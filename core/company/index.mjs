@@ -628,9 +628,21 @@ const KAIOS_REWARD_EVIDENCE_ACTIVITY = Object.freeze({
   DAILY_QUEST_VERIFIED: "DAILY_QUEST"
 });
 
+// Authority-bearing reward, wallet, economy and resource provenance must be
+// reviewed into repository-owned exact-attestation registries. Runtime callers
+// may reference IDs only; ordinary objects, VERIFIED strings and local proofs
+// never create canonical authority. The registries intentionally remain empty
+// until trusted adapters and Human/governance decisions are connected.
+export const CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS = Object.freeze([]);
+
 export function createKaiosPlayerRewardEntitlement({
-  entitlementId, playerId, lifeId, eventType, eventId, eventEvidence,
-  walletControlProof, occurredAt, existingEntitlements = []
+  entitlementId, playerId, lifeId, eventType, eventId, eventEvidence = null,
+  walletControlProof = null, rewardEventAttestationId = null,
+  walletControlAttestationId = null, occurredAt, existingEntitlements = []
 }) {
   requireId(entitlementId, "player_reward.entitlement_id");
   requireId(playerId, "player_reward.player_id");
@@ -638,16 +650,21 @@ export function createKaiosPlayerRewardEntitlement({
   requireId(eventId, "player_reward.event_id");
   requireEnum(eventType, Object.keys(KAIOS_PLAYER_REWARD_POLICY.milestones), "player_reward.event_type");
   requireArray(existingEntitlements, "player_reward.existing_entitlements");
+  invariant(eventEvidence === null, "CALLER_SUPPLIED_PLAYER_REWARD_EVENT_EVIDENCE_FORBIDDEN", "Player reward evidence must be referenced by repository-owned attestation ID");
+  invariant(walletControlProof === null, "CALLER_SUPPLIED_PLAYER_REWARD_WALLET_CONTROL_FORBIDDEN", "Player wallet control must be referenced by repository-owned attestation ID");
+  const verifiedEventEvidence = CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS.find((item) => item.attestation_id === rewardEventAttestationId);
+  invariant(verifiedEventEvidence, "PLAYER_REWARD_EVENT_ATTESTATION_NOT_CONNECTED", "The exact repository-owned player reward event attestation is not connected");
+  const verifiedWalletControl = CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS.find((item) => item.attestation_id === walletControlAttestationId);
+  invariant(verifiedWalletControl, "PLAYER_REWARD_WALLET_ATTESTATION_NOT_CONNECTED", "The exact repository-owned wallet-control attestation is not connected");
   invariant(!existingEntitlements.some((item) => item.entitlement_id === entitlementId || item.event_id === eventId), "PLAYER_REWARD_REPLAY", "A verified game event may create only one KAIOS entitlement");
-  invariant(walletControlProof?.status === "VERIFIED_LOCAL_WALLET_CONTROL" && walletControlProof.authentication_method === "EIP191_PERSONAL_SIGN", "PLAYER_REWARD_WALLET_CONTROL_REQUIRED", "Player KAIOS entitlement requires the existing EIP-191 wallet-control proof");
-  invariant(walletControlProof.actor_id === playerId && Number(walletControlProof.chain_id) === KAIOS_PLAYER_REWARD_POLICY.chain_id, "PLAYER_REWARD_WALLET_BINDING_MISMATCH", "Wallet proof must bind the exact player and BSC chain 56");
-  const walletAddress = normalizeEmploymentWallet(walletControlProof.wallet_address);
-  requireId(eventEvidence?.evidence_id, "player_reward.evidence_id");
-  invariant(eventEvidence.status === "VERIFIED" && eventEvidence.activity_type === KAIOS_REWARD_EVIDENCE_ACTIVITY[eventType], "PLAYER_REWARD_EVENT_NOT_VERIFIED", "Reward entitlement requires verified evidence for the exact milestone");
-  invariant(eventEvidence.player_id === playerId && eventEvidence.life_id === lifeId && eventEvidence.event_id === eventId, "PLAYER_REWARD_EVENT_BINDING_MISMATCH", "Reward evidence must bind the exact player, Life and event");
-  invariant(eventEvidence.same_controller_self_match !== true && eventEvidence.wash_trade !== true && eventEvidence.fake_volume !== true, "PLAYER_REWARD_INVALID_ACTIVITY", "Self-match, wash trade and fake volume can never earn KAIOS");
+  invariant(verifiedWalletControl.status === "REPOSITORY_VERIFIED_WALLET_CONTROL" && verifiedWalletControl.authentication_method === "EIP191_PERSONAL_SIGN", "PLAYER_REWARD_WALLET_CONTROL_REQUIRED", "Player KAIOS entitlement requires repository-verified EIP-191 wallet control");
+  invariant(verifiedWalletControl.actor_id === playerId && Number(verifiedWalletControl.chain_id) === KAIOS_PLAYER_REWARD_POLICY.chain_id, "PLAYER_REWARD_WALLET_BINDING_MISMATCH", "Wallet attestation must bind the exact player and BSC chain 56");
+  const walletAddress = normalizeEmploymentWallet(verifiedWalletControl.wallet_address);
+  invariant(verifiedEventEvidence.status === "REPOSITORY_VERIFIED_EVENT" && verifiedEventEvidence.activity_type === KAIOS_REWARD_EVIDENCE_ACTIVITY[eventType], "PLAYER_REWARD_EVENT_NOT_VERIFIED", "Reward entitlement requires repository-verified evidence for the exact milestone");
+  invariant(verifiedEventEvidence.player_id === playerId && verifiedEventEvidence.life_id === lifeId && verifiedEventEvidence.event_id === eventId, "PLAYER_REWARD_EVENT_BINDING_MISMATCH", "Reward attestation must bind the exact player, Life and event");
+  invariant(verifiedEventEvidence.same_controller_self_match !== true && verifiedEventEvidence.wash_trade !== true && verifiedEventEvidence.fake_volume !== true, "PLAYER_REWARD_INVALID_ACTIVITY", "Self-match, wash trade and fake volume can never earn KAIOS");
   if (eventType === "FIRST_K11520_SETTLED_TRADE") {
-    invariant(eventEvidence.receipt_status === 1 && /^0x[0-9a-fA-F]{64}$/.test(String(eventEvidence.transaction_hash ?? "")), "PLAYER_REWARD_MARKET_RECEIPT_REQUIRED", "First-trade reward requires a successful verified settlement receipt");
+    invariant(verifiedEventEvidence.receipt_attestation_id && verifiedEventEvidence.receipt_status === 1 && /^0x[0-9a-fA-F]{64}$/.test(String(verifiedEventEvidence.transaction_hash ?? "")), "PLAYER_REWARD_MARKET_RECEIPT_REQUIRED", "First-trade reward requires an exact repository-owned successful settlement receipt attestation");
   }
   const occurred = parseEmploymentTime(occurredAt, "player_reward.occurred_at");
   const rule = KAIOS_PLAYER_REWARD_POLICY.milestones[eventType];
@@ -665,9 +682,9 @@ export function createKaiosPlayerRewardEntitlement({
     life_id: lifeId,
     event_type: eventType,
     event_id: eventId,
-    evidence_id: eventEvidence.evidence_id,
+    reward_event_attestation_id: verifiedEventEvidence.attestation_id,
+    wallet_control_attestation_id: verifiedWalletControl.attestation_id,
     recipient_address: walletAddress,
-    wallet_control_proof_id: walletControlProof.proof_id,
     asset: KAIOS_PLAYER_REWARD_POLICY.asset,
     chain_id: KAIOS_PLAYER_REWARD_POLICY.chain_id,
     token_address: KAIOS_PLAYER_REWARD_POLICY.token_address.toLowerCase(),
@@ -688,6 +705,8 @@ export function evaluateKaiosRewardBudgetSimulation({
   lifeFixedMilestoneCommittedKaiosWei
 }) {
   invariant(entitlement?.policy_id === KAIOS_PLAYER_REWARD_POLICY.policy_id && entitlement.paid === false, "KAIOS_REWARD_ENTITLEMENT_REQUIRED", "Budget simulation requires an unpaid KAIOS Player Reward entitlement");
+  const rewardAttestation = CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS.find((item) => item.attestation_id === entitlement.reward_event_attestation_id);
+  invariant(rewardAttestation && rewardAttestation.event_id === entitlement.event_id && rewardAttestation.player_id === entitlement.player_id && rewardAttestation.life_id === entitlement.life_id, "KAIOS_REWARD_ENTITLEMENT_PROVENANCE_NOT_CONNECTED", "Budget simulation requires a repository-bound reward entitlement provenance");
   const amount = requirePositiveKaiosWei(entitlement.amount_kaios_wei, "reward_budget.amount_kaios_wei");
   const treasury = BigInt(treasuryBalanceKaiosWei);
   const genesisCommitted = BigInt(genesisCommittedKaiosWei);
@@ -743,6 +762,7 @@ export function createKaiosLiquidityGenesisSimulation({
     kaios_amount_wei: kaios.toString(),
     counter_asset_amount_wei: counterAsset.toString(),
     reference_price_source: referencePriceSource,
+    reference_price_verified: false,
     target_maximum_price_impact_bps: KAIOS_LIQUIDITY_GENESIS_POLICY.target_maximum_price_impact_bps,
     preview_slippage_bps: KAIOS_LIQUIDITY_GENESIS_POLICY.default_preview_slippage_bps,
     accounting_class: "LIQUIDITY_PROVISION",
@@ -757,14 +777,30 @@ export function createKaiosLiquidityGenesisSimulation({
 }
 
 export function createKaiosEconomyEvidenceSnapshot({
-  snapshotId, asOf, evidenceStatus = "NOT_CONNECTED", holderRecords = [],
+  snapshotId, asOf, snapshotAttestationId = null, evidenceStatus = "NOT_CONNECTED", holderRecords = [],
   entitlements = [], payments = [], trades = [], resourceAccounts = [],
   companyAccounts = [], liquiditySnapshots = [], treasuryBalanceKaiosWei = null
 }) {
   requireId(snapshotId, "kaios_economy.snapshot_id");
   parseEmploymentTime(asOf, "kaios_economy.as_of");
   for (const [field, value] of Object.entries({ holderRecords, entitlements, payments, trades, resourceAccounts, companyAccounts, liquiditySnapshots })) requireArray(value, `kaios_economy.${field}`);
-  const connected = evidenceStatus === "REPOSITORY_OR_CHAIN_VERIFIED";
+  const callerClaimsConnectedEvidence = evidenceStatus !== "NOT_CONNECTED" || holderRecords.length > 0 || entitlements.length > 0 || payments.length > 0 || trades.length > 0 || resourceAccounts.length > 0 || companyAccounts.length > 0 || liquiditySnapshots.length > 0 || treasuryBalanceKaiosWei !== null;
+  const snapshotAttestation = CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS.find((item) => item.attestation_id === snapshotAttestationId);
+  if (snapshotAttestationId === null) invariant(!callerClaimsConnectedEvidence, "CALLER_SUPPLIED_KAIOS_ECONOMY_EVIDENCE_FORBIDDEN", "Connected economy evidence must come from a repository-owned exact snapshot attestation");
+  else invariant(snapshotAttestation, "KAIOS_ECONOMY_SNAPSHOT_ATTESTATION_NOT_CONNECTED", "The exact repository-owned economy snapshot attestation is not connected");
+  if (snapshotAttestation) {
+    invariant(snapshotAttestation.snapshot_id === snapshotId && snapshotAttestation.as_of === asOf && snapshotAttestation.status === "REPOSITORY_OR_CHAIN_VERIFIED", "KAIOS_ECONOMY_SNAPSHOT_BINDING_MISMATCH", "Economy snapshot attestation must bind the exact snapshot ID and observation time");
+    evidenceStatus = snapshotAttestation.status;
+    holderRecords = snapshotAttestation.holder_records ?? [];
+    entitlements = snapshotAttestation.entitlements ?? [];
+    payments = snapshotAttestation.payments ?? [];
+    trades = snapshotAttestation.trades ?? [];
+    resourceAccounts = snapshotAttestation.resource_accounts ?? [];
+    companyAccounts = snapshotAttestation.company_accounts ?? [];
+    liquiditySnapshots = snapshotAttestation.liquidity_snapshots ?? [];
+    treasuryBalanceKaiosWei = snapshotAttestation.treasury_balance_kaios_wei ?? null;
+  }
+  const connected = Boolean(snapshotAttestation);
   const unknown = () => "UNKNOWN";
   const verifiedHolders = connected ? holderRecords.filter((item) => item.evidence_status === "VERIFIED_CHAIN_INDEXER" && /^0x[0-9a-fA-F]{40}$/.test(String(item.address ?? "")) && BigInt(item.balance_kaios_wei ?? "0") > 0n) : [];
   const uniqueHolders = new Map(verifiedHolders.map((item) => [item.address.toLowerCase(), item]));
@@ -776,6 +812,7 @@ export function createKaiosEconomyEvidenceSnapshot({
     snapshot_id: snapshotId,
     as_of: asOf,
     evidence_status: evidenceStatus,
+    snapshot_attestation_id: snapshotAttestation?.attestation_id ?? null,
     holders: Object.freeze({
       total: connected ? uniqueHolders.size : unknown(),
       active: connected ? [...uniqueHolders.values()].filter((item) => item.active === true).length : unknown(),
@@ -810,22 +847,27 @@ export function createKaiosEconomyEvidenceSnapshot({
   });
 }
 
-export function createResourceLedgerSubaccount({ accountId, nodeId, nodeName, canonicalLocation, resourceTypes, createdAt }) {
+export function createResourceLedgerSubaccount({ accountId, designationId, createdAt }) {
   requireId(accountId, "resource_account.account_id");
-  requireId(nodeId, "resource_account.node_id");
-  invariant(typeof nodeName === "string" && nodeName.trim().length > 0, "RESOURCE_NODE_NAME_REQUIRED", "Resource account requires the canonical node name");
-  invariant(typeof canonicalLocation === "string" && canonicalLocation.trim().length > 0, "RESOURCE_CANONICAL_LOCATION_REQUIRED", "Resource account requires a canonical location reference");
-  requireArray(resourceTypes, "resource_account.resource_types");
-  invariant(resourceTypes.length > 0 && new Set(resourceTypes).size === resourceTypes.length && resourceTypes.every((item) => /^[A-Z][A-Z0-9_]{1,63}$/.test(item)), "RESOURCE_TYPES_INVALID", "Resource account requires unique canonical resource types");
+  requireId(designationId, "resource_account.designation_id");
+  const designation = CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.find((item) => item.designation_id === designationId);
+  invariant(designation, "RESOURCE_ACCOUNT_DESIGNATION_NOT_CONNECTED", "The exact repository-owned resource account designation is not connected");
+  invariant(designation.status === "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT" && designation.account_id === accountId, "RESOURCE_ACCOUNT_DESIGNATION_BINDING_MISMATCH", "Resource account designation must bind the exact account ID");
+  requireId(designation.node_id, "resource_account.node_id");
+  invariant(typeof designation.node_name === "string" && designation.node_name.trim().length > 0, "RESOURCE_NODE_NAME_REQUIRED", "Resource account requires the canonical node name");
+  invariant(typeof designation.canonical_location === "string" && designation.canonical_location.trim().length > 0, "RESOURCE_CANONICAL_LOCATION_REQUIRED", "Resource account requires a canonical location reference");
+  requireArray(designation.resource_types, "resource_account.resource_types");
+  invariant(designation.resource_types.length > 0 && new Set(designation.resource_types).size === designation.resource_types.length && designation.resource_types.every((item) => /^[A-Z][A-Z0-9_]{1,63}$/.test(item)), "RESOURCE_TYPES_INVALID", "Resource account requires unique canonical resource types");
   parseEmploymentTime(createdAt, "resource_account.created_at");
   return Object.freeze({
     account_id: accountId,
+    designation_id: designation.designation_id,
     account_type: "PROGRAMMATIC_LEDGER_SUBACCOUNT",
-    node_id: nodeId,
-    node_name: nodeName,
-    canonical_location: canonicalLocation,
-    economic_owner: nodeId,
-    resource_types: Object.freeze([...resourceTypes]),
+    node_id: designation.node_id,
+    node_name: designation.node_name,
+    canonical_location: designation.canonical_location,
+    economic_owner: designation.node_id,
+    resource_types: Object.freeze([...designation.resource_types]),
     chain_id: 56,
     public_address: null,
     eoa_private_key_created: false,
@@ -837,27 +879,37 @@ export function createResourceLedgerSubaccount({ accountId, nodeId, nodeName, ca
 }
 
 export function createTemporaryResourceCustodyBindingCandidate({
-  bindingId, resourceAccount, publicAddress, custodianId, walletControlProof,
+  bindingId, resourceAccount, publicAddress, custodianId, walletControlProof = null,
+  walletControlAttestationId = null, custodyDesignationId = null,
   purpose, asset = "KAIOS", maxAmountKaiosWei, validFrom, validUntil,
-  humanDecisionId, existingBindings = []
+  humanDecisionId = null, existingBindings = []
 }) {
   requireId(bindingId, "resource_custody.binding_id");
-  invariant(resourceAccount?.account_type === "PROGRAMMATIC_LEDGER_SUBACCOUNT", "RESOURCE_LEDGER_ACCOUNT_REQUIRED", "Temporary custody must reference the canonical resource ledger subaccount");
-  requireId(custodianId, "resource_custody.custodian_id");
-  requireId(humanDecisionId, "resource_custody.human_decision_id");
+  invariant(walletControlProof === null, "CALLER_SUPPLIED_RESOURCE_CUSTODY_WALLET_CONTROL_FORBIDDEN", "Temporary custody wallet control must be referenced by repository-owned attestation ID");
+  invariant(humanDecisionId === null, "CALLER_SUPPLIED_RESOURCE_CUSTODY_DECISION_FORBIDDEN", "Temporary custody Human decisions must come from a repository-owned exact designation");
+  const custodyDesignation = CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS.find((item) => item.designation_id === custodyDesignationId);
+  invariant(custodyDesignation, "RESOURCE_CUSTODY_DESIGNATION_NOT_CONNECTED", "The exact repository-owned temporary custody designation is not connected");
+  const verifiedWalletControl = CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS.find((item) => item.attestation_id === walletControlAttestationId);
+  invariant(verifiedWalletControl, "RESOURCE_CUSTODY_WALLET_ATTESTATION_NOT_CONNECTED", "The exact repository-owned custodian wallet-control attestation is not connected");
+  invariant(resourceAccount?.account_type === "PROGRAMMATIC_LEDGER_SUBACCOUNT" && CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.some((item) => item.designation_id === resourceAccount.designation_id), "RESOURCE_LEDGER_ACCOUNT_REQUIRED", "Temporary custody must reference a repository-designated canonical resource ledger subaccount");
   requireArray(existingBindings, "resource_custody.existing_bindings");
   invariant(!existingBindings.some((item) => item.binding_id === bindingId), "RESOURCE_CUSTODY_BINDING_REPLAY", "Temporary custody binding IDs are append-only and cannot be reused");
   invariant(asset === "KAIOS", "RESOURCE_CUSTODY_ASSET_INVALID", "This temporary resource custody candidate is bound only to KAIOS");
-  invariant(typeof purpose === "string" && purpose.length >= 3, "RESOURCE_CUSTODY_PURPOSE_REQUIRED", "Temporary resource custody requires a bounded purpose");
+  invariant(custodyDesignation.status === "REPOSITORY_DESIGNATED_TEMPORARY_RESOURCE_CUSTODY" && custodyDesignation.binding_id === bindingId && custodyDesignation.account_id === resourceAccount.account_id && custodyDesignation.node_id === resourceAccount.node_id, "RESOURCE_CUSTODY_DESIGNATION_BINDING_MISMATCH", "Custody designation must bind the exact binding, account and node");
+  requireId(custodyDesignation.human_decision_id, "resource_custody.human_decision_id");
+  invariant(custodyDesignation.custodian_id === custodianId && custodyDesignation.purpose === purpose && custodyDesignation.asset === asset, "RESOURCE_CUSTODY_DESIGNATION_SCOPE_MISMATCH", "Custody designation must bind the exact custodian, purpose and asset");
   const address = normalizeEmploymentWallet(publicAddress);
-  invariant(walletControlProof?.status === "VERIFIED_LOCAL_WALLET_CONTROL" && walletControlProof.authentication_method === "EIP191_PERSONAL_SIGN", "RESOURCE_CUSTODY_WALLET_CONTROL_REQUIRED", "Temporary Human custody requires public-address control proof");
-  invariant(walletControlProof.actor_id === custodianId && Number(walletControlProof.chain_id) === 56 && normalizeEmploymentWallet(walletControlProof.wallet_address) === address, "RESOURCE_CUSTODY_WALLET_BINDING_MISMATCH", "Custodian proof must bind the exact Human, address and chain");
+  invariant(verifiedWalletControl.status === "REPOSITORY_VERIFIED_WALLET_CONTROL" && verifiedWalletControl.authentication_method === "EIP191_PERSONAL_SIGN", "RESOURCE_CUSTODY_WALLET_CONTROL_REQUIRED", "Temporary Human custody requires repository-verified public-address control");
+  invariant(verifiedWalletControl.actor_id === custodianId && Number(verifiedWalletControl.chain_id) === 56 && normalizeEmploymentWallet(verifiedWalletControl.wallet_address) === address, "RESOURCE_CUSTODY_WALLET_BINDING_MISMATCH", "Custodian attestation must bind the exact Human, address and chain");
   const maximum = requirePositiveKaiosWei(maxAmountKaiosWei, "resource_custody.max_amount_kaios_wei");
+  invariant(maximum.toString() === String(custodyDesignation.max_amount_kaios_wei), "RESOURCE_CUSTODY_AMOUNT_BINDING_MISMATCH", "Custody designation must bind the exact maximum amount");
   const starts = parseEmploymentTime(validFrom, "resource_custody.valid_from");
   const ends = parseEmploymentTime(validUntil, "resource_custody.valid_until");
-  invariant(ends > starts && ends - starts <= 90 * 24 * 60 * 60 * 1000, "RESOURCE_CUSTODY_VALIDITY_INVALID", "Temporary resource custody must expire within 90 days");
+  invariant(validFrom === custodyDesignation.valid_from && validUntil === custodyDesignation.valid_until && ends > starts && ends - starts <= 90 * 24 * 60 * 60 * 1000, "RESOURCE_CUSTODY_VALIDITY_INVALID", "Temporary resource custody must match the designation and expire within 90 days");
   return Object.freeze({
     binding_id: bindingId,
+    custody_designation_id: custodyDesignation.designation_id,
+    wallet_control_attestation_id: verifiedWalletControl.attestation_id,
     node_id: resourceAccount.node_id,
     account_id: resourceAccount.account_id,
     canonical_location: resourceAccount.canonical_location,
@@ -871,12 +923,12 @@ export function createTemporaryResourceCustodyBindingCandidate({
     max_amount_kaios_wei: maximum.toString(),
     valid_from: validFrom,
     valid_until: validUntil,
-    human_decision_id: humanDecisionId,
+    human_decision_id: custodyDesignation.human_decision_id,
     migration_policy: "FREEZE_ROUTE_RECONCILE_CREATE_VERIFIED_RESOURCE_ACCOUNT_MIGRATE_WITH_EXACT_AUTHORITY_RETIRE_TEMPORARY_ROUTE",
     canonical_node_wallet: false,
     company_or_human_owns_node_assets: false,
     payment_authority: false,
-    status: "CANDIDATE_AWAITING_REPOSITORY_DESIGNATION_NOT_PAYMENT_AUTHORITY"
+    status: "CANDIDATE_AWAITING_PAYMENT_AUTHORITY"
   });
 }
 
