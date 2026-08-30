@@ -137,6 +137,7 @@ import {
   createKaiosLiquidityGenesisSimulation, createKaiosEconomyEvidenceSnapshot,
   K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY, createGenesisDevelopmentPortfolioCandidate,
   createGenesisDevelopmentAllocationCandidate, scanCanonicalWorldResourceEconomy, createK88895ResourceEconomyRuntime,
+  createCanonicalResourceEconomyBatchExpansion,
   createKaiosCivilizationCirculationHealth,
   createResourceLedgerSubaccount, createTemporaryResourceCustodyBindingCandidate,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
@@ -4120,6 +4121,27 @@ test("K88895 activates one off-chain resource economy without inventing inventor
   assert.equal(runtime.chain_write, false);
 });
 
+test("canonical resource batch expands the same fail-closed runtime to five more evidenced nodes", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  const batch = createCanonicalResourceEconomyBatchExpansion({ worldResourceScan, createdAt: "2026-08-30T13:02:00.000Z" });
+  assert.equal(batch.resource_economy_connected_before, 0);
+  assert.equal(batch.resource_economy_connected_after, 6);
+  assert.deepEqual(batch.nodes.map((item) => item.node_id), ["K88895", "K377", "K5168", "K6888", "K7744", "K99999"]);
+  assert.ok(batch.nodes.every((item) => item.ledger.account_type === "PROGRAMMATIC_LEDGER_SUBACCOUNT"));
+  assert.ok(batch.nodes.every((item) => item.ledger.eoa_private_key_created === false));
+  assert.ok(batch.nodes.every((item) => item.kgen_path.status === "NOT_CONNECTED"));
+  assert.ok(batch.nodes.every((item) => item.market_path.listing_updates_ct === false));
+  assert.ok(batch.nodes.every((item) => item.real_kaios_paid === false && item.real_kgen_paid === false && item.chain_write === false));
+  assert.equal(batch.nodes.find((item) => item.node_id === "K377").resource_profile.resource_types[0], "WATER");
+  assert.equal(batch.nodes.find((item) => item.node_id === "K5168").resource_profile.resource_types[0], "MINERAL");
+  assert.equal(batch.nodes.find((item) => item.node_id === "K6888").resource_profile.resource_types[0], "FOREST_BIOMASS");
+  assert.equal(batch.white_bone_cave_discovery_work_order.node_id, "K16888");
+  assert.deepEqual(batch.white_bone_cave_discovery_work_order.asserted_resources, []);
+  assert.equal(batch.white_bone_cave_discovery_work_order.authority_created, false);
+  assert.equal(batch.next_resource_node, "K16888_WHITE_BONE_CAVE_DISCOVERY");
+});
+
 test("civilization circulation health exposes blockers without fabricating holders, trades or LP", async () => {
   const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
   const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
@@ -4156,7 +4178,7 @@ test("KAIOS Economy Dashboard stays UNKNOWN and rejects caller-supplied verified
 });
 
 test("resource accounts and temporary Human custody require repository-owned designations", () => {
-  assert.equal(CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.length, 1);
+  assert.equal(CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.length, 6);
   const k88895 = createResourceLedgerSubaccount({ accountId: "RESOURCE_LEDGER_K88895", designationId: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1", createdAt: "2026-08-30T04:00:00.000Z" });
   assert.equal(k88895.node_id, "K88895");
   assert.equal(k88895.can_accrue_entitlements, true);

@@ -978,7 +978,12 @@ export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([
     authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY",
     payment_authority: false,
     chain_write_authority: false
-  })
+  }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K377_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K377", node_id: "K377", node_name: "三七七銀河峽谷", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_377p0_三七七銀河峽谷_R11", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K5168_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K5168", node_id: "K5168", node_name: "金山銀礦", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_5168p0_金山銀礦_R22", resource_types: Object.freeze(["MINERAL"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K6888_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K6888", node_id: "K6888", node_name: "松樹國", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_6888p0_松樹國_R26", resource_types: Object.freeze(["FOREST_BIOMASS"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K7744_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K7744", node_id: "K7744", node_name: "流沙河", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_7744p0_流沙河_R28", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K99999_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K99999", node_id: "K99999", node_name: "命運之神 / 銀河主脈", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#K99999", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false })
 ]);
 export const CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS = Object.freeze([]);
 
@@ -1067,6 +1072,78 @@ export function createK88895ResourceEconomyRuntime({ worldResourceScan, createdA
     chain_write: false,
     created_at: createdAt,
     status: "ACTIVE_OFFCHAIN_RESOURCE_ECONOMY_AWAITING_FIRST_VERIFIED_EVENT"
+  });
+}
+
+const BATCH_RESOURCE_EVENT_TYPES = Object.freeze({
+  WATER: Object.freeze(["WATER_OBSERVATION_VERIFIED", "WATER_SERVICE_DELIVERY_VERIFIED"]),
+  MINERAL: Object.freeze(["MINERAL_SURVEY_VERIFIED", "MINERAL_HARVEST_VERIFIED"]),
+  FOREST_BIOMASS: Object.freeze(["FOREST_STATE_VERIFIED", "SUSTAINABLE_BIOMASS_HARVEST_VERIFIED"])
+});
+
+export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan, createdAt }) {
+  invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "Resource batch expansion requires the canonical world resource scan");
+  parseEmploymentTime(createdAt, "resource_batch.created_at");
+  const firstNode = createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt });
+  const batchNodeIds = ["K377", "K5168", "K6888", "K7744", "K99999"];
+  const expanded = batchNodeIds.map((nodeId) => {
+    const node = worldResourceScan.nodes.find((item) => item.canonical_node_id === nodeId);
+    const designation = CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.find((item) => item.node_id === nodeId);
+    invariant(node && designation, "RESOURCE_BATCH_NODE_DESIGNATION_REQUIRED", `Resource batch node ${nodeId} must bind canonical scan evidence and a repository designation`);
+    invariant(JSON.stringify([...node.resource_candidates].sort()) === JSON.stringify([...designation.resource_types].sort()), "RESOURCE_BATCH_CANON_MISMATCH", `Resource batch node ${nodeId} designation must match canonical resource candidates`);
+    const ledger = createResourceLedgerSubaccount({ accountId: designation.account_id, designationId: designation.designation_id, createdAt });
+    const eventTypes = [...new Set(designation.resource_types.flatMap((resourceType) => BATCH_RESOURCE_EVENT_TYPES[resourceType] ?? []))];
+    return Object.freeze({
+      runtime_id: `KAIOS_RESOURCE_ECONOMY_${nodeId}_V1`,
+      node_id: nodeId,
+      node_name: designation.node_name,
+      resource_profile: Object.freeze({ resource_types: Object.freeze([...designation.resource_types]), source: "CANONICAL_UNIVERSE_MAP_CLASS", status: "ACTIVE_OFFCHAIN_PROFILE_CANONICAL_CLASSES_ONLY" }),
+      ledger,
+      inventory_model: Object.freeze({ entries: Object.freeze(designation.resource_types.map((resourceType) => Object.freeze({ resource_type: resourceType, verified_quantity: null, unit: null, status: "AWAITING_VERIFIED_INVENTORY_EVIDENCE" }))), caller_supplied_inventory_authority: false, status: "ACTIVE_EMPTY_AWAITING_VERIFIED_RESOURCE_EVENTS" }),
+      production_model: Object.freeze({ accepted_event_types: Object.freeze(eventTypes), required_evidence: Object.freeze(["EVENT_ID", "NODE_ID", "RESOURCE_TYPE", "QUANTITY", "UNIT", "OBSERVED_AT", "EVIDENCE_HASH", "REPLAY_KEY"]), auto_generated_output: false, status: "READY_FOR_VERIFIED_OFFCHAIN_EVENTS" }),
+      consumption_model: Object.freeze({ required_inputs: Object.freeze(["WORK", "ENERGY", "TRANSPORT_AS_APPLICABLE", "REGENERATION_OR_SUSTAINABILITY_EVIDENCE"]), input_sources_connected: false, status: "MODEL_ACTIVE_INPUT_ROUTES_NOT_CONNECTED" }),
+      work_model: Object.freeze({ work_types: Object.freeze(["OBSERVATION", "SUSTAINABLE_HARVEST", "MAINTENANCE", "TRANSPORT", "MARKET_SERVICE"]), evidence_required: true, entitlement_capable: true, paid: false, status: "READY_FOR_VERIFIED_WORK_ENTITLEMENTS" }),
+      kaios_path: Object.freeze({ paths: Object.freeze(["RESOURCE_DEVELOPMENT", "VERIFIED_WORK", "VERIFIED_PRODUCTION", "SALE", "SERVICE"]), entitlement_capable: true, settlement_connected: false, paid: false, status: "ENTITLEMENT_RUNTIME_CONNECTED_PAYMENT_GATE_NOT_CONNECTED" }),
+      kgen_path: Object.freeze({ canonical_evidence: null, minted_or_distributed: false, status: "NOT_CONNECTED" }),
+      market_path: Object.freeze({ exchange_id: "K11520", listing_requires_verified_inventory: true, settlement_requires_common_kaios_payment_rail: true, listing_updates_ct: false, ct_requires_verified_settled_trade: true, status: "READY_FOR_LISTING_AFTER_VERIFIED_INVENTORY_SETTLEMENT_NOT_CONNECTED" }),
+      genesis_development_allocation: null,
+      development_allocation_status: "VERIFIED_NEED_AND_AMOUNT_REQUIRED",
+      resource_economy_connected: true,
+      connection_scope: "OFFCHAIN_PROFILE_LEDGER_EVENT_AND_ENTITLEMENT_RUNTIME",
+      real_kaios_paid: false,
+      real_kgen_paid: false,
+      chain_write: false,
+      created_at: createdAt,
+      status: "ACTIVE_OFFCHAIN_RESOURCE_ECONOMY_AWAITING_FIRST_VERIFIED_EVENT"
+    });
+  });
+  const whiteBoneCave = worldResourceScan.white_bone_cave;
+  const whiteBoneCaveDiscovery = Object.freeze({
+    work_order_id: "KAIOS_RESOURCE_DISCOVERY_K16888_WHITE_BONE_CAVE_V1",
+    node_id: "K16888",
+    point_alias_id: "P_16888p0_白骨洞_廣寒宮_R48",
+    discovery_scope: Object.freeze(["ENVIRONMENT", "PHYSICS", "CIVILIZATION_CANON", "ECOLOGY", "DEVELOPABLE_RESOURCE", "SERVICE", "WORK", "MARKET"]),
+    asserted_resources: Object.freeze([]),
+    resource_status: whiteBoneCave.resource_status,
+    account_designated: false,
+    kaios_path: "NOT_CONNECTED",
+    kgen_path: "NOT_CONNECTED",
+    authority_created: false,
+    status: "OPEN_DISCOVERY_REQUIRED_NO_RESOURCE_FABRICATION"
+  });
+  const nodes = Object.freeze([firstNode, ...expanded]);
+  return Object.freeze({
+    batch_id: "KAIOS_CANONICAL_RESOURCE_ECONOMY_BATCH_V1",
+    resource_economy_connected_before: 0,
+    resource_economy_connected_after: nodes.length,
+    nodes,
+    white_bone_cave_discovery_work_order: whiteBoneCaveDiscovery,
+    next_resource_node: "K16888_WHITE_BONE_CAVE_DISCOVERY",
+    real_kaios_paid: false,
+    real_kgen_paid: false,
+    chain_write: false,
+    created_at: createdAt,
+    status: "SIX_CANONICAL_RESOURCE_NODES_CONNECTED_OFFCHAIN_NEXT_DISCOVERY_READY"
   });
 }
 
