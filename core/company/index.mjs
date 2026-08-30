@@ -966,30 +966,40 @@ const KAIOS_REWARD_EVIDENCE_ACTIVITY = Object.freeze({
 export const CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS = Object.freeze([]);
-export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([
+export const KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES = Object.freeze([
   Object.freeze({
     designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1",
-    status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT",
+    status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED",
     account_id: "RESOURCE_LEDGER_K88895",
     node_id: "K88895",
     node_name: "蟠桃園",
     canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_88895p0_蟠桃園_R97",
     resource_types: Object.freeze(["CULTIVATION_LAND", "ORCHARD_PRODUCE"]),
     authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY",
+    human_decision_id: null,
+    can_accrue_entitlements: false,
     payment_authority: false,
     chain_write_authority: false
   }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K377_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K377", node_id: "K377", node_name: "三七七銀河峽谷", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_377p0_三七七銀河峽谷_R11", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K5168_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K5168", node_id: "K5168", node_name: "金山銀礦", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_5168p0_金山銀礦_R22", resource_types: Object.freeze(["MINERAL"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K6888_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K6888", node_id: "K6888", node_name: "松樹國", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_6888p0_松樹國_R26", resource_types: Object.freeze(["FOREST_BIOMASS"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K7744_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K7744", node_id: "K7744", node_name: "流沙河", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_7744p0_流沙河_R28", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false }),
-  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K99999_V1", status: "REPOSITORY_DESIGNATED_RESOURCE_ACCOUNT", account_id: "RESOURCE_LEDGER_K99999", node_id: "K99999", node_name: "命運之神 / 銀河主脈", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#K99999", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", payment_authority: false, chain_write_authority: false })
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K377_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K377", node_id: "K377", node_name: "三七七銀河峽谷", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_377p0_三七七銀河峽谷_R11", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K5168_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K5168", node_id: "K5168", node_name: "金山銀礦", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_5168p0_金山銀礦_R22", resource_types: Object.freeze(["MINERAL"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K6888_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K6888", node_id: "K6888", node_name: "松樹國", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_6888p0_松樹國_R26", resource_types: Object.freeze(["FOREST_BIOMASS"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K7744_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K7744", node_id: "K7744", node_name: "流沙河", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#P_7744p0_流沙河_R28", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false }),
+  Object.freeze({ designation_id: "RESOURCE_ACCOUNT_DESIGNATION_K99999_V1", status: "DESIGNATION_CANDIDATE_REVIEW_REQUIRED", account_id: "RESOURCE_LEDGER_K99999", node_id: "K99999", node_name: "命運之神 / 銀河主脈", canonical_location: "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json#K99999", resource_types: Object.freeze(["WATER"]), authority_scope: "OFFCHAIN_RESOURCE_ENTITLEMENT_LEDGER_ONLY", human_decision_id: null, can_accrue_entitlements: false, payment_authority: false, chain_write_authority: false })
 ]);
+export const K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE = KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES[0];
+export const CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS = Object.freeze([]);
+export const CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS = Object.freeze([]);
 export const CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS = Object.freeze([]);
 
-export function createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt }) {
-  invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "K88895 resource economy requires the canonical world resource scan");
-  const node = worldResourceScan.nodes.find((item) => item.canonical_node_id === "K88895");
+export function createK88895ResourceEconomyRuntime({ worldResourceScan = null, worldResourceScanAttestationId = null, createdAt }) {
+  invariant(worldResourceScan == null, "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN", "K88895 resource economy cannot trust a caller-supplied world resource scan");
+  const scanAttestation = CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS.find((item) => item.attestation_id === worldResourceScanAttestationId);
+  invariant(scanAttestation, "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED", "K88895 resource economy requires a repository-owned exact world resource scan attestation");
+  invariant(scanAttestation.status === "REPOSITORY_VERIFIED_CANONICAL_WORLD_RESOURCE_SCAN", "WORLD_RESOURCE_SCAN_ATTESTATION_STATUS_REQUIRED", "World resource scan attestation must be repository verified");
+  invariant(scanAttestation.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "WORLD_RESOURCE_SCAN_POLICY_BINDING_MISMATCH", "World resource scan attestation must bind the exact canonical scan policy");
+  invariant(scanAttestation.universe_map_version === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.universe_map_version, "WORLD_RESOURCE_SCAN_MAP_BINDING_MISMATCH", "World resource scan attestation must bind the exact CURRENT Universe Map version");
+  const node = scanAttestation.nodes.find((item) => item.canonical_node_id === "K88895");
   invariant(node && node.point_alias_ids.includes("P_88895p0_蟠桃園_R97"), "K88895_CANONICAL_NODE_REQUIRED", "K88895 resource economy must bind the canonical Peach Garden point");
   invariant(node.resource_candidates.includes("CULTIVATION_LAND") && node.resource_candidates.includes("ORCHARD_PRODUCE"), "K88895_CANONICAL_RESOURCE_CLASSES_REQUIRED", "K88895 requires the canonical cultivation and orchard candidate classes");
   const ledger = createResourceLedgerSubaccount({
@@ -1081,10 +1091,16 @@ const BATCH_RESOURCE_EVENT_TYPES = Object.freeze({
   FOREST_BIOMASS: Object.freeze(["FOREST_STATE_VERIFIED", "SUSTAINABLE_BIOMASS_HARVEST_VERIFIED"])
 });
 
-export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan, createdAt }) {
-  invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "Resource batch expansion requires the canonical world resource scan");
+export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan: callerWorldResourceScan = null, worldResourceScanAttestationId = null, createdAt }) {
+  invariant(callerWorldResourceScan == null, "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN", "Resource batch expansion cannot trust a caller-supplied world resource scan");
+  const scanAttestation = CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS.find((item) => item.attestation_id === worldResourceScanAttestationId);
+  invariant(scanAttestation, "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED", "Resource batch expansion requires a repository-owned exact world resource scan attestation");
+  invariant(scanAttestation.status === "REPOSITORY_VERIFIED_CANONICAL_WORLD_RESOURCE_SCAN", "WORLD_RESOURCE_SCAN_ATTESTATION_STATUS_REQUIRED", "World resource scan attestation must be repository verified");
+  invariant(scanAttestation.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "WORLD_RESOURCE_SCAN_POLICY_BINDING_MISMATCH", "World resource scan attestation must bind the exact canonical scan policy");
+  invariant(scanAttestation.universe_map_version === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.universe_map_version, "WORLD_RESOURCE_SCAN_MAP_BINDING_MISMATCH", "World resource scan attestation must bind the exact CURRENT Universe Map version");
+  const worldResourceScan = scanAttestation;
   parseEmploymentTime(createdAt, "resource_batch.created_at");
-  const firstNode = createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt });
+  const firstNode = createK88895ResourceEconomyRuntime({ worldResourceScanAttestationId, createdAt });
   const batchNodeIds = ["K377", "K5168", "K6888", "K7744", "K99999"];
   const expanded = batchNodeIds.map((nodeId) => {
     const node = worldResourceScan.nodes.find((item) => item.canonical_node_id === nodeId);
@@ -1149,7 +1165,14 @@ export function createCanonicalResourceEconomyBatchExpansion({ worldResourceScan
 
 export const PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY = Object.freeze({
   policy_id: "KAIOS_PUBLIC_GAME_NODE_ECONOMIC_AUDIT_V1",
-  source_paths: Object.freeze(["index.html", "K線西遊記/index.html"]),
+  source_paths: Object.freeze([
+    "index.html",
+    "K線西遊記/index.html",
+    "KGEN-KAIOS/world-viewer/data/synthetic-world.json",
+    "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js",
+    "api/kaios/ecosystem/v1/habitats.json",
+    "api/kaios/aquaculture/v1/ponds.json"
+  ]),
   auto_add_funding_candidate: true,
   equal_amount_per_node_forbidden: true,
   no_player_means_investment_stage: true,
@@ -1182,16 +1205,22 @@ const TEMPLE_FUNDING_CLASS = Object.freeze({
   K8895: "INFRASTRUCTURE_FUND"
 });
 
-export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPortalHtml, worldResourceScan, resourceEconomyBatch, genesisDevelopmentPortfolio, createdAt }) {
+export async function auditPublicGameNodeFunding({
+  rootHomepageHtml, galaxyPortalHtml, worldResourceScan, genesisDevelopmentPortfolio,
+  syntheticWorld, causalWorldState, ecosystemProjection, aquacultureProjection, createdAt
+}) {
   invariant(typeof rootHomepageHtml === "string" && rootHomepageHtml.length > 100, "PUBLIC_ROOT_HOMEPAGE_REQUIRED", "Public game node audit requires the official root homepage source");
   invariant(typeof galaxyPortalHtml === "string" && galaxyPortalHtml.length > 100, "PUBLIC_GALAXY_PORTAL_REQUIRED", "Public game node audit requires the official Galaxy portal source");
   invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "Public game node audit requires the canonical world resource scan");
-  invariant(resourceEconomyBatch?.batch_id === "KAIOS_CANONICAL_RESOURCE_ECONOMY_BATCH_V1", "RESOURCE_ECONOMY_BATCH_REQUIRED", "Public game node audit requires the current resource economy batch");
   invariant(genesisDevelopmentPortfolio?.portfolio_id === K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY.policy_id, "GENESIS_DEVELOPMENT_PORTFOLIO_REQUIRED", "Public game node audit requires the current Genesis development portfolio");
+  invariant(syntheticWorld?.meta?.synthetic === true && syntheticWorld.meta.simulation_scope === "LOCAL_SYNTHETIC_ONLY", "PUBLIC_SYNTHETIC_WORLD_REQUIRED", "Public game node audit requires the exact synthetic World Viewer data source");
+  invariant(causalWorldState?.mode === "LOCAL_DETERMINISTIC_SIMULATION" && causalWorldState.authority === "NO_PRODUCTION_AUTHORITY", "PUBLIC_CAUSAL_WORLD_REQUIRED", "Public game node audit requires the fail-closed causal runtime state");
+  invariant(ecosystemProjection?.simulation_only === true && ecosystemProjection.read_only === true && ecosystemProjection.wallet === "NONE", "PUBLIC_ECOSYSTEM_PROJECTION_REQUIRED", "Public game node audit requires the read-only public ecosystem projection");
+  invariant(aquacultureProjection?.simulation_only === true && aquacultureProjection.read_only === true && aquacultureProjection.wallet === "NONE", "PUBLIC_AQUACULTURE_PROJECTION_REQUIRED", "Public game node audit requires the read-only public aquaculture projection");
   parseEmploymentTime(createdAt, "public_game_node_audit.created_at");
 
   const amountedByNode = new Map(genesisDevelopmentPortfolio.allocations.map((allocation) => [allocation.canonical_node_id, allocation]));
-  const resourceRuntimeByNode = new Map(resourceEconomyBatch.nodes.map((node) => [node.node_id, node]));
+  const resourceCandidateByNode = new Map(KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES.map((designation) => [designation.node_id, designation]));
   const publicNodes = [];
   const seen = new Set();
   const add = (node) => {
@@ -1206,7 +1235,7 @@ export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPorta
     const canonical = worldResourceScan.nodes.find((node) => node.canonical_node_id === nodeId);
     invariant(canonical, "PUBLIC_TEMPLE_CANONICAL_NODE_REQUIRED", `Public temple ${nodeId} must resolve to the canonical Universe Map`);
     const allocation = amountedByNode.get(nodeId) ?? null;
-    const resourceRuntime = resourceRuntimeByNode.get(nodeId) ?? null;
+    const resourceCandidate = resourceCandidateByNode.get(nodeId) ?? null;
     add({
       node_id: nodeId,
       node_name: match[2].trim(),
@@ -1214,7 +1243,7 @@ export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPorta
       world_location: canonical.point_alias_names.join(" / "),
       public_route: `K線西遊記/temples/${match[1]}/index.html`,
       canonical_point_aliases: canonical.point_alias_ids,
-      resource_status: resourceRuntime ? resourceRuntime.resource_profile.status : canonical.resource_status,
+      resource_status: resourceCandidate ? "RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE_REVIEW_REQUIRED" : canonical.resource_status,
       infrastructure_status: "PUBLIC_INTERFACE_PRESENT_ECONOMIC_INFRASTRUCTURE_AUDIT_REQUIRED",
       population_status: "UNKNOWN",
       player_status: "UNKNOWN",
@@ -1223,8 +1252,8 @@ export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPorta
       job_status: "GAP_AUDIT_REQUIRED",
       service_status: "PUBLIC_INTERFACE_PRESENT_SERVICE_EVIDENCE_REQUIRED",
       market_status: nodeId === "K11520" ? "MARKET_INTERFACE_PRESENT_VERIFIED_SETTLEMENT_NOT_CONNECTED" : "MARKET_PATH_AUDIT_REQUIRED",
-      kaios_account_status: resourceRuntime ? resourceRuntime.ledger.status : "NOT_CONNECTED",
-      kgen_path_status: resourceRuntime ? resourceRuntime.kgen_path.status : "NOT_CONNECTED",
+      kaios_account_status: resourceCandidate?.status ?? "NOT_CONNECTED",
+      kgen_path_status: "NOT_CONNECTED",
       operating_cost: "ESTIMATION_REQUIRED",
       development_need: "AUDIT_REQUIRED",
       resource_development_need: canonical.resource_candidates.length ? "VERIFIED_PROFILE_OR_DISCOVERY_REQUIRED" : "RESOURCE_DISCOVERY_REQUIRED",
@@ -1237,7 +1266,7 @@ export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPorta
       funding_class: allocation?.fund_class ?? TEMPLE_FUNDING_CLASS[nodeId] ?? "INFRASTRUCTURE_FUND",
       funded: false,
       budget_candidate_amounted: Boolean(allocation),
-      resource_economy_connected: Boolean(resourceRuntime),
+      resource_economy_connected: false,
       market_settlement_connected: false,
       player_reward_connected: false,
       operational_economic_path_connected: false,
@@ -1258,6 +1287,76 @@ export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPorta
     add({ node_id: rule.node_id, node_name: rule.node_name, node_type: rule.node_type, world_location: "EARTH/K280_OR_ASSOCIATED_PUBLIC_RUNTIME", public_route: `world-viewer/${slug ? `${slug}/` : ""}`, canonical_point_aliases: Object.freeze([]), resource_status: rule.node_type === "RESOURCE_GAME_NODE" ? "PUBLIC_SIMULATION_RESOURCE_PROFILE_NOT_CANONICAL_LEDGER_CONNECTED" : "RESOURCE_DISCOVERY_REQUIRED", infrastructure_status: "PUBLIC_INTERFACE_PRESENT_ECONOMIC_INFRASTRUCTURE_AUDIT_REQUIRED", population_status: "UNKNOWN", player_status: rule.node_type === "PLAYER_SERVICE" ? "PLAYER_ENTRY_PRESENT_ACTIVITY_UNKNOWN" : "UNKNOWN", ai_life_status: rule.node_type.includes("LIFE") || rule.node_type === "COMPANY" ? "PUBLIC_SIMULATION_PRESENT_AUTHORITY_PARTIAL" : "UNKNOWN", company_status: rule.node_type === "COMPANY" ? "AI_ANT_COMPANY_FORMING_TREASURY_NOT_BOUND" : "NOT_APPLICABLE_OR_UNKNOWN", job_status: rule.node_type === "COMPANY" ? "WORK_SYSTEM_PRESENT_CAPITAL_NOT_CONNECTED" : "GAP_AUDIT_REQUIRED", service_status: "PUBLIC_INTERFACE_PRESENT_SERVICE_EVIDENCE_REQUIRED", market_status: rule.node_type === "MARKET" ? "MARKET_INTERFACE_PRESENT_VERIFIED_SETTLEMENT_NOT_CONNECTED" : "MARKET_PATH_AUDIT_REQUIRED", kaios_account_status: "NOT_CONNECTED", kgen_path_status: "NOT_CONNECTED", operating_cost: "ESTIMATION_REQUIRED", development_need: "AUDIT_REQUIRED", resource_development_need: rule.node_type === "RESOURCE_GAME_NODE" ? "P0_CANONICAL_BINDING_REQUIRED" : "DISCOVERY_REQUIRED", infrastructure_need: "ESTIMATION_REQUIRED", player_incentive_need: rule.node_type === "PLAYER_SERVICE" || rule.node_type === "GAME_RUNTIME" ? "P0_REWARD_DESIGN_REQUIRED" : "ASSESSMENT_REQUIRED", liquidity_need: rule.node_type === "MARKET" ? "P0_EVIDENCE_AND_BUDGET_REQUIRED" : "ASSESSMENT_REQUIRED", genesis_funding_eligibility: "ELIGIBLE_FOR_EVIDENCE_BASED_GENESIS_REVIEW", genesis_funding_candidate_id: existingCompanyCandidate ? "CURRENT_CANDIDATE_KAIOS_AI_COMPANY_AND_AI_ANT_COMPANY" : `AUTO_GENESIS_CANDIDATE_${rule.node_id}_V1`, gross_candidate_kaios_wei: null, funding_class: rule.funding_class, funded: false, budget_candidate_amounted: false, resource_economy_connected: false, market_settlement_connected: false, player_reward_connected: false, operational_economic_path_connected: false, planning_economic_path_connected: true });
   }
 
+  const addPublicRuntimeSubject = ({ nodeId, nodeName, nodeType, parentPublicNodeId, publicRoute, sourceScope, sourceStatus = "SIMULATION_ONLY", sourceAuthority = "NO_PRODUCTION_AUTHORITY", fundingClass = "INFRASTRUCTURE_FUND", resourceStatus = "RESOURCE_DISCOVERY_REQUIRED", bindingNodeId = null }) => add({
+    node_id: nodeId,
+    node_name: nodeName || nodeId,
+    node_type: nodeType,
+    parent_public_node_id: parentPublicNodeId,
+    binding_node_id: bindingNodeId,
+    world_location: `${sourceScope}/${parentPublicNodeId}`,
+    public_route: publicRoute,
+    public_runtime_scope: sourceScope,
+    source_status: sourceStatus,
+    source_authority: sourceAuthority,
+    canonical_point_aliases: Object.freeze([]),
+    resource_status: resourceStatus,
+    infrastructure_status: "PUBLIC_SIMULATION_PRESENT_PRODUCTION_INFRASTRUCTURE_NOT_CONNECTED",
+    population_status: "UNKNOWN_OR_SIMULATED",
+    player_status: "PUBLICLY_SELECTABLE_ACTIVITY_NOT_VERIFIED",
+    ai_life_status: "UNKNOWN_OR_SIMULATED",
+    company_status: "NOT_APPLICABLE_OR_UNKNOWN",
+    job_status: "GAP_AUDIT_REQUIRED",
+    service_status: "PUBLIC_SIMULATION_PRESENT_SERVICE_EVIDENCE_REQUIRED",
+    market_status: "MARKET_PATH_AUDIT_REQUIRED",
+    kaios_account_status: "NOT_CONNECTED",
+    kgen_path_status: "NOT_CONNECTED",
+    operating_cost: "ESTIMATION_REQUIRED",
+    development_need: "AUDIT_REQUIRED",
+    resource_development_need: fundingClass === "RESOURCE_DEVELOPMENT_FUND" ? "P0_CANONICAL_BINDING_REQUIRED" : "DISCOVERY_REQUIRED",
+    infrastructure_need: "ESTIMATION_REQUIRED",
+    player_incentive_need: "ASSESSMENT_REQUIRED",
+    liquidity_need: fundingClass === "MARKET_DEVELOPMENT_FUND" ? "ASSESSMENT_REQUIRED" : "NOT_YET_ASSESSED",
+    genesis_funding_eligibility: "ELIGIBLE_FOR_EVIDENCE_BASED_GENESIS_REVIEW",
+    genesis_funding_candidate_id: `AUTO_GENESIS_CANDIDATE_${String(nodeId).replace(/[^A-Za-z0-9_-]/g, "_")}_V1`,
+    gross_candidate_kaios_wei: null,
+    funding_class: fundingClass,
+    funded: false,
+    budget_candidate_amounted: false,
+    resource_economy_connected: false,
+    market_settlement_connected: false,
+    player_reward_connected: false,
+    operational_economic_path_connected: false,
+    planning_economic_path_connected: true
+  });
+
+  const syntheticCollections = Object.freeze([
+    ["earth", "EARTH"], ["regions", "REGION"], ["cities", "CITY"],
+    ["parcels", "LAND_PARCEL"], ["buildings", "BUILDING"], ["rooms", "ROOM"]
+  ]);
+  for (const [collection, fallbackType] of syntheticCollections) {
+    for (const item of Array.isArray(syntheticWorld[collection]) ? syntheticWorld[collection] : [syntheticWorld[collection]].filter(Boolean)) {
+      const subtype = item.land_use ?? item.building_type ?? item.room_type ?? item.object_type ?? fallbackType;
+      const resourceLike = ["FARM", "FOREST", "INDUSTRIAL"].includes(subtype);
+      const marketLike = ["MARKETPLACE", "SHOP", "COMMERCIAL"].includes(subtype);
+      addPublicRuntimeSubject({ nodeId: item.id, nodeName: item.label, nodeType: subtype, parentPublicNodeId: item.parent_id ?? item.parcel_id ?? item.building_id ?? "WORLD_K280", publicRoute: "world-viewer/", sourceScope: "WORLD_VIEWER_SYNTHETIC_HIERARCHY", sourceStatus: item.status ?? "PUBLIC_SYNTHETIC", sourceAuthority: syntheticWorld.meta.privacy_class, fundingClass: resourceLike ? "RESOURCE_DEVELOPMENT_FUND" : marketLike ? "MARKET_DEVELOPMENT_FUND" : "INFRASTRUCTURE_FUND", resourceStatus: resourceLike ? "PUBLIC_SYNTHETIC_RESOURCE_EVIDENCE_CANONICAL_BINDING_REQUIRED" : "RESOURCE_DISCOVERY_REQUIRED" });
+    }
+  }
+
+  const causalCollectionNames = Object.freeze(["worlds", "regions", "nodes", "parcels", "terrain", "roads", "rivers", "bridges", "energy"]);
+  for (const collection of causalCollectionNames) {
+    for (const item of causalWorldState.entities[collection] ?? []) {
+      const resourceLike = ["TERRAIN", "RIVER_SEGMENT", "ENERGY_SOURCE"].includes(item.type);
+      addPublicRuntimeSubject({ nodeId: item.id, nodeName: item.label ?? item.id, nodeType: item.type, parentPublicNodeId: "CAUSAL_RUNTIME_K280", publicRoute: "world-viewer/causal-runtime/", sourceScope: "CAUSAL_RUNTIME_ENTITY", sourceStatus: item.status, sourceAuthority: item.authority, fundingClass: resourceLike ? "RESOURCE_DEVELOPMENT_FUND" : "INFRASTRUCTURE_FUND", resourceStatus: resourceLike ? "PUBLIC_SIMULATION_RESOURCE_EVIDENCE_CANONICAL_BINDING_REQUIRED" : "RESOURCE_DISCOVERY_REQUIRED" });
+    }
+  }
+  addPublicRuntimeSubject({ nodeId: causalWorldState.project.id, nodeName: causalWorldState.project.label ?? causalWorldState.project.project_type, nodeType: causalWorldState.project.type, parentPublicNodeId: "CAUSAL_RUNTIME_K280", publicRoute: "world-viewer/causal-runtime/", sourceScope: "CAUSAL_RUNTIME_PROJECT", sourceStatus: causalWorldState.project.status, sourceAuthority: causalWorldState.project.authority });
+
+  for (const habitat of ecosystemProjection.habitats) {
+    addPublicRuntimeSubject({ nodeId: habitat.id, nodeName: habitat.type, nodeType: habitat.type, parentPublicNodeId: "ECOSYSTEM_K280", publicRoute: "world-viewer/ecosystem-v1/", sourceScope: "ECOSYSTEM_HABITAT", sourceStatus: habitat.status, sourceAuthority: habitat.authority, fundingClass: "RESOURCE_DEVELOPMENT_FUND", resourceStatus: "PUBLIC_SIMULATION_RESOURCE_PROFILE_CANONICAL_BINDING_REQUIRED" });
+  }
+  addPublicRuntimeSubject({ nodeId: aquacultureProjection.land.land_parcel_id, nodeName: "KAIOS Fishpond Land", nodeType: "AQUACULTURE_LAND", parentPublicNodeId: "AQUACULTURE_K280", publicRoute: "world-viewer/aquaculture-v1/", sourceScope: "AQUACULTURE_RUNTIME", sourceStatus: aquacultureProjection.land.usage_right, sourceAuthority: aquacultureProjection.authority, fundingClass: "RESOURCE_DEVELOPMENT_FUND", resourceStatus: "PUBLIC_SIMULATION_RESOURCE_PROFILE_CANONICAL_BINDING_REQUIRED" });
+  addPublicRuntimeSubject({ nodeId: aquacultureProjection.pond.pond_id, nodeName: "KAIOS Fishpond", nodeType: "AQUACULTURE_POND", parentPublicNodeId: "AQUACULTURE_K280", publicRoute: "world-viewer/aquaculture-v1/", sourceScope: "AQUACULTURE_RUNTIME", sourceStatus: aquacultureProjection.pond.status, sourceAuthority: aquacultureProjection.authority, fundingClass: "RESOURCE_DEVELOPMENT_FUND", resourceStatus: "PUBLIC_SIMULATION_RESOURCE_PROFILE_CANONICAL_BINDING_REQUIRED", bindingNodeId: aquacultureProjection.pond.habitat_id });
+
   const nodes = Object.freeze(publicNodes.sort((a, b) => a.node_id.localeCompare(b.node_id)));
   const unbudgeted = nodes.filter((node) => !node.budget_candidate_amounted);
   const workQueue = Object.freeze(nodes.map((node) => Object.freeze({
@@ -1271,7 +1370,7 @@ export async function auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPorta
   return Object.freeze({
     audit_id: "KAIOS_PUBLIC_GAME_NODE_FUNDING_AUDIT_V1",
     policy_id: PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.policy_id,
-    source_hash: await sha256(`${rootHomepageHtml}\n${galaxyPortalHtml}\n${worldResourceScan.universe_map_version}`),
+    source_hash: await sha256(`${rootHomepageHtml}\n${galaxyPortalHtml}\n${worldResourceScan.universe_map_version}\n${JSON.stringify(syntheticWorld)}\n${JSON.stringify(causalWorldState)}\n${JSON.stringify(ecosystemProjection)}\n${JSON.stringify(aquacultureProjection)}`),
     public_game_node_count: nodes.length,
     funded_nodes: 0,
     funded_or_budgeted_nodes: nodes.filter((node) => node.budget_candidate_amounted).length,

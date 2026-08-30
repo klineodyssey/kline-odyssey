@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
+import { createCausalWorldRuntime } from "../KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
@@ -109,7 +110,8 @@ import {
   CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY,
   CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS, CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS,
   CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS, CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS,
-  CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS,
+  KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES, K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE,
+  CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS, CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS,
   CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
   CIVILIZATION_REAL_EXECUTION_POLICY, CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS,
   AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY, CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES,
@@ -4092,86 +4094,72 @@ test("canonical world scan groups coordinate aliases and keeps White Bone Cave r
   assert.throws(() => scanCanonicalWorldResourceEconomy({ universeMap: fakeMap }), (error) => error.code === "CANONICAL_UNIVERSE_MAP_VERSION_REQUIRED");
 });
 
-test("K88895 activates one off-chain resource economy without inventing inventory, KGEN or payment", async () => {
+
+test("K88895 resource economy fails closed without repository-owned designation and scan attestations", async () => {
   const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
-  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
-  const runtime = createK88895ResourceEconomyRuntime({ worldResourceScan, createdAt: "2026-08-30T13:01:00.000Z" });
-  assert.equal(runtime.node_id, "K88895");
-  assert.deepEqual(runtime.resource_profile.resource_types, ["CULTIVATION_LAND", "ORCHARD_PRODUCE"]);
-  assert.equal(runtime.ledger.account_id, "RESOURCE_LEDGER_K88895");
-  assert.equal(runtime.ledger.account_type, "PROGRAMMATIC_LEDGER_SUBACCOUNT");
-  assert.equal(runtime.ledger.economic_owner, "K88895");
-  assert.equal(runtime.ledger.public_address, null);
-  assert.equal(runtime.ledger.eoa_private_key_created, false);
-  assert.equal(runtime.inventory_model.entries[0].verified_quantity, null);
-  assert.equal(runtime.inventory_model.entries[1].verified_quantity, "0");
-  assert.equal(runtime.production_model.auto_generated_output, false);
-  assert.equal(runtime.work_model.entitlement_capable, true);
-  assert.equal(runtime.work_model.paid, false);
-  assert.equal(runtime.kaios_path.entitlement_capable, true);
-  assert.equal(runtime.kaios_path.settlement_connected, false);
-  assert.equal(runtime.kgen_path.status, "NOT_CONNECTED");
-  assert.equal(runtime.market_path.exchange_id, "K11520");
-  assert.equal(runtime.market_path.listing_updates_ct, false);
-  assert.equal(runtime.genesis_development_allocation.recoverable_capital_kaios_wei, "90000000000000000000");
-  assert.equal(runtime.genesis_development_allocation.conditional_development_subsidy_kaios_wei, "10000000000000000000");
-  assert.equal(runtime.genesis_development_allocation.subsidy_recognized, false);
-  assert.equal(runtime.resource_economy_connected, true);
-  assert.equal(runtime.real_kaios_paid, false);
-  assert.equal(runtime.real_kgen_paid, false);
-  assert.equal(runtime.chain_write, false);
+  const callerScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  assert.equal(CANONICAL_KAIOS_WORLD_RESOURCE_SCAN_ATTESTATIONS.length, 0);
+  assert.throws(
+    () => createK88895ResourceEconomyRuntime({ worldResourceScan: callerScan, createdAt: "2026-08-30T13:01:00.000Z" }),
+    (error) => error.code === "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN"
+  );
+  assert.throws(
+    () => createK88895ResourceEconomyRuntime({ worldResourceScanAttestationId: "CALLER_CHOSEN_SCAN_ATTESTATION", createdAt: "2026-08-30T13:01:00.000Z" }),
+    (error) => error.code === "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED"
+  );
 });
 
-test("canonical resource batch expands the same fail-closed runtime to five more evidenced nodes", async () => {
+test("canonical resource batch expansion rejects caller scans and unknown attestation IDs", async () => {
   const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
-  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
-  const batch = createCanonicalResourceEconomyBatchExpansion({ worldResourceScan, createdAt: "2026-08-30T13:02:00.000Z" });
-  assert.equal(batch.resource_economy_connected_before, 0);
-  assert.equal(batch.resource_economy_connected_after, 6);
-  assert.deepEqual(batch.nodes.map((item) => item.node_id), ["K88895", "K377", "K5168", "K6888", "K7744", "K99999"]);
-  assert.ok(batch.nodes.every((item) => item.ledger.account_type === "PROGRAMMATIC_LEDGER_SUBACCOUNT"));
-  assert.ok(batch.nodes.every((item) => item.ledger.eoa_private_key_created === false));
-  assert.ok(batch.nodes.every((item) => item.kgen_path.status === "NOT_CONNECTED"));
-  assert.ok(batch.nodes.every((item) => item.market_path.listing_updates_ct === false));
-  assert.ok(batch.nodes.every((item) => item.real_kaios_paid === false && item.real_kgen_paid === false && item.chain_write === false));
-  assert.equal(batch.nodes.find((item) => item.node_id === "K377").resource_profile.resource_types[0], "WATER");
-  assert.equal(batch.nodes.find((item) => item.node_id === "K5168").resource_profile.resource_types[0], "MINERAL");
-  assert.equal(batch.nodes.find((item) => item.node_id === "K6888").resource_profile.resource_types[0], "FOREST_BIOMASS");
-  assert.equal(batch.white_bone_cave_discovery_work_order.node_id, "K16888");
-  assert.deepEqual(batch.white_bone_cave_discovery_work_order.asserted_resources, []);
-  assert.equal(batch.white_bone_cave_discovery_work_order.authority_created, false);
-  assert.equal(batch.next_resource_node, "K16888_WHITE_BONE_CAVE_DISCOVERY");
+  const callerScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  assert.throws(
+    () => createCanonicalResourceEconomyBatchExpansion({ worldResourceScan: callerScan, createdAt: "2026-08-30T13:02:00.000Z" }),
+    (error) => error.code === "CALLER_SUPPLIED_WORLD_RESOURCE_SCAN_FORBIDDEN"
+  );
+  assert.throws(
+    () => createCanonicalResourceEconomyBatchExpansion({ worldResourceScanAttestationId: "CALLER_CHOSEN_SCAN_ATTESTATION", createdAt: "2026-08-30T13:02:00.000Z" }),
+    (error) => error.code === "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED"
+  );
 });
-
-test("public game node audit discovers every route-backed node and creates unequal evidence-first funding work", async () => {
+test("public game node audit discovers route-backed and selectable runtime subjects with unequal evidence-first funding work", async () => {
   const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
   const rootHomepageHtml = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
   const galaxyPortalHtml = await fs.readFile(new URL("../K線西遊記/index.html", import.meta.url), "utf8");
+  const syntheticWorld = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/world-viewer/data/synthetic-world.json", import.meta.url), "utf8"));
+  const ecosystemProjection = JSON.parse(await fs.readFile(new URL("../api/kaios/ecosystem/v1/habitats.json", import.meta.url), "utf8"));
+  const aquacultureProjection = JSON.parse(await fs.readFile(new URL("../api/kaios/aquaculture/v1/ponds.json", import.meta.url), "utf8"));
+  const causalWorldState = createCausalWorldRuntime().getSnapshot();
   const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
-  const resourceEconomyBatch = createCanonicalResourceEconomyBatchExpansion({ worldResourceScan, createdAt: "2026-08-30T13:10:00.000Z" });
   const genesisDevelopmentPortfolio = createGenesisDevelopmentPortfolioCandidate({ createdAt: "2026-08-30T13:10:00.000Z" });
-  const audit = await auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPortalHtml, worldResourceScan, resourceEconomyBatch, genesisDevelopmentPortfolio, createdAt: "2026-08-30T13:11:00.000Z" });
+  const audit = await auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPortalHtml, worldResourceScan, genesisDevelopmentPortfolio, syntheticWorld, causalWorldState, ecosystemProjection, aquacultureProjection, createdAt: "2026-08-30T13:11:00.000Z" });
   assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.auto_add_funding_candidate, true);
   assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.equal_amount_per_node_forbidden, true);
   assert.equal(audit.source_hash.length, 64);
-  assert.equal(audit.public_game_node_count, 26);
+  assert.equal(audit.public_game_node_count, 69);
   assert.equal(audit.funded_nodes, 0);
   assert.equal(audit.funded_or_budgeted_nodes, 4);
   assert.deepEqual(audit.funded_or_budgeted_node_ids, ["K11520", "K12345", "K8888", "K8895"]);
-  assert.equal(audit.unfunded_public_nodes, 22);
+  assert.equal(audit.unfunded_public_nodes, 65);
   assert.equal(audit.resource_connected_nodes, 0);
   assert.equal(audit.market_connected_nodes, 0);
   assert.equal(audit.player_reward_connected_nodes, 0);
-  assert.equal(audit.nodes_with_no_operational_economic_path, 26);
-  assert.equal(audit.nodes_with_planning_path, 26);
-  assert.equal(audit.newly_discovered_funding_candidates.length, 22);
-  assert.equal(audit.world_resource_development_queue.length, 26);
+  assert.equal(audit.nodes_with_no_operational_economic_path, 69);
+  assert.equal(audit.nodes_with_planning_path, 69);
+  assert.equal(audit.newly_discovered_funding_candidates.length, 65);
+  assert.equal(audit.world_resource_development_queue.length, 69);
   assert.ok(audit.unfunded_public_node_ids.includes("K18921"));
   assert.ok(audit.unfunded_public_node_ids.includes("KAIOS_AI_COMPANY"));
   assert.ok(audit.unfunded_public_node_ids.includes("AQUACULTURE_K280"));
+  assert.ok(audit.unfunded_public_node_ids.includes("EARTH-K280"));
+  assert.ok(audit.unfunded_public_node_ids.includes("PROJECT-HOUSE-FOUNDATION-001"));
+  assert.ok(audit.unfunded_public_node_ids.includes("HABITAT-FISHPOND-V1"));
+  assert.ok(audit.unfunded_public_node_ids.includes("POND-KAIOS-001"));
   assert.equal(audit.nodes.find((node) => node.node_id === "K11520").market_settlement_connected, false);
   assert.equal(audit.nodes.find((node) => node.node_id === "K18921").funding_class, "LIQUIDITY_DEVELOPMENT_FUND");
   assert.equal(audit.nodes.find((node) => node.node_id === "ECOSYSTEM_K280").funding_class, "RESOURCE_DEVELOPMENT_FUND");
+  assert.equal(audit.nodes.find((node) => node.node_id === "parcel-002").funding_class, "RESOURCE_DEVELOPMENT_FUND");
+  assert.equal(audit.nodes.find((node) => node.node_id === "room-market-001").funding_class, "MARKET_DEVELOPMENT_FUND");
+  assert.equal(audit.nodes.find((node) => node.node_id === "POND-KAIOS-001").binding_node_id, "HABITAT-FISHPOND-V1");
   assert.equal(audit.nodes.find((node) => node.node_id === "KAIOS_AI_COMPANY").gross_candidate_kaios_wei, null);
   assert.equal(audit.highest_priority_unfunded_public_node, "K18921");
   assert.equal(audit.watcher_connected, false);
@@ -4216,11 +4204,15 @@ test("KAIOS Economy Dashboard stays UNKNOWN and rejects caller-supplied verified
 });
 
 test("resource accounts and temporary Human custody require repository-owned designations", () => {
-  assert.equal(CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.length, 6);
-  const k88895 = createResourceLedgerSubaccount({ accountId: "RESOURCE_LEDGER_K88895", designationId: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1", createdAt: "2026-08-30T04:00:00.000Z" });
-  assert.equal(k88895.node_id, "K88895");
-  assert.equal(k88895.can_accrue_entitlements, true);
-  assert.equal(k88895.can_receive_chain_payment, false);
+  assert.equal(CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS.length, 0);
+  assert.equal(KAIOS_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATES.length, 6);
+  assert.equal(K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE.status, "DESIGNATION_CANDIDATE_REVIEW_REQUIRED");
+  assert.equal(K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE.human_decision_id, null);
+  assert.equal(K88895_RESOURCE_ACCOUNT_DESIGNATION_CANDIDATE.can_accrue_entitlements, false);
+  assert.throws(
+    () => createResourceLedgerSubaccount({ accountId: "RESOURCE_LEDGER_K88895", designationId: "RESOURCE_ACCOUNT_DESIGNATION_K88895_V1", createdAt: "2026-08-30T04:00:00.000Z" }),
+    (error) => error.code === "RESOURCE_ACCOUNT_DESIGNATION_NOT_CONNECTED"
+  );
   assert.equal(CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS.length, 0);
   assert.throws(
     () => createResourceLedgerSubaccount({ accountId: "RESOURCE_ACCOUNT_K88895", designationId: "CALLER_CHOSEN_RESOURCE_DESIGNATION", createdAt: "2026-08-30T04:00:00.000Z" }),
