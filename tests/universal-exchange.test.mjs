@@ -105,7 +105,8 @@ import {
   createFieldServiceDemandScan
   , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
   KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, KAIOS_PLAYER_REWARD_POLICY,
-  KAIOS_LIQUIDITY_GENESIS_POLICY,
+  KAIOS_LIQUIDITY_GENESIS_POLICY, K18888_GENESIS_QE_POLICY,
+  CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY,
   CANONICAL_KAIOS_PLAYER_REWARD_EVENT_ATTESTATIONS, CANONICAL_KAIOS_WALLET_CONTROL_ATTESTATIONS,
   CANONICAL_KAIOS_ECONOMY_SNAPSHOT_ATTESTATIONS, CANONICAL_KAIOS_RESOURCE_ACCOUNT_DESIGNATIONS,
   CANONICAL_KAIOS_RESOURCE_CUSTODY_DESIGNATIONS,
@@ -134,6 +135,8 @@ import {
   createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
   createKaiosPlayerRewardEntitlement, evaluateKaiosRewardBudgetSimulation,
   createKaiosLiquidityGenesisSimulation, createKaiosEconomyEvidenceSnapshot,
+  createGenesisDevelopmentAllocationCandidate, scanCanonicalWorldResourceEconomy,
+  createKaiosCivilizationCirculationHealth,
   createResourceLedgerSubaccount, createTemporaryResourceCustodyBindingCandidate,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
   appendEmploymentPhase1BCompanyEvent,
@@ -4009,6 +4012,78 @@ test("KAIOS Liquidity Genesis reuses Auto LP and remains a non-executable DEX si
   assert.equal(simulation.chain_write, false);
   assert.equal(simulation.lp_token_owner, "NOT_ASSIGNED_POLICY_REQUIRED");
   assert.throws(() => createKaiosLiquidityGenesisSimulation({ simulationId: "KAIOS_LP_SIM_0002", pairId: "KAIOS_KGEN", kaiosAmountWei: "200000000000000000000001", counterAssetAmountWei: "1", treasuryBalanceKaiosWei: "22213020930416874731235000", referencePriceSource: "REVIEWED_PRICE_DISCOVERY_INPUT", createdAt: "2026-08-30T05:00:00.000Z" }), (error) => error.code === "KAIOS_LP_ALLOCATION_EXCEEDED");
+});
+
+test("K18888 Genesis QE keeps -10% development support balanced and separate from commercial credit", () => {
+  assert.equal(K18888_GENESIS_QE_POLICY.canonical_node_id, "K18888");
+  assert.equal(K18888_GENESIS_QE_POLICY.rejected_typo_node_id, "K18887");
+  assert.equal(K18888_GENESIS_QE_POLICY.rejected_typo_status, "TYPO_REJECTED_NOT_CREATED");
+  assert.equal(K18888_GENESIS_QE_POLICY.development_rate_bps, -1000);
+  assert.equal(K18888_GENESIS_QE_POLICY.commercial_credit_separate, true);
+  const allocation = createGenesisDevelopmentAllocationCandidate({
+    allocationId: "K18888_QE_RESOURCE_K16888_0001",
+    fundClass: "RESOURCE_DEVELOPMENT_FUND",
+    economicPurpose: "K16888 canonical resource discovery and ledger design",
+    beneficiaryId: "K16888",
+    grossCapitalKaiosWei: "100000000000000000000",
+    performanceCondition: "Repository-reviewed resource profile and ledger designation",
+    evidenceRefs: ["P_16888p0_白骨洞_廣寒宮_R48"],
+    createdAt: "2026-08-30T12:30:00.000Z"
+  });
+  assert.equal(allocation.gross_development_capital_kaios_wei, "100000000000000000000");
+  assert.equal(allocation.recoverable_capital_kaios_wei, "90000000000000000000");
+  assert.equal(allocation.conditional_development_subsidy_kaios_wei, "10000000000000000000");
+  assert.equal(allocation.ledger_events.length, 3);
+  assert.equal(allocation.subsidy_recognized, false);
+  assert.equal(allocation.real_kaios_distributed, false);
+  assert.throws(
+    () => createGenesisDevelopmentAllocationCandidate({ allocationId: "K18888_QE_COMMERCIAL_0001", fundClass: "COMMERCIAL_CREDIT", economicPurpose: "Commercial working capital", beneficiaryId: "COMPANY_0001", grossCapitalKaiosWei: "100", performanceCondition: "Revenue repayment", createdAt: "2026-08-30T12:30:00.000Z" }),
+    (error) => error.code === "COMMERCIAL_CREDIT_REQUIRES_SEPARATE_POLICY"
+  );
+});
+
+test("canonical world scan groups coordinate aliases and keeps White Bone Cave resource truth unknown", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const scan = scanCanonicalWorldResourceEconomy({ universeMap });
+  assert.equal(scan.universe_map_version, CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.universe_map_version);
+  assert.equal(scan.total_map_points, 123);
+  assert.equal(scan.total_canonical_world_nodes, 108);
+  assert.equal(scan.coordinate_alias_points, 15);
+  assert.equal(scan.resource_profile_complete, 0);
+  assert.equal(scan.resource_ledger_connected, 0);
+  assert.equal(scan.kaios_path_connected, 0);
+  assert.equal(scan.kgen_path_connected, 0);
+  assert.equal(scan.real_accounts_created, 0);
+  assert.equal(scan.white_bone_cave.canonical_node_id, "K16888");
+  assert.ok(scan.white_bone_cave.point_alias_ids.includes("P_16888p0_白骨洞_廣寒宮_R48"));
+  assert.ok(scan.white_bone_cave.point_alias_names.includes("白骨洞 / 廣寒宮"));
+  assert.deepEqual(scan.white_bone_cave.resource_candidates, []);
+  assert.equal(scan.white_bone_cave.resource_status, "DISCOVERY_REQUIRED");
+  assert.equal(scan.white_bone_cave.account_status, "CANDIDATE_NOT_REPOSITORY_DESIGNATED");
+  assert.equal(scan.white_bone_cave.eoa_private_key_created, false);
+  assert.equal(scan.white_bone_cave.kgen_path_status, "NOT_CONNECTED");
+  assert.equal(scan.white_bone_cave.kaios_path_status, "NOT_CONNECTED");
+  const fakeMap = structuredClone(universeMap);
+  fakeMap.version = "CALLER_INVENTED_MAP";
+  assert.throws(() => scanCanonicalWorldResourceEconomy({ universeMap: fakeMap }), (error) => error.code === "CANONICAL_UNIVERSE_MAP_VERSION_REQUIRED");
+});
+
+test("civilization circulation health exposes blockers without fabricating holders, trades or LP", async () => {
+  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
+  const economySnapshot = createKaiosEconomyEvidenceSnapshot({ snapshotId: "KAIOS_CIRCULATION_ECONOMY_0001", asOf: "2026-08-30T12:31:00.000Z" });
+  const health = createKaiosCivilizationCirculationHealth({ worldResourceScan, economySnapshot });
+  assert.equal(health.holder_count, "UNKNOWN");
+  assert.equal(health.ct, null);
+  assert.equal(health.resource_nodes, worldResourceScan.resource_nodes_found);
+  assert.equal(health.active_resource_nodes, 0);
+  assert.equal(health.public_investment_wei, "0");
+  assert.equal(health.fabricated_metrics, false);
+  assert.equal(health.real_payment_executed, false);
+  assert.equal(health.real_trade_executed, false);
+  assert.equal(health.real_lp_created, false);
+  assert.ok(health.broken_circulation_paths.includes("K18888_GENESIS_QE_BUDGET_AUTHORITY_NOT_CONNECTED"));
+  assert.equal(health.status, "BLOCKED_NO_VERIFIED_END_TO_END_CIRCULATION_EVIDENCE");
 });
 
 test("KAIOS Economy Dashboard stays UNKNOWN and rejects caller-supplied verified metrics", () => {
