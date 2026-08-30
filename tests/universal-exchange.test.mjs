@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
-import { createCausalWorldRuntime } from "../KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
@@ -140,7 +139,7 @@ import {
   K18888_GENESIS_DEVELOPMENT_PORTFOLIO_POLICY, createGenesisDevelopmentPortfolioCandidate,
   createGenesisDevelopmentAllocationCandidate, scanCanonicalWorldResourceEconomy, createK88895ResourceEconomyRuntime,
   createCanonicalResourceEconomyBatchExpansion,
-  PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY, auditPublicGameNodeFunding,
+  PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY, CANONICAL_PUBLIC_GAME_NODE_AUDIT_SOURCE_ATTESTATIONS, auditPublicGameNodeFunding,
   createKaiosCivilizationCirculationHealth,
   createResourceLedgerSubaccount, createTemporaryResourceCustodyBindingCandidate,
   evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
@@ -4121,53 +4120,26 @@ test("canonical resource batch expansion rejects caller scans and unknown attest
     (error) => error.code === "WORLD_RESOURCE_SCAN_ATTESTATION_NOT_CONNECTED"
   );
 });
-test("public game node audit discovers route-backed and selectable runtime subjects with unequal evidence-first funding work", async () => {
-  const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
-  const rootHomepageHtml = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
-  const galaxyPortalHtml = await fs.readFile(new URL("../K線西遊記/index.html", import.meta.url), "utf8");
-  const syntheticWorld = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/world-viewer/data/synthetic-world.json", import.meta.url), "utf8"));
-  const ecosystemProjection = JSON.parse(await fs.readFile(new URL("../api/kaios/ecosystem/v1/habitats.json", import.meta.url), "utf8"));
-  const aquacultureProjection = JSON.parse(await fs.readFile(new URL("../api/kaios/aquaculture/v1/ponds.json", import.meta.url), "utf8"));
-  const causalWorldState = createCausalWorldRuntime().getSnapshot();
-  const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });
-  const genesisDevelopmentPortfolio = createGenesisDevelopmentPortfolioCandidate({ createdAt: "2026-08-30T13:10:00.000Z" });
-  const audit = await auditPublicGameNodeFunding({ rootHomepageHtml, galaxyPortalHtml, worldResourceScan, genesisDevelopmentPortfolio, syntheticWorld, causalWorldState, ecosystemProjection, aquacultureProjection, createdAt: "2026-08-30T13:11:00.000Z" });
+test("public game node audit rejects caller sources and unknown repository attestation IDs", async () => {
   assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.auto_add_funding_candidate, true);
-  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.equal_amount_per_node_forbidden, true);
-  assert.equal(audit.source_hash.length, 64);
-  assert.equal(audit.public_game_node_count, 69);
-  assert.equal(audit.funded_nodes, 0);
-  assert.equal(audit.funded_or_budgeted_nodes, 4);
-  assert.deepEqual(audit.funded_or_budgeted_node_ids, ["K11520", "K12345", "K8888", "K8895"]);
-  assert.equal(audit.unfunded_public_nodes, 65);
-  assert.equal(audit.resource_connected_nodes, 0);
-  assert.equal(audit.market_connected_nodes, 0);
-  assert.equal(audit.player_reward_connected_nodes, 0);
-  assert.equal(audit.nodes_with_no_operational_economic_path, 69);
-  assert.equal(audit.nodes_with_planning_path, 69);
-  assert.equal(audit.newly_discovered_funding_candidates.length, 65);
-  assert.equal(audit.world_resource_development_queue.length, 69);
-  assert.ok(audit.unfunded_public_node_ids.includes("K18921"));
-  assert.ok(audit.unfunded_public_node_ids.includes("KAIOS_AI_COMPANY"));
-  assert.ok(audit.unfunded_public_node_ids.includes("AQUACULTURE_K280"));
-  assert.ok(audit.unfunded_public_node_ids.includes("EARTH-K280"));
-  assert.ok(audit.unfunded_public_node_ids.includes("PROJECT-HOUSE-FOUNDATION-001"));
-  assert.ok(audit.unfunded_public_node_ids.includes("HABITAT-FISHPOND-V1"));
-  assert.ok(audit.unfunded_public_node_ids.includes("POND-KAIOS-001"));
-  assert.equal(audit.nodes.find((node) => node.node_id === "K11520").market_settlement_connected, false);
-  assert.equal(audit.nodes.find((node) => node.node_id === "K18921").funding_class, "LIQUIDITY_DEVELOPMENT_FUND");
-  assert.equal(audit.nodes.find((node) => node.node_id === "ECOSYSTEM_K280").funding_class, "RESOURCE_DEVELOPMENT_FUND");
-  assert.equal(audit.nodes.find((node) => node.node_id === "parcel-002").funding_class, "RESOURCE_DEVELOPMENT_FUND");
-  assert.equal(audit.nodes.find((node) => node.node_id === "room-market-001").funding_class, "MARKET_DEVELOPMENT_FUND");
-  assert.equal(audit.nodes.find((node) => node.node_id === "POND-KAIOS-001").binding_node_id, "HABITAT-FISHPOND-V1");
-  assert.equal(audit.nodes.find((node) => node.node_id === "KAIOS_AI_COMPANY").gross_candidate_kaios_wei, null);
-  assert.equal(audit.highest_priority_unfunded_public_node, "K18921");
-  assert.equal(audit.watcher_connected, false);
-  assert.equal(audit.heartbeat_callable, true);
-  assert.equal(audit.real_kaios_paid, false);
-  assert.equal(audit.chain_write, false);
+  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.real_payment_authority, false);
+  assert.equal(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.chain_write_authority, false);
+  assert.equal(CANONICAL_PUBLIC_GAME_NODE_AUDIT_SOURCE_ATTESTATIONS.length, 0);
+  await assert.rejects(
+    auditPublicGameNodeFunding({
+      rootHomepageHtml: "<html>" + "x".repeat(101) + "</html>",
+      createdAt: "2026-08-30T13:11:00.000Z"
+    }),
+    (error) => error.code === "CALLER_SUPPLIED_PUBLIC_GAME_AUDIT_SOURCE_FORBIDDEN"
+  );
+  await assert.rejects(
+    auditPublicGameNodeFunding({
+      sourceAttestationId: "CALLER_CHOSEN_PUBLIC_GAME_AUDIT_SOURCE",
+      createdAt: "2026-08-30T13:11:00.000Z"
+    }),
+    (error) => error.code === "PUBLIC_GAME_AUDIT_SOURCE_ATTESTATION_NOT_CONNECTED"
+  );
 });
-
 test("civilization circulation health exposes blockers without fabricating holders, trades or LP", async () => {
   const universeMap = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
   const worldResourceScan = scanCanonicalWorldResourceEconomy({ universeMap });

@@ -1183,6 +1183,8 @@ export const PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY = Object.freeze({
   chain_write_authority: false
 });
 
+export const CANONICAL_PUBLIC_GAME_NODE_AUDIT_SOURCE_ATTESTATIONS = Object.freeze([]);
+
 const PUBLIC_WORLD_ROUTE_RULES = Object.freeze({
   "": Object.freeze({ node_id: "WORLD_K280", node_name: "KAIOS World Viewer", node_type: "WORLD_NODE", funding_class: "INFRASTRUCTURE_FUND" }),
   "causal-runtime": Object.freeze({ node_id: "CAUSAL_RUNTIME_K280", node_name: "KAIOS 真實因果世界", node_type: "GAME_RUNTIME", funding_class: "INFRASTRUCTURE_FUND" }),
@@ -1206,9 +1208,43 @@ const TEMPLE_FUNDING_CLASS = Object.freeze({
 });
 
 export async function auditPublicGameNodeFunding({
-  rootHomepageHtml, galaxyPortalHtml, worldResourceScan, genesisDevelopmentPortfolio,
-  syntheticWorld, causalWorldState, ecosystemProjection, aquacultureProjection, createdAt
+  sourceAttestationId = null,
+  rootHomepageHtml: callerRootHomepageHtml = null,
+  galaxyPortalHtml: callerGalaxyPortalHtml = null,
+  worldResourceScan: callerWorldResourceScan = null,
+  genesisDevelopmentPortfolio: callerGenesisDevelopmentPortfolio = null,
+  syntheticWorld: callerSyntheticWorld = null,
+  causalWorldState: callerCausalWorldState = null,
+  ecosystemProjection: callerEcosystemProjection = null,
+  aquacultureProjection: callerAquacultureProjection = null,
+  createdAt
 }) {
+  const callerSources = [
+    callerRootHomepageHtml,
+    callerGalaxyPortalHtml,
+    callerWorldResourceScan,
+    callerGenesisDevelopmentPortfolio,
+    callerSyntheticWorld,
+    callerCausalWorldState,
+    callerEcosystemProjection,
+    callerAquacultureProjection
+  ];
+  invariant(callerSources.every((item) => item == null), "CALLER_SUPPLIED_PUBLIC_GAME_AUDIT_SOURCE_FORBIDDEN", "Public game node audit cannot trust caller-supplied repository, world, economy or projection sources");
+  const sourceAttestation = CANONICAL_PUBLIC_GAME_NODE_AUDIT_SOURCE_ATTESTATIONS.find((item) => item.attestation_id === sourceAttestationId);
+  invariant(sourceAttestation, "PUBLIC_GAME_AUDIT_SOURCE_ATTESTATION_NOT_CONNECTED", "Public game node audit requires a repository-owned exact source attestation");
+  invariant(sourceAttestation.status === "REPOSITORY_VERIFIED_EXACT_PUBLIC_GAME_AUDIT_SOURCES", "PUBLIC_GAME_AUDIT_SOURCE_ATTESTATION_STATUS_REQUIRED", "Public game node audit source attestation must be repository verified");
+  invariant(sourceAttestation.policy_id === PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.policy_id, "PUBLIC_GAME_AUDIT_POLICY_BINDING_MISMATCH", "Public game node audit source attestation must bind the exact audit policy");
+  invariant(JSON.stringify(sourceAttestation.source_paths) === JSON.stringify(PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.source_paths), "PUBLIC_GAME_AUDIT_SOURCE_PATH_BINDING_MISMATCH", "Public game node audit source attestation must bind every exact repository source path");
+  const {
+    root_homepage_html: rootHomepageHtml,
+    galaxy_portal_html: galaxyPortalHtml,
+    world_resource_scan: worldResourceScan,
+    genesis_development_portfolio: genesisDevelopmentPortfolio,
+    synthetic_world: syntheticWorld,
+    causal_world_state: causalWorldState,
+    ecosystem_projection: ecosystemProjection,
+    aquaculture_projection: aquacultureProjection
+  } = sourceAttestation.sources ?? {};
   invariant(typeof rootHomepageHtml === "string" && rootHomepageHtml.length > 100, "PUBLIC_ROOT_HOMEPAGE_REQUIRED", "Public game node audit requires the official root homepage source");
   invariant(typeof galaxyPortalHtml === "string" && galaxyPortalHtml.length > 100, "PUBLIC_GALAXY_PORTAL_REQUIRED", "Public game node audit requires the official Galaxy portal source");
   invariant(worldResourceScan?.scan_policy_id === CANONICAL_UNIVERSE_RESOURCE_SCAN_POLICY.policy_id, "CANONICAL_WORLD_RESOURCE_SCAN_REQUIRED", "Public game node audit requires the canonical world resource scan");
@@ -1217,6 +1253,8 @@ export async function auditPublicGameNodeFunding({
   invariant(causalWorldState?.mode === "LOCAL_DETERMINISTIC_SIMULATION" && causalWorldState.authority === "NO_PRODUCTION_AUTHORITY", "PUBLIC_CAUSAL_WORLD_REQUIRED", "Public game node audit requires the fail-closed causal runtime state");
   invariant(ecosystemProjection?.simulation_only === true && ecosystemProjection.read_only === true && ecosystemProjection.wallet === "NONE", "PUBLIC_ECOSYSTEM_PROJECTION_REQUIRED", "Public game node audit requires the read-only public ecosystem projection");
   invariant(aquacultureProjection?.simulation_only === true && aquacultureProjection.read_only === true && aquacultureProjection.wallet === "NONE", "PUBLIC_AQUACULTURE_PROJECTION_REQUIRED", "Public game node audit requires the read-only public aquaculture projection");
+  const boundSourceHash = await sha256(`${rootHomepageHtml}\n${galaxyPortalHtml}\n${worldResourceScan.universe_map_version}\n${JSON.stringify(syntheticWorld)}\n${JSON.stringify(causalWorldState)}\n${JSON.stringify(ecosystemProjection)}\n${JSON.stringify(aquacultureProjection)}`);
+  invariant(sourceAttestation.source_hash === boundSourceHash, "PUBLIC_GAME_AUDIT_SOURCE_HASH_MISMATCH", "Public game node audit source attestation must bind the exact source bytes and projections");
   parseEmploymentTime(createdAt, "public_game_node_audit.created_at");
 
   const amountedByNode = new Map(genesisDevelopmentPortfolio.allocations.map((allocation) => [allocation.canonical_node_id, allocation]));
@@ -1370,7 +1408,7 @@ export async function auditPublicGameNodeFunding({
   return Object.freeze({
     audit_id: "KAIOS_PUBLIC_GAME_NODE_FUNDING_AUDIT_V1",
     policy_id: PUBLIC_GAME_NODE_ECONOMIC_AUDIT_POLICY.policy_id,
-    source_hash: await sha256(`${rootHomepageHtml}\n${galaxyPortalHtml}\n${worldResourceScan.universe_map_version}\n${JSON.stringify(syntheticWorld)}\n${JSON.stringify(causalWorldState)}\n${JSON.stringify(ecosystemProjection)}\n${JSON.stringify(aquacultureProjection)}`),
+    source_hash: boundSourceHash,
     public_game_node_count: nodes.length,
     funded_nodes: 0,
     funded_or_budgeted_nodes: nodes.filter((node) => node.budget_candidate_amounted).length,
