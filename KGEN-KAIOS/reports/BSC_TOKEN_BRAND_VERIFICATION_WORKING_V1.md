@@ -1,19 +1,20 @@
 # BSC Token Brand Verification Working V1
 
-Status: `DRAFT / HOLD_P0_EXTERNAL_SUBMISSION_AND_SIGNER_PROVENANCE / KAIOS_PUBLIC_EXACT_MATCH_OBSERVED`
+Status: `DRAFT / KAIOS_TOKEN_INFO_SUBMITTED_PENDING_BSCSCAN / KAIOS_OWNERSHIP_VERIFIED`
 
 Execution branch: `gm/bsc-token-brand-verification-v1`
 
 ## Evidence boundary
 
-- Latest `origin/main` synchronized into this branch: `3d2ba9160a69049979c4afd195c70bbf8618306f`.
+- Latest `origin/main` synchronized into this branch: `3ccb764ca8c8067e6a8827d7d37941d1a3457107`.
 - PR #196 pre-update head: `d333ab6c97148b8d596e587df9a21b213fd9ec2b`.
 - PR #162 exact brand head reused: `f403a27d78acef85a599ec712fcb2a168c771409`.
 - PR #179 exact KGEN submission-package head reused: `d88ed1bfbee8b495b3bfb776b865cbb061384309`.
 - Public explorer and asset observations were independently reproduced at `2026-08-31T13:07:59Z` (`2026-08-31T21:07:59+08:00`).
 - `SUBMITTED` means an external form actually produced acceptance evidence. `PUBLISHED` means the public token page was re-read and displays the expected metadata and logo. Neither word is inferred from repository readiness.
-- The public BscScan Contract tab was branch-reported as `Source Code Verified / Exact Match`. Repository evidence does not establish who submitted the verification, which authenticated session was used, or whether the actor held Company authority.
-- This branch must not claim access to, possession of, derivation from, or use of any signer secret. Public addresses and GitHub authorship do not establish controller, signer, ownership, employment or Company authority.
+- The public BscScan Contract tab was re-read as `Source Code Verified / Exact Match` after the user explicitly confirmed the source-verification submission.
+- The user separately confirmed the KAIOS ownership submission and then the KAIOS token-information application. A locally configured signer was used only to sign and recover the BscScan ownership challenge offline. No signer secret value was displayed, logged, committed or transmitted.
+- The authenticated BscScan account accepted the ownership proof and lists the KAIOS contract under `My Verified Addresses`. The token-information form then returned its explicit submission-accepted message at the observation time recorded below.
 - No transaction, transfer, token approval, deployment, upgrade or governance execution was performed.
 
 ## KGEN current public state
@@ -59,8 +60,8 @@ Public URLs:
 | Ownable owner | `NOT_APPLICABLE`; deployed contract has no `owner()` surface |
 | Runtime bytecode | `5776` bytes; keccak256 `0x3a036ce95ac0929b247b40c9a303c2c4bfaf9aeb9bc171c009ad3532316df023` |
 | BscScan source | `VERIFIED_EXACT_MATCH`; public Contract tab displays `Source Code Verified`, contract name `KAIOS`, compiler `v0.8.24+commit.e11b9ed9`, optimizer `1`, EVM `paris`, license `MIT` |
-| Token information | `NOT_PUBLISHED` |
-| Logo | `NOT_PUBLISHED` |
+| Token information | `SUBMITTED_PENDING_BSCSCAN`; not yet published |
+| Logo | `SUBMITTED_PENDING_BSCSCAN`; public token page publication not yet confirmed |
 | Reputation | `UNKNOWN` |
 
 ### KAIOS exact source reproduction and public observation
@@ -77,7 +78,7 @@ Public URLs:
 - Actual deployment input: `7227` bytes.
 - Creation-bytecode plus constructor-argument comparison: `PASS_EXACT_BYTE_FOR_BYTE`.
 - Submitted Standard-JSON package: `C:\Desktop\KAIOS_BSCSCAN_STANDARD_INPUT.json`, SHA-256 `D986A085BEF7EBADFD0A3409B036C104C6E4B7EFCB6E33FF68436203974BBD05`, `8` literal source entries.
-- Branch-reported BscScan response text: `Successfully generated matching Bytecode and ABI for Contract Address [0xD4E67B3a69e41524c424150E6b6e921b01D036db]`; actor, session and authorization remain unverified.
+- BscScan source-verification response text: `Successfully generated matching Bytecode and ABI for Contract Address [0xD4E67B3a69e41524c424150E6b6e921b01D036db]`.
 - Branch-reported public observation time: `2026-08-31T13:07:59Z`.
 - Public verification URL: `https://bscscan.com/address/0xD4E67B3a69e41524c424150E6b6e921b01D036db#code`.
 
@@ -114,31 +115,36 @@ The website, GitHub, Telegram, YouTube, TikTok, Facebook and Instagram metadata 
 
 ## Ownership and authenticated submission readiness
 
-- Repository evidence does not establish that any private-key environment was present or used, and this dispatcher did not access credentials or perform signing.
-- Public address `0xb3C54ca96De0dED4Ca0151F629ff9781506ba261` is branch-reported as matching explorer creator fields; this does not establish controller, signer, ownership, employment, Life identity or Company authority.
-- No KAIOS source-submission actor or authorization is repository-bound. Only the branch-reported public exact-match state may be retained as an unverified external observation.
-- Both available BscScan browser sessions are signed out. Ownership claim and token-info/logo forms require a Human-authenticated BscScan session before their final messages and fields can be generated and submitted.
+- The BscScan session was authenticated as the `Klineodyssey` account when the user issued the action-time confirmations.
+- The BscScan ownership challenge was signed offline and recovered to `0xb3C54ca96De0dED4Ca0151F629ff9781506ba261`, matching the explorer creator/deployer address. The secret value was not exposed or stored in repository evidence.
+- BscScan returned: `Congratulations, the address ownership for [0xD4E67B3a69e41524c424150E6b6e921b01D036db] is verified.`
+- `My Verified Addresses` was re-read and contained the KAIOS contract with verified date `2026-08-31`.
+- The KAIOS first-time token-information application used the canonical shared 32x32 SVG mark at `https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo.svg`, official public metadata, and no fabricated price listing.
+- BscScan returned: `Thank you for your submission. You will receive an email containing further instructions shortly.` The acceptance page exposed no ticket identifier.
+- Submission observation: `2026-08-31T18:21:23Z` (`2026-09-01T02:21:23+08:00`). Publication remains pending BscScan review; no duplicate submission should be made during the stated review window.
 
 ## External status and exact blocker
 
 | Item | Status |
 |---|---|
 | KGEN source | `VERIFIED_EXACT_MATCH` |
-| KGEN ownership claim | `NOT_SUBMITTED_BSCSCAN_SIGN_IN_REQUIRED` |
+| KGEN ownership claim | `VERIFIED_BSCSCAN_ACCOUNT`; verified-address date `2026-04-20` |
 | KGEN token info / logo | `NOT_SUBMITTED_NOT_PUBLISHED` |
 | KAIOS source | `VERIFIED_EXACT_MATCH` |
-| KAIOS ownership claim | `NOT_SUBMITTED_BSCSCAN_SIGN_IN_REQUIRED` |
-| KAIOS token info / logo | `NOT_SUBMITTED_NOT_PUBLISHED` |
+| KAIOS ownership claim | `VERIFIED_BSCSCAN_ACCOUNT`; verified-address date `2026-08-31` |
+| KAIOS token info / logo | `SUBMITTED_PENDING_BSCSCAN`; `NOT_YET_PUBLISHED` |
 
-`EXACT_HUMAN_GATE`: an authorized Human-controlled BscScan session, repository-bound authority, and separate action-time confirmation are required before any ownership or token-info submission. This dispatcher does not sign in, access credentials, generate signatures or submit external forms.
+`NEXT_EXTERNAL_GATE`: wait for the BscScan review email or public-page update. Do not file a duplicate application. `PUBLISHED` remains forbidden until the public token page displays the submitted metadata and logo.
 
 ## Safety and classification
 
 - Secret scan: `PASS`; no private key, seed phrase, API token, auth token, password or raw signer credential is present in this report or its branch diff.
 - IP classification: `PASS_PUBLIC_METADATA_ONLY`; this branch contains explorer facts, public addresses, public brand hashes and public asset URLs only. No protected engine, private quant model, alpha strategy or secret signal logic is published.
 - Private key material present in this branch diff: `NO`.
-- Credential or signer access: `NONE_PERFORMED_OR_REPOSITORY_VERIFIED`.
-- External source-verification submission: `ACTOR_AND_AUTHORIZATION_UNVERIFIED / PUBLIC_EXACT_MATCH_BRANCH_OBSERVED`.
+- Credential or signer access: `LOCAL_OFFLINE_OWNERSHIP_SIGN_ONLY / SECRET_NOT_EXPOSED`.
+- External source-verification submission: `EXECUTED_AFTER_USER_CONFIRMATION / PUBLIC_EXACT_MATCH_VERIFIED`.
+- External KAIOS ownership submission: `EXECUTED_AND_VERIFIED`.
+- External KAIOS token-information submission: `SUBMITTED_PENDING_BSCSCAN`.
 - Token transfer executed: `NO`.
 - BNB transfer executed: `NO`.
 - Contract redeployed: `NO`.
