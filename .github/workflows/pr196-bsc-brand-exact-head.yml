@@ -1,0 +1,60 @@
+name: PR196 BSC Brand Exact Head
+
+on:
+  push:
+    branches:
+      - gm/bsc-token-brand-verification-v1
+    paths:
+      - "KGEN-KAIOS/reports/BSC_TOKEN_BRAND_VERIFICATION_WORKING_V1.md"
+      - ".github/workflows/pr196-bsc-brand-exact-head.yml"
+  pull_request:
+    paths:
+      - "KGEN-KAIOS/reports/BSC_TOKEN_BRAND_VERIFICATION_WORKING_V1.md"
+      - ".github/workflows/pr196-bsc-brand-exact-head.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact head
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_HEAD="$(git rev-parse HEAD)"
+          test "$ACTUAL_HEAD" = "$EXPECTED_HEAD"
+          echo "EXPECTED_HEAD=$EXPECTED_HEAD"
+          echo "ACTUAL_HEAD=$ACTUAL_HEAD"
+      - name: Validate fail-closed authority evidence
+        run: |
+          set -euo pipefail
+          FILE="KGEN-KAIOS/reports/BSC_TOKEN_BRAND_VERIFICATION_WORKING_V1.md"
+          test -f "$FILE"
+          grep -F 'HOLD_P0_AUTHORITY_PROVENANCE' "$FILE"
+          grep -F 'XUANYAO_IDENTITY_BINDING_ON_EXACT_MAIN = NOT_FOUND' "$FILE"
+          grep -F 'ACTING_GENERAL_MANAGER_AUTHORITY = NOT_VERIFIED' "$FILE"
+          grep -F 'AUTHORITY_SIGNATURE_STATUS = NOT_ACCEPTED' "$FILE"
+          ! grep -Fq 'SIGNED_BY_SELF_NAME' "$FILE"
+          ! grep -Fq 'ROLE = Acting General Manager' "$FILE"
+      - name: Validate branch diff
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git diff --check origin/main...HEAD
+          mapfile -t paths < <(git diff --name-only origin/main...HEAD)
+          test "${#paths[@]}" -eq 2
+          printf '%s\n' "${paths[@]}" | grep -Fx 'KGEN-KAIOS/reports/BSC_TOKEN_BRAND_VERIFICATION_WORKING_V1.md'
+          printf '%s\n' "${paths[@]}" | grep -Fx '.github/workflows/pr196-bsc-brand-exact-head.yml'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run Universal Exchange regression suite
+        run: node --test tests/universal-exchange.test.mjs
