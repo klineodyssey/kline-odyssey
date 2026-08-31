@@ -7,23 +7,26 @@ import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 /**
  * @title KUFOV4
- * @notice KUFO successor candidate: immediate alchemy output, one K280-year lifetime, then one-way KUFO -> KSHIP conversion.
- * @dev This is a deterministic expiry/decay epoch, not continuous exponential decay. Transfers preserve each lot birth time.
+ * @notice KUFO successor candidate with immediate alchemy output and Three-Autumn decay.
+ * @dev Autumn 1 converts 50% of original lot, Autumn 2 reaches 75%, Autumn 3 converts all remainder.
+ *      This intentionally guarantees zero residual KUFO dust after three K280 years.
  */
 contract KUFOV4 is ERC20, ERC20Capped {
-    bytes32 public constant ORGAN_WORMHOLE_511111 = keccak256("KAIOS.ORGAN.WORMHOLE.511111");
+    bytes32 public constant ORGAN_OUTPUT_168888 = keccak256("KAIOS.ORGAN.KUFO.OUTPUT.168888");
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
+    uint256 public constant TOKEN_POINT_511111 = 511_111;
+    uint256 public constant OUTPUT_POINT_168888 = 168_888;
     uint256 public constant KSHIP_PER_KUFO = 1_000;
     uint256 public constant K280_YEAR_SECONDS = 31_556_926;
     uint256 public constant MAX_SUPPLY = 72_000_000_000_000 ether;
-    uint256 public constant MAX_LOTS_PER_TRANSFER = 64;
+    uint256 public constant MAX_LOTS_PER_OPERATION = 64;
 
     struct Lot {
         address owner;
-        uint256 amount;
+        uint256 initialAmount;
+        uint256 convertedAmount;
         uint64 bornAt;
         bytes32 sourceProof;
-        bool decayed;
     }
 
     IKAIOSOrganRegistry public immutable organRegistry;
@@ -37,43 +40,22 @@ contract KUFOV4 is ERC20, ERC20Capped {
     uint256 public nextLotId = 1;
     uint256 public totalMintedFromAlchemy;
     uint256 public totalDecayedForKship;
-    bool private _controlledDecayBurn;
+    bool private _decayBurn;
 
     error ZeroAddress();
     error ZeroAmount();
-    error OnlyCurrentWormhole(address caller);
+    error OnlyCurrentOutput(address caller);
     error OnlyCurrentKshipConverter(address caller);
     error ProofAlreadyUsed(bytes32 proofId);
     error UnknownLot(uint256 lotId);
     error WrongLotOwner(address expected, address actual);
-    error LotNotExpired(uint256 lotId, uint256 expiresAt, uint256 currentTime);
-    error LotAlreadyDecayed(uint256 lotId);
-    error LotAmountMismatch(uint256 lotAmount, uint256 requested);
-    error LotTraversalLimit(uint256 limit);
-    error LineageBalanceMismatch(address owner, uint256 remaining);
-    error UnauthorizedBurn();
+    error NoDecayAvailable(uint256 lotId);
+    error LotTraversalLimit();
+    error LineageBalanceMismatch(address owner, uint256 missing);
 
-    event ImmediateAlchemyMinted(
-        bytes32 indexed proofId,
-        uint256 indexed lotId,
-        address indexed beneficiary,
-        uint256 kufoAmount,
-        uint64 bornAt
-    );
-    event LotSplit(
-        uint256 indexed parentLotId,
-        uint256 indexed childLotId,
-        address indexed newOwner,
-        uint256 amount,
-        uint64 bornAt
-    );
-    event KUFODecayedToKSHIP(
-        uint256 indexed lotId,
-        address indexed owner,
-        address indexed beneficiary,
-        uint256 kufoBurned,
-        uint256 expectedKship
-    );
+    event ImmediateAlchemyMinted(bytes32 indexed proofId, uint256 indexed lotId, address indexed beneficiary, uint256 kufoAmount, uint64 bornAt);
+    event LotSplit(uint256 indexed parentLotId, uint256 indexed childLotId, address indexed newOwner, uint256 childInitial, uint256 childConverted);
+    event ThreeAutumnDecay(uint256 indexed lotId, address indexed owner, address indexed beneficiary, uint256 kufoBurned, uint256 expectedKship, uint8 autumn);
 
     constructor(address registry)
         ERC20("KUFO Alchemy Mass", "KUFO")
@@ -83,9 +65,9 @@ contract KUFOV4 is ERC20, ERC20Capped {
         organRegistry = IKAIOSOrganRegistry(registry);
     }
 
-    function mintFromImmediateProof(bytes32 proofId, address beneficiary, uint256 amount) external {
-        address wormhole = organRegistry.organ(ORGAN_WORMHOLE_511111);
-        if (msg.sender != wormhole || wormhole == address(0)) revert OnlyCurrentWormhole(msg.sender);
+    function mintFromImmediateProof(bytes32 proofId, address beneficiary, uint256 amount) external returns (uint256 lotId) {
+        address output = organRegistry.organ(ORGAN_OUTPUT_168888);
+        if (msg.sender != output || output == address(0)) revert OnlyCurrentOutput(msg.sender);
         if (beneficiary == address(0)) revert ZeroAddress();
         if (amount == 0) revert ZeroAmount();
         if (proofMinted[proofId]) revert ProofAlreadyUsed(proofId);
@@ -93,75 +75,85 @@ contract KUFOV4 is ERC20, ERC20Capped {
         proofMinted[proofId] = true;
         totalMintedFromAlchemy += amount;
         _mint(beneficiary, amount);
-        uint256 lotId = _createLot(beneficiary, amount, uint64(block.timestamp), proofId);
+        lotId = _createLot(beneficiary, amount, 0, uint64(block.timestamp), proofId);
         emit ImmediateAlchemyMinted(proofId, lotId, beneficiary, amount, uint64(block.timestamp));
     }
 
-    function decayLotForKship(
-        uint256 lotId,
-        address owner,
-        address beneficiary,
-        uint256 kufoAmount
-    ) external returns (uint256 expectedKship) {
+    function targetConvertedAmount(uint256 lotId) public view returns (uint256) {
+        Lot memory item = _lots[lotId];
+        if (item.owner == address(0)) revert UnknownLot(lotId);
+        uint256 elapsed = block.timestamp > item.bornAt ? block.timestamp - item.bornAt : 0;
+        if (elapsed < K280_YEAR_SECONDS) return 0;
+        if (elapsed < 2 * K280_YEAR_SECONDS) return item.initialAmount / 2;
+        if (elapsed < 3 * K280_YEAR_SECONDS) return item.initialAmount * 3 / 4;
+        return item.initialAmount;
+    }
+
+    function claimableDecay(uint256 lotId) public view returns (uint256) {
+        Lot memory item = _lots[lotId];
+        uint256 target = targetConvertedAmount(lotId);
+        return target > item.convertedAmount ? target - item.convertedAmount : 0;
+    }
+
+    function currentAutumn(uint256 lotId) public view returns (uint8) {
+        Lot memory item = _lots[lotId];
+        if (item.owner == address(0)) revert UnknownLot(lotId);
+        uint256 elapsed = block.timestamp > item.bornAt ? block.timestamp - item.bornAt : 0;
+        if (elapsed < K280_YEAR_SECONDS) return 0;
+        if (elapsed < 2 * K280_YEAR_SECONDS) return 1;
+        if (elapsed < 3 * K280_YEAR_SECONDS) return 2;
+        return 3;
+    }
+
+    function decayAvailableForKship(uint256 lotId, address owner, address beneficiary)
+        external
+        returns (uint256 kufoBurned, uint256 expectedKship)
+    {
         address converter = organRegistry.organ(ORGAN_KSHIP_CONVERTER);
         if (msg.sender != converter || converter == address(0)) revert OnlyCurrentKshipConverter(msg.sender);
         if (owner == address(0) || beneficiary == address(0)) revert ZeroAddress();
-        if (kufoAmount == 0) revert ZeroAmount();
 
-        Lot storage lot = _lots[lotId];
-        if (lot.owner == address(0)) revert UnknownLot(lotId);
-        if (lot.owner != owner) revert WrongLotOwner(lot.owner, owner);
-        if (lot.decayed) revert LotAlreadyDecayed(lotId);
-        uint256 expiresAt = uint256(lot.bornAt) + K280_YEAR_SECONDS;
-        if (block.timestamp < expiresAt) revert LotNotExpired(lotId, expiresAt, block.timestamp);
-        if (lot.amount != kufoAmount) revert LotAmountMismatch(lot.amount, kufoAmount);
+        Lot storage item = _lots[lotId];
+        if (item.owner == address(0)) revert UnknownLot(lotId);
+        if (item.owner != owner) revert WrongLotOwner(item.owner, owner);
+        kufoBurned = claimableDecay(lotId);
+        if (kufoBurned == 0) revert NoDecayAvailable(lotId);
 
-        lot.decayed = true;
-        _removeLot(owner, lotId);
-        expectedKship = kufoAmount * KSHIP_PER_KUFO;
-        totalDecayedForKship += kufoAmount;
-        _controlledDecayBurn = true;
-        _burn(owner, kufoAmount);
-        _controlledDecayBurn = false;
-        emit KUFODecayedToKSHIP(lotId, owner, beneficiary, kufoAmount, expectedKship);
+        item.convertedAmount += kufoBurned;
+        totalDecayedForKship += kufoBurned;
+        expectedKship = kufoBurned * KSHIP_PER_KUFO;
+        _decayBurn = true;
+        _burn(owner, kufoBurned);
+        _decayBurn = false;
+        if (item.convertedAmount == item.initialAmount) _remove(owner, lotId);
+        emit ThreeAutumnDecay(lotId, owner, beneficiary, kufoBurned, expectedKship, currentAutumnForTimestamp(item.bornAt));
     }
 
-    function lot(uint256 lotId) external view returns (Lot memory) {
-        return _lots[lotId];
+    function currentAutumnForTimestamp(uint64 bornAt) public view returns (uint8) {
+        uint256 elapsed = block.timestamp > bornAt ? block.timestamp - bornAt : 0;
+        if (elapsed < K280_YEAR_SECONDS) return 0;
+        if (elapsed < 2 * K280_YEAR_SECONDS) return 1;
+        if (elapsed < 3 * K280_YEAR_SECONDS) return 2;
+        return 3;
     }
 
-    function lotIds(address owner, uint256 limit) external view returns (uint256[] memory ids) {
-        if (limit == 0 || limit > MAX_LOTS_PER_TRANSFER) revert LotTraversalLimit(limit);
-        ids = new uint256[](limit);
+    function lot(uint256 lotId) external view returns (Lot memory) { return _lots[lotId]; }
+
+    function ownerLotIds(address owner) external view returns (uint256[] memory ids) {
+        uint256 count = activeLotCount[owner];
+        if (count > MAX_LOTS_PER_OPERATION) revert LotTraversalLimit();
+        ids = new uint256[](count);
         uint256 cursor = _head[owner];
-        uint256 count;
-        while (cursor != 0 && count < limit) {
-            ids[count] = cursor;
-            cursor = _next[cursor];
-            unchecked { ++count; }
-        }
-        assembly ("memory-safe") { mstore(ids, count) }
-    }
-
-    function expiresAt(uint256 lotId) external view returns (uint256) {
-        Lot memory item = _lots[lotId];
-        if (item.owner == address(0) && !item.decayed) revert UnknownLot(lotId);
-        return uint256(item.bornAt) + K280_YEAR_SECONDS;
+        for (uint256 i; i < count; ++i) { ids[i] = cursor; cursor = _next[cursor]; }
     }
 
     function conservationInvariantHolds() external view returns (bool) {
         return totalSupply() + totalDecayedForKship == totalMintedFromAlchemy;
     }
 
-    function _update(address from, address to, uint256 value)
-        internal
-        override(ERC20, ERC20Capped)
-    {
-        if (from != address(0) && to != address(0) && from != to) {
-            _moveLots(from, to, value);
-        } else if (to == address(0) && !_controlledDecayBurn) {
-            revert UnauthorizedBurn();
-        }
+    function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Capped) {
+        if (from != address(0) && to != address(0) && from != to) _moveLots(from, to, value);
+        if (to == address(0) && !_decayBurn) revert LineageBalanceMismatch(from, value);
         super._update(from, to, value);
     }
 
@@ -169,64 +161,54 @@ contract KUFOV4 is ERC20, ERC20Capped {
         uint256 remaining = amount;
         uint256 cursor = _head[from];
         uint256 processed;
-        while (cursor != 0 && remaining > 0 && processed < MAX_LOTS_PER_TRANSFER) {
+        while (cursor != 0 && remaining > 0 && processed < MAX_LOTS_PER_OPERATION) {
             uint256 following = _next[cursor];
             Lot storage item = _lots[cursor];
-            uint256 take = item.amount <= remaining ? item.amount : remaining;
-            if (take == item.amount) {
-                _removeLot(from, cursor);
+            uint256 liveAmount = item.initialAmount - item.convertedAmount;
+            uint256 take = liveAmount < remaining ? liveAmount : remaining;
+            if (take == liveAmount) {
+                _remove(from, cursor);
                 item.owner = to;
-                _appendLot(to, cursor);
+                _append(to, cursor);
             } else {
-                item.amount -= take;
-                uint256 childId = _createLot(to, take, item.bornAt, item.sourceProof);
-                emit LotSplit(cursor, childId, to, take, item.bornAt);
+                uint256 childInitial = item.initialAmount * take / liveAmount;
+                if (childInitial < take) childInitial = take;
+                uint256 childConverted = childInitial - take;
+                item.initialAmount -= childInitial;
+                item.convertedAmount -= childConverted;
+                uint256 child = _createLot(to, childInitial, childConverted, item.bornAt, item.sourceProof);
+                emit LotSplit(cursor, child, to, childInitial, childConverted);
             }
             remaining -= take;
             cursor = following;
             unchecked { ++processed; }
         }
         if (remaining != 0) {
-            if (cursor != 0) revert LotTraversalLimit(MAX_LOTS_PER_TRANSFER);
+            if (cursor != 0) revert LotTraversalLimit();
             revert LineageBalanceMismatch(from, remaining);
         }
     }
 
-    function _createLot(address owner, uint256 amount, uint64 bornAt, bytes32 sourceProof)
-        private
-        returns (uint256 lotId)
-    {
+    function _createLot(address owner, uint256 initialAmount, uint256 convertedAmount, uint64 bornAt, bytes32 proofId) private returns (uint256 lotId) {
         lotId = nextLotId++;
-        _lots[lotId] = Lot({
-            owner: owner,
-            amount: amount,
-            bornAt: bornAt,
-            sourceProof: sourceProof,
-            decayed: false
-        });
-        _appendLot(owner, lotId);
+        _lots[lotId] = Lot(owner, initialAmount, convertedAmount, bornAt, proofId);
+        _append(owner, lotId);
     }
 
-    function _appendLot(address owner, uint256 lotId) private {
-        uint256 tail = _tail[owner];
-        if (tail == 0) _head[owner] = lotId;
-        else {
-            _next[tail] = lotId;
-            _prev[lotId] = tail;
-        }
+    function _append(address owner, uint256 lotId) private {
+        uint256 tailId = _tail[owner];
+        if (tailId == 0) _head[owner] = lotId;
+        else { _next[tailId] = lotId; _prev[lotId] = tailId; }
         _tail[owner] = lotId;
         unchecked { ++activeLotCount[owner]; }
     }
 
-    function _removeLot(address owner, uint256 lotId) private {
+    function _remove(address owner, uint256 lotId) private {
         uint256 previous = _prev[lotId];
         uint256 following = _next[lotId];
-        if (previous == 0) _head[owner] = following;
-        else _next[previous] = following;
-        if (following == 0) _tail[owner] = previous;
-        else _prev[following] = previous;
-        delete _prev[lotId];
-        delete _next[lotId];
+        if (previous == 0) _head[owner] = following; else _next[previous] = following;
+        if (following == 0) _tail[owner] = previous; else _prev[following] = previous;
+        delete _prev[lotId]; delete _next[lotId];
         unchecked { --activeLotCount[owner]; }
     }
 }
