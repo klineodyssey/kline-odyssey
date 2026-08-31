@@ -1,6 +1,6 @@
 # BSC Token Brand Verification Working V1
 
-Status: `DRAFT / KAIOS_TOKEN_INFO_SUBMITTED_PENDING_BSCSCAN / KAIOS_OWNERSHIP_VERIFIED`
+Status: `DRAFT / KGEN_AND_KAIOS_TOKEN_INFO_SUBMITTED_PENDING_BSCSCAN / OWNERSHIP_VERIFIED`
 
 Execution branch: `gm/bsc-token-brand-verification-v1`
 
@@ -27,11 +27,11 @@ Execution branch: `gm/bsc-token-brand-verification-v1`
 | BscScan source | `EXACT_MATCH_VERIFIED` (`KGEN_Token_V7_5_2`) |
 | Proxy | `NO` |
 | Current owner | `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166` (BankGovernance contract) |
-| Token information | `NOT_PUBLISHED` |
-| Logo | `NOT_PUBLISHED`; BscScan renders `empty-token.svg` |
+| Token information | `SUBMITTED_PENDING_BSCSCAN`; not yet published |
+| Logo | `SUBMITTED_PENDING_BSCSCAN`; public token page publication not yet confirmed |
 | Reputation | `UNKNOWN` |
 
-The KGEN `Info` tab contains only the BscScan update link. No existing token-info ticket or accepted ownership claim was found in repository evidence or the signed-out public surface. PR #179 remains the single KGEN submission-package lineage and supplies the official links, description and asset URLs.
+Before submission, the KGEN public page had no official website or published logo. PR #179 remained the single KGEN submission-package lineage and supplied the official links, description and asset URLs. After explicit user confirmation, the authenticated BscScan form accepted a first-time KGEN token-information application. Publication is still pending BscScan review.
 
 ### KGEN canonical public assets
 
@@ -122,6 +122,8 @@ The website, GitHub, Telegram, YouTube, TikTok, Facebook and Instagram metadata 
 - The KAIOS first-time token-information application used the canonical shared 32x32 SVG mark at `https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo.svg`, official public metadata, and no fabricated price listing.
 - BscScan returned: `Thank you for your submission. You will receive an email containing further instructions shortly.` The acceptance page exposed no ticket identifier.
 - Submission observation: `2026-08-31T18:21:23Z` (`2026-09-01T02:21:23+08:00`). Publication remains pending BscScan review; no duplicate submission should be made during the stated review window.
+- The user then explicitly confirmed completing KGEN in the same workflow. The KGEN application reused PR #179 metadata and the same canonical 32x32 SVG mark, kept CoinMarketCap and CoinGecko price fields blank because no current listing URL was verified, and received the same BscScan submission-accepted message.
+- KGEN submission observation: `2026-08-31T18:33:05Z` (`2026-09-01T02:33:05+08:00`). The acceptance page exposed no ticket identifier. KGEN publication also remains pending BscScan review and must not be resubmitted during the review window.
 
 ## External status and exact blocker
 
@@ -129,7 +131,7 @@ The website, GitHub, Telegram, YouTube, TikTok, Facebook and Instagram metadata 
 |---|---|
 | KGEN source | `VERIFIED_EXACT_MATCH` |
 | KGEN ownership claim | `VERIFIED_BSCSCAN_ACCOUNT`; verified-address date `2026-04-20` |
-| KGEN token info / logo | `NOT_SUBMITTED_NOT_PUBLISHED` |
+| KGEN token info / logo | `SUBMITTED_PENDING_BSCSCAN`; `NOT_YET_PUBLISHED` |
 | KAIOS source | `VERIFIED_EXACT_MATCH` |
 | KAIOS ownership claim | `VERIFIED_BSCSCAN_ACCOUNT`; verified-address date `2026-08-31` |
 | KAIOS token info / logo | `SUBMITTED_PENDING_BSCSCAN`; `NOT_YET_PUBLISHED` |
@@ -145,6 +147,7 @@ The website, GitHub, Telegram, YouTube, TikTok, Facebook and Instagram metadata 
 - External source-verification submission: `EXECUTED_AFTER_USER_CONFIRMATION / PUBLIC_EXACT_MATCH_VERIFIED`.
 - External KAIOS ownership submission: `EXECUTED_AND_VERIFIED`.
 - External KAIOS token-information submission: `SUBMITTED_PENDING_BSCSCAN`.
+- External KGEN token-information submission: `SUBMITTED_PENDING_BSCSCAN`.
 - Token transfer executed: `NO`.
 - BNB transfer executed: `NO`.
 - Contract redeployed: `NO`.
