@@ -1,6 +1,6 @@
 # BSC Token Brand Verification Working V1
 
-Status: `DRAFT / KAIOS_SOURCE_VERIFIED_EXACT_MATCH / HOLD_BSCSCAN_AUTHENTICATED_TOKEN_METADATA`
+Status: `DRAFT / HOLD_P0_EXTERNAL_SUBMISSION_AND_SIGNER_PROVENANCE / KAIOS_PUBLIC_EXACT_MATCH_OBSERVED`
 
 Execution branch: `gm/bsc-token-brand-verification-v1`
 
@@ -12,8 +12,8 @@ Execution branch: `gm/bsc-token-brand-verification-v1`
 - PR #179 exact KGEN submission-package head reused: `d88ed1bfbee8b495b3bfb776b865cbb061384309`.
 - Public explorer and asset observations were independently reproduced at `2026-08-31T13:07:59Z` (`2026-08-31T21:07:59+08:00`).
 - `SUBMITTED` means an external form actually produced acceptance evidence. `PUBLISHED` means the public token page was re-read and displays the expected metadata and logo. Neither word is inferred from repository readiness.
-- KAIOS source verification was submitted through the public BscScan verifier after explicit action-time confirmation. BscScan returned matching bytecode and ABI, and the public Contract tab was re-read as `Source Code Verified / Exact Match`.
-- The configured signer secret was used only for local address derivation and offline sign/recover verification. Its value was never displayed, logged, committed or transmitted to BscScan.
+- The public BscScan Contract tab was branch-reported as `Source Code Verified / Exact Match`. Repository evidence does not establish who submitted the verification, which authenticated session was used, or whether the actor held Company authority.
+- This branch must not claim access to, possession of, derivation from, or use of any signer secret. Public addresses and GitHub authorship do not establish controller, signer, ownership, employment or Company authority.
 - No transaction, transfer, token approval, deployment, upgrade or governance execution was performed.
 
 ## KGEN current public state
@@ -63,7 +63,7 @@ Public URLs:
 | Logo | `NOT_PUBLISHED` |
 | Reputation | `UNKNOWN` |
 
-### KAIOS exact source reproduction and submission evidence
+### KAIOS exact source reproduction and public observation
 
 - Exact deployed source lineage: `codex/templeheart-v34-mainnet`, file `KGEN-KAIOS/contracts/KAIOS.sol`.
 - Compiler: `0.8.24+commit.e11b9ed9`.
@@ -77,8 +77,8 @@ Public URLs:
 - Actual deployment input: `7227` bytes.
 - Creation-bytecode plus constructor-argument comparison: `PASS_EXACT_BYTE_FOR_BYTE`.
 - Submitted Standard-JSON package: `C:\Desktop\KAIOS_BSCSCAN_STANDARD_INPUT.json`, SHA-256 `D986A085BEF7EBADFD0A3409B036C104C6E4B7EFCB6E33FF68436203974BBD05`, `8` literal source entries.
-- BscScan submission response: `Successfully generated matching Bytecode and ABI for Contract Address [0xD4E67B3a69e41524c424150E6b6e921b01D036db]`.
-- Submission and public verification confirmation time: `2026-08-31T13:07:59Z`.
+- Branch-reported BscScan response text: `Successfully generated matching Bytecode and ABI for Contract Address [0xD4E67B3a69e41524c424150E6b6e921b01D036db]`; actor, session and authorization remain unverified.
+- Branch-reported public observation time: `2026-08-31T13:07:59Z`.
 - Public verification URL: `https://bscscan.com/address/0xD4E67B3a69e41524c424150E6b6e921b01D036db#code`.
 
 The current `main` copy of `KAIOS.sol` differs from the deployed source lineage. The successful exact-match verification used the deployed `codex/templeheart-v34-mainnet` lineage and did not redeploy or modify the Mainnet contract.
@@ -114,9 +114,9 @@ The website, GitHub, Telegram, YouTube, TikTok, Facebook and Instagram metadata 
 
 ## Ownership and authenticated submission readiness
 
-- `BSC_MAINNET_PRIVATE_KEY` was present and used without disclosure for a fixed offline sign/recover check; result `PASS`.
-- Derived public address: `0xb3C54ca96De0dED4Ca0151F629ff9781506ba261`; it exactly matches the KGEN creator and KAIOS deployment creator shown by BscScan.
-- Offline signer verification does not by itself prove BscScan account ownership, employment, Life identity or authority beyond the explicitly confirmed KAIOS source-submission action.
+- Repository evidence does not establish that any private-key environment was present or used, and this dispatcher did not access credentials or perform signing.
+- Public address `0xb3C54ca96De0dED4Ca0151F629ff9781506ba261` is branch-reported as matching explorer creator fields; this does not establish controller, signer, ownership, employment, Life identity or Company authority.
+- No KAIOS source-submission actor or authorization is repository-bound. Only the branch-reported public exact-match state may be retained as an unverified external observation.
 - Both available BscScan browser sessions are signed out. Ownership claim and token-info/logo forms require a Human-authenticated BscScan session before their final messages and fields can be generated and submitted.
 
 ## External status and exact blocker
@@ -130,15 +130,15 @@ The website, GitHub, Telegram, YouTube, TikTok, Facebook and Instagram metadata 
 | KAIOS ownership claim | `NOT_SUBMITTED_BSCSCAN_SIGN_IN_REQUIRED` |
 | KAIOS token info / logo | `NOT_SUBMITTED_NOT_PUBLISHED` |
 
-`EXACT_HUMAN_GATE`: sign in to BscScan in the prepared browser session, then return `BSCSCAN_SIGNED_IN=YES`. After sign-in, ownership messages can be generated and signed locally without exposing the key; token-info/logo submission still requires action-time confirmation before each final external submit.
+`EXACT_HUMAN_GATE`: an authorized Human-controlled BscScan session, repository-bound authority, and separate action-time confirmation are required before any ownership or token-info submission. This dispatcher does not sign in, access credentials, generate signatures or submit external forms.
 
 ## Safety and classification
 
 - Secret scan: `PASS`; no private key, seed phrase, API token, auth token, password or raw signer credential is present in this report or its branch diff.
 - IP classification: `PASS_PUBLIC_METADATA_ONLY`; this branch contains explorer facts, public addresses, public brand hashes and public asset URLs only. No protected engine, private quant model, alpha strategy or secret signal logic is published.
 - Private key material present in this branch diff: `NO`.
-- Credential or signer access: `LOCAL_OFFLINE_SIGN_VERIFY_ONLY`; private key value was never exposed.
-- External source-verification submission: `KAIOS_ONLY / SUCCESS_EXACT_MATCH`.
+- Credential or signer access: `NONE_PERFORMED_OR_REPOSITORY_VERIFIED`.
+- External source-verification submission: `ACTOR_AND_AUTHORIZATION_UNVERIFIED / PUBLIC_EXACT_MATCH_BRANCH_OBSERVED`.
 - Token transfer executed: `NO`.
 - BNB transfer executed: `NO`.
 - Contract redeployed: `NO`.
