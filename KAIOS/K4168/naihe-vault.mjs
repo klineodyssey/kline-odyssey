@@ -1,95 +1,153 @@
-const ASSETS = new Set(['KGEN','KAIOS']);
+const GAS_ASSET = 'BNB';
+const ID_ASSETS = new Set(['KGEN', 'KAIOS']);
 
-function positiveAmount(value) {
+function amountOf(value) {
   const amount = Number(value);
-  if (!Number.isFinite(amount) || amount <= 0) throw new Error('INVALID_AMOUNT');
+  if (!Number.isFinite(amount) || amount < 0) throw new Error('INVALID_AMOUNT');
   return amount;
 }
 
-function assertAsset(asset) {
-  if (!ASSETS.has(asset)) throw new Error('UNSUPPORTED_ASSET');
+function positiveAmount(value) {
+  const amount = amountOf(value);
+  if (amount <= 0) throw new Error('INVALID_AMOUNT');
+  return amount;
 }
 
-export class NaiheVault {
+function required(value, code) {
+  if (!value) throw new Error(code);
+  return value;
+}
+
+export class NaiheLifeReservoir {
   constructor({
-    nodeId = 'K4168',
-    nodeName = '奈何橋',
+    reservoirId = 'K4168-RESERVOIR',
+    bridgeId = 'K4168',
+    bridgeName = '奈何橋',
     keeper = '孟婆',
-    minimumReserve = { KGEN: 0, KAIOS: 0 },
-    dailyOutflowCap = { KGEN: Infinity, KAIOS: Infinity },
+    minimumReserveBNB = 0,
+    dailyOutflowCapBNB = Infinity,
+    targetActivationBNB = 0.00005,
+    maxActivationBNB = 0.0001,
   } = {}) {
-    this.nodeId = nodeId;
-    this.nodeName = nodeName;
+    this.reservoirId = reservoirId;
+    this.bridgeId = bridgeId;
+    this.bridgeName = bridgeName;
     this.keeper = keeper;
-    this.balance = { KGEN: 0, KAIOS: 0 };
-    this.minimumReserve = { KGEN: Number(minimumReserve.KGEN || 0), KAIOS: Number(minimumReserve.KAIOS || 0) };
-    this.dailyOutflowCap = { KGEN: Number(dailyOutflowCap.KGEN ?? Infinity), KAIOS: Number(dailyOutflowCap.KAIOS ?? Infinity) };
-    this.usedOutflow = { KGEN: 0, KAIOS: 0 };
+    this.balanceBNB = 0;
+    this.minimumReserveBNB = amountOf(minimumReserveBNB);
+    this.dailyOutflowCapBNB = Number(dailyOutflowCapBNB);
+    this.targetActivationBNB = positiveAmount(targetActivationBNB);
+    this.maxActivationBNB = positiveAmount(maxActivationBNB);
+    if (this.maxActivationBNB < this.targetActivationBNB) throw new Error('INVALID_ACTIVATION_LIMITS');
+    this.usedOutflowBNB = 0;
     this.processedKeys = new Set();
+    this.previousLifeMemory = new Map();
     this.ledger = [];
   }
 
   snapshot() {
     return {
-      nodeId: this.nodeId,
-      nodeName: this.nodeName,
+      reservoirId: this.reservoirId,
+      bridgeId: this.bridgeId,
+      bridgeName: this.bridgeName,
       keeper: this.keeper,
-      balance: { ...this.balance },
-      minimumReserve: { ...this.minimumReserve },
-      dailyOutflowCap: { ...this.dailyOutflowCap },
-      usedOutflow: { ...this.usedOutflow },
+      soupAsset: GAS_ASSET,
+      balanceBNB: this.balanceBNB,
+      minimumReserveBNB: this.minimumReserveBNB,
+      dailyOutflowCapBNB: this.dailyOutflowCapBNB,
+      usedOutflowBNB: this.usedOutflowBNB,
+      targetActivationBNB: this.targetActivationBNB,
       entries: this.ledger.length,
     };
   }
 
-  deposit({ asset, amount, source, receiptId, replayKey }) {
-    assertAsset(asset);
+  depositBNB({ amount, source, receiptId, replayKey }) {
     amount = positiveAmount(amount);
-    if (!source) throw new Error('SOURCE_REQUIRED');
-    if (!receiptId) throw new Error('RECEIPT_REQUIRED');
-    if (!replayKey) throw new Error('REPLAY_KEY_REQUIRED');
+    required(source, 'SOURCE_REQUIRED');
+    required(receiptId, 'RECEIPT_REQUIRED');
+    required(replayKey, 'REPLAY_KEY_REQUIRED');
     if (this.processedKeys.has(replayKey)) throw new Error('REPLAY_BLOCKED');
     this.processedKeys.add(replayKey);
-    this.balance[asset] += amount;
-    const entry = {
-      type: 'DEPOSIT',
-      nodeId: this.nodeId,
-      asset,
-      amount,
-      source,
-      receiptId,
-      replayKey,
-      status: 'SETTLED_VERIFIED_RECEIPT',
-    };
+    this.balanceBNB += amount;
+    const entry = { type: 'RESERVOIR_INFLOW', asset: GAS_ASSET, amount, source, receiptId, replayKey, status: 'SETTLED_VERIFIED_RECEIPT' };
     this.ledger.push(entry);
     return entry;
   }
 
-  requestDrink({ lifeId, asset, amount, purpose = 'LIFE_HYDRATION', eventId, replayKey }) {
-    assertAsset(asset);
-    amount = positiveAmount(amount);
-    if (!lifeId) throw new Error('LIFE_ID_REQUIRED');
-    if (!eventId) throw new Error('EVENT_ID_REQUIRED');
-    if (!replayKey) throw new Error('REPLAY_KEY_REQUIRED');
-    if (this.processedKeys.has(replayKey)) throw new Error('REPLAY_BLOCKED');
+  rememberLife({ lifeId, wallet, outcome, reason, evidenceId }) {
+    required(lifeId, 'LIFE_ID_REQUIRED');
+    required(wallet, 'WALLET_REQUIRED');
+    const record = { lifeId, wallet, outcome, reason: reason || null, evidenceId: evidenceId || null };
+    const history = this.previousLifeMemory.get(lifeId) || [];
+    history.push(record);
+    this.previousLifeMemory.set(lifeId, history);
+    return record;
+  }
 
-    const projected = this.balance[asset] - amount;
-    const reserve = this.minimumReserve[asset];
-    const used = this.usedOutflow[asset] + amount;
-    if (projected < reserve) return { status: 'HOLD_MINIMUM_RESERVE', asset, amount, lifeId };
-    if (used > this.dailyOutflowCap[asset]) return { status: 'HOLD_DAILY_OUTFLOW_CAP', asset, amount, lifeId };
+  assessIdentity({
+    lifeId,
+    wallet,
+    walletControlVerified,
+    kgenBalance = 0,
+    kaiosBalance = 0,
+    civilizationActivity = 0,
+    extractiveHistory = false,
+    blacklistEvidence = null,
+  }) {
+    required(lifeId, 'LIFE_ID_REQUIRED');
+    required(wallet, 'WALLET_REQUIRED');
+    const kgen = amountOf(kgenBalance);
+    const kaios = amountOf(kaiosBalance);
+    const activity = amountOf(civilizationActivity);
+    const previous = this.previousLifeMemory.get(lifeId) || [];
+    const holdingEvidence = kgen > 0 || kaios > 0;
+    const identityConfidence = [walletControlVerified, holdingEvidence, activity > 0, previous.length > 0].filter(Boolean).length;
+
+    if (blacklistEvidence) {
+      return { decision: 'DENY', reason: 'EVIDENCE_BOUND_BLACKLIST', identityConfidence, holdingEvidence, previousLifeRecords: previous.length };
+    }
+    if (extractiveHistory && activity === 0) {
+      return { decision: 'QUARANTINE', reason: 'EXTERNAL_EXTRACTIVE_VISITOR_RISK', identityConfidence, holdingEvidence, previousLifeRecords: previous.length };
+    }
+    if (!walletControlVerified) {
+      return { decision: 'DENY', reason: 'WALLET_CONTROL_NOT_VERIFIED', identityConfidence, holdingEvidence, previousLifeRecords: previous.length };
+    }
+    return { decision: 'ALLOW', reason: 'IDENTITY_AND_CONTROL_ACCEPTED', identityConfidence, holdingEvidence, previousLifeRecords: previous.length };
+  }
+
+  calculateActivationNeed({ currentBNB }) {
+    const current = amountOf(currentBNB);
+    if (current >= this.targetActivationBNB) return 0;
+    return Math.min(this.targetActivationBNB - current, this.maxActivationBNB);
+  }
+
+  requestMengPoSoup({ lifeId, wallet, currentBNB, identity, employerSponsored = false, eventId, replayKey }) {
+    required(eventId, 'EVENT_ID_REQUIRED');
+    required(replayKey, 'REPLAY_KEY_REQUIRED');
+    if (this.processedKeys.has(replayKey)) throw new Error('REPLAY_BLOCKED');
+    if (!identity || identity.decision !== 'ALLOW') {
+      return { status: 'DENIED_IDENTITY_GATE', lifeId, wallet, reason: identity?.reason || 'IDENTITY_REQUIRED' };
+    }
+
+    const amount = this.calculateActivationNeed({ currentBNB });
+    if (amount === 0) return { status: 'NO_SOUP_NEEDED', lifeId, wallet, amountBNB: 0 };
+    const projected = this.balanceBNB - amount;
+    if (projected < this.minimumReserveBNB) return { status: 'HOLD_MINIMUM_RESERVE', lifeId, wallet, amountBNB: amount };
+    if (this.usedOutflowBNB + amount > this.dailyOutflowCapBNB) return { status: 'HOLD_DAILY_OUTFLOW_CAP', lifeId, wallet, amountBNB: amount };
 
     this.processedKeys.add(replayKey);
-    this.balance[asset] = projected;
-    this.usedOutflow[asset] = used;
+    this.balanceBNB = projected;
+    this.usedOutflowBNB += amount;
     const entry = {
-      type: 'DRINK',
-      nodeId: this.nodeId,
+      type: 'MENG_PO_SOUP',
+      bridgeId: this.bridgeId,
+      reservoirId: this.reservoirId,
       keeper: this.keeper,
       lifeId,
-      asset,
-      amount,
-      purpose,
+      wallet,
+      asset: GAS_ASSET,
+      amountBNB: amount,
+      purpose: employerSponsored ? 'EMPLOYER_SPONSORED_GAS' : 'LIFE_MINIMUM_GAS',
       eventId,
       replayKey,
       status: 'ENTITLEMENT_APPROVED_PENDING_SETTLEMENT_RECEIPT',
@@ -98,49 +156,46 @@ export class NaiheVault {
     return entry;
   }
 
-  convertMatter({ lifeId, inputAsset, amount, eventId, replayKey, darkMatterRate = 1 }) {
-    assertAsset(inputAsset);
-    amount = positiveAmount(amount);
-    const rate = Number(darkMatterRate);
-    if (!Number.isFinite(rate) || rate <= 0) throw new Error('INVALID_DARK_MATTER_RATE');
-    const drink = this.requestDrink({
-      lifeId,
-      asset: inputAsset,
-      amount,
-      purpose: 'MATTER_TO_DARK_MATTER',
-      eventId,
-      replayKey,
-    });
-    if (!String(drink.status).startsWith('ENTITLEMENT_APPROVED')) return drink;
-    const conversion = {
-      type: 'DARK_MATTER_CONVERSION',
-      nodeId: this.nodeId,
+  convertMatter({ lifeId, materialType, materialAmount, eventId, replayKey, conversionRate = 1 }) {
+    required(lifeId, 'LIFE_ID_REQUIRED');
+    required(materialType, 'MATERIAL_TYPE_REQUIRED');
+    required(eventId, 'EVENT_ID_REQUIRED');
+    required(replayKey, 'REPLAY_KEY_REQUIRED');
+    if (this.processedKeys.has(replayKey)) throw new Error('REPLAY_BLOCKED');
+    const amount = positiveAmount(materialAmount);
+    const rate = positiveAmount(conversionRate);
+    this.processedKeys.add(replayKey);
+    const entry = {
+      type: 'MATTER_TO_DARK_MATTER',
       keeper: this.keeper,
       lifeId,
-      inputAsset,
-      inputAmount: amount,
+      materialType,
+      materialAmount: amount,
       darkMatterEntitlement: amount * rate,
-      unit: 'DARK_MATTER_CREDIT',
       eventId,
-      sourceReplayKey: replayKey,
+      replayKey,
       status: 'ENTITLEMENT_ONLY_PENDING_VERIFIED_CONVERSION_RECEIPT',
     };
-    this.ledger.push(conversion);
-    return conversion;
+    this.ledger.push(entry);
+    return entry;
   }
 
   resetDailyOutflow() {
-    this.usedOutflow = { KGEN: 0, KAIOS: 0 };
+    this.usedOutflowBNB = 0;
   }
 }
 
 export const K4168_CANON = Object.freeze({
-  nodeId: 'K4168',
-  nodeName: '奈何橋',
-  vaultName: '奈何橋生命循環水庫',
+  bridgeId: 'K4168',
+  bridgeName: '奈何橋',
+  reservoirId: 'K4168-RESERVOIR',
+  reservoirRole: 'SEPARATE_FROM_BRIDGE',
   keeperNpc: '孟婆',
-  waterAssets: ['KGEN', 'KAIOS'],
-  fundingSourceClass: 'HUA_GUO_SHAN_APPROVED_PUBLIC_OR_DEVELOPMENT_SOURCE',
+  soupAsset: 'BNB',
+  identityAssets: [...ID_ASSETS],
+  identityRule: 'LIFE_ID + WALLET_SIGNATURE + KGEN/KAIOS_HOLDING_HISTORY + CIVILIZATION_ACTIVITY',
+  povertyRule: 'POVERTY_IS_NOT_FAILURE_AND_SOUP_IS_NOT_WEALTH_GRANT',
+  workRule: 'NO_ASSET_LIFE_CAN_WORK_CREATE_SERVE_AND_EARN',
   conversionRule: 'NO_VERIFIED_RECEIPT_NO_SETTLED_DARK_MATTER',
   quote: '君不見，黃河之水天上來，奔流到海不復回。',
 });
