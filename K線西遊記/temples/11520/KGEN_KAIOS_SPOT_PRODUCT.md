@@ -24,7 +24,7 @@ Limit orders match at maker price under price-time priority. Same-Life and same-
 
 ## Settlement phase
 
-The dedicated `kgen-kaios-settlement-adapter.mjs` now models the exact dual-asset settlement boundary:
+The dedicated `kgen-kaios-settlement-adapter.mjs` models the exact dual-asset settlement boundary:
 
 1. bind an exact `MATCHED_UNSETTLED` trade;
 2. create a non-executing settlement intent;
@@ -36,13 +36,27 @@ The dedicated `kgen-kaios-settlement-adapter.mjs` now models the exact dual-asse
 
 Receipt attestations are replay protected. Production remains fail-closed because the production receipt registry, signer and chain execution adapter are not connected. Repository test fixtures exist only under the exact test-market identifier.
 
+## Frontend view candidate
+
+`kgen-kaios-market-view.mjs` now provides a presentation-safe view model and HTML renderer for the existing K11520 frontend lineage. It exposes:
+
+- live order-book quote state;
+- bid/ask rows;
+- market-order preview;
+- `MATCHED_UNSETTLED` versus `VERIFIED_SETTLED` counts;
+- receipt-gated CT and verified volume;
+- explicit `NOT_CONNECTED` signer/receipt-registry state.
+
+The renderer never labels a pending trade as paid or settled and HTML-escapes actor data. It is a view layer only; it cannot submit orders, sign, pay or write chain state.
+
 ## Product sequence
 
 Completed candidate layers:
 
 1. KGEN/KAIOS book and smooth quote surface;
 2. match-bound dual-asset settlement intent;
-3. receipt-gated ownership / CT / OHLC / verified-volume state machine.
+3. receipt-gated ownership / CT / OHLC / verified-volume state machine;
+4. presentation-safe KGEN/KAIOS market view model.
 
 Remaining production gates:
 
@@ -51,7 +65,7 @@ Remaining production gates:
 3. bind KGEN ownership-transfer execution/receipt verification;
 4. connect a repository-bound production receipt registry and secure signer policy;
 5. validate exact-chain receipts before any CT/ownership state transition;
-6. expose the settled state in the K11520 frontend without inventing payment state.
+6. wire the view model into the existing K11520 route after lineage review, without inventing payment state.
 
 ## Safety
 
