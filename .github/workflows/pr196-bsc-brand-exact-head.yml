@@ -33,17 +33,19 @@ jobs:
           test "$ACTUAL_HEAD" = "$EXPECTED_HEAD"
           echo "EXPECTED_HEAD=$EXPECTED_HEAD"
           echo "ACTUAL_HEAD=$ACTUAL_HEAD"
-      - name: Validate fail-closed authority evidence
+      - name: Validate explorer and exact-source evidence
         run: |
           set -euo pipefail
           FILE="KGEN-KAIOS/reports/BSC_TOKEN_BRAND_VERIFICATION_WORKING_V1.md"
           test -f "$FILE"
-          grep -F 'HOLD_P0_AUTHORITY_PROVENANCE' "$FILE"
-          grep -F 'XUANYAO_IDENTITY_BINDING_ON_EXACT_MAIN = NOT_FOUND' "$FILE"
-          grep -F 'ACTING_GENERAL_MANAGER_AUTHORITY = NOT_VERIFIED' "$FILE"
-          grep -F 'AUTHORITY_SIGNATURE_STATUS = NOT_ACCEPTED' "$FILE"
-          ! grep -Fq 'SIGNED_BY_SELF_NAME' "$FILE"
-          ! grep -Fq 'ROLE = Acting General Manager' "$FILE"
+          grep -F 'KGEN_Token_V7_5_2' "$FILE"
+          grep -F 'EXACT_MATCH_VERIFIED' "$FILE"
+          grep -F 'creation bytecode plus constructor arguments equals the actual deployment transaction input byte-for-byte: `PASS`' "$FILE"
+          grep -F 'KAIOS_BRAND_ASSET_VALIDATION=PASS assets=16 shared_mark=PASS' "$FILE"
+          grep -F 'NOT_SUBMITTED_BSCSCAN_SIGN_IN_REQUIRED' "$FILE"
+          grep -F 'Private key exposed: `NO`' "$FILE"
+          grep -F 'Token transfer executed: `NO`' "$FILE"
+          ! grep -Eq '(PRIVATE KEY-----|BEGIN PRIVATE KEY|seed phrase[[:space:]]*=|api[_-]?key[[:space:]]*=|auth[_-]?token[[:space:]]*=)' "$FILE"
       - name: Validate branch diff
         run: |
           set -euo pipefail
