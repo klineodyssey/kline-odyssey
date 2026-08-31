@@ -6,7 +6,7 @@ Execution branch: `gm/bsc-token-brand-verification-v1`
 
 ## Evidence boundary
 
-- Latest `origin/main` synchronized into this branch: `ffd207165dafd729cc5b302948d6ee413a51789c`.
+- Latest `origin/main` evaluated by exact-head CI: `ffd207165dafd729cc5b302948d6ee413a51789c`; branch relation before this correction was ahead `14` / behind `1`, with zero path overlap in the main-only evidence update.
 - PR #196 pre-update head: `d333ab6c97148b8d596e587df9a21b213fd9ec2b`.
 - PR #162 exact brand head reused: `f403a27d78acef85a599ec712fcb2a168c771409`.
 - PR #179 exact KGEN submission-package head reused: `d88ed1bfbee8b495b3bfb776b865cbb061384309`.
