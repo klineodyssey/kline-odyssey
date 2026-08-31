@@ -27,12 +27,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: KGEN-KAIOS/package-lock.json
-      - run: npm ci
+      - run: npm ci --omit=optional
       - run: npm run compile
       - run: node --test --test-concurrency=1 tests/kufo-v4-three-autumns.unit.test.mjs
       - run: git diff --check HEAD^ HEAD
