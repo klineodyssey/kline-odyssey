@@ -30,6 +30,7 @@ Execution branch: `gm/bsc-token-brand-verification-v1`
 | Token information | `SUBMITTED_PENDING_BSCSCAN`; not yet published |
 | Logo | `SUBMITTED_PENDING_BSCSCAN`; public token page publication not yet confirmed |
 | Reputation | `UNKNOWN` |
+| DEX price reference | `LIVE_PUBLIC_REFERENCE`; GeckoTerminal KGEN/WBNB on PancakeSwap V2 |
 
 Before submission, the KGEN public page had no official website or published logo. PR #179 remained the single KGEN submission-package lineage and supplied the official links, description and asset URLs. After explicit user confirmation, the authenticated BscScan form accepted a first-time KGEN token-information application. Publication is still pending BscScan review.
 
@@ -46,6 +47,16 @@ Public URLs:
 - `https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-64.png`
 - `https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png`
 - `https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo.svg`
+
+### KGEN live market reference
+
+- Pair: `KGEN/WBNB` on PancakeSwap V2 (BSC).
+- Pair address: `0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2`.
+- KGEN token: `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be`.
+- WBNB token: `0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c`.
+- Public reference: `https://www.geckoterminal.com/bsc/pools/0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2`.
+- GeckoTerminal displayed a non-zero KGEN price and pool liquidity when re-read at `2026-08-31T18:36:19Z`; both values are time-sensitive and must not be frozen as a canonical price.
+- The BscScan application exposed only CoinMarketCap and CoinGecko coin-ticker fields. No matching KGEN coin page was found on those two providers, so those fields were correctly left blank rather than populated with a GeckoTerminal pool URL. This does not mean KGEN lacks a live DEX price.
 
 ## KAIOS current public and deployment state
 
