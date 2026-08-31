@@ -1,0 +1,38 @@
+name: KAIOS KUFO V4 Review
+
+on:
+  pull_request:
+    paths:
+      - 'KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol'
+      - 'KGEN-KAIOS/contracts/KUFOOutputJindouyun168888V4.sol'
+      - 'KGEN-KAIOS/contracts/KUFOV4.sol'
+      - 'KGEN-KAIOS/runtime/kufo-v4-policy.mjs'
+      - 'KGEN-KAIOS/tests/kufo-v4-three-autumns.unit.test.mjs'
+      - 'KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md'
+      - '.github/workflows/kaios-kufo-v4-review.yml'
+  push:
+    branches:
+      - 'gm/k18911-kufo-three-autumn-final-v4'
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: KGEN-KAIOS
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: KGEN-KAIOS/package-lock.json
+      - run: npm ci
+      - run: npm run compile
+      - run: node --test --test-concurrency=1 tests/kufo-v4-three-autumns.unit.test.mjs
+      - run: git diff --check HEAD^ HEAD
