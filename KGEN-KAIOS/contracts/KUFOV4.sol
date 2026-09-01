@@ -26,6 +26,8 @@ contract KUFOV4 is ERC20, ERC20Capped {
         address owner;
         uint256 initialAmount;
         uint256 convertedAmount;
+        uint256 firstAutumnTarget;
+        uint256 secondAutumnTarget;
         uint64 bornAt;
         bytes32 sourceProof;
     }
@@ -85,7 +87,15 @@ contract KUFOV4 is ERC20, ERC20Capped {
         proofMinted[proofId] = true;
         totalMintedFromAlchemy += amount;
         _mint(beneficiary, amount);
-        lotId = _createLot(beneficiary, amount, 0, uint64(block.timestamp), proofId);
+        lotId = _createLot(
+            beneficiary,
+            amount,
+            0,
+            amount / 2,
+            amount * 3 / 4,
+            uint64(block.timestamp),
+            proofId
+        );
         emit ImmediateAlchemyMinted(proofId, lotId, beneficiary, amount, uint64(block.timestamp));
     }
 
@@ -94,8 +104,8 @@ contract KUFOV4 is ERC20, ERC20Capped {
         if (item.owner == address(0)) revert UnknownLot(lotId);
         uint256 elapsed = block.timestamp > item.bornAt ? block.timestamp - item.bornAt : 0;
         if (elapsed < K280_YEAR_SECONDS) return 0;
-        if (elapsed < 2 * K280_YEAR_SECONDS) return item.initialAmount / 2;
-        if (elapsed < 3 * K280_YEAR_SECONDS) return item.initialAmount * 3 / 4;
+        if (elapsed < 2 * K280_YEAR_SECONDS) return item.firstAutumnTarget;
+        if (elapsed < 3 * K280_YEAR_SECONDS) return item.secondAutumnTarget;
         return item.initialAmount;
     }
 
@@ -224,12 +234,29 @@ contract KUFOV4 is ERC20, ERC20Capped {
                 item.owner = to;
                 _append(to, cursor);
             } else {
-                uint256 childInitial = item.initialAmount * take / liveAmount;
+                uint256 originalInitial = item.initialAmount;
+                uint256 childInitial = originalInitial * take / liveAmount;
                 if (childInitial < take) childInitial = take;
                 uint256 childConverted = childInitial - take;
+                uint256 childFirstAutumnTarget =
+                    item.firstAutumnTarget * childInitial / originalInitial;
+                uint256 childSecondAutumnTarget =
+                    item.secondAutumnTarget * childInitial / originalInitial;
+
                 item.initialAmount -= childInitial;
                 item.convertedAmount -= childConverted;
-                uint256 child = _createLot(to, childInitial, childConverted, item.bornAt, item.sourceProof);
+                item.firstAutumnTarget -= childFirstAutumnTarget;
+                item.secondAutumnTarget -= childSecondAutumnTarget;
+
+                uint256 child = _createLot(
+                    to,
+                    childInitial,
+                    childConverted,
+                    childFirstAutumnTarget,
+                    childSecondAutumnTarget,
+                    item.bornAt,
+                    item.sourceProof
+                );
                 emit LotSplit(cursor, child, to, childInitial, childConverted);
             }
             remaining -= take;
@@ -242,9 +269,25 @@ contract KUFOV4 is ERC20, ERC20Capped {
         }
     }
 
-    function _createLot(address owner, uint256 initialAmount, uint256 convertedAmount, uint64 bornAt, bytes32 proofId) private returns (uint256 lotId) {
+    function _createLot(
+        address owner,
+        uint256 initialAmount,
+        uint256 convertedAmount,
+        uint256 firstAutumnTarget,
+        uint256 secondAutumnTarget,
+        uint64 bornAt,
+        bytes32 proofId
+    ) private returns (uint256 lotId) {
         lotId = nextLotId++;
-        _lots[lotId] = Lot(owner, initialAmount, convertedAmount, bornAt, proofId);
+        _lots[lotId] = Lot(
+            owner,
+            initialAmount,
+            convertedAmount,
+            firstAutumnTarget,
+            secondAutumnTarget,
+            bornAt,
+            proofId
+        );
         _append(owner, lotId);
     }
 

@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { alchemyQuote, threeAutumnState, K280_YEAR_SECONDS } from "../runtime/kufo-v4-policy.mjs";
+import {
+  alchemyQuote,
+  splitThreeAutumnLineage,
+  threeAutumnState,
+  K280_YEAR_SECONDS
+} from "../runtime/kufo-v4-policy.mjs";
 
 const E18 = 10n ** 18n;
 
@@ -50,4 +55,29 @@ test("odd smallest-unit dust is forcibly absorbed by third autumn", () => {
   const third = threeAutumnState(initial, second.targetConvertedKufoWei, 3n * K280_YEAR_SECONDS);
   assert.equal(third.remainingKufoWei, 0n);
   assert.equal(second.targetConvertedKufoWei + third.claimableKufoWei, initial);
+});
+
+
+test("partial transfers preserve precommitted first- and second-autumn totals", () => {
+  const original = {
+    initialKufoWei: 3n,
+    alreadyConvertedWei: 0n,
+    firstAutumnTargetWei: 1n,
+    secondAutumnTargetWei: 2n
+  };
+  const { parent, child } = splitThreeAutumnLineage(original, 1n);
+
+  assert.equal(parent.initialKufoWei + child.initialKufoWei, original.initialKufoWei);
+  assert.equal(
+    parent.firstAutumnTargetWei + child.firstAutumnTargetWei,
+    original.firstAutumnTargetWei
+  );
+  assert.equal(
+    parent.secondAutumnTargetWei + child.secondAutumnTargetWei,
+    original.secondAutumnTargetWei
+  );
+  assert.notEqual(
+    parent.secondAutumnTargetWei + child.secondAutumnTargetWei,
+    parent.initialKufoWei * 3n / 4n + child.initialKufoWei * 3n / 4n
+  );
 });

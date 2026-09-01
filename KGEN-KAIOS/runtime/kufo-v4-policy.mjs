@@ -34,3 +34,58 @@ export function threeAutumnState(initialKufoWei, alreadyConvertedWei, elapsedSec
     terminal: target === initialKufoWei
   });
 }
+
+
+export function splitThreeAutumnLineage(lot, transferredLiveWei) {
+  const {
+    initialKufoWei,
+    alreadyConvertedWei,
+    firstAutumnTargetWei,
+    secondAutumnTargetWei
+  } = lot;
+  for (const value of [
+    initialKufoWei,
+    alreadyConvertedWei,
+    firstAutumnTargetWei,
+    secondAutumnTargetWei,
+    transferredLiveWei
+  ]) {
+    if (typeof value !== "bigint") throw new TypeError("lineage values must be bigint");
+  }
+  if (
+    initialKufoWei <= 0n ||
+    alreadyConvertedWei < 0n ||
+    alreadyConvertedWei >= initialKufoWei ||
+    firstAutumnTargetWei < 0n ||
+    firstAutumnTargetWei > secondAutumnTargetWei ||
+    secondAutumnTargetWei > initialKufoWei
+  ) {
+    throw new RangeError("INVALID_LINEAGE");
+  }
+  const liveWei = initialKufoWei - alreadyConvertedWei;
+  if (transferredLiveWei <= 0n || transferredLiveWei >= liveWei) {
+    throw new RangeError("PARTIAL_TRANSFER_REQUIRED");
+  }
+
+  const childInitialKufoWei = initialKufoWei * transferredLiveWei / liveWei;
+  const childAlreadyConvertedWei = childInitialKufoWei - transferredLiveWei;
+  const childFirstAutumnTargetWei =
+    firstAutumnTargetWei * childInitialKufoWei / initialKufoWei;
+  const childSecondAutumnTargetWei =
+    secondAutumnTargetWei * childInitialKufoWei / initialKufoWei;
+
+  return Object.freeze({
+    parent: Object.freeze({
+      initialKufoWei: initialKufoWei - childInitialKufoWei,
+      alreadyConvertedWei: alreadyConvertedWei - childAlreadyConvertedWei,
+      firstAutumnTargetWei: firstAutumnTargetWei - childFirstAutumnTargetWei,
+      secondAutumnTargetWei: secondAutumnTargetWei - childSecondAutumnTargetWei
+    }),
+    child: Object.freeze({
+      initialKufoWei: childInitialKufoWei,
+      alreadyConvertedWei: childAlreadyConvertedWei,
+      firstAutumnTargetWei: childFirstAutumnTargetWei,
+      secondAutumnTargetWei: childSecondAutumnTargetWei
+    })
+  });
+}
