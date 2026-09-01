@@ -72,10 +72,11 @@ test('wallet transaction bridge fails closed until exact ATM and clearing deploy
   assert.deepEqual(productAvailability(97),{atm:false,clearing:false,fullyConnected:false,reason:'DEPLOYMENT_RECEIPTS_REQUIRED'});
 });
 
-test('Solidity candidates contain no arbitrary player-balance sweep and clearing requires fresh oracle marks',()=>{
+test('Solidity candidates contain bidirectional escrow, no arbitrary player-balance sweep, and fresh oracle marks',()=>{
   const atm=fs.readFileSync(new URL('../KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol',import.meta.url),'utf8');
   const clearing=fs.readFileSync(new URL('../KGEN-KAIOS/contracts/KAIOSWarpClearing11520V1.sol',import.meta.url),'utf8');
-  assert.match(atm,/acceptTokenQuote/); assert.match(atm,/acceptBnbQuote/); assert.match(atm,/nonReentrant/);
+  assert.match(atm,/createTokenQuote/); assert.match(atm,/createBnbQuote/); assert.match(atm,/acceptQuote/);
+  assert.match(atm,/makerToken/); assert.match(atm,/takerToken/); assert.match(atm,/nonReentrant/);
   assert.match(clearing,/currentMark/); assert.match(clearing,/STALE_MARK/); assert.match(clearing,/INSUFFICIENT_COUNTERPARTY_RESERVE/);
   assert.doesNotMatch(clearing,/function\s+sweep\s*\(/i);
 });
