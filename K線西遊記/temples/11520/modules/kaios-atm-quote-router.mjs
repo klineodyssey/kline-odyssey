@@ -1,3 +1,5 @@
+import './kaios-live-wallet-controls.mjs';
+
 // 11520 KAIOS bilateral ATM/UFO quote layer.
 // This is part of the existing K11520 exchange lineage; it is not a second exchange.
 // Quotes are negotiated market offers. Physics/White-Hole ratios are never silently used as ATM prices.
