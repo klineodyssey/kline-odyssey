@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>11520 花果山宇宙萬物交易所 · KAIOS 曲速指數市場</title>
+<script src="../12345/assets/ethers-5.7.2.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.16.1/dist/index.umd.min.js"></script>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;color-scheme:dark;background:#07100c;color:#eef8f1}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#163d29,#07100c 55%);min-height:100vh}.top{padding:18px 20px;border-bottom:1px solid #315642;display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.brand{font-weight:900;letter-spacing:.04em}.badge{border:1px solid #5f8d70;border-radius:999px;padding:5px 9px;font-size:12px}.warn{background:#3b2e0a;color:#ffe9a6}.ok{background:#0d3821;color:#b7ffd4}.wrap{max-width:1180px;margin:auto;padding:18px;display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.card{background:#0b1711dd;border:1px solid #315642;border-radius:18px;padding:16px;box-shadow:0 12px 40px #0006}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.quotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.quote{padding:10px;border-radius:12px;background:#10271a;border:1px solid #294e36}.qv{font-size:20px;font-weight:800;margin-top:4px}label{display:block;font-size:12px;opacity:.75;margin-bottom:4px}input,select,button{width:100%;padding:11px;border-radius:10px;border:1px solid #446653;background:#0a1510;color:#fff}button{cursor:pointer;font-weight:800}button.primary{background:#176d3d}button.short{background:#8c2d2d}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.muted{opacity:.7;font-size:12px}.big{font-size:28px;font-weight:900}.positions{display:grid;gap:8px}.pos{padding:10px;border:1px solid #315642;border-radius:12px;background:#0e1d15}.poshead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.green{color:#8cffae}.red{color:#ff9797}.footer{max-width:1180px;margin:0 auto 30px;padding:0 18px}.log{white-space:pre-wrap;max-height:180px;overflow:auto;background:#050b08;padding:10px;border-radius:10px;font-family:ui-monospace,monospace;font-size:12px}@media(max-width:800px){.wrap{grid-template-columns:1fr}.quotes{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div><div class="brand">11520 · 花果山宇宙萬物交易所</div><div class="muted">KAIOS Warp Index Market · 同一 11520 專案內的驗收候選</div></div><div><span class="badge warn">LOCAL PLAY · NO MAINNET SETTLEMENT</span></div></header>
+<main class="wrap">
+<section class="card">
+<h2>即時指數</h2>
+<div class="quotes">
+<div class="quote"><div>BTC/USDT</div><div class="qv" id="btcUsdt">—</div></div>
+<div class="quote"><div>BNB/USDT</div><div class="qv" id="bnbUsdt">—</div></div>
+<div class="quote"><div>BTC/BNB</div><div class="qv" id="btcBnb">—</div></div>
+<div class="quote"><div>BTC/WBNB</div><div class="qv" id="btcWbnb">—</div></div>
+<div class="quote"><div>BTC/KGEN</div><div class="qv" id="btcKgen">WAIT KGEN QUOTE</div></div>
+<div class="quote"><div>BTC/KAIOS</div><div class="qv" id="btcKaios">INDEX PNL UNIT</div></div>
+</div>
+<p class="muted">BTC/USDT、BNB/USDT 為外部參考指數；BTC/BNB 與 BTC/WBNB 由參考價推導。BTC/KGEN 在 KGEN 可驗證報價不足時不得造價。KAIOS 是本市場 PnL/保證金單位，不偽裝成外部 BTC 現貨價格。</p>
+<hr>
+<h2>下單</h2>
+<div class="row"><div><label>市場</label><select id="symbol"><option>BTC/USDT</option><option>BTC/BNB</option><option>BTC/WBNB</option></select></div><div><label>曲速 C</label><select id="warp"><option>0.0000001</option><option>0.001</option><option>0.1</option><option selected>1</option><option>10</option><option>100</option><option>1000</option></select></div><div><label>本單保證金 KAIOS</label><input id="collateral" type="number" min="0" step="0.01" value="100"></div><div><label>維持保證金</label><input value="5%" disabled></div></div>
+<div class="actions"><button class="primary" id="longBtn">做多 LONG · 馬上成交</button><button class="short" id="shortBtn">做空 SHORT · 馬上成交</button></div>
+<p class="muted">規則：1 指數點 = 1 KAIOS × C。最大損失先限制於該部位保證金；1000C 目前是驗收候選安全上限，不代表 Production 已批准無限槓桿。</p>
+</section>
+<section class="card">
+<h2>玩家 / 保證金</h2>
+<div class="row"><button id="connect">連接錢包</button><button id="wc">WalletConnect</button></div>
+<p id="wallet" class="muted">尚未連線。可先以 LOCAL PLAYER 玩。</p>
+<div class="row"><div><label>本地驗收用 KAIOS 入金</label><input id="deposit" type="number" min="0" value="1000"></div><div><label>&nbsp;</label><button id="depositBtn">存入本地保證金</button></div></div>
+<p class="muted">真正 KAIOS 鏈上入金/出金尚未接到 11520 Settlement Proxy，因此此按鈕只建立驗收用本地保證金，不會轉幣。</p>
+<div class="row"><div><div class="muted">Equity</div><div class="big" id="equity">0 KAIOS</div></div><div><div class="muted">Available</div><div class="big" id="available">0 KAIOS</div></div></div>
+<h3>持倉</h3><div class="positions" id="positions"><div class="muted">尚無持倉</div></div>
+</section>
+</main>
+<section class="footer card"><div><a href="./index.html" style="color:#9cf1b7">← 回 11520 主頁</a></div><h3>驗收紀錄</h3><div id="log" class="log"></div></section>
+<script type="module">
+import { KaiosWarpIndexMarket, formatKaios, computePnlKaios } from './modules/kaios-warp-index-market.mjs';
+const market = new KaiosWarpIndexMarket({maintenanceMarginBps:500,maxWarpC:1000,pointValueKaios:1});
+let playerId='LOCAL_PLAYER_11520'; let connectedProvider=null;
+const $=id=>document.getElementById(id); const log=m=>{$('log').textContent=`${new Date().toLocaleTimeString()} ${m}\n`+$('log').textContent};
+function fmt(v,d=4){return Number(v).toLocaleString(undefined,{maximumFractionDigits:d})}
+async function fetchTicker(symbol){const r=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`,{cache:'no-store'});if(!r.ok)throw new Error(`QUOTE_${symbol}_${r.status}`);return Number((await r.json()).price)}
+async function refreshQuotes(){try{const [btc,bnb]=await Promise.all([fetchTicker('BTCUSDT'),fetchTicker('BNBUSDT')]);const cross=btc/bnb;market.setIndex('BTC/USDT',btc,{source:'BINANCE_PUBLIC_REFERENCE'});market.setIndex('BTC/BNB',cross,{source:'DERIVED_BTCUSDT_DIV_BNBUSDT'});market.setIndex('BTC/WBNB',cross,{source:'DERIVED_REFERENCE_1_BNB_APPROX_1_WBNB'});$('btcUsdt').textContent=fmt(btc,2);$('bnbUsdt').textContent=fmt(bnb,2);$('btcBnb').textContent=fmt(cross,6);$('btcWbnb').textContent=fmt(cross,6);market.checkLiquidations();render();}catch(e){log(`報價失敗：${e.message}`)}}
+function currentPnl(p){const idx=market.getIndex(p.symbol);return idx?computePnlKaios({entryIndex:p.entryIndex,currentIndex:idx.price,direction:p.direction,warpC:p.warpC}):0}
+function render(){const s=market.snapshot(playerId);$('equity').textContent=formatKaios(s.equityKaios);$('available').textContent=formatKaios(s.availableKaios);const open=[...market.positions.values()].filter(p=>p.playerId===playerId&&p.status==='OPEN');$('positions').innerHTML=open.length?open.map(p=>`<div class="pos"><div class="poshead"><b>${p.direction} ${p.symbol} · ${p.warpC}C</b><span class="${currentPnl(p)>=0?'green':'red'}">${formatKaios(currentPnl(p))}</span></div><div class="muted">Entry ${fmt(p.entryIndex,6)} · Liq ${fmt(p.liquidationIndex,6)} · Margin ${fmt(p.collateralKaios,4)} KAIOS</div><button data-close="${p.positionId}" style="margin-top:8px">平倉</button></div>`).join(''):'<div class="muted">尚無持倉</div>';document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{try{const out=market.closePosition(b.dataset.close);log(`平倉 ${out.positionId} PnL=${fmt(out.realizedPnlKaios,8)} KAIOS`);render()}catch(e){log(e.code||e.message)}})}
+function open(direction){try{const p=market.openPosition({playerId,symbol:$('symbol').value,direction,warpC:$('warp').value,collateralKaios:$('collateral').value});log(`成交 ${p.positionId} ${direction} ${p.symbol} ${p.warpC}C @ ${p.entryIndex}`);render()}catch(e){log(`下單失敗：${e.code||e.message}`)}}
+$('longBtn').onclick=()=>open('LONG');$('shortBtn').onclick=()=>open('SHORT');$('depositBtn').onclick=()=>{try{market.depositLocal(playerId,$('deposit').value,{mode:'LOCAL_REVIEW_ONLY'});log(`本地保證金 +${$('deposit').value} KAIOS`);render()}catch(e){log(e.code||e.message)}};
+$('connect').onclick=async()=>{try{if(!window.ethereum)throw new Error('NO_INJECTED_WALLET');const accounts=await window.ethereum.request({method:'eth_requestAccounts'});playerId=accounts[0];connectedProvider=window.ethereum;$('wallet').textContent=`Injected: ${playerId}`;render();log('Injected wallet connected; no automatic deposit or trade broadcast.')}catch(e){log(e.message)}};
+$('wc').onclick=async()=>{try{const EP=window.EthereumProvider?.default||window.EthereumProvider;if(!EP)throw new Error('WALLETCONNECT_PROVIDER_MISSING');const provider=await EP.init({projectId:'ed256d3118a9c971d550ed5ee522b4d9',chains:[56],showQrModal:true,rpcMap:{56:'https://bsc-dataseed.binance.org/'},metadata:{name:'K-Line Odyssey 11520',description:'Huaguoshan Universal Exchange',url:location.origin,icons:[]}});await provider.connect();const accounts=provider.accounts||await provider.request({method:'eth_accounts'});playerId=accounts[0];connectedProvider=provider;$('wallet').textContent=`WalletConnect: ${playerId}`;render();log('WalletConnect connected; Project ID reuses existing 12345/16888 project.')}catch(e){log(`WalletConnect: ${e.message}`)}};
+refreshQuotes();setInterval(refreshQuotes,5000);render();log('11520 KAIOS Warp Index V1 loaded in local-review mode.');
+</script>
+</body>
+</html>
