@@ -9,7 +9,8 @@ import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
  * @title KUFOV4
  * @notice KUFO successor candidate with immediate alchemy output and Three-Autumn decay.
  * @dev Autumn 1 converts 50% of original lot, Autumn 2 reaches 75%, Autumn 3 converts all remainder.
- *      This intentionally guarantees zero residual KUFO dust after three K280 years.
+ *      Matured KUFO is burned only through the current KSHIP converter, which then mints KSHIP from
+ *      the recorded carrier proof. This guarantees zero residual KUFO dust after three K280 years.
  */
 contract KUFOV4 is ERC20, ERC20Capped {
     bytes32 public constant ORGAN_OUTPUT_168888 = keccak256("KAIOS.ORGAN.KUFO.OUTPUT.168888");
@@ -29,8 +30,17 @@ contract KUFOV4 is ERC20, ERC20Capped {
         bytes32 sourceProof;
     }
 
+    struct CarrierBurnRecord {
+        address owner;
+        address beneficiary;
+        address converter;
+        uint256 kufoBurned;
+        uint256 expectedKship;
+    }
+
     IKAIOSOrganRegistry public immutable organRegistry;
     mapping(bytes32 => bool) public proofMinted;
+    mapping(bytes32 => CarrierBurnRecord) private _carrierBurnRecords;
     mapping(uint256 => Lot) private _lots;
     mapping(address => uint256) private _head;
     mapping(address => uint256) private _tail;
@@ -48,14 +58,14 @@ contract KUFOV4 is ERC20, ERC20Capped {
     error OnlyCurrentKshipConverter(address caller);
     error ProofAlreadyUsed(bytes32 proofId);
     error UnknownLot(uint256 lotId);
-    error WrongLotOwner(address expected, address actual);
-    error NoDecayAvailable(uint256 lotId);
     error LotTraversalLimit();
     error LineageBalanceMismatch(address owner, uint256 missing);
+    error InsufficientMaturedDecay(address owner, uint256 requested, uint256 available);
 
     event ImmediateAlchemyMinted(bytes32 indexed proofId, uint256 indexed lotId, address indexed beneficiary, uint256 kufoAmount, uint64 bornAt);
     event LotSplit(uint256 indexed parentLotId, uint256 indexed childLotId, address indexed newOwner, uint256 childInitial, uint256 childConverted);
     event ThreeAutumnDecay(uint256 indexed lotId, address indexed owner, address indexed beneficiary, uint256 kufoBurned, uint256 expectedKship, uint8 autumn);
+    event CarrierBurnRecorded(bytes32 indexed proofId, address indexed owner, address indexed beneficiary, address converter, uint256 kufoBurned, uint256 expectedKship);
 
     constructor(address registry)
         ERC20("KUFO Alchemy Mass", "KUFO")
@@ -101,28 +111,75 @@ contract KUFOV4 is ERC20, ERC20Capped {
         return currentAutumnForTimestamp(item.bornAt);
     }
 
-    function decayAvailableForKship(uint256 lotId, address owner, address beneficiary)
-        external returns (uint256 kufoBurned, uint256 expectedKship)
+    /**
+     * @notice Existing KSHIPConverter-compatible entry point.
+     * @dev The converter may burn only KUFO that has become claimable under the Three-Autumn schedule.
+     *      The proof record is consumed by KSHIP.mintFromCarrierProof in the same converter transaction.
+     */
+    function burnForCarrier(address owner, address beneficiary, uint256 kufoAmount, bytes32 carrierProofId)
+        external returns (uint256 expectedKship)
     {
         address converter = organRegistry.organ(ORGAN_KSHIP_CONVERTER);
         if (msg.sender != converter || converter == address(0)) revert OnlyCurrentKshipConverter(msg.sender);
         if (owner == address(0) || beneficiary == address(0)) revert ZeroAddress();
+        if (kufoAmount == 0) revert ZeroAmount();
+        if (_carrierBurnRecords[carrierProofId].owner != address(0)) revert ProofAlreadyUsed(carrierProofId);
 
-        Lot storage item = _lots[lotId];
-        if (item.owner == address(0)) revert UnknownLot(lotId);
-        if (item.owner != owner) revert WrongLotOwner(item.owner, owner);
-        kufoBurned = claimableDecay(lotId);
-        if (kufoBurned == 0) revert NoDecayAvailable(lotId);
-        uint8 autumn = currentAutumnForTimestamp(item.bornAt);
+        uint256 remaining = kufoAmount;
+        uint256 available;
+        uint256 cursor = _head[owner];
+        uint256 processed;
 
-        item.convertedAmount += kufoBurned;
-        totalDecayedForKship += kufoBurned;
-        expectedKship = kufoBurned * KSHIP_PER_KUFO;
+        while (cursor != 0 && remaining > 0 && processed < MAX_LOTS_PER_OPERATION) {
+            uint256 following = _next[cursor];
+            Lot storage item = _lots[cursor];
+            uint256 target = targetConvertedAmount(cursor);
+            uint256 claimable = target > item.convertedAmount ? target - item.convertedAmount : 0;
+            available += claimable;
+
+            if (claimable != 0) {
+                uint256 take = claimable < remaining ? claimable : remaining;
+                item.convertedAmount += take;
+                totalDecayedForKship += take;
+                remaining -= take;
+                emit ThreeAutumnDecay(
+                    cursor,
+                    owner,
+                    beneficiary,
+                    take,
+                    take * KSHIP_PER_KUFO,
+                    currentAutumnForTimestamp(item.bornAt)
+                );
+                if (item.convertedAmount == item.initialAmount) _remove(owner, cursor);
+            }
+
+            cursor = following;
+            unchecked { ++processed; }
+        }
+
+        if (remaining != 0) {
+            if (cursor != 0) revert LotTraversalLimit();
+            revert InsufficientMaturedDecay(owner, kufoAmount, available);
+        }
+
+        expectedKship = kufoAmount * KSHIP_PER_KUFO;
+        _carrierBurnRecords[carrierProofId] = CarrierBurnRecord(
+            owner,
+            beneficiary,
+            msg.sender,
+            kufoAmount,
+            expectedKship
+        );
+
         _decayBurn = true;
-        _burn(owner, kufoBurned);
+        _burn(owner, kufoAmount);
         _decayBurn = false;
-        if (item.convertedAmount == item.initialAmount) _remove(owner, lotId);
-        emit ThreeAutumnDecay(lotId, owner, beneficiary, kufoBurned, expectedKship, autumn);
+
+        emit CarrierBurnRecorded(carrierProofId, owner, beneficiary, msg.sender, kufoAmount, expectedKship);
+    }
+
+    function carrierBurnRecord(bytes32 proofId) external view returns (CarrierBurnRecord memory) {
+        return _carrierBurnRecords[proofId];
     }
 
     function currentAutumnForTimestamp(uint64 bornAt) public view returns (uint8) {
