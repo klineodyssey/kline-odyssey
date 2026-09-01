@@ -26,6 +26,7 @@ export function createShell(callbacks = {}) {
     playerMovement: byId("player-hud-movement"),
     worldRevision: byId("world-revision-value"),
     simulationClock: byId("simulation-clock-value"),
+    sessionStart: byId("session-start-button"),
     enterSelected: byId("enter-selected-button"),
     stepUp: byId("player-step-up-button"),
     stepLeft: byId("player-step-left-button"),
@@ -57,6 +58,7 @@ export function createShell(callbacks = {}) {
   listen("zoom-in-button", "click", () => callbacks.onZoomIn?.());
   listen("zoom-out-button", "click", () => callbacks.onZoomOut?.());
   listen("login-button", "click", () => callbacks.onLogin?.());
+  listen("session-start-button", "click", () => callbacks.onLogin?.());
   listen("mock-location-consent", "change", () => {
     elements.consentAccept.disabled = !elements.consentInput.checked;
   });
@@ -164,6 +166,7 @@ export function createShell(callbacks = {}) {
   function setLoggedIn(player) {
     elements.login.textContent = player ? "End mock session" : "Mock login";
     elements.login.classList.toggle("is-authenticated", Boolean(player));
+    elements.sessionStart.hidden = Boolean(player);
     elements.login.setAttribute("aria-label", player
       ? `End mock session for ${player.display_name}`
       : "Open mock login and voluntary location consent");
@@ -254,6 +257,7 @@ export function createShell(callbacks = {}) {
     elements.loading.hidden = ready;
     elements.shell.classList.toggle("is-ready", ready);
     elements.login.disabled = !ready;
+    elements.sessionStart.disabled = !ready;
   }
 
   elements.shell.dataset.theme = theme;

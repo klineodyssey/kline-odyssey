@@ -38,6 +38,19 @@ test("canonical Viewer exposes hierarchy, navigation, and honest catalog states"
   assert.equal(prohibitedTerms.some((term) => viewer.includes(term)), false);
 });
 
+test("offline mobile player receives a clear start action instead of unusable controls", async () => {
+  const [viewer, shell, styles] = await Promise.all([
+    read("../index.html"),
+    read("../ui/shell.js"),
+    read("../ui/styles.css")
+  ]);
+  assert.match(viewer, /id="session-start-button"[\s\S]*開始遊戲/);
+  assert.match(shell, /listen\("session-start-button", "click", \(\) => callbacks\.onLogin\?\.\(\)\)/);
+  assert.match(shell, /elements\.sessionStart\.disabled = !ready/);
+  assert.match(styles, /data-session="inactive"\][^\n]*player-action-toolbar[^\n]*display:\s*none/);
+  assert.match(styles, /login-button::after\s*\{\s*content:\s*"開始"/);
+});
+
 test("capability audit preserves static simulation boundaries", async () => {
   const audit = await read("../FULL_WORLD_VIEWER_CAPABILITY_AUDIT.md");
   assert.match(audit, /FISHPOND[\s\S]*IMPLEMENTED_INTERACTIVE/);

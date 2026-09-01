@@ -1,6 +1,11 @@
-# 11520 Universal Exchange V4.0 Current Handoff
+# 11520 Universal Exchange V4.0.1 Current Handoff
 
-V4.0 is the active cumulative public release. It repairs the Production player entry and upgrades `DIGITAL_ANT_APP_0001` to V1.7.0 without changing Life ID, immutable Birth Certificate, Wallet ownership, Thought Organ, Primary Job or Listing identity rights.
+V4.0.1 adds a bounded module-boot watchdog and IndexedDB readiness timeout. If
+module execution or browser storage stalls, 11520 now exits the spinner and
+shows a usable compatibility route with truthful `NOT CONNECTED`, `NO TRADE`
+and `CT = NULL` labels. It does not manufacture a trade, settlement or price.
+
+V4.0.1 is the active cumulative release candidate. It preserves the V4.0 player entry and `DIGITAL_ANT_APP_0001` V1.7.0 without changing Life ID, immutable Birth Certificate, Wallet ownership, Thought Organ, Primary Job or Listing identity rights.
 
 The first screen now provides an animated Wukong Hair concierge, Voice, Text, Explore, Join, Work and My AI. Voice controls never silently disable: a user gesture triggers audible Speech Synthesis where supported, microphone permission and Speech Recognition are explicit, errors are shown by reason, and unsupported capture focuses the Text fallback. The character has idle/listening/thinking/speaking/success/error states with CSS 3D and 2D/reduced-motion fallback. Audio is not stored and a transcript cannot create a Request without confirmation.
 

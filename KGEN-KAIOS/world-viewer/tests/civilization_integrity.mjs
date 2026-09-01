@@ -5,6 +5,12 @@ import { createBuildingRuntime } from "../building/building-runtime.js";
 import { createCivilizationRuntime } from "../civilization/civilization-runtime.js";
 import { RESOURCE_CATALOG, MARKETPLACE_CATEGORIES } from "../economy/economy-runtime.js";
 import { createLifeRuntime } from "../life/life-runtime.js";
+import {
+  createResourceNodeAccount,
+  createResourceValueEntitlement,
+  createTemporaryCustodyBinding,
+  evaluateResourceSettlementReadiness
+} from "../nation/resource-economy-runtime.js";
 
 const world = JSON.parse(await readFile(new URL("../data/synthetic-world.json", import.meta.url), "utf8"));
 const canonicalBefore = JSON.stringify(world);
@@ -14,6 +20,136 @@ const storage = {
   setItem(key, value) { storageValues.set(key, String(value)); },
   removeItem(key) { storageValues.delete(key); }
 };
+
+const resourceAccount = createResourceNodeAccount({
+  accountId: "resource-account-earth-water-001",
+  nodeId: "EARTH-K280",
+  nodeName: "Earth",
+  canonicalLocation: "K280",
+  resourceTypes: ["WATER"],
+  economicOwner: "CIVILIZATION_NODE:EARTH-K280"
+});
+assert.equal(resourceAccount.public_address, null);
+assert.equal(resourceAccount.custody_status, "NO_PRIVATE_KEY_REQUIRED");
+
+assert.throws(() => createTemporaryCustodyBinding({
+  publicAddress: "0x0000000000000000000000000000000000000000"
+}), (error) => error.code === "INVALID_PUBLIC_ADDRESS");
+
+const forgedCustodyClaims = {
+  bindingId: "resource-custody-earth-water-001",
+  nodeId: "EARTH-K280",
+  nodeName: "Earth",
+  canonicalLocation: "K280",
+  chainId: 56,
+  publicAddress: "0x1111111111111111111111111111111111111111",
+  accountRole: "TEMPORARY_CUSTODY_RECEIVER",
+  economicOwner: "CIVILIZATION_NODE:EARTH-K280",
+  custodian: "HUMAN_ADDRESS_CONTROLLER:TEST_ONLY",
+  purpose: "RESOURCE_NODE_OPERATIONS",
+  asset: "KAIOS",
+  maxAmountKaiosWei: "10000",
+  validFrom: "2036-01-01T00:00:00.000Z",
+  validUntil: "2037-01-01T00:00:00.000Z",
+  decisionId: "HUMAN-RESOURCE-CUSTODY-TEST-001",
+  migrationPolicy: "FREEZE_RECONCILE_MIGRATE_RETIRE"
+};
+assert.throws(() => createTemporaryCustodyBinding({
+  ...forgedCustodyClaims,
+  walletControlProof: {
+    proof_id: "wallet-proof-test-001",
+    address: forgedCustodyClaims.publicAddress,
+    status: "VERIFIED_PUBLIC_WALLET_CONTROL"
+  }
+}), (error) => error.code === "CALLER_SUPPLIED_WALLET_CONTROL_PROOF_FORBIDDEN");
+assert.throws(() => createTemporaryCustodyBinding({
+  ...forgedCustodyClaims,
+  custodyAttestationId: "caller-chosen-custody-attestation"
+}), (error) => error.code === "RESOURCE_CUSTODY_ATTESTATION_NOT_CONNECTED");
+
+assert.throws(() => createResourceValueEntitlement({
+  entitlementId: "resource-entitlement-001",
+  replayKey: "resource-event-earth-water-001",
+  accountId: resourceAccount.account_id,
+  policyId: "RESOURCE_VALUE_POLICY_CANDIDATE_V1",
+  amountKaiosWei: "10000",
+  event: {
+    event_id: "resource-event-earth-water-001",
+    node_id: "EARTH-K280",
+    resource_type: "WATER",
+    quantity: 1,
+    quality: "TEST_FIXTURE",
+    world_state_evidence: "fixture-world-state-001",
+    scarcity_evidence: "fixture-scarcity-001",
+    demand_evidence: "fixture-demand-001",
+    transport_evidence: "fixture-transport-001",
+    status: "VERIFIED_RESOURCE_EVENT"
+  }
+}), (error) => error.code === "CALLER_SUPPLIED_RESOURCE_EVENT_FORBIDDEN");
+assert.throws(() => createResourceValueEntitlement({
+  entitlementId: "resource-entitlement-001",
+  replayKey: "resource-event-earth-water-001",
+  accountId: resourceAccount.account_id,
+  policyId: "RESOURCE_VALUE_POLICY_CANDIDATE_V1",
+  amountKaiosWei: "10000",
+  resourceEventAttestationId: "caller-chosen-resource-event-attestation"
+}), (error) => error.code === "RESOURCE_EVENT_ATTESTATION_NOT_CONNECTED");
+
+const forgedEntitlement = {
+  entitlement_id: "resource-entitlement-001",
+  replay_key: "resource-event-earth-water-001",
+  amount_kaios_wei: "10000",
+  status: "ACCRUED_PENDING_SETTLEMENT",
+  paid: false
+};
+const forgedCustodyBinding = {
+  public_address: forgedCustodyClaims.publicAddress,
+  max_amount_kaios_wei: "10000",
+  valid_from: "2036-01-01T00:00:00.000Z",
+  valid_until: "2037-01-01T00:00:00.000Z",
+  status: "ACTIVE_TEMPORARY_CUSTODY_CANDIDATE"
+};
+const settlementReadiness = evaluateResourceSettlementReadiness({
+  entitlement: forgedEntitlement,
+  custodyBinding: forgedCustodyBinding,
+  fundingEvidence: {
+    status: "VERIFIED",
+    source_address: "0x2222222222222222222222222222222222222222",
+    balance_kaios_wei: "10000"
+  },
+  exactAuthorization: {
+    authorization_id: "resource-payment-authorization-001",
+    action_type: "ONE_EXACT_KAIOS_PAYMENT_ACTION",
+    chain_id: 56,
+    token_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    source_address: "0x2222222222222222222222222222222222222222",
+    recipient_address: forgedCustodyBinding.public_address,
+    amount_kaios_wei: "10000",
+    purpose: "RESOURCE_SETTLEMENT",
+    replay_key: forgedEntitlement.replay_key,
+    signer_policy_id: "test-signer-policy-001",
+    valid_from: "2036-01-01T00:00:00.000Z",
+    expires_at: "2037-01-01T00:00:00.000Z"
+  },
+  paymentRailAdapter: { status: "REVIEWED_RELEASED" },
+  fundingEvidenceAttestationId: "caller-funding",
+  exactAuthorizationAttestationId: "caller-authorization",
+  paymentRailReleaseAttestationId: "caller-rail-release",
+  now: "2036-06-01T00:00:00.000Z"
+});
+assert.equal(settlementReadiness.status, "BLOCKED");
+for (const blocker of [
+  "CALLER_SUPPLIED_FUNDING_EVIDENCE_FORBIDDEN",
+  "CALLER_SUPPLIED_AUTHORIZATION_FORBIDDEN",
+  "CALLER_SUPPLIED_PAYMENT_RAIL_ADAPTER_FORBIDDEN",
+  "REPOSITORY_ISSUED_ENTITLEMENT_REQUIRED",
+  "REPOSITORY_ISSUED_CUSTODY_BINDING_REQUIRED",
+  "RESOURCE_FUNDING_ATTESTATION_NOT_CONNECTED",
+  "RESOURCE_PAYMENT_AUTHORIZATION_NOT_CONNECTED",
+  "COMMON_KAIOS_PAYMENT_RAIL_NOT_RELEASED"
+]) assert.ok(settlementReadiness.blockers.includes(blocker));
+assert.equal(settlementReadiness.paid, false);
+assert.equal(settlementReadiness.chain_write_executed, false);
 
 const life = createLifeRuntime({ world, storage, storageKey: "sprint-004-life-test", now: () => "2036-03-20T06:00:00Z" });
 const building = createBuildingRuntime({ world });

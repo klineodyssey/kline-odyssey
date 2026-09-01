@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KLINE ODYSSEY | KGEN Universe Portal V3.0</title>
-  <meta name="description" content="KLINE ODYSSEY official KGEN Universe Portal V3.0. Where the Market Becomes the Myth.">
-  <meta property="og:title" content="KLINE ODYSSEY | KGEN Universe Portal V3.0">
-  <meta property="og:description" content="KGEN 宇宙文明生命引擎，花果山台灣・信念不滅・市場無界。">
+  <title>KAIOS Civilization AI OS | KLINE ODYSSEY</title>
+  <meta name="description" content="進入 KAIOS 文明：建立生命、探索世界、尋找工作、使用 AI 伙伴與 K11520 萬物宇宙交易所。">
+  <meta property="og:title" content="KAIOS Civilization AI OS | KLINE ODYSSEY">
+  <meta property="og:description" content="從出生、世界、工作到市場，開始你的 KAIOS 文明人生。">
   <meta property="og:image" content="https://klineodyssey.github.io/kline-odyssey/assets/og-cover.jpg">
   <meta property="og:url" content="https://klineodyssey.github.io/kline-odyssey/">
   <meta name="theme-color" content="#070706">
@@ -115,6 +115,63 @@
       gap: 6px;
       flex-wrap: wrap;
       font-size: 0.88rem;
+    }
+
+    .nav-menu {
+      margin-left: auto;
+    }
+
+    .nav-menu-toggle {
+      display: none;
+    }
+
+    .release-ribbon {
+      border-bottom: 1px solid rgba(72, 217, 255, 0.28);
+      color: #dff8ff;
+      background: rgba(4, 30, 38, 0.96);
+    }
+
+    .release-ribbon-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .life-pulse {
+      max-width: 760px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+      margin: 20px 0;
+    }
+
+    .life-pulse article {
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      background: rgba(5, 5, 4, 0.7);
+    }
+
+    .life-pulse small {
+      display: block;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .life-pulse strong {
+      display: block;
+      margin-top: 4px;
+      color: #fff8e1;
+    }
+
+    .mobile-bottom-nav {
+      display: none;
     }
 
     .mobile-nav-label {
@@ -685,18 +742,53 @@
     }
 
     @media (max-width: 760px) {
-      .nav {
-        align-items: flex-start;
-        flex-direction: column;
+      body {
+        padding-bottom: calc(66px + env(safe-area-inset-bottom));
       }
 
-      .nav-links {
-        width: 100%;
-        justify-content: flex-start;
+      .nav {
+        position: relative;
+        align-items: center;
+        flex-direction: row;
+      }
+
+      .nav-menu-toggle {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border: 1px solid rgba(243, 199, 102, 0.4);
+        border-radius: 10px;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.06);
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .nav-menu:not(.open) .nav-links {
+        display: none;
+      }
+
+      .nav-menu.open .nav-links {
+        position: absolute;
+        top: calc(100% + 1px);
+        left: 10px;
+        right: 10px;
+        max-height: min(66vh, 520px);
+        overflow-y: auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+        padding: 12px;
+        border: 1px solid rgba(243, 199, 102, 0.32);
+        border-radius: 0 0 14px 14px;
+        background: rgba(7, 7, 6, 0.98);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
       }
 
       .nav-links a {
-        flex: 1 1 auto;
+        width: 100%;
       }
 
       .desktop-nav-label {
@@ -740,6 +832,7 @@
       }
 
       .hero-stats,
+      .life-pulse,
       .map-panel,
       .support-layout,
       .k280-layout {
@@ -767,11 +860,40 @@
       .support-image {
         min-height: 280px;
       }
+
+      .mobile-bottom-nav {
+        position: fixed;
+        z-index: 40;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        padding: 6px max(6px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+        border-top: 1px solid rgba(243, 199, 102, 0.35);
+        background: rgba(5, 5, 4, 0.97);
+        backdrop-filter: blur(14px);
+      }
+
+      .mobile-bottom-nav a {
+        min-height: 48px;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 1px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.66rem;
+        font-weight: 900;
+      }
+
+      .mobile-bottom-nav a:first-child {
+        color: #ffe59a;
+      }
     }
 
     @media (max-width: 430px) {
-      .hero-actions .button,
-      .nav-links a {
+      .hero-actions .button {
         width: 100%;
         flex-basis: 100%;
       }
@@ -797,13 +919,21 @@
   </style>
 </head>
 <body>
+  <aside class="release-ribbon" aria-label="Public experimental release status">
+    <div class="release-ribbon-inner">
+      <span>PUBLIC EXPERIMENTAL · 功能會持續更新，真實資產操作仍採精確授權</span>
+      <span id="public-build-sha">BUILD SHA：讀取中</span>
+    </div>
+  </aside>
   <header class="site-header" aria-label="KLINE ODYSSEY primary navigation">
     <nav class="nav">
       <a class="brand" href="./" aria-label="KLINE ODYSSEY Home">
         <img src="logo.png" alt="KGEN logo">
         <span>KLINE ODYSSEY</span>
       </a>
-      <div class="nav-links">
+      <div class="nav-menu">
+        <button class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="full-navigation">全部功能</button>
+        <div class="nav-links" id="full-navigation">
         <a href="./world-viewer/causal-runtime/"><span class="desktop-nav-label">KAIOS 因果世界</span><span class="mobile-nav-label">真實因果世界</span></a>
         <a href="./world-viewer/player-genesis/"><span class="desktop-nav-label">開始 KAIOS 人生</span><span class="mobile-nav-label">Player Genesis</span></a>
         <a href="./world-viewer/life-runtime/"><span class="desktop-nav-label">KAIOS 生命</span><span class="mobile-nav-label">Life Runtime</span></a>
@@ -820,6 +950,7 @@
         <a href="security/">Security</a>
         <a href="#map">Universe Map</a>
         <a href="#library">Whitepaper</a>
+        </div>
       </div>
     </nav>
   </header>
@@ -827,15 +958,20 @@
   <main>
     <section class="hero" id="top">
       <div class="hero-inner">
-        <p class="eyebrow">Official Homepage V3.0 Universe Portal</p>
-        <h1>KLINE ODYSSEY</h1>
-        <p class="hero-subtitle">KGEN 宇宙文明生命引擎</p>
-        <p class="tagline">Where the Market Becomes the Myth. 花果山台灣以市場、信念、AI 與 Web3 構築可演化的金融文明。</p>
+        <p class="eyebrow">KAIOS CIVILIZATION AI OS · PUBLIC EXPERIMENTAL</p>
+        <h1>從這裡，開始你的文明人生</h1>
+        <p class="hero-subtitle">出生、探索、學習、工作、創業與交易，都在同一個世界。</p>
+        <p class="tagline">你不需要先理解 PR、CI 或區塊鏈工程。先建立生命，KAIOS 會帶你找到所在地、目前需要與下一個能做的行動。</p>
+        <div class="life-pulse" aria-label="Your starting life status">
+          <article><small>我是誰？</small><strong>尚未建立的訪客</strong></article>
+          <article><small>我在哪裡？</small><strong>地球 · K280</strong></article>
+          <article><small>下一步</small><strong>建立我的生命</strong></article>
+        </div>
         <div class="hero-actions" aria-label="Primary actions">
-          <a class="button primary" href="K線西遊記/index.html">進入宇宙</a>
-          <a class="button dark" href="community/" data-official-link="youtube" data-official-link-replace="true">YouTube</a>
-          <a class="button dark" href="KGEN/whitepaper/">Whitepaper</a>
-          <a class="button cyan" href="K線西遊記/temples/12345/index.html">12345 五指山</a>
+          <a class="button primary" href="./world-viewer/player-genesis/">開始我的人生</a>
+          <a class="button cyan" href="./world-viewer/">探索 KAIOS 世界</a>
+          <a class="button dark" href="./K線西遊記/temples/11520/index.html">開啟 K11520</a>
+          <a class="button dark" href="#player-genesis">先了解玩法</a>
         </div>
         <div class="hero-stats" aria-label="Universe overview">
           <div class="stat"><b>123</b><span>Universe Map coordinates</span></div>
@@ -1382,6 +1518,14 @@
     </section>
   </main>
 
+  <nav class="mobile-bottom-nav" aria-label="KAIOS mobile primary navigation">
+    <a href="./world-viewer/"><span>◎</span><span>世界</span></a>
+    <a href="./world-viewer/player-genesis/"><span>◆</span><span>任務</span></a>
+    <a href="./K線西遊記/temples/11520/index.html#/AI"><span>✦</span><span>AI</span></a>
+    <a href="./K線西遊記/temples/11520/index.html#/PORTFOLIO"><span>◈</span><span>錢包</span></a>
+    <a href="./K線西遊記/temples/11520/index.html#/MY_LIFE"><span>●</span><span>我的人生</span></a>
+  </nav>
+
   <footer>
     <div class="footer-inner">
       <p><strong>PrimeForge 創世碑文</strong></p>
@@ -1404,5 +1548,32 @@
     </div>
   </footer>
   <script src="assets/official-links.js" data-manifest="OfficialLinks.json"></script>
+  <script>
+    const navMenu = document.querySelector(".nav-menu");
+    const navMenuToggle = document.querySelector(".nav-menu-toggle");
+    navMenuToggle?.addEventListener("click", () => {
+      const open = navMenu.classList.toggle("open");
+      navMenuToggle.setAttribute("aria-expanded", String(open));
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && navMenu?.classList.contains("open")) {
+        navMenu.classList.remove("open");
+        navMenuToggle.setAttribute("aria-expanded", "false");
+        navMenuToggle.focus();
+      }
+    });
+    fetch("https://api.github.com/repos/klineodyssey/kline-odyssey/commits/main", {
+      cache: "no-store",
+      headers: { Accept: "application/vnd.github+json" }
+    })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+      .then((build) => {
+        const sha = String(build.sha || "").slice(0, 12);
+        document.querySelector("#public-build-sha").textContent = sha ? `BUILD SHA：${sha}` : "BUILD SHA：未提供";
+      })
+      .catch(() => {
+        document.querySelector("#public-build-sha").textContent = "BUILD SHA：暫時無法讀取";
+      });
+  </script>
 </body>
 </html>

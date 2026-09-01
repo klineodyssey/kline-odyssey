@@ -65,15 +65,28 @@ export class MemoryUniverseStore {
 }
 
 export class IndexedDbUniverseStore {
-  constructor(name = "KGEN_11520_UNIVERSE_V2") {
+  constructor(name = "KGEN_11520_UNIVERSE_V2", { openTimeoutMs = 2500 } = {}) {
     invariant(globalThis.indexedDB, "INDEXEDDB_UNAVAILABLE", "IndexedDB is unavailable in this runtime");
     this.name = name;
-    this.dbPromise = this.#open();
+    this.dbPromise = this.#open(openTimeoutMs);
   }
 
-  #open() {
+  #open(openTimeoutMs) {
     return new Promise((resolve, reject) => {
       const request = globalThis.indexedDB.open(this.name, 1);
+      let settled = false;
+      const finish = (handler, value) => {
+        if (settled) return false;
+        settled = true;
+        globalThis.clearTimeout(timeout);
+        handler(value);
+        return true;
+      };
+      const timeout = globalThis.setTimeout(() => {
+        const error = new Error(`IndexedDB open timed out after ${openTimeoutMs}ms`);
+        error.code = "INDEXEDDB_OPEN_TIMEOUT";
+        finish(reject, error);
+      }, openTimeoutMs);
       request.onupgradeneeded = () => {
         const db = request.result;
         const entities = db.createObjectStore("entities", { keyPath: "key" });
@@ -81,9 +94,21 @@ export class IndexedDbUniverseStore {
         const events = db.createObjectStore("events", { keyPath: "event_id" });
         events.createIndex("subject_id", "subject_id", { unique: false });
       };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        if (!finish(resolve, request.result)) request.result?.close?.();
+      };
+      request.onerror = () => finish(reject, request.error ?? new Error("IndexedDB open failed"));
+      request.onblocked = () => {
+        const error = new Error("IndexedDB open was blocked by another page");
+        error.code = "INDEXEDDB_OPEN_BLOCKED";
+        finish(reject, error);
+      };
     });
+  }
+
+  async ready() {
+    await this.dbPromise;
+    return this;
   }
 
   async #request(request) {

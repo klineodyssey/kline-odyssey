@@ -1,4 +1,9 @@
-# 11520 Universal Exchange V3.9
+# 11520 Universal Exchange V4.0.1
+
+V4.0.1 is a startup-resilience release candidate. A module or IndexedDB stall
+now produces a bounded compatibility screen instead of an endless spinner.
+The fallback links back to Player Genesis, World and AI Company and never
+labels an unverified trade, settlement or CT as live.
 
 ## Digital Ant next-stage status
 
