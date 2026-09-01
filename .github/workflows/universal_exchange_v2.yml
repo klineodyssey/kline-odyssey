@@ -10,7 +10,10 @@ on:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
       - "tests/11520-kgen-native-market-cell.test.mjs"
+      - "tests/11520-kaios-warp-atm.test.mjs"
       - "K線西遊記/temples/11520/**"
+      - "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol"
+      - "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
       - ".github/workflows/universal_exchange_v2.yml"
@@ -19,7 +22,10 @@ on:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
       - "tests/11520-kgen-native-market-cell.test.mjs"
+      - "tests/11520-kaios-warp-atm.test.mjs"
       - "K線西遊記/temples/11520/**"
+      - "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol"
+      - "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/workflows/universal_exchange_v2.yml"
 
@@ -41,6 +47,8 @@ jobs:
         run: node --test tests/universal-exchange.test.mjs
       - name: Run 11520 KGEN native market-cell tests
         run: node --test tests/11520-kgen-native-market-cell.test.mjs
+      - name: Run 11520 KAIOS warp and ATM tests
+        run: node --test tests/11520-kaios-warp-atm.test.mjs
 
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
