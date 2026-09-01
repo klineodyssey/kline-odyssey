@@ -11,6 +11,7 @@ on:
       - "tests/universal-exchange.test.mjs"
       - "tests/11520-kgen-native-market-cell.test.mjs"
       - "tests/11520-kaios-warp-atm.test.mjs"
+      - "tests/11520-kaios-warp-evm.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol"
       - "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol"
@@ -24,6 +25,7 @@ on:
       - "tests/universal-exchange.test.mjs"
       - "tests/11520-kgen-native-market-cell.test.mjs"
       - "tests/11520-kaios-warp-atm.test.mjs"
+      - "tests/11520-kaios-warp-evm.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol"
       - "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol"
@@ -59,8 +61,12 @@ jobs:
         run: node --test tests/universal-exchange.test.mjs
       - name: Run 11520 KGEN native market-cell tests
         run: node --test tests/11520-kgen-native-market-cell.test.mjs
-      - name: Run 11520 KAIOS warp and ATM tests
+      - name: Run 11520 KAIOS warp and ATM model tests
         run: node --test tests/11520-kaios-warp-atm.test.mjs
+      - name: Install isolated EVM test dependencies
+        run: npm install --no-save --ignore-scripts ethers@5.7.2 ganache@7.9.2 solc@0.8.24
+      - name: Run 11520 real-EVM lifecycle tests
+        run: node --test tests/11520-kaios-warp-evm.test.mjs
 
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
