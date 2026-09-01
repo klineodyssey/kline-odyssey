@@ -1,5 +1,18 @@
 # 11520 Changelog
 
+## 4.0.2
+
+- Repaired the production browser entry after mobile QA found the page could remain at `Loading canonical universe…`. The browser no longer imports the aggregate `core/index.mjs`, whose signer and Starforge exports intentionally depend on Node-only `node:module`.
+- Replaced that aggregate import with explicit browser-safe Registry, Market, Portfolio, Life, Job, Company, App and KGEN integration modules. Node-only signer code remains available to trusted local runtimes and is not bundled into the public browser graph.
+- Added a cache-busted production entry and regression coverage preventing the aggregate Node-only export surface from being reintroduced. The wallet and swap safety boundaries are otherwise unchanged.
+
+## 4.0.1
+
+- Added a mobile MetaMask deep link and an explicit injected-wallet connection gate for BNB Smart Chain chain 56.
+- Added user-initiated EIP-747 wallet discovery for the canonical KGEN and KAIOS token addresses. Both use the Human-directed shared KGEN master mark while retaining different token symbols and contracts.
+- Kept KGEN/WBNB as the only verified external AMM path. KAIOS is displayed as `MAINNET_TOKEN_LIVE_NO_VERIFIED_DEX_PAIR`; the UI cannot fabricate a KAIOS swap or price.
+- Added regression coverage for chain switching, allowlisted token metadata, malicious dapp URLs and mobile-control presence. No transaction is sent by connect or add-token actions.
+
 ## 4.0.0
 
 - Repaired the Production Voice entry: controls are visible on first load, never silently disable, request microphone permission only after a user gesture, report browser/permission/network/no-speech errors, and always focus the text fallback when capture cannot run.

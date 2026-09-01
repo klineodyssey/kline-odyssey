@@ -16,6 +16,75 @@ export const KGEN_SWAP_CONFIG = Object.freeze({
   deadline_seconds: 1200
 });
 
+export const KAIOS_TOKEN_CONFIG = Object.freeze({
+  chain_id: 56,
+  token_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+  token_symbol: "KAIOS",
+  token_decimals: 18,
+  token_image: "https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png",
+  market_status: "MAINNET_TOKEN_LIVE_NO_VERIFIED_DEX_PAIR"
+});
+
+export const BSC_WALLET_ASSETS = Object.freeze({
+  KGEN: Object.freeze({
+    address: KGEN_SWAP_CONFIG.token_address,
+    symbol: "KGEN",
+    decimals: KGEN_SWAP_CONFIG.token_decimals,
+    image: "https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png"
+  }),
+  KAIOS: Object.freeze({
+    address: KAIOS_TOKEN_CONFIG.token_address,
+    symbol: KAIOS_TOKEN_CONFIG.token_symbol,
+    decimals: KAIOS_TOKEN_CONFIG.token_decimals,
+    image: KAIOS_TOKEN_CONFIG.token_image
+  })
+});
+
+export async function ensureBscWalletNetwork({ ethereum }) {
+  invariant(ethereum?.request, "WALLET_PROVIDER_REQUIRED", "An EIP-1193 wallet provider is required");
+  const expected = KGEN_SWAP_CONFIG.chain_hex;
+  let current = String(await ethereum.request({ method: "eth_chainId" })).toLowerCase();
+  if (current !== expected) {
+    try {
+      await ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: expected }] });
+    } catch (error) {
+      if (Number(error?.code) !== 4902) throw error;
+      await ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: expected,
+          chainName: "BNB Smart Chain",
+          nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+          rpcUrls: ["https://bsc-dataseed.binance.org/"],
+          blockExplorerUrls: ["https://bscscan.com"]
+        }]
+      });
+    }
+    current = String(await ethereum.request({ method: "eth_chainId" })).toLowerCase();
+  }
+  invariant(current === expected, "WRONG_CHAIN", "Wallet must confirm BNB Smart Chain chain 56");
+  return Object.freeze({ status: "BSC_CHAIN_VERIFIED", chain_id: 56, chain_hex: expected });
+}
+
+export async function watchBscWalletAsset({ ethereum, symbol }) {
+  invariant(ethereum?.request, "WALLET_PROVIDER_REQUIRED", "An EIP-1193 wallet provider is required");
+  const asset = BSC_WALLET_ASSETS[String(symbol ?? "").toUpperCase()];
+  invariant(asset, "UNREGISTERED_WALLET_ASSET", "Only canonical KGEN and KAIOS may be added by this control");
+  await ensureBscWalletNetwork({ ethereum });
+  const accepted = await ethereum.request({
+    method: "wallet_watchAsset",
+    params: { type: "ERC20", options: asset }
+  });
+  invariant(accepted === true, "WALLET_ASSET_NOT_ACCEPTED", `${asset.symbol} was not accepted by the wallet`);
+  return Object.freeze({ status: "WALLET_ASSET_ACCEPTED", symbol: asset.symbol, address: asset.address });
+}
+
+export function createMetaMaskMobileDeepLink(pageUrl) {
+  const parsed = new URL(pageUrl);
+  invariant(["http:", "https:"].includes(parsed.protocol), "INVALID_DAPP_URL", "Mobile wallet link requires an HTTP(S) dapp URL");
+  return `https://metamask.app.link/dapp/${parsed.host}${parsed.pathname}${parsed.search}${parsed.hash}`;
+}
+
 const PAIR_ABI = Object.freeze([
   "function token0() view returns (address)",
   "function token1() view returns (address)",
@@ -90,6 +159,7 @@ export async function createKgenSwapAdapter({ ethers, ethereum, store = null, co
   }
 
   async function connect() {
+    await ensureBscWalletNetwork({ ethereum });
     const accounts = await ethereum.request({ method: "eth_requestAccounts" });
     invariant(accounts?.[0], "WALLET_ACCOUNT_REQUIRED", "Wallet did not expose an account");
     await snapshot();
