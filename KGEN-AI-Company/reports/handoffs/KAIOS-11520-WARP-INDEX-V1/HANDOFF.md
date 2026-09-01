@@ -1,15 +1,15 @@
 # KAIOS-11520-WARP-INDEX-V1 Handoff
 
 STATUS: REVIEW_FIRST
-OWNER: 11520 Project Page / ChatGPT worker
-REVIEWER: codex-gm-01 / 衡曜
+OWNER: UNASSIGNED / HUMAN_OR_GOVERNANCE_DESIGNATION_REQUIRED
+REVIEWER: DISTINCT_INDEPENDENT_REVIEW_REQUIRED
 BRANCH: sol/11520-kaios-warp-index-v1
 MAINNET_WRITE: NO
 DEPLOYMENT: NO
 MERGE: NO
 PAYMENT: NO
 
-## Human product direction captured
+## Branch-reported product direction (authority unverified)
 
 11520 remains one Universal Exchange project; do not create a second exchange stack. KAIOS is the civilization settlement / player margin unit for the proposed index-game layer. A player chooses an external/reference index, warp speed C, LONG or SHORT, and the local candidate applies `1 index point = 1 KAIOS × C` for PnL. Requested market families include BTC/USDT, BTC/BNB, BTC/WBNB, BTC/KGEN and BTC/KAIOS, with future commodities such as gold and oil following the same oracle/index adapter principle.
 
@@ -52,7 +52,7 @@ Historical live records identify the older Brain 11520, TempleHeart 12345 and Ma
 
 ## New conversion requirement requiring GM / Canon review
 
-The Human additionally described a gameplay/economy path where Heart lamp / wish state may affect a KGEN→KAIOS conversion (described as `1 KGEN = 500` without wish and `1 KGEN = 800` with wish), and an alternate mobile ATM / UFO KAIOS exchange route.
+The branch reports a gameplay/economy proposal where Heart lamp / wish state may affect a KGEN→KAIOS conversion (described as `1 KGEN = 500` without wish and `1 KGEN = 800` with wish), and an alternate mobile ATM / UFO KAIOS exchange route. The proposal's Human or governance authority is not bound by repository evidence at this head.
 
 This handoff DOES NOT implement those rates because current repository Canon separately records the KGEN→KAIOS White Hole mechanism as `1 actually destroyed KGEN -> 1,000 KAIOS settled to 18888`, not an ordinary DEX price. The 500/800 proposal therefore requires explicit reconciliation with TempleHeart behavior, KAIOS conservation, 18888 settlement, and the intended ATM/UFO custody model before any code or Mainnet adapter is changed.
 

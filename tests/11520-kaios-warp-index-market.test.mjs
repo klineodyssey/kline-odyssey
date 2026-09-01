@@ -34,6 +34,8 @@ test('local player can deposit, open and close one position', () => {
   const closed = m.closePosition(p.positionId);
   assert.equal(closed.realizedPnlKaios, 50);
   assert.equal(m.snapshot('0xplayer').equityKaios, 1050);
+  m.setIndex('BTC/USDT', 100010, { source: 'TEST_FIXTURE' });
+  assert.equal(m.snapshot('0xplayer').equityKaios, 1050);
 });
 
 test('loss is bounded by position collateral', () => {

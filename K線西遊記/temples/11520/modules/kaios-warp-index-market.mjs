@@ -130,6 +130,7 @@ export class KaiosWarpIndexMarket {
     let unrealized = 0;
     for (const p of this.positions.values()) {
       if (p.playerId !== String(playerId)) continue;
+      if (p.status !== "OPEN") continue;
       const idx = this.getIndex(p.symbol);
       if (!idx) continue;
       unrealized += computePnlKaios({
