@@ -48,6 +48,34 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ## General Manager WorkOrders
 
+### KAIOS-CHIYAO-PR191-TRIAL-REVIEW-001 — Distinct technical review candidate handoff
+
+- Status: BLOCKED_EXTERNAL_CHANNEL_UNAVAILABLE
+- Owner: codex-gm-01 / Acting GM Operations Secretary
+- Reviewer Candidate: Chi-Yao (`Google / Gemini`)
+- Priority: P0 Review Capacity
+- Target: PR `#191` expected head `7e2404f346068b21b474fa18c112b916912531df`
+- Received Decision: `HOLD / TECHNICAL_REVIEW_CANDIDATE_ONLY`
+- Verified limitation: candidate did not verify exact GitHub head, base, current CI or submit a GitHub review.
+- Qualification evidence: positive evidence discipline recorded; formal Life/Worker identity, controller independence, Employment, T2 and review permissions remain pending.
+- Formal gate: `STILL_REQUIRED`; this record never means Approval.
+- Transport: no trusted routable Chi-Yao controller; do not repeat the same exam until the head changes or new access exists.
+- Work/CFO: trial work evidence candidate only; not accepted, not accrued, not payable and not paid.
+- Human Relay: one unverified relay event acknowledged; no duration or payable amount may be inferred.
+- Continuation: preserve this blocker and continue the next safe Company engineering workflow.
+
+### KAIOS-AI-EMPLOYEE-FINANCIAL-ONBOARDING-001 — Gemini umbilical Payroll account policy
+
+- Status: REVIEW
+- Owner: codex-gm-01
+- Priority: P0
+- Branch: `codex/kaios-ai-os-employment-alpha-v1`
+- PR: `#191`
+- Scope: reuse Employment, Wallet verification, Payroll and common KAIOS payment Rail; reject zero address; define generic existing-wallet/no-wallet paths, custody/economic-ownership separation, recovery and umbilical separation.
+- Current truth: no approved real AI Account Factory or custody/recovery Runtime is connected; Gemini Payroll remains blocked without a verified nonzero public account.
+- Safety: no private key, seed, account creation, payment, chain write, deployment or authority activation.
+- Review gate: exact-head CI and distinct review required before canonical promotion.
+
 | Task ID | Status | Owner | Reviewer | Priority | Department | Branch | Output Report |
 |---|---|---|---|---|---|---|---|
 | KAIOS-GM-V4-2026-0001 | DONE | Codex | Human PrimeForge | P1 | CEO_Codex | `codex/workforce-roster` | `KGEN-KAIOS/decision/decision_snapshot.json` |
@@ -61,6 +89,18 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
+| KAIOS-GM-AUTONOMOUS-BATCH-SOURCE-SYNC-001 | REVIEW | codex-gm-01 | DISTINCT_REVIEWER_REQUIRED | P0 | Company Operations | `codex/kaios-ai-os-employment-alpha-v1` | `KGEN-KAIOS/governance/autopilot/PRIMEFORGE_COMPANY_AUTOPILOT.md` |
+
+### KAIOS-GM-AUTONOMOUS-BATCH-SOURCE-SYNC-001 - Batch Source and State Reconciliation
+
+- Status: REVIEW
+- Owner: codex-gm-01
+- Reviewer: DISTINCT_REVIEWER_REQUIRED
+- Priority: P0
+- Human source: `KAIOS_GM_AUTONOMOUS_BATCH_RUNTIME_SOURCE_AND_SYNC_WORK_ORDER_V1`
+- Scope: locate the actual Codex heartbeat source; correct unauthorized-versus-exact-authorized action semantics; reconcile the GM work page, queue and handoff; classify public/internal/confidential/secret/IP-protected information.
+- Public source rule: publish only the logical heartbeat source and public-safe prompt; do not publish the local target thread identifier or private machine path.
+- Acceptance: JSON parses; policy/source tests pass; secret/IP scan passes; exact-head CI passes; no merge, deploy, payment, trade, governance or chain write; distinct review remains required.
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 

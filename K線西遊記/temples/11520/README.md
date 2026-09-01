@@ -1,4 +1,35 @@
-# 11520 Universal Exchange V3.9
+# 11520 Universal Exchange
+
+## V4.4 AI employee financial onboarding candidate — under review
+
+- The zero address is invalid for Employment, Payroll and KAIOS payment recipients/sources.
+- Current main does not authorize the Company to manufacture a real AI wallet. New AI employees either verify an existing self-controlled public account or enter a fail-closed umbilical-account provisioning request.
+- The repository-owned account-factory allowlist is empty. No Gemini address, custody authority, recovery authority or Payroll readiness is fabricated.
+- Economic ownership belongs to the AI Life/Employee. Company, Mother Machine, HR, CFO, Payroll and Secure Signer responsibilities remain separate from asset ownership.
+- Umbilical separation preserves Life ID, work history and property until an authorized migration receipt exists. Family Support is separate and has no automatic deduction without policy and consent.
+
+## V4.3 Employment Phase 1C candidate — under review
+
+- Company authority verification now resolves only repository-owned `authorityId` records from an immutable allowlist. Caller-supplied authority metadata is never repository proof. The allowlist remains empty until a reviewed governance record exists, so formal interview, hiring, mission, compensation and Payroll actions still fail closed.
+- Company operational authority proposal candidates are machine-validatable but remain non-authoritative and unverified: caller-supplied proposer/controller IDs, evidence references and SHA-shaped version strings are not repository provenance. They exclude Worker activation and all funding, settlement and ATM-advance scopes; provenance and identity verification, distinct governance review and an explicit repository allowlist change are mandatory before activation.
+- Governance review candidates now enter the existing append-only Company History with replay-safe IDs, but stay `UNVERIFIED_GOVERNANCE_REVIEW_CANDIDATE_NOT_DECISION`; no reviewer identity, independence, governance decision or activation is inferred.
+- A deterministic Review Request Packet now hash-binds proposal, repository/base/head claims, changed files, CI run IDs and required reviewer capabilities. It remains an unverified routing artifact—not a review, provenance proof or authority grant.
+- Read-only GitHub snapshot candidates can now be integrity-checked and matched against the packet. Until a trusted transport attests the observation, successful matches remain non-authoritative claims and cannot count as exact-head CI provenance or distinct review.
+- The fixed read-only GitHub API candidate fetcher can collect repository, PR, changed-file and successful exact-head workflow claims without GitHub mutation capability. Because it runs in the caller-controlled JavaScript realm, it remains unattested and cannot verify repository or CI provenance; a trusted external connector, proposal authorship and distinct Reviewer independence are still required.
+- A replay-safe provenance-attestation request now hash-binds the exact proposal and review packet for a future trusted external read-only connector. It is only a request: connector identity, detached attestation, repository/CI provenance, proposer identity, distinct review and activation all remain false or null.
+- The exact first-payroll integration policy remains `0.00000000000001 KAIOS` (`10000` base units at 18 decimals), but no actor, funding source, signer or successful receipt is connected and no payment is claimed.
+- The active `JOBS` Apply button now submits the first real digital-orientation job (`KAIOS_AI_OS_FIRST_EMPLOYMENT_ORIENTATION`) rather than the legacy 8 KAIOS simulation job. The UI names the exact 10000-wei reward and never exposes `PAID` without both the paid flag and a settlement receipt.
+- One shared KAIOS payment Rail now covers the declared Payroll, ATM, field/resource/cargo/player/App, market, Public Good and operating-expense purposes. It accepts only fresh balance evidence from a canonically bound source and an exact recipient proof: existing EIP-191 wallet control, registered node evidence, or a time-limited Human designation bound to source, destination, purpose and amount.
+- Business approval, funding authority, the technical signer and settlement verification stay separate. Submission requires a repository-owned authority plus an unused `ONE_EXACT_KAIOS_PAYMENT_ACTION` signer policy; both live allowlists are empty. Paid state additionally requires a repository-owned exact-receipt attestation from an attested external transport; its allowlist is empty, and caller-supplied receipt fields or verification flags cannot promote settlement. The ATM page exposes these gates read-only and cannot sign or transfer.
+- Real execution is default-deny, not permanently simulation-only. Unauthorized merge, release, deployment, payment, Payroll, trade, transfer, governance or chain write is forbidden; an exact machine-verifiable authorization may advance only to the action-specific execution gates. Policy evaluation itself grants no signer or execution authority. Private-key and seed-phrase output remain permanently forbidden.
+
+- The existing 11520 public website now exposes one connected playable path: public-wallet challenge verification → candidate application → local safety self-check → non-employment Alpha participation record → mission acceptance → ordered local-orientation trace validation → simulated KAIOS earning. The self-check is not a Company interview or employment decision.
+- This candidate does not create a canonical Life, Human employment decision, employee or Worker ID, Worker activation, funded payroll, real KAIOS transfer, transaction hash, location proof or cargo delivery. `company_decision`, `employee_id`, `worker_id` and activation authority remain null. The earning state is `EARNED_SIMULATION_NOT_PAYABLE` until treasury, payroll and settlement authority exist.
+- Identity proof is local and chain-bound to BSC chain `56`. The browser verifies the recovered public address and persists only a SHA-256 signature commitment; it never requests or stores a private key, seed phrase or raw signature.
+- Each Alpha transition is also projected into the existing append-only `COMPANY` history stream. Replaying the same event type and record ID is an `IDEMPOTENT_NOOP`; the public record remains simulation-labelled and cannot imply funded payroll or settlement.
+- `JOBS`, `MISSIONS`, `ATM` and `MARKET` are direct website entries. ATM remains `UNDER_REVIEW / NO_WITHDRAWAL`, and Market reuses the existing 11520 listing registry rather than creating another exchange.
+
+## Earlier cumulative status
 
 ## Digital Ant next-stage status
 

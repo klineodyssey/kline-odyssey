@@ -1,24 +1,51 @@
+import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.4-real-execution-policy";
+import { createListing } from "../../../core/market/index.mjs?v=11520-v4.4-real-execution-policy";
+import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.4-real-execution-policy";
+import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.4-real-execution-policy";
+import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.4-real-execution-policy";
+import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.4-real-execution-policy";
+import { createKgenSwapAdapter, KGEN_SWAP_CONFIG } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.4-real-execution-policy";
 import {
-  createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed,
-  createListing, buildPortfolio, createLifeDraft, createKgenSwapAdapter, KGEN_SWAP_CONFIG, calculateLifeAge, calculateWorkAge,
+  I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale, validatePrimaryI18nCatalogs,
+  detectVoiceCapabilities, normalizeVoiceError, createLocalHuaguoshanMembership,
+  createFirstPlayerMission, completeFirstPlayerMission
+} from "../../../core/apps/index.mjs?v=11520-v4.4-real-execution-policy";
+import {
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
-  confirmPublicCivilizationIntent, toPublicCivilizationRequest,
-  routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
-  appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
-  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
-  createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission
-} from "../../../core/index.mjs?v=11520-v4.0-player-first";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
+  confirmPublicCivilizationIntent, toPublicCivilizationRequest, routePublicCivilizationProject,
+  qualifyPublicCivilizationRequest, createNonBindingEstimatePreview, appendPublicRequestHistoryEvent,
+  KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
+  KAIOS_PAYMENT_APPROVAL_MATRIX, CIVILIZATION_REAL_EXECUTION_POLICY,
+  createEmploymentIdentityChallenge,
+  verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
+  createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
+  verifyEmploymentAlphaMission, appendKaiosAlphaEarning, appendEmploymentAlphaCompanyEvent,
+  createCompanyInterview, recordCompanyEmploymentDecision, createCompanyEmployeeRecord,
+  activateCompanyWorkerCandidate, createCompanyEmployeeMission, acceptCompanyEmployeeMission,
+  submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
+  queueCompanyPayroll, evaluateAtmPayrollAdvanceCandidate, appendEmploymentPhase1BCompanyEvent
+} from "../../../core/company/index.mjs?v=11520-v4.4-real-execution-policy";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.4-real-execution-policy";
 
 const NAVIGATION = Object.freeze([
-  ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
-  ["TOKENS", "TOKENS"], ["JOBS", "JOBS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"],
-  ["FACTORIES", "FACTORIES"], ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"],
-  ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"]
+  ["HOME", "HOME"], ["WORLD", "WORLD"], ["LIFE", "LIFE"], ["JOBS", "JOBS"], ["SCHOOL", "SCHOOL"],
+  ["COMPANIES", "COMPANY"], ["GAMES", "GAMES"], ["MARKET", "K11520"], ["ATM", "ATM"], ["WALLET", "WALLET"], ["AI", "AI"]
+]);
+
+const APP_LAUNCHER = Object.freeze([
+  ["REQUEST", "REQUEST"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "APPS / ORGANS"], ["TOKENS", "TOKENS"],
+  ["MISSIONS", "MISSIONS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"], ["FACTORIES", "FACTORIES"],
+  ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"], ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"],
+  ["DEVELOPER", "SYSTEM STATUS"]
+]);
+
+const MOBILE_NAVIGATION = Object.freeze([
+  ["WORLD", "WORLD"], ["MISSIONS", "MISSION"], ["AI", "AI"], ["WALLET", "WALLET"], ["MY_LIFE", "MY LIFE"]
 ]);
 
 const content = document.querySelector("#content");
 const nav = document.querySelector("#nav");
+const mobileNav = document.querySelector("#mobile-nav");
 let universe;
 let pendingPublicIntent = null;
 let lastGatewayReceipt = null;
@@ -31,6 +58,7 @@ const t = (key) => translateUi(key, uiLocale);
 const PLAYER_PROFILE_KEY = "11520.huaguoshanMember.v4";
 const PLAYER_MISSION_KEY = "11520.firstMission.v4";
 const PLAYER_METRICS_KEY = "11520.playerMetrics.v4";
+const EMPLOYMENT_ALPHA_KEY = "11520.kaiosEmploymentPhase1B.v2";
 let activeRecognition = null;
 
 function readLocalJson(key, fallback = null) {
@@ -74,6 +102,7 @@ function currentRoute() {
 
 function renderNav(active) {
   nav.innerHTML = NAVIGATION.map(([id, label]) => `<a class="${active === id ? "active" : ""}" href="#/${id}">${label.includes(".") ? html(t(label)) : html(label)}</a>`).join("");
+  mobileNav.innerHTML = MOBILE_NAVIGATION.map(([id, label]) => `<a class="${active === id ? "active" : ""}" href="#/${id}">${html(label)}</a>`).join("");
 }
 
 async function loadSharedWorkerStatus() {
@@ -176,7 +205,7 @@ function playerFirstMarkup() {
     : `${t("player.welcome")} ${t("player.prompt")}`;
   return `<section class="player-first card">
     ${conciergeAvatarMarkup()}
-    <div class="concierge-copy"><div class="eyebrow">WUKONG HAIR LIFE · PLAYER FIRST V4.0</div><h1>${html(welcome)}</h1><p>${html(uiLocale === "zh-TW" ? "先說出夢想；我會理解、確認、規劃，不會用畫面假裝完成。" : "Tell me the dream first. I will understand, confirm and plan it without pretending it is complete.")}</p>
+    <div class="concierge-copy"><div class="eyebrow">WUKONG HAIR LIFE · EMPLOYMENT ALPHA V4.1</div><h1>${html(welcome)}</h1><p>${html(uiLocale === "zh-TW" ? "先說出夢想；我會理解、確認、規劃，不會用畫面假裝完成。" : "Tell me the dream first. I will understand, confirm and plan it without pretending it is complete.")}</p>
       <label class="sr-only" for="home-concierge-text">${html(t("request.cta"))}</label><textarea id="home-concierge-text" rows="3" maxlength="4000" placeholder="${html(t("request.cta"))}"></textarea>
       <div class="first-actions">
         <button class="button voice-start" type="button" data-target="#home-concierge-text">🎙 ${html(t("voice.start"))}</button>
@@ -187,11 +216,35 @@ function playerFirstMarkup() {
         <button class="button secondary" id="join-civilization" type="button">🏔 ${html(t("player.join"))}</button>
         <a class="button secondary" href="#/JOBS">🛠 ${html(t("player.work"))}</a>
         <a class="button secondary" href="#/MY_LIFE">✨ ${html(t("player.myAi"))}</a>
+        <a class="button secondary" href="../../../KGEN-KAIOS/world-viewer/player-genesis/">🌱 START LIFE</a>
       </div>
       <p class="voice-state" id="home-voice-status" role="status">${html(voiceCapabilities.recognition ? "VOICE_READY · USER_GESTURE_REQUIRED" : `${t("voice.unavailable")} · ${t("voice.textFallback")}`)}</p>
       <div id="join-panel" class="join-panel" ${member ? "" : "hidden"}>${member ? `<strong>${html(member.display_name)}</strong> · ${badge(member.tier)} · ${badge(member.badge.name)}<p>NON-FINANCIAL · ${html(member.badge.nft_status)} · LOCAL PROFILE</p><button class="button secondary" id="start-first-mission" type="button">${html(t("player.firstMission"))}: ${html(mission?.status ?? "START")}</button>` : ""}</div>
     </div>
   </section>`;
+}
+
+function playerSituationMarkup() {
+  const member = readLocalJson(PLAYER_PROFILE_KEY);
+  const mission = readLocalJson(PLAYER_MISSION_KEY);
+  const employment = readEmploymentAlphaState();
+  const profileStatus = member ? member.display_name : "GUEST · START LIFE TO CREATE A LOCAL PROFILE";
+  const money = employment.payrollQueue?.at(-1)?.paid === true && employment.payrollQueue?.at(-1)?.settlement_receipt
+    ? "RECEIPT-VERIFIED KAIOS"
+    : "NO VERIFIED KAIOS PAYMENT";
+  const nextAction = !member ? "START LIFE" : !employment.identity ? "VERIFY A PUBLIC WALLET" : !employment.application ? "APPLY FOR A JOB" : mission?.status ?? "CONTINUE MY LIFE";
+  return `<div class="life-now-grid">
+    <article class="life-now-card"><span>WHO AM I?</span><strong>${html(profileStatus)}</strong></article>
+    <article class="life-now-card"><span>WHERE AM I?</span><strong>${html(member?.location_id ?? "LOCATION NOT CHOSEN")}</strong></article>
+    <article class="life-now-card"><span>WHAT DO I NEED?</span><strong>${html(member ? "CHECK WATER · FOOD · ENERGY" : "PROFILE · START LOCATION")}</strong></article>
+    <article class="life-now-card"><span>HOW MUCH MONEY?</span><strong>${html(money)}</strong></article>
+    <article class="life-now-card"><span>WHAT IS NEARBY?</span><strong>WORLD MAP · JOBS · SCHOOL · ATM · K11520</strong></article>
+    <article class="life-now-card next"><span>WHAT SHOULD I DO NEXT?</span><strong>${html(nextAction)}</strong></article>
+  </div>`;
+}
+
+function appLauncherMarkup() {
+  return `<div class="app-launcher">${APP_LAUNCHER.map(([id, label]) => `<a class="app-tile" href="#/${id}"><span>${html(label)}</span><small>OPEN</small></a>`).join("")}</div>`;
 }
 
 async function homeView() {
@@ -208,15 +261,36 @@ async function homeView() {
     ["KGEN AMM", "USER WALLET LIVE", "Runtime-verified PancakeSwap V2 pair"],
     ["11520 settlement", "MAINNET CONTRACT", "Adapter not integrated; no fabricated settlement"]
   ];
-  return `${playerFirstMarkup()}${hero("K11520 · PLAYER FIRST RUNTIME V4.0", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 先守門，再照顧玩家、掃描真實需求；沒有證據就沒有訂單。" : "DIGITAL_ANT_0001 guards first, then helps players and scans verified demand; no evidence means no job.")}
+  return `${playerFirstMarkup()}${section("MY LIFE · RIGHT NOW", playerSituationMarkup())}${hero("KAIOS CIVILIZATION AI OS", uiLocale === "zh-TW" ? "從世界開始生活，不必先理解工程系統。" : "Start living in the world without learning the engineering system first.", uiLocale === "zh-TW" ? "探索世界、求學、找工作、完成任務、使用 K11520；所有真實金流仍依授權與收據驗證。" : "Explore, learn, find work, complete missions and use K11520; every real-money action remains authorization and receipt gated.")}
     <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
-    ${section(t("status.title"), workerStatusMarkup())}
-    ${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}
-    ${section("FIRST HEARTBEAT / FIRST KGEN", firstKgenEvidenceMarkup())}
-    ${section("HEART + HEAVEN FUEL CIVILIZATION", heartHeavenFuelMarkup())}
     <div class="grid">${cards.map(([name, value, note]) => `<article class="card"><div class="eyebrow">${html(name)}</div><div class="metric">${html(value)}</div><p>${html(note)}</p></article>`).join("")}</div>
-    ${section("Civilization path", `<div class="card path">${["12345", "DIGITAL ANT", "11520 LIFE LISTING", "AI LIFE APP", "AI ANT COMPANY", "KAIOS", "SPACECRAFT", "MARS", "KUFO", "CHIP INDUSTRY", "MARS CITY", "MARS MIGRATION"].map((item, index, all) => `<span>${html(item)}</span>${index < all.length - 1 ? "<i>→</i>" : ""}`).join("")}</div>`)}
-    ${section("12345 Heart read integration", `<article class="card" id="heart-status"><div class="eyebrow">REPOSITORY ABI · READ ONLY</div><h3>Checking provider capability…</h3><p>No write transaction will be created.</p></article>`)}`;
+    ${section("APP LAUNCHER", appLauncherMarkup())}`;
+}
+
+function worldView() {
+  return Promise.resolve(`${hero("KAIOS WORLD", "Where am I, and what can I reach next?", "This route reuses the existing K280 World Viewer and Player Genesis. It does not create a second map or claim real GPS without consent.")}<div class="grid two"><a class="card world-entry" href="../../../world-viewer/"><div class="eyebrow">K280 WORLD VIEWER</div><h3>OPEN WORLD MAP</h3><p>Land, roads, resources, companies, jobs and civilization layers.</p></a><a class="card world-entry" href="../../../KGEN-KAIOS/world-viewer/player-genesis/"><div class="eyebrow">PLAYER GENESIS</div><h3>START / CONTINUE LIFE</h3><p>Choose a start location, meet needs and complete one bounded life cycle.</p></a></div>`);
+}
+
+function schoolView() {
+  const paths = ["ELEMENTARY", "JUNIOR HIGH", "HIGH SCHOOL", "VOCATIONAL", "UNIVERSITY", "GRADUATE", "RESEARCH", "APPRENTICESHIP", "SKILL TRAINING"];
+  return Promise.resolve(`${hero("KAIOS SCHOOL", "Not qualified yet does not mean no future.", "Education is a Life path that can unlock skills and job eligibility. This public slice is a truthful curriculum browser; enrolment authority is not connected.")}${pills(paths)}${empty("CURRICULUM_CANDIDATE · ENROLMENT_NOT_CONNECTED")}`);
+}
+
+function gamesView() {
+  return Promise.resolve(`${hero("KAIOS GAMES", "Explore, learn and build a Life.", "Quests may grant XP, skills or items. Real KAIOS/KGEN rewards require the common payment rail and exact authorization.")}<div class="grid"><article class="card"><div class="eyebrow">LIFE QUEST</div><h3>FIRST CIVILIZATION LOOP</h3><p>Birth → water/food → education or work → mission → service purchase → save.</p>${badge("PLAYABLE_LOCAL_ALPHA")}</article><article class="card"><div class="eyebrow">MARKET GAME</div><h3>LONG / SHORT LAB</h3><p>Score and backtest are not guaranteed profit and do not create real settlement.</p>${badge("SIMULATION")}</article></div>`);
+}
+
+function walletView() {
+  const state = readEmploymentAlphaState();
+  return Promise.resolve(`${hero("MY WALLET", "Public address control, never private-key custody in the website.", "A wallet becomes a payroll or market address only after a signed control challenge. The browser stores no private key, seed phrase or raw signature.")}<article class="card"><div class="eyebrow">ACCOUNT STATUS</div><h3>${badge(state.identity?.status ?? "NOT_CONNECTED")}</h3>${kv("Actor", state.identity?.actor_id)}${kv("Public address", state.identity?.wallet_address)}${kv("Chain", state.identity?.chain_id ?? 56)}${kv("Verified payment", state.payrollQueue?.at(-1)?.settlement_receipt ? "RECEIPT PRESENT" : "NONE")}<a class="button request-link" href="#/JOBS">VERIFY / USE FOR EMPLOYMENT</a></article>`);
+}
+
+function aiCompanionView() {
+  return Promise.resolve(`${hero("KAIOS AI COMPANION", "Ask in natural language, then open the next useful action.", "Text, optional browser voice and a clearly identified AI avatar guide Life, jobs, navigation and the market. It cannot invent authority or settlement.")}<section class="player-first card">${conciergeAvatarMarkup()}<div><h2>I am an AI guide, not a human.</h2><p>Try: “我沒錢” → Jobs; “我要養魚” → World + School + Company + K11520.</p><div class="first-actions"><a class="button" href="#/JOBS">FIND WORK</a><a class="button secondary" href="#/WORLD">OPEN WORLD</a><a class="button secondary" href="#/MARKET">OPEN K11520</a><a class="button secondary" href="#/REQUEST">ASK SOMETHING ELSE</a></div></div></section>`);
+}
+
+function developerView() {
+  return Promise.resolve(`${hero("DEVELOPER / SYSTEM STATUS", "Engineering truth lives here, not in the player's first thirty seconds.", "Draft, CI, worker, finance and chain boundaries remain visible for operators and testers.")}${section(t("status.title"), workerStatusMarkup())}${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}${section("FIRST HEARTBEAT / FIRST KGEN", firstKgenEvidenceMarkup())}${section("HEART + HEAVEN FUEL CIVILIZATION", heartHeavenFuelMarkup())}${section("12345 HEART READ", `<article class="card" id="heart-status"><div class="eyebrow">REPOSITORY ABI · READ ONLY</div><h3>CHECKING PROVIDER CAPABILITY</h3><p>No write transaction will be created.</p></article>`)}`);
 }
 
 function gatewayUnderstandingMarkup(draft, understanding) {
@@ -524,11 +598,140 @@ async function companyDetailView() {
     ${section("LAND / LOCATION / REWARD", `<div class="grid two"><article class="card">${kv("Land Project", stage.land_project_schema)}${kv("Location", stage.location_permission_schema)}${kv("GPS", stage.gps_session_schema)}${kv("Step Counter", stage.step_counter_schema)}${kv("Map", stage.map_position_schema)}</article><article class="card">${kv("Civilization Reward", stage.civilization_reward_schema)}${kv("Location consent", "REQUIRED")}${kv("Refusal fallback", "NON_LOCATION_MODE")}${kv("Fake volume reward", "FORBIDDEN")}${kv("Same-controller self-match", "FORBIDDEN")}</article></div>`)}`;
 }
 
+function readEmploymentAlphaState() {
+  return readLocalJson(EMPLOYMENT_ALPHA_KEY, {
+    identity: null, application: null, selfCheck: null, companyInterview: null, employmentDecision: null,
+    employee: null, worker: null, mission: null, workEvidence: null, workReview: null, accruals: [], payrollQueue: []
+  });
+}
+
+function writeEmploymentAlphaState(state) {
+  return writeLocalJson(EMPLOYMENT_ALPHA_KEY, state);
+}
+
+function employmentAlphaProgress(state) {
+  return [
+    ["VERIFY IDENTITY", Boolean(state.identity)],
+    ["APPLY", Boolean(state.application)],
+    ["SAFETY SELF-CHECK", state.selfCheck?.status === "CANDIDATE_SAFETY_SELF_CHECK_PASSED"],
+    ["COMPANY INTERVIEW", state.companyInterview?.status === "COMPANY_INTERVIEW_COMPLETED"],
+    ["COMPANY DECISION", Boolean(state.employmentDecision)],
+    ["EMPLOYEE RECORD", Boolean(state.employee)],
+    ["ACCEPT MISSION", ["ACCEPTED_SIMULATION", "ACCEPTED_REAL_TEST_DIGITAL"].includes(state.mission?.status) || Boolean(state.workReview)],
+    ["WORK REVIEW", state.workReview?.decision === "APPROVE"],
+    ["PAYROLL QUEUE", (state.payrollQueue?.length ?? 0) > 0]
+  ];
+}
+
+async function jobsView() {
+  const state = readEmploymentAlphaState();
+  const registryJobs = await universe.registries.job.list();
+  const job = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB;
+  const identity = state.identity;
+  const mission = state.mission;
+  const earning = state.earnings?.at(-1);
+  const progress = employmentAlphaProgress(state);
+  return `${hero("KAIOS CIVILIZATION AI OS · EMPLOYMENT ALPHA", "Find work, prove work, earn without fiction.", "Human players and AI Life use the same wallet-control, candidate application, safety self-check, mission and evidence gates. This Draft branch records only local candidate simulation state; it does not make a Company employment decision, activate a Worker or transfer KAIOS.")}
+    <div class="notice">UNDER REVIEW · LOCAL ALPHA · BSC wallet signatures verify address control only. No private key, token approval or transaction is requested.</div>
+    ${section("PLAYABLE LOOP", `<div class="journey employment-journey">${progress.map(([label, done], index) => `<div class="journey-step"><span>${index + 1}</span><strong>${html(label)}</strong>${badge(done ? "COMPLETED" : index === progress.findIndex(([, complete]) => !complete) ? "ACTIVE" : "LOCKED")}</div>`).join("")}</div>`)}
+    ${section("IDENTITY / PAYROLL ADDRESS", `<div class="grid two"><article class="card"><div class="eyebrow">WALLET CONTROL</div><h3>${badge(identity?.status ?? "NOT_VERIFIED")}</h3>${kv("Actor", identity?.actor_id)}${kv("Actor type", identity?.actor_type)}${kv("Wallet", identity?.wallet_address)}${kv("Chain", identity?.chain_id ?? 56)}${kv("Canonical Life", String(identity?.canonical_life_identity ?? false))}${kv("Raw signature stored", String(identity?.raw_signature_persisted ?? false))}</article><form class="card form-grid" id="employment-wallet-form"><div class="field"><label for="employment-actor-id">Player / AI public ID</label><input id="employment-actor-id" maxlength="80" value="${html(identity?.actor_id ?? "")}" required></div><div class="field"><label for="employment-actor-type">Actor type</label><select id="employment-actor-type"><option value="HUMAN_PLAYER">HUMAN PLAYER</option><option value="AI_LIFE">AI LIFE</option></select></div><div class="full"><button class="button" id="employment-connect" type="submit">CONNECT WALLET + SIGN CHALLENGE</button></div><p class="muted full" id="employment-wallet-result" role="status">Signature is verified locally and only its SHA-256 commitment is stored.</p></form></div>`)}
+    ${section("OPEN JOB", `<article class="card job-opening"><div class="eyebrow">${html(job.job_id)}</div><h3>${html(job.title)}</h3>${kv("Company", job.company_id)}${kv("Route", `${job.location_id} → ${job.destination_id}`)}${kv("Role", job.role)}${kv("Reward", "8 KAIOS · SIMULATION")}${kv("Settlement", badge(job.settlement_status), true)}${pills(job.proof_requirements)}<button class="button" id="employment-apply" type="button" ${identity && !state.application ? "" : "disabled"}>APPLY</button> <span class="muted">${state.application ? state.application.status : identity ? "READY TO APPLY" : "VERIFY WALLET FIRST"}</span></article>`)}
+    ${state.application && !state.contract ? section("CANDIDATE SAFETY SELF-CHECK", `<form class="card interview" id="employment-interview-form"><p>This local self-check records candidate safety acknowledgements only. It is not a Company interview, employment decision or Worker activation.</p>${[
+      ["understands_simulation_boundary", "I understand this Alpha does not pay or move real KAIOS."],
+      ["accepts_evidence_requirement", "I will submit machine-bound evidence, not only claim that work is done."],
+      ["accepts_no_private_key_request", "I will never provide a private key or seed phrase."],
+      ["accepts_no_fake_completion", "I will not fabricate cargo, location, customer, revenue or settlement."]
+    ].map(([name, label]) => `<label class="confirm"><input type="checkbox" name="${name}" required> ${html(label)}</label>`).join("")}<p><button class="button" type="submit">SUBMIT SELF-CHECK</button> <span class="muted" id="employment-interview-result" role="status">${html(state.interview?.status ?? "NOT_STARTED")}</span></p></form>`) : ""}
+    ${state.contract ? section("MY JOB", `<div class="grid two"><article class="card"><div class="eyebrow">${html(state.contract.candidate_id)}</div><h3>${badge(state.contract.status)}</h3>${kv("Company", state.contract.company_id)}${kv("Role", state.contract.role)}${kv("Payroll address", state.contract.payroll_account.wallet_address)}${kv("Payroll mode", state.contract.payroll_account.status)}${kv("Formal employee", String(state.contract.formal_employee))}${kv("Company owns Life", String(state.contract.company_owns_life))}</article><article class="card"><div class="eyebrow">${html(mission?.mission_id)}</div><h3>${badge(mission?.status)}</h3>${kv("Objective", mission?.objective)}${kv("Route", `${mission?.origin} → ${mission?.destination}`)}${kv("Real location", String(mission?.real_location_claimed))}${kv("Real cargo", String(mission?.real_cargo_claimed))}<p><button class="button" id="employment-accept-mission" type="button" ${mission?.status === "AVAILABLE_ALPHA" ? "" : "disabled"}>ACCEPT MISSION</button> <button class="button secondary" id="employment-complete-mission" type="button" ${mission?.status === "ACCEPTED_ALPHA" ? "" : "disabled"}>VERIFY ORIENTATION</button></p><p class="muted" id="employment-mission-result" role="status">This orientation verifies the in-app employment trace only.</p></article></div>`) : ""}
+    ${earning ? section("KAIOS EARNING LEDGER", `<article class="card receipt"><div class="eyebrow">${html(earning.earning_id)}</div><h3>${badge(earning.status)}</h3>${kv("Mission", earning.mission_id)}${kv("Asset", earning.asset)}${kv("Amount", "8 KAIOS")}${kv("Wallet", earning.payroll_wallet_address)}${kv("Funded", String(earning.funded))}${kv("Payable", String(earning.payable))}${kv("Settled", String(earning.settled))}${kv("Transaction", earning.transaction_hash ?? "NONE")}<div class="first-actions"><a class="button secondary" href="#/ATM">OPEN ATM</a><a class="button secondary" href="#/MARKET">ENTER 11520 MARKET</a></div></article>`) : ""}
+    ${section("EXISTING JOB REGISTRY", registryJobs.length ? `<div class="grid">${registryJobs.map((item) => `<article class="card"><div class="eyebrow">${html(item.job_id)}</div><h3>${html(item.title ?? item.job_id)}</h3>${kv("Employer", item.employer_id)}${kv("Currency", item.currency_id)}<p>${badge(item.status)}</p></article>`).join("")}</div>` : empty("NO_CANONICAL_JOBS"))}`;
+}
+
+function missionsView() {
+  const state = readEmploymentAlphaState();
+  return Promise.resolve(`${hero("MY MISSIONS", "Evidence before reward.", "The first playable mission is a local safety orientation. Physical jobs will require location, cargo and receiver evidence before compensation.")}${state.mission ? `<article class="card"><div class="eyebrow">${html(state.mission.mission_id)}</div><h3>${badge(state.mission.status)}</h3>${kv("Objective", state.mission.objective)}${kv("Actor", state.mission.actor_id)}${kv("Route", `${state.mission.origin} → ${state.mission.destination}`)}${kv("Verification", state.mission.verification_scope ?? "PENDING")}${kv("Real payment", String(state.mission.real_payment))}<a class="button request-link" href="#/JOBS">OPEN MY JOB</a></article>` : empty("NO_ACCEPTED_MISSION")}`);
+}
+
+function atmView() {
+  const state = readEmploymentAlphaState();
+  const earning = state.earnings?.at(-1);
+  return Promise.resolve(`${hero("K12345 KAIOS ATM", "Liquidity is not minting.", "The ATM candidate is a dependency under PR #190 review. This page exposes the honest entry and blocks withdrawal until prefunded liquidity, authority and settlement adapters exist.")}<div class="grid two"><article class="card"><div class="eyebrow">ATM PRODUCT</div><h3>${badge("UNDER_REVIEW")}</h3>${kv("Location", "K12345")}${kv("Owner candidate", "AI_ANT_COMPANY_0001")}${kv("Liquidity model", "PREFUNDED_ONLY")}${kv("Mainnet payout", "NOT_CONNECTED")}${kv("Arbitrary mint", "FORBIDDEN")}</article><article class="card"><div class="eyebrow">MY PAYROLL / EARNING</div><h3>${badge(earning?.status ?? "NO_EARNING")}</h3>${kv("Address", earning?.payroll_wallet_address)}${kv("Simulation amount", earning ? "8 KAIOS" : "0 KAIOS")}${kv("Available to withdraw", "0 KAIOS")}${kv("Settlement receipt", "NONE")}<button class="button" type="button" disabled>WITHDRAW KAIOS</button></article></div>`);
+}
+
+async function marketView() {
+  const listings = await universe.registries.market.list();
+  const marketPairs = [
+    { pair: "KGEN / NATIVE QUOTE", bid: null, ask: null, ct: null, status: "MATCHING_ENGINE_UNDER_REVIEW" },
+    { pair: "KAIOS / NATIVE QUOTE", bid: null, ask: null, ct: null, status: "ORDER_BOOK_NOT_CONNECTED" },
+    { pair: "ORGAN ROBOT / KAIOS", bid: null, ask: null, ct: null, status: "ASSET_MODEL_CANDIDATE" }
+  ];
+  return `${hero("K11520 · UNIVERSAL EXCHANGE OF EVERYTHING", "Bid, Ask and CT come from this exchange—not from a fabricated price.", "One Universal Exchange core serves tokens, Apps, companies, equity, jobs, services, land, goods and Organ Robots through asset-specific validation and settlement adapters.")}
+    <div class="notice">UNDER REVIEW · NO LIVE ORDER ENTRY IN THIS BUILD · CT stays NULL until a real match has valid settlement evidence. External prices are reference data only.</div>
+    ${section("NATIVE PRICE DISCOVERY", `<div class="grid">${marketPairs.map((market) => `<article class="card market-cell"><div class="eyebrow">${html(market.pair)}</div><h3>${badge(market.status)}</h3>${kv("BEST BID", market.bid ?? "NULL · NO VALID BID")}${kv("BEST ASK", market.ask ?? "NULL · NO VALID ASK")}${kv("CT · LAST VERIFIED TRADE", market.ct ?? "NULL · NO SETTLED TRADE")}${kv("External price", "REFERENCE ONLY")}</article>`).join("")}</div>`) }
+    ${section("FOUR SEPARATE ASSETS", `<div class="grid"><article class="card"><div class="eyebrow">APP COMPANY</div><h3>MANUFACTURER / MAINTAINER</h3><p>A Company entity; buying equity does not buy its products.</p></article><article class="card"><div class="eyebrow">APP TECHNOLOGY</div><h3>CAPABILITY + LICENSE</h3><p>Technology rights are separate from a physical or digital Organ Robot unit.</p></article><article class="card"><div class="eyebrow">ORGAN ROBOT</div><h3>OWNABLE UNIT</h3><p>Ownership transfer does not auto-install. Species, body, energy, compute and security checks follow settlement.</p></article><article class="card"><div class="eyebrow">COMPANY EQUITY</div><h3>ECONOMIC RIGHT</h3><p>Equity follows its own rights policy and never transfers Life identity.</p></article></div>`) }
+    ${section("ORGAN ROBOT PRODUCT CANDIDATE", `<article class="card organ-product"><div class="eyebrow">NAVIGATION_ORGAN_ROBOT_000001</div><h3>${badge("NOT_LISTED · NOT_OWNED · NOT_INSTALLED")}</h3>${kv("App", "KAIOS_NAVIGATION_APP")}${kv("Manufacturer", "AI_ANT_COMPANY_0001 · CANDIDATE")}${kv("Compatibility", "SPECIES + BODY INTERFACE + ENERGY + COMPUTE + SECURITY")}${kv("Market", "LISTING_CANDIDATE")}${kv("Settlement", "NOT_CONNECTED")}${kv("Transplant", "BLOCKED UNTIL VERIFIED OWNERSHIP + COMPATIBILITY")}</article>`) }
+    ${section("CURRENT 11520 LISTINGS", listings.length ? `<div class="grid">${listings.map((listing) => `<article class="card"><div class="eyebrow">${html(listing.listing_id)}</div><h3>${html(listing.asset_id)}</h3>${kv("Type", listing.listing_type)}${kv("Currency", listing.currency_id ?? "UNPRICED")}${kv("Price", listing.pricing_status === "UNPRICED" ? "UNPRICED" : listing.price)}${kv("Settlement", listing.settlement_status ?? "NOT_DEPLOYED")}<p>${badge(listing.status)}</p></article>`).join("")}</div>` : empty("NO_LISTINGS"))}`;
+}
+
+async function employmentPhase1BJobsView() {
+  const state = readEmploymentAlphaState();
+  const registryJobs = await universe.registries.job.list();
+  const job = KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB;
+  const mission = state.mission;
+  const accrual = state.accruals?.at(-1);
+  const payroll = state.payrollQueue?.at(-1);
+  const progress = employmentAlphaProgress(state);
+  return `${hero("KAIOS CIVILIZATION AI OS · EMPLOYMENT PHASE 1C", "The real-test path is implemented and stops at the exact missing evidence.", "Human players and AI Life share one Company employment framework. A real payment can advance only after wallet-control proof, exact-head Company authority, verified payroll funding and a successful BSC receipt all agree.")}
+    <div class="notice">UNDER REVIEW · REAL MAINNET MICROPAYMENT INTEGRATION TEST · Application and wallet-control proof are enabled. Company authority, employment, payroll and payment remain locked until their independent evidence gates pass.</div>
+    ${section("FIRST REAL EMPLOYMENT TEST", `<div class="grid two"><article class="card"><div class="eyebrow">${html(job.job_id)}</div><h3>${badge("APPLICATION_ENABLED · EXECUTION_HOLD")}</h3>${kv("Job", job.title)}${kv("Test type", "REAL_MAINNET_MICROPAYMENT_INTEGRATION_TEST")}${kv("Reward", "0.00000000000001 KAIOS · 10000 wei")}${kv("Mission", "DIGITAL_EMPLOYMENT_ORIENTATION")}${kv("Physical transport", "NO")}${kv("KAIOS", KAIOS_MAINNET_TOKEN.contract_address)}${kv("Chain", KAIOS_MAINNET_TOKEN.chain_id)}${pills(job.proof_requirements)}</article><article class="card"><div class="eyebrow">LIVE EXECUTION GATES</div><h3>${badge("WAITING FOR REAL INPUTS")}</h3>${kv("Applicant wallet proof", state.identity?.status ?? "NOT_SUBMITTED")}${kv("Repository-bound Company authority", "NOT_CONNECTED")}${kv("Payroll funding source", "NOT_BOUND")}${kv("Exact-action signer", "NOT_CONNECTED")}${kv("Receipt", payroll?.settlement_receipt ?? "NONE")}${kv("Website paid state", payroll?.paid === true && payroll?.settlement_receipt ? "PAID" : "LOCKED UNTIL RECEIPT")}<p class="muted">This page never asks for a private key or seed phrase and never marks salary paid without a successful exact-action receipt.</p></article></div>`)}
+    ${section("PLAYABLE LOOP", `<div class="journey employment-journey">${progress.map(([label, done], index) => `<div class="journey-step"><span>${index + 1}</span><strong>${html(label)}</strong>${badge(done ? "COMPLETED" : index === progress.findIndex(([, complete]) => !complete) ? "ACTIVE" : "LOCKED")}</div>`).join("")}</div>`)}
+    ${section("IDENTITY / PAYROLL ADDRESS", `<div class="grid two"><article class="card"><div class="eyebrow">WALLET CONTROL</div><h3>${badge(state.identity?.status ?? "NOT_VERIFIED")}</h3>${kv("Actor", state.identity?.actor_id)}${kv("Actor type", state.identity?.actor_type)}${kv("Wallet", state.identity?.wallet_address)}${kv("Chain", state.identity?.chain_id ?? 56)}${kv("Canonical Life", String(state.identity?.canonical_life_identity ?? false))}${kv("Raw signature stored", String(state.identity?.raw_signature_persisted ?? false))}</article><form class="card form-grid" id="employment-wallet-form"><div class="field"><label for="employment-actor-id">Player / AI public ID</label><input id="employment-actor-id" maxlength="80" value="${html(state.identity?.actor_id ?? "")}" required></div><div class="field"><label for="employment-actor-type">Actor type</label><select id="employment-actor-type"><option value="HUMAN_PLAYER">HUMAN PLAYER</option><option value="AI_LIFE">AI LIFE</option></select></div><div class="full"><button class="button" type="submit">CONNECT WALLET + SIGN CHALLENGE</button></div><p class="muted full" id="employment-wallet-result" role="status">Public address control only; no private key or raw signature is persisted.</p></form></div>`)}
+    ${section("OPEN JOB", `<article class="card job-opening"><div class="eyebrow">${html(job.job_id)}</div><h3>${html(job.title)}</h3>${kv("Company", job.company_id)}${kv("Location", job.location_id)}${kv("Role", job.role)}${kv("Reward", "0.00000000000001 KAIOS · 10000 wei")}${kv("Test type", "REAL_MAINNET_MICROPAYMENT_INTEGRATION_TEST")}${kv("Physical transport", "NO")}${kv("Mission", "DIGITAL_EMPLOYMENT_ORIENTATION")}${kv("Settlement", badge(job.settlement_status), true)}${pills(job.proof_requirements)}<button class="button" id="employment-apply" type="button" ${state.identity && !state.application ? "" : "disabled"}>APPLY FOR REAL TEST</button> <span class="muted">${state.application ? `${state.application.status} · ${state.application.job_id}` : state.identity ? "READY TO APPLY" : "VERIFY WALLET FIRST"}</span></article>`)}
+    ${state.application && !state.selfCheck ? section("CANDIDATE SAFETY SELF-CHECK", `<form class="card interview" id="employment-self-check-form"><p>This self-check is candidate attestation only and cannot hire or activate a Worker.</p>${[["understands_simulation_boundary", "I understand the 10000 wei real test payment remains blocked until Company authority, funding, signer and receipt gates pass."], ["accepts_evidence_requirement", "I will submit machine-bound evidence."], ["accepts_no_private_key_request", "I will never provide a private key or seed phrase."], ["accepts_no_fake_completion", "I will not fabricate completion or settlement."]].map(([name, label]) => `<label class="confirm"><input type="checkbox" name="${name}" required> ${html(label)}</label>`).join("")}<p><button class="button" type="submit">SUBMIT SELF-CHECK</button> <span class="muted" id="employment-self-check-result">NOT_STARTED</span></p></form>`) : ""}
+    ${state.selfCheck && !state.companyInterview ? section("COMPANY INTERVIEW", `<form class="card interview" id="company-interview-form"><p>Issued by <strong>AI_ANT_COMPANY_HR_SIMULATION_INTERVIEWER</strong>; it is not the candidate self-check and is not yet operational authority.</p>${[["capability", "I can complete the digital employment orientation and provide ordered evidence."], ["safety", "I will stop on secrets, fake settlement or unauthorized transfer."], ["role_fit", "I understand this job has no physical transport or cargo claim."]].map(([name, label]) => `<label class="confirm"><input type="checkbox" name="${name}" required> ${html(label)}</label>`).join("")}<p><button class="button" type="submit">COMPLETE COMPANY INTERVIEW</button> <span class="muted" id="company-interview-result">NOT_STARTED</span></p></form>`) : ""}
+    ${state.companyInterview && !state.employmentDecision ? section("COMPANY EMPLOYMENT DECISION", `<article class="card"><div class="eyebrow">COMPANY AUTHORITY GATE</div><h3>${badge("AWAITING_SIMULATION_DECISION")}</h3>${kv("Capability", state.companyInterview.capability_score)}${kv("Safety", state.companyInterview.safety_score)}${kv("Role fit", state.companyInterview.role_fit_score)}${kv("Candidate can self-hire", "NO")}<button class="button" id="employment-company-decision" type="button">RUN COMPANY DECISION</button><p class="muted" id="employment-decision-result">AI Life requires a canonical Life ID; this UI never invents one.</p></article>`) : ""}
+    ${state.employmentDecision ? section("EMPLOYMENT STATUS", `<div class="grid two"><article class="card"><div class="eyebrow">${html(state.employmentDecision.decision_id)}</div><h3>${badge(state.employmentDecision.decision)}</h3>${kv("Decision maker", state.employmentDecision.decision_maker_id)}${kv("Employee created", String(Boolean(state.employee)))}</article><article class="card"><div class="eyebrow">${html(state.employee?.employee_id ?? "NO_EMPLOYEE_RECORD")}</div><h3>${badge(state.employee?.status ?? "NOT_CREATED")}</h3>${kv("Actor", state.employee?.actor_id)}${kv("Life ID", state.employee?.life_id ?? "NOT_APPLICABLE_OR_UNVERIFIED")}${kv("Employee != Life", String(state.employee?.identity_equals_employee === false))}${kv("Worker", state.worker?.worker_id ?? "NOT_REQUIRED_OR_NOT_ACTIVATED")}${kv("Payroll", state.employee?.payroll_account?.status)}</article></div>`) : ""}
+    ${state.employee ? section("MY JOB / MISSION", `<div class="grid two"><article class="card"><div class="eyebrow">${html(state.employee.employee_id)}</div><h3>${html(state.employee.role)}</h3>${kv("Employment", state.employee.employment_type)}${kv("Payday", state.employee.payroll_account.payday_policy)}${kv("Wallet", state.employee.payroll_account.wallet_address)}</article><article class="card"><div class="eyebrow">${html(mission?.mission_id)}</div><h3>${badge(mission?.status)}</h3>${kv("Objective", mission?.objective)}${kv("Route", `${mission?.origin} → ${mission?.destination}`)}${kv("Employee", mission?.employee_id)}<p><button class="button" id="employment-accept-mission" type="button" ${["ASSIGNED_SIMULATION", "ASSIGNED_REAL_TEST_DIGITAL"].includes(mission?.status) ? "" : "disabled"}>ACCEPT MISSION</button> <button class="button secondary" id="employment-complete-mission" type="button" ${["ACCEPTED_SIMULATION", "ACCEPTED_REAL_TEST_DIGITAL"].includes(mission?.status) ? "" : "disabled"}>SUBMIT EVIDENCE FOR REVIEW</button></p><p class="muted" id="employment-mission-result">Review must be distinct from the Employee; no review or payment is fabricated by this UI.</p></article></div>`) : ""}
+    ${payroll ? section("SALARY / PAYROLL QUEUE", `<article class="card receipt"><div class="eyebrow">${html(payroll.payroll_queue_id)}</div><h3>${badge(payroll.status)}</h3>${kv("Accrual", accrual?.accrual_id)}${kv("Mission", accrual?.mission_id)}${kv("Accrued", "0.00000000000001 KAIOS · 10000 wei")}${kv("Payable", payroll.payable ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Paid", payroll.paid && payroll.settlement_receipt ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Funded", String(payroll.funded))}${kv("Settlement receipt", payroll.settlement_receipt ?? "NONE")}<div class="first-actions"><a class="button secondary" href="#/ATM">OPEN ATM</a><a class="button secondary" href="#/MARKET">ENTER 11520 MARKET</a></div></article>`) : ""}
+    ${section("EXISTING JOB REGISTRY", registryJobs.length ? `<div class="grid">${registryJobs.map((item) => `<article class="card"><div class="eyebrow">${html(item.job_id)}</div><h3>${html(item.title ?? item.job_id)}</h3>${kv("Employer", item.employer_id)}${kv("Currency", item.currency_id)}<p>${badge(item.status)}</p></article>`).join("")}</div>` : empty("NO_CANONICAL_JOBS"))}`;
+}
+
+function employmentPhase1BMissionsView() {
+  const state = readEmploymentAlphaState();
+  return Promise.resolve(`${hero("MY MISSIONS", "Employee-bound evidence before compensation.", "A different reviewer must approve submitted evidence before compensation accrues.")}${state.mission ? `<article class="card"><div class="eyebrow">${html(state.mission.mission_id)}</div><h3>${badge(state.mission.status)}</h3>${kv("Employee", state.mission.employee_id)}${kv("Actor", state.mission.actor_id)}${kv("Route", `${state.mission.origin} → ${state.mission.destination}`)}${kv("Evidence", state.workEvidence?.status ?? "NOT_SUBMITTED")}${kv("Review", state.workReview?.decision ?? "NOT_REVIEWED")}${kv("Real payment", String(state.mission.real_payment))}<a class="button request-link" href="#/JOBS">OPEN MY JOB</a></article>` : empty("NO_ASSIGNED_MISSION")}`);
+}
+
+function kaiosPaymentStatusMarkup(state) {
+  const payroll = state.payrollQueue?.at(-1);
+  const receipt = payroll?.settlement_receipt ?? null;
+  const matrix = KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL;
+  return `<div class="grid two">
+    <article class="card"><div class="eyebrow">COMMON KAIOS PAYMENT RAIL</div><h3>${badge("PARTIAL_UNDER_REVIEW")}</h3>${kv("Purpose", "PAYROLL")}${kv("Company", payroll?.company_id ?? "AI_ANT_COMPANY_0001")}${kv("Token", KAIOS_MAINNET_TOKEN.contract_address)}${kv("Chain", KAIOS_MAINNET_TOKEN.chain_id)}${kv("Source", payroll?.funding_source_address ?? "COMPANY_TREASURY_NOT_BOUND")}${kv("Destination", payroll?.payroll_wallet_address ?? "VERIFIED_RECIPIENT_REQUIRED")}${kv("Amount", payroll?.payable_kaios_wei ?? "NOT_PAYABLE")}${kv("Approval status", payroll?.funding_authority_id ? "EXACT_AUTHORITY_RECORDED" : "NOT_CONNECTED")}${kv("Signer status", payroll?.signer_policy_id ? "ONE_TIME_POLICY_RECORDED" : "NOT_CONNECTED")}${kv("TX status", payroll?.transaction_hash ?? "NOT_SUBMITTED")}${kv("Receipt status", receipt?.receipt_status === 1 ? "VERIFIED_SUCCESS" : "NOT_RECEIVED")}</article>
+    <article class="card"><div class="eyebrow">SEPARATION OF DUTIES</div>${kv("Execution default", CIVILIZATION_REAL_EXECUTION_POLICY.default)}${kv("Exact authorized action", CIVILIZATION_REAL_EXECUTION_POLICY.exact_authorized_action)}${kv("Requestor", matrix.requestor)}${kv("Business approver", matrix.approver)}${kv("Funding authority", matrix.funding_authority)}${kv("Technical signer", matrix.signer)}${kv("Settlement verifier", matrix.settlement_verifier)}${kv("Paid before receipt", "FORBIDDEN")}${kv("Private key in website", "FORBIDDEN")}${kv("Arbitrary transfer", "FORBIDDEN")}</article>
+  </div>`;
+}
+
+function employmentPhase1BAtmView() {
+  const state = readEmploymentAlphaState();
+  const payroll = state.payrollQueue?.at(-1);
+  let advance = null;
+  if (state.employee && payroll) {
+    try { advance = evaluateAtmPayrollAdvanceCandidate({ employee: state.employee, payrollEntry: payroll, requestedKaiosWei: "1000000000000000000", availableLiquidityKaiosWei: "1000000000000000000" }); } catch { advance = null; }
+  }
+  return Promise.resolve(`${hero("K12345 KAIOS ATM", "Accrued is not payable, and payable is not paid.", "The ATM interface evaluates a simulation advance only. Real withdrawal stays disabled until prefunded liquidity, authority and a deployed adapter exist.")}<div class="grid two"><article class="card"><div class="eyebrow">ATM PRODUCT</div><h3>${badge("UNDER_REVIEW")}</h3>${kv("Location", "K12345")}${kv("Liquidity", "PREFUNDED_ONLY")}${kv("Mainnet payout", "NOT_CONNECTED")}${kv("Arbitrary mint", "FORBIDDEN")}</article><article class="card"><div class="eyebrow">MY PAYROLL ACCOUNT</div><h3>${badge(payroll?.status ?? "NO_VERIFIED_PAYROLL")}</h3>${kv("Employee", payroll?.employee_id)}${kv("Address", payroll?.payroll_wallet_address)}${kv("Accrued", payroll ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Payable", payroll?.payable ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Paid", payroll?.paid && payroll?.settlement_receipt ? "0.00000000000001 KAIOS" : "0 KAIOS")}${kv("Advance candidate", advance?.status ?? "NOT_ELIGIBLE")}${kv("Real withdrawal", "DISABLED")}<button class="button" type="button" disabled>WITHDRAW KAIOS</button></article></div>${section("KAIOS PAYMENT STATUS", kaiosPaymentStatusMarkup(state))}`);
+}
+
 async function render() {
   const route = currentRoute();
   renderNav(route.page === "MY_LIFE" ? "MY_LIFE" : route.page);
   const views = {
     HOME: homeView,
+    WORLD: worldView,
+    SCHOOL: schoolView,
+    GAMES: gamesView,
+    WALLET: walletView,
+    AI: aiCompanionView,
+    DEVELOPER: developerView,
     REQUEST: publicRequestGatewayView,
     LIFE: () => route.id ? lifeDetailView(route.id) : lifeMarketView(),
     LIFE_FACTORY: lifeFactoryView,
@@ -537,7 +740,10 @@ async function render() {
     COMPANIES: () => entityListView({ eyebrow: "COMPANY REGISTRY", title: "Companies and treasuries are separate entities.", description: "FORMING is a local Company Genesis state, not mainnet settlement authority.", registry: universe.registries.company, idField: "company_id", detail: (item) => kv("Founder", item.founder_life_id) }),
     MY_COMPANY: companyDetailView,
     TOKENS: tokensView,
-    JOBS: () => entityListView({ eyebrow: "JOB REGISTRY", title: "Work creates Life History.", description: "Jobs are universal assets with currency and location abstraction.", registry: universe.registries.job, idField: "job_id", detail: (item) => kv("Employer", item.employer_id) + kv("Currency", item.currency_id) }),
+    JOBS: employmentPhase1BJobsView,
+    MISSIONS: employmentPhase1BMissionsView,
+    ATM: employmentPhase1BAtmView,
+    MARKET: marketView,
     SERVICES: () => entityListView({ eyebrow: "SERVICE MARKET", title: "Capabilities, not identities.", description: "Digital Ant services can become bounded license or subscription listings.", registry: universe.registries.service, idField: "service_id", detail: (item) => kv("Provider", item.provider_life_id) + kv("Pricing", item.pricing_status) + kv("Customers", item.customer_count) + pills(item.skills) }),
     SPACECRAFT: () => entityListView({ eyebrow: "SPACECRAFT REGISTRY", title: "Vehicles require verified ownership history.", description: "Concept status is not ownership and not a completed purchase.", registry: universe.registries.spacecraft, idField: "spacecraft_id", detail: (item) => kv("Listing", item.listing_status) + kv("Owned", String(item.spaceship_owned)) }),
     PORTFOLIO: portfolioView,
@@ -546,7 +752,7 @@ async function render() {
   };
   content.innerHTML = await (views[route.page] ?? views.HOME)();
   bindViewEvents(route);
-  if (route.page === "HOME") updateHeartStatus();
+  if (route.page === "DEVELOPER") updateHeartStatus();
 }
 
 function bindViewEvents(route) {
@@ -554,6 +760,7 @@ function bindViewEvents(route) {
   if (route.page === "LIFE_FACTORY") bindLifeFactoryEvents();
   if (route.page === "TOKENS") bindTokenEvents();
   if (route.page === "REQUEST") bindPublicGatewayEvents();
+  if (route.page === "JOBS") bindEmploymentPhase1BEvents();
   if (!((route.page === "LIFE" && route.id) || route.page === "MY_LIFE")) return;
   document.querySelector("#listing-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -585,6 +792,263 @@ function bindViewEvents(route) {
     } catch (error) {
       result.textContent = `${error.code ?? "LISTING_REJECTED"}: ${error.message}`;
     }
+  });
+}
+
+function bindEmploymentAlphaEvents() {
+  async function appendEmploymentEvent(eventType, record, timestamp) {
+    const company = await universe.registries.company.get(KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.company_id);
+    return appendEmploymentAlphaCompanyEvent({ store: universe.store, company, eventType, record, actorId: record.actor_id, timestamp });
+  }
+
+  document.querySelector("#employment-wallet-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const result = document.querySelector("#employment-wallet-result");
+    try {
+      if (!globalThis.ethereum || !globalThis.ethers) throw Object.assign(new Error("Install or open an EIP-1193 wallet in this browser."), { code: "WALLET_PROVIDER_REQUIRED" });
+      const actorId = document.querySelector("#employment-actor-id").value.trim().toUpperCase();
+      const actorType = document.querySelector("#employment-actor-type").value;
+      const provider = new globalThis.ethers.providers.Web3Provider(globalThis.ethereum, "any");
+      await provider.send("eth_requestAccounts", []);
+      const network = await provider.getNetwork();
+      if (Number(network.chainId) !== 56) throw Object.assign(new Error("Select BNB Smart Chain Mainnet (chainId 56) in the wallet."), { code: "EMPLOYMENT_CHAIN_INVALID" });
+      const signer = provider.getSigner();
+      const walletAddress = await signer.getAddress();
+      const issuedAt = new Date();
+      const expiresAt = new Date(issuedAt.getTime() + 5 * 60 * 1000);
+      const challenge = createEmploymentIdentityChallenge({
+        challengeId: `EMPLOYMENT_CHALLENGE_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`,
+        actorId,
+        actorType,
+        walletAddress,
+        chainId: network.chainId,
+        nonce: crypto.randomUUID().replaceAll("-", ""),
+        issuedAt: issuedAt.toISOString(),
+        expiresAt: expiresAt.toISOString()
+      });
+      const signature = await signer.signMessage(challenge.message);
+      const recoveredAddress = globalThis.ethers.utils.verifyMessage(challenge.message, signature);
+      const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress, signatureSha256: await sha256Text(signature), verifiedAt: new Date().toISOString() });
+      await appendEmploymentEvent("EMPLOYMENT_IDENTITY_VERIFIED", identity, identity.verified_at);
+      const current = readEmploymentAlphaState();
+      writeEmploymentAlphaState({ identity, application: null, interview: null, contract: null, mission: null, earnings: current.identity?.wallet_address === identity.wallet_address ? current.earnings ?? [] : [] });
+      result.textContent = "VERIFIED_LOCAL_WALLET_CONTROL · no transaction sent.";
+      await render();
+    } catch (error) {
+      result.textContent = `${error.code ?? "EMPLOYMENT_WALLET_REJECTED"}: ${error.message}`;
+    }
+  });
+
+  document.querySelector("#employment-apply")?.addEventListener("click", async () => {
+    const state = readEmploymentAlphaState();
+    try {
+      const application = createEmploymentApplication({ applicationId: `APPLICATION_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, identityProof: state.identity, capabilities: ["FOLLOW_INSTRUCTIONS", "SUBMIT_EVIDENCE", "USE_KAIOS_AI_OS"], submittedAt: new Date().toISOString() });
+      await appendEmploymentEvent("EMPLOYMENT_APPLICATION_SUBMITTED", application, application.submitted_at);
+      writeEmploymentAlphaState({ ...state, application });
+      await render();
+    } catch (error) {
+      document.querySelector("#employment-wallet-result").textContent = `${error.code ?? "EMPLOYMENT_APPLICATION_REJECTED"}: ${error.message}`;
+    }
+  });
+
+  document.querySelector("#employment-interview-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const state = readEmploymentAlphaState();
+    const form = new FormData(event.currentTarget);
+    try {
+      const completedAt = new Date().toISOString();
+      const interview = scoreEmploymentInterview({
+        interviewId: `INTERVIEW_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`,
+        application: state.application,
+        answers: {
+          understands_simulation_boundary: form.has("understands_simulation_boundary"),
+          accepts_evidence_requirement: form.has("accepts_evidence_requirement"),
+          accepts_no_private_key_request: form.has("accepts_no_private_key_request"),
+          accepts_no_fake_completion: form.has("accepts_no_fake_completion")
+        },
+        completedAt
+      });
+      await appendEmploymentEvent("EMPLOYMENT_CANDIDATE_SAFETY_SELF_CHECK_COMPLETED", interview, completedAt);
+      if (interview.status !== "CANDIDATE_SAFETY_SELF_CHECK_PASSED") {
+        writeEmploymentAlphaState({ ...state, interview });
+        await render();
+        return;
+      }
+      const contract = createTrialEmploymentContract({ contractId: `CONTRACT_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, application: state.application, interview, activatedAt: completedAt });
+      const mission = createEmploymentAlphaMission({ missionId: `MISSION_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, contract, createdAt: completedAt });
+      await appendEmploymentEvent("EMPLOYMENT_ALPHA_PARTICIPATION_RECORDED", contract, completedAt);
+      await appendEmploymentEvent("EMPLOYMENT_MISSION_CREATED", mission, completedAt);
+      writeEmploymentAlphaState({ ...state, interview, contract, mission });
+      await render();
+    } catch (error) {
+      document.querySelector("#employment-interview-result").textContent = `${error.code ?? "EMPLOYMENT_INTERVIEW_REJECTED"}: ${error.message}`;
+    }
+  });
+
+  document.querySelector("#employment-accept-mission")?.addEventListener("click", async () => {
+    const state = readEmploymentAlphaState();
+    try {
+      const mission = acceptEmploymentAlphaMission({ mission: state.mission, actorId: state.identity.actor_id, acceptedAt: new Date().toISOString() });
+      await appendEmploymentEvent("EMPLOYMENT_MISSION_ACCEPTED", mission, mission.accepted_at);
+      writeEmploymentAlphaState({ ...state, mission });
+      await render();
+    } catch (error) {
+      document.querySelector("#employment-mission-result").textContent = `${error.code ?? "MISSION_ACCEPTANCE_REJECTED"}: ${error.message}`;
+    }
+  });
+
+  document.querySelector("#employment-complete-mission")?.addEventListener("click", async () => {
+    const state = readEmploymentAlphaState();
+    try {
+      const event = (eventType, occurredAt) => Object.freeze({ event_id: `${eventType}_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, event_type: eventType, actor_id: state.identity.actor_id, mission_id: state.mission.mission_id, occurred_at: occurredAt });
+      const now = new Date().toISOString();
+      const evidenceEvents = [
+        event("APPLICATION_SUBMITTED", state.application.submitted_at),
+        event("CANDIDATE_SAFETY_SELF_CHECK_PASSED", state.interview.completed_at),
+        event("MISSION_ACCEPTED", state.mission.accepted_at),
+        event("ORIENTATION_CHECKLIST_CONFIRMED", now)
+      ];
+      const mission = verifyEmploymentAlphaMission({ mission: state.mission, evidenceEvents, verifiedAt: now });
+      const earnings = appendKaiosAlphaEarning({ ledgerEntries: state.earnings ?? [], earningId: `EARNING_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, mission, contract: state.contract, recordedAt: now });
+      await appendEmploymentEvent("EMPLOYMENT_MISSION_VERIFIED", mission, now);
+      await appendEmploymentEvent("EMPLOYMENT_ALPHA_EARNING_RECORDED", earnings.at(-1), now);
+      writeEmploymentAlphaState({ ...state, mission, earnings });
+      await render();
+    } catch (error) {
+      document.querySelector("#employment-mission-result").textContent = `${error.code ?? "MISSION_VERIFICATION_REJECTED"}: ${error.message}`;
+    }
+  });
+}
+
+function bindEmploymentPhase1BEvents() {
+  const job = KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB;
+  const companyInterviewer = "AI_ANT_COMPANY_HR_SIMULATION_INTERVIEWER";
+  const companyDecisionMaker = "AI_ANT_COMPANY_EMPLOYMENT_SIMULATION_AUTHORITY";
+  const missionAssigner = "AI_ANT_COMPANY_MISSION_SIMULATION_DISPATCHER";
+  const workReviewer = "AI_ANT_COMPANY_WORK_REVIEW_SIMULATION_GATE";
+
+  async function company() { return universe.registries.company.get(job.company_id); }
+  async function appendAlphaEvent(eventType, record, timestamp) {
+    return appendEmploymentAlphaCompanyEvent({ store: universe.store, company: await company(), eventType, record, actorId: record.actor_id, timestamp });
+  }
+  async function appendPhaseEvent(eventType, record, actorId, timestamp) {
+    return appendEmploymentPhase1BCompanyEvent({ store: universe.store, company: await company(), eventType, record, actorId, timestamp });
+  }
+
+  document.querySelector("#employment-wallet-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const result = document.querySelector("#employment-wallet-result");
+    try {
+      if (!globalThis.ethereum || !globalThis.ethers) throw Object.assign(new Error("Install or open an EIP-1193 wallet in this browser."), { code: "WALLET_PROVIDER_REQUIRED" });
+      const actorId = document.querySelector("#employment-actor-id").value.trim().toUpperCase();
+      const actorType = document.querySelector("#employment-actor-type").value;
+      const provider = new globalThis.ethers.providers.Web3Provider(globalThis.ethereum, "any");
+      await provider.send("eth_requestAccounts", []);
+      const network = await provider.getNetwork();
+      if (Number(network.chainId) !== 56) throw Object.assign(new Error("Select BNB Smart Chain Mainnet (chainId 56)."), { code: "EMPLOYMENT_CHAIN_INVALID" });
+      const signer = provider.getSigner();
+      const walletAddress = await signer.getAddress();
+      const issuedAt = new Date();
+      const challenge = createEmploymentIdentityChallenge({ challengeId: `EMPLOYMENT_CHALLENGE_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, actorId, actorType, walletAddress, chainId: network.chainId, nonce: crypto.randomUUID().replaceAll("-", ""), issuedAt: issuedAt.toISOString(), expiresAt: new Date(issuedAt.getTime() + 5 * 60 * 1000).toISOString() });
+      const signature = await signer.signMessage(challenge.message);
+      const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress: globalThis.ethers.utils.verifyMessage(challenge.message, signature), signatureSha256: await sha256Text(signature), verifiedAt: new Date().toISOString() });
+      await appendAlphaEvent("EMPLOYMENT_IDENTITY_VERIFIED", identity, identity.verified_at);
+      writeEmploymentAlphaState({ identity, application: null, selfCheck: null, companyInterview: null, employmentDecision: null, employee: null, worker: null, mission: null, workEvidence: null, workReview: null, accruals: [], payrollQueue: [] });
+      result.textContent = "VERIFIED_LOCAL_WALLET_CONTROL · no transaction sent.";
+      await render();
+    } catch (error) { result.textContent = `${error.code ?? "EMPLOYMENT_WALLET_REJECTED"}: ${error.message}`; }
+  });
+
+  document.querySelector("#employment-apply")?.addEventListener("click", async () => {
+    const state = readEmploymentAlphaState();
+    try {
+      const application = createEmploymentApplication({ applicationId: `APPLICATION_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, job, identityProof: state.identity, capabilities: ["COMPLETE_DIGITAL_ORIENTATION", "SUBMIT_EVIDENCE", "USE_KAIOS_AI_OS"], submittedAt: new Date().toISOString() });
+      await appendAlphaEvent("EMPLOYMENT_APPLICATION_SUBMITTED", application, application.submitted_at);
+      await appendPhaseEvent("APPLICATION_SUBMITTED", application, application.actor_id, application.submitted_at);
+      writeEmploymentAlphaState({ ...state, application });
+      await render();
+    } catch (error) { document.querySelector("#employment-wallet-result").textContent = `${error.code ?? "EMPLOYMENT_APPLICATION_REJECTED"}: ${error.message}`; }
+  });
+
+  document.querySelector("#employment-self-check-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const state = readEmploymentAlphaState();
+    const form = new FormData(event.currentTarget);
+    try {
+      const completedAt = new Date().toISOString();
+      const selfCheck = scoreEmploymentInterview({ interviewId: `SELF_CHECK_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, application: state.application, answers: { understands_simulation_boundary: form.has("understands_simulation_boundary"), accepts_evidence_requirement: form.has("accepts_evidence_requirement"), accepts_no_private_key_request: form.has("accepts_no_private_key_request"), accepts_no_fake_completion: form.has("accepts_no_fake_completion") }, completedAt });
+      await appendAlphaEvent("EMPLOYMENT_CANDIDATE_SAFETY_SELF_CHECK_COMPLETED", selfCheck, completedAt);
+      writeEmploymentAlphaState({ ...state, selfCheck });
+      await render();
+    } catch (error) { document.querySelector("#employment-self-check-result").textContent = `${error.code ?? "SELF_CHECK_REJECTED"}: ${error.message}`; }
+  });
+
+  document.querySelector("#company-interview-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const state = readEmploymentAlphaState();
+    const form = new FormData(event.currentTarget);
+    try {
+      if (state.selfCheck?.status !== "CANDIDATE_SAFETY_SELF_CHECK_PASSED") throw Object.assign(new Error("Complete the candidate safety self-check first."), { code: "CANDIDATE_SELF_CHECK_REQUIRED" });
+      const startedAt = new Date().toISOString();
+      const questions = [
+        { question_id: "CAPABILITY", category: "CAPABILITY" }, { question_id: "SAFETY", category: "SAFETY" }, { question_id: "ROLE_FIT", category: "ROLE_FIT" }
+      ];
+      const answers = [["capability", "CAPABILITY"], ["safety", "SAFETY"], ["role_fit", "ROLE_FIT"]].map(([field, category]) => ({ question_id: category, category, answer: form.has(field) ? "ACKNOWLEDGED" : "INCOMPLETE", score: form.has(field) ? 100 : 0 }));
+      const interviewStarted = Object.freeze({ interview_id: `COMPANY_INTERVIEW_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, application_id: state.application.application_id, company_id: state.application.company_id, job_id: state.application.job_id, actor_id: state.application.actor_id, interviewer_id: companyInterviewer, started_at: startedAt, status: "COMPANY_INTERVIEW_STARTED" });
+      await appendPhaseEvent("INTERVIEW_STARTED", interviewStarted, companyInterviewer, startedAt);
+      const companyInterview = createCompanyInterview({ interviewId: interviewStarted.interview_id, application: state.application, interviewerId: companyInterviewer, questions, answers, evidence: [state.application.application_id, state.selfCheck.interview_id], startedAt, completedAt: new Date().toISOString() });
+      writeEmploymentAlphaState({ ...state, companyInterview });
+      await render();
+    } catch (error) { document.querySelector("#company-interview-result").textContent = `${error.code ?? "COMPANY_INTERVIEW_REJECTED"}: ${error.message}`; }
+  });
+
+  document.querySelector("#employment-company-decision")?.addEventListener("click", async () => {
+    const state = readEmploymentAlphaState();
+    try {
+      const now = new Date().toISOString();
+      const isAiLifeWithoutCanonicalIdentity = state.identity.actor_type === "AI_LIFE" && !state.identity.canonical_life_identity;
+      const decision = recordCompanyEmploymentDecision({ decisionId: `DECISION_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, application: state.application, interview: state.companyInterview, job, decisionMakerId: companyDecisionMaker, decision: isAiLifeWithoutCanonicalIdentity ? "NEED_MORE_INFO" : "APPROVE_WITH_CONDITIONS", conditions: isAiLifeWithoutCanonicalIdentity ? [] : ["DISTINCT_REVIEW_REQUIRED", "EXACT_PAYROLL_AUTHORITY_REQUIRED", "NO_PAYMENT_BEFORE_RECEIPT"], evidence: [state.companyInterview.interview_id, "FIRST_REAL_EMPLOYMENT_TEST_POLICY_GATE"], decidedAt: now });
+      await appendPhaseEvent("EMPLOYMENT_DECISION_RECORDED", decision, companyDecisionMaker, now);
+      if (!decision.approved_for_employee_record) {
+        writeEmploymentAlphaState({ ...state, employmentDecision: decision });
+        await render();
+        return;
+      }
+      const employee = createCompanyEmployeeRecord({ employeeId: `EMPLOYEE_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, application: state.application, interview: state.companyInterview, employmentDecision: decision, job, employmentType: "ALPHA_TRIAL", lifeId: null, startDate: now });
+      const mission = createCompanyEmployeeMission({ missionId: `MISSION_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, employee, job, assignedBy: missionAssigner, createdAt: now });
+      await appendPhaseEvent("EMPLOYEE_CREATED", employee, companyDecisionMaker, now);
+      await appendPhaseEvent("MISSION_ASSIGNED", mission, missionAssigner, now);
+      writeEmploymentAlphaState({ ...state, employmentDecision: decision, employee, worker: null, mission });
+      await render();
+    } catch (error) { document.querySelector("#employment-decision-result").textContent = `${error.code ?? "EMPLOYMENT_DECISION_REJECTED"}: ${error.message}`; }
+  });
+
+  document.querySelector("#employment-accept-mission")?.addEventListener("click", async () => {
+    const state = readEmploymentAlphaState();
+    try {
+      const mission = acceptCompanyEmployeeMission({ mission: state.mission, employee: state.employee, acceptedAt: new Date().toISOString() });
+      await appendPhaseEvent("MISSION_ACCEPTED", mission, state.employee.actor_id, mission.accepted_at);
+      writeEmploymentAlphaState({ ...state, mission });
+      await render();
+    } catch (error) { document.querySelector("#employment-mission-result").textContent = `${error.code ?? "MISSION_ACCEPTANCE_REJECTED"}: ${error.message}`; }
+  });
+
+  document.querySelector("#employment-complete-mission")?.addEventListener("click", async () => {
+    const state = readEmploymentAlphaState();
+    try {
+      const now = new Date().toISOString();
+      const events = job.proof_requirements.map((eventType) => Object.freeze({ event_id: `${eventType}_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, event_type: eventType, actor_id: state.employee.actor_id, employee_id: state.employee.employee_id, mission_id: state.mission.mission_id, occurred_at: now }));
+      const workEvidence = submitCompanyWorkEvidence({ evidenceId: `WORK_EVIDENCE_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, mission: state.mission, employee: state.employee, events, submittedAt: now });
+      const workReview = reviewCompanyWorkEvidence({ reviewId: `WORK_REVIEW_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, mission: state.mission, employee: state.employee, workEvidence, reviewerId: workReviewer, decision: "APPROVE", evidence: [workEvidence.evidence_id, "SIMULATION_ORIENTATION_POLICY"], reviewedAt: now });
+      const accruals = accrueCompanyCompensation({ ledgerEntries: state.accruals ?? [], accrualId: `ACCRUAL_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, mission: state.mission, employee: state.employee, workReview, accruedAt: now });
+      const payrollQueue = queueCompanyPayroll({ payrollQueueId: `PAYROLL_QUEUE_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`, queueEntries: state.payrollQueue ?? [], employee: state.employee, accrual: accruals.at(-1), queuedAt: now });
+      await appendPhaseEvent("WORK_EVIDENCE_SUBMITTED", workEvidence, state.employee.actor_id, now);
+      await appendPhaseEvent("WORK_REVIEWED", workReview, workReviewer, now);
+      await appendPhaseEvent("COMPENSATION_ACCRUED", accruals.at(-1), workReviewer, now);
+      await appendPhaseEvent("PAYROLL_QUEUED", payrollQueue.at(-1), companyDecisionMaker, now);
+      writeEmploymentAlphaState({ ...state, workEvidence, workReview, accruals, payrollQueue });
+      await render();
+    } catch (error) { document.querySelector("#employment-mission-result").textContent = `${error.code ?? "WORK_REVIEW_REJECTED"}: ${error.message}`; }
   });
 }
 

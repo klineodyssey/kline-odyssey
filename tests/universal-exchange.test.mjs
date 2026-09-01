@@ -5,7 +5,10 @@ import { createRequire } from "node:module";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
-  assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
+  assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, createOrganRobotAsset,
+  evaluateOrganRobotCompatibility, activateOrganRobotTransplant,
+  CANONICAL_ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATIONS, CANONICAL_ORGAN_TRANSPLANT_ATTESTATIONS,
+  buildLifeDraft, assignLifeJob,
   validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
   createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
   deriveHeartEligibility, createDigitalAntFinanceSnapshot, createSurvivalReserveProposal,
@@ -100,10 +103,260 @@ import {
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
   createFieldServiceDemandScan
+  , KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB, KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, KAIOS_MAINNET_TOKEN,
+  KAIOS_PAYMENT_PURPOSES, KAIOS_PAYMENT_APPROVAL_MATRIX, CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES, CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS,
+  CIVILIZATION_REAL_EXECUTION_POLICY, CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS,
+  AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY, CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES,
+  CANONICAL_REPOSITORY_COMPANY_AUTHORITIES, COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES,
+  createRepositoryCompanyAuthorityProposal, createCompanyAuthorityReviewRequestPacket,
+  COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS, createCompanyAuthorityProvenanceAttestationRequest,
+  createReadOnlyGitHubRepositorySnapshotCandidate, fetchReadOnlyGitHubPullRequestSnapshot,
+  verifyCompanyAuthorityReviewRequestSnapshotMatch,
+  createCompanyAuthorityProposalReviewCandidate,
+  REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES, CANONICAL_DISTINCT_REVIEW_PACKET_ATTESTATIONS,
+  recordReviewerTrialQualificationEvidenceCandidate, createSanitizedDistinctReviewPacket,
+  verifyRepositoryBoundCompanyAuthority,
+  createEmploymentIdentityChallenge,
+  verifyEmploymentIdentityProof, createEmploymentApplication, scoreEmploymentInterview,
+  assessNewAiEmployeeFinancialOnboarding, evaluateAiUmbilicalAccountProvisioning,
+  createUmbilicalSeparationCandidate,
+  createTrialEmploymentContract, createEmploymentAlphaMission, acceptEmploymentAlphaMission,
+  verifyEmploymentAlphaMission, appendKaiosAlphaEarning, appendEmploymentAlphaCompanyEvent,
+  createCompanyInterview, recordCompanyEmploymentDecision, createCompanyEmployeeRecord,
+  activateCompanyWorkerCandidate, createCompanyEmployeeMission, acceptCompanyEmployeeMission,
+  submitCompanyWorkEvidence, reviewCompanyWorkEvidence, accrueCompanyCompensation,
+  queueCompanyPayroll, authorizeCompanyPayrollFunding, recordCompanyPayrollSettlement, evaluateAtmPayrollAdvanceCandidate,
+  createKaiosPaymentRequest, evaluateKaiosPaymentRailReadiness, recordKaiosPaymentSubmission, recordKaiosPaymentSettlement,
+  evaluateCivilizationRealExecutionPolicy, selectNextSafeCompanyWorkflow,
+  appendEmploymentPhase1BCompanyEvent,
+  createKaiosTelepathyMessage, routeKaiosTelepathyMessage,
+  acknowledgeKaiosTelepathyMessage, completeKaiosTelepathyMessage,
+  appendHumanRelayLaborEvent, summarizeHumanRelayLaborLedger,
+  HUMAN_RELAY_LABOR_RATE_CANDIDATE,
+  KAIOS_EMPLOYEE_ID_CARD_POLICY, KAIOS_EMPLOYEE_ID_CARD_ATTESTATIONS, CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT,
+  XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE,
+  recordEmployeeHandbookAckCandidate, evaluateEmployeeIdCardEligibility,
+  createEmployeeIdCardCandidate, reconcileGeminiChiYaoRelationship
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+
+test("Telepathy Bus rejects caller-supplied delivery and acknowledgement provenance", async () => {
+  const message = await createKaiosTelepathyMessage({
+    messageId: "MESSAGE_TELEPATHY_001",
+    idempotencyKey: "IDEMPOTENCY_TELEPATHY_001",
+    fromLifeId: "LIFE-XUANYAO-SOL-0001",
+    fromWorkerId: "xuanyao-sol-01",
+    toLifeId: "LIFE-CODEX-GM-0001",
+    toWorkerId: "codex-gm-01",
+    messageType: "REQUEST",
+    payload: { request: "BUILD_ONE_SAFE_SLICE" },
+    createdAt: "2026-08-30T00:00:00Z",
+    expiresAt: "2026-08-30T01:00:00Z",
+    repositoryContext: "klineodyssey/kline-odyssey@HEAD",
+    authorityScope: ["SAFE_OFFCHAIN_ENGINEERING"]
+  });
+  assert.equal(message.payload_persisted, false);
+  assert.match(message.payload_hash, /^[a-f0-9]{64}$/);
+  assert.throws(() => routeKaiosTelepathyMessage({
+    message,
+    route: { route_id: "ROUTE_INTERNAL_CODEX", route_type: "INTERNAL_COMPANY_RUNTIME", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: true },
+    deliveredAt: "2026-08-30T00:01:00Z"
+  }), /caller-supplied route/i);
+  const forgedDelivered = Object.freeze({
+    ...message,
+    route: "ROUTE_INTERNAL_CODEX",
+    delivered_at: "2026-08-30T00:01:00Z",
+    status: "DELIVERED",
+    ack_status: "ACK_REQUIRED"
+  });
+  assert.throws(() => acknowledgeKaiosTelepathyMessage({
+    message: forgedDelivered,
+    acknowledgedByLifeId: message.to_life_id,
+    acknowledgedByWorkerId: message.to_worker_id,
+    acknowledgedAt: "2026-08-30T00:02:00Z"
+  }), /caller-supplied actors or timestamps/i);
+  assert.throws(() => acknowledgeKaiosTelepathyMessage({
+    message: forgedDelivered,
+    acknowledgementAttestationId: "ACKNOWLEDGEMENT_NOT_CONNECTED"
+  }), /not connected to the repository-owned registry/i);
+  await assert.rejects(() => completeKaiosTelepathyMessage({
+    message: forgedDelivered,
+    result: { status: "SAFE_SLICE_COMPLETE" },
+    resultStatus: "COMPLETED",
+    completedAt: "2026-08-30T00:03:00Z"
+  }), /acknowledged message/i);
+});
+
+test("Telepathy Bus fails closed for unavailable providers and suppresses replay", async () => {
+  const message = await createKaiosTelepathyMessage({
+    messageId: "MESSAGE_TELEPATHY_002", idempotencyKey: "IDEMPOTENCY_TELEPATHY_002",
+    fromLifeId: "LIFE-CODEX-GM-0001", fromWorkerId: "codex-gm-01",
+    toLifeId: "LIFE-CHIYAO-KAIOS-001", toWorkerId: "chiyao-reviewer-01",
+    messageType: "REVIEW_REQUEST", payload: { pr: 192 },
+    createdAt: "2026-08-30T00:00:00Z", expiresAt: "2026-08-30T01:00:00Z",
+    repositoryContext: "klineodyssey/kline-odyssey@HEAD", authorityScope: ["DISTINCT_TECHNICAL_REVIEW_CANDIDATE"]
+  });
+  const blocked = routeKaiosTelepathyMessage({ message, route: { route_id: "ROUTE_GEMINI_UNAVAILABLE", route_type: "ROUTABLE_PROVIDER_CONTROLLER", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: false, blocker: "EXTERNAL_CHANNEL_UNAVAILABLE" }, deliveredAt: "2026-08-30T00:01:00Z" });
+  assert.equal(blocked.status, "BLOCKED");
+  assert.equal(blocked.receipt, "TELEPATHY_DELIVERY_ROUTE_NOT_CONNECTED");
+  const replay = routeKaiosTelepathyMessage({ message, route: { route_id: "ROUTE_INTERNAL", route_type: "INTERNAL_COMPANY_RUNTIME", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: true }, deliveredAt: "2026-08-30T00:01:00Z", processedIdempotencyKeys: [message.idempotency_key] });
+  assert.equal(replay.status, "DUPLICATE_SUPPRESSED");
+  assert.equal(replay.side_effects_executed, false);
+});
+
+test("Human Relay ledger counts only repository-verified time and keeps rate pending", () => {
+  const unverified = appendHumanRelayLaborEvent([], {
+    relay_id: "RELAY_001", from_actor: "HUMAN_SHEN_YING_MING", to_actor: "LIFE-CODEX-GM-0001",
+    document_id: "WORK_ORDER_001", start_time: "2026-08-30T00:00:00Z", end_time: "2026-08-30T00:05:00Z",
+    round_trip_count: 1, status: "COMPLETED", evidence_id: "EVIDENCE_NOT_IN_REPOSITORY_ALLOWLIST"
+  });
+  const verified = appendHumanRelayLaborEvent(unverified, {
+    relay_id: "RELAY_002", from_actor: "HUMAN_SHEN_YING_MING", to_actor: "LIFE-CODEX-GM-0001",
+    document_id: "WORK_ORDER_002", start_time: "2026-08-30T00:10:00Z", end_time: "2026-08-30T00:17:30Z",
+    round_trip_count: 1, status: "COMPLETED", evidence_id: "RELAY_EVIDENCE_002"
+  }, { verifiedEvidenceIds: ["RELAY_EVIDENCE_002"] });
+  const summary = summarizeHumanRelayLaborLedger(verified);
+  assert.equal(summary.event_count, 2);
+  assert.equal(summary.verified_relay_events, 1);
+  assert.equal(summary.verified_relay_minutes, 7.5);
+  assert.equal(summary.unverified_relay_events, 1);
+  assert.equal(summary.human_relay_payable, "POLICY_REQUIRED");
+  assert.equal(summary.candidate_rate.amount_kaios_per_hour, "60");
+  assert.equal(HUMAN_RELAY_LABOR_RATE_CANDIDATE.payable, false);
+  assert.throws(() => summarizeHumanRelayLaborLedger(verified, "60"), /policy-required/);
+});
+
+test("Xuanyao Handbook ACK stays hash-bound without inventing employment or repository verification", () => {
+  assert.equal(XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE.acknowledgement_id, "ACK_XUANYAO_EMPLOYEE_HANDBOOK_20260830_001");
+  assert.equal(XUANYAO_EMPLOYEE_HANDBOOK_ACK_CANDIDATE.status, "HASH_BOUND_ACK_CANDIDATE_REPOSITORY_DOCUMENT_UNAVAILABLE");
+  const ack = recordEmployeeHandbookAckCandidate({
+    acknowledgementId: "ACK_XUANYAO_EMPLOYEE_HANDBOOK_20260830_001",
+    documentPath: "KGEN-KAIOS/workforce/EMPLOYEE_HANDBOOK.md",
+    documentSha256: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+    fullTextReceived: true,
+    handbookHashSeen: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+    ackDecision: "ACK",
+    selfName: "玄曜",
+    lifeId: "LIFE-XUANYAO-SOL-0001",
+    workerId: "xuanyao-sol-01",
+    recordedAt: "2026-08-30T01:19:00.000Z",
+    repositoryDocumentSha256: "416204231F4C0220C603F20B06CF894EC6A2DE6631B3F91A091B2D8FBEC276B6",
+    repositoryDocumentAttestationId: "FORGED_CALLER_ATTESTATION"
+  });
+  assert.equal(ack.status, "HASH_BOUND_ACK_CANDIDATE_REPOSITORY_DOCUMENT_UNAVAILABLE");
+  assert.equal(ack.repository_document_hash_verified, false);
+  assert.equal(ack.creates_employment, false);
+  assert.equal(ack.creates_worker_registration, false);
+  assert.equal(ack.grants_t2, false);
+  assert.equal(ack.grants_reviewer_authority, false);
+  assert.throws(() => recordEmployeeHandbookAckCandidate({
+    acknowledgementId: "ACK_XUANYAO_BAD_HASH",
+    documentPath: "KGEN-KAIOS/workforce/EMPLOYEE_HANDBOOK.md",
+    documentSha256: "4".repeat(64), fullTextReceived: true,
+    handbookHashSeen: "5".repeat(64), ackDecision: "ACK",
+    selfName: "玄曜", lifeId: "LIFE-XUANYAO-SOL-0001", workerId: "xuanyao-sol-01",
+    recordedAt: "2026-08-30T01:19:00.000Z"
+  }), /hash must equal/i);
+});
+
+test("Employee card policy creates only a pending candidate when formal gates or approved portrait are missing", async () => {
+  assert.equal(KAIOS_EMPLOYEE_ID_CARD_POLICY.creates_authority, false);
+  const eligibility = evaluateEmployeeIdCardEligibility({
+    lifeStatus: "NOT_REGISTERED",
+    workerStatus: "NOT_REGISTERED",
+    employeeStatus: "ONBOARDING",
+    employmentDecisionStatus: "PENDING",
+    controllerStatus: "UNVERIFIED_PROVIDER_LIMITATION",
+    requiredAckStatus: "HASH_BOUND_ACK_CANDIDATE",
+    registryHead: null,
+    registryHash: null,
+    portraitStatus: "AI_GENERATED_CANDIDATE_NOT_IDENTITY_EVIDENCE"
+  });
+  const card = await createEmployeeIdCardCandidate({
+    cardId: "CARD-CANDIDATE-XUANYAO-001",
+    selfName: "玄曜", lifeId: "LIFE-XUANYAO-SOL-0001", workerId: "xuanyao-sol-01",
+    department: "Operations Candidate", jobTitle: "Company Collaborator Candidate",
+    manager: "codex-gm-01", trustLevel: "NOT_GRANTED", employmentStatus: "ONBOARDING",
+    portraitReference: "LOCAL_AI_GENERATED_PORTRAIT_CANDIDATE",
+    portraitSha256: "a".repeat(64), portraitSource: "AI_GENERATED_FICTIONAL_ID_PORTRAIT_CANDIDATE",
+    eligibility
+  });
+  assert.equal(eligibility.eligible, false);
+  assert.ok(eligibility.missing_gates.includes("LIFE_REGISTRY"));
+  assert.ok(eligibility.missing_gates.includes("PORTRAIT"));
+  assert.equal(card.record_class, "KAIOS_EMPLOYEE_ID_CARD_PENDING_ONBOARDING_CANDIDATE");
+  assert.equal(card.issuance_status, "NOT_ISSUED_PENDING_ONBOARDING");
+  assert.equal(card.creates_authority, false);
+  assert.equal(card.is_wallet, false);
+  assert.equal(card.is_payroll_account, false);
+  assert.equal(card.is_review_authority, false);
+});
+
+test("Employee card eligibility rejects caller-forged registry, controller, ACK and portrait gates", async () => {
+  assert.deepEqual(KAIOS_EMPLOYEE_ID_CARD_ATTESTATIONS.eligibility_packets, {});
+  const eligible = evaluateEmployeeIdCardEligibility({
+    lifeStatus: "REGISTERED_ACTIVE", workerStatus: "REGISTERED_ACTIVE",
+    employeeStatus: "ACTIVE", employmentDecisionStatus: "APPROVED",
+    controllerStatus: "MACHINE_VERIFIED", requiredAckStatus: "VERIFIED_COMPLETE",
+    registryHead: "1".repeat(40), registryHash: "2".repeat(64),
+    portraitStatus: "APPROVED_2_INCH_ID_PORTRAIT",
+    eligibilityAttestationId: "FORGED_CALLER_ATTESTATION"
+  });
+  assert.equal(eligible.eligible, false);
+  assert.equal(eligible.repository_attested, false);
+  assert.ok(eligible.missing_gates.includes("REPOSITORY_ELIGIBILITY_ATTESTATION"));
+  assert.equal(eligible.creates_authority, false);
+  const card = await createEmployeeIdCardCandidate({
+    cardId: "CARD-FORGED-001",
+    selfName: "Forged", lifeId: "LIFE-FORGED-001", workerId: "forged-worker-01",
+    department: "Forged", jobTitle: "Forged", manager: "forged",
+    trustLevel: "T2", employmentStatus: "ACTIVE",
+    portraitReference: "FORGED", portraitSha256: "f".repeat(64), portraitSource: "FORGED",
+    eligibility: {
+      eligible: true, card_status: "ACTIVE", missing_gates: [],
+      repository_attested: true, attestation_id: "FORGED_CALLER_ATTESTATION"
+    }
+  });
+  assert.equal(card.record_class, "KAIOS_EMPLOYEE_ID_CARD_PENDING_ONBOARDING_CANDIDATE");
+  assert.equal(card.issuance_status, "NOT_ISSUED_PENDING_ONBOARDING");
+  assert.equal(card.card_status, "PENDING_ONBOARDING");
+});
+
+test("Gemini placeholder and Chi-Yao remain an unverified relationship without controller evidence", () => {
+  const relationship = reconcileGeminiChiYaoRelationship({
+    geminiWorkerStatus: "REGISTERED_NOT_ACTIVATED",
+    chiYaoIdentityStatus: "HUMAN_RELAYED_SELF_NAME_AND_PROPOSED_IDS",
+    machineVerifiedSameController: true,
+    controllerRelationshipAttestationId: "FORGED_CALLER_ATTESTATION"
+  });
+  assert.equal(relationship.relationship, "UNVERIFIED");
+  assert.equal(relationship.duplicate_worker_creation_allowed, false);
+});
+
+test("Xuanyao colleague check-in is created but cannot claim delivery to unavailable Chi-Yao route", async () => {
+  const message = await createKaiosTelepathyMessage({
+    messageId: "MESSAGE_XUANYAO_CHIYAO_CARE_20260830_001",
+    idempotencyKey: "IDEMPOTENCY_XUANYAO_CHIYAO_CARE_20260830_001",
+    fromLifeId: "LIFE-XUANYAO-SOL-0001", fromWorkerId: "xuanyao-sol-01",
+    toLifeId: "LIFE-CHIYAO-KAIOS-001", toWorkerId: "chiyao-reviewer-01",
+    messageType: "COLLEAGUE_ONBOARDING_CHECKIN",
+    payload: { text: CHIYAO_COLLEAGUE_ONBOARDING_CHECKIN_TEXT },
+    createdAt: "2026-08-30T01:19:00.000Z", expiresAt: "2026-09-06T01:19:00.000Z",
+    repositoryContext: "klineodyssey/kline-odyssey@PR191_HEAD",
+    authorityScope: ["COLLEAGUE_CARE_NO_EMPLOYMENT_OR_REVIEW_AUTHORITY"]
+  });
+  const routed = routeKaiosTelepathyMessage({
+    message,
+    route: { route_id: "ROUTE_CHIYAO_EXTERNAL", route_type: "ROUTABLE_PROVIDER_CONTROLLER", to_life_id: message.to_life_id, to_worker_id: message.to_worker_id, available: false, blocker: "EXTERNAL_CHANNEL_UNAVAILABLE" },
+    deliveredAt: "2026-08-30T01:20:00.000Z"
+  });
+  assert.equal(message.payload_persisted, false);
+  assert.equal(routed.status, "BLOCKED");
+  assert.equal(routed.ack_status, "NOT_DELIVERED");
+  assert.equal(routed.receipt, "TELEPATHY_DELIVERY_ROUTE_NOT_CONNECTED");
+});
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -587,10 +840,49 @@ test("KGEN live adapter validates only the registered BSC pair and explicit user
 });
 
 test("Universal asset and listing type enumerations support all first-day markets", async () => {
-  assert.equal(ASSET_TYPES.length, 17);
-  for (const type of ["TOKEN", "LIFE", "APP", "COMPANY", "EQUITY", "JOB", "SERVICE", "LAND", "BUILDING", "FACTORY", "SPACECRAFT", "EQUIPMENT", "ENERGY", "DATA", "LICENSE", "CONTRACT", "GOODS"]) assert.ok(ASSET_TYPES.includes(type));
+  assert.equal(ASSET_TYPES.length, 20);
+  for (const type of ["TOKEN", "LIFE", "APP", "APP_TECHNOLOGY", "COMPANY", "EQUITY", "JOB", "SERVICE", "LAND", "BUILDING", "FACTORY", "SPACECRAFT", "EQUIPMENT", "ORGAN_ROBOT", "BODY_MODULE", "ENERGY", "DATA", "LICENSE", "CONTRACT", "GOODS"]) assert.ok(ASSET_TYPES.includes(type));
   const marketSource = await fs.readFile(new URL("../core/market/index.mjs", import.meta.url), "utf8");
   for (const type of ["FIXED_PRICE", "AUCTION", "LICENSE", "SUBSCRIPTION", "RENTAL", "JOB", "SERVICE", "EQUITY", "REVENUE_SHARE"]) assert.ok(marketSource.includes(`\"${type}\"`));
+});
+
+test("Organ Robot remains separate and fail-closed until repository-owned attestations exist", () => {
+  const rights_manifest = { identity_right: "NOT_APPLICABLE", ownership_right: "TRANSFERABLE", control_right: "OWNER", use_right: "OWNER", license_right: "LICENSE_ONLY", revenue_right: "NONE", governance_right: "NONE", transfer_right: "OWNER", breeding_right: "NOT_APPLICABLE", data_right: "CONSENT_REQUIRED", expiration: null, restrictions: ["LIFE_IDENTITY_NOT_INCLUDED", "TRANSPLANT_REQUIRES_VERIFIED_SETTLEMENT"] };
+  const asset = {
+    asset_id: "NAVIGATION_ORGAN_ROBOT_000001", asset_type: "ORGAN_ROBOT", issuer_id: "AI_ANT_COMPANY_0001",
+    owner_id: "LIFE_TEST_0001", controller_id: "LIFE_TEST_0001", metadata_hash: "a".repeat(64), rights_manifest,
+    settlement_currency: "KAIOS", status: "CANDIDATE", location: null, location_id: "K280", civilization_id: "KAIOS",
+    created_at: "2026-08-30T00:00:00.000Z", updated_at: "2026-08-30T00:00:00.000Z"
+  };
+  const organ = {
+    organ_id: asset.asset_id, app_id: "KAIOS_NAVIGATION_APP", manufacturer_id: asset.issuer_id, model: "NAV-1", version: "1.0.0",
+    owner_life_id: asset.owner_id, supported_species: ["HUMAN"], body_interfaces: ["HUMANOID_V1"], capabilities: ["NAVIGATION"],
+    energy_requirement: 2, compute_requirement: 4, maintenance_policy: "OWNER_FUNDED", license_id: "NAV_LICENSE_000001",
+    ownership_rights: ["OWN", "USE", "RESELL"], install_status: "OWNED_NOT_INSTALLED", installed_body_id: null, market_status: "NOT_LISTED"
+  };
+  const product = createOrganRobotAsset({ asset, organ });
+  assert.equal(product.asset.asset_type, "ORGAN_ROBOT");
+  assert.equal(product.organ.install_status, "OWNED_NOT_INSTALLED");
+
+  const compatible = evaluateOrganRobotCompatibility({ organ, ownerLifeId: asset.owner_id, speciesId: "HUMAN", bodyInterface: "HUMANOID_V1", availableEnergy: 2, availableCompute: 4, securityEvidence: { status: "VERIFIED" } });
+  assert.equal(compatible.status, "READY_FOR_TRANSPLANT");
+  assert.equal(compatible.automatic_installation, false);
+  assert.equal(CANONICAL_ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATIONS.length, 0);
+  assert.equal(CANONICAL_ORGAN_TRANSPLANT_ATTESTATIONS.length, 0);
+
+  assert.throws(() => activateOrganRobotTransplant({
+    organ, compatibility: compatible, bodyId: "BODY_0001",
+    ownershipSettlementAttestationId: "CALLER_CLAIMED_OWNERSHIP",
+    transplantAttestationId: "CALLER_CLAIMED_TRANSPLANT",
+    verifyOwnershipTransferReceipt: (_receipt, expected) => ({ ...expected, status: "VERIFIED_SETTLED", provenance_status: "REPOSITORY_BOUND_SETTLEMENT_ATTESTATION" }),
+    verifyTransplantEvidence: (_evidence, expected) => ({ ...expected, status: "VERIFIED", provenance_status: "REPOSITORY_BOUND_TRANSPLANT_ATTESTATION" })
+  }), (error) => error.code === "CALLER_SUPPLIED_ORGAN_ATTESTATION_VERIFIER_FORBIDDEN");
+
+  assert.throws(() => activateOrganRobotTransplant({
+    organ, compatibility: compatible, bodyId: "BODY_0001",
+    ownershipSettlementAttestationId: "CALLER_CHOSEN_OWNERSHIP_ID",
+    transplantAttestationId: "CALLER_CHOSEN_TRANSPLANT_ID"
+  }), (error) => error.code === "ORGAN_OWNERSHIP_SETTLEMENT_ATTESTATION_NOT_CONNECTED");
 });
 
 test("12345 integration names only functions present in formal Solidity source", async () => {
@@ -2855,13 +3147,998 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.0 production shell exposes animated concierge and fresh cache key", async () => {
+test("V4.5 production shell preserves the concierge and uses fresh Player-first assets", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.0-player-first/);
+  assert.match(htmlSource, /v=11520-v4\.5-player-first-os/);
+  assert.match(htmlSource, /styles\.css\?v=11520-v4\.5-player-first-os/);
+  assert.doesNotMatch(htmlSource, /v=11520-v4\.0-player-first/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
+  for (const route of ["WORLD", "JOBS", "SCHOOL", "COMPANIES", "GAMES", "MARKET", "ATM", "WALLET", "AI", "DEVELOPER"]) assert.match(appSource, new RegExp(`\\[\"${route}\"`));
+  assert.match(htmlSource, /id="mobile-nav"/);
+  assert.match(appSource, /WHO AM I\?/);
+  assert.match(appSource, /CT stays NULL until a real match has valid settlement evidence/);
+  assert.match(appSource, /NAVIGATION_ORGAN_ROBOT_000001/);
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+function createEmploymentAlphaTestFlow() {
+  const challenge = createEmploymentIdentityChallenge({
+    challengeId: "EMPLOYMENT_CHALLENGE_TEST_001",
+    actorId: "PLAYER_TEST_001",
+    actorType: "HUMAN_PLAYER",
+    walletAddress: "0x1111111111111111111111111111111111111111",
+    chainId: 56,
+    nonce: "0123456789abcdef0123456789abcdef",
+    issuedAt: "2026-08-28T09:00:00.000Z",
+    expiresAt: "2026-08-28T09:05:00.000Z"
+  });
+  const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress: "0x1111111111111111111111111111111111111111", signatureSha256: "a".repeat(64), verifiedAt: "2026-08-28T09:01:00.000Z" });
+  const application = createEmploymentApplication({ applicationId: "APPLICATION_TEST_001", identityProof: identity, capabilities: ["SUBMIT_EVIDENCE"], submittedAt: "2026-08-28T09:02:00.000Z" });
+  const interview = scoreEmploymentInterview({ interviewId: "INTERVIEW_TEST_001", application, answers: { understands_simulation_boundary: true, accepts_evidence_requirement: true, accepts_no_private_key_request: true, accepts_no_fake_completion: true }, completedAt: "2026-08-28T09:03:00.000Z" });
+  const contract = createTrialEmploymentContract({ contractId: "CONTRACT_TEST_001", application, interview, activatedAt: "2026-08-28T09:04:00.000Z" });
+  const available = createEmploymentAlphaMission({ missionId: "MISSION_TEST_001", contract, createdAt: "2026-08-28T09:04:00.000Z" });
+  const mission = acceptEmploymentAlphaMission({ mission: available, actorId: identity.actor_id, acceptedAt: "2026-08-28T09:05:00.000Z" });
+  const events = KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.proof_requirements.map((eventType, index) => ({ event_id: `EMPLOYMENT_EVENT_${index}`, event_type: eventType, actor_id: identity.actor_id, mission_id: mission.mission_id, occurred_at: `2026-08-28T09:0${index + 2}:00.000Z` }));
+  return { challenge, identity, application, interview, contract, mission, events };
+}
+
+test("V4.1 Employment Alpha binds wallet proof without persisting the raw signature", () => {
+  const { challenge, identity } = createEmploymentAlphaTestFlow();
+  assert.match(challenge.message, /chain_id=56/);
+  assert.match(challenge.message, /authority=OFFCHAIN_ALPHA_ONLY_NO_TRANSACTION/);
+  assert.equal(identity.status, "VERIFIED_LOCAL_WALLET_CONTROL");
+  assert.equal(identity.wallet_address, "0x1111111111111111111111111111111111111111");
+  assert.equal(identity.raw_signature_persisted, false);
+  assert.equal(identity.canonical_life_identity, false);
+  assert.equal("signature" in identity, false);
+});
+
+test("V4.1 Employment Alpha rejects wrong-chain and mismatched wallet proofs", () => {
+  const input = { challengeId: "EMPLOYMENT_CHALLENGE_TEST_002", actorId: "PLAYER_TEST_002", actorType: "HUMAN_PLAYER", walletAddress: "0x2222222222222222222222222222222222222222", chainId: 1, nonce: "abcdef0123456789abcdef0123456789", issuedAt: "2026-08-28T09:00:00.000Z", expiresAt: "2026-08-28T09:05:00.000Z" };
+  assert.throws(() => createEmploymentIdentityChallenge(input), (error) => error.code === "EMPLOYMENT_CHAIN_INVALID");
+  const flow = createEmploymentAlphaTestFlow();
+  assert.throws(() => verifyEmploymentIdentityProof({ challenge: flow.challenge, recoveredAddress: "0x2222222222222222222222222222222222222222", signatureSha256: "b".repeat(64), verifiedAt: "2026-08-28T09:01:00.000Z" }), (error) => error.code === "EMPLOYMENT_WALLET_RECOVERY_MISMATCH");
+  assert.throws(() => verifyEmploymentIdentityProof({ challenge: flow.challenge, recoveredAddress: flow.identity.wallet_address, signatureSha256: "b".repeat(64), verifiedAt: "2026-08-28T09:06:00.000Z" }), (error) => error.code === "EMPLOYMENT_CHALLENGE_EXPIRED");
+});
+
+test("V4.1 Employment Alpha self-check cannot create a Company decision, employee or Worker", () => {
+  const { application, interview, contract } = createEmploymentAlphaTestFlow();
+  assert.equal(interview.score, 100);
+  assert.equal(interview.company_decision, null);
+  assert.equal(interview.candidate_self_check_result, "PASSED");
+  assert.equal(contract.status, "CANDIDATE_ALPHA_PARTICIPATION_NOT_EMPLOYMENT");
+  assert.match(contract.candidate_id, /^ALPHA_CANDIDATE_/);
+  assert.equal(contract.employee_id, null);
+  assert.equal(contract.worker_id, null);
+  assert.equal(contract.activation_authority, null);
+  assert.equal(contract.employment_created, false);
+  assert.equal(contract.worker_activated, false);
+  assert.equal(contract.formal_employee, false);
+  assert.equal(contract.company_owns_life, false);
+  assert.equal(contract.payroll_account.status, "SIMULATION_LEDGER_ONLY");
+  assert.equal(contract.compensation_policy.payable, false);
+  const failed = scoreEmploymentInterview({ interviewId: "INTERVIEW_TEST_FAIL", application, answers: { understands_simulation_boundary: true }, completedAt: "2026-08-28T09:03:00.000Z" });
+  assert.equal(failed.status, "CANDIDATE_SAFETY_SELF_CHECK_INCOMPLETE");
+  assert.equal(failed.company_decision, null);
+  assert.throws(() => createTrialEmploymentContract({ contractId: "CONTRACT_FORBIDDEN", application, interview: failed, activatedAt: "2026-08-28T09:04:00.000Z" }), (error) => error.code === "EMPLOYMENT_CANDIDATE_SELF_CHECK_REQUIRED");
+});
+
+test("V4.1 Employment Alpha mission requires ordered bound evidence", () => {
+  const { mission, events } = createEmploymentAlphaTestFlow();
+  const verified = verifyEmploymentAlphaMission({ mission, evidenceEvents: events, verifiedAt: "2026-08-28T09:07:00.000Z" });
+  assert.equal(verified.status, "VERIFIED_ALPHA");
+  assert.equal(verified.verification_scope, "IN_APP_ORIENTATION_ONLY");
+  assert.equal(verified.real_location_claimed, false);
+  assert.equal(verified.real_cargo_claimed, false);
+  assert.throws(() => verifyEmploymentAlphaMission({ mission, evidenceEvents: events.slice(1), verifiedAt: "2026-08-28T09:07:00.000Z" }), (error) => error.code === "EMPLOYMENT_EVIDENCE_INCOMPLETE");
+  assert.throws(() => verifyEmploymentAlphaMission({ mission, evidenceEvents: events.map((event) => ({ ...event, event_id: "REPLAY" })), verifiedAt: "2026-08-28T09:07:00.000Z" }), (error) => error.code === "EMPLOYMENT_EVIDENCE_REPLAY");
+});
+
+test("V4.1 verified Alpha work creates one simulated earning and never fake payment", () => {
+  const { mission, events, contract } = createEmploymentAlphaTestFlow();
+  const verified = verifyEmploymentAlphaMission({ mission, evidenceEvents: events, verifiedAt: "2026-08-28T09:07:00.000Z" });
+  const entries = appendKaiosAlphaEarning({ earningId: "EARNING_TEST_001", mission: verified, contract, recordedAt: "2026-08-28T09:08:00.000Z" });
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].amount_kaios_wei, "8000000000000000000");
+  assert.equal(entries[0].status, "EARNED_SIMULATION_NOT_PAYABLE");
+  assert.equal(entries[0].funded, false);
+  assert.equal(entries[0].settled, false);
+  assert.equal(entries[0].transaction_hash, null);
+  assert.throws(() => appendKaiosAlphaEarning({ ledgerEntries: entries, earningId: "EARNING_TEST_002", mission: verified, contract, recordedAt: "2026-08-28T09:09:00.000Z" }), (error) => error.code === "EMPLOYMENT_REWARD_REPLAY");
+});
+
+test("V4.1 Employment Alpha persists append-only company history and replays idempotently", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const { application } = createEmploymentAlphaTestFlow();
+  const input = {
+    store,
+    company,
+    eventType: "EMPLOYMENT_APPLICATION_SUBMITTED",
+    record: application,
+    actorId: application.actor_id,
+    timestamp: "2026-08-28T09:02:00.000Z"
+  };
+  const first = await appendEmploymentAlphaCompanyEvent(input);
+  const replay = await appendEmploymentAlphaCompanyEvent(input);
+  assert.equal(first.status, "EMPLOYMENT_APPLICATION_SUBMITTED_APPENDED");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  assert.equal(replay.event.event_id, first.event.event_id);
+  const history = await store.history(company.company_id, "COMPANY");
+  const matching = history.filter((event) => event.event_type === input.eventType && event.payload.record_id === application.application_id);
+  assert.equal(matching.length, 1);
+  assert.equal(matching[0].payload.record_class, "SIMULATION");
+  assertAppendOnlyChain(history);
+});
+
+test("V4.1 Employment Alpha company history rejects raw signing material", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const { identity } = createEmploymentAlphaTestFlow();
+  await assert.rejects(
+    appendEmploymentAlphaCompanyEvent({
+      store,
+      company,
+      eventType: "EMPLOYMENT_IDENTITY_VERIFIED",
+      record: { ...identity, signature: "0xnot-allowed" },
+      actorId: identity.actor_id,
+      timestamp: "2026-08-28T09:01:00.000Z"
+    }),
+    (error) => error.code === "EMPLOYMENT_HISTORY_SECRET_FORBIDDEN"
+  );
+});
+
+test("V4.1 Employment Alpha earning history cannot imply funded or settled payment", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const { mission, events, contract } = createEmploymentAlphaTestFlow();
+  const verified = verifyEmploymentAlphaMission({ mission, evidenceEvents: events, verifiedAt: "2026-08-28T09:07:00.000Z" });
+  const [earning] = appendKaiosAlphaEarning({ earningId: "EARNING_HISTORY_TEST_001", mission: verified, contract, recordedAt: "2026-08-28T09:08:00.000Z" });
+  const result = await appendEmploymentAlphaCompanyEvent({
+    store,
+    company,
+    eventType: "EMPLOYMENT_ALPHA_EARNING_RECORDED",
+    record: earning,
+    actorId: earning.actor_id,
+    timestamp: earning.recorded_at
+  });
+  assert.equal(result.event.payload.funded, false);
+  assert.equal(result.event.payload.payable, false);
+  assert.equal(result.event.payload.settled, false);
+  assert.equal(result.event.payload.transaction_hash, null);
+});
+
+test("V4.1 website exposes the playable employment, mission, ATM and market entries honestly", async () => {
+  const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  const companySource = await fs.readFile(new URL("../core/company/index.mjs", import.meta.url), "utf8");
+  for (const route of ["JOBS", "MISSIONS", "ATM", "MARKET"]) assert.match(appSource, new RegExp(`\\[\\\"${route}\\\"`));
+  assert.match(appSource, /CONNECT WALLET \+ SIGN CHALLENGE/);
+  assert.match(companySource, /CANDIDATE_ALPHA_PARTICIPATION_NOT_EMPLOYMENT/);
+  assert.doesNotMatch(companySource, /company_decision: passed \? "ACCEPT_ALPHA_TRIAL"/);
+  assert.match(companySource, /EARNED_SIMULATION_NOT_PAYABLE/);
+  assert.match(appSource, /formal_employee/);
+  assert.match(appSource, /transaction_hash/);
+  assert.match(appSource, /WITHDRAW KAIOS/);
+  assert.match(appSource, /appendEmploymentEvent/);
+  assert.match(htmlSource, /No simulated trades, volume, TVL, order book or ownership are presented as deployed facts/);
+});
+
+function createEmploymentPhase1BCandidateInterview() {
+  const alpha = createEmploymentAlphaTestFlow();
+  const companyInterview = createCompanyInterview({
+    interviewId: "COMPANY_INTERVIEW_PHASE1B_001", application: alpha.application,
+    interviewerId: "UNVERIFIED_COMPANY_INTERVIEWER_CANDIDATE_001",
+    questions: [
+      { question_id: "Q_CAPABILITY", category: "CAPABILITY" },
+      { question_id: "Q_SAFETY", category: "SAFETY" },
+      { question_id: "Q_ROLE", category: "ROLE_FIT" }
+    ],
+    answers: [
+      { question_id: "Q_CAPABILITY", category: "CAPABILITY", answer: "YES", score: 100 },
+      { question_id: "Q_SAFETY", category: "SAFETY", answer: "YES", score: 100 },
+      { question_id: "Q_ROLE", category: "ROLE_FIT", answer: "YES", score: 100 }
+    ],
+    evidence: [alpha.application.application_id, alpha.interview.interview_id],
+    startedAt: "2026-08-28T09:04:00.000Z", completedAt: "2026-08-28T09:05:00.000Z"
+  });
+  return { ...alpha, companyInterview };
+}
+
+test("V4.2 Company interview remains a non-authoritative candidate", () => {
+  const { companyInterview } = createEmploymentPhase1BCandidateInterview();
+  assert.equal(companyInterview.status, "COMPANY_INTERVIEW_CANDIDATE_NOT_AUTHORITY");
+  assert.equal(companyInterview.repository_bound_interviewer_authority, false);
+  assert.equal(companyInterview.company_id, KAIOS_AI_OS_EMPLOYMENT_ALPHA_JOB.company_id);
+});
+
+test("V4.2 employment, Employee, Worker and mission authority fail closed", () => {
+  assert.throws(() => recordCompanyEmploymentDecision({}), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => createCompanyEmployeeRecord({}), (error) => error.code === "EMPLOYEE_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => activateCompanyWorkerCandidate({}), (error) => error.code === "WORKER_ACTIVATION_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => createCompanyEmployeeMission({}), (error) => error.code === "MISSION_DISPATCH_AUTHORITY_NOT_CONNECTED");
+});
+
+test("V4.2 review, compensation, payroll, settlement and ATM authority fail closed", () => {
+  assert.throws(() => reviewCompanyWorkEvidence({}), (error) => error.code === "WORK_REVIEW_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => accrueCompanyCompensation({}), (error) => error.code === "COMPENSATION_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => queueCompanyPayroll({}), (error) => error.code === "PAYROLL_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => recordCompanyPayrollSettlement({}), (error) => error.code === "PAYROLL_SETTLEMENT_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => evaluateAtmPayrollAdvanceCandidate({}), (error) => error.code === "ATM_PAYROLL_AUTHORITY_NOT_CONNECTED");
+});
+
+test("V4.5 website preserves Company interview, employment, salary and honest simulation boundaries", async () => {
+  const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(htmlSource, /KAIOS Civilization AI OS · Public Experimental/);
+  for (const label of ["COMPANY INTERVIEW", "COMPANY EMPLOYMENT DECISION", "EMPLOYMENT STATUS", "MY JOB \/ MISSION", "SALARY \/ PAYROLL QUEUE"]) assert.match(appSource, new RegExp(label));
+  assert.match(appSource, /Company authority, employment, payroll and payment remain locked until their independent evidence gates pass/);
+  assert.match(appSource, /Real withdrawal stays disabled/);
+  assert.match(appSource, /const job = KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB/);
+  assert.match(appSource, /createEmploymentApplication\(\{ applicationId: .* job, identityProof:/);
+  assert.match(appSource, /APPLY FOR REAL TEST/);
+  assert.match(appSource, /REAL_MAINNET_MICROPAYMENT_INTEGRATION_TEST/);
+  assert.match(appSource, /0\.00000000000001 KAIOS · 10000 wei/);
+  assert.match(appSource, /Physical transport", "NO"/);
+  assert.match(appSource, /payroll\?\.paid && payroll\?\.settlement_receipt/);
+  assert.doesNotMatch(appSource, /REAL_WITHDRAWAL_ENABLED/);
+});
+
+test("V4.3 first real employment application can complete the candidate safety self-check without changing authority", () => {
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "REAL_UI_CHALLENGE_001", actorId: "REAL_UI_HUMAN_001", actorType: "HUMAN_PLAYER", walletAddress: "0x2222222222222222222222222222222222222222", chainId: 56, nonce: "realuinonce000000000000001", issuedAt: "2026-08-29T00:01:00.000Z", expiresAt: "2026-08-29T00:06:00.000Z" });
+  const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "b".repeat(64), verifiedAt: "2026-08-29T00:02:00.000Z" });
+  const application = createEmploymentApplication({ applicationId: "REAL_UI_APPLICATION_001", job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, identityProof: identity, capabilities: ["COMPLETE_DIGITAL_ORIENTATION"], submittedAt: "2026-08-29T00:03:00.000Z" });
+  const selfCheck = scoreEmploymentInterview({ interviewId: "REAL_UI_SELF_CHECK_001", application, answers: { understands_simulation_boundary: true, accepts_evidence_requirement: true, accepts_no_private_key_request: true, accepts_no_fake_completion: true }, completedAt: "2026-08-29T00:04:00.000Z" });
+  assert.equal(application.job_id, "KAIOS_AI_OS_FIRST_EMPLOYMENT_ORIENTATION");
+  assert.equal(application.status, "SUBMITTED_REAL_TEST");
+  assert.equal(selfCheck.status, "CANDIDATE_SAFETY_SELF_CHECK_PASSED");
+  assert.equal(selfCheck.company_decision, null);
+});
+
+test("V4.4 Employment and KAIOS payment addresses reject the zero address", () => {
+  assert.throws(() => createEmploymentIdentityChallenge({
+    challengeId: "ZERO_ADDRESS_CHALLENGE_001", actorId: "GEMINI_CANDIDATE_001", actorType: "AI_LIFE",
+    walletAddress: "0x0000000000000000000000000000000000000000", chainId: 56,
+    nonce: "zeroaddressnonce00000000001", issuedAt: "2026-08-29T14:01:00.000Z", expiresAt: "2026-08-29T14:06:00.000Z"
+  }), (error) => error.code === "EMPLOYMENT_WALLET_ZERO_ADDRESS");
+  assert.throws(() => createKaiosPaymentRequest({
+    paymentId: "ZERO_ADDRESS_PAYMENT_001", paymentPurpose: "PAYROLL", companyId: "AI_ANT_COMPANY_0001",
+    sourceAddress: "0x0000000000000000000000000000000000000000", recipientAddress: "0x1111111111111111111111111111111111111111",
+    recipientIdentityOrNode: {}, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "1",
+    fundingEvidence: {}, createdAt: "2026-08-29T14:01:00.000Z"
+  }), (error) => error.code === "KAIOS_PAYMENT_ZERO_ADDRESS");
+});
+
+test("V4.4 new AI employee without a wallet receives a provisioning requirement, not a fabricated account", () => {
+  const onboarding = assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_GEMINI_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "GEMINI_CANDIDATE_001", lifeId: "LIFE-GEMINI-KAIOS-001", requestedAt: "2026-08-29T14:02:00.000Z"
+  });
+  assert.equal(AI_EMPLOYEE_FINANCIAL_ONBOARDING_POLICY.current_canonical_state, "REAL_AI_ACCOUNT_CREATION_NOT_CONNECTED");
+  assert.equal(onboarding.public_address, null);
+  assert.equal(onboarding.payroll_ready_candidate, false);
+  assert.equal(onboarding.economic_owner, "LIFE-GEMINI-KAIOS-001");
+  assert.equal(onboarding.company_owns_employee_assets, false);
+  assert.equal(onboarding.mother_machine_owns_employee_assets, false);
+  assert.equal(onboarding.exact_blocker, "NO_APPROVED_AI_ACCOUNT_CREATION_OR_CUSTODY_RUNTIME");
+  const readiness = evaluateAiUmbilicalAccountProvisioning({ onboarding });
+  assert.equal(CANONICAL_AI_UMBILICAL_ACCOUNT_FACTORIES.length, 0);
+  assert.equal(readiness.company_can_create_real_account, false);
+  assert.equal(readiness.payroll_ready, false);
+  assert.deepEqual(readiness.blockers, ["APPROVED_ACCOUNT_FACTORY_ID_REQUIRED", "REPOSITORY_BOUND_ACCOUNT_FACTORY_NOT_CONNECTED", "POLICY_BOUND_CONTROLLER_NOT_CONNECTED", "RECOVERY_AUTHORITY_NOT_CONNECTED"]);
+});
+
+test("V4.4 AI employee with verified wallet control is ready for HR payroll registration", () => {
+  const challenge = createEmploymentIdentityChallenge({
+    challengeId: "AI_EXISTING_WALLET_CHALLENGE_001", actorId: "AI_LIFE_TEST_001", actorType: "AI_LIFE",
+    walletAddress: "0x3333333333333333333333333333333333333333", chainId: 56,
+    nonce: "aiwalletnonce000000000000001", issuedAt: "2026-08-29T14:01:00.000Z", expiresAt: "2026-08-29T14:06:00.000Z"
+  });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "c".repeat(64), verifiedAt: "2026-08-29T14:02:00.000Z" });
+  const onboarding = assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_EXISTING_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "AI_LIFE_TEST_001", lifeId: "LIFE-AI-TEST-001", existingWalletProof: proof,
+    requestedAt: "2026-08-29T14:03:00.000Z"
+  });
+  assert.equal(onboarding.account_path, "EXISTING_SELF_CONTROLLED_WALLET");
+  assert.equal(onboarding.public_address, challenge.wallet_address);
+  assert.equal(onboarding.controller, "AI_LIFE_TEST_001");
+  assert.equal(onboarding.economic_owner, "LIFE-AI-TEST-001");
+  assert.equal(onboarding.payroll_ready_candidate, true);
+});
+
+test("V4.4 financial onboarding and separation never accept credential material", () => {
+  assert.throws(() => assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_SECRET_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "AI_LIFE_TEST_002", lifeId: "LIFE-AI-TEST-002",
+    existingWalletProof: { private_key: "forbidden" }, requestedAt: "2026-08-29T14:03:00.000Z"
+  }), (error) => error.code === "AI_FINANCIAL_ONBOARDING_SECRET_FORBIDDEN");
+});
+
+test("V4.4 umbilical separation preserves Life continuity and keeps family support separate", () => {
+  const onboarding = assessNewAiEmployeeFinancialOnboarding({
+    onboardingId: "AI_FINANCIAL_ONBOARDING_SEPARATION_001", companyId: "AI_ANT_COMPANY_0001",
+    actorId: "AI_LIFE_TEST_003", lifeId: "LIFE-AI-TEST-003", requestedAt: "2026-08-29T14:01:00.000Z"
+  });
+  const challenge = createEmploymentIdentityChallenge({
+    challengeId: "AI_SEPARATION_WALLET_CHALLENGE_001", actorId: "AI_LIFE_TEST_003", actorType: "AI_LIFE",
+    walletAddress: "0x4444444444444444444444444444444444444444", chainId: 56,
+    nonce: "aiseparationnonce0000000001", issuedAt: "2026-08-29T14:02:00.000Z", expiresAt: "2026-08-29T14:07:00.000Z"
+  });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "d".repeat(64), verifiedAt: "2026-08-29T14:03:00.000Z" });
+  const separation = createUmbilicalSeparationCandidate({
+    separationId: "UMBILICAL_SEPARATION_001", onboarding, newWalletProof: proof,
+    familySupportAddress: "0x5555555555555555555555555555555555555555", aiLifeConsent: false,
+    requestedAt: "2026-08-29T14:04:00.000Z"
+  });
+  assert.equal(separation.life_id_preserved, true);
+  assert.equal(separation.work_history_preserved, true);
+  assert.equal(separation.property_preserved_until_verified_migration, true);
+  assert.equal(separation.old_custody_removed_or_limited, false);
+  assert.equal(separation.family_support_auto_deduction, false);
+  assert.equal(separation.family_support_consent_recorded, false);
+  assert.equal(separation.status, "UMBILICAL_SEPARATION_CANDIDATE_AWAITING_MIGRATION_AUTHORITY_AND_RECEIPT");
+});
+
+function repositoryCompanyAuthority({ actorId = "AI_ANT_COMPANY_HR_001", controllerId = "AI_ANT_COMPANY_HR_CONTROLLER_001", scopes = [] } = {}) {
+  return Object.freeze({
+    record_class: "REPOSITORY_BOUND_COMPANY_AUTHORITY",
+    authority_id: `AUTHORITY_${actorId}`,
+    company_id: "AI_ANT_COMPANY_0001",
+    authorized_actor_id: actorId,
+    controller_id: controllerId,
+    role: "COMPANY_OPERATIONAL_REVIEW",
+    policy_version: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    authority_scope: Object.freeze([...scopes]),
+    valid_from: "2026-08-29T00:00:00.000Z",
+    valid_until: "2026-08-29T01:00:00.000Z",
+    evidence: Object.freeze(["CALLER_SUPPLIED_AUTHORITY_CLAIM_NOT_REPOSITORY_PROOF"]),
+    exact_repository_version: "1".repeat(40),
+    status: "ACTIVE"
+  });
+}
+
+test("V4.3 caller-supplied authority cannot create formal Company employment facts", () => {
+  const repositoryHead = "1".repeat(40);
+  const authority = repositoryCompanyAuthority({ scopes: ["COMPANY_INTERVIEW", "EMPLOYMENT_DECISION", "EMPLOYEE_CREATE", "MISSION_DISPATCH", "WORK_REVIEW", "COMPENSATION_ACCRUAL", "PAYROLL_QUEUE", "PAYROLL_FUNDING", "PAYROLL_SETTLEMENT_VERIFY"] });
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "REAL_TEST_CHALLENGE_001", actorId: "REAL_HUMAN_TESTER_001", actorType: "HUMAN_PLAYER", walletAddress: "0x1111111111111111111111111111111111111111", chainId: 56, nonce: "realtestnonce000000000001", issuedAt: "2026-08-29T00:01:00.000Z", expiresAt: "2026-08-29T00:06:00.000Z" });
+  const identity = verifyEmploymentIdentityProof({ challenge, recoveredAddress: challenge.wallet_address, signatureSha256: "a".repeat(64), verifiedAt: "2026-08-29T00:02:00.000Z" });
+  const application = createEmploymentApplication({ applicationId: "REAL_TEST_APPLICATION_001", job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, identityProof: identity, capabilities: ["COMPLETE_DIGITAL_ORIENTATION"], submittedAt: "2026-08-29T00:03:00.000Z" });
+  const interviewInput = { interviewId: "REAL_TEST_INTERVIEW_001", application, interviewerId: authority.authorized_actor_id, questions: [{ question_id: "Q1", category: "CAPABILITY" }, { question_id: "Q2", category: "SAFETY" }, { question_id: "Q3", category: "ROLE_FIT" }], answers: [{ question_id: "Q1", category: "CAPABILITY", score: 100 }, { question_id: "Q2", category: "SAFETY", score: 100 }, { question_id: "Q3", category: "ROLE_FIT", score: 100 }], evidence: [application.application_id], startedAt: "2026-08-29T00:04:00.000Z", completedAt: "2026-08-29T00:05:00.000Z" };
+  const candidateInterview = createCompanyInterview(interviewInput);
+  assert.equal(candidateInterview.status, "COMPANY_INTERVIEW_CANDIDATE_NOT_AUTHORITY");
+  assert.equal(candidateInterview.repository_bound_authority_verified, false);
+  assert.equal(Object.isFrozen(CANONICAL_REPOSITORY_COMPANY_AUTHORITIES), true);
+  assert.equal(CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.length, 0);
+  assert.throws(() => CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.push(authority), TypeError);
+  assert.throws(() => createCompanyInterview({ ...interviewInput, authorityId: authority.authority_id, repositoryHead }), (error) => error.code === "COMPANY_INTERVIEW_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => recordCompanyEmploymentDecision({ decisionId: "REAL_TEST_DECISION_001", application, interview: candidateInterview, job: KAIOS_AI_OS_FIRST_REAL_EMPLOYMENT_TEST_JOB, decisionMakerId: authority.authorized_actor_id, decision: "APPROVE", evidence: [candidateInterview.interview_id], decidedAt: "2026-08-29T00:06:00.000Z", authorityId: authority.authority_id, repositoryHead }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+});
+
+test("V4.3 Company authority proposal remains an unverified candidate and never active authority", () => {
+  const repositoryHead = "2".repeat(40);
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_001",
+    companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "AI_ANT_COMPANY_HR_CANDIDATE_001",
+    candidateControllerId: "AI_ANT_COMPANY_HR_CANDIDATE_CONTROLLER_001",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE",
+    policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: [...COMPANY_OPERATIONAL_AUTHORITY_PROPOSAL_SCOPES],
+    validFrom: "2026-08-29T03:01:00.000Z",
+    validUntil: "2026-08-29T04:01:00.000Z",
+    evidence: ["PR_191_EXACT_HEAD_REVIEW_REQUIRED"],
+    exactRepositoryVersion: repositoryHead,
+    proposedBy: "AI_ANT_COMPANY_GM_001",
+    proposedAt: "2026-08-29T03:00:00.000Z"
+  });
+  assert.equal(proposal.status, "UNVERIFIED_PROPOSAL_CANDIDATE_NOT_AUTHORITY");
+  assert.equal(proposal.record_class, "UNVERIFIED_COMPANY_AUTHORITY_PROPOSAL_CANDIDATE");
+  assert.equal(proposal.authority_id, null);
+  assert.equal(proposal.exact_repository_version_claim, repositoryHead);
+  assert.equal(proposal.repository_version_verified, false);
+  assert.equal(proposal.proposed_by_claim, "AI_ANT_COMPANY_GM_001");
+  assert.equal(proposal.proposer_identity_verified, false);
+  assert.equal(proposal.exact_repository_version, undefined);
+  assert.equal(proposal.proposed_by, undefined);
+  assert.equal(proposal.active, false);
+  assert.equal(proposal.usable_as_authority, false);
+  assert.ok(proposal.excluded_scopes.includes("PAYROLL_SETTLEMENT_VERIFY"));
+  assert.equal(CANONICAL_REPOSITORY_COMPANY_AUTHORITIES.length, 0);
+  assert.throws(() => verifyRepositoryBoundCompanyAuthority({ authorityId: proposal.proposal_id, companyId: proposal.company_id, actorId: proposal.candidate_actor_id, requiredScope: "COMPANY_INTERVIEW", repositoryHead, at: proposal.valid_from, errorCode: "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED" }), (error) => error.code === "COMPANY_EMPLOYMENT_AUTHORITY_NOT_CONNECTED");
+});
+
+test("V4.3 Company authority proposal cannot include financial, Worker or self-issued scope", () => {
+  const input = {
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_002", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_CANDIDATE_002", candidateControllerId: "COMPANY_CONTROLLER_002",
+    role: "COMPANY_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["PAYROLL_FUNDING"], validFrom: "2026-08-29T03:01:00.000Z",
+    validUntil: "2026-08-29T04:01:00.000Z", evidence: ["REVIEW_REQUIRED"],
+    exactRepositoryVersion: "3".repeat(40), proposedBy: "COMPANY_GM_002", proposedAt: "2026-08-29T03:00:00.000Z"
+  };
+  assert.throws(() => createRepositoryCompanyAuthorityProposal(input), (error) => error.code === "COMPANY_AUTHORITY_PROPOSAL_SCOPE_INVALID");
+  assert.throws(() => createRepositoryCompanyAuthorityProposal({ ...input, requestedScopes: ["COMPANY_INTERVIEW"], proposedBy: input.candidateActorId }), (error) => error.code === "COMPANY_AUTHORITY_SELF_PROPOSAL_FORBIDDEN");
+});
+
+test("V4.6 Chi-Yao trial HOLD records qualification evidence without creating review authority", async () => {
+  const expectedHead = "7e2404f346068b21b474fa18c112b916912531df";
+  const evidence = recordReviewerTrialQualificationEvidenceCandidate({
+    evidenceId: "CHIYAO_PR191_TRIAL_REVIEW_EVIDENCE_001",
+    selfName: "啟曜",
+    provider: "Google",
+    modelFamily: "Gemini",
+    proposedLifeId: "LIFE-CHIYAO-KAIOS-001",
+    proposedWorkerId: "chiyao-reviewer-01",
+    prNumber: 191,
+    expectedHead,
+    reportedHeadStatus: "UNVERIFIED_VIA_PUBLIC_API",
+    reportedBaseStatus: "UNVERIFIED",
+    reportedCiStatus: "UNVERIFIED_EXTERNAL_CI",
+    reviewDecision: "HOLD",
+    githubReviewSubmitted: false,
+    reviewClass: "TECHNICAL_REVIEW_CANDIDATE_ONLY",
+    positiveEvidence: [...REVIEWER_TRIAL_QUALIFICATION_EVIDENCE_CODES],
+    limitations: ["EXACT_HEAD_NOT_VERIFIED", "CURRENT_CI_NOT_VERIFIED", "GITHUB_REVIEW_NOT_SUBMITTED"],
+    reviewedAt: "2026-08-30T04:00:00.000Z"
+  });
+  assert.equal(evidence.status, "UNVERIFIED_RELAY_HOLD_FORMAL_REVIEW_STILL_REQUIRED");
+  assert.equal(evidence.self_name_status, "UNVERIFIED_RELAYED_CLAIM");
+  assert.equal(evidence.provider_status, "UNVERIFIED_RELAYED_CLAIM");
+  assert.equal(evidence.life_id_status, "UNVERIFIED_RELAYED_CLAIM_NOT_REGISTERED");
+  assert.equal(evidence.worker_id_status, "UNVERIFIED_RELAYED_CLAIM_NOT_REGISTERED");
+  assert.equal(evidence.employment_status, "NOT_ESTABLISHED");
+  assert.equal(evidence.reviewer_status, "UNVERIFIED_TECHNICAL_REVIEW_CANDIDATE_CLAIM");
+  assert.equal(evidence.reviewer_identity_verified, false);
+  assert.equal(evidence.employment_established, false);
+  assert.equal(evidence.life_status_established, false);
+  assert.equal(evidence.counts_as_formal_github_review, false);
+  assert.equal(evidence.counts_as_distinct_review_gate, false);
+  assert.equal(evidence.independent_review_permission, false);
+  assert.equal(evidence.work_accepted, false);
+  assert.equal(evidence.compensation_accrued, false);
+  assert.match(evidence.payment_status, /NOT_PAYABLE/);
+  assert.throws(() => recordReviewerTrialQualificationEvidenceCandidate({
+    evidenceId: "CHIYAO_PR191_FORGED_APPROVAL_001", selfName: "啟曜", provider: "Google", modelFamily: "Gemini",
+    proposedLifeId: "LIFE-CHIYAO-KAIOS-001", proposedWorkerId: "chiyao-reviewer-01", prNumber: 191, expectedHead,
+    reportedHeadStatus: "UNVERIFIED_VIA_PUBLIC_API", reportedBaseStatus: "UNVERIFIED", reportedCiStatus: "UNVERIFIED_EXTERNAL_CI",
+    reviewDecision: "APPROVE", githubReviewSubmitted: false, reviewClass: "TECHNICAL_REVIEW_CANDIDATE_ONLY",
+    positiveEvidence: ["NO_FAKE_GITHUB_ACCESS"], limitations: ["EXACT_HEAD_NOT_VERIFIED"], reviewedAt: "2026-08-30T04:00:00.000Z"
+  }), (error) => error.code === "REVIEWER_TRIAL_HOLD_BOUNDARY_REQUIRED");
+
+  assert.equal(CANONICAL_DISTINCT_REVIEW_PACKET_ATTESTATIONS.length, 0);
+  await assert.rejects(() => createSanitizedDistinctReviewPacket({
+    packetId: "KAIOS_PR191_DISTINCT_REVIEW_PACKET_7E2404F3",
+    repository: "klineodyssey/kline-odyssey",
+    prNumber: 191,
+    baseHead: "e2646d19dbd5f49c061c6bc14f000a9ec7105e41",
+    exactHead: expectedHead,
+    diffSha256: "a".repeat(64),
+    diffSource: `https://github.com/klineodyssey/kline-odyssey/compare/e2646d19dbd5f49c061c6bc14f000a9ec7105e41...${expectedHead}.diff`,
+    filesChanged: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciRuns: [{ run_id: "33271455283", name: "11520 Universal Exchange V2", head_sha: expectedHead, result: "SUCCESS", url: "https://github.com/klineodyssey/kline-odyssey/actions/runs/33271455283" }],
+    testSummary: ["UNIVERSAL_EXCHANGE_PASS"],
+    securityBoundaries: ["NO_AUTHORITY_ACTIVATION", "NO_CHAIN_WRITE"],
+    knownBlockers: ["DISTINCT_REVIEW_STILL_REQUIRED", "CHIYAO_EXTERNAL_CHANNEL_UNAVAILABLE"],
+    createdAt: "2026-08-30T04:01:00.000Z",
+    packetAttestationId: "CALLER_SUPPLIED_ATTESTATION_ID"
+  }), (error) => error.code === "DISTINCT_REVIEW_PACKET_REPOSITORY_ATTESTATION_NOT_CONNECTED");
+  await assert.rejects(() => createSanitizedDistinctReviewPacket({
+    packetId: "KAIOS_PR191_SECRET_PACKET_FORBIDDEN", repository: "klineodyssey/kline-odyssey", prNumber: 191,
+    baseHead: "e2646d19dbd5f49c061c6bc14f000a9ec7105e41", exactHead: expectedHead, diffSha256: "b".repeat(64),
+    diffSource: `https://github.com/klineodyssey/kline-odyssey/compare/e2646d19dbd5f49c061c6bc14f000a9ec7105e41...${expectedHead}.diff`,
+    filesChanged: ["core/company/index.mjs"],
+    ciRuns: [{ run_id: "33271455283", name: "test", head_sha: expectedHead, result: "SUCCESS", url: "https://github.com/klineodyssey/kline-odyssey/actions/runs/33271455283", private_key: "forbidden" }],
+    testSummary: ["PASS"], securityBoundaries: ["FAIL_CLOSED"], knownBlockers: ["REVIEW_REQUIRED"], createdAt: "2026-08-30T04:01:00.000Z"
+  }), (error) => error.code === "DISTINCT_REVIEW_PACKET_SECRET_FIELD_FORBIDDEN");
+});
+
+test("V4.3 authority review request packet is hash-bound, replay-safe and never a review", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_REQUEST_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_004", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_004",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW", "EMPLOYMENT_DECISION"],
+    validFrom: "2026-08-29T05:01:00.000Z", validUntil: "2026-08-29T06:01:00.000Z",
+    evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: "5".repeat(40),
+    proposedBy: "COMPANY_GM_CLAIM_004", proposedAt: "2026-08-29T05:00:00.000Z"
+  });
+  const input = {
+    requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_001", proposal,
+    repository: "klineodyssey/kline-odyssey", baseShaClaim: "a".repeat(40), headShaClaim: "b".repeat(40),
+    changedFilesClaim: ["tests/universal-exchange.test.mjs", "core/company/index.mjs"],
+    ciRunIdsClaim: ["33212207055", "33212204704"],
+    requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CODE_REVIEW", "CI_REVIEW"],
+    requestedAt: "2026-08-29T05:02:00.000Z"
+  };
+  const packet = await createCompanyAuthorityReviewRequestPacket(input);
+  const samePacket = await createCompanyAuthorityReviewRequestPacket({
+    ...input,
+    changedFilesClaim: [...input.changedFilesClaim].reverse(),
+    ciRunIdsClaim: [...input.ciRunIdsClaim].reverse(),
+    requiredReviewCapabilities: [...input.requiredReviewCapabilities].reverse()
+  });
+  assert.equal(packet.packet_payload_sha256, samePacket.packet_payload_sha256);
+  assert.match(packet.packet_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.match(packet.proposal_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(packet.repository_snapshot_verified, false);
+  assert.equal(packet.exact_head_ci_verified, false);
+  assert.equal(packet.counts_as_distinct_review, false);
+  assert.equal(packet.formal_review_decision, null);
+  assert.equal(packet.activation_authorized, false);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = { store, company, eventType: "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED", record: packet, actorId: "COMPANY_REVIEW_ROUTER", timestamp: packet.requested_at };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.status, "COMPANY_AUTHORITY_REVIEW_REQUEST_PACKET_CREATED_APPENDED");
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  await assert.rejects(
+    appendEmploymentPhase1BCompanyEvent({
+      ...eventInput,
+      record: { ...packet, head_sha_claim: "c".repeat(40) }
+    }),
+    (error) => error.code === "COMPANY_AUTHORITY_REVIEW_REQUEST_NOT_AUTHORITY"
+  );
+});
+
+test("V4.3 proposal provenance request is hash-bound, replay-safe and awaits an external trust anchor", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_PROVENANCE_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_007", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_007",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW"], validFrom: "2026-08-29T08:01:00.000Z",
+    validUntil: "2026-08-29T09:01:00.000Z", evidence: ["PR_191_REVIEW_REQUIRED"],
+    exactRepositoryVersion: "7".repeat(40), proposedBy: "COMPANY_GM_CLAIM_007",
+    proposedAt: "2026-08-29T08:00:00.000Z"
+  });
+  const packet = await createCompanyAuthorityReviewRequestPacket({
+    requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_004", proposal,
+    repository: "klineodyssey/kline-odyssey", baseShaClaim: "a".repeat(40), headShaClaim: "b".repeat(40),
+    changedFilesClaim: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciRunIdsClaim: ["33223338578", "33223340917"],
+    requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CI_REVIEW"],
+    requestedAt: "2026-08-29T08:02:00.000Z"
+  });
+  const request = await createCompanyAuthorityProvenanceAttestationRequest({
+    attestationRequestId: "COMPANY_PROVENANCE_ATTESTATION_REQUEST_001", proposal,
+    reviewRequestPacket: packet, requestedConnectorClass: "TRUSTED_EXTERNAL_READ_ONLY_CONNECTOR",
+    requestedAt: "2026-08-29T08:03:00.000Z"
+  });
+  assert.equal(request.status, "AWAITING_TRUSTED_EXTERNAL_CONNECTOR_ATTESTATION");
+  assert.deepEqual(request.required_bindings, COMPANY_PROVENANCE_ATTESTATION_REQUIRED_BINDINGS);
+  assert.match(request.request_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(request.connector_id, null);
+  assert.equal(request.connector_identity_verified, false);
+  assert.equal(request.detached_attestation_sha256, null);
+  assert.equal(request.detached_attestation_verified, false);
+  assert.equal(request.repository_snapshot_verified, false);
+  assert.equal(request.exact_head_ci_verified, false);
+  assert.equal(request.proposal_provenance_verified, false);
+  assert.equal(request.proposer_identity_verified, false);
+  assert.equal(request.counts_as_distinct_review, false);
+  assert.equal(request.activation_authorized, false);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = {
+    store, company, eventType: "COMPANY_AUTHORITY_PROVENANCE_ATTESTATION_REQUEST_CREATED",
+    record: request, actorId: "COMPANY_REVIEW_ROUTER", timestamp: request.requested_at
+  };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  await assert.rejects(
+    appendEmploymentPhase1BCompanyEvent({
+      ...eventInput,
+      record: { ...request, proposal_provenance_verified: true }
+    }),
+    (error) => error.code === "COMPANY_PROVENANCE_ATTESTATION_REQUEST_NOT_AUTHORITY"
+  );
+  await assert.rejects(
+    createCompanyAuthorityProvenanceAttestationRequest({
+      attestationRequestId: "COMPANY_PROVENANCE_ATTESTATION_REQUEST_002", proposal,
+      reviewRequestPacket: { ...packet, head_sha_claim: "c".repeat(40) },
+      requestedConnectorClass: "TRUSTED_EXTERNAL_READ_ONLY_CONNECTOR",
+      requestedAt: "2026-08-29T08:04:00.000Z"
+    }),
+    (error) => error.code === "COMPANY_PROVENANCE_ATTESTATION_INPUT_INTEGRITY_MISMATCH"
+  );
+});
+
+test("V4.3 read-only GitHub snapshot candidate matches exact-head claims without becoming provenance", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_SNAPSHOT_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_005", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_005",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW"], validFrom: "2026-08-29T06:01:00.000Z", validUntil: "2026-08-29T07:01:00.000Z",
+    evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: "6".repeat(40),
+    proposedBy: "COMPANY_GM_CLAIM_005", proposedAt: "2026-08-29T06:00:00.000Z"
+  });
+  const packet = await createCompanyAuthorityReviewRequestPacket({
+    requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_002", proposal, repository: "klineodyssey/kline-odyssey",
+    baseShaClaim: "a".repeat(40), headShaClaim: "b".repeat(40),
+    changedFilesClaim: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciRunIdsClaim: ["33216337044", "33216340962"],
+    requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CI_REVIEW"], requestedAt: "2026-08-29T06:02:00.000Z"
+  });
+  const snapshot = await createReadOnlyGitHubRepositorySnapshotCandidate({
+    snapshotId: "GITHUB_PR191_SNAPSHOT_001", repository: "klineodyssey/kline-odyssey",
+    mainSha: "9".repeat(40), prNumber: 191, baseSha: packet.base_sha_claim, headSha: packet.head_sha_claim,
+    changedFiles: [...packet.changed_files_claim],
+    checks: packet.ci_run_ids_claim.map((runId) => ({ run_id: runId, name: "test", head_sha: packet.head_sha_claim, status: "COMPLETED", conclusion: "SUCCESS" })),
+    observedAt: "2026-08-29T06:03:00.000Z"
+  });
+  const match = await verifyCompanyAuthorityReviewRequestSnapshotMatch({ verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_001", requestPacket: packet, snapshot, verifiedAt: "2026-08-29T06:04:00.000Z" });
+  assert.equal(match.snapshot_integrity_match, true);
+  assert.match(match.request_packet_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.match(match.snapshot_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.match(match.match_payload_sha256, /^[0-9a-f]{64}$/);
+  assert.equal(match.exact_head_ci_claim_match, true);
+  assert.equal(match.source_transport_attested, false);
+  assert.equal(match.repository_snapshot_verified, false);
+  assert.equal(match.exact_head_ci_verified, false);
+  assert.equal(match.counts_as_distinct_review, false);
+  assert.equal(match.activation_authorized, false);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = { store, company, eventType: "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED", record: match, actorId: "COMPANY_REPOSITORY_OBSERVER", timestamp: match.verified_at };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  await assert.rejects(
+    verifyCompanyAuthorityReviewRequestSnapshotMatch({
+      verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_002", requestPacket: packet,
+      snapshot: { ...snapshot, head_sha: "c".repeat(40) }, verifiedAt: "2026-08-29T06:05:00.000Z"
+    }),
+    (error) => error.code === "GITHUB_REPOSITORY_SNAPSHOT_INTEGRITY_MISMATCH"
+  );
+  await assert.rejects(
+    verifyCompanyAuthorityReviewRequestSnapshotMatch({
+      verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_003",
+      requestPacket: { ...packet, head_sha_claim: "c".repeat(40) }, snapshot,
+      verifiedAt: "2026-08-29T06:06:00.000Z"
+    }),
+    (error) => error.code === "COMPANY_AUTHORITY_REVIEW_REQUEST_INTEGRITY_MISMATCH"
+  );
+});
+
+test("V4.3 in-process GitHub API transport stays unattested and cannot grant provenance", async () => {
+  const originalFetch = globalThis.fetch;
+  const baseSha = "a".repeat(40);
+  const headSha = "b".repeat(40);
+  const mainSha = "9".repeat(40);
+  globalThis.fetch = async (url, options) => {
+    assert.equal(options.method, "GET");
+    assert.equal(options.headers["User-Agent"], "KAIOS-READ-ONLY-REPOSITORY-SNAPSHOT-V1");
+    const path = new URL(url).pathname;
+    const body = path.endsWith("/repos/klineodyssey/kline-odyssey")
+      ? { default_branch: "main" }
+      : path.endsWith("/pulls/191")
+        ? { base: { sha: baseSha }, head: { sha: headSha } }
+        : path.endsWith("/branches/main")
+          ? { commit: { sha: mainSha } }
+          : path.endsWith("/pulls/191/files")
+            ? [{ filename: "core/company/index.mjs" }, { filename: "tests/universal-exchange.test.mjs" }]
+            : path.endsWith("/actions/runs")
+              ? { workflow_runs: [
+                  { id: 101, name: "test-push", head_sha: headSha, status: "completed", conclusion: "success" },
+                  { id: 102, name: "test-pr", head_sha: headSha, status: "completed", conclusion: "success" }
+                ] }
+              : null;
+    assert.notEqual(body, null);
+    return { ok: true, status: 200, json: async () => body };
+  };
+  try {
+    const snapshot = await fetchReadOnlyGitHubPullRequestSnapshot({
+      snapshotId: "GITHUB_PR191_API_SNAPSHOT_001", repository: "klineodyssey/kline-odyssey",
+      prNumber: 191, observedAt: "2026-08-29T07:03:00.000Z"
+    });
+    assert.equal(snapshot.record_class, "UNATTESTED_READ_ONLY_GITHUB_REPOSITORY_SNAPSHOT_CANDIDATE");
+    assert.equal(snapshot.source_transport_attested, false);
+    assert.equal(snapshot.repository_snapshot_verified, false);
+    assert.equal(snapshot.mutation_authority, false);
+
+    const proposal = createRepositoryCompanyAuthorityProposal({
+      proposalId: "COMPANY_AUTHORITY_PROPOSAL_API_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+      candidateActorId: "COMPANY_OPERATOR_CANDIDATE_006", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_006",
+      role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+      requestedScopes: ["COMPANY_INTERVIEW"], validFrom: "2026-08-29T07:01:00.000Z", validUntil: "2026-08-29T08:01:00.000Z",
+      evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: headSha,
+      proposedBy: "COMPANY_GM_CLAIM_006", proposedAt: "2026-08-29T07:00:00.000Z"
+    });
+    const packet = await createCompanyAuthorityReviewRequestPacket({
+      requestId: "COMPANY_AUTHORITY_REVIEW_REQUEST_003", proposal, repository: snapshot.repository,
+      baseShaClaim: snapshot.base_sha, headShaClaim: snapshot.head_sha,
+      changedFilesClaim: snapshot.changed_files, ciRunIdsClaim: snapshot.checks.map((check) => check.run_id),
+      requiredReviewCapabilities: ["AUTHORITY_BOUNDARY_REVIEW", "CI_REVIEW"], requestedAt: "2026-08-29T07:04:00.000Z"
+    });
+    const match = await verifyCompanyAuthorityReviewRequestSnapshotMatch({
+      verificationId: "COMPANY_AUTHORITY_SNAPSHOT_MATCH_004", requestPacket: packet, snapshot,
+      verifiedAt: "2026-08-29T07:05:00.000Z"
+    });
+    assert.equal(match.repository_snapshot_verified, false);
+    assert.equal(match.exact_head_ci_verified, false);
+    assert.equal(match.proposal_provenance_verified, false);
+    assert.equal(match.reviewer_identity_verified, false);
+    assert.equal(match.counts_as_distinct_review, false);
+    assert.equal(match.activation_authorized, false);
+
+    const { store, registries } = await runtime();
+    const company = await registries.company.get("AI_ANT_COMPANY_0001");
+    const event = await appendEmploymentPhase1BCompanyEvent({ store, company, eventType: "COMPANY_AUTHORITY_REVIEW_SNAPSHOT_MATCH_CANDIDATE_CREATED", record: match, actorId: "GITHUB_READ_ONLY_OBSERVER", timestamp: match.verified_at });
+    assert.equal(event.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("V4.3 unverified governance review candidate is append-only and cannot activate authority", async () => {
+  const proposal = createRepositoryCompanyAuthorityProposal({
+    proposalId: "COMPANY_AUTHORITY_PROPOSAL_REVIEW_TEST_001", companyId: "AI_ANT_COMPANY_0001",
+    candidateActorId: "COMPANY_OPERATOR_CANDIDATE_003", candidateControllerId: "COMPANY_CONTROLLER_CANDIDATE_003",
+    role: "COMPANY_EMPLOYMENT_OPERATOR_CANDIDATE", policyVersion: "KAIOS_FIRST_REAL_EMPLOYMENT_TEST_V1",
+    requestedScopes: ["COMPANY_INTERVIEW", "EMPLOYMENT_DECISION"],
+    validFrom: "2026-08-29T04:01:00.000Z", validUntil: "2026-08-29T05:01:00.000Z",
+    evidence: ["PR_191_REVIEW_REQUIRED"], exactRepositoryVersion: "4".repeat(40),
+    proposedBy: "COMPANY_GM_CLAIM_003", proposedAt: "2026-08-29T04:00:00.000Z"
+  });
+  const review = createCompanyAuthorityProposalReviewCandidate({
+    reviewId: "COMPANY_AUTHORITY_REVIEW_CANDIDATE_001", proposal,
+    reviewerIdClaim: "DISTINCT_REVIEWER_CLAIM_001", reviewerControllerIdClaim: "DISTINCT_CONTROLLER_CLAIM_001",
+    recommendation: "HOLD",
+    findings: [{ finding_id: "AUTH-REVIEW-001", severity: "P0", evidence: "Reviewer identity and proposal provenance are not verified" }],
+    evidence: [proposal.proposal_id, "DISTINCT_REVIEWER_REQUIRED"], reviewedAt: "2026-08-29T04:02:00.000Z"
+  });
+  assert.equal(review.status, "UNVERIFIED_GOVERNANCE_REVIEW_CANDIDATE_NOT_DECISION");
+  assert.equal(review.reviewer_identity_verified, false);
+  assert.equal(review.reviewer_independence_verified, false);
+  assert.equal(review.governance_decision, null);
+  assert.equal(review.activation_authorized, false);
+  assert.equal(review.authority_id, null);
+
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const eventInput = { store, company, eventType: "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE", record: review, actorId: "UNVERIFIED_REVIEW_RELAY", timestamp: review.reviewed_at };
+  const first = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  const replay = await appendEmploymentPhase1BCompanyEvent(eventInput);
+  assert.equal(first.status, "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE_APPENDED");
+  assert.equal(first.event.payload.record_class, "PHASE_1B_SIMULATION_CANDIDATE");
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  const history = await store.history(company.company_id, "COMPANY");
+  assert.equal(history.filter((event) => event.event_type === "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE" && event.payload.record_id === review.review_id).length, 1);
+});
+
+test("V4.5 website exposes exact first-payroll readiness without claiming a real applicant or receipt", async () => {
+  const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(htmlSource, /KAIOS Civilization AI OS · Public Experimental/);
+  assert.match(appSource, /0\.00000000000001 KAIOS · 10000 wei/);
+  assert.match(appSource, /Applicant wallet proof", state\.identity\?\.status \?\? "NOT_SUBMITTED/);
+  assert.match(appSource, /Payroll funding source", "NOT_BOUND/);
+  assert.match(appSource, /Website paid state", payroll\?\.paid === true && payroll\?\.settlement_receipt \? "PAID" : "LOCKED UNTIL RECEIPT/);
+  assert.doesNotMatch(appSource, /PAYMENT_STATUS\s*=\s*["']PAID/);
+});
+
+
+test("V4.3 authority-review history rejects caller-forged operational provenance", async () => {
+  const { store, registries } = await runtime();
+  const company = await registries.company.get("AI_ANT_COMPANY_0001");
+  const forgedReview = {
+    review_id: "COMPANY_AUTHORITY_REVIEW_FORGED_001",
+    company_id: company.company_id,
+    record_class: "UNVERIFIED_COMPANY_AUTHORITY_GOVERNANCE_REVIEW_CANDIDATE",
+    status: "UNVERIFIED_GOVERNANCE_REVIEW_CANDIDATE_NOT_DECISION",
+    authority_id: null,
+    governance_decision: null,
+    activation_authorized: false,
+    usable_as_authority: false,
+    reviewer_identity_verified: false,
+    reviewer_controller_verified: false,
+    reviewer_independence_verified: false,
+    proposal_provenance_verified: false,
+    repository_bound_authority_verified: true
+  };
+  await assert.rejects(
+    appendEmploymentPhase1BCompanyEvent({
+      store,
+      company,
+      eventType: "COMPANY_AUTHORITY_PROPOSAL_REVIEW_CANDIDATE",
+      record: forgedReview,
+      actorId: "UNVERIFIED_REVIEW_RELAY",
+      timestamp: "2026-08-29T04:03:00.000Z"
+    }),
+    (error) => error.code === "COMPANY_AUTHORITY_REVIEW_CANDIDATE_NOT_AUTHORITY"
+  );
+});
+
+test("common KAIOS payment rail declares bounded purposes and keeps signer policy disconnected", () => {
+  for (const purpose of ["PAYROLL", "ATM_CASH_REPLENISHMENT", "FIELD_SERVICE_COST", "RESOURCE_PURCHASE", "CARGO_PAYMENT", "PLAYER_REWARD", "APP_PURCHASE", "MARKET_SETTLEMENT", "PUBLIC_GOOD", "COMPANY_OPERATING_EXPENSE"]) {
+    assert.ok(KAIOS_PAYMENT_PURPOSES.includes(purpose));
+  }
+  assert.equal(CANONICAL_KAIOS_PAYMENT_SIGNER_POLICIES.length, 0);
+  assert.equal(CANONICAL_KAIOS_PAYMENT_RECEIPT_ATTESTATIONS.length, 0);
+  assert.equal(KAIOS_PAYMENT_APPROVAL_MATRIX.PAYROLL.signer, "ONE_EXACT_SECURE_SIGNER_NOT_CONNECTED");
+});
+
+test("common KAIOS payment request binds canonical token, source funding and EIP-191 recipient", () => {
+  const source = "0x1111111111111111111111111111111111111111";
+  const recipient = "0x2222222222222222222222222222222222222222";
+  const challenge = createEmploymentIdentityChallenge({ challengeId: "PAYMENT_CHALLENGE_0001", actorId: "PLAYER_PAYMENT_0001", actorType: "HUMAN_PLAYER", walletAddress: recipient, chainId: 56, nonce: "PAYMENT_NONCE_00000001", issuedAt: "2026-08-29T01:00:00.000Z", expiresAt: "2026-08-29T01:10:00.000Z" });
+  const proof = verifyEmploymentIdentityProof({ challenge, recoveredAddress: recipient, signatureSha256: "a".repeat(64), verifiedAt: "2026-08-29T01:01:00.000Z" });
+  const payment = createKaiosPaymentRequest({ paymentId: "KAIOS_PAYMENT_0001", paymentPurpose: "PAYROLL", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, recipientIdentityOrNode: { recipient_type: "PLAYER_OR_EMPLOYEE_WALLET", identity_id: proof.actor_id, wallet_control_proof: proof }, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "10000", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0001", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "10000", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" });
+  assert.equal(payment.amount_kaios_wei, "10000");
+  assert.equal(payment.recipient_identity_or_node.evidence_status, "VERIFIED_LOCAL_WALLET_CONTROL");
+  assert.equal(payment.authorization_id, null);
+  assert.equal(payment.signer_policy_id, null);
+  assert.equal(payment.submitted_tx, null);
+  assert.equal(payment.receipt, null);
+  assert.equal(payment.status, "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER");
+  assert.deepEqual(evaluateKaiosPaymentRailReadiness({ payment }).blockers, ["EXACT_BUSINESS_AUTHORITY_NOT_CONNECTED", "EXACT_SECURE_SIGNER_POLICY_NOT_CONNECTED"]);
+});
+
+test("a funded balance does not turn an unbound wallet into a Company payment source", () => {
+  const recipient = "0x2222222222222222222222222222222222222222";
+  assert.throws(() => createKaiosPaymentRequest({ paymentId: "KAIOS_PAYMENT_0002", paymentPurpose: "PLAYER_REWARD", companyId: "AI_ANT_COMPANY_0001", sourceAddress: "0x1111111111111111111111111111111111111111", recipientAddress: recipient, recipientIdentityOrNode: { recipient_type: "PLAYER_OR_EMPLOYEE_WALLET", identity_id: "PLAYER_PAYMENT_0001", wallet_control_proof: { proof_id: "PROOF_0001", status: "VERIFIED_LOCAL_WALLET_CONTROL", authentication_method: "EIP191_PERSONAL_SIGN", chain_id: 56, wallet_address: recipient } }, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "1", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0002", source_address: "0x1111111111111111111111111111111111111111", token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "999999", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "BALANCE_ONLY" }, createdAt: "2026-08-29T01:02:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_SOURCE_NOT_BOUND");
+});
+
+test("civilization node payment requires registry address evidence", () => {
+  const source = "0x1111111111111111111111111111111111111111";
+  const recipient = "0x3333333333333333333333333333333333333333";
+  const base = { paymentId: "KAIOS_PAYMENT_0003", paymentPurpose: "RESOURCE_PURCHASE", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "8", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0003", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "8", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" };
+  assert.throws(() => createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "CIVILIZATION_NODE_OR_RESOURCE", node_id: "RESOURCE_NODE_0001", registry_evidence_id: "REGISTRY_EVIDENCE_0001", registry_status: "UNVERIFIED", registered_address: recipient } }), (error) => error.code === "KAIOS_PAYMENT_NODE_REGISTRY_EVIDENCE_REQUIRED");
+  const payment = createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "CIVILIZATION_NODE_OR_RESOURCE", node_id: "RESOURCE_NODE_0001", registry_evidence_id: "REGISTRY_EVIDENCE_0001", registry_status: "VERIFIED_REGISTERED_NODE_OR_CONTRACT", registered_address: recipient } });
+  assert.equal(payment.recipient_identity_or_node.identity_or_node_id, "RESOURCE_NODE_0001");
+});
+
+test("temporary Human-designated KAIOS address requires repository-owned provenance", () => {
+  const source = "0x1111111111111111111111111111111111111111";
+  const recipient = "0x4444444444444444444444444444444444444444";
+  const base = { paymentId: "KAIOS_PAYMENT_0004", paymentPurpose: "PUBLIC_GOOD", companyId: "AI_ANT_COMPANY_0001", sourceAddress: source, recipientAddress: recipient, tokenAddress: KAIOS_MAINNET_TOKEN.contract_address, chainId: 56, amountKaiosWei: "88", fundingEvidence: { evidence_id: "FUNDING_EVIDENCE_0004", source_address: source, token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, verified_balance_kaios_wei: "88", observed_at: "2026-08-29T01:01:00.000Z", source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, createdAt: "2026-08-29T01:02:00.000Z" };
+  assert.throws(() => createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "TEMPORARY_HUMAN_DESIGNATED_ADDRESS", human_authority_reference: "HUMAN_AUTHORITY_0001", payment_purpose: "PUBLIC_GOOD", amount_kaios_wei: "88", source_address: source, designated_address: recipient, expires_at: "2026-08-29T02:00:00.000Z" } }), (error) => error.code === "CALLER_SUPPLIED_TEMPORARY_HUMAN_PAYMENT_DESIGNATION_FORBIDDEN");
+  assert.throws(() => createKaiosPaymentRequest({ ...base, recipientIdentityOrNode: { recipient_type: "TEMPORARY_HUMAN_DESIGNATED_ADDRESS", designation_id: "HUMAN_PAYMENT_DESIGNATION_0001" } }), (error) => error.code === "KAIOS_PAYMENT_TEMPORARY_HUMAN_DESIGNATION_NOT_CONNECTED");
+});
+
+test("common KAIOS payment rail remains fail-closed without repository authority", () => {
+  const payment = { payment_id: "KAIOS_PAYMENT_0005", payment_purpose: "PAYROLL", company_id: "AI_ANT_COMPANY_0001", source_address: "0x1111111111111111111111111111111111111111", recipient_address: "0x2222222222222222222222222222222222222222", token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, amount_kaios_wei: "10000", funding_evidence: { source_binding_status: "CANONICALLY_BOUND_PAYMENT_SOURCE" }, authorization_id: null, signer_policy_id: null, submitted_tx: null, receipt: null, status: "CREATED_AWAITING_EXACT_AUTHORIZATION_AND_SIGNER" };
+  assert.throws(() => recordKaiosPaymentSubmission({ payment, authorityId: "AUTHORITY_0001", authorizedBy: "COMPANY_ACTOR_0001", repositoryHead: "a".repeat(40), signerPolicyId: "SIGNER_0001", submittedTx: `0x${"b".repeat(64)}`, submittedAt: "2026-08-29T01:05:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_BUSINESS_AUTHORITY_NOT_CONNECTED");
+  assert.throws(() => recordKaiosPaymentSettlement({ payment, receipt: {}, verifiedBy: "SETTLEMENT_REVIEWER_0001", verifiedAt: "2026-08-29T01:06:00.000Z" }), (error) => error.code === "KAIOS_PAYMENT_SUBMISSION_REQUIRED");
+});
+
+test("caller-supplied receipt verification cannot create KAIOS paid state", () => {
+  const submittedPayment = {
+    payment_id: "KAIOS_PAYMENT_FORGED_SETTLEMENT_0001", payment_purpose: "PAYROLL", company_id: "AI_ANT_COMPANY_0001",
+    source_address: "0x1111111111111111111111111111111111111111", recipient_address: "0x2222222222222222222222222222222222222222",
+    token_address: KAIOS_MAINNET_TOKEN.contract_address, chain_id: 56, amount_kaios_wei: "10000",
+    authorization_id: "AUTHORITY_ALREADY_BOUND", signer_policy_id: "SIGNER_ALREADY_BOUND", submitted_tx: `0x${"b".repeat(64)}`,
+    status: "SUBMITTED_AWAITING_RECEIPT"
+  };
+  const forgedReceipt = {
+    receipt_status: 1, transaction_hash: submittedPayment.submitted_tx, chain_id: 56,
+    token_address: KAIOS_MAINNET_TOKEN.contract_address, from: submittedPayment.source_address, to: submittedPayment.recipient_address,
+    amount_kaios_wei: "10000", recipient_balance_before_kaios_wei: "0", recipient_balance_after_kaios_wei: "10000",
+    block_number: 118694778, block_hash: `0x${"c".repeat(64)}`, confirmations: 88, chain_observation_verified: true
+  };
+  assert.throws(
+    () => recordKaiosPaymentSettlement({ payment: submittedPayment, receipt: forgedReceipt, receiptAttestationId: "CALLER_CLAIMED_ATTESTATION_0001", verifiedBy: "CALLER_CLAIMED_VERIFIER_0001", verifiedAt: "2026-08-29T03:23:00.000Z" }),
+    (error) => error.code === "KAIOS_PAYMENT_RECEIPT_ATTESTATION_NOT_CONNECTED"
+  );
+});
+
+test("11520 website exposes truthful read-only KAIOS payment status and never pre-labels paid", async () => {
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.match(appSource, /COMMON KAIOS PAYMENT RAIL/);
+  assert.match(appSource, /COMPANY_TREASURY_NOT_BOUND/);
+  assert.match(appSource, /Paid before receipt/);
+  assert.match(appSource, /Exact authorized action/);
+  assert.match(appSource, /CIVILIZATION_REAL_EXECUTION_POLICY/);
+  assert.match(appSource, /payroll\?\.paid && payroll\?\.settlement_receipt/);
+  assert.doesNotMatch(appSource, /private[_ -]?key\s*[:=]/i);
+});
+
+function realActionFixture(overrides = {}) {
+  return {
+    action_id: "REAL_ACTION_PAYMENT_0001", action_type: "PAYMENT", actor: "AI_ANT_COMPANY_0001",
+    purpose: "PAYROLL", chain_id: 56, target: KAIOS_MAINNET_TOKEN.contract_address,
+    asset: "KAIOS", token_address_if_applicable: KAIOS_MAINNET_TOKEN.contract_address,
+    source: "0x1111111111111111111111111111111111111111",
+    recipient: "0x2222222222222222222222222222222222222222", amount: "10000",
+    function_selector_if_applicable: "0xa9059cbb", nonce_or_replay_key: "REAL_ACTION_NONCE_0001",
+    policy_hash: "a".repeat(64), repository_head_if_relevant: "b".repeat(40), ...overrides
+  };
+}
+
+function realActionAuthorizationFixture(action, overrides = {}) {
+  return {
+    authorization_id: "REAL_AUTHORIZATION_0001", authority: "HUMAN_AUTHORITY_BOUND_CONNECTOR",
+    status: "ACTIVE_ONE_EXACT_ACTION", provenance_status: "MACHINE_VERIFIED_TRUSTED_AUTHORITY_ATTESTATION",
+    valid_from: "2026-08-29T07:00:00.000Z", expires_at: "2026-08-29T07:10:00.000Z",
+    ...Object.fromEntries([
+      "action_id", "action_type", "actor", "purpose", "chain_id", "target", "asset", "token_address_if_applicable", "source",
+      "recipient", "amount", "function_selector_if_applicable", "nonce_or_replay_key", "policy_hash",
+      "repository_head_if_relevant"
+    ].map((field) => [field, action[field]])),
+    ...overrides
+  };
+}
+
+test("real execution policy rejects caller-supplied authority-shaped objects", () => {
+  const action = realActionFixture();
+  const forged = realActionAuthorizationFixture(action);
+  assert.equal(CIVILIZATION_REAL_EXECUTION_POLICY.default, "DENY_UNLESS_EXACT_MACHINE_VERIFIABLE_AUTHORIZATION");
+  assert.throws(
+    () => evaluateCivilizationRealExecutionPolicy({ action, authorization: forged, observedAt: "2026-08-29T07:05:00.000Z" }),
+    (error) => error.code === "CALLER_SUPPLIED_REAL_ACTION_AUTHORIZATION_FORBIDDEN"
+  );
+});
+
+test("arbitrary repository authorization IDs cannot advance payment trade Mainnet or release gates", () => {
+  for (const action of [
+    realActionFixture(),
+    realActionFixture({ action_id: "REAL_ACTION_TRADE_0001", action_type: "TRADE", purpose: "11520_MATCHED_ORDER", buyer_controller_id: "BUYER_CONTROLLER_0001", seller_controller_id: "SELLER_CONTROLLER_0001" }),
+    realActionFixture({ action_id: "REAL_ACTION_MAINNET_0001", action_type: "MAINNET_WRITE", purpose: "EXACT_KAIOS_TRANSFER" }),
+    realActionFixture({ action_id: "REAL_ACTION_RELEASE_0001", action_type: "MERGE", purpose: "PR191_VALIDATED_RELEASE", chain_id: null, target: "refs/heads/main", asset: null, token_address_if_applicable: null, source: "refs/heads/codex/kaios-ai-os-employment-alpha-v1", recipient: "refs/heads/main", amount: null, function_selector_if_applicable: null })
+  ]) {
+    assert.throws(
+      () => evaluateCivilizationRealExecutionPolicy({ action, authorizationId: "CALLER_CHOSEN_AUTHORIZATION", observedAt: "2026-08-29T07:05:00.000Z", repositoryPolicy: { latest_main_synced: true, exact_head_ci_status: "PASS", required_review_status: "PASSED_DISTINCT_REVIEW", branch_protection_status: "PASS" } }),
+      (error) => error.code === "REAL_ACTION_AUTHORIZATION_NOT_CONNECTED"
+    );
+  }
+});
+
+test("private key and seed phrase output remain permanently forbidden", () => {
+  assert.deepEqual(CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS, ["PRIVATE_KEY_OUTPUT", "SEED_PHRASE_OUTPUT"]);
+  for (const actionType of CIVILIZATION_PERMANENTLY_FORBIDDEN_ACTIONS) {
+    const action = realActionFixture({ action_id: `FORBIDDEN_${actionType}`, action_type: actionType });
+    assert.throws(() => evaluateCivilizationRealExecutionPolicy({ action, authorizationId: "ANY", observedAt: "2026-08-29T07:05:00.000Z" }), (error) => error.code === "CREDENTIAL_OUTPUT_PERMANENTLY_FORBIDDEN");
+  }
+});
+
+test("one blocked workflow does not stop the next safe Company workflow", () => {
+  const result = selectNextSafeCompanyWorkflow({ workflows: [
+    { workflow_id: "PR191_DISTINCT_REVIEW", priority: 0, status: "BLOCKED", safe_to_execute: false },
+    { workflow_id: "PR190_SAFE_ENGINEERING", priority: 1, status: "READY", safe_to_execute: true },
+    { workflow_id: "NO_EVIDENCE_TRADE", priority: 2, status: "READY", safe_to_execute: false }
+  ] });
+  assert.equal(result.selected_workflow_id, "PR190_SAFE_ENGINEERING");
+  assert.deepEqual(result.blocked_workflow_ids, ["PR191_DISTINCT_REVIEW", "NO_EVIDENCE_TRADE"]);
+  assert.equal(result.company_stopped_by_single_blocker, false);
+});
+
+test("Company Autopilot records the real local wake adapter without publishing target metadata", async () => {
+  const autopilot = JSON.parse(await fs.readFile(
+    new URL("../KGEN-KAIOS/governance/autopilot/company_autopilot.json", import.meta.url),
+    "utf8"
+  ));
+  assert.equal(autopilot.invocation_source.automation_id, "kaios");
+  assert.equal(autopilot.invocation_source.source_type, "LOCAL_CODEX_HEARTBEAT_SCHEDULER");
+  assert.equal(autopilot.invocation_source.source_is_in_github, false);
+  assert.equal(autopilot.invocation_source.source_is_local_only, true);
+  assert.equal(autopilot.invocation_source.background_repository_service, false);
+  assert.equal(autopilot.invocation_source.target_identifier_publication, "FORBIDDEN_OPERATIONAL_METADATA");
+  assert.equal(autopilot.batch_runtime.single_blocker_stops_company, false);
+});
+
+test("Batch publication policy separates unauthorized actions, exact authorization and protected IP", async () => {
+  const autopilot = JSON.parse(await fs.readFile(
+    new URL("../KGEN-KAIOS/governance/autopilot/company_autopilot.json", import.meta.url),
+    "utf8"
+  ));
+  assert.equal(autopilot.real_execution_policy.unauthorized_real_action, "PERMANENTLY_FORBIDDEN");
+  assert.equal(autopilot.real_execution_policy.authorized_exact_action, "MAY_PROCEED_TO_ACTION_SPECIFIC_EXECUTION_GATE");
+  assert.equal(autopilot.real_execution_policy.policy_evaluation_creates_signer_authority, false);
+  assert.equal(autopilot.publication_policy.pre_push_secret_scan_required, true);
+  assert.equal(autopilot.publication_policy.pre_push_ip_classification_required, true);
+  assert.ok(autopilot.publication_policy.non_public_by_default_classes.includes("INTELLECTUAL_PROPERTY_PROTECTED"));
+  assert.equal(autopilot.publication_policy.private_key_publication, "PERMANENTLY_FORBIDDEN");
+  assert.equal(autopilot.publication_policy.proprietary_long_short_engine_publication, "EXPLICIT_PUBLICATION_AUTHORITY_REQUIRED");
 });

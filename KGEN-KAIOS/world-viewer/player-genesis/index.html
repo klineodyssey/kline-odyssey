@@ -60,6 +60,7 @@
         <form id="genesis-form">
           <div class="form-grid">
             <label>玩家名稱<input name="display_name" maxlength="40" required value="KAIOS Player" autocomplete="nickname"></label>
+            <label>生命入口<select name="life_type"><option value="HUMAN_PLAYER">Human Player</option><option value="AI_LIFE">AI Life</option></select></label>
             <label>生日（只存本機）<input name="birthday" type="date" required></label>
             <label>出生地<select name="birthplace_id"><option value="BIRTHPLACE-K280-SYNTHETIC-REGION-01">K280 合成出生區</option><option value="BIRTHPLACE-K280-RIVER-02">K280 河谷出生區</option></select></label>
             <label>起家地<select name="starter_location_id"><option value="STARTER-K280-VALLEY-01">K280 起家谷地</option><option value="STARTER-K280-PLAIN-02">K280 起家平原</option></select></label>
@@ -83,10 +84,12 @@
       <section class="dashboard" id="dashboard" hidden aria-label="KAIOS Player Genesis dashboard">
         <nav class="section-tabs" aria-label="Dashboard sections">
           <button type="button" data-target="identity-panel" aria-pressed="true">身份</button>
+          <button type="button" data-target="path-panel" aria-pressed="false">人生</button>
           <button type="button" data-target="work-panel" aria-pressed="false">工作</button>
           <button type="button" data-target="wallet-panel" aria-pressed="false">帳戶</button>
           <button type="button" data-target="household-panel" aria-pressed="false">家庭</button>
           <button type="button" data-target="life-panel" aria-pressed="false">生命</button>
+          <button type="button" data-target="telepathy-panel" aria-pressed="false">訊息</button>
         </nav>
 
         <section class="panel" id="identity-panel">
@@ -96,6 +99,16 @@
             <article><h3>起家土地</h3><div id="starter-land"></div></article>
             <article><h3>Consent</h3><div id="consent-summary"></div></article>
           </div>
+        </section>
+
+        <section class="panel" id="path-panel">
+          <header class="section-header"><div><p class="eyebrow">WORLD MAP + LIFE PATH</p><h2>先活下來，再選人生</h2></div><span>ONE PLAYABLE LOOP</span></header>
+          <div class="split">
+            <article><h3>人生路徑</h3><label>選擇路徑<select id="life-path-select"><option value="EDUCATION">教育</option><option value="EMPLOYMENT">就業</option><option value="VOCATIONAL_LABOR">職業勞動</option><option value="ENTREPRENEURSHIP">創業</option><option value="RESEARCH">研究</option><option value="ECOLOGY_FARMING_AQUACULTURE">生態／農漁</option><option value="LOGISTICS_TRANSPORT">物流運輸</option><option value="SECURITY">保全</option><option value="MARKET_TRADING_GAME">市場遊戲</option><option value="EXPLORATION_QUEST">探索任務</option><option value="APP_PRODUCT_CREATION">App／產品</option></select></label><label>教育類型<select id="education-path-select"><option value="SKILL_TRAINING">技能訓練</option><option value="APPRENTICESHIP">學徒</option><option value="VOCATIONAL">職校</option><option value="UNIVERSITY">大學</option><option value="RESEARCH">研究</option></select></label><button type="button" id="select-life-path">確認人生路徑</button><div id="life-path-summary"></div></article>
+            <article><h3>World Map 行動</h3><div class="action-bar"><button type="button" id="visit-water">前往水源</button><button type="button" id="collect-water">取得水</button><button type="button" id="visit-food">前往採集林</button><button type="button" id="collect-food">取得食物</button><a class="map-link" href="../">打開完整 World Map</a></div><p class="form-notice">導航關閉時使用 NON_LOCATION_MODE；不儲存精確 GPS。</p></article>
+          </div>
+          <div class="metrics needs" id="need-grid"></div>
+          <div class="first-purchase"><button type="button" id="buy-first-service">購買 3 模擬幣的水與食物指南</button><span id="life-loop-result">EARN FIRST · THEN BUY ONE SERVICE</span></div>
         </section>
 
         <section class="panel" id="work-panel">
@@ -128,6 +141,16 @@
         <section class="panel" id="life-panel">
           <header class="section-header"><div><p class="eyebrow">SURVIVAL + LIFECYCLE</p><h2>AI 載體與生命狀態</h2></div><span>REPLAYABLE</span></header>
           <div class="split"><article><h3>AI Body Profile</h3><div id="ai-needs"></div></article><article><h3>老化、失效與歷史</h3><div id="lifecycle-summary"></div><div class="action-bar"><button type="button" id="age-life">推進生命週期</button><button type="button" id="simulate-death">模擬 AI 維護失效</button></div></article></div>
+        </section>
+
+        <section class="panel" id="telepathy-panel">
+          <header class="section-header"><div><p class="eyebrow">KAIOS TELEPATHY BUS</p><h2>玩家不再搬公文</h2></div><span>PAYLOAD HASH ONLY</span></header>
+          <div class="split">
+            <form id="telepathy-form"><label>送給誰<select id="telepathy-target"><option value="CODEX_GM">衡曜／Company GM（Browser Controller 尚未接通）</option><option value="CHIYAO">啟曜（外部 Controller 尚不可路由）</option></select></label><label>需求<textarea id="telepathy-request" rows="4" maxlength="1000" placeholder="告訴公司你需要什麼"></textarea></label><button type="submit">建立安全 Outbox Request</button><p id="telepathy-result" role="status">NOT SENT</p></form>
+            <article><h3>Human Relay CFO</h3><div id="relay-summary"></div></article>
+          </div>
+          <ol class="telepathy-list" id="telepathy-list"></ol>
+          <p class="form-notice">目前只保存不含原文的安全 Outbox metadata。Browser→GM 與外部 Provider 都沒有可驗證 Controller，因此不偽造送達或 ACK；接通後才能自動配送。</p>
         </section>
 
         <section class="event-panel" aria-labelledby="event-title"><header><h2 id="event-title">Life History</h2><span>IMMUTABLE IN SIMULATION EXPORT</span></header><ol id="event-list"></ol></section>

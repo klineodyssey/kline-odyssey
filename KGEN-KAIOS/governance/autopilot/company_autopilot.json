@@ -1,8 +1,8 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.4.7",
-    "revision": "2026-08-01.4",
+    "version": "0.5.0",
+    "revision": "2026-08-29.1",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
     "last_updated": "2026-08-01",
     "updated_by": "codex-gm-01",
@@ -145,6 +145,72 @@
     ],
     "maintenance_is_parallel_service_lane": true,
     "scheduler_grants_authority": false
+  },
+  "invocation_source": {
+    "automation_id": "kaios",
+    "name": "KAIOS 安全公司心跳",
+    "source_type": "LOCAL_CODEX_HEARTBEAT_SCHEDULER",
+    "logical_source_path": "$CODEX_HOME/automations/kaios/automation.toml",
+    "trigger": "RRULE_SCHEDULE",
+    "schedule_public_summary": "HOURLY_INTERVAL_1",
+    "source_is_in_github": false,
+    "source_is_local_only": true,
+    "source_sha256": "9bce1375dc2a8d3f95a8670f7fb03fc8d39031ccd582e90c783fe3aaa618ca8b",
+    "background_repository_service": false,
+    "target_identifier_publication": "FORBIDDEN_OPERATIONAL_METADATA",
+    "wake_adapter_only": true
+  },
+  "batch_runtime": {
+    "reconcile_before_selection": true,
+    "mutable_sources_refreshed_each_invocation": true,
+    "select_one_bounded_slice_per_turn": true,
+    "single_blocker_stops_company": false,
+    "blocked_item_action": "PRESERVE_AND_RECORD",
+    "next_item_action": "SELECT_NEXT_CONFLICT_FREE_AUTHORIZED_SAFE_WORK",
+    "next_invocation_resumes_from_checkpoint_after_fresh_revalidation": true
+  },
+  "real_execution_policy": {
+    "default": "DENY_UNLESS_EXACT_MACHINE_VERIFIABLE_AUTHORIZATION",
+    "unauthorized_real_action": "PERMANENTLY_FORBIDDEN",
+    "authorized_exact_action": "MAY_PROCEED_TO_ACTION_SPECIFIC_EXECUTION_GATE",
+    "policy_evaluation_creates_business_authority": false,
+    "policy_evaluation_creates_signer_authority": false,
+    "private_key_output": "PERMANENTLY_FORBIDDEN",
+    "seed_phrase_output": "PERMANENTLY_FORBIDDEN",
+    "required_exact_bindings": [
+      "ACTION_ID",
+      "ACTION_TYPE",
+      "ACTOR",
+      "AUTHORITY",
+      "PURPOSE",
+      "CHAIN_ID",
+      "TARGET",
+      "TOKEN_OR_ASSET",
+      "SOURCE",
+      "RECIPIENT",
+      "AMOUNT",
+      "SELECTOR_IF_RELEVANT",
+      "NONCE_OR_REPLAY_KEY",
+      "VALID_FROM",
+      "EXPIRES_AT",
+      "POLICY_HASH",
+      "REPOSITORY_HEAD_IF_RELEVANT"
+    ]
+  },
+  "publication_policy": {
+    "manifest": "KGEN-KAIOS/genesis-dna/DNA_PRIVACY_AND_HEAVEN_SECRET.md",
+    "pre_push_secret_scan_required": true,
+    "pre_push_ip_classification_required": true,
+    "public_classes": ["PUBLIC"],
+    "non_public_by_default_classes": [
+      "INTERNAL",
+      "CONFIDENTIAL",
+      "SECRET",
+      "INTELLECTUAL_PROPERTY_PROTECTED"
+    ],
+    "private_key_publication": "PERMANENTLY_FORBIDDEN",
+    "seed_phrase_publication": "PERMANENTLY_FORBIDDEN",
+    "proprietary_long_short_engine_publication": "EXPLICIT_PUBLICATION_AUTHORITY_REQUIRED"
   },
   "formal_sources": {
     "boot": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",

@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import {
   AI_BODY_PROFILES,
+  BASIC_LIFE_NEEDS,
+  EDUCATION_PATHS,
+  LIFE_PATHS,
+  STARTER_WORLD_NODES,
   WORK_MARKET,
   acceptFirstWork,
   advanceLifecycle,
@@ -10,13 +14,18 @@ import {
   createPlayerGenesisRuntime,
   createPlayerGenesisState,
   createSimulatedDescendant,
+  buyStarterService,
   exportSimulation,
   importSimulation,
+  identifyNextLifeNeed,
   performWorkTick,
   reviewWork,
   runHouseholdExpenseLoop,
   runPayroll,
+  satisfyStarterNeed,
+  selectLifePath,
   simulateDeath,
+  travelToStarterNode,
   validateState,
   walletSummary
 } from "../player-genesis/player-genesis-runtime.js";
@@ -89,6 +98,48 @@ test("starter land begins at primitive foraging with bounded resources", () => {
   assert.equal(state.starter_land.civilization_stage, "PRIMITIVE_FORAGING");
   assert.equal(state.starter_land.asset_class, "LAND_PARCEL");
   assert.ok(state.starter_land.forbidden_starter_assets.includes("FACTORY"));
+});
+
+test("player chooses one of the shared life paths and education requires a valid path", () => {
+  const state = genesis();
+  assert.ok(LIFE_PATHS.includes("ENTREPRENEURSHIP"));
+  assert.ok(EDUCATION_PATHS.includes("SKILL_TRAINING"));
+  assert.throws(() => selectLifePath(state, "EDUCATION"), /EDUCATION_PATH_REQUIRED/);
+  selectLifePath(state, "EDUCATION", "SKILL_TRAINING");
+  assert.equal(state.life_path.status, "ENROLLED_SIMULATION");
+});
+
+test("basic needs identify the next requirement from real local state", () => {
+  const state = genesis();
+  assert.deepEqual(BASIC_LIFE_NEEDS.slice(0, 3), ["WATER", "FOOD", "SLEEP"]);
+  const next = identifyNextLifeNeed(state);
+  assert.equal(next.next_need, "MONEY");
+  assert.equal(next.evidence, "LOCAL_SIMULATION_STATE");
+});
+
+test("world route reuses map primitives and needs require arrival evidence", () => {
+  const state = genesis();
+  selectLifePath(state, "EMPLOYMENT");
+  assert.equal(STARTER_WORLD_NODES.K280_WATER_SOURCE.type, "WATER");
+  assert.throws(() => satisfyStarterNeed(state, "K280_WATER_SOURCE"), /ARRIVAL_REQUIRED/);
+  const route = travelToStarterNode(state, "K280_WATER_SOURCE");
+  assert.equal(route.status, "ARRIVED_SIMULATION");
+  assert.equal(route.map_evidence, "UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json");
+  satisfyStarterNeed(state, "K280_WATER_SOURCE");
+  assert.equal(state.starter_land.resources.water, 11);
+  assert.equal(route.exact_gps_stored, false);
+});
+
+test("first playable loop requires earnings before one service purchase", () => {
+  const state = genesis();
+  selectLifePath(state, "VOCATIONAL_LABOR");
+  assert.throws(() => buyStarterService(state, "K280_WATER_AND_FOOD_GUIDE"), /EARNINGS_REQUIRED/);
+  completeWork(state);
+  const purchase = buyStarterService(state, "K280_WATER_AND_FOOD_GUIDE");
+  assert.equal(purchase.status, "SIMULATED_SETTLED");
+  assert.equal(state.life_loop.status, "FIRST_PLAYABLE_LIFE_LOOP_COMPLETE");
+  assert.equal(state.life_loop.completed_cycles, 1);
+  assert.throws(() => buyStarterService(state, "K280_WATER_AND_FOOD_GUIDE"), /ALREADY_PURCHASED/);
 });
 
 test("work market contains all eight required roles", () => {
@@ -301,10 +352,17 @@ test("official homepage, Full Viewer, and public route expose Player Genesis", a
 });
 
 test("UI exposes loading, error, retry, save, resume, export, import and reset", async () => {
-  const html = await fs.readFile(new URL("../player-genesis/index.html", import.meta.url), "utf8");
+  const [html, app] = await Promise.all([
+    fs.readFile(new URL("../player-genesis/index.html", import.meta.url), "utf8"),
+    fs.readFile(new URL("../player-genesis/app.js", import.meta.url), "utf8")
+  ]);
   for (const id of ["loading-state", "error-state", "retry-button", "save-button", "resume-button", "export-button", "import-input", "reset-button"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
+  for (const id of ["path-panel", "need-grid", "telepathy-panel", "telepathy-form", "relay-summary"]) assert.match(html, new RegExp(`id="${id}"`));
+  assert.match(app, /LOCAL_BROWSER_TO_GM_CONTROLLER_NOT_CONNECTED/);
+  assert.match(app, /payload_persisted === false/);
+  assert.doesNotMatch(app, /available: true \}.*ROUTE_BROWSER_TO_CODEX/s);
 });
 
 test("responsive styles cover required mobile and desktop constraints", async () => {

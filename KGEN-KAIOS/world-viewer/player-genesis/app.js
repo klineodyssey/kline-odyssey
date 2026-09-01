@@ -1,6 +1,20 @@
 import { createPlayerGenesisRuntime } from "./player-genesis-runtime.js";
+import {
+  createKaiosTelepathyMessage,
+  routeKaiosTelepathyMessage,
+  summarizeHumanRelayLaborLedger,
+  HUMAN_RELAY_LABOR_RATE_CANDIDATE
+} from "../../../core/company/index.mjs";
 
 const runtime = createPlayerGenesisRuntime();
+const TELEPATHY_CACHE_KEY = "kaios.telepathy.safe-metadata-cache.v1";
+function readTelepathyCache() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TELEPATHY_CACHE_KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed.filter((message) => message?.payload_persisted === false).slice(-40) : [];
+  } catch { return []; }
+}
+const telepathyMessages = readTelepathyCache();
 const $ = (id) => document.getElementById(id);
 const elements = {
   loading: $("loading-state"), error: $("error-state"), errorDetail: $("error-detail"),
@@ -48,6 +62,7 @@ function render() {
 
   $("identity-metrics").innerHTML = [
     metric("Player Life ID", state.ids.player_life_id),
+    metric("Life Type", state.player.actor_type),
     metric("AI Life ID", state.ids.ai_life_id),
     metric("Household ID", state.ids.household_id),
     metric("Starter Land ID", state.ids.starter_land_id)
@@ -65,6 +80,25 @@ function render() {
     ["GPS", state.consent.gps], ["Navigation", state.consent.navigation], ["Step counter", state.consent.step_counter],
     ["Exact GPS stored", state.exact_gps_stored ? "YES" : "NO"], ["Birthday", state.player.birthday_private]
   ]);
+
+  const nextNeed = runtime.identifyNextLifeNeed();
+  $("life-path-summary").innerHTML = dataList([
+    ["Selected path", state.life_path.selected_path ?? "CHOOSE YOUR PATH"],
+    ["Education", state.life_path.education_path ?? "NOT SELECTED"],
+    ["Next need", `${nextNeed.next_need} · ${nextNeed.level}/100`],
+    ["Current node", state.world_map.current_node_id],
+    ["Navigation", state.consent.navigation],
+    ["Map evidence", state.world_map.map_evidence],
+    ["Loop", state.life_loop.status]
+  ]);
+  $("need-grid").innerHTML = Object.entries(state.basic_needs).map(([need, level]) => metric(need, `${level}/100`)).join("");
+  $("select-life-path").disabled = state.life_path.selected_path !== null;
+  $("visit-water").disabled = state.world_map.current_node_id === "K280_WATER_SOURCE";
+  $("collect-water").disabled = state.world_map.current_node_id !== "K280_WATER_SOURCE";
+  $("visit-food").disabled = state.world_map.current_node_id === "K280_FORAGING_GROVE";
+  $("collect-food").disabled = state.world_map.current_node_id !== "K280_FORAGING_GROVE";
+  $("buy-first-service").disabled = state.payroll.status !== "PAID" || state.purchases.length > 0;
+  $("life-loop-result").textContent = state.purchases.length ? `${state.purchases.at(-1).service_id} · ${state.purchases.at(-1).status}` : "EARN FIRST · THEN BUY ONE SERVICE";
 
   const job = state.active_work_order;
   $("work-status").textContent = job.status;
@@ -111,6 +145,24 @@ function render() {
   ]);
   $("simulate-death").disabled = state.ai.lifecycle_stage === "DECEASED";
   $("event-list").innerHTML = state.events.slice().reverse().map((event) => `<li><strong>T${event.tick}</strong> ${escapeHtml(event.type)}</li>`).join("");
+  renderTelepathy(state);
+}
+
+function renderTelepathy(state) {
+  const relay = summarizeHumanRelayLaborLedger([]);
+  $("telepathy-list").innerHTML = telepathyMessages.length
+    ? telepathyMessages.slice().reverse().map((message) => `<li><strong>${escapeHtml(message.status)}</strong> ${escapeHtml(message.message_type)} → ${escapeHtml(message.to_worker_id)}<small>${escapeHtml(message.receipt ?? "NO RECEIPT")}</small></li>`).join("")
+    : "<li><strong>NO MESSAGES</strong><small>Send a request without copying a work order between pages.</small></li>";
+  $("relay-summary").innerHTML = dataList([
+    ["Verified relay events", relay.verified_relay_events],
+    ["Verified minutes", relay.verified_relay_minutes],
+    ["Unverified relay events", relay.unverified_relay_events],
+    ["Labor rate", relay.human_labor_rate],
+    ["Payable", relay.human_relay_payable],
+    ["Rate candidate", `${HUMAN_RELAY_LABOR_RATE_CANDIDATE.amount_kaios_per_hour} KAIOS/hour · NOT CANON`],
+    ["Cost center", HUMAN_RELAY_LABOR_RATE_CANDIDATE.cost_center],
+    ["Current Life", state.ids.player_life_id]
+  ]);
 }
 
 $("genesis-form").addEventListener("submit", (event) => {
@@ -120,6 +172,7 @@ $("genesis-form").addEventListener("submit", (event) => {
     const gpsGranted = form.has("gps");
     runtime.create({
       display_name: form.get("display_name"),
+      life_type: form.get("life_type"),
       birthday: form.get("birthday"),
       gps_consent: gpsGranted ? "CONSENT_GRANTED" : "CONSENT_DENIED",
       navigation_consent: form.has("navigation") ? "CONSENT_GRANTED" : "CONSENT_DENIED",
@@ -138,6 +191,12 @@ $("genesis-form").addEventListener("submit", (event) => {
 });
 
 action("accept-work", () => runtime.acceptFirstWork());
+action("select-life-path", () => runtime.selectLifePath($("life-path-select").value, $("education-path-select").value));
+action("visit-water", () => runtime.travelToStarterNode("K280_WATER_SOURCE"));
+action("collect-water", () => runtime.satisfyStarterNeed("K280_WATER_SOURCE"));
+action("visit-food", () => runtime.travelToStarterNode("K280_FORAGING_GROVE"));
+action("collect-food", () => runtime.satisfyStarterNeed("K280_FORAGING_GROVE"));
+action("buy-first-service", () => runtime.buyStarterService("K280_WATER_AND_FOOD_GUIDE"));
 action("work-tick", () => runtime.performWorkTick());
 action("review-work", () => runtime.reviewWork());
 action("payroll", () => runtime.runPayroll());
@@ -149,6 +208,47 @@ action("save-button", () => { runtime.save(); elements.saveStatus.textContent = 
 action("resume-button", () => { runtime.resume(); elements.saveStatus.textContent = runtime.getState() ? "SIMULATION RESUMED" : "NO SAVED SIMULATION"; });
 action("reset-button", () => { if (confirm("重置本地模擬？不可變歷史只會保留在先前匯出的 JSON。")) { runtime.reset(); elements.saveStatus.textContent = "SIMULATION RESET"; } });
 $("retry-button").addEventListener("click", () => location.reload());
+
+$("telepathy-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    const state = runtime.getState();
+    const request = $("telepathy-request").value.trim();
+    if (!request) throw new Error("TELEPATHY_REQUEST_REQUIRED");
+    const target = $("telepathy-target").value;
+    const now = new Date();
+    const targetRecord = target === "CODEX_GM"
+      ? { life: "LIFE-CODEX-GM-0001", worker: "codex-gm-01", route: "ROUTE_BROWSER_TO_CODEX_NOT_CONNECTED", type: "INTERNAL_COMPANY_RUNTIME", available: false, blocker: "LOCAL_BROWSER_TO_GM_CONTROLLER_NOT_CONNECTED" }
+      : { life: "LIFE-CHIYAO-KAIOS-001", worker: "chiyao-reviewer-01", route: "ROUTE_CHIYAO_EXTERNAL", type: "ROUTABLE_PROVIDER_CONTROLLER", available: false };
+    const message = await createKaiosTelepathyMessage({
+      messageId: `MESSAGE_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`,
+      idempotencyKey: `IDEMPOTENCY_${crypto.randomUUID().replaceAll("-", "").toUpperCase()}`,
+      fromLifeId: state.ids.player_life_id,
+      fromWorkerId: `${state.ids.player_life_id}-SESSION`,
+      toLifeId: targetRecord.life,
+      toWorkerId: targetRecord.worker,
+      messageType: "REQUEST",
+      payload: { request },
+      createdAt: now.toISOString(),
+      expiresAt: new Date(now.getTime() + 60 * 60 * 1000).toISOString(),
+      repositoryContext: "klineodyssey/kline-odyssey@PUBLIC_EXPERIMENTAL_BUILD",
+      authorityScope: ["REQUEST_ROUTING_ONLY"]
+    });
+    let routed = routeKaiosTelepathyMessage({
+      message,
+      route: { route_id: targetRecord.route, route_type: targetRecord.type, to_life_id: targetRecord.life, to_worker_id: targetRecord.worker, available: targetRecord.available, blocker: targetRecord.blocker ?? "EXTERNAL_CHANNEL_UNAVAILABLE" },
+      deliveredAt: new Date(now.getTime() + 1).toISOString(),
+      processedIdempotencyKeys: telepathyMessages.map((item) => item.idempotency_key)
+    });
+    telepathyMessages.push(routed);
+    localStorage.setItem(TELEPATHY_CACHE_KEY, JSON.stringify(telepathyMessages.slice(-40)));
+    $("telepathy-request").value = "";
+    $("telepathy-result").textContent = `${routed.status} · ${routed.receipt}`;
+    renderTelepathy(state);
+  } catch (error) {
+    $("telepathy-result").textContent = String(error?.message ?? error);
+  }
+});
 
 $("export-button").addEventListener("click", () => {
   try {
