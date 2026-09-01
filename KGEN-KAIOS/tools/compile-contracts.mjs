@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { execFileSync } from "node:child_process";
 import solc from "solc";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -9,8 +8,6 @@ const sourceRoots = [path.join(root, "contracts"), path.join(root, "tests", "con
 const externalSources = [path.resolve(root, "..", "KGEN", "contracts", "KGEN_TempleHeart_Upgradeable.sol")];
 const artifactsDir = path.join(root, "artifacts");
 const reportsDir = path.join(root, "reports");
-const templeHeartV332Ref = "7344d231837d40b504622c8c8b4376ed25110e20";
-const templeHeartPath = "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol";
 
 function walk(directory) {
   if (!fs.existsSync(directory)) return [];
@@ -27,14 +24,6 @@ const sourceFiles = [
 const sources = Object.fromEntries(
   sourceFiles.map((file) => [path.relative(root, file).replaceAll("\\", "/"), { content: fs.readFileSync(file, "utf8") }]),
 );
-const templeHeartV332Source = execFileSync("git", ["show", `${templeHeartV332Ref}:${templeHeartPath}`], {
-  cwd: path.resolve(root, ".."),
-  encoding: "utf8",
-}).replace(
-  "contract KGEN_TempleHeart_Upgradeable is",
-  "contract KGEN_TempleHeart_V3_3_2_Baseline is",
-);
-sources["tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol"] = { content: templeHeartV332Source };
 
 const input = {
   language: "Solidity",
