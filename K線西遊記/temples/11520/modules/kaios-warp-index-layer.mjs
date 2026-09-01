@@ -8,7 +8,9 @@ export const WARP_POLICY = Object.freeze({
   maintenanceMarginBps: 500,
   settlementAsset: "KAIOS",
   externalIndexSettlementAuthority: false,
-  productionCustody: "NOT_CONNECTED"
+  productionCustody: "NOT_CONNECTED",
+  fullyCollateralizedV1: true,
+  maxProfitCollateralMultiple: 1
 });
 
 function fail(code) { const e = new Error(code); e.code = code; throw e; }
@@ -22,6 +24,13 @@ export function pnlKaios({ entry, mark, direction, warpC, pointValueKaios = 1 })
   const side = String(direction).toUpperCase();
   if (!['LONG','SHORT'].includes(side)) fail("INVALID_DIRECTION");
   return (m - e) * (side === 'LONG' ? 1 : -1) * c * pv;
+}
+
+export function boundedPnlKaios({ rawPnlKaios, collateralKaios, maxProfitCollateralMultiple = 1 }) {
+  const collateral=positive(collateralKaios,'INVALID_COLLATERAL');
+  const raw=Number(rawPnlKaios); if(!Number.isFinite(raw)) fail('INVALID_PNL');
+  const maxWin=collateral*Number(maxProfitCollateralMultiple);
+  return Math.max(-collateral,Math.min(maxWin,raw));
 }
 
 export function liquidationMark({ entry, direction, warpC, collateralKaios, maintenanceMarginBps = 500 }) {
@@ -62,10 +71,21 @@ export class WarpPositionBook {
     const n = positive(amountKaios, 'INVALID_MARGIN_CREDIT');
     const a = this.margin.get(id) || {balance:0,reserved:0,realized:0}; a.balance += n; this.margin.set(id,a); return this.snapshot(id);
   }
+  withdrawReviewKaios(playerId, amountKaios) {
+    const n=positive(amountKaios,'INVALID_WITHDRAW');
+    const a=this._acct(playerId);
+    const available=this.available(playerId);
+    if(n>available)fail('INSUFFICIENT_AVAILABLE_KAIOS');
+    // Realized PnL is folded into cash before review withdrawal so accounting mirrors clearing cashBalance.
+    a.balance+=a.realized; a.realized=0;
+    if(n>a.balance)fail('INSUFFICIENT_CASH_KAIOS');
+    a.balance-=n;
+    return Object.freeze({status:'REVIEW_WITHDRAWN',asset:'KAIOS',amountKaios:n,chainWrite:false,snapshot:this.snapshot(playerId)});
+  }
   _acct(id) { const key=String(id||'').trim(); if(!key) fail('PLAYER_REQUIRED'); if(!this.margin.has(key)) this.margin.set(key,{balance:0,reserved:0,realized:0}); return this.margin.get(key); }
   equity(playerId) {
     const a=this._acct(playerId); let unreal=0;
-    for(const p of this.positions.values()) if(p.playerId===String(playerId)&&p.status==='OPEN') { const mark=this.marks.get(p.symbol); if(mark) unreal+=pnlKaios({entry:p.entry,mark:mark.price,direction:p.direction,warpC:p.warpC}); }
+    for(const p of this.positions.values()) if(p.playerId===String(playerId)&&p.status==='OPEN') { const mark=this.marks.get(p.symbol); if(mark) unreal+=boundedPnlKaios({rawPnlKaios:pnlKaios({entry:p.entry,mark:mark.price,direction:p.direction,warpC:p.warpC}),collateralKaios:p.collateralKaios,maxProfitCollateralMultiple:this.policy.maxProfitCollateralMultiple}); }
     return a.balance+a.realized+unreal;
   }
   available(playerId) { const a=this._acct(playerId); return Math.max(0,this.equity(playerId)-a.reserved); }
@@ -75,17 +95,17 @@ export class WarpPositionBook {
     const collateral=positive(collateralKaios,'INVALID_COLLATERAL'); if(collateral>this.available(playerId)) fail('INSUFFICIENT_KAIOS_MARGIN');
     const side=String(direction).toUpperCase(); if(!['LONG','SHORT'].includes(side)) fail('INVALID_DIRECTION');
     const a=this._acct(playerId); a.reserved+=collateral;
-    const p={positionId:`K11520-WARP-${++this.seq}`,playerId:String(playerId),symbol:mark.symbol,direction:side,warpC:c,collateralKaios:collateral,entry:mark.price,liquidationMark:liquidationMark({entry:mark.price,direction:side,warpC:c,collateralKaios:collateral,maintenanceMarginBps:this.policy.maintenanceMarginBps}),status:'OPEN',openedAt:new Date().toISOString(),settlement:'KAIOS'};
+    const p={positionId:`K11520-WARP-${++this.seq}`,playerId:String(playerId),symbol:mark.symbol,direction:side,warpC:c,collateralKaios:collateral,entry:mark.price,liquidationMark:liquidationMark({entry:mark.price,direction:side,warpC:c,collateralKaios:collateral,maintenanceMarginBps:this.policy.maintenanceMarginBps}),status:'OPEN',openedAt:new Date().toISOString(),settlement:'KAIOS',fullyCollateralizedV1:true,maxProfitKaios:collateral*this.policy.maxProfitCollateralMultiple};
     this.positions.set(p.positionId,p); return {...p};
   }
   close(positionId) {
     const p=this.positions.get(String(positionId)); if(!p||p.status!=='OPEN') fail('POSITION_NOT_OPEN'); const mark=this.marks.get(p.symbol); if(!mark) fail('INDEX_NOT_AVAILABLE');
     const raw=pnlKaios({entry:p.entry,mark:mark.price,direction:p.direction,warpC:p.warpC});
-    const realized=Math.max(-p.collateralKaios,raw); const a=this._acct(p.playerId); a.reserved=Math.max(0,a.reserved-p.collateralKaios); a.realized+=realized;
-    Object.assign(p,{exit:mark.price,realizedPnlKaios:realized,status:'CLOSED',closedAt:new Date().toISOString()}); return {...p};
+    const realized=boundedPnlKaios({rawPnlKaios:raw,collateralKaios:p.collateralKaios,maxProfitCollateralMultiple:this.policy.maxProfitCollateralMultiple}); const a=this._acct(p.playerId); a.reserved=Math.max(0,a.reserved-p.collateralKaios); a.realized+=realized;
+    Object.assign(p,{exit:mark.price,rawPnlKaios:raw,realizedPnlKaios:realized,status:'CLOSED',closedAt:new Date().toISOString()}); return {...p};
   }
   liquidate() {
     const out=[]; for(const p of this.positions.values()) if(p.status==='OPEN') { const mark=this.marks.get(p.symbol); if(!mark) continue; const hit=p.direction==='LONG'?mark.price<=p.liquidationMark:mark.price>=p.liquidationMark; if(hit){const c=this.close(p.positionId); p.status='LIQUIDATED'; c.status='LIQUIDATED'; out.push(c);} } return out;
   }
-  snapshot(playerId){const a=this._acct(playerId);return{playerId:String(playerId),kaiosBalance:a.balance,reservedKaios:a.reserved,realizedPnlKaios:a.realized,equityKaios:this.equity(playerId),availableKaios:this.available(playerId),productionCustody:this.policy.productionCustody};}
+  snapshot(playerId){const a=this._acct(playerId);return{playerId:String(playerId),kaiosBalance:a.balance,reservedKaios:a.reserved,realizedPnlKaios:a.realized,equityKaios:this.equity(playerId),availableKaios:this.available(playerId),productionCustody:this.policy.productionCustody,fullyCollateralizedV1:this.policy.fullyCollateralizedV1};}
 }
