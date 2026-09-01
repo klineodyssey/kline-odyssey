@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "KAIOS_11520_GPU_REAL_EVIDENCE_REGISTRY_V1",
+  "mode": "REPOSITORY_BOUND_CANDIDATE",
+  "company_address": "0.00011520",
+  "company_k_coordinate": "K11520",
+  "warehouse_id": "0.00011520_K11520_GPU_BONDED_WAREHOUSE",
+  "status": "NO_VERIFIED_REAL_GPU_INVENTORY",
+  "records": []
+}

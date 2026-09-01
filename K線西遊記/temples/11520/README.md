@@ -1,6 +1,19 @@
-# 11520 Universal Exchange V3.9
+# 11520 Universal Exchange V4.0.5
+
+This Draft models the KAIOS AI Company office and exchange coordinate at `0.00011520 / K11520`; the stronger GPU bonded-warehouse role remains `CANDIDATE_UNVERIFIED` because no independently verifiable immutable Human authority record is bound here. The native KGEN and NVIDIA GPU/KGEN + GPU/KAIOS engines in this repository are review candidates only until their explicit runtime, custody and settlement gates are separately activated. Paper inventory and paper matches must never be displayed as real warehouse stock or Mainnet settlement.
+
+The fixed repository evidence organs are `runtime/gpu-real-evidence-registry.v1.json` and `runtime/company-trading-capital-registry.v1.json`. Their closed schemas are wired into the GPU readiness evaluator only as source readers, and the current registry truths are zero verified real GPU records and zero funded trading-capital accounts. Callers cannot substitute a path, parser, transport or copied object to manufacture inventory or funding. The external repository-bound verifier authority remains `NOT_WIRED_FAIL_CLOSED`; non-empty or self-labelled verified inventory and funded-account records are rejected until independently reviewed trust anchors exist. Real trade remains blocked by missing independent inventory, ownership, cargo, transport, warehouse, capital, production market, policy, settlement, signer, review and no-broadcast fork evidence.
+
+## PR #169 native KGEN market candidate
+
+`PR #169` is `PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME`. The active `app.mjs` imports only the module's read-only GPU readiness and deployed-settlement compatibility probes; it does not instantiate or activate the paper matcher. The module has no signer, custody, settlement execution, transfer, approval, Mainnet write or deployment authority. Human authority assigns `0.00011520` as both the K11520 AI Company universe address and the fixed KGEN Universe price coordinate `0.00011520 USD_PER_KGEN`. That fixed coordinate is not an automatic matched-trade CT, GPU transaction price, target, floor or L/P-derived quote. `nativeMatchedTradeCT` is null before the first valid native match and thereafter equals the latest valid native matched trade price. External PancakeSwap/WBNB/USD/L/P values have zero authority to populate native CT. Orders and cancellations require an independently verified opaque actor context; free owner/controller strings, forged contexts, expired contexts and same-owner/controller matches fail closed. The quote asset and `UNFROZEN_CANDIDATE` status are fixed candidate boundaries and cannot be promoted by constructor input, so any generated matched price remains `NATIVE_MARKET_PRICE_CANDIDATE` until quote-unit governance is independently frozen. See `NATIVE_KGEN_MARKET_CANDIDATE.md` and exact-head CI before any activation.
 
 ## Digital Ant next-stage status
+
+- V4.0.5 preserves the mobile injected-wallet entry, fail-closed BSC chain-56 switching and user-initiated wallet display metadata for canonical KGEN and KAIOS, and adds the read-only 11520 settlement runtime-identity gate. It loads only explicit browser-safe modules; Node-only signer and Starforge modules are excluded from the public browser dependency graph. These controls never receive a private key and connect/add-token/read-only settlement checks send no transaction.
+- The Token page renders the fixed repository GPU readiness sources as a read-only blocker panel. It truthfully reports zero verified real inventory, zero funded segregated trading capital and the unwired external verifier; the panel has no GPU signer, settlement or transaction control.
+- The same page performs a two-endpoint, three-confirmation BSC read of the configured `ExchangeSettlement11520` proxy, implementation slot, fixed 18888 bank, fixed 11520 Brain, module ID, version, governance-finalized flag, governance role and `totalSettled`. Expected proxy and implementation runtime hashes are bound to frozen source commit `9492d73aaac7a9cee2cf9b813aa78468719aadcd`, Solidity `0.8.24`, the recorded compiler settings and the two UUPS `__self` immutable offsets. A successful fixed-endpoint quorum therefore verifies the historical V1 runtime identity and its governance-authorized KAIOS payment capability from 18888 to the fixed Brain. V1 still cannot bind a buyer, seller, GPU serial, custody delivery, KGEN/KAIOS dual-quote payment or atomic inventory transfer. The production GPU settlement adapter remains `NOT_IMPLEMENTED` and real trade remains fail-closed.
+- KGEN/WBNB remains the only verified external AMM route. KAIOS is a live Mainnet token without a verified DEX pair; no KAIOS swap, quote or synthetic price is exposed.
 
 - V3.9 activates `KGEN_FIELD_SERVICE_BUSINESS` after the WUKONG_GATEKEEPER primary-job gate. Its CFO scans verified K280/Universe Map nodes for cash logistics, KUFO supply, waste collection and general delivery demand.
 - The scan currently sees four canonical nodes but no ATM cash/KUFO inventory evidence, waste inventory or cargo request. Therefore real/candidate Field Jobs, route, costs, quote, delivery evidence, Revenue and First KAIOS all remain zero or evidence-required.
@@ -92,7 +105,7 @@
 - Work Queue schema is ready and empty. No automatic dispatch or chain write is enabled.
 - `AI_ANT_COMPANY_0001`: `FORMING / LOCAL_11520`; Demand and product research are local only; Real KGEN and Real KAIOS company payment remain unauthorized.
 
-This directory is the active static-first exchange frontend. It is not a settlement contract and it does not simulate market activity.
+This directory is the active static-first exchange frontend. It is not a settlement contract and it does not simulate market activity. The PR #169 market module is an explicitly separate paper candidate and does not change this active-runtime statement.
 
 - Entry: `index.html`
 - UI controller: `app.mjs`
@@ -102,7 +115,7 @@ This directory is the active static-first exchange frontend. It is not a settlem
 - Canonical migration: verified currency metadata upgrades stale local projections through `CANONICAL_SEED_UPGRADED` events; local history is retained
 - Chain read: Temple Heart 12345, verified at runtime
 - KGEN AMM chain write: `USER_WALLET_LIVE`, after runtime verification and explicit wallet confirmation
-- 11520 settlement contract: BSC mainnet proxy live; frontend settlement adapter not yet integrated
+- 11520 settlement contract: BSC mainnet proxy live; read-only identity/compatibility adapter integrated; transaction adapter and atomic GPU settlement not implemented
 - KAIOS: `MAINNET_LIVE`; KGEN→KAIOS follows the White Hole mechanism and is not exposed as a DEX swap
 - Life Factory: local append-only `GENESIS_DRAFT` only; genesis, wallet binding and organ assignment require separate verified evidence
 - Digital Ant birth: `BORN / ALIVE / ON_DUTY`; the immutable first-BNB evidence is block `116031445`, verified through archive state transition, full block transaction, receipt and independent BSC RPC reads

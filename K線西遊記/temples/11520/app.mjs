@@ -1,14 +1,31 @@
+import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.0.2-browser-safe";
+import { createListing } from "../../../core/market/index.mjs?v=11520-v4.0.2-browser-safe";
+import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.0.2-browser-safe";
+import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.0.2-browser-safe";
+import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.0.2-browser-safe";
+import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.0.2-browser-safe";
 import {
-  createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed,
-  createListing, buildPortfolio, createLifeDraft, createKgenSwapAdapter, KGEN_SWAP_CONFIG, calculateLifeAge, calculateWorkAge,
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
   confirmPublicCivilizationIntent, toPublicCivilizationRequest,
   routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
-  appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
-  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
-  createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission
-} from "../../../core/index.mjs?v=11520-v4.0-player-first";
+  appendPublicRequestHistoryEvent
+} from "../../../core/company/index.mjs?v=11520-v4.0.2-browser-safe";
+import {
+  I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale, validatePrimaryI18nCatalogs,
+  detectVoiceCapabilities, normalizeVoiceError, createLocalHuaguoshanMembership,
+  createFirstPlayerMission, completeFirstPlayerMission
+} from "../../../core/apps/index.mjs?v=11520-v4.0.2-browser-safe";
+import {
+  createKgenSwapAdapter, KGEN_SWAP_CONFIG, KAIOS_TOKEN_CONFIG, watchBscWalletAsset,
+  ensureBscWalletNetwork, createMetaMaskMobileDeepLink
+} from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.0.2-browser-safe";
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
+import {
+  evaluateExchangeSettlement11520Snapshot,
+  evaluateGpu11520RealTradeReadiness,
+  readExchangeSettlement11520SnapshotQuorum,
+  readRepositoryBoundGpu11520Evidence
+} from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0.5-settlement-runtime-identity";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -303,9 +320,86 @@ async function tokensView() {
   const currencies = await universe.registries.currency.list();
   const cards = currencies.map((item) => `<article class="card"><div class="eyebrow">${html(item.currency_id)}</div><h3>${html(item.name)}</h3>${kv("Civilization", item.civilization_scale)}${kv("Mass class", item.mass_class ?? "NOT_DEFINED")}${kv("Life role", item.life_role ?? "NOT_DEFINED")}${kv("Contract", item.currency_id === "BNB" ? "NATIVE ASSET · NO CONTRACT" : item.contract_address ? "REGISTERED · VERIFY AT RUNTIME" : "NOT_DEPLOYED")}${kv("Trade", badge(item.trade_status ?? "NOT_DEPLOYED"), true)}<p>${badge(item.status)}</p></article>`).join("");
   const genesis = universe.seed.kaios_genesis;
+  const mobileWalletLink = createMetaMaskMobileDeepLink(location.href);
+  let gpuReadiness;
+  let settlement11520;
+  try {
+    const evidence = await readRepositoryBoundGpu11520Evidence();
+    gpuReadiness = evaluateGpu11520RealTradeReadiness({ evidenceBundle: evidence });
+  } catch (error) {
+    gpuReadiness = Object.freeze({
+      company_address: "0.00011520",
+      company_k_coordinate: "K11520",
+      route: "K12345_TO_K11520",
+      repository_source_status: "SOURCE_READ_FAILED",
+      repository_verifier_status: "NOT_WIRED",
+      status: "BLOCKED_FAIL_CLOSED",
+      blockers: Object.freeze([error?.message || "GPU_READINESS_SOURCE_UNAVAILABLE"]),
+      real_trade_enabled: false,
+      chain_write: false
+    });
+  }
+  try {
+    settlement11520 = evaluateExchangeSettlement11520Snapshot(
+      await readExchangeSettlement11520SnapshotQuorum({ timeoutMs: 10000 })
+    );
+  } catch (error) {
+    settlement11520 = Object.freeze({
+      status: "READ_ONLY_RPC_CHECK_FAILED",
+      observed_at: null,
+      block_number: null,
+      configured_capability_claim_unverified: "GOVERNANCE_AUTHORIZED_18888_KAIOS_PAYMENT_TO_FIXED_11520_BRAIN",
+      expected_runtime_code_hashes_repository_bound: true,
+      runtime_code_identity_verified: false,
+      total_settled_atomic: null,
+      gpu_trade_compatibility: "NOT_VERIFIED_FAIL_CLOSED",
+      production_gpu_settlement_adapter_status: "NOT_IMPLEMENTED",
+      blockers: Object.freeze([error?.message || "SETTLEMENT_11520_READ_FAILED"]),
+      incompatibilities: Object.freeze([error?.message || "SETTLEMENT_11520_READ_FAILED"]),
+      real_trade_enabled: false,
+      chain_write: false
+    });
+  }
   return `${hero("TOKEN MARKET", "Real chain state, explicit wallet consent.", "KGEN uses its verified BSC mainnet KGEN/WBNB pair and PancakeSwap V2 Router. No synthetic candles, order book, TVL, fills or prices are generated.")}
     <div class="grid">${cards}</div>
+    ${section("Mobile wallet entry", `<article class="card">
+      <div class="notice">This page never receives a private key. On mobile, open it inside MetaMask or another compatible injected-wallet browser. Every live transaction still requires the wallet's own confirmation screen.</div>
+      ${kv("Network", "BNB Smart Chain · chain 56")}
+      ${kv("KGEN", KGEN_SWAP_CONFIG.token_address)}
+      ${kv("KAIOS", KAIOS_TOKEN_CONFIG.token_address)}
+      ${kv("KAIOS market", badge(KAIOS_TOKEN_CONFIG.market_status), true)}
+      <p><button class="button secondary" id="wallet-connect" type="button">Connect / switch to BSC</button> <button class="button secondary" id="watch-kgen" type="button">Add KGEN to wallet</button> <button class="button secondary" id="watch-kaios" type="button">Add KAIOS to wallet</button> <a class="button" id="open-metamask-mobile" href="${html(mobileWalletLink)}" rel="noreferrer">Open in MetaMask mobile</a></p>
+      <div class="mono" id="wallet-entry-result" role="status">No wallet permission requested yet.</div>
+    </article>`)}
     ${section("KAIOS Mainnet Genesis", `<article class="card">${kv("Status", badge(genesis.status), true)}${kv("Mechanism", "KGEN WHITE HOLE · NOT A DEX SWAP")}${kv("Genesis timestamp", genesis.timestamp)}${kv("Genesis block", genesis.block)}${kv("Genesis KAIOS", genesis.genesis_kaios)}${kv("Settlement TX", genesis.settlement_tx_hash)}${kv("Epoch TX", genesis.epoch_tx_hash)}${kv("Receiving treasury", "18888 LINGXIAO CELESTIAL BANK")}</article>`)}
+    ${section("11520 NVIDIA GPU real-trade readiness", `<article class="card">
+      <div class="notice">Read-only status. This panel cannot create inventory, fund capital, request a signer, settle a trade or send a transaction.</div>
+      ${kv("Company address", gpuReadiness.company_address)}
+      ${kv("Company coordinate", gpuReadiness.company_k_coordinate)}
+      ${kv("Logistics route", gpuReadiness.route)}
+      ${kv("Repository source", badge(gpuReadiness.repository_source_status), true)}
+      ${kv("External verifier", badge(gpuReadiness.repository_verifier_status), true)}
+      ${kv("Readiness", badge(gpuReadiness.status), true)}
+      ${kv("Real trade enabled", String(gpuReadiness.real_trade_enabled))}
+      ${kv("Chain write", String(gpuReadiness.chain_write))}
+      <div class="eyebrow">OPEN BLOCKERS</div>${pills(gpuReadiness.blockers)}
+    </article>`)}
+    ${section("11520 settlement code-identity gate", `<article class="card">
+      <div class="notice">Frozen source/compiler evidence and exact runtime hashes are repository-bound. A successful fixed-endpoint quorum can verify the historical V1 runtime identity; V1 still cannot atomically settle a GPU trade.</div>
+      ${kv("Observed status", badge(settlement11520.status), true)}
+      ${kv("Observed block", settlement11520.block_number ?? "UNAVAILABLE")}
+      ${kv("Observed at", settlement11520.observed_at ?? "UNAVAILABLE")}
+      ${kv("Runtime capability", settlement11520.deployed_capability ?? settlement11520.configured_capability_claim_unverified ?? "UNVERIFIED")}
+      ${kv("Expected code hashes bound", String(settlement11520.expected_runtime_code_hashes_repository_bound ?? false))}
+      ${kv("Runtime code identity verified", String(settlement11520.runtime_code_identity_verified ?? false))}
+      ${kv("Total settled (atomic KAIOS)", settlement11520.total_settled_atomic ?? "UNVERIFIED")}
+      ${kv("GPU compatibility", badge(settlement11520.gpu_trade_compatibility), true)}
+      ${kv("Production GPU adapter", badge(settlement11520.production_gpu_settlement_adapter_status), true)}
+      ${kv("Real trade enabled", String(settlement11520.real_trade_enabled))}
+      ${kv("Chain write", String(settlement11520.chain_write))}
+      <div class="eyebrow">IDENTITY BLOCKERS</div>${pills(settlement11520.blockers ?? [])}
+      <div class="eyebrow">INCOMPATIBILITIES</div>${pills(settlement11520.incompatibilities)}
+    </article>`)}
     ${section("KGEN / WBNB live AMM", `<form class="card form-grid" id="kgen-swap-form">
       <div class="notice full">LIVE BSC transaction. Connect a wallet on chain 56. The Router supports KGEN fee-on-transfer behavior. Quotes are live and may differ from final receipt due to token tax, pool movement and gas. Nothing is submitted without wallet confirmation.</div>
       <div class="field"><label for="swap-direction">Action</label><select id="swap-direction"><option value="BUY_KGEN">BUY KGEN with BNB</option><option value="SELL_KGEN">SELL KGEN for BNB</option></select></div>
@@ -921,11 +1015,29 @@ function swapFormIntent(confirmed = document.querySelector("#swap-confirm")?.che
 
 function bindTokenEvents() {
   const result = document.querySelector("#swap-result");
+  const walletResult = document.querySelector("#wallet-entry-result");
   let adapter;
   async function getAdapter() {
     if (!globalThis.ethereum) throw Object.assign(new Error("Install or enable an EIP-1193 wallet."), { code: "WALLET_PROVIDER_REQUIRED" });
     adapter ??= await createKgenSwapAdapter({ ethers: globalThis.ethers, ethereum: globalThis.ethereum, store: universe.store });
     return adapter;
+  }
+  document.querySelector("#wallet-connect")?.addEventListener("click", async () => {
+    try {
+      if (!globalThis.ethereum) throw Object.assign(new Error("Open this page in MetaMask mobile or install a compatible wallet."), { code: "WALLET_PROVIDER_REQUIRED" });
+      await ensureBscWalletNetwork({ ethereum: globalThis.ethereum });
+      const connected = await (await getAdapter()).connect();
+      walletResult.textContent = `BSC wallet connected: ${connected.account}. No transaction was sent.`;
+    } catch (error) { walletResult.textContent = `${error.code ?? "WALLET_CONNECT_STOP"}: ${error.message}`; }
+  });
+  for (const symbol of ["KGEN", "KAIOS"]) {
+    document.querySelector(`#watch-${symbol.toLowerCase()}`)?.addEventListener("click", async () => {
+      try {
+        if (!globalThis.ethereum) throw Object.assign(new Error("Open this page in MetaMask mobile or install a compatible wallet."), { code: "WALLET_PROVIDER_REQUIRED" });
+        const accepted = await watchBscWalletAsset({ ethereum: globalThis.ethereum, symbol });
+        walletResult.textContent = `${accepted.symbol} accepted by wallet at ${accepted.address}. This did not transfer tokens.`;
+      } catch (error) { walletResult.textContent = `${error.code ?? "WALLET_ASSET_STOP"}: ${error.message}`; }
+    });
   }
   document.querySelector("#verify-market")?.addEventListener("click", async () => {
     try {

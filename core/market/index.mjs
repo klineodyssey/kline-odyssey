@@ -19,9 +19,9 @@ export function validateListing(listing) {
   return listing;
 }
 
-export function createListing({ listing, asset, seller }) {
+export function createListing({ listing, asset, seller, sellerController = null }) {
   validateListing(listing);
-  invariant(asset.controller_id === seller || asset.owner_id === seller, "LISTING_PERMISSION_DENIED", "Seller does not control this asset");
+  invariant([seller, sellerController].filter(Boolean).includes(asset.controller_id) || [seller, sellerController].filter(Boolean).includes(asset.owner_id), "LISTING_PERMISSION_DENIED", "Seller does not control this asset");
   assertRightsOfferAllowed(asset, listing.rights_offered);
   if (listing.status === "LISTED") {
     invariant(asset.asset_type !== "LIFE", "LIFE_IDENTITY_NOT_FOR_SALE", "A formal profile listing cannot use the Life identity asset");
@@ -66,4 +66,105 @@ export function validateOrder(order) {
 
 export function createMarketRegistry(store, createRegistry) {
   return createRegistry({ domain: "MARKET", stream: "MARKET", idField: "listing_id", validate: validateListing, store });
+}
+
+export const UNIVERSAL_11520_MARKET = Object.freeze({
+  market_id: "K11520_UNIVERSAL_EXCHANGE",
+  company_address: "0.00011520",
+  company_k_coordinate: "K11520",
+  quote_currencies: Object.freeze(["KGEN", "KAIOS"]),
+  physical_asset_types: Object.freeze(["GOODS", "EQUIPMENT", "SPACECRAFT"]),
+  runtime_status: "LOCAL_REGISTRY_AND_PAPER_SETTLEMENT_CANDIDATE",
+  mainnet_settlement: false
+});
+
+function unsignedAtomic(value, field) {
+  invariant(/^\d+$/.test(String(value)), "INVALID_ATOMIC_AMOUNT", `${field} must be an unsigned integer atomic amount`);
+  return BigInt(value);
+}
+
+export function verify11520ActorContext({ actorContext, verifyActorContext, purpose, observedAt }) {
+  invariant(typeof verifyActorContext === "function", "ACTOR_CONTEXT_VERIFIER_REQUIRED", "11520 actions require an independent actor-context verifier");
+  const authority = verifyActorContext(actorContext, Object.freeze({
+    purpose,
+    market_id: UNIVERSAL_11520_MARKET.market_id,
+    observed_at: observedAt
+  }));
+  requireFields(authority, ["actor_id", "controller_id", "authentication_status", "authentication_method", "evidence_id"], "Verified11520ActorContext");
+  invariant(authority.authentication_status === "VERIFIED", "ACTOR_CONTEXT_NOT_VERIFIED", "11520 actor context must be independently verified");
+  invariant(authority.actor_id && authority.controller_id && authority.evidence_id, "ACTOR_CONTEXT_INCOMPLETE", "Verified actor context is incomplete");
+  return Object.freeze({ ...authority });
+}
+
+export function validate11520WarehouseReceipt(receipt, { asset, depositorAuthority }) {
+  requireFields(receipt, [
+    "receipt_id", "warehouse_id", "asset_id", "asset_type", "depositor_actor_id", "supplier_id",
+    "model", "serial_number", "ownership_evidence_id", "cargo_receipt_id", "acquisition_cost_atomic",
+    "acquisition_currency", "deposited_at", "evidence_class", "status"
+  ], "WarehouseReceipt11520");
+  requireId(receipt.receipt_id, "warehouse_receipt.receipt_id");
+  invariant(receipt.warehouse_id === "0.00011520_K11520_GPU_BONDED_WAREHOUSE", "WAREHOUSE_DESTINATION_MISMATCH", "Physical 11520 inventory must be deposited at the registered K11520 warehouse");
+  invariant(receipt.asset_id === asset.asset_id && receipt.asset_type === asset.asset_type, "WAREHOUSE_ASSET_MISMATCH", "Warehouse receipt must identify the listed asset");
+  invariant(receipt.depositor_actor_id === depositorAuthority.actor_id, "WAREHOUSE_DEPOSITOR_MISMATCH", "Warehouse depositor must match the verified listing actor");
+  for (const field of ["supplier_id", "model", "serial_number", "ownership_evidence_id", "cargo_receipt_id"]) {
+    invariant(typeof receipt[field] === "string" && receipt[field].trim().length > 0, "WAREHOUSE_PROVENANCE_REQUIRED", `Warehouse receipt requires ${field}`);
+  }
+  invariant(unsignedAtomic(receipt.acquisition_cost_atomic, "warehouse acquisition cost") > 0n, "WAREHOUSE_COST_REQUIRED", "Warehouse receipt requires a positive acquisition cost");
+  invariant(UNIVERSAL_11520_MARKET.quote_currencies.includes(receipt.acquisition_currency), "WAREHOUSE_CURRENCY_FORBIDDEN", "Warehouse acquisition currency must be KGEN or KAIOS for this candidate");
+  return Object.freeze({
+    ...receipt,
+    caller_claimed_evidence_class: receipt.evidence_class,
+    caller_claimed_status: receipt.status,
+    evidence_class: "CALLER_ASSERTED_UNVERIFIED",
+    status: "WAREHOUSE_EVIDENCE_PENDING",
+    verification_authority: "FORMAL_REPOSITORY_BOUND_WAREHOUSE_VERIFIER_REQUIRED"
+  });
+}
+
+export function create11520UniversalListingCandidate({
+  listing,
+  asset,
+  sellerActorContext,
+  verifyActorContext,
+  observedAt,
+  unitPriceAtomic,
+  quantityAtomic,
+  evidenceIds,
+  warehouseReceipt = null
+}) {
+  const sellerAuthority = verify11520ActorContext({ actorContext: sellerActorContext, verifyActorContext, purpose: "CREATE_UNIVERSAL_LISTING", observedAt });
+  invariant(listing.status === "LOCAL_DRAFT", "UNREVIEWED_LISTING_CANNOT_BE_LIVE", "Universal listing candidates begin as local drafts");
+  invariant(listing.seller_id === sellerAuthority.actor_id, "LISTING_ACTOR_MISMATCH", "Listing seller must match the verified actor");
+  invariant(UNIVERSAL_11520_MARKET.quote_currencies.includes(listing.currency_id), "LISTING_QUOTE_CURRENCY_FORBIDDEN", "11520 candidate listings quote only in KGEN or KAIOS");
+  invariant(asset.asset_type !== "LIFE", "LIFE_IDENTITY_NOT_FOR_SALE", "A Life identity cannot be listed; list a separate Job or Service asset");
+  const checked = createListing({ listing, asset, seller: sellerAuthority.actor_id, sellerController: sellerAuthority.controller_id });
+  const unitPrice = unsignedAtomic(unitPriceAtomic, "listing unit price");
+  const quantity = unsignedAtomic(quantityAtomic, "listing quantity");
+  invariant(unitPrice > 0n && quantity > 0n, "LISTING_ATOMIC_AMOUNT_REQUIRED", "Listing price and quantity must be positive atomic amounts");
+  invariant(Array.isArray(evidenceIds) && evidenceIds.length > 0 && evidenceIds.every((id) => typeof id === "string" && id.length > 0), "LISTING_EVIDENCE_REQUIRED", "Universal listing candidates require evidence references");
+
+  const physical = UNIVERSAL_11520_MARKET.physical_asset_types.includes(asset.asset_type);
+  const warehouse = physical ? validate11520WarehouseReceipt(warehouseReceipt, { asset, depositorAuthority: sellerAuthority }) : null;
+  invariant(!physical || warehouse, "PHYSICAL_INVENTORY_WAREHOUSE_REQUIRED", "Physical assets require a verified warehouse receipt");
+
+  return Object.freeze({
+    candidate_id: `CANDIDATE_${listing.listing_id}`,
+    market_id: UNIVERSAL_11520_MARKET.market_id,
+    company_address: UNIVERSAL_11520_MARKET.company_address,
+    listing: Object.freeze({ ...checked }),
+    asset_id: asset.asset_id,
+    asset_type: asset.asset_type,
+    seller_authority: sellerAuthority,
+    unit_price_atomic: unitPrice.toString(),
+    quantity_atomic: quantity.toString(),
+    total_ask_atomic: (unitPrice * quantity).toString(),
+    quote_currency: listing.currency_id,
+    evidence_ids: Object.freeze([...evidenceIds]),
+    warehouse_receipt: warehouse,
+    inventory_class: physical ? "PHYSICAL_WAREHOUSE_EVIDENCE_PENDING" : "DIGITAL_OR_SERVICE_CANDIDATE",
+    status: physical ? "WAREHOUSE_EVIDENCE_REQUIRED" : "READY_FOR_DISTINCT_LISTING_REVIEW",
+    settlement_status: "NOT_DEPLOYED",
+    custody_transfer: false,
+    mainnet_transaction_sent: false
+  });
 }

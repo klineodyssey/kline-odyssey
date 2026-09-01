@@ -1,6 +1,6 @@
 # KGEN CoinMarketCap Circulating Supply Verification
 
-Status: `VERIFIED_READ_ONLY_SNAPSHOT`
+Status: `CURRENT_API_WITH_APPEND_ONLY_HISTORICAL_SUBMISSION_EVIDENCE`
 
 Contract: `0xba3d3810e58735cb6813bc1cdc5458c0d71432be`
 
@@ -22,7 +22,33 @@ The original extensionless routes remain deployed for backward compatibility.
 The `.txt` routes are the canonical CoinMarketCap endpoints because GitHub Pages
 serves them with a plain-text Content-Type.
 
-## Frozen Chain Snapshot
+## Current read-only supply state — 2026-08-27
+
+The API endpoints and `kgen_cmc_supply_snapshot.json` were refreshed from a
+single frozen BSC block. The July Annex A, XLSX, CSV and emission package below
+remain immutable historical submission evidence; they are not silently
+rewritten to impersonate a current external-platform filing.
+
+| Field | Value |
+|---|---:|
+| BSC block | `118355844` |
+| Block timestamp | `2026-08-27T08:59:50Z` |
+| Nominal maximum supply | `72,000,000 KGEN` |
+| Current totalSupply, net of burns | `71,976,169.974243092224959062 KGEN` |
+| Verifiably burned | `23,830.025756907775040938 KGEN` |
+| Excluded current balances | `67,622,278.423930992599787732 KGEN` |
+| Evidence-based circulating supply | `4,353,891.550312099625171330 KGEN` |
+| Current owner | `0xa2792fbdcc8a8aac364053431d44e0a8d335e166` (`BankGovernance`) |
+| Deployment creator/indexer provenance | `0xb3c54ca96de0ded4ca0151f629ff9781506ba261` |
+| Current bankWallet | `0xa06ef53c9ad4af739fd13ca1ded446437134b0ee` |
+| Historical bank reserve | `0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c` |
+
+The current owner and deployment creator are intentionally distinct fields.
+The historical bank reserve remains excluded from circulating supply even
+after `bankWallet()` changed; an address-role change does not make retained
+reserve assets public circulation.
+
+## Historical frozen submission snapshot — 2026-07-28
 
 | Field | Value |
 |---|---:|
@@ -69,9 +95,9 @@ question from the KGEN balance held by the pair.
 
 | Address | Balance KGEN | Classification | Circulating | Evidence and reason |
 |---|---:|---|---|---|
-| `0xb3c54ca96de0ded4ca0151f629ff9781506ba261` | `41,775,638.372417177049704684` | `FOUNDER_OR_TEAM_CONTROLLED` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb3c54ca96de0ded4ca0151f629ff9781506ba261); current owner and original mint recipient |
+| `0xb3c54ca96de0ded4ca0151f629ff9781506ba261` | `41,775,638.372417177049704684` | `FOUNDER_OR_TEAM_CONTROLLED` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb3c54ca96de0ded4ca0151f629ff9781506ba261); owner at this 2026-07-28 frozen snapshot and original mint recipient; ownership later moved to BankGovernance at block 116012988 |
 | `0xe87f6975fa3d4f3d56dce49fc978884285a3ed85` | `7,808,747.106941087148180620` | `TREASURY` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xe87f6975fa3d4f3d56dce49fc978884285a3ed85); current `autoLPWallet` |
-| `0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c` | `7,219,494.213882174296359000` | `BANK` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c); current `bankWallet` |
+| `0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c` | `7,219,494.213882174296359000` | `BANK` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c); `bankWallet` at this 2026-07-28 frozen snapshot; retained legacy reserve after the receiver changed at block 116060103 |
 | `0x0fd21cf643211d067a18a416da219827da26e288` | `7,209,747.106941087148179274` | `REWARD` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0x0fd21cf643211d067a18a416da219827da26e288); current `rewardWallet` |
 | `0xcd60bf474e691f2484950a0276eaf507616ca4b9` | `3,600,000.000000000000000000` | `FOUNDER_OR_TEAM_CONTROLLED` | No | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xcd60bf474e691f2484950a0276eaf507616ca4b9); repository runtime records identify it as `MOTHER` |
 | `0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2` | `1,060,310.050838289978556142` | `LIQUIDITY_POOL` | Yes | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2); canonical PancakeSwap V2 pair |
@@ -103,9 +129,9 @@ uses this field for locked, vested, foundation, treasury, and team allocations.
 
 | Address | Label | Balance KGEN | Classification | Unlock Date | Evidence |
 |---|---|---:|---|---|---|
-| `0xb3c54ca96de0ded4ca0151f629ff9781506ba261` | Contract owner and original mint recipient | `41,775,638.372417177049704684` | `PROJECT_CONTROLLED_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb3c54ca96de0ded4ca0151f629ff9781506ba261) |
+| `0xb3c54ca96de0ded4ca0151f629ff9781506ba261` | Deployment creator, former owner and original mint recipient | `41,775,638.372417177049704684` | `PROJECT_CONTROLLED_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xb3c54ca96de0ded4ca0151f629ff9781506ba261) |
 | `0xe87f6975fa3d4f3d56dce49fc978884285a3ed85` | autoLPWallet reserve | `7,808,747.106941087148180620` | `TREASURY_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xe87f6975fa3d4f3d56dce49fc978884285a3ed85) |
-| `0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c` | bankWallet | `7,219,494.213882174296359000` | `BANK_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c) |
+| `0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c` | Legacy bank receiver and retained reserve | `7,219,494.213882174296359000` | `BANK_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c) |
 | `0x0fd21cf643211d067a18a416da219827da26e288` | rewardWallet | `7,209,747.106941087148179274` | `REWARD_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0x0fd21cf643211d067a18a416da219827da26e288) |
 | `0xcd60bf474e691f2484950a0276eaf507616ca4b9` | MOTHER repository reference | `3,600,000.000000000000000000` | `PROJECT_CONTROLLED_NON_CIRCULATING` | `No scheduled unlock` | [BscScan](https://bscscan.com/token/0xba3d3810e58735cb6813bc1cdc5458c0d71432be?a=0xcd60bf474e691f2484950a0276eaf507616ca4b9) |
 

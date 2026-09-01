@@ -11,6 +11,18 @@ export const CODEX_GM_ENV = Object.freeze({
   walletAddress: "CODEX_GM_0001_WALLET_ADDRESS"
 });
 
+export const CODEX_GM_SIGNER_CONNECTION_PROFILE = Object.freeze({
+  profile_id: "KAIOS_REPOSITORY_BOUND_LIFE_WALLET_PROFILE_V1:LIFE-CODEX-GM-0001",
+  life_id: "LIFE-CODEX-GM-0001",
+  env_prefix: "CODEX_GM_0001",
+  wallet_address: "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+  chain_id: 56,
+  identity_sources: Object.freeze([
+    "KGEN-KAIOS/worker_registry.json",
+    "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md"
+  ])
+});
+
 export function createDigitalLifeEnvironment(envPrefix) {
   invariant(/^[A-Z][A-Z0-9_]*$/.test(envPrefix ?? ""), "INVALID_ENV_PREFIX", "Digital Life wallet environment prefix is invalid");
   return Object.freeze({
@@ -91,6 +103,75 @@ export function verifyDigitalLifeWalletBinding({ lifeId, envPrefix, expectedChai
 
 export function verifyDigitalAntWalletBinding(environment = process.env) {
   return verifyDigitalLifeWalletBinding({ lifeId: "DIGITAL_ANT_0001", envPrefix: "DIGITAL_ANT_0001", expectedChainId: 56 }, environment);
+}
+
+/**
+ * Produce public, non-secret evidence that the configured credential derives
+ * the canonical Life wallet. This proves credential binding only. It grants
+ * no transaction, allowance, transfer, trade, treasury or broadcast authority
+ * and deliberately does not expose the signer callback.
+ */
+export function validateRepositoryBoundLifeWalletProfile({
+  lifeId,
+  envPrefix,
+  expectedAddress,
+  expectedChainId = 56
+} = {}) {
+  const profile = CODEX_GM_SIGNER_CONNECTION_PROFILE;
+  invariant(
+    lifeId === profile.life_id &&
+      envPrefix === profile.env_prefix &&
+      expectedChainId === profile.chain_id &&
+      typeof expectedAddress === "string" &&
+      expectedAddress.toLowerCase() === profile.wallet_address.toLowerCase(),
+    "REPOSITORY_BOUND_LIFE_WALLET_PROFILE_MISMATCH",
+    "Signer connection evidence must match the repository-bound Life, environment, wallet and chain profile"
+  );
+  return profile;
+}
+
+export function verifyDigitalLifeSignerConnection({
+  lifeId,
+  envPrefix,
+  expectedAddress,
+  expectedChainId = 56,
+  observedAt = new Date().toISOString()
+}, environment = process.env) {
+  const profile = validateRepositoryBoundLifeWalletProfile({ lifeId, envPrefix, expectedAddress, expectedChainId });
+  const observedAtMs = Date.parse(String(observedAt ?? ""));
+  invariant(Number.isFinite(observedAtMs), "SIGNER_OBSERVED_AT_INVALID", "Signer connection evidence requires a valid observation timestamp");
+  const binding = verifyDigitalLifeWalletBinding({
+    lifeId: profile.life_id,
+    envPrefix: profile.env_prefix,
+    expectedChainId: profile.chain_id
+  }, environment);
+  binding.assertChainId(profile.chain_id);
+  const address = binding.withVerifiedAddress((value) => value);
+  const ethers = ethersRuntime();
+  const canonicalExpected = ethers.utils.getAddress(profile.wallet_address);
+  if (ethers.utils.getAddress(address) !== canonicalExpected) {
+    stopped("CANONICAL_LIFE_WALLET_MISMATCH", "Digital Life signer STOP: configured wallet does not match repository-bound Life identity");
+  }
+  const observedAtIso = new Date(observedAtMs).toISOString();
+  return Object.freeze({
+    evidence_type: "DIGITAL_LIFE_SIGNER_CONNECTION_V1",
+    connection_evidence_id: `SIGNER-CONNECTION:${profile.life_id}:${profile.chain_id}:${canonicalExpected.toLowerCase()}:${observedAtIso}`,
+    identity_profile_id: profile.profile_id,
+    identity_sources: profile.identity_sources,
+    life_id: profile.life_id,
+    wallet_address: canonicalExpected,
+    chain_id: profile.chain_id,
+    observed_at: observedAtIso,
+    observation_time_authority: false,
+    status: "CONNECTED_BINDING_ONLY",
+    credential_binding: "VERIFIED_BOUND",
+    identity_authority: false,
+    transaction_authority: false,
+    policy_broker_connected: false,
+    signer_callback_exposed: false,
+    raw_key_exportable: false,
+    private_key_exposed: false
+  });
 }
 
 export function assertNoSensitiveSerialization(value) {

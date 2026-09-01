@@ -296,6 +296,83 @@ Player Token / KAIOS
 
 Other pools are optional. The chosen pool must not be described as guaranteed liquidity unless reserves and redemption terms actually support that claim.
 
+### 10.4 K11520 GPU Repository Evidence Boundary — 2026-08-27
+
+The NVIDIA GPU candidate uses one fixed repository evidence path:
+
+```text
+K線西遊記/temples/11520/runtime/gpu-real-evidence-registry.v1.json
+K線西遊記/temples/11520/runtime/company-trading-capital-registry.v1.json
+```
+
+The loader accepts no caller-selected path, parser, transport or data source.
+It validates closed registry identities, unique evidence roots and unique
+capital accounts, then tracks only the exact returned object as repository-
+bound. Copying or reconstructing the fields loses that identity. A future GPU
+record must match its capital registry account by ID, asset, available amount,
+status and authority receipt. The current registries contain zero records and
+state `NO_VERIFIED_REAL_GPU_INVENTORY / NO_FUNDED_TRADING_CAPITAL`; this proves
+only that the repository contains no accepted real GPU inventory or funded
+trading capital. It does not create a GPU, warehouse custody, capital,
+settlement, signer authority or trade permission.
+
+The fixed repository source readers are wired only for closed-schema,
+zero-inventory and zero-capital truth. They are not external evidence verifiers
+and therefore do not remove the
+`REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` blocker. Non-empty,
+self-labelled verified inventory or funded-account records remain rejected
+until independently reviewed trust anchors bind the external inventory,
+ownership, cargo, transport, warehouse, capital, production-market, Policy Box,
+settlement, signer, distinct-review and no-broadcast fork evidence.
+
+### 10.5 KAIOS Market Genesis Readiness — 2026-08-27
+
+A read-only two-provider BSC chain 56 quorum observation at confirmed block
+`118386241` (`2026-08-27T12:47:52Z`, block hash
+`0x0554bb8154deb5f63e7ea07506efc696384bd085f03c87b5e981d652b8d1a81b`)
+reported:
+
+```text
+KAIOS Token code = PRESENT
+KAIOS Organ Registry Pair Registry organ = ZERO ADDRESS
+PancakeSwap V2 KAIOS / WBNB pair = ZERO ADDRESS
+PancakeSwap V2 KAIOS / KGEN pair = ZERO ADDRESS
+PancakeSwap V2 KAIOS / USDT pair = ZERO ADDRESS
+```
+
+The runtime now reads one confirmed block from at least two distinct HTTPS BSC
+RPC endpoints and requires exact agreement on chain ID, block hash, KAIOS
+bytecode presence, Pair Registry organ and all three Pancake V2 factory results.
+An RPC disagreement, wrong chain, missing code or malformed ABI result fails
+closed. Only the exact object produced through the built-in fixed RPC list and
+internally captured fetch transport is marked
+`RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION`; caller-supplied RPC URLs or fetch
+transports are schema probes only, and copying or caller-constructing the same
+fields loses verified status.
+
+This proves only a timestamped no-pair observation at that block. It is not a
+permanent `NO_LIVE_KAIOS_PAIR` claim, price authority, repository-bound funding
+evidence or permission to create liquidity. KAIOS is Mainnet-live as a token;
+token deployment must not be misreported as market deployment.
+
+Any genesis-liquidity proposal must identify exact two-sided capital, asset
+ownership, budget evidence, a fixed funding account, an approved risk policy,
+a secure signer and governance review. The initial deposit ratio is only an
+opening market input; it does not replace the white-hole mass rule and does not
+guarantee a future price.
+
+The only candidate funding class admitted by the closed local allowlist is
+`COMPANY_TRADING_TREASURY`; it still remains unusable until a machine-verifiable
+funding registry binds the exact account, asset, balance, budget, authority,
+expiry and revocation state. Caller-provided booleans or labels are never
+authorization. The following capital classes are prohibited from funding a market-genesis
+proposal: 18888 reserve or performance bond, 8888 payroll liability or funded
+salary, KGEN reserve, KGEN catalyst escrow, Naihe Genesis reserve, Public Good
+emergency reserve and refundable principal. The readiness runtime creates no
+calldata, approval, transfer, pair, liquidity position or Mainnet transaction,
+and it is structurally incapable of returning `READY_FOR_INDEPENDENT_REVIEW`
+until the missing repository-bound verifiers are implemented.
+
 ---
 
 ## 11. Gas and Settlement
@@ -426,3 +503,13 @@ A civilization must not be rejected solely because it does not use Jade Emperor,
 - Defined asset, life, species, civilization and player-universe application types.
 - Defined genesis-mass proof, liquidity, pricing, gas, external traders and residents.
 - Linked cross-universe communication to KAIOS settlement and KUFO only for physical transport.
+
+### V1.1 — 2026-08-27
+
+- Added the read-only KAIOS external-pair observation and fail-closed market
+  genesis funding boundary.
+
+### V1.2 — 2026-08-27
+
+- Added the two-provider, same-confirmed-block BSC market snapshot adapter.
+- Kept market creation, pricing, funding, signing and execution fail-closed.

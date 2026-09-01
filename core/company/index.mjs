@@ -1670,6 +1670,186 @@ export function validateFieldDeliveryEvidence(evidence) {
   return Object.freeze({ ...evidence, status: "DELIVERY_VERIFIED" });
 }
 
+export const NVIDIA_GPU_11520_ROUTE = Object.freeze({
+  route_id: "KAIOS_GPU_K12345_TO_K11520_V1",
+  origin_address: "0.00012345",
+  origin_k_coordinate: "K12345",
+  origin_name: "五指山悟空財神殿",
+  destination_address: "0.00011520",
+  destination_k_coordinate: "K11520",
+  destination_name: "花果山交易所公司辦公室與GPU倉庫",
+  k_index_difference: 825,
+  km_per_k_index: 22.761724301279,
+  distance_km: 18778.422548555,
+  map_evidence: "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json"
+});
+
+export const GPU_LANDED_COST_FIELDS = Object.freeze([
+  "gpu_acquisition", "lamp_service", "packaging", "transport", "kship_or_energy",
+  "food", "labor", "insurance", "warehouse", "listing_fee", "settlement_fee",
+  "gas", "tax", "risk_reserve"
+]);
+
+export const GPU_ACQUISITION_EVIDENCE_FIELDS = Object.freeze([
+  "wish", "heartbeat_or_cross_day_breath", "fortune_entitlement",
+  "available_funds", "lamp_service"
+]);
+
+function ceilDiv(value, divisor) {
+  return (value + divisor - 1n) / divisor;
+}
+
+export function calculateGpuTransportPlan({
+  vehicleId, speedMetersPerHour, gpuMassGrams, packagingMassGrams,
+  vehicleMassGrams, energyWhPerKm, foodCostAtomicPerHour,
+  laborCostAtomicPerHour, insuranceCostAtomic, warehouseCostAtomic,
+  riskReserveAtomic, deliveryEvidence = null
+}) {
+  invariant(typeof vehicleId === "string" && vehicleId.trim(), "GPU_TRANSPORT_VEHICLE_REQUIRED", "GPU transport requires an identified vehicle");
+  const unsigned = (value, field, { allowZero = false } = {}) => {
+    invariant(/^\d+$/.test(String(value)), "GPU_TRANSPORT_VALUE_INVALID", `${field} must be an unsigned integer`);
+    const result = BigInt(value);
+    invariant(allowZero || result > 0n, "GPU_TRANSPORT_VALUE_REQUIRED", `${field} must be positive`);
+    return result;
+  };
+  const speed = unsigned(speedMetersPerHour, "speedMetersPerHour");
+  const gpuMass = unsigned(gpuMassGrams, "gpuMassGrams");
+  const packagingMass = unsigned(packagingMassGrams, "packagingMassGrams", { allowZero: true });
+  const vehicleMass = unsigned(vehicleMassGrams, "vehicleMassGrams");
+  const energyRate = unsigned(energyWhPerKm, "energyWhPerKm");
+  const foodRate = unsigned(foodCostAtomicPerHour, "foodCostAtomicPerHour", { allowZero: true });
+  const laborRate = unsigned(laborCostAtomicPerHour, "laborCostAtomicPerHour", { allowZero: true });
+  const insurance = unsigned(insuranceCostAtomic, "insuranceCostAtomic", { allowZero: true });
+  const warehouse = unsigned(warehouseCostAtomic, "warehouseCostAtomic", { allowZero: true });
+  const risk = unsigned(riskReserveAtomic, "riskReserveAtomic", { allowZero: true });
+  const distanceMeters = 18_778_422_549n;
+  const travelSeconds = ceilDiv(distanceMeters * 3600n, speed);
+  const energyWh = ceilDiv(distanceMeters * energyRate, 1000n);
+  const food = ceilDiv(travelSeconds * foodRate, 3600n);
+  const labor = ceilDiv(travelSeconds * laborRate, 3600n);
+  return Object.freeze({
+    route_id: NVIDIA_GPU_11520_ROUTE.route_id,
+    vehicle_id: vehicleId,
+    distance_meters: distanceMeters.toString(),
+    speed_meters_per_hour: speed.toString(),
+    gpu_mass_grams: gpuMass.toString(),
+    packaging_mass_grams: packagingMass.toString(),
+    payload_mass_grams: (gpuMass + packagingMass).toString(),
+    vehicle_mass_grams: vehicleMass.toString(),
+    total_moving_mass_grams: (gpuMass + packagingMass + vehicleMass).toString(),
+    travel_time_seconds: travelSeconds.toString(),
+    energy_wh: energyWh.toString(),
+    food_cost_atomic: food.toString(),
+    labor_cost_atomic: labor.toString(),
+    insurance_cost_atomic: insurance.toString(),
+    warehouse_cost_atomic: warehouse.toString(),
+    risk_reserve_atomic: risk.toString(),
+    delivery_evidence: deliveryEvidence,
+    delivery_status: deliveryEvidence ? "DELIVERY_EVIDENCE_PROVIDED_PENDING_VERIFICATION" : "NOT_DELIVERED",
+    chain_write: false
+  });
+}
+
+export function createGpuAcquisitionPipelineCandidate({
+  candidateId, lifeId, mode = "PAPER_SIMULATION", evidence = {},
+  inventory, transportPlan, landedCost
+}) {
+  requireId(candidateId, "gpu_acquisition_candidate_id");
+  requireId(lifeId, "gpu_acquisition_life_id");
+  requireEnum(mode, ["PAPER_SIMULATION", "REAL_EVIDENCE_CANDIDATE"], "gpu_acquisition.mode");
+  const expectedStatus = mode === "PAPER_SIMULATION" ? "PAPER_SIMULATION" : "VERIFIED";
+  const missingEvidence = GPU_ACQUISITION_EVIDENCE_FIELDS.filter((field) => evidence?.[field]?.status !== expectedStatus);
+  validateGpuInventoryUnit(inventory);
+  invariant(transportPlan?.route_id === NVIDIA_GPU_11520_ROUTE.route_id, "GPU_TRANSPORT_PLAN_REQUIRED", "GPU acquisition must bind the formal K12345 to K11520 route");
+  const blockers = [...missingEvidence.map((field) => `${field.toUpperCase()}_EVIDENCE_MISSING`)];
+  if (landedCost?.status !== "QUOTE_COMPLETE") blockers.push("GPU_LANDED_COST_INCOMPLETE");
+  if (mode === "REAL_EVIDENCE_CANDIDATE") {
+    if (inventory.inventory_mode !== "VERIFIED_REAL_INVENTORY") blockers.push("REAL_GPU_INVENTORY_NOT_VERIFIED");
+    if (!transportPlan.delivery_evidence) blockers.push("GPU_DELIVERY_EVIDENCE_MISSING");
+  }
+  return Object.freeze({
+    candidate_id: candidateId,
+    life_id: lifeId,
+    mode,
+    route_id: NVIDIA_GPU_11520_ROUTE.route_id,
+    evidence_status: Object.freeze(Object.fromEntries(GPU_ACQUISITION_EVIDENCE_FIELDS.map((field) => [field, evidence?.[field]?.status ?? "MISSING"]))),
+    inventory_id: inventory.inventory_id,
+    transport_status: transportPlan.delivery_status,
+    landed_cost_status: landedCost?.status ?? "QUOTE_INCOMPLETE",
+    status: blockers.length ? "BLOCKED_MISSING_EVIDENCE" : mode === "PAPER_SIMULATION" ? "PAPER_PIPELINE_READY" : "REAL_INVENTORY_PIPELINE_CANDIDATE_READY",
+    blockers: Object.freeze(blockers),
+    gpu_created_from_nothing: false,
+    fortune_entitlement_is_inventory: false,
+    lamp_service_is_inventory: false,
+    real_inventory_created: false,
+    real_trade_executed: false,
+    chain_write: false
+  });
+}
+
+export function validateGpuInventoryUnit(unit) {
+  requireFields(unit, ["inventory_id", "inventory_mode", "brand", "model", "serial_number", "supplier", "ownership_evidence", "acquisition_cost", "cargo_receipt", "warehouse_receipt", "status"], "GpuInventoryUnit");
+  requireId(unit.inventory_id, "inventory_id");
+  requireEnum(unit.inventory_mode, ["PAPER_SIMULATION", "VERIFIED_REAL_INVENTORY"], "gpu.inventory_mode");
+  invariant(unit.brand === "NVIDIA", "GPU_BRAND_NOT_NVIDIA", "The first 11520 GPU product is an NVIDIA GPU chip");
+  if (unit.inventory_mode === "PAPER_SIMULATION") {
+    invariant(unit.status === "PAPER_SIMULATION_NOT_REAL_INVENTORY", "PAPER_GPU_MUST_BE_LABELLED", "A simulated GPU cannot claim real inventory status");
+    invariant(unit.ownership_evidence === null && unit.cargo_receipt === null && unit.warehouse_receipt === null, "PAPER_GPU_FAKE_EVIDENCE", "Paper inventory cannot fabricate ownership, cargo or warehouse receipts");
+    return unit;
+  }
+  for (const field of ["model", "serial_number", "supplier", "ownership_evidence", "cargo_receipt", "warehouse_receipt"]) {
+    invariant(typeof unit[field] === "string" && unit[field].trim(), "REAL_GPU_EVIDENCE_INCOMPLETE", `Verified GPU inventory requires ${field}`);
+  }
+  invariant(unit.acquisition_cost && ["KGEN", "KAIOS"].includes(unit.acquisition_cost.asset) && /^\d+$/.test(String(unit.acquisition_cost.amount_atomic)), "REAL_GPU_ACQUISITION_COST_REQUIRED", "Verified GPU inventory requires an atomic KGEN or KAIOS acquisition cost");
+  invariant(unit.status === "VERIFIED_INVENTORY_AT_K11520", "REAL_GPU_STATUS_INVALID", "Real inventory must be verified at the K11520 warehouse");
+  return unit;
+}
+
+export function calculateGpuLandedCost({ quoteAsset, components, companyMarginAtomic }) {
+  const normalizedAsset = String(quoteAsset ?? "").toUpperCase();
+  invariant(["KGEN", "KAIOS"].includes(normalizedAsset), "GPU_QUOTE_ASSET_NOT_ALLOWED", "GPU listings may be quoted only in KGEN or KAIOS");
+  invariant(components && typeof components === "object", "GPU_COST_BASIS_REQUIRED", "GPU landed cost requires every explicit cost component");
+  const unknown = GPU_LANDED_COST_FIELDS.filter((field) => components[field] === null || components[field] === undefined || !/^\d+$/.test(String(components[field])));
+  if (unknown.length) {
+    return Object.freeze({ quote_asset: normalizedAsset, status: "QUOTE_INCOMPLETE", unknown_components: Object.freeze(unknown), landed_cost_atomic: null, company_margin_atomic: null, minimum_ask_atomic: null });
+  }
+  invariant(/^\d+$/.test(String(companyMarginAtomic)), "GPU_COMPANY_MARGIN_REQUIRED", "GPU minimum ask requires an explicit unsigned company margin");
+  const normalized = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, BigInt(components[field]).toString()]));
+  const landed = GPU_LANDED_COST_FIELDS.reduce((sum, field) => sum + BigInt(normalized[field]), 0n);
+  const margin = BigInt(companyMarginAtomic);
+  return Object.freeze({
+    quote_asset: normalizedAsset,
+    components: Object.freeze(normalized),
+    landed_cost_atomic: landed.toString(),
+    company_margin_atomic: margin.toString(),
+    minimum_ask_atomic: (landed + margin).toString(),
+    status: "QUOTE_COMPLETE",
+    sale_below_minimum_requires_recorded_company_decision: true
+  });
+}
+
+export function evaluateGpu11520MarketReadiness({ inventory, route, landedCost, signerConnected = false, companyBudgetStatus = "NOT_BOUND", settlementStatus = "PAPER_ONLY" }) {
+  validateGpuInventoryUnit(inventory);
+  validateFieldRoute(route);
+  const blockers = ["INDEPENDENT_GPU_READINESS_VERIFIERS_NOT_WIRED"];
+  if (landedCost?.status !== "QUOTE_COMPLETE") blockers.push("GPU_LANDED_COST_INCOMPLETE");
+  if (inventory.inventory_mode !== "VERIFIED_REAL_INVENTORY") blockers.push("REAL_GPU_INVENTORY_NOT_VERIFIED");
+  if (!inventory.warehouse_receipt) blockers.push("K11520_WAREHOUSE_RECEIPT_MISSING");
+  if (companyBudgetStatus !== "FUNDED_ASSIGNED_COMPANY_BUDGET") blockers.push("COMPANY_TRADING_BUDGET_NOT_BOUND");
+  if (signerConnected !== true) blockers.push("HENGYAO_SIGNER_NOT_CONNECTED");
+  if (settlementStatus !== "VERIFIED_11520_GPU_SETTLEMENT") blockers.push("GPU_SETTLEMENT_NOT_VERIFIED");
+  return Object.freeze({
+    route_id: NVIDIA_GPU_11520_ROUTE.route_id,
+    company_address: NVIDIA_GPU_11520_ROUTE.destination_address,
+    paper_market_ready: landedCost?.status === "QUOTE_COMPLETE",
+    real_trade_ready: false,
+    real_trade_status: "BLOCKED_INDEPENDENT_VERIFIERS_NOT_WIRED",
+    blockers: Object.freeze(blockers),
+    real_trade_executed: false,
+    chain_write: false
+  });
+}
+
 export function createWorkforceGap({ verifiedJobs, eligibleWorkers, availableCapacity }) {
   requireArray(verifiedJobs, "verified_field_jobs"); requireArray(eligibleWorkers, "eligible_workers");
   invariant(verifiedJobs.every((job) => job.verified === true), "WORKFORCE_GAP_REQUIRES_REAL_DEMAND", "Hiring cannot be triggered by hypothetical jobs");
@@ -1863,5 +2043,297 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     missing,
     auto_found: false,
     company_status: company.status
+  });
+}
+
+export const KAIOS_MARKET_GENESIS_CONFIG = Object.freeze({
+  chain_id: 56,
+  company_address: "0.00011520",
+  company_k_coordinate: "K11520",
+  kaios_token: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+  kgen_token: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+  wbnb_token: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+  usdt_token: "0x55d398326f99059fF775485246999027B3197955",
+  pancakeswap_v2_factory: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+  organ_registry: "0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",
+  pair_registry_organ_id: "0x7f0ccf230c57abe19671b563448caa0159a9a9f51d4548c25dacd532e9e1b86e",
+  permitted_quote_assets: Object.freeze(["WBNB", "KGEN", "USDT"]),
+  permitted_funding_source_classes: Object.freeze(["COMPANY_TRADING_TREASURY"]),
+  snapshot_verifier_status: "RPC_QUORUM_READ_ONLY_IMPLEMENTED",
+  funding_registry_status: "NOT_IMPLEMENTED",
+  execution_authority: "NOT_GRANTED_BY_READINESS_RUNTIME"
+});
+
+const KAIOS_MARKET_RPC_URLS = Object.freeze([
+  "https://bsc-dataseed.binance.org",
+  "https://bsc.publicnode.com"
+]);
+const repositoryBoundKaiosMarketFetch =
+  typeof globalThis.fetch === "function" ? globalThis.fetch.bind(globalThis) : null;
+const verifiedKaiosMarketSnapshots = new WeakSet();
+const ORGAN_SELECTOR = "0xc7e9a48e";
+const GET_PAIR_SELECTOR = "0xe6a43905";
+
+function hexQuantityToNumber(value, field) {
+  invariant(typeof value === "string" && /^0x[0-9a-f]+$/i.test(value), "KAIOS_MARKET_RPC_HEX_INVALID", `${field} must be a JSON-RPC hex quantity`);
+  const number = Number(BigInt(value));
+  invariant(Number.isSafeInteger(number), "KAIOS_MARKET_RPC_NUMBER_UNSAFE", `${field} exceeds the safe integer range`);
+  return number;
+}
+
+function decodeRpcAddress(value, field) {
+  invariant(typeof value === "string" && /^0x[0-9a-f]{64}$/i.test(value), "KAIOS_MARKET_RPC_ADDRESS_INVALID", `${field} must be a 32-byte ABI address result`);
+  return `0x${value.slice(-40)}`;
+}
+
+function encodeAddressWord(address) {
+  invariant(isEvmAddress(address), "KAIOS_MARKET_RPC_INPUT_ADDRESS_INVALID", "RPC pair lookup requires a canonical EVM address");
+  return address.slice(2).toLowerCase().padStart(64, "0");
+}
+
+async function rpcRequest({ url, method, params, fetchImpl, signal, id }) {
+  const response = await fetchImpl(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
+    signal
+  });
+  invariant(response?.ok === true, "KAIOS_MARKET_RPC_HTTP_FAILURE", `RPC ${method} failed`);
+  const payload = await response.json();
+  invariant(payload && payload.error === undefined && payload.result !== undefined, "KAIOS_MARKET_RPC_RESPONSE_FAILURE", `RPC ${method} returned an invalid response`);
+  return payload.result;
+}
+
+async function observeKaiosMarketAtBlock({ url, blockNumber, fetchImpl, signal, requestId }) {
+  const blockTag = `0x${BigInt(blockNumber).toString(16)}`;
+  const call = (to, data, offset) => rpcRequest({
+    url,
+    method: "eth_call",
+    params: [{ to, data }, blockTag],
+    fetchImpl,
+    signal,
+    id: requestId + offset
+  });
+  const getPairData = (quote) => `${GET_PAIR_SELECTOR}${encodeAddressWord(KAIOS_MARKET_GENESIS_CONFIG.kaios_token)}${encodeAddressWord(quote)}`;
+  const [block, kaiosCode, pairRegistry, wbnbPair, kgenPair, usdtPair] = await Promise.all([
+    rpcRequest({ url, method: "eth_getBlockByNumber", params: [blockTag, false], fetchImpl, signal, id: requestId }),
+    rpcRequest({ url, method: "eth_getCode", params: [KAIOS_MARKET_GENESIS_CONFIG.kaios_token, blockTag], fetchImpl, signal, id: requestId + 1 }),
+    call(KAIOS_MARKET_GENESIS_CONFIG.organ_registry, `${ORGAN_SELECTOR}${KAIOS_MARKET_GENESIS_CONFIG.pair_registry_organ_id.slice(2)}`, 2),
+    call(KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory, getPairData(KAIOS_MARKET_GENESIS_CONFIG.wbnb_token), 3),
+    call(KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory, getPairData(KAIOS_MARKET_GENESIS_CONFIG.kgen_token), 4),
+    call(KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory, getPairData(KAIOS_MARKET_GENESIS_CONFIG.usdt_token), 5)
+  ]);
+  invariant(block && /^0x[0-9a-f]{64}$/i.test(block.hash), "KAIOS_MARKET_BLOCK_HASH_REQUIRED", "RPC market observation requires an exact block hash");
+  invariant(hexQuantityToNumber(block.number, "block.number") === blockNumber, "KAIOS_MARKET_BLOCK_MISMATCH", "RPC returned a different block than requested");
+  return Object.freeze({
+    block_hash: block.hash.toLowerCase(),
+    block_timestamp: hexQuantityToNumber(block.timestamp, "block.timestamp"),
+    kaios_code: kaiosCode && kaiosCode !== "0x" ? "PRESENT" : "ABSENT",
+    pair_registry_organ: decodeRpcAddress(pairRegistry, "pair registry organ"),
+    pairs: Object.freeze({
+      WBNB: decodeRpcAddress(wbnbPair, "KAIOS/WBNB pair"),
+      KGEN: decodeRpcAddress(kgenPair, "KAIOS/KGEN pair"),
+      USDT: decodeRpcAddress(usdtPair, "KAIOS/USDT pair")
+    })
+  });
+}
+
+/**
+ * Read the canonical KAIOS token, Pair Registry organ and Pancake V2 pairs
+ * from at least two independent BSC RPC endpoints at one confirmed block.
+ *
+ * This adapter is read-only. It exposes no signer, transaction, allowance,
+ * liquidity or broadcast method. A quorum observation is timestamped evidence,
+ * not permanent proof that a pair can never exist and not execution authority.
+ */
+export async function readKaiosExternalMarketSnapshotQuorum({
+  rpcUrls = KAIOS_MARKET_RPC_URLS,
+  confirmations = 3,
+  fetchImpl = repositoryBoundKaiosMarketFetch,
+  timeoutMs = 15000
+} = {}) {
+  invariant(typeof fetchImpl === "function", "KAIOS_MARKET_FETCH_REQUIRED", "KAIOS market snapshot requires fetch");
+  invariant(Array.isArray(rpcUrls) && new Set(rpcUrls).size >= 2, "KAIOS_MARKET_RPC_QUORUM_REQUIRED", "KAIOS market snapshot requires at least two distinct RPC endpoints");
+  invariant(rpcUrls.every((url) => /^https:\/\//.test(String(url))), "KAIOS_MARKET_RPC_HTTPS_REQUIRED", "KAIOS market RPC endpoints must use HTTPS");
+  invariant(Number.isInteger(confirmations) && confirmations >= 1, "KAIOS_MARKET_CONFIRMATIONS_REQUIRED", "KAIOS market snapshot requires at least one confirmation");
+  invariant(Number.isInteger(timeoutMs) && timeoutMs > 0, "KAIOS_MARKET_TIMEOUT_INVALID", "KAIOS market snapshot timeout must be positive");
+  const repositoryBoundTransport =
+    fetchImpl === repositoryBoundKaiosMarketFetch &&
+    confirmations === 3 &&
+    rpcUrls.length === KAIOS_MARKET_RPC_URLS.length &&
+    rpcUrls.every((url, index) => url === KAIOS_MARKET_RPC_URLS[index]);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const heads = await Promise.all(rpcUrls.map(async (url, index) => {
+      const [chainIdHex, blockNumberHex] = await Promise.all([
+        rpcRequest({ url, method: "eth_chainId", params: [], fetchImpl, signal: controller.signal, id: index * 100 + 1 }),
+        rpcRequest({ url, method: "eth_blockNumber", params: [], fetchImpl, signal: controller.signal, id: index * 100 + 2 })
+      ]);
+      const chainId = hexQuantityToNumber(chainIdHex, "chainId");
+      invariant(chainId === KAIOS_MARKET_GENESIS_CONFIG.chain_id, "KAIOS_MARKET_WRONG_CHAIN", "Every market RPC must report BSC chain 56");
+      return hexQuantityToNumber(blockNumberHex, "blockNumber");
+    }));
+    const blockNumber = Math.min(...heads) - confirmations;
+    invariant(blockNumber > 0, "KAIOS_MARKET_CONFIRMED_BLOCK_INVALID", "Confirmed market block must be positive");
+    const observations = await Promise.all(rpcUrls.map((url, index) => observeKaiosMarketAtBlock({
+      url,
+      blockNumber,
+      fetchImpl,
+      signal: controller.signal,
+      requestId: index * 1000 + 10
+    })));
+    const expected = JSON.stringify(observations[0]);
+    invariant(observations.every((observation) => JSON.stringify(observation) === expected), "KAIOS_MARKET_RPC_QUORUM_MISMATCH", "BSC RPC endpoints disagree on the KAIOS market snapshot");
+    const observed = observations[0];
+    const snapshot = Object.freeze({
+      observed_at: new Date(observed.block_timestamp * 1000).toISOString(),
+      block_number: blockNumber,
+      block_hash: observed.block_hash,
+      chain_id: KAIOS_MARKET_GENESIS_CONFIG.chain_id,
+      kaios_code: observed.kaios_code,
+      pair_registry_organ: observed.pair_registry_organ,
+      pairs: observed.pairs,
+      evidence_class: repositoryBoundTransport
+        ? "RPC_QUORUM_VERIFIED_READ_ONLY"
+        : "CALLER_SUPPLIED_TRANSPORT_SCHEMA_PROBE",
+      provider_count: rpcUrls.length,
+      confirmations,
+      execution_performed: false,
+      mainnet_transaction_sent: false
+    });
+    if (repositoryBoundTransport) verifiedKaiosMarketSnapshots.add(snapshot);
+    return snapshot;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+const KAIOS_MARKET_PROTECTED_CAPITAL = Object.freeze([
+  "BANK_18888_RESERVE",
+  "BANK_18888_PERFORMANCE_BOND",
+  "BANK_8888_PAYROLL_LIABILITY",
+  "BANK_8888_FUNDED_SALARY",
+  "KGEN_RESERVE",
+  "KGEN_CATALYST_ESCROW",
+  "NAIHE_GENESIS_RESERVE",
+  "PUBLIC_GOOD_EMERGENCY_RESERVE",
+  "REFUNDABLE_PRINCIPAL"
+]);
+
+function isZeroAddress(value) {
+  return /^0x0{40}$/i.test(value);
+}
+
+function isEvmAddress(value) {
+  return typeof value === "string" && /^0x[0-9a-f]{40}$/i.test(value);
+}
+
+export function evaluateKaiosExternalMarketSnapshot(snapshot) {
+  requireFields(snapshot, ["observed_at", "block_number", "chain_id", "kaios_code", "pair_registry_organ", "pairs"], "KaiosExternalMarketSnapshot");
+  invariant(snapshot.chain_id === KAIOS_MARKET_GENESIS_CONFIG.chain_id, "KAIOS_MARKET_WRONG_CHAIN", "KAIOS market observation must use BSC chain 56");
+  invariant(Number.isInteger(snapshot.block_number) && snapshot.block_number > 0, "KAIOS_MARKET_BLOCK_REQUIRED", "KAIOS market observation requires a positive BSC block");
+  invariant(snapshot.kaios_code === "PRESENT", "KAIOS_TOKEN_CODE_REQUIRED", "Canonical KAIOS bytecode must be present");
+  requireFields(snapshot.pairs, KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets, "KaiosPairSnapshot");
+  invariant(isEvmAddress(snapshot.pair_registry_organ), "KAIOS_PAIR_REGISTRY_ADDRESS_INVALID", "Pair Registry observation must be an EVM address");
+  invariant(KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets.every((asset) => isEvmAddress(snapshot.pairs[asset])), "KAIOS_PAIR_ADDRESS_INVALID", "Every observed pair must be an EVM address or the zero address");
+
+  const livePairs = KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets.filter((asset) => !isZeroAddress(snapshot.pairs[asset]));
+  const pairRegistryActive = !isZeroAddress(snapshot.pair_registry_organ);
+  const quorumVerified = verifiedKaiosMarketSnapshots.has(snapshot);
+  return Object.freeze({
+    observed_at: snapshot.observed_at,
+    block_number: snapshot.block_number,
+    block_hash: quorumVerified ? snapshot.block_hash : null,
+    chain_id: snapshot.chain_id,
+    pair_registry_status: quorumVerified
+      ? (pairRegistryActive ? "RPC_QUORUM_NONZERO_AT_BLOCK" : "RPC_QUORUM_ZERO_AT_BLOCK")
+      : (pairRegistryActive ? "CALLER_REPORTED_NONZERO_REQUIRES_REPOSITORY_BOUND_VERIFICATION" : "CALLER_REPORTED_ZERO_UNVERIFIED"),
+    candidate_pairs: Object.freeze([...livePairs]),
+    market_status: quorumVerified ? "RPC_QUORUM_VERIFIED_READ_ONLY_OBSERVATION" : "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION",
+    price_status: "UNVERIFIED_NO_MARKET_PRICE_AUTHORITY",
+    evidence_status: quorumVerified ? "RPC_QUORUM_VERIFIED_READ_ONLY" : "BLOCKED_REPOSITORY_BOUND_SNAPSHOT_VERIFIER_NOT_IMPLEMENTED",
+    timestamped_no_pair_observation: quorumVerified && livePairs.length === 0,
+    authoritative_no_pair_claim: false,
+    execution_performed: false
+  });
+}
+
+export function createKaiosMarketGenesisProposal({
+  snapshot,
+  quoteAsset,
+  kaiosAmountAtomic,
+  quoteAmountAtomic,
+  fundingSourceClass,
+  fundingSourceId,
+  kaiosAvailableAtomic,
+  quoteAvailableAtomic,
+  budgetEvidence,
+  assetOwnerAuthorization,
+  riskPolicyApproved,
+  signerReady,
+  governanceReviewReady,
+  pairRegistryPlanApproved
+}) {
+  const market = evaluateKaiosExternalMarketSnapshot(snapshot);
+  invariant(KAIOS_MARKET_GENESIS_CONFIG.permitted_quote_assets.includes(quoteAsset), "KAIOS_MARKET_QUOTE_ASSET_FORBIDDEN", "Quote asset is not in the KAIOS market proposal allowlist");
+  invariant(!KAIOS_MARKET_PROTECTED_CAPITAL.includes(fundingSourceClass), "KAIOS_MARKET_PROTECTED_CAPITAL", "Protected civilization capital cannot fund KAIOS market liquidity");
+  invariant(KAIOS_MARKET_GENESIS_CONFIG.permitted_funding_source_classes.includes(fundingSourceClass), "KAIOS_MARKET_FUNDING_SOURCE_UNREGISTERED", "Funding source class is not in the closed candidate allowlist");
+  invariant(typeof fundingSourceId === "string" && fundingSourceId.length > 0, "KAIOS_MARKET_FUNDING_SOURCE_REQUIRED", "A fixed funding source is required");
+  invariant([kaiosAmountAtomic, quoteAmountAtomic, kaiosAvailableAtomic, quoteAvailableAtomic].every((value) => /^\d+$/.test(String(value))), "KAIOS_MARKET_ATOMIC_AMOUNT_INVALID", "Market amounts must be unsigned integer atomic units");
+
+  const kaiosAmount = BigInt(kaiosAmountAtomic);
+  const quoteAmount = BigInt(quoteAmountAtomic);
+  const kaiosAvailable = BigInt(kaiosAvailableAtomic);
+  const quoteAvailable = BigInt(quoteAvailableAtomic);
+  invariant(kaiosAmount > 0n && quoteAmount > 0n, "KAIOS_MARKET_TWO_SIDED_CAPITAL_REQUIRED", "Initial liquidity requires positive KAIOS and quote capital");
+
+  const checks = Object.freeze({
+    rpc_quorum_market_snapshot: market.evidence_status === "RPC_QUORUM_VERIFIED_READ_ONLY",
+    repository_bound_market_snapshot: false,
+    closed_funding_registry: false,
+    fixed_funding_account_binding: false,
+    kaios_funded: kaiosAvailable >= kaiosAmount,
+    quote_funded: quoteAvailable >= quoteAmount,
+    budget_evidence_verified: false,
+    asset_owner_authorization_verified: false,
+    risk_policy_verified: false,
+    secure_signer_verified: false,
+    governance_review_verified: false,
+    pair_registry_plan_verified: false
+  });
+  const blockers = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name.toUpperCase());
+
+  return Object.freeze({
+    proposal_id: `KAIOS_${quoteAsset}_MARKET_GENESIS_V1`,
+    company_address: KAIOS_MARKET_GENESIS_CONFIG.company_address,
+    company_k_coordinate: KAIOS_MARKET_GENESIS_CONFIG.company_k_coordinate,
+    chain_id: KAIOS_MARKET_GENESIS_CONFIG.chain_id,
+    venue: "PANCAKESWAP_V2_CANDIDATE",
+    base_asset: "KAIOS",
+    quote_asset: quoteAsset,
+    funding_source_class: fundingSourceClass,
+    funding_source_id: fundingSourceId,
+    caller_claims: Object.freeze({
+      budget_evidence: Boolean(budgetEvidence),
+      asset_owner_authorization: Boolean(assetOwnerAuthorization),
+      risk_policy: Boolean(riskPolicyApproved),
+      signer_ready: Boolean(signerReady),
+      governance_review_ready: Boolean(governanceReviewReady),
+      pair_registry_plan_approved: Boolean(pairRegistryPlanApproved)
+    }),
+    caller_claims_are_authority: false,
+    initial_capital_atomic: Object.freeze({ KAIOS: kaiosAmount.toString(), [quoteAsset]: quoteAmount.toString() }),
+    initial_quote_rational: Object.freeze({ numerator_quote_atomic: quoteAmount.toString(), denominator_kaios_atomic: kaiosAmount.toString() }),
+    quote_is_market_input_not_protocol_ratio: true,
+    checks,
+    blockers: Object.freeze(blockers),
+    status: "BLOCKED_MACHINE_VERIFIABLE_MARKET_GENESIS_EVIDENCE_NOT_IMPLEMENTED",
+    unsigned_payload_status: "NOT_CREATED",
+    execution_authorized: false,
+    execution_performed: false,
+    protected_capital_used: false,
+    mainnet_transaction_sent: false
   });
 }

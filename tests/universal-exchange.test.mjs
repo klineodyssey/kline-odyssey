@@ -1,12 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import vm from "node:vm";
 import { createRequire } from "node:module";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
-  validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
+  validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, KAIOS_TOKEN_CONFIG, BSC_WALLET_ASSETS,
+  ensureBscWalletNetwork, watchBscWalletAsset, createMetaMaskMobileDeepLink, DigitalLifeBirthResolver,
   createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
   deriveHeartEligibility, createDigitalAntFinanceSnapshot, createSurvivalReserveProposal,
   createFirstKgenAcquisitionPlan, createDigitalAntWishProposal, runWukongGatekeeperHourlyJob,
@@ -99,13 +101,434 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan, UNIVERSAL_11520_MARKET, create11520UniversalListingCandidate,
+  create11520EscrowCandidate, validate11520SettlementReceipt, create11520SettlementAccounting,
+  GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS, create11520GpuAtomicSettlementCandidate,
+  KAIOS_MARKET_GENESIS_CONFIG, readKaiosExternalMarketSnapshotQuorum,
+  evaluateKaiosExternalMarketSnapshot, createKaiosMarketGenesisProposal,
+  NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS,
+  validateGpuInventoryUnit, calculateGpuLandedCost, evaluateGpu11520MarketReadiness,
+  calculateGpuTransportPlan, createGpuAcquisitionPipelineCandidate
 } from "../core/index.mjs";
-import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
+
+async function exerciseKgenWalletDiscovery(provider) {
+  const homepage = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
+  const script = [...homepage.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map((match) => match[1])
+    .find((candidate) => candidate.includes("data-watch-kgen"));
+  assert.ok(script, "wallet discovery script must be present");
+  let clickHandler;
+  const button = {
+    disabled: false,
+    addEventListener(type, handler) {
+      if (type === "click") clickHandler = handler;
+    }
+  };
+  const status = { textContent: "INITIAL" };
+  const document = {
+    querySelector(selector) {
+      if (selector === "[data-watch-kgen]") return button;
+      if (selector === "[data-watch-kgen-status]") return status;
+      return null;
+    }
+  };
+  const window = { location: { href: "https://example.invalid/" } };
+  if (provider) window.ethereum = provider;
+  vm.runInNewContext(script, { document, window, URL });
+  assert.equal(typeof clickHandler, "function");
+  await clickHandler();
+  return { button, status };
+}
+
+test("KGEN wallet discovery uses the canonical BSC asset without transaction authority", async () => {
+  const homepage = await fs.readFile(new URL("../index.html", import.meta.url), "utf8");
+  assert.match(homepage, /wallet may ask to switch to BNB Smart Chain \(chain 56\)/);
+  assert.match(homepage, /address:\s*"0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"/);
+  assert.match(homepage, /symbol:\s*"KGEN"/);
+  assert.match(homepage, /decimals:\s*18/);
+  assert.match(homepage, /assets\/kgen\/kgen-logo-256\.png/);
+  assert.doesNotMatch(homepage, /eth_sendRawTransaction|eth_sendTransaction/);
+  assert.doesNotMatch(homepage, /method:\s*"approve"|method:\s*"transfer"/);
+
+  const missing = await exerciseKgenWalletDiscovery(null);
+  assert.match(missing.status.textContent, /provider not detected/i);
+  assert.equal(missing.button.disabled, false);
+
+  const alreadyCalls = [];
+  const already = await exerciseKgenWalletDiscovery({
+    async request(payload) {
+      alreadyCalls.push(payload);
+      return payload.method === "eth_chainId" ? "0x38" : true;
+    }
+  });
+  assert.deepEqual(alreadyCalls.map(({ method }) => method), ["eth_chainId", "wallet_watchAsset"]);
+  assert.equal(alreadyCalls[1].params.options.address, "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be");
+  assert.match(already.status.textContent, /accepted by the wallet/i);
+
+  const switchCalls = [];
+  await exerciseKgenWalletDiscovery({
+    async request(payload) {
+      switchCalls.push(payload);
+      if (payload.method === "eth_chainId") return "0x1";
+      if (payload.method === "wallet_watchAsset") return true;
+      return null;
+    }
+  });
+  assert.deepEqual(switchCalls.map(({ method }) => method), ["eth_chainId", "wallet_switchEthereumChain", "wallet_watchAsset"]);
+  assert.equal(switchCalls[1].params.length, 1);
+  assert.equal(switchCalls[1].params[0].chainId, "0x38");
+
+  const declined = await exerciseKgenWalletDiscovery({
+    async request({ method }) {
+      if (method === "eth_chainId") return "0x38";
+      return false;
+    }
+  });
+  assert.match(declined.status.textContent, /did not add KGEN/i);
+  assert.doesNotMatch(declined.status.textContent, /accepted by the wallet/i);
+
+  const rejected = await exerciseKgenWalletDiscovery({
+    async request({ method }) {
+      if (method === "eth_chainId") return "0x1";
+      throw new Error("User rejected");
+    }
+  });
+  assert.match(rejected.status.textContent, /User rejected/);
+  assert.doesNotMatch(rejected.status.textContent, /accepted by the wallet/i);
+  assert.equal(rejected.button.disabled, false);
+});
+import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, verifyDigitalLifeSignerConnection, validateRepositoryBoundLifeWalletProfile, CODEX_GM_ENV, CODEX_GM_SIGNER_CONNECTION_PROFILE } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
+
+const actorEvidence = new Map([
+  ["EVIDENCE_SELLER", Object.freeze({ actor_id: "LIFE_GPU_SELLER", controller_id: "CTRL_GPU_SELLER", authentication_status: "VERIFIED", authentication_method: "TEST_REGISTRY", evidence_id: "EVIDENCE_SELLER" })],
+  ["EVIDENCE_BUYER", Object.freeze({ actor_id: "LIFE_GPU_BUYER", controller_id: "CTRL_GPU_BUYER", authentication_status: "VERIFIED", authentication_method: "TEST_REGISTRY", evidence_id: "EVIDENCE_BUYER" })],
+  ["EVIDENCE_SAME_CONTROLLER", Object.freeze({ actor_id: "LIFE_SECOND_BUYER", controller_id: "CTRL_GPU_SELLER", authentication_status: "VERIFIED", authentication_method: "TEST_REGISTRY", evidence_id: "EVIDENCE_SAME_CONTROLLER" })]
+]);
+
+function verify11520TestActor(context) {
+  const verified = actorEvidence.get(context?.evidence_id);
+  if (!verified) throw new Error("UNKNOWN_ACTOR_EVIDENCE");
+  return verified;
+}
+
+function gpuAsset11520() {
+  return {
+    asset_id: "GPU_NVIDIA_TEST_0001", asset_type: "EQUIPMENT", issuer_id: "SUPPLIER_NVIDIA_AUTHORIZED_TEST",
+    owner_id: "LIFE_GPU_SELLER", controller_id: "CTRL_GPU_SELLER", metadata_hash: "GPU_METADATA_HASH",
+    rights_manifest: {
+      identity_right: "NOT_APPLICABLE", ownership_right: "TRANSFERABLE", control_right: "TRANSFER_WITH_OWNERSHIP",
+      use_right: "TRANSFERABLE", license_right: "NOT_APPLICABLE", revenue_right: "NOT_APPLICABLE",
+      governance_right: "NOT_APPLICABLE", transfer_right: "TRANSFERABLE", breeding_right: "NOT_APPLICABLE",
+      data_right: "NOT_APPLICABLE", expiration: null, restrictions: []
+    },
+    settlement_currency: "KGEN", status: "CANDIDATE", location: "0.00011520", location_id: "K11520",
+    civilization_id: "KAIOS", created_at: "2026-08-27T13:30:00+08:00", updated_at: "2026-08-27T13:30:00+08:00"
+  };
+}
+
+function gpuListing11520() {
+  return {
+    listing_id: "LISTING_GPU_NVIDIA_TEST_0001", asset_id: "GPU_NVIDIA_TEST_0001", seller_id: "LIFE_GPU_SELLER",
+    listing_type: "FIXED_PRICE", currency_id: "KGEN", price: 2, quantity: 1,
+    rights_offered: ["ownership_right", "transfer_right"], start_time: "2026-08-27T13:30:00+08:00", end_time: null,
+    status: "LOCAL_DRAFT"
+  };
+}
+
+function gpuWarehouseReceipt11520() {
+  return {
+    receipt_id: "WAREHOUSE_GPU_NVIDIA_TEST_0001", warehouse_id: "0.00011520_K11520_GPU_BONDED_WAREHOUSE",
+    asset_id: "GPU_NVIDIA_TEST_0001", asset_type: "EQUIPMENT", depositor_actor_id: "LIFE_GPU_SELLER",
+    supplier_id: "SUPPLIER_NVIDIA_AUTHORIZED_TEST", model: "NVIDIA_GPU_TEST_MODEL", serial_number: "TEST-SERIAL-0001",
+    ownership_evidence_id: "OWNERSHIP_TEST_0001", cargo_receipt_id: "CARGO_K12345_K11520_TEST_0001",
+    acquisition_cost_atomic: "1500000000000000000", acquisition_currency: "KGEN",
+    deposited_at: "2026-08-27T13:30:00+08:00", evidence_class: "EXTERNAL_VERIFIED", status: "VERIFIED_CANDIDATE"
+  };
+}
+
+function serviceListingCandidate11520() {
+  const asset = { ...gpuAsset11520(), asset_id: "SERVICE_GPU_LOGISTICS_0001", asset_type: "SERVICE" };
+  const listing = {
+    ...gpuListing11520(),
+    listing_id: "LISTING_SERVICE_GPU_LOGISTICS_0001",
+    asset_id: asset.asset_id,
+    listing_type: "SERVICE",
+    currency_id: "KAIOS",
+    rights_offered: ["use_right"]
+  };
+  return create11520UniversalListingCandidate({
+    listing, asset, sellerActorContext: { evidence_id: "EVIDENCE_SELLER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:31:00+08:00", unitPriceAtomic: "88000000000000000000",
+    quantityAtomic: "1", evidenceIds: ["SERVICE_SCOPE_0001"]
+  });
+}
+
+test("11520 physical listing cannot promote caller-asserted warehouse labels", () => {
+  const candidate = create11520UniversalListingCandidate({
+    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER", actor_id: "FORGED_LABEL" },
+    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:31:00+08:00",
+    unitPriceAtomic: "2000000000000000000", quantityAtomic: "1", evidenceIds: ["GPU_METADATA_HASH"],
+    warehouseReceipt: gpuWarehouseReceipt11520()
+  });
+  assert.equal(UNIVERSAL_11520_MARKET.company_address, "0.00011520");
+  assert.equal(candidate.seller_authority.actor_id, "LIFE_GPU_SELLER");
+  assert.equal(candidate.total_ask_atomic, "2000000000000000000");
+  assert.equal(candidate.inventory_class, "PHYSICAL_WAREHOUSE_EVIDENCE_PENDING");
+  assert.equal(candidate.status, "WAREHOUSE_EVIDENCE_REQUIRED");
+  assert.equal(candidate.warehouse_receipt.evidence_class, "CALLER_ASSERTED_UNVERIFIED");
+  assert.equal(candidate.warehouse_receipt.status, "WAREHOUSE_EVIDENCE_PENDING");
+  assert.equal(candidate.custody_transfer, false);
+  assert.throws(() => create11520EscrowCandidate({
+    listingCandidate: candidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" },
+    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00",
+    amountAtomic: candidate.total_ask_atomic
+  }), (error) => error.code === "LISTING_CANDIDATE_REQUIRED");
+  assert.throws(() => create11520UniversalListingCandidate({
+    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:31:00+08:00", unitPriceAtomic: "1", quantityAtomic: "1", evidenceIds: ["EVIDENCE"], warehouseReceipt: null
+  }));
+});
+
+test("11520 lists Life work as a separate Service asset and never sells Life identity", () => {
+  const lifeAsset = { ...gpuAsset11520(), asset_id: "LIFE_GPU_SELLER", asset_type: "LIFE" };
+  const listing = { ...gpuListing11520(), asset_id: lifeAsset.asset_id };
+  assert.throws(() => create11520UniversalListingCandidate({
+    listing, asset: lifeAsset, sellerActorContext: { evidence_id: "EVIDENCE_SELLER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:31:00+08:00", unitPriceAtomic: "1", quantityAtomic: "1", evidenceIds: ["EVIDENCE"]
+  }), (error) => error.code === "LIFE_IDENTITY_NOT_FOR_SALE");
+
+  const serviceAsset = { ...gpuAsset11520(), asset_id: "SERVICE_GPU_LOGISTICS_0001", asset_type: "SERVICE" };
+  const serviceListing = { ...gpuListing11520(), listing_id: "LISTING_SERVICE_GPU_LOGISTICS_0001", asset_id: serviceAsset.asset_id, listing_type: "SERVICE", currency_id: "KAIOS", rights_offered: ["use_right"] };
+  const serviceCandidate = create11520UniversalListingCandidate({
+    listing: serviceListing, asset: serviceAsset, sellerActorContext: { evidence_id: "EVIDENCE_SELLER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:31:00+08:00", unitPriceAtomic: "88000000000000000000", quantityAtomic: "1", evidenceIds: ["SERVICE_SCOPE_0001"]
+  });
+  assert.equal(serviceCandidate.inventory_class, "DIGITAL_OR_SERVICE_CANDIDATE");
+  assert.equal(serviceCandidate.quote_currency, "KAIOS");
+});
+
+test("11520 service escrow is paper-only and blocks self or same-controller settlement", () => {
+  const listingCandidate = serviceListingCandidate11520();
+  const escrow = create11520EscrowCandidate({ listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00", amountAtomic: listingCandidate.total_ask_atomic });
+  assert.equal(escrow.status, "UNFUNDED_MODEL_ONLY");
+  assert.equal(escrow.allowance_requested, false);
+  assert.equal(escrow.mainnet_transaction_sent, false);
+  assert.throws(() => create11520EscrowCandidate({ listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_SAME_CONTROLLER" }, verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00", amountAtomic: listingCandidate.total_ask_atomic }), (error) => error.code === "SAME_CONTROLLER_MATCH_FORBIDDEN");
+  assert.throws(() => create11520EscrowCandidate({ listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00", amountAtomic: "1" }), (error) => error.code === "ESCROW_AMOUNT_MISMATCH");
+});
+
+test("11520 receipt callback cannot manufacture settlement or revenue", () => {
+  const listingCandidate = serviceListingCandidate11520();
+  const escrow = create11520EscrowCandidate({ listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:32:00+08:00", amountAtomic: listingCandidate.total_ask_atomic });
+  const receiptInput = {
+    receipt_id: "SETTLEMENT_GPU_TEST_0001", listing_id: escrow.listing_id, escrow_id: escrow.escrow_id, chain_id: 56,
+    tx_hash: `0x${"a".repeat(64)}`, block_number: 118325000, receipt_status: 1,
+    buyer_actor_id: escrow.buyer_authority.actor_id, seller_actor_id: escrow.seller_actor_id, beneficiary: escrow.beneficiary,
+    asset_id: escrow.asset_id, currency_id: escrow.currency_id, amount_atomic: escrow.amount_atomic, confirmed_at: "2026-08-27T13:40:00+08:00"
+  };
+  const verifyChainReceipt = (txHash) => txHash === receiptInput.tx_hash ? { chain_id: 56, block_number: 118325000, receipt_status: 1 } : null;
+  const receiptCandidate = validate11520SettlementReceipt(receiptInput, { escrowCandidate: escrow, verifyChainReceipt });
+  assert.equal(receiptCandidate.status, "CHAIN_RECEIPT_CANDIDATE_NOT_REPOSITORY_BOUND");
+  assert.equal(receiptCandidate.chain_settlement_proven, false);
+  assert.throws(() => validate11520SettlementReceipt(receiptInput, { escrowCandidate: escrow, verifyChainReceipt, consumedReceiptIds: [receiptInput.receipt_id] }), (error) => error.code === "SETTLEMENT_RECEIPT_REPLAY");
+  assert.throws(() => validate11520SettlementReceipt({ ...receiptInput, beneficiary: "ATTACKER" }, { escrowCandidate: escrow, verifyChainReceipt }), (error) => error.code === "SETTLEMENT_BENEFICIARY_MISMATCH");
+  assert.throws(() => validate11520SettlementReceipt({ ...receiptInput, block_number: 1 }, { escrowCandidate: escrow, verifyChainReceipt }), (error) => error.code === "SETTLEMENT_CHAIN_RECEIPT_MISMATCH");
+  const accounting = create11520SettlementAccounting({ receipt: receiptCandidate, companyId: "KAIOS_AI_COMPANY", feeAtomic: "10000000000000000" });
+  assert.equal(accounting.balanced, true);
+  assert.equal(accounting.accounting_status, "DRAFT_MODEL_ONLY_NOT_POSTED");
+  assert.equal(accounting.revenue_status, "NOT_REVENUE_UNVERIFIED_SETTLEMENT_CONNECTOR");
+  assert.equal(accounting.payroll_funding_status, "NOT_AUTOMATIC");
+  assert.ok(accounting.entries.every((entry) => entry.posting_status === "NOT_POSTED"));
+  assert.equal(accounting.entries.reduce((sum, entry) => sum + (entry.direction === "DEBIT" ? BigInt(entry.amount_atomic) : -BigInt(entry.amount_atomic)), 0n), 0n);
+});
+
+test("11520 GPU atomic envelope binds warehouse unit, parties, currency and amount but cannot execute", () => {
+  const listingCandidate = create11520UniversalListingCandidate({
+    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" },
+    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:31:00+08:00",
+    unitPriceAtomic: "2000000000000000000", quantityAtomic: "1", evidenceIds: ["GPU_METADATA_HASH"],
+    warehouseReceipt: gpuWarehouseReceipt11520()
+  });
+  const candidate = create11520GpuAtomicSettlementCandidate({
+    listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:32:00+08:00", expiresAt: "2026-08-27T13:47:00+08:00",
+    tradeNonce: "GPU-TRADE-0001"
+  });
+  assert.equal(candidate.chain_id, 56);
+  assert.equal(candidate.market_id, "K11520_UNIVERSAL_EXCHANGE");
+  assert.equal(candidate.gpu_serial_number, "TEST-SERIAL-0001");
+  assert.equal(candidate.warehouse_receipt_id, "WAREHOUSE_GPU_NVIDIA_TEST_0001");
+  assert.equal(candidate.buyer_actor_id, "LIFE_GPU_BUYER");
+  assert.equal(candidate.seller_actor_id, "LIFE_GPU_SELLER");
+  assert.equal(candidate.beneficiary, "LIFE_GPU_SELLER");
+  assert.equal(candidate.currency_id, "KGEN");
+  assert.equal(candidate.amount_atomic, "2000000000000000000");
+  assert.deepEqual(candidate.atomic_actions, GPU_ATOMIC_SETTLEMENT_11520_REQUIREMENTS.atomic_actions);
+  assert.equal(candidate.deployed_v1_compatibility, "INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT");
+  assert.equal(candidate.production_adapter_status, "NOT_IMPLEMENTED");
+  assert.equal(candidate.settlement_ready, false);
+  assert.equal(candidate.unsigned_payload, null);
+  assert.equal(candidate.signer_requested, false);
+  assert.equal(candidate.buyer_payment_collected, false);
+  assert.equal(candidate.gpu_custody_transferred, false);
+  assert.equal(candidate.revenue_recognized, false);
+  assert.equal(candidate.real_trade_executed, false);
+  assert.equal(candidate.mainnet_transaction_sent, false);
+});
+
+test("11520 GPU atomic envelope rejects replay, expiry, self-control and warehouse tampering", () => {
+  const listingCandidate = create11520UniversalListingCandidate({
+    listing: gpuListing11520(), asset: gpuAsset11520(), sellerActorContext: { evidence_id: "EVIDENCE_SELLER" },
+    verifyActorContext: verify11520TestActor, observedAt: "2026-08-27T13:31:00+08:00",
+    unitPriceAtomic: "2000000000000000000", quantityAtomic: "1", evidenceIds: ["GPU_METADATA_HASH"],
+    warehouseReceipt: gpuWarehouseReceipt11520()
+  });
+  const base = {
+    listingCandidate, buyerActorContext: { evidence_id: "EVIDENCE_BUYER" }, verifyActorContext: verify11520TestActor,
+    observedAt: "2026-08-27T13:32:00+08:00", expiresAt: "2026-08-27T13:47:00+08:00", tradeNonce: "GPU-TRADE-0002"
+  };
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, consumedTradeNonces: [base.tradeNonce] }), (error) => error.code === "GPU_SETTLEMENT_NONCE_REPLAY");
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, expiresAt: base.observedAt }), (error) => error.code === "GPU_SETTLEMENT_EXPIRY_INVALID");
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, buyerActorContext: { evidence_id: "EVIDENCE_SAME_CONTROLLER" } }), (error) => error.code === "SAME_CONTROLLER_MATCH_FORBIDDEN");
+  const tampered = { ...listingCandidate, warehouse_receipt: { ...listingCandidate.warehouse_receipt, asset_id: "GPU_ATTACKER" } };
+  assert.throws(() => create11520GpuAtomicSettlementCandidate({ ...base, listingCandidate: tampered }), (error) => error.code === "GPU_SETTLEMENT_WAREHOUSE_ASSET_MISMATCH");
+});
+
+const kaiosNoPairSnapshot = Object.freeze({
+  observed_at: "2026-08-27T13:10:00+08:00",
+  block_number: 118324943,
+  chain_id: 56,
+  kaios_code: "PRESENT",
+  pair_registry_organ: "0x0000000000000000000000000000000000000000",
+  pairs: Object.freeze({
+    WBNB: "0x0000000000000000000000000000000000000000",
+    KGEN: "0x0000000000000000000000000000000000000000",
+    USDT: "0x0000000000000000000000000000000000000000"
+  })
+});
+
+test("KAIOS market snapshot remains unverified until repository-bound evidence exists", () => {
+  const market = evaluateKaiosExternalMarketSnapshot(kaiosNoPairSnapshot);
+  assert.equal(KAIOS_MARKET_GENESIS_CONFIG.company_address, "0.00011520");
+  assert.equal(market.market_status, "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION");
+  assert.equal(market.pair_registry_status, "CALLER_REPORTED_ZERO_UNVERIFIED");
+  assert.equal(market.price_status, "UNVERIFIED_NO_MARKET_PRICE_AUTHORITY");
+  assert.equal(market.authoritative_no_pair_claim, false);
+  assert.equal(market.execution_performed, false);
+  assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, chain_id: 1 }), (error) => error.code === "KAIOS_MARKET_WRONG_CHAIN");
+  assert.throws(() => evaluateKaiosExternalMarketSnapshot({ ...kaiosNoPairSnapshot, pairs: { ...kaiosNoPairSnapshot.pairs, KGEN: "UNKNOWN" } }), (error) => error.code === "KAIOS_PAIR_ADDRESS_INVALID");
+});
+
+function kaiosMarketRpcFetch({ mismatchUrl = null } = {}) {
+  const zeroWord = `0x${"0".repeat(64)}`;
+  const oneWord = `0x${"0".repeat(63)}1`;
+  return async (url, options) => {
+    const request = JSON.parse(options.body);
+    let result;
+    if (request.method === "eth_chainId") result = "0x38";
+    else if (request.method === "eth_blockNumber") result = "0x3e8";
+    else if (request.method === "eth_getBlockByNumber") {
+      result = { number: "0x3e5", hash: `0x${"a".repeat(64)}`, timestamp: "0x66ce2e00" };
+    } else if (request.method === "eth_getCode") result = "0x6000";
+    else if (request.method === "eth_call") {
+      const isFactory = request.params[0].to.toLowerCase() === KAIOS_MARKET_GENESIS_CONFIG.pancakeswap_v2_factory.toLowerCase();
+      result = mismatchUrl === url && isFactory ? oneWord : zeroWord;
+    } else throw new Error(`unexpected RPC method ${request.method}`);
+    return { ok: true, async json() { return { jsonrpc: "2.0", id: request.id, result }; } };
+  };
+}
+
+test("caller-supplied KAIOS RPC transport remains an unverified schema probe", async () => {
+  const rpcUrls = ["https://rpc-one.example", "https://rpc-two.example"];
+  const snapshot = await readKaiosExternalMarketSnapshotQuorum({ rpcUrls, fetchImpl: kaiosMarketRpcFetch(), confirmations: 3 });
+  assert.equal(snapshot.block_number, 997);
+  assert.equal(snapshot.provider_count, 2);
+  assert.equal(snapshot.evidence_class, "CALLER_SUPPLIED_TRANSPORT_SCHEMA_PROBE");
+  assert.equal(snapshot.mainnet_transaction_sent, false);
+  const market = evaluateKaiosExternalMarketSnapshot(snapshot);
+  assert.equal(market.market_status, "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION");
+  assert.equal(market.pair_registry_status, "CALLER_REPORTED_ZERO_UNVERIFIED");
+  assert.equal(market.timestamped_no_pair_observation, false);
+  assert.equal(market.authoritative_no_pair_claim, false);
+  assert.equal(market.execution_performed, false);
+
+  const callerCopy = evaluateKaiosExternalMarketSnapshot(structuredClone(snapshot));
+  assert.equal(callerCopy.market_status, "UNVERIFIED_EXTERNAL_MARKET_OBSERVATION");
+  assert.equal(callerCopy.timestamped_no_pair_observation, false);
+});
+
+test("KAIOS read-only market adapter rejects RPC disagreement, one provider and wrong chain", async () => {
+  const rpcUrls = ["https://rpc-one.example", "https://rpc-two.example"];
+  await assert.rejects(
+    readKaiosExternalMarketSnapshotQuorum({ rpcUrls, fetchImpl: kaiosMarketRpcFetch({ mismatchUrl: rpcUrls[1] }) }),
+    (error) => error.code === "KAIOS_MARKET_RPC_QUORUM_MISMATCH"
+  );
+  await assert.rejects(
+    readKaiosExternalMarketSnapshotQuorum({ rpcUrls: [rpcUrls[0]], fetchImpl: kaiosMarketRpcFetch() }),
+    (error) => error.code === "KAIOS_MARKET_RPC_QUORUM_REQUIRED"
+  );
+  const wrongChainFetch = async (url, options) => {
+    const request = JSON.parse(options.body);
+    if (request.method === "eth_chainId") return { ok: true, async json() { return { result: "0x1", id: request.id }; } };
+    return kaiosMarketRpcFetch()(url, options);
+  };
+  await assert.rejects(
+    readKaiosExternalMarketSnapshotQuorum({ rpcUrls, fetchImpl: wrongChainFetch }),
+    (error) => error.code === "KAIOS_MARKET_WRONG_CHAIN"
+  );
+});
+
+test("KAIOS pair proposal cannot self-upgrade caller claims into verified readiness", () => {
+  const base = {
+    snapshot: kaiosNoPairSnapshot,
+    quoteAsset: "KGEN",
+    kaiosAmountAtomic: "1000000000000000000000",
+    quoteAmountAtomic: "1000000000000000000",
+    fundingSourceClass: "COMPANY_TRADING_TREASURY",
+    fundingSourceId: "KAIOS_AI_COMPANY_TRADING_TREASURY_UNBOUND",
+    kaiosAvailableAtomic: "1000000000000000000000",
+    quoteAvailableAtomic: "1000000000000000000",
+    budgetEvidence: true,
+    assetOwnerAuthorization: true,
+    riskPolicyApproved: true,
+    signerReady: true,
+    governanceReviewReady: true,
+    pairRegistryPlanApproved: true
+  };
+  const proposal = createKaiosMarketGenesisProposal(base);
+  assert.equal(proposal.status, "BLOCKED_MACHINE_VERIFIABLE_MARKET_GENESIS_EVIDENCE_NOT_IMPLEMENTED");
+  assert.deepEqual(proposal.initial_quote_rational, {
+    numerator_quote_atomic: "1000000000000000000",
+    denominator_kaios_atomic: "1000000000000000000000"
+  });
+  assert.equal(proposal.execution_authorized, false);
+  assert.equal(proposal.mainnet_transaction_sent, false);
+  assert.equal(proposal.caller_claims_are_authority, false);
+  assert.equal(proposal.checks.repository_bound_market_snapshot, false);
+  assert.equal(proposal.checks.closed_funding_registry, false);
+  assert.equal(proposal.checks.secure_signer_verified, false);
+
+  const underfunded = createKaiosMarketGenesisProposal({ ...base, quoteAvailableAtomic: "0", signerReady: false });
+  assert.ok(underfunded.blockers.includes("QUOTE_FUNDED"));
+  assert.ok(underfunded.blockers.includes("SECURE_SIGNER_VERIFIED"));
+  assert.equal(underfunded.status, "BLOCKED_MACHINE_VERIFIABLE_MARKET_GENESIS_EVIDENCE_NOT_IMPLEMENTED");
+});
+
+test("KAIOS market genesis cannot use protected bank, payroll, catalyst or public-good reserves", () => {
+  const common = {
+    snapshot: kaiosNoPairSnapshot, quoteAsset: "WBNB", kaiosAmountAtomic: "1", quoteAmountAtomic: "1",
+    fundingSourceId: "FORBIDDEN", kaiosAvailableAtomic: "1", quoteAvailableAtomic: "1",
+    budgetEvidence: true, assetOwnerAuthorization: true, riskPolicyApproved: true, signerReady: true, governanceReviewReady: true, pairRegistryPlanApproved: true
+  };
+  for (const fundingSourceClass of ["BANK_18888_RESERVE", "BANK_8888_PAYROLL_LIABILITY", "KGEN_CATALYST_ESCROW", "NAIHE_GENESIS_RESERVE"]) {
+    assert.throws(() => createKaiosMarketGenesisProposal({ ...common, fundingSourceClass }), (error) => error.code === "KAIOS_MARKET_PROTECTED_CAPITAL");
+  }
+  assert.throws(() => createKaiosMarketGenesisProposal({ ...common, fundingSourceClass: "RENAMED_UNVERIFIED_TREASURY" }), (error) => error.code === "KAIOS_MARKET_FUNDING_SOURCE_UNREGISTERED");
+});
 
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
@@ -176,6 +599,129 @@ test("V3.9 delivery revenue requires complete receiver acceptance evidence", () 
   const evidence = { origin_evidence: "A", pickup_evidence: "B", cargo_evidence: "C", route_evidence: "D", arrival_coordinate: "E", delivery_timestamp: "F", receiver_evidence: "G", customer_acceptance: "H" };
   assert.equal(validateFieldDeliveryEvidence(evidence).status, "DELIVERY_VERIFIED");
   assert.throws(() => validateFieldDeliveryEvidence({ ...evidence, customer_acceptance: null }), /Revenue requires/);
+});
+
+test("K12345 to K11520 NVIDIA GPU route preserves the assigned company address and map distance", () => {
+  assert.equal(NVIDIA_GPU_11520_ROUTE.origin_address, "0.00012345");
+  assert.equal(NVIDIA_GPU_11520_ROUTE.destination_address, "0.00011520");
+  assert.equal(NVIDIA_GPU_11520_ROUTE.destination_k_coordinate, "K11520");
+  assert.equal(NVIDIA_GPU_11520_ROUTE.k_index_difference, 825);
+  assert.equal(NVIDIA_GPU_11520_ROUTE.distance_km, 18778.422548555);
+  assert.equal(validateFieldRoute({
+    origin: NVIDIA_GPU_11520_ROUTE.origin_name,
+    destination: NVIDIA_GPU_11520_ROUTE.destination_name,
+    origin_coordinate: 12345,
+    destination_coordinate: 11520,
+    distance: NVIDIA_GPU_11520_ROUTE.distance_km,
+    route: [12345, 11520],
+    travel_time: 1,
+    map_evidence: NVIDIA_GPU_11520_ROUTE.map_evidence
+  }).distance, 18778.422548555);
+});
+
+test("GPU landed cost is atomic, complete, and includes every mandated component", () => {
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field, index) => [field, String(index + 1)]));
+  const quote = calculateGpuLandedCost({ quoteAsset: "KAIOS", components, companyMarginAtomic: "15" });
+  assert.equal(quote.status, "QUOTE_COMPLETE");
+  assert.equal(quote.landed_cost_atomic, "105");
+  assert.equal(quote.minimum_ask_atomic, "120");
+  assert.equal(Object.keys(quote.components).length, 14);
+  assert.equal(calculateGpuLandedCost({ quoteAsset: "KGEN", components: { ...components, food: null }, companyMarginAtomic: "15" }).status, "QUOTE_INCOMPLETE");
+  assert.throws(() => calculateGpuLandedCost({ quoteAsset: "BNB", components, companyMarginAtomic: "15" }), /KGEN or KAIOS/);
+});
+
+test("GPU logistics calculates route time, mass, energy, food and labor without claiming delivery", () => {
+  const transport = calculateGpuTransportPlan({
+    vehicleId: "PAPER_VEHICLE_001", speedMetersPerHour: "80000",
+    gpuMassGrams: "2500", packagingMassGrams: "500", vehicleMassGrams: "2000000",
+    energyWhPerKm: "400", foodCostAtomicPerHour: "2", laborCostAtomicPerHour: "8",
+    insuranceCostAtomic: "100", warehouseCostAtomic: "50", riskReserveAtomic: "200"
+  });
+  assert.equal(transport.route_id, NVIDIA_GPU_11520_ROUTE.route_id);
+  assert.equal(transport.payload_mass_grams, "3000");
+  assert.equal(transport.total_moving_mass_grams, "2003000");
+  assert.equal(transport.delivery_status, "NOT_DELIVERED");
+  assert.equal(transport.chain_write, false);
+  assert.ok(BigInt(transport.travel_time_seconds) > 0n);
+  assert.ok(BigInt(transport.energy_wh) > 0n);
+});
+
+test("wish, heartbeat, fortune and lamp form only a paper GPU acquisition candidate", () => {
+  const inventory = {
+    inventory_id: "GPU-PAPER-PIPELINE-001", inventory_mode: "PAPER_SIMULATION", brand: "NVIDIA", model: "PAPER_GPU_MODEL",
+    serial_number: "PAPER_SIMULATION_NO_SERIAL", supplier: "PAPER_SIMULATION", ownership_evidence: null,
+    acquisition_cost: null, cargo_receipt: null, warehouse_receipt: null, status: "PAPER_SIMULATION_NOT_REAL_INVENTORY"
+  };
+  const transportPlan = calculateGpuTransportPlan({
+    vehicleId: "PAPER_VEHICLE_001", speedMetersPerHour: "80000", gpuMassGrams: "2500",
+    packagingMassGrams: "500", vehicleMassGrams: "2000000", energyWhPerKm: "400",
+    foodCostAtomicPerHour: "2", laborCostAtomicPerHour: "8", insuranceCostAtomic: "100",
+    warehouseCostAtomic: "50", riskReserveAtomic: "200"
+  });
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const candidate = createGpuAcquisitionPipelineCandidate({
+    candidateId: "GPU_ACQUISITION_PAPER_001", lifeId: "LIFE-CODEX-GM-0001", mode: "PAPER_SIMULATION",
+    evidence: Object.fromEntries(["wish", "heartbeat_or_cross_day_breath", "fortune_entitlement", "available_funds", "lamp_service"].map((field) => [field, { status: "PAPER_SIMULATION" }])),
+    inventory, transportPlan, landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(candidate.status, "PAPER_PIPELINE_READY");
+  assert.equal(candidate.gpu_created_from_nothing, false);
+  assert.equal(candidate.fortune_entitlement_is_inventory, false);
+  assert.equal(candidate.lamp_service_is_inventory, false);
+  assert.equal(candidate.real_inventory_created, false);
+  assert.equal(candidate.real_trade_executed, false);
+  assert.equal(candidate.chain_write, false);
+  const blocked = createGpuAcquisitionPipelineCandidate({
+    candidateId: "GPU_ACQUISITION_REAL_BLOCKED", lifeId: "LIFE-CODEX-GM-0001", mode: "REAL_EVIDENCE_CANDIDATE",
+    evidence: {}, inventory, transportPlan, landedCost: calculateGpuLandedCost({ quoteAsset: "KAIOS", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(blocked.status, "BLOCKED_MISSING_EVIDENCE");
+  assert.ok(blocked.blockers.includes("REAL_GPU_INVENTORY_NOT_VERIFIED"));
+  assert.ok(blocked.blockers.includes("GPU_DELIVERY_EVIDENCE_MISSING"));
+});
+
+test("paper GPU inventory cannot fabricate real receipts or pass real-trade readiness", () => {
+  const inventory = {
+    inventory_id: "GPU-PAPER-001", inventory_mode: "PAPER_SIMULATION", brand: "NVIDIA", model: "PAPER_GPU_MODEL",
+    serial_number: "PAPER_SIMULATION_NO_SERIAL", supplier: "PAPER_SIMULATION", ownership_evidence: null,
+    acquisition_cost: null, cargo_receipt: null, warehouse_receipt: null, status: "PAPER_SIMULATION_NOT_REAL_INVENTORY"
+  };
+  assert.equal(validateGpuInventoryUnit(inventory), inventory);
+  assert.throws(() => validateGpuInventoryUnit({ ...inventory, warehouse_receipt: "FAKE" }), /cannot fabricate/);
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const readiness = evaluateGpu11520MarketReadiness({
+    inventory,
+    route: { origin: "K12345", destination: "K11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 18778.422548555, route: [12345, 11520], travel_time: 1, map_evidence: NVIDIA_GPU_11520_ROUTE.map_evidence },
+    landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" })
+  });
+  assert.equal(readiness.paper_market_ready, true);
+  assert.equal(readiness.real_trade_ready, false);
+  assert.ok(readiness.blockers.includes("REAL_GPU_INVENTORY_NOT_VERIFIED"));
+  assert.ok(readiness.blockers.includes("HENGYAO_SIGNER_NOT_CONNECTED"));
+  assert.equal(readiness.real_trade_executed, false);
+});
+
+test("forged GPU evidence and caller readiness flags cannot authorize real trade", () => {
+  const inventory = {
+    inventory_id: "GPU-FORGED-001", inventory_mode: "VERIFIED_REAL_INVENTORY", brand: "NVIDIA", model: "FORGED",
+    serial_number: "FORGED", supplier: "FORGED", ownership_evidence: "FORGED",
+    acquisition_cost: { asset: "KGEN", amount_atomic: "1" }, cargo_receipt: "FORGED", warehouse_receipt: "FORGED",
+    status: "VERIFIED_INVENTORY_AT_K11520"
+  };
+  const components = Object.fromEntries(GPU_LANDED_COST_FIELDS.map((field) => [field, "1"]));
+  const readiness = evaluateGpu11520MarketReadiness({
+    inventory,
+    route: { origin: "K12345", destination: "K11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 18778.422548555, route: [12345, 11520], travel_time: 1, map_evidence: NVIDIA_GPU_11520_ROUTE.map_evidence },
+    landedCost: calculateGpuLandedCost({ quoteAsset: "KGEN", components, companyMarginAtomic: "1" }),
+    signerConnected: true,
+    companyBudgetStatus: "FUNDED_ASSIGNED_COMPANY_BUDGET",
+    settlementStatus: "VERIFIED_11520_GPU_SETTLEMENT"
+  });
+  assert.equal(readiness.real_trade_ready, false);
+  assert.equal(readiness.real_trade_status, "BLOCKED_INDEPENDENT_VERIFIERS_NOT_WIRED");
+  assert.ok(readiness.blockers.includes("INDEPENDENT_GPU_READINESS_VERIFIERS_NOT_WIRED"));
+  assert.equal(readiness.real_trade_executed, false);
+  assert.equal(readiness.chain_write, false);
 });
 
 test("V3.9 workforce gap follows verified demand and does not create Life", () => {
@@ -428,6 +974,42 @@ test("generic Digital Life wallet binding preserves Digital Ant compatibility an
   assert.equal(verifyDigitalAntWalletBinding({ DIGITAL_ANT_0001_PRIVATE_KEY: ant.privateKey, DIGITAL_ANT_0001_WALLET_ADDRESS: ant.address }).life_id, "DIGITAL_ANT_0001");
 });
 
+test("public signer connection evidence is restricted to the repository-bound Hengyao profile", () => {
+  const profile = validateRepositoryBoundLifeWalletProfile({
+    lifeId: "LIFE-CODEX-GM-0001",
+    envPrefix: "CODEX_GM_0001",
+    expectedAddress: "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    expectedChainId: 56
+  });
+  assert.equal(profile, CODEX_GM_SIGNER_CONNECTION_PROFILE);
+  assert.equal(profile.life_id, "LIFE-CODEX-GM-0001");
+  assert.equal(profile.wallet_address, "0x4DF6E9629Dad1072103cFd2bC81845fd97429214");
+  assert.equal(profile.chain_id, 56);
+
+  assert.throws(() => validateRepositoryBoundLifeWalletProfile({
+    lifeId: "LIFE-CODEX-GM-0001",
+    envPrefix: "CODEX_GM_0001",
+    expectedAddress: "0x0000000000000000000000000000000000000001",
+    expectedChainId: 56
+  }), (error) => error.code === "REPOSITORY_BOUND_LIFE_WALLET_PROFILE_MISMATCH");
+  assert.throws(() => validateRepositoryBoundLifeWalletProfile({
+    lifeId: "CALLER_ASSERTED_LIFE",
+    envPrefix: "CALLER_ASSERTED",
+    expectedAddress: profile.wallet_address,
+    expectedChainId: 56
+  }), (error) => error.code === "REPOSITORY_BOUND_LIFE_WALLET_PROFILE_MISMATCH");
+
+  const canonicalInput = {
+    lifeId: profile.life_id,
+    envPrefix: profile.env_prefix,
+    expectedAddress: profile.wallet_address,
+    expectedChainId: profile.chain_id,
+    observedAt: "2026-08-27T06:00:00Z"
+  };
+  assert.throws(() => verifyDigitalLifeSignerConnection(canonicalInput, {}), (error) => error.code === "MISSING_PRIVATE_KEY");
+  assert.throws(() => verifyDigitalLifeSignerConnection({ ...canonicalInput, observedAt: "not-a-time" }, {}), (error) => error.code === "SIGNER_OBSERVED_AT_INVALID");
+});
+
 test("General Manager clock-in, payroll, patrol and modeled transit remain fail-closed", () => {
   const clockIn = createGeneralManagerClockIn({ mandatoryReads: ["BOOT", "CURRENT", "WORKQUEUE"], workerRegistryRead: true, companyHealth: { delivered_not_reviewed: 0, review_failed: 1, expired_claims: 1, pending_employee_delivery: 0 } });
   assert.equal(clockIn.status, "CLOCK_IN_READY");
@@ -586,6 +1168,51 @@ test("KGEN live adapter validates only the registered BSC pair and explicit user
   assert.throws(() => validateSwapIntent({ direction: "SELL_KGEN", amount: "1", slippage_bps: 1, action_reason: "Real sale", confirmed: true }), (error) => error.code === "INVALID_SLIPPAGE");
 });
 
+test("mobile wallet entry switches to BSC and only registers canonical KGEN or KAIOS", async () => {
+  let chainId = "0x1";
+  const calls = [];
+  const ethereum = {
+    async request(payload) {
+      calls.push(structuredClone(payload));
+      if (payload.method === "eth_chainId") return chainId;
+      if (payload.method === "wallet_switchEthereumChain") { chainId = payload.params[0].chainId; return null; }
+      if (payload.method === "wallet_watchAsset") return true;
+      throw new Error(`Unexpected method ${payload.method}`);
+    }
+  };
+  const network = await ensureBscWalletNetwork({ ethereum });
+  assert.equal(network.chain_id, 56);
+  assert.ok(calls.some((call) => call.method === "wallet_switchEthereumChain" && call.params[0].chainId === "0x38"));
+
+  const kgen = await watchBscWalletAsset({ ethereum, symbol: "KGEN" });
+  const kaios = await watchBscWalletAsset({ ethereum, symbol: "KAIOS" });
+  assert.equal(kgen.address, KGEN_SWAP_CONFIG.token_address);
+  assert.equal(kaios.address, KAIOS_TOKEN_CONFIG.token_address);
+  assert.equal(BSC_WALLET_ASSETS.KGEN.image, BSC_WALLET_ASSETS.KAIOS.image);
+  const watchCalls = calls.filter((call) => call.method === "wallet_watchAsset");
+  assert.equal(watchCalls.length, 2);
+  assert.deepEqual(watchCalls.map((call) => call.params.options.symbol), ["KGEN", "KAIOS"]);
+  await assert.rejects(watchBscWalletAsset({ ethereum, symbol: "FAKE" }), (error) => error.code === "UNREGISTERED_WALLET_ASSET");
+  assert.equal(createMetaMaskMobileDeepLink("https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/#/TOKENS"), "https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/#/TOKENS");
+  assert.throws(() => createMetaMaskMobileDeepLink("javascript:alert(1)"), (error) => error.code === "INVALID_DAPP_URL");
+});
+
+test("11520 browser entry avoids the Node-only aggregate core export surface", async () => {
+  const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(appSource, /core\/index\.mjs/, "browser entry must not import the aggregate index that exports Node-only signer modules");
+  for (const browserSafeModule of [
+    "core/registry/universe-runtime.mjs",
+    "core/market/index.mjs",
+    "core/portfolio/index.mjs",
+    "core/life/factory.mjs",
+    "core/life/index.mjs",
+    "core/jobs/index.mjs",
+    "core/company/index.mjs",
+    "core/apps/index.mjs",
+    "core/integrations/kgen-pancakeswap-v2.mjs"
+  ]) assert.match(appSource, new RegExp(browserSafeModule.replaceAll("/", "\\/")));
+});
+
 test("Universal asset and listing type enumerations support all first-day markets", async () => {
   assert.equal(ASSET_TYPES.length, 17);
   for (const type of ["TOKEN", "LIFE", "APP", "COMPANY", "EQUITY", "JOB", "SERVICE", "LAND", "BUILDING", "FACTORY", "SPACECRAFT", "EQUIPMENT", "ENERGY", "DATA", "LICENSE", "CONTRACT", "GOODS"]) assert.ok(ASSET_TYPES.includes(type));
@@ -601,12 +1228,14 @@ test("12345 integration names only functions present in formal Solidity source",
 });
 
 test("11520 production shell contains no random market generation or fake metrics", async () => {
-  const files = ["../K線西遊記/temples/11520/index.html", "../K線西遊記/temples/11520/app.mjs"];
+  const files = ["../K線西遊記/temples/11520/index.html", "../K線西遊記/temples/11520/app.mjs", "../core/integrations/kgen-pancakeswap-v2.mjs"];
   const source = (await Promise.all(files.map((file) => fs.readFile(new URL(file, import.meta.url), "utf8")))).join("\n");
   assert.ok(!source.includes("Math.random"));
   assert.ok(!/88,?888|模擬掛單|fake tvl/i.test(source));
   for (const route of ["HOME", "LIFE", "LIFE FACTORY", "APPS", "COMPANIES", "TOKENS", "JOBS", "SERVICES", "PROPERTY", "FACTORIES", "SPACECRAFT", "PORTFOLIO", "MY LIFE", "MY COMPANY"]) assert.ok(source.includes(route));
   assert.ok(source.includes("createKgenSwapAdapter"));
+  for (const id of ["wallet-connect", "watch-kgen", "watch-kaios", "open-metamask-mobile"]) assert.ok(source.includes(id));
+  assert.ok(source.includes("MAINNET_TOKEN_LIVE_NO_VERIFIED_DEX_PAIR"));
 });
 
 function heartFixture() {
@@ -2855,13 +3484,18 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.0 production shell exposes animated concierge and fresh cache key", async () => {
+test("V4.0.5 production shell preserves concierge and exposes the runtime-identity mobile cache key", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.0-player-first/);
+  assert.match(htmlSource, /app\.mjs\?v=11520-v4\.0\.5-settlement-runtime-identity-2/);
+  assert.match(htmlSource, /styles\.css\?v=11520-v4\.0\.5-runtime-identity-overflow-fix/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
+  assert.match(cssSource, /\.sidebar\{[^}]*overflow:auto;min-width:0;max-width:100vw/);
+  assert.match(cssSource, /\.content\{padding:20px;min-width:0;max-width:100vw/);
+  assert.match(cssSource, /\.kv\{grid-template-columns:1fr\}/);
+  assert.match(cssSource, /overflow-wrap:anywhere/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
 });

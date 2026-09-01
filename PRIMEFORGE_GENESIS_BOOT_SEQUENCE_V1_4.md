@@ -582,6 +582,9 @@ K線西遊記/index.html
 K線西遊記/temples/11520/index.html#/REQUEST
 ↓
 K線西遊記/temples/11520/app.mjs
+K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs
+K線西遊記/temples/11520/runtime/gpu-real-evidence-registry.v1.json
+K線西遊記/temples/11520/runtime/company-trading-capital-registry.v1.json
 ↓
 core/index.mjs
 ↓
@@ -600,6 +603,8 @@ QUOTE != REVENUE
 UNBOUND_TREASURY blocks PAYMENT
 Contact Evidence is never public
 Private Key is never browser data
+GPU repository evidence is closed-schema and zero inventory remains zero
+Company trading capital is segregated and zero funding remains zero
 ```
 
 GitHub Pages 必須發布 `core/`，否則 11520 的 ES module 依賴不完整。
