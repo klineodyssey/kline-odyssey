@@ -14,6 +14,7 @@ on:
       - "K線西遊記/temples/11520/**"
       - "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol"
       - "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol"
+      - "KGEN-KAIOS/contracts/KAIOSWarpClearing11520V1.sol"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
       - ".github/workflows/universal_exchange_v2.yml"
@@ -26,6 +27,7 @@ on:
       - "K線西遊記/temples/11520/**"
       - "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol"
       - "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol"
+      - "KGEN-KAIOS/contracts/KAIOSWarpClearing11520V1.sol"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/workflows/universal_exchange_v2.yml"
 
@@ -43,6 +45,16 @@ jobs:
       - name: Validate ES modules
         shell: bash
         run: find core "K線西遊記/temples/11520/modules" -name '*.mjs' -print0 | xargs -0 -n1 node --check
+      - name: Compile 11520 Solidity product candidates
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/solc-11520"
+          npx --yes solc@0.8.24 --bin --abi \
+            KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol \
+            KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol \
+            KGEN-KAIOS/contracts/KAIOSWarpClearing11520V1.sol \
+            -o "$RUNNER_TEMP/solc-11520"
+          test -n "$(find "$RUNNER_TEMP/solc-11520" -name '*.bin' -type f -size +1c -print -quit)"
       - name: Run Universal Exchange tests
         run: node --test tests/universal-exchange.test.mjs
       - name: Run 11520 KGEN native market-cell tests
