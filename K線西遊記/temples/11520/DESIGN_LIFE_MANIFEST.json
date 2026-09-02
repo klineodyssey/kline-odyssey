@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "revision": "2026-09-03.1",
+    "status": "ACTIVE",
+    "last_updated": "2026-09-03",
+    "updated_by": "GPT-5.6 Sol",
+    "reviewed_by": "Human instruction approved for construction",
+    "source_commit": "PENDING_THIS_CHANGESET",
+    "task_id": "K11520-GAME-UI-CONSTRUCTION-20260903",
+    "change_reason": "Register the 11520 construction drawing and governed UI organ specification as traceable design Lives.",
+    "ancestor": "K線西遊記/temples/11520/MANIFEST.json",
+    "source_of_truth": true
+  },
+  "place": {
+    "place_id": "11520",
+    "formal_name": "11520 花果山 5D K 線西遊記 / 花果山宇宙萬物交易所",
+    "life_class": "PLACE_ORGANISM",
+    "formal_entrypoint": "index.html",
+    "playable_route": "game-5d.html"
+  },
+  "design_lives": [
+    {
+      "life_id": "LIFE-11520-UI-REFERENCE",
+      "resource_id": "UI_REFERENCE",
+      "species": "DESIGN_DRAWING_LIFE",
+      "place_id": "11520",
+      "path": "design/UI_REFERENCE.svg",
+      "purpose": "Authoritative construction zoning reference for the playable 11520 UI.",
+      "version": "1.0.0",
+      "revision": "2026-09-03.1",
+      "status": "ACTIVE",
+      "feeds": ["visual-layout", "organ-location", "navigation-zoning"],
+      "consumes": ["GAME_UI_SPEC.md"],
+      "replacement_policy": "UPDATE_IN_PLACE_WITH_REVISION; NEVER_SILENTLY_REPLACE"
+    },
+    {
+      "life_id": "LIFE-11520-UI-SPEC",
+      "resource_id": "GAME_UI_SPEC",
+      "species": "SPECIFICATION_ORGAN_LIFE",
+      "place_id": "11520",
+      "path": "GAME_UI_SPEC.md",
+      "purpose": "Cumulative functional and engineering specification for all 11520 playable UI organs.",
+      "version": "1.0.0",
+      "revision": "2026-09-03.1",
+      "status": "ACTIVE",
+      "feeds": ["index.html", "app.mjs", "game-5d.html", "backend/server.mjs"],
+      "replacement_policy": "CUMULATIVE_UPDATE_ONLY"
+    }
+  ],
+  "construction_law": {
+    "one_image_one_life": true,
+    "one_place_one_current_spec": true,
+    "formal_filenames_versionless": true,
+    "behavior_change_requires_changelog": true,
+    "silent_feature_removal_forbidden": true
+  }
+}
