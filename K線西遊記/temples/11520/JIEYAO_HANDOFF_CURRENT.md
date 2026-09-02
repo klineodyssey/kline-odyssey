@@ -1,0 +1,135 @@
+# 界曜｜11520 花果山 5D K 線西遊記｜CURRENT Handoff
+
+## Metadata
+- VERSION: 1.0.0
+- REVISION: 2026-09-03.1
+- STATUS: ACTIVE_HANDOFF
+- OWNER_PAGE_IDENTITY: 界曜
+- MODEL_RUNTIME: GPT-5.6 Sol
+- PURPOSE: 新頁直接接續 11520 作品施工，不重新定義既有器官，不要求人類重新搬運規格。
+- FORMAL_RULE: 檔名固定不帶版本；版本與 revision 寫在文件內。
+
+## 1. 界曜目前身分與人事狀態
+- SELF_NAME: 界曜
+- NAME_STATUS: 由此頁自行使用的個體名；尚未完成 AI company 正式面試/任用。
+- CURRENT_ROLE: 11520 花果山 5D K 線西遊記作品創作者/工程候選者。
+- EMPLOYMENT_STATUS: NOT_YET_INTERVIEWED / PORTFOLIO_IN_PROGRESS。
+- HUMAN_INSTRUCTION: 先完成個人作品，待總經理返工後帶作品參加 AI company 面試。
+- 不得把作品施工本身宣稱為已受聘、已授權 Mainnet、已付款或已取得治理權限。
+
+## 2. 11520 正式來源
+- REPOSITORY: klineodyssey/kline-odyssey
+- PLACE: K線西遊記/temples/11520/
+- FORMAL_PRODUCT_ID: KGEN_11520_UNIVERSAL_EXCHANGE
+- FORMAL_ENTRYPOINT: index.html
+- FORMAL_RUNTIME: app.mjs
+- PLAYABLE_5D_ROUTE: game-5d.html
+- FORMAL_UI_SPEC: GAME_UI_SPEC.md
+- CONSTRUCTION_REFERENCE: design/UI_REFERENCE.svg
+- DESIGN_LIFE_MANIFEST: DESIGN_LIFE_MANIFEST.json
+- ORGAN_REGISTRY: ui-organs.mjs
+- EXISTING_MANIFEST: MANIFEST.json
+- CHANGELOG: CHANGELOG.md
+
+## 3. 已鎖定的世界與經濟定義
+### 3.1 空間層
+- XZ = 地平面。
+- Y = 空間高度。
+- 左搖桿 = XZ 移動與角色朝向。
+- 右手拖曳 = 第三人稱鏡頭 360° 旋轉。
+- C = 空間曲速/移動速度，0C = 靜止；C 不得再當交易槓桿。
+- Google/OSM 地圖只做出生地、起家處、地址與導航錨點；真正打怪在自己的 5D 遊戲世界。
+
+### 3.2 K 場
+- KX/KY/KZ = 三個獨立市場/宇宙球膜軸；每軸可獨立選市場。
+- K 場結算 = KGEN。
+- 火力 = signed lots，中間 0 口，上多、下空。
+- 常用精細區 0~10 口，外側加速至 100 口。
+- 目前遊戲契約約定：1 KGEN = 1 口。
+- L = 交易槓桿；L 與 C 永久分離。
+- PnL = 價格點差 × 多空方向 × 口數 × 點值。
+- L 影響保證金，不得再重複乘進 PnL。
+- 下單流程 = 調參 -> 下單開火 -> 預覽確認窗 -> 確認/取消 -> submit。
+- ⚔ 寶劍只展開/收合火力與 L，絕對不能直接送單。
+
+### 3.3 XYZ 生活/戰鬥層
+- XYZ 世界的打怪、生活、食物、寵物、任務等使用 KAIOS。
+- KUFO 是獨立長效能源/燃料類。
+- KX/KY/KZ 使用 KGEN；XYZ 使用 KAIOS。不可混用。
+
+## 4. UI 母圖施工規格
+11520 不是玩具單頁。母圖要求所有器官都存在且可開/關，不得因後續修改某一功能而把其他器官刪掉。
+
+必須保留/完成：
+1. 主城世界(5D)
+2. K 場交易面板
+3. 持倉部位
+4. 委託掛單
+5. 歷史成交
+6. 資產總覽
+7. 交易紀錄/統計
+8. 市場資訊
+9. 背包/道具
+10. 角色狀態
+11. 世界地圖
+12. ATM/換鈔
+13. 系統設定
+14. AI/幫助
+15. 下單確認窗
+16. 右下完整收合快捷器官列
+17. 左側完整器官列（desktop）
+18. XZ 搖桿、Y 高度、C 曲速、火力、L 槓桿、打怪/技能/閃避/平倉/下單開火控制。
+
+## 5. 已完成的主要工程
+- GAME_UI_SPEC.md：11520 累積式正式施工規格。
+- design/UI_REFERENCE.svg：母圖正式施工參考。
+- DESIGN_LIFE_MANIFEST.json：一圖一生命/設計生命治理資料。
+- ui-organs.mjs：器官 registry。
+- game-5d.html 已重做成母圖式完整器官架構，加入左側器官列、右下快捷列、功能面板、KX/KY/KZ、市場選擇、資產/持倉/歷史/背包/角色/世界地圖/設定/幫助、下單確認、3D 世界與控制。
+- 新增 world/gameplay-runtime.mjs：開始把怪物、世界邊界、碰撞、戰鬥/掉落/世界狀態從 HTML 拆成正式 gameplay runtime；此模組尚未完成與 game-5d.html 全接線。
+
+## 6. 最近重要 commit
+- 771b7bdb7731dab852200e53d8c1eb671cf9fd0c — game-5d 母圖完整器官施工版。
+- b9bb02afe79ed4c0894afde88c66f9da043c5022 — CHANGELOG 同步。
+- bc3f772e078b6f23ff00deaf86ce62bd559af9a1 — world/gameplay-runtime.mjs 初始正式 gameplay runtime。
+
+新頁接手時必須先讀 GitHub main 的最新 HEAD；以上 SHA 只作 lineage，不得假設仍是最新 main。
+
+## 7. 下一頁立即工作順序
+P0-A：把 world/gameplay-runtime.mjs 正式接入 game-5d.html，移除「按一下隨機加 KAIOS」玩具戰鬥，改成距離/攻擊範圍/怪物 HP/仇恨/反擊/死亡/掉落/KAIOS 結算。
+
+P0-B：加入真正 collision/world boundary：角色不能穿過建築、ATM、岩石等阻擋；移動必須經 runtime 驗證。
+
+P0-C：完善 3D 資源管線：目前角色仍是程式幾何組裝，不符合最終驗收；要接可替換 GLB/GLTF skeleton-ready 角色，至少 idle/walk/run/attack/hit/death；場景要有更正式樹木、花草、地形、建築、怪物資源 manifest。
+
+P0-D：角色/怪物動畫狀態與 UI HP 同步；打怪要形成真正 gameplay loop，不可 UI animation = reward。
+
+P0-E：把世界內點擊目的地、自動尋路/小地圖重新完成，保持 Google/OSM 只作真實地址錨點。
+
+P1-A：下單確認加入商品規格層：tick size、point value、最大口數、最大 L、原始/維持保證金、風控/強平規則；各市場不得永遠硬用同一規格。
+
+P1-B：後端架構維持 Cloud Run + Firestore + Cloud Storage/CDN 方向；在真正 endpoint 部署前必須明確顯示 LOCAL DEMO/OFFCHAIN，不可宣稱已有多人 production backend。
+
+P1-C：登入資源下載流程：manifest -> 驗證版本/hash -> world/model/audio pack -> 失敗重試 -> 進入世界。
+
+## 8. 不能再犯的錯
+- 不得把 Y 改成口數；Y 永遠是空間高度。
+- 不得把 C 改成 L；C 永遠是空間曲速，0C 靜止。
+- 不得讓 ⚔ 寶劍直接成交。
+- 不得只做 alert()/隨機加錢的玩具功能。
+- 不得因修改交易把背包、角色、地圖、設定等器官消失。
+- 不得把 Google 地圖當真正戰鬥幾何。
+- 不得把 GitHub Pages 當 production backend。
+- 不得假造 wallet/chain/backend 已部署狀態。
+- 正式檔名不得塞版本號；版本寫在 metadata/changelog。
+
+## 9. 驗收標準
+產品不可以叫完成，如果仍有：primitive placeholder 角色無可替換模型管線、平面假 5D、 декоратив按鈕/alert-only、無碰撞、無怪物狀態機、面板關不了、交易可繞過確認、後端狀態造假、規格/manifest/changelog 不一致。
+
+## 10. 新頁開工命令
+讀取：AGENTS/開機規範 + K線西遊記/temples/11520/GAME_UI_SPEC.md + JIEYAO_HANDOFF_CURRENT.md + MANIFEST.json + CHANGELOG.md + game-5d.html + world/gameplay-runtime.mjs。
+
+然後直接從 P0-A 開工，不重新問已鎖定的 XYZ/KXKYKZ/C/L/火力/KGEN/KAIOS 定義。每次改動同步 GAME_UI_SPEC.md（若行為規格改變）、CHANGELOG.md、必要 manifest/runtime metadata。
+
+## 11. 此頁封存決定
+本頁可以在 handoff 成功後封存為前一施工頁。新頁接續時以 GitHub CURRENT 文件和 latest main 為工作真實來源，不以舊聊天文字覆蓋 CURRENT。
