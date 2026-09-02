@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "placeId": "11520",
+  "placeName": "花果山",
+  "productName": "11520 花果山 5D K 線西遊記",
+  "lifePolicy": {
+    "mode": "ONE_IMAGE_ONE_LIFE_ONE_PLACE_ONE_SPEC",
+    "visualReference": "11520 mother image",
+    "runtimeSource": "./world-runtime.mjs"
+  },
+  "economyDomains": {
+    "XYZ": { "settlement": "KAIOS", "scope": ["combat", "life", "world", "missions", "shops"] },
+    "KX_KY_KZ": { "settlement": "KGEN", "scope": ["market", "position", "pnl", "margin", "orders"] }
+  },
+  "requiredPanels": [
+    "WORLD_5D",
+    "TRADE",
+    "POSITIONS",
+    "ORDERS",
+    "HISTORY",
+    "ASSETS",
+    "TRADE_RECORDS",
+    "MARKET_INFO",
+    "INVENTORY",
+    "CHARACTER",
+    "WORLD_MAP",
+    "ATM",
+    "SETTINGS",
+    "HELP"
+  ],
+  "requiredWorldControls": ["XZ_MOVE", "Y_VERTICAL", "C_WARP", "ATTACK", "SKILL", "DODGE", "INTERACT"],
+  "requiredRuntimeRules": {
+    "buildingCollision": true,
+    "monsterAggro": true,
+    "monsterAttack": true,
+    "monsterDeath": true,
+    "monsterRespawnMs": 8000,
+    "kaiosRewardOnlyOnConfirmedKill": true
+  },
+  "safety": {
+    "offchainGameState": true,
+    "mainnetTransactions": false,
+    "realMoneyExecution": false
+  }
+}
