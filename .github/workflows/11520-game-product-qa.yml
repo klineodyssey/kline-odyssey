@@ -1,0 +1,44 @@
+name: 11520 Game Product QA
+
+on:
+  push:
+    paths:
+      - "K線西遊記/temples/11520/**"
+      - ".github/workflows/11520-game-product-qa.yml"
+  pull_request:
+    paths:
+      - "K線西遊記/temples/11520/**"
+      - ".github/workflows/11520-game-product-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate 11520 ES modules
+        run: |
+          node --check "K線西遊記/temples/11520/runtime/world-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/game-ui-runtime.mjs"
+          node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
+      - name: Run 11520 runtime and UI static tests
+        run: node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs"
+      - name: Install Chromium smoke-test runtime
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Run mobile browser smoke test
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
