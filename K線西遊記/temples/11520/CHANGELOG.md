@@ -1,5 +1,17 @@
 # 11520 Changelog
 
+## 2026-09-03 · P0-A Formal Gameplay Runtime Integration
+
+- Continued the existing 11520 mother-image product on `latest main` without redefining the locked XYZ / KX-KY-KZ / C / L / firepower / KGEN / KAIOS rules.
+- Reused the existing formal `runtime/world-runtime.mjs` instead of creating a duplicate `world/gameplay-runtime.mjs` organ. The handoff path was stale; repository CURRENT remains authoritative.
+- Removed the `Math.random()` button-combat path from `game-5d.html`. Normal and skill attacks now call the formal runtime and require the nearest living monster to be within the configured melee range.
+- KAIOS combat reward is now kill-gated: non-lethal hits produce `0 KAIOS`; a reward is added only after the runtime marks the monster `DEAD`. Existing explicit skill cost remains a separate XYZ/KAIOS cost.
+- Wired formal monster HP, aggro, chase, attack range, attack cooldown, counterattack damage, death and 8-second respawn events into the playable HUD and Three.js monster meshes.
+- Added stable monster Life IDs and deterministic spawn origins to the existing runtime. Respawn returns the Life to its original spawn coordinate instead of reviving at the death location.
+- Routed XZ/Y movement through `resolvePlayerMove()` so world bounds and existing HOME / ATM / SHOP collision objects can block movement without deleting any UI organ.
+- Kept the complete cumulative organ inventory reachable: 5D world, K-market panel, positions, open orders, trade history, assets, records/statistics, market information, backpack, character, world map, ATM, settings, AI/help, order confirmation, desktop rail and right-bottom dock.
+- No Mainnet transaction, payment, treasury, governance, deployment or AI-company employment claim is introduced. This remains personal 11520 portfolio construction and local/off-chain game state where stated.
+
 ## 2026-09-03 · Playable 5D Mother-Image Construction
 
 - Rebuilt `game-5d.html` from the user-approved 11520 construction mother image instead of continuing the reduced three-button prototype.
