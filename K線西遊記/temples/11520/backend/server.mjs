@@ -8,6 +8,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const dataFile = resolve(here, 'data', 'players.json');
 const resourceManifest = resolve(here, '..', 'assets', 'resource-manifest.json');
 const PORT = Number(process.env.PORT || 11520);
+const MAINTENANCE_RATE = 0.75;
+const POINT_VALUE_KGEN = 1;
 const sessions = new Map();
 let players = {};
 
@@ -20,6 +22,7 @@ function send(res, status, body){ res.writeHead(status, {'content-type':'applica
 async function json(req){ let s=''; for await (const c of req) s += c; return s ? JSON.parse(s) : {}; }
 function auth(req){ const token=(req.headers.authorization||'').replace(/^Bearer\s+/i,''); return sessions.get(token)||null; }
 function playerView(p){ return { id:p.id,name:p.name,xyz:p.xyz,kgen:p.kgen,kaios:p.kaios,kufo:p.kufo,hp:p.hp,home:p.home||null,updatedAt:p.updatedAt }; }
+function requiredMargin(lots, leverage){ return lots / leverage; }
 
 await loadDb();
 const server=http.createServer(async (req,res)=>{
@@ -34,7 +37,7 @@ const server=http.createServer(async (req,res)=>{
       players[id] ||= {id,name:String(body.name||'旅人').slice(0,40),xyz:{x:0,y:0,z:0},kgen:10,kaios:1000,kufo:1,hp:100,home:null,updatedAt:now};
       players[id].updatedAt=now; await persist();
       const token=randomBytes(24).toString('hex'); sessions.set(token,id);
-      return send(res,200,{token,player:playerView(players[id]),orderMode:'OFFCHAIN_SIMULATION'});
+      return send(res,200,{token,player:playerView(players[id]),orderMode:'OFFCHAIN_SIMULATION',rules:{pointValueKgen:POINT_VALUE_KGEN,maintenanceRate:MAINTENANCE_RATE}});
     }
     if(req.method==='GET' && url.pathname==='/api/v1/player'){
       const id=auth(req); if(!id) return send(res,401,{error:'UNAUTHORIZED'}); return send(res,200,{player:playerView(players[id])});
@@ -53,9 +56,11 @@ const server=http.createServer(async (req,res)=>{
       if(!(lots>=1&&lots<=100)) return send(res,400,{error:'BAD_LOTS'});
       if(!(leverage>=1&&leverage<=1000)) return send(res,400,{error:'BAD_LEVERAGE'});
       if(!Number.isFinite(price)||price<=0) return send(res,400,{error:'BAD_PRICE'});
-      if(p.kgen<lots) return send(res,409,{error:'INSUFFICIENT_KGEN',required:lots,available:p.kgen});
-      p.kgen-=lots; p.updatedAt=new Date().toISOString(); await persist();
-      return send(res,200,{order:{id:randomUUID(),axis,side,lots,leverage,marginKgen:lots,entryPrice:price,status:'FILLED_SIMULATION'},player:playerView(p)});
+      const initialMarginKgen=requiredMargin(lots,leverage);
+      const maintenanceMarginKgen=initialMarginKgen*MAINTENANCE_RATE;
+      if(p.kgen<initialMarginKgen) return send(res,409,{error:'INSUFFICIENT_KGEN',required:initialMarginKgen,available:p.kgen});
+      p.kgen-=initialMarginKgen; p.updatedAt=new Date().toISOString(); await persist();
+      return send(res,200,{order:{id:randomUUID(),axis,side,lots,leverage,entryPrice:price,pointValueKgen:POINT_VALUE_KGEN,initialMarginKgen,maintenanceMarginKgen,pnlFormula:'(markPrice-entryPrice)*direction*lots*pointValueKgen',status:'FILLED_SIMULATION'},player:playerView(p)});
     }
     return send(res,404,{error:'NOT_FOUND'});
   } catch (e) { return send(res,500,{error:'SERVER_ERROR',message:String(e?.message||e)}); }
