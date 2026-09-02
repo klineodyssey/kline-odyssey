@@ -1,14 +1,14 @@
 /*
 KGEN_META
-VERSION: 1.0.0
-REVISION: 2026-09-03.1
+VERSION: 1.1.0
+REVISION: 2026-09-03.2
 STATUS: ACTIVE
 LAST_UPDATED: 2026-09-03
 UPDATED_BY: GPT-5.6 Sol
 REVIEWED_BY: Human construction instruction
 SOURCE_COMMIT: PENDING_THIS_CHANGESET
 TASK_ID: K11520-GAMEPLAY-RUNTIME-20260903
-CHANGE_REASON: Introduce persistent XYZ-world gameplay rules for collision, monsters, combat, rewards and world objects; replace random-button toy combat with deterministic stateful runtime boundaries.
+CHANGE_REASON: Introduce persistent XYZ-world gameplay rules for collision, monsters, combat, rewards and world objects; formalize monster life IDs and deterministic spawn-point respawn.
 ANCESTOR: GAME_UI_SPEC.md + game-5d.html
 SOURCE_OF_TRUTH: TRUE
 */
@@ -38,17 +38,17 @@ export const MONSTER_TEMPLATES = Object.freeze({
 export function createWorldState() {
   return {
     monsters: [
-      spawnMonster('MON-11520-001', 'STONE_APE', 6, -8),
-      spawnMonster('MON-11520-002', 'FIRE_WISP', -13, -5),
-      spawnMonster('MON-11520-003', 'STONE_APE', 18, 12),
+      spawnMonster('MON-11520-001', 'LIFE-MONSTER-11520-001', 'STONE_APE', 6, -8),
+      spawnMonster('MON-11520-002', 'LIFE-MONSTER-11520-002', 'FIRE_WISP', -13, -5),
+      spawnMonster('MON-11520-003', 'LIFE-MONSTER-11520-003', 'STONE_APE', 18, 12),
     ],
     lastTick: Date.now(),
   };
 }
 
-function spawnMonster(id, templateKey, x, z) {
+function spawnMonster(id, lifeId, templateKey, x, z) {
   const t = MONSTER_TEMPLATES[templateKey];
-  return { id, ...t, x, y: 0, z, hp: t.maxHp, state: 'IDLE', lastAttackAt: 0, defeatedAt: null };
+  return { id, lifeId, ...t, x, y: 0, z, spawnX: x, spawnZ: z, hp: t.maxHp, state: 'IDLE', lastAttackAt: 0, defeatedAt: null };
 }
 
 export function distance2D(a, b) {
@@ -86,8 +86,8 @@ export function tickWorld(world, player, now = Date.now()) {
   for (const m of world.monsters) {
     if (m.state === 'DEAD') {
       if (m.defeatedAt && now - m.defeatedAt >= WORLD_RULES.respawnMs) {
-        m.hp = m.maxHp; m.state = 'IDLE'; m.defeatedAt = null;
-        events.push({ type: 'RESPAWN', monsterId: m.id });
+        m.x = m.spawnX; m.z = m.spawnZ; m.hp = m.maxHp; m.state = 'IDLE'; m.defeatedAt = null; m.lastAttackAt = 0;
+        events.push({ type: 'RESPAWN', monsterId: m.id, lifeId: m.lifeId });
       }
       continue;
     }
@@ -99,9 +99,10 @@ export function tickWorld(world, player, now = Date.now()) {
       const step = m.speed * delta;
       m.x += dx / len * step; m.z += dz / len * step;
     }
-    if (dist <= WORLD_RULES.monsterAttackRange && now - m.lastAttackAt >= WORLD_RULES.monsterAttackCooldownMs) {
+    const afterMoveDist = distance2D(player, m);
+    if (afterMoveDist <= WORLD_RULES.monsterAttackRange && now - m.lastAttackAt >= WORLD_RULES.monsterAttackCooldownMs) {
       m.lastAttackAt = now;
-      events.push({ type: 'PLAYER_HIT', monsterId: m.id, damage: m.attack });
+      events.push({ type: 'PLAYER_HIT', monsterId: m.id, lifeId: m.lifeId, damage: m.attack });
     }
   }
   world.lastTick = now;
