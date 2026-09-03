@@ -1,3 +1,5 @@
+import './wallet-game-bridge.mjs';
+
 export const WALK_SPEED = 0.07;
 export const TURN_SPEED = 0.075;
 export const DESTINATIONS = Object.freeze({
