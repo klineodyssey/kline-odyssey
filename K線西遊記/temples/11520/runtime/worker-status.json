@@ -11,30 +11,30 @@
   "chain_write": false,
   "worker_health": "HEALTHY",
   "work_stop_reason": null,
-  "generated_at": "2026-09-02T22:41:10.133Z",
+  "generated_at": "2026-09-03T01:08:40.103Z",
   "last_work_cycle": {
-    "event_id": "DIGITAL_ANT_0001_HOURLY_2026090222",
+    "event_id": "DIGITAL_ANT_0001_HOURLY_2026090301",
     "life_id": "DIGITAL_ANT_0001",
     "app_id": "DIGITAL_ANT_APP_0001",
-    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026090222",
-    "scheduled_at": "2026-09-02T22:00:00.000Z",
-    "started_at": "2026-09-02T22:41:08.028Z",
-    "finished_at": "2026-09-02T22:41:10.132Z",
-    "bsc_block": 119616913,
+    "work_cycle_id": "DIGITAL_ANT_0001_HOURLY_2026090301",
+    "scheduled_at": "2026-09-03T01:00:00.000Z",
+    "started_at": "2026-09-03T01:08:37.871Z",
+    "finished_at": "2026-09-03T01:08:40.101Z",
+    "bsc_block": 119636559,
     "wallet_state": {
       "status": "PUBLIC_ADDRESS_READ",
-      "bnb": "0.0056219718"
+      "bnb": "0.00560889495"
     },
     "heart_state": {
       "status": "12345_PATROL_COMPLETED",
       "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
       "eligibility_source": "CLIENT_DERIVED",
       "heartbeat": {
-        "status": "ELIGIBLE",
-        "reason": "HEARTBEAT_ELIGIBLE",
+        "status": "NOT_ELIGIBLE",
+        "reason": "HEARTBEAT_COOLDOWN",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-09-02T22:41:08.000Z"
+        "next_eligible_time": "2026-09-03T01:52:34.000Z"
       },
       "fortune": {
         "status": "NOT_ELIGIBLE",
@@ -48,7 +48,7 @@
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-09-03T00:00:00.000Z"
+        "next_eligible_time": "2026-09-03T23:59:59.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -74,8 +74,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 119616815,
-        "to_block": 119616914,
+        "from_block": 119636460,
+        "to_block": 119636559,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -108,8 +108,8 @@
       }
     },
     "finance_state": {
-      "BNB": "0.0056219718",
-      "KGEN": "102.0",
+      "BNB": "0.00560889495",
+      "KGEN": "113.0",
       "KAIOS": "1080000.0",
       "actual_income": "0",
       "actual_expense": "0",
@@ -159,12 +159,12 @@
     ],
     "gatekeeper_duty": {
       "status": "COMPLETED",
-      "gatekeeper_started_at": "2026-09-02T22:41:08.392Z",
-      "gatekeeper_finished_at": "2026-09-02T22:41:09.811Z",
-      "heart_block": 119616914,
+      "gatekeeper_started_at": "2026-09-03T01:08:38.297Z",
+      "gatekeeper_finished_at": "2026-09-03T01:08:39.772Z",
+      "heart_block": 119636559,
       "heart_status": "AVAILABLE",
       "fortune_status": "NOT_ELIGIBLE",
-      "heartbeat_status": "ELIGIBLE",
+      "heartbeat_status": "NOT_ELIGIBLE",
       "ignition_status": "OUT_OF_WINDOW",
       "lamp_status": "INSUFFICIENT_BALANCE",
       "wish_status": "ELIGIBLE",
@@ -174,22 +174,22 @@
       "degradation_affects_safety": false,
       "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
       "evidence": [
-        "HEART_BLOCK_119616914",
+        "HEART_BLOCK_119636559",
         "HEART_BYTECODE_VERIFIED",
         "CORE_HEART_INDEXER_HEALTHY"
       ]
     },
     "heart_action_candidates": {
       "heartbeat": {
-        "candidate_id": "HEARTBEATCLAIM_119616914",
+        "candidate_id": "HEARTBEATCLAIM_119636559",
         "action": "heartbeatClaim",
-        "status": "ACTION_CANDIDATE",
-        "eligible_at_observation": true,
-        "observed_block": 119616914,
-        "observed_at": "2026-09-02T22:41:08.000Z",
+        "status": "NO_ACTION",
+        "eligible_at_observation": false,
+        "observed_block": 119636559,
+        "observed_at": "2026-09-03T01:08:37.000Z",
         "evidence": [
-          "HEART_BLOCK_119616914",
-          "HEARTBEAT_ELIGIBLE"
+          "HEART_BLOCK_119636559",
+          "HEARTBEAT_COOLDOWN"
         ],
         "trusted_for_signature": false,
         "signer_must_revalidate": true,
@@ -197,14 +197,14 @@
         "tx_hash": null
       },
       "ignition": {
-        "candidate_id": "IGNITEANDCLAIM_119616914",
+        "candidate_id": "IGNITEANDCLAIM_119636559",
         "action": "igniteAndClaim",
         "status": "NO_ACTION",
         "eligible_at_observation": false,
-        "observed_block": 119616914,
-        "observed_at": "2026-09-02T22:41:08.000Z",
+        "observed_block": 119636559,
+        "observed_at": "2026-09-03T01:08:37.000Z",
         "evidence": [
-          "HEART_BLOCK_119616914",
+          "HEART_BLOCK_119636559",
           "OUT_OF_WINDOW",
           "IGNITE_OUT_OF_WINDOW"
         ],
@@ -214,14 +214,14 @@
         "tx_hash": null
       },
       "fortune": {
-        "candidate_id": "FORTUNECLAIM_119616914",
+        "candidate_id": "FORTUNECLAIM_119636559",
         "action": "fortuneClaim",
         "status": "NO_ACTION",
         "eligible_at_observation": false,
-        "observed_block": 119616914,
-        "observed_at": "2026-09-02T22:41:08.000Z",
+        "observed_block": 119636559,
+        "observed_at": "2026-09-03T01:08:37.000Z",
         "evidence": [
-          "HEART_BLOCK_119616914",
+          "HEART_BLOCK_119636559",
           "FORTUNE_COOLDOWN"
         ],
         "trusted_for_signature": false,
@@ -230,14 +230,14 @@
         "tx_hash": null
       },
       "wish": {
-        "candidate_id": "MAKEWISH_119616914",
+        "candidate_id": "MAKEWISH_119636559",
         "action": "makeWish",
         "status": "NO_ACTION",
         "eligible_at_observation": false,
-        "observed_block": 119616914,
-        "observed_at": "2026-09-02T22:41:08.000Z",
+        "observed_block": 119636559,
+        "observed_at": "2026-09-03T01:08:37.000Z",
         "evidence": [
-          "HEART_BLOCK_119616914",
+          "HEART_BLOCK_119636559",
           "FIRST_WISH_ALREADY_COMPLETED"
         ],
         "trusted_for_signature": false,
@@ -248,11 +248,11 @@
     },
     "ignition_window": {
       "status": "OUT_OF_WINDOW",
-      "observed_at": "2026-09-02T22:41:09.811Z",
+      "observed_at": "2026-09-03T01:08:39.772Z",
       "window": "UTC_00_00_TO_00_10",
       "in_window": false,
-      "next_window_start": "2026-09-03T00:00:00.000Z",
-      "next_window_end": "2026-09-03T00:10:00.000Z"
+      "next_window_start": "2026-09-04T00:00:00.000Z",
+      "next_window_end": "2026-09-04T00:10:00.000Z"
     },
     "life_event_status": {
       "FIRST_HEARTBEAT_EVENT": "VERIFIED",
@@ -279,7 +279,7 @@
       "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
       "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
       "mismatch": [],
-      "checked_at": "2026-09-02T22:41:08.029Z"
+      "checked_at": "2026-09-03T01:08:37.873Z"
     },
     "life_certification": {
       "certification_id": "DIGITAL_ANT_0001_AI_LIFE_CERTIFICATION_V3_8",
@@ -305,7 +305,7 @@
       "listing_scope": "LOCAL_11520",
       "evidence": [
         "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
-        "HEART_BLOCK_119616914",
+        "HEART_BLOCK_119636559",
         "K線西遊記/temples/11520/runtime/worker-status.json"
       ]
     },
@@ -384,7 +384,7 @@
         "civilization_product_need": "ANT_MECH_BODY",
         "first_income_path": "GET_FIRST_REAL_CUSTOMER",
         "dark_matter_preserved": true,
-        "kgen_energy": "102.0",
+        "kgen_energy": "113.0",
         "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
       },
       "thought_organ": {
@@ -399,7 +399,7 @@
         "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "mismatch": [],
-        "checked_at": "2026-09-02T22:41:08.029Z"
+        "checked_at": "2026-09-03T01:08:37.873Z"
       },
       "first_kaios_strategy": {
         "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -543,7 +543,7 @@
         "problem": "FIRST_KAIOS_NOT_OCCURRED",
         "evidence": [
           "PRIMARY_JOB_COMPLETED",
-          "KGEN_102.0",
+          "KGEN_113.0",
           "KAIOS_1080000.0",
           "CUSTOMERS_0",
           "TREASURY_NOT_BOUND"
@@ -597,7 +597,7 @@
           "civilization_product_need": "ANT_MECH_BODY",
           "first_income_path": "GET_FIRST_REAL_CUSTOMER",
           "dark_matter_preserved": true,
-          "kgen_energy": "102.0",
+          "kgen_energy": "113.0",
           "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
         },
         "thought_organ": {
@@ -612,7 +612,7 @@
           "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "mismatch": [],
-          "checked_at": "2026-09-02T22:41:08.029Z"
+          "checked_at": "2026-09-03T01:08:37.873Z"
         },
         "first_kaios_strategy": {
           "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -756,7 +756,7 @@
           "problem": "FIRST_KAIOS_NOT_OCCURRED",
           "evidence": [
             "PRIMARY_JOB_COMPLETED",
-            "KGEN_102.0",
+            "KGEN_113.0",
             "KAIOS_1080000.0",
             "CUSTOMERS_0",
             "TREASURY_NOT_BOUND"
@@ -793,10 +793,10 @@
       }
     },
     "work_time": {
-      "gatekeeper_work_seconds": 1.419,
+      "gatekeeper_work_seconds": 1.475,
       "cfo_work_seconds": 0.001,
-      "company_work_seconds": 0.319,
-      "life_health_seconds": 0.18
+      "company_work_seconds": 0.327,
+      "life_health_seconds": 0.204
     },
     "action_taken": "NO_ACTION",
     "result": "WORK_CYCLE_COMPLETED",
@@ -811,29 +811,29 @@
     "tx_hash": null,
     "work_duration_seconds": 2
   },
-  "next_expected_at": "2026-09-02T23:00:00.000Z",
+  "next_expected_at": "2026-09-03T02:00:00.000Z",
   "metrics": {
-    "completed_cycles": 243,
+    "completed_cycles": 244,
     "failed_cycles": 1,
     "degraded_cycles": 5,
-    "no_action_cycles": 249,
+    "no_action_cycles": 250,
     "action_cycles": 0,
-    "work_duration_seconds": 617,
-    "gatekeeper_work_seconds": 523.1000000000003,
-    "cfo_work_seconds": 0.1390000000000001,
-    "company_work_seconds": 71.58500000000002,
-    "missed_cycles": 175
+    "work_duration_seconds": 619,
+    "gatekeeper_work_seconds": 524.5750000000003,
+    "cfo_work_seconds": 0.1400000000000001,
+    "company_work_seconds": 71.91200000000002,
+    "missed_cycles": 177
   },
   "primary_job": "WUKONG_GATEKEEPER",
   "secondary_work": "AI_ANT_COMPANY_FOUNDER",
   "gatekeeper_duty": {
     "status": "COMPLETED",
-    "gatekeeper_started_at": "2026-09-02T22:41:08.392Z",
-    "gatekeeper_finished_at": "2026-09-02T22:41:09.811Z",
-    "heart_block": 119616914,
+    "gatekeeper_started_at": "2026-09-03T01:08:38.297Z",
+    "gatekeeper_finished_at": "2026-09-03T01:08:39.772Z",
+    "heart_block": 119636559,
     "heart_status": "AVAILABLE",
     "fortune_status": "NOT_ELIGIBLE",
-    "heartbeat_status": "ELIGIBLE",
+    "heartbeat_status": "NOT_ELIGIBLE",
     "ignition_status": "OUT_OF_WINDOW",
     "lamp_status": "INSUFFICIENT_BALANCE",
     "wish_status": "ELIGIBLE",
@@ -843,22 +843,22 @@
     "degradation_affects_safety": false,
     "advanced_graph_status": "ADVANCED_GRAPH_INDEXER_REQUIRED",
     "evidence": [
-      "HEART_BLOCK_119616914",
+      "HEART_BLOCK_119636559",
       "HEART_BYTECODE_VERIFIED",
       "CORE_HEART_INDEXER_HEALTHY"
     ]
   },
   "heart_action_candidates": {
     "heartbeat": {
-      "candidate_id": "HEARTBEATCLAIM_119616914",
+      "candidate_id": "HEARTBEATCLAIM_119636559",
       "action": "heartbeatClaim",
-      "status": "ACTION_CANDIDATE",
-      "eligible_at_observation": true,
-      "observed_block": 119616914,
-      "observed_at": "2026-09-02T22:41:08.000Z",
+      "status": "NO_ACTION",
+      "eligible_at_observation": false,
+      "observed_block": 119636559,
+      "observed_at": "2026-09-03T01:08:37.000Z",
       "evidence": [
-        "HEART_BLOCK_119616914",
-        "HEARTBEAT_ELIGIBLE"
+        "HEART_BLOCK_119636559",
+        "HEARTBEAT_COOLDOWN"
       ],
       "trusted_for_signature": false,
       "signer_must_revalidate": true,
@@ -866,14 +866,14 @@
       "tx_hash": null
     },
     "ignition": {
-      "candidate_id": "IGNITEANDCLAIM_119616914",
+      "candidate_id": "IGNITEANDCLAIM_119636559",
       "action": "igniteAndClaim",
       "status": "NO_ACTION",
       "eligible_at_observation": false,
-      "observed_block": 119616914,
-      "observed_at": "2026-09-02T22:41:08.000Z",
+      "observed_block": 119636559,
+      "observed_at": "2026-09-03T01:08:37.000Z",
       "evidence": [
-        "HEART_BLOCK_119616914",
+        "HEART_BLOCK_119636559",
         "OUT_OF_WINDOW",
         "IGNITE_OUT_OF_WINDOW"
       ],
@@ -883,14 +883,14 @@
       "tx_hash": null
     },
     "fortune": {
-      "candidate_id": "FORTUNECLAIM_119616914",
+      "candidate_id": "FORTUNECLAIM_119636559",
       "action": "fortuneClaim",
       "status": "NO_ACTION",
       "eligible_at_observation": false,
-      "observed_block": 119616914,
-      "observed_at": "2026-09-02T22:41:08.000Z",
+      "observed_block": 119636559,
+      "observed_at": "2026-09-03T01:08:37.000Z",
       "evidence": [
-        "HEART_BLOCK_119616914",
+        "HEART_BLOCK_119636559",
         "FORTUNE_COOLDOWN"
       ],
       "trusted_for_signature": false,
@@ -899,14 +899,14 @@
       "tx_hash": null
     },
     "wish": {
-      "candidate_id": "MAKEWISH_119616914",
+      "candidate_id": "MAKEWISH_119636559",
       "action": "makeWish",
       "status": "NO_ACTION",
       "eligible_at_observation": false,
-      "observed_block": 119616914,
-      "observed_at": "2026-09-02T22:41:08.000Z",
+      "observed_block": 119636559,
+      "observed_at": "2026-09-03T01:08:37.000Z",
       "evidence": [
-        "HEART_BLOCK_119616914",
+        "HEART_BLOCK_119636559",
         "FIRST_WISH_ALREADY_COMPLETED"
       ],
       "trusted_for_signature": false,
@@ -917,11 +917,11 @@
   },
   "ignition_window": {
     "status": "OUT_OF_WINDOW",
-    "observed_at": "2026-09-02T22:41:09.811Z",
+    "observed_at": "2026-09-03T01:08:39.772Z",
     "window": "UTC_00_00_TO_00_10",
     "in_window": false,
-    "next_window_start": "2026-09-03T00:00:00.000Z",
-    "next_window_end": "2026-09-03T00:10:00.000Z"
+    "next_window_start": "2026-09-04T00:00:00.000Z",
+    "next_window_end": "2026-09-04T00:10:00.000Z"
   },
   "life_event_status": {
     "FIRST_HEARTBEAT_EVENT": "VERIFIED",
@@ -948,7 +948,7 @@
     "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
     "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
     "mismatch": [],
-    "checked_at": "2026-09-02T22:41:08.029Z"
+    "checked_at": "2026-09-03T01:08:37.873Z"
   },
   "life_certification": {
     "certification_id": "DIGITAL_ANT_0001_AI_LIFE_CERTIFICATION_V3_8",
@@ -974,7 +974,7 @@
     "listing_scope": "LOCAL_11520",
     "evidence": [
       "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
-      "HEART_BLOCK_119616914",
+      "HEART_BLOCK_119636559",
       "K線西遊記/temples/11520/runtime/worker-status.json"
     ]
   },
@@ -984,11 +984,11 @@
       "source": "REPOSITORY_ABI_PUBLIC_CHAIN_READ",
       "eligibility_source": "CLIENT_DERIVED",
       "heartbeat": {
-        "status": "ELIGIBLE",
-        "reason": "HEARTBEAT_ELIGIBLE",
+        "status": "NOT_ELIGIBLE",
+        "reason": "HEARTBEAT_COOLDOWN",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-09-02T22:41:08.000Z"
+        "next_eligible_time": "2026-09-03T01:52:34.000Z"
       },
       "fortune": {
         "status": "NOT_ELIGIBLE",
@@ -1002,7 +1002,7 @@
         "reason": "IGNITE_OUT_OF_WINDOW",
         "eligibility_source": "CLIENT_DERIVED",
         "write_status": "WRITE_NOT_CONNECTED",
-        "next_eligible_time": "2026-09-03T00:00:00.000Z"
+        "next_eligible_time": "2026-09-03T23:59:59.000Z"
       },
       "lamp": {
         "status": "INSUFFICIENT_BALANCE",
@@ -1028,8 +1028,8 @@
         "status": "CORE_HEART_INDEXER_HEALTHY",
         "indexer": "CORE_HEART_INDEXER",
         "failed_event_types": [],
-        "from_block": 119616815,
-        "to_block": 119616914,
+        "from_block": 119636460,
+        "to_block": 119636559,
         "fortune_claims": [],
         "wishes": [],
         "heartbeat_claims": [],
@@ -1136,7 +1136,7 @@
         "civilization_product_need": "ANT_MECH_BODY",
         "first_income_path": "GET_FIRST_REAL_CUSTOMER",
         "dark_matter_preserved": true,
-        "kgen_energy": "102.0",
+        "kgen_energy": "113.0",
         "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
       },
       "thought_organ": {
@@ -1151,7 +1151,7 @@
         "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
         "mismatch": [],
-        "checked_at": "2026-09-02T22:41:08.029Z"
+        "checked_at": "2026-09-03T01:08:37.873Z"
       },
       "first_kaios_strategy": {
         "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -1295,7 +1295,7 @@
         "problem": "FIRST_KAIOS_NOT_OCCURRED",
         "evidence": [
           "PRIMARY_JOB_COMPLETED",
-          "KGEN_102.0",
+          "KGEN_113.0",
           "KAIOS_1080000.0",
           "CUSTOMERS_0",
           "TREASURY_NOT_BOUND"
@@ -1349,7 +1349,7 @@
           "civilization_product_need": "ANT_MECH_BODY",
           "first_income_path": "GET_FIRST_REAL_CUSTOMER",
           "dark_matter_preserved": true,
-          "kgen_energy": "102.0",
+          "kgen_energy": "113.0",
           "next_mission_evidence": "ANT_MECH_REQUIREMENTS_AND_REAL_CUSTOMER"
         },
         "thought_organ": {
@@ -1364,7 +1364,7 @@
           "expected_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "observed_sha256": "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48",
           "mismatch": [],
-          "checked_at": "2026-09-02T22:41:08.029Z"
+          "checked_at": "2026-09-03T01:08:37.873Z"
         },
         "first_kaios_strategy": {
           "strategy_id": "DIGITAL_ANT_0001_FIRST_KAIOS_STRATEGY_V3_8",
@@ -1508,7 +1508,7 @@
           "problem": "FIRST_KAIOS_NOT_OCCURRED",
           "evidence": [
             "PRIMARY_JOB_COMPLETED",
-            "KGEN_102.0",
+            "KGEN_113.0",
             "KAIOS_1080000.0",
             "CUSTOMERS_0",
             "TREASURY_NOT_BOUND"
