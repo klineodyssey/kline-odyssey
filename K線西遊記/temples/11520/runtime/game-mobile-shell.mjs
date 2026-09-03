@@ -25,21 +25,40 @@ function addDrawer({el,id,label,side,storageKey,defaultCollapsed=false}){
 }
 
 function bestProvider(){
-  const c=[globalThis.trustwallet?.ethereum,globalThis.ethereum,globalThis.BinanceChain,globalThis.okxwallet];
-  return c.find(p=>p?.request)||null;
+  const providers=[];
+  const add=p=>{if(p?.request&&!providers.includes(p))providers.push(p)};
+  add(globalThis.ethereum);for(const p of globalThis.ethereum?.providers||[])add(p);add(globalThis.trustwallet?.ethereum);add(globalThis.trustwallet);add(globalThis.BinanceChain);add(globalThis.okxwallet);add(globalThis.bitkeep?.ethereum);
+  return providers[0]||null;
 }
 
-function trustDappUrl(){return `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(location.href)}`}
+function siteRootPath(){
+  const path=decodeURI(location.pathname||'');
+  const marker='/K線西遊記/';
+  const i=path.indexOf(marker);
+  return i>=0?path.slice(0,i):'';
+}
 
-async function copyUrl(btn){
-  try{await navigator.clipboard.writeText(location.href);const old=btn.textContent;btn.textContent='已複製';setTimeout(()=>btn.textContent=old,1200)}catch{prompt('複製此網址到錢包 DApp Browser',location.href)}
+function wallet12345BridgeUrl(){
+  const root=siteRootPath();
+  const u=new URL(`${root}/wallet-12345.html`,location.origin);
+  u.searchParams.set('autoconnect','1');
+  u.searchParams.set('source','11520');
+  u.searchParams.set('from','game-5d');
+  u.searchParams.set('bridge','1');
+  return u.href;
 }
 
 function installWalletLauncher(){
   const connect=document.getElementById('walletConnect');if(!connect||document.getElementById('walletLaunchSheet'))return;
-  const sheet=document.createElement('section');sheet.id='walletLaunchSheet';sheet.innerHTML=`<h3>連接真實 BSC 錢包</h3><p>目前頁面會優先使用錢包提供的 EIP-1193 provider。一般 Chrome/Safari 沒有注入式錢包時，請用錢包的 DApp Browser 開啟本頁；連線後只讀地址、BNB、KGEN verified 餘額，不會自動簽名或送交易。</p><div class="wallet-actions"><a id="openTrust11520" rel="noopener">Trust Wallet 開啟</a><button id="copy11520Url" type="button">複製 DApp 網址</button><button id="retry11520Wallet" type="button">重新偵測錢包</button><button id="close11520WalletSheet" type="button">關閉</button></div><p>WalletConnect v2 原地配對尚未啟用：需要正式 Reown/WalletConnect projectId 與網域 allowlist，不能用假的 ID。</p>`;document.body.appendChild(sheet);
-  sheet.querySelector('#openTrust11520').href=trustDappUrl();sheet.querySelector('#copy11520Url').onclick=e=>copyUrl(e.currentTarget);sheet.querySelector('#close11520WalletSheet').onclick=()=>sheet.classList.remove('open');sheet.querySelector('#retry11520Wallet').onclick=()=>{if(bestProvider()){sheet.classList.remove('open');connect.click()}else sheet.querySelector('p').textContent='仍未偵測到注入式 EVM provider；請在 Trust Wallet / 其他 EVM 錢包的 DApp Browser 內開啟本頁。'};
+  const title=document.querySelector('#walletPanel .walletHead b');if(title)title.textContent='🔗 12345 錢包｜BSC / KGEN';
+  const msg=document.getElementById('walletMsg');if(msg&&!bestProvider())msg.textContent='12345 負責錢包選擇與入口；11520 只讀 BSC 56、地址、BNB、KGEN verified。';
+  const sheet=document.createElement('section');sheet.id='walletLaunchSheet';sheet.innerHTML=`<h3>12345 錢包中心</h3><p>11520 不另建第二套錢包。由 12345 Wallet Bridge 負責 MetaMask、Trust Wallet、OKX、Bitget、Binance、Direct / WalletConnect 等既有錢包入口；回到可提供 EIP-1193 provider 的環境後，11520 只讀 BSC 56、地址、BNB 與 KGEN verified 餘額。</p><div class="wallet-actions"><a id="open12345Wallet" rel="noopener">前往 12345 錢包中心</a><button id="retry11520Wallet" type="button">重新偵測錢包</button><button id="close11520WalletSheet" type="button">關閉</button></div>`;document.body.appendChild(sheet);
+  sheet.querySelector('#open12345Wallet').href=wallet12345BridgeUrl();
+  sheet.querySelector('#close11520WalletSheet').onclick=()=>sheet.classList.remove('open');
+  sheet.querySelector('#retry11520Wallet').onclick=()=>{if(bestProvider()){sheet.classList.remove('open');connect.click()}else sheet.querySelector('p').textContent='目前瀏覽器仍沒有 EIP-1193 provider。請先進 12345 錢包中心選擇錢包／開啟 DApp 連線，再回 11520 讀取 BSC/KGEN。'};
   connect.addEventListener('click',e=>{if(bestProvider())return;e.preventDefault();e.stopImmediatePropagation();sheet.classList.add('open')},true);
+  let retrying=false;const retry=()=>{if(retrying||!bestProvider())return;retrying=true;sheet.classList.remove('open');queueMicrotask(()=>connect.click());setTimeout(()=>{retrying=false},600)};
+  addEventListener('focus',retry);document.addEventListener('visibilitychange',()=>{if(!document.hidden)retry()});
 }
 
 export function install11520MobileShell(){
