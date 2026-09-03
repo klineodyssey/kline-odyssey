@@ -1,17 +1,29 @@
 const ERC20_BALANCE_OF='0x70a08231';
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){return BigInt(hex&&hex!=='0x'?hex:'0x0');}
+function providerCandidates(explicit){return [explicit,globalThis.trustwallet?.ethereum,globalThis.ethereum,globalThis.BinanceChain,globalThis.okxwallet].filter(Boolean);}
+export function detectInjectedWallet(ethereum){return providerCandidates(ethereum).find(p=>typeof p?.request==='function')||null;}
 export function formatUnits(value,decimals=18){
   const n=typeof value==='bigint'?value:BigInt(value||0),d=10n**BigInt(decimals),whole=n/d,frac=(n%d).toString().padStart(decimals,'0').replace(/0+$/,'');
   return frac?`${whole}.${frac}`:`${whole}`;
 }
-export async function connectInjectedWallet({ethereum=globalThis.ethereum,allowedChainIds=[56,97]}={}){
-  if(!ethereum?.request)return {ok:false,reason:'NO_INJECTED_WALLET'};
-  const accounts=await ethereum.request({method:'eth_requestAccounts'});
+async function readChainId(provider){const chainHex=await provider.request({method:'eth_chainId'});return Number.parseInt(chainHex,16);}
+async function trySwitchChain(provider,targetChainId){
+  if(!targetChainId)return {ok:false,reason:'NO_TARGET_CHAIN'};
+  try{await provider.request({method:'wallet_switchEthereumChain',params:[{chainId:`0x${Number(targetChainId).toString(16)}`} ]});return {ok:true,chainId:await readChainId(provider)};}catch(error){return {ok:false,reason:'CHAIN_SWITCH_REJECTED',error};}
+}
+export async function connectInjectedWallet({ethereum,allowedChainIds=[56,97],switchChain=true}={}){
+  const provider=detectInjectedWallet(ethereum);
+  if(!provider)return {ok:false,reason:'NO_INJECTED_WALLET'};
+  const accounts=await provider.request({method:'eth_requestAccounts'});
   if(!accounts?.[0])return {ok:false,reason:'NO_ACCOUNT'};
-  const chainHex=await ethereum.request({method:'eth_chainId'}),chainId=Number.parseInt(chainHex,16);
-  if(allowedChainIds.length&&!allowedChainIds.includes(chainId))return {ok:false,reason:'UNSUPPORTED_CHAIN',account:accounts[0],chainId};
-  return {ok:true,account:accounts[0],chainId,provider:ethereum};
+  let chainId=await readChainId(provider);
+  if(allowedChainIds.length&&!allowedChainIds.includes(chainId)&&switchChain){
+    const switched=await trySwitchChain(provider,allowedChainIds[0]);
+    if(switched.ok)chainId=switched.chainId;
+  }
+  if(allowedChainIds.length&&!allowedChainIds.includes(chainId))return {ok:false,reason:'UNSUPPORTED_CHAIN',account:accounts[0],chainId,provider};
+  return {ok:true,account:accounts[0],chainId,provider};
 }
 export async function readNativeBalance({provider,account}){
   const raw=await provider.request({method:'eth_getBalance',params:[account,'latest']});
@@ -36,3 +48,4 @@ export function assertExecutableOrder({wallet,chainId,marketAdapter,order}){
   if(!order?.axis||!order?.side||!(Number(order?.notional)>0))return {ok:false,reason:'INVALID_ORDER'};
   return {ok:true};
 }
+if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||''))import('./game-mobile-shell.mjs').catch(()=>{});
