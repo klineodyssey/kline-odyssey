@@ -15,7 +15,7 @@ function bindSlot(index,parent,lifeId,species){
   replaceLifeVisual(parent,{species:slot.species||'MARKET_LIFE',lifeId:slot.lifeId});
   parent.userData.slotIndex=index;parent.userData.lifeId=slot.lifeId;parent.userData.species=slot.species;return slot;
 }
-function freeDynamicSlot(){return slots.find((s,i)=>i>=INITIAL.length&&s?.parent&&!s.lifeId)||null}
+function freeDynamicSlot(){return slots.find(s=>s?.parent&&!s.lifeId)||null}
 function applyEvent(event){
   if(!event?.lifeId)return;
   if(event.type==='DESPAWN'){
