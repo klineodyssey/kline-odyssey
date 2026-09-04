@@ -1,69 +1,40 @@
 /* KGEN_META
-VERSION: 1.1.0
+VERSION: 1.2.0
 STATUS: ACTIVE
-PURPOSE: Product-level mobile UI corrections that must not alter gameplay control semantics.
+PURPOSE: Mobile UI cleanup, branded energy controls, AI voice assistant, music and intro.
 */
 
 const isGame=typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'');
+const A='./assets/ui/';
 
 function installCss(){
-  if(!isGame||document.getElementById('k11520ProductFixesStyle'))return;
-  const s=document.createElement('style');s.id='k11520ProductFixesStyle';s.textContent=`
+  if(!isGame||document.getElementById('k11520ProductFixesStyleV2'))return;
+  const s=document.createElement('style');s.id='k11520ProductFixesStyleV2';s.textContent=`
     #yControl .track{position:absolute!important}
     #yEnergyMarker{position:absolute;z-index:6;left:50%;width:12px;height:12px;transform:translate(-50%,50%);border-radius:50%;border:1px solid #d8fbff;background:#7feeff;box-shadow:0 0 7px #7feeff,0 0 16px #68e4ff,0 0 28px #68e4ff88;pointer-events:none;transition:bottom .045s linear}
-    #yThumb{transition:top .045s linear;box-shadow:0 0 10px #68e4ff88}
-
-    /* The fixed toggle is the only collapsed-wallet affordance. Do not leave a long empty panel behind it. */
-    #walletPanel.collapsed{width:0!important;height:0!important;min-width:0!important;min-height:0!important;padding:0!important;border:0!important;box-shadow:none!important;overflow:hidden!important;pointer-events:none!important}
-    #walletPanel:not(.collapsed){pointer-events:auto!important}
-
-    @media(max-width:420px){
-      /* Keep combat/energy controls away from the right utility rail without changing their handlers. */
-      .controls{right:72px!important;transform:scale(.82)!important;transform-origin:right bottom!important}
-      .sliderDock{right:72px!important;bottom:204px!important;transform:scale(.82)!important;transform-origin:right bottom!important}
-
-      /* One stable utility rail: wallet, mode, backpack, organ menu. */
-      #walletToggle.k11520-fixed-wallet-toggle{right:8px!important;top:auto!important;bottom:214px!important}
-      #gameModeToggle{right:8px!important;top:auto!important;bottom:148px!important}
-      #backpackButton{right:8px!important;bottom:82px!important}
-      #dock{right:8px!important;bottom:18px!important}
-    }
+    .sliderDock .thumb{height:25px!important;width:40px!important;border-radius:12px!important;overflow:hidden;background-position:center!important;background-repeat:no-repeat!important;background-size:cover!important}
+    #yThumb{transition:top .045s linear;box-shadow:0 0 10px #ff8cf588!important;background-image:url('${A}goddess-ui.webp')!important;border-color:#ff98ed!important}
+    #cThumb{background-image:url('${A}ufo-ui.png')!important;background-color:#0b2740!important;border-color:#5edcff!important;box-shadow:0 0 10px #53d8ff88!important;background-size:contain!important}
+    #lotsThumb{background-image:url('${A}brand-k-ui.webp')!important;background-color:#19150a!important;border-color:#ffd96e!important;box-shadow:0 0 10px #ffd86a88!important}
+    #yControl label::before{content:'仙女 · ';color:#ff9eef} #cControl label::before{content:'飛碟 · ';color:#71ddff} #lotsControl label::before{content:'K · ';color:#ffd66d}
+    #walletPanel.collapsed{display:none!important;width:0!important;height:0!important;padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;overflow:hidden!important;pointer-events:none!important}
+    #walletPanel:not(.collapsed){display:block!important;pointer-events:auto!important}
+    #aiChatButton,#bgmButton{position:fixed;z-index:985;right:8px;width:46px;height:46px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ee;color:#9eeeff;box-shadow:0 7px 24px #0009;font-weight:800}
+    #aiChatButton{bottom:280px} #bgmButton{bottom:334px;color:#ffd978;border-color:#ffd97866}
+    #aiChatPanel{position:fixed;z-index:2400;left:10px;right:64px;bottom:12px;max-height:66vh;border:1px solid #ff8df077;border-radius:16px;background:#08131df8;box-shadow:0 20px 70px #000d;display:none;overflow:hidden}
+    #aiChatPanel.open{display:grid;grid-template-rows:auto 1fr auto}.aiHead{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid #fff1}.aiHead b{flex:1;color:#ff9dec}.aiHead button{width:36px;height:36px;border:1px solid #fff2;border-radius:10px;background:#111b26}.aiMsgs{padding:10px;overflow:auto;min-height:180px;max-height:42vh}.aiMsg{max-width:88%;margin:5px 0;padding:8px 10px;border-radius:12px;background:#122230}.aiMsg.user{margin-left:auto;background:#28324c}.aiMsg.ai{border:1px solid #ff8df033}.aiComposer{display:grid;grid-template-columns:1fr 42px 42px;gap:6px;padding:10px;border-top:1px solid #fff1}.aiComposer input{min-width:0;border:1px solid #68e4ff33;background:#071019;border-radius:10px;padding:9px}.aiComposer button{border:1px solid #68e4ff44;background:#10202d;border-radius:10px}
+    #intro11520{position:fixed;z-index:5000;inset:0;background:radial-gradient(circle at 50% 45%,#153257 0,#071018 45%,#020407 100%);display:grid;place-items:center;perspective:900px;transition:opacity .5s ease}#intro11520.hide{opacity:0;pointer-events:none}.introCore{text-align:center;transform-style:preserve-3d;animation:introFly 2.8s cubic-bezier(.2,.8,.2,1) both}.introLogo{width:108px;height:108px;margin:auto;border-radius:50%;background:url('${A}brand-k-ui.webp') center/cover;box-shadow:0 0 40px #ffd55b88;animation:introSpin 2.8s ease-in-out both}.introTitle{margin-top:16px;color:#f5d680;font-size:24px;font-weight:900;text-shadow:0 0 18px #f5d68066}.introSub{margin-top:5px;color:#9deaff;font-size:12px}.introSkip{margin-top:18px;border:1px solid #fff3;background:#0d1722;color:#fff;border-radius:10px;padding:8px 14px}@keyframes introFly{0%{transform:translateZ(-700px) rotateX(20deg);opacity:0}45%{opacity:1}100%{transform:translateZ(0) rotateX(0)}}@keyframes introSpin{0%{transform:rotateY(0) scale(.5)}100%{transform:rotateY(720deg) scale(1)}}
+    @media(max-width:420px){.controls{right:72px!important;transform:scale(.82)!important;transform-origin:right bottom!important}.sliderDock{right:72px!important;bottom:204px!important;transform:scale(.82)!important;transform-origin:right bottom!important}#walletToggle.k11520-fixed-wallet-toggle{right:8px!important;top:auto!important;bottom:214px!important}#gameModeToggle{right:8px!important;top:auto!important;bottom:148px!important}#backpackButton{right:8px!important;bottom:82px!important}#dock{right:8px!important;bottom:18px!important}}
   `;document.head.appendChild(s);
 }
-
-function yRatio(){
-  const text=document.getElementById('yRead')?.textContent||'Y 0';
-  const value=Number(text.match(/-?\d+(?:\.\d+)?/)?.[0]||0);
-  return Math.max(0,Math.min(1,value/40));
-}
-
-function installYMarker(){
-  const control=document.getElementById('yControl'),track=control?.querySelector('.track'),thumb=document.getElementById('yThumb');
-  if(!control||!track||!thumb)return false;
-  let marker=document.getElementById('yEnergyMarker');
-  if(!marker){marker=document.createElement('i');marker.id='yEnergyMarker';track.appendChild(marker);}
-  const sync=()=>{
-    const r=yRatio();
-    marker.style.bottom=`${(r*100).toFixed(2)}%`;
-    // The original vertical control is 140px tall; track runs from 28px to 115px.
-    // Keep the real thumb centre on the same Y energy level instead of fixed at 50%.
-    thumb.style.top=`${(115-r*87).toFixed(2)}px`;
-    thumb.dataset.energyRatio=r.toFixed(4);
-  };
-  const read=document.getElementById('yRead');
-  if(read)new MutationObserver(sync).observe(read,{childList:true,subtree:true,characterData:true});
-  for(const ev of ['pointerdown','pointermove','pointerup','touchmove'])control.addEventListener(ev,sync,{passive:true});
-  let last=0;const loop=t=>{if(t-last>60){sync();last=t}requestAnimationFrame(loop)};requestAnimationFrame(loop);sync();return true;
-}
-
-export function install11520ProductFixes(){
-  if(!isGame)return {ok:false,reason:'NOT_11520_GAME'};
-  installCss();
-  if(!installYMarker()){
-    const observer=new MutationObserver(()=>{if(installYMarker())observer.disconnect()});
-    observer.observe(document.documentElement,{childList:true,subtree:true});
-  }
-  return {ok:true};
-}
-
+function yRatio(){const text=document.getElementById('yRead')?.textContent||'Y 0';const value=Number(text.match(/-?\d+(?:\.\d+)?/)?.[0]||0);return Math.max(0,Math.min(1,value/40));}
+function installYMarker(){const control=document.getElementById('yControl'),track=control?.querySelector('.track'),thumb=document.getElementById('yThumb');if(!control||!track||!thumb)return false;let marker=document.getElementById('yEnergyMarker');if(!marker){marker=document.createElement('i');marker.id='yEnergyMarker';track.appendChild(marker)}const sync=()=>{const r=yRatio();marker.style.bottom=`${(r*100).toFixed(2)}%`;thumb.style.top=`${(115-r*87).toFixed(2)}px`;thumb.dataset.energyRatio=r.toFixed(4)};const read=document.getElementById('yRead');if(read)new MutationObserver(sync).observe(read,{childList:true,subtree:true,characterData:true});for(const ev of ['pointerdown','pointermove','pointerup','touchmove'])control.addEventListener(ev,sync,{passive:true});let last=0;const loop=t=>{if(t-last>60){sync();last=t}requestAnimationFrame(loop)};requestAnimationFrame(loop);sync();return true;}
+function speak(text){if(!('speechSynthesis'in globalThis))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='zh-TW';u.rate=1.02;speechSynthesis.speak(u)}
+function localAnswer(q){const s=String(q||'').trim();if(/怎麼玩|教學|操作/.test(s))return'左下 XZ 遙桿控制移動；Y 高度控制離地高度，C 曲速控制移動倍率，口數控制交易口數。';if(/KGEN/i.test(s))return'KGEN 在 11520 分成本機遊戲帳本與已驗證鏈上唯讀餘額；遊戲不會替你自動簽名或送真交易。';if(/KAIOS/i.test(s))return'KAIOS 是 11520 世界的生活與生命結算單位之一。';if(/市場|行情|多空/.test(s))return'KX、KY、KZ 是三個市場空間軸；同向可同行，反向形成市場對戰，輸贏由市場結算。';if(/背包|牛|魚|蝦|雞|鴨/.test(s))return'靠近可收納生命後可捕捉進背包；活體保留 LIFE_ID，放出後仍是同一個生命。';return'我是 11520 AI 語音客服。可問操作、KGEN、KAIOS、市場、背包、任務或導航。雲端 AI 端點尚未設定時，我先用本機安全知識庫回答。'}
+async function aiReply(q){const endpoint=globalThis.K11520_AI_ENDPOINT;if(endpoint)try{const r=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:q,placeId:'11520'})});if(r.ok){const j=await r.json();if(j?.reply)return String(j.reply)}}catch{}return localAnswer(q)}
+function installAi(){if(document.getElementById('aiChatButton'))return;const btn=document.createElement('button');btn.id='aiChatButton';btn.textContent='AI';btn.title='AI聊天 / 語音客服';document.body.appendChild(btn);const p=document.createElement('section');p.id='aiChatPanel';p.innerHTML=`<div class="aiHead"><b>🧚 11520 AI 語音客服</b><button id="aiClose">×</button></div><div class="aiMsgs" id="aiMsgs"><div class="aiMsg ai">你好，我可以用文字或語音協助你玩 11520。</div></div><div class="aiComposer"><input id="aiInput" placeholder="問遊戲、KGEN、KAIOS、市場、任務…"><button id="aiMic">🎙</button><button id="aiSend">➤</button></div>`;document.body.appendChild(p);const msgs=p.querySelector('#aiMsgs'),input=p.querySelector('#aiInput');const add=(text,who)=>{const d=document.createElement('div');d.className=`aiMsg ${who}`;d.textContent=text;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight};const send=async()=>{const q=input.value.trim();if(!q)return;input.value='';add(q,'user');const a=await aiReply(q);add(a,'ai');speak(a)};btn.onclick=()=>p.classList.toggle('open');p.querySelector('#aiClose').onclick=()=>p.classList.remove('open');p.querySelector('#aiSend').onclick=send;input.addEventListener('keydown',e=>{if(e.key==='Enter')send()});p.querySelector('#aiMic').onclick=()=>{const R=globalThis.SpeechRecognition||globalThis.webkitSpeechRecognition;if(!R){add('這個瀏覽器目前沒有語音辨識，可用文字輸入；語音回覆仍可使用。','ai');return}const r=new R();r.lang='zh-TW';r.onresult=e=>{input.value=e.results[0][0].transcript;send()};r.onerror=()=>add('語音辨識失敗，請再試一次。','ai');r.start()}}
+let audioCtx=null,ambient=null,bgmOn=false;function toggleBgm(){const btn=document.getElementById('bgmButton');if(!audioCtx)audioCtx=new (globalThis.AudioContext||globalThis.webkitAudioContext)();if(!bgmOn){audioCtx.resume();const gain=audioCtx.createGain();gain.gain.value=.025;gain.connect(audioCtx.destination);const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator();o1.type='sine';o2.type='triangle';o1.frequency.value=174.6;o2.frequency.value=261.6;o1.connect(gain);o2.connect(gain);o1.start();o2.start();ambient={gain,o1,o2};bgmOn=true;btn.textContent='♫'}else{ambient?.o1.stop();ambient?.o2.stop();ambient=null;bgmOn=false;btn.textContent='♪'}}
+function installBgm(){if(document.getElementById('bgmButton'))return;const b=document.createElement('button');b.id='bgmButton';b.textContent='♪';b.title='背景音樂';b.onclick=toggleBgm;document.body.appendChild(b)}
+function installIntro(){if(sessionStorage.getItem('11520.intro.seen.v2'))return;const o=document.createElement('div');o.id='intro11520';o.innerHTML=`<div class="introCore"><div class="introLogo"></div><div class="introTitle">11520 花果山 5D</div><div class="introSub">K線西遊記 · 從 K 線走向宇宙</div><button class="introSkip">進入世界</button></div>`;document.body.appendChild(o);const close=()=>{sessionStorage.setItem('11520.intro.seen.v2','1');o.classList.add('hide');setTimeout(()=>o.remove(),520)};o.querySelector('button').onclick=close;setTimeout(close,3000)}
+export function install11520ProductFixes(){if(!isGame)return{ok:false,reason:'NOT_11520_GAME'};installCss();installAi();installBgm();installIntro();if(!installYMarker()){const observer=new MutationObserver(()=>{if(installYMarker())observer.disconnect()});observer.observe(document.documentElement,{childList:true,subtree:true})}return{ok:true,features:['wallet-shell-removal','branded-energy-thumbs','ai-voice','ambient-bgm','3d-css-intro']}}
 if(isGame)queueMicrotask(install11520ProductFixes);
