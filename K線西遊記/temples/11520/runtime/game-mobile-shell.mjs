@@ -15,13 +15,16 @@ function style(){
   .v .track{overflow:hidden;border:1px solid #68e4ff18;background:linear-gradient(180deg,#0f1a24,#09131b)}
   .energy-grid,.energy-fill{position:absolute;inset:0;pointer-events:none;border-radius:8px}
   .energy-grid{background:repeating-linear-gradient(to top,transparent 0 8px,#68e4ff30 8px 9px);opacity:.8}
-  .energy-fill{top:auto;height:50%;background:repeating-linear-gradient(to top,#68e4ff16 0 7px,#68e4ff8c 7px 9px);box-shadow:0 0 14px #68e4ff55 inset,0 0 10px #68e4ff33;transition:height .08s linear}
+  .energy-fill{top:auto;height:0;background:repeating-linear-gradient(to top,#68e4ff16 0 7px,#68e4ff8c 7px 9px);box-shadow:0 0 14px #68e4ff55 inset,0 0 10px #68e4ff33;transition:height .08s linear}
   .v[data-energy='high'] .energy-fill{filter:brightness(1.35)}
   .v[data-energy='max'] .energy-fill{filter:brightness(1.7);box-shadow:0 0 18px #68e4ffaa inset,0 0 14px #68e4ff88}
+  #yControl[data-airborne='1'] label{color:#8ceaff}#yControl[data-airborne='1'] label:after{content:' · AIRBORNE';font-size:6px}
   #chatHandle{position:fixed;z-index:930;left:0;top:54%;min-width:42px;height:46px;border:1px solid #68e4ff66;border-left:0;border-radius:0 13px 13px 0;background:#09131dee;color:#8ceaff;font-weight:900;box-shadow:0 8px 26px #0009}
   #gameChat{position:fixed;z-index:2100;left:8px;right:8px;bottom:10px;height:min(42vh,360px);border:1px solid #68e4ff55;border-radius:16px;background:#08131df5;box-shadow:0 18px 70px #000c;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;transform:translateY(calc(100% + 20px));transition:transform .2s ease}
   #gameChat.open{transform:none}.chatHead{display:flex;align-items:center;gap:6px;padding:8px;border-bottom:1px solid #ffffff12}.chatHead b{color:#8ceaff;margin-right:auto}.chatHead button,.chatComposer button{border:1px solid #68e4ff44;background:#10202a;color:#eef;border-radius:9px;min-height:34px}.chatHead button.active{background:#17445f;color:#fff}.chatLog{padding:10px;overflow:auto;display:flex;flex-direction:column;gap:7px}.chatBubble{max-width:82%;padding:7px 10px;border-radius:12px;background:#17242d;align-self:flex-start;font-size:12px;line-height:1.35}.chatBubble.self{align-self:flex-end;background:#2a563d}.chatBubble.system{max-width:94%;align-self:center;background:#111922;color:#9eb0bc;text-align:center;font-size:10px}.chatBubble small{display:block;color:#91a2ad;font-size:9px;margin-bottom:2px}.chatComposer{display:grid;grid-template-columns:1fr auto;gap:7px;padding:8px;border-top:1px solid #ffffff12}.chatComposer input{min-width:0;border:1px solid #ffffff20;border-radius:10px;background:#0d1820;padding:9px;color:#fff;outline:none}
-  @media(max-width:420px){#hudToggleAxes{top:70px}#hudToggleTele,#hudToggleMonster{top:176px}#hudToggleMap{top:255px}#hudToggleParams{right:4px;bottom:346px}.hud-drawer-toggle{padding:6px 8px;font-size:9px}.joyWrap{transform:scale(.85);transform-origin:left bottom;left:8px!important;bottom:16px!important}#chatHandle{top:58%}#gameChat{height:38vh}}
+  /* Keep the joystick hit-box unchanged; shrink only the visible rings. */
+  .joyWrap .joyPlane{inset:13%;background:#07141d99;border-width:1px}.joyWrap .joyGuide{left:36px;top:36px;width:82px;height:82px}.joyWrap .joyPlane:after{top:-19px}
+  @media(max-width:420px){#hudToggleAxes{top:70px}#hudToggleTele,#hudToggleMonster{top:176px}#hudToggleMap{top:255px}#hudToggleParams{right:4px;bottom:346px}.hud-drawer-toggle{padding:6px 8px;font-size:9px}.joyWrap{left:8px!important;bottom:16px!important}#chatHandle{top:58%}#gameChat{height:38vh}}
   `;document.head.appendChild(s);
 }
 
@@ -36,11 +39,22 @@ function addDrawer({el,id,label,side,storageKey,defaultCollapsed=false}){
 }
 
 function installEnergyLayers(){
+  const cLevels=[0,.000001,.00001,.0001,.001,.01,.1,1,10,100,1000];
+  const ratioFor=control=>{
+    if(control.id==='yControl')return Math.max(0,Math.min(1,(parseFloat(document.getElementById('yRead')?.textContent?.match(/-?\d+(?:\.\d+)?/)?.[0]||0))/40));
+    if(control.id==='lotsControl')return Math.max(0,Math.min(1,(parseFloat(document.getElementById('lotsRead')?.textContent?.match(/\d+(?:\.\d+)?/)?.[0]||0))/100));
+    if(control.id==='cControl'){
+      const v=parseFloat(document.getElementById('cRead')?.textContent?.match(/\d*\.?\d+(?:e[-+]?\d+)?/i)?.[0]||0),i=Math.max(0,cLevels.indexOf(v));return i/(cLevels.length-1);
+    }
+    return 0;
+  };
   for(const control of document.querySelectorAll('.sliderDock .v')){
-    const track=control.querySelector('.track'),thumb=control.querySelector('.thumb');if(!track||!thumb||track.querySelector('.energy-grid'))continue;
-    const grid=document.createElement('i'),fill=document.createElement('i');grid.className='energy-grid';fill.className='energy-fill';track.prepend(grid,fill);
-    const sync=()=>{const tr=track.getBoundingClientRect(),th=thumb.getBoundingClientRect();if(!tr.height)return;const center=th.top+th.height/2;const ratio=Math.max(0,Math.min(1,(tr.bottom-center)/tr.height));fill.style.height=`${(ratio*100).toFixed(1)}%`;control.dataset.energy=ratio>.88?'max':ratio>.62?'high':'normal';};
-    new MutationObserver(sync).observe(thumb,{attributes:true,attributeFilter:['style','class']});
+    const track=control.querySelector('.track');if(!track)continue;
+    let grid=track.querySelector('.energy-grid'),fill=track.querySelector('.energy-fill');
+    if(!grid){grid=document.createElement('i');fill=document.createElement('i');grid.className='energy-grid';fill.className='energy-fill';track.prepend(grid,fill)}
+    const sync=()=>{const ratio=ratioFor(control);fill.style.height=`${(ratio*100).toFixed(1)}%`;control.dataset.energy=ratio>.88?'max':ratio>.62?'high':'normal';if(control.id==='yControl')control.dataset.airborne=ratio>0?'1':'0';};
+    const read=control.querySelector('.read');if(read)new MutationObserver(sync).observe(read,{childList:true,characterData:true,subtree:true});
+    const thumb=control.querySelector('.thumb');if(thumb)new MutationObserver(sync).observe(thumb,{attributes:true,attributeFilter:['style','class']});
     control.addEventListener('pointerdown',()=>requestAnimationFrame(sync));control.addEventListener('pointermove',()=>requestAnimationFrame(sync));addEventListener('resize',sync);queueMicrotask(sync);
   }
 }
