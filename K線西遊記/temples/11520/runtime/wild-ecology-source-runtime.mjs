@@ -1,17 +1,19 @@
 /*
 KGEN_META
-VERSION: 1.0.0
-REVISION: 2026-09-04.WILD-ECOLOGY
+VERSION: 1.1.0
+REVISION: 2026-09-05.WILD-ECOLOGY
 STATUS: ACTIVE
 PURPOSE: Persistent baseline ecology for the 11520 living world. Wild life is not Exchange Brain freight; it coexists with source-managed Market Life.
 */
 
-export const WILD_ECOLOGY_VERSION='11520-WILD-ECOLOGY-V1';
+export const WILD_ECOLOGY_VERSION='11520-WILD-ECOLOGY-V1.1';
 export const WILD_SPECIES=Object.freeze([
   {species:'FISH',name:'花果山魚',kind:'ANIMAL',count:3,maxHp:30,speed:.010,habitat:'WATER',collectable:true},
   {species:'SHRIMP',name:'花果山蝦',kind:'ANIMAL',count:3,maxHp:18,speed:.012,habitat:'WATER',collectable:true},
   {species:'COW',name:'花果山牛',kind:'ANIMAL',count:2,maxHp:120,speed:.007,habitat:'LAND',collectable:true},
   {species:'SHEEP',name:'花果山羊',kind:'ANIMAL',count:2,maxHp:75,speed:.009,habitat:'LAND',collectable:true},
+  {species:'CHICKEN',name:'花果山雞',kind:'ANIMAL',count:3,maxHp:32,speed:.011,habitat:'LAND',collectable:true},
+  {species:'DUCK',name:'花果山鴨',kind:'ANIMAL',count:3,maxHp:38,speed:.010,habitat:'WETLAND',collectable:true},
   {species:'TREE',name:'花果山樹',kind:'PLANT',count:5,maxHp:160,speed:0,habitat:'LAND',collectable:true},
   {species:'FLOWER',name:'花果山花',kind:'PLANT',count:6,maxHp:20,speed:0,habitat:'LAND',collectable:true},
 ]);
@@ -44,7 +46,7 @@ export function tickWildEcology(ecology,{now=Date.now(),dtMs=16}={}){
     life.age+=dt/1000;life.growth=Math.min(1,life.growth+dt/1000/1800);
     if(life.kind==='ANIMAL'&&life.speed>0){
       const phase=now/2200+(hash(life.lifeId)%628)/100;
-      const radius=life.habitat==='WATER'?2.4:3.8;
+      const radius=life.habitat==='WATER'?2.4:life.habitat==='WETLAND'?3.0:3.8;
       life.x=life.homeX+Math.cos(phase)*radius;life.z=life.homeZ+Math.sin(phase*.83)*radius;
     }
     life.lastTick=now;
