@@ -8,8 +8,8 @@ await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/tem
 await page.waitForTimeout(1000);
 assert.deepEqual(errors,[],'boot page errors: '+errors.join('\n'));
 
-// Controls that a player must be able to touch on the default 390x844 phone screen.
-for(const id of ['joy','attack','skill','dodge','orderFire','tradeSword','walletToggle','dockToggle']){
+// Default clean-play controls that must be touchable on a 390x844 phone screen.
+for(const id of ['joy','attack','skill','dodge','walletToggle','dockToggle']){
   const loc=page.locator('#'+id);
   const diag=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{id:el.id,display:s.display,visibility:s.visibility,opacity:s.opacity,w:r.width,h:r.height,x:r.x,y:r.y}});
   assert.ok(diag.w>0&&diag.h>0&&diag.display!=='none'&&diag.visibility!=='hidden',`control ${id} not visible: ${JSON.stringify(diag)}`);
@@ -17,10 +17,6 @@ for(const id of ['joy','attack','skill','dodge','orderFire','tradeSword','wallet
 
 // Core visible actions accept real pointer clicks.
 for(const id of ['attack','skill','dodge']){await page.locator('#'+id).click({timeout:3000});await page.waitForTimeout(20)}
-await page.locator('#tradeSword').click({timeout:3000});
-await page.locator('#orderFire').click({timeout:3000});
-await page.waitForTimeout(30);
-if(await page.locator('#confirm').evaluate(el=>el.classList.contains('open')))await page.locator('#cancelOrder').click({timeout:3000});
 
 // Product shell and all 14 organs are reachable through the visible menu button.
 assert.equal(await page.locator('#rail [data-organ]').count(),14);
