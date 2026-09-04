@@ -1,14 +1,15 @@
 /*
 KGEN_META
-VERSION: 1.0.1
-REVISION: 2026-09-04.MARKET-LIFE-CORE-SOURCE-SLOT-FIX
+VERSION: 1.0.2
+REVISION: 2026-09-04.LIVING-WORLD-UNMARKETED-LIFE-FIX
 STATUS: ACTIVE
-SOURCE_OF_TRUTH: MARKET_LIFE_AI_SPEC.md
-CHANGE_REASON: Allow internal inactive SOURCE_SLOT placeholders to exist without a market while preserving mandatory markets for real Market Life.
+SOURCE_OF_TRUTH: MARKET_LIFE_AI_SPEC.md / LIVING_WORLD_ECOSYSTEM_SPEC.md
+CHANGE_REASON: Internal SOURCE_SLOT and baseline WILD_ECOLOGY species may exist without market dimensions. Real Market Life remains market-required.
 */
 
 export const MARKET_LIFE_ACTIONS=Object.freeze(['HOLD','FOLLOW','OPPOSE','HEDGE','REALLOCATE','REDUCE','RETREAT','REENTER']);
 export const MARKET_LIFE_STATES=Object.freeze(['ALIVE','WOUNDED','RETREATING','DEAD','NAIHE','MENGPO_RECOVERY','REBIRTH']);
+export const UNMARKETED_WORLD_SPECIES=Object.freeze(['FISH','SHRIMP','COW','SHEEP','TREE','FLOWER']);
 
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
 const copy=v=>JSON.parse(JSON.stringify(v));
@@ -20,7 +21,8 @@ export function createMarketLife({
   if(!lifeId)throw new Error('MARKET_LIFE_REQUIRES_LIFE_ID');
   const allowed=[...new Set(markets)].filter(Boolean);
   const isInactiveSourceSlot=species==='SOURCE_SLOT';
-  if(!allowed.length&&!isInactiveSourceSlot)throw new Error('MARKET_LIFE_REQUIRES_MARKET');
+  const isWildEcology=UNMARKETED_WORLD_SPECIES.includes(species);
+  if(!allowed.length&&!isInactiveSourceSlot&&!isWildEcology)throw new Error('MARKET_LIFE_REQUIRES_MARKET');
   return {
     lifeId,name:name||lifeId,species,
     intelligence:Math.max(1,Math.floor(intelligence)),
@@ -30,7 +32,7 @@ export function createMarketLife({
     vitality:clamp(vitality,0,100),
     fear:clamp(fear,0,1),profitDrive:clamp(profitDrive,0,1),
     positions:copy(positions),memory:[],memoryCapacity:Math.max(4,Math.floor(memoryCapacity)),
-    state:isInactiveSourceSlot?'DEAD':'ALIVE',strategy:isInactiveSourceSlot?'HIDDEN':'HOLD',confidence:isInactiveSourceSlot?0:0.5,lastDecisionAt:0,
+    state:isInactiveSourceSlot?'DEAD':'ALIVE',strategy:isInactiveSourceSlot?'HIDDEN':isWildEcology?'WILD_ECOLOGY':'HOLD',confidence:isInactiveSourceSlot?0:0.5,lastDecisionAt:0,
     growth:{experience:0,wins:0,losses:0,dimensionUnlocks:0},
     lifecycle:{diedAt:null,naiheAt:null,mengpoAt:null,rebornAt:null},
   };
@@ -53,6 +55,7 @@ function exposureScore(perception){
 
 export function decideMarketLife(life,perception,{random=()=>0.5}={}){
   if(life.state==='DEAD'||life.state==='NAIHE'||life.state==='MENGPO_RECOVERY')return decision(life,'HOLD',0,'LIFECYCLE_LOCK',perception.now);
+  if(!life.marketDimensions.length)return decision(life,'HOLD',0,'UNMARKETED_WORLD_LIFE',perception.now);
   const capRatio=life.startingCapital>0?life.capital/life.startingCapital:0;
   const survivalPressure=clamp((1-life.vitality/100)*0.55+(1-capRatio)*0.45,0,1);
   const seen=Object.values(perception.visiblePlayerAxes||{});
@@ -108,6 +111,7 @@ export function advanceMarketLifeCycle(life,{now=Date.now(),naiheDelayMs=1500,me
 }
 
 export function maybeGrowMarketLife(life,{availableMarkets=[]}={}){
+  if(!life.marketDimensions.length)return {grown:false,life:snapshotMarketLife(life)};
   const threshold=50*Math.max(1,life.marketDimensions.length);
   if(life.growth.experience<threshold)return {grown:false,life:snapshotMarketLife(life)};
   const next=(availableMarkets||[]).find(m=>m&&!life.marketDimensions.includes(m));
