@@ -1,3 +1,5 @@
+import './life-visual-bootstrap.mjs';
+
 const ERC20_BALANCE_OF='0x70a08231';
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){return BigInt(hex&&hex!=='0x'?hex:'0x0');}
