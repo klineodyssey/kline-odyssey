@@ -60,6 +60,7 @@ function pin11520WalletToggle(){
   style.id='k11520FixedWalletToggleStyle';
   style.textContent=`
     #walletToggle.k11520-fixed-wallet-toggle{position:fixed!important;z-index:980!important;right:72px!important;top:398px!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;border:1px solid #68e4ff66!important;border-radius:11px!important;background:#101a25!important;color:#8ceaff!important;display:block!important;transform:none!important;touch-action:manipulation!important}
+    #hudToggleAxes,#hudToggleMonster,#hudToggleParams{right:72px!important}
     body.game-clean-mode #walletToggle.k11520-fixed-wallet-toggle{display:none!important}
     @media(max-width:420px){body:not(.game-clean-mode) #walletPanel{right:68px!important;width:calc(100vw - 84px)!important;max-width:calc(100vw - 84px)!important}}
     @media(min-width:421px){#walletToggle.k11520-fixed-wallet-toggle{right:68px!important;top:302px!important}}
