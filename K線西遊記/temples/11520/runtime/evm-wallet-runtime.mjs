@@ -77,4 +77,5 @@ function pin11520WalletToggle(){
 if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'')){
   pin11520WalletToggle();
   import('./game-mobile-shell.mjs').catch(()=>{});
+  import('./backpack-ui.mjs').catch(()=>{});
 }
