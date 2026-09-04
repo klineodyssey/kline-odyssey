@@ -1,5 +1,3 @@
-import './life-visual-bootstrap.mjs';
-
 const ERC20_BALANCE_OF='0x70a08231';
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){return BigInt(hex&&hex!=='0x'?hex:'0x0');}
@@ -77,6 +75,7 @@ function pin11520WalletToggle(){
 }
 
 if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'')){
+  import('./life-visual-bootstrap.mjs').catch(()=>{});
   pin11520WalletToggle();
   import('./game-mobile-shell.mjs').catch(()=>{});
   import('./backpack-ui.mjs').then(()=>import('./living-world-browser-bridge.mjs')).catch(()=>{});
