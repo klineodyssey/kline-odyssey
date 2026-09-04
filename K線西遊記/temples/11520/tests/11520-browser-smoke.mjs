@@ -32,15 +32,13 @@ await page.locator('#gameModeToggle').click({timeout:3000});
 await page.waitForTimeout(80);
 for(const id of ['walletToggle','dockToggle','orderFire','tradeSword','flat'])await assertVisible(id);
 
-// Wallet collapse control stays usable in the same place and can reveal Connect.
+// Wallet collapse control stays at the same screen position after expand/collapse.
 const toggleBefore=await page.locator('#walletToggle').boundingBox();assert.ok(toggleBefore);
 await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(80);
 const toggleAfter=await page.locator('#walletToggle').boundingBox();assert.ok(toggleAfter);
 assert.ok(Math.abs(toggleAfter.x-toggleBefore.x)<12&&Math.abs(toggleAfter.y-toggleBefore.y)<12,'wallet toggle moved away after expand/collapse');
-await page.locator('#walletConnect').click({timeout:3000});await page.waitForTimeout(50);
-assert.ok((await page.locator('#walletMsg').textContent()).length>0);
 
-// All 14 formal organs are reachable from the menu.
+// All 14 formal organs are reachable before any modal can intentionally cover the UI.
 assert.equal(await page.locator('#rail [data-organ]').count(),14);
 await page.locator('#dockToggle').click({timeout:3000});
 for(const id of ['trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help']){
@@ -50,6 +48,10 @@ for(const id of ['trade','positions','orders','history','assets','records','mark
   await page.locator('#sheetClose').click({timeout:3000});
   await page.locator('#dockToggle').click({timeout:3000});
 }
+
+// Wallet connect is checked last because no-injected-wallet flow may intentionally open a launch sheet/modal.
+await page.locator('#walletConnect').click({timeout:3000});await page.waitForTimeout(50);
+assert.ok((await page.locator('#walletMsg').textContent()).length>0);
 
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 await browser.close();
