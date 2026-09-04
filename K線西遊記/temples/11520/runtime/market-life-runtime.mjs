@@ -1,10 +1,10 @@
 /*
 KGEN_META
-VERSION: 1.0.0
-REVISION: 2026-09-04.MARKET-LIFE-CORE
+VERSION: 1.0.1
+REVISION: 2026-09-04.MARKET-LIFE-CORE-SOURCE-SLOT-FIX
 STATUS: ACTIVE
 SOURCE_OF_TRUTH: MARKET_LIFE_AI_SPEC.md
-CHANGE_REASON: First executable Market Life AI core. AI monsters are living markets, not passive HP targets.
+CHANGE_REASON: Allow internal inactive SOURCE_SLOT placeholders to exist without a market while preserving mandatory markets for real Market Life.
 */
 
 export const MARKET_LIFE_ACTIONS=Object.freeze(['HOLD','FOLLOW','OPPOSE','HEDGE','REALLOCATE','REDUCE','RETREAT','REENTER']);
@@ -19,7 +19,8 @@ export function createMarketLife({
 }={}){
   if(!lifeId)throw new Error('MARKET_LIFE_REQUIRES_LIFE_ID');
   const allowed=[...new Set(markets)].filter(Boolean);
-  if(!allowed.length)throw new Error('MARKET_LIFE_REQUIRES_MARKET');
+  const isInactiveSourceSlot=species==='SOURCE_SLOT';
+  if(!allowed.length&&!isInactiveSourceSlot)throw new Error('MARKET_LIFE_REQUIRES_MARKET');
   return {
     lifeId,name:name||lifeId,species,
     intelligence:Math.max(1,Math.floor(intelligence)),
@@ -29,7 +30,7 @@ export function createMarketLife({
     vitality:clamp(vitality,0,100),
     fear:clamp(fear,0,1),profitDrive:clamp(profitDrive,0,1),
     positions:copy(positions),memory:[],memoryCapacity:Math.max(4,Math.floor(memoryCapacity)),
-    state:'ALIVE',strategy:'HOLD',confidence:0.5,lastDecisionAt:0,
+    state:isInactiveSourceSlot?'DEAD':'ALIVE',strategy:isInactiveSourceSlot?'HIDDEN':'HOLD',confidence:isInactiveSourceSlot?0:0.5,lastDecisionAt:0,
     growth:{experience:0,wins:0,losses:0,dimensionUnlocks:0},
     lifecycle:{diedAt:null,naiheAt:null,mengpoAt:null,rebornAt:null},
   };
