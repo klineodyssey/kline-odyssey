@@ -1,13 +1,13 @@
 /*
 KGEN_META
-VERSION: 1.1.0
-REVISION: 2026-09-04.LIVING-WORLD-SOURCE
+VERSION: 1.2.0
+REVISION: 2026-09-05.LIVING-WORLD-SOURCE
 STATUS: ACTIVE
 SOURCE_OF_TRUTH: HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md / MARKET_LIFE_AI_SPEC.md / LIVING_WORLD_ECOSYSTEM_SPEC.md
 PURPOSE: Standard ingress for Exchange Brain / Digital Ant Market Life plus baseline wild ecology.
 */
 
-export const MARKET_LIFE_SOURCE_VERSION='11520-MARKET-LIFE-SOURCE-V1';
+export const MARKET_LIFE_SOURCE_VERSION='11520-MARKET-LIFE-SOURCE-V1.2';
 export const SOURCE_EVENT=Object.freeze({SPAWN:'SPAWN',UPDATE:'UPDATE',DESPAWN:'DESPAWN'});
 const CHANNEL='kline-odyssey-11520-market-life-source-v1';
 const STORAGE='11520.marketLifeSource.queue.v1';
@@ -28,14 +28,20 @@ export function normalizeMarketLifeSourceEvent(raw={}){
 function persist(event){if(typeof localStorage==='undefined')return;try{const q=JSON.parse(localStorage.getItem(STORAGE)||'[]');q.push(event);localStorage.setItem(STORAGE,JSON.stringify(q.slice(-256)))}catch{}}
 export function publishMarketLifeSourceEvent(raw,{persistLocal=true,broadcast=true}={}){const event=normalizeMarketLifeSourceEvent(raw);memoryQueue.push(event);if(persistLocal)persist(event);if(broadcast&&typeof BroadcastChannel!=='undefined'){try{const c=new BroadcastChannel(CHANNEL);c.postMessage(event);c.close()}catch{}}if(typeof window!=='undefined'){try{window.dispatchEvent(new CustomEvent('11520:market-life-source',{detail:event}))}catch{}}return event}
 
-const WILD=[
- ['FISH','花果山魚',-12,-8,30],['FISH','花果山魚',-9,-11,30],['SHRIMP','花果山蝦',-15,-10,18],['SHRIMP','花果山蝦',-11,-13,18],
- ['COW','花果山牛',16,12,120],['COW','花果山牛',20,9,120],['SHEEP','花果山羊',12,16,75],['SHEEP','花果山羊',18,17,75],
- ['TREE','花果山樹',-18,16,160],['TREE','花果山樹',-22,12,160],['TREE','花果山樹',22,-14,160],['FLOWER','花果山花',-6,18,20],['FLOWER','花果山花',7,18,20],['FLOWER','花果山花',18,-6,20]
-];
+export const BASELINE_WILD_ECOLOGY=Object.freeze([
+ Object.freeze({species:'FISH',name:'花果山魚 1',x:-12,z:-8,maxHp:30}),Object.freeze({species:'FISH',name:'花果山魚 2',x:-9,z:-11,maxHp:30}),
+ Object.freeze({species:'SHRIMP',name:'花果山蝦 1',x:-15,z:-10,maxHp:18}),Object.freeze({species:'SHRIMP',name:'花果山蝦 2',x:-11,z:-13,maxHp:18}),
+ Object.freeze({species:'COW',name:'花果山牛 1',x:16,z:12,maxHp:120}),Object.freeze({species:'COW',name:'花果山牛 2',x:20,z:9,maxHp:120}),
+ Object.freeze({species:'SHEEP',name:'花果山羊 1',x:12,z:16,maxHp:75}),Object.freeze({species:'SHEEP',name:'花果山羊 2',x:18,z:17,maxHp:75}),
+ Object.freeze({species:'TREE',name:'花果山樹 1',x:-18,z:16,maxHp:160}),Object.freeze({species:'TREE',name:'花果山樹 2',x:-22,z:12,maxHp:160}),Object.freeze({species:'TREE',name:'花果山樹 3',x:22,z:-14,maxHp:160}),
+ Object.freeze({species:'FLOWER',name:'花果山花 1',x:-6,z:18,maxHp:20}),Object.freeze({species:'FLOWER',name:'花果山花 2',x:7,z:18,maxHp:20}),Object.freeze({species:'FLOWER',name:'花果山花 3',x:18,z:-6,maxHp:20}),
+ Object.freeze({species:'CHICKEN',name:'花果山雞 1',x:10,z:10,maxHp:32}),Object.freeze({species:'CHICKEN',name:'花果山雞 2',x:13,z:8,maxHp:32}),
+ Object.freeze({species:'DUCK',name:'花果山鴨 1',x:-5,z:-16,maxHp:38}),Object.freeze({species:'DUCK',name:'花果山鴨 2',x:-2,z:-18,maxHp:38}),
+]);
+export function baselineWildEcology(){return BASELINE_WILD_ECOLOGY.map((w,i)=>({...w,lifeId:`LIFE-WILD-11520-${w.species}-${String(i+1).padStart(3,'0')}`,sourceId:'WILD-ECOLOGY-11520',y:0,vitality:100,collectable:['FISH','SHRIMP','COW','CHICKEN','DUCK'].includes(w.species)}))}
 function seedWildEcology(){
-  if(typeof sessionStorage==='undefined')return;const key='11520.wildEcology.seed.v1';if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1');
-  WILD.forEach((w,i)=>memoryQueue.push(normalizeMarketLifeSourceEvent({type:'SPAWN',sourceId:'WILD-ECOLOGY-11520',lifeId:`LIFE-WILD-11520-${w[0]}-${String(i+1).padStart(3,'0')}`,name:`${w[1]} ${i+1}`,species:w[0],intelligence:w[0]==='TREE'||w[0]==='FLOWER'?1:2,markets:[],capital:0,vitality:100,maxHp:w[4],attack:0,speed:w[0]==='TREE'||w[0]==='FLOWER'?0:.008,x:w[2],y:0,z:w[3],strategy:'WILD_ECOLOGY',meta:{sourceClass:'WILD_ECOLOGY',collectable:true,playerOwnable:true}})));
+  if(typeof sessionStorage==='undefined')return;const key='11520.wildEcology.seed.v2';if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1');
+  baselineWildEcology().forEach(w=>memoryQueue.push(normalizeMarketLifeSourceEvent({type:'SPAWN',sourceId:w.sourceId,lifeId:w.lifeId,name:w.name,species:w.species,intelligence:w.species==='TREE'||w.species==='FLOWER'?1:2,markets:[],capital:0,vitality:100,maxHp:w.maxHp,attack:0,speed:w.species==='TREE'||w.species==='FLOWER'?0:.008,x:w.x,y:0,z:w.z,strategy:'WILD_ECOLOGY',meta:{sourceClass:'WILD_ECOLOGY',collectable:w.collectable,playerOwnable:true}})));
 }
 
 let listenersInstalled=false;
