@@ -78,4 +78,5 @@ if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globa
   pin11520WalletToggle();
   import('./game-mobile-shell.mjs').catch(()=>{});
   import('./backpack-ui.mjs').catch(()=>{});
+  import('./game-ui-product-fixes.mjs').catch(()=>{});
 }
