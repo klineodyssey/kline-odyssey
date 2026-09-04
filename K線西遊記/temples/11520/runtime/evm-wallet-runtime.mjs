@@ -48,4 +48,31 @@ export function assertExecutableOrder({wallet,chainId,marketAdapter,order}){
   if(!order?.axis||!order?.side||!(Number(order?.notional)>0))return {ok:false,reason:'INVALID_ORDER'};
   return {ok:true};
 }
-if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||''))import('./game-mobile-shell.mjs').catch(()=>{});
+
+function pin11520WalletToggle(){
+  if(typeof document==='undefined')return;
+  const btn=document.getElementById('walletToggle');
+  if(!btn||btn.dataset.k11520Pinned==='1')return;
+  btn.dataset.k11520Pinned='1';
+  btn.classList.add('k11520-fixed-wallet-toggle');
+  document.body.appendChild(btn);
+  const style=document.createElement('style');
+  style.id='k11520FixedWalletToggleStyle';
+  style.textContent=`
+    #walletToggle.k11520-fixed-wallet-toggle{position:fixed!important;z-index:980!important;right:8px!important;top:398px!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;border:1px solid #68e4ff66!important;border-radius:11px!important;background:#101a25!important;color:#8ceaff!important;display:block!important;transform:none!important;touch-action:manipulation!important}
+    body.game-clean-mode #walletToggle.k11520-fixed-wallet-toggle{display:none!important}
+    @media(min-width:421px){#walletToggle.k11520-fixed-wallet-toggle{top:302px!important}}
+  `;
+  document.head.appendChild(style);
+  const panel=document.getElementById('walletPanel');
+  if(panel){
+    const sync=()=>{btn.textContent=panel.classList.contains('collapsed')?'◀':'▶';btn.setAttribute('aria-expanded',String(!panel.classList.contains('collapsed')))};
+    new MutationObserver(sync).observe(panel,{attributes:true,attributeFilter:['class']});
+    sync();
+  }
+}
+
+if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'')){
+  pin11520WalletToggle();
+  import('./game-mobile-shell.mjs').catch(()=>{});
+}
