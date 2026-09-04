@@ -1,5 +1,18 @@
 # 11520 Changelog
 
+## 2026-09-04 · KGEN / KAIOS Market Life AI Civilization Canon
+
+- Added `MARKET_LIFE_AI_SPEC.md` as the authoritative product concept for living markets in 11520.
+- Locked the civilization principle that monsters are Market Life themselves, not passive NPC targets waiting for HP depletion.
+- Defined Market Life identity, profit motive, fear/survival pressure, capital/risk, vitality, memory and autonomous strategy.
+- Small Market Life may operate a single market; increasingly intelligent/grown AI life may unlock more KX/KY/KZ market dimensions.
+- High-tier life such as a Bull Demon King class may perceive multi-market player exposure, follow, oppose, hedge, reallocate, retreat or re-enter according to its own survival/profit decision.
+- Explicitly prohibited fixed `player long => monster short` behavior and AI that intentionally dies merely to reward the player.
+- Separated market action, KGEN capital/PnL, Life vitality and KAIOS world/reward results.
+- Defined Naihe / Mengpo as a post-death life-cycle boundary; the historical 8-second respawn is test fallback only and is not the full life-cycle canon.
+- Added future tamable/tradable Life concept for fish/cattle/duck-type AI while preserving independent Life IDs and forbidding unverified real-asset transfer.
+- Locked static Pages / real-wallet / real-settlement safety boundaries and a modular runtime architecture for later implementation.
+
 ## 2026-09-03 · Canonical Trading / Vehicle / Regression Lock
 
 - Added `KGEN_TRADING_SPEC.md` as the authoritative KGEN trading mathematics source: `1 KGEN = 1 lot`; order principal/margin equals absolute lots; `PnL = price difference × direction × lots × C`; C never reduces principal.
@@ -10,7 +23,7 @@
 - Vehicle organ failure degrades only corresponding capability. Vehicle disassembly never deletes the player Life; the player falls back to ordinary walking/XYZ gameplay (走路取經).
 - The proposed extra `100×` fuel/capability reserve remains `UNRESOLVED`; it is not a production formula until a later explicit Human Decision.
 - Updated `GAME_UI_SPEC.md` to restore the historical MOBA control invariant: joystick inner zone controls XZ movement; outer ring circular drag controls avatar heading; right-hand camera orbit remains independent.
-- Locked the historical KayKit Adventurers CC0 Knight GLB + GLTFLoader + AnimationMixer pipeline as a capability that must not be silently removed. Primitive/capsule character is fallback-only.
+- Locked the historical KayKit Adventurers CC0 Knight GLB + `GLTFLoader` + `AnimationMixer` pipeline as a capability that must not be silently removed. Primitive/capsule character is fallback-only.
 - KX/KY/KZ are locked as independent market axes with independent market/side/lots/C/order/position state.
 - Updated `JIEYAO_HANDOFF_CURRENT.md` so future construction pages read GAME_UI_SPEC + KGEN_TRADING_SPEC + VEHICLE_C_SPEC before modifying runtime and do not require the human to repeat these definitions.
 - Change-control law: `CODE MUST IMPLEMENT SPEC; CODE DOES NOT REDEFINE SPEC`. A code/spec conflict is a regression unless a new explicit Human Decision changes the canon.
@@ -22,7 +35,7 @@
 - Removed the `Math.random()` button-combat path from `game-5d.html`; attacks use the formal runtime and KAIOS reward is kill-gated.
 - Wired monster HP, aggro, chase, attack range/cooldown, death and 8-second respawn into the playable world.
 - Routed XZ/Y movement through `resolvePlayerMove()` so world bounds and collision objects can block movement.
-- Kept the cumulative organ inventory reachable; no Mainnet/payment/treasury/governance authority is introduced.
+- Kept the cumulative organ inventory reachable; no Mainnet/payment/treasury/governance/chain authority is introduced.
 
 ## 2026-09-03 · Playable 5D Mother-Image Construction
 
