@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.1.0
 STATUS: ACTIVE
 PURPOSE: Product-level mobile UI corrections that must not alter gameplay control semantics.
 */
@@ -12,9 +12,21 @@ function installCss(){
     #yControl .track{position:absolute!important}
     #yEnergyMarker{position:absolute;z-index:6;left:50%;width:12px;height:12px;transform:translate(-50%,50%);border-radius:50%;border:1px solid #d8fbff;background:#7feeff;box-shadow:0 0 7px #7feeff,0 0 16px #68e4ff,0 0 28px #68e4ff88;pointer-events:none;transition:bottom .045s linear}
     #yThumb{transition:top .045s linear;box-shadow:0 0 10px #68e4ff88}
+
+    /* The fixed toggle is the only collapsed-wallet affordance. Do not leave a long empty panel behind it. */
+    #walletPanel.collapsed{width:0!important;height:0!important;min-width:0!important;min-height:0!important;padding:0!important;border:0!important;box-shadow:none!important;overflow:hidden!important;pointer-events:none!important}
+    #walletPanel:not(.collapsed){pointer-events:auto!important}
+
     @media(max-width:420px){
-      .controls{right:82px!important}
-      .sliderDock{right:74px!important}
+      /* Keep combat/energy controls away from the right utility rail without changing their handlers. */
+      .controls{right:72px!important;transform:scale(.82)!important;transform-origin:right bottom!important}
+      .sliderDock{right:72px!important;bottom:204px!important;transform:scale(.82)!important;transform-origin:right bottom!important}
+
+      /* One stable utility rail: wallet, mode, backpack, organ menu. */
+      #walletToggle.k11520-fixed-wallet-toggle{right:8px!important;top:auto!important;bottom:214px!important}
+      #gameModeToggle{right:8px!important;top:auto!important;bottom:148px!important}
+      #backpackButton{right:8px!important;bottom:82px!important}
+      #dock{right:8px!important;bottom:18px!important}
     }
   `;document.head.appendChild(s);
 }
