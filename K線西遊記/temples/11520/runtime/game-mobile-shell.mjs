@@ -10,7 +10,13 @@ function style(){
   #walletLaunchSheet{position:fixed;z-index:2200;left:10px;right:10px;bottom:12px;border:1px solid #68e4ff66;border-radius:16px;background:#08131df5;padding:14px;box-shadow:0 18px 60px #000c;display:none}
   #walletLaunchSheet.open{display:block}#walletLaunchSheet h3{margin:0 0 8px;color:#8ceaff}#walletLaunchSheet p{margin:5px 0 10px;color:#aab5bf;font-size:12px;line-height:1.45}
   #walletLaunchSheet .wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}#walletLaunchSheet button,#walletLaunchSheet a{display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:10px;border:1px solid #68e4ff55;background:#101d28;color:#eef;text-decoration:none;font-weight:700}
-  @media(max-width:420px){#hudToggleAxes{top:70px}#hudToggleTele,#hudToggleMonster{top:176px}#hudToggleMap{top:255px}#hudToggleParams{right:4px;bottom:346px}.hud-drawer-toggle{padding:6px 8px;font-size:9px}}
+  .v .track{overflow:hidden;border:1px solid #68e4ff18;background:linear-gradient(180deg,#0f1a24,#09131b)}
+  .energy-grid,.energy-fill{position:absolute;inset:0;pointer-events:none;border-radius:8px}
+  .energy-grid{background:repeating-linear-gradient(to top,transparent 0 8px,#68e4ff30 8px 9px);opacity:.8}
+  .energy-fill{top:auto;height:50%;background:repeating-linear-gradient(to top,#68e4ff16 0 7px,#68e4ff8c 7px 9px);box-shadow:0 0 14px #68e4ff55 inset,0 0 10px #68e4ff33;transition:height .08s linear}
+  .v[data-energy='high'] .energy-fill{filter:brightness(1.35)}
+  .v[data-energy='max'] .energy-fill{filter:brightness(1.7);box-shadow:0 0 18px #68e4ffaa inset,0 0 14px #68e4ff88}
+  @media(max-width:420px){#hudToggleAxes{top:70px}#hudToggleTele,#hudToggleMonster{top:176px}#hudToggleMap{top:255px}#hudToggleParams{right:4px;bottom:346px}.hud-drawer-toggle{padding:6px 8px;font-size:9px}.joyWrap{transform:scale(.85);transform-origin:left bottom;left:8px!important;bottom:16px!important}}
   `;document.head.appendChild(s);
 }
 
@@ -22,6 +28,16 @@ function addDrawer({el,id,label,side,storageKey,defaultCollapsed=false}){
   const saved=localStorage.getItem(storageKey);let collapsed=saved==null?defaultCollapsed:saved==='1';
   const render=()=>{el.classList.toggle(cls,collapsed);btn.textContent=`${label}${collapsed?'›':'‹'}`;btn.setAttribute('aria-expanded',String(!collapsed));};
   btn.addEventListener('click',()=>{collapsed=!collapsed;localStorage.setItem(storageKey,collapsed?'1':'0');render()});render();
+}
+
+function installEnergyLayers(){
+  for(const control of document.querySelectorAll('.sliderDock .v')){
+    const track=control.querySelector('.track'),thumb=control.querySelector('.thumb');if(!track||!thumb||track.querySelector('.energy-grid'))continue;
+    const grid=document.createElement('i'),fill=document.createElement('i');grid.className='energy-grid';fill.className='energy-fill';track.prepend(grid,fill);
+    const sync=()=>{const tr=track.getBoundingClientRect(),th=thumb.getBoundingClientRect();if(!tr.height)return;const center=th.top+th.height/2;const ratio=Math.max(0,Math.min(1,(tr.bottom-center)/tr.height));fill.style.height=`${(ratio*100).toFixed(1)}%`;control.dataset.energy=ratio>.88?'max':ratio>.62?'high':'normal';};
+    new MutationObserver(sync).observe(thumb,{attributes:true,attributeFilter:['style','class']});
+    control.addEventListener('pointerdown',()=>requestAnimationFrame(sync));control.addEventListener('pointermove',()=>requestAnimationFrame(sync));addEventListener('resize',sync);queueMicrotask(sync);
+  }
 }
 
 function bestProvider(){
@@ -68,6 +84,7 @@ export function install11520MobileShell(){
   addDrawer({el:document.querySelector('.monsterHud'),id:'hudToggleMonster',label:'生命',side:'right',storageKey:'11520.hud.monster'});
   addDrawer({el:document.querySelector('.minimapWrap'),id:'hudToggleMap',label:'地圖',side:'left',storageKey:'11520.hud.map'});
   addDrawer({el:document.querySelector('.sliderDock'),id:'hudToggleParams',label:'參數',side:'right',storageKey:'11520.hud.params'});
+  installEnergyLayers();
   installWalletLauncher();
 }
 
