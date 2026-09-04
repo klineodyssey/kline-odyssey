@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const is11520Game=typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(location.pathname);
 
 function style(){
@@ -16,7 +18,10 @@ function style(){
   .energy-fill{top:auto;height:50%;background:repeating-linear-gradient(to top,#68e4ff16 0 7px,#68e4ff8c 7px 9px);box-shadow:0 0 14px #68e4ff55 inset,0 0 10px #68e4ff33;transition:height .08s linear}
   .v[data-energy='high'] .energy-fill{filter:brightness(1.35)}
   .v[data-energy='max'] .energy-fill{filter:brightness(1.7);box-shadow:0 0 18px #68e4ffaa inset,0 0 14px #68e4ff88}
-  @media(max-width:420px){#hudToggleAxes{top:70px}#hudToggleTele,#hudToggleMonster{top:176px}#hudToggleMap{top:255px}#hudToggleParams{right:4px;bottom:346px}.hud-drawer-toggle{padding:6px 8px;font-size:9px}.joyWrap{transform:scale(.85);transform-origin:left bottom;left:8px!important;bottom:16px!important}}
+  #chatHandle{position:fixed;z-index:930;left:0;top:54%;min-width:42px;height:46px;border:1px solid #68e4ff66;border-left:0;border-radius:0 13px 13px 0;background:#09131dee;color:#8ceaff;font-weight:900;box-shadow:0 8px 26px #0009}
+  #gameChat{position:fixed;z-index:2100;left:8px;right:8px;bottom:10px;height:min(42vh,360px);border:1px solid #68e4ff55;border-radius:16px;background:#08131df5;box-shadow:0 18px 70px #000c;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;transform:translateY(calc(100% + 20px));transition:transform .2s ease}
+  #gameChat.open{transform:none}.chatHead{display:flex;align-items:center;gap:6px;padding:8px;border-bottom:1px solid #ffffff12}.chatHead b{color:#8ceaff;margin-right:auto}.chatHead button,.chatComposer button{border:1px solid #68e4ff44;background:#10202a;color:#eef;border-radius:9px;min-height:34px}.chatHead button.active{background:#17445f;color:#fff}.chatLog{padding:10px;overflow:auto;display:flex;flex-direction:column;gap:7px}.chatBubble{max-width:82%;padding:7px 10px;border-radius:12px;background:#17242d;align-self:flex-start;font-size:12px;line-height:1.35}.chatBubble.self{align-self:flex-end;background:#2a563d}.chatBubble.system{max-width:94%;align-self:center;background:#111922;color:#9eb0bc;text-align:center;font-size:10px}.chatBubble small{display:block;color:#91a2ad;font-size:9px;margin-bottom:2px}.chatComposer{display:grid;grid-template-columns:1fr auto;gap:7px;padding:8px;border-top:1px solid #ffffff12}.chatComposer input{min-width:0;border:1px solid #ffffff20;border-radius:10px;background:#0d1820;padding:9px;color:#fff;outline:none}
+  @media(max-width:420px){#hudToggleAxes{top:70px}#hudToggleTele,#hudToggleMonster{top:176px}#hudToggleMap{top:255px}#hudToggleParams{right:4px;bottom:346px}.hud-drawer-toggle{padding:6px 8px;font-size:9px}.joyWrap{transform:scale(.85);transform-origin:left bottom;left:8px!important;bottom:16px!important}#chatHandle{top:58%}#gameChat{height:38vh}}
   `;document.head.appendChild(s);
 }
 
@@ -38,6 +43,42 @@ function installEnergyLayers(){
     new MutationObserver(sync).observe(thumb,{attributes:true,attributeFilter:['style','class']});
     control.addEventListener('pointerdown',()=>requestAnimationFrame(sync));control.addEventListener('pointermove',()=>requestAnimationFrame(sync));addEventListener('resize',sync);queueMicrotask(sync);
   }
+}
+
+function installDeadZoneCamera(){
+  if(!is11520Game||THREE.PerspectiveCamera.prototype.__k11520DeadZone)return;
+  const proto=THREE.PerspectiveCamera.prototype,originalLookAt=proto.lookAt;
+  let focus=null;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  proto.lookAt=function(x,y,z){
+    let tx,ty,tz;if(x&&typeof x==='object'){tx=x.x;ty=x.y;tz=x.z}else{tx=Number(x)||0;ty=Number(y)||0;tz=Number(z)||0}
+    if(!focus)focus={x:tx,z:tz};
+    const ox=this.position.x-tx,oz=this.position.z-tz,len=Math.hypot(ox,oz)||1;
+    const back={x:ox/len,z:oz/len},forward={x:-back.x,z:-back.z},right={x:back.z,z:-back.x};
+    const dx=tx-focus.x,dz=tz-focus.z;
+    const sx=dx*right.x+dz*right.z,sz=dx*forward.x+dz*forward.z;
+    const deadX=2.65,deadZ=2.15,cx=clamp(sx,-deadX,deadX),cz=clamp(sz,-deadZ,deadZ);
+    const desired={x:tx-(right.x*cx+forward.x*cz),z:tz-(right.z*cx+forward.z*cz)};
+    focus.x+=(desired.x-focus.x)*.34;focus.z+=(desired.z-focus.z)*.34;
+    const shiftX=focus.x-tx,shiftZ=focus.z-tz;
+    this.position.x+=shiftX;this.position.z+=shiftZ;
+    return originalLookAt.call(this,focus.x,ty,focus.z);
+  };
+  proto.__k11520DeadZone=true;
+}
+
+function installGameChat(){
+  if(document.getElementById('gameChat'))return;
+  const handle=document.createElement('button');handle.id='chatHandle';handle.type='button';handle.textContent='聊';handle.setAttribute('aria-label','展開遊戲聊天');document.body.appendChild(handle);
+  const chat=document.createElement('section');chat.id='gameChat';chat.innerHTML=`<div class="chatHead"><b>遊戲聊天</b><button data-chat-channel="world" class="active">世界</button><button data-chat-channel="team">隊伍</button><button data-chat-channel="system">系統</button><button id="chatClose">×</button></div><div class="chatLog" id="chatLog"></div><form class="chatComposer" id="chatComposer"><input id="chatInput" maxlength="160" autocomplete="off" placeholder="輸入訊息…"><button type="submit">送出</button></form>`;document.body.appendChild(chat);
+  const key='11520.chat.v1';let channel='world';
+  let store;try{store=JSON.parse(localStorage.getItem(key)||'{}')}catch{store={}}for(const c of ['world','team','system'])if(!Array.isArray(store[c]))store[c]=[];
+  if(!store.system.length)store.system.push({who:'系統',text:'聊天 UI 已啟用；目前為本機測試紀錄，多人即時聊天尚未接後端。',at:Date.now(),system:true});
+  const save=()=>localStorage.setItem(key,JSON.stringify(store));save();
+  const render=()=>{const log=document.getElementById('chatLog');log.innerHTML=store[channel].slice(-80).map(m=>`<div class="chatBubble ${m.self?'self':''} ${m.system?'system':''}">${m.system?'':`<small>${m.who||'玩家'} · ${new Date(m.at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</small>`}${String(m.text||'').replace(/[&<>]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]))}</div>`).join('');log.scrollTop=log.scrollHeight;document.getElementById('chatInput').disabled=channel==='system';};
+  handle.onclick=()=>{chat.classList.add('open');render()};document.getElementById('chatClose').onclick=()=>chat.classList.remove('open');
+  chat.querySelectorAll('[data-chat-channel]').forEach(b=>b.onclick=()=>{channel=b.dataset.chatChannel;chat.querySelectorAll('[data-chat-channel]').forEach(x=>x.classList.toggle('active',x===b));render()});
+  document.getElementById('chatComposer').onsubmit=e=>{e.preventDefault();if(channel==='system')return;const input=document.getElementById('chatInput'),text=input.value.trim();if(!text)return;store[channel].push({who:'我',text,at:Date.now(),self:true});store[channel]=store[channel].slice(-80);input.value='';save();render()};render();
 }
 
 function bestProvider(){
@@ -84,8 +125,7 @@ export function install11520MobileShell(){
   addDrawer({el:document.querySelector('.monsterHud'),id:'hudToggleMonster',label:'生命',side:'right',storageKey:'11520.hud.monster'});
   addDrawer({el:document.querySelector('.minimapWrap'),id:'hudToggleMap',label:'地圖',side:'left',storageKey:'11520.hud.map'});
   addDrawer({el:document.querySelector('.sliderDock'),id:'hudToggleParams',label:'參數',side:'right',storageKey:'11520.hud.params'});
-  installEnergyLayers();
-  installWalletLauncher();
+  installEnergyLayers();installDeadZoneCamera();installGameChat();installWalletLauncher();
 }
 
 if(is11520Game){queueMicrotask(install11520MobileShell)}
