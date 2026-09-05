@@ -20,7 +20,7 @@ const assertVisible=async id=>{
   const diag=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{id:el.id,display:s.display,visibility:s.visibility,opacity:s.opacity,w:r.width,h:r.height,x:r.x,y:r.y}});
   assert.ok(diag.w>0&&diag.h>0&&diag.display!=='none'&&diag.visibility!=='hidden',`control ${id} not visible: ${JSON.stringify(diag)}`);
 };
-const intersects=(a,b)=>a&&b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
+const intersects=(a,b)=>!!(a&&b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y);
 
 // Default formal screen is clean play: joystick + combat + one fixed settings toggle.
 for(const id of ['joy','attack','skill','dodge','gameModeToggle'])await assertVisible(id);
