@@ -63,6 +63,16 @@ export const PUBLIC_GATEWAY_FUTURE_INPUT_TYPES = Object.freeze(["IMAGE", "FILE",
 export const REQUEST_VISIBILITIES = Object.freeze(["PUBLIC", "PRIVATE", "COMPANY_ONLY", "ANONYMIZED_PUBLIC"]);
 export const PUBLIC_REQUEST_HISTORY_EVENTS = Object.freeze(["INTENT_DRAFTED", "INTENT_CONFIRMED", "REQUEST_RECEIVED", "REQUEST_QUALIFIED", "PLAN_CREATED", "ESTIMATE_CREATED", "QUOTE_READY", "QUOTE_SENT", "ACCEPTED", "ORDER_CONFIRMED", "WORK_STARTED", "DELIVERED", "CLOSED"]);
 export const WORKTREE_CLASSIFICATIONS = Object.freeze(["PROJECT_SOURCE", "USER_DATA", "GENERATED_ARTIFACT", "TEMP", "CACHE", "BUILD_OUTPUT", "UNKNOWN"]);
+export const OPTION_B_BINDING_COST_FIELDS = Object.freeze([
+  "direct_engineering_cost", "review_cost", "infra_cost", "security_cost",
+  "project_management_cost", "risk_reserve", "contingency", "company_margin"
+]);
+export const OPTION_B_WORK_PACKAGE_IDS = Object.freeze([
+  "WP1_CUSTOMER_GATEWAY", "WP2_REQUIREMENT_INTAKE", "WP3_QUOTE_ENGINE", "WP4_DELIVERY_ESTIMATOR",
+  "WP5_WBS_DISPATCHER", "WP6_ACCEPTANCE_ESCROW_MODEL", "WP7_K18888_TRANSFER_ADAPTER",
+  "WP8_K11520_TRADER_CELL", "WP9_REVENUE_PAYROLL_ACCOUNTING", "WP10_EMPLOYMENT_GENESIS_PIPELINE",
+  "WP11_DISTINCT_QA_LOOP", "WP12_COMPANY_DASHBOARD"
+]);
 export const DEMAND_FIRST_CIVILIZATION_LAWS = Object.freeze([
   "FACTORY_WITHOUT_PRODUCT_FORBIDDEN", "PRODUCT_WITHOUT_NEED_FORBIDDEN", "PRODUCTION_WITHOUT_BOM_FORBIDDEN",
   "BOM_WITHOUT_RESOURCE_FORBIDDEN", "SALE_WITHOUT_INVENTORY_FORBIDDEN", "DELIVERY_WITHOUT_TRANSPORT_FORBIDDEN",
@@ -1368,6 +1378,133 @@ export function createNonBindingEstimatePreview({ request, route }) {
   return Object.freeze({ estimate_id: `ESTIMATE_${request.request_id}`, request_id: request.request_id, estimated_scope: route.expected_output, cost_drivers: Object.freeze(costDrivers), estimated_cost: null, currency: "POLICY_REQUIRED", estimated_time: "ESTIMATE_PENDING", missing_information: Object.freeze([...request.missing_information]), risks: Object.freeze([...route.known_constraints]), next_approval: "APPROVED_COST_MARGIN_AND_RISK_POLICIES", quote_id: null, binding: false, revenue: "0", record_class: "SIMULATION", status: "ESTIMATE_ONLY" });
 }
 
+function validateOptionBMilestones(milestones, totalPrice) {
+  requireArray(milestones, "option_b.milestones");
+  invariant(milestones.length === 5, "OPTION_B_MILESTONE_COUNT_INVALID", "Option B requires exactly M0 through M4");
+  let previousDue = -Infinity;
+  let milestoneTotal = 0n;
+  milestones.forEach((milestone, index) => {
+    assertExactObjectFields(milestone, ["milestone_id", "amount", "deliverables", "acceptance_tests", "due_at", "payment_trigger"], "OptionBMilestone", "UNKNOWN_OPTION_B_FIELD");
+    invariant(milestone.milestone_id === `M${index}`, "OPTION_B_MILESTONE_ORDER_INVALID", "Option B milestones must be ordered M0 through M4");
+    requireArray(milestone.deliverables, `option_b.${milestone.milestone_id}.deliverables`);
+    requireArray(milestone.acceptance_tests, `option_b.${milestone.milestone_id}.acceptance_tests`);
+    invariant(milestone.deliverables.length > 0 && milestone.acceptance_tests.length > 0, "OPTION_B_MILESTONE_EVIDENCE_REQUIRED", "Every milestone needs deliverables and acceptance tests");
+    const due = Date.parse(milestone.due_at);
+    invariant(Number.isFinite(due) && due > previousDue, "OPTION_B_MILESTONE_DATE_INVALID", "Milestone due dates must be valid and strictly increasing");
+    previousDue = due;
+    milestoneTotal += quoteAmount(milestone.amount, `${milestone.milestone_id}.amount`);
+  });
+  invariant(milestoneTotal === totalPrice, "OPTION_B_MILESTONE_TOTAL_MISMATCH", "Milestone amounts must exactly equal the binding proposal total");
+}
+
+// A caller-supplied reference is never authority; this candidate remains non-dispatchable until canonical resolution exists.
+export function createOperatingCompanyBindingProposal({
+  proposal_id, project_id, request_id, customer_id, conditional_acceptance_reference,
+  cost_breakdown, milestones, accepted_direction_at, earliest_start_at, target_delivery_at,
+  workforce, payment_architecture, human_gates = [], external_dependencies = []
+}) {
+  for (const [field, value] of Object.entries({ proposal_id, project_id, request_id, customer_id })) requireId(value, field);
+  invariant(typeof conditional_acceptance_reference === "string" && conditional_acceptance_reference.trim(), "CONDITIONAL_ACCEPTANCE_REFERENCE_REQUIRED", "A proposal candidate may retain only a Customer acceptance reference");
+  invariant(cost_breakdown && typeof cost_breakdown === "object" && !Array.isArray(cost_breakdown), "OPTION_B_COST_BREAKDOWN_REQUIRED", "Option B requires a reproducible cost breakdown");
+  invariant(Object.keys(cost_breakdown).length === OPTION_B_BINDING_COST_FIELDS.length && OPTION_B_BINDING_COST_FIELDS.every((field) => Object.hasOwn(cost_breakdown, field)), "OPTION_B_COST_FIELDS_INVALID", "Option B cost breakdown must contain only the canonical cost fields");
+  const normalizedCosts = Object.fromEntries(OPTION_B_BINDING_COST_FIELDS.map((field) => [field, quoteAmount(cost_breakdown[field], field).toString()]));
+  const totalPrice = OPTION_B_BINDING_COST_FIELDS.reduce((sum, field) => sum + BigInt(normalizedCosts[field]), 0n);
+  invariant(totalPrice > 0n, "OPTION_B_TOTAL_PRICE_INVALID", "Proposed total must be positive");
+  validateOptionBMilestones(milestones, totalPrice);
+  assertExactObjectFields(workforce, ["ai_workers_required", "distinct_reviewers_required", "current_distinct_reviewer_capacity", "workforce_gap_plan"], "OptionBWorkforce", "UNKNOWN_OPTION_B_FIELD");
+  invariant(Number.isInteger(workforce.ai_workers_required) && workforce.ai_workers_required > 0, "OPTION_B_WORKER_REQUIREMENT_INVALID", "Option B requires a positive worker estimate");
+  invariant(Number.isInteger(workforce.distinct_reviewers_required) && workforce.distinct_reviewers_required > 0 && Number.isInteger(workforce.current_distinct_reviewer_capacity) && workforce.current_distinct_reviewer_capacity >= 0, "OPTION_B_REVIEW_CAPACITY_INVALID", "Reviewer requirements and capacity must be explicit non-negative integers");
+  invariant(workforce.current_distinct_reviewer_capacity >= workforce.distinct_reviewers_required || workforce.workforce_gap_plan, "OPTION_B_REVIEW_GAP_PLAN_REQUIRED", "Insufficient Reviewer capacity requires a workforce gap plan");
+  assertExactObjectFields(payment_architecture, ["company_receivable_address", "project_escrow", "signer_policy", "refund_policy", "dispute_policy", "milestone_release_policy", "payment_ready"], "OptionBPaymentArchitecture", "UNKNOWN_OPTION_B_FIELD");
+  invariant(payment_architecture.payment_ready === false && payment_architecture.company_receivable_address === null && payment_architecture.project_escrow === "NOT_DEPLOYED", "OPTION_B_PAYMENT_NOT_READY", "This candidate cannot bind a receivable address, deploy escrow or enable payment");
+  for (const field of ["accepted_direction_at", "earliest_start_at", "target_delivery_at"]) invariant(Number.isFinite(Date.parse({ accepted_direction_at, earliest_start_at, target_delivery_at }[field])), "OPTION_B_DATE_INVALID", `${field} must be an ISO timestamp`);
+  invariant(Date.parse(earliest_start_at) >= Date.parse(accepted_direction_at) && Date.parse(target_delivery_at) >= Date.parse(earliest_start_at), "OPTION_B_DATE_SEQUENCE_INVALID", "Acceptance-reference, start and target delivery dates must be chronological");
+  requireArray(human_gates, "option_b.human_gates");
+  requireArray(external_dependencies, "option_b.external_dependencies");
+  const reviewBlocked = workforce.current_distinct_reviewer_capacity < workforce.distinct_reviewers_required;
+  return Object.freeze({
+    proposal_id, project_id, request_id, customer_id, option: "OPERATING_AI_COMPANY", currency: "KAIOS",
+    conditional_acceptance_reference: conditional_acceptance_reference.trim(),
+    conditional_acceptance_verified: false, authority_resolution: "NOT_IMPLEMENTED_FAIL_CLOSED",
+    cost_breakdown: Object.freeze(normalizedCosts), total_proposed_price: totalPrice.toString(),
+    milestones: Object.freeze(milestones.map((item) => Object.freeze({ ...item, deliverables: Object.freeze([...item.deliverables]), acceptance_tests: Object.freeze([...item.acceptance_tests]) }))),
+    accepted_direction_at, earliest_start_at, target_delivery_at, workforce: Object.freeze({ ...workforce }),
+    payment_architecture: Object.freeze({ ...payment_architecture }), human_gates: Object.freeze([...human_gates]), external_dependencies: Object.freeze([...external_dependencies]),
+    engineering_preparation_authorized: false, project_activated: false, payment_requested: false, payment_received: false,
+    real_revenue: "0", chain_write: false, distinct_review_blocked: reviewBlocked,
+    status: "DRAFT_PROPOSAL_NOT_AUTHORIZED"
+  });
+}
+
+export function validateOperatingCompanyBindingProposal(proposal) {
+  assertExactObjectFields(proposal, ["proposal_id", "project_id", "request_id", "customer_id", "option", "currency", "conditional_acceptance_reference", "conditional_acceptance_verified", "authority_resolution", "cost_breakdown", "total_proposed_price", "milestones", "accepted_direction_at", "earliest_start_at", "target_delivery_at", "workforce", "payment_architecture", "human_gates", "external_dependencies", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"], "OperatingCompanyProposalCandidate", "UNKNOWN_OPTION_B_FIELD");
+  const rebuilt = createOperatingCompanyBindingProposal({
+    proposal_id: proposal.proposal_id, project_id: proposal.project_id, request_id: proposal.request_id, customer_id: proposal.customer_id,
+    conditional_acceptance_reference: proposal.conditional_acceptance_reference, cost_breakdown: proposal.cost_breakdown,
+    milestones: proposal.milestones, accepted_direction_at: proposal.accepted_direction_at, earliest_start_at: proposal.earliest_start_at,
+    target_delivery_at: proposal.target_delivery_at, workforce: proposal.workforce, payment_architecture: proposal.payment_architecture,
+    human_gates: proposal.human_gates, external_dependencies: proposal.external_dependencies
+  });
+  for (const field of ["option", "currency", "conditional_acceptance_verified", "authority_resolution", "total_proposed_price", "engineering_preparation_authorized", "project_activated", "payment_requested", "payment_received", "real_revenue", "chain_write", "distinct_review_blocked", "status"]) {
+    invariant(String(proposal[field]) === String(rebuilt[field]), "OPTION_B_PROPOSAL_DERIVED_STATE_MISMATCH", `${field} must equal the fail-closed rebuilt value`);
+  }
+  return rebuilt;
+}
+
+export function createOptionBWorkBreakdown({ proposal, work_packages }) {
+  const validatedProposal = validateOperatingCompanyBindingProposal(proposal);
+  invariant(validatedProposal.status === "DRAFT_PROPOSAL_NOT_AUTHORIZED" && validatedProposal.engineering_preparation_authorized === false, "OPTION_B_AUTHORITY_NOT_FAIL_CLOSED", "WBS creation requires the proposal to remain fail-closed");
+  requireArray(work_packages, "option_b.work_packages");
+  invariant(work_packages.length === OPTION_B_WORK_PACKAGE_IDS.length, "OPTION_B_WBS_COUNT_INVALID", "Option B requires all twelve work packages");
+  const ids = work_packages.map((item) => item.task_id);
+  invariant(new Set(ids).size === ids.length && OPTION_B_WORK_PACKAGE_IDS.every((id) => ids.includes(id)), "OPTION_B_WBS_ID_INVALID", "Option B work package IDs must be complete and unique");
+  let totalHours = 0;
+  const normalized = work_packages.map((item, index) => {
+    invariant(!Object.hasOwn(item, "assigned_worker_id"), "OPTION_B_PREMATURE_WORKER_ASSIGNMENT", "WBS assigns roles; only the canonical Company Dispatcher may later resolve a Registry-qualified worker");
+    assertExactObjectFields(item, ["task_id", "assigned_role", "required_skills", "trust_required", "reviewer_required", "dependencies", "files_allowed", "branch", "estimated_hours", "start_gate", "acceptance_tests", "delivery_artifact"], "OptionBWorkPackage", "UNKNOWN_OPTION_B_FIELD");
+    for (const field of ["required_skills", "dependencies", "files_allowed", "acceptance_tests"]) requireArray(item[field], `option_b.${item.task_id}.${field}`);
+    invariant(typeof item.assigned_role === "string" && item.assigned_role && ["T2", "T3", "T4", "T5"].includes(item.trust_required), "OPTION_B_WORK_AUTHORITY_INVALID", "Each package requires a role and a CURRENT T2-T5 trust candidate");
+    invariant(item.branch.startsWith("codex/") && item.files_allowed.length > 0 && item.acceptance_tests.length > 0, "OPTION_B_WORK_SCOPE_INVALID", "Each package requires an isolated branch, file scope and acceptance tests");
+    invariant(Number.isInteger(item.estimated_hours) && item.estimated_hours > 0, "OPTION_B_WORK_HOURS_INVALID", "Estimated hours must be positive integers");
+    for (const dependency of item.dependencies) invariant(ids.indexOf(dependency) >= 0 && ids.indexOf(dependency) < index, "OPTION_B_DEPENDENCY_INVALID", "Dependencies must exist earlier in topological order");
+    totalHours += item.estimated_hours;
+    return Object.freeze({ ...item, required_skills: Object.freeze([...item.required_skills]), dependencies: Object.freeze([...item.dependencies]), files_allowed: Object.freeze([...item.files_allowed]), acceptance_tests: Object.freeze([...item.acceptance_tests]), assigned_worker_id: null, claim_id: null, fencing_token: null, status: "DRAFT_ROLE_SCOPED_NOT_DISPATCHABLE" });
+  });
+  return Object.freeze({ wbs_id: `WBS_${proposal.project_id}`, project_id: proposal.project_id, work_packages: Object.freeze(normalized), total_estimated_hours: totalHours, assigned_workers: 0, distinct_review_blocked: proposal.distinct_review_blocked, registry_dispatch_authorized: false, external_effect: false, status: "DRAFT_WBS_NOT_DISPATCHABLE" });
+}
+
+function addUtcBusinessDays(timestamp, businessDays) {
+  const date = new Date(timestamp);
+  invariant(Number.isFinite(date.getTime()), "OPTION_B_DATE_INVALID", "Schedule timestamps must be valid ISO dates");
+  let remaining = businessDays;
+  while (remaining > 0) {
+    date.setUTCDate(date.getUTCDate() + 1);
+    const weekday = date.getUTCDay();
+    if (weekday !== 0 && weekday !== 6) remaining -= 1;
+  }
+  return date.toISOString();
+}
+
+export function estimateOptionBDeliverySchedule({ proposal, wbs, engineering_capacity_hours_per_day, reviewer_capacity, human_gate_business_days = 0 }) {
+  validateOperatingCompanyBindingProposal(proposal);
+  invariant(wbs?.project_id === proposal.project_id && Number.isInteger(wbs.total_estimated_hours) && wbs.total_estimated_hours > 0, "OPTION_B_WBS_REQUIRED", "Delivery estimation requires the project's validated WBS");
+  invariant(Number.isInteger(engineering_capacity_hours_per_day) && engineering_capacity_hours_per_day > 0, "OPTION_B_ENGINEERING_CAPACITY_INVALID", "Engineering capacity must be a positive number of hours per business day");
+  invariant(Number.isInteger(reviewer_capacity) && reviewer_capacity >= 0 && Number.isInteger(human_gate_business_days) && human_gate_business_days >= 0, "OPTION_B_SCHEDULE_CAPACITY_INVALID", "Reviewer capacity and Human gate days must be explicit non-negative integers");
+  const engineeringDays = Math.ceil(wbs.total_estimated_hours / engineering_capacity_hours_per_day);
+  const engineeringCompleteAt = addUtcBusinessDays(proposal.earliest_start_at, engineeringDays);
+  const gatedAt = addUtcBusinessDays(engineeringCompleteAt, human_gate_business_days);
+  const reviewerBlocked = reviewer_capacity === 0;
+  return Object.freeze({
+    project_id: proposal.project_id, earliest_start_at: proposal.earliest_start_at,
+    engineering_business_days: engineeringDays, engineering_complete_at: engineeringCompleteAt,
+    human_gate_business_days, human_gates_complete_at: gatedAt, reviewer_capacity,
+    review_complete_at: reviewerBlocked ? null : addUtcBusinessDays(gatedAt, Math.ceil(OPTION_B_WORK_PACKAGE_IDS.length / reviewer_capacity)),
+    target_delivery_at: proposal.target_delivery_at, target_delivery_binding: false,
+    critical_path: Object.freeze(reviewerBlocked ? ["ENGINEERING", "HUMAN_GATES", "DISTINCT_REVIEWER_CAPACITY_BLOCKED"] : ["ENGINEERING", "HUMAN_GATES", "DISTINCT_REVIEW", "CUSTOMER_ACCEPTANCE"]),
+    status: reviewerBlocked ? "TARGET_DATE_CONDITIONAL_REVIEWER_CAPACITY_BLOCKED" : "DELIVERY_ESTIMATE_READY"
+  });
+}
+
 export function validatePublicCivilizationRequestGateway(gateway) {
   requireFields(gateway, ["gateway_id", "company_id", "cta", "supported_inputs", "unavailable_inputs", "request_visibilities", "journey", "draft_intents", "requests", "public_board", "quote_gate", "treasury_gate", "authority", "real_state", "recorded_at", "status"], "PublicCivilizationRequestGateway");
   for (const field of ["supported_inputs", "unavailable_inputs", "request_visibilities", "journey", "draft_intents", "requests"]) requireArray(gateway[field], `public_gateway.${field}`);
@@ -1863,5 +2000,219 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     missing,
     auto_found: false,
     company_status: company.status
+  });
+}
+
+export const KAIOS_18888_PAYMENT_CONFIG = Object.freeze({
+  chain_id: 56,
+  kaios_address: "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+  bank_address: "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+  public_good_treasury: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  beneficiary_authority_status: "UNBOUND_CANDIDATE_ONLY",
+  budget_authority_status: "UNBOUND",
+  deployed_abi_status: "UNBOUND",
+  runtime_codehash_status: "UNBOUND",
+  minimum_delay_seconds: 3600,
+  maximum_request_age_seconds: 900,
+  allowed_purposes: Object.freeze(["PUBLIC_GOOD_TREASURY_REFILL"]),
+  execution_mode: "NON_AUTHORITATIVE_DRAFT_ONLY"
+});
+
+const KAIOS_18888_PAYMENT_REQUEST_FIELDS = Object.freeze([
+  "request_id", "chain_id", "bank_address", "beneficiary", "amount_wei", "purpose_code",
+  "budget_id", "nonce", "requested_by", "requested_at", "valid_until", "authorization_status"
+]);
+
+function sameEvmAddress(left, right) {
+  return /^0x[0-9a-fA-F]{40}$/.test(String(left)) && String(left).toLowerCase() === String(right).toLowerCase();
+}
+
+function assertRepositoryBoundKaios18888PaymentConfig(config) {
+  invariant(config === KAIOS_18888_PAYMENT_CONFIG, "CALLER_SUPPLIED_PAYMENT_CONFIG_FORBIDDEN", "18888 payment authority configuration must be the frozen repository-bound singleton");
+  return config;
+}
+
+function assertExactObjectFields(record, fields, label, errorCode = "UNKNOWN_PAYMENT_FIELD") {
+  requireFields(record, fields, label);
+  const unknown = Object.keys(record).filter((field) => !fields.includes(field));
+  invariant(unknown.length === 0, errorCode, `${label} contains unsupported fields: ${unknown.join(", ")}`);
+}
+
+export function validateKaios18888PaymentRequest(request, {
+  observedTimestamp,
+  config = KAIOS_18888_PAYMENT_CONFIG
+} = {}) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
+  assertExactObjectFields(request, KAIOS_18888_PAYMENT_REQUEST_FIELDS, "Kaios18888PaymentRequest");
+  invariant(/^[A-Z0-9][A-Z0-9_-]{7,127}$/.test(request.request_id), "INVALID_PAYMENT_REQUEST_ID", "Payment request ID must be a stable uppercase identifier");
+  invariant(request.chain_id === config.chain_id, "WRONG_CHAIN", "18888 payment preparation requires BSC chain 56");
+  invariant(sameEvmAddress(request.bank_address, config.bank_address), "WRONG_BANK", "Payment request must target the canonical 18888 proxy");
+  invariant(sameEvmAddress(request.beneficiary, config.public_good_treasury), "WRONG_BENEFICIARY", "This route is bound to the Public Good Treasury");
+  invariant(config.allowed_purposes.includes(request.purpose_code), "PURPOSE_NOT_ALLOWED", "Payment purpose is not allowlisted");
+  invariant(/^\d+$/.test(request.amount_wei) && BigInt(request.amount_wei) > 0n, "INVALID_PAYMENT_AMOUNT", "Payment amount must be positive integer Wei");
+  invariant(/^[A-Z0-9][A-Z0-9_-]{3,127}$/.test(request.budget_id), "INVALID_BUDGET_ID", "A fixed company budget ID is required");
+  invariant(/^[A-Z0-9][A-Z0-9_-]{7,127}$/.test(request.nonce), "INVALID_PAYMENT_NONCE", "A replay-safe nonce is required");
+  invariant(typeof request.requested_by === "string" && request.requested_by.length >= 3, "REQUESTER_REQUIRED", "Payment requester identity is required");
+  invariant(!Number.isNaN(Date.parse(request.requested_at)), "INVALID_REQUEST_TIMESTAMP", "Payment request timestamp must be ISO-8601 compatible");
+  invariant(!Number.isNaN(Date.parse(request.valid_until)), "INVALID_REQUEST_EXPIRY", "Payment request expiry must be ISO-8601 compatible");
+  invariant(request.authorization_status === "PROPOSAL_PREPARATION_ONLY", "UNBOUND_PAYMENT_AUTHORITY", "This candidate cannot accept caller-asserted Human or governance authorization");
+  if (observedTimestamp !== undefined) {
+    invariant(Number.isInteger(observedTimestamp) && observedTimestamp > 0, "INVALID_CHAIN_TIMESTAMP", "A fresh chain timestamp is required");
+    const requestedAt = Math.floor(Date.parse(request.requested_at) / 1000);
+    const validUntil = Math.floor(Date.parse(request.valid_until) / 1000);
+    invariant(requestedAt <= observedTimestamp, "REQUEST_FROM_FUTURE", "Payment request cannot be newer than the observed chain time");
+    invariant(validUntil >= observedTimestamp, "PAYMENT_REQUEST_EXPIRED", "Payment request has expired");
+    invariant(observedTimestamp - requestedAt <= config.maximum_request_age_seconds, "STALE_PAYMENT_REQUEST", "Payment request observation is stale");
+  }
+  return request;
+}
+
+export function prepareKaios18888UnsignedDisbursement({
+  ethers,
+  request,
+  observedTimestamp,
+  requestedDelaySeconds = KAIOS_18888_PAYMENT_CONFIG.minimum_delay_seconds,
+  config = KAIOS_18888_PAYMENT_CONFIG
+}) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
+  invariant(ethers?.utils?.defaultAbiCoder, "ETHERS_REQUIRED", "18888 draft preparation requires ethers hashing utilities");
+  validateKaios18888PaymentRequest(request, { observedTimestamp, config });
+  invariant(Number.isInteger(requestedDelaySeconds) && requestedDelaySeconds >= config.minimum_delay_seconds, "TIMELOCK_TOO_SHORT", "18888 disbursement delay must be at least one hour");
+
+  const coder = ethers.utils.defaultAbiCoder;
+  const requestHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(request.request_id));
+  const budgetHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(request.budget_id));
+  const nonceHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(request.nonce));
+  const purposeHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${request.purpose_code}|${request.budget_id}|${request.request_id}`));
+  const disbursementId = ethers.utils.keccak256(coder.encode(
+    ["bytes32", "address", "address", "uint256", "bytes32", "bytes32"],
+    [requestHash, config.bank_address, request.beneficiary, request.amount_wei, budgetHash, nonceHash]
+  ));
+  const executableAt = observedTimestamp + requestedDelaySeconds;
+  return Object.freeze({
+    status: "NON_AUTHORITATIVE_PAYMENT_DRAFT",
+    execution_authority: "ABSENT_BY_DESIGN",
+    chain_id: config.chain_id,
+    disbursement_id: disbursementId,
+    purpose_hash: purposeHash,
+    executable_at: executableAt,
+    beneficiary: request.beneficiary,
+    amount_wei: request.amount_wei,
+    budget_id: request.budget_id,
+    nonce: request.nonce,
+    calls: null,
+    calldata: null,
+    blockers: Object.freeze([
+      "REPOSITORY_BOUND_HUMAN_OR_GOVERNANCE_AUTHORIZATION_REQUIRED",
+      "FUNDED_APPROVED_BUDGET_AND_CAP_REQUIRED",
+      "CANONICAL_BENEFICIARY_ROLE_REQUIRED",
+      "MAIN_TRACKED_DEPLOYED_ABI_REQUIRED",
+      "PROXY_IMPLEMENTATION_RUNTIME_CODEHASH_BINDING_REQUIRED"
+    ]),
+    transaction_sent: false,
+    signer_requested: false
+  });
+}
+
+export function validateKaios18888PaymentReadiness(snapshot, config = KAIOS_18888_PAYMENT_CONFIG) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
+  const fields = ["chain_id", "bank_address", "kaios_address", "beneficiary", "bank_code", "kaios_code", "bank_paused", "bank_healthy", "available_wei", "amount_wei", "proposer_has_role", "approver_has_role", "proposer_address", "approver_address", "existing_beneficiary", "budget_authority_bound", "beneficiary_authority_bound", "deployed_abi_bound", "runtime_codehash_bound"];
+  assertExactObjectFields(snapshot, fields, "Kaios18888PaymentReadiness");
+  const gates = Object.freeze({
+    chain: snapshot.chain_id === config.chain_id,
+    bank: sameEvmAddress(snapshot.bank_address, config.bank_address) && snapshot.bank_code !== "0x",
+    token: sameEvmAddress(snapshot.kaios_address, config.kaios_address) && snapshot.kaios_code !== "0x",
+    beneficiary: sameEvmAddress(snapshot.beneficiary, config.public_good_treasury),
+    bank_health: snapshot.bank_paused === false && snapshot.bank_healthy === true,
+    funded: /^\d+$/.test(snapshot.available_wei) && /^\d+$/.test(snapshot.amount_wei) && BigInt(snapshot.available_wei) >= BigInt(snapshot.amount_wei),
+    proposer_role: snapshot.proposer_has_role === true,
+    approver_role: snapshot.approver_has_role === true,
+    independent_approval: !sameEvmAddress(snapshot.proposer_address, snapshot.approver_address),
+    replay_free: sameEvmAddress(snapshot.existing_beneficiary, "0x0000000000000000000000000000000000000000"),
+    approved_budget: snapshot.budget_authority_bound === true && config.budget_authority_status === "BOUND_REPOSITORY_VERIFIED",
+    beneficiary_authority: snapshot.beneficiary_authority_bound === true && config.beneficiary_authority_status === "BOUND_REPOSITORY_VERIFIED",
+    deployed_abi: snapshot.deployed_abi_bound === true && config.deployed_abi_status === "BOUND_REPOSITORY_VERIFIED",
+    runtime_codehash: snapshot.runtime_codehash_bound === true && config.runtime_codehash_status === "BOUND_REPOSITORY_VERIFIED"
+  });
+  const blockers = Object.entries(gates).filter(([, passed]) => !passed).map(([gate]) => gate);
+  return Object.freeze({
+    status: blockers.length === 0 ? "READY_FOR_SEPARATE_AUTHORIZED_ADAPTER" : "FAIL_CLOSED",
+    gates,
+    blockers,
+    transaction_authority: "NOT_INCLUDED",
+    transaction_sent: false
+  });
+}
+
+const KAIOS_18888_READ_ABI = Object.freeze([
+  "function kaios() view returns (address)",
+  "function bankHealth() view returns (uint256 balance,uint256 reserve,uint256 available,uint256 accountedInflow,uint256 totalOutflow,bool healthy,bool isPaused)",
+  "function PAYMENT_PROPOSER_ROLE() view returns (bytes32)",
+  "function PAYMENT_APPROVER_ROLE() view returns (bytes32)",
+  "function hasRole(bytes32 role,address account) view returns (bool)",
+  "function disbursement(bytes32 disbursementId) view returns (tuple(address beneficiary,uint256 amount,uint64 executableAt,address proposer,address approver,bytes32 purposeHash,bool executed,bool cancelled))"
+]);
+
+export async function readKaios18888PaymentReadiness({
+  ethers,
+  provider,
+  prepared,
+  proposerAddress,
+  approverAddress,
+  bankReader,
+  config = KAIOS_18888_PAYMENT_CONFIG
+}) {
+  assertRepositoryBoundKaios18888PaymentConfig(config);
+  invariant(ethers?.Contract && provider?.getNetwork && provider?.getCode && provider?.getBlockNumber, "READ_PROVIDER_REQUIRED", "A read-only ethers provider is required");
+  invariant(prepared?.status === "NON_AUTHORITATIVE_PAYMENT_DRAFT", "PAYMENT_DRAFT_REQUIRED", "A validated non-authoritative payment draft is required");
+  invariant(sameEvmAddress(prepared.beneficiary, config.public_good_treasury), "WRONG_BENEFICIARY", "Prepared payment beneficiary is not the fixed Public Good Treasury");
+  invariant(sameEvmAddress(proposerAddress, proposerAddress) && sameEvmAddress(approverAddress, approverAddress), "ROLE_ACCOUNT_REQUIRED", "Proposer and approver addresses are required for the read-only role check");
+
+  const network = await provider.getNetwork();
+  const blockNumber = await provider.getBlockNumber();
+  const [bankCode, kaiosCode] = await Promise.all([
+    provider.getCode(config.bank_address, blockNumber),
+    provider.getCode(config.kaios_address, blockNumber)
+  ]);
+  const bank = bankReader ?? new ethers.Contract(config.bank_address, KAIOS_18888_READ_ABI, provider);
+  const [kaiosAddress, health, proposerRole, approverRole, existing] = await Promise.all([
+    bank.kaios(),
+    bank.bankHealth(),
+    bank.PAYMENT_PROPOSER_ROLE(),
+    bank.PAYMENT_APPROVER_ROLE(),
+    bank.disbursement(prepared.disbursement_id)
+  ]);
+  const [proposerHasRole, approverHasRole] = await Promise.all([
+    bank.hasRole(proposerRole, proposerAddress),
+    bank.hasRole(approverRole, approverAddress)
+  ]);
+  const snapshot = Object.freeze({
+    chain_id: Number(network.chainId),
+    bank_address: config.bank_address,
+    kaios_address: kaiosAddress,
+    beneficiary: prepared.beneficiary,
+    bank_code: bankCode,
+    kaios_code: kaiosCode,
+    bank_paused: Boolean(health.isPaused ?? health[6]),
+    bank_healthy: Boolean(health.healthy ?? health[5]),
+    available_wei: String(health.available ?? health[2]),
+    amount_wei: prepared.amount_wei,
+    proposer_has_role: proposerHasRole,
+    approver_has_role: approverHasRole,
+    proposer_address: proposerAddress,
+    approver_address: approverAddress,
+    existing_beneficiary: existing.beneficiary ?? existing[0],
+    budget_authority_bound: false,
+    beneficiary_authority_bound: false,
+    deployed_abi_bound: false,
+    runtime_codehash_bound: false
+  });
+  return Object.freeze({
+    observed_block: blockNumber,
+    snapshot,
+    readiness: validateKaios18888PaymentReadiness(snapshot, config),
+    provider_mode: "READ_ONLY_UNVERIFIED_SCHEMA_PROBE",
+    signer_requested: false,
+    transaction_sent: false
   });
 }
