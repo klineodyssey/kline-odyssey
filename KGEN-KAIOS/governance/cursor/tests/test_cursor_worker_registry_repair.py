@@ -69,11 +69,19 @@ KNOWN_CLAIM_STATES = {
     "EXPIRED",
     "ABANDONED",
     "COMPLETED_CODEX_REVIEWED",
+    "REWORK_REQUIRED_CLAIM_RELEASED",
+    "EXPIRED_UNDELIVERED_RELEASED",
+    "CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
+    "OPEN_REASSIGNABLE_CLAIM_RELEASED",
 }
 
 UNLOCKED_CLAIM_STATES = {
     "RELEASED",
     "COMPLETED_CODEX_REVIEWED",
+    "REWORK_REQUIRED_CLAIM_RELEASED",
+    "EXPIRED_UNDELIVERED_RELEASED",
+    "CLOSED_NO_DELIVERY_WORKER_OFFBOARDED",
+    "OPEN_REASSIGNABLE_CLAIM_RELEASED",
 }
 
 
@@ -150,13 +158,17 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
                 "feature/unregistered",
             )
 
-    def test_foundational_life_creator_scope(self):
+    def test_suspended_foundational_life_creator_preserves_history_and_trust_without_authority(self):
         self.assertEqual(self.cursor["worker_class"], "FOUNDATIONAL_LIFE_CREATOR")
         self.assertEqual(
             self.cursor["worker_classes"],
             ["FOUNDATIONAL_LIFE_CREATOR", "LIFE_RESEARCH_ANALYST"],
         )
-        self.assertEqual(self.cursor["permission"], "worker_code_limited")
+        self.assertEqual(self.cursor["permission"], "pending_readonly")
+        self.assertEqual(self.cursor["employee_status"], "ACTIVE_SUSPENDED_UNPAID")
+        self.assertEqual(self.cursor["payroll_status"], "SUSPENDED_NO_WORK_NO_PAY")
+        self.assertEqual(self.cursor["trust_level"], "T2")
+        self.assertEqual(self.cursor["status"], "OFFLINE")
         self.assertTrue(
             {"GRASS", "TREE", "FISH", "SHRIMP", "MOUNTAIN", "SOIL", "WATER", "RIVER"}
             <= set(self.cursor["allowed_work"])
@@ -205,23 +217,16 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
 
     def test_fungi_release_and_life_energy_manual_claim_are_serialized(self):
         metadata = self.registry["metadata"]
-        self.assertEqual(
-            metadata["source_commit"],
-            "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
-        )
+        self.assertEqual(metadata["source_commit"], "ac304fc585f5f86846d2c61b69ecad8f59bc0a66")
         self.assertEqual(
             metadata["task_id"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+            "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
         )
-        self.assertIn("manual-only", metadata["change_reason"])
+        self.assertIn("leave without pay", metadata["change_reason"])
 
         locked = validate_one_task_lock(self.registry["dispatch_history"])
-        self.assertEqual(len(locked), 1)
-        self.assertEqual(
-            locked[0]["task_id"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(len(self.registry["active_claims"]), 1)
+        self.assertEqual(locked, [])
+        self.assertEqual(self.registry["active_claims"], [])
 
         fungi_events = [
             event
@@ -246,31 +251,58 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             if event["task_id"]
             == "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001"
         ]
-        self.assertEqual(len(life_energy_events), 1)
-        self.assertEqual(life_energy_events[0]["event_type"], "CLAIM_REGISTERED")
+        self.assertEqual(
+            [event["event_type"] for event in life_energy_events],
+            ["CLAIM_REGISTERED", "CLAIM_CLOSED_REWORK_REQUIRED", "CLAIM_RELEASED"],
+        )
+        r2_events = [
+            event
+            for event in self.registry["claim_events"]
+            if event["task_id"] == "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001"
+        ]
+        self.assertEqual(
+            [event["event_type"] for event in r2_events],
+            [
+                "CLAIM_REGISTERED",
+                "CLAIM_RECONCILIATION",
+                "TASK_CLOSED_WORKER_OFFBOARDED",
+                "EMPLOYMENT_DECISION_CORRECTION_TASK_REOPENED",
+            ],
+        )
+        self.assertEqual([event["sequence"] for event in r2_events], [1, 2, 3, 4])
+        self.assertEqual(r2_events[1]["new_state"], "OPEN")
+        self.assertTrue(r2_events[1]["task_reassignable"])
+        self.assertEqual(r2_events[2]["previous_event_id"], r2_events[1]["event_id"])
+        self.assertEqual(r2_events[2]["old_state"], "OPEN")
+        self.assertEqual(r2_events[2]["new_state"], "CLOSED")
+        self.assertFalse(r2_events[2]["task_reassignable"])
+        self.assertEqual(r2_events[3]["previous_event_id"], r2_events[2]["event_id"])
+        self.assertEqual(r2_events[3]["old_state"], "CLOSED")
+        self.assertEqual(r2_events[3]["new_state"], "OPEN")
+        self.assertTrue(r2_events[3]["task_reassignable"])
 
     def test_dispatch_history_ends_with_life_energy_claim_and_excludes_microbial(self):
         final_dispatch = self.registry["dispatch_history"][-1]
         self.assertEqual(
             final_dispatch["task_id"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
         )
-        self.assertEqual(final_dispatch["status"], "CLAIMED")
+        self.assertEqual(final_dispatch["status"], "OPEN_REASSIGNABLE_CLAIM_RELEASED")
         self.assertNotIn(
             "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
             {item["task_id"] for item in self.registry["dispatch_history"]},
         )
 
-    def test_microbial_research_is_bounded_preparation_only(self):
+    def test_microbial_research_preparation_is_held_during_unpaid_suspension(self):
         self.assertEqual(len(self.registry["prepared_tasks"]), 1)
         prepared = self.registry["prepared_tasks"][0]
         self.assertEqual(
             prepared["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001"
         )
         self.assertEqual(prepared["worker_id"], self.cursor["worker_id"])
-        self.assertEqual(prepared["status"], "PREPARATION_ONLY")
+        self.assertEqual(prepared["status"], "HOLD_WORKER_SUSPENDED_UNPAID")
         self.assertEqual(prepared["claim_state"], "NOT_CLAIMED")
-        self.assertEqual(prepared["dispatch_state"], "NOT_DISPATCHED")
+        self.assertEqual(prepared["dispatch_state"], "HOLD")
         self.assertIsNone(prepared["execution_base"])
         self.assertEqual(
             prepared["execution_base_binding"],
@@ -286,16 +318,10 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(
             prepared["output_status"], "CURSOR_RESEARCH_PROPOSAL_ONLY"
         )
-        self.assertEqual(
-            self.cursor["current_task"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(
-            self.cursor["current_branch"],
-            "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(self.cursor["status"], "CLAIMED")
-        self.assertEqual(self.cursor["heartbeat"], "2026-08-03T12:45:00Z")
+        self.assertIsNone(self.cursor["current_task"])
+        self.assertIsNone(self.cursor["current_branch"])
+        self.assertEqual(self.cursor["status"], "OFFLINE")
+        self.assertEqual(self.cursor["heartbeat"], "2026-08-16T12:49:02Z")
         self.assertIn("MICROBIAL_RESEARCH", self.cursor["allowed_work"])
 
         self.assertEqual(
@@ -413,24 +439,21 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             )
             self.assertEqual(hashlib.sha256(payload).hexdigest(), evidence["sha256"])
 
-    def test_continuous_queue_projects_preparation_only(self):
+    def test_continuous_queue_is_disabled_during_unpaid_suspension(self):
         queue = self.forest_queue
         self.assertEqual(
             queue["continuous_dispatch_mode"],
-            "CODEX_CONTROLLED_PREPARATION_ONLY",
+            "DISABLED_WORKER_SUSPENDED_UNPAID",
         )
         self.assertFalse(queue["automatic_unreviewed_dispatch"])
         self.assertTrue(
             {
-                "PREVIOUS_TASK_CODEX_REVIEWED",
-                "PREVIOUS_TASK_CLOSED",
-                "PREVIOUS_CLAIM_RELEASED",
-                "PREPARATION_PR_MERGED",
-                "EXACT_PREPARATION_MERGE_SHA_RECORDED",
-                "PLANNED_BRANCH_CREATED_AT_EXACT_PREPARATION_MERGE_SHA",
-                "ISOLATED_WORKTREE_VERIFIED_AT_EXACT_PREPARATION_MERGE_SHA",
-                "SEPARATE_ACTIVATION_PR_REVIEWED_AND_MERGED",
-                "FAIL_CLOSED_EXPIRY_AND_REVALIDATION_DEFINED",
+                "CURSOR_SERVICE_AVAILABLE",
+                "BOOT_COMPLETE",
+                "CURRENT_SYNC",
+                "REGISTRY_CHECK",
+                "ACK_REVALIDATION_IF_REQUIRED",
+                "FRESH_EXPLICIT_TASK_AND_CLAIM",
             }
             <= set(queue["next_dispatch_requires"])
         )
@@ -447,56 +470,59 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(by_priority[9]["status"], "RELEASED")
         self.assertEqual(by_priority[10]["status"], "RELEASED")
         self.assertEqual(by_priority[11]["status"], "RELEASED")
-        self.assertEqual(by_priority[12]["status"], "PREPARATION_ONLY")
+        self.assertEqual(by_priority[12]["status"], "HOLD_WORKER_SUSPENDED_UNPAID")
+        for priority in range(13, 21):
+            self.assertEqual(by_priority[priority]["status"], "HOLD_WORKER_SUSPENDED_UNPAID")
         self.assertEqual(by_priority[12]["task_id"], "KAIOS-CURSOR-MICROBIAL-RESEARCH-001")
         self.assertEqual(queue["active_claims"], self.registry["active_claims"])
         self.assertEqual(
             queue["worker_state"],
             {
                 "worker_id": "cursor-01",
-                "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-                "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-                "status": "CLAIMED",
+                "current_task": None,
+                "current_branch": None,
+                "status": "OFFLINE",
+                "availability_for_current_work": "SUSPENDED_UNPAID",
+                "availability_reason": "CURSOR_EXTERNAL_SERVICE_UNAVAILABLE_SUBSCRIPTION_NOT_ACTIVE",
             },
         )
         self.assertEqual(queue["prepared_task"], self.registry["prepared_tasks"][0])
 
-    def test_four_way_active_claims_are_equal_and_single(self):
+    def test_four_way_active_claims_are_equal_and_empty(self):
         claim_sets = [
             self.registry["active_claims"],
             self.forest_queue["active_claims"],
             self.software_queue["active_claims"],
             self.public_queue["active_claims"],
         ]
-        self.assertTrue(all(len(claims) == 1 for claims in claim_sets))
+        self.assertTrue(all(len(claims) == 0 for claims in claim_sets))
         self.assertTrue(all(claims == claim_sets[0] for claims in claim_sets[1:]))
         self.assertEqual(self.public_queue["worker_state"], self.forest_queue["worker_state"])
         self.assertEqual(self.public_queue["prepared_task"], self.forest_queue["prepared_task"])
         self.assertEqual(
             self.software_queue["cursor"]["current_status"],
-            "CLAIMED_WAITING_MANUAL_EXECUTION",
+            "SUSPENDED_UNPAID_EXTERNAL_SERVICE_UNAVAILABLE",
         )
         self.assertEqual(
             self.software_queue["cursor"]["current_task"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+            None,
         )
         self.assertEqual(
             self.software_queue["cursor"]["current_branch"],
-            "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+            None,
         )
         self.assertEqual(
             self.software_queue["cursor"]["prepared_task_status"],
-            "PREPARATION_ONLY",
+            "HOLD_WORKER_SUSPENDED_UNPAID",
         )
         self.assertIsNone(self.software_queue["cursor"]["execution_base"])
         self.assertFalse(
             self.software_queue["cursor"]["descendant_wildcard_allowed"]
         )
 
-    def test_life_energy_claim_is_manual_candidate_only_and_exactly_bounded(self):
+    def test_life_energy_claim_is_released_task_open_and_not_reactivatable(self):
         envelope = self.life_energy_envelope
         claim = self.life_energy_claim
-        active = self.registry["active_claims"][0]
         task_id = "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001"
         expected_paths = [
             "KAIOS/economy/candidates/payroll-v0/",
@@ -506,16 +532,26 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         ]
         self.assertEqual(envelope["task_id"], task_id)
         self.assertEqual(claim["task_id"], task_id)
-        self.assertEqual(active["task_id"], task_id)
-        self.assertEqual(envelope["status"], "DISPATCHED")
+        self.assertEqual(self.registry["active_claims"], [])
+        self.assertEqual(envelope["status"], "R2_EXPIRED_UNDELIVERED_RELEASED_TASK_OPEN")
+        self.assertEqual(claim["status"], "CLOSED_AND_RELEASED_REWORK_REQUIRED")
         self.assertTrue(envelope["claim_created"])
         self.assertTrue(envelope["human_response_file_received"])
         self.assertEqual(envelope["allowed_paths"], expected_paths)
         self.assertEqual(claim["allowed_paths"], expected_paths)
         self.assertEqual(len(envelope["expected_files"]), 7)
         self.assertEqual(envelope["expected_files"], claim["expected_files"])
-        self.assertEqual(envelope["claim_id"], active["claim_id"])
-        self.assertEqual(envelope["fencing_token"], active["fencing_token"])
+        self.assertEqual(envelope["claim_id"], "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01")
+        self.assertEqual(envelope["fencing_token"], "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-R2")
+        self.assertTrue(envelope["r2_reconciliation"]["task_reassignable"])
+        self.assertEqual(
+            envelope["r2_reconciliation"]["claim_release_event_id"],
+            "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+        )
+        self.assertEqual(
+            envelope["r2_reconciliation"]["employment_correction_event_id"],
+            "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004",
+        )
         self.assertTrue(envelope["automatic"] is False)
         self.assertTrue(envelope["external_autonomy"] is False)
         self.assertTrue(envelope["cursor_api_key_required"] is False)

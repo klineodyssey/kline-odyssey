@@ -23,23 +23,7 @@
     "production_authority": false,
     "external_autonomy": false
   },
-  "active_claims": [
-    {
-      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
-      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-      "worker_id": "cursor-01",
-      "status": "CLAIMED",
-      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-      "base_commit": "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
-      "claimed_at": "2026-08-03T12:45:00Z",
-      "lease_expires_at": "2026-08-05T12:45:00Z",
-      "record_version": 1,
-      "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-001-R1",
-      "output_status": "CANDIDATE_ONLY",
-      "manual_execution_only": true,
-      "external_autonomy": false
-    }
-  ],
+  "active_claims": [],
   "codex_queue": [
     { "priority": 1, "work": "REPOSITORY_NAMING_AUDIT", "status": "MERGED_PR_108", "depends_on": [] },
     { "priority": 2, "work": "IDENTITY_STANDARD", "status": "MERGED_PR_108", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
@@ -75,11 +59,11 @@
   "cursor": {
     "worker_id": "cursor-01",
     "one_task_at_a_time": true,
-    "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-    "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-    "current_status": "CLAIMED_WAITING_MANUAL_EXECUTION",
+    "current_task": null,
+    "current_branch": null,
+    "current_status": "SUSPENDED_UNPAID_EXTERNAL_SERVICE_UNAVAILABLE",
     "prepared_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-    "prepared_task_status": "PREPARATION_ONLY",
+    "prepared_task_status": "HOLD_WORKER_SUSPENDED_UNPAID",
     "prepared_task_envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
     "preparation_source_commit": "7008e4f9449f6df050171cf47ec6ec56419925e9",
     "execution_base": null,
@@ -92,18 +76,11 @@
     "prepared_task_authorized_path": "KAIOS/life/candidates/forest-agriculture-v1/microbial-research/",
     "prepared_task_expected_file_count": 8,
     "software_life_task": "KAIOS-CURSOR-SOFTWARE-LIFE-MANIFEST-CANDIDATES-001",
-    "software_life_task_status": "QUEUED_AFTER_EXISTING_APPROVED_TASKS",
+    "software_life_task_status": "HOLD_WORKER_SUSPENDED_UNPAID",
     "output_authority": "CANDIDATE_ONLY",
-    "next_existing_queue_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
-    "next_existing_queue_task_priority": 1,
-    "current_active_tasks": {
-      "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001": {
-        "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01",
-        "status": "CLAIMED",
-        "manual_execution_only": true,
-        "external_autonomy": false
-      }
-    },
+    "next_existing_queue_task": null,
+    "next_existing_queue_task_priority": null,
+    "current_active_tasks": {},
     "can_merge": false,
     "can_deploy": false,
     "can_promote_canonical": false

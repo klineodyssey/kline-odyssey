@@ -45,9 +45,44 @@ assert.ok(colony.required.includes("winter_or_emergency_reserve"));
 assert.equal(colony.properties.simulation_only.const, true);
 
 const dispatch = documents["KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json"];
-assert.equal(dispatch.status, "PREPARED_NOT_DISPATCHED");
-assert.equal(dispatch.claim_created, false);
-assert.equal(dispatch.human_response_file_received, false);
+const registry = JSON.parse(fs.readFileSync(path.resolve(here, "../../../KGEN-KAIOS/worker_registry.json"), "utf8"));
+const r2Events = registry.claim_events.filter((event) => event.task_id === "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001");
+assert.equal(dispatch.status, "R2_EXPIRED_UNDELIVERED_RELEASED_TASK_OPEN");
+assert.equal(dispatch.claim_created, true);
+assert.deepEqual(r2Events.map((event) => event.event_type), [
+  "CLAIM_REGISTERED",
+  "CLAIM_RECONCILIATION",
+  "TASK_CLOSED_WORKER_OFFBOARDED",
+  "EMPLOYMENT_DECISION_CORRECTION_TASK_REOPENED"
+]);
+assert.deepEqual(r2Events.map((event) => event.sequence), [1, 2, 3, 4]);
+assert.equal(r2Events[1].new_state, "OPEN");
+assert.equal(r2Events[1].task_reassignable, true);
+assert.equal(r2Events[2].previous_event_id, r2Events[1].event_id);
+assert.equal(r2Events[2].old_state, "OPEN");
+assert.equal(r2Events[2].new_state, "CLOSED");
+assert.equal(r2Events[2].task_reassignable, false);
+assert.equal(r2Events[3].previous_event_id, r2Events[2].event_id);
+assert.equal(r2Events[3].old_state, "CLOSED");
+assert.equal(r2Events[3].new_state, "OPEN");
+assert.equal(r2Events[3].task_reassignable, true);
+assert.equal(dispatch.r2_reconciliation.claim_release_event_id, r2Events[1].event_id);
+assert.equal(dispatch.r2_reconciliation.superseded_task_close_event_id, r2Events[2].event_id);
+assert.equal(dispatch.r2_reconciliation.employment_correction_event_id, r2Events[3].event_id);
+assert.equal(dispatch.r2_reconciliation.classification, "EXPIRED_UNDELIVERED_RELEASED_TASK_OPEN_CURSOR_SUSPENDED_UNPAID");
+assert.equal(dispatch.r2_reconciliation.lease_expired, true);
+assert.equal(dispatch.r2_reconciliation.delivery_present, false);
+assert.equal(dispatch.r2_reconciliation.review_present, false);
+assert.equal(dispatch.r2_reconciliation.acceptance_present, false);
+assert.equal(dispatch.r2_reconciliation.payroll_state, "NOT_ELIGIBLE_NO_ACCEPTED_DELIVERY");
+assert.equal(dispatch.r2_reconciliation.payment_state, "NOT_SENT");
+assert.equal(dispatch.r2_reconciliation.claim_active, false);
+assert.equal(dispatch.r2_reconciliation.lease_active, false);
+assert.equal(dispatch.r2_reconciliation.task_reassignable, true);
+assert.equal(dispatch.r2_reconciliation.do_not_wake_cursor, true);
+assert.equal(dispatch.r2_reconciliation.trust_changed, false);
+assert.equal(dispatch.r2_reconciliation.employment_changed, true);
+assert.equal(dispatch.r2_reconciliation.mainnet_write, false);
 assert.ok(dispatch.forbidden_work.includes("KGEN"));
 assert.ok(dispatch.forbidden_work.includes("real wallet"));
 

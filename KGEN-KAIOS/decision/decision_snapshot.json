@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "version": "4.3",
+    "version": "4.4",
     "status": "ACTIVE",
-    "updated_at": "2026-08-16T20:49:02+08:00",
+    "updated_at": "2026-08-29T21:42:00+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
-    "task_id": "HENGYAO-FIRST-GM-CLOCK-IN-001",
-    "source_commit": null,
+    "task_id": "KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-001",
+    "source_commit": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
     "source_of_truth": true
   },
   "daily_operation": {
@@ -45,15 +45,27 @@
     "pages_https": true,
     "pages_12345_http": 200,
     "pages_16888_http": 200,
-    "active_employee_claims": 1,
+    "active_employee_claims": 0,
     "delivered_not_reviewed": 0
   },
   "workqueue": {
-    "active_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "worker": "cursor-01",
-    "status": "CLAIMED",
-    "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
-    "lease_expires_at": "2026-08-18T12:49:02Z",
+    "active_task": null,
+    "worker": null,
+    "status": "NO_ACTIVE_CLAIM",
+    "claim_id": null,
+    "lease_expires_at": null,
+    "open_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "open_task_status": "OPEN_REASSIGNABLE_CLAIM_RELEASED",
+    "claim_release_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+    "superseded_task_close_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+    "employment_correction_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-004",
+    "cursor_availability": "SUSPENDED_UNPAID_EXTERNAL_SERVICE_UNAVAILABLE",
+    "cursor_employee_status": "ACTIVE_SUSPENDED_UNPAID",
+    "cursor_runtime_status": "OFFLINE_EXTERNAL_SERVICE_UNAVAILABLE",
+    "cursor_payroll_status": "SUSPENDED_NO_WORK_NO_PAY",
+    "cursor_trust_level": "T2",
+    "cursor_reapplication_required": false,
+    "cursor_fresh_claim_required_after_reactivation": true,
     "map_handoff": "KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001",
     "map_handoff_status": "HOLD_FOR_MAP_WORLD_AGENT"
   },
@@ -73,8 +85,8 @@
     "kgen_bank_wallet": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE"
   },
   "publication": {
-    "branch": "codex/codex-gm-life-runtime-v1",
-    "draft_pr": null,
+    "branch": "codex/KAIOS-EXPIRED-CURSOR-R2-CLAIM-RECONCILIATION-V1-001",
+    "draft_pr": 176,
     "publication_pending_at_snapshot": true,
     "mainnet_write": false
   }

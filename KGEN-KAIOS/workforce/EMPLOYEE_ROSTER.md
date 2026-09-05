@@ -26,7 +26,7 @@ A registry name is not enough to mark a worker active. Active duty requires Boot
 | Waiting review | 0 |
 | Blocked | 0 |
 | Registered not activated | 8 |
-| Suspended | 0 |
+| Suspended | 1 |
 | Revoked | 0 |
 | Human operators | 1 |
 
@@ -35,7 +35,7 @@ A registry name is not enough to mark a worker active. Active duty requires Boot
 | Worker ID | Name | Type | Department | Status | Trust | Desk | Current Task |
 |---|---|---|---|---|---|---|---|
 | `codex-gm-01` | Codex-General-Manager | Codex | CEO_Codex | ACTIVE_ON_DUTY | T5 | Codex Review Workspace | KGEN-WORKFORCE-ROSTER-2026-0001 |
-| `cursor-01` | Cursor Primary Worker | Cursor | Construction / Documentation / QA | ACTIVE_IDLE | T2 | Cursor Worker Workspace | - |
+| `cursor-01` | Cursor Primary Worker | Cursor | Foundational Life / Documentation / QA | ACTIVE_SUSPENDED_UNPAID | T2 | Suspended desk | - |
 | `cursor-generic-01` | Cursor Generic Candidate | Cursor | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
 | `claude-01` | Claude Candidate | Claude | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
 | `gemini-01` | Gemini Candidate | Gemini | Worker Pool | REGISTERED_NOT_ACTIVATED | T0 | Not assigned | - |
@@ -49,7 +49,7 @@ A registry name is not enough to mark a worker active. Active duty requires Boot
 ## Rules
 
 - Codex is the only default merge and push-main authority.
-- Cursor may push only `cursor-handoff/<Task-ID>` and may not push main.
+- `cursor-01` remains employed but is on unpaid leave because the external Cursor service is unavailable. It has no active claim, branch, tool, payroll or company-work authority during suspension; T2 trust and historical work remain preserved. Reactivation requires service availability, Boot, CURRENT sync, registry check, ACK revalidation if required and a fresh claim.
 - Unactivated AI workers are candidates, not active employees.
 - Human Engineer and Human Operator are separate records.
 - No token, private key, password, seed phrase, IP address, private email or real local path is stored in this roster.
