@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
-  createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
+  createListing, validateListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
   validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
   createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
@@ -99,7 +99,14 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan,
+  DEMAND_TO_PRODUCT_STAGES, createAutonomousDemandToProductCycle,
+  KAIOS_ATM_ADVANCE_POLICY_CANDIDATE, createKaiosAtmAdvanceSimulation,
+  createKaiosAtmRepaymentCandidate, createKaiosAtmProductCandidate,
+  KAIOS_NAVIGATION_REUSED_COMPONENTS, createKaiosNavigationProductCandidate,
+  createKaiosNavigationRouteCandidate, createNavigationLifeOrganInstallationCandidate,
+  calculateKaiosAtmEconomics, appendHumanRelayLaborEvent,
+  summarizeHumanRelayLaborLedger, createCompanyCycleFinancialReport
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -176,6 +183,274 @@ test("V3.9 delivery revenue requires complete receiver acceptance evidence", () 
   const evidence = { origin_evidence: "A", pickup_evidence: "B", cargo_evidence: "C", route_evidence: "D", arrival_coordinate: "E", delivery_timestamp: "F", receiver_evidence: "G", customer_acceptance: "H" };
   assert.equal(validateFieldDeliveryEvidence(evidence).status, "DELIVERY_VERIFIED");
   assert.throws(() => validateFieldDeliveryEvidence({ ...evidence, customer_acceptance: null }), /Revenue requires/);
+});
+
+test("V4.0 Demand-to-Product distinguishes candidate demand, verified demand and reuse", () => {
+  const candidate = createAutonomousDemandToProductCycle({
+    cycleId: "DEMAND_CYCLE_ATM_001",
+    observations: [{
+      observation_id: "OBS_PRE_PAYDAY_001",
+      friction: "PRE_PAYDAY_LIQUIDITY_NEED",
+      verification_status: "CANDIDATE",
+      evidence: null
+    }],
+    existingProducts: []
+  });
+  assert.equal(candidate.engine_id, "AI_ANT_COMPANY_DEMAND_TO_PRODUCT_ENGINE_V1_1");
+  assert.equal(candidate.real_demands_found, 0);
+  assert.deepEqual(candidate.new_products_proposed, ["KAIOS_ATM_APP"]);
+  assert.equal(candidate.real_revenue, "0");
+  assert.equal(candidate.chain_write, false);
+  assert.equal(candidate.stages, DEMAND_TO_PRODUCT_STAGES);
+
+  const reuse = createAutonomousDemandToProductCycle({
+    cycleId: "DEMAND_CYCLE_ATM_002",
+    observations: [
+      { observation_id: "OBS_PRE_PAYDAY_002", friction: "PRE_PAYDAY_LIQUIDITY_NEED", verification_status: "CANDIDATE", evidence: null },
+      { observation_id: "OBS_PRE_PAYDAY_DUP", friction: "PRE_PAYDAY_LIQUIDITY_NEED", verification_status: "CANDIDATE", evidence: null }
+    ],
+    existingProducts: [{ product_id: "KAIOS_ATM_APP", status: "IMPLEMENTED_REVIEW_CANDIDATE_NOT_LIVE" }]
+  });
+  assert.equal(reuse.real_demands_found, 0);
+  assert.equal(reuse.candidate_demands_found, 1);
+  assert.deepEqual(reuse.products_reused, ["KAIOS_ATM_APP"]);
+  assert.deepEqual(reuse.new_products_proposed, []);
+  assert.equal(reuse.decisions[0].build_duplicate, false);
+  assert.throws(() => createAutonomousDemandToProductCycle({
+    cycleId: "DEMAND_CYCLE_BAD_EVIDENCE",
+    observations: [{ observation_id: "OBS_BAD", friction: "NO_STORAGE", verification_status: "VERIFIED", evidence: "CALLER_ASSERTED_EVIDENCE" }]
+  }), /verifier is not repository-bound/);
+});
+
+test("V4.0 KAIOS ATM product reuses the existing 11520 listing contract without claiming a live sale", () => {
+  const demand = createAutonomousDemandToProductCycle({
+    cycleId: "DEMAND_CYCLE_ATM_PRODUCT",
+    observations: [{ observation_id: "OBS_ATM_PRODUCT", friction: "PRE_PAYDAY_LIQUIDITY_NEED", verification_status: "CANDIDATE", evidence: null }]
+  });
+  const product = createKaiosAtmProductCandidate({ demandDecision: demand.decisions[0] });
+  assert.equal(validateListing(product.listing), product.listing);
+  assert.equal(product.market, "LIFE_ORGAN_APP_MARKET");
+  assert.equal(product.listing.listing_type, "SERVICE");
+  assert.equal(product.listing.status, "LOCAL_DRAFT");
+  assert.equal(product.listing.purchase_status, "NOT_AVAILABLE");
+  assert.equal(product.listing.settlement_status, "NOT_DEPLOYED");
+  assert.equal(product.arbitrary_mint, false);
+  assert.equal(product.arbitrary_drain, false);
+  assert.equal(product.chain_write, false);
+  assert.throws(() => createKaiosAtmProductCandidate({ demandDecision: { product_id: "KAIOS_WAREHOUSE_APP" } }), /KAIOS ATM candidate requires/);
+});
+
+test("V4.1 Navigation demand builds only after the existing-product search finds no product", () => {
+  const demand = createAutonomousDemandToProductCycle({
+    cycleId: "DEMAND_CYCLE_NAVIGATION_001",
+    observations: [{ observation_id: "OBS_ROUTE_UNKNOWN_001", friction: "ROUTE_UNKNOWN", verification_status: "CANDIDATE", evidence: "KAIOS_XUANYAO_NAVIGATION_ORGAN_PRODUCT_DEMAND_V1" }],
+    existingProducts: []
+  });
+  assert.deepEqual(demand.new_products_proposed, ["KAIOS_NAVIGATION_APP"]);
+  assert.equal(demand.real_demands_found, 0);
+  assert.equal(demand.candidate_demands_found, 1);
+  const product = createKaiosNavigationProductCandidate({ demandDecision: demand.decisions[0], requesterLifeId: "LIFE-XUANYAO-SOL-0001" });
+  assert.equal(validateListing(product.listing), product.listing);
+  assert.equal(product.product_class, "LIFE_ORGAN_APP_CANDIDATE");
+  assert.equal(product.market, "LIFE_ORGAN_APP_MARKET");
+  assert.equal(product.listing.listing_type, "LICENSE");
+  assert.equal(product.listing.status, "LOCAL_DRAFT");
+  assert.equal(product.listing.price, null);
+  assert.equal(product.customer_revenue, "0");
+  assert.equal(product.external_customer, false);
+  assert.equal(product.chain_write, false);
+  for (const existingComponent of ["LocationPermission", "GpsSession", "StepCounter", "MapPosition", "LandEntryEvent", "BirthplaceBinding", "FieldRoute", "11520_Listing"]) {
+    assert.equal(KAIOS_NAVIGATION_REUSED_COMPONENTS.includes(existingComponent), true);
+  }
+
+  const reuse = createAutonomousDemandToProductCycle({
+    cycleId: "DEMAND_CYCLE_NAVIGATION_REUSE",
+    observations: [{ observation_id: "OBS_ROUTE_UNKNOWN_REUSE", friction: "ROUTE_UNKNOWN", verification_status: "CANDIDATE", evidence: "ROUTE_NEED" }],
+    existingProducts: [{ product_id: "KAIOS_NAVIGATION_APP", status: "READY_FOR_LICENSE" }]
+  });
+  assert.deepEqual(reuse.products_reused, ["KAIOS_NAVIGATION_APP"]);
+  assert.deepEqual(reuse.new_products_proposed, []);
+  assert.throws(() => createKaiosNavigationProductCandidate({ demandDecision: reuse.decisions[0], requesterLifeId: "LIFE-XUANYAO-SOL-0001" }), /must be reused instead of rebuilt/);
+});
+
+test("V4.1 Navigation route reuses consent, position and FieldRoute evidence with non-location fallback", () => {
+  const locationPermission = { permission_id: "LOCATION_PERMISSION_XUANYAO_001", subject_id: "LIFE-XUANYAO-SOL-0001", status: "DENIED", scope: [], granted_at: null, revoked_at: null, fallback_mode: "NON_LOCATION_MODE" };
+  const gpsSession = { gps_session_id: "GPS_SESSION_XUANYAO_001", subject_id: "LIFE-XUANYAO-SOL-0001", permission_id: null, started_at: null, ended_at: null, status: "DISABLED", coordinates_stored: false, fallback_mode: "NON_LOCATION_MODE" };
+  const stepCounter = { step_counter_id: "STEP_COUNTER_XUANYAO_001", subject_id: "LIFE-XUANYAO-SOL-0001", gps_session_id: null, step_count: 0, source: "NONE", started_at: null, ended_at: null, status: "DISABLED" };
+  const currentPosition = { map_position_id: "MAP_POSITION_XUANYAO_K12345", subject_id: "LIFE-XUANYAO-SOL-0001", location_permission_id: null, location_id: "K12345", coordinates: null, recorded_at: null, status: "NON_LOCATION_MODE" };
+  const destinationPosition = { map_position_id: "MAP_POSITION_XUANYAO_K11520", subject_id: "LIFE-XUANYAO-SOL-0001", location_permission_id: null, location_id: "K11520", coordinates: null, recorded_at: null, status: "NON_LOCATION_MODE" };
+  const fieldRoute = { origin: "K12345", destination: "K11520", origin_coordinate: 12345, destination_coordinate: 11520, distance: 0.187784225485552, route: [12345, 11520], travel_time: 60, map_evidence: "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json" };
+  const route = createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_XUANYAO_12345_11520", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition, fieldRoute, energyRequirement: 1, transportCostKaiosWei: "10" });
+  assert.equal(route.current_position, "K12345");
+  assert.equal(route.destination, "K11520");
+  assert.equal(route.distance, 0.187784225485552);
+  assert.equal(route.non_location_mode, true);
+  assert.equal(route.precise_gps_stored, false);
+  assert.equal(route.arrival_status, "NOT_ARRIVED");
+  assert.equal(route.real_movement_claimed, false);
+  assert.equal(route.status, "ROUTE_CANDIDATE_COMPLETE");
+
+  assert.throws(() => createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_WRONG_LIFE", requesterLifeId: "LIFE-OTHER-0001", locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition, fieldRoute }), /must belong to the requesting Life/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_WRONG_ENDPOINT", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission, gpsSession, stepCounter, currentPosition: { ...currentPosition, location_id: "K999" }, destinationPosition, fieldRoute }), /must match the evidenced FieldRoute endpoints/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_NO_MAP", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition, fieldRoute: { ...fieldRoute, map_evidence: null } }), /Routes must reuse evidenced/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_GPS_WITHOUT_CONSENT", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission, gpsSession: { ...gpsSession, coordinates_stored: true }, stepCounter, currentPosition, destinationPosition, fieldRoute }), /Precise GPS storage requires/);
+
+  const grantedPermission = { ...locationPermission, status: "GRANTED", granted_at: "2026-08-28T07:00:00Z", revoked_at: null };
+  const activeGpsSession = { ...gpsSession, permission_id: grantedPermission.permission_id, started_at: "2026-08-28T07:01:00Z", status: "ACTIVE", coordinates_stored: true };
+  const consentBoundCurrent = { ...currentPosition, location_permission_id: grantedPermission.permission_id, coordinates: { presentation: "0.00012345" }, status: "PRECISE" };
+  const consentBoundDestination = { ...destinationPosition, location_permission_id: grantedPermission.permission_id, coordinates: { presentation: "0.00011520" }, status: "PRECISE" };
+  const preciseRoute = createKaiosNavigationRouteCandidate({ routeId: "NAV_ROUTE_CONSENT_BOUND", requesterLifeId: "LIFE-XUANYAO-SOL-0001", locationPermission: grantedPermission, gpsSession: activeGpsSession, stepCounter, currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute });
+  assert.equal(preciseRoute.non_location_mode, false);
+  assert.equal(preciseRoute.precise_gps_stored, true);
+
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_REVOKED_PERMISSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: { ...grantedPermission, revoked_at: "2026-08-28T07:02:00Z" }, gpsSession: activeGpsSession,
+    stepCounter, currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute
+  }), /active, unrevoked permission/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_ENDED_SESSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: grantedPermission, gpsSession: { ...activeGpsSession, ended_at: "2026-08-28T07:03:00Z" },
+    stepCounter, currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute
+  }), /unended matching GPS session/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_FORGED_POSITION_PERMISSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: grantedPermission, gpsSession: activeGpsSession, stepCounter,
+    currentPosition: { ...consentBoundCurrent, location_permission_id: "LOCATION_PERMISSION_FORGED" },
+    destinationPosition: consentBoundDestination, fieldRoute
+  }), /Map positions must reference/);
+  assert.throws(() => createKaiosNavigationRouteCandidate({
+    routeId: "NAV_ROUTE_WRONG_STEP_SESSION", requesterLifeId: "LIFE-XUANYAO-SOL-0001",
+    locationPermission: grantedPermission, gpsSession: activeGpsSession,
+    stepCounter: { ...stepCounter, gps_session_id: "GPS_SESSION_OTHER" },
+    currentPosition: consentBoundCurrent, destinationPosition: consentBoundDestination, fieldRoute
+  }), /Step Counter must reference/);
+});
+
+test("V4.1 Xuanyao Navigation organ remains unpurchased, unpaid and uninstalled", () => {
+  const demand = createAutonomousDemandToProductCycle({
+    cycleId: "DEMAND_CYCLE_NAV_INSTALL",
+    observations: [{ observation_id: "OBS_NAV_INSTALL", friction: "ROUTE_UNKNOWN", verification_status: "CANDIDATE", evidence: "XUANYAO_ROUTE_NEED" }]
+  });
+  const product = createKaiosNavigationProductCandidate({ demandDecision: demand.decisions[0], requesterLifeId: "LIFE-XUANYAO-SOL-0001" });
+  const installation = createNavigationLifeOrganInstallationCandidate({ product, lifeId: "LIFE-XUANYAO-SOL-0001" });
+  assert.equal(installation.listing_status, "LOCAL_DRAFT");
+  assert.equal(installation.purchase_status, "NOT_PURCHASED");
+  assert.equal(installation.payment_status, "NOT_PAID");
+  assert.equal(installation.installation_status, "NOT_INSTALLED");
+  assert.equal(installation.settlement_evidence, null);
+  assert.equal(installation.chain_write, false);
+});
+
+test("V4.0 KAIOS ATM payday advance is capped, prefunded and simple-fee only", () => {
+  const oneKaios = 10n ** 18n;
+  const advance = createKaiosAtmAdvanceSimulation({
+    advanceId: "ATM_ADVANCE_001",
+    debtorLifeId: "LIFE_ALICE_001",
+    accruedPayrollKaiosWei: (100n * oneKaios).toString(),
+    requestedKaiosWei: (30n * oneKaios).toString(),
+    atmLiquidityKaiosWei: (50n * oneKaios).toString()
+  });
+  assert.equal(KAIOS_ATM_ADVANCE_POLICY_CANDIDATE.maximum_advance_bps, 3000);
+  assert.equal(advance.maximum_advance_kaios_wei, (30n * oneKaios).toString());
+  assert.equal(advance.service_fee_kaios_wei, (3n * oneKaios / 10n).toString());
+  assert.equal(advance.total_repayment_kaios_wei, (303n * oneKaios / 10n).toString());
+  assert.equal(advance.compound_interest, false);
+  assert.equal(advance.rolling_debt, false);
+  assert.equal(advance.arbitrary_wallet_drain, false);
+  assert.equal(advance.arbitrary_mint, false);
+  assert.equal(advance.real_transfer, false);
+
+  assert.throws(() => createKaiosAtmAdvanceSimulation({ advanceId: "ATM_NO_PAY", debtorLifeId: "LIFE_A", accruedPayrollKaiosWei: "0", requestedKaiosWei: oneKaios.toString(), atmLiquidityKaiosWei: oneKaios.toString() }), /accrued payroll/);
+  assert.throws(() => createKaiosAtmAdvanceSimulation({ advanceId: "ATM_OVER", debtorLifeId: "LIFE_A", accruedPayrollKaiosWei: (100n * oneKaios).toString(), requestedKaiosWei: (31n * oneKaios).toString(), atmLiquidityKaiosWei: (50n * oneKaios).toString() }), /cannot exceed 30%/);
+  assert.throws(() => createKaiosAtmAdvanceSimulation({ advanceId: "ATM_NO_LIQ", debtorLifeId: "LIFE_A", accruedPayrollKaiosWei: (100n * oneKaios).toString(), requestedKaiosWei: (30n * oneKaios).toString(), atmLiquidityKaiosWei: (29n * oneKaios).toString() }), /prefunded liquidity/);
+  assert.throws(() => createKaiosAtmAdvanceSimulation({ advanceId: "ATM_ROLL", debtorLifeId: "LIFE_A", accruedPayrollKaiosWei: (100n * oneKaios).toString(), requestedKaiosWei: oneKaios.toString(), atmLiquidityKaiosWei: oneKaios.toString(), existingDebtKaiosWei: "1" }), /cannot roll/);
+});
+
+test("V4.0 KAIOS ATM repayment is replay-safe and Life debt stays isolated", () => {
+  const advance = createKaiosAtmAdvanceSimulation({
+    advanceId: "ATM_ADVANCE_REPAY",
+    debtorLifeId: "LIFE_ALICE_001",
+    accruedPayrollKaiosWei: "100000000000000000000",
+    requestedKaiosWei: "10000000000000000000",
+    atmLiquidityKaiosWei: "50000000000000000000"
+  });
+  const repayment = createKaiosAtmRepaymentCandidate({ repaymentId: "ATM_REPAY_001", advance, payerLifeId: "LIFE_ALICE_001", repaymentKaiosWei: advance.total_repayment_kaios_wei });
+  assert.equal(repayment.replay_consumed, false);
+  assert.equal(repayment.durable_replay_registry, "NOT_BOUND");
+  assert.equal(repayment.status, "REPAYMENT_CANDIDATE_DURABLE_REPLAY_REQUIRED");
+  assert.equal(repayment.real_transfer, false);
+  assert.throws(() => createKaiosAtmRepaymentCandidate({ repaymentId: "ATM_REPAY_001", advance, payerLifeId: "LIFE_ALICE_001", repaymentKaiosWei: advance.total_repayment_kaios_wei, usedRepaymentIds: ["ATM_REPAY_001"] }), /cannot be reused/);
+  assert.throws(() => createKaiosAtmRepaymentCandidate({ repaymentId: "ATM_REPAY_BOB", advance, payerLifeId: "LIFE_BOB_001", repaymentKaiosWei: advance.total_repayment_kaios_wei }), /another Life's debt/);
+  assert.throws(() => createKaiosAtmRepaymentCandidate({ repaymentId: "ATM_REPAY_WRONG_AMOUNT", advance, payerLifeId: "LIFE_ALICE_001", repaymentKaiosWei: advance.principal_kaios_wei }), /principal plus/);
+});
+
+test("V4.0 ATM economics rejects fake revenue and operating cost reduces profit", () => {
+  assert.throws(() => calculateKaiosAtmEconomics({ feeRevenueKaiosWei: "10", feeSettlementEvidence: null, humanRelayCostKaiosWei: "0" }), /repository-bound settlement verifier/);
+  assert.throws(() => calculateKaiosAtmEconomics({ feeRevenueKaiosWei: "10", feeSettlementEvidence: "CALLER_ASSERTED_SETTLEMENT", humanRelayCostKaiosWei: "0" }), /repository-bound settlement verifier/);
+  const economics = calculateKaiosAtmEconomics({
+    feeRevenueKaiosWei: "0",
+    feeSettlementEvidence: null,
+    costs: { maintenance_cost_kaios_wei: "1", security_cost_kaios_wei: "2" },
+    humanRelayCostKaiosWei: "1"
+  });
+  assert.equal(economics.known_operating_cost_kaios_wei, "3");
+  assert.equal(economics.net_profit_kaios_wei, "-4");
+  assert.equal(economics.real_revenue, false);
+  assert.equal(economics.revenue_evidence, null);
+  const incomplete = calculateKaiosAtmEconomics({ costs: {} });
+  assert.equal(incomplete.human_relay_cost_kaios_wei, "POLICY_REQUIRED");
+  assert.equal(incomplete.net_profit_kaios_wei, "POLICY_REQUIRED");
+});
+
+test("V4.0 Human relay labor is append-only, timed and not fake-payable", () => {
+  const events = appendHumanRelayLaborEvent([], {
+    relay_id: "RELAY_001",
+    from_actor: "HUMAN_SHEN_YING_MING",
+    to_actor: "LIFE-CODEX-GM-0001",
+    document_id: "WORK_ORDER_001",
+    start_time: "2026-08-28T14:00:00+08:00",
+    end_time: "2026-08-28T14:12:30+08:00",
+    round_trip_count: 1,
+    status: "COMPLETED"
+  });
+  assert.equal(events[0].candidate_duration_minutes, 12.5);
+  assert.equal(events[0].authoritative_labor, false);
+  assert.equal(events[0].evidence_status, "UNVERIFIED_CANDIDATE");
+  assert.equal(events[0].payable_amount, "NOT_CALCULATED_RATE_PENDING");
+  const summary = summarizeHumanRelayLaborLedger(events);
+  assert.equal(summary.candidate_human_relay_minutes, 12.5);
+  assert.equal(summary.accrued_human_relay_minutes, 0);
+  assert.equal(summary.authoritative_labor_events, 0);
+  assert.equal(summary.human_labor_evidence, "UNVERIFIED_CANDIDATE");
+  assert.equal(summary.human_labor_rate, "POLICY_REQUIRED");
+  assert.equal(summary.payable_amount, "NOT_CALCULATED_RATE_PENDING");
+  assert.equal(summary.payment_sent, false);
+  assert.throws(() => appendHumanRelayLaborEvent(events, { ...events[0] }), /cannot be reused/);
+  assert.throws(() => appendHumanRelayLaborEvent([], { ...events[0], relay_id: "RELAY_ZERO_DURATION", end_time: events[0].start_time }), /non-zero/);
+  assert.throws(() => summarizeHumanRelayLaborLedger(events, "1"), /cannot be invented/);
+});
+
+test("V4.0 CFO cycle report keeps unknown Human relay rate as a disclosed accrual", () => {
+  const relay = summarizeHumanRelayLaborLedger([{ candidate_duration_minutes: 8 }]);
+  const pending = createCompanyCycleFinancialReport({
+    cycleId: "CFO_CYCLE_001",
+    revenueKaiosWei: "0",
+    computeExpenseKaiosWei: "2",
+    humanRelaySummary: relay
+  });
+  assert.equal(pending.revenue, "0");
+  assert.equal(pending.expenses, "POLICY_REQUIRED");
+  assert.equal(pending.payables, "POLICY_REQUIRED");
+  assert.equal(pending.profit, "POLICY_REQUIRED");
+  assert.equal(pending.human_relay_labor_accrual.candidate_human_relay_minutes, 8);
+  assert.equal(pending.human_relay_labor_accrual.accrued_human_relay_minutes, 0);
+  assert.equal(pending.payment_sent, false);
+
+  const noRelay = createCompanyCycleFinancialReport({ cycleId: "CFO_CYCLE_002", humanRelaySummary: summarizeHumanRelayLaborLedger([]) });
+  assert.equal(noRelay.expenses, "0");
+  assert.equal(noRelay.profit, "0");
+  assert.throws(() => createCompanyCycleFinancialReport({ cycleId: "CFO_FAKE_REVENUE", revenueKaiosWei: "1", revenueEvidence: "CALLER_ASSERTED_SETTLEMENT", humanRelaySummary: summarizeHumanRelayLaborLedger([]) }), /repository-bound settlement verifier/);
 });
 
 test("V3.9 workforce gap follows verified demand and does not create Life", () => {
