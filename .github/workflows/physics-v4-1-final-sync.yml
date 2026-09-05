@@ -1,0 +1,104 @@
+name: Physics V4.1 Final Main Sync
+
+on:
+  push:
+    branches:
+      - codex/physics-civilization-full-runtime-v4-1
+    paths:
+      - .github/workflows/physics-v4-1-final-sync.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Merge latest main and resolve canonical with minimal V4.1 binding patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'physics-v4-1-final-sync'
+          git config user.email 'physics-v4-1-final-sync@users.noreply.github.com'
+          git fetch origin main
+          set +e
+          git merge --no-commit --no-ff origin/main
+          merge_code=$?
+          set -e
+          if [ "$merge_code" -ne 0 ]; then
+            conflicts="$(git diff --name-only --diff-filter=U)"
+            echo "conflicts=$conflicts"
+            bad="$(printf '%s\n' "$conflicts" | grep -v '^core/data/canonical.json$' || true)"
+            if [ -n "$bad" ]; then
+              echo "Unexpected merge conflicts:" >&2
+              echo "$bad" >&2
+              exit 1
+            fi
+            git checkout --theirs core/data/canonical.json
+            git add core/data/canonical.json
+          fi
+
+          # Always start canonical from latest main formatting and newest Digital Ant state,
+          # then apply only the active Thought Organ value migration as literal replacements.
+          git show origin/main:core/data/canonical.json > core/data/canonical.json
+
+          python3 <<'PY'
+          from pathlib import Path
+          import hashlib
+          current = Path('docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md')
+          canonical = Path('core/data/canonical.json')
+          text = current.read_text(encoding='utf-8').replace('\r\n','\n')
+          sha = hashlib.sha256(text.encode()).hexdigest()
+          c = canonical.read_text(encoding='utf-8')
+          replacements = {
+            'DIGITAL_ANT_0001_PHYSICS_THOUGHT_ORGAN_V3_8': 'DIGITAL_ANT_0001_PHYSICS_THOUGHT_ORGAN_V4_1',
+            'PF-PHYSICS-CURRENT-V3-8': 'PF-PHYSICS-CURRENT-V4-1',
+            'V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE': 'V4.1 CUMULATIVE LIVING PHYSICS',
+            'dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48': sha,
+            'CURRENT_EQUALS_V3_8_BYTE_IDENTICAL': 'CURRENT_EQUALS_V4_1_BYTE_IDENTICAL',
+            'CANONICAL_UTF8_LF_SHA256_DBB4774A71DB614994DFF3E08E9CEC34B94633C4D46DCA13BFF2F6F54D9B0B48': f'CANONICAL_UTF8_LF_SHA256_{sha.upper()}',
+            'DIGITAL_ANT_APP_0001_V1_5_0_COMPATIBLE': 'DIGITAL_ANT_APP_0001_V4_1_PHYSICS_COMPATIBLE',
+            'PR_148_CURRENT_INSTALL': 'PR_159_V4_1_CUMULATIVE_MIGRATION'
+          }
+          for old,new in replacements.items():
+            if old in c:
+              c = c.replace(old,new)
+          canonical.write_text(c, encoding='utf-8', newline='\n')
+          print('physics_sha256=', sha)
+          PY
+
+          git add core/data/canonical.json
+          if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+            git commit -m 'Merge latest main into Physics V4.1 integration'
+          else
+            git commit -m 'Normalize Physics V4.1 canonical binding on latest main' || true
+          fi
+
+      - name: Validate final branch state
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp -s docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+          test "$(git hash-object docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md)" = '6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc'
+          grep -Fq 'DOC_ID: PF-PHYSICS-CURRENT-V4-1' docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+          grep -Fq '# PART 114. V3.8 Signature' docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md
+          node --check core/jobs/public-read-only-worker.mjs
+          node --test tests/universal-exchange.test.mjs
+          node -e "JSON.parse(require('fs').readFileSync('core/data/canonical.json','utf8')); console.log('canonical json PASS')"
+
+      - name: Remove one-shot sync and push only after PASS
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/physics-v4-1-final-sync.yml
+          git commit -m 'Complete Physics V4.1 final sync validation'
+          git push origin HEAD:codex/physics-civilization-full-runtime-v4-1

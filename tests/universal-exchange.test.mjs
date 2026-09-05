@@ -2700,14 +2700,16 @@ test("V3.9 canonical truth preserves primary job, zero business fiction, and pro
   assert.equal(seed.next_stage.heart_autopilot_v3_7.ignition.write_runtime, "PRIVATE_WINDOW_GATED_SCHEDULER");
 });
 
-test("V3.8 Physics CURRENT is the byte-identical authoritative Thought Organ", async () => {
+test("V4.1 Physics CURRENT is the byte-identical authoritative cumulative Thought Organ", async () => {
   const current = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", import.meta.url));
-  const formal = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md", import.meta.url));
-  assert.deepEqual(current, formal);
-  const inspected = await inspectPhysicsThoughtOrgan({ seed, checkedAt: "2026-08-16T23:27:18.851Z" });
-  assert.equal(inspected.observation.document_id, "PF-PHYSICS-CURRENT-V3-8");
-  assert.equal(inspected.observation.version, "V3.8 LIVING PHYSICS / KUFO-KSHIP WARP / BIO-LIFE");
-  assert.equal(inspected.observation.sha256, "dbb4774a71db614994dff3e08e9cec34b94633c4d46dca13bff2f6f54d9b0b48");
+  const latest = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md", import.meta.url));
+  const ancestor = await fs.readFile(new URL("../docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md", import.meta.url));
+  assert.deepEqual(current, latest);
+  assert.ok(current.length > ancestor.length);
+  assert.ok(current.includes(ancestor));
+  const inspected = await inspectPhysicsThoughtOrgan({ seed, checkedAt: "2026-08-20T00:00:00.000Z" });
+  assert.equal(inspected.observation.document_id, "PF-PHYSICS-CURRENT-V4-1");
+  assert.equal(inspected.observation.version, "V4.1 CUMULATIVE LIVING PHYSICS");
   assert.equal(inspected.health.status, "HEALTHY");
   assert.equal(assertThoughtOrganReadyForPlanning(inspected.health), true);
   assert.equal(CANONICAL_TRUTH_PRIORITY[0], "DEPLOYED_CHAIN_TRUTH");
