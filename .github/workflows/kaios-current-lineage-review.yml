@@ -1,0 +1,76 @@
+name: KAIOS Current Lineage Review
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/kaios-current-lineage-review.yml"
+      - "KGEN-KAIOS/tools/verify-current-lineage.mjs"
+      - "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json"
+      - "KGEN-KAIOS/reports/KAIOS_LINEAGE_STALE_REFERENCE_AUDIT_2026-08-09.json"
+      - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+      - "docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md"
+      - "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md"
+      - "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md"
+      - "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md"
+      - "docs/constitution/01_KGEN_Universe_Constitution.md"
+      - "docs/constitution/02_KAIOS_Civilization_Constitution.md"
+      - "docs/constitution/03_Celestial_Bank_18888.md"
+      - "K線西遊記/data/kgen-5d-world-map.json"
+      - "KGEN-KAIOS/contracts/KAIOS.sol"
+      - "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kaios-current-lineage-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  current-lineage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Confirm exact pull request head
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Enforce review-only boundary
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only "$BASE_SHA" HEAD)"
+          printf '%s\n' "$changed"
+          if grep -E '\.sol$' <<<"$changed"; then
+            echo "Solidity changes are outside this review-only workflow." >&2
+            exit 1
+          fi
+          if grep -E '(^|/)(archive|archives)(/|$)|_ARCHIVE' <<<"$changed"; then
+            echo "Historical archive changes are outside this review-only workflow." >&2
+            exit 1
+          fi
+      - name: Validate verifier syntax
+        run: node --check KGEN-KAIOS/tools/verify-current-lineage.mjs
+      - name: Preserve Physics CURRENT and V3.8 identity
+        shell: bash
+        run: |
+          test "$(git hash-object docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md)" = \
+            "$(git hash-object docs/physics/KGEN_Universe_Physics_Runtime_V3_8.md)"
+      - name: Verify current lineage
+        run: node KGEN-KAIOS/tools/verify-current-lineage.mjs
+      - name: Require reproducible committed report
+        run: git diff --exit-code -- KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json
+      - name: Check patch whitespace
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git diff --check "$BASE_SHA"...HEAD
