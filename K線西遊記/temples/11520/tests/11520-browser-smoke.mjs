@@ -64,6 +64,7 @@ const toggleBefore=await page.locator('#walletToggle').boundingBox();assert.ok(t
 await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(80);
 const toggleAfter=await page.locator('#walletToggle').boundingBox();assert.ok(toggleAfter);
 assert.ok(Math.abs(toggleAfter.x-toggleBefore.x)<12&&Math.abs(toggleAfter.y-toggleBefore.y)<12,'wallet toggle moved away after expand/collapse');
+await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(80);
 
 // All 14 formal organs are reachable before any modal can intentionally cover the UI.
 assert.equal(await page.locator('#rail [data-organ]').count(),14);
@@ -77,6 +78,7 @@ for(const id of ['trade','positions','orders','history','assets','records','mark
 }
 
 // Wallet connect is checked last because no-injected-wallet flow may intentionally open a launch sheet/modal.
+await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(80);
 await page.locator('#walletConnect').click({timeout:3000});await page.waitForTimeout(50);
 assert.ok((await page.locator('#walletMsg').textContent()).length>0);
 
