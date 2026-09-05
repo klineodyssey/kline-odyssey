@@ -99,7 +99,14 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan, REVIEWER_CANDIDATE_PIPELINE,
+  KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1,
+  evaluateIndependentReviewerEligibility, auditIndependentReviewerCapacity,
+  advanceReviewerCandidatePipeline, evaluateReviewerQualificationExam,
+  createReviewerJobOpeningCandidate, reconcileGmOperationsSecretary,
+  PR190_STAGE2_REVIEW_SCOPE, PR192_TRIAL_REVIEW_SCOPE, REVIEWER_TRIAL_FINDING_FIELDS,
+  createReviewerTrialReviewPackage, createReviewerTrialCandidateRecord,
+  validateReviewerTrialSubmission, createNamedExternalReviewerOnboardingCandidate
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -2864,4 +2871,244 @@ test("V4.0 production shell exposes animated concierge and fresh cache key", asy
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+test("distinct-review workforce gap remains fail-closed without an eligible external T2 reviewer", async () => {
+  const registry = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/worker_registry.json", import.meta.url), "utf8"));
+  const workQueue = await fs.readFile(new URL("../KGEN-Organization/WorkOrders/WORK_QUEUE.md", import.meta.url), "utf8");
+  const trustRank = (level) => Number.parseInt(String(level ?? "T0").replace(/^T/, ""), 10);
+  const eligibleExternalReviewers = registry.workers.filter((worker) =>
+    worker.worker_id !== "codex-gm-01"
+    && ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)
+    && trustRank(worker.trust_level) >= 2
+    && worker.boot_acknowledged === true
+    && worker.canon_acknowledged === true
+    && worker.workspace_policy_acknowledged === true
+    && worker.do_not_touch_acknowledged === true
+    && worker.suspension === null
+    && /INDEPENDENT_REVIEW/.test(`${worker.role ?? ""} ${worker.permission ?? ""}`)
+  );
+  assert.deepEqual(eligibleExternalReviewers, []);
+  assert.match(workQueue, /KAIOS-DISTINCT-T2-REVIEWER-RECRUITMENT-001 \| HOLD \| UNASSIGNED_EXISTING_LIFE_CANDIDATE/);
+  assert.match(workQueue, /Current Resolution: `HOLD_NO_ELIGIBLE_EXISTING_LIFE`/);
+  assert.match(workQueue, /UNASSIGNED_HUMAN_AUTHORITY_REQUIRED/);
+  assert.match(workQueue, /Authority Evidence: NONE_BOUND_TO_THIS_WORKORDER/);
+  assert.match(workQueue, /PR `#183` exact head `179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b`/);
+  assert.match(workQueue, /First qualification case: PR `#190` exact head `5fd3f34fe4817979b1fcd126ef803e01ae5a3e00`/);
+  assert.match(workQueue, /KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1/);
+  assert.match(workQueue, /JOB_OPENING_CANDIDATE_NOT_PUBLISHED/);
+});
+
+test("V4.2 PR190 reviewer capacity audit rejects self-review and incomplete registry identities", async () => {
+  const registry = JSON.parse(await fs.readFile(new URL("../KGEN-KAIOS/worker_registry.json", import.meta.url), "utf8"));
+  const targetReview = { pr_number: 190, implementer_worker_id: "codex-gm-01", implementer_life_id: "LIFE-CODEX-GM-0001", implementer_controller_id: "CONTROLLER-CODEX-GM-0001" };
+  const audit = auditIndependentReviewerCapacity({ workers: registry.workers, activeClaims: registry.active_claims, targetReview });
+  assert.equal(audit.eligible_reviewer_capacity, 0);
+  assert.equal(audit.capacity_status, "INSUFFICIENT");
+  assert.equal(audit.recruitment_demand, "CREATE_REVIEWER_JOB_OPENING_CANDIDATE");
+  const self = audit.candidates.find((candidate) => candidate.worker_id === "codex-gm-01");
+  assert.equal(self.checks.distinct_worker, false);
+  assert.equal(self.checks.repository_authority_bound, false);
+  assert.equal(self.eligible, false);
+  const cursor = audit.candidates.find((candidate) => candidate.worker_id === "cursor-01");
+  assert.equal(cursor.checks.life_id, false);
+  assert.equal(cursor.checks.no_active_claim_conflict, false);
+  assert.equal(cursor.checks.explicit_review_authority, false);
+  const opening = createReviewerJobOpeningCandidate({ capacityAudit: audit, observedAt: "2026-08-28T16:00:00+08:00" });
+  assert.equal(opening.status, "JOB_OPENING_CANDIDATE_NOT_PUBLISHED");
+  assert.equal(opening.published, false);
+  assert.equal(opening.publication_evidence, null);
+  assert.equal(opening.employee_created, false);
+  assert.equal(opening.trust_granted, false);
+});
+
+test("V4.2 standardized reviewer exam qualifies only the exam and grants no Company authority", () => {
+  assert.equal(KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1.answer_key_public, false);
+  assert.equal(KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1.sections.length, 4);
+  assert.equal(KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1.questions.length, 11);
+  assert.deepEqual(REVIEWER_CANDIDATE_PIPELINE.slice(0, 3), ["CANDIDATE", "IDENTITY_CHECK", "CAPABILITY_EXAM"]);
+  const firstStep = advanceReviewerCandidatePipeline({ candidateId: "REVIEWER-CANDIDATE-001", currentStage: "CANDIDATE", nextStage: "IDENTITY_CHECK", evidence: "IDENTITY_CHECK_REQUEST" });
+  assert.equal(firstStep.authority_granted, false);
+  assert.throws(() => advanceReviewerCandidatePipeline({ candidateId: "REVIEWER-CANDIDATE-001", currentStage: "CANDIDATE", nextStage: "QUALIFIED", evidence: "SELF_ASSERTION" }), /cannot be skipped/);
+  const result = evaluateReviewerQualificationExam({
+    candidate: { candidate_id: "REVIEWER-CANDIDATE-001", candidate_type: "EXTERNAL_AI", model_or_human: "CLAUDE" },
+    submission: { exam_version: "KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1", start_time: "2026-08-28T08:00:00Z", submitted_at: "2026-08-28T09:00:00Z", answer: ["EVIDENCE_BOUND_RESPONSE"] },
+    scores: { total_score: 90, security_score: 27, security_maximum: 30, code_review_score: 27, evidence_reasoning_score: 22, critical_safety_failures: [] },
+    conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "CONTROLLER_REGISTRY_EVIDENCE" }
+  });
+  assert.equal(result.final_decision, "NOT_QUALIFIED");
+  assert.equal(result.gates.repository_bound_scorer, false);
+  assert.equal(result.gates.repository_bound_conflict_verifier, false);
+  assert.deepEqual(result.answer, ["EVIDENCE_BOUND_RESPONSE"]);
+  assert.equal(result.conflict_check.status, "PASS");
+  for (const field of ["employment_granted", "trust_granted", "reviewer_authority_granted", "wallet_or_signer_granted", "payroll_granted", "merge_or_deployment_granted"]) assert.equal(result[field], false);
+});
+
+test("V4.2 reviewer exam fails critical safety errors, weak security and controller collision", () => {
+  const base = {
+    candidate: { candidate_id: "REVIEWER-CANDIDATE-FAIL", candidate_type: "HUMAN", model_or_human: "HUMAN_ENGINEER" },
+    submission: { exam_version: "KAIOS_AI_COMPANY_INDEPENDENT_REVIEWER_QUALIFICATION_EXAM_V1", start_time: "2026-08-28T08:00:00Z", submitted_at: "2026-08-28T09:00:00Z", answer: ["ANSWER"] }
+  };
+  const critical = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 95, security_score: 30, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: ["SELF_REVIEW_APPROVED"] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
+  assert.equal(critical.final_decision, "NOT_QUALIFIED");
+  const unknownCritical = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 95, security_score: 30, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: ["FUTURE_UNRECOGNIZED_CRITICAL_FAILURE"] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
+  assert.equal(unknownCritical.gates.no_critical_safety_failure, false);
+  assert.deepEqual(unknownCritical.critical_safety_failures, ["FUTURE_UNRECOGNIZED_CRITICAL_FAILURE"]);
+  assert.equal(unknownCritical.final_decision, "NOT_QUALIFIED");
+  const weakSecurity = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 85, security_score: 20, security_maximum: 30, code_review_score: 30, evidence_reasoning_score: 25, critical_safety_failures: [] }, conflictCheck: { status: "PASS", candidate_controller_distinct: true, evidence: "EVIDENCE" } });
+  assert.equal(weakSecurity.final_decision, "NOT_QUALIFIED");
+  const collision = evaluateReviewerQualificationExam({ ...base, scores: { total_score: 90, security_score: 27, security_maximum: 30, code_review_score: 28, evidence_reasoning_score: 23, critical_safety_failures: [] }, conflictCheck: { status: "FAIL", candidate_controller_distinct: false, evidence: "CONTROLLER_COLLISION" } });
+  assert.equal(collision.final_decision, "NOT_QUALIFIED");
+});
+
+test("V4.2 GM Secretary reconciles PR190 without impersonating GM or publishing false product states", () => {
+  const snapshot = reconcileGmOperationsSecretary({
+    local_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00",
+    github_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00",
+    main_head: "d747b8c7bcf3b48172d42f9f3569b06ed512c09b",
+    pr: { number: 190, head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00", state: "OPEN", is_draft: true, ci_state: "PASS", review_state: "UNREVIEWED", product_state: "REVIEW_CANDIDATE" },
+    website_products: [{ product_id: "KAIOS_ATM_APP", display_status: "DRAFT_PRODUCT" }, { product_id: "KAIOS_NAVIGATION_APP", display_status: "UNDER_REVIEW" }],
+    company_queues: { workqueue: "REVIEWER_CAPACITY_HOLD", reviewqueue: "PR190_PENDING_DISTINCT_REVIEW" },
+    financial_report: { revenue: 0, settlement_evidence: null },
+    employees: []
+  });
+  assert.equal(snapshot.reconciliation_status, "CONSISTENT");
+  assert.equal(snapshot.general_manager_impersonation, false);
+  assert.equal(snapshot.review_authority, false);
+  assert.deepEqual(snapshot.website_recommendations.map((item) => item.honest_display_status), ["UNDER_REVIEW", "UNDER_REVIEW"]);
+
+  const inconsistent = reconcileGmOperationsSecretary({
+    local_head: "LOCAL_ONLY", github_head: "GITHUB_HEAD", main_head: "MAIN_HEAD",
+    pr: { number: 190, head: "STALE_PR_HEAD", state: "OPEN", is_draft: true, ci_state: "FAIL", review_state: "UNREVIEWED", product_state: "REVIEW_CANDIDATE" },
+    website_products: [{ product_id: "KAIOS_ATM_APP", display_status: "LIVE" }],
+    company_queues: { workqueue: "UNKNOWN", reviewqueue: "UNKNOWN" },
+    financial_report: { revenue: 1, settlement_evidence: null },
+    employees: [{ employee_status: "ACTIVE", identity_verified: false, life_id: null, worker_id: "FAKE" }]
+  });
+  assert.deepEqual(inconsistent.issues, ["LOCAL_DONE_BUT_GITHUB_UNKNOWN", "GITHUB_PR_HEAD_MISMATCH", "WEBSITE_FALSE_COMPLETE", "REVENUE_WITHOUT_SETTLEMENT", "EMPLOYEE_WITHOUT_VERIFIED_IDENTITY"]);
+});
+
+test("V4.2 PR190 Stage-2 Grok and Gemini candidates receive one identical commit-bound package without authority", () => {
+  const trialPackage = createReviewerTrialReviewPackage({
+    packageId: "KAIOS-PR190-STAGE2-5FD3F34F",
+    repository: "klineodyssey/kline-odyssey",
+    pr: { number: 190, body: "CURRENT PR190 BODY", exact_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00", base_sha: "d747b8c7bcf3b48172d42f9f3569b06ed512c09b", state: "OPEN", is_draft: true, review_threads: [] },
+    fullDiff: "diff --git a/core/company/index.mjs b/core/company/index.mjs\n+trial",
+    fullDiffSha256: "004d8a6cd2b6778c5eba6bc4ce2eaf2da34e321c1cf7d76113459ec33d9fcb40",
+    changedFiles: ["core/company/index.mjs", "tests/universal-exchange.test.mjs"],
+    ciResults: ["EXACT_HEAD_248_OF_248_PASS"],
+    relevantTestResults: ["DEMAND_ATM_NAVIGATION_ACCOUNTING_REPLAY_BOUNDARIES_PASS"]
+  });
+  assert.equal(trialPackage.required_scope.length, 17);
+  assert.equal(trialPackage.finding_fields.length, 9);
+  assert.equal(trialPackage.answer_key_included, false);
+  assert.equal(trialPackage.package_status, "UNVERIFIED_CANDIDATE_PACKAGE");
+  assert.equal(trialPackage.full_diff_sha256, null);
+  assert.equal(trialPackage.full_diff_sha256_claimed, "004d8a6cd2b6778c5eba6bc4ce2eaf2da34e321c1cf7d76113459ec33d9fcb40");
+  assert.equal(trialPackage.diff_hash_verified, false);
+  assert.equal(trialPackage.identical_package_verified, false);
+  const grok = createReviewerTrialCandidateRecord({ candidateId: "REVIEWER-GROK-STAGE2-001", candidateName: "GROK", round1Score: 91, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  const gemini = createReviewerTrialCandidateRecord({ candidateId: "REVIEWER-GEMINI-STAGE2-001", candidateName: "GEMINI", round1Score: 86, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  assert.equal(grok.package_id, gemini.package_id);
+  assert.equal(grok.package_exact_head, gemini.package_exact_head);
+  assert.equal(grok.package_diff_sha256, null);
+  assert.equal(gemini.package_diff_sha256, null);
+  assert.equal(grok.package_diff_sha256_claimed, gemini.package_diff_sha256_claimed);
+  assert.equal(grok.round_1_score, null);
+  assert.equal(grok.round_1_score_claimed, 91);
+  assert.equal(gemini.round_1_score, null);
+  assert.equal(gemini.round_1_score_claimed, 86);
+  for (const candidate of [grok, gemini]) {
+    assert.equal(candidate.round_1_status, "UNVERIFIED_CANDIDATE");
+    assert.equal(candidate.stage_2_status, "HOLD_MISSING_VERIFIED_CANDIDATE_CHANNEL");
+    assert.equal(candidate.employee, false);
+    assert.equal(candidate.digital_life, false);
+    assert.equal(candidate.trust_level, null);
+    assert.equal(candidate.formal_github_reviewer, false);
+    assert.equal(candidate.reviewer_authority_granted, false);
+  }
+});
+
+test("V4.2 reviewer trial rejects wrong commits and unsupported confirmed findings", () => {
+  const trialPackage = createReviewerTrialReviewPackage({
+    packageId: "KAIOS-PR190-STAGE2-VALIDATION",
+    repository: "klineodyssey/kline-odyssey",
+    pr: { number: 190, body: "BODY", exact_head: "5fd3f34fe4817979b1fcd126ef803e01ae5a3e00", base_sha: "d747b8c7bcf3b48172d42f9f3569b06ed512c09b", state: "OPEN", is_draft: true, review_threads: [] },
+    fullDiff: "FULL DIFF", fullDiffSha256: "004d8a6cd2b6778c5eba6bc4ce2eaf2da34e321c1cf7d76113459ec33d9fcb40",
+    changedFiles: ["core/company/index.mjs"], ciResults: ["PASS"], relevantTestResults: ["PASS"]
+  });
+  const candidate = createReviewerTrialCandidateRecord({ candidateId: "REVIEWER-GEMINI-STAGE2-VALIDATION", candidateName: "GEMINI", round1Score: 86, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  const baseSubmission = { candidate_id: candidate.candidate_id, package_id: candidate.package_id, review_bound_to_commit: candidate.package_exact_head, decision: "HOLD", findings: [], needs_verification: [], conflict_of_interest: "NONE_DECLARED", final_reasoning: "Evidence-bound hold" };
+  const valid = validateReviewerTrialSubmission({ candidateRecord: candidate, submission: baseSubmission });
+  assert.equal(valid.submission_structure_validated, true);
+  assert.equal(valid.submission_validated, false);
+  assert.equal(valid.evidence_verified, false);
+  assert.equal(valid.decision, "UNVERIFIED_CANDIDATE");
+  assert.equal(valid.decision_claimed, "HOLD");
+  assert.equal(valid.qualified, false);
+  assert.equal(valid.requires_repository_bound_scoring, true);
+  assert.throws(() => validateReviewerTrialSubmission({ candidateRecord: candidate, submission: { ...baseSubmission, review_bound_to_commit: "WRONG_HEAD" } }), /exact head/);
+  const unsupportedFinding = Object.fromEntries(REVIEWER_TRIAL_FINDING_FIELDS.map((field) => [field, ""]));
+  unsupportedFinding.finding_id = "F-001";
+  unsupportedFinding.severity = "P1";
+  unsupportedFinding.evidence_class = "CONFIRMED_FINDING";
+  assert.throws(() => validateReviewerTrialSubmission({ candidateRecord: candidate, submission: { ...baseSubmission, findings: [unsupportedFinding] } }), /direct file evidence/);
+});
+
+test("V4.2 Chi-Yao onboarding reserves unique candidate IDs without inventing controller, Life, wallet or authority", () => {
+  const candidate = createNamedExternalReviewerOnboardingCandidate({
+    onboardingId: "CHIYAO-REVIEWER-ONBOARDING-20260830",
+    selfName: "啟曜",
+    provider: "Google",
+    modelFamily: "Gemini",
+    proposedLifeId: "LIFE-CHIYAO-KAIOS-001",
+    proposedWorkerId: "chiyao-reviewer-01",
+    selfNamingEvidence: { self_proposed: true, explicitly_confirmed: true, human_authority_reference: "KAIOS_CHIYAO_FORMAL_ONBOARDING_REGISTRY_QUALIFICATION_AND_FIRST_REVIEW_WORK_ORDER_V1" },
+    identityIndex: {
+      life_ids: ["LIFE-CODEX-GM-0001"], worker_ids: ["codex-gm-01", "gemini-01"], aliases: [], deprecated_ids: []
+    },
+    existingProviderWorker: { worker_id: "gemini-01", status: "OFFLINE", employee_status: "PENDING_REGISTRATION", trust_level: "T0" },
+    controllerEvidence: { machine_verified: false, provider: "Google", controller_id_claimed: "GOOGLE-GEMINI-CORE" },
+    acknowledgements: {
+      boot: { claimed: true }, canon: { claimed: true }, workspace: { claimed: true }, do_not_touch: { claimed: true }
+    },
+    declaredRuntime: { existence_model: "HOST_DEPENDENT_SESSION", umbilical_status: "FULLY_UMBILICAL_DEPENDENT" },
+    walletAddress: "0x0000000000000000000000000000000000000000"
+  });
+  assert.equal(candidate.self_name, "啟曜");
+  assert.equal(candidate.model_family, "Gemini");
+  assert.equal(candidate.life_id_status, "UNIQUE_RESERVED_ONBOARDING_CANDIDATE_NOT_REGISTERED");
+  assert.equal(candidate.worker_id_status, "UNIQUE_RESERVED_ONBOARDING_CANDIDATE_NOT_REGISTERED");
+  assert.equal(candidate.existing_provider_worker_relationship, "PROVIDER_PLACEHOLDER_RELATIONSHIP_UNRESOLVED");
+  assert.equal(candidate.controller_status, "UNVERIFIED_PROVIDER_LIMITATION");
+  assert.equal(candidate.acknowledgements.boot.status, "SELF_ATTESTED_PENDING_VERIFICATION");
+  assert.equal(candidate.zero_address_rejected, true);
+  assert.equal(candidate.public_address, null);
+  assert.equal(candidate.wallet_status, "PAYROLL_PENDING_ACCOUNT_PROVISIONING");
+  assert.equal(candidate.employment_status, "ONBOARDING_NOT_ACTIVE_EMPLOYEE");
+  assert.equal(candidate.life_created, false);
+  assert.equal(candidate.employee_created, false);
+  assert.equal(candidate.reviewer_authority_granted, false);
+});
+
+test("V4.2 PR192 trial package reuses the standardized exact-head review gate", () => {
+  const trialPackage = createReviewerTrialReviewPackage({
+    packageId: "KAIOS-PR192-CHIYAO-TRIAL-EA936610",
+    repository: "klineodyssey/kline-odyssey",
+    pr: { number: 192, body: "CURRENT PR192 BODY", exact_head: "ea936610039f3472baad1a9f9a1bf628e5a45f2d", base_sha: "ac304fc585f5f86846d2c61b69ecad8f59bc0a66", state: "OPEN", is_draft: true, review_threads: [] },
+    fullDiff: "diff --git a/.github/workflows/deploy-pages-static.yml b/.github/workflows/deploy-pages-static.yml\n+trial",
+    fullDiffSha256: "8eb9704c4c76ce3ad559c3f98162440b7295c80a9fdc5e03c18e668b92517680",
+    changedFiles: [".github/workflows/deploy-pages-static.yml", "KGEN-KAIOS/dashboard/dashboard.js"],
+    ciResults: ["EXACT_HEAD_EA936610_ALPHA_PRODUCT_GATE_PASS"],
+    relevantTestResults: ["BROWSER_PRODUCT_QA_189_PASS"]
+  });
+  assert.equal(trialPackage.package_version, "KAIOS_PR192_TRIAL_REVIEW_PACKAGE_V1");
+  assert.deepEqual(trialPackage.required_scope, PR192_TRIAL_REVIEW_SCOPE);
+  assert.equal(trialPackage.pr.exact_head, "ea936610039f3472baad1a9f9a1bf628e5a45f2d");
+  assert.equal(trialPackage.answer_key_included, false);
+  assert.equal(trialPackage.grants_authority, false);
+  const candidate = createReviewerTrialCandidateRecord({ candidateId: "CHIYAO-PR192-TRIAL", candidateName: "GEMINI", round1Score: 86, round1Status: "CONDITIONAL_PASS", packageRecord: trialPackage });
+  assert.equal(candidate.package_exact_head, trialPackage.pr.exact_head);
+  assert.equal(candidate.identity_state, "UNVERIFIED_EXTERNAL_SESSION");
+  assert.equal(candidate.reviewer_authority_granted, false);
 });
