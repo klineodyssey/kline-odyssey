@@ -34,6 +34,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/map-object-navigation-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/capture-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/backpack-runtime.mjs"
@@ -42,7 +43,7 @@ jobs:
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
-          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-spatial-navigation.test.mjs"
+          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-spatial-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-capture-runtime.test.mjs"
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
