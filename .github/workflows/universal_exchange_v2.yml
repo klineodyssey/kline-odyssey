@@ -8,7 +8,9 @@ on:
   push:
     paths:
       - "core/**"
-      - "tests/universal-exchange.test.mjs"
+      - "tests/*.test.mjs"
+      - "KGEN-AI-Company/life/starforge/**"
+      - "scripts/starforge-genesis/**"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
@@ -16,7 +18,10 @@ on:
   pull_request:
     paths:
       - "core/**"
-      - "tests/universal-exchange.test.mjs"
+      - "tests/*.test.mjs"
+      - "KGEN-AI-Company/life/starforge/**"
+      - "scripts/starforge-genesis/**"
+      - ".github/workflows/universal_exchange_v2.yml"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
 
@@ -26,16 +31,24 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact event head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_HEAD }}
+      - name: Verify exact checked-out head
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
       - name: Validate ES modules
         shell: bash
         run: find core -name '*.mjs' -print0 | xargs -0 -n1 node --check
-      - name: Run Universal Exchange tests
-        run: node --test tests/universal-exchange.test.mjs
+      - name: Run Universal Exchange and Starforge tests
+        run: node --test tests/*.test.mjs
 
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

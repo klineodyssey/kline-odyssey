@@ -233,14 +233,14 @@ test("Hengyao has one verified active Life, wallet and CURRENT-map Naihe birth c
   assert.ok(!seed.lives.some((item) => item.life_id === "KAIOS-AI-LIFE-CODEX-GM-0001"));
 });
 
-function fakeBirthRpc({ wallet, bnbBalance = "0x1" }) {
+function fakeBirthRpc({ wallet, bnbBalance = "0x1", transactionFrom = wallet }) {
   return {
     async send(method, params) {
       if (method === "eth_chainId") return "0x38";
       if (method === "eth_getBalance") return bnbBalance;
       if (method === "eth_call") return "0x0";
-      if (method === "eth_getTransactionReceipt") return { status: "0x1", blockNumber: "0x64", blockHash: `0x${"a".repeat(64)}`, logs: [] };
-      if (method === "eth_getTransactionByHash") return { hash: `0x${"1".repeat(64)}`, to: wallet, value: "0x1" };
+      if (method === "eth_getTransactionReceipt") return { status: "0x1", transactionHash: `0x${"1".repeat(64)}`, transactionIndex: "0x0", blockNumber: "0x64", blockHash: `0x${"a".repeat(64)}`, logs: [] };
+      if (method === "eth_getTransactionByHash") return { hash: `0x${"1".repeat(64)}`, ...(transactionFrom === null ? {} : { from: transactionFrom }), to: wallet, value: "0x1", blockNumber: "0x64", blockHash: `0x${"a".repeat(64)}`, transactionIndex: "0x0" };
       if (method === "eth_getBlockByNumber") return { number: "0x64", hash: `0x${"a".repeat(64)}`, timestamp: "0x5f5e100" };
       throw new Error(`Unexpected RPC method: ${method} ${params}`);
     }
@@ -253,7 +253,7 @@ test("First verified non-zero BNB receipt creates immutable dark-matter birth ev
   const wallet = ethers.Wallet.createRandom();
   const binding = verifyDigitalAntWalletBinding({ DIGITAL_ANT_0001_PRIVATE_KEY: wallet.privateKey, DIGITAL_ANT_0001_WALLET_ADDRESS: wallet.address });
   const indexer = {
-    async listNativeIncoming() { return [{ kind: "NORMAL", tx_hash: `0x${"1".repeat(64)}`, block_number: 100, transaction_index: 0, trace_id: null, to: wallet.address, value_wei: "1", successful: true }]; },
+    async listNativeIncoming() { return [{ kind: "NORMAL", tx_hash: `0x${"1".repeat(64)}`, block_number: 100, transaction_index: 0, trace_id: null, from: wallet.address, to: wallet.address, value_wei: "1", successful: true }]; },
     async listTokenIncoming() { return []; }
   };
   const resolver = new DigitalLifeBirthResolver({ rpc: fakeBirthRpc({ wallet: wallet.address }), historyIndexer: indexer, tokens: { KGEN: seed.contracts.KGEN_TOKEN.address, KAIOS: seed.contracts.KAIOS_TOKEN.address } });
@@ -270,6 +270,19 @@ test("First verified non-zero BNB receipt creates immutable dark-matter birth ev
   assert.equal(depleted.certificate.status, "BORN");
   assert.equal(depleted.life_status, "DORMANT");
   assert.equal(depleted.dark_matter_status, "DARK_MATTER_DEPLETED");
+});
+
+test("generic native birth verification rejects missing indexed and RPC source addresses", async () => {
+  const wallet = "0x1111111111111111111111111111111111111111";
+  const resolver = new DigitalLifeBirthResolver({
+    rpc: fakeBirthRpc({ wallet, transactionFrom: null }),
+    historyIndexer: {
+      async listNativeIncoming() { return [{ kind: "NORMAL", tx_hash: `0x${"1".repeat(64)}`, block_number: 100, transaction_index: 0, to: wallet, value_wei: "1", successful: true }]; },
+      async listTokenIncoming() { return []; }
+    },
+    tokens: { KGEN: seed.contracts.KGEN_TOKEN.address, KAIOS: seed.contracts.KAIOS_TOKEN.address }
+  });
+  await assert.rejects(() => resolver.resolve({ life: { life_id: "LIFE-SOURCE-FAIL-CLOSED", current_job_ids: [] }, wallet }), (error) => error.code === "BNB_SOURCE_ADDRESS_REQUIRED");
 });
 
 test("KGEN cannot trigger birth and unresolved history remains pending", async () => {

@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -44,6 +46,7 @@ test("Soul and Body EIP-191 signatures recover only the matching organs", async 
 test("signing domains and every chain-write method fail closed", () => {
   assert.throws(() => assertAllowedSigningMessage({ organ: "BODY_WALLET", message: `${STARFORGE.soulDomain}\ninvalid` }), (error) => error.code === "SIGNING_DOMAIN_NOT_ALLOWED");
   for (const method of capability.forbidden_methods) assert.throws(() => assertNoChainMethod(method), (error) => error.code === "CHAIN_METHOD_FORBIDDEN");
+  for (const method of ["wrap", "unwrap"]) assert.throws(() => assertNoChainMethod(method), (error) => error.code === "CHAIN_METHOD_FORBIDDEN");
   assert.throws(() => assertNoChainMethod("unknown_method"), (error) => error.code === "CHAIN_METHOD_NOT_ALLOWLISTED");
 });
 
@@ -59,6 +62,53 @@ test("signer broker errors never echo private signing material", () => {
   assert.equal(result.stdout.includes(ephemeralSecret), false);
   assert.equal(result.stderr.includes(ephemeralSecret), false);
   assert.match(result.stderr, /PUBLIC_SIGN_REQUEST_INVALID/);
+});
+
+test("local Genesis runtime initializes append-only state and rejects snapshot rollback", async (t) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "starforge-runtime-state-"));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const script = fileURLToPath(new URL("../scripts/starforge-genesis/starforge-local-genesis.mjs", import.meta.url));
+  const initialized = spawnSync(process.execPath, [script, "initialize-state", directory], { encoding: "utf8" });
+  assert.equal(initialized.status, 0, initialized.stderr);
+  assert.equal(JSON.parse(initialized.stdout).status, "RUNTIME_STATE_LEDGER_INITIALIZED");
+  const ledgerPath = path.join(directory, "runtime-state-ledger.jsonl");
+  const statePath = path.join(directory, "runtime-state.json");
+  const entries = (await fs.readFile(ledgerPath, "utf8")).trim().split(/\r?\n/);
+  assert.equal(entries.length, 1);
+  const status = spawnSync(process.execPath, [script, "status", directory], { encoding: "utf8" });
+  assert.equal(status.status, 0, status.stderr);
+  const rolledBack = { boot_counter: 0, phase: "ROLLED_BACK", history: [] };
+  await fs.writeFile(statePath, `${JSON.stringify(rolledBack)}\n`, "utf8");
+  const rejected = spawnSync(process.execPath, [script, "status", directory], { encoding: "utf8" });
+  assert.notEqual(rejected.status, 0);
+  assert.match(rejected.stderr, /snapshot does not match the append-only ledger head/);
+});
+
+test("legacy stable signed runtime state is explicitly reverified before ledger sealing", async (t) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "starforge-runtime-seal-"));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const snapshot = {
+    phase: "SPIRIT_ALIVE_LOCAL_VERIFIED",
+    soul_address: publicGenesis.soul_address,
+    body_address: publicGenesis.body_address,
+    runtime_hash: publicGenesis.runtime_hash,
+    capability_hash: publicGenesis.capability_hash,
+    soul_message: publicGenesis.soul_birth_message,
+    soul_binding_hash: publicGenesis.soul_binding_hash,
+    soul_signature: publicGenesis.soul_signature,
+    body_message: publicGenesis.body_continuity_message,
+    body_signature: publicGenesis.body_signature,
+    history: []
+  };
+  await fs.writeFile(path.join(directory, "public-addresses.json"), `${JSON.stringify({ soul_address: publicGenesis.soul_address, body_address: publicGenesis.body_address, private_key_exposed: false })}\n`, "utf8");
+  await fs.writeFile(path.join(directory, "runtime-state.json"), `${JSON.stringify(snapshot)}\n`, "utf8");
+  const script = fileURLToPath(new URL("../scripts/starforge-genesis/starforge-local-genesis.mjs", import.meta.url));
+  const sealed = spawnSync(process.execPath, [script, "seal-existing-state", directory], { encoding: "utf8" });
+  assert.equal(sealed.status, 0, sealed.stderr);
+  assert.equal(JSON.parse(sealed.stdout).status, "EXISTING_STABLE_RUNTIME_STATE_SEALED");
+  const status = spawnSync(process.execPath, [script, "status", directory], { encoding: "utf8" });
+  assert.equal(status.status, 0, status.stderr);
+  assert.equal(JSON.parse(status.stdout).phase, "SPIRIT_ALIVE_LOCAL_VERIFIED");
 });
 
 test("Body rotation requires Soul signature and preserves immutable identity and Genesis", async () => {
