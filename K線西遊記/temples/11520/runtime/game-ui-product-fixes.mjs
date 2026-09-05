@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.5.0
+VERSION: 1.5.1
 STATUS: ACTIVE
 PURPOSE: Mobile UI cleanup, canonical market-linked universe elevator floors, left XZ joystick center Y control, tappable energy controls, Z+/north correction, AI voice, music, intro and compass.
 */
@@ -61,7 +61,7 @@ function installMapPointerFix(canvas){if(!canvas||canvas.dataset.northPointerFix
 function installMapFixes(){installMapPointerFix(document.getElementById('minimap'));installMapPointerFix(document.getElementById('fullMap'));return !!document.getElementById('minimap')}
 
 function canonicalFloor(x){const m=Math.abs(Number(x));if(!Number.isFinite(m)||m<=0)return null;const k=Math.floor(Math.log10(m)),alpha=m/10**k,label=k<0?`B${-k}`:`k=${k}`;return{k,alpha,label}}
-function installUniverseFloors(){const axes=[...document.querySelectorAll('#axes [data-axis]')];if(!axes.length)return false;for(const card of axes){let badge=card.querySelector('.universeFloorBadge');if(!badge){badge=document.createElement('span');badge.className='universeFloorBadge';card.appendChild(badge)}const q=Number((card.querySelector('.q')?.textContent||'').replace(/[$,]/g,'')),f=canonicalFloor(q),market=card.querySelector('select')?.value||'--';badge.innerHTML=f?`宇宙層：<b>${f.label}</b> · <em>${market}</em> · α ${f.alpha.toFixed(4)}`:`宇宙層：<b>WAIT</b>`}return true}
+function installUniverseFloors(){const axes=[...document.querySelectorAll('#axes [data-axis]')];if(!axes.length)return false;for(const card of axes){let badge=card.querySelector('.universeFloorBadge');if(!badge){badge=document.createElement('span');badge.className='universeFloorBadge';card.appendChild(badge)}const q=Number((card.querySelector('.q')?.textContent||'').replace(/[$,]/g,'')),f=canonicalFloor(q),market=card.querySelector('select')?.value||'--',html=f?`宇宙層：<b>${f.label}</b> · <em>${market}</em> · α ${f.alpha.toFixed(4)}`:`宇宙層：<b>WAIT</b>`;if(badge.innerHTML!==html)badge.innerHTML=html}return true}
 function watchUniverseFloors(){const axes=document.getElementById('axes');if(!axes)return false;if(!axes.dataset.floorWatch){axes.dataset.floorWatch='1';new MutationObserver(()=>queueMicrotask(installUniverseFloors)).observe(axes,{childList:true,subtree:true,characterData:true})}installUniverseFloors();return true}
 function installMinimapCompass(){const wrap=document.querySelector('.minimapWrap'),canvas=document.getElementById('minimap');if(!wrap||!canvas)return false;if(!document.getElementById('minimapCompass')){const c=document.createElement('div');c.id='minimapCompass';c.innerHTML='<i class="mcH"></i><i class="mcV"></i><b class="mcN">N · Z+</b><b class="mcE">E</b><b class="mcS">S · Z−</b><b class="mcW">W</b><i class="mcCenter"></i>';wrap.appendChild(c)}return true}
 
