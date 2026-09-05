@@ -9,6 +9,7 @@ import {
   createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission
 } from "../../../core/index.mjs?v=11520-v4.0-player-first";
 import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
+import { createKgenNativeMarketCell } from "./modules/kgen-native-market-cell.mjs?v=11520-v4.0-native-orderbook-readonly";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
@@ -32,6 +33,8 @@ const PLAYER_PROFILE_KEY = "11520.huaguoshanMember.v4";
 const PLAYER_MISSION_KEY = "11520.firstMission.v4";
 const PLAYER_METRICS_KEY = "11520.playerMetrics.v4";
 let activeRecognition = null;
+
+const nativeKgenMarket = createKgenNativeMarketCell();
 
 function readLocalJson(key, fallback = null) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
@@ -303,8 +306,15 @@ async function tokensView() {
   const currencies = await universe.registries.currency.list();
   const cards = currencies.map((item) => `<article class="card"><div class="eyebrow">${html(item.currency_id)}</div><h3>${html(item.name)}</h3>${kv("Civilization", item.civilization_scale)}${kv("Mass class", item.mass_class ?? "NOT_DEFINED")}${kv("Life role", item.life_role ?? "NOT_DEFINED")}${kv("Contract", item.currency_id === "BNB" ? "NATIVE ASSET · NO CONTRACT" : item.contract_address ? "REGISTERED · VERIFY AT RUNTIME" : "NOT_DEPLOYED")}${kv("Trade", badge(item.trade_status ?? "NOT_DEPLOYED"), true)}<p>${badge(item.status)}</p></article>`).join("");
   const genesis = universe.seed.kaios_genesis;
+  const nativeMarket = nativeKgenMarket.getMarketState();
+  const nativeBook = nativeKgenMarket.getOrderBook();
+  const orderRows = [
+    ...nativeBook.bids.map((order) => ({ ...order, side: "BID" })),
+    ...nativeBook.asks.map((order) => ({ ...order, side: "ASK" }))
+  ];
   return `${hero("TOKEN MARKET", "Real chain state, explicit wallet consent.", "KGEN uses its verified BSC mainnet KGEN/WBNB pair and PancakeSwap V2 Router. No synthetic candles, order book, TVL, fills or prices are generated.")}
     <div class="grid">${cards}</div>
+    ${section("K11520 NATIVE ORDER BOOK · PUBLIC READ ONLY", `<div class="notice">EXPERIMENTAL / UNDER REVIEW / NOT CONNECTED. This panel reads the existing PR #169 in-memory candidate. It cannot place, cancel, match, settle or transfer assets.</div><div class="grid two" data-native-market-state="${html(nativeMarket.runtimeStatus)}"><article class="card"><div class="eyebrow">${html(nativeMarket.marketId)}</div><h3>${badge(nativeMarket.runtimeStatus)}</h3>${kv("Base asset", nativeMarket.baseAsset)}${kv("Quote asset", nativeMarket.quoteAsset)}${kv("Quote status", badge(nativeMarket.quoteStatus), true)}${kv("CT · last verified settled trade", nativeMarket.ct ?? "NULL · NO VERIFIED TRADE")}${kv("Best bid", nativeMarket.bestBid ?? "NULL")}${kv("Best ask", nativeMarket.bestAsk ?? "NULL")}</article><article class="card"><div class="eyebrow">TRUTH BOUNDARY</div><h3>${badge("READ_ONLY_NOT_CONNECTED")}</h3>${kv("Matched trades", nativeMarket.matchedTradeCount)}${kv("Verified settled trades", nativeMarket.verifiedTradeCount)}${kv("Settlement", nativeMarket.settlement)}${kv("Ownership transfer", nativeMarket.ownershipTransfer)}${kv("Receipt", nativeMarket.receiptVerification)}${kv("Chain write", String(nativeMarket.chainWrite))}${kv("Signer", String(nativeMarket.signer))}</article></div><div class="table-wrap"><table aria-label="K11520 native KGEN candidate order book"><thead><tr><th>Side</th><th>Price</th><th>Quantity remaining</th><th>Order</th></tr></thead><tbody>${orderRows.length ? orderRows.map((order) => `<tr><td>${html(order.side)}</td><td>${html(order.price)}</td><td>${html(order.remaining)}</td><td>${html(order.id)}</td></tr>`).join("") : `<tr><td colspan="4">NO ACTIVE VERIFIED ORDERS · CT REMAINS NULL</td></tr>`}</tbody></table></div>`) }
     ${section("KAIOS Mainnet Genesis", `<article class="card">${kv("Status", badge(genesis.status), true)}${kv("Mechanism", "KGEN WHITE HOLE · NOT A DEX SWAP")}${kv("Genesis timestamp", genesis.timestamp)}${kv("Genesis block", genesis.block)}${kv("Genesis KAIOS", genesis.genesis_kaios)}${kv("Settlement TX", genesis.settlement_tx_hash)}${kv("Epoch TX", genesis.epoch_tx_hash)}${kv("Receiving treasury", "18888 LINGXIAO CELESTIAL BANK")}</article>`)}
     ${section("KGEN / WBNB live AMM", `<form class="card form-grid" id="kgen-swap-form">
       <div class="notice full">LIVE BSC transaction. Connect a wallet on chain 56. The Router supports KGEN fee-on-transfer behavior. Quotes are live and may differ from final receipt due to token tax, pool movement and gas. Nothing is submitted without wallet confirmation.</div>
