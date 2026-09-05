@@ -1,8 +1,8 @@
 # KAIOS Civilization Circulatory Runtime — Multi-Worker Handoff Handbook
 
 STATUS: DESIGN_AND_HANDOFF_AUTHORITY / NOT_DEPLOYED
-VERSION: V1.1
-DATE: 2026-08-20 Asia/Taipei
+VERSION: V1.4
+DATE: 2026-08-27 Asia/Taipei
 PURPOSE: durable handoff source so Human, AI, Codex, ChatGPT pages, workers, reviewers and future digital lives can resume work without reconstructing decisions from chat history.
 
 > This handbook records deployed facts, current design Canon, implementation candidates, superseded history and open review items separately. It does not authorize deployment, governance execution, payment, burn, token transfer or any chain transaction.
@@ -15,7 +15,7 @@ Every worker taking over this task MUST:
 2. Fetch latest `main`; never assume a remembered SHA is current.
 3. Read PR #136 exact Phase 2 deployed-evidence lineage at `00c79b380ce094c17d75697f360820c4d2035071`.
 4. Read PR #152 exact design-only Canon correction at `672ab4884e8cf6f9d07c176a862fb858cafe8161`.
-5. Read PR #158 exact catalyst/KUFO/KSHIP implementation candidate at `e679a71a0b9ed42d601a739740bf8d59de96f322`.
+5. Read PR #158 exact current implementation candidate from its live Draft head; never reuse the historical `e679a71...` snapshot as current evidence.
 6. Read PR #160 Mainnet provenance reconciliation before closeout of #135/#136.
 7. Preserve deployed evidence as history. Never rewrite later design as if already deployed.
 8. Re-run exact-head CI after every semantic code change.
@@ -42,7 +42,7 @@ Current design mass scale:
 - 1 KUFO = 1 g.
 - 1 KSHIP = 1 mg.
 
-For exactly representable amounts:
+For exactly representable amounts under the Human-frozen fresh-contribution Canon:
 
 - required KGEN catalyst = KAIOS / 1000.
 - KUFO entitlement lineage = KAIOS × 1000.
@@ -54,7 +54,7 @@ For exactly representable amounts:
 - equal-mass catalyst = 5,000 KGEN = 5,000,000 kg.
 - KUFO lineage target = 5,000,000,000 KUFO.
 
-KGEN is catalyst in PR #158. It is not burned and is not converted into KUFO. Exact catalyst must ultimately return to the recorded catalyst owner.
+KGEN is the equal-mass civilization contribution. It is not burned and is not converted into KUFO. Under the current fresh-contribution Canon it goes directly to an immutable catalyst bank, never enters furnace escrow and is not returned after a successful atomic delivery.
 
 ## 3. 18911 alchemy chronology
 
@@ -62,7 +62,7 @@ Historical/repository V1 furnace semantics use 49 Epoch maturity.
 
 PR #158 adds KGEN catalyst escrow but still uses 49 Alchemy Epochs before proof consumption.
 
-Current design decision introduces a two-stage chronology:
+The former proposed two-stage chronology was:
 
 ```text
 49 Epoch REVIEW
@@ -70,22 +70,34 @@ Current design decision introduces a two-stage chronology:
 =130 Epoch TOTAL
 ```
 
-This 130-Epoch rule is `CURRENT_DESIGN_CANON` for the successor implementation. It is NOT deployed and is NOT yet implemented in PR #158.
+This 49+81 waiting model is `HISTORICAL_SUPERSEDED`. It must not be described as CURRENT and must not be implemented by simply changing a single wait constant to 130.
 
-Required future state machine:
+Current Human-frozen successor design is:
 
 ```text
-SUBMITTED
--> REVIEWING (49 Epoch)
--> REVIEW_PASSED
--> CATALYZING (81 Epoch)
--> MATURED (total 130 Epoch)
--> PROOF_CONSUMED
--> KUFO_LINEAGE_ESTABLISHED
--> CATALYST_RETURNED
+holder
+-> successor K18911
+-> exact KGEN contribution transferred directly to immutable catalystBank
+-> exact catalyst-bank balance delta verified
+-> existing deployed KAIOS ABI burns the authorized KAIOS
+-> K511111 releases
+-> KUFO is minted immediately to the beneficiary fixed at transaction entry
 ```
 
-Rejection/cancellation/refund behavior before and during catalysis remains `OPEN_REVIEW` and must be frozen before implementation.
+Current rules:
+
+- minimum = 1 KAIOS;
+- required KGEN contribution = KAIOS / 1000, exactly representable or fail closed;
+- 130 days is the maximum freshness window for eligible KGEN contribution evidence, not a KUFO delivery delay;
+- exactly day 130 remains valid; one second later is expired;
+- delivery delay = 0;
+- any failed step atomically reverts;
+- cancellation after success is not applicable;
+- refund is not applicable because no furnace KGEN escrow exists;
+- KUFO decay begins at its actual mint timestamp;
+- the alternate 0.10% KGEN bank-tax credit route remains `DESIGN_ONLY_DISABLED` until indexer, attester, root and budget Canon are frozen.
+
+PR #158 remains an `IMPLEMENTED_REVIEW_CANDIDATE`, not deployment evidence. The production catalyst-bank address and KUFO `halfLifeSeconds` remain unfrozen deployment blockers.
 
 ## 4. 18888 service and 18911 alchemy separation
 
@@ -118,43 +130,42 @@ Current design direction:
 
 This is `CURRENT_DESIGN_CANON / IMPLEMENTATION_PENDING`, not deployed functionality.
 
-## 6. Proposed K1852 Catalyst Relay
+## 6. K1852 contribution-proof boundary
 
 Do NOT modify historical V7.5.2 deployment and pretend new methods already exist there.
 
-Preferred successor architecture: separately reviewed `K1852CatalystRelay` adapter/organ.
+K1852 routing remains `DESIGN_ONLY_UNFROZEN`. The existing GalacticBank cannot be represented as a live relay or automatic return organ. Under the current fresh-contribution Canon, a future proof/indexer adapter would establish a recent bank contribution; it would not create a returnable furnace escrow.
 
 Minimum ticket fields:
 
 ```text
-catalystTicketId
+contributionProofId
 lifeId
-catalystOwner
+originalContributor
 beneficiary
 kaiosAmount
-requiredKgenCatalyst
+requiredKgenContribution
 sourcePoint
 furnacePoint=18911
-submittedAt
-reviewEndsAt
-catalysisEndsAt
+contributionTimestamp
+freshnessExpiresAt
+bankReceiptEvidence
 alchemyProofId
 status
-catalystReturned
+proofConsumed
 ```
 
 Mandatory invariants:
 
-- ticket replay impossible;
+- proof replay impossible;
 - exact KGEN balance delta checked;
 - no fee-on-transfer ambiguity;
 - no arbitrary beneficiary replacement;
-- no admin sweep of active catalyst;
-- catalyst returned only to recorded catalyst owner;
-- KGEN total supply unchanged by catalysis;
-- 18888 cannot spend catalyst escrow;
+- original contributor preserved even if a relay submits the call;
+- KGEN total supply unchanged by contribution;
+- 18888, payroll and trading treasury cannot spend the bank contribution;
 - 18911 cannot consume another Life/proof ticket;
-- completion cannot mark catalyst returned without actual balance delta.
+- no execution while the route is `DESIGN_ONLY_DISABLED`.
 
 ## 7. Genesis organs and addresses
 
@@ -238,10 +249,12 @@ Maintain separate ledgers/routes for:
 4. `CLAIMABLE_RESOURCE_REWARD` — verified reward liabilities.
 5. `FUNDED_RESOURCE_REWARD_POOL` — funded reward capital.
 6. `KGEN_RESERVE` — existing KGEN reserve/tax accumulation.
-7. `KGEN_CATALYST_ESCROW` — temporary catalyst custody; never payroll/equity.
+7. `KGEN_CATALYST_ESCROW` — historical/candidate escrow classification only; current fresh path must keep this at zero because KGEN goes directly to the immutable catalyst bank.
 8. `ALCHEMY_BURNED_KAIOS` — permanently destroyed KAIOS; never refundable principal.
 9. `KUFO_LINEAGE` — post-alchemy entitlement/mass lineage.
 10. `KSHIP_PROPULSION` — decay-derived transport fuel lineage.
+11. `TRADING_TREASURY` — the only account class that a future trading policy may authorize.
+12. `TRADING_REALIZED_PNL` — receipt-backed realized result; never inferred from a quote or paper trade.
 
 Cross-spending is prohibited unless an explicit future Canon and implementation authorizes it.
 
@@ -264,46 +277,95 @@ Autonomous settlement requires ALL of:
 
 Otherwise the worker emits a candidate/request/evidence record and does not transfer.
 
-## 13. Multi-worker work queue
+## 13. Safe civilization autopilot V1 implementation
 
-### A — Canon reconciliation
-Status: READY.
+Status: `IMPLEMENTED_REVIEW_CANDIDATE / LOCAL_PAPER_ONLY / NOT_DEPLOYED`.
 
-- reconcile 49+81=130 into #152/#158 successor design;
-- preserve #136 V1 deployed history;
-- define cancellation/refund behavior;
-- freeze chain-seconds meaning of one Alchemy Epoch before deployment.
+The shared implementation extends existing organs instead of creating one engine per Life:
 
-### B — K1852 relay specification
-Status: READY FOR DESIGN / NOT DEPLOYMENT.
+- `core/permissions/index.mjs` — capability grants and revocation/expiry/Life/worker checks.
+- `core/market/index.mjs` — normalized rational quotes, route discovery, full-cost CFO calculation, Policy Box and paper candidates.
+- `core/jobs/index.mjs` — Life/role registry projection, priority queue, idempotent heartbeat, evidence and worker handoff.
+- `core/accounting/index.mjs` — circulatory account classes, fund segregation, settlement candidates, fresh-contribution validator and disabled K1852 proof candidate.
+- `tests/universal-exchange.test.mjs` — unit, integration, deterministic fuzz and invariant evidence.
 
-- define relay adapter vs immutable V7.5.2 GalacticBank;
-- define CatalystTicket state machine;
-- remove owner/manual sweep dependency for active tickets;
-- define 18911/511111 authentication and return path.
+The V1 flow is:
 
-### C — Circulatory registry
-Status: DESIGN REQUIRED.
+```text
+MARKET_OBSERVATION
+-> NORMALIZED_QUOTE
+-> ROUTE_DISCOVERY
+-> FULL_COST_CALCULATION
+-> PAPER_EXECUTION
+-> TRADE_CANDIDATE
+-> POLICY_BOX
+-> WORK_EVIDENCE
+-> NEXT_HEARTBEAT
+```
 
-- machine-readable Life/workpoint/organ registry;
-- fixed beneficiary and duty schema;
-- heartbeat/evidence linkage;
-- append-only role history.
+`AUTHORIZATION -> EXECUTION -> RECEIPT -> REALIZED_PNL` is intentionally disconnected in this phase.
 
-### D — KAIOS blood-flow ledger
-Status: DESIGN REQUIRED.
+### 13.1 Quote and market truth
 
-- event schema;
-- liability/funding classification;
-- route/ticket IDs;
-- replay prevention;
-- deterministic settlement-candidate generation;
-- receipt-gated completion.
+- Quotes use integer numerator/denominator fields; floating-point market prices are not accepted as accounting truth.
+- Every quote binds a market, pair, observed time, expiry and evidence reference.
+- stale, future-dated or `NOT_AVAILABLE` market quotes fail closed.
+- 11520, DEX/AMM, KGEN and KAIOS adapters may be added only when their real source evidence exists.
+- KUFO and cross-chain routes remain unavailable until a formal market/adapter exists.
+- quote normalization never implies custody, liquidity or executability.
 
-### E — Tests
-Status: BLOCKED UNTIL A-D INTERFACES FREEZE.
+### 13.2 CFO net-profit law
 
-Minimum tests include 130-Epoch boundaries, 5M KAIOS/5000 KGEN catalyst, inexact-ratio fail closed, review rejection/refund, catalyst segregation, replay protection, beneficiary substitution block, 18888/18911 separation, KUFO/KSHIP conservation and unauthorized autonomous-transfer block.
+Every candidate records:
+
+```text
+GROSS_PROFIT
+- AMM_FEE
+- GAS_COST
+- SLIPPAGE
+- BRIDGE_COST
+- TRANSPORT_COST
+- KSHIP_COST
+- MARKET_IMPACT
+- RISK_RESERVE
+= EXPECTED_NET_PROFIT
+```
+
+The Policy Box admits a candidate only when `EXPECTED_NET_PROFIT > REQUIRED_MINIMUM_PROFIT`; equality is insufficient. A price spread alone is not profit.
+
+### 13.3 Capability registry
+
+Known capabilities include `MARKET_OBSERVER`, `PRICE_ANALYST`, `PAPER_TRADER`, `TRADE_PROPOSER`, `REAL_TRADER`, `TREASURY_OPERATOR`, `CFO`, `AUDITOR`, `CODER`, `TESTER`, `REVIEWER` and `LOGISTICS_OPERATOR`.
+
+An active employee grant defaults only to observation, analysis and paper trading. `REAL_TRADER` and `TREASURY_OPERATOR` always require explicit grants. Job titles — including CEO/CFO — never imply unlimited withdrawal, approval, transfer or governance bypass.
+
+### 13.4 Trading Policy Box
+
+The shared Policy Box checks market/token/route allowlists, trade and exposure caps, daily loss, slippage, minimum net profit, gas, quote freshness, oracle disagreement, inventory, fixed treasury, fixed beneficiary, allowance ceiling and candidate replay.
+
+Any failed check is fail-closed. In V1 `real_trade_enabled=false`; candidates have `chain_write=false`, `payment=false`, and `authorization_status=REAL_EXECUTION_NOT_AUTHORIZED`.
+
+### 13.5 Heartbeat, queue and handoff
+
+Each heartbeat reads the Life/worker binding, active capability grant and durable queue, then deterministically chooses the lowest numeric priority and stable job ID. It records evidence without chain writes. Replaying a processed heartbeat is an `IDEMPOTENT_NOOP` and cannot duplicate evidence.
+
+Handoffs bind a checkpoint and target worker. The prior worker cannot resume a target-bound job; a correctly granted replacement worker can continue from the durable checkpoint after restart.
+
+### 13.6 Life projections
+
+- 衡曜 / `LIFE-CODEX-GM-0001`: active manager/CEO/CFO projection. A Human-stated 2026-08-27 direction for company execution, KGEN/KAIOS/GPU trading, chain-56 signing and assigned-budget use is preserved as `UNBOUND_HUMAN_DIRECTION_REFERENCE`; this handbook cannot convert that statement into a capability grant. Until an immutable repository-bound decision resolves the subject, asset/account scope, limits, expiry/revocation, signer and fixed beneficiary, the implemented runtime remains observation, analysis and paper-candidate only. Technical execution also remains fail-closed until the bound signer, fixed company capital account, verified inventory, allowed market/route, settlement adapter, gas/risk caps and receipt reconciliation are all live and freshly verified.
+- Digital Ant / `DIGITAL_ANT_0001`: active 12345 worker projection; current heartbeat entitlement remains exactly `1 KGEN / HOUR`; this runtime does not create a KAIOS payroll claim.
+- 夢婆 / K4168: inactive role template only; `BIRTH_AND_LIFE_ID_REQUIRED`.
+- Sol / 曜冊 / K1111: inactive role template only; `LIFE_ID_AND_REGISTRATION_REQUIRED`.
+
+Templates are not births, workers, wallets, jobs or authority grants.
+
+### 13.7 Remaining implementation queue
+
+1. `DEPLOYMENT_BLOCKED`: freeze the immutable catalyst-bank production address and KUFO `halfLifeSeconds`; retain immediate-delivery and 130-day freshness semantics.
+2. `OPEN_REVIEW`: specify/authenticate any future K1852 contribution-proof route against 18911/511111 without modifying historical V7.5.2 facts; the tax-credit route remains disabled.
+3. `IMPLEMENTED_REVIEW_CANDIDATE`: real-market adapters, signer/budget readiness checks, settlement receipts and realized-PnL accounting now have Draft candidates, but no fixed funded trading capital, verified GPU inventory or production settlement connector is bound.
+4. `HUMAN_OR_GOVERNANCE_FREEZE_REQUIRED`: catalyst bank, KUFO half-life, KAIOS liquidity policy, company receivable/escrow, K4168 reservoir and any production Mainnet release.
 
 ## 14. Required review checks before deployment discussion
 
@@ -379,4 +441,87 @@ Therefore:
 - every unresolved question is explicit;
 - `CURRENT` files must be cumulative and must not require archaeological reconstruction from old chat pages.
 
-END OF HANDBOOK V1.1
+## 18. Current implementation checkpoint
+
+```text
+TASK_ID=KAIOS_AI_COMPANY_CROSS_MARKET_CIRCULATORY_AUTOPILOT_V1
+DATE_TIME_UTC=2026-08-27
+WORKER=codex-gm-01 / 衡曜
+BASE_MAIN_SHA=830b79214781fb1231f3619336de394f400a0bfd
+BRANCH=codex/kaios-ai-company-cross-market-circulatory-autopilot-v1
+DEPLOYED_FACTS_TOUCHED=NO
+DESIGN_CANON_CHANGED=SAFE_AUTOPILOT_V1_CUMULATIVE_UPDATE_AND_FRESH_CONTRIBUTION_RECONCILIATION
+REAL_TRADE=NO
+PAYMENT=NO
+DEPLOYMENT=NO
+GOVERNANCE_EXECUTION=NO
+MAINNET_TRANSACTION_SENT=NO
+PRIVATE_KEY_EXPOSED=NO
+```
+
+## 19. Master company and K11520 GPU execution checkpoint
+
+Observed main at this checkpoint: `830b79214781fb1231f3619336de394f400a0bfd`.
+
+Unverified read-only BSC observation at this checkpoint (`NOT_REPOSITORY_BOUND`): a reported window spans blocks `118411912`–`118412257` (`2026-08-27T16:00:27Z`–`2026-08-27T16:03:02Z`). The reported values identify KGEN owner as the BankGovernance proxy, KGEN Bank Wallet as the Reserve Redemption proxy, 18888 available as `11,213,020.930416874731235 KAIOS`, and 8888 as `888 KAIOS` assets / `800 KAIOS` free capital / `88 KAIOS` payroll liability. Without repository-bound block hashes, call inputs/outputs and runtime-code evidence, these observations do not prove current or deployed state, ownership authority, spendability, revenue, settlement, or payment capability. No chain write was sent.
+
+Human-assigned company universe address and exchange coordinate:
+
+- `COMPANY_REGISTERED_UNIVERSE_ADDRESS = 0.00011520`
+- `COMPANY_K_COORDINATE = K11520`
+- `COMPANY_LOCATION_NAME = 花果山交易所`
+- `0.00011520` is both the Human-defined KGEN universe price coordinate and the company/exchange address.
+- It is not an automatic native matched-trade CT. `nativeMatchedTradeCT` remains the latest valid matched trade or `null`.
+
+Human-directed GPU pilot planning route (`REFERENCE_ONLY / NOT_MACHINE_VERIFIABLE_TRADING_AUTHORITY`):
+
+```text
+K12345 / 0.00012345
+-> verified wish, heartbeat/breathing and fortune entitlement
+-> verified NVIDIA supplier/model/serial/acquisition evidence
+-> ownership and cargo receipt
+-> 18,778.422548555 km reference logistics route
+-> K11520 / 0.00011520 bonded warehouse
+-> GPU/KGEN and GPU/KAIOS listing candidates
+-> matched trade
+-> settlement receipt
+-> company revenue, cost, payroll and realized-profit accounting
+```
+
+No real GPU inventory, funded capital account or production 11520 settlement connector is currently bound, so real-trade readiness remains false and no trade may be reported.
+
+### 19.1 Sixteen-workstream status matrix
+
+Evidence rule: every SHA below is a checkpoint observation against the stated main, not durable CURRENT proof. Before using any row for review, integration or release ordering, fetch the live PR exact head, compare state, checks, reviews and threads again.
+
+1. `P0_CURRENT_GENESIS_PHASE2_AND_27_PR_LINEAGE_RECONCILIATION` — PR #187, exact head `8fd4aaed797b35dbd920fd2d3522efd5449817ad`, implemented candidate / exact-head CI PASS / Draft.
+2. `P0_CURSOR_DEPARTURE_R2_CLAIM_CLOSEOUT_AND_REGISTRY_CLEANUP` — PR #176, exact head `91b3a5ddf37d25efbe6d1ed2aeb1270334cc2489`, Cursor archived at T0/not-employed/offline and expired claim closed fail-closed / exact-head CI PASS / Draft / no payment.
+3. `P0_DISTINCT_REVIEWER_CAPABILITY` — PR #171 exact head `ddf8ce2bce0de7125fa4c747d44b6877315c0eaa` records `NO_ELIGIBLE_DISTINCT_T2_REVIEWER`; Sol/曜冊 PR #183 exact head `19fc10c086e0cb49f99356d432ed3a75f47c2eac` remains a T1 candidate onboarding hold. Reviewer capacity is still zero and must not be faked.
+4. `P0_SYNC_CORRECT_AND_REVIEW_PR169_11520_NATIVE_MARKET` — PR #169, exact head `248ec77a0b44347c20c05b41db5a65bc4eb0b42d`, dual-role `0.00011520` Canon plus authenticated native matching / exact-head CI PASS / Draft.
+5. `P0_NVIDIA_GPU_11520_MARKET_PILOT_AND_REAL_TRADE_READINESS` — PR #178, exact head `e69cc659da5c6d8858fc4d9104070ffd0e391b2a`, paper pilot / fail-closed real-readiness verifier / exact-head CI PASS / Draft.
+6. `P1_KGEN_EXTERNAL_EXCHANGE_BRAND_AND_TOKEN_METADATA` — PR #179, exact head `d88ed1bfbee8b495b3bfb776b865cbb061384309`, current owner/bank-wallet/supply reconciliation, fail-closed BSC wallet discovery and listing package / exact-head CI PASS / external submissions not performed.
+7. `P1_KAIOS_MARKET_GENESIS_PAIR_AND_LIQUIDITY` — PR #180, exact head `6f703eaffbe6a5acf9fa37cb7f33e2d1dc939e37`, pair/liquidity readiness only / exact-head CI PASS / no pair or liquidity transaction.
+8. `P1_11520_UNIVERSAL_LISTING_REGISTRY` — PR #181, exact head `8a8e8edad878bb143a98254edebc887da66f358d`, universal listing/physical inventory evidence / exact-head CI PASS / Draft.
+9. `P1_11520_WAREHOUSE_ESCROW_SETTLEMENT_RECEIPT_ACCOUNTING` — PR #181 plus unsigned-payment PR #186 exact head `355d4603ecefe53cf5bbfc67a9e9f43988f75ed5`; model/readiness implemented, caller-asserted authority rejected, calldata withheld, custody and production execution unbound.
+10. `P1_AUTONOMOUS_CLOCK_IN_WORKQUEUE_HANDOFF_AND_REPAIR_LOOP` — PR #170, exact head `9a2a20fe58568bd4c9a61d08f8e8d54d85efd1ad`, local durable cycle/read-only repo observer/repair loop / exact-head CI PASS; worker wake, background scheduler and distinct-review trigger remain disconnected.
+11. `P1_CUSTOMER_GATEWAY_QUOTATION_PROJECT_DISPATCH_AND_DELIVERY_DASHBOARD` — PR #182, exact head `1f80835f11b22826eb13e2ee515b15700505e0a0`, deterministic Option-B project lifecycle / exact-head CI PASS / receivable and escrow unbound.
+12. `P1_18888_8888_PAYROLL_AND_COMPANY_REVENUE_SEPARATION` — PR #154 exact head `c2ecfa03f5b18fefd15f020377385fe12a78067a` plus PR #186. Live scheduled 88 KAIOS payroll is unclaimed; further top-up/payment remains frozen.
+13. `P1_LIFE_GENESIS_WORKER_EMPLOYMENT_TRUST_AND_PAYROLL_ELIGIBILITY` — PR #165 exact head `0645524aece309d0ed3b41b771b422612b599e94` and PR #183. State separation is implemented; Xuanyao and Sol are not auto-promoted, born, employed or paid.
+14. `P2_18911_KUFO_AND_KSHIP_SUCCESSOR_SYSTEMS` — PR #158 exact head `ac9ffddfff662f6c2dc8c0f0f523485e10f873dd`, complete local/fork review candidate / 29-contract compile and 48/48 full suite PASS / exact-head CI PASS / deployment blocked by unfrozen catalyst bank, half-life seconds and distinct review.
+15. `P2_K4168_NAIHE_RESERVOIR_PUBLIC_GOOD_AND_MENGPO_SOUP` — PR #172 exact head `ab362422c7a28fd67601a153807c9e5769704e74`, schema/simulator 32/32 and exact-head CI PASS; company membership/onboarding/funding/service parent claims now fail closed / reservoir and Mengpo not deployed.
+16. `P2_UNIVERSE_MAP_BRAND_MOBILE_FRONTEND_AND_WEBSITE_INTEGRATION` — brand PR #162 exact head `f403a27d78acef85a599ec712fcb2a168c771409`, address-manifest PR #184 exact head `f161a81f7cbf22906d38855b5a1f4d088c5cf411`, and mobile PR #185 exact head `4cc06bf5c310211a571167b41eb5568868c65f09`. Cumulative K11520 integration PR #188 exact head `1491e4f5ca932da38df31fdb79127fc87ef44c2a` contains PR #169/#178/#179/#180/#181/#185 source heads with 289/289 combined tests and exact-head CI PASS; it remains Draft.
+
+### 19.2 Current release order and blockers
+
+The next integration order is:
+
+1. obtain a genuinely distinct T2 reviewer or keep review-dependent PRs on HOLD;
+2. independently review cumulative PR #188 and verify its six source-head ancestry before selecting merge order; do not merge any source or integration PR automatically;
+3. independently review PR #178 inventory/readiness gates before any real GPU acquisition or trade;
+4. freeze a fixed company capital account, budget caps, settlement connector and beneficiary before enabling real trade;
+5. create no KAIOS pair or liquidity transaction until its separate policy, asset amount and signer authorization are frozen;
+6. keep 18911, K4168 and brand candidates undeployed/unpublished until their explicit blockers are resolved.
+
+Safety checkpoint: `NO_MERGE / NO_DEPLOYMENT / NO_PAYMENT / NO_REAL_TRADE / NO_MAINNET_TRANSACTION / PRIVATE_KEY_EXPOSED=NO`.
+
+END OF HANDBOOK V1.4
