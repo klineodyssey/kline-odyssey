@@ -2,6 +2,19 @@ name: Deploy Pages Static
 
 on:
   workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Exact tag or SHA already reachable from main to publish as the official experimental build
+        required: false
+        default: main
+        type: string
+      release_mode:
+        description: Public truth label written into build-info.json
+        required: false
+        default: experimental
+        type: choice
+        options:
+          - experimental
   push:
     branches:
       - main
@@ -23,15 +36,67 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout main
+      - name: Checkout exact release source
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+          fetch-depth: 0
 
-      - name: Build static site
+      - name: Public release secret and protected-IP gate
         shell: bash
         run: |
           set -euo pipefail
+
+          git fetch --no-tags origin main
+          source_sha="$(git rev-parse HEAD)"
+          if ! git merge-base --is-ancestor "$source_sha" origin/main; then
+            echo "::error::Official Pages release source must already be reachable from origin/main."
+            exit 1
+          fi
+          if git rev-parse "$source_sha^" >/dev/null 2>&1; then
+            scan_base="$(git rev-parse "$source_sha^")"
+            changed_files="$(git diff --name-only "$scan_base" "$source_sha")"
+            release_diff_command=(git diff --unified=0 "$scan_base" "$source_sha")
+          else
+            scan_base=""
+            changed_files="$(git ls-tree -r --name-only "$source_sha")"
+            release_diff_command=(git show --format= --unified=0 --root "$source_sha")
+          fi
+          printf '%s\n' "$changed_files"
+
+          if printf '%s\n' "$changed_files" | grep -Eiq '(^|/)(\.env($|\.)|id_rsa|id_ed25519|.*\.pem$|.*\.key$|keystore|wallet-backup|seed-phrase|private-key|signer-credential)'; then
+            echo "::error::Release diff contains a secret-bearing file name."
+            exit 1
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -Eiq '(proprietary[-_ ]?(long[-_ ]?short|trading|quant|alpha|signal)|private[-_ ]?(trading|quant|alpha|signal)|unpublished[-_ ]?quant|secret[-_ ]?signal)'; then
+            echo "::error::Release diff contains an IP-protected path."
+            exit 1
+          fi
+
+          if [ -n "$changed_files" ]; then
+            "${release_diff_command[@]}" \
+              | grep '^+' \
+              | grep -Ev '^\+\+\+' \
+              | grep -Eiq '(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|PRIVATE[_-]?KEY[[:space:]]*=|SEED[_-]?PHRASE[[:space:]]*=|MNEMONIC[[:space:]]*=|AWS_SECRET_ACCESS_KEY[[:space:]]*=|GITHUB_TOKEN[[:space:]]*=)' \
+              && { echo "::error::Release diff contains a credential-like value."; exit 1; } \
+              || true
+          fi
+
+      - name: Build static site
+        shell: bash
+        env:
+          RELEASE_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.release_mode || 'experimental' }}
+          SOURCE_REF_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          SOURCE_REF="${SOURCE_REF_INPUT}"
+          SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
+          ORIGIN_MAIN_SHA="$(git rev-parse origin/main)"
+          SOURCE_AHEAD_OF_MAIN="$(git rev-list --count origin/main..HEAD)"
+          SOURCE_BEHIND_MAIN="$(git rev-list --count HEAD..origin/main)"
 
           rm -rf _site
           mkdir -p _site
@@ -120,19 +185,26 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/dashboard"
           cat > "_site/KGEN-KAIOS/dashboard/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${ORIGIN_MAIN_SHA}",
+            "origin_main_commit": "${ORIGIN_MAIN_SHA}",
+            "source_commit": "${SOURCE_SHA}",
+            "source_tree": "${SOURCE_TREE}",
+            "source_ref": "${SOURCE_REF}",
+            "source_ahead_of_main": ${SOURCE_AHEAD_OF_MAIN},
+            "source_behind_main": ${SOURCE_BEHIND_MAIN},
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "mode": "read-only"
+            "mode": "${RELEASE_MODE}",
+            "channel": "official-public-experimental"
           }
           EOF
 
           mkdir -p "_site/KGEN-KAIOS/V8"
           cat > "_site/KGEN-KAIOS/V8/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -143,8 +215,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V8.1"
           cat > "_site/KGEN-KAIOS/V8.1/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -155,8 +227,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V8.2"
           cat > "_site/KGEN-KAIOS/V8.2/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -167,8 +239,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V8.3"
           cat > "_site/KGEN-KAIOS/V8.3/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -179,8 +251,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V9.0"
           cat > "_site/KGEN-KAIOS/V9.0/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -191,8 +263,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V9.1"
           cat > "_site/KGEN-KAIOS/V9.1/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -203,8 +275,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V9.2"
           cat > "_site/KGEN-KAIOS/V9.2/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -215,8 +287,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V9.3"
           cat > "_site/KGEN-KAIOS/V9.3/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
@@ -227,8 +299,8 @@ jobs:
           mkdir -p "_site/KGEN-KAIOS/V10"
           cat > "_site/KGEN-KAIOS/V10/build-info.json" <<EOF
           {
-            "main_commit": "${GITHUB_SHA}",
-            "branch": "${GITHUB_REF_NAME}",
+            "main_commit": "${SOURCE_SHA}",
+            "branch": "${SOURCE_REF}",
             "workflow": "deploy-pages-static.yml",
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "mode": "read-only",
