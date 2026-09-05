@@ -1,0 +1,26 @@
+name: K8888 Mobile ATM UFO
+on:
+  push:
+    branches: [gm/k8888-mobile-atm-ufo-v1]
+    paths:
+      - 'KAIOS/K8888/**'
+      - '.github/workflows/k8888-mobile-atm-ufo.yml'
+  pull_request:
+    paths:
+      - 'KAIOS/K8888/**'
+      - '.github/workflows/k8888-mobile-atm-ufo.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node KAIOS/K8888/mobile-atm-ufo.test.mjs
+      - run: git diff --check
