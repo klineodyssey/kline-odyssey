@@ -1,6 +1,7 @@
 # KAIOS — Canonical Monetary Core
 
-**Status:** Review candidate. Not audited and not authorized for mainnet deployment.
+**Status:** KAIOS V1 is Mainnet live. V3 successor organs are implemented review candidates and are
+not authorized for deployment. `KAIOS.sol` must remain identical to latest `main`.
 
 This file is the canonical README for `KAIOS.sol`. It merges the latest Friction Mirror monetary core with the current 18911 -> 511111 -> KUFO architecture.
 
@@ -74,28 +75,26 @@ holder owns KAIOS
 
 The furnace cannot burn more than the holder has explicitly approved. KAIOS contains no owner/admin confiscation burn path.
 
-## 49 Alchemy Epochs
+## Deployed V1 and V3 successor timing
 
-The 49-Epoch maturation clock is **not** hard-coded into `KAIOS.sol`.
+The deployed old 18911 body uses 49 Epoch maturity. That is `DEPLOYED_V1_HISTORY`, not V3 successor
+behavior, and it is not hard-coded into `KAIOS.sol`.
 
-It belongs to the 18911 furnace/runtime so future time-scale rules can evolve without replacing the KAIOS monetary core.
-
-Suggested state flow:
-
-```text
-BURNED -> REFINING -> MATURED -> CLAIMED
-```
+The V3 review candidate requires an exact KGEN/1000 direct contribution to an immutable catalyst
+bank, then uses the existing five-argument KAIOS burn ABI and same-transaction 511111 release. Its
+delivery delay is zero. The 130-human-day number applies only to a future contribution-credit route,
+which remains `DESIGN_ONLY_DISABLED`.
 
 ## 511111 Qitian Dasheng Palace / Wormhole
 
-`511111` is the future matured-proof claim / wormhole boundary for KUFO.
+`511111` is the future V3 same-transaction proof-consumption / wormhole boundary for KUFO. It is not deployed.
 
 KAIOS does not mint KUFO. The 511111/KUFO protocol must independently verify that:
 
 - the source Alchemy Proof exists;
 - it came from the canonical KAIOS contract;
 - it came through the official 18911 furnace;
-- the 49-Epoch maturation rules are satisfied;
+- the V3 Furnace proof records an exact bank receipt and is consumed in the same transaction;
 - the proof has not already been claimed;
 - the KUFO output matches `1 KAIOS = 1,000 KUFO`.
 
@@ -164,7 +163,7 @@ without a real upstream holder-authorized burn.
 1. Pin the exact OpenZeppelin Contracts version compatible with Solidity 0.8.24.
 2. Verify the canonical KGEN production address and genesis supply.
 3. Verify the 18888 Treasury proxy address.
-4. Verify the 18911 furnace proxy address and deployment order.
+4. Verify the old 18911 address, Organ Registry active body and successor predecessor binding.
 5. Compile `KAIOS.sol`.
 6. Test genesis KGEN supply => zero pending KAIOS.
 7. Test 1 destroyed KGEN => exactly 1,000 KAIOS to 18888.
@@ -172,8 +171,8 @@ without a real upstream holder-authorized burn.
 9. Test KGEN supply increase after settlement is rejected.
 10. Test ordinary KAIOS transfers are 0% native tax.
 11. Test non-18911 callers cannot invoke `burnForAlchemy()`.
-12. Test 18911 cannot burn without sufficient holder allowance.
-13. Test 18911 cannot burn more than holder allowance.
+12. Test V3 requires exact independent KAIOS and KGEN allowances.
+13. Test V3 rejects an excess, deficient or fee-like allowance/receipt path atomically.
 14. Test 1 KAIOS burn records expected 1,000 KUFO.
 15. Test Alchemy Proof IDs are unique.
 16. Test conservation invariant before and after alchemy burns.
