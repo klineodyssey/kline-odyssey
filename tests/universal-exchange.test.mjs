@@ -14,6 +14,7 @@ import {
   validateService, createSchedulerAdapter, runDigitalAntWorkerCycle, validateWorkQueueItem,
   assertLifeStageWorkEligibility, validateEmploymentProfile, validateProjectRequest, validateQuote,
   validateCompanyContract, validateProjectEscrow, validateWorkOrder, validateSalaryEntry,
+  KAIOS_18888_PAYMENT_CONFIG, validateKaios18888PaymentRequest, prepareKaios18888UnsignedDisbursement, validateKaios18888PaymentReadiness, readKaios18888PaymentReadiness,
   validateLandProjectRequest, validateLocationPermission, validateGpsSession, validateStepCounter,
   validateMapPosition, validateLandEntryEvent, validateBirthplaceBinding, validateCivilizationReward,
   assertCompanyWalletSeparation, calculateAppManifestHash, runDigitalAntHourlyCycle,
@@ -1415,6 +1416,147 @@ test("V2.8 Company distress never kills Founder Life and wash-trading rewards re
   assert.equal(state.founder_life_status, "ALIVE");
   const reward = { reward_id: "REWARD_V2_8", activity_type: "WASH_TRADE", currency_id: "KAIOS", evidence: null, controller_relationship: "SAME_CONTROLLER_SELF_MATCH", status: "REJECTED" };
   assert.throws(() => validateCivilizationReward(reward), (error) => error.code === "INVALID_CIVILIZATION_REWARD_ACTIVITY");
+});
+
+test("18888 Public Good payment adapter creates only a non-authoritative fail-closed draft", () => {
+  const require = createRequire(import.meta.url);
+  const ethers = require("../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js");
+  const request = {
+    request_id: "KAIOS_PUBLIC_GOOD_REFILL_20260827_001",
+    chain_id: 56,
+    bank_address: KAIOS_18888_PAYMENT_CONFIG.bank_address,
+    beneficiary: KAIOS_18888_PAYMENT_CONFIG.public_good_treasury,
+    amount_wei: "1000000000000000000",
+    purpose_code: "PUBLIC_GOOD_TREASURY_REFILL",
+    budget_id: "OPTION_B_PUBLIC_GOOD_INTERFACE_BUDGET",
+    nonce: "PUBLIC_GOOD_REFILL_NONCE_0001",
+    requested_by: "LIFE-CODEX-GM-0001",
+    requested_at: "2026-08-27T12:00:00+08:00",
+    valid_until: "2026-08-27T12:10:00+08:00",
+    authorization_status: "PROPOSAL_PREPARATION_ONLY"
+  };
+  const observedTimestamp = Math.floor(Date.parse("2026-08-27T12:05:00+08:00") / 1000);
+  assert.equal(validateKaios18888PaymentRequest(request, { observedTimestamp }), request);
+  const prepared = prepareKaios18888UnsignedDisbursement({ ethers, request, observedTimestamp });
+  assert.equal(prepared.status, "NON_AUTHORITATIVE_PAYMENT_DRAFT");
+  assert.equal(prepared.executable_at, observedTimestamp + 3600);
+  assert.equal(prepared.calls, null);
+  assert.equal(prepared.calldata, null);
+  assert.deepEqual(prepared.blockers, [
+    "REPOSITORY_BOUND_HUMAN_OR_GOVERNANCE_AUTHORIZATION_REQUIRED",
+    "FUNDED_APPROVED_BUDGET_AND_CAP_REQUIRED",
+    "CANONICAL_BENEFICIARY_ROLE_REQUIRED",
+    "MAIN_TRACKED_DEPLOYED_ABI_REQUIRED",
+    "PROXY_IMPLEMENTATION_RUNTIME_CODEHASH_BINDING_REQUIRED"
+  ]);
+  assert.equal(prepared.signer_requested, false);
+  assert.equal(prepared.transaction_sent, false);
+  assert.doesNotMatch(JSON.stringify(prepared), /private.?key|seed.?phrase/i);
+
+  assert.throws(() => validateKaios18888PaymentRequest({ ...request, beneficiary: "0x0000000000000000000000000000000000000001" }, { observedTimestamp }), (error) => error.code === "WRONG_BENEFICIARY");
+  assert.throws(() => validateKaios18888PaymentRequest({ ...request, unexpected: true }, { observedTimestamp }), (error) => error.code === "UNKNOWN_PAYMENT_FIELD");
+  assert.throws(() => validateKaios18888PaymentRequest({ ...request, authorization_status: "HUMAN_APPROVED_MACHINE_VERIFIABLE" }, { observedTimestamp }), (error) => error.code === "UNBOUND_PAYMENT_AUTHORITY");
+  assert.throws(
+    () => validateKaios18888PaymentRequest(request, { observedTimestamp, config: { ...KAIOS_18888_PAYMENT_CONFIG } }),
+    (error) => error.code === "CALLER_SUPPLIED_PAYMENT_CONFIG_FORBIDDEN"
+  );
+  assert.throws(() => validateKaios18888PaymentRequest({ ...request, valid_until: "2026-08-27T12:04:59+08:00" }, { observedTimestamp }), (error) => error.code === "PAYMENT_REQUEST_EXPIRED");
+  assert.throws(() => validateKaios18888PaymentRequest({ ...request, requested_at: "2026-08-27T11:49:59+08:00" }, { observedTimestamp }), (error) => error.code === "STALE_PAYMENT_REQUEST");
+  assert.throws(() => prepareKaios18888UnsignedDisbursement({ ethers, request, observedTimestamp, requestedDelaySeconds: 3599 }), (error) => error.code === "TIMELOCK_TOO_SHORT");
+});
+
+test("18888 payment readiness fails closed on role collision, replay or reserve shortage", () => {
+  const base = {
+    chain_id: 56,
+    bank_address: KAIOS_18888_PAYMENT_CONFIG.bank_address,
+    kaios_address: KAIOS_18888_PAYMENT_CONFIG.kaios_address,
+    beneficiary: KAIOS_18888_PAYMENT_CONFIG.public_good_treasury,
+    bank_code: "0x01",
+    kaios_code: "0x01",
+    bank_paused: false,
+    bank_healthy: true,
+    available_wei: "1000000000000000000",
+    amount_wei: "1000000000000000000",
+    proposer_has_role: true,
+    approver_has_role: true,
+    proposer_address: "0x1111111111111111111111111111111111111111",
+    approver_address: "0x2222222222222222222222222222222222222222",
+    existing_beneficiary: "0x0000000000000000000000000000000000000000",
+    budget_authority_bound: false,
+    beneficiary_authority_bound: false,
+    deployed_abi_bound: false,
+    runtime_codehash_bound: false
+  };
+  const readiness = validateKaios18888PaymentReadiness(base);
+  assert.equal(readiness.status, "FAIL_CLOSED");
+  assert.deepEqual(readiness.blockers.slice(-4), ["approved_budget", "beneficiary_authority", "deployed_abi", "runtime_codehash"]);
+  assert.ok(validateKaios18888PaymentReadiness({ ...base, approver_address: base.proposer_address }).blockers.includes("independent_approval"));
+  assert.ok(validateKaios18888PaymentReadiness({ ...base, existing_beneficiary: base.beneficiary }).blockers.includes("replay_free"));
+  assert.ok(validateKaios18888PaymentReadiness({ ...base, available_wei: "999999999999999999" }).blockers.includes("funded"));
+  const forgedBoundConfig = {
+    ...KAIOS_18888_PAYMENT_CONFIG,
+    budget_authority_status: "BOUND_REPOSITORY_VERIFIED",
+    beneficiary_authority_status: "BOUND_REPOSITORY_VERIFIED",
+    deployed_abi_status: "BOUND_REPOSITORY_VERIFIED",
+    runtime_codehash_status: "BOUND_REPOSITORY_VERIFIED"
+  };
+  assert.throws(
+    () => validateKaios18888PaymentReadiness({
+      ...base,
+      budget_authority_bound: true,
+      beneficiary_authority_bound: true,
+      deployed_abi_bound: true,
+      runtime_codehash_bound: true
+    }, forgedBoundConfig),
+    (error) => error.code === "CALLER_SUPPLIED_PAYMENT_CONFIG_FORBIDDEN"
+  );
+});
+
+test("18888 payment reader verifies live-shape bank state without requesting a signer", async () => {
+  const require = createRequire(import.meta.url);
+  const ethers = require("../K線西遊記/temples/12345/assets/ethers-5.7.2.umd.min.js");
+  const amount = "1000000000000000000";
+  const prepared = prepareKaios18888UnsignedDisbursement({
+    ethers,
+    request: {
+      request_id: "KAIOS_PUBLIC_GOOD_REFILL_20260827_002",
+      chain_id: 56,
+      bank_address: KAIOS_18888_PAYMENT_CONFIG.bank_address,
+      beneficiary: KAIOS_18888_PAYMENT_CONFIG.public_good_treasury,
+      amount_wei: amount,
+      purpose_code: "PUBLIC_GOOD_TREASURY_REFILL",
+      budget_id: "OPTION_B_PUBLIC_GOOD_INTERFACE_BUDGET",
+      nonce: "PUBLIC_GOOD_REFILL_NONCE_0002",
+      requested_by: "LIFE-CODEX-GM-0001",
+      requested_at: "2026-08-27T12:00:00+08:00",
+      valid_until: "2026-08-27T12:10:00+08:00",
+      authorization_status: "PROPOSAL_PREPARATION_ONLY"
+    },
+    observedTimestamp: Math.floor(Date.parse("2026-08-27T12:05:00+08:00") / 1000)
+  });
+  const proposer = "0x1111111111111111111111111111111111111111";
+  const approver = "0x2222222222222222222222222222222222222222";
+  const zero = "0x0000000000000000000000000000000000000000";
+  const provider = {
+    async getNetwork() { return { chainId: 56 }; },
+    async getBlockNumber() { return 118333481; },
+    async getCode(address) { return address.toLowerCase() === KAIOS_18888_PAYMENT_CONFIG.bank_address.toLowerCase() ? "0x6001" : "0x6002"; }
+  };
+  const bankReader = {
+    async kaios() { return KAIOS_18888_PAYMENT_CONFIG.kaios_address; },
+    async bankHealth() { return { available: amount, healthy: true, isPaused: false }; },
+    async PAYMENT_PROPOSER_ROLE() { return `0x${"11".repeat(32)}`; },
+    async PAYMENT_APPROVER_ROLE() { return `0x${"22".repeat(32)}`; },
+    async hasRole(_role, account) { return account === proposer || account === approver; },
+    async disbursement() { return { beneficiary: zero }; }
+  };
+  const result = await readKaios18888PaymentReadiness({ ethers, provider, prepared, proposerAddress: proposer, approverAddress: approver, bankReader });
+  assert.equal(result.observed_block, 118333481);
+  assert.equal(result.readiness.status, "FAIL_CLOSED");
+  assert.deepEqual(result.readiness.blockers.slice(-4), ["approved_budget", "beneficiary_authority", "deployed_abi", "runtime_codehash"]);
+  assert.equal(result.provider_mode, "READ_ONLY_UNVERIFIED_SCHEMA_PROBE");
+  assert.equal(result.signer_requested, false);
+  assert.equal(result.transaction_sent, false);
 });
 
 test("V3.0 corrects legacy 33333 role while Land retains consent and zero cash", () => {
