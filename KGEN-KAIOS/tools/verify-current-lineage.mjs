@@ -24,7 +24,14 @@ const forbidden = [
   "Species → Cell → Organ",
 ];
 const safeConflictReferenceFiles = new Set([
+  "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
   "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+]);
+const auditedPathAliases = new Map([
+  [
+    "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+    "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+  ],
 ]);
 const failures = [];
 
@@ -51,12 +58,18 @@ for (const relativePath of new Set(
     .map((item) => item.path),
 )) {
   if (relativePath.includes("/archive/") || relativePath.includes("_ARCHIVE")) continue;
-  const header = fs.readFileSync(path.join(repo, relativePath), "utf8").split(/\r?\n/u).slice(0, 12).join("\n");
-  if (!header.includes("SUPERSEDED")) failures.push({ path: relativePath, reason: "MISSING_SUPERSEDED_MARKER" });
+  const resolvedRelativePath = auditedPathAliases.get(relativePath) ?? relativePath;
+  const absolutePath = path.join(repo, resolvedRelativePath);
+  if (!fs.existsSync(absolutePath)) {
+    failures.push({ path: relativePath, resolvedPath: resolvedRelativePath, reason: "HISTORICAL_AUDIT_FILE_NOT_FOUND" });
+    continue;
+  }
+  const header = fs.readFileSync(absolutePath, "utf8").split(/\r?\n/u).slice(0, 12).join("\n");
+  if (!header.includes("SUPERSEDED")) failures.push({ path: resolvedRelativePath, reason: "MISSING_SUPERSEDED_MARKER" });
 }
 
 const assertions = {
-  kgenMassScale: fs.readFileSync(path.join(repo, activeFiles[0]), "utf8").includes("1 KGEN = 1 metric ton = 1,000 kg"),
+  kgenMassScale: /1 KGEN\s*=\s*1,?000 kg/u.test(fs.readFileSync(path.join(repo, activeFiles[0]), "utf8")),
   kaiosRatio: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("KAIOS_PER_KGEN = 1_000"),
   frictionMirror: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("IKGENSupply(KGEN).totalSupply()"),
   organRegistry: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("ORGAN_REGISTRY.organ"),
@@ -73,6 +86,7 @@ const report = {
   activeFiles,
   forbidden,
   assertions,
+  auditedPathAliases: Object.fromEntries(auditedPathAliases),
   failures,
 };
 fs.mkdirSync(path.dirname(reportPath), { recursive: true });

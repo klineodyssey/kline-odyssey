@@ -331,6 +331,68 @@ test("permissionless normalization returns only excess over 108000 to the regist
   assert.equal(await context.kgen.balanceOf(legacyBrainVault), 71_891_995n * ETHER);
 });
 
+test("fortuneClaim requires an exact pre-existing 1 KGEN pass and never consumes it", async () => {
+  const context = await setupLineage();
+  const { heart } = await deployTempleHeart(context);
+  const user = context.signers[2];
+  const userAddress = await user.getAddress();
+  const civilizationId = id("CIV-FORTUNE-KGEN-PASS");
+  const wishHash = id("WISH-FORTUNE-KGEN-PASS");
+  await mintKaiosByBurningKgen(context, 2n * ETHER);
+  await (await context.kgen.transfer(await heart.getAddress(), 20_010n * ETHER)).wait();
+  await makeWishAndHolyCup(context, heart, user, civilizationId, wishHash, "KGEN-PASS");
+  const proofId = await createFortuneProof(context, heart, user, civilizationId, wishHash, "KGEN-PASS");
+
+  await (await context.kgen.transfer(userAddress, ETHER - 1n)).wait();
+  const heartBefore = await context.kgen.balanceOf(await heart.getAddress());
+  const epochIndex = BigInt(Math.floor((await latestTimestamp(context)) / Number(await heart.fortuneEpochSeconds())));
+  await assert.rejects(heart.connect(user).fortuneClaim(proofId));
+  assert.equal(await context.kgen.balanceOf(userAddress), ETHER - 1n);
+  assert.equal(await context.kgen.balanceOf(await heart.getAddress()), heartBefore);
+  assert.equal(await heart.fortuneBurnProofConsumed(proofId), false);
+  assert.equal(await heart.fortuneEpochClaims(epochIndex), 0n);
+
+  await (await context.kgen.transfer(userAddress, 1n)).wait();
+  assert.equal(await context.kgen.balanceOf(userAddress), await heart.MIN_FORTUNE_KGEN_PASS_RAW());
+  assert.equal(await heart.connect(user).fortuneClaim.staticCall(proofId), ETHER);
+  await (await heart.connect(user).fortuneClaim(proofId)).wait();
+  assert.equal(await context.kgen.balanceOf(userAddress), 2n * ETHER);
+  assert.equal(await context.kgen.balanceOf(await heart.getAddress()), heartBefore - ETHER);
+  assert.equal(await heart.fortuneMinWhole(), 1n);
+  assert.equal(await heart.fortuneMaxWhole(), 8n);
+  assert.equal(await heart.HEARTBEAT_REWARD_WHOLE(), 1n);
+  assert.equal(await heart.heartbeatMaxClaimsPerHour(), 88n);
+  assert.equal(await heart.IGNITE_REWARD_WHOLE(), 8n);
+  assert.equal(await heart.igniteMaxClaimsPerDay(), 88n);
+});
+
+test("a valid heartbeat can furnish the first KGEN civilization pass before Fortune", async () => {
+  const context = await setupLineage();
+  const { heart } = await deployTempleHeart(context);
+  const user = context.signers[2];
+  const userAddress = await user.getAddress();
+  const civilizationId = id("CIV-HEARTBEAT-TO-FORTUNE");
+  const wishHash = id("WISH-HEARTBEAT-TO-FORTUNE");
+  await mintKaiosByBurningKgen(context, 2n * ETHER);
+  await (await context.kgen.transfer(await heart.getAddress(), 20_010n * ETHER)).wait();
+  await makeWishAndHolyCup(context, heart, user, civilizationId, wishHash, "HEARTBEAT-PASS");
+  const proofId = await createFortuneProof(
+    context,
+    heart,
+    user,
+    civilizationId,
+    wishHash,
+    "HEARTBEAT-PASS",
+  );
+
+  assert.equal(await context.kgen.balanceOf(userAddress), 0n);
+  await assert.rejects(heart.connect(user).fortuneClaim(proofId));
+  await (await heart.connect(user).heartbeatClaim()).wait();
+  assert.equal(await context.kgen.balanceOf(userAddress), ETHER);
+  await (await heart.connect(user).fortuneClaim(proofId)).wait();
+  assert.equal(await context.kgen.balanceOf(userAddress), 2n * ETHER);
+});
+
 test("fortune ledger never claws back claims and requires a later voluntary repayment for the next claim", async () => {
   const context = await setupLineage();
   const { heart } = await deployTempleHeart(context);
@@ -338,13 +400,14 @@ test("fortune ledger never claws back claims and requires a later voluntary repa
   const civilizationId = id("CIV-FORTUNE-LEDGER");
   await mintKaiosByBurningKgen(context, 10n * ETHER);
   await (await context.kgen.transfer(await heart.getAddress(), 20_050n * ETHER)).wait();
+  await (await context.kgen.transfer(await user.getAddress(), ETHER)).wait();
 
   const wishOne = id("WISH-FORTUNE-ONE");
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishOne, "ONE");
   const proofOne = await createFortuneProof(context, heart, user, civilizationId, wishOne, "ONE");
   await (await heart.connect(user).fortuneClaim(proofOne)).wait();
   const afterFirstClaim = await context.kgen.balanceOf(await user.getAddress());
-  assert.equal(afterFirstClaim, ETHER);
+  assert.equal(afterFirstClaim, 2n * ETHER);
   await assert.rejects(heart.connect(user).fortuneClaim(proofOne));
 
   await advanceTime(context.provider, 30 * 86_400 + 1);
@@ -386,6 +449,7 @@ test("fortuneClaim rejects beneficiary redirects and preserves proof replay prot
   const wishHash = id("WISH-FORTUNE-REDIRECT");
   await mintKaiosByBurningKgen(context, 3n * ETHER);
   await (await context.kgen.transfer(await heart.getAddress(), 20_010n * ETHER)).wait();
+  await (await context.kgen.transfer(await user.getAddress(), ETHER)).wait();
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishHash, "REDIRECT");
   const redirectProof = await createFortuneProof(
     context,

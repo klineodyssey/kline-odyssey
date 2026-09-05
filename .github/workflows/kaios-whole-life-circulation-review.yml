@@ -1,0 +1,110 @@
+name: KAIOS Whole-Life Circulation Candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/KAIOS-WHOLE-LIFE-CIRCULATION-12345-HEART-V1-001"
+    paths:
+      - "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
+      - "KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md"
+      - "KGEN-KAIOS/**"
+      - ".github/workflows/kaios-whole-life-circulation-review.yml"
+  pull_request:
+    paths:
+      - "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
+      - "KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md"
+      - "KGEN-KAIOS/**"
+      - ".github/workflows/kaios-whole-life-circulation-review.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head-review:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: KGEN-KAIOS/package-lock.json
+      - name: Resolve current review base
+        run: |
+          if test -n "$EVENT_BASE_SHA"; then
+            base_sha="$EVENT_BASE_SHA"
+          else
+            git fetch --no-tags origin main
+            base_sha="$(git rev-parse origin/main)"
+          fi
+          printf 'BASE_SHA=%s\n' "$base_sha" >> "$GITHUB_ENV"
+      - name: Bind checkout to exact candidate head
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+      - name: Install pinned review dependencies
+        working-directory: KGEN-KAIOS
+        run: npm ci
+      - name: Parse closed schemas and examples
+        run: |
+          jq empty KGEN-KAIOS/life-circulation/schemas/life-circulatory-runtime.schema.json
+          jq empty KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json
+          jq empty KGEN-KAIOS/life-circulation/schemas/life-transaction-policy.schema.json
+          jq empty KGEN-KAIOS/life-circulation/schemas/human-autonomy-onboarding-decision.schema.json
+          jq empty KGEN-KAIOS/life-circulation/schemas/xuanyao-life-worker-onboarding.schema.json
+          jq empty KGEN-KAIOS/life-circulation/examples/whole-life-circulation.candidate.json
+          jq empty KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json
+          jq empty KGEN-KAIOS/life-circulation/examples/xuanyao-life-worker-onboarding.candidate.json
+          jq empty KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json
+          jq empty KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json
+      - name: Run circulation replay, fuzz, invariant, custody, and health tests
+        run: |
+          set -o pipefail
+          node --test KGEN-KAIOS/life-circulation/tests/*.test.mjs | tee /tmp/whole-life-circulation-tests.tap
+      - name: Compile, ABI-diff, storage-check, scan, and run token tests
+        working-directory: KGEN-KAIOS
+        env:
+          INTEGRATION_BASE_RANGE: ${{ env.BASE_SHA }}...HEAD
+          TEMPLEHEART_ABI_BASE_REF: ${{ env.BASE_SHA }}
+        run: |
+          set -o pipefail
+          npm run test:all | tee /tmp/whole-life-solidity-and-invariants.tap
+      - name: Run repository regression tests
+        run: |
+          set -o pipefail
+          node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
+      - name: Reject whitespace damage
+        run: git diff --check "$BASE_SHA...HEAD"
+      - name: Create exact-head evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/whole-life-circulation-exact-head
+          printf 'GITHUB_SHA=%s\nEXPECTED_HEAD=%s\nBASE_SHA=%s\nTREE_SHA=%s\n' \
+            "$GITHUB_SHA" "$EXPECTED_HEAD" "$BASE_SHA" "$(git rev-parse HEAD^{tree})" \
+            > /tmp/whole-life-circulation-exact-head/identity.txt
+          git diff --name-only "$BASE_SHA...HEAD" \
+            | while IFS= read -r file; do test ! -f "$file" || sha256sum "$file"; done \
+            > /tmp/whole-life-circulation-exact-head/file-sha256.txt
+          cp /tmp/whole-life-circulation-tests.tap /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp /tmp/whole-life-solidity-and-invariants.tap /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp /tmp/repository-regression-tests.tap /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/TEMPLEHEART_STORAGE_LAYOUT_VALIDATION.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json /tmp/whole-life-circulation-exact-head/ 2>/dev/null || true
+      - name: Preserve exact-head review reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: whole-life-circulation-exact-head-evidence-${{ env.EXPECTED_HEAD }}
+          path: /tmp/whole-life-circulation-exact-head/
+          if-no-files-found: error
+          retention-days: 30

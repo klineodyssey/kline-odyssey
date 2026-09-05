@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "compiler": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+  "baseline": {
+    "ref": "f507724d1876c28e3d24a7316c440ea9304a5228",
+    "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+    "entries": 206
+  },
+  "candidate": {
+    "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+    "entries": 208
+  },
+  "allowedAdditions": [
+    "error:FortuneKgenPassRequired(uint256,uint256)",
+    "function:MIN_FORTUNE_KGEN_PASS_RAW()"
+  ],
+  "observedAdditions": [
+    "error:FortuneKgenPassRequired(uint256,uint256)",
+    "function:MIN_FORTUNE_KGEN_PASS_RAW()"
+  ],
+  "failures": {
+    "removals": [],
+    "changed": [],
+    "unexpectedAdditions": [],
+    "missingExpectedAdditions": []
+  }
+}

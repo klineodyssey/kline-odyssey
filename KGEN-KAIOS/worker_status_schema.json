@@ -30,7 +30,7 @@
     "worker_id": { "type": "string", "minLength": 1 },
     "worker_type": {
       "type": "string",
-      "enum": ["Codex", "Cursor", "Claude", "Gemini", "OpenHands", "GitHub Copilot", "ChatGPT", "Deep Research", "Human Engineer"]
+      "enum": ["Codex", "Cursor", "Claude", "Gemini", "OpenHands", "GitHub Copilot", "ChatGPT", "ChatGPT／KAIOS Architect", "Deep Research", "Human Engineer"]
     },
     "role": { "type": "string", "minLength": 1 },
     "permission": {
@@ -51,15 +51,99 @@
     "reviewer": { "type": "string", "minLength": 1 },
     "employee_status": {
       "type": "string",
-      "enum": ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED", "PENDING_REGISTRATION", "SUSPENDED", "REVOKED", "ARCHIVED"]
+      "enum": ["ACTIVE", "TRUSTED", "SENIOR_TRUSTED", "ONBOARDING", "PENDING_REGISTRATION", "SUSPENDED", "REVOKED", "ARCHIVED"]
     },
     "trust_level": { "type": "string", "enum": ["T0", "T1", "T2", "T3", "T4", "T5"] },
     "boot_acknowledged": { "type": "boolean" },
     "canon_acknowledged": { "type": "boolean" },
     "workspace_policy_acknowledged": { "type": "boolean" },
     "do_not_touch_acknowledged": { "type": "boolean" },
-    "suspension": { "type": ["object", "string", "null"] },
+    "suspension": {
+      "oneOf": [
+        { "$ref": "workforce/WORKER_SUSPENSION_SCHEMA.json" },
+        { "type": "string" },
+        { "type": "null" }
+      ]
+    },
     "autonomy_scope": { "type": "string", "minLength": 1 },
+    "life_identity_ref": { "type": ["string", "null"] },
+    "soul_identity_ref": { "type": ["string", "null"] },
+    "life_identity_status": { "type": "string", "enum": ["ACTIVE", "CANDIDATE", "UNVERIFIED", "NOT_ASSIGNED"] },
+    "life_status": { "type": "string", "enum": ["ALIVE", "ALIVE_WITH_DARK_MATTER"] },
+    "life_wallet_address": { "type": ["string", "null"], "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "life_birth_tx": { "type": ["string", "null"], "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "life_birthplace_code": { "type": ["integer", "null"], "minimum": 0 },
+    "life_birth_timestamp": { "type": ["string", "null"], "format": "date-time" },
+    "life_birth_evidence_id": { "type": ["string", "null"], "minLength": 1 },
+    "life_birth_decision_id": { "type": ["string", "null"], "minLength": 1 },
+    "life_birth_decision_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "controller_id": { "type": ["string", "null"], "minLength": 1 },
+    "controller_evidence_id": { "type": ["string", "null"], "minLength": 1 },
+    "controller_independence": { "type": "string", "enum": ["VERIFIED", "UNVERIFIED"] },
+    "controller_binding_status": { "type": "string", "minLength": 1 },
+    "controller_binding_checked_at": { "type": ["string", "null"], "format": "date-time" },
+    "review_permissions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "independent_review_eligible": { "type": "boolean" },
+    "acknowledgment_handoff_status": { "type": "string", "minLength": 1 },
+    "acknowledgment_handoff_created_at": { "type": ["string", "null"], "format": "date-time" },
+    "acknowledgment_handoff_refreshed_at": { "type": ["string", "null"], "format": "date-time" },
+    "acknowledgment_handoff_ack_count": { "type": "integer", "minimum": 0 },
+    "blocking_violation": { "type": ["string", "null"] },
+    "active_claim": { "type": ["string", "null"] },
+    "pr165_review_status": { "type": "string", "minLength": 1 },
+    "pr170_review_status": { "type": "string", "minLength": 1 },
+    "pr169_review_conflict": { "type": "string", "minLength": 1 },
+    "autonomy_decision_id": { "type": ["string", "null"], "minLength": 1 },
+    "chain_write_operational": { "type": "boolean" },
+    "secure_signer_connected": { "type": "boolean" },
+    "safe_offchain_clock_in_status": { "type": "string", "enum": ["CLOCKED_IN", "CLOCKED_OUT", "NOT_CLOCKED_IN"] },
+    "safe_offchain_clock_in_at": { "type": ["string", "null"], "format": "date-time" },
+    "pending_rework_task_id": { "type": ["string", "null"] },
+    "fresh_claim_required": { "type": "boolean" },
+    "availability_for_current_work": { "type": "string", "minLength": 1 },
+    "availability_scope": { "type": "string", "minLength": 1 },
+    "active_claim_preserved": { "type": "boolean" },
+    "authority_boundaries": {
+      "type": "object",
+      "required": ["wallet", "payment", "mainnet", "payroll_eligible"],
+      "properties": {
+        "wallet": { "type": "string", "const": "NONE" },
+        "payment": { "type": "string", "const": "NONE" },
+        "mainnet": { "type": "string", "const": "NONE" },
+        "payroll_eligible": { "type": "boolean", "const": false }
+      },
+      "additionalProperties": false
+    },
+    "registration_evidence": {
+      "type": "object",
+      "required": [
+        "source",
+        "signed_by_self_name",
+        "signed_at",
+        "signature_mode",
+        "life_and_soul_claim_match_work_order",
+        "cryptographic_identity_verified",
+        "independent_acknowledgement_verified",
+        "registry_cross_reference_before_candidate",
+        "verification_status"
+      ],
+      "properties": {
+        "source": { "type": "string", "const": "HUMAN_AUTHORIZED_TEXTUAL_WORK_ORDER" },
+        "signed_by_self_name": { "type": "string", "minLength": 1 },
+        "signed_at": { "type": "string", "format": "date-time" },
+        "signature_mode": { "type": "string", "const": "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC" },
+        "life_and_soul_claim_match_work_order": { "type": "boolean" },
+        "cryptographic_identity_verified": { "type": "boolean" },
+        "independent_acknowledgement_verified": { "type": "boolean" },
+        "registry_cross_reference_before_candidate": { "type": "string", "const": "NOT_FOUND_AT_OBSERVED_MAIN" },
+        "verification_status": { "type": "string", "const": "PENDING_INDEPENDENT_VERIFICATION" }
+      },
+      "additionalProperties": false
+    },
     "worker_class": { "type": "string", "minLength": 1 },
     "worker_classes": {
       "type": "array",

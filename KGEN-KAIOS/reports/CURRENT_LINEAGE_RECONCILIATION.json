@@ -27,5 +27,8 @@
     "noMainnetDeployment": true,
     "staleCurrentFindingsLimitedToPr127": true
   },
+  "auditedPathAliases": {
+    "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md"
+  },
   "failures": []
 }

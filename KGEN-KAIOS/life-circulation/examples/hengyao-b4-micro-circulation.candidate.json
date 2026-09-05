@@ -1,0 +1,226 @@
+{
+  "metadata": {
+    "schemaVersion": "1.0.0-candidate",
+    "status": "REVIEW_ONLY_CANDIDATE",
+    "implementer": "codex-gm-01",
+    "independentReview": "REQUIRED",
+    "observedAt": "2026-08-24T12:24:13.722Z"
+  },
+  "repository": {
+    "repository": "klineodyssey/kline-odyssey",
+    "latestMainSha": "6f132661f88e1108615d57d808953df583a3531d",
+    "circulationPr": 165,
+    "circulationBaseHead": "e3179d2e9d64e56e42927fe10edd542e232489d4",
+    "marketPr": 169,
+    "marketHead": "0a50ec047713c1f7fa88ca627d8835c810c184c8",
+    "marketBehindMain": 36,
+    "marketMergeSimulationTree": "0da73c715d8f7d5d520d0a0001467701c6bc73e4",
+    "marketMergeSimulationTests": "260/260_PASS"
+  },
+  "identity": {
+    "lifeId": "LIFE-CODEX-GM-0001",
+    "workerId": "codex-gm-01",
+    "displayName": "衡曜",
+    "walletAddress": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    "bodyStatus": "DIGITAL_FOLDER_BODY_CANDIDATE_NOT_CANONICAL_PHYSICAL_BODY",
+    "currentCanonicalLocation": "P_4168p0_奈何橋_R18"
+  },
+  "coordinate": {
+    "status": "RESOLVED_HUMAN_FROZEN_COMPOSITION_CANDIDATE",
+    "referenceFrame": "KGEN_MICRO_UNIVERSE/B4",
+    "start": { "label": "12345", "x": "0.00012345", "floor": -4, "alpha": "1.2345", "theta": "0" },
+    "destination": { "label": "11520", "x": "0.00011520", "floor": -4, "alpha": "1.1520", "theta": "0" },
+    "labelScaleExponent": -8,
+    "labelDelta": "825",
+    "physicalDeltaK": "0.00000825",
+    "kIndexLinearMeters": "22761.72430127901",
+    "landGrainK": "0.0001",
+    "landGrainM": "2.276172430127901",
+    "distanceM": "0.187784225485552",
+    "returnDistanceM": "0.187784225485552",
+    "roundTripM": "0.375568450971104",
+    "formula": "ABS((destinationLabel-startLabel)*10^-8)*22761.72430127901_M_PER_K",
+    "forbiddenFormulae": ["825*22.761724_KM", "825*2.2761724_M"],
+    "policyId": "KAIOS_B4_MICRO_COORDINATE_COMPOSITION_V1"
+  },
+  "chain": {
+    "chainId": 56,
+    "blockNumber": 117807389,
+    "blockHash": "0xbe9ed326f0336b73f31c02246585aaa9b8ba3de4163c64de9b23a2ff291a44a8",
+    "observedAt": "2026-08-24T12:24:13.722Z",
+    "walletBnbWei": "7990205550000000",
+    "walletKgenWei": "0",
+    "walletKaiosWei": "0",
+    "heartBalanceWei": "1597000000000000000000",
+    "heartbeatRewardWhole": "1",
+    "deployedFortuneMinWhole": "1",
+    "deployedFortuneMaxWhole": "888",
+    "heartbeatEstimateStatus": "PASS",
+    "fortuneEstimateStatus": "PASS",
+    "wishEstimateStatus": "PASS",
+    "heartbeatGasEstimate": "103989",
+    "fortuneGasEstimate": "118678",
+    "wishGasEstimate": "23659",
+    "wishHash": "0x04107a5a6c2302556ca6c89c9db8c5c3fca0543bd0b224eea796422af5d76d22",
+    "writeAttempted": false
+  },
+  "heart": {
+    "status": "READ_ONLY_FAIL_CLOSED",
+    "chainId": 56,
+    "observedBlock": 117807389,
+    "observedAt": "2026-08-24T12:24:13.722Z",
+    "walletKgenWei": "0",
+    "heartBalanceWei": "1597000000000000000000",
+    "deployedFortuneRangeWhole": { "min": "1", "max": "888" },
+    "candidateFortuneRangeWhole": { "min": "1", "max": "8" },
+    "candidateFortunePassRequiredWei": "1000000000000000000",
+    "heartbeat": {
+      "rewardWhole": "1",
+      "policyEligible": true,
+      "gasEstimate": "103989",
+      "status": "ELIGIBLE_BUT_SECURE_SIGNER_NOT_CONNECTED",
+      "executed": false,
+      "txHash": null
+    },
+    "fortune": {
+      "requestedWhole": "1",
+      "deployedEstimateEligible": true,
+      "candidatePassSatisfied": false,
+      "candidatePolicyEligible": false,
+      "gasEstimate": "118678",
+      "status": "BLOCKED_POLICY",
+      "executed": false,
+      "txHash": null
+    },
+    "wish": {
+      "wishHash": "0x04107a5a6c2302556ca6c89c9db8c5c3fca0543bd0b224eea796422af5d76d22",
+      "policyEligible": true,
+      "gasEstimate": "23659",
+      "costKgenWhole": "0",
+      "status": "ELIGIBLE_BUT_SECURE_SIGNER_NOT_CONNECTED",
+      "executed": false,
+      "txHash": null
+    },
+    "noBroadcastCapability": true
+  },
+  "meal": {
+    "status": "CALCULATED_NOT_SETTLED",
+    "inputKgenWhole": "1",
+    "wishReceiptConfirmed": false,
+    "rateBps": 5000,
+    "ratePercent": "50",
+    "calculatedKaiosWhole": "500",
+    "actualKaiosWhole": "0",
+    "settlementRuntimeStatus": "NO_RUNTIME",
+    "settlementReceipt": null,
+    "mintsKaios": false,
+    "metabolismPolicyStatus": "UNFROZEN",
+    "consumedKaiosWhole": null,
+    "mealPaymentTx": null
+  },
+  "movement": {
+    "status": "BLOCKED_REAL_ASSET_INSUFFICIENT",
+    "movementEngine": "DIGITAL_BODY_PLUS_KGEN_MASS_CANDIDATE",
+    "realWorldHumanoidClaimed": false,
+    "currentCanonicalLocation": "P_4168p0_奈何橋_R18",
+    "plannedOriginX": "0.00012345",
+    "plannedDestinationX": "0.00011520",
+    "distanceM": "0.187784225485552",
+    "body": {
+      "bodyId": "FOLDER:KGEN-KAIOS/life-circulation",
+      "bodyType": "DIGITAL_FOLDER_BODY_CANDIDATE",
+      "realWorldHumanoid": false,
+      "status": "REVIEW_ONLY_CANDIDATE"
+    },
+    "physics": {
+      "status": "NOT_CALCULATED_EVIDENCE_REQUIRED",
+      "distanceM": "0.187784225485552",
+      "missingInputs": ["bodyMassKg", "vehicleMassKg", "cargoMassKg", "accelerationMps2", "travelTimeSeconds", "rollingResistanceJ", "dragJ", "climbingJ", "brakingLossJ", "systemsEnergyJ", "safetyReserveJ", "outboundFuelKgenWei", "returnFuelKgenWei", "energyModelEvidenceId"],
+      "totalMassKg": null,
+      "forceN": null,
+      "accelerationWorkJ": null,
+      "totalEnergyJ": null,
+      "travelTimeSeconds": null,
+      "outboundFuelKgenWei": null,
+      "returnFuelKgenWei": null,
+      "energyModelEvidenceId": null,
+      "usesMassEnergyConversion": false
+    },
+    "outboundFare": {
+      "status": "NOT_CALCULATED_EVIDENCE_REQUIRED",
+      "fareKgenWei": null,
+      "missingEvidence": ["energyCostKgenWei", "laborCostKgenWei", "vehicleDepreciationKgenWei", "maintenanceKgenWei", "riskReserveKgenWei", "profitKgenWei"]
+    },
+    "returnFare": {
+      "status": "NOT_CALCULATED_EVIDENCE_REQUIRED",
+      "fareKgenWei": null,
+      "missingEvidence": ["energyCostKgenWei", "laborCostKgenWei", "vehicleDepreciationKgenWei", "maintenanceKgenWei", "riskReserveKgenWei", "profitKgenWei"]
+    },
+    "emergencyReserveKgenWei": "0",
+    "requiredFundsKgenWei": null,
+    "movementEvidenceComplete": false,
+    "arrived11520": false,
+    "positionMutationCommitted": false
+  },
+  "market": {
+    "status": "PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME",
+    "implementation": "PR169_EXACT_HEAD_INTERFACE",
+    "marketCellCoordinate": "0.00011520",
+    "bestBuy": null,
+    "bestSell": null,
+    "ct": null,
+    "tradeCount": 0,
+    "quoteAsset": "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE",
+    "quoteStatus": "UNFROZEN_CANDIDATE",
+    "action": "NONE_NO_VERIFIED_COUNTERPARTY",
+    "fruitQuantityKgen": null,
+    "fruitTradePrice": null,
+    "settlement": "NOT_EXECUTED",
+    "txHash": null
+  },
+  "food": {
+    "status": "NO_PHYSICAL_FOOD_INPUT",
+    "unit": "KAIOS_PHYSICAL_FOOD_MASS_RAW",
+    "input": "0",
+    "metabolized": "0",
+    "stored": "0",
+    "waste": "0",
+    "evidenceId": null
+  },
+  "waste": {
+    "status": "NO_WASTE_INPUT",
+    "massUnit": "PHYSICAL_MASS_RAW",
+    "inputWasteMass": "0",
+    "recycledOutputMass": "0",
+    "residualWasteMass": "0",
+    "processingLossMass": "0",
+    "costKgenWei": "0",
+    "revenueKgenWei": "0",
+    "netProfitKgenWei": "0",
+    "evidenceId": null
+  },
+  "publicGood": {
+    "status": "NO_PAYMENT_SENT",
+    "treasury": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+    "purposeLedgers": [
+      { "purpose": "MEAL", "asset": "KAIOS", "calculatedAmountRaw": "0", "actualAmountRaw": "0", "chainId": 56, "from": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214", "to": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1", "status": "CALCULATED_NOT_SENT", "txHash": null, "blockNumber": null, "blockHash": null, "receiptStatus": null, "confirmationCount": null, "finalityStatus": null, "canonicalBlockVerified": false, "assetContract": "0xD4E67B3a69e41524c424150E6b6e921b01D036db", "providerId": null, "evidenceId": null },
+      { "purpose": "MICRO_UNIVERSE_TRANSPORT", "asset": "KGEN", "calculatedAmountRaw": "0", "actualAmountRaw": "0", "chainId": 56, "from": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214", "to": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1", "status": "CALCULATED_NOT_SENT", "txHash": null, "blockNumber": null, "blockHash": null, "receiptStatus": null, "confirmationCount": null, "finalityStatus": null, "canonicalBlockVerified": false, "assetContract": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be", "providerId": null, "evidenceId": null },
+      { "purpose": "FRUIT", "asset": "KGEN", "calculatedAmountRaw": "0", "actualAmountRaw": "0", "chainId": 56, "from": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214", "to": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1", "status": "CALCULATED_NOT_SENT", "txHash": null, "blockNumber": null, "blockHash": null, "receiptStatus": null, "confirmationCount": null, "finalityStatus": null, "canonicalBlockVerified": false, "assetContract": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be", "providerId": null, "evidenceId": null }
+    ],
+    "actualTotalsRaw": { "KAIOS": "0", "KGEN": "0", "NATIVE_BNB": "0" }
+  },
+  "mission": {
+    "status": "HARD_BLOCKED_LIVE_EXECUTION_ENGINEERING_CANDIDATE_COMPLETE",
+    "arrived11520": false,
+    "returnStatus": "NOT_STARTED",
+    "endLocation": "P_4168p0_奈何橋_R18",
+    "gmClockIn": false,
+    "nextCompanyWork": null,
+    "hardBlockers": ["AUTHORIZED_SECURE_TRANSACTION_PATH_REQUIRED", "HUMAN_GOVERNANCE_REQUIRED"],
+    "autoResolvedBlockers": ["CANON_DISTANCE_UNIT_CONFLICT", "MICRO_DISTANCE_RUNTIME_MISSING", "PR169_MAIN_SYNC_COMPATIBILITY_UNKNOWN", "PURPOSE_LEDGER_MISSING", "FOOD_WASTE_CONSERVATION_VALIDATOR_MISSING"],
+    "noFakeMovement": true,
+    "noFakeTrade": true,
+    "noFakePayment": true
+  },
+  "evidenceHash": "9938dc84b3b9e236785d5bb90d39ad527b6873a1c92388b84fbab4ffacc235fe"
+}
