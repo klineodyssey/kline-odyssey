@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.2.4
+VERSION: 1.2.5
 STATUS: ACTIVE
 PURPOSE: Mobile UI cleanup, fixed branded energy icons, AI voice assistant, music and intro.
 */
@@ -8,8 +8,8 @@ const isGame=typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.
 const A='./assets/ui/';
 
 function installCss(){
-  if(!isGame||document.getElementById('k11520ProductFixesStyleV5'))return;
-  const s=document.createElement('style');s.id='k11520ProductFixesStyleV5';s.textContent=`
+  if(!isGame||document.getElementById('k11520ProductFixesStyleV6'))return;
+  const s=document.createElement('style');s.id='k11520ProductFixesStyleV6';s.textContent=`
     #yControl .track,#cControl .track,#lotsControl .track{position:absolute!important}
     #yEnergyMarker{display:none!important}
     .sliderDock .thumb{height:16px!important;width:36px!important;border-radius:9px!important;background-image:none!important;background:#173f56!important;box-shadow:none!important;border:1px solid var(--cyan)!important}
@@ -25,7 +25,7 @@ function installCss(){
     #aiChatPanel{position:fixed;z-index:2400;left:10px;right:64px;bottom:12px;max-height:66vh;border:1px solid #ff8df077;border-radius:16px;background:#08131df8;box-shadow:0 20px 70px #000d;display:none;overflow:hidden}
     #aiChatPanel.open{display:grid;grid-template-rows:auto 1fr auto}.aiHead{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid #fff1}.aiHead b{flex:1;color:#ff9dec}.aiHead button{width:36px;height:36px;border:1px solid #fff2;border-radius:10px;background:#111b26}.aiMsgs{padding:10px;overflow:auto;min-height:180px;max-height:42vh}.aiMsg{max-width:88%;margin:5px 0;padding:8px 10px;border-radius:12px;background:#122230}.aiMsg.user{margin-left:auto;background:#28324c}.aiMsg.ai{border:1px solid #ff8df033}.aiComposer{display:grid;grid-template-columns:1fr 42px 42px;gap:6px;padding:10px;border-top:1px solid #fff1}.aiComposer input{min-width:0;border:1px solid #68e4ff33;background:#071019;border-radius:10px;padding:9px}.aiComposer button{border:1px solid #68e4ff44;background:#10202d;border-radius:10px}
     #intro11520{position:fixed;z-index:5000;inset:0;background:radial-gradient(circle at 50% 45%,#153257 0,#071018 45%,#020407 100%);display:grid;place-items:center;perspective:900px;transition:opacity .5s ease;pointer-events:auto}#intro11520.hide{opacity:0;pointer-events:none}.introCore{text-align:center;transform-style:preserve-3d}.introLogo{width:108px;height:108px;margin:auto;border-radius:50%;background:url('${A}brand-k-ui.webp') center/cover;box-shadow:0 0 40px #ffd55b88;animation:introLogoFly 2.4s cubic-bezier(.2,.8,.2,1) both}.introTitle{margin-top:16px;color:#f5d680;font-size:24px;font-weight:900;text-shadow:0 0 18px #f5d68066;animation:introFade .9s ease both}.introSub{margin-top:5px;color:#9deaff;font-size:12px;animation:introFade 1.2s ease both}.introSkip{position:relative;z-index:2;margin-top:18px;border:1px solid #fff3;background:#0d1722;color:#fff;border-radius:10px;padding:10px 16px;touch-action:manipulation;pointer-events:auto}@keyframes introLogoFly{0%{transform:translateZ(-700px) rotateY(0) scale(.5);opacity:0}45%{opacity:1}100%{transform:translateZ(0) rotateY(720deg) scale(1)}}@keyframes introFade{0%{opacity:0}100%{opacity:1}}
-    @media(max-width:420px){.joyWrap{left:-6px!important}.controls{right:72px!important;transform:scale(.82)!important;transform-origin:right bottom!important}.sliderDock{right:72px!important;bottom:204px!important;transform:scale(.82)!important;transform-origin:right bottom!important}#walletToggle.k11520-fixed-wallet-toggle{right:8px!important;top:auto!important;bottom:214px!important}#gameModeToggle{right:8px!important;top:auto!important;bottom:148px!important}#backpackButton{right:8px!important;bottom:82px!important}#dock{right:8px!important;bottom:18px!important}#dock.open{z-index:1600!important}#dock.open .rail{z-index:1601!important;background:#091018f8!important}#aiChatButton{right:8px!important;bottom:280px!important}#bgmButton{right:8px!important;bottom:334px!important}}
+    @media(max-width:420px){.joyWrap{left:-18px!important}.controls{right:72px!important;transform:scale(.82)!important;transform-origin:right bottom!important}.sliderDock{right:72px!important;bottom:204px!important;transform:scale(.82)!important;transform-origin:right bottom!important}#walletToggle.k11520-fixed-wallet-toggle{right:8px!important;top:auto!important;bottom:214px!important}#gameModeToggle{right:8px!important;top:auto!important;bottom:148px!important}#backpackButton{right:8px!important;bottom:82px!important}#dock{right:8px!important;bottom:18px!important}#dock.open{z-index:1600!important}#dock.open .rail{z-index:1601!important;background:#091018f8!important}#aiChatButton{right:8px!important;bottom:280px!important}#bgmButton{right:8px!important;bottom:334px!important}}
   `;document.head.appendChild(s);
 }
 function yRatio(){const text=document.getElementById('yRead')?.textContent||'Y 0';const value=Number(text.match(/-?\d+(?:\.\d+)?/)?.[0]||0);return Math.max(0,Math.min(1,value/40));}
