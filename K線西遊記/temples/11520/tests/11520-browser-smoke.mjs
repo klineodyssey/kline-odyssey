@@ -42,7 +42,8 @@ const after=await page.locator('#xyz').textContent();assert.notEqual(after,befor
 
 // Branded Y/C/K pictures are fixed at the top of each energy track, not moving thumbs.
 for(const id of ['yControl','cControl','lotsControl']){
-  const bg=await page.locator(`#${id} .track`).evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
+  const icon=page.locator(`#${id} .energyTap`);
+  const bg=await icon.evaluate(el=>getComputedStyle(el).backgroundImage);
   assert.ok(bg&&bg!=='none',`${id} fixed energy icon missing`);
 }
 assert.equal(await page.locator('#yEnergyMarker').count(),0,'legacy glowing Y energy marker should be removed');
