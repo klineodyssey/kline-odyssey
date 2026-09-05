@@ -2,11 +2,21 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {createWorldState,resolvePlayerMove,playerAttack,tickWorld} from '../runtime/world-runtime.mjs';
+import {createMarketLife} from '../runtime/market-life-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 
 test('0C still allows ordinary XZ walking',()=>{const s=movementStep({forward:1,turn:0,heading:0,warp:0});assert.ok(s.distance>0);assert.ok(s.dz>0)});
 test('joystick horizontal rotates player',()=>{const s=movementStep({forward:0,turn:1,heading:0,warp:0});assert.ok(s.heading>0);assert.equal(s.distance,0)});
 test('collision blocks building',()=>{const r=resolvePlayerMove({x:0,y:0,z:0},{x:-7,y:0,z:7});assert.equal(r.blocked,true)});
+
+test('baseline chicken and duck may exist without market dimensions',()=>{
+  for(const species of ['CHICKEN','DUCK']){
+    const life=createMarketLife({lifeId:`LIFE-QA-${species}-001`,species,markets:[],capital:0,vitality:100});
+    assert.deepEqual(life.marketDimensions,[]);
+    assert.equal(life.strategy,'WILD_ECOLOGY');
+    assert.equal(life.state,'ALIVE');
+  }
+});
 
 test('source-driven Market Life spawns, requires settlement, and despawns',()=>{
   const w=createWorldState(0),p={x:2,y:0,z:2};

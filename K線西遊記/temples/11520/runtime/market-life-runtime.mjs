@@ -1,15 +1,15 @@
 /*
 KGEN_META
-VERSION: 1.0.2
-REVISION: 2026-09-04.LIVING-WORLD-UNMARKETED-LIFE-FIX
+VERSION: 1.0.3
+REVISION: 2026-09-05.LIVING-WORLD-UNMARKETED-SPECIES-COMPLETE
 STATUS: ACTIVE
 SOURCE_OF_TRUTH: MARKET_LIFE_AI_SPEC.md / LIVING_WORLD_ECOSYSTEM_SPEC.md
-CHANGE_REASON: Internal SOURCE_SLOT and baseline WILD_ECOLOGY species may exist without market dimensions. Real Market Life remains market-required.
+CHANGE_REASON: Keep all baseline wild-ecology species valid without market dimensions. Real Market Life remains market-required.
 */
 
 export const MARKET_LIFE_ACTIONS=Object.freeze(['HOLD','FOLLOW','OPPOSE','HEDGE','REALLOCATE','REDUCE','RETREAT','REENTER']);
 export const MARKET_LIFE_STATES=Object.freeze(['ALIVE','WOUNDED','RETREATING','DEAD','NAIHE','MENGPO_RECOVERY','REBIRTH']);
-export const UNMARKETED_WORLD_SPECIES=Object.freeze(['FISH','SHRIMP','COW','SHEEP','TREE','FLOWER']);
+export const UNMARKETED_WORLD_SPECIES=Object.freeze(['FISH','SHRIMP','COW','SHEEP','CHICKEN','DUCK','TREE','FLOWER']);
 
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
 const copy=v=>JSON.parse(JSON.stringify(v));
