@@ -1,0 +1,20 @@
+name: KAIOS brand review
+on:
+  push:
+    branches: [codex/kaios-kufo-kship-brand-review-v1]
+    paths: ['assets/kaios/**','tools/*kaios-brand-assets.py','.github/workflows/kaios-brand-review.yml']
+  pull_request:
+    paths: ['assets/kaios/**','tools/*kaios-brand-assets.py','.github/workflows/kaios-brand-review.yml']
+permissions: {contents: read}
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python tools/validate-kaios-brand-assets.py
+      - run: git diff --check
