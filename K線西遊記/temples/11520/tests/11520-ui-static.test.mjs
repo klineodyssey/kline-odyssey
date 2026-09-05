@@ -5,14 +5,17 @@ import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
 const here=dirname(fileURLToPath(import.meta.url));
 const html=readFileSync(resolve(here,'../game-5d.html'),'utf8');
+const main=readFileSync(resolve(here,'../runtime/game-5d-main.mjs'),'utf8');
+const fixes=readFileSync(resolve(here,'../runtime/game-ui-product-fixes.mjs'),'utf8');
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
-test('all formal organs remain present',()=>{for(const id of organs)assert.ok(html.includes(`['${id}'`),id)});
-test('all current fixed control surfaces exist',()=>{for(const id of fixed)assert.ok(html.includes(`id="${id}"`),id)});
-test('core controls have event wiring',()=>{
-  for(const token of ["joy.addEventListener('pointerdown'","$('#lookPad').addEventListener('pointerdown'","$('#attack').onclick","$('#skill').onclick","$('#dodge').onclick","$('#tradeSword').onclick","$('#flat').onclick","$('#orderFire').onclick","$('#dockToggle').onclick","$('#walletConnect').onclick","$('#walletRefresh').onclick","$('#walletToggle').onclick","bindVertical('#yControl'","bindVertical('#lotsControl'","bindVertical('#cControl'"])assert.ok(html.includes(token),token);
-});
-test('0C walking remains independent from C control',()=>{assert.equal(html.includes('D.warp===0?0'),false);assert.ok(html.includes('function moveManual()'));assert.ok(html.includes('const speed=.10'))});
-test('current dynamic organ actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setNavTarget','bindMap'])assert.ok(html.includes(token),token)});
-test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));assert.ok(html.includes('requiredMargin'));assert.ok(html.includes('positionRisk'));assert.ok(html.includes('playerAttack'))});
+test('all formal organs remain in modular runtime',()=>{for(const id of organs)assert.ok(main.includes(`['${id}'`),id)});
+test('all current fixed control surfaces exist in HTML shell',()=>{for(const id of fixed)assert.ok(html.includes(`id="${id}"`),id)});
+test('HTML shell delegates to the maintainable game runtime',()=>{assert.ok(html.includes('./runtime/game-5d-main.mjs'));assert.equal(html.includes("joy.addEventListener('pointerdown'"),false)});
+test('core controls have event wiring in game runtime',()=>{for(const token of ["joy.addEventListener('pointerdown'","$('#lookPad').addEventListener('pointerdown'","$('#attack').onclick","$('#skill').onclick","$('#dodge').onclick","$('#tradeSword').onclick","$('#flat').onclick","$('#orderFire').onclick","$('#dockToggle').onclick","$('#walletConnect').onclick","$('#walletRefresh').onclick","$('#walletToggle').onclick","bindVertical('#yControl'","bindVertical('#lotsControl'","bindVertical('#cControl'"])assert.ok(main.includes(token),token)});
+test('0C walking remains independent from C control',()=>{assert.equal(main.includes('D.warp===0?0'),false);assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('const speed=.10'))});
+test('dynamic organ, map and object inspection actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setWaypoint','bindMap','inspectMapPoint','showEntityInfo'])assert.ok(main.includes(token),token)});
+test('canonical coordinate runtime replaces event/canvas mirroring',()=>{assert.ok(main.includes('joystickToWorld'));assert.ok(main.includes('worldToNorthUpMap'));assert.equal(fixes.includes('scaleY(-1)'),false);assert.equal(fixes.includes('mirrorY'),false);assert.equal(fixes.includes('installMapPointerFix'),false)});
+test('Y/C/Lots fixed top icons and canonical floors remain active',()=>{for(const id of ['yEnergyTap','cEnergyTap','lotsEnergyTap'])assert.ok(fixes.includes(id));assert.ok(fixes.includes('Math.floor(Math.log10(m))'));assert.ok(fixes.includes("k<0?`B${-k}`:`k=${k}`"))});
+test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));assert.ok(main.includes('requiredMargin'));assert.ok(main.includes('positionRisk'));assert.ok(main.includes('playerAttack'))});
