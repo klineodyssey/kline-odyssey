@@ -1,596 +1,939 @@
 {
-  "taskId": "KAIOS-TOKEN-LINEAGE-INTEGRATION-20260809",
+  "taskId": "KAIOS-CURRENT-CANON-RECONCILIATION-20260809",
   "auditedAt": "2026-08-09T00:00:00+08:00",
-  "scope": "repository working tree plus PR #127 conflict evidence",
-  "reconciledActiveFiles": [
-    "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+  "status": "PASS",
+  "scope": {
+    "repositoryTrackedFiles": 3705,
+    "repositoryReadableTextFiles": 3703,
+    "repositoryPdfFiles": 33,
+    "repositoryPdfPages": 222,
+    "externalPackage": {
+      "label": "HUMAN_PACKAGE/KAIOS Genesis Charter V2.0",
+      "provided": false,
+      "totalFiles": 0,
+      "textFiles": 0,
+      "pdfFiles": 0,
+      "pdfPages": 0,
+      "pdfExtraction": "NOT_REQUESTED"
+    },
+    "scannedFilesTotal": 3705
+  },
+  "finalCanon": {
+    "18888": "LINGXIAO_CELESTIAL_BANK",
+    "33333": "KAIOS_GOLD_AND_SILVER_ISLAND_TOKEN_POINT",
+    "36000": "WHITE_HOLE",
+    "KGEN_TO_KAIOS": "1_TO_1000",
+    "KAIOS_MAX_SUPPLY": "72_000_000_000",
+    "KAIOS_TO_KUFO": "1_TO_1000",
+    "genesisInscription": [
+      "NO KGEN BURN, NO KAIOS MINT.",
+      "ONE BURNED KGEN CREATES ONE THOUSAND KAIOS.",
+      "NO DISCRETIONARY MINTING.",
+      "CIVILIZATION MASS SHALL BE CONSERVED."
+    ]
+  },
+  "singleSourceOfTruth": "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
+  "legacyScaleReferenceCount": 46,
+  "legacyScaleFiles": [
+    "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+    "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md",
+    "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
+    "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
     "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
-    "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
+    "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
+    "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md",
+    "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.3_ARCHIVE.md",
+    "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md",
+    "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md",
+    "KGEN-KAIOS/reports/RECOVERY-KAIOS-TOKEN-LINEAGE-INTEGRATION-20260809.md",
+    "KGEN-KAIOS/tests/token-surface.security.test.mjs",
+    "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+    "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+    "K線西遊記/daily/2026-01-21/subtitle_en.srt",
+    "K線西遊記/daily/20260129/悟空新文_Weight_of_the_World/Wukong_Essay_Weight_Not_Smart_subtitle_en.srt",
+    "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+    "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+    "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md"
+  ],
+  "preReconciliationActiveScaleConflictFiles": [
+    "docs/constitution/02_KAIOS_Civilization_Constitution.md",
+    "docs/constitution/03_Celestial_Bank_18888.md"
+  ],
+  "humanReportedFileResolution": {
+    "KAIOS_GENESIS_INSCRIPTION_V1.0.md": "SUPERSEDED_BY_HUMAN_V1.2_INTAKE; canonical unversioned inscription reconciled to the exact four-line Final Canon",
+    "KAIOS_GENESIS_INSCRIPTION_V1.2.md": "INTEGRATED_AS_KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md; no duplicate versioned active inscription retained",
+    "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol": "PRESENT_AND_RECONCILED_TO_EXACT_ONE_THOUSAND_TEXT"
+  },
+  "correctedFiles": [
+    "KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md",
+    "KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md",
+    "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md",
+    "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
+    "KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md",
+    "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+    "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md",
+    "KGEN-KAIOS/contracts/KAIOS.sol",
+    "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol",
+    "KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
+    "docs/constitution/00_PrimeForge_Creation_Declaration.md",
     "docs/constitution/01_KGEN_Universe_Constitution.md",
     "docs/constitution/02_KAIOS_Civilization_Constitution.md",
     "docs/constitution/03_Celestial_Bank_18888.md",
-    "K線西遊記/data/kgen-5d-world-map.json"
+    "docs/constitution/04_People_Bank_8888.md",
+    "docs/constitution/05_Gold_Island_33333.md",
+    "docs/constitution/06_Huaguo_Exchange_11520.md",
+    "docs/constitution/08_AI_Company.md",
+    "docs/physics/final-whitepaper/CODEX_KAIOS_WHITE_HOLE_GENESIS_IMPLEMENTATION_INSTRUCTIONS.md"
   ],
-  "patterns": [
-    "1 KGEN = 1 kg",
-    "10,000 KAIOS",
-    "KAIOS_PER_KGEN = 10_000",
-    "BurnProofGenesis",
-    "Species → Cell → Organ"
+  "supersededHistoryFiles": [
+    "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
+    "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
+    "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md",
+    "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.3_ARCHIVE.md",
+    "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md",
+    "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md"
   ],
-  "counts": {
-    "CURRENT-CONFLICT": 2,
-    "HISTORICAL-ARCHIVE": 44,
-    "TEST-FIXTURE": 1,
-    "SAFE": 34
+  "contractCriticalAudit": [
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KAIOS.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KUFOClaimWormhole.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KUFO.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KSHIP.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KSHIPConverter.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KAIOSPairRegistry.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN-KAIOS/contracts/KAIOSEventHorizonVaultV01.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    },
+    {
+      "contractPath": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+      "status": "NO_1_TO_10000_CONFLICT"
+    }
+  ],
+  "classifications": {
+    "CURRENT_CORRECT": 29,
+    "SUPERSEDED_HISTORY": 20,
+    "ACTIVE_CONFLICT": 0,
+    "COMMENT_ONLY": 25,
+    "TEST_FIXTURE": 1,
+    "CONTRACT_CRITICAL": 0
+  },
+  "organResponsibilities": {
+    "8888": "GAO_LAO_ZHUANG_PEOPLE_BANK: prototype daily people/company accounts and internal payroll ledger; not the 18888 central settlement bank.",
+    "8895": "YUNZHANG_CAVE_SHADOW_BANK: own-capital real-economy underwriting concept; no genesis-scale authority, 8888 deposit use, or guaranteed 18888 bailout.",
+    "11520": "UNIVERSE_EXCHANGE: life/civilization admission, listings, market and exchange gateway.",
+    "12345": "TEMPLEHEART: civilization/financial heart and Temple interaction organ; not the formal salary treasury.",
+    "16888": "MOON_GUANGHAN: lunar celestial point and independent Moon life/land domain; the latest Human package proposes a Guanghan reproduction/DNA/RNA runtime as a subordinate function.",
+    "18888": "LINGXIAO_CELESTIAL_BANK: KAIOS settlement, lawful 500-seat salary and civilization funding under auditable bank rules; no unrestricted owner withdrawal.",
+    "33333": "KAIOS_GOLD_AND_SILVER_ISLAND_TOKEN_POINT: token deployment Point ID, never an EVM address or treasury.",
+    "36000": "WHITE_HOLE: actual canonical KGEN totalSupply-reduction observation boundary."
+  },
+  "externalPackageOrganAudit": {
+    "pointReferenceLineCounts": {
+      "8888": 0,
+      "8895": 0,
+      "11520": 17,
+      "12345": 26,
+      "16888": 7,
+      "18888": 3,
+      "33333": 0,
+      "36000": 0
+    },
+    "reconciledSourceConflicts": [
+      {
+        "path": "HUMAN_PACKAGE/KAIOS_Chapter_24_Cosmic_Ecology_Natural_Selection_Species_Exchange_Runtime.md",
+        "line": 139,
+        "sourceText": "18888 花果山",
+        "resolution": "18888 = LINGXIAO_CELESTIAL_BANK; the Human package source line is overridden and is not Active Canon."
+      },
+      {
+        "path": "HUMAN_PACKAGE/KAIOS_Chapter_24_Cosmic_Ecology_Natural_Selection_Species_Exchange_Runtime.md",
+        "line": 140,
+        "sourceText": "11520 Heaven",
+        "resolution": "11520 = HUAGUO_UNIVERSE_EXCHANGE; the Human package source line is overridden and is not Active Canon."
+      }
+    ],
+    "activeConflictsAfterHumanFinalCanonOverride": 0
   },
   "findings": [
     {
-      "path": "docs/physics/final-whitepaper/CODEX_KAIOS_WHITE_HOLE_GENESIS_IMPLEMENTATION_INSTRUCTIONS.md",
-      "line": 43,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/final-whitepaper/CODEX_KAIOS_WHITE_HOLE_GENESIS_IMPLEMENTATION_INSTRUCTIONS.md",
-      "line": 253,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/final-whitepaper/CODEX_V4_PENDING_MERGE_NOTES.md",
-      "line": 354,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
-      "line": 42,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
-      "line": 42,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
-      "line": 382,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
-      "line": 383,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
-      "line": 202,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
-      "line": 203,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V1_6.md",
-      "line": 2661,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V1_7.md",
-      "line": 2760,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V1_7.md",
-      "line": 3215,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
-      "line": 92,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
-      "line": 2004,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
-      "line": 2228,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
-      "line": 2472,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_1_Territory_Unified.md",
-      "line": 2651,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
-      "line": 94,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
-      "line": 2006,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
-      "line": 2230,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
-      "line": 2474,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_3_EARTH_LIFE_CERTIFICATION.md",
-      "line": 2653,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
-      "line": 96,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
-      "line": 2008,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
-      "line": 2232,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
-      "line": 2476,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/physics/KGEN_Universe_Physics_Runtime_V3_7.md",
-      "line": 2655,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
-      "line": 139,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
-      "line": 140,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
-      "line": 264,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
-      "line": 266,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "docs/Whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
-      "line": 976,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
-      "line": 4,
-      "pattern": "BurnProofGenesis",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
-      "line": 5,
-      "pattern": "BurnProofGenesis",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
-      "line": 12,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md",
-      "line": 15,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.3_ARCHIVE.md",
-      "line": 19,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
       "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
       "line": 7,
-      "pattern": "KAIOS_PER_KGEN = 10_000",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
-      "line": 7,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
-      "line": 59,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "Before starting new integration, read `KAIOS_FrictionMirror_Multiverse_README.md` as the KAIOS monetary and point-identity single source of truth. Then report whether the previously assigned work is complete. In particular inspect PR #127 (",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
       "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
       "line": 70,
-      "pattern": "KAIOS_PER_KGEN = 10_000",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
-      "line": 71,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
-    },
-    {
-      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
-      "line": 78,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- `KAIOS_PER_KGEN = 10_000`,",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
       "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
       "line": 82,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- `10,000 KAIOS`",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
       "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
       "line": 83,
-      "pattern": "KAIOS_PER_KGEN = 10_000",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- `KAIOS_PER_KGEN = 10_000`",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
       "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
-      "line": 84,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "line": 98,
+      "pattern": "1_TO_10000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- no obsolete 1:10000 semantics remain in active code/docs,",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
-      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
-      "line": 85,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "path": "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md",
+      "line": 156,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- 舊 1:10,000 / 720 billion 規則全部廢止。",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
-      "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
-      "line": 86,
-      "pattern": "Species → Cell → Organ",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "path": "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
+      "line": 20,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "Earlier `1:10,000` and `720,000,000,000 KAIOS` definitions are superseded.",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
-      "path": "KGEN-KAIOS/KAIOS.md",
-      "line": 23,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Reference is an explicit supersession, audit instruction, or conflict example."
+      "path": "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
+      "line": 20,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "Earlier `1:10,000` and `720,000,000,000 KAIOS` definitions are superseded.",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
-      "path": "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.6.md",
-      "line": 54,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "path": "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
+      "line": 2,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "> **SUPERSEDED HISTORICAL SNAPSHOT:** The 1:10,000 monetary scale in this edition is superseded by the 2026-08-09 CURRENT lineage. Retained for history only.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
     },
     {
       "path": "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
       "line": 241,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "→ 10,000 KAIOS",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
     },
     {
       "path": "KGEN-KAIOS/KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md",
       "line": 245,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "此 10,000 KAIOS 是玩家本金轉換，不是八戒利潤。",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
     },
     {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 65,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+      "line": 8,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "**Mass-ratio reconciliation (2026-08-09):** `1 KGEN = 1,000 KAIOS`; earlier `1:10,000` is superseded.",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 87,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "path": "KGEN-KAIOS/abi/KAIOS.json",
+      "line": 459,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "\"name\": \"KAIOS_PER_KGEN\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 90,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "path": "KGEN-KAIOS/abi/KAIOS.json",
+      "line": 563,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "\"name\": \"MAX_SUPPLY\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 110,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 119,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 168,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 201,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 369,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 461,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 612,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
-      "line": 645,
-      "pattern": "10,000 KAIOS",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
-    },
-    {
-      "path": "KGEN-KAIOS/tests/fixtures/templeheart-v3.3.1-storage-layout.json",
-      "line": 13,
-      "pattern": "BurnProofGenesis",
-      "classification": "TEST-FIXTURE",
-      "action": "Retain as explicit regression fixture."
-    },
-    {
-      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 9,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
-    },
-    {
-      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 10,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
-    },
-    {
-      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
       "line": 11,
-      "pattern": "KAIOS_PER_KGEN = 10_000",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- Maximum supply 720,000,000,000 KAIOS.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
     },
     {
-      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "path": "KGEN-KAIOS/archive/KAIOSV01_BurnProofGenesis_DRAFT_ARCHIVE.md",
       "line": 12,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- 1 burned KGEN = 10,000 KAIOS.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md",
+      "line": 15,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- Fixed creation ratio: 1 burned KGEN = 10,000 KAIOS.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.2_ARCHIVE.md",
+      "line": 16,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- Maximum KAIOS supply: 720,000,000,000.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.3_ARCHIVE.md",
+      "line": 18,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- Maximum supply is 720,000,000,000 KAIOS.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "KGEN-KAIOS/archive/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.3_ARCHIVE.md",
+      "line": 19,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- One irreversibly burned KGEN creates 10,000 KAIOS.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOS.sol",
+      "line": 46,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "uint256 public constant KAIOS_PER_KGEN = 1_000;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOS.sol",
+      "line": 53,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "uint256 public constant MAX_SUPPLY = 72_000_000_000 ether;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOS.sol",
+      "line": 129,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "ERC20Capped(MAX_SUPPLY)",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOS.sol",
+      "line": 170,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "kaiosMinted = newlySettledKgenBurned * KAIOS_PER_KGEN;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOS.sol",
+      "line": 288,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "return pendingKgenBurned() * KAIOS_PER_KGEN;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOS.sol",
+      "line": 302,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "== settledKgenBurned * KAIOS_PER_KGEN;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol",
+      "line": 8,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "function KAIOS_PER_KGEN() external view returns (uint256);",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol",
+      "line": 100,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "uint256 kaiosPerKgen = kaios.KAIOS_PER_KGEN();",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KSHIP.sol",
+      "line": 26,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "uint256 public constant MAX_SUPPLY = 72_000_000_000_000_000 ether;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KSHIP.sol",
+      "line": 43,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "ERC20Capped(MAX_SUPPLY)",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KUFO.sol",
+      "line": 49,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "uint256 public constant MAX_SUPPLY = 72_000_000_000_000 ether;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KUFO.sol",
+      "line": 88,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "ERC20Capped(MAX_SUPPLY)",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_CLOSEOUT_20260809.md",
+      "line": 7,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- Active 1 kg / 1:10,000 references reconciled.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md",
+      "line": 8,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "contained both `KAIOS_PER_KGEN = 10_000` and the administrator-replaceable",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "KGEN-KAIOS/reports/RECOVERY-KAIOS-TOKEN-LINEAGE-INTEGRATION-20260809.md",
+      "line": 14,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "restore PR #127's 1:10,000 or administrator-reported proof model.",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
+      "line": 199,
+      "pattern": "TEN_THOUSAND_KAIOS",
+      "legacyScale": true,
+      "classification": "TEST_FIXTURE",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "assert.equal(source.includes(\"TEN THOUSAND KAIOS\"), false);",
+      "rationale": "Negative regression fixture; it must assert rejection of the legacy inscription or scale."
     },
     {
       "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 13,
-      "pattern": "Species → Cell → Organ",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "line": 17,
+      "pattern": "720_BILLION_RAW",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "{ id: \"720_BILLION_RAW\", regex: /(?<!\\d)720000000000(?!\\d)/gu, legacyScale: true },",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
       "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 76,
-      "pattern": "KAIOS_PER_KGEN = 10_000",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "line": 18,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "{ id: \"720_BILLION_FORMATTED\", regex: /720,000,000,000/gu, legacyScale: true },",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
       "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
-      "line": 83,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "line": 19,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "{ id: \"KAIOS_PER_KGEN\", regex: /KAIOS_PER_KGEN/gu, legacyScale: false },",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
-      "path": "KGEN-KAIOS/tools/validate-templeheart-storage.mjs",
-      "line": 61,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
-    },
-    {
-      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
       "line": 20,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "{ id: \"MAX_SUPPLY\", regex: /MAX_SUPPLY/gu, legacyScale: false },",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 66,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "|| (pattern.id === \"KAIOS_PER_KGEN\" && /10_000|10000/u.test(line));",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 104,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "|| (pattern.id === \"KAIOS_PER_KGEN\" && /10_000|10000/u.test(line)),",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 289,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "KAIOS_MAX_SUPPLY: \"72_000_000_000\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 336,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "`- Legacy 1:10,000 / 720B reference hits: ${legacyFindings.length}`,",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+      "line": 343,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "\"- `KAIOS_MAX_SUPPLY = 72_000_000_000`\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 40,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "const KAIOS_PER_KGEN = 1_000n;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 344,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "const expectedGenesisKaios = historicalBurn * KAIOS_PER_KGEN;",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+      "line": 924,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "accountingInvariant: historicalBurn * KAIOS_PER_KGEN === actualGenesisKaios && actualGenesisKaios === bankBalanceAfterGenesis - bankBalanceBeforeGenesis,",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/validate-integration-artifacts.mjs",
+      "line": 70,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "\"function KAIOS_PER_KGEN() view returns (uint256)\",",
+      "rationale": "Identifier occurrence; numeric value audited independently."
+    },
+    {
+      "path": "KGEN-KAIOS/tools/validate-integration-artifacts.mjs",
+      "line": 119,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "kaios.KAIOS_PER_KGEN({ blockTag }),",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
       "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
-      "line": 21,
-      "pattern": "10,000 KAIOS",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "line": 42,
+      "pattern": "KAIOS_PER_KGEN",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "kaiosRatio: kaios.includes(\"KAIOS_PER_KGEN = 1_000\"),",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
       "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
-      "line": 22,
-      "pattern": "KAIOS_PER_KGEN = 10_000",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "line": 43,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "kaiosCap: kaios.includes(\"MAX_SUPPLY = 72_000_000_000 ether\"),",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
       "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
-      "line": 23,
-      "pattern": "BurnProofGenesis",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "line": 54,
+      "pattern": "TEN_THOUSAND_KAIOS",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "].every((line) => markdownInscription.includes(line)) && !markdownInscription.includes(\"TEN THOUSAND KAIOS\"),",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
     },
     {
-      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
-      "line": 24,
-      "pattern": "Species → Cell → Organ",
-      "classification": "SAFE",
-      "action": "Audit tooling contains the literal search pattern by design."
+      "path": "KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py",
+      "line": 18,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "MAX_SUPPLY = Decimal(\"72000000\")",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
-      "path": "K線西遊記/temples/12345/KGEN_Universe_Physics_Runtime_V1_6.md",
-      "line": 2661,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "path": "KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py",
+      "line": 69,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "self.assertEqual(Decimal(supply[\"nominal_max_supply\"]), MAX_SUPPLY)",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
-      "path": "whitepaper/KGEN_Universe_Physics_Runtime_V1_6.md",
-      "line": 2661,
-      "pattern": "1 KGEN = 1 kg",
-      "classification": "HISTORICAL-ARCHIVE",
-      "action": "Retain historical bytes; mark superseded by 2026-08-09 lineage law."
+      "path": "KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py",
+      "line": 71,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "self.assertEqual(TOTAL + BURNED, MAX_SUPPLY)",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
-      "path": "PR#127:KGEN/contracts/KGEN_TempleHeart_V3_3_0_Upgradeable.sol",
-      "line": null,
-      "pattern": "KAIOS_PER_KGEN = 10_000",
-      "classification": "CURRENT-CONFLICT",
-      "action": "Do not merge PR #127; supersede with the version-free integration contract."
+      "path": "KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py",
+      "line": 201,
+      "pattern": "MAX_SUPPLY",
+      "legacyScale": false,
+      "classification": "CURRENT_CORRECT",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "str(MAX_SUPPLY),",
+      "rationale": "Identifier occurrence; numeric value audited independently."
     },
     {
-      "path": "PR#127:KGEN/contracts/KGEN_TempleHeart_V3_3_1_Upgradeable.sol",
-      "line": null,
-      "pattern": "BurnProofGenesis",
-      "classification": "CURRENT-CONFLICT",
-      "action": "Remove verifier/admin proof authority and consume KAIOS Alchemy records instead."
+      "path": "K線西遊記/daily/2026-01-21/subtitle_en.srt",
+      "line": 42,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "00:01:03,000 --> 00:01:10,000",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "K線西遊記/daily/2026-01-21/subtitle_en.srt",
+      "line": 47,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "00:01:10,000 --> 00:01:17,000",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "K線西遊記/daily/20260129/悟空新文_Weight_of_the_World/Wukong_Essay_Weight_Not_Smart_subtitle_en.srt",
+      "line": 39,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "00:01:00,000 --> 00:01:10,000",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "K線西遊記/daily/20260129/悟空新文_Weight_of_the_World/Wukong_Essay_Weight_Not_Smart_subtitle_en.srt",
+      "line": 45,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "00:01:10,000 --> 00:01:20,000",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+      "line": 202,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- remove all obsolete `1 KGEN = 10,000 KAIOS` assumptions;",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+      "line": 42,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "The previous experimental definitions `1 KGEN = 1 kg` and `1 KGEN = 10,000 KAIOS` are superseded by this SI-aligned law wherever they conflict with the current physics constitution.",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+      "line": 383,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- `1 KGEN = 10,000 KAIOS`;",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "docs/physics/final-whitepaper/KGEN_Universe_Physics_PreSpacetime_WhiteHole_AngularMomentum.md",
+      "line": 384,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "COMMENT_ONLY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "- 720,000,000,000 KAIOS ceiling;",
+      "rationale": "Audit, supersession, or negative-reference text; not an executable monetary definition."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 2,
+      "pattern": "1_TO_10_000",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "> **SUPERSEDED HISTORICAL SNAPSHOT:** The 1 kg / 1:10,000 monetary scale in this edition is superseded by the 2026-08-09 CURRENT lineage. Retained for history only.",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 140,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "1 KGEN = 10,000 KAIOS",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 155,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "= 720,000,000,000 KAIOS",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 164,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "Maximum Supply: 720,000,000,000 KAIOS",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 165,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "Genesis Mint: 720,000,000,000 KAIOS",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 264,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "→ release up to 10,000 KAIOS from Genesis Reserve",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 266,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "Return 10,000 KAIOS",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 759,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "totalSupply <= 720,000,000,000 KAIOS",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 974,
+      "pattern": "720_BILLION_FORMATTED",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "| KAIOS 最大供應 | 720,000,000,000 |",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
+    },
+    {
+      "path": "docs/whitepaper/18888_Celestial_Autonomous_Bank_Whitepaper_V1.0_Genesis_Edition.md",
+      "line": 976,
+      "pattern": "10_000_KAIOS",
+      "legacyScale": true,
+      "classification": "SUPERSEDED_HISTORY",
+      "sourceKind": "REPOSITORY_TRACKED",
+      "excerpt": "| KGEN 參考比例 | 1 KGEN = 10,000 KAIOS |",
+      "rationale": "Historical bytes are retained behind an explicit SUPERSEDED marker."
     }
   ]
 }

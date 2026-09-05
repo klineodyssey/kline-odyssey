@@ -1,0 +1,66 @@
+{
+  "status": "MAINNET_FORK_REHEARSAL_PREVIEW_NOT_FINAL",
+  "evidenceClass": "CHAIN_ID_56_MAINNET_FORK",
+  "mainnetTransactionAuthorized": false,
+  "chainId": "56",
+  "forkBlock": 115460801,
+  "pointIds": {
+    "kaiosGoldAndSilverIslandTokenPoint": "33333",
+    "whiteHole": "36000",
+    "lingxiaoCelestialBank": "18888"
+  },
+  "addresses": {
+    "kgenToken": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "kaiosTokenForkPredicted": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "lingxiaoBankProxyForkPredicted": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "formal11520": "0xd0605F4EF10e5C1438F11AF9edc36926769239d6",
+    "legacyHeart": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972"
+  },
+  "settlement": {
+    "transactionHash": "0x98afe7b42e9c31a81fc66d45a9d865d240a2d5088d43bcf4e85f0bf9fdc5be13",
+    "blockNumber": 115460848,
+    "timestamp": 1786517990,
+    "timestampIso": "2026-08-12T06:59:50.000Z",
+    "kgenGenesisSupply": {
+      "raw": "72000000000000000000000000",
+      "decimal18": "72000000.0"
+    },
+    "kgenSupplyAtSettlementBlock": {
+      "raw": "71977798091069583125268765",
+      "decimal18": "71977798.091069583125268765"
+    },
+    "historicalKgenBurn": {
+      "raw": "22201908930416874731235",
+      "decimal18": "22201.908930416874731235"
+    },
+    "actualGenesisKaiosMinted": {
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
+    },
+    "kaiosTotalSupply": {
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
+    },
+    "bankBalanceBefore": {
+      "raw": "0",
+      "decimal18": "0.0"
+    },
+    "bankBalanceAfter": {
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
+    },
+    "bankBalanceDelta": {
+      "raw": "22201908930416874731235000",
+      "decimal18": "22201908.930416874731235"
+    }
+  },
+  "accountingInvariant": true,
+  "inscription": [
+    "NO KGEN BURN, NO KAIOS MINT.",
+    "ONE BURNED KGEN CREATES ONE THOUSAND KAIOS.",
+    "NO DISCRETIONARY MINTING.",
+    "CIVILIZATION MASS SHALL BE CONSERVED."
+  ],
+  "generation": "AUTOMATIC_FROM_CHAIN_ID_56_FORK_STATE_USING_BIGINT_NO_HUMAN_AMOUNT_INPUT",
+  "warning": "PREVIEW_NOT_FINAL. Regenerate from the actual Mainnet Genesis settlement block after explicit authorization."
+}

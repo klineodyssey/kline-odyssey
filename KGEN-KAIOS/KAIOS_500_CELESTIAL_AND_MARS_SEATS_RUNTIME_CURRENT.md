@@ -1,404 +1,101 @@
 # 《KAIOS 500 神明席 × 火星齊天豪宅席位 Runtime》
 ## KAIOS 500 Celestial Seats and Mars Qitian Habitat Seats Runtime
 
+## Human Final Calendar Payroll Canon (2026-08-11 cumulative update)
+
+The formal 18888 Celestial salary epoch is a deterministic Gregorian calendar month identified as `YYYYMM`. A month's salary matures exactly at day 5, 00:00:00 in UTC+8 / Asia-Taipei civilization time. February may contain 28 or 29 days; other months contain 30 or 31 days; December-to-January changes the year. A fixed 30-day or 365-day approximation is prohibited, and no administrator or keeper advances the month.
+
+An activated seat begins from its checkpointed first salary month. Every matured but unclaimed month remains an entitlement. Claims are all-or-nothing at transaction scope: if 18888 is paused, underfunded, or its risk reserve blocks payment, `lastClaimedMonth` and claimed amount remain unchanged so anyone may retry after a lawful refill. The caller never supplies a beneficiary or amount.
+
+Salary-base, salary-weight and beneficiary changes must use a future `YYYYMM` checkpoint. They cannot rewrite a current or past month. Mainnet starts at 88 KAIOS per active seat per Gregorian month, default weight 1x, with a governance policy range of 1x-5x. These are deployment/governance policy values; calendar correctness remains fixed contract behavior, and inactive seats accrue no salary liability.
+
 **文件狀態：** CURRENT DESIGN / CODEX IMPLEMENTATION BASIS  
-**版本：** V1.0 Genesis Draft  
-**日期：** 2026-08-07  
-**宇宙體系：** KGEN × KAIOS × 18888 × 108000 × 11520  
-**創世者：** 樂天帝（PrimeForge Human Authority）  
-**技術審核角色：** Codex／如來（Automated Technical Review System）  
-**品牌：** K線西遊記｜花果山台灣  
+**版本：** V1.1 Celestial Payroll Reconciliation
+**日期：** 2026-08-09
 
-> 神位不是宗教商品，豪宅不是沒有生命維持系統的空殼。
-
----
-
-# 0. 文件定位
+## 0. 文件定位
 
 本文件區分兩種完全不同的500席制度：
 
 ```text
 18888 靈霄寶殿 500 神明席
-= 文明公共功能、治理責任與供應鏈服務席
+= 文明公共功能、治理責任、供應鏈服務與神職薪俸席
 
 108000 火星齊天豪宅 500 席
 = 火星居住、生存、建設、研究與維運席
 ```
 
-兩者不得混用：
+神明席 ≠ 房地產席；治理權 ≠ 居住權；產品供應鏈資格 ≠ 火星入住安全資格。
 
-```text
-神明席 ≠ 房地產席
-治理權 ≠ 居住權
-產品供應鏈資格 ≠ 火星入住安全資格
-```
+## 1. 18888 靈霄寶殿500神明席
 
-本文件不是宗教認證、保證獲利、保證升值、火星移民承諾、實體土地權狀或已完成人類載人火星移民工程。
+神明席固定為最多500個文明神職／公共功能席；每一席同時是一個可依法累積 KAIOS 薪俸的 Celestial Salary Seat。固定的是功能，流動的是任職者。
 
-本版狀態：
-
-```text
-SIMULATION_AND_DESIGN_ONLY
-NO_REAL_MARS_HABITATION
-NO_HUMAN_SAFETY_CERTIFICATION
-NO_PROPERTY_TITLE
-NO_GUARANTEED_RETURN
-NO_MAINNET_SEAT_SALE
-```
-
----
-
-# 1. 18888 靈霄寶殿500神明席
-
-## 1.1 正式定位
-
-神明席不是選500個神話人物，也不是有錢人購買的尊榮會員。
-
-```text
-Celestial Seat
-= Public Civilization Function Seat
-= 文明不可缺少之公共功能席
-```
-
-神明席固定為500個文明功能，但任職者可以更換：
-
-```text
-固定的是功能
-流動的是任職者
-```
+薪俸不是被動分紅，也不是 Admin 任意發錢。每一席的薪俸權利應依 Epoch、Seat 狀態與薪俸規則形成 entitlement，由該席正式 beneficiary 自領，或由任何 keeper / AI 代為觸發；觸發者不得改 beneficiary、amount、seatId 或 lifeId。銀行餘額不足時 entitlement 必須保留，待新 KAIOS 進入 18888 後重試。
 
 任職者可以是人類、AI生命、公司、合作社、DAO、App生命、生態系統代理者或可驗證供應鏈聯盟。
 
-## 1.2 五大天部
+### 1.1 五大天部
 
-500席初步分為五大天部，每部100席：
+500席初步分為五大天部，每部100席：生命生態部、物質製造部、能源交通部、文明服務部、宇宙智能部。此分類是骨架，不代表已完成500項最終清單。
 
-| 天部 | 主要責任 |
-|---|---|
-| 生命生態部 | 水、糧食、農業、森林、海洋、物種、分解與再生 |
-| 物質製造部 | 礦物、材料、晶片、機械、家電、建築、維修與回收 |
-| 能源交通部 | 發電、儲能、電網、車輛、鐵路、船舶、航空、KUFO |
-| 文明服務部 | 醫療、教育、法律、金融、工作、住宅、通訊與文化 |
-| 宇宙智能部 | AI、App、地圖、導航、科學、太空、Runtime與跨宇宙服務 |
-
-此分類是V1.0骨架，不代表已完成500項最終清單。最終清單須經重複性、供應鏈依賴與公共必要性審查。
-
-## 1.3 神明席申請
+### 1.2 申請與封神榜
 
 ```text
 申請者
 → 11520提交生命／產品／供應鏈資料
-→ Codex如來技術審核
+→ Codex技術審核
 → 公開證據與安全檢查
 → 試營運
 → 多方治理審議
-→ 18888封神榜登記
+→ 18888文明功能登記冊
 → 取得有期限之神明席
 ```
 
-Codex／如來只負責技術、風險、守恆與生命規格審核，不得單獨封神。
+Codex只負責技術、風險、守恆與生命規格審核，不得單獨封神。
 
-正式授位至少需要：
+### 1.3 500席薪俸 Runtime
 
-```text
-Codex技術審核
-+ 人工或多方獨立審查
-+ 公開證據
-+ 治理表決
-+ 申訴機制
-```
-
-## 1.4 封神榜的工程定義
+每席至少分離：
 
 ```text
-封神榜
-= Civilization Function Registry
-= 文明公共功能席位登記冊
+seatId
+lifeId
+templeId
+beneficiary
+salaryWeight / salaryRule
+activatedAt
+status
+lastSettledEpoch / claim checkpoint
+totalSalaryClaimed
 ```
 
-姜太公是華人文化原型，不代表系統召喚其元神，也不代表任何宗教機構背書。
+原則：Seat/Life 與 wallet 分離；換 beneficiary 不等於換生命。薪俸按 Epoch/checkpoint 累積，歷史 entitlement 不得被未來參數追溯改寫。`claimCelestialSalary(seatId)` 可由任何人觸發，但錢只能到正式 beneficiary。18888 KAIOS 不足時合法 entitlement 保留，不得標成已領。500席是薪俸＋職責，不是保證獲利、投資分紅或席位買賣。
 
-海外正式名稱：
+## 2. 108000 火星齊天豪宅500席
 
-```text
-神明席
-= Public Infrastructure Operator Seat
+108000火星500席不是普通豪宅NFT。正式應視為 Mars Qitian Habitat Seat：火星生存艙／建設任務席。只有通過居住安全驗證後，才可在文化介面稱為齊天豪宅席。
 
-封神審核
-= Capability, Safety and Sustainability Review
-```
+三階段：Digital Mars Seat（數位身份／模擬居住）、Mars Construction Mission Seat（建設任務）、Certified Mars Habitat Seat（未來真正通過安全認證後的實體居住席）。目前不得宣稱人類可安全入住或已取得實體土地權。
 
-禁止：
+火星必要供應鏈包括氧氣、水、食物、環境、輻射防護、能源、儲能、建築材料、醫療、交通、通訊、救援、工作、教育、法律與事故治理。
 
-```text
-付幣保證封神
-神明保證獲利
-燒幣換神職
-AI自稱真實宗教神明
-以信仰掩蓋資金流向
-```
+建議500席可分為生命維持與醫療100、能源與基礎建設100、科研與生產100、交通通訊與安全100、居民家庭與文化100；前400席先讓火星能活，最後100席才讓文明真正生活。
 
-## 1.5 任期與退位
-
-神明席不是永久世襲財產。每一Epoch須重新驗證服務是否存在、供應鏈是否可持續、是否履行公共責任、是否發生重大安全事故、財務是否透明，以及是否具備維修、回收與災難恢復能力。
-
-失去能力者：
-
-```text
-神明席退位
-→ 轉為神仙／培育狀態
-→ 或回到一般文明參與者
-→ 改善後可重新申請
-```
-
----
-
-# 2. 108000 火星齊天豪宅500席
-
-## 2.1 不是普通豪宅NFT
-
-108000火星500席不能只表示一間房子。在火星沒有完整生命維持系統前，任何豪宅都只是無法安全居住的外殼。
-
-正式名稱應為：
-
-```text
-Mars Qitian Habitat Seat
-= 火星齊天生存艙／建設任務席
-```
-
-只有通過居住安全驗證後，才可在文化介面稱為「齊天豪宅席」。
-
-## 2.2 火星席位三階段
-
-### A. 虛擬文明席
-
-```text
-Digital Mars Seat
-```
-
-用途為數位身份、火星座標、模擬居住空間、科研、教育、遊戲與AI居民；不得宣稱真實火星入住權。
-
-### B. 建設任務席
-
-```text
-Mars Construction Mission Seat
-```
-
-持席者必須提供或承擔火星必要供應鏈功能，例如能源、氧氣、水、食物、維修或通訊。
-
-### C. 實體居住席
-
-```text
-Certified Mars Habitat Seat
-```
-
-只有在獨立安全認證、冗餘生命維持、撤離與救援能力完成後才能啟用。
-
-目前KAIOS只可進行A階段模擬與B階段規格設計，不得宣稱C階段已實現。
-
-## 2.3 火星必要供應鏈
-
-### 生存核心
-
-- 氧氣生成、儲存與洩漏監測。
-- 水取得、淨化、回收與備援。
-- 食物生產、冷藏、營養與種子庫。
-- 氣壓、溫度、濕度與空氣品質控制。
-- 輻射防護與地下／覆土結構。
-- 火災、毒氣、減壓與隔離系統。
-
-### 能源核心
-
-- 太陽能、核能或其他可靠能源。
-- 儲能與微電網。
-- 備用電力與黑啟動。
-- 熱管理與廢熱回收。
-
-### 建築與材料
-
-- 密封艙體。
-- 火星原位資源利用（ISRU）候選技術。
-- 3D列印、金屬、玻璃、塑膠與複合材料。
-- 工具、零件、維修與回收。
-
-### 醫療與人體
-
-- 急診、手術、藥品與醫療耗材。
-- 低重力健康監測。
-- 心理健康與群體生活治理。
-- 生殖與長期人體研究須另行倫理審查。
-
-### 交通與通訊
-
-- 地表車輛與導航。
-- 地球—火星延遲通訊。
-- 衛星、基地台與資料備援。
-- 起降、補給、撤離與救援方案。
-
-### 文明系統
-
-- 工作、教育、法律、糧食配給與公共衛生。
-- KAIOS支付與帳本。
-- AI自治與人工接管。
-- 事故調查、責任與申訴。
-- 死亡、遺產與資料繼承。
-
-## 2.4 500火星席建議配置
-
-火星500席不應全部是住戶席。
-
-| 類型 | 席數 | 功能 |
-|---|---:|---|
-| 生命維持與醫療席 | 100 | 氧、水、食物、環境、醫療與心理健康 |
-| 能源與基礎建設席 | 100 | 電力、儲能、熱管理、建築與維修 |
-| 科研與生產席 | 100 | 農業、材料、製造、機器人、ISRU與實驗 |
-| 交通通訊與安全席 | 100 | KUFO、地表交通、通訊、導航、救援與資安 |
-| 居民家庭與文化席 | 100 | 居民、家庭、教育、藝術、法律與社群生活 |
-
-```text
-前400席先讓火星能活
-最後100席才讓文明真正生活
-```
-
-未來可調整分類，但500席總量與生命安全底線不得被行銷需求推翻。
-
-## 2.5 沒有人敢住的問題
-
-這個擔心是正確的。如果只有豪宅名稱，卻沒有氧氣、水、食物、能源、醫療、輻射防護、維修與救援，理性的人不應入住。
-
-因此火星席位必須先以建設責任而非享受權利為核心：
-
-```text
-先建立可生存供應鏈
-再產生居住權
-```
-
-禁止宣稱：
-
-- 保證移民火星。
-- 保證取得實體土地。
-- 保證未來升值。
-- 保證任何航太機構運送。
-- 購買席位即可安全入住。
-
-## 2.6 KUFO與火星席
-
-```text
-KUFO Seat
-= 載具／任務／移動能力
-
-Mars Habitat Seat
-= 火星基地內的功能或居住資格
-```
-
-兩者可以綁定任務，但不可混為同一資產；KUFO不等於火星土地所有權。
-
-## 2.7 保證金與失效
-
-火星建設席可要求KGEN或KAIOS保證金，但：
-
-```text
-保證金 ≠ 購買神位
-保證金 ≠ 購買火星土地
-保證金 ≠ 保證收益
-```
-
-保證金僅用於履約、安全事故準備、維修、替代供應商、退出與清算。
-
-供應鏈失效時：
-
-```text
-席位進入RESTRICTED
-→ 啟動備援供應商
-→ 限期修復
-→ 無法修復則退席
-→ 保證金依公開規則處理
-```
-
-氧、水、電力等生命核心必須N+1或更高冗餘，不得因單一席位失效而使整個基地停擺。
-
----
-
-# 3. 18888與108000的關係
+## 3. 18888與108000邊界
 
 ```text
 18888 500神明席
-= 整個KAIOS文明的公共功能治理層
+= 整個KAIOS文明的公共功能治理與神職薪俸層
 
 108000 火星500席
 = 特定火星文明的建設、研究、生存與居住層
 ```
 
-同一生命可以同時擔任18888能源神明席與108000火星微電網建設席，但兩個資格必須分別審核、分別任期、分別問責。
+同一生命可以同時具有兩種資格，但必須分別審核、分別任期、分別問責。18888神明席不能自動取得火星豪宅；火星持席者也不能自動取得天庭治理權。
 
-18888神明席不能自動取得火星豪宅；火星持席者也不能自動取得天庭治理權。
+## 4. 不可變安全天條
 
----
-
-# 4. 申請與審核
-
-## 4.1 神明席
-
-```text
-11520申請
-→ 生命／產品／供應鏈分類
-→ Codex如來技術審核
-→ 公開測試與試營運
-→ 多方治理審議
-→ 18888登記
-```
-
-## 4.2 火星席
-
-```text
-11520申請
-→ 指定火星功能分類
-→ 提交生命維持或建設方案
-→ 故障模式與備援測試
-→ 模擬艙驗證
-→ Codex如來技術審核
-→ 獨立安全審查
-→ 108000登記
-```
-
-任何AI審核結論都必須可解釋、可申訴、可由人類推翻。
-
----
-
-# 5. 對外與海外表述
-
-華人文化介面：
-
-```text
-500神明席
-火星齊天豪宅500席
-Codex如來審核
-封神榜
-```
-
-正式英文與法律介面：
-
-```text
-500 Public Civilization Function Seats
-500 Mars Habitat and Mission Seats
-Automated Technical Review
-Civilization Function Registry
-```
-
-所有介面必須清楚標示：
-
-```text
-CULTURAL NARRATIVE ≠ RELIGIOUS AUTHORITY
-DIGITAL SEAT ≠ REAL PROPERTY TITLE
-SIMULATION ≠ HUMAN-RATED MARS HABITAT
-TOKEN PAYMENT ≠ GUARANTEED APPROVAL OR RETURN
-```
-
----
-
-# 6. 不可變安全天條
-
-```text
 1. 神明席不得以付幣直接購買。
 2. 火星席不得宣稱未存在的真實居住權。
 3. Codex不得單獨封神或決定人類生命價值。
@@ -409,51 +106,7 @@ TOKEN PAYMENT ≠ GUARANTEED APPROVAL OR RETURN
 8. 沒有氧、水、能源、醫療與輻射防護，不得標示為可居住豪宅。
 9. 不得保證獲利、升值、移民或航太運送。
 10. 所有費用、保證金、收入與資產去向必須公開可審計。
-```
 
----
+## 5. 創世結論
 
-# 7. Codex施工交接
-
-Codex回來後不得直接建立「500個可販售NFT」作為完成品。
-
-應先交付：
-
-1. `CelestialFunctionRegistry` 資料模型。
-2. `MarsHabitatSeatRegistry` 資料模型。
-3. 兩套獨立的申請、審核、任期、停權、退席與申訴狀態機。
-4. 供應鏈依賴圖與單點故障檢查。
-5. 火星生命維持最低條件與冗餘欄位。
-6. 海外英文風險揭露文字。
-7. 模擬版前端，不接真實售票、主網資產或入住承諾。
-
-建議狀態：
-
-```text
-DRAFT
-UNDER_REVIEW
-SIMULATION
-TRIAL_OPERATION
-ACTIVE
-RESTRICTED
-SUSPENDED
-RECOVERY
-RETIRED
-REVOKED
-```
-
----
-
-# 8. 創世結論
-
-```text
-18888的500席
-不是500位只領分紅的神仙，
-而是500個維持文明運作的公共器官。
-
-108000的500席
-不是500間沒氧氣的火星空屋，
-而是500個讓火星從不能住，逐步成為能生存、能工作、能形成文明的任務與居住器官。
-```
-
-> 先讓生命能活，再談豪宅；先讓文明能運作，再談封神。
+18888的500席不是500位只領被動分紅的神仙，而是500個有神職責任並依法取得薪俸的文明公共器官。108000的500席不是500間沒氧氣的火星空屋，而是500個讓火星從不能住逐步成為能生存、能工作、能形成文明的任務與居住器官。

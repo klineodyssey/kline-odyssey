@@ -1,6 +1,6 @@
 # 《KAIOS 創世石碑文》
 ## KAIOS Genesis Inscription
-### Civilization Mass Covenant｜文明質量天條
+### V1.2 Civilization Mass Covenant｜文明質量天條
 
 ---
 
@@ -27,7 +27,7 @@ KAIOS 的第一代生成只認正式 KGEN 鏈上 `totalSupply()` 的真實減少
 也不得重複結算同一份已毀滅的 KGEN 質量。
 
 第一代 KAIOS 由 36000 白洞完成質量映射，
-並只生成至 18888 靈霄寶殿金庫。
+並只生成至 18888 靈霄寶殿銀行。
 
 33333 金銀島為 KAIOS 的部署座標。
 
@@ -71,11 +71,7 @@ KAIOS 不得遞迴複製新的 KAIOS(1)、KAIOS(2) 作為無限增發手段。
 >
 > ONE BURNED KGEN CREATES ONE THOUSAND KAIOS.
 >
-> KAIOS NATIVE TAX IS ZERO.
->
-> ONLY HOLDER-AUTHORIZED ALCHEMY MAY BURN KAIOS.
->
-> NO DISCRETIONARY MINTING OR SEIZURE.
+> NO DISCRETIONARY MINTING.
 >
 > CIVILIZATION MASS SHALL BE CONSERVED.
 
@@ -86,10 +82,10 @@ KAIOS 不得遞迴複製新的 KAIOS(1)、KAIOS(2) 作為無限增發手段。
 ```text
 36000  = KGEN -> KAIOS 第一代白洞
 33333  = KAIOS 金銀島部署座標
-18888  = 靈霄寶殿 KAIOS 第一代接收金庫
+18888  = 靈霄寶殿 KAIOS 第一代結算銀行
 18911  = 太上老君鍊丹爐 / 自願 KAIOS 煉化
 511111 = 齊天大聖宮 / 蟲洞 / 成熟 KUFO Claim 邊界
 ```
 
-**狀態：** CANONICAL INSCRIPTION TEXT / CONTRACT HASH CANDIDATE  
-**日期：** 2026-08-08
+**狀態：** CANONICAL INSCRIPTION TEXT / MASS-RATIO + FRICTION-MIRROR RECONCILED
+**日期：** 2026-08-09

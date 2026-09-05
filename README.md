@@ -34,10 +34,18 @@ Last optimized: 2026-06-11
 | Workforce Governance | https://klineodyssey.github.io/kline-odyssey/workforce/ |
 | Official Video Library | https://klineodyssey.github.io/kline-odyssey/video/ |
 | KAIOS Constitution | [KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md](KGEN-KAIOS/constitution/KAIOS_CONSTITUTION.md) |
+| KAIOS Friction Mirror CURRENT Canon | [KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md](KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md) |
+| 18888 Lingxiao Celestial Bank CURRENT | [KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md](KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md) |
+| KAIOS Conservation CURRENT V1.8 | [KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md](KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md) |
+| KAIOS Genesis Inscription | [KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md](KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md) |
 | KAIOS 2026-08-09 Mass and Planck CURRENT | [docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md](docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md) |
 | KAIOS Token Lineage Integration Review | [KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md](KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md) |
 | TempleHeart V3.4 BSC Testnet Rehearsal | [KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md](KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md) |
 | TempleHeart V3.4 BSC Testnet Machine Evidence | [KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json](KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json) |
+| TempleHeart Mainnet Lineage, 18888 Architecture, and New-Proxy Plan | [KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md](KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md) |
+| 18888 Lingxiao Celestial Bank V2 UUPS Runtime | [KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol](KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol) |
+| 18888 Full Bank System Runbook | [KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md](KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md) |
+| 18888 Full Bank Security Report | [KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md](KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md) |
 | KAIOS Kernel V1 Design | [KGEN-KAIOS/kernel/KERNEL_V1.md](KGEN-KAIOS/kernel/KERNEL_V1.md) |
 | Architecture Governance Board | [KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md](KGEN-KAIOS/governance/ARCHITECTURE_GOVERNANCE_BOARD.md) |
 | KAIOS V11.0 Architecture Baseline | [KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md](KGEN-KAIOS/V11/ARCHITECTURE_BASELINE.md) |
