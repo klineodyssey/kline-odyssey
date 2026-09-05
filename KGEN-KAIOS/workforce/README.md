@@ -69,6 +69,7 @@ If any requirement is missing, the worker is treated as `UNREGISTERED_WORKER` an
 | `salary_ledger.jsonl` | V3 append-only prototype payroll ledger |
 | `payroll_snapshot.json` | V3 current payroll summary for dashboard display |
 | `bonus_penalty_rules.json` | V3 quality bonus, research bonus, bug bounty, withholding and penalty rules |
+| `STARFORGE_WORKER_REGISTRATION_CANDIDATE.md` | Review-only Starforge onboarding evidence, authority boundaries, open gates, and durable handoff |
 
 ## Non-Negotiable Rule
 

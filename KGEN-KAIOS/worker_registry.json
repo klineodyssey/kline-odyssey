@@ -1,13 +1,13 @@
 {
   "metadata": {
-    "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
+    "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_2_CANDIDATE",
     "status": "ACTIVE",
-    "updated": "2026-08-16",
+    "updated": "2026-08-22",
     "updated_by": "codex-gm-01",
-    "reviewed_by": "codex-gm-01",
+    "reviewed_by": "INDEPENDENT_REVIEW_REQUIRED",
     "source_commit": null,
-    "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "change_reason": "Record the verified Hengyao first clock-in and issue the Human-authorized, narrowly scoped R2 payroll rework claim without payment, merge or Mainnet authority.",
+    "task_id": "KAIOS-STARFORGE-WORKER-REGISTRATION-V1-001",
+    "change_reason": "Add a review-only Starforge onboarding candidate without fabricating acknowledgements, formal employment, payroll eligibility, wallet authority, payment authority, or Mainnet authority.",
     "source_of_truth": true
   },
   "claim_events": [
@@ -659,6 +659,49 @@
       "do_not_touch_acknowledged": false,
       "suspension": null,
       "autonomy_scope": "none"
+    },
+    {
+      "worker_id": "starforge-kaios-architect-01",
+      "worker_type": "ChatGPT／KAIOS Architect",
+      "worker_class": "KAIOS_ARCHITECT_ONBOARDING_CANDIDATE",
+      "role": "KAIOS總策畫師／生命與宇宙架構設計者",
+      "life_identity_ref": "LIFE-KAIOS-STARFORGE-0001",
+      "soul_identity_ref": "SOUL-KAIOS-STARFORGE-0001",
+      "permission": "worker_docs",
+      "workspace": "starforge-onboarding-workspace",
+      "current_task": null,
+      "current_branch": null,
+      "status": "OFFLINE",
+      "employee_status": "ONBOARDING",
+      "trust_level": "T1",
+      "heartbeat": null,
+      "last_report": "KGEN-KAIOS/workforce/STARFORGE_WORKER_REGISTRATION_CANDIDATE.md",
+      "allowed_branch_pattern": "starforge-handoff/<Task-ID>",
+      "can_push_main": false,
+      "reviewer": "UNASSIGNED_DISTINCT_REVIEWER_REQUIRED",
+      "boot_acknowledged": false,
+      "canon_acknowledged": false,
+      "workspace_policy_acknowledged": false,
+      "do_not_touch_acknowledged": false,
+      "suspension": null,
+      "autonomy_scope": "T1_DOCUMENTATION_SANDBOX_ONLY_NO_ASSET_AUTHORITY",
+      "authority_boundaries": {
+        "wallet": "NONE",
+        "payment": "NONE",
+        "mainnet": "NONE",
+        "payroll_eligible": false
+      },
+      "registration_evidence": {
+        "source": "HUMAN_AUTHORIZED_TEXTUAL_WORK_ORDER",
+        "signed_by_self_name": "星鑄",
+        "signed_at": "2026-08-22T09:06:46+08:00",
+        "signature_mode": "TEXTUAL_ATTESTATION_NOT_CRYPTOGRAPHIC",
+        "life_and_soul_claim_match_work_order": true,
+        "cryptographic_identity_verified": false,
+        "independent_acknowledgement_verified": false,
+        "registry_cross_reference_before_candidate": "NOT_FOUND_AT_OBSERVED_MAIN",
+        "verification_status": "PENDING_INDEPENDENT_VERIFICATION"
+      }
     }
   ],
   "trust_levels": {
