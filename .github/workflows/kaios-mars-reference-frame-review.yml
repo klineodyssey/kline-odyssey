@@ -1,0 +1,80 @@
+name: KAIOS Mars Reference Frame Candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/KAIOS-MARS-CENTERED-REFERENCE-FRAME-V1-001"
+    paths:
+      - "docs/maps/mars-centered-reference-frame/**"
+      - "docs/maps/README.md"
+      - "neural/NEURAL_MAP.json"
+      - "neural/RUNTIME_DEPENDENCY.json"
+      - ".github/workflows/kaios-mars-reference-frame-review.yml"
+  pull_request:
+    paths:
+      - "docs/maps/mars-centered-reference-frame/**"
+      - "docs/maps/README.md"
+      - "neural/NEURAL_MAP.json"
+      - "neural/RUNTIME_DEPENDENCY.json"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head-review:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha || '5d539d237bf948011d234203e451aa980a7b7ce8' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Bind checkout to exact candidate head
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+      - name: Parse candidate and neural indexes
+        run: |
+          jq empty docs/maps/mars-centered-reference-frame/data/mars-centered-reference-frame.candidate.json
+          jq empty docs/maps/mars-centered-reference-frame/schemas/mars-centered-reference-frame.schema.json
+          jq empty neural/NEURAL_MAP.json
+          jq empty neural/RUNTIME_DEPENDENCY.json
+      - name: Run Mars coordinate, frame, evidence, and movement tests
+        run: |
+          set -o pipefail
+          node --test docs/maps/mars-centered-reference-frame/tests/*.test.mjs | tee /tmp/mars-reference-frame-tests.tap
+      - name: Run repository regression tests
+        run: |
+          set -o pipefail
+          node --test tests/*.test.mjs | tee /tmp/repository-regression-tests.tap
+      - name: Validate changed artifacts and scan secrets
+        env:
+          INTEGRATION_BASE_RANGE: ${{ env.BASE_SHA }}...HEAD
+        run: node KGEN-KAIOS/tools/validate-integration-artifacts.mjs
+      - name: Reject whitespace damage
+        run: git diff --check "$BASE_SHA...HEAD"
+      - name: Create exact-head evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/mars-reference-frame-exact-head
+          printf 'GITHUB_SHA=%s\nEXPECTED_HEAD=%s\nBASE_SHA=%s\nTREE_SHA=%s\n' \
+            "$GITHUB_SHA" "$EXPECTED_HEAD" "$BASE_SHA" "$(git rev-parse HEAD^{tree})" \
+            > /tmp/mars-reference-frame-exact-head/identity.txt
+          git diff --name-only "$BASE_SHA...HEAD" \
+            | while IFS= read -r file; do test ! -f "$file" || sha256sum "$file"; done \
+            > /tmp/mars-reference-frame-exact-head/file-sha256.txt
+          cp /tmp/mars-reference-frame-tests.tap /tmp/mars-reference-frame-exact-head/ 2>/dev/null || true
+          cp /tmp/repository-regression-tests.tap /tmp/mars-reference-frame-exact-head/ 2>/dev/null || true
+          cp KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json /tmp/mars-reference-frame-exact-head/ 2>/dev/null || true
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mars-reference-frame-exact-head-evidence-${{ env.EXPECTED_HEAD }}
+          path: /tmp/mars-reference-frame-exact-head/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://klineodyssey.github.io/kline-odyssey/docs/maps/mars-centered-reference-frame/schemas/mars-centered-reference-frame.schema.json",
+  "title": "Mars-Centered Reference Frame Candidate",
+  "type": "object",
+  "required": ["metadata", "inheritedMap", "scale", "frame", "points", "ranges", "civilizationGate", "movementCandidate"],
+  "properties": {
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "inheritedMap": { "$ref": "#/$defs/inheritedMap" },
+    "scale": { "$ref": "#/$defs/scale" },
+    "frame": { "$ref": "#/$defs/frame" },
+    "points": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/point" }
+    },
+    "ranges": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/range" }
+    },
+    "civilizationGate": { "$ref": "#/$defs/civilizationGate" },
+    "movementCandidate": { "$ref": "#/$defs/movementCandidate" }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "decimal": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+    "nullableDecimal": {
+      "oneOf": [
+        { "$ref": "#/$defs/decimal" },
+        { "type": "null" }
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["schemaVersion", "status", "taskId", "implementer", "independentReview", "executionBase"],
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0-candidate" },
+        "status": { "type": "string", "const": "REVIEW_ONLY_CANDIDATE" },
+        "taskId": { "type": "string", "const": "KAIOS-MARS-CENTERED-REFERENCE-FRAME-V1-001" },
+        "implementer": { "type": "string", "const": "codex-gm-01" },
+        "independentReview": { "type": "string", "const": "REQUIRED" },
+        "executionBase": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      },
+      "additionalProperties": false
+    },
+    "inheritedMap": {
+      "type": "object",
+      "required": ["path", "version", "mutation", "pointCountPreserved"],
+      "properties": {
+        "path": { "type": "string", "const": "/docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json" },
+        "version": { "type": "string", "const": "V10.2" },
+        "mutation": { "type": "string", "const": "NONE" },
+        "pointCountPreserved": { "type": "integer", "const": 123 }
+      },
+      "additionalProperties": false
+    },
+    "scale": {
+      "type": "object",
+      "required": ["distanceKm", "kUnits", "exactRational", "displayKmPerK"],
+      "properties": {
+        "distanceKm": { "type": "string", "const": "384400" },
+        "kUnits": { "type": "string", "const": "16888" },
+        "exactRational": { "type": "string", "const": "384400/16888" },
+        "displayKmPerK": { "type": "string", "const": "22.761724301279" }
+      },
+      "additionalProperties": false
+    },
+    "frame": {
+      "type": "object",
+      "required": ["frameId", "localOrigin", "preservedUniverseOrigin", "overridesUniverseK0", "status"],
+      "properties": {
+        "frameId": { "type": "string", "const": "MARS_CENTERED" },
+        "localOrigin": { "type": "string", "const": "MARS/K0" },
+        "preservedUniverseOrigin": { "type": "string", "const": "UNIVERSE/K0" },
+        "overridesUniverseK0": { "type": "boolean", "const": false },
+        "status": { "type": "string", "const": "LOCAL_DERIVED_FRAME_CANDIDATE" }
+      },
+      "additionalProperties": false
+    },
+    "positionEvidence": {
+      "type": "object",
+      "required": ["referenceFrame", "epoch", "timestamp", "source", "distanceKm", "kIndex", "uncertainty"],
+      "properties": {
+        "referenceFrame": { "type": "string", "const": "MARS_CENTERED" },
+        "epoch": { "$ref": "#/$defs/nonEmptyString" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "source": { "$ref": "#/$defs/nonEmptyString" },
+        "distanceKm": { "$ref": "#/$defs/decimal" },
+        "kIndex": { "$ref": "#/$defs/decimal" },
+        "uncertainty": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "point": {
+      "type": "object",
+      "required": ["pointId", "frameId", "kIndex", "displayK", "displayPointId", "name", "pointType", "altitudeKm", "positionEvidence", "status"],
+      "properties": {
+        "pointId": { "$ref": "#/$defs/nonEmptyString" },
+        "frameId": { "type": "string", "const": "MARS_CENTERED" },
+        "kIndex": { "$ref": "#/$defs/decimal" },
+        "displayK": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "null" }
+          ]
+        },
+        "displayPointId": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "pointType": {
+          "type": "string",
+          "enum": ["LOCAL_ORIGIN", "MEAN_SURFACE", "ATMOSPHERE_INTERFACE", "LOW_ORBIT_BOUNDARY", "MOON", "SYNCHRONOUS_ORBIT", "EXTERNAL_BODY_MEAN_DISTANCE"]
+        },
+        "altitudeKm": { "$ref": "#/$defs/nullableDecimal" },
+        "positionEvidence": { "$ref": "#/$defs/positionEvidence" },
+        "status": { "type": "string", "const": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS" }
+      },
+      "additionalProperties": false
+    },
+    "range": {
+      "type": "object",
+      "required": ["rangeId", "frameId", "rangeType", "distanceKmMin", "distanceKmMax", "kIndexMin", "kIndexMax", "epoch", "timestamp", "source", "uncertainty", "status"],
+      "properties": {
+        "rangeId": { "$ref": "#/$defs/nonEmptyString" },
+        "frameId": { "type": "string", "const": "MARS_CENTERED" },
+        "rangeType": { "type": "string", "enum": ["LOW_ORBIT_COMMUNICATION_BAND", "DYNAMIC_EARTH_MARS_DISTANCE"] },
+        "distanceKmMin": { "$ref": "#/$defs/decimal" },
+        "distanceKmMax": { "$ref": "#/$defs/decimal" },
+        "kIndexMin": { "$ref": "#/$defs/decimal" },
+        "kIndexMax": { "$ref": "#/$defs/decimal" },
+        "epoch": { "$ref": "#/$defs/nonEmptyString" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "source": { "$ref": "#/$defs/nonEmptyString" },
+        "uncertainty": { "$ref": "#/$defs/nonEmptyString" },
+        "status": { "type": "string", "const": "DESIGN_REFERENCE_NOT_LIVE_EPHEMERIS" }
+      },
+      "additionalProperties": false
+    },
+    "civilizationGate": {
+      "type": "object",
+      "required": ["pointId", "referenceFrame", "semanticType", "isPhysicalDistance", "physicalDistanceSubstitute", "status"],
+      "properties": {
+        "pointId": { "type": "string", "const": "EARTH_CIV/K108000" },
+        "referenceFrame": { "type": "string", "const": "EARTH_CIV" },
+        "semanticType": { "type": "string", "const": "CIVILIZATION_GATE" },
+        "isPhysicalDistance": { "type": "boolean", "const": false },
+        "physicalDistanceSubstitute": { "type": "boolean", "const": false },
+        "status": { "type": "string", "const": "PRESERVED_GATE_IDENTITY" }
+      },
+      "additionalProperties": false
+    },
+    "movementStep": {
+      "type": "object",
+      "required": ["sequence", "pointRef", "action", "requiredEvidence"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1 },
+        "pointRef": { "$ref": "#/$defs/nonEmptyString" },
+        "action": { "$ref": "#/$defs/nonEmptyString" },
+        "requiredEvidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "movementCandidate": {
+      "type": "object",
+      "required": ["routeId", "status", "sequence", "positionUpdateWithoutEvidence"],
+      "properties": {
+        "routeId": { "type": "string", "const": "EARTH-CIV-GATE-TO-MARS-SURFACE-CANDIDATE" },
+        "status": { "type": "string", "const": "DESIGN_ONLY_EVIDENCE_REQUIRED" },
+        "sequence": {
+          "type": "array",
+          "minItems": 6,
+          "items": { "$ref": "#/$defs/movementStep" }
+        },
+        "positionUpdateWithoutEvidence": { "type": "boolean", "const": false }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
