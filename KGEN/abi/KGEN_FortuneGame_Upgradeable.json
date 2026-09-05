@@ -1,0 +1,1818 @@
+{
+  "contractName": "KGEN_FortuneGame_Upgradeable",
+  "sourceName": "../KGEN/contracts/KGEN_FortuneGame_Upgradeable.sol",
+  "compiler": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AccessControlBadConfirmation",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "neededRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AccessControlUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        }
+      ],
+      "name": "AddressEmptyCode",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyClaimed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "BettingClosed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "BettingStillOpen",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CancellationNotProven",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        }
+      ],
+      "name": "ERC1967InvalidImplementation",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ERC1967NonPayable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "EnforcedPause",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ExpectedPause",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "FailedInnerCall",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "HeartNotOperational",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidBetAmount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidConfig",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidDirection",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidInitialization",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidOracle",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MathOverflowedMulDiv",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoPosition",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotInitializing",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotWinner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OracleAnswerInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OraclePhaseTransition",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OracleRoundOrderInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OracleStale",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OracleUnavailable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PositionAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReentrancyGuardReentrantCall",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RewardCapExceeded",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RoundAlreadyFinalized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RoundNotClosed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RoundNotOpen",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RoundNotResolvable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UUPSUnauthorizedCallContext",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "slot",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UUPSUnsupportedProxiableUUID",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.Direction",
+          "name": "direction",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "amount",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "placedAt",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "placedBlock",
+          "type": "uint64"
+        }
+      ],
+      "name": "BetPlaced",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "betDuration",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "resolveDelay",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "payoutBps",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "minBet",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "maxBet",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "roundRewardCap",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.EconomicMode",
+          "name": "economicMode",
+          "type": "uint8"
+        }
+      ],
+      "name": "GameConfigUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "paused",
+          "type": "bool"
+        }
+      ],
+      "name": "GamePaused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "version",
+          "type": "uint64"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oracle",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "descriptionHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "decimals",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "startMaxAge",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "maxEndDelay",
+          "type": "uint32"
+        }
+      ],
+      "name": "OracleConfigUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Paused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.Direction",
+          "name": "direction",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "betAmount",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "payout",
+          "type": "uint256"
+        }
+      ],
+      "name": "RewardClaimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.CancelReason",
+          "name": "reason",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "cancelledAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "RoundCancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "closedAt",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "totalUp",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "totalDown",
+          "type": "uint128"
+        }
+      ],
+      "name": "RoundClosed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oracle",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "templeHeart",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "payoutBps",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "minBet",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "maxBet",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint128",
+          "name": "roundRewardCap",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.EconomicMode",
+          "name": "economicMode",
+          "type": "uint8"
+        }
+      ],
+      "name": "RoundCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "betOpenAt",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "betCloseAt",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "resolveAt",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "int256",
+          "name": "startPrice",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint80",
+          "name": "startOracleRoundId",
+          "type": "uint80"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startOracleUpdatedAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoundOpened",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.RoundResult",
+          "name": "result",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "int256",
+          "name": "startPrice",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "internalType": "int256",
+          "name": "endPrice",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint80",
+          "name": "startOracleRoundId",
+          "type": "uint80"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint80",
+          "name": "endOracleRoundId",
+          "type": "uint80"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "endOracleUpdatedAt",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "resolvedAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "RoundResolved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "templeHeart",
+          "type": "address"
+        }
+      ],
+      "name": "TempleHeartUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Unpaused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        }
+      ],
+      "name": "Upgraded",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "BPS_DENOMINATOR",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BTC_USD_DESCRIPTION_HASH",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OPERATOR_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "UPGRADER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "UPGRADE_INTERFACE_VERSION",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "name": "betInfo",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum KGEN_FortuneGame_Upgradeable.Direction",
+              "name": "direction",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint128",
+              "name": "amount",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint64",
+              "name": "placedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "placedBlock",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "claimed",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct KGEN_FortuneGame_Upgradeable.Bet",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "name": "canBet",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "name": "canClaim",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "canResolve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "proofRoundId",
+          "type": "uint80"
+        }
+      ],
+      "name": "cancelRound",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "lastOldPhaseRoundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "uint80",
+          "name": "firstNewPhaseRoundId",
+          "type": "uint80"
+        }
+      ],
+      "name": "cancelRoundForPhaseTransition",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "cancelRoundForUnavailableOracle",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "closeRound",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "createRound",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentRoundId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "gameConfig",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "betDuration",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "resolveDelay",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint32",
+          "name": "payoutBps",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint128",
+          "name": "minBet",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint128",
+          "name": "maxBet",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint128",
+          "name": "roundRewardCap",
+          "type": "uint128"
+        },
+        {
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.EconomicMode",
+          "name": "economicMode",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "upgrader",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "templeHeart_",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "descriptionHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "decimals",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint32",
+              "name": "startMaxAge",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxEndDelay",
+              "type": "uint32"
+            }
+          ],
+          "internalType": "struct KGEN_FortuneGame_Upgradeable.OracleConfig",
+          "name": "oracleConfig_",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "betDuration",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "resolveDelay",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint32",
+              "name": "payoutBps",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "minBet",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "maxBet",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "roundRewardCap",
+              "type": "uint128"
+            },
+            {
+              "internalType": "enum KGEN_FortuneGame_Upgradeable.EconomicMode",
+              "name": "economicMode",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct KGEN_FortuneGame_Upgradeable.GameConfig",
+          "name": "gameConfig_",
+          "type": "tuple"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "oracleConfig",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "oracle",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "descriptionHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "decimals",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint32",
+          "name": "startMaxAge",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "maxEndDelay",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum KGEN_FortuneGame_Upgradeable.Direction",
+          "name": "direction",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint128",
+          "name": "amount",
+          "type": "uint128"
+        }
+      ],
+      "name": "placeBet",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "name": "previewPayout",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proxiableUUID",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "callerConfirmation",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "endOracleRoundId",
+          "type": "uint80"
+        }
+      ],
+      "name": "resolveRound",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "roundInfo",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "betOpenAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "betCloseAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "resolveAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "resolvedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "int256",
+              "name": "startPrice",
+              "type": "int256"
+            },
+            {
+              "internalType": "int256",
+              "name": "endPrice",
+              "type": "int256"
+            },
+            {
+              "internalType": "uint80",
+              "name": "startOracleRoundId",
+              "type": "uint80"
+            },
+            {
+              "internalType": "uint80",
+              "name": "endOracleRoundId",
+              "type": "uint80"
+            },
+            {
+              "internalType": "enum KGEN_FortuneGame_Upgradeable.RoundStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum KGEN_FortuneGame_Upgradeable.RoundResult",
+              "name": "result",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint128",
+              "name": "totalUp",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "totalDown",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "upRewardLiability",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "downRewardLiability",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint32",
+              "name": "payoutBps",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "minBet",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "maxBet",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "roundRewardCap",
+              "type": "uint128"
+            },
+            {
+              "internalType": "enum KGEN_FortuneGame_Upgradeable.EconomicMode",
+              "name": "economicMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "templeHeart",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oracleDescriptionHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "oracleDecimals",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint32",
+              "name": "startMaxAge",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxEndDelay",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "startOracleUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "endOracleUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum KGEN_FortuneGame_Upgradeable.CancelReason",
+              "name": "cancelReason",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct KGEN_FortuneGame_Upgradeable.Round",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "secondsUntilClose",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        }
+      ],
+      "name": "secondsUntilResolve",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint64",
+              "name": "betDuration",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "resolveDelay",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint32",
+              "name": "payoutBps",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "minBet",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "maxBet",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint128",
+              "name": "roundRewardCap",
+              "type": "uint128"
+            },
+            {
+              "internalType": "enum KGEN_FortuneGame_Upgradeable.EconomicMode",
+              "name": "economicMode",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct KGEN_FortuneGame_Upgradeable.GameConfig",
+          "name": "config",
+          "type": "tuple"
+        }
+      ],
+      "name": "setGameConfig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "descriptionHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "decimals",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint32",
+              "name": "startMaxAge",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxEndDelay",
+              "type": "uint32"
+            }
+          ],
+          "internalType": "struct KGEN_FortuneGame_Upgradeable.OracleConfig",
+          "name": "config",
+          "type": "tuple"
+        }
+      ],
+      "name": "setOracleConfig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "templeHeart_",
+          "type": "address"
+        }
+      ],
+      "name": "setTempleHeart",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "templeHeart",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "unpause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newImplementation",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "upgradeToAndCall",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ]
+}
