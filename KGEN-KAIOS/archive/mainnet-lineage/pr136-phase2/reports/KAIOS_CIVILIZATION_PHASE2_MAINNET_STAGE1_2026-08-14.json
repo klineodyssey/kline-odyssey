@@ -1,0 +1,491 @@
+{
+  "schema": "KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_V1",
+  "network": "BSC_MAINNET",
+  "chainId": 56,
+  "status": "COMPLETE_LIVE_INACTIVE",
+  "sourceHead": "ed69c2bf911cae40f889e94803ba33f432d25c55",
+  "phase2ConfigSha256": "c327745a66f1aee0f5c0d23ee7ec2e950efecb1ff0dec5bd35390e8713f430eb",
+  "completionBlock": 115888742,
+  "completionTimestamp": 1786710610,
+  "governance": {
+    "mother": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "jadeEmperor": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+    "guanyin": "0xEBEeAC6d09D2d28Db8010b0923442C9Eb2b702FE",
+    "bankGovernance": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "delaySeconds": 3600,
+    "registrations": [
+      {
+        "identity": "REGISTER_ELIGIBILITY",
+        "proposalId": "0xc07b3c9f65eb84a397fd5ad6ff87060271256940a086f7060e6309f441bab48b",
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "calldata": "0x46692b7b90b11fa3ae86f07612e6a3f0eca6d75c1498d703251dcd750e4427b2640a16aa000000000000000000000000a50743fd0fe022714831482355a27559027368f9142001af5835f37de89ed1fbb28a7af83112237a1fbfc3aeafcf394323313b5f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "proposal": {
+          "transactionHash": "0x02bd696f7a19d22f67ff0d11e9924354fc0507f43f2fb4d8370b544696865481",
+          "blockNumber": 115880590,
+          "blockHash": "0x0b60f80fc0613ac72fdffd310f611bd3f7966dea6938961169ffc64a14d2e00e",
+          "timestamp": 1786706939,
+          "gasUsed": "111392",
+          "gasPriceWei": "50000000",
+          "feeWei": "5569600000000"
+        },
+        "approval": {
+          "transactionHash": "0x4431f3d7462f72c4c8d7cb1df514cd4cc5e59f6eb7b38376b9931b6b3b4207d6",
+          "blockNumber": 115880632,
+          "blockHash": "0xacff16ac2aa056cc914dde6a8032a7ac79e3390b1e15e8df07d5fcd80efd2c35",
+          "timestamp": 1786706958,
+          "gasUsed": "57667",
+          "gasPriceWei": "50000000",
+          "feeWei": "2883350000000"
+        },
+        "execution": {
+          "transactionHash": "0x2b01a31dea9094a12609e6ef4b6d03e2a3bd3ee814da3d2b38e067276d4b6899",
+          "blockNumber": 115888656,
+          "blockHash": "0x4a9932b9c79e35e589a6d662bb9493efd1e6bb52ec24fdb7150660ac9bbed53c",
+          "timestamp": 1786710572,
+          "nonce": 38,
+          "gasUsed": "158477",
+          "gasPriceWei": "50000000",
+          "feeWei": "7923850000000"
+        }
+      },
+      {
+        "identity": "REGISTER_RESERVE_REDEMPTION",
+        "proposalId": "0x8afe2e69c204e5c583c77ad6f17fac7301efabb62de0c47d699ca666e40918d5",
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "calldata": "0x46692b7b010f42099385571f486f2951f8662d7a91d979e0cf2e0b193dd3c1b11df7c548000000000000000000000000a06ef53c9ad4af739fd13ca1ded446437134b0ee959c11169882da0859b0dfd1c8f66ba981b6c8c9e72cde81a3aa9da25d74111a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "proposal": {
+          "transactionHash": "0x6223ddfb2f8e1962260d5b99f71dba8db131b6426e6216fa6594ed2310d3336c",
+          "blockNumber": 115880601,
+          "blockHash": "0x12836c481dfe1c35a76b7e30432da5a13a2f86a8ed355ffee05d86f62b4c199a",
+          "timestamp": 1786706944,
+          "gasUsed": "111392",
+          "gasPriceWei": "50000000",
+          "feeWei": "5569600000000"
+        },
+        "approval": {
+          "transactionHash": "0xc898e25f568728b65df4b548e32700760ac702dbe321699b39f6c2200ad3f1e0",
+          "blockNumber": 115880642,
+          "blockHash": "0x2aa285244d72762ca2654929dcb1877179d08901a3ebf93c0fb3d97a48c3c66d",
+          "timestamp": 1786706963,
+          "gasUsed": "57667",
+          "gasPriceWei": "50000000",
+          "feeWei": "2883350000000"
+        },
+        "execution": {
+          "transactionHash": "0x5a5b071cf76627d4a059f26b8ad2fbdabda444b21e01581763262c274110123d",
+          "blockNumber": 115888667,
+          "blockHash": "0x3dfcba58c48a8173775438ffb5ef8cba3e78deec9ffa750344c7a42ec8396bdf",
+          "timestamp": 1786710576,
+          "nonce": 39,
+          "gasUsed": "158477",
+          "gasPriceWei": "50000000",
+          "feeWei": "7923850000000"
+        }
+      },
+      {
+        "identity": "REGISTER_CAPITAL_COMMITMENT",
+        "proposalId": "0x1f823ebc0d3ea8baf85d0d74960cb82e7549c244eca62635b5933705f59fdd99",
+        "target": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+        "calldata": "0x46692b7be18474c647be4ac588784db06c20e46c5ce22cdbe45f2b0f19d40241c3165e1200000000000000000000000004fc1536ec51e8ccaacb961e5af6151de47b078c30ea18b391829a9d695a651b295c9a275d63756687ba94499e579dd54745efa9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "proposal": {
+          "transactionHash": "0xf4488975f992f69a3f4c8165d633aa942cfc40922fe65274afea46273b449963",
+          "blockNumber": 115880610,
+          "blockHash": "0x9581f4c8afc032be8534f7b338c5307a2eed43c99ce32fe9c82158089f7b52f5",
+          "timestamp": 1786706948,
+          "gasUsed": "111392",
+          "gasPriceWei": "50000000",
+          "feeWei": "5569600000000"
+        },
+        "approval": {
+          "transactionHash": "0x54a047194d75a4f773dbc72d359f034c67437ae4779d7dcfd01184b01d1734ac",
+          "blockNumber": 115880652,
+          "blockHash": "0x6486db5b80a2df60044c8573038de2439392a36b0008f90777abf70c244cf888",
+          "timestamp": 1786706967,
+          "gasUsed": "57667",
+          "gasPriceWei": "50000000",
+          "feeWei": "2883350000000"
+        },
+        "execution": {
+          "transactionHash": "0x8ae93238ca8ba0075ca015e1bd1cd56c9eae1fa615bf4b41d3c38991bc16d5a4",
+          "blockNumber": 115888678,
+          "blockHash": "0xcc379ee3efb55421ad0d6e2f30dd84750a0b6641d7c9f44e32bc7ca9c6e9e716",
+          "timestamp": 1786710581,
+          "nonce": 40,
+          "gasUsed": "158477",
+          "gasPriceWei": "50000000",
+          "feeWei": "7923850000000"
+        }
+      }
+    ],
+    "contributionVerifier": {
+      "identity": "SET_CONTRIBUTION_VERIFIER",
+      "proposalId": "0xf0d9892f88fc4b4d2800424459982578d7c2d7e68afa8cd7e6aed6f2cca747fe",
+      "target": "0xA50743fd0fe022714831482355A27559027368F9",
+      "calldata": "0x46b2c69b000000000000000000000000cd60bf474e691f2484950a0276eaf507616ca4b90000000000000000000000000000000000000000000000000000000000000001",
+      "proposal": {
+        "transactionHash": "0x5558685636aafd8a21913045386cd4c122ee7b0ec65f819bc42f745307e94af3",
+        "blockNumber": 115880621,
+        "blockHash": "0xad2837bcf0baca3fa7cc764951ed00b717e0aed8d3338a944421dad8294210b7",
+        "timestamp": 1786706953,
+        "gasUsed": "110040",
+        "gasPriceWei": "50000000",
+        "feeWei": "5502000000000"
+      },
+      "approval": {
+        "transactionHash": "0xdd1f08937734e0a62bff48d0d19dddf0225a24dd070c6ee9f7b4006479e32923",
+        "blockNumber": 115880663,
+        "blockHash": "0xa64f6d49b48a1ccc8ea5b3ac02bf4e54750f2b12ac9df99a67f755f870eaa919",
+        "timestamp": 1786706972,
+        "gasUsed": "57655",
+        "gasPriceWei": "50000000",
+        "feeWei": "2882750000000"
+      },
+      "execution": {
+        "transactionHash": "0xc253f686a6ba62a0a4c49f5d7a48e405ccbb3b7e8b73aa657d31b0d59c9f326c",
+        "blockNumber": 115888720,
+        "blockHash": "0x1fa037d6d9245d8b37a4d165c30dabf7d93850cff4a3cca0484dace905b139f3",
+        "timestamp": 1786710600,
+        "nonce": 44,
+        "gasUsed": "82410",
+        "gasPriceWei": "50000000",
+        "feeWei": "4120500000000"
+      }
+    },
+    "finalizations": [
+      {
+        "identity": "FINALIZE_ELIGIBILITY_GOVERNANCE",
+        "transactionHash": "0xd48b849b6eb5cd994267c0994957c418b3eccdd83895c8bc70f1f0232a619ce8",
+        "blockNumber": 115888688,
+        "blockHash": "0xbc15f292b4b5f8a5cc6d54003bcca6d08fa94a79828b7ffe52a3997163568314",
+        "timestamp": 1786710586,
+        "nonce": 41,
+        "gasUsed": "119994",
+        "gasPriceWei": "50000000",
+        "feeWei": "5999700000000"
+      },
+      {
+        "identity": "FINALIZE_RESERVE_REDEMPTION_GOVERNANCE",
+        "transactionHash": "0x0545e3a1adf652e691160538ca53505c891ddf189d7f8820b79097dd2e3f906a",
+        "blockNumber": 115888699,
+        "blockHash": "0xc33c05ae251d37c8f9558a855b43272d85ee38415ca664d70daaa9fdc26cb28d",
+        "timestamp": 1786710591,
+        "nonce": 42,
+        "gasUsed": "119972",
+        "gasPriceWei": "50000000",
+        "feeWei": "5998600000000"
+      },
+      {
+        "identity": "FINALIZE_CAPITAL_COMMITMENT_GOVERNANCE",
+        "transactionHash": "0x4da88336b5603ef62f7a56e53db2108bec10938e649ba9b2f21cf59a83a74c0e",
+        "blockNumber": 115888709,
+        "blockHash": "0xbfba72ce3000fc0cd0ad89fe98627da3e6eaed58e9d4efde46132b9f476ccdb3",
+        "timestamp": 1786710595,
+        "nonce": 43,
+        "gasUsed": "119950",
+        "gasPriceWei": "50000000",
+        "feeWei": "5997500000000"
+      }
+    ]
+  },
+  "formalDependencies": {
+    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "kaios": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "bank18888": "0x11d34c0F723aCd334B8F95076f73F07f06202aab",
+    "furnace18911": "0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1"
+  },
+  "deployments": [
+    {
+      "identity": "CELESTIAL_ELIGIBILITY_IMPLEMENTATION",
+      "address": "0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779",
+      "reused": true,
+      "transactionHash": "0x039c28a90b5a87be6826c8f9323f9489eee67474b1de9fdd8c2377bc4464b93b",
+      "blockNumber": 115864643,
+      "blockHash": "0x0cd01c7a702a3e9f058e578bb173f84ff0bb657de3833dc77e4a7506d69bbb79",
+      "timestamp": 1786699759,
+      "nonce": 56,
+      "gasUsed": "2840550",
+      "gasPriceWei": "50000000",
+      "feeWei": "142027500000000",
+      "runtimeVerification": {
+        "mode": "UUPS_IMMUTABLE_REFERENCE_ADDRESS_PATCH",
+        "immutableReferences": [
+          {
+            "start": 5804,
+            "length": 32
+          },
+          {
+            "start": 6993,
+            "length": 32
+          }
+        ],
+        "patchedRuntimeHash": "0x8802e43df4bfdadfa88d9404943b3b8de6767672fe7b994072b2fbaaff252309",
+        "status": "PASS"
+      }
+    },
+    {
+      "identity": "CELESTIAL_ELIGIBILITY_PROXY",
+      "address": "0xA50743fd0fe022714831482355A27559027368F9",
+      "reused": false,
+      "transactionHash": "0xaf88e43bf9d90d10c1d095c27fbe02fd202b30f1550cb764c8e1137e92fa7640",
+      "blockNumber": 115880531,
+      "blockHash": "0x6de1af90ddfe0ae4e7e972c9df8f34731dc357ed142879c8e50a425f14427942",
+      "timestamp": 1786706913,
+      "nonce": 57,
+      "gasUsed": "387946",
+      "gasPriceWei": "50000000",
+      "feeWei": "19397300000000",
+      "runtimeVerification": {
+        "status": "PASS",
+        "proxyRuntimeHash": "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6",
+        "implementationSlot": "0x0D21328BdbE12e9E69838Fd33E3C20F0b27f2779"
+      }
+    },
+    {
+      "identity": "KGEN_RESERVE_REDEMPTION_IMPLEMENTATION",
+      "address": "0x8D4a697549Ee45e9973041d0f1c0d0394B1A1034",
+      "reused": false,
+      "transactionHash": "0xc8fcff9e3c2713ffd8071814b6a3fbb6f64d3bbd72dae20e504f04fba93ad724",
+      "blockNumber": 115880542,
+      "blockHash": "0x0d69fa357b29b1d8a307b4344507ec955ca74aea1800db0500a7b26832cf9958",
+      "timestamp": 1786706918,
+      "nonce": 58,
+      "gasUsed": "2424248",
+      "gasPriceWei": "50000000",
+      "feeWei": "121212400000000",
+      "runtimeVerification": {
+        "status": "PASS",
+        "reason": null,
+        "artifactBytes": 10856,
+        "deployedBytes": 10856,
+        "immutableReferences": [
+          {
+            "sourceId": "23419",
+            "start": 5163,
+            "length": 32
+          },
+          {
+            "sourceId": "23419",
+            "start": 5374,
+            "length": 32
+          }
+        ],
+        "rawArtifactRuntimeHash": "0x27b2706a325eb8bac27510853cc89f80bb16cb070bf998667ad1e3471b2e5160",
+        "patchedExpectedRuntimeHash": "0x3e45364adc0c5720c4029bba7aba98030daa2067f2ec84646e758187bb369446",
+        "actualRuntimeHash": "0x3e45364adc0c5720c4029bba7aba98030daa2067f2ec84646e758187bb369446",
+        "normalizedArtifactRuntimeHash": "0x27b2706a325eb8bac27510853cc89f80bb16cb070bf998667ad1e3471b2e5160",
+        "normalizedActualRuntimeHash": "0x27b2706a325eb8bac27510853cc89f80bb16cb070bf998667ad1e3471b2e5160",
+        "patchedRuntimeMatch": true,
+        "normalizedRuntimeMatch": true
+      }
+    },
+    {
+      "identity": "KGEN_RESERVE_REDEMPTION_PROXY",
+      "address": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+      "reused": false,
+      "transactionHash": "0x9125511c8d0b55f4e4553fe538a1d1eb68d9052a0f858820a5ec2bf23cd9adab",
+      "blockNumber": 115880553,
+      "blockHash": "0x5fc2a5f05501fafc4c80f138adb57c3b31f36be35a9f7867def8e5526e584db1",
+      "timestamp": 1786706923,
+      "nonce": 59,
+      "gasUsed": "537046",
+      "gasPriceWei": "50000000",
+      "feeWei": "26852300000000",
+      "runtimeVerification": {
+        "status": "PASS",
+        "proxyRuntimeHash": "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6",
+        "implementationSlot": "0x8D4a697549Ee45e9973041d0f1c0d0394B1A1034"
+      }
+    },
+    {
+      "identity": "CELESTIAL_CAPITAL_COMMITMENT_IMPLEMENTATION",
+      "address": "0x09b4371B071d8957622DD640dbd0F713897Db167",
+      "reused": false,
+      "transactionHash": "0x2b1119f15649ef041fb7107f19945195818e6e7cf98bd12262e4b457266780a1",
+      "blockNumber": 115880564,
+      "blockHash": "0x776cbb2feb0e6fea54f4c934f7bf5ab36921de4b9772cd16950ba742587203c6",
+      "timestamp": 1786706928,
+      "nonce": 60,
+      "gasUsed": "2218099",
+      "gasPriceWei": "50000000",
+      "feeWei": "110904950000000",
+      "runtimeVerification": {
+        "status": "PASS",
+        "reason": null,
+        "artifactBytes": 9903,
+        "deployedBytes": 9903,
+        "immutableReferences": [
+          {
+            "sourceId": "23419",
+            "start": 4221,
+            "length": 32
+          },
+          {
+            "sourceId": "23419",
+            "start": 4432,
+            "length": 32
+          }
+        ],
+        "rawArtifactRuntimeHash": "0x45368261e90f5ce32838432863cef7fa94749ce8937876776741dad65b28da72",
+        "patchedExpectedRuntimeHash": "0xfaac8a87eecf811b04d59969804985161f3bd6e79ef6a995fcdec8dfbe091428",
+        "actualRuntimeHash": "0xfaac8a87eecf811b04d59969804985161f3bd6e79ef6a995fcdec8dfbe091428",
+        "normalizedArtifactRuntimeHash": "0x45368261e90f5ce32838432863cef7fa94749ce8937876776741dad65b28da72",
+        "normalizedActualRuntimeHash": "0x45368261e90f5ce32838432863cef7fa94749ce8937876776741dad65b28da72",
+        "patchedRuntimeMatch": true,
+        "normalizedRuntimeMatch": true
+      }
+    },
+    {
+      "identity": "CELESTIAL_CAPITAL_COMMITMENT_PROXY",
+      "address": "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c",
+      "reused": false,
+      "transactionHash": "0xf4e640168349b37680bee969bfe34ffde5f379a830a9dcb70b561a23ca2590b2",
+      "blockNumber": 115880574,
+      "blockHash": "0x0630d9006e846e4da8be677b5e8653cee4e12ba5f62aabf2528c9c59ee9bb4a8",
+      "timestamp": 1786706932,
+      "nonce": 61,
+      "gasUsed": "391313",
+      "gasPriceWei": "50000000",
+      "feeWei": "19565650000000",
+      "runtimeVerification": {
+        "status": "PASS",
+        "proxyRuntimeHash": "0x572e640425d4d6c1f70e591dec2930f8d9481f510d67a7b9577543ebaeb5dfb6",
+        "implementationSlot": "0x09b4371B071d8957622DD640dbd0F713897Db167"
+      }
+    }
+  ],
+  "moduleState": {
+    "eligibility": {
+      "proxy": "0xA50743fd0fe022714831482355A27559027368F9",
+      "moduleId": "0x90b11fa3ae86f07612e6a3f0eca6d75c1498d703251dcd750e4427b2640a16aa",
+      "versionHash": "0x142001af5835f37de89ed1fbb28a7af83112237a1fbfc3aeafcf394323313b5f",
+      "active": false
+    },
+    "reserveRedemption": {
+      "proxy": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+      "moduleId": "0x010f42099385571f486f2951f8662d7a91d979e0cf2e0b193dd3c1b11df7c548",
+      "versionHash": "0x959c11169882da0859b0dfd1c8f66ba981b6c8c9e72cde81a3aa9da25d74111a",
+      "active": false,
+      "redemptionEnabled": false
+    },
+    "capitalCommitment": {
+      "proxy": "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c",
+      "moduleId": "0xe18474c647be4ac588784db06c20e46c5ce22cdbe45f2b0f19d40241c3165e12",
+      "versionHash": "0x30ea18b391829a9d695a651b295c9a275d63756687ba94499e579dd54745efa9",
+      "active": false
+    }
+  },
+  "roles": {
+    "eligibility": {
+      "DEFAULT_ADMIN_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "GOVERNANCE_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "UPGRADER_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "PAUSER_ROLE": {
+        "guanyin": true
+      }
+    },
+    "reserve": {
+      "DEFAULT_ADMIN_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "GOVERNANCE_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "UPGRADER_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "PAUSER_ROLE": {
+        "guanyin": true
+      }
+    },
+    "capital": {
+      "DEFAULT_ADMIN_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "GOVERNANCE_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "UPGRADER_ROLE": {
+        "bankGovernance": true,
+        "mother": false,
+        "deployer": false
+      },
+      "PAUSER_ROLE": {
+        "guanyin": true
+      }
+    }
+  },
+  "contributionVerifier": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+  "kgenState": {
+    "owner": "0xb3C54ca96De0dED4Ca0151F629ff9781506ba261",
+    "bankWallet": "0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c",
+    "rewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+    "autoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85",
+    "taxRedirectExecuted": false,
+    "ownershipTransferred": false
+  },
+  "economicActivity": {
+    "redemptionRequests": "0",
+    "totalKaiosDepositedForRedemption": "0",
+    "totalKgenRedeemed": "0",
+    "eligibilityCandidates": "0",
+    "capitalCommitments": "0",
+    "capitalCommittedPrincipal": "0",
+    "moduleEnablement": false
+  },
+  "finalNonce": {
+    "deployer": [
+      62,
+      62
+    ],
+    "mother": [
+      45,
+      45
+    ],
+    "jade": [
+      5,
+      5
+    ]
+  },
+  "gas": {
+    "transactionCount": 21,
+    "totalGasUsed": "10391831",
+    "totalFeeWei": "519591550000000",
+    "totalBnbSpent": "0.00051959155"
+  },
+  "security": {
+    "patchedUupsRuntimeVerification": "PASS",
+    "moduleGovernanceFinalized": "PASS",
+    "deploymentSignerPermanentGovernance": "NONE",
+    "kgenTaxRedirectMainnet": "NOT_EXECUTED",
+    "kgenOwnerUnchanged": "PASS",
+    "formalKgenModified": "NO",
+    "formalKaiosModified": "NO",
+    "formalFurnace18911Modified": "NO",
+    "liveBank18888CoreUpgraded": "NO",
+    "redemptionEnabled": "NO",
+    "eligibilityEnabled": "NO",
+    "capitalCommitmentEnabled": "NO"
+  }
+}
