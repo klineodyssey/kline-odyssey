@@ -20,7 +20,7 @@ const assertVisible=async id=>{
   const diag=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{id:el.id,display:s.display,visibility:s.visibility,opacity:s.opacity,w:r.width,h:r.height,x:r.x,y:r.y}});
   assert.ok(diag.w>0&&diag.h>0&&diag.display!=='none'&&diag.visibility!=='hidden',`control ${id} not visible: ${JSON.stringify(diag)}`);
 };
-const intersects=(a,b)=>a&&b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
+const intersects=(a,b)=>!!(a&&b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y);
 
 // Default formal screen is clean play: joystick + combat + one fixed settings toggle.
 for(const id of ['joy','attack','skill','dodge','gameModeToggle'])await assertVisible(id);
@@ -42,7 +42,8 @@ const after=await page.locator('#xyz').textContent();assert.notEqual(after,befor
 
 // Branded Y/C/K pictures are fixed at the top of each energy track, not moving thumbs.
 for(const id of ['yControl','cControl','lotsControl']){
-  const bg=await page.locator(`#${id} .track`).evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
+  const icon=page.locator(`#${id} .energyTap`);
+  const bg=await icon.evaluate(el=>getComputedStyle(el).backgroundImage);
   assert.ok(bg&&bg!=='none',`${id} fixed energy icon missing`);
 }
 assert.equal(await page.locator('#yEnergyMarker').count(),0,'legacy glowing Y energy marker should be removed');
@@ -63,6 +64,7 @@ const toggleBefore=await page.locator('#walletToggle').boundingBox();assert.ok(t
 await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(80);
 const toggleAfter=await page.locator('#walletToggle').boundingBox();assert.ok(toggleAfter);
 assert.ok(Math.abs(toggleAfter.x-toggleBefore.x)<12&&Math.abs(toggleAfter.y-toggleBefore.y)<12,'wallet toggle moved away after expand/collapse');
+await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(80);
 
 // All 14 formal organs are reachable before any modal can intentionally cover the UI.
 assert.equal(await page.locator('#rail [data-organ]').count(),14);
@@ -76,6 +78,7 @@ for(const id of ['trade','positions','orders','history','assets','records','mark
 }
 
 // Wallet connect is checked last because no-injected-wallet flow may intentionally open a launch sheet/modal.
+await page.locator('#walletToggle').click({timeout:3000});await page.waitForTimeout(80);
 await page.locator('#walletConnect').click({timeout:3000});await page.waitForTimeout(50);
 assert.ok((await page.locator('#walletMsg').textContent()).length>0);
 
