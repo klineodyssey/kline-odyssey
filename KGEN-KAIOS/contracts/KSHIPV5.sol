@@ -13,7 +13,6 @@ interface IKUFOV5CarrierBurnRecordSource {
         uint256 kufoBurned;
         uint256 expectedKship;
     }
-
     function carrierBurnRecord(bytes32 proofId) external view returns (CarrierBurnRecord memory);
 }
 
@@ -21,8 +20,7 @@ interface IKUFOV5CarrierBurnRecordSource {
  * @title KSHIPV5
  * @notice Immutable KSHIP antimatter core with a registry-gated K108000 mass-energy burn port.
  * @dev KSHIP has no native half-life. Its supply decreases only when a current authorized
- *      K108000 reactor consumes KSHIP into a mass-energy reaction receipt. This contract is
- *      intentionally non-upgradeable; later changes require a new deployment/version.
+ *      K108000 reactor consumes KSHIP into a ship-bound mass-energy reaction receipt.
  */
 contract KSHIPV5 is ERC20, ERC20Capped {
     string public constant VERSION = "5.0.0";
@@ -41,6 +39,7 @@ contract KSHIPV5 is ERC20, ERC20Capped {
     mapping(bytes32 => bool) public reactionProofConsumed;
 
     struct ReactionBurnRecord {
+        bytes32 shipId;
         address owner;
         address reactor;
         uint256 kshipConsumed;
@@ -52,6 +51,7 @@ contract KSHIPV5 is ERC20, ERC20Capped {
 
     error ZeroAddress();
     error ZeroAmount();
+    error ZeroShipId();
     error OnlyCurrentKshipConverter(address caller);
     error OnlyCurrentK108000Reactor(address caller);
     error ProofAlreadyUsed(bytes32 proofId);
@@ -59,7 +59,7 @@ contract KSHIPV5 is ERC20, ERC20Capped {
     error InsufficientHolderAllowance(uint256 currentAllowance, uint256 requiredAllowance);
 
     event CarrierProofMinted(bytes32 indexed proofId, address indexed beneficiary, uint256 kshipAmount);
-    event KSHIPConsumedForMassEnergy(bytes32 indexed reactionProofId, address indexed owner, address indexed reactor, uint256 kshipAmount);
+    event KSHIPConsumedForMassEnergy(bytes32 indexed reactionProofId, bytes32 indexed shipId, address indexed owner, address reactor, uint256 kshipAmount);
 
     constructor(address registry, address kufoToken)
         ERC20("KSHIP Antimatter Fuel", "KSHIP")
@@ -77,10 +77,8 @@ contract KSHIPV5 is ERC20, ERC20Capped {
 
         IKUFOV5CarrierBurnRecordSource.CarrierBurnRecord memory burnRecord = kufo.carrierBurnRecord(proofId);
         if (
-            burnRecord.owner == address(0) ||
-            burnRecord.beneficiary == address(0) ||
-            burnRecord.converter != msg.sender ||
-            burnRecord.kufoBurned == 0 ||
+            burnRecord.owner == address(0) || burnRecord.beneficiary == address(0) ||
+            burnRecord.converter != msg.sender || burnRecord.kufoBurned == 0 ||
             burnRecord.expectedKship != burnRecord.kufoBurned * KSHIP_PER_KUFO
         ) revert InvalidLineageProof(proofId);
 
@@ -92,9 +90,10 @@ contract KSHIPV5 is ERC20, ERC20Capped {
         emit CarrierProofMinted(proofId, beneficiary, amount);
     }
 
-    function burnForMassEnergy(address owner, uint256 kshipAmount, bytes32 reactionProofId) external returns (uint256) {
+    function burnForMassEnergy(bytes32 shipId, address owner, uint256 kshipAmount, bytes32 reactionProofId) external returns (uint256) {
         address reactor = organRegistry.organ(ORGAN_K108000_REACTOR);
         if (msg.sender != reactor || reactor == address(0)) revert OnlyCurrentK108000Reactor(msg.sender);
+        if (shipId == bytes32(0)) revert ZeroShipId();
         if (owner == address(0)) revert ZeroAddress();
         if (kshipAmount == 0) revert ZeroAmount();
         if (reactionProofConsumed[reactionProofId]) revert ProofAlreadyUsed(reactionProofId);
@@ -106,8 +105,8 @@ contract KSHIPV5 is ERC20, ERC20Capped {
         _spendAllowance(owner, msg.sender, kshipAmount);
         _burn(owner, kshipAmount);
         totalConsumedForMassEnergy += kshipAmount;
-        _reactionBurnRecords[reactionProofId] = ReactionBurnRecord(owner, msg.sender, kshipAmount, block.number, block.timestamp);
-        emit KSHIPConsumedForMassEnergy(reactionProofId, owner, msg.sender, kshipAmount);
+        _reactionBurnRecords[reactionProofId] = ReactionBurnRecord(shipId, owner, msg.sender, kshipAmount, block.number, block.timestamp);
+        emit KSHIPConsumedForMassEnergy(reactionProofId, shipId, owner, msg.sender, kshipAmount);
         return kshipAmount;
     }
 
