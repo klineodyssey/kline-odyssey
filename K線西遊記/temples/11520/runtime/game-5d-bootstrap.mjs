@@ -16,7 +16,7 @@ const fmt=n=>Number(n||0).toFixed(1).replace(/\.0$/,'');
 function toast(t){const el=$('#toast');if(!el)return;el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1600)}
 function hud(){const xyz=$('#xyz'),yr=$('#yRead');if(xyz)xyz.textContent=`X ${fmt(S.xyz.x)} · Y ${fmt(S.xyz.y)} · Z ${fmt(S.xyz.z)}`;if(yr)yr.textContent=`Y ${fmt(S.xyz.y)}`}
 function setThumb(el,t){if(el)el.style.top=(100-Math.max(0,Math.min(1,t))*100)+'%'}
-function bindVertical(sel,fn){const el=$(sel);if(!el)return;let pid=null;const calc=e=>{const r=el.getBoundingClientRect(),t=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));fn(t);e.preventDefault()};el.addEventListener('pointerdown',e=>{pid=e.pointerId;el.setPointerCapture?.(pid);calc(e)},{signal});el.addEventListener('pointermove',e=>{if(e.pointerId===pid)calc(e)},{signal});for(const ev of['pointerup','pointercancel'])el.addEventListener(ev,e=>{if(e.pointerId===pid)pid=null},{signal})}
+function bindVertical(sel,fn){const el=$(sel);if(!el)return;let pid=null;const calc=e=>{const r=el.getBoundingClientRect(),t=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));fn(t);e.preventDefault()};el.addEventListener('pointerdown',e=>{pid=e.pointerId;try{el.setPointerCapture?.(pid)}catch{}calc(e)},{signal});el.addEventListener('pointermove',e=>{if(e.pointerId===pid)calc(e)},{signal});for(const ev of['pointerup','pointercancel'])el.addEventListener(ev,e=>{if(e.pointerId===pid)pid=null},{signal})}
 
 /* ---------------- Living audio ---------------- */
 let audioCtx=null,master=null,themeTimer=null,heartbeatTimer=null,audioOn=false;
