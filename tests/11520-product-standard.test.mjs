@@ -13,11 +13,13 @@ const world=createWorldState(1000);assert.equal(world.monsters.some(m=>m.sourceM
 const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.join(here,'../K線西遊記/temples/11520');
 const html=fs.readFileSync(path.join(root,'game-5d.html'),'utf8');
+const bootstrap=fs.readFileSync(path.join(root,'runtime/game-5d-bootstrap.mjs'),'utf8');
 const main=fs.readFileSync(path.join(root,'runtime/game-5d-main.mjs'),'utf8');
 const visual=fs.readFileSync(path.join(root,'runtime/life-visual-runtime.mjs'),'utf8');
 const spatial=fs.readFileSync(path.join(root,'runtime/spatial-coordinate-runtime.mjs'),'utf8');
 const navigation=fs.readFileSync(path.join(root,'runtime/map-object-navigation-runtime.mjs'),'utf8');
 for(const marker of ['walletConnect','KGEN verified','orderFire','confirmOrder','./runtime/game-5d-bootstrap.mjs'])assert.ok(html.includes(marker),`missing product marker: ${marker}`);
+for(const marker of ["import('./game-5d-main.mjs')",'DEGRADED_PLAYABLE','install11520ProductFixes','joystickToWorld'])assert.ok(bootstrap.includes(marker),`missing bootstrap marker: ${marker}`);
 for(const marker of ['Knight.glb','GLTFLoader','AnimationMixer','KX','KY','KZ','主城世界','K場交易','持倉','委託','歷史','資產','統計','市場','背包','角色','世界地圖','ATM','設定','客服/說明'])assert.ok(main.includes(marker),`missing runtime marker: ${marker}`);
 assert.ok(main.includes("joy.addEventListener('pointerdown'"));assert.ok(main.includes("$('#attack').onclick"));assert.ok(main.includes("$('#dockToggle').onclick"));assert.ok(main.includes('inspectMapPoint'));assert.ok(main.includes('createLifeVisual'));assert.ok(spatial.includes("northAxis:'Z+'"));assert.ok(navigation.includes("kind:'ENTITY'"));assert.ok(visual.includes("visualMode:'PROCEDURAL_3D'"));assert.ok(visual.includes("visualMode:'FALLBACK'"));assert.ok(!main.includes('new THREE.DodecahedronGeometry(.6)'));assert.ok(!main.includes('margin = lots / leverage'));assert.ok(!main.includes('margin = lots / C'));
 console.log('11520 standardized product invariants PASS');
