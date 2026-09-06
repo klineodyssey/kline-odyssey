@@ -29,6 +29,13 @@ jobs:
         run: |
           node --check "K線西遊記/temples/11520/runtime/world-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-ui-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/game-ui-product-fixes.mjs"
+          node --check "K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs"
+          node --check "K線西遊記/temples/11520/runtime/game-5d-main.mjs"
+          node --check "K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/map-object-navigation-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/capture-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/backpack-runtime.mjs"
@@ -37,7 +44,7 @@ jobs:
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
-          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs"
+          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-spatial-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-capture-runtime.test.mjs"
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
@@ -45,9 +52,21 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run mobile browser smoke test
         shell: bash
+        timeout-minutes: 4
         run: |
+          set -o pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-http.log 2>&1 &
           SERVER_PID=$!
-          trap 'kill $SERVER_PID || true' EXIT
+          cleanup() { kill "$SERVER_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
           sleep 2
-          node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
+          CODE=0
+          timeout --signal=TERM --kill-after=10s 150s node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs" || CODE=$?
+          if [ "$CODE" -ne 0 ]; then
+            echo "11520 mobile smoke failed or timed out (exit=$CODE)"
+            echo "--- local HTTP server log ---"
+            cat /tmp/k11520-http.log || true
+            echo "--- process snapshot ---"
+            ps -ef | grep -E 'node|chrom|python3' | grep -v grep || true
+            exit 1
+          fi
