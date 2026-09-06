@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE
 PURPOSE: Canonical 11520 XYZ/XZ world-coordinate conversions shared by joystick, HUD, maps, navigation and camera-facing logic.
 */
@@ -19,10 +19,10 @@ export function clampWorldPosition(p={}){
   };
 }
 
-// Screen joystick convention: nx right is +1; ny up is +1.
-// camYaw=0 means the camera is south of the player looking north toward Z+.
+// Screen joystick convention for the current 11520 camera: screen-right is world X-.
+// ny up remains forward; camYaw=0 means forward is world Z+.
 export function joystickToWorld({nx=0,ny=0,camYaw=0}={}){
-  const rightX=Math.cos(camYaw),rightZ=-Math.sin(camYaw);
+  const rightX=-Math.cos(camYaw),rightZ=Math.sin(camYaw);
   const forwardX=-Math.sin(camYaw),forwardZ=Math.cos(camYaw);
   return {
     x:nx*rightX+ny*forwardX,
