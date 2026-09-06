@@ -32,11 +32,7 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
     bytes32 public constant ORGAN_KGOD = keccak256("KAIOS.ORGAN.KGOD.TOKEN");
     uint256 public constant REACTOR_POINT = 108_000;
 
-    enum ReactionMode {
-        PROPULSION,
-        MATERIAL_FORGE,
-        COGENERATION
-    }
+    enum ReactionMode { PROPULSION, MATERIAL_FORGE, COGENERATION }
 
     struct Allocation {
         uint256 propulsionEnergy;
@@ -69,7 +65,6 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
     uint256 public cumulativeRecoverableEnergy;
     uint256 public cumulativeKgodMassEquivalent;
     uint256 public cumulativeRadiationHeat;
-
     mapping(bytes32 => ReactionRecord) private _reactions;
 
     error ZeroAddress();
@@ -81,7 +76,6 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
     error InvalidModeAllocation(ReactionMode mode);
     error ReactionAlreadyExists(bytes32 reactionProofId);
     error UnknownReaction(bytes32 reactionProofId);
-    error KGODAlreadyMinted(bytes32 reactionProofId);
     error KGODMintMismatch(address beneficiary, uint256 expected, uint256 actual);
 
     event MassEnergyReaction(
@@ -104,12 +98,9 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         organRegistry = IKAIOSOrganRegistry(registry);
     }
 
-    function react(
-        uint256 kshipAmount,
-        address beneficiary,
-        ReactionMode mode,
-        Allocation calldata allocation
-    ) external nonReentrant returns (bytes32 reactionProofId, uint256 kgodAmount) {
+    function react(uint256 kshipAmount, address beneficiary, ReactionMode mode, Allocation calldata allocation)
+        external nonReentrant returns (bytes32 reactionProofId, uint256 kgodAmount)
+    {
         if (beneficiary == address(0)) revert ZeroAddress();
         if (kshipAmount == 0) revert ZeroAmount();
 
@@ -121,10 +112,12 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         uint256 totalOutput = allocation.propulsionEnergy + allocation.recoverableEnergy + allocation.kgodMassEquivalent + allocation.radiationHeat;
         if (totalOutput != totalInput) revert AllocationMismatch(totalInput, totalOutput);
 
-        if (mode == ReactionMode.PROPULSION && allocation.kgodMassEquivalent != 0) revert InvalidModeAllocation(mode);
-        if (mode == ReactionMode.MATERIAL_FORGE && allocation.propulsionEnergy != 0) revert InvalidModeAllocation(mode);
-        if (mode == ReactionMode.COGENERATION && (allocation.propulsionEnergy == 0 || allocation.kgodMassEquivalent == 0)) {
-            revert InvalidModeAllocation(mode);
+        if (mode == ReactionMode.PROPULSION) {
+            if (allocation.propulsionEnergy == 0 || allocation.kgodMassEquivalent != 0) revert InvalidModeAllocation(mode);
+        } else if (mode == ReactionMode.MATERIAL_FORGE) {
+            if (allocation.kgodMassEquivalent == 0 || allocation.propulsionEnergy != 0) revert InvalidModeAllocation(mode);
+        } else {
+            if (allocation.propulsionEnergy == 0 || allocation.kgodMassEquivalent == 0) revert InvalidModeAllocation(mode);
         }
 
         address matterSource = organRegistry.organ(ORGAN_MATTER_SOURCE);
@@ -157,19 +150,8 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         cumulativeKgodMassEquivalent += allocation.kgodMassEquivalent;
         cumulativeRadiationHeat += allocation.radiationHeat;
 
-        emit MassEnergyReaction(
-            reactionProofId,
-            msg.sender,
-            beneficiary,
-            mode,
-            kshipAmount,
-            consumedMatter,
-            totalInput,
-            allocation.propulsionEnergy,
-            allocation.recoverableEnergy,
-            allocation.kgodMassEquivalent,
-            allocation.radiationHeat
-        );
+        emit MassEnergyReaction(reactionProofId, msg.sender, beneficiary, mode, kshipAmount, consumedMatter, totalInput,
+            allocation.propulsionEnergy, allocation.recoverableEnergy, allocation.kgodMassEquivalent, allocation.radiationHeat);
 
         if (allocation.kgodMassEquivalent != 0) {
             address kgod = organRegistry.organ(ORGAN_KGOD);
@@ -190,7 +172,6 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
     }
 
     function conservationInvariantHolds() external view returns (bool) {
-        return cumulativeInputEquivalent ==
-            cumulativePropulsionEnergy + cumulativeRecoverableEnergy + cumulativeKgodMassEquivalent + cumulativeRadiationHeat;
+        return cumulativeInputEquivalent == cumulativePropulsionEnergy + cumulativeRecoverableEnergy + cumulativeKgodMassEquivalent + cumulativeRadiationHeat;
     }
 }
