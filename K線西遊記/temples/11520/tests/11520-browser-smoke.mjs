@@ -25,13 +25,16 @@ const xyz=async()=>{
   const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);
   assert.ok(m,'XYZ HUD parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]};
 };
-const drag=async(selector,toX,toY,pointerId,hold=260)=>{
+// Use a real Playwright pointer sequence rather than synthetic dispatchEvent.
+// Production controls call setPointerCapture(), which requires an active browser pointer.
+const drag=async(selector,toX,toY,_pointerId,hold=260)=>{
   const b=await page.locator(selector).boundingBox();assert.ok(b,selector+' missing box');
-  const ev=(x,y,buttons=1)=>({pointerId,pointerType:'touch',clientX:b.x+b.width*x,clientY:b.y+b.height*y,buttons});
-  await page.dispatchEvent(selector,'pointerdown',ev(.5,.5));
-  await page.dispatchEvent(selector,'pointermove',ev(toX,toY));
+  const sx=b.x+b.width*.5,sy=b.y+b.height*.5,tx=b.x+b.width*toX,ty=b.y+b.height*toY;
+  await page.mouse.move(sx,sy);
+  await page.mouse.down();
+  await page.mouse.move(tx,ty,{steps:5});
   await page.waitForTimeout(hold);
-  await page.dispatchEvent(selector,'pointerup',ev(toX,toY,0));
+  await page.mouse.up();
 };
 
 for(const id of ['joy','attack','skill','dodge','gameModeToggle'])await assertVisible('#'+id);
