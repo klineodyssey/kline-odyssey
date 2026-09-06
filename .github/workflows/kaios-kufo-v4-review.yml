@@ -9,8 +9,10 @@ on:
       - 'KGEN-KAIOS/contracts/KSHIP.sol'
       - 'KGEN-KAIOS/contracts/KSHIPConverter.sol'
       - 'KGEN-KAIOS/runtime/kufo-v4-policy.mjs'
+      - 'KGEN-KAIOS/tests/contracts/KUFOV4EvmHarness.sol'
       - 'KGEN-KAIOS/tests/kufo-v4-three-autumns.unit.test.mjs'
       - 'KGEN-KAIOS/tests/kufo-v4-kship-interface.unit.test.mjs'
+      - 'KGEN-KAIOS/tests/kufo-v4-evm.behavior.test.mjs'
       - 'KGEN-KAIOS/tools/compile-contracts.mjs'
       - 'KGEN-KAIOS/KAIOS_18911_KUFO_THREE_AUTUMNS_V4.md'
       - '.github/workflows/kaios-kufo-v4-review.yml'
@@ -37,5 +39,5 @@ jobs:
           node-version: '22'
       - run: npm install --force --ignore-scripts --no-audit --no-fund
       - run: npm run compile
-      - run: node --test --test-concurrency=1 tests/kufo-v4-three-autumns.unit.test.mjs tests/kufo-v4-kship-interface.unit.test.mjs
+      - run: node --test --test-concurrency=1 tests/kufo-v4-three-autumns.unit.test.mjs tests/kufo-v4-kship-interface.unit.test.mjs tests/kufo-v4-evm.behavior.test.mjs
       - run: git diff --check HEAD^ HEAD
