@@ -8,8 +8,10 @@ const html=readFileSync(resolve(here,'../game-5d.html'),'utf8');
 const main=readFileSync(resolve(here,'../runtime/game-5d-main.mjs'),'utf8');
 const fixes=readFileSync(resolve(here,'../runtime/game-ui-product-fixes.mjs'),'utf8');
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
-const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
+const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder','lifeDetails'];
 
+test('product display is explicitly versioned as V2.3',()=>{assert.ok(html.includes('<title>11520 花果山 V2.3 · 5D K線西遊記</title>'));assert.ok(html.includes('11520 花果山 V2.3'));assert.ok(html.includes('5D K線西遊記'));assert.ok(fixes.includes('VERSION: 2.3.0'))});
+test('Living Market HUD is compact-by-default and user-expandable',()=>{assert.ok(html.includes('<details id="lifeDetails">'));assert.ok(html.includes('<summary>Living Market · 點擊展開</summary>'));assert.ok(html.includes('details[open] #monsterList'))});
 test('all formal organs remain in modular runtime',()=>{for(const id of organs)assert.ok(main.includes(`['${id}'`),id)});
 test('all current fixed control surfaces exist in HTML shell',()=>{for(const id of fixed)assert.ok(html.includes(`id="${id}"`),id)});
 test('HTML shell delegates to the maintainable game runtime',()=>{assert.ok(html.includes('./runtime/game-5d-main.mjs'));assert.equal(html.includes("joy.addEventListener('pointerdown'"),false)});
