@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 2.5.2
+VERSION: 2.5.3
 STATUS: REVIEW_FIRST
 PURPOSE: Human-approved 11520 mobile control imagery with stable DOM installation, explicit blocker cleanup and control-health instrumentation. No trade, wallet, chain, or settlement behavior changes.
 */
@@ -20,18 +20,25 @@ const REQUIRED_CONTROLS=Object.freeze([
 ]);
 
 function ensureStyle(){
-  if($('#k11520ControlsV252Style'))return;
+  if($('#k11520ControlsV253Style'))return;
   $('#k11520ControlsV251Style')?.remove();
+  $('#k11520ControlsV252Style')?.remove();
   const s=document.createElement('style');
-  s.id='k11520ControlsV252Style';
+  s.id='k11520ControlsV253Style';
   s.textContent=`
   /* Approved control map: XZ=brand logo, Y=16888 fairy, lots=KGEN logo, warp=UFO. */
   #joy #knob{overflow:hidden!important;padding:0!important;background:#071018!important;border:2px solid #68e4ff!important;box-shadow:0 5px 18px #000a,0 0 14px #68e4ff55!important;touch-action:none!important}
-  #joy #knob .v252ControlImg{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;border-radius:50%!important;pointer-events:none!important;user-select:none!important}
-  #yJoyV250 .yKnob{overflow:hidden!important;padding:0!important;background:#071018!important;width:52px!important;height:52px!important;margin:-26px 0 0 -26px!important;border:2px solid #f1ca73!important;box-shadow:0 5px 16px #000a!important}
-  #yJoyV250 .yKnob .v252ControlImg{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;object-position:center 18%!important;border-radius:50%!important;pointer-events:none!important;user-select:none!important}
+  #joy #knob .v253ControlImg{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;border-radius:50%!important;pointer-events:none!important;user-select:none!important}
+
+  /* Y control is thumb-start only: the large visual rail must never intercept combat/dashboard taps. */
+  #yJoyV250{pointer-events:none!important}
+  #yJoyV250 .yPlane,#yJoyV250 .yGuide,#yJoyV250 .yPlus,#yJoyV250 .yMinus,#yJoyV250 .yReadout{pointer-events:none!important}
+  #yJoyV250 .yKnob{overflow:hidden!important;padding:0!important;background:#071018!important;width:52px!important;height:52px!important;margin:-26px 0 0 -26px!important;border:2px solid #f1ca73!important;box-shadow:0 5px 16px #000a!important;pointer-events:auto!important;touch-action:none!important;cursor:grab!important}
+  #yJoyV250 .yKnob:active{cursor:grabbing!important}
+  #yJoyV250 .yKnob .v253ControlImg{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;object-position:center 18%!important;border-radius:50%!important;pointer-events:none!important;user-select:none!important}
+
   #cControl .thumb,#lotsControl .thumb{width:44px!important;height:44px!important;border-radius:50%!important;overflow:hidden!important;padding:0!important;background:#071018!important;box-shadow:0 4px 14px #000b!important;z-index:3!important;touch-action:none!important}
-  #cControl .thumb .v252ControlImg,#lotsControl .thumb .v252ControlImg{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;border-radius:50%!important;pointer-events:none!important;user-select:none!important}
+  #cControl .thumb .v253ControlImg,#lotsControl .thumb .v253ControlImg{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;border-radius:50%!important;pointer-events:none!important;user-select:none!important}
   #cControl .track,#lotsControl .track{left:50%!important;right:auto!important;width:12px!important;transform:translateX(-50%)!important;background:repeating-linear-gradient(to top,#2b4c58 0 2px,#071018 2px 13px)!important}
   #cControl,#lotsControl{overflow:visible!important}
   #cControl label,#lotsControl label{font-weight:900!important;color:#f1ca73!important}
@@ -43,9 +50,9 @@ function ensureStyle(){
   /* Keep controls separated on ~390px phones: XZ left, combat center, Y lower-right, C/lots above center-right. */
   @media(max-width:420px){
     #joy{left:14px!important}
-    #yJoyV250{right:54px!important;width:78px!important;height:132px!important}
-    .sliderDock{right:122px!important;bottom:176px!important;gap:7px!important}
-    .sliderDock .v{width:48px!important;height:124px!important}
+    #yJoyV250{right:8px!important;width:68px!important;height:124px!important}
+    .sliderDock{right:94px!important;bottom:176px!important;gap:7px!important}
+    .sliderDock .v{width:46px!important;height:124px!important}
     #cControl .thumb,#lotsControl .thumb{width:42px!important;height:42px!important}
   }
   `;
@@ -54,11 +61,12 @@ function ensureStyle(){
 
 function putImage(host,src,alt){
   if(!host)return false;
-  let img=host.querySelector('img.v252ControlImg');
+  let img=host.querySelector('img.v253ControlImg');
   if(!img){
+    host.querySelectorAll('img.v251ControlImg,img.v252ControlImg').forEach(n=>n.remove());
     host.textContent='';
     img=document.createElement('img');
-    img.className='v252ControlImg';
+    img.className='v253ControlImg';
     host.appendChild(img);
   }
   if(img.getAttribute('src')!==src)img.src=src;
@@ -81,14 +89,14 @@ function removeKnownBlockers(){
   if(look){
     look.style.display='none';
     look.style.pointerEvents='none';
-    look.dataset.v252Retired='1';
+    look.dataset.v253Retired='1';
   }
 }
 
 function controlHealth(){
-  const report={version:'2.5.2',ok:true,controls:{},knownBlockers:{lookPad:'ABSENT'}};
+  const report={version:'2.5.3',ok:true,controls:{},knownBlockers:{lookPad:'ABSENT'},interaction:{yThumbOnly:true}};
   for(const [name,selector,src] of REQUIRED_CONTROLS){
-    const host=$(selector),img=host?.querySelector('img.v252ControlImg');
+    const host=$(selector),img=host?.querySelector('img.v253ControlImg');
     const rect=host?.getBoundingClientRect?.();
     const visible=!!host&&!!rect&&rect.width>0&&rect.height>0&&getComputedStyle(host).display!=='none';
     const hasImage=!!img&&!!img.src;
@@ -101,7 +109,7 @@ function controlHealth(){
     report.knownBlockers.lookPad=(cs.display==='none'||cs.pointerEvents==='none')?'RETIRED':'ACTIVE';
     if(report.knownBlockers.lookPad==='ACTIVE')report.ok=false;
   }
-  document.documentElement.dataset.v252ControlHealth=report.ok?'PASS':'RED';
+  document.documentElement.dataset.v253ControlHealth=report.ok?'PASS':'RED';
   globalThis.__K11520_CONTROL_HEALTH__=report;
   return report;
 }
