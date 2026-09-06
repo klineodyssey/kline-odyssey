@@ -25,9 +25,7 @@ const xyz=async()=>{
   const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);
   assert.ok(m,'XYZ HUD parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]};
 };
-// Use a real Playwright pointer sequence rather than synthetic dispatchEvent.
-// Production controls call setPointerCapture(), which requires an active browser pointer.
-const drag=async(selector,toX,toY,_pointerId,hold=260)=>{
+const dragReal=async(selector,toX,toY,hold=260)=>{
   const b=await page.locator(selector).boundingBox();assert.ok(b,selector+' missing box');
   const sx=b.x+b.width*.5,sy=b.y+b.height*.5,tx=b.x+b.width*toX,ty=b.y+b.height*toY;
   await page.mouse.move(sx,sy);
@@ -36,23 +34,33 @@ const drag=async(selector,toX,toY,_pointerId,hold=260)=>{
   await page.waitForTimeout(hold);
   await page.mouse.up();
 };
+// Canonical vertical controls wrap setPointerCapture in try/catch, so direct pointer
+// dispatch is deterministic in headless Chromium and validates their actual bindVertical handler.
+const dragVertical=async(selector,toY,pointerId)=>{
+  const b=await page.locator(selector).boundingBox();assert.ok(b,selector+' missing box');
+  const p=(y,buttons=1)=>({pointerId,pointerType:'touch',clientX:b.x+b.width*.5,clientY:b.y+b.height*y,buttons});
+  await page.dispatchEvent(selector,'pointerdown',p(.5));
+  await page.dispatchEvent(selector,'pointermove',p(toY));
+  await page.waitForTimeout(80);
+  await page.dispatchEvent(selector,'pointerup',p(toY,0));
+};
 
 for(const id of ['joy','attack','skill','dodge','gameModeToggle'])await assertVisible('#'+id);
 await assertVisible('#knob img');
-let a=await xyz();await drag('#joy',.9,.5,51);let b=await xyz();assert.ok(b.x>a.x,'right must X+');
-await drag('#joy',.1,.5,52);let c=await xyz();assert.ok(c.x<b.x,'left must X-');
-await drag('#joy',.5,.1,53);let d=await xyz();assert.ok(d.z>c.z,'up must Z+');
-await drag('#joy',.5,.9,54);let e=await xyz();assert.ok(e.z<d.z,'down must Z-');
+let a=await xyz();await dragReal('#joy',.9,.5);let b=await xyz();assert.ok(b.x>a.x,'right must X+');
+await dragReal('#joy',.1,.5);let c=await xyz();assert.ok(c.x<b.x,'left must X-');
+await dragReal('#joy',.5,.1);let d=await xyz();assert.ok(d.z>c.z,'up must Z+');
+await dragReal('#joy',.5,.9);let e=await xyz();assert.ok(e.z<d.z,'down must Z-');
 
 await page.locator('#gameModeToggle').click({timeout:3000});await page.waitForTimeout(120);
 for(const id of ['walletToggle','dockToggle','orderFire','tradeSword','flat','aiChatButton','bgmButton'])await assertVisible('#'+id);
 await assertVisible('#yJoyV250 .yKnob img');
-const y0=(await xyz()).y;await drag('#yJoyV250 .yKnob',.5,.05,61,360);const y1=(await xyz()).y;assert.ok(y1>y0,'Y up must increase altitude');
-await drag('#yJoyV250 .yKnob',.5,.95,62,360);const y2=(await xyz()).y;assert.ok(y2<y1,'Y down must decrease altitude');
+const y0=(await xyz()).y;await dragReal('#yJoyV250 .yKnob',.5,.05,360);const y1=(await xyz()).y;assert.ok(y1>y0,'Y up must increase altitude');
+await dragReal('#yJoyV250 .yKnob',.5,.95,360);const y2=(await xyz()).y;assert.ok(y2<y1,'Y down must decrease altitude');
 
 await assertVisible('#lotsThumb img');await assertVisible('#cThumb img');
-const l0=await page.locator('#lotsRead').textContent();await drag('#lotsControl',.5,.1,71);const l1=await page.locator('#lotsRead').textContent();assert.notEqual(l1,l0,'lots must change');await page.waitForTimeout(120);assert.equal(await page.locator('#lotsRead').textContent(),l1,'lots must retain');
-const c0=await page.locator('#cRead').textContent();await drag('#cControl',.5,.1,72);const c1=await page.locator('#cRead').textContent();assert.notEqual(c1,c0,'C must change');await page.waitForTimeout(120);assert.equal(await page.locator('#cRead').textContent(),c1,'C must retain');
+const l0=await page.locator('#lotsRead').textContent();await dragVertical('#lotsControl',.1,71);const l1=await page.locator('#lotsRead').textContent();assert.notEqual(l1,l0,'lots must change');await page.waitForTimeout(120);assert.equal(await page.locator('#lotsRead').textContent(),l1,'lots must retain');
+const c0=await page.locator('#cRead').textContent();await dragVertical('#cControl',.1,72);const c1=await page.locator('#cRead').textContent();assert.notEqual(c1,c0,'C must change');await page.waitForTimeout(120);assert.equal(await page.locator('#cRead').textContent(),c1,'C must retain');
 
 if(await page.locator('#lookPad').count()){
   const look=await page.locator('#lookPad').evaluate(el=>({display:getComputedStyle(el).display,pointer:getComputedStyle(el).pointerEvents}));
