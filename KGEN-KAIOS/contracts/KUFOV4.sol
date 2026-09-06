@@ -7,12 +7,15 @@ import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 /**
  * @title KUFOV4
- * @notice KUFO successor candidate with immediate alchemy output and Three-Autumn decay.
- * @dev Autumn 1 converts 50% of original lot, Autumn 2 reaches 75%, Autumn 3 converts all remainder.
- *      Matured KUFO is burned only through the current KSHIP converter, which then mints KSHIP from
- *      the recorded carrier proof. This guarantees zero residual KUFO dust after three K280 years.
+ * @notice KUFO immutable V4 monetary/material core with immediate alchemy output and Three-Autumn decay.
+ * @dev This token is intentionally NON-UPGRADEABLE. Future revisions must deploy a new version and
+ *      preserve this deployment's bytecode and lineage. Autumn 1 converts 50% of original lot,
+ *      Autumn 2 reaches 75%, Autumn 3 converts all remainder. Matured KUFO is burned only through
+ *      the current KSHIP converter, which then mints KSHIP from the recorded carrier proof.
  */
 contract KUFOV4 is ERC20, ERC20Capped {
+    string public constant VERSION = "4.0.0";
+    bytes32 public constant VERSION_ID = keccak256("KAIOS.KUFO.V4.0.0");
     bytes32 public constant ORGAN_OUTPUT_168888 = keccak256("KAIOS.ORGAN.KUFO.OUTPUT.168888");
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
     uint256 public constant TOKEN_POINT_511111 = 511_111;
@@ -121,11 +124,6 @@ contract KUFOV4 is ERC20, ERC20Capped {
         return currentAutumnForTimestamp(item.bornAt);
     }
 
-    /**
-     * @notice Existing KSHIPConverter-compatible entry point.
-     * @dev The converter may burn only KUFO that has become claimable under the Three-Autumn schedule.
-     *      The proof record is consumed by KSHIP.mintFromCarrierProof in the same converter transaction.
-     */
     function burnForCarrier(address owner, address beneficiary, uint256 kufoAmount, bytes32 carrierProofId)
         external returns (uint256 expectedKship)
     {
