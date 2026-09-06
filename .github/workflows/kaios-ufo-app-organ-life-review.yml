@@ -5,9 +5,12 @@ on:
     paths:
       - 'KGEN-KAIOS/contracts/KAIOSUFOOrganRuntimeV1.sol'
       - 'KGEN-KAIOS/contracts/KAIOSUFOLifeV1.sol'
+      - 'KGEN-KAIOS/contracts/KAIOSUFOPropulsionPhysicsV1.sol'
       - 'KGEN-KAIOS/app/ufo-runtime-v1.mjs'
       - 'KGEN-KAIOS/tests/ufo-app-runtime.unit.test.mjs'
+      - 'KGEN-KAIOS/tests/ufo-propulsion-physics.evm.test.mjs'
       - 'KGEN-KAIOS/docs/UFO_APP_ORGAN_LIFE_SPEC_V1.md'
+      - 'KGEN-KAIOS/docs/UFO_PROPULSION_MASS_ENERGY_WHITEPAPER_V1.md'
       - '.github/workflows/kaios-ufo-app-organ-life-review.yml'
   workflow_dispatch:
 
@@ -26,6 +29,6 @@ jobs:
         working-directory: KGEN-KAIOS
       - run: npm run compile
         working-directory: KGEN-KAIOS
-      - run: node --test --test-concurrency=1 tests/ufo-app-runtime.unit.test.mjs
+      - run: node --test --test-concurrency=1 tests/ufo-app-runtime.unit.test.mjs tests/ufo-propulsion-physics.evm.test.mjs
         working-directory: KGEN-KAIOS
       - run: git diff --check HEAD^ HEAD
