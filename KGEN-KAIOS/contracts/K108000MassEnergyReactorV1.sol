@@ -5,29 +5,37 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 interface IKSHIPMassEnergyBurnable {
-    function burnForMassEnergy(address owner, uint256 kshipAmount, bytes32 reactionProofId) external returns (uint256);
+    function burnForMassEnergy(bytes32 shipId, address owner, uint256 kshipAmount, bytes32 reactionProofId) external returns (uint256);
 }
 
 interface IK108000MatterSource {
-    function consumeMatter(address owner, uint256 matterAmount, bytes32 reactionProofId) external returns (uint256 consumedMatter);
+    function consumeMatter(bytes32 shipId, address owner, uint256 matterAmount, bytes32 reactionProofId) external returns (uint256 consumedMatter);
 }
 
 interface IKGODReactionMinter {
     function mintFromReactionProof(bytes32 reactionProofId) external returns (address beneficiary, uint256 kgodAmount);
 }
 
+interface IKAIOSShipIdentityReaderForReactorV1 {
+    struct ShipIdentity {
+        bytes32 shipId;
+        address controller;
+        address tradingEngine;
+        address reactor;
+        uint64 registeredAt;
+        bool active;
+    }
+    function ship(bytes32 shipId) external view returns (ShipIdentity memory);
+}
+
 /**
  * @title K108000MassEnergyReactorV1
- * @notice K108000 controlled antimatter/matter reaction accounting for propulsion, recoverable energy,
- *         stable KGOD material and unavoidable radiation/heat.
- * @dev Accounting uses one common mass-energy-equivalent unit. KSHIP antimatter and ordinary matter
- *      are consumed in equal amounts. No fixed propulsion/KGOD efficiency is invented here: the caller
- *      selects an allocation whose four outputs MUST exactly equal the total input equivalent. A later
- *      ship/organ policy may constrain allowed allocations without changing this conservation law.
+ * @notice Ship-authenticated K108000 antimatter/matter reactor for propulsion, recoverable energy,
+ *         stable KGOD material and radiation/heat accounting.
  */
 contract K108000MassEnergyReactorV1 is ReentrancyGuard {
-    string public constant VERSION = "1.0.0";
-    bytes32 public constant VERSION_ID = keccak256("KAIOS.K108000.MASS_ENERGY_REACTOR.V1.0.0");
+    string public constant VERSION = "1.1.0";
+    bytes32 public constant VERSION_ID = keccak256("KAIOS.K108000.MASS_ENERGY_REACTOR.V1.1.0");
     bytes32 public constant ORGAN_MATTER_SOURCE = keccak256("KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE");
     bytes32 public constant ORGAN_KGOD = keccak256("KAIOS.ORGAN.KGOD.TOKEN");
     uint256 public constant REACTOR_POINT = 108_000;
@@ -42,6 +50,7 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
     }
 
     struct ReactionRecord {
+        bytes32 shipId;
         address owner;
         address beneficiary;
         ReactionMode mode;
@@ -59,6 +68,8 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
 
     IKSHIPMassEnergyBurnable public immutable kship;
     IKAIOSOrganRegistry public immutable organRegistry;
+    IKAIOSShipIdentityReaderForReactorV1 public immutable shipRegistry;
+
     uint256 public reactionCount;
     uint256 public cumulativeInputEquivalent;
     uint256 public cumulativePropulsionEnergy;
@@ -69,6 +80,9 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
 
     error ZeroAddress();
     error ZeroAmount();
+    error ZeroShipId();
+    error UnauthorizedShipController(bytes32 shipId, address caller);
+    error ReactorNotBoundToShip(bytes32 shipId, address expected, address actual);
     error MatterSourceNotBound();
     error KGODNotBound();
     error MatterMismatch(uint256 expected, uint256 actual);
@@ -80,8 +94,9 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
 
     event MassEnergyReaction(
         bytes32 indexed reactionProofId,
+        bytes32 indexed shipId,
         address indexed owner,
-        address indexed beneficiary,
+        address beneficiary,
         ReactionMode mode,
         uint256 kshipAntimatterConsumed,
         uint256 positiveMatterConsumed,
@@ -92,20 +107,26 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         uint256 radiationHeat
     );
 
-    constructor(address kshipToken, address registry) {
-        if (kshipToken == address(0) || registry == address(0)) revert ZeroAddress();
+    constructor(address kshipToken, address registry, address ships) {
+        if (kshipToken == address(0) || registry == address(0) || ships == address(0)) revert ZeroAddress();
         kship = IKSHIPMassEnergyBurnable(kshipToken);
         organRegistry = IKAIOSOrganRegistry(registry);
+        shipRegistry = IKAIOSShipIdentityReaderForReactorV1(ships);
     }
 
-    function react(uint256 kshipAmount, address beneficiary, ReactionMode mode, Allocation calldata allocation)
+    function react(bytes32 shipId, uint256 kshipAmount, address beneficiary, ReactionMode mode, Allocation calldata allocation)
         external nonReentrant returns (bytes32 reactionProofId, uint256 kgodAmount)
     {
+        if (shipId == bytes32(0)) revert ZeroShipId();
         if (beneficiary == address(0)) revert ZeroAddress();
         if (kshipAmount == 0) revert ZeroAmount();
 
+        IKAIOSShipIdentityReaderForReactorV1.ShipIdentity memory ship = shipRegistry.ship(shipId);
+        if (!ship.active || ship.controller != msg.sender) revert UnauthorizedShipController(shipId, msg.sender);
+        if (ship.reactor != address(this)) revert ReactorNotBoundToShip(shipId, ship.reactor, address(this));
+
         uint256 number = ++reactionCount;
-        reactionProofId = keccak256(abi.encode(block.chainid, address(this), number, msg.sender, beneficiary, kshipAmount, mode));
+        reactionProofId = keccak256(abi.encode(block.chainid, address(this), number, shipId, msg.sender, beneficiary, kshipAmount, mode));
         if (_reactions[reactionProofId].owner != address(0)) revert ReactionAlreadyExists(reactionProofId);
 
         uint256 totalInput = kshipAmount * 2;
@@ -123,12 +144,13 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         address matterSource = organRegistry.organ(ORGAN_MATTER_SOURCE);
         if (matterSource == address(0)) revert MatterSourceNotBound();
 
-        uint256 burnedKship = kship.burnForMassEnergy(msg.sender, kshipAmount, reactionProofId);
+        uint256 burnedKship = kship.burnForMassEnergy(shipId, msg.sender, kshipAmount, reactionProofId);
         if (burnedKship != kshipAmount) revert MatterMismatch(kshipAmount, burnedKship);
-        uint256 consumedMatter = IK108000MatterSource(matterSource).consumeMatter(msg.sender, kshipAmount, reactionProofId);
+        uint256 consumedMatter = IK108000MatterSource(matterSource).consumeMatter(shipId, msg.sender, kshipAmount, reactionProofId);
         if (consumedMatter != kshipAmount) revert MatterMismatch(kshipAmount, consumedMatter);
 
         _reactions[reactionProofId] = ReactionRecord({
+            shipId: shipId,
             owner: msg.sender,
             beneficiary: beneficiary,
             mode: mode,
@@ -150,7 +172,7 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         cumulativeKgodMassEquivalent += allocation.kgodMassEquivalent;
         cumulativeRadiationHeat += allocation.radiationHeat;
 
-        emit MassEnergyReaction(reactionProofId, msg.sender, beneficiary, mode, kshipAmount, consumedMatter, totalInput,
+        emit MassEnergyReaction(reactionProofId, shipId, msg.sender, beneficiary, mode, kshipAmount, consumedMatter, totalInput,
             allocation.propulsionEnergy, allocation.recoverableEnergy, allocation.kgodMassEquivalent, allocation.radiationHeat);
 
         if (allocation.kgodMassEquivalent != 0) {
