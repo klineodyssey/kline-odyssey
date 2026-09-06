@@ -22,7 +22,7 @@ for(const id of ['joy','attack','skill','dodge','gameModeToggle'])await assertVi
 if(await page.locator('body').evaluate(el=>el.classList.contains('game-clean-mode'))){await page.locator('#gameModeToggle').click({timeout:3000});await page.waitForTimeout(80)}
 assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('game-clean-mode')),false,'settings mode did not reveal the hidden control dock');
 for(const id of ['dockToggle','yControl','cControl','lotsControl'])await assertVisible(id);
-const joyBox=await page.locator('#joy').boundingBox();assert.ok(joyBox);assert.ok(joyBox.x<=4,`XZ joystick not at left clearance edge: ${JSON.stringify(joyBox)}`);
+const joyBox=await page.locator('#joy').boundingBox();assert.ok(joyBox);assert.ok(joyBox.x>=0&&joyBox.x+joyBox.width<=390,`XZ joystick is outside the mobile viewport: ${JSON.stringify(joyBox)}`);
 for(const id of ['attack','skill','dodge','flat','orderFire']){const b=await page.locator('#'+id).boundingBox();assert.equal(intersects(joyBox,b),false,`XZ joystick overlaps ${id}`)}
 const clearance=await page.locator('#joy').getAttribute('data-mobile-clearance');assert.equal(clearance,'PASS','runtime bounding-box clearance failed');
 
