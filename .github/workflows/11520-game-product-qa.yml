@@ -51,9 +51,20 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run mobile browser smoke test
         shell: bash
+        timeout-minutes: 4
         run: |
+          set -o pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-http.log 2>&1 &
           SERVER_PID=$!
-          trap 'kill $SERVER_PID || true' EXIT
+          cleanup() { kill "$SERVER_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
           sleep 2
-          node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
+          if ! timeout --signal=TERM --kill-after=10s 150s node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"; then
+            CODE=$?
+            echo "11520 mobile smoke failed or timed out (exit=$CODE)"
+            echo "--- local HTTP server log ---"
+            cat /tmp/k11520-http.log || true
+            echo "--- process snapshot ---"
+            ps -ef | grep -E 'node|chrom|python3' | grep -v grep || true
+            exit 1
+          fi
