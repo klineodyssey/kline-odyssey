@@ -1,7 +1,7 @@
 /* KGEN_META
-VERSION: 2.4.1
+VERSION: 2.5.8
 STATUS: ACTIVE
-PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, or optional capabilities fail.
+PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, or optional capabilities fail. V2.5.8 also installs mobile visual hardening after the production runtime.
 */
 const $=s=>document.querySelector(s);
 
@@ -21,7 +21,7 @@ function ensureIntro(){
   @keyframes kdrift{to{transform:translate3d(8%,10%,0)}}@keyframes kspin{to{transform:rotate(360deg)}}`;
   document.head.appendChild(style);
   const o=document.createElement('div');o.id='intro11520';
-  o.innerHTML=`<div class="stars"></div><div class="ring"></div><div class="core"><div class="logo"></div><div class="title">11520 花果山 V2.4</div><div class="sub">5D K線西遊記</div><div class="life">INTERACTIVE RUNTIME · LIVING MARKET</div><button id="enter11520" type="button">進入活世界</button><div class="status" id="boot11520Status">核心載入中…</div></div>`;
+  o.innerHTML=`<div class="stars"></div><div class="ring"></div><div class="core"><div class="logo"></div><div class="title">11520 花果山 V2.5.8</div><div class="sub">5D K線西遊記</div><div class="life">INTERACTIVE RUNTIME · LIVING MARKET</div><button id="enter11520" type="button">進入活世界</button><div class="status" id="boot11520Status">核心載入中…</div></div>`;
   document.body.appendChild(o);return o;
 }
 
@@ -51,7 +51,11 @@ if(btn){btn.onclick=enterWorld;btn.addEventListener('pointerup',enterWorld);btn.
     try{
       const {install11520ControlsV251}=await import('./game-controls-v251.mjs');
       install11520ControlsV251();
-    }catch(controlErr){console.warn('[11520 bootstrap] V2.5.1 control skin degraded',controlErr)}
+    }catch(controlErr){console.warn('[11520 bootstrap] V2.5 control skin degraded',controlErr)}
+    try{
+      const {install11520MobileVisualHardeningV258}=await import('./mobile-visual-hardening-v258.mjs');
+      install11520MobileVisualHardeningV258();
+    }catch(visualErr){console.warn('[11520 bootstrap] V2.5.8 mobile visual hardening degraded',visualErr)}
     if(status)status.textContent='完整世界 READY';
   }catch(err){
     console.error('[11520 bootstrap] full runtime failed',err);
