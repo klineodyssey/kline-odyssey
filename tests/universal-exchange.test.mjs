@@ -99,9 +99,16 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan,
+  KAIOS_DAILY_LIFE_COMMERCE_POLICY, classifyKgenUniverseReference,
+  calculateK12345LampCargoCandidate, calculateB4DailyTransportModel,
+  createKaiosCargoOwnershipLedger, evaluate11520DailyMarket,
+  createDailyLifeCommerceCycle, KAIOS_CARGO_SETTLEMENT_ABI_CANDIDATE,
+  KAIOS_CARGO_SETTLEMENT_STATES, createKaiosCargoSettlementRuntimeCandidate,
+  verifyKaiosCargoSettlementReceipt
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
+import { createHengyaoHeartbeatPolicy, HENGYAO_HEARTBEAT_HUMAN_AUTHORIZATION, isHengyaoHeartbeatAuthorizationConsumed } from "../core/security/verify-wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
@@ -2864,4 +2871,217 @@ test("V4.0 production shell exposes animated concierge and fresh cache key", asy
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+test("Daily commerce classifies the Human KGEN reference as B4 without creating 11520 CT", () => {
+  const reference = classifyKgenUniverseReference("0.0002524");
+  assert.equal(reference.universe_floor, -4);
+  assert.equal(reference.alpha, 2.524);
+  assert.equal(reference.universe, "B4");
+  assert.equal(reference.boundary_low, 0.0001);
+  assert.equal(reference.boundary_high, 0.001);
+  assert.equal(reference.market_authority, "REFERENCE_ONLY_NOT_11520_NATIVE_CT");
+  assert.equal(reference.native_ct, null);
+  assert.equal(KAIOS_DAILY_LIFE_COMMERCE_POLICY.mission_distance_m, 0.187784225485552);
+});
+
+test("Daily commerce keeps 800 or 500 KAIOS as an unsettled entitlement until receipts exist", () => {
+  const wished = calculateK12345LampCargoCandidate({ lampKgen: "1", wishStatus: "CONFIRMED" });
+  assert.equal(wished.calculated_entitlement_kaios, 800);
+  assert.equal(wished.settled_gross_kaios, 0);
+  assert.equal(wished.settlement_status, "KAIOS_CARGO_SETTLEMENT_NOT_IMPLEMENTED_OR_UNVERIFIED");
+  assert.equal(wished.calculation_is_mint_or_settlement, false);
+  const noWish = calculateK12345LampCargoCandidate({ lampKgen: "1", wishStatus: "NO_WISH" });
+  assert.equal(noWish.calculated_entitlement_kaios, 500);
+  assert.equal(noWish.initial_owner_if_settled, "K12345_TEMPLE");
+  assert.equal(noWish.carrier_owns_cargo, false);
+});
+
+test("Daily transport quote fails closed on missing physical and cost inputs", () => {
+  const incomplete = calculateB4DailyTransportModel({ cargo_mass_kg: 800 });
+  assert.equal(incomplete.status, "QUOTE_INCOMPLETE");
+  assert.equal(incomplete.transport_cost_kaios, null);
+  assert.ok(incomplete.missing_fields.includes("vehicle_mass_kg"));
+  assert.ok(incomplete.missing_fields.includes("carrier_reward_kaios"));
+
+  const modeled = calculateB4DailyTransportModel({
+    cargo_mass_kg: 800,
+    vehicle_mass_kg: 20,
+    acceleration_mps2: 1,
+    food_kaios: 1,
+    fuel_kaios: 2,
+    vehicle_kaios: 3,
+    maintenance_kaios: 4,
+    carrier_reward_kaios: 5,
+    chain_gas_accounting_kaios: 6
+  });
+  assert.equal(modeled.total_mass_kg, 820);
+  assert.equal(modeled.force_n, 820);
+  assert.equal(modeled.acceleration_work_j, 820 * 0.187784225485552);
+  assert.equal(modeled.transport_cost_kaios, 21);
+  assert.equal(modeled.accounting_unit_is_physical_fuel, false);
+});
+
+test("Daily cargo ledger never turns an entitlement or carrier role into ownership", () => {
+  const cargo = calculateK12345LampCargoCandidate({ lampKgen: "1", wishStatus: "CONFIRMED" });
+  const ledger = createKaiosCargoOwnershipLedger({
+    cycleId: "KAIOS-DAILY-CYCLE-20260828-001",
+    cargo,
+    carrierLifeId: "LIFE-CODEX-GM-0001"
+  });
+  assert.equal(ledger.cargo_status, "ENTITLEMENT_ONLY_NOT_CARGO");
+  assert.equal(ledger.current_owner, null);
+  assert.equal(ledger.carrier_is_owner, false);
+  assert.equal(ledger.movement_verified, false);
+  assert.equal(ledger.delivery_verified, false);
+  assert.equal(ledger.events.length, 1);
+});
+
+test("Daily 11520 market requires authenticated distinct actors and a settlement receipt for CT", () => {
+  const empty = evaluate11520DailyMarket({ marketStatus: "PR169_DRAFT_CANDIDATE" });
+  assert.equal(empty.ct, null);
+  assert.equal(empty.real_trade, false);
+  const self = evaluate11520DailyMarket({
+    marketStatus: "PR169_DRAFT_CANDIDATE",
+    latestTrade: {
+      buyer_actor_id: "LIFE-A",
+      seller_actor_id: "LIFE-A",
+      buyer_controller_id: "CTRL-A",
+      seller_controller_id: "CTRL-A",
+      price: "0.0002524",
+      quantity: "1",
+      authentication_status: "BOTH_VERIFIED",
+      match_status: "VALID_MATCH",
+      settlement_receipt: { status: "VERIFIED" }
+    }
+  });
+  assert.equal(self.self_match_rejected, true);
+  assert.equal(self.ct, null);
+  assert.equal(self.real_trade, false);
+  assert.equal(self.fake_volume_created, false);
+});
+
+test("Daily cycle reports blockers and performs no chain, payment or trade action", () => {
+  const cargo = calculateK12345LampCargoCandidate({ lampKgen: "1", wishStatus: "CONFIRMED" });
+  const transport = calculateB4DailyTransportModel({ cargo_mass_kg: cargo.calculated_entitlement_kaios });
+  const ledger = createKaiosCargoOwnershipLedger({ cycleId: "KAIOS-DAILY-CYCLE-20260828-002", cargo, carrierLifeId: "LIFE-CODEX-GM-0001" });
+  const market = evaluate11520DailyMarket({ marketStatus: "PR169_DRAFT_BEHIND_MAIN" });
+  const cycle = createDailyLifeCommerceCycle({
+    cycleId: "KAIOS-DAILY-CYCLE-20260828-002",
+    observedAt: "2026-08-28T05:00:00.000Z",
+    latestMainSha: "db3b6368139154cbfa1cabd322b80f0cb1307bcc",
+    heartRuntime: { status: "READ_ONLY_AUDITED", lamp_write: "DISABLED_SEPARATE_APPROVAL_REQUIRED" },
+    cargo,
+    transport,
+    cargoLedger: ledger,
+    market,
+    companyChecks: { workqueue_processed: true, reviewqueue_processed: true, customer_requests_checked: true }
+  });
+  assert.equal(cycle.status, "SAFE_OFFCHAIN_CANDIDATE_INCOMPLETE");
+  assert.deepEqual(cycle.blockers, ["KAIOS_CARGO_SETTLEMENT_MISSING", "OUTBOUND_MOVEMENT_EVIDENCE_MISSING", "11520_DELIVERY_RECEIPT_MISSING", "NO_AUTHENTICATED_SETTLED_11520_TRADE"]);
+  assert.equal(cycle.real_trade_executed, false);
+  assert.equal(cycle.chain_write_executed, false);
+  assert.equal(cycle.payment_sent, false);
+  assert.equal(cycle.private_key_accessed, false);
+});
+
+test("KAIOS cargo candidate defines the complete receipt-gated interface without mint authority", () => {
+  assert.deepEqual(KAIOS_CARGO_SETTLEMENT_STATES, [
+    "LAMP_PAID", "LAMP_RECEIPT_VERIFIED", "KAIOS_ENTITLEMENT_CALCULATED",
+    "KAIOS_CARGO_ISSUANCE_AUTHORITY_CHECK", "KAIOS_CARGO_SETTLED",
+    "RECEIPT_VERIFIED", "CARGO_AVAILABLE_FOR_11520_TRANSPORT"
+  ]);
+  assert.ok(KAIOS_CARGO_SETTLEMENT_ABI_CANDIDATE.some((entry) => entry.includes("event KAIOSCargoSettled")));
+  const candidate = createKaiosCargoSettlementRuntimeCandidate({
+    cycleId: "KAIOS-CARGO-CYCLE-001",
+    lifeId: "LIFE-CODEX-GM-0001",
+    beneficiary: "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    lampReceipt: {
+      receipt_id: "LAMP-RECEIPT-001",
+      tx_hash: `0x${"1".repeat(64)}`,
+      chain_id: 56,
+      contract: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      payer: "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+      paid_kgen_wei: "1000000000000000000",
+      receipt_status: 1,
+      event: "LampLit"
+    },
+    wishStatus: "CONFIRMED",
+    wishProof: `0x${"2".repeat(64)}`,
+    authority: { adapter_status: "NOT_DEPLOYED" }
+  });
+  assert.equal(candidate.kaios_entitlement_wei, "800000000000000000000");
+  assert.equal(candidate.state, "KAIOS_ENTITLEMENT_CALCULATED");
+  assert.match(candidate.authority_status, /^BLOCKED_/);
+  assert.equal(candidate.source_model, "PREFUNDED_KAIOS_CARGO_POOL_TRANSFER_NOT_MINT");
+  assert.equal(candidate.arbitrary_mint, false);
+  assert.equal(candidate.actual_kaios_cargo_wei, "0");
+  assert.throws(() => verifyKaiosCargoSettlementReceipt(candidate, {}, []), (error) => error.code === "KAIOS_CARGO_AUTHORITY_NOT_READY");
+});
+
+test("Hengyao Heart policy permits only the exact Human-authorized one-time heartbeat", () => {
+  const gasPolicy = { max_action_gas_cost_wei: "100", minimum_survival_bnb_wei: "1000" };
+  const policy = createHengyaoHeartbeatPolicy({ gasPolicy, authorizationEvidence: HENGYAO_HEARTBEAT_HUMAN_AUTHORIZATION });
+  assert.equal(policy.status, "APPROVED_ACTIVE");
+  assert.equal(policy.actions.heartbeatClaim.enabled, true);
+  assert.equal(policy.actions.heartbeatClaim.daily_limit, 1);
+  assert.deepEqual(Object.keys(policy.actions), ["heartbeatClaim"]);
+  assert.throws(() => createHengyaoHeartbeatPolicy({ gasPolicy, authorizationEvidence: "WRONG" }), (error) => error.code === "HENGYAO_HEARTBEAT_HUMAN_AUTHORIZATION_REQUIRED");
+  assert.equal(isHengyaoHeartbeatAuthorizationConsumed({ history: [] }), false);
+  assert.equal(isHengyaoHeartbeatAuthorizationConsumed({ history: [{ status: "COMPLETED_VERIFIED", event_type: "HEARTBEAT_EVENT", worker: "codex-gm-01" }] }), true);
+});
+
+test("KAIOS cargo receipt enforces exact amount, source, beneficiary and single-use Lamp lineage", () => {
+  const source = "0x11d34c0F723aCd334B8F95076f73F07f06202aab";
+  const beneficiary = "0x4DF6E9629Dad1072103cFd2bC81845fd97429214";
+  const candidate = createKaiosCargoSettlementRuntimeCandidate({
+    cycleId: "KAIOS-CARGO-CYCLE-002",
+    lifeId: "LIFE-CODEX-GM-0001",
+    beneficiary,
+    lampReceipt: {
+      receipt_id: "LAMP-RECEIPT-002",
+      tx_hash: `0x${"3".repeat(64)}`,
+      chain_id: 56,
+      contract: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+      payer: beneficiary,
+      paid_kgen_wei: "1000000000000000000",
+      receipt_status: 1,
+      event: "LampLit"
+    },
+    wishStatus: "NO_WISH",
+    authority: {
+      adapter_status: "DEPLOYED_ACTIVE",
+      adapter_address: "0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df",
+      source_pool_address: source,
+      executor_address: "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+      governance_approval_id: "GOV-KAIOS-CARGO-001",
+      source_pool_balance_kaios_wei: "500000000000000000000",
+      source_pool_allowance_kaios_wei: "500000000000000000000"
+    }
+  });
+  assert.equal(candidate.kaios_entitlement_wei, "500000000000000000000");
+  assert.equal(candidate.authority_status, "AUTHORIZED_FOR_RECEIPT_GATED_CALL");
+  const receipt = {
+    tx_hash: `0x${"4".repeat(64)}`,
+    receipt_status: 1,
+    event: "KAIOSCargoSettled",
+    cargo_receipt_id: `0x${"5".repeat(64)}`,
+    beneficiary,
+    lamp_receipt_id: "LAMP-RECEIPT-002",
+    kaios_amount_wei: "500000000000000000000",
+    source_pool: source
+  };
+  const settled = verifyKaiosCargoSettlementReceipt(candidate, receipt, []);
+  assert.equal(settled.state, "CARGO_AVAILABLE_FOR_11520_TRANSPORT");
+  assert.equal(settled.actual_kaios_cargo_wei, "500000000000000000000");
+  assert.equal(settled.replay_consumed, true);
+  assert.throws(() => verifyKaiosCargoSettlementReceipt(candidate, receipt, ["LAMP-RECEIPT-002"]), (error) => error.code === "KAIOS_CARGO_REPLAY");
+  assert.throws(() => verifyKaiosCargoSettlementReceipt(candidate, { ...receipt, beneficiary: source }, []), (error) => error.code === "KAIOS_CARGO_BENEFICIARY_SUBSTITUTION");
+  assert.throws(() => createKaiosCargoSettlementRuntimeCandidate({
+    cycleId: "KAIOS-CARGO-CYCLE-003",
+    lifeId: "LIFE-CODEX-GM-0001",
+    beneficiary,
+    lampReceipt: { ...candidate, receipt_id: "LAMP-RECEIPT-003", tx_hash: `0x${"6".repeat(64)}`, chain_id: 56, contract: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972", payer: source, paid_kgen_wei: "1000000000000000000", receipt_status: 1, event: "LampLit" },
+    wishStatus: "NO_WISH"
+  }), (error) => error.code === "KAIOS_CARGO_PAYER_BENEFICIARY_MISMATCH");
 });

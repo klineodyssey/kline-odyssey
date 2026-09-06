@@ -1865,3 +1865,327 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     company_status: company.status
   });
 }
+
+export const KAIOS_DAILY_LIFE_COMMERCE_POLICY = Object.freeze({
+  policy_id: "KAIOS_DAILY_LIFE_COMMERCE_AND_AI_COMPANY_WORK_CYCLE_V1_CANDIDATE",
+  status: "SAFE_OFFCHAIN_CANDIDATE_NOT_ACTIVE_RUNTIME",
+  sequence: Object.freeze([
+    "READ_CURRENT",
+    "WISH",
+    "HEARTBEAT",
+    "BREATH_IF_ELIGIBLE",
+    "FORTUNE_IF_ELIGIBLE",
+    "LAMP",
+    "KAIOS_CARGO_SETTLEMENT_GATE",
+    "OUTBOUND_MOVEMENT_EVIDENCE",
+    "11520_DELIVERY_RECEIPT_GATE",
+    "11520_MARKET_CHECK",
+    "RETURN_MOVEMENT_EVIDENCE",
+    "GM_CLOCK_IN",
+    "WORKQUEUE",
+    "REVIEWQUEUE",
+    "CUSTOMER_REQUESTS",
+    "CLOCK_OUT"
+  ]),
+  origin: Object.freeze({ point: "K12345", coordinate: "0.00012345", name: "WUKONG_FORTUNE_TEMPLE" }),
+  destination: Object.freeze({ point: "K11520", coordinate: "0.00011520", name: "HUAGUOSHAN_EXCHANGE" }),
+  mission_distance_m: 0.187784225485552,
+  mission_distance_authority: "HUMAN_DIRECTED_B4_MISSION_DISTANCE_CANDIDATE",
+  global_universe_map_distance_overridden: false,
+  provisional_receiver: "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+  provisional_receiver_status: "HUMAN_DIRECTED_PROVISIONAL_NOT_AUTHORIZED_FOR_TRANSFER",
+  chain_write: false,
+  real_trade: false,
+  payment: false
+});
+
+export const KAIOS_CARGO_SETTLEMENT_STATES = Object.freeze([
+  "LAMP_PAID",
+  "LAMP_RECEIPT_VERIFIED",
+  "KAIOS_ENTITLEMENT_CALCULATED",
+  "KAIOS_CARGO_ISSUANCE_AUTHORITY_CHECK",
+  "KAIOS_CARGO_SETTLED",
+  "RECEIPT_VERIFIED",
+  "CARGO_AVAILABLE_FOR_11520_TRANSPORT"
+]);
+
+export const KAIOS_CARGO_SETTLEMENT_ABI_CANDIDATE = Object.freeze([
+  "function KAIOS() view returns (address)",
+  "function HEART_12345() view returns (address)",
+  "function CARGO_SOURCE_POOL() view returns (address)",
+  "function usedLampReceipt(bytes32 lampReceiptId) view returns (bool)",
+  "function settleLampCargo(address beneficiary,bytes32 lampReceiptId,bytes32 wishProof,uint256 lampKgenWei) returns (bytes32 cargoReceiptId,uint256 kaiosAmountWei)",
+  "event KAIOSCargoSettled(bytes32 indexed cargoReceiptId,address indexed beneficiary,bytes32 indexed lampReceiptId,uint256 lampKgenWei,uint256 deliveryRatioBps,uint256 kaiosAmountWei,address sourcePool)"
+]);
+
+export function createKaiosCargoSettlementRuntimeCandidate({ cycleId, lifeId, beneficiary, lampReceipt, wishStatus, wishProof = null, authority = {} }) {
+  requireId(cycleId, "cycle_id");
+  requireId(lifeId, "life_id");
+  invariant(/^0x[0-9a-fA-F]{40}$/.test(String(beneficiary ?? "")), "KAIOS_CARGO_BENEFICIARY_INVALID", "KAIOS cargo requires a fixed beneficiary address");
+  invariant(["CONFIRMED", "NO_WISH"].includes(wishStatus), "WISH_STATUS_INVALID", "Wish status must be CONFIRMED or NO_WISH");
+  if (wishStatus === "CONFIRMED") invariant(/^0x[0-9a-fA-F]{64}$/.test(String(wishProof ?? "")), "KAIOS_CARGO_WISH_PROOF_REQUIRED", "Confirmed Wish cargo requires a bytes32 Wish proof");
+  requireFields(lampReceipt, ["receipt_id", "tx_hash", "chain_id", "contract", "payer", "paid_kgen_wei", "receipt_status", "event"], "LampReceipt");
+  requireId(lampReceipt.receipt_id, "lamp_receipt_id");
+  invariant(/^0x[0-9a-fA-F]{40}$/.test(String(lampReceipt.payer ?? "")), "KAIOS_CARGO_PAYER_INVALID", "Lamp payer must be a valid address");
+  invariant(String(lampReceipt.payer).toLowerCase() === String(beneficiary).toLowerCase(), "KAIOS_CARGO_PAYER_BENEFICIARY_MISMATCH", "Lamp payer and fixed cargo beneficiary must match");
+  invariant(lampReceipt.chain_id === 56, "KAIOS_CARGO_CHAIN_56_REQUIRED", "Lamp receipt must come from BSC chain 56");
+  invariant(/^0x[0-9a-fA-F]{64}$/.test(lampReceipt.tx_hash) && lampReceipt.receipt_status === 1 && lampReceipt.event === "LampLit", "KAIOS_CARGO_LAMP_RECEIPT_INVALID", "Cargo requires a successful verified LampLit receipt");
+  invariant(String(lampReceipt.contract).toLowerCase() === "0xb016d4d8f1aed1339101b30722cad6dba9b8c972", "KAIOS_CARGO_HEART_MISMATCH", "Lamp receipt must identify the deployed K12345 Heart");
+  const lampWei = BigInt(String(lampReceipt.paid_kgen_wei));
+  invariant(lampWei > 0n, "KAIOS_CARGO_LAMP_AMOUNT_INVALID", "Lamp payment must be positive");
+  const ratioBps = wishStatus === "CONFIRMED" ? 8000n : 5000n;
+  const kaiosWei = lampWei * 1000n * ratioBps / 10000n;
+  invariant(kaiosWei * 10000n === lampWei * 1000n * ratioBps, "KAIOS_CARGO_INEXACT_RATIO", "Cargo entitlement must be exactly representable");
+  const sourceBalance = authority.source_pool_balance_kaios_wei === undefined || authority.source_pool_balance_kaios_wei === null ? null : BigInt(String(authority.source_pool_balance_kaios_wei));
+  const sourceAllowance = authority.source_pool_allowance_kaios_wei === undefined || authority.source_pool_allowance_kaios_wei === null ? null : BigInt(String(authority.source_pool_allowance_kaios_wei));
+  const authorityReady = authority.adapter_status === "DEPLOYED_ACTIVE"
+    && /^0x[0-9a-fA-F]{40}$/.test(String(authority.adapter_address ?? ""))
+    && /^0x[0-9a-fA-F]{40}$/.test(String(authority.source_pool_address ?? ""))
+    && /^0x[0-9a-fA-F]{40}$/.test(String(authority.executor_address ?? ""))
+    && typeof authority.governance_approval_id === "string"
+    && authority.governance_approval_id.length > 0
+    && sourceBalance !== null
+    && sourceAllowance !== null
+    && sourceBalance >= kaiosWei
+    && sourceAllowance === kaiosWei;
+  return Object.freeze({
+    runtime_id: "K12345_KAIOS_CARGO_SETTLEMENT_RUNTIME_V1_CANDIDATE",
+    cycle_id: cycleId,
+    life_id: lifeId,
+    beneficiary,
+    replay_key: lampReceipt.receipt_id,
+    lamp_tx_hash: lampReceipt.tx_hash,
+    lamp_kgen_wei: lampWei.toString(),
+    wish_status: wishStatus,
+    wish_proof: wishProof,
+    delivery_ratio_bps: Number(ratioBps),
+    kaios_entitlement_wei: kaiosWei.toString(),
+    state: authorityReady ? "KAIOS_CARGO_ISSUANCE_AUTHORITY_CHECK" : "KAIOS_ENTITLEMENT_CALCULATED",
+    state_machine: KAIOS_CARGO_SETTLEMENT_STATES,
+    authority_status: authorityReady ? "AUTHORIZED_FOR_RECEIPT_GATED_CALL" : "BLOCKED_DEPLOYMENT_GOVERNANCE_INVENTORY_OR_ALLOWANCE",
+    authority: Object.freeze({
+      adapter_status: authority.adapter_status ?? "NOT_DEPLOYED",
+      adapter_address: authority.adapter_address ?? null,
+      source_pool_address: authority.source_pool_address ?? null,
+      executor_address: authority.executor_address ?? null,
+      governance_approval_id: authority.governance_approval_id ?? null
+    }),
+    source_model: "PREFUNDED_KAIOS_CARGO_POOL_TRANSFER_NOT_MINT",
+    arbitrary_mint: false,
+    arbitrary_transfer: false,
+    actual_kaios_cargo_wei: "0",
+    settlement_tx_hash: null,
+    deployment_status: "CANDIDATE_NOT_DEPLOYED"
+  });
+}
+
+export function verifyKaiosCargoSettlementReceipt(candidate, receipt, usedReplayKeys = []) {
+  requireArray(usedReplayKeys, "used_replay_keys");
+  invariant(candidate?.authority_status === "AUTHORIZED_FOR_RECEIPT_GATED_CALL", "KAIOS_CARGO_AUTHORITY_NOT_READY", "Cargo cannot settle before adapter, governance, inventory and allowance gates pass");
+  invariant(!usedReplayKeys.includes(candidate.replay_key), "KAIOS_CARGO_REPLAY", "A Lamp receipt can settle cargo only once");
+  requireFields(receipt, ["tx_hash", "receipt_status", "event", "cargo_receipt_id", "beneficiary", "lamp_receipt_id", "kaios_amount_wei", "source_pool"], "KAIOSCargoReceipt");
+  invariant(/^0x[0-9a-fA-F]{64}$/.test(receipt.tx_hash) && receipt.receipt_status === 1 && receipt.event === "KAIOSCargoSettled", "KAIOS_CARGO_SETTLEMENT_RECEIPT_INVALID", "Cargo settlement requires a successful KAIOSCargoSettled receipt");
+  invariant(/^0x[0-9a-fA-F]{64}$/.test(String(receipt.cargo_receipt_id ?? "")), "KAIOS_CARGO_RECEIPT_ID_INVALID", "Cargo settlement requires a bytes32 receipt ID");
+  invariant(receipt.beneficiary.toLowerCase() === candidate.beneficiary.toLowerCase(), "KAIOS_CARGO_BENEFICIARY_SUBSTITUTION", "Cargo beneficiary cannot change during settlement");
+  invariant(receipt.lamp_receipt_id === candidate.replay_key, "KAIOS_CARGO_LAMP_RECEIPT_MISMATCH", "Settlement receipt must bind the original Lamp receipt");
+  invariant(String(receipt.kaios_amount_wei) === candidate.kaios_entitlement_wei, "KAIOS_CARGO_AMOUNT_MISMATCH", "Settlement must transfer the exact entitlement");
+  invariant(receipt.source_pool.toLowerCase() === candidate.authority.source_pool_address.toLowerCase(), "KAIOS_CARGO_SOURCE_POOL_MISMATCH", "Settlement must use the approved source pool");
+  return Object.freeze({
+    ...candidate,
+    state: "CARGO_AVAILABLE_FOR_11520_TRANSPORT",
+    authority_status: "RECEIPT_VERIFIED",
+    actual_kaios_cargo_wei: candidate.kaios_entitlement_wei,
+    settlement_tx_hash: receipt.tx_hash,
+    cargo_receipt_id: receipt.cargo_receipt_id,
+    replay_consumed: true,
+    deployment_status: "DEPLOYED_RECEIPT_EVIDENCE_VERIFIED"
+  });
+}
+
+function requireNonNegativeNumber(value, field) {
+  const number = Number(value);
+  invariant(Number.isFinite(number) && number >= 0, "DAILY_COMMERCE_NUMBER_INVALID", `${field} must be a finite non-negative number`);
+  return number;
+}
+
+export function classifyKgenUniverseReference(price) {
+  const numeric = Number(price);
+  invariant(Number.isFinite(numeric) && numeric > 0, "KGEN_REFERENCE_PRICE_INVALID", "KGEN reference price must be positive and finite");
+  const floor = Math.floor(Math.log10(numeric));
+  const boundaryLow = Number(`1e${floor}`);
+  const boundaryHigh = Number(`1e${floor + 1}`);
+  const alpha = Number((numeric / boundaryLow).toPrecision(15));
+  return Object.freeze({
+    price: numeric,
+    unit: "USD_PER_KGEN",
+    evidence_class: "HUMAN_SUPPLIED_EXTERNAL_REFERENCE",
+    market_authority: "REFERENCE_ONLY_NOT_11520_NATIVE_CT",
+    universe_floor: floor,
+    alpha,
+    phase: 0,
+    universe: floor < 0 ? `B${Math.abs(floor)}` : `K${floor}`,
+    boundary_low: boundaryLow,
+    boundary_high: boundaryHigh,
+    native_ct: null
+  });
+}
+
+export function calculateK12345LampCargoCandidate({ lampKgen, wishStatus, lampReceipt = null, cargoSettlementReceipt = null }) {
+  const basis = requireNonNegativeNumber(lampKgen, "lampKgen");
+  invariant(["CONFIRMED", "NO_WISH"].includes(wishStatus), "WISH_STATUS_INVALID", "Wish status must be CONFIRMED or NO_WISH");
+  const deliveryRatio = wishStatus === "CONFIRMED" ? 0.8 : 0.5;
+  const entitlement = basis * 1000 * deliveryRatio;
+  const lampVerified = lampReceipt?.receipt_status === 1
+    && lampReceipt?.event === "LampLit"
+    && Number(lampReceipt?.paid_kgen) === basis
+    && typeof lampReceipt?.tx_hash === "string"
+    && /^0x[0-9a-fA-F]{64}$/.test(lampReceipt.tx_hash);
+  const settlementVerified = lampVerified
+    && cargoSettlementReceipt?.receipt_status === 1
+    && cargoSettlementReceipt?.event === "KAIOSCargoSettled"
+    && Number(cargoSettlementReceipt?.amount_kaios) === entitlement
+    && typeof cargoSettlementReceipt?.tx_hash === "string"
+    && /^0x[0-9a-fA-F]{64}$/.test(cargoSettlementReceipt.tx_hash);
+  return Object.freeze({
+    lamp_kgen_basis: basis,
+    wish_status: wishStatus,
+    delivery_ratio: deliveryRatio,
+    kaios_per_kgen_basis: 1000,
+    calculated_entitlement_kaios: entitlement,
+    lamp_receipt_status: lampVerified ? "VERIFIED" : "NOT_VERIFIED",
+    settlement_status: settlementVerified ? "RECEIPT_VERIFIED" : "KAIOS_CARGO_SETTLEMENT_NOT_IMPLEMENTED_OR_UNVERIFIED",
+    settled_gross_kaios: settlementVerified ? entitlement : 0,
+    initial_owner_if_settled: "K12345_TEMPLE",
+    carrier_owns_cargo: false,
+    calculation_is_mint_or_settlement: false
+  });
+}
+
+export function calculateB4DailyTransportModel(input = {}) {
+  const distance = input.distance_m === undefined
+    ? KAIOS_DAILY_LIFE_COMMERCE_POLICY.mission_distance_m
+    : requireNonNegativeNumber(input.distance_m, "distance_m");
+  const physicalFields = ["cargo_mass_kg", "vehicle_mass_kg", "acceleration_mps2"];
+  const costFields = ["food_kaios", "fuel_kaios", "vehicle_kaios", "maintenance_kaios", "carrier_reward_kaios", "chain_gas_accounting_kaios"];
+  const missing = [...physicalFields, ...costFields].filter((field) => input[field] === undefined || input[field] === null);
+  if (missing.length) {
+    return Object.freeze({
+      status: "QUOTE_INCOMPLETE",
+      distance_m: distance,
+      round_trip_distance_m: distance * 2,
+      missing_fields: Object.freeze(missing),
+      force_n: null,
+      acceleration_work_j: null,
+      transport_cost_kaios: null,
+      accounting_unit_is_physical_fuel: false,
+      formula: "F_EQUALS_MA_AND_W_EQUALS_FD"
+    });
+  }
+  const values = Object.fromEntries([...physicalFields, ...costFields].map((field) => [field, requireNonNegativeNumber(input[field], field)]));
+  const totalMass = values.cargo_mass_kg + values.vehicle_mass_kg;
+  const force = totalMass * values.acceleration_mps2;
+  const accelerationWork = force * distance;
+  const transportCost = costFields.reduce((total, field) => total + values[field], 0);
+  return Object.freeze({
+    status: "MODELED_FROM_DECLARED_INPUTS_NOT_SETTLED",
+    ...values,
+    distance_m: distance,
+    round_trip_distance_m: distance * 2,
+    total_mass_kg: totalMass,
+    force_n: force,
+    acceleration_work_j: accelerationWork,
+    transport_cost_kaios: transportCost,
+    accounting_unit_is_physical_fuel: false,
+    formula: "F_EQUALS_MA_AND_W_EQUALS_FD"
+  });
+}
+
+export function createKaiosCargoOwnershipLedger({ cycleId, cargo, carrierLifeId, outboundMovementEvidence = null, deliveryReceipt = null }) {
+  requireId(cycleId, "cycle_id");
+  invariant(cargo && typeof cargo === "object", "CARGO_CANDIDATE_REQUIRED", "Cargo ownership requires a cargo candidate");
+  requireId(carrierLifeId, "carrier_life_id");
+  const settled = cargo.settlement_status === "RECEIPT_VERIFIED" && Number(cargo.settled_gross_kaios) > 0;
+  const moved = settled
+    && outboundMovementEvidence?.status === "VERIFIED"
+    && outboundMovementEvidence?.origin === "0.00012345"
+    && outboundMovementEvidence?.destination === "0.00011520";
+  const delivered = moved
+    && deliveryReceipt?.status === "VERIFIED"
+    && deliveryReceipt?.receiver
+    && Number(deliveryReceipt?.amount_kaios) > 0
+    && Number(deliveryReceipt.amount_kaios) <= Number(cargo.settled_gross_kaios);
+  const events = [{ event_type: "CARGO_ENTITLEMENT_CALCULATED", owner: "K12345_TEMPLE", amount_kaios: cargo.calculated_entitlement_kaios, evidence_class: "CANDIDATE_ONLY" }];
+  if (settled) events.push({ event_type: "CARGO_SETTLED", owner: "K12345_TEMPLE", amount_kaios: cargo.settled_gross_kaios, evidence_class: "RECEIPT_VERIFIED" });
+  if (moved) events.push({ event_type: "CARRIER_CUSTODY_STARTED", owner: "K12345_TEMPLE", carrier: carrierLifeId, ownership_transferred: false, evidence_class: "MOVEMENT_VERIFIED" });
+  if (delivered) events.push({ event_type: "CARGO_DELIVERED", owner: "K12345_TEMPLE", receiver: deliveryReceipt.receiver, amount_kaios: Number(deliveryReceipt.amount_kaios), evidence_class: "DELIVERY_VERIFIED" });
+  return Object.freeze({
+    ledger_id: `${cycleId}:KAIOS_CARGO`,
+    append_only: true,
+    replay_key: cycleId,
+    cargo_status: delivered ? "DELIVERED" : moved ? "IN_TRANSIT" : settled ? "SETTLED_AT_K12345" : "ENTITLEMENT_ONLY_NOT_CARGO",
+    current_owner: settled ? "K12345_TEMPLE" : null,
+    carrier_life_id: carrierLifeId,
+    carrier_is_owner: false,
+    movement_verified: moved,
+    delivery_verified: delivered,
+    events: Object.freeze(events.map((event) => Object.freeze(event)))
+  });
+}
+
+export function evaluate11520DailyMarket({ marketStatus, bestBuy = null, bestSell = null, latestTrade = null } = {}) {
+  invariant(typeof marketStatus === "string" && marketStatus.length > 0, "MARKET_STATUS_REQUIRED", "11520 market status is required");
+  if (!latestTrade) return Object.freeze({ market_status: marketStatus, best_buy: bestBuy, best_sell: bestSell, candidate_ct: null, ct: null, real_trade: false, target_status: "WAIT_FOR_AUTHENTICATED_EXTERNAL_COUNTERPARTY" });
+  requireFields(latestTrade, ["buyer_actor_id", "seller_actor_id", "buyer_controller_id", "seller_controller_id", "price", "quantity", "authentication_status", "match_status", "settlement_receipt"], "DailyMarketTrade");
+  const distinct = latestTrade.buyer_actor_id !== latestTrade.seller_actor_id
+    && latestTrade.buyer_controller_id !== latestTrade.seller_controller_id;
+  const authenticated = latestTrade.authentication_status === "BOTH_VERIFIED";
+  const validMatch = latestTrade.match_status === "VALID_MATCH" && requireNonNegativeNumber(latestTrade.price, "trade.price") > 0 && requireNonNegativeNumber(latestTrade.quantity, "trade.quantity") > 0;
+  const settled = latestTrade.settlement_receipt?.status === "VERIFIED";
+  const real = distinct && authenticated && validMatch && settled;
+  return Object.freeze({
+    market_status: marketStatus,
+    best_buy: bestBuy,
+    best_sell: bestSell,
+    candidate_ct: distinct && authenticated && validMatch ? Number(latestTrade.price) : null,
+    ct: real ? Number(latestTrade.price) : null,
+    real_trade: real,
+    target_status: real ? "DAILY_REAL_TRADE_VERIFIED" : "TRADE_REJECTED_OR_UNSETTLED",
+    self_match_rejected: !distinct,
+    fake_volume_created: false
+  });
+}
+
+export function createDailyLifeCommerceCycle({ cycleId, observedAt, latestMainSha, referencePrice = 0.0002524, heartRuntime, cargo, transport, cargoLedger, market, companyChecks = {} }) {
+  requireId(cycleId, "cycle_id");
+  invariant(Number.isFinite(Date.parse(observedAt)), "DAILY_CYCLE_TIMESTAMP_INVALID", "Daily cycle requires an ISO timestamp");
+  invariant(/^[0-9a-f]{40}$/i.test(String(latestMainSha)), "DAILY_CYCLE_MAIN_SHA_INVALID", "Daily cycle must bind a full latest-main SHA");
+  invariant(heartRuntime && cargo && transport && cargoLedger && market, "DAILY_CYCLE_COMPONENT_REQUIRED", "Daily cycle requires Heart, cargo, transport, ledger and market evidence");
+  const reference = classifyKgenUniverseReference(referencePrice);
+  const blockers = [];
+  if (cargo.settlement_status !== "RECEIPT_VERIFIED") blockers.push("KAIOS_CARGO_SETTLEMENT_MISSING");
+  if (!cargoLedger.movement_verified) blockers.push("OUTBOUND_MOVEMENT_EVIDENCE_MISSING");
+  if (!cargoLedger.delivery_verified) blockers.push("11520_DELIVERY_RECEIPT_MISSING");
+  if (!market.real_trade) blockers.push("NO_AUTHENTICATED_SETTLED_11520_TRADE");
+  if (companyChecks.workqueue_processed !== true) blockers.push("WORKQUEUE_NOT_PROCESSED");
+  if (companyChecks.reviewqueue_processed !== true) blockers.push("REVIEWQUEUE_NOT_PROCESSED");
+  if (companyChecks.customer_requests_checked !== true) blockers.push("CUSTOMER_REQUESTS_NOT_CHECKED");
+  return Object.freeze({
+    cycle_id: cycleId,
+    observed_at: observedAt,
+    latest_main_sha: latestMainSha,
+    status: blockers.length ? "SAFE_OFFCHAIN_CANDIDATE_INCOMPLETE" : "EVIDENCE_COMPLETE_CANDIDATE",
+    policy: KAIOS_DAILY_LIFE_COMMERCE_POLICY,
+    kgen_reference: reference,
+    heart_runtime: Object.freeze({ ...heartRuntime }),
+    cargo,
+    transport,
+    cargo_ledger: cargoLedger,
+    market,
+    company_checks: Object.freeze({ ...companyChecks }),
+    blockers: Object.freeze(blockers),
+    real_trade_executed: false,
+    chain_write_executed: false,
+    payment_sent: false,
+    private_key_accessed: false
+  });
+}
