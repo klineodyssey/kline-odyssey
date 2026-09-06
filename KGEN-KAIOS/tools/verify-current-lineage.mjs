@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { execFileSync } from "node:child_process";
 
 const repo = path.resolve(import.meta.dirname, "..", "..");
 const reportPath = path.join(repo, "KGEN-KAIOS", "reports", "CURRENT_LINEAGE_RECONCILIATION.json");
@@ -23,16 +24,52 @@ const forbidden = [
   "IKAIOSBurnProofGenesis",
   "Species → Cell → Organ",
 ];
-const safeConflictReferenceFiles = new Set([
-  "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+const currentSectionMarkers = new Map([
+  ["docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "## 235. 現行質量尺度"],
 ]);
 const failures = [];
+const normativeContentByPath = new Map();
+const trackedPathByCaseFold = new Map(
+  execFileSync("git", ["ls-files"], { cwd: repo, encoding: "utf8" })
+    .split(/\r?\n/u)
+    .filter(Boolean)
+    .map((relativePath) => [relativePath.toLocaleLowerCase("en-US"), relativePath]),
+);
+
+function canonicalTrackedPath(relativePath) {
+  return trackedPathByCaseFold.get(relativePath.toLocaleLowerCase("en-US")) ?? relativePath;
+}
+
+function currentNormativeContent(relativePath, content) {
+  const marker = currentSectionMarkers.get(relativePath);
+  if (!marker) return content;
+  const offset = content.indexOf(marker);
+  if (offset < 0) {
+    failures.push({ path: relativePath, reason: "MISSING_CURRENT_SECTION_MARKER", marker });
+    return "";
+  }
+  return content.slice(offset);
+}
+
+function isExplicitSupersededReference(line) {
+  return /(?:SUPERSEDED|historical|obsolete|remove legacy|remove all obsolete|歷史|舊)/iu.test(line);
+}
+
+function forbiddenPatternsIn(content) {
+  return forbidden.filter((pattern) => content.includes(pattern));
+}
 
 for (const relativePath of activeFiles) {
   const absolutePath = path.join(repo, relativePath);
   const content = fs.readFileSync(absolutePath, "utf8");
-  for (const pattern of safeConflictReferenceFiles.has(relativePath) ? [] : forbidden) {
-    if (content.includes(pattern)) failures.push({ path: relativePath, pattern });
+  const normativeContent = currentNormativeContent(relativePath, content);
+  normativeContentByPath.set(relativePath, normativeContent);
+  const searchableContent = normativeContent
+    .split(/\r?\n/u)
+    .filter((line) => !isExplicitSupersededReference(line))
+    .join("\n");
+  for (const pattern of forbiddenPatternsIn(searchableContent)) {
+    failures.push({ path: relativePath, pattern });
   }
 }
 
@@ -51,18 +88,31 @@ for (const relativePath of new Set(
     .map((item) => item.path),
 )) {
   if (relativePath.includes("/archive/") || relativePath.includes("_ARCHIVE")) continue;
-  const header = fs.readFileSync(path.join(repo, relativePath), "utf8").split(/\r?\n/u).slice(0, 12).join("\n");
-  if (!header.includes("SUPERSEDED")) failures.push({ path: relativePath, reason: "MISSING_SUPERSEDED_MARKER" });
+  const trackedPath = canonicalTrackedPath(relativePath);
+  const absolutePath = path.join(repo, trackedPath);
+  if (!fs.existsSync(absolutePath)) {
+    failures.push({ path: relativePath, reason: "MISSING_TRACKED_ARCHIVE_REFERENCE" });
+    continue;
+  }
+  const header = fs.readFileSync(absolutePath, "utf8").split(/\r?\n/u).slice(0, 12).join("\n");
+  if (!header.includes("SUPERSEDED")) failures.push({ path: trackedPath, reason: "MISSING_SUPERSEDED_MARKER" });
 }
 
+const physicsCurrentNormative = normativeContentByPath.get(activeFiles[0]) ?? "";
+const scaleCurrent = fs.readFileSync(path.join(repo, activeFiles[1]), "utf8");
 const assertions = {
-  kgenMassScale: fs.readFileSync(path.join(repo, activeFiles[0]), "utf8").includes("1 KGEN = 1 metric ton = 1,000 kg"),
+  kgenMassScale:
+    /1 KGEN\s*=\s*1,?000 kg/u.test(physicsCurrentNormative) &&
+    physicsCurrentNormative.includes("SUPERSEDED_SCALE_RULE") &&
+    scaleCurrent.includes("| KGEN | 1 metric ton = 1,000 kg |"),
   kaiosRatio: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("KAIOS_PER_KGEN = 1_000"),
   frictionMirror: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("IKGENSupply(KGEN).totalSupply()"),
   organRegistry: fs.readFileSync(path.join(repo, "KGEN-KAIOS/contracts/KAIOS.sol"), "utf8").includes("ORGAN_REGISTRY.organ"),
   noMainnetDeployment: !fs.existsSync(path.join(repo, "KGEN-KAIOS", "deployments", "mainnet.json")),
   staleCurrentFindingsLimitedToPr127:
     audit.findings.filter((item) => item.classification === "CURRENT-CONFLICT").every((item) => item.path.startsWith("PR#127:")),
+  scaleCurrentActiveConflictProbe:
+    forbiddenPatternsIn("ACTIVE CURRENT RULE: 1 KGEN = 1 kg").includes("1 KGEN = 1 kg"),
 };
 for (const [name, passed] of Object.entries(assertions)) {
   if (!passed) failures.push({ assertion: name });
