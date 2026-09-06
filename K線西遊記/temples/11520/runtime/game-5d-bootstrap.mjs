@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 2.4.0
+VERSION: 2.4.1
 STATUS: ACTIVE
 PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, or optional capabilities fail.
 */
@@ -48,6 +48,10 @@ if(btn){btn.onclick=enterWorld;btn.addEventListener('pointerup',enterWorld);btn.
 (async()=>{
   try{
     await import('./game-5d-main.mjs');
+    try{
+      const {install11520ControlsV251}=await import('./game-controls-v251.mjs');
+      install11520ControlsV251();
+    }catch(controlErr){console.warn('[11520 bootstrap] V2.5.1 control skin degraded',controlErr)}
     if(status)status.textContent='完整世界 READY';
   }catch(err){
     console.error('[11520 bootstrap] full runtime failed',err);
