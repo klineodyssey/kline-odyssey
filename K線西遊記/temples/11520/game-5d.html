@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#05080d">
-<title>11520 花果山 5D K線西遊記</title>
+<title>11520 花果山 V2.3 · 5D K線西遊記</title>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
 <style>
 :root{--bg:#05080d;--panel:#0b131bef;--gold:#f1ca73;--cyan:#68e4ff;--up:#65e798;--dn:#ff737a;--muted:#9ca8b3}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:#eee;font:14px system-ui,"Noto Sans TC",sans-serif}button,select,input{font:inherit;color:inherit}button{touch-action:manipulation}.panel{background:linear-gradient(180deg,#101923f2,#091018f4);border:1px solid #a77b3570;box-shadow:0 10px 30px #0008}
-#three,#lookPad{position:fixed;inset:0;width:100%;height:100%;touch-action:none}#three{z-index:1}#lookPad{z-index:2;left:48vw;width:52vw}.top{position:fixed;z-index:300;left:8px;right:8px;top:max(6px,env(safe-area-inset-top));height:58px;border-radius:15px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 10px}.brand b{display:block;color:var(--gold);font-size:15px}.brand small{font-size:8px;color:var(--muted)}.pill{border:1px solid #a77b3566;border-radius:10px;padding:6px 9px;text-align:center}.pill small{display:block;font-size:7px;color:var(--muted)}
+#three,#lookPad{position:fixed;inset:0;width:100%;height:100%;touch-action:none}#three{z-index:1}#lookPad{z-index:2;left:48vw;width:52vw}.top{position:fixed;z-index:300;left:8px;right:8px;top:max(6px,env(safe-area-inset-top));height:58px;border-radius:15px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 10px}.brand b{display:block;color:var(--gold);font-size:15px;line-height:1.12}.brand small{font-size:8px;color:var(--muted)}.pill{border:1px solid #a77b3566;border-radius:10px;padding:6px 9px;text-align:center}.pill small{display:block;font-size:7px;color:var(--muted)}
 .axes{position:fixed;z-index:250;left:8px;right:8px;top:72px;height:98px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.axis{border-radius:13px;padding:7px}.axis.active{outline:2px solid #68e4ff99}.axisHead{display:flex;justify-content:space-between;font-size:8px;color:var(--muted)}.axisHead b{color:var(--cyan)}.axis select{width:100%;margin-top:5px;padding:6px;background:#091018;border:1px solid #a77b3555;border-radius:8px;font-size:9px}.axis .q{display:block;margin-top:5px;color:var(--gold);font-size:17px;font-weight:900}.axis .pos{font-size:8px;color:var(--muted)}
 .tele,.monsterHud{position:fixed;z-index:220;top:178px;border-radius:12px;padding:9px;font-size:8px}.tele{left:8px;width:48vw}.monsterHud{right:8px;width:48vw}.bar{height:7px;background:#26313b;border-radius:10px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#56dd89,#b8ef83)}#monsterList{max-height:88px;overflow:auto;overscroll-behavior:contain}
 .wallet{position:fixed;z-index:700;right:8px;top:302px;width:min(510px,calc(100vw - 20px));border-radius:14px;padding:10px}.walletHead{display:flex;gap:8px;align-items:center}.walletHead b{color:var(--cyan);flex:1}.wallet button{border:1px solid #68e4ff66;background:#101a25;border-radius:9px;padding:7px 10px}.walletGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.metric{border:1px solid #ffffff12;border-radius:9px;padding:6px}.metric small{display:block;color:var(--muted);font-size:7px}.metric b{font-size:10px}
@@ -36,7 +36,7 @@
 </head>
 <body>
 <canvas id="three"></canvas><div id="lookPad"></div>
-<header class="top panel"><div class="brand"><b>11520 花果山 5D K線西遊記</b><small>Universe Exchange · Living Market</small></div><div class="pill"><small>KGEN Local Free</small><b id="topFree">100.000</b></div><div class="pill"><small>KAIOS</small><b id="topKaios">1000.0</b></div></header>
+<header class="top panel"><div class="brand"><b><span>11520 花果山 V2.3</span><br><span>5D K線西遊記</span></b><small>Universe Exchange · Living Market</small></div><div class="pill"><small>KGEN Local Free</small><b id="topFree">100.000</b></div><div class="pill"><small>KAIOS</small><b id="topKaios">1000.0</b></div></header>
 <section class="axes" id="axes"></section>
 <div class="tele panel"><b>5D 世界座標 <span id="xyz">X 0 · Y 0 · Z 0</span></b><div>角色：<span id="charState">啟動中</span></div><div>碰撞：<span id="collision">CLEAR</span></div><div>行情：<span id="feed">同步中</span></div></div>
 <div class="monsterHud panel"><b>生命 HP <span id="hp">100</span></b><div class="bar"><i id="hpbar" style="width:100%"></i></div><div>Living Market</div><div id="monsterList"></div></div>
