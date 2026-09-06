@@ -7,6 +7,7 @@ import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 interface IK108000ReactionSource {
     struct ReactionRecord {
+        bytes32 shipId;
         address owner;
         address beneficiary;
         uint8 mode;
@@ -21,15 +22,12 @@ interface IK108000ReactionSource {
         uint256 timestamp;
         bool kgodMinted;
     }
-
     function reactionRecord(bytes32 reactionProofId) external view returns (ReactionRecord memory);
 }
 
 /**
  * @title KGODV1
- * @notice Immutable stable KGOD material minted only from a current K108000 mass-energy reaction proof.
- * @dev KGOD has no native half-life and no owner/admin mint. It does not represent free energy:
- *      every minted unit must already be allocated as kgodMassEquivalent in a conserved K108000 receipt.
+ * @notice Immutable stable KGOD material minted only from a current ship-bound K108000 reaction proof.
  */
 contract KGODV1 is ERC20, ERC20Capped {
     string public constant VERSION = "1.0.0";
@@ -46,7 +44,7 @@ contract KGODV1 is ERC20, ERC20Capped {
     error ProofAlreadyUsed(bytes32 proofId);
     error InvalidReactionProof(bytes32 proofId);
 
-    event ReactionProofMinted(bytes32 indexed proofId, address indexed beneficiary, uint256 kgodAmount);
+    event ReactionProofMinted(bytes32 indexed proofId, bytes32 indexed shipId, address indexed beneficiary, uint256 kgodAmount);
 
     constructor(address registry) ERC20("KGOD Stable Material", "KGOD") ERC20Capped(MAX_SUPPLY) {
         if (registry == address(0)) revert ZeroAddress();
@@ -60,10 +58,8 @@ contract KGODV1 is ERC20, ERC20Capped {
 
         IK108000ReactionSource.ReactionRecord memory record = IK108000ReactionSource(msg.sender).reactionRecord(proofId);
         if (
-            record.owner == address(0) ||
-            record.beneficiary == address(0) ||
-            record.kgodMassEquivalent == 0 ||
-            record.kshipAntimatterConsumed == 0 ||
+            record.shipId == bytes32(0) || record.owner == address(0) || record.beneficiary == address(0) ||
+            record.kgodMassEquivalent == 0 || record.kshipAntimatterConsumed == 0 ||
             record.positiveMatterConsumed != record.kshipAntimatterConsumed ||
             record.totalInputEquivalent != record.kshipAntimatterConsumed + record.positiveMatterConsumed ||
             record.totalInputEquivalent != record.propulsionEnergy + record.recoverableEnergy + record.kgodMassEquivalent + record.radiationHeat
@@ -74,7 +70,7 @@ contract KGODV1 is ERC20, ERC20Capped {
         reactionProofMinted[proofId] = true;
         totalMintedFromReactions += amount;
         _mint(beneficiary, amount);
-        emit ReactionProofMinted(proofId, beneficiary, amount);
+        emit ReactionProofMinted(proofId, record.shipId, beneficiary, amount);
     }
 
     function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Capped) {
