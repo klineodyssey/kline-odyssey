@@ -1,0 +1,36 @@
+name: KAIOS K108000 Mass Energy Review
+
+on:
+  push:
+    branches:
+      - 'gm/k108000-kship-mass-energy-conservation-v1'
+  pull_request:
+    paths:
+      - 'KGEN-KAIOS/contracts/KSHIPV5.sol'
+      - 'KGEN-KAIOS/contracts/K108000MassEnergyReactorV1.sol'
+      - 'KGEN-KAIOS/contracts/KGODV1.sol'
+      - 'KGEN-KAIOS/contracts/testing/K108000PositiveMatterSourceMock.sol'
+      - 'KGEN-KAIOS/tests/k108000-mass-energy.integration.test.mjs'
+      - '.github/workflows/kaios-k108000-mass-energy-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: KGEN-KAIOS
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --force --ignore-scripts --no-audit --no-fund
+      - run: npm run compile
+      - run: node --test --test-concurrency=1 tests/k108000-mass-energy.integration.test.mjs
+      - run: git diff --check HEAD^ HEAD
