@@ -30,6 +30,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/world-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-ui-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-ui-product-fixes.mjs"
+          node --check "K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-5d-main.mjs"
           node --check "K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/map-object-navigation-runtime.mjs"
