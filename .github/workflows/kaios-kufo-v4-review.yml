@@ -6,6 +6,8 @@ on:
       - 'KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol'
       - 'KGEN-KAIOS/contracts/KUFOOutputJindouyun168888V4.sol'
       - 'KGEN-KAIOS/contracts/KUFOV4.sol'
+      - 'KGEN-KAIOS/contracts/KSHIP.sol'
+      - 'KGEN-KAIOS/contracts/KSHIPConverter.sol'
       - 'KGEN-KAIOS/runtime/kufo-v4-policy.mjs'
       - 'KGEN-KAIOS/tests/kufo-v4-three-autumns.unit.test.mjs'
       - 'KGEN-KAIOS/tests/kufo-v4-kship-interface.unit.test.mjs'
