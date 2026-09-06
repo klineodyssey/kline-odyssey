@@ -60,8 +60,9 @@ jobs:
           cleanup() { kill "$SERVER_PID" 2>/dev/null || true; }
           trap cleanup EXIT
           sleep 2
-          if ! timeout --signal=TERM --kill-after=10s 150s node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"; then
-            CODE=$?
+          CODE=0
+          timeout --signal=TERM --kill-after=10s 150s node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs" || CODE=$?
+          if [ "$CODE" -ne 0 ]; then
             echo "11520 mobile smoke failed or timed out (exit=$CODE)"
             echo "--- local HTTP server log ---"
             cat /tmp/k11520-http.log || true
