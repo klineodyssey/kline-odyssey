@@ -40,5 +40,12 @@ function relocateBag(){
 function health(){const p=$('#walletPanel'),t=$('#walletToggle'),b=$('.bagRelocatedV258');const pr=p?.getBoundingClientRect(),tr=t?.getBoundingClientRect(),br=b?.getBoundingClientRect();const report={version:'2.5.8',walletCollapsed:!!p?.classList.contains('collapsed'),walletCompact:!!pr&&pr.width<=50&&pr.height<=50,walletToggleVisible:!!tr&&tr.width>0&&tr.height>0&&(t?.textContent||'').trim().length>0,walletToggleInside:!!pr&&!!tr&&tr.left>=pr.left-1&&tr.right<=pr.right+1&&tr.top>=pr.top-1&&tr.bottom<=pr.bottom+1,bagStandalone:!!b&&b.parentElement===document.body,bagVisible:!!br&&br.width>0&&br.height>0};report.ok=Object.values(report).every((v,k)=>k<1||typeof v!=='boolean'||v);globalThis.__K11520_MOBILE_VISUAL_HEALTH__=report;document.documentElement.dataset.v258VisualHealth=report.ok?'PASS':'RED';return report}
 function apply(){ensureStyle();syncVersion();hardenWallet();relocateBag();return health()}
 
-export function install11520MobileVisualHardeningV258(){apply();let n=0;const tick=()=>{n++;apply();if(n<36)setTimeout(tick,120)};setTimeout(tick,80);let queued=false;const mo=new MutationObserver(()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;apply()})});mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});setTimeout(()=>{try{mo.disconnect()}catch{}apply()},7000);return health()}
+export function install11520MobileVisualHardeningV258(){
+  apply();let n=0;const tick=()=>{n++;apply();if(n<36)setTimeout(tick,120)};setTimeout(tick,80);
+  try{globalThis.__K11520_MOBILE_VISUAL_OBSERVER__?.disconnect()}catch{}
+  let queued=false;const mo=new MutationObserver(()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;apply()})});
+  mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  globalThis.__K11520_MOBILE_VISUAL_OBSERVER__=mo;
+  return health()
+}
 export {health as get11520MobileVisualHealth};
