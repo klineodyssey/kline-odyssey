@@ -1,7 +1,7 @@
 /* KGEN_META
-VERSION: 2.5.3
+VERSION: 2.5.4
 STATUS: REVIEW_FIRST
-PURPOSE: Human-approved 11520 mobile control imagery with stable DOM installation, explicit blocker cleanup, non-blocking Y control and control-health instrumentation. No trade, wallet, chain, or settlement behavior changes.
+PURPOSE: Human-approved 11520 mobile control imagery with stable DOM installation, explicit blocker cleanup, non-blocking Y control, modal layering and control-health instrumentation. No trade, wallet, chain, or settlement behavior changes.
 */
 const $=s=>document.querySelector(s);
 
@@ -20,11 +20,12 @@ const REQUIRED_CONTROLS=Object.freeze([
 ]);
 
 function ensureStyle(){
-  if($('#k11520ControlsV253Style'))return;
+  if($('#k11520ControlsV254Style'))return;
   $('#k11520ControlsV251Style')?.remove();
   $('#k11520ControlsV252Style')?.remove();
+  $('#k11520ControlsV253Style')?.remove();
   const s=document.createElement('style');
-  s.id='k11520ControlsV253Style';
+  s.id='k11520ControlsV254Style';
   s.textContent=`
   /* Approved control map: XZ=brand logo, Y=16888 fairy, lots=KGEN logo, warp=UFO. */
   #joy #knob{overflow:hidden!important;padding:0!important;background:#071018!important;border:2px solid #68e4ff!important;box-shadow:0 5px 18px #000a,0 0 14px #68e4ff55!important;touch-action:none!important}
@@ -44,6 +45,11 @@ function ensureStyle(){
   #cControl,#lotsControl{overflow:visible!important}
   #cControl label,#lotsControl label{font-weight:900!important;color:#f1ca73!important}
   #cControl .read,#lotsControl .read{font-weight:900!important;color:#eafcff!important}
+
+  /* Modal/service organs must be above the compact wallet valve so close/send buttons remain touchable. */
+  #aiChatPanel{z-index:4200!important}
+  #sheet{z-index:4100!important}
+  #confirm{z-index:4300!important}
 
   /* The old full-screen look layer is the known obsolete center interceptor. Remove only this known organ. */
   #lookPad{display:none!important;pointer-events:none!important}
@@ -95,7 +101,7 @@ function removeKnownBlockers(){
 }
 
 function controlHealth(){
-  const report={version:'2.5.3',ok:true,controls:{},knownBlockers:{lookPad:'ABSENT'},bridges:{yControl:'UNKNOWN'}};
+  const report={version:'2.5.4',ok:true,controls:{},knownBlockers:{lookPad:'ABSENT'},bridges:{yControl:'UNKNOWN'}};
   for(const [name,selector,src] of REQUIRED_CONTROLS){
     const host=$(selector),img=host?.querySelector('img.v252ControlImg');
     const rect=host?.getBoundingClientRect?.();
