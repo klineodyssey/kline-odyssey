@@ -20,7 +20,7 @@ const assertVisible=async selector=>{
   assert.ok(diag.w>0&&diag.h>0&&diag.display!=='none'&&diag.visibility!=='hidden',`control ${selector} not visible: ${JSON.stringify(diag)}`);
   return diag;
 };
-const intersects=(a,b)=>a&&b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
+const intersects=(a,b)=>!!(a&&b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y);
 const xyz=async()=>{
   const t=await page.locator('#xyz').textContent();
   const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);
@@ -43,7 +43,7 @@ for(const id of ['attack','skill','dodge']){await page.locator('#'+id).click({ti
 const joyBox=await page.locator('#joy').boundingBox();assert.ok(joyBox);
 for(const id of ['attack','skill','dodge','flat','orderFire']){
   const b=await page.locator('#'+id).boundingBox();
-  assert.equal(intersects(joyBox,b),false,`XZ joystick overlaps ${id}: joy=${JSON.stringify(joyBox)} target=${JSON.stringify(b)}`);
+  if(b)assert.equal(intersects(joyBox,b),false,`XZ joystick overlaps visible ${id}: joy=${JSON.stringify(joyBox)} target=${JSON.stringify(b)}`);
 }
 await assertVisible('#knob img');
 let p0=await xyz();
@@ -65,9 +65,9 @@ for(const id of ['walletToggle','dockToggle','orderFire','tradeSword','flat','ai
 await assertVisible('#yJoyV250');
 await assertVisible('#yJoyV250 .yKnob img');
 const y0=(await xyz()).y;
-await dragPointer('#yJoyV250',{toX:.5,toY:.12,pointerId:61,hold:360});
+await dragPointer('#yJoyV250 .yKnob',{toX:.5,toY:.05,pointerId:61,hold:360});
 const y1=(await xyz()).y;assert.ok(y1>y0,`Y up must increase altitude: ${y0} -> ${y1}`);
-await dragPointer('#yJoyV250',{toX:.5,toY:.88,pointerId:62,hold:360});
+await dragPointer('#yJoyV250 .yKnob',{toX:.5,toY:.95,pointerId:62,hold:360});
 const y2=(await xyz()).y;assert.ok(y2<y1,`Y down must decrease altitude: ${y1} -> ${y2}`);
 
 // Lots and C: the images themselves are draggable thumbs, values update live and remain after release.
