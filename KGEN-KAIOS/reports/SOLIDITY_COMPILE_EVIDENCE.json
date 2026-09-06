@@ -19,8 +19,8 @@
     {
       "contractName": "KGEN_TempleHeart_Upgradeable",
       "sourceName": "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
-      "bytecodeBytes": 23768,
-      "deployedBytecodeBytes": 23553
+      "bytecodeBytes": 23984,
+      "deployedBytecodeBytes": 23769
     },
     {
       "contractName": "ERC1967Proxy",

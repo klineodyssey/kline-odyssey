@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "1.0.0-candidate",
+  "policyId": "HENGYAO_LIFE_TRANSACTION_POLICY_V1",
+  "status": "HUMAN_GOVERNANCE_APPROVED_PENDING_SECURE_SIGNER",
+  "lifeId": "LIFE-CODEX-GM-0001",
+  "workerId": "codex-gm-01",
+  "walletAddress": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+  "chainId": 56,
+  "allowedTarget": {
+    "address": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+    "codeHash": "0x1d3eba15b4c4895710c6e68f3f27e97cb0e2c94edc254d9f1e9148b3d7f55d32",
+    "source": "KGEN/contracts/KGEN_TempleHeart_V3_2_6.sol",
+    "runtimeVerificationRequired": true
+  },
+  "tokenRegistry": {
+    "KGEN": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be"
+  },
+  "allowedMethods": [
+    {
+      "signature": "heartbeatClaim()",
+      "selector": "0x2d293562",
+      "maxGasUnits": "200000",
+      "maxNativeValueWei": "0",
+      "argumentPolicy": "NO_ARGUMENTS",
+      "receiptPolicy": "HEARTBEAT_EVENT_AND_EXACT_1_KGEN_TRANSFER"
+    },
+    {
+      "signature": "makeWish(bytes32)",
+      "selector": "0x85e6be79",
+      "maxGasUnits": "100000",
+      "maxNativeValueWei": "0",
+      "argumentPolicy": "ONE_NONZERO_BYTES32",
+      "receiptPolicy": "WISH_EVENT_EXACT_HASH"
+    },
+    {
+      "signature": "fortuneClaim(uint256)",
+      "selector": "0xf7d28733",
+      "maxGasUnits": "200000",
+      "maxNativeValueWei": "0",
+      "argumentPolicy": "WHOLE_KGEN_1_TO_8_AND_PREEXISTING_1_KGEN_PASS",
+      "receiptPolicy": "FORTUNE_EVENT_AND_EXACT_KGEN_TRANSFER"
+    },
+    {
+      "signature": "vowTo(uint8,uint256)",
+      "selector": "0xbecfd3d2",
+      "maxGasUnits": "200000",
+      "maxNativeValueWei": "0",
+      "argumentPolicy": "EXACT_VERIFIED_NET_PROFIT_AND_PREEXISTING_ALLOWANCE_MAX_8_KGEN",
+      "receiptPolicy": "VOW_EVENT_AND_EXACT_KGEN_TRANSFER_TO_HEART"
+    }
+  ],
+  "requiredGates": [
+    "LIFE_ID",
+    "WORKER_ID",
+    "WALLET_BINDING",
+    "CHAIN_ID",
+    "TARGET",
+    "TARGET_CODE_HASH",
+    "FUNCTION_SELECTOR",
+    "ARGUMENT_BOUNDS",
+    "ZERO_NATIVE_VALUE",
+    "CURRENT_AUTHORITY",
+    "CURRENT_NONCE",
+    "CURRENT_BALANCE",
+    "SIMULATION",
+    "GAS_ESTIMATE",
+    "SURVIVAL_RESERVE",
+    "POLICY_VERSION",
+    "DURABLE_POLICY_ACTIVATION",
+    "DURABLE_HUMAN_DECISION",
+    "EXPIRY",
+    "REPLAY_NONCE",
+    "SECURE_SIGNER_BINDING",
+    "DURABLE_REPLAY_RESERVATION",
+    "CANONICAL_RECEIPT"
+  ],
+  "forbiddenActions": [
+    "ARBITRARY_TRANSFER",
+    "UNLIMITED_APPROVAL",
+    "CONTRACT_DEPLOYMENT",
+    "PROXY_UPGRADE",
+    "GOVERNANCE_EXECUTION",
+    "TREASURY_WITHDRAWAL",
+    "OWNERSHIP_CHANGE",
+    "GENERAL_TOKEN_TRANSFER",
+    "PAYROLL_PAYMENT",
+    "PRIVATE_KEY_OUTPUT"
+  ],
+  "activation": {
+    "currentAuthority": "A2_PERSONAL_LOW_RISK_SIGNING",
+    "requiredAuthority": "A2_PERSONAL_LOW_RISK_SIGNING",
+    "currentStatus": "APPROVED_PENDING_SECURE_SIGNER_BINDING",
+    "approvalEvidenceId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
+    "approvalEvidencePath": "KGEN-KAIOS/life-circulation/policies/hengyao-autonomy-xuanyao-onboarding-human-decision.candidate.json",
+    "approvalDecisionHash": "7002cff12514f03aaa3abb89f99d818ea4de239184d6f921a7bfc3fe4f91cdba",
+    "approvalPolicyScopeHash": "4a4de9f8cffd3342eb9fd69f16f33dbca9130164a30c590080361d8889586cf0",
+    "secureSignerConnected": false,
+    "broadcasterIncluded": false,
+    "operationalActivationReviewed": false
+  },
+  "receipt": {
+    "minimumConfirmations": 12,
+    "canonicalBlockRequired": true,
+    "successfulStatusRequired": true,
+    "exactSenderRequired": true,
+    "exactTargetRequired": true,
+    "exactEventRequired": true,
+    "exactTokenTransferRequiredWhenApplicable": true,
+    "ledgerApplyBeforeVerification": false
+  },
+  "privateKeyPolicy": {
+    "privateKeyAcceptedByGate": false,
+    "seedAcceptedByGate": false,
+    "secretLoggingAllowed": false,
+    "custodyBoundary": "EXTERNAL_AUTHORIZED_SECURE_SIGNER_ONLY"
+  },
+  "secureSignerConnectionRequest": {
+    "REQUEST_TYPE": "HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST",
+    "REQUEST_ID": "HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1",
+    "REQUEST_STATUS": "AWAITING_EXTERNAL_SECURE_SIGNER_EVIDENCE",
+    "REQUEST_CREATED_AT": "2026-08-24T17:26:53Z",
+    "REGISTERED_HENGYAO_WALLET": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    "CHAIN_ID": 56,
+    "SIGNER_PROVIDER_ID": null,
+    "SIGNER_ADDRESS_BINDING": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+    "POLICY_HASH": "4a4de9f8cffd3342eb9fd69f16f33dbca9130164a30c590080361d8889586cf0",
+    "POLICY_HASH_SCOPE": "HENGYAO_A2_APPROVED_POLICY_SCOPE_STABLE_STRINGIFY_SHA256",
+    "ALLOWED_TARGET": "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
+    "ALLOWED_SELECTORS": [
+      "0x2d293562",
+      "0x85e6be79",
+      "0xf7d28733",
+      "0xbecfd3d2"
+    ],
+    "NONCE_SOURCE": "EXTERNAL_PROVIDER_BSC_PENDING_NONCE",
+    "GAS_ESTIMATE_SUPPORT": true,
+    "BROADCAST_CAPABILITY": true,
+    "RECEIPT_QUERY_CAPABILITY": true,
+    "CANONICAL_BLOCK_HASH_VALIDATION": true,
+    "MIN_CONFIRMATIONS": 12,
+    "PRIVATE_KEY_OUTPUT": false,
+    "SEED_OUTPUT": false,
+    "GENERAL_PURPOSE_SIGNING": false,
+    "ARBITRARY_TRANSFER": false,
+    "PROVIDER_ATTESTATION_REQUIRED": true,
+    "FIRST_ACTION_AFTER_MACHINE_VERIFICATION": "heartbeatClaim()",
+    "AUTO_CONTINUE_AFTER_CANONICAL_RECEIPT": [
+      "VERIFY_HEARTBEAT_RECEIPT",
+      "VERIFY_EXACT_1_KGEN_RECEIVED",
+      "PREPARE_FREE_MAKE_WISH",
+      "RESUME_MICROCIRCULATION_UNDER_EXISTING_GATES"
+    ]
+  }
+}

@@ -60,6 +60,8 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
 | KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
+| KAIOS-EXTERNAL-AGENT-IDENTITY-PROVIDER-001 | HOLD | EXTERNAL_PROVIDER_UNASSIGNED | codex-gm-01 | P0 | Infrastructure / Identity | `EXTERNAL_INTEGRATION_NOT_CREATED` | `KGEN-KAIOS/life-circulation/reports/SECURE_TRANSACTION_AND_REVIEWER_GATE_HANDOFF.md` |
+| KAIOS-EXTERNAL-EVM-SECURE-SIGNER-001 | HOLD | EXTERNAL_PROVIDER_UNASSIGNED | codex-gm-01 | P0 | Infrastructure / Security | `EXTERNAL_INTEGRATION_NOT_CREATED` | `KGEN-KAIOS/life-circulation/reports/SECURE_TRANSACTION_AND_REVIEWER_GATE_HANDOFF.md` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
@@ -84,6 +86,42 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 - Scope source: `KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md`, section `4168 Map / World Agent Handoff`
 - Scope: future project-isolated frontend implementation for the existing 4168 奈何橋 point.
 - Activation: requires the responsible Agent to accept a separate bounded task; Company Core does not edit Map/Temple frontend here.
+
+### KAIOS-EXTERNAL-AGENT-IDENTITY-PROVIDER-001 - External Agent Identity Provider
+
+- Status: HOLD
+- Demand Status: UNFULFILLED_EXTERNAL_INFRASTRUCTURE_DEMAND
+- Owner: EXTERNAL_PROVIDER_UNASSIGNED
+- Reviewer: codex-gm-01
+- Priority: P0
+- Risk Level: R1 external identity integration
+- Department: Infrastructure / Identity
+- Purpose: provide machine-verifiable, independent controller identities for `LIFE-XUANYAO-SOL-0001` / `xuanyao-sol-01` and `LIFE-CODEX-GM-0001` / `codex-gm-01` without a self-asserted issuer.
+- Required capabilities: provider-signed agent-instance attestation; authority lease; controller ID; Life ID and Worker ID binding; challenge-response; expiry; nonce; machine-verifiable issuer; independent controller comparison; routable ACK channel.
+- Existing interface: `XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1` in `KGEN-KAIOS/life-circulation/examples/xuanyao-life-worker-onboarding.candidate.json`.
+- Classification: `MISSING_CODE = NO`; `MISSING_EXTERNAL_CAPABILITY = YES`; `ENGINEERING_LOOP = DO_NOT_SPIN`; `WAIT_STATE = PROCUREMENT_INTEGRATION_WAIT`.
+- Claimability: NOT_CLAIMABLE by Cursor or an internal agent. Activation requires a configured external provider and machine-verifiable evidence accepted by the existing verifier.
+- Rescan trigger: only `INSTALLED_CONNECTORS_CHANGED`, `PLUGIN_CATALOG_CHANGED`, `HOST_CAPABILITY_CHANGED`, or `NEW_PROVIDER_CONFIGURED`; otherwise `DO_NOT_REPEAT_IDENTICAL_PROVIDER_SCAN = TRUE`.
+- Auto-continuation after fulfillment: controller bind, independent ACK channel, four Xuanyao ACKs, T2 gate, review-permission gate, then PR #165 distinct review assignment if all gates pass.
+- Prohibited substitutes: fabricated controller IDs, Hengyao self-attestation, model/provider name strings, repository controller records, or Hengyao signing Xuanyao ACKs.
+
+### KAIOS-EXTERNAL-EVM-SECURE-SIGNER-001 - External EVM Secure Signer
+
+- Status: HOLD
+- Demand Status: UNFULFILLED_EXTERNAL_INFRASTRUCTURE_DEMAND
+- Owner: EXTERNAL_PROVIDER_UNASSIGNED
+- Reviewer: codex-gm-01
+- Priority: P0
+- Risk Level: R1 policy-bounded external signing integration
+- Department: Infrastructure / Security
+- Purpose: provide external-custody execution for Hengyao's already-approved A2 low-risk Life transactions without exposing private-key or seed material to the AI environment.
+- Required capabilities: EVM / BSC chain 56; existing Hengyao wallet binding; external secure custody; policy-enforced target and selector allowlists; no arbitrary transfer; no general-purpose signing; nonce; gas estimate; broadcast; receipt query; canonical block verification; 12 confirmations; machine-verifiable provider attestation.
+- Existing interface: `HENGYAO_SECURE_SIGNER_CONNECTION_REQUEST_V1` in `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json`.
+- Classification: `MISSING_CODE = NO`; `MISSING_EXTERNAL_CAPABILITY = YES`; `ENGINEERING_LOOP = DO_NOT_SPIN`; `WAIT_STATE = PROCUREMENT_INTEGRATION_WAIT`.
+- Claimability: NOT_CLAIMABLE by Cursor or an internal agent. Activation requires Human-controlled procurement/configuration or connection of an eligible wallet/custody provider, followed by machine verification through the existing gate.
+- Rescan trigger: only `INSTALLED_CONNECTORS_CHANGED`, `PLUGIN_CATALOG_CHANGED`, `HOST_CAPABILITY_CHANGED`, or `NEW_PROVIDER_CONFIGURED`; otherwise `DO_NOT_REPEAT_IDENTICAL_PROVIDER_SCAN = TRUE`.
+- Auto-continuation after fulfillment: bind signer, execute `heartbeatClaim()`, verify canonical receipt, verify 1 KGEN received, execute the free Wish through the existing gate, then resume microcirculation.
+- Prohibited capabilities: private-key output, seed output, arbitrary transfer, general-purpose signing, Treasury access, or signing outside the existing A2 policy.
 
 ### KAIOS-GM-V4-2026-0001 - General Manager Decision Engine
 

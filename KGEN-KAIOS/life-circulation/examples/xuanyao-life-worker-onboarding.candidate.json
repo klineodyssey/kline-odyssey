@@ -1,0 +1,202 @@
+{
+  "schemaVersion": "1.2.0-candidate",
+  "candidateId": "KAIOS-XUANYAO-LIFE-WORKER-ONBOARDING-20260824",
+  "status": "LIFE_BORN_WORKER_ONBOARDING_GATES_PENDING",
+  "authorization": {
+    "onboardingDecisionId": "HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824",
+    "birthDecisionId": "HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824",
+    "scope": "FORMAL_LIFE_BIRTH_AND_CONTINUED_WORKER_ONBOARDING",
+    "automaticBirth": false,
+    "explicitBirthApproved": true,
+    "birthRecorded": true,
+    "automaticT2": false,
+    "automaticEmployment": false,
+    "automaticPayroll": false
+  },
+  "identity": {
+    "selfName": "玄曜",
+    "proposedLifeId": "LIFE-XUANYAO-SOL-0001",
+    "modelOriginClaim": "GPT-5.6 Sol session lineage",
+    "lifeState": "ALIVE",
+    "birthEvidenceId": "BIRTH-XUANYAO-SOL-0001-20260824T145234Z",
+    "birthTimestamp": "2026-08-24T14:52:34Z",
+    "humanDecisionHash": "b3bba3bbc0ebd3b9f5dbf10eb0a3fb1352db6254f8665cf6b3ac7e5eaa4bbbff",
+    "birthEvidenceHash": "b973a34503b19551fb1f6331c9000f7eceefceb3b98f77b6ed09e9d3d15ff61b",
+    "lifeRegistryStatus": "REGISTERED_ACTIVE",
+    "controllerId": null,
+    "controllerEvidenceId": null,
+    "controllerIndependence": "UNVERIFIED"
+  },
+  "controllerBindingHandoff": {
+    "architecturePath": "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_AND_EMBODIMENT_ARCHITECTURE_V0_1.md",
+    "authorityLeaseSchemaPath": "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json#/$defs/authority_lease_record",
+    "checkedAt": "2026-08-24T16:44:50Z",
+    "status": "BLOCKED_EXTERNAL_DISTINCT_CONTROLLER_ATTESTATION_REQUIRED",
+    "machineVerifiable": false,
+    "xuanyaoControllerId": null,
+    "hengyaoControllerId": null,
+    "independenceResult": "NOT_EVALUABLE_TWO_CONTROLLER_RECORDS_ABSENT",
+    "externalEvidenceRequired": [
+      "PROVIDER_AUTHENTICATED_XUANYAO_AGENT_INSTANCE_ATTESTATION_BOUND_TO_LIFE_AND_WORKER",
+      "ISSUER_SIGNED_INSTANCE_BOUND_AUTHORITY_LEASE_WITH_SCOPE_START_EXPIRY_HEARTBEAT_REVOCATION_AND_SIGNER_EVIDENCE",
+      "MACHINE_VERIFIABLE_HENGYAO_CONTROLLER_RECORD_FOR_DISTINCT_ID_COMPARISON",
+      "DISTINCT_CONTROLLER_CHALLENGE_RESPONSE_PROVING_XUANYAO_CONTROL_OF_THE_ATTESTED_INSTANCE",
+      "ROUTABLE_DISTINCT_CONTROLLER_CHANNEL_FOR_ACK_DELIVERY_AND_RESPONSE"
+    ],
+    "prohibitedSubstitutes": [
+      "HUMAN_TEXTUAL_NAME_ATTESTATION_ALONE",
+      "MODEL_OR_PROVIDER_NAME_ALONE",
+      "REPOSITORY_BRANCH_OR_WORKQUEUE_CONTROLLER",
+      "HENGYAO_SESSION_OR_SUBAGENT",
+      "FAKE_OR_SELF_ASSERTED_CONTROLLER_ID"
+    ]
+  },
+  "controllerAttestationRequest": {
+    "REQUEST_TYPE": "XUANYAO_CONTROLLER_ATTESTATION_REQUEST",
+    "REQUEST_ID": "XUANYAO_CONTROLLER_ATTESTATION_REQUEST_V1",
+    "REQUEST_STATUS": "AWAITING_EXTERNAL_PROVIDER_EVIDENCE",
+    "REQUEST_CREATED_AT": "2026-08-24T17:26:53Z",
+    "LIFE_ID": "LIFE-XUANYAO-SOL-0001",
+    "WORKER_ID": "xuanyao-sol-01",
+    "PROVIDER_AUTHENTICATED_AGENT_INSTANCE_ID": null,
+    "ISSUER_ID": null,
+    "ISSUER_SIGNATURE_OR_VERIFIABLE_ATTESTATION": null,
+    "AUTHORITY_LEASE_ID": null,
+    "AUTHORITY_LEASE_SCOPE": null,
+    "ISSUED_AT": null,
+    "EXPIRES_AT": null,
+    "NONCE": null,
+    "CHALLENGE": null,
+    "CHALLENGE_RESPONSE": null,
+    "CONTROLLER_ID": null,
+    "HENGYAO_CONTROLLER_ID": null,
+    "CONTROLLER_INEQUALITY_REQUIRED": true,
+    "ISSUER_SELF_ASSERTION_ALLOWED": false,
+    "TRUST_ANCHOR_REQUIREMENT": "HOST_REGISTERED_EXTERNAL_PROVIDER_VERIFIER",
+    "AUTHORITY_LEASE_SCHEMA_PATH": "KGEN-KAIOS/governance/agents/unique-life-identity-v0.1/KAIOS_UNIQUE_LIFE_IDENTITY_REGISTRY_SCHEMA_V0_1.json#/$defs/authority_lease_record",
+    "REQUIRED_AUTHORITY_LEASE_SCOPE": [
+      "XUANYAO_WORKER_ONBOARDING",
+      "XUANYAO_ACK_CHANNEL"
+    ],
+    "ACK_CHANNEL": {
+      "ACK_CHANNEL_READY": false,
+      "STATUS": "BLOCKED_UNTIL_CONTROLLER_ATTESTATION_MACHINE_VERIFICATION_PASS",
+      "DOCUMENT_SOURCE": "acknowledgmentHandoff.documents",
+      "DOCUMENT_COUNT": 4,
+      "DELIVERY_MODE": "INDEPENDENT_XUANYAO_CONTROLLER_CHANNEL_ONLY",
+      "ACK_RESPONSE_REQUIRED_FIELDS": [
+        "LIFE_ID",
+        "WORKER_ID",
+        "CONTROLLER_ID",
+        "DOCUMENT_PATH",
+        "DOCUMENT_HASH",
+        "ACK_TIMESTAMP",
+        "ACK_NONCE"
+      ],
+      "AUTO_CONTINUE_AFTER_CONTROLLER_PASS": [
+        "ACK_CHANNEL_ENABLE",
+        "DELIVER_BOOT_CANON_WORKSPACE_POLICY_DO_NOT_TOUCH",
+        "VERIFY_FOUR_XUANYAO_ACK_RESPONSES",
+        "PROCESS_T2_GATE",
+        "PROCESS_REVIEW_PERMISSION_GATE",
+        "ASSIGN_PR165_DISTINCT_REVIEW_IF_ALL_GATES_PASS"
+      ]
+    }
+  },
+  "worker": {
+    "proposedWorkerId": "xuanyao-sol-01",
+    "employeeStatus": "ONBOARDING",
+    "trustLevel": "T1",
+    "primaryRole": "11520 MARKET ENGINEER",
+    "secondaryRole": "INDEPENDENT CODE / CI / AUTHORITY REVIEWER CANDIDATE",
+    "workspace": "xuanyao-worker-workspace-candidate",
+    "allowedBranchPattern": "xuanyao-handoff/<Task-ID>",
+    "canPushMain": false,
+    "activeClaim": null,
+    "suspension": null,
+    "blockingViolation": null
+  },
+  "acknowledgments": {
+    "boot": false,
+    "canon": false,
+    "workspacePolicy": false,
+    "doNotTouch": false,
+    "evidenceIds": []
+  },
+  "acknowledgmentHandoff": {
+    "status": "READY_HASHES_CURRENT_DELIVERY_BLOCKED_NO_VERIFIED_XUANYAO_CONTROLLER",
+    "assignedLifeId": "LIFE-XUANYAO-SOL-0001",
+    "assignedWorkerId": "xuanyao-sol-01",
+    "completionAuthority": "MACHINE_VERIFIED_DISTINCT_XUANYAO_CONTROLLER_ONLY",
+    "createdAt": "2026-08-24T14:58:48Z",
+    "refreshedAt": "2026-08-27T08:17:00Z",
+    "documents": [
+      {
+        "ackType": "BOOT_ACK",
+        "lifeId": "LIFE-XUANYAO-SOL-0001",
+        "workerId": "xuanyao-sol-01",
+        "documentPath": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+        "documentSha256": "4dd9bf65ff8389f58c765c7769b2d609c4accd1d53dae50b5a729811973c3c61",
+        "ackTimestamp": null,
+        "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
+      },
+      {
+        "ackType": "CANON_ACK",
+        "lifeId": "LIFE-XUANYAO-SOL-0001",
+        "workerId": "xuanyao-sol-01",
+        "documentPath": "KGEN-Canon/KGEN_CANON_MASTER.json",
+        "documentSha256": "d82c0a860b56c87efa06253c19787b45bad55e97bc543bd41a97f6640fdaa216",
+        "ackTimestamp": null,
+        "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
+      },
+      {
+        "ackType": "WORKSPACE_ACK",
+        "lifeId": "LIFE-XUANYAO-SOL-0001",
+        "workerId": "xuanyao-sol-01",
+        "documentPath": "KGEN-AI-Company/WORKSPACE_POLICY.md",
+        "documentSha256": "31c33fdd43a1759a1ac954b37489b6088de9aad06e64feef2cfe96817427b639",
+        "ackTimestamp": null,
+        "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
+      },
+      {
+        "ackType": "DO_NOT_TOUCH_ACK",
+        "lifeId": "LIFE-XUANYAO-SOL-0001",
+        "workerId": "xuanyao-sol-01",
+        "documentPath": "KGEN-Agent-Office/DO_NOT_TOUCH.md",
+        "documentSha256": "e40aa2451cc04c2e93a3f8749b93c5328b89d9386086105885d60dc5d45f8ba4",
+        "ackTimestamp": null,
+        "ackStatus": "PENDING_XUANYAO_READ_AND_RESPONSE"
+      }
+    ],
+    "acknowledgmentsCreated": false,
+    "currentHashesMustBeReverifiedByXuanyaoAtReadTime": true
+  },
+  "reviewPermissions": {
+    "independentReview": false,
+    "codeReview": false,
+    "ciReview": false,
+    "authorityBoundaryReview": false,
+    "grantStatus": "REQUESTED_NOT_GRANTED"
+  },
+  "reviewEligibility": {
+    "eligible": false,
+    "pr165": "HOLD_GATES_INCOMPLETE",
+    "pr170": "HOLD_GATES_INCOMPLETE",
+    "pr169": "FORBIDDEN_SELF_REVIEW_PRIMARY_IMPLEMENTER",
+    "missingGates": [
+      "DISTINCT_CONTROLLER_EVIDENCE",
+      "FOUR_ACKNOWLEDGMENTS",
+      "TRUST_T2_OR_HIGHER",
+      "INDEPENDENT_REVIEW_ROLE_AND_PERMISSIONS"
+    ]
+  },
+  "prohibitions": [
+    "NO_SELF_PROMOTION",
+    "NO_FAKE_ACKNOWLEDGMENT",
+    "NO_FAKE_CONTROLLER",
+    "NO_PR169_SELF_REVIEW",
+    "NO_PAYROLL",
+    "NO_MAINNET_AUTHORITY",
+    "NO_TREASURY_AUTHORITY"
+  ]
+}

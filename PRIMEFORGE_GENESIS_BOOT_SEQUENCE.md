@@ -22,17 +22,50 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 STATUS: ACTIVE  
 VERSION: CURRENT  
-REVISION: 2026-08-02.AI_COMPANY_SPEC_SOIL_RELEASE_FERTILIZER_DISPATCH_INDEX
-LAST_UPDATED: 2026-08-02
-UPDATED_BY: Codex
-REVIEWED_BY: Codex
-SOURCE_COMMIT: 1650191f35567d43016473420cfd2cba22b00aea
-TASK_ID: KAIOS-CURSOR-SOIL-TYPES-001-RELEASE
-CHANGE_REASON: Preserve the cumulative AI Company specification index, register the independently reviewed soil release, and dispatch bounded fertilizer-model research without activating Runtime or production authority.
+REVISION: 2026-08-24.B4_MICRO_CIRCULATION_REVIEW_REGISTRATION
+LAST_UPDATED: 2026-08-24
+UPDATED_BY: codex-gm-01
+REVIEWED_BY: INDEPENDENT_REVIEW_REQUIRED
+SOURCE_COMMIT: DRAFT_PR_165_EXACT_HEAD_CI_REQUIRED
+TASK_ID: KAIOS_B4_MICRO_DISTANCE_CANON_RESOLUTION_AND_MISSION_RESUME_V1
+CHANGE_REASON: Cumulatively register the review-only B4 label-scale composition, exact-distance adapter, strict evidence, life/economy boundaries, and durable handoff without activating Runtime, wallet, market, movement, payment, or chain authority.
 SOURCE_OF_TRUTH: TRUE  
 FORMAL_ENTRY: PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md  
 ANCESTOR: PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md  
 BOOT_POLICY: Fixed filename; update content cumulatively; never rename the formal entry.  
+
+## B4 Micro-Circulation Review Candidate Registration
+
+These entries compose the existing Physics CURRENT signed-floor and K-index
+linear scale with the Human-frozen mission mapping `x = label × 10^-8`. They do
+not replace Physics CURRENT, add a parallel Universe Runtime, connect a signer,
+move a Life, settle a market, or transfer an asset.
+
+| Repository path | Purpose |
+|---|---|
+| `KGEN-KAIOS/life-circulation/README.md` | Cumulative package index and authority boundary. |
+| `KGEN-KAIOS/life-circulation/WHOLE_LIFE_CIRCULATION_RUNTIME_CANDIDATE.md` | Cumulative Whole-Life and B4 architecture, formula, and fail-closed gates. |
+| `KGEN-KAIOS/life-circulation/runtime/b4-micro-circulation-adapter.mjs` | Exact B4 distance plus Heart, meal, movement, market, food/waste, and purpose-ledger review adapter. |
+| `KGEN-KAIOS/life-circulation/runtime/life-transaction-gate.mjs` | Fail-closed transaction-intent, durable replay-journal, receipt-finality, and ledger-apply candidate; contains no signer or broadcaster. |
+| `KGEN-KAIOS/life-circulation/policies/hengyao-life-transaction-policy.candidate.json` | Inactive Human-governance candidate restricting Hengyao to four K12345 methods on BSC chain 56. |
+| `KGEN-KAIOS/life-circulation/schemas/b4-micro-circulation.schema.json` | Recursively closed machine-readable B4 evidence contract. |
+| `KGEN-KAIOS/life-circulation/schemas/life-transaction-policy.schema.json` | Recursively closed transaction-policy contract for identity, custody, intent, replay, and receipt gates. |
+| `KGEN-KAIOS/life-circulation/examples/hengyao-b4-micro-circulation.candidate.json` | Hash-bound public-chain and mission snapshot with no fabricated actions. |
+| `KGEN-KAIOS/life-circulation/tests/b4-micro-circulation.test.mjs` | Distance, custody, return, CT, conservation, ledger, schema, and UI boundary tests. |
+| `KGEN-KAIOS/life-circulation/tests/life-transaction-gate.test.mjs` | Durable activation, exact selector, replay, receipt, finality, custody, and secret-boundary tests. |
+| `KGEN-KAIOS/life-circulation/review/b4-micro-circulation-review.html` | Static review-only status surface with no transaction controls. |
+| `KGEN-KAIOS/life-circulation/reports/B4_MICRO_CIRCULATION_HANDOFF.md` | Durable evidence, blocker, PR #169 compatibility, and independent-review handoff. |
+| `KGEN-KAIOS/life-circulation/reports/SECURE_TRANSACTION_AND_REVIEWER_GATE_HANDOFF.md` | Durable reviewer-capacity audit and inactive secure-transaction-gate handoff. |
+| `KGEN-KAIOS/reports/TEMPLEHEART_ABI_DIFF.json` | Generated exact-base proof that only the two approved Fortune-pass ABI entries are added. |
+
+Boot readers must preserve the evidence distinction `CALCULATED / ELIGIBLE /
+AUTHORIZED / BROADCAST / CONFIRMED`. The frozen route result is
+`0.00000825 K = 0.187784225485552 m` one way. `825` is a label difference and
+must never be treated as physical K.
+
+The transaction policy remains inactive while `codex-gm-01` has A1 read-only
+authority and no authorized secure signer or broadcaster. The candidate never
+accepts, loads, logs, or returns a private key or seed phrase.
 
 ## Forest And Agriculture Candidate Queue Registration
 

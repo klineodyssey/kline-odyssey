@@ -64,6 +64,7 @@ contract KGEN_TempleHeart_Upgradeable is
     uint256 public constant HEARTBEAT_REWARD_WHOLE = 1;
     uint256 public constant IGNITE_REWARD_WHOLE = 8;
     uint256 public constant IGNITE_WINDOW_SECONDS = 10 minutes;
+    uint256 public constant MIN_FORTUNE_KGEN_PASS_RAW = 1_000_000_000_000_000_000;
 
     enum WishStatus { None, Created, HolyCupPassed, Claimable, Fulfilled, Expired }
     enum BurnOfferingType { None, Incense, JossPaper, BlessingLamp, FortuneCharm, VowOffering }
@@ -271,6 +272,7 @@ contract KGEN_TempleHeart_Upgradeable is
     error IgniteWindowClosed();
     error IgniteDayFull();
     error RepaymentRequired();
+    error FortuneKgenPassRequired(uint256 actualBalance, uint256 requiredBalance);
     error UnauthorizedGame();
     error GameSurvivalGateClosed();
 
@@ -607,6 +609,10 @@ contract KGEN_TempleHeart_Upgradeable is
     function fortuneClaim(bytes32 proofId) external nonReentrant whenNotPaused returns (uint256 rewardAmount) {
         if (proofId == bytes32(0)) revert InvalidAlchemyProof();
         if (fortuneBurnProofConsumed[proofId]) revert ProofAlreadyConsumed();
+        uint256 claimantKgenBalance = kgen.balanceOf(msg.sender);
+        if (claimantKgenBalance < MIN_FORTUNE_KGEN_PASS_RAW) {
+            revert FortuneKgenPassRequired(claimantKgenBalance, MIN_FORTUNE_KGEN_PASS_RAW);
+        }
 
         WishRecord storage wish = _activeWishByUser[msg.sender];
         FortuneLedger storage ledger = _fortuneLedgerByWallet[msg.sender];

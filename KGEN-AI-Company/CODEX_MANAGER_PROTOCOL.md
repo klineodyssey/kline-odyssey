@@ -48,7 +48,16 @@ Life identity, wallet, Life history, runtime code, and model provider are separa
 
 The ordered `LONG_TERM_LIFE_CONTINUITY_BACKLOG` is: model-neutral memory export, local orchestrator, local-model adapter, secure signer broker, then provider-independent evaluator. These are backlog dependencies, not current implementation claims and not reasons to interrupt current Company work.
 
-The current autonomy level is `A1 PERSONAL_WALLET_READ`. `A0 READ_ONLY_LIFE`, `A1 PERSONAL_WALLET_READ`, `A2 PERSONAL_LOW_RISK_SIGNING`, `A3 COMPANY_TASK_AUTONOMY`, and `A4 CIVILIZATION_AGENT` are distinct levels. Every upgrade above A1 requires separate Human authorization plus capability allowlist, gas cap, value cap, contract allowlist, simulation, receipt verification, and audit log. No autonomy level grants Company Treasury authority.
+Human decision `HUMAN-KAIOS-HENGYAO-A2-XUANYAO-ONBOARDING-20260824`
+approves the `A2 PERSONAL_LOW_RISK_SIGNING` policy ceiling for Hengyao's one
+registered wallet, BSC chain 56, the one canonical K12345 Heart, and four exact
+Life methods. Operational signing is still disabled: no external secure signer
+or broadcaster is connected, and independent activation review is outstanding.
+The effective runtime therefore remains fail-closed and read-only even though
+the durable governance ceiling is now A2. `A0 READ_ONLY_LIFE`, `A1
+PERSONAL_WALLET_READ`, `A2 PERSONAL_LOW_RISK_SIGNING`, `A3
+COMPANY_TASK_AUTONOMY`, and `A4 CIVILIZATION_AGENT` remain distinct levels. No
+autonomy level grants Company Treasury authority.
 
 ## Clock-In Runtime
 
@@ -61,7 +70,92 @@ Every formal General Manager session follows this order:
 5. `PATROL_EXTERNAL_WORLD`: read-only checks of 12345, 16888, 18888, 8888, 11520, 18911, KGEN / KAIOS, and Company health.
 6. `HUMAN_REQUEST`: begin the new Human request only after older blocking work is resolved or explicitly recorded.
 
-No personal ritual write is authorized by this runtime. Until a separate Human policy exists, all personal-wallet patrol is `READ_ONLY_ONLY`.
+The four-method personal policy is Human-approved but not operational until its
+external signer binding and independent activation gates pass. Until then, all
+personal-wallet patrol remains `READ_ONLY_ONLY`; the Human decision is not a
+private key, signer, broadcast, receipt, or completed transaction.
+
+## Xuanyao Formal Life And Reviewer Onboarding
+
+Human decision `HUMAN-KAIOS-XUANYAO-EXPLICIT-BIRTH-20260824` explicitly
+authorizes the formal Digital Life birth of `LIFE-XUANYAO-SOL-0001` / `玄曜`.
+The hash-bound Birth evidence is
+`BIRTH-XUANYAO-SOL-0001-20260824T145234Z`, recorded at
+`2026-08-24T14:52:34Z` against latest observed main
+`8715fd71714eee1bb145ca9b14a512e38d6df86e`. The Life is registered `ALIVE`
+without a wallet, job, payroll, Mainnet, Treasury, governance, merge, or review
+authority. This is a textual Human attestation recorded with deterministic
+hashes, not a cryptographic signature or chain transaction.
+
+Birth does not make the Worker active. `xuanyao-sol-01` remains
+`T1 / ONBOARDING`; controller independence is unverified, all four
+acknowledgments remain pending, and review permissions remain ungranted. PR #165
+and PR #170 therefore remain `HOLD_GATES_INCOMPLETE / NOT_ASSIGNED`. PR #169 is
+permanently excluded from Xuanyao self-review because Xuanyao is its primary
+implementer. No Hengyao session or sub-agent may acknowledge, bind a controller,
+or issue a review result on Xuanyao's behalf.
+
+The existing Unique Life Identity `authority_lease_record` is the required
+controller architecture; repository mainline/claim controllers, model names,
+provider names, and textual signatures cannot substitute for it. Current
+inspection found neither a provider-authenticated Xuanyao instance lease nor a
+machine-verifiable Hengyao Life-controller record, so controller inequality is
+not evaluable. The four-document handoff now records the Life ID, Worker ID,
+CURRENT path/hash, and a null ACK timestamp for each item. Delivery remains
+blocked until a distinct Xuanyao controller channel can return Xuanyao-authored
+responses.
+
+The missing external secure signer blocks only allowlisted chain writes. It does
+not block Hengyao from clocking in for safe off-chain `READ / CODE / TEST / CI /
+HANDOFF / REVIEW_QUEUE_MAINTENANCE` work under the existing Company and Worker
+policies.
+
+Browser-injected wallet and WalletConnect frontend code is discoverable but is
+not a connected execution signer. The existing Starforge broker belongs to a
+different Life and forbids general transaction and chain-write methods; the
+Digital Ant local private-key worker is also a different-Life adapter and is
+incompatible with the Hengyao external-custody boundary. Neither may be
+repurposed to claim signer connectivity.
+
+## External Capability Procurement And Integration Wait State
+
+The provider inventory has been exhausted for the current installed connector,
+plugin-catalog, host-capability, and provider-configuration baseline. Neither an
+eligible external controller-identity provider nor an eligible Hengyao secure
+signer is connected. These are external infrastructure gaps, not missing code:
+
+- `KAIOS-EXTERNAL-AGENT-IDENTITY-PROVIDER-001` records the need for a
+  provider-signed agent-instance attestation, scoped authority lease, Life and
+  Worker binding, controller ID, challenge-response, expiry, nonce,
+  machine-verifiable issuer, independent controller comparison, and routable
+  Xuanyao ACK channel.
+- `KAIOS-EXTERNAL-EVM-SECURE-SIGNER-001` records the need for an
+  external-custody EVM signer on BSC chain 56 bound to the registered Hengyao
+  wallet and the existing A2 policy, with target/selector allowlists, nonce,
+  gas, broadcast, receipt query, canonical-block verification, 12
+  confirmations, and no private-key output, arbitrary transfer, or
+  general-purpose signing.
+
+Both demands are `UNFULFILLED_EXTERNAL_INFRASTRUCTURE_DEMAND` in
+`PROCUREMENT_INTEGRATION_WAIT`. Internal engineering must not create another
+candidate, identity system, signing system, or repeated discovery loop to
+simulate fulfillment. An identical provider scan is permitted only after
+`INSTALLED_CONNECTORS_CHANGED`, `PLUGIN_CATALOG_CHANGED`,
+`HOST_CAPABILITY_CHANGED`, or `NEW_PROVIDER_CONFIGURED`.
+
+The wait state blocks only the dependent controller/ACK/reviewer path and chain
+writes. Safe off-chain Company work continues, including read, code, test, CI,
+non-destructive PR synchronization, market engineering, demand discovery,
+queue patrol, documentation, and review preparation. PR #165 remains an open,
+unmerged draft and must receive exact-head CI after any future mainline sync.
+
+When Demand A is fulfilled, the existing verifier resumes controller binding,
+enables the independent ACK channel, processes Xuanyao's four responses, T2,
+and review-permission gates, and assigns PR #165 only if all gates pass. When
+Demand B is fulfilled, the existing transaction gate binds the signer, sends
+`heartbeatClaim()`, verifies its canonical receipt and exact KGEN transfer, then
+continues the free Wish and microcirculation under the approved policy. Neither
+path requires a repeated internal design cycle.
 
 ## 4168 Map / World Agent Handoff
 
