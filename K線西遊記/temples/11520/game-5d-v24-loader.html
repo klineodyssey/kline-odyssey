@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#05080d">
+<title>11520 花果山 V2.4 啟動器</title>
+<style>
+:root{color-scheme:dark;--bg:#05080d;--panel:#0d1721;--gold:#f1ca73;--cyan:#67e3ff;--muted:#91a1ae}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:#eef;font:15px system-ui,"Noto Sans TC",sans-serif;overflow:hidden}
+#boot{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#153250 0,#071019 46%,#020407 100%);padding:18px}
+.card{width:min(430px,94vw);border:1px solid #a77b3577;border-radius:22px;padding:22px;background:#0a121bdd;box-shadow:0 24px 70px #000b;text-align:center}.orb{width:118px;height:118px;margin:0 auto 14px;border-radius:50%;border:1px solid #67e3ff77;display:grid;place-items:center;color:var(--gold);font-size:38px;font-weight:900;box-shadow:0 0 55px #67e3ff2d;animation:pulse 2.2s infinite}@keyframes pulse{50%{transform:scale(1.06);box-shadow:0 0 75px #f1ca7340}}
+h1{margin:4px 0;color:var(--gold);font-size:24px}h2{margin:0 0 12px;font-size:17px}.desc{color:var(--muted);font-size:13px;line-height:1.55}.checks{margin:16px 0;text-align:left;border:1px solid #ffffff12;border-radius:14px;padding:12px;background:#ffffff05}.checks div{display:flex;justify-content:space-between;gap:12px;margin:5px 0}.ok{color:#71e59a}.warn{color:#f1ca73}.bad{color:#ff858b}
+button{width:100%;padding:13px;border-radius:14px;border:1px solid #f1ca7388;background:#142332;color:var(--gold);font-weight:900;font-size:16px}button:disabled{opacity:.5}.secondary{margin-top:8px;border-color:#67e3ff55;color:var(--cyan);font-size:13px}.tiny{margin-top:10px;color:#758997;font-size:11px}
+#game{position:fixed;inset:0;width:100%;height:100%;border:0;background:#05080d;display:none}#loading{position:fixed;z-index:10;left:50%;top:16px;transform:translateX(-50%);padding:8px 12px;border-radius:12px;border:1px solid #67e3ff55;background:#07111bee;color:#dff8ff;display:none;font-size:12px}
+</style>
+</head>
+<body>
+<div id="boot">
+  <main class="card">
+    <div class="orb">K</div>
+    <h1>11520 花果山 V2.4</h1>
+    <h2>5D K線西遊記 · 生命啟動器</h2>
+    <div class="desc">先啟動最小核心，不預載完整遊戲。確認裝置可運作後，再由你決定是否載入世界資源、行情、AI、音效與遊戲資料。</div>
+    <section class="checks">
+      <div><span>啟動核心</span><b class="ok">READY</b></div>
+      <div><span>JavaScript</span><b id="jsState" class="ok">READY</b></div>
+      <div><span>網路</span><b id="netState" class="warn">CHECKING</b></div>
+      <div><span>世界資源</span><b id="worldState" class="warn">NOT LOADED</b></div>
+    </section>
+    <button id="load">載入世界資源並進入遊戲</button>
+    <button id="lite" class="secondary">只進入本地核心（不等全球行情）</button>
+    <div class="tiny">兩段式啟動：BOOT SHELL → USER CONSENT → FULL WORLD。完整資源失敗時啟動器仍保持可見，不再白屏。</div>
+  </main>
+</div>
+<div id="loading">正在載入 11520 世界…</div>
+<iframe id="game" title="11520 V2.4 game"></iframe>
+<script>
+(()=>{
+'use strict';
+const q=s=>document.querySelector(s), net=q('#netState'), world=q('#worldState'), game=q('#game'), boot=q('#boot'), loading=q('#loading');
+function updateNet(){const on=navigator.onLine;net.textContent=on?'ONLINE':'OFFLINE';net.className=on?'ok':'bad'}
+addEventListener('online',updateNet);addEventListener('offline',updateNet);updateNet();
+function start(lite){
+  q('#load').disabled=true;q('#lite').disabled=true;world.textContent='LOADING';world.className='warn';loading.style.display='block';
+  const target='game-5d-v24-playtest.html'+(lite?'?lite=1':'?full=1');
+  let done=false;
+  const timer=setTimeout(()=>{if(done)return;world.textContent='SLOW / TAP RETRY';world.className='bad';loading.textContent='載入較慢，啟動器仍正常。可返回重試。';q('#load').disabled=false;q('#lite').disabled=false},12000);
+  game.onload=()=>{done=true;clearTimeout(timer);world.textContent='LOADED';world.className='ok';loading.style.display='none';game.style.display='block';boot.style.display='none'};
+  game.onerror=()=>{done=true;clearTimeout(timer);world.textContent='LOAD FAILED';world.className='bad';loading.textContent='完整世界載入失敗，啟動器仍可使用。';q('#load').disabled=false;q('#lite').disabled=false};
+  game.src=target;
+}
+q('#load').onclick=()=>start(false);q('#lite').onclick=()=>start(true);
+})();
+</script>
+</body>
+</html>
