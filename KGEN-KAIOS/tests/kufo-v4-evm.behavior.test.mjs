@@ -60,9 +60,6 @@ test("deployed V4 rejects immature conversion, then mints exact KSHIP after firs
   const beneficiaryAddress = await beneficiary.getAddress();
   await (await output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1"))).wait();
 
-  // Probe the immature path without submitting a transaction. This avoids reusing a
-  // failed estimateGas result after Ganache time travel while still exercising the
-  // deployed contract's revert behavior.
   await assert.rejects(
     converter.convert.staticCall(parseEther("0.5"), beneficiaryAddress),
   );
@@ -74,7 +71,7 @@ test("deployed V4 rejects immature conversion, then mints exact KSHIP after firs
   assert.equal(await kship.balanceOf(beneficiaryAddress), parseEther("500"));
   assert.equal(await kship.balanceOf(await owner.getAddress()), 0n);
   assert.equal(await kufo.conservationInvariantHolds(), true);
-  assert.equal(await kship.conservationInvariantHolds(), true);
+  assert.equal(await kship.conservationInvariantHolds(parseEther("0.5")), true);
 });
 
 test("immediate mint proof is replay-protected and KSHIP proof beneficiary is bound", async () => {
