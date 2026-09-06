@@ -30,18 +30,35 @@ assert.equal(attack.ok,false);
 assert.equal(attack.reason,'SOURCE_SETTLEMENT_REQUIRED');
 assert.equal(attack.rewardKaios,0);
 
-// Static product regression locks.
+// Static product regression locks now follow the externalized runtime architecture.
 const here=path.dirname(fileURLToPath(import.meta.url));
-const html=fs.readFileSync(path.join(here,'../K線西遊記/temples/11520/game-5d.html'),'utf8');
+const root=path.join(here,'../K線西遊記/temples/11520');
+const html=fs.readFileSync(path.join(root,'game-5d.html'),'utf8');
+const main=fs.readFileSync(path.join(root,'runtime/game-5d-main.mjs'),'utf8');
+const fixes=fs.readFileSync(path.join(root,'runtime/game-ui-product-fixes.mjs'),'utf8');
+const controls=fs.readFileSync(path.join(root,'runtime/game-controls-v251.mjs'),'utf8');
+const source=[html,main,fixes,controls].join('\n');
+
 for(const marker of [
-  'Knight.glb','GLTFLoader','AnimationMixer','XZ 平面圓形遙桿',
+  'Knight.glb','GLTFLoader','AnimationMixer',
   'walletConnect','KGEN verified','KX','KY','KZ','orderFire','confirmOrder',
   '主城世界','K場交易','持倉','委託','歷史','資產','統計','市場','背包','角色','世界地圖','ATM','設定','客服/說明'
-]) assert.ok(html.includes(marker),`missing product marker: ${marker}`);
-assert.ok(html.includes("joy.addEventListener('pointerdown'"));
-assert.ok(html.includes("$('#attack').onclick"));
-assert.ok(html.includes("$('#dockToggle').onclick"));
-assert.ok(!html.includes('margin = lots / leverage'));
-assert.ok(!html.includes('margin = lots / C'));
+]) assert.ok(source.includes(marker),`missing product marker: ${marker}`);
+
+for(const marker of [
+  'brand-user-ui.webp','fairy_sprite_36.png','kgen-user-ui.webp','ufo-user-ui.webp',
+  '#yJoyV250 .yKnob','#lotsThumb','#cThumb'
+]) assert.ok(controls.includes(marker),`missing approved mobile-control marker: ${marker}`);
+
+assert.ok(main.includes("joy.addEventListener('pointerdown'"));
+assert.ok(main.includes("$('#attack').onclick"));
+assert.ok(main.includes("$('#dockToggle').onclick"));
+assert.ok(main.includes('function moveManual()'));
+assert.ok(main.includes('setWaypoint'));
+assert.ok(fixes.includes('restoreWalletOrgan'));
+assert.ok(fixes.includes('placeOnlyRealBag'));
+assert.ok(controls.includes("#lookPad{display:none!important;pointer-events:none!important}"));
+assert.ok(!source.includes('margin = lots / leverage'));
+assert.ok(!source.includes('margin = lots / C'));
 
 console.log('11520 standardized product invariants PASS');
