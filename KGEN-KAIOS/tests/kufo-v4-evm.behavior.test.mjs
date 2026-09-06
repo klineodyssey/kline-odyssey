@@ -57,17 +57,21 @@ async function increaseTime(eip1193, seconds) {
 test("deployed V4 rejects immature conversion, then mints exact KSHIP after first autumn", async () => {
   const { eip1193, owner, beneficiary, kufo, output, kship, converter } = await fixture();
   const proof = keccak256(toUtf8Bytes("evm-proof-1"));
+  const beneficiaryAddress = await beneficiary.getAddress();
   await (await output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1"))).wait();
 
+  // Probe the immature path without submitting a transaction. This avoids reusing a
+  // failed estimateGas result after Ganache time travel while still exercising the
+  // deployed contract's revert behavior.
   await assert.rejects(
-    converter.convert(parseEther("0.5"), await beneficiary.getAddress()),
+    converter.convert.staticCall(parseEther("0.5"), beneficiaryAddress),
   );
 
   await increaseTime(eip1193, YEAR);
-  await (await converter.convert(parseEther("0.5"), await beneficiary.getAddress())).wait();
+  await (await converter.convert(parseEther("0.5"), beneficiaryAddress, { gasLimit: 1_500_000n })).wait();
 
   assert.equal(await kufo.balanceOf(await owner.getAddress()), parseEther("0.5"));
-  assert.equal(await kship.balanceOf(await beneficiary.getAddress()), parseEther("500"));
+  assert.equal(await kship.balanceOf(beneficiaryAddress), parseEther("500"));
   assert.equal(await kship.balanceOf(await owner.getAddress()), 0n);
   assert.equal(await kufo.conservationInvariantHolds(), true);
   assert.equal(await kship.conservationInvariantHolds(), true);
