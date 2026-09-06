@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
+
+const ARTIFACT_DIR='artifacts/11520-visual-qa';
+await fs.mkdir(ARTIFACT_DIR,{recursive:true});
 
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
@@ -16,7 +20,7 @@ if(await page.locator('#intro11520').count()){
 
 const assertVisible=async selector=>{
   const loc=page.locator(selector);
-  const d=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{display:s.display,visibility:s.visibility,w:r.width,h:r.height,x:r.x,y:r.y}});
+  const d=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{display:s.display,visibility:s.visibility,w:r.width,h:r.height,x:r.x,y:r.y,right:r.right,bottom:r.bottom}});
   assert.ok(d.w>0&&d.h>0&&d.display!=='none'&&d.visibility!=='hidden',`${selector} not visible: ${JSON.stringify(d)}`);
   return d;
 };
@@ -28,22 +32,14 @@ const xyz=async()=>{
 const dragReal=async(selector,toX,toY,hold=260)=>{
   const b=await page.locator(selector).boundingBox();assert.ok(b,selector+' missing box');
   const sx=b.x+b.width*.5,sy=b.y+b.height*.5,tx=b.x+b.width*toX,ty=b.y+b.height*toY;
-  await page.mouse.move(sx,sy);
-  await page.mouse.down();
-  await page.mouse.move(tx,ty,{steps:5});
-  await page.waitForTimeout(hold);
-  await page.mouse.up();
+  await page.mouse.move(sx,sy);await page.mouse.down();await page.mouse.move(tx,ty,{steps:5});await page.waitForTimeout(hold);await page.mouse.up();
 };
-// Canonical vertical controls wrap setPointerCapture in try/catch, so direct pointer
-// dispatch is deterministic in headless Chromium and validates their actual bindVertical handler.
 const dragVertical=async(selector,toY,pointerId)=>{
   const b=await page.locator(selector).boundingBox();assert.ok(b,selector+' missing box');
   const p=(y,buttons=1)=>({pointerId,pointerType:'touch',clientX:b.x+b.width*.5,clientY:b.y+b.height*y,buttons});
-  await page.dispatchEvent(selector,'pointerdown',p(.5));
-  await page.dispatchEvent(selector,'pointermove',p(toY));
-  await page.waitForTimeout(80);
-  await page.dispatchEvent(selector,'pointerup',p(toY,0));
+  await page.dispatchEvent(selector,'pointerdown',p(.5));await page.dispatchEvent(selector,'pointermove',p(toY));await page.waitForTimeout(80);await page.dispatchEvent(selector,'pointerup',p(toY,0));
 };
+const overlap=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y));
 
 for(const id of ['joy','attack','skill','dodge','gameModeToggle'])await assertVisible('#'+id);
 await assertVisible('#knob img');
@@ -66,8 +62,25 @@ if(await page.locator('#lookPad').count()){
   const look=await page.locator('#lookPad').evaluate(el=>({display:getComputedStyle(el).display,pointer:getComputedStyle(el).pointerEvents}));
   assert.ok(look.display==='none'||look.pointer==='none','lookPad still intercepts world');
 }
-const centerHit=await page.evaluate(()=>document.elementsFromPoint(innerWidth*.5,innerHeight*.58).map(el=>el.id).slice(0,8));
-assert.ok(centerHit.includes('three'),`3D canvas unreachable: ${JSON.stringify(centerHit)}`);assert.equal(centerHit.includes('lookPad'),false,'lookPad occupies center');
+const centerHit=await page.evaluate(()=>document.elementsFromPoint(innerWidth*.5,innerHeight*.58).map(el=>({id:el.id,cls:el.className})).slice(0,10));
+assert.ok(centerHit.some(x=>x.id==='three'),`3D canvas unreachable: ${JSON.stringify(centerHit)}`);assert.equal(centerHit.some(x=>x.id==='lookPad'),false,'lookPad occupies center');
+
+/* Visual geometry gate: a functional PASS is not enough if visible controls collide. */
+const visual=await page.evaluate(()=>{
+  const box=s=>{const el=document.querySelector(s);if(!el)return null;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);if(cs.display==='none'||cs.visibility==='hidden'||r.width<=0||r.height<=0)return null;return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,w:r.width,h:r.height}};
+  const blockers=[...document.body.children].map(el=>{const r=el.getBoundingClientRect(),cs=getComputedStyle(el),txt=(el.textContent||'').replace(/\s+/g,'').trim(),hasUseful=!!el.querySelector?.('button,input,select,textarea,img,canvas,svg,a,[role="button"]');return{id:el.id,cls:String(el.className||''),r:{x:r.x,y:r.y,right:r.right,bottom:r.bottom,w:r.width,h:r.height},position:cs.position,display:cs.display,pointer:cs.pointerEvents,txt,hasUseful}}).filter(x=>['fixed','absolute'].includes(x.position)&&x.display!=='none'&&x.r.w>innerWidth*.45&&x.r.h>=24&&x.r.h<=110&&x.r.y>innerHeight*.48&&x.r.bottom<innerHeight*.82&&!x.hasUseful&&x.txt.length===0);
+  return{viewport:{w:innerWidth,h:innerHeight},boxes:{joy:box('#joy'),y:box('#yJoyV250'),sliders:box('.sliderDock'),combat:box('.controls'),bag:box('.bagRelocatedV250'),dock:box('#dock'),ai:box('#aiChatButton'),bgm:box('#bgmButton'),wallet:box('#walletPanel')},blockers,version:document.querySelector('.brandMetaV250 span:first-child')?.textContent||''};
+});
+const {boxes}=visual;
+for(const [name,v] of Object.entries(boxes))if(v)assert.ok(v.x>=-1&&v.right<=391&&v.y>=-1&&v.bottom<=845,`${name} outside viewport: ${JSON.stringify(v)}`);
+if(boxes.y&&boxes.dock)assert.equal(overlap(boxes.y,boxes.dock),0,'Y control overlaps dock');
+if(boxes.y&&boxes.bag)assert.equal(overlap(boxes.y,boxes.bag),0,'Y control overlaps backpack');
+if(boxes.sliders&&boxes.combat)assert.equal(overlap(boxes.sliders,boxes.combat),0,'C/lots sliders overlap combat dashboard');
+assert.equal(visual.blockers.length,0,'large empty center blocker(s): '+JSON.stringify(visual.blockers));
+assert.match(visual.version,/V2\.5\.5/,'visible product version is stale: '+visual.version);
+
+await page.screenshot({path:`${ARTIFACT_DIR}/11520-mobile-390x844.png`,fullPage:true});
+await fs.writeFile(`${ARTIFACT_DIR}/11520-mobile-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),...visual,centerHit},null,2));
 
 await page.locator('#aiChatButton').click({timeout:3000});await page.waitForTimeout(30);assert.equal(await page.locator('#aiChatPanel').evaluate(el=>el.classList.contains('open')),true,'AI did not open');
 await page.locator('#aiClose').click({timeout:3000});await page.waitForTimeout(30);assert.equal(await page.locator('#aiChatPanel').evaluate(el=>el.classList.contains('open')),false,'AI did not close');
@@ -88,4 +101,4 @@ for(const id of ['trade','positions','orders','history','assets','records','mark
 
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 await browser.close();
-console.log('11520 V2.5 approved mobile browser smoke PASS');
+console.log('11520 V2.5.5 mobile functional + visual geometry smoke PASS');
