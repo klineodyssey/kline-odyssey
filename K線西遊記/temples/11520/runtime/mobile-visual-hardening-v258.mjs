@@ -1,7 +1,7 @@
 /* KGEN_META
 VERSION: 2.6.3
 STATUS: ACTIVE
-PURPOSE: Mobile visual hardening for the current 11520 live experiment. Keep the collapsed wallet valve visible, exactly one real backpack usable, preserve live UI/version truth, never starve the browser event loop, keep the Y fairy control physically separated from combat controls on 390x844 mobile, and enforce compact collapsed wallet geometry at runtime.
+PURPOSE: Mobile visual hardening for the current 11520 live experiment. Keep the collapsed wallet valve visible, exactly one real backpack usable, preserve live UI/version truth, never starve the browser event loop, keep the Y fairy control physically separated from combat controls on 390x844 mobile, keep Y labels inside the right viewport edge, and enforce compact collapsed wallet geometry at runtime.
 */
 const $=s=>document.querySelector(s);
 function ensureStyle(){
@@ -16,6 +16,7 @@ function ensureStyle(){
     #walletPanel.collapsed{right:66px!important;bottom:238px!important}
     .bagRelocatedV258{right:5px!important;bottom:84px!important}
     #yJoyV250{position:fixed!important;right:4px!important;left:auto!important;bottom:218px!important;top:auto!important;width:44px!important;max-width:44px!important;height:146px!important;transform:none!important;margin:0!important;z-index:2960!important;pointer-events:none!important}
+    #yJoyV250 .yTitle,#yJoyV250 .yReadout{left:auto!important;right:0!important;width:max-content!important;max-width:150px!important;text-align:right!important;white-space:nowrap!important;overflow:visible!important;transform:none!important}
     #yJoyV250 .yTrack{left:8px!important;right:8px!important;pointer-events:auto!important}
     #yJoyV250 .yKnob{left:50%!important;pointer-events:auto!important}
     #yJoyV250 .yKnob img{pointer-events:none!important}
