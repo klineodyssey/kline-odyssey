@@ -1,14 +1,14 @@
 /* KGEN_META
-VERSION: 1.1.1
+VERSION: 1.1.2
 STATUS: ACTIVE
-PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle at one stable screen position, and prevent legacy control skins from overwriting the current product label.
+PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, and keep the wallet toggle at one stable screen position.
 */
 import * as THREE from 'three';
 
 const $=s=>document.querySelector(s);
 const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
-const PRODUCT_VERSION='V2.6.3';
-let cleanupTimer=null,walletTimer=null;
+const PRODUCT_VERSION='V2.6.3 · 5D K線西遊記';
+let cleanupTimer=null,walletTimer=null,versionTimer=null;
 
 function installStyle(){
   if($('#k11520HumanUxStyle'))return;
@@ -53,8 +53,6 @@ function patchAvatarFacing(){
     try{
       let player=null;
       scene?.traverse?.(o=>{if(!player&&o?.userData?.isPlayer)player=o});
-      // The loaded knight model's visual forward is opposite the movement heading.
-      // game-5d-main resets rotation every frame, so apply one deterministic 180° correction immediately before render.
       if(player?.rotation)player.rotation.y+=Math.PI;
     }catch{}
     return original.call(this,scene,camera);
@@ -86,14 +84,9 @@ function ensureKaiosMetric(){
   const grid=$('#walletPanel .walletGrid');
   if(!grid)return false;
   let metric=$('#walletKaiosMetric');
-  if(!metric){
-    metric=document.createElement('div');metric.id='walletKaiosMetric';metric.className='metric';
-    metric.innerHTML='<small>KAIOS 遊戲餘額</small><b id="wKaios">--</b>';
-    grid.appendChild(metric);
-  }
+  if(!metric){metric=document.createElement('div');metric.id='walletKaiosMetric';metric.className='metric';metric.innerHTML='<small>KAIOS 遊戲餘額</small><b id="wKaios">--</b>';grid.appendChild(metric)}
   return true;
 }
-
 function hexToNumber(hex){try{return Number(BigInt(hex||'0x0'))}catch{return 0}}
 function formatUnits(hex,decimals=18){try{const n=BigInt(hex||'0x0'),d=10n**BigInt(decimals),whole=n/d,frac=(n%d).toString().padStart(decimals,'0').slice(0,6).replace(/0+$/,'');return frac?`${whole}.${frac}`:String(whole)}catch{return'--'}}
 function balanceOfData(address){return '0x70a08231'+String(address||'').toLowerCase().replace(/^0x/,'').padStart(64,'0')}
@@ -103,67 +96,40 @@ async function refreshOwnWallet({requestPermission=false}={}){
   const provider=globalThis.ethereum,msg=$('#walletMsg'),addr=$('#wAddr'),chain=$('#wChain'),bnb=$('#wBnb'),kgen=$('#wKgen'),kaios=$('#wKaios'),connect=$('#walletConnect');
   if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();
   if(!provider?.request){if(msg)msg.textContent='11520 未偵測到瀏覽器 EVM 錢包；可先使用遊戲內 KAIOS。';if(connect)connect.textContent='未偵測到錢包';return false}
-  let accounts=[];
-  try{accounts=await provider.request({method:requestPermission?'eth_requestAccounts':'eth_accounts'})||[]}catch(e){if(msg)msg.textContent=requestPermission?'錢包連線未授權':'已偵測錢包，尚未授權本頁讀取';return false}
+  let accounts=[];try{accounts=await provider.request({method:requestPermission?'eth_requestAccounts':'eth_accounts'})||[]}catch(e){if(msg)msg.textContent=requestPermission?'錢包連線未授權':'已偵測錢包，尚未授權本頁讀取';return false}
   if(!accounts.length){if(msg)msg.textContent='已偵測到錢包；點「連線」後只讀取地址與餘額，不自動簽名或轉帳。';if(connect)connect.textContent='連線錢包';return false}
   const account=accounts[0];
   try{
-    const [chainHex,bnbHex,kgenHex]=await Promise.all([
-      provider.request({method:'eth_chainId'}),
-      provider.request({method:'eth_getBalance',params:[account,'latest']}),
-      provider.request({method:'eth_call',params:[{to:KGEN,data:balanceOfData(account)},'latest']})
-    ]);
-    if(addr)addr.textContent=account.slice(0,6)+'…'+account.slice(-4);
-    if(chain)chain.textContent=String(hexToNumber(chainHex));
-    if(bnb)bnb.textContent=formatUnits(bnbHex,18);
-    if(kgen)kgen.textContent=formatUnits(kgenHex,18);
-    if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();
-    if(msg)msg.textContent=`11520 自有錢包視窗 · ${hexToNumber(chainHex)===56?'BSC 56':'目前鏈 '+hexToNumber(chainHex)} · BNB/KGEN 唯讀；KAIOS 顯示遊戲餘額。`;
-    if(connect)connect.textContent='已連線';
-    return true;
+    const [chainHex,bnbHex,kgenHex]=await Promise.all([provider.request({method:'eth_chainId'}),provider.request({method:'eth_getBalance',params:[account,'latest']}),provider.request({method:'eth_call',params:[{to:KGEN,data:balanceOfData(account)},'latest']})]);
+    if(addr)addr.textContent=account.slice(0,6)+'…'+account.slice(-4);if(chain)chain.textContent=String(hexToNumber(chainHex));if(bnb)bnb.textContent=formatUnits(bnbHex,18);if(kgen)kgen.textContent=formatUnits(kgenHex,18);if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();
+    if(msg)msg.textContent=`11520 自有錢包視窗 · ${hexToNumber(chainHex)===56?'BSC 56':'目前鏈 '+hexToNumber(chainHex)} · BNB/KGEN 唯讀；KAIOS 顯示遊戲餘額。`;if(connect)connect.textContent='已連線';return true
   }catch(e){if(msg)msg.textContent='錢包已偵測，但餘額讀取失敗；可稍後重新整理。';return false}
 }
 
 function pinWallet(){
-  const panel=$('#walletPanel'),toggle=$('#walletToggle'),connect=$('#walletConnect');
-  if(!panel||!toggle)return false;
-  panel.dataset.k11520StableAnchor='1';
-  toggle.setAttribute('aria-label','展開或收合 11520 錢包');
+  const panel=$('#walletPanel'),toggle=$('#walletToggle'),connect=$('#walletConnect');if(!panel||!toggle)return false;
+  panel.dataset.k11520StableAnchor='1';toggle.setAttribute('aria-label','展開或收合 11520 錢包');
   const sync=()=>{const collapsed=panel.classList.contains('collapsed');toggle.textContent=collapsed?'💰':'×';toggle.title=collapsed?'開啟 11520 錢包':'關閉 11520 錢包'};
   if(!toggle.dataset.k11520StableAnchor){toggle.dataset.k11520StableAnchor='1';toggle.addEventListener('click',()=>setTimeout(sync,0))}
   if(connect&&!connect.dataset.k11520OwnWallet){connect.dataset.k11520OwnWallet='1';connect.addEventListener('click',e=>{e.stopImmediatePropagation();refreshOwnWallet({requestPermission:true})},true)}
-  ensureKaiosMetric();sync();refreshOwnWallet();
-  if(!walletTimer)walletTimer=setInterval(()=>refreshOwnWallet(),12000);
-  return true;
+  ensureKaiosMetric();sync();refreshOwnWallet();if(!walletTimer)walletTimer=setInterval(()=>refreshOwnWallet(),12000);return true;
 }
 
-function stampProductVersion(){
-  const target=document.querySelector('.brandMetaV250 span:first-child');
-  if(!target)return false;
-  const text=`${PRODUCT_VERSION} · 5D K線西遊記`;
-  if(target.textContent!==text)target.textContent=text;
-  target.dataset.k11520ProductVersion=PRODUCT_VERSION;
-  return true;
+function enforceProductVersion(){
+  const el=document.querySelector('.brandMetaV250 span:first-child');
+  if(el&&el.textContent!==PRODUCT_VERSION)el.textContent=PRODUCT_VERSION;
 }
-
-function humanizeButtons(){
-  const labels={chatHandle:'聊天',dockToggle:'功能選單',aiChatButton:'AI 助手',bgmButton:'音樂',gameModeToggle:'遊戲設定',walletToggle:'11520 錢包',backpackButton:'背包 / 活體收納'};
-  for(const [id,label] of Object.entries(labels)){const el=$('#'+id);if(el)el.setAttribute('aria-label',label)}
-}
-
-function raiseOpenSurface(){
-  for(const sel of ['#aiChatPanel','#gameChat','#backpackPanel','.sheet','.confirm']){const el=$(sel);if(el&&(el.classList.contains('open')||el.classList.contains('show')))el.style.zIndex='7500'}
-}
-
-function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface();stampProductVersion()}
+function humanizeButtons(){const labels={chatHandle:'聊天',dockToggle:'功能選單',aiChatButton:'AI 助手',bgmButton:'音樂',gameModeToggle:'遊戲設定',walletToggle:'11520 錢包',backpackButton:'背包 / 活體收納'};for(const [id,label] of Object.entries(labels)){const el=$('#'+id);if(el)el.setAttribute('aria-label',label)}}
+function raiseOpenSurface(){for(const sel of ['#aiChatPanel','#gameChat','#backpackPanel','.sheet','.confirm']){const el=$(sel);if(el&&(el.classList.contains('open')||el.classList.contains('show')))el.style.zIndex='7500'}}
+function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface();enforceProductVersion()}
 function scheduleCleanup(){clearTimeout(cleanupTimer);cleanupTimer=setTimeout(cleanup,60)}
 
 export function install11520HumanUx(){
   patchAvatarFacing();cleanup();
-  const mo=new MutationObserver(scheduleCleanup);mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  const mo=new MutationObserver(scheduleCleanup);mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,characterData:true,attributeFilter:['class']});
   addEventListener('resize',scheduleCleanup,{passive:true});
-  globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());
-  globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
-  globalThis.__K11520_HUMAN_UX__={version:'1.1.1',productVersion:PRODUCT_VERSION,avatarFacing:'movement-aligned-180-model-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME']};
+  globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
+  if(!versionTimer)versionTimer=setInterval(enforceProductVersion,250);
+  globalThis.__K11520_HUMAN_UX__={version:'1.1.2',productVersion:PRODUCT_VERSION,avatarFacing:'movement-aligned-180-model-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME']};
   return globalThis.__K11520_HUMAN_UX__;
 }
