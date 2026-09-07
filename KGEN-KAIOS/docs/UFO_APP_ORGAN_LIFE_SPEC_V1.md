@@ -9,6 +9,7 @@ Build one authenticated UFO organism runtime on top of the verified Product_06 m
 ## Identity
 - `SHIP_ID` is the primary UFO machine identity.
 - `controller` comes from `KAIOSShipIdentityRegistryV1`.
+- Flight and cogeneration readiness use the registry's canonical `ship(SHIP_ID)` record. The global Trading Engine and K108000 Reactor organ addresses must exactly match that ship record; a merely non-zero, stale, or different ship's endpoint is not ready.
 - `LIFE_ID` is optional at deployment time and may remain zero / NOT_ASSIGNED until an external canonical KAIOS birth process assigns one.
 - Changing chat pages, app sessions, or controllers does not create a new UFO life automatically.
 

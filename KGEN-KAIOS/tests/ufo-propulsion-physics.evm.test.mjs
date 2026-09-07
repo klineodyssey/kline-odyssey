@@ -140,3 +140,72 @@ test("engine fractions must sum to 100% and exhaust must remain subluminal", asy
     },
   }));
 });
+
+test("UFO organ and life runtimes use the Product_06 ship ABI and require exact ship-bound organs", async () => {
+  const eip1193 = ganache.provider({ logging: { quiet: true } });
+  const provider = new BrowserProvider(eip1193);
+  const registrar = await provider.getSigner(0);
+  const controller = await provider.getSigner(1);
+  const tradingEngine = await provider.getSigner(2);
+  const wrongEndpoint = await provider.getSigner(3);
+
+  const organRegistry = await deploy("KUFOV4MockOrganRegistry", registrar);
+  const shipRegistry = await deploy("KAIOSShipIdentityRegistryV1", registrar, [await registrar.getAddress()]);
+  const reactor = await deploy("MockOrgan", registrar);
+  const matterSource = await deploy("MockOrgan", registrar);
+  const kship = await deploy("MockOrgan", registrar);
+  const navigation = await deploy("MockOrgan", registrar);
+  const kgod = await deploy("MockOrgan", registrar);
+  const shipId = keccak256(toUtf8Bytes("KAIOS-UFO-ABI-INTEGRATION-001"));
+
+  await (await shipRegistry.registerShip(
+    shipId,
+    await controller.getAddress(),
+    await tradingEngine.getAddress(),
+    await reactor.getAddress(),
+  )).wait();
+
+  const organs = await deploy("KAIOSUFOOrganRuntimeV1", registrar, [
+    await organRegistry.getAddress(),
+    await shipRegistry.getAddress(),
+    shipId,
+  ]);
+
+  assert.equal(await organs.controller(), await controller.getAddress());
+  assert.equal(await organs.readyForFlight(), false);
+
+  const ids = {
+    trading: keccak256(toUtf8Bytes("KAIOS.ORGAN.UFO.TRADING_ENGINE")),
+    matter: keccak256(toUtf8Bytes("KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE")),
+    reactor: keccak256(toUtf8Bytes("KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR")),
+    kship: keccak256(toUtf8Bytes("KAIOS.ORGAN.KSHIP.TOKEN")),
+    kgod: keccak256(toUtf8Bytes("KAIOS.ORGAN.KGOD.TOKEN")),
+    navigation: keccak256(toUtf8Bytes("KAIOS.ORGAN.UFO.NAVIGATION")),
+  };
+
+  await (await organRegistry.setOrgan(ids.trading, await wrongEndpoint.getAddress())).wait();
+  await (await organRegistry.setOrgan(ids.matter, await matterSource.getAddress())).wait();
+  await (await organRegistry.setOrgan(ids.reactor, await wrongEndpoint.getAddress())).wait();
+  await (await organRegistry.setOrgan(ids.kship, await kship.getAddress())).wait();
+  await (await organRegistry.setOrgan(ids.kgod, await kgod.getAddress())).wait();
+  await (await organRegistry.setOrgan(ids.navigation, await navigation.getAddress())).wait();
+
+  assert.equal(await organs.criticalOrgansBound(), false);
+  assert.equal(await organs.readyForFlight(), false);
+
+  await (await organRegistry.setOrgan(ids.trading, await tradingEngine.getAddress())).wait();
+  await (await organRegistry.setOrgan(ids.reactor, await reactor.getAddress())).wait();
+
+  assert.equal(await organs.criticalOrgansBound(), true);
+  assert.equal(await organs.readyForFlight(), true);
+  assert.equal(await organs.readyForCogeneration(), true);
+
+  const life = await deploy("KAIOSUFOLifeV1", registrar, [await organs.getAddress(), `0x${"00".repeat(32)}`]);
+  await assert.rejects(life.activate());
+  await (await life.connect(controller).activate()).wait();
+  await (await life.connect(controller).enterFlight()).wait();
+  assert.equal(await life.state(), 2n);
+
+  await (await shipRegistry.setShipActive(shipId, false)).wait();
+  assert.equal(await organs.readyForFlight(), false);
+});

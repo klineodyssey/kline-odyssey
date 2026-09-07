@@ -4,8 +4,16 @@ pragma solidity 0.8.24;
 import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 interface IKAIOSShipIdentityRead {
-    function controllerOf(bytes32 shipId) external view returns (address);
-    function isActive(bytes32 shipId) external view returns (bool);
+    struct ShipIdentity {
+        bytes32 shipId;
+        address controller;
+        address tradingEngine;
+        address reactor;
+        uint64 registeredAt;
+        bool active;
+    }
+
+    function ship(bytes32 shipId) external view returns (ShipIdentity memory);
 }
 
 /**
@@ -43,7 +51,7 @@ contract KAIOSUFOOrganRuntimeV1 {
     }
 
     function controller() external view returns (address) {
-        return shipIdentity.controllerOf(shipId);
+        return shipIdentity.ship(shipId).controller;
     }
 
     function organ(bytes32 organId) public view returns (address) {
@@ -51,26 +59,43 @@ contract KAIOSUFOOrganRuntimeV1 {
     }
 
     function criticalOrgansBound() public view returns (bool) {
-        return organ(ORGAN_TRADING_ENGINE) != address(0)
+        IKAIOSShipIdentityRead.ShipIdentity memory currentShip = shipIdentity.ship(shipId);
+        return _criticalOrgansBound(currentShip);
+    }
+
+    function _criticalOrgansBound(IKAIOSShipIdentityRead.ShipIdentity memory currentShip)
+        private
+        view
+        returns (bool)
+    {
+        return currentShip.tradingEngine != address(0)
+            && currentShip.reactor != address(0)
+            && organ(ORGAN_TRADING_ENGINE) == currentShip.tradingEngine
             && organ(ORGAN_WHITE_HOLE_MATTER) != address(0)
-            && organ(ORGAN_K108000_REACTOR) != address(0)
+            && organ(ORGAN_K108000_REACTOR) == currentShip.reactor
             && organ(ORGAN_KSHIP) != address(0)
             && organ(ORGAN_NAVIGATION) != address(0);
     }
 
     function readyForFlight() external view returns (bool) {
-        return shipIdentity.isActive(shipId)
-            && shipIdentity.controllerOf(shipId) != address(0)
-            && criticalOrgansBound();
+        IKAIOSShipIdentityRead.ShipIdentity memory currentShip = shipIdentity.ship(shipId);
+        return currentShip.active
+            && currentShip.controller != address(0)
+            && _criticalOrgansBound(currentShip);
     }
 
     function readyForCogeneration() external view returns (bool) {
-        return shipIdentity.isActive(shipId)
-            && criticalOrgansBound()
+        IKAIOSShipIdentityRead.ShipIdentity memory currentShip = shipIdentity.ship(shipId);
+        return currentShip.active
+            && currentShip.controller != address(0)
+            && _criticalOrgansBound(currentShip)
             && organ(ORGAN_KGOD) != address(0);
     }
 
     function readyForMobileATM() external view returns (bool) {
-        return shipIdentity.isActive(shipId) && organ(ORGAN_ATM_BANK) != address(0);
+        IKAIOSShipIdentityRead.ShipIdentity memory currentShip = shipIdentity.ship(shipId);
+        return currentShip.active
+            && currentShip.controller != address(0)
+            && organ(ORGAN_ATM_BANK) != address(0);
     }
 }
