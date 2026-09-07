@@ -11,7 +11,13 @@ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1500);
 assert.deepEqual(errors,[],'boot page errors: '+errors.join('\n'));
-if(await page.locator('#intro11520').count()){const enter=page.locator('#enter11520');if(await enter.isVisible())await enter.click({timeout:3000});await page.waitForTimeout(700)}
+if(await page.locator('#intro11520').count()){
+  const enter=page.locator('#enter11520');
+  if(await enter.count()&&await enter.isVisible().catch(()=>false))await enter.click({timeout:1500}).catch(()=>{});
+  await page.locator('#intro11520').waitFor({state:'hidden',timeout:2500}).catch(()=>{});
+  assert.equal(await page.locator('#intro11520').isVisible().catch(()=>false),false,'intro must dismiss by tap or automatic fail-open');
+  await page.waitForTimeout(250)
+}
 
 const assertVisible=async selector=>{const loc=page.locator(selector);const d=await loc.evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return{display:s.display,visibility:s.visibility,w:r.width,h:r.height,x:r.x,y:r.y,right:r.right,bottom:r.bottom,text:(el.textContent||'').trim()}});assert.ok(d.w>0&&d.h>0&&d.display!=='none'&&d.visibility!=='hidden',`${selector} not visible: ${JSON.stringify(d)}`);return d};
 const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);assert.ok(m,'XYZ HUD parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]}};
