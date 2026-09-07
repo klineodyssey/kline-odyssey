@@ -21,7 +21,7 @@ const drag=async(toX,toY,id)=>{const b=await joyBox();await page.dispatchEvent('
 const tapCenter=async id=>{const b=await joyBox();const p=point(b,.5,.5,1,id);await page.dispatchEvent('#joy','pointerdown',p);await page.waitForTimeout(70);await page.dispatchEvent('#joy','pointerup',{...p,buttons:0});await page.waitForTimeout(120)};
 const visible=async sel=>{const r=await page.locator(sel).evaluate(el=>{const b=el.getBoundingClientRect(),s=getComputedStyle(el);return{w:b.width,h:b.height,display:s.display,visibility:s.visibility,opacity:s.opacity,pointer:s.pointerEvents}});assert.ok(r.w>0&&r.h>0&&r.display!=='none'&&r.visibility!=='hidden'&&r.opacity!=='0',`${sel} not visible ${JSON.stringify(r)}`);return r};
 
-await visible('#joy');const knobState=await visible('#knob');assert.notEqual(knobState.pointer,'none','joystick center must accept touch');await visible('#knob img');
+await visible('#joy');await visible('#knob');await visible('#knob img');
 assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XZ','default joystick plane must be XZ');
 let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+');
 await drag(.10,.50,102);let p2=await xyz();assert.ok(p2.x<p1.x,'XZ left must X-');
@@ -30,7 +30,7 @@ await drag(.50,.90,104);let p4=await xyz();assert.ok(p4.z<p3.z,'XZ down must Z-'
 await visible('#knob img');
 
 await tapCenter(201);
-assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XY','center image tap must switch to XY');
+assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XY','center image tap must switch to XY through joystick surface');
 assert.match(await page.locator('#k11520PlaneLabel').textContent(),/XY/);
 assert.match(await page.locator('#k11520DirTop').textContent(),/Y\+/);
 assert.match(await page.locator('#knob img').getAttribute('alt'),/XY/);
