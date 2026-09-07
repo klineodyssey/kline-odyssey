@@ -1,7 +1,7 @@
 /* KGEN_META
-VERSION: 1.2.1
+VERSION: 1.3.0
 STATUS: ACTIVE
-PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle at one stable screen position, and prevent dock menus from being covered by floating shortcuts.
+PURPOSE: Human-first 11520 interaction layer. Align avatar facing with visible X movement, keep modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle stable, prevent dock pointer collisions, keep joystick imagery visible, and automatically separate mobile controls that collide.
 */
 import * as THREE from 'three';
 
@@ -36,19 +36,24 @@ function installStyle(){
   #dockToggle{z-index:7040!important}
   #bgmButton,#gameModeToggle{opacity:.84}
   [data-k11520-dock-muted='1']{opacity:.08!important;pointer-events:none!important;visibility:hidden!important;transform:scale(.92)!important;transition:opacity .12s ease,transform .12s ease!important}
+  #knob img{display:block!important;opacity:1!important;visibility:visible!important;pointer-events:none!important;max-width:100%!important;max-height:100%!important}
 
   @media(max-width:420px){
     #walletPanel,#walletPanel.collapsed{right:58px!important;bottom:230px!important}
     #walletToggle{right:62px!important;bottom:234px!important}
     #chatHandle{z-index:7100!important}
     #gameChat,#aiChatPanel,#backpackPanel{z-index:7500!important}
+    #joy{width:136px!important;height:136px!important;left:6px!important;bottom:8px!important;overflow:visible!important}
+    #knob{z-index:3!important}
+    #yJoyV250{right:4px!important;left:auto!important;bottom:218px!important;top:auto!important;width:44px!important;height:146px!important;z-index:7060!important;pointer-events:none!important}
+    #yJoyV250 .yTrack,#yJoyV250 .yKnob,#yJoyV250 .yKnob img{pointer-events:auto!important}
   }
   `;
   document.head.appendChild(s);
 }
 
 function patchAvatarFacing(){
-  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV3)return;
+  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV4)return;
   const original=THREE.WebGLRenderer.prototype.render;
   THREE.WebGLRenderer.prototype.render=function(scene,camera){
     let player=null,originalYaw=null;
@@ -56,12 +61,14 @@ function patchAvatarFacing(){
       scene?.traverse?.(o=>{if(!player&&o?.userData?.isPlayer)player=o});
       if(player?.rotation){
         originalYaw=player.rotation.y;
-        player.rotation.y=Math.PI-originalYaw;
+        // The canvas is mirrored on X. Reflect the heading exactly once for rendering.
+        // Do not add PI here: the previous PI offset made the knight look left while moving right.
+        player.rotation.y=-originalYaw;
       }
     }catch{}
     try{return original.call(this,scene,camera)}finally{if(player?.rotation&&originalYaw!==null)player.rotation.y=originalYaw}
   };
-  THREE.WebGLRenderer.prototype.__k11520HumanFacingV3=true;
+  THREE.WebGLRenderer.prototype.__k11520HumanFacingV4=true;
 }
 
 function normalizeBackpack(){
@@ -124,15 +131,35 @@ function syncDockOcclusion(){
   const dock=$('.dock');
   const railVisible=!!rail&&getComputedStyle(rail).display!=='none'&&getComputedStyle(rail).visibility!=='hidden';
   const open=railVisible||!!dock?.classList.contains('open');
-  for(const sel of ['#aiChatButton','#bgmButton','#backpackButton']){
+  for(const sel of ['#aiChatButton','#bgmButton','#backpackButton','[data-k11520-real-bag="1"]','.bagRelocatedV258']){
     const el=$(sel);if(!el)continue;
     if(open)el.dataset.k11520DockMuted='1';else delete el.dataset.k11520DockMuted;
+  }
+}
+function rect(el){if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left,y:r.top,right:r.right,bottom:r.bottom,w:r.width,h:r.height}}
+function overlaps(a,b,gap=0){return !!a&&!!b&&a.right+gap>b.x&&b.right+gap>a.x&&a.bottom+gap>b.y&&b.bottom+gap>a.y}
+function keepJoystickVisual(){const img=$('#knob img');if(img){img.style.setProperty('display','block','important');img.style.setProperty('visibility','visible','important');img.style.setProperty('opacity','1','important')}}
+function resolveMobileCollisions(){
+  if(innerWidth>420)return;
+  const joy=$('#joy'),dodge=$('#dodge'),y=$('#yJoyV250');
+  keepJoystickVisual();
+  if(joy&&dodge&&overlaps(rect(joy),rect(dodge),10)){
+    joy.style.setProperty('width','128px','important');joy.style.setProperty('height','128px','important');
+  }
+  if(y){
+    let bottom=218;
+    const blockers=['#aiChatButton','#bgmButton','#walletToggle','#dockToggle','[data-k11520-real-bag="1"]','.controls button'].flatMap(sel=>[...document.querySelectorAll(sel)]).filter(el=>el!==y&&!el.closest('#yJoyV250'));
+    for(let i=0;i<8;i++){
+      y.style.setProperty('bottom',`${bottom}px`,'important');
+      const yr=rect(y);if(!blockers.some(el=>{const cs=getComputedStyle(el);return cs.display!=='none'&&cs.visibility!=='hidden'&&overlaps(yr,rect(el),8)}))break;
+      bottom+=14;
+    }
   }
 }
 function enforceProductVersion(){const el=document.querySelector('.brandMetaV250 span:first-child');if(el&&el.textContent!==PRODUCT_VERSION)el.textContent=PRODUCT_VERSION}
 function humanizeButtons(){const labels={chatHandle:'聊天',dockToggle:'功能選單',aiChatButton:'AI 助手',bgmButton:'音樂',gameModeToggle:'遊戲設定',walletToggle:'11520 錢包',backpackButton:'背包 / 活體收納'};for(const [id,label] of Object.entries(labels)){const el=$('#'+id);if(el)el.setAttribute('aria-label',label)}}
 function raiseOpenSurface(){for(const sel of ['#aiChatPanel','#gameChat','#backpackPanel','.sheet','.confirm']){const el=$(sel);if(el&&(el.classList.contains('open')||el.classList.contains('show')))el.style.zIndex='7500'}}
-function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface();syncDockOcclusion();enforceProductVersion()}
+function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface();syncDockOcclusion();resolveMobileCollisions();enforceProductVersion()}
 function scheduleCleanup(){clearTimeout(cleanupTimer);cleanupTimer=setTimeout(cleanup,20)}
 
 export function install11520HumanUx(){
@@ -140,9 +167,11 @@ export function install11520HumanUx(){
   const mo=new MutationObserver(scheduleCleanup);mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,characterData:true,attributeFilter:['class','style']});
   addEventListener('resize',scheduleCleanup,{passive:true});
   document.addEventListener('pointerdown',e=>{if(e.target?.closest?.('#dockToggle,.dockToggle'))setTimeout(syncDockOcclusion,0)},true);
+  document.addEventListener('pointerup',()=>{keepJoystickVisual();setTimeout(resolveMobileCollisions,0)},true);
+  document.addEventListener('pointercancel',()=>{keepJoystickVisual();setTimeout(resolveMobileCollisions,0)},true);
   document.addEventListener('click',e=>{if(e.target?.closest?.('#dockToggle,.dockToggle'))setTimeout(syncDockOcclusion,0)},true);
   globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
-  if(!versionTimer)versionTimer=setInterval(enforceProductVersion,250);
-  globalThis.__K11520_HUMAN_UX__={version:'1.2.1',productVersion:PRODUCT_VERSION,avatarFacing:'screen-mirrored-yaw-with-model-forward-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-visibility'};
+  if(!versionTimer)versionTimer=setInterval(()=>{enforceProductVersion();resolveMobileCollisions()},250);
+  globalThis.__K11520_HUMAN_UX__={version:'1.3.0',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-no-extra-pi',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:true};
   return globalThis.__K11520_HUMAN_UX__;
 }
