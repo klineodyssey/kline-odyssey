@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.3.1
+VERSION: 1.3.2
 STATUS: ACTIVE
 PURPOSE: Human-first 11520 interaction layer. Align avatar facing with visible X movement, keep modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle stable, prevent dock pointer collisions, keep joystick imagery visible, and automatically separate mobile controls that collide.
 */
@@ -53,7 +53,7 @@ function installStyle(){
 }
 
 function patchAvatarFacing(){
-  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV4)return;
+  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV5)return;
   const original=THREE.WebGLRenderer.prototype.render;
   THREE.WebGLRenderer.prototype.render=function(scene,camera){
     let player=null,originalYaw=null;
@@ -61,12 +61,16 @@ function patchAvatarFacing(){
       scene?.traverse?.(o=>{if(!player&&o?.userData?.isPlayer)player=o});
       if(player?.rotation){
         originalYaw=player.rotation.y;
-        player.rotation.y=-originalYaw;
+        // The player mesh's modeled forward axis is opposite the simulation heading.
+        // The world canvas is mirrored on X, so reflect the heading and apply that
+        // single model-forward correction only at render time. Simulation XYZ/yaw
+        // remain canonical and untouched.
+        player.rotation.y=Math.PI-originalYaw;
       }
     }catch{}
     try{return original.call(this,scene,camera)}finally{if(player?.rotation&&originalYaw!==null)player.rotation.y=originalYaw}
   };
-  THREE.WebGLRenderer.prototype.__k11520HumanFacingV4=true;
+  THREE.WebGLRenderer.prototype.__k11520HumanFacingV5=true;
 }
 
 function normalizeBackpack(){
@@ -174,6 +178,6 @@ export function install11520HumanUx(){
   document.addEventListener('click',e=>{if(e.target?.closest?.('#dockToggle,.dockToggle'))setTimeout(syncDockOcclusion,0)},true);
   globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
   if(!versionTimer)versionTimer=setInterval(()=>{enforceProductVersion();resolveMobileCollisions()},250);
-  globalThis.__K11520_HUMAN_UX__={version:'1.3.1',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-no-extra-pi',chatTopLayer:true,singleBackpack:'living-cargo-relocated-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:true};
+  globalThis.__K11520_HUMAN_UX__={version:'1.3.2',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-plus-model-forward-pi',chatTopLayer:true,singleBackpack:'living-cargo-relocated-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:true};
   return globalThis.__K11520_HUMAN_UX__;
 }
