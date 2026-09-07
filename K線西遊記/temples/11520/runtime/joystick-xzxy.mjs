@@ -1,18 +1,19 @@
 /* KGEN_META
-VERSION: 2.6.14
+VERSION: 2.6.15
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: XZXY Joystick
-PURPOSE: Persistent XZ/XY plane joystick. XZ uses the human-approved KGEN Genesis art; XY uses the human-approved Chang'e art; C warp uses the human-approved UFO art. Plane switching is fail-neutral: the active pointer is released and the knob returns to origin before the next plane can move the player. Wallet/trade/settlement/chain authority is unchanged.
+PURPOSE: Persistent XZ/XY plane joystick. XZ preserves the human-approved KGEN Genesis art already installed by the control skin; XY uses the approved Chang'e art; C warp uses the approved UFO art. Plane switching is fail-neutral: the active pointer is released and the knob returns to origin before the next plane can move the player. Wallet/trade/settlement/chain authority is unchanged.
 */
 const $=s=>document.querySelector(s);
 const STORE='k11520.joystick.plane';
-const KGEN='./assets/ui/kgen-user-ui.webp';
+const KGEN_FALLBACK='./assets/ui/kgen-user-ui.webp';
 const FAIRY='./assets/ui/goddess-ui.webp';
 const UFO='./assets/ui/ufo-user-ui.webp';
-let mode='XZ',xyPid=null,xyProxyPid=null,centerTap=null,imageGuard=null,auxGuard=null;
+let mode='XZ',xyPid=null,xyProxyPid=null,centerTap=null,imageGuard=null,auxGuard=null,xzApprovedSrc=null;
 
 function loadMode(){try{const v=localStorage.getItem(STORE);mode=v==='XY'?'XY':'XZ'}catch{mode='XZ'}}
 function saveMode(){try{localStorage.setItem(STORE,mode)}catch{}}
+function captureApprovedXz(){if(xzApprovedSrc)return xzApprovedSrc;const src=$('#knob img')?.getAttribute('src')||'';if(src.startsWith('data:image/'))xzApprovedSrc=src;else xzApprovedSrc=KGEN_FALLBACK;return xzApprovedSrc}
 function style(){if($('#k11520JoystickPlaneStyle'))return;const s=document.createElement('style');s.id='k11520JoystickPlaneStyle';s.textContent=`
 #joy{overflow:visible!important}
 #joy .joyPlane:after{display:none!important}
@@ -26,10 +27,10 @@ function style(){if($('#k11520JoystickPlaneStyle'))return;const s=document.creat
 `;
 document.head.appendChild(s)}
 function ensureLabels(){const joy=$('#joy');if(!joy)return false;for(const id of ['k11520PlaneLabel','k11520DirTop','k11520DirBottom','k11520DirLeft','k11520DirRight'])if(!$('#'+id)){const n=document.createElement('span');n.id=id;joy.appendChild(n)}return true}
-function expectedImage(){return mode==='XY'?{src:FAIRY,alt:'XY 模式嫦娥'}:{src:KGEN,alt:'XZ 模式 KGEN Genesis'}}
+function expectedImage(){return mode==='XY'?{src:FAIRY,alt:'XY 模式嫦娥'}:{src:captureApprovedXz(),alt:'XZ 模式 KGEN Genesis'}}
 function ensureKnobImage(){const knob=$('#knob');if(!knob)return false;let img=knob.querySelector('img');if(!img){img=document.createElement('img');img.draggable=false;knob.replaceChildren(img)}const expected=expectedImage();if(img.getAttribute('src')!==expected.src)img.setAttribute('src',expected.src);if(img.alt!==expected.alt)img.alt=expected.alt;img.style.display='block';img.style.visibility='visible';img.style.opacity='1';img.dataset.k11520XzxyMode=mode;return true}
 function ensureUfoAsset(){const host=$('#cThumb');if(!host)return false;let img=host.querySelector('img');if(!img){img=document.createElement('img');img.className='v260ControlImg';img.draggable=false;host.replaceChildren(img)}if(img.getAttribute('src')!==UFO)img.setAttribute('src',UFO);img.alt='C 曲速 UFO control';img.draggable=false;return true}
-function render(){ensureLabels();ensureKnobImage();ensureUfoAsset();const label=$('#k11520PlaneLabel'),top=$('#k11520DirTop'),bottom=$('#k11520DirBottom'),left=$('#k11520DirLeft'),right=$('#k11520DirRight');if(label)label.textContent=`${mode} 模式 · 點中央圖切換`;if(left)left.textContent='X−';if(right)right.textContent='X+';if(top)top.textContent=mode==='XY'?'Y+':'Z+';if(bottom)bottom.textContent=mode==='XY'?'Y−':'Z−';document.documentElement.dataset.k11520JoyPlane=mode;globalThis.__K11520_JOYSTICK_XZXY__={organ:'XZXY Joystick',version:'2.6.14',mode,persistent:true,horizontal:'X',vertical:mode==='XY'?'Y':'Z',assets:{XZ:KGEN,XY:FAIRY,warp:UFO},neutralSwitch:true};globalThis.__K11520_JOYSTICK_PLANE__=globalThis.__K11520_JOYSTICK_XZXY__}
+function render(){ensureLabels();ensureKnobImage();ensureUfoAsset();const label=$('#k11520PlaneLabel'),top=$('#k11520DirTop'),bottom=$('#k11520DirBottom'),left=$('#k11520DirLeft'),right=$('#k11520DirRight');if(label)label.textContent=`${mode} 模式 · 點中央圖切換`;if(left)left.textContent='X−';if(right)right.textContent='X+';if(top)top.textContent=mode==='XY'?'Y+':'Z+';if(bottom)bottom.textContent=mode==='XY'?'Y−':'Z−';document.documentElement.dataset.k11520JoyPlane=mode;globalThis.__K11520_JOYSTICK_XZXY__={organ:'XZXY Joystick',version:'2.6.15',mode,persistent:true,horizontal:'X',vertical:mode==='XY'?'Y':'Z',assets:{XZ:xzApprovedSrc?'approved-embedded-kgen-genesis':KGEN_FALLBACK,XY:FAIRY,warp:UFO},neutralSwitch:true};globalThis.__K11520_JOYSTICK_PLANE__=globalThis.__K11520_JOYSTICK_XZXY__}
 function installImageGuard(){const knob=$('#knob');if(!knob)return false;try{imageGuard?.disconnect()}catch{}let repairing=false;imageGuard=new MutationObserver(()=>{if(repairing)return;const img=knob.querySelector('img'),expected=expectedImage();if(!img||img.getAttribute('src')!==expected.src||img.alt!==expected.alt||img.dataset.k11520XzxyMode!==mode){repairing=true;ensureKnobImage();queueMicrotask(()=>{repairing=false})}});imageGuard.observe(knob,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','style','class','data-k11520-xzxy-mode']});globalThis.__K11520_XZXY_IMAGE_GUARD__=imageGuard;return true}
 function installAuxGuard(){const c=$('#cThumb');if(!c)return false;try{auxGuard?.disconnect()}catch{}let repairing=false;auxGuard=new MutationObserver(()=>{if(repairing)return;const img=c.querySelector('img');if(!img||img.getAttribute('src')!==UFO){repairing=true;ensureUfoAsset();queueMicrotask(()=>{repairing=false})}});auxGuard.observe(c,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','class']});globalThis.__K11520_XZXY_AUX_GUARD__=auxGuard;return true}
 function flash(text){const t=$('#toast');if(!t)return;t.textContent=text;t.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>t.classList.remove('show'),1000)}
@@ -44,5 +45,5 @@ function bind(){const joy=$('#joy'),knob=$('#knob');if(!joy||!knob||joy.dataset.
   joy.addEventListener('pointermove',e=>{if(e.__k11520XYProxy)return;if(centerTap&&centerTap.id===e.pointerId&&Math.hypot(e.clientX-centerTap.x,e.clientY-centerTap.y)>8)centerTap=null;if(mode!=='XY'||e.pointerId!==xyPid)return;queueMicrotask(()=>{if(xyPid!==e.pointerId)return;neutralizeZ(e);yEvent('pointermove',e,xyProxyPid)})},{capture:true,passive:true});
   const end=e=>{if(e.__k11520XYProxy)return;const tap=centerTap;centerTap=null;const isTap=!!tap&&tap.id===e.pointerId&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<=8&&performance.now()-tap.t<420;if(isTap){e.preventDefault();toggle(e)}else if(e.pointerId===xyPid){const pid=xyProxyPid;xyPid=null;xyProxyPid=null;queueMicrotask(()=>yEvent(e.type==='pointercancel'?'pointercancel':'pointerup',e,pid||999999))}requestAnimationFrame(resetKnobVisual)};
   joy.addEventListener('pointerup',end,{capture:true,passive:false});joy.addEventListener('pointercancel',end,{capture:true,passive:false});return true}
-function install(){style();loadMode();ensureLabels();render();bind();installImageGuard();installAuxGuard();resetKnobVisual();let n=0;const tick=()=>{n++;render();bind();installImageGuard();installAuxGuard();if(n<20)setTimeout(tick,180)};setTimeout(tick,80);return globalThis.__K11520_JOYSTICK_XZXY__}
+function install(){style();captureApprovedXz();loadMode();ensureLabels();render();bind();installImageGuard();installAuxGuard();resetKnobVisual();let n=0;const tick=()=>{n++;render();bind();installImageGuard();installAuxGuard();if(n<20)setTimeout(tick,180)};setTimeout(tick,80);return globalThis.__K11520_JOYSTICK_XZXY__}
 export function install11520JoystickXZXY(){return install()}
