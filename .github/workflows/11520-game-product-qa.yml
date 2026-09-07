@@ -36,7 +36,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/living-world-inventory-runtime.mjs"
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-controls-v251.mjs"
-          node --check "K線西遊記/temples/11520/runtime/joystick-plane-mode-v269.mjs"
+          node --check "K線西遊記/temples/11520/runtime/joystick-xzxy.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
           node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs"
@@ -45,7 +45,7 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.51.1
           npx playwright install --with-deps chromium
-      - name: Run mobile XZ/XY functional and visual smoke test
+      - name: Run mobile XZXY functional and visual smoke test
         shell: bash
         run: |
           set -o pipefail
@@ -53,9 +53,9 @@ jobs:
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 2
-          echo "[11520-QA] XZ/XY browser smoke start $(date -u +%FT%TZ)"
+          echo "[11520-QA] XZXY browser smoke start $(date -u +%FT%TZ)"
           set +e
-          timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-smoke-v269.mjs" 2>&1 | tee /tmp/k11520-browser-smoke.log
+          timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-xzxy.mjs" 2>&1 | tee /tmp/k11520-browser-smoke.log
           RC=${PIPESTATUS[0]}
           set -e
           if [ "$RC" -ne 0 ]; then
@@ -64,7 +64,7 @@ jobs:
             tail -n 200 /tmp/k11520-http.log || true
             exit "$RC"
           fi
-          echo "[11520-QA] XZ/XY browser smoke completed $(date -u +%FT%TZ)"
+          echo "[11520-QA] XZXY browser smoke completed $(date -u +%FT%TZ)"
       - name: Verify mandatory runtime screenshot evidence exists
         if: always()
         shell: bash
