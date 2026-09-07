@@ -1,12 +1,13 @@
 /* KGEN_META
-VERSION: 1.1.0
+VERSION: 1.1.1
 STATUS: ACTIVE
-PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, and keep the wallet toggle at one stable screen position.
+PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle at one stable screen position, and prevent legacy control skins from overwriting the current product label.
 */
 import * as THREE from 'three';
 
 const $=s=>document.querySelector(s);
 const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+const PRODUCT_VERSION='V2.6.3';
 let cleanupTimer=null,walletTimer=null;
 
 function installStyle(){
@@ -136,6 +137,15 @@ function pinWallet(){
   return true;
 }
 
+function stampProductVersion(){
+  const target=document.querySelector('.brandMetaV250 span:first-child');
+  if(!target)return false;
+  const text=`${PRODUCT_VERSION} · 5D K線西遊記`;
+  if(target.textContent!==text)target.textContent=text;
+  target.dataset.k11520ProductVersion=PRODUCT_VERSION;
+  return true;
+}
+
 function humanizeButtons(){
   const labels={chatHandle:'聊天',dockToggle:'功能選單',aiChatButton:'AI 助手',bgmButton:'音樂',gameModeToggle:'遊戲設定',walletToggle:'11520 錢包',backpackButton:'背包 / 活體收納'};
   for(const [id,label] of Object.entries(labels)){const el=$('#'+id);if(el)el.setAttribute('aria-label',label)}
@@ -145,7 +155,7 @@ function raiseOpenSurface(){
   for(const sel of ['#aiChatPanel','#gameChat','#backpackPanel','.sheet','.confirm']){const el=$(sel);if(el&&(el.classList.contains('open')||el.classList.contains('show')))el.style.zIndex='7500'}
 }
 
-function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface()}
+function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface();stampProductVersion()}
 function scheduleCleanup(){clearTimeout(cleanupTimer);cleanupTimer=setTimeout(cleanup,60)}
 
 export function install11520HumanUx(){
@@ -154,6 +164,6 @@ export function install11520HumanUx(){
   addEventListener('resize',scheduleCleanup,{passive:true});
   globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());
   globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
-  globalThis.__K11520_HUMAN_UX__={version:'1.1.0',avatarFacing:'movement-aligned-180-model-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME']};
+  globalThis.__K11520_HUMAN_UX__={version:'1.1.1',productVersion:PRODUCT_VERSION,avatarFacing:'movement-aligned-180-model-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME']};
   return globalThis.__K11520_HUMAN_UX__;
 }
