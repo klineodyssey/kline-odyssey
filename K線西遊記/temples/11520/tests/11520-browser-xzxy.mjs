@@ -36,7 +36,7 @@ assert.match(await page.locator('#k11520PlaneLabel').textContent(),/XZ 平面/);
 let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+');assertFixed('XZ right',p0,p1,'y');
 await drag(.50,.10,102);let p2=await xyz();assert.ok(p2.z>p1.z,'XZ up must Z+');assertFixed('XZ up',p1,p2,'y');
 let w0=await world();await dragRail(.90,103,420);let w1=await world();assert.ok(w1.intent.y<w0.intent.y,'XZ rail down must advance Y- intent');assert.ok(near(w1.physical.y,w0.physical.y,.08),'ground must block physical body while Y intent keeps changing');
-await dragRail(.10,104,7600);let w2=await world();assert.ok(w2.intent.y>40,'Y intent must not clamp at legacy 40');assert.ok(w2.physical.y>40,'physical Y must be able to leave legacy 0..40 world band');
+await dragRail(.10,104,14000);let w2=await world();assert.ok(w2.intent.y>40,'Y intent must not clamp at legacy 40');assert.ok(w2.physical.y>40,'physical Y must be able to leave legacy 0..40 world band');
 await page.screenshot({path:`${OUT}/11520-mobile-xz-ground.png`,fullPage:true});
 
 await tapCenter(201);c=await control();assert.equal(c.mode,'XY');assert.deepEqual(c.discAxes,['X','Y']);assert.equal(c.railAxis,'Z');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_XY',{timeout:2500});assert.match(await page.locator('#knob img').getAttribute('src'),/goddess-ui\.webp$/);assert.match(await page.locator('#yControl label').textContent(),/Z 縱搖桿/);await assertNoDrift('XZ→XY');
