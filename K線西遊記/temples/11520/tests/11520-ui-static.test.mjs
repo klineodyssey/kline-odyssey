@@ -22,8 +22,9 @@ test('0C walking remains independent from C control',()=>{assert.equal(source.in
 test('current dynamic organ actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setWaypoint','bindMap'])assert.ok(main.includes(token),token)});
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','playerAttack'])assert.ok(main.includes(token),token)});
 
-test('human-approved V2.5 control imagery is production-wired',()=>{
-  for(const token of ['brand-k-ui.webp','goddess-ui.webp','kgen-user-ui.webp','ufo-ui.png'])assert.ok(controls.includes(token),token);
+test('human-approved current control imagery is production-wired',()=>{
+  assert.ok(controls.includes("const KGEN_GENESIS_DATA='data:image/webp;base64,"),'KGEN Genesis joystick data asset');
+  for(const token of ['goddess-ui.webp','kgen-user-ui.webp','ufo-ui.png'])assert.ok(controls.includes(token),token);
   for(const token of ['#knob','#yJoyV250 .yKnob','#lotsThumb','#cThumb'])assert.ok(controls.includes(token),token);
 });
 
