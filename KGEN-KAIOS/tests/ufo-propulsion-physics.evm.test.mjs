@@ -33,6 +33,13 @@ function within(actual, expected, tolerance) {
   return actual >= expected - tolerance && actual <= expected + tolerance;
 }
 
+function accountedReactionEnergy(o) {
+  return o.propulsionEnergyJouleWad
+    + o.recoverableEnergyJouleWad
+    + o.radiationHeatEnergyJouleWad
+    + o.kgodMassEquivalentKgWad * C * C;
+}
+
 test("1 mg/s matter + 1 mg/s KSHIP yields the expected mass-energy scale", async () => {
   const physics = await fixture();
   const duration = 60n;
@@ -60,10 +67,14 @@ test("1 mg/s matter + 1 mg/s KSHIP yields the expected mass-energy scale", async
 
   assert.equal(o.kshipConsumedMgWad, 60n * WAD);
   assert.equal(o.positiveMatterConsumedMgWad, 60n * WAD);
+  assert.equal(o.inputMassKgWad, 120_000_000_000_000n);
   assert.equal(o.reactedMassKgWad, 120_000_000_000_000n); // 0.00012 kg WAD
+  assert.equal(o.unreactedMassKgWad, 0n);
 
   const expectedEnergyWad = o.reactedMassKgWad * C * C;
   assert.equal(o.reactionEnergyJouleWad, expectedEnergyWad);
+  assert.equal(o.totalInputEnergyJouleWad, expectedEnergyWad);
+  assert.equal(o.unreactedEnergyJouleWad, 0n);
   assert.equal(o.averageReactionPowerWattWad, expectedEnergyWad / duration);
 
   // ~179.751 GW total reaction power.
@@ -81,9 +92,58 @@ test("1 mg/s matter + 1 mg/s KSHIP yields the expected mass-energy scale", async
 
   // Energy allocation is exhaustive after reaction efficiency.
   assert.equal(
-    o.propulsionEnergyJouleWad + o.recoverableEnergyJouleWad + o.radiationHeatEnergyJouleWad + o.kgodMassEquivalentKgWad * C * C,
+    accountedReactionEnergy(o),
     o.reactionEnergyJouleWad,
   );
+});
+
+test("sub-100% efficiency accounts for all unreacted input mass-energy", async () => {
+  const physics = await fixture();
+  const o = await physics.simulate({
+    shipId: keccak256(toUtf8Bytes("KAIOS-UFO-EFFICIENCY-ACCOUNTING")),
+    shipMassKgWad: 1_000n * WAD,
+    kshipMgPerSecWad: WAD,
+    positiveMatterMgPerSecWad: WAD,
+    durationSec: 60,
+    engine: {
+      reactionEfficiencyBps: 9_000,
+      propulsionFractionBps: 2_500,
+      recoverableFractionBps: 2_500,
+      kgodFractionBps: 2_500,
+      radiationHeatFractionBps: 2_500,
+      exhaustVelocityMPerSec: 1_000_000,
+    },
+  });
+
+  assert.equal(o.reactedMassKgWad + o.unreactedMassKgWad, o.inputMassKgWad);
+  assert.equal(o.reactionEnergyJouleWad + o.unreactedEnergyJouleWad, o.totalInputEnergyJouleWad);
+  assert.equal(accountedReactionEnergy(o) + o.unreactedEnergyJouleWad, o.totalInputEnergyJouleWad);
+  assert.equal(o.unreactedMassKgWad, o.inputMassKgWad / 10n);
+});
+
+test("fixed-point and KGOD conversion residue is conserved in radiation and heat", async () => {
+  const physics = await fixture();
+  const inputMassKgWad = 120_000_000_000_001n;
+  const balancedFlowMgWad = inputMassKgWad * 500_000n;
+  const o = await physics.simulate({
+    shipId: keccak256(toUtf8Bytes("KAIOS-UFO-ROUNDING-ACCOUNTING")),
+    shipMassKgWad: 1_000n * WAD,
+    kshipMgPerSecWad: balancedFlowMgWad,
+    positiveMatterMgPerSecWad: balancedFlowMgWad,
+    durationSec: 1,
+    engine: {
+      reactionEfficiencyBps: 10_000,
+      propulsionFractionBps: 3_333,
+      recoverableFractionBps: 3_333,
+      kgodFractionBps: 3_333,
+      radiationHeatFractionBps: 1,
+      exhaustVelocityMPerSec: 1_000_000,
+    },
+  });
+
+  assert.equal(o.inputMassKgWad, inputMassKgWad);
+  assert.equal(accountedReactionEnergy(o), o.reactionEnergyJouleWad);
+  assert.equal(accountedReactionEnergy(o) + o.unreactedEnergyJouleWad, o.totalInputEnergyJouleWad);
 });
 
 test("matter/antimatter flow must be exactly balanced", async () => {

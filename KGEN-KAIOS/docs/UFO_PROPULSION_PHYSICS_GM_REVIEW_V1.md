@@ -24,6 +24,8 @@ This document does not claim deployment, Mainnet activation, formal Life birth, 
 1. Positive-matter and KSHIP mass-equivalent flow must be equal for the V1 annihilation model; mismatched flow reverts.
 2. Engine allocation fractions must sum to 10000 bps.
 3. Reaction efficiency cannot exceed 10000 bps.
+   - Any unreacted mass-energy below 10000 bps is reported explicitly rather than disappearing from the output ledger.
+   - Fixed-point and KGOD mass-equivalent rounding residue is conservatively retained in radiation/heat.
 4. Effective exhaust velocity must be > 0 and < c.
 5. The simulator is pure/read-only: it cannot move KSHIP, trade KGEN, mint KGOD, create White-Hole credits, or execute propulsion.
 6. Reference local-EVM case is tested for approximately:

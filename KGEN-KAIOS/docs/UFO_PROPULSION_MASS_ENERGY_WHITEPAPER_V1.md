@@ -35,6 +35,8 @@ The runtime then applies a configurable reaction-efficiency factor. The reacted 
 
 This prevents the same reacted energy from being counted twice.
 
+Efficiency below 100% does not erase the remaining input. V1 records the unreacted mass and its mass-energy separately. Integer division and KGOD mass-equivalent conversion residue are conservatively assigned to the radiation/heat bucket, so reacted energy and total input energy remain exactly reconcilable in integer arithmetic.
+
 ## 5. Propulsion model V1
 V1 uses a non-relativistic directed-exhaust approximation for simulation/accounting:
 

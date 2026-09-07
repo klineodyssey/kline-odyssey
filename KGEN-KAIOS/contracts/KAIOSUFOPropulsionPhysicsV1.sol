@@ -36,8 +36,12 @@ contract KAIOSUFOPropulsionPhysicsV1 {
     struct FlightOutput {
         uint256 kshipConsumedMgWad;
         uint256 positiveMatterConsumedMgWad;
+        uint256 inputMassKgWad;
         uint256 reactedMassKgWad;
+        uint256 unreactedMassKgWad;
+        uint256 totalInputEnergyJouleWad;
         uint256 reactionEnergyJouleWad;
+        uint256 unreactedEnergyJouleWad;
         uint256 averageReactionPowerWattWad;
         uint256 propulsionEnergyJouleWad;
         uint256 recoverableEnergyJouleWad;
@@ -62,18 +66,28 @@ contract KAIOSUFOPropulsionPhysicsV1 {
         o.positiveMatterConsumedMgWad = x.positiveMatterMgPerSecWad * x.durationSec;
 
         uint256 totalInputMgWad = o.kshipConsumedMgWad + o.positiveMatterConsumedMgWad;
-        uint256 inputMassKgWad = totalInputMgWad / MG_PER_KG;
-        o.reactedMassKgWad = inputMassKgWad * e.reactionEfficiencyBps / BPS;
+        o.inputMassKgWad = totalInputMgWad / MG_PER_KG;
+        o.reactedMassKgWad = o.inputMassKgWad * e.reactionEfficiencyBps / BPS;
+        o.unreactedMassKgWad = o.inputMassKgWad - o.reactedMassKgWad;
 
         // E = m c^2. kgWad * (m/s)^2 => jouleWad.
+        o.totalInputEnergyJouleWad = o.inputMassKgWad * C_M_PER_S * C_M_PER_S;
         o.reactionEnergyJouleWad = o.reactedMassKgWad * C_M_PER_S * C_M_PER_S;
+        o.unreactedEnergyJouleWad = o.unreactedMassKgWad * C_M_PER_S * C_M_PER_S;
         o.averageReactionPowerWattWad = o.reactionEnergyJouleWad / x.durationSec;
 
         o.propulsionEnergyJouleWad = o.reactionEnergyJouleWad * e.propulsionFractionBps / BPS;
         o.recoverableEnergyJouleWad = o.reactionEnergyJouleWad * e.recoverableFractionBps / BPS;
         uint256 kgodEnergyJouleWad = o.reactionEnergyJouleWad * e.kgodFractionBps / BPS;
-        o.radiationHeatEnergyJouleWad = o.reactionEnergyJouleWad * e.radiationHeatFractionBps / BPS;
         o.kgodMassEquivalentKgWad = kgodEnergyJouleWad / (C_M_PER_S * C_M_PER_S);
+        uint256 accountedKgodEnergyJouleWad = o.kgodMassEquivalentKgWad * C_M_PER_S * C_M_PER_S;
+
+        // Radiation/heat is the conservative residual sink. This preserves exact integer
+        // conservation after basis-point division and KGOD mass-equivalent rounding.
+        o.radiationHeatEnergyJouleWad = o.reactionEnergyJouleWad
+            - o.propulsionEnergyJouleWad
+            - o.recoverableEnergyJouleWad
+            - accountedKgodEnergyJouleWad;
 
         // Non-relativistic directed exhaust approximation: P = F*v_e/2 => F = 2P/v_e.
         uint256 propulsionPowerWattWad = o.propulsionEnergyJouleWad / x.durationSec;
