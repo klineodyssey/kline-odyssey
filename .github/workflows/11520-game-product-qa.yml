@@ -65,6 +65,53 @@ jobs:
             exit "$RC"
           fi
           echo "[11520-QA] XZXY browser smoke completed $(date -u +%FT%TZ)"
+      - name: Capture clean 390x844 final world view
+        shell: bash
+        run: |
+          set -e
+          ARTIFACT_DIR="artifacts/11520-visual-qa"
+          mkdir -p "$ARTIFACT_DIR"
+          if [ -s "$ARTIFACT_DIR/11520-mobile-390x844.png" ]; then
+            mv "$ARTIFACT_DIR/11520-mobile-390x844.png" "$ARTIFACT_DIR/11520-mobile-wallet-expanded.png"
+          fi
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-clean-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {chromium} from 'playwright';
+          const out='artifacts/11520-visual-qa/11520-mobile-390x844.png';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+          const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+          await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+          await page.waitForTimeout(1800);
+          if(await page.locator('#intro11520').isVisible().catch(()=>false)) await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
+          await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
+          await page.waitForTimeout(500);
+          assert.deepEqual(errors,[],'clean final view page errors: '+errors.join('\n'));
+          const settings=page.locator('#k11520UiSettings');
+          if(await settings.count() && await settings.isVisible().catch(()=>false)) {
+            await page.locator('#k11520UiSettingsClose').click({timeout:2000});
+            await settings.waitFor({state:'hidden',timeout:2000});
+          }
+          const wallet=page.locator('#walletPanel');
+          assert.ok(await wallet.count(),'wallet panel missing from clean final view');
+          if(!(await wallet.evaluate(el=>el.classList.contains('collapsed')))) {
+            await page.locator('#walletToggle').click({timeout:2000});
+            await page.waitForTimeout(120);
+          }
+          assert.equal(await wallet.evaluate(el=>el.classList.contains('collapsed')),true,'wallet must be collapsed before final 390x844 capture');
+          assert.equal(await settings.isVisible().catch(()=>false),false,'settings must be closed before final 390x844 capture');
+          const walletBox=await wallet.boundingBox();
+          assert.ok(walletBox && walletBox.width<=50,`collapsed wallet blocks clean world view: ${JSON.stringify(walletBox)}`);
+          const canvas=await page.locator('#three').boundingBox();
+          assert.ok(canvas && canvas.width>=390 && canvas.height>0,'3D world canvas missing from clean final view');
+          await page.screenshot({path:out,fullPage:true});
+          await browser.close();
+          console.log('[11520-QA] clean final world-view screenshot captured');
+          NODE
       - name: Verify mandatory runtime screenshot evidence exists
         if: always()
         shell: bash
