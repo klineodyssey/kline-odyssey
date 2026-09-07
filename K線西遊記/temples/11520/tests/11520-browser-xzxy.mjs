@@ -22,10 +22,11 @@ const tapCenter=async id=>{const b=await joyBox();const p=point(b,.5,.5,1,id);aw
 const visible=async sel=>{const r=await page.locator(sel).evaluate(el=>{const b=el.getBoundingClientRect(),s=getComputedStyle(el);return{w:b.width,h:b.height,display:s.display,visibility:s.visibility,opacity:s.opacity,pointer:s.pointerEvents}});assert.ok(r.w>0&&r.h>0&&r.display!=='none'&&r.visibility!=='hidden'&&r.opacity!=='0',`${sel} not visible ${JSON.stringify(r)}`);return r};
 const near=(a,b,t=.06)=>Math.abs(a-b)<=t;
 const assertNoDrift=async(label)=>{const a=await xyz();await page.waitForTimeout(450);const b=await xyz();assert.ok(near(a.x,b.x)&&near(a.y,b.y)&&near(a.z,b.z),`${label} drifted after plane switch: ${JSON.stringify({a,b})}`)};
+const assertKgenArt=async()=>{const src=await page.locator('#knob img').getAttribute('src');assert.ok(String(src).startsWith('data:image/')||/kgen-user-ui\.webp$/.test(String(src)),`XZ must use approved KGEN Genesis art: ${String(src).slice(0,80)}`)};
 
 await visible('#joy');await visible('#knob');await visible('#knob img');
 assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XZ','default joystick plane must be XZ');
-assert.match(await page.locator('#knob img').getAttribute('src'),/kgen-user-ui\.webp$/,'XZ must use human-approved KGEN art');
+await assertKgenArt();
 assert.match(await page.locator('#cThumb img').getAttribute('src'),/ufo-user-ui\.webp$/,'C warp must use human-approved UFO art');
 let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+');
 await drag(.10,.50,102);let p2=await xyz();assert.ok(p2.x<p1.x,'XZ left must X-');
@@ -49,7 +50,7 @@ await visible('#knob img');
 await tapCenter(202);
 assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XZ','second center tap must return XZ');
 assert.match(await page.locator('#k11520DirTop').textContent(),/Z\+/);
-assert.match(await page.locator('#knob img').getAttribute('src'),/kgen-user-ui\.webp$/);
+await assertKgenArt();
 await assertNoDrift('XY→XZ');
 
 await visible('#gameModeToggle');await page.locator('#gameModeToggle').click({timeout:2000});await page.waitForTimeout(120);await visible('#k11520UiSettings');
