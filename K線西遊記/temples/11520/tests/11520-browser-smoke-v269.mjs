@@ -17,6 +17,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);assert.ok(m,'XYZ parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]}};
 const drag=async(toX,toY,id)=>{const b=await page.locator('#joy').boundingBox();assert.ok(b,'joy missing');const p=(x,y,buttons=1)=>({pointerId:id,pointerType:'touch',clientX:b.x+b.width*x,clientY:b.y+b.height*y,buttons});await page.dispatchEvent('#joy','pointerdown',p(.5,.5));await page.dispatchEvent('#joy','pointermove',p(toX,toY));await page.waitForTimeout(280);await page.dispatchEvent('#joy','pointerup',p(toX,toY,0));await page.waitForTimeout(80)};
 const visible=async sel=>{const r=await page.locator(sel).evaluate(el=>{const b=el.getBoundingClientRect(),s=getComputedStyle(el);return{w:b.width,h:b.height,display:s.display,visibility:s.visibility,opacity:s.opacity}});assert.ok(r.w>0&&r.h>0&&r.display!=='none'&&r.visibility!=='hidden'&&r.opacity!=='0',`${sel} not visible ${JSON.stringify(r)}`)};
+const tapKnobCenter=async()=>{const b=await page.locator('#knob').boundingBox();assert.ok(b,'knob missing');const x=b.x+b.width/2,y=b.y+b.height/2;const hit=await page.evaluate(([x,y])=>document.elementsFromPoint(x,y).map(el=>({id:el.id,cls:el.className})).slice(0,8),[x,y]);assert.ok(hit.some(el=>el.id==='knob'||el.id==='joy'),`joystick center is not pointer reachable: ${JSON.stringify(hit)}`);await page.mouse.click(x,y,{delay:70});await page.waitForTimeout(120)};
 
 await visible('#joy');await visible('#knob img');
 assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XZ','default joystick plane must be XZ');
@@ -26,7 +27,7 @@ await drag(.50,.10,103);let p3=await xyz();assert.ok(p3.z>p2.z,'XZ up must Z+');
 await drag(.50,.90,104);let p4=await xyz();assert.ok(p4.z<p3.z,'XZ down must Z-');
 await visible('#knob img');
 
-await page.locator('#knob').click({timeout:2000});await page.waitForTimeout(120);
+await tapKnobCenter();
 assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XY','center image tap must switch to XY');
 assert.match(await page.locator('#k11520PlaneLabel').textContent(),/XY/);
 assert.match(await page.locator('#k11520DirTop').textContent(),/Y\+/);
@@ -37,7 +38,7 @@ await drag(.50,.90,106);let q2=await xyz();assert.ok(q2.y<q1.y,'XY down must Y-'
 await drag(.90,.50,107);let q3=await xyz();assert.ok(q3.x>q2.x,'XY right must keep X+');
 await visible('#knob img');
 
-await page.locator('#knob').click({timeout:2000});await page.waitForTimeout(120);
+await tapKnobCenter();
 assert.equal(await page.locator('html').getAttribute('data-k11520-joy-plane'),'XZ','second center tap must return XZ');
 assert.match(await page.locator('#k11520DirTop').textContent(),/Z\+/);
 
