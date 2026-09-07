@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.3.0
+VERSION: 1.3.1
 STATUS: ACTIVE
 PURPOSE: Human-first 11520 interaction layer. Align avatar facing with visible X movement, keep modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle stable, prevent dock pointer collisions, keep joystick imagery visible, and automatically separate mobile controls that collide.
 */
@@ -61,8 +61,6 @@ function patchAvatarFacing(){
       scene?.traverse?.(o=>{if(!player&&o?.userData?.isPlayer)player=o});
       if(player?.rotation){
         originalYaw=player.rotation.y;
-        // The canvas is mirrored on X. Reflect the heading exactly once for rendering.
-        // Do not add PI here: the previous PI offset made the knight look left while moving right.
         player.rotation.y=-originalYaw;
       }
     }catch{}
@@ -75,14 +73,18 @@ function normalizeBackpack(){
   const canonical=$('#backpackButton');
   const candidates=[...document.querySelectorAll('button,[role="button"],[title],[aria-label]')].filter(el=>/背包|🎒/.test(`${el.textContent||''} ${el.title||''} ${el.getAttribute('aria-label')||''}`));
   if(!canonical&&!candidates.length)return false;
-  const real=canonical||candidates.find(el=>el.classList.contains('bagRelocatedV258'))||candidates.find(el=>el.classList.contains('bagRelocatedV250'))||candidates[0];
+  const real=candidates.find(el=>el.classList.contains('bagRelocatedV258'))||candidates.find(el=>el.classList.contains('bagRelocatedV250'))||canonical||candidates[0];
   real.dataset.k11520RealBag='1';
+  delete real.dataset.k11520HiddenDuplicate;
+  real.removeAttribute('aria-hidden');
+  real.tabIndex=0;
   real.style.removeProperty('display');
   real.title='背包 / 活體收納';
   real.setAttribute('aria-label','開啟背包與活體收納');
   for(const el of candidates){
     if(el===real)continue;
     el.dataset.k11520HiddenDuplicate='1';
+    el.removeAttribute('data-k11520-real-bag');
     el.setAttribute('aria-hidden','true');
     el.tabIndex=-1;
   }
@@ -172,6 +174,6 @@ export function install11520HumanUx(){
   document.addEventListener('click',e=>{if(e.target?.closest?.('#dockToggle,.dockToggle'))setTimeout(syncDockOcclusion,0)},true);
   globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
   if(!versionTimer)versionTimer=setInterval(()=>{enforceProductVersion();resolveMobileCollisions()},250);
-  globalThis.__K11520_HUMAN_UX__={version:'1.3.0',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-no-extra-pi',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:true};
+  globalThis.__K11520_HUMAN_UX__={version:'1.3.1',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-no-extra-pi',chatTopLayer:true,singleBackpack:'living-cargo-relocated-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:true};
   return globalThis.__K11520_HUMAN_UX__;
 }
