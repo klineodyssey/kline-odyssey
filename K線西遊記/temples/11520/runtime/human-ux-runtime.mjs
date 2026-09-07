@@ -1,7 +1,7 @@
 /* KGEN_META
-VERSION: 1.1.2
+VERSION: 1.2.0
 STATUS: ACTIVE
-PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, and keep the wallet toggle at one stable screen position.
+PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle at one stable screen position, and prevent dock menus from being covered by floating shortcuts.
 */
 import * as THREE from 'three';
 
@@ -35,6 +35,7 @@ function installStyle(){
   #aiChatButton{z-index:7040!important}
   #dockToggle{z-index:7040!important}
   #bgmButton,#gameModeToggle{opacity:.84}
+  [data-k11520-dock-muted='1']{opacity:.12!important;pointer-events:none!important;transform:scale(.92)!important;transition:opacity .12s ease,transform .12s ease!important}
 
   @media(max-width:420px){
     #walletPanel,#walletPanel.collapsed{right:58px!important;bottom:230px!important}
@@ -47,17 +48,24 @@ function installStyle(){
 }
 
 function patchAvatarFacing(){
-  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV2)return;
+  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV3)return;
   const original=THREE.WebGLRenderer.prototype.render;
   THREE.WebGLRenderer.prototype.render=function(scene,camera){
+    let player=null,originalYaw=null;
     try{
-      let player=null;
       scene?.traverse?.(o=>{if(!player&&o?.userData?.isPlayer)player=o});
-      if(player?.rotation)player.rotation.y+=Math.PI;
+      if(player?.rotation){
+        originalYaw=player.rotation.y;
+        // The world canvas is mirrored on X so the visible horizontal heading is mirrored too.
+        // Mirror the yaw only for the render call, then restore simulation state. The PI offset
+        // compensates the knight asset's visual forward axis, so screen-right movement faces right
+        // and screen-left movement faces left without altering canonical XYZ movement.
+        player.rotation.y=Math.PI-originalYaw;
+      }
     }catch{}
-    return original.call(this,scene,camera);
+    try{return original.call(this,scene,camera)}finally{if(player?.rotation&&originalYaw!==null)player.rotation.y=originalYaw}
   };
-  THREE.WebGLRenderer.prototype.__k11520HumanFacingV2=true;
+  THREE.WebGLRenderer.prototype.__k11520HumanFacingV3=true;
 }
 
 function normalizeBackpack(){
@@ -115,13 +123,17 @@ function pinWallet(){
   ensureKaiosMetric();sync();refreshOwnWallet();if(!walletTimer)walletTimer=setInterval(()=>refreshOwnWallet(),12000);return true;
 }
 
-function enforceProductVersion(){
-  const el=document.querySelector('.brandMetaV250 span:first-child');
-  if(el&&el.textContent!==PRODUCT_VERSION)el.textContent=PRODUCT_VERSION;
+function syncDockOcclusion(){
+  const dock=$('.dock'),open=!!dock?.classList.contains('open');
+  for(const sel of ['#aiChatButton','#bgmButton','#backpackButton']){
+    const el=$(sel);if(!el)continue;
+    if(open)el.dataset.k11520DockMuted='1';else delete el.dataset.k11520DockMuted;
+  }
 }
+function enforceProductVersion(){const el=document.querySelector('.brandMetaV250 span:first-child');if(el&&el.textContent!==PRODUCT_VERSION)el.textContent=PRODUCT_VERSION}
 function humanizeButtons(){const labels={chatHandle:'聊天',dockToggle:'功能選單',aiChatButton:'AI 助手',bgmButton:'音樂',gameModeToggle:'遊戲設定',walletToggle:'11520 錢包',backpackButton:'背包 / 活體收納'};for(const [id,label] of Object.entries(labels)){const el=$('#'+id);if(el)el.setAttribute('aria-label',label)}}
 function raiseOpenSurface(){for(const sel of ['#aiChatPanel','#gameChat','#backpackPanel','.sheet','.confirm']){const el=$(sel);if(el&&(el.classList.contains('open')||el.classList.contains('show')))el.style.zIndex='7500'}}
-function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface();enforceProductVersion()}
+function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface();syncDockOcclusion();enforceProductVersion()}
 function scheduleCleanup(){clearTimeout(cleanupTimer);cleanupTimer=setTimeout(cleanup,60)}
 
 export function install11520HumanUx(){
@@ -130,6 +142,6 @@ export function install11520HumanUx(){
   addEventListener('resize',scheduleCleanup,{passive:true});
   globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
   if(!versionTimer)versionTimer=setInterval(enforceProductVersion,250);
-  globalThis.__K11520_HUMAN_UX__={version:'1.1.2',productVersion:PRODUCT_VERSION,avatarFacing:'movement-aligned-180-model-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME']};
+  globalThis.__K11520_HUMAN_UX__={version:'1.2.0',productVersion:PRODUCT_VERSION,avatarFacing:'screen-mirrored-yaw-with-model-forward-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:true};
   return globalThis.__K11520_HUMAN_UX__;
 }
