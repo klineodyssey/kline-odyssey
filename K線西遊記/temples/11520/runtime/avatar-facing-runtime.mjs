@@ -1,7 +1,7 @@
 /* KGEN_META
-VERSION: 1.3.0
+VERSION: 1.3.1
 STATUS: ACTIVE
-PURPOSE: Visual-only 11520 avatar-facing and locomotion presentation. Keep canonical XYZ and heading semantics unchanged while compensating mirrored-X presentation and distinguishing XZ ground locomotion from XY / YZ flight presentation.
+PURPOSE: Visual-only 11520 avatar-facing and locomotion presentation. Keep canonical XYZ and heading semantics unchanged, center the original 3D character visual pivot before parent-facing rotation, compensate mirrored-X presentation, and distinguish XZ ground locomotion from XY / YZ flight presentation.
 */
 import * as THREE from 'three';
 
@@ -9,9 +9,32 @@ const plane=()=>{const v=document.documentElement?.dataset?.k11520JoyPlane;retur
 const motionInput=()=>globalThis.__K11520_3D_CONTROL__?.vector||globalThis.__K11520_JOYSTICK_XZXY__?.vector||{x:0,y:0,z:0};
 function playerAncestor(root){let n=root;while(n){if(n?.userData?.isPlayer)return n;n=n.parent}return null}
 function clipName(action){try{return action?.getClip?.()?.name||''}catch{return''}}
+function centerPlayerVisual(child){
+  if(!child||child.userData?.k11520PivotCentered)return child;
+  try{
+    child.updateMatrixWorld?.(true);
+    const box=new THREE.Box3().setFromObject(child);
+    if(!box.isEmpty()){
+      const center=box.getCenter(new THREE.Vector3());
+      if(Number.isFinite(center.x))child.position.x-=center.x;
+      if(Number.isFinite(center.z))child.position.z-=center.z;
+    }
+    child.userData.k11520PivotCentered=true;
+  }catch{}
+  return child;
+}
 
 export function install11520AvatarFacingCorrection(){
   const proto=THREE.Object3D.prototype;
+  if(!proto.__k11520PlayerVisualPivotV1){
+    const nextAdd=proto.add;
+    proto.add=function(...objects){
+      if(this?.userData?.isPlayer)for(const obj of objects)centerPlayerVisual(obj);
+      return nextAdd.apply(this,objects);
+    };
+    proto.__k11520PlayerVisualPivotV1=true;
+  }
+
   if(!proto.__k11520AvatarFacingCorrectionV4){
     const nextUpdateMatrixWorld=proto.updateMatrixWorld;
     proto.updateMatrixWorld=function(force){
@@ -60,6 +83,6 @@ export function install11520AvatarFacingCorrection(){
     mixerProto.__k11520GroundFlightSplitV2=true;
   }
 
-  globalThis.__K11520_AVATAR_FACING__={version:'1.3.0',scope:'player-matrix-and-locomotion-presentation',canonicalCoordinatesUntouched:true,xPositive:'screen-right',xNegative:'screen-left',ground:'XZ',flight:['XY','YZ']};
+  globalThis.__K11520_AVATAR_FACING__={version:'1.3.1',scope:'player-pivot-matrix-and-locomotion-presentation',canonicalCoordinatesUntouched:true,pivotCentered:true,xPositive:'screen-right',xNegative:'screen-left',ground:'XZ',flight:['XY','YZ']};
   return true;
 }
