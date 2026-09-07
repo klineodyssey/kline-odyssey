@@ -35,6 +35,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/wild-ecology-source-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/living-world-inventory-runtime.mjs"
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
+          node --check "K線西遊記/temples/11520/runtime/game-controls-v251.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
           node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs"
@@ -43,7 +44,7 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.51.1
           npx playwright install --with-deps chromium
-      - name: Run mobile browser smoke test
+      - name: Run mobile browser functional and visual smoke test
         shell: bash
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-http.log 2>&1 &
@@ -51,3 +52,11 @@ jobs:
           trap 'kill $SERVER_PID || true' EXIT
           sleep 2
           node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
+      - name: Upload 11520 runtime visual QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 11520-runtime-visual-qa-${{ github.sha }}
+          path: artifacts/11520-visual-qa/
+          if-no-files-found: warn
+          retention-days: 14
