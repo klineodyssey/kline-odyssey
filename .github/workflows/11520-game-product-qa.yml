@@ -66,11 +66,22 @@ jobs:
             exit "$RC"
           fi
           echo "[11520-QA] browser smoke completed $(date -u +%FT%TZ)"
+      - name: Verify mandatory runtime screenshot evidence exists
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          SCREENSHOT="artifacts/11520-visual-qa/11520-mobile-390x844.png"
+          if [ ! -s "$SCREENSHOT" ]; then
+            echo "[11520-QA] QA_RED: mandatory 390x844 runtime screenshot missing or empty: $SCREENSHOT"
+            exit 1
+          fi
+          echo "[11520-QA] screenshot evidence present: $SCREENSHOT ($(wc -c < "$SCREENSHOT") bytes)"
       - name: Upload 11520 runtime visual QA evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: 11520-runtime-visual-qa-${{ github.sha }}
           path: artifacts/11520-visual-qa/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
