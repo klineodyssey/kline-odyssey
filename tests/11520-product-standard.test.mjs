@@ -30,7 +30,8 @@ const controls=fs.readFileSync(path.join(root,'runtime/game-controls-v251.mjs'),
 const source=[html,main,fixes,controls].join('\n');
 
 for(const marker of ['Knight.glb','GLTFLoader','AnimationMixer','walletConnect','KGEN verified','KX','KY','KZ','orderFire','confirmOrder','主城世界','K場交易','持倉','委託','歷史','資產','統計','市場','背包','角色','世界地圖','ATM','設定','客服/說明'])assert.ok(source.includes(marker),`missing product marker: ${marker}`);
-for(const marker of ['brand-k-ui.webp','goddess-ui.webp','kgen-user-ui.webp','ufo-ui.png','#yJoyV250 .yKnob','#lotsThumb','#cThumb'])assert.ok(controls.includes(marker),`missing approved mobile-control marker: ${marker}`);
+assert.ok(controls.includes("const KGEN_GENESIS_DATA='data:image/webp;base64,"),'missing approved mobile-control marker: KGEN Genesis joystick data asset');
+for(const marker of ['goddess-ui.webp','kgen-user-ui.webp','ufo-ui.png','#yJoyV250 .yKnob','#lotsThumb','#cThumb'])assert.ok(controls.includes(marker),`missing approved mobile-control marker: ${marker}`);
 
 assert.ok(main.includes("joy.addEventListener('pointerdown'"));assert.ok(main.includes("$('#attack').onclick"));assert.ok(main.includes("$('#dockToggle').onclick"));assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('setWaypoint'));assert.ok(fixes.includes('restoreWalletOrgan'));assert.ok(fixes.includes('placeOnlyRealBag'));assert.ok(controls.includes("#lookPad{display:none!important;pointer-events:none!important}"));assert.ok(!source.includes('margin = lots / leverage'));assert.ok(!source.includes('margin = lots / C'));
 console.log('11520 standardized product invariants PASS');
