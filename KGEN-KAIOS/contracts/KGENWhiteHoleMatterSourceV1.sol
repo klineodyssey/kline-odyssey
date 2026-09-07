@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+
 interface IKAIOSShipIdentityReaderV1 {
     struct ShipIdentity {
         bytes32 shipId;
@@ -32,6 +36,180 @@ interface IKGENWhiteHoleBurnVerifierV1 {
         bool washTrade;
     }
     function verifiedBurn(bytes32 burnId) external view returns (VerifiedBurn memory);
+}
+
+interface IKGENWhiteHoleTokenPolicyV1 {
+    function TAX_BPS_BURN() external view returns (uint16);
+    function isMarketMakerPair(address account) external view returns (bool);
+    function isTaxExempt(address account) external view returns (bool);
+}
+
+/**
+ * @title KGENWhiteHoleBurnVerifierV1
+ * @notice Immutable dual-attestor adapter for recent KGEN AMM burn receipts.
+ * @dev EVM contracts cannot read historical transaction logs directly. Two distinct immutable
+ *      attestors therefore sign the same block-anchored EIP-191 evidence. This contract checks the
+ *      live KGEN AMM/tax policy, recomputes the burn from the gross KGEN amount, fixes the physical
+ *      conversion scale at deployment, and rejects reused transaction-log coordinates. It has no
+ *      owner, mutable verifier set, token transfer, mint, burn, rescue, or upgrade function.
+ */
+contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
+    using MessageHashUtils for bytes32;
+
+    string public constant VERSION = "1.0.0";
+    bytes32 public constant VERSION_ID = keccak256("KAIOS.KGEN.WHITE_HOLE.BURN_VERIFIER.V1.0.0");
+    uint256 private constant BPS = 10_000;
+
+    IKGENWhiteHoleTokenPolicyV1 public immutable kgen;
+    address public immutable attestorA;
+    address public immutable attestorB;
+    uint256 public immutable matterPerKgenNumerator;
+    uint256 public immutable matterPerKgenDenominator;
+
+    struct BurnEvidence {
+        bytes32 transactionHash;
+        uint64 blockNumber;
+        bytes32 blockHash;
+        uint32 logIndex;
+        address pair;
+        address trader;
+        address burnSource;
+        uint256 grossTradeKgen;
+    }
+
+    mapping(bytes32 => VerifiedBurn) private _verifiedBurns;
+    mapping(bytes32 => bool) public transactionLogConsumed;
+
+    error ZeroAddress();
+    error InvalidAttestors();
+    error InvalidScale();
+    error InvalidEvidence();
+    error InvalidBlockEvidence(uint256 blockNumber, bytes32 blockHash);
+    error PairNotRegistered(address pair);
+    error TaxExemptBurnSource(address burnSource);
+    error BurnSourceNotTradeBound(address burnSource);
+    error ZeroBurn();
+    error InvalidAttestations(address signerA, address signerB);
+    error EvidenceAlreadyConsumed(bytes32 evidenceId);
+
+    event BurnReceiptVerified(
+        bytes32 indexed burnId,
+        bytes32 indexed transactionHash,
+        uint32 indexed logIndex,
+        address pair,
+        address trader,
+        address burnSource,
+        uint256 grossTradeKgen,
+        uint256 burnedKgen,
+        uint256 positiveMatterEquivalent
+    );
+
+    constructor(
+        address kgenToken,
+        address firstAttestor,
+        address secondAttestor,
+        uint256 scaleNumerator,
+        uint256 scaleDenominator
+    ) {
+        if (kgenToken == address(0)) revert ZeroAddress();
+        if (firstAttestor == address(0) || secondAttestor == address(0) || firstAttestor == secondAttestor) {
+            revert InvalidAttestors();
+        }
+        if (scaleNumerator == 0 || scaleDenominator == 0) revert InvalidScale();
+        kgen = IKGENWhiteHoleTokenPolicyV1(kgenToken);
+        attestorA = firstAttestor;
+        attestorB = secondAttestor;
+        matterPerKgenNumerator = scaleNumerator;
+        matterPerKgenDenominator = scaleDenominator;
+    }
+
+    function burnIdFor(BurnEvidence calldata evidence) public view returns (bytes32) {
+        return keccak256(abi.encode(block.chainid, address(kgen), evidence.transactionHash, evidence.logIndex));
+    }
+
+    function evidenceDigest(BurnEvidence calldata evidence) public view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                VERSION_ID,
+                block.chainid,
+                address(this),
+                address(kgen),
+                evidence.transactionHash,
+                evidence.blockNumber,
+                evidence.blockHash,
+                evidence.logIndex,
+                evidence.pair,
+                evidence.trader,
+                evidence.burnSource,
+                evidence.grossTradeKgen,
+                matterPerKgenNumerator,
+                matterPerKgenDenominator
+            )
+        );
+    }
+
+    function submitVerifiedBurn(BurnEvidence calldata evidence, bytes calldata signatureA, bytes calldata signatureB)
+        external returns (bytes32 burnId, uint256 burnedKgen, uint256 positiveMatterEquivalent)
+    {
+        if (
+            evidence.transactionHash == bytes32(0) || evidence.blockHash == bytes32(0) ||
+            evidence.pair == address(0) || evidence.trader == address(0) || evidence.burnSource == address(0) ||
+            evidence.grossTradeKgen == 0
+        ) revert InvalidEvidence();
+        if (
+            evidence.blockNumber >= block.number || block.number - evidence.blockNumber > 256 ||
+            blockhash(evidence.blockNumber) != evidence.blockHash
+        ) revert InvalidBlockEvidence(evidence.blockNumber, evidence.blockHash);
+        if (!kgen.isMarketMakerPair(evidence.pair)) revert PairNotRegistered(evidence.pair);
+        if (kgen.isTaxExempt(evidence.burnSource)) revert TaxExemptBurnSource(evidence.burnSource);
+        if (evidence.burnSource != evidence.trader && evidence.burnSource != evidence.pair) {
+            revert BurnSourceNotTradeBound(evidence.burnSource);
+        }
+
+        burnedKgen = Math.mulDiv(evidence.grossTradeKgen, kgen.TAX_BPS_BURN(), BPS);
+        if (burnedKgen == 0) revert ZeroBurn();
+        positiveMatterEquivalent = Math.mulDiv(burnedKgen, matterPerKgenNumerator, matterPerKgenDenominator);
+        if (positiveMatterEquivalent == 0) revert ZeroBurn();
+
+        bytes32 digest = evidenceDigest(evidence).toEthSignedMessageHash();
+        address signerA = ECDSA.recover(digest, signatureA);
+        address signerB = ECDSA.recover(digest, signatureB);
+        bool correctAttestors =
+            (signerA == attestorA && signerB == attestorB) || (signerA == attestorB && signerB == attestorA);
+        if (!correctAttestors) revert InvalidAttestations(signerA, signerB);
+
+        burnId = burnIdFor(evidence);
+        if (transactionLogConsumed[burnId] || _verifiedBurns[burnId].valid) revert EvidenceAlreadyConsumed(burnId);
+        transactionLogConsumed[burnId] = true;
+        _verifiedBurns[burnId] = VerifiedBurn({
+            burnId: burnId,
+            tradeId: evidence.transactionHash,
+            pairId: bytes32(uint256(uint160(evidence.pair))),
+            trader: evidence.trader,
+            burnedKgen: burnedKgen,
+            positiveMatterEquivalent: positiveMatterEquivalent,
+            valid: true,
+            ammTrade: true,
+            selfMatch: false,
+            washTrade: false
+        });
+
+        emit BurnReceiptVerified(
+            burnId,
+            evidence.transactionHash,
+            evidence.logIndex,
+            evidence.pair,
+            evidence.trader,
+            evidence.burnSource,
+            evidence.grossTradeKgen,
+            burnedKgen,
+            positiveMatterEquivalent
+        );
+    }
+
+    function verifiedBurn(bytes32 burnId) external view returns (VerifiedBurn memory) {
+        return _verifiedBurns[burnId];
+    }
 }
 
 /**
