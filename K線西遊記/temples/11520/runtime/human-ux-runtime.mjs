@@ -1,100 +1,159 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.1.0
 STATUS: ACTIVE
-PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible X movement, keep chat/modal surfaces above game HUD, collapse duplicate backpack controls to one real organ, and keep the wallet toggle anchored at one predictable location.
+PURPOSE: Human-first 11520 interaction layer. Keep avatar facing aligned with visible movement, keep chat/modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, and keep the wallet toggle at one stable screen position.
 */
 import * as THREE from 'three';
 
 const $=s=>document.querySelector(s);
-let cleanupTimer=null;
+const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+let cleanupTimer=null,walletTimer=null;
 
 function installStyle(){
   if($('#k11520HumanUxStyle'))return;
   const s=document.createElement('style');
   s.id='k11520HumanUxStyle';
   s.textContent=`
-  #chatHandle{z-index:6100!important;min-width:46px!important;min-height:46px!important;display:grid!important;place-items:center!important}
-  #gameChat,#aiChatPanel,.sheet,.confirm{z-index:6500!important}
-  #gameChat.open,#aiChatPanel.open,.sheet.open,.confirm.open{pointer-events:auto!important}
-  #chatClose,#aiClose,#sheetClose,#confirmX{position:relative!important;z-index:6502!important;min-width:42px!important;min-height:42px!important;touch-action:manipulation!important}
+  #chatHandle{z-index:7100!important;min-width:46px!important;min-height:46px!important;display:grid!important;place-items:center!important}
+  #gameChat,#aiChatPanel,.sheet,.confirm,#backpackPanel{z-index:7500!important}
+  #gameChat.open,#aiChatPanel.open,.sheet.open,.confirm.open,#backpackPanel.open{pointer-events:auto!important}
+  #chatClose,#aiClose,#sheetClose,#confirmX,#backpackClose{position:relative!important;z-index:7502!important;min-width:42px!important;min-height:42px!important;touch-action:manipulation!important}
+
   #walletPanel,#walletPanel.collapsed{right:58px!important;bottom:230px!important}
-  #walletPanel.collapsed{width:46px!important;height:46px!important;padding:4px!important;overflow:hidden!important}
+  #walletPanel{z-index:6900!important;padding-top:50px!important}
+  #walletPanel.collapsed{width:46px!important;height:46px!important;padding:4px!important;overflow:visible!important;background:#101923ee!important}
   #walletPanel.collapsed .walletHead{width:38px!important;height:38px!important;margin:0!important}
-  #walletToggle{min-width:38px!important;min-height:38px!important;touch-action:manipulation!important}
-  .bagRelocatedV250,.bagRelocatedV258,[data-k11520-real-bag='1']{min-width:44px!important;min-height:44px!important;touch-action:manipulation!important}
-  #dockToggle,#aiChatButton,#bgmButton,#gameModeToggle{min-width:44px!important;min-height:44px!important;touch-action:manipulation!important}
+  #walletToggle{position:fixed!important;right:62px!important;bottom:234px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;z-index:6950!important;touch-action:manipulation!important}
+  #walletPanel:not(.collapsed) .walletHead{padding-right:44px!important}
+  #walletKaiosMetric{display:block!important}
+
+  #backpackButton,[data-k11520-real-bag='1']{z-index:7050!important;right:5px!important;bottom:84px!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;touch-action:manipulation!important}
   button[data-k11520-hidden-duplicate='1']{display:none!important;pointer-events:none!important}
-  @media(max-width:420px){#walletPanel,#walletPanel.collapsed{right:58px!important;bottom:230px!important}#chatHandle{z-index:6100!important}#gameChat,#aiChatPanel{z-index:6500!important}}
+
+  #dockToggle,#aiChatButton,#bgmButton,#gameModeToggle{min-width:44px!important;min-height:44px!important;touch-action:manipulation!important}
+  #aiChatButton{z-index:7040!important}
+  #dockToggle{z-index:7040!important}
+  #bgmButton,#gameModeToggle{opacity:.84}
+
+  @media(max-width:420px){
+    #walletPanel,#walletPanel.collapsed{right:58px!important;bottom:230px!important}
+    #walletToggle{right:62px!important;bottom:234px!important}
+    #chatHandle{z-index:7100!important}
+    #gameChat,#aiChatPanel,#backpackPanel{z-index:7500!important}
+  }
   `;
   document.head.appendChild(s);
 }
 
 function patchAvatarFacing(){
-  if(THREE.WebGLRenderer.prototype.__k11520HumanFacing)return;
+  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV2)return;
   const original=THREE.WebGLRenderer.prototype.render;
   THREE.WebGLRenderer.prototype.render=function(scene,camera){
     try{
       let player=null;
       scene?.traverse?.(o=>{if(!player&&o?.userData?.isPlayer)player=o});
-      if(player?.rotation&&document.querySelector('#three')?.dataset?.xVisualMirror==='1')player.rotation.y=-player.rotation.y;
+      // The loaded knight model's visual forward is opposite the movement heading.
+      // game-5d-main resets rotation every frame, so apply one deterministic 180° correction immediately before render.
+      if(player?.rotation)player.rotation.y+=Math.PI;
     }catch{}
     return original.call(this,scene,camera);
   };
-  THREE.WebGLRenderer.prototype.__k11520HumanFacing=true;
+  THREE.WebGLRenderer.prototype.__k11520HumanFacingV2=true;
 }
 
 function normalizeBackpack(){
+  const canonical=$('#backpackButton');
   const candidates=[...document.querySelectorAll('button,[role="button"],[title],[aria-label]')].filter(el=>/背包|🎒/.test(`${el.textContent||''} ${el.title||''} ${el.getAttribute('aria-label')||''}`));
-  if(!candidates.length)return false;
-  const real=candidates.find(el=>el.classList.contains('bagRelocatedV258'))||candidates.find(el=>el.classList.contains('bagRelocatedV250'))||candidates.find(el=>el.dataset?.organ==='bag')||candidates.find(el=>typeof el.onclick==='function')||candidates[0];
+  if(!canonical&&!candidates.length)return false;
+  const real=canonical||candidates.find(el=>el.classList.contains('bagRelocatedV258'))||candidates.find(el=>el.classList.contains('bagRelocatedV250'))||candidates[0];
   real.dataset.k11520RealBag='1';
   real.style.removeProperty('display');
-  if(!real.getAttribute('aria-label'))real.setAttribute('aria-label','開啟背包');
+  real.title='背包 / 活體收納';
+  real.setAttribute('aria-label','開啟背包與活體收納');
   for(const el of candidates){
     if(el===real)continue;
-    if(el.closest('#rail')&&el.dataset?.organ==='bag')continue;
     el.dataset.k11520HiddenDuplicate='1';
     el.setAttribute('aria-hidden','true');
     el.tabIndex=-1;
   }
+  const panel=$('#backpackPanel');
+  if(panel){panel.dataset.k11520CanonicalBackpack='1';const head=panel.querySelector('.bpHead b');if(head)head.textContent='🎒 花果山背包 · 活體收納'}
   return true;
 }
 
+function ensureKaiosMetric(){
+  const grid=$('#walletPanel .walletGrid');
+  if(!grid)return false;
+  let metric=$('#walletKaiosMetric');
+  if(!metric){
+    metric=document.createElement('div');metric.id='walletKaiosMetric';metric.className='metric';
+    metric.innerHTML='<small>KAIOS 遊戲餘額</small><b id="wKaios">--</b>';
+    grid.appendChild(metric);
+  }
+  return true;
+}
+
+function hexToNumber(hex){try{return Number(BigInt(hex||'0x0'))}catch{return 0}}
+function formatUnits(hex,decimals=18){try{const n=BigInt(hex||'0x0'),d=10n**BigInt(decimals),whole=n/d,frac=(n%d).toString().padStart(decimals,'0').slice(0,6).replace(/0+$/,'');return frac?`${whole}.${frac}`:String(whole)}catch{return'--'}}
+function balanceOfData(address){return '0x70a08231'+String(address||'').toLowerCase().replace(/^0x/,'').padStart(64,'0')}
+
+async function refreshOwnWallet({requestPermission=false}={}){
+  ensureKaiosMetric();
+  const provider=globalThis.ethereum,msg=$('#walletMsg'),addr=$('#wAddr'),chain=$('#wChain'),bnb=$('#wBnb'),kgen=$('#wKgen'),kaios=$('#wKaios'),connect=$('#walletConnect');
+  if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();
+  if(!provider?.request){if(msg)msg.textContent='11520 未偵測到瀏覽器 EVM 錢包；可先使用遊戲內 KAIOS。';if(connect)connect.textContent='未偵測到錢包';return false}
+  let accounts=[];
+  try{accounts=await provider.request({method:requestPermission?'eth_requestAccounts':'eth_accounts'})||[]}catch(e){if(msg)msg.textContent=requestPermission?'錢包連線未授權':'已偵測錢包，尚未授權本頁讀取';return false}
+  if(!accounts.length){if(msg)msg.textContent='已偵測到錢包；點「連線」後只讀取地址與餘額，不自動簽名或轉帳。';if(connect)connect.textContent='連線錢包';return false}
+  const account=accounts[0];
+  try{
+    const [chainHex,bnbHex,kgenHex]=await Promise.all([
+      provider.request({method:'eth_chainId'}),
+      provider.request({method:'eth_getBalance',params:[account,'latest']}),
+      provider.request({method:'eth_call',params:[{to:KGEN,data:balanceOfData(account)},'latest']})
+    ]);
+    if(addr)addr.textContent=account.slice(0,6)+'…'+account.slice(-4);
+    if(chain)chain.textContent=String(hexToNumber(chainHex));
+    if(bnb)bnb.textContent=formatUnits(bnbHex,18);
+    if(kgen)kgen.textContent=formatUnits(kgenHex,18);
+    if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();
+    if(msg)msg.textContent=`11520 自有錢包視窗 · ${hexToNumber(chainHex)===56?'BSC 56':'目前鏈 '+hexToNumber(chainHex)} · BNB/KGEN 唯讀；KAIOS 顯示遊戲餘額。`;
+    if(connect)connect.textContent='已連線';
+    return true;
+  }catch(e){if(msg)msg.textContent='錢包已偵測，但餘額讀取失敗；可稍後重新整理。';return false}
+}
+
 function pinWallet(){
-  const panel=$('#walletPanel'),toggle=$('#walletToggle');
+  const panel=$('#walletPanel'),toggle=$('#walletToggle'),connect=$('#walletConnect');
   if(!panel||!toggle)return false;
   panel.dataset.k11520StableAnchor='1';
-  if(!toggle.getAttribute('aria-label'))toggle.setAttribute('aria-label','展開或收合錢包');
-  const sync=()=>{
-    const collapsed=panel.classList.contains('collapsed');
-    toggle.textContent=collapsed?'▶':'◀';
-    toggle.title=collapsed?'展開錢包':'收合錢包';
-  };
+  toggle.setAttribute('aria-label','展開或收合 11520 錢包');
+  const sync=()=>{const collapsed=panel.classList.contains('collapsed');toggle.textContent=collapsed?'💰':'×';toggle.title=collapsed?'開啟 11520 錢包':'關閉 11520 錢包'};
   if(!toggle.dataset.k11520StableAnchor){toggle.dataset.k11520StableAnchor='1';toggle.addEventListener('click',()=>setTimeout(sync,0))}
-  sync();
+  if(connect&&!connect.dataset.k11520OwnWallet){connect.dataset.k11520OwnWallet='1';connect.addEventListener('click',e=>{e.stopImmediatePropagation();refreshOwnWallet({requestPermission:true})},true)}
+  ensureKaiosMetric();sync();refreshOwnWallet();
+  if(!walletTimer)walletTimer=setInterval(()=>refreshOwnWallet(),12000);
   return true;
 }
 
 function humanizeButtons(){
-  const labels={chatHandle:'聊天',dockToggle:'功能選單',aiChatButton:'AI 助手',bgmButton:'音樂',gameModeToggle:'遊戲設定',walletToggle:'錢包'};
-  for(const [id,label] of Object.entries(labels)){const el=$('#'+id);if(el&&!el.getAttribute('aria-label'))el.setAttribute('aria-label',label)}
+  const labels={chatHandle:'聊天',dockToggle:'功能選單',aiChatButton:'AI 助手',bgmButton:'音樂',gameModeToggle:'遊戲設定',walletToggle:'11520 錢包',backpackButton:'背包 / 活體收納'};
+  for(const [id,label] of Object.entries(labels)){const el=$('#'+id);if(el)el.setAttribute('aria-label',label)}
 }
 
 function raiseOpenSurface(){
-  const ai=$('#aiChatPanel'),chat=$('#gameChat');
-  if(ai?.classList.contains('open'))ai.style.zIndex='6500';
-  if(chat?.classList.contains('open'))chat.style.zIndex='6500';
+  for(const sel of ['#aiChatPanel','#gameChat','#backpackPanel','.sheet','.confirm']){const el=$(sel);if(el&&(el.classList.contains('open')||el.classList.contains('show')))el.style.zIndex='7500'}
 }
 
 function cleanup(){installStyle();normalizeBackpack();pinWallet();humanizeButtons();raiseOpenSurface()}
-function scheduleCleanup(){clearTimeout(cleanupTimer);cleanupTimer=setTimeout(cleanup,40)}
+function scheduleCleanup(){clearTimeout(cleanupTimer);cleanupTimer=setTimeout(cleanup,60)}
 
 export function install11520HumanUx(){
-  patchAvatarFacing();
-  cleanup();
-  const mo=new MutationObserver(scheduleCleanup);
-  mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  patchAvatarFacing();cleanup();
+  const mo=new MutationObserver(scheduleCleanup);mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
   addEventListener('resize',scheduleCleanup,{passive:true});
-  globalThis.__K11520_HUMAN_UX__={version:'1.0.0',avatarFacing:'visible-X-aligned',chatTopLayer:true,singleBackpack:true,walletStableAnchor:true};
+  globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());
+  globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
+  globalThis.__K11520_HUMAN_UX__={version:'1.1.0',avatarFacing:'movement-aligned-180-model-correction',chatTopLayer:true,singleBackpack:'living-cargo-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME']};
   return globalThis.__K11520_HUMAN_UX__;
 }
