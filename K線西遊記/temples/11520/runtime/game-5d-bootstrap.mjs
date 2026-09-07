@@ -1,7 +1,7 @@
 /* KGEN_META
 VERSION: 2.6.9
 STATUS: ACTIVE
-PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, optional capabilities, or mobile tap delivery fail. V2.6.9 keeps the scoped mobile freeze hotfix and installs the persistent left-bottom XZ/XY joystick plane switch after the canonical controls.
+PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, optional capabilities, or mobile tap delivery fail. V2.6.9 keeps the scoped mobile freeze hotfix and installs the persistent left-bottom XZXY Joystick after the canonical controls.
 */
 const $=s=>document.querySelector(s);
 const PRODUCT_VERSION='V2.6.6';
@@ -18,7 +18,7 @@ setTimeout(()=>enterWorld(),1400);
   try{const {install11520AvatarFacingCorrection}=await import('./avatar-facing-runtime.mjs');install11520AvatarFacingCorrection()}catch(facingErr){console.warn('[11520 bootstrap] avatar-facing correction degraded',facingErr)}
   await import('./game-5d-main.mjs');
   try{const {install11520ControlsV251}=await import('./game-controls-v251.mjs');install11520ControlsV251();guardProductVersion()}catch(controlErr){console.warn('[11520 bootstrap] V2.6.9 control skin degraded',controlErr)}
-  try{const {install11520JoystickPlaneModeV269}=await import('./joystick-plane-mode-v269.mjs');install11520JoystickPlaneModeV269()}catch(planeErr){console.warn('[11520 bootstrap] XZ/XY joystick plane mode degraded',planeErr)}
+  try{const {install11520JoystickXZXY}=await import('./joystick-xzxy.mjs');install11520JoystickXZXY()}catch(planeErr){console.warn('[11520 bootstrap] XZXY joystick degraded',planeErr)}
   try{const {install11520MobileVisualHardeningV258}=await import('./mobile-visual-hardening-v258.mjs');install11520MobileVisualHardeningV258()}catch(visualErr){console.warn('[11520 bootstrap] V2.6.9 mobile visual hardening degraded',visualErr)}
   try{const {install11520MobileUiSettingsV267}=await import('./mobile-ui-settings-v267.mjs');install11520MobileUiSettingsV267()}catch(settingsErr){console.warn('[11520 bootstrap] V2.6.9 mobile UI settings degraded',settingsErr)}
   guardProductVersion();if(status)status.textContent='完整世界 READY'
