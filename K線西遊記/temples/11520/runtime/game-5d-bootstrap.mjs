@@ -16,7 +16,7 @@ setTimeout(()=>enterWorld(),1400);
 (async()=>{try{
   try{const {install11520AvatarFacingCorrection}=await import('./avatar-facing-runtime.mjs');install11520AvatarFacingCorrection()}catch(facingErr){console.warn('[11520 bootstrap] avatar-facing correction degraded',facingErr)}
   await import('./game-5d-main.mjs');
-  try{const {install11520ControlsV251}=await import('./game-controls-v251.mjs');install11520ControlsV251();guardProductVersion()}catch(controlErr){console.warn('[11520 bootstrap] control skin degraded',controlErr)}
+  try{const {install11520ControlsV251}=await import('./game-controls.mjs');install11520ControlsV251();guardProductVersion()}catch(controlErr){console.warn('[11520 bootstrap] control skin degraded',controlErr)}
   try{const {install11520JoystickXZXY}=await import('./joystick-xzxy.mjs');install11520JoystickXZXY()}catch(planeErr){console.warn('[11520 bootstrap] XZXY joystick degraded',planeErr)}
   try{const {install11520MobileVisualHardeningV258}=await import('./mobile-visual-hardening-v258.mjs');install11520MobileVisualHardeningV258()}catch(visualErr){console.warn('[11520 bootstrap] mobile visual hardening degraded',visualErr)}
   try{const {install11520MobileUiSettings}=await import('./mobile-ui-settings.mjs');install11520MobileUiSettings()}catch(settingsErr){console.warn('[11520 bootstrap] Mobile UI Settings degraded',settingsErr)}
