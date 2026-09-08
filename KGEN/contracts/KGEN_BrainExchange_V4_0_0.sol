@@ -11,18 +11,10 @@ pragma solidity ^0.8.24;
  * - real KGEN deposits and withdrawals with principal accounting
  * - reward liabilities separated from principal
  * - payroll / Heart / Treasury operations can spend surplus only
- * - pausable deposits and administration while user exits remain available
+ * - pausable deposits and new risk while user exits/settlement remain available
+ * - replay-safe position collateral reservation inside the single Brain ledger
  * - UUPS upgrades protected by an explicit delay
- * - no fake settlement state: this contract does NOT manufacture trading PnL
- *
- * IMPORTANT:
- * - This source intentionally uses OpenZeppelin upgradeable contracts rather
- *   than a bespoke proxy implementation. The repository must add a pinned,
- *   audited OpenZeppelin dependency and compile/test this contract before any
- *   deployment can be considered.
- * - Price-exposed KX/KY/KZ trading requires a separately reviewed oracle,
- *   position, liquidation and settlement engine. Deposits alone must never be
- *   presented as completed investment/trade settlement.
+ * - no fake settlement state: trading PnL must come from a separately reviewed engine
  */
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -50,11 +42,16 @@ contract KGEN_BrainExchange_V4_0_0 is
     bytes32 public constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
+    bytes32 public constant SETTLEMENT_ROLE = keccak256("SETTLEMENT_ROLE");
 
     uint256 public constant ACC_SCALE = 1e27;
     uint256 public constant MIN_PAYROLL_INTERVAL = 7 days;
     uint256 public constant MIN_UPGRADE_DELAY = 2 days;
     uint256 public constant MAX_BPS = 10_000;
+
+    uint8 private constant RESERVATION_ACTIVE = 1;
+    uint8 private constant RESERVATION_RELEASED = 2;
+    uint8 private constant RESERVATION_SETTLED = 3;
 
     IERC20 public kgen;
     uint8 public kgenDecimals;
@@ -74,10 +71,21 @@ contract KGEN_BrainExchange_V4_0_0 is
     // V4 rejects new deposits that would push totalPrincipal above this cap.
     uint256 public brainCapacityWhole;
 
-    // User principal. This is never intentionally spendable by payroll,
-    // Heart supply, Mars distribution or Treasury sweep.
+    // User principal. Locked position collateral remains part of principal and
+    // therefore remains inside reservedBalance(); it is not duplicated custody.
     uint256 public totalPrincipal;
     mapping(address => uint256) public principalOf;
+
+    struct PositionReservation {
+        address user;
+        uint256 amountWei;
+        int256 realizedPnlWei;
+        uint8 status;
+    }
+
+    mapping(bytes32 => PositionReservation) public positionReservations;
+    mapping(address => uint256) public lockedPrincipalOf;
+    uint256 public totalLockedPrincipal;
 
     // Pull-reward accounting. totalRewardLiability reserves all distributed
     // but not yet claimed rewards so administration cannot sweep them.
@@ -101,6 +109,15 @@ contract KGEN_BrainExchange_V4_0_0 is
     event MarginWithdrawn(address indexed user, uint256 amountWei);
     event ProfitAccrued(address indexed user, uint256 amountWei);
     event ProfitClaimed(address indexed user, uint256 amountWei);
+    event PositionCollateralReserved(bytes32 indexed positionKey, address indexed user, uint256 amountWei);
+    event PositionCollateralReleased(bytes32 indexed positionKey, address indexed user, uint256 amountWei);
+    event PositionCollateralSettled(
+        bytes32 indexed positionKey,
+        address indexed user,
+        uint256 lockedWei,
+        int256 realizedPnlWei,
+        uint256 principalAfterWei
+    );
     event PayrollRolled(
         uint256 indexed whenTs,
         uint256 surplusBeforeWei,
@@ -194,11 +211,17 @@ contract KGEN_BrainExchange_V4_0_0 is
         emit MarginDeposited(msg.sender, requestedWei, receivedWei);
     }
 
-    /// @dev User exits remain available while paused. Pause blocks new risk,
-    ///      not withdrawal of already-accounted principal.
+    function availablePrincipal(address user) public view returns (uint256) {
+        uint256 principal = principalOf[user];
+        uint256 locked = lockedPrincipalOf[user];
+        return principal > locked ? principal - locked : 0;
+    }
+
+    /// @dev User exits remain available while paused, but active position
+    /// collateral cannot be withdrawn until the position releases/settles it.
     function withdrawMargin(uint256 amountWei) external nonReentrant {
         require(amountWei > 0, "AMOUNT_ZERO");
-        require(principalOf[msg.sender] >= amountWei, "INSUFFICIENT_PRINCIPAL");
+        require(availablePrincipal(msg.sender) >= amountWei, "PRINCIPAL_LOCKED_OR_INSUFFICIENT");
         _accrue(msg.sender);
 
         principalOf[msg.sender] -= amountWei;
@@ -240,6 +263,96 @@ contract KGEN_BrainExchange_V4_0_0 is
     }
 
     // ---------------------------------------------------------------------
+    // Position collateral reservation / settlement
+    // ---------------------------------------------------------------------
+
+    /// @notice Reserve existing Brain principal for one external position key.
+    /// The key is one-shot: released/settled keys can never be reused.
+    function reservePositionCollateral(bytes32 positionKey, address user, uint256 amountWei)
+        external
+        onlyRole(SETTLEMENT_ROLE)
+        nonReentrant
+        whenNotPaused
+    {
+        require(positionKey != bytes32(0), "ZERO_POSITION_KEY");
+        require(user != address(0), "ZERO_USER");
+        require(amountWei > 0, "AMOUNT_ZERO");
+        require(positionReservations[positionKey].status == 0, "POSITION_KEY_USED");
+        require(availablePrincipal(user) >= amountWei, "INSUFFICIENT_AVAILABLE_PRINCIPAL");
+
+        positionReservations[positionKey] = PositionReservation({
+            user: user,
+            amountWei: amountWei,
+            realizedPnlWei: 0,
+            status: RESERVATION_ACTIVE
+        });
+        lockedPrincipalOf[user] += amountWei;
+        totalLockedPrincipal += amountWei;
+        require(totalLockedPrincipal <= totalPrincipal, "LOCKED_GT_PRINCIPAL");
+
+        emit PositionCollateralReserved(positionKey, user, amountWei);
+    }
+
+    /// @notice Release collateral for a cancelled/rejected position.
+    /// This remains available while paused so risk can be reduced safely.
+    function releasePositionCollateral(bytes32 positionKey)
+        external
+        onlyRole(SETTLEMENT_ROLE)
+        nonReentrant
+    {
+        PositionReservation storage reservation = positionReservations[positionKey];
+        require(reservation.status == RESERVATION_ACTIVE, "RESERVATION_NOT_ACTIVE");
+
+        address user = reservation.user;
+        uint256 amountWei = reservation.amountWei;
+        reservation.status = RESERVATION_RELEASED;
+        lockedPrincipalOf[user] -= amountWei;
+        totalLockedPrincipal -= amountWei;
+
+        emit PositionCollateralReleased(positionKey, user, amountWei);
+    }
+
+    /// @notice Convert externally verified realized PnL into Brain accounting.
+    /// Losses are capped by the position's locked collateral. Profits can only
+    /// become principal if real free surplus already exists in the Brain.
+    /// No token transfer occurs here; this is a single-ledger accounting move.
+    function settlePositionCollateral(bytes32 positionKey, int256 realizedPnlWei)
+        external
+        onlyRole(SETTLEMENT_ROLE)
+        nonReentrant
+    {
+        PositionReservation storage reservation = positionReservations[positionKey];
+        require(reservation.status == RESERVATION_ACTIVE, "RESERVATION_NOT_ACTIVE");
+
+        address user = reservation.user;
+        uint256 lockedWei = reservation.amountWei;
+        _accrue(user);
+
+        lockedPrincipalOf[user] -= lockedWei;
+        totalLockedPrincipal -= lockedWei;
+
+        if (realizedPnlWei > 0) {
+            uint256 profitWei = uint256(realizedPnlWei);
+            require(profitWei <= freeSurplus(), "INSUFFICIENT_REAL_SURPLUS");
+            principalOf[user] += profitWei;
+            totalPrincipal += profitWei;
+        } else if (realizedPnlWei < 0) {
+            uint256 lossWei = uint256(-(realizedPnlWei + 1)) + 1;
+            require(lossWei <= lockedWei, "LOSS_EXCEEDS_LOCKED_COLLATERAL");
+            require(principalOf[user] >= lossWei, "LOSS_EXCEEDS_PRINCIPAL");
+            principalOf[user] -= lossWei;
+            totalPrincipal -= lossWei;
+        }
+
+        reservation.realizedPnlWei = realizedPnlWei;
+        reservation.status = RESERVATION_SETTLED;
+        rewardDebt[user] = (principalOf[user] * accRewardPerShare) / ACC_SCALE;
+        _assertSolvent();
+
+        emit PositionCollateralSettled(positionKey, user, lockedWei, realizedPnlWei, principalOf[user]);
+    }
+
+    // ---------------------------------------------------------------------
     // Surplus / payroll
     // ---------------------------------------------------------------------
 
@@ -266,8 +379,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         require(block.timestamp >= nextPayrollAt, "NOT_YET");
         require(solvent(), "INSOLVENT");
 
-        // Catch up by whole intervals so a delayed keeper cannot schedule the
-        // next payroll in the past and repeatedly roll the same window.
         uint256 intervalsElapsed = ((block.timestamp - nextPayrollAt) / payrollInterval) + 1;
         nextPayrollAt += intervalsElapsed * payrollInterval;
 
@@ -281,8 +392,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         uint256 marsAmount = (surplus * marsBps) / MAX_BPS;
         uint256 publicGoodAmount = (surplus * publicGoodBps) / MAX_BPS;
 
-        // If nobody has principal deposited, the margin allocation remains
-        // free surplus instead of becoming an unclaimable liability.
         if (marginReward > 0 && totalPrincipal > 0) {
             accRewardPerShare += (marginReward * ACC_SCALE) / totalPrincipal;
             totalRewardLiability += marginReward;
@@ -305,8 +414,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         emit PayrollRolled(block.timestamp, surplus, marginReward, marsAmount, publicGoodAmount);
     }
 
-    /// @dev Heart supply can use surplus only; it can never intentionally
-    ///      transfer principal or already-promised margin rewards.
     function supplyHeart(uint256 amountWei) external onlyRole(KEEPER_ROLE) nonReentrant whenNotPaused {
         require(templeHeart != address(0), "HEART_NOT_SET");
         require(amountWei > 0, "AMOUNT_ZERO");
@@ -316,7 +423,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         emit HeartSupplied(templeHeart, amountWei);
     }
 
-    /// @dev Treasury sweep is intentionally restricted to free surplus.
     function sweepToTreasury(uint256 amountWei) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant whenNotPaused {
         require(amountWei > 0, "AMOUNT_ZERO");
         require(treasury != address(0), "TREASURY_NOT_SET");
@@ -437,6 +543,7 @@ contract KGEN_BrainExchange_V4_0_0 is
         scheduledUpgradeEta = 0;
     }
 
-    // Reserve storage slots for future upgrades.
-    uint256[40] private __gap;
+    // Three storage slots are consumed by reservation mapping, locked-principal
+    // mapping and totalLockedPrincipal. Preserve the remainder for upgrades.
+    uint256[37] private __gap;
 }
