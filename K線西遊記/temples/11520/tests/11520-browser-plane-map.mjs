@@ -16,6 +16,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
 await page.waitForFunction(()=>globalThis.__K11520_XYZ_INPUT_AUTHORITY__?.legacyXZBubbleSuppressed===true,{timeout:3000});
 await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XZ',{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__===true,{timeout:3000});
 await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.legacyXZPreserved===true,{timeout:3000});
 assert.ok(await page.locator('#minimap').count(),'minimap missing');
 assert.ok(await page.locator('.k11520PlaneMapOverlay').count(),'plane map overlay missing');
@@ -58,4 +59,4 @@ const authority=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_
 assert.equal(authority.authoritative,true);assert.equal(authority.legacyXZBubbleSuppressed,true);
 assert.deepEqual(errors,[],'page errors after XYZ navigation: '+errors.join('\n'));
 await browser.close();
-console.log('11520 authoritative XYZ input + XZ/XY/YZ plane map + XY/YZ waypoint travel browser QA PASS');
+console.log('11520 authoritative XYZ input + explicitly booted XZ/XY/YZ plane map navigation + XY/YZ waypoint travel browser QA PASS');
