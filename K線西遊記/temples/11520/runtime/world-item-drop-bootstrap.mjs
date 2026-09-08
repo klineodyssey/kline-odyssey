@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE
 PURPOSE: Capture the production Three.js world scene before game boot, turn backpack discard into a real canonical 3D ground drop, and allow nearby pickup without changing the item's identity.
 */
@@ -7,7 +7,7 @@ PURPOSE: Capture the production Three.js world scene before game boot, turn back
 import * as THREE from 'three';
 import {createWorldItemVisual} from './world-item-visual-runtime.mjs';
 
-export const WORLD_ITEM_DROP_VERSION='11520-WORLD-ITEM-DROP-V1';
+export const WORLD_ITEM_DROP_VERSION='11520-WORLD-ITEM-DROP-V1.0.1';
 const drops=new Map();
 let worldScene=null,installed=false,nextId=1,pickupButton=null;
 
@@ -16,6 +16,7 @@ const position=()=>{
   const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};
   return {x:finite(p.x),y:Math.max(0,finite(p.y)),z:finite(p.z)};
 };
+const visibleDropPosition=()=>{const p=position();return{x:p.x+1.15,y:p.y,z:p.z+.75}};
 
 function captureWorldScene(){
   if(worldScene)return;
@@ -26,7 +27,7 @@ function captureWorldScene(){
     if(!worldScene&&objects.some(o=>o?.userData?.isGround===true)){
       worldScene=this;
       proto.add=original;
-      globalThis.__K11520_WORLD_ITEM_DROP__.sceneReady=true;
+      if(globalThis.__K11520_WORLD_ITEM_DROP__)globalThis.__K11520_WORLD_ITEM_DROP__.sceneReady=true;
     }
     return result;
   }
@@ -35,15 +36,16 @@ function captureWorldScene(){
 
 function cloneOne(item={}){return {...item,qty:1,meta:{...(item.meta||{})}}}
 
-export function dropBackpackItemToWorld(item={},at=position()){
+export function dropBackpackItemToWorld(item={},at=null){
   if(!worldScene)return {ok:false,reason:'WORLD_SCENE_NOT_READY'};
   if(!item?.itemId)return {ok:false,reason:'ITEM_REQUIRED'};
+  const spot=at?{x:finite(at.x),y:Math.max(0,finite(at.y)),z:finite(at.z)}:visibleDropPosition();
   const unit=cloneOne(item),id=`DROP-${Date.now()}-${nextId++}`;
-  const visual=createWorldItemVisual(THREE,unit,{context:'GROUND_DROP',scale:.62,x:at.x,y:at.y,z:at.z,yOffset:.32,rotationY:.55});
+  const visual=createWorldItemVisual(THREE,unit,{context:'GROUND_DROP',scale:.62,x:spot.x,y:spot.y,z:spot.z,yOffset:.32,rotationY:.55});
   visual.root.userData={...(visual.root.userData||{}),worldDropId:id,itemId:unit.itemId,collectable:true};
   worldScene.add(visual.root);
-  drops.set(id,{id,item:unit,root:visual.root,identityKey:visual.identityKey,shape:visual.descriptor.shape,custodyType:visual.custody?.custodyType||null,x:at.x,y:at.y,z:at.z,createdAt:Date.now()});
-  return {ok:true,id,identityKey:visual.identityKey,shape:visual.descriptor.shape,custodyType:visual.custody?.custodyType||null};
+  drops.set(id,{id,item:unit,root:visual.root,identityKey:visual.identityKey,shape:visual.descriptor.shape,custodyType:visual.custody?.custodyType||null,x:spot.x,y:spot.y,z:spot.z,createdAt:Date.now()});
+  return {ok:true,id,identityKey:visual.identityKey,shape:visual.descriptor.shape,custodyType:visual.custody?.custodyType||null,position:spot};
 }
 
 function nearestDrop(maxDistance=2.6){
