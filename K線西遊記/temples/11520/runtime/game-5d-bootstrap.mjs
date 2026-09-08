@@ -32,5 +32,6 @@ setTimeout(()=>releaseIntro(),BOOT_FAIL_OPEN_MS+900);
   guardAxisRail();guardProductVersion();
   try{const {install11520MobileControlLayout}=await import('./mobile-control-layout.mjs');install11520MobileControlLayout()}catch(layoutErr){console.warn('[11520 bootstrap] mobile control layout degraded',layoutErr)}
   try{const {install11520PlaneMap}=await import('./plane-map-runtime.mjs');install11520PlaneMap()}catch(mapErr){console.warn('[11520 bootstrap] plane map degraded',mapErr)}
+  try{const {install11520XyzMapNavigation}=await import('./xyz-map-navigation-runtime.mjs');install11520XyzMapNavigation()}catch(navErr){console.warn('[11520 bootstrap] XYZ waypoint navigation degraded',navErr)}
   if(status)status.textContent='完整世界 READY'
 }catch(err){console.error('[11520 bootstrap] full runtime failed',err);if(status)status.textContent='完整世界載入失敗 · 已放行本地介面';releaseIntro();const c=$('#charState');if(c)c.textContent='RUNTIME DEGRADED'}})();
