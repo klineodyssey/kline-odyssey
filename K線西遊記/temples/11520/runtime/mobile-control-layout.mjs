@@ -1,8 +1,8 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.4
-REVISION: 2026-09-09.HUMAN-3RAIL-HUD
+VERSION: 1.1.5
+REVISION: 2026-09-09.P1-VISUAL-HARDENING
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; provides signed energy presentation and a tested master HUD collapse without changing XYZ or trading semantics.
 */
 const $=s=>document.querySelector(s);
@@ -25,18 +25,19 @@ function installStyle(){
   .minimapWrap{top:286px!important}
 
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
-  #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(16px,env(safe-area-inset-bottom))!important;width:44px!important;height:132px!important;z-index:456!important;display:block!important}
-  #cControl{left:170px!important;right:auto!important}
-  #lotsControl{left:218px!important;right:auto!important}
+  #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(16px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
+  #cControl{left:166px!important;right:auto!important}
+  #lotsControl{left:216px!important;right:auto!important}
   #yControl{left:266px!important;right:auto!important}
+  #cControl label,#lotsControl label,#yControl label{top:5px!important;font-size:7px!important;line-height:1.05!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
+  #cControl .read,#lotsControl .read,#yControl .read{bottom:4px!important;font-size:7px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   #yControl .track{background:linear-gradient(to bottom,#123f32 0%,#123f32 48%,#25313a 48%,#25313a 52%,#4b2029 52%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
   #yControl[data-energy-sign="positive"]{border-color:#65e79899!important;box-shadow:0 0 16px #65e79822!important}
   #yControl[data-energy-sign="negative"]{border-color:#ff737a99!important;box-shadow:0 0 16px #ff737a22!important}
   #yControl[data-energy-sign="zero"]{border-color:#a77b3570!important}
-  #yControl[data-energy-sign="positive"] #k11520EnergyRead{color:#65e798!important}
-  #yControl[data-energy-sign="negative"] #k11520EnergyRead{color:#ff737a!important}
-  #yControl[data-energy-sign="zero"] #k11520EnergyRead{color:#f1ca73!important}
-  #k11520EnergyRead{position:absolute;left:-18px;right:-18px;bottom:-18px;text-align:center;font-size:8px;font-weight:900;white-space:nowrap;pointer-events:none;text-shadow:0 1px 2px #000}
+  #yControl[data-energy-sign="positive"] label,#yControl[data-energy-sign="positive"] .read{color:#65e798!important}
+  #yControl[data-energy-sign="negative"] label,#yControl[data-energy-sign="negative"] .read{color:#ff737a!important}
+  #yControl[data-energy-sign="zero"] label,#yControl[data-energy-sign="zero"] .read{color:#f1ca73!important}
 
   .controls{position:fixed!important;left:auto!important;right:56px!important;top:auto!important;bottom:158px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
   .controls .skill,.controls .dodge,.controls .flat,.controls .tool{position:absolute!important;width:40px!important;height:40px!important;top:auto!important;bottom:0!important;border-radius:50%!important;font-size:11px!important}
@@ -77,8 +78,8 @@ function installStyle(){
 function setImportant(el,key,value){if(el)el.style.setProperty(key,value,'important')}
 function applyRail(){
   if(innerWidth>MOBILE_MAX)return;
-  const specs=[['#cControl','170px'],['#lotsControl','218px'],['#yControl','266px']];
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(16px, env(safe-area-inset-bottom))'],['width','44px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
+  const specs=[['#cControl','166px'],['#lotsControl','216px'],['#yControl','266px']];
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(16px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
 function applyRightOrgans(){
   if(innerWidth>MOBILE_MAX)return;
@@ -100,14 +101,17 @@ function normalizeBrand(){
 }
 function installEnergyRead(){
   const rail=$('#yControl');if(!rail)return false;
-  let out=$('#k11520EnergyRead');if(!out){out=document.createElement('div');out.id='k11520EnergyRead';rail.appendChild(out)}
+  const label=rail.querySelector('label'),out=rail.querySelector('.read');if(!label||!out)return false;
   const paint=()=>{
     const ctl=globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null;
     const axis=String(ctl?.railAxis||'Y').toUpperCase(),key=axis.toLowerCase();
     const world=globalThis.__K11520_WORLD_COORDS__||null;
     const raw=Number(world?.intent?.[key]??ctl?.rail?.value??0),v=Number.isFinite(raw)?raw:0;
     const sign=v>0.0001?'positive':v<-0.0001?'negative':'zero';rail.dataset.energySign=sign;
-    out.textContent=`${axis} 能階 ${v>0?'+':''}${v.toFixed(1)}`;
+    const level=sign==='positive'?'正能階':sign==='negative'?'負能階':'中性能階';
+    label.textContent=`${axis} ${level}`;
+    out.textContent=`${v>0?'+':''}${v.toFixed(1)}`;
+    rail.setAttribute('aria-label',`${axis} ${level} ${out.textContent}`);
   };
   paint();clearInterval(energyTimer);energyTimer=setInterval(paint,100);return true;
 }
