@@ -13,6 +13,11 @@ import {KGEN_MarketRiskKernel_V1_0_0} from "./KGEN_MarketRiskKernel_V1_0_0.sol";
  * - NO oracle network call
  * - executor-supplied observations are validated for freshness/bounds only
  * - final money movement must be performed by a separately reviewed settlement adapter
+ *
+ * Isolated-margin rule:
+ * - realized user loss is capped at the position collateral
+ * - a price gap beyond collateral is recorded explicitly as badDebtWad
+ * - bad debt is NOT silently charged to the trader's other Brain principal
  */
 contract KGEN_PositionEngine_V1_0_0 {
     uint256 internal constant BPS = 10_000;
@@ -38,7 +43,9 @@ contract KGEN_PositionEngine_V1_0_0 {
         uint64 openedAt;
         uint64 closedAt;
         uint256 exitPriceWad;
+        int256 rawPnlWad;
         int256 realizedPnlWad;
+        uint256 badDebtWad;
         Status status;
     }
 
@@ -51,8 +58,8 @@ contract KGEN_PositionEngine_V1_0_0 {
     event ExecutorSet(address indexed executor);
     event MarketConfigured(Market indexed market, uint16 initialMarginBps, uint16 maintenanceMarginBps, uint32 maxOracleAge, uint256 minPriceWad, uint256 maxPriceWad, bool enabled);
     event PositionOpened(uint256 indexed positionId, address indexed trader, Market indexed market, int256 sizeWad, uint256 collateralWad, uint256 entryPriceWad);
-    event PositionClosed(uint256 indexed positionId, uint256 exitPriceWad, int256 realizedPnlWad);
-    event PositionLiquidated(uint256 indexed positionId, uint256 markPriceWad, int256 realizedPnlWad);
+    event PositionClosed(uint256 indexed positionId, uint256 exitPriceWad, int256 rawPnlWad, int256 realizedPnlWad, uint256 badDebtWad);
+    event PositionLiquidated(uint256 indexed positionId, uint256 markPriceWad, int256 rawPnlWad, int256 realizedPnlWad, uint256 badDebtWad);
 
     error NotAdmin();
     error NotExecutor();
@@ -126,7 +133,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         uint256 updatedAt
     ) external onlyExecutor returns (uint256 positionId) {
         if (trader == address(0)) revert InvalidTrader();
-        if (collateralWad == 0) revert InvalidCollateral();
+        if (collateralWad == 0 || collateralWad > uint256(type(int256).max)) revert InvalidCollateral();
         MarketConfig memory cfg = _config(market);
         uint256 validated = _validatePrice(cfg, priceWad, updatedAt);
         uint256 sizeAbs = _abs(sizeWad);
@@ -144,7 +151,9 @@ contract KGEN_PositionEngine_V1_0_0 {
             openedAt: uint64(block.timestamp),
             closedAt: 0,
             exitPriceWad: 0,
+            rawPnlWad: 0,
             realizedPnlWad: 0,
+            badDebtWad: 0,
             status: Status.OPEN
         });
         emit PositionOpened(positionId, trader, market, sizeWad, collateralWad, validated);
@@ -169,24 +178,29 @@ contract KGEN_PositionEngine_V1_0_0 {
     function closePosition(uint256 positionId, uint256 exitPriceWad, uint256 updatedAt)
         external
         onlyExecutor
-        returns (int256 realizedPnlWad)
+        returns (int256 realizedPnlWad, uint256 badDebtWad)
     {
         Position storage p = positions[positionId];
         if (p.status != Status.OPEN) revert PositionNotOpen();
         MarketConfig memory cfg = _config(p.market);
         uint256 exitPrice = _validatePrice(cfg, exitPriceWad, updatedAt);
-        realizedPnlWad = KGEN_MarketRiskKernel_V1_0_0.pnl(p.sizeWad, p.entryPriceWad, exitPrice);
+        (int256 rawPnlWad, int256 boundedPnlWad, uint256 gapDebtWad) =
+            _settlementOutcome(p.sizeWad, p.entryPriceWad, exitPrice, p.collateralWad);
+
         p.exitPriceWad = exitPrice;
-        p.realizedPnlWad = realizedPnlWad;
+        p.rawPnlWad = rawPnlWad;
+        p.realizedPnlWad = boundedPnlWad;
+        p.badDebtWad = gapDebtWad;
         p.closedAt = uint64(block.timestamp);
         p.status = Status.CLOSED;
-        emit PositionClosed(positionId, exitPrice, realizedPnlWad);
+        emit PositionClosed(positionId, exitPrice, rawPnlWad, boundedPnlWad, gapDebtWad);
+        return (boundedPnlWad, gapDebtWad);
     }
 
     function liquidatePosition(uint256 positionId, uint256 markPriceWad, uint256 updatedAt)
         external
         onlyExecutor
-        returns (int256 realizedPnlWad)
+        returns (int256 realizedPnlWad, uint256 badDebtWad)
     {
         Position storage p = positions[positionId];
         if (p.status != Status.OPEN) revert PositionNotOpen();
@@ -194,12 +208,33 @@ contract KGEN_PositionEngine_V1_0_0 {
         if (!shouldLiquidate) revert NotLiquidatable();
         MarketConfig memory cfg = _config(p.market);
         uint256 mark = _validatePrice(cfg, markPriceWad, updatedAt);
-        realizedPnlWad = KGEN_MarketRiskKernel_V1_0_0.pnl(p.sizeWad, p.entryPriceWad, mark);
+        (int256 rawPnlWad, int256 boundedPnlWad, uint256 gapDebtWad) =
+            _settlementOutcome(p.sizeWad, p.entryPriceWad, mark, p.collateralWad);
+
         p.exitPriceWad = mark;
-        p.realizedPnlWad = realizedPnlWad;
+        p.rawPnlWad = rawPnlWad;
+        p.realizedPnlWad = boundedPnlWad;
+        p.badDebtWad = gapDebtWad;
         p.closedAt = uint64(block.timestamp);
         p.status = Status.LIQUIDATED;
-        emit PositionLiquidated(positionId, mark, realizedPnlWad);
+        emit PositionLiquidated(positionId, mark, rawPnlWad, boundedPnlWad, gapDebtWad);
+        return (boundedPnlWad, gapDebtWad);
+    }
+
+    function _settlementOutcome(
+        int256 sizeWad,
+        uint256 entryPriceWad,
+        uint256 exitPriceWad,
+        uint256 collateralWad
+    ) internal pure returns (int256 rawPnlWad, int256 realizedPnlWad, uint256 badDebtWad) {
+        rawPnlWad = KGEN_MarketRiskKernel_V1_0_0.pnl(sizeWad, entryPriceWad, exitPriceWad);
+        if (rawPnlWad >= 0) return (rawPnlWad, rawPnlWad, 0);
+
+        uint256 rawLossWad = uint256(-(rawPnlWad + 1)) + 1;
+        if (rawLossWad <= collateralWad) return (rawPnlWad, rawPnlWad, 0);
+
+        realizedPnlWad = -int256(collateralWad);
+        badDebtWad = rawLossWad - collateralWad;
     }
 
     function _config(Market market) internal view returns (MarketConfig memory cfg) {
