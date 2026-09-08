@@ -28,5 +28,7 @@ setTimeout(()=>releaseIntro(),BOOT_FAIL_OPEN_MS+900);
   try{const {install11520NormalMarketPresentation}=await import('./normal-market-presentation.mjs');install11520NormalMarketPresentation()}catch(normalErr){console.warn('[11520 bootstrap] normal-market presentation degraded',normalErr)}
   try{const {install11520MobileVisualHardeningV258}=await import('./mobile-visual-hardening-v258.mjs');install11520MobileVisualHardeningV258()}catch(visualErr){console.warn('[11520 bootstrap] mobile visual hardening degraded',visualErr)}
   try{const {install11520MobileUiSettings}=await import('./mobile-ui-settings.mjs');install11520MobileUiSettings()}catch(settingsErr){console.warn('[11520 bootstrap] Mobile UI Settings degraded',settingsErr)}
-  guardAxisRail();guardProductVersion();if(status)status.textContent='完整世界 READY'
+  guardAxisRail();guardProductVersion();
+  try{const {install11520MobileControlLayout}=await import('./mobile-control-layout.mjs');install11520MobileControlLayout()}catch(layoutErr){console.warn('[11520 bootstrap] mobile control layout degraded',layoutErr)}
+  if(status)status.textContent='完整世界 READY'
 }catch(err){console.error('[11520 bootstrap] full runtime failed',err);if(status)status.textContent='完整世界載入失敗 · 已放行本地介面';releaseIntro();const c=$('#charState');if(c)c.textContent='RUNTIME DEGRADED'}})();
