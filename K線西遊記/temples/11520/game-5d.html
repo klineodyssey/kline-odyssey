@@ -26,8 +26,16 @@
  .minimapWrap{left:6px;top:274px;width:116px;height:134px;padding:5px}.minimapWrap #minimap{width:104px;height:94px}.minimapWrap small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  .wallet{right:6px!important;top:auto!important;bottom:206px!important}.wallet.collapsed{width:42px!important;height:44px!important;padding:4px!important}.wallet.collapsed #walletToggle{width:32px!important;height:34px!important}
  .joyWrap{left:-42px!important;bottom:max(14px,env(safe-area-inset-bottom))!important;width:146px;height:146px}.joyGuide{left:24px;top:24px;width:98px;height:98px}.knob{left:49px;top:49px;width:48px;height:48px}.joyPlane:after{left:34px;right:-70px;top:-18px;text-align:left}
- .sliderDock{right:70px!important;bottom:176px!important;gap:4px!important;transform:none!important}.v{width:42px;height:112px}.track{top:25px;bottom:22px;left:9px;right:9px}.v label{font-size:6px}.v .read{font-size:6px}.energyTap{width:27px!important;height:27px!important;background-size:23px 23px!important}.energyTap::after{display:none}
- .controls{right:50px!important;bottom:10px!important;width:184px!important;height:158px!important;transform:none!important}.attack{width:58px;height:58px;right:0;bottom:0}.skill{width:44px;height:44px;right:66px;bottom:6px}.dodge{width:44px;height:44px;right:116px;bottom:8px}.flat{width:44px;height:44px;right:82px;bottom:62px}.order{width:62px;height:62px;right:0;bottom:70px}.tool{right:70px;bottom:112px;width:46px;height:46px}
+ .sliderDock{position:fixed!important;right:auto!important;bottom:auto!important;display:block!important;width:0!important;height:0!important;transform:none!important;z-index:455!important}
+ .sliderDock .v{width:44px!important;border-radius:12px!important}.sliderDock .track{top:25px;bottom:22px;left:9px;right:9px}.sliderDock .v label{font-size:6px}.sliderDock .v .read{font-size:6px}.energyTap{width:27px!important;height:27px!important;background-size:23px 23px!important}.energyTap::after{display:none}
+ #yControl{position:fixed!important;right:58px!important;bottom:max(14px,env(safe-area-inset-bottom))!important;height:132px!important;z-index:456!important}
+ #cControl{position:fixed!important;right:112px!important;bottom:194px!important;height:118px!important;z-index:456!important}
+ #lotsControl{position:fixed!important;right:60px!important;bottom:194px!important;height:118px!important;z-index:456!important}
+ .controls{position:fixed!important;right:56px!important;bottom:146px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
+ .controls .skill,.controls .dodge,.controls .flat,.controls .tool{width:40px!important;height:40px!important;bottom:0!important;top:auto!important;border-radius:50%!important;font-size:11px!important}
+ .controls .skill{right:0!important}.controls .flat{right:44px!important}.controls .dodge{right:88px!important}.controls .tool{right:132px!important}
+ .controls .attack,.controls .order{position:fixed!important;bottom:320px!important;width:48px!important;height:38px!important;border-radius:11px!important;font-size:9px!important;line-height:1.05!important;z-index:470!important}
+ .controls .attack{right:110px!important}.controls .order{right:58px!important}
  .dock{right:5px;bottom:10px}.dockToggle{width:44px;height:58px}.rail{bottom:64px;width:48px}
  .toast{bottom:auto;top:274px;max-width:210px;font-size:10px;padding:6px 9px;pointer-events:none}.waypointAction{bottom:174px;font-size:11px;padding:8px 12px}
  .assetTag{display:none}#aiChatButton{right:5px!important;bottom:138px!important;width:42px!important;height:42px!important}#bgmButton{right:5px!important;bottom:186px!important;width:42px!important;height:42px!important}
