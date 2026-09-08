@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planePointToWorld,vectorToward3D} from '../runtime/xyz-map-navigation-runtime.mjs';
+import {normalizeWorldTarget3D,planePointToWorld,vectorToward3D} from '../runtime/xyz-map-navigation-runtime.mjs';
+
+test('world target keeps all XYZ coordinates and clamps only below-ground Y',()=>{
+  assert.deepEqual(normalizeWorldTarget3D({x:12.5,y:8.25,z:-3.75}),{x:12.5,y:8.25,z:-3.75});
+  assert.deepEqual(normalizeWorldTarget3D({x:2,y:-9,z:4}),{x:2,y:0,z:4});
+});
 
 test('XY map changes X/Y and preserves Z depth',()=>{
   const p=planePointToWorld({px:75,py:25,width:100,height:100,center:{x:10,y:5,z:7},mode:'XY',range:20});
