@@ -4,7 +4,7 @@ STATUS: ACTIVE DRAFT CANDIDATE
 TASK_ID: KAIOS-11520-LIVING-WORLD-LOGISTICS-20260908
 BASE_BRANCH: main
 EXACT_BASE_SHA: 45aac5b703dd4b80fca54a60f1b6531f27c1ac32
-EXACT_HEAD_SHA: 4880727a6e1dad9ca9a0f704b6d8e98172207f2a
+EXACT_HEAD_SHA: 7420570b17109429e4584ba17851d23295c75b0d
 DRAFT_PR: #221
 
 ## Current completed slice
@@ -14,20 +14,21 @@ DRAFT_PR: #221
 - Digital Ant logistics/CFO simulation and source-managed Market Life XYZ autonomy remain enabled on this Draft candidate.
 - Mobile lower HUD has an authoritative formal layout organ: `runtime/mobile-control-layout.mjs`.
 - On 390x844, C warp, lots, remaining-axis rail, attack/order actions, minimap, wallet, backpack and dock are separated into non-overlapping zones.
-- Browser QA now machine-checks the control-layout overlap report instead of relying only on screenshot existence.
+- Browser QA machine-checks the control-layout overlap report instead of relying only on screenshot existence.
 
 ## Exact-head QA
 
-- 11520 Universal Exchange V2 #1595: SUCCESS
-- 11520 Game Product QA #467: SUCCESS
+- 11520 Universal Exchange V2 #1597: SUCCESS
+- 11520 Game Product QA #469: SUCCESS
 - ES module validation: PASS
 - Runtime/product invariant tests: PASS
 - Real Chromium 390x844 XZ / XY / YZ functional QA: PASS
 - Mandatory screenshots: PASS
 - Mobile control overlap gate: PASS
-- Manual visual inspection: PASS
+- Manual visual inspection of the implementation-equivalent UI artifact from tested code head `4880727a6e1dad9ca9a0f704b6d8e98172207f2a`: PASS
 - Visual artifact ID: 10039250633
 - Artifact digest: `sha256:007bc2b3a142c454b22ed9acb58224553a4e923bbdd1dee82c9ae04f5387db87`
+- Exact head `7420570b17109429e4584ba17851d23295c75b0d` differs only by this handoff documentation record and re-ran both mandatory workflows successfully.
 
 ## Measured 390x844 layout
 
