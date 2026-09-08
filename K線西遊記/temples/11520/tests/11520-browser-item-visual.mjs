@@ -2,6 +2,7 @@ import {chromium} from 'playwright';
 import fs from 'node:fs/promises';
 
 const out='artifacts/11520-visual-qa/11520-backpack-item-3d.png';
+const dropOut='artifacts/11520-visual-qa/11520-live-world-ground-drop.png';
 const worldOut='artifacts/11520-visual-qa/11520-world-item-identity-390x844.png';
 await fs.mkdir('artifacts/11520-visual-qa',{recursive:true});
 const browser=await chromium.launch({headless:true});
@@ -25,6 +26,21 @@ const shapes=await page.$$eval('canvas.bp3d[data-item3d="ready"]',els=>els.map(e
 for(const expected of ['CRYSTAL','KGEN_CYLINDER','CASH_BUNDLE','FOOD','LIFE_CRATE'])if(!shapes.includes(expected))throw new Error(`MISSING_3D_ITEM_SHAPE:${expected}`);
 if(pageErrors.length)throw new Error(`PAGEERROR:${pageErrors.join('|')}`);
 await page.screenshot({path:out,fullPage:false});
+
+await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__?.sceneReady===true,null,{timeout:5000});
+await page.locator('[data-item="QA-CASH"] [data-action="discard"]').click();
+await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__?.drops?.size===1,null,{timeout:3000});
+const liveDrop=await page.evaluate(()=>{const api=globalThis.__K11520_WORLD_ITEM_DROP__,d=[...api.drops.values()][0];return{sceneReady:api.sceneReady,size:api.drops.size,identityKey:d.identityKey,shape:d.shape,custodyType:d.custodyType,itemId:d.item.itemId,backpackHasCash:globalThis.K11520Backpack.get().items.some(i=>i.itemId==='QA-CASH')}});
+if(!liveDrop.sceneReady||liveDrop.size!==1)throw new Error('LIVE_WORLD_DROP_NOT_CREATED');
+if(liveDrop.shape!=='CASH_BUNDLE'||liveDrop.custodyType!=='CASH_CASE')throw new Error(`LIVE_WORLD_DROP_WRONG_VISUAL:${liveDrop.shape}/${liveDrop.custodyType}`);
+if(liveDrop.backpackHasCash)throw new Error('DISCARDED_CASH_STILL_IN_BACKPACK');
+await page.locator('#backpackClose').click();
+await page.waitForSelector('#worldItemPickup.show',{timeout:3000});
+await page.screenshot({path:dropOut,fullPage:false});
+const pickup=await page.evaluate(()=>globalThis.__K11520_WORLD_ITEM_DROP__.collectNearest());
+if(!pickup?.ok)throw new Error(`LIVE_WORLD_PICKUP_FAILED:${pickup?.reason}`);
+const afterPickup=await page.evaluate(()=>({dropCount:globalThis.__K11520_WORLD_ITEM_DROP__.drops.size,backpackHasCash:globalThis.K11520Backpack.get().items.some(i=>i.itemId==='QA-CASH')}));
+if(afterPickup.dropCount!==0||!afterPickup.backpackHasCash)throw new Error('LIVE_WORLD_PICKUP_DID_NOT_RESTORE_BACKPACK');
 
 const identity=await page.evaluate(async()=>{
   const THREE=await import('three');
@@ -71,5 +87,6 @@ if(identity.transitCustody!=='ARMORED_CASH_CASE'||identity.unloadCustody!=='ATM_
 await page.waitForTimeout(250);
 await page.screenshot({path:worldOut,fullPage:false});
 console.log(`[11520 ITEM 3D QA] PASS shapes=${shapes.join(',')} screenshot=${out}`);
+console.log(`[11520 LIVE WORLD DROP QA] PASS identity=${liveDrop.identityKey} custody=${liveDrop.custodyType} pickup=PASS screenshot=${dropOut}`);
 console.log(`[11520 CASH CUSTODY QA] PASS ${identity.custodyTypes.join('->')} live=${identity.transitCustody}->${identity.unloadCustody} screenshot=${worldOut}`);
 await browser.close();
