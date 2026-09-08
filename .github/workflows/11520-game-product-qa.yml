@@ -37,6 +37,8 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/wild-ecology-source-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/living-world-inventory-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/kaios-atm-receiving-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/digital-ant-kaios-receiving-bridge.mjs"
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-controls-v251.mjs"
           node --check "K線西遊記/temples/11520/runtime/joystick-xzxy.mjs"
@@ -45,7 +47,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
-          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs"
+          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-kaios-atm-receiving.test.mjs"
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
