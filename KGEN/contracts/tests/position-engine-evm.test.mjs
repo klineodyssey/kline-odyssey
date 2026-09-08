@@ -141,7 +141,11 @@ await expectRevert(
 assert.equal(await engine.nextPositionId(), 1n);
 await (await mockBrain.setFailReserve(false)).wait();
 
-await (await engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('20'), px100, now)).wait();
+// Explicit gas limit bypasses BrowserProvider/Ganache caching of the immediately
+// preceding failed estimate for identical calldata; receipt execution is the invariant.
+await (await engine.connect(executor).openPosition(
+  await trader.getAddress(), 0, size1, parseEther('20'), px100, now, { gasLimit: 1_500_000 }
+)).wait();
 const longId = 1n;
 const longKey = await engine.positionKey(longId);
 let reservation = await mockBrain.reservations(longKey);
@@ -239,7 +243,9 @@ reservation = await mockBrain.reservations(rollbackKey);
 assert.equal(reservation.active, true);
 assert.equal(reservation.realizedPnlWei, 0n);
 await (await mockBrain.setFailSettle(false)).wait();
-await (await engine.connect(executor).closePosition(rollbackId, px110, freshNow)).wait();
+await (await engine.connect(executor).closePosition(
+  rollbackId, px110, freshNow, { gasLimit: 1_500_000 }
+)).wait();
 p = await engine.positions(rollbackId);
 assert.equal(p.status, 2n);
 reservation = await mockBrain.reservations(rollbackKey);
