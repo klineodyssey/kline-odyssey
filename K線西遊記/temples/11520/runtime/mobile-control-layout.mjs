@@ -1,13 +1,13 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.7
-REVISION: 2026-09-09.BINARY-ENERGY-SIGN
+VERSION: 1.1.8
+REVISION: 2026-09-09.ENERGY-LABEL-OWNERSHIP
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; presents the normal-axis energy in two clear sign classes (>=0 and <0); and keeps the tested master HUD collapse without changing XYZ or trading semantics.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=420;
-let guard=null,timers=[],energyTimer=null,collapseBound=false;
+let guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 
 function installStyle(){
@@ -107,11 +107,18 @@ function installEnergyRead(){
     const raw=Number(world?.intent?.[key]??ctl?.rail?.value??0),v=Number.isFinite(raw)?raw:0;
     const sign=v<0?'negative':'nonnegative';rail.dataset.energySign=sign;
     const level=sign==='negative'?'負能階':'非負能階';
-    label.textContent=`${axis} 縱搖桿 · ${level}`;
-    out.textContent=`${v>0?'+':''}${v.toFixed(1)}`;
-    rail.setAttribute('aria-label',`${axis} 縱搖桿 ${level} ${out.textContent}`);
+    const nextLabel=`${axis} 縱搖桿 · ${level}`;
+    if(label.textContent!==nextLabel)label.textContent=nextLabel;
+    const nextRead=`${v>0?'+':''}${v.toFixed(1)}`;
+    if(out.textContent!==nextRead)out.textContent=nextRead;
+    rail.setAttribute('aria-label',`${axis} 縱搖桿 ${level} ${nextRead}`);
   };
-  paint();clearInterval(energyTimer);energyTimer=setInterval(paint,100);return true;
+  paint();clearInterval(energyTimer);energyTimer=setInterval(paint,100);
+  try{energyLabelGuard?.disconnect()}catch{}
+  let repairing=false;
+  energyLabelGuard=new MutationObserver(()=>{if(repairing)return;repairing=true;queueMicrotask(()=>{paint();repairing=false})});
+  energyLabelGuard.observe(label,{childList:true,characterData:true,subtree:true});
+  return true;
 }
 function installMasterCollapse(){
   let b=$('#k11520HudCollapseAll');if(!b){b=document.createElement('button');b.id='k11520HudCollapseAll';b.type='button';b.setAttribute('aria-label','總收合或展開 HUD');document.body.appendChild(b)}
