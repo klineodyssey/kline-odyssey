@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.2.0
+VERSION: 1.2.1
 STATUS: ACTIVE
 PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life, Digital Ant, wild creatures and monsters.
 */
@@ -11,7 +11,14 @@ export const LIFE_VISUAL_POLICY=Object.freeze({
 });
 
 const finite=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+const SPECIES_PALETTE=Object.freeze({
+  ANT:0xd89a28,BULL_DEMON:0x8b3f2f,APE:0x6f7882,WISP:0xff7a24,
+  FISH:0x3f86d8,SHRIMP:0xe45b4f,COW:0xb88452,SHEEP:0xe8dfc9,
+  CHICKEN:0xd9a62e,DUCK:0x4f9f85,TREE:0x3f8b4a,FLOWER:0xd95fa5,
+});
 function colorForSpecies(species='LIFE'){
+  const archetype=creatureArchetypeForSpecies(species),canonical=SPECIES_PALETTE[archetype];
+  if(canonical!=null)return canonical;
   let h=2166136261;
   for(const c of String(species))h=(h^c.charCodeAt(0))*16777619>>>0;
   return h&0xffffff;
