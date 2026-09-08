@@ -4,6 +4,14 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 * * * *"   # 每小時一次（UTC）
+  push:
+    paths:
+      - ".github/scripts/update_latest_video.py"
+      - ".github/workflows/update-latest-video-rss.yml"
+  pull_request:
+    paths:
+      - ".github/scripts/update_latest_video.py"
+      - ".github/workflows/update-latest-video-rss.yml"
 
 permissions:
   contents: write
@@ -23,10 +31,15 @@ jobs:
       - name: Install deps
         run: pip install feedparser
 
+      - name: Run deterministic RSS fail-safe coverage
+        run: python .github/scripts/update_latest_video.py --self-test
+
       - name: Update README latest video block
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python .github/scripts/update_latest_video.py
 
       - name: Commit & push if changed
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
