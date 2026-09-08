@@ -25,7 +25,8 @@ const result=await page.evaluate(async()=>{
     const root=createProceduralLifeBody(THREE,{species:s,name:s,scale:.92});root.rotation.y=i%2?-.34:.3;scene.add(root);
     const box=new THREE.Box3().setFromObject(root),size=new THREE.Vector3(),center=new THREE.Vector3();box.getSize(size);box.getCenter(center);
     const half=Math.max(.45,Math.max(size.x,size.y,size.z)*.68+.12);
-    const camera=new THREE.OrthographicCamera(-half,half,half,-half,.01,20);camera.position.set(center.x,center.y,center.z+6);camera.lookAt(center);renderer.render(scene,camera);
+    const camera=new THREE.OrthographicCamera(-half,half,half,-half,.01,20);camera.position.set(center.x,center.y,center.z+6);camera.lookAt(center);
+    renderer.compile(scene,camera);renderer.render(scene,camera);renderer.render(scene,camera);
     cards.push({species:s,label:display(s),url:renderCanvas.toDataURL('image/png')});labels.push({species:s,archetype:creatureArchetypeForSpecies(s),childCount:root.children.length});
   }
   const host=document.createElement('section');host.id='qaCreatureGallery';host.style.cssText='position:fixed;inset:0;z-index:99999;background:#071016;padding:9px;box-sizing:border-box;color:#fff;font:11px system-ui;overflow:hidden';
