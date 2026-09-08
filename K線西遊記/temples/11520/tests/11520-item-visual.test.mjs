@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {itemVisualDescriptor} from '../runtime/item-visual-runtime.mjs';
-import {WORLD_ITEM_CONTEXTS,assertSameCanonicalItemIdentity,canonicalWorldItem} from '../runtime/world-item-visual-runtime.mjs';
+import {WORLD_ITEM_CONTEXTS,assertSameCanonicalItemIdentity,canonicalWorldItem,cargoItemFromLife} from '../runtime/world-item-visual-runtime.mjs';
 
 test('11520 item visual identity uses distinct 3D shapes for core item families',()=>{
   const cases=[
@@ -40,4 +40,14 @@ test('context changes custody/presentation only, never item geometry identity',(
   assert.equal(ground.identityKey,ant.identityKey);
   assert.equal(ant.identityKey,atm.identityKey);
   assert.notEqual(ground.context,ant.context);
+});
+
+test('live Digital Ant cargo derives the same canonical item identity used by the world item runtime',()=>{
+  const life={lifeId:'LIFE-DIGITAL-ANT-QA',species:'DIGITAL_ANT',cargo:{cargoId:'CARGO-QA-1',amount:88,unit:'KAIOS'},mission:{status:'IN_TRANSIT'}};
+  const item=cargoItemFromLife(life);
+  const ant=canonicalWorldItem(item,'ANT_CARGO');
+  const atm=canonicalWorldItem(item,'ATM_UNLOAD');
+  assert.equal(item.itemId,'CARGO-QA-1');
+  assert.equal(ant.descriptor.shape,'CASH_BUNDLE');
+  assert.equal(ant.identityKey,atm.identityKey);
 });
