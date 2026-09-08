@@ -1,11 +1,12 @@
 /* KGEN_META
-VERSION: 1.1.0
+VERSION: 1.1.1
 STATUS: ACTIVE
 PURPOSE: Keep one canonical 3D identity for an item across ground drops, backpack storage, Digital Ant cargo and ATM unloading.
 */
 
 import {createProceduralItemBody,itemVisualDescriptor} from './item-visual-runtime.mjs';
 
+export const LIVE_CARGO_ITEM_WIRING_VERSION='11520-LIVE-CARGO-ITEM-V1';
 export const WORLD_ITEM_CONTEXTS=Object.freeze(['GROUND_DROP','BACKPACK','ANT_CARGO','ATM_UNLOAD']);
 
 function finite(v,f=0){return Number.isFinite(Number(v))?Number(v):f}
