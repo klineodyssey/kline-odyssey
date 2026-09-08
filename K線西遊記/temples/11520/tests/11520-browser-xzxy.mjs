@@ -18,6 +18,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);assert.ok(m,'XYZ parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]}};
 const world=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_WORLD_COORDS__||null));
 const control=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_3D_CONTROL__||null));
+const normal=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_NORMAL_MARKET__||null));
 const joyBox=async()=>{const b=await page.locator('#joy').boundingBox();assert.ok(b,'joy missing');return b};
 const railBox=async()=>{const b=await page.locator('#yControl').boundingBox();assert.ok(b,'axis rail missing');return b};
 const point=(b,x,y,buttons=1,id=1)=>({pointerId:id,pointerType:'touch',clientX:b.x+b.width*x,clientY:b.y+b.height*y,buttons});
@@ -29,35 +30,35 @@ const near=(a,b,t=.16)=>Math.abs(a-b)<=t;
 const assertFixed=(label,a,b,key)=>assert.ok(near(a[key],b[key]),`${label} must preserve ${key.toUpperCase()}: ${JSON.stringify({a,b})}`);
 const assertNoDrift=async label=>{const a=await xyz();await page.waitForTimeout(400);const b=await xyz();assert.ok(near(a.x,b.x)&&near(a.y,b.y)&&near(a.z,b.z),`${label} drifted: ${JSON.stringify({a,b})}`)};
 const assertKgenArt=async()=>{const src=await page.locator('#knob img').getAttribute('src');assert.ok(String(src).startsWith('data:image/')||/kgen-user-ui\.webp$/.test(String(src)),`XZ must use approved KGEN art: ${String(src).slice(0,80)}`)};
+const assertNormal=async(mode,axis)=>{await page.waitForFunction(([m,a])=>globalThis.__K11520_NORMAL_MARKET__?.mode===m&&globalThis.__K11520_NORMAL_MARKET__?.normalAxis===a,[mode,axis],{timeout:2000});const n=await normal();assert.equal(n.marketsRemainConcurrent,true);assert.equal(n.tradingAxisUntouched,true);assert.match(await page.locator('#k11520PlaneLabel').textContent(),new RegExp(`${mode} 操控面.*⊥ ${axis} 多空`));const cards=page.locator('[data-axis]');assert.equal(await cards.count(),3,'all KX/KY/KZ markets must remain visible');assert.ok(await page.locator(`[data-axis="${axis}"].k11520NormalActive`).count(),`${axis} must be normal-active`)};
 
 await visible('#joy');await visible('#knob');await visible('#knob img');await visible('#yControl');
-let c=await control();assert.equal(c.mode,'XZ');assert.deepEqual(c.discAxes,['X','Z']);assert.equal(c.railAxis,'Y');assert.equal(c.unboundedCoordinateIntent,true);await assertKgenArt();
-assert.match(await page.locator('#k11520PlaneLabel').textContent(),/XZ 平面/);assert.match(await page.locator('#yControl label').textContent(),/Y 縱搖桿/);
+let c=await control();assert.equal(c.mode,'XZ');assert.deepEqual(c.discAxes,['X','Z']);assert.equal(c.railAxis,'Y');assert.equal(c.unboundedCoordinateIntent,true);await assertKgenArt();await assertNormal('XZ','KY');assert.match(await page.locator('#yControl label').textContent(),/Y 縱搖桿/);
 let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+');assertFixed('XZ right',p0,p1,'y');
 await drag(.50,.10,102);let p2=await xyz();assert.ok(p2.z>p1.z,'XZ up must Z+');assertFixed('XZ up',p1,p2,'y');
 let w0=await world();await dragRail(.90,103,420);let w1=await world();assert.ok(w1.intent.y<w0.intent.y,'XZ rail down must advance Y- intent');assert.ok(near(w1.physical.y,w0.physical.y,.08),'ground must block physical body while Y intent keeps changing');
 let w2=w1;for(let i=0;i<15&&w2.intent.y<=40;i++){await dragRail(.10,104+i,2000);w2=await world()}assert.ok(w2.intent.y>40,`Y intent must cross legacy 40 independent of frame rate: ${JSON.stringify(w2)}`);assert.ok(w2.physical.y>40,`physical Y must be able to leave legacy 0..40 world band: ${JSON.stringify(w2)}`);
 await page.screenshot({path:`${OUT}/11520-mobile-xz-ground.png`,fullPage:true});
 
-await tapCenter(201);c=await control();assert.equal(c.mode,'XY');assert.deepEqual(c.discAxes,['X','Y']);assert.equal(c.railAxis,'Z');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_XY',{timeout:2500});assert.match(await page.locator('#knob img').getAttribute('src'),/goddess-ui\.webp$/);assert.match(await page.locator('#yControl label').textContent(),/Z 縱搖桿/);await assertNoDrift('XZ→XY');
+await tapCenter(201);c=await control();assert.equal(c.mode,'XY');assert.deepEqual(c.discAxes,['X','Y']);assert.equal(c.railAxis,'Z');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_XY',{timeout:2500});assert.match(await page.locator('#knob img').getAttribute('src'),/goddess-ui\.webp$/);assert.match(await page.locator('#yControl label').textContent(),/Z 縱搖桿/);await assertNormal('XY','KZ');await assertNoDrift('XZ→XY');
 let q0=await xyz();await drag(.50,.10,202);let q1=await xyz();assert.ok(q1.y>q0.y,'XY up must Y+');assertFixed('XY up',q0,q1,'z');
 await drag(.90,.50,203);let q2=await xyz();assert.ok(q2.x>q1.x,'XY right must X+');assertFixed('XY right',q1,q2,'z');
 await dragRail(.10,204,420);let q3=await xyz();assert.ok(q3.z>q2.z,'XY rail up must Z+');assertFixed('XY rail',q2,q3,'y');
 await page.screenshot({path:`${OUT}/11520-mobile-xy-flight.png`,fullPage:true});
 
-await tapCenter(301);c=await control();assert.equal(c.mode,'YZ');assert.deepEqual(c.discAxes,['Y','Z']);assert.equal(c.railAxis,'X');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_YZ',{timeout:2500});const heartSrc=await page.locator('#knob img').getAttribute('src');assert.ok(String(heartSrc).startsWith('data:image/webp;base64,'),'YZ must use human-approved heart image');assert.match(await page.locator('#yControl label').textContent(),/X 縱搖桿/);await assertNoDrift('XY→YZ');
+await tapCenter(301);c=await control();assert.equal(c.mode,'YZ');assert.deepEqual(c.discAxes,['Y','Z']);assert.equal(c.railAxis,'X');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_YZ',{timeout:2500});const heartSrc=await page.locator('#knob img').getAttribute('src');assert.ok(String(heartSrc).startsWith('data:image/webp;base64,'),'YZ must use human-approved heart image');assert.match(await page.locator('#yControl label').textContent(),/X 縱搖桿/);await assertNormal('YZ','KX');await assertNoDrift('XY→YZ');
 let r0=await xyz();await drag(.90,.50,302);let r1=await xyz();assert.ok(r1.y>r0.y,'YZ right must Y+');assertFixed('YZ right',r0,r1,'x');
 await drag(.50,.10,303);let r2=await xyz();assert.ok(r2.z>r1.z,'YZ up must Z+');assertFixed('YZ up',r1,r2,'x');
 await dragRail(.10,304,420);let r3=await xyz();assert.ok(r3.x>r2.x,'YZ rail up must X+');
 await page.screenshot({path:`${OUT}/11520-mobile-yz-flight.png`,fullPage:true});
 
-await tapCenter(401);c=await control();assert.equal(c.mode,'XZ','third tap must cycle YZ→XZ');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='GROUND',{timeout:2500});await assertKgenArt();await assertNoDrift('YZ→XZ');
+await tapCenter(401);c=await control();assert.equal(c.mode,'XZ','third tap must cycle YZ→XZ');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='GROUND',{timeout:2500});await assertKgenArt();await assertNormal('XZ','KY');await assertNoDrift('YZ→XZ');
 
 const attack=await visible('#attack'),order=await visible('#orderFire'),joy=await visible('#joy'),dock=await visible('#dockToggle');for(const [name,b] of [['attack',attack],['order',order]]){assert.ok(b.x>=0&&b.right<=390&&b.y>=0&&b.bottom<=844,`${name} must remain inside mobile viewport`);assert.ok(b.bottom<joy.y,`${name} quick action must sit above circular joystick zone`);assert.ok(!(b.x<dock.right&&b.right>dock.x&&b.y<dock.bottom&&b.bottom>dock.y),`${name} must not overlap dock toggle`)}
 
 await visible('#gameModeToggle');await page.locator('#gameModeToggle').click({timeout:2000});await page.waitForTimeout(120);await visible('#k11520UiSettings');
 const labels=await page.locator('#k11520UiSettings .row span').allTextContents();assert.ok(labels.includes('聊天'),'settings must retain chat');assert.ok(!labels.includes('錢包')&&!labels.includes('背包'),'wallet/backpack must not be globally collapsible');await page.locator('#k11520UiSettingsClose').click();
 await page.waitForTimeout(120);await page.screenshot({path:`${OUT}/11520-mobile-390x844.png`,fullPage:true});
-await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),organ:'XYZ Plane Joystick',mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),quickActions:{attack,order}},null,2));
+await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),organ:'XYZ Plane Joystick',mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),normalMarket:await normal(),quickActions:{attack,order}},null,2));
 await browser.close();
-console.log('11520 XZ+Y / XY+Z / YZ+X 3D controller browser QA PASS');
+console.log('11520 XZ+Y / XY+Z / YZ+X 3D controller + normal market browser QA PASS');
