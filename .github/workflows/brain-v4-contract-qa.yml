@@ -5,17 +5,21 @@ on:
     paths:
       - "KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol"
       - "KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol"
+      - "KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - "KGEN/contracts/tests/position-engine-evm.test.mjs"
       - ".github/workflows/brain-v4-contract-qa.yml"
   pull_request:
     paths:
       - "KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol"
       - "KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol"
+      - "KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - "KGEN/contracts/tests/position-engine-evm.test.mjs"
       - ".github/workflows/brain-v4-contract-qa.yml"
   workflow_dispatch:
 
@@ -41,7 +45,7 @@ jobs:
             @openzeppelin/contracts-upgradeable@5.0.2 \
             ethers@6.15.0 \
             ganache@7.9.2
-      - name: Compile Brain V4 and Market Risk Kernel with pinned solc 0.8.24
+      - name: Compile Brain V4, Market Risk Kernel and Position Engine with pinned solc 0.8.24
         shell: bash
         run: |
           set -euo pipefail
@@ -54,13 +58,16 @@ jobs:
             --include-path node_modules \
             -o /tmp/brain-v4-build \
             KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol \
-            KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
+            KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol \
+            KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
           test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_V4_0_0_sol_KGEN_BrainExchange_V4_0_0.bin
-          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_V4_0_0_sol_KGEN_BrainExchange_V4_0_0.abi
           test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_MarketRiskKernel_V1_0_0_sol_KGEN_MarketRiskKernelHarness_V1_0_0.bin
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_PositionEngine_V1_0_0_sol_KGEN_PositionEngine_V1_0_0.bin
       - name: Run executable EVM Brain real-funds invariants
         run: node "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - name: Run executable EVM KX-KY-KZ risk invariants
         run: node "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - name: Run executable EVM position-state invariants
+        run: node "KGEN/contracts/tests/position-engine-evm.test.mjs"
       - name: Reject tracked build artifacts
         run: git diff --exit-code
