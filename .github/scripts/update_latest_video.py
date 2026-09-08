@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import sys
 import feedparser
 
 # 你的 YouTube RSS（免登入、免 cookie）
@@ -13,7 +14,14 @@ END = "<!-- LATEST_VIDEO_END -->"
 def main():
     feed = feedparser.parse(RSS_URL)
     if not feed.entries:
-        raise RuntimeError("RSS has no entries. Check RSS_URL.")
+        detail = getattr(feed, "bozo_exception", None)
+        suffix = f" ({detail})" if detail else ""
+        print(
+            "WARNING: YouTube RSS returned no entries; keeping README latest-video block unchanged"
+            f"{suffix}",
+            file=sys.stderr,
+        )
+        return
 
     entry = feed.entries[0]
     video_url = entry.link
