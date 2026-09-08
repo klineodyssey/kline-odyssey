@@ -10,6 +10,7 @@ on:
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
       - "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
       - ".github/workflows/brain-v4-contract-qa.yml"
   pull_request:
     paths:
@@ -20,6 +21,7 @@ on:
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
       - "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
       - ".github/workflows/brain-v4-contract-qa.yml"
   workflow_dispatch:
 
@@ -69,5 +71,7 @@ jobs:
         run: node "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
       - name: Run executable EVM position-state invariants
         run: node "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - name: Run actual Brain proxy + Position Engine receipt-level integration invariants
+        run: node "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
       - name: Reject tracked build artifacts
         run: git diff --exit-code
