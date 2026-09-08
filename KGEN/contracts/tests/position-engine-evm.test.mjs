@@ -46,7 +46,12 @@ const engine = new Contract(deployed.target, artifact.abi, admin);
 
 async function expectRevert(promise, label) {
   let reverted = false;
-  try { await promise; } catch { reverted = true; }
+  try {
+    const result = await promise;
+    if (result && typeof result.wait === 'function') await result.wait();
+  } catch {
+    reverted = true;
+  }
   assert.ok(reverted, `expected revert: ${label}`);
 }
 
