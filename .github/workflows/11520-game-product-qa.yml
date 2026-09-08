@@ -32,6 +32,8 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/backpack-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/backpack-ui.mjs"
+          node --check "K線西遊記/temples/11520/runtime/item-visual-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/wild-ecology-source-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/living-world-inventory-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs"
@@ -43,7 +45,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
-          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs"
+          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs"
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
@@ -69,10 +71,14 @@ jobs:
             timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
             RC=${PIPESTATUS[0]}
           fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-item-visual.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
           set -e
           if [ "$RC" -ne 0 ]; then
             echo "[11520-QA] browser smoke failed or timed out rc=$RC"
-            tail -n 260 /tmp/k11520-browser-smoke.log || true
+            tail -n 300 /tmp/k11520-browser-smoke.log || true
             tail -n 200 /tmp/k11520-http.log || true
             exit "$RC"
           fi
@@ -93,6 +99,8 @@ jobs:
           done
           LIVING="artifacts/11520-visual-qa/11520-living-world-digital-ant.png"
           if [ ! -s "$LIVING" ]; then echo "[11520-QA] QA_RED: living-world screenshot missing: $LIVING"; exit 1; fi
+          ITEMS="artifacts/11520-visual-qa/11520-backpack-item-3d.png"
+          if [ ! -s "$ITEMS" ]; then echo "[11520-QA] QA_RED: 3D item screenshot missing: $ITEMS"; exit 1; fi
           echo "[11520-QA] screenshot evidence present"
       - name: Upload 11520 runtime visual QA evidence
         if: always()
