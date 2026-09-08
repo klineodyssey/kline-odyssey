@@ -1,7 +1,7 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.5
+VERSION: 1.1.6
 REVISION: 2026-09-09.P1-VISUAL-HARDENING
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; provides signed energy presentation and a tested master HUD collapse without changing XYZ or trading semantics.
 */
@@ -109,9 +109,9 @@ function installEnergyRead(){
     const raw=Number(world?.intent?.[key]??ctl?.rail?.value??0),v=Number.isFinite(raw)?raw:0;
     const sign=v>0.0001?'positive':v<-0.0001?'negative':'zero';rail.dataset.energySign=sign;
     const level=sign==='positive'?'正能階':sign==='negative'?'負能階':'中性能階';
-    label.textContent=`${axis} ${level}`;
+    label.textContent=`${axis} 縱搖桿 · ${level}`;
     out.textContent=`${v>0?'+':''}${v.toFixed(1)}`;
-    rail.setAttribute('aria-label',`${axis} ${level} ${out.textContent}`);
+    rail.setAttribute('aria-label',`${axis} 縱搖桿 ${level} ${out.textContent}`);
   };
   paint();clearInterval(energyTimer);energyTimer=setInterval(paint,100);return true;
 }
