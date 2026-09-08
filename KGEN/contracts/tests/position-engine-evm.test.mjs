@@ -55,9 +55,6 @@ async function expectRevert(promise, label) {
   assert.ok(reverted, `expected revert: ${label}`);
 }
 
-// Read time directly from the EIP-1193 provider. ethers BrowserProvider may cache
-// "latest" across Ganache evm_increaseTime/evm_mine calls, which can make a
-// genuinely fresh oracle observation look stale to the contract.
 async function latestTimestamp() {
   const block = await eip1193.request({ method: 'eth_getBlockByNumber', params: ['latest', false] });
   return BigInt(block.timestamp);
@@ -77,47 +74,43 @@ for (const market of [0, 1, 2]) {
   await (await engine.configureMarket(market, 2000, 500, 60, px50, px150, true)).wait();
 }
 
-// Only executor may create state transitions.
 await expectRevert(
   engine.connect(stranger).openPosition(await trader.getAddress(), 0, size1, parseEther('20'), px100, now),
   'unauthorized open'
 );
-
-// 100 notional at 20% initial margin requires 20 collateral.
 await expectRevert(
   engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('19'), px100, now),
   'initial margin floor'
 );
 
-const openLongTx = await engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('20'), px100, now);
-await openLongTx.wait();
+await (await engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('20'), px100, now)).wait();
 const longId = 1n;
 let p = await engine.positions(longId);
 assert.equal(p.trader, await trader.getAddress());
 assert.equal(p.market, 0n);
-assert.equal(p.status, 1n); // OPEN
+assert.equal(p.status, 1n);
 
-// Long at 100 marked 110 => +10 PnL, 30 equity, 5.5 MM, healthy.
 let mark = await engine.markPosition(longId, px110, now);
 assert.equal(mark[0], parseEther('10'));
 assert.equal(mark[1], parseEther('30'));
 assert.equal(mark[2], parseEther('5.5'));
 assert.equal(mark[3], false);
 
-// Stale oracle observations are fail-closed.
 await eip1193.request({ method: 'evm_increaseTime', params: [120] });
 await eip1193.request({ method: 'evm_mine', params: [] });
 await expectRevert(engine.markPosition(longId, px110, now), 'stale mark');
 const freshNow = await latestTimestamp();
 
-// Close long at 120 => +20 realized PnL; no token movement occurs in this engine.
+// Profitable close preserves raw == realized and creates no bad debt.
 await (await engine.connect(executor).closePosition(longId, px120, freshNow)).wait();
 p = await engine.positions(longId);
-assert.equal(p.status, 2n); // CLOSED
+assert.equal(p.status, 2n);
+assert.equal(p.rawPnlWad, parseEther('20'));
 assert.equal(p.realizedPnlWad, parseEther('20'));
+assert.equal(p.badDebtWad, 0n);
 await expectRevert(engine.connect(executor).closePosition(longId, px120, freshNow), 'double close');
 
-// Short KY at 100, collateral 20. Mark 120 => -20 PnL, zero equity, liquidatable.
+// Short KY at 100, collateral 20. Mark 120 => loss exactly equals collateral.
 await (await engine.connect(executor).openPosition(await trader.getAddress(), 1, -size1, parseEther('20'), px100, freshNow)).wait();
 const shortId = 2n;
 mark = await engine.markPosition(shortId, px120, freshNow);
@@ -126,8 +119,10 @@ assert.equal(mark[1], 0n);
 assert.equal(mark[3], true);
 await (await engine.connect(executor).liquidatePosition(shortId, px120, freshNow)).wait();
 p = await engine.positions(shortId);
-assert.equal(p.status, 3n); // LIQUIDATED
+assert.equal(p.status, 3n);
+assert.equal(p.rawPnlWad, -parseEther('20'));
 assert.equal(p.realizedPnlWad, -parseEther('20'));
+assert.equal(p.badDebtWad, 0n);
 
 // KZ is a real independent market enum/config, not a second world/runtime.
 await (await engine.connect(executor).openPosition(await trader.getAddress(), 2, size1, parseEther('20'), px80, freshNow)).wait();
@@ -135,4 +130,17 @@ const kz = await engine.positions(3n);
 assert.equal(kz.market, 2n);
 assert.equal(kz.entryPriceWad, px80);
 
-console.log('[position-engine-evm] PASS: KX/KY/KZ open, IM/MM, fresh oracle, long/short PnL, close, liquidation, no custody');
+// Gap-risk invariant: a short from 100 to 150 loses 50 raw, but isolated
+// user settlement is capped at the 20 collateral; the remaining 30 is explicit bad debt.
+await (await engine.connect(executor).openPosition(await trader.getAddress(), 0, -size1, parseEther('20'), px100, freshNow)).wait();
+const gapId = 4n;
+mark = await engine.markPosition(gapId, px150, freshNow);
+assert.equal(mark[3], true);
+await (await engine.connect(executor).liquidatePosition(gapId, px150, freshNow)).wait();
+p = await engine.positions(gapId);
+assert.equal(p.rawPnlWad, -parseEther('50'));
+assert.equal(p.realizedPnlWad, -parseEther('20'));
+assert.equal(p.badDebtWad, parseEther('30'));
+assert.equal(p.status, 3n);
+
+console.log('[position-engine-evm] PASS: KX/KY/KZ, IM/MM, oracle freshness, close/liquidation, isolated-loss cap, explicit bad debt');
