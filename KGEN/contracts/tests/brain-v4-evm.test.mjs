@@ -3,7 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import solc from 'solc';
 import ganache from 'ganache';
-import { BrowserProvider, Contract, ContractFactory, parseEther } from 'ethers';
+import { BrowserProvider, Contract, ContractFactory, id, parseEther } from 'ethers';
 
 const brainPath = 'KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol';
 const brainSource = fs.readFileSync(brainPath, 'utf8');
@@ -73,7 +73,7 @@ console.log(`[brain-v4-evm] optimized runtime size: ${runtimeBytes} bytes`);
 const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 10 } });
 const provider = new BrowserProvider(eip1193);
 const signers = await Promise.all(Array.from({ length: 9 }, (_, i) => provider.getSigner(i)));
-const [admin, keeper, pauser, upgrader, treasury, publicGood, heart, user] = signers;
+const [admin, keeper, pauser, upgrader, treasury, publicGood, heart, user, settlement] = signers;
 
 async function deploy(artifact, signer, args = []) {
   const factory = new ContractFactory(artifact.abi, artifact.bytecode, signer);
@@ -84,7 +84,12 @@ async function deploy(artifact, signer, args = []) {
 
 async function expectRevert(promise, label) {
   let reverted = false;
-  try { await promise; } catch { reverted = true; }
+  try {
+    const result = await promise;
+    if (result && typeof result.wait === 'function') await result.wait();
+  } catch {
+    reverted = true;
+  }
   assert.ok(reverted, `expected revert: ${label}`);
 }
 
@@ -96,7 +101,7 @@ async function latestRawTimestamp() {
 const token = await deploy(mockArtifact, admin);
 const mars = await deploy(marsArtifact, admin);
 const implementation = await deploy(brainArtifact, admin);
-const now = BigInt((await provider.getBlock('latest')).timestamp);
+const now = await latestRawTimestamp();
 const init = new ContractFactory(brainArtifact.abi, brainArtifact.bytecode, admin).interface.encodeFunctionData('initialize', [
   token.target,
   await admin.getAddress(),
@@ -112,6 +117,7 @@ const brain = new Contract(proxy.target, brainArtifact.abi, admin);
 await (await brain.setPublicGoodTreasury(await publicGood.getAddress())).wait();
 await (await brain.setTempleHeart(await heart.getAddress())).wait();
 await (await brain.setMarsSeats(mars.target)).wait();
+await (await brain.grantRole(await brain.SETTLEMENT_ROLE(), await settlement.getAddress())).wait();
 
 // Real custody: deposit credits exactly what the contract receives.
 await (await token.mint(await user.getAddress(), parseEther('1000'))).wait();
@@ -141,17 +147,76 @@ await (await brain.connect(user).claimProfit()).wait();
 assert.equal(await brain.totalRewardLiability(), 0n);
 assert.equal(await brain.solvent(), true);
 
-// Emergency pause blocks new deposits, but user exits remain available.
+// Emergency pause blocks new deposits and new position reservations, but exits remain available.
 await (await brain.connect(pauser).pause()).wait();
 await expectRevert(brain.connect(user).depositMargin(parseEther('1')), 'paused deposit');
+await expectRevert(
+  brain.connect(settlement).reservePositionCollateral(id('PAUSED-POSITION'), await user.getAddress(), parseEther('1')),
+  'paused position reservation'
+);
 await (await brain.connect(user).withdrawMargin(parseEther('10'))).wait();
 assert.equal(await brain.principalOf(await user.getAddress()), parseEther('90'));
 await (await brain.unpause()).wait();
 
-// 50M is a real hard-cap mechanism; lowering to current principal blocks the next deposit.
-await (await brain.setBrainCapacityWhole(90)).wait();
-await expectRevert(brain.connect(user).depositMargin(parseEther('1')), 'principal capacity gate');
+// Reservation uses the same Brain principal; it does not create a second custody balance.
+const releaseKey = id('KX-RELEASE-1');
+await (await brain.connect(settlement).reservePositionCollateral(releaseKey, await user.getAddress(), parseEther('30'))).wait();
+assert.equal(await brain.lockedPrincipalOf(await user.getAddress()), parseEther('30'));
+assert.equal(await brain.availablePrincipal(await user.getAddress()), parseEther('60'));
 assert.equal(await brain.totalPrincipal(), parseEther('90'));
+await expectRevert(brain.connect(user).withdrawMargin(parseEther('61')), 'cannot withdraw locked position collateral');
+
+// Pause never traps existing risk: release is intentionally available while paused.
+await (await brain.connect(pauser).pause()).wait();
+await (await brain.connect(settlement).releasePositionCollateral(releaseKey)).wait();
+assert.equal(await brain.lockedPrincipalOf(await user.getAddress()), 0n);
+await expectRevert(
+  brain.connect(settlement).reservePositionCollateral(releaseKey, await user.getAddress(), parseEther('1')),
+  'released position key cannot replay'
+);
+await (await brain.unpause()).wait();
+
+// Realized loss converts locked principal into free surplus without moving tokens.
+const lossKey = id('KY-LOSS-1');
+await (await brain.connect(settlement).reservePositionCollateral(lossKey, await user.getAddress(), parseEther('20'))).wait();
+await (await brain.connect(settlement).settlePositionCollateral(lossKey, -parseEther('15'))).wait();
+assert.equal(await brain.principalOf(await user.getAddress()), parseEther('75'));
+assert.equal(await brain.totalPrincipal(), parseEther('75'));
+assert.equal(await brain.lockedPrincipalOf(await user.getAddress()), 0n);
+assert.equal(await brain.freeSurplus(), parseEther('35'));
+
+// Realized profit can only become principal if the Brain already has real free surplus.
+const profitKey = id('KZ-PROFIT-1');
+await (await brain.connect(settlement).reservePositionCollateral(profitKey, await user.getAddress(), parseEther('20'))).wait();
+await (await brain.connect(settlement).settlePositionCollateral(profitKey, parseEther('10'))).wait();
+assert.equal(await brain.principalOf(await user.getAddress()), parseEther('85'));
+assert.equal(await brain.totalPrincipal(), parseEther('85'));
+assert.equal(await brain.freeSurplus(), parseEther('25'));
+await expectRevert(brain.connect(settlement).settlePositionCollateral(profitKey, parseEther('10')), 'settlement replay blocked');
+
+// Losses cannot exceed the collateral that was actually locked for the position.
+const cappedLossKey = id('KX-CAPPED-LOSS');
+await (await brain.connect(settlement).reservePositionCollateral(cappedLossKey, await user.getAddress(), parseEther('5'))).wait();
+await expectRevert(
+  brain.connect(settlement).settlePositionCollateral(cappedLossKey, -parseEther('6')),
+  'loss exceeds locked collateral'
+);
+await (await brain.connect(settlement).releasePositionCollateral(cappedLossKey)).wait();
+
+// Profits fail closed when no real surplus exists to fund them.
+const oversizedProfitKey = id('KY-OVERSIZED-PROFIT');
+await (await brain.connect(settlement).reservePositionCollateral(oversizedProfitKey, await user.getAddress(), parseEther('1'))).wait();
+await expectRevert(
+  brain.connect(settlement).settlePositionCollateral(oversizedProfitKey, parseEther('26')),
+  'profit exceeds real surplus'
+);
+await (await brain.connect(settlement).releasePositionCollateral(oversizedProfitKey)).wait();
+assert.equal(await brain.solvent(), true);
+
+// 50M is a real hard-cap mechanism; lowering to current principal blocks the next deposit.
+await (await brain.setBrainCapacityWhole(85)).wait();
+await expectRevert(brain.connect(user).depositMargin(parseEther('1')), 'principal capacity gate');
+assert.equal(await brain.totalPrincipal(), parseEther('85'));
 
 // UUPS upgrades must be explicitly scheduled and survive the minimum delay.
 const implementation2 = await deploy(brainArtifact, admin);
@@ -171,7 +236,8 @@ assert.ok(afterAdvance >= eta, `EVM time advance failed: block=${afterAdvance} e
 await (await brain.connect(upgrader).upgradeToAndCall(implementation2.target, '0x', { gasLimit: 1_500_000 })).wait();
 assert.equal(await brain.scheduledImplementation(), '0x0000000000000000000000000000000000000000');
 assert.equal(await brain.scheduledUpgradeEta(), 0n);
-assert.equal(await brain.totalPrincipal(), parseEther('90'));
+assert.equal(await brain.totalPrincipal(), parseEther('85'));
+assert.equal(await brain.lockedPrincipalOf(await user.getAddress()), 0n);
 assert.equal(await brain.solvent(), true);
 
-console.log('[brain-v4-evm] PASS: custody, principal reserve, payroll liability, pause exit, capacity, upgrade timelock');
+console.log('[brain-v4-evm] PASS: custody, principal reserve, reservation/replay, real-surplus settlement, pause exit, capacity, upgrade timelock');
