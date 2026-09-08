@@ -30,24 +30,34 @@ export function projectPlanePoint(point={},center={},mode='XZ',{width=1,height=1
 function mode(){return globalThis.__K11520_3D_CONTROL__?.mode||globalThis.__K11520_WORLD_COORDS__?.mode||'XZ'}
 function coords(){return globalThis.__K11520_WORLD_COORDS__?.physical||{x:0,y:0,z:0}}
 function zoom(){return 1.3}
+function cleanLegacyMiniChrome(base){
+  const wrap=base?.closest?.('.minimapWrap');if(!wrap)return;
+  for(const n of wrap.querySelectorAll(':scope > b,:scope > small'))n.style.display='none';
+  wrap.dataset.k11520PlaneMapChrome='clean';
+}
 function ensureOverlay(base){
-  if(!base)return null;
+  if(!base)return null;cleanLegacyMiniChrome(base);
   let c=overlays.get(base);
   if(c&&document.body.contains(c))return c;
   const parent=base.parentElement;if(!parent)return null;
   const ps=getComputedStyle(parent);if(ps.position==='static')parent.style.position='relative';
   c=document.createElement('canvas');c.className='k11520PlaneMapOverlay';c.width=base.width;c.height=base.height;
-  Object.assign(c.style,{position:'absolute',inset:'0',width:'100%',height:'100%',pointerEvents:'none',zIndex:'4'});
+  Object.assign(c.style,{position:'absolute',pointerEvents:'none',zIndex:'4',borderRadius:'8px'});
   parent.appendChild(c);overlays.set(base,c);return c;
+}
+function placeOverlay(base,canvas){
+  canvas.style.left=`${base.offsetLeft}px`;canvas.style.top=`${base.offsetTop}px`;
+  canvas.style.width=`${base.clientWidth}px`;canvas.style.height=`${base.clientHeight}px`;
 }
 function depthLabel(n){const x=finite(n);return `${x>=0?'+':'−'}${Math.abs(x).toFixed(Math.abs(x)>=10?0:1)}`}
 function drawGrid(ctx,w,h){ctx.strokeStyle='#204355';ctx.lineWidth=1;for(let i=0;i<=8;i++){const x=i*w/8,y=i*h/8;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
 function drawOverlay(base){
-  const canvas=ensureOverlay(base);if(!canvas)return;
+  const canvas=ensureOverlay(base);if(!canvas)return;placeOverlay(base,canvas);
   if(canvas.width!==base.width)canvas.width=base.width;if(canvas.height!==base.height)canvas.height=base.height;
   const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,m=mode(),spec=planeSpec(m),center=coords(),range=RANGE/zoom();
   ctx.clearRect(0,0,w,h);
-  if(m!=='XZ'){ctx.fillStyle='rgba(5,18,27,.96)';ctx.fillRect(0,0,w,h);drawGrid(ctx,w,h)}
+  if(m!=='XZ'){ctx.fillStyle='#05121b';ctx.fillRect(0,0,w,h);drawGrid(ctx,w,h)}
+  else{ctx.fillStyle='rgba(5,18,27,.68)';ctx.fillRect(0,0,w,30)}
   ctx.font='700 11px system-ui';ctx.textBaseline='top';ctx.fillStyle='#9eeeff';ctx.fillText(`${m} 切面 · ⟂ ${spec.normal}`,6,5);
   ctx.font='700 9px system-ui';ctx.fillStyle='#f1ca73';ctx.fillText(`${spec.depth} 深度 ${finite(center[spec.depth.toLowerCase()]).toFixed(1)}`,6,20);
   if(m!=='XZ'){
@@ -62,9 +72,9 @@ function drawOverlay(base){
     const ctl=globalThis.__K11520_3D_CONTROL__,v=ctl?.vector||{x:0,y:0,z:0},hAxis=spec.h.toLowerCase(),vAxis=spec.v.toLowerCase();
     ctx.fillStyle='#65e798';ctx.beginPath();ctx.arc(w/2,h/2,5,0,Math.PI*2);ctx.fill();
     const vx=finite(v[hAxis]),vy=finite(v[vAxis]);if(Math.abs(vx)+Math.abs(vy)>.03){ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(w/2,h/2);ctx.lineTo(w/2+vx*16,h/2-vy*16);ctx.stroke()}
-    ctx.fillStyle='#9ca8b3';ctx.font='600 7px system-ui';ctx.fillText('切面顯示；導航點選請在 XZ 或 3D 世界',6,h-12);
+    ctx.fillStyle='#9ca8b3';ctx.font='600 7px system-ui';ctx.fillText('切面顯示 · 導航請用 XZ / 3D',6,h-12);
   }
-  globalThis.__K11520_PLANE_MAP__={organ:'XYZ Plane Map',mode:m,hAxis:spec.h,vAxis:spec.v,depthAxis:spec.depth,normalAxis:spec.normal,center:{...center},dynamicPlane:true,threeDimensionalWorld:true};
+  globalThis.__K11520_PLANE_MAP__={organ:'XYZ Plane Map',mode:m,hAxis:spec.h,vAxis:spec.v,depthAxis:spec.depth,normalAxis:spec.normal,center:{...center},dynamicPlane:true,threeDimensionalWorld:true,legacyMiniChromeHidden:true};
 }
 function blockWrongPlaneMapTap(e){if(mode()==='XZ')return;e.stopImmediatePropagation();if(e.cancelable)e.preventDefault()}
 function bindBase(base){if(!base||base.dataset.k11520PlaneMapBound)return;base.dataset.k11520PlaneMapBound='1';for(const type of ['pointerdown','pointermove','pointerup'])base.addEventListener(type,blockWrongPlaneMapTap,{capture:true,passive:false})}
