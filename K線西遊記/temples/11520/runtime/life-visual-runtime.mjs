@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.2.1
+VERSION: 1.2.2
 STATUS: ACTIVE
 PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life, Digital Ant, wild creatures and monsters.
 */
@@ -62,7 +62,8 @@ function buildHumanoid(THREE,root,main,dark){
   for(const x of[-.11,.11]){const e=add(root,`CREATURE_EYE_${x<0?'L':'R'}`,new THREE.Mesh(new THREE.SphereGeometry(.045,8,6),dark));e.position.set(x,1.52,.285)}
 }
 function buildAnt(THREE,root,main,dark){
-  for(const [i,[z,r]] of [[0,[.38,.24]],[1,[0,.3]],[2,[-.42,.34]]].entries()){
+  const segments=[[.38,.24],[0,.3],[-.42,.34]];
+  for(const [i,[z,r]] of segments.entries()){
     const b=add(root,`ANT_SEGMENT_${i}`,new THREE.Mesh(new THREE.SphereGeometry(r,12,8),main));b.position.set(0,.65,z)
   }
   const head=add(root,'ANT_HEAD',new THREE.Mesh(new THREE.SphereGeometry(.22,12,8),main));head.position.set(0,.72,.62);
@@ -115,7 +116,8 @@ function buildBird(THREE,root,main,dark,{kind='CHICKEN'}={}){
 }
 function buildTree(THREE,root,main,dark){
   const trunk=add(root,'TREE_TRUNK',new THREE.Mesh(new THREE.CylinderGeometry(.16,.24,1.28,8),dark));trunk.position.y=.64;
-  for(const [i,[x,y,z,s]] of [[0,[0,1.55,0,.62]],[1,[-.34,1.35,.06,.42]],[2,[.36,1.38,-.08,.44]]].entries()){
+  const crowns=[[0,1.55,0,.62],[-.34,1.35,.06,.42],[.36,1.38,-.08,.44]];
+  for(const [i,[x,y,z,s]] of crowns.entries()){
     const crown=add(root,`TREE_CROWN_${i}`,new THREE.Mesh(new THREE.SphereGeometry(s,12,9),main));crown.position.set(x,y,z)
   }
 }
