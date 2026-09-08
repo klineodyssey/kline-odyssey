@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.3.1
+VERSION: 1.3.3
 STATUS: ACTIVE
 PURPOSE: Human-first 11520 interaction layer. Align avatar facing with visible X movement, keep modal surfaces above the HUD, expose one real living-cargo backpack, auto-detect an injected wallet without auto-signing, show BNB/KGEN/KAIOS balances, keep the wallet toggle stable, prevent dock pointer collisions, keep joystick imagery visible, and automatically separate mobile controls that collide.
 */
@@ -8,7 +8,7 @@ import * as THREE from 'three';
 const $=s=>document.querySelector(s);
 const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 const PRODUCT_VERSION='V2.6.3 · 5D K線西遊記';
-let cleanupTimer=null,walletTimer=null,versionTimer=null;
+let cleanupTimer=null,walletTimer=null,versionTimer=null,joystickImageSrc=null,joystickImageAlt='KGEN GENESIS';
 
 function installStyle(){
   if($('#k11520HumanUxStyle'))return;
@@ -53,7 +53,7 @@ function installStyle(){
 }
 
 function patchAvatarFacing(){
-  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV4)return;
+  if(THREE.WebGLRenderer.prototype.__k11520HumanFacingV5)return;
   const original=THREE.WebGLRenderer.prototype.render;
   THREE.WebGLRenderer.prototype.render=function(scene,camera){
     let player=null,originalYaw=null;
@@ -61,12 +61,16 @@ function patchAvatarFacing(){
       scene?.traverse?.(o=>{if(!player&&o?.userData?.isPlayer)player=o});
       if(player?.rotation){
         originalYaw=player.rotation.y;
-        player.rotation.y=-originalYaw;
+        // The player mesh's modeled forward axis is opposite the simulation heading.
+        // The world canvas is mirrored on X, so reflect the heading and apply that
+        // single model-forward correction only at render time. Simulation XYZ/yaw
+        // remain canonical and untouched.
+        player.rotation.y=Math.PI-originalYaw;
       }
     }catch{}
     try{return original.call(this,scene,camera)}finally{if(player?.rotation&&originalYaw!==null)player.rotation.y=originalYaw}
   };
-  THREE.WebGLRenderer.prototype.__k11520HumanFacingV4=true;
+  THREE.WebGLRenderer.prototype.__k11520HumanFacingV5=true;
 }
 
 function normalizeBackpack(){
@@ -140,7 +144,22 @@ function syncDockOcclusion(){
 }
 function rect(el){if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left,y:r.top,right:r.right,bottom:r.bottom,w:r.width,h:r.height}}
 function overlaps(a,b,gap=0){return !!a&&!!b&&a.right+gap>b.x&&b.right+gap>a.x&&a.bottom+gap>b.y&&b.bottom+gap>a.y}
-function keepJoystickVisual(){const img=$('#knob img');if(img){img.style.setProperty('display','block','important');img.style.setProperty('visibility','visible','important');img.style.setProperty('opacity','1','important')}}
+function keepJoystickVisual(){
+  const knob=$('#knob');if(!knob)return false;
+  let img=knob.querySelector('img');
+  if(img){
+    const src=img.getAttribute('src');if(src)joystickImageSrc=src;
+    if(img.alt)joystickImageAlt=img.alt;
+  }else if(joystickImageSrc){
+    img=document.createElement('img');img.src=joystickImageSrc;img.alt=joystickImageAlt;img.draggable=false;knob.replaceChildren(img);
+  }
+  if(!img)return false;
+  img.style.setProperty('display','block','important');
+  img.style.setProperty('visibility','visible','important');
+  img.style.setProperty('opacity','1','important');
+  img.style.setProperty('pointer-events','none','important');
+  return true;
+}
 function resolveMobileCollisions(){
   if(innerWidth>420)return;
   const joy=$('#joy'),dodge=$('#dodge'),y=$('#yJoyV250');
@@ -166,7 +185,17 @@ function scheduleCleanup(){clearTimeout(cleanupTimer);cleanupTimer=setTimeout(cl
 
 export function install11520HumanUx(){
   patchAvatarFacing();cleanup();
-  const mo=new MutationObserver(scheduleCleanup);mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,characterData:true,attributeFilter:['class','style']});
+  const mo=new MutationObserver(mutations=>{
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes||[]){
+        if(!(node instanceof Element))continue;
+        const img=node.matches?.('#knob img')?node:node.querySelector?.('#knob img');
+        if(img){const src=img.getAttribute('src');if(src)joystickImageSrc=src;if(img.alt)joystickImageAlt=img.alt}
+      }
+    }
+    scheduleCleanup();
+  });
+  mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,characterData:true,attributeFilter:['class','style']});
   addEventListener('resize',scheduleCleanup,{passive:true});
   document.addEventListener('pointerdown',e=>{if(e.target?.closest?.('#dockToggle,.dockToggle'))setTimeout(syncDockOcclusion,0)},true);
   document.addEventListener('pointerup',()=>{keepJoystickVisual();setTimeout(resolveMobileCollisions,0)},true);
@@ -174,6 +203,6 @@ export function install11520HumanUx(){
   document.addEventListener('click',e=>{if(e.target?.closest?.('#dockToggle,.dockToggle'))setTimeout(syncDockOcclusion,0)},true);
   globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
   if(!versionTimer)versionTimer=setInterval(()=>{enforceProductVersion();resolveMobileCollisions()},250);
-  globalThis.__K11520_HUMAN_UX__={version:'1.3.1',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-no-extra-pi',chatTopLayer:true,singleBackpack:'living-cargo-relocated-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:true};
+  globalThis.__K11520_HUMAN_UX__={version:'1.3.3',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-plus-model-forward-pi',chatTopLayer:true,singleBackpack:'living-cargo-relocated-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:'cache-and-restore'};
   return globalThis.__K11520_HUMAN_UX__;
 }
