@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {itemVisualDescriptor} from '../runtime/item-visual-runtime.mjs';
-import {WORLD_ITEM_CONTEXTS,assertSameCanonicalItemIdentity,canonicalWorldItem,cargoItemFromLife} from '../runtime/world-item-visual-runtime.mjs';
+import {WORLD_ITEM_CONTEXTS,CASH_CUSTODY_BY_CONTEXT,assertSameCanonicalItemIdentity,canonicalWorldItem,cargoItemFromLife,custodyDescriptor} from '../runtime/world-item-visual-runtime.mjs';
 
 test('11520 item visual identity uses distinct 3D shapes for core item families',()=>{
   const cases=[
@@ -31,7 +31,16 @@ test('one item keeps one canonical 3D identity across ground, backpack, ant carg
   assert.equal(new Set(proof.states.map(x=>x.identityKey)).size,1);
 });
 
-test('context changes custody/presentation only, never item geometry identity',()=>{
+test('physical KAIOS cash always has an explicit custody container and is never a ledger transfer',()=>{
+  const item={itemId:'KAIOS-CASH-001',kind:'MATERIAL',name:'KAIOS 現鈔',qty:88,meta:{cargoKind:'CASH',unit:'KAIOS'}};
+  const states=WORLD_ITEM_CONTEXTS.map(context=>canonicalWorldItem(item,context));
+  assert.deepEqual(states.map(x=>x.custody.custodyType),WORLD_ITEM_CONTEXTS.map(x=>CASH_CUSTODY_BY_CONTEXT[x]));
+  assert.ok(states.every(x=>x.custody.physicalCash===true&&x.custody.requiresCustodyContainer===true&&x.custody.ledgerTransfer===false));
+  assert.equal(new Set(states.map(x=>x.identityKey)).size,1,'cash asset identity must survive custody changes');
+  assert.equal(new Set(states.map(x=>x.custodyKey)).size,4,'custody container identity may change with custody state');
+});
+
+test('ledger-like KGEN cargo does not silently become physical cash custody',()=>{
   const item={itemId:'KGEN-CYL-001',kind:'MATERIAL',name:'KGEN 貨筒',meta:{cargoKind:'KGEN'}};
   const ground=canonicalWorldItem(item,'GROUND_DROP');
   const ant=canonicalWorldItem(item,'ANT_CARGO');
@@ -39,6 +48,7 @@ test('context changes custody/presentation only, never item geometry identity',(
   assert.equal(ground.descriptor.shape,'KGEN_CYLINDER');
   assert.equal(ground.identityKey,ant.identityKey);
   assert.equal(ant.identityKey,atm.identityKey);
+  assert.equal(custodyDescriptor(item,'ANT_CARGO').requiresCustodyContainer,false);
   assert.notEqual(ground.context,ant.context);
 });
 
@@ -50,4 +60,6 @@ test('live Digital Ant cargo derives the same canonical item identity used by th
   assert.equal(item.itemId,'CARGO-QA-1');
   assert.equal(ant.descriptor.shape,'CASH_BUNDLE');
   assert.equal(ant.identityKey,atm.identityKey);
+  assert.equal(ant.custody.custodyType,'ARMORED_CASH_CASE');
+  assert.equal(atm.custody.custodyType,'ATM_CASSETTE');
 });
