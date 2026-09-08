@@ -21,10 +21,9 @@ const result=await page.evaluate(async()=>{
   const renderer=new THREE.WebGLRenderer({canvas:renderCanvas,antialias:true,alpha:false,preserveDrawingBuffer:true});renderer.setSize(180,180,false);renderer.setPixelRatio(1);renderer.setClearColor(0x0a1720,1);
   const cards=[],labels=[];
   for(const [i,s] of species.entries()){
-    const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xffffff,0x263544,2.3));const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(3,6,8);scene.add(key);
-    const root=createProceduralLifeBody(THREE,{species:s,name:s,scale:1});root.rotation.y=i%2?-.34:.3;scene.add(root);
-    const box=new THREE.Box3().setFromObject(root),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3()),maxDim=Math.max(size.x,size.y,size.z,.5);
-    const camera=new THREE.PerspectiveCamera(34,1,.01,100);const dist=maxDim/(2*Math.tan((34*Math.PI/180)/2))*1.42;camera.position.set(center.x,center.y+maxDim*.05,center.z+dist);camera.lookAt(center);renderer.render(scene,camera);
+    const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xffffff,0x263544,2.6));const key=new THREE.DirectionalLight(0xffffff,2.4);key.position.set(3,6,8);scene.add(key);
+    const root=createProceduralLifeBody(THREE,{species:s,name:s,scale:.92});root.rotation.y=i%2?-.34:.3;scene.add(root);
+    const camera=new THREE.OrthographicCamera(-1.45,1.45,2.45,-.2,.01,20);camera.position.set(0,1.15,6);camera.lookAt(0,1.15,0);renderer.render(scene,camera);
     cards.push({species:s,label:display(s),url:renderCanvas.toDataURL('image/png')});labels.push({species:s,archetype:creatureArchetypeForSpecies(s),childCount:root.children.length});
   }
   const host=document.createElement('section');host.id='qaCreatureGallery';host.style.cssText='position:fixed;inset:0;z-index:99999;background:#071016;padding:9px;box-sizing:border-box;color:#fff;font:11px system-ui;overflow:hidden';
