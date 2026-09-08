@@ -13,6 +13,8 @@ pragma solidity ^0.8.24;
  * - payroll / Heart / Treasury operations can spend surplus only
  * - pausable deposits and new risk while user exits/settlement remain available
  * - replay-safe position collateral reservation inside the single Brain ledger
+ * - real insurance reserve funded only from already-existing surplus
+ * - explicit uncovered bad debt that halts new risk without trapping exits
  * - UUPS upgrades protected by an explicit delay
  * - no fake settlement state: trading PnL must come from a separately reviewed engine
  */
@@ -61,18 +63,11 @@ contract KGEN_BrainExchange_V4_0_0 is
     address public templeHeart;
     address public marsSeats;
 
-    // Default economic split: 50% margin rewards, 25% Mars, 5% public good,
-    // remaining 20% stays as unallocated Brain surplus.
     uint16 public marginBps;
     uint16 public marsBps;
     uint16 public publicGoodBps;
-
-    // Hard principal-deposit capacity. Unlike V3.2.0's display-only warning,
-    // V4 rejects new deposits that would push totalPrincipal above this cap.
     uint256 public brainCapacityWhole;
 
-    // User principal. Locked position collateral remains part of principal and
-    // therefore remains inside reservedBalance(); it is not duplicated custody.
     uint256 public totalPrincipal;
     mapping(address => uint256) public principalOf;
 
@@ -87,8 +82,6 @@ contract KGEN_BrainExchange_V4_0_0 is
     mapping(address => uint256) public lockedPrincipalOf;
     uint256 public totalLockedPrincipal;
 
-    // Pull-reward accounting. totalRewardLiability reserves all distributed
-    // but not yet claimed rewards so administration cannot sweep them.
     uint256 public accRewardPerShare;
     uint256 public totalRewardLiability;
     mapping(address => uint256) public rewardDebt;
@@ -99,11 +92,16 @@ contract KGEN_BrainExchange_V4_0_0 is
 
     bool public economicConfigLocked;
 
-    // UUPS upgrade delay. A new implementation must be scheduled first and
-    // cannot be authorized until the ETA has elapsed.
     address public scheduledImplementation;
     uint256 public scheduledUpgradeEta;
     uint256 public upgradeDelay;
+
+    // Insurance is not a second custody pool: these KGEN remain in the Brain
+    // contract and are merely reserved from payroll/admin spending. A gap loss
+    // consumes this reserve first. Any remainder is recorded as uncovered debt
+    // and blocks new risk until real KGEN recapitalizes it.
+    uint256 public insuranceReserve;
+    uint256 public uncoveredBadDebt;
 
     event MarginDeposited(address indexed user, uint256 requestedWei, uint256 receivedWei);
     event MarginWithdrawn(address indexed user, uint256 amountWei);
@@ -116,8 +114,13 @@ contract KGEN_BrainExchange_V4_0_0 is
         address indexed user,
         uint256 lockedWei,
         int256 realizedPnlWei,
+        uint256 badDebtWei,
+        uint256 insuranceCoveredWei,
         uint256 principalAfterWei
     );
+    event InsuranceAllocated(uint256 amountWei, uint256 reserveAfterWei);
+    event BadDebtRecorded(bytes32 indexed positionKey, uint256 badDebtWei, uint256 insuranceCoveredWei, uint256 uncoveredAfterWei);
+    event BadDebtRecapitalized(address indexed contributor, uint256 requestedWei, uint256 receivedWei, uint256 uncoveredAfterWei);
     event PayrollRolled(
         uint256 indexed whenTs,
         uint256 surplusBeforeWei,
@@ -144,7 +147,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         _;
     }
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
@@ -217,8 +219,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         return principal > locked ? principal - locked : 0;
     }
 
-    /// @dev User exits remain available while paused, but active position
-    /// collateral cannot be withdrawn until the position releases/settles it.
     function withdrawMargin(uint256 amountWei) external nonReentrant {
         require(amountWei > 0, "AMOUNT_ZERO");
         require(availablePrincipal(msg.sender) >= amountWei, "PRINCIPAL_LOCKED_OR_INSUFFICIENT");
@@ -263,11 +263,45 @@ contract KGEN_BrainExchange_V4_0_0 is
     }
 
     // ---------------------------------------------------------------------
+    // Insurance / trading health
+    // ---------------------------------------------------------------------
+
+    function tradingHealthy() public view returns (bool) {
+        return solvent() && uncoveredBadDebt == 0;
+    }
+
+    /// @notice Earmark already-existing real Brain surplus as insurance.
+    /// No token moves and no second custody pool is created.
+    function allocateInsuranceReserve(uint256 amountWei) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+        require(amountWei > 0, "AMOUNT_ZERO");
+        require(uncoveredBadDebt == 0, "BAD_DEBT_OUTSTANDING");
+        require(amountWei <= freeSurplus(), "SURPLUS_ONLY");
+        insuranceReserve += amountWei;
+        _assertSolvent();
+        emit InsuranceAllocated(amountWei, insuranceReserve);
+    }
+
+    /// @notice Add real KGEN to repair uncovered trading bad debt. Actual
+    /// received amount is measured, preserving fee-on-transfer correctness.
+    function recapitalizeBadDebt(uint256 requestedWei) external nonReentrant returns (uint256 receivedWei) {
+        require(requestedWei > 0, "AMOUNT_ZERO");
+        require(uncoveredBadDebt > 0, "NO_BAD_DEBT");
+
+        uint256 beforeBal = kgen.balanceOf(address(this));
+        kgen.safeTransferFrom(msg.sender, address(this), requestedWei);
+        uint256 afterBal = kgen.balanceOf(address(this));
+        require(afterBal > beforeBal, "NO_TOKENS_RECEIVED");
+        receivedWei = afterBal - beforeBal;
+
+        uint256 reduction = receivedWei > uncoveredBadDebt ? uncoveredBadDebt : receivedWei;
+        uncoveredBadDebt -= reduction;
+        emit BadDebtRecapitalized(msg.sender, requestedWei, receivedWei, uncoveredBadDebt);
+    }
+
+    // ---------------------------------------------------------------------
     // Position collateral reservation / settlement
     // ---------------------------------------------------------------------
 
-    /// @notice Reserve existing Brain principal for one external position key.
-    /// The key is one-shot: released/settled keys can never be reused.
     function reservePositionCollateral(bytes32 positionKey, address user, uint256 amountWei)
         external
         onlyRole(SETTLEMENT_ROLE)
@@ -277,6 +311,8 @@ contract KGEN_BrainExchange_V4_0_0 is
         require(positionKey != bytes32(0), "ZERO_POSITION_KEY");
         require(user != address(0), "ZERO_USER");
         require(amountWei > 0, "AMOUNT_ZERO");
+        require(uncoveredBadDebt == 0, "TRADING_HALTED_BAD_DEBT");
+        require(solvent(), "INSOLVENT");
         require(positionReservations[positionKey].status == 0, "POSITION_KEY_USED");
         require(availablePrincipal(user) >= amountWei, "INSUFFICIENT_AVAILABLE_PRINCIPAL");
 
@@ -293,8 +329,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         emit PositionCollateralReserved(positionKey, user, amountWei);
     }
 
-    /// @notice Release collateral for a cancelled/rejected position.
-    /// This remains available while paused so risk can be reduced safely.
     function releasePositionCollateral(bytes32 positionKey)
         external
         onlyRole(SETTLEMENT_ROLE)
@@ -312,11 +346,11 @@ contract KGEN_BrainExchange_V4_0_0 is
         emit PositionCollateralReleased(positionKey, user, amountWei);
     }
 
-    /// @notice Convert externally verified realized PnL into Brain accounting.
-    /// Losses are capped by the position's locked collateral. Profits can only
-    /// become principal if real free surplus already exists in the Brain.
-    /// No token transfer occurs here; this is a single-ledger accounting move.
-    function settlePositionCollateral(bytes32 positionKey, int256 realizedPnlWei)
+    /// @notice Atomically apply engine-bounded realized PnL and explicit gap
+    /// bad debt. Existing insurance is consumed first. Insufficient insurance
+    /// never charges unrelated user principal and never traps the close; the
+    /// remainder becomes uncoveredBadDebt and halts only new risk.
+    function settlePositionCollateral(bytes32 positionKey, int256 realizedPnlWei, uint256 badDebtWei)
         external
         onlyRole(SETTLEMENT_ROLE)
         nonReentrant
@@ -331,25 +365,51 @@ contract KGEN_BrainExchange_V4_0_0 is
         lockedPrincipalOf[user] -= lockedWei;
         totalLockedPrincipal -= lockedWei;
 
+        uint256 lossWei;
         if (realizedPnlWei > 0) {
+            require(badDebtWei == 0, "BAD_DEBT_WITH_PROFIT");
             uint256 profitWei = uint256(realizedPnlWei);
             require(profitWei <= freeSurplus(), "INSUFFICIENT_REAL_SURPLUS");
             principalOf[user] += profitWei;
             totalPrincipal += profitWei;
         } else if (realizedPnlWei < 0) {
-            uint256 lossWei = uint256(-(realizedPnlWei + 1)) + 1;
+            lossWei = uint256(-(realizedPnlWei + 1)) + 1;
             require(lossWei <= lockedWei, "LOSS_EXCEEDS_LOCKED_COLLATERAL");
             require(principalOf[user] >= lossWei, "LOSS_EXCEEDS_PRINCIPAL");
+            if (badDebtWei > 0) require(lossWei == lockedWei, "BAD_DEBT_BEFORE_COLLATERAL_EXHAUSTED");
             principalOf[user] -= lossWei;
             totalPrincipal -= lossWei;
+        } else {
+            require(badDebtWei == 0, "BAD_DEBT_WITH_ZERO_PNL");
+        }
+
+        uint256 insuranceCoveredWei;
+        if (badDebtWei > 0) {
+            insuranceCoveredWei = badDebtWei > insuranceReserve ? insuranceReserve : badDebtWei;
+            insuranceReserve -= insuranceCoveredWei;
+            uint256 uncoveredWei = badDebtWei - insuranceCoveredWei;
+            uncoveredBadDebt += uncoveredWei;
+            emit BadDebtRecorded(positionKey, badDebtWei, insuranceCoveredWei, uncoveredBadDebt);
         }
 
         reservation.realizedPnlWei = realizedPnlWei;
         reservation.status = RESERVATION_SETTLED;
         rewardDebt[user] = (principalOf[user] * accRewardPerShare) / ACC_SCALE;
+
+        // Actual user principal/reward/insurance liabilities remain fully backed.
+        // uncoveredBadDebt is explicit trading deficit metadata, not a fabricated
+        // payable reserve; new risk is halted until recapitalized.
         _assertSolvent();
 
-        emit PositionCollateralSettled(positionKey, user, lockedWei, realizedPnlWei, principalOf[user]);
+        emit PositionCollateralSettled(
+            positionKey,
+            user,
+            lockedWei,
+            realizedPnlWei,
+            badDebtWei,
+            insuranceCoveredWei,
+            principalOf[user]
+        );
     }
 
     // ---------------------------------------------------------------------
@@ -357,7 +417,7 @@ contract KGEN_BrainExchange_V4_0_0 is
     // ---------------------------------------------------------------------
 
     function reservedBalance() public view returns (uint256) {
-        return totalPrincipal + totalRewardLiability;
+        return totalPrincipal + totalRewardLiability + insuranceReserve;
     }
 
     function freeSurplus() public view returns (uint256) {
@@ -375,6 +435,7 @@ contract KGEN_BrainExchange_V4_0_0 is
     }
 
     function rollPayroll() external onlyRole(KEEPER_ROLE) nonReentrant whenNotPaused {
+        require(uncoveredBadDebt == 0, "BAD_DEBT_OUTSTANDING");
         require(nextPayrollAt != 0, "PAYROLL_NOT_SET");
         require(block.timestamp >= nextPayrollAt, "NOT_YET");
         require(solvent(), "INSOLVENT");
@@ -415,6 +476,7 @@ contract KGEN_BrainExchange_V4_0_0 is
     }
 
     function supplyHeart(uint256 amountWei) external onlyRole(KEEPER_ROLE) nonReentrant whenNotPaused {
+        require(uncoveredBadDebt == 0, "BAD_DEBT_OUTSTANDING");
         require(templeHeart != address(0), "HEART_NOT_SET");
         require(amountWei > 0, "AMOUNT_ZERO");
         require(amountWei <= freeSurplus(), "SURPLUS_ONLY");
@@ -424,6 +486,7 @@ contract KGEN_BrainExchange_V4_0_0 is
     }
 
     function sweepToTreasury(uint256 amountWei) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant whenNotPaused {
+        require(uncoveredBadDebt == 0, "BAD_DEBT_OUTSTANDING");
         require(amountWei > 0, "AMOUNT_ZERO");
         require(treasury != address(0), "TREASURY_NOT_SET");
         require(amountWei <= freeSurplus(), "SURPLUS_ONLY");
@@ -543,7 +606,6 @@ contract KGEN_BrainExchange_V4_0_0 is
         scheduledUpgradeEta = 0;
     }
 
-    // Three storage slots are consumed by reservation mapping, locked-principal
-    // mapping and totalLockedPrincipal. Preserve the remainder for upgrades.
-    uint256[37] private __gap;
+    // Reservation consumed 3 slots; insurance accounting consumes 2 more.
+    uint256[35] private __gap;
 }
