@@ -5,6 +5,7 @@ PURPOSE: Present the 3D world through the active XZ / XY / YZ control plane. The
 */
 
 import {WORLD_OBJECTS} from './world-runtime.mjs';
+import {install11520XyzMapNavigation} from './xyz-map-navigation-runtime.mjs';
 
 const MODE_SPECS=Object.freeze({
   XZ:Object.freeze({h:'X',v:'Z',depth:'Y',normal:'KY'}),
@@ -77,11 +78,9 @@ function drawOverlay(base){
     const ctl=globalThis.__K11520_3D_CONTROL__,v=ctl?.vector||{x:0,y:0,z:0},hAxis=spec.h.toLowerCase(),vAxis=spec.v.toLowerCase();
     ctx.fillStyle='#65e798';ctx.beginPath();ctx.arc(w/2,h/2,5,0,Math.PI*2);ctx.fill();
     const vx=finite(v[hAxis]),vy=finite(v[vAxis]);if(Math.abs(vx)+Math.abs(vy)>.03){ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(w/2,h/2);ctx.lineTo(w/2+vx*16,h/2-vy*16);ctx.stroke()}
-    ctx.fillStyle='#9ca8b3';ctx.font='600 7px system-ui';ctx.fillText('切面顯示 · 導航請用 XZ / 3D',6,h-12);
+    ctx.fillStyle='#9ca8b3';ctx.font='600 7px system-ui';ctx.fillText('點圖設定此切面 XYZ waypoint',6,h-12);
   }
-  globalThis.__K11520_PLANE_MAP__={organ:'XYZ Plane Map',mode:m,hAxis:spec.h,vAxis:spec.v,depthAxis:spec.depth,normalAxis:spec.normal,center:{...center},dynamicPlane:true,threeDimensionalWorld:true,legacyMiniChromeHidden:true};
+  globalThis.__K11520_PLANE_MAP__={organ:'XYZ Plane Map',mode:m,hAxis:spec.h,vAxis:spec.v,depthAxis:spec.depth,normalAxis:spec.normal,center:{...center},dynamicPlane:true,threeDimensionalWorld:true,legacyMiniChromeHidden:true,planeWaypointNavigation:true};
 }
-function blockWrongPlaneMapTap(e){if(mode()==='XZ')return;e.stopImmediatePropagation();if(e.cancelable)e.preventDefault()}
-function bindBase(base){if(!base||base.dataset.k11520PlaneMapBound)return;base.dataset.k11520PlaneMapBound='1';for(const type of ['pointerdown','pointermove','pointerup'])base.addEventListener(type,blockWrongPlaneMapTap,{capture:true,passive:false})}
-function tick(){const bases=[document.querySelector('#minimap'),document.querySelector('#fullMap')].filter(Boolean);for(const b of bases){bindBase(b);drawOverlay(b)}requestAnimationFrame(tick)}
-export function install11520PlaneMap(){requestAnimationFrame(tick);return globalThis.__K11520_PLANE_MAP__||{organ:'XYZ Plane Map',dynamicPlane:true}}
+function tick(){const bases=[document.querySelector('#minimap'),document.querySelector('#fullMap')].filter(Boolean);for(const b of bases)drawOverlay(b);requestAnimationFrame(tick)}
+export function install11520PlaneMap(){install11520XyzMapNavigation();requestAnimationFrame(tick);return globalThis.__K11520_PLANE_MAP__||{organ:'XYZ Plane Map',dynamicPlane:true,planeWaypointNavigation:true}}

@@ -39,9 +39,10 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/joystick-xzxy.mjs"
           node --check "K線西遊記/temples/11520/runtime/xyz-input-authority-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/plane-map-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
-          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs"
+          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs"
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
