@@ -35,21 +35,21 @@ await page.locator('#k11520EnergyRead').waitFor({state:'visible',timeout:2500});
 const trackBg=await page.locator('#yControl .track').evaluate(el=>getComputedStyle(el).backgroundImage);
 assert.match(trackBg,/linear-gradient/i,'remaining-axis track must encode positive/negative energy zones');
 
-const wallet=await box('#walletPanel'),chat=await box('#aiChatButton');
+const wallet=await box('#walletPanel'),chat=await box('#chatHandle');
 assert.ok(wallet.x>=330,`collapsed wallet button must be on right rail: ${JSON.stringify(wallet)}`);
-assert.ok(chat.x>=330,`chat button must be on right rail: ${JSON.stringify(chat)}`);
+assert.ok(chat.x>=330,`real chat handle must be on right rail: ${JSON.stringify(chat)}`);
 
 const toggle='#k11520HudCollapseAll';
 assert.equal(await visible(toggle),true,'master HUD collapse toggle must remain visible');
 await page.locator(toggle).click();await page.waitForTimeout(120);
 assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('k11520HudCollapsed')),true,'master collapse must set collapsed state');
-for(const sel of ['.top','.axes','.tele','.monsterHud','.minimapWrap','.joyWrap','#cControl','#lotsControl','#yControl','.controls','#walletPanel','#aiChatButton','#bgmButton','.dock'])assert.equal(await visible(sel),false,`${sel} must collapse under master HUD switch`);
+for(const sel of ['.top','.axes','.tele','.monsterHud','.minimapWrap','.joyWrap','#cControl','#lotsControl','#yControl','.controls','#walletPanel','#chatHandle','#aiChatButton','#bgmButton','.dock'])assert.equal(await visible(sel),false,`${sel} must collapse under master HUD switch`);
 assert.equal(await visible(toggle),true,'master collapse toggle must stay usable while collapsed');
 await page.screenshot({path:`${OUT}/11520-mobile-hud-collapsed.png`,fullPage:true});
 
 await page.locator(toggle).click();await page.waitForTimeout(120);
 assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('k11520HudCollapsed')),false,'master collapse must restore expanded state');
-for(const sel of ['.top','.axes','.tele','.monsterHud','.minimapWrap','.joyWrap','#cControl','#lotsControl','#yControl','.controls','#walletPanel','#aiChatButton','.dock'])assert.equal(await visible(sel),true,`${sel} must restore after master expand`);
+for(const sel of ['.top','.axes','.tele','.monsterHud','.minimapWrap','.joyWrap','#cControl','#lotsControl','#yControl','.controls','#walletPanel','#chatHandle','#aiChatButton','.dock'])assert.equal(await visible(sel),true,`${sel} must restore after master expand`);
 await page.screenshot({path:`${OUT}/11520-mobile-hud-3rail.png`,fullPage:true});
 
 const report=await page.evaluate(()=>structuredClone(globalThis.__K11520_MOBILE_CONTROL_LAYOUT__||null));
@@ -57,4 +57,4 @@ assert.ok(report?.ok,`mobile layout report must PASS: ${JSON.stringify(report)}`
 assert.equal(report.threeRailAligned,true,'layout report must confirm three-rail alignment');
 assert.equal(report.equalWorldLifeWidth,true,'layout report must confirm equal world/life widths');
 await browser.close();
-console.log('11520 mobile HUD three-rail + right organ rail + master collapse browser QA PASS');
+console.log('11520 mobile HUD three-rail + real chat/right organ rail + master collapse browser QA PASS');
