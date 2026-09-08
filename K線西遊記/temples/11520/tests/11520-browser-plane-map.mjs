@@ -32,6 +32,11 @@ const mapTap=async(fx,fy,id)=>{
   const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width*fx,clientY:b.y+b.height*fy,buttons:1};
   await page.dispatchEvent('#minimap','pointerdown',p);await page.waitForTimeout(40);await page.dispatchEvent('#minimap','pointerup',{...p,buttons:0});await page.waitForTimeout(120);
 };
+const worldCanvasTap=async(fx,fy,id)=>{
+  const b=await page.locator('#three').boundingBox();assert.ok(b,'3D canvas missing');
+  const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width*fx,clientY:b.y+b.height*fy,buttons:1};
+  await page.dispatchEvent('#three','pointerdown',p);await page.waitForTimeout(45);await page.dispatchEvent('#three','pointerup',{...p,buttons:0});await page.waitForTimeout(160);
+};
 const startPlaneNav=async()=>{await page.locator('#xyzWaypointAction').click();await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true,{timeout:2000})};
 const cancelPlaneNav=async(id)=>{
   const b=await page.locator('#joy').boundingBox();assert.ok(b);
@@ -61,8 +66,15 @@ const publishedTarget=await page.evaluate(()=>structuredClone(globalThis.__K1152
 await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.16},[world0.x,world0.y,world0.z],{timeout:4000});
 await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD target QA stop'));
 
+const tap0=await coords();await worldCanvasTap(.72,.53,731);
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',{timeout:2500});
+const groundTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(groundTarget.y.toFixed(3)),0);assert.ok(Math.abs(groundTarget.x-tap0.x)>.1||Math.abs(groundTarget.z-tap0.z)>.1,'world tap did not create a distinct XYZ target');
+await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.12},[tap0.x,tap0.y,tap0.z],{timeout:4000});
+await page.screenshot({path:`${OUT}/11520-world-tap-xyz.png`,fullPage:true});
+await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD canvas tap QA stop'));
+
 const authority=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_INPUT_AUTHORITY__));
 assert.equal(authority.authoritative,true);assert.equal(authority.legacyXZBubbleSuppressed,true);
 assert.deepEqual(errors,[],'page errors after XYZ navigation: '+errors.join('\n'));
 await browser.close();
-console.log('11520 authoritative XYZ input + XZ/XY/YZ plane map + canonical WORLD target travel browser QA PASS');
+console.log('11520 authoritative XYZ input + plane maps + canonical WORLD target + direct 3D world tap routing browser QA PASS');
