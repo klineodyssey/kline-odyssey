@@ -32,7 +32,11 @@ function coords(){return globalThis.__K11520_WORLD_COORDS__?.physical||{x:0,y:0,
 function zoom(){return 1.3}
 function cleanLegacyMiniChrome(base){
   const wrap=base?.closest?.('.minimapWrap');if(!wrap)return;
-  for(const n of wrap.querySelectorAll(':scope > b,:scope > small'))n.style.display='none';
+  for(const n of [...wrap.children]){
+    if(n===base||n.classList?.contains('k11520PlaneMapOverlay'))continue;
+    n.style.setProperty('display','none','important');
+    n.setAttribute('aria-hidden','true');
+  }
   wrap.dataset.k11520PlaneMapChrome='clean';
 }
 function ensureOverlay(base){
@@ -43,7 +47,7 @@ function ensureOverlay(base){
   const ps=getComputedStyle(parent);if(ps.position==='static')parent.style.position='relative';
   c=document.createElement('canvas');c.className='k11520PlaneMapOverlay';c.width=base.width;c.height=base.height;
   Object.assign(c.style,{position:'absolute',pointerEvents:'none',zIndex:'4',borderRadius:'8px'});
-  parent.appendChild(c);overlays.set(base,c);return c;
+  parent.appendChild(c);overlays.set(base,c);cleanLegacyMiniChrome(base);return c;
 }
 function placeOverlay(base,canvas){
   canvas.style.left=`${base.offsetLeft}px`;canvas.style.top=`${base.offsetTop}px`;
@@ -52,6 +56,7 @@ function placeOverlay(base,canvas){
 function depthLabel(n){const x=finite(n);return `${x>=0?'+':'−'}${Math.abs(x).toFixed(Math.abs(x)>=10?0:1)}`}
 function drawGrid(ctx,w,h){ctx.strokeStyle='#204355';ctx.lineWidth=1;for(let i=0;i<=8;i++){const x=i*w/8,y=i*h/8;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
 function drawOverlay(base){
+  cleanLegacyMiniChrome(base);
   const canvas=ensureOverlay(base);if(!canvas)return;placeOverlay(base,canvas);
   if(canvas.width!==base.width)canvas.width=base.width;if(canvas.height!==base.height)canvas.height=base.height;
   const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,m=mode(),spec=planeSpec(m),center=coords(),range=RANGE/zoom();
