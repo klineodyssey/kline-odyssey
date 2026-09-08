@@ -38,7 +38,7 @@ assert.ok(c.x+c.width<=lots.x&&lots.x+lots.width<=rail.x,'three rails must be or
 assert.ok(lots.x-(c.x+c.width)>=6&&rail.x-(lots.x+lots.width)>=6,'three rails need readable visual gutters');
 assert.ok(rail.y+rail.height<=844,'three-rail group must remain inside 390x844 viewport');
 const trackBg=await page.locator('#yControl .track').evaluate(el=>getComputedStyle(el).backgroundImage);
-assert.match(trackBg,/linear-gradient/i,'remaining-axis track must encode positive/negative energy zones');
+assert.match(trackBg,/linear-gradient/i,'remaining-axis track must encode nonnegative/negative energy zones');
 
 const expectedAxis={XZ:'Y',XY:'Z',YZ:'X'};
 async function setPlane(target){
@@ -64,17 +64,17 @@ for(const mode of ['XZ','XY','YZ']){
   await setPlane(mode);await page.waitForTimeout(160);
   const label=(await page.locator('#yControl label').textContent()||'').trim();
   assert.ok(label.startsWith(expectedAxis[mode]+' 縱搖桿'),`${mode} normal axis must be ${expectedAxis[mode]}: ${label}`);
-  assert.ok(label.includes('中性能階'),`${mode} zero state must be neutral energy: ${label}`);
+  assert.ok(label.includes('非負能階'),`${mode} zero state must be nonnegative energy: ${label}`);
 }
 await setPlane('XZ');await page.waitForTimeout(160);
-assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'zero','boot/reset normal-axis energy must be neutral');
-assert.match((await page.locator('#yControl label').textContent())||'',/中性能階/,'neutral energy label missing');
+assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'nonnegative','boot/reset normal-axis energy must be >= 0 class');
+assert.match((await page.locator('#yControl label').textContent())||'',/非負能階/,'nonnegative energy label missing');
 await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-zero.png`,fullPage:true});
 
 let releaseEnergy=await pressEnergy(1);
-assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'positive','positive normal-axis energy state missing');
-assert.match((await page.locator('#yControl label').textContent())||'',/正能階/,'positive energy label missing');
-const positiveColor=await page.locator('#yControl .read').evaluate(el=>getComputedStyle(el).color);
+assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'nonnegative','positive normal-axis energy must stay in >= 0 class');
+assert.match((await page.locator('#yControl label').textContent())||'',/非負能階/,'positive nonnegative energy label missing');
+const nonnegativeColor=await page.locator('#yControl .read').evaluate(el=>getComputedStyle(el).color);
 await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-positive.png`,fullPage:true});
 await releaseEnergy();
 
@@ -88,7 +88,7 @@ releaseEnergy=await pressEnergy(-1);
 assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'negative','negative normal-axis energy state missing');
 assert.match((await page.locator('#yControl label').textContent())||'',/負能階/,'negative energy label missing');
 const negativeColor=await page.locator('#yControl .read').evaluate(el=>getComputedStyle(el).color);
-assert.notEqual(positiveColor,negativeColor,'positive and negative energy must use visibly different colors');
+assert.notEqual(nonnegativeColor,negativeColor,'>=0 and <0 energy must use visibly different colors');
 await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-negative.png`,fullPage:true});
 await releaseEnergy();
 
@@ -123,4 +123,4 @@ assert.equal(report.threeRailAligned,true,'layout report must confirm three-rail
 assert.equal(report.equalWorldLifeWidth,true,'layout report must confirm equal world/life widths');
 assert.deepEqual(errors,[],'page errors after interactions: '+errors.join('\n'));
 await browser.close();
-console.log('11520 mobile HUD P1 visual hardening QA PASS: three rails, XYZ normal-axis labels, neutral boot plus real +/- rail gestures, right-rail pointer reachability, two collapse/expand cycles, no drift');
+console.log('11520 mobile HUD energy-sign QA PASS: >=0 versus <0, XYZ normal-axis labels, right-rail reachability, two collapse/expand cycles, no drift');
