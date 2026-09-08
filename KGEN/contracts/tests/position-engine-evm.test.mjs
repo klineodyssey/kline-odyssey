@@ -50,6 +50,14 @@ async function expectRevert(promise, label) {
   assert.ok(reverted, `expected revert: ${label}`);
 }
 
+// Read time directly from the EIP-1193 provider. ethers BrowserProvider may cache
+// "latest" across Ganache evm_increaseTime/evm_mine calls, which can make a
+// genuinely fresh oracle observation look stale to the contract.
+async function latestTimestamp() {
+  const block = await eip1193.request({ method: 'eth_getBlockByNumber', params: ['latest', false] });
+  return BigInt(block.timestamp);
+}
+
 const px50 = parseEther('50');
 const px80 = parseEther('80');
 const px100 = parseEther('100');
@@ -57,7 +65,7 @@ const px110 = parseEther('110');
 const px120 = parseEther('120');
 const px150 = parseEther('150');
 const size1 = parseEther('1');
-const now = BigInt((await provider.getBlock('latest')).timestamp);
+const now = await latestTimestamp();
 
 // Configure all three canonical markets: 20% initial margin, 5% maintenance, 60s oracle freshness.
 for (const market of [0, 1, 2]) {
@@ -95,7 +103,7 @@ assert.equal(mark[3], false);
 await eip1193.request({ method: 'evm_increaseTime', params: [120] });
 await eip1193.request({ method: 'evm_mine', params: [] });
 await expectRevert(engine.markPosition(longId, px110, now), 'stale mark');
-const freshNow = BigInt((await provider.getBlock('latest')).timestamp);
+const freshNow = await latestTimestamp();
 
 // Close long at 120 => +20 realized PnL; no token movement occurs in this engine.
 await (await engine.connect(executor).closePosition(longId, px120, freshNow)).wait();
