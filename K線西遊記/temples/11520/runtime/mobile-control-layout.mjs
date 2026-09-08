@@ -1,13 +1,14 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.2
+VERSION: 1.1.3
 REVISION: 2026-09-09.HUMAN-3RAIL-HUD
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; provides signed energy presentation and a tested master HUD collapse without changing XYZ or trading semantics.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=420;
 let guard=null,timers=[],energyTimer=null,collapseBound=false;
+const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
@@ -74,15 +75,17 @@ function setImportant(el,key,value){if(el)el.style.setProperty(key,value,'import
 function applyRail(){
   if(innerWidth>MOBILE_MAX)return;
   const specs=[['#cControl','170px'],['#lotsControl','218px'],['#yControl','266px']];
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(16px, env(safe-area-inset-bottom))'],['width','44px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(16px, env(safe-area-inset-bottom))'],['width','44px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
 function applyRightOrgans(){
   if(innerWidth>MOBILE_MAX)return;
-  const wallet=$('#walletPanel');
+  const wallet=$('#walletPanel'),chat=$('#aiChatButton'),bgm=$('#bgmButton'),bag=$('.bagRelocatedV250'),dock=$('#dock');
+  if(hudCollapsed()){for(const el of [wallet,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
+  for(const el of [wallet,chat,bgm,bag,dock])el?.style.removeProperty('display');
   if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','234px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','206px')}}
-  const organs=[['#aiChatButton','134px'],['#bgmButton','184px'],['.bagRelocatedV250','84px']];
-  for(const [sel,bottom] of organs){const el=$(sel);if(!el)continue;setImportant(el,'position','fixed');setImportant(el,'left','auto');setImportant(el,'right','5px');setImportant(el,'bottom',bottom);if(sel!==' .bagRelocatedV250'){setImportant(el,'width','42px');setImportant(el,'height','42px')}}
-  const dock=$('#dock');if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px')}
+  const organs=[[chat,'134px'],[bgm,'184px'],[bag,'84px']];
+  for(const [el,bottom] of organs){if(!el)continue;setImportant(el,'position','fixed');setImportant(el,'left','auto');setImportant(el,'right','5px');setImportant(el,'bottom',bottom);setImportant(el,'width','42px');setImportant(el,'height','42px')}
+  if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px')}
 }
 function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;
@@ -106,7 +109,7 @@ function installEnergyRead(){
 }
 function installMasterCollapse(){
   let b=$('#k11520HudCollapseAll');if(!b){b=document.createElement('button');b.id='k11520HudCollapseAll';b.type='button';b.setAttribute('aria-label','總收合或展開 HUD');document.body.appendChild(b)}
-  const sync=()=>{const collapsed=document.documentElement.classList.contains('k11520HudCollapsed');b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0'};
+  const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
 function apply(){installStyle();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
@@ -117,8 +120,8 @@ function measure(){
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.warp.right<=report.lots.left&&report.lots.right<=report.axisRail.left);
   report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
   report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud)};
-  report.collapsed=document.documentElement.classList.contains('k11520HudCollapsed');
-  report.ok=innerWidth>MOBILE_MAX||(report.threeRailAligned&&report.equalWorldLifeWidth&&Object.values(report.overlaps).every(v=>!v));
+  report.collapsed=hudCollapsed();
+  report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.threeRailAligned&&report.equalWorldLifeWidth&&Object.values(report.overlaps).every(v=>!v));
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
   return report;
 }
