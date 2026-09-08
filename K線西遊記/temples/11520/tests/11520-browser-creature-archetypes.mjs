@@ -33,8 +33,15 @@ const result=await page.evaluate(async()=>{
     const camera=new THREE.OrthographicCamera(-half,half,half,-half,.01,20);camera.position.set(center.x,center.y,center.z+6);camera.lookAt(center);
 
     const target=new THREE.WebGLRenderTarget(180,180,{depthBuffer:true});
-    renderer.setRenderTarget(target);renderer.clear();renderer.compile(scene,camera);renderer.render(scene,camera);
-    const pixels=new Uint8Array(180*180*4);renderer.readRenderTargetPixels(target,0,0,180,180,pixels);renderer.setRenderTarget(null);
+    const pixels=new Uint8Array(180*180*4);let foregroundPixels=0;
+    renderer.setRenderTarget(target);renderer.compile(scene,camera);
+    for(let attempt=0;attempt<3&&foregroundPixels<100;attempt++){
+      renderer.clear();renderer.render(scene,camera);renderer.getContext().finish();
+      renderer.readRenderTargetPixels(target,0,0,180,180,pixels);
+      const bg=[pixels[0],pixels[1],pixels[2]];foregroundPixels=0;
+      for(let p=0;p<pixels.length;p+=4)if(Math.abs(pixels[p]-bg[0])+Math.abs(pixels[p+1]-bg[1])+Math.abs(pixels[p+2]-bg[2])>18)foregroundPixels++;
+    }
+    renderer.setRenderTarget(null);
 
     const card=document.createElement('div');card.style.cssText='border:1px solid #ffffff22;border-radius:10px;background:#0a1720;padding:4px;text-align:center;min-width:0;overflow:hidden';
     const canvas=document.createElement('canvas');canvas.width=180;canvas.height=180;canvas.setAttribute('aria-label',s);canvas.style.cssText='width:100%;height:168px;display:block;margin:auto';
@@ -43,7 +50,7 @@ const result=await page.evaluate(async()=>{
     ctx.putImageData(image,0,0);card.appendChild(canvas);
     const label=document.createElement('b');label.textContent=display(s);label.style.cssText='display:block;color:#d8e8ef;font-size:9px;line-height:1.1;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';card.appendChild(label);
     const small=document.createElement('small');small.textContent=s;small.style.cssText='display:block;color:#78909c;font-size:6px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';card.appendChild(small);grid.appendChild(card);
-    labels.push({species:s,archetype:creatureArchetypeForSpecies(s),childCount:root.children.length,nonBackground:pixels.some((v,idx)=>idx%4!==3&&v!==0)});target.dispose();
+    labels.push({species:s,archetype:creatureArchetypeForSpecies(s),childCount:root.children.length,foregroundPixels});target.dispose();
   }
   renderer.dispose();
   return labels;
@@ -53,7 +60,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 assert.equal(result.length,12);
 assert.equal(new Set(result.map(x=>x.archetype)).size,12,'all canonical species should retain distinct archetype IDs');
 assert.ok(result.every(x=>x.childCount>=3),'each creature must render as a multi-part 3D body');
-assert.ok(result.every(x=>x.nonBackground),'each creature render target must contain visible pixel data');
+assert.ok(result.every(x=>x.foregroundPixels>=100),'each creature render target must contain visible foreground pixels: '+JSON.stringify(result));
 await page.waitForTimeout(300);
 await page.screenshot({path:`${OUT}/11520-creature-archetypes-390x844.png`,fullPage:true});
 await browser.close();
