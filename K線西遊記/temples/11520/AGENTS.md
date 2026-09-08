@@ -21,7 +21,8 @@ For every 11520 UI, control-layout, responsive, HUD, world-view, wallet-panel, o
 5. Inspect the screenshot itself before claiming PASS. DOM existence, clickability, coordinates, unit tests, and `pageerror=0` do not prove visual correctness.
 6. If screenshot evidence shows overlap, clipping, missing images, blank/opaque overlays, displaced controls, wrong z-index, unreadable labels, or a stale version label, visual QA is FAIL even if functional CI is green.
 7. Save screenshots as CI artifacts or otherwise make them reviewable from the workflow/job. Prefer deterministic filenames tied to the tested SHA and viewport.
-8. A final 11520 QA report must distinguish at least `FUNCTIONAL_QA` and `VISUAL_QA`. Do not collapse them into one PASS.
+8. Screenshot evidence is mandatory for every finished, half-finished, candidate, experiment, and human-testable 11520 build. Missing or empty screenshot evidence is `QA_RED` / `NOT_COMPLETE`, including when other functional tests pass or fail earlier.
+9. A final 11520 QA report must distinguish at least `FUNCTIONAL_QA` and `VISUAL_QA`. Do not collapse them into one PASS.
 
 ## Visual defects that must be actively checked
 
@@ -69,4 +70,4 @@ If functional QA passes but screenshot review fails, the status is `FUNCTIONAL_P
 
 Treat 11520 as an organism with organs: an agent is expected to know the current organ/control map, notice missing or dead organs, and investigate regressions without relying on Human to discover every defect. When a visible organ is non-functional, overlapping, missing, duplicated, or blocked, record it as a defect and repair/test it before declaring completion.
 
-Signed policy source: Human feedback captured 2026-09-06; installed as persistent 11520 agent guidance so future pages/agents do not require the Human to repeat these rules.
+Signed policy source: Human feedback captured 2026-09-06 and reinforced 2026-09-07; installed as persistent 11520 agent guidance so future pages/agents do not require the Human to repeat these rules.

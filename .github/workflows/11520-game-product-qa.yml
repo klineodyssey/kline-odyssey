@@ -19,7 +19,7 @@ permissions:
 jobs:
   product-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,6 +36,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/living-world-inventory-runtime.mjs"
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-controls-v251.mjs"
+          node --check "K線西遊記/temples/11520/runtime/joystick-xzxy.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
           node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs"
@@ -44,19 +45,42 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.51.1
           npx playwright install --with-deps chromium
-      - name: Run mobile browser functional and visual smoke test
+      - name: Run mobile XZXY functional and visual smoke test
         shell: bash
         run: |
+          set -o pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 2
-          node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
+          echo "[11520-QA] XZXY browser smoke start $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-xzxy.mjs" 2>&1 | tee /tmp/k11520-browser-smoke.log
+          RC=${PIPESTATUS[0]}
+          set -e
+          if [ "$RC" -ne 0 ]; then
+            echo "[11520-QA] browser smoke failed or timed out rc=$RC"
+            tail -n 200 /tmp/k11520-browser-smoke.log || true
+            tail -n 200 /tmp/k11520-http.log || true
+            exit "$RC"
+          fi
+          echo "[11520-QA] XZXY browser smoke completed $(date -u +%FT%TZ)"
+      - name: Verify mandatory runtime screenshot evidence exists
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          SCREENSHOT="artifacts/11520-visual-qa/11520-mobile-390x844.png"
+          if [ ! -s "$SCREENSHOT" ]; then
+            echo "[11520-QA] QA_RED: mandatory 390x844 runtime screenshot missing or empty: $SCREENSHOT"
+            exit 1
+          fi
+          echo "[11520-QA] screenshot evidence present: $SCREENSHOT ($(wc -c < "$SCREENSHOT") bytes)"
       - name: Upload 11520 runtime visual QA evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: 11520-runtime-visual-qa-${{ github.sha }}
           path: artifacts/11520-visual-qa/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
