@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.1.0
 STATUS: ACTIVE
 PURPOSE: Keep one canonical 3D identity for an item across ground drops, backpack storage, Digital Ant cargo and ATM unloading.
 */
@@ -9,6 +9,19 @@ import {createProceduralItemBody,itemVisualDescriptor} from './item-visual-runti
 export const WORLD_ITEM_CONTEXTS=Object.freeze(['GROUND_DROP','BACKPACK','ANT_CARGO','ATM_UNLOAD']);
 
 function finite(v,f=0){return Number.isFinite(Number(v))?Number(v):f}
+
+export function cargoItemFromLife(life={}){
+  const cargo=life.cargo||{};
+  const unit=String(cargo.unit||cargo.currency||cargo.asset||cargo.kind||'').toUpperCase();
+  const species=String(cargo.species||cargo.lifeSpecies||'').toUpperCase();
+  const living=Boolean(species||cargo.lifeId||cargo.kind==='LIVING_CARGO');
+  const itemId=cargo.itemId||cargo.cargoId||life.mission?.cargoId||`${life.lifeId||life.id||'LIFE'}-CARGO`;
+  const amount=finite(cargo.amount??cargo.qty,1);
+  if(living)return {itemId,kind:'LIVING_CARGO',name:cargo.name||species||'Living Cargo',species:species||'LIFE',lifeId:cargo.lifeId||null,qty:amount,meta:{cargoKind:'LIVING_CARGO',unit}};
+  if(unit.includes('KGEN'))return {itemId,kind:'MATERIAL',name:cargo.name||'KGEN 貨筒',qty:amount,meta:{cargoKind:'KGEN',unit:'KGEN'}};
+  if(unit.includes('KAIOS')||unit.includes('CASH'))return {itemId,kind:'MATERIAL',name:cargo.name||'KAIOS 現鈔',qty:amount,meta:{cargoKind:'CASH',unit:'KAIOS'}};
+  return {itemId,kind:'MATERIAL',name:cargo.name||cargo.kind||'物流貨物',qty:amount,meta:{cargoKind:unit||'MATERIAL',unit}};
+}
 
 export function canonicalWorldItem(item={},context='GROUND_DROP'){
   const ctx=WORLD_ITEM_CONTEXTS.includes(String(context).toUpperCase())?String(context).toUpperCase():'GROUND_DROP';
