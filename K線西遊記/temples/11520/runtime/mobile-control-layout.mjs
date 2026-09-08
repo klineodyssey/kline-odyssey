@@ -12,12 +12,10 @@ function installStyle(){
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
   s.textContent=`
 @media(max-width:${MOBILE_MAX}px){
-  /* Header: keep the place name on row 1 and Wall Street on the metadata row. */
   .brand .hqLine{white-space:nowrap!important;font-size:12px!important}
   .brand .brandMetaV250{display:flex!important;align-items:center!important;gap:4px!important;font-size:8px!important;white-space:nowrap!important}
   #k11520DistrictLine{order:-1;color:#f1ca73!important;font-weight:900!important}
 
-  /* Market cards stay where they are; world/life start only after the cards. */
   .tele,.monsterHud{top:208px!important;height:86px!important;padding:7px!important;font-size:7px!important;overflow:hidden!important}
   .tele{left:6px!important;width:calc(50% - 9px)!important}
   .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
@@ -27,7 +25,6 @@ function installStyle(){
   .minimapWrap{left:6px!important;top:306px!important;width:116px!important;height:134px!important;padding:5px!important}
   .minimapWrap #minimap{width:104px!important;height:94px!important}.minimapWrap small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  /* Bottom controller cluster: XYZ disc | C | lots | remaining-axis rail. */
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
   #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
   #cControl{position:fixed!important;left:166px!important;right:auto!important;top:auto!important;bottom:max(14px,env(safe-area-inset-bottom))!important;width:44px!important;height:132px!important;z-index:456!important}
@@ -39,14 +36,12 @@ function installStyle(){
   #yControl.energy-negative{border-color:#ff737a!important;box-shadow:0 0 16px #ff737a44!important}#yControl.energy-negative #k11520SignedEnergy{color:#ff737a!important}
   #yControl.energy-zero #k11520SignedEnergy{color:#f1ca73!important}
 
-  /* Action rows move down with the world/life stack, while staying clear of the controller cluster. */
   .controls{position:fixed!important;left:auto!important;right:56px!important;top:auto!important;bottom:154px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
   .controls .skill,.controls .dodge,.controls .flat,.controls .tool{position:absolute!important;width:40px!important;height:40px!important;top:auto!important;bottom:0!important;border-radius:50%!important;font-size:11px!important}
   .controls .skill{right:0!important}.controls .flat{right:44px!important}.controls .dodge{right:88px!important}.controls .tool{right:132px!important}
   .controls .attack,.controls .order{position:fixed!important;top:auto!important;bottom:270px!important;width:54px!important;height:38px!important;border-radius:11px!important;font-size:9px!important;line-height:1.05!important;z-index:470!important}
   .controls .attack{left:170px!important;right:auto!important}.controls .order{left:228px!important;right:auto!important}
 
-  /* Wallet quick button joins the right-side utility rail when collapsed. */
   #walletPanel.collapsed{right:5px!important;left:auto!important;bottom:238px!important;width:46px!important;height:46px!important;padding:4px!important}
   #walletPanel.collapsed #walletToggle{width:36px!important;height:36px!important}
 
@@ -58,9 +53,9 @@ function installStyle(){
 }
 function setImportant(el,key,value){if(el)el.style.setProperty(key,value,'important')}
 function applyRail(){const el=$('#yControl');if(!el||innerWidth>MOBILE_MAX)return;for(const [k,v] of [['position','fixed'],['left','auto'],['right','58px'],['top','auto'],['bottom','max(14px, env(safe-area-inset-bottom))'],['width','44px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='remaining-axis-rail'}
-function normalizeBrand(){if(innerWidth>MOBILE_MAX)return false;const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;const place=line.querySelector('span:last-child');if(place&&/11520/.test(place.textContent||''))place.textContent='11520 花果山美國';let district=$('#k11520DistrictLine');if(!district){district=document.createElement('span');district.id='k11520DistrictLine';district.textContent='（華爾街）';meta.appendChild(district)}return true}
+function normalizeBrand(){if(innerWidth>MOBILE_MAX)return false;const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;const place=line.querySelector('span:last-child');if(place&&/11520/.test(place.textContent||'')&&place.textContent!=='11520 花果山美國')place.textContent='11520 花果山美國';let district=$('#k11520DistrictLine');if(!district){district=document.createElement('span');district.id='k11520DistrictLine';district.textContent='（華爾街）';meta.appendChild(district)}return true}
 function installBrandGuard(){try{brandGuard?.disconnect()}catch{}const brand=$('.brand');if(!brand)return;let busy=false;brandGuard=new MutationObserver(()=>{if(busy)return;busy=true;normalizeBrand();queueMicrotask(()=>busy=false)});brandGuard.observe(brand,{childList:true,characterData:true,subtree:true})}
-function signedEnergy(){const rail=$('#yControl'),raw=$('#yRead')?.textContent||'';if(!rail||innerWidth>MOBILE_MAX)return null;let out=$('#k11520SignedEnergy');if(!out){out=document.createElement('div');out.id='k11520SignedEnergy';rail.appendChild(out)}const axis=(raw.match(/\b([XYZ])\b/i)?.[1]||globalThis.__K11520_3D_CONTROL__?.railAxis||'Y').toUpperCase();const m=raw.match(/[-+]?\d+(?:\.\d+)?/),value=m?Number(m[0]):0;rail.classList.remove('energy-positive','energy-negative','energy-zero');if(value>0){rail.classList.add('energy-positive');out.textContent=`${axis} 正能階 +${Math.abs(value).toFixed(1)}`}else if(value<0){rail.classList.add('energy-negative');out.textContent=`${axis} 負能階 −${Math.abs(value).toFixed(1)}`}else{rail.classList.add('energy-zero');out.textContent=`${axis} 能階 0.0`}rail.dataset.k11520SignedEnergy=String(value);return{axis,value,state:value>0?'POSITIVE':value<0?'NEGATIVE':'ZERO'}}
+function signedEnergy(){const rail=$('#yControl'),raw=$('#yRead')?.textContent||'';if(!rail||innerWidth>MOBILE_MAX)return null;let out=$('#k11520SignedEnergy');if(!out){out=document.createElement('div');out.id='k11520SignedEnergy';rail.appendChild(out)}const axis=(raw.match(/\b([XYZ])\b/i)?.[1]||globalThis.__K11520_3D_CONTROL__?.railAxis||'Y').toUpperCase();const m=raw.match(/[-+]?\d+(?:\.\d+)?/),value=m?Number(m[0]):0,state=value>0?'POSITIVE':value<0?'NEGATIVE':'ZERO',css=`energy-${state.toLowerCase()}`;if(rail.dataset.k11520EnergyState!==state){rail.classList.remove('energy-positive','energy-negative','energy-zero');rail.classList.add(css);rail.dataset.k11520EnergyState=state}const text=value>0?`${axis} 正能階 +${Math.abs(value).toFixed(1)}`:value<0?`${axis} 負能階 −${Math.abs(value).toFixed(1)}`:`${axis} 能階 0.0`;if(out.textContent!==text)out.textContent=text;rail.dataset.k11520SignedEnergy=String(value);return{axis,value,state}}
 function installSignedEnergy(){clearInterval(energyTimer);signedEnergy();energyTimer=setInterval(signedEnergy,120)}
 function masterTargets(){return['.top','.axes','.tele','.monsterHud','.minimapWrap','.joyWrap','.controls','#cControl','#lotsControl','#yControl','#walletPanel','#backpackButton','#aiChatButton','#bgmButton','.dock'].map(s=>$(s)).filter(Boolean)}
 function updateMasterButton(){const b=$('#hudMasterToggle'),collapsed=document.documentElement.classList.contains('k11520HudCollapsed');if(!b)return;b.textContent=collapsed?'展':'收';b.title=collapsed?'展開全部 HUD':'收合全部 HUD';b.setAttribute('aria-label',b.title);b.setAttribute('aria-pressed',collapsed?'true':'false')}
@@ -68,19 +63,8 @@ function verifyMasterCollapse(){const root=document.documentElement,b=$('#hudMas
 function installMasterCollapse(){let b=$('#hudMasterToggle');if(!b){b=document.createElement('button');b.id='hudMasterToggle';b.type='button';document.body.appendChild(b);b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');updateMasterButton()})}updateMasterButton();return verifyMasterCollapse()}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
-function measure(){
-  const report={viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),world:rect('.tele'),life:rect('.monsterHud'),wallet:rect('#walletPanel'),backpack:rect('#backpackButton'),dock:rect('#dock'),master:rect('#hudMasterToggle'),signedEnergy:signedEnergy(),masterCollapseQa:globalThis.__K11520_MASTER_COLLAPSE_QA__||null};
-  report.overlaps={warpMinimap:overlap(report.warp,report.minimap),lotsMinimap:overlap(report.lots,report.minimap),warpLots:overlap(report.warp,report.lots),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.world,report.life)};
-  report.equalWorldLifeWidth=!report.world||!report.life||Math.abs(report.world.width-report.life.width)<=2;
-  report.ok=innerWidth>MOBILE_MAX||(Object.values(report.overlaps).every(v=>!v)&&report.equalWorldLifeWidth&&(report.masterCollapseQa?.ok!==false));
-  document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
-  return report;
-}
+function measure(){const report={viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),world:rect('.tele'),life:rect('.monsterHud'),wallet:rect('#walletPanel'),backpack:rect('#backpackButton'),dock:rect('#dock'),master:rect('#hudMasterToggle'),signedEnergy:signedEnergy(),masterCollapseQa:globalThis.__K11520_MASTER_COLLAPSE_QA__||null};report.overlaps={warpMinimap:overlap(report.warp,report.minimap),lotsMinimap:overlap(report.lots,report.minimap),warpLots:overlap(report.warp,report.lots),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.world,report.life)};report.equalWorldLifeWidth=!report.world||!report.life||Math.abs(report.world.width-report.life.width)<=2;report.ok=innerWidth>MOBILE_MAX||(Object.values(report.overlaps).every(v=>!v)&&report.equalWorldLifeWidth&&(report.masterCollapseQa?.ok!==false));document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';return report}
 function apply(){installStyle();applyRail();normalizeBrand();signedEnergy();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
-function installGuard(){
-  try{guard?.disconnect()}catch{}
-  const rail=$('#yControl');if(rail){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();signedEnergy();queueMicrotask(()=>{busy=false})});guard.observe(rail,{attributes:true,attributeFilter:['style','class']})}
-  installBrandGuard();installSignedEnergy();timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
-}
+function installGuard(){try{guard?.disconnect()}catch{}const rail=$('#yControl');if(rail){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();signedEnergy();queueMicrotask(()=>{busy=false})});guard.observe(rail,{attributes:true,attributeFilter:['style']})}installBrandGuard();installSignedEnergy();timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay))}
 export function install11520MobileControlLayout(){apply();installGuard();addEventListener('resize',apply,{passive:true});return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__}
 export function get11520MobileControlLayout(){return measure()}
