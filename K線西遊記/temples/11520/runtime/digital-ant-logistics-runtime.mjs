@@ -1,10 +1,10 @@
 /*
 KGEN_META
-VERSION: 1.1.0
+VERSION: 1.1.1
 REVISION: 2026-09-08.DIGITAL-ANT-CFO-XYZ-LOGISTICS
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
-CHANGE_REASON: Upgrade Digital Ant from fixed XZ delivery to autonomous XYZ dispatch with explicit freight economics, six-direction routing, no-trade decisions, and receipt-gated simulation boundaries.
+CHANGE_REASON: Upgrade Digital Ant from fixed XZ delivery to autonomous XYZ dispatch with explicit freight economics, six-direction routing, no-trade decisions, and receipt-gated simulation boundaries. Preserve null distanceMeters as automatic world-distance mode.
 */
 
 import {universeLevel,routeFromAnchor,logisticsDecision,LOGISTICS_ANCHOR} from './logistics-universe-runtime.mjs';
@@ -51,10 +51,11 @@ export function createDeliveryMission({
   speedMetersPerSecond=1,tipRate=0
 }={}){
   const normalizedMode=DELIVERY_MODES.includes(String(mode).toUpperCase())?String(mode).toUpperCase():'OBSERVE';
+  const explicitDistance=distanceMeters===null||distanceMeters===undefined||distanceMeters===''?null:Math.max(0,n(distanceMeters));
   return {
     missionId,cargoKind,amount:Math.max(0,n(amount)),unit:String(unit||'KAIOS'),destinationAtmId:String(destinationAtmId||''),
     price:n(price,LOGISTICS_ANCHOR),demand:n(demand),mode:normalizedMode,marketEdge:n(marketEdge),freightOffer:Math.max(0,n(freightOffer)),
-    economics:{distanceMeters:Number.isFinite(Number(distanceMeters))?Math.max(0,n(distanceMeters)):null,metersPerWorldUnit:Math.max(0.000001,n(metersPerWorldUnit,1)),baseFreight:Math.max(0,n(baseFreight)),distanceRate:Math.max(0,n(distanceRate)),loadRate:Math.max(0,n(loadRate)),riskRate:Math.max(0,n(riskRate)),fuelPerMeter:Math.max(0,n(fuelPerMeter)),salaryPerSecond:Math.max(0,n(salaryPerSecond)),maintenancePerMeter:Math.max(0,n(maintenancePerMeter)),timeCostPerSecond:Math.max(0,n(timeCostPerSecond)),riskProbability:clamp(riskProbability,0,1),riskLoss:Math.max(0,n(riskLoss)),speedMetersPerSecond:Math.max(0.000001,n(speedMetersPerSecond,1)),tipRate:Math.max(0,n(tipRate))},
+    economics:{distanceMeters:explicitDistance,metersPerWorldUnit:Math.max(0.000001,n(metersPerWorldUnit,1)),baseFreight:Math.max(0,n(baseFreight)),distanceRate:Math.max(0,n(distanceRate)),loadRate:Math.max(0,n(loadRate)),riskRate:Math.max(0,n(riskRate)),fuelPerMeter:Math.max(0,n(fuelPerMeter)),salaryPerSecond:Math.max(0,n(salaryPerSecond)),maintenancePerMeter:Math.max(0,n(maintenancePerMeter)),timeCostPerSecond:Math.max(0,n(timeCostPerSecond)),riskProbability:clamp(riskProbability,0,1),riskLoss:Math.max(0,n(riskLoss)),speedMetersPerSecond:Math.max(0.000001,n(speedMetersPerSecond,1)),tipRate:Math.max(0,n(tipRate))},
     status:'CREATED',createdAt:Date.now(),pickedUpAt:null,deliveredAt:null,failedAt:null,receiptVerified:false,
   };
 }
