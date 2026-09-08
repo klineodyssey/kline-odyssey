@@ -301,16 +301,25 @@ contract KGEN_PositionEngine_V1_0_0 {
     {
         Position storage p = positions[positionId];
         if (p.status != Status.OPEN) revert PositionNotOpen();
-        (int256 rawPnlWad, int256 equityWad, uint256 maintenanceMarginWad, bool shouldLiquidate) = markPosition(positionId);
-        if (!shouldLiquidate) revert NotLiquidatable();
+
+        // Liquidation eligibility and settlement MUST use one exact oracle
+        // observation. A second read in the same transaction could otherwise
+        // bind the eligibility decision to one quorum result and realized PnL
+        // to another result from a mutable/adversarial external feed.
+        MarketConfig memory cfg = _config(p.market);
         (uint256 mark,,) = _readOracle(p.market);
+        int256 rawPnlWad = KGEN_MarketRiskKernel_V1_0_0.pnl(p.sizeWad, p.entryPriceWad, mark);
+        uint256 notionalWad = KGEN_MarketRiskKernel_V1_0_0.notional(_abs(p.sizeWad), mark);
+        bool shouldLiquidate = KGEN_MarketRiskKernel_V1_0_0.liquidatable(
+            p.collateralWad,
+            rawPnlWad,
+            notionalWad,
+            cfg.maintenanceMarginBps
+        );
+        if (!shouldLiquidate) revert NotLiquidatable();
+
         (, int256 boundedPnlWad, uint256 gapDebtWad) =
             _settlementOutcome(p.sizeWad, p.entryPriceWad, mark, p.collateralWad);
-
-        // Keep explicit locals above so review can compare the exact mark used
-        // for liquidation eligibility with settlement output.
-        equityWad;
-        maintenanceMarginWad;
 
         p.exitPriceWad = mark;
         p.rawPnlWad = rawPnlWad;
