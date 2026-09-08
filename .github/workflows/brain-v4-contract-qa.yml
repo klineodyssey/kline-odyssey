@@ -1,0 +1,55 @@
+name: 11520 Brain V4 Contract QA
+
+on:
+  push:
+    paths:
+      - "KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol"
+      - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - ".github/workflows/brain-v4-contract-qa.yml"
+  pull_request:
+    paths:
+      - "KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol"
+      - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - ".github/workflows/brain-v4-contract-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-static-invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run no-dependency fund-safety source invariants
+        run: node "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - name: Install pinned Solidity compiler and OpenZeppelin dependencies
+        run: |
+          npm install --no-save --package-lock=false \
+            solc@0.8.24 \
+            @openzeppelin/contracts@5.0.2 \
+            @openzeppelin/contracts-upgradeable@5.0.2
+      - name: Compile Brain V4 with pinned solc 0.8.24
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/brain-v4-build
+          mkdir -p /tmp/brain-v4-build
+          npx solcjs \
+            --bin \
+            --abi \
+            --base-path . \
+            --include-path node_modules \
+            -o /tmp/brain-v4-build \
+            KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_V4_0_0_sol_KGEN_BrainExchange_V4_0_0.bin
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_V4_0_0_sol_KGEN_BrainExchange_V4_0_0.abi
+      - name: Reject accidental deployment artifacts in repository
+        run: |
+          test ! -e KGEN/contracts/node_modules
+          test ! -e node_modules || true
+          git diff --exit-code
