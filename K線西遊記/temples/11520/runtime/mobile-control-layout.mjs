@@ -1,9 +1,9 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.6
-REVISION: 2026-09-09.P1-VISUAL-HARDENING
-PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; provides signed energy presentation and a tested master HUD collapse without changing XYZ or trading semantics.
+VERSION: 1.1.7
+REVISION: 2026-09-09.BINARY-ENERGY-SIGN
+PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; presents the normal-axis energy in two clear sign classes (>=0 and <0); and keeps the tested master HUD collapse without changing XYZ or trading semantics.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=420;
@@ -31,13 +31,11 @@ function installStyle(){
   #yControl{left:266px!important;right:auto!important}
   #cControl label,#lotsControl label,#yControl label{top:5px!important;font-size:7px!important;line-height:1.05!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   #cControl .read,#lotsControl .read,#yControl .read{bottom:4px!important;font-size:7px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
-  #yControl .track{background:linear-gradient(to bottom,#123f32 0%,#123f32 48%,#25313a 48%,#25313a 52%,#4b2029 52%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
-  #yControl[data-energy-sign="positive"]{border-color:#65e79899!important;box-shadow:0 0 16px #65e79822!important}
+  #yControl .track{background:linear-gradient(to bottom,#123f32 0%,#123f32 49.5%,#2b343b 49.5%,#2b343b 50.5%,#4b2029 50.5%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
+  #yControl[data-energy-sign="nonnegative"]{border-color:#65e79899!important;box-shadow:0 0 16px #65e79822!important}
   #yControl[data-energy-sign="negative"]{border-color:#ff737a99!important;box-shadow:0 0 16px #ff737a22!important}
-  #yControl[data-energy-sign="zero"]{border-color:#a77b3570!important}
-  #yControl[data-energy-sign="positive"] label,#yControl[data-energy-sign="positive"] .read{color:#65e798!important}
+  #yControl[data-energy-sign="nonnegative"] label,#yControl[data-energy-sign="nonnegative"] .read{color:#65e798!important}
   #yControl[data-energy-sign="negative"] label,#yControl[data-energy-sign="negative"] .read{color:#ff737a!important}
-  #yControl[data-energy-sign="zero"] label,#yControl[data-energy-sign="zero"] .read{color:#f1ca73!important}
 
   .controls{position:fixed!important;left:auto!important;right:56px!important;top:auto!important;bottom:158px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
   .controls .skill,.controls .dodge,.controls .flat,.controls .tool{position:absolute!important;width:40px!important;height:40px!important;top:auto!important;bottom:0!important;border-radius:50%!important;font-size:11px!important}
@@ -107,8 +105,8 @@ function installEnergyRead(){
     const axis=String(ctl?.railAxis||'Y').toUpperCase(),key=axis.toLowerCase();
     const world=globalThis.__K11520_WORLD_COORDS__||null;
     const raw=Number(world?.intent?.[key]??ctl?.rail?.value??0),v=Number.isFinite(raw)?raw:0;
-    const sign=v>0.0001?'positive':v<-0.0001?'negative':'zero';rail.dataset.energySign=sign;
-    const level=sign==='positive'?'正能階':sign==='negative'?'負能階':'中性能階';
+    const sign=v<0?'negative':'nonnegative';rail.dataset.energySign=sign;
+    const level=sign==='negative'?'負能階':'非負能階';
     label.textContent=`${axis} 縱搖桿 · ${level}`;
     out.textContent=`${v>0?'+':''}${v.toFixed(1)}`;
     rail.setAttribute('aria-label',`${axis} 縱搖桿 ${level} ${out.textContent}`);
