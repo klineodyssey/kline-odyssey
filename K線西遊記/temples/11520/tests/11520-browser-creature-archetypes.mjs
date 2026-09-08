@@ -34,7 +34,8 @@ const result=await page.evaluate(async()=>{
 
     const target=new THREE.WebGLRenderTarget(180,180,{depthBuffer:true});
     const pixels=new Uint8Array(180*180*4);let foregroundPixels=0;
-    renderer.setRenderTarget(target);renderer.compile(scene,camera);
+    renderer.setRenderTarget(target);
+    if(renderer.compileAsync)await renderer.compileAsync(scene,camera);else renderer.compile(scene,camera);
     for(let attempt=0;attempt<3&&foregroundPixels<100;attempt++){
       renderer.clear();renderer.render(scene,camera);renderer.getContext().finish();
       renderer.readRenderTargetPixels(target,0,0,180,180,pixels);
@@ -56,12 +57,12 @@ const result=await page.evaluate(async()=>{
   return labels;
 });
 
+await page.waitForTimeout(300);
+await page.screenshot({path:`${OUT}/11520-creature-archetypes-390x844.png`,fullPage:true});
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 assert.equal(result.length,12);
 assert.equal(new Set(result.map(x=>x.archetype)).size,12,'all canonical species should retain distinct archetype IDs');
 assert.ok(result.every(x=>x.childCount>=3),'each creature must render as a multi-part 3D body');
 assert.ok(result.every(x=>x.foregroundPixels>=100),'each creature render target must contain visible foreground pixels: '+JSON.stringify(result));
-await page.waitForTimeout(300);
-await page.screenshot({path:`${OUT}/11520-creature-archetypes-390x844.png`,fullPage:true});
 await browser.close();
 console.log('11520 creature/monster 3D archetype browser visual QA PASS');
