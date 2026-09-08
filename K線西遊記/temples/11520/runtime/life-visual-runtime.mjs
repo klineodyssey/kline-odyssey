@@ -1,7 +1,7 @@
 /* KGEN_META
-VERSION: 1.2.0
+VERSION: 1.3.0
 STATUS: ACTIVE
-PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life and Digital Ant creatures, with canonical item geometry for live cargo/unload states.
+PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life and Digital Ant creatures, with canonical item geometry and explicit cash custody containers for live cargo/unload states.
 */
 
 import {canonicalWorldItem,cargoItemFromLife,createWorldItemVisual} from './world-item-visual-runtime.mjs';
@@ -41,6 +41,7 @@ function installCargoVisualFactory(THREE,root,cargo){
   cargo.userData.cargoVisualFactory=(life,context)=>createWorldItemVisual(THREE,cargoItemFromLife(life),{context,scale:.55,yOffset:0});
   cargo.userData.cargoIdentityKey=null;
   cargo.userData.cargoContext=null;
+  cargo.userData.custodyType=null;
   root.add(cargo);
 }
 
@@ -49,13 +50,15 @@ function syncCanonicalCargoVisual(cargo,life,p){
   const context=p.waitingReceipt?'ATM_UNLOAD':'ANT_CARGO';
   const item=cargoItemFromLife(life);
   const state=canonicalWorldItem(item,context);
-  if(cargo.userData.cargoIdentityKey!==state.identityKey){
+  const needsRebuild=cargo.userData.cargoIdentityKey!==state.identityKey||cargo.userData.cargoContext!==context||cargo.userData.custodyType!==state.custody?.custodyType;
+  if(needsRebuild){
     cargo.clear();
     const v=cargo.userData.cargoVisualFactory?.(life,context);
     if(v?.root){v.root.position.set(0,0,0);v.root.rotation.set(0,.35,0);cargo.add(v.root)}
     cargo.userData.cargoIdentityKey=state.identityKey;
   }
   cargo.userData.cargoContext=context;
+  cargo.userData.custodyType=state.custody?.custodyType||null;
   cargo.userData.itemId=item.itemId||null;
   cargo.userData.itemShape=state.descriptor.shape;
   cargo.userData.itemLabel=state.descriptor.label;
@@ -112,5 +115,5 @@ export function syncLifeVisual(root,life={}){
   const cargo=root.getObjectByName?.('LIFE_STATUS_CARGO');syncCanonicalCargoVisual(cargo,life,p);
   const receipt=root.getObjectByName?.('LIFE_STATUS_RECEIPT');if(receipt)receipt.visible=p.waitingReceipt;
   const retirement=root.getObjectByName?.('LIFE_STATUS_RETIREMENT');if(retirement)retirement.visible=p.retired;
-  root.userData={...(root.userData||{}),lifeId:life.lifeId||null,sourceLifeId:life.sourceLifeId||null,sourceManaged:Boolean(life.sourceManaged),state:life.state||null,lifestyleAction:p.action,missionStatus:p.missionStatus,carryingCargo:p.carrying,waitingReceipt:p.waitingReceipt,retired:p.retired,cargoContext:cargo?.userData?.cargoContext||null,cargoIdentityKey:cargo?.userData?.cargoIdentityKey||null,cargoShape:cargo?.userData?.itemShape||null};
+  root.userData={...(root.userData||{}),lifeId:life.lifeId||null,sourceLifeId:life.sourceLifeId||null,sourceManaged:Boolean(life.sourceManaged),state:life.state||null,lifestyleAction:p.action,missionStatus:p.missionStatus,carryingCargo:p.carrying,waitingReceipt:p.waitingReceipt,retired:p.retired,cargoContext:cargo?.userData?.cargoContext||null,cargoIdentityKey:cargo?.userData?.cargoIdentityKey||null,cargoShape:cargo?.userData?.itemShape||null,cargoCustodyType:cargo?.userData?.custodyType||null};
 }
