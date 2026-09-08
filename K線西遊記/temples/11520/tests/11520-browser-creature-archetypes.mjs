@@ -20,6 +20,15 @@ const result=await page.evaluate(async()=>{
   const renderCanvas=document.createElement('canvas');renderCanvas.width=180;renderCanvas.height=180;
   const renderer=new THREE.WebGLRenderer({canvas:renderCanvas,antialias:true,alpha:false,preserveDrawingBuffer:true});renderer.setSize(180,180,false);renderer.setPixelRatio(1);renderer.setClearColor(0x0a1720,1);
 
+  const warmScene=new THREE.Scene(),warmCamera=new THREE.OrthographicCamera(-1,1,1,-1,.01,10);
+  warmCamera.position.z=2;warmScene.add(new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.5),new THREE.MeshBasicMaterial({color:0xffffff})));
+  const warmTarget=new THREE.WebGLRenderTarget(16,16);
+  renderer.setRenderTarget(warmTarget);
+  if(renderer.compileAsync)await renderer.compileAsync(warmScene,warmCamera);else renderer.compile(warmScene,warmCamera);
+  renderer.clear();renderer.render(warmScene,warmCamera);renderer.getContext().finish();
+  renderer.setRenderTarget(null);warmTarget.dispose();
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+
   const host=document.createElement('section');host.id='qaCreatureGallery';host.style.cssText='position:fixed;inset:0;z-index:99999;background:#071016;padding:9px;box-sizing:border-box;color:#fff;font:11px system-ui;overflow:hidden';
   const title=document.createElement('div');title.textContent='11520 生物／妖怪 3D 識別 QA';title.style.cssText='font-size:15px;font-weight:800;color:#f5d77c;text-align:center;height:27px';host.appendChild(title);
   const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:6px;height:790px;align-content:stretch';host.appendChild(grid);document.body.appendChild(host);
@@ -40,7 +49,7 @@ const result=await page.evaluate(async()=>{
       renderer.clear();renderer.render(scene,camera);renderer.getContext().finish();
       renderer.readRenderTargetPixels(target,0,0,180,180,pixels);
       const bg=[pixels[0],pixels[1],pixels[2]];foregroundPixels=0;
-      for(let p=0;p<pixels.length;p+=4)if(Math.abs(pixels[p]-bg[0])+Math.abs(pixels[p+1]-bg[1])+Math.abs(pixels[p+2]-bg[2])>18)foregroundPixels++;
+      for(let p=0;p<pixels.length;p+=4)if(Math.abs(pixels[p]-bg[0])+Math.abs(pixels[p+1]-bg[1])+Math.abs(pixels[p+2]-bg[2])>4)foregroundPixels++;
     }
     renderer.setRenderTarget(null);
 
