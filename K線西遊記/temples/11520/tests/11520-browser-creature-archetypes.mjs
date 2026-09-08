@@ -31,14 +31,16 @@ const result=await page.evaluate(async()=>{
   const title=document.createElement('div');title.textContent='11520 生物／妖怪 3D 識別 QA';title.style.cssText='font-size:15px;font-weight:800;color:#f5d77c;text-align:center;height:27px';host.appendChild(title);
   const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:7px;height:780px;align-content:start';
   grid.innerHTML=cards.map(c=>`<div style="border:1px solid #ffffff22;border-radius:11px;background:#0a1720;padding:5px;text-align:center;min-height:173px"><img src="${c.url}" alt="${c.species}" style="width:108px;height:132px;object-fit:contain;display:block;margin:auto"><b style="display:block;color:#d8e8ef;font-size:10px;margin-top:2px">${c.label}</b><small style="display:block;color:#78909c;font-size:7px">${c.species}</small></div>`).join('');
-  host.appendChild(grid);document.body.appendChild(host);globalThis.__K11520_QA_CREATURE_RENDERER__=renderer;return labels;
+  host.appendChild(grid);document.body.appendChild(host);globalThis.__K11520_QA_CREATURE_RENDERER__=renderer;
+  await Promise.all([...grid.querySelectorAll('img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));
+  return labels;
 });
 
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 assert.equal(result.length,12);
 assert.equal(new Set(result.map(x=>x.archetype)).size,12,'all canonical species should retain distinct archetype IDs');
 assert.ok(result.every(x=>x.childCount>=3),'each creature must render as a multi-part 3D body');
-await page.waitForTimeout(350);
+await page.waitForTimeout(300);
 await page.screenshot({path:`${OUT}/11520-creature-archetypes-390x844.png`,fullPage:true});
 await browser.close();
 console.log('11520 creature/monster 3D archetype browser visual QA PASS');
