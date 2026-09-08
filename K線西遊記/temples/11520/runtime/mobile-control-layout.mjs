@@ -1,7 +1,7 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.1
+VERSION: 1.1.2
 REVISION: 2026-09-09.HUMAN-3RAIL-HUD
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; provides signed energy presentation and a tested master HUD collapse without changing XYZ or trading semantics.
 */
@@ -76,6 +76,14 @@ function applyRail(){
   const specs=[['#cControl','170px'],['#lotsControl','218px'],['#yControl','266px']];
   for(const [sel,left] of specs){const el=$(sel);if(!el)continue;for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(16px, env(safe-area-inset-bottom))'],['width','44px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
+function applyRightOrgans(){
+  if(innerWidth>MOBILE_MAX)return;
+  const wallet=$('#walletPanel');
+  if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','234px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','206px')}}
+  const organs=[['#aiChatButton','134px'],['#bgmButton','184px'],['.bagRelocatedV250','84px']];
+  for(const [sel,bottom] of organs){const el=$(sel);if(!el)continue;setImportant(el,'position','fixed');setImportant(el,'left','auto');setImportant(el,'right','5px');setImportant(el,'bottom',bottom);if(sel!==' .bagRelocatedV250'){setImportant(el,'width','42px');setImportant(el,'height','42px')}}
+  const dock=$('#dock');if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px')}
+}
 function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;
   const text=(line.textContent||'').replace(/\s+/g,' ').trim();
@@ -101,7 +109,7 @@ function installMasterCollapse(){
   const sync=()=>{const collapsed=document.documentElement.classList.contains('k11520HudCollapsed');b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0'};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();applyRail();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
@@ -116,7 +124,7 @@ function measure(){
 }
 function installGuard(){
   try{guard?.disconnect()}catch{}
-  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
+  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightOrgans();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
   timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
 }
 export function install11520MobileControlLayout(){apply();installGuard();addEventListener('resize',apply,{passive:true});return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__}
