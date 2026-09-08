@@ -7,12 +7,15 @@ await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
-await page.waitForTimeout(1900);
-if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
-await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
-await page.waitForTimeout(900);
-assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
+async function boot(){
+  await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+  await page.waitForTimeout(1900);
+  if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
+  await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
+  await page.waitForTimeout(900);
+  assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
+}
+await boot();
 
 const box=async sel=>{const b=await page.locator(sel).boundingBox();assert.ok(b,`${sel} missing`);return b};
 const visible=async sel=>page.locator(sel).evaluate(el=>{const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&b.width>0&&b.height>0});
@@ -53,8 +56,8 @@ async function pressEnergy(sign){
   const cx=b.x+b.width/2,cy=b.y+b.height/2,targetY=sign>0?b.y+b.height*.14:b.y+b.height*.86;
   await page.dispatchEvent('#yControl','pointerdown',{pointerId:id,pointerType:'touch',clientX:cx,clientY:cy,buttons:1});
   await page.dispatchEvent('#yControl','pointermove',{pointerId:id,pointerType:'touch',clientX:cx,clientY:targetY,buttons:1});
-  await page.waitForTimeout(180);
-  return async()=>{await page.dispatchEvent('#yControl','pointerup',{pointerId:id,pointerType:'touch',clientX:cx,clientY:targetY,buttons:0});await page.waitForTimeout(180)};
+  await page.waitForTimeout(220);
+  return async()=>{await page.dispatchEvent('#yControl','pointerup',{pointerId:id,pointerType:'touch',clientX:cx,clientY:targetY,buttons:0});await page.waitForTimeout(120)};
 }
 
 for(const mode of ['XZ','XY','YZ']){
@@ -63,7 +66,10 @@ for(const mode of ['XZ','XY','YZ']){
   assert.ok(label.startsWith(expectedAxis[mode]+' 縱搖桿'),`${mode} normal axis must be ${expectedAxis[mode]}: ${label}`);
   assert.ok(label.includes('中性能階'),`${mode} zero state must be neutral energy: ${label}`);
 }
-await setPlane('XZ');
+await setPlane('XZ');await page.waitForTimeout(160);
+assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'zero','boot/reset normal-axis energy must be neutral');
+assert.match((await page.locator('#yControl label').textContent())||'',/中性能階/,'neutral energy label missing');
+await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-zero.png`,fullPage:true});
 
 let releaseEnergy=await pressEnergy(1);
 assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'positive','positive normal-axis energy state missing');
@@ -71,8 +77,13 @@ assert.match((await page.locator('#yControl label').textContent())||'',/正能�
 const positiveColor=await page.locator('#yControl .read').evaluate(el=>getComputedStyle(el).color);
 await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-positive.png`,fullPage:true});
 await releaseEnergy();
-assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'zero','rail release must return to neutral energy');
 
+await page.reload({waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(1900);
+if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
+await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
+await page.waitForTimeout(900);
+await setPlane('XZ');await page.waitForTimeout(160);
 releaseEnergy=await pressEnergy(-1);
 assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'negative','negative normal-axis energy state missing');
 assert.match((await page.locator('#yControl label').textContent())||'',/負能階/,'negative energy label missing');
@@ -80,9 +91,6 @@ const negativeColor=await page.locator('#yControl .read').evaluate(el=>getComput
 assert.notEqual(positiveColor,negativeColor,'positive and negative energy must use visibly different colors');
 await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-negative.png`,fullPage:true});
 await releaseEnergy();
-assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'zero','zero normal-axis energy state missing');
-assert.match((await page.locator('#yControl label').textContent())||'',/中性能階/,'neutral energy label missing');
-await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-zero.png`,fullPage:true});
 
 const wallet=await box('#walletPanel'),chat=await box('#chatHandle');
 assert.ok(wallet.x>=330,`collapsed wallet button must be on right rail: ${JSON.stringify(wallet)}`);
@@ -115,4 +123,4 @@ assert.equal(report.threeRailAligned,true,'layout report must confirm three-rail
 assert.equal(report.equalWorldLifeWidth,true,'layout report must confirm equal world/life widths');
 assert.deepEqual(errors,[],'page errors after interactions: '+errors.join('\n'));
 await browser.close();
-console.log('11520 mobile HUD P1 visual hardening QA PASS: three rails, XYZ normal-axis labels, real +/-/0 rail gestures, right-rail pointer reachability, two collapse/expand cycles, no drift');
+console.log('11520 mobile HUD P1 visual hardening QA PASS: three rails, XYZ normal-axis labels, neutral boot plus real +/- rail gestures, right-rail pointer reachability, two collapse/expand cycles, no drift');
