@@ -3,16 +3,22 @@ pragma solidity ^0.8.24;
 
 import {KGEN_MarketRiskKernel_V1_0_0} from "./KGEN_MarketRiskKernel_V1_0_0.sol";
 
+interface IKGENBrainSettlementV4 {
+    function reservePositionCollateral(bytes32 positionKey, address user, uint256 amountWei) external;
+    function releasePositionCollateral(bytes32 positionKey) external;
+    function settlePositionCollateral(bytes32 positionKey, int256 realizedPnlWei, uint256 badDebtWei) external;
+}
+
 /**
  * KGEN_PositionEngine_V1_0_0
  * Candidate position state machine for KX/KY/KZ markets.
  *
  * SAFETY BOUNDARY:
- * - NO token custody
- * - NO payout / settlement transfer
+ * - NO token custody in this contract
  * - NO oracle network call
  * - executor-supplied observations are validated for freshness/bounds only
- * - final money movement must be performed by a separately reviewed settlement adapter
+ * - Brain collateral reservation and settlement are called atomically with
+ *   position state transitions; a Brain revert rolls the whole transition back
  *
  * Isolated-margin rule:
  * - realized user loss is capped at the position collateral
@@ -51,13 +57,14 @@ contract KGEN_PositionEngine_V1_0_0 {
 
     address public admin;
     address public executor;
+    IKGENBrainSettlementV4 public immutable brainSettlement;
     uint256 public nextPositionId = 1;
     mapping(Market => MarketConfig) public marketConfig;
     mapping(uint256 => Position) public positions;
 
     event ExecutorSet(address indexed executor);
     event MarketConfigured(Market indexed market, uint16 initialMarginBps, uint16 maintenanceMarginBps, uint32 maxOracleAge, uint256 minPriceWad, uint256 maxPriceWad, bool enabled);
-    event PositionOpened(uint256 indexed positionId, address indexed trader, Market indexed market, int256 sizeWad, uint256 collateralWad, uint256 entryPriceWad);
+    event PositionOpened(uint256 indexed positionId, address indexed trader, Market indexed market, int256 sizeWad, uint256 collateralWad, uint256 entryPriceWad, bytes32 positionKey);
     event PositionClosed(uint256 indexed positionId, uint256 exitPriceWad, int256 rawPnlWad, int256 realizedPnlWad, uint256 badDebtWad);
     event PositionLiquidated(uint256 indexed positionId, uint256 markPriceWad, int256 rawPnlWad, int256 realizedPnlWad, uint256 badDebtWad);
 
@@ -82,10 +89,11 @@ contract KGEN_PositionEngine_V1_0_0 {
         _;
     }
 
-    constructor(address initialAdmin, address initialExecutor) {
-        if (initialAdmin == address(0) || initialExecutor == address(0)) revert ZeroAddress();
+    constructor(address initialAdmin, address initialExecutor, address initialBrainSettlement) {
+        if (initialAdmin == address(0) || initialExecutor == address(0) || initialBrainSettlement == address(0)) revert ZeroAddress();
         admin = initialAdmin;
         executor = initialExecutor;
+        brainSettlement = IKGENBrainSettlementV4(initialBrainSettlement);
         emit ExecutorSet(initialExecutor);
     }
 
@@ -93,6 +101,10 @@ contract KGEN_PositionEngine_V1_0_0 {
         if (nextExecutor == address(0)) revert ZeroAddress();
         executor = nextExecutor;
         emit ExecutorSet(nextExecutor);
+    }
+
+    function positionKey(uint256 positionId) public view returns (bytes32) {
+        return keccak256(abi.encodePacked(address(this), positionId));
     }
 
     function configureMarket(
@@ -142,6 +154,12 @@ contract KGEN_PositionEngine_V1_0_0 {
         if (collateralWad < minInitialMargin) revert InitialMarginTooLow();
 
         positionId = nextPositionId++;
+        bytes32 key = positionKey(positionId);
+
+        // Reserve first inside this transaction. If Brain rejects new risk,
+        // all PositionEngine state including nextPositionId rolls back.
+        brainSettlement.reservePositionCollateral(key, trader, collateralWad);
+
         positions[positionId] = Position({
             trader: trader,
             market: market,
@@ -156,7 +174,7 @@ contract KGEN_PositionEngine_V1_0_0 {
             badDebtWad: 0,
             status: Status.OPEN
         });
-        emit PositionOpened(positionId, trader, market, sizeWad, collateralWad, validated);
+        emit PositionOpened(positionId, trader, market, sizeWad, collateralWad, validated, key);
     }
 
     function markPosition(uint256 positionId, uint256 markPriceWad, uint256 updatedAt)
@@ -193,6 +211,12 @@ contract KGEN_PositionEngine_V1_0_0 {
         p.badDebtWad = gapDebtWad;
         p.closedAt = uint64(block.timestamp);
         p.status = Status.CLOSED;
+
+        // Brain is the only money ledger. A failure here reverts the state
+        // writes above, so a position can never be closed without matching
+        // collateral settlement.
+        brainSettlement.settlePositionCollateral(positionKey(positionId), boundedPnlWad, gapDebtWad);
+
         emit PositionClosed(positionId, exitPrice, rawPnlWad, boundedPnlWad, gapDebtWad);
         return (boundedPnlWad, gapDebtWad);
     }
@@ -217,6 +241,9 @@ contract KGEN_PositionEngine_V1_0_0 {
         p.badDebtWad = gapDebtWad;
         p.closedAt = uint64(block.timestamp);
         p.status = Status.LIQUIDATED;
+
+        brainSettlement.settlePositionCollateral(positionKey(positionId), boundedPnlWad, gapDebtWad);
+
         emit PositionLiquidated(positionId, mark, rawPnlWad, boundedPnlWad, gapDebtWad);
         return (boundedPnlWad, gapDebtWad);
     }
