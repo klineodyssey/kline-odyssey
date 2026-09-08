@@ -19,6 +19,7 @@ const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=Str
 const world=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_WORLD_COORDS__||null));
 const control=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_3D_CONTROL__||null));
 const normal=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_NORMAL_MARKET__||null));
+const mobileLayout=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_MOBILE_CONTROL_LAYOUT__||null));
 const joyBox=async()=>{const b=await page.locator('#joy').boundingBox();assert.ok(b,'joy missing');return b};
 const railBox=async()=>{const b=await page.locator('#yControl').boundingBox();assert.ok(b,'axis rail missing');return b};
 const point=(b,x,y,buttons=1,id=1)=>({pointerId:id,pointerType:'touch',clientX:b.x+b.width*x,clientY:b.y+b.height*y,buttons});
@@ -55,10 +56,12 @@ await page.screenshot({path:`${OUT}/11520-mobile-yz-flight.png`,fullPage:true});
 await tapCenter(401);c=await control();assert.equal(c.mode,'XZ','third tap must cycle YZ→XZ');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='GROUND',{timeout:2500});await assertKgenArt();await assertNormal('XZ','KY');await assertNoDrift('YZ→XZ');
 
 const attack=await visible('#attack'),order=await visible('#orderFire'),joy=await visible('#joy'),dock=await visible('#dockToggle');for(const [name,b] of [['attack',attack],['order',order]]){assert.ok(b.x>=0&&b.right<=390&&b.y>=0&&b.bottom<=844,`${name} must remain inside mobile viewport`);assert.ok(b.bottom<joy.y,`${name} quick action must sit above circular joystick zone`);assert.ok(!(b.x<dock.right&&b.right>dock.x&&b.y<dock.bottom&&b.bottom>dock.y),`${name} must not overlap dock toggle`)}
+await visible('#cControl');await visible('#lotsControl');await visible('#yControl');
+await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',{timeout:3500});const layout=await mobileLayout();assert.ok(layout,'mobile layout report missing');assert.equal(layout.ok,true,JSON.stringify(layout));for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`mobile control overlap ${key}: ${JSON.stringify(layout)}`);
 
 await visible('#gameModeToggle');await page.locator('#gameModeToggle').click({timeout:2000});await page.waitForTimeout(120);await visible('#k11520UiSettings');
 const labels=await page.locator('#k11520UiSettings .row span').allTextContents();assert.ok(labels.includes('聊天'),'settings must retain chat');assert.ok(!labels.includes('錢包')&&!labels.includes('背包'),'wallet/backpack must not be globally collapsible');await page.locator('#k11520UiSettingsClose').click();
 await page.waitForTimeout(120);await page.screenshot({path:`${OUT}/11520-mobile-390x844.png`,fullPage:true});
-await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),organ:'XYZ Plane Joystick',mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),normalMarket:await normal(),quickActions:{attack,order}},null,2));
+await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),organ:'XYZ Plane Joystick',mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),normalMarket:await normal(),mobileControlLayout:layout,quickActions:{attack,order}},null,2));
 await browser.close();
-console.log('11520 XZ+Y / XY+Z / YZ+X 3D controller + normal market browser QA PASS');
+console.log('11520 XZ+Y / XY+Z / YZ+X 3D controller + normal market + mobile control layout browser QA PASS');
