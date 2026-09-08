@@ -16,8 +16,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
 await page.waitForFunction(()=>globalThis.__K11520_XYZ_INPUT_AUTHORITY__?.legacyXZBubbleSuppressed===true,{timeout:3000});
 await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XZ',{timeout:3000});
-await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__===true,{timeout:3000});
-await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.legacyXZPreserved===true,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.legacyXZPreserved===true,{timeout:3000});
 assert.ok(await page.locator('#minimap').count(),'minimap missing');
 assert.ok(await page.locator('.k11520PlaneMapOverlay').count(),'plane map overlay missing');
 
@@ -55,8 +54,15 @@ const yzt=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NA
 await startPlaneNav();await page.waitForFunction(([y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.abs((p.y||0)-y)>.12||Math.abs((p.z||0)-z)>.12},[yz0.y,yz0.z],{timeout:4000});
 await cancelPlaneNav(722);await page.screenshot({path:`${OUT}/11520-plane-map-yz.png`,fullPage:true});
 
+const world0=await coords(),worldTarget={x:world0.x+1.2,y:world0.y+1.1,z:world0.z-1.0};
+await page.evaluate(target=>{const nav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;nav.setWorldTarget(target,{mode:'WORLD',source:'WORLD_ENTITY'});nav.start()},worldTarget);
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_ENTITY'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.worldTargetAuthority===true,{timeout:2000});
+const publishedTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));for(const k of ['x','y','z'])assert.equal(Number(publishedTarget[k].toFixed(3)),Number(worldTarget[k].toFixed(3)));
+await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.16},[world0.x,world0.y,world0.z],{timeout:4000});
+await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD target QA stop'));
+
 const authority=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_INPUT_AUTHORITY__));
 assert.equal(authority.authoritative,true);assert.equal(authority.legacyXZBubbleSuppressed,true);
 assert.deepEqual(errors,[],'page errors after XYZ navigation: '+errors.join('\n'));
 await browser.close();
-console.log('11520 authoritative XYZ input + explicitly booted XZ/XY/YZ plane map navigation + XY/YZ waypoint travel browser QA PASS');
+console.log('11520 authoritative XYZ input + XZ/XY/YZ plane map + canonical WORLD target travel browser QA PASS');
