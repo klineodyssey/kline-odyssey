@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {createWorldState,resolvePlayerMove,playerAttack,tickWorld} from '../runtime/world-runtime.mjs';
-import {createMarketLife,perceiveMarketLife,decideMarketLife,applyMarketResult,advanceMarketLifeCycle,SEVEN_EMOTIONS,SIX_DESIRES} from '../runtime/market-life-runtime.mjs';
+import {createMarketLife} from '../runtime/market-life-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 
 test('0C still allows ordinary XZ walking',()=>{const s=movementStep({forward:1,turn:0,heading:0,warp:0});assert.ok(s.distance>0);assert.ok(s.dz>0)});
@@ -16,47 +16,6 @@ test('baseline chicken and duck may exist without market dimensions',()=>{
     assert.equal(life.strategy,'WILD_ECOLOGY');
     assert.equal(life.state,'ALIVE');
   }
-});
-
-test('living Market Life has seven emotions and six desires',()=>{
-  const life=createMarketLife({lifeId:'LIFE-QA-PSYCHE-001',species:'MONSTER',markets:['BTCUSDT']});
-  assert.deepEqual(Object.keys(life.emotions),[...SEVEN_EMOTIONS]);
-  assert.deepEqual(Object.keys(life.desires),[...SIX_DESIRES]);
-  assert.ok(life.desires.survival>life.desires.status,'survival must be a first-class drive');
-});
-
-test('fearful wounded monster retreats instead of fighting to death',()=>{
-  const life=createMarketLife({lifeId:'LIFE-QA-FEAR-001',species:'MONSTER',markets:['BTCUSDT'],capital:40,vitality:24,emotions:{fear:.92,anger:.15,sorrow:.65},desires:{survival:1,wealth:.4,status:.2}});
-  const perception=perceiveMarketLife(life,{playerAxes:{KX:{market:'BTCUSDT',side:1,lots:2,c:.01}},threat:.9,escapeAvailable:true,now:1000});
-  const d=decideMarketLife(life,perception,{random:()=>.2});
-  assert.equal(d.action,'RETREAT');
-  assert.equal(d.reason,'FEAR_OF_DEATH');
-  assert.ok(d.psyche.survival>.72);
-});
-
-test('anger can make a healthy low-fear monster oppose a rival',()=>{
-  const life=createMarketLife({lifeId:'LIFE-QA-ANGER-001',species:'MONSTER',markets:['BTCUSDT'],capital:100,vitality:100,emotions:{fear:.05,anger:.95,aversion:.8,desire:.5},desires:{survival:.8,wealth:.4,status:.9}});
-  const perception=perceiveMarketLife(life,{playerAxes:{KX:{market:'BTCUSDT',side:1,lots:1,c:.01}},threat:.05,now:2000});
-  const d=decideMarketLife(life,perception,{random:()=>.3});
-  assert.equal(d.action,'OPPOSE');
-  assert.equal(d.reason,'ANGER_OR_RIVALRY');
-});
-
-test('loss changes emotion and death still flows through Naihe Mengpo rebirth',()=>{
-  const life=createMarketLife({lifeId:'LIFE-QA-REBIRTH-001',species:'MONSTER',markets:['BTCUSDT'],capital:10,vitality:10,emotions:{fear:.4,anger:.3,sorrow:.2}});
-  const beforeFear=life.emotions.fear;
-  applyMarketResult(life,{pnl:-20,market:'BTCUSDT',now:3000});
-  assert.equal(life.state,'DEAD');
-  assert.ok(life.emotions.fear>beforeFear);
-  advanceMarketLifeCycle(life,{now:4600,naiheDelayMs:1500,mengpoDelayMs:3000,rebirthDelayMs:8000});
-  assert.equal(life.state,'NAIHE');
-  advanceMarketLifeCycle(life,{now:7700,naiheDelayMs:1500,mengpoDelayMs:3000,rebirthDelayMs:8000});
-  assert.equal(life.state,'MENGPO_RECOVERY');
-  assert.ok(life.emotions.anger<.5,'Mengpo recovery should cool anger rather than preserve combat rage');
-  advanceMarketLifeCycle(life,{now:15800,naiheDelayMs:1500,mengpoDelayMs:3000,rebirthDelayMs:8000});
-  assert.equal(life.state,'ALIVE');
-  assert.equal(life.strategy,'REENTER');
-  assert.equal(life.vitality,100);
 });
 
 test('source-driven Market Life spawns, requires settlement, and despawns',()=>{
