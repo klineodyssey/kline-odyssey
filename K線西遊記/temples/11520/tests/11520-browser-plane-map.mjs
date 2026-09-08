@@ -35,7 +35,7 @@ const mapTap=async(fx,fy,id)=>{
 const startPlaneNav=async()=>{await page.locator('#xyzWaypointAction').click();await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true,{timeout:2000})};
 const cancelPlaneNav=async(id)=>{
   const b=await page.locator('#joy').boundingBox();assert.ok(b);
-  const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width*.68,clientY:b.y+b.height*.50,buttons:1};
+  const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width*.80,clientY:b.y+b.height*.50,buttons:1};
   await page.dispatchEvent('#joy','pointerdown',p);await page.waitForTimeout(50);await page.dispatchEvent('#joy','pointerup',{...p,buttons:0});await page.waitForTimeout(120);
 };
 let m=await plane();assert.equal(m.mode,'XZ');assert.equal(m.hAxis,'X');assert.equal(m.vAxis,'Z');assert.equal(m.depthAxis,'Y');assert.equal(m.normalAxis,'KY');
