@@ -28,8 +28,8 @@ const result=await page.evaluate(async()=>{
   }
   const host=document.createElement('section');host.id='qaCreatureGallery';host.style.cssText='position:fixed;inset:0;z-index:99999;background:#071016;padding:9px;box-sizing:border-box;color:#fff;font:11px system-ui;overflow:hidden';
   const title=document.createElement('div');title.textContent='11520 生物／妖怪 3D 識別 QA';title.style.cssText='font-size:15px;font-weight:800;color:#f5d77c;text-align:center;height:27px';host.appendChild(title);
-  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:7px;height:780px;align-content:start';
-  grid.innerHTML=cards.map(c=>`<div style="border:1px solid #ffffff22;border-radius:11px;background:#0a1720;padding:5px;text-align:center;min-height:173px"><img src="${c.url}" alt="${c.species}" style="width:108px;height:132px;object-fit:contain;display:block;margin:auto"><b style="display:block;color:#d8e8ef;font-size:10px;margin-top:2px">${c.label}</b><small style="display:block;color:#78909c;font-size:7px">${c.species}</small></div>`).join('');
+  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:6px;height:790px;align-content:stretch';
+  grid.innerHTML=cards.map(c=>`<div style="border:1px solid #ffffff22;border-radius:10px;background:#0a1720;padding:4px;text-align:center;min-width:0;overflow:hidden"><img src="${c.url}" alt="${c.species}" style="width:100%;height:168px;object-fit:contain;display:block;margin:auto"><b style="display:block;color:#d8e8ef;font-size:9px;line-height:1.1;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.label}</b><small style="display:block;color:#78909c;font-size:6px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.species}</small></div>`).join('');
   host.appendChild(grid);document.body.appendChild(host);globalThis.__K11520_QA_CREATURE_RENDERER__=renderer;
   await Promise.all([...grid.querySelectorAll('img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));
   return labels;
