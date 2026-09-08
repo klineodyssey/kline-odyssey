@@ -3,7 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import solc from 'solc';
 import ganache from 'ganache';
-import { BrowserProvider, ContractFactory, parseEther } from 'ethers';
+import { BrowserProvider, Contract, ContractFactory, parseEther } from 'ethers';
 
 const brainPath = 'KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol';
 const brainSource = fs.readFileSync(brainPath, 'utf8');
@@ -44,7 +44,7 @@ const input = {
   },
   settings: {
     optimizer: { enabled: true, runs: 200 },
-    outputSelection: { '*': { '*': ['abi', 'evm.bytecode.object'] } },
+    outputSelection: { '*': { '*': ['abi', 'evm.bytecode.object', 'evm.deployedBytecode.object'] } },
   },
 };
 const output = JSON.parse(solc.compile(JSON.stringify(input), { import: findImports }));
@@ -54,13 +54,21 @@ if (errors.length) throw new Error(errors.map((e) => e.formattedMessage).join('\
 function artifact(source, name) {
   const c = output.contracts[source]?.[name];
   assert.ok(c, `missing compiled artifact ${source}:${name}`);
-  return { abi: c.abi, bytecode: `0x${c.evm.bytecode.object}` };
+  return {
+    abi: c.abi,
+    bytecode: `0x${c.evm.bytecode.object}`,
+    deployedBytecode: c.evm.deployedBytecode.object,
+  };
 }
 
 const brainArtifact = artifact(brainPath, 'KGEN_BrainExchange_V4_0_0');
 const mockArtifact = artifact('KGEN/contracts/tests/BrainV4Harness.sol', 'MockKGEN');
 const marsArtifact = artifact('KGEN/contracts/tests/BrainV4Harness.sol', 'MockMarsSeats');
 const proxyArtifact = artifact('KGEN/contracts/tests/BrainV4Harness.sol', 'BrainV4TestProxy');
+
+const runtimeBytes = brainArtifact.deployedBytecode.length / 2;
+assert.ok(runtimeBytes <= 24_576, `optimized runtime bytecode exceeds EIP-170: ${runtimeBytes} bytes`);
+console.log(`[brain-v4-evm] optimized runtime size: ${runtimeBytes} bytes`);
 
 const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 10 } });
 const provider = new BrowserProvider(eip1193);
@@ -80,6 +88,11 @@ async function expectRevert(promise, label) {
   assert.ok(reverted, `expected revert: ${label}`);
 }
 
+async function latestRawTimestamp() {
+  const block = await eip1193.request({ method: 'eth_getBlockByNumber', params: ['latest', false] });
+  return BigInt(block.timestamp);
+}
+
 const token = await deploy(mockArtifact, admin);
 const mars = await deploy(marsArtifact, admin);
 const implementation = await deploy(brainArtifact, admin);
@@ -94,7 +107,7 @@ const init = new ContractFactory(brainArtifact.abi, brainArtifact.bytecode, admi
   now,
 ]);
 const proxy = await deploy(proxyArtifact, admin, [implementation.target, init]);
-const brain = new (await import('ethers')).Contract(proxy.target, brainArtifact.abi, admin);
+const brain = new Contract(proxy.target, brainArtifact.abi, admin);
 
 await (await brain.setPublicGoodTreasury(await publicGood.getAddress())).wait();
 await (await brain.setTempleHeart(await heart.getAddress())).wait();
@@ -143,10 +156,19 @@ assert.equal(await brain.totalPrincipal(), parseEther('90'));
 // UUPS upgrades must be explicitly scheduled and survive the minimum delay.
 const implementation2 = await deploy(brainArtifact, admin);
 await (await brain.connect(upgrader).scheduleUpgrade(implementation2.target)).wait();
+const eta = await brain.scheduledUpgradeEta();
 await expectRevert(brain.connect(upgrader).upgradeToAndCall(implementation2.target, '0x'), 'upgrade timelock');
-await eip1193.request({ method: 'evm_increaseTime', params: [2 * 24 * 60 * 60] });
+
+const beforeAdvance = await latestRawTimestamp();
+if (beforeAdvance < eta) {
+  const delta = Number((eta - beforeAdvance) + 60n);
+  await eip1193.request({ method: 'evm_increaseTime', params: [delta] });
+}
 await eip1193.request({ method: 'evm_mine', params: [] });
-await (await brain.connect(upgrader).upgradeToAndCall(implementation2.target, '0x')).wait();
+const afterAdvance = await latestRawTimestamp();
+assert.ok(afterAdvance >= eta, `EVM time advance failed: block=${afterAdvance} eta=${eta}`);
+
+await (await brain.connect(upgrader).upgradeToAndCall(implementation2.target, '0x', { gasLimit: 1_500_000 })).wait();
 assert.equal(await brain.scheduledImplementation(), '0x0000000000000000000000000000000000000000');
 assert.equal(await brain.scheduledUpgradeEta(), 0n);
 assert.equal(await brain.totalPrincipal(), parseEther('90'));
