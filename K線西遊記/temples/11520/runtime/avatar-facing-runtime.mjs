@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.3.3
+VERSION: 1.3.4
 STATUS: ACTIVE
 PURPOSE: Visual-only 11520 avatar-facing and locomotion presentation. Keep canonical XYZ and heading semantics unchanged, center the original 3D character visual pivot, keep its animated silhouette framed during facing turns, compensate mirrored-X presentation, and distinguish XZ ground locomotion from XY / YZ flight presentation.
 */
@@ -7,7 +7,6 @@ import * as THREE from 'three';
 
 const plane=()=>{const v=document.documentElement?.dataset?.k11520JoyPlane;return v==='XY'||v==='YZ'?v:'XZ'};
 const motionInput=()=>globalThis.__K11520_3D_CONTROL__?.vector||globalThis.__K11520_JOYSTICK_XZXY__?.vector||{x:0,y:0,z:0};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function playerAncestor(root){let n=root;while(n){if(n?.userData?.isPlayer)return n;n=n.parent}return null}
 function clipName(action){try{return action?.getClip?.()?.name||''}catch{return''}}
 function centerPlayerVisual(child){
@@ -65,24 +64,26 @@ export function install11520AvatarFacingCorrection(){
   }
 
   const rendererProto=THREE.WebGLRenderer.prototype;
-  if(!rendererProto.__k11520AvatarFrameV2){
+  if(!rendererProto.__k11520AvatarVisualCenterV3){
     const nextRender=rendererProto.render;
     rendererProto.render=function(scene,camera){
-      const player=findPlayer(scene);if(!player||!camera?.position)return nextRender.call(this,scene,camera);
-      const original=camera.position.clone();
+      const player=findPlayer(scene);if(!player)return nextRender.call(this,scene,camera);
+      const child=player.children?.[0];
+      if(!child?.position)return nextRender.call(this,scene,camera);
+      const original=child.position.clone();
       try{
-        scene.updateMatrixWorld?.(true);
+        player.updateMatrixWorld?.(true);
         const box=new THREE.Box3().setFromObject(player);
         if(!box.isEmpty()){
-          const center=box.getCenter(new THREE.Vector3()),dx=center.x-player.position.x,dz=center.z-player.position.z,expectedY=player.position.y+.8,dy=center.y-expectedY;
-          if(Number.isFinite(dx))camera.position.x+=clamp(dx,-8,8);
-          if(Number.isFinite(dz))camera.position.z+=clamp(dz,-8,8);
-          if(Number.isFinite(dy))camera.position.y+=clamp(dy,-4,4);
+          const center=box.getCenter(new THREE.Vector3());
+          const localCenter=player.worldToLocal(center.clone());
+          if(Number.isFinite(localCenter.x))child.position.x-=localCenter.x;
+          if(Number.isFinite(localCenter.z))child.position.z-=localCenter.z;
         }
         return nextRender.call(this,scene,camera);
-      }finally{camera.position.copy(original)}
+      }finally{child.position.copy(original)}
     };
-    rendererProto.__k11520AvatarFrameV2=true;
+    rendererProto.__k11520AvatarVisualCenterV3=true;
   }
 
   const mixerProto=THREE.AnimationMixer.prototype;
@@ -106,6 +107,6 @@ export function install11520AvatarFacingCorrection(){
     mixerProto.__k11520GroundFlightSplitV2=true;
   }
 
-  globalThis.__K11520_AVATAR_FACING__={version:'1.3.3',scope:'player-pivot-frame-matrix-and-locomotion-presentation',canonicalCoordinatesUntouched:true,pivotCentered:true,visualBoundsFramed:true,xPositive:'screen-right',xNegative:'screen-left',ground:'XZ',flight:['XY','YZ']};
+  globalThis.__K11520_AVATAR_FACING__={version:'1.3.4',scope:'player-pivot-render-center-matrix-and-locomotion-presentation',canonicalCoordinatesUntouched:true,pivotCentered:true,visualBoundsFramed:true,xPositive:'screen-right',xNegative:'screen-left',ground:'XZ',flight:['XY','YZ']};
   return true;
 }
