@@ -1,7 +1,7 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.0
+VERSION: 1.1.1
 REVISION: 2026-09-09.HUMAN-3RAIL-HUD
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; provides signed energy presentation and a tested master HUD collapse without changing XYZ or trading semantics.
 */
@@ -15,7 +15,8 @@ function installStyle(){
   s.textContent=`
 @media(max-width:${MOBILE_MAX}px){
   .brand .hqLine{white-space:nowrap!important}
-  .brand .brandMetaV250{white-space:nowrap!important}
+  .brand .brandMetaV250{white-space:nowrap!important;gap:4px!important}
+  .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
   .axes{z-index:250!important}
   .tele,.monsterHud{top:190px!important;height:86px!important}
   .tele{left:6px!important;width:calc(50% - 9px)!important}
@@ -79,7 +80,7 @@ function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;
   const text=(line.textContent||'').replace(/\s+/g,' ').trim();
   if(text.includes('（華爾街）'))line.innerHTML='<span class="hqFlag" aria-hidden="true">🇺🇸</span><span>11520 花果山美國</span>';
-  const first=meta.querySelector('span:first-child');if(first&&!first.textContent.includes('華爾街'))first.textContent=`（華爾街） · ${first.textContent}`;
+  let district=meta.querySelector('.hqDistrictV111');if(!district){district=document.createElement('span');district.className='hqDistrictV111';district.textContent='（華爾街）';const clock=meta.querySelector('.brandClockV250');meta.insertBefore(district,clock||null)}
   return true;
 }
 function installEnergyRead(){
