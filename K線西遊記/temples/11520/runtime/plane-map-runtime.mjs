@@ -1,0 +1,72 @@
+/* KGEN_META
+STATUS: ACTIVE
+FORMAL_ORGAN_NAME: XYZ Plane Map
+PURPOSE: Present the 3D world through the active XZ / XY / YZ control plane. The map follows the joystick plane; the remaining axis is shown as signed depth instead of pretending every mode is XZ.
+*/
+
+import {WORLD_OBJECTS} from './world-runtime.mjs';
+
+const MODE_SPECS=Object.freeze({
+  XZ:Object.freeze({h:'X',v:'Z',depth:'Y',normal:'KY'}),
+  XY:Object.freeze({h:'X',v:'Y',depth:'Z',normal:'KZ'}),
+  YZ:Object.freeze({h:'Y',v:'Z',depth:'X',normal:'KX'}),
+});
+const RANGE=34;
+const overlays=new WeakMap();
+
+const finite=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+export function planeSpec(mode='XZ'){return MODE_SPECS[mode]||MODE_SPECS.XZ}
+export function projectPlanePoint(point={},center={},mode='XZ',{width=1,height=1,range=RANGE}={}){
+  const s=planeSpec(mode),r=Math.max(Number.EPSILON,Math.abs(finite(range,RANGE)));
+  const h=s.h.toLowerCase(),v=s.v.toLowerCase(),d=s.depth.toLowerCase();
+  return {
+    px:width/2+((finite(point[h])-finite(center[h]))/r)*(width/2),
+    py:height/2-((finite(point[v])-finite(center[v]))/r)*(height/2),
+    depth:finite(point[d])-finite(center[d]),
+    h:s.h,v:s.v,depthAxis:s.depth,normal:s.normal,
+  };
+}
+
+function mode(){return globalThis.__K11520_3D_CONTROL__?.mode||globalThis.__K11520_WORLD_COORDS__?.mode||'XZ'}
+function coords(){return globalThis.__K11520_WORLD_COORDS__?.physical||{x:0,y:0,z:0}}
+function zoom(){return 1.3}
+function ensureOverlay(base){
+  if(!base)return null;
+  let c=overlays.get(base);
+  if(c&&document.body.contains(c))return c;
+  const parent=base.parentElement;if(!parent)return null;
+  const ps=getComputedStyle(parent);if(ps.position==='static')parent.style.position='relative';
+  c=document.createElement('canvas');c.className='k11520PlaneMapOverlay';c.width=base.width;c.height=base.height;
+  Object.assign(c.style,{position:'absolute',inset:'0',width:'100%',height:'100%',pointerEvents:'none',zIndex:'4'});
+  parent.appendChild(c);overlays.set(base,c);return c;
+}
+function depthLabel(n){const x=finite(n);return `${x>=0?'+':'−'}${Math.abs(x).toFixed(Math.abs(x)>=10?0:1)}`}
+function drawGrid(ctx,w,h){ctx.strokeStyle='#204355';ctx.lineWidth=1;for(let i=0;i<=8;i++){const x=i*w/8,y=i*h/8;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
+function drawOverlay(base){
+  const canvas=ensureOverlay(base);if(!canvas)return;
+  if(canvas.width!==base.width)canvas.width=base.width;if(canvas.height!==base.height)canvas.height=base.height;
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,m=mode(),spec=planeSpec(m),center=coords(),range=RANGE/zoom();
+  ctx.clearRect(0,0,w,h);
+  if(m!=='XZ'){ctx.fillStyle='rgba(5,18,27,.96)';ctx.fillRect(0,0,w,h);drawGrid(ctx,w,h)}
+  ctx.font='700 11px system-ui';ctx.textBaseline='top';ctx.fillStyle='#9eeeff';ctx.fillText(`${m} 切面 · ⟂ ${spec.normal}`,6,5);
+  ctx.font='700 9px system-ui';ctx.fillStyle='#f1ca73';ctx.fillText(`${spec.depth} 深度 ${finite(center[spec.depth.toLowerCase()]).toFixed(1)}`,6,20);
+  if(m!=='XZ'){
+    for(const o of WORLD_OBJECTS){
+      const p=projectPlanePoint(o,center,m,{width:w,height:h,range});
+      if(p.px<0||p.px>w||p.py<0||p.py>h)continue;
+      const alpha=Math.max(.25,1-Math.min(1,Math.abs(p.depth)/range)*.7);
+      ctx.globalAlpha=alpha;ctx.fillStyle=o.kind==='ATM'?'#9fdff0':'#b68a55';
+      ctx.fillRect(p.px-4,p.py-4,8,8);ctx.globalAlpha=1;
+      ctx.fillStyle=p.depth>=0?'#73e7a7':'#ff9d8b';ctx.font='700 7px system-ui';ctx.fillText(`${spec.depth}${depthLabel(p.depth)}`,p.px+5,p.py-5);
+    }
+    const ctl=globalThis.__K11520_3D_CONTROL__,v=ctl?.vector||{x:0,y:0,z:0},hAxis=spec.h.toLowerCase(),vAxis=spec.v.toLowerCase();
+    ctx.fillStyle='#65e798';ctx.beginPath();ctx.arc(w/2,h/2,5,0,Math.PI*2);ctx.fill();
+    const vx=finite(v[hAxis]),vy=finite(v[vAxis]);if(Math.abs(vx)+Math.abs(vy)>.03){ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(w/2,h/2);ctx.lineTo(w/2+vx*16,h/2-vy*16);ctx.stroke()}
+    ctx.fillStyle='#9ca8b3';ctx.font='600 7px system-ui';ctx.fillText('切面顯示；導航點選請在 XZ 或 3D 世界',6,h-12);
+  }
+  globalThis.__K11520_PLANE_MAP__={organ:'XYZ Plane Map',mode:m,hAxis:spec.h,vAxis:spec.v,depthAxis:spec.depth,normalAxis:spec.normal,center:{...center},dynamicPlane:true,threeDimensionalWorld:true};
+}
+function blockWrongPlaneMapTap(e){if(mode()==='XZ')return;e.stopImmediatePropagation();if(e.cancelable)e.preventDefault()}
+function bindBase(base){if(!base||base.dataset.k11520PlaneMapBound)return;base.dataset.k11520PlaneMapBound='1';for(const type of ['pointerdown','pointermove','pointerup'])base.addEventListener(type,blockWrongPlaneMapTap,{capture:true,passive:false})}
+function tick(){const bases=[document.querySelector('#minimap'),document.querySelector('#fullMap')].filter(Boolean);for(const b of bases){bindBase(b);drawOverlay(b)}requestAnimationFrame(tick)}
+export function install11520PlaneMap(){requestAnimationFrame(tick);return globalThis.__K11520_PLANE_MAP__||{organ:'XYZ Plane Map',dynamicPlane:true}}
