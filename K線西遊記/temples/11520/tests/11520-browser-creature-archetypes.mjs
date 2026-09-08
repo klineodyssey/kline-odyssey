@@ -21,8 +21,12 @@ const result=await page.evaluate(async()=>{
   const renderer=new THREE.WebGLRenderer({canvas:renderCanvas,antialias:true,alpha:false,preserveDrawingBuffer:true});renderer.setSize(180,180,false);renderer.setPixelRatio(1);renderer.setClearColor(0x0a1720,1);
 
   const warmScene=new THREE.Scene(),warmCamera=new THREE.OrthographicCamera(-1,1,1,-1,.01,10);
-  warmCamera.position.z=2;warmScene.add(new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.5),new THREE.MeshBasicMaterial({color:0xffffff})));
-  const warmTarget=new THREE.WebGLRenderTarget(16,16);
+  warmScene.add(new THREE.HemisphereLight(0xffffff,0x263544,2.6));const warmKey=new THREE.DirectionalLight(0xffffff,2.4);warmKey.position.set(3,6,8);warmScene.add(warmKey);
+  const warmRoot=createProceduralLifeBody(THREE,{species:'DIGITAL_ANT',name:'WARMUP',scale:.92});warmScene.add(warmRoot);
+  const warmBox=new THREE.Box3().setFromObject(warmRoot),warmSize=new THREE.Vector3(),warmCenter=new THREE.Vector3();warmBox.getSize(warmSize);warmBox.getCenter(warmCenter);
+  const warmHalf=Math.max(.45,Math.max(warmSize.x,warmSize.y,warmSize.z)*.68+.12);
+  warmCamera.left=-warmHalf;warmCamera.right=warmHalf;warmCamera.top=warmHalf;warmCamera.bottom=-warmHalf;warmCamera.position.set(warmCenter.x,warmCenter.y,warmCenter.z+6);warmCamera.lookAt(warmCenter);warmCamera.updateProjectionMatrix();
+  const warmTarget=new THREE.WebGLRenderTarget(180,180,{depthBuffer:true});
   renderer.setRenderTarget(warmTarget);
   if(renderer.compileAsync)await renderer.compileAsync(warmScene,warmCamera);else renderer.compile(warmScene,warmCamera);
   renderer.clear();renderer.render(warmScene,warmCamera);renderer.getContext().finish();
@@ -49,7 +53,7 @@ const result=await page.evaluate(async()=>{
       renderer.clear();renderer.render(scene,camera);renderer.getContext().finish();
       renderer.readRenderTargetPixels(target,0,0,180,180,pixels);
       const bg=[pixels[0],pixels[1],pixels[2]];foregroundPixels=0;
-      for(let p=0;p<pixels.length;p+=4)if(Math.abs(pixels[p]-bg[0])+Math.abs(pixels[p+1]-bg[1])+Math.abs(pixels[p+2]-bg[2])>4)foregroundPixels++;
+      for(let p=0;p<pixels.length;p+=4)if(pixels[p]!==bg[0]||pixels[p+1]!==bg[1]||pixels[p+2]!==bg[2])foregroundPixels++;
     }
     renderer.setRenderTarget(null);
 
