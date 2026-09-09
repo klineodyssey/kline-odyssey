@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
-import {createWorldState,resolvePlayerMove,playerAttack,tickWorld} from '../runtime/world-runtime.mjs';
-import {createMarketLife} from '../runtime/market-life-runtime.mjs';
+import {createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
+import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 
 test('0C still allows ordinary XZ walking',()=>{const s=movementStep({forward:1,turn:0,heading:0,warp:0});assert.ok(s.distance>0);assert.ok(s.dz>0)});
@@ -31,6 +32,98 @@ test('source-driven Market Life spawns, requires settlement, and despawns',()=>{
   publishMarketLifeSourceEvent({type:'DESPAWN',sourceId:'QA-DIGITAL-ANT',lifeId:'LIFE-QA-DIGITAL-ANT-001',reason:'QA_DONE'},{persistLocal:false,broadcast:false});
   tickWorld(w,p,102);
   assert.equal(w.monsters.some(m=>m.sourceManaged&&m.lifeId==='LIFE-QA-DIGITAL-ANT-001'),false);
+});
+
+test('source updates merge market dimensions without Set-only APIs',()=>{
+  const w=createWorldState(0);
+  const base={type:'SPAWN',sourceId:'QA-SOURCE',lifeId:'LIFE-QA-SOURCE-MARKETS',name:'旅妖',species:'BULL_DEMON',intelligence:4,markets:['BTCUSDT'],capital:50,vitality:100,maxHp:100,attack:2,rewardKaios:0,speed:.01,positions:{},x:0,y:0,z:0};
+  applyMarketLifeSourceEvents(w,[base]);
+  assert.doesNotThrow(()=>applyMarketLifeSourceEvents(w,[{...base,type:'UPDATE',markets:['ETHUSDT'],x:1,y:2,z:3}]));
+  const slot=w.monsters.find(m=>m.lifeId==='LIFE-QA-SOURCE-MARKETS');
+  assert.deepEqual(slot.marketLife.marketDimensions.sort(),['BTCUSDT','ETHUSDT']);
+  assert.deepEqual({x:slot.x,y:slot.y,z:slot.z},{x:1,y:2,z:3});
+});
+
+test('source-managed Market Life can visibly travel in full XYZ',()=>{
+  const w=createWorldState(0);
+  applyMarketLifeSourceEvents(w,[{type:'SPAWN',sourceId:'QA-LIFE',lifeId:'LIFE-QA-3D-TRAVEL',name:'遊山妖',species:'BULL_DEMON',intelligence:4,markets:['BTCUSDT'],capital:50,vitality:100,maxHp:100,attack:2,rewardKaios:0,speed:.02,positions:{},x:0,y:0,z:0}]);
+  const slot=w.monsters.find(m=>m.lifeId==='LIFE-QA-3D-TRAVEL');
+  slot.marketLife.preferences={work:0,travel:1,comfort:.2};slot.marketLife.needs={hunger:.1,fatigue:.1,social:.1,curiosity:.9};
+  const before={x:slot.x,y:slot.y,z:slot.z};
+  const r=tickSourceManagedLife(slot,{now:2000,deltaMs:500,makeDecision:true,random:()=>0});
+  assert.equal(r.ok,true);
+  assert.ok(['EXPLORE','TRAVEL'].includes(r.action));
+  assert.notDeepEqual({x:slot.x,y:slot.y,z:slot.z},before);
+  assert.deepEqual({x:slot.x,y:slot.y,z:slot.z},slot.marketLife.world.position);
+});
+
+test('source-managed Digital Ant uses ATM mission as visible work destination',()=>{
+  const w=createWorldState(0);
+  applyMarketLifeSourceEvents(w,[{type:'SPAWN',sourceId:'QA-ANT',lifeId:'LIFE-QA-ANT-WORLD',name:'Digital Ant',species:'DIGITAL_ANT',intelligence:5,markets:['BTCUSDT'],capital:50,vitality:100,maxHp:100,attack:0,rewardKaios:0,speed:.02,positions:{},x:0,y:4,z:0,mission:{missionId:'ATM-RUN',status:'IN_TRANSIT',destinationAtmId:'ATM-11520-001',quote:{net:4}}}]);
+  const slot=w.monsters.find(m=>m.lifeId==='LIFE-QA-ANT-WORLD');
+  const r=tickSourceManagedLife(slot,{now:2000,deltaMs:500,makeDecision:true,random:()=>.5});
+  assert.equal(r.action,'WORK');
+  assert.equal(r.destination.id,'ATM-11520-001');
+  assert.ok(slot.x>0);
+  assert.ok(slot.z>0);
+  assert.ok(slot.y<4,'3D delivery path must also move vertically toward the ATM');
+});
+
+test('Digital Ant CFO can reject loss-making freight and choose positive EV delivery',()=>{
+  const ant=createDigitalAnt({capital:20,cargoCapacity:100});
+  const atms=buildAtmRegistry([{id:'ATM-A',type:'ATM',x:3,y:4,z:0},{id:'ATM-B',type:'ATM',x:1,y:1,z:1}]);
+  const loss=createDeliveryMission({missionId:'LOSS',amount:10,destinationAtmId:'ATM-A',freightOffer:1,demand:1,fuelPerMeter:1,speedMetersPerSecond:1});
+  const good=createDeliveryMission({missionId:'GOOD',amount:10,destinationAtmId:'ATM-B',freightOffer:10,demand:1,fuelPerMeter:.1,speedMetersPerSecond:1});
+  assert.equal(cfoEvaluateDelivery(ant,loss,atms[0]).action,'REQUOTE');
+  const chosen=chooseBestDelivery(ant,[loss,good],atms);
+  assert.equal(chosen.action,'ACCEPT');
+  assert.equal(chosen.mission.missionId,'GOOD');
+});
+
+test('OBSERVE delivery earns no market tip while favorable LONG can earn one',()=>{
+  const ant=createDigitalAnt({capital:20});
+  const atm={atmId:'ATM-Q',x:3,y:4,z:0,online:true};
+  const observe=createDeliveryMission({amount:10,destinationAtmId:'ATM-Q',mode:'OBSERVE',freightOffer:5,marketEdge:2,tipRate:.5,demand:1});
+  const long=createDeliveryMission({amount:10,destinationAtmId:'ATM-Q',mode:'LONG',freightOffer:5,marketEdge:2,tipRate:.5,demand:1});
+  assert.equal(quoteDeliveryEconomics(ant,observe,atm).tip,0);
+  assert.ok(quoteDeliveryEconomics(ant,long,atm).tip>0);
+});
+
+test('Digital Ant travels full XYZ and requires verified receipt before delivery settlement',()=>{
+  const ant=createDigitalAnt({capital:20,cargoCapacity:100});
+  const atms=buildAtmRegistry([{id:'ATM-XYZ',type:'ATM',x:1,y:1,z:1}]);
+  const mission=createDeliveryMission({missionId:'XYZ',amount:10,destinationAtmId:'ATM-XYZ',freightOffer:10,demand:1,speedMetersPerSecond:1});
+  assert.equal(assignDelivery(ant,mission,atms).ok,true);
+  assert.equal(loadCargo(ant).ok,true);
+  let result;
+  for(let i=0;i<20;i++){result=tickDigitalAntDelivery(ant,{deltaMs:100,speed:.02});if(result.arrived)break;}
+  assert.equal(result.arrived,true);
+  assert.ok(ant.y>0,'Y must move during XYZ delivery');
+  assert.equal(ant.mission.status,'ARRIVED_AWAITING_RECEIPT');
+  assert.equal(verifyDeliveryReceipt(ant,{receiptId:null,verified:false}).ok,false);
+  const settled=verifyDeliveryReceipt(ant,{receiptId:'QA-RECEIPT-001',verified:true});
+  assert.equal(settled.ok,true);
+  assert.equal(ant.mission.status,'DELIVERED');
+  assert.ok(ant.retirementReserve>=0);
+});
+
+test('Market Life may work, travel, rest, or retire instead of being forced into combat',()=>{
+  const worker=createMarketLife({lifeId:'LIFE-QA-WORKER',markets:['BTCUSDT'],capital:20,retirementReserve:0,targetRetirementReserve:100,preferences:{work:1,travel:0,comfort:.5}});
+  const work=decideMarketLifeLifestyle(worker,{jobs:[{id:'JOB-1',expectedNet:5}],random:()=>0});
+  assert.equal(work.action,'WORK');
+  const econ=applyLifestyleEconomy(worker,{income:10,expenses:2,retirementRate:.25});
+  assert.equal(econ.net,8);
+  assert.equal(econ.contribution,2);
+
+  const traveler=createMarketLife({lifeId:'LIFE-QA-TRAVEL',markets:['BTCUSDT'],preferences:{work:0,travel:1,comfort:.2},needs:{hunger:.1,fatigue:.1,social:.1,curiosity:.9}});
+  const travel=decideMarketLifeLifestyle(traveler,{destinations:[{id:'SCENIC-1',x:2,y:3,z:4}],random:()=>0});
+  assert.equal(travel.action,'EXPLORE');
+  const moved=travelMarketLife(traveler,{deltaMs:100,speed:.01});
+  assert.equal(moved.ok,true);
+  assert.ok(moved.position.y>0);
+
+  const retiree=createMarketLife({lifeId:'LIFE-QA-RETIRE',markets:['BTCUSDT'],retirementReserve:120,targetRetirementReserve:100,preferences:{work:.2,travel:.5,comfort:.8}});
+  assert.equal(decideMarketLifeLifestyle(retiree,{random:()=>.5}).action,'RETIRE');
 });
 
 test('consumable item mutates inventory and hp',()=>{const inv=defaultInventory(),r=useInventoryItem(inv,'POTION-001',50);assert.equal(r.ok,true);assert.equal(r.hp,85);assert.equal(inv.find(i=>i.id==='POTION-001').qty,2)});
