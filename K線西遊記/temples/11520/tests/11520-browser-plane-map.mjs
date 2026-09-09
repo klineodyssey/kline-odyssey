@@ -14,14 +14,14 @@ if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.loc
 await page.waitForTimeout(800);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
-await page.waitForFunction(()=>globalThis.__K11520_XYZ_INPUT_AUTHORITY__?.legacyXZBubbleSuppressed===true,{timeout:3000});
-await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XZ',{timeout:3000});
-await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.legacyXZPreserved===true,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_INPUT_AUTHORITY__?.legacyXZBubbleSuppressed===true,null,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XZ',null,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.legacyXZPreserved===true,null,{timeout:3000});
 assert.ok(await page.locator('#minimap').count(),'minimap missing');
 assert.ok(await page.locator('.k11520PlaneMapOverlay').count(),'plane map overlay missing');
 
 const tapCenter=async(id)=>{
-  const b=await page.locator('#joy').boundingBox();assert.ok(b,'joystick missing');
+  const b=await page.locator('#knob').boundingBox();assert.ok(b,'joystick thumb missing');
   const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width/2,clientY:b.y+b.height/2,buttons:1};
   await page.dispatchEvent('#joy','pointerdown',p);await page.waitForTimeout(70);await page.dispatchEvent('#joy','pointerup',{...p,buttons:0});await page.waitForTimeout(260);
 };
@@ -41,7 +41,7 @@ const startPlaneNav=async()=>{
   assert.equal(await page.locator('#xyzWaypointAction').count(),1,'waypoint action missing');
   const started=await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.start?.()===true);
   assert.equal(started,true,'waypoint navigation failed to start');
-  await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true,{timeout:2000});
+  await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true,null,{timeout:2000});
 };
 const cancelPlaneNav=async(id)=>{
   const b=await page.locator('#joy').boundingBox();assert.ok(b);
@@ -51,15 +51,15 @@ const cancelPlaneNav=async(id)=>{
 let m=await plane();assert.equal(m.mode,'XZ');assert.equal(m.hAxis,'X');assert.equal(m.vAxis,'Z');assert.equal(m.depthAxis,'Y');assert.equal(m.normalAxis,'KY');
 await page.screenshot({path:`${OUT}/11520-plane-map-xz.png`,fullPage:true});
 
-await tapCenter(701);await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XY',{timeout:2000});m=await plane();assert.equal(m.hAxis,'X');assert.equal(m.vAxis,'Y');assert.equal(m.depthAxis,'Z');assert.equal(m.normalAxis,'KZ');
-const xy0=await coords();await mapTap(.72,.34,711);await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.target&&globalThis.__K11520_XYZ_MAP_NAVIGATION__.mode==='XY',{timeout:2000});
+await tapCenter(701);await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XY',null,{timeout:2000});m=await plane();assert.equal(m.hAxis,'X');assert.equal(m.vAxis,'Y');assert.equal(m.depthAxis,'Z');assert.equal(m.normalAxis,'KZ');
+const xy0=await coords();await mapTap(.72,.34,711);await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.target&&globalThis.__K11520_XYZ_MAP_NAVIGATION__.mode==='XY',null,{timeout:2000});
 const xyt=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.ok(xyt.x>xy0.x);assert.ok(xyt.y>=xy0.y);assert.equal(Number(xyt.z.toFixed(3)),Number(xy0.z.toFixed(3)));
 await startPlaneNav();await page.waitForFunction(([x,y])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.abs((p.x||0)-x)>.12||Math.abs((p.y||0)-y)>.12},[xy0.x,xy0.y],{timeout:4000});
 await cancelPlaneNav(712);assert.equal(await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active),false);
 await page.screenshot({path:`${OUT}/11520-plane-map-xy.png`,fullPage:true});
 
-await tapCenter(702);await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='YZ',{timeout:2000});m=await plane();assert.equal(m.hAxis,'Y');assert.equal(m.vAxis,'Z');assert.equal(m.depthAxis,'X');assert.equal(m.normalAxis,'KX');
-const yz0=await coords();await mapTap(.70,.66,721);await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.target&&globalThis.__K11520_XYZ_MAP_NAVIGATION__.mode==='YZ',{timeout:2000});
+await tapCenter(702);await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='YZ',null,{timeout:2000});m=await plane();assert.equal(m.hAxis,'Y');assert.equal(m.vAxis,'Z');assert.equal(m.depthAxis,'X');assert.equal(m.normalAxis,'KX');
+const yz0=await coords();await mapTap(.70,.66,721);await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.target&&globalThis.__K11520_XYZ_MAP_NAVIGATION__.mode==='YZ',null,{timeout:2000});
 const yzt=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(yzt.x.toFixed(3)),Number(yz0.x.toFixed(3)));assert.ok(Math.abs(yzt.y-yz0.y)>.1||Math.abs(yzt.z-yz0.z)>.1);
 await startPlaneNav();await page.waitForTimeout(180);
 const yzNav=await page.evaluate(()=>({active:globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active,mode:globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode,vector:structuredClone(globalThis.__K11520_XYZ_NAV_VECTOR__||{})}));assert.equal(yzNav.active,true);assert.equal(yzNav.mode,'YZ');assert.ok(Math.abs(Number(yzNav.vector.y)||0)>.01||Math.abs(Number(yzNav.vector.z)||0)>.01,'YZ waypoint must publish Y/Z movement intent');
@@ -67,13 +67,13 @@ await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('YZ pla
 
 const world0=await coords(),worldTarget={x:world0.x+1.2,y:world0.y+1.1,z:world0.z-1.0};
 await page.evaluate(target=>{const nav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;nav.setWorldTarget(target,{mode:'WORLD',source:'WORLD_ENTITY'});nav.start()},worldTarget);
-await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_ENTITY'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.worldTargetAuthority===true,{timeout:2000});
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_ENTITY'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.worldTargetAuthority===true,null,{timeout:2000});
 const publishedTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));for(const k of ['x','y','z'])assert.equal(Number(publishedTarget[k].toFixed(3)),Number(worldTarget[k].toFixed(3)));
 await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.16},[world0.x,world0.y,world0.z],{timeout:4000});
 await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD target QA stop'));
 
 const tap0=await coords();await worldCanvasTap(.72,.53,731);
-await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',{timeout:2500});
+await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',null,{timeout:2500});
 const groundTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(groundTarget.y.toFixed(3)),0);assert.ok(Math.abs(groundTarget.x-tap0.x)>.1||Math.abs(groundTarget.z-tap0.z)>.1,'world tap did not create a distinct XYZ target');
 await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.12},[tap0.x,tap0.y,tap0.z],{timeout:4000});
 await page.screenshot({path:`${OUT}/11520-world-tap-xyz.png`,fullPage:true});
