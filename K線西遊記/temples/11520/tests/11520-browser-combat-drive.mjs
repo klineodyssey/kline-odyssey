@@ -30,18 +30,18 @@ async function drive(){return page.evaluate(()=>structuredClone(globalThis.__K11
 // C=0: ordinary pilgrimage walking remains live, not frozen.
 await setVertical('#cControl',0);
 let d=await drive();
-assert.equal(d.c,0);assert.equal(d.cMode,'LOCAL_WALK');assert.equal(d.vectorMultiplier,1);
+assert.equal(d.c,0);assert.equal(d.cMode,'LOCAL_WALK');assert.equal(d.xyzStep,.1);
 assert.equal((await page.locator('#k11520DriveHud').textContent()).includes('0C LOCAL_WALK'),true);
 
-// C=1: canonical light-speed/spot layer keeps factor 1.
+// C=1: canonical light-speed/spot layer preserves the public base XYZ step at 0.1.
 await setVertical('#cControl',.7);
 d=await drive();
-assert.equal(d.c,1);assert.equal(d.cMode,'LIGHT_SPEED_SPOT');assert.equal(d.vectorMultiplier,1);
+assert.equal(d.c,1);assert.equal(d.cMode,'LIGHT_SPEED_SPOT');assert.equal(d.xyzStep,.1);
 
 // C=10: superluminal layer scales XYZ intent by 10, without changing the source disc/rail state.
 await setVertical('#cControl',.8);
 d=await drive();
-assert.equal(d.c,10);assert.equal(d.cMode,'SUPERLUMINAL_WARP');assert.equal(d.vectorMultiplier,10);
+assert.equal(d.c,10);assert.equal(d.cMode,'SUPERLUMINAL_WARP');assert.equal(d.xyzStep,1);
 
 const joy=await box('#joy'),id=pointerId++,cx=joy.x+joy.width/2,cy=joy.y+joy.height/2;
 await page.dispatchEvent('#joy','pointerdown',{pointerId:id,pointerType:'touch',clientX:cx,clientY:cy,buttons:1});
