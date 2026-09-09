@@ -15,6 +15,12 @@ await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch((
 await page.waitForTimeout(700);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
+// This suite verifies the canonical XYZ controller itself, not a trading-speed selection.
+// Pin the live drive to the ordinary local-walk baseline so the unbounded-coordinate
+// assertions cannot inherit a low C value from the selected market card.
+await page.evaluate(()=>{const el=document.querySelector('#cRead');if(el)el.textContent='0C'});
+await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE__?.c===0&&globalThis.__K11520_COMBAT_DRIVE__?.cMode==='LOCAL_WALK',null,{timeout:2000});
+
 const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);assert.ok(m,'XYZ parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]}};
 const world=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_WORLD_COORDS__||null));
 const control=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_3D_CONTROL__||null));
