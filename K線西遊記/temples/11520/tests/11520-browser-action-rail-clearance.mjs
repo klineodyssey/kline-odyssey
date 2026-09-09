@@ -13,7 +13,7 @@ if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.loc
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
 await page.waitForTimeout(900);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
-await page.waitForFunction(()=>globalThis.__K11520_ACTION_RAIL_CLEARANCE__?.version==='1.0.1',null,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_ACTION_RAIL_CLEARANCE__?.version==='1.0.2',null,{timeout:3000});
 const r=await page.evaluate(()=>structuredClone(globalThis.__K11520_ACTION_RAIL_CLEARANCE__));
 assert.ok(r.rail,'remaining-axis rail missing');
 assert.ok(r.dock,'right utility dock missing');
