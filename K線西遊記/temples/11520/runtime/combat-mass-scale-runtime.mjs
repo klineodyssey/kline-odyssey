@@ -1,8 +1,8 @@
 /* KGEN_META
-VERSION: 1.1.1
+VERSION: 1.1.0
 STATUS: PROTOTYPE
 FORMAL_ORGAN_NAME: 11520 Combat Mass Scale Runtime
-PURPOSE: Canonical simulation-only bridge between KGEN lot/index scale and KAIOS XYZ game mass, while preserving the existing discrete C warp rail. Local walking at C=0 is allowed; sublight C levels must never make ordinary XYZ locomotion slower than walking; C=1 is the light-speed/spot regime and C>1 increases gameplay travel speed. No wallet, trade, chain, settlement, payment, or treasury mutation.
+PURPOSE: Canonical simulation-only bridge between KGEN lot/index scale and KAIOS XYZ game mass, while preserving the existing discrete C warp rail. Local walking at C=0 is allowed and does not become spot/warp trading. No wallet, trade, chain, settlement, payment, or treasury mutation.
 */
 
 export const K11520_COMBAT_SCALE = Object.freeze({
@@ -55,9 +55,8 @@ export function cMode(value) {
 export function movementVelocity({localBaseVelocity=1,c=0}={}) {
   const base = finite(localBaseVelocity) ? Math.max(0,Number(localBaseVelocity)) : 0;
   const warp = normalizeC(c);
-  // Gameplay invariant: selecting a sublight C rail level must not make the avatar slower than ordinary local walking.
-  // C<=1 keeps the local traversable step stable while the mode records the physical/trading regime; C>1 expands travel speed.
-  return warp<=1 ? base : base*warp;
+  // C=0 remains ordinary local XYZ walking. The C rail is not a literal multiplier that would freeze walking.
+  return warp===0 ? base : base*warp;
 }
 
 export function scaleInvariant() {
