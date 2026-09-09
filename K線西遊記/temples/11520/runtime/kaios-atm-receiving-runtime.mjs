@@ -11,15 +11,23 @@ export const DELIVERY_STATES=Object.freeze([
 ]);
 export const DELIVERY_ERRORS=Object.freeze([
   'RECONCILIATION_REQUIRED','RPC_DISAGREEMENT','TX_REVERTED','TX_DROPPED','AMOUNT_MISMATCH','WRONG_RECEIVER',
-  'REPLAY_BLOCKED','DELIVERY_REJECTED','DIRECTION_ROUTE_MISMATCH','ROUTE_EVIDENCE_MISSING',
+  'REPLAY_BLOCKED','DELIVERY_REJECTED','DIRECTION_ROUTE_MISMATCH','ROUTE_EVIDENCE_MISSING','INVALID_EXACT_AMOUNT',
 ]);
 const STATE_INDEX=new Map(DELIVERY_STATES.map((x,i)=>[x,i]));
 const ADDR=/^0x[0-9a-fA-F]{40}$/;
 const TX=/^0x[0-9a-fA-F]{64}$/;
+const UINT=/^(0|[1-9][0-9]*)$/;
 const clone=x=>JSON.parse(JSON.stringify(x));
 const finite=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 const normAddr=v=>ADDR.test(String(v||''))?String(v).toLowerCase():null;
 const eqAddr=(a,b)=>normAddr(a)!==null&&normAddr(a)===normAddr(b);
+function exactUint(v){
+  if(typeof v==='bigint'){if(v<0n)throw new Error('INVALID_EXACT_AMOUNT');return v}
+  if(typeof v==='number'){if(!Number.isSafeInteger(v)||v<0)throw new Error('INVALID_EXACT_AMOUNT');return BigInt(v)}
+  const s=String(v??'');if(!UINT.test(s))throw new Error('INVALID_EXACT_AMOUNT');return BigInt(s);
+}
+const exactString=v=>exactUint(v).toString();
+const exactSub=(a,b)=>(exactUint(a)-exactUint(b)).toString();
 
 function advance(record,next){
   if(!STATE_INDEX.has(next))throw new Error(`UNKNOWN_DELIVERY_STATE:${next}`);
@@ -51,23 +59,25 @@ export function createKaiosAtmReceivingModule(config={}){
     receiver_chain_id:56,
     receiver_contract_or_escrow_address:receiver,
     KAIOS_token_address:token,
-    cargo_manifest_id:null,sender:null,authorized_amount:0,received_amount:0,freight_fee:0,
-    restricted_inventory_balance:0,custody_liability_balance:0,available_ATM_inventory:0,
+    cargo_manifest_id:null,sender:null,authorized_amount:'0',received_amount:'0',freight_fee:'0',
+    restricted_inventory_balance:'0',custody_liability_balance:'0',available_ATM_inventory:'0',
     purpose_hash:null,replay_key:null,valid_from:null,expires_at:null,transaction_hash:null,block_number:null,
     receipt_status:'NOT_FOUND',token_balance_before:null,token_balance_after:null,
     delivery_status:'CARGO_REGISTERED',receiver_acceptance:false,accounting_status:'UNRECONCILED',
     custody_policy_id:config.custody_policy_id||null,receipt_verifier_id:config.receipt_verifier_id||null,
-    last_error:null,freight_fee_revenue:0,gas_cost_bnb:0,delivery_cost:0,net_profit:0,
+    last_error:null,freight_fee_revenue:'0',gas_cost_bnb:0,delivery_cost:'0',net_profit:'0',
     _journal:[],_usedReplayKeys:new Set(),_verifiedReceipt:null,
   };
   journal(record,'MODULE_CREATED',{receiverConfigured:Boolean(receiver),tokenConfigured:Boolean(token)});
 
   function registerCargo(manifest={}){
     if(record.cargo_manifest_id)return fail(record,'DELIVERY_REJECTED',{reason:'CARGO_ALREADY_REGISTERED'});
-    if(!manifest.cargo_manifest_id||!normAddr(manifest.sender)||finite(manifest.authorized_amount)<=0||!manifest.purpose_hash||!manifest.replay_key)
+    let authorized,fee;
+    try{authorized=exactUint(manifest.authorized_amount);fee=exactUint(manifest.freight_fee??0)}catch{return fail(record,'INVALID_EXACT_AMOUNT',{field:'manifest'})}
+    if(!manifest.cargo_manifest_id||!normAddr(manifest.sender)||authorized<=0n||!manifest.purpose_hash||!manifest.replay_key)
       return fail(record,'DELIVERY_REJECTED',{reason:'MANIFEST_INCOMPLETE'});
-    record.cargo_manifest_id=String(manifest.cargo_manifest_id);record.sender=normAddr(manifest.sender);record.authorized_amount=finite(manifest.authorized_amount);
-    record.freight_fee=Math.max(0,finite(manifest.freight_fee));record.purpose_hash=String(manifest.purpose_hash);record.replay_key=String(manifest.replay_key);
+    record.cargo_manifest_id=String(manifest.cargo_manifest_id);record.sender=normAddr(manifest.sender);record.authorized_amount=authorized.toString();
+    record.freight_fee=fee.toString();record.purpose_hash=String(manifest.purpose_hash);record.replay_key=String(manifest.replay_key);
     record.valid_from=manifest.valid_from||null;record.expires_at=manifest.expires_at||null;
     record.restricted_inventory_balance=record.authorized_amount;record.custody_liability_balance=record.authorized_amount;
     advance(record,'AWAITING_EXACT_AUTHORIZATION');journal(record,'CARGO_REGISTERED',{cargo_manifest_id:record.cargo_manifest_id,authorized_amount:record.authorized_amount});
@@ -97,19 +107,19 @@ export function createKaiosAtmReceivingModule(config={}){
     const transfer=evidence.transfer||{};
     if(!eqAddr(transfer.token,record.KAIOS_token_address)||!eqAddr(transfer.from,record.sender)||!eqAddr(transfer.to,record.receiver_contract_or_escrow_address))
       return fail(record,'WRONG_RECEIVER',{transfer});
-    const amount=finite(transfer.amount);
+    let amount;try{amount=exactString(transfer.amount)}catch{return fail(record,'INVALID_EXACT_AMOUNT',{field:'transfer.amount'})}
     if(amount!==record.authorized_amount)return fail(record,'AMOUNT_MISMATCH',{expected:record.authorized_amount,received:amount});
-    record.received_amount=amount;record.block_number=Number.isFinite(Number(evidence.block_number))?Number(evidence.block_number):null;
+    record.received_amount=amount;record.block_number=Number.isSafeInteger(Number(evidence.block_number))?Number(evidence.block_number):null;
     record.receipt_status='FOUND_VERIFIED';record._verifiedReceipt=clone(evidence);record._usedReplayKeys.add(record.replay_key);
     advance(record,'RECEIPT_FOUND');journal(record,'RECEIPT_VERIFIED',{block_number:record.block_number,amount});
     return {ok:true,snapshot:snapshot(record)};
   }
   function reconcileBalance({token_balance_before,token_balance_after}={}){
     if(record.delivery_status!=='RECEIPT_FOUND')return fail(record,'RECONCILIATION_REQUIRED',{reason:'RECEIPT_NOT_READY'});
-    const before=finite(token_balance_before,NaN),after=finite(token_balance_after,NaN);
-    if(!Number.isFinite(before)||!Number.isFinite(after)||after-before!==record.received_amount)return fail(record,'RECONCILIATION_REQUIRED',{before,after,expectedDelta:record.received_amount});
-    record.token_balance_before=before;record.token_balance_after=after;record.accounting_status='BALANCE_RECONCILED';advance(record,'BALANCE_RECONCILED');
-    journal(record,'BALANCE_RECONCILED',{before,after,delta:after-before});return {ok:true,snapshot:snapshot(record)};
+    let before,after;try{before=exactUint(token_balance_before);after=exactUint(token_balance_after)}catch{return fail(record,'INVALID_EXACT_AMOUNT',{field:'balance'})}
+    if(after<before||after-before!==exactUint(record.received_amount))return fail(record,'RECONCILIATION_REQUIRED',{before:before.toString(),after:after.toString(),expectedDelta:record.received_amount});
+    record.token_balance_before=before.toString();record.token_balance_after=after.toString();record.accounting_status='BALANCE_RECONCILED';advance(record,'BALANCE_RECONCILED');
+    journal(record,'BALANCE_RECONCILED',{before:record.token_balance_before,after:record.token_balance_after,delta:(after-before).toString()});return {ok:true,snapshot:snapshot(record)};
   }
   function markArrived(){if(record.delivery_status!=='BALANCE_RECONCILED')return fail(record,'RECONCILIATION_REQUIRED');advance(record,'ARRIVED_AT_11520');journal(record,'ARRIVED_AT_11520');return {ok:true,snapshot:snapshot(record)}}
   function acceptAtmInventory({accepted=true}={}){
@@ -118,10 +128,11 @@ export function createKaiosAtmReceivingModule(config={}){
     record.receiver_acceptance=true;record.available_ATM_inventory=record.received_amount;record.accounting_status='RESTRICTED_INVENTORY_WITH_MATCHING_LIABILITY';advance(record,'ATM_INVENTORY_ACCEPTED');journal(record,'ATM_INVENTORY_ACCEPTED',{amount:record.available_ATM_inventory});
     return {ok:true,snapshot:snapshot(record)};
   }
-  function markDelivered({gas_cost_bnb=0,delivery_cost=0,freight_fee_evidence=false}={}){
+  function markDelivered({gas_cost_bnb=0,delivery_cost='0',freight_fee_evidence=false}={}){
     if(record.delivery_status!=='ATM_INVENTORY_ACCEPTED'||!record.receiver_acceptance)return fail(record,'DELIVERY_REJECTED',{reason:'ATM_NOT_ACCEPTED'});
-    record.gas_cost_bnb=Math.max(0,finite(gas_cost_bnb));record.delivery_cost=Math.max(0,finite(delivery_cost));
-    record.freight_fee_revenue=freight_fee_evidence===true?record.freight_fee:0;record.net_profit=record.freight_fee_revenue-record.delivery_cost;
+    let cost;try{cost=exactUint(delivery_cost)}catch{return fail(record,'INVALID_EXACT_AMOUNT',{field:'delivery_cost'})}
+    record.gas_cost_bnb=Math.max(0,finite(gas_cost_bnb));record.delivery_cost=cost.toString();
+    record.freight_fee_revenue=freight_fee_evidence===true?record.freight_fee:'0';record.net_profit=exactSub(record.freight_fee_revenue,record.delivery_cost);
     advance(record,'DELIVERED');journal(record,'DELIVERED',{freight_fee_revenue:record.freight_fee_revenue,delivery_cost:record.delivery_cost,gas_cost_bnb:record.gas_cost_bnb});
     return {ok:true,snapshot:snapshot(record)};
   }
