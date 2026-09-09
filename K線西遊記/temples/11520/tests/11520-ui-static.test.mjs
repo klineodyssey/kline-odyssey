@@ -15,7 +15,8 @@ const xyzAuthority=read('../runtime/xyz-input-authority-runtime.mjs');
 const driveLive=read('../runtime/combat-drive-live-runtime.mjs');
 const driveAdapter=read('../runtime/combat-drive-adapter.mjs');
 const massScale=read('../runtime/combat-mass-scale-runtime.mjs');
-const source=[html,main,fixes,controls,xyzControl,xyzAuthority,driveLive,driveAdapter,massScale].join('\n');
+const characterStatus=read('../runtime/character-status-runtime.mjs');
+const source=[html,main,fixes,controls,xyzControl,xyzAuthority,driveLive,driveAdapter,massScale,characterStatus].join('\n');
 
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
@@ -53,6 +54,13 @@ test('C and lot drive bridge is installed by XYZ authority without asset mutatio
   assert.ok(massScale.includes("if (c===0) return 'LOCAL_WALK'"),'0C must remain local walking');
   assert.ok(massScale.includes("if (c===1) return 'LIGHT_SPEED_SPOT'"),'1C must remain light-speed spot');
   for(const forbidden of ['sendTransaction','eth_sendTransaction','privateKey','treasuryTransfer'])assert.equal(driveLive.includes(forbidden),false,forbidden);
+});
+
+test('detailed HP and character inspection are read-only and boot-wired',()=>{
+  assert.ok(xyzAuthority.includes("import('./character-status-runtime.mjs')"),'character status must load in live boot path');
+  for(const token of ['HP ${Math.round(h.current)} / ${h.max}','${h.pct.toFixed(1)}%','角色資料','悟空 · 11520 玩家','KAIOS','XYZ','C 曲速','口數','KX','KY','KZ'])assert.ok(characterStatus.includes(token),token);
+  assert.ok(characterStatus.includes('simulationOnly:true'));
+  for(const forbidden of ['sendTransaction','eth_sendTransaction','privateKey','treasuryTransfer','approve(','transfer('])assert.equal(characterStatus.includes(forbidden),false,forbidden);
 });
 
 test('known central interceptor is explicitly retired, not heuristically scanned',()=>{
