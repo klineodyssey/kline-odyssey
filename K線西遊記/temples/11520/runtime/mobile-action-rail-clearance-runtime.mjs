@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: 11520 Mobile Action Rail Clearance Runtime
 PURPOSE: Human-directed mobile safe-zone patch. Keeps the three bottom rails clear of the right utility rail and keeps opened action/order/confirm surfaces above ordinary HUD organs. UI-only; no trading, wallet, chain, payment, treasury, governance, or secret mutation.
@@ -9,7 +9,7 @@ const $=s=>document.querySelector(s);
 
 function style(){
   let s=$('#k11520MobileActionRailClearance');
-  if(!s){s=document.createElement('style');s.id='k11520MobileActionRailClearance';document.head.appendChild(s)}
+  if(!s){s=document.createElement('style');s.id='k11520MobileActionRailClearance'}
   s.textContent=`
 @media(max-width:${MOBILE_MAX}px){
   #cControl{left:154px!important;right:auto!important}
@@ -21,6 +21,7 @@ function style(){
   .sheet.open .close,.confirm.open .close{position:relative!important;z-index:2!important}
 }
 `;
+  document.head.appendChild(s);
   return s;
 }
 
@@ -31,7 +32,7 @@ function report(){
   const openSurface=document.querySelector('.sheet.open,.confirm.open');
   const surfaceZ=openSurface?Number(getComputedStyle(openSurface).zIndex)||0:0;
   const hudZ=Math.max(...['#dock','#backpackButton','#walletPanel','#chatHandle','#k11520HudCollapseAll'].map(sel=>{const el=$(sel);return el?(Number(getComputedStyle(el).zIndex)||0):0}));
-  const out={version:'1.0.0',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
+  const out={version:'1.0.1',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
   out.ok=innerWidth>MOBILE_MAX||Boolean(rail&&c&&lots&&out.rightSafeGap>=80&&!out.railDockOverlap&&out.actionSurfaceOnTop);
   document.documentElement.dataset.k11520ActionRailClearance=out.ok?'PASS':'RED';
   globalThis.__K11520_ACTION_RAIL_CLEARANCE__=out;
@@ -42,11 +43,12 @@ function apply(){style();queueMicrotask(report);setTimeout(report,120);setTimeou
 
 export function install11520MobileActionRailClearance(){
   if(typeof document==='undefined')return null;
-  const observer=new MutationObserver(mutations=>{if(innerWidth>MOBILE_MAX)return;const relevant=mutations.some(m=>m.type==='attributes'&&(m.target.classList?.contains('sheet')||m.target.classList?.contains('confirm')));if(relevant)queueMicrotask(report)});
-  observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+  const observer=new MutationObserver(mutations=>{if(innerWidth>MOBILE_MAX)return;const relevant=mutations.some(m=>(m.type==='attributes'&&(m.target.classList?.contains('sheet')||m.target.classList?.contains('confirm')))||(m.type==='childList'&&[...m.addedNodes].some(n=>n?.id==='k11520MobileControlLayout')));if(relevant)queueMicrotask(apply)});
+  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
   globalThis.__K11520_ACTION_RAIL_CLEARANCE_OBSERVER__?.disconnect?.();
   globalThis.__K11520_ACTION_RAIL_CLEARANCE_OBSERVER__=observer;
   addEventListener('resize',apply,{passive:true});
+  for(const delay of [0,180,480,900,1800])setTimeout(apply,delay);
   return apply();
 }
 
