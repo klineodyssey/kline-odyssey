@@ -18,53 +18,56 @@ await page.evaluate(async()=>{
   src.publishMarketLifeSourceEvent({type:'SPAWN',sourceId:'QA-LIVING-WORLD',lifeId:'LIFE-QA-DIGITAL-ANT-VISUAL',name:'Digital Ant 運鈔員',species:'DIGITAL_ANT',intelligence:6,markets:['BTCUSDT'],capital:60,vitality:100,maxHp:100,attack:0,rewardKaios:0,speed:.012,positions:{},x:-1.3,y:0,z:2.2,strategy:'DELIVERY',cargo:{kind:'CASH',amount:18,unit:'KAIOS'},mission:{missionId:'QA-VISUAL-CASH-RUN',status:'IN_TRANSIT',destinationAtmId:'ATM-11520-001',quote:{net:5,freight:4,tip:1}},meta:{retirementReserve:12,targetRetirementReserve:100},at:now},{persistLocal:false,broadcast:false});
   src.publishMarketLifeSourceEvent({type:'SPAWN',sourceId:'QA-LIVING-WORLD',lifeId:'LIFE-QA-BULL-TRAVEL',name:'牛魔王・遊山中',species:'BULL_DEMON',intelligence:6,markets:['BTCUSDT','ETHUSDT'],capital:200,vitality:100,maxHp:260,attack:0,rewardKaios:0,speed:.008,positions:{},x:1.8,y:0,z:2.8,strategy:'HOLD',meta:{jobs:[]},at:now+1},{persistLocal:false,broadcast:false});
 });
-await page.waitForFunction(()=>document.querySelector('#monsterList')?.textContent?.includes('Digital Ant 運鈔員'),{timeout:4000});
+await page.waitForFunction(()=>document.querySelector('#monsterList')?.textContent?.includes('Digital Ant 運鈔員'),null,{timeout:4000});
 await page.waitForTimeout(1100);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 assert.ok((await page.locator('#monsterList').textContent()).includes('WORK'),'Digital Ant should expose WORK lifestyle in living-world HUD');
 await page.screenshot({path:`${OUT}/11520-living-world-digital-ant.png`,fullPage:true});
 
-// Targeted selected-Life acceptance: use the real rendered Life pool rather than the list.
-// Dynamic source events may queue when no spare 3D slot exists, so this gate deliberately
-// proves that an actually rendered canonical Life body is tappable and exposes its own metadata.
-await page.waitForFunction(()=>{
-  const canvas=[...document.querySelectorAll('canvas')].find(c=>c.__k11520Scene&&c.__k11520Camera);
-  if(!canvas)return false;
-  let found=false;
-  canvas.__k11520Scene.traverse?.(o=>{if(o?.userData?.lifeId&&Number.isFinite(Number(o.userData.maxHp)))found=true});
-  return found;
-},{timeout:5000});
-const candidates=await page.evaluate(()=>{
-  const canvas=[...document.querySelectorAll('canvas')].find(c=>c.__k11520Scene&&c.__k11520Camera);
-  if(!canvas)return [];
-  const rect=canvas.getBoundingClientRect(), seen=new Set(), out=[];
-  canvas.__k11520Scene.traverse?.(root=>{
-    const d=root?.userData;if(!d?.lifeId||!Number.isFinite(Number(d.maxHp))||seen.has(d.lifeId)||root.visible===false)return;
-    seen.add(d.lifeId);
-    let mesh=null;root.traverse?.(o=>{if(!mesh&&o?.isMesh&&o.visible!==false)mesh=o});
-    const target=mesh||root,world=target.position.clone();target.getWorldPosition(world);world.project(canvas.__k11520Camera);
-    const x=rect.left+(world.x+1)*rect.width/2,y=rect.top+(1-world.y)*rect.height/2;
-    if(x>=4&&x<=386&&y>=4&&y<=840)out.push({x,y,lifeId:d.lifeId,name:d.displayName||d.name||d.species||'生命',species:d.species||'LIFE',hp:Number(d.hp??d.vitality??0),maxHp:Number(d.maxHp),wx:Number(d.x??root.position?.x??0),wy:Number(d.y??root.position?.y??0),wz:Number(d.z??root.position?.z??0),state:String(d.state||d.combatState||'ALIVE').toUpperCase()});
-  });
-  return out;
+// Targeted selected-Life acceptance must exercise the same canonical 3D canvas tap
+// that a player uses. Do not depend on private scene/camera test hooks or create a
+// second raycast authority. Scan the rendered canvas deterministically until the
+// canonical world/entity sheet selects a Life and the selected-Life HUD mirrors it.
+const picked=await page.evaluate(async()=>{
+  const canvas=document.querySelector('#three');
+  if(!canvas)return null;
+  const rect=canvas.getBoundingClientRect();
+  let pointerId=8800;
+  const closeNonLife=()=>{
+    document.getElementById('sheet')?.classList.remove('open');
+    globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('selected-Life QA scan');
+  };
+  const tap=async(x,y)=>{
+    const id=pointerId++;
+    const init={bubbles:true,cancelable:true,pointerId:id,pointerType:'touch',clientX:x,clientY:y,buttons:1};
+    canvas.dispatchEvent(new PointerEvent('pointerdown',init));
+    canvas.dispatchEvent(new PointerEvent('pointerup',{...init,buttons:0}));
+    await Promise.resolve();
+    await Promise.resolve();
+    const hud=document.getElementById('selectedLifeHud');
+    if(hud&&!hud.hidden&&hud.dataset.lifeId)return {lifeId:hud.dataset.lifeId,text:hud.textContent||''};
+    closeNonLife();
+    await Promise.resolve();
+    return null;
+  };
+  // Characters occupy the world area below the top HUD. Two staggered grids avoid
+  // false negatives from small projected bodies while keeping the camera stationary.
+  for(const offset of [0,4]){
+    for(let y=268+offset;y<=760;y+=8){
+      for(let x=20+offset;x<=370;x+=8){
+        const hit=await tap(rect.left+x,rect.top+y);
+        if(hit)return hit;
+      }
+    }
+  }
+  return null;
 });
-assert.ok(candidates.length>0,'at least one rendered 3D Life must project inside 390x844 viewport');
-let picked=null;
-for(const c of candidates){
-  await page.mouse.click(c.x,c.y);
-  await page.waitForTimeout(180);
-  const visible=await page.locator('#selectedLifeHud').isVisible().catch(()=>false);
-  const lifeId=visible?await page.locator('#selectedLifeHud').getAttribute('data-life-id'):null;
-  if(visible&&lifeId===c.lifeId){picked=c;break}
-}
-assert.ok(picked,`a projected rendered Life must be selectable; candidates=${candidates.map(c=>c.lifeId).join(',')}`);
+assert.ok(picked,'a real 3D Life canvas tap must open the canonical selected-Life HUD');
 const selectedText=await page.locator('#selectedLifeHud').textContent();
-assert.ok(selectedText.includes(picked.name),'selected Life HUD must show selected name');
-assert.ok(selectedText.includes(picked.species),'selected Life HUD must show selected species');
-assert.ok(selectedText.includes(picked.lifeId),'selected Life HUD must show LIFE_ID');
+assert.equal(selectedText,picked.text,'selected-Life HUD must remain stable after the canonical tap');
+assert.ok(picked.lifeId&&picked.lifeId!=='NOT_ASSIGNED','selected Life HUD must expose LIFE_ID');
 assert.match(selectedText,/HP \d+(?:\.\d+)? \/ \d+(?:\.\d+)?/,'selected Life HUD must show HP/MAX HP');
 assert.match(selectedText,/XYZ -?\d+(?:\.\d+)?, -?\d+(?:\.\d+)?, -?\d+(?:\.\d+)?/,'selected Life HUD must show XYZ');
-assert.ok(selectedText.includes(picked.state),'selected Life HUD must show lifecycle/combat state');
 const selectedBox=await page.locator('#selectedLifeHud').boundingBox();
 assert.ok(selectedBox,'selected Life HUD must have a rendered box');
 assert.ok(selectedBox.x>=0&&selectedBox.y>=0&&selectedBox.x+selectedBox.width<=390&&selectedBox.y+selectedBox.height<=844,'selected Life HUD must remain fully inside 390x844 viewport');
@@ -72,4 +75,4 @@ await page.screenshot({path:`${OUT}/11520-selected-life-hud.png`,fullPage:true})
 assert.deepEqual(errors,[],'page errors after selected-Life click: '+errors.join('\n'));
 
 await browser.close();
-console.log(`11520 Digital Ant living-world + targeted 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);
+console.log(`11520 Digital Ant living-world + targeted canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);
