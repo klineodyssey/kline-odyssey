@@ -1,3 +1,4 @@
+import './mobile-action-rail-clearance-runtime.mjs';
 /* KGEN_META
 VERSION: 2.6.16
 STATUS: ACTIVE
