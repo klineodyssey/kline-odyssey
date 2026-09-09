@@ -2,7 +2,7 @@
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
 VERSION: 1.2.1
-REVISION: 2026-09-09.HUMAN-SCREENSHOT-HUD-TIDY
+REVISION: 2026-09-09.VIEWPORT-THUMB-CLEARANCE
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; keeps the normal-axis Wukong artwork visible; aligns combat actions and right utility organs from real mobile screenshot feedback; delegates circular-thumb motion to the canonical XYZ Plane Joystick; and preserves XYZ/trading semantics.
 */
 const $=s=>document.querySelector(s);
@@ -26,7 +26,7 @@ function installStyle(){
   #knob{will-change:transform!important}
 
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
-  #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(16px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
+  #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(28px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
   #cControl{left:166px!important;right:auto!important}
   #lotsControl{left:216px!important;right:auto!important}
   #yControl{left:266px!important;right:auto!important}
@@ -81,7 +81,7 @@ function setImportant(el,key,value){if(el)el.style.setProperty(key,value,'import
 function applyRail(){
   if(innerWidth>MOBILE_MAX)return;
   const specs=[['#cControl','166px'],['#lotsControl','216px'],['#yControl','266px']];
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(16px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
 function applyRightOrgans(){
   if(innerWidth>MOBILE_MAX)return;
