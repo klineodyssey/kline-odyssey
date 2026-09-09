@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.1
+VERSION: 1.0.2
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: 11520 Mobile Action Rail Clearance Runtime
 PURPOSE: Human-directed mobile safe-zone patch. Keeps the three bottom rails clear of the right utility rail and keeps opened action/order/confirm surfaces above ordinary HUD organs. UI-only; no trading, wallet, chain, payment, treasury, governance, or secret mutation.
@@ -17,8 +17,8 @@ function style(){
   #yControl{left:254px!important;right:auto!important}
   .controls .attack{left:154px!important;right:auto!important}
   .controls .order{left:218px!important;right:auto!important}
-  .sheet.open,.confirm.open{z-index:8600!important;isolation:isolate!important;box-shadow:0 24px 80px #000e!important}
-  .sheet.open .close,.confirm.open .close{position:relative!important;z-index:2!important}
+  #confirm.open,.sheet.open,.confirm.open{z-index:8600!important;isolation:isolate!important;box-shadow:0 24px 80px #000e!important}
+  #confirm.open .close,.sheet.open .close,.confirm.open .close{position:relative!important;z-index:2!important}
 }
 `;
   document.head.appendChild(s);
@@ -32,7 +32,7 @@ function report(){
   const openSurface=document.querySelector('.sheet.open,.confirm.open');
   const surfaceZ=openSurface?Number(getComputedStyle(openSurface).zIndex)||0:0;
   const hudZ=Math.max(...['#dock','#backpackButton','#walletPanel','#chatHandle','#k11520HudCollapseAll'].map(sel=>{const el=$(sel);return el?(Number(getComputedStyle(el).zIndex)||0):0}));
-  const out={version:'1.0.1',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
+  const out={version:'1.0.2',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
   out.ok=innerWidth>MOBILE_MAX||Boolean(rail&&c&&lots&&out.rightSafeGap>=80&&!out.railDockOverlap&&out.actionSurfaceOnTop);
   document.documentElement.dataset.k11520ActionRailClearance=out.ok?'PASS':'RED';
   globalThis.__K11520_ACTION_RAIL_CLEARANCE__=out;
