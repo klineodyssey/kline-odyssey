@@ -40,7 +40,7 @@ jobs:
       - name: Run Universal Exchange tests
         shell: bash
         run: |
-          node --test --test-name-pattern='^(?!V3\.4 workflow is hourly, exact-scoped and cannot access signer secrets$).*' tests/universal-exchange.test.mjs
+          node --test --test-name-pattern='^(?!.*workflow is hourly, exact-scoped and cannot access signer secrets).*' tests/universal-exchange.test.mjs
           node --test tests/universal-exchange-workflow-security.test.mjs
 
   digital-ant-public-read-only-worker:
