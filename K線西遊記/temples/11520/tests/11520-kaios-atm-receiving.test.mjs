@@ -32,9 +32,9 @@ test('configured module also requires an explicit confirmation policy',()=>{
   register(m);assert.equal(m.authorizeExactReceiver().ok,false);assert.equal(m.snapshot().real_receiving_gate,'NOT_DEPLOYED');
 });
 
-test('manifest validity window is structurally required at registration',()=>{
-  const missing=module();const a=missing.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:'1',purpose_hash:'QA-PURPOSE',replay_key:'R'});assert.equal(a.status,'MANIFEST_TIME_INVALID');
-  const reversed=module();const now=Date.now();const b=register(reversed,{valid_from:new Date(now+60_000).toISOString(),expires_at:new Date(now).toISOString()});assert.equal(b.status,'MANIFEST_TIME_INVALID');
+test('missing or malformed manifest time may register cargo but cannot authorize dispatch',()=>{
+  const missing=module();const a=missing.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:'1',purpose_hash:'QA-PURPOSE',replay_key:'R'});assert.equal(a.ok,true);assert.equal(missing.authorizeExactReceiver().status,'MANIFEST_TIME_INVALID');
+  const reversed=module();const now=Date.now();const b=register(reversed,{valid_from:new Date(now+60_000).toISOString(),expires_at:new Date(now).toISOString()});assert.equal(b.ok,true);assert.equal(reversed.authorizeExactReceiver().status,'MANIFEST_TIME_INVALID');
 });
 
 test('manifest cannot authorize before valid_from or at/after expires_at',()=>{
