@@ -1,7 +1,8 @@
 /* KGEN_META
-VERSION: 1.1.0
-STATUS: ACTIVE
-PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life and Digital Ant creatures.
+VERSION: 1.2.0
+REVISION: 2026-09-09.SELECTABLE-LIFE-METADATA
+STATUS: CANDIDATE
+PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life and Digital Ant creatures, with canonical selectable identity/HP/XYZ metadata.
 */
 
 export const LIFE_VISUAL_POLICY=Object.freeze({
@@ -39,7 +40,7 @@ export function createProceduralLifeBody(THREE,{species='LIFE',name='Market Life
   if(!THREE)throw new Error('THREE_REQUIRED');
   const root=new THREE.Group();
   root.name=`LIFE:${name}`;
-  root.userData={lifeVisual:true,species,name,visualMode:'PROCEDURAL_3D',baseScale:Number(scale)||1};
+  root.userData={lifeVisual:true,species,name,displayName:name,visualMode:'PROCEDURAL_3D',baseScale:Number(scale)||1};
   const color=colorForSpecies(species);
   const mat=new THREE.MeshStandardMaterial({color,roughness:.72,metalness:.08});
   const dark=new THREE.MeshStandardMaterial({color:0x15202b,roughness:.8});
@@ -67,23 +68,26 @@ export function createProceduralLifeBody(THREE,{species='LIFE',name='Market Life
 export function createFallbackLifeBody(THREE,{name='Life',scale=1}={}){
   if(!THREE)throw new Error('THREE_REQUIRED');
   const mesh=new THREE.Mesh(new THREE.DodecahedronGeometry(.55),new THREE.MeshStandardMaterial({color:0x7b2025}));
-  mesh.name=`FALLBACK:${name}`;mesh.userData={lifeVisual:true,visualMode:'FALLBACK',fallback:true,label:LIFE_VISUAL_POLICY.fallbackLabel,baseScale:Number(scale)||1};mesh.scale.setScalar(Number(scale)||1);return mesh;
+  mesh.name=`FALLBACK:${name}`;mesh.userData={lifeVisual:true,visualMode:'FALLBACK',fallback:true,label:LIFE_VISUAL_POLICY.fallbackLabel,name,displayName:name,baseScale:Number(scale)||1};mesh.scale.setScalar(Number(scale)||1);return mesh;
 }
 
 export async function createLifeVisual(THREE,{gltfLoader=null,modelUrl=null,...spec}={}){
-  if(modelUrl&&gltfLoader){try{const gltf=await new Promise((resolve,reject)=>gltfLoader.load(modelUrl,resolve,undefined,reject));const root=gltf.scene;root.userData={...(root.userData||{}),lifeVisual:true,visualMode:'GLTF_3D',fallback:false,species:spec.species,name:spec.name,baseScale:Number(spec.scale)||1};return{root,mode:'GLTF_3D',fallback:false}}catch{/* fall through to procedural */}}
+  if(modelUrl&&gltfLoader){try{const gltf=await new Promise((resolve,reject)=>gltfLoader.load(modelUrl,resolve,undefined,reject));const root=gltf.scene;root.userData={...(root.userData||{}),lifeVisual:true,visualMode:'GLTF_3D',fallback:false,species:spec.species,name:spec.name,displayName:spec.name,baseScale:Number(spec.scale)||1};return{root,mode:'GLTF_3D',fallback:false}}catch{/* fall through to procedural */}}
   try{return{root:createProceduralLifeBody(THREE,spec),mode:'PROCEDURAL_3D',fallback:false}}catch(error){return{root:createFallbackLifeBody(THREE,spec),mode:'FALLBACK',fallback:true,error}}
 }
 
 export function syncLifeVisual(root,life={}){
   if(!root)return;
   const p=lifePresentationState(life),base=finite(root.userData?.baseScale,1)||1;
+  const x=finite(life.x),y=finite(life.y),z=finite(life.z);
+  const hp=Math.max(0,finite(life.hp,finite(life.vitality,0)));
+  const maxHp=Math.max(1,finite(life.maxHp,100));
   root.visible=life.state!=='DEAD';
-  root.position.set(finite(life.x),Math.max(.05,finite(life.y)),finite(life.z));
+  root.position.set(x,Math.max(.05,y),z);
   root.scale.setScalar(base*p.scale);
   root.rotation.x=p.pitch;
   const cargo=root.getObjectByName?.('LIFE_STATUS_CARGO');if(cargo)cargo.visible=p.carrying;
   const receipt=root.getObjectByName?.('LIFE_STATUS_RECEIPT');if(receipt)receipt.visible=p.waitingReceipt;
-  const retirement=root.getObjectByName?.('LIFE_STATUS_RETIREMENT');if(retirement)retirement.visible=p.retired;
-  root.userData={...(root.userData||{}),lifeId:life.lifeId||null,sourceLifeId:life.sourceLifeId||null,sourceManaged:Boolean(life.sourceManaged),state:life.state||null,lifestyleAction:p.action,missionStatus:p.missionStatus,carryingCargo:p.carrying,waitingReceipt:p.waitingReceipt,retired:p.retired};
+  const retirementHalo=root.getObjectByName?.('LIFE_STATUS_RETIREMENT');if(retirementHalo)retirementHalo.visible=p.retired;
+  root.userData={...(root.userData||{}),lifeVisual:true,lifeId:life.lifeId||null,sourceLifeId:life.sourceLifeId||null,displayName:life.name||life.baseName||root.userData?.displayName||root.userData?.name||life.species||'生命',name:life.name||life.baseName||root.userData?.name||life.species||'生命',species:life.species||root.userData?.species||'LIFE',hp,maxHp,x,y,z,sourceManaged:Boolean(life.sourceManaged),state:life.state||null,lifestyleAction:p.action,missionStatus:p.missionStatus,carryingCargo:p.carrying,waitingReceipt:p.waitingReceipt,retired:p.retired};
 }
