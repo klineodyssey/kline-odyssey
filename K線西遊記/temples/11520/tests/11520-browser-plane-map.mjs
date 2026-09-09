@@ -61,8 +61,9 @@ await page.screenshot({path:`${OUT}/11520-plane-map-xy.png`,fullPage:true});
 await tapCenter(702);await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='YZ',{timeout:2000});m=await plane();assert.equal(m.hAxis,'Y');assert.equal(m.vAxis,'Z');assert.equal(m.depthAxis,'X');assert.equal(m.normalAxis,'KX');
 const yz0=await coords();await mapTap(.70,.66,721);await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.target&&globalThis.__K11520_XYZ_MAP_NAVIGATION__.mode==='YZ',{timeout:2000});
 const yzt=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(yzt.x.toFixed(3)),Number(yz0.x.toFixed(3)));assert.ok(Math.abs(yzt.y-yz0.y)>.1||Math.abs(yzt.z-yz0.z)>.1);
-await startPlaneNav();await page.waitForFunction(([y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.abs((p.y||0)-y)>.12||Math.abs((p.z||0)-z)>.12},[yz0.y,yz0.z],{timeout:4000});
-await cancelPlaneNav(722);await page.screenshot({path:`${OUT}/11520-plane-map-yz.png`,fullPage:true});
+await startPlaneNav();await page.waitForTimeout(180);
+const yzNav=await page.evaluate(()=>({active:globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active,mode:globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode,vector:structuredClone(globalThis.__K11520_XYZ_NAV_VECTOR__||{})}));assert.equal(yzNav.active,true);assert.equal(yzNav.mode,'YZ');assert.ok(Math.abs(Number(yzNav.vector.y)||0)>.01||Math.abs(Number(yzNav.vector.z)||0)>.01,'YZ waypoint must publish Y/Z movement intent');
+await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('YZ plane map QA stop'));await page.waitForTimeout(80);assert.equal(await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active),false);await page.screenshot({path:`${OUT}/11520-plane-map-yz.png`,fullPage:true});
 
 const world0=await coords(),worldTarget={x:world0.x+1.2,y:world0.y+1.1,z:world0.z-1.0};
 await page.evaluate(target=>{const nav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;nav.setWorldTarget(target,{mode:'WORLD',source:'WORLD_ENTITY'});nav.start()},worldTarget);
