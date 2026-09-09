@@ -1,13 +1,13 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.2.0
-REVISION: 2026-09-09.ANALOG-THUMB-FOLLOW
-PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; presents the normal-axis energy in two clear sign classes (>=0 and <0); gives the normal-axis rail a visible Wukong artwork thumb; makes the fixed-base circular joystick artwork follow the player finger within the canonical input radius and ease back to center; and keeps the tested master HUD collapse without changing XYZ or trading semantics.
+VERSION: 1.2.1
+REVISION: 2026-09-09.HUMAN-SCREENSHOT-HUD-TIDY
+PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; keeps the normal-axis Wukong artwork visible; aligns combat actions and right utility organs from real mobile screenshot feedback; delegates circular-thumb motion to the canonical XYZ Plane Joystick; and preserves XYZ/trading semantics.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=420;
-let guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false,discVisualBound=false,discVisualPid=null;
+let guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 
 function installStyle(){
@@ -23,8 +23,7 @@ function installStyle(){
   .tele{left:6px!important;width:calc(50% - 9px)!important}
   .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
   .minimapWrap{top:286px!important}
-  #knob{will-change:transform!important;transition:transform 120ms cubic-bezier(.2,.75,.25,1),filter 100ms ease!important}
-  #knob[data-k11520-disc-drag="1"]{transition:none!important;filter:brightness(1.08) drop-shadow(0 0 8px #68e4ff66)!important}
+  #knob{will-change:transform!important}
 
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
   #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(16px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
@@ -45,19 +44,19 @@ function installStyle(){
   .controls{position:fixed!important;left:auto!important;right:56px!important;top:auto!important;bottom:158px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
   .controls .skill,.controls .dodge,.controls .flat,.controls .tool{position:absolute!important;width:40px!important;height:40px!important;top:auto!important;bottom:0!important;border-radius:50%!important;font-size:11px!important}
   .controls .skill{right:0!important}.controls .flat{right:44px!important}.controls .dodge{right:88px!important}.controls .tool{right:132px!important}
-  .controls .attack,.controls .order{position:fixed!important;top:auto!important;bottom:320px!important;width:54px!important;height:38px!important;border-radius:11px!important;font-size:9px!important;line-height:1.05!important;z-index:470!important}
-  .controls .attack{left:170px!important;right:auto!important}.controls .order{left:228px!important;right:auto!important}
+  .controls .attack,.controls .order{position:fixed!important;top:auto!important;bottom:212px!important;width:58px!important;height:40px!important;border-radius:12px!important;font-size:10px!important;line-height:1.05!important;z-index:470!important}
+  .controls .attack{left:164px!important;right:auto!important}.controls .order{left:228px!important;right:auto!important}
 
   #walletPanel{right:54px!important}
-  #walletPanel.collapsed{right:5px!important;bottom:234px!important;width:42px!important;height:44px!important;padding:4px!important}
+  #walletPanel.collapsed{right:5px!important;bottom:226px!important;width:42px!important;height:44px!important;padding:4px!important}
   #walletPanel.collapsed #walletToggle{width:32px!important;height:34px!important}
-  #chatHandle{left:auto!important;right:5px!important;top:auto!important;bottom:334px!important;width:42px!important;min-width:42px!important;height:46px!important;border-left:1px solid #68e4ff66!important;border-radius:13px!important}
-  #aiChatButton{right:5px!important;left:auto!important;bottom:134px!important;width:42px!important;height:42px!important}
-  #bgmButton{right:5px!important;left:auto!important;bottom:184px!important;width:42px!important;height:42px!important}
-  .bagRelocatedV250{right:5px!important;left:auto!important;bottom:84px!important}
+  #chatHandle{left:auto!important;right:5px!important;top:auto!important;bottom:330px!important;width:42px!important;min-width:42px!important;height:46px!important;border-left:1px solid #68e4ff66!important;border-radius:13px!important}
+  #aiChatButton{right:5px!important;left:auto!important;bottom:122px!important;width:42px!important;height:42px!important}
+  #bgmButton{right:5px!important;left:auto!important;bottom:174px!important;width:42px!important;height:42px!important}
+  .bagRelocatedV250{right:5px!important;left:auto!important;bottom:70px!important}
   .dock,.dock.open{right:5px!important;left:auto!important}
 
-  #k11520HudCollapseAll{position:fixed;z-index:3050;right:5px;top:286px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
+  #k11520HudCollapseAll{position:fixed;z-index:3050;right:5px;left:auto;top:auto;bottom:390px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
   html.k11520HudCollapsed .top,
   html.k11520HudCollapsed .axes,
   html.k11520HudCollapsed .tele,
@@ -89,27 +88,12 @@ function applyRightOrgans(){
   const wallet=$('#walletPanel'),handle=$('#chatHandle'),chat=$('#aiChatButton'),bgm=$('#bgmButton'),bag=$('.bagRelocatedV250'),dock=$('#dock');
   if(hudCollapsed()){for(const el of [wallet,handle,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
   for(const el of [wallet,handle,chat,bgm,bag,dock])el?.style.removeProperty('display');
-  if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','234px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','206px')}}
-  if(handle){for(const [k,v] of [['position','fixed'],['left','auto'],['right','5px'],['top','auto'],['bottom','334px'],['width','42px'],['min-width','42px'],['height','46px']])setImportant(handle,k,v)}
-  const organs=[[chat,'134px'],[bgm,'184px'],[bag,'84px']];
+  if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','226px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','206px')}}
+  if(handle){for(const [k,v] of [['position','fixed'],['left','auto'],['right','5px'],['top','auto'],['bottom','330px'],['width','42px'],['min-width','42px'],['height','46px']])setImportant(handle,k,v)}
+  const organs=[[chat,'122px'],[bgm,'174px'],[bag,'70px']];
   for(const [el,bottom] of organs){if(!el)continue;setImportant(el,'position','fixed');setImportant(el,'left','auto');setImportant(el,'right','5px');setImportant(el,'bottom',bottom);setImportant(el,'width','42px');setImportant(el,'height','42px')}
   if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px')}
 }
-function installDiscThumbFollow(){
-  const joy=$('#joy'),knob=$('#knob');if(!joy||!knob||discVisualBound)return false;
-  const move=source=>{
-    const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=source.clientX-cx,dy=source.clientY-cy,dist=Math.hypot(dx,dy);
-    const travel=Math.max(1,Math.min(r.width,r.height)/2*.68),scale=Math.min(1,dist/travel),tx=dist?dx/dist*travel*scale:0,ty=dist?dy/dist*travel*scale:0;
-    knob.dataset.k11520DiscDrag='1';knob.style.transform=`translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
-    document.documentElement.dataset.k11520DiscThumbFollowing='1';
-  };
-  const end=e=>{if(e.pointerId!==discVisualPid)return;discVisualPid=null;delete knob.dataset.k11520DiscDrag;knob.style.transform='translate(0px, 0px)';document.documentElement.dataset.k11520DiscThumbFollowing='0'};
-  joy.addEventListener('pointerdown',e=>{discVisualPid=e.pointerId;move(e)},{capture:false,passive:true});
-  joy.addEventListener('pointermove',e=>{if(e.pointerId===discVisualPid)move(e)},{capture:false,passive:true});
-  joy.addEventListener('pointerup',end,{capture:false,passive:true});joy.addEventListener('pointercancel',end,{capture:false,passive:true});
-  discVisualBound=true;document.documentElement.dataset.k11520DiscThumbFollowing='0';return true;
-}
-function applyRightAndDisc(){applyRightOrgans();installDiscThumbFollow()}
 function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;
   const text=(line.textContent||'').replace(/\s+/g,' ').trim();
@@ -142,17 +126,17 @@ function installEnergyRead(){
 }
 function installMasterCollapse(){
   let b=$('#k11520HudCollapseAll');if(!b){b=document.createElement('button');b.id='k11520HudCollapseAll';b.type='button';b.setAttribute('aria-label','總收合或展開 HUD');document.body.appendChild(b)}
-  const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightAndDisc()};
+  const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();applyRail();applyRightAndDisc();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
   const report={viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.warp.right<=report.lots.left&&report.lots.right<=report.axisRail.left);
   report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
-  report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud)};
+  report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();
   report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.threeRailAligned&&report.equalWorldLifeWidth&&Object.values(report.overlaps).every(v=>!v));
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
@@ -160,7 +144,7 @@ function measure(){
 }
 function installGuard(){
   try{guard?.disconnect()}catch{}
-  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightAndDisc();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
+  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightOrgans();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
   timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
 }
 export function install11520MobileControlLayout(){apply();installGuard();addEventListener('resize',apply,{passive:true});return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__}
