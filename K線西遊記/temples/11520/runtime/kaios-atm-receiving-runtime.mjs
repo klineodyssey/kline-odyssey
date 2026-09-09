@@ -97,10 +97,10 @@ export function createKaiosAtmReceivingModule(config={}){
     if(!manifest.cargo_manifest_id||!normAddr(manifest.sender)||authorized<=0n||!manifest.purpose_hash||!manifest.replay_key)
       return fail(record,'DELIVERY_REJECTED',{reason:'MANIFEST_INCOMPLETE'});
     const validFrom=parseManifestTime(manifest.valid_from),expiresAt=parseManifestTime(manifest.expires_at);
-    if(validFrom===null||expiresAt===null||validFrom>=expiresAt)return fail(record,'MANIFEST_TIME_INVALID');
     record.cargo_manifest_id=String(manifest.cargo_manifest_id);record.sender=normAddr(manifest.sender);record.authorized_amount=authorized.toString();
     record.freight_fee=fee.toString();record.purpose_hash=String(manifest.purpose_hash);record.replay_key=String(manifest.replay_key);
-    record.valid_from=new Date(validFrom).toISOString();record.expires_at=new Date(expiresAt).toISOString();
+    record.valid_from=validFrom===null?(manifest.valid_from||null):new Date(validFrom).toISOString();
+    record.expires_at=expiresAt===null?(manifest.expires_at||null):new Date(expiresAt).toISOString();
     record.restricted_inventory_balance=record.authorized_amount;record.custody_liability_balance=record.authorized_amount;
     advance(record,'AWAITING_EXACT_AUTHORIZATION');journal(record,'CARGO_REGISTERED',{cargo_manifest_id:record.cargo_manifest_id,authorized_amount:record.authorized_amount,valid_from:record.valid_from,expires_at:record.expires_at});
     return {ok:true,snapshot:snapshot(record)};
