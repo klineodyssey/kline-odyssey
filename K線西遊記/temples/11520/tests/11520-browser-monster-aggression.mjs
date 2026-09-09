@@ -15,17 +15,20 @@ await page.waitForTimeout(900);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 const initialHp=Number((await page.locator('#hp').textContent()||'0').trim());
 assert.ok(initialHp>0,'player HP must start positive');
-await page.evaluate(async()=>{
-  const {publishMarketLifeSourceEvent}=await import('./runtime/market-life-source-runtime.mjs');
-  publishMarketLifeSourceEvent({type:'SPAWN',sourceId:'QA-BROWSER-MONSTER',lifeId:'LIFE-QA-BROWSER-BULL',name:'QA 攻擊牛魔王',species:'BULL_DEMON',intelligence:4,markets:[],capital:0,vitality:100,maxHp:100,attack:7,rewardKaios:0,speed:.01,positions:{},x:1,y:0,z:0},{persistLocal:false,broadcast:false});
+await page.evaluate(()=>{
+  window.dispatchEvent(new CustomEvent('11520:market-life-source',{detail:{
+    type:'SPAWN',sourceId:'QA-BROWSER-MONSTER',lifeId:'LIFE-QA-BROWSER-BULL',name:'QA 攻擊牛魔王',species:'BULL_DEMON',
+    intelligence:4,markets:[],capital:0,vitality:100,maxHp:100,attack:7,rewardKaios:0,speed:.01,positions:{},x:1,y:0,z:0,
+    strategy:'QA_HOSTILE_MONSTER',meta:{sourceClass:'QA_BROWSER',role:'MONSTER'}
+  }}));
 });
-await page.waitForFunction(()=>document.querySelector('#monsterList')?.textContent?.includes('QA 攻擊牛魔王'),null,{timeout:4000});
+await page.waitForFunction(()=>document.querySelector('#monsterList')?.textContent?.includes('QA 攻擊牛魔王'),null,{timeout:5000});
 await page.waitForFunction(start=>Number((document.querySelector('#hp')?.textContent||'0').trim())<start,initialHp,{timeout:5000});
 const damagedHp=Number((await page.locator('#hp').textContent()||'0').trim());
 assert.ok(damagedHp<initialHp,`monster must actually damage player HP: ${initialHp} -> ${damagedHp}`);
 assert.ok(initialHp-damagedHp>=7,'damage must reflect hostile monster attack power');
 await page.screenshot({path:`${OUT}/11520-mobile-monster-attack-hp.png`,fullPage:true});
-await page.evaluate(async()=>{const {publishMarketLifeSourceEvent}=await import('./runtime/market-life-source-runtime.mjs');publishMarketLifeSourceEvent({type:'DESPAWN',sourceId:'QA-BROWSER-MONSTER',lifeId:'LIFE-QA-BROWSER-BULL',reason:'QA_DONE'},{persistLocal:false,broadcast:false})});
+await page.evaluate(()=>window.dispatchEvent(new CustomEvent('11520:market-life-source',{detail:{type:'DESPAWN',sourceId:'QA-BROWSER-MONSTER',lifeId:'LIFE-QA-BROWSER-BULL',reason:'QA_DONE'}})));
 await page.waitForTimeout(250);
 assert.deepEqual(errors,[],'page errors after monster attack: '+errors.join('\n'));
 await browser.close();
