@@ -19,7 +19,9 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 const box=async sel=>{const b=await page.locator(sel).boundingBox();assert.ok(b,`${sel} missing`);return b};
 let pointerId=1200;
 async function setVertical(sel,t){
-  const b=await box(sel),id=pointerId++,x=b.x+b.width/2,y=b.y+b.height*(1-t);
+  const b=await box(sel),id=pointerId++,x=b.x+b.width/2;
+  const normalized=Math.max(.005,Math.min(.995,1-t));
+  const y=b.y+b.height*normalized;
   await page.dispatchEvent(sel,'pointerdown',{pointerId:id,pointerType:'touch',clientX:x,clientY:y,buttons:1});
   await page.dispatchEvent(sel,'pointermove',{pointerId:id,pointerType:'touch',clientX:x,clientY:y,buttons:1});
   await page.dispatchEvent(sel,'pointerup',{pointerId:id,pointerType:'touch',clientX:x,clientY:y,buttons:0});
