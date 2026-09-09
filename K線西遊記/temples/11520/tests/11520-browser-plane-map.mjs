@@ -37,7 +37,12 @@ const worldCanvasTap=async(fx,fy,id)=>{
   const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width*fx,clientY:b.y+b.height*fy,buttons:1};
   await page.dispatchEvent('#three','pointerdown',p);await page.waitForTimeout(45);await page.dispatchEvent('#three','pointerup',{...p,buttons:0});await page.waitForTimeout(160);
 };
-const startPlaneNav=async()=>{await page.locator('#xyzWaypointAction').click();await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true,{timeout:2000})};
+const startPlaneNav=async()=>{
+  assert.equal(await page.locator('#xyzWaypointAction').count(),1,'waypoint action missing');
+  const started=await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.start?.()===true);
+  assert.equal(started,true,'waypoint navigation failed to start');
+  await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true,{timeout:2000});
+};
 const cancelPlaneNav=async(id)=>{
   const b=await page.locator('#joy').boundingBox();assert.ok(b);
   const p={pointerId:id,pointerType:'touch',clientX:b.x+b.width*.80,clientY:b.y+b.height*.50,buttons:1};
