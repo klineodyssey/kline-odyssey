@@ -41,8 +41,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      actions: write
-      contents: write
+      contents: read
       issues: read
     concurrency:
       group: digital-ant-public-hourly-worker
@@ -64,36 +63,12 @@ jobs:
             --status "K線西遊記/temples/11520/runtime/worker-status.json" \
             --events-dir "K線西遊記/temples/11520/runtime/work-events" \
             --output "$RUNNER_TEMP/digital-ant-hourly-worker.json"
-      - name: Commit append-only public Work Evidence
-        id: publish
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "pages_required=false" >> "$GITHUB_OUTPUT"
-          git config user.name "digital-ant-worker"
-          git config user.email "digital-ant-worker@users.noreply.github.com"
-          git add -- "K線西遊記/temples/11520/runtime/worker-status.json"
-          git add -- "K線西遊記/temples/11520/runtime/work-events"
-          if git diff --cached --quiet; then
-            echo "No new hourly evidence (idempotent run)."
-            exit 0
-          fi
-          git commit -m "Record Digital Ant hourly work evidence"
-          git fetch origin main
-          if [ "$(git rev-parse HEAD^)" != "$(git rev-parse origin/main)" ]; then
-            git rebase origin/main
-          fi
-          git push origin HEAD:main
-          echo "pages_required=true" >> "$GITHUB_OUTPUT"
-      - name: Publish shared Worker Evidence to Pages
-        if: steps.publish.outputs.pages_required == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run deploy-pages-static.yml --ref main
-      - name: Preserve public Work Event evidence
+      - name: Preserve public Work Event evidence without repository mutation
         uses: actions/upload-artifact@v4
         with:
           name: digital-ant-hourly-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/digital-ant-hourly-worker.json
+          path: |
+            ${{ runner.temp }}/digital-ant-hourly-worker.json
+            K線西遊記/temples/11520/runtime/worker-status.json
           if-no-files-found: error
           retention-days: 30
