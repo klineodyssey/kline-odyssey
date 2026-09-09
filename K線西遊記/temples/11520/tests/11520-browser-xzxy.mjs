@@ -16,10 +16,14 @@ await page.waitForTimeout(700);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
 // This suite verifies the canonical XYZ controller itself, not a trading-speed selection.
-// Pin the live drive to the ordinary local-walk baseline so the unbounded-coordinate
-// assertions cannot inherit a low C value from the selected market card.
-await page.evaluate(()=>{const el=document.querySelector('#cRead');if(el)el.textContent='0C'});
-await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE__?.c===0&&globalThis.__K11520_COMBAT_DRIVE__?.cMode==='LOCAL_WALK',null,{timeout:2000});
+// Pin the actual C rail to the ordinary local-walk baseline so the unbounded-coordinate
+// assertions cannot inherit the selected market card's default low-C trading state.
+const cBox=await page.locator('#cControl').boundingBox();assert.ok(cBox,'C rail missing');
+const cPid=77,cx=cBox.x+cBox.width/2,cy=cBox.y+cBox.height*.94;
+await page.dispatchEvent('#cControl','pointerdown',{pointerId:cPid,pointerType:'touch',clientX:cx,clientY:cy,buttons:1});
+await page.dispatchEvent('#cControl','pointermove',{pointerId:cPid,pointerType:'touch',clientX:cx,clientY:cy,buttons:1});
+await page.dispatchEvent('#cControl','pointerup',{pointerId:cPid,pointerType:'touch',clientX:cx,clientY:cy,buttons:0});
+await page.waitForFunction(()=>document.querySelector('#cRead')?.textContent?.trim()==='0C'&&globalThis.__K11520_COMBAT_DRIVE__?.c===0&&globalThis.__K11520_COMBAT_DRIVE__?.cMode==='LOCAL_WALK',null,{timeout:2500});
 
 const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);assert.ok(m,'XYZ parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]}};
 const world=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_WORLD_COORDS__||null));
