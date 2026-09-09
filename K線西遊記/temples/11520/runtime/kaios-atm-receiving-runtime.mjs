@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.1.0
+VERSION: 1.2.0
 STATUS: ACTIVE
 PURPOSE: Read-only/fail-closed KAIOS ATM receiving and reconciliation runtime for the existing 11520 product. This module never signs or sends a transaction.
 */
@@ -13,6 +13,7 @@ export const DELIVERY_ERRORS=Object.freeze([
   'RECONCILIATION_REQUIRED','RPC_DISAGREEMENT','TX_REVERTED','TX_DROPPED','AMOUNT_MISMATCH','WRONG_RECEIVER',
   'REPLAY_BLOCKED','DELIVERY_REJECTED','DIRECTION_ROUTE_MISMATCH','ROUTE_EVIDENCE_MISSING','INVALID_EXACT_AMOUNT',
   'VERIFIER_ID_MISMATCH','CHAIN_ID_MISMATCH','FINALITY_REQUIRED','BLOCK_IDENTITY_MISSING','LOG_IDENTITY_MISSING',
+  'MANIFEST_TIME_INVALID','MANIFEST_NOT_YET_VALID','MANIFEST_EXPIRED',
 ]);
 const STATE_INDEX=new Map(DELIVERY_STATES.map((x,i)=>[x,i]));
 const ADDR=/^0x[0-9a-fA-F]{40}$/;
@@ -30,6 +31,17 @@ function exactUint(v){
 }
 const exactString=v=>exactUint(v).toString();
 const exactSub=(a,b)=>(exactUint(a)-exactUint(b)).toString();
+function parseManifestTime(v){
+  if(typeof v!=='string'||!v.trim())return null;
+  const ms=Date.parse(v);return Number.isFinite(ms)?ms:null;
+}
+function manifestWindowStatus(record,now=Date.now()){
+  const from=parseManifestTime(record.valid_from),expires=parseManifestTime(record.expires_at);
+  if(from===null||expires===null||from>=expires)return {ok:false,status:'MANIFEST_TIME_INVALID'};
+  if(now<from)return {ok:false,status:'MANIFEST_NOT_YET_VALID',valid_from:record.valid_from};
+  if(now>=expires)return {ok:false,status:'MANIFEST_EXPIRED',expires_at:record.expires_at};
+  return {ok:true,valid_from:record.valid_from,expires_at:record.expires_at};
+}
 
 function advance(record,next){
   if(!STATE_INDEX.has(next))throw new Error(`UNKNOWN_DELIVERY_STATE:${next}`);
@@ -72,6 +84,7 @@ export function createKaiosAtmReceivingModule(config={}){
     custody_policy_id:config.custody_policy_id||null,receipt_verifier_id:config.receipt_verifier_id||null,
     required_confirmations:requiredConfirmations,
     receipt_evidence_authority:'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY',
+    manifest_time_authority:'SYSTEM_WALL_CLOCK_FAIL_CLOSED',
     last_error:null,freight_fee_revenue:'0',gas_cost_bnb:0,delivery_cost:'0',net_profit:'0',
     _journal:[],_usedReplayKeys:new Set(),_verifiedReceipt:null,
   };
@@ -83,19 +96,22 @@ export function createKaiosAtmReceivingModule(config={}){
     try{authorized=exactUint(manifest.authorized_amount);fee=exactUint(manifest.freight_fee??0)}catch{return fail(record,'INVALID_EXACT_AMOUNT',{field:'manifest'})}
     if(!manifest.cargo_manifest_id||!normAddr(manifest.sender)||authorized<=0n||!manifest.purpose_hash||!manifest.replay_key)
       return fail(record,'DELIVERY_REJECTED',{reason:'MANIFEST_INCOMPLETE'});
+    const validFrom=parseManifestTime(manifest.valid_from),expiresAt=parseManifestTime(manifest.expires_at);
+    if(validFrom===null||expiresAt===null||validFrom>=expiresAt)return fail(record,'MANIFEST_TIME_INVALID');
     record.cargo_manifest_id=String(manifest.cargo_manifest_id);record.sender=normAddr(manifest.sender);record.authorized_amount=authorized.toString();
     record.freight_fee=fee.toString();record.purpose_hash=String(manifest.purpose_hash);record.replay_key=String(manifest.replay_key);
-    record.valid_from=manifest.valid_from||null;record.expires_at=manifest.expires_at||null;
+    record.valid_from=new Date(validFrom).toISOString();record.expires_at=new Date(expiresAt).toISOString();
     record.restricted_inventory_balance=record.authorized_amount;record.custody_liability_balance=record.authorized_amount;
-    advance(record,'AWAITING_EXACT_AUTHORIZATION');journal(record,'CARGO_REGISTERED',{cargo_manifest_id:record.cargo_manifest_id,authorized_amount:record.authorized_amount});
+    advance(record,'AWAITING_EXACT_AUTHORIZATION');journal(record,'CARGO_REGISTERED',{cargo_manifest_id:record.cargo_manifest_id,authorized_amount:record.authorized_amount,valid_from:record.valid_from,expires_at:record.expires_at});
     return {ok:true,snapshot:snapshot(record)};
   }
   function authorizeExactReceiver(){
     if(record.delivery_status!=='AWAITING_EXACT_AUTHORIZATION')return fail(record,'DELIVERY_REJECTED',{reason:'WRONG_STATE'});
     if(!record.receiver_contract_or_escrow_address||!record.KAIOS_token_address||!record.custody_policy_id||!record.receipt_verifier_id||!record.required_confirmations)
       return fail(record,'DELIVERY_REJECTED',{reason:'11520_REAL_KAIOS_RECEIVING_GATE_NOT_DEPLOYED'});
+    const window=manifestWindowStatus(record);if(!window.ok)return fail(record,window.status,window);
     if(record._usedReplayKeys.has(record.replay_key))return fail(record,'REPLAY_BLOCKED');
-    advance(record,'READY_FOR_DISPATCH');journal(record,'EXACT_RECEIVER_AUTHORIZED',{receiver:record.receiver_contract_or_escrow_address,required_confirmations:record.required_confirmations});
+    advance(record,'READY_FOR_DISPATCH');journal(record,'EXACT_RECEIVER_AUTHORIZED',{receiver:record.receiver_contract_or_escrow_address,required_confirmations:record.required_confirmations,valid_from:record.valid_from,expires_at:record.expires_at});
     return {ok:true,snapshot:snapshot(record)};
   }
   function noteExternalTransaction(txHash){
@@ -106,6 +122,7 @@ export function createKaiosAtmReceivingModule(config={}){
   }
   function verifyReceiptEvidence(evidence={}){
     if(record.delivery_status!=='TX_PENDING')return fail(record,'DELIVERY_REJECTED',{reason:'WRONG_STATE'});
+    const window=manifestWindowStatus(record);if(!window.ok)return fail(record,window.status,window);
     if(String(evidence.receipt_verifier_id||'')!==String(record.receipt_verifier_id||''))return fail(record,'VERIFIER_ID_MISMATCH');
     if(Number(evidence.chain_id)!==record.receiver_chain_id)return fail(record,'CHAIN_ID_MISMATCH',{expected:record.receiver_chain_id,received:evidence.chain_id??null});
     if(evidence.rpc_agreement===false)return fail(record,'RPC_DISAGREEMENT');
