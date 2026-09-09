@@ -11,7 +11,7 @@ await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/tem
 await page.waitForTimeout(1900);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
-await page.waitForTimeout(900);
+await page.waitForFunction(()=>Boolean(globalThis.__K11520_WORLD_COORDS__?.physical),null,{timeout:10000});
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 const initialHp=Number((await page.locator('#hp').textContent()||'0').trim());
 assert.ok(initialHp>0,'player HP must start positive');
