@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {replaceLifeVisual} from './life-visual-factory.mjs';
 import {baselineWildEcology} from './market-life-source-runtime.mjs';
+import './selected-life-hud.mjs';
 
 const FLAG='__k11520LifeVisualBootstrapV3';
 const slots=[];
