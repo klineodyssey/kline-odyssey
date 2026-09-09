@@ -16,10 +16,12 @@ await page.waitForTimeout(700);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
 // This suite verifies the canonical XYZ controller at ordinary local-walk speed.
-// Use the real C rail's exact bottom detent; dedicated combat-drive QA separately
+// Wait until the live drive/controller has installed the C-rail listener, then use a
+// real pointer gesture inside the bottom detent. Dedicated combat-drive QA separately
 // verifies the 0C/1C/10C scale semantics and lot/mass HUD.
+await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_API__&&globalThis.__K11520_3D_CONTROL__,null,{timeout:5000});
 const cBox=await page.locator('#cControl').boundingBox();assert.ok(cBox,'C rail missing');
-const cPid=77,cx=cBox.x+cBox.width/2,cy=cBox.y+cBox.height;
+const cPid=77,cx=cBox.x+cBox.width/2,cy=cBox.y+cBox.height*.995;
 await page.dispatchEvent('#cControl','pointerdown',{pointerId:cPid,pointerType:'touch',clientX:cx,clientY:cy,buttons:1});
 await page.dispatchEvent('#cControl','pointermove',{pointerId:cPid,pointerType:'touch',clientX:cx,clientY:cy,buttons:1});
 await page.dispatchEvent('#cControl','pointerup',{pointerId:cPid,pointerType:'touch',clientX:cx,clientY:cy,buttons:0});
