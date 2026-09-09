@@ -18,7 +18,7 @@ assert.ok(initialHp>0,'player HP must start positive');
 await page.evaluate(()=>{
   window.dispatchEvent(new CustomEvent('11520:market-life-source',{detail:{
     type:'SPAWN',sourceId:'QA-BROWSER-MONSTER',lifeId:'LIFE-QA-BROWSER-BULL',name:'QA 攻擊牛魔王',species:'BULL_DEMON',
-    intelligence:4,markets:[],capital:0,vitality:100,maxHp:100,attack:7,rewardKaios:0,speed:.01,positions:{},x:1,y:0,z:0,
+    intelligence:4,markets:['BTCUSDT'],capital:100,vitality:100,maxHp:100,attack:7,rewardKaios:0,speed:.01,positions:{},x:1,y:0,z:0,
     strategy:'QA_HOSTILE_MONSTER',meta:{sourceClass:'QA_BROWSER',role:'MONSTER'}
   }}));
 });
