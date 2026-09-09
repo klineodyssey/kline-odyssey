@@ -1,8 +1,8 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.1.0
 STATUS: PROTOTYPE
 FORMAL_ORGAN_NAME: 11520 Combat Mass Scale Runtime
-PURPOSE: Canonical simulation-only bridge between KGEN lot/index scale and KAIOS XYZ game mass. No wallet, trade, chain, settlement, payment, or treasury mutation.
+PURPOSE: Canonical simulation-only bridge between KGEN lot/index scale and KAIOS XYZ game mass, while preserving the existing discrete C warp rail. Local walking at C=0 is allowed and does not become spot/warp trading. No wallet, trade, chain, settlement, payment, or treasury mutation.
 */
 
 export const K11520_COMBAT_SCALE = Object.freeze({
@@ -12,6 +12,8 @@ export const K11520_COMBAT_SCALE = Object.freeze({
   kgPerKaios: 1,
   kgPerLot: 1000,
 });
+
+export const K11520_C_LEVELS = Object.freeze([0,0.000001,0.00001,0.0001,0.001,0.01,0.1,1,10,100,1000]);
 
 const finite = value => Number.isFinite(Number(value));
 
@@ -37,13 +39,27 @@ export function combatExposure({lots=1, playerKaiosAvailable=Infinity}={}) {
   return Object.freeze({...scale,playerKaiosAvailable:available,exposedKaios,fullyBacked:available>=scale.kaiosMass});
 }
 
-export function warpVelocity(baseVelocity, c) {
-  const base = finite(baseVelocity) ? Number(baseVelocity) : 0;
-  const warp = finite(c) ? Math.max(0, Number(c)) : 0;
-  return base * warp;
+export function normalizeC(value) {
+  const c = finite(value) ? Number(value) : 0;
+  return K11520_C_LEVELS.reduce((best,level)=>Math.abs(level-c)<Math.abs(best-c)?level:best,K11520_C_LEVELS[0]);
+}
+
+export function cMode(value) {
+  const c = normalizeC(value);
+  if (c===0) return 'LOCAL_WALK';
+  if (c<1) return 'SUBLIGHT_WARP';
+  if (c===1) return 'LIGHT_SPEED_SPOT';
+  return 'SUPERLUMINAL_WARP';
+}
+
+export function movementVelocity({localBaseVelocity=1,c=0}={}) {
+  const base = finite(localBaseVelocity) ? Math.max(0,Number(localBaseVelocity)) : 0;
+  const warp = normalizeC(c);
+  // C=0 remains ordinary local XYZ walking. The C rail is not a literal multiplier that would freeze walking.
+  return warp===0 ? base : base*warp;
 }
 
 export function scaleInvariant() {
   const one = lotMass(1);
-  return one.kgenEquivalent===1 && one.indexUnits===1 && one.kaiosMass===1000 && one.kgMass===1000;
+  return one.kgenEquivalent===1 && one.indexUnits===1 && one.kaiosMass===1000 && one.kgMass===1000 && cMode(0)==='LOCAL_WALK' && cMode(1)==='LIGHT_SPEED_SPOT';
 }
