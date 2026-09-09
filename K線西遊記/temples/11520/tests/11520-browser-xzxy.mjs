@@ -15,6 +15,13 @@ await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch((
 await page.waitForTimeout(700);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
+// This suite verifies the canonical raw XYZ controller independently of C-drive scaling.
+// Stop only this test page's drive timer. The joystick renderer continues to expose raw
+// disc/rail vectors; dedicated combat-drive QA separately verifies real 0C/1C/10C behavior.
+await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_TIMER__&&globalThis.__K11520_3D_CONTROL__,null,{timeout:5000});
+await page.evaluate(()=>{clearInterval(globalThis.__K11520_COMBAT_DRIVE_TIMER__);globalThis.__K11520_COMBAT_DRIVE_TIMER__=null});
+await page.waitForTimeout(120);
+
 const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);assert.ok(m,'XYZ parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]}};
 const world=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_WORLD_COORDS__||null));
 const control=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_3D_CONTROL__||null));
@@ -22,8 +29,11 @@ const normal=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_NORM
 const mobileLayout=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_MOBILE_CONTROL_LAYOUT__||null));
 const joyBox=async()=>{const b=await page.locator('#joy').boundingBox();assert.ok(b,'joy missing');return b};
 const railBox=async()=>{const b=await page.locator('#yControl').boundingBox();assert.ok(b,'axis rail missing');return b};
+const knobBox=async()=>{const b=await page.locator('#knob').boundingBox();assert.ok(b,'knob missing');return b};
+const center=b=>({x:b.x+b.width/2,y:b.y+b.height/2});
 const point=(b,x,y,buttons=1,id=1)=>({pointerId:id,pointerType:'touch',clientX:b.x+b.width*x,clientY:b.y+b.height*y,buttons});
 const drag=async(toX,toY,id,hold=300)=>{const b=await joyBox();await page.dispatchEvent('#joy','pointerdown',point(b,.5,.5,1,id));await page.dispatchEvent('#joy','pointermove',point(b,toX,toY,1,id));await page.waitForTimeout(hold);await page.dispatchEvent('#joy','pointerup',point(b,toX,toY,0,id));await page.waitForTimeout(120)};
+const assertThumbFollows=async()=>{const b=await joyBox(),k0=await knobBox(),c0=center(k0),p0=point(b,.5,.5,1,91),p1=point(b,.88,.22,1,91);await page.dispatchEvent('#joy','pointerdown',p0);await page.dispatchEvent('#joy','pointermove',p1);await page.waitForTimeout(100);const k1=await knobBox(),c1=center(k1),travel=Math.hypot(c1.x-c0.x,c1.y-c0.y),limit=Math.min(b.width,b.height)/2*.70;assert.ok(c1.x>c0.x+12,`joystick thumb must follow finger right: ${JSON.stringify({c0,c1})}`);assert.ok(c1.y<c0.y-10,`joystick thumb must follow finger up: ${JSON.stringify({c0,c1})}`);assert.ok(travel<=limit+2,`joystick thumb must remain clamped: ${JSON.stringify({travel,limit,c0,c1})}`);assert.equal(await page.locator('#joy').getAttribute('data-k11520-disc-active'),'1','drag visual state missing');await page.screenshot({path:`${OUT}/11520-mobile-joystick-follow.png`,fullPage:true});await page.dispatchEvent('#joy','pointerup',{...p1,buttons:0});await page.waitForTimeout(180);const c2=center(await knobBox());assert.ok(Math.hypot(c2.x-c0.x,c2.y-c0.y)<3,`joystick thumb must ease back to center: ${JSON.stringify({c0,c2})}`);assert.equal(await page.locator('#joy').getAttribute('data-k11520-disc-active'),'0','thumb follow state must clear after release')};
 const dragRail=async(toY,id,hold=320)=>{const b=await railBox(),p0=point(b,.5,.5,1,id),p1=point(b,.5,toY,1,id);await page.dispatchEvent('#yControl','pointerdown',p0);await page.dispatchEvent('#yControl','pointermove',p1);await page.waitForTimeout(hold);await page.dispatchEvent('#yControl','pointerup',{...p1,buttons:0});await page.waitForTimeout(120)};
 const tapCenter=async id=>{const b=await joyBox(),p=point(b,.5,.5,1,id);await page.dispatchEvent('#joy','pointerdown',p);await page.waitForTimeout(70);await page.dispatchEvent('#joy','pointerup',{...p,buttons:0});await page.waitForTimeout(180)};
 const visible=async sel=>{const r=await page.locator(sel).evaluate(el=>{const b=el.getBoundingClientRect(),s=getComputedStyle(el);return{x:b.x,y:b.y,w:b.width,h:b.height,right:b.right,bottom:b.bottom,display:s.display,visibility:s.visibility,opacity:s.opacity,pointer:s.pointerEvents}});assert.ok(r.w>0&&r.h>0&&r.display!=='none'&&r.visibility!=='hidden'&&r.opacity!=='0',`${sel} not visible ${JSON.stringify(r)}`);return r};
@@ -35,6 +45,7 @@ const assertNormal=async(mode,axis)=>{await page.waitForFunction(([m,a])=>global
 
 await visible('#joy');await visible('#knob');await visible('#knob img');await visible('#yControl');
 let c=await control();assert.equal(c.mode,'XZ');assert.deepEqual(c.discAxes,['X','Z']);assert.equal(c.railAxis,'Y');assert.equal(c.unboundedCoordinateIntent,true);await assertKgenArt();await assertNormal('XZ','KY');assert.match(await page.locator('#yControl label').textContent(),/Y 縱搖桿/);
+await assertThumbFollows();
 let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+');assertFixed('XZ right',p0,p1,'y');
 await drag(.50,.10,102);let p2=await xyz();assert.ok(p2.z>p1.z,'XZ up must Z+');assertFixed('XZ up',p1,p2,'y');
 let w0=await world();await dragRail(.90,103,420);let w1=await world();assert.ok(w1.intent.y<w0.intent.y,'XZ rail down must advance Y- intent');assert.ok(near(w1.physical.y,w0.physical.y,.08),'ground must block physical body while Y intent keeps changing');
@@ -64,4 +75,4 @@ const labels=await page.locator('#k11520UiSettings .row span').allTextContents()
 await page.waitForTimeout(120);await page.screenshot({path:`${OUT}/11520-mobile-390x844.png`,fullPage:true});
 await fs.writeFile(`${OUT}/11520-xzxy-layout.json`,JSON.stringify({capturedAt:new Date().toISOString(),organ:'XYZ Plane Joystick',mode:(await control()).mode,xyz:await xyz(),world:await world(),controller:await control(),normalMarket:await normal(),mobileControlLayout:layout,quickActions:{attack,order}},null,2));
 await browser.close();
-console.log('11520 XZ+Y / XY+Z / YZ+X 3D controller + normal market + mobile control layout browser QA PASS');
+console.log('11520 XZ+Y / XY+Z / YZ+X controller + touch-follow thumb + normal market + mobile control layout browser QA PASS');
