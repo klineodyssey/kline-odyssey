@@ -7,14 +7,17 @@ const FLAG='__k11520LifeVisualBootstrapV3';
 const slots=[];
 const byLifeId=new Map();
 const pending=[];
-const INITIAL=baselineWildEcology().map(w=>[w.lifeId,w.species]);
+const BASELINE=baselineWildEcology();
+const INITIAL=BASELINE.map(w=>[w.lifeId,w.species]);
+const baselineByLifeId=new Map(BASELINE.map(w=>[w.lifeId,w]));
 
+function detailFromLife(life={}){return {lifeId:life.lifeId||null,displayName:life.name||life.lifeId||null,species:life.species||'MARKET_LIFE',hp:Number.isFinite(Number(life.hp))?Number(life.hp):Math.max(0,(Number(life.maxHp)||100)*(Number(life.vitality??100)/100)),maxHp:Number(life.maxHp)||100,x:Number(life.x)||0,y:Number(life.y)||0,z:Number(life.z)||0,state:life.state||((Number(life.vitality??100)>0)?'ALIVE':'DEAD')}}
 function bindSlot(index,parent,lifeId,species){
   const slot=slots[index]||(slots[index]={index,parent:null,lifeId:null,species:null});slot.parent=parent;
   if(lifeId){slot.lifeId=lifeId;byLifeId.set(lifeId,slot)}
   if(species)slot.species=species;
   replaceLifeVisual(parent,{species:slot.species||'MARKET_LIFE',lifeId:slot.lifeId});
-  parent.userData.slotIndex=index;parent.userData.lifeId=slot.lifeId;parent.userData.species=slot.species;return slot;
+  Object.assign(parent.userData,detailFromLife(baselineByLifeId.get(slot.lifeId)||{lifeId:slot.lifeId,species:slot.species}),{slotIndex:index});return slot;
 }
 function freeDynamicSlot(){return slots.find(s=>s?.parent&&!s.lifeId)||null}
 function applyEvent(event){
@@ -25,7 +28,7 @@ function applyEvent(event){
   let slot=byLifeId.get(event.lifeId);
   if(!slot&&event.type==='SPAWN'){slot=freeDynamicSlot();if(slot){slot.lifeId=event.lifeId;byLifeId.set(event.lifeId,slot)}}
   if(!slot){pending.push(event);return}
-  slot.parent.visible=Number(event.vitality??100)>0;slot.species=event.species||slot.species||'MARKET_LIFE';slot.parent.userData.lifeId=slot.lifeId;slot.parent.userData.species=slot.species;replaceLifeVisual(slot.parent,{species:slot.species,lifeId:slot.lifeId});
+  slot.parent.visible=Number(event.vitality??100)>0;slot.species=event.species||slot.species||'MARKET_LIFE';Object.assign(slot.parent.userData,detailFromLife({...event,lifeId:slot.lifeId,species:slot.species}));replaceLifeVisual(slot.parent,{species:slot.species,lifeId:slot.lifeId});
 }
 function flushPending(){for(let i=0;i<pending.length;){const free=freeDynamicSlot();if(!free)break;const e=pending.splice(i,1)[0];applyEvent(e)}}
 
