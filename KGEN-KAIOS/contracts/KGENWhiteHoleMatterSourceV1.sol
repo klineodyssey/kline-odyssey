@@ -4,6 +4,7 @@ pragma solidity 0.8.24;
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 interface IKAIOSShipIdentityReaderV1 {
     struct ShipIdentity {
@@ -44,14 +45,57 @@ interface IKGENWhiteHoleTokenPolicyV1 {
     function isTaxExempt(address account) external view returns (bool);
 }
 
+interface IKGENWhiteHoleBurnReplayRegistryV1 {
+    function consume(bytes32 burnId) external;
+    function consumed(bytes32 burnId) external view returns (bool);
+}
+
+/**
+ * @title KGENWhiteHoleBurnReplayRegistryV1
+ * @notice Append-only replay ledger shared by every approved White-Hole verifier version.
+ * @dev The canonical organ registry may replace the verifier after its governance delay, but no
+ *      verifier version can clear or reuse an already-consumed transaction/log burn coordinate.
+ */
+contract KGENWhiteHoleBurnReplayRegistryV1 {
+    string public constant VERSION = "1.0.0";
+    bytes32 public constant VERSION_ID = keccak256("KAIOS.KGEN.WHITE_HOLE.BURN.REPLAY.REGISTRY.V1.0.0");
+    bytes32 public constant ORGAN_WHITE_HOLE_BURN_VERIFIER =
+        keccak256("KAIOS.ORGAN.KGEN.WHITE_HOLE.BURN_VERIFIER");
+
+    IKAIOSOrganRegistry public immutable organRegistry;
+    mapping(bytes32 => bool) public consumed;
+
+    error ZeroAddress();
+    error InvalidBurnId();
+    error OnlyCurrentVerifier(address caller);
+    error BurnAlreadyConsumed(bytes32 burnId);
+
+    event BurnConsumed(bytes32 indexed burnId, address indexed verifier);
+
+    constructor(address registry) {
+        if (registry == address(0)) revert ZeroAddress();
+        organRegistry = IKAIOSOrganRegistry(registry);
+    }
+
+    function consume(bytes32 burnId) external {
+        if (burnId == bytes32(0)) revert InvalidBurnId();
+        address verifier = organRegistry.organ(ORGAN_WHITE_HOLE_BURN_VERIFIER);
+        if (verifier == address(0) || msg.sender != verifier) revert OnlyCurrentVerifier(msg.sender);
+        if (consumed[burnId]) revert BurnAlreadyConsumed(burnId);
+        consumed[burnId] = true;
+        emit BurnConsumed(burnId, msg.sender);
+    }
+}
+
 /**
  * @title KGENWhiteHoleBurnVerifierV1
  * @notice Immutable dual-attestor adapter for recent KGEN AMM burn receipts.
  * @dev EVM contracts cannot read historical transaction logs directly. Two distinct immutable
  *      attestors therefore sign the same block-anchored EIP-191 evidence. This contract checks the
  *      live KGEN AMM/tax policy, recomputes the burn from the gross KGEN amount, fixes the physical
- *      conversion scale at deployment, and rejects reused transaction-log coordinates. It has no
- *      owner, mutable verifier set, token transfer, mint, burn, rescue, or upgrade function.
+ *      conversion scale at deployment, rejects tax-exempt trade endpoints, and consumes each
+ *      transaction-log coordinate in the shared append-only replay registry. It has no owner,
+ *      mutable verifier set, token transfer, mint, burn, rescue, or upgrade function.
  */
 contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
     using MessageHashUtils for bytes32;
@@ -61,6 +105,7 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
     uint256 private constant BPS = 10_000;
 
     IKGENWhiteHoleTokenPolicyV1 public immutable kgen;
+    IKGENWhiteHoleBurnReplayRegistryV1 public immutable replayRegistry;
     address public immutable attestorA;
     address public immutable attestorB;
     uint256 public immutable matterPerKgenNumerator;
@@ -78,7 +123,6 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
     }
 
     mapping(bytes32 => VerifiedBurn) private _verifiedBurns;
-    mapping(bytes32 => bool) public transactionLogConsumed;
 
     error ZeroAddress();
     error InvalidAttestors();
@@ -86,7 +130,7 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
     error InvalidEvidence();
     error InvalidBlockEvidence(uint256 blockNumber, bytes32 blockHash);
     error PairNotRegistered(address pair);
-    error TaxExemptBurnSource(address burnSource);
+    error TaxExemptTradeEndpoint(address endpoint);
     error BurnSourceNotTradeBound(address burnSource);
     error ZeroBurn();
     error InvalidAttestations(address signerA, address signerB);
@@ -106,17 +150,19 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
 
     constructor(
         address kgenToken,
+        address sharedReplayRegistry,
         address firstAttestor,
         address secondAttestor,
         uint256 scaleNumerator,
         uint256 scaleDenominator
     ) {
-        if (kgenToken == address(0)) revert ZeroAddress();
+        if (kgenToken == address(0) || sharedReplayRegistry == address(0)) revert ZeroAddress();
         if (firstAttestor == address(0) || secondAttestor == address(0) || firstAttestor == secondAttestor) {
             revert InvalidAttestors();
         }
         if (scaleNumerator == 0 || scaleDenominator == 0) revert InvalidScale();
         kgen = IKGENWhiteHoleTokenPolicyV1(kgenToken);
+        replayRegistry = IKGENWhiteHoleBurnReplayRegistryV1(sharedReplayRegistry);
         attestorA = firstAttestor;
         attestorB = secondAttestor;
         matterPerKgenNumerator = scaleNumerator;
@@ -161,7 +207,8 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
             blockhash(evidence.blockNumber) != evidence.blockHash
         ) revert InvalidBlockEvidence(evidence.blockNumber, evidence.blockHash);
         if (!kgen.isMarketMakerPair(evidence.pair)) revert PairNotRegistered(evidence.pair);
-        if (kgen.isTaxExempt(evidence.burnSource)) revert TaxExemptBurnSource(evidence.burnSource);
+        if (kgen.isTaxExempt(evidence.trader)) revert TaxExemptTradeEndpoint(evidence.trader);
+        if (kgen.isTaxExempt(evidence.pair)) revert TaxExemptTradeEndpoint(evidence.pair);
         if (evidence.burnSource != evidence.trader && evidence.burnSource != evidence.pair) {
             revert BurnSourceNotTradeBound(evidence.burnSource);
         }
@@ -179,8 +226,8 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
         if (!correctAttestors) revert InvalidAttestations(signerA, signerB);
 
         burnId = burnIdFor(evidence);
-        if (transactionLogConsumed[burnId] || _verifiedBurns[burnId].valid) revert EvidenceAlreadyConsumed(burnId);
-        transactionLogConsumed[burnId] = true;
+        if (replayRegistry.consumed(burnId) || _verifiedBurns[burnId].valid) revert EvidenceAlreadyConsumed(burnId);
+        replayRegistry.consume(burnId);
         _verifiedBurns[burnId] = VerifiedBurn({
             burnId: burnId,
             tradeId: evidence.transactionHash,
@@ -209,6 +256,10 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
 
     function verifiedBurn(bytes32 burnId) external view returns (VerifiedBurn memory) {
         return _verifiedBurns[burnId];
+    }
+
+    function transactionLogConsumed(bytes32 burnId) external view returns (bool) {
+        return replayRegistry.consumed(burnId);
     }
 }
 

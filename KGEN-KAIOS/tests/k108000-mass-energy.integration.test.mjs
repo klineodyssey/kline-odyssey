@@ -22,6 +22,7 @@ const CONVERTER_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.KSHIP.CONVERTER"));
 const REACTOR_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR"));
 const MATTER_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE"));
 const KGOD_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.KGOD.TOKEN"));
+const BURN_VERIFIER_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.KGEN.WHITE_HOLE.BURN_VERIFIER"));
 const SHIP_ID = keccak256(toUtf8Bytes("KAIOS.SHIP.KUFO.TEST.001"));
 
 function artifact(name) {
@@ -66,8 +67,10 @@ async function fixture() {
     await owner.getAddress(),
   ]);
   await (await kgen.setMarketMakerPair(pairAddress, true)).wait();
+  const replayRegistry = await deploy("KGENWhiteHoleBurnReplayRegistryV1", owner, [await registry.getAddress()]);
   const burnVerifier = await deploy("KGENWhiteHoleBurnVerifierV1", owner, [
     await kgen.getAddress(),
+    await replayRegistry.getAddress(),
     await attestorA.getAddress(),
     await attestorB.getAddress(),
     1,
@@ -75,7 +78,7 @@ async function fixture() {
   ]);
   const matter = await deploy("KGENWhiteHoleMatterSourceV1", owner, [await burnVerifier.getAddress(), await ships.getAddress()]);
   const reactor = await deploy("K108000MassEnergyReactorV1", owner, [await kship.getAddress(), await registry.getAddress(), await ships.getAddress()]);
-  const kgod = await deploy("KGODV1", owner, [await registry.getAddress()]);
+  const kgod = await deploy("KGODV1", owner, [await reactor.getAddress()]);
 
   await (await ships.registerShip(SHIP_ID, await owner.getAddress(), await trader.getAddress(), await reactor.getAddress())).wait();
   await (await registry.setOrgan(OUTPUT_ID, await output.getAddress())).wait();
@@ -83,10 +86,11 @@ async function fixture() {
   await (await registry.setOrgan(REACTOR_ID, await reactor.getAddress())).wait();
   await (await registry.setOrgan(MATTER_ID, await matter.getAddress())).wait();
   await (await registry.setOrgan(KGOD_ID, await kgod.getAddress())).wait();
+  await (await registry.setOrgan(BURN_VERIFIER_ID, await burnVerifier.getAddress())).wait();
 
   return {
     eip1193, owner, beneficiary, outsider, attestorA, attestorB, pairAddress, trader,
-    registry, kufo, output, kship, converter, ships, kgen, burnVerifier, matter, reactor, kgod,
+    registry, kufo, output, kship, converter, ships, kgen, replayRegistry, burnVerifier, matter, reactor, kgod,
   };
 }
 
@@ -217,6 +221,76 @@ test("immutable dual-attestor verifier binds recent KGEN AMM burn evidence and b
   await assert.rejects(
     f.burnVerifier.submitVerifiedBurn.staticCall(proof.evidence, proof.signatureA, proof.signatureB),
   );
+});
+
+test("White-Hole verifier rejects a tax-exempt trader or pair even with both attestations", async () => {
+  const f = sharedFixture;
+  const amount = 5_000n;
+  const grossTradeKgen = amount * 1_000n;
+  const traderAddress = await f.trader.getAddress();
+  await (await f.kgen.setTaxExempt(f.pairAddress, true)).wait();
+  await (await f.kgen.transfer(traderAddress, grossTradeKgen)).wait();
+  const supplyBefore = await f.kgen.totalSupply();
+  const transfer = await f.kgen.connect(f.trader).transfer(f.pairAddress, grossTradeKgen);
+  const receipt = await transfer.wait();
+  assert.equal(await f.kgen.totalSupply(), supplyBefore, "the exempt transfer must not burn KGEN");
+  const block = await f.owner.provider.getBlock(receipt.blockNumber);
+  const evidence = {
+    transactionHash: receipt.hash,
+    blockNumber: receipt.blockNumber,
+    blockHash: block.hash,
+    logIndex: 987_654,
+    pair: f.pairAddress,
+    trader: traderAddress,
+    burnSource: traderAddress,
+    grossTradeKgen,
+  };
+  await f.eip1193.request({ method: "evm_mine", params: [] });
+  const digest = await f.burnVerifier.evidenceDigest(evidence);
+  await assert.rejects(f.burnVerifier.submitVerifiedBurn.staticCall(
+    evidence,
+    await f.attestorA.signMessage(getBytes(digest)),
+    await f.attestorB.signMessage(getBytes(digest)),
+  ));
+});
+
+test("shared replay registry rejects one KGEN burn across verifier versions", async () => {
+  const f = sharedFixture;
+  const proofV1 = await buildBurnEvidence(f, 5_000n, "cross-version");
+  const acceptedV1 = await f.burnVerifier.submitVerifiedBurn.staticCall(
+    proofV1.evidence,
+    proofV1.signatureA,
+    proofV1.signatureB,
+  );
+  await (await f.burnVerifier.submitVerifiedBurn(proofV1.evidence, proofV1.signatureA, proofV1.signatureB)).wait();
+
+  const verifierV2 = await deploy("KGENWhiteHoleBurnVerifierV1", f.owner, [
+    await f.kgen.getAddress(),
+    await f.replayRegistry.getAddress(),
+    await f.attestorA.getAddress(),
+    await f.attestorB.getAddress(),
+    1,
+    1,
+  ]);
+  await (await f.registry.setOrgan(BURN_VERIFIER_ID, await verifierV2.getAddress())).wait();
+  const digestV2 = await verifierV2.evidenceDigest(proofV1.evidence);
+  const signatureA2 = await f.attestorA.signMessage(getBytes(digestV2));
+  const signatureB2 = await f.attestorB.signMessage(getBytes(digestV2));
+  assert.equal(await verifierV2.burnIdFor(proofV1.evidence), acceptedV1[0]);
+  await assert.rejects(verifierV2.submitVerifiedBurn.staticCall(proofV1.evidence, signatureA2, signatureB2));
+});
+
+test("KGOD immutable reactor binding rejects a registry-selected forged reaction source", async () => {
+  const f = sharedFixture;
+  const spoof = await deploy("K108000ReactionSpoofMock", f.owner);
+  await (await f.registry.setOrgan(REACTOR_ID, await spoof.getAddress())).wait();
+  await assert.rejects(spoof.mintWithoutFuel.staticCall(
+    await f.kgod.getAddress(),
+    keccak256(toUtf8Bytes("TEST.NO.KSHIP.NO.MATTER")),
+    await f.beneficiary.getAddress(),
+    parseEther("100"),
+  ));
+  assert.equal(await f.kgod.totalSupply(), 0n);
 });
 
 test("white-hole matter rejects self-match, wash-trade and duplicate burn credit", async () => {

@@ -10,17 +10,23 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 16,
-  "contractCount": 27,
+  "sourceCount": 28,
+  "contractCount": 42,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
-  "warnings": 0,
+  "warnings": 1,
   "contracts": [
     {
       "contractName": "KGEN_TempleHeart_Upgradeable",
       "sourceName": "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
       "bytecodeBytes": 23768,
       "deployedBytecodeBytes": 23553
+    },
+    {
+      "contractName": "KGEN_Token_V7_5_2",
+      "sourceName": "../KGEN/contracts/KGEN_Token_V7_5_2.sol",
+      "bytecodeBytes": 5290,
+      "deployedBytecodeBytes": 3807
     },
     {
       "contractName": "ERC1967Proxy",
@@ -83,6 +89,12 @@
       "deployedBytecodeBytes": 17
     },
     {
+      "contractName": "K108000MassEnergyReactorV1",
+      "sourceName": "contracts/K108000MassEnergyReactorV1.sol",
+      "bytecodeBytes": 4792,
+      "deployedBytecodeBytes": 4470
+    },
+    {
       "contractName": "KAIOS",
       "sourceName": "contracts/KAIOS.sol",
       "bytecodeBytes": 7228,
@@ -93,6 +105,12 @@
       "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
       "bytecodeBytes": 2381,
       "deployedBytecodeBytes": 2084
+    },
+    {
+      "contractName": "KAIOSAlchemyFurnaceV4",
+      "sourceName": "contracts/KAIOSAlchemyFurnaceV4.sol",
+      "bytecodeBytes": 3257,
+      "deployedBytecodeBytes": 2952
     },
     {
       "contractName": "KAIOSEventHorizonVaultV01",
@@ -119,16 +137,52 @@
       "deployedBytecodeBytes": 1535
     },
     {
+      "contractName": "KAIOSShipIdentityRegistryV1",
+      "sourceName": "contracts/KAIOSShipIdentityRegistryV1.sol",
+      "bytecodeBytes": 2110,
+      "deployedBytecodeBytes": 1938
+    },
+    {
+      "contractName": "KGENWhiteHoleBurnReplayRegistryV1",
+      "sourceName": "contracts/KGENWhiteHoleMatterSourceV1.sol",
+      "bytecodeBytes": 1091,
+      "deployedBytecodeBytes": 924
+    },
+    {
+      "contractName": "KGENWhiteHoleBurnVerifierV1",
+      "sourceName": "contracts/KGENWhiteHoleMatterSourceV1.sol",
+      "bytecodeBytes": 5515,
+      "deployedBytecodeBytes": 4992
+    },
+    {
+      "contractName": "KGENWhiteHoleMatterSourceV1",
+      "sourceName": "contracts/KGENWhiteHoleMatterSourceV1.sol",
+      "bytecodeBytes": 3059,
+      "deployedBytecodeBytes": 2816
+    },
+    {
+      "contractName": "KGODV1",
+      "sourceName": "contracts/KGODV1.sol",
+      "bytecodeBytes": 4154,
+      "deployedBytecodeBytes": 3167
+    },
+    {
       "contractName": "KSHIP",
       "sourceName": "contracts/KSHIP.sol",
-      "bytecodeBytes": 4153,
-      "deployedBytecodeBytes": 3118
+      "bytecodeBytes": 4479,
+      "deployedBytecodeBytes": 3444
     },
     {
       "contractName": "KSHIPConverter",
       "sourceName": "contracts/KSHIPConverter.sol",
       "bytecodeBytes": 1221,
       "deployedBytecodeBytes": 950
+    },
+    {
+      "contractName": "KSHIPV5",
+      "sourceName": "contracts/KSHIPV5.sol",
+      "bytecodeBytes": 5665,
+      "deployedBytecodeBytes": 4612
     },
     {
       "contractName": "KUFO",
@@ -143,10 +197,46 @@
       "deployedBytecodeBytes": 765
     },
     {
-      "contractName": "KGEN_TempleHeart_V3_3_2_Baseline",
-      "sourceName": "tests/baseline/KGEN_TempleHeart_V3_3_2_Baseline.sol",
-      "bytecodeBytes": 18513,
-      "deployedBytecodeBytes": 18298
+      "contractName": "KUFOOutputJindouyun168888V4",
+      "sourceName": "contracts/KUFOOutputJindouyun168888V4.sol",
+      "bytecodeBytes": 1089,
+      "deployedBytecodeBytes": 849
+    },
+    {
+      "contractName": "KUFOV4",
+      "sourceName": "contracts/KUFOV4.sol",
+      "bytecodeBytes": 9498,
+      "deployedBytecodeBytes": 8513
+    },
+    {
+      "contractName": "KGENWhiteHoleBurnVerifierMock",
+      "sourceName": "contracts/test/KGENWhiteHoleBurnVerifierMock.sol",
+      "bytecodeBytes": 721,
+      "deployedBytecodeBytes": 693
+    },
+    {
+      "contractName": "K108000PositiveMatterSourceMock",
+      "sourceName": "contracts/testing/K108000PositiveMatterSourceMock.sol",
+      "bytecodeBytes": 508,
+      "deployedBytecodeBytes": 480
+    },
+    {
+      "contractName": "K108000ReactionSpoofMock",
+      "sourceName": "contracts/testing/K108000PositiveMatterSourceMock.sol",
+      "bytecodeBytes": 1068,
+      "deployedBytecodeBytes": 1040
+    },
+    {
+      "contractName": "KUFOV4MockOrganRegistry",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 212,
+      "deployedBytecodeBytes": 185
+    },
+    {
+      "contractName": "KUFOV4MockOutput",
+      "sourceName": "tests/contracts/KUFOV4EvmHarness.sol",
+      "bytecodeBytes": 312,
+      "deployedBytecodeBytes": 284
     },
     {
       "contractName": "MockKGEN",
