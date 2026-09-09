@@ -10,8 +10,9 @@ const SENDER=DIGITAL_ANT_11520_CARGO.sender;
 const TX='0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const BLOCK_HASH='0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 const TRANSFER_TOPIC='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+function activeWindow(){const now=Date.now();return {valid_from:new Date(now-60_000).toISOString(),expires_at:new Date(now+3_600_000).toISOString()}}
 function module(config={}){return createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',required_confirmations:12,...config})}
-function register(m,{replay='REPLAY-1',amount='1080000',fee='888'}={}){return m.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:amount,freight_fee:fee,purpose_hash:'QA-PURPOSE',replay_key:replay})}
+function register(m,{replay='REPLAY-1',amount='1080000',fee='888',...window}={}){return m.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:amount,freight_fee:fee,purpose_hash:'QA-PURPOSE',replay_key:replay,...activeWindow(),...window})}
 function receipt(overrides={}){
   const base={
     receipt_verifier_id:'QA-VERIFIER',chain_id:56,status:1,transaction_hash:TX,block_number:'123456',block_hash:BLOCK_HASH,
@@ -31,11 +32,22 @@ test('configured module also requires an explicit confirmation policy',()=>{
   register(m);assert.equal(m.authorizeExactReceiver().ok,false);assert.equal(m.snapshot().real_receiving_gate,'NOT_DEPLOYED');
 });
 
-test('happy path requires exact chain/log identity, finality, balance reconciliation and ATM acceptance before DELIVERED',()=>{
+test('manifest validity window is structurally required at registration',()=>{
+  const missing=module();const a=missing.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:'1',purpose_hash:'QA-PURPOSE',replay_key:'R'});assert.equal(a.status,'MANIFEST_TIME_INVALID');
+  const reversed=module();const now=Date.now();const b=register(reversed,{valid_from:new Date(now+60_000).toISOString(),expires_at:new Date(now).toISOString()});assert.equal(b.status,'MANIFEST_TIME_INVALID');
+});
+
+test('manifest cannot authorize before valid_from or at/after expires_at',()=>{
+  const now=Date.now();
+  const future=module();register(future,{valid_from:new Date(now+3_600_000).toISOString(),expires_at:new Date(now+7_200_000).toISOString()});assert.equal(future.authorizeExactReceiver().status,'MANIFEST_NOT_YET_VALID');
+  const expired=module();register(expired,{valid_from:new Date(now-7_200_000).toISOString(),expires_at:new Date(now-3_600_000).toISOString()});assert.equal(expired.authorizeExactReceiver().status,'MANIFEST_EXPIRED');
+});
+
+test('happy path requires exact chain/log identity, finality, manifest time, balance reconciliation and ATM acceptance before DELIVERED',()=>{
   const m=module();register(m);assert.equal(m.authorizeExactReceiver().ok,true);assert.equal(m.noteExternalTransaction(TX).ok,true);
   assert.equal(m.verifyReceiptEvidence(receipt()).ok,true);assert.equal(m.snapshot().available_ATM_inventory,'0');
   assert.equal(m.snapshot().block_number,'123456');assert.equal(m.snapshot().block_hash,BLOCK_HASH);assert.equal(m.snapshot().transfer_log_index,'7');assert.equal(m.snapshot().confirmations,'12');
-  assert.equal(m.snapshot().receipt_evidence_authority,'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY');
+  assert.equal(m.snapshot().receipt_evidence_authority,'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY');assert.equal(m.snapshot().manifest_time_authority,'SYSTEM_WALL_CLOCK_FAIL_CLOSED');
   assert.equal(m.reconcileBalance({token_balance_before:'10',token_balance_after:'1080010'}).ok,true);assert.equal(m.markArrived().ok,true);assert.equal(m.acceptAtmInventory({accepted:true}).ok,true);
   const delivered=m.markDelivered({gas_cost_bnb:.001,delivery_cost:'100',freight_fee_evidence:true});assert.equal(delivered.ok,true);
   const s=m.snapshot();assert.equal(s.delivery_status,'DELIVERED');assert.equal(s.restricted_inventory_balance,'1080000');assert.equal(s.custody_liability_balance,'1080000');assert.equal(s.available_ATM_inventory,'1080000');assert.equal(s.freight_fee_revenue,'888');assert.equal(s.net_profit,'788');assert.equal(s.mainnet_write_executed,false);
