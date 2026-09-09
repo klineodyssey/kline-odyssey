@@ -9,8 +9,8 @@ const TOKEN='0x2222222222222222222222222222222222222222';
 const SENDER=DIGITAL_ANT_11520_CARGO.sender;
 const TX='0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 function module(config={}){return createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',...config})}
-function register(m,{replay='REPLAY-1'}={}){return m.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:1080000,freight_fee:888,purpose_hash:'QA-PURPOSE',replay_key:replay})}
-function receipt(overrides={}){return {status:1,transaction_hash:TX,block_number:123456,rpc_agreement:true,transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount:1080000},...overrides}}
+function register(m,{replay='REPLAY-1',amount='1080000',fee='888'}={}){return m.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:amount,freight_fee:fee,purpose_hash:'QA-PURPOSE',replay_key:replay})}
+function receipt(overrides={}){return {status:1,transaction_hash:TX,block_number:123456,rpc_agreement:true,transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount:'1080000'},...overrides}}
 
 test('default module is NOT_DEPLOYED and cannot authorize a dispatch',()=>{
   const m=createKaiosAtmReceivingModule();register(m);const a=m.authorizeExactReceiver();
@@ -19,17 +19,32 @@ test('default module is NOT_DEPLOYED and cannot authorize a dispatch',()=>{
 
 test('happy path requires exact receipt, balance reconciliation, ATM acceptance before DELIVERED',()=>{
   const m=module();register(m);assert.equal(m.authorizeExactReceiver().ok,true);assert.equal(m.noteExternalTransaction(TX).ok,true);
-  assert.equal(m.verifyReceiptEvidence(receipt()).ok,true);assert.equal(m.snapshot().available_ATM_inventory,0);
-  assert.equal(m.reconcileBalance({token_balance_before:10,token_balance_after:1080010}).ok,true);assert.equal(m.markArrived().ok,true);assert.equal(m.acceptAtmInventory({accepted:true}).ok,true);
-  const delivered=m.markDelivered({gas_cost_bnb:.001,delivery_cost:100,freight_fee_evidence:true});assert.equal(delivered.ok,true);
-  const s=m.snapshot();assert.equal(s.delivery_status,'DELIVERED');assert.equal(s.restricted_inventory_balance,1080000);assert.equal(s.custody_liability_balance,1080000);assert.equal(s.available_ATM_inventory,1080000);assert.equal(s.freight_fee_revenue,888);assert.equal(s.net_profit,788);assert.equal(s.mainnet_write_executed,false);
+  assert.equal(m.verifyReceiptEvidence(receipt()).ok,true);assert.equal(m.snapshot().available_ATM_inventory,'0');
+  assert.equal(m.reconcileBalance({token_balance_before:'10',token_balance_after:'1080010'}).ok,true);assert.equal(m.markArrived().ok,true);assert.equal(m.acceptAtmInventory({accepted:true}).ok,true);
+  const delivered=m.markDelivered({gas_cost_bnb:.001,delivery_cost:'100',freight_fee_evidence:true});assert.equal(delivered.ok,true);
+  const s=m.snapshot();assert.equal(s.delivery_status,'DELIVERED');assert.equal(s.restricted_inventory_balance,'1080000');assert.equal(s.custody_liability_balance,'1080000');assert.equal(s.available_ATM_inventory,'1080000');assert.equal(s.freight_fee_revenue,'888');assert.equal(s.net_profit,'788');assert.equal(s.mainnet_write_executed,false);
+});
+
+test('exact integer accounting preserves values above Number.MAX_SAFE_INTEGER',()=>{
+  const amount='900719925474099312345678901234567890';
+  const before='123456789012345678901234567890';
+  const after=(BigInt(before)+BigInt(amount)).toString();
+  const m=module();register(m,{amount,fee:'999999999999999999'});m.authorizeExactReceiver();m.noteExternalTransaction(TX);
+  assert.equal(m.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount}})).ok,true);
+  assert.equal(m.reconcileBalance({token_balance_before:before,token_balance_after:after}).ok,true);m.markArrived();m.acceptAtmInventory({accepted:true});
+  assert.equal(m.snapshot().authorized_amount,amount);assert.equal(m.snapshot().received_amount,amount);assert.equal(m.snapshot().available_ATM_inventory,amount);
+});
+
+test('unsafe or fractional Number amounts fail closed instead of rounding',()=>{
+  const unsafe=module();const a=register(unsafe,{amount:Number.MAX_SAFE_INTEGER+10});assert.equal(a.ok,false);assert.equal(a.status,'INVALID_EXACT_AMOUNT');
+  const fractional=module();const b=register(fractional,{amount:1.5});assert.equal(b.ok,false);assert.equal(b.status,'INVALID_EXACT_AMOUNT');
 });
 
 test('cannot jump directly to delivered from local state',()=>{const m=module();register(m);assert.equal(m.markDelivered({freight_fee_evidence:true}).ok,false);assert.notEqual(m.snapshot().delivery_status,'DELIVERED')});
 
 test('wrong receiver and amount mismatch fail closed',()=>{
-  const a=module();register(a);a.authorizeExactReceiver();a.noteExternalTransaction(TX);assert.equal(a.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:'0x3333333333333333333333333333333333333333',amount:1080000}})).status,'WRONG_RECEIVER');
-  const b=module();register(b);b.authorizeExactReceiver();b.noteExternalTransaction(TX);assert.equal(b.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount:1079999}})).status,'AMOUNT_MISMATCH');
+  const a=module();register(a);a.authorizeExactReceiver();a.noteExternalTransaction(TX);assert.equal(a.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:'0x3333333333333333333333333333333333333333',amount:'1080000'}})).status,'WRONG_RECEIVER');
+  const b=module();register(b);b.authorizeExactReceiver();b.noteExternalTransaction(TX);assert.equal(b.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount:'1079999'}})).status,'AMOUNT_MISMATCH');
 });
 
 test('RPC disagreement, reverted and dropped transaction are explicit errors',()=>{
@@ -38,7 +53,7 @@ test('RPC disagreement, reverted and dropped transaction are explicit errors',()
   const c=module();register(c);c.authorizeExactReceiver();c.noteExternalTransaction(TX);assert.equal(c.verifyReceiptEvidence(receipt({dropped:true})).status,'TX_DROPPED');
 });
 
-test('balance delta mismatch does not release ATM inventory',()=>{const m=module();register(m);m.authorizeExactReceiver();m.noteExternalTransaction(TX);m.verifyReceiptEvidence(receipt());const r=m.reconcileBalance({token_balance_before:0,token_balance_after:100});assert.equal(r.status,'RECONCILIATION_REQUIRED');assert.equal(m.snapshot().available_ATM_inventory,0)});
+test('balance delta mismatch does not release ATM inventory',()=>{const m=module();register(m);m.authorizeExactReceiver();m.noteExternalTransaction(TX);m.verifyReceiptEvidence(receipt());const r=m.reconcileBalance({token_balance_before:'0',token_balance_after:'100'});assert.equal(r.status,'RECONCILIATION_REQUIRED');assert.equal(m.snapshot().available_ATM_inventory,'0')});
 
 test('append-only journal advances monotonically',()=>{const m=module();register(m);m.authorizeExactReceiver();const a=m.journal();assert.ok(a.length>=3);assert.deepEqual(a.map(x=>x.seq),a.map((_,i)=>i+1));a[0].type='MUTATED_COPY';assert.notEqual(m.journal()[0].type,'MUTATED_COPY')});
 
