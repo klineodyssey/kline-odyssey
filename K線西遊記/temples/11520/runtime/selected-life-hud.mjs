@@ -1,10 +1,11 @@
 /* KGEN_META
-VERSION: 1.0.1
-REVISION: 2026-09-09.SELECTED-LIFE-HUD
+VERSION: 1.0.2
+REVISION: 2026-09-09.SELECTED-LIFE-HUD-NODE-TESTABLE
 STATUS: CANDIDATE
 PURPOSE: Tap/click an existing 3D Life body and expose canonical XYZ combat identity, HP and state without creating parallel combat data.
 */
-import * as THREE from 'three';
+let THREE=null;
+if(typeof document!=='undefined')THREE=await import('three');
 
 const FLAG='__k11520SelectedLifeHudV1';
 const PANEL_ID='selectedLifeHud';
@@ -20,5 +21,5 @@ export function selectedLifeText(data={}){const s=selectedLifeSnapshot(data);ret
 function ensurePanel(){if(typeof document==='undefined')return null;let p=document.getElementById(PANEL_ID);if(p)return p;p=document.createElement('section');p.id=PANEL_ID;p.hidden=true;p.setAttribute('aria-live','polite');p.setAttribute('aria-label','選中生命資訊');p.style.cssText='position:fixed;left:12px;top:152px;z-index:470;max-width:min(250px,calc(100vw - 24px));padding:9px 11px;border:1px solid rgba(126,228,255,.65);border-radius:10px;background:rgba(4,17,27,.88);color:#e8fbff;font:600 12px/1.45 system-ui,sans-serif;white-space:pre-line;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.3)';document.body.appendChild(p);return p}
 function lifeRoot(object){let n=object,candidate=null;while(n){if(n.userData?.lifeVisual||n.userData?.lifeId){candidate=n;if(Number.isFinite(Number(n.userData?.maxHp)))return n}n=n.parent}return candidate}
 function show(root){const p=ensurePanel();if(!p||!root)return null;const d={...(root.userData||{}),x:root.userData?.x??root.position?.x,y:root.userData?.y??root.position?.y,z:root.userData?.z??root.position?.z};p.textContent=selectedLifeText(d);p.hidden=false;p.dataset.lifeId=selectedLifeSnapshot(d).lifeId;return d}
-export function installSelectedLifeHud(){if(typeof document==='undefined'||THREE.WebGLRenderer.prototype[FLAG])return {ok:true,alreadyInstalled:true};const original=THREE.WebGLRenderer.prototype.render;THREE.WebGLRenderer.prototype.render=function(scene,camera){const canvas=this.domElement;if(canvas&&!canvas.__k11520LifePick){canvas.__k11520LifePick=true;const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();canvas.addEventListener('pointerup',e=>{if(e.button!=null&&e.button!==0)return;const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;pointer.x=((e.clientX-rect.left)/rect.width)*2-1;pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;ray.setFromCamera(pointer,canvas.__k11520Camera||camera);const hit=ray.intersectObjects((canvas.__k11520Scene||scene).children,true).find(h=>lifeRoot(h.object));if(hit)show(lifeRoot(hit.object))},{passive:true})}canvas.__k11520Scene=scene;canvas.__k11520Camera=camera;return original.call(this,scene,camera)};THREE.WebGLRenderer.prototype[FLAG]=true;ensurePanel();globalThis.K11520SelectedLifeHud={show,selectedLifeSnapshot,selectedLifeText};return {ok:true}}
+export function installSelectedLifeHud(){if(typeof document==='undefined'||!THREE)return {ok:true,browserOnly:true};if(THREE.WebGLRenderer.prototype[FLAG])return {ok:true,alreadyInstalled:true};const original=THREE.WebGLRenderer.prototype.render;THREE.WebGLRenderer.prototype.render=function(scene,camera){const canvas=this.domElement;if(canvas&&!canvas.__k11520LifePick){canvas.__k11520LifePick=true;const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();canvas.addEventListener('pointerup',e=>{if(e.button!=null&&e.button!==0)return;const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;pointer.x=((e.clientX-rect.left)/rect.width)*2-1;pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;ray.setFromCamera(pointer,canvas.__k11520Camera||camera);const hit=ray.intersectObjects((canvas.__k11520Scene||scene).children,true).find(h=>lifeRoot(h.object));if(hit)show(lifeRoot(hit.object))},{passive:true})}canvas.__k11520Scene=scene;canvas.__k11520Camera=camera;return original.call(this,scene,camera)};THREE.WebGLRenderer.prototype[FLAG]=true;ensurePanel();globalThis.K11520SelectedLifeHud={show,selectedLifeSnapshot,selectedLifeText};return {ok:true}}
 installSelectedLifeHud();
