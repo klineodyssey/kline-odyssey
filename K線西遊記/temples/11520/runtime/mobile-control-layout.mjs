@@ -1,13 +1,13 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.1.9
-REVISION: 2026-09-09.WUKONG-Y-THUMB
-PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; presents the normal-axis energy in two clear sign classes (>=0 and <0); gives the normal-axis rail a visible Wukong artwork thumb; and keeps the tested master HUD collapse without changing XYZ or trading semantics.
+VERSION: 1.2.0
+REVISION: 2026-09-09.ANALOG-THUMB-FOLLOW
+PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; moves wallet/chat to the right organ rail; prevents market cards from covering world/life HUD; presents the normal-axis energy in two clear sign classes (>=0 and <0); gives the normal-axis rail a visible Wukong artwork thumb; makes the fixed-base circular joystick artwork follow the player finger within the canonical input radius and ease back to center; and keeps the tested master HUD collapse without changing XYZ or trading semantics.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=420;
-let guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
+let guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false,discVisualBound=false,discVisualPid=null;
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 
 function installStyle(){
@@ -23,6 +23,8 @@ function installStyle(){
   .tele{left:6px!important;width:calc(50% - 9px)!important}
   .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
   .minimapWrap{top:286px!important}
+  #knob{will-change:transform!important;transition:transform 120ms cubic-bezier(.2,.75,.25,1),filter 100ms ease!important}
+  #knob[data-k11520-disc-drag="1"]{transition:none!important;filter:brightness(1.08) drop-shadow(0 0 8px #68e4ff66)!important}
 
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
   #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(16px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
@@ -93,6 +95,21 @@ function applyRightOrgans(){
   for(const [el,bottom] of organs){if(!el)continue;setImportant(el,'position','fixed');setImportant(el,'left','auto');setImportant(el,'right','5px');setImportant(el,'bottom',bottom);setImportant(el,'width','42px');setImportant(el,'height','42px')}
   if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px')}
 }
+function installDiscThumbFollow(){
+  const joy=$('#joy'),knob=$('#knob');if(!joy||!knob||discVisualBound)return false;
+  const move=source=>{
+    const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=source.clientX-cx,dy=source.clientY-cy,dist=Math.hypot(dx,dy);
+    const travel=Math.max(1,Math.min(r.width,r.height)/2*.68),scale=Math.min(1,dist/travel),tx=dist?dx/dist*travel*scale:0,ty=dist?dy/dist*travel*scale:0;
+    knob.dataset.k11520DiscDrag='1';knob.style.transform=`translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+    document.documentElement.dataset.k11520DiscThumbFollowing='1';
+  };
+  const end=e=>{if(e.pointerId!==discVisualPid)return;discVisualPid=null;delete knob.dataset.k11520DiscDrag;knob.style.transform='translate(0px, 0px)';document.documentElement.dataset.k11520DiscThumbFollowing='0'};
+  joy.addEventListener('pointerdown',e=>{discVisualPid=e.pointerId;move(e)},{capture:false,passive:true});
+  joy.addEventListener('pointermove',e=>{if(e.pointerId===discVisualPid)move(e)},{capture:false,passive:true});
+  joy.addEventListener('pointerup',end,{capture:false,passive:true});joy.addEventListener('pointercancel',end,{capture:false,passive:true});
+  discVisualBound=true;document.documentElement.dataset.k11520DiscThumbFollowing='0';return true;
+}
+function applyRightAndDisc(){applyRightOrgans();installDiscThumbFollow()}
 function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;
   const text=(line.textContent||'').replace(/\s+/g,' ').trim();
@@ -125,10 +142,10 @@ function installEnergyRead(){
 }
 function installMasterCollapse(){
   let b=$('#k11520HudCollapseAll');if(!b){b=document.createElement('button');b.id='k11520HudCollapseAll';b.type='button';b.setAttribute('aria-label','總收合或展開 HUD');document.body.appendChild(b)}
-  const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
+  const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightAndDisc()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();applyRail();applyRightAndDisc();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
@@ -143,7 +160,7 @@ function measure(){
 }
 function installGuard(){
   try{guard?.disconnect()}catch{}
-  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightOrgans();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
+  const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightAndDisc();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
   timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
 }
 export function install11520MobileControlLayout(){apply();installGuard();addEventListener('resize',apply,{passive:true});return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__}
