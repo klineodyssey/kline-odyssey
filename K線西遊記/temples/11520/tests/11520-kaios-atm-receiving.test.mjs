@@ -8,18 +8,34 @@ const RECEIVER='0x1111111111111111111111111111111111111111';
 const TOKEN='0x2222222222222222222222222222222222222222';
 const SENDER=DIGITAL_ANT_11520_CARGO.sender;
 const TX='0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-function module(config={}){return createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',...config})}
+const BLOCK_HASH='0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+const TRANSFER_TOPIC='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+function module(config={}){return createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',required_confirmations:12,...config})}
 function register(m,{replay='REPLAY-1',amount='1080000',fee='888'}={}){return m.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:amount,freight_fee:fee,purpose_hash:'QA-PURPOSE',replay_key:replay})}
-function receipt(overrides={}){return {status:1,transaction_hash:TX,block_number:123456,rpc_agreement:true,transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount:'1080000'},...overrides}}
+function receipt(overrides={}){
+  const base={
+    receipt_verifier_id:'QA-VERIFIER',chain_id:56,status:1,transaction_hash:TX,block_number:'123456',block_hash:BLOCK_HASH,
+    observed_head_block:'123467',rpc_agreement:true,
+    transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount:'1080000',transaction_hash:TX,block_number:'123456',block_hash:BLOCK_HASH,log_index:'7',event_signature:TRANSFER_TOPIC},
+  };
+  return {...base,...overrides};
+}
 
 test('default module is NOT_DEPLOYED and cannot authorize a dispatch',()=>{
   const m=createKaiosAtmReceivingModule();register(m);const a=m.authorizeExactReceiver();
   assert.equal(a.ok,false);assert.equal(m.snapshot().real_receiving_gate,'NOT_DEPLOYED');assert.equal(m.snapshot().delivery_status,'AWAITING_EXACT_AUTHORIZATION');
 });
 
-test('happy path requires exact receipt, balance reconciliation, ATM acceptance before DELIVERED',()=>{
+test('configured module also requires an explicit confirmation policy',()=>{
+  const m=createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER'});
+  register(m);assert.equal(m.authorizeExactReceiver().ok,false);assert.equal(m.snapshot().real_receiving_gate,'NOT_DEPLOYED');
+});
+
+test('happy path requires exact chain/log identity, finality, balance reconciliation and ATM acceptance before DELIVERED',()=>{
   const m=module();register(m);assert.equal(m.authorizeExactReceiver().ok,true);assert.equal(m.noteExternalTransaction(TX).ok,true);
   assert.equal(m.verifyReceiptEvidence(receipt()).ok,true);assert.equal(m.snapshot().available_ATM_inventory,'0');
+  assert.equal(m.snapshot().block_number,'123456');assert.equal(m.snapshot().block_hash,BLOCK_HASH);assert.equal(m.snapshot().transfer_log_index,'7');assert.equal(m.snapshot().confirmations,'12');
+  assert.equal(m.snapshot().receipt_evidence_authority,'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY');
   assert.equal(m.reconcileBalance({token_balance_before:'10',token_balance_after:'1080010'}).ok,true);assert.equal(m.markArrived().ok,true);assert.equal(m.acceptAtmInventory({accepted:true}).ok,true);
   const delivered=m.markDelivered({gas_cost_bnb:.001,delivery_cost:'100',freight_fee_evidence:true});assert.equal(delivered.ok,true);
   const s=m.snapshot();assert.equal(s.delivery_status,'DELIVERED');assert.equal(s.restricted_inventory_balance,'1080000');assert.equal(s.custody_liability_balance,'1080000');assert.equal(s.available_ATM_inventory,'1080000');assert.equal(s.freight_fee_revenue,'888');assert.equal(s.net_profit,'788');assert.equal(s.mainnet_write_executed,false);
@@ -30,7 +46,8 @@ test('exact integer accounting preserves values above Number.MAX_SAFE_INTEGER',(
   const before='123456789012345678901234567890';
   const after=(BigInt(before)+BigInt(amount)).toString();
   const m=module();register(m,{amount,fee:'999999999999999999'});m.authorizeExactReceiver();m.noteExternalTransaction(TX);
-  assert.equal(m.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount}})).ok,true);
+  const ev=receipt();ev.transfer={...ev.transfer,amount};
+  assert.equal(m.verifyReceiptEvidence(ev).ok,true);
   assert.equal(m.reconcileBalance({token_balance_before:before,token_balance_after:after}).ok,true);m.markArrived();m.acceptAtmInventory({accepted:true});
   assert.equal(m.snapshot().authorized_amount,amount);assert.equal(m.snapshot().received_amount,amount);assert.equal(m.snapshot().available_ATM_inventory,amount);
 });
@@ -40,11 +57,29 @@ test('unsafe or fractional Number amounts fail closed instead of rounding',()=>{
   const fractional=module();const b=register(fractional,{amount:1.5});assert.equal(b.ok,false);assert.equal(b.status,'INVALID_EXACT_AMOUNT');
 });
 
+test('receipt verifier id and chain id are exact fail-closed boundaries',()=>{
+  const a=module();register(a);a.authorizeExactReceiver();a.noteExternalTransaction(TX);assert.equal(a.verifyReceiptEvidence(receipt({receipt_verifier_id:'CALLER-FORGED'})).status,'VERIFIER_ID_MISMATCH');
+  const b=module();register(b);b.authorizeExactReceiver();b.noteExternalTransaction(TX);assert.equal(b.verifyReceiptEvidence(receipt({chain_id:97})).status,'CHAIN_ID_MISMATCH');
+});
+
+test('receipt requires exact block identity and configured finality',()=>{
+  const a=module();register(a);a.authorizeExactReceiver();a.noteExternalTransaction(TX);assert.equal(a.verifyReceiptEvidence(receipt({block_hash:null})).status,'BLOCK_IDENTITY_MISSING');
+  const b=module();register(b);b.authorizeExactReceiver();b.noteExternalTransaction(TX);assert.equal(b.verifyReceiptEvidence(receipt({observed_head_block:'123466'})).status,'FINALITY_REQUIRED');
+  const c=module();register(c);c.authorizeExactReceiver();c.noteExternalTransaction(TX);assert.equal(c.verifyReceiptEvidence(receipt({observed_head_block:'123455'})).status,'FINALITY_REQUIRED');
+});
+
+test('decoded Transfer must bind transaction, block, log index and ERC20 event signature',()=>{
+  for(const [field,value] of [['transaction_hash','0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'],['block_hash','0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'],['event_signature','0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee']]){
+    const m=module();register(m);m.authorizeExactReceiver();m.noteExternalTransaction(TX);const ev=receipt();ev.transfer={...ev.transfer,[field]:value};assert.equal(m.verifyReceiptEvidence(ev).status,'LOG_IDENTITY_MISSING');
+  }
+  const missing=module();register(missing);missing.authorizeExactReceiver();missing.noteExternalTransaction(TX);const ev=receipt();ev.transfer={...ev.transfer,log_index:null};assert.equal(missing.verifyReceiptEvidence(ev).status,'LOG_IDENTITY_MISSING');
+});
+
 test('cannot jump directly to delivered from local state',()=>{const m=module();register(m);assert.equal(m.markDelivered({freight_fee_evidence:true}).ok,false);assert.notEqual(m.snapshot().delivery_status,'DELIVERED')});
 
 test('wrong receiver and amount mismatch fail closed',()=>{
-  const a=module();register(a);a.authorizeExactReceiver();a.noteExternalTransaction(TX);assert.equal(a.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:'0x3333333333333333333333333333333333333333',amount:'1080000'}})).status,'WRONG_RECEIVER');
-  const b=module();register(b);b.authorizeExactReceiver();b.noteExternalTransaction(TX);assert.equal(b.verifyReceiptEvidence(receipt({transfer:{token:TOKEN,from:SENDER,to:RECEIVER,amount:'1079999'}})).status,'AMOUNT_MISMATCH');
+  const a=module();register(a);a.authorizeExactReceiver();a.noteExternalTransaction(TX);const ea=receipt();ea.transfer={...ea.transfer,to:'0x3333333333333333333333333333333333333333'};assert.equal(a.verifyReceiptEvidence(ea).status,'WRONG_RECEIVER');
+  const b=module();register(b);b.authorizeExactReceiver();b.noteExternalTransaction(TX);const eb=receipt();eb.transfer={...eb.transfer,amount:'1079999'};assert.equal(b.verifyReceiptEvidence(eb).status,'AMOUNT_MISMATCH');
 });
 
 test('RPC disagreement, reverted and dropped transaction are explicit errors',()=>{
