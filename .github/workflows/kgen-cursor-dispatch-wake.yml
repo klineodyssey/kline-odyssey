@@ -60,6 +60,34 @@ jobs:
             -H "Authorization: Bearer ${CURSOR_API_KEY}" \
             -H "Content-Type: application/json" \
             -d "$BODY")
+          API_ERROR_CODE=$(python3 <<'PY'
+          import json
+
+          try:
+              payload = json.load(open("/tmp/cursor-agent.json", encoding="utf-8"))
+          except (OSError, json.JSONDecodeError):
+              print("unparseable_response")
+          else:
+              error = payload.get("error") or {}
+              print(error.get("code") or "")
+          PY
+          )
           echo "Cursor API HTTP ${HTTP}"
-          cat /tmp/cursor-agent.json
-          test "$HTTP" -ge 200 -a "$HTTP" -lt 300
+          if [ "$HTTP" -ge 200 ] && [ "$HTTP" -lt 300 ]; then
+            echo "Cursor Cloud Agent dispatch accepted."
+            exit 0
+          fi
+          if [ "$HTTP" = "403" ] && [ "$API_ERROR_CODE" = "plan_required" ]; then
+            echo "::warning title=Cursor Cloud Agent HOLD::Cursor Cloud Agent is unavailable for the current plan; no agent was launched."
+            {
+              echo "## Cursor dispatch status"
+              echo ""
+              echo "- Status: \`HOLD_EXTERNAL_PLAN_REQUIRED\`"
+              echo "- HTTP: \`403\`"
+              echo "- API code: \`plan_required\`"
+              echo "- Agent launched: \`NO\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "::error title=Cursor Cloud Agent dispatch failed::HTTP ${HTTP}; API code ${API_ERROR_CODE:-unknown}"
+          exit 1
