@@ -1,17 +1,18 @@
 /*
 KGEN_META
-VERSION: 1.6.0
-REVISION: 2026-09-08.SOURCE-LIFE-3D-LIFESTYLE
+VERSION: 1.7.0
+REVISION: 2026-09-10.MONSTER-AGGRESSION
 STATUS: ACTIVE / SIMULATION-FIRST
-LAST_UPDATED: 2026-09-08
+LAST_UPDATED: 2026-09-10
 UPDATED_BY: ChatGPT / GPT-5.6 Sol
-CHANGE_REASON: Make source-driven Digital Ant and Market Life visibly inhabit the 11520 XYZ world, fix dynamic market-dimension updates, and connect autonomous travel/work/rest lifestyle decisions without fabricating real settlement.
+CHANGE_REASON: Keep source-driven Digital Ant and Market Life autonomous while allowing actual hostile monster species to chase nearby players, stop in attack range, and emit simulation-only KAIOS-HP contact damage events.
 SOURCE_OF_TRUTH: TRUE
 */
 
 import {createMarketLife,perceiveMarketLife,decideMarketLife,decideMarketLifeLifestyle,tickMarketLifeNeeds,travelMarketLife,advanceMarketLifeCycle,maybeGrowMarketLife,snapshotMarketLife,remember} from './market-life-runtime.mjs';
 import {deriveMarketRelations,animationIntentForRelations} from './market-relation-runtime.mjs';
 import {drainMarketLifeSourceEvents,installMarketLifeSourceListeners} from './market-life-source-runtime.mjs';
+import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-runtime.mjs';
 
 export const WORLD_RULES=Object.freeze({
   placeId:'11520',settlement:'KAIOS',
@@ -175,7 +176,14 @@ export function tickWorld(world,player,now=Date.now()){
   const events=[];events.push(...applyMarketLifeSourceEvents(world,drainMarketLifeSourceEvents()));const playerAxes=readPlayerAxesFromGame(),quotes=readQuotesFromGame();
   if(now-(world.lastMarketLifeTick||0)>=WORLD_RULES.marketLifeDecisionMs){const ml=tickMarketLives(world,{playerAxes,quotes,now,deltaMs,availableMarkets:['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']});events.push(...ml.events)}
   else for(const m of world.monsters){if(!m.sourceManaged||m.state==='DEAD')continue;tickSourceManagedLife(m,{playerAxes,quotes,now,deltaMs,makeDecision:false})}
-  world.lastTick=now;return{world,events,playerDamage:0};
+  for(const m of world.monsters){
+    if(!m.sourceManaged||m.state==='DEAD'||!isHostileMonster(m))continue;
+    const aggression=chaseStep(m,player,{deltaMs,aggroRange:WORLD_RULES.monsterAggroRange,attackRange:WORLD_RULES.monsterAttackRange});
+    if(aggression.state==='CHASE'||aggression.state==='ATTACK'){m.state=aggression.state;m.visualMode=aggression.state;events.push({type:'MONSTER_AGGRO',monsterId:m.id,lifeId:m.lifeId,state:aggression.state,distance:aggression.distance,conflictAxes:aggression.conflictAxes,simulationOnly:true})}
+    const hit=maybeMonsterHit(m,player,now,{cooldownMs:WORLD_RULES.monsterAttackCooldownMs,attackRange:WORLD_RULES.monsterAttackRange});if(hit)events.push(hit);
+  }
+  const playerDamage=events.filter(e=>e.type==='PLAYER_HIT').reduce((n,e)=>n+Math.max(0,finite(e.damage)),0);
+  world.lastTick=now;return{world,events,playerDamage};
 }
 
 export function getMarketLifeSnapshot(world){return world.monsters.filter(m=>m.sourceManaged).map(m=>({monsterId:m.id,name:m.baseName,sourceId:m.sourceId,relation:m.marketRelation,visualMode:m.visualMode,mission:m.mission,cargo:m.cargo,route:m.route,position:{x:m.x,y:m.y,z:m.z},lifestyle:m.marketLife.lifestyle,world:m.marketLife.world,life:snapshotMarketLife(m.marketLife)}))}
