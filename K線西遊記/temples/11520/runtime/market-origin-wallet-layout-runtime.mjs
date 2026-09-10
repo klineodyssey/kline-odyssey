@@ -1,17 +1,37 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.1.0
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: 11520 Market Origin + Stable Wallet Layout Runtime
-PURPOSE: Seed XYZ from live KX/KY/KZ market quotes once, preserve autonomous signed displacement thereafter, keep wallet toggle at one fixed anchor, and keep the remaining-axis rail clear of the right utility dock.
+PURPOSE: Use live KX/KY/KZ market quotes as the immutable global XYZ origin for the play session, add signed player displacement on top, keep the wallet toggle at one fixed anchor, and keep the remaining-axis rail clear of the right utility dock. Local physics stays origin-relative for numerical stability; global coordinates are market-origin based.
 */
 const $=s=>document.querySelector(s);
 const MARKET_ORIGIN_KEY='k11520.marketOrigin.v1';
-function marketPrice(axis){const card=document.querySelector(`[data-axis="${axis}"]`);const text=card?.querySelector('.q')?.textContent||'';const n=Number(text.replace(/[^0-9+\-.]/g,''));return Number.isFinite(n)&&n!==0?n:null}
-function readOrigin(){const x=marketPrice('KX'),y=marketPrice('KY'),z=marketPrice('KZ');return [x,y,z].every(Number.isFinite)?{x,y,z,source:'KX_KY_KZ_LIVE_MARKET'}:null}
-function installStyle(){let s=$('#k11520StableWalletRailStyle');if(!s){s=document.createElement('style');s.id='k11520StableWalletRailStyle';document.head.appendChild(s)}s.textContent=`#walletToggle{position:fixed!important;right:6px!important;top:auto!important;bottom:118px!important;left:auto!important;transform:none!important;z-index:9900!important}@media(max-width:420px){#walletPanel{right:56px!important;left:auto!important;max-width:calc(100vw - 68px)!important}#cControl{left:136px!important;right:auto!important}#lotsControl{left:186px!important;right:auto!important}#yControl{left:236px!important;right:auto!important}.controls .attack{left:136px!important;right:auto!important}.controls .order{left:200px!important;right:auto!important}}`;return s}
+const AXES=['KX','KY','KZ'];
+const axisKey={KX:'x',KY:'y',KZ:'z'};
+let walletInitial=null;
+
+function parseNumber(text){const clean=String(text||'').replace(/,/g,'').replace(/[^0-9+\-.]/g,'');const n=Number(clean);return Number.isFinite(n)?n:null}
+function marketPrice(axis){const card=document.querySelector(`[data-axis="${axis}"]`);return parseNumber(card?.querySelector('.q')?.textContent)}
+function marketName(axis){return document.querySelector(`[data-axis="${axis}"] [data-market]`)?.value?.replace('/','')||null}
+function readOrigin(){const values=Object.fromEntries(AXES.map(a=>[axisKey[a],marketPrice(a)]));if(!Object.values(values).every(Number.isFinite))return null;return{...values,markets:Object.fromEntries(AXES.map(a=>[a,marketName(a)])),source:'KX_KY_KZ_LIVE_MARKET',capturedAt:new Date().toISOString()}}
+function installStyle(){let s=$('#k11520StableWalletRailStyle');if(!s){s=document.createElement('style');s.id='k11520StableWalletRailStyle';document.head.appendChild(s)}s.textContent=`
+#walletToggle{position:fixed!important;right:72px!important;top:398px!important;bottom:auto!important;left:auto!important;transform:none!important;z-index:9900!important}
+@media(max-width:420px){
+  #walletPanel{right:68px!important;left:auto!important;max-width:calc(100vw - 84px)!important}
+  #cControl{left:136px!important;right:auto!important}
+  #lotsControl{left:186px!important;right:auto!important}
+  #yControl{left:236px!important;right:auto!important}
+  .controls .attack{left:136px!important;right:auto!important}
+  .controls .order{left:200px!important;right:auto!important}
+}
+`;return s}
 function walletAnchor(){const b=$('#walletToggle');if(!b)return null;const r=b.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}}
-function layoutReport(){const rail=$('#yControl'),dock=$('#dock');if(!rail||!dock)return null;const r=rail.getBoundingClientRect(),d=dock.getBoundingClientRect();const overlap=r.left<d.right&&r.right>d.left&&r.top<d.bottom&&r.bottom>d.top;const out={rail:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},dock:{left:d.left,right:d.right,top:d.top,bottom:d.bottom},overlap,walletAnchor:walletAnchor()};document.documentElement.dataset.k11520MarketOriginLayout=overlap?'RED':'PASS';globalThis.__K11520_MARKET_ORIGIN_LAYOUT__=out;return out}
+function overlapRect(a,b){return !!a&&!!b&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}
+function rect(el){if(!el)return null;const r=el.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
+function layoutReport(){const rail=rect($('#yControl')),dock=rect($('#dock')),wallet=walletAnchor();const overlap=overlapRect(rail,dock);if(!walletInitial&&wallet)walletInitial={...wallet};const walletStable=!!walletInitial&&!!wallet&&Math.abs(walletInitial.x-wallet.x)<1&&Math.abs(walletInitial.y-wallet.y)<1;const out={version:'1.1.0',rail,dock,overlap,walletAnchor:wallet,walletInitial,walletStable};document.documentElement.dataset.k11520MarketOriginLayout=!overlap&&walletStable?'PASS':'RED';globalThis.__K11520_MARKET_ORIGIN_LAYOUT__=out;globalThis.__K11520_WALLET_ANCHOR__={initial:walletInitial,current:wallet,stable:walletStable};return out}
 function publishOrigin(origin){if(!origin)return false;globalThis.__K11520_MARKET_ORIGIN__={...origin,immutableBaseline:true,signedDisplacement:true};try{sessionStorage.setItem(MARKET_ORIGIN_KEY,JSON.stringify(origin))}catch{}document.dispatchEvent(new CustomEvent('k11520:market-origin-ready',{detail:origin}));return true}
-function restoreOrSeed(){try{const old=JSON.parse(sessionStorage.getItem(MARKET_ORIGIN_KEY)||'null');if(old&&[old.x,old.y,old.z].every(Number.isFinite))return publishOrigin(old)}catch{}return publishOrigin(readOrigin())}
-export function install11520MarketOriginWalletLayout(){if(typeof document==='undefined')return null;installStyle();let tries=0;const timer=setInterval(()=>{tries++;if(globalThis.__K11520_MARKET_ORIGIN__||restoreOrSeed()||tries>80)clearInterval(timer);layoutReport()},250);const panel=$('#walletPanel'),btn=$('#walletToggle');if(panel&&btn){const anchor=walletAnchor();globalThis.__K11520_WALLET_ANCHOR__={initial:anchor,current:anchor,stable:true};new MutationObserver(()=>{installStyle();requestAnimationFrame(()=>{const now=walletAnchor();globalThis.__K11520_WALLET_ANCHOR__={initial:anchor,current:now,stable:!!anchor&&!!now&&Math.abs(anchor.x-now.x)<1&&Math.abs(anchor.y-now.y)<1}})}).observe(panel,{attributes:true,attributeFilter:['class']})}addEventListener('resize',()=>{installStyle();layoutReport()},{passive:true});for(const t of [0,300,900,1800])setTimeout(()=>{installStyle();layoutReport();restoreOrSeed()},t);return{origin:globalThis.__K11520_MARKET_ORIGIN__||null,layout:layoutReport()}}
+function restoreOrSeed(){if(globalThis.__K11520_MARKET_ORIGIN__)return true;try{const old=JSON.parse(sessionStorage.getItem(MARKET_ORIGIN_KEY)||'null');if(old&&[old.x,old.y,old.z].every(Number.isFinite))return publishOrigin(old)}catch{}return publishOrigin(readOrigin())}
+function globalizeLocal(){const origin=globalThis.__K11520_MARKET_ORIGIN__,local=globalThis.__K11520_WORLD_COORDS__;if(!origin||!local?.physical)return null;const p=local.physical,i=local.intent||p;const physical={x:origin.x+(Number(p.x)||0),y:origin.y+(Number(p.y)||0),z:origin.z+(Number(p.z)||0)};const intent={x:origin.x+(Number(i.x)||0),y:origin.y+(Number(i.y)||0),z:origin.z+(Number(i.z)||0)};const globalCoords={origin:{x:origin.x,y:origin.y,z:origin.z},originMarkets:origin.markets||{},displacement:{x:Number(p.x)||0,y:Number(p.y)||0,z:Number(p.z)||0},physical,intent,mode:local.mode||'XZ',signedMirrorSpace:true,localPhysicsOriginRelative:true};globalThis.__K11520_GLOBAL_WORLD_COORDS__=globalCoords;const xyz=$('#xyz');if(xyz)xyz.textContent=`X ${physical.x.toLocaleString(undefined,{maximumFractionDigits:2})} · Y ${physical.y.toLocaleString(undefined,{maximumFractionDigits:2})} · Z ${physical.z.toLocaleString(undefined,{maximumFractionDigits:2})}`;const control=globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__;const rail=(control?.railAxis||'Y').toUpperCase(),key=rail.toLowerCase(),read=$('#yRead');if(read&&Number.isFinite(physical[key]))read.textContent=`${rail} ${physical[key].toLocaleString(undefined,{maximumFractionDigits:2})}`;return globalCoords}
+function tick(){installStyle();restoreOrSeed();const coords=globalizeLocal(),layout=layoutReport();globalThis.__K11520_MARKET_ORIGIN_RUNTIME__={version:'1.1.0',origin:globalThis.__K11520_MARKET_ORIGIN__||null,global:coords,layout};return globalThis.__K11520_MARKET_ORIGIN_RUNTIME__}
+export function install11520MarketOriginWalletLayout(){if(typeof document==='undefined')return null;installStyle();const timer=setInterval(tick,80);globalThis.__K11520_MARKET_ORIGIN_TIMER__&&clearInterval(globalThis.__K11520_MARKET_ORIGIN_TIMER__);globalThis.__K11520_MARKET_ORIGIN_TIMER__=timer;addEventListener('resize',tick,{passive:true});for(const t of [0,200,500,1000,1800])setTimeout(tick,t);return tick()}
 if(typeof document!=='undefined')install11520MarketOriginWalletLayout();
