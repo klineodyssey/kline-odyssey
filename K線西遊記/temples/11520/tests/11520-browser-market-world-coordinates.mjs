@@ -8,7 +8,7 @@ await page.route('https://api.binance.com/api/v3/ticker/price',async route=>rout
 await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1200);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
-await page.waitForFunction(()=>globalThis.__K11520_MARKET_WORLD_COORDS__?.version==='1.0.0',null,{timeout:5000});
+await page.waitForFunction(()=>globalThis.__K11520_MARKET_WORLD_COORDS__?.version==='1.0.1',null,{timeout:5000});
 let s=await page.evaluate(()=>structuredClone(globalThis.__K11520_MARKET_WORLD_COORDS__));
 assert.deepEqual(s.origin,{x:60000,y:2500,z:900});
 assert.deepEqual(s.world,{x:60000,y:2500,z:900});
