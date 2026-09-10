@@ -19,7 +19,7 @@ await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch((
 await page.waitForTimeout(900);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 await page.waitForFunction(()=>globalThis.__K11520_ACTION_RAIL_CLEARANCE__?.version==='1.2.0',null,{timeout:4000});
-await page.waitForFunction(()=>globalThis.__K11520_MARKET_ORIGIN_RUNTIME__?.version==='1.2.0'&&globalThis.__K11520_GLOBAL_WORLD_COORDS__?.physical,null,{timeout:5000});
+await page.waitForFunction(()=>globalThis.__K11520_MARKET_ORIGIN_RUNTIME__?.version==='1.3.0'&&globalThis.__K11520_GLOBAL_WORLD_COORDS__?.physical,null,{timeout:5000});
 const r=await page.evaluate(()=>structuredClone(globalThis.__K11520_ACTION_RAIL_CLEARANCE__));
 assert.ok(r.rail,'remaining-axis rail missing');
 assert.ok(r.dock,'right utility dock missing');
@@ -43,12 +43,12 @@ assert.ok(Math.abs(moved.global.displacement.x)+Math.abs(moved.global.displaceme
 for(const k of ['x','y','z'])assert.ok(Math.abs(moved.global.physical[k]-(moved.origin[k]+moved.global.displacement[k]))<1e-6,`global ${k} must equal market origin + signed displacement`);
 assert.notEqual(moved.visible,initial.visible,'visible global XYZ must change when player moves');
 
-// Wallet contract: one fixed toggle anchor before/after open/close.
+// Wallet contract: one fixed viewport toggle anchor before/after open/close.
 const wallet=page.locator('#walletToggle');await wallet.waitFor({state:'visible',timeout:3000});const w0=await wallet.boundingBox();assert.ok(w0,'wallet toggle missing');
 await wallet.click({force:true});await page.waitForTimeout(180);const w1=await wallet.boundingBox();assert.ok(w1,'wallet toggle missing after first toggle');
 await wallet.click({force:true});await page.waitForTimeout(180);const w2=await wallet.boundingBox();assert.ok(w2,'wallet toggle missing after second toggle');
 for(const w of [w1,w2]){assert.ok(Math.abs(w.x-w0.x)<1&&Math.abs(w.y-w0.y)<1,`wallet toggle anchor moved: ${JSON.stringify({w0,w})}`)}
-const walletState=await page.evaluate(()=>structuredClone(globalThis.__K11520_WALLET_ANCHOR__));assert.equal(walletState.stable,true,'wallet runtime must report stable fixed anchor');
+const walletState=await page.evaluate(()=>structuredClone(globalThis.__K11520_WALLET_ANCHOR__));assert.equal(walletState.stable,true,'wallet runtime must report stable fixed anchor');assert.equal(walletState.viewportPinned,true,'wallet toggle must remain a body-level viewport anchor');
 
 // Open-order layer contract: the existing confirm surface must render and hit-test above every ordinary HUD organ.
 await page.evaluate(()=>document.querySelector('#confirm')?.classList.add('open'));
