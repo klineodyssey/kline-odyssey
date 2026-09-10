@@ -14,7 +14,7 @@ import {
 const root = path.resolve(import.meta.dirname, "..");
 const artifacts = path.join(root, "artifacts");
 const YEAR = 31_556_926;
-const OUTPUT_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.KUFO.OUTPUT.168888"));
+const OUTPUT_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.WORMHOLE.511111"));
 const CONVERTER_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.KSHIP.CONVERTER"));
 
 function artifact(name) {
@@ -38,7 +38,7 @@ async function fixture() {
   const fragmented = await provider.getSigner(3);
 
   const registry = await deploy("KUFOV4MockOrganRegistry", owner);
-  const kufo = await deploy("KUFOV4", owner, [await registry.getAddress()]);
+  const kufo = await deploy("KUFO", owner, [await registry.getAddress()]);
   const output = await deploy("KUFOV4MockOutput", owner);
   const kship = await deploy("KSHIP", owner, [await registry.getAddress(), await kufo.getAddress()]);
   const converter = await deploy("KSHIPConverter", owner, [await kufo.getAddress(), await kship.getAddress()]);
@@ -71,7 +71,7 @@ test("deployed V4 rejects immature conversion, then mints exact KSHIP after firs
   assert.equal(await kship.balanceOf(beneficiaryAddress), parseEther("500"));
   assert.equal(await kship.balanceOf(await owner.getAddress()), 0n);
   assert.equal(await kufo.conservationInvariantHolds(), true);
-  assert.equal(await kship.conservationInvariantHolds(parseEther("0.5")), true);
+  assert.equal(await kship.supplyConservationHolds(), true);
 });
 
 test("immediate mint proof is replay-protected and KSHIP proof beneficiary is bound", async () => {
@@ -79,7 +79,7 @@ test("immediate mint proof is replay-protected and KSHIP proof beneficiary is bo
   const proof = keccak256(toUtf8Bytes("evm-proof-replay"));
   await (await output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1"))).wait();
   await assert.rejects(
-    output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1")),
+    async () => (await output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1"))).wait(),
   );
 
   await increaseTime(eip1193, YEAR);

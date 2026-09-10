@@ -1,3 +1,5 @@
+export const UFO_RUNTIME_VERSION = "1.0.0";
+
 export const UFO_LIFE_STATE = Object.freeze({
   0: "DORMANT",
   1: "ALIVE",

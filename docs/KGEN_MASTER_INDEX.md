@@ -16,11 +16,19 @@ This addendum does not regenerate the historical inventory below.
 | `docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md` | Physics | SI mass, wave/photon, taxonomy/composition and Planck boundary reconciliation | CURRENT review candidate |
 | `KGEN-KAIOS/contracts/KAIOS.sol` | Contract | Friction Mirror KAIOS monetary core | Review only |
 | `KGEN-KAIOS/contracts/KAIOSOrganRegistry.sol` | Contract | Governed runtime organ resolution | Review only |
-| `KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol` | Contract | 18911 Alchemy proof runtime | Review only |
-| `KGEN-KAIOS/contracts/KUFO.sol` | Contract | KUFO gram-scale Token Core | Review only |
-| `KGEN-KAIOS/contracts/KUFOClaimWormhole.sol` | Contract | 511111 matured proof claim organ | Review only |
-| `KGEN-KAIOS/contracts/KSHIP.sol` | Contract | KSHIP milligram-scale Token Core | Review only |
-| `KGEN-KAIOS/contracts/KSHIPConverter.sol` | Contract | KUFO-to-KSHIP conversion organ | Review only |
+| `KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol` | Contract | K18911 immediate Alchemy proof runtime | Review only |
+| `KGEN-KAIOS/contracts/KUFO.sol` | Contract | K511111 Three-Autumn KUFO Token Core | Review only |
+| `KGEN-KAIOS/contracts/KUFOClaimWormhole.sol` | Contract | K511111 fixed-beneficiary KUFO birth organ | Review only |
+| `KGEN-KAIOS/contracts/KSHIP.sol` | Contract | K108000 KSHIP antimatter Token Core | Review only |
+| `KGEN-KAIOS/contracts/KSHIPConverter.sol` | Contract | K108000 點石成金 KUFO-to-KSHIP organ | Review only |
+| `KGEN-KAIOS/contracts/KAIOSUFOOrganRuntime.sol` | Contract | Canonical version-internal SHIP_ID organ readiness projection | Review only |
+| `KGEN-KAIOS/contracts/KAIOSUFOLife.sol` | Contract | Canonical version-internal UFO lifecycle state machine | Review only |
+| `KGEN-KAIOS/contracts/KAIOSUFOPropulsionPhysics.sol` | Contract | Canonical version-internal deterministic propulsion accounting | Review only |
+| `KGEN-KAIOS/app/ufo-runtime.mjs` | Runtime | Canonical version-internal fail-closed UFO UI projection | Review only |
+| `KGEN-KAIOS/contracts/K108000MassEnergyReactor.sol` | Contract | K108000 equal-matter reactor and conserved output ledger | Review only |
+| `KGEN-KAIOS/contracts/KGOD.sol` | Contract | K168888 proof-bound KGOD Token Core | Review only |
+| `KGEN-KAIOS/contracts/KAIOSShipIdentityRegistry.sol` | Contract | SHIP_ID controller and reactor binding | Review only |
+| `KGEN-KAIOS/contracts/KGENWhiteHoleMatterSource.sol` | Contract | Replay-protected KGEN-burn positive-matter credit | Review only |
 | `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol` | Contract | Version-free TempleHeart UUPS integration candidate | Review only |
 | `KGEN-KAIOS/reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Audit | PR #127/#128 reconciliation and test evidence | Ready for Human review |
 | `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md` | Testnet Evidence | Human-readable TempleHeart V3.3.2 to V3.4.0 UUPS rehearsal | PASS on BSC Testnet chainId 97 |

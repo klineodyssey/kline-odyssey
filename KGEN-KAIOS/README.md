@@ -16,11 +16,19 @@ No deployment script or Mainnet address is included.
 |---|---|
 | `contracts/KAIOS.sol` | Friction Mirror monetary core; 1 destroyed KGEN -> 1,000 KAIOS to 18888 |
 | `contracts/KAIOSOrganRegistry.sol` | Bootstrap-sealed and timelocked 18911/511111/KSHIP/Pair organ registry |
-| `contracts/KAIOSAlchemyFurnace.sol` | Holder-authorized KAIOS burn and 49-epoch maturity proof |
-| `contracts/KUFO.sol` | Proof-bound, zero-genesis KUFO core |
-| `contracts/KUFOClaimWormhole.sol` | 511111 single-claim organ with fixed beneficiary |
-| `contracts/KSHIP.sol` | Proof-bound, zero-genesis KSHIP core |
-| `contracts/KSHIPConverter.sol` | Holder-authorized KUFO-to-KSHIP conversion organ |
+| `contracts/KAIOSAlchemyFurnace.sol` | K18911 holder-authorized KAIOS burn with current-KGEN balance proof |
+| `contracts/KUFO.sol` | K511111 proof-bound Three-Autumn KUFO core; version is internal |
+| `contracts/KUFOClaimWormhole.sol` | K511111 immediate single-proof KUFO birth organ with fixed beneficiary |
+| `contracts/KSHIP.sol` | K108000 proof-bound KSHIP antimatter core; version is internal |
+| `contracts/KSHIPConverter.sol` | K108000 點石成金 KUFO-to-KSHIP conversion organ |
+| `contracts/KAIOSUFOOrganRuntime.sol` | Version-internal, read-only SHIP_ID organ readiness projection |
+| `contracts/KAIOSUFOLife.sol` | Version-internal UFO lifecycle state machine; no automatic formal Life birth |
+| `contracts/KAIOSUFOPropulsionPhysics.sol` | Version-internal deterministic mass-energy flight simulator; no token movement |
+| `app/ufo-runtime.mjs` | Version-internal fail-closed UFO UI projection and action guards |
+| `contracts/K108000MassEnergyReactor.sol` | Equal-matter KSHIP reactor with exact output conservation |
+| `contracts/KGOD.sol` | K168888 reaction-proof-bound KGOD material core |
+| `contracts/KAIOSShipIdentityRegistry.sol` | Ship/controller/trading-engine/reactor identity binding |
+| `contracts/KGENWhiteHoleMatterSource.sol` | Replay-protected KGEN-burn positive-matter credit path |
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
 

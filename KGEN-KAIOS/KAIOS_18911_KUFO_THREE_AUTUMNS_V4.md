@@ -7,9 +7,9 @@ This is the current Product 5 review candidate. It preserves deployed history bu
 ## Point roles
 
 - K18911 = 煉丹爐; KAIOS alchemy entry.
-- K511111 = 齊天大聖宮 / KUFO 蟲洞與幣世界座標. `511111` is a civilization point, not an EVM hexadecimal address.
-- K168888 = 筋斗雲; fixed-beneficiary KUFO output organ.
-- K108000 = future KSHIP fuel-consumption → KGOD transformation point; outside this product.
+- K511111 = 齊天大聖宮 / KUFO 蟲洞與 KUFO 出生座標. `511111` is a civilization point, not an EVM hexadecimal address.
+- K108000 = 點石成金; matured KUFO becomes KSHIP and KSHIP enters the mass-energy reactor here.
+- K168888 = 筋斗雲; proof-bound KGOD birth/output coordinate.
 - K16888 = future marriage / KGOD ring point; outside this product.
 
 ## Immediate alchemy
@@ -19,8 +19,8 @@ This is the current Product 5 review candidate. It preserves deployed history bu
 - KUFO output = `KAIOS input * 1,000`.
 - KGEN is balance proof only: no transfer, burn, lock, escrow, allowance, holding-age or tax-history requirement.
 - KAIOS alchemy burn record remains the upstream settlement evidence.
-- after successful KAIOS burn proof, K18911 calls the registered K168888 output organ in the same transaction.
-- K168888 cannot redirect beneficiary or amount.
+- after successful KAIOS burn proof, K18911 calls the registered K511111 wormhole organ in the same transaction.
+- K511111 cannot redirect beneficiary or amount.
 
 Example: `0.001 KAIOS` + current wallet balance `>= 0.000001 KGEN` → immediate `1 KUFO`.
 
@@ -43,7 +43,7 @@ Transfers preserve lot age. Partial transfers split lineage lots without resetti
 
 ## Downstream boundary
 
-KSHIP is future UFO antimatter fuel. Its later fuel consumption at K108000 may produce KGOD. KGOD, K16888 marriage, KDNA and KRNA are intentionally not implemented by this Product 5 candidate.
+KSHIP is future UFO antimatter fuel born through K108000 點石成金 conversion. Its later equal-matter reaction at K108000 may produce proof-bound KGOD at K168888. K16888 marriage, KDNA and KRNA are intentionally not implemented by this Product 5 candidate.
 
 ## Safety
 

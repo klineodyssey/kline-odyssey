@@ -15,9 +15,10 @@ import {
 
 const root = path.resolve(import.meta.dirname, "..");
 const artifacts = path.join(root, "artifacts");
+const compileEvidencePath = path.join(root, "reports", "SOLIDITY_COMPILE_EVIDENCE.json");
 const YEAR = 31_556_926;
 
-const OUTPUT_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.KUFO.OUTPUT.168888"));
+const OUTPUT_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.WORMHOLE.511111"));
 const CONVERTER_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.KSHIP.CONVERTER"));
 const REACTOR_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR"));
 const MATTER_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE"));
@@ -54,11 +55,11 @@ async function fixture() {
   const trader = await provider.getSigner(6);
 
   const registry = await deploy("KUFOV4MockOrganRegistry", owner);
-  const kufo = await deploy("KUFOV4", owner, [await registry.getAddress()]);
+  const kufo = await deploy("KUFO", owner, [await registry.getAddress()]);
   const output = await deploy("KUFOV4MockOutput", owner);
-  const kship = await deploy("KSHIPV5", owner, [await registry.getAddress(), await kufo.getAddress()]);
+  const kship = await deploy("KSHIP", owner, [await registry.getAddress(), await kufo.getAddress()]);
   const converter = await deploy("KSHIPConverter", owner, [await kufo.getAddress(), await kship.getAddress()]);
-  const ships = await deploy("KAIOSShipIdentityRegistryV1", owner, [await owner.getAddress()]);
+  const ships = await deploy("KAIOSShipIdentityRegistry", owner, [await owner.getAddress()]);
   const pairAddress = await pair.getAddress();
   const kgen = await deploy("KGEN_Token_V7_5_2", owner, [
     await owner.getAddress(),
@@ -67,8 +68,8 @@ async function fixture() {
     await owner.getAddress(),
   ]);
   await (await kgen.setMarketMakerPair(pairAddress, true)).wait();
-  const replayRegistry = await deploy("KGENWhiteHoleBurnReplayRegistryV1", owner, [await registry.getAddress()]);
-  const burnVerifier = await deploy("KGENWhiteHoleBurnVerifierV1", owner, [
+  const replayRegistry = await deploy("KGENWhiteHoleBurnReplayRegistry", owner, [await registry.getAddress()]);
+  const burnVerifier = await deploy("KGENWhiteHoleBurnVerifier", owner, [
     await kgen.getAddress(),
     await replayRegistry.getAddress(),
     await attestorA.getAddress(),
@@ -76,9 +77,9 @@ async function fixture() {
     1,
     1,
   ]);
-  const matter = await deploy("KGENWhiteHoleMatterSourceV1", owner, [await burnVerifier.getAddress(), await ships.getAddress()]);
-  const reactor = await deploy("K108000MassEnergyReactorV1", owner, [await kship.getAddress(), await registry.getAddress(), await ships.getAddress()]);
-  const kgod = await deploy("KGODV1", owner, [await reactor.getAddress()]);
+  const matter = await deploy("KGENWhiteHoleMatterSource", owner, [await burnVerifier.getAddress(), await ships.getAddress()]);
+  const reactor = await deploy("K108000MassEnergyReactor", owner, [await kship.getAddress(), await registry.getAddress(), await ships.getAddress()]);
+  const kgod = await deploy("KGOD", owner, [await reactor.getAddress()]);
 
   await (await ships.registerShip(SHIP_ID, await owner.getAddress(), await trader.getAddress(), await reactor.getAddress())).wait();
   await (await registry.setOrgan(OUTPUT_ID, await output.getAddress())).wait();
@@ -89,7 +90,7 @@ async function fixture() {
   await (await registry.setOrgan(BURN_VERIFIER_ID, await burnVerifier.getAddress())).wait();
 
   return {
-    eip1193, owner, beneficiary, outsider, attestorA, attestorB, pairAddress, trader,
+    eip1193, provider, owner, beneficiary, outsider, attestorA, attestorB, pairAddress, trader,
     registry, kufo, output, kship, converter, ships, kgen, replayRegistry, burnVerifier, matter, reactor, kgod,
   };
 }
@@ -152,6 +153,95 @@ test.afterEach(async () => {
     await sharedFixture.eip1193.request({ method: "evm_revert", params: [snapshotId] }),
     true,
   );
+});
+
+test("unsigned deployment plan derives exact constructors and fails closed before any chain action", () => {
+  const evidence = JSON.parse(fs.readFileSync(compileEvidencePath, "utf8"));
+  const plan = evidence.unsignedDeploymentPlan;
+  assert.equal(plan.status, "UNSIGNED_PREDEPLOYMENT_CANDIDATE");
+  assert.equal(plan.chainId, 56);
+  assert.equal(plan.chainWriteAuthorized, false);
+  assert.equal(plan.signerUseAuthorized, false);
+  assert.equal(plan.allCandidateAddressesMustBeNull, true);
+
+  const expectedConstructors = new Map([
+    ["KAIOSOrganRegistry", ["initialOwner:address", "governanceDelay:uint64"]],
+    ["KUFO", ["registry:address"]],
+    ["KAIOSAlchemyFurnace", ["kaiosToken:address", "kgenToken:address", "registry:address"]],
+    ["KUFOClaimWormhole", ["furnace18911:address", "kufoToken511111:address"]],
+    ["KSHIP", ["registry:address", "kufoToken:address"]],
+    ["KSHIPConverter", ["kufoToken:address", "kshipToken:address"]],
+    ["KAIOSShipIdentityRegistry", ["registrar_:address"]],
+    ["KGENWhiteHoleBurnReplayRegistry", ["registry:address"]],
+    ["KGENWhiteHoleBurnVerifier", [
+      "kgenToken:address",
+      "sharedReplayRegistry:address",
+      "firstAttestor:address",
+      "secondAttestor:address",
+      "scaleNumerator:uint256",
+      "scaleDenominator:uint256",
+    ]],
+    ["KGENWhiteHoleMatterSource", ["verifier:address", "ships:address"]],
+    ["K108000MassEnergyReactor", ["kshipToken:address", "registry:address", "ships:address"]],
+    ["KGOD", ["reactor:address"]],
+  ]);
+
+  assert.equal(plan.stages.length, expectedConstructors.size);
+  plan.stages.forEach((stage, index) => {
+    assert.equal(stage.order, index + 1);
+    assert.equal(stage.candidateAddress, null);
+    assert.doesNotMatch(stage.contractName, /V\d+(?:_|$)/);
+    assert.deepEqual(
+      stage.constructorInputs.map(({ name, type }) => `${name}:${type}`),
+      expectedConstructors.get(stage.contractName),
+    );
+  });
+
+  for (const dependency of Object.values(plan.externalDependencies)) {
+    assert.equal(dependency.candidateAddress, null);
+    assert.ok(dependency.verificationRequired.length > 0);
+  }
+
+  const expectedOrganKeys = new Map([
+    ["KAIOS.ORGAN.FURNACE.18911", keccak256(toUtf8Bytes("KAIOS.ORGAN.FURNACE.18911"))],
+    ["KAIOS.ORGAN.WORMHOLE.511111", OUTPUT_ID],
+    ["KAIOS.ORGAN.KSHIP.CONVERTER", CONVERTER_ID],
+    ["KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR", REACTOR_ID],
+    ["KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE", MATTER_ID],
+    ["KAIOS.ORGAN.KGEN.WHITE_HOLE.BURN_VERIFIER", BURN_VERIFIER_ID],
+    ["KAIOS.ORGAN.KGOD.TOKEN", KGOD_ID],
+  ]);
+  assert.equal(plan.organBindings.length, expectedOrganKeys.size);
+  for (const binding of plan.organBindings) {
+    assert.equal(binding.id, expectedOrganKeys.get(binding.key));
+    assert.equal(binding.candidateAddress, null);
+  }
+
+  assert.deepEqual(plan.canonicalFlow, [
+    "K18911_KAIOS_ALCHEMY_FURNACE",
+    "K511111_KUFO_BIRTH_WORMHOLE",
+    "K108000_KSHIP_CONVERTER",
+    "K108000_EQUAL_MATTER_REACTOR",
+    "K168888_KGOD_BIRTH",
+  ]);
+  assert.ok(plan.postDeploymentGates.includes("SEPARATE_EXACT_ACTION_AUTHORIZATION"));
+});
+
+test("version-free deployment artifacts expose internal versions and canonical birth points", async () => {
+  const f = sharedFixture;
+  assert.equal(await f.kufo.TOKEN_POINT_511111(), 511_111n);
+  assert.equal(await f.kship.BIRTH_POINT(), 108_000n);
+  assert.equal(await f.converter.CONVERSION_POINT(), 108_000n);
+  assert.equal(await f.reactor.REACTOR_POINT(), 108_000n);
+  assert.equal(await f.reactor.KGOD_OUTPUT_POINT(), 168_888n);
+  assert.equal(await f.kgod.BIRTH_POINT(), 168_888n);
+  assert.equal(await f.kship.VERSION(), "5.0.0");
+  assert.equal(await f.reactor.VERSION(), "1.1.0");
+  assert.equal(await f.kgod.VERSION(), "1.0.0");
+
+  for (const contract of [f.kufo, f.kship, f.converter, f.ships, f.replayRegistry, f.burnVerifier, f.matter, f.reactor, f.kgod]) {
+    assert.notEqual(await f.provider.getCode(await contract.getAddress()), "0x");
+  }
 });
 
 test("KUFO -> KSHIP + verified White-Hole matter -> ship cogeneration conserves mass-energy and mints only allocated KGOD", async () => {
@@ -264,7 +354,7 @@ test("shared replay registry rejects one KGEN burn across verifier versions", as
   );
   await (await f.burnVerifier.submitVerifiedBurn(proofV1.evidence, proofV1.signatureA, proofV1.signatureB)).wait();
 
-  const verifierV2 = await deploy("KGENWhiteHoleBurnVerifierV1", f.owner, [
+  const verifierV2 = await deploy("KGENWhiteHoleBurnVerifier", f.owner, [
     await f.kgen.getAddress(),
     await f.replayRegistry.getAddress(),
     await f.attestorA.getAddress(),
@@ -299,7 +389,7 @@ test("white-hole matter rejects self-match, wash-trade and duplicate burn credit
   const ownerAddress = await owner.getAddress();
   const pairId = keccak256(toUtf8Bytes("KGEN/WBNB"));
   const mockVerifier = await deploy("KGENWhiteHoleBurnVerifierMock", owner);
-  const mockMatter = await deploy("KGENWhiteHoleMatterSourceV1", owner, [
+  const mockMatter = await deploy("KGENWhiteHoleMatterSource", owner, [
     await mockVerifier.getAddress(),
     await ships.getAddress(),
   ]);

@@ -60,7 +60,7 @@ These must remain explicit model/profile inputs or require separate canonical re
 
 ## Conservation boundary
 
-`KAIOSUFOPropulsionPhysicsV1.sol` is a deterministic simulator only.
+`KAIOSUFOPropulsionPhysics.sol` is a deterministic simulator only. Its canonical filename and contract name are version-free; `VERSION` and `VERSION_ID` carry the implementation version.
 
 Actual consumption/mint authority remains downstream/upstream in the Product_06 conservation lineage:
 
@@ -79,7 +79,7 @@ Codex/GM should return P0/P1/P2 and GO / GO_WITH_FIXES / NO_GO after checking:
 - non-relativistic approximation boundary and required guard/label
 - whether thrust approximation `F = 2P/v_e` is accepted only for the stated directed-exhaust model
 - whether a photon-drive profile needs a separate formula rather than reusing the exhaust approximation
-- compatibility with SHIP_ID, White-Hole Matter Source, KSHIPV5, K108000 reactor, and KGOD proof lineage
+- compatibility with SHIP_ID, White-Hole Matter Source, KSHIP, K108000 reactor, and KGOD proof lineage
 - no asset-moving authority in the simulator
 - no Mainnet/deployment claim
 

@@ -8,13 +8,13 @@ Build one authenticated UFO organism runtime on top of the verified Product_06 m
 
 ## Identity
 - `SHIP_ID` is the primary UFO machine identity.
-- `controller` comes from `KAIOSShipIdentityRegistryV1`.
+- `controller` comes from `KAIOSShipIdentityRegistry`.
 - Flight and cogeneration readiness use the registry's canonical `ship(SHIP_ID)` record. The global Trading Engine and K108000 Reactor organ addresses must exactly match that ship record; a merely non-zero, stale, or different ship's endpoint is not ready.
 - `LIFE_ID` is optional at deployment time and may remain zero / NOT_ASSIGNED until an external canonical KAIOS birth process assigns one.
 - Changing chat pages, app sessions, or controllers does not create a new UFO life automatically.
 
 ## Body and organs
-`KAIOSUFOOrganRuntimeV1` is a read-only organ projection. It does not own funds and cannot replace organs.
+`KAIOSUFOOrganRuntime` is a read-only organ projection. It does not own funds and cannot replace organs. Its canonical filename and contract name are version-free; `VERSION` and `VERSION_ID` carry the implementation version.
 
 Critical flight organs:
 - Trading Engine
@@ -30,7 +30,7 @@ Additional organs:
 The organ runtime reads canonical addresses from `IKAIOSOrganRegistry`. Missing critical organs fail closed.
 
 ## Life state machine
-`KAIOSUFOLifeV1` states:
+`KAIOSUFOLife` states:
 - DORMANT
 - ALIVE
 - FLIGHT
@@ -59,7 +59,7 @@ All K108000 outputs must equal total mass-energy input. A burn receipt, matter c
 The UFO must not manufacture energy by wash trading. Energy/matter credit is valid only when the upstream burn verifier marks the trade as a real AMM trade and rejects self-match or wash-trade lineage.
 
 ## App runtime
-`app/ufo-runtime-v1.mjs` is a fail-closed UI projection. It exposes identity, state, organs, capabilities, and action guards. The app does not infer readiness from labels or optimistic UI state; it consumes verified contract state.
+`app/ufo-runtime.mjs` is a fail-closed UI projection. It exposes identity, state, organs, capabilities, and action guards. The app does not infer readiness from labels or optimistic UI state; it consumes verified contract state. `UFO_RUNTIME_VERSION` records the implementation version inside the canonical program.
 
 ## K8888 relationship
 K8888 Mobile ATM / Bank is an optional organ of the UFO organism. It is not merged into the life contract and remains independently replaceable/versioned.

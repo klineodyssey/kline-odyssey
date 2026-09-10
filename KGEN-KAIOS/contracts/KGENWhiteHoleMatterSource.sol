@@ -6,7 +6,7 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
-interface IKAIOSShipIdentityReaderV1 {
+interface IKAIOSShipIdentityReader {
     struct ShipIdentity {
         bytes32 shipId;
         address controller;
@@ -23,7 +23,7 @@ interface IKAIOSShipIdentityReaderV1 {
  *         The 0.10% burn calculation belongs upstream in KGEN trade-tax/burn lineage and MUST NOT
  *         be applied a second time here.
  */
-interface IKGENWhiteHoleBurnVerifierV1 {
+interface IKGENWhiteHoleBurnVerifier {
     struct VerifiedBurn {
         bytes32 burnId;
         bytes32 tradeId;
@@ -39,24 +39,24 @@ interface IKGENWhiteHoleBurnVerifierV1 {
     function verifiedBurn(bytes32 burnId) external view returns (VerifiedBurn memory);
 }
 
-interface IKGENWhiteHoleTokenPolicyV1 {
+interface IKGENWhiteHoleTokenPolicy {
     function TAX_BPS_BURN() external view returns (uint16);
     function isMarketMakerPair(address account) external view returns (bool);
     function isTaxExempt(address account) external view returns (bool);
 }
 
-interface IKGENWhiteHoleBurnReplayRegistryV1 {
+interface IKGENWhiteHoleBurnReplayRegistry {
     function consume(bytes32 burnId) external;
     function consumed(bytes32 burnId) external view returns (bool);
 }
 
 /**
- * @title KGENWhiteHoleBurnReplayRegistryV1
+ * @title KGENWhiteHoleBurnReplayRegistry
  * @notice Append-only replay ledger shared by every approved White-Hole verifier version.
  * @dev The canonical organ registry may replace the verifier after its governance delay, but no
  *      verifier version can clear or reuse an already-consumed transaction/log burn coordinate.
  */
-contract KGENWhiteHoleBurnReplayRegistryV1 {
+contract KGENWhiteHoleBurnReplayRegistry {
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.KGEN.WHITE_HOLE.BURN.REPLAY.REGISTRY.V1.0.0");
     bytes32 public constant ORGAN_WHITE_HOLE_BURN_VERIFIER =
@@ -88,7 +88,7 @@ contract KGENWhiteHoleBurnReplayRegistryV1 {
 }
 
 /**
- * @title KGENWhiteHoleBurnVerifierV1
+ * @title KGENWhiteHoleBurnVerifier
  * @notice Immutable dual-attestor adapter for recent KGEN AMM burn receipts.
  * @dev EVM contracts cannot read historical transaction logs directly. Two distinct immutable
  *      attestors therefore sign the same block-anchored EIP-191 evidence. This contract checks the
@@ -97,15 +97,15 @@ contract KGENWhiteHoleBurnReplayRegistryV1 {
  *      transaction-log coordinate in the shared append-only replay registry. It has no owner,
  *      mutable verifier set, token transfer, mint, burn, rescue, or upgrade function.
  */
-contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
+contract KGENWhiteHoleBurnVerifier is IKGENWhiteHoleBurnVerifier {
     using MessageHashUtils for bytes32;
 
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.KGEN.WHITE_HOLE.BURN_VERIFIER.V1.0.0");
     uint256 private constant BPS = 10_000;
 
-    IKGENWhiteHoleTokenPolicyV1 public immutable kgen;
-    IKGENWhiteHoleBurnReplayRegistryV1 public immutable replayRegistry;
+    IKGENWhiteHoleTokenPolicy public immutable kgen;
+    IKGENWhiteHoleBurnReplayRegistry public immutable replayRegistry;
     address public immutable attestorA;
     address public immutable attestorB;
     uint256 public immutable matterPerKgenNumerator;
@@ -161,8 +161,8 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
             revert InvalidAttestors();
         }
         if (scaleNumerator == 0 || scaleDenominator == 0) revert InvalidScale();
-        kgen = IKGENWhiteHoleTokenPolicyV1(kgenToken);
-        replayRegistry = IKGENWhiteHoleBurnReplayRegistryV1(sharedReplayRegistry);
+        kgen = IKGENWhiteHoleTokenPolicy(kgenToken);
+        replayRegistry = IKGENWhiteHoleBurnReplayRegistry(sharedReplayRegistry);
         attestorA = firstAttestor;
         attestorB = secondAttestor;
         matterPerKgenNumerator = scaleNumerator;
@@ -264,7 +264,7 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
 }
 
 /**
- * @title KGENWhiteHoleMatterSourceV1
+ * @title KGENWhiteHoleMatterSource
  * @notice Converts verified, irreversible KGEN White-Hole AMM burn receipts into non-transferable
  *         positive-matter credit owned by an authenticated ship ID.
  * @dev No KGEN is minted, restored, transferred or rescued here. A burn proof can be credited once.
@@ -272,12 +272,12 @@ contract KGENWhiteHoleBurnVerifierV1 is IKGENWhiteHoleBurnVerifierV1 {
  *      receipts fail closed. `positiveMatterEquivalent` is supplied by the canonical burn verifier
  *      so this contract does not invent a KGEN<->KSHIP physical scale.
  */
-contract KGENWhiteHoleMatterSourceV1 {
+contract KGENWhiteHoleMatterSource {
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.KGEN.WHITE_HOLE.MATTER_SOURCE.V1.0.0");
 
-    IKGENWhiteHoleBurnVerifierV1 public immutable burnVerifier;
-    IKAIOSShipIdentityReaderV1 public immutable shipRegistry;
+    IKGENWhiteHoleBurnVerifier public immutable burnVerifier;
+    IKAIOSShipIdentityReader public immutable shipRegistry;
 
     struct BurnCredit {
         bytes32 shipId;
@@ -323,19 +323,19 @@ contract KGENWhiteHoleMatterSourceV1 {
 
     constructor(address verifier, address ships) {
         if (verifier == address(0) || ships == address(0)) revert ZeroAddress();
-        burnVerifier = IKGENWhiteHoleBurnVerifierV1(verifier);
-        shipRegistry = IKAIOSShipIdentityReaderV1(ships);
+        burnVerifier = IKGENWhiteHoleBurnVerifier(verifier);
+        shipRegistry = IKAIOSShipIdentityReader(ships);
     }
 
     function claimBurnForShip(bytes32 burnId, bytes32 shipId) external returns (uint256 creditedMatter) {
         if (shipId == bytes32(0)) revert ZeroShipId();
         if (_burnCredits[burnId].claimedAt != 0) revert BurnAlreadyCredited(burnId);
 
-        IKAIOSShipIdentityReaderV1.ShipIdentity memory ship = shipRegistry.ship(shipId);
+        IKAIOSShipIdentityReader.ShipIdentity memory ship = shipRegistry.ship(shipId);
         if (!ship.active) revert UnknownOrInactiveShip(shipId);
         if (msg.sender != ship.controller && msg.sender != ship.tradingEngine) revert UnauthorizedClaimant(msg.sender);
 
-        IKGENWhiteHoleBurnVerifierV1.VerifiedBurn memory burn = burnVerifier.verifiedBurn(burnId);
+        IKGENWhiteHoleBurnVerifier.VerifiedBurn memory burn = burnVerifier.verifiedBurn(burnId);
         if (!burn.valid || burn.burnId != burnId || burn.burnedKgen == 0 || burn.positiveMatterEquivalent == 0) {
             revert InvalidBurn(burnId);
         }
@@ -365,7 +365,7 @@ contract KGENWhiteHoleMatterSourceV1 {
         if (matterAmount == 0) revert ZeroAmount();
         if (reactionMatterConsumed[reactionProofId]) revert ReactionAlreadyConsumed(reactionProofId);
 
-        IKAIOSShipIdentityReaderV1.ShipIdentity memory ship = shipRegistry.ship(shipId);
+        IKAIOSShipIdentityReader.ShipIdentity memory ship = shipRegistry.ship(shipId);
         if (!ship.active || ship.controller != owner) revert UnknownOrInactiveShip(shipId);
         if (msg.sender != ship.reactor) revert OnlyShipReactor(msg.sender);
 

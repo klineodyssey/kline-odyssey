@@ -17,13 +17,13 @@ interface IKAIOSShipIdentityRead {
 }
 
 /**
- * @title KAIOSUFOOrganRuntimeV1
+ * @title KAIOSUFOOrganRuntime
  * @notice Read-only organ projection for one authenticated KAIOS UFO.
  * @dev This runtime does not own assets and cannot replace organ implementations.
  *      It reads the canonical organ registry and ship identity registry and exposes
  *      a fail-closed readiness view for apps and the UFO life runtime.
  */
-contract KAIOSUFOOrganRuntimeV1 {
+contract KAIOSUFOOrganRuntime {
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.UFO.ORGAN_RUNTIME.V1.0.0");
 

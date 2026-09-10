@@ -3,10 +3,10 @@ name: KAIOS UFO App Organ Life Review
 on:
   pull_request:
     paths:
-      - 'KGEN-KAIOS/contracts/KAIOSUFOOrganRuntimeV1.sol'
-      - 'KGEN-KAIOS/contracts/KAIOSUFOLifeV1.sol'
-      - 'KGEN-KAIOS/contracts/KAIOSUFOPropulsionPhysicsV1.sol'
-      - 'KGEN-KAIOS/app/ufo-runtime-v1.mjs'
+      - 'KGEN-KAIOS/contracts/KAIOSUFOOrganRuntime.sol'
+      - 'KGEN-KAIOS/contracts/KAIOSUFOLife.sol'
+      - 'KGEN-KAIOS/contracts/KAIOSUFOPropulsionPhysics.sol'
+      - 'KGEN-KAIOS/app/ufo-runtime.mjs'
       - 'KGEN-KAIOS/tests/ufo-app-runtime.unit.test.mjs'
       - 'KGEN-KAIOS/tests/ufo-propulsion-physics.evm.test.mjs'
       - 'KGEN-KAIOS/docs/UFO_APP_ORGAN_LIFE_SPEC_V1.md'

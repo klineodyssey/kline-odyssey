@@ -5,13 +5,13 @@ Version: 4.0.0
 Solidity: 0.8.24
 Upgradeable: NO
 Mainnet status: NOT DEPLOYED / NOT LIVE
-Primary lineage: KAIOS -> K18911 -> K168888 -> K511111 KUFO -> KSHIP
+Primary lineage: KAIOS -> K18911 -> K511111 KUFO -> K108000 KSHIP -> K168888 KGOD
 
 ## 1. Purpose
 
-KUFO is the KAIOS civilization mass produced by the K18911 alchemy product and delivered through the K168888 output organ to the K511111 KUFO world coordinate. K511111 is a KAIOS world coordinate and must not be interpreted as a literal EVM address.
+KUFO is the KAIOS civilization mass produced by the K18911 alchemy furnace and born through the K511111 wormhole. K511111 is a KAIOS world coordinate and must not be interpreted as a literal EVM address. K168888 is reserved for the downstream KGOD output and is not the KUFO birth organ.
 
-KUFO V4 is designed as a non-upgradeable ERC-20 capped material token whose physical law is fixed at deployment. Organ routing remains replaceable through the KAIOS Organ Registry, but the deployed KUFO token implementation itself has no proxy upgrade path.
+KUFO is designed as a non-upgradeable ERC-20 capped material token whose physical law is fixed at deployment. The canonical source filename and contract name carry no version suffix; `VERSION` and `VERSION_ID` remain inside the bytecode. Organ routing remains replaceable through the KAIOS Organ Registry, but the deployed KUFO token implementation itself has no proxy upgrade path.
 
 ## 2. Immediate alchemy rule
 

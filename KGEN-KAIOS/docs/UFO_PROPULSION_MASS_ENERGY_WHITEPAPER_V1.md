@@ -17,7 +17,7 @@ This document defines the first deterministic propulsion-accounting model for KA
 ## 3. KGEN White-Hole boundary
 The historical KGEN tax/burn percentage is an upstream token-economy rule. This propulsion runtime does NOT multiply a trade by 0.10% itself. It consumes only an already verified positive-matter-equivalent credit from the White-Hole matter source. This avoids charging the burn twice and permits the KGEN burn verifier/scale lineage to evolve independently under review.
 
-Any example that combines `1 KGEN = 1000 kg` with a 0.10% KGEN burn is an engineering scale example until the exact CURRENT KGEN physics/White-Hole lineage is independently reconciled and approved. It is not hard-coded in `KAIOSUFOPropulsionPhysicsV1.sol`.
+Any example that combines `1 KGEN = 1000 kg` with a 0.10% KGEN burn is an engineering scale example until the exact CURRENT KGEN physics/White-Hole lineage is independently reconciled and approved. It is not hard-coded in `KAIOSUFOPropulsionPhysics.sol`.
 
 ## 4. Reaction model
 For a full matter/antimatter reaction candidate, positive-matter mass-equivalent flow must equal KSHIP antimatter mass-equivalent flow. Let each side flow at m_dot kg/s. Total input mass flow is 2*m_dot.
@@ -86,7 +86,7 @@ A UFO's economic value should not be hard-coded from fuel alone. Candidate valua
 - simulation functions cannot mint, transfer, deploy or change Mainnet state.
 
 ## 9. Contract
-`KGEN-KAIOS/contracts/KAIOSUFOPropulsionPhysicsV1.sol`
+`KGEN-KAIOS/contracts/KAIOSUFOPropulsionPhysics.sol`
 
 The contract is a pure deterministic calculator. Inputs include SHIP_ID, ship mass, KSHIP/positive-matter mass-equivalent flow, duration and an Engine Profile. Outputs include consumed mass, reacted mass, energy, average power, thrust, acceleration, delta-v, distance, recoverable energy, KGOD mass-equivalent potential and radiation/heat.
 

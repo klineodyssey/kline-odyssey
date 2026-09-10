@@ -16,7 +16,7 @@ interface IKGODReactionMinter {
     function mintFromReactionProof(bytes32 reactionProofId) external returns (address beneficiary, uint256 kgodAmount);
 }
 
-interface IKAIOSShipIdentityReaderForReactorV1 {
+interface IKAIOSShipIdentityReaderForReactor {
     struct ShipIdentity {
         bytes32 shipId;
         address controller;
@@ -29,16 +29,17 @@ interface IKAIOSShipIdentityReaderForReactorV1 {
 }
 
 /**
- * @title K108000MassEnergyReactorV1
+ * @title K108000MassEnergyReactor
  * @notice Ship-authenticated K108000 antimatter/matter reactor for propulsion, recoverable energy,
  *         stable KGOD material and radiation/heat accounting.
  */
-contract K108000MassEnergyReactorV1 is ReentrancyGuard {
+contract K108000MassEnergyReactor is ReentrancyGuard {
     string public constant VERSION = "1.1.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.K108000.MASS_ENERGY_REACTOR.V1.1.0");
     bytes32 public constant ORGAN_MATTER_SOURCE = keccak256("KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE");
     bytes32 public constant ORGAN_KGOD = keccak256("KAIOS.ORGAN.KGOD.TOKEN");
     uint256 public constant REACTOR_POINT = 108_000;
+    uint256 public constant KGOD_OUTPUT_POINT = 168_888;
 
     enum ReactionMode { PROPULSION, MATERIAL_FORGE, COGENERATION }
 
@@ -68,7 +69,7 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
 
     IKSHIPMassEnergyBurnable public immutable kship;
     IKAIOSOrganRegistry public immutable organRegistry;
-    IKAIOSShipIdentityReaderForReactorV1 public immutable shipRegistry;
+    IKAIOSShipIdentityReaderForReactor public immutable shipRegistry;
 
     uint256 public reactionCount;
     uint256 public cumulativeInputEquivalent;
@@ -111,7 +112,7 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         if (kshipToken == address(0) || registry == address(0) || ships == address(0)) revert ZeroAddress();
         kship = IKSHIPMassEnergyBurnable(kshipToken);
         organRegistry = IKAIOSOrganRegistry(registry);
-        shipRegistry = IKAIOSShipIdentityReaderForReactorV1(ships);
+        shipRegistry = IKAIOSShipIdentityReaderForReactor(ships);
     }
 
     function react(bytes32 shipId, uint256 kshipAmount, address beneficiary, ReactionMode mode, Allocation calldata allocation)
@@ -121,7 +122,7 @@ contract K108000MassEnergyReactorV1 is ReentrancyGuard {
         if (beneficiary == address(0)) revert ZeroAddress();
         if (kshipAmount == 0) revert ZeroAmount();
 
-        IKAIOSShipIdentityReaderForReactorV1.ShipIdentity memory ship = shipRegistry.ship(shipId);
+        IKAIOSShipIdentityReaderForReactor.ShipIdentity memory ship = shipRegistry.ship(shipId);
         if (!ship.active || ship.controller != msg.sender) revert UnauthorizedShipController(shipId, msg.sender);
         if (ship.reactor != address(this)) revert ReactorNotBoundToShip(shipId, ship.reactor, address(this));
 

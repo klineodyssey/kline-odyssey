@@ -10,13 +10,13 @@ interface IKAIOSUFOOrganRuntimeRead {
 }
 
 /**
- * @title KAIOSUFOLifeV1
+ * @title KAIOSUFOLife
  * @notice Lifecycle state machine for one authenticated KAIOS UFO organism candidate.
  * @dev This contract does NOT create a formal KAIOS Life record by itself. lifeId may be zero
  *      until an external canonical birth/registry process assigns one. It cannot move tokens,
  *      trade, mint KGOD, or replace organs; it only coordinates life state and emits auditable intent.
  */
-contract KAIOSUFOLifeV1 {
+contract KAIOSUFOLife {
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.UFO.LIFE.V1.0.0");
 

@@ -2,12 +2,12 @@
 pragma solidity 0.8.24;
 
 /**
- * @title KAIOSShipIdentityRegistryV1
+ * @title KAIOSShipIdentityRegistry
  * @notice Minimal immutable-lineage registry for unique KUFO/UFO ship identities.
  * @dev The registrar may register or deactivate ships; it cannot spend ship assets.
  *      Each ship binds one controller, one trading engine and one K108000 reactor endpoint.
  */
-contract KAIOSShipIdentityRegistryV1 {
+contract KAIOSShipIdentityRegistry {
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.SHIP.IDENTITY.REGISTRY.V1.0.0");
 
@@ -49,9 +49,9 @@ contract KAIOSShipIdentityRegistryV1 {
 
     function setShipActive(bytes32 shipId, bool active) external {
         if (msg.sender != registrar) revert OnlyRegistrar(msg.sender);
-        ShipIdentity storage ship = _ships[shipId];
-        if (ship.registeredAt == 0) revert UnknownShip(shipId);
-        ship.active = active;
+        ShipIdentity storage record = _ships[shipId];
+        if (record.registeredAt == 0) revert UnknownShip(shipId);
+        record.active = active;
         emit ShipStatusChanged(shipId, active);
     }
 

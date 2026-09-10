@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @title KAIOS UFO Propulsion Physics V1
+/// @title KAIOS UFO Propulsion Physics
 /// @notice Deterministic accounting/simulation only. It does not move tokens, mint KGOD, or execute propulsion.
 /// @dev Uses mass-equivalent units and integer fixed point. Relativistic flight requires a later runtime.
-contract KAIOSUFOPropulsionPhysicsV1 {
+contract KAIOSUFOPropulsionPhysics {
+    string public constant VERSION = "1.0.0";
+    bytes32 public constant VERSION_ID = keccak256("KAIOS.UFO.PROPULSION_PHYSICS.V1.0.0");
     uint256 public constant BPS = 10_000;
     uint256 public constant C_M_PER_S = 299_792_458;
     uint256 public constant MG_PER_KG = 1_000_000;

@@ -26,7 +26,7 @@ async function fixture() {
   const eip1193 = ganache.provider({ logging: { quiet: true } });
   const provider = new BrowserProvider(eip1193);
   const signer = await provider.getSigner(0);
-  return deploy("KAIOSUFOPropulsionPhysicsV1", signer);
+  return deploy("KAIOSUFOPropulsionPhysics", signer);
 }
 
 function within(actual, expected, tolerance) {
@@ -40,8 +40,24 @@ function accountedReactionEnergy(o) {
     + o.kgodMassEquivalentKgWad * C * C;
 }
 
+test("canonical UFO Solidity artifacts keep versions inside contracts, not filenames", () => {
+  const expected = new Map([
+    ["KAIOSUFOOrganRuntime", "contracts/KAIOSUFOOrganRuntime.sol"],
+    ["KAIOSUFOLife", "contracts/KAIOSUFOLife.sol"],
+    ["KAIOSUFOPropulsionPhysics", "contracts/KAIOSUFOPropulsionPhysics.sol"],
+  ]);
+  for (const [contractName, sourceName] of expected) {
+    const compiled = artifact(contractName);
+    assert.equal(compiled.contractName, contractName);
+    assert.equal(compiled.sourceName, sourceName);
+    assert.doesNotMatch(compiled.contractName, /V\d+(?:_|$)/);
+    assert.doesNotMatch(compiled.sourceName, /V\d+\.sol$/);
+  }
+});
+
 test("1 mg/s matter + 1 mg/s KSHIP yields the expected mass-energy scale", async () => {
   const physics = await fixture();
+  assert.equal(await physics.VERSION(), "1.0.0");
   const duration = 60n;
   const shipMassKgWad = 1_000n * WAD;
   const oneMgPerSecWad = WAD;
@@ -210,7 +226,7 @@ test("UFO organ and life runtimes use the Product_06 ship ABI and require exact 
   const wrongEndpoint = await provider.getSigner(3);
 
   const organRegistry = await deploy("KUFOV4MockOrganRegistry", registrar);
-  const shipRegistry = await deploy("KAIOSShipIdentityRegistryV1", registrar, [await registrar.getAddress()]);
+  const shipRegistry = await deploy("KAIOSShipIdentityRegistry", registrar, [await registrar.getAddress()]);
   const reactor = await deploy("MockOrgan", registrar);
   const matterSource = await deploy("MockOrgan", registrar);
   const kship = await deploy("MockOrgan", registrar);
@@ -225,11 +241,12 @@ test("UFO organ and life runtimes use the Product_06 ship ABI and require exact 
     await reactor.getAddress(),
   )).wait();
 
-  const organs = await deploy("KAIOSUFOOrganRuntimeV1", registrar, [
+  const organs = await deploy("KAIOSUFOOrganRuntime", registrar, [
     await organRegistry.getAddress(),
     await shipRegistry.getAddress(),
     shipId,
   ]);
+  assert.equal(await organs.VERSION(), "1.0.0");
 
   assert.equal(await organs.controller(), await controller.getAddress());
   assert.equal(await organs.readyForFlight(), false);
@@ -260,7 +277,8 @@ test("UFO organ and life runtimes use the Product_06 ship ABI and require exact 
   assert.equal(await organs.readyForFlight(), true);
   assert.equal(await organs.readyForCogeneration(), true);
 
-  const life = await deploy("KAIOSUFOLifeV1", registrar, [await organs.getAddress(), `0x${"00".repeat(32)}`]);
+  const life = await deploy("KAIOSUFOLife", registrar, [await organs.getAddress(), `0x${"00".repeat(32)}`]);
+  assert.equal(await life.VERSION(), "1.0.0");
   await assert.rejects(life.activate());
   await (await life.connect(controller).activate()).wait();
   await (await life.connect(controller).enterFlight()).wait();

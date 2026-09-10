@@ -3,9 +3,9 @@ name: KAIOS KUFO V4 Review
 on:
   pull_request:
     paths:
-      - 'KGEN-KAIOS/contracts/KAIOSAlchemyFurnaceV4.sol'
-      - 'KGEN-KAIOS/contracts/KUFOOutputJindouyun168888V4.sol'
-      - 'KGEN-KAIOS/contracts/KUFOV4.sol'
+      - 'KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol'
+      - 'KGEN-KAIOS/contracts/KUFOClaimWormhole.sol'
+      - 'KGEN-KAIOS/contracts/KUFO.sol'
       - 'KGEN-KAIOS/contracts/KSHIP.sol'
       - 'KGEN-KAIOS/contracts/KSHIPConverter.sol'
       - 'KGEN-KAIOS/runtime/kufo-v4-policy.mjs'

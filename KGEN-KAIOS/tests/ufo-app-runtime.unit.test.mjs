@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { deriveUfoUi, assertActionAllowed } from "../app/ufo-runtime-v1.mjs";
+import { UFO_RUNTIME_VERSION, deriveUfoUi, assertActionAllowed } from "../app/ufo-runtime.mjs";
+
+test("canonical UFO app filename keeps its version inside the runtime", () => {
+  assert.equal(UFO_RUNTIME_VERSION, "1.0.0");
+});
 
 function snapshot(overrides = {}) {
   return {

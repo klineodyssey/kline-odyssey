@@ -6,11 +6,11 @@ on:
       - 'gm/k108000-kship-mass-energy-conservation-v1'
   pull_request:
     paths:
-      - 'KGEN-KAIOS/contracts/KSHIPV5.sol'
-      - 'KGEN-KAIOS/contracts/K108000MassEnergyReactorV1.sol'
-      - 'KGEN-KAIOS/contracts/KGENWhiteHoleMatterSourceV1.sol'
-      - 'KGEN-KAIOS/contracts/KAIOSShipIdentityRegistryV1.sol'
-      - 'KGEN-KAIOS/contracts/KGODV1.sol'
+      - 'KGEN-KAIOS/contracts/KSHIP.sol'
+      - 'KGEN-KAIOS/contracts/K108000MassEnergyReactor.sol'
+      - 'KGEN-KAIOS/contracts/KGENWhiteHoleMatterSource.sol'
+      - 'KGEN-KAIOS/contracts/KAIOSShipIdentityRegistry.sol'
+      - 'KGEN-KAIOS/contracts/KGOD.sol'
       - 'KGEN-KAIOS/contracts/test/KGENWhiteHoleBurnVerifierMock.sol'
       - 'KGEN-KAIOS/contracts/testing/K108000PositiveMatterSourceMock.sol'
       - 'KGEN-KAIOS/tools/compile-contracts.mjs'
