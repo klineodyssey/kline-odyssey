@@ -32,4 +32,4 @@ assert.deepEqual(
   'signed local XYZ coordinates are not clamped at zero regardless of negative magnitude',
 );
 
-console.log('11520 live drive bridge PASS: C scales signed XYZ intent; zero crossing is legal; negative coordinates map to mirror-universe space; lots/KAIOS remain metadata; source control state is not mutated');
+console.log('11520 live drive bridge PASS: C scales signed XYZ intent; zero crossing is legal; negative coordinates stay on signed local XYZ axes while K mirror semantics remain separate; lots/KAIOS remain metadata; source control state is not mutated');

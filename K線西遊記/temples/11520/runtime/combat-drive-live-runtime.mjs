@@ -63,7 +63,7 @@ export function exposeDriveState(root=globalThis.document,{applyToLiveControl=fa
     signedXyzCoordinates:true,
     zeroCrossingAllowed:true,
     negativeCoordinateMeaning:'NEGATIVE_XYZ_AXIS',
-      mirrorUniverseCoupling:'SEPARATE_K_DIRECTION_ONLY',
+    mirrorUniverseCoupling:'SEPARATE_K_DIRECTION_ONLY',
   };
   return globalThis.__K11520_COMBAT_DRIVE__;
 }
