@@ -92,10 +92,11 @@ assert.notEqual(nonnegativeColor,negativeColor,'>=0 and <0 energy must use visib
 await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-negative.png`,fullPage:true});
 await releaseEnergy();
 
-const wallet=await box('#walletPanel'),chat=await box('#chatHandle');
+const wallet=await box('#walletPanel'),settings=await box('#gameModeToggle'),chat=await box('#chatHandle');
 assert.ok(wallet.x>=330,`collapsed wallet button must be on right rail: ${JSON.stringify(wallet)}`);
 assert.ok(chat.x>=330,`real chat handle must be on right rail: ${JSON.stringify(chat)}`);
-for(const sel of ['#walletToggle','#chatHandle','#aiChatButton','#bgmButton','.bagRelocatedV250','#dockToggle']){
+assert.ok(settings.y+settings.height<=wallet.y||wallet.y+wallet.height<=settings.y,`settings and wallet controls must not overlap: ${JSON.stringify({settings,wallet})}`);
+for(const sel of ['#gameModeToggle','#walletToggle','#chatHandle','#aiChatButton','#bgmButton','.bagRelocatedV250','#dockToggle']){
   assert.equal(await visible(sel),true,`${sel} must be visible on right utility rail`);
   assert.equal(await centerReachable(sel),true,`${sel} center must not be intercepted by a transparent/overlapping layer`);
 }
