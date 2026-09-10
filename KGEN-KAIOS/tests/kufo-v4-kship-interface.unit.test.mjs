@@ -10,16 +10,16 @@ function functionNames(abi) {
   return new Set(abi.filter((item) => item.type === "function").map((item) => item.name));
 }
 
-test("KUFOV4 exposes the existing KSHIPConverter carrier interface", () => {
-  const kufo = artifact("KUFOV4");
+test("KUFO exposes the existing KSHIPConverter carrier interface", () => {
+  const kufo = artifact("KUFO");
   const names = functionNames(kufo.abi);
   assert.equal(names.has("burnForCarrier"), true);
   assert.equal(names.has("carrierBurnRecord"), true);
   assert.equal(names.has("decayAvailableForKship"), false);
 });
 
-test("KSHIP and KSHIPConverter remain compatible with KUFOV4 proof lineage", () => {
-  const kufo = artifact("KUFOV4");
+test("KSHIP and KSHIPConverter remain compatible with KUFO proof lineage", () => {
+  const kufo = artifact("KUFO");
   const kship = artifact("KSHIP");
   const converter = artifact("KSHIPConverter");
 

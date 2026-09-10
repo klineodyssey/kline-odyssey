@@ -1,15 +1,17 @@
-# KSHIP V4 Whitepaper
+# KSHIP / K108000 / KGOD Cumulative Whitepaper
 
 Status: DRAFT PRODUCT CANDIDATE
-Version: 4.0.0-compatible lineage
+Version: KSHIP 5.0.0 / K108000 1.1.0 / KGOD 1.0.0
 Solidity: 0.8.24
 Upgradeable: NO
 Mainnet status: NOT DEPLOYED / NOT LIVE
-Primary lineage: KUFO -> KSHIP -> K108000 -> KGOD
+Primary lineage: K511111 KUFO -> K108000 點石成金 KSHIP -> K108000 equal-matter reaction -> K168888 筋斗雲 KGOD
 
 ## 1. Purpose
 
-KSHIP is the stable carrier material produced from terminally decaying KUFO. It is the downstream material used by the K108000 propulsion / transformation lineage.
+KSHIP is the stable carrier material produced from terminally decaying KUFO at K108000 點石成金. It is the antimatter input used by the K108000 propulsion / transformation reactor. KGOD is minted only from a verified K108000 reaction proof and is born at the K168888 筋斗雲 coordinate.
+
+The canonical Solidity filenames and contract names are `KSHIP`, `K108000MassEnergyReactor`, and `KGOD`. Version identity is encoded inside each contract through `VERSION` and `VERSION_ID`, not in the formal program filename. None has a Mainnet address until an authorized deployment receipt exists.
 
 KSHIP has NO HALF-LIFE in Product_05. Once valid KSHIP is minted from a verified KUFO carrier proof, this product does not automatically decay it.
 
@@ -52,11 +54,11 @@ This ceiling corresponds to the current modeled KAIOS -> KUFO -> KSHIP civilizat
 
 KSHIP tracks totalMintedFromKufo and totalSupply.
 
-Because Product_05 defines no native KSHIP burn or decay, the token exposes the conservation condition:
+KSHIP exposes the cumulative conservation condition:
 
-totalSupply == totalMintedFromKufo
+totalSupply + totalConsumedForMassEnergy == totalMintedFromKufo
 
-Downstream consumption through K108000 is outside Product_05 and must be introduced only in the later Product_06 lineage with its own explicit conservation accounting.
+K108000 additionally requires equal positive-matter and KSHIP input and exact allocation across propulsion, recoverable energy, KGOD mass-equivalent, and radiation/heat.
 
 ## 7. Non-upgradeable core
 
@@ -82,9 +84,9 @@ The only privileged mint actor is the current KSHIPConverter resolved through th
 
 KSHIP is designated for later Product_06 use:
 
-KSHIP -> K108000 -> KGOD.
+K511111 KUFO -> K108000 KSHIP -> K108000 reaction -> K168888 KGOD.
 
-Product_05 does not activate KGOD, marriage, KDNA or KRNA logic.
+KGOD remains a deployment candidate until a separately authorized deployment binds it to the exact K108000 reactor. Marriage, KDNA and KRNA logic remain outside this lineage.
 
 ## 10. Verification requirements
 
@@ -100,9 +102,29 @@ Before deployment, GM review must verify:
 - no hidden upgrade path
 - exact-head Solidity compile and EVM behavioral tests
 
-## 11. Deployment boundary
+## 11. Deployment-ready dependency order
+
+The candidate constructor graph is machine-tested locally in this order. The live KAIOS token's immutable `ORGAN_REGISTRY()` is an external dependency and must be reused; deploying a second registry would create an unusable split lineage.
+
+1. Read and verify `KAIOS.ORGAN_REGISTRY()` on the intended chain; verify registry bytecode, owner, pending owner, bootstrap state, minimum delay and existing bindings.
+2. `KUFO(registry)`.
+3. `KAIOSAlchemyFurnace(kaios, kgen, registry)` and `KUFOClaimWormhole(furnace, kufo)` for K18911 -> K511111.
+4. `KSHIP(registry, kufo)` and `KSHIPConverter(kufo, kship)` at K108000.
+5. `KAIOSShipIdentityRegistry(registrar)`.
+6. `KGENWhiteHoleBurnReplayRegistry(registry)`.
+7. `KGENWhiteHoleBurnVerifier(kgen, replayRegistry, attestorA, attestorB, scaleNumerator, scaleDenominator)`.
+8. `KGENWhiteHoleMatterSource(verifier, shipRegistry)`.
+9. `K108000MassEnergyReactor(kship, registry, shipRegistry)`.
+10. `KGOD(reactor)` at K168888.
+11. Propose the exact furnace, wormhole, converter, verifier, matter source, reactor and KGOD bindings in the reused registry. If bootstrap is closed, wait the on-chain minimum delay and execute each binding only under a separate exact authorization. Register the intended SHIP_ID/controller tuple only under its separately verified authority.
+
+Every constructor rejects a zero dependency. Deployment is not complete until each receipt has status `1`, deployed bytecode is non-empty, constructor arguments are independently reproduced, the live KAIOS token points to the reused registry, organ keys resolve to the intended contracts, and the deployed version constants match this cumulative specification.
+
+## 12. Deployment boundary
 
 This whitepaper describes a repository candidate only. It does not assert Mainnet deployment, activation, registry mutation, signer use, token movement or governance approval.
+
+No KSHIP, K108000 reactor or KGOD Mainnet contract address exists in this repository candidate yet. An address may be published only after the separately authorized deployment transaction is mined and verified.
 
 Required flow:
 

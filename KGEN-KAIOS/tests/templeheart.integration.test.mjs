@@ -75,6 +75,7 @@ async function makeWishAndHolyCup(context, heart, user, civilizationId, wishHash
 
 async function createFortuneProof(context, heart, user, civilizationId, wishHash, suffix, beneficiary = user) {
   const amount = 1n * ETHER;
+  await (await context.kgen.connect(context.owner).transfer(await user.getAddress(), amount / 1_000n)).wait();
   await (await context.kaios.connect(context.treasury).transfer(await user.getAddress(), amount)).wait();
   await (await context.kaios.connect(user).approve(await context.furnace.getAddress(), amount)).wait();
   const destination = await heart.alchemyDestinationCode(await heart.fortunePurposeCode(), wishHash);
@@ -86,7 +87,8 @@ async function createFortuneProof(context, heart, user, civilizationId, wishHash
       destination,
     )
   ).wait();
-  const proofId = eventArgs(receipt, context.furnace, "AlchemyProofCreated").proofId;
+  const proofId = eventArgs(receipt, context.furnace, "ImmediateAlchemyCreated").proofId;
+  await (await context.kgen.connect(user).transfer(await context.owner.getAddress(), amount / 1_000n)).wait();
   assert.notEqual(proofId, id(`UNUSED-${suffix}`));
   return proofId;
 }
@@ -134,6 +136,7 @@ test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-boun
   const purpose = await heart.offeringPurposeCode(1);
   const destination = await heart.alchemyDestinationCode(purpose, wishHash);
   const amount = 250n * ETHER;
+  await (await context.kgen.transfer(await context.treasury.getAddress(), amount / 1_000n)).wait();
   await (await context.kaios.connect(context.treasury).approve(await context.furnace.getAddress(), amount)).wait();
   const burnReceipt = await (
     await context.furnace.connect(context.treasury).burnForKufo(
@@ -143,7 +146,7 @@ test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-boun
       destination,
     )
   ).wait();
-  const proofId = eventArgs(burnReceipt, context.furnace, "AlchemyProofCreated").proofId;
+  const proofId = eventArgs(burnReceipt, context.furnace, "ImmediateAlchemyCreated").proofId;
 
   await (await heart.connect(context.treasury).recordBurnOffering(proofId, 1)).wait();
   assert.equal(await heart.totalOfferingKaiosBurned(), amount);
@@ -161,6 +164,7 @@ test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", a
   const purpose = await heart.offeringPurposeCode(1);
   const destination = await heart.alchemyDestinationCode(purpose, wishHash);
   const amount = 100n * ETHER;
+  await (await context.kgen.transfer(await context.treasury.getAddress(), 2n * amount / 1_000n)).wait();
   await (await context.kaios.connect(context.treasury).approve(await context.furnace.getAddress(), 2n * amount)).wait();
 
   const redirectReceipt = await (
@@ -171,7 +175,7 @@ test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", a
       destination,
     )
   ).wait();
-  const redirectProof = eventArgs(redirectReceipt, context.furnace, "AlchemyProofCreated").proofId;
+  const redirectProof = eventArgs(redirectReceipt, context.furnace, "ImmediateAlchemyCreated").proofId;
   await assert.rejects(heart.connect(context.treasury).recordBurnOffering(redirectProof, 1));
 
   const mismatchReceipt = await (
@@ -182,7 +186,7 @@ test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", a
       id("WRONG-PURPOSE"),
     )
   ).wait();
-  const mismatchProof = eventArgs(mismatchReceipt, context.furnace, "AlchemyProofCreated").proofId;
+  const mismatchProof = eventArgs(mismatchReceipt, context.furnace, "ImmediateAlchemyCreated").proofId;
   await assert.rejects(heart.connect(context.treasury).recordBurnOffering(mismatchProof, 1));
 });
 
