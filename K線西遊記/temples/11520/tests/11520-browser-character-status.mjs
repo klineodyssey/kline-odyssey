@@ -33,6 +33,7 @@ for(const token of ['生命','KAIOS','XYZ','C 曲速','口數','KX','KY','KZ'])a
 const sheetZ=await page.locator('#sheet').evaluate(el=>Number(getComputedStyle(el).zIndex)||0);
 const hudMax=await page.evaluate(()=>Math.max(...['#dock','#backpackButton','#walletPanel','#chatHandle','#k11520HudCollapseAll'].map(s=>{const e=document.querySelector(s);return e?(Number(getComputedStyle(e).zIndex)||0):0})));
 assert.ok(sheetZ>hudMax,`character card must render above HUD: ${sheetZ} <= ${hudMax}`);
+await page.screenshot({path:`${OUT}/11520-mobile-character-status.png`,fullPage:true});
 
 await page.locator('#sheetClose').click();
 await page.evaluate(()=>{globalThis.__K11520_TEST_WORLD_TAP_ROUTES__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__.push(e.detail?.route))});
@@ -48,6 +49,5 @@ await page.locator('#sheetClose').click();
 await tapCanvas(.12,.78,72);
 assert.equal(await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__?.at(-1)),'GROUND','non-avatar canvas tap must remain routed to canonical world interaction');
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'ground tap must not be consumed as a character-card tap');
-await page.screenshot({path:`${OUT}/11520-mobile-character-status.png`,fullPage:true});
 await browser.close();
-console.log('11520 character status PASS: real organ, raycast avatar, and world tap routing verified at 390x844');
+console.log('11520 character status PASS: real organ, raycast avatar, world tap routing, and open-card visual evidence verified at 390x844');
