@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.2.0
+VERSION: 1.3.0
 STATUS: ACTIVE
 PURPOSE: Read-only/fail-closed KAIOS ATM receiving and reconciliation runtime for the existing 11520 product. This module never signs or sends a transaction.
 */
@@ -13,7 +13,7 @@ export const DELIVERY_ERRORS=Object.freeze([
   'RECONCILIATION_REQUIRED','RPC_DISAGREEMENT','TX_REVERTED','TX_DROPPED','AMOUNT_MISMATCH','WRONG_RECEIVER',
   'REPLAY_BLOCKED','DELIVERY_REJECTED','DIRECTION_ROUTE_MISMATCH','ROUTE_EVIDENCE_MISSING','INVALID_EXACT_AMOUNT',
   'VERIFIER_ID_MISMATCH','CHAIN_ID_MISMATCH','FINALITY_REQUIRED','BLOCK_IDENTITY_MISSING','LOG_IDENTITY_MISSING',
-  'MANIFEST_TIME_INVALID','MANIFEST_NOT_YET_VALID','MANIFEST_EXPIRED',
+  'MANIFEST_TIME_INVALID','MANIFEST_NOT_YET_VALID','MANIFEST_EXPIRED','REPLAY_REGISTRY_UNAVAILABLE',
 ]);
 const STATE_INDEX=new Map(DELIVERY_STATES.map((x,i)=>[x,i]));
 const ADDR=/^0x[0-9a-fA-F]{40}$/;
@@ -70,6 +70,14 @@ export function createKaiosAtmReceivingModule(config={}){
   const token=normAddr(config.KAIOS_token_address);
   const confirmations=Number(config.required_confirmations);
   const requiredConfirmations=Number.isSafeInteger(confirmations)&&confirmations>0?confirmations:null;
+  const replayRegistry=config.replay_registry;
+  const replayRegistryReady=Boolean(
+    replayRegistry&&
+    replayRegistry.durability==='DURABLE_SHARED_REPLAY_REGISTRY'&&
+    String(replayRegistry.registry_id||'').trim()&&
+    typeof replayRegistry.reserve==='function'&&
+    typeof replayRegistry.commit==='function'
+  );
   const record={
     receiver_module_id:config.receiver_module_id||KAIOS_ATM_RECEIVING_VERSION,
     receiver_chain_id:56,
@@ -85,10 +93,21 @@ export function createKaiosAtmReceivingModule(config={}){
     required_confirmations:requiredConfirmations,
     receipt_evidence_authority:'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY',
     manifest_time_authority:'SYSTEM_WALL_CLOCK_FAIL_CLOSED',
+    replay_registry_id:replayRegistryReady?String(replayRegistry.registry_id):null,
+    replay_registry_authority:replayRegistryReady?'EXTERNAL_DURABLE_SHARED_REGISTRY':'NOT_CONNECTED',
+    replay_reservation_id:null,replay_reservation_status:'NOT_RESERVED',
     last_error:null,freight_fee_revenue:'0',gas_cost_bnb:0,delivery_cost:'0',net_profit:'0',
     _journal:[],_usedReplayKeys:new Set(),_verifiedReceipt:null,
   };
-  journal(record,'MODULE_CREATED',{receiverConfigured:Boolean(receiver),tokenConfigured:Boolean(token),requiredConfirmations});
+  journal(record,'MODULE_CREATED',{receiverConfigured:Boolean(receiver),tokenConfigured:Boolean(token),requiredConfirmations,replayRegistryReady});
+
+  function replayBinding(){
+    return Object.freeze({
+      namespace:'KAIOS_11520_ATM_RECEIVING_V1',replay_key:record.replay_key,cargo_manifest_id:record.cargo_manifest_id,
+      purpose_hash:record.purpose_hash,sender:record.sender,receiver:record.receiver_contract_or_escrow_address,
+      token:record.KAIOS_token_address,amount:record.authorized_amount,
+    });
+  }
 
   function registerCargo(manifest={}){
     if(record.cargo_manifest_id)return fail(record,'DELIVERY_REJECTED',{reason:'CARGO_ALREADY_REGISTERED'});
@@ -107,10 +126,14 @@ export function createKaiosAtmReceivingModule(config={}){
   }
   function authorizeExactReceiver(){
     if(record.delivery_status!=='AWAITING_EXACT_AUTHORIZATION')return fail(record,'DELIVERY_REJECTED',{reason:'WRONG_STATE'});
-    if(!record.receiver_contract_or_escrow_address||!record.KAIOS_token_address||!record.custody_policy_id||!record.receipt_verifier_id||!record.required_confirmations)
+    if(!record.receiver_contract_or_escrow_address||!record.KAIOS_token_address||!record.custody_policy_id||!record.receipt_verifier_id||!record.required_confirmations||!replayRegistryReady)
       return fail(record,'DELIVERY_REJECTED',{reason:'11520_REAL_KAIOS_RECEIVING_GATE_NOT_DEPLOYED'});
     const window=manifestWindowStatus(record);if(!window.ok)return fail(record,window.status,window);
     if(record._usedReplayKeys.has(record.replay_key))return fail(record,'REPLAY_BLOCKED');
+    let reservation;
+    try{reservation=replayRegistry.reserve(replayBinding())}catch{return fail(record,'REPLAY_REGISTRY_UNAVAILABLE',{operation:'reserve'})}
+    if(!reservation||reservation.ok!==true||!String(reservation.reservation_id||''))return fail(record,'REPLAY_BLOCKED',{registry_status:reservation?.status||'INVALID_RESPONSE'});
+    record.replay_reservation_id=String(reservation.reservation_id);record.replay_reservation_status='RESERVED';record._usedReplayKeys.add(record.replay_key);
     advance(record,'READY_FOR_DISPATCH');journal(record,'EXACT_RECEIVER_AUTHORIZED',{receiver:record.receiver_contract_or_escrow_address,required_confirmations:record.required_confirmations,valid_from:record.valid_from,expires_at:record.expires_at});
     return {ok:true,snapshot:snapshot(record)};
   }
@@ -129,7 +152,7 @@ export function createKaiosAtmReceivingModule(config={}){
     if(evidence.dropped===true)return fail(record,'TX_DROPPED');
     if(evidence.status!==1&&evidence.status!=='0x1'&&evidence.status!==true)return fail(record,'TX_REVERTED');
     if(String(evidence.transaction_hash||'').toLowerCase()!==record.transaction_hash)return fail(record,'DELIVERY_REJECTED',{reason:'TX_HASH_MISMATCH'});
-    if(record._usedReplayKeys.has(record.replay_key))return fail(record,'REPLAY_BLOCKED');
+    if(record.replay_reservation_status!=='RESERVED'||!record.replay_reservation_id)return fail(record,'REPLAY_BLOCKED',{reason:'RESERVATION_MISSING'});
 
     let blockNumber,observedHead;
     try{blockNumber=exactUint(evidence.block_number);observedHead=exactUint(evidence.observed_head_block)}catch{return fail(record,'BLOCK_IDENTITY_MISSING')}
@@ -153,7 +176,12 @@ export function createKaiosAtmReceivingModule(config={}){
     let amount;try{amount=exactString(transfer.amount)}catch{return fail(record,'INVALID_EXACT_AMOUNT',{field:'transfer.amount'})}
     if(amount!==record.authorized_amount)return fail(record,'AMOUNT_MISMATCH',{expected:record.authorized_amount,received:amount});
 
-    record.received_amount=amount;record.block_number=blockNumber.toString();record.block_hash=blockHash;
+    let committed;
+    try{committed=replayRegistry.commit(Object.freeze({...replayBinding(),reservation_id:record.replay_reservation_id,transaction_hash:record.transaction_hash,block_number:blockNumber.toString(),block_hash:blockHash,log_index:logIndex.toString()}))}
+    catch{return fail(record,'REPLAY_REGISTRY_UNAVAILABLE',{operation:'commit'})}
+    if(!committed||committed.ok!==true||committed.status!=='COMMITTED')return fail(record,'REPLAY_BLOCKED',{registry_status:committed?.status||'INVALID_RESPONSE'});
+
+    record.replay_reservation_status='COMMITTED';record.received_amount=amount;record.block_number=blockNumber.toString();record.block_hash=blockHash;
     record.transfer_log_index=logIndex.toString();record.observed_head_block=observedHead.toString();record.confirmations=confirmations.toString();
     record.receipt_status='FOUND_STRUCTURALLY_VERIFIED_CHAIN_IDENTITY_NOT_INDEPENDENT_RPC_AUTHORITY';record._verifiedReceipt=clone(evidence);record._usedReplayKeys.add(record.replay_key);
     advance(record,'RECEIPT_FOUND');journal(record,'RECEIPT_CHAIN_IDENTITY_VERIFIED',{block_number:record.block_number,block_hash:record.block_hash,log_index:record.transfer_log_index,confirmations:record.confirmations,amount});
@@ -186,6 +214,6 @@ export function createKaiosAtmReceivingModule(config={}){
 
 export function snapshot(record){
   const out={};for(const [k,v] of Object.entries(record)){if(!k.startsWith('_'))out[k]=v}
-  out.real_receiving_gate=record.receiver_contract_or_escrow_address&&record.KAIOS_token_address&&record.custody_policy_id&&record.receipt_verifier_id&&record.required_confirmations?'CONFIGURED_STRUCTURAL_VERIFICATION_ONLY':'NOT_DEPLOYED';
+  out.real_receiving_gate=record.receiver_contract_or_escrow_address&&record.KAIOS_token_address&&record.custody_policy_id&&record.receipt_verifier_id&&record.required_confirmations&&record.replay_registry_id?'CONFIGURED_STRUCTURAL_VERIFICATION_ONLY':'NOT_DEPLOYED';
   out.mainnet_write_executed=false;return clone(out);
 }

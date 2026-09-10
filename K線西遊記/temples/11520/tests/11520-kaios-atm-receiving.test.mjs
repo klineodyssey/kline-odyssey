@@ -11,7 +11,26 @@ const TX='0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const BLOCK_HASH='0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 const TRANSFER_TOPIC='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 function activeWindow(){const now=Date.now();return {valid_from:new Date(now-60_000).toISOString(),expires_at:new Date(now+3_600_000).toISOString()}}
-function module(config={}){return createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',required_confirmations:12,...config})}
+function replayRegistry({failReserve=false,failCommit=false}={}){
+  const entries=new Map();let seq=0;
+  return {
+    durability:'DURABLE_SHARED_REPLAY_REGISTRY',registry_id:'QA-DURABLE-REPLAY',
+    reserve(binding){
+      if(failReserve)throw new Error('registry unavailable');
+      const key=`${binding.namespace}:${binding.replay_key}`;
+      if(entries.has(key))return {ok:false,status:'DUPLICATE'};
+      const reservation_id=`QA-RESERVATION-${++seq}`;entries.set(key,{binding,reservation_id,status:'RESERVED'});
+      return {ok:true,status:'RESERVED',reservation_id};
+    },
+    commit(receipt){
+      if(failCommit)throw new Error('registry unavailable');
+      const key=`${receipt.namespace}:${receipt.replay_key}`,entry=entries.get(key);
+      if(!entry||entry.reservation_id!==receipt.reservation_id||entry.status!=='RESERVED')return {ok:false,status:'DUPLICATE'};
+      entry.status='COMMITTED';entry.receipt=receipt;return {ok:true,status:'COMMITTED'};
+    },
+  };
+}
+function module(config={}){return createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',required_confirmations:12,replay_registry:replayRegistry(),...config})}
 function register(m,{replay='REPLAY-1',amount='1080000',fee='888',...window}={}){return m.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:amount,freight_fee:fee,purpose_hash:'QA-PURPOSE',replay_key:replay,...activeWindow(),...window})}
 function receipt(overrides={}){
   const base={
@@ -32,6 +51,24 @@ test('configured module also requires an explicit confirmation policy',()=>{
   register(m);assert.equal(m.authorizeExactReceiver().ok,false);assert.equal(m.snapshot().real_receiving_gate,'NOT_DEPLOYED');
 });
 
+test('configured module requires a durable shared replay registry',()=>{
+  const m=createKaiosAtmReceivingModule({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',required_confirmations:12});
+  register(m);const result=m.authorizeExactReceiver();assert.equal(result.ok,false);assert.equal(result.snapshot.real_receiving_gate,'NOT_DEPLOYED');assert.equal(result.snapshot.replay_registry_authority,'NOT_CONNECTED');
+});
+
+test('shared replay registry atomically blocks the same replay key across module instances',()=>{
+  const shared=replayRegistry();
+  const first=module({replay_registry:shared});register(first,{replay:'SHARED-REPLAY'});assert.equal(first.authorizeExactReceiver().ok,true);
+  const second=module({replay_registry:shared});register(second,{replay:'SHARED-REPLAY'});const duplicate=second.authorizeExactReceiver();
+  assert.equal(duplicate.ok,false);assert.equal(duplicate.status,'REPLAY_BLOCKED');assert.equal(duplicate.snapshot.delivery_status,'AWAITING_EXACT_AUTHORIZATION');
+});
+
+test('replay registry outage fails closed at reserve and commit boundaries',()=>{
+  const reserveDown=module({replay_registry:replayRegistry({failReserve:true})});register(reserveDown);assert.equal(reserveDown.authorizeExactReceiver().status,'REPLAY_REGISTRY_UNAVAILABLE');
+  const commitDown=module({replay_registry:replayRegistry({failCommit:true})});register(commitDown);assert.equal(commitDown.authorizeExactReceiver().ok,true);commitDown.noteExternalTransaction(TX);
+  const result=commitDown.verifyReceiptEvidence(receipt());assert.equal(result.status,'REPLAY_REGISTRY_UNAVAILABLE');assert.equal(result.snapshot.delivery_status,'TX_PENDING');assert.equal(result.snapshot.receipt_status,'NOT_FOUND');
+});
+
 test('missing or malformed manifest time may register cargo but cannot authorize dispatch',()=>{
   const missing=module();const a=missing.registerCargo({cargo_manifest_id:'QA-CARGO',sender:SENDER,authorized_amount:'1',purpose_hash:'QA-PURPOSE',replay_key:'R'});assert.equal(a.ok,true);assert.equal(missing.authorizeExactReceiver().status,'MANIFEST_TIME_INVALID');
   const reversed=module();const now=Date.now();const b=register(reversed,{valid_from:new Date(now+60_000).toISOString(),expires_at:new Date(now).toISOString()});assert.equal(b.ok,true);assert.equal(reversed.authorizeExactReceiver().status,'MANIFEST_TIME_INVALID');
@@ -46,6 +83,7 @@ test('manifest cannot authorize before valid_from or at/after expires_at',()=>{
 test('happy path requires exact chain/log identity, finality, manifest time, balance reconciliation and ATM acceptance before DELIVERED',()=>{
   const m=module();register(m);assert.equal(m.authorizeExactReceiver().ok,true);assert.equal(m.noteExternalTransaction(TX).ok,true);
   assert.equal(m.verifyReceiptEvidence(receipt()).ok,true);assert.equal(m.snapshot().available_ATM_inventory,'0');
+  assert.equal(m.snapshot().replay_registry_authority,'EXTERNAL_DURABLE_SHARED_REGISTRY');assert.equal(m.snapshot().replay_reservation_status,'COMMITTED');
   assert.equal(m.snapshot().block_number,'123456');assert.equal(m.snapshot().block_hash,BLOCK_HASH);assert.equal(m.snapshot().transfer_log_index,'7');assert.equal(m.snapshot().confirmations,'12');
   assert.equal(m.snapshot().receipt_evidence_authority,'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY');assert.equal(m.snapshot().manifest_time_authority,'SYSTEM_WALL_CLOCK_FAIL_CLOSED');
   assert.equal(m.reconcileBalance({token_balance_before:'10',token_balance_after:'1080010'}).ok,true);assert.equal(m.markArrived().ok,true);assert.equal(m.acceptAtmInventory({accepted:true}).ok,true);
