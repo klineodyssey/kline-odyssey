@@ -10,11 +10,11 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 28,
-  "contractCount": 42,
+  "sourceCount": 24,
+  "contractCount": 38,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
-  "warnings": 1,
+  "warnings": 0,
   "contracts": [
     {
       "contractName": "KGEN_TempleHeart_Upgradeable",
@@ -89,10 +89,10 @@
       "deployedBytecodeBytes": 17
     },
     {
-      "contractName": "K108000MassEnergyReactorV1",
-      "sourceName": "contracts/K108000MassEnergyReactorV1.sol",
-      "bytecodeBytes": 4792,
-      "deployedBytecodeBytes": 4470
+      "contractName": "K108000MassEnergyReactor",
+      "sourceName": "contracts/K108000MassEnergyReactor.sol",
+      "bytecodeBytes": 4833,
+      "deployedBytecodeBytes": 4511
     },
     {
       "contractName": "KAIOS",
@@ -103,14 +103,8 @@
     {
       "contractName": "KAIOSAlchemyFurnace",
       "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
-      "bytecodeBytes": 2381,
-      "deployedBytecodeBytes": 2084
-    },
-    {
-      "contractName": "KAIOSAlchemyFurnaceV4",
-      "sourceName": "contracts/KAIOSAlchemyFurnaceV4.sol",
-      "bytecodeBytes": 3257,
-      "deployedBytecodeBytes": 2952
+      "bytecodeBytes": 3426,
+      "deployedBytecodeBytes": 3121
     },
     {
       "contractName": "KAIOSEventHorizonVaultV01",
@@ -127,8 +121,8 @@
     {
       "contractName": "KAIOSOrganRegistry",
       "sourceName": "contracts/KAIOSOrganRegistry.sol",
-      "bytecodeBytes": 2718,
-      "deployedBytecodeBytes": 2404
+      "bytecodeBytes": 2998,
+      "deployedBytecodeBytes": 2684
     },
     {
       "contractName": "KAIOSPairRegistry",
@@ -137,76 +131,58 @@
       "deployedBytecodeBytes": 1535
     },
     {
-      "contractName": "KAIOSShipIdentityRegistryV1",
-      "sourceName": "contracts/KAIOSShipIdentityRegistryV1.sol",
+      "contractName": "KAIOSShipIdentityRegistry",
+      "sourceName": "contracts/KAIOSShipIdentityRegistry.sol",
       "bytecodeBytes": 2110,
       "deployedBytecodeBytes": 1938
     },
     {
-      "contractName": "KGENWhiteHoleBurnReplayRegistryV1",
-      "sourceName": "contracts/KGENWhiteHoleMatterSourceV1.sol",
+      "contractName": "KGENWhiteHoleBurnReplayRegistry",
+      "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
       "bytecodeBytes": 1091,
       "deployedBytecodeBytes": 924
     },
     {
-      "contractName": "KGENWhiteHoleBurnVerifierV1",
-      "sourceName": "contracts/KGENWhiteHoleMatterSourceV1.sol",
+      "contractName": "KGENWhiteHoleBurnVerifier",
+      "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
       "bytecodeBytes": 5515,
       "deployedBytecodeBytes": 4992
     },
     {
-      "contractName": "KGENWhiteHoleMatterSourceV1",
-      "sourceName": "contracts/KGENWhiteHoleMatterSourceV1.sol",
+      "contractName": "KGENWhiteHoleMatterSource",
+      "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
       "bytecodeBytes": 3059,
       "deployedBytecodeBytes": 2816
     },
     {
-      "contractName": "KGODV1",
-      "sourceName": "contracts/KGODV1.sol",
-      "bytecodeBytes": 4154,
-      "deployedBytecodeBytes": 3167
+      "contractName": "KGOD",
+      "sourceName": "contracts/KGOD.sol",
+      "bytecodeBytes": 4194,
+      "deployedBytecodeBytes": 3207
     },
     {
       "contractName": "KSHIP",
       "sourceName": "contracts/KSHIP.sol",
-      "bytecodeBytes": 4479,
-      "deployedBytecodeBytes": 3444
+      "bytecodeBytes": 5705,
+      "deployedBytecodeBytes": 4652
     },
     {
       "contractName": "KSHIPConverter",
       "sourceName": "contracts/KSHIPConverter.sol",
-      "bytecodeBytes": 1221,
-      "deployedBytecodeBytes": 950
-    },
-    {
-      "contractName": "KSHIPV5",
-      "sourceName": "contracts/KSHIPV5.sol",
-      "bytecodeBytes": 5665,
-      "deployedBytecodeBytes": 4612
+      "bytecodeBytes": 1511,
+      "deployedBytecodeBytes": 1239
     },
     {
       "contractName": "KUFO",
       "sourceName": "contracts/KUFO.sol",
-      "bytecodeBytes": 6051,
-      "deployedBytecodeBytes": 4992
+      "bytecodeBytes": 9457,
+      "deployedBytecodeBytes": 8472
     },
     {
       "contractName": "KUFOClaimWormhole",
       "sourceName": "contracts/KUFOClaimWormhole.sol",
-      "bytecodeBytes": 1035,
-      "deployedBytecodeBytes": 765
-    },
-    {
-      "contractName": "KUFOOutputJindouyun168888V4",
-      "sourceName": "contracts/KUFOOutputJindouyun168888V4.sol",
-      "bytecodeBytes": 1089,
-      "deployedBytecodeBytes": 849
-    },
-    {
-      "contractName": "KUFOV4",
-      "sourceName": "contracts/KUFOV4.sol",
-      "bytecodeBytes": 9498,
-      "deployedBytecodeBytes": 8513
+      "bytecodeBytes": 1308,
+      "deployedBytecodeBytes": 1067
     },
     {
       "contractName": "KGENWhiteHoleBurnVerifierMock",

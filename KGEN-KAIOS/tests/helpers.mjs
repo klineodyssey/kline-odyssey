@@ -44,12 +44,12 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
     await treasury.getAddress(),
     await registry.getAddress(),
   ]);
-  const kufo = await deploy("KUFO", owner, [await registry.getAddress(), await kaios.getAddress()]);
+  const kufo = await deploy("KUFO", owner, [await registry.getAddress()]);
   const kship = await deploy("KSHIP", owner, [await registry.getAddress(), await kufo.getAddress()]);
   const furnace = await deploy("KAIOSAlchemyFurnace", owner, [
     await kaios.getAddress(),
+    await kgen.getAddress(),
     await registry.getAddress(),
-    epochSeconds,
   ]);
   const wormhole = await deploy("KUFOClaimWormhole", owner, [
     await furnace.getAddress(),

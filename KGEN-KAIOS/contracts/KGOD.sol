@@ -25,13 +25,14 @@ interface IK108000ReactionSource {
 }
 
 /**
- * @title KGODV1
- * @notice Immutable stable KGOD material minted only from its deployment-bound K108000 reactor.
+ * @title KGOD
+ * @notice Immutable stable KGOD material born at K168888 only from its deployment-bound K108000 reactor.
  * @dev A mutable organ-registry update cannot replace the trusted reaction source or authorize minting.
  */
-contract KGODV1 is ERC20, ERC20Capped {
+contract KGOD is ERC20, ERC20Capped {
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.KGOD.V1.0.0");
+    uint256 public constant BIRTH_POINT = 168_888;
     uint256 public constant MAX_SUPPLY = 144_000_000_000_000_000 ether;
 
     IK108000ReactionSource public immutable reactionSource;

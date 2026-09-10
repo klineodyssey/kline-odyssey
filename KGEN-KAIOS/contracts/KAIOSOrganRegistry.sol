@@ -14,6 +14,13 @@ contract KAIOSOrganRegistry is Ownable2Step {
     bytes32 public constant ORGAN_FURNACE_18911 = keccak256("KAIOS.ORGAN.FURNACE.18911");
     bytes32 public constant ORGAN_WORMHOLE_511111 = keccak256("KAIOS.ORGAN.WORMHOLE.511111");
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
+    bytes32 public constant ORGAN_K108000_REACTOR =
+        keccak256("KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR");
+    bytes32 public constant ORGAN_K108000_MATTER_SOURCE =
+        keccak256("KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE");
+    bytes32 public constant ORGAN_KGEN_WHITE_HOLE_BURN_VERIFIER =
+        keccak256("KAIOS.ORGAN.KGEN.WHITE_HOLE.BURN_VERIFIER");
+    bytes32 public constant ORGAN_KGOD = keccak256("KAIOS.ORGAN.KGOD.TOKEN");
     bytes32 public constant ORGAN_PAIR_REGISTRY = keccak256("KAIOS.ORGAN.PAIR.REGISTRY");
     bytes32 public constant ORGAN_EXCHANGE_TREASURY_11520 =
         keccak256("KAIOS.ORGAN.EXCHANGE_TREASURY.11520");

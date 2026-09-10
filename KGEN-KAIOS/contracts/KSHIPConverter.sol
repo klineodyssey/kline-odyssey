@@ -16,9 +16,12 @@ interface IKSHIPMinter {
 
 /**
  * @title KSHIPConverter
- * @notice Holder-authorized KUFO burn to KSHIP carrier accounting conversion.
+ * @notice K108000 點石成金: holder-authorized KUFO burn to KSHIP carrier accounting conversion.
  */
 contract KSHIPConverter {
+    string public constant VERSION = "5.0.0";
+    bytes32 public constant VERSION_ID = keccak256("KAIOS.KSHIP_CONVERTER.V5.0.0");
+    uint256 public constant CONVERSION_POINT = 108_000;
     IKUFOCarrierBurnable public immutable kufo;
     IKSHIPMinter public immutable kship;
     uint256 public conversionCount;
