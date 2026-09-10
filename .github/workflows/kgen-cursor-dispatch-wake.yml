@@ -61,7 +61,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$BODY")
           API_ERROR_CODE=$(python3 <<'PY'
-          import json
+          import json, re
 
           try:
               payload = json.load(open("/tmp/cursor-agent.json", encoding="utf-8"))
@@ -69,7 +69,8 @@ jobs:
               print("unparseable_response")
           else:
               error = payload.get("error") or {}
-              print(error.get("code") or "")
+              code = error.get("code") or ""
+              print(code if isinstance(code, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", code) else "untrusted_error_code")
           PY
           )
           echo "Cursor API HTTP ${HTTP}"
