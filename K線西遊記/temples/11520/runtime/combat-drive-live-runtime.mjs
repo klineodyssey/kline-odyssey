@@ -1,8 +1,8 @@
 /* KGEN_META
-VERSION: 1.1.0
+VERSION: 1.3.0
 STATUS: PROTOTYPE
 FORMAL_ORGAN_NAME: 11520 Live Combat Drive Bridge
-PURPOSE: Apply the existing discrete C rail to XYZ joystick intent and expose lot/KAIOS mass to the game HUD. Simulation-only; never mutates KX/KY/KZ positions, wallets, balances, chain state, payments, treasury, or governance.
+PURPOSE: Apply the existing discrete C rail to XYZ joystick intent and expose lot/KAIOS mass to the game HUD. XYZ movement remains signed so crossing zero enters the legal mirror-universe side defined by Signed Universe Math. Simulation-only; never mutates KX/KY/KZ positions, wallets, balances, chain state, payments, treasury, or governance.
 */
 import {buildDriveState,readDriveStateFromDom} from './combat-drive-adapter.mjs';
 
@@ -30,7 +30,19 @@ export function rawVectorFromControl(source){
 export function scaledControlState(source,drive){
   if(!source||typeof source!=='object')return source;
   const v=rawVectorFromControl(source),factor=driveMultiplier(drive?.c||0);
-  return {...source,vector:{x:v.x*factor,y:v.y*factor,z:v.z*factor},drive:{...drive,vectorMultiplier:factor,rawVector:v}};
+  const scaled={x:v.x*factor,y:v.y*factor,z:v.z*factor};
+  return {
+    ...source,
+    vector:scaled,
+    drive:{
+      ...drive,
+      vectorMultiplier:factor,
+      rawVector:v,
+      signedUniverseCoordinates:true,
+      zeroCrossingAllowed:true,
+      negativeCoordinateMeaning:'MIRROR_UNIVERSE',
+    },
+  };
 }
 
 export function exposeDriveState(root=globalThis.document,{applyToLiveControl=false}={}){
@@ -42,7 +54,15 @@ export function exposeDriveState(root=globalThis.document,{applyToLiveControl=fa
     globalThis.__K11520_JOYSTICK_XZXY__=live;
     globalThis.__K11520_JOYSTICK_PLANE__=live;
   }
-  globalThis.__K11520_COMBAT_DRIVE__={...drive,controlVector:live?.vector||{x:0,y:0,z:0},simulationOnly:true,appliedToLiveControl:Boolean(applyToLiveControl&&live)};
+  globalThis.__K11520_COMBAT_DRIVE__={
+    ...drive,
+    controlVector:live?.vector||{x:0,y:0,z:0},
+    simulationOnly:true,
+    appliedToLiveControl:Boolean(applyToLiveControl&&live),
+    signedUniverseCoordinates:true,
+    zeroCrossingAllowed:true,
+    negativeCoordinateMeaning:'MIRROR_UNIVERSE',
+  };
   return globalThis.__K11520_COMBAT_DRIVE__;
 }
 
@@ -61,6 +81,17 @@ export function install11520LiveCombatDrive({root=globalThis.document,intervalMs
   tick();
   clearInterval(globalThis.__K11520_COMBAT_DRIVE_TIMER__);
   globalThis.__K11520_COMBAT_DRIVE_TIMER__=setInterval(tick,Math.max(40,Number(intervalMs)||60));
-  globalThis.__K11520_COMBAT_DRIVE_API__={read:()=>exposeDriveState(root,{applyToLiveControl}),render:tick,scaleVector(vector={}){const d=readDriveStateFromDom(root),f=driveMultiplier(d.c);return{x:(finite(vector.x)?Number(vector.x):0)*f,y:(finite(vector.y)?Number(vector.y):0)*f,z:(finite(vector.z)?Number(vector.z):0)*f}}};
+  globalThis.__K11520_COMBAT_DRIVE_API__={
+    read:()=>exposeDriveState(root,{applyToLiveControl}),
+    render:tick,
+    scaleVector(vector={}){
+      const d=readDriveStateFromDom(root),f=driveMultiplier(d.c);
+      return {
+        x:(finite(vector.x)?Number(vector.x):0)*f,
+        y:(finite(vector.y)?Number(vector.y):0)*f,
+        z:(finite(vector.z)?Number(vector.z):0)*f,
+      };
+    },
+  };
   return globalThis.__K11520_COMBAT_DRIVE__;
 }
