@@ -97,9 +97,9 @@ async function fixture() {
 async function buildBurnEvidence(f, amount, suffix = "1") {
   const traderAddress = await f.trader.getAddress();
   const grossTradeKgen = amount * 1_000n;
-  await (await f.kgen.transfer(traderAddress, grossTradeKgen)).wait();
+  await (await f.kgen.transfer(traderAddress, grossTradeKgen, { gasLimit: 250_000n })).wait();
   const supplyBefore = await f.kgen.totalSupply();
-  const burnTx = await f.kgen.connect(f.trader).transfer(f.pairAddress, grossTradeKgen);
+  const burnTx = await f.kgen.connect(f.trader).transfer(f.pairAddress, grossTradeKgen, { gasLimit: 250_000n });
   const receipt = await burnTx.wait();
   assert.equal(supplyBefore - await f.kgen.totalSupply(), amount);
   const block = await f.owner.provider.getBlock(receipt.blockNumber);
@@ -229,9 +229,9 @@ test("White-Hole verifier rejects a tax-exempt trader or pair even with both att
   const grossTradeKgen = amount * 1_000n;
   const traderAddress = await f.trader.getAddress();
   await (await f.kgen.setTaxExempt(f.pairAddress, true)).wait();
-  await (await f.kgen.transfer(traderAddress, grossTradeKgen)).wait();
+  await (await f.kgen.transfer(traderAddress, grossTradeKgen, { gasLimit: 250_000n })).wait();
   const supplyBefore = await f.kgen.totalSupply();
-  const transfer = await f.kgen.connect(f.trader).transfer(f.pairAddress, grossTradeKgen);
+  const transfer = await f.kgen.connect(f.trader).transfer(f.pairAddress, grossTradeKgen, { gasLimit: 250_000n });
   const receipt = await transfer.wait();
   assert.equal(await f.kgen.totalSupply(), supplyBefore, "the exempt transfer must not burn KGEN");
   const block = await f.owner.provider.getBlock(receipt.blockNumber);
