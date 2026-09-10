@@ -12,23 +12,24 @@ assert.deepEqual(scaledControlState(source,{c:0,lots:1,kaiosMass:1000}).vector,{
 assert.deepEqual(scaledControlState(source,{c:10,lots:3,kaiosMass:3000}).vector,{x:10,y:-5,z:2.5});
 assert.deepEqual(source.vector,{x:1,y:-.5,z:.25},'source control state must not be mutated');
 
-const mirror=scaledControlState(
+const negativeAxes=scaledControlState(
   {mode:'XZ',vector:{x:-1,y:0,z:-1}},
   {c:10,lots:1,kaiosMass:1000},
 );
-assert.deepEqual(mirror.vector,{x:-10,y:0,z:-10},'negative XYZ remains signed and may cross zero into the mirror-universe side');
-assert.equal(mirror.drive.signedUniverseCoordinates,true);
-assert.equal(mirror.drive.zeroCrossingAllowed,true);
-assert.equal(mirror.drive.negativeCoordinateMeaning,'MIRROR_UNIVERSE');
+assert.deepEqual(negativeAxes.vector,{x:-10,y:0,z:-10},'negative XYZ remains signed and may cross zero along local physical axes');
+assert.equal(negativeAxes.drive.signedXyzCoordinates,true);
+assert.equal(negativeAxes.drive.zeroCrossingAllowed,true);
+assert.equal(negativeAxes.drive.negativeCoordinateMeaning,'NEGATIVE_XYZ_AXIS');
+assert.equal(negativeAxes.drive.mirrorUniverseCoupling,'SEPARATE_K_DIRECTION_ONLY');
 
-const deepMirror=scaledControlState(
+const deepNegativeAxes=scaledControlState(
   {mode:'XYZ',vector:{x:-12.5,y:-0.25,z:-40}},
   {c:100,lots:2,kaiosMass:2000},
 );
 assert.deepEqual(
-  deepMirror.vector,
+  deepNegativeAxes.vector,
   {x:-1250,y:-25,z:-4000},
-  'signed coordinates are not clamped at zero regardless of negative magnitude',
+  'signed local XYZ coordinates are not clamped at zero regardless of negative magnitude',
 );
 
 console.log('11520 live drive bridge PASS: C scales signed XYZ intent; zero crossing is legal; negative coordinates map to mirror-universe space; lots/KAIOS remain metadata; source control state is not mutated');
