@@ -10,7 +10,6 @@ on:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
-      - "tests/run-universal-exchange-security-migration.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
@@ -20,7 +19,6 @@ on:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
-      - "tests/run-universal-exchange-security-migration.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/workflows/universal_exchange_v2.yml"
@@ -42,7 +40,7 @@ jobs:
       - name: Run Universal Exchange tests
         shell: bash
         run: |
-          node tests/run-universal-exchange-security-migration.mjs
+          node --test tests/universal-exchange.test.mjs
           node --test tests/universal-exchange-workflow-security.test.mjs
 
   digital-ant-public-read-only-worker:
