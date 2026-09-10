@@ -104,20 +104,21 @@ Before deployment, GM review must verify:
 
 ## 11. Deployment-ready dependency order
 
-The candidate constructor graph is machine-tested locally in this order:
+The candidate constructor graph is machine-tested locally in this order. The live KAIOS token's immutable `ORGAN_REGISTRY()` is an external dependency and must be reused; deploying a second registry would create an unusable split lineage.
 
-1. `KAIOSOrganRegistry(initialOwner, governanceDelay)`.
-2. `KUFO(registry)` and `KSHIP(registry, kufo)`.
-3. `KSHIPConverter(kufo, kship)` at K108000.
-4. `KAIOSShipIdentityRegistry(registrar)`.
-5. `KGENWhiteHoleBurnReplayRegistry(registry)`.
-6. `KGENWhiteHoleBurnVerifier(kgen, replayRegistry, attestorA, attestorB, scaleNumerator, scaleDenominator)`.
-7. `KGENWhiteHoleMatterSource(verifier, shipRegistry)`.
-8. `K108000MassEnergyReactor(kship, registry, shipRegistry)`.
-9. `KGOD(reactor)` at K168888.
-10. Bind the exact converter, verifier, matter source, reactor and KGOD addresses in the Organ Registry, register the intended SHIP_ID/controller tuple, then seal bootstrap or use the governance-delay path.
+1. Read and verify `KAIOS.ORGAN_REGISTRY()` on the intended chain; verify registry bytecode, owner, pending owner, bootstrap state, minimum delay and existing bindings.
+2. `KUFO(registry)`.
+3. `KAIOSAlchemyFurnace(kaios, kgen, registry)` and `KUFOClaimWormhole(furnace, kufo)` for K18911 -> K511111.
+4. `KSHIP(registry, kufo)` and `KSHIPConverter(kufo, kship)` at K108000.
+5. `KAIOSShipIdentityRegistry(registrar)`.
+6. `KGENWhiteHoleBurnReplayRegistry(registry)`.
+7. `KGENWhiteHoleBurnVerifier(kgen, replayRegistry, attestorA, attestorB, scaleNumerator, scaleDenominator)`.
+8. `KGENWhiteHoleMatterSource(verifier, shipRegistry)`.
+9. `K108000MassEnergyReactor(kship, registry, shipRegistry)`.
+10. `KGOD(reactor)` at K168888.
+11. Propose the exact furnace, wormhole, converter, verifier, matter source, reactor and KGOD bindings in the reused registry. If bootstrap is closed, wait the on-chain minimum delay and execute each binding only under a separate exact authorization. Register the intended SHIP_ID/controller tuple only under its separately verified authority.
 
-Every constructor rejects a zero dependency. Deployment is not complete until each receipt has status `1`, deployed bytecode is non-empty, constructor arguments are independently reproduced, organ keys resolve to the intended contracts, and the deployed version constants match this cumulative specification.
+Every constructor rejects a zero dependency. Deployment is not complete until each receipt has status `1`, deployed bytecode is non-empty, constructor arguments are independently reproduced, the live KAIOS token points to the reused registry, organ keys resolve to the intended contracts, and the deployed version constants match this cumulative specification.
 
 ## 12. Deployment boundary
 
