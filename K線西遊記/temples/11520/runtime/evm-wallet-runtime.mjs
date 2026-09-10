@@ -88,6 +88,7 @@ function pin11520WalletToggle(){
 if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'')){
   import('./life-visual-bootstrap.mjs').catch(()=>{});
   pin11520WalletToggle();
+  import('./market-world-coordinate-runtime.mjs').catch(()=>{});
   import('./game-mobile-shell.mjs').catch(()=>{});
   import('./backpack-ui.mjs').then(()=>import('./living-world-browser-bridge.mjs')).catch(()=>{});
   import('./game-ui-product-fixes.mjs').catch(()=>{});
