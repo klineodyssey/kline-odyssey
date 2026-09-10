@@ -17,9 +17,11 @@ await page.waitForFunction(()=>globalThis.__K11520_CHARACTER_STATUS__?.character
 const detail=(await page.locator('#k11520HpDetail').textContent()||'').trim();
 assert.match(detail,/HP\s+\d+\s*\/\s*100/,'detailed HP current/max missing');
 assert.match(detail,/\d+\.\d%/,'HP percentage missing');
-const characterButton=page.locator('[data-organ="character"],#character,[data-organ]').filter({hasText:/角色|Character/i}).first();
-if(await characterButton.count()) await characterButton.click();
-else await page.evaluate(()=>globalThis.__K11520_CHARACTER_STATUS_API__?.openCard?.());
+const characterButton=page.locator('[data-organ="character"]').first();
+assert.equal(await characterButton.count(),1,'real character organ button must exist');
+if(!await characterButton.isVisible())await page.locator('#dockToggle').click();
+assert.equal(await characterButton.isVisible(),true,'real character organ button must be user-visible');
+await characterButton.click();
 await page.waitForTimeout(140);
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),true,'character sheet must open');
 const title=(await page.locator('#sheetTitle').textContent()||'').trim();
@@ -31,6 +33,21 @@ for(const token of ['生命','KAIOS','XYZ','C 曲速','口數','KX','KY','KZ'])a
 const sheetZ=await page.locator('#sheet').evaluate(el=>Number(getComputedStyle(el).zIndex)||0);
 const hudMax=await page.evaluate(()=>Math.max(...['#dock','#backpackButton','#walletPanel','#chatHandle','#k11520HudCollapseAll'].map(s=>{const e=document.querySelector(s);return e?(Number(getComputedStyle(e).zIndex)||0):0})));
 assert.ok(sheetZ>hudMax,`character card must render above HUD: ${sheetZ} <= ${hudMax}`);
+
+await page.locator('#sheetClose').click();
+await page.evaluate(()=>{globalThis.__K11520_TEST_WORLD_TAP_ROUTES__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__.push(e.detail?.route))});
+const canvas=await page.locator('#three').boundingBox();
+assert.ok(canvas,'3D canvas missing');
+const tapCanvas=async(fx,fy,id)=>{const p={pointerId:id,pointerType:'touch',clientX:canvas.x+canvas.width*fx,clientY:canvas.y+canvas.height*fy,buttons:1};await page.dispatchEvent('#three','pointerdown',p);await page.waitForTimeout(45);await page.dispatchEvent('#three','pointerup',{...p,buttons:0});await page.waitForTimeout(160)};
+await tapCanvas(.5,.5,71);
+assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),true,'raycast player tap must open character sheet');
+assert.match((await page.locator('#sheetTitle').textContent()||'').trim(),/角色資料/,'raycast player tap opened wrong sheet');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__?.at(-1)),'PLAYER','avatar tap must be classified by the 3D player raycast');
+
+await page.locator('#sheetClose').click();
+await tapCanvas(.12,.78,72);
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__?.at(-1)),'GROUND','non-avatar canvas tap must remain routed to canonical world interaction');
+assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'ground tap must not be consumed as a character-card tap');
 await page.screenshot({path:`${OUT}/11520-mobile-character-status.png`,fullPage:true});
 await browser.close();
-console.log('11520 character status PASS: detailed HP and inspectable player data card visible at 390x844');
+console.log('11520 character status PASS: real organ, raycast avatar, and world tap routing verified at 390x844');

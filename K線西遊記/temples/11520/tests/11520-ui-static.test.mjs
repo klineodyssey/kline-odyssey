@@ -60,6 +60,11 @@ test('detailed HP and character inspection are read-only and boot-wired',()=>{
   assert.ok(xyzAuthority.includes("import('./character-status-runtime.mjs')"),'character status must load in live boot path');
   for(const token of ['HP ${Math.round(h.current)} / ${h.max}','${h.pct.toFixed(1)}%','角色資料','悟空 · 11520 玩家','KAIOS','XYZ','C 曲速','口數','KX','KY','KZ'])assert.ok(characterStatus.includes(token),token);
   assert.ok(characterStatus.includes('simulationOnly:true'));
+  assert.ok(characterStatus.includes("addEventListener('k11520:player-tap'"),'avatar inspection must use the canonical 3D player raycast event');
+  assert.ok(characterStatus.includes('worldTapPassthrough:true'),'non-avatar world taps must remain canonical');
+  assert.equal(characterStatus.includes('centralAvatar='),false,'hard-coded canvas rectangle must not consume world/entity taps');
+  assert.ok(main.includes("emitWorldTapRoute('PLAYER')"),'player raycast route must be explicit');
+  assert.ok(main.includes("emitWorldTapRoute('GROUND'"),'ground route must remain explicit');
   for(const forbidden of ['sendTransaction','eth_sendTransaction','privateKey','treasuryTransfer','approve(','transfer('])assert.equal(characterStatus.includes(forbidden),false,forbidden);
 });
 
