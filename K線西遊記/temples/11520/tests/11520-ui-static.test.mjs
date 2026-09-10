@@ -11,7 +11,11 @@ const main=read('../runtime/game-5d-main.mjs');
 const fixes=read('../runtime/game-ui-product-fixes.mjs');
 const controls=read('../runtime/game-controls-v251.mjs');
 const xyzControl=read('../runtime/joystick-xzxy.mjs');
-const source=[html,main,fixes,controls,xyzControl].join('\n');
+const xyzAuthority=read('../runtime/xyz-input-authority-runtime.mjs');
+const driveLive=read('../runtime/combat-drive-live-runtime.mjs');
+const driveAdapter=read('../runtime/combat-drive-adapter.mjs');
+const massScale=read('../runtime/combat-mass-scale-runtime.mjs');
+const source=[html,main,fixes,controls,xyzControl,xyzAuthority,driveLive,driveAdapter,massScale].join('\n');
 
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
@@ -37,6 +41,18 @@ test('XYZ plane control is unbounded intent with collision-constrained body',()=
   assert.ok(main.includes("blocker={name:'GROUND'}"));
   assert.ok(main.includes('S.intentXYZ={x:S.intentXYZ.x+v.x*speed'));
   assert.ok(xyzControl.includes('unboundedCoordinateIntent:true'));
+});
+
+test('C and lot drive bridge is installed by XYZ authority without asset mutation',()=>{
+  assert.ok(xyzAuthority.includes("import('./combat-drive-live-runtime.mjs')"),'XYZ authority must install live drive bridge');
+  assert.ok(xyzAuthority.includes('applyToLiveControl:true'),'live XYZ intent scaling must be enabled');
+  assert.ok(driveLive.includes('rawVectorFromControl'),'drive scaling must rebuild raw XYZ from disc/rail state to avoid compounding');
+  assert.ok(driveLive.includes('__K11520_3D_CONTROL__=live'),'scaled control must reach canonical main runtime input');
+  assert.ok(driveLive.includes('simulationOnly:true'),'drive bridge must remain simulation-only');
+  assert.ok(massScale.includes('kaiosPerKgen: 1000'),'1 KGEN must remain 1000 KAIOS');
+  assert.ok(massScale.includes("if (c===0) return 'LOCAL_WALK'"),'0C must remain local walking');
+  assert.ok(massScale.includes("if (c===1) return 'LIGHT_SPEED_SPOT'"),'1C must remain light-speed spot');
+  for(const forbidden of ['sendTransaction','eth_sendTransaction','privateKey','treasuryTransfer'])assert.equal(driveLive.includes(forbidden),false,forbidden);
 });
 
 test('known central interceptor is explicitly retired, not heuristically scanned',()=>{
