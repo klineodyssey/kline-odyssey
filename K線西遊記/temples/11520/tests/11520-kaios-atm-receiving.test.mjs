@@ -88,7 +88,15 @@ test('happy path requires exact chain/log identity, finality, manifest time, bal
   assert.equal(m.snapshot().receipt_evidence_authority,'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY');assert.equal(m.snapshot().manifest_time_authority,'SYSTEM_WALL_CLOCK_FAIL_CLOSED');
   assert.equal(m.reconcileBalance({token_balance_before:'10',token_balance_after:'1080010'}).ok,true);assert.equal(m.markArrived().ok,true);assert.equal(m.acceptAtmInventory({accepted:true}).ok,true);
   const delivered=m.markDelivered({gas_cost_bnb:.001,delivery_cost:'100',freight_fee_evidence:true});assert.equal(delivered.ok,true);
-  const s=m.snapshot();assert.equal(s.delivery_status,'DELIVERED');assert.equal(s.restricted_inventory_balance,'1080000');assert.equal(s.custody_liability_balance,'1080000');assert.equal(s.available_ATM_inventory,'1080000');assert.equal(s.freight_fee_revenue,'888');assert.equal(s.net_profit,'788');assert.equal(s.mainnet_write_executed,false);
+  const s=m.snapshot();assert.equal(s.delivery_status,'DELIVERED');assert.equal(s.restricted_inventory_balance,'1080000');assert.equal(s.custody_liability_balance,'1080000');assert.equal(s.available_ATM_inventory,'1080000');assert.equal(s.freight_fee,'888');assert.equal(s.freight_fee_revenue,'0');assert.equal(s.freight_fee_revenue_status,'UNVERIFIED_NO_INDEPENDENT_ACCOUNTING_EVIDENCE');assert.equal(s.freight_fee_revenue_authority,'NONE_CONNECTED');assert.equal(s.net_profit,'-100');assert.equal(s.mainnet_write_executed,false);
+});
+
+test('caller-supplied freight fee evidence cannot manufacture recognized revenue',()=>{
+  const m=module();register(m,{fee:'888'});m.authorizeExactReceiver();m.noteExternalTransaction(TX);m.verifyReceiptEvidence(receipt());
+  m.reconcileBalance({token_balance_before:'10',token_balance_after:'1080010'});m.markArrived();m.acceptAtmInventory({accepted:true});
+  const delivered=m.markDelivered({delivery_cost:'0',freight_fee_evidence:true});assert.equal(delivered.ok,true);
+  const s=m.snapshot();assert.equal(s.freight_fee,'888');assert.equal(s.freight_fee_revenue,'0');assert.equal(s.freight_fee_revenue_status,'UNVERIFIED_NO_INDEPENDENT_ACCOUNTING_EVIDENCE');assert.equal(s.freight_fee_revenue_authority,'NONE_CONNECTED');assert.equal(s.net_profit,'0');
+  const last=m.journal().at(-1);assert.equal(last.type,'DELIVERED');assert.equal(last.data.caller_freight_fee_evidence_ignored,true);assert.equal(last.data.freight_fee_revenue,'0');
 });
 
 test('exact integer accounting preserves values above Number.MAX_SAFE_INTEGER',()=>{
