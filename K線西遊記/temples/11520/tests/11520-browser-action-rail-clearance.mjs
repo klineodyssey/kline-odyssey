@@ -13,7 +13,7 @@ if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.loc
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
 await page.waitForTimeout(900);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
-await page.waitForFunction(()=>globalThis.__K11520_ACTION_RAIL_CLEARANCE__?.version==='1.2.0',null,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_ACTION_RAIL_CLEARANCE__?.version==='1.2.1',null,{timeout:3000});
 const r=await page.evaluate(()=>structuredClone(globalThis.__K11520_ACTION_RAIL_CLEARANCE__));
 assert.ok(r.rail,'remaining-axis rail missing');
 assert.ok(r.dock,'right utility dock missing');
@@ -22,7 +22,6 @@ assert.equal(r.railDockOverlap,false,'remaining-axis rail must not overlap right
 for(const sel of ['#cControl','#lotsControl','#yControl','#orderFire','#attack']){const b=await page.locator(sel).boundingBox();assert.ok(b,`${sel} missing`);assert.ok(b.x>=0&&b.x+b.width<=390,`${sel} must fit viewport`)}
 const railBox=await page.locator('#yControl').boundingBox(),dockBox=await page.locator('#dock').boundingBox();assert.ok(railBox&&dockBox);assert.ok(railBox.x+railBox.width+14<=dockBox.x,'remaining-axis rail must sit clear left of the actual utility dock');
 
-// Wallet toggle must remain on one physical anchor across collapse / expand.
 await page.waitForFunction(()=>globalThis.__K11520_WALLET_ANCHOR__?.version==='1.1.0',null,{timeout:3000});
 const walletBefore=await page.locator('#walletToggle').boundingBox();
 assert.ok(walletBefore,'wallet toggle missing');
@@ -34,7 +33,6 @@ await page.waitForTimeout(180);
 const walletAfterTwo=await page.locator('#walletToggle').boundingBox();
 for(const b of [walletAfterOne,walletAfterTwo]){assert.ok(b,'wallet toggle disappeared');assert.ok(Math.abs(b.x-walletBefore.x)<1&&Math.abs(b.y-walletBefore.y)<1,`wallet toggle anchor moved: before=${JSON.stringify(walletBefore)} after=${JSON.stringify(b)}`)}
 
-// Open-order layer contract: the existing confirm surface must render and hit-test above every ordinary HUD organ.
 await page.evaluate(()=>document.querySelector('#confirm')?.classList.add('open'));
 await page.waitForTimeout(180);
 const layer=await page.evaluate(()=>{const open=document.querySelector('#confirm.open');const z=open?Number(getComputedStyle(open).zIndex)||0:0;const hud=['#dock','#backpackButton','#walletPanel','#chatHandle','#k11520HudCollapseAll'].map(s=>{const e=document.querySelector(s);return e?(Number(getComputedStyle(e).zIndex)||0):0});return{z,hudMax:Math.max(...hud),rect:open?(()=>{const r=open.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}})():null,hit:(()=>{if(!open)return false;const r=open.getBoundingClientRect(),x=r.left+r.width/2,y=Math.max(r.top+20,Math.min(r.bottom-20,r.top+r.height/2)),h=document.elementFromPoint(x,y);return !!h&&(h===open||open.contains(h))})()}});
