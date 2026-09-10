@@ -163,9 +163,11 @@ test("unsigned deployment plan derives exact constructors and fails closed befor
   assert.equal(plan.chainWriteAuthorized, false);
   assert.equal(plan.signerUseAuthorized, false);
   assert.equal(plan.allCandidateAddressesMustBeNull, true);
+  assert.equal(plan.registryStrategy, "REUSE_REGISTRY_BOUND_TO_LIVE_KAIOS");
+  assert.equal(plan.registryBootstrapAssumption, "FAIL_CLOSED_UNTIL_LIVE_READ");
+  assert.equal(plan.organUpdateMode, "PROPOSE_DELAY_EXECUTE_IF_BOOTSTRAP_CLOSED");
 
   const expectedConstructors = new Map([
-    ["KAIOSOrganRegistry", ["initialOwner:address", "governanceDelay:uint64"]],
     ["KUFO", ["registry:address"]],
     ["KAIOSAlchemyFurnace", ["kaiosToken:address", "kgenToken:address", "registry:address"]],
     ["KUFOClaimWormhole", ["furnace18911:address", "kufoToken511111:address"]],
@@ -201,6 +203,8 @@ test("unsigned deployment plan derives exact constructors and fails closed befor
     assert.equal(dependency.candidateAddress, null);
     assert.ok(dependency.verificationRequired.length > 0);
   }
+  assert.equal(plan.externalDependencies.organRegistry.derivedFrom, "KAIOS.ORGAN_REGISTRY()");
+  assert.ok(plan.externalDependencies.kaiosToken.verificationRequired.includes("BURN_FOR_ALCHEMY_SELECTOR"));
 
   const expectedOrganKeys = new Map([
     ["KAIOS.ORGAN.FURNACE.18911", keccak256(toUtf8Bytes("KAIOS.ORGAN.FURNACE.18911"))],
@@ -225,6 +229,8 @@ test("unsigned deployment plan derives exact constructors and fails closed befor
     "K168888_KGOD_BIRTH",
   ]);
   assert.ok(plan.postDeploymentGates.includes("SEPARATE_EXACT_ACTION_AUTHORIZATION"));
+  assert.ok(plan.postDeploymentGates.includes("WAIT_REUSED_REGISTRY_MINIMUM_DELAY"));
+  assert.equal(plan.stages.some(({ contractName }) => contractName === "KAIOSOrganRegistry"), false);
 });
 
 test("version-free deployment artifacts expose internal versions and canonical birth points", async () => {

@@ -251,6 +251,9 @@
     "chainWriteAuthorized": false,
     "signerUseAuthorized": false,
     "allCandidateAddressesMustBeNull": true,
+    "registryStrategy": "REUSE_REGISTRY_BOUND_TO_LIVE_KAIOS",
+    "registryBootstrapAssumption": "FAIL_CLOSED_UNTIL_LIVE_READ",
+    "organUpdateMode": "PROPOSE_DELAY_EXECUTE_IF_BOOTSTRAP_CLOSED",
     "canonicalFlow": [
       "K18911_KAIOS_ALCHEMY_FURNACE",
       "K511111_KUFO_BIRTH_WORMHOLE",
@@ -264,7 +267,9 @@
         "verificationRequired": [
           "CHAIN_ID",
           "BYTECODE",
-          "TOKEN_IDENTITY"
+          "TOKEN_IDENTITY",
+          "BURN_FOR_ALCHEMY_SELECTOR",
+          "ORGAN_REGISTRY_GETTER"
         ]
       },
       "kgenToken": {
@@ -275,11 +280,17 @@
           "TOKEN_IDENTITY"
         ]
       },
-      "initialOwner": {
+      "organRegistry": {
         "candidateAddress": null,
+        "derivedFrom": "KAIOS.ORGAN_REGISTRY()",
         "verificationRequired": [
-          "CONTROL_PROOF",
-          "AUTHORITY"
+          "CHAIN_ID",
+          "BYTECODE",
+          "KAIOS_BINDING",
+          "OWNER",
+          "PENDING_OWNER",
+          "MINIMUM_DELAY",
+          "BOOTSTRAP_STATE"
         ]
       },
       "registrar": {
@@ -307,26 +318,6 @@
     "stages": [
       {
         "order": 1,
-        "contractName": "KAIOSOrganRegistry",
-        "sourceName": "contracts/KAIOSOrganRegistry.sol",
-        "constructorInputs": [
-          {
-            "name": "initialOwner",
-            "type": "address"
-          },
-          {
-            "name": "governanceDelay",
-            "type": "uint64"
-          }
-        ],
-        "dependencies": [
-          "initialOwner",
-          "governanceDelay"
-        ],
-        "candidateAddress": null
-      },
-      {
-        "order": 2,
         "contractName": "KUFO",
         "sourceName": "contracts/KUFO.sol",
         "constructorInputs": [
@@ -336,12 +327,12 @@
           }
         ],
         "dependencies": [
-          "KAIOSOrganRegistry"
+          "organRegistry"
         ],
         "candidateAddress": null
       },
       {
-        "order": 3,
+        "order": 2,
         "contractName": "KAIOSAlchemyFurnace",
         "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
         "constructorInputs": [
@@ -361,12 +352,12 @@
         "dependencies": [
           "KAIOS",
           "KGEN",
-          "KAIOSOrganRegistry"
+          "organRegistry"
         ],
         "candidateAddress": null
       },
       {
-        "order": 4,
+        "order": 3,
         "contractName": "KUFOClaimWormhole",
         "sourceName": "contracts/KUFOClaimWormhole.sol",
         "constructorInputs": [
@@ -386,7 +377,7 @@
         "candidateAddress": null
       },
       {
-        "order": 5,
+        "order": 4,
         "contractName": "KSHIP",
         "sourceName": "contracts/KSHIP.sol",
         "constructorInputs": [
@@ -400,13 +391,13 @@
           }
         ],
         "dependencies": [
-          "KAIOSOrganRegistry",
+          "organRegistry",
           "KUFO"
         ],
         "candidateAddress": null
       },
       {
-        "order": 6,
+        "order": 5,
         "contractName": "KSHIPConverter",
         "sourceName": "contracts/KSHIPConverter.sol",
         "constructorInputs": [
@@ -426,7 +417,7 @@
         "candidateAddress": null
       },
       {
-        "order": 7,
+        "order": 6,
         "contractName": "KAIOSShipIdentityRegistry",
         "sourceName": "contracts/KAIOSShipIdentityRegistry.sol",
         "constructorInputs": [
@@ -441,7 +432,7 @@
         "candidateAddress": null
       },
       {
-        "order": 8,
+        "order": 7,
         "contractName": "KGENWhiteHoleBurnReplayRegistry",
         "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
         "constructorInputs": [
@@ -451,12 +442,12 @@
           }
         ],
         "dependencies": [
-          "KAIOSOrganRegistry"
+          "organRegistry"
         ],
         "candidateAddress": null
       },
       {
-        "order": 9,
+        "order": 8,
         "contractName": "KGENWhiteHoleBurnVerifier",
         "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
         "constructorInputs": [
@@ -494,7 +485,7 @@
         "candidateAddress": null
       },
       {
-        "order": 10,
+        "order": 9,
         "contractName": "KGENWhiteHoleMatterSource",
         "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
         "constructorInputs": [
@@ -514,7 +505,7 @@
         "candidateAddress": null
       },
       {
-        "order": 11,
+        "order": 10,
         "contractName": "K108000MassEnergyReactor",
         "sourceName": "contracts/K108000MassEnergyReactor.sol",
         "constructorInputs": [
@@ -533,13 +524,13 @@
         ],
         "dependencies": [
           "KSHIP",
-          "KAIOSOrganRegistry",
+          "organRegistry",
           "KAIOSShipIdentityRegistry"
         ],
         "candidateAddress": null
       },
       {
-        "order": 12,
+        "order": 11,
         "contractName": "KGOD",
         "sourceName": "contracts/KGOD.sol",
         "constructorInputs": [
@@ -594,7 +585,10 @@
     "postDeploymentGates": [
       "VERIFY_EACH_DEPLOYED_BYTECODE",
       "VERIFY_INTERNAL_VERSION_AND_WORLD_POINT",
-      "BIND_ORGANS_THROUGH_GOVERNED_REGISTRY",
+      "VERIFY_KAIOS_POINTS_TO_THE_REUSED_ORGAN_REGISTRY",
+      "PROPOSE_EACH_ORGAN_BINDING_THROUGH_REUSED_REGISTRY",
+      "WAIT_REUSED_REGISTRY_MINIMUM_DELAY",
+      "EXECUTE_AND_VERIFY_EACH_ORGAN_BINDING",
       "REGISTER_SHIP_ID_AND_CONTROLLER",
       "RUN_EXACT_HEAD_INTEGRATION_TESTS",
       "INDEPENDENT_REVIEW",

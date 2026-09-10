@@ -138,6 +138,8 @@ The V4 candidate requires review for:
 
 This whitepaper describes a repository candidate. It does not assert deployment, Mainnet activation, registry mutation, signer execution, token transfer, governance approval or chain write.
 
+Mainnet deployment must reuse the Organ Registry returned by the live KAIOS token's immutable `ORGAN_REGISTRY()` getter. A second registry would not authorize `KAIOS.burnForAlchemy` and would split the monetary lineage. Before any deployment or binding transaction, a read-only preflight must verify the live KAIOS and KGEN identities, non-empty bytecode, the KAIOS alchemy selector, the registry bytecode and ownership, bootstrap state, minimum delay and every current organ binding. If bootstrap is closed, each new organ must use the registry's propose-delay-execute route; elapsed time alone is never a transaction authorization.
+
 The required flow is:
 
 玄曜 Product Engineering -> exact-head CI / EVM tests -> Codex/衡曜 GM independent review -> human-authorized deployment process.
