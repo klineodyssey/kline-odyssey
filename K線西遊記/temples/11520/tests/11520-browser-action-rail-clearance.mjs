@@ -34,7 +34,7 @@ assert.equal(initial.origin.x,65000.25);assert.equal(initial.origin.y,3500.5);as
 assert.deepEqual(initial.global.origin,{x:65000.25,y:3500.5,z:600.75});
 assert.ok(!/^X\s+0(?:\.0+)?\s+·\s+Y\s+0(?:\.0+)?\s+·\s+Z\s+0/.test(initial.text),'visible XYZ must not start at 0/0/0 once market origin is ready');
 const joy=await page.locator('#joy').boundingBox();assert.ok(joy,'joystick missing');
-await page.mouse.move(joy.x+joy.width/2,joy.y+joy.height/2);await page.mouse.down();await page.mouse.move(joy.x+joy.width*.82,joy.y+joy.height*.5,{steps:5});await page.waitForTimeout(450);await page.mouse.up();await page.waitForTimeout(200);
+await page.mouse.move(joy.x+joy.width*.24,joy.y+joy.height*.5);await page.mouse.down();await page.mouse.move(joy.x+joy.width*.82,joy.y+joy.height*.5,{steps:5});await page.waitForTimeout(450);await page.mouse.up();await page.waitForTimeout(200);
 const moved=await page.evaluate(()=>({origin:structuredClone(globalThis.__K11520_MARKET_ORIGIN__),global:structuredClone(globalThis.__K11520_GLOBAL_WORLD_COORDS__)}));
 assert.deepEqual({x:moved.origin.x,y:moved.origin.y,z:moved.origin.z},{x:initial.origin.x,y:initial.origin.y,z:initial.origin.z},'market origin must remain immutable while player moves');
 assert.ok(Math.abs(moved.global.displacement.x)+Math.abs(moved.global.displacement.y)+Math.abs(moved.global.displacement.z)>0.001,'player movement must produce nonzero local displacement');
