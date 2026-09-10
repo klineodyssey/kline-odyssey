@@ -52,25 +52,36 @@ export function assertExecutableOrder({wallet,chainId,marketAdapter,order}){
 function pin11520WalletToggle(){
   if(typeof document==='undefined')return;
   const btn=document.getElementById('walletToggle');
-  if(!btn||btn.dataset.k11520Pinned==='1')return;
-  btn.dataset.k11520Pinned='1';
-  btn.classList.add('k11520-fixed-wallet-toggle');
-  document.body.appendChild(btn);
-  const style=document.createElement('style');
-  style.id='k11520FixedWalletToggleStyle';
+  if(!btn)return;
+  if(btn.dataset.k11520Pinned!=='1'){
+    btn.dataset.k11520Pinned='1';
+    btn.classList.add('k11520-fixed-wallet-toggle');
+    document.body.appendChild(btn);
+  }
+  let style=document.getElementById('k11520FixedWalletToggleStyle');
+  if(!style){style=document.createElement('style');style.id='k11520FixedWalletToggleStyle';document.head.appendChild(style)}
   style.textContent=`
-    #walletToggle.k11520-fixed-wallet-toggle{position:fixed!important;z-index:980!important;right:72px!important;top:398px!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;border:1px solid #68e4ff66!important;border-radius:11px!important;background:#101a25!important;color:#8ceaff!important;display:block!important;transform:none!important;touch-action:manipulation!important}
+    #walletToggle.k11520-fixed-wallet-toggle{position:fixed!important;z-index:9810!important;right:72px!important;top:398px!important;left:auto!important;bottom:auto!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;margin:0!important;border:1px solid #68e4ff66!important;border-radius:11px!important;background:#101a25!important;color:#8ceaff!important;display:grid!important;place-items:center!important;transform:none!important;translate:none!important;touch-action:manipulation!important}
     #hudToggleAxes,#hudToggleMonster,#hudToggleParams{right:72px!important}
-    body.game-clean-mode #walletToggle.k11520-fixed-wallet-toggle{display:none!important}
-    @media(max-width:420px){body:not(.game-clean-mode) #walletPanel{right:68px!important;width:calc(100vw - 84px)!important;max-width:calc(100vw - 84px)!important}}
+    @media(max-width:420px){body:not(.game-clean-mode) #walletPanel{position:fixed!important;right:68px!important;top:398px!important;width:calc(100vw - 84px)!important;max-width:calc(100vw - 84px)!important}#walletToggle.k11520-fixed-wallet-toggle{right:72px!important;top:398px!important}}
     @media(min-width:421px){#walletToggle.k11520-fixed-wallet-toggle{right:68px!important;top:302px!important}}
   `;
-  document.head.appendChild(style);
   const panel=document.getElementById('walletPanel');
   if(panel){
-    const sync=()=>{btn.textContent=panel.classList.contains('collapsed')?'◀':'▶';btn.setAttribute('aria-expanded',String(!panel.classList.contains('collapsed')))};
-    new MutationObserver(sync).observe(panel,{attributes:true,attributeFilter:['class']});
-    sync();
+    const anchor=()=>{
+      btn.style.setProperty('position','fixed','important');
+      btn.style.setProperty('right',innerWidth<=420?'72px':'68px','important');
+      btn.style.setProperty('top',innerWidth<=420?'398px':'302px','important');
+      btn.style.setProperty('left','auto','important');
+      btn.style.setProperty('bottom','auto','important');
+      btn.style.setProperty('transform','none','important');
+      const r=btn.getBoundingClientRect();
+      globalThis.__K11520_WALLET_ANCHOR__={version:'1.1.0',collapsed:panel.classList.contains('collapsed'),x:r.x,y:r.y,width:r.width,height:r.height};
+    };
+    const sync=()=>{btn.textContent=panel.classList.contains('collapsed')?'◀':'▶';btn.setAttribute('aria-expanded',String(!panel.classList.contains('collapsed')));anchor()};
+    if(!panel.dataset.k11520WalletAnchorObserved){new MutationObserver(sync).observe(panel,{attributes:true,attributeFilter:['class','style']});panel.dataset.k11520WalletAnchorObserved='1'}
+    addEventListener('resize',anchor,{passive:true});
+    sync();requestAnimationFrame(anchor);setTimeout(anchor,120);setTimeout(anchor,500);
   }
 }
 
