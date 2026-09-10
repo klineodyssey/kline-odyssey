@@ -9,10 +9,34 @@ const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 
 await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
-await page.waitForTimeout(1900);
-if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
-await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
-await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_API__&&globalThis.__K11520_COMBAT_DRIVE__,null,{timeout:4000});
+const bootTimeout=15000;
+await page.waitForTimeout(250);
+if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:5000});
+await page.locator('#intro11520').waitFor({state:'hidden',timeout:bootTimeout});
+try{
+  await page.waitForFunction(()=>Boolean(
+    document.querySelector('#cControl')&&
+    document.querySelector('#lotsControl')&&
+    document.querySelector('#joy')&&
+    globalThis.__K11520_COMBAT_DRIVE_API__&&
+    globalThis.__K11520_COMBAT_DRIVE__
+  ),null,{timeout:bootTimeout});
+}catch(err){
+  const diagnostic=await page.evaluate(()=>{
+    const intro=document.querySelector('#intro11520');
+    return{
+      readyState:document.readyState,
+      introPresent:Boolean(intro),
+      introVisible:Boolean(intro&&getComputedStyle(intro).display!=='none'&&getComputedStyle(intro).visibility!=='hidden'&&Number(getComputedStyle(intro).opacity)!==0),
+      cControl:Boolean(document.querySelector('#cControl')),
+      lotsControl:Boolean(document.querySelector('#lotsControl')),
+      joy:Boolean(document.querySelector('#joy')),
+      combatDriveApi:Boolean(globalThis.__K11520_COMBAT_DRIVE_API__),
+      combatDriveState:Boolean(globalThis.__K11520_COMBAT_DRIVE__)
+    };
+  });
+  throw new Error(`combat drive runtime readiness timeout: ${JSON.stringify(diagnostic)}; page errors: ${errors.join(' | ')||'none'}; ${err.message}`);
+}
 await page.waitForTimeout(300);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 
@@ -64,4 +88,4 @@ const hud=await page.locator('#k11520DriveHud').textContent();assert.match(hud,/
 await page.screenshot({path:`${OUT}/11520-mobile-combat-drive-c10-3lots.png`,fullPage:true});
 assert.deepEqual(errors,[]);
 await browser.close();
-console.log('11520 combat drive browser QA PASS: 0C walk, 1C spot, 10C warp, 3 lots = 3000 KAIOS/kg, screenshot captured');
+console.log('11520 combat drive browser QA PASS: bounded runtime readiness, 0C walk, 1C spot, 10C warp, 3 lots = 3000 KAIOS/kg, screenshot captured');
