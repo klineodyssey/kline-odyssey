@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.2.2
+VERSION: 1.2.3
 STATUS: ACTIVE
 PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life, Digital Ant, wild creatures and monsters.
 */
@@ -136,11 +136,12 @@ export function createProceduralLifeBody(THREE,{species='LIFE',name='Market Life
     COW:(T,r,m,d)=>buildQuadruped(T,r,m,d,{kind:'COW'}),SHEEP:(T,r,m,d)=>buildQuadruped(T,r,m,d,{kind:'SHEEP'}),
     CHICKEN:(T,r,m,d)=>buildBird(T,r,m,d,{kind:'CHICKEN'}),DUCK:(T,r,m,d)=>buildBird(T,r,m,d,{kind:'DUCK'}),TREE:buildTree,FLOWER:buildFlower,HUMANOID:buildHumanoid};
   (builders[archetype]||buildHumanoid)(THREE,root,main,dark);
+  const archetypeScale=finite(root.scale?.x,1)||1;root.userData.archetypeScale=archetypeScale;
   const cargo=new THREE.Group();cargo.name='LIFE_STATUS_CARGO';cargo.visible=false;
   const cargoBody=new THREE.Mesh(new THREE.BoxGeometry(.62,.42,.46),mat(THREE,0xc79a36,{roughness:.48,metalness:.48}));cargoBody.position.set(0,.82,-.48);cargo.add(cargoBody);root.add(cargo);
   const statusRing=add(root,'LIFE_STATUS_RECEIPT',new THREE.Mesh(new THREE.TorusGeometry(.48,.045,8,28),mat(THREE,0x62d7ff,{roughness:.35,metalness:.25,emissive:0x123744})));statusRing.rotation.x=Math.PI/2;statusRing.position.y=.08;statusRing.visible=false;
   const retirementHalo=add(root,'LIFE_STATUS_RETIREMENT',new THREE.Mesh(new THREE.TorusGeometry(.39,.035,8,30),mat(THREE,0xffd66b,{roughness:.3,metalness:.4,emissive:0x4b3610})));retirementHalo.position.y=1.94;retirementHalo.visible=false;
-  root.scale.multiplyScalar(Number(scale)||1);return root;
+  root.scale.setScalar(archetypeScale*(Number(scale)||1));return root;
 }
 
 export function createFallbackLifeBody(THREE,{name='Life',scale=1}={}){
@@ -155,8 +156,8 @@ export async function createLifeVisual(THREE,{gltfLoader=null,modelUrl=null,...s
 }
 
 export function syncLifeVisual(root,life={}){
-  if(!root)return;const p=lifePresentationState(life),base=finite(root.userData?.baseScale,1)||1;
-  root.visible=life.state!=='DEAD';root.position.set(finite(life.x),Math.max(.05,finite(life.y)),finite(life.z));root.scale.setScalar(base*p.scale);root.rotation.x=p.pitch;
+  if(!root)return;const p=lifePresentationState(life),base=finite(root.userData?.baseScale,1)||1,archetypeScale=finite(root.userData?.archetypeScale,1)||1;
+  root.visible=life.state!=='DEAD';root.position.set(finite(life.x),Math.max(.05,finite(life.y)),finite(life.z));root.scale.setScalar(base*archetypeScale*p.scale);root.rotation.x=p.pitch;
   const cargo=root.getObjectByName?.('LIFE_STATUS_CARGO');if(cargo)cargo.visible=p.carrying;
   const receipt=root.getObjectByName?.('LIFE_STATUS_RECEIPT');if(receipt)receipt.visible=p.waitingReceipt;
   const retirement=root.getObjectByName?.('LIFE_STATUS_RETIREMENT');if(retirement)retirement.visible=p.retired;
