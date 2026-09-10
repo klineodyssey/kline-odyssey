@@ -134,6 +134,34 @@ def self_test():
             "HTTP non-success",
         )
 
+        # An invalid HTTP status representation must fail closed without mutation.
+        readme.write_text(seed, encoding="utf-8")
+        _expect_runtime_error(
+            SimpleNamespace(status="not-a-status", bozo=False, entries=[]),
+            readme,
+            "invalid HTTP status",
+        )
+
+        # A parser result without an entries collection is not a valid empty feed.
+        readme.write_text(seed, encoding="utf-8")
+        _expect_runtime_error(
+            SimpleNamespace(status=200, bozo=False),
+            readme,
+            "missing entries collection",
+        )
+
+        # A malformed first entry must remain red and must not mutate README.
+        readme.write_text(seed, encoding="utf-8")
+        _expect_runtime_error(
+            SimpleNamespace(
+                status=200,
+                bozo=False,
+                entries=[SimpleNamespace(title="Missing Link")],
+            ),
+            readme,
+            "malformed first entry",
+        )
+
         # Valid content still replaces exactly the governed marker block.
         readme.write_text(seed, encoding="utf-8")
         changed = update_latest_video(
