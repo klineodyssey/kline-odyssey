@@ -28,6 +28,7 @@ jobs:
       - name: Validate 11520 ES modules
         run: |
           node --check "K線西遊記/temples/11520/runtime/world-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/monster-aggression-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-ui-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs"
@@ -41,11 +42,23 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/game-controls-v251.mjs"
           node --check "K線西遊記/temples/11520/runtime/joystick-xzxy.mjs"
           node --check "K線西遊記/temples/11520/runtime/xyz-input-authority-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/combat-mass-scale-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/combat-drive-adapter.mjs"
+          node --check "K線西遊記/temples/11520/runtime/combat-drive-live-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/plane-map-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/mobile-control-layout.mjs"
+          node --check "K線西遊記/temples/11520/tests/monster-aggression-runtime.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-combat-drive.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-monster-aggression.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
           node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs"
+          node "K線西遊記/temples/11520/tests/combat-mass-scale-runtime.mjs"
+          node "K線西遊記/temples/11520/tests/combat-drive-adapter.mjs"
+          node "K線西遊記/temples/11520/tests/combat-drive-live-runtime.mjs"
+          node "K線西遊記/temples/11520/tests/monster-aggression-runtime.mjs"
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
@@ -63,6 +76,18 @@ jobs:
           set +e
           timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-xzxy.mjs" 2>&1 | tee /tmp/k11520-browser-smoke.log
           RC=${PIPESTATUS[0]}
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-combat-drive.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-monster-aggression.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
           if [ "$RC" -eq 0 ]; then
             timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-plane-map.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
             RC=${PIPESTATUS[0]}
@@ -101,6 +126,13 @@ jobs:
           if [ ! -s "$LIVING" ]; then echo "[11520-QA] QA_RED: living-world screenshot missing: $LIVING"; exit 1; fi
           ITEMS="artifacts/11520-visual-qa/11520-backpack-item-3d.png"
           if [ ! -s "$ITEMS" ]; then echo "[11520-QA] QA_RED: 3D item screenshot missing: $ITEMS"; exit 1; fi
+          HUD="artifacts/11520-visual-qa/11520-mobile-hud-3rail.png"
+          COLLAPSED="artifacts/11520-visual-qa/11520-mobile-hud-collapsed.png"
+          DRIVE="artifacts/11520-visual-qa/11520-mobile-combat-drive-c10-3lots.png"
+          MONSTER="artifacts/11520-visual-qa/11520-mobile-monster-attack-hp.png"
+          if [ ! -s "$HUD" ] || [ ! -s "$COLLAPSED" ]; then echo "[11520-QA] QA_RED: mobile HUD three-rail/collapse screenshots missing"; exit 1; fi
+          if [ ! -s "$DRIVE" ]; then echo "[11520-QA] QA_RED: C/lot combat-drive screenshot missing"; exit 1; fi
+          if [ ! -s "$MONSTER" ]; then echo "[11520-QA] QA_RED: monster attack HP screenshot missing"; exit 1; fi
           echo "[11520-QA] screenshot evidence present"
       - name: Upload 11520 runtime visual QA evidence
         if: always()
