@@ -8,8 +8,13 @@ on:
     paths:
       - 'KGEN-KAIOS/contracts/KSHIPV5.sol'
       - 'KGEN-KAIOS/contracts/K108000MassEnergyReactorV1.sol'
+      - 'KGEN-KAIOS/contracts/KGENWhiteHoleMatterSourceV1.sol'
+      - 'KGEN-KAIOS/contracts/KAIOSShipIdentityRegistryV1.sol'
       - 'KGEN-KAIOS/contracts/KGODV1.sol'
+      - 'KGEN-KAIOS/contracts/test/KGENWhiteHoleBurnVerifierMock.sol'
       - 'KGEN-KAIOS/contracts/testing/K108000PositiveMatterSourceMock.sol'
+      - 'KGEN-KAIOS/tools/compile-contracts.mjs'
+      - 'KGEN/contracts/KGEN_Token_V7_5_2.sol'
       - 'KGEN-KAIOS/tests/k108000-mass-energy.integration.test.mjs'
       - '.github/workflows/kaios-k108000-mass-energy-review.yml'
 

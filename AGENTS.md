@@ -66,6 +66,23 @@ There is no committed ESLint, pytest, or npm test suite. Validation is via:
 - Manual browser check of temple UIs
 - Running `tx_btc_convert.py` against committed raw CSV samples
 
+## Repository-wide frontend runtime visual QA
+
+These rules apply to **every frontend, game, viewer, dashboard, temple, portal, wallet UI, market UI, AI UI, and future interactive surface in this repository**. They are not specific to 11520.
+
+1. **Functional QA is not Visual QA.** A page that loads, a button that fires, or a test suite that returns PASS is not sufficient to declare a frontend complete.
+2. Every meaningful frontend/UI change must be validated in a **real browser runtime** whenever browser automation is available. Prefer Playwright/Chromium or an equivalent real browser engine over DOM-only simulation.
+3. Browser QA should capture at least one **runtime screenshot artifact** after the page has actually booted and rendered its interactive state. Mobile-facing products must include an appropriate mobile viewport; 390×844 is the repository baseline unless the product defines another canonical viewport.
+4. The screenshot must be reviewed for visual regressions. At minimum inspect: unexpected blank or translucent overlays, clipped controls, z-index errors, duplicate controls, missing images/icons, invisible text, off-screen widgets, impossible touch targets, modal layers behind lower layers, overlapping combat/trading/navigation controls, broken responsive layout, stale version labels, and large empty blockers covering the primary content area.
+5. **`FUNCTIONAL_PASS + VISUAL_FAIL = NOT_COMPLETE`.** The agent must continue repair and re-test; it must not report the product as complete merely because CI logic passes.
+6. Do not rely on broad or unexplained DOM-scanning hacks as the sole visual fix. Find the actual DOM/CSS/runtime source of the blocker whenever possible, then add defensive cleanup only as a secondary guard.
+7. Interactive products must provide visible feedback. A user click/tap should not silently do nothing when the product can reasonably identify a target, move to a location, open a panel, show a status, or explain why the action is unavailable.
+8. For touch/joystick/slider controls, verify both the **displayed value and the actual runtime behavior**. A HUD value changing in the correct direction while the avatar or object moves in the wrong direction is a failure.
+9. When a UI element represents a functional organ (wallet, backpack, map, AI assistant, order panel, controller, menu, etc.), the element must be tested for both presence and usability. A visible but non-functional control is a defect, not a cosmetic issue.
+10. When a directory contains a more specific `AGENTS.md`, agents must read and follow that local file in addition to this root file. Local rules may add stricter product-specific acceptance criteria but must not weaken these repository-wide requirements.
+11. Runtime screenshot evidence should be retained as a CI artifact when practical so reviewers can inspect what the browser actually rendered instead of relying only on logs.
+12. Before reporting a frontend as ready for human testing or merge, state both statuses explicitly when relevant: `FUNCTIONAL_QA` and `VISUAL_QA`.
+
 ### Gotchas
 
 - **CORS on Binance API**: Temple 16888 and some game shells call `api.binance.com` directly; browsers on `localhost` will log CORS errors. UI still renders; live klines may fall back or fail silently.
@@ -130,4 +147,3 @@ Before modifying any program file, first check for existing same-function files 
 - `C:\Desktop\kline-odyssey\docs\KGEN_TEMPLE_12345_MAP.md`
 - `C:\Desktop\kline-odyssey\docs\KGEN_FRONTEND_INDEX.md`
 - `C:\Desktop\kline-odyssey\docs\KGEN_RUNTIME_RULES.md`
-

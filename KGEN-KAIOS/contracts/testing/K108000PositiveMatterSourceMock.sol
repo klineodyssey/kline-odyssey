@@ -25,3 +25,53 @@ contract K108000PositiveMatterSourceMock {
         return matterAmount;
     }
 }
+
+interface IKGODAuditMint {
+    function mintFromReactionProof(bytes32 proofId) external returns (address beneficiary, uint256 amount);
+}
+
+/** @notice TEST-ONLY forged reaction source used to prove KGOD stays bound to its immutable reactor. */
+contract K108000ReactionSpoofMock {
+    struct ReactionRecord {
+        bytes32 shipId;
+        address owner;
+        address beneficiary;
+        uint8 mode;
+        uint256 kshipAntimatterConsumed;
+        uint256 positiveMatterConsumed;
+        uint256 totalInputEquivalent;
+        uint256 propulsionEnergy;
+        uint256 recoverableEnergy;
+        uint256 kgodMassEquivalent;
+        uint256 radiationHeat;
+        uint256 blockNumber;
+        uint256 timestamp;
+        bool kgodMinted;
+    }
+
+    ReactionRecord private _record;
+
+    function mintWithoutFuel(address kgod, bytes32 proofId, address beneficiary, uint256 amount) external {
+        _record = ReactionRecord({
+            shipId: keccak256("TEST.SPOOF.SHIP"),
+            owner: msg.sender,
+            beneficiary: beneficiary,
+            mode: 2,
+            kshipAntimatterConsumed: amount,
+            positiveMatterConsumed: amount,
+            totalInputEquivalent: amount * 2,
+            propulsionEnergy: 0,
+            recoverableEnergy: 0,
+            kgodMassEquivalent: amount,
+            radiationHeat: amount,
+            blockNumber: block.number,
+            timestamp: block.timestamp,
+            kgodMinted: false
+        });
+        IKGODAuditMint(kgod).mintFromReactionProof(proofId);
+    }
+
+    function reactionRecord(bytes32) external view returns (ReactionRecord memory) {
+        return _record;
+    }
+}

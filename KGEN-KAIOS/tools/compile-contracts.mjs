@@ -5,7 +5,10 @@ import solc from "solc";
 
 const root = path.resolve(import.meta.dirname, "..");
 const sourceRoots = [path.join(root, "contracts"), path.join(root, "tests", "contracts")];
-const externalSources = [path.resolve(root, "..", "KGEN", "contracts", "KGEN_TempleHeart_Upgradeable.sol")];
+const externalSources = [
+  path.resolve(root, "..", "KGEN", "contracts", "KGEN_TempleHeart_Upgradeable.sol"),
+  path.resolve(root, "..", "KGEN", "contracts", "KGEN_Token_V7_5_2.sol"),
+];
 const artifactsDir = path.join(root, "artifacts");
 const reportsDir = path.join(root, "reports");
 

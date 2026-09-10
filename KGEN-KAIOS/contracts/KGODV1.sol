@@ -3,7 +3,6 @@ pragma solidity 0.8.24;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
-import {IKAIOSOrganRegistry} from "./interfaces/IKAIOSOrganRegistry.sol";
 
 interface IK108000ReactionSource {
     struct ReactionRecord {
@@ -27,36 +26,35 @@ interface IK108000ReactionSource {
 
 /**
  * @title KGODV1
- * @notice Immutable stable KGOD material minted only from a current ship-bound K108000 reaction proof.
+ * @notice Immutable stable KGOD material minted only from its deployment-bound K108000 reactor.
+ * @dev A mutable organ-registry update cannot replace the trusted reaction source or authorize minting.
  */
 contract KGODV1 is ERC20, ERC20Capped {
     string public constant VERSION = "1.0.0";
     bytes32 public constant VERSION_ID = keccak256("KAIOS.KGOD.V1.0.0");
-    bytes32 public constant ORGAN_K108000_REACTOR = keccak256("KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR");
     uint256 public constant MAX_SUPPLY = 144_000_000_000_000_000 ether;
 
-    IKAIOSOrganRegistry public immutable organRegistry;
+    IK108000ReactionSource public immutable reactionSource;
     uint256 public totalMintedFromReactions;
     mapping(bytes32 => bool) public reactionProofMinted;
 
     error ZeroAddress();
-    error OnlyCurrentK108000Reactor(address caller);
+    error OnlyConfiguredK108000Reactor(address caller);
     error ProofAlreadyUsed(bytes32 proofId);
     error InvalidReactionProof(bytes32 proofId);
 
     event ReactionProofMinted(bytes32 indexed proofId, bytes32 indexed shipId, address indexed beneficiary, uint256 kgodAmount);
 
-    constructor(address registry) ERC20("KGOD Stable Material", "KGOD") ERC20Capped(MAX_SUPPLY) {
-        if (registry == address(0)) revert ZeroAddress();
-        organRegistry = IKAIOSOrganRegistry(registry);
+    constructor(address reactor) ERC20("KGOD Stable Material", "KGOD") ERC20Capped(MAX_SUPPLY) {
+        if (reactor == address(0)) revert ZeroAddress();
+        reactionSource = IK108000ReactionSource(reactor);
     }
 
     function mintFromReactionProof(bytes32 proofId) external returns (address beneficiary, uint256 amount) {
-        address reactor = organRegistry.organ(ORGAN_K108000_REACTOR);
-        if (msg.sender != reactor || reactor == address(0)) revert OnlyCurrentK108000Reactor(msg.sender);
+        if (msg.sender != address(reactionSource)) revert OnlyConfiguredK108000Reactor(msg.sender);
         if (reactionProofMinted[proofId]) revert ProofAlreadyUsed(proofId);
 
-        IK108000ReactionSource.ReactionRecord memory record = IK108000ReactionSource(msg.sender).reactionRecord(proofId);
+        IK108000ReactionSource.ReactionRecord memory record = reactionSource.reactionRecord(proofId);
         if (
             record.shipId == bytes32(0) || record.owner == address(0) || record.beneficiary == address(0) ||
             record.kgodMassEquivalent == 0 || record.kshipAntimatterConsumed == 0 ||
