@@ -79,7 +79,7 @@ test("immediate mint proof is replay-protected and KSHIP proof beneficiary is bo
   const proof = keccak256(toUtf8Bytes("evm-proof-replay"));
   await (await output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1"))).wait();
   await assert.rejects(
-    output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1")),
+    async () => (await output.mint(await kufo.getAddress(), proof, await owner.getAddress(), parseEther("1"))).wait(),
   );
 
   await increaseTime(eip1193, YEAR);
