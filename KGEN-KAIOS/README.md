@@ -21,6 +21,10 @@ No deployment script or Mainnet address is included.
 | `contracts/KUFOClaimWormhole.sol` | K511111 immediate single-proof KUFO birth organ with fixed beneficiary |
 | `contracts/KSHIP.sol` | K108000 proof-bound KSHIP antimatter core; version is internal |
 | `contracts/KSHIPConverter.sol` | K108000 點石成金 KUFO-to-KSHIP conversion organ |
+| `contracts/KAIOSUFOOrganRuntime.sol` | Version-internal, read-only SHIP_ID organ readiness projection |
+| `contracts/KAIOSUFOLife.sol` | Version-internal UFO lifecycle state machine; no automatic formal Life birth |
+| `contracts/KAIOSUFOPropulsionPhysics.sol` | Version-internal deterministic mass-energy flight simulator; no token movement |
+| `app/ufo-runtime.mjs` | Version-internal fail-closed UFO UI projection and action guards |
 | `contracts/K108000MassEnergyReactor.sol` | Equal-matter KSHIP reactor with exact output conservation |
 | `contracts/KGOD.sol` | K168888 reaction-proof-bound KGOD material core |
 | `contracts/KAIOSShipIdentityRegistry.sol` | Ship/controller/trading-engine/reactor identity binding |

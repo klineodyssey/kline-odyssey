@@ -10,8 +10,8 @@
   "evmVersion": "paris",
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
-  "sourceCount": 24,
-  "contractCount": 38,
+  "sourceCount": 27,
+  "contractCount": 41,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -135,6 +135,24 @@
       "sourceName": "contracts/KAIOSShipIdentityRegistry.sol",
       "bytecodeBytes": 2110,
       "deployedBytecodeBytes": 1938
+    },
+    {
+      "contractName": "KAIOSUFOLife",
+      "sourceName": "contracts/KAIOSUFOLife.sol",
+      "bytecodeBytes": 4157,
+      "deployedBytecodeBytes": 3710
+    },
+    {
+      "contractName": "KAIOSUFOOrganRuntime",
+      "sourceName": "contracts/KAIOSUFOOrganRuntime.sol",
+      "bytecodeBytes": 4340,
+      "deployedBytecodeBytes": 3949
+    },
+    {
+      "contractName": "KAIOSUFOPropulsionPhysics",
+      "sourceName": "contracts/KAIOSUFOPropulsionPhysics.sol",
+      "bytecodeBytes": 2093,
+      "deployedBytecodeBytes": 2065
     },
     {
       "contractName": "KGENWhiteHoleBurnReplayRegistry",

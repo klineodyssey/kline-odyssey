@@ -21,6 +21,10 @@ This addendum does not regenerate the historical inventory below.
 | `KGEN-KAIOS/contracts/KUFOClaimWormhole.sol` | Contract | K511111 fixed-beneficiary KUFO birth organ | Review only |
 | `KGEN-KAIOS/contracts/KSHIP.sol` | Contract | K108000 KSHIP antimatter Token Core | Review only |
 | `KGEN-KAIOS/contracts/KSHIPConverter.sol` | Contract | K108000 點石成金 KUFO-to-KSHIP organ | Review only |
+| `KGEN-KAIOS/contracts/KAIOSUFOOrganRuntime.sol` | Contract | Canonical version-internal SHIP_ID organ readiness projection | Review only |
+| `KGEN-KAIOS/contracts/KAIOSUFOLife.sol` | Contract | Canonical version-internal UFO lifecycle state machine | Review only |
+| `KGEN-KAIOS/contracts/KAIOSUFOPropulsionPhysics.sol` | Contract | Canonical version-internal deterministic propulsion accounting | Review only |
+| `KGEN-KAIOS/app/ufo-runtime.mjs` | Runtime | Canonical version-internal fail-closed UFO UI projection | Review only |
 | `KGEN-KAIOS/contracts/K108000MassEnergyReactor.sol` | Contract | K108000 equal-matter reactor and conserved output ledger | Review only |
 | `KGEN-KAIOS/contracts/KGOD.sol` | Contract | K168888 proof-bound KGOD Token Core | Review only |
 | `KGEN-KAIOS/contracts/KAIOSShipIdentityRegistry.sol` | Contract | SHIP_ID controller and reactor binding | Review only |
