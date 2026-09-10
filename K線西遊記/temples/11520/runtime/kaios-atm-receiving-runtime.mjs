@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.3.0
+VERSION: 1.3.1
 STATUS: ACTIVE
 PURPOSE: Read-only/fail-closed KAIOS ATM receiving and reconciliation runtime for the existing 11520 product. This module never signs or sends a transaction.
 */
@@ -96,7 +96,7 @@ export function createKaiosAtmReceivingModule(config={}){
     replay_registry_id:replayRegistryReady?String(replayRegistry.registry_id):null,
     replay_registry_authority:replayRegistryReady?'EXTERNAL_DURABLE_SHARED_REGISTRY':'NOT_CONNECTED',
     replay_reservation_id:null,replay_reservation_status:'NOT_RESERVED',
-    last_error:null,freight_fee_revenue:'0',gas_cost_bnb:0,delivery_cost:'0',net_profit:'0',
+    last_error:null,freight_fee_revenue:'0',freight_fee_revenue_status:'NOT_EVALUATED',freight_fee_revenue_authority:'NONE_CONNECTED',gas_cost_bnb:0,delivery_cost:'0',net_profit:'0',
     _journal:[],_usedReplayKeys:new Set(),_verifiedReceipt:null,
   };
   journal(record,'MODULE_CREATED',{receiverConfigured:Boolean(receiver),tokenConfigured:Boolean(token),requiredConfirmations,replayRegistryReady});
@@ -204,9 +204,13 @@ export function createKaiosAtmReceivingModule(config={}){
   function markDelivered({gas_cost_bnb=0,delivery_cost='0',freight_fee_evidence=false}={}){
     if(record.delivery_status!=='ATM_INVENTORY_ACCEPTED'||!record.receiver_acceptance)return fail(record,'DELIVERY_REJECTED',{reason:'ATM_NOT_ACCEPTED'});
     let cost;try{cost=exactUint(delivery_cost)}catch{return fail(record,'INVALID_EXACT_AMOUNT',{field:'delivery_cost'})}
+    const callerRevenueClaim=freight_fee_evidence===true;
     record.gas_cost_bnb=Math.max(0,finite(gas_cost_bnb));record.delivery_cost=cost.toString();
-    record.freight_fee_revenue=freight_fee_evidence===true?record.freight_fee:'0';record.net_profit=exactSub(record.freight_fee_revenue,record.delivery_cost);
-    advance(record,'DELIVERED');journal(record,'DELIVERED',{freight_fee_revenue:record.freight_fee_revenue,delivery_cost:record.delivery_cost,gas_cost_bnb:record.gas_cost_bnb});
+    record.freight_fee_revenue='0';
+    record.freight_fee_revenue_status=record.freight_fee==='0'?'NO_FREIGHT_FEE':'UNVERIFIED_NO_INDEPENDENT_ACCOUNTING_EVIDENCE';
+    record.freight_fee_revenue_authority='NONE_CONNECTED';
+    record.net_profit=exactSub(record.freight_fee_revenue,record.delivery_cost);
+    advance(record,'DELIVERED');journal(record,'DELIVERED',{freight_fee_revenue:record.freight_fee_revenue,freight_fee_revenue_status:record.freight_fee_revenue_status,freight_fee_revenue_authority:record.freight_fee_revenue_authority,caller_freight_fee_evidence_ignored:callerRevenueClaim,delivery_cost:record.delivery_cost,gas_cost_bnb:record.gas_cost_bnb});
     return {ok:true,snapshot:snapshot(record)};
   }
   return {registerCargo,authorizeExactReceiver,noteExternalTransaction,verifyReceiptEvidence,reconcileBalance,markArrived,acceptAtmInventory,markDelivered,snapshot:()=>snapshot(record),journal:()=>record._journal.map(clone)};
