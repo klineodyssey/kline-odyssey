@@ -15,6 +15,7 @@ import {
 
 const root = path.resolve(import.meta.dirname, "..");
 const artifacts = path.join(root, "artifacts");
+const compileEvidencePath = path.join(root, "reports", "SOLIDITY_COMPILE_EVIDENCE.json");
 const YEAR = 31_556_926;
 
 const OUTPUT_ID = keccak256(toUtf8Bytes("KAIOS.ORGAN.WORMHOLE.511111"));
@@ -152,6 +153,78 @@ test.afterEach(async () => {
     await sharedFixture.eip1193.request({ method: "evm_revert", params: [snapshotId] }),
     true,
   );
+});
+
+test("unsigned deployment plan derives exact constructors and fails closed before any chain action", () => {
+  const evidence = JSON.parse(fs.readFileSync(compileEvidencePath, "utf8"));
+  const plan = evidence.unsignedDeploymentPlan;
+  assert.equal(plan.status, "UNSIGNED_PREDEPLOYMENT_CANDIDATE");
+  assert.equal(plan.chainId, 56);
+  assert.equal(plan.chainWriteAuthorized, false);
+  assert.equal(plan.signerUseAuthorized, false);
+  assert.equal(plan.allCandidateAddressesMustBeNull, true);
+
+  const expectedConstructors = new Map([
+    ["KAIOSOrganRegistry", ["initialOwner:address", "governanceDelay:uint64"]],
+    ["KUFO", ["registry:address"]],
+    ["KAIOSAlchemyFurnace", ["kaiosToken:address", "kgenToken:address", "registry:address"]],
+    ["KUFOClaimWormhole", ["furnace18911:address", "kufoToken511111:address"]],
+    ["KSHIP", ["registry:address", "kufoToken:address"]],
+    ["KSHIPConverter", ["kufoToken:address", "kshipToken:address"]],
+    ["KAIOSShipIdentityRegistry", ["registrar_:address"]],
+    ["KGENWhiteHoleBurnReplayRegistry", ["registry:address"]],
+    ["KGENWhiteHoleBurnVerifier", [
+      "kgenToken:address",
+      "sharedReplayRegistry:address",
+      "firstAttestor:address",
+      "secondAttestor:address",
+      "scaleNumerator:uint256",
+      "scaleDenominator:uint256",
+    ]],
+    ["KGENWhiteHoleMatterSource", ["verifier:address", "ships:address"]],
+    ["K108000MassEnergyReactor", ["kshipToken:address", "registry:address", "ships:address"]],
+    ["KGOD", ["reactor:address"]],
+  ]);
+
+  assert.equal(plan.stages.length, expectedConstructors.size);
+  plan.stages.forEach((stage, index) => {
+    assert.equal(stage.order, index + 1);
+    assert.equal(stage.candidateAddress, null);
+    assert.doesNotMatch(stage.contractName, /V\d+(?:_|$)/);
+    assert.deepEqual(
+      stage.constructorInputs.map(({ name, type }) => `${name}:${type}`),
+      expectedConstructors.get(stage.contractName),
+    );
+  });
+
+  for (const dependency of Object.values(plan.externalDependencies)) {
+    assert.equal(dependency.candidateAddress, null);
+    assert.ok(dependency.verificationRequired.length > 0);
+  }
+
+  const expectedOrganKeys = new Map([
+    ["KAIOS.ORGAN.FURNACE.18911", keccak256(toUtf8Bytes("KAIOS.ORGAN.FURNACE.18911"))],
+    ["KAIOS.ORGAN.WORMHOLE.511111", OUTPUT_ID],
+    ["KAIOS.ORGAN.KSHIP.CONVERTER", CONVERTER_ID],
+    ["KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR", REACTOR_ID],
+    ["KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE", MATTER_ID],
+    ["KAIOS.ORGAN.KGEN.WHITE_HOLE.BURN_VERIFIER", BURN_VERIFIER_ID],
+    ["KAIOS.ORGAN.KGOD.TOKEN", KGOD_ID],
+  ]);
+  assert.equal(plan.organBindings.length, expectedOrganKeys.size);
+  for (const binding of plan.organBindings) {
+    assert.equal(binding.id, expectedOrganKeys.get(binding.key));
+    assert.equal(binding.candidateAddress, null);
+  }
+
+  assert.deepEqual(plan.canonicalFlow, [
+    "K18911_KAIOS_ALCHEMY_FURNACE",
+    "K511111_KUFO_BIRTH_WORMHOLE",
+    "K108000_KSHIP_CONVERTER",
+    "K108000_EQUAL_MATTER_REACTOR",
+    "K168888_KGOD_BIRTH",
+  ]);
+  assert.ok(plan.postDeploymentGates.includes("SEPARATE_EXACT_ACTION_AUTHORIZATION"));
 });
 
 test("version-free deployment artifacts expose internal versions and canonical birth points", async () => {

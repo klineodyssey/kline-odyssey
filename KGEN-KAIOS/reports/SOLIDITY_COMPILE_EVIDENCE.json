@@ -244,5 +244,361 @@
       "bytecodeBytes": 660,
       "deployedBytecodeBytes": 92
     }
-  ]
+  ],
+  "unsignedDeploymentPlan": {
+    "status": "UNSIGNED_PREDEPLOYMENT_CANDIDATE",
+    "chainId": 56,
+    "chainWriteAuthorized": false,
+    "signerUseAuthorized": false,
+    "allCandidateAddressesMustBeNull": true,
+    "canonicalFlow": [
+      "K18911_KAIOS_ALCHEMY_FURNACE",
+      "K511111_KUFO_BIRTH_WORMHOLE",
+      "K108000_KSHIP_CONVERTER",
+      "K108000_EQUAL_MATTER_REACTOR",
+      "K168888_KGOD_BIRTH"
+    ],
+    "externalDependencies": {
+      "kaiosToken": {
+        "candidateAddress": null,
+        "verificationRequired": [
+          "CHAIN_ID",
+          "BYTECODE",
+          "TOKEN_IDENTITY"
+        ]
+      },
+      "kgenToken": {
+        "candidateAddress": null,
+        "verificationRequired": [
+          "CHAIN_ID",
+          "BYTECODE",
+          "TOKEN_IDENTITY"
+        ]
+      },
+      "initialOwner": {
+        "candidateAddress": null,
+        "verificationRequired": [
+          "CONTROL_PROOF",
+          "AUTHORITY"
+        ]
+      },
+      "registrar": {
+        "candidateAddress": null,
+        "verificationRequired": [
+          "CONTROL_PROOF",
+          "AUTHORITY"
+        ]
+      },
+      "attestorA": {
+        "candidateAddress": null,
+        "verificationRequired": [
+          "INDEPENDENCE",
+          "CONTROL_PROOF"
+        ]
+      },
+      "attestorB": {
+        "candidateAddress": null,
+        "verificationRequired": [
+          "INDEPENDENCE",
+          "CONTROL_PROOF"
+        ]
+      }
+    },
+    "stages": [
+      {
+        "order": 1,
+        "contractName": "KAIOSOrganRegistry",
+        "sourceName": "contracts/KAIOSOrganRegistry.sol",
+        "constructorInputs": [
+          {
+            "name": "initialOwner",
+            "type": "address"
+          },
+          {
+            "name": "governanceDelay",
+            "type": "uint64"
+          }
+        ],
+        "dependencies": [
+          "initialOwner",
+          "governanceDelay"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 2,
+        "contractName": "KUFO",
+        "sourceName": "contracts/KUFO.sol",
+        "constructorInputs": [
+          {
+            "name": "registry",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KAIOSOrganRegistry"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 3,
+        "contractName": "KAIOSAlchemyFurnace",
+        "sourceName": "contracts/KAIOSAlchemyFurnace.sol",
+        "constructorInputs": [
+          {
+            "name": "kaiosToken",
+            "type": "address"
+          },
+          {
+            "name": "kgenToken",
+            "type": "address"
+          },
+          {
+            "name": "registry",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KAIOS",
+          "KGEN",
+          "KAIOSOrganRegistry"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 4,
+        "contractName": "KUFOClaimWormhole",
+        "sourceName": "contracts/KUFOClaimWormhole.sol",
+        "constructorInputs": [
+          {
+            "name": "furnace18911",
+            "type": "address"
+          },
+          {
+            "name": "kufoToken511111",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KAIOSAlchemyFurnace",
+          "KUFO"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 5,
+        "contractName": "KSHIP",
+        "sourceName": "contracts/KSHIP.sol",
+        "constructorInputs": [
+          {
+            "name": "registry",
+            "type": "address"
+          },
+          {
+            "name": "kufoToken",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KAIOSOrganRegistry",
+          "KUFO"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 6,
+        "contractName": "KSHIPConverter",
+        "sourceName": "contracts/KSHIPConverter.sol",
+        "constructorInputs": [
+          {
+            "name": "kufoToken",
+            "type": "address"
+          },
+          {
+            "name": "kshipToken",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KUFO",
+          "KSHIP"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 7,
+        "contractName": "KAIOSShipIdentityRegistry",
+        "sourceName": "contracts/KAIOSShipIdentityRegistry.sol",
+        "constructorInputs": [
+          {
+            "name": "registrar_",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "registrar"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 8,
+        "contractName": "KGENWhiteHoleBurnReplayRegistry",
+        "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
+        "constructorInputs": [
+          {
+            "name": "registry",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KAIOSOrganRegistry"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 9,
+        "contractName": "KGENWhiteHoleBurnVerifier",
+        "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
+        "constructorInputs": [
+          {
+            "name": "kgenToken",
+            "type": "address"
+          },
+          {
+            "name": "sharedReplayRegistry",
+            "type": "address"
+          },
+          {
+            "name": "firstAttestor",
+            "type": "address"
+          },
+          {
+            "name": "secondAttestor",
+            "type": "address"
+          },
+          {
+            "name": "scaleNumerator",
+            "type": "uint256"
+          },
+          {
+            "name": "scaleDenominator",
+            "type": "uint256"
+          }
+        ],
+        "dependencies": [
+          "KGEN",
+          "KGENWhiteHoleBurnReplayRegistry",
+          "attestorA",
+          "attestorB"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 10,
+        "contractName": "KGENWhiteHoleMatterSource",
+        "sourceName": "contracts/KGENWhiteHoleMatterSource.sol",
+        "constructorInputs": [
+          {
+            "name": "verifier",
+            "type": "address"
+          },
+          {
+            "name": "ships",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KGENWhiteHoleBurnVerifier",
+          "KAIOSShipIdentityRegistry"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 11,
+        "contractName": "K108000MassEnergyReactor",
+        "sourceName": "contracts/K108000MassEnergyReactor.sol",
+        "constructorInputs": [
+          {
+            "name": "kshipToken",
+            "type": "address"
+          },
+          {
+            "name": "registry",
+            "type": "address"
+          },
+          {
+            "name": "ships",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "KSHIP",
+          "KAIOSOrganRegistry",
+          "KAIOSShipIdentityRegistry"
+        ],
+        "candidateAddress": null
+      },
+      {
+        "order": 12,
+        "contractName": "KGOD",
+        "sourceName": "contracts/KGOD.sol",
+        "constructorInputs": [
+          {
+            "name": "reactor",
+            "type": "address"
+          }
+        ],
+        "dependencies": [
+          "K108000MassEnergyReactor"
+        ],
+        "candidateAddress": null
+      }
+    ],
+    "organBindings": [
+      {
+        "key": "KAIOS.ORGAN.FURNACE.18911",
+        "id": "0xc7dc58355a278d2d7c66791b96331912455bb79b53dbf7c740701ddbf33de567",
+        "candidateAddress": null
+      },
+      {
+        "key": "KAIOS.ORGAN.WORMHOLE.511111",
+        "id": "0x350468796a11b8416408b6a170c8b6a3357a36daa5839627c4f8e95a0baa1d56",
+        "candidateAddress": null
+      },
+      {
+        "key": "KAIOS.ORGAN.KSHIP.CONVERTER",
+        "id": "0x0027d250835ba7841d162af0232ae231063b5e84c0bfb10c531a6f6777946ec9",
+        "candidateAddress": null
+      },
+      {
+        "key": "KAIOS.ORGAN.K108000.MASS_ENERGY_REACTOR",
+        "id": "0x79f1ad06bb45a9ad0aca8a70e64512e480f7e4ef76719249584bf2f9e0fbdfa0",
+        "candidateAddress": null
+      },
+      {
+        "key": "KAIOS.ORGAN.K108000.POSITIVE_MATTER_SOURCE",
+        "id": "0x50fa9fdf162361af7e560356deccd784404b56529de756811fbebb344999e3f2",
+        "candidateAddress": null
+      },
+      {
+        "key": "KAIOS.ORGAN.KGEN.WHITE_HOLE.BURN_VERIFIER",
+        "id": "0xf7b1e6fa1f7456333c82438938229d2d1d0ea0a4b918d2dd7947d307b033d4a4",
+        "candidateAddress": null
+      },
+      {
+        "key": "KAIOS.ORGAN.KGOD.TOKEN",
+        "id": "0xe81752027eccdcc89ac2cad987ac161c24b2a92b9205caa5c0ce95608c3ed217",
+        "candidateAddress": null
+      }
+    ],
+    "postDeploymentGates": [
+      "VERIFY_EACH_DEPLOYED_BYTECODE",
+      "VERIFY_INTERNAL_VERSION_AND_WORLD_POINT",
+      "BIND_ORGANS_THROUGH_GOVERNED_REGISTRY",
+      "REGISTER_SHIP_ID_AND_CONTROLLER",
+      "RUN_EXACT_HEAD_INTEGRATION_TESTS",
+      "INDEPENDENT_REVIEW",
+      "SEPARATE_EXACT_ACTION_AUTHORIZATION"
+    ]
+  }
 }
