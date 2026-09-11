@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE
 PURPOSE: Bridge DIGITAL_ANT_0001 Market Life visualization to the read-only 11520 KAIOS ATM receiving state machine without signing or fabricating settlement.
 */
@@ -31,7 +31,7 @@ export function createDigitalAntKaiosReceivingBridge(config={}){
     mission:{status:'AWAITING_EXACT_AUTHORIZATION',route:null},
   };
   function syncVisual({spawn=false}={}){
-    const s=receiving.snapshot();ant.state=GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:s.delivery_status,settlementMode:s.real_receiving_gate==='CONFIGURED'?'CHAIN_EVIDENCE_REQUIRED':'SIMULATION_BLOCKED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
+    const s=receiving.snapshot();ant.state=GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:s.delivery_status,settlementMode:s.real_receiving_gate==='CONFIGURED_STRUCTURAL_VERIFICATION_ONLY'?'CHAIN_EVIDENCE_REQUIRED':'SIMULATION_BLOCKED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
     const options={axis:'KY',market:'KAIOS_ATM_LOGISTICS',side:1,lots:1,c:0,mission:ant.mission,route:ant.mission.route};
     return spawn?publishDigitalAntSpawn(ant,options):publishDigitalAntUpdate(ant,options);
   }

@@ -160,6 +160,12 @@ test('Digital Ant bridge preserves SAME_LIFE_ID and waits when real receiver is 
   const b=createDigitalAntKaiosReceivingBridge();const r=b.registerCargo();assert.equal(r.ok,true);const s=b.snapshot();assert.equal(s.ant.lifeId,'DIGITAL_ANT_0001');assert.equal(s.receiving.real_receiving_gate,'NOT_DEPLOYED');assert.equal(s.receiving.delivery_status,'AWAITING_EXACT_AUTHORIZATION');assert.equal(s.ant.state,'WAIT');
 });
 
+test('Digital Ant bridge reports chain evidence mode only for the configured structural gate',()=>{
+  const blocked=createDigitalAntKaiosReceivingBridge();blocked.syncVisual();assert.equal(blocked.snapshot().ant.mission.settlementMode,'SIMULATION_BLOCKED');
+  const configured=createDigitalAntKaiosReceivingBridge({receiver_contract_or_escrow_address:RECEIVER,KAIOS_token_address:TOKEN,custody_policy_id:'QA-CUSTODY',receipt_verifier_id:'QA-VERIFIER',required_confirmations:12,replay_registry:replayRegistry()});
+  configured.syncVisual();const s=configured.snapshot();assert.equal(s.receiving.real_receiving_gate,'CONFIGURED_STRUCTURAL_VERIFICATION_ONLY');assert.equal(s.ant.mission.settlementMode,'CHAIN_EVIDENCE_REQUIRED');assert.equal(s.receiving.receipt_evidence_authority,'STRUCTURAL_CHAIN_EVIDENCE_ONLY_NOT_INDEPENDENT_RPC_AUTHORITY');assert.equal(s.receiving.mainnet_write_executed,false);
+});
+
 test('receiving source contains no signer/private-key or transaction-send capability',async()=>{
   const src=await fs.readFile(new URL('../runtime/kaios-atm-receiving-runtime.mjs',import.meta.url),'utf8');
   for(const forbidden of ['private'+'Key','send'+'Transaction','eth_'+'sendTransaction','wallet.'+'sign','new Wallet'])assert.equal(src.includes(forbidden),false,`forbidden capability found: ${forbidden}`);
