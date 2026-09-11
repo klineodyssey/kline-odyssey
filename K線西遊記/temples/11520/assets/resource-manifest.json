@@ -1,0 +1,16 @@
+{
+  "product": "11520 花果山宇宙萬物交易所",
+  "version": "1.0.0",
+  "required": [
+    {"id":"world-core","url":"./assets/world-pack.json","type":"json"}
+  ],
+  "runtime": [
+    {"id":"three","url":"https://unpkg.com/three@0.166.1/build/three.module.js","type":"module"},
+    {"id":"leaflet","url":"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js","type":"script"}
+  ],
+  "backend": {
+    "apiVersion": "v1",
+    "requiredForRealOrders": true,
+    "fallback": "LOCAL_DEMO"
+  }
+}
