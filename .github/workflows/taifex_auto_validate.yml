@@ -32,6 +32,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas openpyxl numpy
 
+      - name: Run TAIFEX trailing-empty parser regression tests
+        run: python -m unittest discover -s tests -p 'test_tx_trailing_empty_compat.py' -v
+
       - name: Find latest raw csv
         id: latest_raw
         run: |
