@@ -24,6 +24,7 @@ assert.equal(await characterButton.isVisible(),true,'real character organ button
 await characterButton.click();
 await page.waitForTimeout(140);
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),true,'character sheet must open');
+assert.equal(await page.locator('#dock').evaluate(el=>el.classList.contains('open')),false,'character sheet must close the organ rail instead of leaving duplicate controls behind it');
 const title=(await page.locator('#sheetTitle').textContent()||'').trim();
 assert.match(title,/角色資料/);
 const card=page.locator('#k11520CharacterCard');
