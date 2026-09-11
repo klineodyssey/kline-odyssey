@@ -52,7 +52,11 @@ function currentNormativeContent(relativePath, content) {
 }
 
 function isExplicitSupersededReference(line) {
-  return /(?:SUPERSEDED|historical|obsolete|remove legacy|remove all obsolete|歷史|舊)/iu.test(line);
+  return (
+    /^\s*[-*]\s*remove(?: all)?\s+(?:obsolete|legacy)\b/iu.test(line) ||
+    /^\s*本檔保留歷史演化文字，因此前段仍可看到舊的\s*/u.test(line) ||
+    /^\s*所有衝突的舊\s+.*\s+自\s+.*\s+起標記\s*$/u.test(line)
+  );
 }
 
 function forbiddenPatternsIn(content) {
@@ -113,6 +117,9 @@ const assertions = {
     audit.findings.filter((item) => item.classification === "CURRENT-CONFLICT").every((item) => item.path.startsWith("PR#127:")),
   scaleCurrentActiveConflictProbe:
     forbiddenPatternsIn("ACTIVE CURRENT RULE: 1 KGEN = 1 kg").includes("1 KGEN = 1 kg"),
+  supersededReferenceScopeFailsClosed:
+    !isExplicitSupersededReference("ACTIVE historical rule: 1 KGEN = 1 kg") &&
+    !isExplicitSupersededReference("現行舊規則仍有效：1 KGEN = 1 kg"),
 };
 for (const [name, passed] of Object.entries(assertions)) {
   if (!passed) failures.push({ assertion: name });
