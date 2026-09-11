@@ -31,12 +31,14 @@ jobs:
       - name: Launch Cursor Cloud Agent
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          MERGED_PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGED_PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
           if [ -z "${CURSOR_API_KEY:-}" ]; then
             echo "::notice::CURSOR_API_KEY not set. Add it in GitHub repo Settings → Secrets → Actions."
             if [ "${{ github.event_name }}" = "pull_request" ]; then
-              echo "Merged PR: #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }})"
+              echo "Merged PR: #${MERGED_PR_NUMBER} (${MERGED_PR_HEAD_REF})"
             fi
             echo "See KGEN-AI-Company/automation/README.md"
             exit 0
