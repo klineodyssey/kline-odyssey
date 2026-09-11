@@ -23,10 +23,16 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout without persisted credentials
+      - name: Checkout exact validation head without persisted credentials
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+
+      - name: Confirm exact validation head
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
       - name: Set up Python
         uses: actions/setup-python@v5
