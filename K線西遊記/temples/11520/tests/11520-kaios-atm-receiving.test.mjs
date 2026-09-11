@@ -150,10 +150,14 @@ test('balance delta mismatch does not release ATM inventory',()=>{const m=module
 
 test('append-only journal advances monotonically',()=>{const m=module();register(m);m.authorizeExactReceiver();const a=m.journal();assert.ok(a.length>=3);assert.deepEqual(a.map(x=>x.seq),a.map((_,i)=>i+1));a[0].type='MUTATED_COPY';assert.notEqual(m.journal()[0].type,'MUTATED_COPY')});
 
-test('route direction requires evidence and agrees with target coordinate',()=>{
+test('physical XYZ route evidence cannot authorize K-market direction',()=>{
   assert.equal(validateRouteEvidence({axis:'KX',direction:'LONG'}).status,'ROUTE_EVIDENCE_MISSING');
   const common={axis:'KX',from:{x:1,y:0,z:0},to:{x:2,y:0,z:0},routeEvidence:{id:'R'},decisionEvidence:{id:'D'},marketState:{id:'M'},technicalIndicators:{id:'T'},risk:1,cost:2,expectedProfit:3};
-  assert.equal(validateRouteEvidence({...common,direction:'LONG'}).ok,true);assert.equal(validateRouteEvidence({...common,direction:'SHORT'}).status,'DIRECTION_ROUTE_MISMATCH');
+  const long=validateRouteEvidence({...common,direction:'LONG'}),short=validateRouteEvidence({...common,direction:'SHORT'});
+  for(const proof of [long,short]){
+    assert.equal(proof.ok,false);assert.equal(proof.status,'MARKET_DIRECTION_AUTHORITY_NOT_CONNECTED');
+    assert.deepEqual(proof.spatial_delta,{x:1,y:0,z:0});assert.equal(proof.authority,'K_MARKET_DIRECTION_MUST_NOT_BE_DERIVED_FROM_PLAYER_XYZ');
+  }
 });
 
 test('Digital Ant bridge preserves SAME_LIFE_ID and waits when real receiver is absent',()=>{
