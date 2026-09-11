@@ -39,6 +39,46 @@ jobs:
           echo "latest_csv=$latest_csv" >> $GITHUB_OUTPUT
           echo "Latest raw: $latest_csv"
 
+      - name: Test terminal delimiter boundary
+        env:
+          LATEST_RAW: ${{ steps.latest_raw.outputs.latest_csv }}
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          from tempfile import TemporaryDirectory
+
+          pipeline_path = Path("scripts/tx_full_day_pipeline_v882_UTF8BOM.py")
+          spec = importlib.util.spec_from_file_location("tx_pipeline_boundary", pipeline_path)
+          if spec is None or spec.loader is None:
+              raise RuntimeError(f"Unable to load canonical pipeline: {pipeline_path}")
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+
+          source_path = Path(os.environ["LATEST_RAW"])
+          parsed = module.read_csv_strict_19_multiline(str(source_path))
+          if parsed.empty:
+              raise RuntimeError("Latest TAIFEX raw parsed to no records")
+
+          source_lines = module._read_text_any(str(source_path)).splitlines()
+          first_data = next(index for index, line in enumerate(source_lines) if line and not line.startswith("交易日期"))
+          source_lines[first_data] = f"{source_lines[first_data]}UNEXPECTED_FIELD"
+          with TemporaryDirectory() as temporary_directory:
+              malformed = Path(temporary_directory) / "nonempty-column-20.csv"
+              malformed.write_text("\n".join(source_lines) + "\n", encoding="utf-8-sig")
+              try:
+                  module.read_csv_strict_19_multiline(str(malformed))
+              except ValueError as error:
+                  if "20 欄" not in str(error):
+                      raise
+              else:
+                  raise RuntimeError("Non-empty column 20 did not fail closed")
+
+          print(f"Terminal empty delimiter accepted: {source_path}; records={len(parsed)}")
+          print("Non-empty column 20 rejected: PASS")
+          PY
+
       - name: Validate canonical master covers latest raw
         env:
           LATEST_RAW: ${{ steps.latest_raw.outputs.latest_csv }}
