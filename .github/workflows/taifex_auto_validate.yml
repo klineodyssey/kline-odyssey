@@ -39,24 +39,39 @@ jobs:
           echo "latest_csv=$latest_csv" >> $GITHUB_OUTPUT
           echo "Latest raw: $latest_csv"
 
-      - name: Find latest master xlsx
-        id: latest_xlsx
+      - name: Validate canonical master covers latest raw
+        env:
+          LATEST_RAW: ${{ steps.latest_raw.outputs.latest_csv }}
         run: |
-          latest_xlsx=$(ls -1 master/台指近全*.xlsx | sort | tail -n 1)
-          echo "latest_xlsx=$latest_xlsx" >> $GITHUB_OUTPUT
-          echo "Latest xlsx: $latest_xlsx"
+          python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
 
-      - name: Extract date from latest xlsx filename
-        id: dateinfo
-        run: |
-          fname=$(basename "${{ steps.latest_xlsx.outputs.latest_xlsx }}")
-          ymd=$(echo "$fname" | sed -E 's/^台指近全([0-9]{8})\.xlsx$/\1/')
-          echo "ymd=$ymd" >> $GITHUB_OUTPUT
-          echo "Date: $ymd"
+          root = Path.cwd()
+          pipeline_path = root / "scripts" / "tx_full_day_pipeline_v882_UTF8BOM.py"
+          master_path = root / "master" / "台指近全.xlsx"
 
-      - name: Run validator
-        run: |
-          python tx_transfer_validator.py \
-            --raw "${{ steps.latest_raw.outputs.latest_csv }}" \
-            --out "${{ steps.latest_xlsx.outputs.latest_xlsx }}" \
-            --date "${{ steps.dateinfo.outputs.ymd }}"
+          spec = importlib.util.spec_from_file_location("tx_pipeline", pipeline_path)
+          if spec is None or spec.loader is None:
+              raise RuntimeError(f"Unable to load canonical pipeline: {pipeline_path}")
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+
+          master = module._load_master(str(master_path))
+          module.validate_near_full(master)
+
+          latest_raw = os.environ["LATEST_RAW"]
+          source = module.read_csv_strict_19_multiline(latest_raw)
+          near = module.make_near_full_day(source)
+          raw_dates = {int(value) for value in near["交易日期"].tolist()}
+          master_dates = {int(value) for value in master["交易日期"].tolist()}
+          missing_dates = sorted(raw_dates - master_dates)
+          if missing_dates:
+              raise RuntimeError(
+                  f"Canonical master is missing dates from {latest_raw}: {missing_dates}"
+              )
+
+          print(f"Canonical master valid: {master_path}")
+          print(f"Latest raw covered: {latest_raw}; dates={sorted(raw_dates)}")
+          PY
