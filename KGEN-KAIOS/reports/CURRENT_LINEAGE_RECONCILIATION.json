@@ -27,7 +27,8 @@
     "noMainnetDeployment": true,
     "staleCurrentFindingsLimitedToPr127": true,
     "scaleCurrentActiveConflictProbe": true,
-    "supersededReferenceScopeFailsClosed": true
+    "supersededReferenceScopeFailsClosed": true,
+    "explicitSupersededReferencesRecognized": true
   },
   "failures": []
 }
