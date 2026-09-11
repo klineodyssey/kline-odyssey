@@ -14,11 +14,36 @@ on:
       - ".github/workflows/update-latest-video-rss.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  update:
+  validate:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install feedparser
+
+      - name: Run deterministic RSS fail-safe coverage
+        run: python .github/scripts/update_latest_video.py --self-test
+
+  update:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,11 +60,9 @@ jobs:
         run: python .github/scripts/update_latest_video.py --self-test
 
       - name: Update README latest video block
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python .github/scripts/update_latest_video.py
 
       - name: Commit & push if changed
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
