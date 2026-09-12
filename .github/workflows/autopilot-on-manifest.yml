@@ -20,6 +20,7 @@ jobs:
       - name: Checkout exact source revision
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
 
       - name: Verify checked-out SHA
