@@ -10,9 +10,16 @@
     "testnet:templeheart:rehearse": "node tools/validate-templeheart-storage.mjs --testnet-rehearsal",
     "testnet:templeheart:bootstrap-rehearse": "node tools/validate-templeheart-storage.mjs --testnet-bootstrap-rehearsal",
     "lineage:verify": "node tools/verify-current-lineage.mjs",
+    "canon:audit": "node tools/generate-stale-reference-audit.mjs",
     "integrity:validate": "node tools/validate-integration-artifacts.mjs",
+    "mainnet:genesis-record": "node tools/validate-integration-artifacts.mjs --generate-kaios-genesis-record",
+    "bank:simulate": "node tools/simulate-lingxiao-genesis-chain-reaction.mjs",
+    "bank:mainnet-fork-rehearse": "node tools/rehearse-lingxiao-mainnet-fork.mjs",
+    "bank:api": "node tools/generate-lingxiao-bank-api.mjs",
+    "bank:deployment-plan": "node scripts/prepare-lingxiao-18888-deployment.mjs",
+    "bank:upgrade-plan": "node scripts/prepare-lingxiao-18888-upgrade.mjs",
     "test": "node --test --test-concurrency=1 --test-reporter=spec tests/*.test.mjs",
-    "test:all": "npm run compile && npm run storage:validate && npm run lineage:verify && npm run integrity:validate && npm test"
+    "test:all": "npm run compile && npm run storage:validate && npm run canon:audit && npm run lineage:verify && npm run integrity:validate && npm test"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "5.0.2",

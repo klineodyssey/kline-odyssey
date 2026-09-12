@@ -20,6 +20,7 @@
 | Dashboard | `DASHBOARD_MODEL.md` | Defines visible company health |
 | Recovery | `RECOVERY_MODEL.md` | Defines failure recovery |
 | Security | `SECURITY_MODEL.md` | Defines permission tiers |
+| 8888 Commercial Bank | `contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol` | Code-bearing UUPS bank for civilian payroll, savings and registered commerce; legacy 8888 remains lineage-only |
 
 ## Component Rule
 

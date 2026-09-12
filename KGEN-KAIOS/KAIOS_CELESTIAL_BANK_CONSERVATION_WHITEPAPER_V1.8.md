@@ -1,12 +1,10 @@
 # 《18888 靈霄寶殿神明銀行 × KAIOS 文明質量守恆白皮書》
-> **SUPERSEDED HISTORICAL SNAPSHOT:** The 1:10,000 monetary scale in this edition is superseded by the 2026-08-09 CURRENT lineage. Retained for history only.
-
 ## Celestial Autonomous Bank 18888 × KAIOS Civilization-Mass Conservation Whitepaper
-### V1.6 Multicivilization Edition
+### V1.8 Mass-Reconciled Circulating-Civilization Edition
 
 **文件狀態：** CANONICAL SPECIFICATION / GITHUB EDITION  
 **版本日期：** 2026-08-06  
-**取代版本：** V1.5
+**取代版本：** V1.7
 
 > NO KGEN BURN, NO KAIOS MINT.  
 > NO KGEN COMMITMENT, NO PLAYER UNIVERSE.  
@@ -14,14 +12,14 @@
 
 # 0. V1.6 核心
 
-V1.6 保留 V1.5 的白洞、創世黑洞、玩家子宇宙及物理邊界，並新增多文明與宗教中立約束。
+V1.8 保留 V1.7 的白洞、創世黑洞、玩家子宇宙及物理邊界，並新增多文明與宗教中立約束。
 
 # 1. 白洞與創世黑洞
 
 ```text
 WHITE_HOLE_KGEN
 → verified permanent burn
-→ KAIOS mint at 1:10,000
+→ KAIOS mint at 1:1,000
 
 GENESIS_BLACK_HOLE_KGEN
 → irreversible commitment
@@ -31,7 +29,7 @@ GENESIS_BLACK_HOLE_KGEN
 → approved PlayerUniverse Runtime
 ```
 
-同一筆 KGEN 不得同時作為白洞 Burn Proof 與黑洞 GenesisMassProof。
+同一份已永久減少並由白洞 Friction Mirror 認列的 KGEN 質量，不得再被重複計入黑洞 GenesisMassProof。
 
 # 2. 三種貨幣角色
 
@@ -45,19 +43,11 @@ PLAYER LOCAL TOKEN = internal wages, food, rent and local accounting
 
 # 3. 8895 雲棧洞合法取得 KAIOS
 
-玩家可選擇白洞轉換契約：
+8895 雲棧洞不得自行宣告「燒 1 KGEN 就直接 Mint KAIOS 給玩家」。第一代 KAIOS 的唯一生成路徑仍是 Friction Mirror：正式 KGEN `totalSupply()` 永久減少後，由 KAIOS `settleWhiteHoleMass()` 只把新增 KAIOS Mint 到固定 18888。
 
-```text
-contracted KGEN
-→ official white-hole controller
-→ verified permanent burn
-→ 10,000 KAIOS per KGEN
-→ player principal escrow / contract account
-```
+8895 若要讓玩家取得 KAIOS，只能走已存在 KAIOS 的合法經濟路徑，例如市場交換、正式 18888 文明撥款、商業收入或經治理核准的 8888/8895 經濟模組。不得把 8895 當成第二個 KAIOS Minter，也不得讓同一份 KGEN Burn 被重複生成 KAIOS。
 
-白洞生成的 KAIOS 是玩家本金轉換，不是八戒利潤。額外利息或分潤只能來自實業收入、服務費、合法投資收益或事先鎖定的獎勵準備；禁止新玩家本金支付舊玩家收益。
-
-可逆 KGEN 鎖倉與不可逆白洞轉換必須是不同商品。
+可逆 KGEN 鎖倉與不可逆 KGEN 真實 Burn 必須是不同商品；任何利息或分潤只能來自實業收入、服務費、合法投資收益或事先鎖定的獎勵準備，禁止新玩家本金支付舊玩家收益。
 
 # 4. KAIOS 公共文明邊界
 
@@ -141,7 +131,7 @@ KAIOS_MULTICIVILIZATION_RELIGIOUS_NEUTRALITY_LIFE_MIGRATION_RUNTIME_V1.0.md
 # 11. 核心不變量
 
 ```text
-KAIOS_TOTAL_MINTED == VERIFIED_WHITE_HOLE_KGEN_BURNED * 10,000
+KAIOS_TOTAL_MINTED == VERIFIED_WHITE_HOLE_KGEN_BURNED * 1,000
 WHITE_HOLE_AND_BLACK_HOLE_DOUBLE_COUNT == 0
 DISCRETIONARY_KAIOS_MINT == 0
 UNREVIEWED_11520_LISTING == 0
@@ -152,3 +142,26 @@ CIVILIZATION_DISCRIMINATION_IN_TECHNICAL_REVIEW == 0
 # 12. 最終天條
 
 > KAIOS 是全球、多文明、宗教中立的公共協議。白洞建立共同 KAIOS 文明；創世黑洞建立玩家創世質量與經審核的子宇宙。各文明保有自己的歷史、文化、生命與治理，所有生命以同一 Life Registry 與 11520 技術標準進入宇宙。
+
+
+---
+
+## V1.7 Canon Reconciliation
+
+- KGEN → KAIOS 固定為 `1 KGEN = 1,000 KAIOS`。
+- KGEN 創世供應 72,000,000，因此第一代 KAIOS 理論上限為 72,000,000,000。
+- 33333 = Gold & Silver Island / KAIOS token deployment point；不是 EVM 錢包或 Treasury。
+- 36000 = White Hole。
+- 18888 = Lingxiao Celestial Bank / 第一代 KAIOS settlement destination。
+- 舊 1:10,000 / 720 billion 規則全部廢止。
+
+
+# 16. 18888 Money-Circulation Canon
+
+18888 不是 receive-only vault。KAIOS 白洞生成到 18888 後，必須能依正式銀行帳本進入文明循環。安全原則是「防偷，不防合法花錢；防亂花，不防流通」。
+
+第一層正式出金為 500 Celestial Salary Seats：每席是神職／公共功能席，也是薪俸席。薪俸按 Epoch / checkpoint 形成 entitlement，由正式 beneficiary 自領或由 permissionless keeper / AI 代觸發；觸發者不得改收款人或金額，銀行餘額不足時 entitlement 保留。
+
+第二層為 Civilization Allocation Ledger，用於神域運轉、文明工程、生命創造、公共建設及向正式 8888 高老莊商業器官配置流動資本。Admin 不得繞過帳本使用 unrestricted withdrawal。
+
+8888 高老莊承接商業、企業、一般工作薪資、買賣、供應鏈、生產與消費；18888 不應吞併 8888 的日常商業職能。

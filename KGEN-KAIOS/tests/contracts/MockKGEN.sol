@@ -14,3 +14,19 @@ contract MockKGEN is ERC20 {
         _burn(msg.sender, amount);
     }
 }
+
+contract MockKAIOSForTreasury is ERC20 {
+    address public immutable KGEN;
+    address public immutable LINGXIAO_TREASURY_18888;
+
+    constructor(address canonicalKgen, address treasury18888)
+        ERC20("Mock KAIOS", "mKAIOS")
+    {
+        KGEN = canonicalKgen;
+        LINGXIAO_TREASURY_18888 = treasury18888;
+    }
+
+    function mintToTreasury(uint256 amount) external {
+        _mint(LINGXIAO_TREASURY_18888, amount);
+    }
+}

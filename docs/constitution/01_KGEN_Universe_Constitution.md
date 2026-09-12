@@ -314,8 +314,8 @@ KGEN 宇宙金融分工：
 8888 高老莊
 = 人民商業銀行
 
-33333 金銀島
-= 文明貢獻與獎勵中心
+33333 金銀島 / Gold & Silver Island
+= KAIOS Token 部署點與宇宙 Point ID
 
 11520 花果山悟空交易所
 = 生命、公司、土地、文明與服務市場
@@ -325,7 +325,7 @@ KGEN 宇宙金融分工：
 
 8888 管理玩家、AI、家庭與公司的日常金融。
 
-33333 管理 Proof of Civilization。
+33333 不是 wallet、treasury、bank、EOA 或 recipient；正式 KAIOS Token address 必須與 Point ID 分開記錄。
 
 11520 管理市場交換。
 
@@ -637,7 +637,7 @@ KGEN 宇宙的最終目標，是建立一個：
 | World | K280 | 多代幣、多物種、多文明創世世界 |
 | Central Bank | 18888 | 宇宙儲備與清算 |
 | Commercial Bank | 8888 | 玩家與文明日常金融 |
-| Contribution | 33333 | Proof of Civilization |
+| KAIOS Token Point | 33333 | Gold & Silver Island；部署點 ID，不是 EVM address |
 | Exchange | 11520 | 生命、商品、土地、公司與文明市場 |
 
 # 附錄 B：正式狀態

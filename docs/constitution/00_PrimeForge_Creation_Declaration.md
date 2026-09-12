@@ -537,14 +537,13 @@ K280
 - 貸款。
 - 日常支付。
 
-## 15.3 33333 金銀島
+## 15.3 33333 金銀島 / Gold & Silver Island
 
-文明貢獻中心，負責：
+KAIOS Token 部署點與宇宙 Point ID，必須遵守：
 
-- Proof of Civilization。
-- 工作獎勵。
-- 生態復育獎勵。
-- 技術與安全貢獻獎勵。
+- 33333 不是 wallet、treasury、bank、EOA 或 Genesis holding address。
+- 正式 KAIOS BSC Token address 只有部署後的 `0x...` contract address。
+- Proof of Civilization 與文明獎勵不得因歷史文字而自動歸入 33333；須由 Human Canon 另定器官。
 
 薪資與文明獎勵必須分開。
 

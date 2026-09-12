@@ -221,6 +221,60 @@ test("TempleHeart rehearses the exact V3.3.2 to V3.4.0 UUPS upgrade and preserve
   await assert.rejects(heart.initializeAlchemyIntegration(await context.kaios.getAddress()));
 });
 
+test("fresh V3.4 proxy initialization is role-bound, replay-safe, and preserves its EIP-712 domain", async () => {
+  const context = await setupLineage();
+  const implementation = await deploy("KGEN_TempleHeart_Upgradeable", context.owner);
+  const compiled = artifact("KGEN_TempleHeart_Upgradeable");
+  const admin = context.signers[1];
+  const upgrader = context.signers[2];
+  const operator = context.signers[3];
+  const holyCupSigner = context.signers[4];
+  const initializeArguments = [
+    await admin.getAddress(),
+    await upgrader.getAddress(),
+    await operator.getAddress(),
+    await holyCupSigner.getAddress(),
+    await context.kgen.getAddress(),
+    await context.exchangeTreasury11520.getAddress(),
+    await context.kaios.getAddress(),
+  ];
+  const initializeData = implementation.interface.encodeFunctionData("initialize", initializeArguments);
+  const proxy = await deploy("TestERC1967Proxy", context.owner, [
+    await implementation.getAddress(),
+    initializeData,
+  ]);
+  const heart = new Contract(await proxy.getAddress(), compiled.abi, admin);
+
+  assert.equal(await heart.version(), "3.4.0");
+  assert.equal(await heart.organRegistry(), "0x0000000000000000000000000000000000000000");
+  assert.equal(await heart.gameSurvivalGateWhole(), 1_888n);
+  assert.equal(await heart.heartbeatMaxClaimsPerHour(), 88n);
+  assert.equal(await heart.igniteMaxClaimsPerDay(), 88n);
+  assert.equal(await heart.fortuneGame(), "0x0000000000000000000000000000000000000000");
+  assert.equal(await heart.hasRole(await heart.DEFAULT_ADMIN_ROLE(), await admin.getAddress()), true);
+  assert.equal(await heart.hasRole(await heart.UPGRADER_ROLE(), await upgrader.getAddress()), true);
+  assert.equal(await heart.hasRole(await heart.OPERATOR_ROLE(), await operator.getAddress()), true);
+  assert.equal(await heart.hasRole(await heart.HOLY_CUP_SIGNER_ROLE(), await holyCupSigner.getAddress()), true);
+
+  const domainBefore = await heart.eip712Domain();
+  await assert.rejects(
+    heart.connect(context.signers[5]).initializeV340(await context.registry.getAddress()),
+  );
+  await (await heart.initializeV340(await context.registry.getAddress())).wait();
+  const domainAfter = await heart.eip712Domain();
+  assert.deepEqual([...domainAfter].map(String), [...domainBefore].map(String));
+  assert.equal(await heart.organRegistry(), await context.registry.getAddress());
+  assert.equal(await heart.current11520Treasury(), await context.exchangeTreasury11520.getAddress());
+
+  await assert.rejects(heart.initialize(...initializeArguments));
+  await assert.rejects(heart.initializeV340(await context.registry.getAddress()));
+  await assert.rejects(heart.initializeAlchemyIntegration(await context.kaios.getAddress()));
+  await assert.rejects(implementation.initialize(...initializeArguments));
+  await assert.rejects(
+    heart.connect(context.signers[5]).upgradeToAndCall(await implementation.getAddress(), "0x"),
+  );
+});
+
 test("heartbeatClaim pays 1 KGEN, enforces wallet and civilization cooldowns, and preserves the operational floor", async () => {
   const context = await setupLineage();
   const { heart } = await deployTempleHeart(context);

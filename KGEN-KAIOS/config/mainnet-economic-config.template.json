@@ -1,0 +1,34 @@
+{
+  "status": "HUMAN_CONFIRM_REQUIRED",
+  "chainId": 56,
+  "units": "18-decimal KAIOS wei unless explicitly stated",
+  "confirmed": {
+    "governanceDelaySeconds": 3600,
+    "salaryCalendar": "MONTHLY_DAY_5_00_00_UTC_PLUS_8",
+    "celestialSeat500InitialState": "ACTIVE",
+    "civilizationAllocationInitialState": "ACTIVE",
+    "economicRouter8888InitialState": "ACTIVE_AFTER_FORMAL_8888_BINDING",
+    "exchangeSettlement11520InitialState": "ACTIVE",
+    "bankRiskControllerInitialState": "ACTIVE",
+    "bankGovernanceInitialState": "ACTIVE",
+    "bankMigrationInitialState": "REGISTERED_BUT_INACTIVE"
+  },
+  "humanConfirmRequired": {
+    "celestialSalaryBase": null,
+    "salaryWeightRules": null,
+    "minimumReserve": null,
+    "salaryExposureCap": null,
+    "allocationExposureCap": null,
+    "router8888Cap": null,
+    "settlement11520Cap": null,
+    "depositInterestRatePpmPerMonthlyEpoch": null,
+    "distinctGovernanceApprover": null,
+    "pauser": null
+  },
+  "constraints": {
+    "unknownValuesMustRemainNull": true,
+    "noMainnetTransactionWithoutExplicitApproval": true,
+    "interestRateChangesApplyToFutureEpochsOnly": true,
+    "deploymentSignerGetsNoAutomaticGovernanceRole": true
+  }
+}

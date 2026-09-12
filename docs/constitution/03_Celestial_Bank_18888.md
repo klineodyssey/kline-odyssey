@@ -111,23 +111,23 @@ KGEN Reference Maximum Supply:
 72,000,000 KGEN
 
 KAIOS Maximum Supply:
-720,000,000,000 KAIOS
+72,000,000,000 KAIOS
 ```
 
 建議模式：
 
 ```text
-Genesis Mint:
-720,000,000,000 KAIOS
+Genesis Settlement Mint:
+(72,000,000 KGEN - KGEN.totalSupply at settlement) * 1,000
 
 Genesis Receiver:
 18888 Celestial Genesis Reserve
 
-Post-Genesis Mint:
-DISABLED
+Later Friction-Mirror Settlement:
+only newly destroyed and previously unsettled KGEN * 1,000
 ```
 
-創世後，18888 只負責從儲備釋放、回收或 Burn，不再新增供應。
+創世後，18888 可依銀行規則支付合法神明薪俸與文明資金；KAIOS 供應仍只能由真實 KGEN 毀滅的未結算差額生成，不得任意 Mint。
 
 ---
 
@@ -331,14 +331,15 @@ NO_REAL_KGEN_DEPOSIT
 NO_REAL_KAIOS_TOKEN
 ```
 
-## 8.2 未來儲備模式
+## 8.2 CURRENT Friction Mirror settlement mode
 
 ```text
-1 KGEN 鎖入 18888
-→ 對應最多 1,000 KAIOS 可結算額度
+KGEN.totalSupply() 真實永久下降 1 KGEN
+→ 36000 White Hole 認列
+→ KAIOS.settleWhiteHoleMass()
+→ 1,000 KAIOS 直接 mint 至正式 18888 Bank Proxy
 
-1,000 KAIOS 回收或 Burn
-→ 釋放最多 1 KGEN
+18888 不託管 KGEN，也不建立 KAIOS 回收兌回 KGEN 的保證。
 ```
 
 核心不變量：
@@ -638,8 +639,8 @@ MigrationVault
 # 18. 核心不變量
 
 ```text
-totalSupply <= 720,000,000,000 KAIOS
-postGenesisMint == 0
+totalSupply <= 72,000,000,000 KAIOS
+discretionaryMint == 0
 seatCount <= 500
 claim(epoch, seat) <= 1
 noUnauthorizedBurn
@@ -749,8 +750,8 @@ review_result
 8888 高老莊
 = 人民商業銀行
 
-33333 金銀島
-= Proof of Civilization 與文明獎勵中心
+33333 金銀島 / Gold & Silver Island
+= KAIOS Token 部署點與宇宙 Point ID；不是 wallet、treasury 或 EVM address
 
 11520 花果山悟空交易所
 = 生命、公司、土地與文明市場
@@ -841,9 +842,9 @@ AI 不可獨占
 | 名稱 | Celestial Autonomous Bank |
 | KGEN Bank Tax | 0.10% |
 | 神明席位 | 500 |
-| KGEN/KAIOS 比例 | 1:10,000 |
-| KAIOS 最大供應 | 720,000,000,000 |
-| 創世後 Mint | 禁止 |
+| KGEN/KAIOS 比例 | 1:1,000 |
+| KAIOS 最大供應 | 72,000,000,000 |
+| 任意 Mint | 禁止；僅允許 Friction Mirror 未結算差額 |
 | 真實 KGEN 託管 | 停用 |
 | 真實兌換 | 停用 |
 | 主網部署 | 未授權 |
