@@ -37,6 +37,7 @@ jobs:
 
           import hashlib
           import json
+          import re
           from pathlib import Path
 
           inbox = Path("K線西遊記/autopilot/inbox")
@@ -44,16 +45,27 @@ jobs:
           if not manifests:
               raise SystemExit("AUTOPILOT_MANIFEST_MISSING")
 
+          manifest_name = re.compile(r"\d{8}_manifest\.json")
+          max_manifest_bytes = 1_048_576
+          raw_by_manifest: dict[Path, bytes] = {}
           for path in manifests:
+              if manifest_name.fullmatch(path.name) is None:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_NAME_INVALID:{path.name}")
+              if path.is_symlink() or not path.is_file():
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_TYPE_INVALID:{path.name}")
+              if path.stat().st_size > max_manifest_bytes:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_TOO_LARGE:{path.name}")
               try:
-                  payload = json.loads(path.read_text(encoding="utf-8"))
+                  raw = path.read_bytes()
+                  payload = json.loads(raw.decode("utf-8"))
               except (OSError, UnicodeError, json.JSONDecodeError) as exc:
                   raise SystemExit(f"AUTOPILOT_MANIFEST_INVALID:{path.name}:{type(exc).__name__}") from exc
               if not isinstance(payload, dict):
                   raise SystemExit(f"AUTOPILOT_MANIFEST_NOT_OBJECT:{path.name}")
+              raw_by_manifest[path] = raw
 
           latest = manifests[-1]
-          raw = latest.read_bytes()
+          raw = raw_by_manifest[latest]
           print(f"manifest_count={len(manifests)}")
           print(f"latest_manifest={latest.name}")
           print(f"latest_manifest_bytes={len(raw)}")
