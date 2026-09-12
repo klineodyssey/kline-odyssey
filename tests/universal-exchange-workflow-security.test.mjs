@@ -32,9 +32,15 @@ test("Cursor dispatch wake fails closed without exposing API bodies or shell-eva
   assert.match(workflow, /HOLD_EXTERNAL_PLAN_REQUIRED/);
   assert.match(workflow, /Agent launched: \\`NO\\`/);
   assert.match(workflow, /untrusted_error_code/);
+  assert.match(workflow, /https:\/\/api\.cursor\.com\/v1\/agents/);
+  assert.match(workflow, /--user "\$\{CURSOR_API_KEY\}:"/);
+  assert.match(workflow, /API_RESPONSE_STATUS=/);
+  assert.match(workflow, /run_agent_id == agent_id/);
+  assert.match(workflow, /structured agent\/run acknowledgement missing/);
 
   assert.doesNotMatch(workflow, /cat\s+\/tmp\/cursor-agent\.json/);
   assert.doesNotMatch(workflow, /echo\s+[^\n]*\/tmp\/cursor-agent\.json/);
+  assert.doesNotMatch(workflow, /Authorization:\s*Bearer/);
   assert.doesNotMatch(workflow, /contents:\s*write/);
   assert.doesNotMatch(workflow, /actions:\s*write/);
   assert.doesNotMatch(workflow, /git\s+push\b/);

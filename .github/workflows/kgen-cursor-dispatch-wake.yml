@@ -59,7 +59,7 @@ jobs:
           )
           HTTP=$(curl -sS -w "%{http_code}" -o /tmp/cursor-agent.json \
             -X POST "https://api.cursor.com/v1/agents" \
-            -H "Authorization: Bearer ${CURSOR_API_KEY}" \
+            --user "${CURSOR_API_KEY}:" \
             -H "Content-Type: application/json" \
             -d "$BODY")
           API_ERROR_CODE=$(python3 <<'PY'
@@ -70,13 +70,43 @@ jobs:
           except (OSError, json.JSONDecodeError):
               print("unparseable_response")
           else:
-              error = payload.get("error") or {}
+              error = payload.get("error") or {} if isinstance(payload, dict) else {}
+              if not isinstance(error, dict):
+                  error = {}
               code = error.get("code") or ""
               print(code if isinstance(code, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", code) else "untrusted_error_code")
           PY
           )
+          API_RESPONSE_STATUS=$(python3 <<'PY'
+          import json, re
+
+          def valid_id(value, prefix):
+              return isinstance(value, str) and re.fullmatch(prefix + r"[A-Za-z0-9-]{1,128}", value) is not None
+
+          try:
+              payload = json.load(open("/tmp/cursor-agent.json", encoding="utf-8"))
+          except (OSError, json.JSONDecodeError):
+              print("invalid")
+          else:
+              agent = payload.get("agent") if isinstance(payload, dict) else None
+              run = payload.get("run") if isinstance(payload, dict) else None
+              agent_id = agent.get("id") if isinstance(agent, dict) else None
+              run_id = run.get("id") if isinstance(run, dict) else None
+              run_agent_id = run.get("agentId") if isinstance(run, dict) else None
+              accepted = (
+                  valid_id(agent_id, "bc-")
+                  and valid_id(run_id, "run-")
+                  and run_agent_id == agent_id
+              )
+              print("accepted" if accepted else "invalid")
+          PY
+          )
           echo "Cursor API HTTP ${HTTP}"
           if [ "$HTTP" -ge 200 ] && [ "$HTTP" -lt 300 ]; then
+            if [ "$API_RESPONSE_STATUS" != "accepted" ]; then
+              echo "::error title=Cursor Cloud Agent dispatch failed::HTTP ${HTTP}; structured agent/run acknowledgement missing"
+              exit 1
+            fi
             echo "Cursor Cloud Agent dispatch accepted."
             exit 0
           fi

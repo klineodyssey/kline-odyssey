@@ -23,6 +23,9 @@ Workflow: `.github/workflows/kgen-cursor-dispatch-wake.yml`
 2. GitHub repo **Settings → Secrets → Actions** → `CURSOR_API_KEY`
 
 After the secret is set, every Codex dispatch merge automatically POSTs to `https://api.cursor.com/v1/agents` with prompt in `cursor-dispatch-wake-prompt.txt`.
+The workflow uses Cursor's documented HTTP Basic API-key authentication and only
+accepts a 2xx response when it contains matching structured `agent` and `run`
+identifiers; an empty or malformed success response fails closed.
 
 **Manual test:** GitHub → Actions → **KGEN Cursor Dispatch Wake** → **Run workflow** (uses `workflow_dispatch`).
 
