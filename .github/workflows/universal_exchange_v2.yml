@@ -13,6 +13,7 @@ on:
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
+      - ".github/workflows/kgen-cursor-dispatch-wake.yml"
       - ".github/workflows/universal_exchange_v2.yml"
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - "tests/universal-exchange-workflow-security.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+      - ".github/workflows/kgen-cursor-dispatch-wake.yml"
       - ".github/workflows/universal_exchange_v2.yml"
 
 permissions:
