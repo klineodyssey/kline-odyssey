@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.3.1
+VERSION: 1.3.2
 STATUS: ACTIVE
 PURPOSE: Read-only/fail-closed KAIOS ATM receiving and reconciliation runtime for the existing 11520 product. This module never signs or sends a transaction.
 */
@@ -11,7 +11,7 @@ export const DELIVERY_STATES=Object.freeze([
 ]);
 export const DELIVERY_ERRORS=Object.freeze([
   'RECONCILIATION_REQUIRED','RPC_DISAGREEMENT','TX_REVERTED','TX_DROPPED','AMOUNT_MISMATCH','WRONG_RECEIVER',
-  'REPLAY_BLOCKED','DELIVERY_REJECTED','DIRECTION_ROUTE_MISMATCH','ROUTE_EVIDENCE_MISSING','INVALID_EXACT_AMOUNT',
+  'REPLAY_BLOCKED','DELIVERY_REJECTED','DIRECTION_ROUTE_MISMATCH','ROUTE_EVIDENCE_MISSING','MARKET_DIRECTION_AUTHORITY_NOT_CONNECTED','INVALID_EXACT_AMOUNT',
   'VERIFIER_ID_MISMATCH','CHAIN_ID_MISMATCH','FINALITY_REQUIRED','BLOCK_IDENTITY_MISSING','LOG_IDENTITY_MISSING',
   'MANIFEST_TIME_INVALID','MANIFEST_NOT_YET_VALID','MANIFEST_EXPIRED','REPLAY_REGISTRY_UNAVAILABLE',
 ]);
@@ -60,9 +60,8 @@ export function validateRouteEvidence({axis,direction,from,to,routeEvidence,deci
   if(!['KX','KY','KZ'].includes(a)||!['LONG','SHORT'].includes(d)||!routeEvidence||!decisionEvidence||!marketState||!technicalIndicators)
     return {ok:false,status:'ROUTE_EVIDENCE_MISSING'};
   if(!Number.isFinite(Number(risk))||!Number.isFinite(Number(cost))||!Number.isFinite(Number(expectedProfit)))return {ok:false,status:'ROUTE_EVIDENCE_MISSING'};
-  const key={KX:'x',KY:'y',KZ:'z'}[a],delta=finite(to?.[key])-finite(from?.[key]);
-  if((d==='LONG'&&delta<=0)||(d==='SHORT'&&delta>=0))return {ok:false,status:'DIRECTION_ROUTE_MISMATCH',delta};
-  return {ok:true,axis:a,direction:d,delta};
+  const spatial_delta=Object.freeze({x:finite(to?.x)-finite(from?.x),y:finite(to?.y)-finite(from?.y),z:finite(to?.z)-finite(from?.z)});
+  return {ok:false,status:'MARKET_DIRECTION_AUTHORITY_NOT_CONNECTED',axis:a,direction:d,spatial_delta,authority:'K_MARKET_DIRECTION_MUST_NOT_BE_DERIVED_FROM_PLAYER_XYZ'};
 }
 
 export function createKaiosAtmReceivingModule(config={}){
