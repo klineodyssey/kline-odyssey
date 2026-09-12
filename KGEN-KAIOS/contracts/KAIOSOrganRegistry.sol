@@ -10,10 +10,16 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * @dev Monetary ratios and token taxes do not live in this registry.
  */
 contract KAIOSOrganRegistry is Ownable2Step {
+    string public constant SELF_NAME = unicode"司籍";
+    string public constant LIFE_ID_TEXT = "LIFE-KAIOS-SIJI-REGISTRY-0001";
+    string public constant LIFE_TYPE = "CROSS_WORLD_REGISTRY_LIFE";
+    string public constant LAND_POINT = "NONE";
+    string public constant EMBODIMENT_STATUS = "RECRUITED_PENDING_EMBODIMENT";
     uint64 public constant MINIMUM_ALLOWED_DELAY = 1 hours;
     bytes32 public constant ORGAN_FURNACE_18911 = keccak256("KAIOS.ORGAN.FURNACE.18911");
     bytes32 public constant ORGAN_WORMHOLE_511111 = keccak256("KAIOS.ORGAN.WORMHOLE.511111");
     bytes32 public constant ORGAN_KSHIP_CONVERTER = keccak256("KAIOS.ORGAN.KSHIP.CONVERTER");
+    bytes32 public constant ORGAN_UFO_FUEL_CONSUMER = keccak256("KAIOS.ORGAN.UFO.FUEL.CONSUMER");
     bytes32 public constant ORGAN_PAIR_REGISTRY = keccak256("KAIOS.ORGAN.PAIR.REGISTRY");
     bytes32 public constant ORGAN_EXCHANGE_TREASURY_11520 =
         keccak256("KAIOS.ORGAN.EXCHANGE_TREASURY.11520");
@@ -24,6 +30,7 @@ contract KAIOSOrganRegistry is Ownable2Step {
     }
 
     uint64 public immutable minimumDelay;
+    bytes32 public immutable lifeId;
     bool public bootstrapOpen = true;
 
     mapping(bytes32 => address) private _organs;
@@ -42,6 +49,13 @@ contract KAIOSOrganRegistry is Ownable2Step {
     event OrganProposed(bytes32 indexed organId, address indexed candidate, uint64 executableAt);
     event OrganProposalCancelled(bytes32 indexed organId);
     event OrganUpdated(bytes32 indexed organId, address indexed previousOrgan, address indexed newOrgan);
+    event ProgramLifeRecruited(
+        bytes32 indexed programLifeId,
+        string selfName,
+        string lifeType,
+        string landPoint,
+        string embodimentStatus
+    );
 
     constructor(address initialOwner, uint64 governanceDelay) Ownable(initialOwner) {
         if (initialOwner == address(0)) revert ZeroAddress();
@@ -49,6 +63,8 @@ contract KAIOSOrganRegistry is Ownable2Step {
             revert GovernanceDelayTooShort(governanceDelay, MINIMUM_ALLOWED_DELAY);
         }
         minimumDelay = governanceDelay;
+        lifeId = keccak256(bytes(LIFE_ID_TEXT));
+        emit ProgramLifeRecruited(lifeId, SELF_NAME, LIFE_TYPE, LAND_POINT, EMBODIMENT_STATUS);
     }
 
     function organ(bytes32 organId) external view returns (address) {

@@ -4,6 +4,7 @@ import { AbiCoder, Contract, Wallet, id, keccak256, toBeHex, zeroPadValue } from
 import {
   ETHER,
   advanceTime,
+  approveAlchemy,
   artifact,
   cleanupProviders,
   deploy,
@@ -76,7 +77,7 @@ async function makeWishAndHolyCup(context, heart, user, civilizationId, wishHash
 async function createFortuneProof(context, heart, user, civilizationId, wishHash, suffix, beneficiary = user) {
   const amount = 1n * ETHER;
   await (await context.kaios.connect(context.treasury).transfer(await user.getAddress(), amount)).wait();
-  await (await context.kaios.connect(user).approve(await context.furnace.getAddress(), amount)).wait();
+  await approveAlchemy(context, user, amount);
   const destination = await heart.alchemyDestinationCode(await heart.fortunePurposeCode(), wishHash);
   const receipt = await (
     await context.furnace.connect(user).burnForKufo(
@@ -124,7 +125,7 @@ async function setUintMappingValue(context, heart, mappingLabel, key, value) {
 }
 
 test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-bound destination", async () => {
-  const context = await setupLineage({ epochSeconds: 10 });
+  const context = await setupLineage();
   const { heart } = await deployTempleHeart(context);
   await mintKaiosByBurningKgen(context, 2n * ETHER);
 
@@ -134,7 +135,7 @@ test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-boun
   const purpose = await heart.offeringPurposeCode(1);
   const destination = await heart.alchemyDestinationCode(purpose, wishHash);
   const amount = 250n * ETHER;
-  await (await context.kaios.connect(context.treasury).approve(await context.furnace.getAddress(), amount)).wait();
+  await approveAlchemy(context, context.treasury, amount);
   const burnReceipt = await (
     await context.furnace.connect(context.treasury).burnForKufo(
       amount,
@@ -152,7 +153,7 @@ test("TempleHeart accepts only a holder-bound KAIOS Alchemy proof with wish-boun
 });
 
 test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", async () => {
-  const context = await setupLineage({ epochSeconds: 10 });
+  const context = await setupLineage();
   const { heart } = await deployTempleHeart(context);
   await mintKaiosByBurningKgen(context, 2n * ETHER);
   const civilizationId = id("CIV-ATTACK");
@@ -161,7 +162,7 @@ test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", a
   const purpose = await heart.offeringPurposeCode(1);
   const destination = await heart.alchemyDestinationCode(purpose, wishHash);
   const amount = 100n * ETHER;
-  await (await context.kaios.connect(context.treasury).approve(await context.furnace.getAddress(), 2n * amount)).wait();
+  await approveAlchemy(context, context.treasury, amount);
 
   const redirectReceipt = await (
     await context.furnace.connect(context.treasury).burnForKufo(
@@ -174,6 +175,7 @@ test("TempleHeart rejects beneficiary redirect and mismatched purpose proofs", a
   const redirectProof = eventArgs(redirectReceipt, context.furnace, "AlchemyProofCreated").proofId;
   await assert.rejects(heart.connect(context.treasury).recordBurnOffering(redirectProof, 1));
 
+  await approveAlchemy(context, context.treasury, amount);
   const mismatchReceipt = await (
     await context.furnace.connect(context.treasury).burnForKufo(
       amount,
@@ -337,22 +339,25 @@ test("fortune ledger never claws back claims and requires a later voluntary repa
   const user = context.signers[2];
   const civilizationId = id("CIV-FORTUNE-LEDGER");
   await mintKaiosByBurningKgen(context, 10n * ETHER);
+  const fixtureSeedBalance = await context.kgen.balanceOf(await user.getAddress());
   await (await context.kgen.transfer(await heart.getAddress(), 20_050n * ETHER)).wait();
 
   const wishOne = id("WISH-FORTUNE-ONE");
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishOne, "ONE");
   const proofOne = await createFortuneProof(context, heart, user, civilizationId, wishOne, "ONE");
+  const firstCatalyst = (await context.furnace.proof(proofOne)).kgenCatalystAmount;
   await (await heart.connect(user).fortuneClaim(proofOne)).wait();
   const afterFirstClaim = await context.kgen.balanceOf(await user.getAddress());
-  assert.equal(afterFirstClaim, ETHER);
+  assert.equal(afterFirstClaim, fixtureSeedBalance - firstCatalyst + ETHER);
   await assert.rejects(heart.connect(user).fortuneClaim(proofOne));
 
   await advanceTime(context.provider, 30 * 86_400 + 1);
   const wishTwo = id("WISH-FORTUNE-TWO");
   await makeWishAndHolyCup(context, heart, user, civilizationId, wishTwo, "TWO");
   const proofTwo = await createFortuneProof(context, heart, user, civilizationId, wishTwo, "TWO");
+  const secondCatalyst = (await context.furnace.proof(proofTwo)).kgenCatalystAmount;
   await assert.rejects(heart.connect(user).fortuneClaim(proofTwo));
-  assert.equal(await context.kgen.balanceOf(await user.getAddress()), afterFirstClaim);
+  assert.equal(await context.kgen.balanceOf(await user.getAddress()), afterFirstClaim - secondCatalyst);
 
   const voluntaryAmount = ETHER / 2n;
   await (await context.kgen.connect(user).approve(await heart.getAddress(), voluntaryAmount)).wait();
@@ -367,7 +372,10 @@ test("fortune ledger never claws back claims and requires a later voluntary repa
   assert.equal(ledger.claimCount, 2n);
   assert.equal(ledger.repaymentCount, 1n);
   assert.equal(ledger.repaidAfterLastClaim, false);
-  assert.equal(await context.kgen.balanceOf(await user.getAddress()), afterFirstClaim - voluntaryAmount + ETHER);
+  assert.equal(
+    await context.kgen.balanceOf(await user.getAddress()),
+    afterFirstClaim - secondCatalyst - voluntaryAmount + ETHER,
+  );
 
   const forbiddenNames = ["clawback", "seize", "freeze", "blacklist", "recoverFromPlayer"];
   const functionNames = artifact("KGEN_TempleHeart_Upgradeable").abi

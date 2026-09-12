@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { BrowserProvider, ContractFactory, id } from "ethers";
+import { BrowserProvider, ContractFactory, id, keccak256 } from "ethers";
 import ganache from "ganache";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -10,6 +10,7 @@ export const ETHER = 10n ** 18n;
 export const ORGAN_FURNACE_18911 = id("KAIOS.ORGAN.FURNACE.18911");
 export const ORGAN_WORMHOLE_511111 = id("KAIOS.ORGAN.WORMHOLE.511111");
 export const ORGAN_KSHIP_CONVERTER = id("KAIOS.ORGAN.KSHIP.CONVERTER");
+export const ORGAN_UFO_FUEL_CONSUMER = id("KAIOS.ORGAN.UFO.FUEL.CONSUMER");
 export const ORGAN_PAIR_REGISTRY = id("KAIOS.ORGAN.PAIR.REGISTRY");
 export const ORGAN_EXCHANGE_TREASURY_11520 = id("KAIOS.ORGAN.EXCHANGE_TREASURY.11520");
 
@@ -25,7 +26,12 @@ export async function deploy(name, signer, args = []) {
   return contract;
 }
 
-export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAccounts = 10 } = {}) {
+export async function setupLineage({
+  delay = 3600,
+  halfLifeSeconds = 1_000,
+  totalAccounts = 10,
+  withUfoConsumer = false,
+} = {}) {
   const eip1193 = ganache.provider({
     chain: { chainId: 31337, hardfork: "shanghai" },
     logging: { quiet: true },
@@ -44,12 +50,28 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
     await treasury.getAddress(),
     await registry.getAddress(),
   ]);
-  const kufo = await deploy("KUFO", owner, [await registry.getAddress(), await kaios.getAddress()]);
+  const kufo = await deploy("KUFO", owner, [
+    await registry.getAddress(),
+    await kaios.getAddress(),
+    halfLifeSeconds,
+  ]);
   const kship = await deploy("KSHIP", owner, [await registry.getAddress(), await kufo.getAddress()]);
+  const catalystBank = await deploy("MockOrgan", owner);
+  const [kaiosCodeHash, kgenCodeHash, registryCodeHash, catalystBankCodeHash] = await Promise.all([
+    provider.getCode(await kaios.getAddress()).then(keccak256),
+    provider.getCode(await kgen.getAddress()).then(keccak256),
+    provider.getCode(await registry.getAddress()).then(keccak256),
+    provider.getCode(await catalystBank.getAddress()).then(keccak256),
+  ]);
   const furnace = await deploy("KAIOSAlchemyFurnace", owner, [
     await kaios.getAddress(),
+    await kgen.getAddress(),
+    await catalystBank.getAddress(),
     await registry.getAddress(),
-    epochSeconds,
+    kaiosCodeHash,
+    kgenCodeHash,
+    registryCodeHash,
+    catalystBankCodeHash,
   ]);
   const wormhole = await deploy("KUFOClaimWormhole", owner, [
     await furnace.getAddress(),
@@ -59,6 +81,7 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
     await kufo.getAddress(),
     await kship.getAddress(),
   ]);
+  const ufoConsumer = await deploy("KSHIPPropulsionConsumerHarness", owner);
   const pairRegistry = await deploy("KAIOSPairRegistry", owner, [await owner.getAddress()]);
   const exchangeTreasury11520 = await deploy("MockOrgan", owner);
 
@@ -70,6 +93,9 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
     [ORGAN_EXCHANGE_TREASURY_11520, exchangeTreasury11520],
   ]) {
     await (await registry.bootstrapOrgan(organId, await contract.getAddress())).wait();
+  }
+  if (withUfoConsumer) {
+    await (await registry.bootstrapOrgan(ORGAN_UFO_FUEL_CONSUMER, await ufoConsumer.getAddress())).wait();
   }
   await (await registry.sealBootstrap()).wait();
 
@@ -85,11 +111,13 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
     kufo,
     kship,
     furnace,
+    catalystBank,
     wormhole,
     converter,
+    ufoConsumer,
     pairRegistry,
     exchangeTreasury11520,
-    epochSeconds,
+    halfLifeSeconds,
   };
 }
 
@@ -117,7 +145,25 @@ export async function advanceTime(provider, seconds) {
   await provider.send("evm_mine", []);
 }
 
+export async function approveAlchemy(context, signer, kaiosAmount) {
+  if (kaiosAmount % 1_000n !== 0n) throw new Error("INEXACT_KGEN_CATALYST_RATIO");
+  const catalystAmount = kaiosAmount / 1_000n;
+  await (await context.kaios.connect(signer).approve(await context.furnace.getAddress(), kaiosAmount)).wait();
+  await (await context.kgen.connect(signer).approve(await context.furnace.getAddress(), catalystAmount)).wait();
+  return catalystAmount;
+}
+
 export async function mintKaiosByBurningKgen(context, kgenAmount) {
+  const supplyBefore = await context.kgen.totalSupply();
+  if (kgenAmount < supplyBefore && !context.catalystFixtureSeeded) {
+    const catalystSeed = 10n * ETHER;
+    const furnaceAddress = await context.furnace.getAddress();
+    for (const signer of context.signers.slice(1)) {
+      await (await context.kgen.connect(context.owner).transfer(await signer.getAddress(), catalystSeed)).wait();
+      await (await context.kgen.connect(signer).approve(furnaceAddress, catalystSeed)).wait();
+    }
+    context.catalystFixtureSeeded = true;
+  }
   await (await context.kgen.connect(context.owner).burn(kgenAmount)).wait();
   await (await context.kaios.connect(context.owner).settleWhiteHoleMass()).wait();
   return kgenAmount * 1_000n;

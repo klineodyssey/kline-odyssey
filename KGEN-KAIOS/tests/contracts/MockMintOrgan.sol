@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 interface IMockKUFO {
-    function mintFromMaturedProof(bytes32 proofId) external returns (address, uint256);
+    function mintFromImmediateProof(bytes32 proofId) external returns (address, uint256);
 }
 
 interface IMockKSHIP {
@@ -11,7 +11,7 @@ interface IMockKSHIP {
 
 contract MockMintOrgan {
     function attemptKufoMint(address kufo, bytes32 proofId) external {
-        IMockKUFO(kufo).mintFromMaturedProof(proofId);
+        IMockKUFO(kufo).mintFromImmediateProof(proofId);
     }
 
     function attemptKshipMint(address kship, bytes32 proofId) external {

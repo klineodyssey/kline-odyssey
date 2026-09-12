@@ -8,21 +8,24 @@
 
 ## 2026-08-09 Token Lineage Integration Review
 
-The review-only KGEN -> KAIOS -> KUFO -> KSHIP implementation is under
-`contracts/`, with a pinned Solidity 0.8.24 test harness in this directory.
-No deployment script or Mainnet address is included.
+KAIOS V1 is Mainnet live; `contracts/KAIOS.sol` is preserved exactly against latest main. The
+review-only successor 18911 -> KUFO -> KSHIP implementation is under `contracts/`, with a pinned
+Solidity 0.8.24 test harness in this directory. No successor deployment script is included.
 
 | Entry | Purpose |
 |---|---|
 | `contracts/KAIOS.sol` | Friction Mirror monetary core; 1 destroyed KGEN -> 1,000 KAIOS to 18888 |
 | `contracts/KAIOSOrganRegistry.sol` | Bootstrap-sealed and timelocked 18911/511111/KSHIP/Pair organ registry |
-| `contracts/KAIOSAlchemyFurnace.sol` | Holder-authorized KAIOS burn and 49-epoch maturity proof |
-| `contracts/KUFO.sol` | Proof-bound, zero-genesis KUFO core |
-| `contracts/KUFOClaimWormhole.sol` | 511111 single-claim organ with fixed beneficiary |
+| `contracts/KAIOSAlchemyFurnace.sol` | Same-Life V3 successor: exact KGEN bank receipt + deployed five-argument KAIOS burn ABI + atomic release |
+| `contracts/KUFO.sol` | Proof-bound, zero-genesis KUFO core with bounded linked-list lot operations |
+| `contracts/KUFOClaimWormhole.sol` | 511111 same-transaction single-use organ with fixed beneficiary |
 | `contracts/KSHIP.sol` | Proof-bound, zero-genesis KSHIP core |
 | `contracts/KSHIPConverter.sol` | Holder-authorized KUFO-to-KSHIP conversion organ |
 | `contracts/KAIOSPairRegistry.sol` | External pair metadata without Token Core authority |
 | `reports/KAIOS_TOKEN_LINEAGE_INTEGRATION_REVIEW_2026-08-09.md` | Executive review and evidence index |
+| `program-life-manifest.json` | External Program Life identity mapping, including deployed KAIOS ABI-preserving identity and successor embodiment status |
+| `reports/KAIOS_18911_V3_FRONTEND_SUPPORT_HANDOFF.json` | Chain-56 read-only resolver, compiler ABI surface and fail-closed UI state contract |
+| `reports/KAIOS_18911_V3_MAINNET_COMPATIBILITY.json` | Read-only BSC Mainnet plus pinned local-fork compatibility evidence for deployed KAIOS ABI and successor constructor gates |
 
 ## Purpose
 

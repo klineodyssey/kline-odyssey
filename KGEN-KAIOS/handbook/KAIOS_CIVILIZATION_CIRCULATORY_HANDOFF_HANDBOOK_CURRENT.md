@@ -1,6 +1,6 @@
 # KAIOS Civilization Circulatory Runtime — Multi-Worker Handoff Handbook
 
-STATUS: DESIGN_AND_HANDOFF_AUTHORITY / NOT_DEPLOYED
+STATUS: CURRENT_HANDOFF_AUTHORITY / MIXED_DEPLOYED_HISTORY_AND_UNDEPLOYED_CANDIDATES
 VERSION: V1.1
 DATE: 2026-08-20 Asia/Taipei
 PURPOSE: durable handoff source so Human, AI, Codex, ChatGPT pages, workers, reviewers and future digital lives can resume work without reconstructing decisions from chat history.
@@ -15,7 +15,7 @@ Every worker taking over this task MUST:
 2. Fetch latest `main`; never assume a remembered SHA is current.
 3. Read PR #136 exact Phase 2 deployed-evidence lineage at `00c79b380ce094c17d75697f360820c4d2035071`.
 4. Read PR #152 exact design-only Canon correction at `672ab4884e8cf6f9d07c176a862fb858cafe8161`.
-5. Read PR #158 exact catalyst/KUFO/KSHIP implementation candidate at `e679a71a0b9ed42d601a739740bf8d59de96f322`.
+5. Query PR #158 and read its exact current head; do not reuse an earlier review SHA or CI run.
 6. Read PR #160 Mainnet provenance reconciliation before closeout of #135/#136.
 7. Preserve deployed evidence as history. Never rewrite later design as if already deployed.
 8. Re-run exact-head CI after every semantic code change.
@@ -54,38 +54,40 @@ For exactly representable amounts:
 - equal-mass catalyst = 5,000 KGEN = 5,000,000 kg.
 - KUFO lineage target = 5,000,000,000 KUFO.
 
-KGEN is catalyst in PR #158. It is not burned and is not converted into KUFO. Exact catalyst must ultimately return to the recorded catalyst owner.
+In the V3 review candidate, KGEN is a fresh civilization contribution, not KUFO feedstock. It is not
+burned and is not converted into KUFO. The exact required KGEN moves directly to the immutable
+catalyst bank and remains there as civilization capital; 18911 never escrows it and therefore has no
+catalyst-return liability. Earlier escrow-and-return wording is historical and superseded.
 
-## 3. 18911 alchemy chronology
+## 3. 18911 alchemy chronology and compatibility
 
-Historical/repository V1 furnace semantics use 49 Epoch maturity.
+`DEPLOYED_V1_HISTORY`: KAIOS and old 18911 are live. The old Furnace at
+`0x44c2CA9B9eba19d8F79F6E1786fd9D25e73738e1` implements a 49-Epoch maturity runtime. It remains
+the Organ Registry active body until a separately authorized timelocked update. Its history is not
+rewritten.
 
-PR #158 adds KGEN catalyst escrow but still uses 49 Alchemy Epochs before proof consumption.
-
-Current design decision introduces a two-stage chronology:
-
-```text
-49 Epoch REVIEW
-+81 Epoch CATALYSIS
-=130 Epoch TOTAL
-```
-
-This 130-Epoch rule is `CURRENT_DESIGN_CANON` for the successor implementation. It is NOT deployed and is NOT yet implemented in PR #158.
-
-Required future state machine:
+`CURRENT_DESIGN_CANON`: the V3 successor uses a 130-human-day contribution freshness window, not a
+delivery delay. A direct exact KGEN bank contribution is fresh at transaction time, so the same
+atomic transaction transfers KGEN to the immutable catalyst bank, burns KAIOS through the deployed
+five-argument KAIOS ABI, consumes the Furnace proof at 511111 and mints KUFO to the fixed beneficiary.
 
 ```text
-SUBMITTED
--> REVIEWING (49 Epoch)
--> REVIEW_PASSED
--> CATALYZING (81 Epoch)
--> MATURED (total 130 Epoch)
--> PROOF_CONSUMED
--> KUFO_LINEAGE_ESTABLISHED
--> CATALYST_RETURNED
+DELIVERY_DELAY = 0
+REJECTION = ATOMIC_REVERT
+CANCELLATION_AFTER_SUCCESS = NOT_APPLICABLE
+REFUND_AFTER_SUCCESS = NOT_APPLICABLE_NO_ESCROW
+KGEN_FURNACE_CUSTODY = 0
 ```
 
-Rejection/cancellation/refund behavior before and during catalysis remains `OPEN_REVIEW` and must be frozen before implementation.
+The previous `49 + 81 = 130 Epoch delayed delivery` proposal is
+`HISTORICAL_SUPERSEDED_BY_HUMAN_FRESHNESS_CANON`. It must not be implemented by changing one wait
+constant. The 130-day tax-credit route remains `DESIGN_ONLY_DISABLED` until its indexer, attester,
+budget and production catalyst bank are frozen.
+
+PR #158 V3 is an `IMPLEMENTED_REVIEW_CANDIDATE`, not deployed. `KAIOS.sol` must remain identical to
+latest main; catalyst bank fields belong to the successor Furnace proof. The latest committed
+read-only BSC compatibility report records `alchemyBurnCount=0`, `totalKaiosBurnedForAlchemy=0`, and
+no pending Furnace proposal, so no legacy proof migration is required at that snapshot.
 
 ## 4. 18888 service and 18911 alchemy separation
 
@@ -122,7 +124,8 @@ This is `CURRENT_DESIGN_CANON / IMPLEMENTATION_PENDING`, not deployed functional
 
 Do NOT modify historical V7.5.2 deployment and pretend new methods already exist there.
 
-Preferred successor architecture: separately reviewed `K1852CatalystRelay` adapter/organ.
+Possible future architecture: separately reviewed `K1852CatalystRelay` adapter/organ. It is not part
+of the executable direct V3 candidate and remains `DESIGN_ONLY_UNFROZEN`.
 
 Minimum ticket fields:
 
@@ -135,12 +138,12 @@ kaiosAmount
 requiredKgenCatalyst
 sourcePoint
 furnacePoint=18911
-submittedAt
-reviewEndsAt
-catalysisEndsAt
+sourceEventBlock
+sourceEventTimestamp
+freshnessExpiresAt
 alchemyProofId
 status
-catalystReturned
+consumedAmount
 ```
 
 Mandatory invariants:
@@ -149,12 +152,15 @@ Mandatory invariants:
 - exact KGEN balance delta checked;
 - no fee-on-transfer ambiguity;
 - no arbitrary beneficiary replacement;
-- no admin sweep of active catalyst;
-- catalyst returned only to recorded catalyst owner;
+- no admin sweep or owner-withdraw dependency;
+- original contributor and fixed beneficiary preserved;
 - KGEN total supply unchanged by catalysis;
-- 18888 cannot spend catalyst escrow;
+- 18888 cannot fund or spend the ticket;
 - 18911 cannot consume another Life/proof ticket;
-- completion cannot mark catalyst returned without actual balance delta.
+- completion cannot mark a credit consumed without a deterministic bank-tax source and actual amount.
+
+The direct V3 path does not use this ticket: it transfers KGEN straight to an immutable bank, verifies
+the exact bank balance delta and retains no KGEN in 18911.
 
 ## 7. Genesis organs and addresses
 
@@ -238,7 +244,7 @@ Maintain separate ledgers/routes for:
 4. `CLAIMABLE_RESOURCE_REWARD` — verified reward liabilities.
 5. `FUNDED_RESOURCE_REWARD_POOL` — funded reward capital.
 6. `KGEN_RESERVE` — existing KGEN reserve/tax accumulation.
-7. `KGEN_CATALYST_ESCROW` — temporary catalyst custody; never payroll/equity.
+7. `KGEN_CATALYST_BANK_CONTRIBUTION` — successful direct contribution; never payroll/equity or refundable Furnace escrow.
 8. `ALCHEMY_BURNED_KAIOS` — permanently destroyed KAIOS; never refundable principal.
 9. `KUFO_LINEAGE` — post-alchemy entitlement/mass lineage.
 10. `KSHIP_PROPULSION` — decay-derived transport fuel lineage.
@@ -267,20 +273,20 @@ Otherwise the worker emits a candidate/request/evidence record and does not tran
 ## 13. Multi-worker work queue
 
 ### A — Canon reconciliation
-Status: READY.
+Status: COMPLETE FOR V3 REVIEW CANDIDATE.
 
-- reconcile 49+81=130 into #152/#158 successor design;
-- preserve #136 V1 deployed history;
-- define cancellation/refund behavior;
-- freeze chain-seconds meaning of one Alchemy Epoch before deployment.
+- preserve 49-Epoch old 18911 as deployed V1 history;
+- define 130 human days only as contribution freshness;
+- define immediate delivery and atomic revert/no escrow;
+- keep production catalyst bank and KUFO half-life seconds as deployment blockers.
 
 ### B — K1852 relay specification
 Status: READY FOR DESIGN / NOT DEPLOYMENT.
 
 - define relay adapter vs immutable V7.5.2 GalacticBank;
-- define CatalystTicket state machine;
-- remove owner/manual sweep dependency for active tickets;
-- define 18911/511111 authentication and return path.
+- define future tax-credit ticket and attester boundaries;
+- remove owner/manual sweep dependency;
+- keep K1852 compatibility `DESIGN_ONLY_UNFROZEN`.
 
 ### C — Circulatory registry
 Status: DESIGN REQUIRED.
@@ -301,9 +307,12 @@ Status: DESIGN REQUIRED.
 - receipt-gated completion.
 
 ### E — Tests
-Status: BLOCKED UNTIL A-D INTERFACES FREEZE.
+Status: IMPLEMENTED FOR DIRECT V3 REVIEW PATH.
 
-Minimum tests include 130-Epoch boundaries, 5M KAIOS/5000 KGEN catalyst, inexact-ratio fail closed, review rejection/refund, catalyst segregation, replay protection, beneficiary substitution block, 18888/18911 separation, KUFO/KSHIP conservation and unauthorized autonomous-transfer block.
+Minimum tests include deployed KAIOS ABI compatibility, exact 1 KAIOS/0.001 KGEN direct contribution,
+bank receipt delta, atomic rollback, replay protection, beneficiary substitution block, 130-day
+tax-credit reference boundaries, KUFO/KSHIP conservation, lot-fragmentation gas bounds and
+unauthorized propulsion block.
 
 ## 14. Required review checks before deployment discussion
 

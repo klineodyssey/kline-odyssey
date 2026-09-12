@@ -5,6 +5,8 @@
   "description": "Review-only KGEN to KAIOS to KUFO to KSHIP lineage contracts",
   "scripts": {
     "compile": "node tools/compile-contracts.mjs",
+    "frontend:handoff": "node tools/generate-v3-frontend-handoff.mjs",
+    "mainnet:compatibility": "node tools/verify-mainnet-v3-compatibility.mjs",
     "storage:validate": "node tools/validate-templeheart-storage.mjs",
     "testnet:templeheart:preflight": "node tools/validate-templeheart-storage.mjs --testnet-preflight",
     "testnet:templeheart:rehearse": "node tools/validate-templeheart-storage.mjs --testnet-rehearsal",
@@ -12,7 +14,7 @@
     "lineage:verify": "node tools/verify-current-lineage.mjs",
     "integrity:validate": "node tools/validate-integration-artifacts.mjs",
     "test": "node --test --test-concurrency=1 --test-reporter=spec tests/*.test.mjs",
-    "test:all": "npm run compile && npm run storage:validate && npm run lineage:verify && npm run integrity:validate && npm test"
+    "test:all": "npm run compile && npm run frontend:handoff && npm run storage:validate && npm run lineage:verify && npm run integrity:validate && npm test"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "5.0.2",

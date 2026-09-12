@@ -53,26 +53,36 @@ KAIOS genesis supply starts at zero. KAIOS does not mint because an administrato
 
 ## 4. 18911 → 511111 KUFO flow
 
-`holder approves 18911`
-→ `18911 invokes real KAIOS burn`
-→ `beneficiary + LifeID + provenance are frozen into proof`
-→ `49 Alchemy Epoch maturation`
-→ `511111 validates matured, unclaimed proof`
-→ `KUFO mints to the proof beneficiary`
+`DEPLOYED_V1_HISTORY`: the live old 18911 body uses 49 Epoch maturity. This remains historical runtime
+truth until an authorized Organ Registry update and must not be relabeled as V3.
 
-Candidate runtime parameter: 1 Alchemy Epoch = 1 hour, therefore 49 epochs = 49 hours. The **49-epoch count belongs to the furnace/runtime**, not the KAIOS monetary core. The duration must remain explicitly configurable/reviewable unless later elevated to immutable canon.
+`IMPLEMENTED_REVIEW_CANDIDATE` V3 flow:
 
-No claimant may redirect a matured proof to another beneficiary.
+`holder gives exact KGEN + KAIOS allowances`
+→ `18911 sends KAIOS/1000 KGEN directly to immutable catalyst bank`
+→ `18911 verifies exact bank balance delta`
+→ `18911 invokes deployed five-argument KAIOS burn ABI`
+→ `beneficiary + LifeID + provenance are frozen into linked KAIOS/Furnace proofs`
+→ `511111 consumes the proof in the same transaction`
+→ `KUFO mints immediately to the proof beneficiary`
+
+The 130-human-day number is only the freshness boundary for a future deterministic KGEN bank-tax
+credit route. That route is `DESIGN_ONLY_DISABLED`. Direct V3 contribution age is zero; no 49/81/130
+delivery wait applies. No claimant may redirect the proof beneficiary.
 
 ## 5. KUFO → KSHIP flow
 
 `KUFO holder approves official KSHIP converter`
-→ `real KUFO burn`
+→ `only newly decayed KUFO is burned`
 → `unique ShipGenesisProof`
 → `1 KUFO burned = 1,000 KSHIP minted`
 → `KSHIP goes to the beneficiary fixed at conversion time`
 
-KSHIP is the milligram-scale carrier genesis accounting unit. The "neutrino-like interaction mode" is a future ship/physics runtime property, not an ERC-20 property.
+KUFO decay starts at its actual mint timestamp; transfer/split does not reset time. Each KUFO can
+produce at most 1,000 KSHIP over its full lifetime. KSHIP has no expiry. KUFO/KSHIP remain
+`IMPLEMENTED_REVIEW_CANDIDATE_NOT_DEPLOYED`; the production half-life seconds are unfrozen. KSHIP is
+the milligram-scale carrier genesis accounting unit. The "neutrino-like interaction mode" is a future
+ship/physics runtime property, not an ERC-20 property.
 
 ## 6. Market pairs are external market infrastructure
 
