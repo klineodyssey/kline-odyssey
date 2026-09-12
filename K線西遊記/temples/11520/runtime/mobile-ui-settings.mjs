@@ -1,6 +1,6 @@
 import './mobile-action-rail-clearance-runtime.mjs';
 /* KGEN_META
-VERSION: 2.6.16
+VERSION: 2.6.17
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile UI Settings
 PURPOSE: One lower-right settings console owns HUD visibility. Legacy scattered drawer toggles are retired from the visible UI; chat has an explicit expand/collapse handle; wallet and backpack are protected organs; right-rail hit targets stay separated on mobile. Formal filename is version-free.
@@ -30,7 +30,7 @@ function retireLegacyCleanMode(){if(document.body?.classList.contains('game-clea
 function retireLegacyDrawerToggles(){for(const btn of document.querySelectorAll('.hud-drawer-toggle')){btn.hidden=true;btn.setAttribute('aria-hidden','true');btn.tabIndex=-1}for(const el of document.querySelectorAll('.axes,.tele,.monsterHud,.minimapWrap,.sliderDock'))el.classList.remove('hud-collapsed-left','hud-collapsed-right','hud-collapsed-top')}
 function style(){if($('#k11520UiSettingsStyle'))return;const s=document.createElement('style');s.id='k11520UiSettingsStyle';s.textContent=`
 .hud-drawer-toggle{display:none!important;visibility:hidden!important;pointer-events:none!important}
-#gameModeToggle{position:fixed!important;z-index:7080!important;right:5px!important;left:auto!important;top:auto!important;bottom:278px!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;border-radius:12px!important;display:grid!important;place-items:center!important;font-size:16px!important}
+#gameModeToggle{position:fixed!important;z-index:7080!important;right:5px!important;left:auto!important;top:auto!important;bottom:284px!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;border-radius:12px!important;display:grid!important;place-items:center!important;font-size:16px!important}
 body:has(#dock.open) #gameModeToggle{visibility:hidden!important;pointer-events:none!important}
 #k11520UiSettings{position:fixed;z-index:8200;right:54px;top:270px;width:220px;max-width:calc(100vw - 66px);padding:8px;border:1px solid #68e4ff66;border-radius:14px;background:#071018f5;box-shadow:0 14px 40px #000c;display:none;grid-template-columns:1fr 1fr;gap:5px 7px;font:800 9px system-ui,"Noto Sans TC",sans-serif;color:#e9fbff}
 #k11520UiSettings.open{display:grid}
@@ -49,7 +49,7 @@ document.head.appendChild(s)}
 function targets(sel){try{return [...document.querySelectorAll(sel)]}catch{return[]}}
 function applyOne(key,on){const spec=SURFACES.find(x=>x[0]===key);if(!spec)return;for(const el of targets(spec[2])){const hidden=!on;if(el.classList.contains('k11520HiddenBySettings')!==hidden)el.classList.toggle('k11520HiddenBySettings',hidden);if(key==='chat'&&hidden&&el.id==='gameChat')el.classList.remove('open')}}
 function protectWalletBackpack(){for(const sel of PROTECTED)for(const el of targets(sel)){el.classList.remove('k11520HiddenBySettings');el.removeAttribute('aria-hidden')}const bag=$('#backpackButton');if(bag){bag.dataset.k11520ProtectedOrgan='1';bag.style.removeProperty('display')}const wallet=$('#walletPanel');if(wallet)wallet.dataset.k11520ProtectedOrgan='1'}
-function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]);protectWalletBackpack();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.16',allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
+function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]);protectWalletBackpack();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.17',allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
 function toggleKey(key){if(key==='all')allOn=!allOn;else{state[key]=!state[key];if(state[key])allOn=true}save();apply()}
 async function toggleFullscreen(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();else await document.exitFullscreen?.()}catch{}syncFullscreen()}
 function syncFullscreen(){const b=$('#k11520FullscreenSwitch');if(b)b.setAttribute('aria-checked',String(!!document.fullscreenElement))}
