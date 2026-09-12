@@ -16,7 +16,6 @@ permissions:
 
 jobs:
   autopilot:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     concurrency:
       group: kgen-autopilot-core-${{ github.ref }}
