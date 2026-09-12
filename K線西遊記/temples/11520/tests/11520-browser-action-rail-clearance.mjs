@@ -19,7 +19,7 @@ await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch((
 await page.waitForTimeout(900);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 await page.waitForFunction(()=>globalThis.__K11520_ACTION_RAIL_CLEARANCE__?.version==='1.2.0',null,{timeout:4000});
-await page.waitForFunction(()=>globalThis.__K11520_MARKET_ORIGIN_RUNTIME__?.version==='1.4.0'&&globalThis.__K11520_WORLD_COORDS__?.physical,null,{timeout:5000});
+await page.waitForFunction(()=>globalThis.__K11520_MARKET_ORIGIN_RUNTIME__?.marketAxesSeparate===true&&globalThis.__K11520_WORLD_COORDS__?.physical,null,{timeout:5000});
 const r=await page.evaluate(()=>structuredClone(globalThis.__K11520_ACTION_RAIL_CLEARANCE__));
 assert.ok(r.rail,'remaining-axis rail missing');
 assert.ok(r.dock,'right utility dock missing');
