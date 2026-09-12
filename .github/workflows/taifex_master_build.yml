@@ -87,6 +87,7 @@ jobs:
           PY
 
       - name: Commit generated TAIFEX master files
+        if: github.ref == 'refs/heads/main'
         run: |
           set -euo pipefail
           git config user.name "kline-bot"
