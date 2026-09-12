@@ -24,6 +24,7 @@ test("Cursor dispatch wake fails closed without exposing API bodies or shell-eva
   const workflow = await fs.readFile(new URL("../.github/workflows/kgen-cursor-dispatch-wake.yml", import.meta.url), "utf8");
 
   assert.match(workflow, /permissions:\s*\n\s*contents:\s*read/);
+  assert.match(workflow, /timeout-minutes:\s*5/);
   assert.match(workflow, /MERGED_PR_NUMBER:\s*\$\{\{ github\.event\.pull_request\.number \}\}/);
   assert.match(workflow, /MERGED_PR_HEAD_REF:\s*\$\{\{ github\.event\.pull_request\.head\.ref \}\}/);
   assert.match(workflow, /Merged PR: #\$\{MERGED_PR_NUMBER\} \(\$\{MERGED_PR_HEAD_REF\}\)/);
@@ -34,6 +35,7 @@ test("Cursor dispatch wake fails closed without exposing API bodies or shell-eva
   assert.match(workflow, /untrusted_error_code/);
   assert.match(workflow, /https:\/\/api\.cursor\.com\/v1\/agents/);
   assert.match(workflow, /--user "\$\{CURSOR_API_KEY\}:"/);
+  assert.match(workflow, /--connect-timeout 10 --max-time 60/);
   assert.match(workflow, /API_RESPONSE_STATUS=/);
   assert.match(workflow, /run_agent_id == agent_id/);
   assert.match(workflow, /structured agent\/run acknowledgement missing/);

@@ -22,6 +22,7 @@ jobs:
       (github.event.pull_request.merged == true &&
        startsWith(github.event.pull_request.head.ref, 'codex/'))
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
@@ -57,7 +58,8 @@ jobs:
           }))
           PY
           )
-          HTTP=$(curl -sS -w "%{http_code}" -o /tmp/cursor-agent.json \
+          HTTP=$(curl -sS --connect-timeout 10 --max-time 60 \
+            -w "%{http_code}" -o /tmp/cursor-agent.json \
             -X POST "https://api.cursor.com/v1/agents" \
             --user "${CURSOR_API_KEY}:" \
             -H "Content-Type: application/json" \

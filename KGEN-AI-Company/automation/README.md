@@ -26,6 +26,8 @@ After the secret is set, every Codex dispatch merge automatically POSTs to `http
 The workflow uses Cursor's documented HTTP Basic API-key authentication and only
 accepts a 2xx response when it contains matching structured `agent` and `run`
 identifiers; an empty or malformed success response fails closed.
+The job has a five-minute hard limit and the API request has explicit connection
+and total-time limits, so an unavailable endpoint cannot occupy a runner indefinitely.
 
 **Manual test:** GitHub → Actions → **KGEN Cursor Dispatch Wake** → **Run workflow** (uses `workflow_dispatch`).
 
