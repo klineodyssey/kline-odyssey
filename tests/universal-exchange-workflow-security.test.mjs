@@ -24,6 +24,8 @@ test("Cursor dispatch wake fails closed without exposing API bodies or shell-eva
   const workflow = await fs.readFile(new URL("../.github/workflows/kgen-cursor-dispatch-wake.yml", import.meta.url), "utf8");
 
   assert.match(workflow, /permissions:\s*\n\s*contents:\s*read/);
+  assert.match(workflow, /uses:\s*actions\/checkout@v7/);
+  assert.doesNotMatch(workflow, /uses:\s*actions\/checkout@v4/);
   assert.match(workflow, /timeout-minutes:\s*5/);
   assert.match(workflow, /MERGED_PR_NUMBER:\s*\$\{\{ github\.event\.pull_request\.number \}\}/);
   assert.match(workflow, /MERGED_PR_HEAD_REF:\s*\$\{\{ github\.event\.pull_request\.head\.ref \}\}/);
