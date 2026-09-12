@@ -28,6 +28,11 @@ After the secret is set, every Codex dispatch merge automatically POSTs to `http
 
 If the secret is missing, the workflow logs a notice and exits successfully (does not fail the merge).
 
+If Cursor returns `403 plan_required`, the workflow records
+`HOLD_EXTERNAL_PLAN_REQUIRED`, explicitly reports that no agent was launched, and
+exits successfully so an unavailable external subscription does not create a false
+repository CI failure. Other non-success API responses still fail closed.
+
 ## Optional: Cursor Automations UI (native GitHub trigger)
 
 Same prompt as `cursor-dispatch-wake-prompt.txt`. Create at [cursor.com/automations](https://cursor.com/automations):
