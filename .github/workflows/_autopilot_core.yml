@@ -40,11 +40,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          trigger_event="${{ github.event_name }}"
           source_event="${{ inputs.source_event || github.event_name }}"
+          echo "trigger_event=${trigger_event}"
           echo "source_event=${source_event}"
           if [ -e "scripts/build_kgen_pipeline.py" ]; then
             echo "::error::Autopilot builder exists but this core remains fail-closed pending explicit reviewed wiring."
             exit 1
           fi
-          echo "AUTOPILOT_CORE_HOLD_NO_BUILDER"
+          if [ "${trigger_event}" != "pull_request" ]; then
+            echo "::error::AUTOPILOT_CORE_HOLD_NO_BUILDER"
+            echo "::error::Reusable workflow calls must fail until a reviewed pipeline builder is wired."
+            exit 1
+          fi
+          echo "AUTOPILOT_CORE_VALIDATION_ONLY_NO_BUILDER"
           echo "Repository mutation is disabled: no write token, no persisted checkout credential, no commit/push step."
