@@ -1,17 +1,61 @@
 name: Autopilot on Manifest
+
 on:
   push:
     paths:
+      - ".github/workflows/autopilot-on-manifest.yml"
+      - "K線西遊記/autopilot/inbox/*.json"
+  pull_request:
+    paths:
+      - ".github/workflows/autopilot-on-manifest.yml"
       - "K線西遊記/autopilot/inbox/*.json"
 
+permissions:
+  contents: read
+
 jobs:
-  log-and-check:
+  validate-manifests:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Show manifest list
-        run: ls -l "K線西遊記/autopilot/inbox"
-      - name: Print latest manifest
+      - name: Checkout exact source revision
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Verify checked-out SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          ls -t "K線西遊記/autopilot/inbox" | head -n 1 | xargs -I {} cat "K線西遊記/autopilot/inbox/{}"
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Validate manifests without logging raw contents
+        run: |
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          from pathlib import Path
+
+          inbox = Path("K線西遊記/autopilot/inbox")
+          manifests = sorted(inbox.glob("*.json"))
+          if not manifests:
+              raise SystemExit("AUTOPILOT_MANIFEST_MISSING")
+
+          for path in manifests:
+              try:
+                  payload = json.loads(path.read_text(encoding="utf-8"))
+              except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_INVALID:{path.name}:{type(exc).__name__}") from exc
+              if not isinstance(payload, dict):
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_NOT_OBJECT:{path.name}")
+
+          latest = manifests[-1]
+          raw = latest.read_bytes()
+          print(f"manifest_count={len(manifests)}")
+          print(f"latest_manifest={latest.name}")
+          print(f"latest_manifest_bytes={len(raw)}")
+          print(f"latest_manifest_sha256={hashlib.sha256(raw).hexdigest()}")
+          print("raw_manifest_logged=NO")
+          PY
