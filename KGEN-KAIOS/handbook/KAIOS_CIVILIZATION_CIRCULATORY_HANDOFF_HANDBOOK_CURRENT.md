@@ -1,8 +1,8 @@
 # KAIOS Civilization Circulatory Runtime — Multi-Worker Handoff Handbook
 
 STATUS: DESIGN_AND_HANDOFF_AUTHORITY / NOT_DEPLOYED
-VERSION: V1.1
-DATE: 2026-08-20 Asia/Taipei
+VERSION: V1.4
+DATE: 2026-08-27 Asia/Taipei
 PURPOSE: durable handoff source so Human, AI, Codex, ChatGPT pages, workers, reviewers and future digital lives can resume work without reconstructing decisions from chat history.
 
 > This handbook records deployed facts, current design Canon, implementation candidates, superseded history and open review items separately. It does not authorize deployment, governance execution, payment, burn, token transfer or any chain transaction.
@@ -13,9 +13,9 @@ Every worker taking over this task MUST:
 
 1. Read this file before coding.
 2. Fetch latest `main`; never assume a remembered SHA is current.
-3. Read PR #136 exact Phase 2 deployed-evidence lineage at `00c79b380ce094c17d75697f360820c4d2035071`.
-4. Read PR #152 exact design-only Canon correction at `672ab4884e8cf6f9d07c176a862fb858cafe8161`.
-5. Read PR #158 exact catalyst/KUFO/KSHIP implementation candidate at `e679a71a0b9ed42d601a739740bf8d59de96f322`.
+3. Preserve PR #136 exact Phase 2 deployed-evidence lineage at `00c79b380ce094c17d75697f360820c4d2035071` as history; it is 259 commits behind current `main` at this checkpoint.
+4. Preserve PR #152 exact design-only Canon lineage at `672ab4884e8cf6f9d07c176a862fb858cafe8161` as history; PR #158 proposes a later freshness model, but that proposal remains unbound until an immutable repository-bound Human decision record is added.
+5. Read PR #158 exact catalyst/KUFO/KSHIP implementation candidate at `ac9ffddfff662f6c2dc8c0f0f523485e10f873dd` and independently verify its latest head before review.
 6. Read PR #160 Mainnet provenance reconciliation before closeout of #135/#136.
 7. Preserve deployed evidence as history. Never rewrite later design as if already deployed.
 8. Re-run exact-head CI after every semantic code change.
@@ -54,38 +54,27 @@ For exactly representable amounts:
 - equal-mass catalyst = 5,000 KGEN = 5,000,000 kg.
 - KUFO lineage target = 5,000,000,000 KUFO.
 
-KGEN is catalyst in PR #158. It is not burned and is not converted into KUFO. Exact catalyst must ultimately return to the recorded catalyst owner.
+KGEN is not burned and is not converted into KUFO. PR #158 records a V3 successor implementation direction using an exact fresh KGEN bank contribution retained by an immutable catalyst bank rather than escrowed or returned. That direction is `UNBOUND_HUMAN_DIRECTION_REFERENCE / IMPLEMENTED_REVIEW_CANDIDATE` until an immutable repository-bound Human decision record identifies the subject, fields, authority, scope and supersession lineage. Repetition in this handbook does not promote it to `CURRENT_DESIGN_CANON`. Earlier catalyst-escrow-and-return designs remain preserved historical candidates.
 
 ## 3. 18911 alchemy chronology
 
-Historical/repository V1 furnace semantics use 49 Epoch maturity.
+Historical/deployed V1 furnace semantics use a 49-Epoch proof maturity period. The earlier proposed `49 REVIEW + 81 CATALYSIS = 130 Epoch delivery delay` model is `HISTORICAL_SUPERSEDED`.
 
-PR #158 adds KGEN catalyst escrow but still uses 49 Alchemy Epochs before proof consumption.
-
-Current design decision introduces a two-stage chronology:
+PR #158 records the following V3 successor candidate:
 
 ```text
-49 Epoch REVIEW
-+81 Epoch CATALYSIS
-=130 Epoch TOTAL
+MIN_ALCHEMY_AMOUNT = 1 KAIOS
+REQUIRED_KGEN = KAIOS_AMOUNT / 1000
+130 DAYS = KGEN CONTRIBUTION FRESHNESS WINDOW
+DELIVERY_DELAY = 0
+REJECTION = ATOMIC_REVERT
+CANCELLATION = NOT_APPLICABLE_AFTER_SUCCESS
+REFUND = NOT_APPLICABLE_NO_ESCROW
 ```
 
-This 130-Epoch rule is `CURRENT_DESIGN_CANON` for the successor implementation. It is NOT deployed and is NOT yet implemented in PR #158.
+The target atomic path is holder -> successor K18911 -> exact KGEN transfer directly to immutable catalyst bank -> deployed KAIOS burn ABI -> K511111 release -> immediate KUFO mint to the fixed beneficiary. Any failed step reverts the full transaction. The furnace must retain no KGEN.
 
-Required future state machine:
-
-```text
-SUBMITTED
--> REVIEWING (49 Epoch)
--> REVIEW_PASSED
--> CATALYZING (81 Epoch)
--> MATURED (total 130 Epoch)
--> PROOF_CONSUMED
--> KUFO_LINEAGE_ESTABLISHED
--> CATALYST_RETURNED
-```
-
-Rejection/cancellation/refund behavior before and during catalysis remains `OPEN_REVIEW` and must be frozen before implementation.
+This is `UNBOUND_HUMAN_DIRECTION_REFERENCE / IMPLEMENTED_REVIEW_CANDIDATE`, not deployed or current Canon. Production discussion remains blocked until immutable repository-bound Human decision evidence is added, the catalyst-bank address and KUFO `halfLifeSeconds` are frozen, legacy V1 proof compatibility is resolved, and distinct review passes.
 
 ## 4. 18888 service and 18911 alchemy separation
 
@@ -110,51 +99,22 @@ Existing Solidity capability is limited to ERC-20 deposit, native deposit, depos
 
 It does NOT currently implement automatic 18911 routing, 18888 routing, Life binding, catalyst tickets, proof binding, automatic catalyst return or satellite communication semantics.
 
-Current design direction:
+Design review boundary:
 
-- civilization point K1852 = artificial-satellite / white-hole communication-relay role;
-- investigate the Galactic Bank identity as the KGEN catalyst communication/intermediary organ;
+- civilization point K1852 remains a candidate artificial-satellite / white-hole communication-relay role;
+- `K1852_ROUTE_STATUS = DESIGN_ONLY_UNFROZEN`;
+- K1852, the KGEN `bankWallet`, the Reserve Redemption proxy and a future catalyst bank are not assumed to be the same role;
 - normal autonomous operation must not depend on arbitrary manual owner withdrawal.
 
-This is `CURRENT_DESIGN_CANON / IMPLEMENTATION_PENDING`, not deployed functionality.
+This is `OPEN_REVIEW`, not deployed functionality and not a production catalyst-bank selection.
 
-## 6. Proposed K1852 Catalyst Relay
+## 6. KGEN contribution proof routes
 
-Do NOT modify historical V7.5.2 deployment and pretend new methods already exist there.
+Do NOT modify historical V7.5.2 KGEN or GalacticBank deployments and pretend new methods already exist there.
 
-Preferred successor architecture: separately reviewed `K1852CatalystRelay` adapter/organ.
+The candidate direct V3 route would have to verify an exact balance increase at a frozen immutable catalyst bank in the same atomic transaction. It proposes no return ticket, but this remains unbound candidate behavior rather than active Canon.
 
-Minimum ticket fields:
-
-```text
-catalystTicketId
-lifeId
-catalystOwner
-beneficiary
-kaiosAmount
-requiredKgenCatalyst
-sourcePoint
-furnacePoint=18911
-submittedAt
-reviewEndsAt
-catalysisEndsAt
-alchemyProofId
-status
-catalystReturned
-```
-
-Mandatory invariants:
-
-- ticket replay impossible;
-- exact KGEN balance delta checked;
-- no fee-on-transfer ambiguity;
-- no arbitrary beneficiary replacement;
-- no admin sweep of active catalyst;
-- catalyst returned only to recorded catalyst owner;
-- KGEN total supply unchanged by catalysis;
-- 18888 cannot spend catalyst escrow;
-- 18911 cannot consume another Life/proof ticket;
-- completion cannot mark catalyst returned without actual balance delta.
+The alternative KGEN 0.10% bank-share credit route remains `DESIGN_ONLY_DISABLED`. A future proof must bind `txHash + logIndex + wallet + amount + timestamp`, use only the actual Bank share, preserve the actual buyer identity, accept contributions no older than 130 days (the exact boundary remains valid), consume credits FIFO, and prevent replay. Indexer, attester, batch-root and operating budget remain unfrozen.
 
 ## 7. Genesis organs and addresses
 
@@ -238,7 +198,7 @@ Maintain separate ledgers/routes for:
 4. `CLAIMABLE_RESOURCE_REWARD` — verified reward liabilities.
 5. `FUNDED_RESOURCE_REWARD_POOL` — funded reward capital.
 6. `KGEN_RESERVE` — existing KGEN reserve/tax accumulation.
-7. `KGEN_CATALYST_ESCROW` — temporary catalyst custody; never payroll/equity.
+7. `KGEN_CATALYST_BANK_CONTRIBUTION` — exact fresh contribution retained by the frozen catalyst bank; never payroll, trading capital or refundable escrow. Historical escrow designs remain separately labelled.
 8. `ALCHEMY_BURNED_KAIOS` — permanently destroyed KAIOS; never refundable principal.
 9. `KUFO_LINEAGE` — post-alchemy entitlement/mass lineage.
 10. `KSHIP_PROPULSION` — decay-derived transport fuel lineage.
@@ -264,46 +224,34 @@ Autonomous settlement requires ALL of:
 
 Otherwise the worker emits a candidate/request/evidence record and does not transfer.
 
-## 13. Multi-worker work queue
+## 13. Current company work queue
 
-### A — Canon reconciliation
-Status: READY.
+The current 16-workstream order is: Genesis/PR lineage; Cursor offboarding; distinct reviewer capacity; PR #169; NVIDIA GPU paper market and real-readiness; KGEN metadata; KAIOS market genesis; universal listing registry; warehouse/escrow/settlement/accounting; autonomous company cycle; customer gateway/project runtime; 18888/8888/payroll/revenue separation; Life/worker/employment/trust/payroll gates; 18911/KUFO/KSHIP successor; K4168/Public Good/Mengpo; Universe Map/brand/mobile/frontend.
 
-- reconcile 49+81=130 into #152/#158 successor design;
-- preserve #136 V1 deployed history;
-- define cancellation/refund behavior;
-- freeze chain-seconds meaning of one Alchemy Epoch before deployment.
+Engineering candidates may proceed on isolated Draft branches. Real trade, payment, deployment and governance stay fail-closed unless the corresponding signer, budget, inventory, counterparty, settlement and independent-review gates are all machine-verifiably satisfied.
 
-### B — K1852 relay specification
-Status: READY FOR DESIGN / NOT DEPLOYMENT.
+Checkpoint classification refreshed at `2026-08-28T01:23:19Z`:
 
-- define relay adapter vs immutable V7.5.2 GalacticBank;
-- define CatalystTicket state machine;
-- remove owner/manual sweep dependency for active tickets;
-- define 18911/511111 authentication and return path.
+| # | Workstream | Durable candidate/evidence | Current state |
+|---|---|---|---|
+| 1 | Genesis / Phase 2 / open-PR lineage | #187 plus deployed-history lineage #135/#136/#160/#184 | ENGINEERING_CURRENT; DISTINCT_REVIEW_PENDING |
+| 2 | Cursor R2 departure and claim closeout | #176 | CANDIDATE_CLOSEOUT_ONLY; MAIN_STILL_CLAIMED; NO_DELIVERY; NO_PAYMENT |
+| 3 | Distinct reviewer capacity | #171 and #183 | GOVERNANCE_HOLD; NO_ELIGIBLE_DIFFERENT_LIFE_AND_CONTROLLER_T2_REVIEWER |
+| 4 | K11520 native KGEN market | #169, cumulatively integrated by #188 | ENGINEERING_PASS; DRAFT; DISTINCT_REVIEW_PENDING |
+| 5 | NVIDIA GPU market pilot / real readiness | #178, cumulatively integrated by #188 | PAPER_PASS; REAL_INVENTORY_AND_SETTLEMENT_BLOCKED |
+| 6 | KGEN external metadata / wallet discovery | #179 | ENGINEERING_PASS; EXTERNAL_PUBLICATION_NOT_PERFORMED |
+| 7 | KAIOS market genesis | #180 plus fresh read-only evidence | READINESS_GATE_PASS; RPC_QUORUM_NO_PAIR_OBSERVATION_AT_BLOCK_118404108 |
+| 8 | Universal listing registry | #181, cumulatively integrated by #188 | PAPER_PASS; PRODUCTION_AUTHORITY_UNBOUND |
+| 9 | Warehouse / escrow / settlement / accounting | #181/#188 | PAPER_PASS; REAL_CUSTODY_AND_SETTLEMENT_BLOCKED |
+| 10 | Autonomous company safe cycle | #170 | ENGINEERING_PASS; CONNECTORS_AND_DISTINCT_REVIEW_PENDING |
+| 11 | Customer gateway / quote / project runtime | #182 | SIMULATION_PASS; PAYMENT_ADDRESS_AND_ESCROW_UNBOUND |
+| 12 | 18888/8888 payroll and company revenue separation | #154/#161/#182 plus live read-only evidence | LIVE_PAYROLL_SCHEDULE_PRESERVED; CLAIM_NOT_MATURE; REAL_REVENUE_UNFUNDED |
+| 13 | Life / worker / employment / trust / payroll eligibility | #163-#165/#176/#183 | CANDIDATES_AND_HOLDS; NO_AUTOMATIC_BIRTH_OR_TRUST_PROMOTION |
+| 14 | K18911 / KUFO / KSHIP successor | #158 | ENGINEERING_PASS; UNDEPLOYED; CATALYST_BANK_AND_HALF_LIFE_UNFROZEN |
+| 15 | K4168 Naihe reservoir / Public Good / Mengpo | #172 | DESIGN_AND_SIMULATION_PASS; RESERVOIR_NOT_DEPLOYED |
+| 16 | Universe Map / brand / mobile / website integration | #162/#185/#188 | REVIEW_CANDIDATES_PASS; PUBLICATION_AND_MAINNET_WRITE_DISABLED |
 
-### C — Circulatory registry
-Status: DESIGN REQUIRED.
-
-- machine-readable Life/workpoint/organ registry;
-- fixed beneficiary and duty schema;
-- heartbeat/evidence linkage;
-- append-only role history.
-
-### D — KAIOS blood-flow ledger
-Status: DESIGN REQUIRED.
-
-- event schema;
-- liability/funding classification;
-- route/ticket IDs;
-- replay prevention;
-- deterministic settlement-candidate generation;
-- receipt-gated completion.
-
-### E — Tests
-Status: BLOCKED UNTIL A-D INTERFACES FREEZE.
-
-Minimum tests include 130-Epoch boundaries, 5M KAIOS/5000 KGEN catalyst, inexact-ratio fail closed, review rejection/refund, catalyst segregation, replay protection, beneficiary substitution block, 18888/18911 separation, KUFO/KSHIP conservation and unauthorized autonomous-transfer block.
+`ENGINEERING_PASS` means the stated branch tests and exact-head CI passed. It does not mean independent approval, merge, deployment, funded inventory, signer connectivity or a live market transaction.
 
 ## 14. Required review checks before deployment discussion
 
@@ -379,4 +327,86 @@ Therefore:
 - every unresolved question is explicit;
 - `CURRENT` files must be cumulative and must not require archaeological reconstruction from old chat pages.
 
-END OF HANDBOOK V1.1
+## 18. GitHub PR lineage checkpoint — 2026-08-28
+
+Observed at `2026-08-28T01:23:19Z` against `origin/main = db3b6368139154cbfa1cabd322b80f0cb1307bcc`.
+
+The remembered counts of 27, 36 and 38 open PRs are superseded. GitHub reported 36 open PRs at this checkpoint. A green workflow means tests passed at that head; it is not an independent review, deployment claim or merge authorization. Divergence is point-in-time evidence and changes whenever `main` or a PR head advances.
+
+### Current open candidates and exact-head evidence
+
+At this checkpoint, #183, #176, #173, #172 and #171 were zero commits behind `main`. #187 was then non-destructively synchronized to that same `main` in this branch. Other open candidates require their own fresh divergence check before review or integration.
+
+- #188 exact head `1491e4f5ca932da38df31fdb79127fc87ef44c2a` cumulatively integrates #169, #178, #179, #180, #181 and #185; ahead 88 / behind 1 at this checkpoint. It preserves the assigned `0.00011520` K11520 company/KGEN-price coordinate without seeding matched-trade CT, combines the paper market, listing/warehouse gates and browser-safe mobile wallet, and keeps the GPU atomic-settlement candidate fail-closed with no payload, signer request, payment, inventory transfer, revenue recognition or Mainnet transaction. Fixed, closed-schema repository sources still record zero accepted GPU inventory and zero funded segregated trading-capital accounts; `REPOSITORY_BOUND_GPU_EVIDENCE_VERIFIER_NOT_WIRED` remains unconditional. Frozen source commit `9492d73aaac7a9cee2cf9b813aa78468719aadcd`, its Solidity `0.8.24` compile evidence, exact proxy/runtime hashes and two deterministic UUPS `__self` immutable offsets are repository-bound. The fixed-endpoint, three-confirmation quorum may verify `VERIFIED_HISTORICAL_V1_RUNTIME_IDENTITY` and the historical V1 governance-authorized 18888 KAIOS payment capability to the fixed Brain; caller-selected RPC or transport remains only a schema probe and cannot obtain authority. This verification does not turn V1 into GPU settlement: it remains `INCOMPATIBLE_WITH_ATOMIC_GPU_TRADE_SETTLEMENT`, the production GPU adapter remains `NOT_IMPLEMENTED`, and real GPU trade remains disabled. Exact-head Universal push/PR CI `33088969692` / `33088976065`, exact-head verification `33088976573` and Product QA `33088976069` are green. These checks are not independent review, deployment action or execution authority. #188 remains Draft / HOLD P1 pending distinct review, independently verified inventory/ownership/warehouse evidence, funded segregated capital, production market/settlement, a reviewed Policy Broker, secure signer and no-broadcast fork evidence.
+- #187 is this lineage reconciliation candidate. It is evidence/documentation only and cannot approve itself.
+- #186 is the unsigned/read-only 18888 Public Good payment adapter; live read is fail-closed because the tested Mother/Jade addresses do not hold the bank payment roles.
+- #185 is the mobile chain-56 wallet/watch-asset candidate; it sends no token transaction and does not claim a KAIOS DEX pair exists.
+- #184 is the cumulative Mainnet address manifest candidate and supersedes the compact-document role of #167 without deleting #167 history.
+- #178 remains stacked on #169 and is PAPER inventory/market only.
+- #183 exact head is `179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b`; it is a neutral T1 onboarding proposal HOLD, not a Life birth, Worker registration, T2 promotion or employment grant. Exact-head push/PR proposal-safety CI `33126296739` / `33126299765` are green.
+- #158 remains an undeployed review candidate; catalyst bank, half-life seconds and legacy compatibility are deployment blockers.
+- #161 exact head is `a07b83ef82fed8380827921912534a7e3ad8adc2`; its paper-only circulatory and cross-market engine remains Draft, and real execution remains disabled. Its divergence and CI must be freshly rechecked before review.
+- #170 exact head is `9a2a20fe58568bd4c9a61d08f8e8d54d85efd1ad`; 272/272 local tests and exact-head push/PR CI `33086236891` / `33086240479` pass. It was ahead 17 / behind 1 at this checkpoint. Reviewer independence requires distinct Worker, Life and controller identities; Review Queue items cannot bypass the R0/R1 risk gate; and the selected task must match the observed repository, PR, branch and exact head before local persistence. Canonical Registry/WorkQueue/task-envelope provenance, shared Claim authority, wake/review connectors and distinct independent review remain unavailable.
+- #179 exact head is `d88ed1bfbee8b495b3bfb776b865cbb061384309`; it was ahead 9 / behind 1 at this checkpoint. Its committed BSC supply snapshot is block `118374207` and all external metadata submissions remain unperformed.
+- #180 records a read-only Pancake V2 factory observation of no KAIOS/WBNB pair. A later fixed-transport RPC quorum observed zero-address KAIOS/WBNB, KAIOS/KGEN and KAIOS/USDT pairs at block `118404108` (`2026-08-27T15:01:55Z`). These are timestamped observations, not permanent market claims or authorization to create liquidity.
+
+### Fresh BSC read-only circulation checkpoint
+
+At BSC block `118384842` (`2026-08-27T12:37:23Z`), public `eth_call` and balance reads reported:
+
+- KGEN total supply: `71,976,169.974243092224959062 KGEN`; owner: Bank Governance `0xa2792fBDCc8A8AaC364053431D44E0a8D335E166`; current token `bankWallet`: `0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE`.
+- Official KGEN/WBNB pair `0xf36640d7327b53ba3d7fcc1d98dfc1b85574b6c2`: `1,507,743.430766413416938743 KGEN` and `0.620800346671894633 WBNB`; reserve timestamp `2026-08-16T11:21:26Z`. These reserves are stale market evidence and must not be presented as a fresh trade price.
+- KAIOS total supply: `22,213,908.930416874731235 KAIOS`.
+- K18888: balance `22,213,020.930416874731235 KAIOS`, reserve requirement `11,000,000 KAIOS`, available `11,213,020.930416874731235 KAIOS`, total accounted inflow `22,213,908.930416874731235 KAIOS`, total/module disbursed `888 KAIOS`.
+- K8888: assets `888 KAIOS`, free capital `800 KAIOS`, payroll liability `88 KAIOS`, account/payment liabilities `0`, accounts/payrolls `1/1`, current calendar epoch `24319`.
+- Hengyao bound wallet public BNB balance: `0.00799020555 BNB`.
+- PancakeSwap V2 KAIOS/WBNB pair: not found (factory returned the zero address).
+
+This checkpoint performed no signing, transaction construction, broadcast, payment, liquidity operation or chain write. It does not authorize the available K18888 capital, the K8888 payroll pool or the Hengyao BNB balance for GPU inventory or trading. Credential binding remains `CONNECTED_BINDING_ONLY`; the fixed trading-capital registry reports `NO_FUNDED_TRADING_CAPITAL` with zero accounts, and transaction Policy Broker, production settlement and independent GPU/warehouse evidence verification remain unavailable.
+
+### Later BSC read-only banking checkpoint
+
+At BSC block `118404995` (`2026-08-27T15:08:34Z`, hash `0x232caf4a3af5144da878dedd177f7ee58c7664bc8b4a885dec57525ae3de6722`), two fixed HTTPS providers returned identical contract state:
+
+- K18888 balance / reserve / available: `22,213,020.930416874731235 / 11,000,000 / 11,213,020.930416874731235 KAIOS`.
+- K8888 assets / free capital / payroll liability: `888 / 800 / 88 KAIOS`; accounts/payrolls: `1/1`.
+- Hengyao account balance: `0 KAIOS`; bound beneficiary: `0x4DF6E9629Dad1072103cFd2bC81845fd97429214`.
+
+This later checkpoint was `eth_call` only. It did not claim, pay, transfer, sign or modify chain state.
+
+### Fresh KAIOS market RPC-quorum checkpoint
+
+At BSC block `118386241` (`2026-08-27T12:47:52Z`), two fixed HTTPS BSC RPC endpoints agreed on chain 56 and block hash `0x0554bb8154deb5f63e7ea07506efc696384bd085f03c87b5e981d652b8d1a81b`. Read-only calls reported:
+
+- canonical KAIOS bytecode: present;
+- Organ Registry Pair Registry organ: zero address;
+- PancakeSwap V2 KAIOS/WBNB pair: zero address;
+- PancakeSwap V2 KAIOS/KGEN pair: zero address;
+- PancakeSwap V2 KAIOS/USDT pair: zero address.
+
+Evidence class is `RPC_QUORUM_VERIFIED_READ_ONLY`. The production evaluator does not accept caller-selected endpoints or a caller-supplied fetch implementation as verification authority; those inputs are schema probes only. This checkpoint created no signer request, transaction payload, pair, liquidity, approval or chain write.
+
+These branches must be resynchronized whenever `main` advances semantically, then re-run exact-head CI.
+
+### Stale, divergent or stacked candidates requiring reconciliation
+
+`#188, #186, #185, #184, #182, #181, #180, #179, #178, #177, #174, #170, #169, #168, #167, #166, #165, #164, #163, #162, #161, #160, #159, #158, #154, #153, #152, #136, #135, #134, #133, #48`
+
+- #163 security review remains an independent dependency. #164 and #165 must not substitute for it.
+- #164 exact head `d36954801f43c76a81dd7f907cbc1dcbe6edb071` and #165 exact head `8160a59afccac539504306cd78ce08df224ef0b0` share registry surfaces and require schema/merge reconciliation plus a distinct reviewer. #164 exact-head Universal/validation CI `33127352611` / `33127354413` are green but do not resolve that governance dependency.
+- #170 cannot receive final approval from its own implementer; #171 records the unresolved distinct-reviewer capacity gap.
+- #173 exact head `629ba1b8a333dbcae988ce0454320a1efd36e997` is zero commits behind main and has green exact-head Universal/CURRENT-lineage CI `33130602041` / `33130604373`; it remains unmerged and cannot be treated as main.
+- #169 was divergent from current main at this checkpoint, but its latest semantics and tests are cumulatively integrated by #188; preserve #169 as dependency history rather than silently merging it alone.
+- #167 is a stale compact address-manifest candidate; use #184 for cumulative review while preserving #167 as history.
+- #135 -> #136 -> #152 -> #153 -> #154 is historical stacked lineage. Preserve deployed evidence, but do not wholesale merge the stack into current `main`.
+- #133/#134 and #48 are old independent candidates hundreds of commits behind; require explicit product-owner disposition, not silent merge.
+
+### Review order
+
+1. Obtain distinct security/identity review for #163, then reconcile #164 and #165 in dependency order.
+2. Obtain a governance-eligible distinct reviewer for #170 before connector activation.
+3. Review #188 as the cumulative K11520 integration candidate, while preserving #169/#181/#185 as dependency history; review #178, #179-#186, #158, #162 and #172 independently where they are not superseded.
+4. Preserve deployed Mainnet evidence from the #135/#136 lineage while reconciling documentation through #184 and live chain reads.
+5. Keep every PR Draft/HOLD and do not merge under the current work order.
+
+END OF HANDBOOK V1.4
