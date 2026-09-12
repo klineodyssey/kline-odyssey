@@ -9,7 +9,11 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.match(workflow, /digital-ant-public-read-only-worker:/);
   assert.match(workflow, /--status "K線西遊記\/temples\/11520\/runtime\/worker-status\.json"/);
   assert.match(workflow, /Preserve public Work Event evidence without repository mutation/);
-  assert.match(workflow, /uses: actions\/upload-artifact@v4/);
+
+  assert.equal((workflow.match(/uses: actions\/checkout@v7/g) ?? []).length, 2);
+  assert.equal((workflow.match(/uses: actions\/setup-node@v7/g) ?? []).length, 2);
+  assert.match(workflow, /uses: actions\/upload-artifact@v7/);
+  assert.doesNotMatch(workflow, /uses: actions\/(?:checkout|setup-node|upload-artifact)@v4/);
 
   assert.doesNotMatch(workflow, /contents:\s*write/);
   assert.doesNotMatch(workflow, /actions:\s*write/);
