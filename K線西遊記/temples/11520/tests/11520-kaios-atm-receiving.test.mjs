@@ -160,6 +160,15 @@ test('physical XYZ route evidence cannot authorize K-market direction',()=>{
   }
 });
 
+test('Digital Ant bridge keeps a rejected K-market route visibly fail-closed',()=>{
+  const b=createDigitalAntKaiosReceivingBridge();
+  const route={axis:'KX',direction:'LONG',from:{x:1,y:0,z:0},to:{x:2,y:0,z:0},routeEvidence:{id:'R'},decisionEvidence:{id:'D'},marketState:{id:'M'},technicalIndicators:{id:'T'},risk:1,cost:2,expectedProfit:3};
+  const result=b.setRoute(route),snapshot=b.snapshot();
+  assert.equal(result.ok,false);assert.equal(result.status,'MARKET_DIRECTION_AUTHORITY_NOT_CONNECTED');
+  assert.equal(snapshot.ant.state,'REJECT');assert.equal(snapshot.ant.mission.status,'MARKET_DIRECTION_AUTHORITY_NOT_CONNECTED');
+  assert.equal(snapshot.ant.mission.deliveryStatus,'CARGO_REGISTERED');assert.deepEqual(snapshot.ant.mission.route,route);
+});
+
 test('Digital Ant bridge preserves SAME_LIFE_ID and waits when real receiver is absent',()=>{
   const b=createDigitalAntKaiosReceivingBridge();const r=b.registerCargo();assert.equal(r.ok,true);const s=b.snapshot();assert.equal(s.ant.lifeId,'DIGITAL_ANT_0001');assert.equal(s.receiving.real_receiving_gate,'NOT_DEPLOYED');assert.equal(s.receiving.delivery_status,'AWAITING_EXACT_AUTHORIZATION');assert.equal(s.ant.state,'WAIT');
 });
