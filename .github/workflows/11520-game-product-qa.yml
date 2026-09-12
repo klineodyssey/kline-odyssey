@@ -58,6 +58,7 @@ jobs:
           node --check "K線西遊記/temples/11520/tests/11520-browser-action-rail-clearance.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-combat-drive.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-monster-aggression.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-creature-archetypes.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
           node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-kaios-atm-receiving.test.mjs"
@@ -114,10 +115,14 @@ jobs:
             timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-item-visual.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
             RC=${PIPESTATUS[0]}
           fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-creature-archetypes.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
           set -e
           if [ "$RC" -ne 0 ]; then
             echo "[11520-QA] browser smoke failed or timed out rc=$RC"
-            tail -n 300 /tmp/k11520-browser-smoke.log || true
+            tail -n 340 /tmp/k11520-browser-smoke.log || true
             tail -n 200 /tmp/k11520-http.log || true
             exit "$RC"
           fi
@@ -142,6 +147,8 @@ jobs:
           if [ ! -s "$LIVING" ]; then echo "[11520-QA] QA_RED: living-world screenshot missing: $LIVING"; exit 1; fi
           ITEMS="artifacts/11520-visual-qa/11520-backpack-item-3d.png"
           if [ ! -s "$ITEMS" ]; then echo "[11520-QA] QA_RED: 3D item screenshot missing: $ITEMS"; exit 1; fi
+          CREATURES="artifacts/11520-visual-qa/11520-creature-archetypes-390x844.png"
+          if [ ! -s "$CREATURES" ]; then echo "[11520-QA] QA_RED: creature archetype screenshot missing: $CREATURES"; exit 1; fi
           HUD="artifacts/11520-visual-qa/11520-mobile-hud-3rail.png"
           COLLAPSED="artifacts/11520-visual-qa/11520-mobile-hud-collapsed.png"
           DRIVE="artifacts/11520-visual-qa/11520-mobile-combat-drive-c10-3lots.png"
