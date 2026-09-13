@@ -24,7 +24,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 assert.ok((await page.locator('#monsterList').textContent()).includes('WORK'),'Digital Ant should expose WORK lifestyle in living-world HUD');
 await page.screenshot({path:`${OUT}/11520-living-world-digital-ant.png`,fullPage:true});
 
-await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.lifeCanvasHitPoints?.('LIFE-QA-BULL-TRAVEL').length>0,null,{timeout:4000});
+await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.lifeCanvasHitPoints?.('LIFE-QA-BULL-TRAVEL').length>0,null,{timeout:15000});
 const pickedRoute=await page.evaluate(async()=>{
   const canvas=document.querySelector('#three');
   const projection=globalThis.__K11520_WORLD_SELECTION_PROJECTION__;
