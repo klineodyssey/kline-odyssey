@@ -45,6 +45,7 @@ jobs:
         run: |
           node --test tests/universal-exchange.test.mjs
           node --test tests/universal-exchange-workflow-security.test.mjs
+          node --test tests/11520-kgen-native-market-cell.test.mjs
 
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

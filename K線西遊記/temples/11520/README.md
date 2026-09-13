@@ -124,3 +124,17 @@ node core/security/resolve-digital-ant-birth.mjs
 A complete trusted address indexer or archive-state proof is required for historical resolution. Candidate blocks and transactions are cross-checked through independent BSC RPC reads; missing capability returns `BIRTH_EVIDENCE_PENDING` rather than guessing.
 
 The first public work snapshot was observed on BSC block `116039099`. It records BNB `0.006`, KGEN `0`, KAIOS `0`, a valid Heart code/config read and an owner-unapproved KGEN acquisition scenario. The scenario is block-stamped evidence only: `broadcast_capability=ABSENT`, `live_trading=false`, `chain_write=false`. V3.5 separates the operational Core Heart Event Indexer from optional advanced transaction-graph analysis; no risk label is escalated without evidence.
+
+
+## NVIDIA GPU paper-market candidate
+
+The K12345 → K11520 NVIDIA GPU route, landed-cost model, acquisition evidence model, and isolated GPU/KGEN and GPU/KAIOS order books are bounded paper-simulation candidates.
+
+- `0.00011520` and K11520 remain candidate coordinates with no repository-bound Human authority.
+- No real GPU inventory, supplier purchase, cargo delivery, warehouse receipt, company budget, signer, settlement, or production actor registry is asserted.
+- Whole-chip lot size is `1`; fractional chips fail closed.
+- Matches remain `MATCHED_UNSETTLED`; CT stays undefined until a repository-owned settlement attestation exists. No such production registry is connected.
+- The implementation has no wallet, RPC, signer, storage, DOM, transfer, or chain-write authority.
+- Real-trade readiness always fails closed while independent GPU readiness verifiers are not wired.
+
+Lineage: historical PR #178; current-main successor preserves the fail-closed actor and settlement boundary introduced by PR #328.
