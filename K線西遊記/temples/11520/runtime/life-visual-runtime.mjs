@@ -1,8 +1,10 @@
 /* KGEN_META
-VERSION: 1.2.3
+VERSION: 1.3.0
 STATUS: ACTIVE
-PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life, Digital Ant, wild creatures and monsters.
+PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life, Digital Ant, wild creatures and monsters, with canonical item geometry and explicit cash custody containers.
 */
+
+import {canonicalWorldItem,cargoItemFromLife,createWorldItemVisual} from './world-item-visual-runtime.mjs';
 
 export const LIFE_VISUAL_POLICY=Object.freeze({
   primitiveFallbackOnlyOnLoadFailure:true,
@@ -127,6 +129,36 @@ function buildFlower(THREE,root,main,dark){
   for(let i=0;i<6;i++){const p=add(root,`FLOWER_PETAL_${i}`,new THREE.Mesh(new THREE.SphereGeometry(.12,8,6),main));const a=i*Math.PI/3;p.position.set(Math.cos(a)*.18,.86,Math.sin(a)*.18);p.scale.set(1.35,.7,.9)}
 }
 
+function installCargoVisualFactory(THREE,root,cargo){
+  cargo.userData.cargoVisualFactory=(life,context)=>createWorldItemVisual(THREE,cargoItemFromLife(life),{context,scale:.55,yOffset:0});
+  cargo.userData.cargoIdentityKey=null;
+  cargo.userData.cargoContext=null;
+  cargo.userData.custodyType=null;
+  root.add(cargo);
+}
+
+function syncCanonicalCargoVisual(cargo,life,p){
+  if(!cargo||!p.carrying){if(cargo)cargo.visible=false;return}
+  const context=p.waitingReceipt?'ATM_UNLOAD':'ANT_CARGO';
+  const item=cargoItemFromLife(life);
+  const state=canonicalWorldItem(item,context);
+  const needsRebuild=cargo.userData.cargoIdentityKey!==state.identityKey||cargo.userData.cargoContext!==context||cargo.userData.custodyType!==state.custody?.custodyType;
+  if(needsRebuild){
+    cargo.clear();
+    const v=cargo.userData.cargoVisualFactory?.(life,context);
+    if(v?.root){v.root.position.set(0,0,0);v.root.rotation.set(0,.35,0);cargo.add(v.root)}
+    cargo.userData.cargoIdentityKey=state.identityKey;
+  }
+  cargo.userData.cargoContext=context;
+  cargo.userData.custodyType=state.custody?.custodyType||null;
+  cargo.userData.itemId=item.itemId||null;
+  cargo.userData.itemShape=state.descriptor.shape;
+  cargo.userData.itemLabel=state.descriptor.label;
+  cargo.visible=true;
+  if(p.waitingReceipt){cargo.position.set(.72,.18,.28);cargo.rotation.set(0,.18,0)}
+  else{cargo.position.set(0,.82,-.48);cargo.rotation.set(0,0,0)}
+}
+
 export function createProceduralLifeBody(THREE,{species='LIFE',name='Market Life',scale=1}={}){
   if(!THREE)throw new Error('THREE_REQUIRED');
   const root=new THREE.Group();const archetype=creatureArchetypeForSpecies(species);
@@ -137,8 +169,7 @@ export function createProceduralLifeBody(THREE,{species='LIFE',name='Market Life
     CHICKEN:(T,r,m,d)=>buildBird(T,r,m,d,{kind:'CHICKEN'}),DUCK:(T,r,m,d)=>buildBird(T,r,m,d,{kind:'DUCK'}),TREE:buildTree,FLOWER:buildFlower,HUMANOID:buildHumanoid};
   (builders[archetype]||buildHumanoid)(THREE,root,main,dark);
   const archetypeScale=finite(root.scale?.x,1)||1;root.userData.archetypeScale=archetypeScale;
-  const cargo=new THREE.Group();cargo.name='LIFE_STATUS_CARGO';cargo.visible=false;
-  const cargoBody=new THREE.Mesh(new THREE.BoxGeometry(.62,.42,.46),mat(THREE,0xc79a36,{roughness:.48,metalness:.48}));cargoBody.position.set(0,.82,-.48);cargo.add(cargoBody);root.add(cargo);
+  const cargo=new THREE.Group();cargo.name='LIFE_STATUS_CARGO';cargo.visible=false;installCargoVisualFactory(THREE,root,cargo);
   const statusRing=add(root,'LIFE_STATUS_RECEIPT',new THREE.Mesh(new THREE.TorusGeometry(.48,.045,8,28),mat(THREE,0x62d7ff,{roughness:.35,metalness:.25,emissive:0x123744})));statusRing.rotation.x=Math.PI/2;statusRing.position.y=.08;statusRing.visible=false;
   const retirementHalo=add(root,'LIFE_STATUS_RETIREMENT',new THREE.Mesh(new THREE.TorusGeometry(.39,.035,8,30),mat(THREE,0xffd66b,{roughness:.3,metalness:.4,emissive:0x4b3610})));retirementHalo.position.y=1.94;retirementHalo.visible=false;
   root.scale.setScalar(archetypeScale*(Number(scale)||1));return root;
@@ -158,8 +189,8 @@ export async function createLifeVisual(THREE,{gltfLoader=null,modelUrl=null,...s
 export function syncLifeVisual(root,life={}){
   if(!root)return;const p=lifePresentationState(life),base=finite(root.userData?.baseScale,1)||1,archetypeScale=finite(root.userData?.archetypeScale,1)||1;
   root.visible=life.state!=='DEAD';root.position.set(finite(life.x),Math.max(.05,finite(life.y)),finite(life.z));root.scale.setScalar(base*archetypeScale*p.scale);root.rotation.x=p.pitch;
-  const cargo=root.getObjectByName?.('LIFE_STATUS_CARGO');if(cargo)cargo.visible=p.carrying;
+  const cargo=root.getObjectByName?.('LIFE_STATUS_CARGO');syncCanonicalCargoVisual(cargo,life,p);
   const receipt=root.getObjectByName?.('LIFE_STATUS_RECEIPT');if(receipt)receipt.visible=p.waitingReceipt;
   const retirement=root.getObjectByName?.('LIFE_STATUS_RETIREMENT');if(retirement)retirement.visible=p.retired;
-  root.userData={...(root.userData||{}),lifeId:life.lifeId||null,sourceLifeId:life.sourceLifeId||null,sourceManaged:Boolean(life.sourceManaged),state:life.state||null,lifestyleAction:p.action,missionStatus:p.missionStatus,carryingCargo:p.carrying,waitingReceipt:p.waitingReceipt,retired:p.retired};
+  root.userData={...(root.userData||{}),lifeId:life.lifeId||null,sourceLifeId:life.sourceLifeId||null,sourceManaged:Boolean(life.sourceManaged),state:life.state||null,lifestyleAction:p.action,missionStatus:p.missionStatus,carryingCargo:p.carrying,waitingReceipt:p.waitingReceipt,retired:p.retired,cargoContext:cargo?.userData?.cargoContext||null,cargoIdentityKey:cargo?.userData?.cargoIdentityKey||null,cargoShape:cargo?.userData?.itemShape||null,cargoCustodyType:cargo?.userData?.custodyType||null};
 }
