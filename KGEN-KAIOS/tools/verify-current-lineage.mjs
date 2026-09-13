@@ -51,8 +51,14 @@ function currentNormativeContent(relativePath, content) {
   return content.slice(offset);
 }
 
+const explicitSupersededReferenceLines = new Set([
+  "本檔保留歷史演化文字，因此前段仍可看到舊的 `1 KGEN = 1 kg`。",
+  "所有衝突的舊 `1 KGEN = 1 kg` 自 V3.8 起標記",
+  "- remove all obsolete `1 KGEN = 10,000 KAIOS` assumptions;",
+]);
+
 function isExplicitSupersededReference(line) {
-  return /(?:SUPERSEDED|historical|obsolete|remove legacy|remove all obsolete|歷史|舊)/iu.test(line);
+  return explicitSupersededReferenceLines.has(line.trim());
 }
 
 function forbiddenPatternsIn(content) {
@@ -113,6 +119,14 @@ const assertions = {
     audit.findings.filter((item) => item.classification === "CURRENT-CONFLICT").every((item) => item.path.startsWith("PR#127:")),
   scaleCurrentActiveConflictProbe:
     forbiddenPatternsIn("ACTIVE CURRENT RULE: 1 KGEN = 1 kg").includes("1 KGEN = 1 kg"),
+  supersededReferenceScopeFailsClosed:
+    !isExplicitSupersededReference("ACTIVE historical rule: 1 KGEN = 1 kg") &&
+    !isExplicitSupersededReference("現行舊規則仍有效：1 KGEN = 1 kg") &&
+    !isExplicitSupersededReference(
+      "本檔保留歷史演化文字，因此前段仍可看到舊的 `1 KGEN = 1 kg`。 ACTIVE CURRENT RULE: 1 KGEN = 1 kg",
+    ),
+  explicitSupersededReferencesRecognized:
+    [...explicitSupersededReferenceLines].every((line) => isExplicitSupersededReference(line)),
 };
 for (const [name, passed] of Object.entries(assertions)) {
   if (!passed) failures.push({ assertion: name });
