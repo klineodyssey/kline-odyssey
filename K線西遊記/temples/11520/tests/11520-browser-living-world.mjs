@@ -25,20 +25,24 @@ assert.ok((await page.locator('#monsterList').textContent()).includes('WORK'),'D
 await page.screenshot({path:`${OUT}/11520-living-world-digital-ant.png`,fullPage:true});
 
 await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.lifeCanvasHitPoints?.('LIFE-QA-TREE-SELECTION').length>0,null,{timeout:15000});
-const hitPoints=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.lifeCanvasHitPoints('LIFE-QA-TREE-SELECTION'));
 await page.evaluate(()=>{globalThis.__K11520_QA_WORLD_TAP_ROUTES__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_QA_WORLD_TAP_ROUTES__.push(e.detail||null))});
-let pickedRoute=null,pointerId=8800;
-for(const point of hitPoints){
-  const init={pointerId:pointerId++,pointerType:'touch',clientX:point.clientX,clientY:point.clientY,buttons:1};
-  await page.dispatchEvent('#three','pointerdown',init);
-  await page.waitForTimeout(45);
-  await page.dispatchEvent('#three','pointerup',{...init,buttons:0});
-  await page.waitForTimeout(120);
-  pickedRoute=await page.evaluate(()=>globalThis.__K11520_QA_WORLD_TAP_ROUTES__?.at(-1)||null);
+let pickedRoute=null,tapDiagnostic=null;
+for(let attempt=0;attempt<24;attempt+=1){
+  const point=await page.evaluate(()=>{
+    const canvas=document.querySelector('#three'),points=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.lifeCanvasHitPoints('LIFE-QA-TREE-SELECTION');
+    return points.find(p=>document.elementFromPoint(p.clientX,p.clientY)===canvas)||null;
+  });
+  if(!point){await page.waitForTimeout(60);continue}
+  await page.evaluate(()=>{globalThis.__K11520_QA_WORLD_TAP_ROUTES__=[]});
+  await page.touchscreen.tap(point.clientX,point.clientY);
+  await page.waitForTimeout(140);
+  tapDiagnostic=await page.evaluate(()=>({routes:structuredClone(globalThis.__K11520_QA_WORLD_TAP_ROUTES__||[]),selectedLifeId:document.querySelector('#selectedLifeHud')?.dataset.lifeId||null}));
+  pickedRoute=tapDiagnostic.routes.at(-1)||null;
   if(pickedRoute?.route==='ENTITY'&&pickedRoute.entityType==='MONSTER'&&pickedRoute.entityId===point.entityId)break;
   pickedRoute=null;
+  await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('selected-Life QA retry'));
 }
-assert.ok(pickedRoute,'the target Life projection must route a real Playwright canvas pointer tap through the canonical MONSTER raycast');
+assert.ok(pickedRoute,`a real Chromium touchscreen tap must route the target Life through the canonical MONSTER raycast: ${JSON.stringify(tapDiagnostic)}`);
 await page.waitForFunction(()=>{const hud=document.getElementById('selectedLifeHud');return hud&&!hud.hidden&&hud.dataset.lifeId},{timeout:3000});
 const picked=await page.locator('#selectedLifeHud').evaluate(hud=>({lifeId:hud.dataset.lifeId,text:hud.textContent||''}));
 const selectedText=await page.locator('#selectedLifeHud').textContent();
