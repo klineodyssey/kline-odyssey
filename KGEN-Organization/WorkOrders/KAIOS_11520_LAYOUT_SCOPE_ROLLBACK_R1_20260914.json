@@ -1,0 +1,49 @@
+{
+  "task_id": "KAIOS-11520-LAYOUT-SCOPE-ROLLBACK-R1-20260914",
+  "risk": "R1",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QA",
+  "exact_base_sha": "2c4b48d4f2f3eb0050f770ee7beb8fb91c880de6",
+  "visual_baseline_sha": "5c82666282c8bba6c11cddcc7042069bceba570b",
+  "branch": "chatgpt-handoff/KAIOS-11520-LAYOUT-SCOPE-ROLLBACK-R1-20260914",
+  "scope": {
+    "changed_runtime_files": [
+      "K線西遊記/temples/11520/runtime/market-origin-wallet-layout-runtime.mjs",
+      "K線西遊記/temples/11520/runtime/mobile-control-layout.mjs"
+    ],
+    "changed_test_files": [
+      "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs"
+    ],
+    "retained_requested_changes": [
+      "single utility master",
+      "three true-circle 34px thumbs",
+      "approved Wukong poster crop",
+      "compact X/Y/Z vertical-axis visible label",
+      "energy sign retained in aria-label and title"
+    ],
+    "restored_geometry": {
+      "status_cards": "direct siblings at y=190 with 86px height; no injected floating wrapper",
+      "minimap_top_px": 286,
+      "rail_left_px": [166, 216, 266],
+      "rail_size_px": [42, 132]
+    }
+  },
+  "acceptance": {
+    "no_k11520_status_flow_wrapper": true,
+    "three_rail_group_exact_anchors": true,
+    "market_xyz_semantics_unchanged": true,
+    "real_chromium_viewport": "390x844",
+    "functional_qa_required": true,
+    "visual_qa_required": true,
+    "production_pages_sha_required": true
+  },
+  "forbidden_side_effects": [
+    "MAINNET",
+    "PAYMENT",
+    "TREASURY",
+    "TOKEN_TRANSFER",
+    "SIGNER_OR_PRIVATE_KEY",
+    "GOVERNANCE",
+    "WORKER_OR_LIFE_ACTIVATION",
+    "EXTERNAL_PAID_AGENT"
+  ]
+}

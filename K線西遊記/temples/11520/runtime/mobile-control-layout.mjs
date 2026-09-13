@@ -1,9 +1,9 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.1
-REVISION: 2026-09-14.SINGLE-COLLAPSED-UTILITY-MASTER
-PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group with non-squashable circular thumbs; keeps the approved Wukong poster crop visible; flows World/Life status below the K market cards; separates the utility master from whole-HUD collapse; delegates circular-thumb motion to the canonical XYZ Plane Joystick; and preserves XYZ/trading semantics.
+VERSION: 1.3.2
+REVISION: 2026-09-14.FORWARD-LAYOUT-SCOPE-ROLLBACK
+PURPOSE: Human-directed 390x844 HUD ownership. Restores the pre-redesign control geometry while retaining one utility master, three non-squashable circular thumbs, compact remaining-axis labels and safe K-card/status separation.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=420;
@@ -19,16 +19,17 @@ function installStyle(){
   .brand .brandMetaV250{white-space:nowrap!important;gap:4px!important}
   .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
   .axes{z-index:250!important}
-  #k11520StatusFlow{position:fixed!important;z-index:251!important;left:6px!important;right:6px!important;top:184px!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;align-items:stretch!important;pointer-events:none!important}
-  #k11520StatusFlow>.tele,#k11520StatusFlow>.monsterHud{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-height:92px!important;max-height:112px!important;margin:0!important;overflow:auto!important;box-sizing:border-box!important;pointer-events:auto!important}
-  .minimapWrap{top:306px!important}
+  .tele,.monsterHud{top:190px!important;height:86px!important}
+  .tele{left:6px!important;width:calc(50% - 9px)!important}
+  .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
+  .minimapWrap{top:286px!important}
   #knob{will-change:transform!important}
 
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
   #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(28px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
-  #cControl{left:154px!important;right:auto!important}
-  #lotsControl{left:208px!important;right:auto!important}
-  #yControl{left:262px!important;right:auto!important}
+  #cControl{left:166px!important;right:auto!important}
+  #lotsControl{left:216px!important;right:auto!important}
+  #yControl{left:266px!important;right:auto!important}
   #cControl label,#lotsControl label,#yControl label{top:5px!important;font-size:7px!important;line-height:1.05!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   #cControl .read,#lotsControl .read,#yControl .read{bottom:4px!important;font-size:7px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   #yControl .track{background:linear-gradient(to bottom,#123f32 0%,#123f32 49.5%,#2b343b 49.5%,#2b343b 50.5%,#4b2029 50.5%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
@@ -91,7 +92,7 @@ function installStyle(){
 function setImportant(el,key,value){if(el)el.style.setProperty(key,value,'important')}
 function applyRail(){
   if(innerWidth>MOBILE_MAX)return;
-  const specs=[['#cControl','154px'],['#lotsControl','208px'],['#yControl','262px']];
+  const specs=[['#cControl','166px'],['#lotsControl','216px'],['#yControl','266px']];
   for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
 function applyRightOrgans(){
@@ -137,24 +138,19 @@ function installEnergyRead(){
   energyLabelGuard.observe(label,{childList:true,characterData:true,subtree:true});
   return true;
 }
-function installStatusFlow(){
-  const world=$('.tele'),life=$('.monsterHud');if(!world||!life)return false;
-  let flow=$('#k11520StatusFlow');if(!flow){flow=document.createElement('div');flow.id='k11520StatusFlow';flow.setAttribute('aria-label','World 與 Life 狀態');world.parentNode?.insertBefore(flow,world)}
-  if(world.parentElement!==flow)flow.appendChild(world);if(life.parentElement!==flow)flow.appendChild(life);return true;
-}
 function installMasterCollapse(){
   let b=$('#k11520HudCollapseAll');if(!b){b=document.createElement('button');b.id='k11520HudCollapseAll';b.type='button';b.setAttribute('aria-label','總收合或展開 HUD');document.body.appendChild(b)}
   const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();installStatusFlow();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
-  const report={viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),statusFlow:rect('#k11520StatusFlow'),masterCollapse:rect('#k11520HudCollapseAll')};
+  const report={version:'1.3.2',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),marketAxes:rect('.axes'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.warp.right<=report.lots.left&&report.lots.right<=report.axisRail.left);
   report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
-  report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketStatus:overlap(rect('.axes'),report.statusFlow),statusMap:overlap(report.statusFlow,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
+  report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketAxes,report.worldHud),marketLife:overlap(report.marketAxes,report.lifeHud),statusMap:overlap(report.worldHud,report.minimap)||overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();
   report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.threeRailAligned&&report.equalWorldLifeWidth&&Object.values(report.overlaps).every(v=>!v));
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
