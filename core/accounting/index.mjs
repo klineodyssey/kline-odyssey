@@ -158,3 +158,180 @@ export function createDigitalAntCfoDailyReport({ date, financeSnapshot, reserveP
     first_kgen_goal: firstKgenPlan.status
   });
 }
+
+export const CIRCULATORY_ACCOUNT_CLASSES = Object.freeze([
+  "REFUNDABLE_PRINCIPAL",
+  "CLAIMABLE_SALARY",
+  "FUNDED_SALARY_BUDGET",
+  "CLAIMABLE_RESOURCE_REWARD",
+  "FUNDED_RESOURCE_REWARD_POOL",
+  "KGEN_RESERVE",
+  "KGEN_CATALYST_ESCROW",
+  "ALCHEMY_BURNED_KAIOS",
+  "KUFO_LINEAGE",
+  "KSHIP_PROPULSION",
+  "TRADING_TREASURY",
+  "TRADING_REALIZED_PNL"
+]);
+
+export const NON_TRADABLE_CIRCULATORY_CLASSES = Object.freeze([
+  "REFUNDABLE_PRINCIPAL",
+  "CLAIMABLE_SALARY",
+  "FUNDED_SALARY_BUDGET",
+  "CLAIMABLE_RESOURCE_REWARD",
+  "FUNDED_RESOURCE_REWARD_POOL",
+  "KGEN_RESERVE",
+  "KGEN_CATALYST_ESCROW",
+  "ALCHEMY_BURNED_KAIOS",
+  "KUFO_LINEAGE",
+  "KSHIP_PROPULSION"
+]);
+
+export function createCirculatoryTreasurySnapshot({ snapshotId, balances, liabilities = {}, observedAt }) {
+  const normalizedBalances = {};
+  const normalizedLiabilities = {};
+  for (const accountClass of CIRCULATORY_ACCOUNT_CLASSES) {
+    normalizedBalances[accountClass] = assertUnsignedIntegerString(balances?.[accountClass] ?? "0", `balance.${accountClass}`).toString();
+    normalizedLiabilities[accountClass] = assertUnsignedIntegerString(liabilities?.[accountClass] ?? "0", `liability.${accountClass}`).toString();
+  }
+  invariant(BigInt(normalizedBalances.REFUNDABLE_PRINCIPAL) >= BigInt(normalizedLiabilities.REFUNDABLE_PRINCIPAL), "PRINCIPAL_UNDERCOLLATERALIZED", "Refundable principal must remain fully isolated");
+  invariant(BigInt(normalizedBalances.FUNDED_SALARY_BUDGET) >= BigInt(normalizedLiabilities.CLAIMABLE_SALARY), "SALARY_BUDGET_UNFUNDED", "Claimable salary must be funded");
+  invariant(BigInt(normalizedBalances.FUNDED_RESOURCE_REWARD_POOL) >= BigInt(normalizedLiabilities.CLAIMABLE_RESOURCE_REWARD), "RESOURCE_REWARD_UNFUNDED", "Claimable resource reward must be funded");
+  return Object.freeze({
+    snapshot_id: snapshotId,
+    balances: Object.freeze(normalizedBalances),
+    liabilities: Object.freeze(normalizedLiabilities),
+    observed_at: observedAt,
+    cross_spending_allowed: false
+  });
+}
+
+export function assertTradingTreasurySegregation(snapshot, { sourceAccountClass, amount }) {
+  invariant(CIRCULATORY_ACCOUNT_CLASSES.includes(sourceAccountClass), "UNKNOWN_ACCOUNT_CLASS", "Unknown circulatory account class");
+  invariant(sourceAccountClass === "TRADING_TREASURY", "TREASURY_SEGREGATION_BREACH", `${sourceAccountClass} cannot fund trading`);
+  invariant(!NON_TRADABLE_CIRCULATORY_CLASSES.includes(sourceAccountClass), "PROTECTED_FUND_TRADING_FORBIDDEN", "Protected funds cannot be traded");
+  const requested = assertUnsignedIntegerString(amount, "trading amount");
+  invariant(requested <= BigInt(snapshot.balances.TRADING_TREASURY), "TRADING_TREASURY_INSUFFICIENT", "Trading treasury is insufficient");
+  return true;
+}
+
+export function createCirculatorySettlementCandidate({
+  settlementId, lifeId, beneficiary, accountClass, amount, budgetId,
+  workEvidenceId, replayKeys = new Set(), createdAt
+}) {
+  invariant(!replayKeys.has(settlementId), "SETTLEMENT_REPLAY", "Settlement candidate ID was already used");
+  invariant(["CLAIMABLE_SALARY", "CLAIMABLE_RESOURCE_REWARD", "TRADING_REALIZED_PNL"].includes(accountClass), "UNAUTHORIZED_SETTLEMENT_CLASS", "Account class cannot create a settlement candidate");
+  invariant(typeof lifeId === "string" && lifeId.length > 0, "SETTLEMENT_LIFE_REQUIRED", "Settlement requires a Life ID");
+  invariant(typeof beneficiary === "string" && beneficiary.length > 0, "SETTLEMENT_BENEFICIARY_REQUIRED", "Settlement requires a fixed beneficiary");
+  invariant(typeof budgetId === "string" && budgetId.length > 0, "SETTLEMENT_BUDGET_REQUIRED", "Settlement requires a funded budget reference");
+  invariant(typeof workEvidenceId === "string" && workEvidenceId.length > 0, "WORK_EVIDENCE_REQUIRED", "Settlement requires work evidence");
+  return Object.freeze({
+    settlement_id: settlementId,
+    life_id: lifeId,
+    beneficiary,
+    account_class: accountClass,
+    amount: assertUnsignedIntegerString(amount, "settlement amount").toString(),
+    budget_id: budgetId,
+    work_evidence_id: workEvidenceId,
+    status: "SETTLEMENT_CANDIDATE",
+    authorization: "NOT_GRANTED",
+    receipt: null,
+    chain_write: false,
+    created_at: createdAt
+  });
+}
+
+export const ALCHEMY_FRESH_CONTRIBUTION_CANON = Object.freeze({
+  authority: "HUMAN_FRESHNESS_CANON_IMPLEMENTED_REVIEW_CANDIDATE_NOT_DEPLOYED",
+  minimum_kaios_amount_wei: "1000000000000000000",
+  contribution_freshness_window_days: 130,
+  contribution_freshness_window_seconds: 130 * 24 * 60 * 60,
+  delivery_delay_seconds: 0,
+  kaios_to_kgen_catalyst_ratio: "1000:1",
+  kaios_to_kufo_lineage_ratio: "1:1000",
+  kgen_destination: "IMMUTABLE_CATALYST_BANK_UNFROZEN",
+  kgen_escrowed_by_furnace: false,
+  kgen_returned: false,
+  kgen_retained_as_civilization_asset: true,
+  rejection: "ATOMIC_REVERT",
+  cancellation_after_success: "NOT_APPLICABLE",
+  refund: "NOT_APPLICABLE_NO_ESCROW",
+  tax_credit_route: "DESIGN_ONLY_DISABLED",
+  deployed: false
+});
+
+export function calculateFreshAlchemyLineage({
+  kaiosAmountWei, kgenContributionWei, contributionAgeSeconds = 0,
+  bankReceiptVerified = false
+}) {
+  const kaios = assertUnsignedIntegerString(kaiosAmountWei, "kaiosAmountWei");
+  const contribution = assertUnsignedIntegerString(kgenContributionWei, "kgenContributionWei");
+  invariant(kaios >= BigInt(ALCHEMY_FRESH_CONTRIBUTION_CANON.minimum_kaios_amount_wei), "ALCHEMY_MINIMUM_AMOUNT", "Alchemy requires at least 1 KAIOS");
+  invariant(kaios % 1000n === 0n, "INEXACT_CONTRIBUTION_RATIO", "KAIOS amount must produce an exact KGEN bank contribution");
+  invariant(contribution === kaios / 1000n, "CONTRIBUTION_RATIO_MISMATCH", "KGEN bank contribution must equal KAIOS amount divided by 1000");
+  invariant(Number.isInteger(contributionAgeSeconds) && contributionAgeSeconds >= 0, "INVALID_CONTRIBUTION_AGE", "Contribution age must be a non-negative integer number of seconds");
+  invariant(contributionAgeSeconds <= ALCHEMY_FRESH_CONTRIBUTION_CANON.contribution_freshness_window_seconds, "KGEN_CONTRIBUTION_EXPIRED", "KGEN bank contribution is older than the 130-day freshness window");
+  invariant(bankReceiptVerified === true, "KGEN_BANK_RECEIPT_REQUIRED", "Immediate KUFO delivery requires a verified exact catalyst-bank receipt");
+  return Object.freeze({
+    kaios_burned: kaios.toString(),
+    required_kgen_contribution: contribution.toString(),
+    kufo_lineage: (kaios * 1000n).toString(),
+    contribution_age_seconds: contributionAgeSeconds,
+    contribution_freshness_window_days: 130,
+    delivery_delay_seconds: 0,
+    status: "IMMEDIATE_KUFO_DELIVERY_CANDIDATE",
+    atomic_revert_required: true,
+    catalyst_bank_receipt_verified: true,
+    kgen_burned: false,
+    kgen_held_by_furnace: false,
+    kgen_return_required: false,
+    kgen_retained_by_bank: true,
+    tax_credit_route: "DESIGN_ONLY_DISABLED",
+    deployed: false
+  });
+}
+
+export function createK1852ContributionProofCandidate({
+  proofId, lifeId, originalContributor, beneficiary, kaiosAmountWei,
+  kgenContributionWei, contributionTimestamp, furnacePoint = 18911, sourcePoint = 1852
+}) {
+  invariant(furnacePoint === 18911 && sourcePoint === 1852, "CATALYST_RELAY_POINT_MISMATCH", "Catalyst relay must bind K1852 to K18911");
+  invariant(typeof proofId === "string" && proofId.length > 0, "CONTRIBUTION_PROOF_ID_REQUIRED", "Contribution proof ID is required");
+  invariant(typeof originalContributor === "string" && originalContributor.length > 0, "ORIGINAL_CONTRIBUTOR_REQUIRED", "A relay candidate must preserve the original contributor");
+  invariant(typeof beneficiary === "string" && beneficiary.length > 0, "CONTRIBUTION_BENEFICIARY_REQUIRED", "A fixed beneficiary is required");
+  invariant(Number.isFinite(Date.parse(contributionTimestamp)), "INVALID_CONTRIBUTION_TIMESTAMP", "A verifiable contribution timestamp is required");
+  const kaios = assertUnsignedIntegerString(kaiosAmountWei, "kaiosAmountWei");
+  const contribution = assertUnsignedIntegerString(kgenContributionWei, "kgenContributionWei");
+  invariant(kaios % 1000n === 0n && contribution === kaios / 1000n, "CONTRIBUTION_RATIO_MISMATCH", "Contribution proof must preserve the exact 1:1000 KGEN/KAIOS ratio");
+  return Object.freeze({
+    contribution_proof_id: proofId,
+    life_id: lifeId,
+    original_contributor: originalContributor,
+    beneficiary,
+    kaios_amount: kaios.toString(),
+    required_kgen_contribution: contribution.toString(),
+    source_point: sourcePoint,
+    furnace_point: furnacePoint,
+    contribution_timestamp: contributionTimestamp,
+    freshness_window_days: 130,
+    status: "DESIGN_ONLY_DISABLED",
+    executable: false,
+    proof_consumed: false,
+    bank_receipt_verified: false,
+    kgen_return_required: false,
+    existing_k1852_contract_modified: false,
+    chain_write: false
+  });
+}
+
+export function assertKufoKshipConservation({ initialKufoMilli, remainingKufoMilli, generatedKshipUnits, burnedKshipUnits = "0" }) {
+  const initial = assertUnsignedIntegerString(initialKufoMilli, "initialKufoMilli");
+  const remaining = assertUnsignedIntegerString(remainingKufoMilli, "remainingKufoMilli");
+  const generated = assertUnsignedIntegerString(generatedKshipUnits, "generatedKshipUnits");
+  const burned = assertUnsignedIntegerString(burnedKshipUnits, "burnedKshipUnits");
+  invariant(remaining <= initial, "KUFO_REMAINING_EXCEEDS_INITIAL", "Remaining KUFO cannot exceed initial KUFO");
+  const maximumGenerated = (initial - remaining) * 1000n;
+  invariant(generated <= maximumGenerated, "KSHIP_MASS_CONSERVATION_BREACH", "Generated KSHIP exceeds decayed KUFO mass");
+  invariant(burned <= generated, "KSHIP_BURN_EXCEEDS_GENERATION", "Propulsion burn cannot exceed generated KSHIP");
+  return true;
+}

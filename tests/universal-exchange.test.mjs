@@ -99,7 +99,17 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan,
+  createCivilizationCapabilityGrant, assertCivilizationCapability,
+  normalizeCrossMarketQuote, discoverCrossMarketRoute, calculateCrossMarketNetProfit,
+  createTradingPolicyBox, evaluateTradingPolicyBox, createPaperTradeCandidate, recordPaperTradeReceipt,
+  createCirculatoryTreasurySnapshot, assertTradingTreasurySegregation,
+  createCirculatorySettlementCandidate, calculateFreshAlchemyLineage,
+  createK1852ContributionProofCandidate, assertKufoKshipConservation,
+  CIVILIZATION_AUTOPILOT_LIFE_REGISTRY, KAIOS_CIRCULATORY_RUNTIME,
+  KAIOS_CROSS_MARKET_AUTOPILOT,
+  createCivilizationJobQueue, runCivilizationAutopilotHeartbeat,
+  handoffCivilizationJob, createDigitalAntCirculatoryAdapter
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -2864,4 +2874,281 @@ test("V4.0 production shell exposes animated concierge and fresh cache key", asy
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+const AUTOPILOT_NOW = "2026-08-20T08:00:00.000Z";
+
+function autopilotGrant(overrides = {}) {
+  return createCivilizationCapabilityGrant({
+    grantId: "GRANT_HENGYAO_MARKET_V1",
+    lifeId: "LIFE-CODEX-GM-0001",
+    workerId: "codex-gm-01",
+    workPoint: 4168,
+    jobRoles: ["GENERAL_MANAGER", "CEO", "CFO"],
+    capabilities: ["TRADE_PROPOSER", "CFO", "AUDITOR", "CODER", "TESTER", "REVIEWER"],
+    issuedAt: AUTOPILOT_NOW,
+    ...overrides
+  });
+}
+
+function quote({ id, market, price, status = "PAPER_ONLY", observed = "2026-08-20T07:59:30.000Z", expires = "2026-08-20T08:01:00.000Z" }) {
+  return {
+    quote_id: id, market_id: market, adapter_status: status,
+    base_asset: "KAIOS", quote_asset: "USDT",
+    price_numerator: String(price), price_denominator: "1",
+    observed_at: observed, expires_at: expires, evidence: `EVIDENCE_${id}`
+  };
+}
+
+function paperFixture() {
+  const route = discoverCrossMarketRoute({
+    routeId: "ROUTE_11520_TO_DEX",
+    buyQuote: quote({ id: "Q_BUY", market: "11520_INTERNAL", price: 100 }),
+    sellQuote: quote({ id: "Q_SELL", market: "BSC_DEX_OBSERVED", price: 120 }),
+    baseAmount: "10", observedAt: AUTOPILOT_NOW, maxAgeSeconds: 60
+  });
+  const profitability = calculateCrossMarketNetProfit({
+    grossProfit: route.gross_profit,
+    costs: { amm_fee: "2", gas_cost: "3", slippage: "4", bridge_cost: "0", transport_cost: "0", kship_cost: "0", market_impact: "1", risk_reserve: "10" }
+  });
+  const policy = createTradingPolicyBox({
+    policyBoxId: "POLICY_SAFE_PAPER_V1",
+    marketAllowlist: ["11520_INTERNAL", "BSC_DEX_OBSERVED"],
+    tokenAllowlist: ["KAIOS", "USDT"], routeAllowlist: ["ROUTE_11520_TO_DEX"],
+    maxTradeAmount: "100", maxHourlyExposure: "1000", maxDailyExposure: "5000",
+    maxDailyLoss: "100", maxSlippageBps: 50, minimumExpectedNetProfit: "100",
+    gasCeiling: "10", priceFreshnessSeconds: 60, oracleDisagreementBps: 25,
+    inventoryLimit: "10000", fixedTreasury: "TRADING_TREASURY_001",
+    fixedBeneficiary: "COMPANY_BENEFICIARY_001", allowanceCeiling: "0",
+    realTradeEnabled: false
+  });
+  return { route, profitability, policy };
+}
+
+test("Civilization capability defaults enable observation and paper work without asset authority", () => {
+  const grant = autopilotGrant();
+  for (const capability of ["MARKET_OBSERVER", "PRICE_ANALYST", "PAPER_TRADER", "TRADE_PROPOSER"]) {
+    assert.equal(assertCivilizationCapability(grant, capability, { lifeId: grant.life_id, workerId: grant.worker_id, observedAt: AUTOPILOT_NOW }), true);
+  }
+  assert.equal(grant.capabilities.includes("REAL_TRADER"), false);
+  assert.equal(grant.capabilities.includes("TREASURY_OPERATOR"), false);
+  assert.equal(grant.unlimited_withdraw, false);
+  assert.equal(grant.governance_bypass, false);
+  assert.equal(KAIOS_CROSS_MARKET_AUTOPILOT.scope, "CIVILIZATION_SHARED_ORGAN");
+  assert.equal(KAIOS_CROSS_MARKET_AUTOPILOT.enabled.auto_paper_trade, true);
+  assert.equal(KAIOS_CROSS_MARKET_AUTOPILOT.prohibited.real_trade, true);
+  assert.equal(KAIOS_CROSS_MARKET_AUTOPILOT.one_engine_per_life, false);
+});
+
+test("Cross-market quotes normalize rational prices and reject stale or nonexistent markets", () => {
+  const normalized = normalizeCrossMarketQuote(quote({ id: "Q1", market: "11520_INTERNAL", price: 100 }), { observedAt: AUTOPILOT_NOW, maxAgeSeconds: 60 });
+  assert.deepEqual(normalized.normalized_price, { numerator: "100", denominator: "1" });
+  assert.equal(normalized.executable, false);
+  assert.throws(() => normalizeCrossMarketQuote(quote({ id: "OLD", market: "DEX", price: 100, observed: "2026-08-20T07:00:00.000Z" }), { observedAt: AUTOPILOT_NOW, maxAgeSeconds: 60 }), (error) => error.code === "STALE_QUOTE");
+  assert.throws(() => normalizeCrossMarketQuote(quote({ id: "FAKE", market: "KUFO_MARKET", price: 100, status: "NOT_AVAILABLE" }), { observedAt: AUTOPILOT_NOW, maxAgeSeconds: 60 }), (error) => error.code === "MARKET_NOT_AVAILABLE");
+});
+
+test("CFO net-profit math subtracts every cost before policy admission", () => {
+  const { route, profitability } = paperFixture();
+  assert.equal(route.gross_profit, "200");
+  assert.equal(profitability.total_cost, "20");
+  assert.equal(profitability.expected_net_profit, "180");
+  assert.deepEqual(Object.keys(profitability.costs), ["amm_fee", "gas_cost", "slippage", "bridge_cost", "transport_cost", "kship_cost", "market_impact", "risk_reserve"]);
+});
+
+test("Paper trade candidate passes fixed scope but real execution stays blocked", () => {
+  const { route, profitability, policy } = paperFixture();
+  const candidate = createPaperTradeCandidate({
+    candidateId: "TRADE_CANDIDATE_001", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01",
+    capabilityGrant: autopilotGrant(), route, profitability, policy,
+    treasury: "TRADING_TREASURY_001", beneficiary: "COMPANY_BENEFICIARY_001",
+    slippageBps: 20, gasCost: "3", oracleDisagreementBps: 10, createdAt: AUTOPILOT_NOW
+  });
+  assert.equal(candidate.mode, "PAPER_ONLY");
+  assert.equal(candidate.chain_write, false);
+  assert.equal(candidate.authorization_status, "REAL_EXECUTION_NOT_AUTHORIZED");
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate, exposure: { hourly: "0", daily: "0", daily_loss: "0" }, requireRealTrade: true }), (error) => error.code === "REAL_TRADE_DISABLED");
+});
+
+test("Policy box fails closed on negative net, slippage, gas, replay and beneficiary drift", () => {
+  const { route, profitability, policy } = paperFixture();
+  const candidate = createPaperTradeCandidate({
+    candidateId: "TRADE_CANDIDATE_002", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01",
+    capabilityGrant: autopilotGrant(), route, profitability, policy,
+    treasury: "TRADING_TREASURY_001", beneficiary: "COMPANY_BENEFICIARY_001",
+    slippageBps: 20, gasCost: "3", oracleDisagreementBps: 10, createdAt: AUTOPILOT_NOW
+  });
+  const exposure = { hourly: "0", daily: "0", daily_loss: "0" };
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate: { ...candidate, expected_net_profit: "-1" }, exposure }), (error) => error.code === "NET_PROFIT_BELOW_MINIMUM");
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate: { ...candidate, slippage_bps: 51 }, exposure }), (error) => error.code === "SLIPPAGE_CAP_EXCEEDED");
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate: { ...candidate, gas_cost: "11" }, exposure }), (error) => error.code === "GAS_CEILING_EXCEEDED");
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate: { ...candidate, inventory_after: "10001" }, exposure }), (error) => error.code === "INVENTORY_LIMIT_EXCEEDED");
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate: { ...candidate, requested_allowance: "1" }, exposure }), (error) => error.code === "ALLOWANCE_CEILING_EXCEEDED");
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate, exposure, seenCandidateIds: new Set([candidate.candidate_id]) }), (error) => error.code === "DUPLICATE_TRADE_REPLAY");
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate: { ...candidate, beneficiary: "ATTACKER" }, exposure }), (error) => error.code === "WRONG_BENEFICIARY");
+});
+
+test("Paper receipts are replay-safe and cannot masquerade as chain receipts", () => {
+  const { route, profitability, policy } = paperFixture();
+  const candidate = createPaperTradeCandidate({
+    candidateId: "PAPER_RECEIPT_CANDIDATE", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01",
+    capabilityGrant: autopilotGrant(), route, profitability, policy,
+    treasury: "TRADING_TREASURY_001", beneficiary: "COMPANY_BENEFICIARY_001",
+    slippageBps: 20, gasCost: "3", oracleDisagreementBps: 10, createdAt: AUTOPILOT_NOW
+  });
+  const receipt = recordPaperTradeReceipt({ receiptId: "PAPER_RECEIPT_001", candidate, observedAt: AUTOPILOT_NOW });
+  assert.equal(receipt.receipt_type, "PAPER_SIMULATION");
+  assert.equal(receipt.tx_hash, null);
+  assert.equal(receipt.realized_pnl, null);
+  assert.throws(() => recordPaperTradeReceipt({ receiptId: receipt.receipt_id, candidate, seenReceiptIds: new Set([receipt.receipt_id]), observedAt: AUTOPILOT_NOW }), (error) => error.code === "DUPLICATE_RECEIPT");
+});
+
+test("Policy box stops daily loss and wrong Life or revoked role fails capability gates", () => {
+  const { route, profitability, policy } = paperFixture();
+  assert.throws(() => createPaperTradeCandidate({
+    candidateId: "WRONG_LIFE", lifeId: "OTHER_LIFE", workerId: "codex-gm-01", capabilityGrant: autopilotGrant(), route, profitability, policy,
+    treasury: "TRADING_TREASURY_001", beneficiary: "COMPANY_BENEFICIARY_001", slippageBps: 20, gasCost: "3", oracleDisagreementBps: 10, createdAt: AUTOPILOT_NOW
+  }), (error) => error.code === "CAPABILITY_LIFE_ID_MISMATCH");
+  assert.throws(() => assertCivilizationCapability(autopilotGrant({ status: "REVOKED" }), "PAPER_TRADER", { lifeId: "LIFE-CODEX-GM-0001", observedAt: AUTOPILOT_NOW }), (error) => error.code === "CAPABILITY_REVOKED_OR_INACTIVE");
+  const candidate = { ...createPaperTradeCandidate({
+    candidateId: "LOSS_STOP", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01", capabilityGrant: autopilotGrant(), route, profitability, policy,
+    treasury: "TRADING_TREASURY_001", beneficiary: "COMPANY_BENEFICIARY_001", slippageBps: 20, gasCost: "3", oracleDisagreementBps: 10, createdAt: AUTOPILOT_NOW
+  }) };
+  assert.throws(() => evaluateTradingPolicyBox({ policy, candidate, exposure: { hourly: "0", daily: "0", daily_loss: "101" } }), (error) => error.code === "DAILY_LOSS_STOP");
+});
+
+test("Circulatory accounting isolates principal, salary, rewards, reserve and catalyst from trading", () => {
+  const snapshot = createCirculatoryTreasurySnapshot({
+    snapshotId: "CIRCULATORY_001",
+    balances: { REFUNDABLE_PRINCIPAL: "500", FUNDED_SALARY_BUDGET: "88", FUNDED_RESOURCE_REWARD_POOL: "40", KGEN_RESERVE: "100", KGEN_CATALYST_ESCROW: "5", ALCHEMY_BURNED_KAIOS: "10", TRADING_TREASURY: "25" },
+    liabilities: { REFUNDABLE_PRINCIPAL: "500", CLAIMABLE_SALARY: "88", CLAIMABLE_RESOURCE_REWARD: "40" },
+    observedAt: AUTOPILOT_NOW
+  });
+  assert.equal(assertTradingTreasurySegregation(snapshot, { sourceAccountClass: "TRADING_TREASURY", amount: "25" }), true);
+  for (const accountClass of ["REFUNDABLE_PRINCIPAL", "CLAIMABLE_SALARY", "KGEN_RESERVE", "KGEN_CATALYST_ESCROW", "ALCHEMY_BURNED_KAIOS"]) {
+    assert.throws(() => assertTradingTreasurySegregation(snapshot, { sourceAccountClass: accountClass, amount: "1" }), (error) => error.code === "TREASURY_SEGREGATION_BREACH");
+  }
+  assert.throws(() => createCirculatoryTreasurySnapshot({ snapshotId: "BAD", balances: { FUNDED_SALARY_BUDGET: "1" }, liabilities: { CLAIMABLE_SALARY: "2" }, observedAt: AUTOPILOT_NOW }), (error) => error.code === "SALARY_BUDGET_UNFUNDED");
+});
+
+test("Circulatory settlement candidates require evidence, fixed beneficiary and replay protection", () => {
+  const candidate = createCirculatorySettlementCandidate({ settlementId: "SETTLEMENT_001", lifeId: "LIFE_1", beneficiary: "BENEFICIARY_1", accountClass: "CLAIMABLE_SALARY", amount: "88", budgetId: "BUDGET_1", workEvidenceId: "EVIDENCE_1", createdAt: AUTOPILOT_NOW });
+  assert.equal(candidate.status, "SETTLEMENT_CANDIDATE");
+  assert.equal(candidate.authorization, "NOT_GRANTED");
+  assert.throws(() => createCirculatorySettlementCandidate({ settlementId: "SETTLEMENT_001", lifeId: "LIFE_1", beneficiary: "BENEFICIARY_1", accountClass: "CLAIMABLE_SALARY", amount: "88", budgetId: "BUDGET_1", workEvidenceId: "EVIDENCE_1", replayKeys: new Set(["SETTLEMENT_001"]), createdAt: AUTOPILOT_NOW }), (error) => error.code === "SETTLEMENT_REPLAY");
+});
+
+test("Civilization job heartbeat is deterministic, replay-safe, restartable and handoff-bound", () => {
+  const queue = createCivilizationJobQueue({ queueId: "QUEUE_1", jobs: [{ job_id: "JOB_MARKET_1", parent_goal: "SAFE_AUTOPILOT", priority: 1, required_capabilities: ["MARKET_OBSERVER", "PAPER_TRADER"], status: "READY", work_point: 4168, objective: "Observe and paper trade" }] });
+  const first = runCivilizationAutopilotHeartbeat({ queue, heartbeatId: "HB_1", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01", capabilityGrant: autopilotGrant(), observedAt: AUTOPILOT_NOW, workResult: { status: "PAPER_CANDIDATE_RECORDED", evidence: ["QUOTE_SET_1"] } });
+  assert.equal(first.status, "WORK_EVIDENCE_RECORDED");
+  const restarted = createCivilizationJobQueue(JSON.parse(JSON.stringify({ queueId: first.queue.queue_id, jobs: first.queue.jobs, heartbeatIds: first.queue.processed_heartbeat_ids, evidence: first.queue.evidence })));
+  const replay = runCivilizationAutopilotHeartbeat({ queue: restarted, heartbeatId: "HB_1", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01", capabilityGrant: autopilotGrant(), observedAt: AUTOPILOT_NOW });
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  assert.equal(replay.queue.evidence.length, first.queue.evidence.length);
+  const handed = handoffCivilizationJob({ queue: first.queue, jobId: "JOB_MARKET_1", fromWorkerId: "codex-gm-01", toWorkerId: "worker-02", checkpointId: "CHECKPOINT_1", observedAt: AUTOPILOT_NOW });
+  assert.equal(handed.jobs[0].handoff_target_worker_id, "worker-02");
+  const wrongWorker = runCivilizationAutopilotHeartbeat({ queue: handed, heartbeatId: "HB_2", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01", capabilityGrant: autopilotGrant(), observedAt: AUTOPILOT_NOW });
+  assert.equal(wrongWorker.status, "NO_ELIGIBLE_JOB");
+  const nextGrant = createCivilizationCapabilityGrant({
+    grantId: "GRANT_HANDOFF_WORKER_02", lifeId: "LIFE-WORKER-0002", workerId: "worker-02",
+    workPoint: 4168, jobRoles: ["MARKET_RESEARCH_WORKER"], capabilities: ["MARKET_OBSERVER", "PAPER_TRADER"], issuedAt: AUTOPILOT_NOW
+  });
+  const continued = runCivilizationAutopilotHeartbeat({ queue: handed, heartbeatId: "HB_3", lifeId: "LIFE-WORKER-0002", workerId: "worker-02", capabilityGrant: nextGrant, observedAt: AUTOPILOT_NOW, workResult: { status: "HANDOFF_CONTINUED", evidence: ["CHECKPOINT_1"] } });
+  assert.equal(continued.status, "WORK_EVIDENCE_RECORDED");
+  assert.equal(continued.selected_job.assigned_worker_id, "worker-02");
+  assert.throws(() => createCivilizationJobQueue({ queueId: "DUPLICATE_QUEUE", jobs: [queue.jobs[0], queue.jobs[0]] }), (error) => error.code === "DUPLICATE_JOB");
+});
+
+test("Cross-market circulatory integration records a paper candidate as work evidence", () => {
+  const { route, profitability, policy } = paperFixture();
+  const candidate = createPaperTradeCandidate({
+    candidateId: "INTEGRATION_TRADE_001", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01",
+    capabilityGrant: autopilotGrant(), route, profitability, policy,
+    treasury: "TRADING_TREASURY_001", beneficiary: "COMPANY_BENEFICIARY_001",
+    slippageBps: 20, gasCost: "3", oracleDisagreementBps: 10, createdAt: AUTOPILOT_NOW
+  });
+  const queue = createCivilizationJobQueue({ queueId: "INTEGRATION_QUEUE", jobs: [{
+    job_id: "INTEGRATION_JOB", parent_goal: "SAFE_AUTOPILOT", priority: 0,
+    required_capabilities: ["MARKET_OBSERVER", "PRICE_ANALYST", "PAPER_TRADER"], status: "READY",
+    work_point: 4168, objective: "Create a safe paper-trade candidate"
+  }] });
+  const result = runCivilizationAutopilotHeartbeat({
+    queue, heartbeatId: "INTEGRATION_HB_1", lifeId: "LIFE-CODEX-GM-0001", workerId: "codex-gm-01",
+    capabilityGrant: autopilotGrant(), observedAt: AUTOPILOT_NOW,
+    workResult: { status: "PAPER_CANDIDATE_RECORDED", evidence: [candidate.candidate_id], chain_write: false, real_trade: false, payment: false }
+  });
+  assert.equal(result.work_evidence.evidence[0], candidate.candidate_id);
+  assert.equal(result.work_evidence.chain_write, false);
+  assert.equal(candidate.authorization_status, "REAL_EXECUTION_NOT_AUTHORIZED");
+});
+
+test("Deterministic fuzz preserves net-profit and 18911 mass invariants", () => {
+  let state = 0x13579bdf;
+  const next = () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state;
+  };
+  for (let index = 0; index < 256; index += 1) {
+    const costs = {
+      amm_fee: String(next() % 1000), gas_cost: String(next() % 1000), slippage: String(next() % 1000), bridge_cost: String(next() % 1000),
+      transport_cost: String(next() % 1000), kship_cost: String(next() % 1000), market_impact: String(next() % 1000), risk_reserve: String(next() % 1000)
+    };
+    const total = Object.values(costs).reduce((sum, value) => sum + BigInt(value), 0n);
+    const gross = total + BigInt(next() % 10000);
+    const result = calculateCrossMarketNetProfit({ grossProfit: gross.toString(), costs });
+    assert.equal(BigInt(result.expected_net_profit), gross - total);
+
+    const kaios = BigInt((next() % 1_000_000) + 1) * 10n ** 18n;
+    const lineage = calculateFreshAlchemyLineage({ kaiosAmountWei: kaios.toString(), kgenContributionWei: (kaios / 1000n).toString(), contributionAgeSeconds: index, bankReceiptVerified: true });
+    assert.equal(BigInt(lineage.required_kgen_contribution) * 1000n, BigInt(lineage.kaios_burned));
+    assert.equal(BigInt(lineage.kufo_lineage), BigInt(lineage.kaios_burned) * 1000n);
+  }
+});
+
+test("Digital Ant adapter preserves 1 KGEN hourly entitlement and no KAIOS payroll claim", () => {
+  const adapter = createDigitalAntCirculatoryAdapter({ heartbeatEvidenceId: "HEART_12345_001", observedAt: AUTOPILOT_NOW });
+  assert.equal(adapter.heartbeat_entitlement, "1 KGEN / HOUR");
+  assert.equal(adapter.kaios_payroll_active, false);
+  assert.equal(adapter.rewrites_entitlement_as_kaios, false);
+  assert.equal(adapter.real_trade, false);
+});
+
+test("Life registry keeps Mengpo and Yaoce inactive until formal Life IDs exist", () => {
+  assert.equal(CIVILIZATION_AUTOPILOT_LIFE_REGISTRY.records.length, 2);
+  assert.equal(CIVILIZATION_AUTOPILOT_LIFE_REGISTRY.records.find((life) => life.life_id === "LIFE-CODEX-GM-0001").treasury_operator, false);
+  assert.equal(CIVILIZATION_AUTOPILOT_LIFE_REGISTRY.inactive_role_templates.find((profile) => profile.display_name === "夢婆").status, "BIRTH_AND_LIFE_ID_REQUIRED");
+  assert.equal(CIVILIZATION_AUTOPILOT_LIFE_REGISTRY.inactive_role_templates.find((profile) => profile.duty_name === "曜冊").life_id, null);
+  assert.equal(KAIOS_CIRCULATORY_RUNTIME.disabled.real_trade, true);
+});
+
+test("18911 fresh contribution Canon delivers immediately and preserves exact 5M/5000 mass", () => {
+  const unit = 10n ** 18n;
+  const kaios = 5_000_000n * unit;
+  const contribution = 5_000n * unit;
+  const delivered = calculateFreshAlchemyLineage({ kaiosAmountWei: kaios.toString(), kgenContributionWei: contribution.toString(), contributionAgeSeconds: 130 * 24 * 60 * 60, bankReceiptVerified: true });
+  assert.equal(delivered.status, "IMMEDIATE_KUFO_DELIVERY_CANDIDATE");
+  assert.equal(delivered.required_kgen_contribution, contribution.toString());
+  assert.equal(delivered.kufo_lineage, (kaios * 1000n).toString());
+  assert.equal(delivered.delivery_delay_seconds, 0);
+  assert.equal(delivered.kgen_held_by_furnace, false);
+  assert.equal(delivered.kgen_return_required, false);
+  assert.equal(delivered.kgen_retained_by_bank, true);
+  assert.equal(delivered.deployed, false);
+  assert.throws(() => calculateFreshAlchemyLineage({ kaiosAmountWei: "1000000000000000001", kgenContributionWei: "1000000000000000", bankReceiptVerified: true }), (error) => error.code === "INEXACT_CONTRIBUTION_RATIO");
+  assert.throws(() => calculateFreshAlchemyLineage({ kaiosAmountWei: unit.toString(), kgenContributionWei: (unit / 1000n).toString(), contributionAgeSeconds: 130 * 24 * 60 * 60 + 1, bankReceiptVerified: true }), (error) => error.code === "KGEN_CONTRIBUTION_EXPIRED");
+  assert.throws(() => calculateFreshAlchemyLineage({ kaiosAmountWei: unit.toString(), kgenContributionWei: (unit / 1000n).toString(), bankReceiptVerified: false }), (error) => error.code === "KGEN_BANK_RECEIPT_REQUIRED");
+});
+
+test("K1852 proof route remains disabled and KUFO/KSHIP conservation is bounded", () => {
+  const unit = 10n ** 18n;
+  const ticket = createK1852ContributionProofCandidate({ proofId: "CONTRIBUTION_PROOF_1", lifeId: "LIFE_1", originalContributor: "OWNER_1", beneficiary: "BENEFICIARY_1", kaiosAmountWei: unit.toString(), kgenContributionWei: (unit / 1000n).toString(), contributionTimestamp: "2026-08-20T00:00:00.000Z" });
+  assert.equal(ticket.source_point, 1852);
+  assert.equal(ticket.furnace_point, 18911);
+  assert.equal(ticket.status, "DESIGN_ONLY_DISABLED");
+  assert.equal(ticket.executable, false);
+  assert.equal(ticket.kgen_return_required, false);
+  assert.equal(ticket.existing_k1852_contract_modified, false);
+  assert.equal(assertKufoKshipConservation({ initialKufoMilli: "1000", remainingKufoMilli: "500", generatedKshipUnits: "500000", burnedKshipUnits: "100" }), true);
+  assert.throws(() => assertKufoKshipConservation({ initialKufoMilli: "1000", remainingKufoMilli: "500", generatedKshipUnits: "500001" }), (error) => error.code === "KSHIP_MASS_CONSERVATION_BREACH");
 });
