@@ -9,6 +9,7 @@ on:
     paths:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
+      - "tests/autonomous-company-engineering-cycle.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
@@ -19,6 +20,7 @@ on:
     paths:
       - "core/**"
       - "tests/universal-exchange.test.mjs"
+      - "tests/autonomous-company-engineering-cycle.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
@@ -44,6 +46,7 @@ jobs:
         shell: bash
         run: |
           node --test tests/universal-exchange.test.mjs
+          node --test tests/autonomous-company-engineering-cycle.test.mjs
           node --test tests/universal-exchange-workflow-security.test.mjs
           node --test tests/11520-kgen-native-market-cell.test.mjs
 
