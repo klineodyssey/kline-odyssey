@@ -107,14 +107,17 @@ function lifeCanvasHitPoints(lifeId){
   const physicalClientX=(raycastClientX)=>renderer.domElement.dataset.xVisualMirror==='1'
     ?rect.left+rect.width-(raycastClientX-rect.left)
     :raycastClientX;
+  const centerX=(minX+maxX)/2,centerY=(minY+maxY)/2,candidates=[];
   const stepX=Math.max(2,(maxX-minX)/14),stepY=Math.max(2,(maxY-minY)/18);
-  for(let y=minY+stepY/2;y<=maxY&&points.length<24;y+=stepY)for(let x=minX+stepX/2;x<=maxX&&points.length<24;x+=stepX)if(routesToTarget(x,y))points.push(Object.freeze({clientX:physicalClientX(x),clientY:y,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
+  for(let y=minY+stepY/2;y<=maxY;y+=stepY)for(let x=minX+stepX/2;x<=maxX;x+=stepX)if(routesToTarget(x,y))candidates.push({clientX:physicalClientX(x),clientY:y,score:(x-centerX)**2+(y-centerY)**2});
+  candidates.sort((a,b)=>a.score-b.score);
+  for(const point of candidates.slice(0,24))points.push(Object.freeze({clientX:point.clientX,clientY:point.clientY,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
   return Object.freeze(points);
 }
 function visibleLifeCanvasHitPoints(){
   for(const monster of world.monsters){
     if(monster.state==='DEAD'||!monster.lifeId)continue;
-    const points=lifeCanvasHitPoints(monster.lifeId);
+    const points=lifeCanvasHitPoints(monster.lifeId).filter(point=>document.elementFromPoint(point.clientX,point.clientY)===renderer.domElement);
     if(points.length)return points;
   }
   return Object.freeze([]);
@@ -126,7 +129,7 @@ function ancestorData(obj,key){let n=obj;while(n){if(n.userData&&n.userData[key]
 function objectEntity(o){return{objectName:o.name||o.label||o.id||o.kind||'世界物件',objectType:o.kind||'WORLD_OBJECT',lifeId:o.lifeId||null,x:Number(o.x)||0,y:Number(o.y)||0,z:Number(o.z)||0,functionText:o.functionText||o.purpose||'11520 世界設施／物件',interactionText:o.interactionText||'查看、導航、接近後互動'}}
 function monsterEntity(m){return{objectName:m.name||m.baseName||m.species||'Market Life',objectType:m.species||m.sourceType||'MARKET_LIFE',lifeId:m.lifeId||null,x:Number(m.x)||0,y:Number(m.y)||0,z:Number(m.z)||0,functionText:`Living World 生命 · HP ${Math.round(m.hp||0)}/${Math.round(m.maxHp||0)}`,interactionText:'查看、導航、接近後依生命規則互動／捕捉／戰鬥'}}
 function emitWorldTapRoute(route,detail={}){renderer.domElement.dispatchEvent(new CustomEvent('k11520:world-tap',{detail:{route,...detail}}));return route}
-function monsterAt(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect();tapPointer.x=((clientX-rect.left)/rect.width)*2-1;tapPointer.y=-((clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);for(const hit of raycaster.intersectObjects(scene.children,true)){if(ancestorData(hit.object,'isPlayer'))return null;const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null)return world.monsters.find(x=>String(x.id)===String(mid))||null;if(ancestorData(hit.object,'worldObjectId')!=null)return null}return null}
+function monsterAt(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect(),radii=[0,6,12,18],samples=[];for(const radius of radii){if(!radius)samples.push([0,0]);else for(let i=0;i<8;i++){const angle=i*Math.PI/4;samples.push([Math.cos(angle)*radius,Math.sin(angle)*radius])}}for(const [dx,dy] of samples){const x=clientX+dx,y=clientY+dy;if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)continue;tapPointer.x=((x-rect.left)/rect.width)*2-1;tapPointer.y=-((y-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);for(const hit of raycaster.intersectObjects(scene.children,true)){if(ancestorData(hit.object,'isPlayer'))break;const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null)return world.monsters.find(item=>String(item.id)===String(mid))||null;if(ancestorData(hit.object,'worldObjectId')!=null)break}}return null}
 function routeMonsterTap(m){if(!m||m.state==='DEAD')return null;showEntityInfo(monsterEntity(m));toast(`發現 ${m.name||m.baseName||m.species||'生命'}`);return emitWorldTapRoute('ENTITY',{entityType:'MONSTER',entityId:String(m.id),lifeId:String(m.lifeId||'')})}
 function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){const routed=routeMonsterTap(latchedMonster);if(routed)return routed}const rect=renderer.domElement.getBoundingClientRect();tapPointer.x=((clientX-rect.left)/rect.width)*2-1;tapPointer.y=-((clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);const hits=raycaster.intersectObjects(scene.children,true);for(const hit of hits){if(ancestorData(hit.object,'isPlayer')){renderer.domElement.dispatchEvent(new CustomEvent('k11520:player-tap',{detail:{source:'WORLD_RAYCAST'}}));return emitWorldTapRoute('PLAYER')}const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null){const m=world.monsters.find(x=>String(x.id)===String(mid));const routed=routeMonsterTap(m);if(routed)return routed}const oid=ancestorData(hit.object,'worldObjectId');if(oid!=null){const o=WORLD_OBJECTS.find(x=>String(x.id)===String(oid));if(o){showEntityInfo(objectEntity(o));toast(`發現 ${o.name||o.label||o.kind||'物件'}`);return emitWorldTapRoute('ENTITY',{entityType:'WORLD_OBJECT',entityId:String(oid)})}}}
   let pointHit=hits.find(h=>ancestorData(h.object,'isGround'));let p=pointHit?.point;if(!p){const q=new THREE.Vector3();if(raycaster.ray.intersectPlane(groundPlane,q))p=q}if(p){cancelNavigation('切換世界目標');S.navTarget=null;document.getElementById('waypointAction')?.remove();setWorldTarget3D({x:p.x,y:p.y,z:p.z},{mode:'WORLD',source:'WORLD_GROUND'});startWorldNavigation3D();toast(`XYZ 前往 X ${fmt(p.x,1)} · Y ${fmt(p.y,1)} · Z ${fmt(p.z,1)}`);return emitWorldTapRoute('GROUND',{x:p.x,y:p.y,z:p.z})}toast('這裡沒有可到達目標');return emitWorldTapRoute('NONE')
