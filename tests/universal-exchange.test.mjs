@@ -99,6 +99,9 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence,
+  createAtmEmployeeCompensationPlan, createAtmCargoCfoPlan, underwriteEmployeeLoan,
+  createPrepaidPayrollSchedule, createSalaryAdvanceCreditPlan, rankAtmExpansionSites,
+  createProjectProfitSharingPlan, createAquacultureProjectDraft, createAutonomousBusinessWorkOrder,
   NVIDIA_GPU_11520_ROUTE, GPU_LANDED_COST_FIELDS, GPU_ACQUISITION_EVIDENCE_FIELDS,
   calculateGpuTransportPlan, createGpuAcquisitionPipelineCandidate, validateGpuInventoryUnit,
   calculateGpuLandedCost, evaluateGpu11520MarketReadiness, createWorkforceGap,
@@ -179,6 +182,166 @@ test("V3.9 delivery revenue requires complete receiver acceptance evidence", () 
   const evidence = { origin_evidence: "A", pickup_evidence: "B", cargo_evidence: "C", route_evidence: "D", arrival_coordinate: "E", delivery_timestamp: "F", receiver_evidence: "G", customer_acceptance: "H" };
   assert.equal(validateFieldDeliveryEvidence(evidence).status, "DELIVERY_VERIFIED");
   assert.throws(() => validateFieldDeliveryEvidence({ ...evidence, customer_acceptance: null }), /Revenue requires/);
+});
+
+test("ATM Life employment is explicit and CEO plus CFO never creates double salary", () => {
+  const plan = createAtmEmployeeCompensationPlan({
+    plan_id: "ATM_PAYROLL_PLAN_001", atm_id: "ATM-11520-001", employee_life_id: "LIFE-ATM-11520-001",
+    work_order_id: "ATM_DELIVERY_WORK_001", base_salary_atomic: "1000", trip_pay_atomic: "200",
+    energy_allowance_atomic: "100", maintenance_allowance_atomic: "80", risk_allowance_atomic: "20",
+    payroll_withholding_atomic: "50"
+  });
+  assert.equal(plan.status, "EMPLOYMENT_PROPOSAL_REQUIRED");
+  assert.equal(plan.gross_compensation_atomic, "1400");
+  assert.equal(plan.net_compensation_atomic, "1350");
+  assert.equal(plan.founder_ceo_cfo_double_salary, false);
+  assert.equal(plan.payment_executed, false);
+});
+
+test("ATM employee payroll reservation requires contract, completed work, escrow and exact action", () => {
+  const plan = createAtmEmployeeCompensationPlan({
+    plan_id: "ATM_PAYROLL_PLAN_002", atm_id: "ATM-11520-001", employee_life_id: "LIFE-ATM-11520-001",
+    employment_contract: { contract_id: "EMPLOYMENT_ATM_001", employee_life_id: "LIFE-ATM-11520-001", employer_company_id: "AI_ANT_COMPANY_0001", status: "ACTIVE", evidence: "SIGNED_CONTRACT" },
+    work_order_id: "ATM_DELIVERY_WORK_001", work_completion_evidence: { work_order_id: "ATM_DELIVERY_WORK_001", status: "DELIVERY_VERIFIED" },
+    base_salary_atomic: "1000", trip_pay_atomic: "200", energy_allowance_atomic: "100",
+    maintenance_allowance_atomic: "80", risk_allowance_atomic: "20", payroll_withholding_atomic: "0",
+    salary_escrow_status: "FUNDED_AND_SEGREGATED",
+    settlement_authorization: { action_id: "PAY_ATM_001", policy_hash: "POLICY_HASH", expires_at: "2026-10-01T00:00:00Z" }
+  });
+  assert.equal(plan.status, "READY_FOR_PAYROLL_RESERVATION");
+  assert.deepEqual(plan.blockers, []);
+  assert.equal(plan.exact_action_authorized, true);
+  assert.equal(plan.payment_executed, false);
+});
+
+test("ATM cargo CFO keeps principal as restricted inventory and recognizes freight only after settlement", () => {
+  const operating_costs = {
+    energy_cost: "100", maintenance_cost: "50", bnb_chain_cost: "10", insurance_risk_reserve: "20",
+    security_cost: "30", vehicle_depreciation: "40", loading_cost: "10", unloading_cost: "10", other_verified_cost: "5"
+  };
+  const hold = createAtmCargoCfoPlan({
+    plan_id: "ATM_CARGO_CFO_001", cargo_principal_atomic: "1080000000000000000000000",
+    freight_fee_atomic: "500", target_profit_atomic: "100", operating_costs
+  });
+  assert.equal(hold.dispatch_status, "HOLD");
+  assert.equal(hold.restricted_inventory_asset_atomic, hold.matching_custody_liability_atomic);
+  assert.equal(hold.principal_is_revenue, false);
+  assert.equal(hold.recognized_freight_revenue_atomic, "0");
+  assert.equal(hold.minimum_freight_fee_atomic, "375");
+
+  const ready = createAtmCargoCfoPlan({
+    plan_id: "ATM_CARGO_CFO_002", cargo_principal_atomic: "1080000000000000000000000",
+    freight_fee_atomic: "500", target_profit_atomic: "100", operating_costs,
+    receiver_escrow_verified: true, independent_receipt_verifier_ready: true, durable_replay_ready: true,
+    exact_dispatch_authorization: { action_id: "DISPATCH_001", policy_hash: "POLICY", purpose_hash: "PURPOSE", replay_key: "REPLAY", valid_from: "2026-09-14T00:00:00Z", expires_at: "2026-09-15T00:00:00Z" }
+  });
+  assert.equal(ready.dispatch_status, "READY_FOR_EXTERNAL_SIGNER_DISPATCH");
+  assert.equal(ready.expected_profit_atomic, "225");
+  assert.equal(ready.mainnet_write_executed, false);
+});
+
+test("employee loan underwriting supports funded subsidy but never auto-deducts or seizes Life", () => {
+  const base = {
+    application_id: "ATM_LOAN_001", employee_life_id: "LIFE-ATM-11520-001",
+    employment_evidence: { employee_life_id: "LIFE-ATM-11520-001", contract_id: "EMPLOYMENT_ATM_001", status: "ACTIVE", evidence: "SIGNED_CONTRACT" },
+    purpose: "WORK_EQUIPMENT", principal_atomic: "12000", annual_interest_bps: 600, subsidy_bps: 600,
+    subsidy_funding_evidence: "COMPANY_APPROVED_SUBSIDY_BUDGET", term_months: 12, grace_months: 0,
+    verified_monthly_income_atomic: "5000", essential_living_cost_atomic: "2000", existing_monthly_debt_atomic: "0",
+    max_debt_service_bps: 3000, repayment_source: "VERIFIED_SALARY_AND_SERVICE_FEES",
+    payroll_deduction_opt_in: true, payroll_deduction_key: "ATM_LOAN_001_DEDUCTION",
+    treasury_status: "BOUND_AND_AUDITED", loan_escrow_status: "FUNDED_AND_SEGREGATED",
+    exact_action_authorization: { action_id: "LOAN_DRAW_001", policy_hash: "LOAN_POLICY", expires_at: "2026-10-01T00:00:00Z" }
+  };
+  const approved = underwriteEmployeeLoan(base);
+  assert.equal(approved.decision, "READY_FOR_EXACT_APPROVAL");
+  assert.equal(approved.effective_interest_bps, 0);
+  assert.equal(approved.interest_atomic, "0");
+  assert.equal(approved.automatic_salary_deduction, false);
+  assert.equal(approved.life_id_or_personal_property_seizure, false);
+  assert.equal(approved.payment_executed, false);
+
+  const unaffordable = underwriteEmployeeLoan({ ...base, application_id: "ATM_LOAN_002", principal_atomic: "1200000" });
+  assert.equal(unaffordable.decision, "DECLINED");
+  assert.ok(unaffordable.blockers.includes("REPAYMENT_CAPACITY_INSUFFICIENT"));
+});
+
+test("prepaid payroll distinguishes the 9/5 payment for 10/5 salary from employee debt", () => {
+  const schedule = createPrepaidPayrollSchedule({
+    schedule_id: "PREPAID_PAYROLL_2026_10", employee_life_id: "LIFE-ATM-11520-001",
+    payment_date: "2026-09-05T00:00:00Z", service_period_start: "2026-09-06T00:00:00Z", salary_due_date: "2026-10-05T00:00:00Z",
+    gross_salary_atomic: "100000", employment_evidence: { employee_life_id: "LIFE-ATM-11520-001", employer_company_id: "AI_ANT_COMPANY_0001", contract_id: "EMP_ATM_001", status: "ACTIVE", evidence: "SIGNED" },
+    compensation_policy_status: "APPROVED", payroll_escrow_status: "FUNDED_AND_SEGREGATED",
+    exact_action_authorization: { action_id: "PAYROLL_2026_10", policy_hash: "P", replay_key: "R", expires_at: "2026-09-05T23:00:00Z" }
+  });
+  assert.equal(schedule.status, "READY_FOR_EXACT_PAYROLL_EXECUTION");
+  assert.equal(schedule.payroll_class, "CONTRACTUAL_PREPAID_SALARY");
+  assert.equal(schedule.employee_debt_if_service_completed, false);
+  assert.equal(schedule.expense_recognition, "RATABLY_OVER_VERIFIED_SERVICE_PERIOD");
+  assert.equal(schedule.payment_executed, false);
+});
+
+test("salary advance is separate credit backed only by verified future salary and ATM fees", () => {
+  const plan = createSalaryAdvanceCreditPlan({
+    plan_id: "SALARY_ADVANCE_001", employee_life_id: "LIFE-ATM-11520-001", future_salary_due_date: "2026-10-05T00:00:00Z",
+    verified_future_salary_atomic: "100000", requested_advance_atomic: "50000", maximum_advance_bps: 6000, service_fee_bps: 100,
+    repayment_sources: ["VERIFIED_FUTURE_SALARY", "VERIFIED_ATM_SERVICE_FEES"], employee_consent: true,
+    employment_evidence: { employee_life_id: "LIFE-ATM-11520-001", status: "ACTIVE", evidence: "SIGNED" },
+    salary_receivable_evidence: { employee_life_id: "LIFE-ATM-11520-001", status: "VERIFIED", amount_atomic: "100000" },
+    loan_escrow_status: "FUNDED_AND_SEGREGATED",
+    exact_action_authorization: { action_id: "ADVANCE_001", policy_hash: "P", replay_key: "R", expires_at: "2026-09-20T00:00:00Z" }
+  });
+  assert.equal(plan.status, "READY_FOR_EXACT_CREDIT_EXECUTION");
+  assert.equal(plan.maximum_advance_atomic, "60000");
+  assert.equal(plan.service_fee_atomic, "500");
+  assert.equal(plan.automatic_salary_deduction, false);
+  assert.equal(plan.customer_deposits_may_fund_advance, false);
+  assert.equal(plan.mainnet_write_executed, false);
+});
+
+test("ATM expansion ranks mapped sites but creates no branch without observed demand", () => {
+  const result = rankAtmExpansionSites({ candidates: [
+    { node_id: "K20000", name: "女兒國", coordinate: 20000, map_evidence: "UniverseMap V10.2", observed_demand: { requests: 0, evidence: null }, infrastructure_state: "NOT_VERIFIED", market_activity: 70, operating_cost_score: 40, risk_score: 30, revenue_score: 65 },
+    { node_id: "K16888", name: "白骨洞／廣寒宮", coordinate: 16888, map_evidence: "UniverseMap V10.2", observed_demand: { requests: 2, evidence: "CONFIRMED_REQUESTS" }, infrastructure_state: "VERIFIED_READY", market_activity: 60, operating_cost_score: 50, risk_score: 40, revenue_score: 60 }
+  ] });
+  assert.equal(result.status, "SITE_PROPOSAL_CANDIDATE_FOUND");
+  assert.equal(result.selected_site, "K16888");
+  assert.equal(result.atms_created, 0);
+  assert.equal(result.candidates.find((candidate) => candidate.node_id === "K20000").status, "RESEARCH_CANDIDATE");
+});
+
+test("project profit sharing names author and workers but waits for settled revenue", () => {
+  const draft = createProjectProfitSharingPlan({
+    plan_id: "SHARE_001", project_id: "POND_001", author_id: "DIGITAL_ANT_0001", worker_ids: ["LIFE-ATM-11520-001"],
+    gross_revenue_atomic: "10000", direct_cost_atomic: "4000", company_share_bps: 4000, worker_share_bps: 3000,
+    maintenance_reserve_bps: 1000, risk_reserve_bps: 1000, debt_service_bps: 1000
+  });
+  assert.equal(draft.status, "PROPOSED_UNSETTLED");
+  assert.equal(draft.revenue_recognized, false);
+  assert.equal(draft.company_share_atomic, "2400");
+  assert.equal(draft.worker_pool_atomic, "1800");
+  assert.equal(draft.payout_executed, false);
+});
+
+test("fish pond request remains a draft until a real requester confirms it", () => {
+  const draft = createAquacultureProjectDraft({ request_id: "POND_REQUEST_001" });
+  assert.equal(draft.status, "DRAFT_INTENT_NOT_REAL_REQUEST");
+  assert.equal(draft.pond_created, false);
+  assert.equal(draft.fish_created, false);
+  const confirmed = createAquacultureProjectDraft({ request_id: "POND_REQUEST_002", requester_id: "PLAYER_001", requester_confirmation: true, source_evidence: "SIGNED_GATEWAY_REQUEST", location: "K20000", water_source: "VERIFIED_SOURCE", fish_species: "POLICY_SELECTED", food_safety_plan: "REVIEW_REQUIRED", market_plan: "LOCAL_MARKET", budget_atomic: "1000" });
+  assert.equal(confirmed.status, "PLANNABLE_NOT_EXECUTABLE_YET");
+  assert.equal(confirmed.quote_created, false);
+});
+
+test("autonomous business work starts only after Gatekeeper and picks one safe evidenced task", () => {
+  const candidates = [
+    { work_type: "CUSTOMER_PROJECT_QUALIFICATION", problem: "POND_REQUEST", priority: 2, evidence: "CONFIRMED_REQUEST", safe_to_execute: true, required_authority: "LOCAL_R0_R1", expected_result: "PROJECT_DRAFT" },
+    { work_type: "ATM_SITE_RESEARCH", problem: "NO_EXPANSION_EVIDENCE", priority: 1, evidence: "UNIVERSE_MAP", safe_to_execute: true, required_authority: "READ_ONLY", expected_result: "RANKED_CANDIDATES" }
+  ];
+  const order = createAutonomousBusinessWorkOrder({ cycle_id: "CYCLE_001", primary_job_status: "COMPLETED", candidates });
+  assert.equal(order.status, "READY");
+  assert.equal(order.next_action, "ATM_SITE_RESEARCH");
+  assert.equal(order.revenue_created, false);
+  assert.throws(() => createAutonomousBusinessWorkOrder({ cycle_id: "CYCLE_002", primary_job_status: "FAILED", candidates }), (error) => error.code === "PRIMARY_JOB_BYPASS");
 });
 
 test("K12345 to K11520 NVIDIA GPU route preserves the assigned company address and map distance", () => {
@@ -2982,11 +3145,15 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.0 production shell exposes animated concierge and fresh cache key", async () => {
+test("V4.1 production shell exposes animated concierge and autonomous bank cache key", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.0-player-first/);
+  assert.match(htmlSource, /v=11520-v4\.1(?:\.1)?-ai-ant-bank/);
+  assert.match(appSource, /AI ANT BANK/);
+  assert.doesNotMatch(appSource, /from ["']\.\.\/\.\.\/\.\.\/core\/index\.mjs/);
+  assert.match(appSource, /core\/registry\/universe-runtime\.mjs/);
+  assert.match(cssSource, /\.kv strong\{min-width:0;overflow-wrap:anywhere\}/);
   assert.doesNotMatch(htmlSource, /v=11520-v3\.6-first-kgen/);
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);

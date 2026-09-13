@@ -73,6 +73,10 @@ export const FIELD_SERVICE_TYPES = Object.freeze(["CASH_LOGISTICS", "KUFO_SUPPLY
 export const FIELD_SERVICE_ROLES = Object.freeze(["DELIVERY_WORKER", "CASH_TRANSPORTER", "KUFO_SUPPLY_WORKER", "WASTE_COLLECTION_WORKER", "ATM_SERVICE_WORKER", "SECURITY_WORKER", "ROUTE_PLANNER"]);
 export const FIELD_SERVICE_ACCOUNTING_CLASSES = Object.freeze(["SALARY_INCOME", "SERVICE_REVENUE", "FREIGHT_REVENUE", "KUFO_SALE_REVENUE", "CASH_LOGISTICS_REVENUE", "WASTE_SERVICE_REVENUE", "HEARTBEAT_REWARD", "FORTUNE", "EXPENSE"]);
 export const KAIOS_CASH_LAW = Object.freeze({ ledger_asset: "KAIOS_LEDGER", physical_cargo: "KAIOS_CASH_CARGO", ledger_transfer_is_cash_delivery: false });
+export const EMPLOYEE_LOAN_PURPOSES = Object.freeze(["WORK_EQUIPMENT", "ENERGY", "HOUSING", "EDUCATION", "MEDICAL", "EMERGENCY", "TRANSPORT"]);
+export const EMPLOYEE_LOAN_DECISIONS = Object.freeze(["READY_FOR_EXACT_APPROVAL", "CONDITIONAL", "DECLINED"]);
+export const ATM_EXPANSION_STATUSES = Object.freeze(["RESEARCH_CANDIDATE", "DEMAND_VERIFIED_CANDIDATE", "READY_FOR_SITE_PROPOSAL"]);
+export const AUTONOMOUS_BUSINESS_WORK_TYPES = Object.freeze(["GATEKEEPER_DUTY", "DEMAND_SCAN", "PLAYER_FRICTION_REPAIR", "ATM_SITE_RESEARCH", "SERVICE_PACKAGE_RESEARCH", "CUSTOMER_PROJECT_QUALIFICATION", "COST_RESEARCH", "SUPPLY_CHAIN_RESEARCH"]);
 
 export const HEAVEN_TIME_LAW = Object.freeze({
   law_id: "K18888_HEAVEN_TIME_LAW_V3_7",
@@ -1668,6 +1672,331 @@ export function validateFieldDeliveryEvidence(evidence) {
   requireFields(evidence, ["origin_evidence", "pickup_evidence", "cargo_evidence", "route_evidence", "arrival_coordinate", "delivery_timestamp", "receiver_evidence", "customer_acceptance"], "FieldDeliveryEvidence");
   invariant(Object.values(evidence).every(Boolean), "DELIVERY_EVIDENCE_INCOMPLETE", "Revenue requires pickup, route, arrival, receiver and customer acceptance evidence");
   return Object.freeze({ ...evidence, status: "DELIVERY_VERIFIED" });
+}
+
+const ATM_OPERATING_COST_FIELDS = Object.freeze([
+  "energy_cost", "maintenance_cost", "bnb_chain_cost", "insurance_risk_reserve",
+  "security_cost", "vehicle_depreciation", "loading_cost", "unloading_cost", "other_verified_cost"
+]);
+
+function exactAmountRecord(source, fields, prefix) {
+  return Object.fromEntries(fields.map((field) => [field, quoteAmount(source?.[field], `${prefix}.${field}`)]));
+}
+
+export function createAtmEmployeeCompensationPlan({
+  plan_id, atm_id, employee_life_id, employer_company_id = "AI_ANT_COMPANY_0001",
+  employment_contract = null, work_order_id, work_completion_evidence = null,
+  base_salary_atomic, trip_pay_atomic, energy_allowance_atomic, maintenance_allowance_atomic,
+  risk_allowance_atomic, payroll_withholding_atomic = "0", salary_escrow_status = "NOT_BOUND",
+  settlement_authorization = null, currency = "KAIOS"
+}) {
+  requireId(plan_id, "plan_id");
+  invariant(atm_id === "ATM-11520-001", "ATM_EMPLOYEE_ID_INVALID", "Compensation plan must bind the existing 11520 ATM entity");
+  invariant(employee_life_id === "LIFE-ATM-11520-001", "ATM_EMPLOYEE_LIFE_ID_INVALID", "Compensation plan must preserve the existing ATM Life ID");
+  invariant(employer_company_id === "AI_ANT_COMPANY_0001", "ATM_EMPLOYER_INVALID", "ATM employee compensation belongs to the AI Ant Company");
+  invariant(currency === "KAIOS", "ATM_PAYROLL_CURRENCY_INVALID", "ATM employee compensation is denominated in KAIOS");
+  const amounts = exactAmountRecord({ base_salary_atomic, trip_pay_atomic, energy_allowance_atomic, maintenance_allowance_atomic, risk_allowance_atomic, payroll_withholding_atomic }, [
+    "base_salary_atomic", "trip_pay_atomic", "energy_allowance_atomic", "maintenance_allowance_atomic", "risk_allowance_atomic", "payroll_withholding_atomic"
+  ], "atm_compensation");
+  const gross = amounts.base_salary_atomic + amounts.trip_pay_atomic + amounts.energy_allowance_atomic + amounts.maintenance_allowance_atomic + amounts.risk_allowance_atomic;
+  invariant(amounts.payroll_withholding_atomic <= gross, "ATM_WITHHOLDING_EXCEEDS_GROSS", "Payroll withholding cannot exceed gross compensation");
+  const contractVerified = Boolean(
+    employment_contract?.contract_id &&
+    employment_contract?.employee_life_id === employee_life_id &&
+    employment_contract?.employer_company_id === employer_company_id &&
+    employment_contract?.status === "ACTIVE" &&
+    employment_contract?.evidence
+  );
+  const workVerified = Boolean(work_order_id && work_completion_evidence?.status === "DELIVERY_VERIFIED" && work_completion_evidence?.work_order_id === work_order_id);
+  const escrowReady = salary_escrow_status === "FUNDED_AND_SEGREGATED";
+  const exactApprovalReady = Boolean(settlement_authorization?.action_id && settlement_authorization?.policy_hash && settlement_authorization?.expires_at);
+  let status = "READY_FOR_PAYROLL_RESERVATION";
+  const blockers = [];
+  if (!contractVerified) { status = "EMPLOYMENT_PROPOSAL_REQUIRED"; blockers.push("ACTIVE_EMPLOYMENT_CONTRACT_EVIDENCE_REQUIRED"); }
+  if (!workVerified) { if (status === "READY_FOR_PAYROLL_RESERVATION") status = "PAYROLL_BLOCKED_WORK_NOT_DELIVERED"; blockers.push("VERIFIED_WORK_COMPLETION_REQUIRED"); }
+  if (!escrowReady) { if (status === "READY_FOR_PAYROLL_RESERVATION") status = "PAYROLL_BLOCKED_ESCROW_NOT_FUNDED"; blockers.push("SEGREGATED_SALARY_ESCROW_REQUIRED"); }
+  if (!exactApprovalReady) { if (status === "READY_FOR_PAYROLL_RESERVATION") status = "PAYROLL_BLOCKED_EXACT_AUTHORIZATION_REQUIRED"; blockers.push("ONE_EXACT_PAYROLL_ACTION_REQUIRED"); }
+  return Object.freeze({
+    plan_id, atm_id, employee_life_id, employer_company_id, work_order_id: work_order_id || null, currency,
+    base_salary_atomic: amounts.base_salary_atomic.toString(), trip_pay_atomic: amounts.trip_pay_atomic.toString(),
+    energy_allowance_atomic: amounts.energy_allowance_atomic.toString(), maintenance_allowance_atomic: amounts.maintenance_allowance_atomic.toString(),
+    risk_allowance_atomic: amounts.risk_allowance_atomic.toString(), gross_compensation_atomic: gross.toString(),
+    payroll_withholding_atomic: amounts.payroll_withholding_atomic.toString(), net_compensation_atomic: (gross - amounts.payroll_withholding_atomic).toString(),
+    contract_verified: contractVerified, work_verified: workVerified, salary_escrow_status, exact_action_authorized: exactApprovalReady,
+    status, blockers: Object.freeze(blockers), payment_executed: false, founder_ceo_cfo_double_salary: false
+  });
+}
+
+export function createAtmCargoCfoPlan({
+  plan_id, cargo_principal_atomic, freight_fee_atomic, target_profit_atomic,
+  operating_costs, receiver_escrow_verified = false, independent_receipt_verifier_ready = false,
+  durable_replay_ready = false, exact_dispatch_authorization = null,
+  delivery_evidence = null, freight_settlement_evidence = null, currency = "KAIOS"
+}) {
+  requireId(plan_id, "plan_id");
+  invariant(currency === "KAIOS", "ATM_CARGO_CURRENCY_INVALID", "ATM cash cargo is denominated in KAIOS");
+  const principal = quoteAmount(cargo_principal_atomic, "atm_cargo.principal");
+  const fee = quoteAmount(freight_fee_atomic, "atm_cargo.freight_fee");
+  const targetProfit = quoteAmount(target_profit_atomic, "atm_cargo.target_profit");
+  invariant(principal > 0n, "ATM_CARGO_PRINCIPAL_REQUIRED", "ATM cargo requires positive restricted principal");
+  const costs = exactAmountRecord(operating_costs, ATM_OPERATING_COST_FIELDS, "atm_cargo.costs");
+  const totalCost = Object.values(costs).reduce((sum, amount) => sum + amount, 0n);
+  const minimumFreightFee = totalCost + targetProfit;
+  const deliveryVerified = delivery_evidence?.status === "DELIVERY_VERIFIED";
+  const settlementVerified = Boolean(freight_settlement_evidence?.tx_hash && freight_settlement_evidence?.receipt_status === "SUCCESS" && freight_settlement_evidence?.amount_atomic === fee.toString());
+  const recognizedRevenue = deliveryVerified && settlementVerified ? fee : 0n;
+  const exactAuthorizationReady = Boolean(
+    exact_dispatch_authorization?.action_id && exact_dispatch_authorization?.policy_hash &&
+    exact_dispatch_authorization?.purpose_hash && exact_dispatch_authorization?.replay_key &&
+    exact_dispatch_authorization?.valid_from && exact_dispatch_authorization?.expires_at
+  );
+  const blockers = [];
+  if (!receiver_escrow_verified) blockers.push("VERIFIED_11520_RECEIVER_ESCROW_REQUIRED");
+  if (!independent_receipt_verifier_ready) blockers.push("INDEPENDENT_RECEIPT_VERIFIER_REQUIRED");
+  if (!durable_replay_ready) blockers.push("DURABLE_REPLAY_REGISTRY_REQUIRED");
+  if (!exactAuthorizationReady) blockers.push("ONE_EXACT_DISPATCH_AUTHORIZATION_REQUIRED");
+  if (fee < minimumFreightFee) blockers.push("FREIGHT_FEE_BELOW_COST_AND_TARGET_PROFIT");
+  return Object.freeze({
+    plan_id, currency, cargo_principal_atomic: principal.toString(), cargo_accounting_class: "RESTRICTED_INVENTORY",
+    restricted_inventory_asset_atomic: principal.toString(), matching_custody_liability_atomic: principal.toString(),
+    freight_fee_atomic: fee.toString(), target_profit_atomic: targetProfit.toString(),
+    operating_costs: Object.freeze(Object.fromEntries(Object.entries(costs).map(([name, amount]) => [name, amount.toString()]))),
+    total_operating_cost_atomic: totalCost.toString(), minimum_freight_fee_atomic: minimumFreightFee.toString(),
+    expected_profit_atomic: (fee - totalCost).toString(), recognized_freight_revenue_atomic: recognizedRevenue.toString(),
+    realized_profit_atomic: (recognizedRevenue - (deliveryVerified ? totalCost : 0n)).toString(),
+    dispatch_status: blockers.length ? "HOLD" : "READY_FOR_EXTERNAL_SIGNER_DISPATCH",
+    blockers: Object.freeze(blockers), delivery_verified: deliveryVerified, freight_settlement_verified: settlementVerified,
+    principal_is_revenue: false, movement_is_revenue: false, mainnet_write_executed: false
+  });
+}
+
+export function underwriteEmployeeLoan({
+  application_id, employee_life_id, employment_evidence, purpose, principal_atomic,
+  annual_interest_bps, subsidy_bps = 0, subsidy_funding_evidence = null, term_months,
+  grace_months = 0, verified_monthly_income_atomic, essential_living_cost_atomic,
+  existing_monthly_debt_atomic, max_debt_service_bps, repayment_source,
+  payroll_deduction_opt_in = false, payroll_deduction_key = null,
+  treasury_status = "NOT_BOUND", loan_escrow_status = "NOT_DEPLOYED",
+  exact_action_authorization = null, currency = "KAIOS"
+}) {
+  requireId(application_id, "application_id");
+  requireId(employee_life_id, "employee_life_id");
+  requireEnum(purpose, EMPLOYEE_LOAN_PURPOSES, "employee_loan.purpose");
+  invariant(currency === "KAIOS", "EMPLOYEE_LOAN_CURRENCY_INVALID", "Employee loans are denominated in KAIOS");
+  const principal = quoteAmount(principal_atomic, "employee_loan.principal");
+  const monthlyIncome = quoteAmount(verified_monthly_income_atomic, "employee_loan.monthly_income");
+  const livingCost = quoteAmount(essential_living_cost_atomic, "employee_loan.living_cost");
+  const existingDebt = quoteAmount(existing_monthly_debt_atomic, "employee_loan.existing_debt");
+  invariant(principal > 0n, "EMPLOYEE_LOAN_PRINCIPAL_REQUIRED", "Loan principal must be positive");
+  invariant(Number.isSafeInteger(term_months) && term_months > 0 && Number.isSafeInteger(grace_months) && grace_months >= 0 && grace_months < term_months, "EMPLOYEE_LOAN_TERM_INVALID", "Loan term and grace period must be explicit valid months");
+  invariant(Number.isSafeInteger(annual_interest_bps) && annual_interest_bps >= 0 && Number.isSafeInteger(subsidy_bps) && subsidy_bps >= 0 && subsidy_bps <= annual_interest_bps, "EMPLOYEE_LOAN_RATE_INVALID", "Interest and subsidy basis points must be non-negative and subsidy cannot exceed interest");
+  invariant(Number.isSafeInteger(max_debt_service_bps) && max_debt_service_bps > 0 && max_debt_service_bps <= 10_000, "EMPLOYEE_LOAN_DSR_INVALID", "Debt-service cap must be 1..10000 basis points");
+  invariant(subsidy_bps === 0 || subsidy_funding_evidence, "EMPLOYEE_LOAN_SUBSIDY_UNFUNDED", "Subsidized interest requires a verified funding source");
+  invariant(!payroll_deduction_opt_in || payroll_deduction_key, "EMPLOYEE_LOAN_DEDUCTION_KEY_REQUIRED", "Opt-in payroll deduction requires an anti-double-deduction key");
+  const employeeVerified = Boolean(employment_evidence?.status === "ACTIVE" && employment_evidence?.employee_life_id === employee_life_id && employment_evidence?.contract_id && employment_evidence?.evidence);
+  const effectiveRateBps = BigInt(annual_interest_bps - subsidy_bps);
+  const interest = ceilDiv(principal * effectiveRateBps * BigInt(term_months), 10_000n * 12n);
+  const totalRepayment = principal + interest;
+  const repaymentMonths = BigInt(term_months - grace_months);
+  const monthlyPayment = ceilDiv(totalRepayment, repaymentMonths);
+  const incomeCap = monthlyIncome * BigInt(max_debt_service_bps) / 10_000n;
+  const disposable = monthlyIncome > livingCost + existingDebt ? monthlyIncome - livingCost - existingDebt : 0n;
+  const repaymentCapacity = disposable < incomeCap ? disposable : incomeCap;
+  const cashFlowPass = monthlyPayment <= repaymentCapacity;
+  const exactApprovalReady = Boolean(exact_action_authorization?.action_id && exact_action_authorization?.policy_hash && exact_action_authorization?.expires_at);
+  const blockers = [];
+  if (!employeeVerified) blockers.push("ACTIVE_EMPLOYMENT_EVIDENCE_REQUIRED");
+  if (!repayment_source) blockers.push("VERIFIED_REPAYMENT_SOURCE_REQUIRED");
+  if (!cashFlowPass) blockers.push("REPAYMENT_CAPACITY_INSUFFICIENT");
+  if (treasury_status !== "BOUND_AND_AUDITED") blockers.push("COMPANY_TREASURY_NOT_READY");
+  if (loan_escrow_status !== "FUNDED_AND_SEGREGATED") blockers.push("EMPLOYEE_LOAN_ESCROW_NOT_READY");
+  if (!exactApprovalReady) blockers.push("ONE_EXACT_LOAN_ACTION_REQUIRED");
+  const decision = !employeeVerified || !cashFlowPass ? "DECLINED" : blockers.length ? "CONDITIONAL" : "READY_FOR_EXACT_APPROVAL";
+  return Object.freeze({
+    application_id, employee_life_id, purpose, currency, decision,
+    principal_atomic: principal.toString(), annual_interest_bps, subsidy_bps, effective_interest_bps: Number(effectiveRateBps),
+    interest_atomic: interest.toString(), total_repayment_atomic: totalRepayment.toString(), monthly_payment_atomic: monthlyPayment.toString(),
+    repayment_capacity_atomic: repaymentCapacity.toString(), term_months, grace_months, repayment_source: repayment_source || null,
+    payroll_deduction_opt_in, payroll_deduction_key: payroll_deduction_key || null, blockers: Object.freeze(blockers),
+    customer_assets_may_fund_loan: false, automatic_salary_deduction: false, life_id_or_personal_property_seizure: false,
+    payment_executed: false, mainnet_write_executed: false
+  });
+}
+
+export function createPrepaidPayrollSchedule({
+  schedule_id, employee_life_id, employer_company_id = "AI_ANT_COMPANY_0001",
+  payment_date, service_period_start, salary_due_date, gross_salary_atomic,
+  employment_evidence = null, compensation_policy_status = "POLICY_REQUIRED",
+  payroll_escrow_status = "NOT_BOUND", exact_action_authorization = null,
+  currency = "KAIOS"
+}) {
+  requireId(schedule_id, "schedule_id");
+  requireId(employee_life_id, "employee_life_id");
+  invariant(currency === "KAIOS", "PREPAID_PAYROLL_CURRENCY_INVALID", "Prepaid payroll is denominated in KAIOS");
+  const paidAt = Date.parse(payment_date);
+  const startsAt = Date.parse(service_period_start);
+  const dueAt = Date.parse(salary_due_date);
+  invariant([paidAt, startsAt, dueAt].every(Number.isFinite) && paidAt <= startsAt && startsAt < dueAt, "PREPAID_PAYROLL_DATES_INVALID", "Prepaid payroll must be paid before the service period and its due date");
+  const gross = quoteAmount(gross_salary_atomic, "prepaid_payroll.gross_salary");
+  const employmentVerified = Boolean(
+    employment_evidence?.status === "ACTIVE" &&
+    employment_evidence?.employee_life_id === employee_life_id &&
+    employment_evidence?.employer_company_id === employer_company_id &&
+    employment_evidence?.contract_id && employment_evidence?.evidence
+  );
+  const exactApprovalReady = Boolean(
+    exact_action_authorization?.action_id && exact_action_authorization?.policy_hash &&
+    exact_action_authorization?.replay_key && exact_action_authorization?.expires_at
+  );
+  const blockers = [];
+  if (gross <= 0n) blockers.push("APPROVED_COMPENSATION_AMOUNT_REQUIRED");
+  if (!employmentVerified) blockers.push("ACTIVE_EMPLOYMENT_EVIDENCE_REQUIRED");
+  if (compensation_policy_status !== "APPROVED") blockers.push("APPROVED_COMPENSATION_POLICY_REQUIRED");
+  if (payroll_escrow_status !== "FUNDED_AND_SEGREGATED") blockers.push("FUNDED_SEGREGATED_PAYROLL_ESCROW_REQUIRED");
+  if (!exactApprovalReady) blockers.push("ONE_EXACT_PREPAID_PAYROLL_ACTION_REQUIRED");
+  return Object.freeze({
+    schedule_id, employee_life_id, employer_company_id, currency,
+    payment_date, service_period_start, salary_due_date,
+    gross_salary_atomic: gross.toString(),
+    payroll_class: "CONTRACTUAL_PREPAID_SALARY",
+    employer_initial_accounting: "PREPAID_COMPENSATION_ASSET",
+    expense_recognition: "RATABLY_OVER_VERIFIED_SERVICE_PERIOD",
+    employee_debt_if_service_completed: false,
+    unearned_amount_recovery: "CONTRACT_AND_LAW_ONLY",
+    life_or_personal_property_seizure: false,
+    status: blockers.length ? "PREPAID_PAYROLL_HOLD" : "READY_FOR_EXACT_PAYROLL_EXECUTION",
+    blockers: Object.freeze(blockers), payment_executed: false, mainnet_write_executed: false
+  });
+}
+
+export function createSalaryAdvanceCreditPlan({
+  plan_id, employee_life_id, future_salary_due_date, verified_future_salary_atomic,
+  requested_advance_atomic, maximum_advance_bps, service_fee_bps = 0,
+  repayment_sources = [], employee_consent = false, employment_evidence = null,
+  salary_receivable_evidence = null, loan_escrow_status = "NOT_DEPLOYED",
+  exact_action_authorization = null, currency = "KAIOS"
+}) {
+  requireId(plan_id, "plan_id");
+  requireId(employee_life_id, "employee_life_id");
+  requireArray(repayment_sources, "salary_advance.repayment_sources");
+  invariant(currency === "KAIOS", "SALARY_ADVANCE_CURRENCY_INVALID", "Salary advances are denominated in KAIOS");
+  invariant(Number.isFinite(Date.parse(future_salary_due_date)) && Date.parse(future_salary_due_date) > Date.now(), "SALARY_ADVANCE_DUE_DATE_INVALID", "Salary advance requires a future payroll due date");
+  invariant(Number.isSafeInteger(maximum_advance_bps) && maximum_advance_bps > 0 && maximum_advance_bps <= 10_000, "SALARY_ADVANCE_LTV_INVALID", "Maximum salary advance must be 1..10000 basis points");
+  invariant(Number.isSafeInteger(service_fee_bps) && service_fee_bps >= 0 && service_fee_bps <= 10_000, "SALARY_ADVANCE_FEE_INVALID", "Salary advance fee must be 0..10000 basis points");
+  const salary = quoteAmount(verified_future_salary_atomic, "salary_advance.future_salary");
+  const requested = quoteAmount(requested_advance_atomic, "salary_advance.requested");
+  const maximum = salary * BigInt(maximum_advance_bps) / 10_000n;
+  const fee = ceilDiv(requested * BigInt(service_fee_bps), 10_000n);
+  const employmentVerified = Boolean(employment_evidence?.status === "ACTIVE" && employment_evidence?.employee_life_id === employee_life_id && employment_evidence?.evidence);
+  const receivableVerified = Boolean(salary_receivable_evidence?.status === "VERIFIED" && salary_receivable_evidence?.employee_life_id === employee_life_id && salary_receivable_evidence?.amount_atomic === salary.toString());
+  const sourceSet = new Set(repayment_sources);
+  const sourcesValid = sourceSet.has("VERIFIED_FUTURE_SALARY") && sourceSet.has("VERIFIED_ATM_SERVICE_FEES");
+  const exactApprovalReady = Boolean(exact_action_authorization?.action_id && exact_action_authorization?.policy_hash && exact_action_authorization?.replay_key && exact_action_authorization?.expires_at);
+  const blockers = [];
+  if (!employmentVerified) blockers.push("ACTIVE_EMPLOYMENT_EVIDENCE_REQUIRED");
+  if (!receivableVerified) blockers.push("VERIFIED_FUTURE_SALARY_RECEIVABLE_REQUIRED");
+  if (!employee_consent) blockers.push("EMPLOYEE_OPT_IN_CONSENT_REQUIRED");
+  if (!sourcesValid) blockers.push("SALARY_AND_ATM_FEE_REPAYMENT_SOURCES_REQUIRED");
+  if (requested <= 0n || requested > maximum) blockers.push("REQUEST_EXCEEDS_VERIFIED_SALARY_ADVANCE_LIMIT");
+  if (loan_escrow_status !== "FUNDED_AND_SEGREGATED") blockers.push("FUNDED_SEGREGATED_ADVANCE_ESCROW_REQUIRED");
+  if (!exactApprovalReady) blockers.push("ONE_EXACT_SALARY_ADVANCE_ACTION_REQUIRED");
+  return Object.freeze({
+    plan_id, employee_life_id, currency, future_salary_due_date,
+    verified_future_salary_atomic: salary.toString(), requested_advance_atomic: requested.toString(),
+    maximum_advance_atomic: maximum.toString(), maximum_advance_bps, service_fee_bps,
+    service_fee_atomic: fee.toString(), total_repayment_atomic: (requested + fee).toString(),
+    repayment_sources: Object.freeze([...repayment_sources]),
+    status: blockers.length ? "SALARY_ADVANCE_HOLD" : "READY_FOR_EXACT_CREDIT_EXECUTION",
+    blockers: Object.freeze(blockers), automatic_salary_deduction: false,
+    customer_deposits_may_fund_advance: false, life_or_personal_property_seizure: false,
+    payment_executed: false, mainnet_write_executed: false
+  });
+}
+
+export function rankAtmExpansionSites({ candidates }) {
+  requireArray(candidates, "atm_expansion.candidates");
+  const ranked = candidates.map((candidate) => {
+    requireFields(candidate, ["node_id", "name", "coordinate", "map_evidence", "observed_demand", "infrastructure_state", "market_activity", "operating_cost_score", "risk_score", "revenue_score"], "AtmExpansionCandidate");
+    requireId(candidate.node_id, "atm_expansion.node_id");
+    invariant(candidate.map_evidence && candidate.coordinate !== null && candidate.coordinate !== undefined, "ATM_SITE_MAP_EVIDENCE_REQUIRED", "ATM expansion must reuse a mapped civilization coordinate");
+    for (const field of ["market_activity", "operating_cost_score", "risk_score", "revenue_score"]) invariant(Number.isFinite(Number(candidate[field])) && Number(candidate[field]) >= 0 && Number(candidate[field]) <= 100, "ATM_SITE_SCORE_INVALID", `${field} must be 0..100`);
+    const demandVerified = Boolean(candidate.observed_demand?.evidence && Number(candidate.observed_demand?.requests ?? 0) > 0);
+    const infrastructureReady = candidate.infrastructure_state === "VERIFIED_READY";
+    const score = Math.round((Number(candidate.market_activity) + Number(candidate.revenue_score) + (100 - Number(candidate.operating_cost_score)) + (100 - Number(candidate.risk_score))) / 4 + (demandVerified ? 25 : 0));
+    const status = demandVerified && infrastructureReady ? "READY_FOR_SITE_PROPOSAL" : demandVerified ? "DEMAND_VERIFIED_CANDIDATE" : "RESEARCH_CANDIDATE";
+    return Object.freeze({ ...candidate, score, status, demand_verified: demandVerified, atm_created: false, revenue_created: false });
+  }).sort((a, b) => b.score - a.score || String(a.node_id).localeCompare(String(b.node_id)));
+  return Object.freeze({
+    status: ranked.some((candidate) => candidate.status === "READY_FOR_SITE_PROPOSAL") ? "SITE_PROPOSAL_CANDIDATE_FOUND" : "OBSERVED_DEMAND_REQUIRED",
+    coordinate_authority: "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+    candidates: Object.freeze(ranked), selected_site: ranked.find((candidate) => candidate.status === "READY_FOR_SITE_PROPOSAL")?.node_id ?? null,
+    atms_created: 0, real_jobs_created: 0
+  });
+}
+
+export function createProjectProfitSharingPlan({
+  plan_id, project_id, author_id, worker_ids, gross_revenue_atomic, direct_cost_atomic,
+  company_share_bps, worker_share_bps, maintenance_reserve_bps, risk_reserve_bps,
+  debt_service_bps = 0, settlement_evidence = null, currency = "KAIOS"
+}) {
+  requireId(plan_id, "plan_id"); requireId(project_id, "project_id"); requireId(author_id, "author_id");
+  requireArray(worker_ids, "profit_sharing.worker_ids");
+  invariant(currency === "KAIOS", "PROFIT_SHARING_CURRENCY_INVALID", "Project sharing is denominated in KAIOS");
+  const bps = [company_share_bps, worker_share_bps, maintenance_reserve_bps, risk_reserve_bps, debt_service_bps];
+  invariant(bps.every((value) => Number.isSafeInteger(value) && value >= 0) && bps.reduce((sum, value) => sum + value, 0) === 10_000, "PROFIT_SHARING_BPS_INVALID", "Profit sharing basis points must be non-negative and total 10000");
+  const gross = quoteAmount(gross_revenue_atomic, "profit_sharing.gross_revenue");
+  const directCost = quoteAmount(direct_cost_atomic, "profit_sharing.direct_cost");
+  invariant(directCost <= gross, "PROJECT_DIRECT_COST_EXCEEDS_REVENUE", "Direct cost cannot exceed settled project revenue");
+  const distributable = gross - directCost;
+  const share = (value) => distributable * BigInt(value) / 10_000n;
+  const settled = Boolean(settlement_evidence?.status === "VERIFIED_SETTLED" && settlement_evidence?.project_id === project_id && settlement_evidence?.amount_atomic === gross.toString());
+  const workerPool = share(worker_share_bps);
+  return Object.freeze({
+    plan_id, project_id, author_id, worker_ids: Object.freeze([...worker_ids]), currency,
+    gross_revenue_atomic: gross.toString(), direct_cost_atomic: directCost.toString(), distributable_profit_atomic: distributable.toString(),
+    company_share_atomic: share(company_share_bps).toString(), worker_pool_atomic: workerPool.toString(),
+    maintenance_reserve_atomic: share(maintenance_reserve_bps).toString(), risk_reserve_atomic: share(risk_reserve_bps).toString(),
+    debt_service_atomic: share(debt_service_bps).toString(), worker_distribution: "REQUIRES_COMPENSATION_POLICY_AND_WORK_EVIDENCE",
+    status: settled ? "PROFIT_SHARING_READY_FOR_ACCOUNTING" : "PROPOSED_UNSETTLED",
+    revenue_recognized: settled, payout_executed: false, mainnet_write_executed: false
+  });
+}
+
+export function createAquacultureProjectDraft({
+  request_id, requester_id = null, requester_confirmation = false, source_evidence = null,
+  location = null, water_source = null, fish_species = null, food_safety_plan = null,
+  market_plan = null, budget_atomic = null, currency = "KAIOS"
+}) {
+  requireId(request_id, "request_id");
+  const evidenceReady = Boolean(requester_id && requester_confirmation && source_evidence);
+  const requirements = { location, water_source, fish_species, food_safety_plan, market_plan, budget_atomic };
+  const missing = Object.entries(requirements).filter(([, value]) => value === null || value === undefined || value === "").map(([name]) => name.toUpperCase());
+  return Object.freeze({
+    project_id: `AQUACULTURE_${request_id}`, request_id, requester_id, currency,
+    project_type: "LAND", product: "EDIBLE_AND_MARKETABLE_FISH_POND",
+    customer_request_verified: evidenceReady, requirements: Object.freeze({ ...requirements }), missing_information: Object.freeze(missing),
+    status: !evidenceReady ? "DRAFT_INTENT_NOT_REAL_REQUEST" : missing.length ? "NEED_MORE_INFO" : "PLANNABLE_NOT_EXECUTABLE_YET",
+    pond_created: false, fish_created: false, quote_created: false, revenue_created: false,
+    next_step: evidenceReady ? (missing.length ? "COLLECT_MISSING_REQUIREMENTS" : "LAND_WATER_SAFETY_AND_BOM_REVIEW") : "REQUESTER_CONFIRMATION_AND_SOURCE_EVIDENCE_REQUIRED"
+  });
+}
+
+export function createAutonomousBusinessWorkOrder({ cycle_id, primary_job_status, candidates }) {
+  requireId(cycle_id, "cycle_id"); requireArray(candidates, "autonomous_work.candidates");
+  invariant(["COMPLETED", "DEGRADED_SAFE"].includes(primary_job_status), "PRIMARY_JOB_BYPASS", "Wukong Gatekeeper duty must complete before autonomous business work");
+  const eligible = candidates.filter((candidate) => {
+    requireFields(candidate, ["work_type", "problem", "priority", "evidence", "safe_to_execute", "required_authority", "expected_result"], "AutonomousBusinessCandidate");
+    requireEnum(candidate.work_type, AUTONOMOUS_BUSINESS_WORK_TYPES, "autonomous_work.work_type");
+    return candidate.evidence && candidate.safe_to_execute === true && ["READ_ONLY", "LOCAL_R0_R1"].includes(candidate.required_authority);
+  }).sort((a, b) => Number(a.priority) - Number(b.priority) || String(a.work_type).localeCompare(String(b.work_type)));
+  const selected = eligible[0] ?? null;
+  return Object.freeze({
+    work_order_id: selected ? `AUTO_${cycle_id}_${selected.work_type}` : `AUTO_${cycle_id}_NO_SAFE_WORK`,
+    cycle_id, primary_job_status, status: selected ? "READY" : "BLOCKED_NO_EVIDENCED_SAFE_WORK",
+    selected_work: selected ? Object.freeze({ ...selected }) : null,
+    customer_created: false, revenue_created: false, settlement_created: false, mainnet_write_authorized: false,
+    next_action: selected?.work_type ?? "COLLECT_VERIFIABLE_DEMAND_EVIDENCE"
+  });
 }
 
 export const NVIDIA_GPU_11520_ROUTE = Object.freeze({
