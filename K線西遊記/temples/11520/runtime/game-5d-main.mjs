@@ -78,6 +78,27 @@ const avatar=new THREE.Group();avatar.userData.isPlayer=true;scene.add(avatar);l
 const lifeVisuals=new Map(),lifeVisualPending=new Set();async function ensureLifeVisual(m){if(m.state==='DEAD'||!(m.name||m.baseName))return null;const key=`${m.lifeId||m.id}|${m.species}`;const current=lifeVisuals.get(m.id);if(current?.key===key)return current.root;if(current){scene.remove(current.root);lifeVisuals.delete(m.id)}if(lifeVisualPending.has(m.id))return null;lifeVisualPending.add(m.id);try{const v=await createLifeVisual(THREE,{species:m.species,name:m.baseName||m.name,scale:.75});v.root.userData.worldMonsterId=m.id;v.root.userData.lifeId=m.lifeId||null;v.root.traverse?.(n=>{n.userData.worldMonsterId=m.id;n.userData.lifeId=m.lifeId||null});scene.add(v.root);lifeVisuals.set(m.id,{key,root:v.root,mode:v.mode});return v.root}finally{lifeVisualPending.delete(m.id)}}
 function syncLifeVisuals(){for(const m of world.monsters){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m)}}
 
+function lifeCanvasHitPoints(lifeId){
+  const monster=world.monsters.find(m=>String(m.lifeId||'')===String(lifeId||''));
+  const visual=monster&&lifeVisuals.get(monster.id);
+  if(!monster||!visual?.root?.visible)return Object.freeze([]);
+  const rect=renderer.domElement.getBoundingClientRect(),points=[],seen=new Set();
+  const projectPoint=point=>{
+    const projected=point.clone().project(camera);
+    if(!Number.isFinite(projected.x)||!Number.isFinite(projected.y)||!Number.isFinite(projected.z)||projected.z< -1||projected.z>1)return;
+    const clientX=rect.left+(projected.x+1)*rect.width/2,clientY=rect.top+(1-projected.y)*rect.height/2;
+    if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return;
+    const key=`${Math.round(clientX*10)}:${Math.round(clientY*10)}`;
+    if(seen.has(key))return;seen.add(key);
+    points.push(Object.freeze({clientX,clientY,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
+  };
+  visual.root.updateWorldMatrix(true,true);
+  projectPoint(new THREE.Box3().setFromObject(visual.root).getCenter(new THREE.Vector3()));
+  visual.root.traverse?.(node=>{if(node?.isMesh&&node.visible!==false)projectPoint(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()))});
+  return Object.freeze(points);
+}
+globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints});
+
 const raycaster=new THREE.Raycaster(),tapPointer=new THREE.Vector2(),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);let worldTapStart=null;
 function ancestorData(obj,key){let n=obj;while(n){if(n.userData&&n.userData[key]!=null)return n.userData[key];n=n.parent}return null}
 function objectEntity(o){return{objectName:o.name||o.label||o.id||o.kind||'世界物件',objectType:o.kind||'WORLD_OBJECT',lifeId:o.lifeId||null,x:Number(o.x)||0,y:Number(o.y)||0,z:Number(o.z)||0,functionText:o.functionText||o.purpose||'11520 世界設施／物件',interactionText:o.interactionText||'查看、導航、接近後互動'}}
