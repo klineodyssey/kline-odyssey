@@ -1,0 +1,67 @@
+{
+  "schema_version": "KAIOS_PR_SUPERSEDED_CLOSEOUT_V1",
+  "task_id": "KAIOS-11520-PR209-SUPERSEDED-CLOSEOUT-R0-20260914",
+  "generated_at": "2026-09-13T19:20:00Z",
+  "operator": "chatgpt-01",
+  "risk": "R0",
+  "target_pr": 209,
+  "target_pr_state_before": "OPEN_DRAFT",
+  "target_pr_head": "acbcf8abe96fc17fa0b6ef01269bde6036e9c9be",
+  "target_pr_base": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "merge_base_with_current_main": "cb0d8fbe260970fb48024e75f56afe98b9ea85ef",
+  "exact_main_base": "4ba9ca77e6e08b9fa2515209f667b3b02054aca4",
+  "divergence": {
+    "main_ahead_by": 394,
+    "pr_unique_commits": 41,
+    "status": "DIVERGED",
+    "github_mergeable": false
+  },
+  "changed_file_count": 18,
+  "decision": "CLOSE_UNMERGED_AS_SUPERSEDED",
+  "findings": {
+    "exact_blob_absorbed": [
+      "K線西遊記/temples/11520/runtime/map-object-navigation-runtime.mjs"
+    ],
+    "enhanced_or_replaced_on_main": [
+      ".github/workflows/11520-game-product-qa.yml",
+      "K線西遊記/temples/11520/game-5d.html",
+      "K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs",
+      "K線西遊記/temples/11520/runtime/game-5d-main.mjs",
+      "K線西遊記/temples/11520/runtime/game-ui-product-fixes.mjs",
+      "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs",
+      "K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs",
+      "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs",
+      "K線西遊記/temples/11520/tests/11520-spatial-navigation.test.mjs",
+      "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs",
+      "tests/11520-product-standard.test.mjs"
+    ],
+    "obsolete_interview_or_preview_only": [
+      "K線西遊記/temples/11520/JIEYAO_INTERVIEW_RETEST_V2.md",
+      "K線西遊記/temples/11520/game-5d-v24-loader.html",
+      "K線西遊記/temples/11520/game-5d-v24-playtest.html",
+      "preview-11520-v24.html"
+    ],
+    "excluded_unintegrated_candidate": [
+      "K線西遊記/temples/11520/runtime/capture-runtime.mjs",
+      "K線西遊記/temples/11520/tests/11520-capture-runtime.test.mjs"
+    ]
+  },
+  "excluded_candidate_reason": "The capture prototype is not wired to canonical Life authority, durable replay, custody, or the current UI; it uses injected/random resolution and must not be smuggled into a superseded closeout.",
+  "ui_runtime_changed": false,
+  "protected_actions": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "signer": false,
+    "private_keys": false,
+    "worker_or_life_activation": false,
+    "external_agent": false
+  },
+  "acceptance": {
+    "closeout_manifest_json_parses": true,
+    "report_records_exact_shas": true,
+    "old_pr_must_not_merge": true,
+    "close_old_pr_only_after_closeout_pr_merge": true
+  }
+}
