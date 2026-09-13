@@ -1,7 +1,7 @@
 # KAIOS AI Agent Handoff Protocol V1.0
 
-Status: READY_FOR_HUMAN_ARCHITECTURE_REVIEW  
-Runtime Implementation: NOT_STARTED  
+Status: LOCAL_VALIDATOR_CANDIDATE
+Runtime Implementation: HASH_BOUND_VALIDATION_ONLY
 Cursor Dispatch: NOT_DISPATCHED
 
 ## Rule
@@ -86,8 +86,62 @@ Every handoff evidence path must include source provenance: source path, source 
 
 ## Architecture Boundary
 
-This protocol does not implement file writers, automation, databases, schedulers or live enforcement. It defines the required contract for future implementation.
+This protocol does not implement a live cross-session transport, file writer, database, scheduler, Agent wake-up or public posting. Runtime V0.1 now validates a handoff envelope and its append-only audit chain locally; transport and durable persistence remain unimplemented.
+
+## V1.1 Instance-Bound Handoff Candidate
+
+The local candidate reuses Company Boot Runtime V0.1. It does not create a second Company OS.
+
+An identity name, Life ID or Worker ID in a message is a claim until an independently supplied active instance registry binds all four values:
+
+- `SELF_NAME`
+- `LIFE_ID`
+- `WORKER_ID`
+- `INSTANCE_ID`
+
+No delivery is valid without both a verified sender instance and a verified recipient instance. A missing recipient returns `MISSING_VERIFIED_REPLY_TARGET`; the sender must not guess a session ID or broadcast.
+
+The immutable message envelope contains:
+
+- `MESSAGE_ID`
+- `CORRELATION_ID`
+- `IDEMPOTENCY_KEY`
+- full sender and recipient identity tuples
+- `CREATED_AT`
+- `REPOSITORY`
+- `BASE_SHA`
+- `HEAD_SHA`
+- `PAYLOAD`
+- `PAYLOAD_SHA256`
+- `MESSAGE_SHA256`
+- `REPLY_TO`
+- initial ACK, decision and delivery states
+- `SIGNATURE_TYPE`
+- an explicit all-false protected-action safety boundary
+
+`MESSAGE_SHA256` binds the canonical JSON envelope excluding only its own hash field. `PAYLOAD_SHA256` independently binds canonical JSON payload content. Exact replay of both Message ID and idempotency key is an `IDEMPOTENT_NOOP`; conflicting replay fails closed.
+
+The append-only audit trail uses:
+
+```text
+CREATED
+-> QUEUED
+-> DELIVERED
+-> ACKNOWLEDGED
+-> ANSWERED
+-> REVIEWED
+```
+
+Any non-terminal step may instead become `FAILED_CLOSED`. Each event binds the message hash and previous event hash. The verified recipient—not the sender—must author `ACKNOWLEDGED` and `ANSWERED`. `REVIEWED` requires a third verified instance distinct from sender and recipient. This enforces ACK non-impersonation and forbids self-review.
+
+Current transport decision:
+
+- repository documents and GitHub artifacts remain the durable evidence bus;
+- saved Codex session resume is session continuation, not an authenticated cross-Life mailbox;
+- remote-control or UI follow-up queueing does not itself prove a Life/Worker/Instance binding;
+- no live verified reply target is recorded for the current mobile instance;
+- therefore automatic delivery remains `BLOCKED_MISSING_VERIFIED_REPLY_TARGET`.
 
 ## Result
 
-READY_FOR_BASELINE_REVIEW
+LOCAL_VALIDATOR_CANDIDATE_REQUIRES_DISTINCT_REVIEW
