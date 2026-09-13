@@ -1865,3 +1865,379 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     company_status: company.status
   });
 }
+
+export const DEMAND_TO_PRODUCT_STAGES = Object.freeze([
+  "OBSERVE_REAL_STATE", "DETECT_FRICTION", "VERIFIED_DEMAND", "SEARCH_EXISTING_PRODUCT",
+  "REUSE_OR_BUY", "DESIGN_IF_MISSING", "IMPLEMENT", "TEST", "COST_MODEL", "PRICE_MODEL",
+  "11520_LISTING", "REAL_SALE", "REAL_REVENUE", "PERFORMANCE_FEEDBACK", "NEXT_DEMAND"
+]);
+
+export const AUTONOMOUS_PRODUCT_DEMAND_MAP = Object.freeze({
+  PRE_PAYDAY_LIQUIDITY_NEED: "KAIOS_ATM_APP",
+  ROUTE_UNKNOWN: "KAIOS_NAVIGATION_APP",
+  NO_STORAGE: "KAIOS_WAREHOUSE_APP",
+  NO_FOOD: "KAIOS_FOOD_SERVICE_APP",
+  NO_ENERGY: "KAIOS_CHARGING_SERVICE_APP",
+  NO_SETTLEMENT: "KAIOS_SETTLEMENT_APP"
+});
+
+export function createAutonomousDemandToProductCycle({ cycleId, observations = [], existingProducts = [] }) {
+  requireId(cycleId, "demand_product_cycle_id");
+  requireArray(observations, "demand_product.observations");
+  requireArray(existingProducts, "demand_product.existing_products");
+  for (const product of existingProducts) requireFields(product, ["product_id", "status"], "ExistingProduct");
+  const observedProductIds = new Set();
+  const decisions = [];
+  for (const observation of observations) {
+    requireFields(observation, ["observation_id", "friction", "verification_status", "evidence"], "DemandObservation");
+    requireId(observation.observation_id, "observation_id");
+    invariant(["VERIFIED", "CANDIDATE", "REJECTED"].includes(observation.verification_status), "DEMAND_VERIFICATION_STATUS_INVALID", "Demand observations must be VERIFIED, CANDIDATE or REJECTED");
+    invariant(observation.verification_status !== "VERIFIED", "DEMAND_EVIDENCE_VERIFIER_NOT_BOUND", "Verified demand is blocked because the demand evidence verifier is not repository-bound");
+    const productId = AUTONOMOUS_PRODUCT_DEMAND_MAP[observation.friction] ?? null;
+    if (!productId || observation.verification_status === "REJECTED" || observedProductIds.has(productId)) continue;
+    observedProductIds.add(productId);
+    const existing = existingProducts.find((product) => product?.product_id === productId && !["RETIRED", "NOT_FOUND"].includes(product?.status));
+    decisions.push(Object.freeze({
+      observation_id: observation.observation_id,
+      friction: observation.friction,
+      demand_verified: observation.verification_status === "VERIFIED",
+      evidence: observation.evidence ?? null,
+      product_id: productId,
+      existing_product_status: existing?.status ?? "NOT_FOUND",
+      action: existing ? "REUSE_EXISTING_PRODUCT" : "PROPOSE_PRODUCT_CANDIDATE",
+      build_duplicate: false,
+      customer_order: false,
+      revenue: "0"
+    }));
+  }
+  const verifiedDemandCount = decisions.filter((decision) => decision.demand_verified).length;
+  return Object.freeze({
+    engine_id: "AI_ANT_COMPANY_DEMAND_TO_PRODUCT_ENGINE_V1_1",
+    company_id: "AI_ANT_COMPANY_0001",
+    cycle_id: cycleId,
+    stages: DEMAND_TO_PRODUCT_STAGES,
+    decisions: Object.freeze(decisions),
+    real_demands_found: verifiedDemandCount,
+    candidate_demands_found: decisions.length - verifiedDemandCount,
+    products_reused: decisions.filter((decision) => decision.action === "REUSE_EXISTING_PRODUCT").map((decision) => decision.product_id),
+    new_products_proposed: decisions.filter((decision) => decision.action === "PROPOSE_PRODUCT_CANDIDATE").map((decision) => decision.product_id),
+    real_customers: 0,
+    real_sales: 0,
+    real_revenue: "0",
+    chain_write: false,
+    status: decisions.length ? "DEMAND_PRODUCT_DECISIONS_READY" : "NO_SUPPORTED_EVIDENCED_DEMAND"
+  });
+}
+
+export const KAIOS_ATM_ADVANCE_POLICY_CANDIDATE = Object.freeze({
+  policy_id: "KAIOS_ATM_PAYDAY_ADVANCE_POLICY_CANDIDATE_V1",
+  status: "SIMULATION_ONLY_NOT_CANON_NOT_LIVE",
+  maximum_advance_bps: 3000,
+  service_fee_bps: 100,
+  minimum_fee_kaios_wei: "100000000000000000",
+  maximum_fee_kaios_wei: "5000000000000000000",
+  compound_interest: false,
+  rolling_debt: false,
+  arbitrary_wallet_drain: false,
+  arbitrary_mint: false,
+  liquidity_source: "PREFUNDED_LIQUIDITY_OR_FORMALLY_AUTHORIZED_SOURCE_ONLY"
+});
+
+function kaiosWei(value, field) {
+  return quoteAmount(value, field);
+}
+
+export function createKaiosAtmAdvanceSimulation({ advanceId, debtorLifeId, accruedPayrollKaiosWei, requestedKaiosWei, atmLiquidityKaiosWei, existingDebtKaiosWei = "0" }) {
+  requireId(advanceId, "advance_id");
+  requireId(debtorLifeId, "debtor_life_id");
+  const accrued = kaiosWei(accruedPayrollKaiosWei, "accrued_payroll_kaios_wei");
+  const requested = kaiosWei(requestedKaiosWei, "requested_kaios_wei");
+  const liquidity = kaiosWei(atmLiquidityKaiosWei, "atm_liquidity_kaios_wei");
+  const existingDebt = kaiosWei(existingDebtKaiosWei, "existing_debt_kaios_wei");
+  invariant(accrued > 0n, "ATM_NO_ACCRUED_PAYROLL", "Payday advance requires machine-verified accrued payroll");
+  invariant(requested > 0n, "ATM_ADVANCE_AMOUNT_INVALID", "Requested advance must be positive");
+  invariant(existingDebt === 0n, "ATM_ROLLING_DEBT_FORBIDDEN", "A new advance cannot roll an existing debt");
+  const maximumAdvance = accrued * BigInt(KAIOS_ATM_ADVANCE_POLICY_CANDIDATE.maximum_advance_bps) / 10000n;
+  invariant(requested <= maximumAdvance, "ATM_ADVANCE_OVER_LIMIT", "Advance cannot exceed 30% of machine-verified accrued payroll");
+  invariant(liquidity >= requested, "ATM_INSUFFICIENT_LIQUIDITY", "ATM requires prefunded liquidity for the requested advance");
+  const proportionalFee = requested * BigInt(KAIOS_ATM_ADVANCE_POLICY_CANDIDATE.service_fee_bps) / 10000n;
+  const minimumFee = BigInt(KAIOS_ATM_ADVANCE_POLICY_CANDIDATE.minimum_fee_kaios_wei);
+  const maximumFee = BigInt(KAIOS_ATM_ADVANCE_POLICY_CANDIDATE.maximum_fee_kaios_wei);
+  const fee = proportionalFee < minimumFee ? minimumFee : proportionalFee > maximumFee ? maximumFee : proportionalFee;
+  return Object.freeze({
+    advance_id: advanceId,
+    debtor_life_id: debtorLifeId,
+    accrued_payroll_kaios_wei: accrued.toString(),
+    maximum_advance_kaios_wei: maximumAdvance.toString(),
+    principal_kaios_wei: requested.toString(),
+    service_fee_kaios_wei: fee.toString(),
+    total_repayment_kaios_wei: (requested + fee).toString(),
+    liquidity_before_kaios_wei: liquidity.toString(),
+    modeled_liquidity_after_kaios_wei: (liquidity - requested).toString(),
+    compound_interest: false,
+    rolling_debt: false,
+    arbitrary_wallet_drain: false,
+    arbitrary_mint: false,
+    real_transfer: false,
+    status: "SIMULATION_ONLY_GOVERNANCE_POLICY_REQUIRED"
+  });
+}
+
+export function createKaiosAtmRepaymentCandidate({ repaymentId, advance, payerLifeId, repaymentKaiosWei, usedRepaymentIds = [] }) {
+  requireId(repaymentId, "repayment_id");
+  requireArray(usedRepaymentIds, "used_repayment_ids");
+  invariant(!usedRepaymentIds.includes(repaymentId), "ATM_DUPLICATE_REPAYMENT", "Repayment evidence cannot be reused");
+  invariant(advance?.debtor_life_id === payerLifeId, "ATM_DEBTOR_ISOLATION", "One Life cannot repay or mutate another Life's debt without separate authority");
+  invariant(kaiosWei(repaymentKaiosWei, "repayment_kaios_wei") === kaiosWei(advance.total_repayment_kaios_wei, "total_repayment_kaios_wei"), "ATM_REPAYMENT_AMOUNT_MISMATCH", "Repayment candidate must match principal plus the simple service fee");
+  return Object.freeze({ repayment_id: repaymentId, advance_id: advance.advance_id, payer_life_id: payerLifeId, repayment_kaios_wei: String(repaymentKaiosWei), replay_consumed: false, durable_replay_registry: "NOT_BOUND", real_transfer: false, status: "REPAYMENT_CANDIDATE_DURABLE_REPLAY_REQUIRED" });
+}
+
+export function createKaiosAtmProductCandidate({ demandDecision, ownerId = "AI_ANT_COMPANY_0001" }) {
+  invariant(demandDecision?.product_id === "KAIOS_ATM_APP", "KAIOS_ATM_DEMAND_REQUIRED", "KAIOS ATM candidate requires the matching Demand-to-Product decision");
+  return Object.freeze({
+    product_id: "KAIOS_ATM_APP",
+    company_id: "AI_ANT_COMPANY_0001",
+    owner_id: ownerId,
+    product_class: "APP_SERVICE_EQUIPMENT_CANDIDATE",
+    market: "LIFE_ORGAN_APP_MARKET",
+    capabilities: Object.freeze(["KAIOS_BALANCE_VIEW", "KAIOS_WITHDRAWAL_CANDIDATE", "KAIOS_DEPOSIT_CANDIDATE", "PAYDAY_ADVANCE_SIMULATION", "LIQUIDITY_STATUS", "LOCATION", "SERVICE_FEE", "RECEIPT", "MAINTENANCE", "11520_LISTING"]),
+    liquidity_model: "PREFUNDED_ONLY",
+    advance_policy: KAIOS_ATM_ADVANCE_POLICY_CANDIDATE,
+    arbitrary_mint: false,
+    arbitrary_drain: false,
+    chain_write: false,
+    financial_policy_live: false,
+    status: "IMPLEMENTED_REVIEW_CANDIDATE_NOT_LIVE",
+    listing: Object.freeze({
+      listing_id: "11520_LISTING_KAIOS_ATM_APP_CANDIDATE",
+      asset_id: "KAIOS_ATM_APP",
+      seller_id: ownerId,
+      listing_type: "SERVICE",
+      currency_id: null,
+      price: null,
+      quantity: 1,
+      rights_offered: Object.freeze(["use_right", "license_right"]),
+      start_time: null,
+      end_time: null,
+      status: "LOCAL_DRAFT",
+      pricing_status: "UNPRICED",
+      registry_scope: "LOCAL_11520_CANDIDATE",
+      settlement_status: "NOT_DEPLOYED",
+      identity_right_offered: false,
+      purchase_status: "NOT_AVAILABLE",
+      installation_status: "NOT_INSTALLED",
+      maintenance_status: "POLICY_REQUIRED",
+      resale_status: "POLICY_REQUIRED"
+    })
+  });
+}
+
+export const KAIOS_NAVIGATION_REUSED_COMPONENTS = Object.freeze([
+  "LocationPermission", "GpsSession", "StepCounter", "MapPosition",
+  "LandEntryEvent", "BirthplaceBinding", "FieldRoute", "11520_Listing"
+]);
+
+export function createKaiosNavigationProductCandidate({ demandDecision, requesterLifeId, ownerId = "AI_ANT_COMPANY_0001" }) {
+  invariant(demandDecision?.product_id === "KAIOS_NAVIGATION_APP", "KAIOS_NAVIGATION_DEMAND_REQUIRED", "KAIOS Navigation candidate requires the matching Demand-to-Product decision");
+  invariant(demandDecision.action === "PROPOSE_PRODUCT_CANDIDATE", "KAIOS_NAVIGATION_DUPLICATE_BUILD_FORBIDDEN", "An existing Navigation product must be reused instead of rebuilt");
+  requireId(requesterLifeId, "navigation_requester_life_id");
+  return Object.freeze({
+    product_id: "KAIOS_NAVIGATION_APP",
+    company_id: "AI_ANT_COMPANY_0001",
+    owner_id: ownerId,
+    requester_life_id: requesterLifeId,
+    product_class: "LIFE_ORGAN_APP_CANDIDATE",
+    market: "LIFE_ORGAN_APP_MARKET",
+    reused_runtime_components: KAIOS_NAVIGATION_REUSED_COMPONENTS,
+    capabilities: Object.freeze(["CURRENT_POSITION", "DESTINATION", "ROUTE", "DISTANCE", "TRAVEL_TIME", "ENERGY_REQUIREMENT", "TRANSPORT_COST", "MAP_EVIDENCE", "ARRIVAL_EVIDENCE", "NON_LOCATION_MODE"]),
+    precise_gps_required: false,
+    background_tracking: false,
+    external_customer: false,
+    customer_revenue: "0",
+    chain_write: false,
+    status: "IMPLEMENTED_REVIEW_CANDIDATE_NOT_LIVE",
+    listing: Object.freeze({
+      listing_id: "11520_LISTING_KAIOS_NAVIGATION_APP_CANDIDATE",
+      asset_id: "KAIOS_NAVIGATION_APP",
+      seller_id: ownerId,
+      listing_type: "LICENSE",
+      currency_id: null,
+      price: null,
+      quantity: 1,
+      rights_offered: Object.freeze(["use_right", "license_right"]),
+      start_time: null,
+      end_time: null,
+      status: "LOCAL_DRAFT",
+      pricing_status: "UNPRICED",
+      registry_scope: "LOCAL_11520_CANDIDATE",
+      settlement_status: "NOT_DEPLOYED",
+      identity_right_offered: false,
+      purchase_status: "NOT_AVAILABLE",
+      installation_status: "NOT_INSTALLED",
+      maintenance_status: "POLICY_REQUIRED",
+      resale_status: "POLICY_REQUIRED"
+    })
+  });
+}
+
+export function createKaiosNavigationRouteCandidate({ routeId, requesterLifeId, locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition, fieldRoute, energyRequirement = null, transportCostKaiosWei = null, arrivalEvidence = null }) {
+  requireId(routeId, "navigation_route_id");
+  requireId(requesterLifeId, "navigation_requester_life_id");
+  validateLocationPermission(locationPermission);
+  validateGpsSession(gpsSession);
+  validateStepCounter(stepCounter);
+  validateMapPosition(currentPosition);
+  validateMapPosition(destinationPosition);
+  validateFieldRoute(fieldRoute);
+  for (const entity of [locationPermission, gpsSession, stepCounter, currentPosition, destinationPosition]) {
+    invariant(entity.subject_id === requesterLifeId, "NAVIGATION_SUBJECT_MISMATCH", "Navigation permission, session, counter and positions must belong to the requesting Life");
+  }
+  invariant(gpsSession.permission_id === null || gpsSession.permission_id === locationPermission.permission_id, "NAVIGATION_PERMISSION_MISMATCH", "GPS session must reference the supplied Location Permission");
+  invariant(stepCounter.gps_session_id === null || stepCounter.gps_session_id === gpsSession.gps_session_id, "NAVIGATION_SESSION_MISMATCH", "Step Counter must reference the supplied GPS session");
+  for (const position of [currentPosition, destinationPosition]) {
+    invariant(position.location_permission_id === null || position.location_permission_id === locationPermission.permission_id, "NAVIGATION_PERMISSION_MISMATCH", "Map positions must reference the supplied Location Permission");
+  }
+  const activePreciseGpsSession = locationPermission.status === "GRANTED"
+    && Boolean(locationPermission.granted_at)
+    && locationPermission.revoked_at === null
+    && gpsSession.status === "ACTIVE"
+    && Boolean(gpsSession.started_at)
+    && gpsSession.ended_at === null
+    && gpsSession.permission_id === locationPermission.permission_id;
+  invariant(gpsSession.coordinates_stored !== true || activePreciseGpsSession, "NAVIGATION_PRECISE_GPS_WITHOUT_CONSENT", "Precise GPS storage requires an active, unrevoked permission and an unended matching GPS session");
+  const positionCoordinatesPresent = [currentPosition, destinationPosition].some((position) => position.coordinates !== null);
+  invariant(!positionCoordinatesPresent || (activePreciseGpsSession && gpsSession.coordinates_stored === true), "NAVIGATION_PRECISE_POSITION_WITHOUT_CONSENT", "Precise MapPosition coordinates require the same active consent-bound GPS session");
+  invariant(currentPosition.location_id === fieldRoute.origin && destinationPosition.location_id === fieldRoute.destination, "NAVIGATION_ROUTE_POSITION_MISMATCH", "Map positions must match the evidenced FieldRoute endpoints");
+  const energyKnown = energyRequirement !== null && Number(energyRequirement) >= 0;
+  const costKnown = transportCostKaiosWei !== null;
+  const normalizedCost = costKnown ? kaiosWei(transportCostKaiosWei, "navigation_transport_cost_kaios_wei").toString() : "POLICY_REQUIRED";
+  const nonLocationMode = !activePreciseGpsSession;
+  return Object.freeze({
+    route_id: routeId,
+    requester_life_id: requesterLifeId,
+    current_position: currentPosition.location_id,
+    destination: destinationPosition.location_id,
+    route: Object.freeze([...fieldRoute.route]),
+    distance: fieldRoute.distance,
+    travel_time: fieldRoute.travel_time,
+    energy_requirement: energyKnown ? Number(energyRequirement) : "MODEL_REQUIRED",
+    transport_cost_kaios_wei: normalizedCost,
+    map_evidence: fieldRoute.map_evidence,
+    arrival_evidence: arrivalEvidence,
+    arrival_status: arrivalEvidence ? "ARRIVAL_EVIDENCE_CANDIDATE" : "NOT_ARRIVED",
+    non_location_mode: nonLocationMode,
+    precise_gps_stored: gpsSession.coordinates_stored === true,
+    real_movement_claimed: false,
+    status: energyKnown && costKnown ? "ROUTE_CANDIDATE_COMPLETE" : "ROUTE_CANDIDATE_COST_OR_ENERGY_INCOMPLETE"
+  });
+}
+
+export function createNavigationLifeOrganInstallationCandidate({ product, lifeId }) {
+  invariant(product?.product_id === "KAIOS_NAVIGATION_APP", "KAIOS_NAVIGATION_PRODUCT_REQUIRED", "Installation candidate requires the KAIOS Navigation App product");
+  requireId(lifeId, "navigation_installation_life_id");
+  return Object.freeze({
+    installation_id: `INSTALL_${product.product_id}_${lifeId}`,
+    product_id: product.product_id,
+    life_id: lifeId,
+    listing_id: product.listing.listing_id,
+    listing_status: product.listing.status,
+    purchase_status: "NOT_PURCHASED",
+    payment_status: "NOT_PAID",
+    installation_status: "NOT_INSTALLED",
+    settlement_evidence: null,
+    chain_write: false,
+    status: "INSTALLATION_CANDIDATE_WAITING_FOR_FORMAL_LISTING_PURCHASE_AND_SETTLEMENT"
+  });
+}
+
+export function calculateKaiosAtmEconomics({ feeRevenueKaiosWei = "0", feeSettlementEvidence = null, costs = {}, humanRelayCostKaiosWei = null }) {
+  const revenue = kaiosWei(feeRevenueKaiosWei, "atm_fee_revenue_kaios_wei");
+  invariant(revenue === 0n, "ATM_SETTLEMENT_VERIFIER_NOT_BOUND", "ATM Revenue cannot be recognized until a repository-bound settlement verifier exists");
+  const costFields = ["liquidity_cost_kaios_wei", "energy_cost_kaios_wei", "transport_cost_kaios_wei", "location_cost_kaios_wei", "maintenance_cost_kaios_wei", "network_cost_kaios_wei", "security_cost_kaios_wei", "depreciation_kaios_wei"];
+  const normalizedCosts = Object.fromEntries(costFields.map((field) => [field, kaiosWei(costs[field] ?? "0", field).toString()]));
+  const knownCosts = Object.values(normalizedCosts).reduce((sum, value) => sum + BigInt(value), 0n);
+  const relayPolicyPending = humanRelayCostKaiosWei === null;
+  const relayCost = relayPolicyPending ? 0n : kaiosWei(humanRelayCostKaiosWei, "human_relay_cost_kaios_wei");
+  return Object.freeze({
+    revenue_kaios_wei: revenue.toString(),
+    costs: Object.freeze(normalizedCosts),
+    known_operating_cost_kaios_wei: knownCosts.toString(),
+    human_relay_cost_kaios_wei: relayPolicyPending ? "POLICY_REQUIRED" : relayCost.toString(),
+    net_profit_kaios_wei: relayPolicyPending ? "POLICY_REQUIRED" : (revenue - knownCosts - relayCost).toString(),
+    revenue_evidence: null,
+    real_revenue: false,
+    status: relayPolicyPending ? "COST_INCOMPLETE_HUMAN_LABOR_RATE_REQUIRED" : "SIMULATION_COMPLETE_ZERO_REVENUE_ONLY"
+  });
+}
+
+export function appendHumanRelayLaborEvent(events, event) {
+  requireArray(events, "human_relay_events");
+  requireFields(event, ["relay_id", "from_actor", "to_actor", "document_id", "start_time", "end_time", "round_trip_count", "status"], "HumanRelayLaborEvent");
+  requireId(event.relay_id, "relay_id");
+  requireId(event.document_id, "relay_document_id");
+  invariant(!events.some((existing) => existing.relay_id === event.relay_id), "HUMAN_RELAY_REPLAY", "Relay events are append-only and relay IDs cannot be reused");
+  invariant(event.from_actor !== event.to_actor, "HUMAN_RELAY_ACTOR_COLLISION", "Human relay requires distinct sender and receiver actors");
+  invariant(Number.isInteger(event.round_trip_count) && event.round_trip_count >= 1, "HUMAN_RELAY_ROUND_TRIP_INVALID", "Relay round-trip count must be a positive integer");
+  invariant(["COMPLETED", "PARTIAL", "FAILED_CLOSED"].includes(event.status), "HUMAN_RELAY_STATUS_INVALID", "Relay status is invalid");
+  const start = Date.parse(event.start_time);
+  const end = Date.parse(event.end_time);
+  invariant(Number.isFinite(start) && Number.isFinite(end) && end > start, "HUMAN_RELAY_TIME_INVALID", "Relay timestamps must be valid, ordered and non-zero; unknown labor time cannot be recorded as free work");
+  const normalized = Object.freeze({ ...event, candidate_duration_minutes: Number(((end - start) / 60000).toFixed(6)), authoritative_labor: false, evidence_status: "UNVERIFIED_CANDIDATE", payable_amount: "NOT_CALCULATED_RATE_PENDING" });
+  return Object.freeze([...events, normalized]);
+}
+
+export function summarizeHumanRelayLaborLedger(events, humanLaborRateKaiosPerMinute = null) {
+  requireArray(events, "human_relay_events");
+  const candidateMinutes = Number(events.reduce((sum, event) => sum + Number(event.candidate_duration_minutes ?? 0), 0).toFixed(6));
+  invariant(humanLaborRateKaiosPerMinute === null, "HUMAN_LABOR_RATE_POLICY_NOT_APPROVED", "The current Human relay labor rate is policy-required and cannot be invented by this Runtime");
+  return Object.freeze({
+    ledger_id: "AI_ANT_COMPANY_HUMAN_RELAY_LABOR_LEDGER_V1",
+    event_count: events.length,
+    candidate_human_relay_minutes: candidateMinutes,
+    accrued_human_relay_minutes: 0,
+    authoritative_labor_events: 0,
+    human_labor_evidence: events.length ? "UNVERIFIED_CANDIDATE" : "NONE",
+    human_labor_rate: "POLICY_REQUIRED",
+    payable_amount: "NOT_CALCULATED_RATE_PENDING",
+    payment_sent: false,
+    status: events.length ? "UNVERIFIED_RELAY_CANDIDATES_EVIDENCE_AND_RATE_PENDING" : "NO_RELAY_EVENTS"
+  });
+}
+
+export function createCompanyCycleFinancialReport({ cycleId, revenueKaiosWei = "0", revenueEvidence = null, cashKaiosWei = "0", receivablesKaiosWei = "0", knownPayablesKaiosWei = "0", salaryLiabilityKaiosWei = "0", computeExpenseKaiosWei = "0", gasExpenseKaiosWei = "0", securityExpenseKaiosWei = "0", projectCostKaiosWei = "0", reserveKaiosWei = "0", humanRelaySummary }) {
+  requireId(cycleId, "financial_cycle_id");
+  const revenue = kaiosWei(revenueKaiosWei, "revenue_kaios_wei");
+  invariant(revenue === 0n, "COMPANY_SETTLEMENT_VERIFIER_NOT_BOUND", "Company Revenue cannot be recognized until a repository-bound settlement verifier exists");
+  const cash = kaiosWei(cashKaiosWei, "cash_kaios_wei");
+  const receivables = kaiosWei(receivablesKaiosWei, "receivables_kaios_wei");
+  const payables = kaiosWei(knownPayablesKaiosWei, "known_payables_kaios_wei");
+  const salary = kaiosWei(salaryLiabilityKaiosWei, "salary_liability_kaios_wei");
+  const compute = kaiosWei(computeExpenseKaiosWei, "compute_expense_kaios_wei");
+  const gas = kaiosWei(gasExpenseKaiosWei, "gas_expense_kaios_wei");
+  const security = kaiosWei(securityExpenseKaiosWei, "security_expense_kaios_wei");
+  const project = kaiosWei(projectCostKaiosWei, "project_cost_kaios_wei");
+  const reserve = kaiosWei(reserveKaiosWei, "reserve_kaios_wei");
+  const relayRatePending = (Number(humanRelaySummary?.candidate_human_relay_minutes ?? 0) > 0 || Number(humanRelaySummary?.accrued_human_relay_minutes ?? 0) > 0) && humanRelaySummary?.human_labor_rate === "POLICY_REQUIRED";
+  const knownExpenses = compute + gas + security + project;
+  return Object.freeze({
+    report_id: `CFO_REPORT_${cycleId}`,
+    company_id: "AI_ANT_COMPANY_0001",
+    cycle_id: cycleId,
+    revenue: revenue.toString(),
+    expenses: relayRatePending ? "POLICY_REQUIRED" : knownExpenses.toString(),
+    cash: cash.toString(),
+    receivables: receivables.toString(),
+    payables: relayRatePending ? "POLICY_REQUIRED" : payables.toString(),
+    salary_liability: salary.toString(),
+    human_relay_labor_accrual: humanRelaySummary ?? summarizeHumanRelayLaborLedger([]),
+    compute_expense: compute.toString(),
+    gas_expense: gas.toString(),
+    security_expense: security.toString(),
+    project_cost: project.toString(),
+    profit: relayRatePending ? "POLICY_REQUIRED" : (revenue - knownExpenses).toString(),
+    reserve: reserve.toString(),
+    revenue_evidence: null,
+    payment_sent: false,
+    status: relayRatePending ? "FINANCIAL_REPORT_RATE_POLICY_REQUIRED" : "FINANCIAL_REPORT_COMPLETE"
+  });
+}
