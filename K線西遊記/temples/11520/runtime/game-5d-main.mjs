@@ -107,14 +107,17 @@ function lifeCanvasHitPoints(lifeId){
   const physicalClientX=(raycastClientX)=>renderer.domElement.dataset.xVisualMirror==='1'
     ?rect.left+rect.width-(raycastClientX-rect.left)
     :raycastClientX;
+  const centerX=(minX+maxX)/2,centerY=(minY+maxY)/2,candidates=[];
   const stepX=Math.max(2,(maxX-minX)/14),stepY=Math.max(2,(maxY-minY)/18);
-  for(let y=minY+stepY/2;y<=maxY&&points.length<24;y+=stepY)for(let x=minX+stepX/2;x<=maxX&&points.length<24;x+=stepX)if(routesToTarget(x,y))points.push(Object.freeze({clientX:physicalClientX(x),clientY:y,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
+  for(let y=minY+stepY/2;y<=maxY;y+=stepY)for(let x=minX+stepX/2;x<=maxX;x+=stepX)if(routesToTarget(x,y))candidates.push({clientX:physicalClientX(x),clientY:y,score:(x-centerX)**2+(y-centerY)**2});
+  candidates.sort((a,b)=>a.score-b.score);
+  for(const point of candidates.slice(0,24))points.push(Object.freeze({clientX:point.clientX,clientY:point.clientY,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
   return Object.freeze(points);
 }
 function visibleLifeCanvasHitPoints(){
   for(const monster of world.monsters){
     if(monster.state==='DEAD'||!monster.lifeId)continue;
-    const points=lifeCanvasHitPoints(monster.lifeId);
+    const points=lifeCanvasHitPoints(monster.lifeId).filter(point=>document.elementFromPoint(point.clientX,point.clientY)===renderer.domElement);
     if(points.length)return points;
   }
   return Object.freeze([]);
