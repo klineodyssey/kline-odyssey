@@ -2336,6 +2336,183 @@ export async function restoreAutonomousCompanyEngineeringCycleState({ store, com
   });
 }
 
+const AUTONOMOUS_ENGINEERING_GITHUB_API_ORIGIN = "https://api.github.com";
+const AUTONOMOUS_ENGINEERING_GITHUB_FAILURE_CONCLUSIONS = Object.freeze([
+  "failure", "timed_out", "cancelled", "action_required", "startup_failure"
+]);
+
+function aggregateAutonomousEngineeringCheckRuns(checkRuns, totalCount, requiredCheckNames) {
+  invariant(Array.isArray(checkRuns), "GITHUB_CHECK_RUNS_INVALID", "GitHub check-runs response must contain an array");
+  invariant(Number.isInteger(totalCount) && totalCount >= checkRuns.length, "GITHUB_CHECK_COUNT_INVALID", "GitHub check-runs response must contain a valid total_count");
+  if (totalCount > checkRuns.length) return "INCOMPLETE_CHECK_SET";
+  if (checkRuns.length === 0) return "NO_CHECKS";
+  for (const requiredName of requiredCheckNames) {
+    const latest = checkRuns
+      .filter((run) => run?.name === requiredName)
+      .sort((left, right) => Number(right?.id ?? 0) - Number(left?.id ?? 0))[0];
+    if (!latest) return "MISSING_REQUIRED_CHECK";
+    if (latest.status !== "completed" || !latest.conclusion) return "PENDING";
+    if (AUTONOMOUS_ENGINEERING_GITHUB_FAILURE_CONCLUSIONS.includes(latest.conclusion)) return "FAIL";
+    if (latest.conclusion !== "success") return "MISSING_REQUIRED_CHECK";
+  }
+  return "PASS";
+}
+
+/**
+ * Observe public GitHub repository state without credentials or mutation.
+ *
+ * The adapter is deliberately restricted to canonical api.github.com GETs,
+ * omits Authorization and cookies, rejects redirects, and exposes no write,
+ * dispatch, merge, deployment, worker, signer, payment, or chain capability.
+ */
+export async function readLatestRepositorySnapshot(options) {
+  invariant(options && typeof options === "object" && !Array.isArray(options), "GITHUB_READ_OPTIONS_REQUIRED", "GitHub read options are required");
+  for (const forbiddenField of ["token", "authorization", "headers", "api_base", "api_origin", "credentials"]) {
+    invariant(!Object.prototype.hasOwnProperty.call(options, forbiddenField), "GITHUB_CREDENTIALS_FORBIDDEN", `Credential or endpoint override is forbidden: ${forbiddenField}`);
+  }
+  const {
+    repository,
+    active_task_pr = null,
+    observed_at,
+    required_check_names = [],
+    fetch_impl = globalThis.fetch
+  } = options;
+  invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? ""), "INVALID_GITHUB_REPOSITORY", "Repository must use owner/name form");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_REPOSITORY_OBSERVATION_TIME", "observed_at must be an ISO timestamp");
+  invariant(typeof fetch_impl === "function", "GITHUB_READ_ADAPTER_REQUIRED", "A read-only fetch adapter is required");
+  invariant(active_task_pr === null || (Number.isInteger(active_task_pr) && active_task_pr > 0), "INVALID_ACTIVE_TASK_PR", "active_task_pr must be a positive integer or null");
+  invariant(Array.isArray(required_check_names) && required_check_names.length > 0 && required_check_names.every((name) => typeof name === "string" && name.trim()), "GITHUB_REQUIRED_CHECKS_INVALID", "required_check_names must contain one or more exact check names");
+  invariant(new Set(required_check_names).size === required_check_names.length, "GITHUB_REQUIRED_CHECKS_DUPLICATE", "required_check_names must not contain duplicates");
+
+  const headers = Object.freeze({
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  });
+  const read = async (path) => {
+    const url = `${AUTONOMOUS_ENGINEERING_GITHUB_API_ORIGIN}/repos/${repository}${path}`;
+    let response;
+    try {
+      response = await fetch_impl(url, Object.freeze({ method: "GET", headers, credentials: "omit", redirect: "error" }));
+    } catch {
+      invariant(false, "GITHUB_READ_FAILED", `GitHub read failed for ${path}`);
+    }
+    invariant(response?.ok === true, "GITHUB_READ_FAILED", `GitHub read failed for ${path}: HTTP ${response?.status ?? "UNKNOWN"}`);
+    let body;
+    try {
+      body = await response.json();
+    } catch {
+      invariant(false, "GITHUB_RESPONSE_INVALID", `GitHub response was not valid JSON for ${path}`);
+    }
+    invariant(body && typeof body === "object" && !Array.isArray(body), "GITHUB_RESPONSE_INVALID", `GitHub response was not an object for ${path}`);
+    return body;
+  };
+
+  const repositoryState = await read("");
+  invariant(typeof repositoryState.default_branch === "string" && repositoryState.default_branch.trim(), "GITHUB_DEFAULT_BRANCH_MISSING", "GitHub repository response is missing default_branch");
+  const defaultBranch = repositoryState.default_branch;
+  const mainCommit = await read(`/commits/${encodeURIComponent(defaultBranch)}`);
+  invariant(/^[0-9a-f]{40}$/.test(mainCommit.sha ?? ""), "GITHUB_MAIN_SHA_INVALID", "GitHub main commit response is invalid");
+  const mainCommitTime = mainCommit.commit?.committer?.date ?? mainCommit.commit?.author?.date;
+  invariant(typeof mainCommitTime === "string" && !Number.isNaN(Date.parse(mainCommitTime)), "GITHUB_MAIN_TIME_INVALID", "GitHub main commit time is invalid");
+
+  let pullRequest = null;
+  if (active_task_pr !== null) {
+    const pr = await read(`/pulls/${active_task_pr}`);
+    invariant(/^[0-9a-f]{40}$/.test(pr.head?.sha ?? ""), "GITHUB_PR_HEAD_INVALID", "GitHub pull request head is invalid");
+    invariant(typeof pr.head?.ref === "string" && pr.head.ref.trim(), "GITHUB_PR_HEAD_REF_INVALID", "GitHub pull request head branch is invalid");
+    invariant(typeof pr.base?.ref === "string" && pr.base.ref.trim(), "GITHUB_PR_BASE_REF_INVALID", "GitHub pull request base branch is invalid");
+    const comparison = await read(`/compare/${encodeURIComponent(defaultBranch)}...${pr.head.sha}`);
+    const checks = await read(`/commits/${pr.head.sha}/check-runs?per_page=100`);
+    invariant(Number.isInteger(comparison.ahead_by) && comparison.ahead_by >= 0 && Number.isInteger(comparison.behind_by) && comparison.behind_by >= 0, "GITHUB_DIVERGENCE_INVALID", "GitHub comparison is missing valid ahead/behind counts");
+    const checkRuns = checks.check_runs;
+    const ciStatus = aggregateAutonomousEngineeringCheckRuns(checkRuns, checks.total_count, required_check_names);
+    pullRequest = Object.freeze({
+      number: active_task_pr,
+      head_sha: pr.head.sha,
+      head_ref: pr.head.ref,
+      head_repository: pr.head.repo?.full_name ?? null,
+      base_ref: pr.base.ref,
+      state: String(pr.state ?? "").toUpperCase(),
+      draft: pr.draft === true,
+      mergeable: pr.mergeable === true ? true : pr.mergeable === false ? false : null,
+      mergeable_state: typeof pr.mergeable_state === "string" ? pr.mergeable_state : null,
+      ahead_main: comparison.ahead_by,
+      behind_main: comparison.behind_by,
+      ci_status: ciStatus,
+      check_count: checkRuns.length,
+      total_check_count: checks.total_count,
+      required_check_names: Object.freeze([...required_check_names]),
+      check_runs: Object.freeze(checkRuns.map((run) => Object.freeze({
+        id: run.id ?? null,
+        name: run.name ?? null,
+        status: run.status ?? null,
+        conclusion: run.conclusion ?? null,
+        head_sha: run.head_sha ?? null,
+        html_url: run.html_url ?? null
+      })))
+    });
+  }
+
+  return Object.freeze({
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    observed_at,
+    repository,
+    default_branch: defaultBranch,
+    main_sha: mainCommit.sha,
+    main_commit_time: mainCommitTime,
+    active_task_pr: pullRequest,
+    authority: Object.freeze({
+      public_github_read: true,
+      credentials_used: false,
+      github_write: false,
+      workflow_dispatch: false,
+      merge: false,
+      deployment: false,
+      external_agent: false,
+      payment: false,
+      signer: false,
+      chain_write: false
+    })
+  });
+}
+
+/**
+ * Evaluate a snapshot only. A passing result is evidence, never merge power.
+ */
+export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha, expected_head_sha }) {
+  invariant(repository_snapshot?.snapshot_type === "LATEST_REPOSITORY_READ_ONLY", "LATEST_REPOSITORY_SNAPSHOT_REQUIRED", "Exact-head CI gate requires a fresh read-only repository snapshot");
+  invariant(/^[0-9a-f]{40}$/.test(expected_main_sha ?? ""), "EXPECTED_MAIN_SHA_INVALID", "Expected main must be a lowercase Git SHA");
+  invariant(/^[0-9a-f]{40}$/.test(expected_head_sha ?? ""), "EXPECTED_HEAD_SHA_INVALID", "Expected PR head must be a lowercase Git SHA");
+  const hold = (status, fields = {}) => Object.freeze({
+    status,
+    expected_main_sha,
+    observed_main_sha: repository_snapshot.main_sha ?? null,
+    expected_head_sha,
+    observed_head_sha: repository_snapshot.active_task_pr?.head_sha ?? null,
+    exact_main: repository_snapshot.main_sha === expected_main_sha,
+    exact_head: repository_snapshot.active_task_pr?.head_sha === expected_head_sha,
+    ci_status: repository_snapshot.active_task_pr?.ci_status ?? "UNKNOWN",
+    behind_main: repository_snapshot.active_task_pr?.behind_main ?? null,
+    external_effect: false,
+    merge_authorized: false,
+    ...fields
+  });
+  if (repository_snapshot.main_sha !== expected_main_sha) return hold("HOLD_STALE_MAIN");
+  const pr = repository_snapshot.active_task_pr;
+  if (!pr) return hold("HOLD_ACTIVE_PR_REQUIRED");
+  if (pr.head_sha !== expected_head_sha) return hold("HOLD_STALE_PR_HEAD");
+  if (pr.state !== "OPEN") return hold("HOLD_PR_NOT_OPEN");
+  if (pr.draft) return hold("HOLD_PR_DRAFT");
+  if (pr.base_ref !== repository_snapshot.default_branch) return hold("HOLD_PR_BASE_BRANCH_MISMATCH", { expected_base: repository_snapshot.default_branch, observed_base: pr.base_ref });
+  if (pr.head_ref === repository_snapshot.default_branch || pr.head_ref.startsWith("codex/")) return hold("HOLD_FORBIDDEN_BRANCH_PATH", { observed_head_ref: pr.head_ref });
+  if (pr.behind_main !== 0) return hold("HOLD_PR_BEHIND_MAIN");
+  if (pr.ahead_main < 1) return hold("HOLD_PR_HAS_NO_BRANCH_DIFF");
+  if (pr.mergeable === false) return hold("HOLD_PR_NOT_MERGEABLE");
+  if (pr.mergeable === null) return hold("HOLD_PR_MERGEABILITY_UNKNOWN");
+  if (pr.ci_status !== "PASS") return hold(pr.ci_status === "FAIL" ? "HOLD_EXACT_HEAD_CI_FAILED" : "HOLD_EXACT_HEAD_CI_INCOMPLETE");
+  return hold("EXACT_MAIN_HEAD_CI_PASS", { exact_main: true, exact_head: true, ci_status: "PASS", behind_main: 0 });
+}
+
 export function createAutonomousBusinessWorkOrder({ cycle_id, primary_job_status, candidates }) {
   requireId(cycle_id, "cycle_id"); requireArray(candidates, "autonomous_work.candidates");
   invariant(["COMPLETED", "DEGRADED_SAFE"].includes(primary_job_status), "PRIMARY_JOB_BYPASS", "Wukong Gatekeeper duty must complete before autonomous business work");
