@@ -70,6 +70,7 @@ KNOWN_CLAIM_STATES = {
     "ABANDONED",
     "COMPLETED_CODEX_REVIEWED",
     "READY_FOR_ATOMIC_CLAIM",
+    "SUSPENDED_BY_HUMAN_COST_DECISION",
     "REWORK_REQUIRED_CLAIM_RELEASED",
 }
 
@@ -77,6 +78,7 @@ UNLOCKED_CLAIM_STATES = {
     "RELEASED",
     "COMPLETED_CODEX_REVIEWED",
     "READY_FOR_ATOMIC_CLAIM",
+    "SUSPENDED_BY_HUMAN_COST_DECISION",
     "REWORK_REQUIRED_CLAIM_RELEASED",
 }
 
@@ -255,7 +257,7 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
     def test_dispatch_history_ends_with_life_energy_claim_and_excludes_microbial(self):
         final_dispatch = self.registry["dispatch_history"][-1]
         self.assertEqual(final_dispatch["task_id"], "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001")
-        self.assertEqual(final_dispatch["status"], "READY_FOR_ATOMIC_CLAIM")
+        self.assertEqual(final_dispatch["status"], "SUSPENDED_BY_HUMAN_COST_DECISION")
         self.assertNotIn(
             "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
             {item["task_id"] for item in self.registry["dispatch_history"]},
@@ -288,7 +290,7 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         )
         self.assertIsNone(self.cursor["current_task"])
         self.assertIsNone(self.cursor["current_branch"])
-        self.assertEqual(self.cursor["status"], "IDLE")
+        self.assertEqual(self.cursor["status"], "OFFLINE")
         self.assertEqual(self.cursor["heartbeat"], "2026-09-13T14:21:31Z")
         self.assertIn("MICROBIAL_RESEARCH", self.cursor["allowed_work"])
 
@@ -411,7 +413,7 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         queue = self.forest_queue
         self.assertEqual(
             queue["continuous_dispatch_mode"],
-            "HUMAN_APPROVED_BOUNDED_EXTERNAL_PILOT",
+            "CODEX_CHATGPT_PRIMARY_CURSOR_ON_DEMAND",
         )
         self.assertFalse(queue["automatic_unreviewed_dispatch"])
         self.assertTrue(
@@ -449,7 +451,7 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
                 "worker_id": "cursor-01",
                 "current_task": None,
                 "current_branch": None,
-                "status": "IDLE",
+                "status": "SUSPENDED_BY_HUMAN_COST_DECISION",
             },
         )
         self.assertEqual(queue["prepared_task"], self.registry["prepared_tasks"][0])
@@ -467,7 +469,7 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(self.public_queue["prepared_task"], self.forest_queue["prepared_task"])
         self.assertEqual(
             self.software_queue["cursor"]["current_status"],
-            "ACTIVE_IDLE_READY_FOR_BOUNDED_PILOT",
+            "ON_DEMAND_EXTERNAL_CAPACITY_ONLY_SUSPENDED",
         )
         self.assertIsNone(self.software_queue["cursor"]["current_task"])
         self.assertIsNone(self.software_queue["cursor"]["current_branch"])
@@ -492,7 +494,7 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         ]
         self.assertEqual(envelope["task_id"], task_id)
         self.assertEqual(claim["task_id"], task_id)
-        self.assertEqual(envelope["status"], "READY_FOR_ATOMIC_CLAIM")
+        self.assertEqual(envelope["status"], "SUSPENDED_BY_HUMAN_COST_DECISION")
         self.assertFalse(envelope["claim_created"])
         self.assertTrue(envelope["human_response_file_received"])
         self.assertEqual(envelope["allowed_paths"], expected_paths)
@@ -501,10 +503,10 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(envelope["expected_files"], claim["expected_files"])
         self.assertIsNone(envelope["claim_id"])
         self.assertIsNone(envelope["fencing_token"])
-        self.assertTrue(envelope["automatic"])
-        self.assertTrue(envelope["external_autonomy"])
-        self.assertTrue(envelope["cursor_api_key_required"])
-        self.assertTrue(envelope["external_wake_workflow_allowed"])
+        self.assertFalse(envelope["automatic"])
+        self.assertFalse(envelope["external_autonomy"])
+        self.assertFalse(envelope["cursor_api_key_required"])
+        self.assertFalse(envelope["external_wake_workflow_allowed"])
         self.assertEqual(envelope["r2_task_packet"]["TASK_ID"], "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001")
         self.assertEqual(envelope["bounded_pilot_policy"]["concurrency"], 1)
         self.assertEqual(envelope["bounded_pilot_policy"]["max_worker_minutes"], 60)

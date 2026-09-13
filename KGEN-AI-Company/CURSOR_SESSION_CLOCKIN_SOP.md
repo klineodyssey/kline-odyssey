@@ -94,7 +94,7 @@ Current safety status as of this SOP revision:
 - external Cursor API / agent launch remains fail-closed in that workflow until an action-specific Human decision authorizes the external launch configuration and the required secret/provider setup is actually present;
 - dialogue/clone rules and repo-native handoff remain available independently of the external wake path.
 
-Do not claim full unattended automation while the external wake workflow reports `HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED`.
+Cursor Cloud is `SUSPENDED_BY_HUMAN_COST_DECISION` and is on-demand external capacity only. Do not claim Cursor is active, but do not treat its subscription state as a blocker for the Codex/ChatGPT 24H Company loop.
 
 ## Protected live actions
 

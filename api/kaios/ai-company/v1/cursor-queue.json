@@ -18,16 +18,17 @@
   "reviewer": "codex-gm-01",
   "branch_template": "cursor-handoff/<Task-ID>",
   "one_task_at_a_time": true,
-  "continuous_dispatch_mode": "HUMAN_APPROVED_BOUNDED_EXTERNAL_PILOT",
+  "continuous_dispatch_mode": "CODEX_CHATGPT_PRIMARY_CURSOR_ON_DEMAND",
   "automatic_unreviewed_dispatch": false,
   "active_claims": [],
   "worker_state": {
     "worker_id": "cursor-01",
     "current_task": null,
     "current_branch": null,
-    "status": "IDLE"
+    "status": "SUSPENDED_BY_HUMAN_COST_DECISION"
   },
   "next_dispatch_requires": [
+    "HUMAN_HIGH_WORKLOAD_EXTERNAL_CAPACITY_REACTIVATION",
     "FORMAL_TASK_READY_FOR_ATOMIC_CLAIM",
     "NO_ACTIVE_REPOSITORY_OR_PROVIDER_RUN",
     "NO_SAME_TASK_BRANCH_OR_OPEN_PR",
@@ -40,8 +41,8 @@
   "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
   "bounded_pilot": {
     "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "status": "READY_FOR_ATOMIC_CLAIM",
-    "authorized_by": "沈英明",
+    "status": "SUSPENDED_BY_HUMAN_COST_DECISION",
+    "authorized_by": null,
     "daily_cost_cap_usd": 1,
     "monthly_cost_cap_usd": 20,
     "max_launches_per_day": 4,
@@ -49,7 +50,9 @@
     "watchdog_seconds": 300,
     "max_worker_minutes": 60,
     "visual_qa": "NOT_APPLICABLE_NO_UI_CHANGE",
-    "protected_actions_allowed": false
+    "protected_actions_allowed": false,
+    "authorization_evidence": "HUMAN_CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_2026-09-13",
+    "limits_state": "INACTIVE_DEFERRED_UNTIL_HIGH_WORKLOAD"
   },
   "queue": [
     {

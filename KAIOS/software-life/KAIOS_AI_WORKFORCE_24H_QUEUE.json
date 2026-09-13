@@ -25,43 +25,221 @@
   },
   "active_claims": [],
   "codex_queue": [
-    { "priority": 1, "work": "REPOSITORY_NAMING_AUDIT", "status": "MERGED_PR_108", "depends_on": [] },
-    { "priority": 2, "work": "IDENTITY_STANDARD", "status": "MERGED_PR_108", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
-    { "priority": 3, "work": "MANIFEST_SCHEMA", "status": "MERGED_PR_109", "depends_on": ["IDENTITY_STANDARD"] },
-    { "priority": 4, "work": "TAXONOMY_CROSSWALK", "status": "MERGED_PR_108", "depends_on": ["IDENTITY_STANDARD"] },
-    { "priority": 5, "work": "ORGAN_STANDARD", "status": "MERGED_PR_112", "depends_on": ["MANIFEST_SCHEMA"] },
-    { "priority": 6, "work": "ORGAN_COMPATIBILITY_SCHEMA", "status": "MERGED_PR_112", "depends_on": ["ORGAN_STANDARD"] },
-    { "priority": 7, "work": "TRANSPLANT_STANDARD", "status": "MERGED_PR_112", "depends_on": ["ORGAN_COMPATIBILITY_SCHEMA"] },
-    { "priority": 8, "work": "REPRODUCTION_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA"] },
-    { "priority": 9, "work": "REPRODUCTION_SCHEMA", "status": "QUEUED", "depends_on": ["REPRODUCTION_STANDARD"] },
-    { "priority": 10, "work": "GENOME_STANDARD", "status": "QUEUED", "depends_on": ["MANIFEST_SCHEMA", "REPRODUCTION_STANDARD"] },
-    { "priority": 11, "work": "RENAME_PLAN", "status": "MERGED_PR_108", "depends_on": ["REPOSITORY_NAMING_AUDIT"] },
-    { "priority": 12, "work": "BATCH_A_MIGRATION", "status": "QUEUED", "depends_on": ["RENAME_PLAN", "MANIFEST_SCHEMA"] },
-    { "priority": 13, "work": "BATCH_B_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_A_MIGRATION"] },
-    { "priority": 14, "work": "BATCH_C_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_B_MIGRATION"] },
-    { "priority": 15, "work": "BATCH_D_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_C_MIGRATION"] },
-    { "priority": 16, "work": "BATCH_E_MIGRATION", "status": "QUEUED", "depends_on": ["BATCH_D_MIGRATION"] },
-    { "priority": 17, "work": "K11520_LISTING_STANDARD", "status": "QUEUED", "depends_on": ["GENOME_STANDARD", "TRANSPLANT_STANDARD"] },
-    { "priority": 18, "work": "K11520_LISTING_SCHEMA", "status": "QUEUED", "depends_on": ["K11520_LISTING_STANDARD"] },
-    { "priority": 19, "work": "SOFTWARE_LIFE_VIEWER", "status": "QUEUED", "depends_on": ["SOFTWARE_LIFE_REGISTRY"] },
-    { "priority": 20, "work": "READ_ONLY_APIS", "status": "QUEUED", "depends_on": ["SOFTWARE_LIFE_REGISTRY"] },
-    { "priority": 21, "work": "AI_COMPANY_INTEGRATION", "status": "QUEUED", "depends_on": ["GENOME_STANDARD", "ORGAN_STANDARD"] },
-    { "priority": 22, "work": "REGRESSION_TESTS", "status": "QUEUED", "depends_on": ["BATCH_E_MIGRATION", "SOFTWARE_LIFE_VIEWER", "READ_ONLY_APIS"] },
-    { "priority": 23, "work": "DOCUMENTATION_CENTER", "status": "QUEUED", "depends_on": ["SOFTWARE_LIFE_VIEWER"] },
-    { "priority": 24, "work": "RECOVERY_AND_CLOSEOUT", "status": "QUEUED", "depends_on": ["REGRESSION_TESTS"] }
+    {
+      "priority": 1,
+      "work": "REPOSITORY_NAMING_AUDIT",
+      "status": "MERGED_PR_108",
+      "depends_on": []
+    },
+    {
+      "priority": 2,
+      "work": "IDENTITY_STANDARD",
+      "status": "MERGED_PR_108",
+      "depends_on": [
+        "REPOSITORY_NAMING_AUDIT"
+      ]
+    },
+    {
+      "priority": 3,
+      "work": "MANIFEST_SCHEMA",
+      "status": "MERGED_PR_109",
+      "depends_on": [
+        "IDENTITY_STANDARD"
+      ]
+    },
+    {
+      "priority": 4,
+      "work": "TAXONOMY_CROSSWALK",
+      "status": "MERGED_PR_108",
+      "depends_on": [
+        "IDENTITY_STANDARD"
+      ]
+    },
+    {
+      "priority": 5,
+      "work": "ORGAN_STANDARD",
+      "status": "MERGED_PR_112",
+      "depends_on": [
+        "MANIFEST_SCHEMA"
+      ]
+    },
+    {
+      "priority": 6,
+      "work": "ORGAN_COMPATIBILITY_SCHEMA",
+      "status": "MERGED_PR_112",
+      "depends_on": [
+        "ORGAN_STANDARD"
+      ]
+    },
+    {
+      "priority": 7,
+      "work": "TRANSPLANT_STANDARD",
+      "status": "MERGED_PR_112",
+      "depends_on": [
+        "ORGAN_COMPATIBILITY_SCHEMA"
+      ]
+    },
+    {
+      "priority": 8,
+      "work": "REPRODUCTION_STANDARD",
+      "status": "QUEUED",
+      "depends_on": [
+        "MANIFEST_SCHEMA"
+      ]
+    },
+    {
+      "priority": 9,
+      "work": "REPRODUCTION_SCHEMA",
+      "status": "QUEUED",
+      "depends_on": [
+        "REPRODUCTION_STANDARD"
+      ]
+    },
+    {
+      "priority": 10,
+      "work": "GENOME_STANDARD",
+      "status": "QUEUED",
+      "depends_on": [
+        "MANIFEST_SCHEMA",
+        "REPRODUCTION_STANDARD"
+      ]
+    },
+    {
+      "priority": 11,
+      "work": "RENAME_PLAN",
+      "status": "MERGED_PR_108",
+      "depends_on": [
+        "REPOSITORY_NAMING_AUDIT"
+      ]
+    },
+    {
+      "priority": 12,
+      "work": "BATCH_A_MIGRATION",
+      "status": "QUEUED",
+      "depends_on": [
+        "RENAME_PLAN",
+        "MANIFEST_SCHEMA"
+      ]
+    },
+    {
+      "priority": 13,
+      "work": "BATCH_B_MIGRATION",
+      "status": "QUEUED",
+      "depends_on": [
+        "BATCH_A_MIGRATION"
+      ]
+    },
+    {
+      "priority": 14,
+      "work": "BATCH_C_MIGRATION",
+      "status": "QUEUED",
+      "depends_on": [
+        "BATCH_B_MIGRATION"
+      ]
+    },
+    {
+      "priority": 15,
+      "work": "BATCH_D_MIGRATION",
+      "status": "QUEUED",
+      "depends_on": [
+        "BATCH_C_MIGRATION"
+      ]
+    },
+    {
+      "priority": 16,
+      "work": "BATCH_E_MIGRATION",
+      "status": "QUEUED",
+      "depends_on": [
+        "BATCH_D_MIGRATION"
+      ]
+    },
+    {
+      "priority": 17,
+      "work": "K11520_LISTING_STANDARD",
+      "status": "QUEUED",
+      "depends_on": [
+        "GENOME_STANDARD",
+        "TRANSPLANT_STANDARD"
+      ]
+    },
+    {
+      "priority": 18,
+      "work": "K11520_LISTING_SCHEMA",
+      "status": "QUEUED",
+      "depends_on": [
+        "K11520_LISTING_STANDARD"
+      ]
+    },
+    {
+      "priority": 19,
+      "work": "SOFTWARE_LIFE_VIEWER",
+      "status": "QUEUED",
+      "depends_on": [
+        "SOFTWARE_LIFE_REGISTRY"
+      ]
+    },
+    {
+      "priority": 20,
+      "work": "READ_ONLY_APIS",
+      "status": "QUEUED",
+      "depends_on": [
+        "SOFTWARE_LIFE_REGISTRY"
+      ]
+    },
+    {
+      "priority": 21,
+      "work": "AI_COMPANY_INTEGRATION",
+      "status": "QUEUED",
+      "depends_on": [
+        "GENOME_STANDARD",
+        "ORGAN_STANDARD"
+      ]
+    },
+    {
+      "priority": 22,
+      "work": "REGRESSION_TESTS",
+      "status": "QUEUED",
+      "depends_on": [
+        "BATCH_E_MIGRATION",
+        "SOFTWARE_LIFE_VIEWER",
+        "READ_ONLY_APIS"
+      ]
+    },
+    {
+      "priority": 23,
+      "work": "DOCUMENTATION_CENTER",
+      "status": "QUEUED",
+      "depends_on": [
+        "SOFTWARE_LIFE_VIEWER"
+      ]
+    },
+    {
+      "priority": 24,
+      "work": "RECOVERY_AND_CLOSEOUT",
+      "status": "QUEUED",
+      "depends_on": [
+        "REGRESSION_TESTS"
+      ]
+    }
   ],
   "implicit_registry_dependency": {
     "work": "SOFTWARE_LIFE_REGISTRY",
     "status": "MERGED_PR_109",
-    "depends_on": ["MANIFEST_SCHEMA", "TAXONOMY_CROSSWALK"],
-    "future_detail_extensions": ["ORGAN_STANDARD", "GENOME_STANDARD"]
+    "depends_on": [
+      "MANIFEST_SCHEMA",
+      "TAXONOMY_CROSSWALK"
+    ],
+    "future_detail_extensions": [
+      "ORGAN_STANDARD",
+      "GENOME_STANDARD"
+    ]
   },
   "cursor": {
     "worker_id": "cursor-01",
     "one_task_at_a_time": true,
     "current_task": null,
     "current_branch": null,
-    "current_status": "ACTIVE_IDLE_READY_FOR_BOUNDED_PILOT",
+    "current_status": "ON_DEMAND_EXTERNAL_CAPACITY_ONLY_SUSPENDED",
     "prepared_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
     "prepared_task_status": "PREPARATION_ONLY",
     "prepared_task_envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
@@ -82,7 +260,7 @@
     "next_existing_queue_task_priority": 1,
     "current_active_tasks": {},
     "bounded_pilot_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "bounded_pilot_status": "READY_FOR_ATOMIC_CLAIM",
+    "bounded_pilot_status": "SUSPENDED_BY_HUMAN_COST_DECISION",
     "can_merge": false,
     "can_deploy": false,
     "can_promote_canonical": false

@@ -104,10 +104,12 @@ test("public Cursor queue exposes the bounded payroll pilot while Microbial stay
     worker_id: "cursor-01",
     current_task: null,
     current_branch: null,
-    status: "IDLE"
+    status: "SUSPENDED_BY_HUMAN_COST_DECISION"
   });
   assert.equal(projection.bounded_pilot.task_id, "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001");
-  assert.equal(projection.bounded_pilot.status, "READY_FOR_ATOMIC_CLAIM");
+  assert.equal(projection.bounded_pilot.status, "SUSPENDED_BY_HUMAN_COST_DECISION");
+  assert.equal(projection.bounded_pilot.authorized_by, null);
+  assert.equal(projection.bounded_pilot.authorization_evidence, "HUMAN_CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_2026-09-13");
   assert.equal(projection.bounded_pilot.concurrency, 1);
   assert.equal(projection.bounded_pilot.max_launches_per_day, 4);
   assert.equal(projection.bounded_pilot.max_worker_minutes, 60);
