@@ -1,6 +1,6 @@
 # KGEN CoinMarketCap Circulating Supply Verification
 
-Status: `VERIFIED_READ_ONLY_SNAPSHOT`
+Status: `CURRENT_API_WITH_APPEND_ONLY_HISTORICAL_SUBMISSION_EVIDENCE`
 
 Contract: `0xba3d3810e58735cb6813bc1cdc5458c0d71432be`
 
@@ -22,7 +22,33 @@ The original extensionless routes remain deployed for backward compatibility.
 The `.txt` routes are the canonical CoinMarketCap endpoints because GitHub Pages
 serves them with a plain-text Content-Type.
 
-## Frozen Chain Snapshot
+## Current read-only supply state — 2026-08-27
+
+The API endpoints and `kgen_cmc_supply_snapshot.json` were refreshed from a
+single frozen BSC block. The July Annex A, XLSX, CSV and emission package below
+remain immutable historical submission evidence; they are not silently
+rewritten to impersonate a current external-platform filing.
+
+| Field | Value |
+|---|---:|
+| BSC block | `118355844` |
+| Block timestamp | `2026-08-27T08:59:50Z` |
+| Nominal maximum supply | `72,000,000 KGEN` |
+| Current totalSupply, net of burns | `71,976,169.974243092224959062 KGEN` |
+| Verifiably burned | `23,830.025756907775040938 KGEN` |
+| Excluded current balances | `67,622,278.423930992599787732 KGEN` |
+| Evidence-based circulating supply | `4,353,891.550312099625171330 KGEN` |
+| Current owner | `0xa2792fbdcc8a8aac364053431d44e0a8d335e166` (`BankGovernance`) |
+| Deployment creator/indexer provenance | `0xb3c54ca96de0ded4ca0151f629ff9781506ba261` |
+| Current bankWallet | `0xa06ef53c9ad4af739fd13ca1ded446437134b0ee` |
+| Historical bank reserve | `0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c` |
+
+The current owner and deployment creator are intentionally distinct fields.
+The historical bank reserve remains excluded from circulating supply even
+after `bankWallet()` changed; an address-role change does not make retained
+reserve assets public circulation.
+
+## Historical frozen submission snapshot — 2026-07-28
 
 | Field | Value |
 |---|---:|
