@@ -34,7 +34,8 @@ const liveDrop=await page.evaluate(()=>{const api=globalThis.__K11520_WORLD_ITEM
 if(!liveDrop.sceneReady||liveDrop.size!==1)throw new Error('LIVE_WORLD_DROP_NOT_CREATED');
 if(liveDrop.shape!=='CASH_BUNDLE'||liveDrop.custodyType!=='CASH_CASE')throw new Error(`LIVE_WORLD_DROP_WRONG_VISUAL:${liveDrop.shape}/${liveDrop.custodyType}`);
 if(liveDrop.backpackHasCash)throw new Error('DISCARDED_CASH_STILL_IN_BACKPACK');
-await page.locator('#backpackClose').click();
+await page.click('#backpackButton');
+await page.waitForFunction(()=>!document.querySelector('#backpackPanel')?.classList.contains('open'),null,{timeout:3000});
 await page.waitForSelector('#worldItemPickup.show',{timeout:3000});
 await page.screenshot({path:dropOut,fullPage:false});
 const pickup=await page.evaluate(()=>globalThis.__K11520_WORLD_ITEM_DROP__.collectNearest());
