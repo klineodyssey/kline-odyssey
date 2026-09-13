@@ -24,6 +24,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Setup Python
         uses: actions/setup-python@v6

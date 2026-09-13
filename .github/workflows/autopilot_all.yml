@@ -39,6 +39,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -104,6 +105,7 @@ jobs:
           fi
 
       - name: Restore engine.zip from Secret
+        if: github.ref == 'refs/heads/main'
         id: restore_engine
         continue-on-error: true
         shell: bash
