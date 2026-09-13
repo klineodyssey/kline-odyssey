@@ -13,6 +13,13 @@ const COMPANY_K_COORDINATE = "K11520";
 const KGEN_PRICE_COORDINATE_UNIT = "USD_PER_KGEN";
 const CANONICAL_SETTLEMENT_ATTESTATIONS = Object.freeze({});
 const TEST_ONLY_MARKET_ID = "TEST_ONLY_11520_KGEN_NATIVE_MARKET";
+const TEST_ONLY_GPU_KGEN_MARKET_ID = "TEST_ONLY_11520_NVIDIA_GPU_KGEN_PAPER_MARKET";
+const TEST_ONLY_GPU_KAIOS_MARKET_ID = "TEST_ONLY_11520_NVIDIA_GPU_KAIOS_PAPER_MARKET";
+const REPOSITORY_TEST_MARKET_IDS = new Set([
+  TEST_ONLY_MARKET_ID,
+  TEST_ONLY_GPU_KGEN_MARKET_ID,
+  TEST_ONLY_GPU_KAIOS_MARKET_ID
+]);
 
 function repositoryTestActor({ marketId = TEST_ONLY_MARKET_ID, purpose, actorId, controllerId, evidenceId, expiresAt = null }) {
   return Object.freeze({
@@ -38,7 +45,9 @@ const CANONICAL_ACTOR_CONTEXT_ATTESTATIONS = Object.freeze({
   "TEST-SAME-OWNER-C2-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-same", controllerId: "ctrl:test-c2", evidenceId: "TEST-SAME-OWNER-C2-PLACE" }),
   "TEST-SHARED-CONTROLLER-A-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-shared-a", controllerId: "ctrl:test-shared", evidenceId: "TEST-SHARED-CONTROLLER-A-PLACE" }),
   "TEST-SHARED-CONTROLLER-B-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-shared-b", controllerId: "ctrl:test-shared", evidenceId: "TEST-SHARED-CONTROLLER-B-PLACE" }),
-  "TEST-EXPIRED-ACTOR-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-expired", controllerId: "ctrl:test-expired", evidenceId: "TEST-EXPIRED-ACTOR-PLACE", expiresAt: "2026-08-22T14:59:59.999Z" })
+  "TEST-EXPIRED-ACTOR-PLACE": repositoryTestActor({ purpose: "PLACE_ORDER", actorId: "life:test-expired", controllerId: "ctrl:test-expired", evidenceId: "TEST-EXPIRED-ACTOR-PLACE", expiresAt: "2026-08-22T14:59:59.999Z" }),
+  "TEST-GPU-KGEN-A-PLACE": repositoryTestActor({ marketId: TEST_ONLY_GPU_KGEN_MARKET_ID, purpose: "PLACE_ORDER", actorId: "life:test-gpu-a", controllerId: "ctrl:test-gpu-a", evidenceId: "TEST-GPU-KGEN-A-PLACE" }),
+  "TEST-GPU-KGEN-B-PLACE": repositoryTestActor({ marketId: TEST_ONLY_GPU_KGEN_MARKET_ID, purpose: "PLACE_ORDER", actorId: "life:test-gpu-b", controllerId: "ctrl:test-gpu-b", evidenceId: "TEST-GPU-KGEN-B-PLACE" })
 });
 
 function parseDecimal(value, label = "value") {
@@ -85,7 +94,7 @@ function normalizeNonce(value, label = "nonce") {
 }
 
 function resolveVerifiedActorContext({ actorAttestationId, timestampMs, purpose, marketId }) {
-  if (marketId !== TEST_ONLY_MARKET_ID) throw new Error("ACTOR_CONTEXT_ATTESTATION_REGISTRY_NOT_CONNECTED");
+  if (!REPOSITORY_TEST_MARKET_IDS.has(marketId)) throw new Error("ACTOR_CONTEXT_ATTESTATION_REGISTRY_NOT_CONNECTED");
   const normalizedAttestationId = normalizeEvidenceId(actorAttestationId);
   const verified = CANONICAL_ACTOR_CONTEXT_ATTESTATIONS[normalizedAttestationId];
   if (!verified) throw new Error("ACTOR_CONTEXT_ATTESTATION_NOT_FOUND");
@@ -156,8 +165,15 @@ function bucketStart(timestampMs, intervalMs) {
  * - Anonymous actors, same-owner matches and same-controller matches fail closed.
  * - This module has no signer, custody, settlement, transfer, approval, chain-write or Mainnet authority.
  */
-export function createKgenNativeMarketCell({
-  marketId = "11520_KGEN_NATIVE_MARKET",
+function createVerified11520PaperMarketCell({
+  marketId,
+  baseAsset,
+  baseDecimals,
+  quoteAsset,
+  quoteDecimals,
+  priceStatus,
+  pricingAuthority,
+  ctMeaning,
   tickSize = "0.00000001",
   lotSize = "0.00000001",
   candleIntervalMs = 60_000,
@@ -182,6 +198,7 @@ export function createKgenNativeMarketCell({
   const consumedSettlementRequestTradeIds = new Set();
   const consumedSettlementRequestIds = new Set();
   const consumedSettlementRequestReplayKeys = new Set();
+  const supportsNativeSettlementRequests = baseAsset === BASE_ASSET && quoteAsset === QUOTE_ASSET;
   let nextOrder = 1;
   let sequence = 1;
   let ct = null;
@@ -234,8 +251,8 @@ export function createKgenNativeMarketCell({
     const trade = {
       id: `T${trades.length + 1}`,
       marketId,
-      baseAsset: BASE_ASSET,
-      quoteAsset: QUOTE_ASSET,
+      baseAsset,
+      quoteAsset,
       priceRaw: price,
       quantityRaw: quantity,
       price: formatDecimal(price),
@@ -363,6 +380,7 @@ export function createKgenNativeMarketCell({
   }
 
   function createSettlementRequestPacket({ tradeId, requestId, replayKey }) {
+    if (!supportsNativeSettlementRequests) throw new Error("NATIVE_SETTLEMENT_REQUEST_PACKET_NOT_AVAILABLE_FOR_THIS_MARKET");
     const normalizedRequestId = normalizeEvidenceId(requestId);
     const normalizedReplayKey = normalizeNonce(replayKey, "settlement request replay key");
     const trade = trades.find((candidate) => candidate.id === tradeId);
@@ -480,19 +498,20 @@ export function createKgenNativeMarketCell({
       kgenUniversePriceCoordinate: MARKET_CELL_COORDINATE,
       kgenUniversePriceCoordinateUnit: KGEN_PRICE_COORDINATE_UNIT,
       runtimeStatus: "PAPER_IN_MEMORY_CANDIDATE_NOT_ACTIVE_RUNTIME",
-      baseAsset: BASE_ASSET,
-      baseDecimals: BASE_DECIMALS,
-      quoteAsset: QUOTE_ASSET,
+      baseAsset,
+      baseDecimals,
+      quoteAsset,
       quoteStatus: QUOTE_STATUS,
-      quoteDecimals: QUOTE_DECIMALS,
+      quoteDecimals,
       tickSize: formatDecimal(tickRaw),
       lotSize: formatDecimal(lotRaw),
-      priceStatus: "NATIVE_MARKET_PRICE_CANDIDATE",
-      pricingAuthority: "NATIVE_11520_MATCHED_BUY_SELL_TRADES_ONLY",
+      priceStatus,
+      pricingAuthority,
       externalReferencePriceAuthority: false,
       ct: ct === null ? null : formatDecimal(ct),
-      nativeMatchedTradeCT: ct === null ? null : formatDecimal(ct),
-      ctMeaning: "CURRENT_NATIVE_MATCHED_TRADE_PRICE_UNIVERSE_BOUNDARY",
+      matchedTradeCT: ct === null ? null : formatDecimal(ct),
+      nativeMatchedTradeCT: baseAsset === "KGEN" && ct !== null ? formatDecimal(ct) : null,
+      ctMeaning,
       bestBid: book.bestBid,
       bestAsk: book.bestAsk,
       matchedTradeCount: trades.length,
@@ -532,11 +551,49 @@ export function createKgenNativeMarketCell({
   return Object.freeze({
     placeOrder,
     cancelOrder,
-    createSettlementRequestPacket,
+    ...(supportsNativeSettlementRequests ? { createSettlementRequestPacket } : {}),
     recordVerifiedSettlement,
     getOrderBook,
     getMarketState,
     getTrades,
     getCandles
+  });
+}
+
+export function createKgenNativeMarketCell(options = {}) {
+  return createVerified11520PaperMarketCell({
+    ...options,
+    marketId: options.marketId ?? "11520_KGEN_NATIVE_MARKET",
+    baseAsset: BASE_ASSET,
+    baseDecimals: BASE_DECIMALS,
+    quoteAsset: QUOTE_ASSET,
+    quoteDecimals: QUOTE_DECIMALS,
+    priceStatus: "NATIVE_MARKET_PRICE_CANDIDATE",
+    pricingAuthority: "NATIVE_11520_MATCHED_BUY_SELL_TRADES_ONLY",
+    ctMeaning: "CURRENT_NATIVE_MATCHED_TRADE_PRICE_UNIVERSE_BOUNDARY"
+  });
+}
+
+/**
+ * Isolated NVIDIA GPU paper book. Production actor and settlement registries
+ * remain disconnected; this factory adds no signer, wallet, RPC, storage,
+ * settlement, transfer, DOM, process or chain-write authority.
+ */
+export function createGpu11520PaperMarket({ quoteAsset, ...options } = {}) {
+  const normalizedQuote = String(quoteAsset ?? "").trim().toUpperCase();
+  if (!new Set(["KGEN", "KAIOS"]).has(normalizedQuote)) {
+    throw new Error("GPU_QUOTE_ASSET_NOT_ALLOWED");
+  }
+  return createVerified11520PaperMarketCell({
+    ...options,
+    marketId: options.marketId ?? `11520_NVIDIA_GPU_${normalizedQuote}_PAPER_MARKET`,
+    baseAsset: "NVIDIA_GPU_CHIP",
+    baseDecimals: 0,
+    quoteAsset: normalizedQuote,
+    quoteDecimals: 18,
+    lotSize: options.lotSize ?? "1",
+    priceStatus: `GPU_${normalizedQuote}_MARKET_PRICE_CANDIDATE`,
+    pricingAuthority: "ISOLATED_GPU_PAPER_MATCHES_ONLY",
+    ctMeaning: "CURRENT_GPU_PAPER_MATCHED_TRADE_PRICE_NOT_SETTLED"
   });
 }

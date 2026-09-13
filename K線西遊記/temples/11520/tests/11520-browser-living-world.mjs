@@ -24,7 +24,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 assert.ok((await page.locator('#monsterList').textContent()).includes('WORK'),'Digital Ant should expose WORK lifestyle in living-world HUD');
 await page.screenshot({path:`${OUT}/11520-living-world-digital-ant.png`,fullPage:true});
 
-const picked=await page.evaluate(async()=>{
+const scanForPicked=()=>page.evaluate(async()=>{
   const canvas=document.querySelector('#three');
   if(!canvas)return null;
   const rect=canvas.getBoundingClientRect();
@@ -50,6 +50,11 @@ const picked=await page.evaluate(async()=>{
   }
   return null;
 });
+let picked=null;
+for(let attempt=0;attempt<3&&!picked;attempt+=1){
+  if(attempt)await page.waitForTimeout(800);
+  picked=await scanForPicked();
+}
 assert.ok(picked,'a real 3D Life canvas tap must open the canonical selected-Life HUD');
 const selectedText=await page.locator('#selectedLifeHud').textContent();
 assert.equal(selectedText,picked.text,'selected-Life HUD must remain stable after the canonical tap');
