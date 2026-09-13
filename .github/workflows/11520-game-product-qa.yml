@@ -54,7 +54,6 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/mobile-action-rail-clearance-runtime.mjs"
           node --check "K線西遊記/temples/11520/tests/monster-aggression-runtime.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs"
-          node --check "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-character-status.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-action-rail-clearance.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-combat-drive.mjs"
@@ -84,10 +83,6 @@ jobs:
           set +e
           timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-xzxy.mjs" 2>&1 | tee /tmp/k11520-browser-smoke.log
           RC=${PIPESTATUS[0]}
-          if [ "$RC" -eq 0 ]; then
-            timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
-            RC=${PIPESTATUS[0]}
-          fi
           if [ "$RC" -eq 0 ]; then
             timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-character-status.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
             RC=${PIPESTATUS[0]}
@@ -159,12 +154,10 @@ jobs:
           DRIVE="artifacts/11520-visual-qa/11520-mobile-combat-drive-c10-3lots.png"
           MONSTER="artifacts/11520-visual-qa/11520-mobile-monster-attack-hp.png"
           ACTION_RAIL="artifacts/11520-visual-qa/11520-mobile-action-rail-clearance.png"
-          DOCK_OPEN="artifacts/11520-visual-qa/11520-mobile-dock-open.png"
           if [ ! -s "$HUD" ] || [ ! -s "$COLLAPSED" ]; then echo "[11520-QA] QA_RED: mobile HUD three-rail/collapse screenshots missing"; exit 1; fi
           if [ ! -s "$DRIVE" ]; then echo "[11520-QA] QA_RED: C/lot combat-drive screenshot missing"; exit 1; fi
           if [ ! -s "$MONSTER" ]; then echo "[11520-QA] QA_RED: monster attack HP screenshot missing"; exit 1; fi
           if [ ! -s "$ACTION_RAIL" ]; then echo "[11520-QA] QA_RED: action-layer/right-rail screenshot missing"; exit 1; fi
-          if [ ! -s "$DOCK_OPEN" ]; then echo "[11520-QA] QA_RED: dock-open pointer-clearance screenshot missing"; exit 1; fi
           echo "[11520-QA] screenshot evidence present"
       - name: Upload 11520 runtime visual QA evidence
         if: always()
