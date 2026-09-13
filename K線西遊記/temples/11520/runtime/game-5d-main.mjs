@@ -108,7 +108,15 @@ function lifeCanvasHitPoints(lifeId){
   for(let y=minY+stepY/2;y<=maxY&&points.length<24;y+=stepY)for(let x=minX+stepX/2;x<=maxX&&points.length<24;x+=stepX)if(routesToTarget(x,y))points.push(Object.freeze({clientX:x,clientY:y,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
   return Object.freeze(points);
 }
-globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints});
+function visibleLifeCanvasHitPoints(){
+  for(const monster of world.monsters){
+    if(monster.state==='DEAD'||!monster.lifeId)continue;
+    const points=lifeCanvasHitPoints(monster.lifeId);
+    if(points.length)return points;
+  }
+  return Object.freeze([]);
+}
+globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints,visibleLifeCanvasHitPoints});
 
 const raycaster=new THREE.Raycaster(),tapPointer=new THREE.Vector2(),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);let worldTapStart=null;
 function ancestorData(obj,key){let n=obj;while(n){if(n.userData&&n.userData[key]!=null)return n.userData[key];n=n.parent}return null}
