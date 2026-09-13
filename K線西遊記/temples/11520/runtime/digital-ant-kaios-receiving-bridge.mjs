@@ -31,7 +31,7 @@ export function createDigitalAntKaiosReceivingBridge(config={}){
     mission:{status:'AWAITING_EXACT_AUTHORIZATION',route:null},
   };
   function syncVisual({spawn=false,stateOverride=null,missionStatusOverride=null}={}){
-    const s=receiving.snapshot();ant.state=stateOverride||GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:missionStatusOverride||s.delivery_status,settlementMode:s.real_receiving_gate==='CONFIGURED'?'CHAIN_EVIDENCE_REQUIRED':'SIMULATION_BLOCKED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
+    const s=receiving.snapshot();ant.state=stateOverride||GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:missionStatusOverride||s.delivery_status,settlementMode:s.real_receiving_gate==='CONFIGURED_STRUCTURAL_VERIFICATION_ONLY'?'CHAIN_EVIDENCE_REQUIRED':'SIMULATION_BLOCKED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
     const options={axis:'KY',market:'KAIOS_ATM_LOGISTICS',side:1,lots:1,c:0,mission:ant.mission,route:ant.mission.route};
     return spawn?publishDigitalAntSpawn(ant,options):publishDigitalAntUpdate(ant,options);
   }
