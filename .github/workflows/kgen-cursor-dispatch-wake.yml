@@ -1,7 +1,6 @@
-# KGEN cursor-01 dispatch wake (HUMAN-AUTO-CLOCKIN-001 / option 2)
-# Launches a Cursor Cloud Agent when Codex merges a codex/* dispatch PR to main.
-# Requires repo secret: CURSOR_API_KEY (Cursor Dashboard → API Keys)
-# Docs: KGEN-AI-Company/automation/README.md
+# KGEN cursor-01 dispatch wake safety gate
+# External agent launch is disabled in repository automation.
+# A future launch path requires a separate, exact Human authorization and review.
 
 name: KGEN Cursor Dispatch Wake
 
@@ -16,50 +15,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  wake-cursor-01:
+  hold-cursor-dispatch:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.pull_request.merged == true &&
        startsWith(github.event.pull_request.head.ref, 'codex/'))
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Launch Cursor Cloud Agent
-        env:
-          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+      - name: Record fail-closed dispatch status
         run: |
-          set -euo pipefail
-          if [ -z "${CURSOR_API_KEY:-}" ]; then
-            echo "::notice::CURSOR_API_KEY not set. Add it in GitHub repo Settings → Secrets → Actions."
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
-              echo "Merged PR: #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }})"
-            fi
-            echo "See KGEN-AI-Company/automation/README.md"
-            exit 0
-          fi
-          BODY=$(python3 <<'PY'
-          import json, pathlib
-          prompt = pathlib.Path("KGEN-AI-Company/automation/cursor-dispatch-wake-prompt.txt").read_text()
-          print(json.dumps({
-              "name": "KGEN-Cursor-Dispatch-Wake",
-              "prompt": {"text": prompt},
-              "repos": [{
-                  "url": "https://github.com/klineodyssey/kline-odyssey",
-                  "startingRef": "main"
-              }],
-              "autoCreatePR": False
-          }))
-          PY
-          )
-          HTTP=$(curl -sS -w "%{http_code}" -o /tmp/cursor-agent.json \
-            -X POST "https://api.cursor.com/v1/agents" \
-            -H "Authorization: Bearer ${CURSOR_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "$BODY")
-          echo "Cursor API HTTP ${HTTP}"
-          cat /tmp/cursor-agent.json
-          test "$HTTP" -ge 200 -a "$HTTP" -lt 300
+          {
+            echo "## Cursor dispatch status"
+            echo ""
+            echo "- Status: `HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED`"
+            echo "- External API called: `NO`"
+            echo "- Agent launched: `NO`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Cursor dispatch held::External API and agent launch are disabled pending exact Human authorization."

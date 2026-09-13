@@ -8,8 +8,9 @@ on:
       - "K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py"
       - ".github/workflows/taifex_master_build.yml"
 
+# Generated workbooks are CI artifacts; repository updates must enter through a non-main pull request.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: taifex-master-${{ github.ref }}
@@ -19,14 +20,15 @@ jobs:
   build-taifex-master:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v4
+      - name: Checkout triggering ref
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -86,19 +88,10 @@ jobs:
           print("validated rows=", len(df), "last_date=", df["交易日期"].iloc[-1])
           PY
 
-      - name: Commit generated TAIFEX master files
-        run: |
-          set -euo pipefail
-          git config user.name "kline-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add "K線西遊記/kline-taifex/master/台指近全.xlsx"
-          git add "K線西遊記/kline-taifex/master/台指近全"*.xlsx || true
-
-          if git diff --cached --quiet; then
-            echo "No master changes to commit."
-            exit 0
-          fi
-
-          git commit -m "taifex: rebuild 台指近全 from raw CSV"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Upload validated TAIFEX master candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: taifex-master-${{ github.sha }}
+          path: "K線西遊記/kline-taifex/master/台指近全*.xlsx"
+          if-no-files-found: error
+          retention-days: 14

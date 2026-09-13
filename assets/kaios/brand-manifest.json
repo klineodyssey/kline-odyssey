@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "2.0.0",
+  "status": "REVIEW_CANDIDATE_NOT_CURRENT",
+  "visualSystem": "SAME_KGEN_MASTER_MARK_DIFFERENT_SYMBOL_NAMES",
+  "masterAsset": "assets/kgen/kgen-logo.svg",
+  "masterRasterAsset": "assets/kgen/kgen-logo-256.png",
+  "sharedMark": true,
+  "source": "Repository canonical KGEN black-gold mark; no third-party visual assets",
+  "licenseStatus": "HUMAN_APPROVED_REPOSITORY_OWNED_MASTER_MARK",
+  "humanVisualDirection": {
+    "decisionId": "KAIOS_HENGYAO_MASTER_COMPANY_AND_11520_GPU_REAL_MARKET_WORK_ORDER_V3_FINAL",
+    "decision": "SAME_MASTER_MARK_DIFFERENT_SYMBOL_NAMES",
+    "authorizedBy": "\u6c88\u82f1\u660e",
+    "signedAtUtc": "2026-08-27T04:17:44Z",
+    "status": "HUMAN_APPROVED"
+  },
+  "websiteReplacementAuthorized": false,
+  "externalMetadataSubmissionStatus": "NOT_SUBMITTED_ACCOUNT_OWNERSHIP_GATE",
+  "tokenMetadata": {
+    "network": "BNB Smart Chain Mainnet",
+    "chainId": 56,
+    "address": "0xD4E67B3a69e41524c424150E6b6e921b01D036db",
+    "deploymentTransaction": "0x731bccd9d1116831d9b43966672cb27d9017c75b6806c32109c5c210d2c3be9c",
+    "name": "KAIOS Civilization Credit",
+    "symbol": "KAIOS",
+    "decimals": 18,
+    "tokenStatus": "MAINNET_LIVE",
+    "marketStatus": "NO_VERIFIED_PAIR_AT_OBSERVED_BLOCK",
+    "priceStatus": "UNAVAILABLE",
+    "observedBlock": 118404108,
+    "observedAtUtc": "2026-08-27T15:01:55Z",
+    "logo": "assets/kaios/kaios-token-512.png"
+  },
+  "externalDiscovery": {
+    "bscScanTokenInfo": "ACCOUNT_OWNERSHIP_GATE_NOT_SUBMITTED",
+    "trustWalletAssets": "NOT_SUBMITTED",
+    "pancakeTokenList": "NOT_SUBMITTED",
+    "coinMarketCap": "NOT_SUBMITTED",
+    "coinGecko": "NOT_SUBMITTED"
+  },
+  "assets": [
+    {
+      "path": "assets/kaios/kaios-apple-touch-icon-180.png",
+      "sha256": "d0cfb7b2ad89ae35c1ed2a5b7af8cb5c647c455e4cbce3625d042213c6f13adb",
+      "width": 180,
+      "height": 180,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-favicon-32.png",
+      "sha256": "0e17b800116353a76d513c69789546b520775c99203b97533546e1b2ccf92c81",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-favicon-64.png",
+      "sha256": "593cb8933cdd698a3e553b713a1c7b4fbb87127397a706e252fd1e23424cb6a6",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-128.png",
+      "sha256": "e00f97f10951960c207f709f109bf0a1b40f0c83e3505daee3ae468a8361479a",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-256.png",
+      "sha256": "955afb35b65e7e5c106d774fe6b624d3aee75c6048b311604d35563e97c39e68",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-32.png",
+      "sha256": "0e17b800116353a76d513c69789546b520775c99203b97533546e1b2ccf92c81",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-512.png",
+      "sha256": "a0d6821bf03136e4d0a80bbc54f0a64263a91f7fcca5c1f6dc70e3ccc82f4056",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-64.png",
+      "sha256": "593cb8933cdd698a3e553b713a1c7b4fbb87127397a706e252fd1e23424cb6a6",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-dark.svg",
+      "sha256": "26523886a87db891462ddfee0db01bec47d6478f8b3464e83c48059f23963b1e",
+      "viewBox": "0 0 32 32"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-light.svg",
+      "sha256": "a5c1f4d07b632aad42d75b07907857a65d250934a4f5d109f4a84666349cff4e",
+      "viewBox": "0 0 32 32"
+    },
+    {
+      "path": "assets/kaios/kaios-logo-monochrome.svg",
+      "sha256": "fe0682e83d92625741cb4ec5db69bf457742749a2b53f89800d20d9fc351ff36",
+      "viewBox": "0 0 32 32"
+    },
+    {
+      "path": "assets/kaios/kaios-logo.svg",
+      "sha256": "12a9735fbaf0f0056a85c890986f23d39720c8ac01f7908c7a5af8290fb5f33e",
+      "viewBox": "0 0 32 32"
+    },
+    {
+      "path": "assets/kaios/kaios-og-1200x630.png",
+      "sha256": "a3e99c03d3df36498991ea826af875329a1cf132ed23b7c51170fe40238bb2b2",
+      "width": 1200,
+      "height": 630,
+      "mode": "RGB"
+    },
+    {
+      "path": "assets/kaios/kaios-token-512.png",
+      "sha256": "a0d6821bf03136e4d0a80bbc54f0a64263a91f7fcca5c1f6dc70e3ccc82f4056",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kship-token-512.png",
+      "sha256": "a0d6821bf03136e4d0a80bbc54f0a64263a91f7fcca5c1f6dc70e3ccc82f4056",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    },
+    {
+      "path": "assets/kaios/kufo-token-512.png",
+      "sha256": "a0d6821bf03136e4d0a80bbc54f0a64263a91f7fcca5c1f6dc70e3ccc82f4056",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA"
+    }
+  ]
+}

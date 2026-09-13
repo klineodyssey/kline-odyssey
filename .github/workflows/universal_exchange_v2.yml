@@ -13,6 +13,7 @@ on:
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
       - ".github/ISSUE_TEMPLATE/civilization-request.yml"
+      - ".github/workflows/kgen-cursor-dispatch-wake.yml"
       - ".github/workflows/universal_exchange_v2.yml"
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - "tests/universal-exchange-workflow-security.test.mjs"
       - "K線西遊記/temples/11520/**"
       - "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md"
+      - ".github/workflows/kgen-cursor-dispatch-wake.yml"
       - ".github/workflows/universal_exchange_v2.yml"
 
 permissions:
@@ -29,9 +31,10 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "20"
       - name: Validate ES modules
@@ -46,6 +49,7 @@ jobs:
   digital-ant-public-read-only-worker:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       issues: read
@@ -53,11 +57,11 @@ jobs:
       group: digital-ant-public-hourly-worker
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20"
       - name: Run one independent read-only hourly or ignition-window cycle
@@ -70,7 +74,7 @@ jobs:
             --events-dir "K線西遊記/temples/11520/runtime/work-events" \
             --output "$RUNNER_TEMP/digital-ant-hourly-worker.json"
       - name: Preserve public Work Event evidence without repository mutation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digital-ant-hourly-${{ github.run_id }}-${{ github.run_attempt }}
           path: |

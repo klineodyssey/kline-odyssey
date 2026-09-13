@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE
 PURPOSE: Bridge DIGITAL_ANT_0001 Market Life visualization to the read-only 11520 KAIOS ATM receiving state machine without signing or fabricating settlement.
 */
@@ -30,8 +30,8 @@ export function createDigitalAntKaiosReceivingBridge(config={}){
     cargo:{cargoId:config.cargo_manifest_id||'KAIOS-11520-DIGITAL-ANT-0001',amount:DIGITAL_ANT_11520_CARGO.amount,unit:'KAIOS',sourceTx:DIGITAL_ANT_11520_CARGO.sourceTx},
     mission:{status:'AWAITING_EXACT_AUTHORIZATION',route:null},
   };
-  function syncVisual({spawn=false}={}){
-    const s=receiving.snapshot();ant.state=GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:s.delivery_status,settlementMode:s.real_receiving_gate==='CONFIGURED'?'CHAIN_EVIDENCE_REQUIRED':'SIMULATION_BLOCKED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
+  function syncVisual({spawn=false,stateOverride=null,missionStatusOverride=null}={}){
+    const s=receiving.snapshot();ant.state=stateOverride||GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:missionStatusOverride||s.delivery_status,settlementMode:s.real_receiving_gate==='CONFIGURED_STRUCTURAL_VERIFICATION_ONLY'?'CHAIN_EVIDENCE_REQUIRED':'SIMULATION_BLOCKED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
     const options={axis:'KY',market:'KAIOS_ATM_LOGISTICS',side:1,lots:1,c:0,mission:ant.mission,route:ant.mission.route};
     return spawn?publishDigitalAntSpawn(ant,options):publishDigitalAntUpdate(ant,options);
   }
@@ -40,7 +40,7 @@ export function createDigitalAntKaiosReceivingBridge(config={}){
     const out=receiving.registerCargo(manifest);syncVisual({spawn:true});return out;
   }
   function setRoute(route={}){
-    const proof=validateRouteEvidence(route);if(!proof.ok){ant.state='REJECT';ant.mission={...ant.mission,status:proof.status,route};syncVisual();return proof}
+    const proof=validateRouteEvidence(route);if(!proof.ok){ant.mission={...ant.mission,route};syncVisual({stateOverride:'REJECT',missionStatusOverride:proof.status});return proof}
     ant.mission={...ant.mission,route:{...route,proof}};syncVisual();return {ok:true,proof};
   }
   function authorize(){const out=receiving.authorizeExactReceiver();syncVisual();return out}

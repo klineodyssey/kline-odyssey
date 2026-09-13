@@ -89,8 +89,10 @@ def read_csv_strict_19_multiline(path: str) -> pd.DataFrame:
     """以標準 CSV 規則解析，並相容真正被拆行的 19 欄記錄。
 
     csv.reader 會正確處理引號內逗號與引號內換行。若來源真的把一筆資料
-    無引號拆成多個實體列，才會把不足 19 欄的相鄰列接回；任何超過 19 欄
-    或接回後仍不足 19 欄的資料一律拒絕，避免靜默欄位錯位。
+    無引號拆成多個實體列，才會把不足 19 欄的相鄰列接回。TAIFEX 匯出檔
+    若在完整 19 欄後多帶一個終端分隔符，只接受第 20 欄為空並移除；任何
+    非空第 20 欄、更多欄位或接回後仍不足 19 欄的資料一律拒絕，避免靜默
+    欄位錯位。
     """
     text = _read_text_any(path)
     parsed_rows = [_clean_row(row) for row in csv.reader(StringIO(text, newline=""))]
@@ -106,6 +108,9 @@ def read_csv_strict_19_multiline(path: str) -> pd.DataFrame:
             if buffer:
                 raise ValueError(f"第 {row_number} 列表頭前仍有未完成資料：{path}")
             continue
+
+        if len(row) == 20 and row[-1] == "":
+            row = row[:-1]
 
         if len(row) > 19:
             raise ValueError(
