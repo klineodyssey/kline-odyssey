@@ -8,6 +8,7 @@ on:
       - "K線西遊記/kline-taifex/scripts/tx_full_day_pipeline_v882_UTF8BOM.py"
       - ".github/workflows/taifex_master_build.yml"
 
+# Generated workbooks are CI artifacts; repository updates must enter through a non-main pull request.
 permissions:
   contents: read
 
