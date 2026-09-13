@@ -1,17 +1,109 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.1",
     "status": "ACTIVE",
-    "last_updated": "2026-07-12",
-    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001"
+    "last_updated": "2026-08-23",
+    "task_id": "KGEN-WORKFORCE-ROSTER-2026-0001",
+    "related_task_ids": [
+      "KAIOS-SOL-YAOCE-AI-COMPANY-INDEPENDENT-REVIEWER-INTERVIEW-V1-001"
+    ]
   },
-  "workflow": ["APPLIED", "IDENTITY_CHECK", "CAPABILITY_TEST", "SANDBOX_TRIAL", "CODEX_REVIEW", "PROBATION", "ACTIVE_EMPLOYEE", "REJECTED", "SUSPENDED"],
+  "workflow": [
+    "APPLIED",
+    "IDENTITY_CHECK",
+    "CAPABILITY_TEST",
+    "SANDBOX_TRIAL",
+    "CODEX_REVIEW",
+    "PROBATION",
+    "ACTIVE_EMPLOYEE",
+    "REJECTED",
+    "SUSPENDED"
+  ],
   "candidates": [
-    {"candidate_id":"cursor-02","role":"QA / route validation worker","status":"APPLIED","recommended_trial":"Validate Pages routes and JSON parse without editing protected paths","risk_limit":"R0-R1"},
-    {"candidate_id":"security-auditor-01","role":"Security, secrets and protected path auditor","status":"APPLIED","recommended_trial":"Read-only protected path and secret scan","risk_limit":"R0 read-only"},
-    {"candidate_id":"data-engineer-01","role":"JSON, Schema, Universe Map and data pipeline worker","status":"APPLIED","recommended_trial":"Validate schema/example consistency","risk_limit":"R0-R1"},
-    {"candidate_id":"frontend-agent-01","role":"Portal, mobile and Pages frontend worker","status":"APPLIED","recommended_trial":"Fix one non-protected visual issue on handoff branch","risk_limit":"R0-R1"},
-    {"candidate_id":"research-agent-01","role":"Research, specification and R&D suggestion worker","status":"APPLIED","recommended_trial":"Produce research report only; no code edits","risk_limit":"R0"},
-    {"candidate_id":"human-engineer-01","role":"Human environment, network and deployment assistant","status":"IDENTITY_CHECK","recommended_trial":"Assist with local environment verification under Human control","risk_limit":"Human-approved only"}
+    {
+      "candidate_id": "cursor-02",
+      "role": "QA / route validation worker",
+      "status": "APPLIED",
+      "recommended_trial": "Validate Pages routes and JSON parse without editing protected paths",
+      "risk_limit": "R0-R1"
+    },
+    {
+      "candidate_id": "security-auditor-01",
+      "role": "Security, secrets and protected path auditor",
+      "status": "APPLIED",
+      "recommended_trial": "Read-only protected path and secret scan",
+      "risk_limit": "R0 read-only"
+    },
+    {
+      "candidate_id": "data-engineer-01",
+      "role": "JSON, Schema, Universe Map and data pipeline worker",
+      "status": "APPLIED",
+      "recommended_trial": "Validate schema/example consistency",
+      "risk_limit": "R0-R1"
+    },
+    {
+      "candidate_id": "frontend-agent-01",
+      "role": "Portal, mobile and Pages frontend worker",
+      "status": "APPLIED",
+      "recommended_trial": "Fix one non-protected visual issue on handoff branch",
+      "risk_limit": "R0-R1"
+    },
+    {
+      "candidate_id": "research-agent-01",
+      "role": "Research, specification and R&D suggestion worker",
+      "status": "APPLIED",
+      "recommended_trial": "Produce research report only; no code edits",
+      "risk_limit": "R0"
+    },
+    {
+      "candidate_id": "human-engineer-01",
+      "role": "Human environment, network and deployment assistant",
+      "status": "IDENTITY_CHECK",
+      "recommended_trial": "Assist with local environment verification under Human control",
+      "risk_limit": "Human-approved only"
+    },
+    {
+      "candidate_id": "sol-yaoce-reviewer-candidate-001",
+      "self_name": "Sol",
+      "role_name": "曜冊",
+      "role": "Digital Life Lifecycle / Authority Boundary Reviewer candidate",
+      "status": "PROPOSED_HUMAN_REQUIRED",
+      "authorized_onboarding_level": null,
+      "canonical_life_id": null,
+      "canonical_worker_id": null,
+      "controller_identity_status": "UNVERIFIED",
+      "worker_type_status": "UNVERIFIED",
+      "employment_status": "APPLICANT_NOT_EMPLOYEE",
+      "review_authority": "NONE",
+      "payroll_eligibility": "BLOCKED",
+      "acknowledgments": {
+        "boot": false,
+        "canon": false,
+        "workspace_policy": false,
+        "do_not_touch": false
+      },
+      "human_authorization": null,
+      "recommended_trial": "Read-only review of the Economic Sponsor / Naihe Source / Service Operator / Regeneration Parent separation schema and test matrix",
+      "trial_task_id": "KAIOS-SOL-YAOCE-LIFECYCLE-ROLE-SEPARATION-DRYRUN-001",
+      "trial_dispatch_status": "HOLD_HUMAN_DECISION_IDENTITY_AND_ACKNOWLEDGMENTS_REQUIRED",
+      "risk_limit": "R0 read-only",
+      "forbidden": [
+        "SELF_ASSIGN_LIFE_ID",
+        "SELF_ASSIGN_WORKER_ID",
+        "SELF_PROMOTE_T2",
+        "REVIEW_PR169",
+        "REVIEW_PR170",
+        "MODIFY_CURRENT_CANON",
+        "MERGE",
+        "DEPLOY",
+        "PAY",
+        "TRANSFER_ASSETS",
+        "MAINNET_TRANSACTION",
+        "GOVERNANCE_EXECUTION",
+        "PRIVATE_KEY_ACCESS"
+      ],
+      "proposed_onboarding_level": "T1",
+      "decision_authority_status": "HUMAN_REQUIRED_INDEPENDENT_IMMUTABLE_EVIDENCE_NOT_BOUND"
+    }
   ]
 }
