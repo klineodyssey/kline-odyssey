@@ -1,0 +1,154 @@
+{
+  "schema": "KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_EVIDENCE_V1",
+  "status": "PASS",
+  "network": "BSC Mainnet",
+  "chainId": 56,
+  "sourceHead": "811bbe2e7a2979bb0ae317642bc13efc24253f36",
+  "formalAddresses": {
+    "kgen": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "bankGovernance": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "mother": "0xCd60BF474e691F2484950a0276Eaf507616Ca4b9",
+    "jadeEmperor": "0xc15E08834fCA9F2d3462a3f8f0BC30524D6dd756",
+    "reserveRedemptionProxy": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+    "eligibilityProxy": "0xA50743fd0fe022714831482355A27559027368F9",
+    "capitalCommitmentProxy": "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c"
+  },
+  "authorizedCall": {
+    "target": "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+    "function": "setTaxWallets(address,address,address)",
+    "selector": "0x9fda0581",
+    "bankWallet": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+    "rewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+    "autoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85",
+    "calldata": "0x9fda0581000000000000000000000000a06ef53c9ad4af739fd13ca1ded446437134b0ee0000000000000000000000000fd21cf643211d067a18a416da219827da26e288000000000000000000000000e87f6975fa3d4f3d56dce49fc978884285a3ed85",
+    "calldataHash": "0x52a85f0854d7e57ab42821880c4e76731be9ad569cc3f83fd92c84f08de94320",
+    "valueWei": "0"
+  },
+  "governance": {
+    "proposalId": "0x8dd91246c88280a82c39126e10f6275058eb0654b5157915c69e85734da05f25",
+    "delaySeconds": 3600,
+    "executableAt": 1786787727,
+    "executionTimestamp": 1786787745,
+    "delaySatisfied": true,
+    "proposal": {
+      "transactionHash": "0x625f39ab8ea2a5c3a6d68623b9f79122ab2aeaccece9ab32e913b231134c3a16",
+      "blockNumber": 116052064,
+      "blockHash": "0x9a8a22f65edba08e72a8b753b2445a7f976e753f83b288db2053b087fdbc6742",
+      "timestamp": 1786784127,
+      "timestampUtc": "2026-08-15T08:55:27Z",
+      "timestampAsiaTaipei": "2026-08-15T16:55:27+08:00",
+      "gasUsed": "110666",
+      "effectiveGasPriceWei": "50000000",
+      "feeWei": "5533300000000",
+      "bnbSpent": "0.0000055333",
+      "status": "PASS"
+    },
+    "approval": {
+      "transactionHash": "0xa7ba5e2fd6dce3e7291cc0ba7026cfbf6d92fbac535c5c27b5b2e3ca7c84f713",
+      "blockNumber": 116052107,
+      "blockHash": "0xb1613d487797de03971322ba9718d626133c24148a058a017ce45fe003078c95",
+      "timestamp": 1786784146,
+      "timestampUtc": "2026-08-15T08:55:46Z",
+      "timestampAsiaTaipei": "2026-08-15T16:55:46+08:00",
+      "gasUsed": "57667",
+      "effectiveGasPriceWei": "50000000",
+      "feeWei": "2883350000000",
+      "bnbSpent": "0.00000288335",
+      "status": "PASS"
+    },
+    "execution": {
+      "transactionHash": "0x7d6be56b14133941991a1d22928603d82446bdcf80472fef9068ee0623d7bfdc",
+      "blockNumber": 116060103,
+      "blockHash": "0x160ceaeaa0a5d63a1199f0936626a3fa0fe670265e6d2893054f0b07a813cf09",
+      "timestamp": 1786787745,
+      "timestampUtc": "2026-08-15T09:55:45Z",
+      "timestampAsiaTaipei": "2026-08-15T17:55:45+08:00",
+      "gasUsed": "94110",
+      "effectiveGasPriceWei": "50000000",
+      "feeWei": "4705500000000",
+      "bnbSpent": "0.0000047055",
+      "status": "PASS"
+    },
+    "totalGasUsed": "262443",
+    "totalFeeWei": "13122150000000",
+    "totalBnbSpent": "0.00001312215"
+  },
+  "kgenState": {
+    "owner": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "before": {
+      "bankWallet": "0xFA4d34c46e86058e672936fa03cfd79F4C7A4b3c",
+      "rewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+      "autoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85"
+    },
+    "after": {
+      "bankWallet": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+      "rewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+      "autoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85"
+    },
+    "taxBps": {
+      "total": 30,
+      "trueBurn": 10,
+      "bank": 10,
+      "reward": 5,
+      "autoLP": 5,
+      "walletToWallet": 0
+    },
+    "taxRatesUnchanged": true,
+    "reserveReceiverTaxExempt": true,
+    "oldBankReceiverTaxExempt": true,
+    "formerOwnerTaxExempt": true
+  },
+  "reserveState": {
+    "registryActive": false,
+    "paused": false,
+    "redemptionEnabled": false,
+    "kgenBalanceWei": "0",
+    "kgenBalance": "0.0",
+    "minimumKgenReserveWei": "100000000000000000000",
+    "frontendState": "RESERVE_ACCUMULATING"
+  },
+  "phase2State": {
+    "eligibility": "LIVE_ACTIVE",
+    "capitalCommitment": "LIVE_ACTIVE",
+    "reserveRedemption": "LIVE_INACTIVE"
+  },
+  "observability": {
+    "indexerStatus": "PASS",
+    "frontendStatus": "PASS",
+    "eventsObserved": [
+      "GovernanceProposalCreated",
+      "GovernanceProposalApproved",
+      "SetTaxWallets",
+      "GovernanceProposalExecuted"
+    ],
+    "indexedOwner": "0xa2792fBDCc8A8AaC364053431D44E0a8D335E166",
+    "indexedBankWallet": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+    "indexedRewardWallet": "0x0Fd21cf643211d067A18A416DA219827dA26E288",
+    "indexedAutoLPWallet": "0xE87F6975Fa3d4F3D56Dce49fc978884285A3eD85",
+    "unclassifiedKgenInflowsPreserved": true
+  },
+  "authorityValidation": {
+    "formerOwnerDirectAuthority": "BLOCKED",
+    "motherDirectAuthority": "BLOCKED",
+    "jadeDirectAuthority": "BLOCKED",
+    "bankGovernanceOwnerAuthority": "PASS",
+    "validationMode": "READ_ONLY_ETH_CALL"
+  },
+  "scope": {
+    "authorizedMainnetTransactions": 3,
+    "sentMainnetTransactions": 3,
+    "setTaxWalletsGovernanceExecutions": 1,
+    "separateSetTaxExemptCalls": 0,
+    "reserveActivations": 0,
+    "redemptionEnableCalls": 0,
+    "redemptions": 0,
+    "mainnetTestTrades": 0,
+    "stage2c2Operations": 0
+  },
+  "notes": [
+    "KGEN emitted its existing SetTaxExempt events for the three configured tax wallets during setTaxWallets; no separate setTaxExempt call or transaction was sent.",
+    "No Mainnet trade was generated for validation; passive accumulation begins when natural taxable KGEN activity occurs.",
+    "Operational margin above the 100 KGEN hard floor remains HUMAN_DECISION_REQUIRED."
+  ],
+  "secretMaterialRecorded": false
+}
