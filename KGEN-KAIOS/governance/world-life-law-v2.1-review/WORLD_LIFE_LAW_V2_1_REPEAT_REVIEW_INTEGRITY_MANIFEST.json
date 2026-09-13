@@ -1,0 +1,121 @@
+{
+    "schema_version":  "1.0.0",
+    "artifact_id":  "WORLD-LIFE-LAW-V2.1-REPEAT-REVIEW-INTEGRITY-MANIFEST-001",
+    "reviewed_main_sha":  "e4bcd8da90309a9557ce2f8eaba83ef0f8d990d4",
+    "runtime_authority":  false,
+    "freeze":  "NOT_APPROVED",
+    "normalization":  "UTF8_LF",
+    "artifacts":  [
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_CUMULATIVE_AMENDMENT_CANDIDATE.md",
+                          "sha256":  "9aae03be8a4df0b0200fcce67668c27223bbaf3e4164c6ef4799518a1f9d62de",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_SOURCE_CLASSIFICATION_NORMATIVE_CANDIDATE.md",
+                          "sha256":  "4073960848af8c120f026abc6ef80ecc9fb1bf3dcf182d485cbafcfed5027b70",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_CONFLICT_MATRIX.json",
+                          "sha256":  "cde72c6ea67a7c398cf7022cdf6b1cdbdc933c4642c7a4bc1f974a4a372124cc",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_BASELINE_EVIDENCE.json",
+                          "sha256":  "c5cbc1f428521f5b831d9b0ecbe9053f0d244f25c0d0fc79a5b19532cbc28396",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_BASELINE_REVIEW.md",
+                          "sha256":  "4aecc249742ec57356dfd87ffaaade464d93077e8c6b2c4aab9531a20573660d",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/WORLD_LIFE_LAW_V2_1_REPEAT_FREEZE_READINESS.json",
+                          "sha256":  "d933f3e401029be6e22a8e7587d525dcadd22b4904f0ee76eef813a5c41fc66e",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/LIFE_OS_V1_1_BASELINE_LINEAGE.json",
+                          "sha256":  "ad8791806daded0e9092f84d14e0183da6ac16a2e2d894c037b569c6525577b5",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/LIFE_OS_V1_1_HASH_VERIFICATION_REPORT.md",
+                          "sha256":  "6616a1ed5531c03ffd56eabe5292b39bb1f16e42111cd949e73a0e70c2356390",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/LIFE_OS_V1_1_SEMANTIC_DELTA_REPORT.md",
+                          "sha256":  "832379d3026f5eb3f418bd6b8eabac8b0a17bfe7780c2602947a02e8220b772c",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/LIFE_OS_V1_1_AUTHORITY_DELTA_REPORT.md",
+                          "sha256":  "7d132c0c042cca3e18d9967503b89e93830e478eb45f85d541d05479ef5f1f03",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/FRZ_HASH_001_RESOLUTION.json",
+                          "sha256":  "21721d45998443a2234cf177a669a0f591b5d7be112419fb816247221d7d18fd",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/autopilot/recovery_points/RECOVERY-20260723-FRZ-HASH-001-LIFE-OS-V1-1.md",
+                          "sha256":  "0c39bde250c861547329cb0deb079be6682d13798b8b5bfcef49d815af300cbd",
+                          "normalization":  "UTF8_LF"
+                      },
+                      {
+                          "path":  "KGEN-KAIOS/governance/world-life-law-v2.1-review/FRZ_HASH_001_CLOSEOUT_CANDIDATE.md",
+                          "sha256":  "d478a7f8bdbbc59b2530d641757c8c4b993ad9bef8ffa30847aa9e60de17a699",
+                          "normalization":  "UTF8_LF"
+                      }
+                  ],
+    "canonical_sources":  [
+                              {
+                                  "path":  "KGEN-KAIOS/life/KAIOS_WORLD_LIFE_LAW.md",
+                                  "sha256":  "4199e1a36e7b823efab2f2733bb2cb37936a0c134cb42ebb186f3ef236b527f9"
+                              },
+                              {
+                                  "path":  "KGEN-KAIOS/life/kaios_world_life_law.json",
+                                  "sha256":  "eca96f3f5360c57b5771f605b7f5bc8d3275cc2b40832b8add4d5723f74c3a27"
+                              },
+                              {
+                                  "path":  "KGEN-KAIOS/life/life_os_architecture_baseline.json",
+                                  "sha256":  "23f4f6bcac9230478d79b1c4eb0fa468288412353772bc83560fedf333740f63"
+                              },
+                              {
+                                  "path":  "KGEN-KAIOS/life/life_os_architecture_baseline_v1_1.json",
+                                  "sha256":  "b6b846259ef328b5c8e9be452979ad77fc48ddb897d8f8a75c6d6401c30d1d11"
+                              }
+                          ],
+    "pr_source_blobs":  [
+                            {
+                                "source":  "PR36_AMENDMENT_001",
+                                "commit":  "6b6672bf91c4de232dcc3452a7e6ce6a2eb66b1d",
+                                "sha256":  "6abeab8099e0af6252aa1b55f0907a2670788c304713848accdfc31fa2339892"
+                            },
+                            {
+                                "source":  "PR36_ACTIVITY_CONTRACT",
+                                "commit":  "6b6672bf91c4de232dcc3452a7e6ce6a2eb66b1d",
+                                "sha256":  "a39fd6255fabac6632e0b1f7ea0b14d7e5604b804145a4c77cb7c1b51c1ff984"
+                            },
+                            {
+                                "source":  "PR47_P1_INTEGRATION",
+                                "commit":  "a01ffe23807553067a5c23145e49b1c518c31612",
+                                "sha256":  "817d2e344a26bba75c0fb5d71dfe2a592c53111594f9bace6e35da801d545c20"
+                            }
+                        ],
+    "frozen_manifest":  {
+                            "members":  13,
+                            "version":  "LIFE-OS-V1.1",
+                            "revision":  "2026-07-23.1",
+                            "pass":  13,
+                            "fail":  0,
+                            "status":  "PASS",
+                            "historical_v1_0":  "13_OF_13_PASS_AT_FROZEN_COMMIT",
+                            "resolution":  "FRZ-HASH-001_OPTION_D"
+                        },
+    "manifest_self_hash":  "EXCLUDED_TO_AVOID_SELF_REFERENCE"
+}
