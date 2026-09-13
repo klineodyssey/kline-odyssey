@@ -181,6 +181,7 @@ jobs:
             --engine_ok "${{ steps.restore_engine.outputs.engine_ok }}"
 
       - name: Commit and push verified outputs
+        if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail

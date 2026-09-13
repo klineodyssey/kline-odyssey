@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -39,24 +39,79 @@ jobs:
           echo "latest_csv=$latest_csv" >> $GITHUB_OUTPUT
           echo "Latest raw: $latest_csv"
 
-      - name: Find latest master xlsx
-        id: latest_xlsx
+      - name: Test terminal delimiter boundary
+        env:
+          LATEST_RAW: ${{ steps.latest_raw.outputs.latest_csv }}
         run: |
-          latest_xlsx=$(ls -1 master/台指近全*.xlsx | sort | tail -n 1)
-          echo "latest_xlsx=$latest_xlsx" >> $GITHUB_OUTPUT
-          echo "Latest xlsx: $latest_xlsx"
+          python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          from tempfile import TemporaryDirectory
 
-      - name: Extract date from latest xlsx filename
-        id: dateinfo
-        run: |
-          fname=$(basename "${{ steps.latest_xlsx.outputs.latest_xlsx }}")
-          ymd=$(echo "$fname" | sed -E 's/^台指近全([0-9]{8})\.xlsx$/\1/')
-          echo "ymd=$ymd" >> $GITHUB_OUTPUT
-          echo "Date: $ymd"
+          pipeline_path = Path("scripts/tx_full_day_pipeline_v882_UTF8BOM.py")
+          spec = importlib.util.spec_from_file_location("tx_pipeline_boundary", pipeline_path)
+          if spec is None or spec.loader is None:
+              raise RuntimeError(f"Unable to load canonical pipeline: {pipeline_path}")
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
 
-      - name: Run validator
+          source_path = Path(os.environ["LATEST_RAW"])
+          parsed = module.read_csv_strict_19_multiline(str(source_path))
+          if parsed.empty:
+              raise RuntimeError("Latest TAIFEX raw parsed to no records")
+
+          source_lines = module._read_text_any(str(source_path)).splitlines()
+          first_data = next(index for index, line in enumerate(source_lines) if line and not line.startswith("交易日期"))
+          source_lines[first_data] = f"{source_lines[first_data]}UNEXPECTED_FIELD"
+          with TemporaryDirectory() as temporary_directory:
+              malformed = Path(temporary_directory) / "nonempty-column-20.csv"
+              malformed.write_text("\n".join(source_lines) + "\n", encoding="utf-8-sig")
+              try:
+                  module.read_csv_strict_19_multiline(str(malformed))
+              except ValueError as error:
+                  if "20 欄" not in str(error):
+                      raise
+              else:
+                  raise RuntimeError("Non-empty column 20 did not fail closed")
+
+          print(f"Terminal empty delimiter accepted: {source_path}; records={len(parsed)}")
+          print("Non-empty column 20 rejected: PASS")
+          PY
+
+      - name: Validate canonical master covers latest raw
+        env:
+          LATEST_RAW: ${{ steps.latest_raw.outputs.latest_csv }}
         run: |
-          python tx_transfer_validator.py \
-            --raw "${{ steps.latest_raw.outputs.latest_csv }}" \
-            --out "${{ steps.latest_xlsx.outputs.latest_xlsx }}" \
-            --date "${{ steps.dateinfo.outputs.ymd }}"
+          python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+
+          root = Path.cwd()
+          pipeline_path = root / "scripts" / "tx_full_day_pipeline_v882_UTF8BOM.py"
+          master_path = root / "master" / "台指近全.xlsx"
+
+          spec = importlib.util.spec_from_file_location("tx_pipeline", pipeline_path)
+          if spec is None or spec.loader is None:
+              raise RuntimeError(f"Unable to load canonical pipeline: {pipeline_path}")
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+
+          master = module._load_master(str(master_path))
+          module.validate_near_full(master)
+
+          latest_raw = os.environ["LATEST_RAW"]
+          source = module.read_csv_strict_19_multiline(latest_raw)
+          near = module.make_near_full_day(source)
+          raw_dates = {int(value) for value in near["交易日期"].tolist()}
+          master_dates = {int(value) for value in master["交易日期"].tolist()}
+          missing_dates = sorted(raw_dates - master_dates)
+          if missing_dates:
+              raise RuntimeError(
+                  f"Canonical master is missing dates from {latest_raw}: {missing_dates}"
+              )
+
+          print(f"Canonical master valid: {master_path}")
+          print(f"Latest raw covered: {latest_raw}; dates={sorted(raw_dates)}")
+          PY
