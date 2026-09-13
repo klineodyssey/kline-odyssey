@@ -28,6 +28,11 @@ await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?
 await page.evaluate(()=>{globalThis.__K11520_QA_WORLD_TAP_ROUTES__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_QA_WORLD_TAP_ROUTES__.push(e.detail||null))});
 let pickedRoute=null,tapDiagnostic=null;
 for(let attempt=0;attempt<24;attempt+=1){
+  await page.evaluate(async()=>{
+    const src=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/market-life-source-runtime.mjs');
+    src.publishMarketLifeSourceEvent({type:'UPDATE',sourceId:'QA-LIVING-WORLD',lifeId:'LIFE-QA-TREE-SELECTION',name:'花果山樹・選取檢核',species:'TREE',intelligence:1,markets:[],capital:0,vitality:100,maxHp:160,attack:0,rewardKaios:0,speed:0,positions:{},x:2.4,y:0,z:1.4,strategy:'WILD_ECOLOGY',meta:{jobs:[]},at:Date.now()},{persistLocal:false,broadcast:false});
+  });
+  await page.waitForTimeout(34);
   const point=await page.evaluate(()=>{
     const canvas=document.querySelector('#three'),points=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.lifeCanvasHitPoints('LIFE-QA-TREE-SELECTION');
     return points.find(p=>document.elementFromPoint(p.clientX,p.clientY)===canvas)||null;
@@ -45,7 +50,7 @@ for(let attempt=0;attempt<24;attempt+=1){
   pickedRoute=null;
   await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('selected-Life QA retry'));
 }
-assert.ok(pickedRoute,`a real Chromium touchscreen tap must route the target Life through the canonical MONSTER raycast: ${JSON.stringify(tapDiagnostic)}`);
+assert.ok(pickedRoute,`a real Chromium pointer tap must route the target Life through the canonical MONSTER raycast: ${JSON.stringify(tapDiagnostic)}`);
 await page.waitForFunction(()=>{const hud=document.getElementById('selectedLifeHud');return hud&&!hud.hidden&&hud.dataset.lifeId},{timeout:3000});
 const picked=await page.locator('#selectedLifeHud').evaluate(hud=>({lifeId:hud.dataset.lifeId,text:hud.textContent||''}));
 const selectedText=await page.locator('#selectedLifeHud').textContent();
