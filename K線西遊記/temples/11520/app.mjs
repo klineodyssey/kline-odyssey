@@ -1,20 +1,29 @@
+import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.1-ai-ant-bank";
+import { createListing } from "../../../core/market/index.mjs?v=11520-v4.1-ai-ant-bank";
+import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.1-ai-ant-bank";
+import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.1-ai-ant-bank";
+import { calculateLifeAge } from "../../../core/life/index.mjs?v=11520-v4.1-ai-ant-bank";
+import { calculateWorkAge, deriveWorkerHealth } from "../../../core/jobs/index.mjs?v=11520-v4.1-ai-ant-bank";
+import { createKgenSwapAdapter, KGEN_SWAP_CONFIG } from "../../../core/integrations/kgen-pancakeswap-v2.mjs?v=11520-v4.1-ai-ant-bank";
 import {
-  createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed,
-  createListing, buildPortfolio, createLifeDraft, createKgenSwapAdapter, KGEN_SWAP_CONFIG, calculateLifeAge, calculateWorkAge,
+  I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale, validatePrimaryI18nCatalogs,
+  detectVoiceCapabilities, normalizeVoiceError, createLocalHuaguoshanMembership,
+  createFirstPlayerMission, completeFirstPlayerMission
+} from "../../../core/apps/index.mjs?v=11520-v4.1-ai-ant-bank";
+import {
   createPublicCivilizationDraftIntent, interpretPublicCivilizationIntent,
-  confirmPublicCivilizationIntent, toPublicCivilizationRequest,
-  routePublicCivilizationProject, qualifyPublicCivilizationRequest, createNonBindingEstimatePreview,
-  appendPublicRequestHistoryEvent, I18N_SUPPORTED_LOCALES, translateUi, normalizeUiLocale,
-  validatePrimaryI18nCatalogs, detectVoiceCapabilities, deriveWorkerHealth, normalizeVoiceError,
-  createLocalHuaguoshanMembership, createFirstPlayerMission, completeFirstPlayerMission
-} from "../../../core/index.mjs?v=11520-v4.0-player-first";
-import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.0-player-first";
+  confirmPublicCivilizationIntent, toPublicCivilizationRequest, routePublicCivilizationProject,
+  qualifyPublicCivilizationRequest, createNonBindingEstimatePreview, appendPublicRequestHistoryEvent,
+  createPrepaidPayrollSchedule, createSalaryAdvanceCreditPlan, rankAtmExpansionSites,
+  createAtmCargoCfoPlan, createAquacultureProjectDraft, createAutonomousBusinessWorkOrder
+} from "../../../core/company/index.mjs?v=11520-v4.1-ai-ant-bank";
+import { readTempleHeart12345 } from "../../../core/integrations/temple-heart-12345.mjs?v=11520-v4.1-ai-ant-bank";
 
 const NAVIGATION = Object.freeze([
   ["HOME", "navigation.home"], ["REQUEST", "navigation.request"], ["LIFE", "navigation.life"], ["LIFE_FACTORY", "LIFE FACTORY"], ["APPS", "navigation.apps"], ["COMPANIES", "navigation.company"],
   ["TOKENS", "TOKENS"], ["JOBS", "JOBS"], ["SERVICES", "SERVICES"], ["PROPERTY", "PROPERTY"],
   ["FACTORIES", "FACTORIES"], ["SPACECRAFT", "SPACECRAFT"], ["PORTFOLIO", "PORTFOLIO"],
-  ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"]
+  ["MY_LIFE", "MY LIFE"], ["MY_COMPANY", "MY COMPANY"], ["BANK", "AI ANT BANK"]
 ]);
 
 const content = document.querySelector("#content");
@@ -118,6 +127,51 @@ function fieldServiceMarkup() {
   </div>`;
 }
 
+function autonomousBankingModel() {
+  const cargo = createAtmCargoCfoPlan({
+    plan_id: "DIGITAL_ANT_ATM_CARGO_CFO_001", cargo_principal_atomic: "1080000000000000000000000",
+    freight_fee_atomic: "0", target_profit_atomic: "0",
+    operating_costs: { energy_cost: "0", maintenance_cost: "0", bnb_chain_cost: "0", insurance_risk_reserve: "0", security_cost: "0", vehicle_depreciation: "0", loading_cost: "0", unloading_cost: "0", other_verified_cost: "0" }
+  });
+  const prepaid = createPrepaidPayrollSchedule({
+    schedule_id: "ATM_PREPAID_PAYROLL_2026_10", employee_life_id: "LIFE-ATM-11520-001",
+    payment_date: "2026-09-05T00:00:00Z", service_period_start: "2026-09-06T00:00:00Z",
+    salary_due_date: "2026-10-05T00:00:00Z", gross_salary_atomic: "0"
+  });
+  const salaryAdvance = createSalaryAdvanceCreditPlan({
+    plan_id: "ATM_SALARY_ADVANCE_POLICY_DRAFT", employee_life_id: "LIFE-ATM-11520-001",
+    future_salary_due_date: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+    verified_future_salary_atomic: "0", requested_advance_atomic: "0", maximum_advance_bps: 6000,
+    service_fee_bps: 0, repayment_sources: ["VERIFIED_FUTURE_SALARY", "VERIFIED_ATM_SERVICE_FEES"]
+  });
+  const sites = rankAtmExpansionSites({ candidates: [
+    { node_id: "K8888", name: "高老莊", coordinate: 8888, map_evidence: "UniverseMap V10.2", observed_demand: { requests: 0, evidence: null }, infrastructure_state: "AUDIT_ONLY", market_activity: 40, operating_cost_score: 50, risk_score: 45, revenue_score: 35 },
+    { node_id: "K8895", name: "雲棧洞", coordinate: 8895, map_evidence: "UniverseMap V10.2", observed_demand: { requests: 0, evidence: null }, infrastructure_state: "NOT_OPERATING", market_activity: 20, operating_cost_score: 60, risk_score: 60, revenue_score: 20 },
+    { node_id: "K16888", name: "白骨洞／廣寒宮", coordinate: 16888, map_evidence: "UniverseMap V10.2", observed_demand: { requests: 0, evidence: null }, infrastructure_state: "MAP_VERIFIED_ONLY", market_activity: 45, operating_cost_score: 55, risk_score: 55, revenue_score: 40 },
+    { node_id: "K20000", name: "女兒國", coordinate: 20000, map_evidence: "UniverseMap V10.2", observed_demand: { requests: 0, evidence: null }, infrastructure_state: "MAP_VERIFIED_ONLY", market_activity: 50, operating_cost_score: 55, risk_score: 40, revenue_score: 45 }
+  ] });
+  const pond = createAquacultureProjectDraft({ request_id: "POND_REQUEST_TEMPLATE_001" });
+  const workOrder = createAutonomousBusinessWorkOrder({ cycle_id: "PUBLIC_BANK_DESK", primary_job_status: "COMPLETED", candidates: [
+    { work_type: "ATM_SITE_RESEARCH", problem: "NO_VERIFIED_ATM_EXPANSION_DEMAND", priority: 1, evidence: sites.coordinate_authority, safe_to_execute: true, required_authority: "READ_ONLY", expected_result: "RANKED_SITE_RESEARCH" },
+    { work_type: "SERVICE_PACKAGE_RESEARCH", problem: "NO_REAL_PROJECT_REQUEST", priority: 2, evidence: "11520_PUBLIC_REQUEST_GATEWAY", safe_to_execute: true, required_authority: "LOCAL_R0_R1", expected_result: "PLAYER_READY_SERVICE_PACKAGE" }
+  ] });
+  return { cargo, prepaid, salaryAdvance, sites, pond, workOrder };
+}
+
+function autonomousBankingMarkup() {
+  const { cargo, prepaid, salaryAdvance, sites, pond, workOrder } = autonomousBankingModel();
+  return `<div class="grid two">
+    <article class="card"><div class="eyebrow">AI ANT BANK · CEO + CFO DESK</div><h3>${badge("LOCAL_POLICY_ACTIVE")}</h3>${kv("Institution", "KAIOS CIVILIZATION BANKING RUNTIME")}${kv("CEO", "DIGITAL_ANT_0001")}${kv("CFO", "DIGITAL_ANT_0001")}${kv("CEO + CFO salary", "ONE COMPENSATION CONTRACT · NO DOUBLE SALARY")}${kv("Existing ATM", "ATM-11520-001")}${kv("ATM Life", "LIFE-ATM-11520-001")}${kv("New exchange created", "NO")}</article>
+    <article class="card"><div class="eyebrow">1,080,000 KAIOS CARGO</div><h3>${badge(cargo.dispatch_status)}</h3>${kv("Accounting", cargo.cargo_accounting_class)}${kv("Restricted inventory", "1,080,000 KAIOS")}${kv("Matching liability", "1,080,000 KAIOS")}${kv("Revenue", "0 KAIOS")}${kv("Delivered", "NO")}${kv("Receiver", "VERIFIED ATM ESCROW REQUIRED")}${kv("Write executed", "NO")}</article>
+    <article class="card"><div class="eyebrow">PREPAID PAYROLL</div><h3>${badge(prepaid.status)}</h3>${kv("Policy example", "2026-09-05 PAYS 2026-10-05 SALARY")}${kv("Class", prepaid.payroll_class)}${kv("Initial accounting", prepaid.employer_initial_accounting)}${kv("Expense", prepaid.expense_recognition)}${kv("Employee debt after service", String(prepaid.employee_debt_if_service_completed))}${kv("Current approved amount", "0 KAIOS")}</article>
+    <article class="card"><div class="eyebrow">SALARY ADVANCE / EMPLOYEE CREDIT</div><h3>${badge(salaryAdvance.status)}</h3>${kv("Advance limit", `${salaryAdvance.maximum_advance_bps / 100}% OF VERIFIED FUTURE SALARY`)}${kv("Repayment", "VERIFIED SALARY + VERIFIED ATM SERVICE FEES")}${kv("Automatic deduction", String(salaryAdvance.automatic_salary_deduction))}${kv("Customer deposits", "FORBIDDEN")}${kv("Current draw", "0 KAIOS")}</article>
+    <article class="card"><div class="eyebrow">ATM EXPANSION · MAP REUSE</div><h3>${badge(sites.status)}</h3>${sites.candidates.map((site) => `${kv(`${site.name} · ${site.coordinate}`, badge(site.status), true)}${kv("Observed requests", site.observed_demand.requests)}`).join("")}${kv("ATM created", sites.atms_created)}${kv("Selected site", sites.selected_site ?? "NONE · PLAYER DEMAND REQUIRED")}</article>
+    <article class="card"><div class="eyebrow">AUTONOMOUS WORK ORDER</div><h3>${badge(workOrder.status)}</h3>${kv("Primary job", workOrder.primary_job_status)}${kv("Selected work", workOrder.next_action)}${kv("Evidence", workOrder.selected_work?.evidence)}${kv("Customer created", String(workOrder.customer_created))}${kv("Revenue created", String(workOrder.revenue_created))}${kv("Mainnet write", String(workOrder.mainnet_write_authorized))}</article>
+    <article class="card"><div class="eyebrow">CUSTOMER PROJECT · FISH POND</div><h3>${badge(pond.status)}</h3>${kv("Product", pond.product)}${kv("Missing", pills(pond.missing_information), true)}${kv("Pond created", String(pond.pond_created))}${kv("Fish created", String(pond.fish_created))}${kv("Next", pond.next_step)}<a class="button secondary" href="#/REQUEST">SUBMIT A REAL POND REQUEST</a></article>
+    <article class="card"><div class="eyebrow">PROJECT PROFIT SHARING</div><h3>${badge("POLICY_DRAFT")}</h3>${kv("Gross revenue", "RECEIPT-GATED")}${kv("Direct costs", "PAID FIRST")}${kv("Company share", "APPROVED PROJECT POLICY")}${kv("Worker share", "WORK EVIDENCE REQUIRED")}${kv("Maintenance / risk", "RESERVED BEFORE PAYOUT")}${kv("Creator attribution", "AUTHOR + WORKER IDS RECORDED")}${kv("Unsettled draft = revenue", "NO")}</article>
+  </div>`;
+}
+
 function firstKgenEvidenceMarkup() {
   const stage = universe?.seed?.next_stage ?? {};
   const event = stage.first_heartbeat_kgen_event ?? {};
@@ -211,6 +265,7 @@ async function homeView() {
   return `${playerFirstMarkup()}${hero("K11520 · PLAYER FIRST RUNTIME V4.0", uiLocale === "zh-TW" ? "文明資產的公開市場與生命工廠。" : "A public market and Life Factory for civilization assets.", uiLocale === "zh-TW" ? "DIGITAL_ANT_0001 先守門，再照顧玩家、掃描真實需求；沒有證據就沒有訂單。" : "DIGITAL_ANT_0001 guards first, then helps players and scans verified demand; no evidence means no job.")}
     <a class="card gateway-cta" href="#/REQUEST"><div><div class="eyebrow">${html(t("request.title"))}</div><h2>${html(t("request.cta"))}</h2><p>DRAFT → UNDERSTAND → CONFIRM → REQUEST</p></div><span aria-hidden="true">→</span></a>
     ${section(t("status.title"), workerStatusMarkup())}
+    ${section("AI ANT BANK · AUTONOMOUS OPERATIONS", autonomousBankingMarkup())}
     ${section("CFO FIELD SERVICE BUSINESS", fieldServiceMarkup())}
     ${section("FIRST HEARTBEAT / FIRST KGEN", firstKgenEvidenceMarkup())}
     ${section("HEART + HEAVEN FUEL CIVILIZATION", heartHeavenFuelMarkup())}
@@ -480,6 +535,7 @@ async function companyDetailView() {
   const readyLines = stage.business_lines.filter((line) => line.status === "READY");
   const developingLines = stage.business_lines.filter((line) => line.status !== "READY");
   return `${hero("MY COMPANY · V3.9", company.name, "Digital and field services share evidence, quote, contract and accounting gates. No verified field inventory or customer request means zero jobs and zero revenue.")}
+    ${section("AI ANT BANK · AUTONOMOUS OPERATIONS", autonomousBankingMarkup())}
     ${section("AUTONOMOUS CFO FIELD SERVICE", fieldServiceMarkup())}
     <div class="grid two">
       <article class="card"><div class="eyebrow">COMPANY IDENTITY</div>${kv("Company ID", company.company_id)}${kv("Founder", company.founder_life_id)}${kv("Status", badge(company.status), true)}${kv("11520", `${stage.company_profile.status} / ${stage.company_profile.scope}`)}${kv("Vision", company.vision)}${kv("Mission", company.mission)}${kv("Dream", company.dream)}${kv("Ultimate mission", company.ultimate_mission)}</article>
@@ -536,6 +592,7 @@ async function render() {
     APPS: () => entityListView({ eyebrow: "APP REGISTRY", title: "Apps evolve. Life identity persists.", description: "Versioned App profiles remain separate from Life entities.", registry: universe.registries.app, idField: "app_id", detail: (item) => kv("Life", item.life_id) + kv("Version", item.version) + kv("Released", item.released_at) + kv("Manifest SHA-256", item.manifest_hash) }),
     COMPANIES: () => entityListView({ eyebrow: "COMPANY REGISTRY", title: "Companies and treasuries are separate entities.", description: "FORMING is a local Company Genesis state, not mainnet settlement authority.", registry: universe.registries.company, idField: "company_id", detail: (item) => kv("Founder", item.founder_life_id) }),
     MY_COMPANY: companyDetailView,
+    BANK: () => Promise.resolve(`${hero("AI ANT BANK · V4.1", "A bank that works from evidence, not imaginary balances.", "Prepaid payroll, employee credit, ATM expansion, cargo accounting and project work share one audited operating desk.")}${section("AUTONOMOUS BANKING DESK", autonomousBankingMarkup())}${section("FIELD SERVICES", fieldServiceMarkup())}`),
     TOKENS: tokensView,
     JOBS: () => entityListView({ eyebrow: "JOB REGISTRY", title: "Work creates Life History.", description: "Jobs are universal assets with currency and location abstraction.", registry: universe.registries.job, idField: "job_id", detail: (item) => kv("Employer", item.employer_id) + kv("Currency", item.currency_id) }),
     SERVICES: () => entityListView({ eyebrow: "SERVICE MARKET", title: "Capabilities, not identities.", description: "Digital Ant services can become bounded license or subscription listings.", registry: universe.registries.service, idField: "service_id", detail: (item) => kv("Provider", item.provider_life_id) + kv("Pricing", item.pricing_status) + kv("Customers", item.customer_count) + pills(item.skills) }),

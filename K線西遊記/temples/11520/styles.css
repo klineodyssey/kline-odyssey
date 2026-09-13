@@ -12,3 +12,4 @@ textarea{font:inherit}.field textarea{background:#071017;color:var(--text);borde
 @supports not (transform-style:preserve-3d){.concierge-avatar,.avatar-head,.avatar-body{transform:none}.concierge-stage:after{content:"2D FALLBACK";position:absolute;bottom:20px;font-size:.65rem;color:var(--muted)}}
 @media(prefers-reduced-motion:reduce){.concierge-avatar,.avatar-aura,.avatar-heart,.avatar-shadow,.avatar-mouth,.avatar-ear{animation:none!important}}
 @media(max-width:850px){.player-first{grid-template-columns:1fr}.concierge-stage{min-height:260px}.concierge-avatar{transform:scale(.84);margin:-15px 0}.first-actions .button{flex:1 1 145px}.player-first h1{font-size:clamp(1.55rem,8vw,2.5rem)}}
+.kv{grid-template-columns:minmax(100px,.5fr) minmax(0,1fr)}.kv strong{min-width:0;overflow-wrap:anywhere}
