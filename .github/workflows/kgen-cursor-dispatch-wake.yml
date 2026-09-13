@@ -1,7 +1,6 @@
-# KGEN cursor-01 dispatch wake (HUMAN-AUTO-CLOCKIN-001 / option 2)
-# Launches a Cursor Cloud Agent when Codex merges a codex/* dispatch PR to main.
-# Requires repo secret: CURSOR_API_KEY (Cursor Dashboard → API Keys)
-# Docs: KGEN-AI-Company/automation/README.md
+# KGEN cursor-01 dispatch wake safety gate
+# External agent launch is disabled in repository automation.
+# A future launch path requires a separate, exact Human authorization and review.
 
 name: KGEN Cursor Dispatch Wake
 
@@ -16,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  wake-cursor-01:
+  hold-cursor-dispatch:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.pull_request.merged == true &&
@@ -26,103 +25,13 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Launch Cursor Cloud Agent
-        env:
-          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          MERGED_PR_NUMBER: ${{ github.event.pull_request.number }}
-          MERGED_PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      - name: Record fail-closed dispatch status
         run: |
-          set -euo pipefail
-          if [ -z "${CURSOR_API_KEY:-}" ]; then
-            echo "::notice::CURSOR_API_KEY not set. Add it in GitHub repo Settings → Secrets → Actions."
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
-              echo "Merged PR: #${MERGED_PR_NUMBER} (${MERGED_PR_HEAD_REF})"
-            fi
-            echo "See KGEN-AI-Company/automation/README.md"
-            exit 0
-          fi
-          BODY=$(python3 <<'PY'
-          import json, pathlib
-          prompt = pathlib.Path("KGEN-AI-Company/automation/cursor-dispatch-wake-prompt.txt").read_text()
-          print(json.dumps({
-              "name": "KGEN-Cursor-Dispatch-Wake",
-              "prompt": {"text": prompt},
-              "repos": [{
-                  "url": "https://github.com/klineodyssey/kline-odyssey",
-                  "startingRef": "main"
-              }],
-              "autoCreatePR": False
-          }))
-          PY
-          )
-          HTTP=$(curl -sS --connect-timeout 10 --max-time 60 \
-            -w "%{http_code}" -o /tmp/cursor-agent.json \
-            -X POST "https://api.cursor.com/v1/agents" \
-            --user "${CURSOR_API_KEY}:" \
-            -H "Content-Type: application/json" \
-            -d "$BODY")
-          API_ERROR_CODE=$(python3 <<'PY'
-          import json, re
-
-          try:
-              payload = json.load(open("/tmp/cursor-agent.json", encoding="utf-8"))
-          except (OSError, json.JSONDecodeError):
-              print("unparseable_response")
-          else:
-              error = payload.get("error") or {} if isinstance(payload, dict) else {}
-              if not isinstance(error, dict):
-                  error = {}
-              code = error.get("code") or ""
-              print(code if isinstance(code, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", code) else "untrusted_error_code")
-          PY
-          )
-          API_RESPONSE_STATUS=$(python3 <<'PY'
-          import json, re
-
-          def valid_id(value, prefix):
-              return isinstance(value, str) and re.fullmatch(prefix + r"[A-Za-z0-9-]{1,128}", value) is not None
-
-          try:
-              payload = json.load(open("/tmp/cursor-agent.json", encoding="utf-8"))
-          except (OSError, json.JSONDecodeError):
-              print("invalid")
-          else:
-              agent = payload.get("agent") if isinstance(payload, dict) else None
-              run = payload.get("run") if isinstance(payload, dict) else None
-              agent_id = agent.get("id") if isinstance(agent, dict) else None
-              run_id = run.get("id") if isinstance(run, dict) else None
-              run_agent_id = run.get("agentId") if isinstance(run, dict) else None
-              accepted = (
-                  valid_id(agent_id, "bc-")
-                  and valid_id(run_id, "run-")
-                  and run_agent_id == agent_id
-              )
-              print("accepted" if accepted else "invalid")
-          PY
-          )
-          echo "Cursor API HTTP ${HTTP}"
-          if [ "$HTTP" -ge 200 ] && [ "$HTTP" -lt 300 ]; then
-            if [ "$API_RESPONSE_STATUS" != "accepted" ]; then
-              echo "::error title=Cursor Cloud Agent dispatch failed::HTTP ${HTTP}; structured agent/run acknowledgement missing"
-              exit 1
-            fi
-            echo "Cursor Cloud Agent dispatch accepted."
-            exit 0
-          fi
-          if [ "$HTTP" = "403" ] && [ "$API_ERROR_CODE" = "plan_required" ]; then
-            echo "::warning title=Cursor Cloud Agent HOLD::Cursor Cloud Agent is unavailable for the current plan; no agent was launched."
-            {
-              echo "## Cursor dispatch status"
-              echo ""
-              echo "- Status: \`HOLD_EXTERNAL_PLAN_REQUIRED\`"
-              echo "- HTTP: \`403\`"
-              echo "- API code: \`plan_required\`"
-              echo "- Agent launched: \`NO\`"
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          echo "::error title=Cursor Cloud Agent dispatch failed::HTTP ${HTTP}; API code ${API_ERROR_CODE:-unknown}"
-          exit 1
+          {
+            echo "## Cursor dispatch status"
+            echo ""
+            echo "- Status: `HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED`"
+            echo "- External API called: `NO`"
+            echo "- Agent launched: `NO`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Cursor dispatch held::External API and agent launch are disabled pending exact Human authorization."
