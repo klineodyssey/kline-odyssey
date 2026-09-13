@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "snapshot_type": "READ_ONLY_CHAIN_AND_REPOSITORY_EVIDENCE",
+  "observed_at_utc": "2026-08-22T21:23:24.000Z",
+  "observed_at_asia_taipei": "2026-08-23T05:23:24+08:00",
+  "repository_main_sha": "c0fae88a24b2299e4eb3a2d7064d3b137957928f",
+  "chain_id": 56,
+  "block_number": 117495395,
+  "block_hash": "0x10ea5ec5cc399bdf0bea8bfe113dd11ee79e8d17da86d740995652459e5d7d6f",
+  "public_good_label_candidate": {
+    "address": "0xB73D6716005B37BEC742D64482fA26033eE1A4E1",
+    "address_type": "EOA",
+    "code": "0x",
+    "transaction_count": 1,
+    "bnb_balance_wei": "12167010000000",
+    "bnb_balance": "0.00001216701",
+    "kgen_balance_wei": "735378467588936466040620",
+    "kgen_balance": "735378.467588936466040620",
+    "kaios_balance_wei": "0",
+    "kaios_balance": "0",
+    "controller_status": "UNVERIFIED",
+    "authority_status": "UNVERIFIED",
+    "repository_ownership_classification": "OWNERSHIP_UNVERIFIED_PUBLIC_CIRCULATING"
+  },
+  "k4168_source_status": "NOT_DEPLOYED",
+  "k4168_reservoir_status": "NOT_DEPLOYED",
+  "k4168_reservoir_address": null,
+  "mengpo_life_status": "NOT_REGISTERED",
+  "mengpo_worker_status": "NOT_REGISTERED",
+  "mengpo_transformation_status": "DESIGN_ONLY_NOT_LIVE",
+  "mainnet_write": false
+}

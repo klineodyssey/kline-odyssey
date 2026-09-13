@@ -28,6 +28,11 @@ No deployment script or Mainnet address is included.
 
 KAIOS is the KGEN AI Operating System. It is not another document library and it is not a mass document expansion. It is the architecture layer that coordinates AI workers, tasks, claims, reports, reviews, recovery, dashboard state, and security policy.
 
+The review-only K4168 Naihe Reservoir candidate is indexed at
+`civilization/naihe-reservoir-v1/`. It defines strict schemas and a paper-only
+conservation simulator; no reservoir, Mengpo operator, transformation rate or
+asset movement is live.
+
 KAIOS sits above the existing KGEN AI Company, Agent Office, Organization, Machine Canon, Genesis Library, Runtime Library, and SDK Library. It does not replace them. It gives them a working operating model.
 
 ## KAIOS Constitution
