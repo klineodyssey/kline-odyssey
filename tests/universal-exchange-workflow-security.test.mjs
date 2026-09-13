@@ -24,25 +24,44 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
 });
 
-test("Cursor dispatch wake is a Human-approved bounded single-task gate", async () => {
+test("Cursor dispatch wake is an inert fail-closed audit gate", async () => {
   const workflow = await fs.readFile(new URL("../.github/workflows/kgen-cursor-dispatch-wake.yml", import.meta.url), "utf8");
 
-  assert.match(workflow, /push:\s*\n\s*branches: \[main\]/);
-  assert.match(workflow, /\.github\/workflows\/kgen-cursor-dispatch-wake\.yml/);
-  assert.match(workflow, /KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001/);
-  assert.match(workflow, /READY_FOR_ATOMIC_CLAIM/);
-  assert.match(workflow, /MAX_LAUNCHES_PER_DAY: "4"/);
-  assert.match(workflow, /WATCHDOG_SECONDS: "300"/);
-  assert.match(workflow, /MAX_WATCHDOG_CHECKS: "12"/);
-  assert.match(workflow, /timeout-minutes:\s*65/);
-  assert.match(workflow, /agentId/);
-  assert.match(workflow, /api\.cursor\.com\/v1\/agents/);
-  assert.match(workflow, /runs\/\$\{run_id\}\/cancel/);
-  assert.match(workflow, /usage\?runId=\$\{run_id\}/);
-  assert.match(workflow, /CURSOR_API_KEY: \$\{\{ secrets\.CURSOR_API_KEY \}\}/);
-  assert.match(workflow, /4xx was not retried and 5xx retry limit was enforced/);
-  assert.match(workflow, /uses: actions\/checkout@v7/);
+  assert.match(workflow, /pull_request:\s*\n\s*types: \[closed\]/);
+  assert.match(workflow, /startsWith\(github\.event\.pull_request\.head\.ref, 'codex\/'\)/);
+  assert.match(workflow, /permissions:\s*\n\s*contents:\s*read/);
+  assert.match(workflow, /timeout-minutes:\s*5/);
+  assert.match(workflow, /HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED/);
+  assert.match(workflow, /External API called: .*NO/);
+  assert.match(workflow, /Agent launched: .*NO/);
+
+  assert.doesNotMatch(workflow, /CURSOR_API_KEY|secrets\./);
+  assert.doesNotMatch(workflow, /api\.cursor\.com|https?:\/\//);
+  assert.doesNotMatch(workflow, /curl\b|wget\b|fetch\(/);
+  assert.doesNotMatch(workflow, /actions\/checkout|actions\/setup-node/);
   assert.doesNotMatch(workflow, /contents:\s*write|actions:\s*write/);
   assert.doesNotMatch(workflow, /git\s+push\b/);
-  assert.doesNotMatch(workflow, /PRIVATE_KEY|SIGN_TRANSACTION|TOKEN_TRANSFER|TREASURY_TRANSFER/);
+  assert.doesNotMatch(workflow, /PRIVATE_KEY|SIGN_TRANSACTION/);
+});
+
+
+test("Cursor operational state cannot self-authorize an external launch", async () => {
+  const readJson = async (path) => JSON.parse(await fs.readFile(new URL(path, import.meta.url), "utf8"));
+  const envelope = await readJson("../KAIOS/economy/life-energy-payroll/KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json");
+  const queue = await readJson("../KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json");
+  const projection = await readJson("../api/kaios/ai-company/v1/cursor-queue.json");
+  const registry = await readJson("../KGEN-KAIOS/worker_registry.json");
+  const workQueue = await fs.readFile(new URL("../KGEN-Organization/WorkOrders/WORK_QUEUE.md", import.meta.url), "utf8");
+  assert.equal(envelope.status, "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED");
+  assert.equal(envelope.dispatch_mode, "CODEX_CONTROLLED_PREPARATION_ONLY");
+  for (const key of ["automatic", "external_autonomy", "cursor_api_key_required", "external_wake_workflow_allowed"]) assert.equal(envelope[key], false);
+  assert.equal(envelope.bounded_pilot_policy.authorized_by, null);
+  assert.equal(envelope.bounded_pilot_policy.authorization_evidence, "NOT_VERIFIED");
+  assert.equal(queue.bounded_pilot.status, "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED");
+  assert.equal(queue.bounded_pilot.authorized_by, null);
+  assert.equal(queue.bounded_pilot.limits_state, "PROPOSED_ONLY_NOT_ACTIVE");
+  assert.deepEqual(projection.bounded_pilot, queue.bounded_pilot);
+  assert.equal(registry.active_claims.length, 0);
+  assert.equal(registry.workers.find(({worker_id}) => worker_id === "cursor-01").autonomy_scope, "NONE_EXTERNAL_WAKE_NOT_AUTHORIZED");
+  assert.match(workQueue, /KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 \| HOLD \|/);
 });

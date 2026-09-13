@@ -59,13 +59,15 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CANONICAL-ORGANISM-V0-1 | DONE | Codex | Codex | P1 | Life Architecture | `codex/kaios-canonical-organism-schema-v0-1` | `KGEN-KAIOS/organism/KAIOS_CANONICAL_ORGANISM_V0_1_BASELINE_MERGE_CLOSEOUT.md` |
 | LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | DONE | Codex | Codex | P1 | Frontend | `codex/land-viewer-schema-v2-compatibility` | `KGEN-KAIOS/world-viewer/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` |
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
-| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | READY_FOR_ATOMIC_CLAIM | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
+| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | HOLD | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
-- Status: READY_FOR_ATOMIC_CLAIM
+- Status: HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED
+- Authorization Evidence: `NOT_VERIFIED`
+- Dispatch Limits: `PROPOSED_ONLY_NOT_ACTIVE`
 - Owner: cursor-01
 - Reviewer: codex-gm-01
 - Priority: P0
