@@ -1997,6 +1997,13 @@ export const AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS = Object.freeze([
   "IRREVERSIBLE_EXTERNAL_ACTION"
 ]);
 
+export const AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES = Object.freeze([
+  "CLOCK_IN",
+  "WORK_ORDER_CANDIDATE",
+  "BLOCKER_STATE",
+  "CLOCK_OUT"
+]);
+
 const AUTONOMOUS_ENGINEERING_PRIORITY = Object.freeze({ P0: 0, P1: 1, P2: 2 });
 const AUTONOMOUS_ENGINEERING_TRUST = Object.freeze({ T0: 0, T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 });
 const AUTONOMOUS_ENGINEERING_SAFE_RISKS = Object.freeze(["R0", "R1", "LOW"]);
@@ -2225,6 +2232,107 @@ export function planAutonomousCompanyEngineeringCycle({
     rejected_candidates: Object.freeze(rejected),
     events: Object.freeze(events),
     next_safe_action: "EXECUTOR_MUST_REVALIDATE_MAIN_AND_AUTHORITY_BEFORE_EACH_WRITE"
+  });
+}
+
+/**
+ * Persist one already-planned engineering cycle to the existing append-only
+ * Company stream. This stores evidence only: it cannot execute the selected
+ * work order or grant repository, deployment, payment, agent, or chain power.
+ */
+export async function persistAutonomousCompanyEngineeringCycle({ store, company, cycle_result }) {
+  invariant(store && typeof store.history === "function" && typeof store.commitBatch === "function", "COMPANY_EVENT_STORE_REQUIRED", "Engineering cycle persistence requires the existing UniverseStore interface");
+  invariant(company && typeof company.company_id === "string" && company.company_id.trim(), "COMPANY_ID_REQUIRED", "Engineering cycle persistence requires a Company identity");
+  invariant(cycle_result && typeof cycle_result.cycle_id === "string", "ENGINEERING_CYCLE_RESULT_REQUIRED", "A planned engineering cycle result is required");
+  requireArray(cycle_result.events, "cycle_result.events");
+  invariant(cycle_result.authority && typeof cycle_result.authority === "object", "ENGINEERING_CYCLE_AUTHORITY_REQUIRED", "A planned engineering cycle must expose its authority boundary");
+  invariant(
+    Object.values(cycle_result.authority).every((value) => value === false),
+    "EXTERNAL_EFFECT_CYCLE_PERSISTENCE_FORBIDDEN",
+    "Durable engineering memory only accepts cycles with no external authority effects"
+  );
+
+  let expectedSequence = 1;
+  const reservedPayloadFields = Object.freeze(["cycle_id", "planner_event_id", "sequence", "cycle_status", "external_effect"]);
+  const operations = cycle_result.events.map((event) => {
+    invariant(event.cycle_id === cycle_result.cycle_id, "CYCLE_EVENT_ID_MISMATCH", "Every persisted event must belong to the planned cycle");
+    invariant(event.sequence === expectedSequence, "CYCLE_EVENT_SEQUENCE_INVALID", "Engineering cycle events must be contiguous and ordered");
+    invariant(AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES.includes(event.event_type), "UNSUPPORTED_DURABLE_ENGINEERING_EVENT", `Unsupported durable engineering event: ${event.event_type}`);
+    invariant(event.event_id === `${cycle_result.cycle_id}:${String(event.sequence).padStart(2, "0")}:${event.event_type}`, "CYCLE_EVENT_ID_INVALID", "Engineering cycle event ids must be deterministic");
+    invariant(typeof event.occurred_at === "string" && !Number.isNaN(Date.parse(event.occurred_at)), "CYCLE_EVENT_TIME_INVALID", "Engineering cycle events require an ISO timestamp");
+    invariant(event.append_only === true && event.external_effect === false, "DURABLE_EVENT_SAFETY_BOUNDARY", "Persisted engineering events must be append-only and side-effect-free");
+    invariant(event.payload && typeof event.payload === "object" && !Array.isArray(event.payload), "DURABLE_EVENT_PAYLOAD_REQUIRED", "Persisted engineering events require an object payload");
+    invariant(
+      reservedPayloadFields.every((field) => !Object.prototype.hasOwnProperty.call(event.payload, field)),
+      "DURABLE_EVENT_RESERVED_FIELD_OVERRIDE",
+      "Planner payload cannot override durable engineering event control fields"
+    );
+    expectedSequence += 1;
+    return {
+      event_id: event.event_id,
+      domain: "COMPANY",
+      stream: "COMPANY",
+      id: company.company_id,
+      entity: company,
+      event_type: event.event_type,
+      actor_id: event.actor_id,
+      timestamp: event.occurred_at,
+      payload: {
+        ...event.payload,
+        cycle_id: cycle_result.cycle_id,
+        planner_event_id: event.event_id,
+        sequence: event.sequence,
+        cycle_status: cycle_result.status,
+        external_effect: false
+      }
+    };
+  });
+
+  const history = await store.history(company.company_id, "COMPANY");
+  const existing = history.filter((event) => event.payload?.cycle_id === cycle_result.cycle_id);
+  if (existing.length) {
+    const exactReplay = existing.length === operations.length && existing.every((event, index) => (
+      event.event_id === operations[index].event_id
+      && event.event_type === operations[index].event_type
+      && event.payload?.planner_event_id === operations[index].event_id
+      && event.payload?.sequence === index + 1
+      && event.payload?.cycle_status === cycle_result.status
+      && event.payload?.external_effect === false
+    ));
+    invariant(exactReplay, "DURABLE_CYCLE_CONFLICT", "Existing durable cycle history is partial or conflicts with this replay");
+    return Object.freeze({ status: "IDEMPOTENT_NOOP", cycle_id: cycle_result.cycle_id, persisted_events: Object.freeze([]) });
+  }
+
+  const persisted = operations.length ? await store.commitBatch(operations) : [];
+  return Object.freeze({
+    status: operations.length ? "CYCLE_EVENTS_PERSISTED" : "NO_EVENTS_TO_PERSIST",
+    cycle_id: cycle_result.cycle_id,
+    persisted_events: Object.freeze(persisted)
+  });
+}
+
+export async function restoreAutonomousCompanyEngineeringCycleState({ store, company_id }) {
+  invariant(store && typeof store.history === "function", "COMPANY_EVENT_STORE_REQUIRED", "Engineering cycle recovery requires the existing UniverseStore interface");
+  requireId(company_id, "company_id");
+  const history = await store.history(company_id, "COMPANY");
+  const cycleEvents = history.filter((event) => (
+    typeof event.payload?.cycle_id === "string"
+    && AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES.includes(event.event_type)
+    && event.payload?.external_effect === false
+  ));
+  const cycleIds = [...new Set(cycleEvents.map((event) => event.payload.cycle_id))];
+  const latestCycleId = cycleIds.at(-1) ?? null;
+  const latestEvents = latestCycleId ? cycleEvents.filter((event) => event.payload.cycle_id === latestCycleId) : [];
+  const clockOut = latestEvents.findLast((event) => event.event_type === "CLOCK_OUT");
+  return Object.freeze({
+    status: latestCycleId ? "RESTART_STATE_RECOVERED" : "NO_DURABLE_CYCLE_HISTORY",
+    company_id,
+    previous_cycle_ids: Object.freeze(cycleIds),
+    latest_cycle_id: latestCycleId,
+    latest_cycle_status: clockOut?.payload?.result ?? latestEvents.at(-1)?.payload?.cycle_status ?? null,
+    latest_event_id: latestEvents.at(-1)?.event_id ?? null,
+    event_count: cycleEvents.length,
+    external_effect: false
   });
 }
 

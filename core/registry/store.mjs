@@ -45,6 +45,7 @@ export class MemoryUniverseStore {
     for (const operation of operations) {
       const existing = [...this.#events, ...stagedEvents].filter((event) => event.subject_id === operation.id && event.stream === operation.stream);
       const event = await createHistoryEvent({
+        event_id: operation.event_id,
         stream: operation.stream,
         event_type: operation.event_type,
         subject_id: operation.id,
@@ -54,6 +55,12 @@ export class MemoryUniverseStore {
         timestamp: operation.timestamp
       }, existing.at(-1)?.event_id ?? null);
       stagedEvents.push(event);
+    }
+    const stagedIds = new Set();
+    for (const event of stagedEvents) {
+      invariant(!stagedIds.has(event.event_id), "DUPLICATE_EVENT_ID", `Duplicate event id: ${event.event_id}`);
+      invariant(!this.#events.some((existing) => existing.event_id === event.event_id), "DUPLICATE_EVENT_ID", `Duplicate event id: ${event.event_id}`);
+      stagedIds.add(event.event_id);
     }
     for (let index = 0; index < operations.length; index += 1) {
       const operation = operations[index];
@@ -141,6 +148,7 @@ export class IndexedDbUniverseStore {
     for (const operation of operations) {
       const prior = [...await this.history(operation.id, operation.stream), ...events.filter((event) => event.subject_id === operation.id && event.stream === operation.stream)];
       events.push(await createHistoryEvent({
+        event_id: operation.event_id,
         stream: operation.stream,
         event_type: operation.event_type,
         subject_id: operation.id,
