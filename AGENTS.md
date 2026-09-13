@@ -6,6 +6,14 @@ Guidance for AI agents working in the KLINE Odyssey repository.
 
 KLINE Odyssey is a static Web3 × finance narrative site (GitHub Pages) with Python market-data pipelines and optional on-chain KGEN contracts. There is no `package.json`, Docker, or database.
 
+## Human-owner merge policy
+
+The active repository merge policy is [`docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md`](docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md).
+
+For ordinary repository work, explicit Human project-owner approval plus required current technical validation is sufficient merge authority. Do not invent a mandatory second or distinct reviewer gate when GitHub itself does not require one. Historical PR text such as `DISTINCT_INDEPENDENT_REVIEW_REQUIRED` must not by itself keep completed low-risk work on HOLD after current Human approval.
+
+Repository merge authority is separate from protected execution authority. Mainnet/Testnet deployment or upgrade execution, real token/BNB/treasury/payroll/payment/liquidity movement, signer/private-key/seed/secret use, governance/admin-role execution, KYC/account-ownership submissions, production oracle activation for real funds, and other live external or chain-state actions still require explicit action-specific Human authorization and their applicable technical safety checks.
+
 ## Cursor session clock-in (方案 2 — Human `HUMAN-AUTO-CLOCKIN-001`)
 
 Every Cursor session in this repo: **Light Boot → company patrol/work → then Human message**.
