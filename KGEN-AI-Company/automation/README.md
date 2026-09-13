@@ -14,6 +14,11 @@ Human decision `APPROVED_WITH_BOUNDED_PILOT` authorizes one harmless repository-
 - watchdog every five minutes and cancellation request at the sixty-minute ceiling;
 - no Mainnet, funds, Treasury, payment, signer, LP, governance, KYC or secret export.
 
+The authorization was renewed by Human Authority 沈英明 on 2026-09-13 after the
+fail-closed containment merge in PR #335. That renewal permits this exact
+bounded dispatcher to be active again; it does not widen the task scope or the
+protected-action deny list.
+
 The initial task is `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001`, sourced from the canonical WorkQueue and its exact task envelope. It starts from the preserved R1 delivery head because the candidate payload is intentionally not on `main`.
 
 ## Event-driven path
@@ -31,6 +36,11 @@ The workflow wakes on a matching WorkQueue/task-envelope/handoff merge to `main`
 - `CURSOR_API_KEY` exists as a GitHub Actions secret.
 
 The request uses a deterministic client-supplied agent ID, so a repeated event receives a 409 conflict instead of starting a second agent. The workflow requests Composer 2 Fast, creates a PR, polls the run every five minutes, and records token usage. Cursor's API reports tokens but not USD cost, so the USD 1/day and USD 20/month ceilings must also remain configured as the provider billing/spend limit in the Cursor dashboard. See the official [Cloud Agents API](https://cursor.com/docs/cloud-agent/api/endpoints) and [Cloud Agents billing guidance](https://cursor.com/docs/cloud-agent#billing).
+
+The first provider preflight, GitHub Actions run `34763700402`, stopped before
+launch with HTTP 403. No agent, branch, pull request, token usage or charge was
+created. A replacement `CURSOR_API_KEY` must have Cloud Agents permission; a
+4xx response is never retried.
 
 ## Delivery and closeout
 
