@@ -37,6 +37,7 @@ The all-HUD action remains a separate function, but it belongs inside the expand
 - Fresh 390×844 boot shows `#k11520UtilityMaster` and hides `#k11520HudCollapseAll`, dock, wallet, chat, AI, BGM, backpack and settings.
 - One master tap reveals `#k11520HudCollapseAll` and every existing utility without auto-opening the organ submenu.
 - Clicking `#k11520HudCollapseAll` still collapses/restores the whole HUD independently.
+- Whole-HUD collapse leaves only its restore action visible; wallet, backpack, settings and the utility master do not remain as stray controls.
 - Closing the utility set hides `#k11520HudCollapseAll` again and leaves one right-side master.
 - Runtime reports `version: 1.7.1`, `hiddenWhenCollapsed: true`, `allReachable: true` and PASS.
 - Real Chromium 390×844 collapsed and expanded screenshots receive direct visual inspection.
