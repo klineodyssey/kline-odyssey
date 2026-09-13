@@ -24,14 +24,15 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
 });
 
-test("Cursor dispatch wake is an inert fail-closed audit gate", async () => {
+test("Cursor Cloud is manual-only and suspended by Human cost decision", async () => {
   const workflow = await fs.readFile(new URL("../.github/workflows/kgen-cursor-dispatch-wake.yml", import.meta.url), "utf8");
 
-  assert.match(workflow, /pull_request:\s*\n\s*types: \[closed\]/);
-  assert.match(workflow, /startsWith\(github\.event\.pull_request\.head\.ref, 'codex\/'\)/);
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.doesNotMatch(workflow, /pull_request:|push:|schedule:/);
   assert.match(workflow, /permissions:\s*\n\s*contents:\s*read/);
   assert.match(workflow, /timeout-minutes:\s*5/);
-  assert.match(workflow, /HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED/);
+  assert.match(workflow, /SUSPENDED_BY_HUMAN_COST_DECISION/);
+  assert.match(workflow, /HTTP 403 retry: .*DISABLED/);
   assert.match(workflow, /External API called: .*NO/);
   assert.match(workflow, /Agent launched: .*NO/);
 
@@ -52,16 +53,17 @@ test("Cursor operational state cannot self-authorize an external launch", async 
   const projection = await readJson("../api/kaios/ai-company/v1/cursor-queue.json");
   const registry = await readJson("../KGEN-KAIOS/worker_registry.json");
   const workQueue = await fs.readFile(new URL("../KGEN-Organization/WorkOrders/WORK_QUEUE.md", import.meta.url), "utf8");
-  assert.equal(envelope.status, "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED");
-  assert.equal(envelope.dispatch_mode, "CODEX_CONTROLLED_PREPARATION_ONLY");
+  assert.equal(envelope.status, "SUSPENDED_BY_HUMAN_COST_DECISION");
+  assert.equal(envelope.dispatch_mode, "ON_DEMAND_EXTERNAL_CAPACITY_ONLY");
   for (const key of ["automatic", "external_autonomy", "cursor_api_key_required", "external_wake_workflow_allowed"]) assert.equal(envelope[key], false);
   assert.equal(envelope.bounded_pilot_policy.authorized_by, null);
-  assert.equal(envelope.bounded_pilot_policy.authorization_evidence, "NOT_VERIFIED");
-  assert.equal(queue.bounded_pilot.status, "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED");
+  assert.equal(envelope.bounded_pilot_policy.authorization_evidence, "HUMAN_CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_2026-09-13");
+  assert.equal(queue.bounded_pilot.status, "SUSPENDED_BY_HUMAN_COST_DECISION");
   assert.equal(queue.bounded_pilot.authorized_by, null);
-  assert.equal(queue.bounded_pilot.limits_state, "PROPOSED_ONLY_NOT_ACTIVE");
+  assert.equal(queue.bounded_pilot.limits_state, "INACTIVE_DEFERRED_UNTIL_HIGH_WORKLOAD");
   assert.deepEqual(projection.bounded_pilot, queue.bounded_pilot);
   assert.equal(registry.active_claims.length, 0);
-  assert.equal(registry.workers.find(({worker_id}) => worker_id === "cursor-01").autonomy_scope, "NONE_EXTERNAL_WAKE_NOT_AUTHORIZED");
+  assert.equal(registry.workers.find(({worker_id}) => worker_id === "cursor-01").status, "OFFLINE");
+  assert.equal(registry.workers.find(({worker_id}) => worker_id === "cursor-01").autonomy_scope, "ON_DEMAND_EXTERNAL_CAPACITY_ONLY");
   assert.match(workQueue, /KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 \| HOLD \|/);
 });

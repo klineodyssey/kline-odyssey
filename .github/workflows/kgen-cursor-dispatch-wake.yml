@@ -1,13 +1,9 @@
-# KGEN cursor-01 dispatch wake safety gate
-# External agent launch is disabled in repository automation.
-# A future launch path requires a separate, exact Human authorization and review.
+# KGEN cursor-01 on-demand capacity status gate.
+# Cursor Cloud is suspended by Human cost decision and never auto-retried.
 
 name: KGEN Cursor Dispatch Wake
 
 on:
-  pull_request:
-    types: [closed]
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -15,11 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  hold-cursor-dispatch:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged == true &&
-       startsWith(github.event.pull_request.head.ref, 'codex/'))
+  record-cursor-suspension:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -30,8 +22,10 @@ jobs:
           {
             echo "## Cursor dispatch status"
             echo ""
-            echo "- Status: `HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED`"
+            echo "- Status: `SUSPENDED_BY_HUMAN_COST_DECISION`"
+            echo "- Capacity role: `ON_DEMAND_EXTERNAL_CAPACITY_ONLY`"
+            echo "- HTTP 403 retry: `DISABLED`"
             echo "- External API called: `NO`"
             echo "- Agent launched: `NO`"
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice title=Cursor dispatch held::External API and agent launch are disabled pending exact Human authorization."
+          echo "::notice title=Cursor Cloud suspended::No subscription retry or external API call is performed."

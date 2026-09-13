@@ -298,14 +298,14 @@
       "source_payload_head": "ff8fca3e610ac936e8998112255901a78296b238",
       "output_status": "CANDIDATE_REWORK_ONLY",
       "reviewer": "codex-gm-01",
-      "status": "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED",
+      "status": "SUSPENDED_BY_HUMAN_COST_DECISION",
       "prior_claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
       "claim_event_ids": [
         "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001",
         "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
         "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003"
       ],
-      "authorization_evidence": "NOT_VERIFIED"
+      "authorization_evidence": "HUMAN_CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_2026-09-13"
     }
   ],
   "prepared_tasks": [
@@ -423,7 +423,7 @@
       "workspace": "cursor-worker-workspace",
       "current_task": null,
       "current_branch": null,
-      "status": "IDLE",
+      "status": "OFFLINE",
       "pending_rework_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
       "fresh_claim_required": true,
       "employee_status": "ACTIVE",
@@ -513,8 +513,8 @@
       "canon_acknowledged": true,
       "workspace_policy_acknowledged": true,
       "do_not_touch_acknowledged": true,
-      "suspension": null,
-      "autonomy_scope": "NONE_EXTERNAL_WAKE_NOT_AUTHORIZED"
+      "suspension": "CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_BY_HUMAN_COST_DECISION",
+      "autonomy_scope": "ON_DEMAND_EXTERNAL_CAPACITY_ONLY"
     },
     {
       "worker_id": "claude-01",

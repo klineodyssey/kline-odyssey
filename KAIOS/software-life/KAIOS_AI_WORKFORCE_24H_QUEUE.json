@@ -239,7 +239,7 @@
     "one_task_at_a_time": true,
     "current_task": null,
     "current_branch": null,
-    "current_status": "ACTIVE_IDLE_PREPARATION_ONLY",
+    "current_status": "ON_DEMAND_EXTERNAL_CAPACITY_ONLY_SUSPENDED",
     "prepared_task": "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
     "prepared_task_status": "PREPARATION_ONLY",
     "prepared_task_envelope_id": "TASK-ENVELOPE-KAIOS-CURSOR-MICROBIAL-RESEARCH-001-V1",
@@ -260,7 +260,7 @@
     "next_existing_queue_task_priority": 1,
     "current_active_tasks": {},
     "bounded_pilot_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "bounded_pilot_status": "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED",
+    "bounded_pilot_status": "SUSPENDED_BY_HUMAN_COST_DECISION",
     "can_merge": false,
     "can_deploy": false,
     "can_promote_canonical": false
