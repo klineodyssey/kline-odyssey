@@ -98,7 +98,7 @@ export async function inspectPhysicsThoughtOrgan({ seed, readFileImpl = readFile
     bytes = await readFileImpl(PHYSICS_CURRENT);
     text = bytes.toString("utf8");
   } catch {}
-  const versionMatch = text.match(/^VERSION:\s*CURRENT\s*\/\s*(V3\.8[^\\\r\n]*)/m);
+  const versionMatch = text.match(/^VERSION:\s*CURRENT\s*\/\s*(V[0-9]+(?:\.[0-9]+)?[^\\\r\n]*)/m);
   const documentMatch = text.match(/^DOC_ID:\s*([^\\\r\n]+)/m);
   const observation = Object.freeze({
     document_id: documentMatch?.[1]?.trim() ?? null,
