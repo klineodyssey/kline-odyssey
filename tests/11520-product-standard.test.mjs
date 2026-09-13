@@ -5,6 +5,7 @@ import path from 'node:path';
 import {requiredMargin,pnlForMove,positionRisk,maxAdversePoints} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {createWorldState,playerAttack,tickWorld} from '../K線西遊記/temples/11520/runtime/world-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../K線西遊記/temples/11520/runtime/market-life-source-runtime.mjs';
+import {PUBLIC_WALLET_IDENTITY_KEY,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 
 assert.equal(requiredMargin({lots:1}),1);
 assert.equal(requiredMargin({lots:100}),100);
@@ -27,6 +28,8 @@ const html=fs.readFileSync(path.join(root,'game-5d.html'),'utf8');
 const main=fs.readFileSync(path.join(root,'runtime/game-5d-main.mjs'),'utf8');
 const fixes=fs.readFileSync(path.join(root,'runtime/game-ui-product-fixes.mjs'),'utf8');
 const controls=fs.readFileSync(path.join(root,'runtime/game-controls-v251.mjs'),'utf8');
+const temple12345=fs.readFileSync(path.join(root,'../12345/index.html'),'utf8');
+const temple16888=fs.readFileSync(path.join(root,'../16888/index.html'),'utf8');
 const source=[html,main,fixes,controls].join('\n');
 
 for(const marker of ['Knight.glb','GLTFLoader','AnimationMixer','walletConnect','KGEN verified','KX','KY','KZ','orderFire','confirmOrder','主城世界','K場交易','持倉','委託','歷史','資產','統計','市場','背包','角色','世界地圖','ATM','設定','客服/說明'])assert.ok(source.includes(marker),`missing product marker: ${marker}`);
@@ -34,4 +37,15 @@ assert.ok(controls.includes("const KGEN_GENESIS_DATA='data:image/webp;base64,"),
 for(const marker of ['goddess-ui.webp','kgen-user-ui.webp','ufo-ui.png','#yJoyV250 .yKnob','#lotsThumb','#cThumb'])assert.ok(controls.includes(marker),`missing approved mobile-control marker: ${marker}`);
 
 assert.ok(main.includes("joy.addEventListener('pointerdown'"));assert.ok(main.includes("$('#attack').onclick"));assert.ok(main.includes("$('#dockToggle').onclick"));assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('setWaypoint'));assert.ok(fixes.includes('restoreWalletOrgan'));assert.ok(fixes.includes('placeOnlyRealBag'));assert.ok(controls.includes("#lookPad{display:none!important;pointer-events:none!important}"));assert.ok(!source.includes('margin = lots / leverage'));assert.ok(!source.includes('margin = lots / C'));
+for(const [temple,id] of [[temple12345,'12345'],[temple16888,'16888']]){
+  assert.match(temple,new RegExp(`href="\.\./11520/game-5d\\.html\\?returnFrom=${id}"`),`${id} must return to canonical 11520 world`);
+  assert.match(temple,/id="return-to-11520"[^>]*>返回宇宙｜11520 花果山世界</,`${id} must expose the visible return control`);
+  assert.match(temple,new RegExp(`bindTempleReturnWalletContinuity\\(\\{sourceWorld:'K${id}'\\}\\)`),`${id} must retain safe public wallet identity`);
+}
+const values=new Map(),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
+const walletIdentity=savePublicWalletIdentity({address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345'},storage);
+assert.equal(walletIdentity.address,readPublicWalletIdentity(storage).address);assert.ok(values.has(PUBLIC_WALLET_IDENTITY_KEY));
+const session=savePlayerSession({xyz:{x:12.5,y:3,z:-8},intentXYZ:{x:13,y:3.5,z:-8.5}},storage);
+assert.deepEqual(readPlayerSession(storage).xyz,session.xyz);assert.ok(values.has(PLAYER_SESSION_KEY));
+assert.equal(savePlayerSession({xyz:{x:Infinity,y:0,z:0},intentXYZ:{x:0,y:0,z:0}},storage),null,'invalid XYZ must fail closed');
 console.log('11520 standardized product invariants PASS');

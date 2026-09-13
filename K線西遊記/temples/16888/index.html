@@ -3658,7 +3658,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <!-- === Universe Navigation Buttons V2.04 === -->
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
-  <a class="nav-btn nav-gold" href="https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html" target="_blank" rel="noopener">返回 &gt; K線西遊記｜銀河宇宙入口</a>
+  <a class="nav-btn nav-gold" href="../11520/game-5d.html?returnFrom=16888" id="return-to-11520" style="position:fixed;right:8px;top:max(8px,env(safe-area-inset-top));z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;">返回宇宙｜11520 花果山世界</a>
+  <span id="return-wallet-continuity" style="position:fixed;right:8px;top:60px;z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.72);color:#d7faff;font-size:11px;line-height:1.35;overflow-wrap:anywhere;text-align:center;">錢包延續：檢查中</span>
   <a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" target="_blank" rel="noopener">官方宇宙首頁入口</a>
 
   <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
@@ -8360,5 +8361,9 @@ if(chainLive){
 })();
 </script>
 
+<script type="module">
+import {bindTempleReturnWalletContinuity} from '../11520/runtime/evm-wallet-runtime.mjs';
+void bindTempleReturnWalletContinuity({sourceWorld:'K16888'});
+</script>
 </body>
 </html>
