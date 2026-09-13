@@ -1,6 +1,6 @@
 # KAIOS Company Boot Runtime V0.1
 
-Status: LOCAL_CLI_PROTOTYPE_REPAIRED
+Status: LOCAL_CLI_PROTOTYPE_REPAIRED_WITH_HANDOFF_VALIDATOR_CANDIDATE
 Scheduler: NOT_APPROVED
 Auto Dispatch: NOT_APPROVED
 Cursor Dispatch: NOT_APPROVED
@@ -19,6 +19,19 @@ Boot and handoff records include:
 - `result_sha256` as a V0.1 compatibility alias for `record_sha256`
 
 The CLI enforces the approved state-machine transition guard. Invalid transitions return `COMPANY_BOOT_FAILED` with `INVALID_STATE_TRANSITION`.
+
+The library also provides a transport-neutral handoff candidate:
+
+- exact sender and recipient instance-registry binding
+- canonical payload and message SHA-256 verification
+- exact-replay idempotency and conflicting-replay rejection
+- append-only status events linked by SHA-256
+- recipient-only acknowledgement and answer
+- distinct-instance review enforcement
+- all-false protected-action safety boundary
+- fail-closed behavior when no verified reply target exists
+
+This validator does not discover sessions or send messages. A caller must supply an independently verified instance registry and a transport. Saved-session resume, a same display name or an unverified page identifier is not sufficient.
 
 ## Commands
 
@@ -57,6 +70,9 @@ The prototype does not:
 - use Real KGEN
 - create PRs
 - merge
+- discover or wake another Codex/ChatGPT session
+- deliver a handoff to a remote instance
+- persist a live inbox/outbox or ACK on its own
 
 ## Tests
 
@@ -66,4 +82,4 @@ $env:PYTHONDONTWRITEBYTECODE = "1"
 python -m unittest discover -s tests -v
 ```
 
-Current second targeted-integrity suite: 74 / 74 PASS (34 existing and 40 new).
+Current targeted-integrity suite: 83 / 83 PASS, including 9 handoff-channel integrity tests.
