@@ -23,10 +23,20 @@ Workflow: `.github/workflows/kgen-cursor-dispatch-wake.yml`
 2. GitHub repo **Settings → Secrets → Actions** → `CURSOR_API_KEY`
 
 After the secret is set, every Codex dispatch merge automatically POSTs to `https://api.cursor.com/v1/agents` with prompt in `cursor-dispatch-wake-prompt.txt`.
+The workflow uses Cursor's documented HTTP Basic API-key authentication and only
+accepts a 2xx response when it contains matching structured `agent` and `run`
+identifiers; an empty or malformed success response fails closed.
+The job has a five-minute hard limit and the API request has explicit connection
+and total-time limits, so an unavailable endpoint cannot occupy a runner indefinitely.
 
 **Manual test:** GitHub → Actions → **KGEN Cursor Dispatch Wake** → **Run workflow** (uses `workflow_dispatch`).
 
 If the secret is missing, the workflow logs a notice and exits successfully (does not fail the merge).
+
+If Cursor returns `403 plan_required`, the workflow records
+`HOLD_EXTERNAL_PLAN_REQUIRED`, explicitly reports that no agent was launched, and
+exits successfully so an unavailable external subscription does not create a false
+repository CI failure. Other non-success API responses still fail closed.
 
 ## Optional: Cursor Automations UI (native GitHub trigger)
 
