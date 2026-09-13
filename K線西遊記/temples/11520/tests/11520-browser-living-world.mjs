@@ -34,7 +34,10 @@ for(let attempt=0;attempt<24;attempt+=1){
   });
   if(!point){await page.waitForTimeout(60);continue}
   await page.evaluate(()=>{globalThis.__K11520_QA_WORLD_TAP_ROUTES__=[]});
-  await page.touchscreen.tap(point.clientX,point.clientY);
+  await page.mouse.move(point.clientX,point.clientY);
+  await page.mouse.down();
+  await page.waitForTimeout(45);
+  await page.mouse.up();
   await page.waitForTimeout(140);
   tapDiagnostic=await page.evaluate(()=>({routes:structuredClone(globalThis.__K11520_QA_WORLD_TAP_ROUTES__||[]),selectedLifeId:document.querySelector('#selectedLifeHud')?.dataset.lifeId||null}));
   pickedRoute=tapDiagnostic.routes.at(-1)||null;
