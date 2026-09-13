@@ -80,8 +80,7 @@ function syncLifeVisuals(){for(const m of world.monsters){const rec=lifeVisuals.
 
 function lifeCanvasHitPoints(lifeId){
   const monster=world.monsters.find(m=>String(m.lifeId||'')===String(lifeId||''));
-  const visual=monster&&lifeVisuals.get(monster.id);
-  if(!monster||!visual?.root?.visible)return Object.freeze([]);
+  if(!monster)return Object.freeze([]);
   const rect=renderer.domElement.getBoundingClientRect(),points=[],seen=new Set();
   const projectPoint=point=>{
     const projected=point.clone().project(camera);
@@ -92,9 +91,14 @@ function lifeCanvasHitPoints(lifeId){
     if(seen.has(key))return;seen.add(key);
     points.push(Object.freeze({clientX,clientY,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
   };
-  visual.root.updateWorldMatrix(true,true);
-  projectPoint(new THREE.Box3().setFromObject(visual.root).getCenter(new THREE.Vector3()));
-  visual.root.traverse?.(node=>{if(node?.isMesh&&node.visible!==false)projectPoint(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()))});
+  const baseY=Math.max(.05,Number(monster.y)||0);
+  for(const y of[.45,.8,1.15,1.5])for(const x of[-.24,0,.24])projectPoint(new THREE.Vector3((Number(monster.x)||0)+x,baseY+y,Number(monster.z)||0));
+  const visual=lifeVisuals.get(monster.id);
+  if(visual?.root?.visible){
+    visual.root.updateWorldMatrix(true,true);
+    projectPoint(new THREE.Box3().setFromObject(visual.root).getCenter(new THREE.Vector3()));
+    visual.root.traverse?.(node=>{if(node?.isMesh&&node.visible!==false)projectPoint(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()))});
+  }
   return Object.freeze(points);
 }
 globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints});
