@@ -1,7 +1,7 @@
 /* KGEN_META
 VERSION: 2.6.17
 STATUS: ACTIVE
-PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, optional capabilities, legacy observers, or mobile tap delivery fail. Installs the persistent XZ / XY / YZ 3D plane controller, keeps its remaining-axis vertical rail authoritative over legacy hidden-Y skin CSS, presents the active K-sphere normal-axis market without changing the trading selection, and installs a simulation-only Movement Combat V1 prototype where XYZ motion determines per-axis conflict, KX/KY/KZ public market ticks judge conflict direction, and KAIOS game HP absorbs damage without mutating KGEN positions, wallet balances, or chain state.
+PURPOSE: Fail-open 11520 bootstrap. The player must always be able to enter the full game even when storage, audio, speech, CDN, optional capabilities, legacy observers, or mobile tap delivery fail. Installs the persistent XZ / XY / YZ 3D plane controller, keeps its remaining-axis vertical rail authoritative over legacy hidden-Y skin CSS, presents the active K-sphere normal-axis market without changing the trading selection, installs canonical world-item identity/drop bridging across custody states, and installs a simulation-only Movement Combat V1 prototype where XYZ motion determines per-axis conflict, KX/KY/KZ public market ticks judge conflict direction, and KAIOS game HP absorbs damage without mutating KGEN positions, wallet balances, or chain state.
 */
 const $=s=>document.querySelector(s);
 const PRODUCT_VERSION='V2.6.17';
@@ -35,6 +35,7 @@ setTimeout(()=>enterWorld(),BOOT_FAIL_OPEN_MS);
 setTimeout(()=>releaseIntro(),BOOT_FAIL_OPEN_MS+900);
 (async()=>{try{
   try{const {install11520AvatarFacingCorrection}=await import('./avatar-facing-runtime.mjs');install11520AvatarFacingCorrection()}catch(facingErr){console.warn('[11520 bootstrap] avatar-facing correction degraded',facingErr)}
+  try{const {install11520WorldItemDropBridge}=await import('./world-item-drop-bootstrap.mjs');install11520WorldItemDropBridge()}catch(dropErr){console.warn('[11520 bootstrap] world-item drop bridge degraded',dropErr)}
   await import('./game-5d-main.mjs');
   try{const {install11520ControlsV251}=await import('./game-controls-v251.mjs');install11520ControlsV251();guardProductVersion()}catch(controlErr){console.warn('[11520 bootstrap] control skin degraded',controlErr)}
   try{const {install11520JoystickXZXY}=await import('./joystick-xzxy.mjs');install11520JoystickXZXY();guardAxisRail()}catch(planeErr){console.warn('[11520 bootstrap] XYZ plane joystick degraded',planeErr)}
