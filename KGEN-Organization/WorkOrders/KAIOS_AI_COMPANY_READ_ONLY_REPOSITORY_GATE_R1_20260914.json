@@ -1,0 +1,116 @@
+{
+  "schema_version": "KAIOS_WORK_ORDER_EVIDENCE_V1",
+  "work_order_id": "KAIOS-AI-COMPANY-READ-ONLY-REPOSITORY-GATE-R1-20260914",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "priority": "P1",
+  "risk_level": "R1",
+  "selected": true,
+  "repository": "klineodyssey/kline-odyssey",
+  "initial_base_sha": "f86f379928b949ac2ffb1c022921a7e0defe6898",
+  "exact_base_sha": "ce99066379c311693fdada044fd708e885b40def",
+  "branch": "chatgpt-handoff/KAIOS-AI-COMPANY-READ-ONLY-REPOSITORY-GATE-R1-20260914",
+  "task_source": {
+    "pull_request": 170,
+    "source_head_sha": "636d77306a2f91300b12857b836d600b729b2fd3",
+    "method": "bounded_current_main_transplant",
+    "old_branch_merged": false
+  },
+  "objective": "Add a credential-free public GitHub repository snapshot reader and a fail-closed exact-main, exact-head, named-CI evidence gate without granting mutation or merge authority.",
+  "scope": [
+    "core/company/index.mjs",
+    "tests/autonomous-company-engineering-cycle.test.mjs",
+    "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_READ_ONLY_REPOSITORY_GATE_R1_20260914.json"
+  ],
+  "acceptance": [
+    "Only canonical https://api.github.com repository endpoints are read.",
+    "Every network request is GET with credentials omitted and redirects rejected.",
+    "Credential, header, endpoint and API-origin overrides are rejected.",
+    "The snapshot records exact default-branch SHA, PR head/base, divergence, mergeability and named check runs.",
+    "Missing, pending, failed, truncated or non-success required checks fail closed.",
+    "Moving main, moving PR head, draft/closed PR, wrong base, codex/* head, behind-main head, empty diff or unknown/non-mergeable state fail closed.",
+    "A passing gate remains evidence-only with merge_authorized=false and external_effect=false.",
+    "Exact-head Universal Exchange CI passes before merge."
+  ],
+  "authority_boundary": {
+    "public_github_read": true,
+    "github_token_or_secret": false,
+    "github_write": false,
+    "workflow_dispatch": false,
+    "merge_capability": false,
+    "deployment_capability": false,
+    "external_agent_launch": false,
+    "worker_or_life_activation": false,
+    "payment_or_asset_transfer": false,
+    "signer_or_private_key": false,
+    "chain_state_mutation": false
+  },
+  "protected_paths_changed": false,
+  "ui_or_game_changed": false,
+  "visual_qa": "NOT_APPLICABLE_NON_UI_CHANGE",
+  "initial_main_preflight": {
+    "sha": "f86f379928b949ac2ffb1c022921a7e0defe6898",
+    "source_pr": 354,
+    "source_head": "codex/11520-hud-minimal-restore-20260914",
+    "parents": [
+      "8d9a9c7c5f94f60976327f1594c2951317405da8",
+      "7be5872cfc0d7998ddf6b8048cbf6aca411580bc"
+    ],
+    "direct_main_write": false,
+    "codex_namespace_policy_violation_observed": true,
+    "external_agent_run_observed_for_sha": false,
+    "post_merge_runs": {
+      "universal_exchange": 34784866835,
+      "pages": 34784866830,
+      "game_product_qa": 34784866859
+    },
+    "post_merge_conclusions": [
+      "success",
+      "success",
+      "success"
+    ]
+  },
+  "main_refresh": {
+    "sha": "ce99066379c311693fdada044fd708e885b40def",
+    "source_pr": 355,
+    "source_head": "codex/temple-return-wallet-continuity-20260914",
+    "parent": "f86f379928b949ac2ffb1c022921a7e0defe6898",
+    "direct_main_write": false,
+    "codex_namespace_policy_violation_observed": true,
+    "path_overlap_with_this_work_order": false,
+    "post_merge_runs": {
+      "universal_exchange": 34786584212,
+      "pages": 34786584224,
+      "game_product_qa": 34786584229
+    },
+    "post_merge_conclusions": [
+      "success",
+      "success",
+      "success"
+    ]
+  },
+  "candidate_ranking": [
+    { "rank": 1, "priority": "P0", "candidate": "PR #232 BrainExchange V4 real-funds upgrade", "disposition": "HOLD", "reason": "Real funds, oracle provenance, contract E2E and security review are unresolved." },
+    { "rank": 2, "priority": "P0", "candidate": "PR #135 Mainnet settlement runtime", "disposition": "HOLD", "reason": "Mainnet execution and signer authority require action-specific Human approval." },
+    { "rank": 3, "priority": "P0", "candidate": "PR #154 payroll bloodflow", "disposition": "HOLD", "reason": "Payroll and real-asset movement are protected actions." },
+    { "rank": 4, "priority": "P0", "candidate": "PR #186 payment adapter", "disposition": "HOLD", "reason": "Payment integration requires verified funding, payee and signer authority." },
+    { "rank": 5, "priority": "P0", "candidate": "PR #199 Auto-LP planner", "disposition": "HOLD", "reason": "Liquidity and real-asset execution are protected." },
+    { "rank": 6, "priority": "P1", "candidate": "PR #170 read-only repository snapshot and exact-head CI gate", "disposition": "SELECTED", "reason": "Bounded current-main R1 evidence-only slice with no secret, write or external executor." },
+    { "rank": 7, "priority": "P1", "candidate": "PR #170 invocation-driven read-only cycle orchestration", "disposition": "NEXT", "reason": "Can compose snapshot, planner and append-only persistence after this gate lands." },
+    { "rank": 8, "priority": "P1", "candidate": "PR #171 obsolete universal-reviewer policy closeout", "disposition": "READY_FOR_AUDIT", "reason": "Repository-only stale-policy reconciliation." },
+    { "rank": 9, "priority": "P1", "candidate": "PR #172 K4168 authority and address reconciliation", "disposition": "HOLD", "reason": "Authority and address provenance gaps remain." },
+    { "rank": 10, "priority": "P1", "candidate": "PR #193 portal lineage closeout", "disposition": "READY_FOR_EQUIVALENCE_AUDIT", "reason": "Old UI branch must be compared against current main before any transplant." },
+    { "rank": 11, "priority": "P1", "candidate": "PR #185 mobile-wallet lineage closeout", "disposition": "READY_FOR_EQUIVALENCE_AUDIT", "reason": "Wallet UI requires current-main and browser/visual revalidation." },
+    { "rank": 12, "priority": "P1", "candidate": "PR #174 parallel-market safety audit", "disposition": "READY_FOR_AUDIT", "reason": "Simulation-only portions may be separable after current-main review." },
+    { "rank": 13, "priority": "P1", "candidate": "PR #187 protected CURRENT reconciliation", "disposition": "HOLD", "reason": "Protected Canon and Runtime CURRENT conflict." },
+    { "rank": 14, "priority": "P2", "candidate": "PR #201 -> #211 -> #212 KUFO/KSHIP/UFO dependency chain", "disposition": "HOLD", "reason": "Dependency order and cross-product authority remain unresolved." },
+    { "rank": 15, "priority": "P2", "candidate": "PR #177 remote handoff executor", "disposition": "HOLD", "reason": "External execution authority is not authorized." },
+    { "rank": 16, "priority": "P2", "candidate": "PR #48 legacy baseline documentation", "disposition": "READY_FOR_SUPERSEDED_AUDIT", "reason": "Low-risk historical documentation cleanup after higher-priority safety slices." }
+  ],
+  "local_verification": {
+    "focused_test": "node --test tests/autonomous-company-engineering-cycle.test.mjs",
+    "focused_result": "17_PASS_0_FAIL",
+    "diff_check": "PASS",
+    "full_ci": "PENDING_EXACT_HEAD"
+  },
+  "next_candidate": "PR #170 invocation-driven read-only cycle orchestration with two exact snapshots and no repository mutation or external executor"
+}

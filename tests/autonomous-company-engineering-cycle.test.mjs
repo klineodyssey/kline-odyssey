@@ -4,6 +4,8 @@ import {
   planAutonomousCompanyEngineeringCycle,
   persistAutonomousCompanyEngineeringCycle,
   restoreAutonomousCompanyEngineeringCycleState,
+  readLatestRepositorySnapshot,
+  evaluateExactHeadCiGate,
   AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_SAFE_ACTIONS,
   AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS
@@ -12,6 +14,7 @@ import { MemoryUniverseStore } from "../core/registry/store.mjs";
 import { assertAppendOnlyChain } from "../core/history/index.mjs";
 
 const MAIN_SHA = "9".repeat(40);
+const HEAD_SHA = "a".repeat(40);
 const acknowledgedWorker = Object.freeze({
   status: "ACTIVE",
   employee_status: "ACTIVE",
@@ -90,6 +93,47 @@ function cycle(overrides = {}) {
     previous_cycle_ids: [],
     ...overrides
   });
+}
+
+function publicGitHubFixtureFetch(overrides = {}) {
+  const calls = [];
+  const bodies = {
+    "/repos/klineodyssey/kline-odyssey": { default_branch: "main" },
+    "/repos/klineodyssey/kline-odyssey/commits/main": {
+      sha: MAIN_SHA,
+      commit: { committer: { date: "2026-09-14T01:00:00Z" } }
+    },
+    "/repos/klineodyssey/kline-odyssey/pulls/353": {
+      state: "open",
+      draft: false,
+      mergeable: true,
+      mergeable_state: "clean",
+      head: { sha: HEAD_SHA, ref: "chatgpt-handoff/SAFE-ENGINEERING-001", repo: { full_name: "klineodyssey/kline-odyssey" } },
+      base: { ref: "main" }
+    },
+    [`/repos/klineodyssey/kline-odyssey/compare/main...${HEAD_SHA}`]: { ahead_by: 2, behind_by: 0 },
+    [`/repos/klineodyssey/kline-odyssey/commits/${HEAD_SHA}/check-runs?per_page=100`]: {
+      total_count: 2,
+      check_runs: [
+        { id: 10, name: "company-safe-cycle", status: "completed", conclusion: "success", head_sha: HEAD_SHA, html_url: "https://github.com/example/check/10" },
+        { id: 11, name: "workflow-security", status: "completed", conclusion: "success", head_sha: HEAD_SHA, html_url: "https://github.com/example/check/11" }
+      ]
+    },
+    ...overrides
+  };
+  const fetch = async (url, options) => {
+    calls.push({ url, options });
+    const parsed = new URL(url);
+    const key = `${parsed.pathname}${parsed.search}`;
+    const body = bodies[key];
+    if (body instanceof Error) throw body;
+    return {
+      ok: body !== undefined,
+      status: body === undefined ? 404 : 200,
+      json: async () => structuredClone(body ?? { message: "not found" })
+    };
+  };
+  return { fetch, calls };
 }
 
 test("selects one current-main R1 task without imposing a universal reviewer", () => {
@@ -274,4 +318,127 @@ test("MemoryUniverseStore rejects duplicate deterministic event ids before mutat
   assert.equal((await store.allEvents()).length, 0);
   assert.equal(await store.getEntity("COMPANY", "COMPANY-A"), null);
   assert.equal(await store.getEntity("COMPANY", "COMPANY-B"), null);
+});
+
+test("reads exact public GitHub main, PR divergence, and named head checks without credentials", async () => {
+  const fixture = publicGitHubFixtureFetch();
+  const snapshot = await readLatestRepositorySnapshot({
+    repository: "klineodyssey/kline-odyssey",
+    active_task_pr: 353,
+    observed_at: "2026-09-14T01:05:00Z",
+    required_check_names: ["company-safe-cycle", "workflow-security"],
+    fetch_impl: fixture.fetch
+  });
+  assert.equal(snapshot.snapshot_type, "LATEST_REPOSITORY_READ_ONLY");
+  assert.equal(snapshot.main_sha, MAIN_SHA);
+  assert.equal(snapshot.active_task_pr.head_sha, HEAD_SHA);
+  assert.equal(snapshot.active_task_pr.behind_main, 0);
+  assert.equal(snapshot.active_task_pr.ci_status, "PASS");
+  assert.equal(snapshot.active_task_pr.check_count, 2);
+  assert.equal(snapshot.authority.public_github_read, true);
+  for (const [authority, enabled] of Object.entries(snapshot.authority)) {
+    if (authority !== "public_github_read") assert.equal(enabled, false, `${authority} must remain disabled`);
+  }
+  assert.equal(fixture.calls.length, 5);
+  for (const call of fixture.calls) {
+    assert.ok(call.url.startsWith("https://api.github.com/repos/klineodyssey/kline-odyssey"));
+    assert.equal(call.options.method, "GET");
+    assert.equal(call.options.credentials, "omit");
+    assert.equal(call.options.redirect, "error");
+    assert.equal("Authorization" in call.options.headers, false);
+  }
+});
+
+test("exact-main and exact-head gate passes evidence without granting merge authority", async () => {
+  const fixture = publicGitHubFixtureFetch();
+  const snapshot = await readLatestRepositorySnapshot({
+    repository: "klineodyssey/kline-odyssey",
+    active_task_pr: 353,
+    observed_at: "2026-09-14T01:05:00Z",
+    required_check_names: ["company-safe-cycle", "workflow-security"],
+    fetch_impl: fixture.fetch
+  });
+  const gate = evaluateExactHeadCiGate({ repository_snapshot: snapshot, expected_main_sha: MAIN_SHA, expected_head_sha: HEAD_SHA });
+  assert.equal(gate.status, "EXACT_MAIN_HEAD_CI_PASS");
+  assert.equal(gate.exact_main, true);
+  assert.equal(gate.exact_head, true);
+  assert.equal(gate.merge_authorized, false);
+  assert.equal(gate.external_effect, false);
+});
+
+test("exact-head gate fails closed for moving main/head, draft, branch, divergence, mergeability, and CI", () => {
+  const basePr = {
+    number: 353,
+    head_sha: HEAD_SHA,
+    head_ref: "chatgpt-handoff/SAFE-ENGINEERING-001",
+    base_ref: "main",
+    state: "OPEN",
+    draft: false,
+    mergeable: true,
+    ahead_main: 1,
+    behind_main: 0,
+    ci_status: "PASS"
+  };
+  const snapshot = (pr = basePr, main_sha = MAIN_SHA) => ({
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    default_branch: "main",
+    main_sha,
+    active_task_pr: pr
+  });
+  const status = (repository_snapshot, expected_main_sha = MAIN_SHA, expected_head_sha = HEAD_SHA) => evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha, expected_head_sha }).status;
+  assert.equal(status(snapshot(basePr, "8".repeat(40))), "HOLD_STALE_MAIN");
+  assert.equal(status(snapshot({ ...basePr, head_sha: "7".repeat(40) })), "HOLD_STALE_PR_HEAD");
+  assert.equal(status(snapshot(null)), "HOLD_ACTIVE_PR_REQUIRED");
+  assert.equal(status(snapshot({ ...basePr, state: "CLOSED" })), "HOLD_PR_NOT_OPEN");
+  assert.equal(status(snapshot({ ...basePr, draft: true })), "HOLD_PR_DRAFT");
+  assert.equal(status(snapshot({ ...basePr, base_ref: "release" })), "HOLD_PR_BASE_BRANCH_MISMATCH");
+  assert.equal(status(snapshot({ ...basePr, head_ref: "codex/unsafe-trigger" })), "HOLD_FORBIDDEN_BRANCH_PATH");
+  assert.equal(status(snapshot({ ...basePr, behind_main: 1 })), "HOLD_PR_BEHIND_MAIN");
+  assert.equal(status(snapshot({ ...basePr, ahead_main: 0 })), "HOLD_PR_HAS_NO_BRANCH_DIFF");
+  assert.equal(status(snapshot({ ...basePr, mergeable: false })), "HOLD_PR_NOT_MERGEABLE");
+  assert.equal(status(snapshot({ ...basePr, mergeable: null })), "HOLD_PR_MERGEABILITY_UNKNOWN");
+  assert.equal(status(snapshot({ ...basePr, ci_status: "FAIL" })), "HOLD_EXACT_HEAD_CI_FAILED");
+  assert.equal(status(snapshot({ ...basePr, ci_status: "PENDING" })), "HOLD_EXACT_HEAD_CI_INCOMPLETE");
+});
+
+test("public repository reader rejects credential and endpoint overrides", async () => {
+  for (const field of ["token", "authorization", "headers", "api_base", "api_origin", "credentials"]) {
+    await assert.rejects(
+      () => readLatestRepositorySnapshot({
+        repository: "klineodyssey/kline-odyssey",
+        observed_at: "2026-09-14T01:05:00Z",
+        required_check_names: ["company-safe-cycle"],
+        fetch_impl: publicGitHubFixtureFetch().fetch,
+        [field]: "forbidden"
+      }),
+      (error) => error.code === "GITHUB_CREDENTIALS_FORBIDDEN"
+    );
+  }
+});
+
+test("public repository reader fails closed on missing, failed, pending, or truncated required checks", async () => {
+  const checkPath = `/repos/klineodyssey/kline-odyssey/commits/${HEAD_SHA}/check-runs?per_page=100`;
+  const cases = [
+    [{ total_count: 0, check_runs: [] }, "NO_CHECKS"],
+    [{ total_count: 1, check_runs: [{ id: 1, name: "other", status: "completed", conclusion: "success" }] }, "MISSING_REQUIRED_CHECK"],
+    [{ total_count: 1, check_runs: [{ id: 1, name: "company-safe-cycle", status: "in_progress", conclusion: null }] }, "PENDING"],
+    [{ total_count: 1, check_runs: [{ id: 1, name: "company-safe-cycle", status: "completed", conclusion: "failure" }] }, "FAIL"],
+    [{ total_count: 101, check_runs: Array.from({ length: 100 }, (_, id) => ({ id, name: id ? "other" : "company-safe-cycle", status: "completed", conclusion: "success" })) }, "INCOMPLETE_CHECK_SET"]
+  ];
+  for (const [checks, expected] of cases) {
+    const fixture = publicGitHubFixtureFetch({ [checkPath]: checks });
+    const snapshot = await readLatestRepositorySnapshot({
+      repository: "klineodyssey/kline-odyssey",
+      active_task_pr: 353,
+      observed_at: "2026-09-14T01:05:00Z",
+      required_check_names: ["company-safe-cycle"],
+      fetch_impl: fixture.fetch
+    });
+    assert.equal(snapshot.active_task_pr.ci_status, expected);
+  }
+  const failedRead = publicGitHubFixtureFetch({ "/repos/klineodyssey/kline-odyssey": new Error("network") });
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-09-14T01:05:00Z", required_check_names: ["company-safe-cycle"], fetch_impl: failedRead.fetch }),
+    (error) => error.code === "GITHUB_READ_FAILED"
+  );
 });
