@@ -160,6 +160,7 @@ main { padding-top: 22px; padding-bottom: 38px; }
 
 .section-title { margin-bottom: 12px; }
 .inline-title { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.inline-title .pill { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: center; }
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--line-soft); border-radius: 8px; }
 table { width: 100%; border-collapse: collapse; min-width: 920px; }
@@ -221,10 +222,30 @@ tr:last-child td { border-bottom: 0; }
 
 .app-footer { display: flex; justify-content: space-between; gap: 16px; padding-top: 16px; padding-bottom: 28px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 
+.experimental-panel { border-color: rgba(255, 112, 110, .6); background: linear-gradient(135deg, rgba(80, 20, 20, .35), rgba(18, 17, 14, .9)); }
+.truth-grid, .pool-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.truth-grid > div, .pool-card { border: 1px solid var(--line-soft); border-radius: 8px; padding: 12px; background: var(--panel-2); }
+.truth-grid span, .pool-card > p { display: block; margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.truth-grid strong, .pool-card code { display: block; overflow-wrap: anywhere; }
+.known-issues { margin: 12px 0 0; padding-left: 20px; color: var(--muted); }
+.known-issues strong { color: var(--warn); }
+.panel-note { color: var(--muted); }
+.pool-card h3, .flow-card h3, .gate-card h3 { margin: 0 0 8px; font-size: 15px; }
+.pool-card dl { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 4px 8px; margin: 10px 0; }
+.pool-card dt { color: var(--muted); }
+.pool-card dd { margin: 0; overflow-wrap: anywhere; }
+.flow-list, .gate-list { display: grid; gap: 10px; margin-top: 12px; }
+.flow-card, .gate-card { border: 1px solid var(--line-soft); border-radius: 8px; padding: 12px; background: var(--panel-2); }
+.flow-card > div { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.flow-card p, .gate-card p { margin: 6px 0 0; color: var(--muted); }
+.flow-status { display: inline-flex; padding: 3px 7px; border: 1px solid var(--line); border-radius: 6px; color: var(--warn); font-size: 11px; font-weight: 800; overflow-wrap: anywhere; }
+.risk-card { border-left: 4px solid var(--red); }
+
 @media (max-width: 1080px) {
   .health-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .two-col, .report-grid, .source-list { grid-template-columns: 1fr; }
   .status-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .truth-grid, .pool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 560px) {
@@ -232,11 +253,14 @@ tr:last-child td { border-bottom: 0; }
   .header-actions { justify-content: flex-start; margin-top: 16px; min-width: 0; }
   .health-grid, .status-grid { grid-template-columns: 1fr 1fr; }
   .inline-title { align-items: flex-start; flex-direction: column; }
+  .inline-title .pill { width: 100%; }
   .notice { align-items: flex-start; flex-direction: column; }
   .kv-list { grid-template-columns: 1fr; }
   table { min-width: 760px; }
   th, td { padding: 10px; }
   .app-footer { flex-direction: column; }
+  .truth-grid, .pool-grid { grid-template-columns: 1fr; }
+  .flow-card > div { display: block; }
 }
 
 @media (max-width: 430px) {
