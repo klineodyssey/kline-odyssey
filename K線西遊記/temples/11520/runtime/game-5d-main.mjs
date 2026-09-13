@@ -117,7 +117,7 @@ function lifeCanvasHitPoints(lifeId){
 function visibleLifeCanvasHitPoints(){
   for(const monster of world.monsters){
     if(monster.state==='DEAD'||!monster.lifeId)continue;
-    const points=lifeCanvasHitPoints(monster.lifeId).filter(point=>document.elementFromPoint(point.clientX,point.clientY)===renderer.domElement);
+    const points=lifeCanvasHitPoints(monster.lifeId).filter(point=>document.elementFromPoint(point.clientX,point.clientY)===renderer.domElement&&String(monsterAt(point.clientX,point.clientY)?.id||'')===String(monster.id));
     if(points.length)return points;
   }
   return Object.freeze([]);
