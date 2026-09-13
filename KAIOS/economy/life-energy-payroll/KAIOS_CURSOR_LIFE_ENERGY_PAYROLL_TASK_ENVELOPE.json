@@ -5,14 +5,14 @@
   "worker_id": "cursor-01",
   "reviewer": "codex-gm-01",
   "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-  "status": "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED",
-  "dispatch_mode": "CODEX_CONTROLLED_PREPARATION_ONLY",
+  "status": "SUSPENDED_BY_HUMAN_COST_DECISION",
+  "dispatch_mode": "ON_DEMAND_EXTERNAL_CAPACITY_ONLY",
   "queue_policy": "ONE_TASK_AT_A_TIME",
   "claim_created": false,
   "claim_id": null,
   "fencing_token": null,
   "record_version": 4,
-  "claim_effective_when": "EXACT_USER_AUTHORED_ACTION_SPECIFIC_AUTHORIZATION_IS_RECORDED_AND_A_SEPARATE_SAFE_DISPATCH_PR_MERGES",
+  "claim_effective_when": "HUMAN_REACTIVATES_EXTERNAL_CAPACITY_AFTER_HIGH_WORKLOAD_REVIEW",
   "claimed_at": null,
   "lease_expires_at": null,
   "expiry_action": "FAIL_CLOSED_REQUIRE_CODEX_REVALIDATION",
@@ -104,9 +104,9 @@
       "KYC",
       "SECRET_EXPORT"
     ],
-    "status": "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED",
-    "authorization_evidence": "NOT_VERIFIED",
-    "limits_state": "PROPOSED_ONLY_NOT_ACTIVE"
+    "status": "SUSPENDED_BY_HUMAN_COST_DECISION",
+    "authorization_evidence": "HUMAN_CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_2026-09-13",
+    "limits_state": "INACTIVE_DEFERRED_UNTIL_HIGH_WORKLOAD"
   },
   "merge_allowed": false,
   "deploy_allowed": false,
@@ -162,5 +162,5 @@
       "READY_FOR_REVIEW = YES/NO"
     ]
   },
-  "notes": "The delivered R1 branch is preserved as source evidence and the expired R2 claim remains closed and released. No exact user-authored, action-specific authorization for an external paid Cursor launch is verified. External wake, payment, escrow release, worker merge, contract, governance and Mainnet action remain prohibited."
+  "notes": "The delivered R1 branch is preserved as source evidence and the expired R2 claim remains closed and released. Human Authority deferred Cursor Cloud until high workload; HTTP 403 is not retried and normal Company work continues through Codex and ChatGPT. External wake, payment, escrow release, worker merge, contract, governance and Mainnet action remain prohibited."
 }

@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "version": "4.4",
+    "version": "4.5",
     "status": "ACTIVE",
-    "updated_at": "2026-09-13T23:08:51+08:00",
+    "updated_at": "2026-09-13T23:31:16+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
-    "task_id": "KAIOS-CURSOR-REPEATED-UNAUTHORIZED-WAKE-CONTAINMENT-R2-20260913",
+    "task_id": "KAIOS-CURSOR-CLOUD-COST-SUSPENSION-20260913",
     "source_commit": null,
     "source_of_truth": true
   },
@@ -21,9 +21,7 @@
       "PATROL_EXTERNAL_WORLD",
       "HUMAN_REQUEST"
     ],
-    "blocking_reasons": [
-      "EXACT_USER_AUTHORED_ACTION_SPECIFIC_CURSOR_LAUNCH_AUTHORIZATION_NOT_VERIFIED"
-    ],
+    "blocking_reasons": [],
     "pending_handoff": 0,
     "pending_review": 0,
     "pending_push": 0,
@@ -51,9 +49,9 @@
     "delivered_not_reviewed": 0
   },
   "workqueue": {
-    "active_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "worker": "cursor-01",
-    "status": "HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED",
+    "active_task": "PATROL_SELECT_NEXT_SAFE_REPOSITORY_TASK",
+    "worker": "codex-gm-01",
+    "status": "WORKING_CURSOR_CLOUD_NOT_A_COMPANY_BLOCKER",
     "claim_id": null,
     "lease_expires_at": null,
     "map_handoff": "KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001",
@@ -75,7 +73,7 @@
     "kgen_bank_wallet": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE"
   },
   "publication": {
-    "branch": "chatgpt-handoff/cursor-authorization-hold-r2-20260913",
+    "branch": "codex/cursor-cloud-human-suspension-20260913",
     "draft_pr": null,
     "publication_pending_at_snapshot": true,
     "mainnet_write": false

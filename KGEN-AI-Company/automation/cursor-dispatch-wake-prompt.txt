@@ -1,8 +1,8 @@
-STATUS = HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED
+STATUS = SUSPENDED_BY_HUMAN_COST_DECISION
 TASK = KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001
 
-Do not call Cursor Cloud or another external provider. Do not read or export a secret. Do not launch, activate or onboard a Worker or Life.
+Do not call or retry Cursor Cloud or another external provider. Do not read or export a secret. Do not launch, activate or onboard a Worker or Life.
 
-The candidate packet may be refined only as repository preparation. Paid external dispatch requires separate exact user-authored, action-specific authorization and a separately reviewed fail-closed successor workflow on latest main.
+Cursor Cloud is on-demand external capacity only. Normal work continues through codex-gm-01, chatgpt-01, GitHub Actions, repository-native handoffs, hourly patrol and Pages. Future paid external dispatch requires a new Human high-workload cost decision and a separately reviewed fail-closed successor workflow on latest main.
 
 Protected actions remain denied: Mainnet, Testnet mutation, funds, Treasury, payment, LP, signer/private key, governance/admin execution, KYC/account ownership, secret export, Worker activation and Life activation.

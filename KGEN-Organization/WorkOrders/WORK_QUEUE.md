@@ -65,9 +65,9 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
-- Status: HOLD_EXPLICIT_HUMAN_AUTHORIZATION_REQUIRED
-- Authorization Evidence: `NOT_VERIFIED`
-- Dispatch Limits: `PROPOSED_ONLY_NOT_ACTIVE`
+- Status: SUSPENDED_BY_HUMAN_COST_DECISION
+- Authorization Evidence: `HUMAN_CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_2026-09-13`
+- Dispatch Limits: `INACTIVE_DEFERRED_UNTIL_HIGH_WORKLOAD`
 - Owner: cursor-01
 - Reviewer: codex-gm-01
 - Priority: P0
