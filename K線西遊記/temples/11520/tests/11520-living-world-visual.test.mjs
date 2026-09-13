@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {lifePresentationState} from '../runtime/life-visual-runtime.mjs';
+import {creatureArchetypeForSpecies,lifePresentationState,syncLifeVisual} from '../runtime/life-visual-runtime.mjs';
 import {canonicalWorldItem,cargoItemFromLife} from '../runtime/world-item-visual-runtime.mjs';
 
 test('Digital Ant in transit visibly carries cargo and works',()=>{
