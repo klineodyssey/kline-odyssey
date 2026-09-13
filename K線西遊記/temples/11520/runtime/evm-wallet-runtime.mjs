@@ -1,8 +1,37 @@
 const ERC20_BALANCE_OF='0x70a08231';
+export const PUBLIC_WALLET_IDENTITY_KEY='klineodyssey.public-wallet-identity.v1';
+export const PLAYER_SESSION_KEY='k11520.player-session.v1';
+const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){return BigInt(hex&&hex!=='0x'?hex:'0x0');}
 function providerCandidates(explicit){return [explicit,globalThis.trustwallet?.ethereum,globalThis.ethereum,globalThis.BinanceChain,globalThis.okxwallet].filter(Boolean);}
 export function detectInjectedWallet(ethereum){return providerCandidates(ethereum).find(p=>typeof p?.request==='function')||null;}
+export function readPublicWalletIdentity(storage=globalThis.localStorage){
+  try{const value=JSON.parse(storage?.getItem(PUBLIC_WALLET_IDENTITY_KEY)||'null');return value?.version===1&&EVM_ADDRESS.test(value.address||'')?value:null}catch{return null}
+}
+export function savePublicWalletIdentity({address,chainId=null,sourceWorld='UNKNOWN'},storage=globalThis.localStorage){
+  if(!EVM_ADDRESS.test(address||''))return null;
+  const value={version:1,address,chainId:Number.isFinite(Number(chainId))?Number(chainId):null,sourceWorld:String(sourceWorld||'UNKNOWN'),updatedAt:new Date().toISOString()};
+  try{storage?.setItem(PUBLIC_WALLET_IDENTITY_KEY,JSON.stringify(value));return value}catch{return null}
+}
+function validXYZ(value){return value&&['x','y','z'].every(axis=>Number.isFinite(Number(value[axis]))&&Math.abs(Number(value[axis]))<=1e9)}
+export function readPlayerSession(storage=globalThis.localStorage){
+  try{const value=JSON.parse(storage?.getItem(PLAYER_SESSION_KEY)||'null');return value?.version===1&&value.world==='K11520'&&validXYZ(value.xyz)&&validXYZ(value.intentXYZ)?value:null}catch{return null}
+}
+export function savePlayerSession({xyz,intentXYZ},storage=globalThis.localStorage){
+  if(!validXYZ(xyz)||!validXYZ(intentXYZ))return null;
+  const value={version:1,world:'K11520',xyz:{x:Number(xyz.x),y:Number(xyz.y),z:Number(xyz.z)},intentXYZ:{x:Number(intentXYZ.x),y:Number(intentXYZ.y),z:Number(intentXYZ.z)},savedAt:new Date().toISOString()};
+  try{storage?.setItem(PLAYER_SESSION_KEY,JSON.stringify(value));return value}catch{return null}
+}
+export async function bindTempleReturnWalletContinuity({linkId='return-to-11520',statusId='return-wallet-continuity',sourceWorld='UNKNOWN',ethereum,storage=globalThis.localStorage}={}){
+  const provider=detectInjectedWallet(ethereum),link=globalThis.document?.getElementById(linkId),status=globalThis.document?.getElementById(statusId);
+  if(globalThis.document?.body){if(link)document.body.appendChild(link);if(status)document.body.appendChild(status)}
+  const render=value=>{const label=value?.address?`${value.address.slice(0,6)}…${value.address.slice(-4)}`:'尚未連結';if(status)status.textContent=`錢包延續：${label}`;if(link){link.dataset.walletContinuity=value?.address?'retained':'none';link.title=value?.address?`返回 11520 並保留公開錢包識別 ${label}`:'返回 11520；尚無公開錢包識別'}};
+  const refresh=async accounts=>{let value=readPublicWalletIdentity(storage);const list=accounts||await provider?.request?.({method:'eth_accounts'}).catch(()=>[])||[];if(EVM_ADDRESS.test(list[0]||'')){const chainHex=await provider?.request?.({method:'eth_chainId'}).catch(()=>null);value=savePublicWalletIdentity({address:list[0],chainId:chainHex?Number.parseInt(chainHex,16):null,sourceWorld},storage)}render(value);return value};
+  await refresh();
+  if(provider?.on)provider.on('accountsChanged',accounts=>{void refresh(accounts)});
+  return {provider,identity:readPublicWalletIdentity(storage)};
+}
 export function formatUnits(value,decimals=18){
   const n=typeof value==='bigint'?value:BigInt(value||0),d=10n**BigInt(decimals),whole=n/d,frac=(n%d).toString().padStart(decimals,'0').replace(/0+$/,'');
   return frac?`${whole}.${frac}`:`${whole}`;
