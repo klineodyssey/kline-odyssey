@@ -2,16 +2,21 @@
 import argparse
 import contextlib
 import io
+import json
 import re
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 from pathlib import Path
 from types import SimpleNamespace
 
 import feedparser
 
 # 你的 YouTube RSS（免登入、免 cookie）
-RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UC2UE0sZXbKnvR-N0Ew6Z6NA"
+CHANNEL_ID = "UC2UE0sZXbKnvR-N0Ew6Z6NA"
+RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
+CHANNEL_VIDEOS_URL = f"https://www.youtube.com/channel/{CHANNEL_ID}/videos"
 
 README_PATH = "README.md"
 
@@ -39,6 +44,129 @@ def _validate_feed(feed):
     if entries is None:
         raise RuntimeError("RSS parser returned no entries collection")
     return entries
+
+
+def _channel_page_matches(page_text):
+    """Confirm that a YouTube page belongs to the configured canonical channel."""
+    identity_markers = (
+        f'"browseId":"{CHANNEL_ID}"',
+        f'"channelId":"{CHANNEL_ID}"',
+        f"youtube.com/channel/{CHANNEL_ID}",
+    )
+    return any(marker in page_text for marker in identity_markers)
+
+
+def _find_video_renderer(value):
+    if isinstance(value, dict):
+        renderer = value.get("videoRenderer")
+        if isinstance(renderer, dict):
+            return renderer
+        lockup = value.get("lockupViewModel")
+        if (
+            isinstance(lockup, dict)
+            and lockup.get("contentType") == "LOCKUP_CONTENT_TYPE_VIDEO"
+        ):
+            title = (
+                lockup.get("metadata", {})
+                .get("lockupMetadataViewModel", {})
+                .get("title", {})
+                .get("content")
+            )
+            return {
+                "videoId": lockup.get("contentId"),
+                "title": {"simpleText": title},
+            }
+        for child in value.values():
+            found = _find_video_renderer(child)
+            if found is not None:
+                return found
+    elif isinstance(value, list):
+        for child in value:
+            found = _find_video_renderer(child)
+            if found is not None:
+                return found
+    return None
+
+
+def _extract_latest_video_from_channel_page(page_text):
+    """Extract the first channel video from YouTube's structured initial page data."""
+    markers = ("var ytInitialData = ", 'window["ytInitialData"] = ')
+    initial_data = None
+    for marker in markers:
+        marker_index = page_text.find(marker)
+        if marker_index == -1:
+            continue
+        payload = page_text[marker_index + len(marker) :]
+        try:
+            initial_data, _ = json.JSONDecoder().raw_decode(payload)
+        except json.JSONDecodeError:
+            continue
+        break
+
+    if initial_data is None:
+        raise RuntimeError("canonical YouTube channel page has no parseable initial data")
+
+    renderer = _find_video_renderer(initial_data)
+    if renderer is None:
+        return None
+
+    video_id = renderer.get("videoId")
+    title_data = renderer.get("title", {})
+    title = title_data.get("simpleText")
+    if not title:
+        title = "".join(
+            run.get("text", "")
+            for run in title_data.get("runs", [])
+            if isinstance(run, dict)
+        )
+    if not isinstance(video_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+        raise RuntimeError("canonical YouTube channel page has an invalid first video id")
+    if not title:
+        raise RuntimeError("canonical YouTube channel page first video is missing a title")
+    return SimpleNamespace(
+        title=title,
+        link=f"https://www.youtube.com/watch?v={video_id}",
+    )
+
+
+def _fetch_url(url, urlopen=urllib.request.urlopen):
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0 (compatible; KLINE-Odyssey-RSS-Updater/1.0)"},
+    )
+    try:
+        with urlopen(request, timeout=20) as response:
+            return response.getcode(), response.read()
+    except urllib.error.HTTPError as exc:
+        return exc.code, exc.read()
+    except Exception as exc:
+        raise RuntimeError(f"YouTube request failed for {url}") from exc
+
+
+def _load_feed(feed_parser=feedparser.parse, urlopen=urllib.request.urlopen):
+    """Load RSS, falling back to the verified canonical channel page on RSS 404."""
+    status_code, rss_body = _fetch_url(RSS_URL, urlopen)
+
+    if status_code != 404:
+        feed = feed_parser(rss_body)
+        feed.status = status_code
+        return feed
+
+    page_status, page_body = _fetch_url(CHANNEL_VIDEOS_URL, urlopen)
+    page_text = page_body.decode("utf-8", errors="replace")
+
+    if page_status != 200 or not _channel_page_matches(page_text):
+        raise RuntimeError(
+            "YouTube RSS returned 404 but the canonical channel page could not be verified"
+        )
+
+    latest_video = _extract_latest_video_from_channel_page(page_text)
+    print(
+        "WARNING: YouTube RSS returned 404; using the verified canonical channel page fallback",
+        file=sys.stderr,
+    )
+    entries = [] if latest_video is None else [latest_video]
+    return SimpleNamespace(status=200, bozo=False, entries=entries)
 
 
 def update_latest_video(feed, readme_path=README_PATH):
@@ -179,6 +307,61 @@ def self_test():
         assert updated.count(START) == 1
         assert updated.count(END) == 1
 
+        # YouTube may return RSS 404 even when the channel page remains available.
+        # The fallback must bind to the exact channel and parse structured page data.
+        page_prefix = f'{{"browseId":"{CHANNEL_ID}"}}'
+        empty_channel = page_prefix + "var ytInitialData = {\"contents\":[]};"
+        assert _channel_page_matches(empty_channel) is True
+        assert _extract_latest_video_from_channel_page(empty_channel) is None
+        assert _channel_page_matches('{"browseId":"UC_WRONG"}') is False
+
+        populated_channel = page_prefix + (
+            'var ytInitialData = {"contents":[{"videoRenderer":'
+            '{"videoId":"abcdefghijk","title":{"runs":[{"text":"Example Video"}]}}}]};'
+        )
+        latest = _extract_latest_video_from_channel_page(populated_channel)
+        assert latest.title == "Example Video"
+        assert latest.link == "https://www.youtube.com/watch?v=abcdefghijk"
+
+        lockup_channel = page_prefix + (
+            'var ytInitialData = {"contents":[{"lockupViewModel":'
+            '{"contentId":"zyxwvutsrqp","contentType":"LOCKUP_CONTENT_TYPE_VIDEO",'
+            '"metadata":{"lockupMetadataViewModel":{"title":{"content":"Lockup Video"}}}}}]};'
+        )
+        latest = _extract_latest_video_from_channel_page(lockup_channel)
+        assert latest.title == "Lockup Video"
+        assert latest.link == "https://www.youtube.com/watch?v=zyxwvutsrqp"
+
+        class FakeResponse:
+            def __init__(self, status, body):
+                self._status = status
+                self._body = body
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def getcode(self):
+                return self._status
+
+            def read(self):
+                return self._body
+
+        def fake_urlopen(request, timeout):
+            assert timeout == 20
+            if request.full_url == RSS_URL:
+                return FakeResponse(404, b"not found")
+            if request.full_url == CHANNEL_VIDEOS_URL:
+                return FakeResponse(200, lockup_channel.encode("utf-8"))
+            raise AssertionError(f"unexpected URL: {request.full_url}")
+
+        fallback_feed = _load_feed(urlopen=fake_urlopen)
+        fallback_entries = _validate_feed(fallback_feed)
+        assert len(fallback_entries) == 1
+        assert fallback_entries[0].title == "Lockup Video"
+
     print("[update-latest-video-self-test] PASS")
 
 
@@ -195,7 +378,7 @@ def main():
         self_test()
         return
 
-    feed = feedparser.parse(RSS_URL)
+    feed = _load_feed()
     update_latest_video(feed, README_PATH)
 
 

@@ -25,7 +25,10 @@
     "frictionMirror": true,
     "organRegistry": true,
     "noMainnetDeployment": true,
-    "staleCurrentFindingsLimitedToPr127": true
+    "staleCurrentFindingsLimitedToPr127": true,
+    "scaleCurrentActiveConflictProbe": true,
+    "supersededReferenceScopeFailsClosed": true,
+    "explicitSupersededReferencesRecognized": true
   },
   "failures": []
 }
