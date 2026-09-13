@@ -179,6 +179,7 @@ export function createKgenNativeMarketCell({
   const candles = new Map();
   const consumedActionKeys = new Set();
   const consumedSettlementAttestations = new Set();
+  const consumedSettlementRequestTradeIds = new Set();
   let nextOrder = 1;
   let sequence = 1;
   let ct = null;
@@ -359,6 +360,60 @@ export function createKgenNativeMarketCell({
     return null;
   }
 
+  function createSettlementRequestPacket({ tradeId, requestId, replayKey }) {
+    const normalizedRequestId = normalizeEvidenceId(requestId);
+    const normalizedReplayKey = normalizeNonce(replayKey, "settlement request replay key");
+    const trade = trades.find((candidate) => candidate.id === tradeId);
+    if (!trade) throw new Error("MATCHED_TRADE_NOT_FOUND");
+    if (consumedSettlementRequestTradeIds.has(trade.id)) throw new Error("SETTLEMENT_REQUEST_REPLAY_FORBIDDEN");
+    if (trade.settlementStatus !== "MATCHED_UNSETTLED") throw new Error("SETTLEMENT_REQUEST_REQUIRES_UNSETTLED_MATCH");
+    const quoteNumerator = trade.priceRaw * trade.quantityRaw;
+    if (quoteNumerator % SCALE !== 0n) throw new Error("SETTLEMENT_QUOTE_AMOUNT_NOT_EXACT_AT_18_DECIMALS");
+    const quoteAmountRaw = quoteNumerator / SCALE;
+    const makerIsBuyer = trade.makerSide === "BUY";
+    consumedSettlementRequestTradeIds.add(trade.id);
+    return Object.freeze({
+      settlement_request_id: normalizedRequestId,
+      settlement_request_replay_key: normalizedReplayKey,
+      market_id: marketId,
+      trade_id: trade.id,
+      trade_timestamp: trade.timestamp,
+      buyer_life_id: makerIsBuyer ? trade.makerOwner : trade.takerOwner,
+      buyer_controller_id: makerIsBuyer ? trade.makerController : trade.takerController,
+      seller_life_id: makerIsBuyer ? trade.takerOwner : trade.makerOwner,
+      seller_controller_id: makerIsBuyer ? trade.takerController : trade.makerController,
+      base_asset: trade.baseAsset,
+      base_quantity: trade.quantity,
+      quote_asset: trade.quoteAsset,
+      quote_asset_status: QUOTE_STATUS,
+      quote_amount: formatDecimal(quoteAmountRaw),
+      payment_purpose: "MARKET_SETTLEMENT",
+      chain_id: null,
+      token_address: null,
+      source_address: null,
+      recipient_address: null,
+      funding_evidence: null,
+      authorization_id: null,
+      signer_policy_id: null,
+      submitted_tx: null,
+      receipt: null,
+      ownership_transfer: null,
+      payment_rail_eligible: false,
+      ct_eligible: false,
+      blockers: Object.freeze([
+        "QUOTE_ASSET_NOT_FROZEN",
+        "BUYER_PAYMENT_ADDRESS_AND_CONTROL_PROOF_NOT_BOUND",
+        "SELLER_RECEIPT_ADDRESS_AND_CONTROL_PROOF_NOT_BOUND",
+        "MARKET_ESCROW_OR_SOURCE_NOT_BOUND",
+        "EXACT_MARKET_SETTLEMENT_AUTHORIZATION_NOT_CONNECTED",
+        "SECURE_SIGNER_POLICY_NOT_CONNECTED",
+        "SETTLEMENT_RECEIPT_VERIFIER_NOT_CONNECTED",
+        "OWNERSHIP_TRANSFER_ADAPTER_NOT_CONNECTED"
+      ]),
+      status: "MATCH_BOUND_SETTLEMENT_REQUEST_BLOCKED_BEFORE_PAYMENT_RAIL"
+    });
+  }
+
   function recordVerifiedSettlement({ tradeId, attestationId }) {
     const normalizedAttestationId = normalizeEvidenceId(attestationId);
     if (consumedSettlementAttestations.has(normalizedAttestationId)) {
@@ -471,6 +526,7 @@ export function createKgenNativeMarketCell({
   return Object.freeze({
     placeOrder,
     cancelOrder,
+    createSettlementRequestPacket,
     recordVerifiedSettlement,
     getOrderBook,
     getMarketState,

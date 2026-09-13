@@ -100,6 +100,50 @@ test("crossed paper market creates an unsettled match without CT", () => {
   assert.equal(market.getOrderBook().asks[0].remaining, "60");
 });
 
+test("matched trade creates one exact settlement request packet without inventing KAIOS payment authority", () => {
+  let now = Date.parse("2026-08-22T15:01:00.000Z");
+  const market = createMarket({ clock: () => now });
+  market.placeOrder({ side: "SELL", price: "0.00048", quantity: "100", actorContext: actor("seller") });
+  now += 1;
+  const matched = market.placeOrder({ side: "BUY", price: "0.00050", quantity: "40", actorContext: actor("buyer") });
+  const packet = market.createSettlementRequestPacket({
+    tradeId: matched.fills[0].id,
+    requestId: "SETTLEMENT-REQUEST-0001",
+    replayKey: "SETTLEMENT-REPLAY-0001",
+    chain_id: 56,
+    token_address: "0x1111111111111111111111111111111111111111",
+    source_address: "0x2222222222222222222222222222222222222222",
+    recipient_address: "0x3333333333333333333333333333333333333333",
+    authorization_id: "CALLER-AUTHORIZATION",
+    signer_policy_id: "CALLER-SIGNER",
+    receipt: { receipt_status: 1 }
+  });
+  assert.equal(packet.trade_id, matched.fills[0].id);
+  assert.equal(packet.buyer_life_id, "life:test-a");
+  assert.equal(packet.seller_life_id, "life:test-b");
+  assert.equal(packet.base_asset, "KGEN");
+  assert.equal(packet.base_quantity, "40");
+  assert.equal(packet.quote_asset, "UNFROZEN_11520_NATIVE_QUOTE_CANDIDATE");
+  assert.equal(packet.quote_amount, "0.0192");
+  assert.equal(packet.payment_purpose, "MARKET_SETTLEMENT");
+  assert.equal(packet.chain_id, null);
+  assert.equal(packet.token_address, null);
+  assert.equal(packet.source_address, null);
+  assert.equal(packet.recipient_address, null);
+  assert.equal(packet.payment_rail_eligible, false);
+  assert.equal(packet.ct_eligible, false);
+  assert.ok(packet.blockers.includes("QUOTE_ASSET_NOT_FROZEN"));
+  assert.ok(packet.blockers.includes("SECURE_SIGNER_POLICY_NOT_CONNECTED"));
+  assert.equal(market.getMarketState().ct, null);
+  assert.throws(() => market.createSettlementRequestPacket({ tradeId: matched.fills[0].id, requestId: "SETTLEMENT-REQUEST-0002", replayKey: "SETTLEMENT-REPLAY-0002" }), /SETTLEMENT_REQUEST_REPLAY_FORBIDDEN/);
+});
+
+test("settlement request packet rejects unknown trades and never accepts caller payment fields", () => {
+  const market = createMarket();
+  assert.throws(() => market.createSettlementRequestPacket({ tradeId: "T999", requestId: "SETTLEMENT-REQUEST-UNKNOWN", replayKey: "SETTLEMENT-REPLAY-UNKNOWN", token_address: "0x1111111111111111111111111111111111111111", receipt_status: 1 }), /MATCHED_TRADE_NOT_FOUND/);
+  assert.equal(market.getMarketState().ct, null);
+});
+
 test("same owner self-match fails closed without CT or volume", () => {
   const market = createMarket();
   market.placeOrder({ side: "SELL", price: "1", quantity: "1", actorContext: actor("same", "seller-control") });
