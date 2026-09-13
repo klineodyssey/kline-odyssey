@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.1
+VERSION: 1.1.0
 STATUS: ACTIVE
 PURPOSE: Bridge DIGITAL_ANT_0001 Market Life visualization to the read-only 11520 KAIOS ATM receiving state machine without signing or fabricating settlement.
 */
@@ -7,11 +7,13 @@ PURPOSE: Bridge DIGITAL_ANT_0001 Market Life visualization to the read-only 1152
 import {createKaiosAtmReceivingModule,validateRouteEvidence} from './kaios-atm-receiving-runtime.mjs';
 import {publishDigitalAntSpawn,publishDigitalAntUpdate} from './digital-ant-market-life-adapter.mjs';
 
-export const DIGITAL_ANT_KAIOS_RECEIVING_BRIDGE_VERSION='DIGITAL_ANT_KAIOS_RECEIVING_BRIDGE_V1';
+export const DIGITAL_ANT_KAIOS_RECEIVING_BRIDGE_VERSION='DIGITAL_ANT_KAIOS_RECEIVING_BRIDGE_V1_1';
 export const DIGITAL_ANT_11520_CARGO=Object.freeze({
   lifeId:'DIGITAL_ANT_0001',
   sender:'0xc8346d6DC80f16941ee874D523f0C17F1548d437',
-  amount:1080000,
+  amount:'1080000000000000000000000',
+  decimals:18,
+  displayAmount:'1080000',
   sourceTx:'0x101cc5df545d8228d40637f393ac184d531c49dc91bfa3c425284fc321758d95',
   source:'18888 Lingxiao Bank Proxy',
   accounting:'RESTRICTED_INVENTORY_WITH_MATCHING_LIABILITY',
@@ -27,11 +29,11 @@ export function createDigitalAntKaiosReceivingBridge(config={}){
   const ant={
     lifeId:DIGITAL_ANT_11520_CARGO.lifeId,name:'Digital Ant 0001',species:'DIGITAL_ANT',role:'ATM_CASH_DELIVERY',
     state:'WAIT',x:0,y:0,z:0,capital:0,vitality:100,
-    cargo:{cargoId:config.cargo_manifest_id||'KAIOS-11520-DIGITAL-ANT-0001',amount:DIGITAL_ANT_11520_CARGO.amount,unit:'KAIOS',sourceTx:DIGITAL_ANT_11520_CARGO.sourceTx},
+    cargo:{cargoId:config.cargo_manifest_id||'KAIOS-11520-DIGITAL-ANT-0001',amount:DIGITAL_ANT_11520_CARGO.amount,displayAmount:DIGITAL_ANT_11520_CARGO.displayAmount,decimals:DIGITAL_ANT_11520_CARGO.decimals,unit:'KAIOS_BASE_UNITS',sourceTx:DIGITAL_ANT_11520_CARGO.sourceTx},
     mission:{status:'AWAITING_EXACT_AUTHORIZATION',route:null},
   };
   function syncVisual({spawn=false,stateOverride=null,missionStatusOverride=null}={}){
-    const s=receiving.snapshot();ant.state=stateOverride||GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:missionStatusOverride||s.delivery_status,settlementMode:s.real_receiving_gate==='CONFIGURED_STRUCTURAL_VERIFICATION_ONLY'?'CHAIN_EVIDENCE_REQUIRED':'SIMULATION_BLOCKED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
+    const s=receiving.snapshot();ant.state=stateOverride||GAME_ACTION_BY_STATE[s.delivery_status]||'WAIT';ant.mission={...ant.mission,status:missionStatusOverride||s.delivery_status,settlementMode:s.real_receiving_gate==='NOT_DEPLOYED'?'SIMULATION_BLOCKED':'CHAIN_EVIDENCE_REQUIRED',deliveryStatus:s.delivery_status,receiptStatus:s.receipt_status,receiverAcceptance:s.receiver_acceptance};
     const options={axis:'KY',market:'KAIOS_ATM_LOGISTICS',side:1,lots:1,c:0,mission:ant.mission,route:ant.mission.route};
     return spawn?publishDigitalAntSpawn(ant,options):publishDigitalAntUpdate(ant,options);
   }
@@ -46,11 +48,12 @@ export function createDigitalAntKaiosReceivingBridge(config={}){
   function authorize(){const out=receiving.authorizeExactReceiver();syncVisual();return out}
   function noteExternalTransaction(txHash){const out=receiving.noteExternalTransaction(txHash);syncVisual();return out}
   function consumeReceipt(evidence){const out=receiving.verifyReceiptEvidence(evidence);syncVisual();return out}
+  async function consumeIndependentReceipt(){const out=await receiving.verifyReceiptFromIndependentSource();syncVisual();return out}
   function reconcile(balanceEvidence){const out=receiving.reconcileBalance(balanceEvidence);syncVisual();return out}
   function arrive(){const out=receiving.markArrived();syncVisual();return out}
   function acceptInventory(input){const out=receiving.acceptAtmInventory(input);syncVisual();return out}
   function deliver(accountingEvidence){const out=receiving.markDelivered(accountingEvidence);syncVisual();return out}
-  return {ant,receiving,registerCargo,setRoute,authorize,noteExternalTransaction,consumeReceipt,reconcile,arrive,acceptInventory,deliver,syncVisual,snapshot:()=>({bridgeVersion:DIGITAL_ANT_KAIOS_RECEIVING_BRIDGE_VERSION,ant:{...ant},receiving:receiving.snapshot()})};
+  return {ant,receiving,registerCargo,setRoute,authorize,noteExternalTransaction,consumeReceipt,consumeIndependentReceipt,reconcile,arrive,acceptInventory,deliver,syncVisual,snapshot:()=>({bridgeVersion:DIGITAL_ANT_KAIOS_RECEIVING_BRIDGE_VERSION,ant:{...ant},receiving:receiving.snapshot()})};
 }
 
 export function installDigitalAntKaiosReceivingBridge(config={}){

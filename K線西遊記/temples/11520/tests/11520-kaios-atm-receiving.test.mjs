@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import {createKaiosAtmReceivingModule,validateRouteEvidence} from '../runtime/kaios-atm-receiving-runtime.mjs';
+import {createKaiosAtmReceivingModule,createIndependentKaiosReceiptVerifier,validateRouteEvidence} from '../runtime/kaios-atm-receiving-runtime.mjs';
 import {createDigitalAntKaiosReceivingBridge,DIGITAL_ANT_11520_CARGO} from '../runtime/digital-ant-kaios-receiving-bridge.mjs';
 
 const RECEIVER='0x1111111111111111111111111111111111111111';
@@ -171,6 +171,36 @@ test('Digital Ant bridge keeps a rejected K-market route visibly fail-closed',()
 
 test('Digital Ant bridge preserves SAME_LIFE_ID and waits when real receiver is absent',()=>{
   const b=createDigitalAntKaiosReceivingBridge();const r=b.registerCargo();assert.equal(r.ok,true);const s=b.snapshot();assert.equal(s.ant.lifeId,'DIGITAL_ANT_0001');assert.equal(s.receiving.real_receiving_gate,'NOT_DEPLOYED');assert.equal(s.receiving.delivery_status,'AWAITING_EXACT_AUTHORIZATION');assert.equal(s.ant.state,'WAIT');
+  assert.equal(s.ant.cargo.amount,'1080000000000000000000000');assert.equal(s.ant.cargo.displayAmount,'1080000');assert.equal(s.ant.cargo.decimals,18);assert.equal(s.ant.cargo.unit,'KAIOS_BASE_UNITS');
+});
+
+test('independent verifier reads two RPC providers and returns balance-bound Transfer evidence',async()=>{
+  const topicAddress=address=>`0x${'0'.repeat(24)}${address.slice(2).toLowerCase()}`;
+  const rawReceipt={status:'0x1',transactionHash:TX,blockNumber:'0x1e240',blockHash:BLOCK_HASH,logs:[{
+    address:TOKEN,transactionHash:TX,blockNumber:'0x1e240',blockHash:BLOCK_HASH,logIndex:'0x7',
+    topics:[TRANSFER_TOPIC,topicAddress(SENDER),topicAddress(RECEIVER)],data:`0x${BigInt(1080000).toString(16)}`
+  }]};
+  const provider=()=>({
+    getChainId:async()=>56,getTransactionReceipt:async()=>structuredClone(rawReceipt),getBlockNumber:async()=>123467n,
+    getTokenBalance:async(_token,_receiver,block)=>block==='123455'?10n:1080010n
+  });
+  const verifier=createIndependentKaiosReceiptVerifier({verifier_id:'QA-VERIFIER',providers:[provider(),provider()]});
+  const m=module({receipt_verifier:verifier});register(m);assert.equal(m.snapshot().real_receiving_gate,'READY_INDEPENDENT_RPC_VERIFICATION');
+  m.authorizeExactReceiver();m.noteExternalTransaction(TX);
+  const verified=await m.verifyReceiptFromIndependentSource();
+  assert.equal(verified.ok,true);assert.equal(verified.status,'INDEPENDENT_RECEIPT_VERIFIED');
+  assert.equal(verified.snapshot.receipt_status,'FOUND_INDEPENDENTLY_VERIFIED');
+  assert.equal(verified.snapshot.receipt_evidence_authority,'INDEPENDENT_RPC_RECEIPT_VERIFIER');
+  assert.equal(m.reconcileBalance(verified.balance_evidence).ok,true);
+});
+
+test('independent verifier fails closed when RPC providers disagree',async()=>{
+  const first={getChainId:async()=>56,getTransactionReceipt:async()=>({status:'0x1',transactionHash:TX,blockNumber:'0x1',blockHash:BLOCK_HASH,logs:[]}),getBlockNumber:async()=>20n,getTokenBalance:async()=>0n};
+  const second={...first,getTransactionReceipt:async()=>({status:'0x1',transactionHash:TX,blockNumber:'0x2',blockHash:BLOCK_HASH,logs:[]})};
+  const verifier=createIndependentKaiosReceiptVerifier({verifier_id:'QA-VERIFIER',providers:[first,second]});
+  const m=module({receipt_verifier:verifier});register(m);m.authorizeExactReceiver();m.noteExternalTransaction(TX);
+  const result=await m.verifyReceiptFromIndependentSource();assert.equal(result.ok,false);assert.equal(result.status,'INDEPENDENT_RECEIPT_VERIFICATION_FAILED');
+  assert.equal(result.snapshot.delivery_status,'TX_PENDING');
 });
 
 test('receiving source contains no signer/private-key or transaction-send capability',async()=>{
