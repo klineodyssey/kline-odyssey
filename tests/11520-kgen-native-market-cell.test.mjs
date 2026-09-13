@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
+import { createGpu11520PaperMarket, createKgenNativeMarketCell } from "../K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs";
 
 let nextActionNonce = 1;
 const TEST_MARKET_ID = "TEST_ONLY_11520_KGEN_NATIVE_MARKET";
@@ -292,4 +292,71 @@ test("core module has no signer, network, storage, DOM, or process authority", a
   assert.doesNotMatch(source, /fetch\s*\(/);
   assert.doesNotMatch(source, /XMLHttpRequest|WebSocket|window\.ethereum|eth_send|signTransaction/);
   assert.doesNotMatch(source, /localStorage|sessionStorage|document\.|process\.env|child_process|node:fs/);
+});
+
+
+test("GPU/KGEN and GPU/KAIOS are isolated paper books and matches cannot update CT without settlement evidence", () => {
+  const kgen = createGpu11520PaperMarket({
+    quoteAsset: "KGEN",
+    marketId: "TEST_ONLY_11520_NVIDIA_GPU_KGEN_PAPER_MARKET"
+  });
+  const kaios = createGpu11520PaperMarket({
+    quoteAsset: "KAIOS",
+    marketId: "TEST_ONLY_11520_NVIDIA_GPU_KAIOS_PAPER_MARKET"
+  });
+  assert.equal(kgen.getMarketState().companyAddress, "0.00011520");
+  assert.equal(kgen.getMarketState().baseAsset, "NVIDIA_GPU_CHIP");
+  assert.equal(kgen.getMarketState().baseDecimals, 0);
+  assert.equal(kgen.getMarketState().quoteAsset, "KGEN");
+  assert.equal(kgen.getMarketState().ct, null);
+  assert.equal(kaios.getMarketState().quoteAsset, "KAIOS");
+
+  kgen.placeOrder({
+    side: "SELL", price: "88000", quantity: "1",
+    actorAttestationId: "TEST-GPU-KGEN-B-PLACE", nonce: "GPU-KGEN-SELL-0001"
+  });
+  const matched = kgen.placeOrder({
+    side: "BUY", price: "88000", quantity: "1",
+    actorAttestationId: "TEST-GPU-KGEN-A-PLACE", nonce: "GPU-KGEN-BUY-0001"
+  });
+  assert.equal(matched.fills.length, 1);
+  assert.equal(matched.fills[0].settlementStatus, "MATCHED_UNSETTLED");
+  assert.equal(kgen.getMarketState().matchedTradeCount, 1);
+  assert.equal(kgen.getMarketState().verifiedTradeCount, 0);
+  assert.equal(kgen.getMarketState().ct, null);
+  assert.equal(kgen.getCandles().length, 0);
+  assert.equal(kaios.getMarketState().matchedTradeCount, 0);
+  assert.equal(kaios.getMarketState().ct, null);
+});
+
+test("GPU paper market rejects unsupported quotes, fractional chips, caller authority and production placement", () => {
+  assert.throws(() => createGpu11520PaperMarket({ quoteAsset: "BNB" }), /GPU_QUOTE_ASSET_NOT_ALLOWED/);
+  assert.throws(
+    () => createGpu11520PaperMarket({ quoteAsset: "KGEN", verifyActorContext: () => ({}) }),
+    /CALLER_SUPPLIED_ACTOR_CONTEXT_VERIFIER_FORBIDDEN/
+  );
+
+  const testMarket = createGpu11520PaperMarket({
+    quoteAsset: "KGEN",
+    marketId: "TEST_ONLY_11520_NVIDIA_GPU_KGEN_PAPER_MARKET"
+  });
+  assert.throws(
+    () => testMarket.placeOrder({
+      side: "BUY", price: "1000", quantity: "0.5",
+      actorAttestationId: "TEST-GPU-KGEN-A-PLACE", nonce: "GPU-FRACTION-0001"
+    }),
+    /lotSize/
+  );
+
+  const productionMarket = createGpu11520PaperMarket({ quoteAsset: "KGEN" });
+  assert.throws(
+    () => productionMarket.placeOrder({
+      side: "BUY", price: "1000", quantity: "1",
+      actorAttestationId: "TEST-GPU-KGEN-A-PLACE", nonce: "GPU-PROD-BLOCK-0001"
+    }),
+    /ACTOR_CONTEXT_ATTESTATION_REGISTRY_NOT_CONNECTED/
+  );
+  assert.equal(productionMarket.getMarketState().ct, null);
+  assert.equal(productionMarket.getMarketState().chainWrite, false);
+  assert.equal(productionMarket.getMarketState().signer, false);
 });
