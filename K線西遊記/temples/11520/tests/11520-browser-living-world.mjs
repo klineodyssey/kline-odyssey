@@ -25,28 +25,20 @@ assert.ok((await page.locator('#monsterList').textContent()).includes('WORK'),'D
 await page.screenshot({path:`${OUT}/11520-living-world-digital-ant.png`,fullPage:true});
 
 await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.lifeCanvasHitPoints?.('LIFE-QA-BULL-TRAVEL').length>0,null,{timeout:15000});
-const pickedRoute=await page.evaluate(async()=>{
-  const canvas=document.querySelector('#three');
-  const projection=globalThis.__K11520_WORLD_SELECTION_PROJECTION__;
-  if(!canvas||!projection)return null;
-  let pointerId=8800,lastRoute=null;
-  const routeListener=e=>{lastRoute=e.detail||null};
-  canvas.addEventListener('k11520:world-tap',routeListener);
-  try{
-    const points=projection.lifeCanvasHitPoints('LIFE-QA-BULL-TRAVEL');
-    for(const point of points){
-      const id=pointerId++;
-      const init={bubbles:true,cancelable:true,pointerId:id,pointerType:'touch',clientX:point.clientX,clientY:point.clientY,buttons:1};
-      lastRoute=null;
-      canvas.dispatchEvent(new PointerEvent('pointerdown',init));
-      canvas.dispatchEvent(new PointerEvent('pointerup',{...init,buttons:0}));
-      await Promise.resolve();
-      if(lastRoute?.route==='ENTITY'&&lastRoute.entityType==='MONSTER'&&lastRoute.entityId===point.entityId)return lastRoute;
-    }
-    return null;
-  }finally{canvas.removeEventListener('k11520:world-tap',routeListener)}
-});
-assert.ok(pickedRoute,'the target Life projection must route a real canvas pointer tap through the canonical MONSTER raycast');
+const hitPoints=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.lifeCanvasHitPoints('LIFE-QA-BULL-TRAVEL'));
+await page.evaluate(()=>{globalThis.__K11520_QA_WORLD_TAP_ROUTES__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_QA_WORLD_TAP_ROUTES__.push(e.detail||null))});
+let pickedRoute=null,pointerId=8800;
+for(const point of hitPoints){
+  const init={pointerId:pointerId++,pointerType:'touch',clientX:point.clientX,clientY:point.clientY,buttons:1};
+  await page.dispatchEvent('#three','pointerdown',init);
+  await page.waitForTimeout(45);
+  await page.dispatchEvent('#three','pointerup',{...init,buttons:0});
+  await page.waitForTimeout(120);
+  pickedRoute=await page.evaluate(()=>globalThis.__K11520_QA_WORLD_TAP_ROUTES__?.at(-1)||null);
+  if(pickedRoute?.route==='ENTITY'&&pickedRoute.entityType==='MONSTER'&&pickedRoute.entityId===point.entityId)break;
+  pickedRoute=null;
+}
+assert.ok(pickedRoute,'the target Life projection must route a real Playwright canvas pointer tap through the canonical MONSTER raycast');
 await page.waitForFunction(()=>{const hud=document.getElementById('selectedLifeHud');return hud&&!hud.hidden&&hud.dataset.lifeId},{timeout:3000});
 const picked=await page.locator('#selectedLifeHud').evaluate(hud=>({lifeId:hud.dataset.lifeId,text:hud.textContent||''}));
 const selectedText=await page.locator('#selectedLifeHud').textContent();
