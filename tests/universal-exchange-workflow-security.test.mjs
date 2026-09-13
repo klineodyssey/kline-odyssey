@@ -24,24 +24,22 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
 });
 
-test("Cursor dispatch wake is a Human-approved bounded single-task gate", async () => {
+test("Cursor dispatch wake is an inert fail-closed audit gate", async () => {
   const workflow = await fs.readFile(new URL("../.github/workflows/kgen-cursor-dispatch-wake.yml", import.meta.url), "utf8");
 
-  assert.match(workflow, /push:\s*\n\s*branches: \[main\]/);
-  assert.match(workflow, /KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001/);
-  assert.match(workflow, /READY_FOR_ATOMIC_CLAIM/);
-  assert.match(workflow, /MAX_LAUNCHES_PER_DAY: "4"/);
-  assert.match(workflow, /WATCHDOG_SECONDS: "300"/);
-  assert.match(workflow, /MAX_WATCHDOG_CHECKS: "12"/);
-  assert.match(workflow, /timeout-minutes:\s*65/);
-  assert.match(workflow, /agentId/);
-  assert.match(workflow, /api\.cursor\.com\/v1\/agents/);
-  assert.match(workflow, /runs\/\$\{run_id\}\/cancel/);
-  assert.match(workflow, /usage\?runId=\$\{run_id\}/);
-  assert.match(workflow, /CURSOR_API_KEY: \$\{\{ secrets\.CURSOR_API_KEY \}\}/);
-  assert.match(workflow, /4xx was not retried and 5xx retry limit was enforced/);
-  assert.match(workflow, /uses: actions\/checkout@v7/);
+  assert.match(workflow, /pull_request:\s*\n\s*types: \[closed\]/);
+  assert.match(workflow, /startsWith\(github\.event\.pull_request\.head\.ref, 'codex\/'\)/);
+  assert.match(workflow, /permissions:\s*\n\s*contents:\s*read/);
+  assert.match(workflow, /timeout-minutes:\s*5/);
+  assert.match(workflow, /HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED/);
+  assert.match(workflow, /External API called: .*NO/);
+  assert.match(workflow, /Agent launched: .*NO/);
+
+  assert.doesNotMatch(workflow, /CURSOR_API_KEY|secrets\./);
+  assert.doesNotMatch(workflow, /api\.cursor\.com|https?:\/\//);
+  assert.doesNotMatch(workflow, /curl\b|wget\b|fetch\(/);
+  assert.doesNotMatch(workflow, /actions\/checkout|actions\/setup-node/);
   assert.doesNotMatch(workflow, /contents:\s*write|actions:\s*write/);
   assert.doesNotMatch(workflow, /git\s+push\b/);
-  assert.doesNotMatch(workflow, /PRIVATE_KEY|SIGN_TRANSACTION|TOKEN_TRANSFER|TREASURY_TRANSFER/);
+  assert.doesNotMatch(workflow, /PRIVATE_KEY|SIGN_TRANSACTION/);
 });
