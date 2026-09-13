@@ -19,7 +19,7 @@ assert.match(detail,/HP\s+\d+\s*\/\s*100/,'detailed HP current/max missing');
 assert.match(detail,/\d+\.\d%/,'HP percentage missing');
 const characterButton=page.locator('[data-organ="character"]').first();
 assert.equal(await characterButton.count(),1,'real character organ button must exist');
-if(!await characterButton.isVisible())await page.locator('#dockToggle').click();
+if(!await page.locator('#dockToggle').isVisible())await page.locator('#k11520UtilityMaster').click();if(!await characterButton.isVisible())await page.locator('#dockToggle').click();
 assert.equal(await characterButton.isVisible(),true,'real character organ button must be user-visible');
 await characterButton.click();
 await page.waitForTimeout(140);

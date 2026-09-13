@@ -26,7 +26,7 @@ assert.ok(r.dock,'right utility dock missing');
 assert.ok(r.rightSafeGap>=80,`right rail safe gap too small: ${r.rightSafeGap}`);
 assert.equal(r.railDockOverlap,false,'remaining-axis rail must not overlap right utility dock');
 for(const sel of ['#cControl','#lotsControl','#yControl','#orderFire','#attack']){const b=await page.locator(sel).boundingBox();assert.ok(b,`${sel} missing`);assert.ok(b.x>=0&&b.x+b.width<=390,`${sel} must fit viewport`)}
-const railBox=await page.locator('#yControl').boundingBox(),dockBox=await page.locator('#dock').boundingBox();assert.ok(railBox&&dockBox);assert.ok(railBox.x+railBox.width+80<=390,'Y/remaining-axis rail must reserve right utility safe zone');assert.ok(railBox.x+railBox.width<=dockBox.x,'Y/remaining-axis rail must sit left of utility dock');
+const railBox=await page.locator('#yControl').boundingBox(),utilityBox=await page.locator('#k11520UtilityMaster').boundingBox();assert.ok(railBox&&utilityBox);assert.ok(railBox.x+railBox.width+80<=390,'Y/remaining-axis rail must reserve right utility safe zone');assert.ok(railBox.x+railBox.width<=utilityBox.x,'Y/remaining-axis rail must sit left of the collapsed utility master');
 
 // Coordinate contract: KX/KY/KZ are market axes; autonomous player XYZ must not be derived from market quotes.
 const initial=await page.evaluate(()=>({
@@ -63,6 +63,7 @@ assert.equal(moved.legacyGlobal,null);
 assert.ok(!moved.visible.includes('65,000.25')&&!moved.visible.includes('65000.25'),'moved player XYZ must remain independent from K market quote');
 
 // Wallet contract: one fixed viewport toggle anchor before/after open/close.
+await page.locator('#k11520UtilityMaster').click();await page.waitForTimeout(160);
 const wallet=page.locator('#walletToggle');await wallet.waitFor({state:'visible',timeout:3000});const w0=await wallet.boundingBox();assert.ok(w0,'wallet toggle missing');
 await wallet.click({force:true});await page.waitForTimeout(180);const w1=await wallet.boundingBox();assert.ok(w1,'wallet toggle missing after first toggle');
 await wallet.click({force:true});await page.waitForTimeout(180);const w2=await wallet.boundingBox();assert.ok(w2,'wallet toggle missing after second toggle');

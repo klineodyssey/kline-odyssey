@@ -18,6 +18,8 @@ await page.addInitScript(()=>{
   ]}));
 });
 await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'networkidle',timeout:60000});
+await page.waitForSelector('#k11520UtilityMaster',{timeout:30000});
+await page.click('#k11520UtilityMaster');
 await page.waitForSelector('#backpackButton',{timeout:30000});
 await page.click('#backpackButton');
 await page.waitForSelector('#backpackPanel.open');
