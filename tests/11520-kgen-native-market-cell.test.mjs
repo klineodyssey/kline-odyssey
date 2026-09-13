@@ -138,6 +138,48 @@ test("matched trade creates one exact settlement request packet without inventin
   assert.throws(() => market.createSettlementRequestPacket({ tradeId: matched.fills[0].id, requestId: "SETTLEMENT-REQUEST-0002", replayKey: "SETTLEMENT-REPLAY-0002" }), /SETTLEMENT_REQUEST_REPLAY_FORBIDDEN/);
 });
 
+test("settlement request identifiers and replay keys are unique across trades without poisoning valid retries", () => {
+  const market = createMarket();
+  market.placeOrder({ side: "SELL", price: "1", quantity: "1", actorContext: actor("seller") });
+  const firstMatch = market.placeOrder({ side: "BUY", price: "1", quantity: "1", actorContext: actor("buyer") });
+  market.placeOrder({ side: "SELL", price: "2", quantity: "1", actorContext: actor("seller") });
+  const secondMatch = market.placeOrder({ side: "BUY", price: "2", quantity: "1", actorContext: actor("buyer") });
+
+  const first = market.createSettlementRequestPacket({
+    tradeId: firstMatch.fills[0].id,
+    requestId: "SETTLEMENT-REQUEST-SHARED",
+    replayKey: "SETTLEMENT-REPLAY-SHARED"
+  });
+  assert.equal(first.trade_id, "T1");
+
+  assert.throws(
+    () => market.createSettlementRequestPacket({
+      tradeId: secondMatch.fills[0].id,
+      requestId: "SETTLEMENT-REQUEST-SHARED",
+      replayKey: "SETTLEMENT-REPLAY-UNIQUE-A"
+    }),
+    /SETTLEMENT_REQUEST_ID_REPLAY_FORBIDDEN/
+  );
+  assert.throws(
+    () => market.createSettlementRequestPacket({
+      tradeId: secondMatch.fills[0].id,
+      requestId: "SETTLEMENT-REQUEST-UNIQUE-B",
+      replayKey: "SETTLEMENT-REPLAY-SHARED"
+    }),
+    /SETTLEMENT_REQUEST_KEY_REPLAY_FORBIDDEN/
+  );
+
+  const second = market.createSettlementRequestPacket({
+    tradeId: secondMatch.fills[0].id,
+    requestId: "SETTLEMENT-REQUEST-UNIQUE-C",
+    replayKey: "SETTLEMENT-REPLAY-UNIQUE-C"
+  });
+  assert.equal(second.trade_id, "T2");
+  assert.equal(second.payment_rail_eligible, false);
+  assert.equal(second.ct_eligible, false);
+  assert.equal(market.getMarketState().ct, null);
+});
+
 test("settlement request packet rejects unknown trades and never accepts caller payment fields", () => {
   const market = createMarket();
   assert.throws(() => market.createSettlementRequestPacket({ tradeId: "T999", requestId: "SETTLEMENT-REQUEST-UNKNOWN", replayKey: "SETTLEMENT-REPLAY-UNKNOWN", token_address: "0x1111111111111111111111111111111111111111", receipt_status: 1 }), /MATCHED_TRADE_NOT_FOUND/);
