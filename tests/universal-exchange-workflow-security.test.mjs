@@ -24,33 +24,22 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
 });
 
-test("Cursor dispatch wake fails closed without exposing API bodies or shell-evaluating PR metadata", async () => {
+test("Cursor dispatch wake is an inert fail-closed audit gate", async () => {
   const workflow = await fs.readFile(new URL("../.github/workflows/kgen-cursor-dispatch-wake.yml", import.meta.url), "utf8");
 
+  assert.match(workflow, /pull_request:\s*\n\s*types: \[closed\]/);
+  assert.match(workflow, /startsWith\(github\.event\.pull_request\.head\.ref, 'codex\/'\)/);
   assert.match(workflow, /permissions:\s*\n\s*contents:\s*read/);
-  assert.match(workflow, /uses:\s*actions\/checkout@v7/);
-  assert.doesNotMatch(workflow, /uses:\s*actions\/checkout@v4/);
   assert.match(workflow, /timeout-minutes:\s*5/);
-  assert.match(workflow, /MERGED_PR_NUMBER:\s*\$\{\{ github\.event\.pull_request\.number \}\}/);
-  assert.match(workflow, /MERGED_PR_HEAD_REF:\s*\$\{\{ github\.event\.pull_request\.head\.ref \}\}/);
-  assert.match(workflow, /Merged PR: #\$\{MERGED_PR_NUMBER\} \(\$\{MERGED_PR_HEAD_REF\}\)/);
-  assert.match(workflow, /re\.fullmatch\(r"\[A-Za-z0-9_\.\-\]\{1,64\}", code\)/);
-  assert.match(workflow, /\[ "\$HTTP" = "403" \] && \[ "\$API_ERROR_CODE" = "plan_required" \]/);
-  assert.match(workflow, /HOLD_EXTERNAL_PLAN_REQUIRED/);
-  assert.match(workflow, /Agent launched: \\`NO\\`/);
-  assert.match(workflow, /untrusted_error_code/);
-  assert.match(workflow, /https:\/\/api\.cursor\.com\/v1\/agents/);
-  assert.match(workflow, /--user "\$\{CURSOR_API_KEY\}:"/);
-  assert.match(workflow, /--connect-timeout 10 --max-time 60/);
-  assert.match(workflow, /API_RESPONSE_STATUS=/);
-  assert.match(workflow, /run_agent_id == agent_id/);
-  assert.match(workflow, /structured agent\/run acknowledgement missing/);
+  assert.match(workflow, /HOLD_EXPLICIT_HUMAN_DISPATCH_AUTHORITY_REQUIRED/);
+  assert.match(workflow, /External API called: .*NO/);
+  assert.match(workflow, /Agent launched: .*NO/);
 
-  assert.doesNotMatch(workflow, /cat\s+\/tmp\/cursor-agent\.json/);
-  assert.doesNotMatch(workflow, /echo\s+[^\n]*\/tmp\/cursor-agent\.json/);
-  assert.doesNotMatch(workflow, /Authorization:\s*Bearer/);
-  assert.doesNotMatch(workflow, /contents:\s*write/);
-  assert.doesNotMatch(workflow, /actions:\s*write/);
+  assert.doesNotMatch(workflow, /CURSOR_API_KEY|secrets\./);
+  assert.doesNotMatch(workflow, /api\.cursor\.com|https?:\/\//);
+  assert.doesNotMatch(workflow, /curl\b|wget\b|fetch\(/);
+  assert.doesNotMatch(workflow, /actions\/checkout|actions\/setup-node/);
+  assert.doesNotMatch(workflow, /contents:\s*write|actions:\s*write/);
   assert.doesNotMatch(workflow, /git\s+push\b/);
   assert.doesNotMatch(workflow, /PRIVATE_KEY|SIGN_TRANSACTION/);
 });
