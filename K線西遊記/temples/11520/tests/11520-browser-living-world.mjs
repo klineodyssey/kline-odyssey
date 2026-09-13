@@ -28,7 +28,9 @@ const scanForPicked=()=>page.evaluate(async()=>{
   const canvas=document.querySelector('#three');
   if(!canvas)return null;
   const rect=canvas.getBoundingClientRect();
-  let pointerId=8800;
+  let pointerId=8800,lastRoute=null;
+  const routeListener=e=>{lastRoute=e.detail||null};
+  canvas.addEventListener('k11520:world-tap',routeListener);
   const closeNonLife=()=>{
     document.getElementById('sheet')?.classList.remove('open');
     globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('selected-Life QA scan');
@@ -36,26 +38,30 @@ const scanForPicked=()=>page.evaluate(async()=>{
   const tap=async(x,y)=>{
     const id=pointerId++;
     const init={bubbles:true,cancelable:true,pointerId:id,pointerType:'touch',clientX:x,clientY:y,buttons:1};
+    lastRoute=null;
     canvas.dispatchEvent(new PointerEvent('pointerdown',init));
     canvas.dispatchEvent(new PointerEvent('pointerup',{...init,buttons:0}));
-    await Promise.resolve();await Promise.resolve();
-    const hud=document.getElementById('selectedLifeHud');
-    if(hud&&!hud.hidden&&hud.dataset.lifeId)return {lifeId:hud.dataset.lifeId,text:hud.textContent||''};
+    await Promise.resolve();
+    if(lastRoute?.route==='ENTITY'&&lastRoute.entityType==='MONSTER')return {entityId:lastRoute.entityId};
     closeNonLife();await Promise.resolve();return null;
   };
-  for(const offset of [0,4]){
-    for(let y=268+offset;y<=760;y+=8){
-      for(let x=20+offset;x<=370;x+=8){const hit=await tap(rect.left+x,rect.top+y);if(hit)return hit;}
+  try{
+    for(const offset of [0,4]){
+      for(let y=268+offset;y<=760;y+=8){
+        for(let x=20+offset;x<=370;x+=8){const hit=await tap(rect.left+x,rect.top+y);if(hit)return hit;}
+      }
     }
-  }
-  return null;
+    return null;
+  }finally{canvas.removeEventListener('k11520:world-tap',routeListener)}
 });
-let picked=null;
-for(let attempt=0;attempt<3&&!picked;attempt+=1){
+let pickedRoute=null;
+for(let attempt=0;attempt<3&&!pickedRoute;attempt+=1){
   if(attempt)await page.waitForTimeout(800);
-  picked=await scanForPicked();
+  pickedRoute=await scanForPicked();
 }
-assert.ok(picked,'a real 3D Life canvas tap must open the canonical selected-Life HUD');
+assert.ok(pickedRoute,'a real 3D Life canvas tap must route through the canonical MONSTER raycast');
+await page.waitForFunction(()=>{const hud=document.getElementById('selectedLifeHud');return hud&&!hud.hidden&&hud.dataset.lifeId},{timeout:3000});
+const picked=await page.locator('#selectedLifeHud').evaluate(hud=>({lifeId:hud.dataset.lifeId,text:hud.textContent||''}));
 const selectedText=await page.locator('#selectedLifeHud').textContent();
 assert.equal(selectedText,picked.text,'selected-Life HUD must remain stable after the canonical tap');
 assert.ok(picked.lifeId&&picked.lifeId!=='NOT_ASSIGNED','selected Life HUD must expose LIFE_ID');
