@@ -1,17 +1,79 @@
 name: Autopilot on Manifest
+
 on:
   push:
     paths:
+      - ".github/workflows/autopilot-on-manifest.yml"
+      - "K線西遊記/autopilot/inbox/*.json"
+  pull_request:
+    paths:
+      - ".github/workflows/autopilot-on-manifest.yml"
       - "K線西遊記/autopilot/inbox/*.json"
 
+permissions:
+  contents: read
+
 jobs:
-  log-and-check:
+  validate-manifests:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Show manifest list
-        run: ls -l "K線西遊記/autopilot/inbox"
-      - name: Print latest manifest
+      - name: Checkout exact source revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checked-out SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          ls -t "K線西遊記/autopilot/inbox" | head -n 1 | xargs -I {} cat "K線西遊記/autopilot/inbox/{}"
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Validate manifests without logging raw contents
+        run: |
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import re
+          from datetime import datetime
+          from pathlib import Path
+
+          inbox = Path("K線西遊記/autopilot/inbox")
+          manifests = sorted(inbox.glob("*.json"))
+          if not manifests:
+              raise SystemExit("AUTOPILOT_MANIFEST_MISSING")
+
+          manifest_name = re.compile(r"\d{8}_manifest\.json")
+          max_manifest_bytes = 1_048_576
+          raw_by_manifest: dict[Path, bytes] = {}
+          for path in manifests:
+              if manifest_name.fullmatch(path.name) is None:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_NAME_INVALID:{path.name}")
+              try:
+                  datetime.strptime(path.name[:8], "%Y%m%d")
+              except ValueError as exc:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_DATE_INVALID:{path.name}") from exc
+              if path.is_symlink() or not path.is_file():
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_TYPE_INVALID:{path.name}")
+              if path.stat().st_size > max_manifest_bytes:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_TOO_LARGE:{path.name}")
+              try:
+                  raw = path.read_bytes()
+                  payload = json.loads(raw.decode("utf-8"))
+              except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_INVALID:{path.name}:{type(exc).__name__}") from exc
+              if not isinstance(payload, dict):
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_NOT_OBJECT:{path.name}")
+              raw_by_manifest[path] = raw
+
+          latest = manifests[-1]
+          raw = raw_by_manifest[latest]
+          print(f"manifest_count={len(manifests)}")
+          print(f"latest_manifest={latest.name}")
+          print(f"latest_manifest_bytes={len(raw)}")
+          print(f"latest_manifest_sha256={hashlib.sha256(raw).hexdigest()}")
+          print("raw_manifest_logged=NO")
+          PY
