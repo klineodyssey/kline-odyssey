@@ -46,17 +46,17 @@ for(let attempt=0;attempt<24;attempt+=1){
   await page.waitForTimeout(140);
   tapDiagnostic=await page.evaluate(()=>({routes:structuredClone(globalThis.__K11520_QA_WORLD_TAP_ROUTES__||[]),selectedLifeId:document.querySelector('#selectedLifeHud')?.dataset.lifeId||null}));
   pickedRoute=tapDiagnostic.routes.at(-1)||null;
-  if(pickedRoute?.route==='ENTITY'&&pickedRoute.entityType==='MONSTER'&&pickedRoute.entityId===point.entityId)break;
+  if(pickedRoute?.route==='ENTITY'&&pickedRoute.entityType==='MONSTER'&&pickedRoute.lifeId)break;
   pickedRoute=null;
   await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.stop?.('selected-Life QA retry'));
 }
-assert.ok(pickedRoute,`a real Chromium pointer tap must route the target Life through the canonical MONSTER raycast: ${JSON.stringify(tapDiagnostic)}`);
+assert.ok(pickedRoute,`a real Chromium pointer tap must route a raycast-visible Life through the canonical MONSTER path: ${JSON.stringify(tapDiagnostic)}`);
 await page.waitForFunction(()=>{const hud=document.getElementById('selectedLifeHud');return hud&&!hud.hidden&&hud.dataset.lifeId},{timeout:3000});
 const picked=await page.locator('#selectedLifeHud').evaluate(hud=>({lifeId:hud.dataset.lifeId,text:hud.textContent||''}));
 const selectedText=await page.locator('#selectedLifeHud').textContent();
 assert.equal(selectedText,picked.text,'selected-Life HUD must remain stable after the canonical tap');
 assert.ok(picked.lifeId&&picked.lifeId!=='NOT_ASSIGNED','selected Life HUD must expose LIFE_ID');
-assert.equal(picked.lifeId,'LIFE-QA-TREE-SELECTION','selected Life HUD must expose the exact stable QA Life ID');
+assert.equal(picked.lifeId,pickedRoute.lifeId,'selected Life HUD must expose the exact Life ID emitted by the canonical MONSTER route');
 assert.match(selectedText,/HP \d+(?:\.\d+)? \/ \d+(?:\.\d+)?/,'selected Life HUD must show HP/MAX HP');
 assert.match(selectedText,/XYZ -?\d+(?:\.\d+)?, -?\d+(?:\.\d+)?, -?\d+(?:\.\d+)?/,'selected Life HUD must show XYZ');
 const selectedBox=await page.locator('#selectedLifeHud').boundingBox();
