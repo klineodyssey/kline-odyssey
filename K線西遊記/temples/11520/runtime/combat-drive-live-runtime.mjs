@@ -1,8 +1,8 @@
 /* KGEN_META
-VERSION: 1.3.0
+VERSION: 1.3.1
 STATUS: PROTOTYPE
 FORMAL_ORGAN_NAME: 11520 Live Combat Drive Bridge
-PURPOSE: Apply the existing discrete C rail to XYZ joystick intent and expose lot/KAIOS mass to the game HUD. XYZ movement remains signed so crossing zero enters the legal mirror-universe side defined by Signed Universe Math. Simulation-only; never mutates KX/KY/KZ positions, wallets, balances, chain state, payments, treasury, or governance.
+PURPOSE: Apply the existing discrete C rail to XYZ joystick intent and expose lot/KAIOS mass to the game HUD. Local physical XYZ movement remains signed across zero while financial +K/-K and Mirror Universe K-direction semantics stay separate. Simulation-only; never mutates KX/KY/KZ positions, wallets, balances, chain state, payments, treasury, or governance.
 */
 import {buildDriveState,readDriveStateFromDom} from './combat-drive-adapter.mjs';
 
@@ -38,9 +38,10 @@ export function scaledControlState(source,drive){
       ...drive,
       vectorMultiplier:factor,
       rawVector:v,
-      signedUniverseCoordinates:true,
+      signedXyzCoordinates:true,
       zeroCrossingAllowed:true,
-      negativeCoordinateMeaning:'MIRROR_UNIVERSE',
+      negativeCoordinateMeaning:'NEGATIVE_XYZ_AXIS',
+      mirrorUniverseCoupling:'SEPARATE_K_DIRECTION_ONLY',
     },
   };
 }
@@ -59,9 +60,10 @@ export function exposeDriveState(root=globalThis.document,{applyToLiveControl=fa
     controlVector:live?.vector||{x:0,y:0,z:0},
     simulationOnly:true,
     appliedToLiveControl:Boolean(applyToLiveControl&&live),
-    signedUniverseCoordinates:true,
+    signedXyzCoordinates:true,
     zeroCrossingAllowed:true,
-    negativeCoordinateMeaning:'MIRROR_UNIVERSE',
+    negativeCoordinateMeaning:'NEGATIVE_XYZ_AXIS',
+    mirrorUniverseCoupling:'SEPARATE_K_DIRECTION_ONLY',
   };
   return globalThis.__K11520_COMBAT_DRIVE__;
 }
