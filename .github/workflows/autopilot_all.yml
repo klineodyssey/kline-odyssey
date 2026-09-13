@@ -35,13 +35,14 @@ jobs:
 
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -104,6 +105,7 @@ jobs:
           fi
 
       - name: Restore engine.zip from Secret
+        if: github.ref == 'refs/heads/main'
         id: restore_engine
         continue-on-error: true
         shell: bash
@@ -181,6 +183,7 @@ jobs:
             --engine_ok "${{ steps.restore_engine.outputs.engine_ok }}"
 
       - name: Commit and push verified outputs
+        if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
