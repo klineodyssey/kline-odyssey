@@ -28,6 +28,12 @@
   ],
   "properties": {
     "worker_id": { "type": "string", "minLength": 1 },
+    "life_identity_ref": { "type": "string", "minLength": 1 },
+    "life_identity_status": { "type": "string", "minLength": 1 },
+    "life_wallet_address": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+    "life_birth_tx": { "type": "string", "pattern": "^0x[a-fA-F0-9]{64}$" },
+    "life_birthplace_code": { "type": "integer", "minimum": 0 },
+    "life_status": { "type": "string", "minLength": 1 },
     "worker_type": {
       "type": "string",
       "enum": ["Codex", "Cursor", "Claude", "Gemini", "OpenHands", "GitHub Copilot", "ChatGPT", "Deep Research", "Human Engineer"]
@@ -40,6 +46,8 @@
     "workspace": { "type": "string", "minLength": 1 },
     "current_task": { "type": ["string", "null"] },
     "current_branch": { "type": ["string", "null"] },
+    "pending_rework_task_id": { "type": ["string", "null"] },
+    "fresh_claim_required": { "type": "boolean" },
     "status": {
       "type": "string",
       "enum": ["ACTIVE", "IDLE", "CLAIMED", "IN_PROGRESS", "REVIEW", "BLOCKED", "OFFLINE"]

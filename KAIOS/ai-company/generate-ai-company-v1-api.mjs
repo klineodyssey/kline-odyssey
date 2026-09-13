@@ -103,6 +103,7 @@ const files = {
     worker_state: cursorQueue.worker_state,
     next_dispatch_requires: cursorQueue.next_dispatch_requires,
     output_authority: cursorQueue.output_authority,
+    bounded_pilot: cursorQueue.bounded_pilot,
     queue: cursorQueue.queue,
     prepared_task: cursorQueue.prepared_task,
     forbidden: cursorQueue.forbidden
