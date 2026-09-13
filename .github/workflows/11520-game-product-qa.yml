@@ -19,7 +19,7 @@ permissions:
 jobs:
   product-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,26 +28,135 @@ jobs:
       - name: Validate 11520 ES modules
         run: |
           node --check "K線西遊記/temples/11520/runtime/world-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/monster-aggression-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/game-ui-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/backpack-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/backpack-ui.mjs"
+          node --check "K線西遊記/temples/11520/runtime/item-visual-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/wild-ecology-source-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/living-world-inventory-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/kaios-atm-receiving-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/digital-ant-kaios-receiving-bridge.mjs"
           node --check "K線西遊記/temples/11520/controls/nonlinear-controls.mjs"
+          node --check "K線西遊記/temples/11520/runtime/game-controls-v251.mjs"
+          node --check "K線西遊記/temples/11520/runtime/joystick-xzxy.mjs"
+          node --check "K線西遊記/temples/11520/runtime/xyz-input-authority-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/character-status-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/combat-mass-scale-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/combat-drive-adapter.mjs"
+          node --check "K線西遊記/temples/11520/runtime/combat-drive-live-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/plane-map-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/mobile-control-layout.mjs"
+          node --check "K線西遊記/temples/11520/runtime/mobile-action-rail-clearance-runtime.mjs"
+          node --check "K線西遊記/temples/11520/tests/monster-aggression-runtime.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-character-status.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-action-rail-clearance.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-combat-drive.mjs"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-monster-aggression.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
-          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs"
+          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-kaios-atm-receiving.test.mjs"
+          node "K線西遊記/temples/11520/tests/combat-mass-scale-runtime.mjs"
+          node "K線西遊記/temples/11520/tests/combat-drive-adapter.mjs"
+          node "K線西遊記/temples/11520/tests/combat-drive-live-runtime.mjs"
+          node "K線西遊記/temples/11520/tests/monster-aggression-runtime.mjs"
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
           npm install --no-save --package-lock=false playwright@1.51.1
           npx playwright install --with-deps chromium
-      - name: Run mobile browser smoke test
+      - name: Run mobile XYZ functional and visual smoke tests
         shell: bash
         run: |
+          set -o pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 2
-          node "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
+          echo "[11520-QA] XYZ browser smoke start $(date -u +%FT%TZ)"
+          set +e
+          timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-xzxy.mjs" 2>&1 | tee /tmp/k11520-browser-smoke.log
+          RC=${PIPESTATUS[0]}
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-character-status.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-action-rail-clearance.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-combat-drive.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-monster-aggression.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-plane-map.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          if [ "$RC" -eq 0 ]; then
+            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-item-visual.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            RC=${PIPESTATUS[0]}
+          fi
+          set -e
+          if [ "$RC" -ne 0 ]; then
+            echo "[11520-QA] browser smoke failed or timed out rc=$RC"
+            tail -n 300 /tmp/k11520-browser-smoke.log || true
+            tail -n 200 /tmp/k11520-http.log || true
+            exit "$RC"
+          fi
+          echo "[11520-QA] XYZ browser smoke completed $(date -u +%FT%TZ)"
+      - name: Verify mandatory runtime screenshot evidence exists
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          SCREENSHOT="artifacts/11520-visual-qa/11520-mobile-390x844.png"
+          if [ ! -s "$SCREENSHOT" ]; then
+            echo "[11520-QA] QA_RED: mandatory 390x844 runtime screenshot missing or empty: $SCREENSHOT"
+            exit 1
+          fi
+          CHARACTER="artifacts/11520-visual-qa/11520-mobile-character-status.png"
+          if [ ! -s "$CHARACTER" ]; then echo "[11520-QA] QA_RED: character status screenshot missing: $CHARACTER"; exit 1; fi
+          for P in xz xy yz; do
+            F="artifacts/11520-visual-qa/11520-plane-map-${P}.png"
+            if [ ! -s "$F" ]; then echo "[11520-QA] QA_RED: plane map screenshot missing: $F"; exit 1; fi
+          done
+          LIVING="artifacts/11520-visual-qa/11520-living-world-digital-ant.png"
+          if [ ! -s "$LIVING" ]; then echo "[11520-QA] QA_RED: living-world screenshot missing: $LIVING"; exit 1; fi
+          ITEMS="artifacts/11520-visual-qa/11520-backpack-item-3d.png"
+          if [ ! -s "$ITEMS" ]; then echo "[11520-QA] QA_RED: 3D item screenshot missing: $ITEMS"; exit 1; fi
+          HUD="artifacts/11520-visual-qa/11520-mobile-hud-3rail.png"
+          COLLAPSED="artifacts/11520-visual-qa/11520-mobile-hud-collapsed.png"
+          DRIVE="artifacts/11520-visual-qa/11520-mobile-combat-drive-c10-3lots.png"
+          MONSTER="artifacts/11520-visual-qa/11520-mobile-monster-attack-hp.png"
+          ACTION_RAIL="artifacts/11520-visual-qa/11520-mobile-action-rail-clearance.png"
+          if [ ! -s "$HUD" ] || [ ! -s "$COLLAPSED" ]; then echo "[11520-QA] QA_RED: mobile HUD three-rail/collapse screenshots missing"; exit 1; fi
+          if [ ! -s "$DRIVE" ]; then echo "[11520-QA] QA_RED: C/lot combat-drive screenshot missing"; exit 1; fi
+          if [ ! -s "$MONSTER" ]; then echo "[11520-QA] QA_RED: monster attack HP screenshot missing"; exit 1; fi
+          if [ ! -s "$ACTION_RAIL" ]; then echo "[11520-QA] QA_RED: action-layer/right-rail screenshot missing"; exit 1; fi
+          echo "[11520-QA] screenshot evidence present"
+      - name: Upload 11520 runtime visual QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 11520-runtime-visual-qa-${{ github.sha }}
+          path: artifacts/11520-visual-qa/
+          if-no-files-found: error
+          retention-days: 14
