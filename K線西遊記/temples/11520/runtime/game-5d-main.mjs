@@ -79,26 +79,33 @@ const lifeVisuals=new Map(),lifeVisualPending=new Set();async function ensureLif
 function syncLifeVisuals(){for(const m of world.monsters){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m)}}
 
 function lifeCanvasHitPoints(lifeId){
-  const monster=world.monsters.find(m=>String(m.lifeId||'')===String(lifeId||''));
-  if(!monster)return Object.freeze([]);
-  const rect=renderer.domElement.getBoundingClientRect(),points=[],seen=new Set();
-  const projectPoint=point=>{
-    const projected=point.clone().project(camera);
-    if(!Number.isFinite(projected.x)||!Number.isFinite(projected.y)||!Number.isFinite(projected.z)||projected.z< -1||projected.z>1)return;
-    const clientX=rect.left+(projected.x+1)*rect.width/2,clientY=rect.top+(1-projected.y)*rect.height/2;
-    if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return;
-    const key=`${Math.round(clientX*10)}:${Math.round(clientY*10)}`;
-    if(seen.has(key))return;seen.add(key);
-    points.push(Object.freeze({clientX,clientY,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
-  };
-  const baseY=Math.max(.05,Number(monster.y)||0);
-  for(const y of[.45,.8,1.15,1.5])for(const x of[-.24,0,.24])projectPoint(new THREE.Vector3((Number(monster.x)||0)+x,baseY+y,Number(monster.z)||0));
-  const visual=lifeVisuals.get(monster.id);
-  if(visual?.root?.visible){
-    visual.root.updateWorldMatrix(true,true);
-    projectPoint(new THREE.Box3().setFromObject(visual.root).getCenter(new THREE.Vector3()));
-    visual.root.traverse?.(node=>{if(node?.isMesh&&node.visible!==false)projectPoint(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()))});
+  const monster=world.monsters.find(m=>String(m.lifeId||'')===String(lifeId||'')),visual=monster&&lifeVisuals.get(monster.id);
+  if(!monster||!visual?.root?.visible)return Object.freeze([]);
+  visual.root.updateWorldMatrix(true,true);
+  const rect=renderer.domElement.getBoundingClientRect(),box=new THREE.Box3().setFromObject(visual.root);
+  if(box.isEmpty())return Object.freeze([]);
+  const projected=[];
+  for(const x of[box.min.x,box.max.x])for(const y of[box.min.y,box.max.y])for(const z of[box.min.z,box.max.z]){
+    const p=new THREE.Vector3(x,y,z).project(camera);
+    if(Number.isFinite(p.x)&&Number.isFinite(p.y)&&Number.isFinite(p.z))projected.push({x:rect.left+(p.x+1)*rect.width/2,y:rect.top+(1-p.y)*rect.height/2});
   }
+  if(!projected.length)return Object.freeze([]);
+  const minX=Math.max(rect.left,Math.min(...projected.map(p=>p.x))),maxX=Math.min(rect.right,Math.max(...projected.map(p=>p.x)));
+  const minY=Math.max(rect.top,Math.min(...projected.map(p=>p.y))),maxY=Math.min(rect.bottom,Math.max(...projected.map(p=>p.y)));
+  if(maxX<minX||maxY<minY)return Object.freeze([]);
+  const probeRaycaster=new THREE.Raycaster(),probePointer=new THREE.Vector2(),points=[];
+  const routesToTarget=(clientX,clientY)=>{
+    probePointer.x=((clientX-rect.left)/rect.width)*2-1;probePointer.y=-((clientY-rect.top)/rect.height)*2+1;
+    probeRaycaster.setFromCamera(probePointer,camera);
+    for(const hit of probeRaycaster.intersectObjects(scene.children,true)){
+      if(ancestorData(hit.object,'isPlayer'))return false;
+      const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null)return String(mid)===String(monster.id);
+      if(ancestorData(hit.object,'worldObjectId')!=null)return false;
+    }
+    return false;
+  };
+  const stepX=Math.max(2,(maxX-minX)/14),stepY=Math.max(2,(maxY-minY)/18);
+  for(let y=minY+stepY/2;y<=maxY&&points.length<24;y+=stepY)for(let x=minX+stepX/2;x<=maxX&&points.length<24;x+=stepX)if(routesToTarget(x,y))points.push(Object.freeze({clientX:x,clientY:y,entityId:String(monster.id),lifeId:String(monster.lifeId||'')}));
   return Object.freeze(points);
 }
 globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints});
