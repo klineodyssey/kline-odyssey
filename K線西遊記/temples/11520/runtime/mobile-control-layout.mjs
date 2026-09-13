@@ -1,8 +1,8 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.0
-REVISION: 2026-09-14.POSTER-THUMB-UTILITY-STATUS-FLOW
+VERSION: 1.3.1
+REVISION: 2026-09-14.SINGLE-COLLAPSED-UTILITY-MASTER
 PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group with non-squashable circular thumbs; keeps the approved Wukong poster crop visible; flows World/Life status below the K market cards; separates the utility master from whole-HUD collapse; delegates circular-thumb motion to the canonical XYZ Plane Joystick; and preserves XYZ/trading semantics.
 */
 const $=s=>document.querySelector(s);
@@ -58,7 +58,7 @@ function installStyle(){
   .dock,.dock.open{right:5px!important;left:auto!important}
 
   #k11520HudCollapseAll{position:fixed;z-index:9992;right:58px;left:auto;top:auto;bottom:218px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
-  html:not(.k11520UtilitiesOpen) #walletPanel,html:not(.k11520UtilitiesOpen) #walletToggle,html:not(.k11520UtilitiesOpen) #chatHandle,html:not(.k11520UtilitiesOpen) #gameModeToggle,html:not(.k11520UtilitiesOpen) #bgmButton,html:not(.k11520UtilitiesOpen) #aiChatButton,html:not(.k11520UtilitiesOpen) #backpackButton,html:not(.k11520UtilitiesOpen) #dock{display:none!important}
+  html:not(.k11520UtilitiesOpen) #walletPanel,html:not(.k11520UtilitiesOpen) #walletToggle,html:not(.k11520UtilitiesOpen) #chatHandle,html:not(.k11520UtilitiesOpen) #gameModeToggle,html:not(.k11520UtilitiesOpen) #bgmButton,html:not(.k11520UtilitiesOpen) #aiChatButton,html:not(.k11520UtilitiesOpen) #backpackButton,html:not(.k11520UtilitiesOpen) #k11520HudCollapseAll,html:not(.k11520UtilitiesOpen) #dock{display:none!important}
   html.k11520UtilitiesOpen #gameModeToggle{display:grid!important;visibility:visible!important;pointer-events:auto!important}
   #k11520UtilityMaster,#dockToggle{display:grid!important;place-items:center!important;min-width:44px!important;min-height:44px!important;color:#dffaff!important}
   #k11520UtilityMaster{position:fixed!important;right:5px!important;bottom:218px!important;width:44px!important;height:44px!important;z-index:9993!important;border-radius:13px!important;border:1px solid #68e4ff66!important;background:#101923ef!important;font:900 18px system-ui!important;touch-action:manipulation!important}
@@ -75,9 +75,12 @@ function installStyle(){
   html.k11520HudCollapsed #yControl,
   html.k11520HudCollapsed .controls,
   html.k11520HudCollapsed #walletPanel,
+  html.k11520HudCollapsed #walletToggle,
   html.k11520HudCollapsed #chatHandle,
   html.k11520HudCollapsed #gameChat,
   html.k11520HudCollapsed .bagRelocatedV250,
+  html.k11520HudCollapsed #backpackButton,
+  html.k11520HudCollapsed #gameModeToggle,
   html.k11520HudCollapsed #aiChatButton,
   html.k11520HudCollapsed #bgmButton,
   html.k11520HudCollapsed #k11520UtilityMaster,

@@ -27,14 +27,14 @@ let railPointerId=1800;const pressRail=async(sign,baseline)=>{const b=await page
 const overlap=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y));
 const rect=async selector=>page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,w:r.width,h:r.height}});
 
-for(const id of ['joy','attack','skill','dodge','k11520UtilityMaster','k11520HudCollapseAll'])await assertVisible('#'+id);await assertVisible('#knob img');
+for(const id of ['joy','attack','skill','dodge','k11520UtilityMaster'])await assertVisible('#'+id);assert.equal(await page.locator('#k11520HudCollapseAll').isVisible(),false,'whole-HUD collapse must boot behind the single utility master');await assertVisible('#knob img');
 for(const id of ['dockToggle','gameModeToggle','walletToggle','chatHandle','aiChatButton','bgmButton','backpackButton'])assert.equal(await page.locator('#'+id).isVisible(),false,`${id} must boot behind the utility master`);
 let a=await xyz();await dragReal('#joy',.9,.5);let b=await xyz();assert.ok(b.x>a.x,'right must X+');await assertVisible('#knob img');await page.screenshot({path:`${ARTIFACT_DIR}/11520-mobile-x-right.png`,fullPage:true});
 const canvasTransform=await page.locator('#three').evaluate(el=>getComputedStyle(el).transform);assert.ok(canvasTransform&&canvasTransform!=='none'&&/^matrix\(-1(?:\.0+)?,/.test(canvasTransform),`X visual mirror missing: ${canvasTransform}`);
 await dragReal('#joy',.1,.5);let c=await xyz();assert.ok(c.x<b.x,'left must X-');await assertVisible('#knob img');await page.screenshot({path:`${ARTIFACT_DIR}/11520-mobile-x-left.png`,fullPage:true});await dragReal('#joy',.5,.1);let d=await xyz();assert.ok(d.z>c.z,'up must Z+');await dragReal('#joy',.5,.9);let e=await xyz();assert.ok(e.z<d.z,'down must Z-');await assertVisible('#knob img');
 
 /* One utility master reveals wallet/backpack/AI/BGM/chat/settings without touching the whole HUD. */
-await page.locator('#k11520UtilityMaster').click({timeout:3000});await page.waitForTimeout(180);assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')),true,'utility master did not expand');
+await page.locator('#k11520UtilityMaster').click({timeout:3000});await page.waitForTimeout(180);assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')),true,'utility master did not expand');await assertVisible('#k11520HudCollapseAll');
 await page.locator('#gameModeToggle').click({timeout:3000});await page.waitForTimeout(180);await assertVisible('#k11520UiSettings');
 assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('game-clean-mode')),false,'legacy clean mode must stay retired');
 for(const id of ['walletToggle','dockToggle','orderFire','tradeSword','flat','aiChatButton','bgmButton'])await assertVisible('#'+id);await assertVisible('#yThumb');assert.match(await page.locator('#yThumb').evaluate(el=>getComputedStyle(el).backgroundImage),/wukong-y-control\.jpg/i,'remaining-axis thumb must show approved Wukong poster artwork');await assertVisible('#backpackButton.bagRelocatedV258');
