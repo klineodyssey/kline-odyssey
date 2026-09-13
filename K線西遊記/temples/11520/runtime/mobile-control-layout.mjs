@@ -19,10 +19,10 @@ function installStyle(){
   .brand .brandMetaV250{white-space:nowrap!important;gap:4px!important}
   .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
   .axes{z-index:250!important}
-  .tele,.monsterHud{top:190px!important;height:98px!important}
+  .tele,.monsterHud{top:190px!important;height:108px!important}
   .tele{left:6px!important;width:calc(50% - 9px)!important}
   .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
-  .minimapWrap{top:298px!important}
+  .minimapWrap{top:308px!important}
   #knob{will-change:transform!important}
 
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
@@ -50,19 +50,19 @@ function installStyle(){
   .controls .attack{left:164px!important;right:auto!important}.controls .order{left:228px!important;right:auto!important}
 
   #walletPanel{right:54px!important}
-  #walletPanel.collapsed{right:5px!important;bottom:310px!important;width:42px!important;height:44px!important;padding:4px!important}
+  #walletPanel.collapsed{right:5px!important;bottom:302px!important;width:42px!important;height:44px!important;padding:4px!important}
   #walletPanel.collapsed #walletToggle{width:32px!important;height:34px!important}
-  #chatHandle{left:auto!important;right:5px!important;top:auto!important;bottom:358px!important;width:42px!important;min-width:42px!important;height:42px!important;border-left:1px solid #68e4ff66!important;border-radius:13px!important}
-  #aiChatButton{right:5px!important;left:auto!important;bottom:454px!important;width:42px!important;height:42px!important}
-  #bgmButton{right:5px!important;left:auto!important;bottom:406px!important;width:42px!important;height:42px!important}
-  .bagRelocatedV250{right:5px!important;left:auto!important;bottom:502px!important}
-  .dock,.dock.open{right:5px!important;left:auto!important;bottom:202px!important}
+  #chatHandle{left:auto!important;right:5px!important;top:auto!important;bottom:350px!important;width:42px!important;min-width:42px!important;height:42px!important;border-left:1px solid #68e4ff66!important;border-radius:13px!important}
+  #aiChatButton{right:5px!important;left:auto!important;bottom:446px!important;width:42px!important;height:42px!important}
+  #bgmButton{right:5px!important;left:auto!important;bottom:398px!important;width:42px!important;height:42px!important}
+  .bagRelocatedV250{right:5px!important;left:auto!important;bottom:490px!important}
+  .dock,.dock.open{right:5px!important;left:auto!important;bottom:194px!important}
 
-  #k11520HudCollapseAll{position:fixed;z-index:9992;right:5px;left:auto;top:auto;bottom:98px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
+  #k11520HudCollapseAll{position:fixed;z-index:9992;right:5px;left:auto;top:auto;bottom:90px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
   html:not(.k11520UtilitiesOpen) #walletPanel,html:not(.k11520UtilitiesOpen) #walletToggle,html:not(.k11520UtilitiesOpen) #chatHandle,html:not(.k11520UtilitiesOpen) #gameModeToggle,html:not(.k11520UtilitiesOpen) #bgmButton,html:not(.k11520UtilitiesOpen) #aiChatButton,html:not(.k11520UtilitiesOpen) #backpackButton,html:not(.k11520UtilitiesOpen) #k11520HudCollapseAll,html:not(.k11520UtilitiesOpen) #dock{display:none!important}
   html.k11520UtilitiesOpen #gameModeToggle{display:grid!important;visibility:visible!important;pointer-events:auto!important}
   #k11520UtilityMaster,#dockToggle{display:grid!important;place-items:center!important;min-width:44px!important;min-height:44px!important;color:#dffaff!important}
-  #k11520UtilityMaster{position:fixed!important;right:5px!important;bottom:150px!important;width:44px!important;height:44px!important;z-index:9993!important;border-radius:13px!important;border:1px solid #68e4ff66!important;background:#101923ef!important;font:900 18px system-ui!important;touch-action:manipulation!important}
+  #k11520UtilityMaster{position:fixed!important;right:5px!important;bottom:142px!important;width:44px!important;height:44px!important;z-index:9993!important;border-radius:13px!important;border:1px solid #68e4ff66!important;background:#101923ef!important;font:900 18px system-ui!important;touch-action:manipulation!important}
   body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520HudCollapseAll,body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520UtilityMaster{visibility:hidden!important;pointer-events:none!important}
   #dock.open .rail{right:58px!important}
   html.k11520HudCollapsed .top,
@@ -101,11 +101,11 @@ function applyRightOrgans(){
   if(hudCollapsed()){for(const el of [wallet,handle,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
   if(!document.documentElement.classList.contains('k11520UtilitiesOpen')){for(const el of [wallet,handle,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
   for(const el of [wallet,handle,chat,bgm,bag,dock])el?.style.removeProperty('display');
-  if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','310px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','206px')}}
-  if(handle){for(const [k,v] of [['position','fixed'],['left','auto'],['right','5px'],['top','auto'],['bottom','358px'],['width','42px'],['min-width','42px'],['height','42px']])setImportant(handle,k,v)}
-  const organs=[[chat,'454px'],[bgm,'406px'],[bag,'502px']];
+  if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','302px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','198px')}}
+  if(handle){for(const [k,v] of [['position','fixed'],['left','auto'],['right','5px'],['top','auto'],['bottom','350px'],['width','42px'],['min-width','42px'],['height','42px']])setImportant(handle,k,v)}
+  const organs=[[chat,'446px'],[bgm,'398px'],[bag,'490px']];
   for(const [el,bottom] of organs){if(!el)continue;setImportant(el,'position','fixed');setImportant(el,'left','auto');setImportant(el,'right','5px');setImportant(el,'bottom',bottom);setImportant(el,'width','42px');setImportant(el,'height','42px')}
-  if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px');setImportant(dock,'bottom','202px')}
+  if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px');setImportant(dock,'bottom','194px')}
 }
 function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;

@@ -7,7 +7,7 @@ PURPOSE: Keep KX/KY/KZ market axes separate from autonomous player XYZ space, pr
 const $=s=>document.querySelector(s);
 const LEGACY_MARKET_ORIGIN_KEY='k11520.marketOrigin.v1';
 let walletInitial=null,utilityBound=false;
-const MOBILE={utilityBottom:150,dockBottom:202,gameBottom:262,walletBottom:310,chatBottom:358,bgmBottom:406,aiBottom:454,bagBottom:502,masterBottom:98};
+const MOBILE={utilityBottom:142,dockBottom:194,gameBottom:254,walletBottom:302,chatBottom:350,bgmBottom:398,aiBottom:446,bagBottom:490,masterBottom:90};
 const OPTIONAL_UTILITIES=['#dock','#gameModeToggle','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#k11520HudCollapseAll'];
 function installStyle(){let s=$('#k11520StableWalletRailStyle');if(!s){s=document.createElement('style');s.id='k11520StableWalletRailStyle';document.head.appendChild(s)}s.textContent=`
 #walletToggle{position:fixed!important;right:5px!important;top:auto!important;bottom:${MOBILE.walletBottom}px!important;left:auto!important;transform:none!important;z-index:9990!important;width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;pointer-events:auto!important;visibility:visible!important;opacity:1!important;font-size:21px!important;line-height:1!important}
