@@ -2,15 +2,15 @@
   "metadata": {
     "version": "4.3",
     "status": "ACTIVE",
-    "updated_at": "2026-08-16T20:49:02+08:00",
+    "updated_at": "2026-09-13T22:21:31+08:00",
     "manager": "codex-gm-01",
     "life_id": "LIFE-CODEX-GM-0001",
-    "task_id": "HENGYAO-FIRST-GM-CLOCK-IN-001",
+    "task_id": "KAIOS-CURSOR-BOUNDED-PILOT-20260913",
     "source_commit": null,
     "source_of_truth": true
   },
   "daily_operation": {
-    "date": "2026-08-16",
+    "date": "2026-09-13",
     "completed": true,
     "ready_for_human_task": true,
     "clock_in_order": [
@@ -22,7 +22,7 @@
       "HUMAN_REQUEST"
     ],
     "blocking_reasons": [],
-    "pending_handoff": 1,
+    "pending_handoff": 0,
     "pending_review": 0,
     "pending_push": 1,
     "protected_path_alerts": 0
@@ -45,15 +45,15 @@
     "pages_https": true,
     "pages_12345_http": 200,
     "pages_16888_http": 200,
-    "active_employee_claims": 1,
+    "active_employee_claims": 0,
     "delivered_not_reviewed": 0
   },
   "workqueue": {
     "active_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
     "worker": "cursor-01",
-    "status": "CLAIMED",
-    "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
-    "lease_expires_at": "2026-08-18T12:49:02Z",
+    "status": "READY_FOR_ATOMIC_CLAIM",
+    "claim_id": null,
+    "lease_expires_at": null,
     "map_handoff": "KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001",
     "map_handoff_status": "HOLD_FOR_MAP_WORLD_AGENT"
   },

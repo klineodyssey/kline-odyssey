@@ -7,7 +7,7 @@
 **Primary Reports Path:** KGEN-AI-Company/reports/  
 **Codex Review Log:** KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md
 
-Cursor reads this file from GitHub. Cursor does not wait for repeated human chat prompts. Cursor accepts one OPEN task at a time, changes it to IN_PROGRESS, creates the required report, completes the task, changes it to REVIEW, and waits for Codex.
+Cursor reads this file from GitHub. Cursor does not wait for repeated human chat prompts. Cursor accepts one OPEN or READY_FOR_ATOMIC_CLAIM task at a time, changes it to IN_PROGRESS, creates the required report, completes the task, changes it to REVIEW, and waits for Codex.
 
 ## Formal Workforce Gate
 
@@ -26,6 +26,7 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | Status | Meaning | Controlled By |
 |---|---|---|
 | OPEN | Ready for Cursor | Codex |
+| READY_FOR_ATOMIC_CLAIM | Human-authorized bounded task passed GM preflight and may be claimed by exactly one worker launch | Codex |
 | CLAIMED | Worker lease created; task reserved for one worker | Cursor or Codex |
 | IN_PROGRESS | Cursor accepted and is working | Cursor |
 | BLOCKED | Work cannot continue without decision | Cursor or Codex |
@@ -58,22 +59,24 @@ The worker must then stop without changing WorkQueue, creating a branch, editing
 | KAIOS-CANONICAL-ORGANISM-V0-1 | DONE | Codex | Codex | P1 | Life Architecture | `codex/kaios-canonical-organism-schema-v0-1` | `KGEN-KAIOS/organism/KAIOS_CANONICAL_ORGANISM_V0_1_BASELINE_MERGE_CLOSEOUT.md` |
 | LAND_VIEWER_SCHEMA_V2_COMPATIBILITY | DONE | Codex | Codex | P1 | Frontend | `codex/land-viewer-schema-v2-compatibility` | `KGEN-KAIOS/world-viewer/LAND_VIEWER_SCHEMA_V2_COMPATIBILITY_MERGE_CLOSEOUT.md` |
 | WORLD_VIEWER_ORGANISM_PACKAGE_INTEGRATION | HOLD | UNASSIGNED | Codex | P1 | Frontend | `NOT_CREATED` | `PENDING_SCOPE` |
-| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | CLAIMED | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
+| KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 | READY_FOR_ATOMIC_CLAIM | cursor-01 | codex-gm-01 | P0 | Payroll QA | `cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001` | `KGEN-AI-Company/reports/CURSOR_LIFE_ENERGY_PAYROLL_CANDIDATE_REPORT.md` |
 | KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 | HOLD | Map / World Agent | codex-gm-01 | P2 | World Map | `NOT_CREATED` | `SPEC_HANDOFF_IN_CODEX_MANAGER_PROTOCOL` |
 | KGEN-BSCSCAN-LOGO-001 | DONE | Cursor + Codex | Codex | P1 | Token Metadata | `cursor/kgen-bscscan-logo-submission-v1` | `KGEN/registry/BscScan/KGEN_BSCSCAN_LOGO_SUBMISSION_V1_MERGE_CLOSEOUT.md` |
 
 ### KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001 - Payroll Candidate Rework
 
-- Status: CLAIMED
+- Status: READY_FOR_ATOMIC_CLAIM
 - Owner: cursor-01
 - Reviewer: codex-gm-01
 - Priority: P0
 - Execution Base: `ff8fca3e610ac936e8998112255901a78296b238`
-- Claim ID: `CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01`
-- Lease: `2026-08-16T12:49:02Z` through `2026-08-18T12:49:02Z`
+- Prior Claim ID: `CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01` (`EXPIRED_AND_RELEASED`)
+- Prior Lease: `2026-08-16T12:49:02Z` through `2026-08-18T12:49:02Z`
+- Dispatch Authority: `APPROVED_WITH_BOUNDED_PILOT` by Human Authority 沈英明
+- Dispatch Limits: USD 1/day policy cap; USD 20/month policy cap; 4 launches/day; concurrency 1; one task at a time; 60-minute ceiling
 - Exact task packet: `KAIOS/economy/life-energy-payroll/KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json`
 - Objective: fix only the 120-versus-80 approved-ledger replay defect and the two schema-invalid `candidate_metadata` fields.
-- Stop condition: submit a bounded candidate delivery for Codex review; no payment, escrow release, merge, Canon change, contract change or Mainnet write.
+- Stop condition: submit a bounded candidate delivery for Codex review; no payment, escrow release, worker merge, Canon change, contract change or Mainnet write. A separate GM exact-head review controls any low-risk merge.
 
 ### KGEN-MAP-4168-NAIHE-GENESIS-STATION-UI-001 - Naihe Genesis Station Handoff
 

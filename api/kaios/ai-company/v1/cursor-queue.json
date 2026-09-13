@@ -18,44 +18,39 @@
   "reviewer": "codex-gm-01",
   "branch_template": "cursor-handoff/<Task-ID>",
   "one_task_at_a_time": true,
-  "continuous_dispatch_mode": "CODEX_CONTROLLED_PREPARATION_ONLY",
+  "continuous_dispatch_mode": "HUMAN_APPROVED_BOUNDED_EXTERNAL_PILOT",
   "automatic_unreviewed_dispatch": false,
-  "active_claims": [
-    {
-      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
-      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "parent_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-      "worker_id": "cursor-01",
-      "reviewer": "codex-gm-01",
-      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
-      "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-R2",
-      "record_version": 2,
-      "status": "CLAIMED",
-      "claimed_at": "2026-08-16T12:49:02Z",
-      "lease_expires_at": "2026-08-18T12:49:02Z",
-      "scope": "TWO_BLOCKER_PAYROLL_REWORK_ONLY",
-      "mainnet_write": false
-    }
-  ],
+  "active_claims": [],
   "worker_state": {
     "worker_id": "cursor-01",
-    "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    "status": "CLAIMED"
+    "current_task": null,
+    "current_branch": null,
+    "status": "IDLE"
   },
   "next_dispatch_requires": [
-    "PREVIOUS_TASK_CODEX_REVIEWED",
-    "PREVIOUS_TASK_CLOSED",
-    "PREVIOUS_CLAIM_RELEASED",
-    "PREPARATION_PR_MERGED",
-    "EXACT_PREPARATION_MERGE_SHA_RECORDED",
-    "PLANNED_BRANCH_CREATED_AT_EXACT_PREPARATION_MERGE_SHA",
-    "ISOLATED_WORKTREE_VERIFIED_AT_EXACT_PREPARATION_MERGE_SHA",
-    "SEPARATE_ACTIVATION_PR_REVIEWED_AND_MERGED",
-    "FAIL_CLOSED_EXPIRY_AND_REVALIDATION_DEFINED"
+    "FORMAL_TASK_READY_FOR_ATOMIC_CLAIM",
+    "NO_ACTIVE_REPOSITORY_OR_PROVIDER_RUN",
+    "NO_SAME_TASK_BRANCH_OR_OPEN_PR",
+    "EXACT_SOURCE_PAYLOAD_HEAD_VERIFIED",
+    "DAILY_AND_MONTHLY_COST_CAP_POLICY_ACTIVE",
+    "IDEMPOTENT_AGENT_ID",
+    "FIVE_MINUTE_WATCHDOG",
+    "PROTECTED_ACTION_DENY_LIST"
   ],
   "output_authority": "CANDIDATE_ONLY_OR_RESEARCH_PROPOSAL_ONLY",
+  "bounded_pilot": {
+    "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+    "status": "READY_FOR_ATOMIC_CLAIM",
+    "authorized_by": "沈英明",
+    "daily_cost_cap_usd": 1,
+    "monthly_cost_cap_usd": 20,
+    "max_launches_per_day": 4,
+    "concurrency": 1,
+    "watchdog_seconds": 300,
+    "max_worker_minutes": 60,
+    "visual_qa": "NOT_APPLICABLE_NO_UI_CHANGE",
+    "protected_actions_allowed": false
+  },
   "queue": [
     {
       "priority": 1,
