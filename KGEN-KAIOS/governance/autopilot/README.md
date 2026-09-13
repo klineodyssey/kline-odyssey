@@ -37,7 +37,7 @@ This directory is an **architecture proposal and integration profile**, not a se
 | Human Decisions | `HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001`; `HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001`; `HUMAN-COMPANY-OS-BOOT-001`; `HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001` |
 | Design | `AUTHORIZED` |
 | Architecture | `OPERATIONALLY_DELEGATED / ACTIVE OPERATOR PROTOCOL` |
-| Runtime implementation | `NOT_STARTED` |
+| Runtime implementation | `SAFE_CYCLE_PLANNER_CANDIDATE_IMPLEMENTED_NOT_CONNECTED` |
 | Background automation | `NOT_RUNNING` |
 | WorkQueue implementation task | `NOT_CREATED` |
 | Deployment | `NOT_STARTED` |
@@ -113,6 +113,28 @@ Codex reran Company Boot and `git fetch origin --prune` at `2026-07-15T17:29:48+
 | `architecture_backlog_registry.json` | Machine-readable proposal backlog |
 | `canonical_atomic_claim_authority.json` | Machine-readable Claim authority proposal |
 | `company_autopilot_architecture_review.json` | Machine-readable review score and gates |
+
+## Safe Cycle Planner Candidate
+
+`core/company/index.mjs` now exports `runAutonomousCompanyCycle()` as the first executable, side-effect-free candidate built on this package. It consumes normalized snapshots of the existing Worker Registry, WorkQueue, Review Queue, exact `main` SHA and task authority; it does not create a competing queue or registry.
+
+The candidate can deterministically:
+
+- clock the General Manager in and out for one cycle;
+- reject stale `main`, replayed cycles, T0/T1 workers, branch-policy mismatches and incomplete task envelopes;
+- preserve `REVIEW → REPAIR → HUMAN_DECISION → ARCHITECTURE → IMPLEMENTATION` ordering;
+- emit one append-only `REVIEW_REQUEST` or safe `WORK_ORDER`/`HANDOFF` candidate;
+- route `REWORK_REQUIRED` back to the explicitly recorded original authorized worker before a new review can be requested;
+- require every work or repair candidate to retain a registered, active, T2+ reviewer distinct from the worker;
+- keep every event free of external side effects.
+
+The candidate now reuses the existing Company history store to persist safe cycle events and recover the last cycle after restart. It also has a read-only GitHub snapshot adapter for current main, active PR divergence and exact-head checks. The read, plan and persist stages compose through `runAutonomousCompanyReadOnlyCycle()`; `evaluateExactHeadCiGate()` rejects stale heads, behind-main branches and incomplete or failed checks. These are local/invocation-driven candidates: there is still no background scheduler.
+
+The canonical migration's one-host SQLite simulator is now implemented as `createLocalSqliteClaimRegistrySimulator()`. It transactionally tests unique task/clone/session/worker custody, CAS record versions, fencing, leases, review custody, repair lineage and restart persistence. It is always labelled `LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY`; it is not a shared service and does not turn automatic dispatch on. It deliberately refuses close and release until canonical Review and Registry authority connectors can supply machine-verifiable evidence instead of caller assertions.
+
+`evaluateClaimCloseEvidenceCandidate()` prepares that connection without creating authority. It binds the current Claim, distinct reviewer, exact PR head/CI, Git object references, payload hashes, Registry version and fencing token; even a consistent packet remains unable to close or release until canonical source loaders are connected.
+
+It cannot persist a shared authoritative Claim, edit GitHub, launch a worker, merge, push `main`, pay, access a private key, deploy or send a transaction. Those connectors remain `NOT_CONNECTED`; the existing Claim/Lease Controller and independent Review gates must authorize them before any future activation.
 
 ## Imported Authorities
 

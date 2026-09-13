@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { createRequire } from "node:module";
 import {
   MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
@@ -99,7 +101,13 @@ import {
   , KAIOS_CASH_LAW, createAtmFieldServiceRequests, validateWasteInventory,
   calculateFieldTripEnergy, calculateMatterAntimatterEnergy, validateFieldRoute,
   calculateFieldServiceQuote, validateFieldDeliveryEvidence, createWorkforceGap,
-  createFieldServiceDemandScan
+  createFieldServiceDemandScan,
+  runAutonomousCompanyCycle, AUTONOMOUS_COMPANY_SAFE_ACTIONS,
+  AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS, AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES,
+  persistAutonomousCompanyCycle, restoreAutonomousCompanyCycleState,
+  readLatestRepositorySnapshot, evaluateExactHeadCiGate,
+  runAutonomousCompanyReadOnlyCycle, createLocalSqliteClaimRegistrySimulator,
+  LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES, evaluateClaimCloseEvidenceCandidate
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
@@ -2864,4 +2872,795 @@ test("V4.0 production shell exposes animated concierge and fresh cache key", asy
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+const AUTONOMOUS_MAIN_SHA = "1".repeat(40);
+const autonomousManager = Object.freeze({
+  worker_id: "codex-gm-01",
+  life_identity_ref: "LIFE-CODEX-GM-0001",
+  controller_id: "CONTROLLER-CODEX-GM-0001",
+  role: "General Manager / Dispatcher / Reviewer",
+  status: "ACTIVE",
+  employee_status: "ACTIVE",
+  trust_level: "T5",
+  active_claim_count: 1,
+  boot_acknowledged: true,
+  canon_acknowledged: true,
+  workspace_policy_acknowledged: true,
+  do_not_touch_acknowledged: true,
+  suspension: null
+});
+const autonomousWorker = Object.freeze({
+  worker_id: "cursor-01",
+  life_identity_ref: "LIFE-CURSOR-0001",
+  controller_id: "CONTROLLER-CURSOR-0001",
+  role: "Worker",
+  status: "ACTIVE",
+  employee_status: "ACTIVE",
+  trust_level: "T2",
+  active_claim_count: 0,
+  current_task: null,
+  allowed_branch_pattern: "cursor-handoff/<Task-ID>",
+  boot_acknowledged: true,
+  canon_acknowledged: true,
+  workspace_policy_acknowledged: true,
+  do_not_touch_acknowledged: true,
+  suspension: null
+});
+const autonomousTask = Object.freeze({
+  task_id: "SAFE-TASK-001",
+  status: "CLAIMABLE",
+  priority_class: "IMPLEMENTATION",
+  priority: "P1",
+  risk_level: "R1",
+  assigned_worker_id: "cursor-01",
+  reviewer_id: "codex-gm-01",
+  branch: "cursor-handoff/SAFE-TASK-001",
+  repository: "klineodyssey/kline-odyssey",
+  active_task_pr: 170,
+  expected_head_sha: "b".repeat(40),
+  authorized_actions: ["READ", "SAFE_BRANCH_WORK", "TEST", "HANDOFF"],
+  task_envelope_status: "AUTHORIZED",
+  authority_status: "MACHINE_VERIFIED",
+  dependencies_complete: true,
+  protected_paths_changed: false,
+  created_at: "2026-08-23T00:00:00Z"
+});
+
+function autonomousCycle(overrides = {}) {
+  return runAutonomousCompanyCycle({
+    cycle_id: "COMPANY-CYCLE-20260823-0001",
+    observed_at: "2026-08-23T00:01:00Z",
+    current_main_sha: AUTONOMOUS_MAIN_SHA,
+    expected_main_sha: AUTONOMOUS_MAIN_SHA,
+    manager: autonomousManager,
+    workers: [autonomousManager, autonomousWorker],
+    work_queue: [autonomousTask],
+    review_queue: [],
+    previous_cycle_ids: [],
+    ...overrides
+  });
+}
+
+test("Autonomous Company cycle creates only a safe assignment candidate", () => {
+  const result = autonomousCycle();
+  assert.equal(result.status, "ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(result.selected_task_id, "SAFE-TASK-001");
+  assert.equal(result.selected_worker_id, "cursor-01");
+  assert.deepEqual(result.events.map((event) => event.event_type), ["CLOCK_IN", "WORK_ORDER", "HANDOFF", "CLOCK_OUT"]);
+  assert.ok(result.events.every((event) => event.append_only && event.external_effect === false));
+  assert.ok(Object.values(result.authority).every((value) => value === false));
+});
+
+test("Autonomous Company cycle is replay safe", () => {
+  const result = autonomousCycle({ previous_cycle_ids: ["COMPANY-CYCLE-20260823-0001"] });
+  assert.equal(result.status, "IDEMPOTENT_NOOP");
+  assert.deepEqual(result.events, []);
+});
+
+test("Autonomous Company cycle fails closed on stale main", () => {
+  const result = autonomousCycle({ expected_main_sha: "2".repeat(40) });
+  assert.equal(result.status, "HOLD_STALE_MAIN");
+  assert.equal(result.selected_action, null);
+  assert.equal(result.events[1].payload.blocker, "STALE_MAIN");
+});
+
+test("Autonomous Company cycle preserves review-first ordering", () => {
+  const review = {
+    ...autonomousTask,
+    task_id: "DELIVERY-001",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/DELIVERY-001",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [review] });
+  assert.equal(result.status, "REVIEW_REQUEST_READY");
+  assert.equal(result.selected_task_id, "DELIVERY-001");
+  assert.equal(result.selected_worker_id, "codex-gm-01");
+});
+
+test("Autonomous Company cycle routes REWORK_REQUIRED to the original worker instead of review", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-001",
+    status: "REWORK_REQUIRED",
+    original_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/REPAIR-001"
+  };
+  const result = autonomousCycle({ review_queue: [repair] });
+  assert.equal(result.status, "REPAIR_ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(result.selected_action, "REPAIR_WORK_ORDER_CANDIDATE");
+  assert.equal(result.selected_worker_id, "cursor-01");
+  assert.deepEqual(result.events.map((event) => event.event_type), ["CLOCK_IN", "WORK_ORDER", "HANDOFF", "CLOCK_OUT"]);
+  assert.equal(result.events[1].payload.work_type, "REPAIR");
+  assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+});
+
+test("Autonomous Company repair requires an explicit original authorized worker", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-NO-WORKER",
+    status: "REWORK_REQUIRED",
+    original_worker_id: null,
+    branch: "cursor-handoff/REPAIR-NO-WORKER"
+  };
+  const result = autonomousCycle({ review_queue: [repair] });
+  assert.equal(result.status, "HOLD_REPAIR_WORKER");
+  assert.equal(result.events[1].payload.blocker, "ORIGINAL_REPAIR_WORKER_REQUIRED");
+});
+
+test("Autonomous Company repair revalidates trust acknowledgments branch and claim boundaries", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-GATES",
+    status: "REWORK_REQUIRED",
+    original_worker_id: "cursor-01",
+    branch: "cursor-handoff/REPAIR-GATES"
+  };
+  for (const [index, workerPatch] of [
+    { trust_level: "T1" },
+    { canon_acknowledged: false },
+    { allowed_branch_pattern: "sol/<Task-ID>" },
+    { active_claim_count: 1, current_task: "OTHER-TASK" }
+  ].entries()) {
+    const result = autonomousCycle({
+      cycle_id: `COMPANY-CYCLE-REPAIR-GATE-${index + 1}`,
+      workers: [autonomousManager, { ...autonomousWorker, ...workerPatch }],
+      review_queue: [repair]
+    });
+    assert.equal(result.status, "HOLD_WORKER");
+  }
+});
+
+test("Autonomous Company repair worker must remain distinct from reviewer", () => {
+  const repair = {
+    ...autonomousTask,
+    task_id: "REPAIR-SELF-REVIEW",
+    status: "REWORK_REQUIRED",
+    original_worker_id: "cursor-01",
+    reviewer_id: "cursor-01",
+    branch: "cursor-handoff/REPAIR-SELF-REVIEW"
+  };
+  const result = autonomousCycle({ review_queue: [repair] });
+  assert.equal(result.status, "HOLD_WORKER");
+});
+
+test("Autonomous Company requests review only after repaired delivery is submitted", () => {
+  const repairedDelivery = {
+    ...autonomousTask,
+    task_id: "REPAIR-COMPLETE",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/REPAIR-COMPLETE",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [repairedDelivery] });
+  assert.equal(result.status, "REVIEW_REQUEST_READY");
+  assert.deepEqual(result.events.map((event) => event.event_type), ["CLOCK_IN", "REVIEW_REQUEST", "CLOCK_OUT"]);
+});
+
+test("Autonomous Company review requires the registered authorized delivery submitter", () => {
+  const delivery = {
+    ...autonomousTask,
+    task_id: "DELIVERY-UNREGISTERED",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "unregistered-worker",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/DELIVERY-UNREGISTERED",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [delivery] });
+  assert.equal(result.status, "HOLD_SUBMITTER");
+  assert.equal(result.events[1].payload.blocker, "AUTHORIZED_DELIVERY_SUBMITTER_REQUIRED");
+  assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+});
+
+test("Autonomous Company assignment requires a registered independent reviewer", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, reviewer_id: "missing-reviewer" }] });
+  assert.equal(result.status, "HOLD_REVIEWER");
+  assert.equal(result.events[1].payload.blocker, "INDEPENDENT_REVIEWER_REQUIRED");
+});
+
+test("Autonomous Company cycle refuses self review", () => {
+  const review = {
+    ...autonomousTask,
+    task_id: "DELIVERY-SELF",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "cursor-01",
+    branch: "cursor-handoff/DELIVERY-SELF",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [review] });
+  assert.equal(result.status, "HOLD_REVIEWER");
+  assert.equal(result.events[1].payload.blocker, "INDEPENDENT_REVIEWER_REQUIRED");
+});
+
+test("Autonomous Company cycle rejects a different worker label sharing the submitter Life or controller", () => {
+  const delivery = {
+    ...autonomousTask,
+    task_id: "DELIVERY-CONTROLLER-COLLISION",
+    status: "DELIVERY_SUBMITTED",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "reviewer-alias-01",
+    branch: "cursor-handoff/DELIVERY-CONTROLLER-COLLISION",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  for (const collision of [
+    { life_identity_ref: autonomousWorker.life_identity_ref, controller_id: "CONTROLLER-REVIEWER-ALIAS" },
+    { life_identity_ref: "LIFE-REVIEWER-ALIAS", controller_id: autonomousWorker.controller_id }
+  ]) {
+    const reviewerAlias = {
+      ...autonomousManager,
+      worker_id: "reviewer-alias-01",
+      role: "Independent Reviewer",
+      active_claim_count: 0,
+      ...collision
+    };
+    const result = autonomousCycle({ workers: [autonomousManager, autonomousWorker, reviewerAlias], review_queue: [delivery] });
+    assert.equal(result.status, "HOLD_REVIEWER");
+    assert.equal(result.events[1].payload.blocker, "INDEPENDENT_REVIEWER_REQUIRED");
+    assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+  }
+});
+
+test("Autonomous Company cycle rejects unregistered or T1 workers", () => {
+  const result = autonomousCycle({ workers: [autonomousManager, { ...autonomousWorker, trust_level: "T1" }] });
+  assert.equal(result.status, "HOLD_WORKER");
+  assert.equal(result.selected_worker_id, null);
+});
+
+test("Autonomous Company cycle rejects branch-policy mismatch", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, branch: "sol/unauthorized" }] });
+  assert.equal(result.status, "HOLD_WORKER");
+});
+
+test("Autonomous Company cycle blocks high-risk external actions", () => {
+  for (const action of AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS) {
+    const result = autonomousCycle({
+      cycle_id: `COMPANY-CYCLE-BLOCK-${action}`,
+      work_queue: [{ ...autonomousTask, authorized_actions: ["READ", action] }]
+    });
+    assert.equal(result.status, "HOLD_TASK_AUTHORITY", action);
+    assert.deepEqual(result.events[1].payload.forbidden_actions, [action]);
+  }
+});
+
+test("Autonomous Company cycle rejects unknown authority instead of guessing", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, authorized_actions: ["READ", "UNKNOWN_POWER"] }] });
+  assert.equal(result.status, "HOLD_TASK_AUTHORITY");
+  assert.deepEqual(result.events[1].payload.unknown_actions, ["UNKNOWN_POWER"]);
+});
+
+test("Autonomous Company cycle stops for Human decisions", () => {
+  const result = autonomousCycle({ work_queue: [{ ...autonomousTask, priority_class: "HUMAN_DECISION" }] });
+  assert.equal(result.status, "HOLD_HUMAN_DECISION");
+  assert.equal(result.events[1].payload.blocker, "HUMAN_DECISION_REQUIRED");
+  assert.equal(result.authority.mainnet_tx_sent, false);
+});
+
+test("Autonomous Company cycle rejects high or unknown implementation risk", () => {
+  for (const risk_level of ["R2", "HIGH", "CRITICAL", "UNCLASSIFIED"]) {
+    const result = autonomousCycle({
+      cycle_id: `COMPANY-CYCLE-RISK-${risk_level}`,
+      work_queue: [{ ...autonomousTask, risk_level }]
+    });
+    assert.equal(result.status, "HOLD_TASK_AUTHORITY", risk_level);
+    assert.equal(result.events[1].payload.risk_is_safe, false);
+  }
+});
+
+test("Autonomous Company cycle applies the same risk gate to review queue deliveries", () => {
+  const delivery = {
+    ...autonomousTask,
+    task_id: "DELIVERY-CRITICAL-RISK",
+    status: "DELIVERY_SUBMITTED",
+    risk_level: "CRITICAL",
+    submitter_worker_id: "cursor-01",
+    reviewer_id: "codex-gm-01",
+    branch: "cursor-handoff/DELIVERY-CRITICAL-RISK",
+    authorized_actions: ["READ", "TEST", "REVIEW_REQUEST"]
+  };
+  const result = autonomousCycle({ review_queue: [delivery] });
+  assert.equal(result.status, "HOLD_TASK_AUTHORITY");
+  assert.equal(result.events[1].payload.risk_is_safe, false);
+  assert.equal(result.events.some((event) => event.event_type === "REVIEW_REQUEST"), false);
+});
+
+test("Autonomous Company cycle cannot assign over an unrelated active claim", () => {
+  const occupiedWorker = { ...autonomousWorker, active_claim_count: 1, current_task: "OTHER-TASK" };
+  const result = autonomousCycle({ workers: [autonomousManager, occupiedWorker] });
+  assert.equal(result.status, "HOLD_WORKER");
+});
+
+test("Autonomous Company cycle requires a machine-verified task envelope", () => {
+  for (const patch of [
+    { task_envelope_status: "DRAFT" },
+    { authority_status: "CHAT_ONLY" },
+    { dependencies_complete: false },
+    { protected_paths_changed: true }
+  ]) {
+    const result = autonomousCycle({ work_queue: [{ ...autonomousTask, ...patch }] });
+    assert.equal(result.status, "HOLD_TASK_AUTHORITY");
+  }
+});
+
+test("Autonomous Company cycle has an explicit bounded safe-action vocabulary", () => {
+  assert.ok(AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("OPEN_DRAFT_PR"));
+  assert.ok(!AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("MERGE_MAIN"));
+  assert.ok(!AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes("MAINNET_TRANSACTION"));
+});
+
+test("Autonomous Company cycle persists into the existing append-only Company history and recovers after restart", async () => {
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = autonomousCycle();
+  const persisted = await persistAutonomousCompanyCycle({ store, company, cycle_result: result });
+  assert.equal(persisted.status, "CYCLE_EVENTS_PERSISTED");
+  assert.deepEqual(persisted.persisted_events.map((event) => event.event_id), result.events.map((event) => event.event_id));
+  assert.ok(persisted.persisted_events.every((event) => event.payload_hash && event.stream === "COMPANY"));
+  assert.equal(assertAppendOnlyChain(await store.history(company.company_id, "COMPANY")), true);
+
+  const recovered = await restoreAutonomousCompanyCycleState({ store, company_id: company.company_id });
+  assert.equal(recovered.status, "RESTART_STATE_RECOVERED");
+  assert.deepEqual(recovered.previous_cycle_ids, [result.cycle_id]);
+  assert.equal(recovered.latest_cycle_id, result.cycle_id);
+  assert.equal(recovered.latest_cycle_status, "ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(recovered.event_count, result.events.length);
+  assert.equal(recovered.external_effect, false);
+
+  const replay = await persistAutonomousCompanyCycle({ store, company, cycle_result: result });
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, result.events.length);
+});
+
+test("Autonomous Company durable memory rejects unsupported or externally effective events", async () => {
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = autonomousCycle();
+  await assert.rejects(
+    () => persistAutonomousCompanyCycle({ store, company, cycle_result: { ...result, authority: { ...result.authority, payment_sent: true } } }),
+    (error) => error.code === "EXTERNAL_EFFECT_CYCLE_PERSISTENCE_FORBIDDEN"
+  );
+  await assert.rejects(
+    () => persistAutonomousCompanyCycle({ store, company, cycle_result: { ...result, events: [{ ...result.events[0], event_type: "PAYMENT_SENT" }] } }),
+    (error) => error.code === "UNSUPPORTED_DURABLE_COMPANY_EVENT"
+  );
+  await assert.rejects(
+    () => persistAutonomousCompanyCycle({
+      store,
+      company,
+      cycle_result: { ...result, cycle_id: "COMPANY-CYCLE-RESERVED-OVERRIDE", events: [{ ...result.events[0], cycle_id: "COMPANY-CYCLE-RESERVED-OVERRIDE", payload: { ...result.events[0].payload, external_effect: true } }] }
+    }),
+    (error) => error.code === "DURABLE_EVENT_RESERVED_FIELD_OVERRIDE"
+  );
+  assert.deepEqual(AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES, ["CLOCK_IN", "WORK_ORDER", "HANDOFF", "REVIEW_REQUEST", "REWORK_ORDER", "BLOCKER_STATE", "CLOCK_OUT"]);
+});
+
+test("Latest Repository Snapshot adapter discovers fresh main PR divergence and exact-head CI read-only", async () => {
+  const mainSha = "a".repeat(40);
+  const headSha = "b".repeat(40);
+  const requests = [];
+  const responses = new Map([
+    ["https://api.github.test/repos/klineodyssey/kline-odyssey", { default_branch: "main" }],
+    ["https://api.github.test/repos/klineodyssey/kline-odyssey/commits/main", { sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }],
+    ["https://api.github.test/repos/klineodyssey/kline-odyssey/pulls/170", { state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }],
+    [`https://api.github.test/repos/klineodyssey/kline-odyssey/compare/main...${headSha}`, { ahead_by: 8, behind_by: 0 }],
+    [`https://api.github.test/repos/klineodyssey/kline-odyssey/commits/${headSha}/check-runs`, { check_runs: [{ name: "test", status: "completed", conclusion: "success" }, { name: "optional", status: "completed", conclusion: "skipped" }] }]
+  ]);
+  const fetch_impl = async (url, options) => {
+    requests.push({ url, options });
+    const body = responses.get(url);
+    return body ? { ok: true, status: 200, json: async () => body } : { ok: false, status: 404, json: async () => ({}) };
+  };
+  const snapshot = await readLatestRepositorySnapshot({
+    repository: "klineodyssey/kline-odyssey",
+    active_task_pr: 170,
+    observed_at: "2026-08-27T06:01:00Z",
+    fetch_impl,
+    api_base: "https://api.github.test"
+  });
+  assert.equal(snapshot.main_sha, mainSha);
+  assert.equal(snapshot.main_commit_time, "2026-08-27T06:00:00Z");
+  assert.equal(snapshot.active_task_pr.head_sha, headSha);
+  assert.equal(snapshot.active_task_pr.head_ref, autonomousTask.branch);
+  assert.equal(snapshot.active_task_pr.base_ref, "main");
+  assert.equal(snapshot.active_task_pr.behind_main, 0);
+  assert.equal(snapshot.active_task_pr.ahead_main, 8);
+  assert.equal(snapshot.active_task_pr.ci_status, "PASS");
+  assert.equal(snapshot.active_task_pr.check_count, 2);
+  assert.deepEqual(snapshot.active_task_pr.required_check_names, ["test"]);
+  assert.ok(requests.every((request) => request.options.method === "GET"));
+  assert.ok(requests.every((request) => request.options.headers.Authorization === undefined));
+  assert.deepEqual(snapshot.authority, { github_read: true, github_write: false, merge: false, branch_push: false, chain_write: false, signer: false });
+});
+
+test("Latest Repository Snapshot adapter fails closed on unavailable or malformed GitHub evidence", async () => {
+  let customOriginRequests = 0;
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({
+      repository: "klineodyssey/kline-odyssey",
+      observed_at: "2026-08-27T06:01:00Z",
+      token: "SECRET_TEST_TOKEN_MUST_NOT_LEAVE_GITHUB",
+      api_base: "https://attacker.example",
+      fetch_impl: async () => {
+        customOriginRequests += 1;
+        return { ok: true, status: 200, json: async () => ({}) };
+      }
+    }),
+    (error) => error.code === "GITHUB_TOKEN_ORIGIN_NOT_ALLOWED"
+  );
+  assert.equal(customOriginRequests, 0);
+
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: false, status: 503 }) }),
+    (error) => error.code === "GITHUB_READ_FAILED"
+  );
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({ repository: "not-a-repository", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: true, json: async () => ({}) }) }),
+    (error) => error.code === "INVALID_GITHUB_REPOSITORY"
+  );
+  await assert.rejects(
+    () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-08-27T06:01:00Z", fetch_impl: async () => ({ ok: true, json: async () => ({}) }), token: "SECRET_TEST_TOKEN", api_base: "https://attacker.example" }),
+    (error) => error.code === "GITHUB_TOKEN_ORIGIN_NOT_ALLOWED"
+  );
+
+  const headSha = "b".repeat(40);
+  const skippedOnlyFetch = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: "a".repeat(40), commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 1, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "skipped" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const skippedOnly = await readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl: skippedOnlyFetch, api_base: "https://api.github.test" });
+  assert.equal(skippedOnly.active_task_pr.ci_status, "MISSING_REQUIRED_CHECK");
+});
+
+test("Exact-head CI gate rejects stale heads behind main failures and incomplete checks", () => {
+  const head = "b".repeat(40);
+  const base = {
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    default_branch: "main",
+    active_task_pr: { head_sha: head, head_ref: autonomousTask.branch, base_ref: "main", state: "OPEN", behind_main: 0, ci_status: "PASS" }
+  };
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: base, expected_head_sha: head }).status, "EXACT_HEAD_CI_PASS");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, base_ref: "release" } }, expected_head_sha: head }).status, "HOLD_PR_BASE_BRANCH_MISMATCH");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: base, expected_head_sha: "c".repeat(40) }).status, "HOLD_STALE_PR_HEAD");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, behind_main: 1 } } }).status, "HOLD_PR_BEHIND_MAIN");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, ci_status: "FAIL" } } }).status, "HOLD_EXACT_HEAD_CI_FAILED");
+  assert.equal(evaluateExactHeadCiGate({ repository_snapshot: { ...base, active_task_pr: { ...base.active_task_pr, ci_status: "PENDING" } } }).status, "HOLD_EXACT_HEAD_CI_INCOMPLETE");
+});
+
+test("Read-plan-persist Company invocation uses fresh GitHub main and writes only local durable evidence", async () => {
+  const mainSha = AUTONOMOUS_MAIN_SHA;
+  const headSha = "b".repeat(40);
+  const fetch_impl = async (url, options) => {
+    assert.equal(options.method, "GET");
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: {
+      cycle_id: "COMPANY-CYCLE-LIVE-READ-001",
+      expected_main_sha: mainSha,
+      expected_head_sha: headSha,
+      manager: autonomousManager,
+      workers: [autonomousManager, autonomousWorker],
+      work_queue: [autonomousTask],
+      review_queue: [],
+      previous_cycle_ids: []
+    },
+    store,
+    company
+  });
+  assert.equal(result.status, "READ_PLAN_PERSIST_CYCLE_COMPLETED");
+  assert.equal(result.repository_snapshot.main_sha, mainSha);
+  assert.equal(result.pre_persistence_snapshot.main_sha, mainSha);
+  assert.equal(result.ci_gate.status, "EXACT_HEAD_CI_PASS");
+  assert.equal(result.task_repository_gate.status, "TASK_REPOSITORY_BINDING_VERIFIED");
+  assert.equal(result.pre_persistence_task_repository_gate.status, "TASK_REPOSITORY_BINDING_VERIFIED");
+  assert.equal(result.cycle_result.status, "ASSIGNMENT_CANDIDATE_READY");
+  assert.equal(result.persistence.status, "CYCLE_EVENTS_PERSISTED");
+  assert.equal(result.authority.local_company_history_write, true);
+  for (const field of ["github_write", "claim_write", "worker_wake", "reviewer_wake", "signer", "chain_write"]) assert.equal(result.authority[field], false);
+});
+
+test("Read-plan-persist Company invocation cannot reuse a green PR for an unrelated task branch", async () => {
+  const mainSha = AUTONOMOUS_MAIN_SHA;
+  const headSha = "b".repeat(40);
+  const fetch_impl = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: "codex/unrelated-green-pr" }, base: { ref: "main" } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 1, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: { cycle_id: "COMPANY-CYCLE-WRONG-PR-BINDING", expected_main_sha: mainSha, expected_head_sha: headSha, manager: autonomousManager, workers: [autonomousManager, autonomousWorker], work_queue: [autonomousTask], review_queue: [], previous_cycle_ids: [] },
+    store,
+    company: { company_id: "KAIOS_AI_COMPANY" }
+  });
+  assert.equal(result.status, "HOLD_TASK_REPOSITORY_BINDING");
+  assert.equal(result.task_repository_gate.observed_branch, "codex/unrelated-green-pr");
+  assert.equal(result.persistence, null);
+  assert.equal((await store.history("KAIOS_AI_COMPANY", "COMPANY")).length, 0);
+});
+
+test("Read-plan-persist Company invocation refuses persistence when main moves after planning", async () => {
+  const firstMain = AUTONOMOUS_MAIN_SHA;
+  const movedMain = "e".repeat(40);
+  const headSha = "b".repeat(40);
+  let mainReads = 0;
+  const fetch_impl = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) {
+      mainReads += 1;
+      return { ok: true, status: 200, json: async () => ({ sha: mainReads === 1 ? firstMain : movedMain, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    }
+    if (url.endsWith("/pulls/170")) return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: autonomousTask.branch }, base: { ref: "main" } }) };
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: { cycle_id: "COMPANY-CYCLE-MOVING-MAIN", expected_main_sha: firstMain, expected_head_sha: headSha, manager: autonomousManager, workers: [autonomousManager, autonomousWorker], work_queue: [autonomousTask], review_queue: [], previous_cycle_ids: [] },
+    store,
+    company
+  });
+  assert.equal(result.status, "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE");
+  assert.equal(result.persistence, null);
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, 0);
+  assert.equal(result.authority.local_company_history_write, false);
+});
+
+test("Read-plan-persist Company invocation refuses persistence when PR branch changes after planning", async () => {
+  const mainSha = AUTONOMOUS_MAIN_SHA;
+  const headSha = "b".repeat(40);
+  let prReads = 0;
+  const fetch_impl = async (url) => {
+    if (url.endsWith("/repos/klineodyssey/kline-odyssey")) return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (url.endsWith("/commits/main")) return { ok: true, status: 200, json: async () => ({ sha: mainSha, commit: { committer: { date: "2026-08-27T06:00:00Z" } } }) };
+    if (url.endsWith("/pulls/170")) {
+      prReads += 1;
+      return { ok: true, status: 200, json: async () => ({ state: "open", draft: true, head: { sha: headSha, ref: prReads === 1 ? autonomousTask.branch : "codex/renamed-after-plan" }, base: { ref: "main" } }) };
+    }
+    if (url.endsWith(`/compare/main...${headSha}`)) return { ok: true, status: 200, json: async () => ({ ahead_by: 12, behind_by: 0 }) };
+    if (url.endsWith(`/commits/${headSha}/check-runs`)) return { ok: true, status: 200, json: async () => ({ check_runs: [{ name: "test", status: "completed", conclusion: "success" }] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "KAIOS_AI_COMPANY" };
+  const result = await runAutonomousCompanyReadOnlyCycle({
+    repository_request: { repository: "klineodyssey/kline-odyssey", active_task_pr: 170, observed_at: "2026-08-27T06:01:00Z", fetch_impl, api_base: "https://api.github.test" },
+    cycle_input: { cycle_id: "COMPANY-CYCLE-MOVING-BRANCH", expected_main_sha: mainSha, expected_head_sha: headSha, manager: autonomousManager, workers: [autonomousManager, autonomousWorker], work_queue: [autonomousTask], review_queue: [], previous_cycle_ids: [] },
+    store,
+    company
+  });
+  assert.equal(result.status, "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE");
+  assert.equal(result.pre_persistence_task_repository_gate.status, "HOLD_TASK_REPOSITORY_BINDING");
+  assert.equal(result.persistence, null);
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, 0);
+  assert.equal(result.authority.local_company_history_write, false);
+});
+
+test("Local SQLite Claim simulator enforces unique custody CAS fencing and idempotency without becoming authority", async () => {
+  assert.deepEqual(LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES, ["ACTIVE", "EXECUTING", "REVIEW", "REPAIR", "RECOVERY_PENDING"]);
+  const simulator = await createLocalSqliteClaimRegistrySimulator();
+  const acquire = {
+    operation_id: "OP-CLAIM-001-ACQUIRE",
+    claim_id: "CLAIM-LOCAL-001",
+    task_id: "TASK-LOCAL-001",
+    clone_id: "CLONE-CODEX-001",
+    worker_id: "worker-local-01",
+    session_id: "session-local-01",
+    branch: "codex/task-local-001",
+    base_sha: "a".repeat(40),
+    observed_at: "2026-08-27T07:00:00Z",
+    lease_expiry: "2026-08-27T07:30:00Z"
+  };
+  try {
+    const claimed = simulator.acquire(acquire);
+    assert.equal(claimed.status, "ACTIVE");
+    assert.equal(claimed.record_version, 1);
+    assert.equal(claimed.fencing_token, 1);
+    assert.equal(claimed.production_claim_authority, false);
+    assert.equal(simulator.authority.status, "LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY");
+    assert.equal(simulator.acquire(acquire).operation_status, "IDEMPOTENT_NOOP");
+
+    assert.throws(() => simulator.acquire({
+      ...acquire,
+      operation_id: "OP-CLAIM-002-CONFLICT",
+      claim_id: "CLAIM-LOCAL-002",
+      clone_id: "CLONE-CODEX-002",
+      session_id: "session-local-02"
+    }), (error) => error.code === "CLAIM_ACTIVE_UNIQUE_CONFLICT");
+
+    const recovered = simulator.recover({
+      operation_id: "OP-CLAIM-001-RECOVER",
+      claim_id: acquire.claim_id,
+      expected_record_version: 1,
+      expected_fencing_token: 1,
+      new_session_id: "session-local-01-recovered",
+      observed_at: "2026-08-27T07:31:00Z",
+      lease_expiry: "2026-08-27T08:00:00Z"
+    });
+    assert.equal(recovered.record_version, 2);
+    assert.equal(recovered.fencing_token, 2);
+    assert.equal(recovered.session_id, "session-local-01-recovered");
+    assert.throws(() => simulator.heartbeat({
+      operation_id: "OP-CLAIM-001-STALE-HEARTBEAT",
+      claim_id: acquire.claim_id,
+      expected_record_version: 2,
+      expected_fencing_token: 1,
+      observed_at: "2026-08-27T07:32:00Z",
+      lease_expiry: "2026-08-27T08:01:00Z"
+    }), (error) => error.code === "STALE_SESSION_FENCED");
+  } finally {
+    simulator.closeDatabase();
+  }
+});
+
+test("Local SQLite Claim simulator preserves review custody and repair lineage but fails closed before authoritative close-release", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "kaios-claim-simulator-"));
+  const databasePath = path.join(directory, "claims.sqlite");
+  let simulator;
+  try {
+    simulator = await createLocalSqliteClaimRegistrySimulator({ database_path: databasePath });
+    const acquired = simulator.acquire({
+      operation_id: "OP-LIFECYCLE-ACQUIRE",
+      claim_id: "CLAIM-LIFECYCLE-001",
+      task_id: "TASK-LIFECYCLE-001",
+      clone_id: "CLONE-LIFECYCLE-001",
+      worker_id: "worker-lifecycle-01",
+      session_id: "session-lifecycle-01",
+      branch: "codex/task-lifecycle-001",
+      base_sha: "b".repeat(40),
+      observed_at: "2026-08-27T08:00:00Z",
+      lease_expiry: "2026-08-27T08:30:00Z"
+    });
+    const executing = simulator.heartbeat({
+      operation_id: "OP-LIFECYCLE-HEARTBEAT",
+      claim_id: acquired.claim_id,
+      expected_record_version: acquired.record_version,
+      expected_fencing_token: acquired.fencing_token,
+      observed_at: "2026-08-27T08:10:00Z",
+      lease_expiry: "2026-08-27T08:40:00Z"
+    });
+    const review = simulator.submitReview({
+      operation_id: "OP-LIFECYCLE-REVIEW-1",
+      claim_id: acquired.claim_id,
+      expected_record_version: executing.record_version,
+      expected_fencing_token: executing.fencing_token,
+      review_owner_id: "reviewer-lifecycle-01",
+      head_sha: "c".repeat(40),
+      observed_at: "2026-08-27T08:20:00Z"
+    });
+    assert.equal(review.status, "REVIEW");
+    assert.equal(review.worker_id, acquired.worker_id);
+    const repair = simulator.repair({
+      operation_id: "OP-LIFECYCLE-REPAIR",
+      claim_id: acquired.claim_id,
+      expected_record_version: review.record_version,
+      expected_fencing_token: review.fencing_token,
+      observed_at: "2026-08-27T09:00:00Z",
+      lease_expiry: "2026-08-27T09:30:00Z"
+    });
+    assert.equal(repair.status, "REPAIR");
+    assert.equal(repair.worker_id, acquired.worker_id);
+    assert.equal(repair.repair_cycle, 1);
+    const secondReview = simulator.submitReview({
+      operation_id: "OP-LIFECYCLE-REVIEW-2",
+      claim_id: acquired.claim_id,
+      expected_record_version: repair.record_version,
+      expected_fencing_token: repair.fencing_token,
+      review_owner_id: "reviewer-lifecycle-01",
+      head_sha: "d".repeat(40),
+      observed_at: "2026-08-27T09:15:00Z"
+    });
+    assert.equal(simulator.authority.authoritative_review_decision, false);
+    assert.equal(simulator.authority.authoritative_registry_reconciliation, false);
+    assert.equal(simulator.authority.close_release, false);
+    assert.throws(() => simulator.release({
+      operation_id: "OP-LIFECYCLE-EARLY-RELEASE",
+      claim_id: acquired.claim_id,
+      expected_record_version: secondReview.record_version,
+      expected_fencing_token: secondReview.fencing_token,
+      observed_at: "2026-08-27T09:16:00Z"
+    }), (error) => error.code === "CLAIM_RELEASE_AUTHORITY_NOT_CONNECTED");
+    assert.throws(() => simulator.close({
+      operation_id: "OP-LIFECYCLE-CLOSE",
+      claim_id: acquired.claim_id,
+      expected_record_version: secondReview.record_version,
+      expected_fencing_token: secondReview.fencing_token,
+      disposition: "APPROVED",
+      registry_reconciled: true,
+      observed_at: "2026-08-27T09:20:00Z"
+    }), (error) => error.code === "CLAIM_CLOSE_AUTHORITY_NOT_CONNECTED");
+    assert.equal(simulator.getClaim(acquired.claim_id).status, "REVIEW");
+    assert.equal(simulator.getEvents(acquired.claim_id).length, 5);
+    simulator.closeDatabase();
+    simulator = await createLocalSqliteClaimRegistrySimulator({ database_path: databasePath });
+    assert.equal(simulator.getClaim(acquired.claim_id).status, "REVIEW");
+    assert.equal(simulator.getEvents(acquired.claim_id).at(-1).mutation, "SUBMIT_REVIEW");
+  } finally {
+    simulator?.closeDatabase();
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("Claim close evidence candidate binds exact head reviewer and registry state without granting authority", () => {
+  const headSha = "a".repeat(40);
+  const claim = {
+    claim_id: "CLAIM-EVIDENCE-001", task_id: "TASK-EVIDENCE-001", worker_id: "worker-evidence-01",
+    review_owner_id: "reviewer-evidence-01", status: "REVIEW", head_sha: headSha, record_version: 4, fencing_token: 2
+  };
+  const repository_snapshot = {
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY", repository: "klineodyssey/kline-odyssey", default_branch: "main",
+    main_sha: "b".repeat(40), active_task_pr: { number: 170, head_sha: headSha, head_ref: "codex/evidence", base_ref: "main", state: "OPEN", draft: true, ahead_main: 1, behind_main: 0, ci_status: "PASS" }
+  };
+  const review_evidence = {
+    evidence_type: "INDEPENDENT_REVIEW_RESULT", review_id: "REVIEW-EVIDENCE-001", claim_id: claim.claim_id,
+    task_id: claim.task_id, worker_id: claim.worker_id, reviewer_id: claim.review_owner_id, head_sha: headSha,
+    decision: "APPROVED", conflict_of_interest: "NONE", source_commit: headSha, payload_sha256: "d".repeat(64), observed_at: "2026-08-28T13:00:00Z"
+  };
+  const registry_evidence = {
+    evidence_type: "CROSS_REGISTRY_RECONCILIATION", reconciliation_id: "RECONCILIATION-EVIDENCE-001",
+    claim_id: claim.claim_id, task_id: claim.task_id, worker_id: claim.worker_id, claim_status: claim.status,
+    record_version: claim.record_version, fencing_token: claim.fencing_token, review_id: review_evidence.review_id,
+    worker_registry_blob_sha: "e".repeat(40), work_queue_blob_sha: "f".repeat(40), task_envelope_blob_sha: "1".repeat(40),
+    payload_sha256: "2".repeat(64), observed_at: "2026-08-28T13:01:00Z"
+  };
+  const result = evaluateClaimCloseEvidenceCandidate({ claim, repository_snapshot, review_evidence, registry_evidence });
+  assert.equal(result.status, "CLAIM_CLOSE_EVIDENCE_CONSISTENT_NOT_AUTHORITY");
+  assert.equal(result.structural_validation, true);
+  assert.equal(result.close_allowed, false);
+  assert.equal(result.release_allowed, false);
+  assert.deepEqual(result.blockers, ["CANONICAL_REVIEW_REGISTRY_CONNECTOR_NOT_CONNECTED", "CANONICAL_WORKER_REGISTRY_CONNECTOR_NOT_CONNECTED"]);
+  assert.throws(() => evaluateClaimCloseEvidenceCandidate({
+    claim, repository_snapshot,
+    review_evidence: { ...review_evidence, reviewer_id: claim.worker_id },
+    registry_evidence
+  }), (error) => error.code === "CLAIM_CLOSE_REVIEWER_MISMATCH");
+  assert.throws(() => evaluateClaimCloseEvidenceCandidate({
+    claim: { ...claim, head_sha: "3".repeat(40) }, repository_snapshot, review_evidence, registry_evidence
+  }), (error) => error.code === "CLAIM_CLOSE_HEAD_MISMATCH");
 });

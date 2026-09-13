@@ -1865,3 +1865,1021 @@ export function createCompanyFoundingReadinessCheck({ company, founderLife, work
     company_status: company.status
   });
 }
+
+export const AUTONOMOUS_COMPANY_SAFE_ACTIONS = Object.freeze([
+  "READ",
+  "RESEARCH",
+  "ANALYZE",
+  "DOCUMENT",
+  "TEST",
+  "SIMULATE",
+  "PAPER_RUNTIME",
+  "ISSUE_TRIAGE",
+  "SAFE_BRANCH_WORK",
+  "COMMIT_TASK_BRANCH",
+  "PUSH_TASK_BRANCH",
+  "OPEN_DRAFT_PR",
+  "CI",
+  "STATUS_RECONCILIATION",
+  "WORK_EVIDENCE",
+  "HANDOFF",
+  "REVIEW_REQUEST"
+]);
+
+export const AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS = Object.freeze([
+  "SELF_APPROVAL",
+  "SELF_BIRTH_APPROVAL",
+  "SELF_EMPLOYMENT_APPROVAL",
+  "SELF_TRUST_ESCALATION",
+  "SELF_PAYROLL_APPROVAL",
+  "PRIVATE_KEY_ACCESS",
+  "TREASURY_TRANSFER",
+  "PAYROLL_PAYMENT",
+  "MAINNET_TRANSACTION",
+  "TOKEN_TRANSFER",
+  "CONTRACT_DEPLOYMENT",
+  "GOVERNANCE_EXECUTION",
+  "OWNERSHIP_TRANSFER",
+  "PUSH_MAIN",
+  "MERGE_MAIN",
+  "IRREVERSIBLE_EXTERNAL_ACTION"
+]);
+
+export const AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES = Object.freeze([
+  "CLOCK_IN",
+  "WORK_ORDER",
+  "HANDOFF",
+  "REVIEW_REQUEST",
+  "REWORK_ORDER",
+  "BLOCKER_STATE",
+  "CLOCK_OUT"
+]);
+
+const AUTONOMOUS_COMPANY_PRIORITY = Object.freeze({ REVIEW: 0, REPAIR: 1, HUMAN_DECISION: 2, ARCHITECTURE: 3, IMPLEMENTATION: 4 });
+const AUTONOMOUS_COMPANY_SEVERITY = Object.freeze({ P0: 0, P1: 1, P2: 2, P3: 3 });
+const AUTONOMOUS_COMPANY_TRUST = Object.freeze({ T0: 0, T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 });
+const AUTONOMOUS_COMPANY_SAFE_RISK_LEVELS = Object.freeze(["R0", "R1", "LOW"]);
+
+function isAutonomousCompanyWorkerEligible(worker, task = null) {
+  if (!worker || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return false;
+  if (worker.status !== "ACTIVE" || (AUTONOMOUS_COMPANY_TRUST[worker.trust_level] ?? -1) < 2 || worker.suspension) return false;
+  if (typeof worker.life_identity_ref !== "string" || !worker.life_identity_ref.trim()) return false;
+  if (typeof worker.controller_id !== "string" || !worker.controller_id.trim()) return false;
+  if (!["boot_acknowledged", "canon_acknowledged", "workspace_policy_acknowledged", "do_not_touch_acknowledged"].every((key) => worker[key] === true)) return false;
+  if (Number(worker.active_claim_count ?? 0) > 1) return false;
+  if (task && Number(worker.active_claim_count ?? 0) > 0 && worker.current_task !== task.task_id) return false;
+  if (task && worker.current_task && worker.current_task !== task.task_id) return false;
+  return true;
+}
+
+function autonomousCompanyActorsAreDistinct(left, right) {
+  if (!left || !right) return false;
+  const normalize = (value) => typeof value === "string" ? value.trim().toLowerCase() : "";
+  const leftWorker = normalize(left.worker_id);
+  const rightWorker = normalize(right.worker_id);
+  const leftLife = normalize(left.life_identity_ref);
+  const rightLife = normalize(right.life_identity_ref);
+  const leftController = normalize(left.controller_id);
+  const rightController = normalize(right.controller_id);
+  return Boolean(leftWorker && rightWorker && leftLife && rightLife && leftController && rightController)
+    && leftWorker !== rightWorker
+    && leftLife !== rightLife
+    && leftController !== rightController;
+}
+
+function autonomousCompanyBranchMatches(pattern, branch, taskId) {
+  if (typeof pattern !== "string" || typeof branch !== "string" || typeof taskId !== "string") return false;
+  const expected = pattern.replace("<Task-ID>", taskId);
+  return expected === branch;
+}
+
+function createAutonomousCompanyEvent(cycleId, sequence, eventType, actorId, observedAt, payload = {}) {
+  return Object.freeze({
+    event_id: `${cycleId}:${String(sequence).padStart(2, "0")}:${eventType}`,
+    cycle_id: cycleId,
+    sequence,
+    event_type: eventType,
+    actor_id: actorId,
+    occurred_at: observedAt,
+    payload: Object.freeze({ ...payload }),
+    append_only: true,
+    external_effect: false
+  });
+}
+
+/**
+ * Deterministic, side-effect-free Company cycle planner.
+ *
+ * It composes the existing Worker Registry, WorkQueue, Review-first priority,
+ * task-envelope and branch policies. It can emit one review or assignment
+ * candidate, but it cannot claim work, edit GitHub, start a worker, merge,
+ * pay, access a signer or write chain state.
+ */
+export function runAutonomousCompanyCycle({
+  cycle_id,
+  observed_at,
+  current_main_sha,
+  expected_main_sha,
+  manager,
+  workers = [],
+  work_queue = [],
+  review_queue = [],
+  previous_cycle_ids = []
+}) {
+  requireId(cycle_id, "cycle_id");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_COMPANY_CYCLE_TIME", "observed_at must be an ISO timestamp");
+  invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
+  invariant(/^[0-9a-f]{40}$/.test(expected_main_sha ?? ""), "INVALID_EXPECTED_MAIN_SHA", "expected_main_sha must be a lowercase Git SHA");
+  requireArray(workers, "workers");
+  requireArray(work_queue, "work_queue");
+  requireArray(review_queue, "review_queue");
+  requireArray(previous_cycle_ids, "previous_cycle_ids");
+
+  const noExternalAuthority = Object.freeze({
+    main_modified: false,
+    merge_executed: false,
+    deployment_executed: false,
+    mainnet_tx_sent: false,
+    payment_sent: false,
+    private_key_accessed: false,
+    worker_started: false,
+    workqueue_modified: false
+  });
+
+  if (previous_cycle_ids.includes(cycle_id)) {
+    return Object.freeze({
+      cycle_id,
+      status: "IDEMPOTENT_NOOP",
+      selected_action: null,
+      selected_task_id: null,
+      selected_worker_id: null,
+      events: Object.freeze([]),
+      authority: noExternalAuthority,
+      next_safe_action: "WAIT_FOR_NEW_CYCLE_ID"
+    });
+  }
+
+  invariant(isAutonomousCompanyWorkerEligible(manager), "GM_REGISTRATION_REQUIRED", "General Manager must be active, T2+ and fully acknowledged");
+  invariant(String(manager.role ?? "").includes("General Manager"), "GM_ROLE_REQUIRED", "Manager role must include General Manager");
+
+  const events = [];
+  const append = (type, payload = {}) => events.push(createAutonomousCompanyEvent(cycle_id, events.length + 1, type, manager.worker_id, observed_at, payload));
+  append("CLOCK_IN", { worker_id: manager.worker_id, current_main_sha });
+
+  if (current_main_sha !== expected_main_sha) {
+    append("BLOCKER_STATE", { blocker: "STALE_MAIN", expected_main_sha, current_main_sha });
+    append("CLOCK_OUT", { result: "HOLD_STALE_MAIN" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_STALE_MAIN",
+      selected_action: null,
+      selected_task_id: null,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "REFRESH_MAIN_AND_RESTART_NEW_CYCLE"
+    });
+  }
+
+  const reviewCandidates = review_queue
+    .filter((item) => ["DELIVERY_SUBMITTED", "REVIEW", "REWORK_REQUIRED"].includes(item.status))
+    .map((item) => ({
+      ...item,
+      priority_class: item.status === "REWORK_REQUIRED" ? "REPAIR" : "REVIEW",
+      source: item.status === "REWORK_REQUIRED" ? "REPAIR_QUEUE" : "REVIEW_QUEUE"
+    }));
+  const workCandidates = work_queue
+    .filter((item) => ["OPEN", "CLAIMABLE"].includes(item.status))
+    .map((item) => ({ ...item, source: "WORK_QUEUE" }));
+  const candidates = [...reviewCandidates, ...workCandidates].sort((a, b) => {
+    const byClass = (AUTONOMOUS_COMPANY_PRIORITY[a.priority_class] ?? 99) - (AUTONOMOUS_COMPANY_PRIORITY[b.priority_class] ?? 99);
+    if (byClass) return byClass;
+    const bySeverity = (AUTONOMOUS_COMPANY_SEVERITY[a.priority] ?? 99) - (AUTONOMOUS_COMPANY_SEVERITY[b.priority] ?? 99);
+    if (bySeverity) return bySeverity;
+    return String(a.created_at ?? "").localeCompare(String(b.created_at ?? "")) || String(a.task_id).localeCompare(String(b.task_id));
+  });
+
+  if (candidates.length === 0) {
+    append("CLOCK_OUT", { result: "NO_SAFE_WORK_AVAILABLE" });
+    return Object.freeze({
+      cycle_id,
+      status: "NO_SAFE_WORK_AVAILABLE",
+      selected_action: null,
+      selected_task_id: null,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "WAIT_FOR_DURABLE_WORK_OR_REVIEW_EVENT"
+    });
+  }
+
+  const selected = candidates[0];
+  requireId(selected.task_id, "task_id");
+
+  if (selected.priority_class === "HUMAN_DECISION") {
+    append("BLOCKER_STATE", { blocker: "HUMAN_DECISION_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_HUMAN_DECISION" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_HUMAN_DECISION",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "WAIT_FOR_MACHINE_VERIFIABLE_HUMAN_DECISION"
+    });
+  }
+
+  const requestedActions = selected.authorized_actions ?? [];
+  requireArray(requestedActions, "authorized_actions");
+  const forbidden = requestedActions.filter((action) => AUTONOMOUS_COMPANY_FORBIDDEN_ACTIONS.includes(action));
+  const unknown = requestedActions.filter((action) => !AUTONOMOUS_COMPANY_SAFE_ACTIONS.includes(action));
+  const riskIsSafe = AUTONOMOUS_COMPANY_SAFE_RISK_LEVELS.includes(selected.risk_level);
+  const taskGatePassed = selected.task_envelope_status === "AUTHORIZED"
+    && selected.authority_status === "MACHINE_VERIFIED"
+    && selected.dependencies_complete === true
+    && selected.protected_paths_changed === false
+    && riskIsSafe
+    && forbidden.length === 0
+    && unknown.length === 0;
+
+  if (!taskGatePassed) {
+    append("BLOCKER_STATE", {
+      blocker: "TASK_AUTHORITY_FAIL_CLOSED",
+      task_id: selected.task_id,
+      risk_level: selected.risk_level ?? null,
+      risk_is_safe: riskIsSafe,
+      forbidden_actions: forbidden,
+      unknown_actions: unknown
+    });
+    append("CLOCK_OUT", { result: "HOLD_TASK_AUTHORITY" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_TASK_AUTHORITY",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "REVIEW_TASK_ENVELOPE_AND_AUTHORITY"
+    });
+  }
+
+  if (selected.source === "REVIEW_QUEUE") {
+    const submitter = workers.find((worker) => worker.worker_id === selected.submitter_worker_id);
+    if (!isAutonomousCompanyWorkerEligible(submitter, selected)
+      || !autonomousCompanyBranchMatches(submitter.allowed_branch_pattern, selected.branch, selected.task_id)) {
+      append("BLOCKER_STATE", { blocker: "AUTHORIZED_DELIVERY_SUBMITTER_REQUIRED", task_id: selected.task_id });
+      append("CLOCK_OUT", { result: "HOLD_SUBMITTER" });
+      return Object.freeze({
+        cycle_id,
+        status: "HOLD_SUBMITTER",
+        selected_action: null,
+        selected_task_id: selected.task_id,
+        selected_worker_id: null,
+        events: Object.freeze(events),
+        authority: noExternalAuthority,
+        next_safe_action: "RESTORE_AUTHORIZED_DELIVERY_SUBMITTER_BINDING"
+      });
+    }
+    const reviewer = workers.find((worker) => worker.worker_id === selected.reviewer_id);
+    if (!isAutonomousCompanyWorkerEligible(reviewer) || !autonomousCompanyActorsAreDistinct(reviewer, submitter)) {
+      append("BLOCKER_STATE", { blocker: "INDEPENDENT_REVIEWER_REQUIRED", task_id: selected.task_id });
+      append("CLOCK_OUT", { result: "HOLD_REVIEWER" });
+      return Object.freeze({
+        cycle_id,
+        status: "HOLD_REVIEWER",
+        selected_action: null,
+        selected_task_id: selected.task_id,
+        selected_worker_id: null,
+        events: Object.freeze(events),
+        authority: noExternalAuthority,
+        next_safe_action: "ASSIGN_DISTINCT_AUTHORIZED_REVIEWER"
+      });
+    }
+    append("REVIEW_REQUEST", { task_id: selected.task_id, reviewer_id: reviewer.worker_id, source: selected.source });
+    append("CLOCK_OUT", { result: "REVIEW_REQUEST_READY" });
+    return Object.freeze({
+      cycle_id,
+      status: "REVIEW_REQUEST_READY",
+      selected_action: "REVIEW_REQUEST",
+      selected_task_id: selected.task_id,
+      selected_worker_id: reviewer.worker_id,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "TRIGGER_INDEPENDENT_REVIEW_ADAPTER_WHEN_CONNECTED"
+    });
+  }
+
+  const reviewer = workers.find((candidate) => candidate.worker_id === selected.reviewer_id);
+  if (!isAutonomousCompanyWorkerEligible(reviewer)) {
+    append("BLOCKER_STATE", { blocker: "INDEPENDENT_REVIEWER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_REVIEWER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_REVIEWER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "ASSIGN_DISTINCT_AUTHORIZED_REVIEWER"
+    });
+  }
+
+  const eligibleWorkers = workers.filter((worker) => isAutonomousCompanyWorkerEligible(worker, selected));
+  const requiredRepairWorkerId = selected.source === "REPAIR_QUEUE" ? selected.original_worker_id : null;
+  if (selected.source === "REPAIR_QUEUE" && (typeof requiredRepairWorkerId !== "string" || !requiredRepairWorkerId.trim())) {
+    append("BLOCKER_STATE", { blocker: "ORIGINAL_REPAIR_WORKER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_REPAIR_WORKER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_REPAIR_WORKER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "RESTORE_ORIGINAL_AUTHORIZED_WORKER_BINDING"
+    });
+  }
+
+  const requiredWorkerId = requiredRepairWorkerId ?? selected.assigned_worker_id;
+  const worker = requiredWorkerId
+    ? eligibleWorkers.find((candidate) => candidate.worker_id === requiredWorkerId)
+    : eligibleWorkers.find((candidate) => (
+      autonomousCompanyActorsAreDistinct(candidate, reviewer)
+      && autonomousCompanyBranchMatches(candidate.allowed_branch_pattern, selected.branch, selected.task_id)
+    ));
+  if (!worker || !autonomousCompanyActorsAreDistinct(worker, reviewer) || !autonomousCompanyBranchMatches(worker.allowed_branch_pattern, selected.branch, selected.task_id)) {
+    append("BLOCKER_STATE", { blocker: "ELIGIBLE_DISTINCT_WORKER_REQUIRED", task_id: selected.task_id });
+    append("CLOCK_OUT", { result: "HOLD_WORKER" });
+    return Object.freeze({
+      cycle_id,
+      status: "HOLD_WORKER",
+      selected_action: null,
+      selected_task_id: selected.task_id,
+      selected_worker_id: null,
+      events: Object.freeze(events),
+      authority: noExternalAuthority,
+      next_safe_action: "REGISTER_OR_ASSIGN_ELIGIBLE_WORKER"
+    });
+  }
+
+  const isRepair = selected.source === "REPAIR_QUEUE";
+  append("WORK_ORDER", {
+    task_id: selected.task_id,
+    worker_id: worker.worker_id,
+    branch: selected.branch,
+    work_type: isRepair ? "REPAIR" : "IMPLEMENTATION"
+  });
+  append("HANDOFF", {
+    task_id: selected.task_id,
+    to_worker_id: worker.worker_id,
+    reviewer_id: reviewer.worker_id,
+    handoff_type: isRepair ? "REPAIR_RETURN" : "INITIAL_ASSIGNMENT"
+  });
+  const readyStatus = isRepair ? "REPAIR_ASSIGNMENT_CANDIDATE_READY" : "ASSIGNMENT_CANDIDATE_READY";
+  append("CLOCK_OUT", { result: readyStatus });
+  return Object.freeze({
+    cycle_id,
+    status: readyStatus,
+    selected_action: isRepair ? "REPAIR_WORK_ORDER_CANDIDATE" : "SAFE_ASSIGNMENT_CANDIDATE",
+    selected_task_id: selected.task_id,
+    selected_worker_id: worker.worker_id,
+    events: Object.freeze(events),
+    authority: noExternalAuthority,
+    next_safe_action: isRepair
+      ? "PERSIST_REPAIR_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
+      : "PERSIST_CLAIM_ATOMICALLY_WHEN_CONNECTOR_IS_AUTHORIZED"
+  });
+}
+
+/**
+ * Persists one already-planned safe Company cycle into the existing Company
+ * history stream. Event ids are deterministic, so IndexedDB rejects a racing
+ * duplicate and MemoryUniverseStore rejects it before mutation.
+ */
+export async function persistAutonomousCompanyCycle({ store, company, cycle_result }) {
+  invariant(store && typeof store.history === "function" && typeof store.commitBatch === "function", "COMPANY_EVENT_STORE_REQUIRED", "Company cycle persistence requires the existing UniverseStore interface");
+  invariant(company && typeof company.company_id === "string" && company.company_id.trim(), "COMPANY_ID_REQUIRED", "Company cycle persistence requires a Company identity");
+  invariant(cycle_result && typeof cycle_result.cycle_id === "string", "COMPANY_CYCLE_RESULT_REQUIRED", "A planned Company cycle result is required");
+  requireArray(cycle_result.events, "cycle_result.events");
+  invariant(cycle_result.authority && typeof cycle_result.authority === "object", "COMPANY_CYCLE_AUTHORITY_REQUIRED", "A planned Company cycle must expose its authority boundary");
+  invariant(
+    Object.values(cycle_result.authority ?? {}).every((value) => value === false),
+    "EXTERNAL_EFFECT_CYCLE_PERSISTENCE_FORBIDDEN",
+    "Durable Company memory only accepts cycles with no external authority effects"
+  );
+
+  const history = await store.history(company.company_id, "COMPANY");
+  if (history.some((event) => event.payload?.cycle_id === cycle_result.cycle_id)) {
+    return Object.freeze({ status: "IDEMPOTENT_NOOP", cycle_id: cycle_result.cycle_id, persisted_events: Object.freeze([]) });
+  }
+
+  let expectedSequence = 1;
+  const reservedPayloadFields = Object.freeze(["cycle_id", "planner_event_id", "sequence", "cycle_status", "external_effect"]);
+  const operations = cycle_result.events.map((event) => {
+    invariant(event.cycle_id === cycle_result.cycle_id, "CYCLE_EVENT_ID_MISMATCH", "Every persisted event must belong to the planned cycle");
+    invariant(event.sequence === expectedSequence, "CYCLE_EVENT_SEQUENCE_INVALID", "Company cycle events must be contiguous and ordered");
+    invariant(AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES.includes(event.event_type), "UNSUPPORTED_DURABLE_COMPANY_EVENT", `Unsupported durable Company event: ${event.event_type}`);
+    invariant(event.append_only === true && event.external_effect === false, "DURABLE_EVENT_SAFETY_BOUNDARY", "Persisted Company events must be append-only and side-effect-free");
+    invariant(event.payload && typeof event.payload === "object" && !Array.isArray(event.payload), "DURABLE_EVENT_PAYLOAD_REQUIRED", "Persisted Company events require an object payload");
+    invariant(
+      reservedPayloadFields.every((field) => !Object.prototype.hasOwnProperty.call(event.payload, field)),
+      "DURABLE_EVENT_RESERVED_FIELD_OVERRIDE",
+      "Planner payload cannot override durable Company event control fields"
+    );
+    expectedSequence += 1;
+    return {
+      event_id: event.event_id,
+      domain: "COMPANY",
+      stream: "COMPANY",
+      id: company.company_id,
+      entity: company,
+      event_type: event.event_type,
+      actor_id: event.actor_id,
+      timestamp: event.occurred_at,
+      payload: {
+        ...event.payload,
+        cycle_id: cycle_result.cycle_id,
+        planner_event_id: event.event_id,
+        sequence: event.sequence,
+        cycle_status: cycle_result.status,
+        external_effect: false
+      }
+    };
+  });
+
+  const persisted = operations.length ? await store.commitBatch(operations) : [];
+  return Object.freeze({
+    status: operations.length ? "CYCLE_EVENTS_PERSISTED" : "NO_EVENTS_TO_PERSIST",
+    cycle_id: cycle_result.cycle_id,
+    persisted_events: Object.freeze(persisted)
+  });
+}
+
+export async function restoreAutonomousCompanyCycleState({ store, company_id }) {
+  invariant(store && typeof store.history === "function", "COMPANY_EVENT_STORE_REQUIRED", "Company cycle recovery requires the existing UniverseStore interface");
+  requireId(company_id, "company_id");
+  const history = await store.history(company_id, "COMPANY");
+  const cycleEvents = history.filter((event) => typeof event.payload?.cycle_id === "string" && AUTONOMOUS_COMPANY_DURABLE_EVENT_TYPES.includes(event.event_type));
+  const cycleIds = [...new Set(cycleEvents.map((event) => event.payload.cycle_id))];
+  const latestCycleId = cycleIds.at(-1) ?? null;
+  const latestEvents = latestCycleId ? cycleEvents.filter((event) => event.payload.cycle_id === latestCycleId) : [];
+  const clockOut = latestEvents.findLast((event) => event.event_type === "CLOCK_OUT");
+  return Object.freeze({
+    status: latestCycleId ? "RESTART_STATE_RECOVERED" : "NO_DURABLE_CYCLE_HISTORY",
+    company_id,
+    previous_cycle_ids: Object.freeze(cycleIds),
+    latest_cycle_id: latestCycleId,
+    latest_cycle_status: clockOut?.payload?.result ?? latestEvents.at(-1)?.payload?.cycle_status ?? null,
+    latest_event_id: latestEvents.at(-1)?.event_id ?? null,
+    event_count: cycleEvents.length,
+    external_effect: false
+  });
+}
+
+export const LOCAL_CLAIM_SIMULATOR_ACTIVE_STATES = Object.freeze(["ACTIVE", "EXECUTING", "REVIEW", "REPAIR", "RECOVERY_PENDING"]);
+
+export function evaluateClaimCloseEvidenceCandidate({ claim, repository_snapshot, review_evidence, registry_evidence }) {
+  requireFields(claim, ["claim_id", "task_id", "worker_id", "review_owner_id", "status", "head_sha", "record_version", "fencing_token"], "ClaimCloseEvidence.claim");
+  requireFields(review_evidence, ["evidence_type", "review_id", "claim_id", "task_id", "worker_id", "reviewer_id", "head_sha", "decision", "conflict_of_interest", "source_commit", "payload_sha256", "observed_at"], "ClaimCloseEvidence.review");
+  requireFields(registry_evidence, ["evidence_type", "reconciliation_id", "claim_id", "task_id", "worker_id", "claim_status", "record_version", "fencing_token", "review_id", "worker_registry_blob_sha", "work_queue_blob_sha", "task_envelope_blob_sha", "payload_sha256", "observed_at"], "ClaimCloseEvidence.registry");
+  invariant(repository_snapshot?.snapshot_type === "LATEST_REPOSITORY_READ_ONLY", "CLAIM_CLOSE_REPOSITORY_SNAPSHOT_REQUIRED", "Claim close evidence requires a fresh read-only repository snapshot");
+  const pr = repository_snapshot.active_task_pr;
+  invariant(pr && pr.state === "OPEN" && pr.base_ref === repository_snapshot.default_branch && pr.behind_main === 0 && pr.ci_status === "PASS", "CLAIM_CLOSE_EXACT_HEAD_CI_REQUIRED", "Claim close evidence requires an open, current, exact-head CI passing PR");
+  invariant(claim.status === "REVIEW", "CLAIM_CLOSE_REVIEW_CUSTODY_REQUIRED", "Claim close evidence can only be prepared from review custody");
+  invariant(/^[0-9a-f]{40}$/.test(claim.head_sha), "CLAIM_CLOSE_HEAD_INVALID", "Claim review custody must bind an exact head SHA");
+  invariant(pr.head_sha === claim.head_sha, "CLAIM_CLOSE_HEAD_MISMATCH", "Repository, Claim and review evidence must bind the same exact head");
+  invariant(review_evidence.evidence_type === "INDEPENDENT_REVIEW_RESULT", "CLAIM_CLOSE_REVIEW_EVIDENCE_TYPE_INVALID", "Review evidence type must be INDEPENDENT_REVIEW_RESULT");
+  invariant(review_evidence.claim_id === claim.claim_id && review_evidence.task_id === claim.task_id && review_evidence.worker_id === claim.worker_id, "CLAIM_CLOSE_REVIEW_LINEAGE_MISMATCH", "Review evidence must bind the Claim, Task and original Worker");
+  invariant(review_evidence.reviewer_id === claim.review_owner_id && review_evidence.reviewer_id !== claim.worker_id, "CLAIM_CLOSE_REVIEWER_MISMATCH", "Review evidence must come from the distinct review custodian");
+  invariant(review_evidence.head_sha === claim.head_sha, "CLAIM_CLOSE_REVIEW_HEAD_MISMATCH", "Review evidence must bind the Claim exact head");
+  invariant(review_evidence.source_commit === claim.head_sha, "CLAIM_CLOSE_REVIEW_SOURCE_MISMATCH", "Review source commit must equal the exact head held in review custody");
+  invariant(["APPROVED", "REJECTED", "BLOCKED"].includes(review_evidence.decision), "CLAIM_CLOSE_REVIEW_DECISION_INVALID", "Review evidence requires an explicit terminal decision");
+  invariant(review_evidence.conflict_of_interest === "NONE", "CLAIM_CLOSE_REVIEW_CONFLICT", "Independent review evidence cannot carry a conflict of interest");
+  invariant(registry_evidence.evidence_type === "CROSS_REGISTRY_RECONCILIATION", "CLAIM_CLOSE_REGISTRY_EVIDENCE_TYPE_INVALID", "Registry evidence type must be CROSS_REGISTRY_RECONCILIATION");
+  invariant(registry_evidence.claim_id === claim.claim_id && registry_evidence.task_id === claim.task_id && registry_evidence.worker_id === claim.worker_id, "CLAIM_CLOSE_REGISTRY_LINEAGE_MISMATCH", "Registry evidence must bind the Claim, Task and Worker");
+  invariant(registry_evidence.claim_status === claim.status && registry_evidence.record_version === claim.record_version && registry_evidence.fencing_token === claim.fencing_token, "CLAIM_CLOSE_REGISTRY_STATE_MISMATCH", "Registry evidence must bind the current Claim status, version and fencing token");
+  invariant(registry_evidence.review_id === review_evidence.review_id, "CLAIM_CLOSE_REVIEW_REGISTRY_MISMATCH", "Review and Registry evidence must bind the same review ID");
+  for (const value of [review_evidence.source_commit, registry_evidence.worker_registry_blob_sha, registry_evidence.work_queue_blob_sha, registry_evidence.task_envelope_blob_sha]) {
+    invariant(typeof value === "string" && /^[0-9a-f]{40}$/.test(value), "CLAIM_CLOSE_GIT_EVIDENCE_INVALID", "Claim close Git evidence must use exact lowercase object IDs");
+  }
+  for (const value of [review_evidence.payload_sha256, registry_evidence.payload_sha256]) {
+    invariant(typeof value === "string" && /^[0-9a-f]{64}$/.test(value), "CLAIM_CLOSE_PAYLOAD_HASH_INVALID", "Claim close payload evidence must use lowercase SHA-256");
+  }
+  for (const value of [review_evidence.observed_at, registry_evidence.observed_at]) {
+    invariant(typeof value === "string" && !Number.isNaN(Date.parse(value)), "CLAIM_CLOSE_EVIDENCE_TIME_INVALID", "Claim close evidence requires an ISO timestamp");
+  }
+  return Object.freeze({
+    status: "CLAIM_CLOSE_EVIDENCE_CONSISTENT_NOT_AUTHORITY",
+    claim_id: claim.claim_id,
+    task_id: claim.task_id,
+    review_id: review_evidence.review_id,
+    decision: review_evidence.decision,
+    exact_head: claim.head_sha,
+    structural_validation: true,
+    authoritative_review_registry_connected: false,
+    authoritative_worker_registry_connected: false,
+    close_allowed: false,
+    release_allowed: false,
+    blockers: Object.freeze(["CANONICAL_REVIEW_REGISTRY_CONNECTOR_NOT_CONNECTED", "CANONICAL_WORKER_REGISTRY_CONNECTOR_NOT_CONNECTED"]),
+    external_effect: false
+  });
+}
+
+/**
+ * One-host SQLite state-machine simulator for the proposed Claim Registry.
+ * It exercises transactions, unique active locks, compare-and-swap versions,
+ * fencing tokens and append-only mutation evidence. It is deliberately not a
+ * shared service, production authority, dispatcher, worker wake or cutover.
+ */
+export async function createLocalSqliteClaimRegistrySimulator({ database_path = ":memory:" } = {}) {
+  invariant(typeof database_path === "string" && database_path.length > 0, "CLAIM_SIMULATOR_PATH_REQUIRED", "Claim simulator requires a SQLite path or :memory:");
+  const { DatabaseSync } = await import("node:sqlite");
+  const database = new DatabaseSync(database_path);
+  database.exec("PRAGMA foreign_keys = ON");
+  database.exec("PRAGMA journal_mode = WAL");
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS company_claims (
+      claim_id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      clone_id TEXT NOT NULL,
+      worker_id TEXT NOT NULL,
+      session_id TEXT NOT NULL,
+      review_owner_id TEXT,
+      status TEXT NOT NULL,
+      fencing_token INTEGER NOT NULL CHECK (fencing_token > 0),
+      lease_expiry TEXT NOT NULL,
+      heartbeat_at TEXT NOT NULL,
+      review_custody_at TEXT,
+      repair_cycle INTEGER NOT NULL DEFAULT 0 CHECK (repair_cycle >= 0),
+      branch TEXT NOT NULL,
+      base_sha TEXT NOT NULL,
+      head_sha TEXT,
+      record_version INTEGER NOT NULL CHECK (record_version > 0),
+      disposition TEXT,
+      registry_reconciled INTEGER NOT NULL DEFAULT 0 CHECK (registry_reconciled IN (0, 1)),
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      closed_at TEXT,
+      released_at TEXT
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_task
+      ON company_claims(task_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_clone
+      ON company_claims(clone_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_session
+      ON company_claims(session_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE UNIQUE INDEX IF NOT EXISTS company_claim_active_worker
+      ON company_claims(worker_id) WHERE status IN ('ACTIVE', 'EXECUTING', 'REVIEW', 'REPAIR', 'RECOVERY_PENDING');
+    CREATE TABLE IF NOT EXISTS company_claim_events (
+      operation_id TEXT PRIMARY KEY,
+      claim_id TEXT NOT NULL,
+      mutation TEXT NOT NULL,
+      record_version INTEGER NOT NULL,
+      fencing_token INTEGER NOT NULL,
+      created_at TEXT NOT NULL,
+      detail TEXT NOT NULL,
+      FOREIGN KEY (claim_id) REFERENCES company_claims(claim_id)
+    );
+  `);
+
+  const claimSelect = database.prepare("SELECT * FROM company_claims WHERE claim_id = ?");
+  const eventSelect = database.prepare("SELECT * FROM company_claim_events WHERE operation_id = ?");
+  const eventInsert = database.prepare("INSERT INTO company_claim_events (operation_id, claim_id, mutation, record_version, fencing_token, created_at, detail) VALUES (?, ?, ?, ?, ?, ?, ?)");
+  const parseTime = (value, field) => {
+    invariant(typeof value === "string" && !Number.isNaN(Date.parse(value)), "CLAIM_TIME_INVALID", `${field} must be an ISO timestamp`);
+    return value;
+  };
+  const claimTextId = (value, field) => {
+    invariant(typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/.test(value), "CLAIM_ID_INVALID", `${field} must be a non-empty machine identifier`);
+    return value;
+  };
+  const getClaim = (claimId) => {
+    const row = claimSelect.get(claimId);
+    invariant(row, "CLAIM_NOT_FOUND", `Claim not found: ${claimId}`);
+    return row;
+  };
+  const publicClaim = (row, operationStatus = "APPLIED") => Object.freeze({
+    ...row,
+    registry_reconciled: row.registry_reconciled === 1,
+    simulator_status: "LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY",
+    operation_status: operationStatus,
+    production_claim_authority: false,
+    worker_wake: false,
+    external_effect: false
+  });
+  const start = () => database.exec("BEGIN IMMEDIATE");
+  const commit = () => database.exec("COMMIT");
+  const rollback = () => {
+    try { database.exec("ROLLBACK"); } catch { /* no open transaction */ }
+  };
+  const replay = (operationId, mutation, claimId) => {
+    claimTextId(operationId, "operation_id");
+    const existing = eventSelect.get(operationId);
+    if (!existing) return null;
+    invariant(existing.mutation === mutation && existing.claim_id === claimId, "CLAIM_OPERATION_REPLAY_MISMATCH", "An operation_id cannot be reused for another claim or mutation");
+    return publicClaim(getClaim(claimId), "IDEMPOTENT_NOOP");
+  };
+  const assertCas = (row, input) => {
+    invariant(Number.isInteger(input.expected_record_version) && input.expected_record_version === row.record_version, "CLAIM_RECORD_VERSION_CONFLICT", "Claim record_version compare-and-swap failed");
+    invariant(Number.isInteger(input.expected_fencing_token) && input.expected_fencing_token === row.fencing_token, "STALE_SESSION_FENCED", "Claim fencing_token is stale");
+  };
+  const appendEvent = (operationId, claimId, mutation, row, observedAt, detail = {}) => {
+    eventInsert.run(operationId, claimId, mutation, row.record_version, row.fencing_token, observedAt, JSON.stringify(detail));
+  };
+  const transactional = (operationId, mutation, claimId, action) => {
+    const replayed = replay(operationId, mutation, claimId);
+    if (replayed) return replayed;
+    start();
+    try {
+      const result = action();
+      commit();
+      return result;
+    } catch (error) {
+      rollback();
+      if (String(error?.code ?? "").startsWith("SQLITE_CONSTRAINT") || /constraint failed/i.test(String(error?.message ?? ""))) {
+        invariant(false, "CLAIM_ACTIVE_UNIQUE_CONFLICT", "A task, clone, worker or session already holds active claim custody");
+      }
+      throw error;
+    }
+  };
+
+  const api = {
+    authority: Object.freeze({
+      status: "LOCAL_SQLITE_SIMULATOR_NOT_AUTHORITY",
+      shared_distributed_authority: false,
+      authoritative_review_decision: false,
+      authoritative_registry_reconciliation: false,
+      close_release: false,
+      automatic_dispatch: false,
+      worker_wake: false,
+      github_write: false,
+      chain_write: false
+    }),
+    acquire(input) {
+      requireFields(input, ["operation_id", "claim_id", "task_id", "clone_id", "worker_id", "session_id", "branch", "base_sha", "observed_at", "lease_expiry"], "ClaimAcquire");
+      for (const field of ["operation_id", "claim_id", "task_id", "clone_id", "worker_id", "session_id"]) claimTextId(input[field], field);
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Claim lease must expire after acquisition");
+      invariant(typeof input.branch === "string" && input.branch.length > 0 && /^[0-9a-f]{40}$/.test(input.base_sha), "CLAIM_BRANCH_BASE_INVALID", "Claim requires a branch and exact base SHA");
+      return transactional(input.operation_id, "ACQUIRE", input.claim_id, () => {
+        database.prepare(`INSERT INTO company_claims
+          (claim_id, task_id, clone_id, worker_id, session_id, status, fencing_token, lease_expiry, heartbeat_at, branch, base_sha, record_version, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, 'ACTIVE', 1, ?, ?, ?, ?, 1, ?, ?)`)
+          .run(input.claim_id, input.task_id, input.clone_id, input.worker_id, input.session_id, input.lease_expiry, input.observed_at, input.branch, input.base_sha, input.observed_at, input.observed_at);
+        const row = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "ACQUIRE", row, input.observed_at, { task_id: input.task_id, session_id: input.session_id });
+        return publicClaim(row);
+      });
+    },
+    heartbeat(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "observed_at", "lease_expiry"], "ClaimHeartbeat");
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      return transactional(input.operation_id, "HEARTBEAT", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(["ACTIVE", "EXECUTING"].includes(row.status), "CLAIM_HEARTBEAT_STATE_INVALID", "Heartbeat requires active execution custody");
+        invariant(Date.parse(input.observed_at) <= Date.parse(row.lease_expiry), "CLAIM_LEASE_EXPIRED", "Expired execution custody cannot heartbeat");
+        invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Heartbeat lease must extend beyond observed_at");
+        database.prepare("UPDATE company_claims SET status = 'EXECUTING', heartbeat_at = ?, lease_expiry = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.observed_at, input.lease_expiry, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "HEARTBEAT", updated, input.observed_at);
+        return publicClaim(updated);
+      });
+    },
+    submitReview(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "review_owner_id", "head_sha", "observed_at"], "ClaimSubmitReview");
+      claimTextId(input.review_owner_id, "review_owner_id");
+      parseTime(input.observed_at, "observed_at");
+      invariant(/^[0-9a-f]{40}$/.test(input.head_sha), "CLAIM_HEAD_SHA_INVALID", "Review custody requires an exact head SHA");
+      return transactional(input.operation_id, "SUBMIT_REVIEW", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(["ACTIVE", "EXECUTING", "REPAIR"].includes(row.status), "CLAIM_REVIEW_STATE_INVALID", "Only execution or repair custody can enter review");
+        invariant(input.review_owner_id !== row.worker_id, "CLAIM_SELF_REVIEW_FORBIDDEN", "Review custody requires a distinct reviewer");
+        database.prepare("UPDATE company_claims SET status = 'REVIEW', review_owner_id = ?, review_custody_at = ?, head_sha = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.review_owner_id, input.observed_at, input.head_sha, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "SUBMIT_REVIEW", updated, input.observed_at, { review_owner_id: input.review_owner_id, head_sha: input.head_sha });
+        return publicClaim(updated);
+      });
+    },
+    repair(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "observed_at", "lease_expiry"], "ClaimRepair");
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Repair lease must expire after repair begins");
+      return transactional(input.operation_id, "REPAIR", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(row.status === "REVIEW", "CLAIM_REPAIR_STATE_INVALID", "Repair must return from review custody");
+        database.prepare("UPDATE company_claims SET status = 'REPAIR', review_owner_id = NULL, repair_cycle = repair_cycle + 1, lease_expiry = ?, heartbeat_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.lease_expiry, input.observed_at, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "REPAIR", updated, input.observed_at, { original_worker_id: row.worker_id });
+        return publicClaim(updated);
+      });
+    },
+    recover(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "new_session_id", "observed_at", "lease_expiry"], "ClaimRecover");
+      claimTextId(input.new_session_id, "new_session_id");
+      parseTime(input.observed_at, "observed_at");
+      parseTime(input.lease_expiry, "lease_expiry");
+      invariant(Date.parse(input.lease_expiry) > Date.parse(input.observed_at), "CLAIM_LEASE_INVALID", "Recovery lease must expire after recovery");
+      return transactional(input.operation_id, "RECOVER", input.claim_id, () => {
+        const row = getClaim(input.claim_id);
+        assertCas(row, input);
+        invariant(["ACTIVE", "EXECUTING", "RECOVERY_PENDING", "EXPIRED", "ABANDONED"].includes(row.status), "CLAIM_RECOVERY_STATE_INVALID", "Claim is not recoverable");
+        invariant(["RECOVERY_PENDING", "EXPIRED", "ABANDONED"].includes(row.status) || Date.parse(input.observed_at) > Date.parse(row.lease_expiry), "CLAIM_RECOVERY_BEFORE_EXPIRY_FORBIDDEN", "Live execution custody cannot be recovered before lease expiry");
+        database.prepare("UPDATE company_claims SET status = 'ACTIVE', session_id = ?, fencing_token = fencing_token + 1, lease_expiry = ?, heartbeat_at = ?, record_version = record_version + 1, updated_at = ? WHERE claim_id = ?")
+          .run(input.new_session_id, input.lease_expiry, input.observed_at, input.observed_at, input.claim_id);
+        const updated = getClaim(input.claim_id);
+        appendEvent(input.operation_id, input.claim_id, "RECOVER", updated, input.observed_at, { previous_session_id: row.session_id, new_session_id: input.new_session_id });
+        return publicClaim(updated);
+      });
+    },
+    close(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "disposition", "registry_reconciled", "observed_at"], "ClaimClose");
+      parseTime(input.observed_at, "observed_at");
+      invariant(["APPROVED", "REJECTED", "BLOCKED"].includes(input.disposition), "CLAIM_DISPOSITION_INVALID", "Close requires an approved, rejected or blocked disposition");
+      invariant(input.registry_reconciled === true, "CLAIM_REGISTRY_RECONCILIATION_REQUIRED", "Claim close requires cross-registry reconciliation");
+      invariant(false, "CLAIM_CLOSE_AUTHORITY_NOT_CONNECTED", "Local simulator cannot trust caller-provided review disposition or registry reconciliation; canonical Review and Registry authority connectors are required");
+    },
+    release(input) {
+      requireFields(input, ["operation_id", "claim_id", "expected_record_version", "expected_fencing_token", "observed_at"], "ClaimRelease");
+      parseTime(input.observed_at, "observed_at");
+      invariant(false, "CLAIM_RELEASE_AUTHORITY_NOT_CONNECTED", "Local simulator cannot release custody until canonical close evidence has been verified by connected Review and Registry authorities");
+    },
+    getClaim(claimId) {
+      return publicClaim(getClaim(claimId), "READ_ONLY");
+    },
+    getEvents(claimId) {
+      claimTextId(claimId, "claim_id");
+      return Object.freeze(database.prepare("SELECT * FROM company_claim_events WHERE claim_id = ? ORDER BY rowid").all(claimId).map((row) => Object.freeze({ ...row, detail: JSON.parse(row.detail) })));
+    },
+    closeDatabase() {
+      database.close();
+    }
+  };
+  return Object.freeze(api);
+}
+
+const CANONICAL_GITHUB_API_ORIGIN = "https://api.github.com";
+
+function normalizeGitHubApiBase(apiBase, token) {
+  invariant(typeof apiBase === "string" && apiBase.length > 0, "GITHUB_API_BASE_INVALID", "GitHub API base is required");
+  let parsed;
+  try {
+    parsed = new URL(apiBase);
+  } catch {
+    invariant(false, "GITHUB_API_BASE_INVALID", "GitHub API base must be an absolute HTTPS URL");
+  }
+  invariant(parsed.protocol === "https:", "GITHUB_API_BASE_INSECURE", "GitHub API reads require HTTPS");
+  invariant(!parsed.username && !parsed.password && !parsed.search && !parsed.hash, "GITHUB_API_BASE_INVALID", "GitHub API base cannot contain credentials, query or fragment");
+  invariant(parsed.pathname === "/" || parsed.pathname === "", "GITHUB_API_BASE_PATH_FORBIDDEN", "GitHub API base cannot contain a path");
+  if (token) {
+    invariant(parsed.origin === CANONICAL_GITHUB_API_ORIGIN, "GITHUB_TOKEN_ORIGIN_NOT_ALLOWED", "GitHub bearer credentials may only be sent to the canonical GitHub API origin");
+  }
+  return parsed.origin;
+}
+
+function githubSnapshotHeaders(token) {
+  return Object.freeze({
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  });
+}
+
+function aggregateGitHubChecks(checkRuns, requiredCheckNames) {
+  if (!Array.isArray(checkRuns) || checkRuns.length === 0) return "NO_CHECKS";
+  invariant(Array.isArray(requiredCheckNames) && requiredCheckNames.length > 0, "GITHUB_REQUIRED_CHECKS_MISSING", "Exact-head CI observation requires named check contexts");
+  const failureConclusions = ["failure", "timed_out", "cancelled", "action_required", "startup_failure"];
+  for (const requiredName of requiredCheckNames) {
+    const matches = checkRuns.filter((run) => run?.name === requiredName);
+    if (matches.length === 0) return "MISSING_REQUIRED_CHECK";
+    if (matches.some((run) => failureConclusions.includes(run.conclusion))) return "FAIL";
+    if (matches.some((run) => run.status !== "completed" || !run.conclusion)) return "PENDING";
+    if (!matches.some((run) => run.conclusion === "success")) return "MISSING_REQUIRED_CHECK";
+  }
+  return "PASS";
+}
+
+/**
+ * Read-only GitHub adapter used at Company clock-in. It discovers current main,
+ * the active PR head, divergence and exact-head checks from GitHub instead of
+ * trusting chat or a stale handoff. It exposes no mutation method.
+ */
+export async function readLatestRepositorySnapshot({
+  repository,
+  active_task_pr = null,
+  observed_at,
+  fetch_impl = globalThis.fetch,
+  token = null,
+  api_base = CANONICAL_GITHUB_API_ORIGIN,
+  required_check_names = ["test"]
+}) {
+  invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? ""), "INVALID_GITHUB_REPOSITORY", "Repository must use owner/name form");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_REPOSITORY_OBSERVATION_TIME", "observed_at must be an ISO timestamp");
+  invariant(typeof fetch_impl === "function", "GITHUB_READ_ADAPTER_REQUIRED", "A read-only fetch adapter is required");
+  invariant(active_task_pr === null || (Number.isInteger(active_task_pr) && active_task_pr > 0), "INVALID_ACTIVE_TASK_PR", "active_task_pr must be a positive integer or null");
+  invariant(Array.isArray(required_check_names) && required_check_names.length > 0 && required_check_names.every((name) => typeof name === "string" && name.trim()), "GITHUB_REQUIRED_CHECKS_INVALID", "required_check_names must contain one or more named check contexts");
+
+  const normalizedApiBase = normalizeGitHubApiBase(api_base, token);
+  const headers = githubSnapshotHeaders(token);
+  const read = async (path) => {
+    const response = await fetch_impl(`${normalizedApiBase}/repos/${repository}${path}`, { method: "GET", headers });
+    invariant(response?.ok === true, "GITHUB_READ_FAILED", `GitHub read failed for ${path}: HTTP ${response?.status ?? "UNKNOWN"}`);
+    return response.json();
+  };
+
+  const repositoryState = await read("");
+  invariant(typeof repositoryState.default_branch === "string" && repositoryState.default_branch, "GITHUB_DEFAULT_BRANCH_MISSING", "GitHub repository response is missing default_branch");
+  const mainCommit = await read(`/commits/${encodeURIComponent(repositoryState.default_branch)}`);
+  invariant(/^[0-9a-f]{40}$/.test(mainCommit.sha ?? ""), "GITHUB_MAIN_SHA_INVALID", "GitHub main commit response is invalid");
+  const mainCommitTime = mainCommit.commit?.committer?.date ?? mainCommit.commit?.author?.date;
+  invariant(typeof mainCommitTime === "string" && !Number.isNaN(Date.parse(mainCommitTime)), "GITHUB_MAIN_TIME_INVALID", "GitHub main commit time is invalid");
+
+  let pullRequest = null;
+  if (active_task_pr !== null) {
+    const pr = await read(`/pulls/${active_task_pr}`);
+    invariant(/^[0-9a-f]{40}$/.test(pr.head?.sha ?? ""), "GITHUB_PR_HEAD_INVALID", "GitHub pull request head is invalid");
+    invariant(typeof pr.head?.ref === "string" && pr.head.ref.trim(), "GITHUB_PR_HEAD_REF_INVALID", "GitHub pull request head branch is invalid");
+    invariant(typeof pr.base?.ref === "string" && pr.base.ref.trim(), "GITHUB_PR_BASE_REF_INVALID", "GitHub pull request base branch is invalid");
+    const comparison = await read(`/compare/${encodeURIComponent(repositoryState.default_branch)}...${pr.head.sha}`);
+    const checks = await read(`/commits/${pr.head.sha}/check-runs`);
+    invariant(Number.isInteger(comparison.ahead_by) && Number.isInteger(comparison.behind_by), "GITHUB_DIVERGENCE_INVALID", "GitHub comparison is missing ahead/behind counts");
+    pullRequest = Object.freeze({
+      number: active_task_pr,
+      head_sha: pr.head.sha,
+      head_ref: pr.head.ref,
+      base_ref: pr.base.ref,
+      state: String(pr.state ?? "").toUpperCase(),
+      draft: pr.draft === true,
+      ahead_main: comparison.ahead_by,
+      behind_main: comparison.behind_by,
+      ci_status: aggregateGitHubChecks(checks.check_runs, required_check_names),
+      check_count: Array.isArray(checks.check_runs) ? checks.check_runs.length : 0,
+      required_check_names: Object.freeze([...required_check_names])
+    });
+  }
+
+  return Object.freeze({
+    snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    observed_at,
+    repository,
+    default_branch: repositoryState.default_branch,
+    main_sha: mainCommit.sha,
+    main_commit_time: mainCommitTime,
+    active_task_pr: pullRequest,
+    authority: Object.freeze({ github_read: true, github_write: false, merge: false, branch_push: false, chain_write: false, signer: false })
+  });
+}
+
+export function evaluateExactHeadCiGate({ repository_snapshot, expected_head_sha = null }) {
+  invariant(repository_snapshot?.snapshot_type === "LATEST_REPOSITORY_READ_ONLY", "LATEST_REPOSITORY_SNAPSHOT_REQUIRED", "Exact-head CI gate requires a fresh read-only repository snapshot");
+  const pr = repository_snapshot.active_task_pr;
+  if (!pr) return Object.freeze({ status: "HOLD_ACTIVE_PR_REQUIRED", exact_head: null, ci_status: "UNKNOWN", behind_main: null, external_effect: false });
+  if (expected_head_sha !== null) {
+    invariant(/^[0-9a-f]{40}$/.test(expected_head_sha), "EXPECTED_HEAD_SHA_INVALID", "Expected PR head must be a lowercase Git SHA");
+    if (pr.head_sha !== expected_head_sha) {
+      return Object.freeze({ status: "HOLD_STALE_PR_HEAD", exact_head: pr.head_sha, expected_head: expected_head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+    }
+  }
+  if (pr.state !== "OPEN") return Object.freeze({ status: "HOLD_PR_NOT_OPEN", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+  if (pr.base_ref !== repository_snapshot.default_branch) {
+    return Object.freeze({
+      status: "HOLD_PR_BASE_BRANCH_MISMATCH",
+      exact_head: pr.head_sha,
+      expected_base: repository_snapshot.default_branch,
+      observed_base: pr.base_ref,
+      ci_status: pr.ci_status,
+      behind_main: pr.behind_main,
+      external_effect: false
+    });
+  }
+  if (pr.behind_main !== 0) return Object.freeze({ status: "HOLD_PR_BEHIND_MAIN", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+  if (pr.ci_status !== "PASS") return Object.freeze({ status: pr.ci_status === "FAIL" ? "HOLD_EXACT_HEAD_CI_FAILED" : "HOLD_EXACT_HEAD_CI_INCOMPLETE", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: pr.behind_main, external_effect: false });
+  return Object.freeze({ status: "EXACT_HEAD_CI_PASS", exact_head: pr.head_sha, ci_status: pr.ci_status, behind_main: 0, external_effect: false });
+}
+
+function evaluateAutonomousTaskRepositoryBinding({ cycle_result, cycle_input, repository_snapshot }) {
+  if (!cycle_result?.selected_task_id) return Object.freeze({ status: "NO_SELECTED_TASK", task_id: null, external_effect: false });
+  const selected = [...(cycle_input.review_queue ?? []), ...(cycle_input.work_queue ?? [])]
+    .find((item) => item?.task_id === cycle_result.selected_task_id);
+  const pr = repository_snapshot.active_task_pr;
+  const verified = Boolean(selected && pr)
+    && selected.repository === repository_snapshot.repository
+    && selected.active_task_pr === pr.number
+    && selected.branch === pr.head_ref
+    && pr.base_ref === repository_snapshot.default_branch
+    && selected.expected_head_sha === pr.head_sha;
+  return Object.freeze({
+    status: verified ? "TASK_REPOSITORY_BINDING_VERIFIED" : "HOLD_TASK_REPOSITORY_BINDING",
+    task_id: cycle_result.selected_task_id,
+    repository: selected?.repository ?? null,
+    active_task_pr: selected?.active_task_pr ?? null,
+    branch: selected?.branch ?? null,
+    expected_head_sha: selected?.expected_head_sha ?? null,
+    expected_base_branch: repository_snapshot.default_branch ?? null,
+    observed_pr: pr?.number ?? null,
+    observed_branch: pr?.head_ref ?? null,
+    observed_base_branch: pr?.base_ref ?? null,
+    observed_head_sha: pr?.head_sha ?? null,
+    external_effect: false
+  });
+}
+
+/**
+ * Invocation-driven safe Company loop: observe GitHub, plan one cycle, then
+ * persist only its local append-only evidence. It deliberately exposes no
+ * Claim, worker wake, review wake, GitHub mutation, signer or chain connector.
+ */
+export async function runAutonomousCompanyReadOnlyCycle({
+  repository_request,
+  cycle_input,
+  store,
+  company
+}) {
+  invariant(repository_request && typeof repository_request === "object", "REPOSITORY_REQUEST_REQUIRED", "Safe Company invocation requires a repository observation request");
+  invariant(cycle_input && typeof cycle_input === "object", "COMPANY_CYCLE_INPUT_REQUIRED", "Safe Company invocation requires planner input");
+  const repositorySnapshot = await readLatestRepositorySnapshot(repository_request);
+  const ciGate = evaluateExactHeadCiGate({ repository_snapshot: repositorySnapshot, expected_head_sha: cycle_input.expected_head_sha ?? null });
+  if (ciGate.status !== "EXACT_HEAD_CI_PASS") {
+    return Object.freeze({
+      status: "HOLD_EXACT_HEAD_CI_GATE",
+      repository_snapshot: repositorySnapshot,
+      ci_gate: ciGate,
+      cycle_result: null,
+      persistence: null,
+      authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+    });
+  }
+  const cycleResult = runAutonomousCompanyCycle({
+    ...cycle_input,
+    observed_at: repositorySnapshot.observed_at,
+    current_main_sha: repositorySnapshot.main_sha
+  });
+  const taskRepositoryGate = evaluateAutonomousTaskRepositoryBinding({
+    cycle_result: cycleResult,
+    cycle_input,
+    repository_snapshot: repositorySnapshot
+  });
+  if (taskRepositoryGate.status === "HOLD_TASK_REPOSITORY_BINDING") {
+    return Object.freeze({
+      status: "HOLD_TASK_REPOSITORY_BINDING",
+      repository_snapshot: repositorySnapshot,
+      task_repository_gate: taskRepositoryGate,
+      ci_gate: ciGate,
+      cycle_result: cycleResult,
+      persistence: null,
+      authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+    });
+  }
+  const prePersistenceSnapshot = await readLatestRepositorySnapshot(repository_request);
+  const prePersistenceGate = evaluateExactHeadCiGate({ repository_snapshot: prePersistenceSnapshot, expected_head_sha: cycle_input.expected_head_sha ?? null });
+  const prePersistenceTaskRepositoryGate = evaluateAutonomousTaskRepositoryBinding({
+    cycle_result: cycleResult,
+    cycle_input,
+    repository_snapshot: prePersistenceSnapshot
+  });
+  const taskBindingMoved = taskRepositoryGate.status === "TASK_REPOSITORY_BINDING_VERIFIED"
+    && prePersistenceTaskRepositoryGate.status !== "TASK_REPOSITORY_BINDING_VERIFIED";
+  const repositoryMoved = prePersistenceSnapshot.main_sha !== repositorySnapshot.main_sha
+    || prePersistenceSnapshot.active_task_pr?.head_sha !== repositorySnapshot.active_task_pr?.head_sha
+    || prePersistenceSnapshot.active_task_pr?.head_ref !== repositorySnapshot.active_task_pr?.head_ref
+    || prePersistenceSnapshot.active_task_pr?.base_ref !== repositorySnapshot.active_task_pr?.base_ref
+    || taskBindingMoved;
+  if (repositoryMoved || prePersistenceGate.status !== "EXACT_HEAD_CI_PASS") {
+    return Object.freeze({
+      status: "HOLD_REPOSITORY_MOVED_BEFORE_PERSISTENCE",
+      repository_snapshot: repositorySnapshot,
+      pre_persistence_snapshot: prePersistenceSnapshot,
+      ci_gate: prePersistenceGate,
+      cycle_result: cycleResult,
+      task_repository_gate: taskRepositoryGate,
+      pre_persistence_task_repository_gate: prePersistenceTaskRepositoryGate,
+      persistence: null,
+      authority: Object.freeze({ local_company_history_write: false, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+    });
+  }
+  const persistence = await persistAutonomousCompanyCycle({ store, company, cycle_result: cycleResult });
+  return Object.freeze({
+    status: "READ_PLAN_PERSIST_CYCLE_COMPLETED",
+    repository_snapshot: repositorySnapshot,
+    pre_persistence_snapshot: prePersistenceSnapshot,
+    ci_gate: prePersistenceGate,
+    cycle_result: cycleResult,
+    task_repository_gate: taskRepositoryGate,
+    pre_persistence_task_repository_gate: prePersistenceTaskRepositoryGate,
+    persistence,
+    authority: Object.freeze({ local_company_history_write: true, github_read: true, github_write: false, claim_write: false, worker_wake: false, reviewer_wake: false, signer: false, chain_write: false })
+  });
+}

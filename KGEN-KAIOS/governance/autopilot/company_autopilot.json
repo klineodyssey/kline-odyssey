@@ -1,30 +1,95 @@
 {
   "metadata": {
     "architecture_id": "PRIMEFORGE-COMPANY-AUTOPILOT-ARCH-001",
-    "version": "0.4.7",
-    "revision": "2026-08-01.4",
+    "version": "0.7.0-candidate",
+    "revision": "2026-08-27.1",
     "status": "ACTIVE_OPERATOR_PROTOCOL_NO_BACKGROUND_SERVICE",
-    "last_updated": "2026-08-01",
+    "last_updated": "2026-08-27",
     "updated_by": "codex-gm-01",
     "reviewed_by": "HUMAN_PRIMEFORGE_FULL_AUTOPILOT_001",
     "human_decision_ids": [
       "HUMAN-PRIMEFORGE-COMPANY-AUTOPILOT-001",
       "HUMAN-COMPANY-AUTOMATIC-MAINTENANCE-001",
       "HUMAN-COMPANY-OS-BOOT-001",
-      "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001"
+      "HUMAN-PRIMEFORGE-FULL-AUTOPILOT-001",
+      "KAIOS_AUTONOMOUS_AI_COMPANY_OPERATING_SYSTEM_V1_1"
     ],
-    "source_commit": "ORIGIN_MAIN_a8d1d3aef66ce6dedf3438649e70c31740603ad3",
-    "source_freshness": "REMOTE_VERIFIED_2026-08-01T12:07:00+08:00",
-    "source_of_truth": true
+    "source_commit": "EXECUTION_BASE_830b79214781fb1231f3619336de394f400a0bfd",
+    "source_freshness": "EXECUTION_BASE_VERIFIED_2026-08-27",
+    "source_of_truth": false,
+    "source_of_truth_boundary": "ARCHITECTURE_CANDIDATE_REQUIRES_LATEST_GITHUB_AND_CANONICAL_REGISTRY_READ"
   },
   "system_identity": {
     "name": "PrimeForge Company Autopilot",
     "type": "INVOCATION_DRIVEN_GOVERNANCE_INTEGRATION",
     "is_background_daemon": false,
     "is_second_company_system": false,
-    "implementation_started": false,
+    "implementation_started": true,
     "workqueue_implementation_created": false,
-    "deployment_started": false
+    "deployment_started": false,
+    "safe_cycle_candidate": {
+      "implementation": "core/company/index.mjs#runAutonomousCompanyCycle",
+      "status": "IMPLEMENTED_LOCAL_CANDIDATE_NOT_CONNECTED",
+      "side_effects": false,
+      "reuses_formal_worker_registry": false,
+      "reuses_formal_workqueue": false,
+      "canonical_input_provenance": "NOT_CONNECTED_FAIL_CLOSED",
+      "reuses_review_first_priority": true,
+      "reviewer_independence": ["DISTINCT_WORKER_ID", "DISTINCT_LIFE_IDENTITY_REF", "DISTINCT_CONTROLLER_ID"],
+      "review_queue_risk_bypass": false,
+      "replay_safe_with_supplied_cycle_history": true,
+      "durable_company_history": {
+        "implementation": "core/company/index.mjs#persistAutonomousCompanyCycle",
+        "store": "EXISTING_UNIVERSE_STORE_COMPANY_STREAM",
+        "browser_persistence": "INDEXEDDB",
+        "deterministic_event_ids": true,
+        "append_only_hash_chain": true,
+        "restart_recovery": "core/company/index.mjs#restoreAutonomousCompanyCycleState",
+        "status": "IMPLEMENTED_LOCAL_CANDIDATE_NOT_BACKGROUND_INVOKED"
+      },
+      "latest_repository_snapshot": {
+        "implementation": "core/company/index.mjs#readLatestRepositorySnapshot",
+        "source": "GITHUB_REST_API",
+        "reads": ["LATEST_MAIN", "MAIN_COMMIT_TIME", "ACTIVE_PR_HEAD", "PR_STATE", "AHEAD_BEHIND", "EXACT_HEAD_CHECK_RUNS"],
+        "github_write": false,
+        "status": "IMPLEMENTED_READ_ONLY_CANDIDATE_NOT_BACKGROUND_INVOKED"
+      },
+      "read_plan_persist_cycle": {
+        "implementation": "core/company/index.mjs#runAutonomousCompanyReadOnlyCycle",
+        "flow": ["READ_LATEST_REPOSITORY", "VERIFY_NAMED_EXACT_HEAD_CI", "PLAN_SAFE_CYCLE", "BIND_SELECTED_TASK_TO_REPOSITORY_PR_DEFAULT_BASE_BRANCH_AND_HEAD", "RE_READ_REPOSITORY_REFS_AND_CHECKS", "PERSIST_LOCAL_COMPANY_HISTORY"],
+        "exact_head_ci_gate": "INTEGRATED_BEFORE_PLAN_AND_RECHECKED_BEFORE_PERSISTENCE",
+        "task_repository_binding": "REPOSITORY_PR_DEFAULT_BASE_TASK_BRANCH_EXACT_HEAD_REQUIRED_BEFORE_AND_AFTER_PLAN",
+        "credential_destination": "HTTPS_CANONICAL_GITHUB_API_ONLY",
+        "moving_repository_result": "HOLD_WITHOUT_PERSISTENCE",
+        "external_effects": false,
+        "status": "IMPLEMENTED_INVOCATION_DRIVEN_CANDIDATE"
+      },
+      "local_sqlite_claim_simulator": {
+        "implementation": "core/company/index.mjs#createLocalSqliteClaimRegistrySimulator",
+        "storage": "NODE_SQLITE_SINGLE_HOST_SANDBOX",
+        "properties": ["TRANSACTION", "UNIQUE_ACTIVE_LOCKS", "COMPARE_AND_SWAP", "FENCING_TOKEN", "LEASE", "REVIEW_CUSTODY", "REPAIR_LINEAGE", "APPEND_ONLY_AUDIT", "RESTART_PERSISTENCE", "CLOSE_RELEASE_FAIL_CLOSED_WITHOUT_CANONICAL_AUTHORITY"],
+        "production_claim_authority": false,
+        "authoritative_review_decision": false,
+        "authoritative_registry_reconciliation": false,
+        "close_release": false,
+        "close_evidence_candidate": "STRUCTURAL_HASH_AND_LINEAGE_VALIDATION_ONLY_NOT_AUTHORITY",
+        "automatic_dispatch": false,
+        "status": "IMPLEMENTED_LOCAL_SIMULATOR_NOT_AUTHORITY"
+      },
+      "background_scheduler": false,
+      "claim_persistence": false,
+      "worker_wake": false,
+      "github_write": false,
+      "mainnet_write": false,
+      "payment": false,
+      "private_key_access": false,
+      "missing_connectors": [
+        "ATOMIC_CLAIM_LEASE_CONNECTOR",
+        "AUTHORIZED_WORKER_WAKE_ADAPTER",
+        "INDEPENDENT_REVIEW_TRIGGER",
+        "BACKGROUND_INVOCATION_SCHEDULER"
+      ]
+    }
   },
   "company_os_boot": {
     "architecture": "COMPANY_OS_BOOT.md",
@@ -186,14 +251,11 @@
       "PROTECTED_PATH_REPORT",
       "REGISTERED_AUTHOR_AND_REVIEWER"
     ],
-    "auto_merge": true,
-    "auto_merge_scope": [
-      "LOW_RISK",
-      "MEDIUM_RISK_AFTER_ALL_GATES"
-    ],
+    "auto_merge": false,
+    "auto_merge_scope": [],
     "high_risk_merge": "HUMAN_DECISION_REQUIRED",
-    "auto_push_main": true,
-    "auto_push_main_scope": "REVIEWED_BRANCH_AND_POST_MERGE_CLOSEOUT_ONLY",
+    "auto_push_main": false,
+    "auto_push_main_scope": "NONE_WITHOUT_SEPARATE_MACHINE_VERIFIABLE_AUTHORIZATION",
     "auto_deploy": false
   },
   "task_envelope_contract": {
@@ -429,7 +491,7 @@
     "universe_map_modified": false,
     "frozen_baseline_modified": false,
     "protected_path_modified": false,
-    "implementation_started": false,
+    "implementation_started": true,
     "implementation_workqueue_created": false,
     "deployment_started": false,
     "commit_allowed_this_round": true,
