@@ -1,0 +1,59 @@
+{
+  "schema": "KAIOS_MACHINE_VERIFIABLE_WORK_ORDER_V1",
+  "work_order_id": "KAIOS-AI-COMPANY-SAFE-PLANNER-CURRENT-MAIN-R1-20260914",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "priority": "P1",
+  "risk": "R1",
+  "repository": "klineodyssey/kline-odyssey",
+  "base_branch": "main",
+  "base_sha": "9b26d2ab00e0005477656a3ec5aacac530e24694",
+  "head_sha_source": "GIT_COMMIT_CONTAINING_THIS_MANIFEST",
+  "source_pr": 170,
+  "source_pr_disposition": "PARTIAL_CURRENT_MAIN_TRANSPLANT_ONLY",
+  "branch": "chatgpt-handoff/KAIOS-AI-COMPANY-SAFE-PLANNER-CURRENT-MAIN-R1-20260914",
+  "objective": "Add a deterministic side-effect-free engineering-cycle planner that ranks P0 before P1 before P2, skips unsafe or blocked work, and emits at most one current-main R0/R1 work-order candidate.",
+  "scope": [
+    "core/company/index.mjs",
+    "tests/autonomous-company-engineering-cycle.test.mjs",
+    ".github/workflows/universal_exchange_v2.yml",
+    "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"
+  ],
+  "excluded": [
+    "PR 170 legacy workflow changes",
+    "PR 170 SQLite persistence",
+    "PR 170 GitHub connector or external executor",
+    "external agent launch",
+    "paid external API",
+    "payment or payroll execution",
+    "Mainnet or chain-state mutation",
+    "worker or Life activation",
+    "merge or deployment execution",
+    "protected Canon or CURRENT changes"
+  ],
+  "acceptance": {
+    "selects_at_most_one_task": true,
+    "priority_order": ["P0", "P1", "P2"],
+    "unsafe_p0_does_not_stall_safe_lower_priority_work": true,
+    "exact_main_required": true,
+    "risk_allowed": ["R0", "R1", "LOW"],
+    "universal_reviewer_required": false,
+    "distinct_reviewer_required_when_declared": true,
+    "main_branch_forbidden": true,
+    "codex_branch_forbidden": true,
+    "suspended_worker_forbidden": true,
+    "all_authority_effect_flags_false": true,
+    "replay_is_idempotent": true
+  },
+  "tests": [
+    "node --check core/company/index.mjs",
+    "node --check tests/autonomous-company-engineering-cycle.test.mjs",
+    "node --test tests/universal-exchange.test.mjs",
+    "node --test tests/autonomous-company-engineering-cycle.test.mjs",
+    "node --test tests/universal-exchange-workflow-security.test.mjs",
+    "node --test tests/11520-kgen-native-market-cell.test.mjs"
+  ],
+  "ui_or_game_change": false,
+  "browser_qa": "NOT_APPLICABLE",
+  "screenshot_visual_qa": "NOT_APPLICABLE",
+  "protected_actions_executed": false
+}

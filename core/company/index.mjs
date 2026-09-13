@@ -1981,6 +1981,253 @@ export function createAquacultureProjectDraft({
   });
 }
 
+export const AUTONOMOUS_ENGINEERING_SAFE_ACTIONS = Object.freeze([
+  "READ", "RESEARCH", "ANALYZE", "DOCUMENT", "TEST", "SIMULATE",
+  "ISSUE_TRIAGE", "SAFE_BRANCH_WORK", "COMMIT_TASK_BRANCH", "PUSH_TASK_BRANCH",
+  "OPEN_PR", "CI", "STATUS_RECONCILIATION", "WORK_EVIDENCE", "HANDOFF",
+  "REVIEW_REQUEST", "VERIFY_STATIC_PAGES"
+]);
+
+export const AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS = Object.freeze([
+  "SELF_APPROVAL", "SELF_BIRTH_APPROVAL", "SELF_EMPLOYMENT_APPROVAL",
+  "SELF_TRUST_ESCALATION", "SELF_PAYROLL_APPROVAL", "PRIVATE_KEY_ACCESS",
+  "TREASURY_TRANSFER", "PAYROLL_PAYMENT", "MAINNET_TRANSACTION", "TOKEN_TRANSFER",
+  "CONTRACT_DEPLOYMENT", "GOVERNANCE_EXECUTION", "OWNERSHIP_TRANSFER",
+  "PUSH_MAIN", "MERGE_MAIN", "EXTERNAL_AGENT_LAUNCH", "PAID_EXTERNAL_API",
+  "IRREVERSIBLE_EXTERNAL_ACTION"
+]);
+
+const AUTONOMOUS_ENGINEERING_PRIORITY = Object.freeze({ P0: 0, P1: 1, P2: 2 });
+const AUTONOMOUS_ENGINEERING_TRUST = Object.freeze({ T0: 0, T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 });
+const AUTONOMOUS_ENGINEERING_SAFE_RISKS = Object.freeze(["R0", "R1", "LOW"]);
+const AUTONOMOUS_ENGINEERING_ACKS = Object.freeze([
+  "boot_acknowledged", "canon_acknowledged", "workspace_policy_acknowledged", "do_not_touch_acknowledged"
+]);
+
+function autonomousEngineeringWorkerEligible(worker, task = null) {
+  if (!worker || worker.status !== "ACTIVE" || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return false;
+  if ((AUTONOMOUS_ENGINEERING_TRUST[worker.trust_level] ?? -1) < 2 || worker.suspension) return false;
+  if (!AUTONOMOUS_ENGINEERING_ACKS.every((field) => worker[field] === true)) return false;
+  if (typeof worker.worker_id !== "string" || !worker.worker_id.trim()) return false;
+  if (typeof worker.life_identity_ref !== "string" || !worker.life_identity_ref.trim()) return false;
+  if (typeof worker.controller_id !== "string" || !worker.controller_id.trim()) return false;
+  if (Number(worker.active_claim_count ?? 0) > 1) return false;
+  if (task && Number(worker.active_claim_count ?? 0) > 0 && worker.current_task !== task.task_id) return false;
+  if (task && worker.current_task && worker.current_task !== task.task_id) return false;
+  return true;
+}
+
+function autonomousEngineeringActorsDistinct(left, right) {
+  if (!left || !right) return false;
+  const normalize = (value) => typeof value === "string" ? value.trim().toLowerCase() : "";
+  return Boolean(normalize(left.worker_id) && normalize(right.worker_id)
+    && normalize(left.life_identity_ref) && normalize(right.life_identity_ref)
+    && normalize(left.controller_id) && normalize(right.controller_id))
+    && normalize(left.worker_id) !== normalize(right.worker_id)
+    && normalize(left.life_identity_ref) !== normalize(right.life_identity_ref)
+    && normalize(left.controller_id) !== normalize(right.controller_id);
+}
+
+function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
+  if (typeof pattern !== "string" || typeof branch !== "string" || typeof taskId !== "string") return false;
+  if (branch === "main" || branch.startsWith("codex/")) return false;
+  return pattern.replace("<Task-ID>", taskId) === branch;
+}
+
+function createAutonomousEngineeringEvent(cycleId, sequence, eventType, actorId, observedAt, payload = {}) {
+  return Object.freeze({
+    event_id: `${cycleId}:${String(sequence).padStart(2, "0")}:${eventType}`,
+    cycle_id: cycleId,
+    sequence,
+    event_type: eventType,
+    actor_id: actorId,
+    occurred_at: observedAt,
+    payload: Object.freeze({ ...payload }),
+    append_only: true,
+    external_effect: false
+  });
+}
+
+/**
+ * Deterministic, side-effect-free planner for one repository engineering cycle.
+ *
+ * It ranks P0 > P1 > P2, skips blocked or unsafe candidates, and emits at most
+ * one bounded work-order candidate. It never claims work, writes GitHub, starts
+ * a worker, merges, deploys, pays, accesses a signer, or mutates chain state.
+ */
+export function planAutonomousCompanyEngineeringCycle({
+  cycle_id,
+  observed_at,
+  current_main_sha,
+  expected_main_sha,
+  manager,
+  workers = [],
+  work_queue = [],
+  previous_cycle_ids = []
+}) {
+  requireId(cycle_id, "cycle_id");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_ENGINEERING_CYCLE_TIME", "observed_at must be an ISO timestamp");
+  invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
+  invariant(/^[0-9a-f]{40}$/.test(expected_main_sha ?? ""), "INVALID_EXPECTED_MAIN_SHA", "expected_main_sha must be a lowercase Git SHA");
+  requireArray(workers, "workers");
+  requireArray(work_queue, "work_queue");
+  requireArray(previous_cycle_ids, "previous_cycle_ids");
+
+  const authority = Object.freeze({
+    repository_written: false,
+    main_modified: false,
+    merge_executed: false,
+    deployment_executed: false,
+    mainnet_tx_sent: false,
+    payment_sent: false,
+    private_key_accessed: false,
+    external_agent_started: false,
+    worker_activated: false,
+    workqueue_modified: false
+  });
+  const result = (status, fields = {}) => Object.freeze({
+    cycle_id,
+    status,
+    selected_task_id: null,
+    selected_worker_id: null,
+    selected_reviewer_id: null,
+    work_order_candidate: null,
+    rejected_candidates: Object.freeze([]),
+    events: Object.freeze([]),
+    authority,
+    ...fields
+  });
+
+  if (previous_cycle_ids.includes(cycle_id)) {
+    return result("IDEMPOTENT_NOOP", { next_safe_action: "WAIT_FOR_NEW_CYCLE_ID" });
+  }
+
+  invariant(autonomousEngineeringWorkerEligible(manager), "GM_REGISTRATION_REQUIRED", "General Manager must be active, T2+ and fully acknowledged");
+  invariant(String(manager.role ?? "").includes("General Manager"), "GM_ROLE_REQUIRED", "Manager role must include General Manager");
+
+  const events = [];
+  const append = (eventType, payload = {}) => events.push(createAutonomousEngineeringEvent(
+    cycle_id, events.length + 1, eventType, manager.worker_id, observed_at, payload
+  ));
+  append("CLOCK_IN", { worker_id: manager.worker_id, current_main_sha });
+
+  if (current_main_sha !== expected_main_sha) {
+    append("BLOCKER_STATE", { blocker: "STALE_MAIN", current_main_sha, expected_main_sha });
+    append("CLOCK_OUT", { result: "HOLD_STALE_MAIN" });
+    return result("HOLD_STALE_MAIN", {
+      events: Object.freeze(events),
+      next_safe_action: "REFRESH_MAIN_AND_RESTART_NEW_CYCLE"
+    });
+  }
+
+  const ordered = work_queue
+    .filter((candidate) => ["OPEN", "CLAIMABLE", "READY"].includes(candidate?.status))
+    .sort((left, right) => {
+      const byPriority = (AUTONOMOUS_ENGINEERING_PRIORITY[left.priority] ?? 99) - (AUTONOMOUS_ENGINEERING_PRIORITY[right.priority] ?? 99);
+      if (byPriority) return byPriority;
+      return String(left.created_at ?? "").localeCompare(String(right.created_at ?? ""))
+        || String(left.task_id ?? "").localeCompare(String(right.task_id ?? ""));
+    });
+
+  const rejected = [];
+  let selection = null;
+  for (const candidate of ordered) {
+    requireId(candidate.task_id, "task_id");
+    const requestedActions = candidate.authorized_actions ?? [];
+    requireArray(requestedActions, "authorized_actions");
+    const reasons = [];
+    const forbidden = requestedActions.filter((action) => AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS.includes(action));
+    const unknown = requestedActions.filter((action) => !AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes(action));
+    if (!(candidate.priority in AUTONOMOUS_ENGINEERING_PRIORITY)) reasons.push("PRIORITY_NOT_P0_P1_P2");
+    if (!AUTONOMOUS_ENGINEERING_SAFE_RISKS.includes(candidate.risk_level)) reasons.push("RISK_NOT_R0_R1");
+    if (candidate.task_envelope_status !== "AUTHORIZED" || candidate.authority_status !== "MACHINE_VERIFIED") reasons.push("AUTHORITY_NOT_MACHINE_VERIFIED");
+    if (candidate.dependencies_complete !== true) reasons.push("DEPENDENCIES_INCOMPLETE");
+    if (candidate.protected_paths_changed !== false) reasons.push("PROTECTED_PATH_SCOPE");
+    if (candidate.expected_base_sha !== current_main_sha) reasons.push("NOT_ON_EXACT_MAIN");
+    if (candidate.ready !== true) reasons.push("NOT_READY");
+    if (candidate.unresolved_threads !== 0 || candidate.blocking_comments !== 0 || candidate.blocking_defects !== 0) reasons.push("BLOCKING_REVIEW_OR_DEFECT");
+    if (candidate.human_decision_required === true) reasons.push("HUMAN_DECISION_REQUIRED");
+    if (candidate.external_effects !== false
+      || candidate.secrets_required !== false
+      || candidate.chain_state_mutation !== false
+      || candidate.worker_activation !== false
+      || candidate.paid_external_api !== false) reasons.push("SIDE_EFFECT_BOUNDARY_NOT_VERIFIED");
+    if (forbidden.length) reasons.push("FORBIDDEN_ACTION");
+    if (unknown.length) reasons.push("UNKNOWN_ACTION");
+
+    const worker = workers.find((entry) => entry.worker_id === candidate.assigned_worker_id);
+    if (!autonomousEngineeringWorkerEligible(worker, candidate)) reasons.push("ELIGIBLE_WORKER_REQUIRED");
+    if (!worker || !autonomousEngineeringBranchMatches(worker.allowed_branch_pattern, candidate.branch, candidate.task_id)) reasons.push("BRANCH_POLICY_MISMATCH");
+
+    const reviewRequirement = candidate.review_requirement ?? "NOT_REQUIRED";
+    if (!["NOT_REQUIRED", "REQUIRED"].includes(reviewRequirement)) reasons.push("REVIEW_POLICY_INVALID");
+    let reviewer = null;
+    if (reviewRequirement === "REQUIRED") {
+      reviewer = workers.find((entry) => entry.worker_id === candidate.reviewer_id);
+      if (!autonomousEngineeringWorkerEligible(reviewer) || !autonomousEngineeringActorsDistinct(worker, reviewer)) reasons.push("DISTINCT_REVIEWER_REQUIRED");
+    }
+
+    if (reasons.length) {
+      rejected.push(Object.freeze({
+        task_id: candidate.task_id,
+        priority: candidate.priority ?? null,
+        reasons: Object.freeze([...new Set(reasons)]),
+        forbidden_actions: Object.freeze(forbidden),
+        unknown_actions: Object.freeze(unknown)
+      }));
+      continue;
+    }
+    selection = { candidate, worker, reviewer, reviewRequirement };
+    break;
+  }
+
+  if (!selection) {
+    append("BLOCKER_STATE", { blocker: "NO_VERIFIED_SAFE_WORK", rejected_task_ids: rejected.map((entry) => entry.task_id) });
+    append("CLOCK_OUT", { result: "NO_VERIFIED_SAFE_WORK" });
+    return result("NO_VERIFIED_SAFE_WORK", {
+      rejected_candidates: Object.freeze(rejected),
+      events: Object.freeze(events),
+      next_safe_action: "REPAIR_CANDIDATE_EVIDENCE_OR_WAIT"
+    });
+  }
+
+  const { candidate, worker, reviewer, reviewRequirement } = selection;
+  const workOrder = Object.freeze({
+    task_id: candidate.task_id,
+    priority: candidate.priority,
+    risk_level: candidate.risk_level,
+    assigned_worker_id: worker.worker_id,
+    reviewer_id: reviewer?.worker_id ?? null,
+    review_requirement: reviewRequirement,
+    branch: candidate.branch,
+    expected_base_sha: candidate.expected_base_sha,
+    authorized_actions: Object.freeze([...(candidate.authorized_actions ?? [])]),
+    scope: Object.freeze([...(candidate.scope ?? [])]),
+    acceptance_tests: Object.freeze([...(candidate.acceptance_tests ?? [])]),
+    execution_authorized: false,
+    merge_authorized: false,
+    deployment_authorized: false,
+    external_effect: false
+  });
+  append("WORK_ORDER_CANDIDATE", {
+    task_id: candidate.task_id,
+    worker_id: worker.worker_id,
+    reviewer_id: reviewer?.worker_id ?? null,
+    review_requirement: reviewRequirement,
+    branch: candidate.branch
+  });
+  append("CLOCK_OUT", { result: "WORK_ORDER_CANDIDATE_READY" });
+  return result("WORK_ORDER_CANDIDATE_READY", {
+    selected_task_id: candidate.task_id,
+    selected_worker_id: worker.worker_id,
+    selected_reviewer_id: reviewer?.worker_id ?? null,
+    work_order_candidate: workOrder,
+    rejected_candidates: Object.freeze(rejected),
+    events: Object.freeze(events),
+    next_safe_action: "EXECUTOR_MUST_REVALIDATE_MAIN_AND_AUTHORITY_BEFORE_EACH_WRITE"
+  });
+}
+
 export function createAutonomousBusinessWorkOrder({ cycle_id, primary_job_status, candidates }) {
   requireId(cycle_id, "cycle_id"); requireArray(candidates, "autonomous_work.candidates");
   invariant(["COMPLETED", "DEGRADED_SAFE"].includes(primary_job_status), "PRIMARY_JOB_BYPASS", "Wukong Gatekeeper duty must complete before autonomous business work");
