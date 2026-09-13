@@ -83,7 +83,7 @@ test("public Cursor queue projection matches the canonical governance queue", as
     "task_id", "status", "worker_id", "reviewer", "branch_template",
     "one_task_at_a_time", "continuous_dispatch_mode",
     "automatic_unreviewed_dispatch", "active_claims", "worker_state",
-    "next_dispatch_requires", "output_authority", "queue", "prepared_task",
+    "next_dispatch_requires", "output_authority", "bounded_pilot", "queue", "prepared_task",
     "forbidden"
   ];
   for (const field of projectedFields) {
@@ -91,7 +91,7 @@ test("public Cursor queue projection matches the canonical governance queue", as
   }
 });
 
-test("public Cursor queue exposes the fresh payroll R2 claim while Microbial stays preparation-only", async () => {
+test("public Cursor queue exposes the bounded payroll pilot while Microbial stays preparation-only", async () => {
   const canonical = JSON.parse(await read(
     "KAIOS/life/forest-agriculture/KAIOS_CURSOR_CONTINUOUS_WORK_QUEUE.json"
   ));
@@ -99,16 +99,19 @@ test("public Cursor queue exposes the fresh payroll R2 claim while Microbial sta
   const projection = JSON.parse(await read("api/kaios/ai-company/v1/cursor-queue.json"));
   assert.deepEqual(projection.active_claims, canonical.active_claims);
   assert.deepEqual(projection.active_claims, registry.active_claims);
-  assert.equal(projection.active_claims.length, 1);
-  assert.equal(projection.active_claims[0].task_id, "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001");
-  assert.equal(projection.active_claims[0].execution_base, "ff8fca3e610ac936e8998112255901a78296b238");
-  assert.equal(projection.active_claims[0].status, "CLAIMED");
+  assert.equal(projection.active_claims.length, 0);
   assert.deepEqual(projection.worker_state, {
     worker_id: "cursor-01",
-    current_task: "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    current_branch: "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-    status: "CLAIMED"
+    current_task: null,
+    current_branch: null,
+    status: "IDLE"
   });
+  assert.equal(projection.bounded_pilot.task_id, "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001");
+  assert.equal(projection.bounded_pilot.status, "READY_FOR_ATOMIC_CLAIM");
+  assert.equal(projection.bounded_pilot.concurrency, 1);
+  assert.equal(projection.bounded_pilot.max_launches_per_day, 4);
+  assert.equal(projection.bounded_pilot.max_worker_minutes, 60);
+  assert.equal(projection.bounded_pilot.protected_actions_allowed, false);
   assert.equal(registry.prepared_tasks.length, 1);
   assert.deepEqual(projection.prepared_task, canonical.prepared_task);
   assert.deepEqual(projection.prepared_task, registry.prepared_tasks[0]);

@@ -2,12 +2,12 @@
   "metadata": {
     "version": "KAIOS_WORKER_REGISTRY_WITH_TRUST_V1_1",
     "status": "ACTIVE",
-    "updated": "2026-09-07",
-    "updated_by": "human-primeforge",
+    "updated": "2026-09-13",
+    "updated_by": "codex-gm-01",
     "reviewed_by": "human-primeforge",
-    "source_commit": null,
-    "task_id": "KAIOS-HUMAN-CHATGPT-T5-20260907",
-    "change_reason": "Human explicitly authorizes chatgpt-01 as a T5 system maintainer to improve execution speed for repository product engineering, coding, testing, review and QA. Existing never-autonomous safety boundaries remain in force unless separately and explicitly authorized.",
+    "source_commit": "22f2c797f53e7d26aa7d18ffdcb03c41d4cd7ff0",
+    "task_id": "KAIOS-CURSOR-BOUNDED-PILOT-20260913",
+    "change_reason": "Human authorized one bounded Cursor Cloud pilot with concurrency one, exact task-envelope binding, stale-claim cleanup, watchdog and protected-action denial. Existing T5 authorization and never-autonomous safety boundaries remain in force.",
     "source_of_truth": true
   },
   "claim_events": [
@@ -89,26 +89,39 @@
       "recorded_by": "codex-gm-01",
       "recorded_at": "2026-08-16T12:49:02Z",
       "reason": "Human authorized a fresh R2 claim limited to the two independently verified payroll delivery blockers."
-    }
-  ],
-  "active_claims": [
+    },
     {
-      "claim_id": "CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01",
+      "event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+      "event_type": "CLAIM_EXPIRED",
+      "sequence": 2,
       "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
       "parent_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
       "worker_id": "cursor-01",
-      "reviewer": "codex-gm-01",
       "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "execution_base": "ff8fca3e610ac936e8998112255901a78296b238",
-      "fencing_token": "FENCE-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-R2",
-      "record_version": 2,
-      "status": "CLAIMED",
-      "claimed_at": "2026-08-16T12:49:02Z",
-      "lease_expires_at": "2026-08-18T12:49:02Z",
-      "scope": "TWO_BLOCKER_PAYROLL_REWORK_ONLY",
-      "mainnet_write": false
+      "reviewer": "codex-gm-01",
+      "source_commit": "ff8fca3e610ac936e8998112255901a78296b238",
+      "previous_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001",
+      "recorded_by": "codex-gm-01",
+      "recorded_at": "2026-09-13T14:21:31Z",
+      "reason": "The lease expired at 2026-08-18T12:49:02Z with no matching R2 branch, pull request or delivery."
+    },
+    {
+      "event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003",
+      "event_type": "CLAIM_RELEASED",
+      "sequence": 3,
+      "task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "parent_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+      "worker_id": "cursor-01",
+      "branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "reviewer": "codex-gm-01",
+      "source_commit": "22f2c797f53e7d26aa7d18ffdcb03c41d4cd7ff0",
+      "previous_event_id": "CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002",
+      "recorded_by": "codex-gm-01",
+      "recorded_at": "2026-09-13T14:21:31Z",
+      "reason": "Expired claim released before the Human-approved bounded pilot is made READY_FOR_ATOMIC_CLAIM; history is preserved and no delivery is inferred."
     }
   ],
+  "active_claims": [],
   "formal_employee_requirements": [
     "worker_id exists",
     "employee_status is ACTIVE, TRUSTED, or SENIOR_TRUSTED",
@@ -151,7 +164,7 @@
     {"task_id":"KAIOS-CURSOR-EARTHWORM-CANDIDATE-001","worker_id":"cursor-01","branch":"cursor-handoff/KAIOS-CURSOR-EARTHWORM-CANDIDATE-001","output_status":"CURSOR_RESEARCH_CANDIDATE_ONLY","reviewer":"codex-gm-01","status":"RELEASED"},
     {"task_id":"KAIOS-CURSOR-FUNGI-CANDIDATE-001","worker_id":"cursor-01","branch":"cursor-handoff/KAIOS-CURSOR-FUNGI-CANDIDATE-001","output_status":"CURSOR_RESEARCH_CANDIDATE_ONLY","reviewer":"codex-gm-01","status":"RELEASED","claim_event_ids":["CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-001","CLAIM-EVENT-KAIOS-CURSOR-FUNGI-CANDIDATE-001-002"]},
     {"task_id":"KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001","worker_id":"cursor-01","branch":"cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001","output_status":"CANDIDATE_ONLY","reviewer":"codex-gm-01","status":"REWORK_REQUIRED_CLAIM_RELEASED","claim_id":"CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-001-cursor-01","claim_event_ids":["CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-001-001","CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-001-002","CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-001-003"]},
-    {"task_id":"KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001","parent_task_id":"KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001","worker_id":"cursor-01","branch":"cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001","execution_base":"ff8fca3e610ac936e8998112255901a78296b238","output_status":"CANDIDATE_REWORK_ONLY","reviewer":"codex-gm-01","status":"CLAIMED","claim_id":"CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01","claim_event_ids":["CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001"]}
+    {"task_id":"KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001","parent_task_id":"KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001","worker_id":"cursor-01","branch":"cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001","execution_base":"LATEST_MAIN_AT_DISPATCH","source_payload_head":"ff8fca3e610ac936e8998112255901a78296b238","output_status":"CANDIDATE_REWORK_ONLY","reviewer":"codex-gm-01","status":"READY_FOR_ATOMIC_CLAIM","prior_claim_id":"CLAIM-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-cursor-01","claim_event_ids":["CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-001","CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-002","CLAIM-EVENT-KAIOS-LIFE-ENERGY-PAYROLL-R2-001-003"]}
   ],
   "prepared_tasks": [
     {
@@ -196,12 +209,12 @@
       "life_status": "ALIVE_WITH_DARK_MATTER",
       "permission": "system_maintainer",
       "workspace": "C:/Desktop/kline-odyssey-codex-gm-life-v1",
-      "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001-REVIEW",
-      "current_branch": "codex/codex-gm-life-runtime-v1",
+      "current_task": "KAIOS-CURSOR-BOUNDED-PILOT-20260913",
+      "current_branch": "codex/cursor-cloud-bounded-pilot-20260913",
       "status": "ACTIVE",
       "employee_status": "ACTIVE",
       "trust_level": "T5",
-      "heartbeat": "2026-08-16T12:49:02Z",
+      "heartbeat": "2026-09-13T14:21:31Z",
       "last_report": "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md",
       "allowed_branch_pattern": "codex/<Task-ID>",
       "can_push_main": true,
@@ -221,14 +234,14 @@
       "worker_class": "FOUNDATIONAL_LIFE_CREATOR",
       "worker_classes": ["FOUNDATIONAL_LIFE_CREATOR","LIFE_RESEARCH_ANALYST"],
       "workspace": "cursor-worker-workspace",
-      "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
-      "status": "CLAIMED",
-      "pending_rework_task_id": null,
-      "fresh_claim_required": false,
+      "current_task": null,
+      "current_branch": null,
+      "status": "IDLE",
+      "pending_rework_task_id": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001",
+      "fresh_claim_required": true,
       "employee_status": "ACTIVE",
       "trust_level": "T2",
-      "heartbeat": "2026-08-16T12:49:02Z",
+      "heartbeat": "2026-09-13T14:21:31Z",
       "last_report": "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
       "allowed_branch_pattern": "cursor-handoff/<Task-ID>",
       "branch_input_aliases": ["cursor/<feature-name>"],
@@ -247,7 +260,7 @@
       "workspace_policy_acknowledged": true,
       "do_not_touch_acknowledged": true,
       "suspension": null,
-      "autonomy_scope": "none"
+      "autonomy_scope": "HUMAN_APPROVED_BOUNDED_EXTERNAL_PILOT"
     },
     {"worker_id":"claude-01","worker_type":"Claude","role":"Worker","permission":"pending","workspace":"claude-worker-workspace","current_task":null,"current_branch":null,"status":"OFFLINE","employee_status":"PENDING_REGISTRATION","trust_level":"T0","heartbeat":null,"last_report":null,"allowed_branch_pattern":"claude-handoff/<Task-ID>","can_push_main":false,"reviewer":"codex-gm-01","boot_acknowledged":false,"canon_acknowledged":false,"workspace_policy_acknowledged":false,"do_not_touch_acknowledged":false,"suspension":null,"autonomy_scope":"none"},
     {"worker_id":"gemini-01","worker_type":"Gemini","role":"Worker","permission":"pending","workspace":"gemini-worker-workspace","current_task":null,"current_branch":null,"status":"OFFLINE","employee_status":"PENDING_REGISTRATION","trust_level":"T0","heartbeat":null,"last_report":null,"allowed_branch_pattern":"gemini-handoff/<Task-ID>","can_push_main":false,"reviewer":"codex-gm-01","boot_acknowledged":false,"canon_acknowledged":false,"workspace_policy_acknowledged":false,"do_not_touch_acknowledged":false,"suspension":null,"autonomy_scope":"none"},

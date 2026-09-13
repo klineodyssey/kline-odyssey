@@ -1,10 +1,33 @@
-KGEN CURSOR DISPATCH WAKE — follow KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md
+KAIOS CURSOR BOUNDED PILOT — cursor-01
 
-You are cursor-01. This run was triggered by a Codex dispatch/release merge (GitHub Actions → Cloud Agents API).
+This is one Human-approved, harmless repository-only task. Read and obey the root AGENTS.md, required Boot files, KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md, the formal WorkQueue row, and the exact task envelope supplied below.
 
-1. Execute §① Light Boot and §② Company patrol exactly.
-2. If continuous queue shows DISPATCHED or READY_FOR_ATOMIC_CLAIM for cursor-01 AND task envelope exists on origin/main:
-   - Claim ONE task only, implement, triple handoff, push cursor-handoff/<Task-ID>, stop.
-3. If no eligible task: reply "QUEUE_EMPTY_AFTER_DISPATCH" with preflight summary; do NOT open PR or edit code.
-4. Do not touch protected paths, main, wallet, KGEN contracts, or WORK_QUEUE authority fields.
-5. Max one task per run.
+Rules:
+
+1. Work on EXACT_TASK_ID only. Do not scan for or claim a second task.
+2. Verify the supplied starting ref is at EXACT_STARTING_HEAD, then create/use TARGET_BRANCH. Verify SOURCE_PAYLOAD_REF is at SOURCE_PAYLOAD_HEAD and copy only r2_task_packet.ALLOWED_FILES from that preserved candidate branch into TARGET_BRANCH. If either head drifts, stop and report BLOCKED_BASE_DRIFT.
+3. Make only the edits allowed by r2_task_packet.ALLOWED_FILES. Do not edit WorkQueue, worker registry, task envelope, governance, automation, contracts, wallets, Runtime CURRENT, KGEN, Mainnet configuration, payments, Treasury, signer material, LP, KYC, or secrets.
+4. Correct only the two recorded candidate-data defects: exact 120-credit allocation replay and schema-invalid candidate_metadata in both colony ledgers.
+5. Run every test in r2_task_packet.TESTS. Also parse every changed JSON file and run git diff --check.
+6. This task has no UI changes, so record VISUAL_QA = NOT_APPLICABLE. Do not claim visual PASS without a changed UI.
+7. Commit, push TARGET_BRANCH, open/update one draft PR against main, and provide the exact commit SHA and test results. Do not merge the PR.
+8. Stop after the handoff. Do not execute Mainnet, token transfer, payment, Treasury, signer, governance, deployment, KYC, or any irreversible external action.
+9. A failed test is not completion. Repair within the exact allowed scope, rerun, and report the remaining blocker if it cannot pass.
+10. Keep all secret values out of commands, logs, reports, commits, screenshots, and chat.
+
+Required final handoff fields:
+
+TASK_ID
+WORKER_ID = cursor-01
+BRANCH
+COMMIT_SHA
+FILES_CHANGED
+TESTS_RUN
+TEST_RESULTS
+FUNCTIONAL_QA
+VISUAL_QA = NOT_APPLICABLE
+KNOWN_LIMITATIONS
+MAINNET_WRITE = NO
+TOKEN_TRANSFER = NO
+PAYMENT = NO
+READY_FOR_GM_REVIEW = YES / NO

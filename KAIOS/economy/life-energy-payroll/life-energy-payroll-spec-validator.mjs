@@ -45,9 +45,14 @@ assert.ok(colony.required.includes("winter_or_emergency_reserve"));
 assert.equal(colony.properties.simulation_only.const, true);
 
 const dispatch = documents["KAIOS_CURSOR_LIFE_ENERGY_PAYROLL_TASK_ENVELOPE.json"];
-assert.equal(dispatch.status, "PREPARED_NOT_DISPATCHED");
+assert.equal(dispatch.status, "READY_FOR_ATOMIC_CLAIM");
 assert.equal(dispatch.claim_created, false);
-assert.equal(dispatch.human_response_file_received, false);
+assert.equal(dispatch.human_response_file_received, true);
+assert.equal(dispatch.queue_policy, "ONE_TASK_AT_A_TIME");
+assert.equal(dispatch.dispatch_mode, "HUMAN_APPROVED_BOUNDED_EXTERNAL_PILOT");
+assert.equal(dispatch.external_wake_workflow_allowed, true);
+assert.equal(dispatch.bounded_pilot_policy.concurrency, 1);
+assert.equal(dispatch.bounded_pilot_policy.max_worker_minutes, 60);
 assert.ok(dispatch.forbidden_work.includes("KGEN"));
 assert.ok(dispatch.forbidden_work.includes("real wallet"));
 

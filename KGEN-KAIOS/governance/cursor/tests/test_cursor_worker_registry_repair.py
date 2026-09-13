@@ -69,11 +69,15 @@ KNOWN_CLAIM_STATES = {
     "EXPIRED",
     "ABANDONED",
     "COMPLETED_CODEX_REVIEWED",
+    "READY_FOR_ATOMIC_CLAIM",
+    "REWORK_REQUIRED_CLAIM_RELEASED",
 }
 
 UNLOCKED_CLAIM_STATES = {
     "RELEASED",
     "COMPLETED_CODEX_REVIEWED",
+    "READY_FOR_ATOMIC_CLAIM",
+    "REWORK_REQUIRED_CLAIM_RELEASED",
 }
 
 
@@ -203,25 +207,21 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             <= set(self.cursor["allowed_work"])
         )
 
-    def test_fungi_release_and_life_energy_manual_claim_are_serialized(self):
+    def test_fungi_release_and_bounded_pilot_are_serialized(self):
         metadata = self.registry["metadata"]
         self.assertEqual(
             metadata["source_commit"],
-            "9f481900eb46ae38dd670d6a1bf8a6b784533f77",
+            "22f2c797f53e7d26aa7d18ffdcb03c41d4cd7ff0",
         )
         self.assertEqual(
             metadata["task_id"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
+            "KAIOS-CURSOR-BOUNDED-PILOT-20260913",
         )
-        self.assertIn("manual-only", metadata["change_reason"])
+        self.assertIn("bounded Cursor Cloud pilot", metadata["change_reason"])
 
         locked = validate_one_task_lock(self.registry["dispatch_history"])
-        self.assertEqual(len(locked), 1)
-        self.assertEqual(
-            locked[0]["task_id"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(len(self.registry["active_claims"]), 1)
+        self.assertEqual(len(locked), 0)
+        self.assertEqual(len(self.registry["active_claims"]), 0)
 
         fungi_events = [
             event
@@ -246,16 +246,16 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             if event["task_id"]
             == "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001"
         ]
-        self.assertEqual(len(life_energy_events), 1)
-        self.assertEqual(life_energy_events[0]["event_type"], "CLAIM_REGISTERED")
+        self.assertEqual(len(life_energy_events), 3)
+        self.assertEqual(
+            [event["event_type"] for event in life_energy_events],
+            ["CLAIM_REGISTERED", "CLAIM_CLOSED_REWORK_REQUIRED", "CLAIM_RELEASED"],
+        )
 
     def test_dispatch_history_ends_with_life_energy_claim_and_excludes_microbial(self):
         final_dispatch = self.registry["dispatch_history"][-1]
-        self.assertEqual(
-            final_dispatch["task_id"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(final_dispatch["status"], "CLAIMED")
+        self.assertEqual(final_dispatch["task_id"], "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001")
+        self.assertEqual(final_dispatch["status"], "READY_FOR_ATOMIC_CLAIM")
         self.assertNotIn(
             "KAIOS-CURSOR-MICROBIAL-RESEARCH-001",
             {item["task_id"] for item in self.registry["dispatch_history"]},
@@ -286,16 +286,10 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         self.assertEqual(
             prepared["output_status"], "CURSOR_RESEARCH_PROPOSAL_ONLY"
         )
-        self.assertEqual(
-            self.cursor["current_task"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(
-            self.cursor["current_branch"],
-            "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(self.cursor["status"], "CLAIMED")
-        self.assertEqual(self.cursor["heartbeat"], "2026-08-03T12:45:00Z")
+        self.assertIsNone(self.cursor["current_task"])
+        self.assertIsNone(self.cursor["current_branch"])
+        self.assertEqual(self.cursor["status"], "IDLE")
+        self.assertEqual(self.cursor["heartbeat"], "2026-09-13T14:21:31Z")
         self.assertIn("MICROBIAL_RESEARCH", self.cursor["allowed_work"])
 
         self.assertEqual(
@@ -413,24 +407,23 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             )
             self.assertEqual(hashlib.sha256(payload).hexdigest(), evidence["sha256"])
 
-    def test_continuous_queue_projects_preparation_only(self):
+    def test_continuous_queue_projects_bounded_pilot_and_preparation_only(self):
         queue = self.forest_queue
         self.assertEqual(
             queue["continuous_dispatch_mode"],
-            "CODEX_CONTROLLED_PREPARATION_ONLY",
+            "HUMAN_APPROVED_BOUNDED_EXTERNAL_PILOT",
         )
         self.assertFalse(queue["automatic_unreviewed_dispatch"])
         self.assertTrue(
             {
-                "PREVIOUS_TASK_CODEX_REVIEWED",
-                "PREVIOUS_TASK_CLOSED",
-                "PREVIOUS_CLAIM_RELEASED",
-                "PREPARATION_PR_MERGED",
-                "EXACT_PREPARATION_MERGE_SHA_RECORDED",
-                "PLANNED_BRANCH_CREATED_AT_EXACT_PREPARATION_MERGE_SHA",
-                "ISOLATED_WORKTREE_VERIFIED_AT_EXACT_PREPARATION_MERGE_SHA",
-                "SEPARATE_ACTIVATION_PR_REVIEWED_AND_MERGED",
-                "FAIL_CLOSED_EXPIRY_AND_REVALIDATION_DEFINED",
+                "FORMAL_TASK_READY_FOR_ATOMIC_CLAIM",
+                "NO_ACTIVE_REPOSITORY_OR_PROVIDER_RUN",
+                "NO_SAME_TASK_BRANCH_OR_OPEN_PR",
+                "EXACT_SOURCE_PAYLOAD_HEAD_VERIFIED",
+                "DAILY_AND_MONTHLY_COST_CAP_POLICY_ACTIVE",
+                "IDEMPOTENT_AGENT_ID",
+                "FIVE_MINUTE_WATCHDOG",
+                "PROTECTED_ACTION_DENY_LIST",
             }
             <= set(queue["next_dispatch_requires"])
         )
@@ -454,36 +447,30 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             queue["worker_state"],
             {
                 "worker_id": "cursor-01",
-                "current_task": "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-                "current_branch": "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-                "status": "CLAIMED",
+                "current_task": None,
+                "current_branch": None,
+                "status": "IDLE",
             },
         )
         self.assertEqual(queue["prepared_task"], self.registry["prepared_tasks"][0])
 
-    def test_four_way_active_claims_are_equal_and_single(self):
+    def test_four_way_active_claims_are_equal_and_empty_before_atomic_claim(self):
         claim_sets = [
             self.registry["active_claims"],
             self.forest_queue["active_claims"],
             self.software_queue["active_claims"],
             self.public_queue["active_claims"],
         ]
-        self.assertTrue(all(len(claims) == 1 for claims in claim_sets))
+        self.assertTrue(all(len(claims) == 0 for claims in claim_sets))
         self.assertTrue(all(claims == claim_sets[0] for claims in claim_sets[1:]))
         self.assertEqual(self.public_queue["worker_state"], self.forest_queue["worker_state"])
         self.assertEqual(self.public_queue["prepared_task"], self.forest_queue["prepared_task"])
         self.assertEqual(
             self.software_queue["cursor"]["current_status"],
-            "CLAIMED_WAITING_MANUAL_EXECUTION",
+            "ACTIVE_IDLE_READY_FOR_BOUNDED_PILOT",
         )
-        self.assertEqual(
-            self.software_queue["cursor"]["current_task"],
-            "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
-        self.assertEqual(
-            self.software_queue["cursor"]["current_branch"],
-            "cursor-handoff/KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001",
-        )
+        self.assertIsNone(self.software_queue["cursor"]["current_task"])
+        self.assertIsNone(self.software_queue["cursor"]["current_branch"])
         self.assertEqual(
             self.software_queue["cursor"]["prepared_task_status"],
             "PREPARATION_ONLY",
@@ -493,10 +480,9 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
             self.software_queue["cursor"]["descendant_wildcard_allowed"]
         )
 
-    def test_life_energy_claim_is_manual_candidate_only_and_exactly_bounded(self):
+    def test_life_energy_history_is_preserved_and_r2_pilot_is_exactly_bounded(self):
         envelope = self.life_energy_envelope
         claim = self.life_energy_claim
-        active = self.registry["active_claims"][0]
         task_id = "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-CANDIDATES-001"
         expected_paths = [
             "KAIOS/economy/candidates/payroll-v0/",
@@ -506,20 +492,22 @@ class CursorWorkerRegistryRepairTests(unittest.TestCase):
         ]
         self.assertEqual(envelope["task_id"], task_id)
         self.assertEqual(claim["task_id"], task_id)
-        self.assertEqual(active["task_id"], task_id)
-        self.assertEqual(envelope["status"], "DISPATCHED")
-        self.assertTrue(envelope["claim_created"])
+        self.assertEqual(envelope["status"], "READY_FOR_ATOMIC_CLAIM")
+        self.assertFalse(envelope["claim_created"])
         self.assertTrue(envelope["human_response_file_received"])
         self.assertEqual(envelope["allowed_paths"], expected_paths)
         self.assertEqual(claim["allowed_paths"], expected_paths)
         self.assertEqual(len(envelope["expected_files"]), 7)
         self.assertEqual(envelope["expected_files"], claim["expected_files"])
-        self.assertEqual(envelope["claim_id"], active["claim_id"])
-        self.assertEqual(envelope["fencing_token"], active["fencing_token"])
-        self.assertTrue(envelope["automatic"] is False)
-        self.assertTrue(envelope["external_autonomy"] is False)
-        self.assertTrue(envelope["cursor_api_key_required"] is False)
-        self.assertTrue(envelope["external_wake_workflow_allowed"] is False)
+        self.assertIsNone(envelope["claim_id"])
+        self.assertIsNone(envelope["fencing_token"])
+        self.assertTrue(envelope["automatic"])
+        self.assertTrue(envelope["external_autonomy"])
+        self.assertTrue(envelope["cursor_api_key_required"])
+        self.assertTrue(envelope["external_wake_workflow_allowed"])
+        self.assertEqual(envelope["r2_task_packet"]["TASK_ID"], "KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001")
+        self.assertEqual(envelope["bounded_pilot_policy"]["concurrency"], 1)
+        self.assertEqual(envelope["bounded_pilot_policy"]["max_worker_minutes"], 60)
         self.assertTrue(claim["manual_execution_only"])
         self.assertFalse(claim["external_autonomy"])
         self.assertFalse(claim["cursor_api_key_required"])

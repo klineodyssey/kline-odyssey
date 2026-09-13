@@ -1,53 +1,39 @@
-# KGEN Cursor Dispatch Wake — repo wiring
+# KGEN Cursor dispatch wake
 
-**Human decision:** `HUMAN-AUTO-CLOCKIN-001` (方案 2)
+This directory carries the repository-side prompt for the bounded Cursor Cloud worker path.
 
-## What is already active (no login required)
+## Active pilot authorization
 
-| Component | Path | Effect |
-|-----------|------|--------|
-| Session rule | `.cursor/rules/kgen-session-clockin.mdc` | Every Cursor chat in this repo: Boot → company → Human |
-| Cloud env install | `.cursor/environment.json` | Cloud Agent VM: Python pipeline deps on boot |
-| SOP | `KGEN-AI-Company/CURSOR_SESSION_CLOCKIN_SOP.md` | Full procedure + cost notes |
-| AGENTS.md | `AGENTS.md` § Cursor session clock-in | Cloud agent summary |
+Human decision `APPROVED_WITH_BOUNDED_PILOT` authorizes one harmless repository-only pilot for `cursor-01`:
 
-## GitHub Actions wake (Codex merge → Cloud Agent)
+- daily policy cap: USD 1;
+- monthly policy cap: USD 20;
+- at most four Cloud Agent launches per UTC day;
+- concurrency one and one formal task at a time;
+- 5xx: at most three retries; 4xx: no retry;
+- watchdog every five minutes and cancellation request at the sixty-minute ceiling;
+- no Mainnet, funds, Treasury, payment, signer, LP, governance, KYC or secret export.
+
+The initial task is `KAIOS-CURSOR-LIFE-ENERGY-PAYROLL-R2-001`, sourced from the canonical WorkQueue and its exact task envelope. It starts from the preserved R1 delivery head because the candidate payload is intentionally not on `main`.
+
+## Event-driven path
 
 Workflow: `.github/workflows/kgen-cursor-dispatch-wake.yml`
 
-**Trigger:** PR merged to `main` with head branch `codex/*`
+The workflow wakes on a matching WorkQueue/task-envelope/handoff merge to `main`, or by explicit manual dispatch. It fails closed unless all of the following are true:
 
-**One-time secret (Human or admin):**
+- the formal task and envelope are `READY_FOR_ATOMIC_CLAIM`;
+- repository active-claim projections are empty and `cursor-01` is idle;
+- the exact starting ref/head match;
+- no target branch or same-task open PR exists;
+- Cursor reports no active agent;
+- the daily launch count is below four;
+- `CURSOR_API_KEY` exists as a GitHub Actions secret.
 
-1. [Cursor Dashboard → API Keys](https://cursor.com/dashboard/api) → create key
-2. GitHub repo **Settings → Secrets → Actions** → `CURSOR_API_KEY`
+The request uses a deterministic client-supplied agent ID, so a repeated event receives a 409 conflict instead of starting a second agent. The workflow requests Composer 2 Fast, creates a PR, polls the run every five minutes, and records token usage. Cursor's API reports tokens but not USD cost, so the USD 1/day and USD 20/month ceilings must also remain configured as the provider billing/spend limit in the Cursor dashboard. See the official [Cloud Agents API](https://cursor.com/docs/cloud-agent/api/endpoints) and [Cloud Agents billing guidance](https://cursor.com/docs/cloud-agent#billing).
 
-After the secret is set, every Codex dispatch merge automatically POSTs to `https://api.cursor.com/v1/agents` with prompt in `cursor-dispatch-wake-prompt.txt`.
-The workflow uses Cursor's documented HTTP Basic API-key authentication and only
-accepts a 2xx response when it contains matching structured `agent` and `run`
-identifiers; an empty or malformed success response fails closed.
-The job has a five-minute hard limit and the API request has explicit connection
-and total-time limits, so an unavailable endpoint cannot occupy a runner indefinitely.
+## Delivery and closeout
 
-**Manual test:** GitHub → Actions → **KGEN Cursor Dispatch Wake** → **Run workflow** (uses `workflow_dispatch`).
+Cursor may change only files allowed by the task packet. It pushes one `cursor-handoff/<Task-ID>` branch and opens one draft PR; it cannot merge. The GM independently checks the exact head, file scope, tests, security boundaries and any UI visual evidence. A low-risk green result may then be merged under the standing Human authorization and Pages must be verified when the changed scope is published.
 
-If the secret is missing, the workflow logs a notice and exits successfully (does not fail the merge).
-
-If Cursor returns `403 plan_required`, the workflow records
-`HOLD_EXTERNAL_PLAN_REQUIRED`, explicitly reports that no agent was launched, and
-exits successfully so an unavailable external subscription does not create a false
-repository CI failure. Other non-success API responses still fail closed.
-
-## Optional: Cursor Automations UI (native GitHub trigger)
-
-Same prompt as `cursor-dispatch-wake-prompt.txt`. Create at [cursor.com/automations](https://cursor.com/automations):
-
-- Trigger: GitHub → Pull request merged → `main`, filter `codex/*`
-- Repo: `klineodyssey/kline-odyssey`
-- Model: Composer 2 Fast
-
-Use **either** GHA+API **or** Automations UI — not both on the same merge unless you want duplicate runs.
-
-## Cost reminder
-
-~$0.03–0.15 per idle wake; + task tokens if cursor-01 claims work. Set Cloud Agent spend limit in Cursor billing.
+After closeout the company records payroll state (`prepaid`, `received`, salary advance and offset status) and selects the next safe formal task. Protected actions always remain Human-authority gated.
