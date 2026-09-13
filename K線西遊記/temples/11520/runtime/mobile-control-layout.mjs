@@ -1,9 +1,9 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.2.1
-REVISION: 2026-09-09.VIEWPORT-THUMB-CLEARANCE
-PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group; keeps the normal-axis Wukong artwork visible; aligns combat actions and right utility organs from real mobile screenshot feedback; delegates circular-thumb motion to the canonical XYZ Plane Joystick; and preserves XYZ/trading semantics.
+VERSION: 1.3.0
+REVISION: 2026-09-14.POSTER-THUMB-UTILITY-STATUS-FLOW
+PURPOSE: Human-directed 390x844 HUD ownership. Keeps C warp, lots and the active remaining XYZ axis as one bottom three-rail group with non-squashable circular thumbs; keeps the approved Wukong poster crop visible; flows World/Life status below the K market cards; separates the utility master from whole-HUD collapse; delegates circular-thumb motion to the canonical XYZ Plane Joystick; and preserves XYZ/trading semantics.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=420;
@@ -19,21 +19,22 @@ function installStyle(){
   .brand .brandMetaV250{white-space:nowrap!important;gap:4px!important}
   .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
   .axes{z-index:250!important}
-  .tele,.monsterHud{top:190px!important;height:86px!important}
-  .tele{left:6px!important;width:calc(50% - 9px)!important}
-  .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
-  .minimapWrap{top:286px!important}
+  #k11520StatusFlow{position:fixed!important;z-index:251!important;left:6px!important;right:6px!important;top:184px!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;align-items:stretch!important;pointer-events:none!important}
+  #k11520StatusFlow>.tele,#k11520StatusFlow>.monsterHud{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-height:92px!important;max-height:112px!important;margin:0!important;overflow:auto!important;box-sizing:border-box!important;pointer-events:auto!important}
+  .minimapWrap{top:306px!important}
   #knob{will-change:transform!important}
 
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
   #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(28px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
-  #cControl{left:166px!important;right:auto!important}
-  #lotsControl{left:216px!important;right:auto!important}
-  #yControl{left:266px!important;right:auto!important}
+  #cControl{left:154px!important;right:auto!important}
+  #lotsControl{left:208px!important;right:auto!important}
+  #yControl{left:262px!important;right:auto!important}
   #cControl label,#lotsControl label,#yControl label{top:5px!important;font-size:7px!important;line-height:1.05!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   #cControl .read,#lotsControl .read,#yControl .read{bottom:4px!important;font-size:7px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   #yControl .track{background:linear-gradient(to bottom,#123f32 0%,#123f32 49.5%,#2b343b 49.5%,#2b343b 50.5%,#4b2029 50.5%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
-  #yThumb{width:34px!important;height:34px!important;border-radius:50%!important;border:2px solid #f1ca73!important;background:#111 url('./assets/wukong-y-control.jpg') center 42%/cover no-repeat!important;box-shadow:0 0 0 2px #05080dcc,0 0 14px #f1ca7366!important;overflow:hidden!important}
+  #cControl .thumb,#lotsControl .thumb,#yControl .thumb{box-sizing:border-box!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;aspect-ratio:1/1!important;flex:0 0 34px!important;flex-shrink:0!important;border-radius:50%!important;transform:translate(-50%,-50%)!important;overflow:hidden!important}
+  #yThumb{border:2px solid #f1ca73!important;background:#111 url('./assets/wukong-y-control.jpg') 38% 50%/cover no-repeat!important;box-shadow:0 0 0 2px #05080dcc,0 0 14px #f1ca7366!important}
+  #yControl label:after{content:none!important;display:none!important}
   #yControl[data-energy-sign="nonnegative"] #yThumb{border-color:#65e798!important;box-shadow:0 0 0 2px #05080dcc,0 0 16px #65e79888!important}
   #yControl[data-energy-sign="negative"] #yThumb{border-color:#ff737a!important;box-shadow:0 0 0 2px #05080dcc,0 0 16px #ff737a88!important}
   #yControl[data-energy-sign="nonnegative"]{border-color:#65e79899!important;box-shadow:0 0 16px #65e79822!important}
@@ -56,7 +57,13 @@ function installStyle(){
   .bagRelocatedV250{right:5px!important;left:auto!important;bottom:70px!important}
   .dock,.dock.open{right:5px!important;left:auto!important}
 
-  #k11520HudCollapseAll{position:fixed;z-index:3050;right:5px;left:auto;top:auto;bottom:390px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
+  #k11520HudCollapseAll{position:fixed;z-index:9992;right:58px;left:auto;top:auto;bottom:218px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
+  html:not(.k11520UtilitiesOpen) #walletPanel,html:not(.k11520UtilitiesOpen) #walletToggle,html:not(.k11520UtilitiesOpen) #chatHandle,html:not(.k11520UtilitiesOpen) #gameModeToggle,html:not(.k11520UtilitiesOpen) #bgmButton,html:not(.k11520UtilitiesOpen) #aiChatButton,html:not(.k11520UtilitiesOpen) #backpackButton,html:not(.k11520UtilitiesOpen) #dock{display:none!important}
+  html.k11520UtilitiesOpen #gameModeToggle{display:grid!important;visibility:visible!important;pointer-events:auto!important}
+  #k11520UtilityMaster,#dockToggle{display:grid!important;place-items:center!important;min-width:44px!important;min-height:44px!important;color:#dffaff!important}
+  #k11520UtilityMaster{position:fixed!important;right:5px!important;bottom:218px!important;width:44px!important;height:44px!important;z-index:9993!important;border-radius:13px!important;border:1px solid #68e4ff66!important;background:#101923ef!important;font:900 18px system-ui!important;touch-action:manipulation!important}
+  body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520HudCollapseAll,body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520UtilityMaster{visibility:hidden!important;pointer-events:none!important}
+  #dock.open .rail{right:50px!important;bottom:58px!important;width:104px!important;max-height:260px!important;grid-template-columns:repeat(2,44px)!important;gap:4px!important;padding:6px!important;overflow:auto!important}
   html.k11520HudCollapsed .top,
   html.k11520HudCollapsed .axes,
   html.k11520HudCollapsed .tele,
@@ -73,6 +80,7 @@ function installStyle(){
   html.k11520HudCollapsed .bagRelocatedV250,
   html.k11520HudCollapsed #aiChatButton,
   html.k11520HudCollapsed #bgmButton,
+  html.k11520HudCollapsed #k11520UtilityMaster,
   html.k11520HudCollapsed .dock{display:none!important}
 }
 `;
@@ -80,13 +88,14 @@ function installStyle(){
 function setImportant(el,key,value){if(el)el.style.setProperty(key,value,'important')}
 function applyRail(){
   if(innerWidth>MOBILE_MAX)return;
-  const specs=[['#cControl','166px'],['#lotsControl','216px'],['#yControl','266px']];
+  const specs=[['#cControl','154px'],['#lotsControl','208px'],['#yControl','262px']];
   for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
 function applyRightOrgans(){
   if(innerWidth>MOBILE_MAX)return;
   const wallet=$('#walletPanel'),handle=$('#chatHandle'),chat=$('#aiChatButton'),bgm=$('#bgmButton'),bag=$('.bagRelocatedV250'),dock=$('#dock');
   if(hudCollapsed()){for(const el of [wallet,handle,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
+  if(!document.documentElement.classList.contains('k11520UtilitiesOpen')){for(const el of [wallet,handle,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
   for(const el of [wallet,handle,chat,bgm,bag,dock])el?.style.removeProperty('display');
   if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','226px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','206px')}}
   if(handle){for(const [k,v] of [['position','fixed'],['left','auto'],['right','5px'],['top','auto'],['bottom','330px'],['width','42px'],['min-width','42px'],['height','46px']])setImportant(handle,k,v)}
@@ -111,11 +120,12 @@ function installEnergyRead(){
     const raw=Number(world?.intent?.[key]??ctl?.rail?.value??0),v=Number.isFinite(raw)?raw:0;
     const sign=v<0?'negative':'nonnegative';rail.dataset.energySign=sign;
     const level=sign==='negative'?'負能階':'非負能階';
-    const nextLabel=`${axis} 縱搖桿 · ${level}`;
+    const nextLabel=`${axis} 縱搖桿`;
     if(label.textContent!==nextLabel)label.textContent=nextLabel;
     const nextRead=`${v>0?'+':''}${v.toFixed(1)}`;
     if(out.textContent!==nextRead)out.textContent=nextRead;
-    rail.setAttribute('aria-label',`${axis} 縱搖桿 ${level} ${nextRead}`);
+    const detail=`${axis} 縱搖桿 ${level} ${nextRead}`;
+    rail.setAttribute('aria-label',detail);rail.title=detail;
   };
   paint();clearInterval(energyTimer);energyTimer=setInterval(paint,100);
   try{energyLabelGuard?.disconnect()}catch{}
@@ -124,19 +134,24 @@ function installEnergyRead(){
   energyLabelGuard.observe(label,{childList:true,characterData:true,subtree:true});
   return true;
 }
+function installStatusFlow(){
+  const world=$('.tele'),life=$('.monsterHud');if(!world||!life)return false;
+  let flow=$('#k11520StatusFlow');if(!flow){flow=document.createElement('div');flow.id='k11520StatusFlow';flow.setAttribute('aria-label','World 與 Life 狀態');world.parentNode?.insertBefore(flow,world)}
+  if(world.parentElement!==flow)flow.appendChild(world);if(life.parentElement!==flow)flow.appendChild(life);return true;
+}
 function installMasterCollapse(){
   let b=$('#k11520HudCollapseAll');if(!b){b=document.createElement('button');b.id='k11520HudCollapseAll';b.type='button';b.setAttribute('aria-label','總收合或展開 HUD');document.body.appendChild(b)}
   const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();installStatusFlow();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
-  const report={viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
+  const report={viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),statusFlow:rect('#k11520StatusFlow'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.warp.right<=report.lots.left&&report.lots.right<=report.axisRail.left);
   report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
-  report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),chatMaster:overlap(report.chat,report.masterCollapse)};
+  report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketStatus:overlap(rect('.axes'),report.statusFlow),statusMap:overlap(report.statusFlow,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();
   report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.threeRailAligned&&report.equalWorldLifeWidth&&Object.values(report.overlaps).every(v=>!v));
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
