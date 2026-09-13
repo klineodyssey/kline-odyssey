@@ -38,6 +38,7 @@ jobs:
           import hashlib
           import json
           import re
+          from datetime import datetime
           from pathlib import Path
 
           inbox = Path("K線西遊記/autopilot/inbox")
@@ -51,6 +52,10 @@ jobs:
           for path in manifests:
               if manifest_name.fullmatch(path.name) is None:
                   raise SystemExit(f"AUTOPILOT_MANIFEST_NAME_INVALID:{path.name}")
+              try:
+                  datetime.strptime(path.name[:8], "%Y%m%d")
+              except ValueError as exc:
+                  raise SystemExit(f"AUTOPILOT_MANIFEST_DATE_INVALID:{path.name}") from exc
               if path.is_symlink() or not path.is_file():
                   raise SystemExit(f"AUTOPILOT_MANIFEST_TYPE_INVALID:{path.name}")
               if path.stat().st_size > max_manifest_bytes:
