@@ -1,0 +1,154 @@
+{
+  "$schema": "./multiverse-life-tax.schema.json",
+  "schema_version": "1.0.0",
+  "candidate_id": "KAIOS_PARALLEL_MARKET_UNIVERSE_LIFE_TAX_V1_CANDIDATE",
+  "status": "DESIGN_ONLY_NOT_LIVE",
+  "mode": "PAPER_SIMULATION_ONLY",
+  "created_at": "2026-08-23T17:31:07+08:00",
+  "source_main_sha": "763f7c17393f11344d94711422708431ed65d58e",
+  "invariants": {
+    "one_map_one_life": true,
+    "one_parallel_universe_embodiment_one_life": true,
+    "life_id_shared_across_universes": false,
+    "personal_wallet_shared_across_lives": false,
+    "one_parcel_one_primary_structure": true,
+    "planet_frame_reuse_forbidden": true,
+    "market_change_is_planet_travel": false,
+    "tax_payment_enabled": false,
+    "company_created": false
+  },
+  "planet_frames": [
+    {
+      "planet_id": "EARTH",
+      "frame_id": "EARTH_K280_SURFACE_V1_CANDIDATE",
+      "origin": "EARTH_CENTER_OF_MASS",
+      "surface_anchor": "K280",
+      "local_origin_label": "EARTH/K280",
+      "coordinate_scope": "EARTH_SURFACE_ONLY",
+      "lineage": "KGEN-KAIOS/land/K280_STANDARD.md",
+      "status": "REFERENCES_FROZEN_ZERO_STATE_ARCHITECTURE",
+      "physical_position_claim": false
+    },
+    {
+      "planet_id": "MARS",
+      "frame_id": "MARS_CENTERED_SURFACE_V1_REFERENCE",
+      "origin": "MARS_CENTER_OF_MASS",
+      "surface_anchor": "MARS_SURFACE_LOCAL",
+      "local_origin_label": "MARS/K0",
+      "coordinate_scope": "MARS_SURFACE_ONLY",
+      "lineage": "DRAFT_PR_166_HEAD_3ef2e3485df00ca61d78bfb5d79c9c079d5fb609",
+      "status": "UNMERGED_REFERENCE_ONLY",
+      "physical_position_claim": false
+    }
+  ],
+  "market_universes": [
+    {
+      "universe_id": "KGEN_MARKET_UNIVERSE",
+      "symbol": "KGEN",
+      "host_planet_id": "EARTH",
+      "planet_frame_id": "EARTH_K280_SURFACE_V1_CANDIDATE",
+      "universe_state": "PAPER_SIMULATION_ONLY",
+      "asset_status": "DEPLOYED_CANON_REFERENCE",
+      "life_classification": "EARTH_PARALLEL_MARKET_UNIVERSE_AI_LIFE",
+      "tax_authority_id": "K18888_KGEN_PAPER",
+      "company_registry_status": "NOT_CREATED"
+    },
+    {
+      "universe_id": "KAIOS_MARKET_UNIVERSE",
+      "symbol": "KAIOS",
+      "host_planet_id": "EARTH",
+      "planet_frame_id": "EARTH_K280_SURFACE_V1_CANDIDATE",
+      "universe_state": "PAPER_SIMULATION_ONLY",
+      "asset_status": "DEPLOYED_CANON_REFERENCE",
+      "life_classification": "EARTH_PARALLEL_MARKET_UNIVERSE_AI_LIFE",
+      "tax_authority_id": "K18888_KAIOS_PAPER",
+      "company_registry_status": "NOT_CREATED"
+    },
+    {
+      "universe_id": "KSHIP_MARKET_UNIVERSE",
+      "symbol": "KSHIP",
+      "host_planet_id": "EARTH",
+      "planet_frame_id": "EARTH_K280_SURFACE_V1_CANDIDATE",
+      "universe_state": "PAPER_SIMULATION_ONLY",
+      "asset_status": "DESIGN_ONLY_NOT_DEPLOYED",
+      "life_classification": "EARTH_PARALLEL_MARKET_UNIVERSE_AI_LIFE",
+      "tax_authority_id": "K18888_KSHIP_PAPER",
+      "company_registry_status": "NOT_CREATED"
+    },
+    {
+      "universe_id": "KUFO_MARKET_UNIVERSE",
+      "symbol": "KUFO",
+      "host_planet_id": "EARTH",
+      "planet_frame_id": "EARTH_K280_SURFACE_V1_CANDIDATE",
+      "universe_state": "PAPER_SIMULATION_ONLY",
+      "asset_status": "DESIGN_ONLY_NOT_DEPLOYED",
+      "life_classification": "EARTH_PARALLEL_MARKET_UNIVERSE_AI_LIFE",
+      "tax_authority_id": "K18888_KUFO_PAPER",
+      "company_registry_status": "NOT_CREATED"
+    },
+    {
+      "universe_id": "KDNA_MARKET_UNIVERSE",
+      "symbol": "KDNA",
+      "host_planet_id": "EARTH",
+      "planet_frame_id": "EARTH_K280_SURFACE_V1_CANDIDATE",
+      "universe_state": "PAPER_SIMULATION_ONLY",
+      "asset_status": "HUMAN_PROPOSED_NOT_FOUND_DEPLOYED",
+      "life_classification": "EARTH_PARALLEL_MARKET_UNIVERSE_AI_LIFE",
+      "tax_authority_id": "K18888_KDNA_PAPER",
+      "company_registry_status": "NOT_CREATED"
+    }
+  ],
+  "building_policy": {
+    "allowed_primary_structure_types": [
+      "MANSION",
+      "RESIDENCE",
+      "MALL",
+      "FACTORY"
+    ],
+    "one_primary_structure_per_parcel": true,
+    "real_world_title_created": false
+  },
+  "company_policy": {
+    "single_universe_company_allowed_in_paper": true,
+    "cross_market_group_status": "NOT_CREATED",
+    "cross_market_group_requires_distinct_universe_entities": true,
+    "cross_market_group_requires_distinct_ledgers": true,
+    "cross_market_group_requires_distinct_wallet_refs": true,
+    "order_received_is_realized_revenue": false,
+    "revenue_requires_delivery_and_settlement_evidence": true
+  },
+  "circulation_policy": {
+    "paper_heartbeat_enabled": true,
+    "life_fluid_conservation_required": true,
+    "replay_protection_required": true,
+    "background_autonomy_claim": false
+  },
+  "tax_policy": {
+    "mirror_jurisdiction": "TAIWAN_ROC_REFERENCE",
+    "tax_authority_pattern": "K18888_<UNIVERSE>_PAPER",
+    "every_life_has_tax_profile": true,
+    "every_map_has_tax_profile": true,
+    "every_material_appearance_has_tax_profile": true,
+    "rates_require_official_effective_rule": true,
+    "real_filing_enabled": false,
+    "real_payment_enabled": false
+  },
+  "long_horizon": {
+    "timestamp_standard": "ISO_8601_WITH_OFFSET",
+    "open_formats": [
+      "JSON",
+      "JSON_SCHEMA_2020_12",
+      "ECMASCRIPT_MODULE",
+      "MARKDOWN"
+    ],
+    "git_lineage_required": true,
+    "one_hundred_million_year_survival_guarantee": false
+  },
+  "external_draft_dependencies": [
+    {
+      "reference": "PR_166",
+      "purpose": "MARS_CENTERED_FRAME_REFERENCE",
+      "authority_status": "UNMERGED_REFERENCE_ONLY"
+    }
+  ]
+}

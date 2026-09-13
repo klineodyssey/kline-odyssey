@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "KAIOS_REAL_WORLD_TAX_MIRROR_SOURCE_REGISTRY_V1_CANDIDATE",
+  "status": "REFERENCE_ONLY_NOT_TAX_ADVICE",
+  "mirror_jurisdiction": "TAIWAN_ROC",
+  "observed_at": "2026-08-23T17:31:07+08:00",
+  "official_sources": [
+    {
+      "source_id": "MOF_TAX_CATALOG_2026",
+      "url": "https://www.etax.nat.gov.tw/etwmain/en/download-document-file",
+      "scope": "OFFICIAL_TAX_CLASS_CATALOG"
+    },
+    {
+      "source_id": "MOF_INDIVIDUAL_PROGRESSIVE_2026",
+      "url": "https://www.etax.nat.gov.tw/etwmain/en/announcement/alien-individual-income-tax/progressive-tax-rate",
+      "scope": "2026_RESIDENT_PROGRESSIVE_RATE_TABLE"
+    },
+    {
+      "source_id": "MOF_ENTERPRISE_INCOME_TAX",
+      "url": "https://www.etax.nat.gov.tw/etwmain/tax-info/understanding/tax-q-and-a/national/profit-seeking-enterprise-income-tax",
+      "scope": "PROFIT_SEEKING_ENTERPRISE_INCOME_TAX"
+    },
+    {
+      "source_id": "MOF_BUSINESS_TAX",
+      "url": "https://www.etax.nat.gov.tw/etwmain/tax-info/understanding/tax-saving-manual/national/business-tax/6opmkDW",
+      "scope": "BUSINESS_TAX_CALCULATION"
+    },
+    {
+      "source_id": "MOF_TAX_CALCULATORS",
+      "url": "https://www.etax.nat.gov.tw/etwmain/tax-info/my-tax/tax-calculation",
+      "scope": "OFFICIAL_CALCULATION_PORTAL"
+    }
+  ],
+  "tax_classes": [
+    { "code": "INDIVIDUAL_INCOME_TAX", "trigger": "INDIVIDUAL_INCOME_LEGALLY_RECOGNIZED", "source_id": "MOF_INDIVIDUAL_PROGRESSIVE_2026" },
+    { "code": "PROFIT_SEEKING_ENTERPRISE_INCOME_TAX", "trigger": "COMPANY_TAXABLE_INCOME_LEGALLY_RECOGNIZED", "source_id": "MOF_ENTERPRISE_INCOME_TAX" },
+    { "code": "BUSINESS_TAX", "trigger": "TAXABLE_SALE_LEGALLY_RECOGNIZED", "source_id": "MOF_BUSINESS_TAX" },
+    { "code": "ESTATE_TAX", "trigger": "ESTATE_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "GIFT_TAX", "trigger": "GIFT_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "STAMP_TAX", "trigger": "TAXABLE_DOCUMENT_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "AMUSEMENT_TAX", "trigger": "TAXABLE_AMUSEMENT_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "LAND_VALUE_TAX", "trigger": "LAND_HOLDING_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "LAND_VALUE_INCREMENT_TAX", "trigger": "LAND_TRANSFER_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "DEED_TAX", "trigger": "BUILDING_TITLE_TRANSFER_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "VEHICLE_LICENSE_TAX", "trigger": "VEHICLE_REGISTRATION_OR_USE_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "HOUSE_TAX", "trigger": "BUILDING_HOLDING_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "COMMODITY_TAX", "trigger": "TAXABLE_COMMODITY_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "TOBACCO_AND_ALCOHOL_TAX", "trigger": "TAXABLE_TOBACCO_OR_ALCOHOL_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "SECURITIES_TRANSACTION_TAX", "trigger": "SECURITIES_TRANSACTION_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "SPECIFICALLY_SELECTED_GOODS_AND_SERVICES_TAX", "trigger": "SELECTED_GOODS_OR_SERVICES_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "FUTURES_TRANSACTION_TAX", "trigger": "FUTURES_TRANSACTION_EVENT", "source_id": "MOF_TAX_CATALOG_2026" },
+    { "code": "MATERIAL_APPEARANCE_TAX_PROFILE", "trigger": "MATERIAL_APPEARED", "source_id": "MOF_TAX_CATALOG_2026" }
+  ],
+  "individual_income_tax_2026_reference": {
+    "currency": "TWD",
+    "resident_use_only": true,
+    "effective_year": 2026,
+    "source_id": "MOF_INDIVIDUAL_PROGRESSIVE_2026",
+    "brackets": [
+      { "up_to": "610000", "rate_bps": 500 },
+      { "up_to": "1380000", "rate_bps": 1200 },
+      { "up_to": "2770000", "rate_bps": 2000 },
+      { "up_to": "5190000", "rate_bps": 3000 },
+      { "up_to": null, "rate_bps": 4000 }
+    ]
+  },
+  "calculation_boundary": {
+    "jurisdiction_and_effective_date_required": true,
+    "taxpayer_classification_required": true,
+    "source_rule_required": true,
+    "filing_enabled": false,
+    "payment_enabled": false,
+    "legal_advice": false
+  }
+}
