@@ -2,9 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   planAutonomousCompanyEngineeringCycle,
+  persistAutonomousCompanyEngineeringCycle,
+  restoreAutonomousCompanyEngineeringCycleState,
+  AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_SAFE_ACTIONS,
   AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS
 } from "../core/company/index.mjs";
+import { MemoryUniverseStore } from "../core/registry/store.mjs";
+import { assertAppendOnlyChain } from "../core/history/index.mjs";
 
 const MAIN_SHA = "9".repeat(40);
 const acknowledgedWorker = Object.freeze({
@@ -177,4 +182,96 @@ test("requires a distinct reviewer only when the task declares review required",
   const selfReviewed = cycle({ work_queue: [{ ...reviewedTask, reviewer_id: worker.worker_id }] });
   assert.equal(selfReviewed.status, "NO_VERIFIED_SAFE_WORK");
   assert.ok(selfReviewed.rejected_candidates[0].reasons.includes("DISTINCT_REVIEWER_REQUIRED"));
+});
+
+test("persists planner evidence in the existing Company stream and restores replay state", async () => {
+  const store = new MemoryUniverseStore();
+  const company = Object.freeze({ company_id: "AI_ANT_COMPANY_0001", status: "FORMING" });
+  const result = cycle();
+  const persisted = await persistAutonomousCompanyEngineeringCycle({ store, company, cycle_result: result });
+  assert.equal(persisted.status, "CYCLE_EVENTS_PERSISTED");
+  assert.deepEqual(persisted.persisted_events.map((event) => event.event_id), result.events.map((event) => event.event_id));
+  assert.ok(persisted.persisted_events.every((event) => event.stream === "COMPANY" && event.payload_hash));
+  assert.equal(assertAppendOnlyChain(await store.history(company.company_id, "COMPANY")), true);
+
+  const restored = await restoreAutonomousCompanyEngineeringCycleState({ store, company_id: company.company_id });
+  assert.equal(restored.status, "RESTART_STATE_RECOVERED");
+  assert.deepEqual(restored.previous_cycle_ids, [result.cycle_id]);
+  assert.equal(restored.latest_cycle_id, result.cycle_id);
+  assert.equal(restored.latest_cycle_status, "WORK_ORDER_CANDIDATE_READY");
+  assert.equal(restored.event_count, result.events.length);
+  assert.equal(restored.external_effect, false);
+
+  const replay = await persistAutonomousCompanyEngineeringCycle({ store, company, cycle_result: result });
+  assert.equal(replay.status, "IDEMPOTENT_NOOP");
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, result.events.length);
+});
+
+test("durable engineering memory rejects authority, event, identity, and payload escalation", async () => {
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "AI_ANT_COMPANY_0001" };
+  const result = cycle();
+  const rejected = [
+    [{ ...result, authority: { ...result.authority, payment_sent: true } }, "EXTERNAL_EFFECT_CYCLE_PERSISTENCE_FORBIDDEN"],
+    [{ ...result, events: [{ ...result.events[0], event_type: "PAYMENT_SENT" }] }, "UNSUPPORTED_DURABLE_ENGINEERING_EVENT"],
+    [{ ...result, events: [{ ...result.events[0], event_id: "FORGED" }] }, "CYCLE_EVENT_ID_INVALID"],
+    [{ ...result, events: [{ ...result.events[0], payload: { ...result.events[0].payload, external_effect: true } }] }, "DURABLE_EVENT_RESERVED_FIELD_OVERRIDE"]
+  ];
+  for (const [cycleResult, code] of rejected) {
+    await assert.rejects(
+      () => persistAutonomousCompanyEngineeringCycle({ store, company, cycle_result: cycleResult }),
+      (error) => error.code === code
+    );
+  }
+  assert.deepEqual(AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES, ["CLOCK_IN", "WORK_ORDER_CANDIDATE", "BLOCKER_STATE", "CLOCK_OUT"]);
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, 0);
+});
+
+test("durable engineering memory rejects partial or conflicting replay", async () => {
+  const store = new MemoryUniverseStore();
+  const company = { company_id: "AI_ANT_COMPANY_0001" };
+  const result = cycle();
+  const first = result.events[0];
+  await store.commit({
+    event_id: first.event_id,
+    domain: "COMPANY",
+    stream: "COMPANY",
+    id: company.company_id,
+    entity: company,
+    event_type: first.event_type,
+    actor_id: first.actor_id,
+    timestamp: first.occurred_at,
+    payload: {
+      ...first.payload,
+      cycle_id: result.cycle_id,
+      planner_event_id: first.event_id,
+      sequence: 1,
+      cycle_status: result.status,
+      external_effect: false
+    }
+  });
+  await assert.rejects(
+    () => persistAutonomousCompanyEngineeringCycle({ store, company, cycle_result: result }),
+    (error) => error.code === "DURABLE_CYCLE_CONFLICT"
+  );
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, 1);
+});
+
+test("MemoryUniverseStore rejects duplicate deterministic event ids before mutating a batch", async () => {
+  const store = new MemoryUniverseStore();
+  const operation = (id) => ({
+    event_id: "CYCLE-001:01:CLOCK_IN",
+    domain: "COMPANY",
+    stream: "COMPANY",
+    id,
+    entity: { company_id: id },
+    event_type: "CLOCK_IN",
+    actor_id: "codex-gm-01",
+    timestamp: "2026-09-14T00:00:00Z",
+    payload: { cycle_id: "CYCLE-001" }
+  });
+  await assert.rejects(() => store.commitBatch([operation("COMPANY-A"), operation("COMPANY-B")]), (error) => error.code === "DUPLICATE_EVENT_ID");
+  assert.equal((await store.allEvents()).length, 0);
+  assert.equal(await store.getEntity("COMPANY", "COMPANY-A"), null);
+  assert.equal(await store.getEntity("COMPANY", "COMPANY-B"), null);
 });
