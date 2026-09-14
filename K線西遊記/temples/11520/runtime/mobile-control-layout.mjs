@@ -20,7 +20,8 @@ function installStyle(){
   .top{left:6px!important;right:6px!important;height:58px!important;padding:7px 8px!important;gap:5px!important}
   .brand{min-width:0!important}.brand b{font-size:12px!important}
   .brand .hqLine{white-space:nowrap!important}
-  .brand .brandMetaV250{font-size:8px!important;white-space:nowrap!important;gap:4px!important}
+  html[data-k11520-layout-owner] .brand .brandMetaV250{font-size:8px!important;white-space:normal!important;flex-wrap:wrap!important;column-gap:4px!important;row-gap:1px!important;line-height:1.05!important}
+  html[data-k11520-layout-owner] .brand .brandMetaV250>span{white-space:nowrap!important}
   .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
   .pill{padding:5px 6px!important}.pill b{font-size:12px!important}
   .axes{top:70px!important;left:6px!important;right:6px!important;height:auto!important;min-height:104px!important;gap:4px!important;align-items:stretch!important;z-index:250!important}
@@ -53,11 +54,11 @@ function installStyle(){
   #yControl[data-energy-sign="negative"]{border-color:#ff737a99!important;box-shadow:0 0 16px #ff737a22!important}
   #yControl[data-energy-sign="nonnegative"] label,#yControl[data-energy-sign="nonnegative"] .read{color:#65e798!important}
   #yControl[data-energy-sign="negative"] label,#yControl[data-energy-sign="negative"] .read{color:#ff737a!important}
-  .controls{position:fixed!important;left:auto!important;right:56px!important;top:auto!important;bottom:158px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
-  .controls .skill,.controls .dodge,.controls .flat,.controls .tool{position:absolute!important;width:40px!important;height:40px!important;top:auto!important;bottom:0!important;border-radius:50%!important;font-size:11px!important}
+  html[data-k11520-layout-owner] .controls{position:fixed!important;left:auto!important;right:56px!important;top:auto!important;bottom:166px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
+  html[data-k11520-layout-owner] .controls .skill,html[data-k11520-layout-owner] .controls .dodge,html[data-k11520-layout-owner] .controls .flat,html[data-k11520-layout-owner] .controls .tool{position:absolute!important;width:40px!important;height:40px!important;top:auto!important;bottom:0!important;border-radius:50%!important;font-size:11px!important}
   .controls .skill{right:0!important}.controls .flat{right:44px!important}.controls .dodge{right:88px!important}.controls .tool{right:132px!important}
-  .controls .attack,.controls .order{position:fixed!important;top:auto!important;bottom:212px!important;width:58px!important;height:40px!important;border-radius:12px!important;font-size:10px!important;line-height:1.05!important;z-index:470!important}
-  .controls .attack{left:136px!important;right:auto!important}.controls .order{left:200px!important;right:auto!important}
+  html[data-k11520-layout-owner] .controls .attack,html[data-k11520-layout-owner] .controls .order{position:fixed!important;top:auto!important;bottom:212px!important;width:58px!important;height:40px!important;border-radius:12px!important;font-size:10px!important;line-height:1.05!important;z-index:470!important}
+  html[data-k11520-layout-owner] .controls .attack{left:136px!important;right:auto!important}html[data-k11520-layout-owner] .controls .order{left:200px!important;right:auto!important}
   #walletPanel{right:54px!important}
   #walletPanel.collapsed{right:5px!important;bottom:302px!important;width:42px!important;height:44px!important;padding:4px!important}
   #walletPanel.collapsed #walletToggle{width:32px!important;height:34px!important}
