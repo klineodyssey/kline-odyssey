@@ -1,0 +1,71 @@
+{
+  "protocol": "KAIOS_11520_MOBILE_IMMERSIVE_TRADING_R1_20260914",
+  "document_type": "BOUNDED_ENGINEERING_WORK_ORDER_AND_EVIDENCE",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "created_at": "2026-09-14T16:51:00+08:00",
+  "human_authority": "沈英明",
+  "repository": "klineodyssey/kline-odyssey",
+  "base_branch": "main",
+  "exact_base_sha": "40aa39349a50ba64935b2796313f7f4f16913bf1",
+  "work_branch": "chatgpt-handoff/11520-mobile-immersive-trading-r1-20260914",
+  "goal": "Finish the deferred 11520 mobile immersive-operation package after the prior oracle/character-tap project closed: maximize usable mobile viewport, repair fullscreen behavior with standards-based browser fullscreen plus a fail-open visible-viewport fallback, keep existing HUD collapse ownership, and make LONG/SHORT direction directly operable on the active K-axis without bypassing the existing order confirmation path.",
+  "scope": {
+    "immersive_viewport": [
+      "Request Fullscreen API with navigationUI=hide when the host browser supports it and user activation permits it.",
+      "Use VisualViewport height to consume the actually visible viewport.",
+      "Provide an explicit viewport-fallback mode when browser or in-app browser fullscreen is unavailable or rejected.",
+      "Keep an explicit exit affordance in immersive mode.",
+      "Do not claim control of unsupported Android system navigation bars or host-app browser chrome."
+    ],
+    "direct_direction_selection": [
+      "Show 多 LONG and 空 SHORT controls only on the currently active K-axis card.",
+      "Synchronize the selection through the existing canonical trade side control rather than creating parallel trading state.",
+      "Direction selection alone MUST NOT execute an order.",
+      "Existing order preview/confirmation remains mandatory and unchanged."
+    ],
+    "existing_layout_ownership": [
+      "Preserve Mobile Control Layout as the sole coordinate/layout owner.",
+      "Preserve the existing global HUD collapse and utility controls; do not add a second collapse system.",
+      "Preserve XZ+Y / XY+Z / YZ+X controller semantics and Normal Market Presentation semantics."
+    ]
+  },
+  "changed_paths": [
+    "K線西遊記/temples/11520/runtime/mobile-immersive-trading-runtime.mjs",
+    "K線西遊記/temples/11520/runtime/mobile-action-rail-clearance-runtime.mjs",
+    "K線西遊記/temples/11520/tests/11520-browser-immersive-trading.mjs",
+    ".github/workflows/11520-game-product-qa.yml",
+    "KGEN-Organization/WorkOrders/KAIOS_11520_MOBILE_IMMERSIVE_TRADING_R1_20260914.json"
+  ],
+  "machine_verifiable_acceptance": [
+    "390x844 real Chromium entry loads without page errors.",
+    "Active K-axis exposes exactly one visible direct direction picker with LONG and SHORT.",
+    "SHORT selection updates the existing canonical trade side to 空 while leaving the sheet closed.",
+    "LONG selection updates the existing canonical trade side to 多 while leaving the sheet closed.",
+    "Switching K-axis keeps exactly one visible direct direction picker.",
+    "Fallback immersive mode consumes the VisualViewport height, sets an explicit mode, exposes an exit control and synchronizes the settings switch.",
+    "Required screenshot artifacts/11520-visual-qa/11520-mobile-immersive-trading.png exists and is non-empty.",
+    "Existing 11520 Game Product QA screenshot gates remain mandatory."
+  ],
+  "safety_invariants": {
+    "mainnet_transaction": false,
+    "wallet_transfer": false,
+    "private_key_or_signer_access": false,
+    "payment": false,
+    "treasury_mutation": false,
+    "governance_mutation": false,
+    "worker_or_life_activation": false,
+    "external_agent_dispatch": false,
+    "direct_order_execution_from_direction_picker": false,
+    "order_confirmation_bypassed": false
+  },
+  "browser_boundary": "A normal web page can request standards-based fullscreen and can size itself to the visible viewport, but it cannot force every Facebook/in-app browser or Android system navigation UI to disappear. Unsupported hosts therefore fail open to visible-viewport immersive mode rather than pretending the OS/browser chrome was removed.",
+  "required_checks": [
+    "11520 Game Product QA",
+    "11520 Responsive Product QA",
+    "11520 Universal Exchange V2",
+    "post-merge Deploy Pages Static"
+  ],
+  "merge_policy": "Merge only from the exact reviewed head after required PR checks are green; then verify the exact merged main SHA with Game Product QA, Responsive Product QA, Universal Exchange V2, and Pages deployment.",
+  "signed_by": "ChatGPT / GPT-5.6 Sol",
+  "signature_time": "2026-09-14T16:51:00+08:00"
+}
