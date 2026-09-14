@@ -25,13 +25,13 @@ assert.ok(yBox.x+yBox.width<=cBox.x,`center energy rail must sit left of C rail:
 assert.ok(cBox.x+cBox.width<=lotsBox.x,`C rail must sit left of positive lot rail: ${JSON.stringify({yBox,cBox,lotsBox})}`);
 assert.ok(lotsBox.x+lotsBox.width<=390,`lot rail must remain inside viewport: ${JSON.stringify({yBox,cBox,lotsBox})}`);
 
-const dragC=async ratio=>{const b=await page.locator('#cControl').boundingBox(),x=b.x+b.width/2,y=b.y+b.height*ratio;await page.dispatchEvent('#cControl','pointerdown',{pointerId:77,pointerType:'touch',clientX:x,clientY:y,buttons:1});await page.waitForTimeout(90);await page.dispatchEvent('#cControl','pointerup',{pointerId:77,pointerType:'touch',clientX:x,clientY:y,buttons:0});await page.waitForTimeout(220)};
+const touchC=async ratio=>{const b=await page.locator('#cControl').boundingBox();assert.ok(b,'#cControl missing before touch');const x=b.x+b.width/2,y=b.y+b.height*ratio;await page.touchscreen.tap(x,y);await page.waitForTimeout(320)};
 
-await dragC(.5);
+await touchC(.5);
 assert.equal((await page.locator('#cRead').textContent()).trim(),'0C','C center must be exactly 0C');
 assert.equal(await page.locator('#cControl').getAttribute('data-c-sign'),'zero');
 
-await dragC(.18);
+await touchC(.18);
 let cText=(await page.locator('#cRead').textContent()).trim();
 assert.match(cText,/^\+/,'C upward must be positive velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC>0,null,{timeout:2500});
@@ -40,7 +40,7 @@ assert.match((await page.locator('#sideBtn').textContent())||'',/多/,'positive 
 assert.equal(await page.locator('#sideBtn').isDisabled(),true,'side must be locked to C sign, not separately toggleable');
 await page.locator('#sheetClose').click();
 
-await dragC(.82);
+await touchC(.82);
 cText=(await page.locator('#cRead').textContent()).trim();
 assert.match(cText,/^-/,'C downward must be negative velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC<0,null,{timeout:2500});
