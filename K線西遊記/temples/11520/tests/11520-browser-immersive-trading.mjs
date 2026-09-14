@@ -42,8 +42,8 @@ await page.waitForTimeout(80);
 assert.match((await page.locator('#sideBtn').textContent()||'').trim(),/多/,'direct LONG must synchronize canonical existing trade direction');
 await page.locator('#sheetClose').click();
 
-await page.evaluate(()=>document.querySelector('[data-axis="KY"]')?.click());
-await page.waitForFunction(()=>document.querySelector('[data-axis="KY"]')?.classList.contains('active')===true,null,{timeout:2000});
+await page.locator('[data-axis="KY"]').first().click({position:{x:12,y:12}});
+await page.waitForFunction(()=>document.querySelector('[data-axis="KY"]')?.classList.contains('active')===true,null,{timeout:3000});
 await page.waitForTimeout(100);
 const visiblePickers=await page.locator('.k11520DirectionPicker').evaluateAll(nodes=>nodes.filter(n=>getComputedStyle(n).display!=='none'&&n.getBoundingClientRect().width>0).length);
 assert.equal(visiblePickers,1,'only the active K axis should show direct LONG/SHORT controls');
