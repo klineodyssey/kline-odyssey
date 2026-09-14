@@ -1,0 +1,68 @@
+{
+  "work_order_id": "KAIOS_11520_SECONDARY_ORACLE_PROVENANCE_FAIL_CLOSED_R1_20260914",
+  "status": "IMPLEMENTED_CANDIDATE_PENDING_EXACT_HEAD_CI",
+  "priority": "P1",
+  "risk_class": "R1",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_main_sha": "0d5b428856e0b4e923429d9d9fda08e543b6c508",
+  "branch": "chatgpt-handoff/11520-oracle-quorum-provenance-r1-20260914",
+  "scope": "SECOND_INDEPENDENT_ORACLE_PROVENANCE_AND_CALLER_READINESS_HARDENING_ONLY",
+  "changed_files": [
+    "K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs",
+    "tests/11520-real-trading-feed-provenance.test.mjs",
+    "KGEN-Organization/WorkOrders/KAIOS_11520_SECONDARY_ORACLE_PROVENANCE_FAIL_CLOSED_R1_20260914.json"
+  ],
+  "primary_provider": "CHAINLINK_DATA_FEEDS",
+  "secondary_provider": "REDSTONE_PUSH",
+  "secondary_provenance": {
+    "official_feed_index": "https://app.redstone.finance/push-feeds?networks=bnb&testnets=true",
+    "interface_model": "CHAINLINK_AGGREGATOR_V3_COMPATIBLE",
+    "KX": {
+      "pair": "BTC/USD",
+      "address": "0xa51738d1937FFc553d5070f43300B385AA2D9F55",
+      "heartbeat_seconds": 60,
+      "deviation_bps": 10
+    },
+    "KY": {
+      "pair": "ETH/USD",
+      "address": "0x9cF19D284862A66378c304ACAcB0E857EBc3F856",
+      "heartbeat_seconds": 21600,
+      "deviation_bps": 50
+    },
+    "KZ": {
+      "pair": "BNB/USD",
+      "address": "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e",
+      "heartbeat_seconds": 60,
+      "deviation_bps": 10,
+      "feed_variant": "bnbMultiFeed",
+      "excluded_alternate": "0x29d2fEC890B0...0f76F85ddBcAE / bnbListaDaoMultiFeed"
+    }
+  },
+  "security_fix": {
+    "before": "caller-supplied independentFeeds could structurally manufacture ready=true",
+    "after": "readiness uses only repository-owned primary and secondary registries; any caller override throws CALLER_FEED_OVERRIDE_FORBIDDEN",
+    "production_quorum_ready": false,
+    "remaining_blockers": [
+      "LIVE_ORACLE_OBSERVATION_NOT_MACHINE_VERIFIED",
+      "PRODUCTION_ORACLE_CONFIGURATION_NOT_AUTHORIZED"
+    ]
+  },
+  "local_validation": {
+    "node_check": "PASS",
+    "node_tests": "5/5 PASS",
+    "visual_qa": "N/A_NO_UI_OR_GAME_SURFACE_CHANGE"
+  },
+  "forbidden_side_effects": [
+    "MAINNET_TRANSACTION",
+    "ORACLE_ONCHAIN_CONFIGURATION",
+    "TOKEN_OR_ASSET_TRANSFER",
+    "PAYMENT",
+    "TREASURY_MUTATION",
+    "GOVERNANCE",
+    "SIGNER_OR_PRIVATE_KEY_ACCESS",
+    "WORKER_OR_LIFE_ACTIVATION",
+    "EXTERNAL_AGENT_DISPATCH"
+  ],
+  "next_candidate": "READ_ONLY_CHAIN56_LIVE_OBSERVATION_FOR_CHAINLINK_AND_REDSTONE_DECIMALS_ROUND_FRESHNESS_DEVIATION_AND_QUORUM",
+  "integration_policy": "MERGE_ONLY_IF_EXACT_HEAD_CI_GREEN_READY_MERGEABLE_CURRENT_MAIN_ZERO_BLOCKERS"
+}
