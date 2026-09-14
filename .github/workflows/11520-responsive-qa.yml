@@ -1,0 +1,59 @@
+name: 11520 Responsive Product QA
+on:
+  pull_request:
+    paths:
+      - 'K線西遊記/temples/11520/**'
+      - '.github/workflows/11520-responsive-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'K線西遊記/temples/11520/**'
+      - '.github/workflows/11520-responsive-qa.yml'
+  workflow_dispatch:
+    inputs:
+      production:
+        description: 'Read-only QA of public Pages instead of local candidate'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: responsive-11520-${{ github.event.pull_request.number || github.ref }}-${{ inputs.production || false }}
+  cancel-in-progress: true
+jobs:
+  responsive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Test real-entry mobile layouts
+        env:
+          PUBLIC_QA: ${{ inputs.production || false }}
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-responsive-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          if [ "$PUBLIC_QA" = true ]; then
+            export K11520_BASE_URL='https://klineodyssey.github.io/kline-odyssey'
+            export K11520_PRODUCTION_QA=1
+          fi
+          node 'K線西遊記/temples/11520/tests/11520-browser-responsive.mjs'
+      - name: Preserve screenshots even on failure
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-responsive-${{ github.sha }}-${{ inputs.production || false }}
+          path: artifacts/11520-responsive-qa/
+          if-no-files-found: error
+          retention-days: 14
