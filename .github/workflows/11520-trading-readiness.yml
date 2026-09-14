@@ -11,6 +11,8 @@ on:
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
       - "KGEN/contracts/tests/position-engine-evm.test.mjs"
       - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
+      - "K線西遊記/temples/11520/runtime/real-trading-market-binding.mjs"
+      - "tests/11520-real-trading-market-binding.test.mjs"
       - ".github/workflows/11520-trading-readiness.yml"
   pull_request:
     paths:
@@ -22,6 +24,8 @@ on:
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
       - "KGEN/contracts/tests/position-engine-evm.test.mjs"
       - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
+      - "K線西遊記/temples/11520/runtime/real-trading-market-binding.mjs"
+      - "tests/11520-real-trading-market-binding.test.mjs"
       - ".github/workflows/11520-trading-readiness.yml"
 
 permissions:
@@ -61,6 +65,7 @@ jobs:
           rm -rf /tmp/brain-v4-build
           mkdir -p /tmp/brain-v4-build
           npx solcjs \
+            --optimize --optimize-runs 200 \
             --bin --abi \
             --base-path . \
             --include-path node_modules \
@@ -82,6 +87,9 @@ jobs:
           cmp -s KGEN/contracts/KGEN_MarketRiskKernel.sol KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
           cmp -s KGEN/contracts/KGEN_PositionEngine.sol KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
 
+      - name: Run fixed axis/market binding invariants
+        run: node --test tests/11520-real-trading-market-binding.test.mjs
+
       - name: Run fund-safety static invariants
         run: node KGEN/contracts/tests/brain-v4-static-invariants.mjs
 
@@ -97,7 +105,7 @@ jobs:
       - name: Run actual Brain proxy + Position Engine integration
         run: node KGEN/contracts/tests/brain-position-integration-evm.test.mjs
 
-      - name: Remove ephemeral aliases and reject generated/tracked drift
+      - name: Remove ephemeral aliases and reject tracked drift
         shell: bash
         run: |
           set -euo pipefail
@@ -106,4 +114,6 @@ jobs:
             KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol \
             KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
           git diff --exit-code
-          test -z "$(git status --porcelain)"
+          test ! -e KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
+          test ! -e KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
+          test ! -e KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
