@@ -1,8 +1,8 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.1.0
 STATUS: ACTIVE / UI-ONLY
 FORMAL_ORGAN_NAME: 11520 Signed C + Immersive Mobile Runtime
-PURPOSE: Make C a signed velocity control centered at 0, map +C to 多 and -C to 空 through the existing canonical trade-side control, preserve positive lot mass, center the normal-axis energy rail in the mobile viewport, and request standards-based immersive fullscreen without claiming control over unsupported host/browser chrome. Direction selection never executes an order.
+PURPOSE: Make C a signed velocity control centered at 0, map +C to 多 and -C to 空 through the existing canonical trade-side control, preserve positive lot mass, center the normal-axis energy rail in the mobile viewport, provide configurable professional long/short color semantics, and request standards-based immersive fullscreen without claiming control over unsupported host/browser chrome. Direction selection never executes an order.
 */
 
 const $=s=>document.querySelector(s);
@@ -11,6 +11,12 @@ const MOBILE_MAX=600;
 const ABS_LEVELS=Object.freeze([0,0.000001,0.00001,0.0001,0.001,0.01,0.1,1,10,100,1000]);
 const signedByAxis={KX:0.001,KY:0.001,KZ:0.001};
 const sideSyncedByAxis={KX:'LONG',KY:'LONG',KZ:'LONG'};
+const COLOR_STORE='k11520.trade.colorScheme';
+const COLOR_SCHEMES=Object.freeze({
+  TW_RED_LONG:Object.freeze({id:'TW_RED_LONG',label:'台股｜多紅 空綠',long:'#ff4f5e',short:'#35d07f',neutral:'#d8e4eb'}),
+  GLOBAL_GREEN_LONG:Object.freeze({id:'GLOBAL_GREEN_LONG',label:'國際｜多綠 空紅',long:'#35d07f',short:'#ff4f5e',neutral:'#d8e4eb'})
+});
+let colorSchemeId='TW_RED_LONG';
 let fallbackImmersive=false,lastError=null,cPointer=null,internalNative=false,busySide=false,observer=null,timer=null;
 
 const activeCard=()=>$('#axes [data-axis].active')||$('#axes [data-axis="KX"]');
@@ -21,20 +27,29 @@ const parseSide=text=>/空|SHORT|SELL/i.test(String(text||''))?'SHORT':'LONG';
 const signSide=v=>v<0?'SHORT':v>0?'LONG':'NEUTRAL';
 const formatC=v=>v===0?'0C':`${v>0?'+':''}${Number(v).toLocaleString(undefined,{maximumFractionDigits:6,useGrouping:false})}C`;
 
+function loadColorScheme(){try{const saved=localStorage.getItem(COLOR_STORE);if(saved&&COLOR_SCHEMES[saved])colorSchemeId=saved}catch{}return colorSchemeId}
+function setColorScheme(id,{persist=true}={}){const next=COLOR_SCHEMES[id]?id:'TW_RED_LONG';colorSchemeId=next;const scheme=COLOR_SCHEMES[next];ROOT.style.setProperty('--k11520-long-color',scheme.long);ROOT.style.setProperty('--k11520-short-color',scheme.short);ROOT.style.setProperty('--k11520-neutral-color',scheme.neutral);ROOT.dataset.k11520TradeColorScheme=next;const select=$('#k11520TradeColorScheme');if(select&&select.value!==next)select.value=next;if(persist)try{localStorage.setItem(COLOR_STORE,next)}catch{}paintSignedC();publish();return next}
+function ensureColorSetting(){const panel=$('#k11520UiSettings');if(!panel)return false;let row=$('#k11520TradeColorRow');if(!row){row=document.createElement('label');row.id='k11520TradeColorRow';row.className='row full k11520TradeColorRow';row.innerHTML=`<span>多空配色</span><select id="k11520TradeColorScheme" aria-label="多空配色"><option value="TW_RED_LONG">台股｜多紅 空綠</option><option value="GLOBAL_GREEN_LONG">國際｜多綠 空紅</option></select>`;panel.appendChild(row);const select=row.querySelector('select');select.addEventListener('change',()=>setColorScheme(select.value));}const select=$('#k11520TradeColorScheme');if(select&&select.value!==colorSchemeId)select.value=colorSchemeId;return true}
+
 function ensureStyle(){
   if($('#k11520SignedCImmersiveStyle'))return;
   const s=document.createElement('style');s.id='k11520SignedCImmersiveStyle';s.textContent=`
+:root{--k11520-long-color:#ff4f5e;--k11520-short-color:#35d07f;--k11520-neutral-color:#d8e4eb}
 html.k11520ImmersiveViewport,html.k11520ImmersiveViewport body{width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important;overflow:hidden!important}
 html.k11520ImmersiveViewport #three{width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important}
 #k11520ImmersiveExit{position:fixed;z-index:13050;right:4px;top:max(4px,env(safe-area-inset-top));width:30px;height:30px;border:1px solid #68e4ff66;border-radius:9px;background:#071018dd;color:#dffaff;font:900 15px system-ui;display:none;place-items:center;touch-action:manipulation;box-shadow:0 4px 18px #000b}
 html.k11520ImmersiveViewport #k11520ImmersiveExit{display:grid}
-#cControl .track{background:linear-gradient(to bottom,#123f32 0%,#123f32 49.2%,#d8e4eb 49.2%,#d8e4eb 50.8%,#4b2029 50.8%,#4b2029 100%)!important}
-#cControl[data-c-sign="positive"]{border-color:#65e79899!important;box-shadow:0 0 16px #65e79822!important}
-#cControl[data-c-sign="negative"]{border-color:#ff737a99!important;box-shadow:0 0 16px #ff737a22!important}
-#cControl[data-c-sign="zero"]{border-color:#d8e4eb77!important;box-shadow:0 0 10px #d8e4eb18!important}
-#cControl[data-c-sign="positive"] label,#cControl[data-c-sign="positive"] .read{color:#65e798!important}
-#cControl[data-c-sign="negative"] label,#cControl[data-c-sign="negative"] .read{color:#ff737a!important}
-#cControl[data-c-sign="zero"] label,#cControl[data-c-sign="zero"] .read{color:#d8e4eb!important}
+#cControl .track{background:linear-gradient(to bottom,color-mix(in srgb,var(--k11520-long-color) 42%,#071018) 0%,color-mix(in srgb,var(--k11520-long-color) 42%,#071018) 49.2%,var(--k11520-neutral-color) 49.2%,var(--k11520-neutral-color) 50.8%,color-mix(in srgb,var(--k11520-short-color) 42%,#071018) 50.8%,color-mix(in srgb,var(--k11520-short-color) 42%,#071018) 100%)!important}
+#cControl[data-c-sign="positive"]{border-color:var(--k11520-long-color)!important;box-shadow:0 0 16px color-mix(in srgb,var(--k11520-long-color) 30%,transparent)!important}
+#cControl[data-c-sign="negative"]{border-color:var(--k11520-short-color)!important;box-shadow:0 0 16px color-mix(in srgb,var(--k11520-short-color) 30%,transparent)!important}
+#cControl[data-c-sign="zero"]{border-color:color-mix(in srgb,var(--k11520-neutral-color) 55%,transparent)!important;box-shadow:0 0 10px color-mix(in srgb,var(--k11520-neutral-color) 18%,transparent)!important}
+#cControl[data-c-sign="positive"] label,#cControl[data-c-sign="positive"] .read{color:var(--k11520-long-color)!important}
+#cControl[data-c-sign="negative"] label,#cControl[data-c-sign="negative"] .read{color:var(--k11520-short-color)!important}
+#cControl[data-c-sign="zero"] label,#cControl[data-c-sign="zero"] .read{color:var(--k11520-neutral-color)!important}
+#orderFire[data-k11520-side="LONG"]{border-color:var(--k11520-long-color)!important}
+#orderFire[data-k11520-side="SHORT"]{border-color:var(--k11520-short-color)!important}
+#k11520TradeColorRow{grid-template-columns:1fr 116px!important}
+#k11520TradeColorScheme{width:116px;height:25px;border:1px solid #68e4ff55;border-radius:7px;background:#10202d;color:#e9fbff;font:800 8px system-ui,"Noto Sans TC",sans-serif;padding:0 4px}
 @media(max-width:${MOBILE_MAX}px){html.k11520ImmersiveViewport body{overscroll-behavior:none!important}}
 `;
   document.head.appendChild(s);
@@ -42,13 +57,7 @@ html.k11520ImmersiveViewport #k11520ImmersiveExit{display:grid}
 
 function syncViewport(){const next=`${viewportHeight()}px`;if(ROOT.style.getPropertyValue('--k11520-visible-vh')!==next)ROOT.style.setProperty('--k11520-visible-vh',next)}
 function immersiveOn(){return !!fullEl()||fallbackImmersive}
-function syncImmersive(){
-  syncViewport();ROOT.classList.toggle('k11520ImmersiveViewport',immersiveOn());
-  const mode=fullEl()?'fullscreen':fallbackImmersive?'viewport-fallback':'off';if(ROOT.dataset.k11520ImmersiveMode!==mode)ROOT.dataset.k11520ImmersiveMode=mode;
-  const sw=$('#k11520FullscreenSwitch');if(sw){sw.dataset.k11520SignedCFullscreen='1';sw.setAttribute('aria-checked',String(immersiveOn()));const label=sw.closest('.row')?.querySelector('span');if(label&&label.textContent!=='沉浸全螢幕')label.textContent='沉浸全螢幕'}
-  const exit=$('#k11520ImmersiveExit');if(exit){const title=fullEl()?'退出全螢幕':'退出沉浸模式';exit.title=title;exit.setAttribute('aria-label',title)}
-  publish();
-}
+function syncImmersive(){syncViewport();ROOT.classList.toggle('k11520ImmersiveViewport',immersiveOn());const mode=fullEl()?'fullscreen':fallbackImmersive?'viewport-fallback':'off';if(ROOT.dataset.k11520ImmersiveMode!==mode)ROOT.dataset.k11520ImmersiveMode=mode;const sw=$('#k11520FullscreenSwitch');if(sw){sw.dataset.k11520SignedCFullscreen='1';sw.setAttribute('aria-checked',String(immersiveOn()));const label=sw.closest('.row')?.querySelector('span');if(label&&label.textContent!=='沉浸全螢幕')label.textContent='沉浸全螢幕'}const exit=$('#k11520ImmersiveExit');if(exit){const title=fullEl()?'退出全螢幕':'退出沉浸模式';exit.title=title;exit.setAttribute('aria-label',title)}publish()}
 async function requestImmersiveFullscreen(){lastError=null;try{if(fullEl())return true;const el=document.documentElement;if(typeof el.requestFullscreen==='function')await el.requestFullscreen({navigationUI:'hide'});else if(typeof el.webkitRequestFullscreen==='function')await el.webkitRequestFullscreen();else throw new Error('FULLSCREEN_API_UNAVAILABLE');fallbackImmersive=false;syncImmersive();return true}catch(err){lastError=String(err?.message||err||'FULLSCREEN_REJECTED');fallbackImmersive=true;syncImmersive();return false}}
 async function exitImmersive(){try{if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen();else if(document.webkitFullscreenElement&&document.webkitExitFullscreen)await document.webkitExitFullscreen()}catch(err){lastError=String(err?.message||err)}fallbackImmersive=false;syncImmersive();return true}
 async function toggleImmersive(){return immersiveOn()?exitImmersive():requestImmersiveFullscreen()}
@@ -70,13 +79,12 @@ function paintSignedC(axis=activeAxis()){
 }
 async function syncCanonicalSide(value){const wanted=signSide(value),axis=activeAxis();if(wanted==='NEUTRAL'||busySide||sideSyncedByAxis[axis]===wanted)return true;busySide=true;ROOT.classList.add('k11520SignedCSideSync');try{const trade=$('[data-organ="trade"]');if(!trade)throw new Error('TRADE_ORGAN_NOT_FOUND');trade.click();await new Promise(r=>requestAnimationFrame(r));let side=$('#sideBtn');if(!side)throw new Error('SIDE_BUTTON_NOT_FOUND');if(parseSide(side.textContent)!==wanted){side.click();await new Promise(r=>requestAnimationFrame(r));side=$('#sideBtn')||side}if(parseSide(side.textContent)!==wanted)throw new Error('SIDE_SYNC_FAILED');sideSyncedByAxis[axis]=wanted;$('#sheetClose')?.click();await new Promise(r=>requestAnimationFrame(r));paintSignedC(axis);return true}catch(err){lastError=String(err?.message||err);return false}finally{ROOT.classList.remove('k11520SignedCSideSync');busySide=false;publish()}}
 function applySignedValue(value,{syncSide=true}={}){const axis=activeAxis();signedByAxis[axis]=Object.is(value,-0)?0:value;dispatchNativeMagnitude(Math.abs(value));paintSignedC(axis);if(syncSide)void syncCanonicalSide(value);return signedByAxis[axis]}
-function renderTradeSideLock(){const side=$('#sideBtn');if(!side)return;const value=Number(signedByAxis[activeAxis()]||0),wanted=signSide(value),text=wanted==='LONG'?'多':wanted==='SHORT'?'空':'中性';side.textContent=`方向：${text}（由 ${formatC(value)}）`;side.disabled=true;side.setAttribute('aria-disabled','true');side.title='多空由 C 正負唯一決定；不可另外切換'}
+function renderTradeSideLock(){const side=$('#sideBtn');if(!side)return;const value=Number(signedByAxis[activeAxis()]||0),wanted=signSide(value),text=wanted==='LONG'?'多':wanted==='SHORT'?'空':'中性';side.textContent=`方向：${text}（由 ${formatC(value)}）`;side.disabled=true;side.dataset.k11520Side=wanted;side.setAttribute('aria-disabled','true');side.title='多空由 C 正負唯一決定；不可另外切換'}
 function onCEvent(e){if(internalNative)return;const el=e.target?.closest?.('#cControl');if(!el)return;if(e.type==='pointerdown'){cPointer=e.pointerId;try{el.setPointerCapture?.(cPointer)}catch{}}if(e.type==='pointermove'&&e.pointerId!==cPointer)return;if((e.type==='pointerup'||e.type==='pointercancel')&&e.pointerId!==cPointer)return;e.preventDefault();e.stopImmediatePropagation();if(e.type!=='pointerup'&&e.type!=='pointercancel'){const v=signedFromPointer(e.clientY,el.getBoundingClientRect());applySignedValue(v)}else cPointer=null}
 function onDocumentClick(e){if(e.target?.id==='sideBtn'){e.preventDefault();e.stopImmediatePropagation();renderTradeSideLock();return}const card=e.target?.closest?.('#axes [data-axis]');if(card)setTimeout(()=>{paintSignedC(card.dataset.axis);void syncCanonicalSide(Number(signedByAxis[card.dataset.axis]||0))},0)}
-
 function bindC(){const el=$('#cControl');if(!el||el.dataset.k11520SignedCBound)return !!el;el.dataset.k11520SignedCBound='1';for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])el.addEventListener(type,onCEvent,{capture:true,passive:false});paintSignedC();return true}
-function publish(){globalThis.__K11520_SIGNED_C_IMMERSIVE__={version:'1.0.0',ready:true,activeAxis:activeAxis(),signedC:Number(signedByAxis[activeAxis()]||0),signedByAxis:{...signedByAxis},lotsRemainPositive:true,cSemantics:'SIGNED_VELOCITY_PLUS_LONG_MINUS_SHORT',fullscreen:!!fullEl(),fallbackImmersive,immersive:immersiveOn(),navigationUiRequested:'hide',lastError,api:{applySignedValue,setFallbackImmersive,requestImmersiveFullscreen,exitImmersive,toggleImmersive,paintSignedC}}}
-function install(){if(typeof document==='undefined')return null;ensureStyle();ensureExit();bindFullscreenSwitch();bindC();syncImmersive();paintSignedC();if(!ROOT.dataset.k11520SignedCGlobalBound){ROOT.dataset.k11520SignedCGlobalBound='1';document.addEventListener('click',onDocumentClick,true);document.addEventListener('fullscreenchange',syncImmersive);document.addEventListener('webkitfullscreenchange',syncImmersive);addEventListener('resize',()=>{syncViewport();paintSignedC()},{passive:true});globalThis.visualViewport?.addEventListener?.('resize',syncViewport,{passive:true})}observer?.disconnect?.();observer=new MutationObserver(()=>{ensureExit();bindFullscreenSwitch();bindC();renderTradeSideLock();paintSignedC()});observer.observe(document.documentElement,{subtree:true,childList:true});clearInterval(timer);timer=setInterval(()=>{bindFullscreenSwitch();bindC();renderTradeSideLock();paintSignedC()},140);publish();return globalThis.__K11520_SIGNED_C_IMMERSIVE__}
+function publish(){const scheme=COLOR_SCHEMES[colorSchemeId];globalThis.__K11520_SIGNED_C_IMMERSIVE__={version:'1.1.0',ready:true,activeAxis:activeAxis(),signedC:Number(signedByAxis[activeAxis()]||0),signedByAxis:{...signedByAxis},lotsRemainPositive:true,cSemantics:'SIGNED_VELOCITY_PLUS_LONG_MINUS_SHORT',colorScheme:colorSchemeId,colorSemantics:{long:scheme.long,short:scheme.short,neutral:scheme.neutral},fullscreen:!!fullEl(),fallbackImmersive,immersive:immersiveOn(),navigationUiRequested:'hide',lastError,api:{applySignedValue,setColorScheme,setFallbackImmersive,requestImmersiveFullscreen,exitImmersive,toggleImmersive,paintSignedC}}}
+function install(){if(typeof document==='undefined')return null;ensureStyle();loadColorScheme();setColorScheme(colorSchemeId,{persist:false});ensureExit();bindFullscreenSwitch();bindC();ensureColorSetting();syncImmersive();paintSignedC();if(!ROOT.dataset.k11520SignedCGlobalBound){ROOT.dataset.k11520SignedCGlobalBound='1';document.addEventListener('click',onDocumentClick,true);document.addEventListener('fullscreenchange',syncImmersive);document.addEventListener('webkitfullscreenchange',syncImmersive);addEventListener('resize',()=>{syncViewport();paintSignedC()},{passive:true});globalThis.visualViewport?.addEventListener?.('resize',syncViewport,{passive:true})}observer?.disconnect?.();observer=new MutationObserver(()=>{ensureExit();bindFullscreenSwitch();bindC();ensureColorSetting();renderTradeSideLock();paintSignedC()});observer.observe(document.documentElement,{subtree:true,childList:true});clearInterval(timer);timer=setInterval(()=>{bindFullscreenSwitch();bindC();ensureColorSetting();renderTradeSideLock();paintSignedC()},140);publish();return globalThis.__K11520_SIGNED_C_IMMERSIVE__}
 
 export function install11520SignedCImmersive(){return install()}
 if(typeof document!=='undefined')install();

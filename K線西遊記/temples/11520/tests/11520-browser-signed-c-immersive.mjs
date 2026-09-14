@@ -34,6 +34,18 @@ const driveC=async ratio=>{
   await page.waitForTimeout(180);
 };
 
+await page.waitForFunction(()=>document.querySelector('#k11520TradeColorScheme'),null,{timeout:3000});
+assert.equal(await page.locator('html').getAttribute('data-k11520-trade-color-scheme'),'TW_RED_LONG','default color scheme must match Taiwan convention');
+let colors=await page.evaluate(()=>({long:getComputedStyle(document.documentElement).getPropertyValue('--k11520-long-color').trim(),short:getComputedStyle(document.documentElement).getPropertyValue('--k11520-short-color').trim()}));
+assert.deepEqual(colors,{long:'#ff4f5e',short:'#35d07f'},'Taiwan preset must be LONG red / SHORT green');
+assert.match((await page.locator('#k11520TradeColorScheme option:checked').textContent()||''),/多紅 空綠/);
+await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.setColorScheme('GLOBAL_GREEN_LONG'));
+colors=await page.evaluate(()=>({scheme:document.documentElement.dataset.k11520TradeColorScheme,long:getComputedStyle(document.documentElement).getPropertyValue('--k11520-long-color').trim(),short:getComputedStyle(document.documentElement).getPropertyValue('--k11520-short-color').trim(),saved:localStorage.getItem('k11520.trade.colorScheme')}));
+assert.deepEqual(colors,{scheme:'GLOBAL_GREEN_LONG',long:'#35d07f',short:'#ff4f5e',saved:'GLOBAL_GREEN_LONG'},'international preset must swap LONG/SHORT colors and persist');
+await page.selectOption('#k11520TradeColorScheme','TW_RED_LONG');
+await page.waitForFunction(()=>document.documentElement.dataset.k11520TradeColorScheme==='TW_RED_LONG',null,{timeout:1500});
+assert.equal(await page.evaluate(()=>localStorage.getItem('k11520.trade.colorScheme')),'TW_RED_LONG','settings selection must persist Taiwan preset');
+
 await driveC(.5);
 assert.equal((await page.locator('#cRead').textContent()).trim(),'0C','C center must be exactly 0C');
 assert.equal(await page.locator('#cControl').getAttribute('data-c-sign'),'zero');
@@ -42,6 +54,8 @@ await driveC(.18);
 let cText=(await page.locator('#cRead').textContent()).trim();
 assert.match(cText,/^\+/,'C upward must be positive velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC>0,null,{timeout:2500});
+assert.equal(await page.locator('#cControl').getAttribute('data-c-side'),'LONG');
+const longColor=await page.locator('#cRead').evaluate(el=>getComputedStyle(el).color);
 await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());await page.waitForTimeout(120);
 assert.match((await page.locator('#sideBtn').textContent())||'',/多/,'positive C must map canonical side to 多');
 assert.equal(await page.locator('#sideBtn').isDisabled(),true,'side must be locked to C sign, not separately toggleable');
@@ -52,6 +66,9 @@ cText=(await page.locator('#cRead').textContent()).trim();
 assert.match(cText,/^-/,'C downward must be negative velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC<0,null,{timeout:2500});
 await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE__?.c<0,null,{timeout:2500});
+assert.equal(await page.locator('#cControl').getAttribute('data-c-side'),'SHORT');
+const shortColor=await page.locator('#cRead').evaluate(el=>getComputedStyle(el).color);
+assert.notEqual(longColor,shortColor,'LONG and SHORT C states must be visually distinct');
 await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());await page.waitForTimeout(120);
 assert.match((await page.locator('#sideBtn').textContent())||'',/空/,'negative C must map canonical side to 空');
 await page.locator('#sheetClose').click();
@@ -79,4 +96,4 @@ assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: normal-axis energy rail centered; +C/0/-C directional velocity; +C=多, -C=空; lot mass positive; immersive visible-viewport fallback verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; configurable persisted LONG/SHORT color presets; positive lots; immersive visible-viewport fallback verified at 390x844');
