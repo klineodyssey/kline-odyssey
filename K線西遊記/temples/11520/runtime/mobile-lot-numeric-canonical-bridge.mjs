@@ -1,11 +1,34 @@
 const $=s=>document.querySelector(s);
-let timer=null,suppressBlur=false;
-function clampLots(raw){const n=Number(String(raw??'').replace(/口/g,'').trim());return Number.isFinite(n)?Math.max(1,Math.min(100,Math.round(n))):null}
-function dispatchLots(lots){const el=$('#lotsControl');if(!el)return null;const r=el.getBoundingClientRect(),t=lots/100,x=r.left+r.width/2,startY=r.top+r.height/2,targetY=r.top+(1-t)*r.height,pointerId=913;const fire=(type,y,buttons)=>el.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,composed:true,pointerId,pointerType:'touch',isPrimary:true,clientX:x,clientY:y,buttons,button:buttons?0:-1}));fire('pointerdown',startY,1);fire('pointermove',targetY,1);fire('pointerup',targetY,0);return lots}
-function shownLots(){const n=parseInt($('#lotsRead')?.textContent||'1',10);return Number.isFinite(n)?Math.max(1,Math.min(100,n)):1}
-function sync(){const input=$('#lotsNumericInput');if(!input||document.activeElement===input)return;input.value=String(shownLots())}
-function commit(raw){const lots=clampLots(raw);if(lots==null){sync();return null}dispatchLots(lots);const input=$('#lotsNumericInput');if(input)input.value=String(lots);queueMicrotask(sync);setTimeout(sync,40);publish();return lots}
-function bind(){const old=$('#lotsNumericInput');if(!old)return false;if(old.dataset.k11520CanonicalLotBridge==='2')return true;const input=old.cloneNode(true);input.type='text';input.inputMode='numeric';input.setAttribute('min','1');input.setAttribute('max','100');input.setAttribute('pattern','-?[0-9]*');input.dataset.k11520NumericBound='1';input.dataset.k11520CanonicalLotBridge='2';old.replaceWith(input);input.addEventListener('keydown',e=>{e.stopImmediatePropagation();if(e.key==='Enter'){e.preventDefault();const requested=input.value,lots=clampLots(requested);suppressBlur=true;if(lots!=null){dispatchLots(lots);input.value=String(lots)}else input.value=String(shownLots());publish();input.blur();setTimeout(()=>{suppressBlur=false;sync()},0)}else if(e.key==='Escape'){e.preventDefault();suppressBlur=true;input.value=String(shownLots());input.blur();setTimeout(()=>{suppressBlur=false;sync()},0)}},{capture:true});input.addEventListener('change',e=>{e.stopImmediatePropagation();if(!suppressBlur)commit(input.value)},{capture:true});input.addEventListener('blur',e=>{e.stopImmediatePropagation();if(!suppressBlur)commit(input.value);sync()},{capture:true});for(const type of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend'])input.addEventListener(type,e=>e.stopPropagation(),{passive:true});input.value=String(shownLots());publish();return true}
-function publish(){const root=globalThis.__K11520_SIGNED_C_IMMERSIVE__;if(root?.api)root.api.setLotsFromNumeric=commit;globalThis.__K11520_LOT_NUMERIC_BRIDGE__={version:'1.0.2',ready:true,range:[1,100],positiveOnly:true,controlledTextInput:true,canonicalInverse:'t=lots/100',api:{commit,dispatchLots}}}
-export function install11520LotNumericCanonicalBridge(){if(typeof document==='undefined')return null;bind();clearInterval(timer);timer=setInterval(()=>{bind();sync();publish()},160);publish();return globalThis.__K11520_LOT_NUMERIC_BRIDGE__}
+let timer=null;
+function bind(){
+  const input=$('#lotsNumericInput');
+  if(!input)return false;
+  if(input.dataset.k11520CanonicalLotBridge==='3')return true;
+  input.type='text';
+  input.inputMode='numeric';
+  input.setAttribute('min','1');
+  input.setAttribute('max','100');
+  input.setAttribute('pattern','-?[0-9]*');
+  input.dataset.k11520CanonicalLotBridge='3';
+  publish();
+  return true;
+}
+function publish(){
+  globalThis.__K11520_LOT_NUMERIC_BRIDGE__={
+    version:'1.1.0',
+    ready:!!$('#lotsNumericInput'),
+    range:[1,100],
+    positiveOnly:true,
+    controlledTextInput:true,
+    authority:'SIGNED_C_RUNTIME_EXISTING_NUMERIC_HANDLER'
+  };
+}
+export function install11520LotNumericCanonicalBridge(){
+  if(typeof document==='undefined')return null;
+  bind();
+  clearInterval(timer);
+  timer=setInterval(()=>{bind();publish()},160);
+  publish();
+  return globalThis.__K11520_LOT_NUMERIC_BRIDGE__;
+}
 if(typeof document!=='undefined')install11520LotNumericCanonicalBridge();
