@@ -18,6 +18,7 @@ on:
       - "tests/11520-real-trading-market-binding.test.mjs"
       - "tests/11520-real-trading-order-intent.test.mjs"
       - "tests/11520-real-trading-preflight-ui.test.mjs"
+      - "tests/11520-order-route.test.mjs"
       - ".github/workflows/11520-trading-readiness.yml"
   pull_request:
     paths:
@@ -36,6 +37,7 @@ on:
       - "tests/11520-real-trading-market-binding.test.mjs"
       - "tests/11520-real-trading-order-intent.test.mjs"
       - "tests/11520-real-trading-preflight-ui.test.mjs"
+      - "tests/11520-order-route.test.mjs"
       - ".github/workflows/11520-trading-readiness.yml"
 
 permissions:
@@ -105,6 +107,9 @@ jobs:
 
       - name: Run player-visible preflight invariants
         run: node --test tests/11520-real-trading-preflight-ui.test.mjs
+
+      - name: Run local-vs-real order-route invariants
+        run: node --test tests/11520-order-route.test.mjs
 
       - name: Run fund-safety static invariants
         run: node KGEN/contracts/tests/brain-v4-static-invariants.mjs
