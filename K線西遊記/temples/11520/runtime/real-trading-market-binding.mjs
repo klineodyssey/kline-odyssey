@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: CANDIDATE
 PURPOSE: Fail-closed 11520 real-trading axis/market identity binding.
 */
@@ -61,18 +61,27 @@ export function assertRealTradingAxisMarket({ axis, market, chainId = 56 } = {})
   return binding;
 }
 
-export function realTradingEligibility({ axis, market, chainId = 56, feedProvenanceVerified = false, brainAddress = null, positionEngineAddress = null } = {}) {
+export function realTradingEligibility({
+  axis,
+  market,
+  chainId = 56,
+  feedProvenanceVerified = false,
+  brainAddress = null,
+  positionEngineAddress = null,
+  humanMainnetAuthorization = false
+} = {}) {
   const binding = assertRealTradingAxisMarket({ axis, market, chainId });
   const blockers = [];
   if (!feedProvenanceVerified) blockers.push('PRODUCTION_FEED_PROVENANCE_REQUIRED');
   if (!/^0x[0-9a-fA-F]{40}$/.test(String(brainAddress ?? ''))) blockers.push('BRAIN_DEPLOYED_ADDRESS_REQUIRED');
   if (!/^0x[0-9a-fA-F]{40}$/.test(String(positionEngineAddress ?? ''))) blockers.push('POSITION_ENGINE_DEPLOYED_ADDRESS_REQUIRED');
-  blockers.push('HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED');
+  if (humanMainnetAuthorization !== true) blockers.push('HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED');
+  const eligible = blockers.length === 0;
   return Object.freeze({
     binding,
-    eligible: false,
+    eligible,
     blockers: Object.freeze(blockers),
-    orderSubmissionEnabled: false,
-    signerRequestEnabled: false
+    orderSubmissionEnabled: eligible,
+    signerRequestEnabled: eligible
   });
 }
