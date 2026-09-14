@@ -9,6 +9,10 @@ on:
     paths:
       - 'K線西遊記/temples/11520/**'
       - '.github/workflows/11520-responsive-qa.yml'
+  workflow_run:
+    workflows: ['Deploy Pages Static']
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       production:
@@ -18,15 +22,17 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: responsive-11520-${{ github.event.pull_request.number || github.ref }}-${{ inputs.production || false }}
+  group: responsive-11520-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.production || false }}
   cancel-in-progress: true
 jobs:
   responsive:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -37,7 +43,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Test real-entry mobile layouts
         env:
-          PUBLIC_QA: ${{ inputs.production || false }}
+          PUBLIC_QA: ${{ inputs.production || github.event_name == 'workflow_run' }}
+          K11520_SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -euo pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-responsive-http.log 2>&1 &
@@ -53,7 +60,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: 11520-responsive-${{ github.sha }}-${{ inputs.production || false }}
+          name: 11520-responsive-${{ github.event.workflow_run.head_sha || github.sha }}-${{ github.event_name }}
           path: artifacts/11520-responsive-qa/
           if-no-files-found: error
           retention-days: 14

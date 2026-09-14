@@ -4,11 +4,12 @@ STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
 VERSION: 1.3.3
 REVISION: 2026-09-14.RESPONSIVE-OWNERSHIP
-PURPOSE: Preserve the approved HUD anchors across mobile widths; measure actual market-card content before placing status. This existing owner replaces the unmerged late hotfix. No world, wallet identity, trading or chain mutation.
+PURPOSE: Preserve approved HUD anchors across mobile widths; measure actual market-card content before placing status. This existing owner replaces the unmerged late hotfix. Thumb travel is presentation-only; no world, wallet identity, trading or chain mutation.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
+const thumbObservers=new WeakMap();
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
@@ -41,9 +42,9 @@ function installStyle(){
   #lotsControl{left:216px!important;right:auto!important}
   #yControl{left:266px!important;right:auto!important}
   #cControl label,#lotsControl label,#yControl label{top:5px!important;font-size:7px!important;line-height:1.05!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
-  #cControl .read,#lotsControl .read,#yControl .read{bottom:4px!important;font-size:7px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
+  html[data-k11520-layout-owner] #cControl .read,html[data-k11520-layout-owner] #lotsControl .read,html[data-k11520-layout-owner] #yControl .read{bottom:4px!important;font-size:7px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   #yControl .track{background:linear-gradient(to bottom,#123f32 0%,#123f32 49.5%,#2b343b 49.5%,#2b343b 50.5%,#4b2029 50.5%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
-  #cControl .thumb,#lotsControl .thumb,#yControl .thumb{box-sizing:border-box!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;aspect-ratio:1/1!important;flex:0 0 34px!important;flex-shrink:0!important;border-radius:50%!important;transform:translate(-50%,-50%)!important;overflow:hidden!important}
+  #cControl .thumb,#lotsControl .thumb,#yControl .thumb{box-sizing:border-box!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;aspect-ratio:1/1!important;flex:0 0 34px!important;flex-shrink:0!important;border-radius:50%!important;transform:translate(-50%,-50%)!important;overflow:hidden!important;top:calc(44px + var(--k11520-thumb-ratio,.5)*47px)!important}
   #yThumb{border:2px solid #f1ca73!important;background:#111 url('./assets/wukong-y-control.jpg') 38% 50%/cover no-repeat!important;box-shadow:0 0 0 2px #05080dcc,0 0 14px #f1ca7366!important}
   #yControl label:after{content:none!important;display:none!important}
   #yControl[data-energy-sign="nonnegative"] #yThumb{border-color:#65e798!important;box-shadow:0 0 0 2px #05080dcc,0 0 16px #65e79888!important}
@@ -84,6 +85,19 @@ function applyRail(){
   const specs=[['#cControl','166px'],['#lotsControl','216px'],['#yControl','266px']];
   for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
+function installThumbBounds(){
+  for(const id of ['cThumb','lotsThumb','yThumb']){
+    const el=$('#'+id);if(!el||thumbObservers.has(el))continue;
+    const sync=()=>{
+      const raw=el.style.top.trim();let ratio=.5;
+      if(/^-?\d+(?:\.\d+)?%$/.test(raw))ratio=parseFloat(raw)/100;
+      else if(/^-?\d+(?:\.\d+)?px$/.test(raw))ratio=parseFloat(raw)/(el.parentElement?.clientHeight||132);
+      const next=String(Math.max(0,Math.min(1,ratio)));
+      if(el.style.getPropertyValue('--k11520-thumb-ratio')!==next)el.style.setProperty('--k11520-thumb-ratio',next);
+    };
+    const observer=new MutationObserver(sync);observer.observe(el,{attributes:true,attributeFilter:['style']});thumbObservers.set(el,observer);sync();
+  }
+}
 function applyRightOrgans(){/* Utility geometry/visibility is owned only by market-origin-wallet-layout-runtime. */}
 function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;
@@ -121,7 +135,7 @@ function installMasterCollapse(){
   const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwner='mobile-control-layout';applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();syncStatusFlow();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwner='mobile-control-layout';applyRail();installThumbBounds();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();syncStatusFlow();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){

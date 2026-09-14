@@ -3,7 +3,7 @@ import './market-origin-wallet-layout-runtime.mjs';
 VERSION: 1.2.1
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: 11520 Mobile Action Rail Clearance Runtime
-PURPOSE: Own open modal layering only. Rail and attack/order coordinates belong to Mobile Control Layout. UI-only; no trading, wallet, chain, payment, treasury, governance, or secret mutation.
+PURPOSE: Own modal layering and non-interactive notifications only. Coordinates belong to Mobile Control Layout. Report schema remains 1.2.0; implementation revision is separately exposed. No trading, wallet, chain, asset or authority mutation.
 */
 const MOBILE_MAX=600;
 const TOP_Z=12000;
@@ -12,6 +12,7 @@ function style(){
   let s=$('#k11520MobileActionRailClearance');
   if(!s){s=document.createElement('style');s.id='k11520MobileActionRailClearance'}
   s.textContent=`
+#toast.toast{pointer-events:none!important}
 #confirm.open,.sheet.open,.confirm.open{position:fixed!important;z-index:${TOP_Z}!important;isolation:isolate!important;box-shadow:0 24px 80px #000e!important}
 #confirm.open .close,.sheet.open .close,.confirm.open .close{position:relative!important;z-index:2!important}
 `;
@@ -27,7 +28,7 @@ function report(){
   const openSurface=document.querySelector('#confirm.open,.sheet.open,.confirm.open');
   const surfaceZ=openSurface?Number(getComputedStyle(openSurface).zIndex)||0:0;
   const hudZ=Math.max(...['#dock','#backpackButton','#walletPanel','#chatHandle','#k11520HudCollapseAll'].map(sel=>{const el=$(sel);return el?(Number(getComputedStyle(el).zIndex)||0):0}));
-  const out={version:'1.2.1',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
+  const out={version:'1.2.0',implementationVersion:'1.2.1',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
   out.ok=innerWidth>MOBILE_MAX||Boolean(rail&&c&&lots&&out.rightSafeGap>=48&&!out.railDockOverlap&&out.actionSurfaceOnTop);
   document.documentElement.dataset.k11520ActionRailClearance=out.ok?'PASS':'RED';
   globalThis.__K11520_ACTION_RAIL_CLEARANCE__=out;
