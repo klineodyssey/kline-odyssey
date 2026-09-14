@@ -1,7 +1,7 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.1.0
 STATUS: ACTIVE_SAFE_PREFLIGHT
-PURPOSE: Player-visible 11520 real-trading readiness preflight. Never signs or broadcasts.
+PURPOSE: Player-visible 11520 real-trading readiness preflight and order-route classification. Never signs or broadcasts.
 */
 import {readPublicWalletIdentity} from './evm-wallet-runtime.mjs';
 import {getRealTradingBinding,assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
@@ -29,6 +29,12 @@ export function inspectRealTradingUiPreflight({axis,market,chainId=56,walletIden
     transactionPayload:null,
     broadcast:false
   });
+}
+
+export function classify11520OrderRoute({preflight=null,localSimulationAvailable=true}={}){
+  if(preflight?.ready===true)return Object.freeze({route:'REAL_READY_FOR_EXPLICIT_WALLET_ACTION',localSimulationAvailable:!!localSimulationAvailable,signerRequested:false,broadcast:false});
+  if(localSimulationAvailable)return Object.freeze({route:'LOCAL_SIMULATION_REAL_BLOCKED',localSimulationAvailable:true,signerRequested:false,broadcast:false,blockers:Object.freeze([...(preflight?.blockers||[])])});
+  return Object.freeze({route:'ORDER_BLOCKED',localSimulationAvailable:false,signerRequested:false,broadcast:false,blockers:Object.freeze([...(preflight?.blockers||[])])});
 }
 
 function activeAxisMarket(){
@@ -73,11 +79,24 @@ function renderPreflight(){
   return result
 }
 
+function notifyOrderRoute(){
+  const preflight=renderPreflight();
+  const route=classify11520OrderRoute({preflight,localSimulationAvailable:true});
+  globalThis.__K11520_ORDER_ROUTE__={...route,checkedAt:new Date().toISOString()};
+  const toast=$('#toast');
+  if(!toast)return route;
+  if(route.route==='REAL_READY_FOR_EXPLICIT_WALLET_ACTION')toast.textContent='真實交易條件已齊；下一步仍需錢包明確確認';
+  else toast.textContent='目前下單走本機模擬；真實交易仍封鎖';
+  toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);
+  return route
+}
+
 export function install11520RealTradingPreflightUi(){
   ensureStyle();
   let host=$('#k11520RealTradePreflight');
   if(!host){host=document.createElement('div');host.id='k11520RealTradePreflight';host.innerHTML='<button type="button" id="k11520RealTradePreflightBtn">真實交易預檢</button><div class="state">真實交易未啟用</div>';document.body.appendChild(host)}
   const btn=$('#k11520RealTradePreflightBtn');if(btn&&!btn.dataset.bound){btn.dataset.bound='1';btn.addEventListener('click',()=>{const result=renderPreflight();const message=result?.ready?'真實交易條件已齊；仍需由錢包明確確認交易':'真實交易仍封鎖：'+(result?.blockers||[]).map(blockerLabel).join('、');const toast=$('#toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2600)}})}
+  const order=$('#orderFire');if(order&&!order.dataset.realTradeRouteBound){order.dataset.realTradeRouteBound='1';order.addEventListener('click',()=>setTimeout(notifyOrderRoute,0))}
   for(const el of document.querySelectorAll('[data-market]'))el.addEventListener('change',renderPreflight);
   for(const el of document.querySelectorAll('[data-axis]'))el.addEventListener('click',()=>setTimeout(renderPreflight,0));
   addEventListener('storage',event=>{if(event.key==='klineodyssey.public-wallet-identity.v1')renderPreflight()});
