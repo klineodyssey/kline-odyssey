@@ -46,6 +46,26 @@ await page.selectOption('#k11520TradeColorScheme','TW_RED_LONG');
 await page.waitForFunction(()=>document.documentElement.dataset.k11520TradeColorScheme==='TW_RED_LONG',null,{timeout:1500});
 assert.equal(await page.evaluate(()=>localStorage.getItem('k11520.trade.colorScheme')),'TW_RED_LONG','settings selection must persist Taiwan preset');
 
+await page.waitForFunction(()=>document.querySelector('#cNumericInput')&&document.querySelector('#lotsNumericInput'),null,{timeout:3000});
+assert.equal(await page.locator('#cNumericInput').getAttribute('inputmode'),'decimal');
+assert.equal(await page.locator('#lotsNumericInput').getAttribute('min'),'1');
+assert.equal(await page.locator('#lotsNumericInput').getAttribute('max'),'100');
+await page.locator('#cNumericInput').fill('-0.1');
+await page.locator('#cNumericInput').press('Enter');
+await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===-0.1,null,{timeout:2500});
+assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C','numeric C input must update canonical signed C display');
+assert.equal(await page.locator('#cControl').getAttribute('data-c-side'),'SHORT','negative numeric C must select SHORT');
+assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'numeric C entry must not leave trade sheet open');
+await page.locator('#lotsNumericInput').fill('7');
+await page.locator('#lotsNumericInput').press('Enter');
+await page.waitForFunction(()=>document.querySelector('#lotsRead')?.textContent?.trim()==='7口',null,{timeout:2500});
+assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7','numeric lot input must remain synchronized');
+assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'numeric lot entry must not open order flow');
+await page.locator('#lotsNumericInput').fill('-5');
+await page.locator('#lotsNumericInput').press('Enter');
+await page.waitForFunction(()=>document.querySelector('#lotsRead')?.textContent?.trim()==='1口',null,{timeout:2500});
+assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'1','negative lot input must clamp to positive minimum');
+
 await driveC(.5);
 assert.equal((await page.locator('#cRead').textContent()).trim(),'0C','C center must be exactly 0C');
 assert.equal(await page.locator('#cControl').getAttribute('data-c-sign'),'zero');
@@ -96,4 +116,4 @@ assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; configurable persisted LONG/SHORT color presets; positive lots; immersive visible-viewport fallback verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; configurable persisted LONG/SHORT color presets; numeric C/lots entry; positive lots; immersive visible-viewport fallback verified at 390x844');

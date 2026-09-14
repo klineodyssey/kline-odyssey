@@ -2,62 +2,33 @@
   "protocol": "KAIOS_11520_SIGNED_C_IMMERSIVE_R1_20260914",
   "document_type": "BOUNDED_ENGINEERING_WORK_ORDER_AND_EVIDENCE",
   "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
-  "created_at": "2026-09-14T17:57:00+08:00",
-  "updated_at": "2026-09-15T04:05:00+08:00",
+  "updated_at": "2026-09-15T04:12:00+08:00",
   "human_authority": "沈英明",
   "repository": "klineodyssey/kline-odyssey",
   "base_branch": "main",
   "exact_base_sha": "40aa39349a50ba64935b2796313f7f4f16913bf1",
   "work_branch": "chatgpt-handoff/11520-signed-c-immersive-r1-20260914",
   "supersedes": "PR #368 direct LONG/SHORT-button model",
-  "goal": "Implement the corrected KGEN 11520 mobile control semantics: the normal-axis energy rail is horizontally centered; C is a signed velocity ratio centered at 0 with +C mapping to 多 and -C mapping to 空; lot count stays positive; immersive fullscreen uses standards-based browser fullscreen where supported and otherwise consumes the actual visible viewport; LONG/SHORT colors are professionally configurable and persisted without changing trading semantics.",
-  "scope": {
-    "normal_axis_energy_rail": "At 390px width, the center of #yControl must be within 2px of viewport center. C and lot rails sit to its right without overlap.",
-    "signed_c": [
-      "C center is exactly 0C.",
-      "Dragging upward selects positive velocity +C and canonical 多 direction.",
-      "Dragging downward selects negative velocity -C and canonical 空 direction.",
-      "Negative C means opposite velocity direction; it does not create negative mass.",
-      "Lot count remains >=1 in the product UI and does not encode trade direction.",
-      "The existing canonical trade side is synchronized from C sign; the separate side toggle is disabled to prevent contradictory state.",
-      "Direction selection alone does not execute an order; existing confirmation remains mandatory."
-    ],
-    "trade_color_configuration": [
-      "Default Taiwan preset is 多/LONG red and 空/SHORT green.",
-      "International preset is 多/LONG green and 空/SHORT red.",
-      "The selected preset is persisted in localStorage key k11520.trade.colorScheme.",
-      "C rail gradient, active C value and order-direction accent use shared LONG/SHORT CSS variables so the semantic colors cannot drift apart.",
-      "Changing color preset changes presentation only; it cannot change C sign, order side, lot count or execute an order."
-    ],
-    "immersive_mobile": [
-      "Request Fullscreen API with navigationUI=hide when supported and user activation permits it.",
-      "Use VisualViewport height for the actual visible game canvas.",
-      "If fullscreen is unavailable or rejected, fail open to visible-viewport immersive mode with an explicit exit affordance.",
-      "Do not claim the page can forcibly hide every Facebook/in-app-browser toolbar or Android navigation surface."
-    ]
+  "goal": "Finish the KGEN 11520 mobile control package: center the normal-axis energy rail; use signed C as direction (+C=多, -C=空, 0C neutral); keep lots positive; provide persistent configurable long/short color presets; allow both slider/touch and precise numeric entry for C and lots; preserve immersive visible-viewport/fullscreen behavior and the existing confirmation path.",
+  "semantics": {
+    "signed_c": "+C=LONG/多, -C=SHORT/空, 0C=neutral; negative C is reverse velocity direction, never negative mass.",
+    "lots": "Positive integer only, 1..100.",
+    "numeric_c": "Direct entry accepts -1000..+1000 and resolves to the nearest existing canonical C level so UI, game state and order state cannot diverge.",
+    "numeric_lots": "Direct entry accepts integer lots and clamps to 1..100; it drives the existing canonical lot control rather than creating parallel state.",
+    "color_default": "TW_RED_LONG: 多/LONG red (#ff4f5e), 空/SHORT green (#35d07f).",
+    "color_alternate": "GLOBAL_GREEN_LONG: 多/LONG green, 空/SHORT red.",
+    "color_persistence": "localStorage k11520.trade.colorScheme",
+    "order_safety": "Slider movement, numeric entry, color changes and direction selection do not execute an order; existing order confirmation remains mandatory."
   },
-  "changed_paths": [
-    "K線西遊記/temples/11520/runtime/mobile-signed-c-immersive-runtime.mjs",
-    "K線西遊記/temples/11520/runtime/mobile-action-rail-clearance-runtime.mjs",
-    "K線西遊記/temples/11520/runtime/mobile-control-layout.mjs",
-    "K線西遊記/temples/11520/runtime/combat-mass-scale-runtime.mjs",
-    "K線西遊記/temples/11520/tests/combat-mass-scale-runtime.mjs",
-    "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs",
-    ".github/workflows/11520-game-product-qa.yml",
-    "KGEN-Organization/WorkOrders/KAIOS_11520_SIGNED_C_IMMERSIVE_R1_20260914.json"
-  ],
   "machine_verifiable_acceptance": [
-    "11520 Game Product QA exact-head succeeds.",
-    "390x844 real Chromium proves centered #yControl geometry.",
-    "390x844 real Chromium proves 0C/+C/-C behavior and canonical 多/空 synchronization.",
-    "Default color preset is TW_RED_LONG with LONG #ff4f5e and SHORT #35d07f.",
-    "Switching to GLOBAL_GREEN_LONG swaps LONG/SHORT colors and persists the selection; switching back through the settings selector restores TW_RED_LONG.",
-    "LONG and SHORT C states have visibly distinct computed colors.",
-    "Lot display stays positive and >=1.",
-    "Signed C reaches __K11520_COMBAT_DRIVE__.c, including negative values.",
-    "Fallback immersive mode matches VisualViewport height and exposes explicit exit.",
-    "artifacts/11520-visual-qa/11520-mobile-signed-c-immersive.png exists and is non-empty.",
-    "Existing XZ+Y / XY+Z / YZ+X, character, action-rail, combat, living-world and screenshot gates remain mandatory."
+    "390x844 Chromium proves #yControl center within 2px of viewport center and Y-C-lot rails do not overlap.",
+    "Slider/touch proves 0C, +C=多, -C=空 and signed combat-drive propagation.",
+    "Numeric C input proves -0.1 produces -0.1C and SHORT without opening an order flow.",
+    "Numeric lots input proves 7 -> 7口 and negative input clamps to 1口.",
+    "Default Taiwan colors and alternate international colors are both machine-verified and persisted.",
+    "Lot display remains positive.",
+    "Immersive fallback matches VisualViewport and keeps an explicit exit.",
+    "Mandatory signed-C screenshot exists and existing 11520 visual/regression gates remain active."
   ],
   "safety_invariants": {
     "mainnet_transaction": false,
@@ -68,9 +39,9 @@
     "governance_mutation": false,
     "worker_or_life_activation": false,
     "external_agent_dispatch": false,
-    "direction_selection_executes_order": false,
-    "order_confirmation_bypassed": false,
-    "color_setting_changes_trade_semantics": false
+    "numeric_entry_executes_order": false,
+    "color_setting_changes_trade_semantics": false,
+    "order_confirmation_bypassed": false
   },
   "required_checks": [
     "11520 Game Product QA",
@@ -80,5 +51,5 @@
   ],
   "merge_policy": "R1 only. Merge only from exact latest main/head after required exact-head checks are green and no blocking comments/threads/races exist. Then verify post-merge exact main and Pages.",
   "signed_by": "ChatGPT / GPT-5.6 Sol",
-  "signature_time": "2026-09-15T04:05:00+08:00"
+  "signature_time": "2026-09-15T04:12:00+08:00"
 }
