@@ -109,4 +109,5 @@ if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globa
   import('./game-mobile-shell.mjs').catch(()=>{});
   import('./backpack-ui.mjs').then(()=>import('./living-world-browser-bridge.mjs')).catch(()=>{});
   import('./game-ui-product-fixes.mjs').catch(()=>{});
+  import('./real-trading-preflight-ui.mjs').then(({install11520RealTradingPreflightUi})=>install11520RealTradingPreflightUi()).catch(()=>{});
 }
