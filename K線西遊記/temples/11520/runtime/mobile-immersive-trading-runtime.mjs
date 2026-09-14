@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE / UI-ONLY
 FORMAL_ORGAN_NAME: 11520 Mobile Immersive Trading Runtime
 PURPOSE: Use the available mobile viewport efficiently, request browser fullscreen with navigation UI hidden when the browser permits it, provide a fail-open immersive viewport fallback when it does not, and expose direct LONG/SHORT selection on the active K-axis card without executing an order. Canonical order confirmation remains unchanged; no wallet, chain, payment, treasury, governance, signer or authority mutation.
@@ -46,15 +46,15 @@ html.k11520DirectionSyncing #sheet{visibility:hidden!important;opacity:0!importa
 }
 
 function viewportHeight(){return Math.max(1,Math.round(globalThis.visualViewport?.height||innerHeight||document.documentElement.clientHeight||1))}
-function syncViewport(){ROOT.style.setProperty('--k11520-visible-vh',`${viewportHeight()}px`)}
+function syncViewport(){const next=`${viewportHeight()}px`;if(ROOT.style.getPropertyValue('--k11520-visible-vh')!==next)ROOT.style.setProperty('--k11520-visible-vh',next)}
 function immersiveOn(){return !!fullscreenElement()||fallbackImmersive}
 function syncImmersive(){
   syncViewport();
   ROOT.classList.toggle('k11520ImmersiveViewport',immersiveOn());
-  ROOT.dataset.k11520ImmersiveMode=fullscreenElement()?'fullscreen':fallbackImmersive?'viewport-fallback':'off';
-  const sw=$('#k11520FullscreenSwitch');if(sw){sw.setAttribute('aria-checked',String(immersiveOn()));sw.dataset.k11520ImmersiveFullscreen='1'}
-  const label=sw?.closest?.('.row')?.querySelector('span');if(label)label.textContent='沉浸全螢幕';
-  const exit=$('#k11520ImmersiveExit');if(exit){exit.title=fullscreenElement()?'退出全螢幕':'退出沉浸模式';exit.setAttribute('aria-label',exit.title)}
+  const mode=fullscreenElement()?'fullscreen':fallbackImmersive?'viewport-fallback':'off';if(ROOT.dataset.k11520ImmersiveMode!==mode)ROOT.dataset.k11520ImmersiveMode=mode;
+  const sw=$('#k11520FullscreenSwitch');if(sw){const checked=String(immersiveOn());if(sw.getAttribute('aria-checked')!==checked)sw.setAttribute('aria-checked',checked);if(sw.dataset.k11520ImmersiveFullscreen!=='1')sw.dataset.k11520ImmersiveFullscreen='1'}
+  const label=sw?.closest?.('.row')?.querySelector('span');if(label&&label.textContent!=='沉浸全螢幕')label.textContent='沉浸全螢幕';
+  const exit=$('#k11520ImmersiveExit');if(exit){const title=fullscreenElement()?'退出全螢幕':'退出沉浸模式';if(exit.title!==title)exit.title=title;if(exit.getAttribute('aria-label')!==title)exit.setAttribute('aria-label',title)}
   publish();
 }
 
@@ -107,10 +107,10 @@ function ensurePicker(card){
 function paintDirections(){
   for(const card of $$('[data-axis]')){
     const axis=card.dataset.axis;if(!axis||!sideByAxis[axis])continue;
-    ensurePicker(card);const side=sideByAxis[axis];card.dataset.k11520Side=side;
-    for(const b of card.querySelectorAll('[data-k11520-side]')){const on=b.dataset.k11520Side===side;b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',`${axis} ${b.dataset.k11520Side==='LONG'?'做多 LONG':'做空 SHORT'}；只選方向，不直接下單`)}
+    ensurePicker(card);const side=sideByAxis[axis];if(card.dataset.k11520Side!==side)card.dataset.k11520Side=side;
+    for(const b of card.querySelectorAll('[data-k11520-side]')){const on=b.dataset.k11520Side===side,pressed=String(on);if(b.getAttribute('aria-pressed')!==pressed)b.setAttribute('aria-pressed',pressed);const aria=`${axis} ${b.dataset.k11520Side==='LONG'?'做多 LONG':'做空 SHORT'}；只選方向，不直接下單`;if(b.getAttribute('aria-label')!==aria)b.setAttribute('aria-label',aria)}
   }
-  const order=$('#orderFire');if(order){const axis=activeAxis(),side=sideByAxis[axis];order.dataset.k11520SelectedSide=side;order.setAttribute('aria-label',`下單確認：${axis} ${side==='LONG'?'多 LONG':'空 SHORT'}；仍需確認`)}
+  const order=$('#orderFire');if(order){const axis=activeAxis(),side=sideByAxis[axis];if(order.dataset.k11520SelectedSide!==side)order.dataset.k11520SelectedSide=side;const aria=`下單確認：${axis} ${side==='LONG'?'多 LONG':'空 SHORT'}；仍需確認`;if(order.getAttribute('aria-label')!==aria)order.setAttribute('aria-label',aria)}
   publish();
 }
 async function syncCanonicalSide(axis,target){
@@ -143,7 +143,7 @@ function observeAxes(){
   if(axesObserver)axesObserver.disconnect();
   axesObserver=new MutationObserver(()=>queueMicrotask(paintDirections));axesObserver.observe(axes,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});paintDirections();return true;
 }
-function publish(){globalThis.__K11520_IMMERSIVE_TRADING__={version:'1.0.0',ready:true,mobile:mobile(),immersive:immersiveOn(),fullscreen:!!fullscreenElement(),fallbackImmersive,lastError,activeAxis:activeAxis(),sideByAxis:{...sideByAxis},directionSelectionOnly:true,orderConfirmationUnchanged:true,navigationUiRequested:'hide',api:{requestImmersiveFullscreen,exitImmersive,toggleImmersive,setFallbackImmersive,syncCanonicalSide,paintDirections}}}
+function publish(){globalThis.__K11520_IMMERSIVE_TRADING__={version:'1.0.1',ready:true,mobile:mobile(),immersive:immersiveOn(),fullscreen:!!fullscreenElement(),fallbackImmersive,lastError,activeAxis:activeAxis(),sideByAxis:{...sideByAxis},directionSelectionOnly:true,orderConfirmationUnchanged:true,navigationUiRequested:'hide',api:{requestImmersiveFullscreen,exitImmersive,toggleImmersive,setFallbackImmersive,syncCanonicalSide,paintDirections}}}
 
 function install(){
   if(typeof document==='undefined')return null;
