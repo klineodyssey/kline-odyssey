@@ -20,13 +20,13 @@ assert.equal(apiState.directionSelectionOnly,true,'direction picker must only se
 assert.equal(apiState.orderConfirmationUnchanged,true,'order confirmation invariant must remain intact');
 assert.equal(apiState.navigationUiRequested,'hide','fullscreen request must ask browser to hide navigation UI when supported');
 
-const activeAxis=await page.locator('[data-axis].active').getAttribute('data-axis');
+const activeAxis=await page.locator('#axes [data-axis].active').getAttribute('data-axis');
 assert.ok(['KX','KY','KZ'].includes(activeAxis),'active K axis missing');
-assert.equal(await page.locator('[data-axis].active .k11520DirectionPicker').count(),1,'active axis must expose exactly one direct direction picker');
-assert.equal(await page.locator('[data-axis].active [data-k11520-side="LONG"]').isVisible(),true,'LONG control must be visible on active axis');
-assert.equal(await page.locator('[data-axis].active [data-k11520-side="SHORT"]').isVisible(),true,'SHORT control must be visible on active axis');
+assert.equal(await page.locator('#axes [data-axis].active .k11520DirectionPicker').count(),1,'active axis must expose exactly one direct direction picker');
+assert.equal(await page.locator('#axes [data-axis].active [data-k11520-side="LONG"]').isVisible(),true,'LONG control must be visible on active axis');
+assert.equal(await page.locator('#axes [data-axis].active [data-k11520-side="SHORT"]').isVisible(),true,'SHORT control must be visible on active axis');
 
-await page.locator('[data-axis].active [data-k11520-side="SHORT"]').click();
+await page.locator('#axes [data-axis].active [data-k11520-side="SHORT"]').click();
 await page.waitForFunction(axis=>globalThis.__K11520_IMMERSIVE_TRADING__?.sideByAxis?.[axis]==='SHORT',activeAxis,{timeout:2500});
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'direct SHORT selection must not leave a trade sheet open');
 await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());
@@ -34,7 +34,7 @@ await page.waitForTimeout(80);
 assert.match((await page.locator('#sideBtn').textContent()||'').trim(),/空/,'direct SHORT must synchronize canonical existing trade direction');
 await page.locator('#sheetClose').click();
 
-await page.locator(`[data-axis="${activeAxis}"] [data-k11520-side="LONG"]`).click();
+await page.locator(`#axes [data-axis="${activeAxis}"] [data-k11520-side="LONG"]`).click();
 await page.waitForFunction(axis=>globalThis.__K11520_IMMERSIVE_TRADING__?.sideByAxis?.[axis]==='LONG',activeAxis,{timeout:2500});
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'direct LONG selection must not leave a trade sheet open');
 await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());
@@ -42,12 +42,12 @@ await page.waitForTimeout(80);
 assert.match((await page.locator('#sideBtn').textContent()||'').trim(),/多/,'direct LONG must synchronize canonical existing trade direction');
 await page.locator('#sheetClose').click();
 
-await page.locator('[data-axis="KY"]').first().click({position:{x:12,y:12}});
-await page.waitForFunction(()=>document.querySelector('[data-axis="KY"]')?.classList.contains('active')===true,null,{timeout:3000});
+await page.locator('#axes [data-axis="KY"]').click({position:{x:12,y:12}});
+await page.waitForFunction(()=>document.querySelector('#axes [data-axis="KY"]')?.classList.contains('active')===true,null,{timeout:3000});
 await page.waitForTimeout(100);
-const visiblePickers=await page.locator('.k11520DirectionPicker').evaluateAll(nodes=>nodes.filter(n=>getComputedStyle(n).display!=='none'&&n.getBoundingClientRect().width>0).length);
+const visiblePickers=await page.locator('#axes .k11520DirectionPicker').evaluateAll(nodes=>nodes.filter(n=>getComputedStyle(n).display!=='none'&&n.getBoundingClientRect().width>0).length);
 assert.equal(visiblePickers,1,'only the active K axis should show direct LONG/SHORT controls');
-assert.equal(await page.locator('[data-axis="KY"] [data-k11520-side="LONG"]').isVisible(),true,'new active axis must inherit direct direction controls after canonical axis rerender');
+assert.equal(await page.locator('#axes [data-axis="KY"] [data-k11520-side="LONG"]').isVisible(),true,'new active axis must inherit direct direction controls after canonical axis rerender');
 
 await page.waitForFunction(()=>document.querySelector('#k11520FullscreenSwitch')?.dataset.k11520ImmersiveBound==='1',null,{timeout:3000});
 const fullscreenLabel=(await page.locator('#k11520FullscreenSwitch').locator('xpath=..').locator('span').textContent()||'').trim();
