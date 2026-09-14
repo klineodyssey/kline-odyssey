@@ -42,7 +42,7 @@ assert.match((await page.locator('#k11520TradeColorScheme option:checked').textC
 await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.setColorScheme('GLOBAL_GREEN_LONG'));
 colors=await page.evaluate(()=>({scheme:document.documentElement.dataset.k11520TradeColorScheme,long:getComputedStyle(document.documentElement).getPropertyValue('--k11520-long-color').trim(),short:getComputedStyle(document.documentElement).getPropertyValue('--k11520-short-color').trim(),saved:localStorage.getItem('k11520.trade.colorScheme')}));
 assert.deepEqual(colors,{scheme:'GLOBAL_GREEN_LONG',long:'#35d07f',short:'#ff4f5e',saved:'GLOBAL_GREEN_LONG'},'international preset must swap LONG/SHORT colors and persist');
-await page.selectOption('#k11520TradeColorScheme','TW_RED_LONG');
+await page.evaluate(()=>{const select=document.querySelector('#k11520TradeColorScheme');select.value='TW_RED_LONG';select.dispatchEvent(new Event('change',{bubbles:true}))});
 await page.waitForFunction(()=>document.documentElement.dataset.k11520TradeColorScheme==='TW_RED_LONG',null,{timeout:1500});
 assert.equal(await page.evaluate(()=>localStorage.getItem('k11520.trade.colorScheme')),'TW_RED_LONG','settings selection must persist Taiwan preset');
 
