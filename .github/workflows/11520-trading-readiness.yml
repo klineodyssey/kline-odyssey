@@ -13,8 +13,11 @@ on:
       - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
       - "K線西遊記/temples/11520/runtime/real-trading-market-binding.mjs"
       - "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs"
+      - "K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs"
+      - "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs"
       - "tests/11520-real-trading-market-binding.test.mjs"
       - "tests/11520-real-trading-order-intent.test.mjs"
+      - "tests/11520-real-trading-preflight-ui.test.mjs"
       - ".github/workflows/11520-trading-readiness.yml"
   pull_request:
     paths:
@@ -28,8 +31,11 @@ on:
       - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
       - "K線西遊記/temples/11520/runtime/real-trading-market-binding.mjs"
       - "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs"
+      - "K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs"
+      - "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs"
       - "tests/11520-real-trading-market-binding.test.mjs"
       - "tests/11520-real-trading-order-intent.test.mjs"
+      - "tests/11520-real-trading-preflight-ui.test.mjs"
       - ".github/workflows/11520-trading-readiness.yml"
 
 permissions:
@@ -96,6 +102,9 @@ jobs:
 
       - name: Run unsigned order-intent invariants
         run: node --test tests/11520-real-trading-order-intent.test.mjs
+
+      - name: Run player-visible preflight invariants
+        run: node --test tests/11520-real-trading-preflight-ui.test.mjs
 
       - name: Run fund-safety static invariants
         run: node KGEN/contracts/tests/brain-v4-static-invariants.mjs
