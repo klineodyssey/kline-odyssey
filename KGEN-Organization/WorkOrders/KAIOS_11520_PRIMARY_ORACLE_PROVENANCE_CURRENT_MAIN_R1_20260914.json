@@ -1,0 +1,61 @@
+{
+  "work_order_id": "KAIOS_11520_PRIMARY_ORACLE_PROVENANCE_CURRENT_MAIN_R1_20260914",
+  "status": "IMPLEMENTED_CANDIDATE_PENDING_EXACT_HEAD_CI",
+  "priority": "P1",
+  "risk_class": "R1",
+  "scope": "11520_PRIMARY_BSC_ORACLE_PROVENANCE_ONLY",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_main_sha": "91d4179850017077fff09e271ad021e371117ef1",
+  "source_pr": 363,
+  "source_pr_head_sha": "2cfd344b06447f9dadd31c874d5d5dc47ab23b2e",
+  "source_pr_base_sha": "d66b1ca1eb71de4fde6b16e4283605cec40624a1",
+  "successor_branch": "chatgpt-handoff/11520-oracle-provenance-current-main-r2-20260914",
+  "reason_for_successor": "SOURCE_PR_PREDATES_EXACT_LATEST_MAIN; TRANSPLANT_MINIMAL_BOUNDED_DIFF_TO_CURRENT_MAIN",
+  "handbook": "KGEN-Organization/Handbooks/KAIOS_11520_PAGE_HANDOFF_HANDBOOK_CURRENT.md",
+  "changed_files": [
+    ".github/workflows/11520-oracle-provenance.yml",
+    "K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs",
+    "tests/11520-real-trading-feed-provenance.test.mjs",
+    "KGEN-Organization/WorkOrders/KAIOS_11520_PRIMARY_ORACLE_PROVENANCE_CURRENT_MAIN_R1_20260914.json"
+  ],
+  "market_binding": {
+    "KX": "BTCUSDT",
+    "KY": "ETHUSDT",
+    "KZ": "BNBUSDT",
+    "chain_id": 56
+  },
+  "oracle_policy": {
+    "primary_provider": "CHAINLINK_DATA_FEEDS",
+    "required_valid_sources": 2,
+    "provider_independence_required": true,
+    "production_quorum_ready": false,
+    "blocker": "SECOND_INDEPENDENT_PRODUCTION_FEED_REQUIRED"
+  },
+  "required_tests": [
+    "node --check K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs",
+    "node --test tests/11520-real-trading-feed-provenance.test.mjs",
+    "11520 Oracle Provenance exact-head workflow"
+  ],
+  "local_preflight": {
+    "syntax": "PASS",
+    "node_tests": "4/4 PASS"
+  },
+  "visual_qa": {
+    "required": false,
+    "reason": "NO_UI_OR_GAME_SURFACE_CHANGE"
+  },
+  "forbidden_side_effects": [
+    "MAINNET_TRANSACTION",
+    "PAYMENT_OR_TRANSFER",
+    "TREASURY_MUTATION",
+    "GOVERNANCE",
+    "WORKER_OR_LIFE_ACTIVATION",
+    "CONTROLLER_OR_SIGNER_APPOINTMENT",
+    "PRIVATE_KEY_ACCESS",
+    "CHAIN_STATE_MUTATION",
+    "EXTERNAL_AGENT_DISPATCH",
+    "PAID_EXTERNAL_API"
+  ],
+  "next_candidate": "SECOND_INDEPENDENT_ORACLE_PROVIDER_PLUS_EXACT_OBSERVATION_BINDING_AND_FAIL_CLOSED_QUORUM",
+  "protected_activation_state": "HOLD_UNTIL_SECOND_INDEPENDENT_SOURCE_AND_EXPLICIT_FINAL_HUMAN_EXECUTION_PACKET"
+}

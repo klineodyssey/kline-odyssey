@@ -1,0 +1,30 @@
+name: 11520 Oracle Provenance
+
+on:
+  push:
+    paths:
+      - "K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs"
+      - "tests/11520-real-trading-feed-provenance.test.mjs"
+      - ".github/workflows/11520-oracle-provenance.yml"
+  pull_request:
+    paths:
+      - "K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs"
+      - "tests/11520-real-trading-feed-provenance.test.mjs"
+      - ".github/workflows/11520-oracle-provenance.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate provenance module
+        run: node --check "K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs"
+      - name: Prove primary identities and fail-closed 2-source quorum
+        run: node --test tests/11520-real-trading-feed-provenance.test.mjs
