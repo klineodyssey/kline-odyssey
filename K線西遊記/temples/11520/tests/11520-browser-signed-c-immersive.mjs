@@ -25,13 +25,20 @@ assert.ok(yBox.x+yBox.width<=cBox.x,`center energy rail must sit left of C rail:
 assert.ok(cBox.x+cBox.width<=lotsBox.x,`C rail must sit left of positive lot rail: ${JSON.stringify({yBox,cBox,lotsBox})}`);
 assert.ok(lotsBox.x+lotsBox.width<=390,`lot rail must remain inside viewport: ${JSON.stringify({yBox,cBox,lotsBox})}`);
 
-const touchC=async ratio=>{const b=await page.locator('#cControl').boundingBox();assert.ok(b,'#cControl missing before touch');const x=b.x+b.width/2,y=b.y+b.height*ratio;await page.touchscreen.tap(x,y);await page.waitForTimeout(320)};
+const driveC=async ratio=>{
+  await page.locator('#cControl').evaluate((el,ratio)=>{
+    const b=el.getBoundingClientRect(),x=b.left+b.width/2,startY=b.top+b.height/2,targetY=b.top+b.height*ratio,pointerId=880;
+    const fire=(type,y,buttons)=>el.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,composed:true,pointerId,pointerType:'touch',isPrimary:true,clientX:x,clientY:y,buttons,button:buttons?0:-1}));
+    fire('pointerdown',startY,1);fire('pointermove',targetY,1);fire('pointerup',targetY,0);
+  },ratio);
+  await page.waitForTimeout(180);
+};
 
-await touchC(.5);
+await driveC(.5);
 assert.equal((await page.locator('#cRead').textContent()).trim(),'0C','C center must be exactly 0C');
 assert.equal(await page.locator('#cControl').getAttribute('data-c-sign'),'zero');
 
-await touchC(.18);
+await driveC(.18);
 let cText=(await page.locator('#cRead').textContent()).trim();
 assert.match(cText,/^\+/,'C upward must be positive velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC>0,null,{timeout:2500});
@@ -40,7 +47,7 @@ assert.match((await page.locator('#sideBtn').textContent())||'',/多/,'positive 
 assert.equal(await page.locator('#sideBtn').isDisabled(),true,'side must be locked to C sign, not separately toggleable');
 await page.locator('#sheetClose').click();
 
-await touchC(.82);
+await driveC(.82);
 cText=(await page.locator('#cRead').textContent()).trim();
 assert.match(cText,/^-/,'C downward must be negative velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC<0,null,{timeout:2500});
