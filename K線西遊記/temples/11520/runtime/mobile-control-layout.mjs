@@ -1,30 +1,40 @@
+import './market-origin-wallet-layout-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.2
-REVISION: 2026-09-14.FORWARD-ONLY-MINIMAL-LAYOUT-RESTORE
-PURPOSE: Human-directed 390x844 HUD ownership. Restores the stable pre-scope-creep placement of World/Life status and the C/lots/remaining-axis rail group while preserving non-squashable circular thumbs, the approved Wukong poster crop, short axis labels, the separate utility master, the canonical XYZ Plane Joystick, and distinct XYZ/trading semantics.
+VERSION: 1.3.3
+REVISION: 2026-09-14.RESPONSIVE-OWNERSHIP
+PURPOSE: Preserve the approved HUD anchors across mobile widths; measure actual market-card content before placing status. This existing owner replaces the unmerged late hotfix. No world, wallet identity, trading or chain mutation.
 */
 const $=s=>document.querySelector(s);
-const MOBILE_MAX=420;
-let guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
+const MOBILE_MAX=600;
+let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
-
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
-  s.textContent=`
+  const css=`
 @media(max-width:${MOBILE_MAX}px){
+  .hud-drawer-toggle,#yJoyV250{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  .top{left:6px!important;right:6px!important;height:58px!important;padding:7px 8px!important;gap:5px!important}
+  .brand{min-width:0!important}.brand b{font-size:12px!important}
   .brand .hqLine{white-space:nowrap!important}
-  .brand .brandMetaV250{white-space:nowrap!important;gap:4px!important}
+  .brand .brandMetaV250{font-size:8px!important;white-space:nowrap!important;gap:4px!important}
   .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
-  .axes{z-index:250!important}
-  .tele,.monsterHud{top:190px!important;height:108px!important}
+  .pill{padding:5px 6px!important}.pill b{font-size:12px!important}
+  .axes{top:70px!important;left:6px!important;right:6px!important;height:auto!important;min-height:104px!important;gap:4px!important;align-items:stretch!important;z-index:250!important}
+  .axis{min-width:0!important;padding:5px!important}.axis select{font-size:8px!important;padding:5px 3px!important}.axis .q{font-size:12px!important}.axis .pos{font-size:7px!important}
+  .universeFloorBadge{font-size:6px!important;overflow:hidden;text-overflow:ellipsis}
+  #joy.joyWrap{left:14px!important;width:146px!important;height:146px!important;bottom:max(16px,env(safe-area-inset-bottom))!important}
+  #joy{--guideSize:98px;--knobSize:62px}
+  #cControl .track,#lotsControl .track,#yControl .track{left:8px!important;right:8px!important;top:27px!important;bottom:24px!important;min-width:32px!important}
+  #k11520RealTradePreflight{right:58px!important;bottom:264px!important;max-width:190px!important}
+  #cControl::after,#lotsControl::after{display:none!important}
+  .tele,.monsterHud{top:var(--k11520-status-top,190px)!important;height:var(--k11520-status-height,108px)!important;padding:7px!important;font-size:7px!important}
   .tele{left:6px!important;width:calc(50% - 9px)!important}
   .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
-  .minimapWrap{top:308px!important}
+  .minimapWrap{top:var(--k11520-map-top,308px)!important;left:6px!important;width:116px!important;height:134px!important;padding:5px!important}.minimapWrap #minimap{width:104px!important;height:94px!important}
   #knob{will-change:transform!important}
-
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
   #cControl,#lotsControl,#yControl{box-sizing:border-box!important;margin:0!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;top:auto!important;bottom:max(28px,env(safe-area-inset-bottom))!important;width:42px!important;height:132px!important;z-index:456!important;display:block!important}
   #cControl{left:166px!important;right:auto!important}
@@ -42,13 +52,11 @@ function installStyle(){
   #yControl[data-energy-sign="negative"]{border-color:#ff737a99!important;box-shadow:0 0 16px #ff737a22!important}
   #yControl[data-energy-sign="nonnegative"] label,#yControl[data-energy-sign="nonnegative"] .read{color:#65e798!important}
   #yControl[data-energy-sign="negative"] label,#yControl[data-energy-sign="negative"] .read{color:#ff737a!important}
-
   .controls{position:fixed!important;left:auto!important;right:56px!important;top:auto!important;bottom:158px!important;width:176px!important;height:42px!important;transform:none!important;z-index:460!important}
   .controls .skill,.controls .dodge,.controls .flat,.controls .tool{position:absolute!important;width:40px!important;height:40px!important;top:auto!important;bottom:0!important;border-radius:50%!important;font-size:11px!important}
   .controls .skill{right:0!important}.controls .flat{right:44px!important}.controls .dodge{right:88px!important}.controls .tool{right:132px!important}
   .controls .attack,.controls .order{position:fixed!important;top:auto!important;bottom:212px!important;width:58px!important;height:40px!important;border-radius:12px!important;font-size:10px!important;line-height:1.05!important;z-index:470!important}
-  .controls .attack{left:164px!important;right:auto!important}.controls .order{left:228px!important;right:auto!important}
-
+  .controls .attack{left:136px!important;right:auto!important}.controls .order{left:200px!important;right:auto!important}
   #walletPanel{right:54px!important}
   #walletPanel.collapsed{right:5px!important;bottom:302px!important;width:42px!important;height:44px!important;padding:4px!important}
   #walletPanel.collapsed #walletToggle{width:32px!important;height:34px!important}
@@ -57,7 +65,6 @@ function installStyle(){
   #bgmButton{right:5px!important;left:auto!important;bottom:398px!important;width:42px!important;height:42px!important}
   .bagRelocatedV250{right:5px!important;left:auto!important;bottom:490px!important}
   .dock,.dock.open{right:5px!important;left:auto!important;bottom:194px!important}
-
   #k11520HudCollapseAll{position:fixed;z-index:9992;right:5px;left:auto;top:auto;bottom:90px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
   html:not(.k11520UtilitiesOpen) #walletPanel,html:not(.k11520UtilitiesOpen) #walletToggle,html:not(.k11520UtilitiesOpen) #chatHandle,html:not(.k11520UtilitiesOpen) #gameModeToggle,html:not(.k11520UtilitiesOpen) #bgmButton,html:not(.k11520UtilitiesOpen) #aiChatButton,html:not(.k11520UtilitiesOpen) #backpackButton,html:not(.k11520UtilitiesOpen) #k11520HudCollapseAll,html:not(.k11520UtilitiesOpen) #dock{display:none!important}
   html.k11520UtilitiesOpen #gameModeToggle{display:grid!important;visibility:visible!important;pointer-events:auto!important}
@@ -65,48 +72,19 @@ function installStyle(){
   #k11520UtilityMaster{position:fixed!important;right:5px!important;bottom:142px!important;width:44px!important;height:44px!important;z-index:9993!important;border-radius:13px!important;border:1px solid #68e4ff66!important;background:#101923ef!important;font:900 18px system-ui!important;touch-action:manipulation!important}
   body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520HudCollapseAll,body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520UtilityMaster{visibility:hidden!important;pointer-events:none!important}
   #dock.open .rail{right:58px!important}
-  html.k11520HudCollapsed .top,
-  html.k11520HudCollapsed .axes,
-  html.k11520HudCollapsed .tele,
-  html.k11520HudCollapsed .monsterHud,
-  html.k11520HudCollapsed .minimapWrap,
-  html.k11520HudCollapsed .joyWrap,
-  html.k11520HudCollapsed #cControl,
-  html.k11520HudCollapsed #lotsControl,
-  html.k11520HudCollapsed #yControl,
-  html.k11520HudCollapsed .controls,
-  html.k11520HudCollapsed #walletPanel,
-  html.k11520HudCollapsed #walletToggle,
-  html.k11520HudCollapsed #chatHandle,
-  html.k11520HudCollapsed #gameChat,
-  html.k11520HudCollapsed .bagRelocatedV250,
-  html.k11520HudCollapsed #backpackButton,
-  html.k11520HudCollapsed #gameModeToggle,
-  html.k11520HudCollapsed #aiChatButton,
-  html.k11520HudCollapsed #bgmButton,
-  html.k11520HudCollapsed #k11520UtilityMaster,
-  html.k11520HudCollapsed .dock{display:none!important}
+  html.k11520HudCollapsed .top,html.k11520HudCollapsed .axes,html.k11520HudCollapsed .tele,html.k11520HudCollapsed .monsterHud,html.k11520HudCollapsed .minimapWrap,html.k11520HudCollapsed .joyWrap,html.k11520HudCollapsed #cControl,html.k11520HudCollapsed #lotsControl,html.k11520HudCollapsed #yControl,html.k11520HudCollapsed .controls,html.k11520HudCollapsed #walletPanel,html.k11520HudCollapsed #walletToggle,html.k11520HudCollapsed #chatHandle,html.k11520HudCollapsed #gameChat,html.k11520HudCollapsed .bagRelocatedV250,html.k11520HudCollapsed #backpackButton,html.k11520HudCollapsed #gameModeToggle,html.k11520HudCollapsed #aiChatButton,html.k11520HudCollapsed #bgmButton,html.k11520HudCollapsed #k11520UtilityMaster,html.k11520HudCollapsed .dock{display:none!important}
 }
 `;
+  if(s.textContent!==css)s.textContent=css;
 }
-function setImportant(el,key,value){if(el)el.style.setProperty(key,value,'important')}
+function setImportant(el,key,value){if(el&&(el.style.getPropertyValue(key)!==value||el.style.getPropertyPriority(key)!=='important'))el.style.setProperty(key,value,'important')}
 function applyRail(){
   if(innerWidth>MOBILE_MAX)return;
+  globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();
   const specs=[['#cControl','166px'],['#lotsControl','216px'],['#yControl','266px']];
   for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='three-rail-group'}
 }
-function applyRightOrgans(){
-  if(innerWidth>MOBILE_MAX)return;
-  const wallet=$('#walletPanel'),handle=$('#chatHandle'),chat=$('#aiChatButton'),bgm=$('#bgmButton'),bag=$('.bagRelocatedV250'),dock=$('#dock');
-  if(hudCollapsed()){for(const el of [wallet,handle,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
-  if(!document.documentElement.classList.contains('k11520UtilitiesOpen')){for(const el of [wallet,handle,chat,bgm,bag,dock])if(el)setImportant(el,'display','none');return}
-  for(const el of [wallet,handle,chat,bgm,bag,dock])el?.style.removeProperty('display');
-  if(wallet){setImportant(wallet,'position','fixed');setImportant(wallet,'left','auto');setImportant(wallet,'top','auto');if(wallet.classList.contains('collapsed')){for(const [k,v] of [['right','5px'],['bottom','302px'],['width','42px'],['height','44px'],['padding','4px']])setImportant(wallet,k,v)}else{setImportant(wallet,'right','54px');setImportant(wallet,'bottom','198px')}}
-  if(handle){for(const [k,v] of [['position','fixed'],['left','auto'],['right','5px'],['top','auto'],['bottom','350px'],['width','42px'],['min-width','42px'],['height','42px']])setImportant(handle,k,v)}
-  const organs=[[chat,'446px'],[bgm,'398px'],[bag,'490px']];
-  for(const [el,bottom] of organs){if(!el)continue;setImportant(el,'position','fixed');setImportant(el,'left','auto');setImportant(el,'right','5px');setImportant(el,'bottom',bottom);setImportant(el,'width','42px');setImportant(el,'height','42px')}
-  if(dock){setImportant(dock,'left','auto');setImportant(dock,'right','5px');setImportant(dock,'bottom','194px')}
-}
+function applyRightOrgans(){/* Utility geometry/visibility is owned only by market-origin-wallet-layout-runtime. */}
 function normalizeBrand(){
   const line=$('.brand .hqLine'),meta=$('.brand .brandMetaV250');if(!line||!meta)return false;
   const text=(line.textContent||'').replace(/\s+/g,' ').trim();
@@ -143,11 +121,11 @@ function installMasterCollapse(){
   const sync=()=>{const collapsed=hudCollapsed();b.textContent=collapsed?'▣':'▤';b.title=collapsed?'展開全部 HUD':'總收合 HUD';b.setAttribute('aria-expanded',String(!collapsed));document.documentElement.dataset.k11520HudCollapsed=collapsed?'1':'0';applyRail();applyRightOrgans()};
   if(!collapseBound){b.addEventListener('click',()=>{document.documentElement.classList.toggle('k11520HudCollapsed');sync()});collapseBound=true}sync();return true;
 }
-function apply(){installStyle();applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
+function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwner='mobile-control-layout';applyRail();applyRightOrgans();normalizeBrand();installEnergyRead();installMasterCollapse();syncStatusFlow();const report=measure();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=report;return report}
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
-  const report={version:'1.3.2',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
+  const report={version:'1.3.3',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.warp.right<=report.lots.left&&report.lots.right<=report.axisRail.left);
   report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
   report.statusBelowMarket=innerWidth>MOBILE_MAX||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
@@ -163,5 +141,24 @@ function installGuard(){
   const roots=[$('#yControl'),$('#cControl'),$('#lotsControl'),$('#walletPanel'),$('#chatHandle'),$('#aiChatButton'),$('#bgmButton'),$('.bagRelocatedV250'),$('#dock')].filter(Boolean);if(roots.length){let busy=false;guard=new MutationObserver(()=>{if(busy||innerWidth>MOBILE_MAX)return;busy=true;applyRail();applyRightOrgans();queueMicrotask(()=>{busy=false})});for(const root of roots)guard.observe(root,{attributes:true,attributeFilter:['style','class']})}
   timers.forEach(clearTimeout);timers=[];for(const delay of [0,90,240,520,1100,1900,2600])timers.push(setTimeout(apply,delay));
 }
-export function install11520MobileControlLayout(){apply();installGuard();addEventListener('resize',apply,{passive:true});return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__}
+function syncStatusFlow(){
+  if(innerWidth>MOBILE_MAX||hudCollapsed())return;
+  const cards=[...document.querySelectorAll('#axes .axis')],hud=[$('.tele'),$('.monsterHud')].filter(Boolean);
+  const bottom=Math.max(174,...cards.map(el=>el.getBoundingClientRect().bottom));
+  const top=Math.max(190,Math.ceil(bottom+10));
+  const height=Math.max(108,...hud.map(el=>{const r=el.getBoundingClientRect();return Math.ceil(Math.max(r.top,...[...el.children].map(c=>c.getBoundingClientRect().bottom))-r.top+9)}));
+  for(const [key,value] of [['--k11520-status-top',`${top}px`],['--k11520-status-height',`${height}px`],['--k11520-map-top',`${top+height+10}px`]]){
+    if(document.documentElement.style.getPropertyValue(key)!==value)document.documentElement.style.setProperty(key,value);
+  }
+}
+export function install11520MobileControlLayout(){
+  apply();
+  if(booted)return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
+  booted=true;installGuard();addEventListener('resize',apply,{passive:true});
+  if(typeof ResizeObserver==='function'){
+    flowObserver=new ResizeObserver(()=>{syncStatusFlow();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
+    for(const el of [$('.axes'),$('.tele'),$('.monsterHud')].filter(Boolean))flowObserver.observe(el);
+  }
+  return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
+}
 export function get11520MobileControlLayout(){return measure()}
