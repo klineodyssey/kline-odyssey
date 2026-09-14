@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.2.0
+VERSION: 1.2.1
 STATUS: PROTOTYPE
 FORMAL_ORGAN_NAME: 11520 Combat Mass Scale Runtime
 PURPOSE: Canonical simulation-only bridge between KGEN lot/index scale and KAIOS XYZ game mass. C is a signed velocity ratio: +C and -C are opposite velocity directions with the same speed magnitude; c itself remains a positive constant. Lot mass stays non-negative. No wallet, trade, chain, settlement, payment, or treasury mutation.
@@ -46,10 +46,12 @@ export function normalizeC(value) {
 }
 
 export function cMode(value) {
-  const c = normalizeC(value),speed=Math.abs(c);
+  const c = normalizeC(value);
   if (c===0) return 'LOCAL_WALK';
+  if (c===1) return 'LIGHT_SPEED_SPOT';
+  if (c===-1) return 'REVERSE_LIGHT_SPEED';
+  const speed=Math.abs(c);
   if (speed<1) return c<0?'REVERSE_SUBLIGHT':'SUBLIGHT_WARP';
-  if (speed===1) return c<0?'REVERSE_LIGHT_SPEED':'LIGHT_SPEED_SPOT';
   return c<0?'REVERSE_SUPERLUMINAL':'SUPERLUMINAL_WARP';
 }
 
