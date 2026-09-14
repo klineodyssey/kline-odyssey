@@ -20,9 +20,10 @@ const centerX=async sel=>{const b=await page.locator(sel).boundingBox();assert.o
 const yCenter=await centerX('#yControl');
 assert.ok(Math.abs(yCenter-195)<=2,`normal-axis energy rail must be centered in 390px viewport, got ${yCenter}`);
 const cBox=await page.locator('#cControl').boundingBox(),lotsBox=await page.locator('#lotsControl').boundingBox(),yBox=await page.locator('#yControl').boundingBox();
-assert.ok(yBox.right<=cBox.x,'center energy rail must sit left of C rail');
-assert.ok(cBox.x+cBox.width<=lotsBox.x,'C rail must sit left of positive lot rail');
-assert.ok(lotsBox.x+lotsBox.width<=390,'lot rail must remain inside viewport');
+assert.ok(yBox&&cBox&&lotsBox,'three vertical rails must all have browser geometry');
+assert.ok(yBox.x+yBox.width<=cBox.x,`center energy rail must sit left of C rail: ${JSON.stringify({yBox,cBox,lotsBox})}`);
+assert.ok(cBox.x+cBox.width<=lotsBox.x,`C rail must sit left of positive lot rail: ${JSON.stringify({yBox,cBox,lotsBox})}`);
+assert.ok(lotsBox.x+lotsBox.width<=390,`lot rail must remain inside viewport: ${JSON.stringify({yBox,cBox,lotsBox})}`);
 
 const dragC=async ratio=>{const b=await page.locator('#cControl').boundingBox(),x=b.x+b.width/2,y=b.y+b.height*ratio;await page.dispatchEvent('#cControl','pointerdown',{pointerId:77,pointerType:'touch',clientX:x,clientY:y,buttons:1});await page.waitForTimeout(90);await page.dispatchEvent('#cControl','pointerup',{pointerId:77,pointerType:'touch',clientX:x,clientY:y,buttons:0});await page.waitForTimeout(220)};
 
