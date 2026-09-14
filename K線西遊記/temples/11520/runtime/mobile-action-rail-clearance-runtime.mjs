@@ -1,4 +1,5 @@
 import './market-origin-wallet-layout-runtime.mjs';
+import './mobile-immersive-trading-runtime.mjs';
 /* KGEN_META
 VERSION: 1.2.1
 STATUS: ACTIVE
