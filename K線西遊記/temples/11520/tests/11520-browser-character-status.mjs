@@ -14,6 +14,7 @@ await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch((
 await page.waitForTimeout(900);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 await page.waitForFunction(()=>globalThis.__K11520_CHARACTER_STATUS__?.characterCard===true,null,{timeout:3000});
+assert.equal(await page.evaluate(()=>globalThis.__K11520_CHARACTER_STATUS__?.avatarCenterPriority),true,'camera-locked avatar tap priority must be active');
 const detail=(await page.locator('#k11520HpDetail').textContent()||'').trim();
 assert.match(detail,/HP\s+\d+\s*\/\s*100/,'detailed HP current/max missing');
 assert.match(detail,/\d+\.\d%/,'HP percentage missing');
@@ -37,18 +38,20 @@ assert.ok(sheetZ>hudMax,`character card must render above HUD: ${sheetZ} <= ${hu
 await page.screenshot({path:`${OUT}/11520-mobile-character-status.png`,fullPage:true});
 
 await page.locator('#sheetClose').click();
-await page.evaluate(()=>{globalThis.__K11520_TEST_WORLD_TAP_ROUTES__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__.push(e.detail?.route))});
+await page.evaluate(()=>{globalThis.__K11520_TEST_WORLD_TAPS__=[];document.querySelector('#three')?.addEventListener('k11520:world-tap',e=>globalThis.__K11520_TEST_WORLD_TAPS__.push(e.detail))});
 const canvas=await page.locator('#three').boundingBox();
 assert.ok(canvas,'3D canvas missing');
 const tapCanvas=async(fx,fy,id)=>{const p={pointerId:id,pointerType:'touch',clientX:canvas.x+canvas.width*fx,clientY:canvas.y+canvas.height*fy,buttons:1};await page.dispatchEvent('#three','pointerdown',p);await page.waitForTimeout(45);await page.dispatchEvent('#three','pointerup',{...p,buttons:0});await page.waitForTimeout(160)};
 await tapCanvas(.5,.5,71);
-assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),true,'raycast player tap must open character sheet');
-assert.match((await page.locator('#sheetTitle').textContent()||'').trim(),/角色資料/,'raycast player tap opened wrong sheet');
-assert.equal(await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__?.at(-1)),'PLAYER','avatar tap must be classified by the 3D player raycast');
+assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),true,'camera-locked player tap must open character sheet');
+assert.match((await page.locator('#sheetTitle').textContent()||'').trim(),/角色資料/,'camera-locked player tap opened wrong sheet');
+const playerTap=await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAPS__?.at(-1));
+assert.equal(playerTap?.route,'PLAYER','avatar center tap must remain classified as PLAYER');
+assert.equal(playerTap?.source,'CAMERA_LOCKED_PLAYER_HITBOX','player priority layer must win before nearby entity touch tolerance');
 
 await page.locator('#sheetClose').click();
 await tapCanvas(.12,.78,72);
-assert.equal(await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAP_ROUTES__?.at(-1)),'GROUND','non-avatar canvas tap must remain routed to canonical world interaction');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAPS__?.at(-1)?.route),'GROUND','non-avatar canvas tap must remain routed to canonical world interaction');
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'ground tap must not be consumed as a character-card tap');
 await browser.close();
-console.log('11520 character status PASS: real organ, raycast avatar, world tap routing, and open-card visual evidence verified at 390x844');
+console.log('11520 character status PASS: real organ, camera-locked avatar priority, world tap routing, and open-card visual evidence verified at 390x844');

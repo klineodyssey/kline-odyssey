@@ -1,0 +1,64 @@
+{
+  "work_order_id": "KAIOS_11520_CHARACTER_TAP_PRIORITY_REPAIR_R1_20260914",
+  "status": "IMPLEMENTED_CANDIDATE_PENDING_EXACT_HEAD_CI",
+  "priority": "P0_POST_MERGE_REGRESSION",
+  "risk_class": "R1",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_main_sha": "9947a2ec2ccebf3781d3f0c28dda42e7dc8f94c8",
+  "branch": "chatgpt-handoff/11520-character-tap-priority-r1-20260914",
+  "trigger": {
+    "merge_pr": 366,
+    "post_merge_game_product_qa_run": 34823236888,
+    "attempt_1": {
+      "status": "FAIL",
+      "assertion": "raycast player tap opened wrong sheet",
+      "actual_sheet": "世界物件"
+    },
+    "attempt_2_same_main_sha": {
+      "status": "FAIL",
+      "assertion": "raycast player tap opened wrong sheet",
+      "actual_sheet": "世界物件"
+    },
+    "static_and_earlier_browser_gates": "PASS_75_OF_75_AND_MOBILE_SMOKE_BEFORE_CHARACTER_STATUS"
+  },
+  "root_cause": "Nearby-monster touch tolerance is latched on pointerdown and routed before the precise player route on pointerup. A life inside the 18px tolerance ring can therefore steal a camera-center avatar tap and open the generic World Object sheet.",
+  "repair": {
+    "owner": "character-status-runtime",
+    "strategy": "CAMERA_LOCKED_PLAYER_CENTER_PRIORITY_CAPTURE",
+    "behavior": [
+      "The third-person camera keeps the player avatar centered.",
+      "A bounded elliptical center hit target captures only short stationary taps.",
+      "PLAYER route is emitted before the generic nearby-life tolerance can consume the pointerup.",
+      "Ground/world interaction outside the avatar center remains untouched.",
+      "No trade, wallet, chain, payment, governance or authority semantics change."
+    ]
+  },
+  "changed_files": [
+    "K線西遊記/temples/11520/runtime/character-status-runtime.mjs",
+    "K線西遊記/temples/11520/tests/11520-browser-character-status.mjs",
+    "KGEN-Organization/WorkOrders/KAIOS_11520_CHARACTER_TAP_PRIORITY_REPAIR_R1_20260914.json"
+  ],
+  "required_validation": [
+    "ES module syntax",
+    "11520-browser-character-status at 390x844 real Chromium",
+    "11520 Game Product QA including mandatory screenshots",
+    "11520 Responsive Product QA",
+    "11520 Universal Exchange regression",
+    "post-merge Game/Responsive/Universal/Pages verification"
+  ],
+  "visual_qa": {
+    "required": true,
+    "reason": "UI_GAME_POINTER_ROUTING_AND_CHARACTER_CARD",
+    "expected_evidence": "11520-mobile-character-status.png plus full Game Product QA artifact"
+  },
+  "forbidden_side_effects": [
+    "MAINNET_TRANSACTION",
+    "PAYMENT_OR_TRANSFER",
+    "TREASURY_MUTATION",
+    "GOVERNANCE",
+    "SIGNER_OR_PRIVATE_KEY_ACCESS",
+    "WORKER_OR_LIFE_ACTIVATION",
+    "EXTERNAL_AGENT_DISPATCH"
+  ],
+  "next_candidate_after_green_post_merge": "READ_ONLY_CHAIN56_ORACLE_LIVE_OBSERVATION_THEN_USER_REQUESTED_FULLSCREEN_AND_LONG_SHORT_UI_REVIEW"
+}
