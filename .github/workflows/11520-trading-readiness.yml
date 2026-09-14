@@ -1,0 +1,109 @@
+name: 11520 Trading Readiness
+
+on:
+  push:
+    paths:
+      - "KGEN/contracts/KGEN_BrainExchange.sol"
+      - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
+      - "KGEN/contracts/KGEN_PositionEngine.sol"
+      - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
+      - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
+      - ".github/workflows/11520-trading-readiness.yml"
+  pull_request:
+    paths:
+      - "KGEN/contracts/KGEN_BrainExchange.sol"
+      - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
+      - "KGEN/contracts/KGEN_PositionEngine.sol"
+      - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
+      - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
+      - ".github/workflows/11520-trading-readiness.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-real-funds-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Assert no tracked duplicate active contract sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
+          test ! -e KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
+          test ! -e KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
+
+      - name: Install pinned Solidity/EVM test dependencies
+        run: |
+          npm install --no-save --package-lock=false \
+            solc@0.8.24 \
+            @openzeppelin/contracts@5.0.2 \
+            @openzeppelin/contracts-upgradeable@5.0.2 \
+            ethers@6.15.0 \
+            ganache@7.9.2
+
+      - name: Compile exact canonical versionless contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/brain-v4-build
+          mkdir -p /tmp/brain-v4-build
+          npx solcjs \
+            --bin --abi \
+            --base-path . \
+            --include-path node_modules \
+            -o /tmp/brain-v4-build \
+            KGEN/contracts/KGEN_BrainExchange.sol \
+            KGEN/contracts/KGEN_MarketRiskKernel.sol \
+            KGEN/contracts/KGEN_PositionEngine.sol
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_sol_KGEN_BrainExchange_V4_0_0.bin
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_PositionEngine_sol_KGEN_PositionEngine_V1_0_0.bin
+
+      - name: Prepare ephemeral canonical aliases for legacy test harness paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp KGEN/contracts/KGEN_BrainExchange.sol KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
+          cp KGEN/contracts/KGEN_MarketRiskKernel.sol KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
+          cp KGEN/contracts/KGEN_PositionEngine.sol KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
+          cmp -s KGEN/contracts/KGEN_BrainExchange.sol KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
+          cmp -s KGEN/contracts/KGEN_MarketRiskKernel.sol KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
+          cmp -s KGEN/contracts/KGEN_PositionEngine.sol KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
+
+      - name: Run fund-safety static invariants
+        run: node KGEN/contracts/tests/brain-v4-static-invariants.mjs
+
+      - name: Run Brain custody EVM invariants
+        run: node KGEN/contracts/tests/brain-v4-evm.test.mjs
+
+      - name: Run market risk kernel EVM invariants
+        run: node KGEN/contracts/tests/market-risk-kernel-evm.test.mjs
+
+      - name: Run Position Engine EVM invariants
+        run: node KGEN/contracts/tests/position-engine-evm.test.mjs
+
+      - name: Run actual Brain proxy + Position Engine integration
+        run: node KGEN/contracts/tests/brain-position-integration-evm.test.mjs
+
+      - name: Remove ephemeral aliases and reject generated/tracked drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f \
+            KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol \
+            KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol \
+            KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
