@@ -1,0 +1,55 @@
+{
+  "protocol": "KAIOS_11520_SIGNED_C_IMMERSIVE_R1_20260914",
+  "document_type": "BOUNDED_ENGINEERING_WORK_ORDER_AND_EVIDENCE",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "updated_at": "2026-09-15T04:12:00+08:00",
+  "human_authority": "沈英明",
+  "repository": "klineodyssey/kline-odyssey",
+  "base_branch": "main",
+  "exact_base_sha": "40aa39349a50ba64935b2796313f7f4f16913bf1",
+  "work_branch": "chatgpt-handoff/11520-signed-c-immersive-r1-20260914",
+  "supersedes": "PR #368 direct LONG/SHORT-button model",
+  "goal": "Finish the KGEN 11520 mobile control package: center the normal-axis energy rail; use signed C as direction (+C=多, -C=空, 0C neutral); keep lots positive; provide persistent configurable long/short color presets; allow both slider/touch and precise numeric entry for C and lots; preserve immersive visible-viewport/fullscreen behavior and the existing confirmation path.",
+  "semantics": {
+    "signed_c": "+C=LONG/多, -C=SHORT/空, 0C=neutral; negative C is reverse velocity direction, never negative mass.",
+    "lots": "Positive integer only, 1..100.",
+    "numeric_c": "Direct entry accepts -1000..+1000 and resolves to the nearest existing canonical C level so UI, game state and order state cannot diverge.",
+    "numeric_lots": "Direct entry accepts integer lots and clamps to 1..100; it drives the existing canonical lot control rather than creating parallel state.",
+    "color_default": "TW_RED_LONG: 多/LONG red (#ff4f5e), 空/SHORT green (#35d07f).",
+    "color_alternate": "GLOBAL_GREEN_LONG: 多/LONG green, 空/SHORT red.",
+    "color_persistence": "localStorage k11520.trade.colorScheme",
+    "order_safety": "Slider movement, numeric entry, color changes and direction selection do not execute an order; existing order confirmation remains mandatory."
+  },
+  "machine_verifiable_acceptance": [
+    "390x844 Chromium proves #yControl center within 2px of viewport center and Y-C-lot rails do not overlap.",
+    "Slider/touch proves 0C, +C=多, -C=空 and signed combat-drive propagation.",
+    "Numeric C input proves -0.1 produces -0.1C and SHORT without opening an order flow.",
+    "Numeric lots input proves 7 -> 7口 and negative input clamps to 1口.",
+    "Default Taiwan colors and alternate international colors are both machine-verified and persisted.",
+    "Lot display remains positive.",
+    "Immersive fallback matches VisualViewport and keeps an explicit exit.",
+    "Mandatory signed-C screenshot exists and existing 11520 visual/regression gates remain active."
+  ],
+  "safety_invariants": {
+    "mainnet_transaction": false,
+    "wallet_transfer": false,
+    "private_key_or_signer_access": false,
+    "payment": false,
+    "treasury_mutation": false,
+    "governance_mutation": false,
+    "worker_or_life_activation": false,
+    "external_agent_dispatch": false,
+    "numeric_entry_executes_order": false,
+    "color_setting_changes_trade_semantics": false,
+    "order_confirmation_bypassed": false
+  },
+  "required_checks": [
+    "11520 Game Product QA",
+    "11520 Responsive Product QA",
+    "11520 Universal Exchange V2",
+    "post-merge Deploy Pages Static"
+  ],
+  "merge_policy": "R1 only. Merge only from exact latest main/head after required exact-head checks are green and no blocking comments/threads/races exist. Then verify post-merge exact main and Pages.",
+  "signed_by": "ChatGPT / GPT-5.6 Sol",
+  "signature_time": "2026-09-15T04:12:00+08:00"
+}

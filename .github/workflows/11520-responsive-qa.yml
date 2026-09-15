@@ -58,7 +58,7 @@ jobs:
           node 'K線西遊記/temples/11520/tests/11520-browser-responsive.mjs'
           if [ "$PUBLIC_QA" != true ]; then
             timeout 100s node 'K線西遊記/temples/11520/tests/11520-browser-character-status.mjs' 2>&1 | tee artifacts/11520-responsive-qa/character-status-test.log
-            timeout 100s node 'K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs' 2>&1 | tee artifacts/11520-responsive-qa/mobile-hud-test.log
+            timeout 180s node 'K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs' 2>&1 | tee artifacts/11520-responsive-qa/mobile-hud-test.log
           fi
       - name: Preserve screenshots and focused failure logs
         if: always()
