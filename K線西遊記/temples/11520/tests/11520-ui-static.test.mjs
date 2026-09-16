@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
 
@@ -75,3 +75,23 @@ test('known central interceptor is explicitly retired, not heuristically scanned
 });
 
 test('one real wallet/backpack organ remains in product-fix layer',()=>{assert.ok(fixes.includes('restoreWalletOrgan'));assert.ok(fixes.includes('placeOnlyRealBag'))});
+
+// Keep the defect fixed at its source rather than adding another late DOM owner.
+test('legacy zero-parameter event handlers and observers are removed at source',()=>{
+  for(const token of ['installZeroParameterSemantics','pinZeroThumb','zeroSemantics','zeroLots','zeroWarp','zeroObserver',"style.top='64%'"])
+    assert.equal(fixes.includes(token),false,`obsolete parameter writer returned: ${token}`);
+});
+test('temporary zero-parameter retirement shim and midpoint polling are absent',()=>{
+  const shim='legacy-parameter-zero-retirement.mjs';
+  assert.equal(existsSync(resolve(here,'../runtime',shim)),false,'delete the shim, not just its import');
+  assert.equal(read('../runtime/mobile-action-rail-clearance-runtime.mjs').includes(shim),false);
+  const bridge=read('../runtime/mobile-lot-numeric-canonical-bridge.mjs');
+  assert.equal(bridge.includes('enforceZeroCMidpoint'),false,'lot bridge must not own C thumb rendering');
+  assert.equal(bridge.includes('#cThumb'),false,'C geometry must not be rewritten by the lot bridge');
+});
+test('product help uses signed C and positive lots without obsolete zero-lot hints',()=>{
+  for(const token of ['最低 0口','C 最低 0','#cControl::after','#lotsControl::after'])assert.equal(fixes.includes(token),false,token);
+  assert.ok(fixes.includes('口數永遠為正'));
+  assert.ok(fixes.includes('向上為 +C 多、向下為 -C 空'));
+  assert.ok(fixes.includes('最小 1 口'));
+});
