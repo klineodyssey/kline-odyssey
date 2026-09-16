@@ -1,8 +1,8 @@
 {
   "protocol": "KAIOS_11520_SIGNED_C_IMMERSIVE_R1_20260914",
   "document_type": "BOUNDED_ENGINEERING_WORK_ORDER_AND_EVIDENCE",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
-  "updated_at": "2026-09-15T04:12:00+08:00",
+  "status": "REWORK_SOURCE_REMOVAL_PENDING_EXACT_HEAD_CI",
+  "updated_at": "2026-09-16T09:25:31Z",
   "human_authority": "沈英明",
   "repository": "klineodyssey/kline-odyssey",
   "base_branch": "main",
@@ -14,7 +14,7 @@
     "signed_c": "+C=LONG/多, -C=SHORT/空, 0C=neutral; negative C is reverse velocity direction, never negative mass.",
     "lots": "Positive integer only, 1..100.",
     "numeric_c": "Direct entry accepts -1000..+1000 and resolves to the nearest existing canonical C level so UI, game state and order state cannot diverge.",
-    "numeric_lots": "Direct entry accepts integer lots and clamps to 1..100; it drives the existing canonical lot control rather than creating parallel state.",
+    "numeric_lots": "Target: accept integer lots 1..100; reject invalid entries and retain the previous value. The Enter bridge implements rejection; change/blur/Escape consistency still requires the next canonical-input audit. Do not call the entire input pipeline complete.",
     "color_default": "TW_RED_LONG: 多/LONG red (#ff4f5e), 空/SHORT green (#35d07f).",
     "color_alternate": "GLOBAL_GREEN_LONG: 多/LONG green, 空/SHORT red.",
     "color_persistence": "localStorage k11520.trade.colorScheme",
@@ -23,8 +23,8 @@
   "machine_verifiable_acceptance": [
     "390x844 Chromium proves #yControl center within 2px of viewport center and Y-C-lot rails do not overlap.",
     "Slider/touch proves 0C, +C=多, -C=空 and signed combat-drive propagation.",
-    "Numeric C input proves -0.1 produces -0.1C and SHORT without opening an order flow.",
-    "Numeric lots input proves 7 -> 7口 and negative input clamps to 1口.",
+    "Numeric C input proves -0.1 produces -0.1C and SHORT without executing an order.",
+    "Numeric lots input proves 7 -> 7口; invalid negative input is rejected without changing the previous valid size.",
     "Default Taiwan colors and alternate international colors are both machine-verified and persisted.",
     "Lot display remains positive.",
     "Immersive fallback matches VisualViewport and keeps an explicit exit.",
@@ -49,7 +49,60 @@
     "11520 Universal Exchange V2",
     "post-merge Deploy Pages Static"
   ],
-  "merge_policy": "R1 only. Merge only from exact latest main/head after required exact-head checks are green and no blocking comments/threads/races exist. Then verify post-merge exact main and Pages.",
+  "merge_policy": "R1 only. Merge only from exact latest main/head after required exact-head checks are green and no blocking comments/threads/P0/P1 defects/races exist. Then verify post-merge exact main and Pages.",
   "signed_by": "ChatGPT / GPT-5.6 Sol",
-  "signature_time": "2026-09-15T04:12:00+08:00"
+  "signature_time": "2026-09-15T04:12:00+08:00",
+  "iterations": [
+    {
+      "id": "KAIOS_11520_ROOT_ZERO_WRITER_REMOVAL_20260916",
+      "selected_task_count": 1,
+      "selected_task": "REMOVE_LEGACY_ZERO_PARAMETER_WRITERS_AT_SOURCE",
+      "priority": "P1",
+      "risk": "R1",
+      "expected_main_sha": "40aa39349a50ba64935b2796313f7f4f16913bf1",
+      "initial_head_sha": "f5997713bb332648a2fe73a37add447add754ed8",
+      "expected_parent_sha": "41dfdbc75e976fe8d88ee4eb8b11f8613a2d90c0",
+      "ref_refresh": {
+        "old_writes_aborted_before_tree_commit_or_ref": true,
+        "observed_intervening_commits": [
+          "b4977df2dca33ef4f92d712bd394caa5968992b7",
+          "41dfdbc75e976fe8d88ee4eb8b11f8613a2d90c0"
+        ],
+        "policy": "Retain the intervening combat test and source-removal commits. Root cleanup is now adopted upstream work, not overwritten or claimed as this session's commit. Apply only the remaining lot-bridge midpoint-guard removal and regression tests."
+      },
+      "candidate_ranking": [
+        {"rank": 1, "priority": "P1", "task": "Complete legacy zero-lot/C-thumb writer and temporary shim removal", "selected": true},
+        {"rank": 2, "priority": "P1", "task": "Audit and consolidate canonical C/side/numeric state across rapid direction, axis, Enter/change/blur/Escape paths", "selected": false},
+        {"rank": 3, "priority": "P2", "task": "Trade-sword and utility-master visual spacing", "selected": false}
+      ],
+      "inventory_scope": "Continuation of active PR #369, not an exhaustive repository-wide audit.",
+      "adopted_source_removal_commit": "41dfdbc75e976fe8d88ee4eb8b11f8613a2d90c0",
+      "adopted_source_blob": "b403cb42784b91def5ae050c0dbef56965214221",
+      "allowed_paths": [
+        "K線西遊記/temples/11520/runtime/mobile-lot-numeric-canonical-bridge.mjs",
+        "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs",
+        "KGEN-Organization/WorkOrders/KAIOS_11520_SIGNED_C_IMMERSIVE_R1_20260914.json"
+      ],
+      "changes": [
+        "Upstream 41df removes installZeroParameterSemantics, its startup/cleanup calls, obsolete minimum-zero CSS/help, and the retirement shim/import.",
+        "Remove C-thumb midpoint enforcement from the lot numeric bridge; preserve its existing lot submission path.",
+        "Add three regression tests to the existing mandatory UI static test suite, without weakening existing browser or product assertions."
+      ],
+      "local_evidence": {
+        "upstream_source_git_blob_verified": "b403cb42784b91def5ae050c0dbef56965214221",
+        "bridge_blob": "9f5ca271cfffa836ff3e272474359bc30488cb23",
+        "static_tests_blob": "592dfe805845a02ca17825c45bfcb9744ec1dd40",
+        "syntax_checks": "PASS on staged runtime/test source",
+        "new_source_regression_tests": "3/3 PASS on staged source; not the full repository suite"
+      },
+      "functional_qa": "PENDING_EXACT_HEAD_CI",
+      "visual_qa": "PENDING_EXACT_HEAD_BROWSER_SCREENSHOT_INSPECTION",
+      "workflow_changes_this_iteration": false,
+      "main_direct_write": false,
+      "rollback": "Bounded corrective PR against then-current main; never restore an older repository tree.",
+      "next_candidate": "Canonical C/side/numeric-state audit, including delayed render and rapid-change races, before declaring all of #369 ready.",
+      "signed_by": "ChatGPT engineering session; no verified Life/Worker identity asserted",
+      "signature_time": "2026-09-16T09:25:31Z"
+    }
+  ]
 }
