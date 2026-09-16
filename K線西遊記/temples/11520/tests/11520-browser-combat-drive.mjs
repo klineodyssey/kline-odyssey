@@ -18,6 +18,7 @@ try{
     document.querySelector('#cControl')&&
     document.querySelector('#lotsControl')&&
     document.querySelector('#joy')&&
+    globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api&&
     globalThis.__K11520_COMBAT_DRIVE_API__&&
     globalThis.__K11520_COMBAT_DRIVE__
   ),null,{timeout:bootTimeout});
@@ -31,6 +32,7 @@ try{
       cControl:Boolean(document.querySelector('#cControl')),
       lotsControl:Boolean(document.querySelector('#lotsControl')),
       joy:Boolean(document.querySelector('#joy')),
+      signedCApi:Boolean(globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api),
       combatDriveApi:Boolean(globalThis.__K11520_COMBAT_DRIVE_API__),
       combatDriveState:Boolean(globalThis.__K11520_COMBAT_DRIVE__)
     };
@@ -51,21 +53,32 @@ async function setVertical(sel,t){
   await page.dispatchEvent(sel,'pointerup',{pointerId:id,pointerType:'touch',clientX:x,clientY:y,buttons:0});
   await page.waitForTimeout(240);
 }
+async function setSignedC(value){
+  await page.evaluate(v=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(v),value);
+  await page.waitForFunction(v=>globalThis.__K11520_COMBAT_DRIVE__?.c===v,value,{timeout:2500});
+  await page.waitForTimeout(80);
+}
 async function drive(){return page.evaluate(()=>structuredClone(globalThis.__K11520_COMBAT_DRIVE__))}
 
-// C=0: ordinary pilgrimage walking remains live, not frozen.
-await setVertical('#cControl',0);
+// 0C lives at the rail midpoint; ordinary pilgrimage walking remains live, not frozen.
+await setSignedC(0);
 let d=await drive();
 assert.equal(d.c,0);assert.equal(d.cMode,'LOCAL_WALK');assert.equal(d.xyzStep,.1);
 assert.equal((await page.locator('#k11520DriveHud').textContent()).includes('0C LOCAL_WALK'),true);
+assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),'50%');
 
-// C=1: canonical light-speed/spot layer preserves the public base XYZ step at 0.1.
-await setVertical('#cControl',.7);
+// +1C: canonical light-speed/spot layer preserves the public base XYZ step at +0.1.
+await setSignedC(1);
 d=await drive();
 assert.equal(d.c,1);assert.equal(d.cMode,'LIGHT_SPEED_SPOT');assert.equal(d.xyzStep,.1);
 
-// C=10: superluminal layer scales XYZ intent by 10, without changing the source disc/rail state.
-await setVertical('#cControl',.8);
+// -1C is the same speed magnitude in the opposite direction.
+await setSignedC(-1);
+d=await drive();
+assert.equal(d.c,-1);assert.equal(d.cMode,'REVERSE_LIGHT_SPEED');assert.equal(d.xyzStep,-.1);
+
+// +10C: superluminal layer scales XYZ intent by 10, without changing the source disc/rail state.
+await setSignedC(10);
 d=await drive();
 assert.equal(d.c,10);assert.equal(d.cMode,'SUPERLUMINAL_WARP');assert.equal(d.xyzStep,1);
 
@@ -88,4 +101,4 @@ const hud=await page.locator('#k11520DriveHud').textContent();assert.match(hud,/
 await page.screenshot({path:`${OUT}/11520-mobile-combat-drive-c10-3lots.png`,fullPage:true});
 assert.deepEqual(errors,[]);
 await browser.close();
-console.log('11520 combat drive browser QA PASS: bounded runtime readiness, 0C walk, 1C spot, 10C warp, 3 lots = 3000 KAIOS/kg, screenshot captured');
+console.log('11520 combat drive browser QA PASS: signed C midpoint/reverse semantics, +1C spot, +10C warp, 3 lots = 3000 KAIOS/kg, screenshot captured');
