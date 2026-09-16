@@ -11,7 +11,7 @@ await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/tem
 await page.waitForTimeout(1900);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
-await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready===true,null,{timeout:5000});
+await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready===true&&globalThis.__K11520_TRADE_DIRECTION_API__,null,{timeout:5000});
 await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',null,{timeout:5000});
 await page.waitForTimeout(500);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
@@ -48,25 +48,66 @@ assert.equal(await page.evaluate(()=>localStorage.getItem('k11520.trade.colorSch
 
 await page.waitForFunction(()=>document.querySelector('#cNumericInput')&&document.querySelector('#lotsNumericInput'),null,{timeout:3000});
 assert.equal(await page.locator('#cNumericInput').getAttribute('inputmode'),'decimal');
+assert.equal(await page.locator('#lotsNumericInput').getAttribute('inputmode'),'numeric');
 assert.equal(await page.locator('#lotsNumericInput').getAttribute('min'),'1');
 assert.equal(await page.locator('#lotsNumericInput').getAttribute('max'),'100');
+assert.equal(await page.locator('#lotsNumericInput').getAttribute('type'),'text');
+
+// Numeric signed C must synchronize game-state side directly without opening trade/order surfaces.
 await page.locator('#cNumericInput').fill('-0.1');
 await page.locator('#cNumericInput').press('Enter');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===-0.1,null,{timeout:2500});
 assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C','numeric C input must update canonical signed C display');
 assert.equal(await page.locator('#cControl').getAttribute('data-c-side'),'SHORT','negative numeric C must select SHORT');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide('KX')),'空','negative C must synchronously set canonical KX side');
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'numeric C entry must not leave trade sheet open');
+
+// Cross-control regression: editing lots after -C must not let native syncControls erase the signed value/thumb.
 await page.locator('#lotsNumericInput').fill('7');
 await page.locator('#lotsNumericInput').press('Enter');
 await page.waitForFunction(()=>document.querySelector('#lotsRead')?.textContent?.trim()==='7口',null,{timeout:2500});
 assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7','numeric lot input must remain synchronized');
+assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C','lot edit must not overwrite signed C display');
+assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),'80%','lot edit must not move -0.1C thumb');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide('KX')),'空','lot edit must not change canonical side');
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'numeric lot entry must not open order flow');
+
+// Invalid lots use one policy on Enter, change/blur and Escape: reject and keep previous canonical size.
 await page.locator('#lotsNumericInput').fill('-5');
 await page.locator('#lotsNumericInput').press('Enter');
-await page.waitForFunction(()=>globalThis.__K11520_LOT_NUMERIC_BRIDGE__?.lastRejected==='-5',null,{timeout:2500});
-assert.equal((await page.locator('#lotsRead').textContent()).trim(),'7口','negative lot input must be rejected without mutating canonical lot size');
-assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7','rejected negative lot input must restore previous valid value');
-assert.equal(await page.evaluate(()=>globalThis.__K11520_LOT_NUMERIC_BRIDGE__?.invalidPolicy),'REJECT_AND_KEEP_PREVIOUS');
+await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.numericEntry?.lastLotRejected==='-5',null,{timeout:2500});
+assert.equal((await page.locator('#lotsRead').textContent()).trim(),'7口');
+assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.numericEntry.invalidLotPolicy),'REJECT_AND_KEEP_PREVIOUS');
+await page.locator('#lotsNumericInput').fill('101');
+await page.locator('#cNumericInput').click();
+await page.waitForTimeout(120);
+assert.equal((await page.locator('#lotsRead').textContent()).trim(),'7口','blur/change invalid lot must keep previous size');
+assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7');
+await page.locator('#lotsNumericInput').fill('9');
+await page.locator('#lotsNumericInput').press('Escape');
+await page.waitForTimeout(80);
+assert.equal((await page.locator('#lotsRead').textContent()).trim(),'7口','Escape must cancel numeric lot edit');
+assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7');
+
+// Rapid sign changes must not be dropped by asynchronous UI-button synchronization.
+await page.evaluate(()=>{const a=globalThis.__K11520_SIGNED_C_IMMERSIVE__.api;a.applySignedValue(0.1);a.applySignedValue(-0.1);a.applySignedValue(0.1);a.applySignedValue(-0.1)});
+await page.waitForTimeout(120);
+assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC),-0.1);
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide('KX')),'空','final rapid sign must win canonical side');
+assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C');
+assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),'80%');
+
+// Per-axis state must survive axis switches without stale renderer drift.
+await page.locator('[data-axis="KY"]').click();
+await page.waitForTimeout(80);
+await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(0.1));
+await page.waitForTimeout(80);
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide('KY')),'多');
+await page.locator('[data-axis="KX"]').click();
+await page.waitForTimeout(120);
+assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C','KX signed C must survive KY round-trip');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide('KX')),'空');
 
 await driveC(.5);
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===0,null,{timeout:2500});
@@ -81,6 +122,7 @@ let cText=(await page.locator('#cRead').textContent()).trim();
 assert.match(cText,/^\+/,'C upward must be positive velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC>0,null,{timeout:2500});
 assert.equal(await page.locator('#cControl').getAttribute('data-c-side'),'LONG');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide('KX')),'多');
 const longColor=await page.locator('#cRead').evaluate(el=>getComputedStyle(el).color);
 await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());await page.waitForTimeout(120);
 assert.match((await page.locator('#sideBtn').textContent())||'',/多/,'positive C must map canonical side to 多');
@@ -93,6 +135,7 @@ assert.match(cText,/^-/,'C downward must be negative velocity');
 await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC<0,null,{timeout:2500});
 await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE__?.c<0,null,{timeout:2500});
 assert.equal(await page.locator('#cControl').getAttribute('data-c-side'),'SHORT');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide('KX')),'空');
 const shortColor=await page.locator('#cRead').evaluate(el=>getComputedStyle(el).color);
 assert.notEqual(longColor,shortColor,'LONG and SHORT C states must be visually distinct');
 await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());await page.waitForTimeout(120);
@@ -122,4 +165,4 @@ assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; canonical 0C midpoint without negative zero; configurable persisted LONG/SHORT color presets; precise numeric C/positive-lot entry with invalid lot rejection; immersive visible-viewport fallback verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: one C renderer; direct canonical side sync; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');

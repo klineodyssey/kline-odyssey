@@ -16,6 +16,8 @@ const driveLive=read('../runtime/combat-drive-live-runtime.mjs');
 const driveAdapter=read('../runtime/combat-drive-adapter.mjs');
 const massScale=read('../runtime/combat-mass-scale-runtime.mjs');
 const characterStatus=read('../runtime/character-status-runtime.mjs');
+const signedC=read('../runtime/mobile-signed-c-immersive-runtime.mjs');
+const actionRail=read('../runtime/mobile-action-rail-clearance-runtime.mjs');
 const source=[html,main,fixes,controls,xyzControl,xyzAuthority,driveLive,driveAdapter,massScale,characterStatus].join('\n');
 
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
@@ -76,19 +78,29 @@ test('known central interceptor is explicitly retired, not heuristically scanned
 
 test('one real wallet/backpack organ remains in product-fix layer',()=>{assert.ok(fixes.includes('restoreWalletOrgan'));assert.ok(fixes.includes('placeOnlyRealBag'))});
 
-// Keep the defect fixed at its source rather than adding another late DOM owner.
 test('legacy zero-parameter event handlers and observers are removed at source',()=>{
   for(const token of ['installZeroParameterSemantics','pinZeroThumb','zeroSemantics','zeroLots','zeroWarp','zeroObserver',"style.top='64%'"])
     assert.equal(fixes.includes(token),false,`obsolete parameter writer returned: ${token}`);
 });
-test('temporary zero-parameter retirement shim and midpoint polling are absent',()=>{
-  const shim='legacy-parameter-zero-retirement.mjs';
-  assert.equal(existsSync(resolve(here,'../runtime',shim)),false,'delete the shim, not just its import');
-  assert.equal(read('../runtime/mobile-action-rail-clearance-runtime.mjs').includes(shim),false);
-  const bridge=read('../runtime/mobile-lot-numeric-canonical-bridge.mjs');
-  assert.equal(bridge.includes('enforceZeroCMidpoint'),false,'lot bridge must not own C thumb rendering');
-  assert.equal(bridge.includes('#cThumb'),false,'C geometry must not be rewritten by the lot bridge');
+
+test('temporary compatibility shims are deleted rather than kept as late DOM owners',()=>{
+  for(const shim of ['legacy-parameter-zero-retirement.mjs','mobile-lot-numeric-canonical-bridge.mjs'])assert.equal(existsSync(resolve(here,'../runtime',shim)),false,`delete obsolete shim: ${shim}`);
+  assert.equal(actionRail.includes('mobile-lot-numeric-canonical-bridge.mjs'),false,'action rail must not load a second lot-input owner');
 });
+
+test('game main no longer owns signed C display or thumb rendering',()=>{
+  assert.ok(main.includes('__K11520_TRADE_DIRECTION_API__'),'game state must expose one direct canonical side API');
+  assert.ok(main.includes('__K11520_SIGNED_C_IMMERSIVE__?.api?.paintSignedC?.(S.axis)'),'native control refresh must delegate signed-C rendering');
+  assert.equal(main.includes("$('#cRead').textContent=`${a.c}C`"),false,'unsigned cRead writer returned');
+  assert.equal(main.includes("setThumb($('#cThumb')"),false,'unsigned cThumb writer returned');
+  assert.ok(main.includes("setTradeSide(S.axis,axis().side==='多'?'空':'多')"),'legacy side button fallback must use canonical side setter');
+});
+
+test('signed C runtime owns one positive-lot numeric policy and direct side synchronization',()=>{
+  for(const token of ['function normalizeNumericLots','invalidLotPolicy:\'REJECT_AND_KEEP_PREVIOUS\'','__K11520_TRADE_DIRECTION_API__?.getSide','api.setSide(axis,side)','l.type=\'text\''])assert.ok(signedC.includes(token),token);
+  for(const token of ['TRADE_ORGAN_NOT_FOUND','SIDE_BUTTON_NOT_FOUND','SIDE_SYNC_FAILED','trade.click()'])assert.equal(signedC.includes(token),false,`async UI-button side sync returned: ${token}`);
+});
+
 test('product help uses signed C and positive lots without obsolete zero-lot hints',()=>{
   for(const token of ['最低 0口','C 最低 0','#cControl::after','#lotsControl::after'])assert.equal(fixes.includes(token),false,token);
   assert.ok(fixes.includes('口數永遠為正'));
