@@ -8,12 +8,12 @@ const $=s=>document.querySelector(s);
 const LEGACY_MARKET_ORIGIN_KEY='k11520.marketOrigin.v1';
 let walletInitial=null,utilityBound=false;
 function put(el,key,value){if(el.style.getPropertyValue(key)!==value||el.style.getPropertyPriority(key)!=='important')el.style.setProperty(key,value,'important')}
-const MOBILE={utilityBottom:150,dockBottom:200,gameBottom:250,walletBottom:300,chatBottom:350,bgmBottom:400,aiBottom:450,bagBottom:500,masterBottom:100};
+const MOBILE={utilityBottom:150,dockBottom:198,gameBottom:246,walletBottom:294,chatBottom:342,bgmBottom:390,aiBottom:438,bagBottom:486,masterBottom:102};
 const OPTIONAL_UTILITIES=['#dock','#gameModeToggle','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#k11520HudCollapseAll'];
 function installStyle(){let s=$('#k11520StableWalletRailStyle');if(!s){s=document.createElement('style');s.id='k11520StableWalletRailStyle';document.head.appendChild(s)}const css=`
 #walletToggle{position:fixed!important;right:5px!important;top:auto!important;bottom:${MOBILE.walletBottom}px!important;left:auto!important;transform:none!important;z-index:9990!important;width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;pointer-events:auto!important;visibility:visible!important;opacity:1!important;font-size:21px!important;line-height:1!important}
 @media(max-width:600px){
-  /* One 44px hit target per 50px slot: six visible pixels between neighbours. */
+  /* One 44px hit target per 48px slot: four visible pixels between neighbours; preserve the health-row clearance. */
   html[data-k11520-layout-owner] #dockToggle,html[data-k11520-layout-owner] #walletToggle{box-sizing:border-box!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;display:grid;place-items:center}
   #k11520HudCollapseAll{border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
   #walletPanel{right:5px!important;left:auto!important}
