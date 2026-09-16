@@ -63,8 +63,10 @@ assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7','
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'numeric lot entry must not open order flow');
 await page.locator('#lotsNumericInput').fill('-5');
 await page.locator('#lotsNumericInput').press('Enter');
-await page.waitForFunction(()=>document.querySelector('#lotsRead')?.textContent?.trim()==='1口',null,{timeout:2500});
-assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'1','negative lot input must clamp to positive minimum');
+await page.waitForFunction(()=>globalThis.__K11520_LOT_NUMERIC_BRIDGE__?.lastRejected==='-5',null,{timeout:2500});
+assert.equal((await page.locator('#lotsRead').textContent()).trim(),'7口','negative lot input must be rejected without mutating canonical lot size');
+assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7','rejected negative lot input must restore previous valid value');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_LOT_NUMERIC_BRIDGE__?.invalidPolicy),'REJECT_AND_KEEP_PREVIOUS');
 
 await driveC(.5);
 assert.equal((await page.locator('#cRead').textContent()).trim(),'0C','C center must be exactly 0C');
@@ -116,4 +118,4 @@ assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; configurable persisted LONG/SHORT color presets; numeric C/lots entry; positive lots; immersive visible-viewport fallback verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; configurable persisted LONG/SHORT color presets; precise numeric C/positive-lot entry with invalid lot rejection; immersive visible-viewport fallback verified at 390x844');
