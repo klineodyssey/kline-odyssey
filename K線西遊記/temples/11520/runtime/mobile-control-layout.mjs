@@ -2,8 +2,8 @@ import './market-origin-wallet-layout-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.4
-REVISION: 2026-09-14.CENTER-NORMAL-RAIL
+VERSION: 1.3.5
+REVISION: 2026-09-17.MOBILE-UTILITY-CLEARANCE
 PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, place signed-C and positive lot rails to its right without overlap, and measure actual market-card content before placing status. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
 const $=s=>document.querySelector(s);
@@ -27,7 +27,7 @@ function installStyle(){
   .axes{top:70px!important;left:6px!important;right:6px!important;height:auto!important;min-height:104px!important;gap:4px!important;align-items:stretch!important;z-index:250!important}
   .axis{min-width:0!important;padding:5px!important}.axis select{font-size:8px!important;padding:5px 3px!important}.axis .q{font-size:12px!important}.axis .pos{font-size:7px!important}
   .universeFloorBadge{font-size:6px!important;overflow:hidden;text-overflow:ellipsis}
-  #joy.joyWrap{left:14px!important;width:146px!important;height:146px!important;bottom:max(16px,env(safe-area-inset-bottom))!important}
+  #joy.joyWrap{left:14px!important;width:min(146px,calc(50vw - 44px))!important;height:min(146px,calc(50vw - 44px))!important;bottom:max(16px,env(safe-area-inset-bottom))!important}
   #joy{--guideSize:98px;--knobSize:62px}
   #cControl .track,#lotsControl .track,#yControl .track{left:8px!important;right:8px!important;top:27px!important;bottom:24px!important;min-width:32px!important}
   #k11520RealTradePreflight{right:58px!important;bottom:264px!important;max-width:190px!important}
@@ -35,6 +35,8 @@ function installStyle(){
   .tele,.monsterHud{top:var(--k11520-status-top,190px)!important;height:var(--k11520-status-height,108px)!important;padding:7px!important;font-size:7px!important}
   .tele{left:6px!important;width:calc(50% - 9px)!important}
   .monsterHud{right:6px!important;width:calc(50% - 9px)!important}
+  html.k11520UtilitiesOpen .tele{width:calc(50% - 36px)!important}
+  html.k11520UtilitiesOpen .monsterHud{right:60px!important;width:calc(50% - 36px)!important}
   .minimapWrap{top:var(--k11520-map-top,308px)!important;left:6px!important;width:116px!important;height:134px!important;padding:5px!important}.minimapWrap #minimap{width:104px!important;height:94px!important}
   #knob{will-change:transform!important}
   .sliderDock{position:static!important;display:contents!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;height:auto!important;gap:0!important}
@@ -59,22 +61,15 @@ function installStyle(){
   .controls .skill{right:0!important}.controls .flat{right:44px!important}.controls .dodge{right:88px!important}.controls .tool{right:132px!important}
   html[data-k11520-layout-owner] .controls .attack,html[data-k11520-layout-owner] .controls .order{position:fixed!important;top:auto!important;bottom:212px!important;width:58px!important;height:40px!important;border-radius:12px!important;font-size:10px!important;line-height:1.05!important;z-index:470!important}
   html[data-k11520-layout-owner] .controls .attack{left:136px!important;right:auto!important}html[data-k11520-layout-owner] .controls .order{left:200px!important;right:auto!important}
-  #walletPanel{right:54px!important}
-  #walletPanel.collapsed{right:5px!important;bottom:302px!important;width:42px!important;height:44px!important;padding:4px!important}
-  #walletPanel.collapsed #walletToggle{width:32px!important;height:34px!important}
-  #chatHandle{left:auto!important;right:5px!important;top:auto!important;bottom:350px!important;width:42px!important;min-width:42px!important;height:42px!important;border-left:1px solid #68e4ff66!important;border-radius:13px!important}
-  #aiChatButton{right:5px!important;left:auto!important;bottom:446px!important;width:42px!important;height:42px!important}
-  #bgmButton{right:5px!important;left:auto!important;bottom:398px!important;width:42px!important;height:42px!important}
-  .bagRelocatedV250{right:5px!important;left:auto!important;bottom:490px!important}
-  .dock,.dock.open{right:5px!important;left:auto!important;bottom:194px!important}
-  #k11520HudCollapseAll{position:fixed;z-index:9992;right:5px;left:auto;top:auto;bottom:90px;width:42px;height:42px;border-radius:13px;border:1px solid #68e4ff66;background:#101923ef;color:#dffaff;font:900 16px system-ui;display:grid;place-items:center;touch-action:manipulation}
+  /* Utility geometry and styling are supplied by Market/Wallet Layout. */
   html:not(.k11520UtilitiesOpen) #walletPanel,html:not(.k11520UtilitiesOpen) #walletToggle,html:not(.k11520UtilitiesOpen) #chatHandle,html:not(.k11520UtilitiesOpen) #gameModeToggle,html:not(.k11520UtilitiesOpen) #bgmButton,html:not(.k11520UtilitiesOpen) #aiChatButton,html:not(.k11520UtilitiesOpen) #backpackButton,html:not(.k11520UtilitiesOpen) #k11520HudCollapseAll,html:not(.k11520UtilitiesOpen) #dock{display:none!important}
   html.k11520UtilitiesOpen #gameModeToggle{display:grid!important;visibility:visible!important;pointer-events:auto!important}
-  #k11520UtilityMaster,#dockToggle{display:grid!important;place-items:center!important;min-width:44px!important;min-height:44px!important;color:#dffaff!important}
-  #k11520UtilityMaster{position:fixed!important;right:5px!important;bottom:142px!important;width:44px!important;height:44px!important;z-index:9993!important;border-radius:13px!important;border:1px solid #68e4ff66!important;background:#101923ef!important;font:900 18px system-ui!important;touch-action:manipulation!important}
   body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520HudCollapseAll,body:has(#aiChatPanel.open,#gameChat.open,#backpackPanel.open,#k11520UiSettings.open,#sheet.open,#walletLaunchSheet.open) #k11520UtilityMaster{visibility:hidden!important;pointer-events:none!important}
   #dock.open .rail{right:58px!important}
   html.k11520HudCollapsed .top,html.k11520HudCollapsed .axes,html.k11520HudCollapsed .tele,html.k11520HudCollapsed .monsterHud,html.k11520HudCollapsed .minimapWrap,html.k11520HudCollapsed .joyWrap,html.k11520HudCollapsed #cControl,html.k11520HudCollapsed #lotsControl,html.k11520HudCollapsed #yControl,html.k11520HudCollapsed .controls,html.k11520HudCollapsed #walletPanel,html.k11520HudCollapsed #walletToggle,html.k11520HudCollapsed #chatHandle,html.k11520HudCollapsed #gameChat,html.k11520HudCollapsed .bagRelocatedV250,html.k11520HudCollapsed #backpackButton,html.k11520HudCollapsed #gameModeToggle,html.k11520HudCollapsed #aiChatButton,html.k11520HudCollapsed #bgmButton,html.k11520HudCollapsed #k11520UtilityMaster,html.k11520HudCollapsed .dock{display:none!important}
+}
+@media(max-width:380px){
+  html[data-k11520-layout-owner] #k11520PlaneLabel{width:calc(100vw - 252px)!important}
 }
 `;
   if(s.textContent!==css)s.textContent=css;
@@ -141,13 +136,13 @@ function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwn
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
-  const report={version:'1.3.4',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
+  const report={version:'1.3.5',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.axisRailCentered=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.axisRail.right<=report.warp.left&&report.warp.right<=report.lots.left);
   report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
   report.statusBelowMarket=innerWidth>MOBILE_MAX||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
   report.mapBelowStatus=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
-  report.overlaps={warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
+  report.overlaps={joyRail:overlap(report.joy,report.axisRail),warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();
   report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.axisRailCentered&&report.threeRailAligned&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v));
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
