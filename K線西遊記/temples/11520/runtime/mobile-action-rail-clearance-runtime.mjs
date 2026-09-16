@@ -1,11 +1,12 @@
 import './market-origin-wallet-layout-runtime.mjs';
 import './mobile-signed-c-immersive-runtime.mjs';
 import './mobile-lot-numeric-canonical-bridge.mjs';
+import './legacy-parameter-zero-retirement.mjs';
 /* KGEN_META
-VERSION: 1.2.2
+VERSION: 1.2.3
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: 11520 Mobile Action Rail Clearance Runtime
-PURPOSE: Own modal layering and non-interactive notifications only. Coordinates belong to Mobile Control Layout. Report schema remains 1.2.0; implementation revision is separately exposed. No trading, wallet, chain, asset or authority mutation.
+PURPOSE: Own modal layering and non-interactive notifications only. Coordinates belong to Mobile Control Layout. Signed-C and positive-lot compatibility retirement is loaded before clearance reporting. No trading, wallet, chain, asset or authority mutation.
 */
 const MOBILE_MAX=600;
 const TOP_Z=12000;
@@ -30,7 +31,7 @@ function report(){
   const openSurface=document.querySelector('#confirm.open,.sheet.open,.confirm.open');
   const surfaceZ=openSurface?Number(getComputedStyle(openSurface).zIndex)||0:0;
   const hudZ=Math.max(...['#dock','#backpackButton','#walletPanel','#chatHandle','#k11520HudCollapseAll'].map(sel=>{const el=$(sel);return el?(Number(getComputedStyle(el).zIndex)||0):0}));
-  const out={version:'1.2.0',implementationVersion:'1.2.2',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
+  const out={version:'1.2.0',implementationVersion:'1.2.3',viewport:{width:innerWidth,height:innerHeight},rail,dock,c,lots,rightSafeGap:rail?innerWidth-rail.right:null,railDockOverlap:overlap(rail,dock),openSurfaceZ:surfaceZ,hudMaxZ:hudZ,actionSurfaceOnTop:!openSurface||surfaceZ>hudZ};
   out.ok=innerWidth>MOBILE_MAX||Boolean(rail&&c&&lots&&out.rightSafeGap>=48&&!out.railDockOverlap&&out.actionSurfaceOnTop);
   document.documentElement.dataset.k11520ActionRailClearance=out.ok?'PASS':'RED';
   globalThis.__K11520_ACTION_RAIL_CLEARANCE__=out;
