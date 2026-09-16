@@ -69,8 +69,12 @@ assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7','
 assert.equal(await page.evaluate(()=>globalThis.__K11520_LOT_NUMERIC_BRIDGE__?.invalidPolicy),'REJECT_AND_KEEP_PREVIOUS');
 
 await driveC(.5);
-assert.equal((await page.locator('#cRead').textContent()).trim(),'0C','C center must be exactly 0C');
+await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===0,null,{timeout:2500});
+const zeroCText=(await page.locator('#cRead').textContent()).trim();
+assert.match(zeroCText,/^0C(?:\s*·\s*靜止)?$/,'C center display must represent canonical 0C');
+assert.doesNotMatch(zeroCText,/-0(?:\.0+)?C/,'C center must never render negative zero');
 assert.equal(await page.locator('#cControl').getAttribute('data-c-sign'),'zero');
+assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),'50%','0C thumb must sit at the canonical midpoint');
 
 await driveC(.18);
 let cText=(await page.locator('#cRead').textContent()).trim();
@@ -118,4 +122,4 @@ assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; configurable persisted LONG/SHORT color presets; precise numeric C/positive-lot entry with invalid lot rejection; immersive visible-viewport fallback verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: centered normal-axis rail; +C=多, -C=空; canonical 0C midpoint without negative zero; configurable persisted LONG/SHORT color presets; precise numeric C/positive-lot entry with invalid lot rejection; immersive visible-viewport fallback verified at 390x844');
