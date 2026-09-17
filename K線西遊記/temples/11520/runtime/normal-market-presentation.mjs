@@ -1,9 +1,10 @@
 /* KGEN_META
-VERSION: 1.0.1
+VERSION: 1.0.2
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Normal Market Presentation
-PURPOSE: Present the K-sphere normal-axis market implied by the active 3D control plane without changing the trading selection or world coordinates. XZ -> KY, XY -> KZ, YZ -> KX. All three K-axis markets remain visible; only the current normal axis is visually emphasized.
+PURPOSE: Present the K-sphere normal-axis market implied by the active 3D control plane without changing the trading selection or world coordinates. XZ -> KY, XY -> KZ, YZ -> KX. All three K-axis markets remain visible; only the current normal axis is visually emphasized. Also loads the bounded mobile capture/equal-rail presentation repair from the live 11520 boot path.
 */
+import './mobile-capture-equal-rail-polish-runtime.mjs';
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const NORMAL_BY_PLANE={XZ:'KY',XY:'KZ',YZ:'KX'};
