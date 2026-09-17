@@ -1,5 +1,4 @@
 import './wallet-game-bridge.mjs';
-import './mobile-capture-equal-rail-polish-runtime.mjs';
 
 export const WALK_SPEED = 0.07;
 export const TURN_SPEED = 0.075;
