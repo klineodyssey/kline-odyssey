@@ -1,17 +1,12 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE
 PURPOSE: Make the backpack capture control visibly render as 捕 and keep Y/C/lot mobile energy tracks on one canonical 26px width without changing control authority.
 */
 
 const MOBILE_MAX=600;
 const STYLE_ID='k11520CaptureEqualRailPolish';
-
-function installStyle(){
-  if(typeof document==='undefined')return;
-  let style=document.getElementById(STYLE_ID);
-  if(!style){style=document.createElement('style');style.id=STYLE_ID;document.head.appendChild(style)}
-  style.textContent=`
+const CSS=`
 @media(max-width:${MOBILE_MAX}px){
   html[data-k11520-layout-owner] #yControl .track,
   html[data-k11520-layout-owner] #cControl .track,
@@ -49,23 +44,30 @@ function installStyle(){
 #backpackPanel #backpackCaptureNearby:active{transform:scale(.96)}
 #backpackPanel #backpackCaptureNearby:focus-visible{outline:2px solid #65e798;outline-offset:2px}
 `;
+
+function installStyle(){
+  if(typeof document==='undefined')return;
+  let style=document.getElementById(STYLE_ID);
+  if(!style){style=document.createElement('style');style.id=STYLE_ID;document.head.appendChild(style)}
+  if(style.textContent!==CSS)style.textContent=CSS;
 }
 
+function setText(el,text){if(el&&el.textContent!==text)el.textContent=text}
 function polishBackpack(){
   const panel=document.getElementById('backpackPanel');
   if(!panel)return false;
   const head=panel.querySelector('.bpHead');
   const capture=document.getElementById('backpackCaptureNearby');
   const title=head?.querySelector('b');
-  if(title&&title.textContent!=='🎒 花果山背包 · 活體收納')title.textContent='🎒 花果山背包 · 活體收納';
+  setText(title,'🎒 花果山背包 · 活體收納');
   if(capture){
-    capture.textContent='捕';
-    capture.title='捕捉附近生命';
-    capture.setAttribute('aria-label','捕捉附近牛、魚、蝦、雞、鴨');
+    setText(capture,'捕');
+    if(capture.title!=='捕捉附近生命')capture.title='捕捉附近生命';
+    if(capture.getAttribute('aria-label')!=='捕捉附近牛、魚、蝦、雞、鴨')capture.setAttribute('aria-label','捕捉附近牛、魚、蝦、雞、鴨');
     capture.dataset.k11520CaptureControl='READY';
   }
   const empty=panel.querySelector('.bpEmpty');
-  if(empty)empty.textContent='背包目前是空的。靠近可捕捉生命後按「捕」，即可將牛、魚、蝦、雞、鴨等活體收入背包；寶物則由採集取得。';
+  setText(empty,'背包目前是空的。靠近可捕捉生命後按「捕」，即可將牛、魚、蝦、雞、鴨等活體收入背包；寶物則由採集取得。');
   return Boolean(capture);
 }
 
@@ -75,13 +77,18 @@ function measure(){
   const y=rect('#yControl .track'),c=rect('#cControl .track'),lots=rect('#lotsControl .track');
   const widths=[y?.width,c?.width,lots?.width].filter(Number.isFinite);
   const equal=widths.length===3&&widths.every(w=>Math.abs(w-26)<1)&&Math.max(...widths)-Math.min(...widths)<1;
-  const report={version:'1.0.0',targetWidth:26,y,c,lots,equal};
+  const report={version:'1.0.1',targetWidth:26,y,c,lots,equal};
   document.documentElement.dataset.k11520EqualRailTracks=equal?'PASS':'RED';
   globalThis.__K11520_CAPTURE_EQUAL_RAIL_POLISH__=report;
   return report;
 }
 
-function apply(){installStyle();polishBackpack();requestAnimationFrame(()=>measure())}
+let queued=false;
+function apply(){
+  installStyle();
+  polishBackpack();
+  if(!queued){queued=true;requestAnimationFrame(()=>{queued=false;measure()})}
+}
 
 export function install11520CaptureEqualRailPolish(){
   if(typeof document==='undefined')return {ok:true,skipped:true};
