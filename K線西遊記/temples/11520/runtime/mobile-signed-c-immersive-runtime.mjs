@@ -1,8 +1,8 @@
 /* KGEN_META
-VERSION: 1.4.1
+VERSION: 1.5.0
 STATUS: ACTIVE / UI-ONLY
 FORMAL_ORGAN_NAME: 11520 Signed C + Immersive Mobile Runtime
-PURPOSE: Signed C velocity (+C=多, -C=空, 0C neutral), positive lots, configurable long/short colors, precise numeric entry, direct canonical side synchronization, and bounded immersive mobile behavior. Direction/size editing never executes an order.
+PURPOSE: Signed C velocity (+C=多, -C=空, 0C neutral), positive lots, configurable long/short colors, precise numeric entry, direct canonical side synchronization, and immersive mobile behavior with a single-line system bar and maximum 3D playfield. Direction/size editing never executes an order.
 */
 
 const $=s=>document.querySelector(s);
@@ -38,6 +38,21 @@ function ensureStyle(){if($('#k11520SignedCImmersiveStyle'))return;const s=docum
 :root{--k11520-long-color:#ff4f5e;--k11520-short-color:#35d07f;--k11520-neutral-color:#d8e4eb}
 html.k11520ImmersiveViewport,html.k11520ImmersiveViewport body{width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important;overflow:hidden!important}
 html.k11520ImmersiveViewport #three{width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important}
+html.k11520ImmersiveViewport .axes,
+html.k11520ImmersiveViewport .tele,
+html.k11520ImmersiveViewport .monsterHud,
+html.k11520ImmersiveViewport .minimapWrap{display:none!important;visibility:hidden!important;pointer-events:none!important}
+html.k11520ImmersiveViewport .top{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:center!important;gap:4px!important;left:4px!important;right:38px!important;top:max(3px,env(safe-area-inset-top))!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding:3px 6px!important;border-radius:9px!important;overflow:hidden!important}
+html.k11520ImmersiveViewport .top .brand{min-width:0!important;overflow:hidden!important}
+html.k11520ImmersiveViewport .top .brand b{display:block!important;min-width:0!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html.k11520ImmersiveViewport .top .brand .hqLine{display:flex!important;align-items:center!important;gap:3px!important;min-width:0!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important}
+html.k11520ImmersiveViewport .top .brand .hqLine>span:last-child{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+html.k11520ImmersiveViewport .top .brand .hqFlag{font-size:11px!important;flex:0 0 auto!important}
+html.k11520ImmersiveViewport .top .brand .brandMetaV250,
+html.k11520ImmersiveViewport .top .brand>small{display:none!important}
+html.k11520ImmersiveViewport .top .pill{display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;height:24px!important;min-height:24px!important;padding:2px 4px!important;border-radius:7px!important;white-space:nowrap!important}
+html.k11520ImmersiveViewport .top .pill small{display:inline!important;font-size:5.5px!important;line-height:1!important}
+html.k11520ImmersiveViewport .top .pill b{font-size:10px!important;line-height:1!important}
 #k11520ImmersiveExit{position:fixed;z-index:13050;right:4px;top:max(4px,env(safe-area-inset-top));width:30px;height:30px;border:1px solid #68e4ff66;border-radius:9px;background:#071018dd;color:#dffaff;font:900 15px system-ui;display:none;place-items:center;touch-action:manipulation;box-shadow:0 4px 18px #000b}
 html.k11520ImmersiveViewport #k11520ImmersiveExit{display:grid}
 #cControl .track{background:linear-gradient(to bottom,color-mix(in srgb,var(--k11520-long-color) 42%,#071018) 0%,color-mix(in srgb,var(--k11520-long-color) 42%,#071018) 49.2%,var(--k11520-neutral-color) 49.2%,var(--k11520-neutral-color) 50.8%,color-mix(in srgb,var(--k11520-short-color) 42%,#071018) 50.8%,color-mix(in srgb,var(--k11520-short-color) 42%,#071018) 100%)!important}
@@ -84,7 +99,7 @@ function onCEvent(e){if(internalNative||e.target?.classList?.contains('k11520Num
 function onDocumentClick(e){if(e.target?.id==='sideBtn'){e.preventDefault();e.stopImmediatePropagation();renderTradeSideLock();return}if(e.target?.closest?.('[data-organ="trade"]'))setTimeout(renderTradeSideLock,0);const card=e.target?.closest?.('#axes [data-axis]');if(card)setTimeout(()=>{paintSignedC(card.dataset.axis);const v=Number(signedByAxis[card.dataset.axis]||0);if(v!==0)syncCanonicalSide(v,card.dataset.axis);syncNumericEditors()},0)}
 function bindC(){const el=$('#cControl');if(!el||el.dataset.k11520SignedCBound)return !!el;el.dataset.k11520SignedCBound='1';for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])el.addEventListener(type,onCEvent,{capture:true,passive:false});paintSignedC();return true}
 
-function publish(){const scheme=COLOR_SCHEMES[colorSchemeId],axis=activeAxis(),v=Number(signedByAxis[axis]||0),wanted=signSide(v),observed=canonicalSideFor(axis),expected=wanted==='LONG'?'多':wanted==='SHORT'?'空':null;globalThis.__K11520_SIGNED_C_IMMERSIVE__={version:'1.4.1',ready:true,activeAxis:axis,signedC:v,signedByAxis:{...signedByAxis},lots:readLots(),lotsRemainPositive:true,cSemantics:'SIGNED_VELOCITY_PLUS_LONG_MINUS_SHORT',canonicalSide:observed,canonicalSideSynced:wanted==='NEUTRAL'||observed===expected,numericEntry:{c:true,lots:true,cRange:[-1000,1000],lotsRange:[1,100],cCanonicalLevels:[...ABS_LEVELS],invalidLotPolicy:'REJECT_AND_KEEP_PREVIOUS',lastLotAccepted,lastLotRejected},colorScheme:colorSchemeId,colorSemantics:{long:scheme.long,short:scheme.short,neutral:scheme.neutral},fullscreen:!!fullEl(),fallbackImmersive,immersive:immersiveOn(),navigationUiRequested:'hide',lastError,api:{applySignedValue,setCFromNumeric,setLotsFromNumeric,setColorScheme,setFallbackImmersive,requestImmersiveFullscreen,exitImmersive,toggleImmersive,paintSignedC,syncCanonicalSide}}}
+function publish(){const scheme=COLOR_SCHEMES[colorSchemeId],axis=activeAxis(),v=Number(signedByAxis[axis]||0),wanted=signSide(v),observed=canonicalSideFor(axis),expected=wanted==='LONG'?'多':wanted==='SHORT'?'空':null;globalThis.__K11520_SIGNED_C_IMMERSIVE__={version:'1.5.0',ready:true,activeAxis:axis,signedC:v,signedByAxis:{...signedByAxis},lots:readLots(),lotsRemainPositive:true,cSemantics:'SIGNED_VELOCITY_PLUS_LONG_MINUS_SHORT',canonicalSide:observed,canonicalSideSynced:wanted==='NEUTRAL'||observed===expected,numericEntry:{c:true,lots:true,cRange:[-1000,1000],lotsRange:[1,100],cCanonicalLevels:[...ABS_LEVELS],invalidLotPolicy:'REJECT_AND_KEEP_PREVIOUS',lastLotAccepted,lastLotRejected},colorScheme:colorSchemeId,colorSemantics:{long:scheme.long,short:scheme.short,neutral:scheme.neutral},fullscreen:!!fullEl(),fallbackImmersive,immersive:immersiveOn(),navigationUiRequested:'hide',lastError,api:{applySignedValue,setCFromNumeric,setLotsFromNumeric,setColorScheme,setFallbackImmersive,requestImmersiveFullscreen,exitImmersive,toggleImmersive,paintSignedC,syncCanonicalSide}}}
 function install(){if(typeof document==='undefined')return null;ensureStyle();loadColorScheme();setColorScheme(colorSchemeId,{persist:false});ensureExit();bindFullscreenSwitch();bindC();ensureColorSetting();ensureNumericEditors();syncImmersive();paintSignedC();syncCanonicalSide(signedByAxis[activeAxis()],activeAxis());if(!ROOT.dataset.k11520SignedCGlobalBound){ROOT.dataset.k11520SignedCGlobalBound='1';document.addEventListener('click',onDocumentClick,true);document.addEventListener('fullscreenchange',syncImmersive);document.addEventListener('webkitfullscreenchange',syncImmersive);addEventListener('resize',()=>{syncViewport();paintSignedC()},{passive:true});globalThis.visualViewport?.addEventListener?.('resize',syncViewport,{passive:true})}clearInterval(timer);timer=setInterval(()=>{bindFullscreenSwitch();bindC();ensureColorSetting();ensureNumericEditors();renderTradeSideLock();syncNumericEditors();publish()},250);publish();return globalThis.__K11520_SIGNED_C_IMMERSIVE__}
 
 export function install11520SignedCImmersive(){return install()}

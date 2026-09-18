@@ -165,9 +165,42 @@ assert.equal(await page.locator('#k11520FullscreenSwitch').getAttribute('aria-ch
 const geometry=await page.evaluate(()=>({visual:Math.round(globalThis.visualViewport?.height||innerHeight),canvas:Math.round(document.querySelector('#three')?.getBoundingClientRect().height||0),css:getComputedStyle(document.documentElement).getPropertyValue('--k11520-visible-vh').trim()}));
 assert.ok(Math.abs(geometry.canvas-geometry.visual)<=2,`immersive canvas must use visible viewport: ${JSON.stringify(geometry)}`);
 assert.equal(geometry.css,`${geometry.visual}px`);
+const immersiveHud=await page.evaluate(()=>{
+  const visible=sel=>{const el=document.querySelector(sel);if(!el)return false;const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&b.width>0&&b.height>0};
+  const top=document.querySelector('.top')?.getBoundingClientRect();
+  const topEl=document.querySelector('.top');
+  return {
+    topVisible:visible('.top'),
+    topHeight:top?.height||0,
+    topScrollHeight:topEl?.scrollHeight||0,
+    topClientHeight:topEl?.clientHeight||0,
+    metaVisible:visible('.brandMetaV250'),
+    axesVisible:visible('.axes'),
+    worldVisible:visible('.tele'),
+    lifeVisible:visible('.monsterHud'),
+    mapVisible:visible('.minimapWrap'),
+    joyVisible:visible('#joy'),
+    attackVisible:visible('#attack'),
+    orderVisible:visible('#orderFire'),
+    yVisible:visible('#yControl'),
+    cVisible:visible('#cControl'),
+    lotsVisible:visible('#lotsControl')
+  };
+});
+assert.equal(immersiveHud.topVisible,true,'immersive mode must keep one compact system line');
+assert.ok(immersiveHud.topHeight<=36,`immersive system line must stay compact: ${JSON.stringify(immersiveHud)}`);
+assert.ok(immersiveHud.topScrollHeight<=immersiveHud.topClientHeight+1,`immersive system line must not wrap vertically: ${JSON.stringify(immersiveHud)}`);
+assert.equal(immersiveHud.metaVisible,false,'immersive mode must hide the second metadata line');
+for(const key of ['axesVisible','worldVisible','lifeVisible','mapVisible'])assert.equal(immersiveHud[key],false,`${key} must yield space to the 3D game in immersive mode`);
+for(const key of ['joyVisible','attackVisible','orderVisible','yVisible','cVisible','lotsVisible'])assert.equal(immersiveHud[key],true,`${key} must remain usable in immersive mode`);
+await page.screenshot({path:`${OUT}/11520-mobile-immersive-gameplay.png`,fullPage:true});
 await page.screenshot({path:`${OUT}/11520-mobile-signed-c-immersive.png`,fullPage:true});
 await page.locator('#k11520ImmersiveExit').click();await page.waitForTimeout(80);
 assert.equal(await page.locator('html').getAttribute('data-k11520-immersive-mode'),'off');
+assert.equal(await page.locator('.axes').isVisible(),true,'normal mode must restore market cards after immersive exit');
+assert.equal(await page.locator('.tele').isVisible(),true,'normal mode must restore world status after immersive exit');
+assert.equal(await page.locator('.monsterHud').isVisible(),true,'normal mode must restore life status after immersive exit');
+assert.equal(await page.locator('.minimapWrap').isVisible(),true,'normal mode must restore minimap after immersive exit');
 
 const layout=await page.evaluate(()=>structuredClone(globalThis.__K11520_MOBILE_CONTROL_LAYOUT__));
 assert.equal(layout.axisRailCentered,true,JSON.stringify(layout));
