@@ -2,7 +2,7 @@
 VERSION: 1.5.0
 STATUS: ACTIVE / UI-ONLY
 FORMAL_ORGAN_NAME: 11520 Signed C + Immersive Mobile Runtime
-PURPOSE: Signed C velocity (+C=多, -C=空, 0C neutral), positive lots, configurable long/short colors, precise numeric entry, direct canonical side synchronization, and immersive mobile behavior with a single-line system bar and maximum 3D playfield. Direction/size editing never executes an order.
+PURPOSE: Signed C velocity (+C=多, -C=空, 0C neutral), positive lots, configurable long/short colors, precise numeric entry, direct canonical side synchronization, and compact normal mobile HUD while preserving fullscreen behavior. Direction/size editing never executes an order.
 */
 
 const $=s=>document.querySelector(s);
@@ -38,21 +38,35 @@ function ensureStyle(){if($('#k11520SignedCImmersiveStyle'))return;const s=docum
 :root{--k11520-long-color:#ff4f5e;--k11520-short-color:#35d07f;--k11520-neutral-color:#d8e4eb}
 html.k11520ImmersiveViewport,html.k11520ImmersiveViewport body{width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important;overflow:hidden!important}
 html.k11520ImmersiveViewport #three{width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important}
-html.k11520ImmersiveViewport .axes,
-html.k11520ImmersiveViewport .tele,
-html.k11520ImmersiveViewport .monsterHud,
-html.k11520ImmersiveViewport .minimapWrap{display:none!important;visibility:hidden!important;pointer-events:none!important}
-html.k11520ImmersiveViewport .top{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:center!important;gap:4px!important;left:4px!important;right:38px!important;top:max(3px,env(safe-area-inset-top))!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding:3px 6px!important;border-radius:9px!important;overflow:hidden!important}
-html.k11520ImmersiveViewport .top .brand{min-width:0!important;overflow:hidden!important}
-html.k11520ImmersiveViewport .top .brand b{display:block!important;min-width:0!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-html.k11520ImmersiveViewport .top .brand .hqLine{display:flex!important;align-items:center!important;gap:3px!important;min-width:0!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important}
-html.k11520ImmersiveViewport .top .brand .hqLine>span:last-child{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
-html.k11520ImmersiveViewport .top .brand .hqFlag{font-size:11px!important;flex:0 0 auto!important}
-html.k11520ImmersiveViewport .top .brand .brandMetaV250,
-html.k11520ImmersiveViewport .top .brand>small{display:none!important}
-html.k11520ImmersiveViewport .top .pill{display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;height:24px!important;min-height:24px!important;padding:2px 4px!important;border-radius:7px!important;white-space:nowrap!important}
-html.k11520ImmersiveViewport .top .pill small{display:inline!important;font-size:5.5px!important;line-height:1!important}
-html.k11520ImmersiveViewport .top .pill b{font-size:10px!important;line-height:1!important}
+@media(max-width:600px){
+  html:not(.k11520ImmersiveViewport),html:not(.k11520ImmersiveViewport) body{
+    width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important;overflow:hidden!important;background:#05080d!important;
+  }
+  html:not(.k11520ImmersiveViewport) #three{
+    width:100vw!important;height:var(--k11520-visible-vh,100dvh)!important;min-height:var(--k11520-visible-vh,100dvh)!important;max-height:var(--k11520-visible-vh,100dvh)!important;
+  }
+  html:not(.k11520ImmersiveViewport) .axes,
+  html:not(.k11520ImmersiveViewport) .tele,
+  html:not(.k11520ImmersiveViewport) .monsterHud,
+  html:not(.k11520ImmersiveViewport) .minimapWrap{
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html:not(.k11520ImmersiveViewport) .top{
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:center!important;gap:4px!important;
+    left:4px!important;right:4px!important;top:max(3px,env(safe-area-inset-top))!important;
+    height:34px!important;min-height:34px!important;max-height:34px!important;padding:3px 6px!important;border-radius:9px!important;overflow:hidden!important;
+  }
+  html:not(.k11520ImmersiveViewport) .top .brand{min-width:0!important;overflow:hidden!important}
+  html:not(.k11520ImmersiveViewport) .top .brand b{display:block!important;min-width:0!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  html:not(.k11520ImmersiveViewport) .top .brand .hqLine{display:flex!important;align-items:center!important;gap:3px!important;min-width:0!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important}
+  html:not(.k11520ImmersiveViewport) .top .brand .hqLine>span:last-child{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  html:not(.k11520ImmersiveViewport) .top .brand .hqFlag{font-size:11px!important;flex:0 0 auto!important}
+  html:not(.k11520ImmersiveViewport) .top .brand .brandMetaV250,
+  html:not(.k11520ImmersiveViewport) .top .brand>small{display:none!important}
+  html:not(.k11520ImmersiveViewport) .top .pill{display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;height:24px!important;min-height:24px!important;padding:2px 4px!important;border-radius:7px!important;white-space:nowrap!important}
+  html:not(.k11520ImmersiveViewport) .top .pill small{display:inline!important;font-size:5.5px!important;line-height:1!important}
+  html:not(.k11520ImmersiveViewport) .top .pill b{font-size:10px!important;line-height:1!important}
+}
 #k11520ImmersiveExit{position:fixed;z-index:13050;right:4px;top:max(4px,env(safe-area-inset-top));width:30px;height:30px;border:1px solid #68e4ff66;border-radius:9px;background:#071018dd;color:#dffaff;font:900 15px system-ui;display:none;place-items:center;touch-action:manipulation;box-shadow:0 4px 18px #000b}
 html.k11520ImmersiveViewport #k11520ImmersiveExit{display:grid}
 #cControl .track{background:linear-gradient(to bottom,color-mix(in srgb,var(--k11520-long-color) 42%,#071018) 0%,color-mix(in srgb,var(--k11520-long-color) 42%,#071018) 49.2%,var(--k11520-neutral-color) 49.2%,var(--k11520-neutral-color) 50.8%,color-mix(in srgb,var(--k11520-short-color) 42%,#071018) 50.8%,color-mix(in srgb,var(--k11520-short-color) 42%,#071018) 100%)!important}
