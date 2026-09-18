@@ -2,7 +2,7 @@
 VERSION: 1.0.2
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Normal Market Presentation
-PURPOSE: Present the K-sphere normal-axis market implied by the active 3D control plane without changing the trading selection or world coordinates. XZ -> KY, XY -> KZ, YZ -> KX. All three K-axis markets remain visible; only the current normal axis is visually emphasized. Also loads the bounded mobile capture/equal-rail presentation repair from the live 11520 boot path.
+PURPOSE: Present the K-sphere normal-axis market implied by the active 3D control plane and make that normal axis the direct trading selection without changing world coordinates. XZ -> KY, XY -> KZ, YZ -> KX. All three K-axis markets remain visible; only the current normal axis is visually emphasized. Also loads the bounded mobile capture/equal-rail presentation repair from the live 11520 boot path.
 */
 import './mobile-capture-equal-rail-polish-runtime.mjs';
 const $=s=>document.querySelector(s);
@@ -58,7 +58,7 @@ function decorateJoystick(mode,normal){
 function paint(){
   const mode=state()?.mode||'XZ',normal=normalAxis(mode),key=`${mode}|${normal}|${$$('[data-axis]').length}`;
   ensureStyle();decorateAxes(normal);decorateJoystick(mode,normal);
-  globalThis.__K11520_NORMAL_MARKET__={mode,normalAxis:normal,semantics:'NORMAL_ONLY_WORK',marketsRemainConcurrent:true,tradingAxisUntouched:true};
+  globalThis.__K11520_NORMAL_MARKET__={mode,normalAxis:normal,semantics:'NORMAL_ONLY_WORK',marketsRemainConcurrent:true,tradingAxisFollowsNormal:true,tradingAxisUntouched:false};
   lastKey=key;
 }
 export function install11520NormalMarketPresentation(){
