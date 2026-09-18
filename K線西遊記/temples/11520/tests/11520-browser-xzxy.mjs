@@ -41,7 +41,7 @@ const near=(a,b,t=.16)=>Math.abs(a-b)<=t;
 const assertFixed=(label,a,b,key)=>assert.ok(near(a[key],b[key]),`${label} must preserve ${key.toUpperCase()}: ${JSON.stringify({a,b})}`);
 const assertNoDrift=async label=>{const a=await xyz();await page.waitForTimeout(400);const b=await xyz();assert.ok(near(a.x,b.x)&&near(a.y,b.y)&&near(a.z,b.z),`${label} drifted: ${JSON.stringify({a,b})}`)};
 const assertKgenArt=async()=>{const src=await page.locator('#knob img').getAttribute('src');assert.ok(String(src).startsWith('data:image/')||/kgen-user-ui\.webp$/.test(String(src)),`XZ must use approved KGEN art: ${String(src).slice(0,80)}`)};
-const assertNormal=async(mode,axis)=>{await page.waitForFunction(([m,a])=>{const n=globalThis.__K11520_NORMAL_MARKET__,cards=[...document.querySelectorAll('[data-axis]')],active=document.querySelector(`[data-axis="${a}"].k11520NormalActive`);return n?.mode===m&&n?.normalAxis===a&&n?.marketsRemainConcurrent===true&&n?.tradingAxisUntouched===true&&cards.length===3&&Boolean(active)},[mode,axis],{timeout:3500,polling:50});const n=await normal();assert.equal(n.marketsRemainConcurrent,true);assert.equal(n.tradingAxisUntouched,true);assert.equal(await page.locator('[data-axis]').count(),3,'all KX/KY/KZ markets must remain visible')};
+const assertNormal=async(mode,axis)=>{await page.waitForFunction(([m,a])=>{const n=globalThis.__K11520_NORMAL_MARKET__,cards=[...document.querySelectorAll('[data-axis]')],active=document.querySelector(`[data-axis="${a}"].k11520NormalActive`);return n?.mode===m&&n?.normalAxis===a&&n?.marketsRemainConcurrent===true&&n?.tradingAxisFollowsNormal===true&&n?.tradingAxisUntouched===false&&cards.length===3&&Boolean(active)},[mode,axis],{timeout:3500,polling:50});const n=await normal();assert.equal(n.marketsRemainConcurrent,true);assert.equal(n.tradingAxisFollowsNormal,true);assert.equal(n.tradingAxisUntouched,false);assert.equal(await page.locator('[data-axis]').count(),3,'all KX/KY/KZ markets must remain visible')};
 
 await visible('#joy');await visible('#knob');await visible('#knob img');await visible('#yControl');
 let c=await control();assert.equal(c.mode,'XZ');assert.deepEqual(c.discAxes,['X','Z']);assert.equal(c.railAxis,'Y');assert.equal(c.unboundedCoordinateIntent,true);await assertKgenArt();await assertNormal('XZ','KY');assert.match(await page.locator('#yControl label').textContent(),/Y 縱搖桿/);
@@ -66,6 +66,12 @@ await page.screenshot({path:`${OUT}/11520-mobile-yz-flight.png`,fullPage:true});
 
 await tapCenter(401);c=await control();assert.equal(c.mode,'XZ','third tap must cycle YZ→XZ');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='GROUND',{timeout:2500});await assertKgenArt();await assertNormal('XZ','KY');await assertNoDrift('YZ→XZ');
 
+await page.locator('#tradeSword').click({timeout:2000});
+await page.waitForFunction(()=>globalThis.__K11520_COMBAT_FX__?.presentationOnly===true,null,{timeout:1800});
+await page.waitForTimeout(45);
+assert.equal(await page.locator('#k11520CombatFlash').count(),1,'combat FX flash layer must exist');
+await page.screenshot({path:`${OUT}/11520-mobile-combat-fx.png`,fullPage:true});
+await page.waitForTimeout(360);
 const attack=await visible('#attack'),order=await visible('#orderFire'),joy=await visible('#joy'),utilityMaster=await visible('#k11520UtilityMaster');for(const [name,b] of [['attack',attack],['order',order]]){assert.ok(b.x>=0&&b.right<=390&&b.y>=0&&b.bottom<=844,`${name} must remain inside mobile viewport`);assert.ok(b.bottom<joy.y,`${name} quick action must sit above circular joystick zone`);assert.ok(!(b.x<utilityMaster.right&&b.right>utilityMaster.x&&b.y<utilityMaster.bottom&&b.bottom>utilityMaster.y),`${name} must not overlap utility master`)}
 await visible('#cControl');await visible('#lotsControl');await visible('#yControl');
 await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',{timeout:3500});const layout=await mobileLayout();assert.ok(layout,'mobile layout report missing');assert.equal(layout.ok,true,JSON.stringify(layout));for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`mobile control overlap ${key}: ${JSON.stringify(layout)}`);
