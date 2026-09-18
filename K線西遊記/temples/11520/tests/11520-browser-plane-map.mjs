@@ -11,9 +11,6 @@ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 const GAME='http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html';
 const enter=async()=>{await page.waitForTimeout(2200);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});await page.waitForTimeout(800);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));await page.waitForFunction(()=>globalThis.__K11520_XYZ_INPUT_AUTHORITY__?.legacyXZBubbleSuppressed===true,null,{timeout:3000});await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.legacyXZPreserved===true,null,{timeout:3000})};
 await page.goto(GAME,{waitUntil:'domcontentloaded',timeout:30000});await enter();
-await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api?.setFallbackImmersive,null,{timeout:3000});
-await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.setFallbackImmersive(true));
-await page.waitForFunction(()=>document.documentElement.classList.contains('k11520ImmersiveViewport')&&document.querySelector('.minimapWrap')&&getComputedStyle(document.querySelector('.minimapWrap')).display!=='none',null,{timeout:3000});
 await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XZ',null,{timeout:3000});
 assert.ok(await page.locator('#minimap').count(),'minimap missing');
 assert.ok(await page.locator('.k11520PlaneMapOverlay').count(),'plane map overlay missing');
@@ -40,9 +37,6 @@ await page.screenshot({path:`${OUT}/11520-plane-map-xy.png`,fullPage:true});
 // Reloading a persisted YZ mode keeps this plane-map test focused on YZ projection/navigation itself.
 await page.evaluate(()=>localStorage.setItem('k11520.joystick.plane','YZ'));
 await page.reload({waitUntil:'domcontentloaded',timeout:30000});await enter();
-await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api?.setFallbackImmersive,null,{timeout:3000});
-await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.setFallbackImmersive(true));
-await page.waitForFunction(()=>document.documentElement.classList.contains('k11520ImmersiveViewport')&&document.querySelector('.minimapWrap')&&getComputedStyle(document.querySelector('.minimapWrap')).display!=='none',null,{timeout:3000});
 await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='YZ',null,{timeout:3000});m=await plane();assert.equal(m.hAxis,'Y');assert.equal(m.vAxis,'Z');assert.equal(m.depthAxis,'X');assert.equal(m.normalAxis,'KX');
 const yz0=await coords();await mapTap(.70,.66,721);await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.target&&globalThis.__K11520_XYZ_MAP_NAVIGATION__.mode==='YZ',null,{timeout:2000});
 const yzt=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(yzt.x.toFixed(3)),Number(yz0.x.toFixed(3)));assert.ok(Math.abs(yzt.y-yz0.y)>.1||Math.abs(yzt.z-yz0.z)>.1);
@@ -67,6 +61,5 @@ await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD can
 const authority=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_INPUT_AUTHORITY__));
 assert.equal(authority.authoritative,true);assert.equal(authority.legacyXZBubbleSuppressed,true);
 assert.deepEqual(errors,[],'page errors after XYZ navigation: '+errors.join('\n'));
-await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api?.setFallbackImmersive(false));
 await browser.close();
 console.log('11520 authoritative XYZ input + plane maps + canonical WORLD target + direct 3D world tap routing browser QA PASS');
