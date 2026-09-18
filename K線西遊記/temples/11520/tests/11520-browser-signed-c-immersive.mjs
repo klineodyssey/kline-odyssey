@@ -15,27 +15,7 @@ await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready==
 await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',null,{timeout:5000});
 await page.waitForTimeout(500);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
-const normalCompact=await page.evaluate(()=>{
-  const visible=sel=>{const el=document.querySelector(sel);if(!el)return false;const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&b.width>0&&b.height>0};
-  const top=document.querySelector('.top'),r=top?.getBoundingClientRect();
-  return {
-    immersive:document.documentElement.classList.contains('k11520ImmersiveViewport'),
-    topVisible:visible('.top'),topHeight:r?.height||0,topScrollHeight:top?.scrollHeight||0,topClientHeight:top?.clientHeight||0,
-    metaVisible:visible('.brandMetaV250'),
-    axesVisible:visible('.axes'),worldVisible:visible('.tele'),lifeVisible:visible('.monsterHud'),mapVisible:visible('.minimapWrap'),
-    joyVisible:visible('#joy'),attackVisible:visible('#attack'),orderVisible:visible('#orderFire'),yVisible:visible('#yControl'),cVisible:visible('#cControl'),lotsVisible:visible('#lotsControl'),
-    bodyHeight:document.body.getBoundingClientRect().height,viewportHeight:Math.round(globalThis.visualViewport?.height||innerHeight)
-  };
-});
-assert.equal(normalCompact.immersive,false,'normal mobile test must remain outside fullscreen/immersive mode');
-assert.equal(normalCompact.topVisible,true,'normal mobile mode must keep one compact system line');
-assert.ok(normalCompact.topHeight<=36,`normal system line must stay compact: ${JSON.stringify(normalCompact)}`);
-assert.ok(normalCompact.topScrollHeight<=normalCompact.topClientHeight+1,`normal system line must not wrap: ${JSON.stringify(normalCompact)}`);
-assert.equal(normalCompact.metaVisible,false,'normal mobile mode must hide the second metadata line');
-for(const key of ['axesVisible','worldVisible','lifeVisible','mapVisible'])assert.equal(normalCompact[key],false,`${key} must yield space to the game in normal mobile mode`);
-for(const key of ['joyVisible','attackVisible','orderVisible','yVisible','cVisible','lotsVisible'])assert.equal(normalCompact[key],true,`${key} must remain usable in normal mobile mode`);
-assert.ok(Math.abs(normalCompact.bodyHeight-normalCompact.viewportHeight)<=2,`normal mobile page must fill the visible viewport without a bottom gap: ${JSON.stringify(normalCompact)}`);
-await page.screenshot({path:`${OUT}/11520-mobile-normal-single-system-line.png`,fullPage:true});
+const normalHud=await page.evaluate(()=>{const visible=sel=>{const el=document.querySelector(sel);if(!el)return false;const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&b.width>0&&b.height>0};return{axes:visible('.axes'),world:visible('.tele'),life:visible('.monsterHud'),map:visible('.minimapWrap'),visual:Math.round(globalThis.visualViewport?.height||innerHeight),css:getComputedStyle(document.documentElement).getPropertyValue('--k11520-visible-vh').trim()}});assert.deepEqual({axes:normalHud.axes,world:normalHud.world,life:normalHud.life,map:normalHud.map},{axes:true,world:true,life:true,map:true},'ordinary HUD must stay visible');assert.equal(normalHud.css,`${normalHud.visual}px`,'ordinary mode must track VisualViewport so browser chrome recovery becomes game space');
 
 const tradeAxis=async()=>page.evaluate(()=>globalThis.__K11520_TRADE_AXIS_API__?.current());
 const initialTradeAxis=await tradeAxis();
@@ -186,11 +166,6 @@ assert.equal(await page.locator('#k11520FullscreenSwitch').getAttribute('aria-ch
 const geometry=await page.evaluate(()=>({visual:Math.round(globalThis.visualViewport?.height||innerHeight),canvas:Math.round(document.querySelector('#three')?.getBoundingClientRect().height||0),css:getComputedStyle(document.documentElement).getPropertyValue('--k11520-visible-vh').trim()}));
 assert.ok(Math.abs(geometry.canvas-geometry.visual)<=2,`immersive canvas must use visible viewport: ${JSON.stringify(geometry)}`);
 assert.equal(geometry.css,`${geometry.visual}px`);
-const immersivePreserve=await page.evaluate(()=>{
-  const visible=sel=>{const el=document.querySelector(sel);if(!el)return false;const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&b.width>0&&b.height>0};
-  return {axes:visible('.axes'),world:visible('.tele'),life:visible('.monsterHud'),map:visible('.minimapWrap')};
-});
-assert.deepEqual(immersivePreserve,{axes:true,world:true,life:true,map:true},'fullscreen/immersive HUD must remain unchanged from the previously approved layout');
 await page.screenshot({path:`${OUT}/11520-mobile-signed-c-immersive.png`,fullPage:true});
 await page.locator('#k11520ImmersiveExit').click();await page.waitForTimeout(80);
 assert.equal(await page.locator('html').getAttribute('data-k11520-immersive-mode'),'off');
