@@ -66,6 +66,12 @@ await page.screenshot({path:`${OUT}/11520-mobile-yz-flight.png`,fullPage:true});
 
 await tapCenter(401);c=await control();assert.equal(c.mode,'XZ','third tap must cycle YZ→XZ');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='GROUND',{timeout:2500});await assertKgenArt();await assertNormal('XZ','KY');await assertNoDrift('YZ→XZ');
 
+await page.locator('#tradeSword').click({timeout:2000});
+await page.waitForFunction(()=>globalThis.__K11520_COMBAT_FX__?.presentationOnly===true,null,{timeout:1800});
+await page.waitForTimeout(45);
+assert.equal(await page.locator('#k11520CombatFlash').count(),1,'combat FX flash layer must exist');
+await page.screenshot({path:`${OUT}/11520-mobile-combat-fx.png`,fullPage:true});
+await page.waitForTimeout(360);
 const attack=await visible('#attack'),order=await visible('#orderFire'),joy=await visible('#joy'),utilityMaster=await visible('#k11520UtilityMaster');for(const [name,b] of [['attack',attack],['order',order]]){assert.ok(b.x>=0&&b.right<=390&&b.y>=0&&b.bottom<=844,`${name} must remain inside mobile viewport`);assert.ok(b.bottom<joy.y,`${name} quick action must sit above circular joystick zone`);assert.ok(!(b.x<utilityMaster.right&&b.right>utilityMaster.x&&b.y<utilityMaster.bottom&&b.bottom>utilityMaster.y),`${name} must not overlap utility master`)}
 await visible('#cControl');await visible('#lotsControl');await visible('#yControl');
 await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',{timeout:3500});const layout=await mobileLayout();assert.ok(layout,'mobile layout report missing');assert.equal(layout.ok,true,JSON.stringify(layout));for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`mobile control overlap ${key}: ${JSON.stringify(layout)}`);
