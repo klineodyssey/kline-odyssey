@@ -1,0 +1,232 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR203-STACKED-WARP-ATM-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit the stacked 11520 KAIOS warp ATM lineage without importing custody, payment, contracts, or writable automation",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_203_STACKED_WARP_ATM_LINEAGE_AUDIT",
+  "exact_base_sha": "51b81abc3ace822abbda032b2b70d7421d95d991",
+  "exact_base_tree_sha": "4d1fae9f3c2cb1676b342a5fc90eb22700678668",
+  "audited_pr": 203,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_base_branch": "gm/k11520-kgen-kaios-spot-v1",
+  "audited_base_sha": "e33982ac3d3ce276935de95cf96b4a7b65d42287",
+  "audited_head_branch": "sol/11520-kaios-warp-atm-integrated-v2",
+  "audited_head_sha": "0e58628783dac4e153e2ac367dbd7d08f649d965",
+  "audited_head_tree_sha": "257b17a391a8cac568d5403c6e31bd2d0ee393ed",
+  "audited_merge_base_sha": "0267ff4d7eb22dccfbe98794a1fc409c3468a7f7",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STACKED_STALE_DRAFT",
+    "ahead": 55,
+    "behind": 720
+  },
+  "pr_relative_scope": {
+    "changed_paths": 12,
+    "insertions": 978,
+    "deletions": 1,
+    "commits": 20
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 203 is stacked on held PR 200, is 720 commits behind exact current main, and combines a second trading stack with real-asset escrow, custody, single-oracle PnL clearing, wallet signing, Mainnet addresses, and inherited write-token automation. Its exact head fails closed only because deployment addresses are null; populating them would enable approvals and real transactions. These protected effects and unresolved security properties cannot be merged by this automation. The only safe bounded task is an evidence-only lineage audit that changes no candidate Runtime, UI, workflow, contract, authority, or pull-request state.",
+  "blocking_findings": [
+    "PR 203 is stacked on held PR 200 rather than exact current main and is 720 commits behind the current product and safety architecture.",
+    "The inherited workflow exposes schedule and workflow_dispatch, grants actions:write and contents:write, pushes directly to main, and dispatches Pages.",
+    "The ATM contract permits arbitrary token pairs despite receiving a KAIOS constructor address and does not account for fee-on-transfer or rebasing assets.",
+    "The margin vault creates a duplicate real KAIOS custody ledger and credits requested amounts instead of observed balance deltas.",
+    "The clearing contract trusts one administrator-controlled mutable oracle and lacks quorum, deviation bounds, round IDs, replay protection, and a market allowlist.",
+    "Clearing reserve funding has no provider-share, redemption, or ownership accounting while the contract can custody and transfer real KAIOS.",
+    "The quote router trusts caller-supplied Life and wallet identifiers, uses JavaScript Number arithmetic for token amounts, and lacks allowlisted oracle provenance and decimal normalization.",
+    "The wallet bridge embeds BSC Mainnet addresses and would send approvals and transactions once contract addresses are populated; it hardcodes 18 decimals.",
+    "The standalone warp UI loads third-party code and public market/RPC endpoints and has no current V4.1 Game, Responsive, or direct 390x844 screenshot evidence.",
+    "The exact-head EVM tests use well-behaved mock tokens and do not cover malicious or fee-on-transfer tokens, oracle manipulation, reserve redemption, upgrade/storage safety, or deployment provenance."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and reuse the current native-market and authenticated-actor architecture instead of adding a parallel exchange core.",
+    "Keep Mainnet addresses, signing, custody, payment, allowance, transfer, settlement, and chain mutation disconnected until exact Human authority and security review exist.",
+    "If contract work is separately authorized, enforce exact asset allowlists, balance-delta accounting, reentrancy-safe token handling, emergency exits, reserve ownership/redemption, and adversarial token tests.",
+    "Use repository-bound oracle provenance with freshness, decimal normalization, deviation limits, round identity, replay resistance, and an independently reviewed trust model.",
+    "Build any retained UI inside current V4.1 and pass exact-head Universal, Game, Responsive, functional Chromium, and direct 390x844 screenshot inspection."
+  ],
+  "source_reads": [
+    { "path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d" },
+    { "path": "K線西遊記/temples/11520/AGENTS.md", "blob_sha": "4e2821c8d86e65afa4c4c50f7fdba7575ca2cd4f" },
+    { "path": "KGEN-Organization/PrimeForge/PRIME_FORGE_BOOT.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371" },
+    { "path": "KGEN-AI-Company/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04" },
+    { "path": "KGEN-AI-Company/GeneralManager/GM_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29" },
+    { "path": "KGEN-AI-Company/governance/HUMAN_OWNER_PR_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1" },
+    { "path": "KGEN-AI-Company/canon/KGEN_CANON_MASTER.md", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29" },
+    { "path": "KGEN-AI-Company/UniverseExchange/CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5" },
+    { "path": "KGEN-AI-Company/reports/handoffs/11520/HANDOFF_CURRENT.md", "blob_sha": "7284ebd50f248332b0fb5eeade7e91cf6637ac7a" },
+    { "path": "KGEN-AI-Company/security/SECURITY_MODEL.md", "blob_sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6" }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "module_syntax": "4/4 PASS",
+      "warp_atm_model_tests": "10/10 PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "0e58628783dac4e153e2ac367dbd7d08f649d965",
+      "historical_ci": {
+        "workflow": "11520 Universal Exchange V2",
+        "run_id": 33475274885,
+        "job_id": 99753108713,
+        "conclusion": "SUCCESS_HISTORICAL_ONLY",
+        "evm_step": "SUCCESS_HISTORICAL_ONLY"
+      },
+      "missing_security_and_product_evidence": [
+        "adversarial and fee-on-transfer token tests",
+        "oracle manipulation and replay tests",
+        "reserve ownership and redemption tests",
+        "deployment and upgrade provenance",
+        "current Game Product QA",
+        "current Responsive Product QA",
+        "390x844 current-shell screenshot inspection"
+      ]
+    },
+    "exact_current_main": {
+      "native_market_universal_planner_and_workflow_suites": "302/302 PASS",
+      "tested_sha": "51b81abc3ace822abbda032b2b70d7421d95d991"
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE"
+  },
+  "classification_counts": {
+    "INHERITED_PROHIBITED_WRITE_TOKEN_WORKFLOW": 1,
+    "PROTECTED_REAL_ASSET_CONTRACT": 1,
+    "DUPLICATE_REAL_CUSTODY_CONTRACT": 1,
+    "PROTECTED_SINGLE_ORACLE_CLEARING_CONTRACT": 1,
+    "STALE_CURRENT_SHELL_UI": 2,
+    "UNVERIFIED_PAYMENT_OR_IDENTITY_RUNTIME": 3,
+    "PAPER_SIMULATION_MODEL": 1,
+    "HISTORICAL_TEST_EVIDENCE_ONLY": 2,
+    "TOTAL": 12
+  },
+  "path_classification": [
+    {
+      "path": ".github/workflows/universal_exchange_v2.yml",
+      "audited_blob_sha": "fad93acab47225b2440896b75515fcf203fd1475",
+      "current_main_blob_sha": "5d73d42656b40ae7af55f963405c09b54fa9e8aa",
+      "classification": "INHERITED_PROHIBITED_WRITE_TOKEN_WORKFLOW",
+      "disposition": "Do not import. The merge result retains scheduled and dispatchable write-token jobs, a direct push to main, and Pages dispatch."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol",
+      "audited_blob_sha": "2d7e72073fec141e2e212dff5d3f55036943b04a",
+      "current_main_blob_sha": null,
+      "classification": "PROTECTED_REAL_ASSET_CONTRACT",
+      "disposition": "Do not import. Arbitrary token pairs, exact-amount accounting, and real escrow require an independently authorized contract-security lane."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol",
+      "audited_blob_sha": "ff221eddefd4555f1fc7f5a0ace60e2110730a85",
+      "current_main_blob_sha": null,
+      "classification": "DUPLICATE_REAL_CUSTODY_CONTRACT",
+      "disposition": "Do not import. It creates a second custody ledger and lacks balance-delta accounting and the current authority model."
+    },
+    {
+      "path": "KGEN-KAIOS/contracts/KAIOSWarpClearing11520V1.sol",
+      "audited_blob_sha": "3a4724906ff267f8f33948122fee663fad3d7c55",
+      "current_main_blob_sha": null,
+      "classification": "PROTECTED_SINGLE_ORACLE_CLEARING_CONTRACT",
+      "disposition": "Do not import. Single-oracle PnL settlement, permanent reserve deposits, custody, and transfers are protected and insufficiently specified."
+    },
+    {
+      "path": "K線西遊記/temples/11520/index.html",
+      "audited_blob_sha": "432c969ba7f8dc0991acea43712828cc3fd2b7d2",
+      "current_main_blob_sha": "a908355fa6359b322b784731144ff5b1237000d8",
+      "classification": "STALE_CURRENT_SHELL_UI",
+      "disposition": "Do not import the obsolete entry patch over the current V4.1 shell."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kaios-atm-quote-router.mjs",
+      "audited_blob_sha": "9f72a7083dea460447928ea7d1f31a37e430357f",
+      "current_main_blob_sha": null,
+      "classification": "UNVERIFIED_PAYMENT_OR_IDENTITY_RUNTIME",
+      "disposition": "Do not import. Caller-shaped identities, Number-based token arithmetic, and unverified price provenance fail current safety requirements."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kaios-chain-transaction-bridge.mjs",
+      "audited_blob_sha": "24c1a208d08866c9b17ac6a6aa67c8ea930ee1ce",
+      "current_main_blob_sha": null,
+      "classification": "UNVERIFIED_PAYMENT_OR_IDENTITY_RUNTIME",
+      "disposition": "Do not import. It embeds Mainnet assets and can send approvals and real transactions after deployment addresses are populated."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kaios-live-wallet-controls.mjs",
+      "audited_blob_sha": "4a15deb429b53ee4f7749e6944a838b442c7e398",
+      "current_main_blob_sha": null,
+      "classification": "UNVERIFIED_PAYMENT_OR_IDENTITY_RUNTIME",
+      "disposition": "Do not import. Real wallet transaction controls are only incidentally blocked by null contract addresses."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kaios-warp-index-layer.mjs",
+      "audited_blob_sha": "e361c1024fed0c3457c5fdd45211fab1b21fe04f",
+      "current_main_blob_sha": null,
+      "classification": "PAPER_SIMULATION_MODEL",
+      "disposition": "Retain only as historical simulation evidence; it does not prove receipt, oracle, margin, custody, or settlement authority."
+    },
+    {
+      "path": "K線西遊記/temples/11520/warp-index.html",
+      "audited_blob_sha": "a1f4b23a7e5b0a95e6962e56c677dd7f8efa1887",
+      "current_main_blob_sha": null,
+      "classification": "STALE_CURRENT_SHELL_UI",
+      "disposition": "Do not import the standalone page, third-party script, direct endpoints, or unverified wallet controls."
+    },
+    {
+      "path": "tests/11520-kaios-warp-atm.test.mjs",
+      "audited_blob_sha": "ad6fa39ad42f5b0aa524b74c0a14c154329f121b",
+      "current_main_blob_sha": null,
+      "classification": "HISTORICAL_TEST_EVIDENCE_ONLY",
+      "disposition": "Retain as historical model evidence; ten cases do not establish protected execution or current product safety."
+    },
+    {
+      "path": "tests/11520-kaios-warp-evm.test.mjs",
+      "audited_blob_sha": "be6ab24677e77595d589ae47efde08f3f8289ba9",
+      "current_main_blob_sha": null,
+      "classification": "HISTORICAL_TEST_EVIDENCE_ONLY",
+      "disposition": "Retain as historical EVM evidence; two happy-path mock-token cases are not adversarial contract validation."
+    }
+  ],
+  "acceptance": [
+    "All 12 PR-relative paths appear exactly once with exact audited and current-main blob state.",
+    "Classification counts sum to 12 and selected_candidate_count is exactly one.",
+    "No candidate Runtime, UI, workflow, contract, test, dependency, deployment address, or authority is imported.",
+    "PR 203 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close or modify it.",
+    "No UI or game code changes in this audit, so new browser screenshot QA is not applicable; missing current visual evidence remains a blocker.",
+    "No Mainnet, payment, custody, settlement, workflow dispatch, write-token worker, external agent, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, oracle provenance, contract integration, storage-layout review, and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_203_STACKED_WARP_ATM_LINEAGE_AUDIT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_194_HOLDER_RESOURCE_LP_STACKED_LINEAGE_AUDIT", "blocker": "Audit only; it is stacked on open PR 191 and contains resource, funding, reward, custody, LP, and authority claims." },
+    { "rank": 5, "priority": "P1_HOLD", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, reservoir, operator, transformation, signer, governance, and parent-evidence authorities are unresolved." },
+    { "rank": 6, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon reconciliation requires a bounded current-main redesign or Human decision." },
+    { "rank": 8, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order and cross-product scope remain unresolved." },
+    { "rank": 9, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "Verified remote identity and external executor authority remain absent." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Frozen baseline integrity decision requires Human authority and its PR text contains stale status claims." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "workflow_dispatch": false,
+    "write_token_worker_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
