@@ -53,6 +53,7 @@ jobs:
           node --check "K線西遊記/temples/11520/runtime/mobile-control-layout.mjs"
           node --check "K線西遊記/temples/11520/runtime/mobile-action-rail-clearance-runtime.mjs"
           node --check "K線西遊記/temples/11520/runtime/mobile-signed-c-immersive-runtime.mjs"
+          node --check "K線西遊記/temples/11520/runtime/public-market-quotes.mjs"
           node --check "K線西遊記/temples/11520/tests/monster-aggression-runtime.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs"
           node --check "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs"
@@ -64,7 +65,7 @@ jobs:
           node --check "K線西遊記/temples/11520/tests/11520-browser-creature-archetypes.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
-          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-kaios-atm-receiving.test.mjs"
+          node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-kaios-atm-receiving.test.mjs" "K線西遊記/temples/11520/tests/11520-public-market-quotes.test.mjs"
           node "K線西遊記/temples/11520/tests/combat-mass-scale-runtime.mjs"
           node "K線西遊記/temples/11520/tests/combat-drive-adapter.mjs"
           node "K線西遊記/temples/11520/tests/combat-drive-live-runtime.mjs"

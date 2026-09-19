@@ -18,6 +18,7 @@ const massScale=read('../runtime/combat-mass-scale-runtime.mjs');
 const characterStatus=read('../runtime/character-status-runtime.mjs');
 const signedC=read('../runtime/mobile-signed-c-immersive-runtime.mjs');
 const actionRail=read('../runtime/mobile-action-rail-clearance-runtime.mjs');
+const publicMarketQuotes=read('../runtime/public-market-quotes.mjs');
 const source=[html,main,fixes,controls,xyzControl,xyzAuthority,driveLive,driveAdapter,massScale,characterStatus].join('\n');
 
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
@@ -29,6 +30,14 @@ test('core controls have runtime event wiring',()=>{for(const token of ["joy.add
 test('0C walking remains independent from C control',()=>{assert.equal(source.includes('D.warp===0?0'),false);assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('const speed=.10'))});
 test('current dynamic organ actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setWaypoint','bindMap','PLANE_TRADE_AXIS','syncTradeAxisFromPlane'])assert.ok(main.includes(token),token)});
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','playerAttack'])assert.ok(main.includes(token),token)});
+
+test('public reference quotes use the browser-safe market-data origin without credentials',()=>{
+  assert.ok(main.includes("import {fetchPublicMarketQuotes} from './public-market-quotes.mjs'"));
+  assert.ok(publicMarketQuotes.includes("origin:'https://data-api.binance.vision'"));
+  assert.ok(publicMarketQuotes.includes("credentials:'omit'"));
+  assert.equal(main.includes('https://api.binance.com'),false,'CORS-hostile general API origin returned');
+  for(const forbidden of ['Authorization','privateKey','sendTransaction','eth_sendTransaction'])assert.equal(publicMarketQuotes.includes(forbidden),false,forbidden);
+});
 
 test('human-approved current control imagery is production-wired',()=>{
   assert.ok(controls.includes("const KGEN_GENESIS_DATA='data:image/webp;base64,"),'KGEN Genesis joystick data asset');

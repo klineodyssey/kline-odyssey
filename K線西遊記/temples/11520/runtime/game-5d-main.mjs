@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 2.1.1
+VERSION: 2.1.2
 STATUS: ACTIVE
 PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collision-constrained physical body, plane-aware maps, canonical XYZ world/entity navigation and 3D Life visuals. Signed-C rendering is delegated to its canonical runtime; game state exposes one direct canonical trade-side setter.
 */
@@ -14,6 +14,7 @@ import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
 import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
 import {create11520CombatFx} from './combat-fx-runtime.mjs';
 import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D} from './xyz-map-navigation-runtime.mjs';
+import {fetchPublicMarketQuotes} from './public-market-quotes.mjs';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
@@ -38,7 +39,7 @@ function renderAxes(){
   $$('[data-market-card]').forEach(card=>card.onclick=()=>openMarketCard(card.dataset.marketCard));
 }
 function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p>即時參考價：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
-async function quotes(){try{const r=await fetch('https://api.binance.com/api/v3/ticker/price',{cache:'no-store'}),j=await r.json();for(const q of j)if(MARKETS.includes(q.symbol))S.quotes[q.symbol]=+q.price;$('#feed').textContent='LIVE · Binance public'}catch{$('#feed').textContent='行情中斷'}renderAxes()}
+async function quotes(){try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});Object.assign(S.quotes,next);$('#feed').textContent='LIVE · Binance public data'}catch{$('#feed').textContent=MARKETS.every(symbol=>Number.isFinite(S.quotes[symbol]))?'STALE · Binance public data':'行情中斷'}renderAxes()}
 function controlState(){return globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null}
 function tradeAxisForPlane(mode=controlState()?.mode||'XZ'){return PLANE_TRADE_AXIS[String(mode).toUpperCase()]||'KY'}
 function syncTradeAxisFromPlane(){

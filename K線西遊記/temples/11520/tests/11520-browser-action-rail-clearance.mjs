@@ -7,7 +7,7 @@ await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.route('https://api.binance.com/api/v3/ticker/price',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([
+await page.route('https://data-api.binance.vision/api/v3/ticker/price*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([
   {symbol:'BTCUSDT',price:'65000.25'},
   {symbol:'ETHUSDT',price:'3500.5'},
   {symbol:'BNBUSDT',price:'600.75'}
