@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-11520-AXIS-ENERGY-ART-ALIGNMENT-R1-20260919",
+  "title": "Correct the 11520 mobile normal-axis energy thumb artwork alignment",
+  "priority": "P1",
+  "risk": "R1",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI",
+  "exact_base_sha": "f99b0a7127ce7d95ef71fa80f3e0218525589658",
+  "base_branch": "main",
+  "work_branch": "kaios/11520-axis-energy-art-alignment-r1-20260919",
+  "selected_reason": "The Human reported that the vertical-axis energy artwork is visually crooked and explicitly required screenshot verification. All inventoried P0 candidates require prohibited real-funds, Mainnet, payment, governance, secret, or external-executor authority.",
+  "defect_evidence": {
+    "viewport": "390x844",
+    "source_asset": "K線西遊記/temples/11520/assets/wukong-y-control.jpg",
+    "before_css": "38% 50% / cover",
+    "observed_failure": "The full portrait poster is compressed into an unreadable diagonal collage inside the 34px circular normal-axis thumb."
+  },
+  "bounded_changes": [
+    "Keep the Human-approved Wukong poster asset unchanged.",
+    "Replace the generic cover crop with a deterministic upright Wukong face focal crop.",
+    "Add browser regressions for the exact background image, focal position, zoom, non-repeat, and circular geometry.",
+    "Do not alter axis semantics, thumb travel, hitboxes, market authority, wallet behavior, or settlement behavior."
+  ],
+  "acceptance": [
+    "Real Chromium at 390x844 shows an upright, recognizable Wukong face centered inside the circular normal-axis thumb.",
+    "The thumb remains 34x34, circular, centered on the normal-axis track, and pointer-reachable.",
+    "C, lots, and normal-axis controls retain their approved spacing and labels.",
+    "Local functional tests and exact-head required CI pass.",
+    "Direct screenshot inspection passes before merge and again on the deployed Pages SHA."
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
