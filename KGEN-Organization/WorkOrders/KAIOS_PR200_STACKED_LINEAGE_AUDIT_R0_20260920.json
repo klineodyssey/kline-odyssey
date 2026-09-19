@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR200-STACKED-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit obsolete stacked KGEN/KAIOS spot-book lineage and preserve a fail-closed hold",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_200_KGEN_KAIOS_SPOT_BOOK_STACKED_LINEAGE_AUDIT",
+  "exact_base_sha": "d8221ef6cb98d8cbc22a3e73f337be27b164ef0e",
+  "exact_base_tree_sha": "05b09b8a22e095c14de147ab60df9ed3b806788c",
+  "audited_pr": 200,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_base_branch": "codex/kaios-11520-settlement-packet-v1",
+  "audited_base_sha": "685dcfd0006584c565e93daee0f9424f911a08eb",
+  "audited_head_branch": "gm/k11520-kgen-kaios-spot-v1",
+  "audited_head_sha": "e33982ac3d3ce276935de95cf96b4a7b65d42287",
+  "audited_head_tree_sha": "f07da71570feed44faab57a5f1da5d35e7d2077d",
+  "audited_merge_base_sha": "0267ff4d7eb22dccfbe98794a1fc409c3468a7f7",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STACKED_DRAFT",
+    "ahead": 35,
+    "behind": 718
+  },
+  "pr_relative_scope": {
+    "changed_paths": 10,
+    "insertions": 739,
+    "deletions": 0
+  },
+  "decision": "HOLD_UNMERGED_UNCLOSED_REQUIRES_CURRENT_MAIN_REDESIGN",
+  "reason": "PR 200 is stacked on the now-closed PR 195 branch and is 718 commits behind current main. It creates a second KGEN/KAIOS matching engine that trusts caller-shaped lifeId and controllerId values, consumes replay state before every self-match rejection, and adds a separate settlement adapter that can derive CT, volume, candles and ownership from embedded test receipts. Its UI mounts into the obsolete legacy #content/TOKENS surface and has no exact-head current Game Product QA, Responsive QA or screenshot evidence. The safe action is an evidence-only audit that keeps the Draft unmerged and unclosed. Any successor must start from exact current main, reuse the strengthened native market core, preserve repository-bound actor attestations, leave the quote asset unfrozen, and keep settlement, custody, ownership and chain effects blocked.",
+  "blocking_findings": [
+    "The Draft is stacked on closed PR 195 rather than exact current main.",
+    "The candidate matching engine accepts caller-asserted Life and controller identifiers instead of current-main repository-bound actor attestations.",
+    "The candidate consumes its replay nonce before same-Life and same-controller self-match checks, so a rejected self-match poisons a legitimate retry.",
+    "The candidate creates a parallel matching engine instead of extending the strengthened current-main native market cell.",
+    "The settlement adapter can turn embedded test receipts into CT, volume, candles and ownership state while the canonical production receipt registry remains unresolved.",
+    "The candidate implicitly models KAIOS as the native quote asset without explicit Canon or authority evidence freezing that choice.",
+    "The legacy UI mount has no exact-head current Game Product QA, Responsive Product QA or 390x844 screenshot evidence."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch.",
+    "Extend or parameterize the one current native market cell instead of adding a competing matching engine.",
+    "Require repository-bound actor and controller attestations and validate self-match before committing replay state.",
+    "Keep production order placement fail-closed and do not freeze KAIOS as quote asset without explicit Canon and authority evidence.",
+    "Keep settlement, payment, ownership, CT and receipt transitions blocked unless connected to a repository-controlled verified registry.",
+    "Rebuild any UI against the current V4.1 shell and obtain exact-head Universal Exchange, Game Product QA, Responsive Product QA and direct screenshot inspection."
+  ],
+  "validation": {
+    "audited_old_head": {
+      "module_syntax": "PASS",
+      "spot_market_and_ui_unit_tests": "17/17 PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "e33982ac3d3ce276935de95cf96b4a7b65d42287",
+      "exact_head_ci": {
+        "workflow": "11520 Universal Exchange V2",
+        "run_id": 33402552645,
+        "conclusion": "SUCCESS_HISTORICAL_ONLY"
+      },
+      "missing_product_evidence": [
+        "current Game Product QA",
+        "current Responsive Product QA",
+        "390x844 screenshot inspection against the current V4.1 shell"
+      ]
+    },
+    "current_main": {
+      "native_market_and_universal_suites": "302/302 PASS",
+      "tested_sha": "d8221ef6cb98d8cbc22a3e73f337be27b164ef0e",
+      "post_merge_responsive_run_id": 35458056468,
+      "post_merge_responsive_conclusion": "SUCCESS",
+      "pages_run_id": 35458027993,
+      "pages_conclusion": "SUCCESS",
+      "pages_deployed_sha": "d8221ef6cb98d8cbc22a3e73f337be27b164ef0e"
+    }
+  },
+  "classification_counts": {
+    "HOLD_QUOTE_ASSET_CANON_AND_PRODUCT_EVIDENCE": 1,
+    "STALE_UI_REQUIRES_CURRENT_MAIN_REBUILD_AND_SCREENSHOT_QA": 5,
+    "HOLD_UNVERIFIED_SETTLEMENT_CUSTODY_RECEIPT_AUTHORITY": 2,
+    "STALE_DUPLICATE_MATCHING_ENGINE_WITH_CALLER_SHAPED_AUTHORITY": 2,
+    "TOTAL": 10
+  },
+  "path_classification": [
+    {
+      "path": "K線西遊記/temples/11520/KGEN_KAIOS_SPOT_PRODUCT.md",
+      "audited_blob_sha": "31eb9ef16c8556dfb40c06f3fc9c2b4470ddad40",
+      "current_main_blob_sha": null,
+      "classification": "HOLD_QUOTE_ASSET_CANON_AND_PRODUCT_EVIDENCE",
+      "disposition": "Do not import. Preserve its unresolved production requirements as future design inputs; it cannot freeze KAIOS as the native quote asset."
+    },
+    {
+      "path": "K線西遊記/temples/11520/index.html",
+      "audited_blob_sha": "487b6fb87e3cbd1f439962cac537a91aeb3b9818",
+      "current_main_blob_sha": "a908355fa6359b322b784731144ff5b1237000d8",
+      "classification": "STALE_UI_REQUIRES_CURRENT_MAIN_REBUILD_AND_SCREENSHOT_QA",
+      "disposition": "Do not import the one-line legacy mount into the materially evolved current V4.1 game shell."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kgen-kaios-market-mount.mjs",
+      "audited_blob_sha": "cada06c34f6c5eb5643ce7646d601844c1b61c36",
+      "current_main_blob_sha": null,
+      "classification": "STALE_UI_REQUIRES_CURRENT_MAIN_REBUILD_AND_SCREENSHOT_QA",
+      "disposition": "Do not import. The legacy #content/TOKENS mount must be redesigned against the current shell."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kgen-kaios-market-view.mjs",
+      "audited_blob_sha": "d8cd0d26231d145d92512573897d1b00ce06890b",
+      "current_main_blob_sha": null,
+      "classification": "STALE_UI_REQUIRES_CURRENT_MAIN_REBUILD_AND_SCREENSHOT_QA",
+      "disposition": "Do not import. The view lacks current exact-head browser and screenshot validation."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kgen-kaios-settlement-adapter.mjs",
+      "audited_blob_sha": "e99372e15ab7358f062b51513017c46dcd1dfccc",
+      "current_main_blob_sha": null,
+      "classification": "HOLD_UNVERIFIED_SETTLEMENT_CUSTODY_RECEIPT_AUTHORITY",
+      "disposition": "Do not import. The adapter can derive CT, volume, candles and ownership from embedded fixtures without canonical production receipt authority."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kgen-kaios-spot-market.mjs",
+      "audited_blob_sha": "daf324a9633eee9b87756107313b8ce41d1b7ddc",
+      "current_main_blob_sha": null,
+      "classification": "STALE_DUPLICATE_MATCHING_ENGINE_WITH_CALLER_SHAPED_AUTHORITY",
+      "disposition": "Do not import. Reuse the current native market core and its repository-bound actor attestations."
+    },
+    {
+      "path": "tests/11520-kgen-kaios-market-mount.test.mjs",
+      "audited_blob_sha": "dfbbe329fe3a6e560b715b120f8209f01ec05da2",
+      "current_main_blob_sha": null,
+      "classification": "STALE_UI_REQUIRES_CURRENT_MAIN_REBUILD_AND_SCREENSHOT_QA",
+      "disposition": "Retain as historical evidence only; DOM-string assertions are not current product visual QA."
+    },
+    {
+      "path": "tests/11520-kgen-kaios-market-view.test.mjs",
+      "audited_blob_sha": "446f34c1831eb63fa594c4ed1e4dac40e2c1d934",
+      "current_main_blob_sha": null,
+      "classification": "STALE_UI_REQUIRES_CURRENT_MAIN_REBUILD_AND_SCREENSHOT_QA",
+      "disposition": "Retain as historical evidence only; rebuild browser coverage with the current V4.1 route."
+    },
+    {
+      "path": "tests/11520-kgen-kaios-settlement-adapter.test.mjs",
+      "audited_blob_sha": "2807ed77af05eaef64f20f071d4248ff9c2755f0",
+      "current_main_blob_sha": null,
+      "classification": "HOLD_UNVERIFIED_SETTLEMENT_CUSTODY_RECEIPT_AUTHORITY",
+      "disposition": "Retain as historical test-fixture evidence only; it is not production receipt or ownership authority."
+    },
+    {
+      "path": "tests/11520-kgen-kaios-spot-market.test.mjs",
+      "audited_blob_sha": "2cb8684ffd336310aeba9d1ba6daa7763e4a413c",
+      "current_main_blob_sha": null,
+      "classification": "STALE_DUPLICATE_MATCHING_ENGINE_WITH_CALLER_SHAPED_AUTHORITY",
+      "disposition": "Retain its quote and preview cases as future test ideas, but do not import its caller-shaped authority model."
+    }
+  ],
+  "acceptance": [
+    "All ten PR-relative changed paths appear exactly once with exact audited blob SHAs and current-main blob state.",
+    "Classification counts sum to ten and selected_candidate_count is exactly one.",
+    "PR 200 remains open Draft, unmerged and HOLD; this evidence-only audit does not close or refresh it.",
+    "No file from the stacked PR 200 branch is imported.",
+    "No KAIOS quote-asset, settlement, custody, ownership, CT, signer or chain authority is created.",
+    "No UI or game product code changes in this audit, so a new real-browser screenshot cycle is not applicable; the missing historical visual evidence remains an explicit blocker."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, oracle provenance, contract integration and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_200_KGEN_KAIOS_SPOT_BOOK_STACKED_LINEAGE_AUDIT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_202_KAIOS_WARP_INDEX_CURRENT_MAIN_EQUIVALENCE_AUDIT", "blocker": "Audit the stale main-based playable branch without reviving authority claims or Mainnet custody." },
+    { "rank": 5, "priority": "P1_HOLD", "candidate": "PR_203_STACKED_WARP_ATM_LINEAGE", "blocker": "It depends on held PR 200 and contains payment, custody and contract surfaces." },
+    { "rank": 6, "priority": "P1_HOLD", "candidate": "PR_172_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Canonical authority and address evidence is missing." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement and payment authority are unresolved." },
+    { "rank": 8, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon conflict requires Human decision." },
+    { "rank": 9, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order and cross-product scope are unresolved." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "External executor authority is not authorized." },
+    { "rank": 11, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Protected baseline decision requires Human authority." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "github_write_connector_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
