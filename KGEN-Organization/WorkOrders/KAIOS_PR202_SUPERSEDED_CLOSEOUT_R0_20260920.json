@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR202-SUPERSEDED-CLOSEOUT-R0-20260920",
+  "title": "Close obsolete KAIOS warp-index lineage without importing its writable workflow or stale UI",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_202_KAIOS_WARP_INDEX_SUPERSEDED_CLOSEOUT",
+  "exact_base_sha": "79b60332424001d0c57965efb15bc20798e8c341",
+  "exact_base_tree_sha": "304d58a5041121bfd0987996caf59c911e6e5cf1",
+  "audited_pr": 202,
+  "audited_state_before_closeout": "OPEN_DRAFT_UNMERGED_SUPERSEDED",
+  "audited_base_branch": "main",
+  "audited_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_head_branch": "sol/11520-kaios-warp-index-v1",
+  "audited_head_sha": "78b7657700faf6f62d839c521484cc93af7564e3",
+  "audited_head_tree_sha": "1a516fe81bbdedf5363c8a2937e830feb45247ee",
+  "audited_merge_base_sha": "67b69bef7b11a13b946f1b729923c00ac1d382a0",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT",
+    "ahead": 7,
+    "behind": 706
+  },
+  "pr_relative_scope": {
+    "changed_paths": 6,
+    "insertions": 457,
+    "deletions": 4
+  },
+  "prior_repository_disposition": {
+    "comment_id": 5489414504,
+    "comment_url": "https://github.com/klineodyssey/kline-odyssey/pull/202#issuecomment-5489414504",
+    "summary": "Repository owner marked PR 202 superseded for integration and instructed that it must not be merged."
+  },
+  "decision": "CLOSE_UNMERGED_AS_SUPERSEDED_WITHOUT_TRANSPLANT",
+  "reason": "PR 202 is an explicitly superseded Draft, is 706 commits behind exact current main, and has been replaced by PR 203 for lineage review. Its workflow adds scheduled and workflow-dispatch execution with actions:write and contents:write, directly pushes generated evidence to main, and dispatches the Pages workflow. Those side effects are outside this automation's merge authority. Its separate warp-index UI and local KAIOS margin engine also predate the current V4.1 shell, current native-market core, authenticated actor model, browser QA, and fail-closed oracle policy. The only safe bounded action is an evidence-only closeout that imports none of the candidate files and closes PR 202 unmerged after this work order reaches exact current main.",
+  "blocking_findings": [
+    "PR 202 is already marked superseded for integration by a repository-owner comment and must not be merged.",
+    "The Draft is 706 commits behind exact current main and its 11520 index.html conflicts with the materially evolved V4.1 product shell.",
+    "The workflow delta enables schedule and workflow_dispatch, grants actions:write and contents:write, commits evidence, pushes directly to main, and dispatches Pages.",
+    "The warp page loads a third-party WalletConnect CDN and calls Binance public ticker endpoints directly without current production-shell fallback or current screenshot evidence.",
+    "The local margin engine accepts arbitrary reference evidence without allowlist, freshness, deviation, or repository-bound oracle provenance.",
+    "The UI creates local KAIOS collateral and immediate fills but is not wired to verified custody, receipt, settlement, or ownership evidence.",
+    "The candidate has only historical unit and Universal Exchange evidence; it lacks current-main Game Product QA, Responsive Product QA, and direct 390x844 screenshot inspection.",
+    "PR 203 cannot make PR 202 safe: PR 203 is stacked on held PR 200 and adds payment, custody, margin-vault, ATM, contract, and native-asset surfaces that require a separate audit."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and modify no workflow capable of write-token use or workflow dispatch without exact Human authorization.",
+    "Reuse the one current 11520 native-market and real-trading readiness architecture instead of creating a separate warp margin engine.",
+    "Treat external indexes as reference-only and enforce allowlisted provenance, freshness, decimal normalization, deviation bounds, and fail-closed behavior.",
+    "Keep all KAIOS margin, custody, payment, receipt, ownership, CT, settlement, signer, and chain effects blocked until their exact authorities are verified.",
+    "Rebuild any retained game concept inside the current V4.1 shell and pass exact-head Universal, Game, Responsive, and direct screenshot QA at 390x844."
+  ],
+  "validation": {
+    "audited_old_head": {
+      "module_syntax": "PASS",
+      "warp_index_unit_tests": "7/7 PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "78b7657700faf6f62d839c521484cc93af7564e3",
+      "historical_ci": {
+        "workflow": "11520 Universal Exchange V2",
+        "run_id": 33471231713,
+        "conclusion": "SUCCESS_HISTORICAL_ONLY"
+      },
+      "missing_product_evidence": [
+        "current Game Product QA",
+        "current Responsive Product QA",
+        "390x844 current-shell screenshot inspection"
+      ]
+    },
+    "exact_current_main": {
+      "native_market_universal_planner_and_workflow_suites": "298/298 PASS",
+      "tested_sha": "79b60332424001d0c57965efb15bc20798e8c341"
+    }
+  },
+  "classification_counts": {
+    "PROHIBITED_WRITE_TOKEN_WORKFLOW_AND_DIRECT_MAIN_PUSH": 1,
+    "SUPERSEDED_HISTORICAL_HANDOFF": 1,
+    "STALE_CURRENT_SHELL_UI": 2,
+    "STALE_REFERENCE_INDEX_MARGIN_ENGINE": 1,
+    "HISTORICAL_UNIT_TEST_ONLY": 1,
+    "TOTAL": 6
+  },
+  "path_classification": [
+    {
+      "path": ".github/workflows/universal_exchange_v2.yml",
+      "audited_blob_sha": "ad99b7a6165e1c69a625fb7a49866e8df8851ae7",
+      "current_main_blob_sha": "5d73d42656b40ae7af55f963405c09b54fa9e8aa",
+      "classification": "PROHIBITED_WRITE_TOKEN_WORKFLOW_AND_DIRECT_MAIN_PUSH",
+      "disposition": "Do not import. The candidate adds scheduled/write-token execution, a direct push to main, and workflow dispatch."
+    },
+    {
+      "path": "KGEN-AI-Company/reports/handoffs/KAIOS-11520-WARP-INDEX-V1/HANDOFF.md",
+      "audited_blob_sha": "4700af7936946d60a94212ab3d26318c904f628f",
+      "current_main_blob_sha": null,
+      "classification": "SUPERSEDED_HISTORICAL_HANDOFF",
+      "disposition": "Retain only as historical branch evidence; it does not grant owner, reviewer, custody, oracle, or settlement authority."
+    },
+    {
+      "path": "K線西遊記/temples/11520/index.html",
+      "audited_blob_sha": "167794fbc7d8e53d483edbcc6b0570dfc88787ca",
+      "current_main_blob_sha": "a908355fa6359b322b784731144ff5b1237000d8",
+      "classification": "STALE_CURRENT_SHELL_UI",
+      "disposition": "Do not import the obsolete entry patch over the current V4.1 shell."
+    },
+    {
+      "path": "K線西遊記/temples/11520/modules/kaios-warp-index-market.mjs",
+      "audited_blob_sha": "87a96c899b5b8bc655508988d42bed460278a95d",
+      "current_main_blob_sha": null,
+      "classification": "STALE_REFERENCE_INDEX_MARGIN_ENGINE",
+      "disposition": "Do not import. Preserve gameplay math only as future test ideas after current-core and oracle-safety redesign."
+    },
+    {
+      "path": "K線西遊記/temples/11520/warp-index.html",
+      "audited_blob_sha": "83600d6facaf99edce43fe033dd65913c2a5aaca",
+      "current_main_blob_sha": null,
+      "classification": "STALE_CURRENT_SHELL_UI",
+      "disposition": "Do not import the standalone legacy page or its direct CDN/oracle dependencies."
+    },
+    {
+      "path": "tests/11520-kaios-warp-index-market.test.mjs",
+      "audited_blob_sha": "e7fa8ed5a9ebef874e05f3f647bf1be1b596a8ea",
+      "current_main_blob_sha": null,
+      "classification": "HISTORICAL_UNIT_TEST_ONLY",
+      "disposition": "Retain as historical test evidence; seven unit cases do not establish current product, oracle, custody, or visual safety."
+    }
+  ],
+  "acceptance": [
+    "All six PR-relative paths appear exactly once with exact audited and current-main blob state.",
+    "Classification counts sum to six and selected_candidate_count is exactly one.",
+    "No candidate Runtime, UI, workflow, test, handoff, authority, or dependency is imported.",
+    "PR 202 is closed unmerged as superseded only after this work order is merged through expected-head protection.",
+    "No UI or game code changes in this closeout, so new browser screenshot QA is not applicable; missing current visual evidence remains a recorded blocker.",
+    "No Mainnet, payment, custody, settlement, workflow dispatch, write-token worker, external agent, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, oracle provenance, contract integration, storage-layout review, and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_202_KAIOS_WARP_INDEX_SUPERSEDED_CLOSEOUT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_203_STACKED_WARP_ATM_LINEAGE_AUDIT", "blocker": "Audit without merging; it is stacked on held PR 200 and includes ATM, vault, custody, payment, contract, and native-asset surfaces." },
+    { "rank": 5, "priority": "P1_HOLD", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, reservoir, operator, transformation, signer, governance, and parent-evidence authorities are unresolved." },
+    { "rank": 6, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon reconciliation requires a bounded current-main redesign or Human decision." },
+    { "rank": 8, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order and cross-product scope remain unresolved." },
+    { "rank": 9, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "Verified remote identity and external executor authority remain absent." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Frozen baseline integrity decision requires Human authority and its PR text contains stale status claims." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "workflow_dispatch": false,
+    "write_token_worker_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
