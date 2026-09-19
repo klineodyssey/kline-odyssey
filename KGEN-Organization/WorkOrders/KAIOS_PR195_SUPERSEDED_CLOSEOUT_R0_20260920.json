@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR195-SUPERSEDED-CLOSEOUT-R0-20260920",
+  "title": "Close obsolete 11520 settlement-request lineage after verifying its stronger current-main replacement",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_195_SUPERSEDED_SETTLEMENT_REQUEST_LINEAGE_CLOSEOUT",
+  "exact_base_sha": "a0be9af4c1c8fca0f0891ec3092c06411b6083b7",
+  "exact_base_tree_sha": "96435dedbdf5c42e6d9fc53d04a65175d9bf60a0",
+  "audited_pr": 195,
+  "audited_state_before_closeout": "OPEN_DRAFT_UNMERGED",
+  "audited_base_branch": "sol/11520-kgen-native-market-cell-v1",
+  "audited_base_sha": "668bf469b007de652a7264cf29150cbc4cdf2fe0",
+  "audited_head_branch": "codex/kaios-11520-settlement-packet-v1",
+  "audited_head_sha": "685dcfd0006584c565e93daee0f9424f911a08eb",
+  "audited_head_tree_sha": "08b47e2f8a3e20d6f34bc330ff47cd6013622be1",
+  "audited_merge_base_sha": "0267ff4d7eb22dccfbe98794a1fc409c3468a7f7",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STACKED_DRAFT",
+    "ahead": 23,
+    "behind": 717
+  },
+  "pr_relative_scope": {
+    "changed_paths": 2,
+    "insertions": 100,
+    "deletions": 0
+  },
+  "decision": "CLOSE_UNMERGED_SUPERSEDED_BY_CURRENT_MAIN_ENHANCED_FAIL_CLOSED_IMPLEMENTATION",
+  "reason": "PR 195 is an open Draft on a prohibited codex/* head stacked on the obsolete PR 169 branch. Its two-file settlement-request capability was already transplanted to current main by merged PR 329. Current main preserves the descriptive, non-authoritative packet while adding market-global request-ID and replay-key uniqueness, valid-retry safety, GPU paper-market isolation and cumulative security coverage. Merging or transplanting PR 195 would regress those safeguards and reintroduce a 717-commit-behind lineage. The bounded action is an evidence-only closeout; real settlement remains blocked pending separately authorized quote-asset, custody, funding, signer, receipt and ownership-transfer evidence.",
+  "replacement": {
+    "pull_request": 329,
+    "title": "feat(11520): add blocked settlement request packets",
+    "merged": true,
+    "merge_commit_sha": "8f9cab0c3ca6db2815c8524ebed2cd2802d132d1",
+    "current_main_runtime_blob_sha": "6a4706aa7212666dea85da24f39d7f177dcdeac9",
+    "current_main_test_blob_sha": "c560fe046867f38be787a3839142c4e6abca2d72",
+    "strengthened_guards": [
+      "one settlement-request packet per exact matched trade",
+      "market-global settlement request ID uniqueness",
+      "market-global settlement replay-key uniqueness",
+      "failed collisions do not poison a valid retry",
+      "caller payment, chain, signer, receipt and authorization fields remain excluded",
+      "payment_rail_eligible and ct_eligible remain false",
+      "GPU KGEN and GPU KAIOS paper markets expose no settlement-request API"
+    ]
+  },
+  "validation": {
+    "audited_old_head": {
+      "module_syntax": "PASS",
+      "native_market": "21/21 PASS",
+      "tested_sha": "685dcfd0006584c565e93daee0f9424f911a08eb"
+    },
+    "current_main_replacement": {
+      "module_syntax": "PASS",
+      "native_and_gpu_market": "24/24 PASS",
+      "workflow_security": "3/3 PASS",
+      "universal_exchange": "258/258 PASS",
+      "combined": "285/285 PASS",
+      "tested_sha": "a0be9af4c1c8fca0f0891ec3092c06411b6083b7"
+    },
+    "current_main_ci": [
+      {
+        "workflow": "11520 Universal Exchange V2",
+        "run_id": 35456497339,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "workflow": "11520 Game Product QA",
+        "run_id": 35456497313,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "workflow": "11520 Responsive Product QA",
+        "run_id": 35456524631,
+        "conclusion": "SUCCESS_AFTER_EXACT_SHA_RERUN"
+      },
+      {
+        "workflow": "Deploy Pages Static",
+        "run_id": 35456497296,
+        "conclusion": "SUCCESS"
+      }
+    ]
+  },
+  "classification_counts": {
+    "SUPERSEDED_BY_CURRENT_MAIN_ENHANCED_FAIL_CLOSED_IMPLEMENTATION": 2,
+    "TOTAL": 2
+  },
+  "path_classification": [
+    {
+      "path": "K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs",
+      "audited_blob_sha": "0ec08bf3f886abf6d5612c904141f29b6e184dc3",
+      "current_main_blob_sha": "6a4706aa7212666dea85da24f39d7f177dcdeac9",
+      "classification": "SUPERSEDED_BY_CURRENT_MAIN_ENHANCED_FAIL_CLOSED_IMPLEMENTATION",
+      "disposition": "Do not import. Current main retains the blocked settlement packet, adds request-ID and replay-key uniqueness, and prevents GPU paper markets from exposing the native settlement-request API."
+    },
+    {
+      "path": "tests/11520-kgen-native-market-cell.test.mjs",
+      "audited_blob_sha": "ce96a68c4783efb19b8a4322a126970a1626eb1f",
+      "current_main_blob_sha": "c560fe046867f38be787a3839142c4e6abca2d72",
+      "classification": "SUPERSEDED_BY_CURRENT_MAIN_ENHANCED_FAIL_CLOSED_IMPLEMENTATION",
+      "disposition": "Do not import. Current main expands the old 21-test scope to 24 tests, including cross-trade identifier collisions, valid-retry safety, authority-surface scanning and GPU isolation."
+    }
+  ],
+  "acceptance": [
+    "Both PR-relative changed paths appear exactly once with audited and current-main blob SHAs.",
+    "Classification counts sum to two and selected_candidate_count is exactly one.",
+    "PR 195 is closed without merge only after this manifest reaches exact current main through a non-codex pull request.",
+    "No file from the PR 195 codex/* branch is imported.",
+    "Current main keeps every authority-bearing settlement field null and keeps payment_rail_eligible and ct_eligible false.",
+    "No UI or game product code changes, so a new real-browser and screenshot cycle is not applicable to this evidence-only closeout."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, oracle provenance, contract integration and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_195_SUPERSEDED_SETTLEMENT_REQUEST_LINEAGE_CLOSEOUT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_200_KGEN_KAIOS_SPOT_BOOK_LINEAGE_AUDIT", "blocker": "Audit the stacked stale spot-book branch against current 11520 runtime without enabling settlement or asset movement." },
+    { "rank": 5, "priority": "P1_HOLD", "candidate": "PR_172_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Canonical authority and address evidence is missing." },
+    { "rank": 6, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement and payment authority are unresolved." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon conflict requires Human decision." },
+    { "rank": 8, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order and cross-product scope are unresolved." },
+    { "rank": 9, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "External executor authority is not authorized." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Protected baseline decision requires Human authority." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "github_write_connector_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
