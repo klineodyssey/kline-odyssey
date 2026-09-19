@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR174-SUPERSEDED-CLOSEOUT-R0-20260919",
+  "title": "Close obsolete parallel-market Life and tax-mirror candidate without importing stale authority or tax claims",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_174_PARALLEL_MARKET_SAFETY_RECONCILIATION",
+  "exact_base_sha": "67d31cfb94243da75bbb93c26a94b4ca1b8d2b5d",
+  "audited_pr": 174,
+  "audited_head_branch": "codex/multiverse-life-tax-surface-v1-candidate",
+  "audited_head_sha": "db497c0497b2ddef624ccf83a7af8aaddae703cf",
+  "audited_merge_base_sha": "7df8a2259621e018f6c3fba370e2d605106cc7ac",
+  "relation_to_base": {
+    "status": "DIVERGED",
+    "ahead": 3,
+    "behind": 768,
+    "changed_paths": 7,
+    "insertions": 1646,
+    "deletions": 0
+  },
+  "decision": "CLOSE_UNMERGED_SUPERSEDED_PRESERVE_REVIEWABLE_FUTURE_INTENTS",
+  "reason": "PR 174 is a draft on a prohibited codex/* lineage, is explicitly marked MERGE = NO and DESIGN_ONLY_NOT_LIVE, is 768 commits behind current main, pins a branch-specific legacy workflow, and embeds high-stakes tax references observed on 2026-08-23. It is not connected to the current Company Core or production runtime. Merging or refreshing it would blur Canon, Life, tax, wallet and settlement authority. The safe action is an evidence-only closeout; any useful idea must be redesigned from exact current main under a separate bounded work order.",
+  "exact_head_validation": {
+    "node_test": "31/31 PASS",
+    "module_syntax": "PASS",
+    "json_files": "3/3 PASS",
+    "git_diff_check": "PASS",
+    "tested_sha": "db497c0497b2ddef624ccf83a7af8aaddae703cf"
+  },
+  "classification_counts": {
+    "EXCLUDE_STALE_BRANCH_PINNED_CI": 1,
+    "ARCHIVE_ONLY_EXPLICIT_NO_MERGE_DESIGN": 1,
+    "CURRENT_MAIN_REDESIGN_CANDIDATE": 3,
+    "HOLD_FRESH_LEGAL_SOURCE_REVIEW": 1,
+    "HOLD_CANON_LIFE_AND_AUTHORITY": 1,
+    "TOTAL": 7
+  },
+  "path_classification": [
+    {
+      "path": ".github/workflows/multiverse-life-tax-candidate-ci.yml",
+      "blob_sha": "5a703b7b9e2658ba32c3615259fac19ea15c5a31",
+      "classification": "EXCLUDE_STALE_BRANCH_PINNED_CI",
+      "disposition": "Do not import. It is pinned to the obsolete codex/* branch and is not a current-main required check."
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/multiverse-life-tax-v1/README.md",
+      "blob_sha": "d7771d19af2243bc6831752f9e7734102c6e8873",
+      "classification": "ARCHIVE_ONLY_EXPLICIT_NO_MERGE_DESIGN",
+      "disposition": "Retain only in PR history. The document states DESIGN_ONLY_NOT_LIVE and MERGE = NO."
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/multiverse-life-tax-v1/multiverse-life-tax-simulator.mjs",
+      "blob_sha": "8ba4c0ff54c6415bead810f143e708ec1108535c",
+      "classification": "CURRENT_MAIN_REDESIGN_CANDIDATE",
+      "disposition": "Do not transplant. Any deterministic paper simulator must be re-scoped against current Canon and must not create Life, wallet, settlement, tax or deployment authority."
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/multiverse-life-tax-v1/multiverse-life-tax.schema.json",
+      "blob_sha": "0547f860a5574c961fd1336543644b93aa31a131",
+      "classification": "CURRENT_MAIN_REDESIGN_CANDIDATE",
+      "disposition": "Do not treat the candidate schema as Canon. Re-evaluate only with an exact-current-main consumer and explicit non-authority semantics."
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/multiverse-life-tax-v1/multiverse-life-tax.test.mjs",
+      "blob_sha": "e28ea9c8a35c971984a3fed51de0c10eb858738e",
+      "classification": "CURRENT_MAIN_REDESIGN_CANDIDATE",
+      "disposition": "The 31 tests are evidence for the isolated old candidate only; they do not prove current runtime integration or authorize deployment."
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/multiverse-life-tax-v1/tax-source-registry.candidate.json",
+      "blob_sha": "dd7b24dbda91235620da1109f44cd7fda8ee541a",
+      "classification": "HOLD_FRESH_LEGAL_SOURCE_REVIEW",
+      "disposition": "Do not import. The references were observed on 2026-08-23 and tax rules are time-sensitive and jurisdiction-specific; fresh official-source and legal review is required."
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/multiverse-life-tax-v1/universe-registry.candidate.json",
+      "blob_sha": "730ab85695f5f83477153c0f8da4275e5629d79c",
+      "classification": "HOLD_CANON_LIFE_AND_AUTHORITY",
+      "disposition": "Do not import or activate. Universe, Life, company, wallet and K18888 authority claims require protected Canon and Human authority evidence."
+    }
+  ],
+  "acceptance": [
+    "All seven PR paths appear exactly once in the classification and their blob SHAs match the audited head.",
+    "Classification counts sum to seven and the selected candidate count is exactly one.",
+    "PR 174 is closed without merge only after this manifest reaches exact current main through a non-codex pull request.",
+    "No PR 174 workflow, runtime, schema, test, registry, Canon, CURRENT or authority claim is imported.",
+    "The old exact head remains reproducible at 31 passing tests without being represented as current integration, deployment, legal advice or tax authority.",
+    "No UI or game product code changes, so real-browser and screenshot QA are not applicable to this evidence-only closeout."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds, oracle provenance, contract integration and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected payments, Mainnet and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_174_PARALLEL_MARKET_SAFETY_RECONCILIATION", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_170_SUPERSEDED_SAFE_CYCLE_LINEAGE_CLOSEOUT", "blocker": "Audit remaining stale branch material against already-merged current-main safe slices; do not restore external execution." },
+    { "rank": 5, "priority": "P1_HOLD", "candidate": "PR_172_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Canonical authority and address evidence is missing." },
+    { "rank": 6, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement and payment authority are unresolved." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon conflict requires Human decision." },
+    { "rank": 8, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order and cross-product scope are unresolved." },
+    { "rank": 9, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "External executor authority is not authorized." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Protected baseline decision requires Human authority." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "tax_filing_or_payment": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
