@@ -2,8 +2,8 @@ import './market-origin-wallet-layout-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.8
-REVISION: 2026-09-20.LANDSCAPE-ENERGY-THUMB-CONTINUITY
+VERSION: 1.3.9
+REVISION: 2026-09-20.LANDSCAPE-STATUS-CLEARANCE
 PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and measure actual market-card content before placing status. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
 const $=s=>document.querySelector(s);
@@ -71,11 +71,12 @@ function installStyle(){
   html.k11520HudCollapsed .top,html.k11520HudCollapsed .axes,html.k11520HudCollapsed .tele,html.k11520HudCollapsed .monsterHud,html.k11520HudCollapsed .minimapWrap,html.k11520HudCollapsed .joyWrap,html.k11520HudCollapsed #cControl,html.k11520HudCollapsed #lotsControl,html.k11520HudCollapsed #yControl,html.k11520HudCollapsed .controls,html.k11520HudCollapsed #walletPanel,html.k11520HudCollapsed #walletToggle,html.k11520HudCollapsed #chatHandle,html.k11520HudCollapsed #gameChat,html.k11520HudCollapsed .bagRelocatedV250,html.k11520HudCollapsed #backpackButton,html.k11520HudCollapsed #gameModeToggle,html.k11520HudCollapsed #aiChatButton,html.k11520HudCollapsed #bgmButton,html.k11520HudCollapsed #k11520UtilityMaster,html.k11520HudCollapsed .dock{display:none!important}
 }
 @media(orientation:landscape) and (max-height:600px){
+  #cControl,#lotsControl,#yControl{height:108px!important;bottom:8px!important}
   #cControl .track,#lotsControl .track{left:8px!important;right:8px!important;top:27px!important;bottom:24px!important;min-width:0!important}
   #yControl .track{left:50%!important;right:auto!important;top:27px!important;bottom:24px!important;width:26px!important;min-width:0!important;transform:translateX(-50%)!important;background:linear-gradient(to bottom,#123f32 0%,#123f32 49.5%,#2b343b 49.5%,#2b343b 50.5%,#4b2029 50.5%,#4b2029 100%)!important;box-shadow:inset 0 0 0 1px #ffffff0c!important}
   #cControl label,#lotsControl label,#yControl label{top:5px!important;font-size:7px!important;line-height:1.05!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
   html[data-k11520-layout-owner] #cControl .read,html[data-k11520-layout-owner] #lotsControl .read,html[data-k11520-layout-owner] #yControl .read{bottom:4px!important;font-size:7px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;text-shadow:0 1px 2px #000!important}
-  #cControl .thumb,#lotsControl .thumb,#yControl .thumb{box-sizing:border-box!important;left:50%!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;aspect-ratio:1/1!important;flex:0 0 34px!important;flex-shrink:0!important;border-radius:50%!important;transform:translate(-50%,-50%)!important;overflow:hidden!important;top:calc(44px + var(--k11520-thumb-ratio,.5)*47px)!important}
+  #cControl .thumb,#lotsControl .thumb,#yControl .thumb{box-sizing:border-box!important;left:50%!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;aspect-ratio:1/1!important;flex:0 0 34px!important;flex-shrink:0!important;border-radius:50%!important;transform:translate(-50%,-50%)!important;overflow:hidden!important;top:calc(36px + var(--k11520-thumb-ratio,.5)*31px)!important}
   #yThumb{border:2px solid #f1ca73!important;background-color:#111!important;background-image:url('./assets/wukong-y-control.jpg')!important;background-position:31.5% 46.3%!important;background-size:426.5% auto!important;background-repeat:no-repeat!important;box-shadow:0 0 0 2px #05080dcc,0 0 14px #f1ca7366!important}
   #yControl label:after{content:none!important;display:none!important}
   #yControl[data-energy-sign="nonnegative"] #yThumb{border-color:#65e798!important;box-shadow:0 0 0 2px #05080dcc,0 0 16px #65e79888!important}
@@ -89,10 +90,12 @@ function installStyle(){
 }
 function setImportant(el,key,value){if(el&&(el.style.getPropertyValue(key)!==value||el.style.getPropertyPriority(key)!=='important'))el.style.setProperty(key,value,'important')}
 function applyRail(){
-  if(innerWidth>MOBILE_MAX)return;
+  const landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
+  if(innerWidth>MOBILE_MAX&&!landscape)return;
   globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();
-  const specs=[['#yControl','calc(50% - 21px)'],['#cControl','calc(50% + 29px)'],['#lotsControl','calc(50% + 79px)']];
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
+  const specs=landscape?[['#yControl','calc(50% - 12px)'],['#cControl','calc(50% + 38px)'],['#lotsControl','calc(50% + 88px)']]:[['#yControl','calc(50% - 21px)'],['#cControl','calc(50% + 29px)'],['#lotsControl','calc(50% + 79px)']];
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
+  if(landscape)for(const [sel] of specs){const el=$(sel);setImportant(el,'bottom','8px');setImportant(el,'height','108px')}
 }
 function installThumbBounds(){
   for(const id of ['cThumb','lotsThumb','yThumb']){
@@ -149,7 +152,7 @@ function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwn
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
-  const report={version:'1.3.8',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
+  const report={version:'1.3.9',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.axisRailCentered=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
   report.axisEnergyGeometryAligned=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&report.axisTrack&&report.axisThumb&&Math.abs((report.axisTrack.left+report.axisTrack.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&Math.abs((report.axisThumb.left+report.axisThumb.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&report.axisTrack.left>=report.axisRail.left&&report.axisTrack.right<=report.axisRail.right);
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.axisRail.right<=report.warp.left&&report.warp.right<=report.lots.left);
