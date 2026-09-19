@@ -101,6 +101,11 @@ test('signed C runtime owns one positive-lot numeric policy and direct side sync
   for(const token of ['TRADE_ORGAN_NOT_FOUND','SIDE_BUTTON_NOT_FOUND','SIDE_SYNC_FAILED','trade.click()'])assert.equal(signedC.includes(token),false,`async UI-button side sync returned: ${token}`);
 });
 
+test('market cards remain information-only and cannot rewrite plane-selected trade authority',()=>{
+  assert.equal(signedC.includes('paintSignedC(card.dataset.axis)'),false,'market-card click must not repaint C for the inspected market');
+  assert.equal(signedC.includes('syncCanonicalSide(v,card.dataset.axis)'),false,'market-card click must not synchronize direction for the inspected market');
+});
+
 test('product help uses signed C and positive lots without obsolete zero-lot hints',()=>{
   for(const token of ['最低 0口','C 最低 0','#cControl::after','#lotsControl::after'])assert.equal(fixes.includes(token),false,token);
   assert.ok(fixes.includes('口數永遠為正'));
