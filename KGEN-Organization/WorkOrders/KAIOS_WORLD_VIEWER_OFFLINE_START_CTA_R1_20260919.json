@@ -1,0 +1,174 @@
+{
+  "schema_version": "kaios.work_order.v1",
+  "work_order_id": "KAIOS-WORLD-VIEWER-OFFLINE-START-CTA-R1-20260919",
+  "repository": "klineodyssey/kline-odyssey",
+  "task_source_type": "HUMAN_CONTINUING_PRODUCT_AUTHORIZATION",
+  "task_source_id": "KAIOS-ENGINEERING-CYCLE-20260919",
+  "task_source_actor": "human-primeforge",
+  "task_source_file": "automation-request",
+  "task_source_commit": "59536e07301e6f2cf07e5d81123b936f74335691",
+  "task_source_reason": "Continue the highest-priority safe current-main UI successor preserved by the PR 193 closeout.",
+  "created_by": "chatgpt-01",
+  "created_at": "2026-09-19T14:10:00Z",
+  "owner": "chatgpt-01",
+  "priority": "P1",
+  "risk_level": "R1",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_CI_AND_VISUAL_QA",
+  "selected_candidate_count": 1,
+  "selected_candidate": {
+    "id": "WORLD_VIEWER_OFFLINE_START_CTA",
+    "title": "Replace unusable offline player controls with a clear local-simulation start action",
+    "reason": "The current Viewer displays disabled player controls before a session exists. A bounded current-main successor can make the start path explicit without importing PR 193's stale portal, 11520, storage, resource or payment scope."
+  },
+  "exact_base": {
+    "branch": "main",
+    "sha": "59536e07301e6f2cf07e5d81123b936f74335691"
+  },
+  "implementation_branch": "chatgpt-handoff/KAIOS-WORLD-VIEWER-OFFLINE-CTA-R1-20260919",
+  "scope": {
+    "changed_files": [
+      "KGEN-KAIOS/world-viewer/index.html",
+      "KGEN-KAIOS/world-viewer/ui/shell.js",
+      "KGEN-KAIOS/world-viewer/ui/styles.css",
+      "KGEN-KAIOS/world-viewer/tests/full_world_official_route.test.mjs",
+      "KGEN-KAIOS/world-viewer/tests/product_qa.py",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/android-landscape-light.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/android-portrait-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/desktop-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/desktop-light.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/iphone-landscape-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/iphone-portrait-light.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/tablet-landscape-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/tablet-portrait-light.png",
+      ".github/workflows/world-viewer-product-qa.yml",
+      "KGEN-Organization/WorkOrders/KAIOS_WORLD_VIEWER_OFFLINE_START_CTA_R1_20260919.json"
+    ],
+    "ui_changed": true,
+    "runtime_authority_changed": false,
+    "canon_changed": false,
+    "current_changed": false,
+    "workflow_changed": true,
+    "root_portal_changed": false,
+    "temple_11520_changed": false
+  },
+  "requirements": [
+    "When the local player session is inactive, hide unusable player action controls.",
+    "Show an enabled 開始遊戲 action after Viewer readiness and route it through the existing consent/login callback.",
+    "After Genesis completes, hide the start action and restore the real player controls.",
+    "Keep the existing top login/logout control available with readable mobile labels.",
+    "Retain LOCAL_SIMULATION_ONLY, no GPS/KYC, no wallet and no settlement boundaries."
+  ],
+  "acceptance": {
+    "static_contract_test": "REQUIRED",
+    "world_viewer_product_qa": "REQUIRED",
+    "real_chromium": "REQUIRED",
+    "viewports": [
+      "360x800",
+      "390x844",
+      "768x1024",
+      "1440x900"
+    ],
+    "screenshots": "REQUIRED_OFFLINE_AND_ACTIVE_STATES",
+    "visual_review": [
+      "CTA is visible and readable while offline",
+      "disabled action controls do not remain visible while offline",
+      "CTA does not overlap mode rail, status, inspector or safe-area controls",
+      "active session restores controls without duplicate CTA",
+      "no clipped text, blank overlay, z-index error or off-screen control"
+    ]
+  },
+  "protected_actions": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "mainnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance_execution": false,
+    "private_key_or_secret_access": false,
+    "worker_or_life_activation": false,
+    "controller_or_signer_appointment": false,
+    "external_agent_launch": false,
+    "paid_external_api": false
+  },
+  "candidate_ranking": [
+    {
+      "rank": 1,
+      "priority": "P0",
+      "candidate": "PR 232 BrainExchange V4 real-funds integration",
+      "disposition": "HOLD",
+      "blocker": "Production oracle provenance, actual-contract E2E, security review and real-funds authority remain unresolved."
+    },
+    {
+      "rank": 2,
+      "priority": "P0",
+      "candidate": "PRs 135/154/186/199 Mainnet, payroll, payment adapter and Auto-LP",
+      "disposition": "HOLD",
+      "blocker": "Protected financial, signer or chain-state effects are outside this run."
+    },
+    {
+      "rank": 3,
+      "priority": "P1",
+      "candidate": "World Viewer offline start CTA current-main successor",
+      "disposition": "SELECTED"
+    },
+    {
+      "rank": 4,
+      "priority": "P1",
+      "candidate": "IndexedDB open timeout and memory fallback current-main successor",
+      "disposition": "NEXT"
+    },
+    {
+      "rank": 5,
+      "priority": "P1",
+      "candidate": "PR 174 parallel-market safety reconciliation",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 6,
+      "priority": "P1",
+      "candidate": "Resource custody, entitlement and payment readiness from PR 193",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 7,
+      "priority": "P1",
+      "candidate": "PR 172 K4168 authority and address evidence",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 8,
+      "priority": "P1",
+      "candidate": "PR 187 protected CURRENT and Canon conflict",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 9,
+      "priority": "P2",
+      "candidate": "PR 201 to 211 to 212 dependency chain",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 10,
+      "priority": "P2",
+      "candidate": "PR 177 remote external executor",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 11,
+      "priority": "P2",
+      "candidate": "PR 48 protected baseline decision",
+      "disposition": "PENDING"
+    }
+  ],
+  "merge_policy": {
+    "risk": "R1",
+    "non_codex_branch_required": true,
+    "exact_latest_main_required": true,
+    "expected_head_sha_required": true,
+    "required_ci_green": true,
+    "functional_qa_required": true,
+    "visual_qa_required": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
