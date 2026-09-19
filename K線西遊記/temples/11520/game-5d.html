@@ -40,6 +40,8 @@
  .toast{bottom:auto;top:274px;max-width:210px;font-size:10px;padding:6px 9px;pointer-events:none}.waypointAction{bottom:174px;font-size:11px;padding:8px 12px}
  .assetTag{display:none}#aiChatButton{right:5px!important;bottom:138px!important;width:42px!important;height:42px!important}#bgmButton{right:5px!important;bottom:186px!important;width:42px!important;height:42px!important}
 }
+@media (orientation:landscape) and (max-height:600px){
+ .axes{top:50px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(62vw,560px)!important;height:72px!important;gap:5px!important}.axis{min-height:72px!important;padding:6px!important;text-align:left!important}.axis .q{font-size:14px!important}.axisMarket{display:block;font-size:10px;margin-top:4px}.minimapWrap{display:none!important}.joyWrap{left:18px!important;bottom:16px!important;width:160px!important;height:160px!important}.sliderDock{right:174px!important;bottom:16px!important}.v{height:128px!important}.controls{right:14px!important;bottom:16px!important;width:154px!important;height:170px!important}.controls .attack{position:absolute!important;right:0!important;bottom:0!important;width:76px!important;height:76px!important;border-radius:50%!important}.controls .skill{position:absolute!important;right:82px!important;bottom:12px!important;width:54px!important;height:54px!important}.controls .tool{position:absolute!important;right:40px!important;bottom:86px!important;width:62px!important;height:62px!important;border-radius:50%!important}.controls .dodge{position:absolute!important;right:106px!important;bottom:76px!important;width:44px!important;height:44px!important}.controls .flat{position:absolute!important;right:0!important;bottom:94px!important;width:42px!important;height:42px!important}.controls .order{position:absolute!important;right:48px!important;bottom:138px!important;width:72px!important;height:34px!important;border-radius:12px!important}}
 </style>
 </head>
 <body>
@@ -52,11 +54,11 @@
 <section class="minimapWrap panel"><b>小地圖 · NORTH_UP</b><canvas id="minimap" width="240" height="224"></canvas><small id="navState">雙指縮放 · 點圖選目標</small></section>
 <div class="joyWrap" id="joy"><div class="joyPlane"></div><div class="joyGuide"></div><div class="knob" id="knob"></div></div>
 <div class="sliderDock"><div class="v panel" id="yControl"><label>Y 高度</label><div class="track"></div><div class="thumb" id="yThumb"></div><div class="read" id="yRead">Y 0</div></div><div class="v panel" id="cControl"><label>C 曲速</label><div class="track"></div><div class="thumb" id="cThumb"></div><div class="read" id="cRead">0C</div></div><div class="v panel" id="lotsControl"><label>口數</label><div class="track"></div><div class="thumb" id="lotsThumb"></div><div class="read" id="lotsRead">1口</div></div></div>
-<div class="controls"><button class="a attack" id="attack">⚔<br>打怪</button><button class="a skill" id="skill">✦</button><button class="a dodge" id="dodge">↯</button><button class="a flat" id="flat">平</button><button class="a order" id="orderFire">下單<br>開火</button><button class="a tool" id="tradeSword" aria-label="3D 攻擊特效">✦<br>特效</button></div>
+<div class="controls"><button class="a attack" id="attack">⚔<br>打怪</button><button class="a skill" id="skill" aria-label="天罡金陣">☀</button><button class="a dodge" id="dodge">↯</button><button class="a flat" id="flat">平</button><button class="a order" id="orderFire">下單<br>開火</button><button class="a tool" id="tradeSword" aria-label="盤古幻斧必殺技">🪓<br>必殺</button></div>
 <div class="dock" id="dock"><nav class="rail panel" id="rail"></nav><button class="dockToggle" id="dockToggle">☰</button></div>
 <section class="sheet panel" id="sheet"><div class="sheetHead"><h2 id="sheetTitle">器官</h2><button class="close" id="sheetClose">×</button></div><div id="sheetBody"></div></section>
 <section class="confirm panel" id="confirm"><div class="sheetHead"><h2>下單確認</h2><button class="close" id="confirmX">×</button></div><div id="confirmBody"></div><div class="grid2"><button class="btn" id="cancelOrder">取消</button><button class="btn" id="confirmOrder">確認模擬成交</button></div></section>
 <div class="assetTag">3D Life：GLTF / procedural low-poly；primitive 只允許 FALLBACK</div><div class="toast" id="toast"></div>
-<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=265"></script>
+<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=266"></script>
 </body>
 </html>
