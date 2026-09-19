@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import {
-  MemoryUniverseStore, createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
+  MemoryUniverseStore, IndexedDbUniverseStore, createResilientBrowserUniverseStore,
+  createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
   validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
@@ -116,6 +117,77 @@ const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json",
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
 }
+
+async function withIndexedDb(fakeIndexedDb, callback) {
+  const original = globalThis.indexedDB;
+  globalThis.indexedDB = fakeIndexedDb;
+  try {
+    return await callback();
+  } finally {
+    if (original === undefined) delete globalThis.indexedDB;
+    else globalThis.indexedDB = original;
+  }
+}
+
+test("IndexedDB startup rejects a hung open request within the configured bound", async () => {
+  await withIndexedDb({ open: () => ({}) }, async () => {
+    const store = new IndexedDbUniverseStore("KGEN_11520_TIMEOUT_TEST", { openTimeoutMs: 20 });
+    await assert.rejects(store.ready(), (error) => (
+      error.code === "INDEXEDDB_OPEN_TIMEOUT"
+        && /timed out after 20ms/.test(error.message)
+    ));
+  });
+});
+
+test("IndexedDB startup closes a database that succeeds after the timeout", async () => {
+  let request;
+  let closeCount = 0;
+  await withIndexedDb({ open: () => (request = {}) }, async () => {
+    const store = new IndexedDbUniverseStore("KGEN_11520_LATE_SUCCESS_TEST", { openTimeoutMs: 10 });
+    await assert.rejects(store.ready(), (error) => error.code === "INDEXEDDB_OPEN_TIMEOUT");
+    request.result = { close: () => { closeCount += 1; } };
+    request.onsuccess();
+    assert.equal(closeCount, 1);
+  });
+});
+
+test("browser storage falls back to non-durable memory when IndexedDB is blocked", async () => {
+  await withIndexedDb({
+    open: () => {
+      const request = {};
+      queueMicrotask(() => request.onblocked());
+      return request;
+    }
+  }, async () => {
+    const result = await createResilientBrowserUniverseStore("KGEN_11520_BLOCKED_TEST", { openTimeoutMs: 50 });
+    assert.equal(result.mode, "MEMORY_FALLBACK");
+    assert.equal(result.durable, false);
+    assert.equal(result.fallback_reason, "INDEXEDDB_OPEN_BLOCKED");
+    assert.equal(result.store.constructor.name, "MemoryUniverseStore");
+    assert.equal(typeof result.store.commitBatch, "function");
+  });
+});
+
+test("browser storage reports durable IndexedDB only after open succeeds", async () => {
+  const db = { close() {} };
+  await withIndexedDb({
+    open: () => {
+      const request = {};
+      queueMicrotask(() => {
+        request.result = db;
+        request.onsuccess();
+      });
+      return request;
+    }
+  }, async () => {
+    const result = await createResilientBrowserUniverseStore("KGEN_11520_READY_TEST", { openTimeoutMs: 50 });
+    assert.equal(result.mode, "INDEXED_DB");
+    assert.equal(result.durable, true);
+    assert.equal(result.fallback_reason, null);
+    assert.equal(result.store.constructor.name, "IndexedDbUniverseStore");
+    assert.equal(typeof result.store.ready, "function");
+  });
+});
 
 test("V3.9 field service scan preserves zero-job truth without inventory evidence", () => {
   const scan = createFieldServiceDemandScan({ nodes: seed.next_stage.field_service_business_v3_9.verified_nodes });
@@ -3145,12 +3217,15 @@ test("V4.0 8888 audit removes fake balances and creates only request drafts", as
   assert.doesNotMatch(bankUi, /KGEN_Wallet\.demoMode=true/);
 });
 
-test("V4.1 production shell exposes animated concierge and autonomous bank cache key", async () => {
+test("V4.1 production shell exposes animated concierge and resilient storage cache key", async () => {
   const htmlSource = await fs.readFile(new URL("../K線西遊記/temples/11520/index.html", import.meta.url), "utf8");
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   const cssSource = await fs.readFile(new URL("../K線西遊記/temples/11520/styles.css", import.meta.url), "utf8");
-  assert.match(htmlSource, /v=11520-v4\.1(?:\.1)?-ai-ant-bank/);
+  assert.match(htmlSource, /v=11520-v4\.1\.2-storage-fallback/);
+  assert.match(htmlSource, /id="storage-status"/);
   assert.match(appSource, /AI ANT BANK/);
+  assert.match(appSource, /createResilientBrowserUniverseStore/);
+  assert.match(appSource, /MEMORY_FALLBACK/);
   assert.doesNotMatch(appSource, /from ["']\.\.\/\.\.\/\.\.\/core\/index\.mjs/);
   assert.match(appSource, /core\/registry\/universe-runtime\.mjs/);
   assert.match(cssSource, /\.kv strong\{min-width:0;overflow-wrap:anywhere\}/);

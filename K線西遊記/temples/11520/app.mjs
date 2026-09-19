@@ -1,4 +1,4 @@
-import { createBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.1-ai-ant-bank";
+import { createResilientBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.1.2-storage-fallback";
 import { createListing } from "../../../core/market/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.1-ai-ant-bank";
@@ -1023,9 +1023,15 @@ async function boot() {
     validatePrimaryI18nCatalogs();
     document.documentElement.lang = uiLocale;
     const seed = await loadCanonicalSeed();
-    let store;
-    try { store = createBrowserUniverseStore(); } catch { store = undefined; }
-    universe = await createUniverseRuntime({ seed, store });
+    const storage = await createResilientBrowserUniverseStore();
+    document.documentElement.dataset.universeStore = storage.mode;
+    const storageStatus = document.querySelector("#storage-status");
+    if (storage.mode === "MEMORY_FALLBACK" && storageStatus) {
+      storageStatus.hidden = false;
+      storageStatus.dataset.reason = storage.fallback_reason;
+      storageStatus.textContent = "本機暫存模式：瀏覽器持久儲存目前無法使用；重新整理後，本次工作階段資料會重置。";
+    }
+    universe = await createUniverseRuntime({ seed, store: storage.store });
     await loadSharedWorkerStatus();
     addEventListener("hashchange", render);
     bindLanguageRuntime();

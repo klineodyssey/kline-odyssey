@@ -1,0 +1,187 @@
+{
+  "schema_version": "kaios.work_order.v1",
+  "work_order_id": "KAIOS-11520-INDEXEDDB-RESILIENT-FALLBACK-R1-20260919",
+  "repository": "klineodyssey/kline-odyssey",
+  "task_source_type": "HUMAN_CONTINUING_PRODUCT_AUTHORIZATION",
+  "task_source_id": "KAIOS-ENGINEERING-CYCLE-20260919",
+  "task_source_actor": "human-primeforge",
+  "task_source_file": "automation-request",
+  "task_source_commit": "1bd2b45d3300cfae997949fd2ada76387582c149",
+  "task_source_reason": "Continue the highest-priority safe current-main runtime successor preserved by the PR 193 closeout and the prior cycle ranking.",
+  "created_by": "chatgpt-01",
+  "created_at": "2026-09-19T15:12:00Z",
+  "owner": "chatgpt-01",
+  "priority": "P1",
+  "risk_level": "R1",
+  "status": "LOCAL_FUNCTIONAL_AND_VISUAL_QA_PASS_PENDING_EXACT_HEAD_CI",
+  "selected_candidate_count": 1,
+  "selected_candidate": {
+    "id": "11520_INDEXEDDB_RESILIENT_FALLBACK",
+    "title": "Bound IndexedDB startup and fall back transparently to session memory",
+    "reason": "The current browser store can leave 11520 boot waiting forever when IndexedDB open is blocked or never settles. A bounded current-main repair can preserve playability without creating external authority or claiming durable persistence."
+  },
+  "exact_base": {
+    "branch": "main",
+    "sha": "1bd2b45d3300cfae997949fd2ada76387582c149"
+  },
+  "implementation_branch": "chatgpt-handoff/KAIOS-INDEXEDDB-RESILIENT-FALLBACK-R1-20260919",
+  "scope": {
+    "changed_files": [
+      "core/registry/store.mjs",
+      "core/registry/universe-runtime.mjs",
+      "tests/universal-exchange.test.mjs",
+      "K線西遊記/temples/11520/app.mjs",
+      "K線西遊記/temples/11520/index.html",
+      "K線西遊記/temples/11520/styles.css",
+      "K線西遊記/temples/11520/tests/11520-browser-storage-fallback.mjs",
+      ".github/workflows/11520-game-product-qa.yml",
+      "KGEN-Organization/WorkOrders/KAIOS_11520_INDEXEDDB_RESILIENT_FALLBACK_R1_20260919.json"
+    ],
+    "ui_changed": true,
+    "runtime_authority_changed": false,
+    "canon_changed": false,
+    "current_changed": false,
+    "workflow_changed": true,
+    "external_effect_added": false
+  },
+  "requirements": [
+    "Reject IndexedDB open attempts that remain unsettled beyond a positive bounded timeout.",
+    "Reject blocked opens immediately and close a database handle that succeeds after the timeout.",
+    "Use durable IndexedDB only after ready() succeeds.",
+    "Fall back to a new in-memory store when IndexedDB is unavailable, blocked, failed or timed out.",
+    "Expose MEMORY_FALLBACK to the runtime and visibly explain that refresh resets session data.",
+    "Keep ordinary durable startup free of fallback warnings.",
+    "Do not add wallet, signer, network-write, payment, Mainnet, governance or external-agent capability."
+  ],
+  "acceptance": {
+    "unit_tests": [
+      "timeout rejects with INDEXEDDB_OPEN_TIMEOUT",
+      "late success closes its database handle",
+      "blocked open returns a MemoryUniverseStore fallback",
+      "successful open reports durable IndexedDB"
+    ],
+    "universal_exchange": "REQUIRED",
+    "game_product_qa": "REQUIRED",
+    "real_chromium": "REQUIRED",
+    "viewport": "390x844",
+    "screenshots": [
+      "11520-portal-memory-fallback-390x844.png",
+      "11520-portal-indexeddb-390x844.png"
+    ],
+    "visual_review": [
+      "fallback notice is readable and inside the viewport",
+      "fallback state has no runtime-stop card",
+      "fallback state adds no horizontal overflow",
+      "durable state remains visually unchanged and hides the warning"
+    ],
+    "local_result": {
+      "universal_exchange_and_security": "285/285 PASS",
+      "game_runtime_and_product_invariants": "87/87 PASS plus four standalone runtime suites PASS",
+      "chromium_storage_paths": "PASS",
+      "fallback_screenshot_sha256": "21f85eca0555dc024090981a5c8d7938cbcf3541971ba435b39445b74a1a4898",
+      "durable_screenshot_sha256": "63639a6cb0af179b316c573059a13b5a057a2528db51c29dc625eb81bed7463d",
+      "visual_qa": "PASS"
+    }
+  },
+  "repository_inventory": {
+    "open_pull_requests": 38,
+    "main_in_progress_or_queued_runs": 0,
+    "latest_main_failure_created_at": "2026-09-14T08:32:25Z",
+    "latest_main_failure_is_current_head": false,
+    "new_p0_incident_observed": false
+  },
+  "protected_actions": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "mainnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance_execution": false,
+    "private_key_or_secret_access": false,
+    "worker_or_life_activation": false,
+    "controller_or_signer_appointment": false,
+    "external_agent_launch": false,
+    "paid_external_api": false
+  },
+  "candidate_ranking": [
+    {
+      "rank": 1,
+      "priority": "P0",
+      "candidate": "PR 232 BrainExchange V4 real-funds integration",
+      "disposition": "HOLD",
+      "blocker": "Production oracle provenance, actual-contract E2E, security review and real-funds authority remain unresolved."
+    },
+    {
+      "rank": 2,
+      "priority": "P0",
+      "candidate": "PRs 135/154/186/199 Mainnet, payroll, payment adapter and Auto-LP",
+      "disposition": "HOLD",
+      "blocker": "Protected financial, signer or chain-state effects are outside this run."
+    },
+    {
+      "rank": 3,
+      "priority": "P1",
+      "candidate": "IndexedDB open timeout and memory fallback current-main successor",
+      "disposition": "SELECTED"
+    },
+    {
+      "rank": 4,
+      "priority": "P1",
+      "candidate": "PR 174 parallel-market safety reconciliation",
+      "disposition": "NEXT"
+    },
+    {
+      "rank": 5,
+      "priority": "P1",
+      "candidate": "Resource custody, entitlement and payment readiness from PR 193",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 6,
+      "priority": "P1",
+      "candidate": "PR 172 K4168 authority and address evidence",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 7,
+      "priority": "P1",
+      "candidate": "PR 187 protected CURRENT and Canon conflict",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 8,
+      "priority": "P1",
+      "candidate": "PR 170 stale safe-cycle lineage closeout after current-main slice verification",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 9,
+      "priority": "P2",
+      "candidate": "PR 201 to 211 to 212 dependency chain",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 10,
+      "priority": "P2",
+      "candidate": "PR 177 remote external executor",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 11,
+      "priority": "P2",
+      "candidate": "PR 48 protected baseline decision",
+      "disposition": "PENDING"
+    }
+  ],
+  "merge_policy": {
+    "risk": "R1",
+    "non_codex_branch_required": true,
+    "exact_latest_main_required": true,
+    "expected_head_sha_required": true,
+    "required_ci_green": true,
+    "functional_qa_required": true,
+    "visual_qa_required": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
