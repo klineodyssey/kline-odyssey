@@ -1227,7 +1227,20 @@ def run_genesis_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -
     monitor = BrowserMonitor(page, args.base_url)
     try:
         load_page(page, args.base_url, "dark")
-        page.locator("#login-button").click()
+        start_button = page.locator("#session-start-button")
+        gate.expect(
+            "login.mobile-start-visible",
+            "consent-login",
+            start_button.is_visible()
+            and start_button.is_enabled()
+            and "開始遊戲" in start_button.inner_text(),
+        )
+        gate.expect(
+            "login.offline-controls-hidden",
+            "consent-login",
+            not page.locator(".player-action-toolbar").is_visible(),
+        )
+        start_button.click()
         visible_consent_dialog(page).get_by_role("button", name="Continue without location").click()
         dialog = page.locator("#genesis-dialog[open]")
         dialog.wait_for(state="visible")
@@ -1268,6 +1281,86 @@ def run_genesis_mobile(browser: Browser, args: argparse.Namespace, gate: Gate) -
         browser_clean(monitor, "genesis-mobile", gate)
     finally:
         context.close()
+
+
+def run_offline_start_visuals(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
+    for width, height in ((360, 800), (390, 844), (768, 1024), (1440, 900)):
+        source = ViewportCase(
+            f"offline-start-{width}x{height}",
+            "mobile" if width < 768 else "tablet" if width < 1024 else "desktop",
+            "portrait" if height > width else "landscape",
+            width,
+            height,
+            "dark",
+            width < 1024,
+            1,
+        )
+        context = new_context(browser, source)
+        page = context.new_page()
+        monitor = BrowserMonitor(page, args.base_url)
+        try:
+            load_page(page, args.base_url, "dark")
+            start_button = page.locator("#session-start-button")
+            gate.expect(
+                "login.offline-cta-layout",
+                "consent-login",
+                start_button.is_visible()
+                and start_button.is_enabled()
+                and not page.locator(".player-action-toolbar").is_visible()
+                and page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"),
+                case=source.slug,
+                details={"bounds": start_button.bounding_box()},
+            )
+            gate.screenshots.append(
+                capture_screenshot(page, source, args.output_dir, None, args.pixel_threshold)
+            )
+
+            start_button.click()
+            visible_consent_dialog(page).get_by_role(
+                "button", name="Continue without location"
+            ).click()
+            page.locator("#genesis-dialog[open]").wait_for(state="visible")
+            complete_genesis(page)
+            page.wait_for_function(
+                "() => document.documentElement.dataset.worldViewerLevel === 'LAND_PARCEL'"
+            )
+            active_case = ViewportCase(
+                f"active-session-{width}x{height}",
+                source.family,
+                source.orientation,
+                width,
+                height,
+                source.theme,
+                source.touch,
+                source.device_scale_factor,
+            )
+            gate.expect(
+                "login.active-cta-layout",
+                "consent-login",
+                not start_button.is_visible()
+                and page.locator(".player-action-toolbar").is_visible()
+                and page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"),
+                case=active_case.slug,
+                details={
+                    "toolbar_bounds": page.locator(".player-action-toolbar").bounding_box()
+                },
+            )
+            gate.screenshots.append(
+                capture_screenshot(
+                    page, active_case, args.output_dir, None, args.pixel_threshold
+                )
+            )
+            browser_clean(monitor, source.slug, gate)
+        except Exception as error:
+            gate.add(
+                "offline-start-visual.execution",
+                "consent-login",
+                "FAIL",
+                case=source.slug,
+                details={"error": clean_text(error)},
+            )
+        finally:
+            context.close()
 
 
 def run_proposal_permissions(browser: Browser, args: argparse.Namespace, gate: Gate) -> None:
@@ -1482,6 +1575,7 @@ def run_login_and_consent(browser: Browser, args: argparse.Namespace, gate: Gate
     monitor = BrowserMonitor(page, args.base_url)
     try:
         load_page(page, args.base_url, "dark")
+        start_button = page.locator("#session-start-button")
         gate.expect(
             "login.initial",
             "consent-login",
@@ -1504,6 +1598,12 @@ def run_login_and_consent(browser: Browser, args: argparse.Namespace, gate: Gate
             "() => document.getElementById('login-button')?.textContent.trim() === 'End mock session'"
         )
         complete_genesis(page)
+        gate.expect(
+            "login.active-controls-visible",
+            "consent-login",
+            page.locator(".player-action-toolbar").is_visible()
+            and not start_button.is_visible(),
+        )
         declined = clean_text(page.locator("#starter-parcel-status").inner_text())
         gate.expect(
             "location.decline",
@@ -2987,6 +3087,7 @@ def main(argv: list[str] | None = None) -> int:
                 run_touch_interaction(browser, args, gate)
                 run_login_and_consent(browser, args, gate)
                 run_genesis_mobile(browser, args, gate)
+                run_offline_start_visuals(browser, args, gate)
                 run_proposal_permissions(browser, args, gate)
                 run_life_stack(browser, args, gate)
                 run_digital_earth_alpha(browser, args, gate)
