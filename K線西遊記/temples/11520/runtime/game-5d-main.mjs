@@ -34,7 +34,7 @@ function setTradeSide(axisId,value){const id=String(axisId||'').toUpperCase(),ta
 globalThis.__K11520_TRADE_DIRECTION_API__=Object.freeze({version:'1.0.0',authority:'GAME_STATE_SIDE',setSide:(axisId,side)=>setTradeSide(axisId,side),getSide:axisId=>S.axes[String(axisId||'').toUpperCase()]?.side||null,snapshot:()=>Object.fromEntries(Object.entries(S.axes).map(([k,v])=>[k,v.side]))});
 
 function renderAxes(){
-  $('#axes').innerHTML=['KX','KY','KZ'].map(a=>{const x=S.axes[a],q=S.quotes[x.market],active=a===S.axis;return `<button type="button" class="axis panel ${active?'active':''}" data-axis="${a}" aria-current="${active?'true':'false'}"><div class="axisHead"><span>${a} 球膜軸</span><b>${q?'LIVE':'WAIT'}</b></div><span class="axisMarket">${x.market.replace('USDT','/USDT')}</span><span class="q">${q?'
+  $('#axes').innerHTML=['KX','KY','KZ'].map(a=>{const x=S.axes[a],q=S.quotes[x.market],active=a===S.axis;return `<button type="button" class="axis panel ${active?'active':''}" data-axis="${a}" data-market="${a}" aria-current="${active?'true':'false'}"><div class="axisHead"><span>${a} 球膜軸</span><b>${q?'LIVE':'WAIT'}</b></div><span class="axisMarket">${x.market.replace('USDT','/USDT')}</span><span class="q">${q?'
 async function quotes(){try{const r=await fetch('https://api.binance.com/api/v3/ticker/price',{cache:'no-store'}),j=await r.json();for(const q of j)if(MARKETS.includes(q.symbol))S.quotes[q.symbol]=+q.price;$('#feed').textContent='LIVE · Binance public'}catch{$('#feed').textContent='行情中斷'}renderAxes()}
 function controlState(){return globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null}
 function tradeAxisForPlane(mode=controlState()?.mode||'XZ'){return PLANE_TRADE_AXIS[String(mode).toUpperCase()]||'KY'}
