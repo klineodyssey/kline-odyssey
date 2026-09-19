@@ -25,6 +25,12 @@ Implementation, WorkQueue, real KGEN payment, real land trade, Land NFT, real fi
 
 See `CIVILIZATION_ECONOMY_RUNTIME_ARCHITECTURE.md` and `CIVILIZATION_ECONOMY_ARCHITECTURE_BASELINE.md`.
 
+### Review candidates outside the frozen baseline
+
+| Package | Status | Purpose |
+|---|---|---|
+| `naihe-reservoir-v1/` | `DESIGN_ONLY_NOT_LIVE` | K4168 Public Good Treasury → Naihe Reservoir → Mengpo → qualified Life paper-accounting, strict schemas and multi-scale Life Fluid registry candidate |
+
 ## Change Control
 
 Proposal → Independent Review → Resolution → ADR → Human Approval → Baseline Update.

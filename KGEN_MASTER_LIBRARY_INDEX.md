@@ -67,6 +67,7 @@ This file is the **unique library-level Master Index** (ORG-P2-003 D7). Other `*
 | KAIOS V11.0 Architecture Baseline | `KGEN-KAIOS/V11/` | Frozen Multi-Agent Civilization Architecture, 11 design documents, ADR set, Resolution, review evidence and evolution log |
 | LAND RUNTIME V1 Architecture Baseline | `KGEN-KAIOS/land/` | Frozen K280 / Land Runtime V1 architecture: parcel geometry, rights separation, territory zones, residence protection, lunar registry (docs only) |
 | Civilization Economy Runtime V1 Baseline | `KGEN-KAIOS/civilization/` | Frozen CIV-ECONOMY-V1.0 architecture: biology mapping, payroll, zones, economic conflict, border margin, title/seat/realm (docs only) |
+| K4168 Naihe Reservoir Candidate V1 | `KGEN-KAIOS/civilization/naihe-reservoir-v1/` | Review-only Public Good → Reservoir → Mengpo → Life schemas, asset registry and paper conservation runtime; no deployment or transfer authority |
 | KAIOS V8.0 One Picture One Temple | `KGEN-KAIOS/V8/` | One-picture-one-temple economy system, asset lifecycle, task generator, real-world link, 11520 exchange, schemas, and read-only demo |
 | KAIOS V8.1 Universe Data Layer | `KGEN-KAIOS/V8.1/` | Universe Graph, entity identity, citizen, profession, lifecycle, world state, schemas, runtime relationship map and read-only viewer |
 | KAIOS V8.2 Civilization Economy Engine | `KGEN-KAIOS/V8.2/` | Civilization economy loop, business library, bank and exchange simulation, market, resources, governance signals, schemas, runtime and read-only dashboard |
