@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#05080d">
+<meta name="theme-color" content="#05080d">\n<link rel="manifest" href="./manifest.webmanifest">\n<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>11520 花果山 · 5D K線西遊記</title>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
 <style>
@@ -66,6 +66,9 @@
 <section class="sheet panel" id="sheet"><div class="sheetHead"><h2 id="sheetTitle">器官</h2><button class="close" id="sheetClose">×</button></div><div id="sheetBody"></div></section>
 <section class="confirm panel" id="confirm"><div class="sheetHead"><h2>下單確認</h2><button class="close" id="confirmX">×</button></div><div id="confirmBody"></div><div class="grid2"><button class="btn" id="cancelOrder">取消</button><button class="btn" id="confirmOrder">確認模擬成交</button></div></section>
 <div class="assetTag">3D Life：GLTF / procedural low-poly；primitive 只允許 FALLBACK</div><div class="toast" id="toast"></div>
-<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=266"></script>
+<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=267"></script>
+<script>
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}))}
+</script>
 </body>
 </html>
