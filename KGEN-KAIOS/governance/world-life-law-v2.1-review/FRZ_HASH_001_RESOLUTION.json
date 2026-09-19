@@ -1,0 +1,26 @@
+{
+  "resolution_id": "FRZ-HASH-001",
+  "decision": "OPTION_D_APPROVED",
+  "classification": "LEGITIMATE_POST_FREEZE_DOCUMENT_UPDATE",
+  "resolution": "NEW_BASELINE_VERSION_CREATED",
+  "historical_baseline_preserved": true,
+  "old_manifest_rewritten": false,
+  "semantic_invariant_change": false,
+  "runtime_authority_change": false,
+  "freeze_authority_change": false,
+  "parent_baseline": "LIFE-OS-V1.0",
+  "new_baseline": "LIFE-OS-V1.1",
+  "new_revision": "2026-07-23.1",
+  "source_commit": "e9fb9b462eb105ac1d455471a71753bc79c5d8c2",
+  "related_pr": 38,
+  "readme": {
+    "path": "KGEN-KAIOS/life/README.md",
+    "parent_sha256": "cd56927bba9d54375e54887d64b952cef553c67783b6161c30a5814c87672490",
+    "new_sha256": "877619910664c510e24a16b7622334591a848b75b9cdecac6de68bb59c7ebd60",
+    "kept_in_hash_scope": true,
+    "semantic_change": false
+  },
+  "world_life_law_freeze": "NOT_APPROVED",
+  "runtime_authority": false,
+  "status": "RESOLVED_CANDIDATE_PENDING_PR_REVIEW"
+}
