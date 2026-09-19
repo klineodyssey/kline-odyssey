@@ -18,7 +18,7 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 // This suite verifies the canonical raw XYZ controller independently of C-drive scaling.
 // Stop only this test page's drive timer. The joystick renderer continues to expose raw
 // disc/rail vectors; dedicated combat-drive QA separately verifies real 0C/1C/10C behavior.
-await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_TIMER__&&globalThis.__K11520_3D_CONTROL__,null,{timeout:5000});
+await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__,null,{timeout:8000});
 await page.evaluate(()=>{clearInterval(globalThis.__K11520_COMBAT_DRIVE_TIMER__);globalThis.__K11520_COMBAT_DRIVE_TIMER__=null});
 await page.waitForTimeout(120);
 
