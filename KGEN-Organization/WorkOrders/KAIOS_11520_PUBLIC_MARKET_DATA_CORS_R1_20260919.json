@@ -1,0 +1,31 @@
+{
+  "work_order_id": "KAIOS-11520-PUBLIC-MARKET-DATA-CORS-R1-20260919",
+  "selected_priority": "P1",
+  "risk": "R1",
+  "exact_base_sha": "3cdf8b4dde5f4a04aada8b93ecd61f9cd81a1e73",
+  "branch": "kaios/11520-public-market-data-cors-r1-20260919",
+  "problem": "The canonical GitHub Pages origin is blocked by CORS when the 11520 browser calls api.binance.com, leaving all three market cards at WAIT.",
+  "decision": "Use Binance's documented public market-data-only origin, request only the canonical KX/KY/KZ symbols, and accept only a complete validated atomic quote set.",
+  "acceptance": [
+    "The quote origin is fixed to https://data-api.binance.vision and cannot be caller-overridden.",
+    "The request is credential-free GET with no Authorization header and no redirect following.",
+    "BTCUSDT, ETHUSDT and BNBUSDT must all be finite and positive before state changes.",
+    "Malformed, incomplete, duplicate, HTTP-error and timeout responses fail closed.",
+    "A failed refresh preserves a previously validated quote set and visibly marks it STALE.",
+    "Real Chromium at 390x844 shows LIVE prices without a quote CORS error.",
+    "Production Pages source hashes match the merged main SHA and the production screenshot shows LIVE prices."
+  ],
+  "prohibited_effects": [
+    "No API key, secret, signer, wallet authorization or paid API.",
+    "No order placement, settlement, payment, Mainnet transaction or chain-state mutation.",
+    "No Worker or Life activation, external agent launch, governance action or Canon rewrite."
+  ],
+  "required_checks": [
+    "11520 Game Product QA",
+    "11520 Responsive Product QA",
+    "11520 Universal Exchange V2",
+    "Deploy Pages Static",
+    "Production 390x844 screenshot visual QA"
+  ],
+  "merge_policy": "Ready, mergeable, exact latest main, exact-head CI green, zero unresolved threads or blocking comments, expected_head_sha required"
+}
