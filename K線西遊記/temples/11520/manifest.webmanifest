@@ -10,6 +10,7 @@
   "background_color":"#05080d",
   "theme_color":"#05080d",
   "icons":[
-    {"src":"./assets/ui/brand-k-ui.webp","sizes":"512x512","type":"image/webp","purpose":"any maskable"}
+    {"src":"./assets/ui/k11520-pwa-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./assets/ui/k11520-pwa-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }
