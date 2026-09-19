@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR194-HOLDER-RESOURCE-LP-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit the stacked holder, resource-account, reward, and LP-planning lineage without importing financial or custody authority",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_194_HOLDER_RESOURCE_LP_STACKED_LINEAGE_AUDIT",
+  "exact_base_sha": "a22c59b35f5e124926e32a4894e3478f31f96a1f",
+  "exact_base_tree_sha": "8a4ba7d76ca5682459073cc7c739f2c5532089c9",
+  "audited_pr": 194,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_base_pr": 191,
+  "audited_base_branch": "codex/kaios-ai-os-employment-alpha-v1",
+  "audited_base_sha": "adb8558c79227790793d6ca22b54930bafb2caa9",
+  "audited_head_branch": "codex/kaios-player-reward-resource-rail-v1",
+  "audited_head_sha": "fba093d3b3cb6dc2beb30ff71793ed4b9ad925fe",
+  "audited_head_tree_sha": "023562dac18c2cae3058f346bafb7d7a8fa687be",
+  "audited_merge_base_sha": "69d95a6c6a460cb65c531b35cb1446c2c72177ed",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STACKED_STALE_DRAFT",
+    "ahead": 63,
+    "behind": 726
+  },
+  "relation_to_stacked_base": {
+    "status": "AHEAD",
+    "ahead": 10,
+    "behind": 0
+  },
+  "pr_relative_scope": {
+    "changed_paths": 3,
+    "insertions": 1429,
+    "deletions": 3,
+    "commits": 10
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 194 is stacked on held PR 191, is 726 commits behind exact current main, and introduces fixed KAIOS reward promises, treasury and QE budgets, LP allocation, resource designation and custody candidates, and caller-described price provenance without current Canon or Human financial authority. Empty registries make its exact head fail closed today, but later population would activate protected entitlement, custody, resource, and market claims. The only safe bounded task is an evidence-only lineage audit that changes no candidate Runtime, UI, workflow, financial policy, authority, or pull-request state.",
+  "blocking_findings": [
+    "PR 194 is stacked on held PR 191 instead of exact current main and is 726 commits behind the current product and safety architecture.",
+    "The candidate hard-codes player reward amounts, a treasury cap, a minimum reserve, Genesis portfolio allocations, a negative-ten-percent QE target, and LP budgets without current Canon or exact Human financial authority.",
+    "The legacy 11520 ECONOMY panel says verified play may create real KAIOS entitlement and displays fixed amounts even though no authoritative reward attestation or payment rail exists.",
+    "The LP simulator accepts a caller-provided referencePriceSource label and has no repository-bound oracle attestation, freshness, decimals, deviation, or round evidence.",
+    "Resource designation and custody models trust locally supplied records and do not prove controller, operator, signer, ownership, custody, or chain authority.",
+    "The public-node audit can create an internal priority queue from locally supplied attestations and hard-codes K18921 as highest priority, which is not authorized project direction.",
+    "All critical attestation, wallet, resource, custody, and public-node registries are empty, so the exact head is non-executable only while those source arrays remain empty.",
+    "The candidate patches an obsolete 11520 app rather than the current V4.1 game shell and has no exact-current-main Game, Responsive, Chromium, or 390x844 screenshot evidence.",
+    "The three-file delta contains no chain transaction or signing implementation, but its financial, entitlement, resource, custody, and LP claims remain protected effects that this automation cannot authorize."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and reuse the current authenticated-actor, native-market, and product-shell architecture.",
+    "Keep rewards, treasury, QE, LP, custody, entitlement, resource designation, settlement, payment, signing, and chain mutation disabled until exact Human authority and Canon evidence exist.",
+    "Bind any future price evidence to repository-verifiable oracle provenance with freshness, decimal normalization, deviation bounds, round identity, and replay resistance.",
+    "Require append-only authoritative attestations and independently verifiable controller, operator, signer, ownership, and custody evidence instead of caller-shaped records.",
+    "If a UI successor is separately authorized, implement it in current V4.1 and pass exact-head Universal, Game, Responsive, functional Chromium, and direct 390x844 screenshot inspection."
+  ],
+  "source_reads": [
+    { "path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d" },
+    { "path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29" },
+    { "path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04" },
+    { "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json", "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6" },
+    { "path": "KGEN-Organization/Canon/README.md", "blob_sha": "ab09423efd39a2bb7ed9b5aba3ed42cae8e2f4be" },
+    { "path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "blob_sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad" },
+    { "path": "KGEN-Organization/Canon/WORK_QUEUE.md", "blob_sha": "c38a5f491dc3f935d9ce578cf774cdff0ed2d51f" },
+    { "path": "KGEN-Organization/Canon/RESPONSIBILITY.md", "blob_sha": "8ca5a014677788ce21d22e034d631e6a40dc15ce" },
+    { "path": "KGEN-KAIOS/civilization/KAIOS_LIFE_BLOOD_AND_TRANSFORMATION_CANON_CURRENT.md", "blob_sha": "a3fe14e347ffe368e343aa0c4535232dade62ca8" },
+    { "path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0" },
+    { "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5" },
+    { "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1" },
+    { "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac" },
+    { "path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa" }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "module_syntax": "2/2 PASS",
+      "universal_exchange_tests": "302/302 PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "fba093d3b3cb6dc2beb30ff71793ed4b9ad925fe",
+      "historical_ci": {
+        "run_id": 33314493458,
+        "conclusion": "SUCCESS_HISTORICAL_ONLY"
+      },
+      "missing_security_and_product_evidence": [
+        "current Canon authority for rewards, treasury, QE, LP, resource designation, and custody",
+        "repository-bound oracle provenance and adversarial price tests",
+        "authoritative controller, operator, signer, ownership, custody, and entitlement attestations",
+        "current Game Product QA",
+        "current Responsive Product QA",
+        "390x844 current-shell screenshot inspection"
+      ]
+    },
+    "exact_current_main": {
+      "universal_exchange_tests": "258/258 PASS",
+      "native_market_binding_and_workflow_security_tests": "31/31 PASS",
+      "total": "289/289 PASS",
+      "github_main_checks": "5/5 SUCCESS",
+      "tested_sha": "a22c59b35f5e124926e32a4894e3478f31f96a1f"
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; PR 194 CURRENT-SHELL VISUAL EVIDENCE REMAINS MISSING"
+  },
+  "classification_counts": {
+    "STALE_FINANCIAL_PROMISE_UI": 1,
+    "PROTECTED_ENTITLEMENT_RESOURCE_CUSTODY_AND_LP_RUNTIME": 1,
+    "HISTORICAL_TEST_EVIDENCE_ONLY": 1,
+    "TOTAL": 3
+  },
+  "path_classification": [
+    {
+      "path": "K線西遊記/temples/11520/app.mjs",
+      "stacked_base_blob_sha": "c7239c5da55e1806e2069c714f585d5a6bea380f",
+      "audited_blob_sha": "abd33494c0e45676b3b0d983a055b8beb34aa3fc",
+      "current_main_blob_sha": "7121bf177acc140c3823d8fb3758d6be31d655df",
+      "classification": "STALE_FINANCIAL_PROMISE_UI",
+      "disposition": "Do not import. The obsolete ECONOMY panel implies real entitlement, displays unauthorized amounts, and lacks current-shell browser and screenshot evidence."
+    },
+    {
+      "path": "core/company/index.mjs",
+      "stacked_base_blob_sha": "85091d3089302f828ff88c5c532f3ab7510f7ff1",
+      "audited_blob_sha": "9a3460fddea8239113179fca1ebfa2fca41f00cb",
+      "current_main_blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd",
+      "classification": "PROTECTED_ENTITLEMENT_RESOURCE_CUSTODY_AND_LP_RUNTIME",
+      "disposition": "Do not import. Fixed financial policies, caller-shaped price and identity evidence, custody candidates, and priority-setting require explicit authority and current architecture."
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "stacked_base_blob_sha": "416902fbdd2b560297f45b4fc39f7a1b4f30861c",
+      "audited_blob_sha": "f4dc632dfc01da80f1a251c761cada8be1bb75c2",
+      "current_main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "classification": "HISTORICAL_TEST_EVIDENCE_ONLY",
+      "disposition": "Retain as historical fail-closed evidence; the tests do not confer financial, entitlement, resource, custody, LP, or oracle authority."
+    }
+  ],
+  "acceptance": [
+    "All 3 PR-relative paths appear exactly once with exact stacked-base, audited-head, and current-main blob SHAs.",
+    "Classification counts sum to 3 and selected_candidate_count is exactly one.",
+    "No candidate Runtime, UI, workflow, test, dependency, financial policy, registry, or authority is imported.",
+    "PR 194 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close or modify it.",
+    "No UI or game code changes in this audit, so new browser screenshot QA is not applicable; missing current visual evidence remains a blocker.",
+    "No Mainnet, payment, treasury, LP, reward, custody, settlement, workflow dispatch, external agent, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, oracle provenance, contract integration, storage-layout review, and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, treasury, and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_194_HOLDER_RESOURCE_LP_STACKED_LINEAGE_AUDIT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_191_EMPLOYMENT_ALPHA_PARENT_LINEAGE_AUDIT", "blocker": "Audit only; the parent remains open, Draft, non-mergeable, and includes employment, worker, payroll, wallet, and authority claims." },
+    { "rank": 5, "priority": "P1", "candidate": "PR_192_PUBLIC_EXPERIMENTAL_LAB_AND_MONEY_FLOW_LINEAGE_AUDIT", "blocker": "Audit only; public lab, money-flow, trial, and authority claims require current-main classification." },
+    { "rank": 6, "priority": "P1_HOLD", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, reservoir, operator, transformation, signer, governance, and parent-evidence authorities are unresolved." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved." },
+    { "rank": 8, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon reconciliation requires a bounded current-main redesign or Human decision." },
+    { "rank": 9, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order and cross-product scope remain unresolved." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "Verified remote identity and external executor authority remain absent." },
+    { "rank": 11, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Frozen baseline integrity decision requires Human authority and its PR text contains stale status claims." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "workflow_dispatch": false,
+    "write_token_worker_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
