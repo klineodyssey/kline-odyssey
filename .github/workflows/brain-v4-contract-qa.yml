@@ -1,0 +1,77 @@
+name: 11520 Brain V4 Contract QA
+
+on:
+  push:
+    paths:
+      - "KGEN/contracts/KGEN_BrainExchange.sol"
+      - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
+      - "KGEN/contracts/KGEN_PositionEngine.sol"
+      - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
+      - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
+      - ".github/workflows/brain-v4-contract-qa.yml"
+  pull_request:
+    paths:
+      - "KGEN/contracts/KGEN_BrainExchange.sol"
+      - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
+      - "KGEN/contracts/KGEN_PositionEngine.sol"
+      - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
+      - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
+      - ".github/workflows/brain-v4-contract-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-fund-invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run no-dependency fund-safety source invariants
+        run: node "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
+      - name: Install pinned Solidity and EVM test dependencies
+        run: |
+          npm install --no-save --package-lock=false \
+            solc@0.8.24 \
+            @openzeppelin/contracts@5.0.2 \
+            @openzeppelin/contracts-upgradeable@5.0.2 \
+            ethers@6.15.0 \
+            ganache@7.9.2
+      - name: Compile canonical Brain, Market Risk Kernel and Position Engine with pinned solc 0.8.24
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/brain-v4-build
+          mkdir -p /tmp/brain-v4-build
+          npx solcjs \
+            --bin \
+            --abi \
+            --base-path . \
+            --include-path node_modules \
+            -o /tmp/brain-v4-build \
+            KGEN/contracts/KGEN_BrainExchange.sol \
+            KGEN/contracts/KGEN_MarketRiskKernel.sol \
+            KGEN/contracts/KGEN_PositionEngine.sol
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_sol_KGEN_BrainExchange_V4_0_0.bin
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_MarketRiskKernel_sol_KGEN_MarketRiskKernelHarness_V1_0_0.bin
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_PositionEngine_sol_KGEN_PositionEngine_V1_0_0.bin
+      - name: Run executable EVM Brain real-funds invariants
+        run: node "KGEN/contracts/tests/brain-v4-evm.test.mjs"
+      - name: Run executable EVM KX-KY-KZ risk invariants
+        run: node "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
+      - name: Run executable EVM position-state invariants
+        run: node "KGEN/contracts/tests/position-engine-evm.test.mjs"
+      - name: Run actual Brain proxy + Position Engine receipt-level integration invariants
+        run: node "KGEN/contracts/tests/brain-position-integration-evm.test.mjs"
+      - name: Reject tracked build artifacts
+        run: git diff --exit-code
