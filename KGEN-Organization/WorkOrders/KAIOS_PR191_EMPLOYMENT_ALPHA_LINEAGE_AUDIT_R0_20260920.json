@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR191-EMPLOYMENT-ALPHA-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit the Employment Alpha lineage without importing employment, payroll, payment, Worker, Life, wallet, or authority claims",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_191_EMPLOYMENT_ALPHA_PARENT_LINEAGE_AUDIT",
+  "exact_base_sha": "e5213455d9326b87052d3db4bf1446ececf8d80f",
+  "exact_base_tree_sha": "8ee1073cdc68a16f19a990b41d30136ea89eaa28",
+  "audited_pr": 191,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_recorded_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_merge_base_sha": "69d95a6c6a460cb65c531b35cb1446c2c72177ed",
+  "audited_head_branch": "codex/kaios-ai-os-employment-alpha-v1",
+  "audited_head_sha": "adb8558c79227790793d6ca22b54930bafb2caa9",
+  "audited_head_tree_sha": "1567369374f8f49770457233ffe0e536bcd1bdbf",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT_NON_MERGEABLE",
+    "ahead": 53,
+    "behind": 727
+  },
+  "pr_scope": {
+    "changed_paths": 20,
+    "insertions": 4723,
+    "deletions": 47,
+    "commits": 53,
+    "conversation_comments": 15,
+    "submitted_reviews": 0,
+    "review_threads": 0
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 191 contains unique but protected employment, compensation, payroll, payment, wallet, Worker, Life, employee-card, controller, repository-authority, asset-ownership, Telepathy, and project-direction candidates. Its exact head is fail closed only because critical authority and attestation registries are empty. It is 727 commits behind exact current main, non-mergeable, and patches obsolete product shells. The only safe bounded task is an evidence-only lineage audit that changes no candidate Runtime, UI, workflow, Canon, CURRENT, financial policy, authority, or pull-request state.",
+  "inventory": {
+    "open_pull_requests": 34,
+    "latest_main_required_checks": "GREEN",
+    "latest_main_failed_workflow_runs_observed": 0,
+    "relevant_todo_fixme_hack_matches": 0,
+    "selected_visual_failure": null,
+    "selected_runtime_defect": null,
+    "security_blocker": "PR 191 protected capabilities cannot be transplanted or activated without exact Human and Canon authority plus current-main redesign and validation."
+  },
+  "blocking_findings": [
+    "PR 191 is an open Draft, is non-mergeable, and is 727 commits behind exact current main.",
+    "Employment and interview candidates could create Employee or Worker status, mission assignments, Human Relay labor-rate claims, handbook acknowledgements, and Employee ID cards without current authoritative attestations.",
+    "Compensation accrual, payroll funding, payroll queueing, payroll settlement, ATM payroll advances, payment requests, payment submissions, receipts, and treasury paths are protected financial effects.",
+    "Wallet provisioning and AI financial onboarding could create address, controller, signer, custody, or payment implications that are not authorized by caller-shaped records.",
+    "Repository authority, review packet, and GitHub snapshot candidates do not prove reviewer identity, controller authority, Human decisions, or permission to write or merge.",
+    "Telepathy delivery and acknowledgement candidates do not prove external communication delivery, consent, employment, or legal acknowledgement.",
+    "Organ Robot asset, ownership, and transplant candidates do not prove custody, ownership, controller authority, or permission to mutate a Life or organism.",
+    "The candidate modifies Company autopilot policy, Company session policy, the work queue, and protected privacy and heaven-secret material, so it cannot establish project direction or authority by itself.",
+    "All critical authority, identity, employment, signer, payment, receipt, treasury, wallet, controller, asset, and acknowledgement registries are empty, so the exact head is fail closed only while those sources remain empty.",
+    "The World Viewer, Player Genesis, and 11520 product changes predate the current shells and have no exact-current-main Game, Responsive, Chromium, or 390x844 screenshot evidence."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and reuse current authenticated-actor, native-market, repository-gate, append-only persistence, and product-shell architecture.",
+    "Keep employment, Worker, Life, compensation, payroll, payment, treasury, wallet, signer, receipt, controller, ownership, transplant, Telepathy, and repository-write effects disabled until exact Human authority and Canon evidence exist.",
+    "Do not derive identity, employment, review, controller, signer, ownership, custody, acknowledgement, or payment authority from caller-shaped records or empty registries.",
+    "Require independently verifiable append-only attestations, replay protection, source provenance, explicit revocation, and fail-closed behavior for any separately authorized successor.",
+    "If a UI successor is separately authorized, implement it in current shells and pass exact-head Universal, Game, Responsive, functional Chromium, and direct 390x844 screenshot inspection."
+  ],
+  "source_reads": [
+    { "path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d" },
+    { "path": "K線西遊記/temples/11520/AGENTS.md", "blob_sha": "4e2821c8d86e65afa4c4c50f7fdba7575ca2cd4f" },
+    { "path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29" },
+    { "path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04" },
+    { "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json", "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6" },
+    { "path": "KGEN-Organization/Canon/README.md", "blob_sha": "ab09423efd39a2bb7ed9b5aba3ed42cae8e2f4be" },
+    { "path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "blob_sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad" },
+    { "path": "KGEN-Organization/Canon/WORK_QUEUE.md", "blob_sha": "c38a5f491dc3f935d9ce578cf774cdff0ed2d51f" },
+    { "path": "KGEN-Organization/Canon/RESPONSIBILITY.md", "blob_sha": "8ca5a014677788ce21d22e034d631e6a40dc15ce" },
+    { "path": "KGEN-KAIOS/civilization/KAIOS_LIFE_BLOOD_AND_TRANSFORMATION_CANON_CURRENT.md", "blob_sha": "a3fe14e347ffe368e343aa0c4535232dade62ca8" },
+    { "path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0" },
+    { "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5" },
+    { "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1" },
+    { "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac" },
+    { "path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa" }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "module_and_json_syntax": "PASS",
+      "universal_and_player_genesis_tests": "331/331 PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "adb8558c79227790793d6ca22b54930bafb2caa9",
+      "historical_exact_head_ci": [
+        { "run_id": 33291147716, "workflow": "Universal Exchange", "conclusion": "SUCCESS_HISTORICAL_ONLY" },
+        { "run_id": 33291147713, "workflow": "World Viewer Product QA", "conclusion": "SUCCESS_HISTORICAL_ONLY" }
+      ],
+      "missing_security_and_product_evidence": [
+        "current Canon and exact Human authority for employment, Worker/Life, compensation, payroll, payment, treasury, wallet, controller, ownership, and transplant claims",
+        "independently verifiable identity, authority, signer, receipt, ownership, custody, and acknowledgement attestations",
+        "current-main architecture equivalence and adversarial tests",
+        "current Game Product QA",
+        "current Responsive Product QA",
+        "390x844 current-shell screenshot inspection"
+      ]
+    },
+    "exact_current_main": {
+      "scheduled_universal_exchange_run_id": 35475358556,
+      "scheduled_universal_exchange_conclusion": "SUCCESS",
+      "pages_run_id_before_change": 35473378048,
+      "pages_conclusion_before_change": "SUCCESS",
+      "tested_sha": "e5213455d9326b87052d3db4bf1446ececf8d80f"
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; PR 191 CURRENT-SHELL VISUAL EVIDENCE REMAINS MISSING"
+  },
+  "classification_counts": {
+    "PROTECTED_DNA_PRIVACY_POLICY": 1,
+    "STALE_AUTOPILOT_SESSION_OR_POLICY": 3,
+    "STALE_WORLD_VIEWER_PRODUCT_OR_DOC": 5,
+    "HISTORICAL_WORLD_VIEWER_TEST_EVIDENCE_ONLY": 1,
+    "STALE_QUEUE_HANDOFF_OR_PRODUCT_DOC": 3,
+    "STALE_11520_PRODUCT_UI": 3,
+    "STALE_ROOT_DOCUMENTATION": 1,
+    "PROTECTED_ORGAN_ASSET_RUNTIME": 1,
+    "PROTECTED_EMPLOYMENT_PAYMENT_AUTHORITY_RUNTIME": 1,
+    "HISTORICAL_UNIVERSAL_TEST_EVIDENCE_ONLY": 1,
+    "TOTAL": 20
+  },
+  "path_classification": [
+    { "path": "KGEN-KAIOS/genesis-dna/DNA_PRIVACY_AND_HEAVEN_SECRET.md", "merge_base_blob_sha": "8fb78189b997a61960c5b6cfe0661c96cad21972", "audited_blob_sha": "a5e32efa6e013324edd39f14031ecfbe4da0e798", "current_main_blob_sha": "8fb78189b997a61960c5b6cfe0661c96cad21972", "classification": "PROTECTED_DNA_PRIVACY_POLICY", "disposition": "Do not import protected privacy or heaven-secret policy from the stale Draft." },
+    { "path": "KGEN-KAIOS/governance/autopilot/COMPANY_SESSION.md", "merge_base_blob_sha": "8f20c77a9ac05f6a5c9f240d0c575a0bf7d39bef", "audited_blob_sha": "4f65c1eef4cc473a720e60b02273c04fcf0b19a7", "current_main_blob_sha": "8f20c77a9ac05f6a5c9f240d0c575a0bf7d39bef", "classification": "STALE_AUTOPILOT_SESSION_OR_POLICY", "disposition": "Do not import; a Draft cannot establish current Company authority or session facts." },
+    { "path": "KGEN-KAIOS/governance/autopilot/PRIMEFORGE_COMPANY_AUTOPILOT.md", "merge_base_blob_sha": "af36638b435cbbbbcda24dcfde4842357f713bfb", "audited_blob_sha": "3eda74a7fc35296f2cf649dbaa31738a39928cf6", "current_main_blob_sha": "af36638b435cbbbbcda24dcfde4842357f713bfb", "classification": "STALE_AUTOPILOT_SESSION_OR_POLICY", "disposition": "Do not import stale employment and authority policy." },
+    { "path": "KGEN-KAIOS/governance/autopilot/company_autopilot.json", "merge_base_blob_sha": "f9a001450d3b1ebf894c590e30d7d528b04eb5a1", "audited_blob_sha": "73432cca871b134922de5560087095bcfc071af7", "current_main_blob_sha": "f9a001450d3b1ebf894c590e30d7d528b04eb5a1", "classification": "STALE_AUTOPILOT_SESSION_OR_POLICY", "disposition": "Do not import machine policy that could shape protected Company actions." },
+    { "path": "KGEN-KAIOS/world-viewer/README.md", "merge_base_blob_sha": "1751cdd9a6284b8b4d731d7689ec9d7e014198e6", "audited_blob_sha": "68178753b1e3d0f20392fb7e34b69bd593a1ba36", "current_main_blob_sha": "1751cdd9a6284b8b4d731d7689ec9d7e014198e6", "classification": "STALE_WORLD_VIEWER_PRODUCT_OR_DOC", "disposition": "Do not import obsolete World Viewer instructions." },
+    { "path": "KGEN-KAIOS/world-viewer/player-genesis/app.js", "merge_base_blob_sha": "2783602cf6255a4df7d0368cc54599e10f089b62", "audited_blob_sha": "8285ca06049f97120a5efda17dc913f80b060c18", "current_main_blob_sha": "2783602cf6255a4df7d0368cc54599e10f089b62", "classification": "STALE_WORLD_VIEWER_PRODUCT_OR_DOC", "disposition": "Do not import obsolete UI glue or employment controls." },
+    { "path": "KGEN-KAIOS/world-viewer/player-genesis/index.html", "merge_base_blob_sha": "98f2a486780ac3aa087885b76e1eecc3cea7e96c", "audited_blob_sha": "a77f2e60722a7bf248bea586ad1b730043a90ba2", "current_main_blob_sha": "98f2a486780ac3aa087885b76e1eecc3cea7e96c", "classification": "STALE_WORLD_VIEWER_PRODUCT_OR_DOC", "disposition": "Do not import obsolete UI or employment claims." },
+    { "path": "KGEN-KAIOS/world-viewer/player-genesis/player-genesis-runtime.js", "merge_base_blob_sha": "68fdb199418c61144155e1c32ad70266ced39c63", "audited_blob_sha": "d8a6d984a5b4fc10a9c5ddf7809d3ddaa46e7444", "current_main_blob_sha": "68fdb199418c61144155e1c32ad70266ced39c63", "classification": "STALE_WORLD_VIEWER_PRODUCT_OR_DOC", "disposition": "Do not import identity, employment, Life, wallet, or authority candidates." },
+    { "path": "KGEN-KAIOS/world-viewer/player-genesis/styles.css", "merge_base_blob_sha": "37dfe58643ef379adce003f721942c5b4c162887", "audited_blob_sha": "116c08b370d893b2a9ccbe719eeb5ffc6345a388", "current_main_blob_sha": "37dfe58643ef379adce003f721942c5b4c162887", "classification": "STALE_WORLD_VIEWER_PRODUCT_OR_DOC", "disposition": "Do not import obsolete styling without current-shell visual QA." },
+    { "path": "KGEN-KAIOS/world-viewer/tests/player_genesis.test.mjs", "merge_base_blob_sha": "2a8ac9a90b47c7d5054c1c7317292d7ee3e4ef01", "audited_blob_sha": "df115f7396f19d7627c57f129d56c6be1f7b0b7f", "current_main_blob_sha": "2a8ac9a90b47c7d5054c1c7317292d7ee3e4ef01", "classification": "HISTORICAL_WORLD_VIEWER_TEST_EVIDENCE_ONLY", "disposition": "Retain as historical fail-closed evidence only; tests confer no authority." },
+    { "path": "KGEN-Organization/WorkOrders/WORK_QUEUE.md", "merge_base_blob_sha": "e7911e601c3a9d05e0e9345e66f685f7762ce6a1", "audited_blob_sha": "1ad73b5553d5b1472492ce21095b4fce99d1afad", "current_main_blob_sha": "9b0df12092cf9195622f00f2878a71341893dafc", "classification": "STALE_QUEUE_HANDOFF_OR_PRODUCT_DOC", "disposition": "Do not overwrite the current queue with stale project direction." },
+    { "path": "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "merge_base_blob_sha": "8072a2241b5c751c3abaabf5563c08da978ba079", "audited_blob_sha": "ab4f75c5507b8530c27ce21a09ac07cd05d99b0a", "current_main_blob_sha": "7284ebd50f248332b0fb5eeade7e91cf6637ac7a", "classification": "STALE_QUEUE_HANDOFF_OR_PRODUCT_DOC", "disposition": "Do not replace the current handoff with stale Employment Alpha status." },
+    { "path": "K線西遊記/temples/11520/README.md", "merge_base_blob_sha": "cd3038f1138eda886dfdddd027bc0a6731d624c6", "audited_blob_sha": "85bad8c295042798e85a92f98c5d5f8160da689f", "current_main_blob_sha": "5b810899d38633f8bbf64659f4f01997051888ab", "classification": "STALE_QUEUE_HANDOFF_OR_PRODUCT_DOC", "disposition": "Do not replace current 11520 documentation." },
+    { "path": "K線西遊記/temples/11520/app.mjs", "merge_base_blob_sha": "4f343ef228eb4bb6784c850da981afb1b2c2febf", "audited_blob_sha": "c7239c5da55e1806e2069c714f585d5a6bea380f", "current_main_blob_sha": "7121bf177acc140c3823d8fb3758d6be31d655df", "classification": "STALE_11520_PRODUCT_UI", "disposition": "Do not import obsolete Employment Alpha UI or authority actions." },
+    { "path": "K線西遊記/temples/11520/index.html", "merge_base_blob_sha": "90d8efccd3a731f7c02a9902b14ff693f74f2619", "audited_blob_sha": "d129cf735fb62a6dfacf03ca786c7ddf347eb73b", "current_main_blob_sha": "a908355fa6359b322b784731144ff5b1237000d8", "classification": "STALE_11520_PRODUCT_UI", "disposition": "Do not replace the current V4.1 shell." },
+    { "path": "K線西遊記/temples/11520/styles.css", "merge_base_blob_sha": "c507369aad8c0909c8e78f78086d73daa410e861", "audited_blob_sha": "92b506f2a21da5f6aa039e5f68a6e242826dce7e", "current_main_blob_sha": "417e62163060112dd2f97122c6734683c1e1b622", "classification": "STALE_11520_PRODUCT_UI", "disposition": "Do not import obsolete styling without current browser evidence." },
+    { "path": "README.md", "merge_base_blob_sha": "4787ed626acdf480370847af27f3c81d0a514515", "audited_blob_sha": "f3f024e06ca36ea2cb99ceca2673cad2209a8f7f", "current_main_blob_sha": "509885b9a47dfd4015e26ac1f7c46b61ee10d6a5", "classification": "STALE_ROOT_DOCUMENTATION", "disposition": "Do not overwrite current repository status or authority statements." },
+    { "path": "core/assets/index.mjs", "merge_base_blob_sha": "0fa8385b4e95f26beceda0e6cb009932b7019e1d", "audited_blob_sha": "8397cf54a3751ab4a99afd661eb2630484a8b79c", "current_main_blob_sha": "0fa8385b4e95f26beceda0e6cb009932b7019e1d", "classification": "PROTECTED_ORGAN_ASSET_RUNTIME", "disposition": "Do not import Organ Robot ownership, custody, or transplant candidates." },
+    { "path": "core/company/index.mjs", "merge_base_blob_sha": "a543b5d83e51971aaf1558cc1c00b4b7584e5a61", "audited_blob_sha": "85091d3089302f828ff88c5c532f3ab7510f7ff1", "current_main_blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd", "classification": "PROTECTED_EMPLOYMENT_PAYMENT_AUTHORITY_RUNTIME", "disposition": "Do not import employment, payroll, payment, wallet, repository-authority, Telepathy, or project-direction candidates." },
+    { "path": "tests/universal-exchange.test.mjs", "merge_base_blob_sha": "65be97a59ff1150cbbd963979fff6e5291bbf282", "audited_blob_sha": "416902fbdd2b560297f45b4fc39f7a1b4f30861c", "current_main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b", "classification": "HISTORICAL_UNIVERSAL_TEST_EVIDENCE_ONLY", "disposition": "Retain as historical fail-closed evidence only; tests confer no employment, payment, or authority." }
+  ],
+  "acceptance": [
+    "All 20 merge-base-to-audited-head paths appear exactly once with exact merge-base, audited-head, and current-main blob SHAs.",
+    "Classification counts sum to 20 and selected_candidate_count is exactly one.",
+    "No candidate Runtime, UI, workflow, test, dependency, Canon, CURRENT, financial policy, registry, or authority is imported.",
+    "PR 191 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close or modify it.",
+    "No UI or game code changes in this audit, so new browser screenshot QA is not applicable; missing current visual evidence remains a blocker.",
+    "No Mainnet, payment, treasury, payroll, wallet, employment, Worker/Life, controller, signer, ownership, transplant, workflow dispatch, external agent, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, exact oracle observation reuse, actual Brain and Position Engine E2E, deployment configuration, and distinct security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, treasury, and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_191_EMPLOYMENT_ALPHA_PARENT_LINEAGE_AUDIT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_192_PUBLIC_EXPERIMENTAL_LAB_AND_MONEY_FLOW_LINEAGE_AUDIT", "blocker": "Audit only; public lab, money-flow, trial, compensation, and authority claims require current-main classification." },
+    { "rank": 5, "priority": "P1", "candidate": "PR_190_DEMAND_TO_PRODUCT_ATM_LINEAGE_AUDIT", "blocker": "Audit only; ATM, product, reviewer, payment, and external-execution claims require current-main classification." },
+    { "rank": 6, "priority": "P1", "candidate": "PR_188_MARKET_WAREHOUSE_MOBILE_WALLET_LINEAGE_AUDIT", "blocker": "Audit only; market, warehouse, mobile wallet, custody, and payment claims require current-main classification." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, reservoir, operator, transformation, signer, governance, and parent-evidence authorities are unresolved." },
+    { "rank": 8, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved." },
+    { "rank": 9, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon reconciliation requires a bounded current-main redesign or Human decision." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order, cross-product scope, Life, controller, organ, and chain effects remain unresolved." },
+    { "rank": 11, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "Verified remote identity and external executor authority remain absent." },
+    { "rank": 12, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Frozen baseline integrity decision requires Human authority and its PR text contains stale status claims." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "payroll": false,
+    "employment_or_compensation_claim": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "ownership_or_transplant_claim": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "workflow_dispatch": false,
+    "write_token_worker_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
