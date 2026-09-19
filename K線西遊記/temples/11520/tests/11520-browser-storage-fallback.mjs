@@ -27,8 +27,24 @@ async function open11520({ blockIndexedDb = false } = {}) {
       || document.documentElement.dataset.universeStore === "MEMORY_FALLBACK"
   ), null, { timeout: 15000 });
   await page.locator("#content .hero").waitFor({ state: "visible", timeout: 15000 });
+  await page.waitForFunction(() => document.body.textContent.includes("KAIOS INCENSE · 18911"), null, { timeout: 15000 });
   assert.deepEqual(errors, [], `11520 portal page errors: ${errors.join("\n")}`);
   return page;
+}
+
+async function assertNoViewportOverflow(page, label) {
+  await page.evaluate(() => document.fonts?.ready);
+  const layout = await page.evaluate(() => ({
+    viewportWidth: innerWidth,
+    documentWidth: document.documentElement.scrollWidth,
+    overflowX: document.documentElement.scrollWidth - innerWidth,
+    sidebar: (() => {
+      const rect = document.querySelector(".sidebar")?.getBoundingClientRect();
+      return rect ? { x: rect.x, right: rect.right, width: rect.width } : null;
+    })()
+  }));
+  assert.ok(layout.overflowX <= 1, `${label} adds horizontal document overflow: ${JSON.stringify(layout)}`);
+  assert.ok(layout.sidebar && layout.sidebar.x >= 0 && layout.sidebar.right <= layout.viewportWidth + 1, `${label} sidebar escapes viewport: ${JSON.stringify(layout)}`);
 }
 
 const fallbackPage = await open11520({ blockIndexedDb: true });
@@ -54,6 +70,7 @@ const fallbackLayout = await fallbackPage.evaluate(() => {
 assert.ok(fallbackLayout.rect.x >= 0 && fallbackLayout.rect.right <= 390, `fallback notice is clipped: ${JSON.stringify(fallbackLayout)}`);
 assert.ok(fallbackLayout.rect.width > 0 && fallbackLayout.rect.height >= 40, `fallback notice is not a usable status surface: ${JSON.stringify(fallbackLayout)}`);
 assert.ok(fallbackLayout.overflowX <= 1, `fallback state adds horizontal overflow: ${JSON.stringify(fallbackLayout)}`);
+await assertNoViewportOverflow(fallbackPage, "memory fallback");
 await fallbackPage.screenshot({ path: `${OUTPUT}/11520-portal-memory-fallback-390x844.png`, fullPage: true });
 await fallbackPage.close();
 
@@ -61,6 +78,7 @@ const durablePage = await open11520();
 assert.equal(await durablePage.locator("html").getAttribute("data-universe-store"), "INDEXED_DB");
 assert.equal(await durablePage.locator("#storage-status").isVisible(), false, "normal durable startup must not show a fallback warning");
 assert.equal(await durablePage.locator("#content .error").count(), 0);
+await assertNoViewportOverflow(durablePage, "durable startup");
 await durablePage.screenshot({ path: `${OUTPUT}/11520-portal-indexeddb-390x844.png`, fullPage: true });
 await durablePage.close();
 
