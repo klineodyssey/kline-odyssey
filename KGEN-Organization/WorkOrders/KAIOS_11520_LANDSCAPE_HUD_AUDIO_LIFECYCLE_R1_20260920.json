@@ -1,0 +1,311 @@
+{
+  "schema_version": "kaios.work_order.v1",
+  "work_order_id": "KAIOS-11520-LANDSCAPE-HUD-AUDIO-LIFECYCLE-R1-20260920",
+  "repository": "klineodyssey/kline-odyssey",
+  "task_source_type": "CURRENT_MAIN_PR_TRIAGE",
+  "task_source_id": "PR-396",
+  "task_source_actor": "human-primeforge",
+  "task_source_file": "automation-request",
+  "task_source_commit": "df88ec9e53deebc2c2d8a44ae7b3ead1a667fb5d",
+  "task_source_reason": "PR 396 was selected as an exact-current-main, bounded P1 UI/runtime defect fix. During the mandatory pre-write main re-fetch, an external actor merged its codex-prefixed branch; this record inventories that race and the exact post-merge verification without replaying or rolling back main.",
+  "created_by": "chatgpt-01",
+  "created_at": "2026-09-19T21:15:00Z",
+  "owner": "chatgpt-01",
+  "priority": "P1",
+  "risk_level": "R1",
+  "status": "POST_MERGE_VERIFIED_PENDING_EVIDENCE_RECORD_MERGE",
+  "selected_candidate_count": 1,
+  "selected_candidate": {
+    "id": "PR-396-11520-LANDSCAPE-HUD-AUDIO-LIFECYCLE",
+    "title": "Close 11520 landscape utility HUD and Web Audio lifecycle gaps",
+    "reason": "Short-landscape controls can overlap or escape their intended ownership, while the synthetic BGM lifecycle can duplicate or retain transient audio nodes. The proposed five-file diff is current-main, local-only, covered by real Chromium screenshots, and does not expand trading, wallet, settlement, or chain authority."
+  },
+  "exact_base": {
+    "branch": "main",
+    "sha": "df88ec9e53deebc2c2d8a44ae7b3ead1a667fb5d",
+    "tree_sha": "6dc94a64b716e7af482ce51872bc5b522fa46fa5"
+  },
+  "source_lineage": {
+    "pull_request": 396,
+    "branch": "codex/k11520-gm-closeout-20260920",
+    "head_sha": "1c09163e84a856558cfa4a733438c99c5752d4f2",
+    "tree_sha": "d6640b4f2c4bdda654d52ca81bfa362bcf48900a",
+    "ahead_by": 1,
+    "behind_by": 0,
+    "merge_sha": "7c8e35319a3c9cf67c9c41bf2672b8a0dfb7278b",
+    "merge_tree_sha": "d6640b4f2c4bdda654d52ca81bfa362bcf48900a",
+    "merge_parent_shas": [
+      "df88ec9e53deebc2c2d8a44ae7b3ead1a667fb5d",
+      "1c09163e84a856558cfa4a733438c99c5752d4f2"
+    ],
+    "integration_disposition": "MERGED_EXTERNALLY_DURING_PRE_WRITE_GATE",
+    "policy_deviation": "The source codex-prefixed branch was merged outside this run before the non-triggering successor could be created. This run did not perform that merge, did not launch an external agent, did not replay the product diff, and did not roll main backward.",
+    "corrective_action": "Inventory the exact merge and publish this evidence record through a non-codex branch after post-merge checks pass."
+  },
+  "implementation_branch": "chatgpt-handoff/KAIOS-11520-LANDSCAPE-AUDIO-EVIDENCE-R0-20260920",
+  "evidence_record_base": {
+    "branch": "main",
+    "sha": "7c8e35319a3c9cf67c9c41bf2672b8a0dfb7278b",
+    "tree_sha": "d6640b4f2c4bdda654d52ca81bfa362bcf48900a"
+  },
+  "scope": {
+    "changed_files": [
+      "K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs",
+      "K線西遊記/temples/11520/runtime/market-origin-wallet-layout-runtime.mjs",
+      "K線西遊記/temples/11520/runtime/mobile-control-layout.mjs",
+      "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs",
+      "K線西遊記/temples/11520/tests/11520-pwa-bgm.test.mjs",
+      "KGEN-Organization/WorkOrders/KAIOS_11520_LANDSCAPE_HUD_AUDIO_LIFECYCLE_R1_20260920.json"
+    ],
+    "transplanted_blob_pairs": [
+      {
+        "path": "K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs",
+        "base_blob": "166b55aff86e6734256425524ec7d9ee43051f64",
+        "source_blob": "dfdd45bd7761065d86f1cf8e88993c773c4cbe00"
+      },
+      {
+        "path": "K線西遊記/temples/11520/runtime/market-origin-wallet-layout-runtime.mjs",
+        "base_blob": "018af8bf8891a8358bc2085c3eb281dda7cb95aa",
+        "source_blob": "bf0b6c842c424c79c2157982d83eaa992c1e4597"
+      },
+      {
+        "path": "K線西遊記/temples/11520/runtime/mobile-control-layout.mjs",
+        "base_blob": "d14aa57765b91eb96059bb096c24fb522ae5dd91",
+        "source_blob": "fabb239d4d9cd4b32fe37469b9c3644f37c91a58"
+      },
+      {
+        "path": "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs",
+        "base_blob": "0d14c69b44c3d5fbc49a8ca167582704c7f0fcb5",
+        "source_blob": "c9627cfb121d022190eb18c2b38510de6075bc82"
+      },
+      {
+        "path": "K線西遊記/temples/11520/tests/11520-pwa-bgm.test.mjs",
+        "base_blob": "bf969a3733012766008a5917d331528fe4e6566f",
+        "source_blob": "5b561eaa966e36e8f9b553cd7c070ddf8175d483"
+      }
+    ],
+    "ui_changed": true,
+    "runtime_authority_changed": false,
+    "canon_changed": false,
+    "current_changed": false,
+    "workflow_changed": false,
+    "root_portal_changed": false,
+    "temple_11520_changed": true
+  },
+  "requirements": [
+    "Keep the 844x390 utility master inside the viewport with clearance from the parameter rails.",
+    "Render expanded short-landscape utility controls as a bounded two-row grid and hide combat controls only while that grid is open.",
+    "Preserve circular thumb artwork and label bounds across portrait and short-landscape layouts.",
+    "Prevent duplicate synthetic BGM starts, suspend or skip audio while hidden, resume safely, stop on pagehide, and disconnect ended transient nodes.",
+    "Preserve local simulation, order-preview cancellation, market-card authority, signed-C, positive-lots, and normal-axis semantics."
+  ],
+  "source_head_evidence": {
+    "ci": [
+      {
+        "name": "Universal Exchange PR",
+        "run_id": 35469398819,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Responsive Product QA PR",
+        "run_id": 35469398854,
+        "conclusion": "SUCCESS",
+        "artifact_id": 10592451583,
+        "artifact_digest": "sha256:60a710757151cea8f887430e466c963c55a2aeab7b0f4dedafb642efa8269963"
+      },
+      {
+        "name": "Game Product QA PR",
+        "run_id": 35469398858,
+        "conclusion": "SUCCESS",
+        "artifact_id": 10592391935,
+        "artifact_digest": "sha256:3bdf2ded0d51f62ab4fd6c70696146044710db7ebff0f2e67d09e8cb0e12fabd"
+      }
+    ],
+    "real_browser": "CHROMIUM",
+    "responsive_report_failures": 0,
+    "viewports": [
+      "360x740",
+      "390x844",
+      "412x772",
+      "432x856",
+      "480x900",
+      "844x390"
+    ],
+    "screenshots_visually_reviewed": [
+      "cold-390-collapsed.png",
+      "cold-390-expanded.png",
+      "cold-landscape-844-collapsed.png",
+      "cold-landscape-844-expanded.png",
+      "cold-landscape-844-closed-again.png",
+      "cold-landscape-844-order-preview.png"
+    ],
+    "visual_result": "PASS",
+    "visual_notes": "The short-landscape utility grid is fully in-frame, separated from the centered rails and joystick, restores the collapsed state cleanly, and leaves the cancellable order preview readable. Portrait controls remain bounded with circular thumbs and no visible overlap."
+  },
+  "post_merge_evidence": {
+    "main_sha": "7c8e35319a3c9cf67c9c41bf2672b8a0dfb7278b",
+    "main_tree_sha": "d6640b4f2c4bdda654d52ca81bfa362bcf48900a",
+    "tree_matches_source_head": true,
+    "runs": [
+      {
+        "name": "11520 Universal Exchange V2",
+        "run_id": 35469701525,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "11520 Responsive Product QA",
+        "run_id": 35469701519,
+        "conclusion": "SUCCESS",
+        "artifact_id": 10592856350,
+        "artifact_digest": "sha256:a661af8d3d1285f057f950612cb88ac7e936812e2df2e538cac5c7895144c77c"
+      },
+      {
+        "name": "11520 Responsive Product QA post-workflow",
+        "run_id": 35469725796,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "11520 Game Product QA",
+        "run_id": 35469701510,
+        "initial_conclusion": "FAILURE",
+        "initial_failure": "A browser smoke wait timed out and prevented later mandatory screenshots from being created.",
+        "rerun_attempt": 2,
+        "rerun_conclusion": "SUCCESS",
+        "classification": "TRANSIENT_BROWSER_TIMING_FAILURE",
+        "artifact_id": 10592402726,
+        "artifact_digest": "sha256:8c5564ab24a0eda300264a6f6bf172ce23c5d0c78a55668b0ea758c7d01799f6"
+      },
+      {
+        "name": "Deploy Pages Static",
+        "run_id": 35469701508,
+        "conclusion": "SUCCESS",
+        "deployed_sha": "7c8e35319a3c9cf67c9c41bf2672b8a0dfb7278b",
+        "artifact_id": 10592851266,
+        "artifact_digest": "sha256:e0fc23b1a07d8f718eeb1a2a1638f0e76f5f5d42ed3fb36b72b0cd89c02fde76"
+      }
+    ],
+    "visual_result": "PASS",
+    "visually_reviewed_exact_main_screenshots": [
+      "cold-landscape-844-collapsed.png",
+      "cold-landscape-844-expanded.png",
+      "cold-390-collapsed.png",
+      "cold-390-expanded.png",
+      "11520-mobile-390x844.png",
+      "11520-mobile-utility-expanded.png",
+      "11520-mobile-zero-controls.png"
+    ]
+  },
+  "acceptance": {
+    "exact_product_tree_ci": [
+      "Universal Exchange",
+      "11520 Responsive Product QA",
+      "11520 Game Product QA"
+    ],
+    "exact_product_tree_ci_result": "PASS",
+    "real_chromium": "REQUIRED",
+    "screenshots": "REQUIRED_AT_SUCCESSOR_EXACT_HEAD",
+    "functional_review": [
+      "expanded and collapsed utility cycles remain pointer-reachable",
+      "order preview opens and is cancelled without transaction",
+      "market-card inspection cannot change trading authority",
+      "BGM lifecycle is bounded across visibilitychange and pagehide"
+    ],
+    "visual_review": [
+      "844x390 collapsed, expanded, closed-again and order-preview states",
+      "390x844 portrait collapsed and expanded states",
+      "no clipping, overlap, off-screen controls, stretched thumb art, blank overlay or horizontal overflow"
+    ]
+  },
+  "protected_actions": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "mainnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance_execution": false,
+    "private_key_or_secret_access": false,
+    "worker_or_life_activation": false,
+    "controller_or_signer_appointment": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "paid_external_api": false
+  },
+  "candidate_ranking": [
+    {
+      "rank": 1,
+      "priority": "P0",
+      "candidate": "PR 232 BrainExchange V4 real-funds, oracle and contract E2E",
+      "disposition": "HOLD",
+      "blocker": "Production oracle provenance, actual-contract E2E, security review and real-funds authority remain unresolved."
+    },
+    {
+      "rank": 2,
+      "priority": "P0",
+      "candidate": "PRs 135/154/186/199 Mainnet, payroll, payment adapter and Auto-LP",
+      "disposition": "HOLD",
+      "blocker": "Protected financial, signer or chain-state effects are outside this run."
+    },
+    {
+      "rank": 3,
+      "priority": "P1",
+      "candidate": "PR 396 11520 landscape HUD and audio lifecycle current-main transplant",
+      "disposition": "SELECTED"
+    },
+    {
+      "rank": 4,
+      "priority": "P1",
+      "candidate": "PR 194 holder, resource and LP stacked-lineage safety audit",
+      "disposition": "NEXT"
+    },
+    {
+      "rank": 5,
+      "priority": "P1",
+      "candidate": "PRs 200/203 market, ATM, vault, custody and payment lineage",
+      "disposition": "HOLD",
+      "blocker": "Current audits identify unsafe authority, custody, payment, workflow and chain-write boundaries."
+    },
+    {
+      "rank": 6,
+      "priority": "P1",
+      "candidate": "PR 172 K4168 authority and address evidence",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 7,
+      "priority": "P1",
+      "candidate": "PR 187 protected CURRENT and Canon conflict",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 8,
+      "priority": "P2",
+      "candidate": "PR 201 to 211 to 212 dependency chain",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 9,
+      "priority": "P2",
+      "candidate": "PR 177 external executor",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 10,
+      "priority": "P2",
+      "candidate": "PR 48 protected baseline decision",
+      "disposition": "PENDING"
+    }
+  ],
+  "merge_policy": {
+    "risk": "R1",
+    "non_codex_branch_required": true,
+    "non_codex_product_integration_satisfied": false,
+    "deviation_origin": "EXTERNAL_CONCURRENT_MERGE",
+    "exact_latest_main_required": true,
+    "expected_head_sha_required": true,
+    "required_ci_green": true,
+    "functional_qa_required": true,
+    "visual_qa_required": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
