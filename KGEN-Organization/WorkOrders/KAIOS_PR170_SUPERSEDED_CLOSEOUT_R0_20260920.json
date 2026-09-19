@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR170-SUPERSEDED-CLOSEOUT-R0-20260920",
+  "title": "Close obsolete autonomous Company safe-cycle lineage without restoring external execution or simulated authority",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_170_SUPERSEDED_SAFE_CYCLE_LINEAGE_CLOSEOUT",
+  "exact_base_sha": "7a9c310878a73b90e3264183f52052ec54105d01",
+  "audited_pr": 170,
+  "audited_head_branch": "codex/kaios-autonomous-company-loop-v1",
+  "audited_head_sha": "636d77306a2f91300b12857b836d600b729b2fd3",
+  "audited_merge_base_sha": "7d20e3b26136c3ccb17e40b8a5faba09d5f7c6e0",
+  "relation_to_base": {
+    "status": "DIVERGED_DRAFT_NOT_MERGEABLE",
+    "ahead": 24,
+    "behind": 175,
+    "changed_paths": 7,
+    "insertions": 1967,
+    "deletions": 20
+  },
+  "decision": "CLOSE_UNMERGED_SUPERSEDED_BY_CURRENT_MAIN_SAFE_SLICES",
+  "reason": "PR 170 is a Draft on a prohibited codex/* lineage, is 175 commits behind current main, is not mergeable, and its own body requires MERGE=NO and DEPLOY=NO. Current main already contains newer fail-closed planner, append-only persistence/replay and credential-free repository snapshot/exact-head gate slices from PRs 352, 353 and 356. Its remaining local SQLite Claim simulator, universal distinct-reviewer rule, caller-shaped authority evidence and invocation orchestrator are not canonical authority and must not be revived by merging or transplanting this branch. The safe action is an evidence-only closeout; any still-useful orchestration idea requires a separate exact-current-main R1 work order with no GitHub write or external executor.",
+  "absorbed_current_main_slices": [
+    {
+      "pull_request": 352,
+      "capability": "fail-closed engineering planner",
+      "current_export": "planAutonomousCompanyEngineeringCycle"
+    },
+    {
+      "pull_request": 353,
+      "capability": "append-only persistence and restart replay",
+      "current_exports": [
+        "persistAutonomousCompanyEngineeringCycle",
+        "restoreAutonomousCompanyEngineeringCycleState"
+      ]
+    },
+    {
+      "pull_request": 356,
+      "capability": "credential-free public GitHub snapshot and exact-main/exact-head CI gate",
+      "current_exports": [
+        "readLatestRepositorySnapshot",
+        "evaluateExactHeadCiGate"
+      ]
+    }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "node_version": "v24.19.0",
+      "universal_exchange": "273/273 PASS",
+      "module_syntax": "PASS",
+      "autopilot_json": "PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "636d77306a2f91300b12857b836d600b729b2fd3"
+    },
+    "current_main_replacement": {
+      "planner_persistence_repository_gate": "17/17 PASS",
+      "workflow_security": "3/3 PASS",
+      "combined": "20/20 PASS",
+      "tested_sha": "7a9c310878a73b90e3264183f52052ec54105d01"
+    }
+  },
+  "classification_counts": {
+    "SUPERSEDED_BY_CURRENT_MAIN": 4,
+    "PARTIALLY_SUPERSEDED_EXCLUDE_UNAUTHORIZED_REMAINDER": 1,
+    "HOLD_STALE_AUTHORITY_AND_HUMAN_DECISION_CLAIMS": 1,
+    "HISTORICAL_TESTS_NOT_IMPORT": 1,
+    "TOTAL": 7
+  },
+  "path_classification": [
+    {
+      "path": ".github/workflows/universal_exchange_v2.yml",
+      "audited_blob_sha": "c25d4da05cceed9e60d612fafd39acdb92ae2263",
+      "current_main_blob_sha": "5d73d42656b40ae7af55f963405c09b54fa9e8aa",
+      "classification": "SUPERSEDED_BY_CURRENT_MAIN",
+      "disposition": "Do not import the historical Node 24 workflow edit. Current main owns the complete workflow and security boundary."
+    },
+    {
+      "path": "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md",
+      "audited_blob_sha": "c86dd97b4a956ca80f7906016c141720323cda23",
+      "current_main_blob_sha": "0a1303ee1e8250a601d642418e35b6beb2d1881f",
+      "classification": "SUPERSEDED_BY_CURRENT_MAIN",
+      "disposition": "Do not import stale candidate status. Current main documents the bounded engineering planner and repository-only safety boundary."
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/README.md",
+      "audited_blob_sha": "3be241c1b150a38a10dd90a6e278dfe568d0339c",
+      "current_main_blob_sha": "912706d32e28ad9a86665c2edd21aefaa5058718",
+      "classification": "SUPERSEDED_BY_CURRENT_MAIN",
+      "disposition": "Do not restore the obsolete universal distinct-reviewer and local Claim simulator narrative."
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/company_autopilot.json",
+      "audited_blob_sha": "8df7272bfde7bbdc5ebe58abd7a0d6702555dd69",
+      "current_main_blob_sha": "f9a001450d3b1ebf894c590e30d7d528b04eb5a1",
+      "classification": "HOLD_STALE_AUTHORITY_AND_HUMAN_DECISION_CLAIMS",
+      "disposition": "Do not import repository-authored Human approval, reviewer authority, canonical connector or execution claims. Formal action-specific evidence remains required."
+    },
+    {
+      "path": "core/company/index.mjs",
+      "audited_blob_sha": "b398adbf660568fb4dfb9f43957dcae2840e4fdc",
+      "current_main_blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd",
+      "classification": "PARTIALLY_SUPERSEDED_EXCLUDE_UNAUTHORIZED_REMAINDER",
+      "disposition": "Planner, durable memory, repository snapshot and CI gate are replaced by current-main implementations. Do not transplant the SQLite Claim simulator, caller-shaped close evidence or invocation orchestrator; none creates canonical authority."
+    },
+    {
+      "path": "core/registry/store.mjs",
+      "audited_blob_sha": "df349db6231b374df8a21b099f5614ec7330f9c8",
+      "current_main_blob_sha": "b6747c2a72bce6272e436a7036b709ef85120842",
+      "classification": "SUPERSEDED_BY_CURRENT_MAIN",
+      "disposition": "Current main contains the newer resilient IndexedDB and memory-fallback store. Do not regress to the old blob."
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "audited_blob_sha": "df1075e82b136bd1b2a3528c9dd895cb203fe7f9",
+      "current_main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "classification": "HISTORICAL_TESTS_NOT_IMPORT",
+      "disposition": "The 273 passing tests validate only the old exact head. Current main has dedicated planner, persistence, repository-gate and workflow-security tests; do not replace its cumulative suite."
+    }
+  ],
+  "acceptance": [
+    "All seven PR paths appear exactly once, with audited and current-main blob SHAs.",
+    "Classification counts sum to seven and selected_candidate_count is exactly one.",
+    "PR 170 is closed without merge only after this manifest reaches exact current main through a non-codex pull request.",
+    "No PR 170 workflow, runtime, documentation, manifest, test or authority claim is imported.",
+    "Current-main safe slices retain planner, append-only persistence/replay, credential-free repository reads and exact-head CI gating without GitHub write or external execution authority.",
+    "No UI or game product code changes, so real-browser and screenshot QA are not applicable to this evidence-only closeout."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds, oracle provenance, contract integration and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected payments, Mainnet and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_170_SUPERSEDED_SAFE_CYCLE_LINEAGE_CLOSEOUT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PRS_195_200_11520_SETTLEMENT_AND_SPOT_LINEAGE_AUDIT", "blocker": "Audit stacked stale market branches against current 11520 runtime; do not enable settlement or asset movement." },
+    { "rank": 5, "priority": "P1_HOLD", "candidate": "PR_172_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Canonical authority and address evidence is missing." },
+    { "rank": 6, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement and payment authority are unresolved." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon conflict requires Human decision." },
+    { "rank": 8, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order and cross-product scope are unresolved." },
+    { "rank": 9, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "External executor authority is not authorized." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Protected baseline decision requires Human authority." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "github_write_connector_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
