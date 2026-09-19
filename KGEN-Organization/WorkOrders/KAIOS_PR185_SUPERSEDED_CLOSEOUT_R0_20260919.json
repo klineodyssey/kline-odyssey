@@ -1,0 +1,194 @@
+{
+  "schema_version": "kaios.work_order.v1",
+  "work_order_id": "KAIOS-PR185-SUPERSEDED-CLOSEOUT-R0-20260919",
+  "created_at": "2026-09-19T11:20:00Z",
+  "repository": "klineodyssey/kline-odyssey",
+  "risk": "R0",
+  "priority": "P1",
+  "selected_candidate_count": 1,
+  "selected_candidate": {
+    "pull_request": 185,
+    "title": "Close obsolete 11520 mobile-wallet V4.0.2 lineage without importing it",
+    "action": "CLOSE_UNMERGED_AS_SUPERSEDED",
+    "reason": "The draft is no longer mergeable and is 716 commits behind current main. Current 11520 V4.1 and its EVM wallet runtime supersede the browser-safe import, connection, chain-switch, and wallet-session portions. Two useful ideas remain explicitly excluded for a bounded current-main successor."
+  },
+  "exact_evidence": {
+    "base_branch": "main",
+    "base_sha": "5408c2c0ec781636d5257af2323a46fd64590e8c",
+    "base_tree_sha": "1a99012967e82f4b5f0b52588f7f7754ea99f489",
+    "legacy_head_branch": "codex/kaios-11520-mobile-wallet-v1",
+    "legacy_head_sha": "afefee031aaa3819155fa884699e8facf9b2f7eb",
+    "merge_base_sha": "ae4f432fc94bd00294436a5ef875f583dec0b794",
+    "main_ahead": 716,
+    "legacy_ahead": 10,
+    "changed_path_count": 10,
+    "additions": 211,
+    "deletions": 31,
+    "legacy_state_before_close": "OPEN_DRAFT_UNMERGED_NOT_MERGEABLE",
+    "legacy_conversation_comments": 1,
+    "legacy_reviews": 0,
+    "legacy_review_threads": 0
+  },
+  "path_classification": [
+    {
+      "path": "K線西遊記/temples/11520/CHANGELOG.md",
+      "classification": "SUPERSEDED_VERSION_LINEAGE"
+    },
+    {
+      "path": "K線西遊記/temples/11520/HANDOFF_CURRENT.md",
+      "classification": "SUPERSEDED_VERSION_LINEAGE"
+    },
+    {
+      "path": "K線西遊記/temples/11520/MANIFEST.json",
+      "classification": "SUPERSEDED_VERSION_LINEAGE"
+    },
+    {
+      "path": "K線西遊記/temples/11520/README.md",
+      "classification": "SUPERSEDED_VERSION_LINEAGE"
+    },
+    {
+      "path": "K線西遊記/temples/11520/SHA256SUMS.txt",
+      "classification": "SUPERSEDED_VERSION_LINEAGE"
+    },
+    {
+      "path": "K線西遊記/temples/11520/VERSION",
+      "classification": "SUPERSEDED_VERSION_LINEAGE"
+    },
+    {
+      "path": "K線西遊記/temples/11520/app.mjs",
+      "classification": "SUPERSEDED_BY_CURRENT_BROWSER_SAFE_V4_1_ENTRY"
+    },
+    {
+      "path": "K線西遊記/temples/11520/index.html",
+      "classification": "SUPERSEDED_BY_CURRENT_GAME_5D_ENTRY"
+    },
+    {
+      "path": "core/integrations/kgen-pancakeswap-v2.mjs",
+      "classification": "PARTIALLY_SUPERSEDED_WITH_EXCLUDED_CANDIDATES",
+      "excluded_candidates": [
+        "EIP_747_WALLET_WATCH_ASSET_FOR_CANONICAL_ALLOWLIST",
+        "HTTP_S_ONLY_METAMASK_MOBILE_DEEP_LINK"
+      ]
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "classification": "OBSOLETE_LINEAGE_TEST_WITH_EXCLUDED_CANDIDATE_COVERAGE"
+    }
+  ],
+  "current_main_equivalence": {
+    "browser_safe_direct_imports": true,
+    "injected_wallet_connection": true,
+    "bsc_chain_switch": true,
+    "wallet_account_and_chain_watch": true,
+    "read_only_native_and_erc20_balances": true,
+    "mainnet_execution_default": "FAIL_CLOSED",
+    "not_yet_absorbed": [
+      "wallet_watchAsset",
+      "MetaMask mobile deep link"
+    ]
+  },
+  "scope": {
+    "changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR185_SUPERSEDED_CLOSEOUT_R0_20260919.json"
+    ],
+    "runtime_changed": false,
+    "ui_changed": false,
+    "canon_changed": false,
+    "current_changed": false,
+    "workflow_changed": false
+  },
+  "validation": {
+    "json_parse": "REQUIRED",
+    "selected_candidate_count_equals_one": "REQUIRED",
+    "path_classification_count_equals_changed_path_count": "REQUIRED",
+    "exact_sha_assertions": "REQUIRED",
+    "protected_action_assertions": "REQUIRED",
+    "git_diff_check": "REQUIRED",
+    "browser_functional_qa": "NOT_APPLICABLE_NO_UI_OR_RUNTIME_CHANGE",
+    "screenshot_visual_qa": "NOT_APPLICABLE_NO_UI_OR_RUNTIME_CHANGE"
+  },
+  "protected_actions": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "mainnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance_execution": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_or_signer_appointment": false,
+    "external_agent_launch": false,
+    "paid_external_api": false,
+    "secret_access": false
+  },
+  "candidate_ranking": [
+    {
+      "rank": 1,
+      "priority": "P0",
+      "candidate": "PR 232 real-funds BrainExchange V4",
+      "disposition": "HOLD",
+      "blocker": "Real funds, oracle provenance, contract E2E, and security authority are unresolved."
+    },
+    {
+      "rank": 2,
+      "priority": "P0",
+      "candidate": "PRs 135/154/186/199 Mainnet, payroll, payment adapter, Auto-LP",
+      "disposition": "HOLD",
+      "blocker": "Protected financial or chain-state effects are outside this automation authority."
+    },
+    {
+      "rank": 3,
+      "priority": "P1",
+      "candidate": "PR 185 obsolete mobile-wallet lineage closeout",
+      "disposition": "SELECTED"
+    },
+    {
+      "rank": 4,
+      "priority": "P1",
+      "candidate": "PR 193 portal lineage equivalence audit",
+      "disposition": "NEXT"
+    },
+    {
+      "rank": 5,
+      "priority": "P1",
+      "candidate": "PR 174 parallel-market safety reconciliation",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 6,
+      "priority": "P1",
+      "candidate": "PR 172 K4168 authority and address evidence",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 7,
+      "priority": "P1",
+      "candidate": "PR 187 protected CURRENT and Canon conflict",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 8,
+      "priority": "P2",
+      "candidate": "PR 201 to 211 to 212 dependency chain",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 9,
+      "priority": "P2",
+      "candidate": "PR 177 remote executor handoff",
+      "disposition": "HOLD"
+    },
+    {
+      "rank": 10,
+      "priority": "P2",
+      "candidate": "PR 48 protected baseline decision",
+      "disposition": "PENDING"
+    }
+  ],
+  "closeout_acceptance": {
+    "legacy_pr_must_not_merge": true,
+    "legacy_pr_final_state": "CLOSED_UNMERGED_SUPERSEDED",
+    "excluded_candidates_require_new_current_main_work_order": true,
+    "expected_head_merge_required_for_this_closeout_pr": true,
+    "post_merge_main_verification_required": true
+  }
+}
