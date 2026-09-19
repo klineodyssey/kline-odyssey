@@ -1,0 +1,83 @@
+{
+  "schema_version": "KAIOS_PR_SUPERSEDED_CLOSEOUT_V1",
+  "task_id": "KAIOS-PR171-SUPERSEDED-CLOSEOUT-R0-20260919",
+  "generated_at": "2026-09-19T10:40:20Z",
+  "operator": "codex-gm-01",
+  "risk": "R0",
+  "exact_main_base": "9c90a07a7a1e5bcacdcd46f778b914315224e740",
+  "target_pr": 171,
+  "target_pr_url": "https://github.com/klineodyssey/kline-odyssey/pull/171",
+  "target_pr_state_before": "OPEN_DRAFT",
+  "target_pr_head_branch": "codex/distinct-reviewer-governance-gate-v1",
+  "target_pr_head": "ceb1e1e42a85516f0b319505c1bc2597de9d8114",
+  "target_pr_reported_base": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "merge_base_with_current_main": "f539847832a4daef5fc52fb5a50ea0649f2b3143",
+  "divergence": {
+    "main_ahead_by": 706,
+    "pr_unique_commits": 18,
+    "status": "DIVERGED",
+    "github_mergeable": false
+  },
+  "changed_files": [
+    "KGEN-AI-Company/reports/CODEX_REVIEW_LOG.md",
+    "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+    "core/company/index.mjs",
+    "tests/universal-exchange.test.mjs"
+  ],
+  "changed_file_count": 4,
+  "decision": "CLOSE_UNMERGED_AS_SUPERSEDED",
+  "decision_basis": [
+    "The active Human-owner merge policy states that a second or distinct reviewer is not a universal merge gate for ordinary repository-only R0/R1 work when current technical validation is green.",
+    "PR 171 is built around a historical universal distinct-reviewer capacity gap and stale PR 190/192 trial snapshots, so merging it would reintroduce superseded process semantics.",
+    "The branch is 706 current-main commits behind and is not mergeable; transplanting its 760-line candidate pipeline is not required to close the obsolete governance hold.",
+    "The proposed Chi-Yao Life, Worker, controller, acknowledgements, payroll account and reviewer authority remain unverified and must not be activated or represented as fact."
+  ],
+  "preserved_truths": [
+    "No reviewer identity may be manufactured.",
+    "If GitHub or an explicit work order requires review, the actual required reviewer and exact-head evidence must be verified.",
+    "Protected external execution, Mainnet, funds, governance, signer, secrets, Worker activation and Life activation remain outside ordinary repository merge authority."
+  ],
+  "excluded_from_transplant": [
+    "Historical mandatory distinct-reviewer queue gate",
+    "Stale PR 190 and PR 192 trial packages",
+    "Unverified external reviewer candidate scores or sessions",
+    "Chi-Yao Life, Worker, controller, acknowledgement, wallet, payroll or reviewer activation",
+    "The 471-line reviewer candidate runtime and its stale coupled tests"
+  ],
+  "candidate_ranking": [
+    {"priority": "P0", "candidate": "PR 232 real-funds BrainExchange V4", "disposition": "HOLD", "reason": "Real funds, oracle provenance and contract E2E require protected authorization and safety review."},
+    {"priority": "P0", "candidate": "PRs 135/154/186/199 Mainnet, payroll, payment and Auto-LP", "disposition": "HOLD", "reason": "Protected chain, payment or liquidity effects are not authorized in this cycle."},
+    {"priority": "P1", "candidate": "PR 171 obsolete universal distinct-reviewer governance gate", "disposition": "SELECTED", "reason": "Safe R0 current-main closeout removes an obsolete open Draft without importing stale authority code."},
+    {"priority": "P1", "candidate": "PRs 193/185 portal and mobile-wallet lineage audit", "disposition": "NEXT", "reason": "Repository-only equivalence audit is safe after the governance closeout."},
+    {"priority": "P1", "candidate": "PR 174 parallel-market safety audit", "disposition": "QUEUED", "reason": "Requires current-main semantic and Canon comparison."},
+    {"priority": "P1", "candidate": "PR 172 K4168 authority/address reconciliation", "disposition": "HOLD", "reason": "Authority and address evidence remain incomplete."},
+    {"priority": "P1", "candidate": "PR 187 CURRENT/Canon lineage reconciliation", "disposition": "HOLD", "reason": "Touches protected CURRENT/Canon semantics."},
+    {"priority": "P2", "candidate": "PRs 201 -> 211 -> 212 KUFO/KSHIP/UFO dependency chain", "disposition": "HOLD", "reason": "Dependency order and cross-product scope are unresolved."},
+    {"priority": "P2", "candidate": "PR 177 remote handoff executor", "disposition": "HOLD", "reason": "External execution authority is outside this cycle."},
+    {"priority": "P2", "candidate": "PR 48 old protected baseline review", "disposition": "QUEUED", "reason": "Requires a separate protected-baseline integrity decision."}
+  ],
+  "ui_or_game_runtime_changed": false,
+  "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY",
+  "protected_actions": {
+    "mainnet": false,
+    "testnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "signer": false,
+    "private_keys": false,
+    "worker_activation": false,
+    "life_activation": false,
+    "external_agent": false,
+    "external_api": false
+  },
+  "acceptance": {
+    "manifest_json_parses": true,
+    "exact_shas_recorded": true,
+    "four_changed_paths_classified": true,
+    "target_pr_must_not_merge": true,
+    "target_pr_closes_only_after_this_closeout_merges": true,
+    "current_human_owner_merge_policy_remains_unchanged": true,
+    "no_program_runtime_or_workflow_change": true
+  }
+}
