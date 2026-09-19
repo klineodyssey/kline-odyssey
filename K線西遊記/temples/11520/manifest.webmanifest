@@ -1,0 +1,15 @@
+{
+  "name":"K11520 花果山交易所 5D Game",
+  "short_name":"K11520",
+  "description":"K線西遊記 K11520 花果山交易所 5D Game",
+  "start_url":"./game-5d.html?source=pwa",
+  "scope":"./",
+  "display":"standalone",
+  "display_override":["fullscreen","standalone","minimal-ui"],
+  "orientation":"any",
+  "background_color":"#05080d",
+  "theme_color":"#05080d",
+  "icons":[
+    {"src":"./assets/ui/brand-k-ui.webp","sizes":"512x512","type":"image/webp","purpose":"any maskable"}
+  ]
+}
