@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR193-SUPERSEDED-CLOSEOUT-R0-20260919",
+  "title": "Close obsolete mixed-scope PR 193 without importing stale portal, 11520, or payment-authority candidates",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_193_LINEAGE_EQUIVALENCE_AND_SAFE_CLOSEOUT",
+  "exact_base_sha": "8a1b82773de1686126166284b7d603be5281e9ba",
+  "audited_pr": 193,
+  "audited_head_sha": "6f99ed7ae90775c9661a00d991db15c4d55abb07",
+  "audited_merge_base_sha": "69d95a6c6a460cb65c531b35cb1446c2c72177ed",
+  "relation_to_base": {
+    "status": "DIVERGED",
+    "ahead": 6,
+    "behind": 709,
+    "changed_paths": 32
+  },
+  "decision": "CLOSE_UNMERGED_SUPERSEDED_PRESERVE_BOUNDED_SUCCESSORS",
+  "reason": "The branch mixes an obsolete 11520 V4.0.1 snapshot, historical visual baselines, a public-portal redesign, IndexedDB startup hardening, and disconnected resource-payment authority candidates. Current main has materially newer 11520 V4.1 and game/runtime work. Refreshing or merging this mixed branch would regress current product files and cross unresolved authority boundaries.",
+  "classification_counts": {
+    "SUPERSEDED_BY_CURRENT_MAIN": 11,
+    "HISTORICAL_BASELINE_NOT_FOR_IMPORT": 8,
+    "CURRENT_MAIN_UI_SUCCESSOR_CANDIDATE": 7,
+    "RESOURCE_AUTHORITY_HOLD": 3,
+    "CURRENT_MAIN_STORAGE_SUCCESSOR_CANDIDATE": 3,
+    "TOTAL": 32
+  },
+  "path_classification": {
+    "SUPERSEDED_BY_CURRENT_MAIN": [
+      ".github/workflows/world-viewer-product-qa.yml",
+      "K線西遊記/temples/11520/CHANGELOG.md",
+      "K線西遊記/temples/11520/HANDOFF_CURRENT.md",
+      "K線西遊記/temples/11520/MANIFEST.json",
+      "K線西遊記/temples/11520/README.md",
+      "K線西遊記/temples/11520/RUNTIME_GENOME.json",
+      "K線西遊記/temples/11520/SHA256SUMS.txt",
+      "K線西遊記/temples/11520/VERSION",
+      "K線西遊記/temples/11520/app.mjs",
+      "K線西遊記/temples/11520/index.html",
+      "K線西遊記/temples/11520/styles.css"
+    ],
+    "HISTORICAL_BASELINE_NOT_FOR_IMPORT": [
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/android-landscape-light.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/android-portrait-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/desktop-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/desktop-light.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/iphone-landscape-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/iphone-portrait-light.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/tablet-landscape-dark.png",
+      "KGEN-KAIOS/world-viewer/tests/baselines/sprint-011/tablet-portrait-light.png"
+    ],
+    "CURRENT_MAIN_UI_SUCCESSOR_CANDIDATE": [
+      "KGEN-KAIOS/world-viewer/index.html",
+      "KGEN-KAIOS/world-viewer/tests/ai-company-public-integration.test.mjs",
+      "KGEN-KAIOS/world-viewer/tests/full_world_official_route.test.mjs",
+      "KGEN-KAIOS/world-viewer/tests/product_qa.py",
+      "KGEN-KAIOS/world-viewer/ui/shell.js",
+      "KGEN-KAIOS/world-viewer/ui/styles.css",
+      "index.html"
+    ],
+    "RESOURCE_AUTHORITY_HOLD": [
+      "KGEN-KAIOS/world-viewer/README.md",
+      "KGEN-KAIOS/world-viewer/nation/resource-economy-runtime.js",
+      "KGEN-KAIOS/world-viewer/tests/civilization_integrity.mjs"
+    ],
+    "CURRENT_MAIN_STORAGE_SUCCESSOR_CANDIDATE": [
+      "core/registry/store.mjs",
+      "core/registry/universe-runtime.mjs",
+      "tests/universal-exchange.test.mjs"
+    ]
+  },
+  "preserved_successor_intents": [
+    {
+      "priority": "P1",
+      "scope": "CURRENT_MAIN_PORTAL_AND_OFFLINE_WORLD_CTA",
+      "requirements": "Implement only against latest main; retain current routes and copy; run real Chromium at 360x800, 390x844, 768x1024 and 1440x900 with screenshot inspection."
+    },
+    {
+      "priority": "P1",
+      "scope": "CURRENT_MAIN_INDEXEDDB_OPEN_TIMEOUT_AND_MEMORY_FALLBACK",
+      "requirements": "Isolate store readiness from the obsolete 11520 snapshot; prove timeout, blocked-open and late-success close behavior without weakening append-only persistence."
+    },
+    {
+      "priority": "P1_HOLD",
+      "scope": "RESOURCE_ACCOUNT_CUSTODY_ENTITLEMENT_AND_PAYMENT_READINESS",
+      "requirements": "Keep disconnected until repository-owned attestations, canonical location decisions, custody policy, exact authorization and reviewed payment-rail release exist; no signer or chain write."
+    }
+  ],
+  "current_main_evidence": {
+    "11520_entry_version": "V4.1",
+    "pr193_11520_version": "V4.0.1",
+    "canonical_location_preserved": "K8888_GAO_LAO_ZHUANG",
+    "resource_payment_registries_in_pr193": "EMPTY_AND_DISCONNECTED",
+    "visual_qa_for_this_closeout": "NOT_APPLICABLE_DOCUMENTATION_ONLY"
+  },
+  "acceptance": [
+    "All 32 PR paths appear exactly once in the classification.",
+    "Classification counts sum to 32.",
+    "PR 193 is closed without merge only after this manifest reaches exact current main through a non-codex pull request.",
+    "No PR 193 runtime, workflow, screenshot baseline, portal code, payment candidate, Canon or CURRENT file is imported.",
+    "Successor intents remain explicit and do not imply authorization or deployment."
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
