@@ -1029,8 +1029,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文 #K線西遊記 #花果山台灣 #KAIOS #KGEN一炷香，送的不只是思念。劉公金垣先生走完80載；生死有簿、生命有帳，記憶穿越時間。願一路好走，安息長眠。  
-👉 https://www.youtube.com/watch?v=PvJGC6Yv32A
+▶ #悟空新文 #K線西遊記 #花果山台灣 #KAIOS #KGEN9月19日，借李白《將進酒》敬我姐一杯。真正的千金不是黃金，是家人；真正的美酒，是還能相聚的時間。姐，生日快樂！人生還長，我們繼續走。  
+👉 https://www.youtube.com/watch?v=cZBeJO7_qc8
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
