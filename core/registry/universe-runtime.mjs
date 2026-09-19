@@ -142,4 +142,26 @@ export async function createUniverseRuntime({ seed, store = new MemoryUniverseSt
   return Object.freeze({ store, registries, seed });
 }
 
-export function createBrowserUniverseStore(name) { return new IndexedDbUniverseStore(name); }
+export function createBrowserUniverseStore(name, options) {
+  return new IndexedDbUniverseStore(name, options);
+}
+
+export async function createResilientBrowserUniverseStore(name, options) {
+  try {
+    const store = createBrowserUniverseStore(name, options);
+    await store.ready();
+    return Object.freeze({
+      store,
+      mode: "INDEXED_DB",
+      durable: true,
+      fallback_reason: null
+    });
+  } catch (error) {
+    return Object.freeze({
+      store: new MemoryUniverseStore(),
+      mode: "MEMORY_FALLBACK",
+      durable: false,
+      fallback_reason: error?.code ?? "INDEXEDDB_OPEN_FAILED"
+    });
+  }
+}

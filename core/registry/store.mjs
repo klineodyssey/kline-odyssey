@@ -72,15 +72,36 @@ export class MemoryUniverseStore {
 }
 
 export class IndexedDbUniverseStore {
-  constructor(name = "KGEN_11520_UNIVERSE_V2") {
+  constructor(name = "KGEN_11520_UNIVERSE_V2", { openTimeoutMs = 2500 } = {}) {
     invariant(globalThis.indexedDB, "INDEXEDDB_UNAVAILABLE", "IndexedDB is unavailable in this runtime");
+    invariant(
+      Number.isInteger(openTimeoutMs) && openTimeoutMs > 0,
+      "INVALID_INDEXEDDB_OPEN_TIMEOUT",
+      "IndexedDB open timeout must be a positive integer"
+    );
     this.name = name;
-    this.dbPromise = this.#open();
+    this.dbPromise = this.#open(openTimeoutMs);
   }
 
-  #open() {
+  #open(openTimeoutMs) {
     return new Promise((resolve, reject) => {
       const request = globalThis.indexedDB.open(this.name, 1);
+      let settled = false;
+      const finish = (handler, value) => {
+        if (settled) return false;
+        settled = true;
+        globalThis.clearTimeout(timeout);
+        handler(value);
+        return true;
+      };
+      const fail = (code, message, cause = undefined) => {
+        const error = new Error(message, cause === undefined ? undefined : { cause });
+        error.code = code;
+        finish(reject, error);
+      };
+      const timeout = globalThis.setTimeout(() => {
+        fail("INDEXEDDB_OPEN_TIMEOUT", `IndexedDB open timed out after ${openTimeoutMs}ms`);
+      }, openTimeoutMs);
       request.onupgradeneeded = () => {
         const db = request.result;
         const entities = db.createObjectStore("entities", { keyPath: "key" });
@@ -88,9 +109,29 @@ export class IndexedDbUniverseStore {
         const events = db.createObjectStore("events", { keyPath: "event_id" });
         events.createIndex("subject_id", "subject_id", { unique: false });
       };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        if (!finish(resolve, db)) {
+          db?.close?.();
+          return;
+        }
+        db.onversionchange = () => db.close();
+      };
+      request.onerror = () => fail(
+        "INDEXEDDB_OPEN_FAILED",
+        request.error?.message || "IndexedDB open failed",
+        request.error
+      );
+      request.onblocked = () => fail(
+        "INDEXEDDB_OPEN_BLOCKED",
+        "IndexedDB open was blocked by another page"
+      );
     });
+  }
+
+  async ready() {
+    await this.dbPromise;
+    return this;
   }
 
   async #request(request) {
