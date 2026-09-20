@@ -1,0 +1,245 @@
+{
+  "schema_version": "1.0",
+  "work_order_id": "KAIOS-PR200-SPOT-BOOK-QUOTE-SURFACE-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit PR #200 spot-book and quote-surface lineage without activating market or settlement effects",
+  "priority": "P1",
+  "risk_class": "R0",
+  "status": "COMPLETED_EVIDENCE_ONLY_HOLD",
+  "selection": {
+    "selected_candidate_count": 1,
+    "selected_candidate": "PR_200_SPOT_BOOK_QUOTE_SURFACE_LINEAGE_AUDIT",
+    "selection_reason": "Highest-ranked executable safe task after P0 protected-effect candidates remain HOLD; the bounded deliverable records exact lineage and fail-closed blockers without transplanting market, settlement, UI, wallet, token, or workflow code."
+  },
+  "repository": {
+    "full_name": "klineodyssey/kline-odyssey",
+    "exact_base_branch": "main",
+    "exact_base_sha": "bccaa647b641d16bf09d6704c5e1cba26003ddf6",
+    "exact_base_tree_sha": "c05cccd748fbab6bed3eefde48c304be98d963d8",
+    "integration_branch": "audit/pr200-spot-book-quote-lineage-r0-20260920",
+    "expected_changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR200_SPOT_BOOK_QUOTE_SURFACE_LINEAGE_AUDIT_R0_20260920.json"
+    ]
+  },
+  "audited_pull_request": {
+    "number": 200,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/200",
+    "title": "feat(11520): add KGEN/KAIOS spot book and quote surface",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD_DO_NOT_MERGE_OR_TRANSPLANT",
+    "base_branch": "codex/kaios-11520-settlement-packet-v1",
+    "base_sha": "685dcfd0006584c565e93daee0f9424f911a08eb",
+    "head_branch": "gm/k11520-kgen-kaios-spot-v1",
+    "head_sha": "e33982ac3d3ce276935de95cf96b4a7b65d42287",
+    "head_tree_sha": "f07da71570feed44faab57a5f1da5d35e7d2077d",
+    "commits_relative_to_parent": 12,
+    "paths_relative_to_parent": 10,
+    "relative_to_exact_main": {
+      "merge_base_sha": "0267ff4d7eb22dccfbe98794a1fc409c3468a7f7",
+      "ahead_by": 35,
+      "behind_by": 745,
+      "status": "DIVERGED"
+    },
+    "conversation_comments": 1,
+    "submitted_reviews": 0,
+    "review_threads": 0
+  },
+  "dependency_lineage": [
+    {
+      "pr": 169,
+      "role": "parent_market_cell",
+      "state": "CLOSED",
+      "draft": true,
+      "merged": false,
+      "head_sha": "668bf469b007de652a7264cf29150cbc4cdf2fe0",
+      "consequence": "Cannot supply current production authority or an integration base."
+    },
+    {
+      "pr": 195,
+      "role": "direct_parent_settlement_packet",
+      "state": "CLOSED",
+      "draft": true,
+      "merged": false,
+      "head_sha": "685dcfd0006584c565e93daee0f9424f911a08eb",
+      "consequence": "Cannot supply current receipt, settlement, or custody authority."
+    },
+    {
+      "pr": 203,
+      "role": "downstream_integrated_warp_and_atm",
+      "state": "OPEN",
+      "draft": true,
+      "merged": false,
+      "head_sha": "0e58628783dac4e153e2ac367dbd7d08f649d965",
+      "consequence": "Must remain HOLD while PR #200 and its ancestors lack a safe current-main successor."
+    }
+  ],
+  "inventory": {
+    "open_pull_request_count": 34,
+    "open_pull_request_numbers": [187, 182, 196, 200, 232, 172, 212, 211, 201, 158, 135, 134, 133, 199, 198, 192, 191, 190, 188, 186, 183, 181, 180, 179, 177, 161, 159, 48, 203, 194, 154, 152, 136, 153],
+    "exact_main_recent_ci_failures": 0,
+    "todo_fixme_hack_default_branch_matches": 0,
+    "p0_summary": "Real-funds, Mainnet, payroll, payment, treasury, liquidity, governance, and Auto-LP work remains non-executable HOLD.",
+    "visual_qa_summary": "PR #200 has no exact-head current-shell Chromium, responsive, or screenshot evidence; historical DOM-only tests are insufficient.",
+    "runtime_summary": "Current main already contains a safer repository-bound native market cell and an unfrozen quote candidate; PR #200 duplicates older engines and evidence models."
+  },
+  "ranked_candidates": [
+    {"rank": 1, "priority": "P0", "candidate": "PR #232 real-funds oracle/e2e", "disposition": "HOLD_PROTECTED_EFFECTS"},
+    {"rank": 2, "priority": "P0", "candidate": "PRs #135/#154/#186/#199 Mainnet, payroll, payment, Auto-LP", "disposition": "HOLD_PROTECTED_EFFECTS"},
+    {"rank": 3, "priority": "P1", "candidate": "PR #200 spot-book/quote-surface lineage audit", "disposition": "SELECTED_R0_EVIDENCE_ONLY"},
+    {"rank": 4, "priority": "P1", "candidate": "PR #203 integrated KAIOS warp/bilateral ATM stacked-lineage audit", "disposition": "NEXT"},
+    {"rank": 5, "priority": "P1", "candidate": "PR #133 FortuneGame/Mainnet lineage audit", "disposition": "PENDING"},
+    {"rank": 6, "priority": "P1", "candidate": "PR #134 TempleHeart bindings lineage audit", "disposition": "PENDING"},
+    {"rank": 7, "priority": "P1", "candidate": "PRs #158/#159 physics/current/catalyst lineage audit", "disposition": "PENDING"},
+    {"rank": 8, "priority": "P1", "candidate": "PR #161 circulatory autopilot lineage audit", "disposition": "PENDING"},
+    {"rank": 9, "priority": "P1", "candidate": "PRs #152/#153/#154 service/payroll/capability lineage audit", "disposition": "PENDING"},
+    {"rank": 10, "priority": "P1", "candidate": "PR #198 mobile ATM/UFO service lineage audit", "disposition": "PENDING"},
+    {"rank": 11, "priority": "P2", "candidate": "PR #177 external executor lineage audit", "disposition": "PENDING"},
+    {"rank": 12, "priority": "P2", "candidate": "PR #48 protected baseline lineage audit", "disposition": "PENDING"}
+  ],
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "KGEN-Canon/README.md", "blob_sha": "73522e0da54967c1f164670742ab599f818e3ede"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-Canon/KGEN_CANON_MASTER.json", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"},
+    {"path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"},
+    {"path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md", "blob_sha": "824626abe0a10894972445d3ae3597b584d44276"},
+    {"path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md", "blob_sha": "760228b706ebec2b88831d09a9d91a829c7bba4a"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md", "blob_sha": "092c11a085412154b26d230ba8007cc41fdd2e18"},
+    {"path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0"},
+    {"path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29"},
+    {"path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa"},
+    {"path": "K線西遊記/temples/11520/AGENTS.md", "blob_sha": "4e2821c8d86e65afa4c4c50f7fdba7575ca2cd4f"},
+    {"path": "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "blob_sha": "8abc55c09675e1f8aa5762516712f579b3874218"},
+    {"path": "K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs", "blob_sha": "6a4706aa7212666dea85da24f39d7f177dcdeac9"},
+    {"path": "tests/11520-kgen-native-market-cell.test.mjs", "blob_sha": "c560fe046867f38be787a3839142c4e6abca2d72"},
+    {"path": "K線西遊記/temples/11520/runtime/public-market-quotes.mjs", "blob_sha": "d81d2f5e80f3ac78c201c582cfa8a9163f99112f"},
+    {"path": "tests/11520-public-market-quotes.test.mjs", "blob_sha": "49db682403b4a5a5b4dad1375c31a17bb4d23176"}
+  ],
+  "path_classification": [
+    {"path": "K線西遊記/temples/11520/KGEN_KAIOS_SPOT_PRODUCT.md", "classification": "PRODUCT_POLICY_HOLD", "base_blob": null, "head_blob": "31eb9ef16c8556dfb40c06f3fc9c2b4470ddad40", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/index.html", "classification": "STALE_CURRENT_UI_MOUNT_HOLD", "base_blob": "24ab992cdd228d49fc9847a1f38d6143d7e49aae", "head_blob": "487b6fb87e3cbd1f439962cac537a91aeb3b9818", "current_main_blob": "a908355fa6359b322b784731144ff5b1237000d8"},
+    {"path": "K線西遊記/temples/11520/modules/kgen-kaios-market-mount.mjs", "classification": "LEGACY_STATIC_MOUNT_HOLD", "base_blob": null, "head_blob": "cada06c34f6c5eb5643ce7646d601844c1b61c36", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/modules/kgen-kaios-market-view.mjs", "classification": "LEGACY_VIEW_SURFACE_HOLD", "base_blob": null, "head_blob": "d8cd0d26231d145d92512573897d1b00ce06890b", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/modules/kgen-kaios-settlement-adapter.mjs", "classification": "SETTLEMENT_RECEIPT_PRECISION_AUTHORITY_HOLD", "base_blob": null, "head_blob": "e99372e15ab7358f062b51513017c46dcd1dfccc", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/modules/kgen-kaios-spot-market.mjs", "classification": "PARALLEL_MARKET_ACTOR_REPLAY_HOLD", "base_blob": null, "head_blob": "daf324a9633eee9b87756107313b8ce41d1b7ddc", "current_main_blob": null},
+    {"path": "tests/11520-kgen-kaios-market-mount.test.mjs", "classification": "HISTORICAL_DOM_TEST_EVIDENCE_ONLY", "base_blob": null, "head_blob": "dfbbe329fe3a6e560b715b120f8209f01ec05da2", "current_main_blob": null},
+    {"path": "tests/11520-kgen-kaios-market-view.test.mjs", "classification": "HISTORICAL_DOM_TEST_EVIDENCE_ONLY", "base_blob": null, "head_blob": "446f34c1831eb63fa594c4ed1e4dac40e2c1d934", "current_main_blob": null},
+    {"path": "tests/11520-kgen-kaios-settlement-adapter.test.mjs", "classification": "HISTORICAL_SETTLEMENT_TEST_EVIDENCE_ONLY", "base_blob": null, "head_blob": "2807ed77af05eaef64f20f071d4248ff9c2755f0", "current_main_blob": null},
+    {"path": "tests/11520-kgen-kaios-spot-market.test.mjs", "classification": "HISTORICAL_MARKET_TEST_EVIDENCE_ONLY", "base_blob": null, "head_blob": "2cb8684ffd336310aeba9d1ba6daa7763e4a413c", "current_main_blob": null}
+  ],
+  "classification_totals": {
+    "PRODUCT_POLICY_HOLD": 1,
+    "STALE_CURRENT_UI_MOUNT_HOLD": 1,
+    "LEGACY_STATIC_MOUNT_HOLD": 1,
+    "LEGACY_VIEW_SURFACE_HOLD": 1,
+    "SETTLEMENT_RECEIPT_PRECISION_AUTHORITY_HOLD": 1,
+    "PARALLEL_MARKET_ACTOR_REPLAY_HOLD": 1,
+    "HISTORICAL_DOM_TEST_EVIDENCE_ONLY": 2,
+    "HISTORICAL_SETTLEMENT_TEST_EVIDENCE_ONLY": 1,
+    "HISTORICAL_MARKET_TEST_EVIDENCE_ONLY": 1,
+    "total": 10
+  },
+  "findings": [
+    "Caller-provided lifeId and controllerId are only regex-normalized; they are not repository-bound identity, controller, consent, or authority evidence.",
+    "The legacy spot engine consumes its replay nonce and advances counters before self-match rejection, allowing a rejected request to poison the nonce and mutate sequence state.",
+    "A second spot engine duplicates the current native market cell and hardcodes KAIOS as quote asset while current main intentionally keeps the 11520 native quote candidate unfrozen.",
+    "The settlement adapter is production fail-closed, but its local fixture can create VERIFIED_SETTLED records, CT values, volumes, candles, and ownership labels without a durable authoritative registry.",
+    "Decimal input is gated through JavaScript Number and aggregate values use Number, permitting precision loss or non-finite behavior for large or high-precision values.",
+    "Caller-controlled settledAtMs determines candle time instead of receipt-bound authoritative time.",
+    "bindMatchedTrade does not bind the source trade marketId and substitutes the adapter marketId, so engine and market origin are not cryptographically linked.",
+    "For custom tick or lot sizes, quote precision failures can occur after maker fills have already mutated orders and trades, so matching is not atomic or rollback-safe.",
+    "Replay, order, trade, and settlement state is process-memory only and is not durable, globally atomic, or exactly once.",
+    "The candidate mounts into a stale legacy shell and has no current V4.1 real-browser, responsive, accessibility, or screenshot evidence.",
+    "The mount owns empty module-private market and settlement instances and exposes no live order or data-feed hookup, leaving the rendered panel static rather than an operational quote surface.",
+    "Parent PRs #169 and #195 are closed and unmerged; downstream PR #203 cannot inherit authority from this held branch."
+  ],
+  "positive_controls": [
+    "Production settlement remains fail-closed when its receipt registry is absent.",
+    "The candidate does not contain signer, wallet, chain-write, approval, transfer, or deployment capability.",
+    "The product text does not reinterpret the KGEN/KAIOS physics scale as a fixed market price.",
+    "Rendered actor text is escaped before DOM insertion."
+  ],
+  "validation": {
+    "historical_exact_head": {
+      "head_sha": "e33982ac3d3ce276935de95cf96b4a7b65d42287",
+      "workflow_run_id": 33402552645,
+      "workflow_name": "11520 Universal Exchange V2",
+      "conclusion": "SUCCESS",
+      "universal_exchange": "238/238 PASS",
+      "native_market_cell": "21/21 PASS",
+      "module_syntax": "PASS",
+      "limitations": [
+        "Historical branch-only evidence; it is not current-main integration evidence.",
+        "Checkout and setup-node v4 emitted Node.js 20 deprecation warnings.",
+        "No exact-head Game Product QA, Responsive QA, Chromium, or screenshot artifact exists."
+      ]
+    },
+    "exact_base_main": {
+      "sha": "bccaa647b641d16bf09d6704c5e1cba26003ddf6",
+      "pages_run_id": 35513240548,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run_id": 35513270538,
+      "responsive_conclusion": "SUCCESS",
+      "responsive_viewports": ["360x740", "390x844", "432x856", "844x390"],
+      "responsive_errors": 0,
+      "code_equivalent_universal_exchange": "302/302 PASS"
+    },
+    "work_order_assertions": [
+      "JSON parses",
+      "selected_candidate_count equals 1",
+      "exactly 10 unique PR-relative paths are classified",
+      "classification totals sum to 10",
+      "all non-null SHA fields are 40 lowercase hexadecimal characters",
+      "all protected effects are false",
+      "diff check passes"
+    ],
+    "target_specific_visual_qa": "NOT_APPLICABLE_DOCUMENTATION_ONLY_CHANGE",
+    "post_merge_visual_qa_required": true
+  },
+  "protected_effects": {
+    "payment": false,
+    "asset_transfer": false,
+    "token_mint": false,
+    "token_burn": false,
+    "mainnet_transaction": false,
+    "governance": false,
+    "worker_activation": false,
+    "life_activation": false,
+    "controller_appointment": false,
+    "signer_appointment": false,
+    "operator_appointment": false,
+    "private_key_access": false,
+    "wallet_request": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "chain_state_mutation": false,
+    "market_activation": false,
+    "settlement_activation": false
+  },
+  "acceptance": {
+    "scope_bounded_to_one_json": true,
+    "no_protected_canon_modified": true,
+    "no_runtime_or_ui_modified": true,
+    "pr_200_remains_open_draft_unmerged": true,
+    "current_main_successor_preferred": true,
+    "safe_successor_requirements": [
+      "Use repository-bound actor attestations and durable authorization, not caller identity strings.",
+      "Validate self-match, precision, and all failure conditions before consuming nonce or mutating book state.",
+      "Use exact decimal arithmetic with bounded units and reject non-finite or over-precision values before mutation.",
+      "Bind receipt, transaction, log, market, asset, parties, amount, time, and replay consumption atomically.",
+      "Retain the current unfrozen quote-candidate policy until separately authorized Canon evidence exists.",
+      "Integrate only into exact current V4.1 shell and complete Chromium plus 390x844 screenshot QA."
+    ]
+  },
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #203 integrated KAIOS warp and bilateral ATM stacked-lineage security audit",
+    "allowed_scope": "Evidence-only lineage audit; do not activate ATM, settlement, token, wallet, payroll, signer, or chain effects."
+  }
+}
