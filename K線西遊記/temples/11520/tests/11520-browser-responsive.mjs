@@ -21,7 +21,7 @@ const reports=[],failures=[],sourceChecks=[];
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourceSha=bytes=>sha(Buffer.from(Buffer.from(bytes).toString('utf8').replace(/\r\n?/g,'\n'),'utf8'));
 async function verifyProductionSource(){
-  for(const name of ['../game-5d.html','../sw.js','../manifest.webmanifest','world-runtime.mjs','game-5d-main.mjs','combat-drive-live-runtime.mjs','combat-fx-runtime.mjs','game-5d-bootstrap.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs']){
+  for(const name of ['../game-5d.html','../sw.js','../manifest.webmanifest','world-runtime.mjs','game-5d-main.mjs','combat-drive-live-runtime.mjs','combat-fx-runtime.mjs','game-5d-bootstrap.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs','plane-map-runtime.mjs','xyz-map-navigation-runtime.mjs']){
     // GitHub Pages publishes LF text while Windows checkouts may materialize CRLF.
     // Compare canonical source text so deployment lineage checks remain byte-format agnostic.
     const expected=sourceSha(await fs.readFile(new URL('../runtime/'+name,import.meta.url)));
@@ -42,6 +42,35 @@ async function snapshot(page){return page.evaluate(sels=>{
   const yThumbStyle=getComputedStyle(document.querySelector('#yThumb'));
   return{width:innerWidth,height:innerHeight,boxes:Object.fromEntries(sels.map(s=>[s,box(document.querySelector(s))])),cards:[...document.querySelectorAll('#axes .axis')].map(box),balances:[...document.querySelectorAll('.top>.pill')].map(box),drawers:[...document.querySelectorAll('.hud-drawer-toggle')].map(box),axisArt:{image:yThumbStyle.backgroundImage,position:yThumbStyle.backgroundPosition,size:yThumbStyle.backgroundSize,repeat:yThumbStyle.backgroundRepeat},settingsInstalled:!!globalThis.__K11520_UI_SETTINGS__,layoutInstalled:!!globalThis.__K11520_MOBILE_CONTROL_LAYOUT__,xyzInstalled:!!globalThis.__K11520_3D_CONTROL__,utilityOpen:document.documentElement.classList.contains('k11520UtilitiesOpen'),version:document.querySelector('.brandMetaV250')?.textContent};
 },selectors)}
+async function verifyKSpaceMap(page,report){
+  const read=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_MAP__);
+  const shot=async name=>page.screenshot({path:`${OUT}/${report.profile.name}-${name}.png`});
+  await page.waitForFunction(()=>globalThis.__K11520_KSPACE_MAP__?.targetId);
+  for(const selector of ['#kspaceViewK','#kspaceViewXYZ']){
+    const b=await page.locator(selector).boundingBox();assert.ok(b.width>=44&&b.height>=44,selector+' touch target');
+    assert.equal(await page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,selector+' pointer blocker');
+  }
+  await page.locator('#minimap').tap();await page.locator('#kspaceDetailMap').waitFor();
+  await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('PLAYER K'));
+  assert.match(await page.locator('#kspaceMapValues').textContent(),/PLAYER K.*MONSTER K.*ΔK.*DIST: 1.00 Ku.*LOCAL XYZ/s);
+  await shot('01_PLAYER_MONSTER_KSPACE');await page.locator('#sheetClose').click();
+  const rows=[];
+  for(const [plane,axis,c,name] of [['YZ','KX','1','02_KX_POSITIVE_PHASE'],['YZ','KX','-1','03_KX_NEGATIVE_PHASE'],['XZ','KY','1','04_KY_PHASE'],['XY','KZ','-1','05_KZ_PHASE']]){
+    for(let i=0;i<3&&(await read()).plane!==plane;i++){await page.locator('#joy').tap();await page.waitForTimeout(180)}
+    await page.locator('#cNumericInput').fill(c);await page.locator('#cNumericInput').press('Enter');
+    await page.waitForFunction(([axis,c])=>globalThis.__K11520_KSPACE_MAP__?.phase===axis+(c==='1'?'+':'−'),[axis,c]);
+    const model=await read(),runtime=await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());
+    assert.equal(model.normal,axis);assert.equal(model.targetId,runtime.target.id);assert.deepEqual(model.monster,runtime.monsterK);assert.deepEqual(model.player,runtime.playerK);assert.deepEqual(model.delta,runtime.deltaK);assert.equal(model.distance,1);
+    await shot(name);await page.locator('#kspaceViewK').click();await shot(name+'-detail');await page.locator('#sheetClose').click();rows.push(model);
+  }
+  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>globalThis.__K11520_KSPACE_MAP__?.neutral===true);
+  await page.locator('#minimap').tap();await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('NO ATTACK PHASE'));await shot('neutral');
+  await page.locator('#kspaceShowLocal').click();await page.waitForFunction(()=>document.querySelector('#minimap')?.dataset.coordinateSpace==='XYZ');
+  assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false);
+  await page.locator('#kspaceViewK').click();await page.waitForFunction(()=>globalThis.__K11520_KSPACE_MAP__?.view==='K');
+  if(report.profile.landscape)await shot('06_LANDSCAPE_KSPACE');
+  report.kspaceMap={rows,status:'FUNCTIONAL_PASS_SCREENSHOTS_REQUIRE_DIRECT_REVIEW'};
+}
 async function verifyKSpaceGameplay(page,report){
   const state=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());
   const input=async value=>{await page.locator('#cNumericInput').fill(value);await page.locator('#cNumericInput').press('Enter');await page.waitForTimeout(100)};
@@ -183,7 +212,7 @@ try{
       const quotePresent=await page.locator('[data-axis="KX"] .q').textContent().then(s=>Number(String(s).replace(/[$,]/g,''))>0);
       if(PRODUCTION)assert.equal(quotePresent,true,'Public Pages market-data-only quote source must be LIVE');
       if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
-      if(profile.width===390||profile.landscape)await verifyKSpaceGameplay(page,report);
+      if(profile.width===390||profile.landscape){await verifyKSpaceMap(page,report);await verifyKSpaceGameplay(page,report)}
       if(profile.landscape)await finalizeLandscape(page,report);
       if(PRODUCTION&&warnings.some(message=>/blocked by CORS|data-api\.binance\.vision.*ERR_FAILED/i.test(message)))failures.push(`${profile.name}: public quote CORS regression`);
       if(errors.length)failures.push(`${profile.name}: ${errors.join('; ')}`);

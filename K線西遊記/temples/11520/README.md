@@ -1,5 +1,11 @@
 # 11520 Universal Exchange V3.9
 
+## K-space coordinate map — V2.6.19 / 2026-09-21
+
+The existing minimap defaults to **K圖**: blue P = Player K, gold M = Monster K, arrow = relative K vector. The current plane supplies the two graph axes; the right depth rail supplies the third K axis. Coincident projected points share a circle/diamond, with depth shown separately. Active phase and ΔK distance use normalized simulation Ku, not raw prices or local attack range.
+
+Tap K圖 or the K canvas to expand player/monster KX/KY/KZ values, ΔK, distance and phase in the existing sheet. **XYZ** restores the local waypoint map. LOCAL XYZ and K-space remain separate: movement does not silently change K; market-card clicks do not change plane authority. No giant permanent HUD was added.
+
 ## K-space practice combat — V2.6.18 / 2026-09-21
 
 Walk toward the visible **K-Guardian · 模擬** with the XYZ joystick. Tap the plane control to choose XZ→KY, XY→KZ or YZ→KX; set C positive/negative to choose that body's phase. Zero C is neutral; lots remain positive position size, never direction. Market cards remain info-only.

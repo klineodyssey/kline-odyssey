@@ -48,7 +48,7 @@ export function setWorldTarget3D(target,{mode:targetMode='WORLD',source='WORLD'}
 export function startWorldNavigation3D(){return start()}
 export function stopWorldNavigation3D(reason=null){stop(reason);return true}
 function mapCanvasFromEventTarget(target){if(!(target instanceof Element))return null;if(target.matches?.('#minimap,#fullMap'))return target;return target.closest?.('#minimap,#fullMap')||null}
-function intercept(e){const plane=mode();if(plane==='XZ')return;const canvas=mapCanvasFromEventTarget(e.target);if(!canvas)return;
+function intercept(e){const plane=mode();if(plane==='XZ')return;const canvas=mapCanvasFromEventTarget(e.target);if(!canvas||canvas.dataset.coordinateSpace==='K')return;
   if(e.type==='pointerdown'){e.preventDefault();e.stopImmediatePropagation();return}
   if(e.type==='pointermove'){e.preventDefault();e.stopImmediatePropagation();return}
   if(e.type==='pointerup'){

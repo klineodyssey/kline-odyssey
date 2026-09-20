@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planeSpec,projectPlanePoint} from '../runtime/plane-map-runtime.mjs';
+import {planeSpec,projectPlanePoint,kSpaceMapModel,projectKSpaceMap} from '../runtime/plane-map-runtime.mjs';
 
 test('plane specs follow controller and normal-axis canon',()=>{
   assert.deepEqual(planeSpec('XZ'),{h:'X',v:'Z',depth:'Y',normal:'KY'});
@@ -22,4 +22,25 @@ test('YZ projects Y/Z and preserves X as signed depth',()=>{
   assert.equal(p.py,20);
   assert.equal(p.depth,5);
   assert.equal(p.depthAxis,'X');
+});
+
+const sample={playerK:{KX:1,KY:-.5,KZ:1},monsterK:{KX:1,KY:-.5,KZ:2},playerLocal:{x:31,y:0,z:3},target:{id:'guardian'},selection:{sign:1}};
+test('K map uses only normalized snapshot K, not local XYZ or world attack distance',()=>{
+  const m=kSpaceMapModel({...sample,distance:900},'YZ');
+  assert.equal(m.phase,'KX+');assert.equal(m.h,'KY');assert.equal(m.v,'KZ');
+  assert.deepEqual(m.delta,{KX:0,KY:0,KZ:1});assert.equal(m.distance,1);
+  assert.deepEqual(m.player,sample.playerK);assert.equal(m.local.x,31);
+  assert.equal(kSpaceMapModel({...sample,selection:{sign:-1}},'XZ').phase,'KY−');
+  assert.equal(kSpaceMapModel({...sample,selection:{sign:0}},'XY').phase,'KZ0');
+});
+test('depth rail preserves a monster coincident in XY projection without fake planar displacement',()=>{
+  const m=kSpaceMapModel(sample,'XY'),p=projectKSpaceMap(m,104,80);
+  assert.deepEqual(p.player,p.monster);assert.notEqual(p.depthPlayer,p.depthMonster);
+});
+test('target change and missing target cannot reuse stale marker/delta',()=>{
+  const next=kSpaceMapModel({...sample,target:{id:'next'},monsterK:{KX:4,KY:1,KZ:1}},'YZ');
+  assert.equal(next.targetId,'next');assert.deepEqual(next.delta,{KX:3,KY:1.5,KZ:0});
+  const missing=kSpaceMapModel({...sample,target:null},'YZ');
+  assert.equal(missing.monster,null);assert.equal(missing.delta,null);assert.equal(missing.distance,null);
+  assert.equal(kSpaceMapModel({...sample,playerK:{KX:NaN,KY:0,KZ:0}}),null);
 });

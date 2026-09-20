@@ -1,5 +1,17 @@
 # Work Queue
 
+## KAIOS-11520-KSPACE-MAP-20260921
+
+- Status: IN_PROGRESS / REAL_BROWSER_QA; completion requires exact-head CI and Pages verification.
+- task_source_type: HUMAN_OWNER_ENGINEERING_ORDER; task_source_id: K11520 K-SPACE MAP VISUALIZATION CONTINUATION; task_source_actor: 沈英明; task_source_file: current Human conversation, recorded in this queue and temple HANDOFF_CURRENT.md.
+- task_source_commit: 6709b92e18cea76f87113fcc57a95fe9260df535 (fetched base lineage only); task_source_reason: #421 has working combat K coordinates but lacks visible map points/vector.
+- created_by / owner: codex-gm-01 / 衡曜; created_at: 2026-09-21; reviewer: codex-gm-01 technical self-QA under explicit Human merge authority; priority: P1; risk_level: LOW_UI_SIMULATION; dependencies: merged #421.
+- Branch: `codex/k11520-kspace-map-20260921`; clean worktree, Human dirty main untouched.
+- Scope: extend existing plane-map organ with normalized Player/Monster markers, vector, depth, delta/distance, active phase and expandable values; retain a separate LOCAL XYZ navigation view. No combat math, settlement, wallet or full HUD redesign.
+- Source/IP: first-party code and original canvas geometry; no new assets, copied music, secret values or new runtime files. Protected live actions DENIED.
+- Acceptance: 390x844 + 844x390, all plane/sign transitions, neutral state, target snapshot consistency, local navigation, existing gameplay/rotation regression, direct screenshot inspection, fresh CI and Pages source hashes.
+- Payroll: current GM receipt/prepay/ATM advance/offset NOT_VERIFIED / HOLD; prototype internal ledger is not real payment evidence. No payment. Paused patrol/Cloud wake remains paused.
+
 ## KAIOS-11520-KSPACE-COMBAT-20260921
 
 - Status: IN_PROGRESS / EXACT_HEAD_QA; release evidence is the PR/CI/Pages SHA, not a predicted result.

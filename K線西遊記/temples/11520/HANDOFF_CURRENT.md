@@ -1,6 +1,16 @@
 # 11520 HANDOFF CURRENT
 
-## Current K-space combat integration — 2026-09-21
+## Current K-space map visualization — 2026-09-21
+
+- TASK_ID: KAIOS-11520-KSPACE-MAP-20260921; Human continuation order; owner 衡曜 / codex-gm-01. Base `6709b92e18cea76f87113fcc57a95fe9260df535` is lineage, not a future CURRENT assertion. Branch `codex/k11520-kspace-map-20260921` is isolated from Human dirty main.
+- BOOT / MUST READ: current Boot, AGENTS, Physics CURRENT, Universe Map, Canon, merge policy, registry, workspace/manager/dispatcher/review rules, queues and this temple's AGENTS/handoff. Registered ACTIVE T5; no active claim conflict. Existing protected PRs are separate from this bounded Human UI order.
+- PROTECTED PATH CHECK: no Canon/Boot/wallet/contracts/source-Life/settlement change. No protected external execution. Provenance is first-party repository code and original canvas rendering, no new assets.
+- TASK PLAN / EXECUTION: extend `runtime/plane-map-runtime.mjs`, preserve #421 snapshot as coordinate authority. K and LOCAL XYZ views share existing minimap footprint. Blue P circle and gold M diamond, Player-to-Monster vector, in-plane axes, separate normal/depth rail, explicit positive/negative/neutral phase, Ku distance and expandable player/monster/delta tuples. Coincident planar points remain coincident; depth is not faked as in-plane displacement.
+- XYZ navigation remains available through the XYZ tab and existing world map. K-map taps open the existing detail sheet and cannot create a local waypoint. Market display prices no longer masquerade as K map coordinates. The simulation normalization/combat source is unchanged.
+- V2.6.19 / shell cache v271. Existing unit/browser tests include all planes/signs, no-target/changed-target projection, live snapshot equality, two view switches, 44px tabs, gameplay and rotation. Mandatory screenshot names 01 through 06 are emitted with viewport prefixes into existing CI artifacts.
+- FINAL REPORT at authoring: candidate undergoing real-browser and exact-head validation. PR checks, actual merge and normal Pages deployment are final release evidence; no predicted completion. Payroll current-period receipts/advance/netting remain HOLD / NOT_VERIFIED; no paid claim. Broad patrol and Cursor remain paused.
+
+## Previous K-space combat integration — 2026-09-21
 
 - TASK_ID: KAIOS-11520-KSPACE-COMBAT-20260921; owner 衡曜 / codex-gm-01 / LIFE-CODEX-GM-0001.
 - Human source: explicit K-SPACE COMBAT COORDINATE IMPLEMENTATION ORDER; ordinary game/simulation repository merge and Pages publication authorized after exact-head tests and direct screenshot review. No second-reviewer ceremony; protected execution remains prohibited.
