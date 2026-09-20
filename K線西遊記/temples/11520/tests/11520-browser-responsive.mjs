@@ -70,7 +70,9 @@ async function verifyKSpaceMap(page,report){
   await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('PLAYER K'));
   assert.match(await page.locator('#kspaceMapValues').textContent(),/PLAYER K.*MONSTER K.*ΔK.*DIST: 1.00 Ku.*LOCAL XYZ/s);
   await shot('01_PLAYER_MONSTER_KSPACE');
-  await page.locator('#sheetBody summary').click();await page.locator('#kspaceDetailMap').scrollIntoViewIfNeeded();await shot('01_NEAR_K_VECTOR');await page.locator('#sheetClose').click();
+  await page.locator('#sheetBody summary').click();await page.locator('#kspaceDetailMap').scrollIntoViewIfNeeded();
+  assert.equal(await page.locator('#sheetClose').evaluate(el=>{const r=el.getBoundingClientRect();return r.width>=44&&r.height>=44&&r.top>=0&&el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,'expanded K-map close must remain visible and pointer-reachable while scrolling');
+  await shot('01_NEAR_K_VECTOR');await page.locator('#sheetClose').click();
   const rows=[];
   for(const [plane,axis,c,name] of [['YZ','KX','1','02_KX_POSITIVE_PHASE'],['YZ','KX','-1','03_KX_NEGATIVE_PHASE'],['XZ','KY','1','04_KY_PHASE'],['XY','KZ','-1','05_KZ_PHASE']]){
     for(let i=0;i<3&&(await read()).plane!==plane;i++){await page.locator('#joy').tap();await page.waitForTimeout(180)}
