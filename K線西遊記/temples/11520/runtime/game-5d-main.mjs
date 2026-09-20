@@ -29,7 +29,7 @@ let lastSessionSave=0,lastSessionSnapshot='';function persistPlayerSession(force
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
 createKSpaceEncounter(world);
 const fmt=(n,d=4)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:d});
-function toast(t){const el=$('#toast');if(!el)return;el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
+function toast(t,combat=false){const el=$('#toast');if(!el)return;el.dataset.kspaceFeedback=String(combat);el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
 function axis(){return S.axes[S.axis]}function price(){return S.quotes[axis().market]||0}
 function normalizeTradeSide(value){return /空|SHORT|SELL/i.test(String(value||''))?'空':'多'}
 function setTradeSide(axisId,value){const id=String(axisId||'').toUpperCase(),target=S.axes[id];if(!target)return false;const next=normalizeTradeSide(value);if(target.side!==next){target.side=next;document.dispatchEvent(new CustomEvent('k11520:trade-side-change',{detail:{axis:id,side:next,source:'SIGNED_C'}}))}return true}
@@ -87,7 +87,7 @@ function attackFeedback(r){
 }
 function performCombat(skill){
   const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now()});
-  toast(attackFeedback(r));
+  toast(attackFeedback(r),true);
   if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
   renderCombatTarget();return r;
 }
