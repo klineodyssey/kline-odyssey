@@ -1,0 +1,377 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR179-WALLET-DISCOVERY-METADATA-STATUS-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit stale KGEN wallet discovery, frozen supply, and external metadata status without issuing wallet requests or publication claims",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_179_WALLET_DISCOVERY_METADATA_STATUS_LINEAGE_AUDIT",
+  "exact_base_sha": "df969b1e7be579a8148b538331ab464833979273",
+  "exact_base_tree_sha": "3db6b8d913c303ef3d7fa9f903450b41d2f6a80f",
+  "integration_branch": "audit/pr179-wallet-metadata-lineage-r0-20260920",
+  "integration_head_derivation": "READ_BRANCH_REF_AFTER_COMMIT",
+  "audited_pr": 179,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_recorded_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_merge_base_sha": "830b79214781fb1231f3619336de394f400a0bfd",
+  "audited_merge_base_tree_sha": "c101af16de79e36cfed1a4343d77799eb304ce41",
+  "audited_head_branch": "codex/kgen-exchange-metadata-wallet-discovery-v1",
+  "audited_head_sha": "d88ed1bfbee8b495b3bfb776b865cbb061384309",
+  "audited_head_tree_sha": "765a526585bd140dc32618611c402605314fad7d",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT_NON_MERGEABLE",
+    "ahead": 9,
+    "behind": 745
+  },
+  "pr_scope": {
+    "changed_paths": 13,
+    "insertions": 355,
+    "deletions": 66,
+    "commits": 9,
+    "conversation_comments": 1,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "historical_hold_comment": "Owner/dispatcher note requires Draft/HOLD, no merge, distinct review, and an authorized external-submission path."
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 179 adds user-initiated wallet_switchEthereumChain and wallet_watchAsset requests, a read-only validation workflow, frozen BSC supply observations, public API projections, and external metadata documents. It does not request a transaction or approval and its historical exact-head tests are green, but wallet-provider consent remains an external user action; the supply snapshot is fixed at BSC block 118374207 on 2026-08-27; the narrative contains a different historical block reference; and BscScan or CoinMarketCap submission, acceptance, ownership, authority, and current state are not proven. The branch is 745 commits behind current main and modifies a stale root portal and universal test lineage. The safe bounded action is a current-main lineage audit only, with zero transplant and zero wallet, platform, workflow-dispatch, credential, or chain side effect.",
+  "inventory": {
+    "open_pull_requests": 34,
+    "latest_main_required_checks": "GREEN",
+    "latest_main_failed_workflow_runs_observed": 0,
+    "relevant_todo_fixme_hack_matches": 0,
+    "selected_visual_failure": null,
+    "selected_runtime_defect": null,
+    "security_blocker": "PR 179 lacks current user-consent UX evidence, current supply evidence, authenticated platform receipts, and repository-bound authority for any wallet or metadata publication action."
+  },
+  "blocking_findings": [
+    "PR 179 is open, Draft, unmerged, non-mergeable, diverged, and 745 commits behind exact current main.",
+    "The root portal calls wallet_switchEthereumChain and wallet_watchAsset after a button click. These are user-visible wallet-provider requests and are not exercised by this audit.",
+    "The wallet code does not call eth_sendTransaction, eth_sendRawTransaction, approve, or transfer, but absence of transfer authority does not authorize a chain-switch or watch-asset prompt.",
+    "The snapshot is frozen at BSC block 118374207 with timestamp 2026-08-27T11:17:35Z; it is historical evidence, not current total supply, circulating supply, holder, owner, reserve, or entitlement state.",
+    "The circulating-supply narrative also retains BSC block 118355844 and older July evidence, so the package contains multiple observation vintages that cannot be collapsed into a current claim.",
+    "Public owner, creator, bank, reward, auto-LP, pair, contract, and holder addresses do not prove controller, signer, ownership, custody, treasury, employment, Life identity, or Company authority.",
+    "The BscScan document explicitly says external publication is not confirmed and records no ownership signature or accepted submission receipt.",
+    "The CoinMarketCap package is a read-only historical verification candidate and records no external submission or platform acceptance.",
+    "The refresh script calls public RPC and GoPlus endpoints and writes repository projections; it is not run because this audit cannot turn mutable external data into authenticated authority or current Canon.",
+    "The historical read-only workflow has contents: read and green exact-head runs, but a branch-specific stale workflow is not transplanted.",
+    "The old root index and wallet-discovery test do not have current-main shell, accessibility, consent, real-browser, or screenshot evidence and must not replace current product surfaces.",
+    "Historical CI success cannot manufacture current external state, accepted publication, a Human decision, reviewer identity, Company authority, signer control, or Mainnet permission."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and preserve protected Canon, CURRENT, Boot, contract, wallet, bridge, workflow, and public-site boundaries.",
+    "Treat block, supply, holder, owner, reserve, liquidity, listing, verification, and metadata values as timestamped external observations with source URLs and observation times.",
+    "Require an explicit user gesture, precise pre-request explanation, rejection recovery, supported-chain handling, accessibility checks, and current-main Chromium screenshot evidence before any wallet-discovery UI can be considered.",
+    "Require repository-bound Human authority plus action-time confirmation before any authenticated BscScan, CoinMarketCap, CoinGecko, wallet, contract, or listing submission.",
+    "Require authenticated external receipts and a post-action public re-read before changing a status to submitted, accepted, verified, listed, or published.",
+    "Never infer controller, signer, ownership, custody, treasury, employment, Life identity, or Company authority from a public address, holder index, transaction, explorer page, GitHub authorship, or local file.",
+    "Never access credentials, generate ownership signatures, send wallet requests, send transactions, dispatch workflows, call paid APIs, or mutate external or chain state as part of a lineage audit."
+  ],
+  "source_reads": [
+    {
+      "path": "AGENTS.md",
+      "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"
+    },
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"
+    },
+    {
+      "path": "KGEN-Canon/README.md",
+      "blob_sha": "73522e0da54967c1f164670742ab599f818e3ede"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md",
+      "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_CANON_MASTER.json",
+      "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_LIFE_RUNTIME_CURRENT.md",
+      "blob_sha": "b4941c14b79f6800bf62d533497fdd5ea783e1f7"
+    },
+    {
+      "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
+      "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md",
+      "blob_sha": "6004ab03612f436150329a4c77492419323a51b0"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md",
+      "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+      "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04"
+    },
+    {
+      "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
+      "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6"
+    },
+    {
+      "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md",
+      "blob_sha": "650d371140179dc955d323da226f41360dda33b1"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+      "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md",
+      "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa"
+    }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "metadata_supply_tests": "22/22 PASS",
+      "universal_exchange": "239/239 PASS",
+      "world_viewer_product_qa": "189/189 PASS",
+      "ai_company_responsive_browser_qa": "4/4 PASS",
+      "world_viewer_screenshot_artifact_id": 9644227786,
+      "world_viewer_screenshot_artifact_digest": "sha256:afbb07c30096421a0ce4fd29d1d06006653784f316ed3c07b01aed398569740f",
+      "historical_run_ids": [
+        33066995390,
+        33066999168,
+        33066999156,
+        33066999224
+      ],
+      "historical_run_conclusions": "4/4 SUCCESS_HISTORICAL_ONLY",
+      "tested_sha": "d88ed1bfbee8b495b3bfb776b865cbb061384309"
+    },
+    "exact_current_main": {
+      "responsive_run_id": 35486493690,
+      "responsive_conclusion": "SUCCESS",
+      "pages_run_id": 35486449885,
+      "pages_conclusion": "SUCCESS",
+      "tested_sha": "df969b1e7be579a8148b538331ab464833979273",
+      "latest_code_equivalent_universal_run_id": 35484718096,
+      "latest_code_equivalent_universal_conclusion": "SUCCESS",
+      "latest_code_equivalent_universal_sha": "16954be3026cdcfc2cb7ab55bf0bfc229c0b170f",
+      "note": "The only subsequent main change before this audit was the document-only PR 196 lineage work order."
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; NO_UI_GAME_OR_WALLET_CODE_TRANSPLANTED; OLD_HEAD_BROWSER_EVIDENCE_IS_HISTORICAL_ONLY"
+  },
+  "classification_counts": {
+    "HISTORICAL_READ_ONLY_WORKFLOW_NOT_TRANSPLANTED": 1,
+    "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD": 10,
+    "STALE_WALLET_DISCOVERY_UI_HOLD": 1,
+    "HISTORICAL_TEST_EVIDENCE_ONLY": 1,
+    "TOTAL": 13
+  },
+  "path_classification": [
+    {
+      "path": ".github/workflows/kgen-metadata-wallet-review.yml",
+      "merge_base_blob_sha": null,
+      "audited_blob_sha": "d4eeaf61da6f77fc8bdbf19b9ef5c2d11b833106",
+      "current_main_blob_sha": null,
+      "classification": "HISTORICAL_READ_ONLY_WORKFLOW_NOT_TRANSPLANTED",
+      "disposition": "Retain historical exact-head CI evidence only; do not add a stale branch-scoped workflow."
+    },
+    {
+      "path": "KGEN/registry/BscScan/KGEN_BSCSCAN_TOKEN_INFO_SUBMISSION_V1.md",
+      "merge_base_blob_sha": "a04b13e78679b85109e187857a736ffc74436dd9",
+      "audited_blob_sha": "f19ae7c2d1c0baec728c56bd506ae27c900193d4",
+      "current_main_blob_sha": "a04b13e78679b85109e187857a736ffc74436dd9",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Do not represent an unsubmitted token-info package as accepted, published, current, or authorized."
+    },
+    {
+      "path": "KGEN/registry/CoinMarketCap/KGEN_CMC_CIRCULATING_SUPPLY_VERIFICATION.md",
+      "merge_base_blob_sha": "17cbcf31e1bd75081967fcbef3e9b1b1f86653e1",
+      "audited_blob_sha": "7608682e067b909025e49601b1eaf77ff14f9634",
+      "current_main_blob_sha": "17cbcf31e1bd75081967fcbef3e9b1b1f86653e1",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Keep multiple historical observation vintages out of current external-platform claims."
+    },
+    {
+      "path": "KGEN/registry/CoinMarketCap/kgen_cmc_supply_snapshot.json",
+      "merge_base_blob_sha": "84d4d1ea585986ab12a2a704409a7a201c76cdbe",
+      "audited_blob_sha": "9cc48b71a9f403a3d85ee5082ebcf8012aba91d1",
+      "current_main_blob_sha": "84d4d1ea585986ab12a2a704409a7a201c76cdbe",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Retain block 118374207 only as historical branch evidence; do not publish it as current supply or authority."
+    },
+    {
+      "path": "KGEN/registry/CoinMarketCap/refresh_kgen_supply.py",
+      "merge_base_blob_sha": "4150b7a742c66480df68085dafca86c007f28001",
+      "audited_blob_sha": "6740a797d2f6ddad41a910d20767551831661806",
+      "current_main_blob_sha": "4150b7a742c66480df68085dafca86c007f28001",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Do not transplant or run a mutable external-data refresh script in a lineage audit."
+    },
+    {
+      "path": "KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py",
+      "merge_base_blob_sha": "a95598c74a66d4c582e7108f9185c91c70b02036",
+      "audited_blob_sha": "23e6b11b52132327c94074dd9ec282e6303a8a5f",
+      "current_main_blob_sha": "a95598c74a66d4c582e7108f9185c91c70b02036",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Historical internal consistency tests do not prove platform submission or acceptance."
+    },
+    {
+      "path": "KGEN/registry/CoinMarketCap/test_kgen_cmc_supply.py",
+      "merge_base_blob_sha": "0bb4bc12ecdd9e6c34f5f7b62bd9d05efaebb94d",
+      "audited_blob_sha": "d78b6e1c1f74e4f748bd030a0c0846354d49f0b2",
+      "current_main_blob_sha": "0bb4bc12ecdd9e6c34f5f7b62bd9d05efaebb94d",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Historical snapshot tests remain old-head evidence only."
+    },
+    {
+      "path": "api/kgen/circulating-supply",
+      "merge_base_blob_sha": "cf0947a3424394d9b53c20a94250c777fd236dd4",
+      "audited_blob_sha": "022360348956f8795ec3a0bd53c4fcdc2f91d758",
+      "current_main_blob_sha": "cf0947a3424394d9b53c20a94250c777fd236dd4",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Do not replace a public projection with a frozen 2026-08-27 value."
+    },
+    {
+      "path": "api/kgen/circulating-supply.txt",
+      "merge_base_blob_sha": "cf0947a3424394d9b53c20a94250c777fd236dd4",
+      "audited_blob_sha": "022360348956f8795ec3a0bd53c4fcdc2f91d758",
+      "current_main_blob_sha": "cf0947a3424394d9b53c20a94250c777fd236dd4",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Do not replace a public projection with a frozen 2026-08-27 value."
+    },
+    {
+      "path": "api/kgen/total-supply",
+      "merge_base_blob_sha": "74db0d5cd8df15eee0bf635c65686511bb066ecd",
+      "audited_blob_sha": "e5ad1bc79d5c6d14a6d365dee887d56a4b3fe6b2",
+      "current_main_blob_sha": "74db0d5cd8df15eee0bf635c65686511bb066ecd",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Do not replace a public projection with a frozen 2026-08-27 value."
+    },
+    {
+      "path": "api/kgen/total-supply.txt",
+      "merge_base_blob_sha": "74db0d5cd8df15eee0bf635c65686511bb066ecd",
+      "audited_blob_sha": "e5ad1bc79d5c6d14a6d365dee887d56a4b3fe6b2",
+      "current_main_blob_sha": "74db0d5cd8df15eee0bf635c65686511bb066ecd",
+      "classification": "STALE_EXTERNAL_METADATA_SUPPLY_AND_PUBLICATION_HOLD",
+      "disposition": "Do not replace a public projection with a frozen 2026-08-27 value."
+    },
+    {
+      "path": "index.html",
+      "merge_base_blob_sha": "af1b2b4d2211c573ed34e0ca397476c738a8237c",
+      "audited_blob_sha": "98adaa42e9dd6005f6ab15247e9fcf6a96d7fe5d",
+      "current_main_blob_sha": "af1b2b4d2211c573ed34e0ca397476c738a8237c",
+      "classification": "STALE_WALLET_DISCOVERY_UI_HOLD",
+      "disposition": "Do not transplant chain-switch or watch-asset prompts without current-main consent, browser, accessibility, and screenshot evidence."
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "merge_base_blob_sha": "65be97a59ff1150cbbd963979fff6e5291bbf282",
+      "audited_blob_sha": "fbf0e10ec64c0f317f5f87cb9647f104633a1809",
+      "current_main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "classification": "HISTORICAL_TEST_EVIDENCE_ONLY",
+      "disposition": "Retain the 239/239 historical run as old-head evidence; current main has independent newer test lineage."
+    }
+  ],
+  "acceptance": [
+    "All 13 merge-base-to-audited-head paths appear exactly once with exact merge-base, audited-head, and current-main blob SHAs.",
+    "Classification counts sum to 13 and selected_candidate_count is exactly one.",
+    "PR 179 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close, update, or merge it.",
+    "No wallet provider request, chain switch, watch-asset request, transaction, approval, transfer, or chain write is performed.",
+    "No stale workflow, root UI, supply endpoint, metadata package, external-platform claim, or historical test is transplanted.",
+    "No UI or game code changes in this audit, so new browser screenshot QA is not applicable; old-head browser evidence is labeled historical only.",
+    "No Mainnet, payment, asset transfer, ownership signature, credential access, publication, listing submission, deployment dispatch, governance, controller, signer, operator, external agent, Worker/Life, paid API, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    {
+      "rank": 1,
+      "priority": "P0_HOLD",
+      "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E",
+      "blocker": "Real-funds execution, oracle reuse, contract E2E, deployment configuration, and security review remain unverified."
+    },
+    {
+      "rank": 2,
+      "priority": "P0_HOLD",
+      "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP",
+      "blocker": "Protected Mainnet, payroll, payment, treasury, and asset operations are not authorized."
+    },
+    {
+      "rank": 3,
+      "priority": "P1_SELECTED",
+      "candidate": "PR_179_WALLET_DISCOVERY_METADATA_STATUS_LINEAGE_AUDIT",
+      "blocker": null
+    },
+    {
+      "rank": 4,
+      "priority": "P1_NEXT",
+      "candidate": "PR_180_KAIOS_MARKET_GENESIS_READINESS_AUDIT",
+      "blocker": "External market observation, funding, ownership, signer, governance, pair-plan, and execution authority remain unresolved."
+    },
+    {
+      "rank": 5,
+      "priority": "P1",
+      "candidate": "PR_181_KAIOS_MARKET_OBSERVER_LINEAGE_AUDIT",
+      "blocker": "Dependency and overlap with PR 180 plus mutable market observations require separate classification."
+    },
+    {
+      "rank": 6,
+      "priority": "P1_HOLD",
+      "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE",
+      "blocker": "Controller, operator, signer, governance, and parent-evidence authorities are unresolved."
+    },
+    {
+      "rank": 7,
+      "priority": "P1_HOLD",
+      "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY",
+      "blocker": "Custody, entitlement, and payment authority are unresolved."
+    },
+    {
+      "rank": 8,
+      "priority": "P1_HOLD",
+      "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT",
+      "blocker": "Protected CURRENT and Canon conflicts require Human resolution."
+    },
+    {
+      "rank": 9,
+      "priority": "P2_HOLD",
+      "candidate": "PRS_201_211_212_DEPENDENCY_CHAIN",
+      "blocker": "Stacked dependency order and protected execution surfaces remain unresolved."
+    },
+    {
+      "rank": 10,
+      "priority": "P2_HOLD",
+      "candidate": "PR_177_EXTERNAL_EXECUTOR",
+      "blocker": "External executor and agent-launch effects are not authorized."
+    },
+    {
+      "rank": 11,
+      "priority": "P2_HOLD",
+      "candidate": "PR_48_PROTECTED_BASELINE_DECISION",
+      "blocker": "Protected baseline disposition requires a Human decision."
+    }
+  ],
+  "protected_effects": {
+    "payment": false,
+    "asset_transfer": false,
+    "mainnet_transaction": false,
+    "wallet_request": false,
+    "chain_switch": false,
+    "watch_asset": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "private_key_or_credential_access": false,
+    "ownership_signature": false,
+    "external_submission_or_publication": false,
+    "paid_external_api": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "worker_or_life_activation": false,
+    "controller_signer_operator_appointment": false,
+    "canon_or_current_mutation": false,
+    "ui_or_game_change": false
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR179_WALLET_DISCOVERY_METADATA_STATUS_LINEAGE_AUDIT_R0_20260920.json"
+  ],
+  "next_candidate": "PR_180_KAIOS_MARKET_GENESIS_READINESS_AUDIT"
+}
