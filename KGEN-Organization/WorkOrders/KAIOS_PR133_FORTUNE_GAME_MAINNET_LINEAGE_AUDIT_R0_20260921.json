@@ -1,0 +1,578 @@
+{
+  "schema_version": "1.0",
+  "work_order_id": "KAIOS-PR133-FORTUNE-GAME-MAINNET-LINEAGE-AUDIT-R0-20260921",
+  "title": "Audit PR #133 FortuneGame and Mainnet lineage without activating gameplay, signer, deployment, or chain effects",
+  "priority": "P1",
+  "risk_class": "R0",
+  "status": "COMPLETED_EVIDENCE_ONLY_HOLD",
+  "selection": {
+    "selected_candidate_count": 1,
+    "selected_candidate": "PR_133_FORTUNE_GAME_MAINNET_LINEAGE_SECURITY_AUDIT",
+    "selection_reason": "Highest-ranked executable safe task after P0 real-funds and Mainnet actions remain HOLD; the bounded deliverable records exact lineage and a free-credit-to-real-Heart economic drain blocker without transplanting contracts, ABI, signer tools, wallet surfaces, deployment claims, or chain state."
+  },
+  "repository": {
+    "full_name": "klineodyssey/kline-odyssey",
+    "exact_base_branch": "main",
+    "exact_base_sha": "069d98181b31824c3cae5416bd6a336b657d0f43",
+    "exact_base_tree_sha": "810e9b28000c0fdf6b55657bd88aa9414fcdc713",
+    "integration_branch": "audit/pr133-fortune-game-lineage-r0-20260921",
+    "expected_changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR133_FORTUNE_GAME_MAINNET_LINEAGE_AUDIT_R0_20260921.json"
+    ]
+  },
+  "audited_pull_request": {
+    "number": 133,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/133",
+    "title": "Add KGEN FortuneGame V1 immutable prediction rounds",
+    "state": "OPEN",
+    "draft": false,
+    "merged": false,
+    "decision": "HOLD_DO_NOT_MERGE_OR_TRANSPLANT",
+    "blocking_pr_body_gate": "This PR must not be merged until Human final review.",
+    "base_branch": "main",
+    "base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+    "head_branch": "codex/fortune-game-v1",
+    "head_sha": "9cc5e215d27929f4724c268588e483bb4df8fcb7",
+    "head_tree_sha": "d712167a277799b3f76e4414f4490e92636e4222",
+    "merge_base_sha": "c7e8c533c5bbc598fac3192e0576bacb55fb6a31",
+    "merge_base_tree_sha": "d557cf27d8093900cf7c3e7cfda3085660e47af5",
+    "commits_relative_to_merge_base": 2,
+    "paths_relative_to_merge_base": 26,
+    "additions_relative_to_merge_base": 5318,
+    "deletions_relative_to_merge_base": 6,
+    "relative_to_exact_main": {
+      "ahead_by": 2,
+      "behind_by": 1016,
+      "status": "DIVERGED"
+    },
+    "conversation_comments": 0,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "exact_head_action_runs": 0,
+    "exact_head_check_runs": 0,
+    "exact_head_commit_statuses": 0
+  },
+  "dependency_lineage": [
+    {
+      "pr": 134,
+      "role": "downstream_temple_12345_frontend_bindings",
+      "state": "OPEN",
+      "draft": true,
+      "merged": false,
+      "head_branch": "codex/12345-v34-frontend",
+      "head_sha": "6185abe662d09d1343e7719fdd031cec4b345bf7",
+      "consequence": "Cannot inherit FortuneGame deployment, wallet, address, or Mainnet authority and remains a stale UI candidate."
+    },
+    {
+      "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+      "role": "current_main_reward_vault_surface",
+      "blob_sha": "dac44ca9ce48d7f8daec40867083d5ae13a77431",
+      "consequence": "Current main exposes admin-settable fortuneGame and real KGEN gamePayout; binding the candidate would make the free-credit model asset-affecting."
+    }
+  ],
+  "inventory": {
+    "open_pull_request_count": 34,
+    "open_pull_request_numbers": [
+      187,
+      182,
+      196,
+      200,
+      232,
+      172,
+      212,
+      211,
+      201,
+      158,
+      135,
+      134,
+      133,
+      199,
+      198,
+      192,
+      191,
+      190,
+      188,
+      186,
+      183,
+      181,
+      180,
+      179,
+      177,
+      161,
+      159,
+      48,
+      203,
+      194,
+      154,
+      152,
+      136,
+      153
+    ],
+    "exact_main_recent_ci_failures": 0,
+    "todo_fixme_hack_default_branch_matches": 0,
+    "p0_summary": "Real-funds, Mainnet, payroll, payment, treasury, liquidity, governance, Auto-LP, deployment, upgrade, and signer actions remain non-executable HOLD.",
+    "visual_qa_summary": "PR #133 changes no current UI/game surface; its frontend handoff is documentation only. Downstream PR #134 is a stale Draft UI branch without current-main visual integration authority.",
+    "runtime_summary": "Current main contains TempleHeart V3.4 with an admin-selected fortuneGame caller and real KGEN payouts, but no FortuneGame implementation or canonical FortuneGame address; PR #133 is a deeply divergent branch."
+  },
+  "ranked_candidates": [
+    {
+      "rank": 1,
+      "priority": "P0",
+      "candidate": "PR #232 real-funds oracle/e2e",
+      "disposition": "HOLD_PROTECTED_EFFECTS"
+    },
+    {
+      "rank": 2,
+      "priority": "P0",
+      "candidate": "PRs #135/#154/#186/#199 Mainnet, payroll, payment, Auto-LP",
+      "disposition": "HOLD_PROTECTED_EFFECTS"
+    },
+    {
+      "rank": 3,
+      "priority": "P1",
+      "candidate": "PR #133 FortuneGame/Mainnet lineage security audit",
+      "disposition": "SELECTED_R0_EVIDENCE_ONLY"
+    },
+    {
+      "rank": 4,
+      "priority": "P1",
+      "candidate": "PR #134 TempleHeart frontend bindings lineage audit",
+      "disposition": "NEXT"
+    },
+    {
+      "rank": 5,
+      "priority": "P1",
+      "candidate": "PRs #158/#159 physics/current/catalyst lineage audit",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 6,
+      "priority": "P1",
+      "candidate": "PR #161 circulatory autopilot lineage audit",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 7,
+      "priority": "P1",
+      "candidate": "PRs #152/#153/#154 service/payroll/capability lineage audit",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 8,
+      "priority": "P1",
+      "candidate": "PR #198 mobile ATM/UFO service lineage audit",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 9,
+      "priority": "P1",
+      "candidate": "PR #194 KGEN/KAIOS settlement lineage audit",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 10,
+      "priority": "P2",
+      "candidate": "PR #177 external executor lineage audit",
+      "disposition": "PENDING"
+    },
+    {
+      "rank": 11,
+      "priority": "P2",
+      "candidate": "PR #48 protected baseline lineage audit",
+      "disposition": "PENDING"
+    }
+  ],
+  "source_reads": [
+    {
+      "path": "AGENTS.md",
+      "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"
+    },
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"
+    },
+    {
+      "path": "KGEN-Canon/README.md",
+      "blob_sha": "73522e0da54967c1f164670742ab599f818e3ede"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md",
+      "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_CANON_MASTER.json",
+      "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"
+    },
+    {
+      "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
+      "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+      "blob_sha": "824626abe0a10894972445d3ae3597b584d44276"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md",
+      "blob_sha": "092c11a085412154b26d230ba8007cc41fdd2e18"
+    },
+    {
+      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+      "blob_sha": "760228b706ebec2b88831d09a9d91a829c7bba4a"
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"
+    },
+    {
+      "path": "docs/KGEN_TEMPLE_12345_MAP.md",
+      "blob_sha": "5ecd261723028dd6e03b44b2cb496e805486d48c"
+    },
+    {
+      "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+      "blob_sha": "dac44ca9ce48d7f8daec40867083d5ae13a77431"
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md",
+      "blob_sha": "6004ab03612f436150329a4c77492419323a51b0"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md",
+      "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+      "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04"
+    },
+    {
+      "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md",
+      "blob_sha": "650d371140179dc955d323da226f41360dda33b1"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+      "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md",
+      "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa"
+    }
+  ],
+  "path_classification": [
+    {
+      "path": "KGEN-KAIOS/package.json",
+      "classification": "HISTORICAL_TEST_COMMANDS_NO_CURRENT_INTEGRATION",
+      "base_blob": "07ce6f55cebb55e3f8d31df2f168cd4af30ff871",
+      "head_blob": "8fe3fa9fa0add599e2d34f7de9de715184b49d88",
+      "current_main_blob": "07ce6f55cebb55e3f8d31df2f168cd4af30ff871"
+    },
+    {
+      "path": "KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.json",
+      "classification": "HISTORICAL_TESTNET_CHAIN_STATE_NO_MAINNET_AUTHORITY",
+      "base_blob": null,
+      "head_blob": "7d15a30d9e76b7cc7983ec2e4da29b6ca59f9253",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/reports/BSC_TESTNET_FORTUNE_GAME_V1_REHEARSAL.md",
+      "classification": "HISTORICAL_TESTNET_CHAIN_STATE_NO_MAINNET_AUTHORITY",
+      "base_blob": null,
+      "head_blob": "7f42bd23db32049595528c0036c7363caacb744d",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json",
+      "classification": "GENERATED_EVIDENCE_STALE_OVERWRITE_HOLD",
+      "base_blob": "ec10d4c20bc69f5b72cf446e40dcfbc982e44920",
+      "head_blob": "3bc3557c8026378a634abeee4948b40feff03b93",
+      "current_main_blob": "ec10d4c20bc69f5b72cf446e40dcfbc982e44920"
+    },
+    {
+      "path": "KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json",
+      "classification": "GENERATED_EVIDENCE_STALE_OVERWRITE_HOLD",
+      "base_blob": "c53114d39e4f9e0ebec2833f19fef91323f40c5a",
+      "head_blob": "19922b4b4e55622964814663fd8821c1d38138fa",
+      "current_main_blob": "c53114d39e4f9e0ebec2833f19fef91323f40c5a"
+    },
+    {
+      "path": "KGEN-KAIOS/tests/contracts/MockAggregatorV3.sol",
+      "classification": "TEST_ONLY_ORACLE_FIXTURE",
+      "base_blob": null,
+      "head_blob": "76b28798c8a7a397335e98cb90152a9d0734f5d5",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/tests/contracts/MockTempleHeartGame.sol",
+      "classification": "TEST_ONLY_PAYOUT_FIXTURE",
+      "base_blob": null,
+      "head_blob": "e8dc5b66edae1a79a022f57847fbd0d72112bb45",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/tests/contracts/TestnetMockTempleHeart1888.sol",
+      "classification": "TEST_ONLY_SURVIVAL_GATE_FIXTURE",
+      "base_blob": null,
+      "head_blob": "551ce69f3dace7b44d27eb0ceff07b245016874e",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/tests/fortune-game.fuzz-invariant.test.mjs",
+      "classification": "HISTORICAL_LOCAL_TEST_ONLY",
+      "base_blob": null,
+      "head_blob": "5f98b4f8c74b81acab4931399148de18aa18c2f8",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/tests/fortune-game.helpers.mjs",
+      "classification": "HISTORICAL_LOCAL_TEST_ONLY",
+      "base_blob": null,
+      "head_blob": "130f84dffc8485e5982b3737da4ab3a3f86bb0a2",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/tests/fortune-game.integration.test.mjs",
+      "classification": "HISTORICAL_LOCAL_TEST_ONLY",
+      "base_blob": null,
+      "head_blob": "edc1db617e1417a0cdc1d0a086c50cb7cba272a1",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/tests/fortune-game.unit.test.mjs",
+      "classification": "HISTORICAL_LOCAL_TEST_ONLY",
+      "base_blob": null,
+      "head_blob": "36205226f3439829f2f05e8c54edfe1f5a99f7f6",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN-KAIOS/tests/helpers.mjs",
+      "classification": "STALE_SHARED_TEST_HELPER_MODIFICATION_HOLD",
+      "base_blob": "770f653e5ff0d9c5adec003f2182ef93ec017b54",
+      "head_blob": "bf2fd55fa05c81dabf98988715e261a95a69682a",
+      "current_main_blob": "770f653e5ff0d9c5adec003f2182ef93ec017b54"
+    },
+    {
+      "path": "KGEN-KAIOS/tools/compile-contracts.mjs",
+      "classification": "STALE_COMPILER_REGRESSION_SURFACE_HOLD",
+      "base_blob": "d01e5b3773ecd3044eabbcc3e38972503fa47f02",
+      "head_blob": "943040953a79955a7894d6cdfa501130742fda56",
+      "current_main_blob": "d01e5b3773ecd3044eabbcc3e38972503fa47f02"
+    },
+    {
+      "path": "KGEN-KAIOS/tools/rehearse-fortune-game-testnet.mjs",
+      "classification": "PRIVATE_KEY_SIGNING_DEPLOY_UPGRADE_CHAIN_WRITE_HOLD",
+      "base_blob": null,
+      "head_blob": "29455e7cab7ab1b71cded8f51443b383afbf4833",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN/README.md",
+      "classification": "STALE_PRODUCT_AND_DEPLOYMENT_STATUS_DOC_HOLD",
+      "base_blob": "76286e45e3a51658e3fccdd5fac5e0f7c0da27fc",
+      "head_blob": "b991c47e59fdbf0a21b75b467f620995432ee6b2",
+      "current_main_blob": "76286e45e3a51658e3fccdd5fac5e0f7c0da27fc"
+    },
+    {
+      "path": "KGEN/abi/KGEN_FortuneGame_Upgradeable.json",
+      "classification": "UNMERGED_ABI_NO_DEPLOYMENT_IDENTITY",
+      "base_blob": null,
+      "head_blob": "ea73efe996998de03afd435f7952eccf7dca61c9",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN/contracts/KGEN_FortuneGame_Upgradeable.sol",
+      "classification": "FREE_CREDIT_REAL_HEART_PAYOUT_AND_UPGRADE_HOLD",
+      "base_blob": null,
+      "head_blob": "8b29da4eeb28550cbe5c41dac0e5643b6d20c854",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN/docs/KGEN_FORTUNE_GAME_FRONTEND_HANDOFF.md",
+      "classification": "STALE_TESTNET_ADDRESS_WALLET_WRITE_HANDOFF_HOLD",
+      "base_blob": null,
+      "head_blob": "eddd2f5355222a9a8d74115c713c3a7fc0156a34",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN/docs/KGEN_FORTUNE_GAME_SECURITY_REVIEW.md",
+      "classification": "SELF_AUTHORED_HISTORICAL_REVIEW_NOT_INDEPENDENT",
+      "base_blob": null,
+      "head_blob": "50e701628b7eadd3f1811af24854ffa48ef3494c",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN/docs/KGEN_FORTUNE_GAME_SPEC.md",
+      "classification": "UNAUTHORIZED_MAINNET_ORACLE_AND_ECONOMIC_CANDIDATE_HOLD",
+      "base_blob": null,
+      "head_blob": "f06b5822bdfb571e9ac67b8b482f246191d3072c",
+      "current_main_blob": null
+    },
+    {
+      "path": "KGEN_MASTER_LIBRARY_INDEX.md",
+      "classification": "CURRENT_MAIN_INDEX_CONFLICT_HOLD",
+      "base_blob": "661a54be0851e5128412b21f175ccc100feb5667",
+      "head_blob": "07d2fc318cd792d1516beaf42f1deab90a6a4a97",
+      "current_main_blob": "c3a378735181bf0db8b7902570943ab057446d99"
+    },
+    {
+      "path": "README.md",
+      "classification": "CURRENT_MAIN_INDEX_CONFLICT_HOLD",
+      "base_blob": "69d5dafb4e787622ef8c2d16f1426288d6a628fd",
+      "head_blob": "e527c020a993322bedf159147f4caf1ae76fa133",
+      "current_main_blob": "509885b9a47dfd4015e26ac1f7c46b61ee10d6a5"
+    },
+    {
+      "path": "docs/KGEN_DEPENDENCY_GRAPH.md",
+      "classification": "CURRENT_MAIN_INDEX_CONFLICT_HOLD",
+      "base_blob": "6b8930d1f693bd9baaa34a759f28ac4fba25b543",
+      "head_blob": "8d360b3ad503bc8ade2990eeff38758c12cfacdc",
+      "current_main_blob": "207b06ec64ff393986fc8dd6c6776d9c7e8c6cae"
+    },
+    {
+      "path": "docs/KGEN_MASTER_INDEX.md",
+      "classification": "CURRENT_MAIN_INDEX_CONFLICT_HOLD",
+      "base_blob": "3c5938fd3976ab759767ff395c5377270512c172",
+      "head_blob": "cacb8d132d44fac513285a962754d39298402306",
+      "current_main_blob": "989c42d658f43d43c6ce544f3b33604f9802def6"
+    },
+    {
+      "path": "docs/KGEN_TEMPLE_12345_MAP.md",
+      "classification": "STALE_TEMPLE_MAP_ADDITION_HOLD",
+      "base_blob": "5ecd261723028dd6e03b44b2cb496e805486d48c",
+      "head_blob": "a5c3f33f5a6908c1eb2849eefc09426259159735",
+      "current_main_blob": "5ecd261723028dd6e03b44b2cb496e805486d48c"
+    }
+  ],
+  "classification_totals": {
+    "HISTORICAL_TEST_COMMANDS_NO_CURRENT_INTEGRATION": 1,
+    "HISTORICAL_TESTNET_CHAIN_STATE_NO_MAINNET_AUTHORITY": 2,
+    "GENERATED_EVIDENCE_STALE_OVERWRITE_HOLD": 2,
+    "TEST_ONLY_ORACLE_FIXTURE": 1,
+    "TEST_ONLY_PAYOUT_FIXTURE": 1,
+    "TEST_ONLY_SURVIVAL_GATE_FIXTURE": 1,
+    "HISTORICAL_LOCAL_TEST_ONLY": 4,
+    "STALE_SHARED_TEST_HELPER_MODIFICATION_HOLD": 1,
+    "STALE_COMPILER_REGRESSION_SURFACE_HOLD": 1,
+    "PRIVATE_KEY_SIGNING_DEPLOY_UPGRADE_CHAIN_WRITE_HOLD": 1,
+    "STALE_PRODUCT_AND_DEPLOYMENT_STATUS_DOC_HOLD": 1,
+    "UNMERGED_ABI_NO_DEPLOYMENT_IDENTITY": 1,
+    "FREE_CREDIT_REAL_HEART_PAYOUT_AND_UPGRADE_HOLD": 1,
+    "STALE_TESTNET_ADDRESS_WALLET_WRITE_HANDOFF_HOLD": 1,
+    "SELF_AUTHORED_HISTORICAL_REVIEW_NOT_INDEPENDENT": 1,
+    "UNAUTHORIZED_MAINNET_ORACLE_AND_ECONOMIC_CANDIDATE_HOLD": 1,
+    "CURRENT_MAIN_INDEX_CONFLICT_HOLD": 4,
+    "STALE_TEMPLE_MAP_ADDITION_HOLD": 1,
+    "total": 26
+  },
+  "findings": [
+    "The public placeBet path accepts an arbitrary CREDIT_ONLY amount without token debit, scarce credit registry, authorization, signature, nonce, or atomic credit consumption, while a resolved winner can invoke TempleHeart.gamePayout for real KGEN.",
+    "Because each wallet gets one free position per round but wallet creation is unconstrained, an attacker can Sybil both UP and DOWN sides at no cost; every non-DRAW round then yields real KGEN until the round cap or TempleHeart 1888 survival floor blocks further payouts.",
+    "The direction-specific reward caps bound only a single round and are operator-configured; they do not prove reserved funds, budget authority, per-player entitlement, aggregate multi-round solvency, or economic loss for losing positions.",
+    "Current main TempleHeart lets DEFAULT_ADMIN_ROLE replace fortuneGame immediately and gamePayout transfers real KGEN to the supplied player. The candidate therefore stops being a harmless simulation as soon as it is bound, even though its spec calls amounts test-credit weights.",
+    "TIME_ARROW_IMMUTABILITY is implementation-local, not protocol-immutable: UPGRADER_ROLE can replace the UUPS implementation after positions are placed, and the rehearsal assigns admin, operator, and upgrader to one wallet.",
+    "OPERATOR_ROLE can configure any code-bearing contract that mimics BTC / USD metadata and a fresh positive answer; no canonical feed registry, exact code or proxy identity, chain-bound manifest, governance delay, or independent authorization is enforced.",
+    "Oracle-unavailable cancellation trusts the snapshotted feed to revert and does not verify a canonical feed identity at cancellation time. A mutable or operator-controlled oracle can make an unfavorable whole round cancellable after the delay.",
+    "Resolution assumes the immediately preceding composite round ID exists and is the prior chronological update. Feed gaps or proxy-specific round behavior can make otherwise valid rounds permanently unresolvable without a reviewed liveness path.",
+    "The committed Testnet runner reads BSC_TESTNET_PRIVATE_KEY and BSC_TESTNET_RPC_URL, funds new wallets, deploys contracts, upgrades a proxy, changes TempleHeart fortuneGame, and sends multiple chain transactions. It is a protected signer/deployment tool and must not be executed or transplanted automatically.",
+    "The rehearsal's real-chain labels prove only historical BSC Testnet observations using a deterministic mock oracle and a shared Testnet Heart. They do not prove Mainnet feed identity, signer authority, governance, budget, solvency, security, or deployment authorization.",
+    "The exact PR head has zero Actions runs, zero check runs, zero commit statuses, zero submitted reviews, zero review threads, and zero conversation comments; the 20/20 and 50/50 results are branch-authored claims rather than exact-head CI evidence.",
+    "The PR body expressly requires Human final review, the head is a codex/* branch, and the branch is 1016 commits behind current main. It is ineligible for automatic merge under both repository policy and the current automation boundary.",
+    "Five index and shared-tool paths conflict with current main or would overwrite current generated evidence, so the branch cannot be refreshed by simple merge or wholesale transplant.",
+    "No canonical FortuneGame address exists in current main, and no Mainnet deployment, Heart binding, oracle activation, economic parameter approval, or UI release authority is established."
+  ],
+  "positive_controls": [
+    "The candidate does not escrow KGEN and labels its economic mode CREDIT_ONLY.",
+    "Positions are recorded atomically before the betting cutoff and current implementation has no individual edit or delete function.",
+    "Round economic, oracle, and Heart configuration is snapshotted at creation.",
+    "The current claim path is nonReentrant and marks claimed only after TempleHeart payout succeeds, preserving retryability on revert.",
+    "The candidate rejects pseudo-random outcome selection and attempts deterministic oracle-round proof checks.",
+    "The PR and evidence explicitly state MAINNET_DEPLOY = BLOCKED and do not embed a private key or authenticated RPC URL.",
+    "Current main does not contain the candidate FortuneGame contract, ABI, signer tool, or canonical deployment address."
+  ],
+  "validation": {
+    "audited_exact_head": {
+      "head_sha": "9cc5e215d27929f4724c268588e483bb4df8fcb7",
+      "action_runs": 0,
+      "check_runs": 0,
+      "commit_statuses": 0,
+      "claimed_branch_authored_results": {
+        "fortune_game": "20/20 PASS",
+        "full_kgen_kaios": "50/50 PASS",
+        "compile": "Solidity 0.8.24 / OpenZeppelin 5.0.2 PASS, 0 warnings",
+        "storage": "PASS (58 preserved, 15 appended)",
+        "diff_check": "PASS"
+      },
+      "limitations": [
+        "No GitHub-hosted exact-head CI evidence exists.",
+        "The signer/deployment rehearsal was inspected statically and was not executed.",
+        "Branch-authored reports and self-authored security review are historical evidence, not independent review or current-main integration proof."
+      ]
+    },
+    "exact_base_main": {
+      "sha": "069d98181b31824c3cae5416bd6a336b657d0f43",
+      "pages_run_id": 35519418993,
+      "pages_conclusion": "SUCCESS",
+      "pages_artifact_id": 10607852923,
+      "pages_artifact_digest": "sha256:9fa87f3a9d4847cb11be7497ce40ad9a2598a5b6df63d9179421e6652ccbd052",
+      "responsive_run_id": 35519450321,
+      "responsive_conclusion": "SUCCESS",
+      "responsive_artifact_id": 10607034292,
+      "responsive_artifact_digest": "sha256:8249d23b4ffd48edbed693d789e2862fce7a1da477ff397be72a73dcc0c8441b",
+      "code_equivalent_universal_exchange": "302/302 PASS"
+    },
+    "work_order_assertions": [
+      "JSON parses",
+      "selected_candidate_count equals 1",
+      "exactly 26 unique PR-relative paths are classified",
+      "classification totals sum to 26",
+      "all audited path SHA fields are null or 40 lowercase hexadecimal characters",
+      "all protected effects are false",
+      "diff check passes"
+    ],
+    "target_specific_visual_qa": "NOT_APPLICABLE_DOCUMENTATION_ONLY_CHANGE",
+    "post_merge_visual_qa_required": true
+  },
+  "protected_effects": {
+    "payment": false,
+    "asset_transfer": false,
+    "token_mint": false,
+    "token_burn": false,
+    "mainnet_transaction": false,
+    "testnet_transaction": false,
+    "governance": false,
+    "worker_activation": false,
+    "life_activation": false,
+    "controller_appointment": false,
+    "signer_appointment": false,
+    "operator_appointment": false,
+    "private_key_access": false,
+    "wallet_request": false,
+    "token_approval": false,
+    "contract_deployment": false,
+    "contract_upgrade": false,
+    "heart_binding": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "chain_state_mutation": false,
+    "gameplay_activation": false,
+    "oracle_activation": false
+  },
+  "acceptance": {
+    "scope_bounded_to_one_json": true,
+    "no_protected_canon_modified": true,
+    "no_runtime_contract_workflow_ui_abi_or_signer_tool_modified": true,
+    "pr_133_remains_open_ready_unmerged": true,
+    "current_main_successor_required": true,
+    "safe_successor_requirements": [
+      "Replace free caller-selected credits with an authoritative scarce entitlement ledger whose issuance, signature, replay protection, debit, cancellation, and payout budget are atomically bound, or keep payouts test-only with no real token path.",
+      "Prove aggregate and per-round solvency, reserve or budget authorization, payout caps, Sybil resistance, and loss-bearing economics before any real TempleHeart binding.",
+      "Use an exact chain-bound canonical oracle manifest with proxy and implementation identity, freshness, heartbeat, phase/gap handling, revocation, and governance evidence.",
+      "Separate admin, operator, upgrader, oracle, and Heart authority with reviewed multisig/timelock controls and define whether immutability requires a non-upgradeable or irreversibly frozen implementation.",
+      "Keep all private-key, funding, deployment, upgrade, Heart-binding, and chain-write tooling outside automatic integration and require action-specific Human authorization.",
+      "Rebuild only on exact current main, preserve current generated evidence and indexes, and run exact-head contract, integration, adversarial-economic, storage-layout, and diff checks.",
+      "If a UI successor is later proposed, bind it to canonical network/deployment manifests and complete current-shell Chromium, responsive, accessibility, and 390x844 screenshot QA."
+    ]
+  },
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #134 TempleHeart V3.4 frontend bindings lineage security audit",
+    "allowed_scope": "Evidence-only lineage audit; do not issue wallet requests, bind contracts, deploy, transact, access signers, switch Mainnet, dispatch workflows, or modify UI/runtime."
+  }
+}
