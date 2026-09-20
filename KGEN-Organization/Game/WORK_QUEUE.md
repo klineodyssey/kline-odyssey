@@ -1,8 +1,17 @@
 # Work Queue
 
+## KAIOS-11520-LIVE-MARKET-MAP-20260921
+
+- Status: IN_PROGRESS; task_source_type: HUMAN_OWNER_EXECUTION_ORDER; task_source_id: 5D WORLD COORDINATES + REAL MARKET POSITION + GAME INTEGRATION; task_source_actor: 沈英明; task_source_file: Human image order dated 2025-09-21 supplied in current conversation (date preserved verbatim); task_source_commit: 924050045f26c1560eba6be80fb2a5eb64f9c0ae (fresh base lineage).
+- task_source_reason: replace fixed production K reference prices with validated public quote batches and show BTC/ETH/BNB market intercepts alongside Player/Monster. created_by / owner / reviewer: codex-gm-01; created_at: 2026-09-21; priority: P1; risk_level: LOW_SIMULATION_UI; dependencies: merged #421 / #423.
+- Branch: codex/k11520-live-market-map-20260921, clean isolated worktree. Preserve Human dirty main, coordinate normalization/phase/combat semantics, local XYZ, controls and layouts.
+- Scope: shared quote-to-K state, WAIT/LIVE/STALE truth, three market markers, values/prices/distances in existing expandable map and market cards, regression/unit/browser screenshots. First-party source and procedural canvas only; no asset copying or credentials. No protected execution, real-funds oracle, payment or signer authority.
+- Acceptance: atomic validated market batches; no fixed production placeholder K; live card/map/combat reference consistency; portrait/landscape direct visual QA, plane/phase changes, refresh/failure/recovery tests, exact-head CI and normal Pages verification.
+- Payroll receipts/prepay/advance/offset: NOT_VERIFIED / HOLD. No PAID/RECEIVED claim. Broad patrol and Cursor remain paused.
+
 ## KAIOS-11520-KSPACE-MAP-20260921
 
-- Status: IN_PROGRESS / REAL_BROWSER_QA; completion requires exact-head CI and Pages verification.
+- Status: COMPLETE; #423 merged as 924050045f26c1560eba6be80fb2a5eb64f9c0ae; main/PR/public Pages QA PASS. Final evidence in PR #423 closeout; superseding live-market visualization is the separate task above.
 - task_source_type: HUMAN_OWNER_ENGINEERING_ORDER; task_source_id: K11520 K-SPACE MAP VISUALIZATION CONTINUATION; task_source_actor: 沈英明; task_source_file: current Human conversation, recorded in this queue and temple HANDOFF_CURRENT.md.
 - task_source_commit: 6709b92e18cea76f87113fcc57a95fe9260df535 (fetched base lineage only); task_source_reason: #421 has working combat K coordinates but lacks visible map points/vector.
 - created_by / owner: codex-gm-01 / 衡曜; created_at: 2026-09-21; reviewer: codex-gm-01 technical self-QA under explicit Human merge authority; priority: P1; risk_level: LOW_UI_SIMULATION; dependencies: merged #421.

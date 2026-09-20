@@ -1,11 +1,11 @@
 /* KGEN_META
-VERSION: 2.2.0
+VERSION: 2.3.0
 STATUS: ACTIVE
 PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collision-constrained physical body, plane-aware maps, canonical XYZ world/entity navigation and 3D Life visuals. Signed-C rendering is delegated to its canonical runtime; game state exposes one direct canonical trade-side setter.
 */
 import * as THREE from 'three';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
-import {createWorldState,resolvePlayerMove,tickWorld,WORLD_OBJECTS,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_PHASES} from './world-runtime.mjs';
+import {createWorldState,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES} from './world-runtime.mjs';
 import {createKgenLedger,requiredMargin,positionRisk,reserveOrder,activateMargin,closeMargin,snapshot} from './kgen-margin-runtime.mjs';
 import {connectInjectedWallet,readNativeBalance,readErc20Balance,watchWallet,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from './evm-wallet-runtime.mjs';
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading} from './spatial-coordinate-runtime.mjs';
@@ -27,7 +27,7 @@ const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:.001,pos:null}
 const restoredSession=readPlayerSession();if(restoredSession){S.xyz={...restoredSession.xyz};S.intentXYZ={...restoredSession.intentXYZ}}
 let lastSessionSave=0,lastSessionSnapshot='';function persistPlayerSession(force=false){const now=Date.now(),snapshot=JSON.stringify([S.xyz,S.intentXYZ]);if(!force&&(snapshot===lastSessionSnapshot||now-lastSessionSave<750))return;lastSessionSave=now;lastSessionSnapshot=snapshot;savePlayerSession({xyz:S.xyz,intentXYZ:S.intentXYZ})}addEventListener('pagehide',()=>persistPlayerSession(true));addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistPlayerSession(true)});
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
-createKSpaceEncounter(world);
+// No synthetic production K position: the encounter starts after valid public quotes arrive.
 const fmt=(n,d=4)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:d});
 function toast(t,combat=false){const el=$('#toast');if(!el)return;el.dataset.kspaceFeedback=String(combat);el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
 function axis(){return S.axes[S.axis]}function price(){return S.quotes[axis().market]||0}
@@ -38,9 +38,25 @@ globalThis.__K11520_TRADE_DIRECTION_API__=Object.freeze({version:'1.0.0',authori
 function renderAxes(){
   $('#axes').innerHTML=['KX','KY','KZ'].map(a=>{const x=S.axes[a],q=S.quotes[x.market],active=a===S.axis;return `<button type="button" class="axis panel ${active?'active':''}" data-axis="${a}" data-market-card="${a}" aria-current="${active?'true':'false'}" aria-label="查看 ${a} ${x.market.replace('USDT','/USDT')} 市場詳情"><div class="axisHead"><span>${a} 球膜軸</span><b>${q?'LIVE':'WAIT'}</b></div><span class="marketName">${x.market.replace('USDT','/USDT')}</span><span class="q">${q?'$'+fmt(q,q<10?5:2):'--'}</span><span class="pos">${x.pos?`${x.pos.side} ${x.pos.lots}口 · ${x.pos.c}C`:'空倉'}</span></button>`}).join('');
   $$('[data-market-card]').forEach(card=>card.onclick=()=>openMarketCard(card.dataset.marketCard));
+  syncMarketKLabels();
 }
-function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p>即時參考價：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
-async function quotes(){try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});Object.assign(S.quotes,next);$('#feed').textContent='LIVE · Binance public data'}catch{$('#feed').textContent=MARKETS.every(symbol=>Number.isFinite(S.quotes[symbol]))?'STALE · Binance public data':'行情中斷'}renderAxes()}
+function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">即時參考價：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
+let quotePending=false;
+async function quotes(){if(quotePending)return;quotePending=true;try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});updateKMarketReference(world,next,Date.now());Object.assign(S.quotes,next);$('#feed').textContent='LIVE · Binance public data'}catch{if(world.kSpace)world.kSpace.quoteFailed=true;$('#feed').textContent=world.kSpace?'STALE · Binance public data':'WAIT · 行情未就緒'}finally{quotePending=false;renderAxes()}}
+function syncMarketKLabels(){
+  if(!$('#marketKLabelsStyle')){const style=document.createElement('style');style.id='marketKLabelsStyle';style.textContent='.axis:has(.marketKValue) .universeFloorBadge{display:none!important}';document.head.append(style)}
+  const market=kMarketSnapshot(world);
+  for(const row of market.markets){
+    const card=$(`[data-market-card="${row.axis}"]`);if(!card)continue;
+    let label=card.querySelector('.marketKValue');if(!label){label=document.createElement('span');label.className='marketKValue';label.style.cssText='display:block;font:600 10px system-ui;color:#b9e7fa;white-space:nowrap';card.append(label)}
+    label.textContent=`${row.axis} ${formatKCoordinate(row.k)} Ku`;label.title=`Ni(P)=100×(P/${row.anchor}−1) · ${market.status} · ${new Date(market.receivedAt).toISOString()}`;
+    card.querySelector('.axisHead b').textContent=market.status;
+    const info=$('#marketReferenceDetail');if(info?.dataset.marketInfoAxis===row.axis)info.textContent=`${market.status} · $${row.price.toFixed(2)} · ${row.axis} ${formatKCoordinate(row.k)} Ku`;
+    const ref=$(`[data-k-reference="${row.axis}"]`);if(ref)ref.textContent=`${row.axis} ${row.symbol}: P=${row.price}, P0=${row.anchor}`;
+  }
+  if(market.status==='STALE')$('#feed').textContent='STALE · 最後有效行情';
+  globalThis.__K11520_MARKET_K__=market;
+}
 function controlState(){return globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null}
 function tradeAxisForPlane(mode=controlState()?.mode||'XZ'){return PLANE_TRADE_AXIS[String(mode).toUpperCase()]||'KY'}
 function syncTradeAxisFromPlane(){
@@ -88,7 +104,7 @@ function attackFeedback(r){
 function performCombat(skill){
   const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now()});
   toast(attackFeedback(r),true);
-  if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
+  if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace?.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
   renderCombatTarget();return r;
 }
 $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performCombat('goldenRain');
@@ -101,16 +117,18 @@ function renderCombatTarget(){
   const t=s.target,body=s.selection?.body||'0C 中性',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
   targetHud.textContent=`◎ K-Guardian · 模擬\n${s.distance.toFixed(1)}u · ${body} · ${part?part.hp+'HP':'選擇 ±C'}\n${status} · 弱點 ${t.exposed} ▾`;
   globalThis.__K11520_KSPACE_COMBAT__=s;
+  const info=$('#combatKValues');if(info){const tuple=v=>['KX','KY','KZ'].map(a=>formatKCoordinate(v[a])).join(' / ');info.textContent=`PLAYER K：${tuple(s.playerK)}\nMONSTER K：${tuple(s.monsterK)}\nΔK：${tuple(s.deltaK)}\nLOCAL XYZ：${['x','y','z'].map(a=>s.playerLocal[a].toFixed(2)).join(' / ')}\n相對方向：${['x','y','z'].map(a=>formatKCoordinate(s.relative[a])).join(' / ')}\n${s.market.status}`}
 }
 function showCombatTarget(){
   const s=combatSnapshot(),t=s?.target;if(!t)return;
   const vec=(v,keys)=>keys.map(k=>`${k} ${Number(v[k]).toFixed(2)}`).join(' · ');
   $('#sheetTitle').textContent='TARGET LOCK · K-Guardian（模擬）';
-  $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${s.distance.toFixed(2)}u · ${s.selection?.body||'0C NEUTRAL'}</b><p>Plane 決定軸，C 正負選部位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash 2.2u：單部位<br>天罡金陣 6u：切面兩軸同相<br>盤古幻斧 4u：前方半圓三軸同相</p><p>PLAYER K：${vec(s.playerK,['KX','KY','KZ'])}<br>MONSTER K：${vec(s.monsterK,['KX','KY','KZ'])}<br>ΔK：${vec(s.deltaK,['KX','KY','KZ'])}<br>局部 XYZ：${vec(s.playerLocal,['x','y','z'])}<br>相對方向：${vec(s.relative,['x','y','z'])}</p><p>R = K + r · 遊戲單位，非真實公尺。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，價格顯示不改座標。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div>${a} ${v.market}: P=${v.price}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/100 ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
+  $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${s.distance.toFixed(2)}u · ${s.selection?.body||'0C NEUTRAL'}</b><p>Plane 決定軸，C 正負選部位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash 2.2u：單部位<br>天罡金陣 6u：切面兩軸同相<br>盤古幻斧 4u：前方半圓三軸同相</p><p id="combatKValues" style="white-space:pre-line">PLAYER K：${vec(s.playerK,['KX','KY','KZ'])}<br>MONSTER K：${vec(s.monsterK,['KX','KY','KZ'])}<br>ΔK：${vec(s.deltaK,['KX','KY','KZ'])}<br>局部 XYZ：${vec(s.playerLocal,['x','y','z'])}<br>相對方向：${vec(s.relative,['x','y','z'])}</p><p>R = K + r · 遊戲單位，非真實公尺。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，公開報價同步 K 基準（${s.market.status}），LOCAL XYZ 不變。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div data-k-reference="${a}">${a} ${v.market}: P=${v.price}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/100 ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
   $('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=600;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
 }
 targetHud.onclick=showCombatTarget;
 globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,simulationOnly:true});
+setInterval(syncMarketKLabels,1000);
 function openOrder(){syncTradeAxisFromPlane();const a=axis(),p=price();if(!p){toast('行情未就緒');return}const principal=requiredMargin({lots:a.lots}),risk=positionRisk({entry:p,mark:p,side:a.side,lots:a.lots,c:a.c});pending={axis:S.axis,market:a.market,side:a.side,lots:a.lots,c:a.c,entry:p,principal};$('#confirmBody').innerHTML=`<div class="grid2"><div class="card"><h3>${pending.axis} ${pending.market}</h3>${pending.side} · ${pending.lots}口 · ${pending.c}C<br>本金 ${pending.principal} KGEN</div><div class="card"><h3>風險</h3>每點 ±${fmt(pending.lots*pending.c,6)} KGEN<br>反向歸零 ${Number.isFinite(risk.maxAdversePoints)?fmt(risk.maxAdversePoints,3):'∞'} 點</div></div><p class="bad">目前確認只建立本機模擬部位，不送鏈。</p>`;$('#confirm').classList.add('open')}
 $('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};$('#confirmOrder').onclick=()=>{if(!pending)return;const a=S.axes[pending.axis];if(a.pos){toast('此軸已有持倉');return}const r=reserveOrder(ledger,pending.principal);if(!r.ok){toast('KGEN Free 不足');return}activateMargin(ledger,pending.principal);a.pos={...pending};S.history.unshift({time:new Date().toLocaleTimeString(),axis:pending.axis,event:'開倉'});pending=null;$('#confirm').classList.remove('open');toast('本機模擬成交');renderAxes();hud()};
 function closePos(){const a=axis(),p=a.pos;if(!p){toast(`${S.axis} 空倉`);return}const mark=price()||p.entry,r=positionRisk({...p,mark});closeMargin(ledger,{margin:p.principal,pnl:r.pnl});a.pos=null;toast(`平倉 ${fmt(r.pnl,4)} KGEN`);renderAxes();hud()}

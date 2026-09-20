@@ -1,5 +1,13 @@
 # 11520 Universal Exchange V3.9
 
+## Public market K-space — V2.6.20 / 2026-09-21
+
+The shared validated BTCUSDT/ETHUSDT/BNBUSDT public quote batch now drives both market cards and simulation K coordinates. `Ki=100*(Pi/P0i-1)` retains the existing anchors (100000/4000/600); these anchors define units, not substitute prices. The production encounter waits for a complete valid batch. Missing/invalid updates retain last-good values visibly marked STALE; no initial `(1,-0.5,1)` is presented as current market data.
+
+The existing K minimap shows three colored market intercepts, Player P, Monster M and their relative vector. Tap to inspect prices, K values, three market distances, player/monster/ΔK tuples, phase and separate LOCAL XYZ. Expand the near-distance projection when a one-Ku vector is small at the market-wide scale. Each scalar price is plotted on its own axis, not as three invented independent coordinates. Plane changes update the oblique projection and normal axis.
+
+Quote updates translate the shared market frame without changing local XYZ, relative K, rendered encounter location, HP, cooldown or attack range. Market cards remain informational; plane plus sign(C) retain authority. Existing decimal-order floor calculations are unchanged; their small card badge yields its space to normalized K to avoid landscape overflow. Shell cache v272 remains network-first, temple-scoped; orientation is any. This is public reference data for simulation, never a real-funds oracle.
+
 ## K-space coordinate map — V2.6.19 / 2026-09-21
 
 The existing minimap defaults to **K圖**: blue P = Player K, gold M = Monster K, arrow = relative K vector. The current plane supplies the two graph axes; the right depth rail supplies the third K axis. Coincident projected points share a circle/diamond, with depth shown separately. Active phase and ΔK distance use normalized simulation Ku, not raw prices or local attack range.
@@ -10,7 +18,7 @@ Tap K圖 or the K canvas to expand player/monster KX/KY/KZ values, ΔK, distance
 
 Walk toward the visible **K-Guardian · 模擬** with the XYZ joystick. Tap the plane control to choose XZ→KY, XY→KZ or YZ→KX; set C positive/negative to choose that body's phase. Zero C is neutral; lots remain positive position size, never direction. Market cards remain info-only.
 
-The reference transform in existing `runtime/world-runtime.mjs` is `Ki=100*(Pi/P0i-1)` with traceable inverse and explicit simulation anchors. Default K is approximately `(1,-0.5,1)`; the practice guardian has K offset `(0,0,1)` and local XYZ `(0,0,6)`. World position is K+local; gameplay distance includes all three dimensions. These are game units, not physical meters, canonical prices or a real-funds oracle. Live display quotes never overwrite these coordinates.
+The reference transform in existing `runtime/world-runtime.mjs` is `Ki=100*(Pi/P0i-1)` with traceable inverse and explicit simulation anchors. V2.6.18's default fixture K was approximately `(1,-0.5,1)`; V2.6.20 supersedes that production source with validated public quotes as described above. The practice guardian retains K offset `(0,0,1)` and local XYZ `(0,0,6)`. World position is K+local; gameplay distance includes all three dimensions. These are game units, not physical meters, canonical prices or a real-funds oracle. Display text is never parsed as coordinate authority.
 
 Slash attacks one selected body within 2.2 units; Golden Rain attacks the two tangent-plane axes of the same phase within 6; Phantom Axe sweeps the three same-phase bodies within 4 and in front of the avatar. Six independent HP pools, exposed/guarded/resistant multipliers and cooldowns determine actual results. The target card shows HP/range and opens source/coordinate details plus an explicit practice reset. Damage feedback explains neutral, range, resistance and weak points. No reward, token, custody or source-managed Life settlement is created.
 

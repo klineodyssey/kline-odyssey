@@ -1,11 +1,11 @@
 /*
 KGEN_META
-VERSION: 1.8.0
-REVISION: 2026-09-21.KSPACE-COMBAT
+VERSION: 1.9.0
+REVISION: 2026-09-21.PUBLIC-MARKET-K
 STATUS: ACTIVE / SIMULATION-FIRST
 LAST_UPDATED: 2026-09-21
 UPDATED_BY: codex-gm-01
-CHANGE_REASON: Add normalized reference K-space and radius-gated six-phase practice combat while preserving source-managed Life and settlement boundaries.
+CHANGE_REASON: Feed normalized simulation K from complete public quote batches; preserve local XYZ, relative combat geometry, source-managed Life and settlement boundaries.
 SOURCE_OF_TRUTH: TRUE
 */
 
@@ -87,6 +87,31 @@ export function kPositionFromReference(reference=KSPACE_REFERENCE){
   if(typeof reference.source!=='string'||!reference.source)throw new RangeError('K_SOURCE_REQUIRED');
   return Object.fromEntries(K_AXES.map(a=>[a,normalizeKPrice(reference[a]?.price,reference[a]?.anchor)]));
 }
+export function formatKCoordinate(k){const n=Math.round(k*100)/100;return `${n>0?'+':''}${(Object.is(n,-0)?0:n).toFixed(2)}`}
+// Public reference data affects this simulation only; never an execution oracle.
+// Fixed anchors define units, NOT fallback prices. Production waits for a complete quote batch.
+export function updateKMarketReference(world,quotes,receivedAt=Date.now()){
+  if(!Number.isFinite(receivedAt)||receivedAt<0)throw new RangeError('INVALID_QUOTE_TIME');
+  const reference={source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'};
+  for(const a of K_AXES){const {market,anchor}=KSPACE_REFERENCE[a];reference[a]={market,anchor,price:quotes?.[market]}}
+  const next=kPositionFromReference(reference); // validate all three before mutating anything
+  if(world.kSpace?.receivedAt>receivedAt)return false;
+  if(!world.kSpace)createKSpaceEncounter(world,reference);
+  const space=world.kSpace,previous=space.playerK;
+  // Translate the shared market frame; preserve each entity's relative K and local XYZ.
+  for(const m of world.monsters.filter(m=>m.simulationCombat&&m.kPosition))
+    m.kPosition=Object.fromEntries(K_AXES.map(a=>[a,next[a]+(m.kPosition[a]-previous[a])]));
+  space.reference=copy(reference);space.playerK=next;space.receivedAt=receivedAt;space.quoteFailed=false;
+  return true;
+}
+export function kMarketSnapshot(world,now=Date.now()){
+  const s=world.kSpace;if(!s||!Number.isFinite(s.receivedAt))return {status:'WAIT',receivedAt:null,markets:[]};
+  const status=s.quoteFailed||now-s.receivedAt>15000?'STALE':'LIVE';
+  const markets=K_AXES.map(axis=>{const v=s.reference[axis],k=s.playerK[axis];return {axis,symbol:v.market,price:v.price,anchor:v.anchor,k,
+    // A scalar market has one axis intercept, not three invented independent coordinates.
+    point:Object.fromEntries(K_AXES.map(a=>[a,a===axis?k:0]))}});
+  return {status,receivedAt:s.receivedAt,source:s.reference.source,markets};
+}
 export function composeKWorld(k,local){
   if(!validVec(local)||!k||!K_AXES.every(a=>Number.isFinite(k[a])))throw new RangeError('INVALID_K_POSITION');
   const result=Object.fromEntries(XYZ.map((v,i)=>[v,k[K_AXES[i]]+local[v]]));
@@ -115,11 +140,12 @@ export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
   const space=world.kSpace;if(!space||!validVec(player))return null;
   const target=world.monsters.find(m=>m.id===space.targetId&&m.simulationCombat),selection=combatPhase(plane,c);
   const playerWorld=composeKWorld(space.playerK,player);
-  if(!target)return {simulationOnly:true,playerK:copy(space.playerK),playerLocal:{...player},playerWorld,target:null};
+  const market=kMarketSnapshot(world);
+  if(!target)return {simulationOnly:true,market,selection,playerK:copy(space.playerK),playerLocal:{...player},playerWorld,target:null};
   const targetWorld=composeKWorld(target.kPosition,target.localPosition);
   const deltaK=Object.fromEntries(K_AXES.map(a=>[a,target.kPosition[a]-space.playerK[a]]));
   const relative=Object.fromEntries(XYZ.map(a=>[a,targetWorld[a]-playerWorld[a]]));
-  return {simulationOnly:true,source:space.reference.source,reference:copy(space.reference),playerK:copy(space.playerK),playerLocal:{...player},playerWorld,
+  return {simulationOnly:true,market,source:space.reference.source,reference:copy(space.reference),playerK:copy(space.playerK),playerLocal:{...player},playerWorld,
     monsterK:copy(target.kPosition),monsterLocal:{...target.localPosition},monsterWorld:targetWorld,deltaK,relative,
     distance:Math.hypot(relative.x,relative.y,relative.z),selection,
     target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies)},

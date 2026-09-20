@@ -1,5 +1,12 @@
 # 11520 Changelog
 
+## 2026-09-21 · V2.6.20 public market K-space
+
+- Replaced fixed production K reference values with atomic validated public BTC/ETH/BNB batches, using existing deterministic/invertible anchors. WAIT and STALE are explicit; no partial/fabricated current K.
+- Added three color-coded market intercepts, prices/normalized values/distances, shared map/card/target updates and expandable near-range relative projection in the existing map footprint.
+- Common-frame translation preserves local movement, monster relative position, HP/cooldown and combat radius. Plane/sign/lots authority, wallet, PWA and BGM unchanged; v272 cache remains scoped/network-first.
+- Added batch update/failure/recovery tests and real-browser screenshots; bounded card-label repair prevents landscape overflow without relocating controls.
+
 ## 2026-09-21 · V2.6.19 K-space map visualization
 
 - Extended the existing map with Player/Monster K markers, relative vector, three-axis projection/depth, signed active phase, Ku distance and expandable K/ΔK/local XYZ values.
