@@ -1,0 +1,595 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR159-PHYSICS-V41-CURRENT-LINEAGE-AUDIT-R0-20260921",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+  "task_source_reason": "Inventory exact current repository risk and audit the highest-priority safe executable candidate without changing protected Physics CURRENT, Canon, workflows, runtime, assets, Life, Worker or chain state.",
+  "created_by": "Codex",
+  "created_at": "2026-09-20T19:14:28Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P1",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY",
+  "exact_base_sha": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+  "exact_base_tree": "07ddfb7eeccc3fb7886eec49449c24a8a7542f78",
+  "subject": {
+    "repository": "klineodyssey/kline-odyssey",
+    "pr": 159,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/159",
+    "title": "Physics V4.1: cumulative CURRENT with KAIOS time, scale and logistics reconciliation",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD",
+    "head_branch": "codex/physics-civilization-full-runtime-v4-1",
+    "head_sha": "eb61cbabbf32d75c5455bac7e604389b921fcff9",
+    "head_tree": "f58904bf174b8c795d8214e17a52a2bc264ebc25",
+    "merge_base_sha": "2b733f7d91349fe250262a9be3157d8934dec48b",
+    "merge_base_tree": "60569c7557bcb8adaee44fa4c7e65e5dab53f373",
+    "comparison_to_exact_base": {
+      "status": "diverged",
+      "ahead_by": 27,
+      "behind_by": 906,
+      "changed_paths": 16,
+      "additions": 15220,
+      "deletions": 584
+    },
+    "evidence": {
+      "workflow_runs": 3,
+      "successful_workflow_runs": 1,
+      "failed_workflow_runs": 2,
+      "check_jobs_successful": 1,
+      "check_jobs_failed": 2,
+      "check_jobs_skipped": 1,
+      "reviews": 0,
+      "review_threads": 0,
+      "comments": 1
+    },
+    "direct_merge_forbidden_reasons": [
+      "codex/* branch may trigger Cursor wake",
+      "Draft",
+      "behind exact latest main by 906 commits",
+      "two exact-head write-capable sync workflow runs failed",
+      "workflow grants contents: write and pushes its own branch",
+      "protected Physics CURRENT and canonical state scope",
+      "stale PR #158 head and alchemy semantics",
+      "stale lineage validator and stale committed PASS report",
+      "34 of 238 exact-head Universal tests failed inside both sync runs",
+      "live tests are three-way diverged from current main",
+      "no review and an unresolved HOLD conversation comment"
+    ]
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 34,
+    "open_prs_reviewed": true,
+    "main_workflow_runs_reviewed": true,
+    "todos_and_runtime_risks_reviewed": true,
+    "visual_qa_history_reviewed": true,
+    "latest_main_movement": {
+      "sha": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "parent": "6709b92e18cea76f87113fcc57a95fe9260df535",
+      "tree": "07ddfb7eeccc3fb7886eec49449c24a8a7542f78",
+      "source_pr": 423,
+      "source_pr_head": "758df7591fcbbc4a82f9ae8ee7d0f8d578e22280",
+      "classification": "EXPECTED_PR_SQUASH_MERGE_NOT_DIRECT_MAIN_WRITE",
+      "changed_paths": 13,
+      "required_post_merge_checks": "SUCCESS"
+    },
+    "ci_inventory": {
+      "current_main_exact_sha": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "current_main_runs": [
+        {
+          "id": 35530951332,
+          "name": "11520 Universal Exchange V2",
+          "conclusion": "SUCCESS"
+        },
+        {
+          "id": 35530951351,
+          "name": "11520 Game Product QA",
+          "conclusion": "SUCCESS"
+        },
+        {
+          "id": 35530951401,
+          "name": "11520 Responsive Product QA",
+          "conclusion": "SUCCESS"
+        },
+        {
+          "id": 35530951428,
+          "name": "Deploy Pages Static",
+          "conclusion": "SUCCESS"
+        },
+        {
+          "id": 35530984653,
+          "name": "11520 Responsive Product QA workflow_run",
+          "conclusion": "SUCCESS"
+        }
+      ],
+      "selected_pr_exact_head": {
+        "universal_run": {
+          "id": 32317541316,
+          "conclusion": "SUCCESS",
+          "tests": 238
+        },
+        "sync_runs": [
+          {
+            "id": 32317537514,
+            "conclusion": "FAILURE",
+            "tests": 238,
+            "pass": 204,
+            "fail": 34
+          },
+          {
+            "id": 32317582366,
+            "conclusion": "FAILURE",
+            "tests": 238,
+            "pass": 204,
+            "fail": 34
+          }
+        ],
+        "failure_signature": "App manifest hash does not match the released manifest; expected 8d41a64d... but actual 0304046b... for additional assertions",
+        "actions_node20_warning": "checkout@v4 and setup-node@v4 are deprecated and forced to Node 24"
+      }
+    },
+    "todo_inventory": {
+      "search_queries": [
+        "TODO",
+        "FIXME",
+        "XXX",
+        "NOT_IMPLEMENTED"
+      ],
+      "default_branch_matches": 0,
+      "interpretation": "No indexed default-branch markers returned; open PRs, exact-head CI and runtime evidence remain the actionable inventory."
+    },
+    "ranked_candidates": [
+      {
+        "rank": 1,
+        "priority": "P0",
+        "candidate": "PR #232 real-funds BrainExchange V4",
+        "decision": "HOLD",
+        "reason": "real funds, oracle, custody, upgrade and deployment authority"
+      },
+      {
+        "rank": 2,
+        "priority": "P0",
+        "candidate": "PRs #135/#154/#186/#199 Mainnet, payroll, payment and Auto-LP lineages",
+        "decision": "HOLD",
+        "reason": "protected live financial or chain effects"
+      },
+      {
+        "rank": 3,
+        "priority": "P1",
+        "candidate": "PR #159 Physics V4.1 and scale CURRENT lineage audit",
+        "decision": "SELECTED",
+        "reason": "highest dependency-ordered safe evidence-only audit after PR #158"
+      },
+      {
+        "rank": 4,
+        "priority": "P1",
+        "candidate": "PR #161 cross-market circulatory autopilot lineage audit",
+        "decision": "NEXT"
+      },
+      {
+        "rank": 5,
+        "priority": "P1",
+        "candidate": "PRs #152/#153/#154 bank authority and payroll lineage",
+        "decision": "HOLD"
+      },
+      {
+        "rank": 6,
+        "priority": "P1",
+        "candidate": "PR #198 mobile ATM and wallet lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 7,
+        "priority": "P1",
+        "candidate": "PR #194 holder resources and LP lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 8,
+        "priority": "P1",
+        "candidate": "PR #177 remote handoff and wallet UI lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 9,
+        "priority": "P1",
+        "candidate": "PRs #188/#190/#191/#192 integrated market, economy, employment and lab lineages",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 10,
+        "priority": "P2",
+        "candidate": "PR #48 historical Life baseline lineage",
+        "decision": "PENDING"
+      }
+    ],
+    "selected_count": 1
+  },
+  "source_reads": [
+    {
+      "path": "AGENTS.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"
+    },
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"
+    },
+    {
+      "path": "KGEN-KAIOS/SECURITY_MODEL.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "092c11a085412154b26d230ba8007cc41fdd2e18"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"
+    },
+    {
+      "path": "KGEN-KAIOS/boot-runtime/KAIOS_BOOT_RUNTIME.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "1b3c72c644c5e7b65793c4ff160e472b35df2b82"
+    },
+    {
+      "path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"
+    },
+    {
+      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "760228b706ebec2b88831d09a9d91a829c7bba4a"
+    },
+    {
+      "path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605"
+    },
+    {
+      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "be9beeaabe090c4c674bbc952e64fc9fb927b3ba"
+    },
+    {
+      "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KAIOS_PR158_ALCHEMY_KUFO_KSHIP_LINEAGE_AUDIT_R0_20260921.json",
+      "ref": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "sha": "36f0addbe0bcc76eb8c9bac8109814385275b00a"
+    },
+    {
+      "path": ".github/workflows/physics-v4-1-final-sync.yml",
+      "ref": "eb61cbabbf32d75c5455bac7e604389b921fcff9",
+      "sha": "6fcc19da62cf4901fab62a559af110252007f3c1"
+    },
+    {
+      "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+      "ref": "eb61cbabbf32d75c5455bac7e604389b921fcff9",
+      "sha": "f6e7f66ce72f3a9ec5f5452c8b84e27a37b20dd6"
+    },
+    {
+      "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
+      "ref": "eb61cbabbf32d75c5455bac7e604389b921fcff9",
+      "sha": "d00183ede81407cd972866991db3c2ee6bd86bc9"
+    },
+    {
+      "path": "docs/physics/archive/v4_1_reconciliation/KGEN_PHYSICS_V4_1_ACTIVE_SUPERSEDE_LAYER.md",
+      "ref": "eb61cbabbf32d75c5455bac7e604389b921fcff9",
+      "sha": "3b81ef610f5f0283c08d983d051c354fbcc38711"
+    },
+    {
+      "path": "docs/physics/archive/v4_1_reconciliation/KAIOS_TIME_REALMS_AND_BIGBANG_DISTANCE_DECISION_2026-08-20.md",
+      "ref": "eb61cbabbf32d75c5455bac7e604389b921fcff9",
+      "sha": "4531c3dbe24ae79016d75be814b6278304439845"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "P1",
+      "id": "WRITE_CAPABLE_SELF_MUTATING_WORKFLOW",
+      "detail": "The candidate adds a workflow with contents: write and workflow_dispatch, merges origin/main into its codex/* branch, rewrites canonical.json, commits, removes itself and pushes the branch. This is a self-mutating write workflow and is outside automatic integration authority."
+    },
+    {
+      "severity": "P1",
+      "id": "EXACT_HEAD_SYNC_CI_FAILED",
+      "detail": "Both exact-head sync runs failed: 204/238 tests passed and 34 failed. Most failures report App manifest hash does not match the released manifest; additional assertions show expected 8d41a64d... versus actual 0304046b...."
+    },
+    {
+      "severity": "P1",
+      "id": "STALE_PR158_SUCCESSOR_SEMANTICS",
+      "detail": "The V4.1 active layer pins PR #158 head e679a71... and describes KGEN escrow/return plus 49-epoch maturation. Current PR #158 head is ac9ffdd... and the audited successor semantics use direct contribution to an immutable catalyst bank, no Furnace-held or returned KGEN and DELIVERY_DELAY=0."
+    },
+    {
+      "severity": "P1",
+      "id": "STALE_VALIDATOR_AND_FALSE_PASS_EVIDENCE",
+      "detail": "The branch verifier raw-rejects substring 1 KGEN = 1 kg in Physics CURRENT while the proposed cumulative CURRENT intentionally retains that historical sentence. Its committed reconciliation report says PASS but was not regenerated against the exact proposed bytes. Current main has a newer precedence-aware fail-closed verifier and three extra regression assertions from merged PR #173."
+    },
+    {
+      "severity": "P1",
+      "id": "PROTECTED_CURRENT_AND_CANON_SCOPE",
+      "detail": "The candidate would replace protected Physics CURRENT and rewrite canonical runtime bindings. V4.1/CURRENT byte identity is a positive control, but neither branch-candidate labels nor caller-generated hashes grant Canon installation authority."
+    },
+    {
+      "severity": "P1",
+      "id": "STALE_RUNTIME_BINDING_AND_MANIFEST_HASH",
+      "detail": "The branch modifies the live 11520 manifest and public worker Physics binding while its sync tests demonstrate a released-manifest hash mismatch across Life, Company and Registry regressions."
+    },
+    {
+      "severity": "P1",
+      "id": "THREE_WAY_TEST_DIVERGENCE",
+      "detail": "tests/universal-exchange.test.mjs changed on both the PR and current main. The branch tests 238 cases, while current main has a materially newer test blob and exact-main CI. Blind rebase or replacement would weaken the current regression boundary."
+    },
+    {
+      "severity": "P1",
+      "id": "MASS_AND_ALCHEMY_CANON_CONFLICT",
+      "detail": "The proposed active layer correctly states the 1 KGEN=1000 kg, 1 KAIOS=1 kg, 1 KUFO=1 g and 1 KSHIP=1 mg scale, but it combines that with superseded 18911 alchemy timing and catalyst custody semantics. The complete successor lineage must be reconciled before any CURRENT installation."
+    },
+    {
+      "severity": "P2",
+      "id": "STALE_ACTIONS_AND_ONE_SHOT_LIFECYCLE",
+      "detail": "The historical workflow uses checkout/setup-node v4 and Node 20, now deprecated. Its PR body describes a one-shot workflow that removes itself, but the file remains in the exact head because both sync attempts failed."
+    },
+    {
+      "severity": "P2",
+      "id": "EXTREME_BRANCH_STALENESS",
+      "detail": "The branch is 906 commits behind current main. Four live paths are PR-only modifications on an unchanged merge-base lineage, ten are PR-only additions and the Universal test path is three-way diverged. Historical exact-head success cannot establish current-main compatibility."
+    }
+  ],
+  "positive_controls": [
+    "The proposed V4.1 and CURRENT files are byte-identical at exact head.",
+    "The preserved V3.8 file remains at the expected Git blob in the candidate workflow check.",
+    "The active layer separates KAIOS civilization time aliases from BNB Chain block.timestamp and real astrophysical claims.",
+    "The active layer rejects universal K-index-to-kilometer extrapolation and separates K72000 from a scientifically established Big Bang location.",
+    "The active layer keeps KUFO life support and KSHIP propulsion reservoirs separate and denies incomplete-physics dispatch.",
+    "The standalone exact-head Universal PR run passed 238 tests, but this positive evidence is superseded for merge readiness by two failing sync runs and main divergence."
+  ],
+  "path_lineage": {
+    "count": 16,
+    "classification_counts": {
+      "added_on_pr": 10,
+      "pr_only_modified_main_unchanged": 5,
+      "diverged_from_current_main": 1
+    },
+    "paths": [
+      {
+        "path": ".github/workflows/physics-v4-1-final-sync.yml",
+        "merge_base_blob": null,
+        "pr_head_blob": "6fcc19da62cf4901fab62a559af110252007f3c1",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/11520/MANIFEST.json",
+        "merge_base_blob": "136aff0862a5f17e04933c761bf0ee919b60296e",
+        "pr_head_blob": "74d8efea2a02c274b0be1b6d01fe5da95098adfa",
+        "current_main_blob": "136aff0862a5f17e04933c761bf0ee919b60296e",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "core/data/canonical.json",
+        "merge_base_blob": "859286ce95edc715720f043f907e037e4725a0d7",
+        "pr_head_blob": "7cfe5aac09d47f2a4d49a67a480d92269d8bd520",
+        "current_main_blob": "859286ce95edc715720f043f907e037e4725a0d7",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "core/jobs/public-read-only-worker.mjs",
+        "merge_base_blob": "0480131df1fd6454431a80932e04c215a9df2d4b",
+        "pr_head_blob": "6f380a56988a8604c5d9b646919324e914863538",
+        "current_main_blob": "0480131df1fd6454431a80932e04c215a9df2d4b",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+        "merge_base_blob": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc",
+        "pr_head_blob": "9dfafd4aba2b392cba5bf6d693bca79c2b37afcc",
+        "current_main_blob": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "docs/physics/KGEN_Universe_Physics_Runtime_V4_1.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "9dfafd4aba2b392cba5bf6d693bca79c2b37afcc",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/CI_THOUGHT_ORGAN_DIAGNOSIS.txt",
+        "merge_base_blob": null,
+        "pr_head_blob": "6a10c75c3d74874f534bf09dff43d8c1871e4d34",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/KAIOS_TIME_REALMS_AND_BIGBANG_DISTANCE_DECISION_2026-08-20.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "4531c3dbe24ae79016d75be814b6278304439845",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/KGEN_PHYSICS_CIVILIZATION_CENSUS_V4_1.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "a2a721aac90d64ca97093f4abe2db9db554cdb62",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/KGEN_PHYSICS_V3_8_PART_INVENTORY_COMPLETE.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "653750bc672c50b5c83f5e55c5faf0cbff82db95",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/KGEN_PHYSICS_V3_8_PART_INVENTORY_GATE.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "c3862dbb6e1bd6ab67a09ff0e4d8e39b7159bf2f",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/KGEN_PHYSICS_V4_1_ACCEPTED_MERGE_PAYLOAD.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "bc220820bcd7f835daf6939ffccb58806127d5c9",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/KGEN_PHYSICS_V4_1_ACTIVE_SUPERSEDE_LAYER.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "3b81ef610f5f0283c08d983d051c354fbcc38711",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/KGEN_PHYSICS_V4_1_COVERAGE_MATRIX.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "c02e10c7936efd8c49dae9829693b4d6f19f8d30",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/archive/v4_1_reconciliation/README.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "b63b5189d543c8b44b142e763bf1fed5e7d5987a",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "tests/universal-exchange.test.mjs",
+        "merge_base_blob": "65be97a59ff1150cbbd963979fff6e5291bbf282",
+        "pr_head_blob": "346d4f0d2abc2e30d1472bffde3a7e7c06fbb820",
+        "current_main_blob": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+        "classification": "diverged_from_current_main"
+      }
+    ]
+  },
+  "validation": {
+    "historical_exact_head": {
+      "universal_run": {
+        "id": 32317541316,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/32317541316",
+        "conclusion": "SUCCESS",
+        "tests": 238
+      },
+      "sync_runs": [
+        {
+          "id": 32317537514,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/32317537514",
+          "conclusion": "FAILURE",
+          "tests": 238,
+          "pass": 204,
+          "fail": 34
+        },
+        {
+          "id": 32317582366,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/32317582366",
+          "conclusion": "FAILURE",
+          "tests": 238,
+          "pass": 204,
+          "fail": 34
+        }
+      ],
+      "caveat": "Exact-head required CI is not green; historical results are not current-main compatibility, Canon authority or merge authority."
+    },
+    "current_main": {
+      "sha": "924050045f26c1560eba6be80fb2a5eb64f9c0ae",
+      "universal_run": {
+        "id": 35530951332,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/35530951332",
+        "conclusion": "SUCCESS"
+      },
+      "game_qa_run": {
+        "id": 35530951351,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/35530951351",
+        "conclusion": "SUCCESS"
+      },
+      "responsive_qa_run": {
+        "id": 35530984653,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/35530984653",
+        "conclusion": "SUCCESS"
+      },
+      "pages_run": {
+        "id": 35530951428,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/35530951428",
+        "conclusion": "SUCCESS"
+      },
+      "code_equivalence": "Current-main validation only; candidate CURRENT, workflow, runtime and tests were not transplanted."
+    },
+    "work_order_assertions": {
+      "json_parse": true,
+      "selected_candidate_count": 1,
+      "path_count_matches": 16,
+      "path_classification_total_matches": 16,
+      "all_blob_shas_are_null_or_git_sha": true,
+      "exact_base_is_latest_at_creation": true,
+      "all_protected_effects_false": true
+    },
+    "functional_qa": "Evidence-only audit; no runtime code, CURRENT, Canon, workflow or UI was changed.",
+    "visual_qa": {
+      "required_for_selected_change": false,
+      "reason": "Single machine-verifiable JSON audit file only; no UI/game/runtime change.",
+      "post_merge_responsive_check": "REQUIRED_BY_CURRENT_MAIN_PIPELINE"
+    }
+  },
+  "protected_effects": {
+    "payment": false,
+    "asset_transfer": false,
+    "token_burn": false,
+    "token_mint": false,
+    "mainnet_transaction": false,
+    "testnet_transaction": false,
+    "governance": false,
+    "worker_activation": false,
+    "life_activation": false,
+    "controller_appointment": false,
+    "signer_appointment": false,
+    "operator_appointment": false,
+    "private_key_access": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "chain_state_mutation": false,
+    "external_publication_claim": false,
+    "deployment_claim": false,
+    "revenue_claim": false,
+    "settlement_claim": false
+  },
+  "implementation": {
+    "type": "MACHINE_VERIFIABLE_LINEAGE_AUDIT_ONLY",
+    "changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR159_PHYSICS_V41_CURRENT_LINEAGE_AUDIT_R0_20260921.json"
+    ],
+    "candidate_current_transplanted": false,
+    "candidate_canon_transplanted": false,
+    "candidate_workflow_transplanted": false,
+    "candidate_runtime_transplanted": false,
+    "candidate_ui_transplanted": false,
+    "next_candidate": "PR #161 cross-market circulatory autopilot lineage security audit"
+  }
+}
