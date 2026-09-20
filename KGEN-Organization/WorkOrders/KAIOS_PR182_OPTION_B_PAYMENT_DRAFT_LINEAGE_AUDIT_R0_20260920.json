@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR182-OPTION-B-PAYMENT-DRAFT-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit stale Option B proposal, WBS, delivery estimate, and 18888 payment-draft lineage without authorizing a project, Worker, payment, or chain effect",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_182_OPTION_B_PROPOSAL_WBS_PAYMENT_DRAFT_LINEAGE_AUDIT",
+  "exact_base_sha": "790a755ff14afc1f0c9c9534fc02546371a3641a",
+  "exact_base_tree_sha": "343fcaa07b3c273d46e1e1b6b63e001795515de5",
+  "integration_branch": "audit/pr182-option-b-payment-draft-lineage-r0-20260920",
+  "integration_head_derivation": "READ_BRANCH_REF_AFTER_COMMIT",
+  "audited_pr": 182,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_recorded_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_merge_base_sha": "b5a4d116374ccab0feff0233a4acf2cb6e641e1e",
+  "audited_merge_base_tree_sha": "f7f7a2432fc7623bb3c867fd5cf0ac0e4f96fe81",
+  "audited_head_branch": "codex/kaios-option-b-customer-project-runtime-v1",
+  "audited_head_sha": "6cce9ec0a07c10dc233a6963c293e1e0f9f79467",
+  "audited_head_tree_sha": "0cdb63f761415309840c79c584c341df76a01103",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT",
+    "ahead": 17,
+    "behind": 743
+  },
+  "pr_scope": {
+    "changed_paths": 3,
+    "insertions": 600,
+    "deletions": 0,
+    "commits": 17,
+    "conversation_comments": 2,
+    "submitted_reviews": 0,
+    "review_threads": 0
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 182 contains useful fail-closed candidate fields and tests, but it accepts caller-shaped Customer references, cost and schedule inputs; describes an unverified direction with binding and accepted terminology; creates role-scoped WBS branches under codex/*; carries stale closed dependency identifiers; and embeds an open unmerged PR 186 payment-draft lineage with fixed Mainnet addresses and caller-injected read adapters. Current main has a newer side-effect-free engineering-cycle planner and later company-runtime safety work. The safe action is a current-main audit record only, with no proposal, payment, Worker, branch plan, wallet, workflow, revenue, signer, or chain capability transplanted.",
+  "inventory": {
+    "open_pull_requests": 34,
+    "latest_main_failed_workflow_runs_observed": 0,
+    "relevant_todo_fixme_hack_matches": 0,
+    "selected_visual_failure": null,
+    "selected_runtime_defect": null,
+    "security_blocker": "No immutable Customer acceptance, financial authority, funded approved budget, canonical beneficiary, deployed escrow, authoritative Worker/reviewer registry, main-tracked ABI/runtime-codehash binding, or authorized payment adapter exists for PR 182."
+  },
+  "blocking_findings": [
+    "PR 182 is open, Draft, unmerged, diverged, and 743 commits behind exact current main.",
+    "createOperatingCompanyBindingProposal requires only a caller-supplied conditional_acceptance_reference and cannot resolve it to an immutable Human decision artifact.",
+    "The API and fields use BindingProposal and accepted_direction_at terminology even though conditional_acceptance_verified, engineering_preparation_authorized, project_activated, payment_requested, and payment_received are always false; publishing these names without the fail-closed context could misstate acceptance or authority.",
+    "The 108888 KAIOS cost model, five milestone amounts, Customer label, delivery dates, roles, capacity, payment policies, dependencies, scopes, hours, and acceptance-test labels are caller or fixture data, not Canon or Human-authorized commercial facts.",
+    "createOptionBWorkBreakdown explicitly requires codex/* branches, while the current integration boundary forbids merging through that wake-triggering path and current main's newer planner rejects codex/* branches.",
+    "WBS packages reject assigned_worker_id but still accept caller-shaped role, trust requirement, file scope, dependency, hours, branch, start gate, and acceptance-test labels without resolving an authoritative Worker, Reviewer, Claim, lease, or fencing token.",
+    "estimateOptionBDeliverySchedule derives dates from caller-supplied hours and capacity; it does not prove staff availability, accepted scope, Human gates, reviewer capacity, or a binding delivery commitment.",
+    "The embedded PR 186 payment draft fixes BSC Mainnet contract and beneficiary addresses in code even though address publication does not prove controller, signer, beneficiary, budget, treasury, or payment authority.",
+    "readKaios18888PaymentReadiness accepts a caller-injected bankReader and caller-supplied proposer and approver addresses; this can model read shapes but cannot authenticate deployed ABI, proxy implementation, runtime codehash, roles, beneficiary, or authorization.",
+    "The payment request's budget_id, requested_by, purpose, nonce, amount, and timing are caller inputs; the resulting NON_AUTHORITATIVE_PAYMENT_DRAFT is not a payment request, approval, funded obligation, receivable, escrow, or revenue event.",
+    "PR 186 remains open Draft and unmerged, so PR 182 cannot treat its payment-draft code as an accepted dependency or current-main capability.",
+    "The fixture dependency list PR169, PR170, and PR176 is stale: all three are now closed unmerged and cannot authorize Option B work.",
+    "Current main has no Option B or KAIOS_18888_PAYMENT_CONFIG symbols and contains later company-runtime and universal-test changes; overwriting it with the stale files would discard subsequent safety work.",
+    "Historical exact-head CI proves only internal behavior of the old candidate. It cannot manufacture Customer acceptance, Company authority, Worker/reviewer eligibility, budget, custody, beneficiary, signer, deployment, payment, revenue, delivery, or chain facts."
+  ],
+  "positive_findings": [
+    "The proposal rebuild forces conditional_acceptance_verified=false, authority_resolution=NOT_IMPLEMENTED_FAIL_CLOSED, engineering_preparation_authorized=false, project_activated=false, payment_requested=false, payment_received=false, real_revenue=0, and chain_write=false.",
+    "Proposal, milestone, workforce, payment-architecture, and WBS objects reject unknown fields, including caller-added payment_authorized and dispatch_authorized flags.",
+    "The WBS rejects assigned_worker_id and returns null Worker, Claim, and fencing-token fields with DRAFT_WBS_NOT_DISPATCHABLE.",
+    "The schedule is explicitly non-binding and blocks completion when reviewer capacity is zero.",
+    "The embedded payment draft returns calls=null and calldata=null, requests no signer, sends no transaction, and keeps authority, budget, beneficiary, ABI, and runtime-codehash gates false.",
+    "Historical push and pull_request exact-head runs both passed 243/243 tests and ES-module validation."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and preserve the current side-effect-free engineering planner and later company-runtime safety work.",
+    "Use neutral candidate names until immutable Customer acceptance and financial authority are independently machine-verified; do not encode accepted or binding facts from caller references.",
+    "Resolve scope, price, milestones, payment terms, delivery date, budget, beneficiary, refund, dispute, and acceptance policies from explicit current Canon and Human-authorized evidence with immutable hashes, purpose, freshness, expiry, and revocation.",
+    "Resolve Workers and distinct Reviewers from an authoritative repository-bound registry and issue exact Claims, leases, fencing tokens, dependency order, path scopes, and non-codex branches only after independent authorization.",
+    "Do not use caller-injected read adapters as deployment evidence; bind chain, proxy, implementation, ABI, runtime codehash, roles, controller, beneficiary, budget, and observed block through independently fetched evidence.",
+    "Keep all payment artifacts non-executable until a separate explicitly authorized path exists; never emit calldata, request a signer, broadcast, recognize revenue, mutate treasury, or claim a receipt from this lineage audit.",
+    "Never access credentials, request wallet approval, transfer assets, appoint a signer/controller/operator, dispatch workflows, call paid APIs, launch an external agent, activate Workers/Life, send a Mainnet transaction, or mutate chain state as part of this audit."
+  ],
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-Canon/README.md", "blob_sha": "73522e0da54967c1f164670742ab599f818e3ede"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-Canon/KGEN_CANON_MASTER.json", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"},
+    {"path": "KGEN-KAIOS/KAIOS_LIFE_RUNTIME_CURRENT.md", "blob_sha": "b4941c14b79f6800bf62d533497fdd5ea783e1f7"},
+    {"path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"},
+    {"path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0"},
+    {"path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29"},
+    {"path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04"},
+    {"path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json", "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa"}
+  ],
+  "validation": {
+    "audited_old_head": {
+      "universal_exchange_push_run_id": 33229451508,
+      "universal_exchange_push_conclusion": "SUCCESS",
+      "universal_exchange_pull_request_run_id": 33229454726,
+      "universal_exchange_pull_request_conclusion": "SUCCESS",
+      "universal_exchange_tests": "243/243 PASS",
+      "es_module_validation": "PASS",
+      "tested_sha": "6cce9ec0a07c10dc233a6963c293e1e0f9f79467"
+    },
+    "exact_current_main": {
+      "pages_run_id": 35494408744,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run_id": 35494437601,
+      "responsive_conclusion": "SUCCESS_AFTER_TRANSIENT_NETWORK_RERUN",
+      "tested_sha": "790a755ff14afc1f0c9c9534fc02546371a3641a",
+      "latest_code_equivalent_universal_run_id": 35484718096,
+      "latest_code_equivalent_universal_conclusion": "SUCCESS",
+      "latest_code_equivalent_universal_tests": "302/302 PASS",
+      "latest_code_equivalent_universal_sha": "16954be3026cdcfc2cb7ab55bf0bfc229c0b170f",
+      "code_equivalence": "Only document-only lineage work orders changed between the tested code SHA and exact current main."
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; NO_UI_GAME_PAYMENT_WALLET_OR_RUNTIME_CODE_TRANSPLANTED"
+  },
+  "classification_counts": {
+    "UNVERIFIED_COMMERCIAL_AND_CUSTOMER_CANDIDATE_HOLD": 1,
+    "STALE_COMPANY_RUNTIME_AND_PAYMENT_DRAFT_HOLD": 1,
+    "HISTORICAL_TEST_EVIDENCE_ONLY": 1,
+    "TOTAL": 3
+  },
+  "path_classification": [
+    {
+      "path": "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md",
+      "merge_base_blob_sha": "0a1303ee1e8250a601d642418e35b6beb2d1881f",
+      "audited_blob_sha": "0934f7841f8bfdd650bb22dc41f89e8a0de14e7c",
+      "current_main_blob_sha": "0a1303ee1e8250a601d642418e35b6beb2d1881f",
+      "classification": "UNVERIFIED_COMMERCIAL_AND_CUSTOMER_CANDIDATE_HOLD",
+      "disposition": "Do not add caller-shaped Customer acceptance, cost, milestone, workforce, delivery, receivable, escrow, or payment facts to the operating-system document."
+    },
+    {
+      "path": "core/company/index.mjs",
+      "merge_base_blob_sha": "a543b5d83e51971aaf1558cc1c00b4b7584e5a61",
+      "audited_blob_sha": "d11ae283bbd3eb8e9ff6cf4a565aec7d76303b46",
+      "current_main_blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd",
+      "classification": "STALE_COMPANY_RUNTIME_AND_PAYMENT_DRAFT_HOLD",
+      "disposition": "Do not transplant stale Option B, codex-branch WBS, delivery estimate, fixed-address payment draft, or caller-injected chain-read code over the newer company runtime."
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "merge_base_blob_sha": "65be97a59ff1150cbbd963979fff6e5291bbf282",
+      "audited_blob_sha": "fffe285543d47d6fe1e00444b518f7319599eaaf",
+      "current_main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "classification": "HISTORICAL_TEST_EVIDENCE_ONLY",
+      "disposition": "Retain 243/243 exact-head results as historical evidence; current main has newer independent 302/302 code-equivalent validation."
+    }
+  ],
+  "acceptance": [
+    "All three merge-base-to-audited-head paths appear exactly once with exact merge-base, audited-head, and current-main blob SHAs.",
+    "Classification counts sum to three and selected_candidate_count is exactly one.",
+    "PR 182 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close, update, or merge it.",
+    "Customer, commercial, WBS, branch-trigger, Worker/reviewer, dependency, schedule, fixed-address, injected-reader, payment-draft, and stale-main defects are recorded.",
+    "No proposal, cost, milestone, payment, company runtime, test, Worker, branch plan, wallet, workflow, revenue, signer, or chain code is transplanted.",
+    "No UI or game code changes in this audit, so target-specific browser screenshot QA is not applicable.",
+    "No project activation, quote acceptance, receivable, escrow, payment, revenue, payroll, Worker/Claim assignment, wallet request, signer appointment, governance execution, credential access, deployment, workflow dispatch, paid API, external agent, Worker/Life, Mainnet transaction, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    {"rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, one-observation liquidation, actual Brain/Engine E2E, production oracle identity, deployment configuration, and independent security review remain protected."},
+    {"rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, treasury, liquidity, and asset operations are not authorized."},
+    {"rank": 3, "priority": "P1_SELECTED", "candidate": "PR_182_OPTION_B_PROPOSAL_WBS_PAYMENT_DRAFT_LINEAGE_AUDIT", "blocker": null},
+    {"rank": 4, "priority": "P1_NEXT", "candidate": "PR_183_SOL_YAOCE_WORKFORCE_PROPOSAL_LINEAGE_AUDIT", "blocker": "Identity, Human authorization, acknowledgments, Worker Registry, trust, review authority, Claim, dispatch, employment, payroll, and controller evidence require separate review."},
+    {"rank": 5, "priority": "P1_HOLD", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, operator, signer, governance, and parent-evidence authorities are unresolved."},
+    {"rank": 6, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved."},
+    {"rank": 7, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon conflicts require Human resolution."},
+    {"rank": 8, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_DEPENDENCY_CHAIN", "blocker": "Stacked dependency order and protected execution surfaces remain unresolved."},
+    {"rank": 9, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_EXECUTOR", "blocker": "External executor and agent-launch effects are not authorized."},
+    {"rank": 10, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Protected baseline disposition requires a Human decision."}
+  ],
+  "protected_effects": {
+    "customer_acceptance": false,
+    "binding_quote_or_contract": false,
+    "project_activation": false,
+    "worker_or_reviewer_assignment": false,
+    "claim_or_dispatch": false,
+    "receivable_or_escrow_binding": false,
+    "payment": false,
+    "revenue_or_payroll": false,
+    "asset_transfer": false,
+    "mainnet_transaction": false,
+    "wallet_request": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "private_key_or_credential_access": false,
+    "signer_appointment": false,
+    "controller_or_operator_appointment": false,
+    "external_submission_or_publication": false,
+    "paid_external_api": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "worker_or_life_activation": false,
+    "canon_or_current_mutation": false,
+    "ui_or_game_change": false
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR182_OPTION_B_PAYMENT_DRAFT_LINEAGE_AUDIT_R0_20260920.json"
+  ],
+  "next_candidate": "PR_183_SOL_YAOCE_WORKFORCE_PROPOSAL_LINEAGE_AUDIT"
+}
