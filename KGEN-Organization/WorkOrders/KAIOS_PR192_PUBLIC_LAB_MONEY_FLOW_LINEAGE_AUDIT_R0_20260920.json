@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR192-PUBLIC-LAB-MONEY-FLOW-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit the public experimental lab and money-flow lineage without publishing financial, chain, authority, or deployment claims",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_192_PUBLIC_LAB_MONEY_FLOW_LINEAGE_AUDIT",
+  "exact_base_sha": "8d0dddec776ec78fe024ab1adafa69bb5647b8c8",
+  "exact_base_tree_sha": "3112bc0a2b93a31d6683341304516e4068f3bf33",
+  "audited_pr": 192,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_recorded_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_merge_base_sha": "ac304fc585f5f86846d2c61b69ecad8f59bc0a66",
+  "audited_head_branch": "codex/public-lab-money-flow-audit",
+  "audited_head_sha": "ea936610039f3472baad1a9f9a1bf628e5a45f2d",
+  "audited_head_tree_sha": "47f6aa2155d937912ff6b186bd832e6bd3e77ce2",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT_NON_MERGEABLE",
+    "ahead": 10,
+    "behind": 733
+  },
+  "pr_scope": {
+    "changed_paths": 8,
+    "insertions": 493,
+    "deletions": 46,
+    "commits": 10,
+    "conversation_comments": 1,
+    "submitted_reviews": 0,
+    "review_threads": 0
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 192 combines a stale public dashboard and homepage banner with a Pages workflow that has pages:write, id-token:write, workflow_dispatch release selection, and production deployment capability. Its dashboard contains an unattested historical BSC snapshot, balances, pending entitlement, money-flow, payroll, ATM, resource, approval-gate, actor-address, and governance candidates that must not be published as current facts. Current main has a newer safer Pages path and intentionally lacks the dashboard. The only safe bounded task is an evidence-only lineage audit that changes no candidate UI, workflow, Runtime, financial data, Canon, CURRENT, authority, deployment, or pull-request state.",
+  "inventory": {
+    "open_pull_requests": 34,
+    "latest_main_required_checks": "GREEN",
+    "latest_main_failed_workflow_runs_observed": 0,
+    "relevant_todo_fixme_hack_matches": 0,
+    "selected_visual_failure": null,
+    "selected_runtime_defect": null,
+    "security_blocker": "PR 192 publication and financial-governance candidates cannot be transplanted or activated without current trusted provenance, exact Human authority, current-main redesign, and exact-head security and product validation."
+  },
+  "blocking_findings": [
+    "PR 192 is an open Draft, is non-mergeable, and is 733 commits behind exact current main.",
+    "The candidate Pages workflow grants pages:write and id-token:write and exposes workflow_dispatch inputs that can select a release ref; this run is not authorized to merge or dispatch such a workflow.",
+    "The candidate workflow uses older checkout and Pages action generations than current main and would regress the current exact-head PR validation and main-only production deployment design.",
+    "The BSC block 118743165 snapshot is explicitly unattested, historical, not independently verified, and not repository-bound evidence of current balances, supply, burn, entitlement, deployment, settlement, custody, or authority.",
+    "Money-flow entries for rewards, employee payroll, ATM, resources, markets, public goods, treasury, and settlement are planning candidates and do not authorize payment, compensation, custody, or asset movement.",
+    "Hard-coded Mother, Yudi, Guanyin, GM, Human, reviewer, owner, address, and approval-gate fields do not prove identity, controller, signer, governance, review, or Human decision authority.",
+    "The public dashboard and homepage banner could cause stale financial and governance candidates to be perceived as current public Company facts.",
+    "Historical Chromium evidence applies only to the obsolete exact head and does not provide current-main UI equivalence, current financial provenance, publication authority, or deployment evidence.",
+    "The rejected historical Pages attempt stopped before deployment and is not proof that the candidate was published.",
+    "Current main intentionally retains the pre-dashboard homepage and dashboard absence; the six public UI and documentation blobs match the merge base rather than the audited head."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and retain current exact-head PR validation and main-only production Pages deployment.",
+    "Do not add workflow_dispatch, release-ref selection, pages:write, id-token:write, deployment, or workflow-dispatch behavior without exact side-effect-specific Human authorization.",
+    "Require repository-bound, independently verifiable, time-bounded provenance for any chain snapshot and label historical observations by exact chain, block, hash, source, and verification status.",
+    "Do not present balances, supply, burn, entitlement, payroll, ATM, reward, resource, treasury, market, approval, actor, address, controller, signer, reviewer, governance, or settlement candidates as true or current without authoritative evidence.",
+    "If a public read-only successor is separately authorized, rebuild it inside the current shell, remove protected action controls, preserve fail-closed labeling, and pass exact-head security, functional Chromium, Responsive, and direct 390x844 screenshot inspection."
+  ],
+  "source_reads": [
+    { "path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d" },
+    { "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371" },
+    { "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc" },
+    { "path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", "blob_sha": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605" },
+    { "path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29" },
+    { "path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04" },
+    { "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json", "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6" },
+    { "path": "KGEN-Organization/Canon/README.md", "blob_sha": "ab09423efd39a2bb7ed9b5aba3ed42cae8e2f4be" },
+    { "path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "blob_sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad" },
+    { "path": "KGEN-Organization/Canon/WORK_QUEUE.md", "blob_sha": "c38a5f491dc3f935d9ce578cf774cdff0ed2d51f" },
+    { "path": "KGEN-Organization/Canon/RESPONSIBILITY.md", "blob_sha": "8ca5a014677788ce21d22e034d631e6a40dc15ce" },
+    { "path": "KGEN-KAIOS/KAIOS_LIFE_RUNTIME_CURRENT.md", "blob_sha": "b4941c14b79f6800bf62d533497fdd5ea783e1f7" },
+    { "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5" },
+    { "path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0" },
+    { "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1" },
+    { "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac" },
+    { "path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa" }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "dashboard_module_syntax": "PASS",
+      "dashboard_json_parse": "PASS",
+      "release_provenance_regression": "PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "ea936610039f3472baad1a9f9a1bf628e5a45f2d",
+      "historical_exact_head_ci": [
+        { "run_id": 33254105183, "workflow": "World Viewer Product QA", "conclusion": "SUCCESS_HISTORICAL_ONLY", "artifact_id": 9715305069, "artifact_sha256": "62303e4daee3d3abe070e23908032715ce71fff838242e70671a97b4c9bf9833" },
+        { "run_id": 33254103560, "workflow": "World Viewer Product QA", "conclusion": "SUCCESS_HISTORICAL_ONLY", "artifact_id": 9715307253, "artifact_sha256": "2a30875049dad51dc5ce5cab8824a6d0fbc8726492bce19ce3b29b55c08774d2" }
+      ],
+      "historical_browser_product_qa": "189/189 PASS",
+      "historical_responsive_viewports": ["360x800", "390x844", "768x1024", "1440x900"],
+      "rejected_pages_run": { "run_id": 33246089502, "disposition": "BLOCKED_BEFORE_DEPLOYMENT_NOT_DEPLOYMENT_EVIDENCE" },
+      "missing_security_and_product_evidence": [
+        "trusted current repository-bound chain snapshot provenance",
+        "exact Human authority for publication, deployment, financial, payroll, ATM, resource, treasury, governance, and actor-address claims",
+        "current-main architecture equivalence and adversarial workflow tests",
+        "current-shell Game and Responsive Product QA",
+        "390x844 current-shell screenshot inspection",
+        "successful authorized deployment bound to current main"
+      ]
+    },
+    "exact_current_main": {
+      "responsive_run_id_before_change": 35476105096,
+      "responsive_conclusion_before_change": "SUCCESS",
+      "pages_run_id_before_change": 35476085925,
+      "pages_conclusion_before_change": "SUCCESS",
+      "tested_sha": "8d0dddec776ec78fe024ab1adafa69bb5647b8c8"
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; PR 192 CURRENT-SHELL VISUAL AND PUBLICATION EVIDENCE REMAIN MISSING"
+  },
+  "classification_counts": {
+    "PROTECTED_PAGES_RELEASE_WORKFLOW": 1,
+    "HISTORICAL_WORKFLOW_TEST_EVIDENCE_ONLY": 1,
+    "STALE_PUBLIC_LAB_DOCUMENTATION": 1,
+    "UNATTESTED_CHAIN_FINANCIAL_GOVERNANCE_CANDIDATE": 1,
+    "STALE_PUBLIC_LAB_UI": 3,
+    "STALE_PUBLIC_RELEASE_BANNER": 1,
+    "TOTAL": 8
+  },
+  "path_classification": [
+    { "path": ".github/workflows/deploy-pages-static.yml", "merge_base_blob_sha": "3ca624bc18acec8691e3121ce9cbfff0f2c0f6bb", "audited_blob_sha": "48f87517c49373c14ec51a8efe202d295b2b97d9", "current_main_blob_sha": "e2694e98ec16ba039ca27b0b972e0a0ac94e51ee", "classification": "PROTECTED_PAGES_RELEASE_WORKFLOW", "disposition": "Do not import write-token deployment, workflow_dispatch release selection, or older action versions; retain current main-only deployment design." },
+    { "path": ".github/workflows/world-viewer-product-qa.yml", "merge_base_blob_sha": "096b99c344c827861d9a7934a5ea6395e8133d28", "audited_blob_sha": "3140539c2aaeaa600e7181a6df88b0d66b71991b", "current_main_blob_sha": "bda262e5b3b5cfb5d30fb63426decd7bd0541ccb", "classification": "HISTORICAL_WORKFLOW_TEST_EVIDENCE_ONLY", "disposition": "Retain the old regression result as historical evidence only; current exact-head checkout and QA have evolved." },
+    { "path": "KGEN-KAIOS/dashboard/README.md", "merge_base_blob_sha": "d428d2db04791ab67729ea589aeef7948ee493dc", "audited_blob_sha": "9f984e1dc6d39a3ad08d76943e48d61f0a705723", "current_main_blob_sha": "d428d2db04791ab67729ea589aeef7948ee493dc", "classification": "STALE_PUBLIC_LAB_DOCUMENTATION", "disposition": "Do not import stale publication, financial, chain-snapshot, or authority documentation." },
+    { "path": "KGEN-KAIOS/dashboard/dashboard.config.json", "merge_base_blob_sha": "e84ee16955773a7585bf6f7544dd4d1f106a055b", "audited_blob_sha": "5f372ab5716705ac98c1330923829e00a7dc8ca1", "current_main_blob_sha": "e84ee16955773a7585bf6f7544dd4d1f106a055b", "classification": "UNATTESTED_CHAIN_FINANCIAL_GOVERNANCE_CANDIDATE", "disposition": "Do not import historical balances, supply, burn, entitlement, money-flow, payroll, ATM, resource, approval-gate, actor-address, or governance candidates." },
+    { "path": "KGEN-KAIOS/dashboard/dashboard.css", "merge_base_blob_sha": "7e89b889c8434d32f31dfee839387b5505bbe1d4", "audited_blob_sha": "9e535e2743b9a33565cca90d976e35ec3ecf1795", "current_main_blob_sha": "7e89b889c8434d32f31dfee839387b5505bbe1d4", "classification": "STALE_PUBLIC_LAB_UI", "disposition": "Do not import obsolete public-lab styling without current-shell visual QA." },
+    { "path": "KGEN-KAIOS/dashboard/dashboard.js", "merge_base_blob_sha": "c2bc9cb3d8a234e6aa8fa8be7b73b695cc436f2d", "audited_blob_sha": "70e42e8e1ce064a2e14ce25db9cd6258d8de574f", "current_main_blob_sha": "c2bc9cb3d8a234e6aa8fa8be7b73b695cc436f2d", "classification": "STALE_PUBLIC_LAB_UI", "disposition": "Do not import runtime rendering of stale financial, chain, approval, or authority candidates." },
+    { "path": "KGEN-KAIOS/dashboard/index.html", "merge_base_blob_sha": "d175299ec2992bec2cfed60a9271d21f8c0adc96", "audited_blob_sha": "82bba960debaaaced877bf188cb72b2f185c0733", "current_main_blob_sha": "d175299ec2992bec2cfed60a9271d21f8c0adc96", "classification": "STALE_PUBLIC_LAB_UI", "disposition": "Do not publish the obsolete dashboard or present candidate data as current public truth." },
+    { "path": "index.html", "merge_base_blob_sha": "af1b2b4d2211c573ed34e0ca397476c738a8237c", "audited_blob_sha": "ba478649cde4fe97ea4b493dbfc91da9a8b168a6", "current_main_blob_sha": "af1b2b4d2211c573ed34e0ca397476c738a8237c", "classification": "STALE_PUBLIC_RELEASE_BANNER", "disposition": "Do not add a public release ribbon for an unverified, unapproved, and unpublished candidate." }
+  ],
+  "acceptance": [
+    "All 8 merge-base-to-audited-head paths appear exactly once with exact merge-base, audited-head, and current-main blob SHAs.",
+    "Classification counts sum to 8 and selected_candidate_count is exactly one.",
+    "No candidate UI, workflow, test, financial data, chain snapshot, Canon, CURRENT, authority, or deployment behavior is imported.",
+    "PR 192 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close or modify it.",
+    "No UI or game code changes in this audit, so new browser screenshot QA is not applicable; missing current visual and publication evidence remains a blocker.",
+    "No Mainnet, payment, treasury, payroll, wallet, publication, deployment, governance, controller, signer, workflow dispatch, external agent, Worker/Life, paid API, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, exact oracle observation reuse, actual Brain and Position Engine E2E, deployment configuration, and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, treasury, and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_192_PUBLIC_LAB_MONEY_FLOW_LINEAGE_AUDIT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_190_DEMAND_TO_PRODUCT_ATM_LINEAGE_AUDIT", "blocker": "Audit only; ATM, product, reviewer, payment, employment, and external-execution claims require current-main classification." },
+    { "rank": 5, "priority": "P1", "candidate": "PR_188_MARKET_WAREHOUSE_MOBILE_WALLET_LINEAGE_AUDIT", "blocker": "Audit only; market, warehouse, mobile-wallet, custody, and payment claims require current-main classification." },
+    { "rank": 6, "priority": "P1", "candidate": "PR_196_BSC_BRANDING_VERIFICATION_LINEAGE_AUDIT", "blocker": "Audit only; public token, address, contract, verification, and chain claims require fresh authoritative evidence." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, reservoir, operator, transformation, signer, governance, and parent-evidence authorities are unresolved." },
+    { "rank": 8, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved." },
+    { "rank": 9, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon reconciliation requires a bounded current-main redesign or Human decision." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order, cross-product scope, Life, controller, organ, and chain effects remain unresolved." },
+    { "rank": 11, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "Verified remote identity and external executor authority remain absent." },
+    { "rank": 12, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Frozen baseline integrity decision requires Human authority and its PR text contains stale status claims." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "payroll": false,
+    "publication_or_deployment": false,
+    "financial_or_balance_claim": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "workflow_dispatch": false,
+    "write_token_worker_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
