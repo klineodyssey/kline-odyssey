@@ -95,7 +95,7 @@ function paintKMap(canvas,model){
   ctx.fillStyle=model.neutral?'#c4cbd5':'#ffd27c';if(!large)ctx.fillText(`${model.phase} ${model.neutral?'中性':'相位'}`,4,2);
   ctx.strokeStyle='#537082';ctx.lineWidth=1;
   arrow(ctx,{x:8,y:p.player.y},{x:w*.71,y:p.player.y});arrow(ctx,{x:p.player.x,y:h-18},{x:p.player.x,y:21});
-  ctx.fillStyle='#b8d5e9';ctx.fillText(model.h,w*.54,h-24);ctx.fillText(model.v,4,18);ctx.fillText(model.normal,w-25,15);
+  ctx.fillStyle='#b8d5e9';ctx.fillText(model.h,w*.54,h-24);ctx.fillText(model.v,4,18);ctx.fillText(model.normal,w-25,large?15:2);
   ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(p.depthX,28);ctx.lineTo(p.depthX,h-18);ctx.stroke();ctx.setLineDash([]);
   if(p.monster){ctx.strokeStyle='#ffca69';ctx.fillStyle='#ffca69';arrow(ctx,p.player,p.monster);arrow(ctx,{x:p.depthX,y:p.depthPlayer},{x:p.depthX,y:p.depthMonster});kMarker(ctx,p.monster,true);kMarker(ctx,{x:p.depthX,y:p.depthMonster},true)}
   // Concentric circle/diamond truthfully show coincident planar points; the depth rail separates them.
