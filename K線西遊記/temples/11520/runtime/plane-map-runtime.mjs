@@ -127,7 +127,7 @@ function paintMarketOverview(canvas,model){
   for(let x=0;x<w;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
   model.market.markets.forEach((m,i)=>{const v=p.point(m.point);ctx.strokeStyle=colors[i];ctx.fillStyle=colors[i];arrow(ctx,p.origin,v);ctx.beginPath();ctx.arc(v.x,v.y,small?3:5,0,Math.PI*2);ctx.fill();
     const name=m.symbol.replace('USDT',''),label=`${m.axis} / ${name}`;
-    if(small){ctx.fillText(name,3+i*(w/3),h-10)}else{const x=Math.max(2,Math.min(w-ctx.measureText(label).width-2,v.x+5)),y=v.y>h/2?v.y+7:v.y-14;ctx.fillText(label,x,Math.max(15,Math.min(h-12,y)))}});
+    if(small){ctx.fillText(`${m.axis} ${name}`,2+i*(w/3),h-10)}else{const tw=ctx.measureText(label).width,x=Math.max(2,Math.min(w-tw-2,v.x+8)),y=Math.max(15,Math.min(h-14,v.y>h/2?v.y+7:v.y-14));ctx.fillStyle='#06131c';ctx.fillRect(x-1,y-1,tw+2,14);ctx.fillStyle=colors[i];ctx.fillText(label,x,y)}});
   if(p.monster){ctx.strokeStyle='#ff798a';ctx.fillStyle='#ff798a';arrow(ctx,p.player,p.monster);kMarker(ctx,p.monster,true)}kMarker(ctx,p.player,false);
   ctx.fillStyle='#60edff';ctx.fillText('P',Math.max(2,p.player.x-11),Math.min(h-12,p.player.y+4));if(p.monster){ctx.fillStyle='#ffca69';ctx.fillText('M',Math.min(w-9,p.monster.x+6),Math.max(15,p.monster.y-10))}
   ctx.fillStyle='#ecf4ff';ctx.fillText(`${model.phase} · ${model.market.status}`,3,2);
