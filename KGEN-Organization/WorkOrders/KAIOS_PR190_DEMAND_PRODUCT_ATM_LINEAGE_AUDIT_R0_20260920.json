@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR190-DEMAND-PRODUCT-ATM-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit the stale demand-to-product, navigation, ATM, labor, and company lineage without importing protected authority or financial effects",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_190_DEMAND_TO_PRODUCT_ATM_LINEAGE_AUDIT",
+  "exact_base_sha": "311b55d6499acefe1e095029462a6f919ad9d743",
+  "exact_base_tree_sha": "2f6a31723f6399e9bb03b5a8c1c990a473cbab42",
+  "audited_pr": 190,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_recorded_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_merge_base_sha": "b5a4d116374ccab0feff0233a4acf2cb6e641e1e",
+  "audited_head_branch": "codex/kaios-demand-product-economy-v1-1",
+  "audited_head_sha": "0a8acc29bb2eb619291f258be74cd30db980def3",
+  "audited_head_tree_sha": "af2886beba135d91822e10aaef84dd06926907f4",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT_NON_MERGEABLE",
+    "ahead": 7,
+    "behind": 737
+  },
+  "pr_scope": {
+    "changed_paths": 2,
+    "insertions": 653,
+    "deletions": 2,
+    "commits": 7,
+    "conversation_comments": 1,
+    "submitted_reviews": 0,
+    "review_threads": 0
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 190 modifies the monolithic company runtime from a base 737 commits behind current main and mixes useful fail-closed candidate modeling with unbound ATM liquidity and payroll inputs, caller-maintained repayment replay state, hard-coded Company and Life identities, location and labor evidence supplied by the caller, financial policy values lacking current Canon or Human authorization, and external-execution language. Current main has newer demand-first, verified field-service scan, workforce-gap, location-consent, work-order, salary-evidence, wallet-separation, and strategy gates. The only safe bounded task is an evidence-only lineage audit that changes no Runtime, test, UI, Canon, CURRENT, authority, employment, payment, deployment, workflow, or pull-request state.",
+  "inventory": {
+    "open_pull_requests": 34,
+    "latest_main_required_checks": "GREEN",
+    "latest_main_failed_workflow_runs_observed": 0,
+    "relevant_todo_fixme_hack_matches": 0,
+    "selected_visual_failure": null,
+    "selected_runtime_defect": null,
+    "security_blocker": "PR 190 ATM, payroll, liquidity, repayment, navigation, location, labor, identity, employment, product ownership, and external-execution candidates cannot be transplanted without current repository-bound authority and durable evidence."
+  },
+  "current_main_equivalence": {
+    "company_runtime_blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd",
+    "exact_old_function_names_present_on_current_main": false,
+    "newer_safe_primitives": [
+      "DEMAND_FIRST_CIVILIZATION_LAWS",
+      "createFirstKaiosStrategy",
+      "createFieldServiceDemandScan",
+      "createWorkforceGap",
+      "validateLocationPermission",
+      "validateGpsSession",
+      "validateMapPosition",
+      "validateLandEntryEvent",
+      "validateBirthplaceBinding",
+      "validateWorkOrder",
+      "validateSalaryEntry",
+      "assertCompanyWalletSeparation"
+    ],
+    "conclusion": "PARTIALLY_SUPERSEDED_BUT_UNIQUE_PROTECTED_CANDIDATES_REMAIN_HOLD"
+  },
+  "blocking_findings": [
+    "PR 190 is open, Draft, non-mergeable, diverged, and 737 commits behind exact current main.",
+    "The stale branch replaces a monolithic company runtime whose current-main blob has independently evolved; direct import would overwrite newer safety and business primitives.",
+    "The candidate intentionally rejects caller-labeled VERIFIED demand because no repository-bound demand verifier exists; its product decision is therefore local candidate output only.",
+    "ATM advance eligibility relies on caller-provided accrued payroll and ATM liquidity amounts without repository-bound payroll, treasury, liquidity, custody, signer, or settlement evidence.",
+    "The 30 percent advance cap, 1 percent fee, fee bounds, prefunded-liquidity rule, and related product economics lack current protected Canon and explicit Human financial authorization.",
+    "Repayment replay protection accepts a caller-provided used-repayment-id collection and reports replay_consumed false; it is not a durable authoritative global replay registry.",
+    "Navigation and location decisions rely on caller-supplied permission, GPS-session, map-position, land-entry, and birthplace records and do not independently establish consent, revocation, provenance, ownership, or current location authority.",
+    "Hard-coded Company, Life, owner, product, listing, route, and K11520 identities do not prove controller, ownership, installation, purchase, deployment, or operating authority.",
+    "Human relay labor records contain caller-shaped actor, document, timestamp, duration, and rate-policy references and cannot prove performed work, employment, payable time, review, or compensation.",
+    "Status strings such as decisions ready, implemented review candidate, and financial report complete may be mistaken for authoritative completion if separated from their local-only and not-live gates.",
+    "Historical exact-head tests demonstrate deterministic candidate behavior and fail-closed assertions only; they do not provide current-main equivalence, financial authority, employment authority, location provenance, settlement readiness, or deployment evidence.",
+    "External automation remains orchestration only and cannot become Company Core, appoint reviewers or workers, perform labor, or execute protected side effects."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and reuse current demand-first, field-service, work-order, location-consent, salary-evidence, wallet-separation, and persistence primitives.",
+    "Bind demand, payroll accrual, liquidity, treasury, custody, signer, settlement, location consent, revocation, map position, labor, reviewer, Company, Life, and product ownership claims to authoritative repository-defined evidence and independent verifiers.",
+    "Use append-only durable replay state with atomic reserve-before-effect behavior; do not trust caller-provided used identifiers as global replay authority.",
+    "Keep financial policy, fees, advance limits, payroll, repayment, settlement, custody, product pricing, and liquidity disabled until exact protected Canon and side-effect-specific Human authorization exist.",
+    "Do not create, activate, appoint, employ, pay, review as, or confer ownership on any Worker, Life, controller, signer, operator, company, product, or external agent.",
+    "Require separate exact-head adversarial tests for identity substitution, caller-shaped evidence, replay races, stale consent, revocation, insufficient liquidity, wallet separation, and false completion claims before any current-main implementation."
+  ],
+  "source_reads": [
+    { "path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d" },
+    { "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371" },
+    { "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc" },
+    { "path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", "blob_sha": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605" },
+    { "path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29" },
+    { "path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04" },
+    { "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json", "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6" },
+    { "path": "KGEN-Organization/Canon/README.md", "blob_sha": "ab09423efd39a2bb7ed9b5aba3ed42cae8e2f4be" },
+    { "path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "blob_sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad" },
+    { "path": "KGEN-Organization/Canon/WORK_QUEUE.md", "blob_sha": "c38a5f491dc3f935d9ce578cf774cdff0ed2d51f" },
+    { "path": "KGEN-Organization/Canon/RESPONSIBILITY.md", "blob_sha": "8ca5a014677788ce21d22e034d631e6a40dc15ce" },
+    { "path": "KGEN-KAIOS/KAIOS_LIFE_RUNTIME_CURRENT.md", "blob_sha": "b4941c14b79f6800bf62d533497fdd5ea783e1f7" },
+    { "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5" },
+    { "path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0" },
+    { "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1" },
+    { "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac" },
+    { "path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa" },
+    { "path": "core/company/index.mjs", "blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd" }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "module_syntax": "PASS",
+      "universal_exchange": "248/248 PASS",
+      "git_diff_check": "PASS",
+      "tested_sha": "0a8acc29bb2eb619291f258be74cd30db980def3",
+      "historical_exact_head_ci": [
+        { "run_id": 33232070759, "workflow": "Universal Exchange CI", "conclusion": "SUCCESS_HISTORICAL_ONLY", "checkout_sha": "0a8acc29bb2eb619291f258be74cd30db980def3" },
+        { "run_id": 33232071935, "workflow": "Universal Exchange CI", "conclusion": "SUCCESS_HISTORICAL_MERGE_CANDIDATE_ONLY", "checkout_sha": "0bb351c1e30f0126586b70027e57484613f85e6c" }
+      ],
+      "missing_security_and_authority_evidence": [
+        "repository-bound demand verifier",
+        "authoritative payroll accrual and employment evidence",
+        "authoritative ATM liquidity, treasury, custody, signer, and settlement evidence",
+        "durable atomic repayment replay registry",
+        "current consent, revocation, location, map, land-entry, and birthplace provenance",
+        "authoritative labor, rate policy, reviewer, and compensation evidence",
+        "current-main architecture equivalence and adversarial tests"
+      ]
+    },
+    "exact_current_main": {
+      "universal_exchange_run_id_before_change": 35480812832,
+      "universal_exchange_conclusion_before_change": "SUCCESS",
+      "responsive_run_ids_before_change": [35480360112, 35480337366],
+      "responsive_conclusion_before_change": "SUCCESS",
+      "game_product_qa_run_id_before_change": 35480337359,
+      "game_product_qa_conclusion_before_change": "SUCCESS",
+      "pages_run_id_before_change": 35480337354,
+      "pages_conclusion_before_change": "SUCCESS",
+      "tested_sha": "311b55d6499acefe1e095029462a6f919ad9d743"
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; PR 190 CHANGES NO UI OR GAME FILES"
+  },
+  "classification_counts": {
+    "PROTECTED_DEMAND_PRODUCT_ATM_NAVIGATION_LABOR_COMPANY_RUNTIME": 1,
+    "HISTORICAL_FAIL_CLOSED_TEST_EVIDENCE_ONLY": 1,
+    "TOTAL": 2
+  },
+  "path_classification": [
+    {
+      "path": "core/company/index.mjs",
+      "merge_base_blob_sha": "a543b5d83e51971aaf1558cc1c00b4b7584e5a61",
+      "audited_blob_sha": "32db3519d0f82903f98240737f423693e551f1a60",
+      "current_main_blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd",
+      "classification": "PROTECTED_DEMAND_PRODUCT_ATM_NAVIGATION_LABOR_COMPANY_RUNTIME",
+      "disposition": "Do not import stale monolithic runtime, ATM economics, caller-shaped payroll, liquidity, repayment, location, labor, identity, product, reviewer, ownership, or external-execution candidates; retain newer current-main safety primitives."
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "merge_base_blob_sha": "65be97a59ff1150cbbd963979fff6e5291bbf282",
+      "audited_blob_sha": "2a299756a8d3b9b45b8cc65fb496b00f923e4076",
+      "current_main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "classification": "HISTORICAL_FAIL_CLOSED_TEST_EVIDENCE_ONLY",
+      "disposition": "Retain the old 248-test result as historical fail-closed evidence only; do not overwrite the independently evolved current-main suite."
+    }
+  ],
+  "acceptance": [
+    "Both merge-base-to-audited-head paths appear exactly once with exact merge-base, audited-head, and current-main blob SHAs.",
+    "Classification counts sum to 2 and selected_candidate_count is exactly one.",
+    "No candidate Runtime, test, ATM policy, navigation, location, labor, payroll, liquidity, repayment, identity, reviewer, employment, product, Company, Canon, CURRENT, workflow, UI, or deployment behavior is imported.",
+    "PR 190 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close or modify it.",
+    "No UI or game code changes in this audit, so new browser screenshot QA is not applicable.",
+    "No Mainnet, payment, treasury, payroll, wallet, publication, deployment, governance, controller, signer, operator, employment, reviewer, external agent, Worker/Life, paid API, workflow dispatch, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    { "rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, oracle observation reuse, contract E2E, deployment configuration, and security review remain unverified." },
+    { "rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, treasury, and asset operations are not authorized." },
+    { "rank": 3, "priority": "P1_SELECTED", "candidate": "PR_190_DEMAND_TO_PRODUCT_ATM_LINEAGE_AUDIT", "blocker": null },
+    { "rank": 4, "priority": "P1_NEXT", "candidate": "PR_188_MARKET_WAREHOUSE_MOBILE_WALLET_LINEAGE_AUDIT", "blocker": "Audit only; market, warehouse, mobile-wallet, custody, and payment claims require current-main classification." },
+    { "rank": 5, "priority": "P1", "candidate": "PR_196_BSC_BRANDING_VERIFICATION_LINEAGE_AUDIT", "blocker": "Audit only; public token, address, contract, verification, and chain claims require fresh authoritative evidence." },
+    { "rank": 6, "priority": "P1", "candidate": "PR_179_WALLET_DISCOVERY_METADATA_STATUS_AUDIT", "blocker": "Audit only; wallet discovery, address, metadata, and external platform status require current authoritative evidence." },
+    { "rank": 7, "priority": "P1_HOLD", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, reservoir, operator, transformation, signer, governance, and parent-evidence authorities are unresolved." },
+    { "rank": 8, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved." },
+    { "rank": 9, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon reconciliation requires a bounded current-main redesign or Human decision." },
+    { "rank": 10, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_KUFO_KSHIP_UFO_DEPENDENCY_CHAIN", "blocker": "Dependency order, cross-product scope, Life, controller, organ, and chain effects remain unresolved." },
+    { "rank": 11, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_HANDOFF_EXECUTOR", "blocker": "Verified remote identity and external executor authority remain absent." },
+    { "rank": 12, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Frozen baseline integrity decision requires Human authority and its PR text contains stale status claims." }
+  ],
+  "prohibited_effects": {
+    "mainnet": false,
+    "payment": false,
+    "treasury": false,
+    "payroll": false,
+    "publication_or_deployment": false,
+    "financial_or_balance_claim": false,
+    "governance": false,
+    "private_key_access": false,
+    "worker_or_life_activation": false,
+    "employment_or_reviewer_appointment": false,
+    "controller_signer_or_operator_appointment": false,
+    "external_agent_launch": false,
+    "paid_api": false,
+    "workflow_dispatch": false,
+    "write_token_worker_activation": false,
+    "chain_state_mutation": false
+  },
+  "merge_policy": {
+    "expected_head_required": true,
+    "exact_latest_main_required": true,
+    "required_ci_green": true,
+    "unresolved_threads_allowed": false,
+    "blocking_comments_allowed": false,
+    "moving_head_or_main_action": "ABORT_AND_REFRESH"
+  }
+}
