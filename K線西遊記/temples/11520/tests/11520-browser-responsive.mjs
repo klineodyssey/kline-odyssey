@@ -44,6 +44,7 @@ async function snapshot(page){return page.evaluate(sels=>{
 },selectors)}
 async function finalizeLandscape(page,report){
   await page.locator('#confirm').waitFor({state:'hidden'});
+  await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
   const controls=['#joy','#yControl','#cControl','#lotsControl','#cNumericInput','#lotsNumericInput','#attack','#skill','#tradeSword','#dodge','#flat','#orderFire','#k11520UtilityMaster'];
   const boxes=()=>page.evaluate(sels=>Object.fromEntries(sels.map(s=>{const e=document.querySelector(s),r=e.getBoundingClientRect(),h=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return[s,{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,hit:h===e||e.contains(h)}]})),controls);
   const overlaps=(a,b)=>a.x<b.right&&a.right>b.x&&a.y<b.bottom&&a.bottom>b.y;
