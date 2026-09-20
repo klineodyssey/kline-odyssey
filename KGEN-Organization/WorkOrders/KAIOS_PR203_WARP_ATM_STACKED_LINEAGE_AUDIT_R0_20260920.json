@@ -1,0 +1,272 @@
+{
+  "schema_version": "1.0",
+  "work_order_id": "KAIOS-PR203-WARP-ATM-STACKED-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit PR #203 integrated KAIOS warp and bilateral ATM lineage without activating protected effects",
+  "priority": "P1",
+  "risk_class": "R0",
+  "status": "COMPLETED_EVIDENCE_ONLY_HOLD",
+  "selection": {
+    "selected_candidate_count": 1,
+    "selected_candidate": "PR_203_WARP_ATM_STACKED_LINEAGE_SECURITY_AUDIT",
+    "selection_reason": "Highest-ranked executable safe task after P0 real-funds and Mainnet candidates remain HOLD; the bounded deliverable records exact lineage, asset-loss defects, and fail-closed successor requirements without transplanting contracts, wallet code, UI, workflow, market, custody, or settlement functionality."
+  },
+  "repository": {
+    "full_name": "klineodyssey/kline-odyssey",
+    "exact_base_branch": "main",
+    "exact_base_sha": "e8c07724a590625c082234aca98687c7fd71274c",
+    "exact_base_tree_sha": "ee97087ab2caef9993bbd65279c01f5db2882d61",
+    "integration_branch": "audit/pr203-warp-atm-lineage-r0-20260920",
+    "expected_changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR203_WARP_ATM_STACKED_LINEAGE_AUDIT_R0_20260920.json"
+    ]
+  },
+  "audited_pull_request": {
+    "number": 203,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/203",
+    "title": "[Draft] 11520 integrated KAIOS warp + bilateral ATM",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD_DO_NOT_MERGE_OR_TRANSPLANT",
+    "base_branch": "gm/k11520-kgen-kaios-spot-v1",
+    "base_sha": "e33982ac3d3ce276935de95cf96b4a7b65d42287",
+    "head_branch": "sol/11520-kaios-warp-atm-integrated-v2",
+    "head_sha": "0e58628783dac4e153e2ac367dbd7d08f649d965",
+    "head_tree_sha": "257b17a391a8cac568d5403c6e31bd2d0ee393ed",
+    "commits_relative_to_parent": 20,
+    "paths_relative_to_parent": 12,
+    "relative_to_exact_main": {
+      "merge_base_sha": "0267ff4d7eb22dccfbe98794a1fc409c3468a7f7",
+      "ahead_by": 55,
+      "behind_by": 746,
+      "status": "DIVERGED"
+    },
+    "conversation_comments": 2,
+    "submitted_reviews": 0,
+    "review_threads": 0
+  },
+  "dependency_lineage": [
+    {
+      "pr": 169,
+      "role": "ancestor_native_market_cell",
+      "state": "CLOSED",
+      "draft": true,
+      "merged": false,
+      "head_sha": "668bf469b007de652a7264cf29150cbc4cdf2fe0",
+      "consequence": "Cannot supply current market, identity, custody, or settlement authority."
+    },
+    {
+      "pr": 195,
+      "role": "ancestor_settlement_packet",
+      "state": "CLOSED",
+      "draft": true,
+      "merged": false,
+      "head_sha": "685dcfd0006584c565e93daee0f9424f911a08eb",
+      "consequence": "Cannot supply current receipt, settlement, custody, or deployment authority."
+    },
+    {
+      "pr": 200,
+      "role": "direct_parent_spot_book_and_quote_surface",
+      "state": "OPEN",
+      "draft": true,
+      "merged": false,
+      "head_sha": "e33982ac3d3ce276935de95cf96b4a7b65d42287",
+      "consequence": "Remains HOLD under its exact lineage audit and cannot be used as an integration base."
+    }
+  ],
+  "inventory": {
+    "open_pull_request_count": 34,
+    "open_pull_request_numbers": [187, 182, 196, 200, 232, 172, 212, 211, 201, 158, 135, 134, 133, 199, 198, 192, 191, 190, 188, 186, 183, 181, 180, 179, 177, 161, 159, 48, 203, 194, 154, 152, 136, 153],
+    "exact_main_recent_ci_failures": 0,
+    "todo_fixme_hack_default_branch_matches": 0,
+    "p0_summary": "Real-funds, Mainnet, payroll, payment, treasury, liquidity, governance, and Auto-LP work remains non-executable HOLD.",
+    "visual_qa_summary": "PR #203 has no exact-head Game Product QA, current-shell Chromium, responsive, or screenshot artifact; its legacy V4.0 warp surface has not been visually validated against current V4.1.",
+    "runtime_summary": "Current main contains newer fail-closed ATM receiving, real-trading binding, wallet separation, market-cell, and V4.1 shell successors; PR #203 is a divergent stacked branch with protected contract and wallet-write surfaces."
+  },
+  "ranked_candidates": [
+    {"rank": 1, "priority": "P0", "candidate": "PR #232 real-funds oracle/e2e", "disposition": "HOLD_PROTECTED_EFFECTS"},
+    {"rank": 2, "priority": "P0", "candidate": "PRs #135/#154/#186/#199 Mainnet, payroll, payment, Auto-LP", "disposition": "HOLD_PROTECTED_EFFECTS"},
+    {"rank": 3, "priority": "P1", "candidate": "PR #203 integrated KAIOS warp/bilateral ATM stacked-lineage audit", "disposition": "SELECTED_R0_EVIDENCE_ONLY"},
+    {"rank": 4, "priority": "P1", "candidate": "PR #133 FortuneGame/Mainnet lineage audit", "disposition": "NEXT"},
+    {"rank": 5, "priority": "P1", "candidate": "PR #134 TempleHeart bindings lineage audit", "disposition": "PENDING"},
+    {"rank": 6, "priority": "P1", "candidate": "PRs #158/#159 physics/current/catalyst lineage audit", "disposition": "PENDING"},
+    {"rank": 7, "priority": "P1", "candidate": "PR #161 circulatory autopilot lineage audit", "disposition": "PENDING"},
+    {"rank": 8, "priority": "P1", "candidate": "PRs #152/#153/#154 service/payroll/capability lineage audit", "disposition": "PENDING"},
+    {"rank": 9, "priority": "P1", "candidate": "PR #198 mobile ATM/UFO service lineage audit", "disposition": "PENDING"},
+    {"rank": 10, "priority": "P1", "candidate": "PR #194 KGEN/KAIOS settlement lineage audit", "disposition": "PENDING"},
+    {"rank": 11, "priority": "P2", "candidate": "PR #177 external executor lineage audit", "disposition": "PENDING"},
+    {"rank": 12, "priority": "P2", "candidate": "PR #48 protected baseline lineage audit", "disposition": "PENDING"}
+  ],
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "KGEN-Canon/README.md", "blob_sha": "73522e0da54967c1f164670742ab599f818e3ede"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-Canon/KGEN_CANON_MASTER.json", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"},
+    {"path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"},
+    {"path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md", "blob_sha": "824626abe0a10894972445d3ae3597b584d44276"},
+    {"path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md", "blob_sha": "760228b706ebec2b88831d09a9d91a829c7bba4a"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md", "blob_sha": "092c11a085412154b26d230ba8007cc41fdd2e18"},
+    {"path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0"},
+    {"path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29"},
+    {"path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa"},
+    {"path": "K線西遊記/temples/11520/AGENTS.md", "blob_sha": "4e2821c8d86e65afa4c4c50f7fdba7575ca2cd4f"},
+    {"path": "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "blob_sha": "8abc55c09675e1f8aa5762516712f579b3874218"},
+    {"path": "K線西遊記/temples/11520/trade-5d.html", "blob_sha": "b21ca280b299f606b9faef01ebe903f245c115df"},
+    {"path": "K線西遊記/temples/11520/runtime/kaios-atm-receiving-runtime.mjs", "blob_sha": "15d72e82dbb4accde010ef10c3b5eb409ff8f6ee"},
+    {"path": "K線西遊記/temples/11520/runtime/real-trading-market-binding.mjs", "blob_sha": "ebccbad9b0e9cc6dc958b72230f74211ee697b47"},
+    {"path": "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs", "blob_sha": "b4641952398df76b9229bb64550af227de37dfd8"},
+    {"path": "K線西遊記/temples/11520/modules/kgen-native-market-cell.mjs", "blob_sha": "6a4706aa7212666dea85da24f39d7f177dcdeac9"}
+  ],
+  "path_classification": [
+    {"path": ".github/workflows/universal_exchange_v2.yml", "classification": "WRITE_TOKEN_DIRECT_MAIN_DISPATCH_HOLD", "base_blob": "581c861725a2bf681c0e3dfbc643cc15fc9144e0", "head_blob": "fad93acab47225b2440896b75515fcf203fd1475", "current_main_blob": "5d73d42656b40ae7af55f963405c09b54fa9e8aa"},
+    {"path": "KGEN-KAIOS/contracts/KAIOSAtmOTC11520V1.sol", "classification": "ASSET_LOSS_NONCONTRACT_TOKEN_EXACT_LEG_HOLD", "base_blob": null, "head_blob": "2d7e72073fec141e2e212dff5d3f55036943b04a", "current_main_blob": null},
+    {"path": "KGEN-KAIOS/contracts/KAIOSMarginVault11520V1.sol", "classification": "CUSTODY_ACCOUNTING_TOKEN_IDENTITY_HOLD", "base_blob": null, "head_blob": "ff221eddefd4555f1fc7f5a0ace60e2110730a85", "current_main_blob": null},
+    {"path": "KGEN-KAIOS/contracts/KAIOSWarpClearing11520V1.sol", "classification": "ORACLE_RESERVE_LIQUIDATION_AUTHORITY_HOLD", "base_blob": null, "head_blob": "3a4724906ff267f8f33948122fee663fad3d7c55", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/index.html", "classification": "STALE_CURRENT_UI_ENTRY_HOLD", "base_blob": "487b6fb87e3cbd1f439962cac537a91aeb3b9818", "head_blob": "432c969ba7f8dc0991acea43712828cc3fd2b7d2", "current_main_blob": "a908355fa6359b322b784731144ff5b1237000d8"},
+    {"path": "K線西遊記/temples/11520/modules/kaios-atm-quote-router.mjs", "classification": "CALLER_QUOTE_NUMBER_MODEL_HOLD", "base_blob": null, "head_blob": "9f72a7083dea460447928ea7d1f31a37e430357f", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/modules/kaios-chain-transaction-bridge.mjs", "classification": "MAINNET_SIGNING_DEPLOYMENT_MANIFEST_HOLD", "base_blob": null, "head_blob": "24c1a208d08866c9b17ac6a6aa67c8ea930ee1ce", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/modules/kaios-live-wallet-controls.mjs", "classification": "LIVE_WALLET_WRITE_SURFACE_HOLD", "base_blob": null, "head_blob": "4a15deb429b53ee4f7749e6944a838b442c7e398", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/modules/kaios-warp-index-layer.mjs", "classification": "CALLER_RECEIPT_ORACLE_SOLVENCY_HOLD", "base_blob": null, "head_blob": "e361c1024fed0c3457c5fdd45211fab1b21fe04f", "current_main_blob": null},
+    {"path": "K線西遊記/temples/11520/warp-index.html", "classification": "STALE_UI_EXTERNAL_SCRIPT_VISUAL_HOLD", "base_blob": null, "head_blob": "a1f4b23a7e5b0a95e6962e56c677dd7f8efa1887", "current_main_blob": null},
+    {"path": "tests/11520-kaios-warp-atm.test.mjs", "classification": "HISTORICAL_CALLER_EVIDENCE_TEST_ONLY", "base_blob": null, "head_blob": "ad6fa39ad42f5b0aa524b74c0a14c154329f121b", "current_main_blob": null},
+    {"path": "tests/11520-kaios-warp-evm.test.mjs", "classification": "HISTORICAL_MOCK_EVM_TEST_ONLY", "base_blob": null, "head_blob": "be6ab24677e77595d589ae47efde08f3f8289ba9", "current_main_blob": null}
+  ],
+  "classification_totals": {
+    "WRITE_TOKEN_DIRECT_MAIN_DISPATCH_HOLD": 1,
+    "ASSET_LOSS_NONCONTRACT_TOKEN_EXACT_LEG_HOLD": 1,
+    "CUSTODY_ACCOUNTING_TOKEN_IDENTITY_HOLD": 1,
+    "ORACLE_RESERVE_LIQUIDATION_AUTHORITY_HOLD": 1,
+    "STALE_CURRENT_UI_ENTRY_HOLD": 1,
+    "CALLER_QUOTE_NUMBER_MODEL_HOLD": 1,
+    "MAINNET_SIGNING_DEPLOYMENT_MANIFEST_HOLD": 1,
+    "LIVE_WALLET_WRITE_SURFACE_HOLD": 1,
+    "CALLER_RECEIPT_ORACLE_SOLVENCY_HOLD": 1,
+    "STALE_UI_EXTERNAL_SCRIPT_VISUAL_HOLD": 1,
+    "HISTORICAL_CALLER_EVIDENCE_TEST_ONLY": 1,
+    "HISTORICAL_MOCK_EVM_TEST_ONLY": 1,
+    "total": 12
+  },
+  "findings": [
+    "The ATM stores an immutable KAIOS address but never requires either quote leg to equal KAIOS, so the alleged bilateral KAIOS boundary is not enforced and arbitrary token-token or token-BNB pairs are accepted.",
+    "The ATM low-level transfer helpers accept an empty successful return without checking token.code.length. An EOA or non-contract token address therefore appears to transfer successfully, allowing an attacker to accept an escrowed real asset without delivering the requested ERC20 leg, or to create a quote with a nonexistent maker asset and obtain the taker's real asset.",
+    "ATM, vault, and clearing credit nominal transfer amounts without verifying balance deltas. Fee-on-transfer, rebasing, or otherwise non-exact tokens can underfund escrow or reserves while accounting records the full requested value.",
+    "The margin vault does not verify that its immutable KAIOS address contains code and can credit deposits even when low-level calls to a non-contract address return success with empty data.",
+    "Warp clearing gives one immutable administrator immediate oracle and risk-cap control and a single mutable oracle sole mark authority, without timelock, quorum, conflict-of-interest separation, signed provenance, or independent receipt evidence.",
+    "An administrator/oracle coalition can open a position, choose a favorable mark, and repeatedly extract the liquidity reserve; the contract provides no commit-reveal, counterparty evidence, or governance boundary.",
+    "Reserve funding has no provider shares or withdrawal path, while only the player can close a position. Abandoned or losing positions, or a stale/stopped oracle, can lock reserve and margin indefinitely because there is no liquidation, expiry, emergency close, or recovery path.",
+    "Mark prices are not numerically bounded; uint-to-int conversion and delta-times-warp arithmetic can overflow or revert, making a position uncloseable.",
+    "The local warp model accepts caller-created VERIFIED_SETTLED KAIOS receipt objects and caller-set reference marks without authoritative provider, freshness, quorum, receipt inclusion, or replay evidence.",
+    "The local model labels itself fully collateralized but does not maintain a counterparty reserve; winning PnL is created by JavaScript arithmetic and withdrawable from the review ledger.",
+    "Quote, price, balance, and PnL arithmetic uses JavaScript Number, exposing precision, rounding, overflow-to-infinity, and non-finite-value risks for token-denominated state.",
+    "PRODUCT_CONTRACTS being null is a positive fail-closed default, but merely filling addresses unlocks approvals, deposits, trades, closes, and withdrawals without enforcing deployment receipt hash, code hash, proxy implementation, chain evidence, revocation, or Human release authorization.",
+    "The live wallet bridge contains protected Mainnet signing paths and static addresses; the UI also loads a third-party WalletConnect script from a CDN without subresource integrity.",
+    "The quote router imports live-wallet controls as a side effect, coupling model/data import to wallet UI mounting and increasing accidental wallet-surface activation risk.",
+    "The branch workflow grants actions:write and contents:write, pushes directly to main, and dispatches Pages. It is forbidden for automatic merge or transplantation.",
+    "The exact-head warp page is a stale V4.0 side surface with no current V4.1 Chromium, responsive, accessibility, or screenshot evidence.",
+    "PR comments are implementation checkpoints and a historical direct-main claim, not independent review, Human authorization, deployment proof, or production authority.",
+    "Ancestors #169 and #195 are closed unmerged, parent #200 remains held, and current main contains newer safer successors; this stacked branch cannot inherit current authority."
+  ],
+  "positive_controls": [
+    "ATM and clearing deployment addresses remain null, so the candidate browser path is currently fail-closed.",
+    "No private key or signer secret is present in the audited diff.",
+    "The ATM candidate does not mint KAIOS or call the White-Hole conversion mechanism.",
+    "Historical lifecycle tests deploy local mock contracts on Ganache and do not prove Testnet or Mainnet deployment.",
+    "The candidate does not treat the KGEN/KAIOS physics scale as a fixed market exchange rate.",
+    "Contract entry points use nonReentrant guards and generally follow checks-effects-interactions."
+  ],
+  "validation": {
+    "historical_exact_head": {
+      "head_sha": "0e58628783dac4e153e2ac367dbd7d08f649d965",
+      "workflow_run_id": 33475274885,
+      "workflow_name": "11520 Universal Exchange V2",
+      "conclusion": "SUCCESS",
+      "module_syntax": "PASS",
+      "solidity_candidate_compile": "3/3 PASS",
+      "universal_exchange": "238/238 PASS",
+      "native_market_cell": "21/21 PASS",
+      "warp_atm_model": "10/10 PASS",
+      "local_evm_lifecycle": "2/2 PASS",
+      "limitations": [
+        "Historical branch-only evidence; it is not current-main integration evidence.",
+        "Tests use caller-created receipt and oracle data plus local mock tokens and Ganache, so they do not prove production identity, custody, solvency, or settlement.",
+        "Checkout and setup-node v4 are historical and emit Node.js 20 deprecation warnings.",
+        "No exact-head Game Product QA, Responsive QA, Chromium, screenshot, or visual artifact exists."
+      ]
+    },
+    "exact_base_main": {
+      "sha": "e8c07724a590625c082234aca98687c7fd71274c",
+      "pages_run_id": 35516290159,
+      "pages_conclusion": "SUCCESS",
+      "pages_artifact_id": 10607356137,
+      "pages_artifact_digest": "sha256:b1e2f98ef9c4bc8bfc4f5558614225beddeb442c08d1d380b58489e4b88a5c70",
+      "responsive_run_id": 35516312076,
+      "responsive_conclusion": "SUCCESS",
+      "responsive_artifact_id": 10607375554,
+      "responsive_artifact_digest": "sha256:2ebfe166f9be46d4d169e53a1e6fbe1cf1fda710bc1a7c690263f00711736870",
+      "code_equivalent_universal_exchange": "302/302 PASS"
+    },
+    "work_order_assertions": [
+      "JSON parses",
+      "selected_candidate_count equals 1",
+      "exactly 12 unique PR-relative paths are classified",
+      "classification totals sum to 12",
+      "all audited path SHA fields are null or 40 lowercase hexadecimal characters",
+      "all protected effects are false",
+      "diff check passes"
+    ],
+    "target_specific_visual_qa": "NOT_APPLICABLE_DOCUMENTATION_ONLY_CHANGE",
+    "post_merge_visual_qa_required": true
+  },
+  "protected_effects": {
+    "payment": false,
+    "asset_transfer": false,
+    "token_mint": false,
+    "token_burn": false,
+    "mainnet_transaction": false,
+    "governance": false,
+    "worker_activation": false,
+    "life_activation": false,
+    "controller_appointment": false,
+    "signer_appointment": false,
+    "operator_appointment": false,
+    "private_key_access": false,
+    "wallet_request": false,
+    "token_approval": false,
+    "contract_deployment": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "chain_state_mutation": false,
+    "market_activation": false,
+    "atm_activation": false,
+    "custody_activation": false,
+    "settlement_activation": false,
+    "oracle_activation": false
+  },
+  "acceptance": {
+    "scope_bounded_to_one_json": true,
+    "no_protected_canon_modified": true,
+    "no_runtime_contract_workflow_or_ui_modified": true,
+    "pr_203_remains_open_draft_unmerged": true,
+    "current_main_successor_preferred": true,
+    "safe_successor_requirements": [
+      "Restrict ATM pairs to explicitly authorized assets, require code-bearing token contracts, and reject nonstandard exact-leg behavior using measured balance deltas or an audited allowlist.",
+      "Bind vault and clearing KAIOS identity to an exact deployment manifest and verify actual balance changes before crediting custody or reserve accounting.",
+      "Separate oracle, administrator, trader, and reserve-provider authority with durable governance, timelock, signed provenance, freshness, conflict controls, and emergency recovery.",
+      "Add bounded arithmetic, liquidation, expiry, emergency close, stale-oracle recovery, reserve-provider accounting, and withdrawal semantics before any real-value rehearsal.",
+      "Replace caller-created receipts and JavaScript Number accounting with authoritative replay-safe receipts and exact bounded decimal or integer units.",
+      "Keep wallet, approval, deployment, and signing functions fail-closed behind Human release authorization, exact code hashes, receipt hashes, proxy identity, chain binding, and revocation.",
+      "Do not transplant the write-token workflow; use current read-only exact-head validation only.",
+      "Integrate only into exact current V4.1 shell and complete Chromium plus 390x844 screenshot QA before any UI successor is considered."
+    ]
+  },
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #133 FortuneGame and Mainnet lineage security audit",
+    "allowed_scope": "Evidence-only lineage audit; do not deploy, transact, pay, transfer assets, activate gameplay value, access signers, dispatch workflows, or change chain state."
+  }
+}
