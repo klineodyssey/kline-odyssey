@@ -1,0 +1,596 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR158-ALCHEMY-KUFO-KSHIP-LINEAGE-AUDIT-R0-20260921",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "bc3db907aa92e1668edbc07c358ebd2360a61a02",
+  "task_source_reason": "Inventory exact current repository risk and audit the highest-priority safe executable candidate without activating asset, wallet, Life, Worker, workflow-dispatch or chain effects.",
+  "created_by": "Codex",
+  "created_at": "2026-09-20T18:13:16Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P1",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY",
+  "exact_base_sha": "bc3db907aa92e1668edbc07c358ebd2360a61a02",
+  "exact_base_tree": "f659d1b3030a619bb26862b0551faae863872779",
+  "subject": {
+    "repository": "klineodyssey/kline-odyssey",
+    "pr": 158,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/158",
+    "title": "KAIOS 18911 KGEN catalyst, KUFO decay and KSHIP propulsion V1",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD",
+    "head_branch": "codex/kaios-18911-kgen-catalyst-kufo-kship-v1",
+    "head_sha": "ac9ffddfff662f6c2dc8c0f0f523485e10f873dd",
+    "head_tree": "2a65369da094a16045066b2a3e330671b1ef431f",
+    "merge_base_sha": "830b79214781fb1231f3619336de394f400a0bfd",
+    "merge_base_tree": "c101af16de79e36cfed1a4343d77799eb304ce41",
+    "comparison_to_exact_base": {
+      "status": "diverged",
+      "ahead_by": 18,
+      "behind_by": 760,
+      "changed_paths": 35,
+      "additions": 7199,
+      "deletions": 348
+    },
+    "evidence": {
+      "workflow_runs": 2,
+      "successful_workflow_runs": 2,
+      "check_jobs_successful": 2,
+      "reviews": 0,
+      "review_threads": 0,
+      "comments": 3
+    },
+    "direct_merge_forbidden_reasons": [
+      "codex/* branch may trigger Cursor wake",
+      "Draft",
+      "behind exact latest main by 760 commits",
+      "real KGEN transfer, KAIOS burn and KUFO mint surface",
+      "protected CURRENT and Canon scope",
+      "unresolved P1 token-liveness, authority, deployment-identity and governance defects",
+      "catalyst-bank production address and KUFO half-life remain unfrozen",
+      "Program Life appointment and embodiment authority is unverified"
+    ]
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 34,
+    "open_prs_reviewed": true,
+    "main_workflow_runs_reviewed": true,
+    "todos_and_runtime_risks_reviewed": true,
+    "visual_qa_history_reviewed": true,
+    "latest_main_movement": {
+      "sha": "bc3db907aa92e1668edbc07c358ebd2360a61a02",
+      "parent": "fc4118430b7c116ca80ca254d7db6b9744486e98",
+      "source_pr": 421,
+      "classification": "EXPECTED_PR_SQUASH_MERGE_NOT_DIRECT_MAIN_WRITE",
+      "changed_paths": 16,
+      "required_post_merge_checks": "SUCCESS"
+    },
+    "ci_inventory": {
+      "current_main_required_runs": "SUCCESS",
+      "superseded_branch_failures": "historical only; PR #421 exact head and current main are green",
+      "selected_pr_exact_head": "2/2 workflow runs SUCCESS",
+      "exact_head_actions_node20_warning": "actions/checkout@v4 and setup-node@v4 forced to Node 24; historical workflow not transplanted"
+    },
+    "todo_inventory": {
+      "search_query": "TODO FIXME XXX HACK",
+      "default_branch_matches": 0,
+      "interpretation": "No indexed default-branch markers returned; open PRs and runtime evidence remain the actionable inventory."
+    },
+    "ranked_candidates": [
+      {
+        "rank": 1,
+        "priority": "P0",
+        "candidate": "PR #232 real-funds BrainExchange V4",
+        "decision": "HOLD",
+        "reason": "real funds, oracle, custody and deployment authority"
+      },
+      {
+        "rank": 2,
+        "priority": "P0",
+        "candidate": "PRs #135/#154/#186/#199 Mainnet, payroll, payment and Auto-LP lineages",
+        "decision": "HOLD",
+        "reason": "protected live financial or chain effects"
+      },
+      {
+        "rank": 3,
+        "priority": "P1",
+        "candidate": "PR #158 alchemy, KUFO and KSHIP lineage audit",
+        "decision": "SELECTED",
+        "reason": "highest dependency-ordered safe evidence-only audit after #133/#134"
+      },
+      {
+        "rank": 4,
+        "priority": "P1",
+        "candidate": "PR #159 Physics V4.1 and scale CURRENT lineage audit",
+        "decision": "NEXT_AFTER_DEPENDENCY",
+        "reason": "records and depends on #158 semantics"
+      },
+      {
+        "rank": 5,
+        "priority": "P1",
+        "candidate": "PR #161 cross-market circulatory autopilot lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 6,
+        "priority": "P1",
+        "candidate": "PRs #152/#153/#154 bank authority and payroll lineage",
+        "decision": "HOLD"
+      },
+      {
+        "rank": 7,
+        "priority": "P1",
+        "candidate": "PR #198 mobile ATM and wallet lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 8,
+        "priority": "P1",
+        "candidate": "PR #194 holder resources and LP lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 9,
+        "priority": "P1",
+        "candidate": "PR #177 remote handoff and wallet UI lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 10,
+        "priority": "P2",
+        "candidate": "PR #48 historical Life baseline lineage",
+        "decision": "PENDING"
+      }
+    ],
+    "selected_count": 1
+  },
+  "source_reads": [
+    {
+      "path": "AGENTS.md",
+      "sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"
+    },
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"
+    },
+    {
+      "path": "KGEN-KAIOS/SECURITY_MODEL.md",
+      "sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md",
+      "sha": "092c11a085412154b26d230ba8007cc41fdd2e18"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md",
+      "sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"
+    },
+    {
+      "path": "KGEN-KAIOS/boot-runtime/KAIOS_BOOT_RUNTIME.md",
+      "sha": "1b3c72c644c5e7b65793c4ff160e472b35df2b82"
+    },
+    {
+      "path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md",
+      "sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+      "sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "P1",
+      "id": "KUFO_EXTERNAL_DUSTING_TOKEN_LIVENESS",
+      "detail": "KUFO processes at most 64 lineage lots per transfer and bounded balance query. Arbitrary holders can create many tiny lots for a victim, after which a full-balance transfer or claimable-decay query can revert with LotTraversalLimit. Manual chunking may recover value but does not eliminate externally triggerable token-liveness degradation."
+    },
+    {
+      "severity": "P1",
+      "id": "CALLER_SELECTED_CODE_IDENTITY",
+      "detail": "The Furnace constructor accepts addresses and their expected code hashes from the deployer and compares code to those caller-supplied hashes. A counterfeit self-consistent KAIOS/registry/catalyst topology can satisfy the checks without a canonical manifest, deployment receipt, governance authorization or frozen production bank."
+    },
+    {
+      "severity": "P1",
+      "id": "UNAUTHORIZED_PROGRAM_LIFE_APPOINTMENTS",
+      "detail": "The manifest and contracts encode HUMAN_APPOINTED identities and named successor Program Lives, but current main contains no canonical birth, consent, controller, appointment, revocation or embodiment authority for those records. They remain proposal metadata only."
+    },
+    {
+      "severity": "P1",
+      "id": "REAL_ASSET_AND_CHAIN_EFFECTS",
+      "detail": "The candidate Furnace transfers real KGEN to a bank, burns real KAIOS and mints KUFO. Even though these operations are transaction-atomic, they are protected asset effects and remain undeployed and unauthorized."
+    },
+    {
+      "severity": "P1",
+      "id": "PROTECTED_CURRENT_AND_CANON_OVERWRITE",
+      "detail": "The 760-commit-stale branch modifies protected CURRENT, Canon, handbook, scale and verifier surfaces. Two files are three-way diverged and the remaining candidate paths would still overwrite a much newer main lineage."
+    },
+    {
+      "severity": "P1",
+      "id": "REGISTRY_BOOTSTRAP_AND_GOVERNANCE_CENTRALIZATION",
+      "detail": "A single owner can replace organs immediately while bootstrapOpen and later uses a one-hour minimum delay without quorum, controller acceptance, recovery, conflict separation or canonical deployment authority."
+    },
+    {
+      "severity": "P1",
+      "id": "HISTORICAL_EXTERNAL_EVIDENCE_NOT_CURRENT_AUTHORITY",
+      "detail": "Stored BSC/fork and Mainnet-compatibility reports are August observations. They do not prove current chain state, signer/controller authority, deployment authorization or custody; the optional verifier can read a caller-configured RPC but is not run by the exact-head workflow."
+    },
+    {
+      "severity": "P1",
+      "id": "SCALE_AND_DEPENDENCY_CONFLICT",
+      "detail": "The candidate promotes 1 KGEN = 1000 kg and 1 KAIOS = 1 kg while protected current Physics lineage has unresolved historical text and PR #159/#173 reconciliation remains unmerged. Candidate Canon cannot supersede current protected authority."
+    },
+    {
+      "severity": "P1",
+      "id": "MUTABLE_CONVERTER_AUTHORITY_AND_RESIDUAL_ALLOWANCE",
+      "detail": "Matured-decay conversion relies on a registry-selected converter and can leave residual allowance when maximum authorization exceeds the burned amount. Propulsion authorization can also become unusable after a registry consumer change."
+    },
+    {
+      "severity": "P2",
+      "id": "STALE_EXACT_HEAD_VALIDATION",
+      "detail": "The exact-head CI passed on 2026-08-27, but the branch is 760 commits behind current main and its 48-contract tests and 238 Universal tests do not establish compatibility with current-main Canon or the current 302-test boundary."
+    }
+  ],
+  "positive_controls": [
+    "KGEN transfer, KAIOS burn and KUFO release revert atomically on any downstream failure.",
+    "The Furnace checks exact holder allowances and actual catalyst-bank balance delta.",
+    "No arbitrary KGEN rescue, sweep, payable or Furnace-held escrow surface was found.",
+    "The tax-credit route remains DESIGN_ONLY_DISABLED.",
+    "The historical workflow grants contents: read only and exact-head CI passed.",
+    "The candidate does not modify the deployed KAIOS.sol or formal KGEN Solidity source."
+  ],
+  "path_lineage": {
+    "count": 35,
+    "classification_counts": {
+      "added_on_pr": 12,
+      "pr_only_modified_main_unchanged": 21,
+      "diverged_from_current_main": 2
+    },
+    "paths": [
+      {
+        "path": ".github/workflows/kaios-18911-program-life-review.yml",
+        "merge_base_blob": null,
+        "pr_head_blob": "5e6a5392da364b392761e703516c1436847c46ed",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS.md",
+        "merge_base_blob": "037ec005e343eeab0b4a57bbd204541d202cc93b",
+        "pr_head_blob": "2cb242bf57fb505ac199f84316e8446e682a1be3",
+        "current_main_blob": "037ec005e343eeab0b4a57bbd204541d202cc93b",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_18911_KGEN_CATALYST_KUFO_KSHIP_CANON.md",
+        "merge_base_blob": null,
+        "pr_head_blob": "6ad8e634ad88db7993391d4e17a70a5078ac5d25",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+        "merge_base_blob": "824626abe0a10894972445d3ae3597b584d44276",
+        "pr_head_blob": "96ded45c8b97b33ee4d8fbe1f4730f07f4ee9e75",
+        "current_main_blob": "824626abe0a10894972445d3ae3597b584d44276",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/README.md",
+        "merge_base_blob": "b18f7056b0651118b1b1d1eea088361412f6a64a",
+        "pr_head_blob": "7965c814333d309464dabff5df109691260eeb8e",
+        "current_main_blob": "b18f7056b0651118b1b1d1eea088361412f6a64a",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KAIOSAlchemyFurnace.sol",
+        "merge_base_blob": "7ca3c666d933731ec1256a7272e9074b9f5933ad",
+        "pr_head_blob": "c7aebd702691521dcb72644c34e639793696a72d",
+        "current_main_blob": "7ca3c666d933731ec1256a7272e9074b9f5933ad",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KAIOSOrganRegistry.sol",
+        "merge_base_blob": "b94143f6d1d4e9768877ae25a3699714a8b131e2",
+        "pr_head_blob": "bb389c31e6ded692d096f28b2345373781dd644d",
+        "current_main_blob": "b94143f6d1d4e9768877ae25a3699714a8b131e2",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KSHIP.sol",
+        "merge_base_blob": "15d4e2d25b0a109482af413b6982d13bc772d68a",
+        "pr_head_blob": "9b53d996a71fc382b8dfdeb3755eec759cf0a9d6",
+        "current_main_blob": "15d4e2d25b0a109482af413b6982d13bc772d68a",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KSHIPConverter.sol",
+        "merge_base_blob": "b3e42d1093a8207b2009d4709a632082779ce350",
+        "pr_head_blob": "14e3711681c2a6388ef67ac1f6226c4c2448b271",
+        "current_main_blob": "b3e42d1093a8207b2009d4709a632082779ce350",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KSHIPPropulsionConsumerHarness.sol",
+        "merge_base_blob": null,
+        "pr_head_blob": "d4e5fa2b5e6b860ed7d3ecd6497630107e038b21",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KUFO.sol",
+        "merge_base_blob": "3946ad716cc3203ed18943b888aaf7ef64dc2964",
+        "pr_head_blob": "b66412bf5f43ee3d0f6fb2881389b4cea727ff12",
+        "current_main_blob": "3946ad716cc3203ed18943b888aaf7ef64dc2964",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KUFOClaimWormhole.sol",
+        "merge_base_blob": "a0cc770484628f5c62dc4cb5f1b7b579fc2deca4",
+        "pr_head_blob": "353708166e2a8e3c220a227e83d4761763f87c86",
+        "current_main_blob": "a0cc770484628f5c62dc4cb5f1b7b579fc2deca4",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/handbook/KAIOS_CIVILIZATION_CIRCULATORY_HANDOFF_HANDBOOK_CURRENT.md",
+        "merge_base_blob": "ac7453b00af9391f4fa9f36ab2a93a9dde7cfb1b",
+        "pr_head_blob": "e2b228302834ee1d1eeac1aa841c3fa39a66308f",
+        "current_main_blob": "ac7453b00af9391f4fa9f36ab2a93a9dde7cfb1b",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/package.json",
+        "merge_base_blob": "07ce6f55cebb55e3f8d31df2f168cd4af30ff871",
+        "pr_head_blob": "4e84a2e6a3529e48d0c5306b6c201f0d67074d4f",
+        "current_main_blob": "07ce6f55cebb55e3f8d31df2f168cd4af30ff871",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/program-life-manifest.json",
+        "merge_base_blob": null,
+        "pr_head_blob": "d5a7bc880c9e7617e78140f07e2aa4c1508ab299",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
+        "merge_base_blob": "d00183ede81407cd972866991db3c2ee6bd86bc9",
+        "pr_head_blob": "08abcd13c4d995df5296d49988f9d96834644dad",
+        "current_main_blob": "617c022d5e91bdd3d046af0f8fba582903ac67b6",
+        "classification": "diverged_from_current_main"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json",
+        "merge_base_blob": "ec10d4c20bc69f5b72cf446e40dcfbc982e44920",
+        "pr_head_blob": "3946eed97edc74b082eb059312327b4c31d779cf",
+        "current_main_blob": "ec10d4c20bc69f5b72cf446e40dcfbc982e44920",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/KAIOS_18911_V3_FRONTEND_SUPPORT_HANDOFF.json",
+        "merge_base_blob": null,
+        "pr_head_blob": "f8a77628c3c62e5dbfaad3ebc5a3403ed7320774",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/KAIOS_18911_V3_MAINNET_COMPATIBILITY.json",
+        "merge_base_blob": null,
+        "pr_head_blob": "84a9b825de5a3e6bd18909d7780a47a94d58df1b",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json",
+        "merge_base_blob": "c53114d39e4f9e0ebec2833f19fef91323f40c5a",
+        "pr_head_blob": "6039614443414ae974cba090b26377644c206f65",
+        "current_main_blob": "c53114d39e4f9e0ebec2833f19fef91323f40c5a",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/contracts/KUFOFragmentationHarness.sol",
+        "merge_base_blob": null,
+        "pr_head_blob": "d742a31a70bbd657e7b09905564ac3d4f3d47c0d",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/contracts/MockKGEN.sol",
+        "merge_base_blob": "d580c2714b10ee51d66ced2eafc74be6edcd72e4",
+        "pr_head_blob": "7a3935c2ee4506a201fbf31eb608fb00e9c9ad51",
+        "current_main_blob": "d580c2714b10ee51d66ced2eafc74be6edcd72e4",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/contracts/MockMintOrgan.sol",
+        "merge_base_blob": "8ce9ad16de88bf3d5e16d86334c1c3551e889800",
+        "pr_head_blob": "ab7002e8db0827aa9104817eb360b40de1c79cdd",
+        "current_main_blob": "8ce9ad16de88bf3d5e16d86334c1c3551e889800",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/helpers.mjs",
+        "merge_base_blob": "770f653e5ff0d9c5adec003f2182ef93ec017b54",
+        "pr_head_blob": "83995d4d82907c6cede553c41778850d37db4f59",
+        "current_main_blob": "770f653e5ff0d9c5adec003f2182ef93ec017b54",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/kufo-lot-gas.security.test.mjs",
+        "merge_base_blob": null,
+        "pr_head_blob": "1d3d2b2395aebd41226420d5cededf4196764465",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/tax-credit-freshness.unit.test.mjs",
+        "merge_base_blob": null,
+        "pr_head_blob": "ca5ef3888513a55f0b00e7357b79a3117fe36ba9",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/templeheart.integration.test.mjs",
+        "merge_base_blob": "2d33a9721a3ffabc1b671de272ffaccc70ae85af",
+        "pr_head_blob": "055d4d7c92b0b84e7f686e47872b6c069b24aed4",
+        "current_main_blob": "2d33a9721a3ffabc1b671de272ffaccc70ae85af",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/token-lineage.fuzz-invariant.test.mjs",
+        "merge_base_blob": "a62e5cedc5fdb806d88045e2cc13091b09afae14",
+        "pr_head_blob": "c46034823021695e44c9da8f10f6c614bf167e57",
+        "current_main_blob": "a62e5cedc5fdb806d88045e2cc13091b09afae14",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/token-lineage.unit.test.mjs",
+        "merge_base_blob": "92bbbabaa74d42e37cd1ea0fc94528c650771ac1",
+        "pr_head_blob": "ae16423cf7f0ba518f192c0036d18fe86d6ab236",
+        "current_main_blob": "92bbbabaa74d42e37cd1ea0fc94528c650771ac1",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
+        "merge_base_blob": "2b71e71ee4880f71d55d5b3a50f18f52dc1c14e1",
+        "pr_head_blob": "12c62e109001b09088d63eceb448caac0520e328",
+        "current_main_blob": "2b71e71ee4880f71d55d5b3a50f18f52dc1c14e1",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/generate-v3-frontend-handoff.mjs",
+        "merge_base_blob": null,
+        "pr_head_blob": "e78779022c7cb21b10dcdbb0615515bf7f487054",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/tax-credit-reference.mjs",
+        "merge_base_blob": null,
+        "pr_head_blob": "f1280115964d48abd26bcf480980ca63df7238e9",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+        "merge_base_blob": "f6e7f66ce72f3a9ec5f5452c8b84e27a37b20dd6",
+        "pr_head_blob": "9bb5aa3f70503d2d6847b4082e727b5873695d58",
+        "current_main_blob": "be9beeaabe090c4c674bbc952e64fc9fb927b3ba",
+        "classification": "diverged_from_current_main"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/verify-mainnet-v3-compatibility.mjs",
+        "merge_base_blob": null,
+        "pr_head_blob": "6fe56455b5d12bf156137a4920a2c08ec7ab4655",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+        "merge_base_blob": "760228b706ebec2b88831d09a9d91a829c7bba4a",
+        "pr_head_blob": "2824f676700ed64a3caa8a77e055e826fc6e18ed",
+        "current_main_blob": "760228b706ebec2b88831d09a9d91a829c7bba4a",
+        "classification": "pr_only_modified_main_unchanged"
+      }
+    ]
+  },
+  "validation": {
+    "historical_exact_head": {
+      "program_life_run": {
+        "id": 33066306365,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/33066306365",
+        "conclusion": "SUCCESS",
+        "contracts_compiled": 29,
+        "solc": "0.8.24",
+        "warnings": 0,
+        "tests": 48,
+        "pass": 48,
+        "fail": 0,
+        "storage_preserved": 58,
+        "storage_appended": 15
+      },
+      "universal_run": {
+        "id": 33066301368,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/33066301368",
+        "conclusion": "SUCCESS",
+        "tests": 238,
+        "pass": 238,
+        "fail": 0
+      },
+      "caveat": "Historical exact-head evidence only; it is not current-main compatibility, independent review, deployment or merge authority."
+    },
+    "current_main": {
+      "universal_run": {
+        "id": 35526200346,
+        "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/35526200346",
+        "conclusion": "SUCCESS",
+        "suite_counts": [
+          258,
+          17,
+          3,
+          24
+        ],
+        "tests": 302,
+        "pass": 302,
+        "fail": 0
+      },
+      "code_equivalence": "Current-main validation only; candidate contracts were not transplanted."
+    },
+    "work_order_assertions": {
+      "json_parse": true,
+      "selected_candidate_count": 1,
+      "path_count_matches": 35,
+      "path_classification_total_matches": 35,
+      "all_blob_shas_are_null_or_git_sha": true,
+      "exact_base_is_latest_at_creation": true,
+      "all_protected_effects_false": true
+    },
+    "functional_qa": "Evidence-only audit; no runtime code was changed.",
+    "visual_qa": {
+      "required_for_selected_change": false,
+      "reason": "Single machine-verifiable JSON audit file only; no UI/game/runtime change.",
+      "post_merge_responsive_check": "REQUIRED_BY_CURRENT_MAIN_PIPELINE"
+    }
+  },
+  "protected_effects": {
+    "payment": false,
+    "asset_transfer": false,
+    "token_burn": false,
+    "token_mint": false,
+    "mainnet_transaction": false,
+    "testnet_transaction": false,
+    "governance": false,
+    "worker_activation": false,
+    "life_activation": false,
+    "controller_appointment": false,
+    "signer_appointment": false,
+    "operator_appointment": false,
+    "private_key_access": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "chain_state_mutation": false,
+    "external_publication_claim": false,
+    "deployment_claim": false,
+    "revenue_claim": false,
+    "settlement_claim": false
+  },
+  "implementation": {
+    "type": "MACHINE_VERIFIABLE_LINEAGE_AUDIT_ONLY",
+    "changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR158_ALCHEMY_KUFO_KSHIP_LINEAGE_AUDIT_R0_20260921.json"
+    ],
+    "candidate_code_transplanted": false,
+    "candidate_workflow_transplanted": false,
+    "candidate_ui_transplanted": false,
+    "next_candidate": "PR #159 Physics V4.1 and scale CURRENT lineage security audit"
+  }
+}
