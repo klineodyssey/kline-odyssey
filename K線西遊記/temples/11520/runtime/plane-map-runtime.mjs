@@ -120,8 +120,8 @@ export function projectMarketKMap(model,width,height){
 function paintMarketOverview(canvas,model){
   const w=canvas.clientWidth||300,h=canvas.clientHeight||200,ratio=Math.min(3,devicePixelRatio||1);
   if(canvas.width!==Math.round(w*ratio)||canvas.height!==Math.round(h*ratio)){canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio)}
-  const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#06131c';ctx.fillRect(0,0,w,h);
-  if(!model?.market.markets.length){ctx.fillStyle='#ccdce8';ctx.font='10px system-ui';ctx.fillText('K 市場 · WAIT',4,4);return}
+  const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#06131c';ctx.fillRect(0,0,w,h);ctx.textBaseline='top';
+  if(!model?.market.markets.length){ctx.fillStyle='#ccdce8';ctx.font='10px system-ui';ctx.fillText('K 市場 · WAIT',4,4);canvas.setAttribute('aria-label','K 市場 WAIT · 尚無有效行情');return}
   const p=projectMarketKMap(model,w,h),small=w<180,colors=['#ffbf4d','#4cecaa','#50aaff'];
   ctx.font=`bold ${small?8:11}px system-ui`;ctx.textBaseline='top';ctx.strokeStyle='#294d62';ctx.lineWidth=1;
   for(let x=0;x<w;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
