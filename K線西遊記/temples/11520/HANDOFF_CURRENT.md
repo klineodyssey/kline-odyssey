@@ -1,6 +1,16 @@
 # 11520 HANDOFF CURRENT
 
-## Current K-space map visualization — 2026-09-21
+## Current public market K-space — 2026-09-21
+
+- TASK_ID: KAIOS-11520-LIVE-MARKET-MAP-20260921; Human image execution order; owner 衡曜 / codex-gm-01. Fresh base 924050045f26c1560eba6be80fb2a5eb64f9c0ae is lineage only. Branch codex/k11520-live-market-map-20260921 is an isolated clean worktree; Human dirty main untouched.
+- Existing `public-market-quotes.mjs` is the sole quote adapter: public market-data-only origin, read-only, credentials omitted, bounded timeout, complete validated batches. No new provider, asset, module, bootstrap, Canon constant, wallet or settlement authority.
+- `world-runtime.mjs` normalizes each batch with existing anchors and translates the common market frame, preserving relative K/local XYZ/rendered location/HP/cooldown/range. Startup WAIT has no fake current encounter; failure/age over 15 seconds yields STALE last-good coordinates. Source and receipt time remain traceable.
+- `game-5d-main.mjs` shares that batch with cards/target detail; normalized K replaces the legacy floor badge's visible card space without changing floor math. `plane-map-runtime.mjs` uses only the shared snapshot: colored axis-intercept market points, oblique third-axis projection, Player/Monster vector, expandable near-distance plot, live prices/K/distances and separate LOCAL XYZ.
+- V2.6.20 / shell cache v272. Existing tests extend atomic validation, stale recovery, inverse transform, neutral formatting, map bounds, live-card/map/combat equality, refresh without player movement, incomplete-batch rejection and recovery. Existing gameplay, portrait/landscape/rotation/PWA/BGM gates remain required.
+- Source/IP: original first-party code and procedural canvas only. No new files or copied assets/music. Protected real-funds execution denied. Added-line secret scan required before publication.
+- Release at authoring: candidate QA in progress; exact PR checks, merge SHA, Pages/source hashes and directly inspected screenshots establish release, not this note. Payroll/ATM advance/offset receipt NOT_VERIFIED / HOLD, no payment. Paused patrol and Cursor remain paused.
+
+## Previous K-space map visualization — 2026-09-21
 
 - TASK_ID: KAIOS-11520-KSPACE-MAP-20260921; Human continuation order; owner 衡曜 / codex-gm-01. Base `6709b92e18cea76f87113fcc57a95fe9260df535` is lineage, not a future CURRENT assertion. Branch `codex/k11520-kspace-map-20260921` is isolated from Human dirty main.
 - BOOT / MUST READ: current Boot, AGENTS, Physics CURRENT, Universe Map, Canon, merge policy, registry, workspace/manager/dispatcher/review rules, queues and this temple's AGENTS/handoff. Registered ACTIVE T5; no active claim conflict. Existing protected PRs are separate from this bounded Human UI order.

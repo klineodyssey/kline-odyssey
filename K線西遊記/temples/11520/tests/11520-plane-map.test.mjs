@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planeSpec,projectPlanePoint,kSpaceMapModel,projectKSpaceMap} from '../runtime/plane-map-runtime.mjs';
+import {planeSpec,projectPlanePoint,kSpaceMapModel,projectKSpaceMap,projectMarketKMap} from '../runtime/plane-map-runtime.mjs';
+
+test('market overview fits all three axis intercepts and player/target in every plane',()=>{
+  const playerK={KX:-18.815,KY:-34.2115,KZ:27.9667};
+  const market={status:'LIVE',markets:['KX','KY','KZ'].map(axis=>({axis,point:Object.fromEntries(['KX','KY','KZ'].map(a=>[a,a===axis?playerK[a]:0]))}))};
+  for(const plane of ['XZ','XY','YZ'])for(const [width,height] of [[106,80],[340,180]]){
+    const model=kSpaceMapModel({playerK,monsterK:{...playerK,KZ:playerK.KZ+1},target:{id:'guardian'},market,selection:{sign:-1}},plane),p=projectMarketKMap(model,width,height);
+    for(const v of [p.origin,p.player,p.monster,...market.markets.map(m=>p.point(m.point))])assert.ok(v.x>=0&&v.x<=width&&v.y>=0&&v.y<=height,JSON.stringify(v));
+    assert.notDeepEqual(p.player,p.monster,'overview retains depth instead of flattening third axis');
+  }
+});
 
 test('plane specs follow controller and normal-axis canon',()=>{
   assert.deepEqual(planeSpec('XZ'),{h:'X',v:'Z',depth:'Y',normal:'KY'});

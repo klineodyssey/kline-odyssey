@@ -1,12 +1,12 @@
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: XYZ Plane Map
-VERSION: 1.2.0
-REVISION: 2026-09-21.KSPACE-MAP
-PURPOSE: Project the existing combat K snapshot and local XYZ in separate views of the existing map. Presentation only; never derive game coordinates from display quotes or change combat authority.
+VERSION: 1.3.0
+REVISION: 2026-09-21.PUBLIC-MARKET-K
+PURPOSE: Project the validated public-market/combat K snapshot and local XYZ in separate views. Presentation only; never parse display text as coordinate authority.
 */
 
-import {WORLD_OBJECTS} from './world-runtime.mjs';
+import {WORLD_OBJECTS,formatKCoordinate} from './world-runtime.mjs';
 import {install11520XyzMapNavigation} from './xyz-map-navigation-runtime.mjs';
 
 const MODE_SPECS=Object.freeze({
@@ -74,7 +74,7 @@ export function kSpaceMapModel(snapshot,plane='XZ'){
   return {plane,h:'K'+spec.h,v:'K'+spec.v,normal:spec.normal,player,monster,delta,
     distance:delta?Math.hypot(...axes.map(a=>delta[a])):null,
     phase:spec.normal+(sign>0?'+':sign<0?'−':'0'),neutral:sign===0,
-    targetId:monster?snapshot.target.id:null,local:{...snapshot.playerLocal},
+    targetId:monster?snapshot.target.id:null,local:{...snapshot.playerLocal},market:snapshot.market||{status:'WAIT',markets:[]},
     range:delta?Math.max(1,...axes.map(a=>Math.abs(delta[a])))*1.5:1.5};
 }
 export function projectKSpaceMap(model,width,height){
@@ -106,18 +106,49 @@ function paintKMap(canvas,model){
   if(large){ctx.fillStyle='#60edff';ctx.fillText('● PLAYER',8,3);ctx.fillStyle='#ffca69';ctx.fillText('◆ MONSTER',100,3);ctx.fillStyle='#e6dbbb';ctx.fillText(`${model.phase} · ${model.neutral?'NO ATTACK PHASE':'ACTIVE'}`,w-170,3);ctx.fillStyle='#adc4d5';ctx.fillText('normal / depth',w-93,h-12)}
   canvas.setAttribute('aria-label',`K-space ${model.plane}: ${model.h} horizontal, ${model.v} vertical, ${model.normal} depth; ${model.phase}; ${model.targetId||'no target'}; delta ${model.distance??'unavailable'} Ku`);
 }
-const kNumber=n=>{const v=Math.round(n*10)/10;return `${v>0?'+':''}${Object.is(v,-0)?0:v.toFixed(1)}`};
+// Overview uses absolute market-axis intercepts. The existing close-range plot remains
+// below it in details so a one-Ku combat vector is never lost to the market-wide scale.
+export function projectMarketKMap(model,width,height){
+  const raw=p=>({x:p[model.h]-.48*p[model.normal],y:-p[model.v]+.32*p[model.normal]});
+  const points=[{KX:0,KY:0,KZ:0},model.player,...(model.monster?[model.monster]:[]),...model.market.markets.map(m=>m.point)];
+  const values=points.map(raw),xs=values.map(p=>p.x),ys=values.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const scale=Math.min((width-44)/Math.max(1,maxX-minX),(height-42)/Math.max(1,maxY-minY));
+  const point=p=>{const v=raw(p);return{x:width/2+(v.x-(minX+maxX)/2)*scale,y:height/2+(v.y-(minY+maxY)/2)*scale}};
+  return {point,origin:point({KX:0,KY:0,KZ:0}),player:point(model.player),monster:model.monster?point(model.monster):null};
+}
+function paintMarketOverview(canvas,model){
+  const w=canvas.clientWidth||300,h=canvas.clientHeight||200,ratio=Math.min(3,devicePixelRatio||1);
+  if(canvas.width!==Math.round(w*ratio)||canvas.height!==Math.round(h*ratio)){canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio)}
+  const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#06131c';ctx.fillRect(0,0,w,h);ctx.textBaseline='top';
+  if(!model?.market.markets.length){ctx.fillStyle='#ccdce8';ctx.font='10px system-ui';ctx.fillText('K 市場 · WAIT',4,4);canvas.setAttribute('aria-label','K 市場 WAIT · 尚無有效行情');return}
+  const p=projectMarketKMap(model,w,h),small=w<180,colors=['#ffbf4d','#4cecaa','#50aaff'];
+  ctx.font=`bold ${small?8:11}px system-ui`;ctx.textBaseline='top';ctx.strokeStyle='#294d62';ctx.lineWidth=1;
+  for(let x=0;x<w;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+  model.market.markets.forEach((m,i)=>{const v=p.point(m.point);ctx.strokeStyle=colors[i];ctx.fillStyle=colors[i];arrow(ctx,p.origin,v);ctx.beginPath();ctx.arc(v.x,v.y,small?3:5,0,Math.PI*2);ctx.fill();
+    const name=m.symbol.replace('USDT',''),label=`${m.axis} / ${name}`;
+    if(small){ctx.fillText(`${m.axis} ${name}`,2+i*(w/3),h-10)}else{const tw=ctx.measureText(label).width,x=Math.max(2,Math.min(w-tw-2,v.x+8)),y=Math.max(15,Math.min(h-14,v.y>h/2?v.y+7:v.y-14));ctx.fillStyle='#06131c';ctx.fillRect(x-1,y-1,tw+2,14);ctx.fillStyle=colors[i];ctx.fillText(label,x,y)}});
+  if(p.monster){ctx.strokeStyle='#ff798a';ctx.fillStyle='#ff798a';arrow(ctx,p.player,p.monster);kMarker(ctx,p.monster,true)}kMarker(ctx,p.player,false);
+  ctx.fillStyle='#60edff';ctx.fillText('P',Math.max(2,p.player.x-11),Math.min(h-12,p.player.y+4));if(p.monster){ctx.fillStyle='#ffca69';ctx.fillText('M',Math.min(w-9,p.monster.x+6),Math.max(15,p.monster.y-10))}
+  ctx.fillStyle='#ecf4ff';ctx.fillText(`${model.phase} · ${model.market.status}`,3,2);
+  canvas.setAttribute('aria-label',`市場 K-space ${model.market.status}; BTC KX, ETH KY, BNB KZ; PLAYER P; MONSTER M; ${model.plane} + ${model.normal} depth`);
+}
+const kNumber=formatKCoordinate;
 function updateKDetails(model){
   const canvas=document.querySelector('#kspaceDetailMap');if(!canvas||!document.querySelector('#sheet.open'))return;
   paintKMap(canvas,model);const body=document.querySelector('#kspaceMapValues');if(!body)return;if(!model){body.textContent='K-space snapshot unavailable';return}
+  paintMarketOverview(document.querySelector('#kspaceMarketMap'),model);
   const tuple=p=>p?['KX','KY','KZ'].map(a=>kNumber(p[a])).join(' / '):'—';
   const lines=[`PLAYER K: ${tuple(model.player)}`,`MONSTER K: ${tuple(model.monster)}`,`ΔK: ${tuple(model.delta)}`,`DIST: ${model.distance===null?'—':model.distance.toFixed(2)+' Ku'}`,`PLANE: ${model.plane} · NORMAL: ${model.normal}`,`ACTIVE: ${model.phase}${model.neutral?' / NEUTRAL / NO ATTACK PHASE':''}`,`TARGET: ${model.targetId||'NONE'}`,`LOCAL XYZ: ${['x','y','z'].map(a=>kNumber(finite(model.local[a]))).join(' / ')}`];
-  body.textContent=lines.join('\n');
+  const markets=model.market.markets.map(m=>`${m.axis}/${m.symbol.replace('USDT','')} $${m.price.toFixed(2)} → ${kNumber(m.k)} Ku`);
+  const distances=model.market.markets.map(m=>`${m.symbol.replace('USDT','')} ${Math.hypot(...['KX','KY','KZ'].map(a=>m.point[a]-model.player[a])).toFixed(1)}`).join(' · ');
+  body.textContent=[`${model.market.status} · UTC ${model.market.receivedAt?new Date(model.market.receivedAt).toISOString().slice(11,19):'WAIT'}`,...markets,`距市場 Ku: ${distances}`,...lines].join('\n');
 }
 function showKDetails(){
   document.querySelector('#sheetTitle').textContent='K-SPACE · 市場座標';
-  document.querySelector('#sheetBody').innerHTML='<p style="margin:0 0 8px">● PLAYER / ◆ MONSTER · KX / KY / KZ（Ku）</p><canvas id="kspaceDetailMap" style="display:block;width:100%;height:180px;border-radius:8px" role="img"></canvas><pre id="kspaceMapValues" style="font:13px/1.65 system-ui;white-space:pre-wrap;overflow-wrap:anywhere"></pre><p class="muted">K = 正規化模擬參考座標；LOCAL XYZ = 自主移動。箭頭為 Player → Monster，右側虛線為第三軸深度；不是原始報價或實際攻擊距離。</p><button id="kspaceShowLocal" class="btn" style="min-height:44px">切換 LOCAL XYZ 導航圖</button>';
+  document.querySelector('#sheetBody').innerHTML='<style>#sheet:has(#kspaceMapValues){display:flex;flex-direction:column;overflow:hidden}#sheet:has(#kspaceMapValues) .sheetHead{flex-shrink:0;z-index:6;background:#101923}#sheet:has(#kspaceMapValues) #sheetBody{min-height:0;flex:1;overflow:auto}#sheet:has(#kspaceMapValues) .close{min-width:44px;min-height:44px}</style><p style="margin:0 0 8px">● PLAYER / ◆ MONSTER · KX / KY / KZ（Ku）</p><canvas id="kspaceMarketMap" style="display:block;width:100%;height:180px;border-radius:8px" role="img"></canvas><pre id="kspaceMapValues" style="font:12px/1.55 system-ui;white-space:pre-wrap;overflow-wrap:anywhere"></pre><details><summary style="min-height:44px;cursor:pointer">Player → Monster 近距離投影 ▾</summary><canvas id="kspaceDetailMap" style="display:block;width:100%;height:180px;border-radius:8px" role="img"></canvas></details><p class="muted">K = 公開報價正規化座標（模擬用途）；LOCAL XYZ = 自主移動。三市場點為各軸截距，非三組杜撰行情。總覽以斜投影保留第三軸；下圖為當前 plane 近距離投影。箭頭為 Player → Monster，右側虛線為第三軸深度；不是原始報價或實際攻擊距離。</p><button id="kspaceShowLocal" class="btn" style="min-height:44px">切換 LOCAL XYZ 導航圖</button>';
   document.querySelector('#sheet').classList.add('open');
+  document.querySelector('#sheetBody').scrollTop=0;
   document.querySelector('#kspaceShowLocal').onclick=()=>{miniView='XYZ';document.querySelector('#sheet').classList.remove('open')};
 }
 function ensureMapViews(base){
@@ -141,7 +172,7 @@ function drawOverlay(base){
   globalThis.__K11520_PLANE_MAP__={organ:'XYZ Plane Map',mode:m,hAxis:spec.h,vAxis:spec.v,depthAxis:spec.depth,normalAxis:spec.normal,marketOrigin:{...origin},localCenter:{...localCenter},center:{...center},originSemantics:'NORMALIZED_K_PLUS_LOCAL_WORLD_OFFSET',dynamicPlane:true,threeDimensionalWorld:true,legacyMiniChromeHidden:true,planeWaypointNavigation:true};
   updateKDetails(model);
   if(base.id==='minimap')globalThis.__K11520_KSPACE_MAP__={...model,view:miniView,source:'COMBAT_SNAPSHOT',coordinateSpace:'NORMALIZED_K',localNavigationPreserved:true};
-  if(base.id==='minimap'&&miniView==='K'){paintKMap(canvas,model);return}
+  if(base.id==='minimap'&&miniView==='K'){paintMarketOverview(canvas,model);return}
   if(canvas.width!==base.width)canvas.width=base.width;if(canvas.height!==base.height)canvas.height=base.height;
   const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
   ctx.clearRect(0,0,w,h);

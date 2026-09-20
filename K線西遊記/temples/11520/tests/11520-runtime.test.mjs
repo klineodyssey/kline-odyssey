@@ -5,7 +5,46 @@ import {createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceMana
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
 import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
-import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE} from '../runtime/world-runtime.mjs';
+import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
+
+test('rounded market K coordinates never display negative zero',()=>{
+  assert.equal(formatKCoordinate(-.0001),'0.00');assert.equal(formatKCoordinate(-0),'0.00');
+  assert.equal(formatKCoordinate(1.01),'+1.01');assert.equal(formatKCoordinate(-18.816),'-18.82');
+});
+
+test('public market K waits, validates atomically, rejects old batches and distinguishes stale last-good data',()=>{
+  const w=createWorldState(0),prices={BTCUSDT:81185,ETHUSDT:2631.54,BNBUSDT:767.8};
+  assert.equal(kMarketSnapshot(w).status,'WAIT');assert.equal(w.kSpace,undefined);
+  for(const bad of [{}, {...prices,BNBUSDT:0},{...prices,ETHUSDT:NaN},{...prices,BTCUSDT:'81185'}]){
+    assert.throws(()=>updateKMarketReference(w,bad,100));assert.equal(w.kSpace,undefined);
+  }
+  updateKMarketReference(w,prices,100);
+  const before=structuredClone(w.kSpace),m=kMarketSnapshot(w,101);
+  assert.equal(m.status,'LIVE');assert.equal(m.markets.length,3);
+  for(const item of m.markets){
+    assert.equal(item.k,normalizeKPrice(prices[item.symbol],item.anchor));
+    assert.ok(Math.abs(inverseKPrice(item.k,item.anchor)-item.price)<1e-8);
+    for(const axis of ['KX','KY','KZ'])assert.equal(item.point[axis],axis===item.axis?item.k:0);
+  }
+  assert.throws(()=>updateKMarketReference(w,{...prices,BNBUSDT:Infinity},200));assert.deepEqual(w.kSpace,before);
+  assert.equal(updateKMarketReference(w,{...prices,BTCUSDT:90000},99),false);assert.deepEqual(w.kSpace,before);
+  assert.equal(kMarketSnapshot(w,15101).status,'STALE');w.kSpace.quoteFailed=true;
+  assert.equal(kMarketSnapshot(w,101).status,'STALE');assert.deepEqual(kMarketSnapshot(w,101).markets,m.markets);
+  updateKMarketReference(w,prices,201);assert.equal(kMarketSnapshot(w,202).status,'LIVE');
+});
+
+test('market-frame translation preserves local position, rendered guardian, relative K/range, HP and cooldown',()=>{
+  const w=createWorldState(0),local={x:0,y:0,z:6};
+  updateKMarketReference(w,{BTCUSDT:81000,ETHUSDT:2600,BNBUSDT:768},100);
+  attackKSpace(w,local,{plane:'XZ',c:-1,now:1000});
+  const before=kCombatSnapshot(w,local),guardian=w.monsters.find(m=>m.simulationCombat),rendered=[guardian.x,guardian.y,guardian.z];
+  updateKMarketReference(w,{BTCUSDT:90000,ETHUSDT:3100,BNBUSDT:699},200);
+  const after=kCombatSnapshot(w,local);
+  assert.notDeepEqual(after.playerK,before.playerK);assert.deepEqual(after.playerLocal,local);
+  assert.deepEqual(after.deltaK,before.deltaK);assert.ok(Math.abs(after.distance-before.distance)<1e-10);
+  assert.deepEqual(after.target,before.target);assert.deepEqual(after.lastResult,before.lastResult);
+  assert.deepEqual([guardian.x,guardian.y,guardian.z],rendered);assert.equal(w.kSpace.lastAttackAt,1000);
+});
 
 test('K-space normalization is scale independent, reversible and rejects unsafe inputs',()=>{
   for(const anchor of [600,4000,100000])for(const ratio of [.5,1,1.01,2]){

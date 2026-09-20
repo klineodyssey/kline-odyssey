@@ -1,5 +1,13 @@
 # Codex Review Log
 
+## 2026-09-21 · KAIOS-11520-LIVE-MARKET-MAP-20260921
+
+- Worker/reviewer: codex-gm-01 / 衡曜; explicit Human image order and active ordinary merge policy. Branch `codex/k11520-live-market-map-20260921`, reconciled with e4fccbe433802d6bfc0319d673c11a7e9981587d. No extra reviewer gate; required exact-head CI and visual QA still apply.
+- Diff: existing world/main/plane-map quote-to-K state and rendering, bootstrap/cache versions, existing tests and cumulative game docs/queue. No new source/asset files. First-party procedural code; public factual prices from the existing read-only adapter. Protected actions, credentials and chain writes NONE.
+- Self-review: complete-batch validation precedes mutation; timestamp ordering and age/failure preserve truthful last-good state. Market-frame translation preserves relative K, local movement and combat state. Axis intercepts explicitly avoid fabricating three-dimensional raw market positions. No quote-text parsing authority.
+- Local evidence at authoring: 105 unit/source/PWA/BGM tests and product/drive invariants PASS. Direct portrait/landscape inspection found and repaired card overflow and duplicate detail `data-axis`; initial full-suite external module transport failure retained. Rerun plus fresh remote checks remain release gates. Screenshots and quote refresh/STALE/recovery evidence use existing responsive artifacts, tied to eventual exact head.
+- Source/IP and added-line credential scan required before push. Payroll ledger contains internal prototype merit rows, not current GM salary/prepay/ATM/offset receipt: NOT_VERIFIED / HOLD, no PAID/RECEIVED. Paused broad patrol and Cursor unchanged.
+
 ## 2026-09-21 · KAIOS-11520-KSPACE-MAP-20260921
 
 - Worker/reviewer: codex-gm-01 / 衡曜, verified ACTIVE T5, no suspension or active claim conflict. Authority: explicit Human map-visualization continuation and ordinary merge policy, not a self-granted protected capability.
