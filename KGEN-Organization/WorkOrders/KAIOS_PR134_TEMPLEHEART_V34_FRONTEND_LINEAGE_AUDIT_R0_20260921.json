@@ -1,0 +1,506 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR134-TEMPLEHEART-V34-FRONTEND-LINEAGE-AUDIT-R0-20260921",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "88362a7c75a06416b65b4f6c91fcba67ed095893",
+  "task_source_reason": "Inventory current repository risk and audit the highest-priority safe executable candidate without activating wallet or chain effects.",
+  "created_by": "Codex",
+  "created_at": "2026-09-20T17:14:17Z",
+  "owner": "Codex",
+  "reviewer": "Human project owner",
+  "priority": "P1",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY",
+  "exact_base_sha": "88362a7c75a06416b65b4f6c91fcba67ed095893",
+  "exact_base_tree": "95d52acaa603d15a3c678eea7f1e66cc7aecd004",
+  "subject": {
+    "repository": "klineodyssey/kline-odyssey",
+    "pr": 134,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/134",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD",
+    "head_branch": "codex/12345-v34-frontend",
+    "head_sha": "6185abe662d09d1343e7719fdd031cec4b345bf7",
+    "head_tree": "c013ac116223546f1e9431dbcf5c30688c52f53f",
+    "merge_base_sha": "c7e8c533c5bbc598fac3192e0576bacb55fb6a31",
+    "merge_base_tree": "d557cf27d8093900cf7c3e7cfda3085660e47af5",
+    "comparison_to_exact_base": {
+      "status": "diverged",
+      "ahead_by": 1,
+      "behind_by": 1017,
+      "changed_paths": 27,
+      "additions": 4771,
+      "deletions": 298
+    },
+    "evidence": {
+      "workflow_runs": 0,
+      "check_runs": 0,
+      "commit_statuses": 0,
+      "reviews": 0,
+      "review_threads": 0,
+      "comments": 0
+    },
+    "direct_merge_forbidden_reasons": [
+      "codex/* branch may trigger Cursor wake",
+      "Draft",
+      "behind exact latest main",
+      "protected wallet and chain-write surface",
+      "no exact-head CI evidence",
+      "unresolved P1 security defects"
+    ]
+  },
+  "inventory_snapshot": {
+    "open_prs_reviewed": true,
+    "main_workflow_runs_reviewed": true,
+    "todos_and_runtime_risks_reviewed": true,
+    "visual_qa_history_reviewed": true,
+    "ranked_candidates": [
+      {
+        "rank": 1,
+        "priority": "P0",
+        "candidate": "PR #232 real-funds Brain V4 oracle and end-to-end custody",
+        "decision": "HOLD",
+        "reason": "real funds, oracle identity, contract review and deployment authority"
+      },
+      {
+        "rank": 2,
+        "priority": "P0",
+        "candidate": "PRs #135/#154/#186/#199 Mainnet, payroll, payment and Auto-LP lineages",
+        "decision": "HOLD",
+        "reason": "protected live financial or chain effects"
+      },
+      {
+        "rank": 3,
+        "priority": "P1",
+        "candidate": "PR #134 TempleHeart V3.4 frontend bindings lineage audit",
+        "decision": "SELECTED",
+        "reason": "highest safe evidence-only audit after PR #133"
+      },
+      {
+        "rank": 4,
+        "priority": "P1",
+        "candidate": "PRs #158/#159 TempleHeart downstream lineage audits",
+        "decision": "NEXT_AFTER_DEPENDENCY",
+        "reason": "depend on #134/#133 lineage"
+      },
+      {
+        "rank": 5,
+        "priority": "P1",
+        "candidate": "PR #161 12345 wallet/runtime lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 6,
+        "priority": "P1",
+        "candidate": "PRs #152/#153/#154 bank canon and payment lineages",
+        "decision": "HOLD"
+      },
+      {
+        "rank": 7,
+        "priority": "P1",
+        "candidate": "PR #198 portable app/wallet lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 8,
+        "priority": "P1",
+        "candidate": "PR #194 holder-resource/LP lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 9,
+        "priority": "P1",
+        "candidate": "PR #177 wallet UI lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 10,
+        "priority": "P2",
+        "candidate": "PR #48 historical runtime lineage",
+        "decision": "PENDING"
+      }
+    ],
+    "selected_count": 1
+  },
+  "source_reads": [
+    {
+      "path": "AGENTS.md",
+      "sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"
+    },
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"
+    },
+    {
+      "path": "KGEN-KAIOS/SECURITY_MODEL.md",
+      "sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md",
+      "sha": "092c11a085412154b26d230ba8007cc41fdd2e18"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md",
+      "sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"
+    },
+    {
+      "path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md",
+      "sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad"
+    },
+    {
+      "path": "KGEN-KAIOS/boot-runtime/KAIOS_BOOT_RUNTIME.md",
+      "sha": "1b3c72c644c5e7b65793c4ff160e472b35df2b82"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+      "sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "P1",
+      "id": "TRUSTED_CODE_IDENTITY_MISSING",
+      "detail": "The resolver enables writes after only address syntax, non-empty bytecode and version() matching 3.4.x. It does not bind proxy implementation, bytecode hash, EIP-1967 implementation, expected owner/admin, deployment receipt or canonical manifest, so any contract that reports an allowed version can unlock writes."
+    },
+    {
+      "severity": "P1",
+      "id": "TESTNET_CHAIN_WRITES_EXPOSED",
+      "detail": "Chain 97 contains a live rehearsal proxy and the public UI enables wallet connect, chain switch/add, makeWish, heartbeatClaim, igniteAndClaim, fortuneClaim, KGEN approve, voluntaryRepayFortune and normalizeHeartBalance. TESTNET_REHEARSAL_ONLY is display metadata, not an authorization gate."
+    },
+    {
+      "severity": "P1",
+      "id": "APPROVAL_AND_TWO_STEP_REPAY_NONATOMIC",
+      "detail": "Repayment first approves KGEN then submits voluntaryRepayFortune. If the second transaction fails, allowance remains. The UI does not present an explicit durable approval-revocation or allowance recovery flow."
+    },
+    {
+      "severity": "P1",
+      "id": "WALLETCONNECT_EXTERNAL_RUNTIME_UNPINNED",
+      "detail": "The page dynamically imports WalletConnect from esm.sh at runtime and embeds a project ID without repository evidence of ownership, terms, telemetry boundary, integrity pin or availability guarantees."
+    },
+    {
+      "severity": "P1",
+      "id": "STALE_UI_OVERWRITE",
+      "detail": "The candidate replaces current Temple 12345 runtime/index surfaces from an August branch and is behind main by 1017 commits; five shared/index paths already diverged from current main."
+    },
+    {
+      "severity": "P1",
+      "id": "FORTUNE_DEPENDENCY_BLOCKED",
+      "detail": "The candidate exposes fortuneClaim and pending game surfaces while parent PR #133 remains HOLD for a real-KGEN payout/economic exploit and lacks current deployment authority."
+    },
+    {
+      "severity": "P1",
+      "id": "CI_NOT_VERIFIED",
+      "detail": "The exact PR head has zero GitHub Actions runs, check runs and statuses. Branch-authored 10/10 and screenshot statements are not exact-head CI evidence."
+    },
+    {
+      "severity": "P2",
+      "id": "SCREENSHOTS_STALE_AND_UNBOUND",
+      "detail": "Three screenshots are committed on the stale branch but have no current-main browser run, screenshot artifact digest or source-hash binding."
+    },
+    {
+      "severity": "P2",
+      "id": "PROTECTED_BOOT_AND_INDEX_SCOPE",
+      "detail": "PR modifies PRIMEFORGE boot and repository indexes for a candidate runtime without current protected-path authorization."
+    }
+  ],
+  "positive_controls": [
+    "Mainnet currentHeart and fortuneGame addresses remain null in the candidate config.",
+    "Legacy Heart is represented as read-only and separated from currentHeart.",
+    "Local ritual state explicitly does not claim on-chain qualification.",
+    "Transaction state waits for a successful receipt before CONFIRMED.",
+    "No private key or mnemonic is requested by the browser code."
+  ],
+  "path_lineage": {
+    "count": 27,
+    "classification_counts": {
+      "pr_only_modified_main_unchanged": 10,
+      "added_on_pr": 12,
+      "diverged_from_current_main": 5
+    },
+    "paths": [
+      {
+        "path": "K線西遊記/temples/12345/LIFE_MANIFEST.json",
+        "merge_base_blob": "a81f07f0e09f6270764f17c8ff6c2a62772a65f2",
+        "pr_head_blob": "bd1f55daeb01f17521abe0f9f9c002469dd28ec7",
+        "current_main_blob": "a81f07f0e09f6270764f17c8ff6c2a62772a65f2",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/RUNTIME_GENOME.json",
+        "merge_base_blob": "afe9301bbcd5b1d5c2785bf22d46a03bf6082e23",
+        "pr_head_blob": "0d8ec9d3e1100d4547fbdf4eb144c9690fb1ccf1",
+        "current_main_blob": "afe9301bbcd5b1d5c2785bf22d46a03bf6082e23",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/abi/temple-heart.json",
+        "merge_base_blob": null,
+        "pr_head_blob": "ab80a166ce8cd221b30d9e0874965e46b0079f45",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/backend/firebase/public/visitor-tracker.js",
+        "merge_base_blob": "96e33b9d2385183d8f9b5c34b8a4c8f3d459de66",
+        "pr_head_blob": "bf1a40bcbda1d068e6b95025784bd827259b8f61",
+        "current_main_blob": "96e33b9d2385183d8f9b5c34b8a4c8f3d459de66",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/config/contracts.json",
+        "merge_base_blob": null,
+        "pr_head_blob": "d04af46c03925b48fa9679e0d5aac1e06602d10d",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/evidence/android-412x915.png",
+        "merge_base_blob": null,
+        "pr_head_blob": "9cc596313df6365765c6a5fd51ca141349b5aeea",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/evidence/desktop-1440x900.png",
+        "merge_base_blob": null,
+        "pr_head_blob": "bffcabe2d3c3e56bf3b73bd4e73ac4747cd3bc5e",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/evidence/tablet-768x1024.png",
+        "merge_base_blob": null,
+        "pr_head_blob": "c56493ba304c71aba741ebc7f8b7a08bca509cda",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/index.html",
+        "merge_base_blob": "cb940fb0ff4257bdd7790b784ccc2344c7d56f34",
+        "pr_head_blob": "fa1066f8e9882d46f0415d3c1ff34441c230cbc3",
+        "current_main_blob": "3b84f4e73f848d846d9712a3a7768dc63d20e8ba",
+        "classification": "diverged_from_current_main"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/contract-resolver.js",
+        "merge_base_blob": null,
+        "pr_head_blob": "4ac2640dae15233e7bfdc3fbbc740123aee42beb",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/fortune-game-adapter.js",
+        "merge_base_blob": null,
+        "pr_head_blob": "a65b18160c644c7ccad820f1e2d89b6f0dbe2173",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/fortune-game-ui.js",
+        "merge_base_blob": null,
+        "pr_head_blob": "d2fc5931d9eb298094cbdc8d76e8279c7dd7b8d1",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/kgen-12345-ai-service.js",
+        "merge_base_blob": "adec69e647ae76061c402ed8610cd08682b0931e",
+        "pr_head_blob": "8e7f4ee3c7de4d944d7ce3feddecfc05d6d45c4d",
+        "current_main_blob": "adec69e647ae76061c402ed8610cd08682b0931e",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/kgen-12345-runtime.js",
+        "merge_base_blob": "fe667c71aca4551efd11a5b94e6e687a31598e93",
+        "pr_head_blob": "d223ebb757ec0e6062953f79dfbb51c0f7ae1bc6",
+        "current_main_blob": "fe667c71aca4551efd11a5b94e6e687a31598e93",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/kgen-12345-ui.js",
+        "merge_base_blob": "38cf5a63cb88d2ee54bcaf7a704db8e6785ae224",
+        "pr_head_blob": "fac4fdc22498848f104fb61e1a210550b16b4917",
+        "current_main_blob": "38cf5a63cb88d2ee54bcaf7a704db8e6785ae224",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/runtime-bootstrap.js",
+        "merge_base_blob": "d16e0c4cb6bd1229ea1150f8bb0c64b025a8e3f3",
+        "pr_head_blob": "71f618caf681389f719c052055c1bfc858ddd625",
+        "current_main_blob": "d16e0c4cb6bd1229ea1150f8bb0c64b025a8e3f3",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/runtime-main.js",
+        "merge_base_blob": "bdc1ac7385da0d6681f1ae224d1f64d97fcf9aa6",
+        "pr_head_blob": "7bfcf90e3ce54811dbd9e7debe98398cac54ed21",
+        "current_main_blob": "bdc1ac7385da0d6681f1ae224d1f64d97fcf9aa6",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/temple-heart-runtime.js",
+        "merge_base_blob": null,
+        "pr_head_blob": "b49068fbb5dba2217881178272b115c060cdc87c",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/temple-heart.css",
+        "merge_base_blob": null,
+        "pr_head_blob": "1bd5e305215e98cef159f5f57200cb2844a0f84b",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/modules/transaction-state.js",
+        "merge_base_blob": null,
+        "pr_head_blob": "f94f4aa6718ae0b2df0b44061c12a63d7ac60d37",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "K線西遊記/temples/12345/tests/frontend-v34.test.mjs",
+        "merge_base_blob": null,
+        "pr_head_blob": "21b784755e7c452b81034025461d2ba23a037ff7",
+        "current_main_blob": null,
+        "classification": "added_on_pr"
+      },
+      {
+        "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+        "merge_base_blob": "49a448094e164c61bb308a9ce7d8e1cce12c4371",
+        "pr_head_blob": "f3251606c9d745bfa1b86babcd774584cdda4f23",
+        "current_main_blob": "49a448094e164c61bb308a9ce7d8e1cce12c4371",
+        "classification": "pr_only_modified_main_unchanged"
+      },
+      {
+        "path": "README.md",
+        "merge_base_blob": "69d5dafb4e787622ef8c2d16f1426288d6a628fd",
+        "pr_head_blob": "6059e2c314ac09280ce17b8ebceba8b896490075",
+        "current_main_blob": "509885b9a47dfd4015e26ac1f7c46b61ee10d6a5",
+        "classification": "diverged_from_current_main"
+      },
+      {
+        "path": "docs/KGEN_DEPENDENCY_GRAPH.md",
+        "merge_base_blob": "6b8930d1f693bd9baaa34a759f28ac4fba25b543",
+        "pr_head_blob": "880ba9a0eb6912e93fcdd1dd56019d7f1cd6c67f",
+        "current_main_blob": "207b06ec64ff393986fc8dd6c6776d9c7e8c6cae",
+        "classification": "diverged_from_current_main"
+      },
+      {
+        "path": "docs/KGEN_FRONTEND_INDEX.md",
+        "merge_base_blob": "c85491d94f7ac8a347746c109e8d1a453c517d1c",
+        "pr_head_blob": "2be0d809700a8b73ae4efac130463b9dcd83c031",
+        "current_main_blob": "1632f520e65ee746192f3784f740f07599accdd5",
+        "classification": "diverged_from_current_main"
+      },
+      {
+        "path": "docs/KGEN_MASTER_INDEX.md",
+        "merge_base_blob": "3c5938fd3976ab759767ff395c5377270512c172",
+        "pr_head_blob": "4714420a27e2fb508718f23e3f3cefc8901288c7",
+        "current_main_blob": "989c42d658f43d43c6ce544f3b33604f9802def6",
+        "classification": "diverged_from_current_main"
+      },
+      {
+        "path": "docs/KGEN_TEMPLE_12345_MAP.md",
+        "merge_base_blob": "5ecd261723028dd6e03b44b2cb496e805486d48c",
+        "pr_head_blob": "2f5baacfd1caa31d3f59c72d41ddae26a03d528f",
+        "current_main_blob": "5ecd261723028dd6e03b44b2cb496e805486d48c",
+        "classification": "pr_only_modified_main_unchanged"
+      }
+    ]
+  },
+  "acceptance": {
+    "json_parse": true,
+    "selected_candidate_count": 1,
+    "unique_paths": 27,
+    "path_count": 27,
+    "classification_sum": 27,
+    "all_blob_values_null_or_40_hex": true,
+    "protected_effects_all_false": true
+  },
+  "protected_effects": {
+    "wallet_request": false,
+    "wallet_chain_switch": false,
+    "wallet_approval": false,
+    "contract_call": false,
+    "testnet_transaction": false,
+    "mainnet_transaction": false,
+    "payment": false,
+    "asset_transfer": false,
+    "private_key_access": false,
+    "signer_access": false,
+    "contract_deploy": false,
+    "contract_upgrade": false,
+    "governance": false,
+    "workflow_dispatch": false,
+    "worker_activation": false,
+    "life_activation": false,
+    "external_agent_launch": false
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR134_TEMPLEHEART_V34_FRONTEND_LINEAGE_AUDIT_R0_20260921.json"
+  ],
+  "tests": [
+    {
+      "name": "work_order_json_parse",
+      "result": "PASS"
+    },
+    {
+      "name": "single_selected_candidate",
+      "result": "PASS"
+    },
+    {
+      "name": "path_lineage_unique_and_complete",
+      "result": "PASS",
+      "detail": "27/27"
+    },
+    {
+      "name": "blob_sha_format",
+      "result": "PASS"
+    },
+    {
+      "name": "protected_effects_false",
+      "result": "PASS"
+    },
+    {
+      "name": "pr_exact_head_github_ci",
+      "result": "NO_EVIDENCE",
+      "detail": "0 runs / 0 checks / 0 statuses"
+    },
+    {
+      "name": "target_specific_browser_visual_qa",
+      "result": "NOT_APPLICABLE",
+      "detail": "audit JSON only; post-merge main responsive Chromium workflow required"
+    }
+  ],
+  "remaining_blockers": [
+    "Bind writes to a Human-authorized canonical contract manifest with exact chain, proxy, implementation/code hashes, roles, deployment receipt and revocation/freshness policy.",
+    "Keep all Testnet/Mainnet write controls disabled unless explicit action-specific Human authorization exists.",
+    "Resolve PR #133 FortuneGame real-KGEN economic exploit before any FortuneGame-facing integration.",
+    "Replace or justify external WalletConnect runtime/project ownership and pin supply-chain integrity.",
+    "Rebase a narrowly scoped successor on exact latest main and rerun functional plus real-browser screenshot QA.",
+    "Provide exact-head required CI and resolve approval recovery/atomicity."
+  ],
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #158/#159 TempleHeart downstream lineage audits",
+    "allowed_scope": "evidence-only lineage and security review",
+    "forbidden_effects": [
+      "wallet request",
+      "chain switch",
+      "approval",
+      "contract call",
+      "deployment",
+      "transaction",
+      "signer access",
+      "workflow dispatch",
+      "UI/runtime mutation"
+    ]
+  },
+  "merge_recommendation": "MERGE_THIS_R0_AUDIT_ONLY; KEEP_PR_134_OPEN_DRAFT_UNMERGED_HOLD"
+}
