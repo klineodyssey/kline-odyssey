@@ -1,11 +1,11 @@
 /*
 KGEN_META
-VERSION: 1.7.0
-REVISION: 2026-09-10.MONSTER-AGGRESSION
+VERSION: 1.8.0
+REVISION: 2026-09-21.KSPACE-COMBAT
 STATUS: ACTIVE / SIMULATION-FIRST
-LAST_UPDATED: 2026-09-10
-UPDATED_BY: ChatGPT / GPT-5.6 Sol
-CHANGE_REASON: Keep source-driven Digital Ant and Market Life autonomous while allowing actual hostile monster species to chase nearby players, stop in attack range, and emit simulation-only KAIOS-HP contact damage events.
+LAST_UPDATED: 2026-09-21
+UPDATED_BY: codex-gm-01
+CHANGE_REASON: Add normalized reference K-space and radius-gated six-phase practice combat while preserving source-managed Life and settlement boundaries.
 SOURCE_OF_TRUTH: TRUE
 */
 
@@ -57,6 +57,107 @@ export function createWorldState(now=Date.now()){
   return world;
 }
 
+// Game reference coordinates, NOT Canon constants, a live oracle or settlement.
+// One unit is one percentage point relative to the explicitly recorded anchor.
+export const KSPACE_REFERENCE=Object.freeze({
+  source:'SIMULATION_REFERENCE_V1',
+  KX:Object.freeze({market:'BTCUSDT',anchor:100000,price:101000}),
+  KY:Object.freeze({market:'ETHUSDT',anchor:4000,price:3980}),
+  KZ:Object.freeze({market:'BNBUSDT',anchor:600,price:606}),
+});
+export const KSPACE_PHASES=Object.freeze(['KX+','KX-','KY+','KY-','KZ+','KZ-']);
+export const KSPACE_SKILLS=Object.freeze({
+  slash:Object.freeze({radius:2.2,damage:35,cooldownMs:350}),
+  goldenRain:Object.freeze({radius:6,damage:22,cooldownMs:1400}),
+  phantomAxe:Object.freeze({radius:4,damage:18,cooldownMs:1900}),
+});
+const K_AXES=['KX','KY','KZ'],XYZ=['x','y','z'];
+const validVec=v=>v&&XYZ.every(k=>typeof v[k]==='number'&&Number.isFinite(v[k]));
+export function normalizeKPrice(price,anchor){
+  if(!Number.isFinite(price)||!Number.isFinite(anchor)||price<=0||anchor<=0)throw new RangeError('INVALID_K_REFERENCE');
+  const k=100*(price/anchor-1);
+  if(!Number.isFinite(k))throw new RangeError('K_OVERFLOW');
+  return Object.is(k,-0)?0:k;
+}
+export function inverseKPrice(k,anchor){
+  if(!Number.isFinite(k)||k<=-100||!Number.isFinite(anchor)||anchor<=0)throw new RangeError('INVALID_K_COORDINATE');
+  const price=anchor*(1+k/100);if(!Number.isFinite(price)||price<=0)throw new RangeError('K_OVERFLOW');return price;
+}
+export function kPositionFromReference(reference=KSPACE_REFERENCE){
+  if(typeof reference.source!=='string'||!reference.source)throw new RangeError('K_SOURCE_REQUIRED');
+  return Object.fromEntries(K_AXES.map(a=>[a,normalizeKPrice(reference[a]?.price,reference[a]?.anchor)]));
+}
+export function composeKWorld(k,local){
+  if(!validVec(local)||!k||!K_AXES.every(a=>Number.isFinite(k[a])))throw new RangeError('INVALID_K_POSITION');
+  const result=Object.fromEntries(XYZ.map((v,i)=>[v,k[K_AXES[i]]+local[v]]));
+  if(!validVec(result))throw new RangeError('K_OVERFLOW');return result;
+}
+export function combatPhase(plane,c){
+  const axis={XZ:'KY',XY:'KZ',YZ:'KX'}[plane];
+  if(!axis||typeof c!=='number'||!Number.isFinite(c))return null;
+  return {axis,sign:Math.sign(c)||0,body:c===0?null:axis+(c>0?'+':'-')};
+}
+export function createKSpaceEncounter(world,reference=KSPACE_REFERENCE){
+  if(world.kSpace)return world.kSpace;
+  const K=kPositionFromReference(reference);
+  world.kSpace={reference:copy(reference),playerK:K,targetId:'SIM-K-GUARDIAN',lastAttackAt:null,lastResult:null};
+  // A local practice entity is never a registered Life or a source settlement.
+  const guardian={id:'SIM-K-GUARDIAN',lifeId:null,species:'STONE_APE',name:'K-Guardian · 模擬',baseName:'K-Guardian · 模擬',
+    simulationCombat:true,sourceManaged:false,state:'GUARD',attack:0,rewardKaios:0,
+    kPosition:{...K,KZ:K.KZ+1},localPosition:{x:0,y:0,z:6},x:0,y:0,z:7,
+    hp:600,maxHp:600,exposed:'KY-',bodies:Object.fromEntries(KSPACE_PHASES.map(id=>[id,{hp:100,maxHp:100,defense:id==='KY-'?0:4}]))};
+  // Render in the player's K-origin frame, using the same R=K+r as hit testing.
+  const origin=composeKWorld(K,{x:0,y:0,z:0}),rendered=composeKWorld(guardian.kPosition,guardian.localPosition);
+  for(const axis of XYZ)guardian[axis]=rendered[axis]-origin[axis];
+  world.monsters.push(guardian);return world.kSpace;
+}
+export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
+  const space=world.kSpace;if(!space||!validVec(player))return null;
+  const target=world.monsters.find(m=>m.id===space.targetId&&m.simulationCombat),selection=combatPhase(plane,c);
+  const playerWorld=composeKWorld(space.playerK,player);
+  if(!target)return {simulationOnly:true,playerK:copy(space.playerK),playerLocal:{...player},playerWorld,target:null};
+  const targetWorld=composeKWorld(target.kPosition,target.localPosition);
+  const deltaK=Object.fromEntries(K_AXES.map(a=>[a,target.kPosition[a]-space.playerK[a]]));
+  const relative=Object.fromEntries(XYZ.map(a=>[a,targetWorld[a]-playerWorld[a]]));
+  return {simulationOnly:true,source:space.reference.source,reference:copy(space.reference),playerK:copy(space.playerK),playerLocal:{...player},playerWorld,
+    monsterK:copy(target.kPosition),monsterLocal:{...target.localPosition},monsterWorld:targetWorld,deltaK,relative,
+    distance:Math.hypot(relative.x,relative.y,relative.z),selection,
+    target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies)},
+    lastResult:space.lastResult?copy(space.lastResult):null};
+}
+export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),heading=0}={}){
+  const snapshot=kCombatSnapshot(world,player,{plane,c}),spec=KSPACE_SKILLS[skill],space=world.kSpace;
+  const result={ok:false,hit:false,simulationOnly:true,rewardKaios:0,skill,body:snapshot?.selection?.body||null,hits:[],damage:0};
+  const finish=reason=>{result.reason=reason;if(space)space.lastResult={...result,at:now};return result};
+  if(!snapshot||!spec||!Number.isFinite(now)||!Number.isFinite(heading))return finish('INVALID_INPUT');
+  if(!snapshot.target||snapshot.target.state==='DEAD')return finish('NO_TARGET');
+  if(!snapshot.selection?.body)return finish('NEUTRAL_PHASE');
+  if(space.lastAttackAt!==null&&now-space.lastAttackAt<space.cooldownMs)return finish('COOLDOWN');
+  space.lastAttackAt=now;space.cooldownMs=spec.cooldownMs;
+  if(snapshot.distance>spec.radius)return finish('OUT_OF_RANGE');
+  const axis=snapshot.selection.axis,sign=snapshot.selection.sign>0?'+':'-';
+  const target=world.monsters.find(m=>m.id===space.targetId);
+  if(skill==='phantomAxe'){
+    const v=snapshot.relative,horizontal=Math.hypot(v.x,v.z);
+    if(horizontal>.001&&(Math.sin(heading)*v.x+Math.cos(heading)*v.z)/horizontal<0)return finish('OUTSIDE_SWEEP');
+  }
+  // Slash: exactly the chosen body. Rain: two tangent-plane axes, same phase.
+  // Axe: three neighboring same-sign bodies in the forward semicircle.
+  const ids=skill==='slash'?[snapshot.selection.body]:K_AXES.filter(a=>skill==='phantomAxe'||a!==axis).map(a=>a+sign);
+  for(const id of ids){
+    const body=target.bodies[id];if(body.hp<=0)continue;
+    const state=id===target.exposed?'EXPOSED':id.slice(0,2)===target.exposed.slice(0,2)?'GUARDED':'RESIST';
+    const multiplier=state==='EXPOSED'?1.5:state==='GUARDED'?.25:.75;
+    const damage=Math.min(body.hp,Math.max(1,Math.round((spec.damage-body.defense)*multiplier)));
+    body.hp-=damage;result.hits.push({body:id,damage,state});result.damage+=damage;
+  }
+  if(!result.hits.length)return finish('BODY_DISABLED');
+  target.hp=Object.values(target.bodies).reduce((sum,b)=>sum+b.hp,0);
+  if(!target.hp){target.state='DEAD';target.defeatedAt=now}
+  result.ok=true;result.hit=true;result.defeated=target.state==='DEAD';
+  return finish(result.hits.some(h=>h.state==='EXPOSED')?'WEAK_POINT':result.hits.every(h=>h.state==='GUARDED')?'BLOCKED_RESIST':'HIT');
+}
+
 function resetSlot(slot){
   const idx=Number(slot.id.match(/(\d+)$/)?.[1]||1)-1;
   Object.assign(slot,inactiveSlot(Math.max(0,idx)));
@@ -64,7 +165,7 @@ function resetSlot(slot){
 }
 
 function findSourceSlot(world,lifeId){return world.monsters.find(m=>m.sourceManaged&&m.sourceLifeId===lifeId)||null}
-function freeSourceSlot(world){return world.monsters.find(m=>!m.sourceManaged&&m.state==='DEAD')||null}
+function freeSourceSlot(world){return world.monsters.find(m=>!m.sourceManaged&&!m.simulationCombat&&m.state==='DEAD')||null}
 function unionMarkets(current=[],incoming=[]){return [...new Set([...(current||[]),...(incoming||[])].filter(Boolean))]}
 
 function hydrateSourceSlot(slot,event){

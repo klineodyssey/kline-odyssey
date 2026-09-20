@@ -1,5 +1,15 @@
 # 11520 Universal Exchange V3.9
 
+## K-space practice combat — V2.6.18 / 2026-09-21
+
+Walk toward the visible **K-Guardian · 模擬** with the XYZ joystick. Tap the plane control to choose XZ→KY, XY→KZ or YZ→KX; set C positive/negative to choose that body's phase. Zero C is neutral; lots remain positive position size, never direction. Market cards remain info-only.
+
+The reference transform in existing `runtime/world-runtime.mjs` is `Ki=100*(Pi/P0i-1)` with traceable inverse and explicit simulation anchors. Default K is approximately `(1,-0.5,1)`; the practice guardian has K offset `(0,0,1)` and local XYZ `(0,0,6)`. World position is K+local; gameplay distance includes all three dimensions. These are game units, not physical meters, canonical prices or a real-funds oracle. Live display quotes never overwrite these coordinates.
+
+Slash attacks one selected body within 2.2 units; Golden Rain attacks the two tangent-plane axes of the same phase within 6; Phantom Axe sweeps the three same-phase bodies within 4 and in front of the avatar. Six independent HP pools, exposed/guarded/resistant multipliers and cooldowns determine actual results. The target card shows HP/range and opens source/coordinate details plus an explicit practice reset. Damage feedback explains neutral, range, resistance and weak points. No reward, token, custody or source-managed Life settlement is created.
+
+Actual movement/phase/skill regression and screenshots extend `tests/11520-browser-responsive.mjs`; existing runtime tests cover normalization, inverse, range/height, cooldown, dead parts and source-slot isolation. Review the exact SHA's CI artifacts before declaring Visual QA. Existing PWA/BGM and all protected-action gates remain unchanged; cache v270 is still network-first and orientation is `any`.
+
 ## Landscape game finalization — 2026-09-20
 
 The existing `game-5d.html` landscape mode keeps movement/plane and Y/C/lots controls on the left, the world in the center and differently sized combat actions on the right. Order remains separate. Portrait anchors and wallet/trading authority are unchanged. Landscape precision inputs and open panels stay inside the viewport.

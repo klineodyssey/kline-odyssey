@@ -1,5 +1,12 @@
 # 11520 Changelog
 
+## 2026-09-21 · V2.6.18 K-space practice combat
+
+- Added traceable normalized reference K coordinates and local XYZ composition, six phase bodies, real radius/height/cooldown gates and distinct slash/plane/sweep tactics without live settlement or rewards.
+- Added compact target feedback/details/reset and six in-world body markers. Plane and signed C remain the only phase authorities; market cards stay informational and lots stay positive.
+- Fixed negative-C joystick reversal, mirrored body text, target occlusion and unbounded avatar-load waiting. Existing scenery is procedural; no new external asset or copyrighted music was introduced.
+- Added actual approach/positive-negative hit/three-skill browser captures and source-slot isolation tests. Worker cache v270 is still scoped and network-first; PWA orientation remains any.
+
 ## 2026-09-20 · Landscape finalization
 
 - Repaired only the existing landscape mode: bounded top/status/map layout, left movement/parameter rails, visible 44px precision inputs, distinct right combat targets, separate order and bounded utility panels.

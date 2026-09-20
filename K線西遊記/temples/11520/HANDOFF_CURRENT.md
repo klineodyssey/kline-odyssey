@@ -1,6 +1,19 @@
 # 11520 HANDOFF CURRENT
 
-## Current landscape finalization — 2026-09-20
+## Current K-space combat integration — 2026-09-21
+
+- TASK_ID: KAIOS-11520-KSPACE-COMBAT-20260921; owner 衡曜 / codex-gm-01 / LIFE-CODEX-GM-0001.
+- Human source: explicit K-SPACE COMBAT COORDINATE IMPLEMENTATION ORDER; ordinary game/simulation repository merge and Pages publication authorized after exact-head tests and direct screenshot review. No second-reviewer ceremony; protected execution remains prohibited.
+- Isolated branch: `codex/k11520-kspace-combat-20260921`; base checkpoint `88362a7c75a06416b65b4f6c91fcba67ed095893` is lineage, never a future CURRENT assertion.
+- V2.6.18 extends existing `runtime/world-runtime.mjs`, `runtime/game-5d-main.mjs` and combat runtimes, not a parallel universe/runtime. Ni(P)=100*(P/P0-1), inverse P=P0*(1+Ki/100); reference prices/anchors are explicit fictional simulation inputs, not live-oracle authority or Canon constants. R=K+r, renderer uses the player K origin.
+- One practice K-Guardian has six body HP pools, no LIFE_ID, capital, reward, custody or source settlement. Plane selects normal axis; sign(C) selects phase; 0C cannot hit. Local movement takes speed magnitude so negative C never reverses the joystick. Lots remain positive and do not choose phase.
+- Slash: 2.2-unit selected body. Golden Rain: 6-unit tangent-plane same-sign bodies. Phantom Axe: 4-unit forward semicircle, three same-sign bodies. All use actual full-XYZ distance, cooldown and live body HP. GUARD/RESIST/EXPOSED yield different damage; no auto-mint, no asset reward. Target panel shows K/XYZ/delta, source/anchors and explicit reset.
+- Visual repair: readable unmirrored phase labels, compact target card outside controls, deterministic clear encounter corridor and forward camera framing. A 12-second model-load fallback prevents invisible-player waits; late model success replaces/disposes the fallback.
+- Evidence: existing responsive QA writes `{profile}-kspace-{target,relative-coordinates,slash-negative,slash-positive,goldenRain,phantomAxe}.png`, four rotation cycles and report.json to `artifacts/11520-responsive-qa`. CI associates artifacts with exact candidate SHA. Reports distinguish functional evidence from required direct image inspection.
+- At documentation time: local implementation/QA; final release authority is the eventual exact-head checks, merge SHA and successful Pages run, not this note. No known defect may be excused by a green source-only check.
+- Payroll: `KGEN-KAIOS/workforce/salary_ledger.jsonl` contains prototype MERIT_POINT/internal-ledger rows, not a current GM paid receipt. Issued/received/advance/offset remain HOLD / NOT_VERIFIED; no payment performed. Broad patrol stays paused; this explicit task does not restart Cursor or automation.
+
+## Previous landscape finalization — 2026-09-20
 
 - TASK_ID: KAIOS-11520-LANDSCAPE-FINALIZATION-20260920.
 - Owner: 衡曜 / codex-gm-01. Human Owner explicitly authorizes low-risk repository merge and normal Pages publication after exact-head Functional + Visual QA.
