@@ -1,5 +1,12 @@
 # 11520 Changelog
 
+## 2026-09-20 · Landscape finalization
+
+- Repaired only the existing landscape mode: bounded top/status/map layout, left movement/parameter rails, visible 44px precision inputs, distinct right combat targets, separate order and bounded utility panels.
+- Preserved portrait controls, market-info-only cards, plane trading authority, signed C/positive lots and immediate combat/direct simulation order.
+- Added elapsed-time golden rain with concentric target/runes and a curved translucent phantom axe with shaft/sweep; slash remains the smaller quick cyan effect.
+- Added four real-browser rotation cycles, touch-target/overlap checks, interaction screenshots and worker cache failure tests. Cache v269 is temple-scoped and fails closed for missing offline modules.
+
 ## 2026-09-04 · KGEN / KAIOS Market Life AI Civilization Canon
 
 - Added `MARKET_LIFE_AI_SPEC.md` as the authoritative product concept for living markets in 11520.

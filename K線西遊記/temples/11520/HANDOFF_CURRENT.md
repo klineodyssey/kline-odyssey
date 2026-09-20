@@ -1,5 +1,19 @@
 # 11520 HANDOFF CURRENT
 
+## Current landscape finalization — 2026-09-20
+
+- TASK_ID: KAIOS-11520-LANDSCAPE-FINALIZATION-20260920.
+- Owner: 衡曜 / codex-gm-01. Human Owner explicitly authorizes low-risk repository merge and normal Pages publication after exact-head Functional + Visual QA.
+- Branch: `codex/k11520-landscape-finalization-20260920`.
+- Reconciled base checkpoint: `2158065ae4eac6563557b890999eed0762756124`; always refetch, never treat this checkpoint as a future CURRENT head.
+- Candidate changes: existing landscape layout/precision inputs/panels, presentation-only golden rain/phantom axe, scoped network-first service-worker failure behavior and regression tests. No duplicate runtime, new assets, trade/wallet identity change or protected execution.
+- Test evidence: `artifacts/11520-responsive-qa/report.json` and `landscape-{slash,goldenRain,phantomAxe}.png`, `landscape-final-844x390.png`, `rotation-portrait-390x844.png`. CI uploads these under its exact SHA; screenshot existence alone is not Visual QA.
+- Local isolated Chrome PWA installation and actual standalone display mode were verified; orientation remains any. Production certification must use the eventual Pages release and fresh public smoke, not this local observation alone.
+- Payroll: current-period GM receipt/advance/deduction not verified from prototype ledger; HOLD, no payment or received-salary claim.
+- Release status: LOCAL_QA / exact-head CI and production verification pending at documentation time. The PR check runs, merge commit and Pages deployment provide authoritative final release evidence.
+
+## Historical living-world candidate (preserved, not current release authority)
+
 STATUS: ACTIVE DRAFT CANDIDATE
 TASK_ID: KAIOS-11520-LIVING-WORLD-LOGISTICS-20260908
 BASE_BRANCH: main

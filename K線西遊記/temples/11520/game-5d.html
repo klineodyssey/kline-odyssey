@@ -3,7 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#05080d">\n<link rel="manifest" href="./manifest.webmanifest">\n<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#05080d">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>11520 花果山 · 5D K線西遊記</title>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"}}</script>
 <style>
@@ -41,12 +45,19 @@
  .assetTag{display:none}#aiChatButton{right:5px!important;bottom:138px!important;width:42px!important;height:42px!important}#bgmButton{right:5px!important;bottom:186px!important;width:42px!important;height:42px!important}
 }
 
-/* K11520 landscape combat HUD V1 */
+/* K11520 landscape combat HUD: bounded left controls, clear centre, right combat. */
 @media (orientation:landscape) and (max-height:600px){
- .top{height:42px!important;left:6px!important;right:6px!important;padding:4px 8px!important}.axes{top:52px!important;left:50%!important;transform:translateX(-50%)!important;width:min(54vw,620px)!important}.axis{min-height:82px!important}
- .tele,.monsterHud,.minimapWrap{opacity:.78!important;transform:scale(.82)!important;transform-origin:top center!important}
- .joystick{left:18px!important;bottom:18px!important;width:180px!important;height:180px!important}.sliderDock{right:184px!important;bottom:18px!important}
- .controls{right:18px!important;bottom:18px!important;width:190px!important;height:190px!important}.controls .attack{width:76px!important;height:76px!important;right:0!important;bottom:0!important;border-radius:50%!important}.controls .skill{width:58px!important;height:58px!important;right:88px!important;bottom:18px!important}.controls .tool{width:58px!important;height:58px!important;right:46px!important;bottom:96px!important}.controls .dodge{width:50px!important;height:50px!important;right:118px!important;bottom:88px!important}.controls .flat{width:46px!important;height:46px!important;right:4px!important;bottom:96px!important}.controls .order{width:64px!important;height:64px!important;right:0!important;bottom:126px!important}
+ .brand .brandMetaV250{font-size:8px!important;line-height:8px!important;margin-top:0!important}.brand .hqLine{line-height:16px!important}
+ .top{height:42px!important;left:max(6px,env(safe-area-inset-left))!important;right:max(6px,env(safe-area-inset-right))!important;padding:4px 8px!important}.top .brand small{display:none}.axes{top:54px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(54vw,620px)!important;height:74px!important;min-height:0!important}.axis{min-height:0!important;padding:5px!important}.axis .q{font-size:14px!important;margin-top:3px!important}.axis .pos{font-size:7px!important}.axis .universeFloorBadge{font-size:6px!important}
+ .axis{line-height:1.1!important}.axis .marketName{display:block!important;font-size:12px!important;line-height:14px!important}.axis .pos{display:block!important;line-height:10px!important}.axis .universeFloorBadge{line-height:8px!important;margin-top:2px!important}
+ .tele,.monsterHud,.minimapWrap{opacity:1!important;transform:none!important}.tele,.monsterHud{top:136px!important;padding:6px!important;font-size:8px!important;height:auto!important;max-height:124px!important;overflow:auto!important}.tele{left:max(176px,calc(env(safe-area-inset-left) + 148px))!important;width:180px!important}.monsterHud{right:194px!important;width:160px!important}.minimapWrap{left:max(14px,env(safe-area-inset-left))!important;top:54px!important;width:140px!important;height:122px!important;padding:5px!important}.minimapWrap #minimap{width:128px!important;height:84px!important}.minimapWrap small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ #joy.joyWrap{left:max(14px,env(safe-area-inset-left))!important;bottom:max(18px,env(safe-area-inset-bottom))!important;width:146px!important;height:146px!important}#k11520PlaneLabel{top:184px!important;bottom:auto!important;left:max(16px,env(safe-area-inset-left))!important}
+ .controls{right:max(18px,env(safe-area-inset-right))!important;bottom:max(18px,env(safe-area-inset-bottom))!important;width:190px!important;height:224px!important;pointer-events:none!important}.controls>button{pointer-events:auto!important;touch-action:manipulation}.controls .attack{width:76px!important;height:76px!important;right:0!important;bottom:0!important;border-radius:50%!important}.controls .skill{width:58px!important;height:58px!important;right:88px!important;bottom:0!important}.controls .tool{width:58px!important;height:58px!important;right:4px!important;bottom:86px!important}.controls .dodge{width:50px!important;height:50px!important;right:88px!important;bottom:76px!important}.controls .flat{width:44px!important;height:44px!important;right:88px!important;bottom:142px!important}.controls .order{width:64px!important;height:58px!important;right:0!important;bottom:164px!important;border-radius:14px!important}
+ #skill::after{content:'金陣';display:block;font-size:9px}#tradeSword::after{content:'幻斧';display:block;font-size:9px}#dodge::after{content:'閃避';display:block;font-size:9px}
+ .toast{top:auto!important;bottom:12px!important;max-width:270px!important;font-size:11px!important;pointer-events:none!important}
+ #k11520RealTradePreflight{right:max(58px,calc(env(safe-area-inset-right) + 53px))!important;bottom:auto!important;top:58px!important;max-width:max(92px,calc(136px - env(safe-area-inset-right)))!important}
+ .sheet.open,.confirm.open{top:max(8px,env(safe-area-inset-top))!important;bottom:max(8px,env(safe-area-inset-bottom))!important;max-height:calc(100dvh - 16px)!important}.sheetHead{position:sticky;top:0;background:#101923;z-index:3}.sheet .close,.confirm .close{min-width:44px;min-height:44px}.confirm.open{display:flex;flex-direction:column}.confirm #confirmBody{min-height:0;overflow:auto;flex:1}.confirm>.grid2{flex-shrink:0}.confirm .btn{min-height:44px}
+ html.k11520UtilitiesOpen #backpackPanel,html.k11520UtilitiesOpen #aiChatPanel,html.k11520UtilitiesOpen #gameChat,html.k11520UtilitiesOpen #k11520UiSettings,html.k11520UtilitiesOpen #walletPanel:not(.collapsed){left:max(10px,env(safe-area-inset-left))!important;right:calc(245px + max(5px,env(safe-area-inset-right)))!important;top:58px!important;bottom:max(12px,env(safe-area-inset-bottom))!important;width:auto!important;max-height:calc(100dvh - 70px)!important;overflow:auto!important;transform:none!important}
  .dock{right:4px!important;bottom:4px!important}.assetTag{display:none!important}
 }
 </style>

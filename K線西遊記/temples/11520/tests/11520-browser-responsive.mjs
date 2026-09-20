@@ -21,7 +21,7 @@ const reports=[],failures=[],sourceChecks=[];
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourceSha=bytes=>sha(Buffer.from(Buffer.from(bytes).toString('utf8').replace(/\r\n?/g,'\n'),'utf8'));
 async function verifyProductionSource(){
-  for(const name of ['game-5d-bootstrap.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs']){
+  for(const name of ['../game-5d.html','../sw.js','../manifest.webmanifest','combat-fx-runtime.mjs','game-5d-bootstrap.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs']){
     // GitHub Pages publishes LF text while Windows checkouts may materialize CRLF.
     // Compare canonical source text so deployment lineage checks remain byte-format agnostic.
     const expected=sourceSha(await fs.readFile(new URL('../runtime/'+name,import.meta.url)));
@@ -42,6 +42,52 @@ async function snapshot(page){return page.evaluate(sels=>{
   const yThumbStyle=getComputedStyle(document.querySelector('#yThumb'));
   return{width:innerWidth,height:innerHeight,boxes:Object.fromEntries(sels.map(s=>[s,box(document.querySelector(s))])),cards:[...document.querySelectorAll('#axes .axis')].map(box),balances:[...document.querySelectorAll('.top>.pill')].map(box),drawers:[...document.querySelectorAll('.hud-drawer-toggle')].map(box),axisArt:{image:yThumbStyle.backgroundImage,position:yThumbStyle.backgroundPosition,size:yThumbStyle.backgroundSize,repeat:yThumbStyle.backgroundRepeat},settingsInstalled:!!globalThis.__K11520_UI_SETTINGS__,layoutInstalled:!!globalThis.__K11520_MOBILE_CONTROL_LAYOUT__,xyzInstalled:!!globalThis.__K11520_3D_CONTROL__,utilityOpen:document.documentElement.classList.contains('k11520UtilitiesOpen'),version:document.querySelector('.brandMetaV250')?.textContent};
 },selectors)}
+async function finalizeLandscape(page,report){
+  await page.locator('#confirm').waitFor({state:'hidden'});
+  const controls=['#joy','#yControl','#cControl','#lotsControl','#cNumericInput','#lotsNumericInput','#attack','#skill','#tradeSword','#dodge','#flat','#orderFire','#k11520UtilityMaster'];
+  const boxes=()=>page.evaluate(sels=>Object.fromEntries(sels.map(s=>{const e=document.querySelector(s),r=e.getBoundingClientRect(),h=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return[s,{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,hit:h===e||e.contains(h)}]})),controls);
+  const overlaps=(a,b)=>a.x<b.right&&a.right>b.x&&a.y<b.bottom&&a.bottom>b.y;
+  const initial=await boxes();
+  const cdp=await page.context().newCDPSession(page);
+  report.combat=[];
+  for(const [selector,variant,delay,duration]of [['#attack','slash',45,330],['#skill','goldenRain',300,1100],['#tradeSword','phantomAxe',180,780]]){
+    const b=initial[selector],pointer={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
+    await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...pointer});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...pointer});await page.waitForTimeout(delay);
+    const timing=await page.evaluate(()=>({variant:__K11520_COMBAT_FX__.variant,elapsed:Date.now()-__K11520_COMBAT_FX__.at}));assert.equal(timing.variant,variant);assert.ok(timing.elapsed<duration,`${variant} capture missed active window: ${timing.elapsed}ms`);
+    // CDP captures the presented frame without Playwright waiting for fonts/layout animation settling.
+    const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(`${OUT}/landscape-${variant}.png`,Buffer.from(shot.data,'base64'));
+    report.combat.push({...timing,realClick:true});await page.waitForTimeout(1300);
+  }
+  await cdp.detach();
+  for(const [s,b]of Object.entries(initial)){assert.ok(b.hit,s+' pointer blocked');assert.ok(b.x>=0&&b.y>=0&&b.right<=844&&b.bottom<=390,s+' clipped');assert.ok(b.width>=44&&b.height>=44,s+' touch target below 44px')}
+  for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++)assert.ok(!overlaps(initial[controls[i]],initial[controls[j]]),controls[i]+' overlaps '+controls[j]);
+  assert.ok(initial['#attack'].width>initial['#skill'].width&&initial['#attack'].width>initial['#tradeSword'].width,'primary attack should be largest');
+  report.rotation=[];
+  for(let i=0;i<4;i++){
+    await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);
+    const portrait=await snapshot(page);check('rotation portrait '+i,portrait);if(i===3)await page.screenshot({path:`${OUT}/rotation-portrait-390x844.png`});
+    await page.setViewportSize({width:844,height:390});await page.waitForTimeout(400);
+    const current=await boxes();for(const s of controls)for(const k of ['x','y','width','height'])assert.ok(Math.abs(current[s][k]-initial[s][k])<1,`${s} ${k} drift after rotation ${i}`);
+    assert.deepEqual(await page.locator('#three').evaluate(e=>[e.clientWidth,e.clientHeight]),[844,390]);report.rotation.push({cycle:i,stable:true});
+  }
+  const input=async(s,v)=>{await page.locator(s).fill(v);await page.locator(s).press('Enter');await page.waitForTimeout(300)};
+  const state=()=>page.evaluate(()=>({axis:__K11520_SIGNED_C_IMMERSIVE__.activeAxis,c:__K11520_SIGNED_C_IMMERSIVE__.signedC,lots:__K11520_SIGNED_C_IMMERSIVE__.lots,side:__K11520_SIGNED_C_IMMERSIVE__.canonicalSide,plane:__K11520_3D_CONTROL__.mode}));
+  for(const [plane,axis]of [['XZ','KY'],['XY','KZ'],['YZ','KX'],['XZ','KY']]){
+    for(let n=0;(await state()).plane!==plane&&n<3;n++){await page.locator('#joy').tap();await page.waitForTimeout(200)}
+    assert.equal((await state()).axis,axis,plane+' normal trading axis');
+    const before=await state();await page.locator('[data-axis="'+(axis==='KX'?'KY':'KX')+'"]').click();await page.locator('#sheet.open').waitFor();assert.deepEqual(await state(),before,'market detail changed trading authority');await page.locator('#sheetClose').click();
+  }
+  await input('#cNumericInput','-0.1');assert.equal((await state()).side,'空');await input('#lotsNumericInput','7');assert.equal((await state()).lots,7);await input('#lotsNumericInput','-5');assert.equal((await state()).lots,7);await input('#cNumericInput','-0');assert.equal((await state()).c,0);assert.ok(!(await page.locator('#cRead').textContent()).includes('-0'));
+  await input('#cNumericInput','1');await input('#lotsNumericInput','1');
+  const world=()=>page.evaluate(()=>structuredClone(__K11520_WORLD_COORDS__));
+  const drag=async(s,x,y)=>{const b=await page.locator(s).boundingBox();await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width*x,b.y+b.height*y,{steps:8});await page.waitForTimeout(320);await page.mouse.up();await page.waitForTimeout(160)};
+  let before=await world();await drag('#joy',.85,.5);assert.ok((await world()).physical.x>before.physical.x,'joystick X+ did not move avatar');before=await world();await drag('#yControl',.5,.15);assert.ok((await world()).physical.y>before.physical.y,'Y+ did not move avatar');await drag('#yControl',.5,.85);
+  await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();assert.ok((await page.locator('#confirmBody').textContent()).includes('KY'));await page.screenshot({path:`${OUT}/landscape-direct-order.png`});await page.locator('#cancelOrder').click();
+  await page.locator('#attack').click();await page.waitForTimeout(420);await page.locator('#attack').click();assert.equal(await page.evaluate(()=>__K11520_COMBAT_FX__.variant),'slash');await page.waitForTimeout(1200);
+  before=await world();await page.locator('#dodge').click();assert.notDeepEqual((await world()).physical,before.physical,'dodge did not move');
+  await page.screenshot({path:`${OUT}/landscape-final-844x390.png`});
+  report.landscapeFinalization='PASS';
+}
 function check(label,state,{expanded=false,landscape=false}={}){const b=state.boxes;const ok=(value,message)=>{if(!value)failures.push(`${label}: ${message}`)};
   ok(/wukong-y-control\.jpg/i.test(state.axisArt.image),'normal-axis thumb lost approved Wukong artwork');
   ok(state.axisArt.position==='31.5% 46.3%','normal-axis artwork focal point drifted: '+state.axisArt.position);
@@ -98,10 +144,11 @@ try{
       assert.deepEqual(authorityAfter,authorityBefore,'market detail click must not change plane-selected trading authority or order semantics');
       await page.locator('#sheetClose').click();report.marketCardAuthority='PRESERVED';
       if(report.states.cold.boxes['#k11520UtilityMaster']?.hit){for(let i=0;i<3;i++){await page.locator('#k11520UtilityMaster').click({timeout:2500});await page.waitForTimeout(250);const opened=await snapshot(page);check(profile.name+' expanded cycle '+i,opened,{expanded:true,landscape:!!profile.landscape});if(i===0){report.states.open=opened;await page.screenshot({path:`${OUT}/${profile.name}-expanded.png`,fullPage:true})}await page.locator('#k11520UtilityMaster').click({timeout:2500});await page.waitForTimeout(250)}report.states.closedAgain=await snapshot(page);check(profile.name+' after cycles',report.states.closedAgain,{landscape:!!profile.landscape});await page.screenshot({path:`${OUT}/${profile.name}-closed-again.png`,fullPage:true})}
-      // Preserve the existing explicit game arming step; never confirm the order.
+      // Open a simulation preview directly; neither order nor combat needs arming.
       const quotePresent=await page.locator('[data-axis="KX"] .q').textContent().then(s=>Number(String(s).replace(/[$,]/g,''))>0);
       if(PRODUCTION)assert.equal(quotePresent,true,'Public Pages market-data-only quote source must be LIVE');
-      if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#tradeSword').click({timeout:2500});await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
+      if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
+      if(profile.landscape)await finalizeLandscape(page,report);
       if(PRODUCTION&&warnings.some(message=>/blocked by CORS|data-api\.binance\.vision.*ERR_FAILED/i.test(message)))failures.push(`${profile.name}: public quote CORS regression`);
       if(errors.length)failures.push(`${profile.name}: ${errors.join('; ')}`);
     }catch(error){report.error=String(error);failures.push(`${profile.name}: ${String(error)}`);await page.screenshot({path:`${OUT}/${profile.name}-failure.png`,fullPage:true,timeout:5000}).catch(()=>{})}finally{await context.close()}

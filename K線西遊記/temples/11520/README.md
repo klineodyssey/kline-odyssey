@@ -1,5 +1,13 @@
 # 11520 Universal Exchange V3.9
 
+## Landscape game finalization — 2026-09-20
+
+The existing `game-5d.html` landscape mode keeps movement/plane and Y/C/lots controls on the left, the world in the center and differently sized combat actions on the right. Order remains separate. Portrait anchors and wallet/trading authority are unchanged. Landscape precision inputs and open panels stay inside the viewport.
+
+`tests/11520-browser-responsive.mjs` exercises four portrait/landscape rotation cycles, real pointer hits, plane-selected trading, info-only market cards, signed C, positive lots, physical joystick/Y movement, direct order preview and three interaction-driven combat screenshots. Golden rain uses an elapsed-time falling pattern and target sigil; phantom axe has an actual curved translucent blade and shaft.
+
+PWA orientation remains `any`. The existing `sw.js` shell cache is network-first, scoped to this temple, caches successful responses only, and never substitutes HTML for missing offline JS. PWA/standalone support does not remove browser chrome from an ordinary tab. All game orders in this work are simulation-only; protected real-money authority is unchanged.
+
 ## Digital Ant next-stage status
 
 - V3.9 activates `KGEN_FIELD_SERVICE_BUSINESS` after the WUKONG_GATEKEEPER primary-job gate. Its CFO scans verified K280/Universe Map nodes for cash logistics, KUFO supply, waste collection and general delivery demand.
