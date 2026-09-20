@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR183-SOL-YAOCE-WORKFORCE-PROPOSAL-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit stale Sol Yaoce workforce proposal lineage without onboarding, appointing, dispatching, employing, or activating any Worker or Life",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_183_SOL_YAOCE_WORKFORCE_PROPOSAL_LINEAGE_AUDIT",
+  "exact_base_sha": "c7fa2fc6967778fca7c5be47f510bfe899849877",
+  "exact_base_tree_sha": "ef3a50d2a83106d62e66758b81a8d4eaeb4022ac",
+  "integration_branch": "audit/pr183-sol-yaoce-workforce-lineage-r0-20260920",
+  "integration_head_derivation": "READ_BRANCH_REF_AFTER_COMMIT",
+  "audited_pr": 183,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_recorded_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_merge_base_sha": "db3b6368139154cbfa1cabd322b80f0cb1307bcc",
+  "audited_merge_base_tree_sha": "76ca3c5a83e06de206313a2fc266d76898d3f70d",
+  "audited_head_branch": "codex/sol-yaoce-t1-onboarding-v1",
+  "audited_head_sha": "179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b",
+  "audited_head_tree_sha": "68569f47b976e24fdea6c1d10707162955090e4f",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT",
+    "ahead": 9,
+    "behind": 748
+  },
+  "pr_scope": {
+    "changed_paths": 2,
+    "insertions": 191,
+    "deletions": 10,
+    "commits": 9,
+    "conversation_comments": 2,
+    "submitted_reviews": 0,
+    "review_threads": 0
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 183 correctly removed an unbound onboarding decision from the formal decision log and removed a trial assignment from the formal WorkQueue, but its remaining recruitment-queue record still introduces an unauthenticated named applicant, T1 proposal, reviewer-candidate role, trial task identifier, and related task identifier without immutable Human authorization, identity or controller evidence, consent, Worker type, acknowledgments, workspace, branch, registry, trust, reviewer, Claim, lease, dispatch, employment, payroll, or authority proof. Its branch-specific workflow is read-only and historically green, but it validates only negative repository fields and cannot authenticate a person or create authority. Current main contains neither changed artifact. The safe action is a current-main audit record only, with no workforce record or workflow transplanted.",
+  "inventory": {
+    "open_pull_requests": 34,
+    "latest_main_failed_workflow_runs_observed": 0,
+    "relevant_todo_fixme_hack_matches": 0,
+    "selected_visual_failure": null,
+    "selected_runtime_defect": null,
+    "security_blocker": "No immutable Human onboarding decision, identity, controller, consent, Worker type, acknowledgments, workspace, branch, canonical registry entry, trust level, reviewer authority, Claim, lease, dispatch authority, employment decision, payroll eligibility, or cross-PR authority isolation exists for the Sol Yaoce proposal."
+  },
+  "blocking_findings": [
+    "PR 183 is open, Draft, unmerged, diverged, and 748 commits behind exact current main.",
+    "The recruitment-queue entry supplies self_name Sol, role_name 曜冊, a reviewer-candidate role, proposed onboarding level T1, a recommended trial, a trial task ID, and a related task ID without an independently authenticated source or immutable Human decision.",
+    "The entry is fail-closed but still risks being misread as an existing person, consenting applicant, accepted reviewer candidate, approved interview, reserved T1 slot, employment relationship, or dispatchable task; none of those facts is proven.",
+    "canonical_life_id, canonical_worker_id, authorized_onboarding_level, and human_authorization are null; controller and Worker type are unverified; all acknowledgments are false; review authority is NONE; employment is APPLICANT_NOT_EMPLOYEE; payroll is BLOCKED; and trial dispatch is HOLD.",
+    "The candidate is absent from the formal Worker Registry. No authoritative identity, controller, consent, trust, workspace, branch, reviewer, Claim, lease, fencing token, or availability record is bound.",
+    "The proposal-safety workflow checks specific repository strings and null fields but cannot prove identity, consent, Human authority, registry admission, trust, employment, reviewer independence, or delivery of acknowledgments.",
+    "The workflow uses a branch-specific push trigger for codex/sol-yaoce-t1-onboarding-v1 and is unnecessary on current main; current integration policy also avoids merging codex/* branches because they can trigger Cursor wake behavior.",
+    "The workflow grants only contents: read and performs no repository write or secret use, but actions/checkout@v4 emitted a Node.js 20 deprecation warning in the historical exact-head run.",
+    "The two PR comments are repository-owner implementation checkpoints, not submitted reviews, independent identity evidence, Human onboarding authorization, or authority to appoint a reviewer.",
+    "PR 176 is now closed unmerged at a later preserved head than the older PR 183 discussion references; its personnel projections never became operative and cannot authorize or block a Sol onboarding decision by itself.",
+    "PRs 169 and 170 are closed unmerged, so the forbidden REVIEW_PR169 and REVIEW_PR170 labels are historical safety markers rather than current task or reviewer authority.",
+    "Open Draft PR 172 explicitly classifies the Sol/曜冊 relay as text provenance only, but PR 183's own workflow does not enforce that cross-PR boundary; PR 172 must continue to resolve controller, operator, signer, governance, and parent-evidence authorities independently.",
+    "Historical 12/12 exact-head CI proves internal fail-closed assertions only. It cannot manufacture a Human decision, person, consent, identity, Worker/Life, reviewer, employment, payroll, Claim, dispatch, authority, or external fact."
+  ],
+  "positive_findings": [
+    "The latest audited head changes only the proposal-safety workflow and recruitment queue; it no longer changes the formal decision log, WorkQueue, or Worker Registry.",
+    "The candidate status is PROPOSED_HUMAN_REQUIRED; canonical Life ID, Worker ID, authorized onboarding level, and Human authorization remain null.",
+    "Controller and Worker type remain UNVERIFIED; employment is APPLICANT_NOT_EMPLOYEE; review authority is NONE; payroll eligibility is BLOCKED; all acknowledgments are false; and trial dispatch remains held.",
+    "The forbidden list denies self-assigned Life and Worker IDs, T2 promotion, merge, deploy, pay, asset transfer, Mainnet transaction, governance execution, private-key access, and selected historical review actions.",
+    "The workflow has contents: read only, calls no paid API, uses no secret, dispatches no workflow, launches no agent, and performs no external or chain write.",
+    "Historical exact-head push and pull_request runs succeeded; the pull_request run reported 12/12 proposal-boundary checks PASS and git diff --check PASS."
+  ],
+  "safe_successor_requirements": [
+    "Do not add a named person, applicant, Worker, Life, reviewer candidate, T1/T2 proposal, task, or interview to an operative queue unless the source, consent, identity, controller, purpose, freshness, and immutable Human decision are independently machine-verifiable.",
+    "Resolve Worker type, canonical Life and Worker IDs, registry status, trust, permissions, acknowledgments, workspace, allowed non-codex branch, reviewer, employment and payroll state through current authoritative sources before any admission decision.",
+    "Treat proposal, interview, recruitment, onboarding, appointment, employment, payroll, Claim, dispatch, review, merge, and external execution as separate gates; one must never imply another.",
+    "If a read-only trial is later authorized, issue an exact current-main Work Order, non-codex branch, narrow file scope, authoritative Claim, lease, fencing token, expiry, stop conditions, distinct reviewer when materially required, and explicit no-merge/no-deploy/no-pay/no-chain boundaries.",
+    "Keep PR 172 and every other lineage from using a Sol/曜冊 relay, candidate record, task label, comment, or local fixture as identity, controller, Worker, reviewer, signer, operator, parent, governance, or Human-authority evidence.",
+    "Use a current-main general workforce safety validator if one is needed; do not transplant the obsolete branch-specific workflow or its deprecated action version unchanged.",
+    "Never activate or onboard a Worker or Life, appoint a reviewer/controller/signer/operator, create or dispatch a Claim, pay, transfer assets, access credentials, dispatch a workflow, call a paid API, launch an external agent, send a Mainnet transaction, execute governance, or mutate chain state as part of this audit."
+  ],
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-Canon/README.md", "blob_sha": "73522e0da54967c1f164670742ab599f818e3ede"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-Canon/KGEN_CANON_MASTER.json", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"},
+    {"path": "KGEN-KAIOS/KAIOS_LIFE_RUNTIME_CURRENT.md", "blob_sha": "b4941c14b79f6800bf62d533497fdd5ea783e1f7"},
+    {"path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"},
+    {"path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md", "blob_sha": "6004ab03612f436150329a4c77492419323a51b0"},
+    {"path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md", "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29"},
+    {"path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md", "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04"},
+    {"path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json", "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md", "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa"}
+  ],
+  "validation": {
+    "audited_old_head": {
+      "proposal_safety_push_run_id": 33126296739,
+      "proposal_safety_push_conclusion": "SUCCESS",
+      "proposal_safety_pull_request_run_id": 33126299765,
+      "proposal_safety_pull_request_conclusion": "SUCCESS",
+      "proposal_boundary_checks": "12/12 PASS",
+      "diff_check": "PASS",
+      "tested_sha": "179bfa8e0219774fde9f9d7bd3668ad42c1a8d2b",
+      "non_blocking_warning": "actions/checkout@v4 Node.js 20 runtime is deprecated and was forced to Node.js 24"
+    },
+    "exact_current_main": {
+      "pages_run_id": 35496501216,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run_id": 35496524696,
+      "responsive_conclusion": "SUCCESS",
+      "tested_sha": "c7fa2fc6967778fca7c5be47f510bfe899849877",
+      "latest_code_equivalent_universal_run_id": 35494058106,
+      "latest_code_equivalent_universal_conclusion": "SUCCESS",
+      "latest_code_equivalent_universal_tests": "302/302 PASS",
+      "latest_code_equivalent_universal_sha": "eaf8f2639960ddd0bdd432efb84797387b8accf1",
+      "code_equivalence": "Only document-only lineage work orders changed between the tested code SHA and exact current main."
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; NO_UI_GAME_WORKFORCE_RUNTIME_OR_WORKFLOW_CODE_TRANSPLANTED"
+  },
+  "classification_counts": {
+    "HISTORICAL_BRANCH_SPECIFIC_READ_ONLY_WORKFLOW_HOLD": 1,
+    "UNVERIFIED_WORKFORCE_PROPOSAL_HOLD": 1,
+    "TOTAL": 2
+  },
+  "path_classification": [
+    {
+      "path": ".github/workflows/sol_yaoce_proposal_safety.yml",
+      "merge_base_blob_sha": null,
+      "audited_blob_sha": "8c3a9debc93dbcfe5cd0b00c5f8c120c141aa412",
+      "current_main_blob_sha": null,
+      "classification": "HISTORICAL_BRANCH_SPECIFIC_READ_ONLY_WORKFLOW_HOLD",
+      "disposition": "Retain 12/12 historical safety evidence; do not add the obsolete codex-branch-specific workflow to current main."
+    },
+    {
+      "path": "KGEN-KAIOS/workforce/recruitment_queue.json",
+      "merge_base_blob_sha": "e67acdc2b7e2a830ffd545ed041eb12914e49f53",
+      "audited_blob_sha": "858166e150f389172290e87bd8b8677c5c3db1be",
+      "current_main_blob_sha": "e67acdc2b7e2a830ffd545ed041eb12914e49f53",
+      "classification": "UNVERIFIED_WORKFORCE_PROPOSAL_HOLD",
+      "disposition": "Do not add the unauthenticated named applicant, T1 proposal, reviewer-candidate role, related task, trial task, or interview lineage to the current recruitment queue."
+    }
+  ],
+  "acceptance": [
+    "Both merge-base-to-audited-head paths appear exactly once with exact merge-base, audited-head, and current-main blob SHAs or explicit null absence.",
+    "Classification counts sum to two and selected_candidate_count is exactly one.",
+    "PR 183 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close, update, refresh, or merge it.",
+    "Identity, controller, consent, T1 proposal, reviewer-candidate, Worker/Life, registry, trust, acknowledgment, workspace, branch, Claim, lease, dispatch, employment, payroll, workflow, and cross-PR authority defects are recorded.",
+    "No recruitment-queue record, workflow, identity, Worker, Life, reviewer candidate, task, Claim, branch plan, employment, payroll, or authority data is transplanted.",
+    "No UI or game code changes in this audit, so target-specific browser screenshot QA is not applicable.",
+    "No onboarding, activation, appointment, hiring, review assignment, Claim, dispatch, payment, payroll settlement, asset transfer, wallet request, signer/controller/operator appointment, governance execution, credential access, deployment, workflow dispatch, paid API, external agent, Mainnet transaction, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    {"rank": 1, "priority": "P0_HOLD", "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E", "blocker": "Real-funds execution, one-observation liquidation, actual Brain/Engine E2E, production oracle identity, deployment configuration, and independent security review remain protected."},
+    {"rank": 2, "priority": "P0_HOLD", "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP", "blocker": "Protected Mainnet, payroll, payment, treasury, liquidity, and asset operations are not authorized."},
+    {"rank": 3, "priority": "P1_SELECTED", "candidate": "PR_183_SOL_YAOCE_WORKFORCE_PROPOSAL_LINEAGE_AUDIT", "blocker": null},
+    {"rank": 4, "priority": "P1_NEXT", "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE", "blocker": "Controller, operator, signer, governance, parent-evidence, and cross-PR provenance authorities are unresolved."},
+    {"rank": 5, "priority": "P1_HOLD", "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY", "blocker": "Custody, entitlement, and payment authority are unresolved."},
+    {"rank": 6, "priority": "P1_HOLD", "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT", "blocker": "Protected CURRENT and Canon conflicts require Human resolution."},
+    {"rank": 7, "priority": "P2_HOLD", "candidate": "PRS_201_211_212_DEPENDENCY_CHAIN", "blocker": "Stacked dependency order and protected execution surfaces remain unresolved."},
+    {"rank": 8, "priority": "P2_HOLD", "candidate": "PR_177_EXTERNAL_EXECUTOR", "blocker": "External executor and agent-launch effects are not authorized."},
+    {"rank": 9, "priority": "P2_HOLD", "candidate": "PR_48_PROTECTED_BASELINE_DECISION", "blocker": "Protected baseline disposition requires a Human decision."}
+  ],
+  "protected_effects": {
+    "identity_or_consent_claim": false,
+    "human_decision_claim": false,
+    "worker_or_life_onboarding": false,
+    "worker_or_life_activation": false,
+    "reviewer_or_role_appointment": false,
+    "employment_or_payroll_authority": false,
+    "claim_or_dispatch": false,
+    "payment": false,
+    "asset_transfer": false,
+    "mainnet_transaction": false,
+    "wallet_request": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "private_key_or_credential_access": false,
+    "signer_appointment": false,
+    "controller_or_operator_appointment": false,
+    "external_submission_or_publication": false,
+    "paid_external_api": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "canon_or_current_mutation": false,
+    "ui_or_game_change": false
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR183_SOL_YAOCE_WORKFORCE_PROPOSAL_LINEAGE_AUDIT_R0_20260920.json"
+  ],
+  "next_candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE"
+}
