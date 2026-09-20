@@ -1,0 +1,296 @@
+{
+  "schema_version": "1.0",
+  "task_id": "KAIOS-PR180-MARKET-GENESIS-READINESS-LINEAGE-AUDIT-R0-20260920",
+  "title": "Audit stale KAIOS market-genesis readiness, funding, oracle, pair, signer, and governance lineage without creating a market",
+  "priority": "P1",
+  "risk": "R0",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "selected_candidate_count": 1,
+  "selected_candidate": "PR_180_KAIOS_MARKET_GENESIS_READINESS_LINEAGE_AUDIT",
+  "exact_base_sha": "3412546c8ccd0efe65ab3be8e4979871b64e9a3b",
+  "exact_base_tree_sha": "5ece32b7af898a509603c40bea426e3f1eff2b34",
+  "integration_branch": "audit/pr180-market-genesis-readiness-r0-20260920",
+  "integration_head_derivation": "READ_BRANCH_REF_AFTER_COMMIT",
+  "audited_pr": 180,
+  "audited_state": "OPEN_DRAFT_UNMERGED_HOLD",
+  "audited_recorded_base_sha": "ed8ef108d1656abb313da52be1e052d8d36ceb8a",
+  "audited_merge_base_sha": "830b79214781fb1231f3619336de394f400a0bfd",
+  "audited_merge_base_tree_sha": "c101af16de79e36cfed1a4343d77799eb304ce41",
+  "audited_head_branch": "codex/kaios-market-genesis-readiness-v1",
+  "audited_head_sha": "6f703eaffbe6a5acf9fa37cb7f33e2d1dc939e37",
+  "audited_head_tree_sha": "6c7fc0860fabc25a123a37a949ab898014bd8661",
+  "relation_to_current_main": {
+    "status": "DIVERGED_STALE_DRAFT_NON_MERGEABLE",
+    "ahead": 5,
+    "behind": 746
+  },
+  "pr_scope": {
+    "changed_paths": 3,
+    "insertions": 258,
+    "deletions": 1,
+    "commits": 5,
+    "conversation_comments": 1,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "historical_hold_comment": "The dispatcher review corrected earlier P0 defects but retained HOLD P1 for repository-bound evidence and shared-path ordering."
+  },
+  "decision": "KEEP_OPEN_DRAFT_HOLD_WITHOUT_TRANSPLANT",
+  "reason": "PR 180 contains a useful fail-closed model: caller-provided market, budget, ownership, risk, signer, governance, and pair-plan values cannot produce readiness; protected capital classes fail; and no calldata, pair, liquidity position, approval, transfer, or transaction can be produced. However, it edits the protected Exchange CURRENT, binds fixed Mainnet addresses and a candidate funding class without repository-bound authority, relies on caller-provided amounts, lacks implemented snapshot, funding, account, balance, budget, ownership, risk, signer, governance, and pair-plan verifiers, overlaps newer current-main runtime and tests, and is 746 commits behind. Its PR body reports BSC block 118374460 while the changed CURRENT and tests use block 118324943, so provenance is internally inconsistent. The safe bounded action is a current-main lineage audit only with zero transplant and zero market, wallet, governance, payment, workflow-dispatch, credential, or chain effect.",
+  "inventory": {
+    "open_pull_requests": 34,
+    "latest_main_required_checks": "GREEN",
+    "latest_main_failed_workflow_runs_observed": 0,
+    "relevant_todo_fixme_hack_matches": 0,
+    "selected_visual_failure": null,
+    "selected_runtime_defect": null,
+    "security_blocker": "No repository-bound current market snapshot, funding registry, account/asset/balance binding, budget authority, ownership authority, risk policy, secure signer, governance review, or pair-registry plan exists for KAIOS market genesis."
+  },
+  "blocking_findings": [
+    "PR 180 is open, Draft, unmerged, non-mergeable, diverged, and 746 commits behind exact current main.",
+    "The branch modifies KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md, a protected canonical CURRENT path, without a current-main protected-change plan.",
+    "The PR body reports a read-only PancakeSwap observation at BSC block 118374460 and 2026-08-27T11:19:29Z, while the changed CURRENT and tests use block 118324943 and a different observation time.",
+    "Caller-supplied zero addresses, code-present labels, pair data, balances, funding source IDs, and booleans cannot prove current market absence, asset availability, ownership, budget, signer, governance, or pair-plan authority.",
+    "The runtime correctly hard-codes all authority verifiers false, so it cannot transition beyond BLOCKED_MACHINE_VERIFIABLE_MARKET_GENESIS_EVIDENCE_NOT_IMPLEMENTED.",
+    "The COMPANY_TRADING_TREASURY allowlist entry is only a local candidate label; no registry binds an authorized account, assets, balances, expiry, revocation, or Human decision.",
+    "Fixed token, factory, organ-registry, and pair-organ addresses are historical branch inputs and cannot independently establish current deployment, controller, signer, custody, listing, or governance facts.",
+    "The proposed available balances are caller-provided and can only drive descriptive kaios_funded or quote_funded flags; they are not custody or solvency evidence.",
+    "The initial quote ratio is a proposal input and cannot establish a market price, liquidity, reserve, settlement, or revenue fact.",
+    "PR 180 overlaps core/company/index.mjs and tests/universal-exchange.test.mjs with still-open PRs 181, 182, and 188; PR 185 is now closed unmerged, making part of the recorded dependency note stale.",
+    "Current main has newer independent company and Universal Exchange test lineage; overwriting it with the stale blobs would regress unrelated safety and runtime work.",
+    "Historical CI success proves only that the old fail-closed branch was internally consistent; it cannot manufacture current oracle evidence, capital, authority, independent review, or Mainnet permission."
+  ],
+  "positive_findings": [
+    "The old runtime returns only a blocked status and never creates an unsigned payload, calldata, approval, pair, liquidity position, transfer, or transaction.",
+    "Caller claims are explicitly marked non-authoritative and cannot satisfy repository-bound verification checks.",
+    "Protected reserve, payroll, catalyst, Naihe, public-good, and refundable-principal capital classes are rejected.",
+    "Unknown or renamed funding classes fail the closed local allowlist.",
+    "Historical exact-head Universal Exchange runs passed 241/241 on both push and pull_request events."
+  ],
+  "safe_successor_requirements": [
+    "Start from exact current main on a non-codex branch and do not edit protected Canon or CURRENT without an explicit protected-change plan and current Human authorization.",
+    "Bind every external market observation to chain ID, block number, block hash, factory and token code hashes, exact RPC call results, evidence hash, observation time, freshness, and revocation state.",
+    "Re-read the canonical factory and registry at action time; a historical zero-address response is not a permanent no-pair theorem.",
+    "Bind any funding candidate to an authoritative registry entry, exact account, exact assets, custody, available balances, budget decision, purpose, expiry, revocation, and replay-safe evidence.",
+    "Require separately evidenced ownership, risk policy, secure signer, governance review, and pair-registry plan; caller booleans and GitHub authorship are never authority.",
+    "Keep proposal modeling structurally separated from execution; execution must require a new action-specific Human authorization and fresh security review.",
+    "Never access credentials, appoint a signer, create a pair, fund liquidity, approve or transfer assets, dispatch workflows, call paid APIs, or mutate chain state as part of a lineage audit."
+  ],
+  "source_reads": [
+    {
+      "path": "AGENTS.md",
+      "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"
+    },
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"
+    },
+    {
+      "path": "KGEN-Canon/README.md",
+      "blob_sha": "73522e0da54967c1f164670742ab599f818e3ede"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md",
+      "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_CANON_MASTER.json",
+      "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_LIFE_RUNTIME_CURRENT.md",
+      "blob_sha": "b4941c14b79f6800bf62d533497fdd5ea783e1f7"
+    },
+    {
+      "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
+      "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"
+    },
+    {
+      "path": "KGEN-KAIOS/civilization/WEAPON_SAFETY_BOUNDARY_STANDARD.md",
+      "blob_sha": "6004ab03612f436150329a4c77492419323a51b0"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/CODEX_GENERAL_MANAGER_BOOT.md",
+      "blob_sha": "9069e7263987363fb4101ee29a21451aab54fc29"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+      "blob_sha": "c58eddb13da0a3ee520202f253290f560f368f04"
+    },
+    {
+      "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
+      "blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6"
+    },
+    {
+      "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md",
+      "blob_sha": "650d371140179dc955d323da226f41360dda33b1"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+      "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"
+    },
+    {
+      "path": "KGEN-KAIOS/governance/cursor/CURSOR_PROTECTED_PATH_POLICY.md",
+      "blob_sha": "8c0a7b42e77d540a220b38837e125ef02b5ccbfa"
+    }
+  ],
+  "validation": {
+    "audited_old_head": {
+      "universal_exchange_push_run_id": 33062435410,
+      "universal_exchange_push_conclusion": "SUCCESS",
+      "universal_exchange_pull_request_run_id": 33062438593,
+      "universal_exchange_pull_request_conclusion": "SUCCESS",
+      "universal_exchange_tests": "241/241 PASS",
+      "tested_sha": "6f703eaffbe6a5acf9fa37cb7f33e2d1dc939e37"
+    },
+    "exact_current_main": {
+      "responsive_run_id": 35489012174,
+      "responsive_conclusion": "SUCCESS",
+      "pages_run_id": 35488992330,
+      "pages_conclusion": "SUCCESS",
+      "tested_sha": "3412546c8ccd0efe65ab3be8e4979871b64e9a3b",
+      "latest_code_equivalent_universal_run_id": 35484718096,
+      "latest_code_equivalent_universal_conclusion": "SUCCESS",
+      "latest_code_equivalent_universal_tests": "302/302 PASS",
+      "latest_code_equivalent_universal_sha": "16954be3026cdcfc2cb7ab55bf0bfc229c0b170f",
+      "code_equivalence": "Only two document-only lineage work orders changed between the tested code SHA and exact current main."
+    },
+    "visual_qa": "NOT_APPLICABLE_DOCUMENT_ONLY_CHANGE; NO_UI_GAME_MARKET_OR_WALLET_CODE_TRANSPLANTED"
+  },
+  "classification_counts": {
+    "PROTECTED_CURRENT_MARKET_GENESIS_CANDIDATE_HOLD": 1,
+    "FAIL_CLOSED_MARKET_PROPOSAL_RUNTIME_HOLD": 1,
+    "HISTORICAL_TEST_EVIDENCE_ONLY": 1,
+    "TOTAL": 3
+  },
+  "path_classification": [
+    {
+      "path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md",
+      "merge_base_blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5",
+      "audited_blob_sha": "34ba2e211c6ad02cc1462ac4832d8641f39d2911",
+      "current_main_blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5",
+      "classification": "PROTECTED_CURRENT_MARKET_GENESIS_CANDIDATE_HOLD",
+      "disposition": "Do not transplant historical market observations, funding labels, Mainnet addresses, or readiness language into protected CURRENT."
+    },
+    {
+      "path": "core/company/index.mjs",
+      "merge_base_blob_sha": "a543b5d83e51971aaf1558cc1c00b4b7584e5a61",
+      "audited_blob_sha": "9b17309637ea64375005e8450c268516209d4438",
+      "current_main_blob_sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd",
+      "classification": "FAIL_CLOSED_MARKET_PROPOSAL_RUNTIME_HOLD",
+      "disposition": "Preserve the old fail-closed design as historical evidence only; do not overwrite newer current-main company runtime or introduce unbound market, funding, balance, signer, or governance claims."
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "merge_base_blob_sha": "65be97a59ff1150cbbd963979fff6e5291bbf282",
+      "audited_blob_sha": "e25038bf71125be5447f7b9b6b65d21662f4a3d8",
+      "current_main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "classification": "HISTORICAL_TEST_EVIDENCE_ONLY",
+      "disposition": "Retain 241/241 exact-head results as historical evidence; current main has newer independent 302/302 code-equivalent validation."
+    }
+  ],
+  "acceptance": [
+    "All three merge-base-to-audited-head paths appear exactly once with exact merge-base, audited-head, and current-main blob SHAs.",
+    "Classification counts sum to three and selected_candidate_count is exactly one.",
+    "PR 180 remains open, Draft, unmerged, and explicitly HOLD; this work order does not close, update, or merge it.",
+    "The observation-block mismatch between the PR body and changed files is explicitly recorded.",
+    "No protected CURRENT, market runtime, test, token address, factory address, funding class, snapshot, or authority claim is transplanted.",
+    "No UI or game code changes in this audit, so new browser screenshot QA is not applicable.",
+    "No pair creation, liquidity funding, payment, asset transfer, wallet request, signer appointment, governance execution, credential access, deployment, workflow dispatch, paid API, external agent, Worker/Life, Mainnet transaction, or chain-state action is performed."
+  ],
+  "candidate_ranking_after_selection": [
+    {
+      "rank": 1,
+      "priority": "P0_HOLD",
+      "candidate": "PR_232_REAL_FUNDS_ORACLE_CONTRACT_E2E",
+      "blocker": "Real-funds execution, authenticated oracle integration, contract E2E, deployment configuration, and security review remain protected."
+    },
+    {
+      "rank": 2,
+      "priority": "P0_HOLD",
+      "candidate": "PRS_135_154_186_199_MAINNET_PAYROLL_PAYMENT_AUTO_LP",
+      "blocker": "Protected Mainnet, payroll, payment, treasury, liquidity, and asset operations are not authorized."
+    },
+    {
+      "rank": 3,
+      "priority": "P1_SELECTED",
+      "candidate": "PR_180_KAIOS_MARKET_GENESIS_READINESS_LINEAGE_AUDIT",
+      "blocker": null
+    },
+    {
+      "rank": 4,
+      "priority": "P1_NEXT",
+      "candidate": "PR_181_UNIVERSAL_LISTING_SETTLEMENT_GATES_LINEAGE_AUDIT",
+      "blocker": "Stale listing, settlement, shared-test, custody, signer, and dependency evidence requires classification before any transplant."
+    },
+    {
+      "rank": 5,
+      "priority": "P1",
+      "candidate": "PR_182_AI_COMPANY_OPTION_B_PROPOSAL_LINEAGE_AUDIT",
+      "blocker": "Overlapping company runtime and proposal authority require separate equivalence and safety review."
+    },
+    {
+      "rank": 6,
+      "priority": "P1_HOLD",
+      "candidate": "PR_172_K4168_AUTHORITY_AND_ADDRESS_EVIDENCE",
+      "blocker": "Controller, operator, signer, governance, and parent-evidence authorities are unresolved."
+    },
+    {
+      "rank": 7,
+      "priority": "P1_HOLD",
+      "candidate": "RESOURCE_CUSTODY_ENTITLEMENT_PAYMENT_AUTHORITY",
+      "blocker": "Custody, entitlement, and payment authority are unresolved."
+    },
+    {
+      "rank": 8,
+      "priority": "P1_HOLD",
+      "candidate": "PR_187_PROTECTED_CURRENT_CANON_CONFLICT",
+      "blocker": "Protected CURRENT and Canon conflicts require Human resolution."
+    },
+    {
+      "rank": 9,
+      "priority": "P2_HOLD",
+      "candidate": "PRS_201_211_212_DEPENDENCY_CHAIN",
+      "blocker": "Stacked dependency order and protected execution surfaces remain unresolved."
+    },
+    {
+      "rank": 10,
+      "priority": "P2_HOLD",
+      "candidate": "PR_177_EXTERNAL_EXECUTOR",
+      "blocker": "External executor and agent-launch effects are not authorized."
+    },
+    {
+      "rank": 11,
+      "priority": "P2_HOLD",
+      "candidate": "PR_48_PROTECTED_BASELINE_DECISION",
+      "blocker": "Protected baseline disposition requires a Human decision."
+    }
+  ],
+  "protected_effects": {
+    "payment": false,
+    "asset_transfer": false,
+    "liquidity_funding": false,
+    "pair_creation": false,
+    "mainnet_transaction": false,
+    "wallet_request": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "private_key_or_credential_access": false,
+    "signer_appointment": false,
+    "controller_or_operator_appointment": false,
+    "external_submission_or_publication": false,
+    "paid_external_api": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "worker_or_life_activation": false,
+    "canon_or_current_mutation": false,
+    "ui_or_game_change": false
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR180_MARKET_GENESIS_READINESS_LINEAGE_AUDIT_R0_20260920.json"
+  ],
+  "next_candidate": "PR_181_UNIVERSAL_LISTING_SETTLEMENT_GATES_LINEAGE_AUDIT"
+}
