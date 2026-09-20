@@ -1,5 +1,11 @@
 # 11520 Changelog
 
+## 2026-09-21 · V2.6.19 K-space map visualization
+
+- Extended the existing map with Player/Monster K markers, relative vector, three-axis projection/depth, signed active phase, Ku distance and expandable K/ΔK/local XYZ values.
+- Preserved XYZ waypoint navigation behind an explicit XYZ tab; K taps only inspect. Removed display-quote-as-coordinate behavior from this map organ. #421 combat and normalization are unchanged.
+- Added projection, target-change/no-target and real-browser plane/sign/map regression evidence; cache v271 remains scoped/network-first and orientation remains any.
+
 ## 2026-09-21 · V2.6.18 K-space practice combat
 
 - Added traceable normalized reference K coordinates and local XYZ composition, six phase bodies, real radius/height/cooldown gates and distinct slash/plane/sweep tactics without live settlement or rewards.
