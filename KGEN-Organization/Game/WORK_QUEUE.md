@@ -1,5 +1,17 @@
 # Work Queue
 
+## KAIOS-11520-KSPACE-COMBAT-20260921
+
+- Status: IN_PROGRESS / EXACT_HEAD_QA; release evidence is the PR/CI/Pages SHA, not a predicted result.
+- Owner: 衡曜 / codex-gm-01 / LIFE-CODEX-GM-0001; explicit Human Owner K-SPACE COMBAT COORDINATE IMPLEMENTATION ORDER.
+- Branch: `codex/k11520-kspace-combat-20260921`; clean isolated worktree; Human dirty main untouched.
+- Scope: extend existing world/main/combat runtimes with simulation reference normalization, K+r, six practice body phases, actual movement/range/skill feedback and compact target UI. Preserve source-managed Life, capture/backpack, wallet, orders, PWA/BGM and portrait/landscape.
+- Acceptance: unit/source checks, real 390x844 and 844x390 gameplay/screenshots, four rotation cycles, exact-head required CI, ordinary merge, Pages source-lineage and public smoke.
+- Source/IP: first-party repository code and original procedural geometry; existing asset sources unchanged; no new assets, music, secrets, runtime folders or Canon constants.
+- Protected actions: DENIED (real trade/settlement, chain writes, token/BNB, payment, treasury, signer, governance, KYC).
+- Payroll: current GM salary receipt/advance/offset NOT_VERIFIED / HOLD; prototype internal ledger is not PAID/RECEIVED. No payment.
+- Next: finish this exact task and production verification; do not resume paused hourly patrol or Cursor wake.
+
 ## KAIOS-11520-LANDSCAPE-FINALIZATION-20260920
 
 - Status: IN_PROGRESS / LOCAL_QA; release evidence belongs to the exact-head PR and Pages run, not an assumed future SHA.

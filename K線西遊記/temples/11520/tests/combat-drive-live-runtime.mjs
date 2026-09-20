@@ -3,6 +3,8 @@ import {driveMultiplier,scaledControlState} from '../runtime/combat-drive-live-r
 
 assert.equal(driveMultiplier(0),1,'0C keeps ordinary local walk speed');
 assert.equal(driveMultiplier(.1),.1);
+assert.equal(driveMultiplier(-.1),.1,'negative market phase must not reverse XYZ movement');
+assert.deepEqual(scaledControlState({mode:'XZ',vector:{x:1,y:0,z:1}},{c:-1}).vector,{x:1,y:0,z:1});
 assert.equal(driveMultiplier(1),1,'1C is the light-speed/spot reference layer');
 assert.equal(driveMultiplier(10),10);
 assert.equal(driveMultiplier(100),100);

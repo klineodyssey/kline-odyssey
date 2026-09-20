@@ -1,8 +1,8 @@
 /* KGEN_META
-VERSION: 1.3.1
+VERSION: 1.4.0
 STATUS: PROTOTYPE
 FORMAL_ORGAN_NAME: 11520 Live Combat Drive Bridge
-PURPOSE: Apply the existing discrete C rail to XYZ joystick intent and expose lot/KAIOS mass to the game HUD. Local physical XYZ movement remains signed across zero while financial +K/-K and Mirror Universe K-direction semantics stay separate. Simulation-only; never mutates KX/KY/KZ positions, wallets, balances, chain state, payments, treasury, or governance.
+PURPOSE: Apply discrete C magnitude to XYZ joystick speed and expose lot/KAIOS mass to the game HUD. Joystick direction remains local XYZ authority; sign(C) remains market/body phase authority and never reverses local movement. Simulation-only; never mutates financial positions, wallets, balances, chain state, payments, treasury, or governance.
 */
 import {buildDriveState,readDriveStateFromDom} from './combat-drive-adapter.mjs';
 
@@ -11,7 +11,9 @@ const AXIS_KEY=a=>String(a||'').toLowerCase();
 
 export function driveMultiplier(c){
   const d=buildDriveState({c,lots:1,localBaseVelocity:1});
-  return d.xyzStep;
+  // sign(C) selects market/body phase, never reverses a local joystick axis.
+  // Keep the signed drive metadata for financial velocity; XYZ uses magnitude.
+  return Math.abs(d.xyzStep);
 }
 
 export function rawVectorFromControl(source){

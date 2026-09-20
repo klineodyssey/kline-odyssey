@@ -5,6 +5,65 @@ import {createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceMana
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
 import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
+import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE} from '../runtime/world-runtime.mjs';
+
+test('K-space normalization is scale independent, reversible and rejects unsafe inputs',()=>{
+  for(const anchor of [600,4000,100000])for(const ratio of [.5,1,1.01,2]){
+    const price=anchor*ratio,k=normalizeKPrice(price,anchor);
+    assert.ok(Math.abs(k-100*(ratio-1))<1e-10);assert.ok(Math.abs(inverseKPrice(k,anchor)-price)<1e-8);
+  }
+  for(const value of [NaN,Infinity,-1,0,'100'])assert.throws(()=>normalizeKPrice(value,100));
+  assert.equal(Object.is(normalizeKPrice(100,100),-0),false);
+  assert.deepEqual(composeKWorld({KX:1,KY:2,KZ:3},{x:4,y:-2,z:8}),{x:5,y:0,z:11});
+  assert.throws(()=>composeKWorld({KX:1,KY:2,KZ:3},{x:NaN,y:0,z:0}));
+});
+test('Plane and C exclusively determine all six body phases',()=>{
+  for(const [plane,axis] of [['XZ','KY'],['XY','KZ'],['YZ','KX']])for(const c of [-.3,0,.3]){
+    const s=combatPhase(plane,c);assert.equal(s.axis,axis);assert.equal(s.body,c===0?null:axis+(c>0?'+':'-'));
+  }
+  assert.equal(combatPhase('INVALID',1),null);assert.equal(combatPhase('XZ',Infinity),null);
+});
+function practice(){const world=createWorldState(0);createKSpaceEncounter(world);return world}
+test('K-space is traceable; local movement changes distance, not reference authority',()=>{
+  const w=practice(),a=kCombatSnapshot(w,{x:0,y:0,z:0}),b=kCombatSnapshot(w,{x:0,y:0,z:5});
+  assert.ok(Math.abs(a.distance-7)<1e-10);assert.ok(Math.abs(b.distance-2)<1e-10);assert.deepEqual(a.playerK,b.playerK);
+  assert.deepEqual(a.deltaK,{KX:0,KY:0,KZ:1});assert.deepEqual(a.reference,KSPACE_REFERENCE);
+  assert.deepEqual(a.playerK,kPositionFromReference());assert.equal(createKSpaceEncounter(w),w.kSpace);
+  assert.equal(w.monsters.filter(m=>m.simulationCombat).length,1);
+});
+test('combat fails closed on neutral, height/range and cooldown; no capital or rewards',()=>{
+  const w=practice(),p={x:0,y:0,z:5},opts={plane:'XZ',c:-.3,now:1000};
+  assert.equal(attackKSpace(w,p,{...opts,c:0}).reason,'NEUTRAL_PHASE');
+  assert.equal(attackKSpace(w,{...p,y:20},opts).reason,'OUT_OF_RANGE');
+  assert.equal(w.monsters.at(-1).hp,600);
+  const r=attackKSpace(w,p,{...opts,now:2000});assert.equal(r.reason,'WEAK_POINT');assert.equal(r.hits[0].body,'KY-');assert.equal(r.damage,53);assert.equal(r.rewardKaios,0);
+  assert.equal(attackKSpace(w,p,{...opts,now:2001}).reason,'COOLDOWN');assert.equal(w.monsters.at(-1).hp,547);
+  assert.equal(attackKSpace(w,p,{...opts,skill:'unknown',now:3000}).reason,'INVALID_INPUT');
+});
+test('three skills have distinct body selection, reach and sweep tactics',()=>{
+  const opts={plane:'XZ',c:-.3,now:1000},p={x:0,y:0,z:4};
+  assert.equal(attackKSpace(practice(),p,opts).reason,'OUT_OF_RANGE');
+  const rain=attackKSpace(practice(),p,{...opts,skill:'goldenRain'});
+  assert.deepEqual(rain.hits.map(h=>h.body),['KX-','KZ-']);
+  const axe=attackKSpace(practice(),p,{...opts,skill:'phantomAxe',heading:0});
+  assert.deepEqual(axe.hits.map(h=>h.body),['KX-','KY-','KZ-']);
+  assert.equal(attackKSpace(practice(),p,{...opts,skill:'phantomAxe',heading:Math.PI}).reason,'OUTSIDE_SWEEP');
+  const guarded=attackKSpace(practice(),{...p,z:5},{...opts,c:.3});assert.equal(guarded.reason,'BLOCKED_RESIST');assert.ok(guarded.damage<axe.hits.find(h=>h.body==='KY-').damage);
+});
+test('combat never damages source-managed Life; dead bodies cannot mint or repeat damage',()=>{
+  const w=practice(),p={x:0,y:0,z:5};
+  applyMarketLifeSourceEvents(w,[{type:'SPAWN',sourceId:'QA',lifeId:'QA-REAL-SOURCE',name:'Source',species:'BULL_DEMON',intelligence:1,markets:['BTCUSDT'],capital:50,vitality:100,maxHp:100,attack:0,rewardKaios:0,speed:0,positions:{},...p}]);
+  const source=structuredClone(w.monsters.find(m=>m.sourceManaged));
+  for(let i=0;i<20;i++)attackKSpace(w,p,{plane:'XZ',c:-.3,now:1000+i*1000});
+  assert.deepEqual(w.monsters.find(m=>m.sourceManaged),source);assert.equal(w.monsters.at(-1).bodies['KY-'].hp,0);
+  assert.equal(attackKSpace(w,p,{plane:'XZ',c:-.3,now:99999}).reason,'BODY_DISABLED');
+});
+test('a defeated practice entity never becomes a source-managed capacity slot',()=>{
+  const w=practice(),guardian=w.monsters.at(-1);guardian.state='DEAD';guardian.hp=0;
+  const events=Array.from({length:25},(_,i)=>({type:'SPAWN',sourceId:'QA',lifeId:'QA-CAPACITY-'+i,name:'Source',species:'DIGITAL_ANT',intelligence:1,markets:['BTCUSDT'],capital:1,vitality:100,maxHp:100,attack:0,rewardKaios:0,speed:0,positions:{},x:0,y:0,z:0}));
+  const result=applyMarketLifeSourceEvents(w,events);assert.equal(result.at(-1).reason,'NO_FREE_SOURCE_SLOT');
+  assert.equal(guardian.simulationCombat,true);assert.equal(guardian.sourceManaged,false);assert.equal(guardian.lifeId,null);
+});
 
 test('0C still allows ordinary XZ walking',()=>{const s=movementStep({forward:1,turn:0,heading:0,warp:0});assert.ok(s.distance>0);assert.ok(s.dz>0)});
 test('joystick horizontal rotates player',()=>{const s=movementStep({forward:0,turn:1,heading:0,warp:0});assert.ok(s.heading>0);assert.equal(s.distance,0)});
