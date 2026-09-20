@@ -1,4 +1,17 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';const root=new URL('../',import.meta.url);const read=p=>fs.readFileSync(new URL(p,root),'utf8');
 const pngSize=p=>{const b=fs.readFileSync(new URL(p,root));assert.deepEqual([...b.subarray(1,4)],[80,78,71],`${p} is not PNG`);return{width:b.readUInt32BE(16),height:b.readUInt32BE(20)}};
+test('service worker scopes cache and fails closed for unavailable modules',async()=>{
+ const {runInNewContext}=await import('node:vm');const handlers={},writes=[],waits=[];let response,offline=false,cached;
+ const shell=new Response('<html>shell</html>',{headers:{'Content-Type':'text/html'}});
+ const cache={put:async(req)=>writes.push(req.url),addAll:async()=>{}};
+ runInNewContext(read('sw.js'),{URL,Response,location:{origin:'https://example.test'},self:{location:{href:'https://example.test/temples/11520/sw.js'},addEventListener:(name,fn)=>handlers[name]=fn},caches:{open:async()=>cache,match:async key=>key==='./game-5d.html'?shell:cached},fetch:async()=>{if(offline)throw Error('offline');return response}});
+ async function request(path,mode='cors'){let result;handlers.fetch({request:{method:'GET',url:'https://example.test'+path,mode},respondWith:p=>result=p,waitUntil:p=>waits.push(p)});const value=await result;await Promise.all(waits.splice(0));return value}
+ response=new Response('missing',{status:404});assert.equal((await request('/temples/11520/missing.mjs')).status,404);assert.equal(writes.length,0);
+ response=new Response('export{}');await request('/temples/11520/runtime/test.mjs');assert.equal(writes.length,1);
+ assert.equal(await request('/temples/12345/index.html'),undefined,'other temples must bypass this worker cache');
+ offline=true;assert.equal((await request('/temples/11520/missing.mjs')).type,'error','missing module must not receive HTML');
+ assert.equal(await(await request('/temples/11520/game-5d.html','navigate')).text(),'<html>shell</html>');
+ cached=new Response('cached module');assert.equal(await(await request('/temples/11520/runtime/test.mjs')).text(),'cached module');
+});
 test('K11520 PWA standalone shell is installable and does not force orientation',()=>{const m=JSON.parse(read('manifest.webmanifest'));assert.equal(m.display,'standalone');assert.equal(m.orientation,'any');assert.ok(m.display_override.includes('fullscreen'));for(const size of [192,512]){const icon=m.icons.find(x=>x.sizes===`${size}x${size}`);assert.ok(icon,`${size}px PWA icon missing`);assert.equal(icon.type,'image/png');assert.match(icon.purpose,/maskable/);assert.deepEqual(pngSize(icon.src),{width:size,height:size})}const h=read('game-5d.html');assert.ok(h.includes('rel="manifest"'));assert.ok(h.includes("serviceWorker.register('./sw.js'"));});
 test('K11520 original theme is synthetic, repository-local, and lifecycle bounded',()=>{const c=read('runtime/game-ui-product-fixes-v23.mjs');assert.ok(c.includes("title:'花果山・星際戰場'"));assert.ok(c.includes('original:true'));assert.ok(c.includes('synthetic:true'));assert.ok(c.includes("document.addEventListener('visibilitychange'"));assert.ok(c.includes("addEventListener('pagehide',stopBgm)"));assert.ok(c.includes('o.onended=()=>disposeVoice(o,g)'));assert.ok(c.includes('d.onended=()=>disposeVoice(d,dg)'));assert.equal(c.includes('Just The Way You Are.mp3'),false);assert.equal(c.includes('Greatest Love Of All.mp3'),false);assert.equal(c.includes('Take My Breath Away.mp3'),false);assert.equal(c.includes('情難枕.mp3'),false);});
