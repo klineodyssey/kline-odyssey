@@ -1,3 +1,11 @@
+export const MAX_C_LEVERAGE=100;
+
+export function normalizeLeverage(c){
+  const n=Math.abs(Number(c)||0);
+  if(!Number.isFinite(n)||n>MAX_C_LEVERAGE)throw new RangeError('C_LEVERAGE_OUT_OF_RANGE');
+  return n;
+}
+
 export function createKgenLedger(total=0){
   const value=Math.max(0,Number(total)||0);
   return {total:value,free:value,lockedMargin:0,reservedOrders:0,realizedPnl:0,unrealizedPnl:0};
@@ -9,27 +17,38 @@ export function equity(ledger){
 
 export function available(ledger){return Math.max(0,Number(ledger.free||0));}
 
-// 11520 locked KGEN law: 1 KGEN = 1 lot of principal/margin.
-// C is NOT used to reduce principal. C only multiplies PnL velocity.
+// 11520 law: 1 KGEN = 1 lot of isolated principal/margin.
+// |C| is leverage, hard-capped at 100x. sign(C)/side supplies direction.
 export function requiredMargin({lots}){
   return Math.max(0,Number(lots)||0);
 }
 
 export function pnlForMove({entry,mark,side,lots,c}){
+  const e=Number(entry);
+  if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
   const direction=String(side).toUpperCase()==='SHORT'||side==='空'?-1:1;
-  return (Number(mark)-Number(entry))*direction*Math.max(0,Number(lots)||0)*Math.max(0,Number(c)||0);
+  const leverage=normalizeLeverage(c);
+  const returnFraction=(Number(mark)-e)/e;
+  return returnFraction*direction*Math.max(0,Number(lots)||0)*leverage;
 }
 
-export function maxAdversePoints(c){
-  const speed=Math.max(0,Number(c)||0);
-  return speed===0?Infinity:1/speed;
+export function maxAdverseFraction(c){
+  const leverage=normalizeLeverage(c);
+  return leverage===0?Infinity:1/leverage;
+}
+
+export function maxAdversePoints(c,entry=1){
+  const fraction=maxAdverseFraction(c);
+  return Number.isFinite(fraction)?Math.max(0,Number(entry)||0)*fraction:Infinity;
 }
 
 export function liquidationMark({entry,side,c}){
-  const distance=maxAdversePoints(c);
+  const e=Number(entry);
+  if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
+  const distance=maxAdversePoints(c,e);
   if(!Number.isFinite(distance))return null;
   const long=!(String(side).toUpperCase()==='SHORT'||side==='空');
-  return Number(entry)+(long?-distance:distance);
+  return e+(long?-distance:distance);
 }
 
 export function clampPositionPnl({principal,pnl}){
@@ -42,7 +61,7 @@ export function positionRisk({entry,mark,side,lots,c}){
   const rawPnl=pnlForMove({entry,mark,side,lots,c});
   const pnl=clampPositionPnl({principal,pnl:rawPnl});
   const remaining=Math.max(0,principal+pnl);
-  return {principal,pnl,rawPnl,remaining,liquidated:rawPnl<=-principal,maxAdversePoints:maxAdversePoints(c),liquidationMark:liquidationMark({entry,side,c})};
+  return {principal,pnl,rawPnl,remaining,liquidated:rawPnl<=-principal,maxAdverseFraction:maxAdverseFraction(c),maxAdversePoints:maxAdversePoints(c,entry),liquidationMark:liquidationMark({entry,side,c})};
 }
 
 export function reserveOrder(ledger,amount){
