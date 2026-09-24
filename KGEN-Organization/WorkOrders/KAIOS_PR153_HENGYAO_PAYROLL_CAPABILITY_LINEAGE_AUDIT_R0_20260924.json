@@ -1,0 +1,281 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR153-HENGYAO-PAYROLL-CAPABILITY-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "SCHEDULED_ENGINEERING_CYCLE",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "54953ce208206cbb91d4a3fecf9fd669fe2a2829",
+  "task_source_reason": "Select exactly one highest-priority safe task after exact-main, open-PR, CI, runtime, visual, dependency and security inventory.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T13:15:52Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P0",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY_AUDIT",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_sha": "54953ce208206cbb91d4a3fecf9fd669fe2a2829",
+  "exact_base_tree": "7bec9549c3b828ad4b42eee31686b02461743ae6",
+  "integration_branch": "integration/pr153-hengyao-payroll-capability-lineage-audit-r0-20260924",
+  "selected_count": 1,
+  "selection": {
+    "candidate": "PR #153 Hengyao payroll capability authority lineage",
+    "decision": "SELECTED_FOR_EVIDENCE_ONLY_LINEAGE_AUDIT",
+    "reason": "Highest-ranked unaudited P0 authority and Mainnet-payroll lineage. A bounded R0 audit can classify its exact four paths and fail-closed blockers without granting a role, enabling a signer, paying salary, changing Life or Worker state, or touching chain state."
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 34,
+    "current_main_recent_workflows": {
+      "failures_in_latest_exact_main_post_merge_set": 0,
+      "pages_run": 35998266362,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run": 35998352755,
+      "responsive_conclusion": "SUCCESS"
+    },
+    "ranked_candidates": [
+      {"rank": 1, "priority": "P0", "candidate": "PR #153 Hengyao payroll capability authority lineage", "decision": "SELECTED"},
+      {"rank": 2, "priority": "P0", "candidate": "PR #154 Hengyao payroll bloodflow and Mainnet receipt lineage", "decision": "NEXT"},
+      {"rank": 3, "priority": "P0", "candidate": "PR #136 civilization Phase 2 module and deployment lineage", "decision": "PENDING"},
+      {"rank": 4, "priority": "P0", "candidate": "PR #196 BSC branding and verification external-authority lineage", "decision": "PENDING"},
+      {"rank": 5, "priority": "P1", "candidate": "PR #187 CURRENT Canon reconciliation lineage", "decision": "PENDING"},
+      {"rank": 6, "priority": "P1", "candidate": "PR #182 Option B project proposal runtime lineage", "decision": "PENDING"},
+      {"rank": 7, "priority": "P1", "candidate": "PR #188 integrated employment / market / ATM lineage", "decision": "PENDING"},
+      {"rank": 8, "priority": "P1", "candidate": "PR #172 K4168 public-good flow lineage", "decision": "PENDING"},
+      {"rank": 9, "priority": "P2", "candidate": "PR #48 historical World Life baseline lineage", "decision": "PENDING"},
+      {"rank": 10, "priority": "P2", "candidate": "Current-main TODO/FIXME inventory after P0 authority and financial lineages", "decision": "PENDING"}
+    ]
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-Canon/KGEN_CANON_MASTER.json", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"},
+    {"path": "KGEN-Canon/KGEN_DEPENDENCY_GRAPH.json", "blob_sha": "9053a7f6ca1775fd8055d0f7fb0986ecdd1ad78d"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "blob_sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md", "blob_sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md", "blob_sha": "fd9b4747284a8f99a85a08713c2f73b1f41bf99d"},
+    {"path": "KGEN-KAIOS/decision/decision_snapshot.json", "blob_sha": "2097e4a725e5d4db860726bce6360aede2f4e14c"},
+    {"path": "KGEN-KAIOS/worker_registry.json", "blob_sha": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c"},
+    {"path": "KGEN-KAIOS/civilization/PAYROLL_STANDARD.md", "blob_sha": "944b473e093ba78b720c7041b4086a89ad8fb54b"},
+    {"path": "KGEN-KAIOS/workforce/payroll_policy.json", "blob_sha": "243b9d82588066641b4075ba7f9b0038f1855cf0"},
+    {"path": "KGEN-KAIOS/workforce/payroll_snapshot.json", "blob_sha": "9ad490bb144c9102c1a70674679f3fea4af0c0fb"},
+    {"path": "KGEN-KAIOS/bank/8888/payroll_reserve.json", "blob_sha": "8c4985a786a28babf6e988ae80756170ebb94d90"},
+    {"path": "KGEN-Organization/WorkOrders/KAIOS_PR152_18888_18911_CANON_LINEAGE_AUDIT_R0_20260924.json", "blob_sha": "90c928f711b7d2cd6424071aa74ea3232e0547c7"}
+  ],
+  "subject": {
+    "pr": 153,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/153",
+    "title": "feat(ai-company): authorize Hengyao scoped payroll capability",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "mergeable_at_audit": true,
+    "base_branch": "codex/codex-gm-life-runtime-v1",
+    "base_sha": "011f9d187589250629fbd26957ff59a4bbe0f082",
+    "base_tree": "6c1d5696d55d0d78326fbbb96f4860adc26e2662",
+    "head_branch": "codex/hengyao-a3-payroll-capability-v1",
+    "head_sha": "566c89a1856d7e5535cb0fe3497d23948d045541",
+    "head_tree": "062333e4485624cfd408d2c0c19ce4e03a2adb68",
+    "merge_base_sha": "011f9d187589250629fbd26957ff59a4bbe0f082",
+    "merge_base_tree": "6c1d5696d55d0d78326fbbb96f4860adc26e2662",
+    "relation_to_current_main": "DIVERGED",
+    "ahead_of_current_main": 2,
+    "behind_current_main": 1016,
+    "pr_relative_commits": 2,
+    "pr_relative_changed_files": 4,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "conversation_comments": 0,
+    "exact_head_actions_runs": 1,
+    "exact_head_commit_statuses": 0,
+    "decision": "HOLD_OPEN_DRAFT_UNMERGED_NO_GO",
+    "direct_merge_forbidden": true,
+    "direct_merge_reasons": [
+      "The head is a codex/* branch whose merge can trigger Cursor wake.",
+      "The head is 1016 commits behind exact current main and stacked on an unmerged codex/* base.",
+      "Three of four changed paths have diverged independently on current main; the fourth would overwrite the current A1 fail-closed manager boundary.",
+      "The candidate grants protected Mainnet payroll, signer and future commerce authority while explicitly admitting that signer enforcement is pending.",
+      "The literal-assertion test proves document contents, not contract identity, role custody, cap enforcement, independent approval or receipt provenance."
+    ]
+  },
+  "path_lineage": {
+    "counts": {"total": 4, "pr_only_modified": 1, "same_at_main_and_head": 0, "three_way_diverged": 3},
+    "paths": [
+      {"path": "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md", "base_blob_sha": "fd9b4747284a8f99a85a08713c2f73b1f41bf99d", "main_blob_sha": "fd9b4747284a8f99a85a08713c2f73b1f41bf99d", "head_blob_sha": "5b562b648d7c2237355f8603200227336b6d36cc", "classification": "PR_ONLY_MODIFIED"},
+      {"path": "KGEN-KAIOS/decision/decision_snapshot.json", "base_blob_sha": "a22c3ddb6d4184855156be7ae73c87a34ff88828", "main_blob_sha": "2097e4a725e5d4db860726bce6360aede2f4e14c", "head_blob_sha": "944a78091cb048115333b656b1e0a872c0d1db81", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/worker_registry.json", "base_blob_sha": "122e787d3cd83e00f164e7b9faf198517aa72dc9", "main_blob_sha": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c", "head_blob_sha": "f351cd27484af8358bb0cd19b9a1ea5f98cd2822", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "tests/universal-exchange.test.mjs", "base_blob_sha": "f9de79f92c0eb204622541217f5f6817807e40dc", "main_blob_sha": "b871b2bc53b967ffb40cac4f3e786f213c12624b", "head_blob_sha": "d878eee9cc1ee17075eae854d87c1e8b24baa4d3", "classification": "THREE_WAY_DIVERGED"}
+    ]
+  },
+  "findings": [
+    {
+      "severity": "P0",
+      "id": "DOCUMENT_DECLARATION_ESCALATES_A1_TO_MAINNET_A3_AUTHORITY",
+      "evidence": {
+        "current_main_protocol_blob": "fd9b4747284a8f99a85a08713c2f73b1f41bf99d",
+        "current_main_boundary": "A1_PERSONAL_WALLET_READ; personal-wallet patrol READ_ONLY_ONLY",
+        "candidate_protocol_blob": "5b562b648d7c2237355f8603200227336b6d36cc",
+        "candidate_boundary": "A3_SCOPED_COMPANY_TASK_AUTONOMY plus 8888_SCOPED_PAYROLL_OPERATOR on chain 56"
+      },
+      "conclusion": "The candidate changes protected operational authority through Markdown and registry declarations. Repository text is not a role grant, signer policy, authenticated Human authorization receipt or enforceable transaction boundary."
+    },
+    {
+      "severity": "P0",
+      "id": "SIGNER_AND_CAP_ENFORCEMENT_EXPLICITLY_PENDING",
+      "evidence": {
+        "policy_scope": "DEFINED",
+        "signer_enforcement": "PENDING",
+        "declared_caps": ["0.0003 BNB per transaction", "0.001 BNB per day", "88 KAIOS self salary", "future 88/188 KAIOS commerce spend"]
+      },
+      "conclusion": "No secure signer broker, durable daily counter, atomic budget reservation, transaction-policy engine, replay consumption or exactly-once receipt registry enforces the declared scope."
+    },
+    {
+      "severity": "P0",
+      "id": "PAYROLL_ROLE_IS_BROADER_THAN_DOCUMENTED_POLICY",
+      "evidence": {
+        "candidate_admission": "Deployed PAYROLL_ADMIN_ROLE is broader than the policy",
+        "declared_mitigations": ["FURTHER_PAYROLL_SCHEDULE=FROZEN", "FURTHER_8888_TOPUP=FORBIDDEN_WITHOUT_NEW_AUTHORIZATION"]
+      },
+      "conclusion": "A text freeze cannot constrain a compromised or independently controlled role. Contract-level least privilege, role-admin provenance, timelock, beneficiary binding, funded-liability conservation and revocation evidence are absent."
+    },
+    {
+      "severity": "P0",
+      "id": "CONTRACT_AND_WALLET_IDENTITY_ARE_ADDRESS_ONLY",
+      "evidence": {
+        "wallet": "0x4DF6E9629Dad1072103cFd2bC81845fd97429214",
+        "payroll_contract": "0x9EcAe137b3A307971EB77B4CDB3ba13aeeF5297C",
+        "missing_bindings": ["proxy implementation", "runtime code hash", "ABI hash", "deployment receipt", "finalized block", "role-admin graph", "signer custody and revocation"]
+      },
+      "conclusion": "Hard-coded addresses do not prove canonical identity, current implementation, wallet control or authorized role custody."
+    },
+    {
+      "severity": "P0",
+      "id": "SELF_PAY_AND_INDEPENDENT_REVIEW_ARE_NOT_MACHINE_BOUND",
+      "evidence": {
+        "declared_salary": "88 KAIOS at epoch 24320",
+        "required_boundary": "General Manager cannot create, review and pay its own bonus",
+        "missing_evidence": ["independent pricing decision", "independent acceptance", "canonical payable task", "funded payroll liability", "beneficiary ownership", "unclaimed state at execution"]
+      },
+      "conclusion": "The candidate asserts a fixed self-pay policy without a signed decision chain or executable separation-of-duty control."
+    },
+    {
+      "severity": "P0",
+      "id": "CANDIDATE_SNAPSHOT_DEPENDS_ON_UNAUDITED_DOWNSTREAM_MAINNET_HISTORY",
+      "evidence": {
+        "snapshot_source_of_truth": false,
+        "snapshot_phase": "PRE_EXECUTION",
+        "superseded_by_pr": 154,
+        "downstream_pr_state": "OPEN_DRAFT_UNMERGED"
+      },
+      "conclusion": "PR #153 points to PR #154 for post-execution state. That downstream branch records real Mainnet routing, account, role and schedule receipts but remains unaudited in this cycle and cannot retroactively authorize #153."
+    },
+    {
+      "severity": "P1",
+      "id": "EXACT_HEAD_TESTS_ASSERT_LITERALS_NOT_ENFORCEMENT",
+      "evidence": {
+        "test_blob": "d878eee9cc1ee17075eae854d87c1e8b24baa4d3",
+        "historical_actions_run": 32042079650,
+        "historical_result": "SUCCESS",
+        "claimed_test_count": "180/180"
+      },
+      "conclusion": "The added test only reads JSON and compares expected strings and booleans. It does not exercise a signer, contract, gas/value cap, role separation, payroll conservation, replay defense or finalized receipt."
+    },
+    {
+      "severity": "P1",
+      "id": "CURRENT_MAIN_HAS_SAFER_FAIL_CLOSED_BOUNDARY",
+      "evidence": {
+        "current_main_protocol": "A1_PERSONAL_WALLET_READ",
+        "current_main_personal_wallet_patrol": "READ_ONLY_ONLY",
+        "current_main_payroll_policy": "chain_payment_requires_human_approval=true"
+      },
+      "conclusion": "Current main preserves the registered identity history while withholding A2/A3 signing and payment authority. Importing the stale candidate would be a security regression."
+    }
+  ],
+  "validation": {
+    "subject_exact_head": {
+      "actions_run": 32042079650,
+      "actions_url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/32042079650",
+      "actions_conclusion": "SUCCESS",
+      "jobs": {"test": "SUCCESS", "digital-ant-public-read-only-worker": "SKIPPED"},
+      "artifacts": 0,
+      "commit_statuses": 0,
+      "submitted_reviews": 0,
+      "review_threads": 0,
+      "conversation_comments": 0,
+      "conclusion": "HISTORICAL_GREEN_LITERAL_ASSERTIONS_DO_NOT_AUTHORIZE_PROTECTED_EFFECTS"
+    },
+    "current_main": {
+      "universal_code_equivalent_run": 35985185684,
+      "universal_conclusion": "SUCCESS",
+      "universal_tests": "258/258 PASS",
+      "code_equivalence_caveat": "Subsequent main changes through the audit base are WorkOrders-only.",
+      "pages_run": 35998266362,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run": 35998352755,
+      "responsive_conclusion": "SUCCESS"
+    },
+    "machine_checks": [
+      "JSON parse",
+      "exact selected_count equals 1",
+      "4 unique subject paths",
+      "path classification totals equal 4",
+      "exactly 1 PR_ONLY_MODIFIED and 3 THREE_WAY_DIVERGED paths",
+      "all 12 path blobs match lowercase 40-hex Git SHAs",
+      "all non-null commit and tree fields match lowercase 40-hex SHA",
+      "all protected effects are false",
+      "subject relation equals ahead 2 / behind 1016"
+    ],
+    "functional_qa": "PASS_EVIDENCE_ONLY_AUDIT",
+    "visual_qa": {
+      "subject_ui_changed": false,
+      "dedicated_subject_browser_required": false,
+      "reason": "PR #153 changes Markdown, JSON and one Node test only; this audit changes one JSON WorkOrder only.",
+      "post_merge_requirement": "Verify deployed current-main SHA and Responsive Chromium screenshot artifact after the audit merge."
+    }
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR153_HENGYAO_PAYROLL_CAPABILITY_LINEAGE_AUDIT_R0_20260924.json"
+  ],
+  "protected_effects": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "deposit_or_withdrawal": false,
+    "salary_or_reward_claim": false,
+    "token_burn_or_mint": false,
+    "real_settlement": false,
+    "oracle_onchain_configuration": false,
+    "deployment_or_upgrade": false,
+    "role_grant_or_revocation": false,
+    "wallet_connection": false,
+    "signer_or_private_key_access": false,
+    "mainnet_or_testnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "canon_installation": false,
+    "controller_signer_operator_appointment": false,
+    "worker_or_life_activation": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "external_submission": false,
+    "paid_external_api": false
+  },
+  "remaining_blockers": [
+    "PR #153 remains OPEN / DRAFT / UNMERGED / HOLD / NO_GO and is 1016 commits behind current main.",
+    "Its codex/* head is stacked on an unmerged codex/* base and cannot be merged through the Cursor-wake path.",
+    "Signer enforcement, durable cap accounting, atomic reservations, replay consumption and exactly-once receipt handling are absent.",
+    "The declared payroll contract and wallet are not bound to current proxy implementation, runtime code, ABI, deployment, finalized block, role-admin or custody evidence.",
+    "The broad PAYROLL_ADMIN_ROLE is not technically constrained to the documented self-pay and employee-task policy.",
+    "Independent pricing, task acceptance, beneficiary ownership, funded liability, unclaimed state and separation of duty are not machine-bound.",
+    "PR #154 remains OPEN / DRAFT / UNMERGED and requires a separate audit of its Mainnet receipts, read-only observations and downstream authorization claims.",
+    "No payroll, payment, role grant, wallet signing, Life or Worker activation, governance, deployment or chain mutation is authorized by this audit."
+  ],
+  "next_candidate": {
+    "priority": "P0",
+    "candidate": "PR #154 Hengyao payroll bloodflow and Mainnet receipt lineage safety audit",
+    "decision": "NEXT_AFTER_POST_MERGE_VERIFICATION"
+  }
+}
