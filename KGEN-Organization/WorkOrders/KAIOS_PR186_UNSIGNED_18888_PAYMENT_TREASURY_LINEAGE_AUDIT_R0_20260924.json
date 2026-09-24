@@ -1,0 +1,341 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR186-UNSIGNED-18888-PAYMENT-TREASURY-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31",
+  "task_source_reason": "Inventory exact current repository risk and audit the highest-priority safe executable candidate without creating a payment, binding a treasury or beneficiary, accessing a signer, changing authority, dispatching a workflow or mutating chain state.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T07:15:55Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P1",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY",
+  "exact_base_sha": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31",
+  "exact_base_tree": "54a272604e6264fef87bfb6a43d1ac48b0259aa9",
+  "subject": {
+    "repository": "klineodyssey/kline-odyssey",
+    "pr": 186,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/186",
+    "title": "feat(company): add unsigned 18888 payment adapter",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD",
+    "product_decision": "REQUIRES_CURRENT_MAIN_FAIL_CLOSED_SUCCESSOR",
+    "head_branch": "codex/kaios-18888-payment-adapter-v1",
+    "head_sha": "ebd1dd1f5fcbe460daec3ee5f53f2bd9e5e2b405",
+    "head_tree": "dc782dc374b196d54a03d7596f0a04c3923795ef",
+    "merge_base_sha": "b5a4d116374ccab0feff0233a4acf2cb6e641e1e",
+    "merge_base_tree": "f7f7a2432fc7623bb3c867fd5cf0ac0e4f96fe81",
+    "comparison_to_exact_base": {
+      "status": "diverged",
+      "ahead_by": 9,
+      "behind_by": 762,
+      "changed_paths": 2,
+      "additions": 356,
+      "deletions": 0
+    },
+    "evidence": {
+      "exact_head_workflow_runs": 2,
+      "exact_head_successful_workflow_runs": 2,
+      "exact_head_commit_statuses": 0,
+      "reviews": 0,
+      "review_threads": 0,
+      "comments": 1,
+      "blocking_comments": 1
+    },
+    "direct_merge_forbidden_reasons": [
+      "Draft and explicitly HOLD P1",
+      "behind exact latest main by 762 commits",
+      "both changed paths have three-way divergence from current main",
+      "repository owner comment keeps the payment, budget, beneficiary, deployment and ordering gates unresolved",
+      "readiness observations can be fabricated through caller-supplied provider and bankReader objects",
+      "no durable nonce, reservation, replay or exactly-once payment state exists",
+      "missing observedTimestamp bypasses request freshness and produces an invalid executable time",
+      "fixed addresses and non-empty bytecode do not authenticate proxy implementation, ABI, roles, budget or beneficiary authority",
+      "head branch uses the codex prefix and must not be merged through the Cursor wake path"
+    ]
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 35,
+    "open_prs_reviewed": true,
+    "main_workflow_runs_reviewed": true,
+    "todos_and_runtime_risks_reviewed": true,
+    "visual_qa_history_reviewed": true,
+    "latest_main": {
+      "sha": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31",
+      "tree": "54a272604e6264fef87bfb6a43d1ac48b0259aa9",
+      "source_pr": 429,
+      "classification": "EXPECTED_PR_SQUASH_MERGE_NOT_DIRECT_MAIN_WRITE",
+      "post_merge_pages_run": 35964490155,
+      "post_merge_responsive_run": 35964542778,
+      "post_merge_checks": "SUCCESS"
+    },
+    "selected_pr_exact_head_ci": {
+      "push_run": 33234407317,
+      "pull_request_run": 33234408821,
+      "conclusion": "SUCCESS",
+      "tests": "241/241 PASS",
+      "limitations": "The exact-head suite proves a non-authoritative draft and fixture-level fail-closed gates. It does not establish trusted RPC provenance, proxy implementation or ABI identity, canonical requester or beneficiary authority, funded budget, durable replay state, signer authority, payment approval or settlement."
+    },
+    "todo_inventory": {
+      "queries": ["TODO", "FIXME", "XXX", "NOT_IMPLEMENTED"],
+      "default_branch_indexed_matches": 0,
+      "interpretation": "Open PRs, CI, runtime evidence and protected-effect boundaries remain the actionable inventory."
+    },
+    "visual_qa_inventory": {
+      "latest_responsive_run": 35964542778,
+      "latest_responsive_conclusion": "SUCCESS",
+      "latest_visual_failures": 0,
+      "selected_task_ui_or_game_change": false
+    },
+    "ranked_candidates": [
+      {"rank": 1, "priority": "P0", "candidate": "PR #232 real-funds BrainExchange V4", "decision": "HOLD", "reason": "real funds, custody, oracle, upgrade and deployment authority"},
+      {"rank": 2, "priority": "P0", "candidate": "PR #196 external identity and brand verification lineage", "decision": "HOLD", "reason": "external identity, publication and authority claims"},
+      {"rank": 3, "priority": "P0", "candidate": "PRs #135/#152/#153/#154 banking, payroll and governance lineages", "decision": "HOLD", "reason": "protected payment, appointment, governance and Mainnet effects"},
+      {"rank": 4, "priority": "P1", "candidate": "PR #186 unsigned 18888 payment and treasury lineage audit", "decision": "SELECTED", "reason": "highest dependency-ordered safe evidence-only audit after PR #199"},
+      {"rank": 5, "priority": "P1", "candidate": "PR #177 remote handoff and wallet UI lineage audit", "decision": "NEXT"},
+      {"rank": 6, "priority": "P1", "candidate": "PR #198 mobile ATM and wallet lineage audit", "decision": "PENDING"},
+      {"rank": 7, "priority": "P1", "candidate": "PRs #188/#190/#191/#192 integrated market, economy, employment and lab lineages", "decision": "PENDING"},
+      {"rank": 8, "priority": "P1", "candidate": "PR #181 universal listing and settlement lineage audit", "decision": "PENDING"},
+      {"rank": 9, "priority": "P1", "candidate": "PR #179 exchange metadata and wallet discovery lineage audit", "decision": "PENDING"},
+      {"rank": 10, "priority": "P1", "candidate": "PR #426 superseded 11520 settlement repair closeout", "decision": "PENDING", "reason": "superseded by merged PR #427; verify safe closeout separately"},
+      {"rank": 11, "priority": "P1", "candidate": "PR #182 Option B project proposal runtime lineage audit", "decision": "PENDING"},
+      {"rank": 12, "priority": "P1", "candidate": "PR #194 holder resource and LP planning lineage audit", "decision": "PENDING"},
+      {"rank": 13, "priority": "P2", "candidate": "PR #48 historical Life baseline lineage", "decision": "PENDING"}
+    ],
+    "selected_count": 1
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "handoff/HANDOFF_CURRENT.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "6ed6bd0b7799c45a9a2416ee4ce039f092922881"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-Organization/WorkOrders/KAIOS_PR182_OPTION_B_PAYMENT_DRAFT_LINEAGE_AUDIT_R0_20260920.json", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "f6a7894f873d69f21adb029941c37c16aa847fa7"},
+    {"path": "core/company/index.mjs", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd"},
+    {"path": "core/data/canonical.json", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "859286ce95edc715720f043f907e037e4725a0d7"},
+    {"path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "092c11a085412154b26d230ba8007cc41fdd2e18"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"},
+    {"path": "KGEN-KAIOS/V10/PAYMENT_STANDARD.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "aa5bfbb184f1e6a09be41f91e076d71d3f0f7a61"},
+    {"path": "KGEN-KAIOS/V10/runtime/PAYMENT_RUNTIME.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "b7d9ae2be3daaf18fbb810d10dcb412d24508117"},
+    {"path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "ref": "49443f6cc57cd69d7ed3735f0d9289cd1f744b31", "sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad"}
+  ],
+  "path_inventory": [
+    {
+      "path": "core/company/index.mjs",
+      "merge_base_blob": "a543b5d83e51971aaf1558cc1c00b4b7584e5a61",
+      "main_blob": "b1ae4dd626299fe55002bb37966bc66a986a8dcd",
+      "pr_head_blob": "61952f34eed0dc13bbd66519c9d0239c9ab70bc5",
+      "classification": "THREE_WAY_DIVERGED_PAYMENT_DRAFT_RUNTIME_HOLD"
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "merge_base_blob": "65be97a59ff1150cbbd963979fff6e5291bbf282",
+      "main_blob": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "pr_head_blob": "ec275a26faa5f1102bce7d34041a7801e298227c",
+      "classification": "THREE_WAY_DIVERGED_HISTORICAL_TEST_EVIDENCE_ONLY"
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR186-F01",
+      "severity": "P1",
+      "area": "payment, budget and beneficiary authority",
+      "finding": "The branch exports fixed Mainnet bank, token and Public Good addresses, but its own configuration marks budget, beneficiary, deployed ABI and runtime codehash authority unbound. Current Canon independently keeps company treasury unbound, payment disabled, settlement false and chain_write false.",
+      "impact": "An address-shaped proposal can be mistaken for an approved beneficiary, funded obligation or treasury instruction even though no such authority exists.",
+      "disposition": "HOLD; preserve NON_AUTHORITATIVE_PAYMENT_DRAFT only and require immutable action-specific Human authority, approved budget/cap and canonical beneficiary evidence before any executable successor."
+    },
+    {
+      "id": "PR186-F02",
+      "severity": "P1",
+      "area": "read provenance",
+      "finding": "readKaios18888PaymentReadiness accepts caller-supplied provider and bankReader objects. A reproduced fake reader reported a fabricated block 999999999, arbitrary sufficient balance, non-empty code, healthy bank and both roles, causing all ten observational gates to pass; only the four hard-coded authority gates kept the result FAIL_CLOSED.",
+      "impact": "The returned chain, code, balance, health, role and replay observations are not independently authenticated and must never be promoted to deployment, funding or authorization evidence.",
+      "disposition": "HOLD; bind trusted RPC, chain, finalized block, proxy, implementation, ABI, runtime codehash and role reads without caller-injected adapters."
+    },
+    {
+      "id": "PR186-F03",
+      "severity": "P1",
+      "area": "draft provenance",
+      "finding": "The reader accepts any object with status NON_AUTHORITATIVE_PAYMENT_DRAFT and the configured beneficiary. It does not verify that the draft was produced by the validator or bind its chain, bank, request, amount, budget, nonce, purpose, time or hash fields to immutable source evidence.",
+      "impact": "A caller can forge the prepared object and shape the subsequent snapshot, even though the current final authority gates still fail closed.",
+      "disposition": "HOLD; use a versioned, fully hashed and provenance-verified draft envelope if the read-only observer is rebuilt."
+    },
+    {
+      "id": "PR186-F04",
+      "severity": "P1",
+      "area": "time validity",
+      "finding": "observedTimestamp is optional. Omitting it skips future, stale and expiry checks and prepareKaios18888UnsignedDisbursement emits executable_at as NaN, which serializes to null. The reproduced request used 2099 timestamps and still produced a draft.",
+      "impact": "Invalid or timeless drafts can enter logs or downstream systems with a misleading payment-shaped identity.",
+      "disposition": "HOLD; require a verified chain timestamp and enforce requested_at, valid_until, observation and delay ordering with finite integer checks."
+    },
+    {
+      "id": "PR186-F05",
+      "severity": "P1",
+      "area": "replay, reservation and atomicity",
+      "finding": "Request ID, budget ID and nonce are syntax-checked but never durably registered, reserved or consumed. replay_free checks only whether an existing tuple beneficiary is zero and does not verify the full disbursement record, cancellation state, concurrent reservation or exactly-once receipt lineage.",
+      "impact": "Repeated or concurrent drafts can reuse the same budget and nonce, oversubscribe an apparent available balance and diverge from any later execution path.",
+      "disposition": "HOLD; require durable transactional replay keys, budget reservation, idempotency and receipt reconciliation."
+    },
+    {
+      "id": "PR186-F06",
+      "severity": "P1",
+      "area": "hash and semantic binding",
+      "finding": "The disbursement ID binds request ID, bank, beneficiary, amount, budget and nonce but not chain ID, purpose, requester, request timestamps or requested delay. purpose_hash is separate and no signed or canonical envelope binds all semantics together.",
+      "impact": "Semantically different drafts can share the same disbursement identity or be recombined incorrectly by a later adapter.",
+      "disposition": "HOLD; define one domain-separated typed hash covering every authoritative field, version, chain and expiry before execution integration."
+    },
+    {
+      "id": "PR186-F07",
+      "severity": "P1",
+      "area": "deployment and contract identity",
+      "finding": "Current main records the 18888 proxy as deployed, but the branch checks only fixed addresses and non-empty bytecode. It does not verify EIP-1967 implementation, runtime codehash, ABI compatibility, upgrade history, governance state, paused state provenance or the canonical role holders at a finalized block.",
+      "impact": "A live address does not prove that the branch ABI or assumed payment semantics match the currently deployed and governed contract.",
+      "disposition": "HOLD; resolve exact deployed-source and proxy lineage from current-main manifests plus fresh independent reads."
+    },
+    {
+      "id": "PR186-F08",
+      "severity": "P1",
+      "area": "lineage and regression boundary",
+      "finding": "The branch is 762 commits behind current main and both changed paths are three-way divergent. Its 241-test boundary predates the current 258-test Universal suite and later company, Canon and payment safety work.",
+      "impact": "Merging or mechanically rebasing the old files can discard later fail-closed behavior and create competing payment truth.",
+      "disposition": "Do not merge the original PR; any successor must be a minimal current-main implementation on a non-codex branch."
+    },
+    {
+      "id": "PR186-F09",
+      "severity": "P1",
+      "area": "exact-head evidence",
+      "finding": "Both exact-head GitHub workflow runs and the reproduced local suite pass 241/241, but tests rely on local fixtures and do not cover missing observedTimestamp, forged prepared objects, trusted RPC provenance, proxy implementation identity, durable replay, concurrent budget reservation or actual authority evidence.",
+      "impact": "Green historical CI proves the intended fail-closed fixture behavior, not production payment readiness.",
+      "disposition": "Retain the runs as historical evidence only."
+    }
+  ],
+  "positive_findings": [
+    "The draft emits calls=null and calldata=null, requests no signer, sends no transaction and labels execution authority absent.",
+    "Copied configuration objects are rejected by identity and caller attempts to relabel the four authority statuses cannot make readiness pass.",
+    "Unknown request and snapshot fields fail closed.",
+    "The configured one-hour minimum delay, amount syntax, distinct proposer/approver check, reserve check and explicit blockers are useful non-executable design inputs.",
+    "Two exact-head GitHub workflow runs and local reproduction pass 241/241 tests."
+  ],
+  "implementation": {
+    "branch": "integration/pr186-payment-treasury-lineage-audit-r0-20260924",
+    "branch_trigger_class": "NON_CODEX",
+    "scope": "Add this evidence-only JSON work order; do not copy any PR #186 runtime or test bytes.",
+    "changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR186_UNSIGNED_18888_PAYMENT_TREASURY_LINEAGE_AUDIT_R0_20260924.json"
+    ],
+    "ui_or_game_change": false,
+    "target_specific_browser_qa_required": false
+  },
+  "acceptance_tests": [
+    "JSON parses successfully",
+    "inventory_snapshot.selected_count equals 1",
+    "path_inventory contains exactly two unique PR-relative paths",
+    "all recorded commit, tree and blob SHAs are 40 lowercase hexadecimal characters",
+    "all protected_effects values are false",
+    "exact-head Universal suite passes 241/241",
+    "exact-base current Universal suite passes 258/258",
+    "caller-injected observation reproduction remains FAIL_CLOSED while proving ten observational gates are forgeable",
+    "missing observedTimestamp reproduction yields NaN executable time and is recorded as a blocker",
+    "git diff --check passes",
+    "integration PR is Ready, mergeable, exact-latest-main based, with zero unresolved reviews, threads or blocking comments",
+    "exact-head required CI is green before expected-head merge",
+    "post-merge main checks, Pages SHA and responsive screenshot QA are verified"
+  ],
+  "verification": {
+    "work_order_json": "PASS",
+    "selected_count": "1/1 PASS",
+    "path_inventory": "2/2 unique paths PASS",
+    "recorded_sha_format": "31/31 PASS",
+    "protected_effect_assertions": "30/30 false PASS",
+    "subject_exact_head_tests": {
+      "command": "node --test tests/universal-exchange.test.mjs",
+      "tests": 241,
+      "pass": 241,
+      "fail": 0,
+      "conclusion": "PASS"
+    },
+    "caller_injected_observation_reproduction": {
+      "fake_block": 999999999,
+      "observational_gates_true": 10,
+      "authority_gates_false": 4,
+      "status": "FAIL_CLOSED",
+      "transaction_sent": false,
+      "conclusion": "PASS_REPRODUCED_UNTRUSTED_OBSERVATION_BOUNDARY"
+    },
+    "missing_timestamp_reproduction": {
+      "future_request_accepted": true,
+      "executable_at_is_nan": true,
+      "serialized_executable_at": null,
+      "conclusion": "BLOCKER_REPRODUCED"
+    },
+    "exact_base_universal": {
+      "command": "node --test tests/universal-exchange.test.mjs",
+      "tests": 258,
+      "pass": 258,
+      "fail": 0,
+      "conclusion": "PASS"
+    },
+    "diff_check": "PASS",
+    "functional_qa": "Evidence-only audit; no runtime behavior changed.",
+    "visual_qa": "NOT_APPLICABLE_NO_UI_OR_GAME_CHANGE",
+    "integration_ci": "PENDING_EXACT_HEAD",
+    "post_merge_ci": "PENDING_MERGE"
+  },
+  "protected_effects": {
+    "paid": false,
+    "requested_payment": false,
+    "created_payment_draft": false,
+    "bound_treasury": false,
+    "bound_beneficiary": false,
+    "reserved_budget": false,
+    "transferred_tokens_or_assets": false,
+    "sent_mainnet_transaction": false,
+    "sent_testnet_transaction": false,
+    "executed_governance": false,
+    "activated_life": false,
+    "onboarded_worker": false,
+    "appointed_controller": false,
+    "appointed_signer": false,
+    "appointed_operator": false,
+    "appointed_reviewer": false,
+    "accessed_private_key": false,
+    "exposed_private_key": false,
+    "mutated_chain_state": false,
+    "dispatched_workflow": false,
+    "launched_external_agent": false,
+    "called_paid_api": false,
+    "deployed_contract": false,
+    "connected_wallet": false,
+    "created_settlement": false,
+    "recognized_revenue": false,
+    "burned_token": false,
+    "minted_token": false,
+    "modified_canon": false,
+    "modified_current": false
+  },
+  "remaining_blockers": [
+    "PR #186 remains Draft, diverged and 762 commits behind exact latest main.",
+    "The owner checkpoint explicitly keeps repository-bound payment, budget, beneficiary, deployment and ordering authority unresolved.",
+    "Caller-injected provider and bankReader values can fabricate every observational readiness gate.",
+    "Missing observedTimestamp bypasses freshness checks and produces an invalid executable time.",
+    "Draft provenance, domain-separated full-field hashing, durable nonce consumption and atomic budget reservation are absent.",
+    "Proxy implementation, ABI, runtime codehash, upgrade history and canonical role-holder identity are not independently bound.",
+    "Current Canon keeps company treasury unbound, payment disabled, real settlement false and chain writes disabled.",
+    "The old 241-test boundary cannot replace current main's 258-test boundary.",
+    "A safe successor must start from current main and preserve the non-executable, fail-closed boundary on a non-codex branch."
+  ],
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #177 remote handoff and wallet UI lineage security audit",
+    "allowed_scope": "Evidence-only R0 audit; no wallet connection, credential access, external agent launch, workflow dispatch, asset movement, authority appointment or chain mutation."
+  }
+}
