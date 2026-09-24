@@ -1,0 +1,383 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR136-PHASE2-DEPLOYED-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "SCHEDULED_ENGINEERING_CYCLE",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "7da15977c494e298423b0fbb956ea64c811d2978",
+  "task_source_reason": "Select exactly one highest-priority safe task after exact-main, open-PR, CI, runtime, visual, dependency and security inventory.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T15:15:20Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P0",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY_AUDIT",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_sha": "7da15977c494e298423b0fbb956ea64c811d2978",
+  "exact_base_tree": "6bc548c266eea0b9c767f3719adc4364c75717ad",
+  "integration_branch": "integration/pr136-phase2-deployed-lineage-audit-r0-20260924",
+  "selected_count": 1,
+  "selection": {
+    "candidate": "PR #136 civilization Phase 2 module and deployed Mainnet lineage",
+    "decision": "SELECTED_FOR_EVIDENCE_ONLY_LINEAGE_AUDIT",
+    "reason": "Highest-ranked unaudited P0 deployment, governance, upgrade and real-asset lineage. A bounded R0 audit can preserve exact source and receipt evidence while refusing deployment, governance, signer, asset or chain effects."
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 32,
+    "current_main_recent_workflows": {
+      "failures_in_latest_exact_main_set": 0,
+      "universal_run": 36018234633,
+      "universal_conclusion": "SUCCESS",
+      "universal_primary_tests": "258/258 PASS",
+      "pages_run": 36012111329,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run": 36012284524,
+      "responsive_conclusion": "SUCCESS"
+    },
+    "ranked_candidates": [
+      {"rank": 1, "priority": "P0", "candidate": "PR #136 Phase 2 deployed module / governance / tax-receiver lineage", "decision": "SELECTED"},
+      {"rank": 2, "priority": "P0", "candidate": "PR #196 BSC branding and verification external-authority lineage", "decision": "NEXT"},
+      {"rank": 3, "priority": "P0", "candidate": "PR #187 protected CURRENT Canon reconciliation lineage", "decision": "PENDING"},
+      {"rank": 4, "priority": "P0", "candidate": "PR #200 KGEN/KAIOS spot book and quote surface lineage", "decision": "PENDING"},
+      {"rank": 5, "priority": "P0", "candidate": "PR #201 K18911 KUFO V4 asset and deployment lineage", "decision": "PENDING"},
+      {"rank": 6, "priority": "P0", "candidate": "PR #211 K108000/KSHIP/KGOD asset and reactor lineage", "decision": "PENDING"},
+      {"rank": 7, "priority": "P0", "candidate": "PR #212 UFO Organ/Life/controller lineage", "decision": "PENDING"},
+      {"rank": 8, "priority": "P0", "candidate": "PR #203 integrated KAIOS warp and bilateral ATM lineage", "decision": "PENDING"},
+      {"rank": 9, "priority": "P0", "candidate": "PR #181 universal listing and settlement gates lineage", "decision": "PENDING"},
+      {"rank": 10, "priority": "P0", "candidate": "PR #180 market genesis readiness lineage", "decision": "PENDING"},
+      {"rank": 11, "priority": "P0", "candidate": "PR #194 holder genesis, resource accounts and LP planning lineage", "decision": "PENDING"},
+      {"rank": 12, "priority": "P1", "candidate": "PR #192 public experimental lab and money-flow lineage", "decision": "PENDING"},
+      {"rank": 13, "priority": "P1", "candidate": "PR #191 playable employment alpha lineage", "decision": "PENDING"},
+      {"rank": 14, "priority": "P1", "candidate": "PR #190 autonomous demand-to-product ATM lineage", "decision": "PENDING"},
+      {"rank": 15, "priority": "P1", "candidate": "PR #188 integrated employment / market / ATM lineage", "decision": "PENDING"},
+      {"rank": 16, "priority": "P1", "candidate": "PR #182 Option B project proposal runtime lineage", "decision": "PENDING"},
+      {"rank": 17, "priority": "P1", "candidate": "PR #183 Sol Yaoce T1 onboarding authority lineage", "decision": "PENDING"},
+      {"rank": 18, "priority": "P1", "candidate": "PR #172 K4168 public-good flow lineage", "decision": "PENDING"},
+      {"rank": 19, "priority": "P1", "candidate": "PR #133 FortuneGame prediction and contract lineage", "decision": "PENDING"},
+      {"rank": 20, "priority": "P2", "candidate": "PR #48 historical World Life baseline lineage", "decision": "PENDING"}
+    ]
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-Canon/KGEN_CANON_MASTER.json", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"},
+    {"path": "KGEN-Canon/KGEN_DEPENDENCY_GRAPH.json", "blob_sha": "9053a7f6ca1775fd8055d0f7fb0986ecdd1ad78d"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "blob_sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md", "blob_sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-AI-Company/CODEX_MANAGER_PROTOCOL.md", "blob_sha": "fd9b4747284a8f99a85a08713c2f73b1f41bf99d"},
+    {"path": "KGEN-KAIOS/decision/decision_snapshot.json", "blob_sha": "2097e4a725e5d4db860726bce6360aede2f4e14c"},
+    {"path": "KGEN-KAIOS/worker_registry.json", "blob_sha": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c"},
+    {"path": "KGEN-Organization/WorkOrders/KAIOS_PR154_HENGYAO_PAYROLL_MAINNET_RECEIPT_LINEAGE_AUDIT_R0_20260924.json", "blob_sha": "407ada4abfc78d87a5e9c9771c4124a121b56c5b"}
+  ],
+  "subject": {
+    "pr": 136,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/136",
+    "title": "feat(kaios): civilization phase 2 modules",
+    "state": "CLOSED",
+    "closed_at": "2026-09-24T15:04:37Z",
+    "draft": true,
+    "merged": false,
+    "mergeable_at_audit": true,
+    "base_branch": "codex/templeheart-v34-mainnet",
+    "base_sha": "2d6d152e0d3c885822745c43d4d96a0836bf4e0e",
+    "base_tree": "663dc0e5310539db441d193c9b121d19d801e5fb",
+    "head_branch": "codex/kaios-civilization-phase2",
+    "head_sha": "00c79b380ce094c17d75697f360820c4d2035071",
+    "head_tree": "c32cc1e40e761eb36fe66191bd3b0f8024d384f4",
+    "merge_base_sha": "c7e8c533c5bbc598fac3192e0576bacb55fb6a31",
+    "merge_base_tree": "d557cf27d8093900cf7c3e7cfda3085660e47af5",
+    "relation_to_pr_base": "AHEAD",
+    "ahead_of_pr_base": 10,
+    "behind_pr_base": 0,
+    "relation_to_current_main": "DIVERGED",
+    "ahead_of_current_main": 40,
+    "behind_current_main": 1034,
+    "pr_relative_commits": 10,
+    "pr_relative_changed_files": 56,
+    "additions": 11858,
+    "deletions": 121,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "conversation_comments": 2,
+    "exact_head_actions_runs": 0,
+    "exact_head_commit_statuses": 0,
+    "decision": "CLOSED_DRAFT_UNMERGED_SUPERSEDED_DEPLOYED_PHASE2_EVIDENCE_ARCHIVED_HOLD_NO_GO",
+    "safe_successor": {
+      "pr": 160,
+      "merge_commit": "bab16dc9bf99479e00f144b5249f16e14b7c6536",
+      "current_manifest_blob": "68afc70f3cf224570defdc13c4389ea4af1351c3",
+      "archived_exact_blobs": 6
+    },
+    "direct_merge_forbidden": true,
+    "direct_merge_reasons": [
+      "The closed, unmerged head is a codex/* branch whose merge path can trigger Cursor wake.",
+      "The head is 1034 commits behind exact current main and changes protected contracts, Boot, Canon-like deployment records and runtime-facing schemas.",
+      "Sixteen of the 56 PR-relative paths are three-way divergent against current main.",
+      "The candidate records real BSC Mainnet deployments, module activation, governance execution, KGEN ownership transfer and tax-wallet redirection; importing or executing it would cross protected-effect boundaries.",
+      "PR #160 already merged a bounded archival successor with six exact Git blobs and an exact-head manifest, without activating source or authority.",
+      "The latest exact-head deployment observations are historical 2026-08-14/15 evidence and cannot prove current implementation, role custody, balances, pause state or authorization."
+    ]
+  },
+  "path_lineage": {
+    "counts": {"total": 56, "pr_only_added": 38, "pr_only_modified": 2, "three_way_diverged": 16, "same_at_main_and_head": 0},
+    "paths": [
+      {"path": ".gitattributes", "base_blob_sha": null, "main_blob_sha": "7b3b5078de79339bb90dcae3e3e3f884c6f0ac42", "head_blob_sha": "cbeb3db684351d7f1001bf68644b76627386fe74", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/KAIOS_CIVILIZATION_PHASE2_CANON.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "dc32863610121d74c770dcc1e0f792e26ce148d1", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md", "base_blob_sha": "61f8752c199e537fbbafd9680a92d532f5c72dfc", "main_blob_sha": "b45f9e9d51cbf5af8125c33a50397207693bd0d6", "head_blob_sha": "5ce04b295f512098b5fd588536e8aed6105ccad5", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/README.md", "base_blob_sha": "306cd15468ede7bc36f0d03f54ff30f4f778834f", "main_blob_sha": "b18f7056b0651118b1b1d1eea088361412f6a64a", "head_blob_sha": "90909c2c3509dea799b51841fe73f916323271bd", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/abi/CelestialCapitalCommitment_Upgradeable.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "309fdba9526371b1e574898b50fc14934d17bdec", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/abi/CelestialEligibility_Upgradeable.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "a2a94ff4f0b980483da2fec551ba38f5ffa84e94", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/abi/KGENReserveRedemption_Upgradeable.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "728c078098d42d2fd84642707d820a6f62ea3917", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/config/kaios-civilization-phase2-deployment.template.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "8ef3e4c9985d824d8021fe207b311657a0518d0c", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/config/lingxiao-18888-module-registry.json", "base_blob_sha": "617c287efdca5d8e4c9937896eabf80b4a3bedb8", "main_blob_sha": null, "head_blob_sha": "d987d79985d178a3f154bd3a87328f93b050ed83", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/config/phase2-mainnet-config.final-review.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "0e52c3a44e27a55c5068e8c6d8750d9b2903f665", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/contracts/CelestialCapitalCommitment_Upgradeable.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "9857fef7056fde61bc0144f19471fef63182acc1", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/contracts/CelestialEligibility_Upgradeable.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "50c037ee01c6746013dc5dfc92713f27ad4a4717", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/contracts/KGENReserveRedemption_Upgradeable.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "5451f3e54798990edf482355b534820b61d67f90", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/contracts/interfaces/ICelestialEligibility.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "26c87370a8348004ed0daf5926fe589de693224a", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/contracts/interfaces/IKAIOSAlchemyFurnaceProof.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "7638060a823f7127f2e388fc6eedce72b6ccc8b7", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/contracts/interfaces/ILingxiaoCelestialBank18888.sol", "base_blob_sha": "6363d364071bb96f2b48b9ce0c7a3d315ae20dda", "main_blob_sha": null, "head_blob_sha": "dff44e3354f2612ab56ae656725ba7c0fbad3381", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/dashboard/kaios-civilization-phase2-status.schema.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "0aed45e7ff8e418208a99ed1c33b992e2a0139ab", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/frontend-adapter/kaiosCivilizationPhase2Adapter.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "4d4932efba1a9f591cbf827966ab52344b17beab", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/indexer/kaios-civilization-phase2-events.schema.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "35f2ee7b1bd84dee4286b37f095b229254b54bd0", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/operations/KAIOS_CIVILIZATION_PHASE2_RUNBOOK.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "1712932bd20ec25c5ad0becde9c2b20b50602901", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/package.json", "base_blob_sha": "1eb3cd87c750b37a7831bc3a0280a9e05932de28", "main_blob_sha": "07ce6f55cebb55e3f8d31df2f168cd4af30ff871", "head_blob_sha": "43e22eacc581acdf8224fe25bce8b122476ba361", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json", "base_blob_sha": "6681ed5ea254101d4ad27d1dd354d5fdf9c6a04c", "main_blob_sha": "ec10d4c20bc69f5b72cf446e40dcfbc982e44920", "head_blob_sha": "f6fb5f4ac59542c67bbad5ff7f4d8491f26b66c4", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "77bbf2e4c2c7e61bd0e0227dd0a0495acad93eee", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_FORK_REHEARSAL.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "7ab876f054566bf63380e7516b68dcf75b06bf32", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "5c2faff5bb9f9f11d39924650113643e37be07f0", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE1_2026-08-14.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "970f1b62635430f7fb2a1237af4f73599949e5ac", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2A_2026-08-15.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "a17dcca618128a666ffdb4c83f9cedba62a1db6d", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2A_2026-08-15.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "846311fcceb8653a06993d685e38a5eb2733cba2", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_2026-08-15.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "7107e4a53bb1a38fdb2cc9b38970ad1701c29837", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2B_2026-08-15.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "f3c35a632846a00585142e3b9a6cc557c80322d4", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "5640349cf498b3b675646ea0d01854faaf662971", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C0_2026-08-15.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "0921672181293da476656fc88cbacc43d722bbbc", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "0a3f9933636059ed6cfd6cf382b4fc33906d7445", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_MAINNET_STAGE2C1_2026-08-15.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "5b612f34f56434b42850a817913b591b76626864", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_CIVILIZATION_PHASE2_SECURITY_REPORT.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "070970a1b74c11e97b72cd347872f4f8415b7429", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_LINEAGE_STALE_REFERENCE_AUDIT_2026-08-09.json", "base_blob_sha": "d6dc35a8770724398936746460fced8334cf59d6", "main_blob_sha": "e581c8533d2f0df1616845270fd7829eb502b07b", "head_blob_sha": "160a3a338394bd2593a8b47d123b3502a90764b8", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_LINEAGE_STALE_REFERENCE_AUDIT_2026-08-09.md", "base_blob_sha": "54d79dbbd7ce333598f2ca433e4a055b5ef89158", "main_blob_sha": "8857258d24d7c1502ef81ad3ff46dedf62b25df3", "head_blob_sha": "74245585d053fc6c23c316c34b04d5270c41e172", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "a55745f3e2742f0dd2908311f68ad278bb39f1f1", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/PHASE2_UUPS_RUNTIME_VERIFICATION_2026-08-14.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "ece1b6609d61cc47b857ef0a0e2c028423cf1dfa", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/README.md", "base_blob_sha": "1f77a267973100f6768e948e2a602f94f9b12440", "main_blob_sha": "1f77a267973100f6768e948e2a602f94f9b12440", "head_blob_sha": "8799dd4a4f940e9ce57ec27a47c7c384e135b6dc", "classification": "PR_ONLY_MODIFIED"},
+      {"path": "KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json", "base_blob_sha": "c67c33d0cc1154060cfe09b6863151d9a6a46897", "main_blob_sha": "c53114d39e4f9e0ebec2833f19fef91323f40c5a", "head_blob_sha": "68820d10ad8a206e7f94dca81a8be7b57970e338", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/scripts/prepare-kaios-civilization-phase2-deployment.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "258ce9558e530360de60e4b0f0b91b1913350473", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/scripts/verify-phase2-uups-runtime.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "01336789be43ff1218fd9e079235e3638097af09", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/tests/contracts/Phase2Mocks.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "ecff5932f610248aefaded20abbd652b830a976d", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/tests/helpers.mjs", "base_blob_sha": "dbd71a7f1f5408aa0afb280c378492bbd822ddbe", "main_blob_sha": "770f653e5ff0d9c5adec003f2182ef93ec017b54", "head_blob_sha": "4a015eb16f3c677e964d3270e9e5636dcdcdeb23", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/tests/phase2-civilization.fuzz-invariant.test.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "641d06d1628feee66fa9e2417360e795242b1b9a", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/tests/phase2-civilization.integration.test.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "587ca88679908a17ae35e299c7306d08cfbf307b", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/tests/token-surface.security.test.mjs", "base_blob_sha": "62cf59a8e568264841d4fb213cecfe615c333155", "main_blob_sha": "2b71e71ee4880f71d55d5b3a50f18f52dc1c14e1", "head_blob_sha": "80b254cca32f7d165ccd250cc2b69b9d7ee0deaa", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/tests/uups-runtime-verifier.test.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "b5aaf6604b048e2734fa03bbaceac3960c242f98", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/tools/compile-contracts.mjs", "base_blob_sha": "3ba869462ef3b41aae93fcd04fa0b9046d07e1b8", "main_blob_sha": "d01e5b3773ecd3044eabbcc3e38972503fa47f02", "head_blob_sha": "439efad65bd815719970be9567288dbe6fd4a113", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs", "base_blob_sha": "2955d0a4ce8daf21615c16d977e457664913c290", "main_blob_sha": "0b8f1d51f8f1bfdca475c846fce3c07180788bbf", "head_blob_sha": "f757c316f7321ef3acd851a0dc788dac944c956f", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "KGEN-KAIOS/tools/rehearse-kaios-civilization-phase2-mainnet-fork.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "6df3a058544c2eec29643a4b82f1c38cbdea8823", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/tools/uups-runtime-verifier.mjs", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "e93bb4a27cc4120121f0bffab28be0270e6ef02f", "classification": "PR_ONLY_ADDED"},
+      {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "base_blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371", "main_blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371", "head_blob_sha": "28fb8ec816bd381e0d736b46849c6f40cdc64400", "classification": "PR_ONLY_MODIFIED"},
+      {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md", "base_blob_sha": "b3057b28f421c9757faca037ea8e37352b8746fd", "main_blob_sha": "4286d1aede181f45eb274196a6799ac18ced42ec", "head_blob_sha": "be6e55d4947a69b6b38113dca5dcdd3d6292fdb8", "classification": "THREE_WAY_DIVERGED"},
+      {"path": "docs/KGEN_MASTER_INDEX.md", "base_blob_sha": "5c3d1bad27c815d43407ffb40ec413795962091f", "main_blob_sha": "989c42d658f43d43c6ce544f3b33604f9802def6", "head_blob_sha": "b7f3c8901171e8592d22e362d450535bbfb9fbdc", "classification": "THREE_WAY_DIVERGED"}
+    ]
+  },
+  "findings": [
+    {
+      "severity": "P0",
+      "id": "HISTORICAL_MAINNET_EVIDENCE_DOES_NOT_PROVE_CURRENT_STATE_OR_AUTHORITY",
+      "evidence": {
+        "latest_subject_evidence_date": "2026-08-15",
+        "audit_date": "2026-09-24",
+        "stage1_completion_block": 115888742,
+        "stage2c1_execution_block": 116060103,
+        "missing_current_bindings": ["finalized current block", "proxy implementation slots", "runtime code hashes", "role-admin graph", "pause and activation state", "token balances", "signer custody and revocation", "current transaction authorization"]
+      },
+      "conclusion": "The archived transaction hashes and runtime comparisons preserve historical provenance only. They do not establish current implementation, role custody, balances, module state or authority and must not be treated as permission to operate."
+    },
+    {
+      "severity": "P0",
+      "id": "SUBJECT_RECORDS_PROTECTED_MAINNET_DEPLOYMENT_GOVERNANCE_AND_TAX_REDIRECT",
+      "evidence": {
+        "chain_id": 56,
+        "deployed_proxies": ["0xA50743fd0fe022714831482355A27559027368F9", "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE", "0x04fC1536EC51E8CCaAcB961E5Af6151De47b078c"],
+        "protected_effects_recorded": ["UUPS deployment", "module registration", "module activation", "governance finalization", "KGEN ownership transfer", "KGEN tax receiver redirection"]
+      },
+      "conclusion": "These are historical protected effects, not repository-only implementation steps. Automation must not replay, validate by signing, activate, upgrade or otherwise operate the deployed system."
+    },
+    {
+      "severity": "P0",
+      "id": "GOVERNANCE_CAN_BIND_LIFE_AND_MANUFACTURE_ELIGIBILITY_EVIDENCE",
+      "evidence": {
+        "eligibility_blob": "50c037ee01c6746013dc5dfc92713f27ad4a4717",
+        "governed_actions": ["bindLife", "setReserveRedemptionEligibility", "setContributionVerifier", "approveCandidate", "revokeCandidate"],
+        "verifier_actions": ["recordConstitutionHistory", "recordContribution"],
+        "missing_controls": ["canonical Life registry proof", "beneficiary signature", "evidence issuer signature", "revocation registry provenance", "independent reviewer separation", "durable external replay consumption"]
+      },
+      "conclusion": "Repository-supplied governance or verifier roles can assert identity, contribution and eligibility without cryptographic or canonical external provenance. Those assertions can feed reserve redemption and review status."
+    },
+    {
+      "severity": "P0",
+      "id": "RESERVE_ROUTE_MOVES_REAL_ASSETS_UNDER_GOVERNABLE_POLICY",
+      "evidence": {
+        "reserve_blob": "5451f3e54798990edf482355b534820b61d67f90",
+        "route": "payer KAIOS -> 18888 Bank; existing reserve KGEN -> canonical beneficiary",
+        "reference": "1000 KAIOS per 1 KGEN",
+        "stage2c1_tax_receiver": "0xA06eF53c9AD4Af739FD13Ca1Ded446437134b0EE",
+        "historical_redemption_enabled": false
+      },
+      "conclusion": "The route is real-asset settlement with a fixed policy reference and governable eligibility. Historical disabled state is not current proof and does not authorize funding, activation, tax receipt use or redemption."
+    },
+    {
+      "severity": "P0",
+      "id": "UUPS_AND_GENERIC_GOVERNANCE_CAN_REWRITE_ASSET_BEHAVIOR",
+      "evidence": {
+        "module_base_blob": "8118f63cc91dfc29e0fabf54baa22393b48b08c4",
+        "upgrade_gate": "UPGRADER_ROLE",
+        "finalized_authority": "BankGovernance receives DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE and UPGRADER_ROLE",
+        "delay_seconds_recorded": 3600
+      },
+      "conclusion": "An archived implementation blob does not bind the current proxy. The governance target can authorize upgrades and other module calls; current implementation slots, role custody, proposal state and signer authorization remain unverified."
+    },
+    {
+      "severity": "P1",
+      "id": "FROZEN_NOT_DEPLOYED_CONFIG_CONFLICTS_WITH_LATER_LIVE_STAGE_RECORDS",
+      "evidence": {
+        "config_blob": "0e52c3a44e27a55c5068e8c6d8750d9b2903f665",
+        "config_status": "HUMAN_V1_PARAMETERS_FROZEN_NOT_DEPLOYED",
+        "stage1_status": "COMPLETE_LIVE_INACTIVE",
+        "later_states": ["eligibility LIVE_ACTIVE", "capital commitment LIVE_ACTIVE", "KGEN tax receiver redirected", "reserve redemption historically inactive and disabled"]
+      },
+      "conclusion": "The branch preserves a timeline, but isolated machine consumers can mistake the predeployment config for current state or later reports for present state. Current main correctly treats the exact head as historical provenance rather than an active status source."
+    },
+    {
+      "severity": "P1",
+      "id": "EXACT_HEAD_HAS_NO_GITHUB_CI_STATUS_OR_REVIEW_EVIDENCE",
+      "evidence": {
+        "actions_runs": 0,
+        "commit_statuses": 0,
+        "submitted_reviews": 0,
+        "review_threads": 0,
+        "branch_claims": ["49 contracts compiled", "79/79 suite", "9/9 Phase2 integration and fuzz"]
+      },
+      "conclusion": "The exact-head test claims are branch-authored records, not independently retrievable GitHub Actions or submitted-review evidence. They cannot authorize integration or protected effects."
+    },
+    {
+      "severity": "P1",
+      "id": "DIRECT_TRANSPLANT_WOULD_OVERWRITE_CURRENT_PROTECTED_LINEAGE",
+      "evidence": {
+        "pr_relative_paths": 56,
+        "pr_only_added": 38,
+        "pr_only_modified": 2,
+        "three_way_diverged": 16,
+        "behind_current_main": 1034,
+        "protected_examples": ["PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md", "contracts", "deployment Canon", "runtime-facing schemas"]
+      },
+      "conclusion": "The old stacked branch cannot be refreshed or merged wholesale without reverting newer accepted behavior and crossing protected-Canon and contract boundaries."
+    },
+    {
+      "severity": "P1",
+      "id": "MERGED_PR160_IS_THE_BOUNDED_SAFE_SUCCESSOR",
+      "evidence": {
+        "successor_merge": "bab16dc9bf99479e00f144b5249f16e14b7c6536",
+        "manifest_blob": "68afc70f3cf224570defdc13c4389ea4af1351c3",
+        "archived_blobs": {
+          "KAIOS_CIVILIZATION_PHASE2_CANON.md": "dc32863610121d74c770dcc1e0f792e26ce148d1",
+          "CelestialEligibility_Upgradeable.sol": "50c037ee01c6746013dc5dfc92713f27ad4a4717",
+          "KGENReserveRedemption_Upgradeable.sol": "5451f3e54798990edf482355b534820b61d67f90",
+          "CelestialCapitalCommitment_Upgradeable.sol": "9857fef7056fde61bc0144f19471fef63182acc1",
+          "Stage1": "5c2faff5bb9f9f11d39924650113643e37be07f0",
+          "Stage2C1": "0a3f9933636059ed6cfd6cf382b4fc33906d7445"
+        }
+      },
+      "conclusion": "Current main already preserves the essential exact lineage without installing old active source, replaying deployment, changing authority or asserting current chain state."
+    }
+  ],
+  "validation": {
+    "subject_exact_head": {
+      "actions_runs": 0,
+      "commit_statuses": 0,
+      "submitted_reviews": 0,
+      "review_threads": 0,
+      "conversation_comments": 2,
+      "historical_claimed_compile": "49 contracts",
+      "historical_claimed_tests": ["79/79 full suite", "9/9 Phase2 integration and fuzz"],
+      "conclusion": "NO_EXACT_HEAD_GITHUB_CI_OR_REVIEW_EVIDENCE"
+    },
+    "current_main": {
+      "universal_run": 36018234633,
+      "universal_url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/36018234633",
+      "universal_conclusion": "SUCCESS",
+      "universal_primary_tests": "258/258 PASS",
+      "additional_suites": ["17/17 PASS", "3/3 PASS", "24/24 PASS"],
+      "pages_run": 36012111329,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run": 36012284524,
+      "responsive_conclusion": "SUCCESS"
+    },
+    "machine_checks": [
+      "JSON parse",
+      "exact selected_count equals 1",
+      "56 unique subject paths",
+      "path classification totals equal 56",
+      "exactly 38 PR_ONLY_ADDED, 2 PR_ONLY_MODIFIED and 16 THREE_WAY_DIVERGED paths",
+      "all non-null path blobs match lowercase 40-hex Git SHAs",
+      "all non-null commit and tree fields match lowercase 40-hex SHA",
+      "all protected effects are false",
+      "subject relation to PR base equals ahead 10 / behind 0",
+      "subject relation to current main equals ahead 40 / behind 1034",
+      "six PR #160 archived blob identities match the exact PR #136 head"
+    ],
+    "functional_qa": "PASS_EVIDENCE_ONLY_AUDIT",
+    "visual_qa": {
+      "subject_ui_changed": false,
+      "dedicated_subject_browser_required": false,
+      "reason": "This audit changes one JSON WorkOrder only; it does not transplant the historical frontend adapter, schemas, game or UI.",
+      "post_merge_requirement": "Verify deployed current-main SHA and Responsive Chromium screenshot artifact after the audit merge."
+    }
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR136_PHASE2_DEPLOYED_LINEAGE_AUDIT_R0_20260924.json"
+  ],
+  "protected_effects": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "deposit_or_withdrawal": false,
+    "salary_or_reward_claim": false,
+    "token_burn_or_mint": false,
+    "real_settlement": false,
+    "oracle_onchain_configuration": false,
+    "deployment_or_upgrade": false,
+    "role_grant_or_revocation": false,
+    "wallet_connection": false,
+    "signer_or_private_key_access": false,
+    "mainnet_or_testnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "canon_installation": false,
+    "controller_signer_operator_appointment": false,
+    "worker_or_life_activation": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "external_submission": false,
+    "paid_external_api": false
+  },
+  "remaining_blockers": [
+    "PR #136 is CLOSED / DRAFT / UNMERGED / SUPERSEDED and its codex/* head is 1034 commits behind current main.",
+    "Sixteen PR-relative paths are three-way divergent, including protected Boot, contracts, reports, package/tests/tooling and index paths.",
+    "Historical Mainnet evidence does not prove current proxy implementations, runtime hashes, role custody, balances, pause/activation state or authority.",
+    "Eligibility identity, contribution and review facts remain governance/verifier assertions without canonical signed provenance.",
+    "The reserve route moves real KAIOS and KGEN and the recorded tax receiver is a live economic endpoint; no operation is authorized.",
+    "UUPS and BankGovernance authority can change module and asset behavior; current signer custody and proposal state are not established.",
+    "Exact PR #136 head has no GitHub Actions run, commit status, submitted review or review thread evidence.",
+    "PR #160 is the accepted archival successor; no old active source, Canon, deployment tooling or protected authority should be transplanted."
+  ],
+  "next_candidate": {
+    "priority": "P0",
+    "candidate": "PR #196 BSC branding and verification external-authority lineage safety audit",
+    "decision": "NEXT_AFTER_POST_MERGE_VERIFICATION"
+  }
+}
