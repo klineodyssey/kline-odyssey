@@ -1,0 +1,388 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR199-LIQUIDITY-FORGE-AUTO-LP-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad",
+  "task_source_reason": "Inventory exact current repository risk and audit the highest-priority safe executable candidate without changing liquidity, treasury, signer, runtime, funds, authority, Life, Worker or chain state.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T06:21:27Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P1",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY",
+  "exact_base_sha": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad",
+  "exact_base_tree": "5cfe1694bbdbc9fd0daba188e2831ca159eb1e00",
+  "subject": {
+    "repository": "klineodyssey/kline-odyssey",
+    "pr": 199,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/199",
+    "title": "feat(k18921): KAIOS liquidity forge and Auto-LP planner",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD",
+    "product_decision": "NO_GO",
+    "head_branch": "gm/k18921-kaios-auto-lp-v1",
+    "head_sha": "97bec7c2a8b57e4c2b83fe86c626451dffa63903",
+    "head_tree": "6ea6b338112b239ca0049e1e977826d156e80eaf",
+    "merge_base_sha": "3d2ba9160a69049979c4afd195c70bbf8618306f",
+    "merge_base_tree": "fdfd41dd3dfb1bbe2e1440f4db21f2fd0a77e251",
+    "comparison_to_exact_base": {
+      "status": "diverged",
+      "ahead_by": 3,
+      "behind_by": 747,
+      "changed_paths": 3,
+      "additions": 169,
+      "deletions": 0
+    },
+    "evidence": {
+      "exact_head_workflow_runs": 0,
+      "exact_head_commit_statuses": 0,
+      "reviews": 0,
+      "review_threads": 0,
+      "comments": 1,
+      "blocking_comments": 1
+    },
+    "direct_merge_forbidden_reasons": [
+      "Draft",
+      "behind exact latest main by 747 commits",
+      "no GitHub Actions run or commit status at exact head",
+      "no review",
+      "owner checkpoint explicitly says do not merge",
+      "caller-asserted pair, treasury, vault, signer, receipt and manipulation gates",
+      "no durable daily-cap, replay, custody, accounting or receipt registry",
+      "unapproved liquidity allocation and treasury-return policy",
+      "overlaps current canonical AI_ANT_AUTO_LP architecture and existing K18921 prototype lineage"
+    ]
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 35,
+    "open_prs_reviewed": true,
+    "main_workflow_runs_reviewed": true,
+    "todos_and_runtime_risks_reviewed": true,
+    "visual_qa_history_reviewed": true,
+    "latest_main": {
+      "sha": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad",
+      "tree": "5cfe1694bbdbc9fd0daba188e2831ca159eb1e00",
+      "source_pr": 428,
+      "classification": "EXPECTED_PR_SQUASH_MERGE_NOT_DIRECT_MAIN_WRITE",
+      "post_merge_pages_run": 35960085016,
+      "post_merge_responsive_run": 35960125324,
+      "post_merge_checks": "SUCCESS"
+    },
+    "selected_pr_exact_head_ci": {
+      "workflow_runs": 0,
+      "commit_statuses": 0,
+      "local_exact_head_tests": "8/8 PASS",
+      "limitations": "The branch tests prove only the caller-fixture model. They deliberately accept fake address strings and bare booleans as pair, treasury, signer and receipt eligibility and do not establish production authority, custody, accounting or chain provenance."
+    },
+    "todo_inventory": {
+      "queries": ["TODO", "FIXME", "XXX", "NOT_IMPLEMENTED"],
+      "default_branch_indexed_matches": 0,
+      "interpretation": "Open PRs, CI, runtime evidence and protected-effect boundaries remain the actionable inventory."
+    },
+    "visual_qa_inventory": {
+      "latest_responsive_run": 35960125324,
+      "latest_responsive_conclusion": "SUCCESS",
+      "latest_visual_failures": 0,
+      "selected_task_ui_or_game_change": false
+    },
+    "ranked_candidates": [
+      {
+        "rank": 1,
+        "priority": "P0",
+        "candidate": "PR #232 real-funds BrainExchange V4",
+        "decision": "HOLD",
+        "reason": "real funds, custody, oracle, upgrade and deployment authority"
+      },
+      {
+        "rank": 2,
+        "priority": "P0",
+        "candidate": "PR #196 external identity and brand verification lineage",
+        "decision": "HOLD",
+        "reason": "external identity, publication and authority claims"
+      },
+      {
+        "rank": 3,
+        "priority": "P0",
+        "candidate": "PRs #135/#152/#153/#154 banking, payroll and governance lineages",
+        "decision": "HOLD",
+        "reason": "protected payment, appointment, governance and Mainnet effects"
+      },
+      {
+        "rank": 4,
+        "priority": "P1",
+        "candidate": "PR #199 liquidity forge and Auto-LP lineage audit",
+        "decision": "SELECTED",
+        "reason": "highest dependency-ordered safe evidence-only audit after PR #161"
+      },
+      {
+        "rank": 5,
+        "priority": "P1",
+        "candidate": "PR #186 payment and treasury lineage audit",
+        "decision": "NEXT"
+      },
+      {
+        "rank": 6,
+        "priority": "P1",
+        "candidate": "PR #177 remote handoff and wallet UI lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 7,
+        "priority": "P1",
+        "candidate": "PR #198 mobile ATM and wallet lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 8,
+        "priority": "P1",
+        "candidate": "PRs #188/#190/#191/#192 integrated market, economy, employment and lab lineages",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 9,
+        "priority": "P1",
+        "candidate": "PR #181 universal listing and settlement lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 10,
+        "priority": "P1",
+        "candidate": "PR #179 exchange metadata and wallet discovery lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 11,
+        "priority": "P1",
+        "candidate": "PR #426 superseded 11520 settlement repair closeout",
+        "decision": "PENDING",
+        "reason": "superseded by merged PR #427; verify safe closeout separately"
+      },
+      {
+        "rank": 12,
+        "priority": "P1",
+        "candidate": "PR #182 Option B project proposal runtime lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 13,
+        "priority": "P1",
+        "candidate": "PR #194 holder resource and LP planning lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 14,
+        "priority": "P2",
+        "candidate": "PR #48 historical Life baseline lineage",
+        "decision": "PENDING"
+      }
+    ],
+    "selected_count": 1
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "handoff/HANDOFF_CURRENT.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "6ed6bd0b7799c45a9a2416ee4ce039f092922881"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "core/company/index.mjs", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "b1ae4dd626299fe55002bb37966bc66a986a8dcd"},
+    {"path": "core/data/canonical.json", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "859286ce95edc715720f043f907e037e4725a0d7"},
+    {"path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"},
+    {"path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "824626abe0a10894972445d3ae3597b584d44276"},
+    {"path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad"},
+    {"path": "docs/KGEN_5D_GAME_ARCHITECTURE.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "4636bb3c8af133153755d0987d05078055c5a307"},
+    {"path": "docs/KGEN_ORGAN_ECONOMY_RUNTIME.md", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "492d909e93b5b45fc6d265999a9fb476d1dcb38a"},
+    {"path": "KGEN/contracts/KGEN_ZhanyaoTaxSplitter_V1_0_1.sol", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "7543ddf0215f888044ed7967ee223c7a14b49d67"},
+    {"path": "K線西遊記/data/kgen-5d-world-map.json", "ref": "aa28dd31ef31e963a66bea5ebf3c218f4285ccad", "sha": "b5f5a51c3fb3ddd92eb49d61e4550b309df1e27e"}
+  ],
+  "path_inventory": [
+    {
+      "path": "KGEN-KAIOS/market/K18921_LIQUIDITY_FORGE.md",
+      "merge_base_blob": null,
+      "main_blob": null,
+      "pr_head_blob": "146c0f3fa6831f39e536a5995041c370289dcdaa",
+      "classification": "PR_ONLY_ADDED_PRODUCT_POLICY_HOLD"
+    },
+    {
+      "path": "KGEN-KAIOS/market/k18921-liquidity-engine.mjs",
+      "merge_base_blob": null,
+      "main_blob": null,
+      "pr_head_blob": "54529e58e3b3255bbfd54096a564b0cdcf3f2b94",
+      "classification": "PR_ONLY_ADDED_RUNTIME_HOLD"
+    },
+    {
+      "path": "tests/k18921-liquidity-engine.test.mjs",
+      "merge_base_blob": null,
+      "main_blob": null,
+      "pr_head_blob": "b252a2b7be4075a8fac868c7655b75e13a393dd6",
+      "classification": "PR_ONLY_ADDED_TESTS_HOLD"
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR199-F01",
+      "severity": "P1",
+      "area": "pair, treasury, vault and signer authority",
+      "finding": "Pool eligibility accepts any truthy pairAddress, treasuryAuthorization, vaultAddress, secureSigner and receiptVerifier. The passing tests use the non-address strings 0xpair and 0xvault and bare true booleans.",
+      "impact": "Caller fixtures can manufacture pair verification, treasury authority, custody, signer binding and receipt-verifier facts.",
+      "disposition": "HOLD; require canonical chain, factory, token, code, deployment, treasury, custody and signer manifests plus independently verified receipts."
+    },
+    {
+      "id": "PR199-F02",
+      "severity": "P1",
+      "area": "market evidence and risk",
+      "finding": "The snapshot has no chain ID, factory, token0/token1, pair code hash, reserves, decimals, block, timestamp, freshness, oracle or depth-source binding. Missing priceImpactBps defaults to zero, while self-match and wash-trade absence defaults to safe.",
+      "impact": "Stale, fabricated or unrelated market data can be treated as a low-impact, non-manipulated eligible pool.",
+      "disposition": "HOLD; use trusted fresh reserve and price evidence and fail closed on every missing risk field."
+    },
+    {
+      "id": "PR199-F03",
+      "severity": "P1",
+      "area": "amounts, units and execution bounds",
+      "finding": "Depth target, current depth, daily cap and price impact are not validated as non-negative bigint values or bound to asset units. The proposal has no quote amount, minimum amounts, slippage enforcement, deadline, allowance lifecycle, fee-on-transfer/rebase handling or reserve-ratio invariant.",
+      "impact": "Malformed, negative, mismatched-unit or economically unsafe proposals can be emitted even though the planner labels the pool eligible.",
+      "disposition": "HOLD; define typed units, checked arithmetic and complete AMM execution parameters before any successor."
+    },
+    {
+      "id": "PR199-F04",
+      "severity": "P1",
+      "area": "budget, replay and atomicity",
+      "finding": "The dailyCap is caller-provided per call and is never reserved or consumed in durable state. Budget allocation may leave integer-division dust and accepts unverified or missing quote budgets without rates, decimals, provenance or atomic reservation.",
+      "impact": "Concurrent or repeated calls can each propose the full cap, over-allocate treasury intent, lose dust and diverge from quote-side funding.",
+      "disposition": "HOLD; require a durable transactional budget ledger, replay keys, locking, idempotency and receipt reconciliation."
+    },
+    {
+      "id": "PR199-F05",
+      "severity": "P1",
+      "area": "accounting and treasury return",
+      "finding": "LP fees, impermanent loss, gas, funding cost and realizedNetProfit are caller-provided bigint values. There is no LP-token balance, fee receipt, mark source, time window, realization event, funding liability or accounting-ledger binding.",
+      "impact": "A caller can manufacture profitable performance and a 70/30 treasury-return proposal without realized, settled or attributable value.",
+      "disposition": "HOLD; retain proposal-only status and require receipt-bound double-entry accounting."
+    },
+    {
+      "id": "PR199-F06",
+      "severity": "P1",
+      "area": "policy and lineage",
+      "finding": "The 60/35/5 pool split, 300-bps impact limit and 70/30 return policy are branch-local constants with no current Canon or Human approval. The branch creates a second Auto-LP runtime instead of integrating the current AI_ANT_AUTO_LP architecture, existing K18921 prototype/game lineage, pair registry and accounting boundaries.",
+      "impact": "Merging would create competing liquidity policy and runtime truth and could be mistaken for treasury or execution authority.",
+      "disposition": "HOLD; a successor must be current-main based, policy-approved and integrated with the existing non-executable Auto-LP architecture."
+    },
+    {
+      "id": "PR199-F07",
+      "severity": "P1",
+      "area": "production lifecycle and emergency controls",
+      "finding": "The module plans only addition. It defines no LP removal, depeg response, oracle divergence, impermanent-loss limit, emergency stop, vault recovery, custody acceptance, approval revocation, position ownership proof or liquidation/withdrawal path.",
+      "impact": "Any later execution integration could lock assets or continue adding risk without a safe exit and recovery lifecycle.",
+      "disposition": "HOLD; define and independently review the complete position lifecycle before any liquidity movement."
+    },
+    {
+      "id": "PR199-F08",
+      "severity": "P1",
+      "area": "exact-head evidence",
+      "finding": "The exact head has no GitHub Actions run, commit status or review. Its eight local tests pass but exercise only the caller-fixture model and do not test replay, concurrency, stale evidence, address/code identity, receipt inclusion, custody, accounting or emergency exits.",
+      "impact": "The branch has no exact-head CI evidence for the security and integration properties required by real liquidity infrastructure.",
+      "disposition": "HOLD; do not merge the original PR."
+    }
+  ],
+  "implementation": {
+    "branch": "integration/pr199-liquidity-forge-lineage-audit-r0-20260924",
+    "branch_trigger_class": "NON_CODEX",
+    "scope": "Add this evidence-only JSON work order; do not copy any PR #199 product, runtime or test bytes.",
+    "changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR199_LIQUIDITY_FORGE_AUTO_LP_LINEAGE_AUDIT_R0_20260924.json"
+    ],
+    "ui_or_game_change": false,
+    "target_specific_browser_qa_required": false
+  },
+  "acceptance_tests": [
+    "JSON parses successfully",
+    "inventory_snapshot.selected_count equals 1",
+    "path_inventory contains exactly three unique PR-relative paths",
+    "all recorded commit, tree and non-null blob SHAs are 40 lowercase hexadecimal characters",
+    "all protected_effects values are false",
+    "exact-head K18921 test suite passes",
+    "exact-base current Universal suite passes",
+    "git diff --check passes",
+    "integration PR is Ready, mergeable, exact-latest-main based, with zero unresolved reviews or threads",
+    "exact-head required CI is green before expected-head merge",
+    "post-merge main checks, Pages SHA and responsive screenshot QA are verified"
+  ],
+  "verification": {
+    "work_order_json": "PASS",
+    "selected_count": "1/1 PASS",
+    "path_inventory": "3/3 unique paths PASS",
+    "recorded_sha_format": "42/42 PASS",
+    "protected_effect_assertions": "28/28 false PASS",
+    "subject_exact_head_tests": {
+      "command": "node --test tests/k18921-liquidity-engine.test.mjs",
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "conclusion": "PASS"
+    },
+    "exact_base_universal": {
+      "command": "node --test tests/universal-exchange.test.mjs",
+      "tests": 258,
+      "pass": 258,
+      "fail": 0,
+      "conclusion": "PASS"
+    },
+    "diff_check": "PASS",
+    "functional_qa": "Evidence-only audit; no runtime behavior changed.",
+    "visual_qa": "NOT_APPLICABLE_NO_UI_OR_GAME_CHANGE",
+    "integration_ci": "PENDING_EXACT_HEAD",
+    "post_merge_ci": "PENDING_MERGE"
+  },
+  "protected_effects": {
+    "paid": false,
+    "transferred_tokens_or_assets": false,
+    "added_liquidity": false,
+    "removed_liquidity": false,
+    "created_pair": false,
+    "executed_swap": false,
+    "sent_mainnet_transaction": false,
+    "sent_testnet_transaction": false,
+    "executed_governance": false,
+    "activated_life": false,
+    "onboarded_worker": false,
+    "appointed_controller": false,
+    "appointed_signer": false,
+    "appointed_operator": false,
+    "appointed_reviewer": false,
+    "accessed_private_key": false,
+    "exposed_private_key": false,
+    "mutated_chain_state": false,
+    "dispatched_workflow": false,
+    "launched_external_agent": false,
+    "called_paid_api": false,
+    "deployed_contract": false,
+    "connected_wallet": false,
+    "created_settlement": false,
+    "burned_token": false,
+    "minted_token": false,
+    "modified_canon": false,
+    "modified_current": false
+  },
+  "remaining_blockers": [
+    "PR #199 remains Draft, diverged and 747 commits behind exact latest main.",
+    "The owner checkpoint explicitly says not to merge the original PR.",
+    "Exact head has no GitHub Actions run, commit status or review.",
+    "Pair, treasury, vault, signer, receipt and manipulation evidence are caller-asserted.",
+    "Budget, cap, replay, custody and accounting state are not durable, atomic or exactly-once.",
+    "The 60/35/5 allocation, 300-bps gate and 70/30 return policy lack current Canon or Human approval.",
+    "The module lacks complete add/remove/rebalance/emergency/custody/approval lifecycle controls.",
+    "K18888 funding availability and K18921 vault ownership are not established.",
+    "A safe successor must integrate current AI_ANT_AUTO_LP, pair registry, accounting and K18921 prototype lineage instead of creating competing truth."
+  ],
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #186 unsigned 18888 payment and treasury lineage security audit",
+    "allowed_scope": "Evidence-only R0 audit; no payment, token transfer, signer access, workflow dispatch, deployment or chain mutation."
+  }
+}
