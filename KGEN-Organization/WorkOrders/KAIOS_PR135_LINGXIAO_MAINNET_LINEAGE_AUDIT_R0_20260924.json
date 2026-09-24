@@ -1,0 +1,1028 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR135-LINGXIAO-MAINNET-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "ae3d7f32b9d9af1467043f776922e72c0cfbf82d",
+  "task_source_reason": "Select exactly one highest-priority safe task after exact-main, open-PR, CI, TODO, runtime, visual, dependency and security inventory.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T11:12:25Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P0",
+  "risk_level": "R0",
+  "dependencies": [
+    "Exact current main ae3d7f32b9d9af1467043f776922e72c0cfbf82d",
+    "Merged provenance successor PR #160 at bab16dc9bf99479e00f144b5249f16e14b7c6536"
+  ],
+  "status": "DONE_EVIDENCE_ONLY_AUDIT",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_sha": "ae3d7f32b9d9af1467043f776922e72c0cfbf82d",
+  "exact_base_tree": "cdb323820454cc8fe3258cd328757dc814fad39a",
+  "integration_branch": "integration/pr135-lingxiao-mainnet-lineage-audit-r0-20260924",
+  "selected_count": 1,
+  "selection": {
+    "candidate": "PR #135 18888 Lingxiao Bank V2 settlement runtime and TempleHeart Mainnet lineage",
+    "decision": "SELECTED_FOR_EVIDENCE_ONLY_LINEAGE_AUDIT",
+    "reason": "Highest-ranked unaudited P0 financial lineage. A safe R0 audit can classify the historical branch, deployed-evidence claims, contract authority boundaries and current-main successor without moving assets or touching chain state."
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 34,
+    "open_issue_count": 2,
+    "failing_exact_latest_main_required_checks": 0,
+    "visual_qa_failures_on_exact_latest_main": 0,
+    "ranked_candidates": [
+      {
+        "rank": 1,
+        "priority": "P0",
+        "candidate": "PR #135 18888 Lingxiao Bank V2 settlement and Mainnet lineage",
+        "decision": "SELECTED"
+      },
+      {
+        "rank": 2,
+        "priority": "P0",
+        "candidate": "PR #152 civilization service/alchemy financial Canon lineage",
+        "decision": "NEXT"
+      },
+      {
+        "rank": 3,
+        "priority": "P0",
+        "candidate": "PR #153 Hengyao payroll capability authority lineage",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 4,
+        "priority": "P0",
+        "candidate": "PR #154 Hengyao payroll bloodflow and Mainnet receipt lineage",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 5,
+        "priority": "P0",
+        "candidate": "PR #136 civilization Phase 2 modules/deployment lineage",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 6,
+        "priority": "P0",
+        "candidate": "PR #196 BSC branding/verification external-authority lineage",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 7,
+        "priority": "P1",
+        "candidate": "PR #187 CURRENT Canon and PR lineage reconciliation",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 8,
+        "priority": "P1",
+        "candidate": "PR #182 Option B project/payment-draft lineage",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 9,
+        "priority": "P2",
+        "candidate": "PR #48 historical World Life baseline lineage",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 10,
+        "priority": "P2",
+        "candidate": "Current-main TODO/FIXME marker triage after P0 financial lineages",
+        "decision": "PENDING"
+      }
+    ]
+  },
+  "source_reads": [
+    {
+      "path": "AGENTS.md",
+      "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"
+    },
+    {
+      "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
+      "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"
+    },
+    {
+      "path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md",
+      "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"
+    },
+    {
+      "path": "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json",
+      "blob_sha": "0f97fc7e723fc97cd8366a10f0c9eb7892df4605"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md",
+      "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_CANON_MASTER.json",
+      "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"
+    },
+    {
+      "path": "KGEN-Canon/KGEN_DEPENDENCY_GRAPH.json",
+      "blob_sha": "9053a7f6ca1775fd8055d0f7fb0986ecdd1ad78d"
+    },
+    {
+      "path": "KGEN-KAIOS/SECURITY_MODEL.md",
+      "blob_sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md",
+      "blob_sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md",
+      "blob_sha": "092c11a085412154b26d230ba8007cc41fdd2e18"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+      "blob_sha": "824626abe0a10894972445d3ae3597b584d44276"
+    },
+    {
+      "path": "KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md",
+      "blob_sha": "9d3f6aaff7819a0c5b004670c396dfb4e9b975c2"
+    },
+    {
+      "path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md",
+      "blob_sha": "760228b706ebec2b88831d09a9d91a829c7bba4a"
+    },
+    {
+      "path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md",
+      "blob_sha": "650d371140179dc955d323da226f41360dda33b1"
+    },
+    {
+      "path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md",
+      "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"
+    },
+    {
+      "path": "KGEN-KAIOS/worker_registry.json",
+      "blob_sha": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c"
+    }
+  ],
+  "subject": {
+    "pr": 135,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/135",
+    "title": "Add 18888 Lingxiao Bank V2 settlement runtime and TempleHeart Mainnet plan",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "mergeable_at_audit": false,
+    "head_branch": "codex/templeheart-v34-mainnet",
+    "head_sha": "2d6d152e0d3c885822745c43d4d96a0836bf4e0e",
+    "head_tree": "663dc0e5310539db441d193c9b121d19d801e5fb",
+    "merge_base_sha": "c7e8c533c5bbc598fac3192e0576bacb55fb6a31",
+    "merge_base_tree": "d557cf27d8093900cf7c3e7cfda3085660e47af5",
+    "ahead_of_current_main": 30,
+    "behind_current_main": 1030,
+    "relation": "DIVERGED",
+    "changed_files": 96,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "conversation_comments": 1,
+    "decision": "HOLD_OPEN_DRAFT_UNMERGED_SUPERSEDED_DEPLOYED_EVIDENCE_ARCHIVED_NO_GO",
+    "direct_merge_forbidden": true,
+    "direct_merge_reasons": [
+      "The head is a codex/* branch whose merge can trigger Cursor wake.",
+      "The branch is 1030 commits behind exact current main and contains five three-way-diverged paths.",
+      "The only conversation comment explicitly says not to merge the historical branch wholesale and names SUPERSEDED_DEPLOYED_EVIDENCE_ARCHIVED as the safe closeout.",
+      "Merged PR #160 already preserves exact #135 deployed-source/evidence blobs under archive paths without restoring stale active source.",
+      "The exact subject head has no GitHub Actions runs, check runs, commit statuses or submitted reviews.",
+      "The branch contains contracts, payment rails, governance, deployment planners and Mainnet evidence; any execution requires action-specific Human authority."
+    ]
+  },
+  "successor": {
+    "pr": 160,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/160",
+    "merged": true,
+    "merge_commit_sha": "bab16dc9bf99479e00f144b5249f16e14b7c6536",
+    "decision": "CURRENT_MAIN_PROVENANCE_SUCCESSOR",
+    "exact_preserved_pr135_blobs": [
+      {
+        "path": "archive/mainnet-lineage/pr135-genesis/contracts/KAIOS.sol",
+        "blob_sha": "86f1111a51ac2ecd6b399f1928765e93cdbdf286"
+      },
+      {
+        "path": "archive/mainnet-lineage/pr135-genesis/contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
+        "blob_sha": "20275dfa5ab8c7a83a115248319d29a1b7bb83f0"
+      },
+      {
+        "path": "archive/mainnet-lineage/pr135-genesis/KAIOS_GENESIS_MAINNET_RECORD.json",
+        "blob_sha": "f49e4949b1ddff66f73c4181c429af2a442162fb"
+      },
+      {
+        "path": "archive/mainnet-lineage/pr135-genesis/KAIOS_GENESIS_MAINNET_INSCRIPTION.md",
+        "blob_sha": "ad6e6e4fbeca07dad6c2da973012640fca0038db"
+      },
+      {
+        "path": "archive/mainnet-lineage/pr135-genesis/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
+        "blob_sha": "09cc3a2e8799aa4fcbfd717d33592b75136e46db"
+      },
+      {
+        "path": "archive/mainnet-lineage/pr135-genesis/config/mainnet-economic-config.final-review.json",
+        "blob_sha": "f72e2893329a0b3b936de7d2630f37698b3a4455"
+      }
+    ]
+  },
+  "path_lineage": {
+    "counts": {
+      "total": 96,
+      "pr_only_added": 56,
+      "pr_modified_main_unchanged": 35,
+      "three_way_diverged": 5
+    },
+    "paths": [
+      {
+        "path": "KGEN-KAIOS/18888_Celestial_Bank_KAIOS_WhiteHole_Whitepaper_V2.0_CURRENT.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "b236c24084ff6daba6197691ea623fff59980171",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/CODEX_HANDOFF_2026-08-09.md",
+        "base_blob_sha": "3b75d95a4ce77f687b16533f868a6825c507aa5f",
+        "main_blob_sha": "3b75d95a4ce77f687b16533f868a6825c507aa5f",
+        "head_blob_sha": "bf842bdcab6d6f2342b54abcec073ca71b8d78cb",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS.md",
+        "base_blob_sha": "037ec005e343eeab0b4a57bbd204541d202cc93b",
+        "main_blob_sha": "037ec005e343eeab0b4a57bbd204541d202cc93b",
+        "head_blob_sha": "161b53bc31730c3e874240e4dd7029a536fb477d",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md",
+        "base_blob_sha": "9d3f6aaff7819a0c5b004670c396dfb4e9b975c2",
+        "main_blob_sha": "9d3f6aaff7819a0c5b004670c396dfb4e9b975c2",
+        "head_blob_sha": "dd5d30658a47a73f097a4a359df49d1422e05a8a",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_CELESTIAL_BANK_CONSERVATION_WHITEPAPER_V1.8.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "9d67baefa34076e9ee99a60f072368474ac1bd83",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_COMPONENTS.md",
+        "base_blob_sha": "c52576b7eab35f4e3d29a251665e6b2597e5608f",
+        "main_blob_sha": "c52576b7eab35f4e3d29a251665e6b2597e5608f",
+        "head_blob_sha": "3893d881ad5e990c43263f12ed3594a0664a9419",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_FrictionMirror_Multiverse_README.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "370c810f87836ee03eba79568ed58f1575fe11f6",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_GENESIS_INSCRIPTION.md",
+        "base_blob_sha": "b45f9e9d51cbf5af8125c33a50397207693bd0d6",
+        "main_blob_sha": "b45f9e9d51cbf5af8125c33a50397207693bd0d6",
+        "head_blob_sha": "61f8752c199e537fbbafd9680a92d532f5c72dfc",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_GENESIS_MAINNET_INSCRIPTION.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "ad6e6e4fbeca07dad6c2da973012640fca0038db",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_GENESIS_MAINNET_RECORD.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "f49e4949b1ddff66f73c4181c429af2a442162fb",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md",
+        "base_blob_sha": "824626abe0a10894972445d3ae3597b584d44276",
+        "main_blob_sha": "824626abe0a10894972445d3ae3597b584d44276",
+        "head_blob_sha": "a2a37e7a433b0fddb8510d61dd26cfdf1efd9a56",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.0.md",
+        "base_blob_sha": "534116490c5e5b00267a7c3334bed64399b9940e",
+        "main_blob_sha": "534116490c5e5b00267a7c3334bed64399b9940e",
+        "head_blob_sha": null,
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/KAIOS_YUNZHAN_CAVE_8895_SHADOW_BANK_REAL_ECONOMY_SPEC_V1.2.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "9416cc5fbfc331423508c94723df861a78b889d8",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/README.md",
+        "base_blob_sha": "b18f7056b0651118b1b1d1eea088361412f6a64a",
+        "main_blob_sha": "b18f7056b0651118b1b1d1eea088361412f6a64a",
+        "head_blob_sha": "306cd15468ede7bc36f0d03f54ff30f4f778834f",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/BankGovernance_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "f427216b00b2de3b8227143cf6d2a25dce5f999b",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/BankMigration_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "5b4e5cdc359fbbf3573e16672bffe52a124dadc5",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/BankRiskController_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "30b506fb52403bfb44c4bcb480815d7785aab794",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/CelestialSeat500_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "099a3d82608660936dc36c19f56804d2d90ab831",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/CivilizationAllocation_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "6dcb2ead3feb593f1208a2cf323fb83b8d1d0c3d",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/EconomicRouter8888_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "aabd25ca8081fc33bc297b54c1da5e13d447c05f",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/ExchangeSettlement11520_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "7b4fe813e553eea4e169efc620c6fc9cf3599283",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/GaolaozhuangCommercialBank8888_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "94757f20338a467a6105d98b1346278dcf5496fc",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/KAIOS.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "956d9d2577c503a1fd9cf4faf2f2caff743b49dd",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/KAIOSGenesisInscription.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "b0b02ab85681ca6d9e42c0611f61b60364b63932",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/abi/LingxiaoCelestialBank18888_Upgradeable.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "710a7ae7b509d6cdfde9ff258b2a6bf5386133bc",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "09cc3a2e8799aa4fcbfd717d33592b75136e46db",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/config/LINGXIAO_18888_MAINNET_DEPLOYMENT_MANIFEST.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "cb12d53917ab9c2149737b5ea86c9d507530a2b4",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/config/lingxiao-18888-bank-system.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "326eab504e55106f4e10c75dae916b638396a46f",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/config/lingxiao-18888-module-registry.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "617c287efdca5d8e4c9937896eabf80b4a3bedb8",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/config/mainnet-economic-config.final-review.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "f72e2893329a0b3b936de7d2630f37698b3a4455",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/config/mainnet-economic-config.template.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "6913b97915d0ac3034b451c774d05550bacfcc86",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/BankGovernance_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "f80a136031a93af604f04bf4aa6d7c50b6ab5e22",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/BankMigration_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "bd1aee27d838545661b005cee095d8a2806c28f0",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/BankRiskController_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "8253e4b8514c3fce9bd49face83b3f119317ec14",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/CelestialSeat500_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "3b895abeadb3fa035f9acb0995c37f82145733a0",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/CivilizationAllocation_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "9ee5d431854b02183fef578498a7c082542b9d10",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/EconomicRouter8888_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "bf2ceb46c0ab098152556419110293a6810938f5",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/ExchangeSettlement11520_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "5179a689cfa1bc02b851db0618ac130411aaceb1",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/GaolaozhuangCommercialBank8888_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "b20010a60056f3eedca639447dfc6d475217311b",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KAIOS.sol",
+        "base_blob_sha": "e2b9e488e3951ce3a096269b922361baa2d62faa",
+        "main_blob_sha": "e2b9e488e3951ce3a096269b922361baa2d62faa",
+        "head_blob_sha": "86f1111a51ac2ecd6b399f1928765e93cdbdf286",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KAIOSGenesisInscription.sol",
+        "base_blob_sha": "e269c7ca403f08d45071a198ac0ee41b1d68c0de",
+        "main_blob_sha": "e269c7ca403f08d45071a198ac0ee41b1d68c0de",
+        "head_blob_sha": "2a4b3a4be297b798d657b95766ed744e9064d9f9",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/KAIOSOrganRegistry.sol",
+        "base_blob_sha": "b94143f6d1d4e9768877ae25a3699714a8b131e2",
+        "main_blob_sha": "b94143f6d1d4e9768877ae25a3699714a8b131e2",
+        "head_blob_sha": "fc455ccef353d8422074d32e0ea04e7ae11f6b7d",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/LingxiaoBankModuleBaseUpgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "8118f63cc91dfc29e0fabf54baa22393b48b08c4",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/LingxiaoCelestialBank18888_Upgradeable.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "20275dfa5ab8c7a83a115248319d29a1b7bb83f0",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/contracts/interfaces/ILingxiaoCelestialBank18888.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "6363d364071bb96f2b48b9ce0c7a3d315ae20dda",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/dashboard/lingxiao-18888-bank-status.schema.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "d6b06d049d55f2ec28058c4901766cba8afb23e6",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/frontend-adapter/lingxiao18888BankAdapter.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "20a04d9f527c1f1b626b329ea86a593f2aedccc2",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/indexer/lingxiao-18888-events.schema.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "23a7e5f7c86eaf5fb5c41b9da44946e3d6e6325e",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/operations/LINGXIAO_18888_FULL_BANK_RUNBOOK.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "32b65e606a4ab00e29e1796e18dc44ccf1326f4b",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/package.json",
+        "base_blob_sha": "07ce6f55cebb55e3f8d31df2f168cd4af30ff871",
+        "main_blob_sha": "07ce6f55cebb55e3f8d31df2f168cd4af30ff871",
+        "head_blob_sha": "1eb3cd87c750b37a7831bc3a0280a9e05932de28",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json",
+        "base_blob_sha": "d00183ede81407cd972866991db3c2ee6bd86bc9",
+        "main_blob_sha": "617c022d5e91bdd3d046af0f8fba582903ac67b6",
+        "head_blob_sha": "d9b59a9778096cbe1f9249514aa71a01ab9b1767",
+        "classification": "THREE_WAY_DIVERGED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/INTEGRATION_ARTIFACT_VALIDATION.json",
+        "base_blob_sha": "ec10d4c20bc69f5b72cf446e40dcfbc982e44920",
+        "main_blob_sha": "ec10d4c20bc69f5b72cf446e40dcfbc982e44920",
+        "head_blob_sha": "6681ed5ea254101d4ad27d1dd354d5fdf9c6a04c",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/KAIOS_LINEAGE_STALE_REFERENCE_AUDIT_2026-08-09.json",
+        "base_blob_sha": "e581c8533d2f0df1616845270fd7829eb502b07b",
+        "main_blob_sha": "e581c8533d2f0df1616845270fd7829eb502b07b",
+        "head_blob_sha": "d6dc35a8770724398936746460fced8334cf59d6",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/KAIOS_LINEAGE_STALE_REFERENCE_AUDIT_2026-08-09.md",
+        "base_blob_sha": "8857258d24d7c1502ef81ad3ff46dedf62b25df3",
+        "main_blob_sha": "8857258d24d7c1502ef81ad3ff46dedf62b25df3",
+        "head_blob_sha": "54d79dbbd7ce333598f2ca433e4a055b5ef89158",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/LINGXIAO_18888_FULL_BANK_SECURITY_REPORT.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "894d1246d7646f8d76f40baa271ee3e656cf9592",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/LINGXIAO_18888_GENESIS_CHAIN_REACTION_SIMULATION.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "79803f2ca7ac48c15fecdfda2fa13a10e0f70e24",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json",
+        "base_blob_sha": "c53114d39e4f9e0ebec2833f19fef91323f40c5a",
+        "main_blob_sha": "c53114d39e4f9e0ebec2833f19fef91323f40c5a",
+        "head_blob_sha": "c67c33d0cc1154060cfe09b6863151d9a6a46897",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_INSCRIPTION_UNSIGNED_DEPLOYMENT.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "ae23475a9cfbc4762a6c34d95a2248416fb71252",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_INSCRIPTION.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "f8ce69d9bb1338a0bfdbaa325492bc83cf904112",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/mainnet-pre-sign/KAIOS_GENESIS_MAINNET_RECORD.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "62b644fb46ca4253341598a12cafa003c4b3b87b",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.json",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "cca9e7f6e3d9c33c98ea2892377f27361a95b0e0",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/reports/mainnet-pre-sign/LINGXIAO_18888_MAINNET_FORK_REHEARSAL.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "9bb5e7a8e5af44e01e19d48b642f516551ad75cb",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/scripts/prepare-lingxiao-18888-deployment.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "ae2dd35552e4de7958732934e18c0b66029b044b",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/scripts/prepare-lingxiao-18888-upgrade.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "e7837001fcec0d445901173bdbcf6bb2eb202737",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/celestial-seat500-calendar.integration.test.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "61d739534803a3fed143deda4e469f87cbe632a2",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/contracts/CelestialSeat500_DurationEpochV1Fixture.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "dd67e10e73947cc4ee74874ad8fc5e38e7db227c",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/contracts/MockKGEN.sol",
+        "base_blob_sha": "d580c2714b10ee51d66ced2eafc74be6edcd72e4",
+        "main_blob_sha": "d580c2714b10ee51d66ced2eafc74be6edcd72e4",
+        "head_blob_sha": "23e70ce655e5955d5e54e5437c2a9fc643bc01ba",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/contracts/MockNonUUPS.sol",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "74cc40b0ee4bcc8522492024bbc7810edbc68919",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/gaolaozhuang-8888-bank.integration.test.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "1c8296f5b11e76c6c4f40771d51ecc4cbd01e540",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/helpers.mjs",
+        "base_blob_sha": "770f653e5ff0d9c5adec003f2182ef93ec017b54",
+        "main_blob_sha": "770f653e5ff0d9c5adec003f2182ef93ec017b54",
+        "head_blob_sha": "dbd71a7f1f5408aa0afb280c378492bbd822ddbe",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/lingxiao-bank-system.integration.test.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "8ae8d58fa0023e9a87cf0cbb2ce9bb098aaf26d9",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/templeheart.integration.test.mjs",
+        "base_blob_sha": "2d33a9721a3ffabc1b671de272ffaccc70ae85af",
+        "main_blob_sha": "2d33a9721a3ffabc1b671de272ffaccc70ae85af",
+        "head_blob_sha": "3cc52824321af9a6ffff03d8d2b39d1f4383d446",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/token-lineage.fuzz-invariant.test.mjs",
+        "base_blob_sha": "a62e5cedc5fdb806d88045e2cc13091b09afae14",
+        "main_blob_sha": "a62e5cedc5fdb806d88045e2cc13091b09afae14",
+        "head_blob_sha": "78ce13bf485c938d66c36b6d5dd3da442257b099",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/token-lineage.unit.test.mjs",
+        "base_blob_sha": "92bbbabaa74d42e37cd1ea0fc94528c650771ac1",
+        "main_blob_sha": "92bbbabaa74d42e37cd1ea0fc94528c650771ac1",
+        "head_blob_sha": "bb50616760f4d1a4629b7c131374159b873920f7",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tests/token-surface.security.test.mjs",
+        "base_blob_sha": "2b71e71ee4880f71d55d5b3a50f18f52dc1c14e1",
+        "main_blob_sha": "2b71e71ee4880f71d55d5b3a50f18f52dc1c14e1",
+        "head_blob_sha": "62cf59a8e568264841d4fb213cecfe615c333155",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/compile-contracts.mjs",
+        "base_blob_sha": "d01e5b3773ecd3044eabbcc3e38972503fa47f02",
+        "main_blob_sha": "d01e5b3773ecd3044eabbcc3e38972503fa47f02",
+        "head_blob_sha": "3ba869462ef3b41aae93fcd04fa0b9046d07e1b8",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/generate-lingxiao-bank-api.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "03b6e83cd28742f772a51afbe79970f22292c5b7",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/generate-stale-reference-audit.mjs",
+        "base_blob_sha": "0b8f1d51f8f1bfdca475c846fce3c07180788bbf",
+        "main_blob_sha": "0b8f1d51f8f1bfdca475c846fce3c07180788bbf",
+        "head_blob_sha": "2955d0a4ce8daf21615c16d977e457664913c290",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/rehearse-lingxiao-mainnet-fork.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "70c27a192d4bf96b417dcecaf6e671545bda9ec6",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/simulate-lingxiao-genesis-chain-reaction.mjs",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "b4a0f3281b2aa0924e30f22bddd7e6edf9f65258",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/validate-integration-artifacts.mjs",
+        "base_blob_sha": "00d33a8c6f777ba30f8f51ee5e61ef098a156f7a",
+        "main_blob_sha": "00d33a8c6f777ba30f8f51ee5e61ef098a156f7a",
+        "head_blob_sha": "22000df759448019b41808062782853a44e1d6db",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "KGEN-KAIOS/tools/verify-current-lineage.mjs",
+        "base_blob_sha": "f6e7f66ce72f3a9ec5f5452c8b84e27a37b20dd6",
+        "main_blob_sha": "be9beeaabe090c4c674bbc952e64fc9fb927b3ba",
+        "head_blob_sha": "44ad6a71d78ec8c76c7c8329d830871427314736",
+        "classification": "THREE_WAY_DIVERGED"
+      },
+      {
+        "path": "KGEN/docs/TEMPLEHEART_MAINNET_LINEAGE.md",
+        "base_blob_sha": null,
+        "main_blob_sha": null,
+        "head_blob_sha": "a6675fe3771963cfa5f2b5faf070d9c809f94d7e",
+        "classification": "PR_ONLY_ADDED"
+      },
+      {
+        "path": "KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md",
+        "base_blob_sha": "a656eeb184020093fdf4c37496b20c1e2161b426",
+        "main_blob_sha": "a656eeb184020093fdf4c37496b20c1e2161b426",
+        "head_blob_sha": "b4d05892c1608c7658948a07cd67a8e54af6d883",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+        "base_blob_sha": "0f66a62de1018e35ca93198dc890fdddf70ab213",
+        "main_blob_sha": "4286d1aede181f45eb274196a6799ac18ced42ec",
+        "head_blob_sha": "b3057b28f421c9757faca037ea8e37352b8746fd",
+        "classification": "THREE_WAY_DIVERGED"
+      },
+      {
+        "path": "README.md",
+        "base_blob_sha": "69d5dafb4e787622ef8c2d16f1426288d6a628fd",
+        "main_blob_sha": "509885b9a47dfd4015e26ac1f7c46b61ee10d6a5",
+        "head_blob_sha": "b08509b2e8de87ce1e524b97a592c0553741e43f",
+        "classification": "THREE_WAY_DIVERGED"
+      },
+      {
+        "path": "docs/KGEN_MASTER_INDEX.md",
+        "base_blob_sha": "3c5938fd3976ab759767ff395c5377270512c172",
+        "main_blob_sha": "989c42d658f43d43c6ce544f3b33604f9802def6",
+        "head_blob_sha": "5c3d1bad27c815d43407ffb40ec413795962091f",
+        "classification": "THREE_WAY_DIVERGED"
+      },
+      {
+        "path": "docs/constitution/00_PrimeForge_Creation_Declaration.md",
+        "base_blob_sha": "7e0075759b96b3d0abe7f9343305ef974129e023",
+        "main_blob_sha": "7e0075759b96b3d0abe7f9343305ef974129e023",
+        "head_blob_sha": "d3f6f534bdd6f0e0321947f95174874356a1c228",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/constitution/01_KGEN_Universe_Constitution.md",
+        "base_blob_sha": "77aa587e92ce95607db6a8be4338fd97a39366d3",
+        "main_blob_sha": "77aa587e92ce95607db6a8be4338fd97a39366d3",
+        "head_blob_sha": "3467cc968b755197e1d586e94e3e0587d493165f",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/constitution/02_KAIOS_Civilization_Constitution.md",
+        "base_blob_sha": "303a134defd23c57b4e9109184d7e81d2d261fbe",
+        "main_blob_sha": "303a134defd23c57b4e9109184d7e81d2d261fbe",
+        "head_blob_sha": "f99ff1b5bb2869f5c288d94570b2eab373271677",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/constitution/03_Celestial_Bank_18888.md",
+        "base_blob_sha": "ccec39b10bd45659996db13a0d8504ae77a00960",
+        "main_blob_sha": "ccec39b10bd45659996db13a0d8504ae77a00960",
+        "head_blob_sha": "3dc4c0d3c36876b38798fbc010c804a6ffc04c1f",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/constitution/04_People_Bank_8888.md",
+        "base_blob_sha": "ae85beabc2d6cc065b158c5ade957d740b494380",
+        "main_blob_sha": "ae85beabc2d6cc065b158c5ade957d740b494380",
+        "head_blob_sha": "ccbbd2a1e21cfe70daa178eaf73e3c08fbfa19d2",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/constitution/05_Gold_Island_33333.md",
+        "base_blob_sha": "dd3bc3c8f47325e51ac11f91b0d09d48e3697fcf",
+        "main_blob_sha": "dd3bc3c8f47325e51ac11f91b0d09d48e3697fcf",
+        "head_blob_sha": "c066a31b28c5c1bef4d7e006acd50b49daf23d53",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/constitution/06_Huaguo_Exchange_11520.md",
+        "base_blob_sha": "03854501000587dca96ba8d2d51d3cc3aefd9dc1",
+        "main_blob_sha": "03854501000587dca96ba8d2d51d3cc3aefd9dc1",
+        "head_blob_sha": "1727e77de856fd6358ee0d23e179c1a4764e3a10",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/constitution/08_AI_Company.md",
+        "base_blob_sha": "50ca8effe0fb73355bb2c97a3566b44b878e2243",
+        "main_blob_sha": "50ca8effe0fb73355bb2c97a3566b44b878e2243",
+        "head_blob_sha": "df287b86a4fd23d925b3b55e74134f7104bb3092",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      },
+      {
+        "path": "docs/physics/final-whitepaper/CODEX_KAIOS_WHITE_HOLE_GENESIS_IMPLEMENTATION_INSTRUCTIONS.md",
+        "base_blob_sha": "010e0304cde1cbb5d2901f24d650c1eca85933c4",
+        "main_blob_sha": "010e0304cde1cbb5d2901f24d650c1eca85933c4",
+        "head_blob_sha": "52b1bf7adb56d8aedcc246ca9540947ca064ac3c",
+        "classification": "PR_MODIFIED_MAIN_UNCHANGED"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "severity": "P0",
+      "id": "HISTORICAL_BRANCH_EXPLICITLY_SUPERSEDED",
+      "conclusion": "PR #135 must remain unmerged. Its own current comment directs archive-only closeout, and merged PR #160 already carries the exact deployed-evidence lineage onto current main without restoring stale active source."
+    },
+    {
+      "severity": "P0",
+      "id": "PROTECTED_MAINNET_AND_AUTHORITY_CLAIMS_NOT_CURRENT_OPERATIONAL_AUTHORITY",
+      "conclusion": "The branch records KAIOS_MAINNET=LIVE, 57 Mainnet transactions, named governance identities, balances and deployment receipts. These are preserved historical repository evidence, not permission for this automation to operate contracts, sign, pay, govern, redeploy or assert present custody/control."
+    },
+    {
+      "severity": "P0",
+      "id": "ROUTE_IDENTITY_IS_CODE_LENGTH_ONLY",
+      "evidence": {
+        "bank_blob": "20275dfa5ab8c7a83a115248319d29a1b7bb83f0",
+        "economic_router_blob": "bf2ceb46c0ab098152556419110293a6810938f5",
+        "exchange_router_blob": "5179a689cfa1bc02b851db0618ac130411aaceb1"
+      },
+      "conclusion": "Bank KGEN/KAIOS, 8888 and 11520 bindings rely on nonzero code plus limited reported values; they do not bind proxy implementation, runtime code hash, ABI, finalized block or an immutable canonical manifest. Governance-controlled initialization/configuration can therefore route real KAIOS to a code-bearing impostor unless deployment provenance is independently enforced."
+    },
+    {
+      "severity": "P0",
+      "id": "GENERIC_GOVERNANCE_CALL_CONTROLS_REAL_FUNDS",
+      "evidence": {
+        "governance_blob": "f80a136031a93af604f04bf4aa6d7c50b6ab5e22",
+        "bank_blob": "20275dfa5ab8c7a83a115248319d29a1b7bb83f0"
+      },
+      "conclusion": "The governance module executes arbitrary zero-value calls to any code-bearing target after proposer/approver delay. Because it receives admin, module-admin and upgrader authority, identity/key compromise or mistaken proposals can replace modules, grant roles, upgrade implementations or alter real-fund routes. Repository names are not proof of controller separation or signer custody."
+    },
+    {
+      "severity": "P1",
+      "id": "EXACT_HEAD_HAS_NO_GITHUB_CI_OR_REVIEW",
+      "conclusion": "The exact subject head has zero Actions runs, check runs, commit statuses and submitted reviews. Branch-recorded 68/68 and Mainnet claims are not exact-head GitHub CI evidence."
+    },
+    {
+      "severity": "P1",
+      "id": "STALE_DIVERGED_PROTECTED_SCOPE",
+      "conclusion": "The subject is ahead 30 / behind 1030 and changes contracts, CURRENT files, constitutions, deployment planners and five three-way-diverged paths. Refreshing or merging it wholesale would overwrite accepted current-main lineage."
+    },
+    {
+      "severity": "P1",
+      "id": "GOVERNANCE_VALUE_FIELD_IS_DEAD",
+      "evidence": {
+        "governance_blob": "f80a136031a93af604f04bf4aa6d7c50b6ab5e22"
+      },
+      "conclusion": "Proposal stores a value field but rejects every nonzero value and execute calls target.call(data) without value. This is internally inconsistent and cannot support native-value governance even though the struct/API advertise it."
+    },
+    {
+      "severity": "P1",
+      "id": "CURRENT_MAIN_SUCCESSOR_IS_ARCHIVE_ONLY",
+      "conclusion": "Current main deliberately keeps #135 source/evidence under archive/mainnet-lineage and does not activate the remaining bank modules, scripts or old CURRENT/Canon edits. That boundary must remain intact."
+    }
+  ],
+  "validation": {
+    "subject_exact_head": {
+      "actions_runs": 0,
+      "check_runs": 0,
+      "commit_statuses": 0,
+      "submitted_reviews": 0,
+      "conclusion": "NO_EXACT_HEAD_GITHUB_CI_EVIDENCE"
+    },
+    "machine_checks": [
+      "JSON parse",
+      "selected_count equals 1",
+      "96 unique subject paths",
+      "path classification totals equal 96",
+      "all non-null blob/commit/tree fields are lowercase 40-hex SHA",
+      "all protected effects are false",
+      "merged PR #160 preserved six exact #135 evidence blobs",
+      "subject/main relation is ahead 30 / behind 1030"
+    ],
+    "functional_qa": "PASS_EVIDENCE_ONLY_AUDIT",
+    "visual_qa": {
+      "subject_ui_changed": false,
+      "dedicated_subject_browser_required": false,
+      "reason": "This audit changes one JSON WorkOrder only; PR #135 frontend adapter/schema are historical branch code and are not transplanted.",
+      "post_merge_requirement": "Verify exact-main Pages deployment and Responsive Chromium screenshot artifact after audit merge."
+    }
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR135_LINGXIAO_MAINNET_LINEAGE_AUDIT_R0_20260924.json"
+  ],
+  "protected_effects": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "deposit_or_withdrawal": false,
+    "funding_or_recapitalization": false,
+    "real_settlement": false,
+    "oracle_onchain_configuration": false,
+    "deployment_or_upgrade": false,
+    "role_grant_or_revocation": false,
+    "wallet_connection": false,
+    "signer_or_private_key_access": false,
+    "mainnet_or_testnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "controller_signer_operator_appointment": false,
+    "worker_or_life_activation": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "external_submission": false,
+    "paid_external_api": false
+  },
+  "remaining_blockers": [
+    "PR #135 remains OPEN / DRAFT / UNMERGED and is explicitly superseded for archive-only closeout.",
+    "The subject branch is 1030 commits behind current main and has five three-way-diverged paths.",
+    "Exact-head GitHub CI, checks, statuses and submitted review evidence are absent.",
+    "Controller/signer custody, current proxy implementation identities and current on-chain configuration were not independently verified by this repository-only audit.",
+    "Route identity is not contract-codehash/implementation-manifest bound inside the candidate contracts.",
+    "No deployment, upgrade, governance, payment, payroll, settlement, asset movement or chain mutation is authorized by this audit."
+  ],
+  "next_candidate": {
+    "priority": "P0",
+    "candidate": "PR #152 civilization service/alchemy financial Canon lineage safety audit",
+    "decision": "NEXT_AFTER_POST_MERGE_VERIFICATION"
+  }
+}
