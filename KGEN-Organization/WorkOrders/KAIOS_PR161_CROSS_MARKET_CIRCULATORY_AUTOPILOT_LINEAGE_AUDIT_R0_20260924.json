@@ -1,0 +1,358 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR161-CROSS-MARKET-CIRCULATORY-AUTOPILOT-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f",
+  "task_source_reason": "Inventory exact current repository risk and audit the highest-priority safe executable candidate without changing protected CURRENT, Canon, runtime, funds, authority, Life, Worker or chain state.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T05:21:45Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P1",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY",
+  "exact_base_sha": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f",
+  "exact_base_tree": "c17ce0c30cbbc2fe6fc532840a77b84d21bde995",
+  "subject": {
+    "repository": "klineodyssey/kline-odyssey",
+    "pr": 161,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/161",
+    "title": "feat(kaios): civilization cross-market circulatory autopilot v1",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "decision": "HOLD",
+    "head_branch": "codex/kaios-ai-company-cross-market-circulatory-autopilot-v1",
+    "head_sha": "a07b83ef82fed8380827921912534a7e3ad8adc2",
+    "head_tree": "9c236688c7b0fc7a2dbae3391ec540505b324617",
+    "merge_base_sha": "830b79214781fb1231f3619336de394f400a0bfd",
+    "merge_base_tree": "c101af16de79e36cfed1a4343d77799eb304ce41",
+    "comparison_to_exact_base": {
+      "status": "diverged",
+      "ahead_by": 9,
+      "behind_by": 765,
+      "changed_paths": 6,
+      "additions": 1157,
+      "deletions": 65
+    },
+    "evidence": {
+      "exact_head_workflow_runs": 1,
+      "successful_workflow_runs": 1,
+      "reviews": 0,
+      "review_threads": 0,
+      "comments": 2,
+      "blocking_comments": 2
+    },
+    "direct_merge_forbidden_reasons": [
+      "codex/* branch may trigger Cursor wake",
+      "Draft",
+      "behind exact latest main by 765 commits",
+      "protected CURRENT handbook scope",
+      "three-way-diverged Universal test boundary",
+      "caller-asserted capability, quote, settlement and evidence authority",
+      "hardcoded active Life and worker role claims without Human authority evidence",
+      "paper-only replay and accounting state with no durable atomic registry",
+      "two unresolved HOLD checkpoint comments",
+      "no review"
+    ]
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 35,
+    "open_prs_reviewed": true,
+    "main_workflow_runs_reviewed": true,
+    "todos_and_runtime_risks_reviewed": true,
+    "visual_qa_history_reviewed": true,
+    "latest_main": {
+      "sha": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f",
+      "tree": "c17ce0c30cbbc2fe6fc532840a77b84d21bde995",
+      "source_pr": 427,
+      "classification": "EXPECTED_PR_SQUASH_MERGE_NOT_DIRECT_MAIN_WRITE",
+      "post_merge_checks": "SUCCESS"
+    },
+    "selected_pr_exact_head_ci": {
+      "run_id": 33103263681,
+      "name": "11520 Universal Exchange V2",
+      "conclusion": "SUCCESS",
+      "limitations": "Historical exact-head tests exercise a stale 238-test-era boundary and do not establish trusted identity, authority, quote provenance, settlement, custody or production deployment."
+    },
+    "todo_inventory": {
+      "queries": ["TODO", "FIXME", "XXX", "NOT_IMPLEMENTED"],
+      "default_branch_indexed_matches": 0,
+      "interpretation": "Open PRs, CI, runtime evidence and protected-effect boundaries remain the actionable inventory."
+    },
+    "ranked_candidates": [
+      {
+        "rank": 1,
+        "priority": "P0",
+        "candidate": "PR #232 real-funds BrainExchange V4",
+        "decision": "HOLD",
+        "reason": "real funds, custody, oracle, upgrade and deployment authority"
+      },
+      {
+        "rank": 2,
+        "priority": "P0",
+        "candidate": "PR #196 external identity and brand verification lineage",
+        "decision": "HOLD",
+        "reason": "external identity, publication and authority claims"
+      },
+      {
+        "rank": 3,
+        "priority": "P0",
+        "candidate": "PRs #135/#152/#153/#154 banking, payroll and governance lineages",
+        "decision": "HOLD",
+        "reason": "protected payment, appointment, governance and Mainnet effects"
+      },
+      {
+        "rank": 4,
+        "priority": "P1",
+        "candidate": "PR #161 cross-market circulatory autopilot lineage audit",
+        "decision": "SELECTED",
+        "reason": "highest dependency-ordered safe evidence-only audit after PR #159"
+      },
+      {
+        "rank": 5,
+        "priority": "P1",
+        "candidate": "PR #199 liquidity forge and Auto-LP lineage audit",
+        "decision": "NEXT"
+      },
+      {
+        "rank": 6,
+        "priority": "P1",
+        "candidate": "PR #186 payment and treasury lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 7,
+        "priority": "P1",
+        "candidate": "PR #177 remote handoff and wallet UI lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 8,
+        "priority": "P1",
+        "candidate": "PR #198 mobile ATM and wallet lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 9,
+        "priority": "P1",
+        "candidate": "PRs #188/#190/#191/#192 integrated market, economy, employment and lab lineages",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 10,
+        "priority": "P1",
+        "candidate": "PR #181 company-core status and authority lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 11,
+        "priority": "P1",
+        "candidate": "PR #179 remote-control and execution lineage audit",
+        "decision": "PENDING"
+      },
+      {
+        "rank": 12,
+        "priority": "P1",
+        "candidate": "PR #426 superseded 11520 settlement repair closeout",
+        "decision": "PENDING",
+        "reason": "superseded by merged PR #427; verify safe closeout separately"
+      },
+      {
+        "rank": 13,
+        "priority": "P2",
+        "candidate": "PR #48 historical Life baseline lineage",
+        "decision": "PENDING"
+      }
+    ],
+    "selected_count": 1
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "handoff/HANDOFF_CURRENT.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "6ed6bd0b7799c45a9a2416ee4ce039f092922881"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-KAIOS/handbook/KAIOS_CIVILIZATION_CIRCULATORY_HANDOFF_HANDBOOK_CURRENT.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "ac7453b00af9391f4fa9f36ab2a93a9dde7cfb1b"},
+    {"path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "ref": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f", "sha": "1dc9cb29bac7dc5e72ee37027008c08414eb15ad"}
+  ],
+  "path_inventory": [
+    {
+      "path": "KGEN-KAIOS/handbook/KAIOS_CIVILIZATION_CIRCULATORY_HANDOFF_HANDBOOK_CURRENT.md",
+      "merge_base_blob": "ac7453b00af9391f4fa9f36ab2a93a9dde7cfb1b",
+      "main_blob": "ac7453b00af9391f4fa9f36ab2a93a9dde7cfb1b",
+      "pr_head_blob": "fb1a7105478db0c312b0abcba749e6a4a281a785",
+      "classification": "PR_ONLY_MODIFIED_PROTECTED_CURRENT_HOLD"
+    },
+    {
+      "path": "core/accounting/index.mjs",
+      "merge_base_blob": "2693610d3bc4965d3a298dd6474a27bab15369a7",
+      "main_blob": "2693610d3bc4965d3a298dd6474a27bab15369a7",
+      "pr_head_blob": "9a3d48dc7d4e6682d3c7cee02985eed64f60c819",
+      "classification": "PR_ONLY_MODIFIED_RUNTIME_HOLD"
+    },
+    {
+      "path": "core/jobs/index.mjs",
+      "merge_base_blob": "6b44ecbbe8d578ffc6c49f995625a2d26e37120d",
+      "main_blob": "6b44ecbbe8d578ffc6c49f995625a2d26e37120d",
+      "pr_head_blob": "c75833882ceab1914d87c6db877c0e21257d67f2",
+      "classification": "PR_ONLY_MODIFIED_RUNTIME_HOLD"
+    },
+    {
+      "path": "core/market/index.mjs",
+      "merge_base_blob": "14e3d18368e962e24b0bd81fddb9bb06b9d73ad1",
+      "main_blob": "14e3d18368e962e24b0bd81fddb9bb06b9d73ad1",
+      "pr_head_blob": "6c2c46ea3e5d781bebc9195047d41583e0775321",
+      "classification": "PR_ONLY_MODIFIED_RUNTIME_HOLD"
+    },
+    {
+      "path": "core/permissions/index.mjs",
+      "merge_base_blob": "2e56f9a81279b42f27649402b5c1f6fdb39b7b8c",
+      "main_blob": "2e56f9a81279b42f27649402b5c1f6fdb39b7b8c",
+      "pr_head_blob": "cb2a432d1cc4bce7ea3ac17b8cae0a6b2e656595",
+      "classification": "PR_ONLY_MODIFIED_RUNTIME_HOLD"
+    },
+    {
+      "path": "tests/universal-exchange.test.mjs",
+      "merge_base_blob": "65be97a59ff1150cbbd963979fff6e5291bbf282",
+      "main_blob": "b871b2bc53b967ffb40cac4f3e786f213c12624b",
+      "pr_head_blob": "97d19e5cfda582ce5b1a40ff7e4a043b69b33f1a",
+      "classification": "THREE_WAY_DIVERGED_TEST_BOUNDARY_HOLD"
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR161-F01",
+      "severity": "P1",
+      "area": "protected CURRENT and mass semantics",
+      "finding": "The PR replaces the current 49+81-day catalyst escrow/return design with a direct immutable-bank contribution, immediate burn/mint and 130-day freshness design, labels it Human-frozen without repository-bound Human decision evidence, and adds stale PR-status claims.",
+      "impact": "Merging would overwrite protected CURRENT and present a disputed future design as authorized current law.",
+      "disposition": "HOLD; do not transplant the handbook."
+    },
+    {
+      "id": "PR161-F02",
+      "severity": "P1",
+      "area": "identity and authority",
+      "finding": "The jobs runtime hardcodes LIFE-CODEX-GM-0001 as an active manager/CEO/CFO with reviewer and execution capabilities, while capability grants are created from caller-supplied employment and capability strings without an authoritative registry, issuer signature, acceptance or revocation evidence.",
+      "impact": "Code can manufacture Life, Worker, employment, reviewer and executive authority facts.",
+      "disposition": "HOLD; require separately authorized registries and signed, revocable bindings."
+    },
+    {
+      "id": "PR161-F03",
+      "severity": "P1",
+      "area": "autopilot evidence and effects",
+      "finding": "Heartbeat and handoff functions accept caller-provided results, evidence and effect booleans, record unverified evidence, and reject protected effects only when named booleans are explicitly true; omitted or unknown effects are not fail-closed.",
+      "impact": "Untrusted callers can manufacture completion evidence and bypass the intended protected-effect boundary by omission or schema drift.",
+      "disposition": "HOLD; require closed schemas, trusted receipts, signed authority and durable replay protection."
+    },
+    {
+      "id": "PR161-F04",
+      "severity": "P1",
+      "area": "market and settlement provenance",
+      "finding": "Quote adapter status, quote evidence, fixed treasury/beneficiary policy, exposure and real-trade eligibility are caller data. Paper receipts use caller-owned Sets and shallow field equality rather than durable, atomic source/asset/decimals/receipt binding.",
+      "impact": "The model cannot establish trusted quote provenance, treasury authority, beneficiary immutability, replay safety or settlement finality.",
+      "disposition": "HOLD; retain paper-only status."
+    },
+    {
+      "id": "PR161-F05",
+      "severity": "P1",
+      "area": "accounting and alchemy",
+      "finding": "Settlement candidates accept caller-provided Life, beneficiary, budget and evidence IDs, while fresh-alchemy lineage trusts a boolean bankReceiptVerified and changes protected KGEN/KAIOS/KUFO semantics without verifying contract identity, receipt inclusion, freshness source, atomic burn or mint.",
+      "impact": "Caller fixtures can be presented as funded settlement or verified contribution evidence, and future chain integration would lack atomic provenance.",
+      "disposition": "HOLD; no payment, burn, mint, transfer or deployment."
+    },
+    {
+      "id": "PR161-F06",
+      "severity": "P1",
+      "area": "durability and concurrency",
+      "finding": "Jobs, grants, replay keys, balances, candidates and receipts are in-memory caller-owned objects or Sets with no durable transaction, locking, idempotency or exactly-once boundary.",
+      "impact": "Concurrent or restarted execution can duplicate work, lose replay state or diverge accounting and authority state.",
+      "disposition": "HOLD production use; a successor needs durable transactional state and recovery tests."
+    }
+  ],
+  "implementation": {
+    "branch": "integration/pr161-cross-market-autopilot-lineage-audit-r0-20260924",
+    "branch_trigger_class": "NON_CODEX",
+    "scope": "Add this evidence-only JSON work order; do not copy any PR #161 runtime, CURRENT, Canon or workflow bytes.",
+    "changed_files": [
+      "KGEN-Organization/WorkOrders/KAIOS_PR161_CROSS_MARKET_CIRCULATORY_AUTOPILOT_LINEAGE_AUDIT_R0_20260924.json"
+    ],
+    "ui_or_game_change": false,
+    "target_specific_browser_qa_required": false
+  },
+  "acceptance_tests": [
+    "JSON parses successfully",
+    "inventory_snapshot.selected_count equals 1",
+    "path_inventory contains exactly six unique PR-relative paths",
+    "all recorded commit, tree and blob SHAs are 40 lowercase hexadecimal characters",
+    "all protected_effects values are false",
+    "exact-base current Universal suite passes",
+    "git diff --check passes",
+    "integration PR is Ready, mergeable, exact-latest-main based, with zero unresolved reviews or threads",
+    "exact-head required CI is green before expected-head merge",
+    "post-merge main checks, Pages SHA and responsive screenshot QA are verified"
+  ],
+  "verification": {
+    "work_order_json": "PASS",
+    "selected_count": "1/1 PASS",
+    "path_inventory": "6/6 unique paths PASS",
+    "recorded_sha_format": "34/34 PASS",
+    "protected_effect_assertions": "24/24 false PASS",
+    "exact_base_universal": {
+      "command": "node --test tests/universal-exchange.test.mjs",
+      "tests": 258,
+      "pass": 258,
+      "fail": 0,
+      "conclusion": "PASS"
+    },
+    "diff_check": "PASS",
+    "functional_qa": "Evidence-only audit; no runtime behavior changed.",
+    "visual_qa": "NOT_APPLICABLE_NO_UI_OR_GAME_CHANGE",
+    "integration_ci": "PENDING_EXACT_HEAD",
+    "post_merge_ci": "PENDING_MERGE"
+  },
+  "protected_effects": {
+    "paid": false,
+    "transferred_tokens_or_assets": false,
+    "sent_mainnet_transaction": false,
+    "sent_testnet_transaction": false,
+    "executed_governance": false,
+    "activated_life": false,
+    "onboarded_worker": false,
+    "appointed_controller": false,
+    "appointed_signer": false,
+    "appointed_operator": false,
+    "appointed_reviewer": false,
+    "accessed_private_key": false,
+    "exposed_private_key": false,
+    "mutated_chain_state": false,
+    "dispatched_workflow": false,
+    "launched_external_agent": false,
+    "called_paid_api": false,
+    "deployed_contract": false,
+    "connected_wallet": false,
+    "created_settlement": false,
+    "burned_token": false,
+    "minted_token": false,
+    "modified_canon": false,
+    "modified_current": false
+  },
+  "remaining_blockers": [
+    "PR #161 remains Draft, diverged and 765 commits behind exact latest main.",
+    "Protected CURRENT and alchemy semantics lack a current repository-bound Human decision.",
+    "Life, Worker, employment, reviewer, manager, controller and beneficiary authority are not verified.",
+    "Quote, treasury, receipt, budget, work-evidence and settlement provenance are caller-asserted.",
+    "Replay, job, grant, receipt and accounting state are not durable, atomic or exactly-once.",
+    "The exact-head Universal test path is three-way diverged from the current main boundary.",
+    "Original PR comments explicitly retain HOLD pending signer, capital, inventory and settlement connectors."
+  ],
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #199 liquidity forge and Auto-LP lineage security audit",
+    "allowed_scope": "Evidence-only R0 audit; no liquidity provisioning, token transfer, signer access, workflow dispatch, deployment or chain mutation."
+  }
+}
