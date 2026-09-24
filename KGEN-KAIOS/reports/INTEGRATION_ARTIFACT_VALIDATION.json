@@ -3,8 +3,8 @@
   "checks": {
     "files": 26,
     "json": 5,
-    "markdown": 5,
-    "utf8": 24,
+    "markdown": 10,
+    "utf8": 26,
     "bom": 0,
     "corruption": 0,
     "secretHits": 0,

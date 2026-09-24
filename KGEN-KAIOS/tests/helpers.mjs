@@ -25,7 +25,7 @@ export async function deploy(name, signer, args = []) {
   return contract;
 }
 
-export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAccounts = 10 } = {}) {
+export async function setupChain({ totalAccounts = 10 } = {}) {
   const eip1193 = ganache.provider({
     chain: { chainId: 31337, hardfork: "shanghai" },
     logging: { quiet: true },
@@ -35,6 +35,11 @@ export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAcco
   const provider = new BrowserProvider(eip1193);
   provider.pollingInterval = 25;
   const signers = await Promise.all(Array.from({ length: totalAccounts }, (_, index) => provider.getSigner(index)));
+  return { eip1193, provider, signers };
+}
+
+export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAccounts = 10 } = {}) {
+  const { eip1193, provider, signers } = await setupChain({ totalAccounts });
   const [owner, treasury] = signers;
 
   const registry = await deploy("KAIOSOrganRegistry", owner, [await owner.getAddress(), delay]);
