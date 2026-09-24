@@ -1,0 +1,255 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR152-18888-18911-CANON-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "SCHEDULED_ENGINEERING_CYCLE",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "e473ad9a7c532ba740fb7ad337db1f9e9e3cb859",
+  "task_source_reason": "Select exactly one highest-priority safe task after exact-main, open-PR, CI, runtime, visual, dependency and security inventory.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T12:14:43Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P0",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY_AUDIT",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_sha": "e473ad9a7c532ba740fb7ad337db1f9e9e3cb859",
+  "exact_base_tree": "6bec524291807d00b8a328228b3a12615389fd56",
+  "integration_branch": "integration/pr152-18888-18911-canon-lineage-audit-r0-20260924",
+  "selected_count": 1,
+  "selection": {
+    "candidate": "PR #152 18888 civilization service / 18911 alchemy Canon lineage",
+    "decision": "SELECTED_FOR_EVIDENCE_ONLY_LINEAGE_AUDIT",
+    "reason": "Highest-ranked unaudited P0 financial and protected-Canon lineage. A bounded R0 audit can classify its exact eight design paths and fail-closed blockers without installing Canon, moving assets, assigning authority or touching chain state."
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 34,
+    "current_main_recent_workflows": {
+      "failures_in_latest_20": 0,
+      "pages_run": 35992721260,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run": 35992777310,
+      "responsive_conclusion": "SUCCESS"
+    },
+    "ranked_candidates": [
+      {"rank": 1, "priority": "P0", "candidate": "PR #152 18888 service / 18911 alchemy Canon lineage", "decision": "SELECTED"},
+      {"rank": 2, "priority": "P0", "candidate": "PR #153 Hengyao payroll capability authority lineage", "decision": "NEXT"},
+      {"rank": 3, "priority": "P0", "candidate": "PR #154 Hengyao payroll bloodflow and Mainnet receipt lineage", "decision": "PENDING"},
+      {"rank": 4, "priority": "P0", "candidate": "PR #136 civilization Phase 2 module and deployment lineage", "decision": "PENDING"},
+      {"rank": 5, "priority": "P0", "candidate": "PR #196 BSC branding and verification external-authority lineage", "decision": "PENDING"},
+      {"rank": 6, "priority": "P1", "candidate": "PR #187 CURRENT Canon reconciliation lineage", "decision": "PENDING"},
+      {"rank": 7, "priority": "P1", "candidate": "PR #182 Option B project proposal runtime lineage", "decision": "PENDING"},
+      {"rank": 8, "priority": "P1", "candidate": "PR #188 integrated employment / market / ATM lineage", "decision": "PENDING"},
+      {"rank": 9, "priority": "P1", "candidate": "PR #172 K4168 public-good flow lineage", "decision": "PENDING"},
+      {"rank": 10, "priority": "P2", "candidate": "PR #48 historical World Life baseline lineage", "decision": "PENDING"},
+      {"rank": 11, "priority": "P2", "candidate": "Current-main TODO/FIXME inventory after P0 financial lineages", "decision": "PENDING"}
+    ]
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-Canon/KGEN_CANON_MASTER.json", "blob_sha": "6e6064cd7c46b4181e1b4bb8398af75b3c379b29"},
+    {"path": "KGEN-Canon/KGEN_DEPENDENCY_GRAPH.json", "blob_sha": "9053a7f6ca1775fd8055d0f7fb0986ecdd1ad78d"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "blob_sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_LINEAGE_CURRENT.md", "blob_sha": "68afc70f3cf224570defdc13c4389ea4af1351c3"},
+    {"path": "KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md", "blob_sha": "092c11a085412154b26d230ba8007cc41fdd2e18"},
+    {"path": "KGEN-KAIOS/KAIOS_WHITE_HOLE_ATOMIC_CONVERSION_AND_LIQUIDITY_RUNTIME_CURRENT.md", "blob_sha": "824626abe0a10894972445d3ae3597b584d44276"},
+    {"path": "KGEN-KAIOS/KAIOS_500_CELESTIAL_AND_MARS_SEATS_RUNTIME_CURRENT.md", "blob_sha": "9d3f6aaff7819a0c5b004670c396dfb4e9b975c2"},
+    {"path": "docs/physics/KGEN_KAIOS_SCALE_AND_PLANCK_RUNTIME_CURRENT.md", "blob_sha": "760228b706ebec2b88831d09a9d91a829c7bba4a"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-KAIOS/worker_registry.json", "blob_sha": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c"},
+    {"path": "KGEN-Organization/WorkOrders/KAIOS_PR158_ALCHEMY_KUFO_KSHIP_LINEAGE_AUDIT_R0_20260921.json", "blob_sha": "36f0addbe0bcc76eb8c9bac8109814385275b00a"},
+    {"path": "KGEN-Organization/WorkOrders/KAIOS_PR159_PHYSICS_V41_CURRENT_LINEAGE_AUDIT_R0_20260921.json", "blob_sha": "fb6f067f71688d2c8f1d15e8094017c460b3537e"},
+    {"path": "KGEN-Organization/WorkOrders/KAIOS_PR135_LINGXIAO_MAINNET_LINEAGE_AUDIT_R0_20260924.json", "blob_sha": "4f13fbdc1164b20047664db955f2031fc6672150"}
+  ],
+  "subject": {
+    "pr": 152,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/152",
+    "title": "docs(kaios): separate 18888 service and 18911 alchemy",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "mergeable_at_audit": true,
+    "base_branch": "codex/kaios-civilization-phase2",
+    "base_sha": "00c79b380ce094c17d75697f360820c4d2035071",
+    "base_tree": "c32cc1e40e761eb36fe66191bd3b0f8024d384f4",
+    "head_branch": "codex/kaios-18888-divine-bank-v2-canon",
+    "head_sha": "672ab4884e8cf6f9d07c176a862fb858cafe8161",
+    "head_tree": "dead275821e5527626965063477fa0fdb2b27146",
+    "merge_base_sha": "c7e8c533c5bbc598fac3192e0576bacb55fb6a31",
+    "merge_base_tree": "d557cf27d8093900cf7c3e7cfda3085660e47af5",
+    "relation_to_current_main": "DIVERGED",
+    "ahead_of_current_main": 41,
+    "behind_current_main": 1031,
+    "pr_relative_commits": 1,
+    "pr_relative_changed_files": 8,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "conversation_comments": 2,
+    "exact_head_actions_runs": 0,
+    "exact_head_commit_statuses": 0,
+    "decision": "HOLD_OPEN_DRAFT_UNMERGED_DESIGN_ONLY_NO_GO",
+    "direct_merge_forbidden": true,
+    "direct_merge_reasons": [
+      "The head is a codex/* branch whose merge can trigger Cursor wake.",
+      "The head is 1031 commits behind exact current main and stacked on an unmerged codex/* base.",
+      "Both conversation comments require Draft / DESIGN-ONLY treatment and later reconciliation.",
+      "The exact head has no GitHub Actions run, commit status, submitted review or review thread evidence.",
+      "The candidate claims protected Canon authority and specifies asset, payroll, reviewer, governance, salary, burn and Mainnet-sensitive semantics without current authorization."
+    ],
+    "comments": [
+      {"id": 5350029586, "url": "https://github.com/klineodyssey/kline-odyssey/pull/152#issuecomment-5350029586", "effect": "Keep Draft / DESIGN-ONLY; retarget or rebase onto reconciled current-main lineage before implementation review; no protected action authorized."},
+      {"id": 5351191014, "url": "https://github.com/klineodyssey/kline-odyssey/pull/152#issuecomment-5351191014", "effect": "Adds a 5,000 KGEN catalyst and K1852 relay design direction, but explicitly keeps it design-only and grants no deployment, governance, payment, burn or chain authority."}
+    ]
+  },
+  "path_lineage": {
+    "counts": {"total": 8, "pr_only_added": 8, "same_at_main_and_head": 0, "three_way_diverged": 0},
+    "paths": [
+      {"path": "KGEN-KAIOS/KAIOS_18888_DIVINE_BANK_V2_CANON.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "87446d36d37804e34e1481df429760d636e3755a", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/KAIOS_18911_MARS_KUFO_SEPARATION_CANON.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "f7793e5b1fbb7847606f4c1ec77996ab9c930057", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/schemas/celestial-seat-v2.schema.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "9946251b7960e6c3d46dd5d8ef3bdb953ca6281e", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/schemas/celestial-fund-flow-v2.schema.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "d03b8f1892b71c3725591aef03da106167baa655", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/schemas/natural-resource-reward-v1.schema.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "ed0e863f2b3e0c4396c2787951737facc084ec26", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_18888_V2_LIVE_CONFLICT_REVIEW.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "b03f4417717f7c7105391541313e66839cb654d2", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/reports/KAIOS_18888_V2_IMPLEMENTATION_HANDOFF.md", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "2aeaea11f3a8a43850e10678bef7d97c6e77170d", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN-KAIOS/tests/fixtures/celestial-bank-v2-invariants.json", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "05d98ac98b3e5598f98599908b4d15c01d28c109", "classification": "PR_ONLY_ADDED"}
+    ]
+  },
+  "findings": [
+    {
+      "severity": "P0",
+      "id": "THREE_WAY_ALCHEMY_SEMANTICS_CONFLICT",
+      "evidence": {
+        "exact_head": "5,000,000 KAIOS burn, 49 Epoch maturity, no KGEN catalyst",
+        "comment_5351191014": "5,000 KGEN escrowed and returned after maturation through a proposed K1852 relay",
+        "current_pr158_audit": "Current #158 head uses direct catalyst-bank contribution, no Furnace-held or returned KGEN and zero delivery delay; #158 remains HOLD"
+      },
+      "conclusion": "No single frozen, authorized 18911 model exists. The exact candidate is stale even relative to its own later comment, and the referenced dependency remains unmerged and blocked."
+    },
+    {
+      "severity": "P0",
+      "id": "ACTIVE_SEAT_SCHEMA_ACCEPTS_UNVERIFIED_AUTHORITY",
+      "evidence": {"schema_blob": "9946251b7960e6c3d46dd5d8ef3bdb953ca6281e", "active_constraints": ["salary.accrualEnabled=true", "principal at least 5M", "releasedAt=null"]},
+      "conclusion": "An ACTIVE record can still contain PENDING or REJECTED evidence, motherProposed=false, jadeApproved=false and executed=false. Address and hash syntax do not prove Life identity, reviewer authorship, consent, role authority or governance execution."
+    },
+    {
+      "severity": "P0",
+      "id": "FUND_FLOW_SCHEMA_DOES_NOT_ENFORCE_ACCOUNTING",
+      "evidence": {"schema_blob": "d03b8f1892b71c3725591aef03da106167baa655", "missing_relations": ["availableTreasury equation", "escrow >= outstanding principal", "salary paid <= funded salary", "reward paid <= funded reward", "movement sum reconciliation"]},
+      "conclusion": "The schema checks unsigned-decimal strings and six caller-supplied zero constants only. Arbitrarily inconsistent balances and movements can validate."
+    },
+    {
+      "severity": "P0",
+      "id": "REVIEWER_SEPARATION_NOT_ENFORCED",
+      "evidence": {"schema_blob": "ed0e863f2b3e0c4396c2787951737facc084ec26", "logic": "not(all three reviewer fields equal zero)"},
+      "conclusion": "One or two zero reviewers are accepted, and one nonzero address may occupy policy, measurement and settlement roles simultaneously despite reviewerSeparationRequired=true."
+    },
+    {
+      "severity": "P1",
+      "id": "STATUS_AND_RECEIPT_PROVENANCE_IS_CALLER_ASSERTED",
+      "evidence": {"seat_schema": "9946251b7960e6c3d46dd5d8ef3bdb953ca6281e", "reward_schema": "ed0e863f2b3e0c4396c2787951737facc084ec26"},
+      "conclusion": "Enum states, booleans, addresses and unkeyed hashes can describe ACTIVE, FUNDED, CLAIMABLE or PAID without a canonical registry, signature, finalized receipt, transition history, replay consumption or durable exactly-once boundary."
+    },
+    {
+      "severity": "P1",
+      "id": "HISTORICAL_LIVE_SNAPSHOT_IS_NOT_CURRENT_AUTHORITY",
+      "evidence": {"report_blob": "b03f4417717f7c7105391541313e66839cb654d2", "snapshot_block": 116436680, "snapshot_time": "2026-08-17T09:00:44Z"},
+      "conclusion": "A stored August observation cannot prove present chain state, proxy implementation, role custody, signer authority, balances, claims or legal readiness."
+    },
+    {
+      "severity": "P1",
+      "id": "PROTECTED_CANON_AUTHORITY_UNBOUND",
+      "evidence": {"canon_blob": "87446d36d37804e34e1481df429760d636e3755a", "label": "Authority: Human Final Canon", "main_security_rule": "Protected paths require explicit Human authorization"},
+      "conclusion": "A label inside a stale candidate file is not a machine-verifiable Human decision source. Current main explicitly keeps #152 Draft design-only until separate authorization."
+    },
+    {
+      "severity": "P1",
+      "id": "FIXTURE_IS_NOT_AN_EXECUTABLE_TEST_HARNESS",
+      "evidence": {"fixture_blob": "05d98ac98b3e5598f98599908b4d15c01d28c109", "exact_head_actions_runs": 0},
+      "conclusion": "The fixture records expectedPass values but PR #152 adds no validator or workflow. Claimed schema and invariant passes are not exact-head GitHub CI evidence."
+    }
+  ],
+  "validation": {
+    "subject_exact_head": {
+      "actions_runs": 0,
+      "commit_statuses": 0,
+      "submitted_reviews": 0,
+      "review_threads": 0,
+      "conversation_comments": 2,
+      "conclusion": "NO_EXACT_HEAD_CI_AND_EXPLICIT_DESIGN_ONLY_HOLD"
+    },
+    "current_main": {
+      "universal_code_equivalent_run": 35985185684,
+      "universal_conclusion": "SUCCESS",
+      "code_equivalence_caveat": "Subsequent main changes through the audit base are WorkOrders-only.",
+      "pages_run": 35992721260,
+      "pages_conclusion": "SUCCESS",
+      "responsive_run": 35992777310,
+      "responsive_conclusion": "SUCCESS"
+    },
+    "machine_checks": [
+      "JSON parse",
+      "exact selected_count equals 1",
+      "8 unique subject paths",
+      "path classification totals equal 8",
+      "all 8 base blobs and main blobs are absent",
+      "all 8 head blobs match lowercase 40-hex Git SHAs",
+      "all non-null commit and tree fields match lowercase 40-hex SHA",
+      "all protected effects are false",
+      "subject relation equals ahead 41 / behind 1031"
+    ],
+    "functional_qa": "PASS_EVIDENCE_ONLY_AUDIT",
+    "visual_qa": {
+      "subject_ui_changed": false,
+      "dedicated_subject_browser_required": false,
+      "reason": "PR #152 changes design Markdown, schemas, reports and one fixture only; this audit changes one JSON WorkOrder only.",
+      "post_merge_requirement": "Verify deployed current-main SHA and Responsive Chromium screenshot artifact after the audit merge."
+    }
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR152_18888_18911_CANON_LINEAGE_AUDIT_R0_20260924.json"
+  ],
+  "protected_effects": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "deposit_or_withdrawal": false,
+    "salary_or_reward_claim": false,
+    "token_burn_or_mint": false,
+    "real_settlement": false,
+    "oracle_onchain_configuration": false,
+    "deployment_or_upgrade": false,
+    "role_grant_or_revocation": false,
+    "wallet_connection": false,
+    "signer_or_private_key_access": false,
+    "mainnet_or_testnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "canon_installation": false,
+    "controller_signer_operator_appointment": false,
+    "worker_or_life_activation": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "external_submission": false,
+    "paid_external_api": false
+  },
+  "remaining_blockers": [
+    "PR #152 remains OPEN / DRAFT / UNMERGED / DESIGN-ONLY / HOLD and its two comments require later reconciliation.",
+    "The subject is 1031 commits behind current main and stacked on an unmerged codex/* base.",
+    "The exact head has no Actions, commit status, submitted review or executable schema/invariant validator.",
+    "The 18911 catalyst, custody, maturation and delivery semantics conflict across the exact head, later comment and current #158 lineage.",
+    "The three schemas do not establish evidence authority, reviewer separation, accounting conservation, legal state transitions, receipt provenance, replay consumption or durable exactly-once execution.",
+    "PR #158 remains HOLD for token-liveness, authority, deployment-identity, governance and scale blockers; PR #159 remains HOLD for protected-CURRENT and dependency conflicts.",
+    "Legal, VASP, tax, AML, independent security, storage-layout, fork and current-chain evidence are absent for activation.",
+    "No Canon installation, deployment, upgrade, payment, salary, reward, burn, mint, governance or chain mutation is authorized by this audit."
+  ],
+  "next_candidate": {
+    "priority": "P0",
+    "candidate": "PR #153 Hengyao payroll capability authority lineage safety audit",
+    "decision": "NEXT_AFTER_POST_MERGE_VERIFICATION"
+  }
+}
