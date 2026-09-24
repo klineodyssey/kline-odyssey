@@ -6,8 +6,21 @@ const OUT='artifacts/11520-visual-qa';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
+  await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{
+    const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/',relative=route.request().url().slice(prefix.length);
+    try{
+      let body=await fs.readFile(`node_modules/three/${relative}`,'utf8');
+      body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);
+      await route.fulfill({status:200,contentType:'text/javascript; charset=utf-8',body});
+    }catch{await route.abort()}
+  });
+  await page.route('https://data-api.binance.vision/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price:'3500'},{symbol:'BNBUSDT',price:'600'}])}));
+  await page.route('https://raw.githubusercontent.com/**',route=>route.abort());
+}
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+if(process.env.K11520_LOCAL_QA_ASSETS==='1')await page.addStyleTag({content:`@font-face{font-family:K11520LocalCJK;src:url('/node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}html,body,button,input,select{font-family:K11520LocalCJK,sans-serif!important}`});
 await page.waitForTimeout(1900);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
@@ -63,6 +76,8 @@ assert.equal(await page.locator('#lotsNumericInput').getAttribute('inputmode'),'
 assert.equal(await page.locator('#lotsNumericInput').getAttribute('min'),'1');
 assert.equal(await page.locator('#lotsNumericInput').getAttribute('max'),'100');
 assert.equal(await page.locator('#lotsNumericInput').getAttribute('type'),'text');
+assert.deepEqual(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.numericEntry.cRange),[-100,100]);
+assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.numericEntry.invalidCPolicy),'REJECT_OUTSIDE_100C_AND_KEEP_PREVIOUS');
 
 // Numeric signed C must synchronize game-state side directly without opening trade/order surfaces.
 await page.locator('#cNumericInput').fill('-0.1');
@@ -73,13 +88,23 @@ assert.equal(await page.locator('#cControl').getAttribute('data-c-side'),'SHORT'
 assert.equal(await page.evaluate(axis=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide(axis),initialTradeAxis),'空','negative C must synchronously set the plane-selected canonical side');
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'numeric C entry must not leave trade sheet open');
 
+// Out-of-range numeric/API values must fail closed and keep the previous valid C.
+await page.locator('#cNumericInput').fill('1000');
+await page.locator('#cNumericInput').press('Enter');
+await page.waitForTimeout(100);
+assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C','numeric C above 100 must keep the previous value');
+assert.equal((await page.locator('#cNumericInput').inputValue()).trim(),'-0.1');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(1000)),null,'API C above 100 must be rejected');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC),-0.1);
+
 // Cross-control regression: editing lots after -C must not let native syncControls erase the signed value/thumb.
+const cThumbBeforeLotEdit=await page.locator('#cThumb').evaluate(el=>el.style.top);
 await page.locator('#lotsNumericInput').fill('7');
 await page.locator('#lotsNumericInput').press('Enter');
 await page.waitForFunction(()=>document.querySelector('#lotsRead')?.textContent?.trim()==='7口',null,{timeout:2500});
 assert.equal((await page.locator('#lotsNumericInput').inputValue()).trim(),'7','numeric lot input must remain synchronized');
 assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C','lot edit must not overwrite signed C display');
-assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),'80%','lot edit must not move -0.1C thumb');
+assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),cThumbBeforeLotEdit,'lot edit must not move -0.1C thumb');
 assert.equal(await page.evaluate(axis=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide(axis),initialTradeAxis),'空','lot edit must not change canonical side');
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'numeric lot entry must not open order flow');
 
@@ -107,7 +132,7 @@ await page.waitForTimeout(120);
 assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC),-0.1);
 assert.equal(await page.evaluate(axis=>globalThis.__K11520_TRADE_DIRECTION_API__.getSide(axis),initialTradeAxis),'空','final rapid sign must win canonical side');
 assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C');
-assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),'80%');
+assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),cThumbBeforeLotEdit,'rapid sign changes must return to the canonical -0.1C thumb');
 
 // Per-axis state must survive plane-driven trading-axis switches without stale renderer drift.
 assert.equal(await switchPlane(991),'KZ','XY plane must select KZ');
@@ -170,10 +195,34 @@ await page.screenshot({path:`${OUT}/11520-mobile-signed-c-immersive.png`,fullPag
 await page.locator('#k11520ImmersiveExit').click();await page.waitForTimeout(80);
 assert.equal(await page.locator('html').getAttribute('data-k11520-immersive-mode'),'off');
 
+// The maximum supported leverage must remain truthful from numeric entry through the
+// last confirmation surface. Keep this screenshot as the visual regression receipt.
+await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(100));
+await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===100,null,{timeout:2500});
+assert.equal((await page.locator('#cRead').textContent()).trim(),'+100C');
+await page.locator('#cNumericInput').fill('1000');
+await page.locator('#cNumericInput').press('Enter');
+await page.waitForTimeout(100);
+assert.equal((await page.locator('#cRead').textContent()).trim(),'+100C','1000C must not displace the last valid 100C state');
+await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());
+await page.waitForTimeout(120);
+await page.locator('#orderFire').evaluate(el=>el.click());
+await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
+await page.waitForTimeout(240);
+const preview=(await page.locator('#confirmBody').innerText()).replace(/\s+/g,' ').trim();
+assert.match(preview,/100C/,'confirmation must show the bounded leverage');
+assert.match(preview,/每 1% 變動/,'confirmation must explain percentage-return PnL');
+assert.match(preview,/反向歸零 1(?:\.0+)?%/,'100C confirmation must disclose 1% adverse liquidation distance');
+assert.match(preview,/本機模擬部位，不送鏈/,'confirmation must retain the no-chain safety boundary');
+const confirmGeometry=await page.locator('#confirm').boundingBox();
+assert.ok(confirmGeometry&&confirmGeometry.x>=0&&confirmGeometry.y>=0&&confirmGeometry.x+confirmGeometry.width<=390&&confirmGeometry.y+confirmGeometry.height<=844,`confirmation must fit 390x844: ${JSON.stringify(confirmGeometry)}`);
+await page.screenshot({path:`${OUT}/11520-c100-settlement-hardening-390x844.png`,fullPage:true});
+await page.locator('#confirmX').click();
+
 const layout=await page.evaluate(()=>structuredClone(globalThis.__K11520_MOBILE_CONTROL_LAYOUT__));
 assert.equal(layout.axisRailCentered,true,JSON.stringify(layout));
 assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: one C renderer; direct canonical side sync; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: one C renderer; direct canonical side sync; 100C hard cap and percent-return preview; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');

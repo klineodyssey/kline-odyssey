@@ -2,7 +2,7 @@
 
 ## Metadata
 - STATUS: ACTIVE / SOURCE_OF_TRUTH
-- REVISION: 2026-09-03.1
+- REVISION: 2026-09-24.1
 - HUMAN_AUTHORITY: 沈英明
 - CHANGE_RULE: CODE MUST IMPLEMENT SPEC; CODE DOES NOT REDEFINE SPEC.
 
@@ -12,18 +12,18 @@
 - `principalKgen = abs(lots)`。
 - C 不得用來減少本金／保證金。
 
-## 2. C 曲速與損益
-- C 是曲速／光速級損益倍率，也是 5D 世界的空間能力概念；不得再以傳統交易所 `L` 模型取代。
-- 交易損益：`PnL_KGEN = priceDifference × direction × lots × C`。
+## 2. C 槓桿與損益
+- C 是帶方向的隔離槓桿倍率，`abs(C)` 上限為 `100`；不得再以傳統交易所 `L` 模型取代。
+- 交易損益：`PnL_KGEN = ((markPrice - entryPrice) / entryPrice) × direction × lots × abs(C)`。
 - 多方 direction = +1；空方 direction = -1。
-- 每點損益絕對值：`abs(lots × C)` KGEN。
-- 在沒有其他已核准風控規則介入時，理論反向歸零距離：`1 / C` 點（C > 0）。
+- 標的每變動 1% 的損益絕對值：`abs(lots × C × 0.01)` KGEN。
+- 在沒有其他已核准風控規則介入時，理論反向歸零報酬率：`1 / abs(C)`（C != 0）。
 
 ### 例
 - 100 口 -> 本金 100 KGEN。
-- 100 口、1C -> 每點 ±100 KGEN；反向 1 點即耗盡該筆本金。
-- 100 口、0.001C -> 每點 ±0.1 KGEN；約反向 1000 點耗盡本金。
-- 1000 口、0.000001C -> 本金 1000 KGEN；每點 ±0.001 KGEN；約反向 1,000,000 點耗盡本金。
+- 100 口、100C -> 標的每變動 1% 即 ±100 KGEN；反向 1% 耗盡該筆本金。
+- 100 口、50C -> 標的每變動 1% 即 ±50 KGEN；反向 2% 耗盡該筆本金。
+- 100 口、1C -> 標的每變動 1% 即 ±1 KGEN；反向 100% 耗盡該筆本金。
 
 ## 3. 單筆清算邊界
 - 每筆訂單的本金是該筆交易的風險池。
@@ -44,7 +44,7 @@ KGEN 錢包餘額不等於全部都是保證金。UI/runtime 必須分開：
 - KX、KY、KZ 是三個獨立交易軸。
 - 每軸保留自己的 market、side、lots、C、position/order state。
 - 調整 KX 不得洗掉 KY/KZ 狀態。
-- 下單確認必須顯示 axis、market、side、lots、C、本金、每點損益、風險／歸零距離、資料時間。
+- 下單確認必須顯示 axis、market、side、lots、C、本金、每 1% 損益、風險／歸零距離、資料時間。
 
 ## 6. 禁止復活的錯誤模型
 以下模型已被人類明確否決，屬 `REJECTED / SUPERSEDED`：

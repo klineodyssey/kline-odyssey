@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR426-11520-C100-SETTLEMENT-HARDENING-R1-20260924",
+  "task_source_type": "HUMAN_REQUEST",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request and PR #426",
+  "task_source_commit": "3900740bb68d7267a23655651cc5ccef726e2ebf",
+  "task_source_reason": "Choose one highest-priority bounded task, repair the exact-head 11520 settlement and UI regressions, preserve fail-closed protected gates, and integrate only after exact-head CI and visual QA.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T04:48:55Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P1",
+  "risk_level": "R1",
+  "dependencies": [
+    "PR #426 exact head ec58e7b191af29cdaed6b1f88be3287e761176cf",
+    "exact main 3900740bb68d7267a23655651cc5ccef726e2ebf",
+    "HOLD comment 5807168463"
+  ],
+  "status": "DONE_IMPLEMENTATION_AWAITING_EXACT_HEAD_REMOTE_INTEGRATION",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_sha": "3900740bb68d7267a23655651cc5ccef726e2ebf",
+  "exact_base_tree": "80390ba90080e8cb7919f6faf2f8b5acaa39afff",
+  "implementation_head_sha": "0e803082042f3c98212ebc988184052aca5574f1",
+  "implementation_head_tree": "a095060754993be8cc51191d4d3939f8249ec5a4",
+  "integration_branch": "integration/k11520-c100-settlement-hardening-r1-20260924",
+  "original_candidate": {
+    "pr": 426,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/426",
+    "title": "fix(11520): hard-cap leverage at 100C and align liquidation math",
+    "state": "OPEN",
+    "draft": false,
+    "merged": false,
+    "head_branch": "codex/k11520-c100-settlement-hardening-20260922",
+    "head_sha": "ec58e7b191af29cdaed6b1f88be3287e761176cf",
+    "changed_files": 4,
+    "commits": 4,
+    "decision": "HOLD_ORIGINAL_HEAD_USE_NON_TRIGGERING_SUCCESSOR",
+    "hold_reasons": [
+      "codex branch merge can trigger Cursor wake",
+      "Game Product QA run 35638223058 failed and browser evidence was skipped",
+      "public UI and control paths still permitted 1000C",
+      "preview wording retained point-delta settlement semantics",
+      "negative order-intent safety gates had been removed",
+      "non-finite risk inputs could fail open"
+    ],
+    "preserved_successful_exact_head_runs": [
+      {"name": "11520 Responsive Product QA", "id": 35638223366, "conclusion": "SUCCESS"},
+      {"name": "11520 Universal Exchange V2", "id": 35638223121, "conclusion": "SUCCESS"},
+      {"name": "11520 Trading Readiness", "id": 35638223177, "conclusion": "SUCCESS"}
+    ]
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 35,
+    "latest_main": {
+      "sha": "3900740bb68d7267a23655651cc5ccef726e2ebf",
+      "tree": "80390ba90080e8cb7919f6faf2f8b5acaa39afff",
+      "parent": "e4fccbe433802d6bfc0319d673c11a7e9981587d",
+      "source_pr": 425,
+      "classification": "EXPECTED_VERIFIED_PR_SQUASH_MERGE"
+    },
+    "todo_search": {
+      "patterns": ["TODO", "FIXME", "XXX", "NOT_IMPLEMENTED"],
+      "decision_basis": "Open PR, CI, runtime and visual evidence outranked unbound markers."
+    },
+    "ranked_candidates": [
+      {"rank": 1, "priority": "P0", "candidate": "PR #232 real-funds BrainExchange V4", "decision": "HOLD", "reason": "real custody, oracle, upgrade and deployment authority"},
+      {"rank": 2, "priority": "P0", "candidate": "PR #196 BSC branding and external verification", "decision": "HOLD", "reason": "external submission identity and authority are not repository-bound"},
+      {"rank": 3, "priority": "P0", "candidate": "PRs #135/#152/#153/#154 bank, governance and payroll lineages", "decision": "HOLD", "reason": "live financial, role, governance or Mainnet effects"},
+      {"rank": 4, "priority": "P1", "candidate": "PR #426 11520 100C settlement hardening", "decision": "SELECTED", "reason": "ready, bounded off-chain R1 repair with a concrete failing required CI and user-visible safety regression"},
+      {"rank": 5, "priority": "P1", "candidate": "PR #161 cross-market circulatory autopilot lineage audit", "decision": "NEXT"},
+      {"rank": 6, "priority": "P1", "candidate": "PR #199 liquidity forge and Auto-LP lineage audit", "decision": "PENDING"},
+      {"rank": 7, "priority": "P1", "candidate": "PR #186 unsigned 18888 payment adapter lineage audit", "decision": "PENDING"},
+      {"rank": 8, "priority": "P1", "candidate": "PR #177 remote handoff and wallet UI lineage audit", "decision": "PENDING"},
+      {"rank": 9, "priority": "P1", "candidate": "PR #198 mobile ATM and wallet lineage audit", "decision": "PENDING"},
+      {"rank": 10, "priority": "P1", "candidate": "PRs #188/#190/#191/#192 integrated market, economy, employment and lab lineages", "decision": "PENDING"},
+      {"rank": 11, "priority": "P1", "candidate": "PR #181 listing and settlement gates lineage audit", "decision": "PENDING"},
+      {"rank": 12, "priority": "P1", "candidate": "PR #179 wallet discovery and metadata lineage audit", "decision": "PENDING"},
+      {"rank": 13, "priority": "P2", "candidate": "PR #48 historical Life baseline lineage", "decision": "PENDING"}
+    ],
+    "selected_count": 1
+  },
+  "scope": {
+    "goal": "Make 100C and percentage-return settlement one fail-closed invariant across intent, risk engine, backend, legacy and current UI, docs and screenshots.",
+    "allowed": [
+      "transplant the four bounded PR #426 commits onto exact main",
+      "repair runtime, UI, backend, documentation and tests inside 11520",
+      "add read-only CI screenshot evidence assertion"
+    ],
+    "forbidden": [
+      "deployment or production oracle activation",
+      "wallet connection or signer request",
+      "payment, token transfer, real settlement or asset mutation",
+      "Mainnet or Testnet transaction",
+      "governance, controller, signer, operator, Worker or Life action",
+      "workflow dispatch or external agent launch"
+    ]
+  },
+  "implementation": {
+    "transplanted_commits": [
+      "934600df",
+      "7f8e4dc9",
+      "1a097694",
+      "d8843c94"
+    ],
+    "hardening_commit": "0e803082042f3c98212ebc988184052aca5574f1",
+    "outcomes": [
+      "reject non-finite, zero and above-100 C before intent or risk calculation",
+      "bind PnL to price-return percentage times direction times lots times abs(C)",
+      "keep isolated principal equal to lots and clamp loss to that principal",
+      "remove 1000C from current UI, legacy UI, backend, controls and documentation",
+      "restore wrong-chain, unverified-feed, zero-price and invalid-wallet negative gates",
+      "require a real 390x844 C100 settlement screenshot in Game Product QA"
+    ],
+    "changed_files_without_work_order": 25,
+    "diff_without_work_order": {"additions": 242, "deletions": 145}
+  },
+  "changed_files": [
+    ".github/workflows/11520-game-product-qa.yml",
+    "K線西遊記/temples/11520/GAME_UI_SPEC.md",
+    "K線西遊記/temples/11520/KGEN_TRADING_SPEC.md",
+    "K線西遊記/temples/11520/SPECIFICATION.md",
+    "K線西遊記/temples/11520/USER_MANUAL.md",
+    "K線西遊記/temples/11520/backend/server.mjs",
+    "K線西遊記/temples/11520/controls/nonlinear-controls.mjs",
+    "K線西遊記/temples/11520/controls/nonlinear-controls.test.mjs",
+    "K線西遊記/temples/11520/runtime/combat-mass-scale-runtime.mjs",
+    "K線西遊記/temples/11520/runtime/game-5d-main.mjs",
+    "K線西遊記/temples/11520/runtime/game-mobile-shell.mjs",
+    "K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs",
+    "K線西遊記/temples/11520/runtime/game-ui-runtime.mjs",
+    "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs",
+    "K線西遊記/temples/11520/runtime/mobile-signed-c-immersive-runtime.mjs",
+    "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
+    "K線西遊記/temples/11520/runtime/trade-guidance-runtime.mjs",
+    "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs",
+    "K線西遊記/temples/11520/tests/11520-runtime.test.mjs",
+    "K線西遊記/temples/11520/tests/combat-mass-scale-runtime.mjs",
+    "K線西遊記/temples/11520/ui-organs.mjs",
+    "K線西遊記/temples/11520/wallet-trade.html",
+    "tests/11520-kgen-margin-wallet-foundation.test.mjs",
+    "tests/11520-product-standard.test.mjs",
+    "tests/11520-real-trading-order-intent.test.mjs",
+    "KGEN-Organization/WorkOrders/KAIOS_PR426_11520_C100_SETTLEMENT_HARDENING_R1_20260924.json"
+  ],
+  "local_verification": {
+    "selected_runtime_product_tests": {"pass": 33, "fail": 0},
+    "game_product_unit_tests": {"pass": 106, "fail": 0},
+    "trading_route_tests": {"pass": 13, "fail": 0},
+    "universal_exchange_tests": {"pass": 258, "fail": 0},
+    "combat_scripts": {"pass": 4, "fail": 0},
+    "git_diff_check": "PASS",
+    "browser": {
+      "engine": "Playwright Chromium 1.51.1",
+      "viewport": "390x844",
+      "functional_result": "PASS",
+      "assertions": [
+        "1000 input preserves the canonical 100C cap",
+        "order confirmation shows 100C and percentage-return risk",
+        "1 percent adverse threshold and fixed principal are visible",
+        "no-chain simulation boundary is visible",
+        "confirmation controls fit the viewport"
+      ],
+      "screenshot_path": "artifacts/11520-visual-qa/11520-c100-settlement-hardening-390x844.png",
+      "screenshot_sha256": "eead36045fd55a93f169e6b2b975a163e0889a23dc92c4275b76348e6c75f7ef",
+      "visual_review": "PASS_NO_OBVIOUS_CLIPPING_OVERLAP_OR_UNREADABLE_CONTROLS"
+    }
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "blob": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "K線西遊記/temples/11520/AGENTS.md", "blob": "4e2821c8d86e65afa4c4c50f7fdba7575ca2cd4f"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "docs/KGEN_BOOT_FLOW.md", "blob": "83593571028c75f99af73bf44403e0ee81451adb"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "ref": "3900740bb68d7267a23655651cc5ccef726e2ebf"},
+    {"path": "handoff/HANDOFF_CURRENT.md", "ref": "3900740bb68d7267a23655651cc5ccef726e2ebf"},
+    {"path": "KGEN-Organization/Handbooks/KAIOS_11520_PAGE_HANDOFF_HANDBOOK_CURRENT.md", "ref": "3900740bb68d7267a23655651cc5ccef726e2ebf"},
+    {"path": "KGEN-Organization/Canon/KGEN_CIVILIZATION_CORE_CANON.md", "ref": "3900740bb68d7267a23655651cc5ccef726e2ebf"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "blob": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "blob": "5b87f5e3841bfb0d40b207b92a4d127fb24a8ae6"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob": "3b0ee2d6d1490c2838de7166d42054ca48877bac"}
+  ],
+  "protected_effects": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "real_settlement": false,
+    "wallet_or_signer_access": false,
+    "mainnet_or_testnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "controller_signer_operator_appointment": false,
+    "worker_or_life_activation": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false
+  },
+  "remote_acceptance": {
+    "required_exact_head_checks": [
+      "11520 Game Product QA",
+      "11520 Universal Exchange V2",
+      "11520 Trading Readiness",
+      "11520 Responsive Product QA"
+    ],
+    "required_before_merge": [
+      "latest main and successor head unchanged on immediate refetch",
+      "PR Ready and mergeable on exact latest main",
+      "all required exact-head checks green",
+      "no unresolved reviews, threads, blocking comments or P0/P1 defects",
+      "squash merge uses expected_head_sha"
+    ],
+    "post_merge": [
+      "verify merged main checks",
+      "verify Pages deployment build version equals merged main",
+      "verify canonical public URL and responsive screenshot artifact"
+    ]
+  },
+  "remaining_blockers": [
+    "Original PR #426 remains unmerged and must not be merged through its codex branch.",
+    "Real-funds deployment, production feed provenance, wallet execution and settlement remain outside this task and fail closed."
+  ],
+  "next_candidate": {
+    "priority": "P1",
+    "candidate": "PR #161 cross-market circulatory autopilot lineage safety audit",
+    "decision": "NEXT_AFTER_POST_MERGE_VERIFICATION"
+  }
+}

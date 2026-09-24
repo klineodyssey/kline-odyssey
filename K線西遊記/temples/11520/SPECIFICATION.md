@@ -107,7 +107,7 @@ These are distinct sources and are currently inconsistent. This specification do
 | `index.html` | Canonical public portal and primary 11520 entry. |
 | `app.mjs` | Canonical portal controller and existing civilization/life/company/runtime views. |
 | `game-5d.html` | Player-facing 5D world + K-field trading game surface. It is a child organ of 11520, not a replacement for `index.html` or `app.mjs`. |
-| `controls/nonlinear-controls.mjs` | Shared nonlinear human-input curves for Fire, C, L and Y. |
+| `controls/nonlinear-controls.mjs` | Shared nonlinear human-input curves for Fire, bounded C and Y; the old L helper remains compatibility-only and deprecated. |
 | `controls/nonlinear-controls.test.mjs` | Regression checks for those input/economic-domain rules. |
 | `assets/resource-manifest.json` | 5D player resource acquisition manifest. |
 | `assets/world-pack.json` | 5D world-resource data package. |
@@ -148,19 +148,19 @@ The original observer interpretation (`X left/right`, `Y up/down`, `Z forward/ba
 - Left 360° joystick controls XZ travel and character facing.
 - Right-side Y vertical control changes spatial Y and returns to center when released.
 - Right-side camera drag rotates the third-person camera around the player; it does not change K long/short direction.
-- `C` is spatial warp/speed, not trading leverage.
+- `C` is the signed canonical control shared by spatial warp and the local isolated trading preview: sign selects long/short, while `abs(C)` is capped at 100 and supplies the preview leverage multiplier.
 
 ### 4.3 Warp C
 
-`C` uses a nonlinear positive rail:
+`C` uses a nonlinear signed rail:
 
 - minimum: `0C`
 - `0C` meaning: spatial stop / no movement from joystick/autowalk
 - precision region: lower half concentrates common movement around `0..10C`
-- upper region accelerates toward `1000C`
-- maximum: `1000C`
+- upper region accelerates toward `100C`
+- maximum: `100C`
 
-C must never be re-used as trading leverage. Trading leverage is `L`.
+The runtime must reject magnitudes above 100C before preview. Trading PnL uses percentage return × lots × `abs(C)`; it must not use absolute price-point delta.
 
 ### 4.4 K-field universe
 
@@ -274,7 +274,7 @@ Protected role: XZ 360° movement and character facing. It must not be repurpose
 Protected roles:
 
 - `Y` rail: spatial vertical movement, self-centering.
-- `C` rail: persistent spatial warp/speed selection from 0 to 1000C.
+- `C` rail: persistent signed spatial warp/trading selection from -100C to +100C with 0C neutral.
 
 ### 6.9 Trading controls
 
@@ -282,7 +282,7 @@ Protected roles:
 
 - `⚔` Sword: expand/collapse trading parameter controls only. It never submits an order.
 - Fire rail: center `0口`; up = long, down = short; common inner region 0..10 lots; outer region accelerates to 100 lots.
-- `L` rail: trading leverage, separate from C.
+- C sign is the single source of long/short direction; `abs(C)` is the isolated leverage multiplier and must remain capped at 100.
 - `下單開火`: opens order-preview/confirmation; never immediately fills on the first press.
 - `平`: close/reduce current governed position through the close-position flow.
 - `打怪`: XYZ world combat action; KAIOS-domain outcome, not a K-field order.
@@ -599,7 +599,7 @@ Future world progression may include jobs, buildings, factories, shops, food, pe
 - `PUT /api/v1/player`
 - `POST /api/v1/order`
 
-Current order backend validates K axis, side, lots, leverage and price, calculates initial/maintenance margin, and returns simulation order metadata.
+Current order backend validates K axis, side, lots, C/leverage and price, rejects C above 100, fixes initial margin at one KGEN per lot, and returns percentage-return simulation metadata.
 
 ### 14.2 Production backend requirements
 
@@ -699,10 +699,10 @@ Minimum manual/automated acceptance suite:
 3. Left joystick changes X/Z and character facing but not Y/K direction.
 4. Y rail changes Y and returns to zero velocity on release.
 5. C bottom = 0C and movement stops.
-6. C halfway reads approximately 10C; top reaches 1000C.
+6. C halfway reads approximately 1C; top reaches 100C.
 7. Sword toggles trade controls without submitting an order.
 8. Fire center = 0; half ≈ 10 lots; extremes = ±100 lots.
-9. L is independent of C and reaches defined range.
+9. Numeric and pointer C controls reject values outside -100C..+100C and keep the previous valid value.
 10. `下單開火` opens confirmation, not fill.
 11. Cancel leaves KGEN/positions unchanged.
 12. Confirmation window shows all mandatory order fields.

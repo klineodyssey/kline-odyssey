@@ -25,7 +25,7 @@ function currentY(){return Number((document.getElementById('yRead')?.textContent
 function installEnergyTaps(){
   const specs=[
     ['yControl','yEnergyTap','Y +5',()=>Math.min(1,(currentY()>=40?0:currentY()+5)/40)],
-    ['cControl','cEnergyTap','C 下一階',()=>{const vals=[0,.000001,.00001,.0001,.001,.01,.1,1,10,100,1000],n=Number((document.getElementById('cRead')?.textContent||'0').replace('C','')),i=Math.max(0,vals.indexOf(n));return((i+1)%vals.length)/(vals.length-1)}],
+    ['cControl','cEnergyTap','C 下一階',()=>{const vals=[0,.000001,.00001,.0001,.001,.01,.1,1,10,100],n=Number((document.getElementById('cRead')?.textContent||'0').replace('C','')),i=Math.max(0,vals.indexOf(n));return((i+1)%vals.length)/(vals.length-1)}],
     ['lotsControl','lotsEnergyTap','口數 +1',()=>{const n=Number((document.getElementById('lotsRead')?.textContent||'1').match(/\d+/)?.[0]||1);return(n>=100?1:n+1)/100}]
   ];
   let ok=true;for(const[cid,id,label,getT]of specs){const c=document.getElementById(cid);if(!c){ok=false;continue}if(document.getElementById(id))continue;const b=document.createElement('button');b.id=id;b.className='energyTap';b.type='button';b.dataset.step=label;b.title=label;b.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault()});b.addEventListener('click',e=>{e.stopPropagation();dispatchVertical(c,getT())});c.appendChild(b)}return ok;

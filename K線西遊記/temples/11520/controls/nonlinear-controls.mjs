@@ -28,9 +28,10 @@ export function segmentedBipolar(v,{fineMax=10,max=100,deadZone=0.025}={}){
 // Trading firepower: 0 center, +1..+100 long, -1..-100 short.
 export function fireLots(v){ return Math.round(segmentedBipolar(v,{fineMax:10,max:100})); }
 // Spatial warp: 0 really means stopped; common travel is concentrated in 0..10C.
-export function warpC(t){ return Math.round(segmentedPositive(t,{fineMax:10,max:1000})); }
-// Trading leverage is separate from C. 1x minimum once a trade is armed.
-export function leverageL(t){ return Math.max(1,Math.round(segmentedPositive(t,{fineMax:10,max:1000}))); }
+// The same Human-approved C boundary is shared with the signed trade preview.
+export function warpC(t){ return Math.round(segmentedPositive(t,{fineMax:10,max:100})); }
+// Compatibility-only alias for older callers. There is no separate L control.
+export function leverageL(t){ return Math.max(1,Math.round(segmentedPositive(t,{fineMax:10,max:100}))); }
 // Y is spatial vertical velocity, not lots. Center returns to zero.
 export function verticalY(v,{fineMax=1,max=10}={}){
   return segmentedBipolar(v,{fineMax,max,deadZone:0.035});
@@ -46,8 +47,8 @@ export function controlBandLabel(value,{bipolar=false,unit='',fineMax=10}={}){
 
 export const CONTROL_SPEC=Object.freeze({
   FIRE:{center:0,fineMax:10,max:100,unit:'口',positive:'多',negative:'空',settlement:'KGEN'},
-  WARP_C:{min:0,fineMax:10,max:1000,unit:'C',zeroMeaning:'靜止'},
-  LEVERAGE_L:{min:1,fineMax:10,max:1000,unit:'x'},
+  WARP_C:{min:0,fineMax:10,max:100,unit:'C',zeroMeaning:'靜止',sharedSignedTradeBoundary:true},
+  LEVERAGE_L:{min:1,fineMax:10,max:100,unit:'x',deprecated:true,aliasOf:'ABS_C'},
   Y:{center:0,meaning:'空間高度／升降',returnsToCenter:true}
 });
 
