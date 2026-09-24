@@ -13,7 +13,7 @@ export const K11520_COMBAT_SCALE = Object.freeze({
   kgPerLot: 1000,
 });
 
-const POSITIVE_C_LEVELS = Object.freeze([0.000001,0.00001,0.0001,0.001,0.01,0.1,1,10,100,1000]);
+const POSITIVE_C_LEVELS = Object.freeze([0.000001,0.00001,0.0001,0.001,0.01,0.1,1,10,100]);
 export const K11520_C_LEVELS = Object.freeze([...POSITIVE_C_LEVELS].reverse().map(v=>-v).concat(0,POSITIVE_C_LEVELS));
 
 const finite = value => Number.isFinite(Number(value));

@@ -82,12 +82,12 @@
 每一器官必須可開/關，有實際 handler/runtime/state；不得以 decorative button 或 `alert()` 冒充完成。
 
 ## 8. 下單確認與語音客服
-確認窗至少顯示：axis、market、side、lots、C、本金 KGEN、每點損益、反向歸零距離/風險、reference price、market-data age、Free KGEN、Cancel、Confirm。
+確認窗至少顯示：axis、market、side、lots、C、本金 KGEN、每 1% 價格變動損益、反向歸零百分比與價格距離/風險、reference price、market-data age、Free KGEN、Cancel、Confirm。
 
 - Preview/Cancel 不得改 balance/position/order。
 - 語音可播報 Preview、Confirm、Filled、Rejected、Liquidated、Closed。
 - 語音不能代替使用者 Confirm 或 wallet signature。
-- AI/客服必須能詳細說明「為什麼能/不能下單」、本金、C、每點損益、錢包狀態、simulation/real-chain boundary。
+- AI/客服必須能詳細說明「為什麼能/不能下單」、本金、C、每 1% 價格變動損益、錢包狀態、simulation/real-chain boundary。
 - 必須有文字說明書 fallback。
 
 ## 9. 真錢包／真交易邊界

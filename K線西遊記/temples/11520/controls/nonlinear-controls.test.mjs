@@ -10,13 +10,15 @@ assert.equal(fireLots(1),100);
 assert.equal(fireLots(-0.5),-10);
 assert.equal(fireLots(-1),-100);
 
-// C is spatial warp. 0C is a true stop. L is trading-only and never aliases C.
+// C is spatial warp and the shared signed trade-control magnitude. Both paths stop at 100.
 assert.equal(warpC(0),0);
 assert.equal(warpC(0.5),10);
-assert.equal(warpC(1),1000);
+assert.equal(warpC(1),100);
 assert.equal(leverageL(0),1);
 assert.equal(leverageL(0.5),10);
-assert.equal(leverageL(1),1000);
+assert.equal(leverageL(1),100);
+assert.equal(CONTROL_SPEC.WARP_C.max,100);
+assert.equal(CONTROL_SPEC.LEVERAGE_L.deprecated,true);
 
 // Y remains a spatial axis with a self-centering signed control.
 assert.equal(verticalY(0),0);
