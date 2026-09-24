@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "KAIOS-PR232-BRAIN-V4-REAL-FUNDS-LINEAGE-AUDIT-R0-20260924",
+  "task_source_type": "SCHEDULED_ENGINEERING_CYCLE",
+  "task_source_id": "KAIOS Engineering Cycle",
+  "task_source_actor": "Human project owner",
+  "task_source_file": "automation request",
+  "task_source_commit": "e749d11657cc2b87f8b5d6829ba5541de600008e",
+  "task_source_reason": "Select exactly one highest-priority safe task after current-main, open-PR, CI, runtime, visual, dependency and security inventory.",
+  "created_by": "Codex",
+  "created_at": "2026-09-24T10:35:08Z",
+  "owner": "Codex",
+  "reviewer": null,
+  "priority": "P0",
+  "risk_level": "R0",
+  "status": "DONE_EVIDENCE_ONLY_AUDIT",
+  "repository": "klineodyssey/kline-odyssey",
+  "exact_base_sha": "e749d11657cc2b87f8b5d6829ba5541de600008e",
+  "exact_base_tree": "e5c2791ffcdd85c09e8e6779b330c3f2edb4d140",
+  "integration_branch": "integration/pr232-brain-v4-lineage-audit-r0-20260924",
+  "selected_count": 1,
+  "selection": {
+    "candidate": "PR #232 real-funds upgradeable BrainExchange V4",
+    "decision": "SELECTED_FOR_EVIDENCE_ONLY_LINEAGE_AUDIT",
+    "reason": "Highest-priority unaudited open P0 candidate. It covers real KGEN custody, UUPS upgradeability, price-oracle configuration, settlement authority and deployment-sensitive code while a safe R0 audit requires no protected effect."
+  },
+  "inventory_snapshot": {
+    "open_pr_count": 34,
+    "existing_machine_verifiable_audits": {
+      "already_audited": [133, 134, 158, 159, 161, 170, 171, 172, 174, 177, 179, 180, 181, 182, 183, 185, 186, 187, 188, 190, 191, 192, 193, 194, 195, 196, 198, 199, 200, 201, 202, 203, 211, 212],
+      "rule": "Do not repeat these completed lineage audits unless their subject head changes or a new defect requires a bounded successor."
+    },
+    "ranked_candidates": [
+      {"rank": 1, "priority": "P0", "candidate": "PR #232 BrainExchange V4 real-funds lineage", "decision": "SELECTED"},
+      {"rank": 2, "priority": "P0", "candidate": "PR #135 18888 Lingxiao Bank V2 settlement lineage", "decision": "NEXT"},
+      {"rank": 3, "priority": "P0", "candidate": "PR #152 civilization service/alchemy financial Canon lineage", "decision": "PENDING"},
+      {"rank": 4, "priority": "P0", "candidate": "PR #153 Hengyao payroll capability authority lineage", "decision": "PENDING"},
+      {"rank": 5, "priority": "P0", "candidate": "PR #154 Hengyao payroll bloodflow and Mainnet receipt lineage", "decision": "PENDING"},
+      {"rank": 6, "priority": "P0", "candidate": "PR #136 civilization Phase 2 module/deployment lineage", "decision": "PENDING"},
+      {"rank": 7, "priority": "P1", "candidate": "Current-main Brain deployment decision packet and live oracle observation", "decision": "BLOCKED_PROTECTED_HUMAN_AUTHORITY"},
+      {"rank": 8, "priority": "P1", "candidate": "Current-main Brain UUPS storage-layout and independent smart-contract review evidence", "decision": "PENDING_REVIEW"},
+      {"rank": 9, "priority": "P2", "candidate": "PR #48 historical World Life baseline lineage", "decision": "PENDING"},
+      {"rank": 10, "priority": "P2", "candidate": "Current-main TODO/FIXME marker triage after P0 financial lineages", "decision": "PENDING"}
+    ]
+  },
+  "source_reads": [
+    {"path": "AGENTS.md", "blob_sha": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d"},
+    {"path": "K線西遊記/temples/11520/AGENTS.md", "blob_sha": "4e2821c8d86e65afa4c4c50f7fdba7575ca2cd4f"},
+    {"path": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md", "blob_sha": "49a448094e164c61bb308a9ce7d8e1cce12c4371"},
+    {"path": "docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md", "blob_sha": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc"},
+    {"path": "KGEN-Canon/KGEN_AI_BOOT_RULES.md", "blob_sha": "4202025a8e3e16485ec45f138061e642048b7c6f"},
+    {"path": "KGEN-KAIOS/SECURITY_MODEL.md", "blob_sha": "4c3001630ca547d19bea6454b7c44aef1fd399f6"},
+    {"path": "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md", "blob_sha": "650d371140179dc955d323da226f41360dda33b1"},
+    {"path": "KGEN-Organization/WorkOrders/KGEN_WORKORDER_STANDARD.md", "blob_sha": "3b0ee2d6d1490c2838de7166d42054ca48877bac"},
+    {"path": "KGEN-KAIOS/worker_registry.json", "blob_sha": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c"},
+    {"path": "KGEN-KAIOS/UNIVERSE_EXCHANGE_RUNTIME_CURRENT.md", "blob_sha": "0805237fbe7641dc3f700c51bb666b9a7c0803c5"},
+    {"path": "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "blob_sha": "5b87f5e3841bfb0d40b207b92a4d127fb24a8ae6"},
+    {"path": "KGEN-Organization/WorkOrders/KAIOS_PR426_11520_C100_SETTLEMENT_HARDENING_R1_20260924.json", "blob_sha": "22e0ba816e2c3e79a780b46acbfdc99408ccff5f"}
+  ],
+  "subject": {
+    "pr": 232,
+    "url": "https://github.com/klineodyssey/kline-odyssey/pull/232",
+    "title": "feat(11520): real-funds upgradeable BrainExchange V4 candidate",
+    "state": "OPEN",
+    "draft": true,
+    "merged": false,
+    "mergeable_at_audit": true,
+    "head_branch": "codex/KAIOS-11520-BRAIN-V4-REAL-FUNDS-001",
+    "head_sha": "375031016c6f9035d07dc33cc6f07d7fe714fe59",
+    "head_tree": "da5bd2397378524b66fa2f7f2f55bc59b491029a",
+    "merge_base_sha": "cc8616ec113f1a83b44e29786a5568fac5ca6b3d",
+    "merge_base_tree": "0dd914c02ab3329a22f4b24d75238b9fe23d30ad",
+    "ahead_of_current_main": 34,
+    "behind_current_main": 341,
+    "relation": "DIVERGED",
+    "changed_files": 12,
+    "submitted_reviews": 0,
+    "review_threads": 0,
+    "conversation_comments": 1,
+    "blocking_comment_id": 5657961139,
+    "decision": "HOLD_OPEN_DRAFT_UNMERGED_NO_GO",
+    "direct_merge_forbidden": true,
+    "direct_merge_reasons": [
+      "The head is a codex/* branch whose merge can trigger Cursor wake.",
+      "The head is 341 commits behind exact current main.",
+      "One unresolved P0 blocking conversation comment remains.",
+      "Three tracked versioned contract duplicates would violate current-main source-of-truth guards.",
+      "Real-funds deployment, funding, oracle configuration, role grants and Mainnet execution require action-specific Human authority."
+    ]
+  },
+  "path_lineage": {
+    "counts": {
+      "total": 12,
+      "same_at_main_and_head": 8,
+      "pr_only_added": 4,
+      "three_way_diverged": 0
+    },
+    "paths": [
+      {"path": ".github/workflows/brain-v4-contract-qa.yml", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "62ab1153234ae1d1303592e348cba622c5c52549", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN/contracts/KGEN_BrainExchange.sol", "base_blob_sha": null, "main_blob_sha": "716c7ae1b1b02379f316437b9dd9b11ee4a6fe17", "head_blob_sha": "716c7ae1b1b02379f316437b9dd9b11ee4a6fe17", "classification": "SAME_AT_MAIN_AND_HEAD"},
+      {"path": "KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "932d019a0e39da08316e7a24fa10755943c43d7b", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN/contracts/KGEN_MarketRiskKernel.sol", "base_blob_sha": null, "main_blob_sha": "3aac0f7af47aa41ceaf73e7e7ee9ec04626fb033", "head_blob_sha": "3aac0f7af47aa41ceaf73e7e7ee9ec04626fb033", "classification": "SAME_AT_MAIN_AND_HEAD"},
+      {"path": "KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "1b313341f018955b6a74a84e5236eb50a74cffa4", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN/contracts/KGEN_PositionEngine.sol", "base_blob_sha": null, "main_blob_sha": "995ba1d4eefe629d2ad3a43acead0512d17c50cf", "head_blob_sha": "995ba1d4eefe629d2ad3a43acead0512d17c50cf", "classification": "SAME_AT_MAIN_AND_HEAD"},
+      {"path": "KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol", "base_blob_sha": null, "main_blob_sha": null, "head_blob_sha": "9027e69fadc26bc260a0cac36ef7cf9f3ff0d0dd", "classification": "PR_ONLY_ADDED"},
+      {"path": "KGEN/contracts/tests/brain-position-integration-evm.test.mjs", "base_blob_sha": null, "main_blob_sha": "a92d58cbe2c67a9c5a9b642fc7e58a6d6a4a4024", "head_blob_sha": "a92d58cbe2c67a9c5a9b642fc7e58a6d6a4a4024", "classification": "SAME_AT_MAIN_AND_HEAD"},
+      {"path": "KGEN/contracts/tests/brain-v4-evm.test.mjs", "base_blob_sha": null, "main_blob_sha": "3db5064e4f09c9dec169d538f80b1b5eb35c7993", "head_blob_sha": "3db5064e4f09c9dec169d538f80b1b5eb35c7993", "classification": "SAME_AT_MAIN_AND_HEAD"},
+      {"path": "KGEN/contracts/tests/brain-v4-static-invariants.mjs", "base_blob_sha": null, "main_blob_sha": "d92f9d481331e30346fac562c46eae3490c52fa1", "head_blob_sha": "d92f9d481331e30346fac562c46eae3490c52fa1", "classification": "SAME_AT_MAIN_AND_HEAD"},
+      {"path": "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs", "base_blob_sha": null, "main_blob_sha": "36effb9248ae0274afee3e9bd8cb23d32492cf17", "head_blob_sha": "36effb9248ae0274afee3e9bd8cb23d32492cf17", "classification": "SAME_AT_MAIN_AND_HEAD"},
+      {"path": "KGEN/contracts/tests/position-engine-evm.test.mjs", "base_blob_sha": null, "main_blob_sha": "71b5b7e3a9a51511a4854a3a2905b116e7e88432", "head_blob_sha": "71b5b7e3a9a51511a4854a3a2905b116e7e88432", "classification": "SAME_AT_MAIN_AND_HEAD"}
+    ]
+  },
+  "findings": [
+    {
+      "severity": "P0",
+      "id": "SPLIT_SOURCE_OF_TRUTH_FALSE_GREEN",
+      "evidence": {
+        "workflow_blob": "62ab1153234ae1d1303592e348cba622c5c52549",
+        "compiled_versionless": ["716c7ae1b1b02379f316437b9dd9b11ee4a6fe17", "3aac0f7af47aa41ceaf73e7e7ee9ec04626fb033", "995ba1d4eefe629d2ad3a43acead0512d17c50cf"],
+        "executed_versioned": ["932d019a0e39da08316e7a24fa10755943c43d7b", "1b313341f018955b6a74a84e5236eb50a74cffa4", "9027e69fadc26bc260a0cac36ef7cf9f3ff0d0dd"]
+      },
+      "conclusion": "The subject workflow compiles the canonical versionless sources but its Position and integration suites read the non-identical versioned sources. Green subject CI therefore does not prove the compiled production candidate was exercised."
+    },
+    {
+      "severity": "P0",
+      "id": "CURRENT_MAIN_REJECTS_DUPLICATE_ACTIVE_SOURCES",
+      "evidence": {
+        "workflow": ".github/workflows/11520-trading-readiness.yml",
+        "workflow_blob_sha": "3712313d14986539aa3a085af1d419d3dd421b4d",
+        "guard": "test ! -e for all three versioned duplicates"
+      },
+      "conclusion": "A refreshed direct merge of PR #232 would restore files that current main deliberately rejects before compiling."
+    },
+    {
+      "severity": "P0",
+      "id": "REAL_FUNDS_ACTIVATION_NOT_AUTHORIZED",
+      "evidence": {
+        "market_binding_blob_sha": "ebccbad9b0e9cc6dc958b72230f74211ee697b47",
+        "feed_provenance_blob_sha": "576a904f84f5df5c7d475423d75b4d4f4ee47952",
+        "production_quorum_ready": false,
+        "mainnet_transaction_authorized": false
+      },
+      "conclusion": "Current main remains fail closed. Live oracle observation, production configuration, deployed addresses, wallet receipt integration and an exact Human Mainnet authorization are absent."
+    },
+    {
+      "severity": "P1",
+      "id": "STALE_DIVERGED_HEAD",
+      "evidence": {"ahead": 34, "behind": 341, "merge_base": "cc8616ec113f1a83b44e29786a5568fac5ca6b3d"},
+      "conclusion": "The subject branch cannot establish current-main compatibility or dependency order."
+    },
+    {
+      "severity": "P1",
+      "id": "ORIGINAL_P0S_HAVE_CURRENT_MAIN_SUCCESSORS",
+      "evidence": {
+        "pr357": "aa06a25fc96de7be87f7ed18b11b4f65509617a8",
+        "pr358": "7689be9671661ceaab58cb0cc7191dc336ce2898",
+        "pr359": "a611a023ac7e06c40b862170343af45de0bdac98",
+        "pr360": "8e1d0197ac2dcad68108a3115853e0204bd38b8b",
+        "pr365": "0d5b428856e0b4e923429d9d9fda08e543b6c508",
+        "pr366": "9947a2ec2ccebf3781d3f0c28dda42e7dc8f94c8",
+        "pr427": "f177fb9a5851b64ff3e0260f2622c27c78f53e6f"
+      },
+      "conclusion": "Current main already contains bounded non-triggering successors for canonical sources, exact-source CI, axis/market binding, unsigned intent, preflight routing, feed provenance and 100C settlement hardening. The old PR must not overwrite that lineage."
+    }
+  ],
+  "validation": {
+    "subject_exact_head": {
+      "workflow_run": 34293191322,
+      "workflow_url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/34293191322",
+      "conclusion": "SUCCESS",
+      "job": "compile-and-fund-invariants",
+      "scope_warning": "FALSE_GREEN_FOR_CANONICAL_EXECUTION_IDENTITY"
+    },
+    "current_main_successor_evidence": [
+      {"head": "0591109092c49ea13bcb5c002a5767f3ca8e77b7", "run": 34798987887, "name": "11520 Trading Readiness", "conclusion": "SUCCESS"},
+      {"head": "547487944609c48352a32b1bc0c36cf167f1109f", "run": 34822807102, "name": "11520 Oracle Provenance", "conclusion": "SUCCESS"},
+      {"head": "28a49130337f1650c409acb1b6e754a8b132a824", "run": 35958043264, "name": "11520 Trading Readiness", "conclusion": "SUCCESS"},
+      {"head": "28a49130337f1650c409acb1b6e754a8b132a824", "run": 35958043177, "name": "11520 Game Product QA", "conclusion": "SUCCESS"},
+      {"head": "28a49130337f1650c409acb1b6e754a8b132a824", "run": 35958043187, "name": "11520 Responsive Product QA", "conclusion": "SUCCESS"},
+      {"head": "28a49130337f1650c409acb1b6e754a8b132a824", "run": 35958043219, "name": "11520 Universal Exchange V2", "conclusion": "SUCCESS"}
+    ],
+    "machine_checks": [
+      "JSON parse",
+      "exact selected_count equals 1",
+      "12 unique subject paths",
+      "path classification totals equal 12",
+      "all non-null Git blob/commit/tree fields match lowercase 40-hex SHA",
+      "all protected effects are false",
+      "three canonical/versioned source pairs are non-identical",
+      "subject head and current main relation is ahead 34 / behind 341"
+    ],
+    "functional_qa": "PASS_EVIDENCE_ONLY_AUDIT",
+    "visual_qa": {
+      "subject_ui_changed": false,
+      "dedicated_subject_browser_required": false,
+      "reason": "PR #232 changes contracts, tests and one CI workflow only; this audit changes one JSON WorkOrder only.",
+      "post_merge_requirement": "Verify current-main Pages and Responsive Chromium screenshot artifact after the audit merge."
+    }
+  },
+  "changed_files": [
+    "KGEN-Organization/WorkOrders/KAIOS_PR232_BRAIN_V4_REAL_FUNDS_LINEAGE_AUDIT_R0_20260924.json"
+  ],
+  "protected_effects": {
+    "payment": false,
+    "token_or_asset_transfer": false,
+    "deposit_or_withdrawal": false,
+    "funding_or_recapitalization": false,
+    "real_settlement": false,
+    "oracle_onchain_configuration": false,
+    "deployment_or_upgrade": false,
+    "role_grant_or_revocation": false,
+    "wallet_connection": false,
+    "signer_or_private_key_access": false,
+    "mainnet_or_testnet_transaction": false,
+    "chain_state_mutation": false,
+    "governance": false,
+    "controller_signer_operator_appointment": false,
+    "worker_or_life_activation": false,
+    "workflow_dispatch": false,
+    "external_agent_launch": false,
+    "external_submission": false,
+    "paid_external_api": false
+  },
+  "remaining_blockers": [
+    "PR #232 remains OPEN / DRAFT / UNMERGED / HOLD and has one explicit P0 blocking comment.",
+    "The subject branch is 341 commits behind current main and contains three non-canonical duplicate contract sources.",
+    "Subject CI compiles and executes different source blobs.",
+    "No independent smart-contract/security review or UUPS storage-layout compatibility review is recorded for activation.",
+    "Production feed live observation and authorized on-chain configuration are not verified.",
+    "Brain and Position Engine deployed addresses, exact implementation identities and SETTLEMENT_ROLE configuration are not verified.",
+    "Wallet/game receipt integration and action-specific Human Mainnet authorization are absent.",
+    "No deployment, funding, real-funds activation or chain mutation is authorized by this audit."
+  ],
+  "next_candidate": {
+    "priority": "P0",
+    "candidate": "PR #135 18888 Lingxiao Bank V2 settlement runtime and TempleHeart Mainnet plan lineage safety audit",
+    "decision": "NEXT_AFTER_POST_MERGE_VERIFICATION"
+  }
+}
