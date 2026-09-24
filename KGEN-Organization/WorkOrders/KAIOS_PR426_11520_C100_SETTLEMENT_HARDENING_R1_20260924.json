@@ -113,8 +113,8 @@
       "restore wrong-chain, unverified-feed, zero-price and invalid-wallet negative gates",
       "require a real 390x844 C100 settlement screenshot in Game Product QA"
     ],
-    "changed_files_without_work_order": 25,
-    "diff_without_work_order": {"additions": 242, "deletions": 145}
+    "changed_files_without_work_order": 26,
+    "diff_without_work_order": {"additions": 271, "deletions": 146}
   },
   "changed_files": [
     ".github/workflows/11520-game-product-qa.yml",
@@ -135,6 +135,7 @@
     "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
     "K線西遊記/temples/11520/runtime/trade-guidance-runtime.mjs",
     "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs",
+    "K線西遊記/temples/11520/tests/11520-browser-smoke.mjs",
     "K線西遊記/temples/11520/tests/11520-runtime.test.mjs",
     "K線西遊記/temples/11520/tests/combat-mass-scale-runtime.mjs",
     "K線西遊記/temples/11520/ui-organs.mjs",
@@ -155,6 +156,7 @@
       "engine": "Playwright Chromium 1.51.1",
       "viewport": "390x844",
       "functional_result": "PASS",
+      "full_mobile_smoke_result": "PASS_AFTER_BOUNDED_THREE_ATTEMPT_POINTER_RETRY",
       "assertions": [
         "1000 input preserves the canonical 100C cap",
         "order confirmation shows 100C and percentage-return risk",
