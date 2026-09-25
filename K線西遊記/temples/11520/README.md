@@ -1,5 +1,21 @@
 # 11520 Universal Exchange V3.9
 
+## Settlement simulation / candidate contracts — V2.6.21 / 2026-09-25
+
+Existing Game ledger now presents PENDING → TOUCH/CROSS → FILLED → position →
+close/SL/TP/liquidation → receipt. C sign alone supplies direction, abs(C)≤100,
+lots1..100 are principal. Available/locked/equity/unrealized/realized are explicitly
+**SIMULATION WALLET**, session-only; readonly chain balance remains separate.
+Public quote ticks never authorize real-funds settlement. Original HUD positions,
+K-space semantics, movement, portrait and landscape are preserved. Shellv273 is
+still same-origin/temple-scoped network-first, orientation any.
+
+`KGEN/contracts/KGEN_OrderTriggerEngine.sol` connects to existing Position/Brain;
+see `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` for unapproved Testnet/Mainnet
+inputs. No deployed address or signer is invented. Browser test entry:
+`K線西遊記/temples/11520/tests/11520-browser-settlement.mjs` (both orientations).
+
+
 ## Public market K-space — V2.6.20 / 2026-09-21
 
 The shared validated BTCUSDT/ETHUSDT/BNBUSDT public quote batch now drives both market cards and simulation K coordinates. `Ki=100*(Pi/P0i-1)` retains the existing anchors (100000/4000/600); these anchors define units, not substitute prices. The production encounter waits for a complete valid batch. Missing/invalid updates retain last-good values visibly marked STALE; no initial `(1,-0.5,1)` is presented as current market data.

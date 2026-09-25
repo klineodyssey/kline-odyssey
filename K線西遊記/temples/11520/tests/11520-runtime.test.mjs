@@ -228,4 +228,14 @@ test('consumable item mutates inventory and hp',()=>{const inv=defaultInventory(
 test('local ATM is explicit state conversion',()=>{const s={kgen:10,kaios:100};assert.equal(exchangeLocal(s,1,10).ok,true);assert.equal(s.kgen,9);assert.equal(s.kaios,110)});
 test('order preview -> execute -> close keeps fixed principal and percentage-return accounting',()=>{const s={kgen:10,pos:{KX:null,KY:null,KZ:null},history:[]};const p=previewOrder({axis:'KX',symbol:'BTCUSDT',fire:2,leverage:2,price:100,kgen:s.kgen,hasPosition:false});assert.equal(p.ok,true);assert.equal(p.order.im,2);executeOrder(s,p.order);assert.equal(s.kgen,8);const c=closePosition(s,'KX',103);assert.equal(c.ok,true);assert.equal(c.pnl,.12);assert.ok(Math.abs(s.kgen-10.12)<1e-12);const st=tradeStats(s.history);assert.equal(st.closed,1);assert.equal(st.realizedPnl,.12)});
 test('legacy order preview rejects lots or C above the shared 100 boundary',()=>{assert.equal(previewOrder({axis:'KX',symbol:'BTCUSDT',fire:101,leverage:1,price:100,kgen:1000,hasPosition:false}).reason,'BAD_LOTS');assert.equal(previewOrder({axis:'KX',symbol:'BTCUSDT',fire:1,leverage:101,price:100,kgen:1000,hasPosition:false}).reason,'BAD_C')});
-test('cancel invariant: preview alone does not mutate balances/position/history',()=>{const s={kgen:10,pos:{KX:null},history:[]};const snap=structuredClone(s);const p=previewOrder({axis:'KX',symbol:'BTCUSDT',fire:-1,leverage:1,price:100,kgen:10,hasPosition:false});assert.equal(p.ok,true);assert.deepEqual(s,snap)});
+test('cancel invariant: preview alone does not mutate balances/position/history',()=>{const s={kgen:10,pos:{KX:null},history:[]};const snap=structuredClone(s);const p=previewOrder({axis:'KX',symbol:'BTCUSDT',fire:1,leverage:-1,price:100,kgen:10,hasPosition:false});assert.equal(p.ok,true);assert.equal(p.order.side,'空');assert.deepEqual(s,snap)});
+test('order execution rejects forged C, lots, side, margin and duplicate positions atomically',()=>{
+ const base=previewOrder({axis:'KX',symbol:'BTCUSDT',fire:1,leverage:-100,price:100,kgen:1000,hasPosition:false}).order;
+ for(const patch of [{c:0},{c:1000},{c:-1000},{lots:-1},{lots:101},{lots:1.5},{side:'多'},{im:0},{price:NaN}]){
+  const state={kgen:1000,pos:{KX:null},history:[]},before=structuredClone(state);
+  assert.equal(executeOrder(state,{...base,...patch}).ok,false);assert.deepEqual(state,before);
+ }
+ const state={kgen:1000,pos:{KX:null},history:[]};assert.equal(executeOrder(state,base).ok,true);
+ const once=structuredClone(state);assert.equal(executeOrder(state,base).reason,'POSITION_EXISTS');assert.deepEqual(state,once);
+ assert.equal(previewOrder({axis:'KX',fire:-1,leverage:1,price:100,kgen:1000}).reason,'BAD_LOTS');
+});

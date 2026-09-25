@@ -96,3 +96,19 @@ HUMAN_ACTION_REQUIRED =
 
 ## Completion rule
 Do not report `CAN_REAL_SETTLE_NOW = YES` unless exact live chain reads and receipt-capable runtime prove the complete path. A matching engine alone is not real settlement.
+
+## 2026-09-25 Human settlement engineering continuation
+
+Existing live endpoints above remain historical Canon and are not automatically
+the candidate BrainV4/Position/Trigger deployments. Versionless organs are extended
+in `codex/k11520-settlement-final-20260925`; no parallel Brain/wallet is introduced.
+Local actual-stack EVM passes32 signed100C stress and12 realistic-price boundary
+cases;8 local deployments and92 smoke transaction records are generated with source
+hashes in `artifacts/settlement-local-evm.json`. This is Ganache1337, not Testnet.
+
+Game existing ledger and sheets show simulation pending/fill/isolated liquidation/
+receipts and five wallet accounting fields;152 tests and both canonical Chromium
+viewports passed. Required exact-head CI/Pages verification is still a release gate.
+`docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` records explicit missing Testnet
+public account/role/feed/gas inputs and live3-source oracle evidence. No signer,
+private key, deployment, role grant, treasury or token transfer executed.

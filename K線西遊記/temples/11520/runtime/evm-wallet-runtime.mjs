@@ -1,3 +1,4 @@
+import {normalizeSignedC,signedPositionSide,requiredMargin} from './kgen-margin-runtime.mjs';
 const ERC20_BALANCE_OF='0x70a08231';
 export const PUBLIC_WALLET_IDENTITY_KEY='klineodyssey.public-wallet-identity.v1';
 export const PLAYER_SESSION_KEY='k11520.player-session.v1';
@@ -75,6 +76,8 @@ export function assertExecutableOrder({wallet,chainId,marketAdapter,order}){
   if(wallet.chainId!==chainId)return {ok:false,reason:'WRONG_CHAIN'};
   if(!marketAdapter?.preview||!marketAdapter?.submit)return {ok:false,reason:'NO_VERIFIED_MARKET_ADAPTER'};
   if(!order?.axis||!order?.side||!(Number(order?.notional)>0))return {ok:false,reason:'INVALID_ORDER'};
+  try{normalizeSignedC(order.c);signedPositionSide(order.c,order.side);requiredMargin({lots:order.lots})}catch(e){return {ok:false,reason:e.message}}
+  if(!['KX','KY','KZ'].includes(order.axis)||!Number.isFinite(Number(order.notional)))return {ok:false,reason:'INVALID_ORDER'};
   return {ok:true};
 }
 

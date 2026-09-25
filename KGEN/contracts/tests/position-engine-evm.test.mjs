@@ -5,8 +5,8 @@ import solc from 'solc';
 import ganache from 'ganache';
 import { BrowserProvider, ContractFactory, Contract, parseEther } from 'ethers';
 
-const enginePath = 'KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol';
-const kernelPath = 'KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol';
+const enginePath = 'KGEN/contracts/KGEN_PositionEngine.sol';
+const kernelPath = 'KGEN/contracts/KGEN_MarketRiskKernel.sol';
 const harnessPath = 'KGEN/contracts/tests/PositionSettlementHarness.sol';
 const harnessSource = `// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
@@ -163,6 +163,12 @@ const px150 = parseEther('150');
 const size1 = parseEther('1');
 
 async function setFeeds(a, b, c, timestamp = null) {
+  // Accepted rounds must advance independently of runner/wall-clock speed.
+  // Explicit timestamps remain available for stale/out-of-order fixtures.
+  if (timestamp === null) {
+    await eip1193.request({ method: 'evm_increaseTime', params: [1] });
+    await eip1193.request({ method: 'evm_mine', params: [] });
+  }
   const ts = timestamp ?? await latestTimestamp();
   await (await feed0.set(a, ts)).wait();
   await (await feed1.set(b, ts)).wait();

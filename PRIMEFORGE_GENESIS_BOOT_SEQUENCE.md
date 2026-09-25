@@ -36,6 +36,17 @@ BOOT_POLICY: Fixed filename; update content cumulatively; never rename the forma
 
 ## Forest And Agriculture Candidate Queue Registration
 
+### K11520 settlement engineering registration (2026-09-25)
+
+Human-requested unique files below do not activate any live-chain authority.
+
+| Repository path | Purpose |
+|---|---|
+| `KGEN/contracts/KGEN_OrderTriggerEngine.sol` | Pending/touch/cross one-shot orders via existing Position and Brain. |
+| `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` | Fail-closed execution package; missing Testnet/feed/role evidence stays blocked. |
+| `K線西遊記/temples/11520/tests/11520-browser-settlement.mjs` | Chromium simulation settlement/receipt/wallet QA in both orientations. |
+
+
 These entries are governance and research records. They do not activate the
 Forest and Agriculture Runtime or grant Cursor Canonical, Runtime, deployment,
 Rights, Economy, Wallet or KGEN authority.

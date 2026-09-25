@@ -15,6 +15,24 @@ pragma solidity ^0.8.24;
 library KGEN_MarketRiskKernel_V1_0_0 {
     uint256 internal constant WAD = 1e18;
     uint256 internal constant MAX_BPS = 10_000;
+    uint256 internal constant MAX_C_WAD = 100e18;
+    uint256 internal constant MAX_LOTS = 100;
+    error InvalidC(); error InvalidLots();
+
+    // Human Canon: one lot locks one KGEN; C never discounts principal.
+    function validateOrder(int256 cWad, uint256 lots) internal pure returns (uint256 leverageWad) {
+        if (cWad == 0 || cWad < -int256(MAX_C_WAD) || cWad > int256(MAX_C_WAD)) revert InvalidC();
+        if (lots == 0 || lots > MAX_LOTS) revert InvalidLots();
+        return uint256(cWad < 0 ? -cWad : cWad);
+    }
+
+    function orderPnl(int256 cWad, uint256 lots, uint256 entry, uint256 mark) internal pure returns (int256) {
+        validateOrder(cWad, lots);
+        if (entry == 0 || mark == 0) revert ZeroPrice();
+        // Bounds also keep signed multiplication deterministic and fail-closed.
+        if (entry > 1e36 || mark > 1e36) revert SignedOverflow();
+        return (int256(mark) - int256(entry)) * cWad * int256(lots) / int256(entry);
+    }
     error ZeroPrice(); error ZeroSize(); error InvalidBps(); error InvalidOracleTime(); error StaleOraclePrice(); error OraclePriceOutOfBounds(); error SignedOverflow();
 
     function validateOraclePrice(uint256 priceWad,uint256 updatedAt,uint256 nowTs,uint256 maxAge,uint256 minPriceWad,uint256 maxPriceWad) internal pure returns (uint256) {

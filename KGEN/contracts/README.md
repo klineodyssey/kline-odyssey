@@ -1,4 +1,42 @@
 # KGEN Contracts (V7.5.2)
+
+## K11520 settlement candidate — 2026-09-25
+
+Existing versionless Brain custody + Risk + Position are extended by
+`KGEN/contracts/KGEN_OrderTriggerEngine.sol`, the unique pending/touch/cross
+one-shot order organ. No contract is deployed by merging these sources.
+The historical versioned-file policy below is lineage, not authority to duplicate
+active organs. `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` is a **blocked**
+execution package, not a deployment receipt.
+
+Run `node KGEN/contracts/tests/brain-position-integration-evm.test.mjs` with the
+pinned dependencies in `.github/workflows/11520-trading-readiness.yml` for actual
+Brain proxy + Position + Trigger integration. Risk is compiled into the engines.
+The token/feeds and chain are local test fixtures. Generated
+`artifacts/settlement-local-evm.json` records real local addresses/transactions/gas
+and source hashes, **not Testnet evidence**.
+
+Brain `SETTLEMENT_ROLE` must be Position only; Position `executor` must be Trigger
+only. Keeper cannot supply a price or arbitrary trader. C is signed WAD ±100,
+lots1..100, margin=lots KGEN, PnL=return×signedC×lots. Maintenance derives from
+mark notional; no hidden fee or fixed1% threshold. Reported liquidation boundary
+uses guaranteed-trigger integer rounding; the actual equity predicate always
+checks the first accepted observation. Off-chain ticks never delivered by feeds
+and keeper cannot be observed by a contract.
+
+This is a **fresh empty PositionEngine** deployment candidate. Legacy orderId=0
+position migration is unsupported, not silently mapped into the Trigger path.
+Use pause-new-risk controls, not disabling a market with open positions (which
+blocks its exits). No upgrade/deploy/role transaction is authorized here.
+
+Game uses the existing ledger for session-only SIMULATION pending/fill/SL/TP/
+liquidation and immutable local receipts. Wallet shows separate available,
+locked, equity, unrealized and realized fields; on-chain balance is read-only.
+`K線西遊記/temples/11520/tests/11520-browser-settlement.mjs` exercises the actual
+Chromium entry at390×844 and844×390. Public quotes are reference data, not a
+real-funds settlement oracle. Production feed/role/Testnet blockers are explicit
+in the manifest; no Mainnet-ready claim without those receipts.
+
 ## 合約定位與使用說明（給工程/審計/合作方）
 
 ---

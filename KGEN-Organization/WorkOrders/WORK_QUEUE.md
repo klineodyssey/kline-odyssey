@@ -1,5 +1,20 @@
 # KGEN Organization V2.0 WorkQueue
 
+## K11520 settlement final engineering — 2026-09-25
+
+- Owner: `codex-gm-01`; Human explicit execution order; isolated branch
+  `codex/k11520-settlement-final-20260925`, base `3c136a30865a43a6222f5e199495a176140be139`.
+- Status: CANDIDATE_QA_PASS_CI_PENDING — actual Brain/Position/Trigger EVM and
+  simulation Chromium QA passed locally; exact-head CI required before merge.
+- Scope: existing custody/position/ledger, signed C ±100, lots1..100, touch/cross,
+  one-shot fill and permanent candidate-contract receipts, isolated liquidation.
+- Protected execution: HOLD; `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` lists
+  missing public Testnet/feed/role/signer-route/gas evidence. No key use or transfer.
+- Source: original repository extension, pinned OpenZeppelin dependency;
+  no imported proprietary engine/music. Added-line secret scan required before push.
+- Payroll: no new receipt; no PAID/RECEIVED claim or payment authorized.
+
+
 **Queue Version:** V3.0 Cursor Execution Edition  
 **Status:** Active  
 **Manager:** Codex  

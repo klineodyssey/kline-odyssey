@@ -6,6 +6,15 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### K11520 settlement candidate (2026-09-25; no chain activation)
+
+`KGEN/contracts/KGEN_OrderTriggerEngine.sol` extends the existing Brain/Position
+organs with pending, touch/cross and one-shot fills. Read
+`docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` for the blocked execution package;
+no Testnet/Mainnet deployment is implied. Browser simulation evidence is generated
+by `K線西遊記/temples/11520/tests/11520-browser-settlement.mjs`.
+
+
 <div style="text-align:center; margin:18px 0 22px 0;">
   <img src="https://klineodyssey.github.io/kline-odyssey/logo.png"
        alt="KGEN Genesis Logo"
