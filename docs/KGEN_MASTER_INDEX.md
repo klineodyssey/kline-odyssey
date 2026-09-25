@@ -1,5 +1,14 @@
 # KGEN MASTER_INDEX
 
+## K11520 settlement candidate registration — 2026-09-25
+
+| Full repository path | Purpose |
+|---|---|
+| `KGEN/contracts/KGEN_OrderTriggerEngine.sol` | Versionless one-shot trigger organ using existing Brain/Position. |
+| `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` | Blocked execution manifest; not a live deployment. |
+| `K線西遊記/temples/11520/tests/11520-browser-settlement.mjs` | Actual Chromium pending/fill/liquidation/receipt/wallet regression. |
+
+
 > **SUB-INDEX — Repository File Inventory**
 > Library-level Master Index: [`KGEN_MASTER_LIBRARY_INDEX.md`](../KGEN_MASTER_LIBRARY_INDEX.md)
 > Decision: ORG-P2-003 D7 (ALIAS). This file is an AUTOPILOT-generated full repo inventory, not the cross-library master.

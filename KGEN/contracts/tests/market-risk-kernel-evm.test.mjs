@@ -5,7 +5,7 @@ import solc from 'solc';
 import ganache from 'ganache';
 import { BrowserProvider, ContractFactory, parseEther } from 'ethers';
 
-const sourcePath = 'KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol';
+const sourcePath = 'KGEN/contracts/KGEN_MarketRiskKernel.sol';
 const source = fs.readFileSync(sourcePath, 'utf8');
 
 function findImports(importPath) {

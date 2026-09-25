@@ -5,8 +5,8 @@ import solc from 'solc';
 import ganache from 'ganache';
 import { BrowserProvider, ContractFactory, Contract, parseEther } from 'ethers';
 
-const enginePath = 'KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol';
-const kernelPath = 'KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol';
+const enginePath = 'KGEN/contracts/KGEN_PositionEngine.sol';
+const kernelPath = 'KGEN/contracts/KGEN_MarketRiskKernel.sol';
 const harnessPath = 'KGEN/contracts/tests/PositionSettlementHarness.sol';
 const harnessSource = `// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;

@@ -1,5 +1,39 @@
 # Codex Review Log
 
+## 2026-09-25 · K11520 settlement candidate / V2.6.21
+
+- Human explicit code/test/PR/merge authority; base main
+  `3c136a30865a43a6222f5e199495a176140be139`; clean isolated
+  `codex/k11520-settlement-final-20260925`. Human dirty checkout untouched.
+- Existing actual Brain proxy custody retained. New unique versionless Trigger
+  uses Position, not a parallel wallet or settlement. Signed C ±100, lots1..100,
+  principal=lots, return-based PnL, pending/touch/cross/one-shot and atomic receipts.
+- Safety fixes from self-review: async feed snapshots use per-feed monotonic
+  round/time/value watermarks + sequence instead of minimum timestamp identity;
+  reported boundary is guaranteed-trigger under integer rounding.
+- EVM local PASS: Brain custody, risk, Position, actual Brain/Position/Trigger,
+  32 signed100C stress cases and12 realistic-price boundary cases. Actual pair
+  evidence: `artifacts/settlement-local-evm.json` with8 deployments,92 smoke tx,
+  source hashes and gas. **Ganache1337 / test fixtures, NOT public Testnet**.
+- Node:152 tests PASS. Real Chromium390×844 and844×390: pending, cross, fill,
+  isolated liquidation, immutable session receipt, five wallet fields, three
+  rotation round trips and attack hit target PASS. Direct screenshot inspection
+  found low-contrast inputs; repaired existing confirmation styles and reran.
+  Evidence: `artifacts/11520-settlement-qa/`. Scrollable landscape confirmation
+  keeps cancel/submit fixed and receipt remains scrollable. No HUD relocation.
+- Original repository extension, pinned MIT OpenZeppelin; no third-party code,
+  proprietary K-line engine, music or secrets imported. Added-line credential
+  scan:0 hits; final staged scan required before push. No signer/key or chain use.
+- Candidate gate: exact-head CI still required before merge. Mainnet readiness
+  remains BLOCKED by approved Testnet execution identity/budget/feed configuration,
+  public Testnet receipts, verified3-source USDT oracle set and chain integration.
+  `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json` is explicitly non-executable.
+- Migration caveat: fresh empty engine only; legacy orderId=0 positions are not
+  silently migrated. Use pause-new-risk, not market-disable with open positions.
+- Payroll follow-up: canonical workforce snapshot/reserve is prototype-only;
+  no task payment receipt, no PAID/RECEIVED claim and no payment executed.
+
+
 ## 2026-09-21 · KAIOS-11520-LIVE-MARKET-MAP-20260921
 
 - Worker/reviewer: codex-gm-01 / 衡曜; explicit Human image order and active ordinary merge policy. Branch `codex/k11520-live-market-map-20260921`, reconciled with e4fccbe433802d6bfc0319d673c11a7e9981587d. No extra reviewer gate; required exact-head CI and visual QA still apply.

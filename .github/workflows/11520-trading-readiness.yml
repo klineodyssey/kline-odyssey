@@ -6,6 +6,7 @@ on:
       - "KGEN/contracts/KGEN_BrainExchange.sol"
       - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
       - "KGEN/contracts/KGEN_PositionEngine.sol"
+      - "KGEN/contracts/KGEN_OrderTriggerEngine.sol"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
@@ -25,6 +26,7 @@ on:
       - "KGEN/contracts/KGEN_BrainExchange.sol"
       - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
       - "KGEN/contracts/KGEN_PositionEngine.sol"
+      - "KGEN/contracts/KGEN_OrderTriggerEngine.sol"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
@@ -46,7 +48,7 @@ permissions:
 jobs:
   canonical-real-funds-candidate:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -84,20 +86,12 @@ jobs:
             -o /tmp/brain-v4-build \
             KGEN/contracts/KGEN_BrainExchange.sol \
             KGEN/contracts/KGEN_MarketRiskKernel.sol \
-            KGEN/contracts/KGEN_PositionEngine.sol
+            KGEN/contracts/KGEN_PositionEngine.sol \
+            KGEN/contracts/KGEN_OrderTriggerEngine.sol
           test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_sol_KGEN_BrainExchange_V4_0_0.bin
           test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_PositionEngine_sol_KGEN_PositionEngine_V1_0_0.bin
 
-      - name: Prepare ephemeral canonical aliases for legacy test harness paths
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp KGEN/contracts/KGEN_BrainExchange.sol KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
-          cp KGEN/contracts/KGEN_MarketRiskKernel.sol KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
-          cp KGEN/contracts/KGEN_PositionEngine.sol KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
-          cmp -s KGEN/contracts/KGEN_BrainExchange.sol KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
-          cmp -s KGEN/contracts/KGEN_MarketRiskKernel.sol KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
-          cmp -s KGEN/contracts/KGEN_PositionEngine.sol KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
+          test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_OrderTriggerEngine_sol_KGEN_OrderTriggerEngine.bin
 
       - name: Run fixed axis/market binding invariants
         run: node --test tests/11520-real-trading-market-binding.test.mjs
@@ -123,18 +117,21 @@ jobs:
       - name: Run Position Engine EVM invariants
         run: node KGEN/contracts/tests/position-engine-evm.test.mjs
 
-      - name: Run actual Brain proxy + Position Engine integration
+      - name: Run actual Brain proxy + Position + Trigger integration and 100C stress
         run: node KGEN/contracts/tests/brain-position-integration-evm.test.mjs
 
-      - name: Remove ephemeral aliases and reject tracked drift
+      - name: Reject tracked drift and parallel contract aliases
         shell: bash
         run: |
           set -euo pipefail
-          rm -f \
-            KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol \
-            KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol \
-            KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
           git diff --exit-code
           test ! -e KGEN/contracts/KGEN_BrainExchange_V4_0_0.sol
           test ! -e KGEN/contracts/KGEN_MarketRiskKernel_V1_0_0.sol
           test ! -e KGEN/contracts/KGEN_PositionEngine_V1_0_0.sol
+      - name: Upload local EVM rehearsal evidence (not Testnet)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: settlement-local-evm-${{ github.sha }}
+          path: artifacts/settlement-local-evm.json
+          if-no-files-found: error

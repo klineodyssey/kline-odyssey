@@ -19,7 +19,7 @@ permissions:
 jobs:
   product-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -74,7 +74,7 @@ jobs:
           node "tests/11520-product-standard.test.mjs"
       - name: Install Chromium smoke-test runtime
         run: |
-          npm install --no-save --package-lock=false playwright@1.51.1
+          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0
           npx playwright install --with-deps chromium
       - name: Run mobile XYZ functional and visual smoke tests
         shell: bash
@@ -144,6 +144,21 @@ jobs:
             exit "$RC"
           fi
           echo "[11520-QA] XYZ browser smoke completed $(date -u +%FT%TZ)"
+      - name: Run deterministic settlement lifecycle in real Chromium (portrait and landscape)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-settlement-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          timeout 180s node "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs"
+      - name: Upload settlement browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 11520-settlement-${{ github.sha }}
+          path: artifacts/11520-settlement-qa/
+          if-no-files-found: error
       - name: Verify mandatory runtime screenshot evidence exists
         if: always()
         shell: bash

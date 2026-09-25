@@ -27,10 +27,20 @@ test('rejects wrong axis market, chain and missing protected authorization',()=>
 });
 test('rejects invalid order values, leverage above 100C and wallet identity',()=>{
  assert.throws(()=>buildRealTradingOrderIntent({...base,lots:0}),/LOTS_OUT_OF_RANGE/);
- assert.throws(()=>buildRealTradingOrderIntent({...base,c:0}),/C_MUST_BE_POSITIVE/);
- assert.throws(()=>buildRealTradingOrderIntent({...base,c:NaN}),/C_MUST_BE_POSITIVE/);
+ assert.throws(()=>buildRealTradingOrderIntent({...base,c:0}),/C_NEUTRAL_NO_POSITION/);
+ assert.throws(()=>buildRealTradingOrderIntent({...base,c:NaN}),/C_LEVERAGE_OUT_OF_RANGE/);
  assert.throws(()=>buildRealTradingOrderIntent({...base,c:100.0001}),/C_LEVERAGE_OUT_OF_RANGE/);
  assert.throws(()=>buildRealTradingOrderIntent({...base,c:1000}),/C_LEVERAGE_OUT_OF_RANGE/);
  assert.throws(()=>buildRealTradingOrderIntent({...base,price:0}),/PRICE_MUST_BE_POSITIVE/);
  assert.throws(()=>buildRealTradingOrderIntent({...base,walletAddress:'0xdead'}),/WALLET_ADDRESS_INVALID/);
+});
+test('signed C alone supplies direction; contradictory side and negative lots cannot execute',()=>{
+ for(const c of [-100,-.001,.001,100]){
+  const intent=buildRealTradingOrderIntent({...base,c,side:undefined});
+  assert.equal(intent.c,c);assert.equal(intent.leverage,Math.abs(c));assert.equal(intent.side,c<0?'SHORT':'LONG');
+  assert.equal(intent.broadcast,false);assert.equal(intent.signerRequested,false);
+ }
+ for(const [c,side] of [[100,'SHORT'],[-100,'LONG']])assert.throws(()=>buildRealTradingOrderIntent({...base,c,side}),/C_SIDE_MISMATCH/);
+ for(const c of [-0,-100.0001,-1000,Infinity])assert.throws(()=>buildRealTradingOrderIntent({...base,c}),/C_/);
+ for(const lots of [-1,0,1.5,101,Infinity])assert.throws(()=>buildRealTradingOrderIntent({...base,lots}),/LOTS_OUT_OF_RANGE/);
 });

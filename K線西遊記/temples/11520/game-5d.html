@@ -60,6 +60,7 @@
  html.k11520UtilitiesOpen #backpackPanel,html.k11520UtilitiesOpen #aiChatPanel,html.k11520UtilitiesOpen #gameChat,html.k11520UtilitiesOpen #k11520UiSettings,html.k11520UtilitiesOpen #walletPanel:not(.collapsed){left:max(10px,env(safe-area-inset-left))!important;right:calc(245px + max(5px,env(safe-area-inset-right)))!important;top:58px!important;bottom:max(12px,env(safe-area-inset-bottom))!important;width:auto!important;max-height:calc(100dvh - 70px)!important;overflow:auto!important;transform:none!important}
  .dock{right:4px!important;bottom:4px!important}.assetTag{display:none!important}
 }
+.confirm input{background:#101923;color:#eef7ff;border:1px solid #7893a3;border-radius:6px;padding:8px;font:inherit}.confirm input:focus{outline:2px solid #ffd25c;outline-offset:1px}
 #kspaceTarget{position:fixed;left:max(8px,env(safe-area-inset-left));top:448px;width:156px;min-height:68px;padding:7px;z-index:221;color:#dfefff;font:11px/1.45 system-ui;text-align:left;white-space:pre-line;border-radius:10px;background:#091119f5;touch-action:manipulation}
 @media(max-width:380px){#kspaceTarget{width:110px;font-size:10px}}
 @media(orientation:landscape) and (max-height:600px){#kspaceTarget{left:auto;top:auto;bottom:max(12px,env(safe-area-inset-bottom));right:194px;width:174px;min-height:68px;font-size:11px}}
@@ -79,9 +80,9 @@
 <div class="controls"><button class="a attack" id="attack">⚔<br>打怪</button><button class="a skill" id="skill" aria-label="天罡金陣">☀</button><button class="a dodge" id="dodge">↯</button><button class="a flat" id="flat">平</button><button class="a order" id="orderFire">下單<br>開火</button><button class="a tool" id="tradeSword" aria-label="盤古幻斧">🪓</button></div>
 <div class="dock" id="dock"><nav class="rail panel" id="rail"></nav><button class="dockToggle" id="dockToggle">☰</button></div>
 <section class="sheet panel" id="sheet"><div class="sheetHead"><h2 id="sheetTitle">器官</h2><button class="close" id="sheetClose">×</button></div><div id="sheetBody"></div></section>
-<section class="confirm panel" id="confirm"><div class="sheetHead"><h2>下單確認</h2><button class="close" id="confirmX">×</button></div><div id="confirmBody"></div><div class="grid2"><button class="btn" id="cancelOrder">取消</button><button class="btn" id="confirmOrder">確認模擬成交</button></div></section>
+<section class="confirm panel" id="confirm"><div class="sheetHead"><h2>下單確認</h2><button class="close" id="confirmX">×</button></div><div id="confirmBody"></div><div class="grid2"><button class="btn" id="cancelOrder">取消</button><button class="btn" id="confirmOrder">建立模擬委託</button></div></section>
 <div class="assetTag">3D Life：GLTF / procedural low-poly；primitive 只允許 FALLBACK</div><div class="toast" id="toast"></div>
-<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=267"></script>
+<script type="module" src="./runtime/game-5d-bootstrap.mjs?v=268"></script>
 <script>
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}))}
 </script>

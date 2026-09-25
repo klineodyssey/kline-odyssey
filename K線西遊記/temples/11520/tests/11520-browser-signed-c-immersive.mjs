@@ -213,7 +213,7 @@ const preview=(await page.locator('#confirmBody').innerText()).replace(/\s+/g,' 
 assert.match(preview,/100C/,'confirmation must show the bounded leverage');
 assert.match(preview,/每 1% 變動/,'confirmation must explain percentage-return PnL');
 assert.match(preview,/反向歸零 1(?:\.0+)?%/,'100C confirmation must disclose 1% adverse liquidation distance');
-assert.match(preview,/本機模擬部位，不送鏈/,'confirmation must retain the no-chain safety boundary');
+assert.match(preview,/PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈/,'confirmation must disclose pending touch/cross execution and retain the no-chain safety boundary');
 const confirmGeometry=await page.locator('#confirm').boundingBox();
 assert.ok(confirmGeometry&&confirmGeometry.x>=0&&confirmGeometry.y>=0&&confirmGeometry.x+confirmGeometry.width<=390&&confirmGeometry.y+confirmGeometry.height<=844,`confirmation must fit 390x844: ${JSON.stringify(confirmGeometry)}`);
 await page.screenshot({path:`${OUT}/11520-c100-settlement-hardening-390x844.png`,fullPage:true});
