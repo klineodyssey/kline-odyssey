@@ -167,8 +167,8 @@ globalThis.__K11520_SIMULATION_EXCHANGE__=Object.freeze({simulationOnly:true,sna
 function orderInput(){const optional=id=>$(id)?.value.trim()?Number($(id).value):null;return {...pending,currentPrice:S.quotes[pending.market],triggerPrice:Number($('#simulationTriggerPrice').value),stopPrice:optional('#simulationStopPrice'),takeProfitPrice:optional('#simulationTakeProfitPrice')}}
 function paintOrderPreview(){
   if(!pending)return;const p=execution.preview(orderInput()),el=$('#simulationOrderPreview');$('#confirmOrder').disabled=!p.ok;
-  if(!p.ok){el.textContent=p.code+' · '+p.reason;return}
-  el.innerHTML=receiptRows([['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+' KGEN'],['每 1% 變動',fmt(p.lots*p.leverage/100,6)+' KGEN'],['AVAILABLE',fmt(p.available,6)+' KGEN'],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+'<small>模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。跳空以 observed price 計算實際斷頭價。</small>';
+  if(!p.ok){el.textContent=pending.axis+' '+pending.market+' · '+p.code+' · '+p.reason;return}
+  el.innerHTML=receiptRows([['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+' KGEN'],['每 1% 變動',fmt(p.lots*p.leverage/100,6)+' KGEN'],['AVAILABLE',fmt(p.available,6)+' KGEN'],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+'<small>模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。跳空以 observed price 計算實際斷頭價。</small>';
 }
 function openOrder(){
   syncTradeAxisFromPlane();const a=axis(),p=price();pending=null;if(!p){toast('ORACLE_STALE · 行情未就緒');return}
