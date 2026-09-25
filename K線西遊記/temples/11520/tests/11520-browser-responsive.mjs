@@ -27,7 +27,11 @@ async function verifyInitialQuoteWait(){
   await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(ready?[{symbol:'BTCUSDT',price:'81185'},{symbol:'ETHUSDT',price:'2631.54'},{symbol:'BNBUSDT',price:'767.8'}]:[])}));
   try{
     await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_MARKET_K__?.status==='WAIT');
-    if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();
+    if(await page.locator('#enter11520').isVisible()){
+      try{await page.locator('#enter11520').click({timeout:1500})}
+      catch(error){if(await page.locator('#intro11520').isVisible())throw error}
+    }
+    await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
     assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot()),null);
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;
@@ -37,7 +41,7 @@ async function verifyInitialQuoteWait(){
   }finally{await context.close()}
 }
 async function verifyProductionSource(){
-  for(const name of ['../game-5d.html','../sw.js','../manifest.webmanifest','../controls/nonlinear-controls.mjs','spatial-coordinate-runtime.mjs','mobile-signed-c-immersive-runtime.mjs','kgen-margin-runtime.mjs','world-runtime.mjs','game-5d-main.mjs','combat-drive-live-runtime.mjs','combat-fx-runtime.mjs','game-5d-bootstrap.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs','plane-map-runtime.mjs','xyz-map-navigation-runtime.mjs']){
+  for(const name of ['../game-5d.html','../sw.js','../manifest.webmanifest','../controls/nonlinear-controls.mjs','spatial-coordinate-runtime.mjs','mobile-signed-c-immersive-runtime.mjs','kgen-margin-runtime.mjs','world-runtime.mjs','game-5d-main.mjs','combat-drive-live-runtime.mjs','combat-fx-runtime.mjs','game-5d-bootstrap.mjs','game-ui-product-fixes-v23.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs','plane-map-runtime.mjs','xyz-map-navigation-runtime.mjs']){
     // GitHub Pages publishes LF text while Windows checkouts may materialize CRLF.
     // Compare canonical source text so deployment lineage checks remain byte-format agnostic.
     const expected=sourceSha(await fs.readFile(new URL('../runtime/'+name,import.meta.url)));
