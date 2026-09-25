@@ -163,6 +163,12 @@ const px150 = parseEther('150');
 const size1 = parseEther('1');
 
 async function setFeeds(a, b, c, timestamp = null) {
+  // Accepted rounds must advance independently of runner/wall-clock speed.
+  // Explicit timestamps remain available for stale/out-of-order fixtures.
+  if (timestamp === null) {
+    await eip1193.request({ method: 'evm_increaseTime', params: [1] });
+    await eip1193.request({ method: 'evm_mine', params: [] });
+  }
   const ts = timestamp ?? await latestTimestamp();
   await (await feed0.set(a, ts)).wait();
   await (await feed1.set(b, ts)).wait();

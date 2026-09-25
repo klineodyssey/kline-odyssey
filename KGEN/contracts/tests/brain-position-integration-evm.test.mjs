@@ -205,6 +205,9 @@ assert.equal(reservation.status, 1n);
 assert.equal(await brain.lockedPrincipalOf(await trader.getAddress()), parseEther('20'));
 
 async function setFeeds(value) {
+  // Do not rely on wall-clock seconds elapsing on fast CI runners.
+  await eip1193.request({ method: 'evm_increaseTime', params: [1] });
+  await eip1193.request({ method: 'evm_mine', params: [] });
   const ts = await latestTimestamp();
   await (await feed0.set(value, ts)).wait();
   await (await feed1.set(value, ts)).wait();
