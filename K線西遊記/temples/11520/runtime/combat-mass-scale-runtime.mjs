@@ -5,6 +5,7 @@ FORMAL_ORGAN_NAME: 11520 Combat Mass Scale Runtime
 PURPOSE: Canonical simulation-only bridge between KGEN lot/index scale and KAIOS XYZ game mass. C is a signed velocity ratio: +C and -C are opposite velocity directions with the same speed magnitude; c itself remains a positive constant. Lot mass stays non-negative. No wallet, trade, chain, settlement, payment, or treasury mutation.
 */
 
+import {C_DETENTS,requireCanonicalC} from '../controls/nonlinear-controls.mjs';
 export const K11520_COMBAT_SCALE = Object.freeze({
   kgenPerLot: 1,
   indexUnitsPerLot: 1,
@@ -13,8 +14,7 @@ export const K11520_COMBAT_SCALE = Object.freeze({
   kgPerLot: 1000,
 });
 
-const POSITIVE_C_LEVELS = Object.freeze([0.000001,0.00001,0.0001,0.001,0.01,0.1,1,10,100]);
-export const K11520_C_LEVELS = Object.freeze([...POSITIVE_C_LEVELS].reverse().map(v=>-v).concat(0,POSITIVE_C_LEVELS));
+export const K11520_C_LEVELS = C_DETENTS;
 
 const finite = value => Number.isFinite(Number(value));
 
@@ -41,8 +41,7 @@ export function combatExposure({lots=1, playerKaiosAvailable=Infinity}={}) {
 }
 
 export function normalizeC(value) {
-  const c = finite(value) ? Number(value) : 0;
-  return K11520_C_LEVELS.reduce((best,level)=>Math.abs(level-c)<Math.abs(best-c)?level:best,0);
+  return requireCanonicalC(value);
 }
 
 export function cMode(value) {

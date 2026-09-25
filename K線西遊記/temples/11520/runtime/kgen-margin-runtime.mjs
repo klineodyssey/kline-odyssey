@@ -1,11 +1,13 @@
-export const MAX_C_LEVERAGE=100;
+import {C_MAX,requireCanonicalC} from '../controls/nonlinear-controls.mjs';
+
+export const MAX_C_LEVERAGE=C_MAX;
 export const MAX_LOTS=100;
 
 export function normalizeSignedC(c,{allowNeutral=false}={}){
   const n=Number(c);
   if(!Number.isFinite(n)||Math.abs(n)>MAX_C_LEVERAGE)throw new RangeError('C_LEVERAGE_OUT_OF_RANGE');
   if(n===0&&!allowNeutral)throw new RangeError('C_NEUTRAL_NO_POSITION');
-  return n===0?0:n;
+  return requireCanonicalC(c,{allowZero:allowNeutral});
 }
 
 export function signedPositionSide(c,side){
@@ -28,9 +30,7 @@ export function signedCFromLegacyMagnitude(c,side){
 }
 
 export function normalizeLeverage(c){
-  const n=Math.abs(Number(c));
-  if(!Number.isFinite(n)||n>MAX_C_LEVERAGE)throw new RangeError('C_LEVERAGE_OUT_OF_RANGE');
-  return n;
+  return Math.abs(normalizeSignedC(c,{allowNeutral:true}));
 }
 
 export function createKgenLedger(total=0){
@@ -193,6 +193,8 @@ export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(
     book.observations[market]={price:observedPrice,at};
     for(const order of book.orders){
       if(order.market!==market||order.status!=='PENDING'||at<order.createdAt||!touchedOrCrossed(previousPrice,order.triggerPrice,observedPrice))continue;
+      // Revalidate persisted/injected pending records before any reserve or receipt.
+      signedPositionSide(order.c,order.side);
       const margin=requiredMargin(order);
       if(draft.free<margin){order.status='REJECTED';order.reason='INSUFFICIENT_FREE_KGEN';events.push({kind:'REJECTED',orderId:order.orderId});continue}
       const walletBefore=draft.free;

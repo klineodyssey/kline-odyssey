@@ -3,11 +3,12 @@ import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
 const OUT='artifacts/11520-visual-qa';
+const BASE=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-async function boot(){await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'))}
+async function boot(){await page.goto(`${BASE}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'))}
 await boot();
 const box=async sel=>{const b=await page.locator(sel).boundingBox();assert.ok(b,`${sel} missing`);return b};
 const visible=async sel=>page.locator(sel).evaluate(el=>{const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&b.width>0&&b.height>0});
@@ -32,11 +33,15 @@ await page.dispatchEvent('#joy','pointerup',{pointerId:pid,pointerType:'touch',c
 assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'nonnegative');await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-zero.png`,fullPage:true});
 let energyPointerId=800;
 async function pressEnergy(sign){
+  // Layout can boot before the asynchronous world/controller modules. Require
+  // their observable readiness, not an arbitrary startup delay, before moving.
+  await page.waitForFunction(()=>globalThis.__K11520_WORLD_COORDS__?.intent&&globalThis.__K11520_3D_CONTROL__?.railAxis,null,{timeout:45000});
   const b=await box('#yControl'),id=energyPointerId++,cx=b.x+b.width/2,cy=b.y+b.height/2,targetY=sign>0?b.y+b.height*.14:b.y+b.height*.86;
   const before=(await page.locator('#yControl .read').textContent()||'').trim();
+  const start=await page.evaluate(()=>{const a=globalThis.__K11520_3D_CONTROL__.railAxis.toLowerCase();return globalThis.__K11520_WORLD_COORDS__.intent[a]});
   await page.dispatchEvent('#yControl','pointerdown',{pointerId:id,pointerType:'touch',clientX:cx,clientY:cy,buttons:1});
   await page.dispatchEvent('#yControl','pointermove',{pointerId:id,pointerType:'touch',clientX:cx,clientY:targetY,buttons:1});
-  await page.waitForFunction(({sign,before})=>{const control=document.querySelector('#yControl'),read=(control?.querySelector('.read')?.textContent||'').trim();return read!==before&&(sign<0?control?.dataset.energySign==='negative':control?.dataset.energySign==='nonnegative')},{sign,before},{timeout:2000});
+  await page.waitForFunction(({sign,before,start})=>{const control=document.querySelector('#yControl'),read=(control?.querySelector('.read')?.textContent||'').trim(),a=globalThis.__K11520_3D_CONTROL__.railAxis.toLowerCase(),value=globalThis.__K11520_WORLD_COORDS__.intent[a];return (value-start)*sign>0&&read!==before&&read.includes('K')&&(sign<0?control?.dataset.energySign==='negative':control?.dataset.energySign==='nonnegative')},{sign,before,start},{timeout:2000});
   return async()=>{await page.dispatchEvent('#yControl','pointerup',{pointerId:id,pointerType:'touch',clientX:cx,clientY:targetY,buttons:0});await page.waitForTimeout(120)};
 }
 let releaseEnergy=await pressEnergy(1);assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'nonnegative');const nonnegativeColor=await page.locator('#yControl .read').evaluate(el=>getComputedStyle(el).color);await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-positive.png`,fullPage:true});await releaseEnergy();

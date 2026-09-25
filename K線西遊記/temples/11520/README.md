@@ -1,5 +1,30 @@
 # 11520 Universal Exchange V3.9
 
+## C detents and physical distance — V2.6.23 / 2026-09-25
+
+Human-approved K11520 simulation calibration: **1 local spatial unit = 1 meter**.
+This is not a new universe Canon. Existing `runtime/spatial-coordinate-runtime.mjs`
+is the sole conversion authority: CURRENT Physics §161 Moon anchor gives
+`kmPerK=384400/16888`. Local positions/radii remain the same gameplay size;
+UI converts them to sufficient-precision K with optional meter details.
+
+Market price → `100*(P/P0-1)` → named KX/KY/KZ normalized market coordinates
+remains independent. Market ΔK is explicitly normalized, not physical K.
+No market-to-physical calibration has been approved: `marketToPhysicalK` rejects
+an absent explicitly dimensioned transform, and composition accepts only a
+`PHYSICAL_K` origin plus converted local XYZ. The practice guardian stays at its
+existing rendered 7-meter location; its separate market KZ+1 does not supply a
+physical meter. Local range tests cannot be altered by a market tick.
+This supersedes earlier K+local arbitrary-unit wording below without removing
+the historical record. Market maps/markers and current public quotes remain.
+
+Canonical C: 0, signed 0.001/0.01/0.1/1, and signed 5..100 in steps of 5.
+Existing `controls/nonlinear-controls.mjs` owns detents, nearest snap, formatting
+and nonlinear travel. Controls snap; executable intent/ledger boundaries reject
+non-detents. RiskKernel enforces the same exact fixed-point set. No chain is
+deployed or activated. Lots remain 1..100 positive integers. Wallet balance is
+read-only; orders/positions/receipts remain simulation. Cache v276 network-first.
+
 ## Wallet → order → settlement — V2.6.22 / 2026-09-25
 
 The existing EIP-1193 wallet organ is now a single shared read-only session:

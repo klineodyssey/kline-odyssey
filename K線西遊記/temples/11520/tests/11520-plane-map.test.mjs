@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planeSpec,projectPlanePoint,kSpaceMapModel,projectKSpaceMap,projectMarketKMap} from '../runtime/plane-map-runtime.mjs';
+import {planeSpec,projectPlanePoint,kSpaceMapModel,kSpaceMapDetails,projectKSpaceMap,projectMarketKMap} from '../runtime/plane-map-runtime.mjs';
+import {gameUnitsToK,formatGameDistanceK} from '../runtime/spatial-coordinate-runtime.mjs';
 
 test('market overview fits all three axis intercepts and player/target in every plane',()=>{
   const playerK={KX:-18.815,KY:-34.2115,KZ:27.9667};
@@ -53,4 +54,23 @@ test('target change and missing target cannot reuse stale marker/delta',()=>{
   const missing=kSpaceMapModel({...sample,target:null},'YZ');
   assert.equal(missing.monster,null);assert.equal(missing.delta,null);assert.equal(missing.distance,null);
   assert.equal(kSpaceMapModel({...sample,playerK:{KX:NaN,KY:0,KZ:0}}),null);
+});
+
+test('local physical distances and XYZ K never reuse market-normalized delta',()=>{
+  const m=kSpaceMapModel({...sample,distance:900},'YZ');
+  assert.equal(m.distance,1);
+  assert.equal(m.localDistance,900);
+  assert.equal(m.localDistanceK,gameUnitsToK(900));
+  assert.equal(m.localK.x,gameUnitsToK(31));
+  assert.equal(m.marketPhysicalTransform,'NOT_CONFIGURED');
+  const text=kSpaceMapDetails(m);
+  assert.match(text,/NORM DIST: 1.00 norm/);
+  assert.ok(text.includes(`LOCAL DIST: ${formatGameDistanceK(900,{detail:true})}`));
+  assert.ok(text.includes(`LOCAL XYZ K: X ${formatGameDistanceK(31,{detail:true})}`));
+  assert.match(text,/市場 → 物理距離轉換：未設定/);
+  assert.doesNotMatch(text,/\bKu\b/);
+  const missing=kSpaceMapModel({...sample,target:null,distance:900});
+  assert.equal(missing.localDistance,null);
+  assert.equal(missing.localDistanceK,null);
+  assert.match(kSpaceMapDetails(missing),/LOCAL DIST: —/);
 });

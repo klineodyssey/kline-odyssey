@@ -12,7 +12,7 @@ assert.equal(fireLots(-1),-100);
 
 // C is spatial warp and the shared signed trade-control magnitude. Both paths stop at 100.
 assert.equal(warpC(0),0);
-assert.equal(warpC(0.5),10);
+assert.equal(warpC(0.5),1,'inner half reserves precision for low-C canonical detents');
 assert.equal(warpC(1),100);
 assert.equal(leverageL(0),1);
 assert.equal(leverageL(0.5),10);

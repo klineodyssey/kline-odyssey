@@ -37,7 +37,7 @@ async function verifyInitialQuoteWait(){
   }finally{await context.close()}
 }
 async function verifyProductionSource(){
-  for(const name of ['../game-5d.html','../sw.js','../manifest.webmanifest','world-runtime.mjs','game-5d-main.mjs','combat-drive-live-runtime.mjs','combat-fx-runtime.mjs','game-5d-bootstrap.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs','plane-map-runtime.mjs','xyz-map-navigation-runtime.mjs']){
+  for(const name of ['../game-5d.html','../sw.js','../manifest.webmanifest','../controls/nonlinear-controls.mjs','spatial-coordinate-runtime.mjs','mobile-signed-c-immersive-runtime.mjs','kgen-margin-runtime.mjs','world-runtime.mjs','game-5d-main.mjs','combat-drive-live-runtime.mjs','combat-fx-runtime.mjs','game-5d-bootstrap.mjs','mobile-control-layout.mjs','market-origin-wallet-layout-runtime.mjs','mobile-action-rail-clearance-runtime.mjs','evm-wallet-runtime.mjs','public-market-quotes.mjs','plane-map-runtime.mjs','xyz-map-navigation-runtime.mjs']){
     // GitHub Pages publishes LF text while Windows checkouts may materialize CRLF.
     // Compare canonical source text so deployment lineage checks remain byte-format agnostic.
     const expected=sourceSha(await fs.readFile(new URL('../runtime/'+name,import.meta.url)));
@@ -68,8 +68,13 @@ async function verifyKSpaceMap(page,report){
   }
   await page.locator('#minimap').tap();await page.locator('#kspaceMarketMap').waitFor();
   await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('PLAYER K'));
-  assert.match(await page.locator('#kspaceMapValues').textContent(),/PLAYER K.*MONSTER K.*ΔK.*DIST: 1.00 Ku.*LOCAL XYZ/s);
+  assert.match(await page.locator('#kspaceMapValues').textContent(),/PLAYER K.*MONSTER K.*ΔK.*NORM DIST: 1.00 norm.*LOCAL DIST: .*K.*LOCAL XYZ K/s);
   await shot('01_PLAYER_MONSTER_KSPACE');
+  // A short landscape sheet must scroll to the actual distance values for evidence.
+  await page.locator('#kspaceMapValues').evaluate(el=>el.scrollIntoView({block:'end'}));
+  await page.screenshot({path:`${OUT}/${report.profile.landscape?'K_DISTANCE_LANDSCAPE':'K_DISTANCE_PORTRAIT'}.png`});
+  const ds=await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());assert.ok(Math.abs(ds.distanceK-ds.distance/(384400*1000/16888))<1e-12);assert.equal(ds.marketPhysicalTransform,'NOT_CONFIGURED');
+  assert.doesNotMatch(await page.locator('#kspaceTarget').textContent(),/\d(?:u|units)\b/);
   await page.locator('#sheetBody summary').click();await page.locator('#kspaceDetailMap').scrollIntoViewIfNeeded();
   assert.equal(await page.locator('#sheetClose').evaluate(el=>{const r=el.getBoundingClientRect();return r.width>=44&&r.height>=44&&r.top>=0&&el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,'expanded K-map close must remain visible and pointer-reachable while scrolling');
   await shot('01_NEAR_K_VECTOR');await page.locator('#sheetClose').click();

@@ -1,4 +1,5 @@
 import './market-origin-wallet-layout-runtime.mjs';
+import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
@@ -132,9 +133,9 @@ function installEnergyRead(){
     const nextLabel=`${axis} 縱搖桿`;
     if(label.textContent!==nextLabel)label.textContent=nextLabel;
     const safe=Object.is(v,-0)?0:v;
-    const nextRead=`${safe>0?'+':''}${safe.toFixed(1)}`;
+    const nextRead=formatGameDistanceK(safe,{compact:true});
     if(out.textContent!==nextRead)out.textContent=nextRead;
-    const detail=`${axis} 縱搖桿 ${level} ${nextRead}`;
+    const detail=`${axis} 縱搖桿 ${level} ${formatGameDistanceK(safe,{detail:true})}`;
     rail.setAttribute('aria-label',detail);rail.title=detail;
   };
   paint();clearInterval(energyTimer);energyTimer=setInterval(paint,100);

@@ -13,6 +13,7 @@ import {createMarketLife,perceiveMarketLife,decideMarketLife,decideMarketLifeLif
 import {deriveMarketRelations,animationIntentForRelations} from './market-relation-runtime.mjs';
 import {drainMarketLifeSourceEvents,installMarketLifeSourceListeners} from './market-life-source-runtime.mjs';
 import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-runtime.mjs';
+import {gameUnitsToK,localPositionToK,composePhysicalK} from './spatial-coordinate-runtime.mjs';
 
 export const WORLD_RULES=Object.freeze({
   placeId:'11520',settlement:'KAIOS',
@@ -113,9 +114,8 @@ export function kMarketSnapshot(world,now=Date.now()){
   return {status,receivedAt:s.receivedAt,source:s.reference.source,markets};
 }
 export function composeKWorld(k,local){
-  if(!validVec(local)||!k||!K_AXES.every(a=>Number.isFinite(k[a])))throw new RangeError('INVALID_K_POSITION');
-  const result=Object.fromEntries(XYZ.map((v,i)=>[v,k[K_AXES[i]]+local[v]]));
-  if(!validVec(result))throw new RangeError('K_OVERFLOW');return result;
+  // Compatibility name; only explicitly tagged PHYSICAL_K origins may compose.
+  return composePhysicalK(k,local);
 }
 export function combatPhase(plane,c){
   const axis={XZ:'KY',XY:'KZ',YZ:'KX'}[plane];
@@ -129,25 +129,27 @@ export function createKSpaceEncounter(world,reference=KSPACE_REFERENCE){
   // A local practice entity is never a registered Life or a source settlement.
   const guardian={id:'SIM-K-GUARDIAN',lifeId:null,species:'STONE_APE',name:'K-Guardian · 模擬',baseName:'K-Guardian · 模擬',
     simulationCombat:true,sourceManaged:false,state:'GUARD',attack:0,rewardKaios:0,
-    kPosition:{...K,KZ:K.KZ+1},localPosition:{x:0,y:0,z:6},x:0,y:0,z:7,
+    kPosition:{...K,KZ:K.KZ+1},localPosition:{x:0,y:0,z:7},x:0,y:0,z:7,
     hp:600,maxHp:600,exposed:'KY-',bodies:Object.fromEntries(KSPACE_PHASES.map(id=>[id,{hp:100,maxHp:100,defense:id==='KY-'?0:4}]))};
-  // Render in the player's K-origin frame, using the same R=K+r as hit testing.
-  const origin=composeKWorld(K,{x:0,y:0,z:0}),rendered=composeKWorld(guardian.kPosition,guardian.localPosition);
-  for(const axis of XYZ)guardian[axis]=rendered[axis]-origin[axis];
+  // Preserve the existing rendered 7m spawn without turning its independent
+  // market KZ+1 phase coordinate into a meter. Collision is local, not market.
+  for(const axis of XYZ)guardian[axis]=guardian.localPosition[axis];
   world.monsters.push(guardian);return world.kSpace;
 }
 export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
   const space=world.kSpace;if(!space||!validVec(player))return null;
   const target=world.monsters.find(m=>m.id===space.targetId&&m.simulationCombat),selection=combatPhase(plane,c);
-  const playerWorld=composeKWorld(space.playerK,player);
+  const playerWorld=localPositionToK(player);
   const market=kMarketSnapshot(world);
   if(!target)return {simulationOnly:true,market,selection,playerK:copy(space.playerK),playerLocal:{...player},playerWorld,target:null};
-  const targetWorld=composeKWorld(target.kPosition,target.localPosition);
+  const targetWorld=localPositionToK(target.localPosition);
   const deltaK=Object.fromEntries(K_AXES.map(a=>[a,target.kPosition[a]-space.playerK[a]]));
-  const relative=Object.fromEntries(XYZ.map(a=>[a,targetWorld[a]-playerWorld[a]]));
+  const relative=Object.fromEntries(XYZ.map(a=>[a,target.localPosition[a]-player[a]]));
+  const distance=Math.hypot(relative.x,relative.y,relative.z);
   return {simulationOnly:true,market,source:space.reference.source,reference:copy(space.reference),playerK:copy(space.playerK),playerLocal:{...player},playerWorld,
     monsterK:copy(target.kPosition),monsterLocal:{...target.localPosition},monsterWorld:targetWorld,deltaK,relative,
-    distance:Math.hypot(relative.x,relative.y,relative.z),selection,
+    distance,distanceK:gameUnitsToK(distance),relativePhysicalK:localPositionToK(relative),
+    worldSpace:'PHYSICAL_K',distanceSpace:'LOCAL_METERS',marketSpace:'MARKET_NORMALIZED',marketPhysicalTransform:'NOT_CONFIGURED',selection,
     target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies)},
     lastResult:space.lastResult?copy(space.lastResult):null};
 }
@@ -160,7 +162,7 @@ export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),
   if(!snapshot.selection?.body)return finish('NEUTRAL_PHASE');
   if(space.lastAttackAt!==null&&now-space.lastAttackAt<space.cooldownMs)return finish('COOLDOWN');
   space.lastAttackAt=now;space.cooldownMs=spec.cooldownMs;
-  if(snapshot.distance>spec.radius)return finish('OUT_OF_RANGE');
+  if(snapshot.distanceK>gameUnitsToK(spec.radius))return finish('OUT_OF_RANGE');
   const axis=snapshot.selection.axis,sign=snapshot.selection.sign>0?'+':'-';
   const target=world.monsters.find(m=>m.id===space.targetId);
   if(skill==='phantomAxe'){

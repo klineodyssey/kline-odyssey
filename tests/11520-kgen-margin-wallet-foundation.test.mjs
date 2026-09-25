@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activateMargin,closeMargin,snapshot,pnlForMove,maxAdversePoints,positionRisk,MAX_C_LEVERAGE,normalizeSignedC,signedCFromLegacyMagnitude} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
+import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 
 assert.equal(MAX_C_LEVERAGE,100);
 assert.equal(requiredMargin({lots:8}),8);
@@ -11,6 +12,17 @@ assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-100);
 assert.equal(pnlForMove({entry:100,mark:101,side:'空',lots:100,c:-100}),-100);
 assert.equal(signedCFromLegacyMagnitude(100,'空'),-100);
 assert.equal(normalizeSignedC(-0,{allowNeutral:true}),0);
+for(const c of C_DETENTS){
+  assert.equal(normalizeSignedC(c,{allowNeutral:true}),c);
+  if(c!==0)assert.ok(Math.abs(pnlForMove({entry:100,mark:101,lots:1,c})-.01*c)<1e-12);
+}
+for(const c of [.0001,-.0001,.3,-.3,3.742,-3.742,17.382,-17.382,99.6,-99.6]){
+  assert.throws(()=>normalizeSignedC(c),/INVALID_C_DETENT/);
+  assert.throws(()=>maxAdversePoints(c,100),/INVALID_C_DETENT/);
+  assert.throws(()=>signedCFromLegacyMagnitude(Math.abs(c),c<0?'SHORT':'LONG'),/INVALID_C_DETENT/);
+  assert.equal(assertExecutableOrder({wallet:{account:'0x1',chainId:56},chainId:56,marketAdapter:{preview(){},submit(){}},order:{axis:'KX',side:c<0?'SHORT':'LONG',notional:1,c,lots:1}}).reason,'INVALID_C_DETENT');
+}
+for(const c of [100.001,-100.001,1000,-1000])assert.throws(()=>normalizeSignedC(c),/C_LEVERAGE_OUT_OF_RANGE/);
 for(const c of [0,-0,101,-101,1000,-1000,NaN,Infinity])assert.throws(()=>pnlForMove({entry:100,mark:101,lots:1,c}),/C_/);
 for(const lots of [0,-1,.5,100.1,101,NaN,Infinity])assert.throws(()=>requiredMargin({lots}),/LOTS_OUT_OF_RANGE/);
 for(const [c,side] of [[100,'SHORT'],[-100,'LONG'],[1,'invalid']])assert.throws(()=>pnlForMove({entry:100,mark:101,lots:1,c,side}),/C_SIDE_MISMATCH|SIDE_NOT_SUPPORTED/);
@@ -59,6 +71,31 @@ assert.equal(touchedOrCrossed(100000,100000,100050),false,'a pre-existing touch 
 assert.equal(touchedOrCrossed(100000,100000,99900),false,'moving away downward also requires a later new touch/cross');
 const tick=(l,price,at)=>observeSimulationPrice(l,{market:'BTCUSDT',price,observedAt:at,now:at});
 const order=(l,params={})=>placeSimulationOrder(l,{axis:'KX',market:'BTCUSDT',c:100,lots:100,triggerPrice:100,now:1001,...params});
+// Every legal signed detent survives pending -> fill -> mark -> close -> receipt
+// without integer rounding, clamping, loss of sub-C precision or wallet mixing.
+for(const c of C_DETENTS.filter(c=>c!==0)){
+  const l=createKgenLedger(1000);tick(l,99,1000);
+  assert.equal(order(l,{c,lots:1}).ok,true);
+  assert.equal(tick(l,100,1002).ok,true);
+  const filled=simulationSnapshot(l);
+  assert.equal(filled.orders[0].c,c);assert.equal(filled.positions[0].c,c);assert.equal(filled.receipts[0].c,c);
+  assert.equal(l.free,999);assert.equal(l.lockedMargin,1);
+  tick(l,100.01,1003);
+  assert.ok(Math.abs(l.unrealizedPnl-.0001*c)<1e-10);
+  assert.equal(closeSimulationPosition(l,filled.positions[0].positionId,{now:1004}).ok,true);
+  const closed=simulationSnapshot(l);
+  assert.equal(closed.receipts[1].c,c);assert.equal(closed.receipts[1].status,'CLOSED');
+  assert.equal(l.lockedMargin,0);assert.ok(Math.abs(l.free-(1000+.0001*c))<1e-10);
+}
+for(const c of [.3,-.3,3.742,17.382,99.6,100.001,-100.001,1000,-1000]){
+  const l=createKgenLedger(1000);tick(l,99,1000);const before=structuredClone(l);
+  assert.equal(order(l,{c,lots:1}).ok,false);assert.deepEqual(l,before);
+}
+{
+  const l=createKgenLedger(1000);tick(l,99,1000);order(l,{c:1,lots:1});
+  l.simulation.orders[0].c=17.382;const before=structuredClone(l);
+  assert.equal(tick(l,100,1002).reason,'INVALID_C_DETENT');assert.deepEqual(l,before,'noncanonical persisted record cannot lock margin or emit a fill');
+}
 for(const c of [100,-100])for(const lots of [1,100]){
   const l=createKgenLedger(1000);assert.equal(tick(l,99,1000).ok,true);
   const created=order(l,{c,lots});assert.equal(created.order.status,'PENDING');assert.equal(l.free,1000);assert.equal(l.lockedMargin,0);

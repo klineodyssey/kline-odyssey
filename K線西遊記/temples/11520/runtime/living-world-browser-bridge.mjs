@@ -4,6 +4,7 @@ STATUS: ACTIVE
 PURPOSE: Browser interaction bridge for nearby wild-life capture -> backpack -> same LIFE_ID release.
 */
 import {baselineWildEcology,publishMarketLifeSourceEvent} from './market-life-source-runtime.mjs';
+import {gameUnitsToK,formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 
 const CAPTURE_DISTANCE=3.2;
 const SUPPORTED=new Set(['COW','FISH','SHRIMP','CHICKEN','DUCK']);
@@ -11,18 +12,19 @@ const registry=new Map();
 for(const life of baselineWildEcology())registry.set(life.lifeId,{...life,active:true,sourceId:'WILD-ECOLOGY-11520'});
 
 function playerPosition(){
-  const text=document.getElementById('xyz')?.textContent||'';
-  const x=Number(text.match(/X\s*(-?\d+(?:\.\d+)?)/i)?.[1]||0),y=Number(text.match(/Y\s*(-?\d+(?:\.\d+)?)/i)?.[1]||0),z=Number(text.match(/Z\s*(-?\d+(?:\.\d+)?)/i)?.[1]||0);
-  return{x,y,z};
+  const p=globalThis.__K11520_WORLD_COORDS__?.physical;
+  // HUD is formatted physical K; never reinterpret its text as local meters.
+  if(!p||!['x','y','z'].every(a=>typeof p[a]==='number'&&Number.isFinite(p[a])))return null;
+  return{x:p.x,y:p.y,z:p.z};
 }
 function weightFor(species){return({COW:18,FISH:2,SHRIMP:.5,CHICKEN:3,DUCK:4})[species]||1}
 function nearest(){
-  const p=playerPosition();let best=null,bestD=Infinity;
+  const p=playerPosition();if(!p)return{ok:false,reason:'LOCAL_POSITION_NOT_READY'};let best=null,bestD=Infinity;
   for(const life of registry.values()){
     if(!life.active||!life.collectable||!SUPPORTED.has(life.species))continue;
     const d=Math.hypot((life.x||0)-p.x,(life.z||0)-p.z);if(d<=CAPTURE_DISTANCE&&d<bestD){best=life;bestD=d}
   }
-  return best?{ok:true,life:best,distance:bestD}:{ok:false,reason:'NO_COLLECTABLE_LIFE_NEARBY'};
+  return best?{ok:true,life:best,distance:bestD,distanceK:gameUnitsToK(bestD),rangeK:gameUnitsToK(CAPTURE_DISTANCE)}:{ok:false,reason:'NO_COLLECTABLE_LIFE_NEARBY'};
 }
 function syncEvent(event){
   if(!event?.lifeId)return;
@@ -47,7 +49,7 @@ export function releaseItem(itemId){
   const api=globalThis.K11520Backpack;if(!api?.get)return{ok:false,reason:'BACKPACK_NOT_READY'};
   const item=api.get().items?.find(i=>i.itemId===itemId);if(!item)return{ok:false,reason:'ITEM_NOT_FOUND'};
   if(item.kind!=='LIVING_CARGO'||!item.lifeId)return{ok:false,reason:'ITEM_NOT_LIVING_CARGO'};
-  const p=playerPosition(),old=registry.get(item.lifeId)||{};
+  const p=playerPosition();if(!p)return{ok:false,reason:'LOCAL_POSITION_NOT_READY'};const old=registry.get(item.lifeId)||{};
   const event=publishMarketLifeSourceEvent({type:'SPAWN',sourceId:'PLAYER-LAND-11520',lifeId:item.lifeId,name:item.name,species:item.species,intelligence:2,markets:[],capital:0,vitality:100,maxHp:item.meta?.maxHp||old.maxHp||100,attack:0,speed:.008,x:p.x+1.2,y:Math.max(0,p.y),z:p.z+1.2,strategy:'PLAYER_OWNED_LIFE',meta:{sourceClass:'PLAYER_OWNED',collectable:true,playerOwnable:true,ownerId:'PLAYER-11520'}});
   syncEvent(event);return{ok:true,lifeId:item.lifeId,species:item.species,x:event.x,y:event.y,z:event.z};
 }
@@ -55,7 +57,7 @@ export function releaseItem(itemId){
 function installCaptureButton(){
   if(typeof document==='undefined'||document.getElementById('backpackCaptureNearby'))return false;
   const panel=document.getElementById('backpackPanel'),head=panel?.querySelector('.bpHead');if(!panel||!head)return false;
-  const btn=document.createElement('button');btn.id='backpackCaptureNearby';btn.type='button';btn.textContent='捕';btn.title='捕捉附近生命';btn.setAttribute('aria-label','捕捉附近牛魚蝦雞鴨');head.insertBefore(btn,head.lastElementChild);
+  const btn=document.createElement('button');btn.id='backpackCaptureNearby';btn.type='button';btn.textContent='捕';btn.title=`捕捉附近生命 · ${formatGameDistanceK(CAPTURE_DISTANCE,{detail:true})}`;btn.setAttribute('aria-label',btn.title);head.insertBefore(btn,head.lastElementChild);
   btn.onclick=()=>{const r=captureNearestLife();const n=document.getElementById('backpackNotice');if(n){n.hidden=false;n.textContent=r.ok?`已捕捉 ${r.life.name}，LIFE_ID 保留`:`捕捉失敗：${r.reason}`;setTimeout(()=>n.hidden=true,2200)}};
   return true;
 }
