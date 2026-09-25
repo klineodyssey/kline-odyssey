@@ -6,9 +6,8 @@ PURPOSE: Human-first 11520 interaction layer. Align avatar facing with visible X
 import * as THREE from 'three';
 
 const $=s=>document.querySelector(s);
-const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 const PRODUCT_VERSION='V2.6.3 · 5D K線西遊記';
-let cleanupTimer=null,walletTimer=null,versionTimer=null,joystickImageSrc=null,joystickImageAlt='KGEN GENESIS';
+let cleanupTimer=null,versionTimer=null,joystickImageSrc=null,joystickImageAlt='KGEN GENESIS';
 
 function installStyle(){
   if($('#k11520HumanUxStyle'))return;
@@ -104,32 +103,13 @@ function ensureKaiosMetric(){
   if(!metric){metric=document.createElement('div');metric.id='walletKaiosMetric';metric.className='metric';metric.innerHTML='<small>KAIOS 遊戲餘額</small><b id="wKaios">--</b>';grid.appendChild(metric)}
   return true;
 }
-function hexToNumber(hex){try{return Number(BigInt(hex||'0x0'))}catch{return 0}}
-function formatUnits(hex,decimals=18){try{const n=BigInt(hex||'0x0'),d=10n**BigInt(decimals),whole=n/d,frac=(n%d).toString().padStart(decimals,'0').slice(0,6).replace(/0+$/,'');return frac?`${whole}.${frac}`:String(whole)}catch{return'--'}}
-function balanceOfData(address){return '0x70a08231'+String(address||'').toLowerCase().replace(/^0x/,'').padStart(64,'0')}
-
-async function refreshOwnWallet({requestPermission=false}={}){
-  ensureKaiosMetric();
-  const provider=globalThis.ethereum,msg=$('#walletMsg'),addr=$('#wAddr'),chain=$('#wChain'),bnb=$('#wBnb'),kgen=$('#wKgen'),kaios=$('#wKaios'),connect=$('#walletConnect');
-  if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();
-  if(!provider?.request){if(msg)msg.textContent='11520 未偵測到瀏覽器 EVM 錢包；可先使用遊戲內 KAIOS。';if(connect)connect.textContent='未偵測到錢包';return false}
-  let accounts=[];try{accounts=await provider.request({method:requestPermission?'eth_requestAccounts':'eth_accounts'})||[]}catch(e){if(msg)msg.textContent=requestPermission?'錢包連線未授權':'已偵測錢包，尚未授權本頁讀取';return false}
-  if(!accounts.length){if(msg)msg.textContent='已偵測到錢包；點「連線」後只讀取地址與餘額，不自動簽名或轉帳。';if(connect)connect.textContent='連線錢包';return false}
-  const account=accounts[0];
-  try{
-    const [chainHex,bnbHex,kgenHex]=await Promise.all([provider.request({method:'eth_chainId'}),provider.request({method:'eth_getBalance',params:[account,'latest']}),provider.request({method:'eth_call',params:[{to:KGEN,data:balanceOfData(account)},'latest']})]);
-    if(addr)addr.textContent=account.slice(0,6)+'…'+account.slice(-4);if(chain)chain.textContent=String(hexToNumber(chainHex));if(bnb)bnb.textContent=formatUnits(bnbHex,18);if(kgen)kgen.textContent=formatUnits(kgenHex,18);if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();
-    if(msg)msg.textContent=`11520 自有錢包視窗 · ${hexToNumber(chainHex)===56?'BSC 56':'目前鏈 '+hexToNumber(chainHex)} · BNB/KGEN 唯讀；KAIOS 顯示遊戲餘額。`;if(connect)connect.textContent='已連線';return true
-  }catch(e){if(msg)msg.textContent='錢包已偵測，但餘額讀取失敗；可稍後重新整理。';return false}
-}
-
+// Wallet RPC and event ownership lives in the existing shared wallet session.
 function pinWallet(){
   const panel=$('#walletPanel'),toggle=$('#walletToggle'),connect=$('#walletConnect');if(!panel||!toggle)return false;
   panel.dataset.k11520StableAnchor='1';toggle.setAttribute('aria-label','展開或收合 11520 錢包');
   const sync=()=>{const collapsed=panel.classList.contains('collapsed');toggle.textContent=collapsed?'💰':'×';toggle.title=collapsed?'開啟 11520 錢包':'關閉 11520 錢包'};
   if(!toggle.dataset.k11520StableAnchor){toggle.dataset.k11520StableAnchor='1';toggle.addEventListener('click',()=>setTimeout(sync,0))}
-  if(connect&&!connect.dataset.k11520OwnWallet){connect.dataset.k11520OwnWallet='1';connect.addEventListener('click',e=>{e.stopImmediatePropagation();refreshOwnWallet({requestPermission:true})},true)}
-  ensureKaiosMetric();sync();refreshOwnWallet();if(!walletTimer)walletTimer=setInterval(()=>refreshOwnWallet(),12000);return true;
+  ensureKaiosMetric();sync();const kaios=$('#wKaios');if(kaios)kaios.textContent=($('#topKaios')?.textContent||'0').trim();return true;
 }
 
 function syncDockOcclusion(){
@@ -201,7 +181,6 @@ export function install11520HumanUx(){
   document.addEventListener('pointerup',()=>{keepJoystickVisual();setTimeout(resolveMobileCollisions,0)},true);
   document.addEventListener('pointercancel',()=>{keepJoystickVisual();setTimeout(resolveMobileCollisions,0)},true);
   document.addEventListener('click',e=>{if(e.target?.closest?.('#dockToggle,.dockToggle'))setTimeout(syncDockOcclusion,0)},true);
-  globalThis.ethereum?.on?.('accountsChanged',()=>refreshOwnWallet());globalThis.ethereum?.on?.('chainChanged',()=>refreshOwnWallet());
   if(!versionTimer)versionTimer=setInterval(()=>{enforceProductVersion();resolveMobileCollisions()},250);
   globalThis.__K11520_HUMAN_UX__={version:'1.3.3',productVersion:PRODUCT_VERSION,avatarFacing:'mirrored-x-heading-plus-model-forward-pi',chatTopLayer:true,singleBackpack:'living-cargo-relocated-canonical',walletStableAnchor:true,walletAutoDetect:true,walletBalances:['BNB','KGEN','KAIOS_GAME'],dockPointerSafety:'computed-rail-plus-relocated-bag',mobileCollisionAvoidance:true,joystickImagePersistence:'cache-and-restore'};
   return globalThis.__K11520_HUMAN_UX__;

@@ -2,9 +2,12 @@ import {normalizeSignedC,signedPositionSide,requiredMargin} from './kgen-margin-
 const ERC20_BALANCE_OF='0x70a08231';
 export const PUBLIC_WALLET_IDENTITY_KEY='klineodyssey.public-wallet-identity.v1';
 export const PLAYER_SESSION_KEY='k11520.player-session.v1';
+export const KGEN_TOKEN_ADDRESS='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+export const KGEN_CHAIN_ID=56;
 const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
-function hexToBigInt(hex){return BigInt(hex&&hex!=='0x'?hex:'0x0');}
+function hexToBigInt(hex){if(typeof hex!=='string'||!/^0x[0-9a-fA-F]+$/.test(hex))throw new Error('INVALID_BALANCE_RESPONSE');return BigInt(hex);}
+function parseChainId(value){if(typeof value!=='string'||!/^0x[0-9a-fA-F]+$/.test(value))throw new Error('INVALID_CHAIN_ID');const n=Number(BigInt(value));if(!Number.isSafeInteger(n)||n<=0)throw new Error('INVALID_CHAIN_ID');return n;}
 function providerCandidates(explicit){return [explicit,globalThis.trustwallet?.ethereum,globalThis.ethereum,globalThis.BinanceChain,globalThis.okxwallet].filter(Boolean);}
 export function detectInjectedWallet(ethereum){return providerCandidates(ethereum).find(p=>typeof p?.request==='function')||null;}
 export function readPublicWalletIdentity(storage=globalThis.localStorage){
@@ -37,16 +40,16 @@ export function formatUnits(value,decimals=18){
   const n=typeof value==='bigint'?value:BigInt(value||0),d=10n**BigInt(decimals),whole=n/d,frac=(n%d).toString().padStart(decimals,'0').replace(/0+$/,'');
   return frac?`${whole}.${frac}`:`${whole}`;
 }
-async function readChainId(provider){const chainHex=await provider.request({method:'eth_chainId'});return Number.parseInt(chainHex,16);}
+async function readChainId(provider){return parseChainId(await provider.request({method:'eth_chainId'}));}
 async function trySwitchChain(provider,targetChainId){
   if(!targetChainId)return {ok:false,reason:'NO_TARGET_CHAIN'};
   try{await provider.request({method:'wallet_switchEthereumChain',params:[{chainId:`0x${Number(targetChainId).toString(16)}`} ]});return {ok:true,chainId:await readChainId(provider)};}catch(error){return {ok:false,reason:'CHAIN_SWITCH_REJECTED',error};}
 }
-export async function connectInjectedWallet({ethereum,allowedChainIds=[56,97],switchChain=true}={}){
+export async function connectInjectedWallet({ethereum,allowedChainIds=[56,97],switchChain=false}={}){
   const provider=detectInjectedWallet(ethereum);
   if(!provider)return {ok:false,reason:'NO_INJECTED_WALLET'};
   const accounts=await provider.request({method:'eth_requestAccounts'});
-  if(!accounts?.[0])return {ok:false,reason:'NO_ACCOUNT'};
+  if(!Array.isArray(accounts)||!EVM_ADDRESS.test(accounts[0]||''))return {ok:false,reason:'NO_ACCOUNT'};
   let chainId=await readChainId(provider);
   if(allowedChainIds.length&&!allowedChainIds.includes(chainId)&&switchChain){
     const switched=await trySwitchChain(provider,allowedChainIds[0]);
@@ -56,20 +59,91 @@ export async function connectInjectedWallet({ethereum,allowedChainIds=[56,97],sw
   return {ok:true,account:accounts[0],chainId,provider};
 }
 export async function readNativeBalance({provider,account}){
+  if(!EVM_ADDRESS.test(account||''))throw new Error('INVALID_ACCOUNT');
   const raw=await provider.request({method:'eth_getBalance',params:[account,'latest']});
   return {raw:hexToBigInt(raw),formatted:formatUnits(hexToBigInt(raw),18)};
 }
 export async function readErc20Balance({provider,token,account,decimals=18}){
   if(!/^0x[0-9a-fA-F]{40}$/.test(token||''))return {ok:false,reason:'INVALID_TOKEN_ADDRESS'};
+  if(!EVM_ADDRESS.test(account||''))return {ok:false,reason:'INVALID_ACCOUNT'};
   const data=ERC20_BALANCE_OF+padAddress(account);
   const rawHex=await provider.request({method:'eth_call',params:[{to:token,data},'latest']});
+  // balanceOf returns one ABI uint256. An empty response is not a zero balance.
+  if(typeof rawHex!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(rawHex))return {ok:false,reason:'INVALID_BALANCE_RESPONSE'};
   const raw=hexToBigInt(rawHex);return {ok:true,raw,formatted:formatUnits(raw,decimals)};
 }
-export function watchWallet({provider,onAccountsChanged,onChainChanged}){
+export function watchWallet({provider,onAccountsChanged,onChainChanged,onDisconnect}){
   if(!provider?.on)return ()=>{};
-  const a=accounts=>onAccountsChanged?.(accounts||[]),c=chain=>onChainChanged?.(Number.parseInt(chain,16));
-  provider.on('accountsChanged',a);provider.on('chainChanged',c);
-  return ()=>{provider.removeListener?.('accountsChanged',a);provider.removeListener?.('chainChanged',c)};
+  const a=accounts=>onAccountsChanged?.(accounts||[]),c=chain=>{let parsed=null;try{parsed=parseChainId(chain)}catch{}onChainChanged?.(parsed)},d=()=>onDisconnect?.();
+  provider.on('accountsChanged',a);provider.on('chainChanged',c);provider.on('disconnect',d);
+  return ()=>{provider.removeListener?.('accountsChanged',a);provider.removeListener?.('chainChanged',c);provider.removeListener?.('disconnect',d)};
+}
+
+/** One read-only EIP-1193 connection organ. No chain switch, signing or send methods. */
+export function createWalletSession({ethereum,storage,timeoutMs=12000}={}){
+  let provider=null,stopWatch=()=>{},generation=0,disposed=false,active=false;
+  const listeners=new Set();
+  let state={account:null,chainId:null,status:'DISCONNECTED',error:null,kgen:null,bnb:null,network:null,balanceReadOnly:true,executionMode:'SIMULATION'};
+  const snapshot=()=>Object.freeze({...state});
+  const publish=patch=>{state={...state,...patch};const value=snapshot();for(const listener of listeners){try{listener(value)}catch{}}return value};
+  const clear={kgen:null,bnb:null};
+  const current=ticket=>!disposed&&active&&ticket===generation;
+  const duration=Number.isFinite(timeoutMs)&&timeoutMs>0?Math.min(timeoutMs,60000):12000;
+  const request=args=>new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>reject(new Error('WALLET_TIMEOUT')),duration);
+    Promise.resolve().then(()=>provider.request(args)).then(resolve,reject).finally(()=>clearTimeout(timer));
+  });
+  const boundedProvider={request};
+  const classify=error=>Number(error?.code)===4001?'USER_REJECTED':Number(error?.code)===4900?'DISCONNECTED':Number(error?.code)===4901?'WRONG_CHAIN':['WALLET_TIMEOUT','INVALID_CHAIN_ID','INVALID_ACCOUNT','INVALID_BALANCE_RESPONSE'].includes(error?.message)?error.message:'WALLET_READ_FAILED';
+  const retain=()=>{try{savePublicWalletIdentity({address:state.account,chainId:state.chainId,sourceWorld:'K11520'},storage??globalThis.localStorage)}catch{}};
+  async function sync({prompt=false,accounts:providedAccounts,chainId:providedChain}={}){
+    if(disposed)return snapshot();
+    const ticket=++generation;
+    publish({...clear,account:null,chainId:null,network:null,status:prompt?'CONNECTING':'READING',error:null});
+    try{
+      const accounts=providedAccounts===undefined?await request({method:prompt?'eth_requestAccounts':'eth_accounts'}):providedAccounts;
+      if(!current(ticket))return snapshot();
+      if(!Array.isArray(accounts))throw new Error('INVALID_ACCOUNT');
+      if(!accounts.length)return publish({...clear,account:null,chainId:null,network:null,status:'DISCONNECTED',error:'DISCONNECTED'});
+      if(!EVM_ADDRESS.test(accounts[0]||''))throw new Error('INVALID_ACCOUNT');
+      const account=accounts[0];
+      const chainId=providedChain===undefined?await readChainId(boundedProvider):providedChain;
+      if(!current(ticket))return snapshot();
+      if(!Number.isSafeInteger(chainId)||chainId<=0)throw new Error('INVALID_CHAIN_ID');
+      publish({account,chainId,network:chainId===KGEN_CHAIN_ID?'BNB Smart Chain':`Chain ${chainId}`,status:chainId===KGEN_CHAIN_ID?'READING':'WRONG_CHAIN',error:chainId===KGEN_CHAIN_ID?null:'WRONG_CHAIN'});
+      retain();
+      if(chainId!==KGEN_CHAIN_ID)return snapshot();
+      const [native,token]=await Promise.all([readNativeBalance({provider:boundedProvider,account}),readErc20Balance({provider:boundedProvider,account,token:KGEN_TOKEN_ADDRESS})]);
+      if(!current(ticket))return snapshot();
+      if(!token.ok)throw new Error(token.reason);
+      return publish({status:'CONNECTED',error:null,kgen:token.formatted,bnb:native.formatted});
+    }catch(error){
+      if(!current(ticket))return snapshot();
+      const reason=classify(error),identityLost=['USER_REJECTED','DISCONNECTED','INVALID_ACCOUNT','INVALID_CHAIN_ID'].includes(reason);
+      return publish({...clear,...(identityLost?{account:null,chainId:null,network:null}:{}),status:reason==='DISCONNECTED'?'DISCONNECTED':reason==='WRONG_CHAIN'?'WRONG_CHAIN':'ERROR',error:reason});
+    }
+  }
+  function attach(){
+    if(disposed)return false;
+    if(active&&provider)return true;
+    provider=detectInjectedWallet(ethereum);
+    if(!provider){publish({...clear,account:null,chainId:null,network:null,status:'NO_WALLET',error:'NO_INJECTED_WALLET'});return false}
+    active=true;
+    stopWatch=watchWallet({provider,
+      onAccountsChanged:accounts=>{if(active)void sync({accounts})},
+      onChainChanged:chainId=>{if(active)void sync({chainId})},
+      onDisconnect:()=>detach('DISCONNECTED')
+    });
+    return true;
+  }
+  function detach(error=null){++generation;active=false;stopWatch();stopWatch=()=>{};return publish({...clear,account:null,chainId:null,network:null,status:'DISCONNECTED',error})}
+  return Object.freeze({
+    connect:()=>attach()?sync({prompt:true}):Promise.resolve(snapshot()),
+    refresh:()=>attach()?sync():Promise.resolve(snapshot()),
+    disconnect:()=>detach(),snapshot,
+    subscribe(listener){if(typeof listener!=='function'||disposed)return ()=>{};listeners.add(listener);try{listener(snapshot())}catch{}return ()=>listeners.delete(listener)},
+    dispose(){detach();disposed=true;listeners.clear()}
+  });
 }
 export function assertExecutableOrder({wallet,chainId,marketAdapter,order}){
   if(!wallet?.account)return {ok:false,reason:'WALLET_NOT_CONNECTED'};

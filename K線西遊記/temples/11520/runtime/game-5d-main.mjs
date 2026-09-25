@@ -6,10 +6,11 @@ PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collisio
 import * as THREE from 'three';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
 import {createWorldState,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES} from './world-runtime.mjs';
-import {createKgenLedger,requiredMargin,positionRisk,reserveOrder,activateMargin,closeMargin,snapshot} from './kgen-margin-runtime.mjs';
+import {createKgenLedger,positionRisk,snapshot} from './kgen-margin-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
-import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot} from './kgen-margin-runtime.mjs';
-import {connectInjectedWallet,readNativeBalance,readErc20Balance,watchWallet,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from './evm-wallet-runtime.mjs';
+import {createExecutionAdapter} from './real-trading-order-intent.mjs';
+import {getWalletSession11520} from './wallet-game-bridge.mjs';
+import {readPublicWalletIdentity,readPlayerSession,savePlayerSession} from './evm-wallet-runtime.mjs';
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading} from './spatial-coordinate-runtime.mjs';
 import {collectInspectableEntities,inspectMapPoint,waypointSummary} from './map-object-navigation-runtime.mjs';
 import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
@@ -19,7 +20,6 @@ import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D} from './x
 import {fetchPublicMarketQuotes} from './public-market-quotes.mjs';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const KGEN='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 const AXIS_MARKETS=Object.freeze({KX:'BTCUSDT',KY:'ETHUSDT',KZ:'BNBUSDT'});
 const MARKETS=Object.freeze(Object.values(AXIS_MARKETS));
 const PLANE_TRADE_AXIS=Object.freeze({XZ:'KY',XY:'KZ',YZ:'KX'});
@@ -29,6 +29,7 @@ const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:.001,pos:null}
 const restoredSession=readPlayerSession();if(restoredSession){S.xyz={...restoredSession.xyz};S.intentXYZ={...restoredSession.intentXYZ}}
 let lastSessionSave=0,lastSessionSnapshot='';function persistPlayerSession(force=false){const now=Date.now(),snapshot=JSON.stringify([S.xyz,S.intentXYZ]);if(!force&&(snapshot===lastSessionSnapshot||now-lastSessionSave<750))return;lastSessionSave=now;lastSessionSnapshot=snapshot;savePlayerSession({xyz:S.xyz,intentXYZ:S.intentXYZ})}addEventListener('pagehide',()=>persistPlayerSession(true));addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistPlayerSession(true)});
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
+const execution=createExecutionAdapter({ledger});
 // No synthetic production K position: the encounter starts after valid public quotes arrive.
 const fmt=(n,d=4)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:d});
 function toast(t,combat=false){const el=$('#toast');if(!el)return;el.dataset.kspaceFeedback=String(combat);el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
@@ -44,7 +45,7 @@ function renderAxes(){
 }
 function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">即時參考價：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
 let quotePending=false;
-async function quotes(){if(quotePending)return;quotePending=true;try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});updateKMarketReference(world,next,Date.now());Object.assign(S.quotes,next);const observedAt=Date.now();for(const market of MARKETS){const result=observeSimulationPrice(ledger,{market,price:next[market],observedAt,now:observedAt});if(result.ok)recordSimulationEvents(result.events)}syncSimulationPositions();$('#feed').textContent='LIVE · Binance public data'}catch{if(world.kSpace)world.kSpace.quoteFailed=true;$('#feed').textContent=world.kSpace?'STALE · Binance public data':'WAIT · 行情未就緒'}finally{quotePending=false;renderAxes()}}
+async function quotes(){if(quotePending)return;quotePending=true;try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});updateKMarketReference(world,next,Date.now());Object.assign(S.quotes,next);const observedAt=Date.now();for(const market of MARKETS){const result=execution.observe({market,price:next[market],observedAt,now:observedAt});if(result.ok)recordSimulationEvents(result.events)}syncSimulationPositions();if(pending)paintOrderPreview();$('#feed').textContent='LIVE · Binance public data'}catch{if(world.kSpace)world.kSpace.quoteFailed=true;$('#feed').textContent=world.kSpace?'STALE · Binance public data':'WAIT · 行情未就緒'}finally{quotePending=false;if(pending)paintOrderPreview();renderAxes()}}
 function syncMarketKLabels(){
   if(!$('#marketKLabelsStyle')){const style=document.createElement('style');style.id='marketKLabelsStyle';style.textContent='.axis:has(.marketKValue) .universeFloorBadge{display:none!important}';document.head.append(style)}
   const market=kMarketSnapshot(world);
@@ -131,30 +132,79 @@ function showCombatTarget(){
 targetHud.onclick=showCombatTarget;
 globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,simulationOnly:true});
 setInterval(syncMarketKLabels,1000);
-function syncSimulationPositions(){const exchange=simulationSnapshot(ledger);for(const id of Object.keys(S.axes))S.axes[id].pos=exchange.positions.find(p=>p.axis===id&&p.status==='OPEN')||null;if(['assets','positions'].includes($('#sheetBody')?.dataset.simOrgan))refreshSimulationSheet()}
+function syncSimulationPositions(){const exchange=execution.snapshot();for(const id of Object.keys(S.axes))S.axes[id].pos=exchange.positions.find(p=>p.axis===id&&p.status==='OPEN')||null;if(['assets','positions'].includes($('#sheetBody')?.dataset.simOrgan))refreshSimulationSheet()}
 function recordSimulationEvents(events){for(const e of events){S.history.unshift({time:new Date(e.triggeredAt??Date.now()).toLocaleTimeString(),axis:e.axis||'',event:`SIMULATION ${e.status||e.kind} ${e.orderId||''}`});toast(`模擬 ${e.status||e.kind}｜${e.axis||''} ${e.c??''}C`)}if(events.length)refreshSimulationSheet()}
+const escapeUI=value=>String(value??'--').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const receiptTime=value=>value==null?'--':new Date(value).toISOString();
+function receiptRows(rows){return '<dl class="exchangeRows">'+rows.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+escapeUI(value)+'</dd></div>').join('')+'</dl>'}
+function walletMetrics(w){return receiptRows([['AVAILABLE',fmt(w.free,6)],['LOCKED MARGIN',fmt(w.lockedMargin,6)],['EQUITY',fmt(w.equity,6)],['UNREALIZED PNL',fmt(w.unrealizedPnl,6)],['REALIZED PNL',fmt(w.realizedPnl,6)]])}
 function simulationOrganHTML(id){
-  const x=simulationSnapshot(ledger),w=x.wallet,tag='<p class="muted">SIMULATION WALLET · 本頁模擬記帳，非鏈上 KGEN / Brain 資產。</p>';
-  if(id==='assets')return tag+`<div class="card">AVAILABLE ${fmt(w.free,6)}<br>LOCKED MARGIN ${fmt(w.lockedMargin,6)}<br>EQUITY ${fmt(w.equity,6)}<br>UNREALIZED PNL ${fmt(w.unrealizedPnl,6)}<br>REALIZED PNL ${fmt(w.realizedPnl,6)}<hr>ON-CHAIN KGEN（唯讀）${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;
-  if(id==='orders')return tag+(x.orders.slice().reverse().map(o=>`<div class="card"><b>${o.orderId} · ${o.status}</b><br>${o.axis} ${o.side} ${o.c}C × ${o.lots}口<br>TRIGGER ${fmt(o.triggerPrice,6)}<br>${o.fillPrice==null?'等待有效觸及／穿越':`FILL ${fmt(o.fillPrice,6)} · ${o.positionId}`}${o.status==='PENDING'?`<br><button class="btn" data-sim-cancel="${o.orderId}">取消模擬委託</button>`:''}</div>`).join('')||'<p>尚無委託</p>');
-  if(id==='positions')return tag+(x.positions.slice().reverse().map(p=>`<div class="card"><b>${p.positionId} · ${p.status}</b><br>${p.axis} ${p.side} ${p.c}C × ${p.lots}口<br>ENTRY ${fmt(p.entry,6)} / MARK ${fmt(p.mark,6)}<br>MARGIN ${fmt(p.margin,6)} / PNL ${fmt(p.status==='OPEN'?positionRisk(p).pnl:0,6)}${p.status==='OPEN'?`<br><button class="btn" data-sim-close="${p.positionId}">平倉（模擬）</button>`:''}</div>`).join('')||'<p>尚無部位</p>');
-  if(id==='history')return tag+'<p>收據為本次頁面工作階段的不可變模擬紀錄；正式永久收據須鏈上結算。</p>'+(x.receipts.slice().reverse().map(r=>`<details class="card"><summary>${r.receiptId} · ${r.status} · ${r.axis}</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px">${JSON.stringify(r,null,2)}</pre></details>`).join('')||'<p>尚無成交／結算收據</p>');
+  const x=execution.snapshot(),w=x.wallet,tag='<p class="muted">SIMULATION WALLET · 本頁模擬記帳，非鏈上 KGEN / Brain 資產。</p>';
+  if(id==='assets')return tag+'<div class="card">'+walletMetrics(w)+'<hr>ON-CHAIN KGEN · READ ONLY<br>'+escapeUI(S.walletKgen??'未連線或尚未驗證')+'</div>';
+  if(id==='orders')return tag+(x.orders.slice().reverse().map(o=>{
+    const r=x.receipts.find(r=>r.orderId===o.orderId&&r.kind==='FILL');
+    return '<div class="card"><b>'+o.orderId+' · '+(o.status==='PENDING'?'PENDING_TRIGGER':o.status)+'</b>'+receiptRows([['MARKET',o.market],['SIDE / C / LOTS',o.side+' / '+o.c+'C / '+o.lots],['CREATED AT',receiptTime(o.createdAt)],['TRIGGER',o.triggerPrice],...(r?[['FILLED AT',receiptTime(r.triggeredAt)],['OBSERVED / FILL',r.observedPrice+' / '+r.fillPrice],['POSITION ID',r.positionId],['RECEIPT ID',r.receiptId]]:[])])+(o.status==='PENDING'?'<p>WAITING FOR PRICE · 等待有效 Touch/Cross</p><button class="btn" data-sim-cancel="'+o.orderId+'">取消模擬委託</button>':'')+'</div>';
+  }).join('')||'<p>尚無委託</p>');
+  if(id==='positions')return tag+(x.positions.slice().reverse().map(p=>{
+    const risk=positionRisk(p),r=x.receipts.find(r=>r.positionId===p.positionId&&r.kind==='SETTLEMENT');
+    return '<div class="card"><b>'+p.positionId+' · '+(p.status==='OPEN'?'POSITION OPEN':p.status==='LIQUIDATED'?'斷頭 / LIQUIDATED':p.status)+'</b>'+receiptRows([['MARKET',p.market],['SIDE / C / LOTS',p.side+' / '+p.c+'C / '+p.lots],['ENTRY / MARK',fmt(p.entry,6)+' / '+fmt(p.mark,6)],['LIQUIDATION',fmt(Math.max(0,risk.liquidationMark),6)],['MARGIN',fmt(p.margin,6)],['UNREALIZED PNL',fmt(p.status==='OPEN'?risk.pnl:0,6)],...(r?[['REALIZED PNL',fmt(r.realizedPnl,6)],['SETTLED AT',receiptTime(r.settledAt)],['RECEIPT ID',r.receiptId]]:[])])+(p.status==='OPEN'?'<button class="btn" data-sim-close="'+p.positionId+'">CLOSE · 平倉（模擬）</button>':'')+'</div>';
+  }).join('')||'<p>尚無部位</p>');
+  if(id==='history')return tag+'<p>ORDER / SETTLEMENT RECEIPTS · 本次頁面工作階段紀錄；重新載入會重設模擬帳本。</p>'+(x.receipts.slice().reverse().map(r=>{
+    const order=x.orders.find(o=>o.orderId===r.orderId),fill=x.receipts.find(f=>f.positionId===r.positionId&&f.kind==='FILL');
+    const rows=[['ORDER ID',r.orderId],['POSITION ID',r.positionId],['MARKET',r.market],['SIDE / C / LOTS',r.side+' / '+r.c+'C / '+r.lots],['CREATED AT',receiptTime(order?.createdAt)],['TRIGGERED AT',receiptTime(r.triggeredAt)],['TRIGGER / FILL',order?.triggerPrice+' / '+fill?.fillPrice],['PREVIOUS / OBSERVED',r.previousPrice+' / '+r.observedPrice]];
+    if(r.kind==='FILL')rows.push(['WALLET BEFORE',r.walletBefore],['MARGIN LOCKED',r.marginLocked],['WALLET AFTER',r.walletAfter]);
+    else rows.push(['SETTLED AT',receiptTime(r.settledAt)],['ENTRY / LIQUIDATION',r.entryPrice+' / '+r.liquidationTrigger],['SETTLEMENT / EXIT',r.settlementPrice],['MARGIN BEFORE / AFTER',r.marginBefore+' / '+r.marginAfter],['RAW / REALIZED PNL',fmt(r.rawPnl,6)+' / '+fmt(r.realizedPnl,6)],['BAD DEBT / GAP LOSS',fmt(r.badDebt,6)]);
+    return '<details class="card" data-receipt="'+r.receiptId+'"><summary>'+r.receiptId+' · '+r.status+' · '+r.axis+'</summary>'+receiptRows(rows)+'<details><summary>原始模擬收據 JSON</summary><pre class="receiptRaw">'+escapeUI(JSON.stringify(r,null,2))+'</pre></details></details>';
+  }).join('')||'<p>尚無成交／結算收據</p>');
   return null;
 }
 function bindSimulationSheet(){
-  $$('[data-sim-cancel]').forEach(b=>b.onclick=()=>{const r=cancelSimulationOrder(ledger,b.dataset.simCancel);toast(r.ok?'模擬委託已取消':r.reason);refreshSimulationSheet()});
-  $$('[data-sim-close]').forEach(b=>b.onclick=()=>{const r=closeSimulationPosition(ledger,b.dataset.simClose);if(r.ok){recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes()}else toast(r.reason);refreshSimulationSheet()});
+  $$('[data-sim-cancel]').forEach(b=>b.onclick=()=>{const r=execution.cancel(b.dataset.simCancel);toast(r.ok?'模擬委託已取消':r.reason);refreshSimulationSheet()});
+  $$('[data-sim-close]').forEach(b=>b.onclick=()=>{const r=execution.close(b.dataset.simClose);if(r.ok){recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes()}else toast(r.reason);refreshSimulationSheet()});
 }
-function refreshSimulationSheet(){const id=$('#sheetBody')?.dataset.simOrgan;if(id&&$('#sheet').classList.contains('open')&&$('#sheetTitle').textContent===ORGANS.find(x=>x[0]===id)?.[2]){$('#sheetBody').innerHTML=simulationOrganHTML(id);bindSimulationSheet()}}
-globalThis.__K11520_SIMULATION_EXCHANGE__=Object.freeze({simulationOnly:true,snapshot:()=>simulationSnapshot(ledger)});
-function openOrder(){syncTradeAxisFromPlane();const a=axis(),p=price();pending=null;if(!p){toast('行情未就緒');return}let c,principal;try{const signed=globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis];c=signed===undefined?signedCFromLegacyMagnitude(a.c,a.side):normalizeSignedC(signed);principal=requiredMargin({lots:a.lots})}catch(e){toast(e.message==='C_NEUTRAL_NO_POSITION'?'0C 中性，不建立部位':'C / 口數無效，拒絕下單');return}const side=c>0?'多':'空',risk=positionRisk({entry:p,mark:p,side,lots:a.lots,c});pending={axis:S.axis,market:a.market,side,lots:a.lots,c,signedC:c,entry:p,principal};const perPercent=pending.lots*Math.abs(pending.c)/100,adversePercent=risk.maxAdverseFraction*100;$('#confirmBody').innerHTML=`<div class="grid2"><div class="card"><h3>${pending.axis} ${pending.market}</h3>${pending.side} · ${pending.lots}口 · ${pending.c}C<br>本金 ${pending.principal} KGEN</div><div class="card"><h3>風險</h3>每 1% 變動 ±${fmt(perPercent,6)} KGEN<br>反向歸零 ${Number.isFinite(adversePercent)?fmt(adversePercent,4)+'%（'+fmt(risk.maxAdversePoints,3)+' 價格點）':'∞'}</div></div><div class="card"><label>觸發價格（SIMULATION）<input id="simulationTriggerPrice" type="number" min="0" step="any" value="${p}" style="width:100%;box-sizing:border-box;min-height:44px"></label><label>停損價（選填）<input id="simulationStopPrice" type="number" min="0" step="any" style="width:100%;box-sizing:border-box;min-height:44px"></label><label>止盈價（選填）<input id="simulationTakeProfitPrice" type="number" min="0" step="any" style="width:100%;box-sizing:border-box;min-height:44px"></label></div><p class="bad">確認建立 PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈。</p>`;$('#confirm').classList.add('open')}
-$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};$('#confirmOrder').onclick=()=>{if(!pending)return;const optional=id=>$(id)?.value.trim()?Number($(id).value):null;const result=placeSimulationOrder(ledger,{...pending,triggerPrice:Number($('#simulationTriggerPrice').value),stopPrice:optional('#simulationStopPrice'),takeProfitPrice:optional('#simulationTakeProfitPrice')});if(!result.ok){toast(`拒絕模擬委託：${result.reason}`);return}pending=null;$('#confirm').classList.remove('open');toast(`${result.order.orderId} PENDING｜等待觸價`);renderAxes();hud()};
-function closePos(){const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=closeSimulationPosition(ledger,p.positionId);if(!r.ok){toast(r.reason);return}recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
+function refreshSimulationSheet(){const id=$('#sheetBody')?.dataset.simOrgan;if(id&&$('#sheet').classList.contains('open')&&$('#sheetTitle').textContent===ORGANS.find(x=>x[0]===id)?.[2]){const body=$('#sheetBody'),html=simulationOrganHTML(id);if(body.innerHTML===html)return;const scroll=$('#sheet').scrollTop,open=[...body.querySelectorAll('[data-receipt][open]')].map(el=>el.dataset.receipt);body.innerHTML=html;for(const el of body.querySelectorAll('[data-receipt]'))el.open=open.includes(el.dataset.receipt);bindSimulationSheet();$('#sheet').scrollTop=scroll}}
+globalThis.__K11520_SIMULATION_EXCHANGE__=Object.freeze({simulationOnly:true,snapshot:()=>execution.snapshot()});
+function orderInput(){const optional=id=>$(id)?.value.trim()?Number($(id).value):null;return {...pending,currentPrice:S.quotes[pending.market],triggerPrice:Number($('#simulationTriggerPrice').value),stopPrice:optional('#simulationStopPrice'),takeProfitPrice:optional('#simulationTakeProfitPrice')}}
+function paintOrderPreview(){
+  if(!pending)return;const p=execution.preview(orderInput()),el=$('#simulationOrderPreview');$('#confirmOrder').disabled=!p.ok;
+  if(!p.ok){el.textContent=p.code+' · '+p.reason;return}
+  el.innerHTML=receiptRows([['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+' KGEN'],['每 1% 變動',fmt(p.lots*p.leverage/100,6)+' KGEN'],['AVAILABLE',fmt(p.available,6)+' KGEN'],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+'<small>模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。跳空以 observed price 計算實際斷頭價。</small>';
+}
+function openOrder(){
+  syncTradeAxisFromPlane();const a=axis(),p=price();pending=null;if(!p){toast('ORACLE_STALE · 行情未就緒');return}
+  let c;try{const signed=globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedByAxis?.[S.axis];c=signed===undefined?signedCFromLegacyMagnitude(a.c,a.side):normalizeSignedC(signed)}catch{toast('ORDER_REJECTED · C 必須非 0 且介於 -100 與 +100');return}
+  pending={axis:S.axis,market:a.market,lots:a.lots,c};
+  $('#confirmBody').innerHTML='<div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。下一筆有效價格 Touch/Cross 才成交；不簽名、不送鏈。</p>';
+  for(const input of $$('#confirmBody input'))input.addEventListener('input',paintOrderPreview);
+  paintOrderPreview();$('#confirm').classList.add('open');
+}
+$('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};
+$('#confirmOrder').onclick=()=>{if(!pending)return;const r=execution.submit(orderInput());if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}pending=null;$('#confirm').classList.remove('open');toast(r.order.orderId+' PENDING_TRIGGER｜等待觸價');openOrgan('orders');renderAxes();hud()};
+function closePos(){const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=execution.close(p.positionId);if(!r.ok){toast(r.reason);return}recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 
 const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{$('#sheet').classList.remove('open');fullMapCanvas=null};
 function openOrgan(id){$('#sheetTitle').textContent=ORGANS.find(x=>x[0]===id)?.[2]||id;const s=snapshot(ledger);let h='';const simulationHTML=simulationOrganHTML(id);$('#sheetBody').dataset.simOrgan=simulationHTML===null?'':id;if(simulationHTML!==null)h=simulationHTML;else if(id==='trade')h=`<div class="card"><h3>${S.axis} ${axis().market}</h3><button id="sideBtn" class="btn">方向：${axis().side}</button><p>口數 ${axis().lots}｜C ${axis().c}</p><p>本金 = 口數 × 1 KGEN</p></div>`;else if(id==='positions')h=['KX','KY','KZ'].map(a=>`<div class="card">${a}：${S.axes[a].pos?`${S.axes[a].pos.side} ${S.axes[a].pos.lots}口 ${S.axes[a].pos.c}C`:'空倉'}</div>`).join('');else if(id==='assets')h=`<div class="card">KGEN Local Free ${fmt(s.free,3)}<br>Locked ${fmt(s.lockedMargin,3)}<br>Verified Wallet ${S.walletKgen==null?'未連線':fmt(S.walletKgen,6)}</div>`;else if(id==='history')h=S.history.map(x=>`<div class="card">${x.time} · ${x.axis} · ${x.event}</div>`).join('')||'尚無歷史';else if(id==='character')h=`<div class="card">HP ${S.hp}/100<br>3D：${$('#charState').textContent}<br>控制座標：X ${fmt(S.intentXYZ.x,1)} / Y ${fmt(S.intentXYZ.y,1)} / Z ${fmt(S.intentXYZ.z,1)}<br>實體座標：X ${fmt(S.xyz.x,1)} / Y ${fmt(S.xyz.y,1)} / Z ${fmt(S.xyz.z,1)}</div>`;else if(id==='worldmap')h='<div class="mapHint">NORTH_UP。單點空白處先設定 waypoint；點建築/生命先看資料，再選導航。雙指縮放；手動碰 3D 遙桿會停止自動導航。</div><div class="mapStage"><canvas id="fullMap" width="900" height="700"></canvas></div>';else if(id==='help')h='<div class="card"><h3>3D 控制說明</h3>點左下圓盤中央圖循環 XZ／XY／YZ。圓盤控制所選兩軸；右下縱搖桿控制剩餘一軸：XZ+Y、XY+Z、YZ+X。XYZ 控制座標不設數值上限；地面或物件可擋住角色實體，但不會把控制座標重設。</div>';else h=`<div class="card">${ORGANS.find(x=>x[0]===id)?.[2]||id} 器官已啟用。</div>`;$('#sheetBody').innerHTML=h;bindSimulationSheet();$('#sheet').classList.add('open');dock.classList.remove('open');$('#sideBtn')?.addEventListener('click',()=>{setTradeSide(S.axis,axis().side==='多'?'空':'多');openOrgan('trade')});if(id==='worldmap'){fullMapCanvas=$('#fullMap');bindMap(fullMapCanvas);drawMap(fullMapCanvas)}}
 
-const wallet={provider:null,account:null};const retainedWallet=readPublicWalletIdentity();if(retainedWallet){$('#wAddr').textContent=retainedWallet.address.slice(0,6)+'…'+retainedWallet.address.slice(-4);$('#wChain').textContent=retainedWallet.chainId??'--';$('#walletMsg').textContent='已保留公開錢包識別｜點連結錢包後更新唯讀餘額'}async function refreshWallet(){if(!wallet.provider||!wallet.account)return;try{const [n,t]=await Promise.all([readNativeBalance({provider:wallet.provider,account:wallet.account}),readErc20Balance({provider:wallet.provider,token:KGEN,account:wallet.account,decimals:18})]);$('#wBnb').textContent=fmt(n.formatted,6);S.walletKgen=t.ok?Number(t.formatted):null;$('#wKgen').textContent=t.ok?fmt(t.formatted,6):'--';$('#walletMsg').textContent='已連線｜鏈上餘額唯讀｜不自動送交易'}catch{$('#walletMsg').textContent='錢包讀取失敗'}}$('#walletConnect').onclick=async()=>{const w=await connectInjectedWallet({allowedChainIds:[56]});if(!w.ok){$('#walletMsg').textContent=w.reason==='NO_INJECTED_WALLET'?'此瀏覽器沒有注入式 EVM 錢包':'錢包/鏈不符合 BSC 56';$('#walletPanel').classList.remove('collapsed');return}wallet.provider=w.provider;wallet.account=w.account;savePublicWalletIdentity({address:w.account,chainId:w.chainId,sourceWorld:'K11520'});$('#wAddr').textContent=w.account.slice(0,6)+'…'+w.account.slice(-4);$('#wChain').textContent=w.chainId;walletUnwatch=watchWallet({provider:w.provider,onAccountsChanged:accounts=>{if(accounts?.[0])savePublicWalletIdentity({address:accounts[0],chainId:w.chainId,sourceWorld:'K11520'});location.reload()},onChainChanged:()=>location.reload()});$('#walletPanel').classList.remove('collapsed');await refreshWallet()};$('#walletRefresh').onclick=refreshWallet;$('#walletToggle').onclick=()=>$('#walletPanel').classList.toggle('collapsed');let walletUnwatch=()=>{};
+const walletSession=getWalletSession11520();
+const retained=readPublicWalletIdentity();
+if(retained){const el=document.createElement('p');el.id='walletRetained';el.textContent='上次公開地址（未驗證連線）：'+retained.address;$('#walletMsg').after(el)}
+function renderWallet(value=walletSession.snapshot()){
+  S.walletKgen=value.kgen;
+  $('#wAddr').textContent=value.account||'DISCONNECTED';
+  $('#wChain').textContent=value.chainId==null?'--':value.network+' · '+value.chainId;
+  $('#wBnb').textContent=value.bnb??'--';$('#wKgen').textContent=value.kgen??'--';
+  $('#walletMsg').textContent=value.status+(value.error?' · '+value.error:'')+'｜ON-CHAIN BALANCE · READ ONLY。交易與結算維持 SIMULATION。';
+  const busy=['CONNECTING','READING'].includes(value.status);
+  $('#walletConnect').disabled=busy;$('#walletRefresh').disabled=busy;
+  $('#walletConnect').textContent=value.status==='CONNECTED'?'重新連線':'Connect Wallet';
+  const summary=$('#walletSimulation');if(summary)summary.innerHTML='<b>SIMULATION WALLET</b>'+walletMetrics(execution.snapshot().wallet);
+  if($('#sheetBody')?.dataset.simOrgan==='assets')refreshSimulationSheet();
+}
+walletSession.subscribe(renderWallet);renderWallet();
+$('#walletConnect').onclick=()=>{$('#walletPanel').classList.remove('collapsed');return walletSession.connect()};
+$('#walletRefresh').onclick=()=>walletSession.refresh();
+$('#walletToggle').onclick=()=>{$('#walletPanel').classList.toggle('collapsed');renderWallet()};
+setInterval(()=>{if(!$('#walletPanel').classList.contains('collapsed'))renderWallet()},1000);
 
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x08110d);scene.fog=new THREE.FogExp2(0x08110d,.025);const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,500),renderer=new THREE.WebGLRenderer({canvas:$('#three'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));scene.add(new THREE.HemisphereLight(0xddeeff,0x223311,2.5));const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(5,12,6);scene.add(sun);const ground=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshStandardMaterial({color:0x294f2d}));ground.rotation.x=-Math.PI/2;ground.userData.isGround=true;scene.add(ground);
 for(let i=0;i<28;i++){const x=Math.sin(i*17.31)*22,z=Math.cos(i*9.71)*22;if(Math.abs(x)<4&&z>-10&&z<12)continue;const g=new THREE.Group(),tr=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,1.2,8),new THREE.MeshStandardMaterial({color:0x5c3920})),leaf=new THREE.Mesh(new THREE.ConeGeometry(.55,1.4,8),new THREE.MeshStandardMaterial({color:0x1e6b32}));tr.position.y=.6;leaf.position.y=1.7;g.add(tr,leaf);g.position.set(x,0,z);scene.add(g)}

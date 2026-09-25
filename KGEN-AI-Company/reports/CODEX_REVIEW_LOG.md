@@ -1,5 +1,22 @@
 # Codex Review Log
 
+## 2026-09-25 · K11520 wallet/order integration / V2.6.22
+
+- Direct Human execution order; isolated codex/k11520-wallet-order-integration-20260925.
+  Base ef9c74c3a6a18d252077fe213add60b0da486b9c; no contract changes.
+- Reused wallet/session, intent, ledger and game organs; removed conflicting
+  legacy wallet RPC/event handlers, focus-triggered consent and reload behavior.
+- Functional: 161 runtime/product tests passed; extended Chromium wallet/settlement
+  lifecycle passed in 390×844 and 844×390; normal close and liquidation receipts
+  agree with wallet balances. Wallet fixtures explicitly non-live.
+- Visual: directly inspected preview, pending, position, liquidation, normal close,
+  wallet identity and metrics. Repaired 38px collapsed-header styles persisting
+  after expansion. No second wallet panel; current UI render stays simulation.
+- Bounded wallet/adapter subtask review found dangling legacy callback; removed.
+  Fresh exact-head CI and deployment verification required before final closeout.
+- No signer, chain switch, chain write, payroll or real asset movement.
+  Payroll snapshot and 8888 reserve are prototype-only; receipt absent → HOLD.
+
 ## 2026-09-25 · K11520 settlement candidate / V2.6.21
 
 - Human explicit code/test/PR/merge authority; base main
