@@ -22,8 +22,13 @@ library KGEN_MarketRiskKernel_V1_0_0 {
     // Human Canon: one lot locks one KGEN; C never discounts principal.
     function validateOrder(int256 cWad, uint256 lots) internal pure returns (uint256 leverageWad) {
         if (cWad == 0 || cWad < -int256(MAX_C_WAD) || cWad > int256(MAX_C_WAD)) revert InvalidC();
+        leverageWad = uint256(cWad < 0 ? -cWad : cWad);
+        // Same selectable C detents as the frontend authority, represented exactly
+        // in WAD. Execution rejects rather than silently rounding an order intent.
+        if (leverageWad != 1e15 && leverageWad != 1e16 && leverageWad != 1e17 &&
+            leverageWad != WAD && (leverageWad < 5e18 || leverageWad % 5e18 != 0)) revert InvalidC();
         if (lots == 0 || lots > MAX_LOTS) revert InvalidLots();
-        return uint256(cWad < 0 ? -cWad : cWad);
+        return leverageWad;
     }
 
     function orderPnl(int256 cWad, uint256 lots, uint256 entry, uint256 mark) internal pure returns (int256) {

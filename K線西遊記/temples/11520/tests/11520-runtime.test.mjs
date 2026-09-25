@@ -5,7 +5,23 @@ import {createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceMana
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
 import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
+import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
+
+test('Human local meter calibration uses the CURRENT Moon K anchor without market tick coercion',()=>{
+  assert.equal(gameUnitsToMeters(1),1);assert.equal(metersToGameUnits(1),1);
+  assert.equal(SPATIAL_CALIBRATION.kmPerK,384400/16888);
+  const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-10*Math.max(1,Math.abs(b)),`${a} != ${b}`);
+  near(gameUnitsToK(22761.724301279),1);
+  for(const value of [-1000,-27.7,-2.2,0,.000001,1,2.2,27.7,22761.724301279])near(kToGameUnits(gameUnitsToK(value)),value);
+  for(const value of [-2,0,.0001,1,100])near(kmToK(kToKm(value)),value);
+  near(gameUnitsToK(2.2),2.2*16888/384400000);near(gameUnitsToK(27.7),27.7*16888/384400000);
+  assert.equal(formatGameDistanceK(2.2),'0.0000966535K');assert.equal(formatGameDistanceK(27.7),'0.00121696K');
+  assert.equal(formatGameDistanceK(-0),'0K');assert.match(formatGameDistanceK(27.7,{detail:true}),/27.7 m/);
+  for(const value of [NaN,Infinity,'1',null])assert.throws(()=>gameUnitsToK(value));
+  assert.throws(()=>marketToPhysicalK({KX:1,KY:2,KZ:3}),/NOT_CONFIGURED/);
+  assert.throws(()=>marketToPhysicalK({KX:1},()=>({x:1,y:0,z:0})),/DIMENSION/);
+});
 
 test('rounded market K coordinates never display negative zero',()=>{
   assert.equal(formatKCoordinate(-.0001),'0.00');assert.equal(formatKCoordinate(-0),'0.00');
@@ -53,7 +69,8 @@ test('K-space normalization is scale independent, reversible and rejects unsafe 
   }
   for(const value of [NaN,Infinity,-1,0,'100'])assert.throws(()=>normalizeKPrice(value,100));
   assert.equal(Object.is(normalizeKPrice(100,100),-0),false);
-  assert.deepEqual(composeKWorld({KX:1,KY:2,KZ:3},{x:4,y:-2,z:8}),{x:5,y:0,z:11});
+  assert.throws(()=>composeKWorld({KX:1,KY:2,KZ:3},{x:4,y:-2,z:8}),/DIMENSION/);
+  assert.deepEqual(composeKWorld({space:'PHYSICAL_K',x:0,y:0,z:0},{x:4,y:-2,z:8}),localPositionToK({x:4,y:-2,z:8}));
   assert.throws(()=>composeKWorld({KX:1,KY:2,KZ:3},{x:NaN,y:0,z:0}));
 });
 test('Plane and C exclusively determine all six body phases',()=>{
@@ -66,6 +83,10 @@ function practice(){const world=createWorldState(0);createKSpaceEncounter(world)
 test('K-space is traceable; local movement changes distance, not reference authority',()=>{
   const w=practice(),a=kCombatSnapshot(w,{x:0,y:0,z:0}),b=kCombatSnapshot(w,{x:0,y:0,z:5});
   assert.ok(Math.abs(a.distance-7)<1e-10);assert.ok(Math.abs(b.distance-2)<1e-10);assert.deepEqual(a.playerK,b.playerK);
+  assert.equal(a.distanceK,gameUnitsToK(7));assert.equal(b.distanceK,gameUnitsToK(2));
+  assert.equal(a.marketPhysicalTransform,'NOT_CONFIGURED');
+  w.monsters.find(m=>m.simulationCombat).kPosition.KZ+=1000;
+  assert.equal(kCombatSnapshot(w,{x:0,y:0,z:5}).distanceK,b.distanceK,'market delta cannot become meters or attack range');
   assert.deepEqual(a.deltaK,{KX:0,KY:0,KZ:1});assert.deepEqual(a.reference,KSPACE_REFERENCE);
   assert.deepEqual(a.playerK,kPositionFromReference());assert.equal(createKSpaceEncounter(w),w.kSpace);
   assert.equal(w.monsters.filter(m=>m.simulationCombat).length,1);
@@ -226,7 +247,7 @@ test('Market Life may work, travel, rest, or retire instead of being forced into
 
 test('consumable item mutates inventory and hp',()=>{const inv=defaultInventory(),r=useInventoryItem(inv,'POTION-001',50);assert.equal(r.ok,true);assert.equal(r.hp,85);assert.equal(inv.find(i=>i.id==='POTION-001').qty,2)});
 test('local ATM is explicit state conversion',()=>{const s={kgen:10,kaios:100};assert.equal(exchangeLocal(s,1,10).ok,true);assert.equal(s.kgen,9);assert.equal(s.kaios,110)});
-test('order preview -> execute -> close keeps fixed principal and percentage-return accounting',()=>{const s={kgen:10,pos:{KX:null,KY:null,KZ:null},history:[]};const p=previewOrder({axis:'KX',symbol:'BTCUSDT',fire:2,leverage:2,price:100,kgen:s.kgen,hasPosition:false});assert.equal(p.ok,true);assert.equal(p.order.im,2);executeOrder(s,p.order);assert.equal(s.kgen,8);const c=closePosition(s,'KX',103);assert.equal(c.ok,true);assert.equal(c.pnl,.12);assert.ok(Math.abs(s.kgen-10.12)<1e-12);const st=tradeStats(s.history);assert.equal(st.closed,1);assert.equal(st.realizedPnl,.12)});
+test('order preview -> execute -> close keeps fixed principal and percentage-return accounting',()=>{const s={kgen:10,pos:{KX:null,KY:null,KZ:null},history:[]};const p=previewOrder({axis:'KX',symbol:'BTCUSDT',fire:2,leverage:5,price:100,kgen:s.kgen,hasPosition:false});assert.equal(p.ok,true);assert.equal(p.order.im,2);executeOrder(s,p.order);assert.equal(s.kgen,8);const c=closePosition(s,'KX',103);assert.equal(c.ok,true);assert.equal(c.pnl,.3);assert.ok(Math.abs(s.kgen-10.3)<1e-12);const st=tradeStats(s.history);assert.equal(st.closed,1);assert.equal(st.realizedPnl,.3)});
 test('legacy order preview rejects lots or C above the shared 100 boundary',()=>{assert.equal(previewOrder({axis:'KX',symbol:'BTCUSDT',fire:101,leverage:1,price:100,kgen:1000,hasPosition:false}).reason,'BAD_LOTS');assert.equal(previewOrder({axis:'KX',symbol:'BTCUSDT',fire:1,leverage:101,price:100,kgen:1000,hasPosition:false}).reason,'BAD_C')});
 test('cancel invariant: preview alone does not mutate balances/position/history',()=>{const s={kgen:10,pos:{KX:null},history:[]};const snap=structuredClone(s);const p=previewOrder({axis:'KX',symbol:'BTCUSDT',fire:1,leverage:-1,price:100,kgen:10,hasPosition:false});assert.equal(p.ok,true);assert.equal(p.order.side,'空');assert.deepEqual(s,snap)});
 test('order execution rejects forged C, lots, side, margin and duplicate positions atomically',()=>{

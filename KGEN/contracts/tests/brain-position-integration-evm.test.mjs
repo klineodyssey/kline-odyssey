@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import solc from 'solc';
 import ganache from 'ganache';
 import { BrowserProvider, Contract, ContractFactory, parseEther } from 'ethers';
+import { C_DETENTS } from '../../../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 
 const brainPath = 'KGEN/contracts/KGEN_BrainExchange.sol';
 const enginePath = 'KGEN/contracts/KGEN_PositionEngine.sol';
@@ -104,7 +105,9 @@ assert.ok(brainArtifact.runtime.length / 2 <= 24_576, 'Brain optimized runtime e
 assert.ok(engineArtifact.runtime.length / 2 <= 24_576, 'Position Engine optimized runtime exceeds EIP-170');
 assert.ok(triggerArtifact.runtime.length / 2 <= 24_576, 'Trigger optimized runtime exceeds EIP-170');
 
-const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 9 } });
+// Oracle freshness is chain-time policy, not host scheduling latency. Explicit
+// evm_increaseTime below still drives stale/future/ordering cases deterministically.
+const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 9 }, miner: { timestampIncrement: 1 } });
 const provider = new BrowserProvider(eip1193);
 provider.pollingInterval = 20;
 const signers = await Promise.all(Array.from({ length: 8 }, (_, i) => provider.getSigner(i)));
@@ -323,13 +326,25 @@ async function fill(c = '100', lots = 1) {
 }
 async function closeAtEntry(positionId) {
   await tick(px100);
+  // Preserve decoded revert diagnostics before sending the local smoke tx.
+  await trigger.connect(trader).closePosition.staticCall(positionId);
   await (await trigger.connect(trader).closePosition(positionId, { gasLimit: 2_000_000 })).wait();
   assert.equal((await engine.positions(positionId)).collateralWad, 0n);
 }
 
 await tick(px100);
-for (const c of ['0', '100.000000000000000001', '-100.000000000000000001', '1000', '-1000']) {
+for (const c of ['0', '0.0001', '-0.0001', '0.3', '-0.3', '3.742', '-3.742', '17.382', '-17.382', '99.6', '-99.6', '100.001', '-100.001', '100.000000000000000001', '-100.000000000000000001', '1000', '-1000']) {
   await expectRevert(trigger.connect(trader).createOrder(0, parseEther(c), 1, px100), `invalid C ${c}`);
+}
+// Exact parity with the shared frontend detent authority through the real
+// Brain proxy / Trigger / Position / Risk path, including tiny C fill receipts.
+for (const c of C_DETENTS.filter(c => c !== 0)) {
+  console.log(`[canonical-c-evm] checking ${c}C fill / close / receipts`);
+  const { id, positionId } = await fill(String(c), 1);
+  assert.equal((await engine.orderTerms(positionId)).cWad, parseEther(String(c)));
+  await closeAtEntry(positionId);
+  assert.equal((await trigger.fillReceipt(id)).c, parseEther(String(c)));
+  assert.equal((await engine.settlementReceipt(positionId)).cWad, parseEther(String(c)));
 }
 for (const lots of [0, 101]) await expectRevert(trigger.connect(trader).createOrder(0, parseEther('1'), lots, px100), `invalid lots ${lots}`);
 let oid = await create();
@@ -530,7 +545,7 @@ fs.writeFileSync('artifacts/settlement-local-evm.json', JSON.stringify({
   authorities: { admin: await admin.getAddress(), upgradeAuthority: await upgrader.getAddress(), pauser: await pauser.getAddress(),
     keeper: await keeper.getAddress(), positionExecutor: trigger.target, brainSettlementRole: engine.target, trader: await trader.getAddress() },
   configuration: { cMax: 100, lotsMax: 100, initialMarginBps: 100, maintenanceMarginBps: 10, oracleMaxAge: 60, oracleMaxDeviationBps: 500, oracleSources: 3, oracleQuorum: 2 },
-  stressCases, realisticBoundaryCases, deploymentReceipts, smokeReceipts,
+  canonicalCDetents: C_DETENTS.filter(c => c !== 0), stressCases, realisticBoundaryCases, deploymentReceipts, smokeReceipts,
   testnetDeployment: 'NOT_EXECUTED', mainnetExecution: 'NOT_AUTHORIZED_OR_EXECUTED',
   limitations: ['Mock token and feeds are local only.', 'No production oracle provenance or live-network deployment is certified.', 'Gas is measured local EVM gas, not a production gas-price estimate.']
 }, null, 2) + '\n');

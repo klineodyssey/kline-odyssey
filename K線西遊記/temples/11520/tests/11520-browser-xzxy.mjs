@@ -8,7 +8,7 @@ const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 await page.addInitScript(()=>{try{localStorage.setItem('k11520.joystick.plane','XZ')}catch{}});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+await page.goto((process.env.K11520_BASE_URL||'http://127.0.0.1:4173')+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1800);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
@@ -18,11 +18,15 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 // This suite verifies the canonical raw XYZ controller independently of C-drive scaling.
 // Stop only this test page's drive timer. The joystick renderer continues to expose raw
 // disc/rail vectors; dedicated combat-drive QA separately verifies real 0C/1C/10C behavior.
-await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_TIMER__&&globalThis.__K11520_3D_CONTROL__,null,{timeout:5000});
+// Bootstrap imports Three.js and the controller asynchronously; a fixed 5s check
+// ran before the real controller existed on a cold network. Wait for readiness,
+// not a guessed fixed startup sleep, and retain the actual runtime diagnostics.
+try{await page.waitForFunction(()=>globalThis.__K11520_COMBAT_DRIVE_TIMER__&&globalThis.__K11520_3D_CONTROL__,null,{timeout:45000})}
+catch(error){throw new Error(`${error}\n${JSON.stringify({errors,state:await page.evaluate(()=>({drive:!!globalThis.__K11520_COMBAT_DRIVE_TIMER__,control:!!globalThis.__K11520_3D_CONTROL__,character:document.querySelector('#charState')?.textContent}))})}`)}
 await page.evaluate(()=>{clearInterval(globalThis.__K11520_COMBAT_DRIVE_TIMER__);globalThis.__K11520_COMBAT_DRIVE_TIMER__=null});
 await page.waitForTimeout(120);
 
-const xyz=async()=>{const t=await page.locator('#xyz').textContent();const m=String(t).match(/X\s*(-?\d+(?:\.\d+)?)\s*·\s*Y\s*(-?\d+(?:\.\d+)?)\s*·\s*Z\s*(-?\d+(?:\.\d+)?)/);assert.ok(m,'XYZ parse failed: '+t);return{x:+m[1],y:+m[2],z:+m[3]}};
+const xyz=async()=>{assert.match(await page.locator('#xyz').textContent(),/LOCAL X .*K.*Y .*K.*Z .*K/);return page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical}))};
 const world=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_WORLD_COORDS__||null));
 const control=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_3D_CONTROL__||null));
 const normal=async()=>page.evaluate(()=>structuredClone(globalThis.__K11520_NORMAL_MARKET__||null));

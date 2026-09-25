@@ -1,5 +1,36 @@
 # 11520 HANDOFF CURRENT
 
+## Human spatial calibration / nonlinear C — 2026-09-25
+
+- TASK_ID: K11520-C-DETENTS-K-DISTANCE-20260925; Human explicitly approved
+  1 LOCAL game spatial unit = 1 meter, scoped only to K11520 simulation.
+  Base 6d546d102dd7ac79bf8ee4ee621d12ddca750b3c is lineage, not future CURRENT.
+- V2.6.23 / shell-v275. Existing spatial-coordinate-runtime owns all conversion:
+  1K = 384400/16888 km from Physics CURRENT Moon anchor. Local render/collision
+  remain meters; K displays use six significant digits, never relabel raw units.
+- Market KX/KY/KZ and delta remain explicitly normalized market coordinates.
+  No market tick = meter calibration exists. Explicit dimensional transform seam
+  rejects absent/untagged PHYSICAL_K; no normalized-market + meter arithmetic.
+  Guardian retains its 7m rendered spawn and unchanged 2.2/6/4m skill ranges.
+- Existing nonlinear-controls owns 49 signed C detents: 0, ±.001/.01/.1/1,
+  ±5..100 by5. Inner half-travel reserves four low-C steps; execution validates
+  without rounding. Simulation, order adapter and candidate RiskKernel agree.
+- XYZ/capture/navigation use numeric spatial state, never parse the converted
+  HUD. Tiny-C labels retain precision; local K distance and normalized market
+  delta are separate in the existing minimap/detail footprint.
+- Local evidence: 166 runtime/product tests; all49 touch detents each orientation;
+  six responsive profiles, rotations, market/phase synchronization and three FX;
+  wallet/settlement lifecycle both sizes. Direct screenshot review repaired a
+  target-card/attack overlap. Exact-head CI and Pages remain release gates.
+- Artifacts: 11520-visual-qa/C_*.png, 11520-responsive-qa/K_DISTANCE_*.png,
+  responsive report.json and 11520-settlement-qa. Fixture wallet/quotes are not
+  Human wallet evidence. Local EVM is not public Testnet or Mainnet deployment.
+- This section supersedes historical arbitrary-unit/R=market+local descriptions
+  below without deleting lineage. No Boot/Physics Canon replacement, new asset,
+  parallel ledger, signer, live transaction or production oracle activation.
+- No verified payroll/ATM/advance receipt for this task: HOLD, not PAID/RECEIVED.
+  Human dirty main, paused patrol and Cursor remain untouched.
+
 ## Wallet/order/settlement integration — 2026-09-25
 
 - TASK_ID: K11520-WALLET-ORDER-INTEGRATION-20260925; direct Human order.

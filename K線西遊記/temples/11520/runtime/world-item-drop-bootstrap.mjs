@@ -6,6 +6,7 @@ PURPOSE: Capture the production Three.js world scene before game boot, turn back
 
 import * as THREE from 'three';
 import {createWorldItemVisual} from './world-item-visual-runtime.mjs';
+import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 
 export const WORLD_ITEM_DROP_VERSION='11520-WORLD-ITEM-DROP-V1.0.1';
 const drops=new Map();
@@ -74,7 +75,7 @@ function ensurePickupButton(){
 function refreshPickup(){
   const b=ensurePickupButton(),hit=nearestDrop();if(!b)return;
   if(!hit){b.classList.remove('show');b.textContent='';return}
-  b.classList.add('show');b.textContent=`拾取 ${hit.drop.item.name||'3D物品'} · ${hit.distance.toFixed(1)}m`;
+  b.classList.add('show');b.textContent=`拾取 ${hit.drop.item.name||'3D物品'} · ${formatGameDistanceK(hit.distance)}`;
 }
 
 function interceptBackpackDiscard(event){

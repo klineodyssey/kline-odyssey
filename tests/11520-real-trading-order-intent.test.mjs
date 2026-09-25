@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAdapter,normalizeExecutionError,EXECUTION_FAILURE_STATES} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 import {createKgenLedger} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
+import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 
 const WALLET='0x3333333333333333333333333333333333333333';
 const BRAIN='0x1111111111111111111111111111111111111111';
@@ -48,6 +49,26 @@ test('signed C alone supplies direction; contradictory side and negative lots ca
 
 const simulationInput={axis:'KX',market:'BTCUSDT',c:100,lots:10,currentPrice:100,triggerPrice:101};
 function fixture(){const ledger=createKgenLedger(1000),adapter=createExecutionAdapter({ledger});assert.equal(adapter.observe({market:'BTCUSDT',price:100,observedAt:1000,now:1000}).ok,true);return {ledger,adapter}}
+test('all canonical signed C detents retain precision across common and unsigned EVM intents',()=>{
+ for(const c of C_DETENTS.filter(c=>c!==0)){
+  const common=buildExecutionOrderIntent({...simulationInput,c,now:1001});
+  const evm=buildRealTradingOrderIntent({...base,c,side:undefined});
+  assert.equal(common.c,c);assert.equal(evm.c,c);assert.equal(common.leverage,Math.abs(c));
+  assert.equal(common.side,evm.side);assert.equal(evm.broadcast,false);
+  const {adapter}=fixture();const preview=adapter.preview(common,{now:1001});
+  assert.equal(preview.ok,true);assert.equal(preview.c,c);assert.equal(preview.leverage,Math.abs(c));
+ }
+});
+test('noncanonical C is rejected by preview, submit and unsigned EVM boundary without snapping or debit',()=>{
+ const {ledger,adapter}=fixture(),before=structuredClone(ledger);
+ for(const c of [.0001,-.0001,.3,-.3,3.742,-3.742,17.382,-17.382,99.6,-99.6]){
+  assert.throws(()=>buildExecutionOrderIntent({...simulationInput,c}),/INVALID_C_DETENT/);
+  assert.throws(()=>buildRealTradingOrderIntent({...base,c,side:undefined}),/INVALID_C_DETENT/);
+  assert.equal(adapter.preview({...simulationInput,c},{now:1001}).reason,'INVALID_C_DETENT');
+  assert.equal(adapter.submit({...simulationInput,c},{now:1001}).reason,'INVALID_C_DETENT');
+  assert.deepEqual(ledger,before);
+ }
+});
 test('common intent needs no wallet and rejects invalid signed C/lots/identity without clamping',()=>{
  for(const c of [-100,100])for(const lots of [1,100]){
   const intent=buildExecutionOrderIntent({...simulationInput,c,lots,now:1000});

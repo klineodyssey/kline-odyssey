@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {C_ABS_DETENTS,signedTravelFromC,formatSignedC} from '../controls/nonlinear-controls.mjs';
 
 const OUT='artifacts/11520-visual-qa';
 await fs.mkdir(OUT,{recursive:true});
@@ -58,6 +59,27 @@ const driveC=async ratio=>{
   await page.waitForTimeout(180);
 };
 
+// Trusted Chromium touch input, not a DOM-dispatched event or runtime setter.
+// Exercise every canonical detent through the rendered control in both layouts.
+const touchSession=await page.context().newCDPSession(page);
+const detentShots=new Map([[0,'C_0'],[.001,'C_0001'],[.01,'C_001'],[.1,'C_01'],[1,'C_1'],[25,'C_25'],[100,'C_100'],[-100,'C_NEG_100']]);
+for(const viewport of [{width:390,height:844},{width:844,height:390}]){
+  await page.setViewportSize(viewport);await page.waitForTimeout(400);
+  for(const value of [0,...C_ABS_DETENTS.slice(1),0,...C_ABS_DETENTS.slice(1).map(n=>-n)]){
+    const box=await page.locator('#cControl').boundingBox();assert.ok(box);
+    const x=box.x+box.width/2,center=box.y+box.height/2,target=box.y+(1-signedTravelFromC(value))*box.height/2;
+    await touchSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y:center}]});
+    for(let step=1;step<=4;step++)await touchSession.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:center+(target-center)*step/4}]});
+    await touchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    await page.waitForFunction(v=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===v,value,{timeout:2000}).catch(async error=>{error.message+=` detent=${value} viewport=${viewport.width} observed=${await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC)}`;throw error});
+    assert.equal((await page.locator('#cRead').textContent()).trim(),formatSignedC(value));
+    const thumb=await page.locator('#cThumb').evaluate(el=>parseFloat(el.style.top));
+    assert.ok(Math.abs(thumb-(1-signedTravelFromC(value))*50)<.001,`thumb drift ${value}`);
+    if(detentShots.has(value))await page.screenshot({path:`${OUT}/${detentShots.get(value)}${viewport.width===844?'_LANDSCAPE':''}.png`});
+  }
+}
+await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);
+
 await page.waitForFunction(()=>document.querySelector('#k11520TradeColorScheme'),null,{timeout:3000});
 assert.equal(await page.locator('html').getAttribute('data-k11520-trade-color-scheme'),'TW_RED_LONG','default color scheme must match Taiwan convention');
 let colors=await page.evaluate(()=>({long:getComputedStyle(document.documentElement).getPropertyValue('--k11520-long-color').trim(),short:getComputedStyle(document.documentElement).getPropertyValue('--k11520-short-color').trim()}));
@@ -95,6 +117,7 @@ await page.waitForTimeout(100);
 assert.equal((await page.locator('#cRead').textContent()).trim(),'-0.1C','numeric C above 100 must keep the previous value');
 assert.equal((await page.locator('#cNumericInput').inputValue()).trim(),'-0.1');
 assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(1000)),null,'API C above 100 must be rejected');
+for(const invalid of [100.001,-100.001,-1000,17.382,99.6,.0001,-.0001])assert.equal(await page.evaluate(v=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.api.applySignedValue(v),invalid),null,`noncanonical API C ${invalid} must reject`);
 assert.equal(await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC),-0.1);
 
 // Cross-control regression: editing lots after -C must not let native syncControls erase the signed value/thumb.

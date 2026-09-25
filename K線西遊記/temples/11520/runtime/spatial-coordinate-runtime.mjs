@@ -1,8 +1,43 @@
 /* KGEN_META
-VERSION: 1.0.2
+VERSION: 1.1.0
 STATUS: ACTIVE
 PURPOSE: Canonical 11520 XYZ/XZ world-coordinate conversions shared by joystick, HUD, maps, navigation and camera-facing logic.
 */
+
+// Physics CURRENT §161: Moon anchor. Human K11520 calibration (2026-09-25):
+// one LOCAL game spatial unit = one meter, not a market-normalized tick.
+export const SPATIAL_CALIBRATION=Object.freeze({
+  authority:'K11520_SIMULATION_SPATIAL_CALIBRATION',metersPerGameUnit:1,
+  kmPerK:384400/16888,gameUnitsPerK:384400*1000/16888,
+  source:'docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md#161',
+});
+function finiteSpatial(value){if(typeof value!=='number'||!Number.isFinite(value))throw new RangeError('INVALID_SPATIAL_VALUE');return Object.is(value,-0)?0:value}
+const converted=value=>finiteSpatial(value);
+export const gameUnitsToMeters=value=>converted(finiteSpatial(value)*SPATIAL_CALIBRATION.metersPerGameUnit);
+export const metersToGameUnits=value=>converted(finiteSpatial(value)/SPATIAL_CALIBRATION.metersPerGameUnit);
+export const kmToK=value=>converted(finiteSpatial(value)/SPATIAL_CALIBRATION.kmPerK);
+export const kToKm=value=>converted(finiteSpatial(value)*SPATIAL_CALIBRATION.kmPerK);
+export const gameUnitsToK=value=>kmToK(gameUnitsToMeters(value)/1000);
+export const kToGameUnits=value=>metersToGameUnits(kToKm(value)*1000);
+export function localPositionToK(p){return Object.fromEntries(['x','y','z'].map(a=>[a,gameUnitsToK(p[a])]))}
+export function formatGameDistanceK(value,{detail=false}={}){
+  const k=gameUnitsToK(value),text=k===0?'0':Number(k.toPrecision(6)).toLocaleString('en-US',{useGrouping:false,maximumSignificantDigits:6});
+  return `${text}K${detail?` ≈ ${Number(gameUnitsToMeters(value).toPrecision(6))} m`:''}`;
+}
+
+// No implicit normalized-market → physical mapping exists. A future calibrated
+// transform must supply dimensional physical K explicitly; never assume 1 tick=1m.
+export function marketToPhysicalK(marketPosition,transform){
+  if(typeof transform!=='function')throw new RangeError('MARKET_PHYSICAL_TRANSFORM_NOT_CONFIGURED');
+  const result=transform(Object.freeze({...marketPosition}));
+  if(result?.space!=='PHYSICAL_K')throw new RangeError('PHYSICAL_K_DIMENSION_REQUIRED');
+  return {space:'PHYSICAL_K',x:finiteSpatial(result.x),y:finiteSpatial(result.y),z:finiteSpatial(result.z)};
+}
+export function composePhysicalK(origin,local){
+  if(origin?.space!=='PHYSICAL_K')throw new RangeError('PHYSICAL_K_DIMENSION_REQUIRED');
+  const r=localPositionToK(local);
+  return Object.fromEntries(['x','y','z'].map(a=>[a,converted(finiteSpatial(origin[a])+r[a])]));
+}
 
 export const SPATIAL_RULES=Object.freeze({
   northAxis:'Z+',

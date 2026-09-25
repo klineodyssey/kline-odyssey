@@ -1,5 +1,29 @@
 # Codex Review Log
 
+## 2026-09-25 · Human spatial calibration and canonical C / V2.6.23
+
+- Direct Human calibration and implementation order; isolated branch
+  codex/k11520-c-detents-k-distance-20260925, base main 6d546d102dd7ac79bf8ee4ee621d12ddca750b3c.
+- One existing physical conversion authority, exact Moon ratio; no market-tick
+  distance claim. Render/collision meters preserved, K used only after conversion.
+  Existing normalized market map remains distinct and synchronized.
+- One C detent table shared by UI/simulation/intent; candidate Solidity WAD gate
+  matches it. Zero stays neutral; malformed/non-detent/over100 execution rejected.
+- 166 Node tests and signed49-detent Chromium gestures each orientation passed.
+  Six responsive profiles and wallet lifecycle passed; directly inspected tiny-C,
+  max-C, distance, rotation and three combat-FX evidence. Found and repaired
+  target-card overlap instead of weakening layout assertions.
+- Additional cold-boot XYZ test waited only5s for asynchronous CDN/controller boot;
+  it now waits for actual readiness with bounded diagnostic failure, not a
+  product behavior change. Local EVM clock likewise uses deterministic block
+  increments, leaving stale/out-of-order oracle rejection tests intact.
+- Actual-pair EVM completed: all48 nonzero C detents,32 signed100C stress and12
+  boundary cases,140 smoke receipts PASS on local Ganache1337 test assets.
+- Candidate exact-head CI and public Pages source/browser verification remain
+  mandatory; release completion is not inferred from this log.
+- Original first-party changes only; no new assets/dependencies/duplicate organs.
+  No real wallet signing or chain execution; absent payroll receipt remains HOLD.
+
 ## 2026-09-25 · K11520 wallet/order integration / V2.6.22
 
 - Direct Human execution order; isolated codex/k11520-wallet-order-integration-20260925.

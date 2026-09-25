@@ -4,6 +4,8 @@ FORMAL_ORGAN_NAME: XYZ Plane Waypoint Navigation
 PURPOSE: Let XZ / XY / YZ plane-map taps and direct 3D world/entity targets share one canonical XYZ waypoint authority while reusing the physical movement/collision engine. Navigation writes only the public XYZ control vector and never bypasses world collision.
 */
 
+import {formatGameDistanceK,gameUnitsToK} from './spatial-coordinate-runtime.mjs';
+
 const MODE_SPECS=Object.freeze({
   XZ:Object.freeze({h:'x',v:'z',depth:'y'}),
   XY:Object.freeze({h:'x',v:'y',depth:'z'}),
@@ -19,7 +21,6 @@ function mode(){return globalThis.__K11520_3D_CONTROL__?.mode||globalThis.__K115
 function physical(){return globalThis.__K11520_WORLD_COORDS__?.physical||{x:0,y:0,z:0}}
 function control(){return globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null}
 function toast(text){const t=document.querySelector('#toast');if(!t)return;t.textContent=text;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),1400)}
-function fmt(n){return finite(n).toFixed(1)}
 
 export function normalizeWorldTarget3D(target={},fallback=physical()){
   return{x:finite(target.x,finite(fallback?.x)),y:Math.max(0,finite(target.y,finite(fallback?.y))),z:finite(target.z,finite(fallback?.z))};
@@ -39,10 +40,10 @@ export function vectorToward3D(from={},target={}){
 }
 function setVector(v){const c=control();if(!c)return false;c.vector={x:finite(v.x),y:finite(v.y),z:finite(v.z)};globalThis.__K11520_XYZ_NAV_VECTOR__={...c.vector};return true}
 function clearVector(){setVector({x:0,y:0,z:0})}
-function publish(){globalThis.__K11520_XYZ_MAP_NAVIGATION__={organ:'XYZ Plane Waypoint Navigation',active:nav.active,target:nav.target?{...nav.target}:null,mode:nav.mode,source:nav.source,startedAt:nav.startedAt,lastDistance:nav.lastDistance,legacyXZPreserved:true,worldTargetAuthority:true,collisionAuthority:'game-5d-main.moveManual',setWorldTarget:setWorldTarget3D,start:startWorldNavigation3D,stop:stopWorldNavigation3D}}
+function publish(){globalThis.__K11520_XYZ_MAP_NAVIGATION__={organ:'XYZ Plane Waypoint Navigation',active:nav.active,target:nav.target?{...nav.target}:null,mode:nav.mode,source:nav.source,startedAt:nav.startedAt,lastDistance:nav.lastDistance,lastDistanceK:nav.lastDistance===null?null:gameUnitsToK(nav.lastDistance),distanceSpace:'LOCAL_METERS',legacyXZPreserved:true,worldTargetAuthority:true,collisionAuthority:'game-5d-main.moveManual',setWorldTarget:setWorldTarget3D,start:startWorldNavigation3D,stop:stopWorldNavigation3D}}
 function stop(reason=null){nav.active=false;clearVector();actionButton?.remove();actionButton=null;if(reason)toast(reason);publish()}
 function start(){if(!nav.target)return false;nav.active=true;nav.startedAt=Date.now();actionButton?.remove();actionButton=null;toast(`XYZ 導航 ${nav.mode} 開始`);publish();return true}
-function showAction(){actionButton?.remove();actionButton=document.createElement('button');actionButton.id='xyzWaypointAction';actionButton.className='waypointAction';const p=nav.target;actionButton.textContent=`前往 ${nav.mode} · X ${fmt(p.x)} Y ${fmt(p.y)} Z ${fmt(p.z)}`;actionButton.onclick=start;document.body.appendChild(actionButton)}
+function showAction(){actionButton?.remove();actionButton=document.createElement('button');actionButton.id='xyzWaypointAction';actionButton.className='waypointAction';const p=nav.target,d=vectorToward3D(physical(),p).distance;actionButton.textContent=`前往 ${nav.mode} · ${formatGameDistanceK(d)}`;actionButton.title=['LOCAL XYZ',...['x','y','z'].map(a=>`${a.toUpperCase()} ${formatGameDistanceK(p[a],{detail:true})}`)].join(' · ');actionButton.setAttribute('aria-label',`${actionButton.textContent}；${actionButton.title}`);actionButton.onclick=start;document.body.appendChild(actionButton)}
 function setTarget(target,plane,source='PLANE_MAP'){nav={active:false,target:normalizeWorldTarget3D(target),mode:plane||mode(),source,startedAt:0,lastDistance:null};clearVector();showAction();toast(`${nav.mode} waypoint 已設定`);publish();return{...nav.target}}
 export function setWorldTarget3D(target,{mode:targetMode='WORLD',source='WORLD'}={}){return setTarget(target,targetMode,source)}
 export function startWorldNavigation3D(){return start()}

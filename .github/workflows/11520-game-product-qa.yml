@@ -89,7 +89,8 @@ jobs:
           timeout --signal=TERM --kill-after=10s 120s node "K線西遊記/temples/11520/tests/11520-browser-xzxy.mjs" 2>&1 | tee /tmp/k11520-browser-smoke.log
           RC=${PIPESTATUS[0]}
           if [ "$RC" -eq 0 ]; then
-            timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
+            # Full signed detent sweep: 49 touch selections in each orientation plus screenshots.
+            timeout --signal=TERM --kill-after=10s 240s node "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs" 2>&1 | tee -a /tmp/k11520-browser-smoke.log
             RC=${PIPESTATUS[0]}
           fi
           if [ "$RC" -eq 0 ]; then

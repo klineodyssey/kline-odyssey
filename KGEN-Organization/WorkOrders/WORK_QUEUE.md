@@ -1,5 +1,26 @@
 # KGEN Organization V2.0 WorkQueue
 
+## K11520 C detents / spatial calibration — 2026-09-25
+
+- Task: K11520-C-DETENTS-K-DISTANCE-20260925; status LOCAL_QA_PASS / EXACT_HEAD_CI_PENDING.
+- Human 沈英明 explicitly approved 1 local game spatial unit = 1 meter,
+  not market-normalized tick = meter. Physical K uses CURRENT Moon anchor.
+- Owner codex-gm-01 (ACTIVE T5); branch codex/k11520-c-detents-k-distance-20260925;
+  fresh base 6d546d102dd7ac79bf8ee4ee621d12ddca750b3c.
+- Session subtask labels: c_detents (controls), c_execution (validation/local EVM),
+  settlement_security_review (distance UI). Not new employees or payroll claims.
+- Original repository-native extensions only. No imported assets or third-party
+  implementation. Added-line secret scan required before push.
+- Reuse existing conversion/control/ledger organs; no new Boot or Physics Canon.
+- Acceptance: shared detents, local-meter/K round trips, no market/physical sum,
+  actual Chromium gestures/screenshots both orientations, settlement regression,
+  exact-head CI, normal merge/Pages. No live chain action or signer.
+- Prior #439/#440 delivered and merged; current main CI verified green. Older
+  protected PRs remain separate HOLD lanes; no unrelated implementation merged.
+- Payroll/ATM: no new verified receipt; HOLD, not PAID/RECEIVED.
+- Actual Brain/Position/Trigger local Ganache1337 PASS: 48 nonzero C detents,
+  32 signed100C stress,12 boundary cases,140 smoke receipts. Not public Testnet.
+
 ## K11520 wallet order integration — 2026-09-25
 
 - Task: K11520-WALLET-ORDER-INTEGRATION-20260925

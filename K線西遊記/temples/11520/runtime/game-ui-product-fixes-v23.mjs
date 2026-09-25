@@ -3,6 +3,7 @@ VERSION: 2.4.0
 STATUS: ACTIVE
 PURPOSE: Playable 11520 product behavior: mobile clearance, center-Y, fixed Y/C/Lots controls, canonical floors, compass, local AI help, BGM and intro.
 */
+import {C_DETENTS,signedTravelFromC} from '../controls/nonlinear-controls.mjs';
 const isGame=typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'');
 const A='./assets/ui/';
 const MIN_GAP=14;
@@ -21,11 +22,11 @@ function installCss(){
 }
 
 function dispatchVertical(control,t){if(!control)return false;const r=control.getBoundingClientRect(),y=r.top+(1-Math.max(0,Math.min(1,t)))*r.height;for(const type of['pointerdown','pointerup'])control.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:7711,pointerType:'touch',clientX:r.left+r.width/2,clientY:y,buttons:type==='pointerdown'?1:0}));return true}
-function currentY(){return Number((document.getElementById('yRead')?.textContent||'0').match(/-?\d+(?:\.\d+)?/)?.[0]||0)}
+function currentY(){return Number(globalThis.__K11520_WORLD_COORDS__?.physical?.y)||0}
 function installEnergyTaps(){
   const specs=[
     ['yControl','yEnergyTap','Y +5',()=>Math.min(1,(currentY()>=40?0:currentY()+5)/40)],
-    ['cControl','cEnergyTap','C 下一階',()=>{const vals=[0,.000001,.00001,.0001,.001,.01,.1,1,10,100],n=Number((document.getElementById('cRead')?.textContent||'0').replace('C','')),i=Math.max(0,vals.indexOf(n));return((i+1)%vals.length)/(vals.length-1)}],
+    ['cControl','cEnergyTap','C 下一階',()=>{const n=Number((document.getElementById('cRead')?.textContent||'0').replace('C','')),i=Math.max(0,C_DETENTS.indexOf(n)),next=C_DETENTS[(i+1)%C_DETENTS.length];return(1+signedTravelFromC(next))/2}],
     ['lotsControl','lotsEnergyTap','口數 +1',()=>{const n=Number((document.getElementById('lotsRead')?.textContent||'1').match(/\d+/)?.[0]||1);return(n>=100?1:n+1)/100}]
   ];
   let ok=true;for(const[cid,id,label,getT]of specs){const c=document.getElementById(cid);if(!c){ok=false;continue}if(document.getElementById(id))continue;const b=document.createElement('button');b.id=id;b.className='energyTap';b.type='button';b.dataset.step=label;b.title=label;b.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault()});b.addEventListener('click',e=>{e.stopPropagation();dispatchVertical(c,getT())});c.appendChild(b)}return ok;
