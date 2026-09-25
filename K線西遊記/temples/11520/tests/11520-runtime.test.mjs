@@ -18,6 +18,8 @@ test('Human local meter calibration uses the CURRENT Moon K anchor without marke
   near(gameUnitsToK(2.2),2.2*16888/384400000);near(gameUnitsToK(27.7),27.7*16888/384400000);
   assert.equal(formatGameDistanceK(2.2),'0.0000966535K');assert.equal(formatGameDistanceK(27.7),'0.00121696K');
   assert.equal(formatGameDistanceK(-0),'0K');assert.match(formatGameDistanceK(27.7,{detail:true}),/27.7 m/);
+  assert.equal(formatGameDistanceK(2.2,{compact:true}),'9.67e-5K');
+  assert.equal(formatGameDistanceK(-.001,{compact:true}),'-4.39e-8K');
   for(const value of [NaN,Infinity,'1',null])assert.throws(()=>gameUnitsToK(value));
   assert.throws(()=>marketToPhysicalK({KX:1,KY:2,KZ:3}),/NOT_CONFIGURED/);
   assert.throws(()=>marketToPhysicalK({KX:1},()=>({x:1,y:0,z:0})),/DIMENSION/);

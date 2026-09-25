@@ -5,9 +5,13 @@
 - TASK_ID: K11520-C-DETENTS-K-DISTANCE-20260925; Human explicitly approved
   1 LOCAL game spatial unit = 1 meter, scoped only to K11520 simulation.
   Base 6d546d102dd7ac79bf8ee4ee621d12ddca750b3c is lineage, not future CURRENT.
-- V2.6.23 / shell-v275. Existing spatial-coordinate-runtime owns all conversion:
+- V2.6.23 / shell-v276. Existing spatial-coordinate-runtime owns all conversion:
   1K = 384400/16888 km from Physics CURRENT Moon anchor. Local render/collision
   remain meters; K displays use six significant digits, never relabel raw units.
+- The narrow Y rail uses compact three-significant-digit scientific K notation;
+  accessible detail retains full K/meters. The legacy energy painter also uses
+  the shared formatter, so low-C motion cannot be rounded back to raw zero.
+  Mobile HUD QA waits for world/controller readiness and asserts signed movement.
 - Market KX/KY/KZ and delta remain explicitly normalized market coordinates.
   No market tick = meter calibration exists. Explicit dimensional transform seam
   rejects absent/untagged PHYSICAL_K; no normalized-market + meter arithmetic.

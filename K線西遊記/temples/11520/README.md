@@ -23,7 +23,7 @@ Existing `controls/nonlinear-controls.mjs` owns detents, nearest snap, formattin
 and nonlinear travel. Controls snap; executable intent/ledger boundaries reject
 non-detents. RiskKernel enforces the same exact fixed-point set. No chain is
 deployed or activated. Lots remain 1..100 positive integers. Wallet balance is
-read-only; orders/positions/receipts remain simulation. Cache v275 network-first.
+read-only; orders/positions/receipts remain simulation. Cache v276 network-first.
 
 ## Wallet → order → settlement — V2.6.22 / 2026-09-25
 

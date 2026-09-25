@@ -20,8 +20,8 @@ export const kToKm=value=>converted(finiteSpatial(value)*SPATIAL_CALIBRATION.kmP
 export const gameUnitsToK=value=>kmToK(gameUnitsToMeters(value)/1000);
 export const kToGameUnits=value=>metersToGameUnits(kToKm(value)*1000);
 export function localPositionToK(p){return Object.fromEntries(['x','y','z'].map(a=>[a,gameUnitsToK(p[a])]))}
-export function formatGameDistanceK(value,{detail=false}={}){
-  const k=gameUnitsToK(value),text=k===0?'0':Number(k.toPrecision(6)).toLocaleString('en-US',{useGrouping:false,maximumSignificantDigits:6});
+export function formatGameDistanceK(value,{detail=false,compact=false}={}){
+  const k=gameUnitsToK(value),text=k===0?'0':compact?k.toExponential(2):Number(k.toPrecision(6)).toLocaleString('en-US',{useGrouping:false,maximumSignificantDigits:6});
   return `${text}K${detail?` ≈ ${Number(gameUnitsToMeters(value).toPrecision(6))} m`:''}`;
 }
 
