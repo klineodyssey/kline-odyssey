@@ -12,6 +12,11 @@ try {
     let eth=4000;
     const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
     const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+    // Exercise late optional UI delivery after the authoritative bootstrap has
+    // already dismissed its intro. It must not create a second pointer blocker.
+    await page.route('**/runtime/game-ui-product-fixes-v23.mjs',async route=>{
+      await new Promise(resolve=>setTimeout(resolve,3500));await route.continue();
+    });
     // Synthetic EIP-1193 provider, not a connected Human wallet or live balance.
     await page.addInitScript(()=>{
       const listeners=new Map();
@@ -36,6 +41,8 @@ try {
     });
     await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT,{timeout:15000});
+    await page.screenshot({path:`${out}/${width}x${height}-late-ui-boot.png`});
+    assert.equal(await page.locator('#intro11520 .introSkip').count(),0,'late legacy UI must not recreate an intro over the live game');
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
     await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');
