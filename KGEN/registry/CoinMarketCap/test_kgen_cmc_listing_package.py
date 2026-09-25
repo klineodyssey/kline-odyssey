@@ -12,18 +12,21 @@ ROOT = Path(__file__).resolve().parents[3]
 CMC = ROOT / "KGEN" / "registry" / "CoinMarketCap"
 API = ROOT / "api" / "kgen"
 
-TOTAL = Decimal("71980505.786117825703641")
-CIRCULATING = Decimal("4366878.985936300061217422")
-EXCLUDED = Decimal("67613626.800181525642423578")
+HISTORICAL_TOTAL = Decimal("71980505.786117825703641")
+HISTORICAL_CIRCULATING = Decimal("4366878.985936300061217422")
+HISTORICAL_EXCLUDED = Decimal("67613626.800181525642423578")
 MAX_SUPPLY = Decimal("72000000")
-BURNED = Decimal("19494.213882174296359")
+HISTORICAL_BURNED = Decimal("19494.213882174296359")
 
 
 class CmcListingPackageTests(unittest.TestCase):
     def test_supply_api_plain_numeric_bodies(self):
+        snapshot = json.loads(
+            (CMC / "kgen_cmc_supply_snapshot.json").read_text(encoding="utf-8")
+        )
         expected = {
-            "total-supply.txt": str(TOTAL),
-            "circulating-supply.txt": str(CIRCULATING),
+            "total-supply.txt": snapshot["supply"]["total_supply"],
+            "circulating-supply.txt": snapshot["supply"]["circulating_supply"],
         }
         for name, value in expected.items():
             body = (API / name).read_bytes()
@@ -54,21 +57,23 @@ class CmcListingPackageTests(unittest.TestCase):
             for row in rows
             if row["Circulating Status"] == "NON_CIRCULATING"
         )
-        self.assertEqual(circulating, CIRCULATING)
-        self.assertEqual(excluded, EXCLUDED)
-        self.assertEqual(circulating + excluded, TOTAL)
+        self.assertEqual(circulating, HISTORICAL_CIRCULATING)
+        self.assertEqual(excluded, HISTORICAL_EXCLUDED)
+        self.assertEqual(circulating + excluded, HISTORICAL_TOTAL)
 
-    def test_snapshot_supply_matches_annex(self):
+    def test_current_snapshot_reconciles_independently_of_historical_annex(self):
         snapshot = json.loads(
             (CMC / "kgen_cmc_supply_snapshot.json").read_text(encoding="utf-8")
         )
         supply = snapshot["supply"]
-        self.assertEqual(Decimal(supply["total_supply"]), TOTAL)
-        self.assertEqual(Decimal(supply["circulating_supply"]), CIRCULATING)
-        self.assertEqual(Decimal(supply["excluded_current_balances"]), EXCLUDED)
         self.assertEqual(Decimal(supply["nominal_max_supply"]), MAX_SUPPLY)
-        self.assertEqual(Decimal(supply["burned_supply"]), BURNED)
-        self.assertEqual(TOTAL + BURNED, MAX_SUPPLY)
+        total = Decimal(supply["total_supply"])
+        circulating = Decimal(supply["circulating_supply"])
+        excluded = Decimal(supply["excluded_current_balances"])
+        burned = Decimal(supply["burned_supply"])
+        self.assertEqual(circulating + excluded, total)
+        self.assertEqual(total + burned, MAX_SUPPLY)
+        self.assertGreater(burned, HISTORICAL_BURNED)
 
     def test_only_five_evidenced_project_wallets_are_excluded(self):
         with (CMC / "KGEN_CMC_ANNEX_A_RICH_LIST_AND_RESERVES_V1.csv").open(
@@ -196,8 +201,8 @@ class CmcListingPackageTests(unittest.TestCase):
             encoding="utf-8"
         )
         required = [
-            str(TOTAL),
-            str(CIRCULATING),
+            str(HISTORICAL_TOTAL),
+            str(HISTORICAL_CIRCULATING),
             str(MAX_SUPPLY),
             "https://klineodyssey.github.io/kline-odyssey/api/kgen/total-supply.txt",
             "https://klineodyssey.github.io/kline-odyssey/api/kgen/circulating-supply.txt",
