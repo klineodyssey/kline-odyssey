@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activateMargin,closeMargin,snapshot,pnlForMove,maxAdversePoints,positionRisk,MAX_C_LEVERAGE,normalizeSignedC,signedCFromLegacyMagnitude} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
-import {formatUnits,readErc20Balance,assertExecutableOrder} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
+import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 
 assert.equal(MAX_C_LEVERAGE,100);
@@ -43,7 +43,7 @@ assert.equal(snapshot(ledger).free,90);
 assert.equal(snapshot(ledger).realizedPnl,-10);
 
 assert.equal(formatUnits(1234500000000000000n,18),'1.2345');
-const mock={request:async ({method})=>method==='eth_call'?'0x0de0b6b3a7640000':null};
+const mock={request:async ({method})=>method==='eth_call'?'0x'+(10n**18n).toString(16).padStart(64,'0'):null};
 const balance=await readErc20Balance({provider:mock,token:'0x0000000000000000000000000000000000000001',account:'0x0000000000000000000000000000000000000002'});
 assert.equal(balance.formatted,'1');
 assert.equal(assertExecutableOrder({wallet:{account:'0x1',chainId:56},chainId:56,marketAdapter:{preview(){},submit(){}},order:{axis:'KX',side:'LONG',notional:1,c:1,lots:1}}).ok,true);
@@ -108,3 +108,79 @@ for(const c of [100,-100])for(const lots of [1,100]){
   tick(l,100,1002);assert.equal(simulationSnapshot(l).orders[0].status,'REJECTED');assert.equal(l.lockedMargin,0);assert.equal(simulationSnapshot(l).receipts.length,0);
 }
 console.log('11520 existing-ledger simulation pending/cross/one-shot/isolated receipts PASS');
+
+// EIP-1193 wallet connection is public-address/read-only balance state, not a ledger.
+const accountA='0x0000000000000000000000000000000000000001';
+const accountB='0x0000000000000000000000000000000000000002';
+const abiBalance=value=>'0x'+(BigInt(value)*10n**18n).toString(16).padStart(64,'0');
+for(const invalid of ['0x','',null,undefined,'garbage','0xwrong',0]){
+  await assert.rejects(()=>readNativeBalance({provider:{request:async()=>invalid},account:accountA}),/INVALID_BALANCE_RESPONSE/,'invalid native response must not become zero');
+}
+assert.equal((await readNativeBalance({provider:{request:async()=>'0x0'},account:accountA})).formatted,'0');
+function walletProvider(){
+  const listeners=new Map(),calls=[];
+  const provider={accounts:[accountA],chain:'0x38',token:abiBalance(123),calls,handler:null,
+    async request(args){calls.push(args);if(provider.handler){const handled=provider.handler(args);if(handled!==undefined)return handled}switch(args.method){case 'eth_requestAccounts':case 'eth_accounts':return provider.accounts;case 'eth_chainId':return provider.chain;case 'eth_getBalance':return '0xde0b6b3a7640000';case 'eth_call':return provider.token;default:throw new Error('Forbidden request '+args.method)}},
+    on(name,fn){if(!listeners.has(name))listeners.set(name,new Set());listeners.get(name).add(fn)},
+    removeListener(name,fn){listeners.get(name)?.delete(fn)},
+    emit(name,value){for(const fn of [...(listeners.get(name)||[])])fn(value)},
+    listenerCount(){return [...listeners.values()].reduce((sum,set)=>sum+set.size,0)}
+  };return provider;
+}
+const microtasks=async()=>{for(let i=0;i<30;i++)await Promise.resolve()};
+{
+  const p=walletProvider(),data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
+  const s=createWalletSession({ethereum:p,storage}),states=[];const unsubscribe=s.subscribe(value=>states.push(value));
+  assert.equal(p.calls.length,0,'construction and subscription cannot request wallet access');
+  assert.equal(s.snapshot().status,'DISCONNECTED');
+  const connected=await s.connect();assert.equal(connected.status,'CONNECTED');assert.equal(connected.account,accountA);assert.equal(connected.chainId,56);
+  assert.equal(connected.kgen,'123');assert.equal(connected.bnb,'1');assert.equal(connected.balanceReadOnly,true);assert.equal(connected.executionMode,'SIMULATION');
+  assert.equal(JSON.parse(data.get(PUBLIC_WALLET_IDENTITY_KEY)).address,accountA,'public identity continuity remains compatible');
+  assert.equal(p.listenerCount(),3);assert.ok(Object.isFrozen(connected));
+  p.accounts=[accountB];p.token=abiBalance(9);p.emit('accountsChanged',p.accounts);
+  assert.equal(s.snapshot().kgen,null,'old address balance is cleared synchronously');await microtasks();
+  assert.equal(s.snapshot().account,accountB);assert.equal(s.snapshot().kgen,'9');
+  p.chain='0x1';p.emit('chainChanged',p.chain);assert.equal(s.snapshot().kgen,null);await microtasks();
+  assert.equal(s.snapshot().status,'WRONG_CHAIN');assert.equal(s.snapshot().chainId,1);assert.equal(s.snapshot().kgen,null);assert.equal(s.snapshot().bnb,null);
+  p.chain='0x38';p.emit('chainChanged',p.chain);await microtasks();assert.equal(s.snapshot().status,'CONNECTED');
+  p.emit('disconnect',{code:4900});assert.equal(s.snapshot().status,'DISCONNECTED');assert.equal(s.snapshot().account,null);assert.equal(s.snapshot().kgen,null);assert.equal(p.listenerCount(),0);
+  await s.connect();s.disconnect();assert.equal(p.listenerCount(),0);p.emit('accountsChanged',[accountA]);await microtasks();assert.equal(s.snapshot().account,null,'logical disconnect detaches events');
+  assert.ok(p.calls.every(({method})=>['eth_requestAccounts','eth_accounts','eth_chainId','eth_getBalance','eth_call'].includes(method)),'no chain switch/sign/send');
+  assert.ok(states.some(value=>value.status==='READING'));unsubscribe();s.dispose();
+}
+{
+  const p=walletProvider(),s=createWalletSession({ethereum:p});await s.connect();
+  p.handler=({method})=>method==='eth_requestAccounts'?Promise.reject({code:4001,message:'provider text must not be exposed'}):undefined;
+  assert.equal((await s.connect()).error,'USER_REJECTED');assert.equal(s.snapshot().account,null);assert.equal(s.snapshot().kgen,null);
+  p.handler=null;p.accounts=['not-an-address'];assert.equal((await s.connect()).error,'INVALID_ACCOUNT');assert.equal(s.snapshot().kgen,null);
+  p.accounts=[accountA];p.token='0x';assert.equal((await s.connect()).error,'INVALID_BALANCE_RESPONSE');assert.equal(s.snapshot().kgen,null,'empty eth_call is unknown, never fake zero');
+  p.token=abiBalance(0);assert.equal((await s.refresh()).kgen,'0','proper ABI zero is a verified zero');
+  p.handler=({method})=>method==='eth_getBalance'?'0x':undefined;
+  assert.equal((await s.refresh()).error,'INVALID_BALANCE_RESPONSE');assert.equal(s.snapshot().bnb,null);assert.equal(s.snapshot().kgen,null,'invalid native read cannot retain a stale verified wallet');p.handler=null;
+  p.chain='0x38garbage';assert.equal((await s.refresh()).error,'INVALID_CHAIN_ID');assert.equal(s.snapshot().account,null);s.dispose();
+}
+{
+  const p=walletProvider(),s=createWalletSession({ethereum:p});await s.connect();
+  let release;let started=false;
+  p.handler=({method})=>method==='eth_call'&&!started?(started=true,new Promise(resolve=>{release=resolve})):undefined;
+  const oldRead=s.refresh();await microtasks();assert.equal(started,true);
+  p.accounts=[accountB];p.token=abiBalance(7);p.emit('accountsChanged',p.accounts);await microtasks();
+  assert.equal(s.snapshot().account,accountB);assert.equal(s.snapshot().kgen,'7');
+  release(abiBalance(999));await oldRead;assert.equal(s.snapshot().kgen,'7','late previous-account response cannot overwrite new account');
+  started=false;const disconnectedRead=s.refresh();await microtasks();s.disconnect();release(abiBalance(888));await disconnectedRead;
+  assert.equal(s.snapshot().status,'DISCONNECTED');assert.equal(s.snapshot().account,null);assert.equal(s.snapshot().kgen,null,'late response cannot resurrect disconnected state');s.dispose();
+}
+{
+  const p=walletProvider(),s=createWalletSession({ethereum:p});await s.connect();let release,started=false;
+  p.handler=({method})=>method==='eth_call'&&!started?(started=true,new Promise(resolve=>{release=resolve})):undefined;
+  const read=s.refresh();await microtasks();p.chain='0x61';p.emit('chainChanged',p.chain);await microtasks();
+  assert.equal(s.snapshot().status,'WRONG_CHAIN');release(abiBalance(999));await read;
+  assert.equal(s.snapshot().chainId,97);assert.equal(s.snapshot().kgen,null,'BSC balance cannot survive a Testnet chain change');s.dispose();
+}
+{
+  const p=walletProvider(),s=createWalletSession({ethereum:p,timeoutMs:5});
+  p.handler=({method})=>method==='eth_requestAccounts'?new Promise(()=>{}):undefined;
+  assert.equal((await s.connect()).error,'WALLET_TIMEOUT');assert.equal(s.snapshot().kgen,null);
+  p.handler=null;assert.equal((await s.connect()).status,'CONNECTED','timeout is recoverable');s.dispose();assert.equal(p.listenerCount(),0);
+}
+console.log('11520 read-only EIP-1193 connect/account/chain/disconnect/race/rejection/timeout PASS');

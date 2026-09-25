@@ -1,5 +1,29 @@
 # 11520 HANDOFF CURRENT
 
+## Wallet/order/settlement integration — 2026-09-25
+
+- TASK_ID: K11520-WALLET-ORDER-INTEGRATION-20260925; direct Human order.
+  Lineage base ef9c74c3a6a18d252077fe213add60b0da486b9c (#439), not a future CURRENT claim.
+- V2.6.22 / shell-v274. Reuses #439 ledger and contracts unchanged.
+  evm-wallet-runtime + wallet-game-bridge own one read-only EIP-1193 session;
+  real-trading-order-intent owns one adapter interface; game-main owns existing UI.
+- Account/chain/disconnect clear unverified balance without page reload.
+  Human UX duplicate RPC/capture/events and focus-driven automatic connect removed.
+  Retained public address is separate and explicitly unverified.
+- Preview is pure; pending has no fill/debit; observed touch/cross fills once.
+  Position/PnL/normal close/isolated liquidation/readable receipt history share
+  the existing simulation ledger. EVM seam is disabled, no flag enables signing.
+- Runtime functional tests and both-size deterministic browser lifecycle passed;
+  screenshot inspection found/fixed expanded wallet header's stale 38px inline
+  sizing. Wallet controls now have real hit-test regression coverage.
+- Exact-head CI and production deployment/source checks remain release gates;
+  use GitHub PR/Actions and live source hashes for completion, not this note.
+- Screenshots: artifacts/11520-settlement-qa, CI artifact 11520-settlement-SHA.
+  Wallet address/balance and quotes in that test are synthetic fixtures, not
+  Human wallet evidence. No external chain transaction was sent.
+- Payroll snapshot/reserve are prototype-only, no payment receipt for this task.
+  Payroll/ATM advances remain HOLD. Human dirty main and paused patrol untouched.
+
 ## Current public market K-space — 2026-09-21
 
 - TASK_ID: KAIOS-11520-LIVE-MARKET-MAP-20260921; Human image execution order; owner 衡曜 / codex-gm-01. Fresh base 924050045f26c1560eba6be80fb2a5eb64f9c0ae is lineage only. Branch codex/k11520-live-market-map-20260921 is an isolated clean worktree; Human dirty main untouched.

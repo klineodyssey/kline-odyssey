@@ -19,7 +19,7 @@ if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
   await page.route('https://raw.githubusercontent.com/**',route=>route.abort());
 }
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+await page.goto((process.env.K11520_BASE_URL||'http://127.0.0.1:4173')+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
 if(process.env.K11520_LOCAL_QA_ASSETS==='1')await page.addStyleTag({content:`@font-face{font-family:K11520LocalCJK;src:url('/node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}html,body,button,input,select{font-family:K11520LocalCJK,sans-serif!important}`});
 await page.waitForTimeout(1900);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});

@@ -1,5 +1,28 @@
 # 11520 Universal Exchange V3.9
 
+## Wallet → order → settlement — V2.6.22 / 2026-09-25
+
+The existing EIP-1193 wallet organ is now a single shared read-only session:
+explicit Connect Wallet, full public address, network/chain, exact decimal KGEN
+balance, bounded errors, account/chain/disconnect synchronization, no page reload.
+Retained public identity is explicitly unverified until a fresh connection.
+No seed/private key, chain switch, signing or broadcast is requested.
+
+The existing `runtime/real-trading-order-intent.mjs` now supplies one common
+intent and execution adapter for the existing `runtime/kgen-margin-runtime.mjs`
+ledger. SIMULATION preview → pending → touch/cross → fill → mark/PnL →
+close/liquidation → receipts shares that ledger, not the read-only chain balance.
+Future EVM adapter is a disabled, fail-closed seam: deployment flags cannot
+activate a transaction, fake success, or fall back to debiting simulation.
+
+Wallet panel, readable orders/positions/receipt history and the preview retain
+portrait/landscape controls. Simulation is session-only, reset on reload;
+wallet identity changes do not reload or reset it. Shell cache v274 is network-first.
+The existing browser settlement test covers both orientations with clearly
+identified synthetic wallet/quote fixtures, including rejection, account/chain
+changes, disconnection, one-shot fill, isolated liquidation and profitable close.
+Those fixtures are not evidence of a Human wallet balance or a chain transaction.
+
 ## Settlement simulation / candidate contracts — V2.6.21 / 2026-09-25
 
 Existing Game ledger now presents PENDING → TOUCH/CROSS → FILLED → position →

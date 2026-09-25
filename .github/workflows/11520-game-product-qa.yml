@@ -151,7 +151,8 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-settlement-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" || true' EXIT
-          timeout 180s node "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs"
+          # Includes wallet lifecycle, liquidation and a second profitable-close cycle in both orientations.
+          timeout 300s node "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs"
       - name: Upload settlement browser evidence
         if: always()
         uses: actions/upload-artifact@v4

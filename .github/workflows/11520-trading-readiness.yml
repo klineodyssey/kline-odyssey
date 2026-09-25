@@ -97,7 +97,7 @@ jobs:
         run: node --test tests/11520-real-trading-market-binding.test.mjs
 
       - name: Run unsigned order-intent invariants
-        run: node --test tests/11520-real-trading-order-intent.test.mjs
+        run: node --test tests/11520-real-trading-order-intent.test.mjs tests/11520-kgen-margin-wallet-foundation.test.mjs
 
       - name: Run player-visible preflight invariants
         run: node --test tests/11520-real-trading-preflight-ui.test.mjs

@@ -1,5 +1,23 @@
 # KGEN Organization V2.0 WorkQueue
 
+## K11520 wallet order integration — 2026-09-25
+
+- Task: K11520-WALLET-ORDER-INTEGRATION-20260925
+- Status: LOCAL_QA_PASS / EXACT_HEAD_CI_PENDING
+- Owner: codex-gm-01; direct Human 沈英明 integration order.
+- Branch: codex/k11520-wallet-order-integration-20260925
+- Fresh base: ef9c74c3a6a18d252077fe213add60b0da486b9c (#439).
+- Scope: existing read-only wallet + common execution adapter + existing simulation
+  ledger UI and receipts. No parallel wallet/position/settlement engine.
+- Bounded session agents: wallet_connection (wallet session), execution_adapter
+  (common intent/adapter). These are subtask labels, not new registered employees.
+- Source classification: original repository extension; no imported music,
+  proprietary engine or external source code. Added-line secret scan before push.
+- Gate: fresh tests, real Chromium 390×844 / 844×390, direct screenshot inspection,
+  exact-head CI then ordinary PR merge and Pages.
+- Protected actions: all chain writes, funds, signer and production oracle HOLD.
+- Payroll: no new payment receipt; PENDING/HOLD, never PAID/RECEIVED.
+
 ## K11520 settlement final engineering — 2026-09-25
 
 - Owner: `codex-gm-01`; Human explicit execution order; isolated branch
