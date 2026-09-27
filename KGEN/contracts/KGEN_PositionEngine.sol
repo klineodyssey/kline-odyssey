@@ -165,7 +165,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         if(t.orderId==0 || sequence<=t.observationSequence) revert OutOfOrderPrice();
         (int256 raw,uint256 notional)=_metrics(id,mark);
         if(KGEN_MarketRiskKernel_V1_0_0.liquidatable(p.collateralWad,raw,notional,_config(p.market).maintenanceMarginBps)) {
-            _settleOrderPosition(id,true); return true;
+            _settleOrderPositionAtObservation(id,true,mark,observedAt,sequence); return true;
         }
         t.lastPrice=mark; t.observedAt=observedAt; t.observationSequence=sequence;
     }
@@ -207,11 +207,20 @@ contract KGEN_PositionEngine_V1_0_0 {
 
     function _settleOrderPosition(uint256 id,bool liquidation) internal returns (int256 realized,uint256 debt) {
         Position storage p=positions[id]; if(p.status!=Status.OPEN) revert PositionNotOpen();
+        (uint256 mark,uint256 observedAt,uint256 sequence)=_acceptMarketObservation(p.market);
+        return _settleOrderPositionAtObservation(id,liquidation,mark,observedAt,sequence);
+    }
+
+    // Decision, accounting and receipt share exactly one accepted observation.
+    // Never re-read feeds after observePosition has detected the boundary: a
+    // feed may return different data after our observation watermark changes.
+    function _settleOrderPositionAtObservation(uint256 id,bool liquidation,uint256 mark,uint256 observedAt,uint256 sequence) internal returns (int256 realized,uint256 debt) {
+        Position storage p=positions[id]; if(p.status!=Status.OPEN) revert PositionNotOpen();
         OrderTerms storage t=orderTerms[id];
         SettlementReceipt storage r=_receipts[id];
         r.positionId=id; r.orderId=t.orderId; r.market=p.market; r.cWad=t.cWad; r.lots=t.lots;
         r.entryPrice=p.entryPriceWad; r.liquidationTrigger=liquidationBoundary(id); r.previousPrice=t.lastPrice;
-        (r.observedPrice,r.observedAt,r.observationSequence)=_acceptMarketObservation(p.market);
+        r.observedPrice=mark; r.observedAt=observedAt; r.observationSequence=sequence;
         if(r.observationSequence<t.observationSequence || (r.observationSequence==t.observationSequence && r.observedPrice!=t.lastPrice)) revert OutOfOrderPrice();
         r.trader=p.trader; r.side=t.cWad>0?int8(1):int8(-1); r.settlementPrice=r.observedPrice; r.triggeredAt=block.timestamp;
         r.settledAt=block.timestamp; r.marginBefore=p.collateralWad; r.marginAfter=0;

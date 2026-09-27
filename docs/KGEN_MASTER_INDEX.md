@@ -1,5 +1,12 @@
 # KGEN MASTER_INDEX
 
+## K11520 BSC97 rehearsal registration — 2026-09-26
+
+- `KGEN/scripts/rehearse_bsc_testnet.mjs`: existing actual organs, pinned compiler,
+  local mechanics and explicitly selected public chain97 test-only deployment.
+- `docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json`: chain/address/role/hash and
+  actual receipt evidence. Test mock feeds do not establish production readiness.
+
 ## K11520 settlement candidate registration — 2026-09-25
 
 | Full repository path | Purpose |

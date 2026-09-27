@@ -61,7 +61,8 @@ function executionFailure(error){
 // EVM_ADAPTER is deliberately a disabled seam until a separately reviewed,
 // authorized deployment/receipt adapter exists. Flags or injected callbacks in
 // page storage must never turn this release into a signer/broadcast path.
-export function createExecutionAdapter({ledger,deployment=null,wallet=null}={}){
+export function createExecutionAdapter({ledger,deployment=null,wallet=null,ethereum=null,ethers=null,...options}={}){
+  if(deployment?.mode==='BSC_TESTNET')return createTestnetExecutionAdapter({deployment,ethereum:ethereum??wallet?.provider,ethers,...options});
   void wallet; // Connecting a read-only wallet does not switch execution mode.
   const requestedMode=deployment?.mode??'SIMULATION';
   if(requestedMode!=='SIMULATION'){
@@ -119,5 +120,304 @@ export function buildRealTradingOrderIntent({
     positionEngineAddress:normalizeAddress(positionEngineAddress,'POSITION_ENGINE_ADDRESS'),
     transactionPayload:null,calldata:null,signerRequested:false,broadcast:false,
     status:'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED'
+  });
+}
+
+// ABI fragments are the existing reviewed organs, not a second settlement engine.
+export const TESTNET_EXECUTION_ABI=Object.freeze({
+  testToken:['function balanceOf(address) view returns(uint256)','function decimals() view returns(uint8)',
+    'function allowance(address,address) view returns(uint256)','function approve(address,uint256) returns(bool)','function faucet()',
+    'event Approval(address indexed owner,address indexed spender,uint256 value)',
+    'event Transfer(address indexed from,address indexed to,uint256 value)'],
+  brainProxy:['function kgen() view returns(address)','function principalOf(address) view returns(uint256)',
+    'function lockedPrincipalOf(address) view returns(uint256)','function availablePrincipal(address) view returns(uint256)',
+    'function SETTLEMENT_ROLE() view returns(bytes32)','function hasRole(bytes32,address) view returns(bool)',
+    'function depositMargin(uint256) returns(uint256)',
+    'event MarginDeposited(address indexed user,uint256 requestedWei,uint256 receivedWei)'],
+  orderTriggerEngine:['function brain() view returns(address)','function engine() view returns(address)','function nextOrderId() view returns(uint256)',
+    'function createOrder(uint8,int256,uint256,uint256) returns(uint256)','function cancelOrder(uint256)',
+    'function closePosition(uint256)',
+    'function order(uint256) view returns(tuple(uint256 orderId,address trader,uint8 market,int256 c,uint256 lots,uint256 triggerPrice,uint256 createdAt,uint256 triggeredAt,uint256 observedPrice,uint256 fillPrice,uint256 positionId,uint8 status,uint256 previousPrice,uint256 observedAt,uint256 observationSequence))',
+    'function fillReceipt(uint256) view returns(tuple(uint256 orderId,uint256 positionId,address trader,uint8 market,int256 c,uint256 lots,uint256 createdAt,uint256 triggeredAt,uint256 previousPrice,uint256 triggerPrice,uint256 observedPrice,uint256 fillPrice,uint256 walletBefore,uint256 marginLocked,uint256 walletAfter,int8 side,uint256 observationSequence))',
+    'event OrderCreated(uint256 indexed orderId,address indexed trader)',
+    'event OrderFilled(uint256 indexed orderId,uint256 indexed positionId,uint256 price)',
+    'event OrderTerminated(uint256 indexed orderId,uint8 status)'],
+  positionEngine:['function brainSettlement() view returns(address)','function executor() view returns(address)',
+    'function readMarketPrice(uint8) view returns(uint256 priceWad,uint256 observedAt,uint8 validSources)',
+    'function marketConfig(uint8) view returns(uint16 initialMarginBps,uint16 maintenanceMarginBps,uint32 maxOracleAge,uint256 minPriceWad,uint256 maxPriceWad,bool enabled)',
+    'function positionSnapshot(uint256) view returns(tuple(address trader,uint8 market,int256 sizeWad,uint256 collateralWad,uint256 entryPriceWad,uint64 openedAt,uint64 closedAt,uint256 exitPriceWad,int256 rawPnlWad,int256 realizedPnlWad,uint256 badDebtWad,uint8 status))',
+    'function orderTerms(uint256) view returns(uint256 orderId,int256 cWad,uint256 lots,uint256 lastPrice,uint256 observedAt,uint256 observationSequence)',
+    'function liquidationBoundary(uint256) view returns(uint256)',
+    'function markPosition(uint256) view returns(int256 unrealizedPnlWad,int256 equityWad,uint256 maintenanceMarginWad,bool liquidatable)',
+    'function settlementReceipt(uint256) view returns(tuple(uint256 positionId,uint256 orderId,uint8 market,int256 cWad,uint256 lots,uint256 entryPrice,uint256 liquidationTrigger,uint256 previousPrice,uint256 observedPrice,uint256 observedAt,uint256 settledAt,uint256 marginBefore,uint256 marginAfter,int256 rawPnl,int256 realizedPnl,uint256 badDebt,uint8 status,address trader,int8 side,uint256 settlementPrice,uint256 triggeredAt,uint256 observationSequence))',
+    'event PositionOpened(uint256 indexed positionId,address indexed trader,uint8 indexed market,int256 sizeWad,uint256 collateralWad,uint256 entryPriceWad,bytes32 positionKey)',
+    'event PositionClosed(uint256 indexed positionId,uint256 exitPriceWad,int256 rawPnlWad,int256 realizedPnlWad,uint256 badDebtWad)',
+    'event PositionLiquidated(uint256 indexed positionId,uint256 markPriceWad,int256 rawPnlWad,int256 realizedPnlWad,uint256 badDebtWad)']
+});
+
+// A timed-out wallet prompt cannot be cancelled by JavaScript. Keep its write
+// lease across adapter recreation until rejection or mined-receipt reconciliation.
+const TESTNET_PENDING_WALLET_REQUESTS=new WeakMap();
+
+/** Public TESTNET only. Caller supplies a repository-reviewed deployment manifest
+ * and the vendored ethers v6 codec. No key, arbitrary calldata, keeper/oracle write,
+ * mainnet switch, or simulation-ledger mutation is exposed here. Every mutation
+ * requires a separate user action invoking one of the named methods below. */
+export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receiptTimeoutMs=90000,
+  pollMs=1500,rpcTimeoutMs=15000,walletRequestTimeoutMs=120000,onState=()=>{}}={}){
+  const blank=()=>({mode:'BSC_TESTNET',label:'TESTNET · NO REAL VALUE',status:'NOT_DEPLOYED_OR_AUTHORIZED',
+    chainId:97,account:null,wallet:null,orders:[],positions:[],receipts:[],observations:{},transaction:null});
+  let state=blank(),busy=false,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null;
+  const copy=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
+  const snapshot=()=>copy({...state,writeBlocked:!!ethereum&&TESTNET_PENDING_WALLET_REQUESTS.has(ethereum)});
+  const publish=patch=>{state={...state,...patch};try{onState(snapshot())}catch{}return snapshot()};
+  const keys=Object.keys(TESTNET_EXECUTION_ABI),validAddress=v=>/^0x[0-9a-fA-F]{40}$/.test(v||'')&&!/^0x0{40}$/i.test(v);
+  const a=Object.freeze({...deployment?.addresses}),hashes=Object.freeze({...deployment?.codeHashes});
+  const configValid=deployment?.mode==='BSC_TESTNET'&&deployment?.status==='DEPLOYED_CONFIG_VERIFIED'&&deployment?.publicNetwork===true&&deployment?.chainId===97&&deployment?.testOnly===true&&
+    deployment?.verified===true&&Number.isSafeInteger(deployment?.deploymentBlock)&&deployment.deploymentBlock>=0&&
+    [...keys,'brainImplementation'].every(k=>validAddress(a[k])&&/^0x[0-9a-fA-F]{64}$/.test(hashes[k]||''))&&
+    new Set([...keys,'brainImplementation'].map(k=>a[k]?.toLowerCase())).size===keys.length+1&&typeof ethereum?.request==='function'&&typeof ethers?.Interface==='function';
+  if(!configValid){
+    const blocked=async()=>executionFailure(new Error('EVM_ADAPTER_NOT_DEPLOYED_OR_AUTHORIZED'));
+    return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:false,snapshot,preview:blocked,submit:blocked,
+      close:blocked,cancel:blocked,approve:blocked,deposit:blocked,faucet:blocked,refresh:blocked,recover:blocked,switchChain:blocked,observe:blocked,dispose(){}});
+  }
+  const fromBlock=deployment.deploymentBlock,abi=Object.fromEntries(keys.map(k=>[k,new ethers.Interface(TESTNET_EXECUTION_ABI[k])]));
+  const req=async(method,params=[])=>{
+    let timer;
+    const timeout=method==='eth_sendTransaction'||method.startsWith('wallet_')?walletRequestTimeoutMs:rpcTimeoutMs;
+    let request;
+    if(method==='eth_sendTransaction'){
+      if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))throw new Error('WALLET_REQUEST_UNRESOLVED');
+      const lease={from:params[0].from,to:params[0].to,hash:null};TESTNET_PENDING_WALLET_REQUESTS.set(ethereum,lease);
+      request=Promise.resolve().then(()=>ethereum.request({method,params})).then(hash=>{lease.hash=hash;return hash},error=>{
+        // Only explicit user rejection proves no broadcast. Other errors stay
+        // fail-closed: an uncertain provider response is not permission to retry.
+        if(Number(error?.code)===4001||error?.code==='ACTION_REJECTED')TESTNET_PENDING_WALLET_REQUESTS.delete(ethereum);
+        throw error;
+      });
+    }else request=ethereum.request({method,params});
+    try{return await Promise.race([request,new Promise((_,reject)=>{
+      timer=setTimeout(()=>reject(new Error('RECEIPT_TIMEOUT')),timeout);
+    })])}finally{clearTimeout(timer)}
+  };
+  const hex=n=>`0x${BigInt(n).toString(16)}`,lower=v=>String(v).toLowerCase();
+  const wad=v=>BigInt(ethers.parseUnits(String(v),18).toString()),num=v=>Number(ethers.formatUnits(v,18));
+  // The repository ships ethers 5; this also accepts ethers 6 test tooling.
+  const decoded=value=>{
+    if(value?._isBigNumber)return BigInt(value.toString());
+    if(Array.isArray(value)){const out=value.map(decoded);let named=value;try{if(value.toObject)named=value.toObject()}catch{}
+      for(const key of Object.keys(named))if(!/^\d+$/.test(key))out[key]=decoded(named[key]);return out}
+    return value;
+  };
+  const fail=reason=>{throw new Error(reason)};
+  const call=async(k,method,args=[],block='latest')=>decoded(abi[k].decodeFunctionResult(method,
+    await req('eth_call',[{to:a[k],data:abi[k].encodeFunctionData(method,args)},block])));
+  const identity=async()=>{
+    if(BigInt(await req('eth_chainId'))!==97n)fail('WRONG_CHAIN');
+    const accounts=await req('eth_accounts');if(!validAddress(accounts?.[0]))fail('DISCONNECTED');return accounts[0];
+  };
+  const sameSession=async(account,ticket)=>{if(ticket!==generation||lower(await identity())!==lower(account))fail('DISCONNECTED')};
+  const verify=async()=>{
+    const account=await identity();
+    for(const k of [...keys,'brainImplementation']){const code=await req('eth_getCode',[a[k],'latest']);if(code==='0x'||lower(ethers.keccak256(code))!==lower(hashes[k]))fail('DEPLOYMENT_CODE_MISMATCH')}
+    const implementation=await req('eth_getStorageAt',[a.brainProxy,'0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc','latest']);
+    if(lower(`0x${implementation.slice(-40)}`)!==lower(a.brainImplementation))fail('PROXY_IMPLEMENTATION_MISMATCH');
+    const links=await Promise.all([call('brainProxy','kgen'),call('positionEngine','brainSettlement'),call('positionEngine','executor'),
+      call('orderTriggerEngine','engine'),call('orderTriggerEngine','brain'),call('testToken','decimals'),call('brainProxy','SETTLEMENT_ROLE')]);
+    if([a.testToken,a.brainProxy,a.orderTriggerEngine,a.positionEngine,a.brainProxy].some((v,i)=>lower(v)!==lower(links[i][0]))||Number(links[5][0])!==18)fail('DEPLOYMENT_LINK_MISMATCH');
+    if(!(await call('brainProxy','hasRole',[links[6][0],a.positionEngine]))[0])fail('SETTLEMENT_ROLE_MISSING');
+    return account;
+  };
+  const marketNames=['BTCUSDT','ETHUSDT','BNBUSDT'],axes=['KX','KY','KZ'];
+  const logsFor=async(k,event,topics,to,cache=null)=>{
+    const result=[],base=abi[k].encodeFilterTopics(event,topics);
+    if(to-fromBlock>2000000)fail('RECOVERY_HISTORY_REQUIRES_INDEXER');
+    const topicMatch=log=>base.every((expected,i)=>{
+      if(expected==null)return true;
+      const actual=lower(log.topics?.[i]||'');
+      return Array.isArray(expected)?expected.some(v=>lower(v)===actual):lower(expected)===actual;
+    });
+    const load=async()=>{
+      const rows=[];
+      const fetchRange=async(start,end)=>{
+        try{return await req('eth_getLogs',[{address:a[k],fromBlock:hex(start),toBlock:hex(end),topics:base}])}
+        catch(error){
+          if(end-start<=2047)throw error;
+          const mid=Math.floor((start+end)/2);
+          return [...await fetchRange(start,mid),...await fetchRange(mid+1,end)];
+        }
+      };
+      for(let start=fromBlock;start<=to;start+=16384){
+        rows.push(...await fetchRange(start,Math.min(to,start+16383)));
+      }
+      return rows;
+    };
+    let logs;
+    if(cache){
+      const key=k+'@'+to+'@'+JSON.stringify(base);
+      if(!cache.has(key))cache.set(key,load());
+      logs=await cache.get(key);
+    }else logs=await load();
+    for(const log of logs){
+      if(log.removed||lower(log.address)!==lower(a[k])||!topicMatch(log))continue;
+      try{const parsed=abi[k].parseLog(log);if(parsed?.name===event)result.push({...log,parsed:{name:parsed.name,args:decoded(parsed.args)}})}catch{}
+    }
+    return result;
+  };
+  const txEvidence=async(log,method)=>{
+    const r=await req('eth_getTransactionReceipt',[log.transactionHash]);
+    if(!r||BigInt(r.status)!==1n||lower(r.blockHash)!==lower(log.blockHash))fail('RECEIPT_NOT_CANONICAL');
+    const block=await req('eth_getBlockByNumber',[r.blockNumber,false]);
+    return {txHash:r.transactionHash,block:Number(BigInt(r.blockNumber)),timestamp:Number(BigInt(block.timestamp))*1000,
+      contract:log.address,method,status:'RECEIPT_CONFIRMED',transactionStatus:'RECEIPT_CONFIRMED',executionMode:'BSC_TESTNET'};
+  };
+  const refreshRead=async()=>{
+    const revision=++refreshRevision;
+    try{
+    const ticket=generation,account=await verify(),height=Number(BigInt(await req('eth_blockNumber'))),tag=hex(height),recoveryLogCache=new Map();
+    const lf=(...args)=>logsFor(...args,recoveryLogCache);
+    const [balance,principal,locked,available,created,deposits,approvals,mints]=await Promise.all([
+      call('testToken','balanceOf',[account],tag),call('brainProxy','principalOf',[account],tag),
+      call('brainProxy','lockedPrincipalOf',[account],tag),call('brainProxy','availablePrincipal',[account],tag),
+      lf('orderTriggerEngine','OrderCreated',[null,account],height),lf('brainProxy','MarginDeposited',[account],height),
+      lf('testToken','Approval',[account,a.brainProxy],height),lf('testToken','Transfer',['0x'+'0'.repeat(40),account],height)]);
+    // Some public BSC97 RPC nodes return empty eth_getLogs for old ranges while
+    // eth_call and transaction receipts remain available. Recover canonical
+    // orders from enumerable contract state instead of treating empty logs as no history.
+    if(created.length===0){
+      const [nextOrderId]=await call('orderTriggerEngine','nextOrderId',[],tag);
+      const upper=BigInt(nextOrderId);if(upper>10001n)fail('RECOVERY_HISTORY_REQUIRES_INDEXER');
+      for(let id=1n;id<upper;id++){
+        const [o]=await call('orderTriggerEngine','order',[id],tag);
+        if(lower(o.trader)!==lower(account))continue;
+        created.push({transactionHash:null,blockHash:null,address:a.orderTriggerEngine,parsed:{name:'OrderCreated',args:{orderId:id,trader:o.trader}},stateRecovered:true});
+      }
+    }
+    const orders=[],positions=[],receipts=[],observations={};let unrealized=0,realized=0,markUnavailable=false;
+    for(let m=0;m<3;m++){
+      try{const q=await call('positionEngine','readMarketPrice',[m],tag);observations[marketNames[m]]={price:num(q[0]),at:Number(q[1])*1000,validSources:Number(q[2]),source:'ON_CHAIN_ORACLE'}}
+      catch{observations[marketNames[m]]={error:'ORACLE_STALE',source:'ON_CHAIN_ORACLE'}}
+    }
+    for(const log of [...approvals,...deposits,...mints])receipts.push({...await txEvidence(log,log.parsed.name),id:log.transactionHash,receiptId:log.transactionHash,kind:log.parsed.name==='Transfer'?'TEST_TOKEN_MINT':log.parsed.name});
+    for(const log of created){
+      const id=log.parsed.args.orderId,[o]=await call('orderTriggerEngine','order',[id],tag);
+      if(lower(o.trader)!==lower(account))fail('ORDER_TRADER_MISMATCH');
+      const order={id:String(id),orderId:String(id),axis:axes[Number(o.market)],market:marketNames[Number(o.market)],c:num(o.c),lots:Number(o.lots),
+        side:o.c>0n?'LONG':'SHORT',status:['NONE','PENDING','FILLED','CANCELLED','REJECTED'][Number(o.status)],
+        triggerPrice:num(o.triggerPrice),createdAt:Number(o.createdAt)*1000,triggeredAt:Number(o.triggeredAt)*1000,
+        observedPrice:num(o.observedPrice),fillPrice:num(o.fillPrice),positionId:String(o.positionId)};
+      orders.push(order);receipts.push({...log.stateRecovered?{status:'STATE_RECOVERED',transactionStatus:'RPC_LOG_INDEX_UNAVAILABLE',executionMode:'BSC_TESTNET'}:await txEvidence(log,'createOrder'),...order,id:`ORDER-${id}`,receiptId:`ORDER-${id}`,kind:'ORDER_CREATED'});
+      if(o.positionId===0n)continue;
+      const pid=o.positionId,[p]=await call('positionEngine','positionSnapshot',[pid],tag),terms=await call('positionEngine','orderTerms',[pid],tag);
+      if(lower(p.trader)!==lower(account))fail('POSITION_TRADER_MISMATCH');
+      const isOpen=Number(p.status)===1;let metrics=[0n],boundary=0n,markError=null;
+      if(isOpen){
+        try{metrics=await call('positionEngine','markPosition',[pid],tag)}catch{metrics=null;markError='ORACLE_STALE';markUnavailable=true}
+        // Boundary is a pure configured reporting calculation, not a fresh quote.
+        boundary=(await call('positionEngine','liquidationBoundary',[pid],tag))[0];
+      }
+      const position={id:String(pid),positionId:String(pid),orderId:String(id),axis:order.axis,market:order.market,side:order.side,c:num(terms.cWad),lots:Number(terms.lots),
+        status:['NONE','OPEN','CLOSED','LIQUIDATED'][Number(p.status)],entry:num(p.entryPriceWad),mark:observations[order.market]?.price??null,
+        margin:num(p.collateralWad),liquidationPrice:num(boundary),unrealizedPnl:metrics?num(metrics[0]):null,markError,realizedPnl:num(p.realizedPnlWad),
+        rawPnl:num(p.rawPnlWad),badDebt:num(p.badDebtWad),openedAt:Number(p.openedAt)*1000,closedAt:Number(p.closedAt)*1000};
+      positions.push(position);if(position.unrealizedPnl!==null)unrealized+=position.unrealizedPnl;realized+=position.realizedPnl;
+      const [fill]=await call('orderTriggerEngine','fillReceipt',[id],tag),fillLogs=await lf('orderTriggerEngine','OrderFilled',[id],height);
+      if(fillLogs.length>1)fail('FILL_RECEIPT_INCONSISTENT');
+      const fillEvidence=fillLogs.length===1?await txEvidence(fillLogs[0],'observeOrder'):{status:'STATE_RECOVERED',transactionStatus:'RPC_LOG_INDEX_UNAVAILABLE',executionMode:'BSC_TESTNET'};
+      receipts.push({...fillEvidence,...order,id:`FILL-${id}`,receiptId:`FILL-${id}`,kind:'FILL',
+        walletBefore:num(fill.walletBefore),marginLocked:num(fill.marginLocked),walletAfter:num(fill.walletAfter),previousPrice:num(fill.previousPrice)});
+      if(!isOpen){const [s]=await call('positionEngine','settlementReceipt',[pid],tag),event=position.status==='LIQUIDATED'?'PositionLiquidated':'PositionClosed',settled=await lf('positionEngine',event,[pid],height);
+        if(settled.length>1)fail('SETTLEMENT_RECEIPT_INCONSISTENT');
+        const settlementEvidence=settled.length===1?await txEvidence(settled[0],event):{status:'STATE_RECOVERED',transactionStatus:'RPC_LOG_INDEX_UNAVAILABLE',executionMode:'BSC_TESTNET'};
+        receipts.push({...settlementEvidence,...position,id:`SETTLEMENT-${pid}`,receiptId:`SETTLEMENT-${pid}`,kind:'SETTLEMENT',
+          entryPrice:num(s.entryPrice),liquidationTrigger:num(s.liquidationTrigger),
+          previousPrice:num(s.previousPrice),observedPrice:num(s.observedPrice),settlementPrice:num(s.settlementPrice),
+          marginBefore:num(s.marginBefore),marginAfter:num(s.marginAfter),liquidationPrice:num(s.liquidationTrigger),
+          triggeredAt:Number(s.triggeredAt)*1000,settledAt:Number(s.settledAt)*1000});}
+    }
+    await sameSession(account,ticket);
+    if(revision<appliedRefreshRevision||height<(state.block??0))return {ok:true,superseded:true,executionMode:'BSC_TESTNET',...snapshot()};
+    const lease=TESTNET_PENDING_WALLET_REQUESTS.get(ethereum);
+    if(lease?.hash&&/^0x[0-9a-fA-F]{64}$/.test(lease.hash)){
+      const r=await req('eth_getTransactionReceipt',[lease.hash]);
+      if(r&&['0x0','0x1'].includes(r.status)&&Number(BigInt(r.blockNumber))<=height&&
+        lower(r.from)===lower(lease.from)&&lower(r.to)===lower(lease.to)&&lower(r.transactionHash)===lower(lease.hash)){
+        if(TESTNET_PENDING_WALLET_REQUESTS.get(ethereum)===lease)TESTNET_PENDING_WALLET_REQUESTS.delete(ethereum);
+      }
+    }
+    if(revision<appliedRefreshRevision)return {ok:true,superseded:true,executionMode:'BSC_TESTNET',...snapshot()};
+    appliedRefreshRevision=revision;
+    publish({account,chainId:97,error:null,status:markUnavailable||Object.values(observations).some(q=>q.error)?'ORACLE_STALE':'READY',wallet:{testTokenBalance:num(balance[0]),testTokenBalanceWei:String(balance[0]),
+      principal:num(principal[0]),principalWei:String(principal[0]),free:num(available[0]),availableWei:String(available[0]),locked:num(locked[0]),lockedMargin:num(locked[0]),
+      lockedWei:String(locked[0]),equity:markUnavailable?null:num(principal[0])+unrealized,unrealizedPnl:markUnavailable?null:unrealized,
+      markError:markUnavailable?'ORACLE_STALE':null,realizedPnl:realized},orders,positions,receipts,observations,block:height});
+    return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
+    }catch(error){if(revision<appliedRefreshRevision)return {ok:true,superseded:true,...snapshot()};throw error}
+  };
+  const refreshInternal=async(force=false)=>{
+    if(refreshFlight){if(!force)return refreshFlight;await refreshFlight.catch(()=>{});}
+    if(refreshFlight)return refreshInternal(force);
+    const flight=refreshRead();refreshFlight=flight;
+    try{return await flight}finally{if(refreshFlight===flight)refreshFlight=null}
+  };
+  const run=async fn=>{try{return await fn()}catch(error){const failure=executionFailure(error),lost=['WRONG_CHAIN','DISCONNECTED'].includes(failure.code);
+    publish({...lost?blank():{},status:failure.code,error:failure.reason,
+      transaction:state.transaction?{...state.transaction,status:failure.code}:null});return failure}};
+  const previewInternal=async(input)=>{
+    await refreshInternal();const intent=buildExecutionOrderIntent(input),quote=state.observations[intent.market];
+    if(!quote?.price)fail('ORACLE_STALE');
+    if(intent.stopPrice!==null||intent.takeProfitPrice!==null)fail('ONCHAIN_STOP_TP_NOT_SUPPORTED');
+    if(BigInt(state.wallet.availableWei)<wad(intent.lots))fail('INSUFFICIENT_MARGIN');
+    const cfg=await call('positionEngine','marketConfig',[intent.contractMarket]);
+    if(!cfg.enabled)fail('MARKET_DISABLED');
+    const c=wad(Math.abs(intent.c)),margin=wad(intent.lots);
+    if((c*BigInt(intent.lots)*BigInt(cfg.initialMarginBps)+9999n)/10000n>margin)fail('INSUFFICIENT_MARGIN');
+    const mm=Number(cfg.maintenanceMarginBps)/10000,leverage=Math.abs(intent.c);
+    const estimate=intent.c>0?(leverage<=1?0:intent.triggerPrice*(leverage-1)/(leverage*(1-mm))):intent.triggerPrice*(leverage+1)/(leverage*(1+mm));
+    return {ok:true,...intent,intent,currentPrice:quote.price,requiredMargin:intent.lots,available:state.wallet.free,
+      estimatedLiquidationPrice:estimate,liquidationModel:'ON_CHAIN_INITIAL_AND_MAINTENANCE_MARGIN_ESTIMATE',executionMode:'BSC_TESTNET'};
+  };
+  const send=async(k,method,args,expectedEvent)=>{
+    const account=await verify(),ticket=generation,data=abi[k].encodeFunctionData(method,args);
+    await req('eth_call',[{from:account,to:a[k],data},'latest']); // preflight; does not mutate
+    const estimate=BigInt(await req('eth_estimateGas',[{from:account,to:a[k],data,value:'0x0'}]));
+    if(estimate<=0n||estimate>3000000n)fail('TRANSACTION_GAS_LIMIT');
+    await sameSession(account,ticket);publish({transaction:{status:'WALLET_REQUEST',method}});
+    const hash=await req('eth_sendTransaction',[{from:account,to:a[k],data,value:'0x0',chainId:'0x61',gas:hex((estimate*12n+9n)/10n)}]);
+    if(!/^0x[0-9a-fA-F]{64}$/.test(hash||''))fail('TX_HASH_INVALID');
+    publish({transaction:{status:'TX_SUBMITTED',method,txHash:hash}});
+    const started=Date.now();let receipt;
+    while(Date.now()-started<receiptTimeoutMs){await sameSession(account,ticket);receipt=await req('eth_getTransactionReceipt',[hash]);if(receipt)break;await new Promise(resolve=>setTimeout(resolve,pollMs))}
+    if(!receipt)fail('RECEIPT_TIMEOUT');
+    if(lower(receipt.to)!==lower(a[k])||lower(receipt.from)!==lower(account)||lower(receipt.transactionHash)!==lower(hash))fail('RECEIPT_IDENTITY_MISMATCH');
+    if(BigInt(receipt.status)!==1n){TESTNET_PENDING_WALLET_REQUESTS.delete(ethereum);fail('TX_REVERTED')}
+    const eventKey=method==='closePosition'?'positionEngine':k;
+    const event=(receipt.logs||[]).filter(l=>lower(l.address)===lower(a[eventKey])).map(l=>{try{return abi[eventKey].parseLog(l)}catch{return null}})
+      .find(l=>method==='closePosition'?['PositionClosed','PositionLiquidated'].includes(l?.name)&&String(l.args.positionId)===String(args[0]):l?.name===expectedEvent);
+    if(expectedEvent&&!event)fail('RECEIPT_EVENT_MISSING');
+    await sameSession(account,ticket);
+    await refreshInternal(true);publish({transaction:{status:'RECEIPT_CONFIRMED',method,txHash:hash,block:Number(BigInt(receipt.blockNumber))}});
+    return {ok:true,status:method==='createOrder'?'ON_CHAIN_ORDER_CREATED':'RECEIPT_CONFIRMED',txHash:hash,
+      orderId:event?.args?.orderId==null?null:String(event.args.orderId),executionMode:'BSC_TESTNET'};
+  };
+  const mutate=fn=>run(async()=>{if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{return await fn()}finally{busy=false}});
+  const invalidate=()=>{generation++;appliedRefreshRevision=++refreshRevision;publish({...blank(),status:'RECONNECT_REQUIRED'})};
+  for(const event of ['accountsChanged','chainChanged','disconnect'])ethereum.on?.(event,invalidate);
+  return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:true,snapshot,
+    preview:input=>run(()=>previewInternal(input)),refresh:()=>run(refreshInternal),recover:()=>run(refreshInternal),
+    submit:input=>mutate(async()=>{const checked=await previewInternal(input);return send('orderTriggerEngine','createOrder',
+      [checked.contractMarket,wad(checked.c),BigInt(checked.lots),wad(checked.triggerPrice)],'OrderCreated')}),
+    approve:amount=>mutate(async()=>{const value=wad(finitePositive(amount,'AMOUNT'));return send('testToken','approve',[a.brainProxy,value],'Approval')}),
+    faucet:()=>mutate(()=>send('testToken','faucet',[],'Transfer')),
+    deposit:amount=>mutate(async()=>{const value=wad(finitePositive(amount,'AMOUNT')),account=await verify();
+      if((await call('testToken','balanceOf',[account]))[0]<value)fail('INSUFFICIENT_BALANCE');
+      if((await call('testToken','allowance',[account,a.brainProxy]))[0]<value)fail('APPROVAL_REQUIRED');
+      return send('brainProxy','depositMargin',[value],'MarginDeposited')}),
+    close:id=>mutate(()=>send('orderTriggerEngine','closePosition',[BigInt(id)],'PositionClosed')),
+    cancel:id=>mutate(()=>send('orderTriggerEngine','cancelOrder',[BigInt(id)],'OrderTerminated')),
+    observe:async()=>executionFailure(new Error('KEEPER_OBSERVATION_REQUIRED')),
+    switchChain:()=>run(async()=>{await req('wallet_switchEthereumChain',[{chainId:'0x61'}]);if(BigInt(await req('eth_chainId'))!==97n)fail('WRONG_CHAIN');return {ok:true,chainId:97}}),
+    dispose(){generation++;for(const event of ['accountsChanged','chainChanged','disconnect'])ethereum.removeListener?.(event,invalidate)}
   });
 }

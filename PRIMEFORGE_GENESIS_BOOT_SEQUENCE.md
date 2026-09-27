@@ -38,6 +38,12 @@ BOOT_POLICY: Fixed filename; update content cumulatively; never rename the forma
 
 ### K11520 settlement engineering registration (2026-09-25)
 
+2026-09-26 cumulative Testnet-only registration (Human deployment order):
+`KGEN/scripts/rehearse_bsc_testnet.mjs` compiles/rehearses the existing organs and
+broadcasts only with explicit `--deploy97`, configured Testnet signer, chain97,
+test assets and gas caps. `docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json`
+records actual public deployment/config/receipt evidence; not Mainnet authority.
+
 Human-requested unique files below do not activate any live-chain authority.
 
 | Repository path | Purpose |

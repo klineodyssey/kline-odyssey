@@ -7,6 +7,8 @@ on:
       - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
       - "KGEN/contracts/KGEN_PositionEngine.sol"
       - "KGEN/contracts/KGEN_OrderTriggerEngine.sol"
+      - "KGEN/scripts/rehearse_bsc_testnet.mjs"
+      - "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
@@ -27,6 +29,8 @@ on:
       - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
       - "KGEN/contracts/KGEN_PositionEngine.sol"
       - "KGEN/contracts/KGEN_OrderTriggerEngine.sol"
+      - "KGEN/scripts/rehearse_bsc_testnet.mjs"
+      - "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
       - "KGEN/contracts/tests/brain-v4-evm.test.mjs"
       - "KGEN/contracts/tests/market-risk-kernel-evm.test.mjs"
@@ -119,6 +123,9 @@ jobs:
 
       - name: Run actual Brain proxy + Position + Trigger integration and 100C stress
         run: node KGEN/contracts/tests/brain-position-integration-evm.test.mjs
+
+      - name: Validate testnet deployment package locally (never public broadcast)
+        run: node KGEN/scripts/rehearse_bsc_testnet.mjs --local
 
       - name: Reject tracked drift and parallel contract aliases
         shell: bash

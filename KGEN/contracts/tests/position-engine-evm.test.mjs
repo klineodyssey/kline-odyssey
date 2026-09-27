@@ -82,6 +82,31 @@ contract MockPriceFeed {
         return (roundId, answer, updatedAt, updatedAt, answeredInRound);
     }
 }
+
+interface IObservationSequence {
+    function marketObservationSequence(uint8 market) external view returns (uint256);
+}
+
+// Adversarial view-only oracle: after the engine accepts the adverse round,
+// a second read in that same transaction returns a valid newer rebound round.
+contract AcceptanceSensitiveFeed {
+    uint8 public constant decimals = 18;
+    IObservationSequence public engine;
+    uint256 public switchSequence;
+    uint256 public adverseAt;
+    constructor(address positionEngine) { engine = IObservationSequence(positionEngine); }
+    function arm(uint256 sequence, uint256 timestamp) external {
+        switchSequence = sequence;
+        adverseAt = timestamp;
+    }
+    function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
+        if (switchSequence == 0) return (1, 100e18, block.timestamp, block.timestamp, 1);
+        bool rebound = engine.marketObservationSequence(0) >= switchSequence;
+        uint80 round = rebound ? 3 : 2;
+        uint256 timestamp = adverseAt + (rebound ? 1 : 0);
+        return (round, rebound ? int256(100e18) : int256(98e18), timestamp, timestamp, round);
+    }
+}
 `;
 
 const sources = {
@@ -118,8 +143,9 @@ assert.ok(mockArtifact?.evm?.bytecode?.object, 'missing mock settlement bytecode
 assert.ok(feedArtifact?.evm?.bytecode?.object, 'missing mock feed bytecode');
 assert.ok(artifact.evm.deployedBytecode.object.length / 2 < 24_576, 'position engine exceeds EIP-170 runtime size');
 
-const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 5 } });
+const eip1193 = ganache.provider({ logging: { quiet: true }, miner: { timestampIncrement: 1 }, wallet: { totalAccounts: 5 } });
 const provider = new BrowserProvider(eip1193);
+provider.pollingInterval = 10;
 const [admin, executor, trader, stranger] = await Promise.all([0,1,2,3].map((i) => provider.getSigner(i)));
 
 async function deploy(compiled, signer, args = []) {
@@ -328,4 +354,39 @@ reservation = await mockBrain.reservations(rollbackKey);
 assert.equal(reservation.active, false);
 assert.equal(reservation.realizedPnlWei, parseEther('10'));
 
-console.log('[position-engine-evm] PASS: authenticated 2-of-3 oracle quorum, freshness/round/deviation gates, KX/KY/KZ risk, atomic Brain settlement, bad debt');
+// Same-observation liquidation against an oracle that rebounds on re-read.
+// A fresh engine keeps this adversarial sequence fixture isolated from earlier tests.
+const snapshotEngine = await deploy(artifact, admin, [await admin.getAddress(), await executor.getAddress(), mockBrain.target]);
+const sensitiveArtifact = output.contracts[harnessPath].AcceptanceSensitiveFeed;
+const sensitiveFeeds = await Promise.all([0, 1, 2].map(() => deploy(sensitiveArtifact, admin, [snapshotEngine.target])));
+await (await snapshotEngine.configureMarket(0, 100, 50, 60, px50, px150, true)).wait();
+await (await snapshotEngine.configureOracle(0, sensitiveFeeds.map(feed => feed.target), 2, 500)).wait();
+// First accept and open happen in separate blocks, so prime feeds with stable
+// adverseAt only after opening; initial expected sequence starts at one.
+await (await snapshotEngine.connect(executor).openCPosition(await trader.getAddress(), 0, parseEther('100'), 1, 9001, 1, { gasLimit: 2_000_000 })).wait();
+await eip1193.request({ method: 'evm_increaseTime', params: [10] });
+await eip1193.request({ method: 'evm_mine', params: [] });
+const adverseAt = await latestTimestamp();
+const sequenceBefore = await snapshotEngine.marketObservationSequence(0);
+for (const feed of sensitiveFeeds) await (await feed.arm(sequenceBefore + 1n, adverseAt)).wait();
+await (await snapshotEngine.connect(executor).observePosition(1, { gasLimit: 2_000_000 })).wait();
+const snapshotPosition = await snapshotEngine.positions(1);
+const snapshotReceipt = await snapshotEngine.settlementReceipt(1);
+const snapshotReservation = await mockBrain.reservations(await snapshotEngine.positionKey(1));
+assert.equal(snapshotPosition.status, 3n);
+assert.equal(snapshotPosition.exitPriceWad, parseEther('98'));
+assert.equal(snapshotPosition.collateralWad, 0n);
+assert.equal(snapshotReceipt.observedPrice, parseEther('98'));
+assert.equal(snapshotReceipt.settlementPrice, snapshotReceipt.observedPrice);
+assert.equal(snapshotReceipt.observedAt, adverseAt);
+assert.equal(snapshotReceipt.observationSequence, sequenceBefore + 1n);
+assert.equal(snapshotReceipt.rawPnl, -parseEther('2'));
+assert.equal(snapshotReceipt.realizedPnl, -parseEther('1'));
+assert.equal(snapshotReceipt.badDebt, parseEther('1'));
+assert.equal(snapshotReservation.realizedPnlWei, snapshotReceipt.realizedPnl);
+assert.equal(snapshotReservation.badDebtWei, snapshotReceipt.badDebt);
+assert.equal((await snapshotEngine.readMarketPrice(0))[0], px100, 'a second oracle read really would rebound');
+assert.equal(await snapshotEngine.marketObservationSequence(0), sequenceBefore + 1n, 'settlement must not accept a second snapshot');
+await expectRevert(snapshotEngine.connect(executor).observePosition(1), 'same observation cannot liquidate twice');
+
+console.log('[position-engine-evm] PASS: authenticated 2-of-3 oracle quorum, freshness/round/deviation gates, KX/KY/KZ risk, atomic Brain settlement, bad debt, adversarial same-observation liquidation');
