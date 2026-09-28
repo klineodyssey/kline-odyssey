@@ -1,5 +1,24 @@
 # KGEN Organization V2.0 WorkQueue
 
+## K11520 public BSC97 rehearsal — 2026-09-26
+
+- Task K11520-BSC97-REHEARSAL-20260926; IN_PROGRESS; owner codex-gm-01 ACTIVE T5.
+- Direct Human test-assets-only chain97 deployment/roles/smoke authorization.
+  Mainnet56/signing with Mainnet credentials/real assets remain forbidden.
+- Fresh base 3e7d72b2b0f6787959e4aa3430eb0b37699ff487; isolated branch
+  codex/k11520-bsc97-rehearsal-20260926. Human dirty checkout untouched.
+- Session subtasks testnet_adapter, testnet_ui, observation_safety are bounded
+  engineering helpers, not invented employee identities or salary receipts.
+- Reuse Brain/Position/Trigger and common UI adapter. New deployment runner is
+  testnet mechanics only; no replacement custody, ledger, or order engine.
+- Test signer route verified read-only on97. Public address and gas cap are in
+  docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json; no secret values recorded.
+- Source/IP: original repository extension, pinned MIT OpenZeppelin dependencies;
+  added-line secret scan before publication. Test feeds are not production data.
+- Actual public receipts, browser QA, exact-head CI and Pages remain gates.
+- Other old protected PRs stay separate; #439–#442 already merged, not reworked.
+- Payroll/ATM/advance receipt absent: HOLD, never PAID/RECEIVED.
+
 ## K11520 C detents / spatial calibration — 2026-09-25
 
 - Task: K11520-C-DETENTS-K-DISTANCE-20260925; status LOCAL_QA_PASS / EXACT_HEAD_CI_PENDING.

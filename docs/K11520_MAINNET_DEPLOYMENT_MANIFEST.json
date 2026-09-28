@@ -1,6 +1,51 @@
 {
   "documentType": "K11520_MAINNET_DEPLOYMENT_MANIFEST",
   "status": "BLOCKED_NOT_EXECUTABLE",
+  "testnetAuthorizationUpdate": {
+    "date": "2026-09-26",
+    "authority": "Human 沈英明 BSC TESTNET ON-CHAIN REHEARSAL ORDER",
+    "chainId": 97,
+    "testAssetsOnly": true,
+    "manifest": "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json",
+    "mainnetAuthorityChanged": false,
+    "note": "Historical Testnet approval blockers below are superseded by this order, but only actual manifest receipts establish deployment/smoke completion. Mainnet remains blocked."
+  },
+  "productionOracleCandidates": {
+    "registry": "K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs",
+    "network": "BNB Smart Chain / 56",
+    "quoteBasis": "USD feeds are candidates, not approved USDT settlement inputs",
+    "verificationDate": "2026-09-26",
+    "chainlink": {
+      "BTC_USD": "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf",
+      "ETH_USD": "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
+      "BNB_USD": "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE",
+      "decimals": 8,
+      "freshness": "Per-feed heartbeat and latest complete round require fresh verification",
+      "provenance": "Existing reviewed registry; official data.chain.link pages returned HTTP403 during this run, not freshly reconfirmed"
+    },
+    "redstone": {
+      "BTC_USD": {
+        "address": "0xa51738d1937FFc553d5070f43300B385AA2D9F55",
+        "heartbeatSeconds": 60,
+        "deviationBps": 10
+      },
+      "ETH_USD": {
+        "address": "0x9cF19D284862A66378c304ACAcB0E857EBc3F856",
+        "heartbeatSeconds": 21600,
+        "deviationBps": 50
+      },
+      "BNB_USD": {
+        "address": "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e",
+        "heartbeatSeconds": 60,
+        "deviationBps": 10
+      },
+      "decimals": "Must verify directly from candidate contracts; not assumed",
+      "provenance": "https://app.redstone.finance/push-feeds?networks=bnb&testnets=true",
+      "independence": "Distinct provider from Chainlink; upstream source correlation not certified"
+    },
+    "thirdProvider": "NOT_APPROVED",
+    "readiness": "BLOCKED: third independent source, USD/USDT conversion policy, live rounds/decimals/freshness, production roles/risk parameters and explicit activation manifest outstanding"
+  },
   "sourceMainAtStart": "3c136a30865a43a6222f5e199495a176140be139",
   "TARGET_CHAIN": "BNB Smart Chain candidate; no execution approval",
   "CHAIN_ID": 56,
@@ -11,9 +56,24 @@
   "POSITION_ENGINE": null,
   "ORDER_TRIGGER_ENGINE": null,
   "RISK_KERNEL": "KGEN/contracts/KGEN_MarketRiskKernel.sol; internal library inlined into engines, no independent live authority",
-  "KX_ORACLE_SET": {"market": "BTC/USDT", "approvedFeeds": [], "requiredConfigured": 3, "requiredValid": 2},
-  "KY_ORACLE_SET": {"market": "ETH/USDT", "approvedFeeds": [], "requiredConfigured": 3, "requiredValid": 2},
-  "KZ_ORACLE_SET": {"market": "BNB/USDT", "approvedFeeds": [], "requiredConfigured": 3, "requiredValid": 2},
+  "KX_ORACLE_SET": {
+    "market": "BTC/USDT",
+    "approvedFeeds": [],
+    "requiredConfigured": 3,
+    "requiredValid": 2
+  },
+  "KY_ORACLE_SET": {
+    "market": "ETH/USDT",
+    "approvedFeeds": [],
+    "requiredConfigured": 3,
+    "requiredValid": 2
+  },
+  "KZ_ORACLE_SET": {
+    "market": "BNB/USDT",
+    "approvedFeeds": [],
+    "requiredConfigured": 3,
+    "requiredValid": 2
+  },
   "ADMIN": null,
   "UPGRADE_AUTHORITY": null,
   "SETTLEMENT_ROLE": "Actual reviewed PositionEngine ONLY; not EOA/keeper/Trigger",
@@ -39,16 +99,70 @@
   ],
   "PAUSE_PATH": "Brain PAUSER_ROLE.pause(), Position admin.setPaused(true), Trigger admin.setPaused(true) stop new risk. Existing close/settlement remain available subject to valid oracle/solvency. Do not disable a market with open positions: that blocks its exits.",
   "ROLLBACK_PATH": "No transaction undo. Pause new risk and settle/exit existing positions. Position/Trigger are non-upgradeable; replacement needs reviewed migration and explicit role approval. Brain uses existing scheduled UUPS upgrade authority and >=2-day delay, no bypass.",
-  "TESTNET": {"proposedChain": "BSC Testnet", "proposedChainId": 97, "approved": false, "rpc": null, "testAsset": null, "deployerPublicAddress": null, "gasBudget": null, "contracts": [], "deploymentTransactions": [], "roleGrantTransactions": [], "smokeTransactions": [], "status": "NOT_DEPLOYED"},
+  "TESTNET": {
+    "chainId": 97,
+    "approved": true,
+    "testAssetsOnly": true,
+    "status": "PUBLIC_CONTRACT_SMOKE_PASS_UI_QA_PENDING",
+    "manifest": "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json",
+    "deployerPublicAddress": "0x3a909988E4d5c9C2326A7a0596714482AB25eE0A",
+    "contracts": {
+      "testToken": "0x41103CB10b71AB3041093f428Beb7baB38404B42",
+      "brainImplementation": "0x079F8C2C517ea7B772F803C345A787Bb84E97B3F",
+      "brainProxy": "0x53FE723c12f748fd7E974eDD8d36D9F4A0241c83",
+      "positionEngine": "0xAABF67ec8C9a50F4c757a8A2A33049840b310b10",
+      "orderTriggerEngine": "0x43801B48BFb91C8e80edcD342b6be7b9143d6532",
+      "oracle": "0x8Db53699F6c8Ac520ca9b5E6d3B16e3B0433a3e7"
+    },
+    "gasSpentTestBnb": "0.0024634971",
+    "receiptCount": 74
+  },
   "BLOCKERS": [
-    "No concrete approved Testnet signer route, role addresses, gas cap, test-token/feed set. No private key accessed",
-    "Registry has two reviewed USD feeds per axis, not an approved three-provider USDT settlement set; third source and USD/USDT basis unresolved",
-    "No public Testnet deployment/smoke receipts for this stack; unrelated TempleHeart receipts cannot be reused",
-    "Game real-funds execution stays disabled without verified deployment/account/ABI; simulation wallet is not chain custody",
-    "No live feed observation or production configuration authorization",
-    "Fresh empty engine candidate only; legacy orderId=0 positions require separate migration review"
+    "Production three-independent-provider USDT settlement oracle set not approved; third provider, USD/USDT basis, decimals/freshness/round validation outstanding",
+    "Production admin/upgrade/pauser/keeper identities and risk parameters not approved",
+    "Public mobile adapter QA, exact-head CI and Pages publication pending",
+    "Mainnet execution manifest requires Human approval; no Mainnet writes authorized"
   ],
-  "NEXT_PROTECTED_ACTION": {"action": "Approve a populated Testnet-only execution manifest before signer use or broadcast", "requiredPublicInputs": ["chain/RPC", "test token", "public deployer/admin/upgrade/pauser/keeper addresses", "approved signer mechanism (never paste a key)", "gas/value cap", "three verified feed addresses and policy per market"], "mainnetAllowed": false},
+  "NEXT_PROTECTED_ACTION": {
+    "action": "Review fully populated Mainnet execution manifest only after production oracle/risk/role gates and public Testnet UI QA pass",
+    "mainnetAllowed": false
+  },
   "SOURCE_CLASSIFICATION": "Original task code extending repository-owned organs; MIT Solidity headers retained; pinned OpenZeppelin5.0.2 dependency. No proprietary engine or third-party commercial asset imported.",
-  "MAINNET_EXECUTION_APPROVAL": "NOT_GRANTED"
+  "MAINNET_EXECUTION_APPROVAL": "NOT_GRANTED",
+  "historicalTestnetState": {
+    "TESTNET": {
+      "proposedChain": "BSC Testnet",
+      "proposedChainId": 97,
+      "approved": false,
+      "rpc": null,
+      "testAsset": null,
+      "deployerPublicAddress": null,
+      "gasBudget": null,
+      "contracts": [],
+      "deploymentTransactions": [],
+      "roleGrantTransactions": [],
+      "smokeTransactions": [],
+      "status": "NOT_DEPLOYED"
+    },
+    "BLOCKERS": [
+      "No concrete approved Testnet signer route, role addresses, gas cap, test-token/feed set. No private key accessed",
+      "Registry has two reviewed USD feeds per axis, not an approved three-provider USDT settlement set; third source and USD/USDT basis unresolved",
+      "No public Testnet deployment/smoke receipts for this stack; unrelated TempleHeart receipts cannot be reused",
+      "Game real-funds execution stays disabled without verified deployment/account/ABI; simulation wallet is not chain custody",
+      "No live feed observation or production configuration authorization",
+      "Fresh empty engine candidate only; legacy orderId=0 positions require separate migration review"
+    ],
+    "NEXT_PROTECTED_ACTION": {
+      "action": "Approve a populated Testnet-only execution manifest before signer use or broadcast",
+      "requiredPublicInputs": [
+        "chain/RPC",
+        "test token",
+        "public deployer/admin/upgrade/pauser/keeper addresses",
+        "approved signer mechanism (never paste a key)",
+        "gas/value cap",
+        "three verified feed addresses and policy per market"
+      ],
+      "mainnetAllowed": false
+    }
+  }
 }

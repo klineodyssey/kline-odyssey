@@ -6,6 +6,14 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### K11520 BSC Testnet rehearsal (2026-09-26)
+
+`KGEN/scripts/rehearse_bsc_testnet.mjs` prepares the existing settlement organs,
+checks them locally (`--local`), and supports explicit chain97-only deployment
+(`--deploy97`). Read `docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json` for actual
+status/addresses/receipts. All assets/oracles are TEST ONLY, NO REAL VALUE; this
+does not authorize or certify Mainnet execution or production oracle readiness.
+
 ### K11520 settlement candidate (2026-09-25; no chain activation)
 
 `KGEN/contracts/KGEN_OrderTriggerEngine.sol` extends the existing Brain/Position
