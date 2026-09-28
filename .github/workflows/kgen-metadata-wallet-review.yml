@@ -1,0 +1,51 @@
+name: KGEN metadata and wallet review
+
+on:
+  push:
+    branches:
+      - codex/kgen-exchange-metadata-wallet-discovery-v1
+    paths:
+      - 'KGEN/registry/BscScan/**'
+      - 'KGEN/registry/CoinMarketCap/**'
+      - 'api/kgen/**'
+      - 'index.html'
+      - 'tests/universal-exchange.test.mjs'
+      - '.github/workflows/kgen-metadata-wallet-review.yml'
+  pull_request:
+    paths:
+      - 'KGEN/registry/BscScan/**'
+      - 'KGEN/registry/CoinMarketCap/**'
+      - 'api/kgen/**'
+      - 'index.html'
+      - 'tests/universal-exchange.test.mjs'
+      - '.github/workflows/kgen-metadata-wallet-review.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kgen-metadata-wallet-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-exact-head:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify current supply snapshot
+        run: python KGEN/registry/CoinMarketCap/test_kgen_cmc_supply.py
+      - name: Verify listing package and API projection
+        run: python KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py
+      - name: Validate snapshot JSON
+        run: python -m json.tool KGEN/registry/CoinMarketCap/kgen_cmc_supply_snapshot.json > /dev/null
+      - name: Validate patch whitespace
+        run: git diff --check

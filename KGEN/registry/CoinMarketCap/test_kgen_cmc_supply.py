@@ -60,8 +60,10 @@ class KgenCmcSupplyTests(unittest.TestCase):
                     "PUBLIC_CIRCULATING",
                     "LIQUIDITY_POOL",
                     "FOUNDER_OR_TEAM_CONTROLLED",
+                    "GOVERNANCE",
                     "TREASURY",
                     "BANK",
+                    "BANK_LEGACY_RESERVE",
                     "REWARD",
                     "LOCKED",
                     "BURN_ADDRESS",
@@ -75,14 +77,35 @@ class KgenCmcSupplyTests(unittest.TestCase):
         for holder in self.data["major_holders"]:
             if holder["category"] in {
                 "FOUNDER_OR_TEAM_CONTROLLED",
+                "GOVERNANCE",
                 "TREASURY",
                 "BANK",
+                "BANK_LEGACY_RESERVE",
                 "REWARD",
                 "LOCKED",
                 "BURN_ADDRESS",
                 "CONTRACT_HELD",
             }:
                 self.assertFalse(holder["included_in_circulating"])
+
+    def test_creator_and_current_owner_are_distinct_roles(self) -> None:
+        roles = self.data["on_chain_roles"]
+        self.assertNotEqual(roles["owner"], roles["deployment_creator_indexer"])
+        self.assertFalse(roles["owner_matches_deployment_creator"])
+        self.assertEqual(
+            roles["owner"], "0xa2792fbdcc8a8aac364053431d44e0a8d335e166"
+        )
+        self.assertEqual(
+            roles["deployment_creator_indexer"],
+            "0xb3c54ca96de0ded4ca0151f629ff9781506ba261",
+        )
+        self.assertEqual(
+            roles["bank_wallet"], "0xa06ef53c9ad4af739fd13ca1ded446437134b0ee"
+        )
+        self.assertEqual(
+            roles["legacy_bank_wallet"],
+            "0xfa4d34c46e86058e672936fa03cfd79f4c7a4b3c",
+        )
 
     def test_ownership_unverified_holders_are_circulating(self) -> None:
         expected = {
