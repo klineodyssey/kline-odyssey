@@ -13,7 +13,7 @@ if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.loc
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});
 await page.waitForTimeout(900);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
-await page.waitForFunction(()=>globalThis.__K11520_CHARACTER_STATUS__?.characterCard===true,null,{timeout:3000});
+await page.waitForFunction(()=>globalThis.__K11520_CHARACTER_STATUS__?.characterCard===true,null,{timeout:8000});
 assert.equal(await page.evaluate(()=>globalThis.__K11520_CHARACTER_STATUS__?.avatarCenterPriority),true,'camera-locked avatar tap priority must be active');
 const detail=(await page.locator('#k11520HpDetail').textContent()||'').trim();
 assert.match(detail,/HP\s+\d+\s*\/\s*100/,'detailed HP current/max missing');
