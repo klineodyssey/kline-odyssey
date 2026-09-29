@@ -1,4 +1,6 @@
 import {C_MAX,requireCanonicalC} from '../controls/nonlinear-controls.mjs';
+// REVISION 2026-09-29: Human-approved absolute index delta, not percentage return.
+export const C_PNL_MODEL='INDEX_DELTA_C_LOTS_V1';
 
 export const MAX_C_LEVERAGE=C_MAX;
 export const MAX_LOTS=100;
@@ -60,20 +62,21 @@ export function pnlForMove({entry,mark,side,lots,c}){
   const quantity=requiredMargin({lots});
   const direction=signedPositionSide(c,side)==='SHORT'?-1:1;
   const leverage=normalizeLeverage(c);
-  const returnFraction=(m-e)/e;
-  return returnFraction*direction*quantity*leverage;
+  return (m-e)*direction*quantity*leverage;
 }
 
-export function maxAdverseFraction(c){
+export function maxAdverseFraction(c,entry=1){
   const leverage=normalizeLeverage(c);
-  return leverage===0?Infinity:1/leverage;
+  const e=Number(entry);
+  if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
+  return leverage===0?Infinity:1/(leverage*e);
 }
 
 export function maxAdversePoints(c,entry=1){
-  const fraction=maxAdverseFraction(c);
+  const leverage=normalizeLeverage(c);
   const e=Number(entry);
   if(!Number.isFinite(e)||e<=0)throw new RangeError('ENTRY_PRICE_MUST_BE_POSITIVE');
-  return Number.isFinite(fraction)?e*fraction:Infinity;
+  return leverage===0?Infinity:1/leverage;
 }
 
 export function liquidationMark({entry,side,c}){
@@ -97,7 +100,7 @@ export function positionRisk({entry,mark,side,lots,c}){
   const rawPnl=pnlForMove({entry,mark,side,lots,c});
   const pnl=clampPositionPnl({principal,pnl:rawPnl});
   const remaining=Math.max(0,principal+pnl);
-  return {principal,pnl,rawPnl,remaining,liquidated:rawPnl<=-principal,maxAdverseFraction:maxAdverseFraction(c),maxAdversePoints:maxAdversePoints(c,entry),liquidationMark:liquidationMark({entry,side,c})};
+  return {principal,pnl,rawPnl,remaining,liquidated:rawPnl<=-principal,pnlModel:C_PNL_MODEL,maxAdverseFraction:maxAdverseFraction(c,entry),maxAdversePoints:maxAdversePoints(c,entry),liquidationMark:liquidationMark({entry,side,c})};
 }
 
 export function reserveOrder(ledger,amount){

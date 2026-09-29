@@ -110,8 +110,8 @@ assert.ok(triggerArtifact.runtime.length / 2 <= 24_576, 'Trigger optimized runti
 const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 9 }, miner: { timestampIncrement: 1 } });
 const provider = new BrowserProvider(eip1193);
 provider.pollingInterval = 20;
-const signers = await Promise.all(Array.from({ length: 8 }, (_, i) => provider.getSigner(i)));
-const [admin, keeper, pauser, upgrader, treasury, executor, trader, stranger] = signers;
+const signers = await Promise.all(Array.from({ length: 9 }, (_, i) => provider.getSigner(i)));
+const [admin, keeper, pauser, upgrader, treasury, executor, trader, stranger, playerC] = signers;
 const deploymentReceipts = [];
 const smokeReceipts = [];
 function receiptRecord(label, receipt) {
@@ -197,7 +197,17 @@ await expectRevert(
   'executor cannot forge direct Brain PnL'
 );
 
-// Real pair: open atomically creates the Brain reservation under an Engine-scoped key.
+// Principal is not exchange risk capital: admission fails before any state persists.
+await expectRevert(engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('20')), 'principal cannot back settlement liability');
+assert.equal(await engine.nextPositionId(), 1n);
+assert.equal(await brain.lockedPrincipalOf(await trader.getAddress()), 0n);
+await (await token.mint(await admin.getAddress(), parseEther('50'))).wait();
+await (await token.approve(proxy.target, parseEther('50'))).wait();
+await (await brain.fundSettlementCapital(parseEther('50'))).wait();
+assert.equal(await brain.settlementCapital(), parseEther('50'));
+assert.equal(await brain.principalOf(await admin.getAddress()), 0n, 'capital funding creates no player principal');
+
+// Real pair: open atomically creates collateral plus worst-outcome liability.
 await (await engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('20'))).wait();
 const longId = 1n;
 const longKey = await engine.positionKey(longId);
@@ -206,6 +216,11 @@ assert.equal(reservation.user, await trader.getAddress());
 assert.equal(reservation.amountWei, parseEther('20'));
 assert.equal(reservation.status, 1n);
 assert.equal(await brain.lockedPrincipalOf(await trader.getAddress()), parseEther('20'));
+assert.equal(await brain.reservedSettlementLiability(), parseEther('50'));
+await expectRevert(engine.connect(executor).openPosition(await trader.getAddress(), 0, -size1, parseEther('20')), 'opposing position cannot net existing liability');
+assert.equal(await engine.nextPositionId(), 2n);
+assert.equal(await brain.lockedPrincipalOf(await trader.getAddress()), parseEther('20'));
+assert.equal(await brain.reservedSettlementLiability(), parseEther('50'));
 
 async function setFeeds(value) {
   // Do not rely on wall-clock seconds elapsing on fast CI runners.
@@ -217,21 +232,10 @@ async function setFeeds(value) {
   await (await feed2.set(value, ts)).wait();
 }
 
-// Profit settlement must fail closed without real surplus, and EVM atomicity must preserve OPEN + reservation.
+// The reserved exchange capital pays profit; player principal is never its source.
 await setFeeds(px120);
-await expectRevert(engine.connect(executor).closePosition(longId), 'profit cannot be minted from nothing');
-let p = await engine.positions(longId);
-assert.equal(p.status, 1n, 'failed settlement must roll Position state back to OPEN');
-reservation = await brain.positionReservations(longKey);
-assert.equal(reservation.status, 1n, 'failed settlement must leave Brain reservation active');
-assert.equal(await brain.lockedPrincipalOf(await trader.getAddress()), parseEther('20'));
-
-// Add real KGEN surplus; exact same close can now settle atomically.
-await (await token.mint(await admin.getAddress(), parseEther('50'))).wait();
-await (await token.transfer(proxy.target, parseEther('20'))).wait();
-assert.equal(await brain.freeSurplus(), parseEther('20'));
 await (await engine.connect(executor).closePosition(longId, { gasLimit: 1_500_000 })).wait();
-p = await engine.positions(longId);
+let p = await engine.positions(longId);
 reservation = await brain.positionReservations(longKey);
 assert.equal(p.status, 2n);
 assert.equal(p.realizedPnlWad, parseEther('20'));
@@ -240,10 +244,15 @@ assert.equal(reservation.realizedPnlWei, parseEther('20'));
 assert.equal(await brain.principalOf(await trader.getAddress()), parseEther('120'));
 assert.equal(await brain.lockedPrincipalOf(await trader.getAddress()), 0n);
 assert.equal(await brain.solvent(), true);
+assert.equal(await brain.settlementCapital(), parseEther('30'));
+assert.equal(await brain.reservedSettlementLiability(), 0n);
 
 // Gap loss uses real insurance reserved from real surplus; unrelated principal is never charged.
+await (await token.mint(await admin.getAddress(), parseEther('50'))).wait();
 await (await token.transfer(proxy.target, parseEther('30'))).wait();
 await (await brain.allocateInsuranceReserve(parseEther('30'))).wait();
+await (await token.approve(proxy.target, parseEther('20'))).wait();
+await (await brain.fundSettlementCapital(parseEther('20'))).wait();
 assert.equal(await brain.insuranceReserve(), parseEther('30'));
 await setFeeds(px100);
 await (await engine.connect(executor).openPosition(await trader.getAddress(), 0, -size1, parseEther('20'))).wait();
@@ -265,7 +274,7 @@ assert.equal(await brain.principalOf(await trader.getAddress()), parseEther('100
 assert.equal(await brain.tradingHealthy(), true);
 assert.equal(await brain.solvent(), true);
 
-console.log('[brain-position-integration-evm] PASS: Engine-only settlement role, real Brain proxy reservation, profit rollback/surplus settlement, insurance gap-loss accounting');
+console.log('[brain-position-integration-evm] PASS: Engine-only role, principal/capital isolation, atomic admission, reserved-capital profit, insurance gap-loss accounting');
 
 // The final execution path uses the SAME real Brain proxy and Position Engine.
 // Only test token and price-feed inputs are mocked; custody/settlement are not.
@@ -278,9 +287,26 @@ await expectRevert(engine.configureMarket(0, 99, 10, 60, px50, px150, true), '10
 await (await token.mint(await trader.getAddress(), parseEther('10000'))).wait();
 await (await token.connect(trader).approve(proxy.target, parseEther('10000'))).wait();
 await (await brain.connect(trader).depositMargin(parseEther('10000'))).wait();
-await (await token.mint(await admin.getAddress(), parseEther('10000'))).wait();
-await (await token.transfer(proxy.target, parseEther('10000'))).wait();
-await (await brain.allocateInsuranceReserve(parseEther('5000'))).wait();
+await tick(px100);
+const undercapitalized = await create('100', 100);
+const admissionNext = await engine.nextPositionId();
+const admissionAvailable = await brain.availablePrincipal(await trader.getAddress());
+await expectRevert(trigger.connect(keeper).observeOrder(undercapitalized, { gasLimit: 2_000_000 }), 'aggregate exchange capital admission gate');
+assert.equal((await trigger.order(undercapitalized)).status, 1n);
+assert.equal((await trigger.fillReceipt(undercapitalized)).orderId, 0n);
+assert.equal(await engine.nextPositionId(), admissionNext);
+assert.equal(await engine.usedOrderIds(undercapitalized), false);
+assert.equal(await brain.availablePrincipal(await trader.getAddress()), admissionAvailable);
+assert.equal(await brain.lockedPrincipalOf(await trader.getAddress()), 0n);
+assert.equal(await brain.reservedSettlementLiability(), 0n);
+await (await trigger.connect(trader).cancelOrder(undercapitalized)).wait();
+// These are explicitly minted local TEST assets, actually transferred into Brain.
+// Worst-price bounds at BTC-like 60000 and 100C x100 lots require up to 600M.
+await (await token.mint(await admin.getAddress(), parseEther('1002000000'))).wait();
+await (await token.approve(proxy.target, parseEther('1000000000'))).wait();
+await (await brain.fundSettlementCapital(parseEther('1000000000'))).wait();
+await (await token.transfer(proxy.target, parseEther('2000000'))).wait();
+await (await brain.allocateInsuranceReserve(parseEther('2000000'))).wait();
 
 async function tick(price, timestamp) {
   await eip1193.request({ method: 'evm_increaseTime', params: [2] });
@@ -332,15 +358,61 @@ async function closeAtEntry(positionId) {
   assert.equal((await engine.positions(positionId)).collateralWad, 0n);
 }
 
+// A/B/C submit independent orders concurrently; custody never nets traders.
+const players = [trader, stranger, playerC];
+for (const actor of players.slice(1)) {
+  await (await token.mint(await actor.getAddress(), parseEther('1000'))).wait();
+  await (await token.connect(actor).approve(proxy.target, parseEther('1000'))).wait();
+  await (await brain.connect(actor).depositMargin(parseEther('1000'))).wait();
+}
+await tick(px100);
+const playerBefore = await Promise.all(players.map(async actor => brain.principalOf(await actor.getAddress())));
+const nextConcurrentOrder = await trigger.nextOrderId();
+await Promise.all(players.map(async (actor, i) => (await trigger.connect(actor).createOrder(0, parseEther(i === 1 ? '-100' : i === 2 ? '1' : '100'), i === 2 ? 1 : 100, px100)).wait()));
+const concurrentOrders = [nextConcurrentOrder, nextConcurrentOrder + 1n, nextConcurrentOrder + 2n];
+for (const id of concurrentOrders) await observe(id);
+assert.equal(await brain.reservedSettlementLiability(), parseEther('1000050'), 'long/short reserve is additive, never optimistically netted');
+await expectRevert(engine.configureMarket(0, 100, 10, 60, px50, px150, true), 'risk bounds frozen while positions remain open');
+await expectRevert(engine.configureOracle(0, [feed0.target, feed1.target, feed2.target], 2, 500), 'oracle configuration frozen while positions remain open');
+for (let i = 0; i < players.length; i++) {
+  const address = await players[i].getAddress();
+  assert.equal(await brain.lockedPrincipalOf(address), parseEther(i === 2 ? '1' : '100'));
+  await expectRevert(brain.connect(players[i]).withdrawMargin(playerBefore[i]), 'locked principal cannot be withdrawn');
+}
+await tick(parseEther('100.001'));
+for (const id of concurrentOrders) {
+  const order = await trigger.order(id);
+  // Owner selection is address-based, not dependent on concurrent mining order.
+  const traderAddresses = await Promise.all(players.map(player => player.getAddress()));
+  const index = traderAddresses.findIndex(address => address.toLowerCase() === order.trader.toLowerCase());
+  await (await trigger.connect(players[index]).closePosition(order.positionId, { gasLimit: 2_000_000 })).wait();
+  const receipt = await engine.settlementReceipt(order.positionId);
+  assert.equal(receipt.trader, traderAddresses[index]);
+  assert.equal(receipt.rawPnl, parseEther(index === 1 ? '-10' : index === 2 ? '0.001' : '10'));
+}
+assert.equal(await brain.reservedSettlementLiability(), 0n);
+for (let i = 0; i < players.length; i++) {
+  const address = await players[i].getAddress();
+  assert.equal(await brain.principalOf(address), playerBefore[i] + parseEther(i === 1 ? '-10' : i === 2 ? '0.001' : '10'));
+  assert.equal(await brain.lockedPrincipalOf(address), 0n);
+  assert.equal(await brain.playerClaimable(address), 0n);
+  const beforeWithdraw = await token.balanceOf(address);
+  await (await brain.connect(players[i]).withdrawMargin(parseEther('1'))).wait();
+  assert.equal(await token.balanceOf(address), beforeWithdraw + parseEther('1'));
+}
+// Restore the intentionally empty account used by the collateral-rejection cases.
+await (await brain.connect(stranger).withdrawMargin(await brain.availablePrincipal(await stranger.getAddress()))).wait();
+console.log('[brain-position-trigger-integration-evm] A/B/C concurrent admission, additive reserves, independent PnL and withdrawals PASS');
+
 await tick(px100);
 for (const c of ['0', '0.0001', '-0.0001', '0.3', '-0.3', '3.742', '-3.742', '17.382', '-17.382', '99.6', '-99.6', '100.001', '-100.001', '100.000000000000000001', '-100.000000000000000001', '1000', '-1000']) {
   await expectRevert(trigger.connect(trader).createOrder(0, parseEther(c), 1, px100), `invalid C ${c}`);
 }
 // Exact parity with the shared frontend detent authority through the real
 // Brain proxy / Trigger / Position / Risk path, including tiny C fill receipts.
-for (const c of C_DETENTS.filter(c => c !== 0)) {
-  console.log(`[canonical-c-evm] checking ${c}C fill / close / receipts`);
-  const { id, positionId } = await fill(String(c), 1);
+for (const c of C_DETENTS.filter(c => c !== 0)) for (const lots of [1, 100]) {
+  console.log(`[canonical-c-evm] checking ${c}C / ${lots} lots fill / close / receipts`);
+  const { id, positionId } = await fill(String(c), lots);
   assert.equal((await engine.orderTerms(positionId)).cWad, parseEther(String(c)));
   await closeAtEntry(positionId);
   assert.equal((await trigger.fillReceipt(id)).c, parseEther(String(c)));
@@ -446,7 +518,7 @@ for (const c of [100, -100]) for (const lots of [1, 100]) {
     const margin = parseEther(String(lots));
     const mark = px100 * BigInt(10000 + moveBps) / 10000n;
     await tick(mark);
-    const expectedRaw = margin * BigInt(c) * BigInt(moveBps) / 10000n;
+    const expectedRaw = (mark - px100) * BigInt(c) * BigInt(lots);
     const expectedNotional = margin * 100n * mark / px100;
     const expectedMm = expectedNotional * 10n / 10000n;
     const isLiquidation = margin + expectedRaw <= expectedMm;
@@ -545,7 +617,8 @@ fs.writeFileSync('artifacts/settlement-local-evm.json', JSON.stringify({
   authorities: { admin: await admin.getAddress(), upgradeAuthority: await upgrader.getAddress(), pauser: await pauser.getAddress(),
     keeper: await keeper.getAddress(), positionExecutor: trigger.target, brainSettlementRole: engine.target, trader: await trader.getAddress() },
   configuration: { cMax: 100, lotsMax: 100, initialMarginBps: 100, maintenanceMarginBps: 10, oracleMaxAge: 60, oracleMaxDeviationBps: 500, oracleSources: 3, oracleQuorum: 2 },
-  canonicalCDetents: C_DETENTS.filter(c => c !== 0), stressCases, realisticBoundaryCases, deploymentReceipts, smokeReceipts,
+  canonicalCDetents: C_DETENTS.filter(c => c !== 0), canonicalLots: [1, 100], stressCases, realisticBoundaryCases,
+  capitalAccounting: { fundedTestTokensOnly: true, reservedSettlementLiability: (await brain.reservedSettlementLiability()).toString(), playerClaims: (await brain.totalPlayerClaimable()).toString(), noOptimisticNetting: true, concurrentPlayers: 3, withdrawalsVerified: true }, deploymentReceipts, smokeReceipts,
   testnetDeployment: 'NOT_EXECUTED', mainnetExecution: 'NOT_AUTHORIZED_OR_EXECUTED',
   limitations: ['Mock token and feeds are local only.', 'No production oracle provenance or live-network deployment is certified.', 'Gas is measured local EVM gas, not a production gas-price estimate.']
 }, null, 2) + '\n');

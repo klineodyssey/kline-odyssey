@@ -234,8 +234,10 @@ await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
 await page.waitForTimeout(240);
 const preview=(await page.locator('#confirmBody').innerText()).replace(/\s+/g,' ').trim();
 assert.match(preview,/100C/,'confirmation must show the bounded leverage');
-assert.match(preview,/每 1% 變動/,'confirmation must explain percentage-return PnL');
-assert.match(preview,/反向歸零 1(?:\.0+)?%/,'100C confirmation must disclose 1% adverse liquidation distance');
+assert.match(preview,/PnL MODEL INDEX_DELTA_C_LOTS_V1/,'confirmation must identify the approved index-delta model');
+assert.match(preview,/每 1 index point 變動 700 KGEN/,'100C times seven lots must expose 700 KGEN per index point');
+assert.match(preview,/反向歸零 0\.01 index points/,'100C confirmation must disclose the absolute-index isolated margin boundary');
+assert.doesNotMatch(preview,/每 1% 變動|反向歸零 1(?:\.0+)?%/,'the retired percentage-return formula must not describe candidate execution');
 assert.match(preview,/PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈/,'confirmation must disclose pending touch/cross execution and retain the no-chain safety boundary');
 const confirmGeometry=await page.locator('#confirm').boundingBox();
 assert.ok(confirmGeometry&&confirmGeometry.x>=0&&confirmGeometry.y>=0&&confirmGeometry.x+confirmGeometry.width<=390&&confirmGeometry.y+confirmGeometry.height<=844,`confirmation must fit 390x844: ${JSON.stringify(confirmGeometry)}`);
@@ -248,4 +250,4 @@ assert.equal(layout.ok,true,JSON.stringify(layout));
 for(const [key,value] of Object.entries(layout.overlaps||{}))assert.equal(value,false,`overlap ${key}: ${JSON.stringify(layout)}`);
 
 await browser.close();
-console.log('11520 signed-C immersive QA PASS: one C renderer; direct canonical side sync; 100C hard cap and percent-return preview; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');
+console.log('11520 signed-C immersive QA PASS: one C renderer; direct canonical side sync; 100C hard cap and index-delta preview; cross-control lot edits preserve signed C; unified invalid-lot policy; rapid sign and axis-switch regressions; centered rail/colors/immersive verified at 390x844');

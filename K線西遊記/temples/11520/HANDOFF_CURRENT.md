@@ -1,5 +1,71 @@
 # 11520 HANDOFF CURRENT
 
+## Complete-product capital/wallet continuation — 2026-09-29
+
+- TASK_ID K11520-COMPLETE-PRODUCT-20260929; Human DOCX handoff V1 and explicit
+  CONTINUE_TO_COMPLETE. Base main12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8 is
+  lineage only: always refetch. Preserved five inherited contract/test edits in
+  codex/k11520-wallet-permanent-approval; Human dirty main was not modified.
+- V2.6.25 / shell-v279. Signed canonical C-order PnL is absolute index delta
+  times C times lots, not divided by entry. One lot is still one KGEN margin.
+  KGEN_TRADING_SPEC, UI specification, manual, preview and tests are synchronized
+  under explicit Human authority. The historical public Testnet bytecode is
+  legacy and archived separately; the capital successor below has real receipts.
+- Brain uses actual token-received funding, distinct free settlement capital,
+  aggregate gross reserved liability and player claims. Position atomically
+  reserves maximum favorable PnL over configured bounds and locks configuration
+  while open. Claims cannot consume another position's earmarked reservation.
+  Settled profit uses its own reservation first; excess available capital pays
+  the rest, otherwise a persistent claim remains. Principal exits stay possible
+  under solvent custody even when legacy claim debt is unfunded.
+- Reviewed P1 found/fixed: an old unfunded claim must not turn another fully
+  funded position's reserved payout into a new claim. Actual Brain regression
+  proves reserved100 pays fundedA100 while legacyB100 remains pending, then
+  genuine funding repaysB; neither player principal finances the other.
+- Brain runtime21105bytes; append-only six-slot gap35→29 against pinned actual
+  pre-capital source. Actual ancestor proxy/timelock upgrade, partial claims,
+  fee-on-transfer actual funding, A/B/C and custody tests pass locally.
+- Wallet adapter reads allowance, requires explicit max-approval confirmation,
+  supports Deposit/Available-only Withdraw, and uses capability-gated candidate
+  claims/preview. Old deployments cannot invent Claimable0 or call absent ABI.
+- PR #445 checkpoint2fb4e5 passed actual-pair/capital Trading Readiness,
+  candidate-wallet Chromium, Responsive and Universal CI. Game Product exposed
+  historical percentage-return and version-label assertions, updated to test
+  the Human-approved index model and V2.6.25 rather than changing product math.
+- Actual local contracts and both390x844/844x390 browsers exercised100C100lots,
+  approve/deposit, pending/cross/fill, PnL, close/liquidation, withdraw, A/B/C
+  isolation and reload. Populated previews were directly image-reviewed after
+  awaiting asynchronous validation; blank loading-state captures are not PASS.
+- Existing rehearsal runner supports explicit, separately archived successors:
+  `--prepare-successor97=<run-id>` compiles/snapshots without provider/signer;
+  `--deploy97 --successor97=<same-run-id>` is a separately authorized public
+  action, verifies predecessor chain/code/roles/proxy/all receipts and refuses
+  reused candidates/runs. Original deployment records remain immutable; a
+  prepared successor is not a deployment receipt. Public successor
+  `capital-20260929` was subsequently deployed under the explicit BSC97 order:
+  75/75 confirmed receipts, 0.0027142114 test BNB gas, new mock token and nine
+  test feeds only. Brain proxy0x60e3801CDf885830ca45Def76a6141f841B0521d;
+  complete addresses, code hashes and receipts are in the Testnet manifest.
+  Actual contract touch/cross, one-shot, isolated loss and insurance tests PASS.
+  Public Chromium now also passes390x844 profit50 close/withdraw/reload and
+  844x390 gap raw loss220 / isolated loss100 / withdraw/reload at100C100lots.
+  Additional37 confirmed browser-attempt/lifecycle transactions are preserved
+  in the manifest, separate from75 deployment/smoke receipts. Final source
+  reloaded both orientations read-only with zero broadcasts; direct screenshots
+  verify wallet metrics, actual receipt history and historic liquidation boundary.
+  EIP1193 uses a bounded Node-only configured Testnet signer broker, not a claim
+  that a Human MetaMask extension was tested. Historical failed captures stay
+  archived as failures, not final visual evidence.
+- Release remains pending fresh exact-head CI, direct mobile screenshots and
+  Pages verification. Use PR/Actions/artifacts for final status, not this entry.
+- Mainnet remains blocked pending concrete contract/role/oracle/funding/gas
+  manifest approval. The configured signer was used only through the bounded
+  BSC97 test-asset route, with no key export and no Mainnet transaction.
+  Mainnet oracle review found USD/USDT basis and third-source policy unresolved;
+  RedStone requires a source-specific timestamp adapter (its changing answer
+  keeps round1), not weakening the existing replay guard. Payroll/ATM/advance
+  has no new real payment receipt: HOLD.
+
 ## Human spatial calibration / nonlinear C — 2026-09-25
 
 - TASK_ID: K11520-C-DETENTS-K-DISTANCE-20260925; Human explicitly approved

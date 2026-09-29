@@ -1,5 +1,43 @@
 # Codex Review Log
 
+## 2026-09-29 · Complete-product settlement capital / PR #445
+
+- Human handoff and CONTINUE_TO_COMPLETE authorize this candidate; preserved
+  inherited branch work and Human dirty main. Mainnet remains protected.
+- Brain actual-received capital/insurance funding, gross risk reservations,
+  per-player claims and recapitalization do not spend other-player principal.
+  Fixed own-reserve priority against outstanding legacy claims; tested actual
+  ancestor proxy upgrade, storage preservation and fee-on-transfer custody.
+- Actual Brain/Position/Trigger EVM covered signed detents,100C100lots normal,
+  boundary/gap/stress, A/B/C accounting and replay. Checkpoint2fb4e5 Trading
+  Readiness, candidate-browser, Responsive and Universal CI passed.
+- Real390x844/844x390 candidate Chromium exercised approval/deposit/withdraw,
+  pending/fill/PnL/close/liquidation and reload. Direct image inspection rejected
+  premature blank preview captures; final populated previews show the model,
+  margin and liquidation boundary. Under CPU stress background polling could
+  starve a slow preview; the minimal in-flight coalescing fix retains user-input
+  invalidation and requires fresh browser/CI validation before release.
+- Mainnet remains NOT_AUTHORIZED. Public old Testnet receipts do not validate
+  candidate bytecode. Under the separate explicit BSC97 authorization, successor
+  capital-20260929 now has75 confirmed candidate deployment/config/smoke receipts;
+  0.0027142114 test BNB gas. Mock assets only, zero native transaction value;
+  original predecessor receipts preserved. Production proxy artifact is build-only.
+- Public browser validation exposed RPC capabilities/latency, not permission to
+  fabricate recovered receipts: the configured endpoint rejects even single-block
+  eth_getLogs. A same-chain public log index is independently checked and its
+  events verified against primary RPC receipts/blocks. Diagnostics can run in
+  read-only mode without constructing a signer. Failed attempt receipts retained.
+- Final public Chromium passes390x844 normal close(+50 testKGEN),844x390 gap
+  liquidation(raw-220,isolated-100), available-only withdrawal and receipt/account
+  reload. All37 additional browser receipts confirmed;112 including deployment.
+  Direct screenshots exposed historic position liquidation price0; now restored
+  from its actual settlement receipt, including legitimate zero. Adapter32 tests
+  and both final-source read-only browsers pass; no extra broadcast for this fix.
+  Display-only preview cache is bounded5s with fresh wallet/oracle identity;
+  submission never uses it and always performs full fresh execution validation.
+- Final exact-head CI, merge, normal Pages publication and public smoke remain
+  mandatory. Payroll/ATM/advance has no task payment receipt: HOLD.
+
 ## 2026-09-25 · Human spatial calibration and canonical C / V2.6.23
 
 - Direct Human calibration and implementation order; isolated branch

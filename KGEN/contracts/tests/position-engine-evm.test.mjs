@@ -33,6 +33,10 @@ contract MockBrainSettlement {
         reservations[key] = Reservation(user, amountWei, 0, 0, true);
     }
 
+    function reservePositionRisk(bytes32 key, uint256, uint256, uint256) external view {
+        require(!failReserve && reservations[key].active, "MOCK_RISK_RESERVE_FAIL");
+    }
+
     function releasePositionCollateral(bytes32 key) external {
         require(reservations[key].active, "MOCK_NOT_ACTIVE");
         reservations[key].active = false;
@@ -104,7 +108,7 @@ contract AcceptanceSensitiveFeed {
         bool rebound = engine.marketObservationSequence(0) >= switchSequence;
         uint80 round = rebound ? 3 : 2;
         uint256 timestamp = adverseAt + (rebound ? 1 : 0);
-        return (round, rebound ? int256(100e18) : int256(98e18), timestamp, timestamp, round);
+        return (round, rebound ? int256(100e18) : int256(9999e16), timestamp, timestamp, round);
     }
 }
 `;
@@ -374,19 +378,37 @@ const snapshotPosition = await snapshotEngine.positions(1);
 const snapshotReceipt = await snapshotEngine.settlementReceipt(1);
 const snapshotReservation = await mockBrain.reservations(await snapshotEngine.positionKey(1));
 assert.equal(snapshotPosition.status, 3n);
-assert.equal(snapshotPosition.exitPriceWad, parseEther('98'));
+assert.equal(snapshotPosition.exitPriceWad, parseEther('99.99'));
 assert.equal(snapshotPosition.collateralWad, 0n);
-assert.equal(snapshotReceipt.observedPrice, parseEther('98'));
+assert.equal(snapshotReceipt.observedPrice, parseEther('99.99'));
 assert.equal(snapshotReceipt.settlementPrice, snapshotReceipt.observedPrice);
 assert.equal(snapshotReceipt.observedAt, adverseAt);
 assert.equal(snapshotReceipt.observationSequence, sequenceBefore + 1n);
-assert.equal(snapshotReceipt.rawPnl, -parseEther('2'));
+assert.equal(snapshotReceipt.rawPnl, -parseEther('1'));
 assert.equal(snapshotReceipt.realizedPnl, -parseEther('1'));
-assert.equal(snapshotReceipt.badDebt, parseEther('1'));
+assert.equal(snapshotReceipt.badDebt, 0n);
 assert.equal(snapshotReservation.realizedPnlWei, snapshotReceipt.realizedPnl);
 assert.equal(snapshotReservation.badDebtWei, snapshotReceipt.badDebt);
 assert.equal((await snapshotEngine.readMarketPrice(0))[0], px100, 'a second oracle read really would rebound');
 assert.equal(await snapshotEngine.marketObservationSequence(0), sequenceBefore + 1n, 'settlement must not accept a second snapshot');
 await expectRevert(snapshotEngine.connect(executor).observePosition(1), 'same observation cannot liquidate twice');
 
+// Reporting threshold is the nearest adverse integer tick, not merely some
+// deeper price that happens to liquidate. Check both sides and tiny-C ranges.
+for (const c of ['0.001', '-0.001', '1', '-1', '100', '-100']) for (const lots of [1n, 100n]) {
+    const cWad = parseEther(c);
+    const boundary = await snapshotEngine.previewLiquidationBoundary(0, cWad, lots, px100);
+    const hit = mark => {
+        const raw = (mark - px100) * cWad * lots / parseEther('1');
+        const notional = (cWad < 0n ? -cWad : cWad) * lots * mark / px100;
+        return lots * parseEther('1') + raw <= notional * 50n / 10000n;
+    };
+    if (boundary === 0n) assert.equal(hit(cWad > 0n ? 1n : 10n ** 36n), false);
+    else {
+        assert.equal(hit(boundary), true, `touch ${c}/${lots}`);
+        assert.equal(hit(boundary + (cWad > 0n ? 1n : -1n)), false, `nearest tick ${c}/${lots}`);
+    }
+}
+
 console.log('[position-engine-evm] PASS: authenticated 2-of-3 oracle quorum, freshness/round/deviation gates, KX/KY/KZ risk, atomic Brain settlement, bad debt, adversarial same-observation liquidation');
+await eip1193.disconnect();

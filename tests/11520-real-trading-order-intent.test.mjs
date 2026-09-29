@@ -4,7 +4,7 @@ import {buildRealTradingOrderIntent,buildExecutionOrderIntent,createExecutionAda
 import {createKgenLedger} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 import {createRequire} from 'node:module';
-import {TESTNET_EXECUTION_ABI} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
+import {TESTNET_EXECUTION_ABI,CAPITAL_EXECUTION_ABI} from '../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs';
 
 const WALLET='0x3333333333333333333333333333333333333333';
 const BRAIN='0x1111111111111111111111111111111111111111';
@@ -88,7 +88,7 @@ test('single adapter preview is pure; pending is not a fill; cross reserves once
  const {ledger,adapter}=fixture(),before=structuredClone(ledger);
  const preview=adapter.preview(simulationInput,{now:1001});
  assert.equal(preview.ok,true);assert.equal(preview.requiredMargin,10);assert.equal(preview.available,1000);
- assert.equal(preview.estimatedLiquidationPrice,99.99);assert.equal(preview.executionMode,'SIMULATION');
+ assert.equal(preview.estimatedLiquidationPrice,100.99);assert.equal(preview.executionMode,'SIMULATION');
  assert.deepEqual(ledger,before);
  const pending=adapter.submit(preview.intent,{now:1002});
  assert.equal(pending.status,'PENDING_TRIGGER');assert.equal(pending.order.status,'PENDING');assert.equal(ledger.free,1000);assert.equal(ledger.lockedMargin,0);
@@ -151,15 +151,16 @@ test('stable wallet/transaction failure states are bounded and do not leak provi
 // Explicit local EIP-1193 fixtures: these addresses/receipts are NOT public deployments.
 const vendored=createRequire(import.meta.url)('../K線西遊記/assets/ethers-5.7.2.umd.min.js');
 const codec=vendored.ethers.utils;
-function testnetFixture(){
+function testnetFixture({capital=false}={}){
  const addresses={testToken:'0x'+'11'.repeat(20),brainProxy:'0x'+'22'.repeat(20),positionEngine:'0x'+'33'.repeat(20),orderTriggerEngine:'0x'+'44'.repeat(20),brainImplementation:'0x'+'55'.repeat(20)};
  const code='0x60006000',codeHashes=Object.fromEntries(Object.keys(addresses).map(k=>[k,codec.keccak256(code)]));
  const deployment={mode:'BSC_TESTNET',status:'DEPLOYED_CONFIG_VERIFIED',chainId:97,testOnly:true,publicNetwork:true,verified:true,deploymentBlock:1,addresses,codeHashes};
- const abi=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[k,new codec.Interface(v)]));
+ if(capital){deployment.capabilities={settlementCapital:'ISOLATED_V1'};deployment.pnlModel='INDEX_DELTA_C_LOTS_V1'}
+ const abi=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[k,new codec.Interface([...v,...(capital?CAPITAL_EXECUTION_ABI[k]||[]:[])])]));
  const keyFor=address=>Object.keys(addresses).find(k=>addresses[k].toLowerCase()===address.toLowerCase());
  const role='0x'+'aa'.repeat(32),blockHash='0x'+'bb'.repeat(32),hash='0x'+'cc'.repeat(32),wad=v=>codec.parseUnits(String(v),18);
- let chain='0x61',account=WALLET,phase='none',sendError=null,reverted=false,pendingReceipts=0,amount=1000,token=5000,approved=0,stale=false,closeLiquidates=false,sendDelay=null,blockedRead=null,suppressLogs=false;
- const listeners=new Map(),calls=[],logs=[],receipts=new Map();
+ let chain='0x61',account=WALLET,phase='none',sendError=null,reverted=false,pendingReceipts=0,amount=1000,token=5000,approved=0n,stale=false,closeLiquidates=false,sendDelay=null,blockedRead=null,suppressLogs=false;
+ const listeners=new Map(),calls=[],logs=[],receipts=new Map();let claimable=0;
  function log(k,name,args){const ev=abi[k].encodeEventLog(abi[k].getEvent(name),args),value={...ev,address:addresses[k],blockNumber:'0x2',blockHash,transactionHash:hash,logIndex:'0x0',removed:false};logs.push(value);return value}
  function record(k,event,args){const eventLog=log(k,event,args);receipts.set(hash,{transactionHash:hash,blockNumber:'0x2',blockHash,status:reverted?'0x0':'0x1',to:addresses[k],from:account,logs:[eventLog]})}
  const provider={on(event,fn){listeners.set(event,fn)},removeListener(event){listeners.delete(event)},async request({method,params=[]}){
@@ -177,8 +178,10 @@ function testnetFixture(){
    if(sendDelay)await sendDelay;
    if(sendError)throw sendError;const k=keyFor(params[0].to),parsed=abi[k].parseTransaction(params[0]);
    if(parsed.name==='createOrder'){if(!reverted){phase='pending';record(k,'OrderCreated',[1,account])}else receipts.set(hash,{status:'0x0',to:addresses[k],from:account,transactionHash:hash});}
-   if(parsed.name==='approve'){approved=Number(codec.formatUnits(parsed.args[1],18));record(k,'Approval',[account,addresses.brainProxy,parsed.args[1]])}
+   if(parsed.name==='approve'){approved=BigInt(parsed.args[1].toString());record(k,'Approval',[account,addresses.brainProxy,parsed.args[1]])}
    if(parsed.name==='depositMargin'){const n=Number(codec.formatUnits(parsed.args[0],18));amount+=n;token-=n;record(k,'MarginDeposited',[account,parsed.args[0],parsed.args[0]])}
+   if(parsed.name==='withdrawMargin'){const n=Number(codec.formatUnits(parsed.args[0],18));amount-=n;token+=n;record(k,'MarginWithdrawn',[account,parsed.args[0]])}
+   if(parsed.name==='claimSettlement'){amount+=claimable;const paid=claimable;claimable=0;record(k,'SettlementClaimPaid',[parsed.args[0],account,wad(paid),0])}
    if(parsed.name==='faucet'){token+=1000;record(k,'Transfer',['0x'+'0'.repeat(40),account,wad(1000)])}
    if(parsed.name==='closePosition'){
     phase=closeLiquidates?'liquidated':'closed';
@@ -194,21 +197,28 @@ function testnetFixture(){
     case 'brain':case 'brainSettlement':out=[addresses.brainProxy];break;
     case 'engine':out=[addresses.positionEngine];break;case 'executor':out=[addresses.orderTriggerEngine];break;
     case 'decimals':out=[18];break;case 'SETTLEMENT_ROLE':out=[role];break;case 'hasRole':out=[true];break;
-    case 'balanceOf':out=[wad(token)];break;case 'allowance':out=[wad(approved)];break;
+    case 'balanceOf':out=[wad(token)];break;case 'allowance':out=[approved];break;
     case 'principalOf':out=[wad(amount)];break;case 'lockedPrincipalOf':out=[wad(phase==='filled'?2:0)];break;
     case 'availablePrincipal':out=[wad(amount-(phase==='filled'?2:0))];break;
+    case 'playerClaimable':out=[wad(claimable)];break;
+    case 'settlementCapital':case 'availableRiskCapacity':out=[wad(500)];break;
+    case 'reservedSettlementLiability':out=[wad(250)];break;
+    case 'previewLiquidationBoundary':out=[wad(99.991)];break;
+    case 'positionKey':out=['0x'+'dd'.repeat(32)];break;
+    case 'settlementClaims':out=[account,1,1,wad(50),wad(50-claimable),wad(claimable),100,100];break;
+    case 'claimSettlement':out=[wad(claimable)];break;
     case 'readMarketPrice':if(stale)throw {code:'CALL_EXCEPTION'};out=[wad(100),100,3];break;
     case 'marketConfig':out=[100,50,3600,1,wad(1000000),true];break;
     case 'nextOrderId':out=[phase==='none'?1:2];break;
-    case 'order':out=[[1,account,0,wad(100),2,wad(100),90,phase!=='pending'?100:0,wad(100),wad(100),phase!=='pending'?1:0,phase!=='pending'?2:1,wad(99),100,1]];break;
+    case 'order':out=[[parsed.args[0],account,0,wad(100),2,wad(100),90,phase!=='pending'?100:0,wad(100),wad(100),phase!=='pending'?parsed.args[0]:0,phase!=='pending'?2:1,wad(99),100,1]];break;
     case 'positionSnapshot':out=[[account,0,wad(2),wad(phase==='filled'?2:0),wad(100),100,phase==='filled'?0:101,0,0,0,0,phase==='liquidated'?3:phase==='closed'?2:1]];break;
-    case 'orderTerms':out=[1,wad(100),2,wad(100),100,1];break;
+    case 'orderTerms':out=[parsed.args[0],wad(100),2,wad(100),100,1];break;
     case 'markPosition':if(stale)throw {code:'CALL_EXCEPTION'};out=[wad(0.1),wad(2.1),wad(0.01),false];break;
     case 'liquidationBoundary':out=[wad(99.5)];break;
-    case 'fillReceipt':out=[[1,1,account,0,wad(100),2,90,100,wad(99),wad(100),wad(100),wad(100),wad(1000),wad(2),wad(998),1,1]];break;
-    case 'settlementReceipt':out=[[1,1,0,wad(100),2,wad(100),wad(99.5),wad(100),wad(99),101,101,wad(2),0,wad(-2),wad(-2),0,phase==='liquidated'?3:2,account,1,wad(99),101,2]];break;
+    case 'fillReceipt':out=[[parsed.args[0],parsed.args[0],account,0,wad(100),2,90,100,wad(99),wad(100),wad(100),wad(100),wad(1000),wad(2),wad(998),1,1]];break;
+    case 'settlementReceipt':out=[[parsed.args[0],parsed.args[0],0,wad(100),2,wad(100),wad(99.5),wad(100),wad(99),101,101,wad(2),0,wad(-2),wad(-2),0,phase==='liquidated'?3:2,account,1,wad(99),101,2]];break;
     case 'createOrder':out=[1];break;case 'approve':out=[true];break;case 'depositMargin':out=[parsed.args[0]];break;case 'faucet':out=[];break;
-    case 'closePosition':out=[];break;
+    case 'closePosition':case 'withdrawMargin':out=[];break;
     default:throw new Error(`fixture missing ${parsed.name}`);
    }
    const encoded=abi[k].encodeFunctionResult(parsed.name,out);
@@ -221,11 +231,38 @@ function testnetFixture(){
   setChain:v=>{chain=v},setAccount:v=>{account=v;listeners.get('accountsChanged')?.(v?[v]:[])},
   setReject:()=>{sendError={code:4001}},setRevert:()=>{reverted=true},setPending:n=>{pendingReceipts=n},setStale:()=>{stale=true},
   setCloseLiquidates:()=>{closeLiquidates=true},setAmount:v=>{amount=v},setSuppressLogs:v=>{suppressLogs=!!v},
+  claimFixture(){claimable=50;record('brainProxy','SettlementClaimRecorded',['0x'+'dd'.repeat(32),account,wad(50),0,wad(50)])},
   delaySend:()=>{let release;sendDelay=new Promise(r=>{release=r});return ()=>{release();sendDelay=null}},
   delayRead:()=>{let release;blockedRead=new Promise(r=>{release=r});return release},
+  settledOrders(count,liquidated=false){phase=liquidated?'liquidated':'closed';for(let id=1;id<=count;id++){record('orderTriggerEngine','OrderCreated',[id,account]);record('orderTriggerEngine','OrderFilled',[id,id,wad(100)]);record('positionEngine',liquidated?'PositionLiquidated':'PositionClosed',[id,wad(99),wad(-2),wad(-2),0])}record('orderTriggerEngine','OrderFilled',[999,999,wad(100)]);record('positionEngine',liquidated?'PositionLiquidated':'PositionClosed',[999,wad(99),wad(-2),wad(-2),0])},
   fill(){phase='filled';record('orderTriggerEngine','OrderFilled',[1,1,wad(100)])}};
 }
 const onchainInput={axis:'KX',market:'BTCUSDT',c:100,lots:2,currentPrice:100,triggerPrice:100};
+test('recovery groups settlement event queries per pinned refresh and filters exact position IDs',async()=>{
+ for(const liquidated of [false,true]){
+  const f=testnetFixture();f.settledOrders(3,liquidated);const adapter=f.make();assert.equal((await adapter.recover()).ok,true);
+  const book=adapter.snapshot();assert.deepEqual(book.positions.map(p=>p.positionId),['1','2','3']);
+  assert.deepEqual(book.receipts.filter(r=>r.kind==='FILL').map(r=>r.receiptId),['FILL-1','FILL-2','FILL-3']);
+  assert.deepEqual(book.receipts.filter(r=>r.kind==='SETTLEMENT').map(r=>r.receiptId),['SETTLEMENT-1','SETTLEMENT-2','SETTLEMENT-3']);
+  for(const [key,event] of [['orderTriggerEngine','OrderFilled'],['positionEngine',liquidated?'PositionLiquidated':'PositionClosed']]){
+   const face=new codec.Interface(TESTNET_EXECUTION_ABI[key]),topic=face.getEventTopic(event);
+   const calls=f.calls.filter(c=>c.method==='eth_getLogs'&&c.params[0].topics[0]===topic);
+   assert.equal(calls.length,1,event+' queried once rather than per position');assert.equal(calls[0].params[0].topics.length,1);assert.equal(calls[0].params[0].toBlock,'0x2');
+  }
+  const createdTopic=new codec.Interface(TESTNET_EXECUTION_ABI.orderTriggerEngine).getEventTopic('OrderCreated');
+  const created=f.calls.find(c=>c.method==='eth_getLogs'&&c.params[0].topics[0]===createdTopic);assert.equal(created.params[0].topics[2].toLowerCase(),'0x'+WALLET.slice(2).toLowerCase().padStart(64,'0'),'trader filter remains narrow');
+  f.calls.length=0;assert.equal((await adapter.refresh()).ok,true);assert.ok(f.calls.some(c=>c.method==='eth_getLogs'),'cache cannot cross refresh snapshot');
+ }
+});
+test('historical position liquidation boundary comes from its canonical settlement receipt including genuine zero',async()=>{
+ for(const liquidated of [false,true])for(const boundary of ['99.5','0']){
+  const f=testnetFixture();f.settledOrders(1,liquidated);const request=f.provider.request,face=new codec.Interface(TESTNET_EXECUTION_ABI.positionEngine);
+  f.provider.request=async args=>{const raw=await request(args);if(args.method==='eth_call'&&args.params[0].to===f.deployment.addresses.positionEngine&&args.params[0].data.startsWith(face.getSighash('settlementReceipt'))){const [s]=face.decodeFunctionResult('settlementReceipt',raw),values=Array.from(s);values[6]=codec.parseUnits(boundary,18);return face.encodeFunctionResult('settlementReceipt',[values])}return raw};
+  const adapter=f.make();assert.equal((await adapter.recover()).ok,true);const position=adapter.snapshot().positions[0],receipt=adapter.snapshot().receipts.find(r=>r.kind==='SETTLEMENT');
+  assert.equal(position.status,liquidated?'LIQUIDATED':'CLOSED');assert.equal(position.liquidationPrice,Number(boundary));assert.equal(position.liquidationPrice,receipt.liquidationTrigger);
+  assert.equal(f.calls.some(c=>c.method==='eth_call'&&c.params[0].to===f.deployment.addresses.positionEngine&&c.params[0].data.startsWith(face.getSighash('liquidationBoundary'))),false,'historical boundary must not be recomputed from a live oracle');
+ }
+});
 test('BSC97 adapter refuses unverified/local/mainnet/empty deployment without RPC',async()=>{
  for(const override of [{verified:false},{publicNetwork:false},{chainId:56},{status:'PREPARED_NOT_DEPLOYED'},{addresses:{}},{codeHashes:{}}]){
   const f=testnetFixture(),adapter=f.make({deployment:{...f.deployment,...override}});assert.equal(adapter.enabled,false);
@@ -238,6 +275,31 @@ test('BSC97 vendored ethers5 adapter validates deployment and reads only real-co
  const preview=await adapter.preview(onchainInput);assert.equal(preview.ok,true);assert.equal(preview.requiredMargin,2);
  assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
  assert.equal((await adapter.observe({price:1})).reason,'KEEPER_OBSERVATION_REQUIRED');
+});
+test('display preview reuses only a bounded fresh READY recovery and still reads live identity and oracle',async t=>{
+ let now=Date.now();t.mock.method(Date,'now',()=>now);const f=testnetFixture(),adapter=f.make();assert.equal((await adapter.refresh()).ok,true);
+ f.calls.length=0;now+=5000;assert.equal((await adapter.preview(onchainInput)).ok,true);
+ assert.equal(f.calls.some(c=>c.method==='eth_getLogs'),false,'fresh preview must not recover history again');
+ assert.ok(f.calls.some(c=>c.method==='eth_chainId'));assert.ok(f.calls.some(c=>c.method==='eth_accounts'));
+ const face=new codec.Interface(TESTNET_EXECUTION_ABI.positionEngine);
+ assert.ok(f.calls.some(c=>c.method==='eth_call'&&c.params[0].data.startsWith(face.getSighash('readMarketPrice'))),'selected oracle is checked at latest even inside TTL');
+ f.calls.length=0;now++;assert.equal((await adapter.preview(onchainInput)).ok,true);assert.ok(f.calls.some(c=>c.method==='eth_getLogs'),'5001ms forces history refresh');
+ f.setStale();assert.equal((await adapter.preview(onchainInput)).code,'ORACLE_STALE','recent READY is not permission to ignore a newly stale oracle');
+});
+test('display preview cache never survives changed account, wrong chain, or mid-preview session invalidation',async()=>{
+ const f=testnetFixture(),adapter=f.make();await adapter.refresh();f.calls.length=0;
+ const other='0x'+'77'.repeat(20);f.setAccount(other);assert.equal((await adapter.preview(onchainInput)).ok,true);assert.equal(adapter.snapshot().account,other);assert.ok(f.calls.some(c=>c.method==='eth_getLogs'));
+ f.setChain('0x38');assert.equal((await adapter.preview(onchainInput)).code,'WRONG_CHAIN');assert.equal(adapter.snapshot().wallet,null);
+ const g=testnetFixture(),second=g.make();await second.refresh();const request=g.provider.request;
+ const face=new codec.Interface(TESTNET_EXECUTION_ABI.positionEngine);
+ g.provider.request=async args=>{const result=await request(args);if(args.method==='eth_call'&&args.params[0].data.startsWith(face.getSighash('marketConfig')))g.setAccount(null);return result};
+ assert.equal((await second.preview(onchainInput)).code,'DISCONNECTED');assert.equal(second.snapshot().wallet,null);
+});
+test('submit never uses display snapshot cache and rejects changed margin before any wallet request',async()=>{
+ const f=testnetFixture(),adapter=f.make();await adapter.refresh();assert.equal((await adapter.preview(onchainInput)).ok,true);
+ f.setAmount(0);f.calls.length=0;const sent=await adapter.submit(onchainInput);assert.equal(sent.code,'INSUFFICIENT_MARGIN');
+ assert.ok(f.calls.some(c=>c.method==='eth_getLogs'),'submit performs a fresh full recovery even within5seconds');
+ assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);assert.equal(adapter.snapshot().wallet.free,0);
 });
 test('onchain order only confirms after successful receipt; reload rebuilds pending and fill from events/state',async()=>{
  const f=testnetFixture(),states=[],adapter=f.make({onState:s=>states.push(s)});f.setPending(2);
@@ -264,6 +326,21 @@ test('test token approval and deposit are separate explicit wallet actions, disc
  assert.equal(adapter.snapshot().wallet.free,1010);assert.equal(adapter.snapshot().wallet.testTokenBalance,4990);
  f.setAccount(null);assert.equal(adapter.snapshot().wallet,null);assert.equal((await adapter.refresh()).code,'DISCONNECTED');
  f.setChain('0x38');assert.equal((await adapter.switchChain()).ok,true);assert.equal(f.calls.at(-1).method,'eth_chainId');
+});
+test('allowance is read-only; max approval is explicit, reusable, and withdrawal cannot consume locked funds',async()=>{
+ const f=testnetFixture(),adapter=f.make();await adapter.refresh();
+ assert.equal(adapter.snapshot().wallet.allowanceWei,'0');assert.equal(adapter.snapshot().wallet.claimable,null);
+ assert.equal(f.calls.filter(c=>c.method==='eth_sendTransaction').length,0);
+ assert.equal((await adapter.approve(100,{unlimited:true})).ok,true);
+ assert.equal(adapter.snapshot().wallet.allowanceWei,((1n<<256n)-1n).toString());
+ assert.equal(adapter.snapshot().wallet.allowanceUnlimited,true);
+ assert.equal((await adapter.deposit(100)).ok,true);assert.equal((await adapter.deposit(500)).ok,true);
+ assert.equal(f.calls.filter(c=>c.method==='eth_sendTransaction'&&c.params[0].to===f.deployment.addresses.testToken).length,1);
+ await adapter.submit(onchainInput);f.fill();await adapter.refresh();
+ assert.equal(adapter.snapshot().wallet.withdrawable,1598);
+ assert.equal((await adapter.withdraw(1599)).code,'INSUFFICIENT_MARGIN');
+ assert.equal((await adapter.withdraw(100)).ok,true);assert.equal(adapter.snapshot().wallet.free,1498);
+ assert.equal(adapter.snapshot().receipts.some(r=>r.kind==='MarginWithdrawn'&&r.amount===100),true);
 });
 test('stale onchain oracle preserves recovered balances/order/receipt but never fabricates PnL or READY',async()=>{
  const f=testnetFixture(),adapter=f.make();assert.equal((await adapter.submit(onchainInput)).ok,true);f.fill();f.setStale();
@@ -314,4 +391,25 @@ test('BSC97 recovery falls back to canonical contract state when RPC log index r
  assert.equal(reloaded.snapshot().orders[0].orderId,'1');assert.equal(reloaded.snapshot().positions[0].status,'OPEN');
  assert.equal(reloaded.snapshot().receipts.find(r=>r.kind==='ORDER_CREATED').transactionStatus,'RPC_LOG_INDEX_UNAVAILABLE');
  assert.equal(reloaded.snapshot().receipts.find(r=>r.kind==='FILL').transactionStatus,'RPC_LOG_INDEX_UNAVAILABLE');
+});
+test('manifest-bound capital accounting and claim recovery use candidate ABI; legacy does not invent zeros',async()=>{
+ const old=testnetFixture(),legacy=old.make();await legacy.refresh();assert.equal(legacy.snapshot().wallet.claimable,null);
+ assert.equal((await legacy.claim('0x'+'dd'.repeat(32))).reason,'CLAIM_NOT_SUPPORTED_BY_DEPLOYMENT');
+ const f=testnetFixture({capital:true}),adapter=f.make();f.claimFixture();await adapter.recover();
+ assert.equal(adapter.snapshot().wallet.claimable,50);assert.equal(adapter.snapshot().wallet.equity,1050);
+ assert.equal(adapter.snapshot().capital.reservedSettlementLiability,250);
+ const preview=await adapter.preview(onchainInput);assert.equal(preview.estimatedLiquidationPrice,99.991);
+ assert.equal(preview.pnlModel,'INDEX_DELTA_C_LOTS_V1');
+ const key=adapter.snapshot().claims[0].key;assert.equal((await adapter.claim(key)).ok,true);
+ assert.equal(adapter.snapshot().wallet.free,1050);assert.equal(adapter.snapshot().wallet.claimable,0);
+ assert.equal(adapter.snapshot().wallet.equity,1050);assert.equal((await adapter.claim(key)).reason,'CLAIM_NOT_AVAILABLE');
+ adapter.dispose();const reload=f.make();await reload.recover();assert.equal(reload.snapshot().wallet.free,1050);
+ assert.equal(reload.snapshot().receipts.some(r=>r.kind==='SettlementClaimPaid'),true);
+});
+test('candidate claims remain actionable when the RPC log index is empty and canonical positions recover',async()=>{
+ const f=testnetFixture({capital:true}),adapter=f.make();await adapter.submit(onchainInput);f.fill();f.claimFixture();f.setSuppressLogs(true);
+ adapter.dispose();const reload=f.make();assert.equal((await reload.recover()).ok,true);
+ assert.equal(reload.snapshot().wallet.claimable,50);assert.equal(reload.snapshot().claims[0].remaining,50);
+ assert.equal(reload.snapshot().claims[0].evidence,'CONTRACT_STATE');
+ assert.equal(reload.snapshot().receipts.some(r=>r.kind==='SettlementClaimRecorded'),false,'no fabricated event receipt');
 });

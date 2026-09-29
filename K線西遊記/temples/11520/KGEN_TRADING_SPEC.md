@@ -2,7 +2,7 @@
 
 ## Metadata
 - STATUS: ACTIVE / SOURCE_OF_TRUTH
-- REVISION: 2026-09-24.1
+- REVISION: 2026-09-29.1
 - HUMAN_AUTHORITY: 沈英明
 - CHANGE_RULE: CODE MUST IMPLEMENT SPEC; CODE DOES NOT REDEFINE SPEC.
 
@@ -13,17 +13,23 @@
 - C 不得用來減少本金／保證金。
 
 ## 2. C 槓桿與損益
+- AUTHORITY: Human `KAIOS_K11520_COMPLETE_PRODUCT_HANDOFF_TO_CODEX_GM_V1` 第六、七節及 `CONTINUE_TO_COMPLETE` 明確核定本節；不是以程式倒推正典。
 - C 是帶方向的隔離槓桿倍率，`abs(C)` 上限為 `100`；不得再以傳統交易所 `L` 模型取代。
-- 交易損益：`PnL_KGEN = ((markPrice - entryPrice) / entryPrice) × direction × lots × abs(C)`。
+- 交易損益：`PnL_KGEN = (markIndex - entryIndex) × signed C × lots`，模型為 `INDEX_DELTA_C_LOTS_V1`。
+- Solidity WAD：`(markPriceWad - entryPriceWad) * cWad * lots / 1e18`；不得除以 entryPrice。
 - 多方 direction = +1；空方 direction = -1。
-- 標的每變動 1% 的損益絕對值：`abs(lots × C × 0.01)` KGEN。
-- 在沒有其他已核准風控規則介入時，理論反向歸零報酬率：`1 / abs(C)`（C != 0）。
+- 標的每變動 1 index 的損益絕對值：`abs(lots × C)` KGEN；若顯示 1% 範例，必須乘該 entryIndex × 0.01，不能用百分比損益模型替代。
+- 理想化反向本金耗盡距離：`1 / abs(C)` index；相對報酬率為 `1 / (abs(C) × entryIndex)`。實際鏈上以 maintenance margin、整數計算與同一 accepted observation 判定，不能寫死 1%。
+- KGEN executable C 為 ±0.001/0.01/0.1/1，以及 ±5..100 每5一檔；0C 不開倉。小於0.001C的 KAIOS 遊戲行為不建立 KGEN margin/position/PnL。
 
 ### 例
 - 100 口 -> 本金 100 KGEN。
-- 100 口、100C -> 標的每變動 1% 即 ±100 KGEN；反向 1% 耗盡該筆本金。
-- 100 口、50C -> 標的每變動 1% 即 ±50 KGEN；反向 2% 耗盡該筆本金。
-- 100 口、1C -> 標的每變動 1% 即 ±1 KGEN；反向 100% 耗盡該筆本金。
+- 100 口、100C -> 變動0.01 index 即 ±100 KGEN；理想化反向0.01 index耗盡本金。
+- 100 口、50C -> 變動0.01 index 即 ±50 KGEN；理想化反向0.02 index耗盡本金。
+- 100 口、1C -> 變動1 index 即 ±100 KGEN；理想化反向1 index耗盡本金。
+
+### 歷史模型（僅 lineage，不是新交易 authority）
+2026-09-24.1 的 `(mark-entry)/entry × signed C × lots` 與「100C反向1%」已由上述 Human handoff 明確取代。既有公開 BSC97 舊合約仍依舊 bytecode 運作，adapter 必須標示 `NOTIONAL_RETURN_V1`，不能把新公式假裝已部署。新候選 ABI/模型僅在 manifest capability 驗證後使用。
 
 ## 3. 單筆清算邊界
 - 每筆訂單的本金是該筆交易的風險池。
@@ -39,6 +45,11 @@ KGEN 錢包餘額不等於全部都是保證金。UI/runtime 必須分開：
 - Reserved Orders：真正待成交委託所預留的 KGEN。
 - Unrealized PnL：未平倉損益。
 - Realized PnL：已平倉損益。
+- Brain Total = principal；Available/Withdrawable = principal - locked。Equity = principal + unrealized PnL + 已結算未付 Player Claimable；Claimable 不得冒充可立即提款的現金。
+- Settlement Capital 為實際 funding 收到的獨立資金，Player Deposit 不增加 Settlement Capital。Insurance 亦獨立，Treasury surplus 不得挪用以上負債。
+- 開倉在同一 transaction 預留 collateral 與依 oracle bounds 計算的最大有利損益。Reserved Settlement Liability 為所有倉位 gross sum；不可樂觀淨額抵銷。不足則整筆 revert。
+- 市場有 open positions 時鎖定該市場風控／價格範圍／oracle configuration，避免已預留 liability 被事後失效。
+- 未付盈利寫入 Player Claimable 與 per-position claim；補資後可部分／完全清償給原 trader principal。未補資不向其他玩家追扣，也不阻擋有足額 custody 的 principal 提款。
 
 ## 5. KX / KY / KZ
 - KX、KY、KZ 是三個獨立交易軸。

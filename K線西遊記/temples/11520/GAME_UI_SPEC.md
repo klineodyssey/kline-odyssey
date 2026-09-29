@@ -1,8 +1,8 @@
 # 11520 花果山 5D K 線西遊記｜遊戲畫面與器官施工規格
 
 ## Metadata
-- VERSION: 1.1.0
-- REVISION: 2026-09-03.2
+- VERSION: 1.2.0
+- REVISION: 2026-09-29.1
 - STATUS: ACTIVE / SOURCE_OF_TRUTH
 - HUMAN_AUTHORITY: 沈英明
 - FORMAL_RULE: 正式檔名固定不帶版本；版本與 revision 寫在文件內。
@@ -91,6 +91,10 @@
 - 必須有文字說明書 fallback。
 
 ## 9. 真錢包／真交易邊界
+- Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE：沿用既有 wallet/adapter/Brain，不建第二套結算。永久 allowance 預設必須明示 spender/額度與錢包簽名；connect 本身不 approve。已足額 allowance 不重複要求 approve。Deposit 一次後可多次下單；Withdraw 僅 Available。
+- 資產表完整分 Wallet KGEN/BNB、Brain Total、Available、Locked、Unrealized/Realized PnL、Equity、Claimable、Withdrawable。未支援 Claimable ABI 的歷史部署顯示 unsupported，不偽造0。
+- 新 C-order 使用 `ΔIndex × signed C × lots`，詳細 authority 見 KGEN_TRADING_SPEC。部署模型必須清楚區分；100C理想歸零距離0.01 index，不可套舊固定1%。
+- Position/receipt 顯示 accepted oracle observation、entry/mark/settlement、margin、PnL、claim及chain receipt；reload/hot-switch從對應account鏈上狀態恢復，不以localStorage當資產帳本。
 - 可連線 EVM wallet、查 chain/account/native balance/ERC-20 `balanceOf`。
 - 真實 settlement 下單只有在正式 contract address + ABI + chain + custody + receipt 全部驗證後才能啟用。
 - 未驗證前必須 fail-closed 或清楚標示 simulation/off-chain；不得把 local FILLED 冒充真成交。

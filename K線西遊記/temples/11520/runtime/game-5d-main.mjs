@@ -31,7 +31,7 @@ const restoredSession=readPlayerSession();if(restoredSession){S.xyz={...restored
 let lastSessionSave=0,lastSessionSnapshot='';function persistPlayerSession(force=false){const now=Date.now(),snapshot=JSON.stringify([S.xyz,S.intentXYZ]);if(!force&&(snapshot===lastSessionSnapshot||now-lastSessionSave<750))return;lastSessionSave=now;lastSessionSnapshot=snapshot;savePlayerSession({xyz:S.xyz,intentXYZ:S.intentXYZ})}addEventListener('pagehide',()=>persistPlayerSession(true));addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistPlayerSession(true)});
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
 const simulationExecution=createExecutionAdapter({ledger});
-let execution=simulationExecution,executionBusy=false,previewSequence=0;
+let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';
 const executionLabel=()=>isTestnet()?'BSC TESTNET · NO REAL VALUE':'SIMULATION';
 async function executionAction(action){
@@ -55,7 +55,7 @@ function renderAxes(){
 }
 function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">即時參考價：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
 let quotePending=false;
-async function quotes(){if(quotePending)return;quotePending=true;try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});updateKMarketReference(world,next,Date.now());Object.assign(S.quotes,next);const observedAt=Date.now();if(!isTestnet())for(const market of MARKETS){const result=execution.observe({market,price:next[market],observedAt,now:observedAt});if(result.ok)recordSimulationEvents(result.events)}syncSimulationPositions();if(pending)paintOrderPreview();$('#feed').textContent='LIVE · Binance public data'}catch{if(world.kSpace)world.kSpace.quoteFailed=true;$('#feed').textContent=world.kSpace?'STALE · Binance public data':'WAIT · 行情未就緒'}finally{quotePending=false;if(pending)paintOrderPreview();renderAxes()}}
+async function quotes(){if(quotePending)return;quotePending=true;try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});updateKMarketReference(world,next,Date.now());Object.assign(S.quotes,next);const observedAt=Date.now();if(!isTestnet())for(const market of MARKETS){const result=execution.observe({market,price:next[market],observedAt,now:observedAt});if(result.ok)recordSimulationEvents(result.events)}syncSimulationPositions();if(pending&&!isTestnet())paintOrderPreview();$('#feed').textContent='LIVE · Binance public data'}catch{if(world.kSpace)world.kSpace.quoteFailed=true;$('#feed').textContent=world.kSpace?'STALE · Binance public data':'WAIT · 行情未就緒'}finally{quotePending=false;if(pending&&!isTestnet())paintOrderPreview();renderAxes()}}
 function syncMarketKLabels(){
   if(!$('#marketKLabelsStyle')){const style=document.createElement('style');style.id='marketKLabelsStyle';style.textContent='.axis:has(.marketKValue) .universeFloorBadge{display:none!important}';document.head.append(style)}
   const market=kMarketSnapshot(world);
@@ -147,9 +147,9 @@ function recordSimulationEvents(events){for(const e of events){S.history.unshift
 const escapeUI=value=>String(value??'--').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const receiptTime=value=>value==null?'--':new Date(value).toISOString();
 function receiptRows(rows){return '<dl class="exchangeRows">'+rows.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+escapeUI(value)+'</dd></div>').join('')+'</dl>'}
-function walletMetrics(w){if(!w)return '<p>尚未驗證鏈上帳戶 / UNVERIFIED</p>';const value=n=>n==null?'UNAVAILABLE':fmt(n,6);return receiptRows([['AVAILABLE',value(w.free)],['LOCKED MARGIN',value(w.lockedMargin)],['EQUITY',value(w.equity)],['UNREALIZED PNL',value(w.unrealizedPnl)],['REALIZED PNL',value(w.realizedPnl)]])}
+function walletMetrics(w){if(!w)return '<p>尚未驗證鏈上帳戶 / UNVERIFIED</p>';const value=n=>n==null?'UNAVAILABLE':fmt(n,6);return receiptRows([['BRAIN TOTAL',value(w.total??w.principal??(w.free+w.lockedMargin))],['AVAILABLE',value(w.free)],['LOCKED MARGIN',value(w.lockedMargin)],['UNREALIZED PNL',value(w.unrealizedPnl)],['EQUITY',value(w.equity)],['REALIZED PNL',value(w.realizedPnl)],['PLAYER CLAIMABLE',w.claimableStatus==='UNSUPPORTED_LEGACY_DEPLOYMENT'?'此舊部署未支援':value(w.claimable)],['WITHDRAWABLE',value(w.withdrawable??(isTestnet()?null:w.free))]])}
 function simulationOrganHTML(id){
-  const x=execution.snapshot(),w=x.wallet,tag=isTestnet()?'<p class="muted">BSC TESTNET 97 · NO REAL VALUE · 僅合約狀態／已確認收據，瀏覽器報價不結算。</p>':'<p class="muted">SIMULATION WALLET · 本頁模擬記帳，非鏈上 KGEN / Brain 資產。</p>';
+  const x=execution.snapshot(),w=x.wallet,tag=isTestnet()?'<p class="muted">BSC TESTNET 97 · NO REAL VALUE · 僅合約狀態／已確認收據，瀏覽器報價不結算。<br>MODEL: '+escapeUI(x.pnlModel||'UNVERIFIED')+(x.pnlModel==='NOTIONAL_RETURN_V1'?'（舊部署比例模型；不是新 ΔIndex 模型）':'')+'</p>':'<p class="muted">SIMULATION WALLET · 本頁模擬記帳，非鏈上 KGEN / Brain 資產。</p>';
   if(id==='assets')return tag+'<div class="card">'+walletMetrics(w)+(isTestnet()?'<hr>TEST TOKEN · NO REAL VALUE<br>'+escapeUI(w?.testTokenBalance??'UNVERIFIED'):'<hr>ON-CHAIN KGEN · READ ONLY<br>'+escapeUI(S.walletKgen??'未連線或尚未驗證'))+'</div>';
   if(id==='orders')return tag+(x.orders.slice().reverse().map(o=>{
     const r=x.receipts.find(r=>r.orderId===o.orderId&&r.kind==='FILL');
@@ -157,9 +157,10 @@ function simulationOrganHTML(id){
   }).join('')||'<p>尚無委託</p>');
   if(id==='positions')return tag+(x.positions.slice().reverse().map(p=>{
     const risk=isTestnet()?{liquidationMark:p.liquidationPrice,pnl:p.unrealizedPnl}:positionRisk(p),r=x.receipts.find(r=>r.positionId===p.positionId&&r.kind==='SETTLEMENT');
-    return '<div class="card"><b>'+p.positionId+' · '+(p.status==='OPEN'?'POSITION OPEN':p.status==='LIQUIDATED'?'斷頭 / LIQUIDATED':p.status)+'</b>'+receiptRows([['MARKET',p.market],['SIDE / C / LOTS',p.side+' / '+p.c+'C / '+p.lots],['ENTRY / MARK',fmt(p.entry,6)+' / '+fmt(p.mark,6)],['LIQUIDATION',risk.liquidationMark==null?'UNAVAILABLE':fmt(Math.max(0,risk.liquidationMark),6)],['MARGIN',fmt(p.margin,6)],['UNREALIZED PNL',p.status==='OPEN'&&risk.pnl==null?'UNAVAILABLE':fmt(p.status==='OPEN'?risk.pnl:0,6)],...(r?[['REALIZED PNL',fmt(r.realizedPnl,6)],['SETTLED AT',receiptTime(r.settledAt)],['RECEIPT ID',r.receiptId]]:[])])+(p.status==='OPEN'?'<button class="btn" data-sim-close="'+p.positionId+'">CLOSE · 平倉（'+executionLabel()+'）</button>':'')+'</div>';
+return '<div class="card"><b>'+p.positionId+' · '+(p.status==='OPEN'?'POSITION OPEN':p.status==='LIQUIDATED'?'斷頭 / LIQUIDATED':p.status)+'</b>'+receiptRows([['MARKET',p.market],['SIDE / C / LOTS',p.side+' / '+p.c+'C / '+p.lots],['ENTRY / MARK',fmt(p.entry,6)+' / '+fmt(p.mark,6)],['LIQUIDATION',risk.liquidationMark==null?'UNAVAILABLE':fmt(Math.max(0,risk.liquidationMark),6)],['ΔINDEX',p.deltaIndex==null?'--':fmt(p.deltaIndex,8)],['POSITION EQUITY',p.equity==null?'--':fmt(p.equity,6)],['ORACLE TIME',receiptTime(p.observedAt)],['POSITION OBSERVATION SEQUENCE',p.observationSequence??'--'],['MARGIN',fmt(p.margin,6)],['UNREALIZED PNL',p.status==='OPEN'&&risk.pnl==null?'UNAVAILABLE':fmt(p.status==='OPEN'?risk.pnl:0,6)],...(r?[['REALIZED PNL',fmt(r.realizedPnl,6)],['SETTLED AT',receiptTime(r.settledAt)],['RECEIPT ID',r.receiptId]]:[])])+(p.status==='OPEN'?'<button class="btn" data-sim-close="'+p.positionId+'">CLOSE · 平倉（'+executionLabel()+'）</button>':'')+'</div>';
   }).join('')||'<p>尚無部位</p>');
   if(id==='history')return tag+(isTestnet()?'<p>CHAIN RECEIPTS · 重新載入後由合約／events／receipts 恢復，不使用模擬帳本。</p>':'<p>ORDER / SETTLEMENT RECEIPTS · 本次頁面工作階段紀錄；重新載入會重設模擬帳本。</p>')+(x.receipts.slice().reverse().map(r=>{
+    if(isTestnet()&&['Approval','MarginDeposited','MarginWithdrawn','TEST_TOKEN_MINT','SettlementClaimRecorded','SettlementClaimPaid'].includes(r.kind))return '<details class="card" data-receipt="'+escapeUI(r.receiptId)+'"><summary>'+escapeUI(r.kind)+' · '+escapeUI(r.status)+'</summary>'+receiptRows([['TX HASH',r.txHash],['BLOCK',r.block],['TIME',receiptTime(r.timestamp)],['CONTRACT',r.contract],['METHOD',r.method],['AMOUNT',r.amount??'--'],['CLAIM PAID',r.paid??'--'],['CLAIM REMAINING',r.remaining??'--'],['TX STATUS',r.transactionStatus]])+'</details>';
     const order=x.orders.find(o=>o.orderId===r.orderId),fill=x.receipts.find(f=>f.positionId===r.positionId&&f.kind==='FILL');
     const rows=[...(isTestnet()?[['TX HASH',r.txHash],['BLOCK',r.block],['CONTRACT',r.contract],['METHOD',r.method],['TX STATUS',r.transactionStatus||r.status]]:[]),['ORDER ID',r.orderId],['POSITION ID',r.positionId],['MARKET',r.market],['SIDE / C / LOTS',r.side+' / '+r.c+'C / '+r.lots],['CREATED AT',receiptTime(order?.createdAt)],['TRIGGERED AT',receiptTime(r.triggeredAt)],['TRIGGER / FILL',order?.triggerPrice+' / '+fill?.fillPrice],['PREVIOUS / OBSERVED',r.previousPrice+' / '+r.observedPrice]];
     if(r.kind==='FILL')rows.push(['WALLET BEFORE',r.walletBefore],['MARGIN LOCKED',r.marginLocked],['WALLET AFTER',r.walletAfter]);
@@ -176,10 +177,10 @@ function refreshSimulationSheet(){const id=$('#sheetBody')?.dataset.simOrgan;if(
 globalThis.__K11520_SIMULATION_EXCHANGE__=Object.freeze({simulationOnly:true,snapshot:()=>simulationExecution.snapshot()});
 globalThis.__K11520_EXECUTION__=Object.freeze({snapshot:()=>execution.snapshot()});
 function orderInput(){const optional=id=>$(id)?.value.trim()?Number($(id).value):null;return {...pending,currentPrice:isTestnet()?execution.snapshot().observations[pending.market]?.price:S.quotes[pending.market],triggerPrice:Number($('#simulationTriggerPrice').value),stopPrice:optional('#simulationStopPrice'),takeProfitPrice:optional('#simulationTakeProfitPrice')}}
-async function paintOrderPreview(){
-  if(!pending)return;const sequence=++previewSequence,adapter=execution;$('#confirmOrder').disabled=true;const p=await adapter.preview(orderInput()),el=$('#simulationOrderPreview');if(!pending||sequence!==previewSequence||adapter!==execution||!el)return;$('#confirmOrder').disabled=!p.ok||executionBusy;
+async function paintOrderPreview({background=false}={}){
+  if(!pending||(background&&previewRequests>0))return;const sequence=++previewSequence,adapter=execution;if(!background)$('#confirmOrder').disabled=true;let p;previewRequests++;try{p=await adapter.preview(orderInput())}finally{previewRequests--}const el=$('#simulationOrderPreview');if(!pending||sequence!==previewSequence||adapter!==execution||!el)return;$('#confirmOrder').disabled=!p.ok||executionBusy;
   if(!p.ok){el.textContent=pending.axis+' '+pending.market+' · '+p.code+' · '+p.reason;return}
-  el.innerHTML=receiptRows([['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+(isTestnet()?' tKGEN TEST':' KGEN')],['每 1% 變動',fmt(p.lots*p.leverage/100,6)+(isTestnet()?' tKGEN TEST':' KGEN')],['AVAILABLE',fmt(p.available,6)+(isTestnet()?' tKGEN TEST':' KGEN')],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+(isTestnet()?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。反向歸零 '+fmt(100/p.leverage,6)+'%。跳空以 observed price 計算實際斷頭價。</small>');
+el.innerHTML=receiptRows([['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+(isTestnet()?' tKGEN TEST':' KGEN')],['PnL MODEL',p.pnlModel||'NOTIONAL_RETURN_V1'],[p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?'每 1 index point 變動':'每 1% 變動（舊部署）',fmt(p.lots*p.leverage/(p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?1:100),6)+(isTestnet()?' tKGEN TEST':' KGEN')],['AVAILABLE',fmt(p.available,6)+(isTestnet()?' tKGEN TEST':' KGEN')],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+(isTestnet()?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。PnL = ΔIndex × C × Lots；反向歸零 '+fmt(1/p.leverage,6)+' index points。跳空以 observed price 計算實際斷頭價。</small>');
 }
 function openOrder(){
   syncTradeAxisFromPlane();const a=axis(),p=isTestnet()?execution.snapshot().observations[a.market]?.price:price();pending=null;if(!p){toast('ORACLE_STALE · 行情未就緒');return}
@@ -234,7 +235,7 @@ async function selectExecutionMode(){
   });
   if(!r.ok)toast(r.reason);renderWallet();
 }
-async function refreshTestnet(){if(!isTestnet()||executionBusy||chainRefreshBusy)return;chainRefreshBusy=true;try{await execution.refresh();syncSimulationPositions();renderWallet()}finally{chainRefreshBusy=false}}
+async function refreshTestnet(){if(!isTestnet()||executionBusy||chainRefreshBusy)return;chainRefreshBusy=true;try{await execution.refresh();syncSimulationPositions();renderWallet();if(pending)void paintOrderPreview({background:true})}finally{chainRefreshBusy=false}}
 const retained=readPublicWalletIdentity();
 if(retained){const el=document.createElement('p');el.id='walletRetained';el.textContent='上次公開地址（未驗證連線）：'+retained.address;$('#walletMsg').after(el)}
 function renderWallet(value=walletSession.snapshot()){
@@ -254,7 +255,16 @@ function renderWallet(value=walletSession.snapshot()){
   $('#testnetActions').hidden=!isTestnet();
   for(const b of $$('#testnetActions button'))b.disabled=busy;
   $('#testnetSwitch').disabled=busy||value.chainId===97;
-  const summary=$('#walletSimulation');if(summary)summary.innerHTML='<b>'+executionLabel()+(isTestnet()?' · BRAIN ACCOUNT':' WALLET')+'</b>'+walletMetrics(chain.wallet)+(isTestnet()?receiptRows([['TEST TOKEN BALANCE',chain.wallet?.testTokenBalance??'UNVERIFIED'],['TX STATUS',chain.transaction?.status||chain.status],['TX HASH',chain.transaction?.txHash||'--']]):'');
+  const amount=Number($('#testnetAmount').value),w=chain.wallet,valid=Number.isFinite(amount)&&amount>0;
+  let enough=false;try{enough=!!w&&BigInt(w.allowanceWei)>=BigInt(Math.ceil(amount*1e6))*10n**12n}catch{}
+  $('#testnetAllowance').textContent=!w?'ALLOWANCE · UNVERIFIED':w.allowanceUnlimited?'ALLOWANCE · 永久授權已確認':`ALLOWANCE · ${fmt(w.allowance,6)} tKGEN`;
+  $('#testnetApprove').disabled=busy||!w||(!$('#testnetUnlimited').checked&&!valid)||enough;
+  $('#testnetApprove').textContent=enough?'授權足夠 · 無需重複 Approve':$('#testnetUnlimited').checked?'Approve 永久額度（需錢包確認）':'Approve 本次額度（需錢包確認）';
+  $('#testnetDeposit').disabled=busy||!w||!valid||!enough||amount>w.testTokenBalance;
+  $('#testnetWithdraw').disabled=busy||!w||!valid||amount>w.withdrawable;
+  $('#testnetClaims').innerHTML=(chain.claims||[]).filter(c=>c.remaining>0).map(c=>`<button class="btn" data-claim="${escapeUI(c.key)}">清償 Claim #${escapeUI(c.positionId)} · ${fmt(c.remaining,6)}</button>`).join('');
+  for(const b of $$('#testnetClaims button')){b.disabled=busy;b.onclick=async()=>{const r=await executionAction(()=>execution.claim(b.dataset.claim));toast(r.ok?'CLAIM PAID → BRAIN AVAILABLE · RECEIPT CONFIRMED':r.reason)}}
+const summary=$('#walletSimulation');if(summary)summary.innerHTML='<b>'+executionLabel()+(isTestnet()?' · BRAIN ACCOUNT':' WALLET')+'</b>'+walletMetrics(chain.wallet)+(chain.capital?'<details><summary>Exchange Capital（非玩家本金）</summary>'+receiptRows([['FREE SETTLEMENT CAPITAL',fmt(chain.capital.settlementCapital,6)],['RESERVED LIABILITY',fmt(chain.capital.reservedSettlementLiability,6)],['ADMISSION CAPACITY',fmt(chain.capital.availableRiskCapacity,6)]])+'</details>':'')+(isTestnet()?receiptRows([['TEST TOKEN BALANCE',chain.wallet?.testTokenBalance??'UNVERIFIED'],['TX STATUS',chain.transaction?.status||chain.status],['TX HASH',chain.transaction?.txHash||'--']]):'');
   if($('#sheetBody')?.dataset.simOrgan==='assets')refreshSimulationSheet();
 }
 walletSession.subscribe(value=>{renderWallet(value);if(isTestnet())void refreshTestnet()});renderWallet();void loadTestnetManifest();
@@ -263,7 +273,9 @@ $('#walletRefresh').onclick=async()=>{await walletSession.refresh();await refres
 $('#executionMode').onclick=selectExecutionMode;
 $('#testnetSwitch').onclick=async()=>{const r=await executionAction(()=>execution.switchChain());if(!r.ok)toast(r.reason);await walletSession.refresh()};
 $('#testnetFaucet').onclick=async()=>{const r=await executionAction(()=>execution.faucet());toast(r.ok?'TEST ONLY FAUCET RECEIPT CONFIRMED':r.reason)};
-for(const method of ['approve','deposit'])$('#testnet'+method[0].toUpperCase()+method.slice(1)).onclick=async()=>{const amount=$('#testnetAmount').value;const r=await executionAction(()=>execution[method](amount));toast(r.ok?'TESTNET '+method.toUpperCase()+' RECEIPT CONFIRMED':r.reason)};
+for(const method of ['approve','deposit','withdraw'])$('#testnet'+method[0].toUpperCase()+method.slice(1)).onclick=async()=>{const amount=$('#testnetAmount').value;const r=await executionAction(()=>execution[method](amount,{unlimited:$('#testnetUnlimited').checked}));toast(r.ok?'TESTNET '+method.toUpperCase()+' RECEIPT CONFIRMED':r.reason)};
+$('#testnetAmount').oninput=()=>renderWallet();$('#testnetUnlimited').onchange=()=>renderWallet();
+for(const b of $$('[data-deposit-preset]'))b.onclick=()=>{$('#testnetAmount').value=b.dataset.depositPreset;renderWallet()};
 $('#walletToggle').onclick=()=>{$('#walletPanel').classList.toggle('collapsed');renderWallet()};
 setInterval(()=>{if(!$('#walletPanel').classList.contains('collapsed'))renderWallet()},1000);
 setInterval(()=>void refreshTestnet(),5000);

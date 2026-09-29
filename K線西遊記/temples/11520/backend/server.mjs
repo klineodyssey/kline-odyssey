@@ -3,6 +3,7 @@ import { randomUUID, randomBytes } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { requiredMargin, normalizeSignedC, signedCFromLegacyMagnitude, signedPositionSide } from '../runtime/kgen-margin-runtime.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dataFile = resolve(here, 'data', 'players.json');
@@ -21,7 +22,6 @@ function send(res, status, body){ res.writeHead(status, {'content-type':'applica
 async function json(req){ let s=''; for await (const c of req) s += c; return s ? JSON.parse(s) : {}; }
 function auth(req){ const token=(req.headers.authorization||'').replace(/^Bearer\s+/i,''); return sessions.get(token)||null; }
 function playerView(p){ return { id:p.id,name:p.name,xyz:p.xyz,kgen:p.kgen,kaios:p.kaios,kufo:p.kufo,hp:p.hp,home:p.home||null,updatedAt:p.updatedAt }; }
-function requiredMargin(lots){ return lots; }
 
 await loadDb();
 const server=http.createServer(async (req,res)=>{
@@ -36,7 +36,7 @@ const server=http.createServer(async (req,res)=>{
       players[id] ||= {id,name:String(body.name||'旅人').slice(0,40),xyz:{x:0,y:0,z:0},kgen:10,kaios:1000,kufo:1,hp:100,home:null,updatedAt:now};
       players[id].updatedAt=now; await persist();
       const token=randomBytes(24).toString('hex'); sessions.set(token,id);
-      return send(res,200,{token,player:playerView(players[id]),orderMode:'OFFCHAIN_SIMULATION',rules:{principalPerLotKgen:1,maxAbsC:100,pnlFormula:'priceReturn*direction*lots*absC',maintenanceRate:MAINTENANCE_RATE}});
+      return send(res,200,{token,player:playerView(players[id]),orderMode:'OFFCHAIN_SIMULATION',rules:{principalPerLotKgen:1,maxAbsC:100,pnlFormula:'deltaIndex*signedC*lots',maintenanceRate:MAINTENANCE_RATE}});
     }
     if(req.method==='GET' && url.pathname==='/api/v1/player'){
       const id=auth(req); if(!id) return send(res,401,{error:'UNAUTHORIZED'}); return send(res,200,{player:playerView(players[id])});
@@ -49,17 +49,19 @@ const server=http.createServer(async (req,res)=>{
     }
     if(req.method==='POST' && url.pathname==='/api/v1/order'){
       const id=auth(req); if(!id) return send(res,401,{error:'UNAUTHORIZED'}); const b=await json(req); const p=players[id];
-      const axis=String(b.axis||''); const side=String(b.side||''); const lots=Math.trunc(Number(b.lots)); const leverage=Math.trunc(Number(b.leverage)); const price=Number(b.price);
+      const axis=String(b.axis||''); const side=String(b.side||''); const lots=Number(b.lots); const price=Number(b.price);
       if(!['KX','KY','KZ'].includes(axis)) return send(res,400,{error:'BAD_AXIS'});
       if(!['多','空'].includes(side)) return send(res,400,{error:'BAD_SIDE'});
-      if(!(lots>=1&&lots<=100)) return send(res,400,{error:'BAD_LOTS'});
-      if(!(leverage>=1&&leverage<=100)) return send(res,400,{error:'BAD_LEVERAGE'});
+      if(!Number.isInteger(lots)||lots<1||lots>100) return send(res,400,{error:'BAD_LOTS'});
+      let c;try { c=b.c===undefined?signedCFromLegacyMagnitude(b.leverage,side):normalizeSignedC(b.c);signedPositionSide(c,side); }
+      catch { return send(res,400,{error:'BAD_C'}); }
+      const leverage=Math.abs(c);
       if(!Number.isFinite(price)||price<=0) return send(res,400,{error:'BAD_PRICE'});
-      const initialMarginKgen=requiredMargin(lots);
+      const initialMarginKgen=requiredMargin({lots});
       const maintenanceMarginKgen=initialMarginKgen*MAINTENANCE_RATE;
       if(p.kgen<initialMarginKgen) return send(res,409,{error:'INSUFFICIENT_KGEN',required:initialMarginKgen,available:p.kgen});
       p.kgen-=initialMarginKgen; p.updatedAt=new Date().toISOString(); await persist();
-      return send(res,200,{order:{id:randomUUID(),axis,side,lots,leverage,entryPrice:price,initialMarginKgen,maintenanceMarginKgen,perOnePercentPnlKgen:lots*leverage/100,pnlFormula:'((markPrice-entryPrice)/entryPrice)*direction*lots*leverage',status:'FILLED_SIMULATION'},player:playerView(p)});
+      return send(res,200,{order:{id:randomUUID(),axis,side,lots,c,leverage,entryPrice:price,initialMarginKgen,maintenanceMarginKgen,perIndexPnlKgen:lots*leverage,perOnePercentPnlKgen:price*lots*leverage/100,pnlFormula:'(markPrice-entryPrice)*signedC*lots',status:'FILLED_SIMULATION'},player:playerView(p)});
     }
     return send(res,404,{error:'NOT_FOUND'});
   } catch (e) { return send(res,500,{error:'SERVER_ERROR',message:String(e?.message||e)}); }

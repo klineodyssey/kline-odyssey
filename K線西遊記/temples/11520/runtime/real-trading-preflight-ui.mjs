@@ -31,7 +31,10 @@ export function inspectRealTradingUiPreflight({axis,market,chainId=56,walletIden
   });
 }
 
-export function classify11520OrderRoute({preflight=null,localSimulationAvailable=true}={}){
+export function classify11520OrderRoute({preflight=null,localSimulationAvailable=true,execution=null}={}){
+  // Reporting only: this does not construct an adapter, sign, or authorize a
+  // Mainnet path. The actual adapter still verifies manifest/code/chain/receipt.
+  if(execution?.mode==='BSC_TESTNET'&&execution?.chainId===97)return Object.freeze({route:'TESTNET_EXPLICIT_WALLET_ACTION',label:'BSC TESTNET 97 · NO REAL VALUE',status:execution.status,signerRequested:false,broadcast:false});
   if(preflight?.ready===true)return Object.freeze({route:'REAL_READY_FOR_EXPLICIT_WALLET_ACTION',localSimulationAvailable:!!localSimulationAvailable,signerRequested:false,broadcast:false});
   if(localSimulationAvailable)return Object.freeze({route:'LOCAL_SIMULATION_REAL_BLOCKED',localSimulationAvailable:true,signerRequested:false,broadcast:false,blockers:Object.freeze([...(preflight?.blockers||[])])});
   return Object.freeze({route:'ORDER_BLOCKED',localSimulationAvailable:false,signerRequested:false,broadcast:false,blockers:Object.freeze([...(preflight?.blockers||[])])});
@@ -81,11 +84,12 @@ function renderPreflight(){
 
 function notifyOrderRoute(){
   const preflight=renderPreflight();
-  const route=classify11520OrderRoute({preflight,localSimulationAvailable:true});
+  const route=classify11520OrderRoute({preflight,localSimulationAvailable:true,execution:globalThis.__K11520_EXECUTION__?.snapshot?.()});
   globalThis.__K11520_ORDER_ROUTE__={...route,checkedAt:new Date().toISOString()};
   const toast=$('#toast');
   if(!toast)return route;
-  if(route.route==='REAL_READY_FOR_EXPLICIT_WALLET_ACTION')toast.textContent='真實交易條件已齊；下一步仍需錢包明確確認';
+  if(route.route==='TESTNET_EXPLICIT_WALLET_ACTION')toast.textContent='BSC TESTNET 97 · NO REAL VALUE；下單需錢包明確確認，receipt 前不算成功';
+  else if(route.route==='REAL_READY_FOR_EXPLICIT_WALLET_ACTION')toast.textContent='真實交易條件已齊；下一步仍需錢包明確確認';
   else toast.textContent='目前下單走本機模擬；真實交易仍封鎖';
   toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);
   return route

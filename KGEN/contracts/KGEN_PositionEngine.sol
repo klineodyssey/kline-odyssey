@@ -5,6 +5,7 @@ import {KGEN_MarketRiskKernel_V1_0_0} from "./KGEN_MarketRiskKernel.sol";
 
 interface IKGENBrainSettlementV4 {
     function reservePositionCollateral(bytes32 positionKey, address user, uint256 amountWei) external;
+    function reservePositionRisk(bytes32 positionKey, uint256 liability, uint256 orderId, uint256 positionId) external;
     function releasePositionCollateral(bytes32 positionKey) external;
     function settlePositionCollateral(bytes32 positionKey, int256 realizedPnlWei, uint256 badDebtWei) external;
 }
@@ -16,7 +17,8 @@ interface IKGENPriceFeedV1 {
 
 /**
  * KGEN_PositionEngine
- * VERSION: 1.0.0
+ * VERSION: 1.1.0
+ * REVISION: 2026-09-29.CAPITAL_ADMISSION_INDEX_PNL
  * STATUS: DRAFT_REAL_FUNDS_CANDIDATE
  * SOURCE_OF_TRUTH: CANDIDATE
  * Formal organ filename is versionless; version remains metadata.
@@ -56,6 +58,7 @@ contract KGEN_PositionEngine_V1_0_0 {
     mapping(uint256 => SettlementReceipt) private _receipts;
     mapping(uint256 => bool) public usedOrderIds;
     bool public paused;
+    mapping(Market => uint256) public openPositionCount;
     error Paused(); error OrderAlreadyUsed(); error OutOfOrderPrice();
 
     function setPaused(bool value) external onlyAdmin { paused = value; }
@@ -73,6 +76,10 @@ contract KGEN_PositionEngine_V1_0_0 {
         id = _openPosition(trader,market,cWad < 0 ? -int256(size) : int256(size),margin,price);
         usedOrderIds[orderId] = true;
         orderTerms[id] = OrderTerms(orderId,cWad,lots,price,observedAt,sequence);
+        MarketConfig memory cfg = _config(market);
+        uint256 favorable = cWad > 0 ? cfg.maxPriceWad : cfg.minPriceWad;
+        uint256 liability = uint256(KGEN_MarketRiskKernel_V1_0_0.orderPnl(cWad,lots,price,favorable));
+        brainSettlement.reservePositionRisk(positionKey(id),liability,orderId,id);
     }
 
     event ExecutorSet(address indexed executor);
@@ -96,12 +103,14 @@ contract KGEN_PositionEngine_V1_0_0 {
     function positionKey(uint256 positionId) public view returns (bytes32) { return keccak256(abi.encodePacked(address(this), positionId)); }
 
     function configureMarket(Market market,uint16 initialMarginBps,uint16 maintenanceMarginBps,uint32 maxOracleAge,uint256 minPriceWad,uint256 maxPriceWad,bool enabled) external onlyAdmin {
+        require(openPositionCount[market] == 0, "OPEN_POSITIONS_CONFIG_LOCKED");
         if (initialMarginBps < 100 || maintenanceMarginBps == 0 || maintenanceMarginBps >= initialMarginBps || initialMarginBps > BPS || maxOracleAge == 0 || minPriceWad == 0 || maxPriceWad <= minPriceWad || maxPriceWad > 1e36) revert InvalidRiskConfig();
         marketConfig[market] = MarketConfig(initialMarginBps,maintenanceMarginBps,maxOracleAge,minPriceWad,maxPriceWad,enabled);
         emit MarketConfigured(market,initialMarginBps,maintenanceMarginBps,maxOracleAge,minPriceWad,maxPriceWad,enabled);
     }
 
     function configureOracle(Market market,address[] calldata feeds,uint8 minValidSources,uint16 maxDeviationBps) external onlyAdmin {
+        require(openPositionCount[market] == 0, "OPEN_POSITIONS_CONFIG_LOCKED");
         if (feeds.length < 2 || feeds.length > MAX_ORACLE_SOURCES || minValidSources < 2 || minValidSources > feeds.length || maxDeviationBps == 0 || maxDeviationBps > 2_000) revert InvalidOracleConfig();
         OracleConfig storage cfg = _oracleConfig[market]; for (uint256 i=0;i<MAX_ORACLE_SOURCES;i++) cfg.feeds[i]=address(0);
         for (uint256 i=0;i<feeds.length;i++) { if (feeds[i]==address(0)) revert ZeroAddress(); for (uint256 j=0;j<i;j++) if (feeds[i]==feeds[j]) revert InvalidOracleConfig(); cfg.feeds[i]=feeds[i]; }
@@ -115,7 +124,11 @@ contract KGEN_PositionEngine_V1_0_0 {
 
     function openPosition(address trader,Market market,int256 sizeWad,uint256 collateralWad) external onlyExecutor returns (uint256 positionId) {
         (uint256 price,,)=_acceptMarketObservation(market);
-        return _openPosition(trader,market,sizeWad,collateralWad,price);
+        positionId = _openPosition(trader,market,sizeWad,collateralWad,price);
+        MarketConfig memory cfg = _config(market);
+        uint256 favorable = sizeWad > 0 ? cfg.maxPriceWad : cfg.minPriceWad;
+        uint256 liability = uint256(KGEN_MarketRiskKernel_V1_0_0.pnl(sizeWad,price,favorable));
+        brainSettlement.reservePositionRisk(positionKey(positionId),liability,0,positionId);
     }
 
     function _openPosition(address trader,Market market,int256 sizeWad,uint256 collateralWad,uint256 validated) internal returns (uint256 positionId) {
@@ -125,6 +138,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         MarketConfig memory cfg=_config(market); uint256 sizeAbs=_abs(sizeWad); uint256 notionalWad=KGEN_MarketRiskKernel_V1_0_0.notional(sizeAbs,validated); uint256 minInitialMargin=(notionalWad*cfg.initialMarginBps+BPS-1)/BPS; if (collateralWad<minInitialMargin || notionalWad > collateralWad*100) revert InitialMarginTooLow();
         positionId=nextPositionId++; bytes32 key=positionKey(positionId); brainSettlement.reservePositionCollateral(key,trader,collateralWad);
         positions[positionId]=Position(trader,market,sizeWad,collateralWad,validated,uint64(block.timestamp),0,0,0,0,0,Status.OPEN);
+        openPositionCount[market]++;
         emit PositionOpened(positionId,trader,market,sizeWad,collateralWad,validated,key);
     }
 
@@ -137,7 +151,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         if (orderTerms[positionId].orderId != 0) return _settleOrderPosition(positionId,false);
         Position storage p=positions[positionId]; if (p.status!=Status.OPEN) revert PositionNotOpen(); (uint256 exitPrice,,)=_readOracle(p.market); (int256 rawPnlWad,int256 boundedPnlWad,uint256 gapDebtWad)=_settlementOutcome(p.sizeWad,p.entryPriceWad,exitPrice,p.collateralWad);
         p.exitPriceWad=exitPrice; p.rawPnlWad=rawPnlWad; p.realizedPnlWad=boundedPnlWad; p.badDebtWad=gapDebtWad; p.closedAt=uint64(block.timestamp); p.status=Status.CLOSED;
-        brainSettlement.settlePositionCollateral(positionKey(positionId),boundedPnlWad,gapDebtWad); emit PositionClosed(positionId,exitPrice,rawPnlWad,boundedPnlWad,gapDebtWad); return (boundedPnlWad,gapDebtWad);
+        openPositionCount[p.market]--; brainSettlement.settlePositionCollateral(positionKey(positionId),boundedPnlWad,gapDebtWad); emit PositionClosed(positionId,exitPrice,rawPnlWad,boundedPnlWad,gapDebtWad); return (boundedPnlWad,gapDebtWad);
     }
 
     function liquidatePosition(uint256 positionId) external onlyExecutor returns (int256 realizedPnlWad,uint256 badDebtWad) {
@@ -147,7 +161,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         bool shouldLiquidate=KGEN_MarketRiskKernel_V1_0_0.liquidatable(p.collateralWad,rawPnlWad,notionalWad,cfg.maintenanceMarginBps); if (!shouldLiquidate) revert NotLiquidatable();
         (,int256 boundedPnlWad,uint256 gapDebtWad)=_settlementOutcome(p.sizeWad,p.entryPriceWad,mark,p.collateralWad);
         p.exitPriceWad=mark; p.rawPnlWad=rawPnlWad; p.realizedPnlWad=boundedPnlWad; p.badDebtWad=gapDebtWad; p.closedAt=uint64(block.timestamp); p.status=Status.LIQUIDATED;
-        brainSettlement.settlePositionCollateral(positionKey(positionId),boundedPnlWad,gapDebtWad); emit PositionLiquidated(positionId,mark,rawPnlWad,boundedPnlWad,gapDebtWad); return (boundedPnlWad,gapDebtWad);
+        openPositionCount[p.market]--; brainSettlement.settlePositionCollateral(positionKey(positionId),boundedPnlWad,gapDebtWad); emit PositionLiquidated(positionId,mark,rawPnlWad,boundedPnlWad,gapDebtWad); return (boundedPnlWad,gapDebtWad);
     }
 
     function _metrics(uint256 id,uint256 mark) internal view returns (int256 raw,uint256 notional) {
@@ -170,39 +184,34 @@ contract KGEN_PositionEngine_V1_0_0 {
         t.lastPrice=mark; t.observedAt=observedAt; t.observationSequence=sequence;
     }
 
-    // Guaranteed-trigger reporting threshold. The exact integer predicate remains
-    // authoritative and can trigger slightly before the conservative long value.
+    // Same integer INDEX_DELTA_C_LOTS predicate used by mark and settlement.
+    // Zero means no representable adverse positive-price trigger in the bounded
+    // arithmetic domain, not a fabricated oracle price.
     function liquidationBoundary(uint256 id) public view returns (uint256 boundary) {
         Position storage p=positions[id]; OrderTerms storage t=orderTerms[id];
-        uint256 lev=_abs(t.cWad); uint256 mm=_config(p.market).maintenanceMarginBps;
-        uint256 exposure=lev*t.lots;
-        if(t.cWad>0) {
-            if(lev<=1e18 || mm>=BPS) return 0;
-            boundary=p.entryPriceWad*(lev-1e18)*BPS/(lev*(BPS-mm));
-            if(boundary==0 || _boundaryTriggers(id,boundary,mm)) return boundary;
-            // Correlated PnL/notional floors put long equity-minus-MM less than
-            // two KGEN wei above its continuous value. Move adversely by >=2.
-            uint256 denominator=exposure*(BPS-mm);
-            uint256 shift=(2*p.entryPriceWad*BPS+denominator-1)/denominator;
-            if(shift>=boundary) return 0; // No representable positive trigger.
-            boundary-=shift;
-        } else {
-            // For shorts raw loss=floor(notional)-exposure. Solve the integer
-            // requirement q+floor(q*MM/BPS)>=margin+exposure before pricing q.
-            uint256 target=(t.lots*1e18+exposure)*BPS;
-            uint256 q=(target+BPS+mm-1)/(BPS+mm);
-            boundary=(q*p.entryPriceWad+exposure-1)/exposure;
-        }
-        if(!_boundaryTriggers(id,boundary,mm)) revert NotLiquidatable();
+        return previewLiquidationBoundary(p.market,t.cWad,t.lots,p.entryPriceWad);
     }
 
-    function _boundaryTriggers(uint256 id,uint256 mark,uint256 mm) internal view returns (bool) {
-        // This is a derived reporting price, not an accepted oracle input. Low-C
-        // short thresholds may exceed 1e36; the derived products remain bounded.
-        OrderTerms storage t=orderTerms[id]; uint256 entry=positions[id].entryPriceWad;
-        int256 raw=(int256(mark)-int256(entry))*t.cWad*int256(t.lots)/int256(entry);
-        uint256 notional=_abs(t.cWad)*t.lots*mark/entry;
-        return KGEN_MarketRiskKernel_V1_0_0.liquidatable(t.lots*1e18,raw,notional,uint16(mm));
+    function previewLiquidationBoundary(Market market,int256 cWad,uint256 lots,uint256 entry) public view returns (uint256) {
+        KGEN_MarketRiskKernel_V1_0_0.validateOrder(cWad,lots);
+        require(entry > 0 && entry <= 1e36, "INVALID_ENTRY");
+        uint16 mm = _config(market).maintenanceMarginBps;
+        uint256 lo = cWad > 0 ? 1 : entry;
+        uint256 hi = cWad > 0 ? entry : 1e36;
+        if (!_boundaryTriggers(cWad,lots,entry,cWad > 0 ? lo : hi,mm)) return 0;
+        while (lo < hi) {
+            uint256 mid = cWad > 0 ? lo + (hi-lo+1)/2 : lo + (hi-lo)/2;
+            bool hit = _boundaryTriggers(cWad,lots,entry,mid,mm);
+            if (cWad > 0) { if (hit) lo=mid; else hi=mid-1; }
+            else { if (hit) hi=mid; else lo=mid+1; }
+        }
+        return lo;
+    }
+
+    function _boundaryTriggers(int256 cWad,uint256 lots,uint256 entry,uint256 mark,uint16 mm) internal pure returns (bool) {
+        int256 raw = KGEN_MarketRiskKernel_V1_0_0.orderPnl(cWad,lots,entry,mark);
+        uint256 notional = _abs(cWad)*lots*mark/entry;
+        return KGEN_MarketRiskKernel_V1_0_0.liquidatable(lots*1e18,raw,notional,mm);
     }
 
     function _settleOrderPosition(uint256 id,bool liquidation) internal returns (int256 realized,uint256 debt) {
@@ -228,6 +237,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         p.exitPriceWad=r.observedPrice; p.rawPnlWad=r.rawPnl; p.realizedPnlWad=r.realizedPnl; p.badDebtWad=r.badDebt;
         p.closedAt=uint64(block.timestamp); p.status=r.status; p.collateralWad=0;
         t.lastPrice=r.observedPrice; t.observedAt=r.observedAt; t.observationSequence=r.observationSequence;
+        openPositionCount[p.market]--;
         brainSettlement.settlePositionCollateral(positionKey(id),r.realizedPnl,r.badDebt);
         if(r.status==Status.LIQUIDATED) emit PositionLiquidated(id,r.observedPrice,r.rawPnl,r.realizedPnl,r.badDebt);
         else emit PositionClosed(id,r.observedPrice,r.rawPnl,r.realizedPnl,r.badDebt);

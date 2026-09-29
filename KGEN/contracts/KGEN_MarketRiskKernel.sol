@@ -3,7 +3,8 @@ pragma solidity ^0.8.24;
 
 /**
  * KGEN_MarketRiskKernel
- * VERSION: 1.0.0
+ * VERSION: 1.1.0
+ * REVISION: 2026-09-29.INDEX_DELTA_C_LOTS
  * STATUS: DRAFT_REAL_FUNDS_CANDIDATE
  * SOURCE_OF_TRUTH: CANDIDATE
  * Formal organ filename is versionless; version remains metadata.
@@ -36,7 +37,7 @@ library KGEN_MarketRiskKernel_V1_0_0 {
         if (entry == 0 || mark == 0) revert ZeroPrice();
         // Bounds also keep signed multiplication deterministic and fail-closed.
         if (entry > 1e36 || mark > 1e36) revert SignedOverflow();
-        return (int256(mark) - int256(entry)) * cWad * int256(lots) / int256(entry);
+        return (int256(mark) - int256(entry)) * cWad * int256(lots) / int256(WAD);
     }
     error ZeroPrice(); error ZeroSize(); error InvalidBps(); error InvalidOracleTime(); error StaleOraclePrice(); error OraclePriceOutOfBounds(); error SignedOverflow();
 
@@ -61,6 +62,8 @@ library KGEN_MarketRiskKernel_V1_0_0 {
 }
 
 contract KGEN_MarketRiskKernelHarness_V1_0_0 {
+    function validateOrder(int256 cWad,uint256 lots) external pure returns(uint256) { return KGEN_MarketRiskKernel_V1_0_0.validateOrder(cWad,lots); }
+    function orderPnl(int256 cWad,uint256 lots,uint256 entry,uint256 mark) external pure returns(int256) { return KGEN_MarketRiskKernel_V1_0_0.orderPnl(cWad,lots,entry,mark); }
     function validateOraclePrice(uint256 priceWad,uint256 updatedAt,uint256 nowTs,uint256 maxAge,uint256 minPriceWad,uint256 maxPriceWad) external pure returns (uint256) { return KGEN_MarketRiskKernel_V1_0_0.validateOraclePrice(priceWad,updatedAt,nowTs,maxAge,minPriceWad,maxPriceWad); }
     function notional(uint256 sizeAbsWad,uint256 priceWad) external pure returns (uint256) { return KGEN_MarketRiskKernel_V1_0_0.notional(sizeAbsWad,priceWad); }
     function pnl(int256 sizeWad,uint256 entryPriceWad,uint256 markPriceWad) external pure returns (int256) { return KGEN_MarketRiskKernel_V1_0_0.pnl(sizeWad,entryPriceWad,markPriceWad); }
