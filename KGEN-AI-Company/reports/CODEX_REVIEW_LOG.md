@@ -2,6 +2,10 @@
 
 ## 2026-09-29 · Complete-product settlement capital / PR #445
 
+- PR446 CI exposed ethers' 250ms rejected-estimate cache after synchronous
+  local funding. The actual-pair test disables provider caching and asserts
+  identical post-funding estimates each reach the EVM. This test-only repair
+  does not weaken capital admission or add timing sleeps; fresh CI is required.
 - Release follow-up: PR445/main b4331317 passed all required CI and normal
   Pages; public exact-source and real-browser rotation/PWA smoke passed.
   Naturally stale ETH/BNB mock feeds correctly preserved balances/receipts and
