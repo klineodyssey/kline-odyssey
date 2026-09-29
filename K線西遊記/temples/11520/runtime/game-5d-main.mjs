@@ -31,7 +31,7 @@ const restoredSession=readPlayerSession();if(restoredSession){S.xyz={...restored
 let lastSessionSave=0,lastSessionSnapshot='';function persistPlayerSession(force=false){const now=Date.now(),snapshot=JSON.stringify([S.xyz,S.intentXYZ]);if(!force&&(snapshot===lastSessionSnapshot||now-lastSessionSave<750))return;lastSessionSave=now;lastSessionSnapshot=snapshot;savePlayerSession({xyz:S.xyz,intentXYZ:S.intentXYZ})}addEventListener('pagehide',()=>persistPlayerSession(true));addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistPlayerSession(true)});
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
 const simulationExecution=createExecutionAdapter({ledger});
-let execution=simulationExecution,executionBusy=false,previewSequence=0;
+let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';
 const executionLabel=()=>isTestnet()?'BSC TESTNET · NO REAL VALUE':'SIMULATION';
 async function executionAction(action){
@@ -178,7 +178,7 @@ globalThis.__K11520_SIMULATION_EXCHANGE__=Object.freeze({simulationOnly:true,sna
 globalThis.__K11520_EXECUTION__=Object.freeze({snapshot:()=>execution.snapshot()});
 function orderInput(){const optional=id=>$(id)?.value.trim()?Number($(id).value):null;return {...pending,currentPrice:isTestnet()?execution.snapshot().observations[pending.market]?.price:S.quotes[pending.market],triggerPrice:Number($('#simulationTriggerPrice').value),stopPrice:optional('#simulationStopPrice'),takeProfitPrice:optional('#simulationTakeProfitPrice')}}
 async function paintOrderPreview({background=false}={}){
-  if(!pending)return;const sequence=++previewSequence,adapter=execution;if(!background)$('#confirmOrder').disabled=true;const p=await adapter.preview(orderInput()),el=$('#simulationOrderPreview');if(!pending||sequence!==previewSequence||adapter!==execution||!el)return;$('#confirmOrder').disabled=!p.ok||executionBusy;
+  if(!pending||(background&&previewRequests>0))return;const sequence=++previewSequence,adapter=execution;if(!background)$('#confirmOrder').disabled=true;let p;previewRequests++;try{p=await adapter.preview(orderInput())}finally{previewRequests--}const el=$('#simulationOrderPreview');if(!pending||sequence!==previewSequence||adapter!==execution||!el)return;$('#confirmOrder').disabled=!p.ok||executionBusy;
   if(!p.ok){el.textContent=pending.axis+' '+pending.market+' · '+p.code+' · '+p.reason;return}
 el.innerHTML=receiptRows([['AXIS',p.axis],['EXECUTION MODE',p.executionMode],['MARKET',p.market],['SIDE',p.side],['C / LEVERAGE / LOTS',p.c+'C / '+p.leverage+'× / '+p.lots],['CURRENT PRICE',p.currentPrice],['TRIGGER PRICE',p.triggerPrice],['REQUIRED MARGIN',p.requiredMargin+(isTestnet()?' tKGEN TEST':' KGEN')],['PnL MODEL',p.pnlModel||'NOTIONAL_RETURN_V1'],[p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?'每 1 index point 變動':'每 1% 變動（舊部署）',fmt(p.lots*p.leverage/(p.pnlModel==='INDEX_DELTA_C_LOTS_V1'?1:100),6)+(isTestnet()?' tKGEN TEST':' KGEN')],['AVAILABLE',fmt(p.available,6)+(isTestnet()?' tKGEN TEST':' KGEN')],['EST. LIQUIDATION',fmt(p.estimatedLiquidationPrice,6)]])+(isTestnet()?'<small>TESTNET · NO REAL VALUE。風險與 liquidation threshold 來自鏈上設定。Oracle stale 時拒絕送出；不以 public browser quote 結算。</small>':'<small>模擬 isolated model：本金 = 口數；維持保證金與手續費為 0。PnL = ΔIndex × C × Lots；反向歸零 '+fmt(1/p.leverage,6)+' index points。跳空以 observed price 計算實際斷頭價。</small>');
 }

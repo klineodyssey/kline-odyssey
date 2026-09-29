@@ -1,5 +1,28 @@
 # Codex Review Log
 
+## 2026-09-29 · Complete-product settlement capital / PR #445
+
+- Human handoff and CONTINUE_TO_COMPLETE authorize this candidate; preserved
+  inherited branch work and Human dirty main. No new protected-chain execution.
+- Brain actual-received capital/insurance funding, gross risk reservations,
+  per-player claims and recapitalization do not spend other-player principal.
+  Fixed own-reserve priority against outstanding legacy claims; tested actual
+  ancestor proxy upgrade, storage preservation and fee-on-transfer custody.
+- Actual Brain/Position/Trigger EVM covered signed detents,100C100lots normal,
+  boundary/gap/stress, A/B/C accounting and replay. Checkpoint2fb4e5 Trading
+  Readiness, candidate-browser, Responsive and Universal CI passed.
+- Real390x844/844x390 candidate Chromium exercised approval/deposit/withdraw,
+  pending/fill/PnL/close/liquidation and reload. Direct image inspection rejected
+  premature blank preview captures; final populated previews show the model,
+  margin and liquidation boundary. Under CPU stress background polling could
+  starve a slow preview; the minimal in-flight coalescing fix retains user-input
+  invalidation and requires fresh browser/CI validation before release.
+- Mainnet remains NOT_AUTHORIZED. Public old Testnet receipts do not validate
+  candidate bytecode. Successor runner preparation is no-broadcast and preserves
+  predecessor receipts; production proxy artifact is build-only.
+- Final exact-head CI, merge, normal Pages publication and public smoke remain
+  mandatory. Payroll/ATM/advance has no task payment receipt: HOLD.
+
 ## 2026-09-25 · Human spatial calibration and canonical C / V2.6.23
 
 - Direct Human calibration and implementation order; isolated branch
