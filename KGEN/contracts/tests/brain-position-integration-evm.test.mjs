@@ -108,7 +108,15 @@ assert.ok(triggerArtifact.runtime.length / 2 <= 24_576, 'Trigger optimized runti
 // Oracle freshness is chain-time policy, not host scheduling latency. Explicit
 // evm_increaseTime below still drives stale/future/ordering cases deterministically.
 const eip1193 = ganache.provider({ logging: { quiet: true }, wallet: { totalAccounts: 9 }, miner: { timestampIncrement: 1 } });
-const provider = new BrowserProvider(eip1193);
+let estimateRpcRequests = 0;
+// Ganache mines synchronously. Ethers' default 250ms cache also retains rejected
+// estimateGas promises, so an unfunded rejection can incorrectly survive the
+// immediately mined funding transaction on fast CI. Always read current local
+// chain state; do not sleep, bypass gas estimation, or weaken capital admission.
+const provider = new BrowserProvider({request: payload => {
+  if (payload.method === 'eth_estimateGas') estimateRpcRequests++;
+  return eip1193.request(payload);
+}}, undefined, {cacheTimeout: -1});
 provider.pollingInterval = 20;
 const signers = await Promise.all(Array.from({ length: 9 }, (_, i) => provider.getSigner(i)));
 const [admin, keeper, pauser, upgrader, treasury, executor, trader, stranger, playerC] = signers;
@@ -206,6 +214,15 @@ await (await token.approve(proxy.target, parseEther('50'))).wait();
 await (await brain.fundSettlementCapital(parseEther('50'))).wait();
 assert.equal(await brain.settlementCapital(), parseEther('50'));
 assert.equal(await brain.principalOf(await admin.getAddress()), 0n, 'capital funding creates no player principal');
+
+// Regression: the exact previously rejected transaction must now estimate
+// successfully, and repeated estimates must reach the EVM instead of a cache.
+const estimatesBeforeFundingCheck = estimateRpcRequests;
+const fundedEstimate = await engine.connect(executor).openPosition.estimateGas(await trader.getAddress(), 0, size1, parseEther('20'));
+const repeatedFundedEstimate = await engine.connect(executor).openPosition.estimateGas(await trader.getAddress(), 0, size1, parseEther('20'));
+assert.ok(fundedEstimate > 0n && repeatedFundedEstimate > 0n);
+assert.equal(estimateRpcRequests - estimatesBeforeFundingCheck, 2, 'each identical post-funding estimate must query current EVM state');
+console.log('[brain-position-integration-evm] uncached unfunded -> funded admission estimates PASS');
 
 // Real pair: open atomically creates collateral plus worst-outcome liability.
 await (await engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('20'))).wait();

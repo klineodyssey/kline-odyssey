@@ -43,6 +43,19 @@ test('selected Testnet route reports Testnet without activating Mainnet or claim
  assert.equal(classify11520OrderRoute({preflight,execution:{mode:'BSC_TESTNET',chainId:56}}).route,'LOCAL_SIMULATION_REAL_BLOCKED');
 });
 
+test('deferred Testnet routing observer preserves execution errors and receipt feedback',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs',import.meta.url),'utf8');
+ const fn=source.slice(source.indexOf('function notifyOrderRoute(){'),source.indexOf('\nexport function install11520RealTradingPreflightUi'));
+ for(const status of ['READY','ORACLE_STALE','WRONG_CHAIN','DISCONNECTED']){
+  const toast={textContent:'ORACLE_STALE · 行情未就緒',classList:{add(){throw new Error('observer must not replace execution feedback')}}};
+  const context=vm.createContext({renderPreflight:()=>({ready:false}),classify11520OrderRoute,$:()=>toast,__K11520_EXECUTION__:{snapshot:()=>({mode:'BSC_TESTNET',chainId:97,status})},setTimeout(){throw new Error('observer must not clear execution feedback')}});
+  vm.runInContext(fn,context);const route=context.notifyOrderRoute();
+  assert.equal(route.route,'TESTNET_EXPLICIT_WALLET_ACTION');assert.equal(route.status,status);
+  assert.equal(context.__K11520_ORDER_ROUTE__.status,status);assert.equal(toast.textContent,'ORACLE_STALE · 行情未就緒');
+  assert.equal(route.signerRequested,false);assert.equal(route.broadcast,false);
+ }
+});
+
 test('routes to explicit wallet action only when preflight is ready',()=>{
   const route=classify11520OrderRoute({preflight:{ready:true,blockers:[]},localSimulationAvailable:true});
   assert.equal(route.route,'REAL_READY_FOR_EXPLICIT_WALLET_ACTION');
