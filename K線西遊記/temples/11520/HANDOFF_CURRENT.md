@@ -9,8 +9,8 @@
 - V2.6.25 / shell-v279. Signed canonical C-order PnL is absolute index delta
   times C times lots, not divided by entry. One lot is still one KGEN margin.
   KGEN_TRADING_SPEC, UI specification, manual, preview and tests are synchronized
-  under explicit Human authority. Existing public Testnet bytecode is legacy,
-  separately labeled; local candidate evidence does not update that deployment.
+  under explicit Human authority. The historical public Testnet bytecode is
+  legacy and archived separately; the capital successor below has real receipts.
 - Brain uses actual token-received funding, distinct free settlement capital,
   aggregate gross reserved liability and player claims. Position atomically
   reserves maximum favorable PnL over configured bounds and locks configuration
@@ -41,12 +41,22 @@
   `--deploy97 --successor97=<same-run-id>` is a separately authorized public
   action, verifies predecessor chain/code/roles/proxy/all receipts and refuses
   reused candidates/runs. Original deployment records remain immutable; a
-  prepared successor is not a deployment receipt. No public successor executed.
+  prepared successor is not a deployment receipt. Public successor
+  `capital-20260929` was subsequently deployed under the explicit BSC97 order:
+  75/75 confirmed receipts, 0.0027142114 test BNB gas, new mock token and nine
+  test feeds only. Brain proxy0x60e3801CDf885830ca45Def76a6141f841B0521d;
+  complete addresses, code hashes and receipts are in the Testnet manifest.
+  Actual contract touch/cross, one-shot, isolated loss and insurance tests PASS.
+  Browser completion remains separately gated; no contract-only visual PASS.
 - Release remains pending fresh exact-head CI, direct mobile screenshots and
   Pages verification. Use PR/Actions/artifacts for final status, not this entry.
 - Mainnet remains blocked pending concrete contract/role/oracle/funding/gas
-  manifest approval. No private signer accessed or public transaction sent by
-  this continuation. Payroll/ATM/advance has no new real receipt: HOLD.
+  manifest approval. The configured signer was used only through the bounded
+  BSC97 test-asset route, with no key export and no Mainnet transaction.
+  Mainnet oracle review found USD/USDT basis and third-source policy unresolved;
+  RedStone requires a source-specific timestamp adapter (its changing answer
+  keeps round1), not weakening the existing replay guard. Payroll/ATM/advance
+  has no new real payment receipt: HOLD.
 
 ## Human spatial calibration / nonlinear C — 2026-09-25
 

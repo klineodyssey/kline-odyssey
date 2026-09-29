@@ -3,7 +3,7 @@
 ## 2026-09-29 · Complete-product settlement capital / PR #445
 
 - Human handoff and CONTINUE_TO_COMPLETE authorize this candidate; preserved
-  inherited branch work and Human dirty main. No new protected-chain execution.
+  inherited branch work and Human dirty main. Mainnet remains protected.
 - Brain actual-received capital/insurance funding, gross risk reservations,
   per-player claims and recapitalization do not spend other-player principal.
   Fixed own-reserve priority against outstanding legacy claims; tested actual
@@ -18,8 +18,15 @@
   starve a slow preview; the minimal in-flight coalescing fix retains user-input
   invalidation and requires fresh browser/CI validation before release.
 - Mainnet remains NOT_AUTHORIZED. Public old Testnet receipts do not validate
-  candidate bytecode. Successor runner preparation is no-broadcast and preserves
-  predecessor receipts; production proxy artifact is build-only.
+  candidate bytecode. Under the separate explicit BSC97 authorization, successor
+  capital-20260929 now has75 confirmed candidate deployment/config/smoke receipts;
+  0.0027142114 test BNB gas. Mock assets only, zero native transaction value;
+  original predecessor receipts preserved. Production proxy artifact is build-only.
+- Public browser validation exposed RPC capabilities/latency, not permission to
+  fabricate recovered receipts: the configured endpoint rejects even single-block
+  eth_getLogs. A same-chain public log index is independently checked and its
+  events verified against primary RPC receipts/blocks. Diagnostics can run in
+  read-only mode without constructing a signer. Failed attempt receipts retained.
 - Final exact-head CI, merge, normal Pages publication and public smoke remain
   mandatory. Payroll/ATM/advance has no task payment receipt: HOLD.
 

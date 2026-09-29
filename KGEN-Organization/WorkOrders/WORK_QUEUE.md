@@ -16,8 +16,10 @@
   execution manifest. Source/IP: original extensions of existing MIT organs.
 - Acceptance: storage-layout preservation, actual proxy/engine EVM, exact-head
   CI, real 390x844/844x390 screenshots, production smoke, non-secret offline ZIP.
-- Prior Testnet receipts remain historical verified evidence, not evidence for
-  this new candidate bytecode or INDEX_DELTA_C_LOTS_V1 accounting model.
+- Prior Testnet receipts remain historical verified evidence. The separately
+  authorized BSC97 successor capital-20260929 now has75 confirmed candidate
+  receipts for INDEX_DELTA_C_LOTS_V1 / ISOLATED_V1; public browser and final
+  exact-head release verification remain separate acceptance gates.
 - Payroll/ATM/advance: no new payment receipt; HOLD, not PAID or RECEIVED.
 
 ## K11520 public BSC97 rehearsal — 2026-09-26

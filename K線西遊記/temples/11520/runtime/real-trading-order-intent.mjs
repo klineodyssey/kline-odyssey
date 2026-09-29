@@ -247,6 +247,9 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   const marketNames=['BTCUSDT','ETHUSDT','BNBUSDT'],axes=['KX','KY','KZ'];
   const logsFor=async(k,event,topics,to,cache=null)=>{
     const result=[],base=abi[k].encodeFilterTopics(event,topics);
+    // One pinned-height event query per refresh, rather than one slow index
+    // request per position. Exact indexed-ID filtering remains mandatory below.
+    const query=cache&&['OrderFilled','PositionClosed','PositionLiquidated'].includes(event)?base.slice(0,1):base;
     if(to-fromBlock>2000000)fail('RECOVERY_HISTORY_REQUIRES_INDEXER');
     const topicMatch=log=>base.every((expected,i)=>{
       if(expected==null)return true;
@@ -256,7 +259,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     const load=async()=>{
       const rows=[];
       const fetchRange=async(start,end)=>{
-        try{return await req('eth_getLogs',[{address:a[k],fromBlock:hex(start),toBlock:hex(end),topics:base}])}
+        try{return await req('eth_getLogs',[{address:a[k],fromBlock:hex(start),toBlock:hex(end),topics:query}])}
         catch(error){
           if(end-start<=2047)throw error;
           const mid=Math.floor((start+end)/2);
@@ -270,7 +273,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     };
     let logs;
     if(cache){
-      const key=k+'@'+to+'@'+JSON.stringify(base);
+      const key=k+'@'+to+'@'+JSON.stringify(query);
       if(!cache.has(key))cache.set(key,load());
       logs=await cache.get(key);
     }else logs=await load();

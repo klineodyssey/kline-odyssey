@@ -93,6 +93,10 @@ try {
     await page.locator('#simulationTriggerPrice').fill('4001');
     await shot('pending-confirm');
     await page.locator('#confirmOrder').click();
+    // PENDING ledger state is observable before the async click handler opens
+    // the orders sheet. Wait for that real UI transition before navigating it.
+    await page.locator('#confirm').waitFor({state:'hidden'});
+    await page.locator('#sheet.open').waitFor({state:'visible'});
     const snap=()=>page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot());
     let s=await snap();assert.equal(s.orders[0].status,'PENDING');assert.equal(s.wallet.lockedMargin,0);
     await organ('orders');await shot('pending');
@@ -249,9 +253,16 @@ async function publicTestnetBrowserQA(){
   assert.equal(manifest.publicNetwork,true);assert.equal(manifest.testOnly,true);assert.equal(manifest.verified,true);
   assert.equal(manifest.pnlModel,'INDEX_DELTA_C_LOTS_V1','public candidate QA must not target legacy percentage-PnL deployment');
   assert.equal(manifest.capabilities?.settlementCapital,'ISOLATED_V1','candidate isolated capital capability required');
-  assert.ok(process.env.BSC_TESTNET_PRIVATE_KEY&&process.env.BSC_TESTNET_RPC_URL,'SIGNER_BLOCKED');
-  const provider=new JsonRpcProvider(process.env.BSC_TESTNET_RPC_URL);provider.pollingInterval=1000;
-  const signer=new Wallet(process.env.BSC_TESTNET_PRIVATE_KEY,provider),account=await signer.getAddress();
+  const readOnly=process.argv.includes('--read-only');
+  assert.ok(process.env.BSC_TESTNET_RPC_URL&&(readOnly||process.env.BSC_TESTNET_PRIVATE_KEY),'SIGNER_BLOCKED');
+  // Public BSC endpoints differ in batch support; EIP-1193 forwards individual
+  // requests, so keep the Node test broker's transport equivalent to a wallet.
+  const provider=new JsonRpcProvider(process.env.BSC_TESTNET_RPC_URL,undefined,{batchMaxCount:1});provider.pollingInterval=1000;
+  // An optional read-only event index must be on the same chain. Returned logs
+  // are still verified against transaction receipts/blocks by the real adapter.
+  const logProvider=process.env.BSC_TESTNET_LOG_RPC_URL?new JsonRpcProvider(process.env.BSC_TESTNET_LOG_RPC_URL,undefined,{batchMaxCount:1}):provider;
+  assert.equal(BigInt(await logProvider.send('eth_chainId',[])),97n);
+  const signer=readOnly?null:new Wallet(process.env.BSC_TESTNET_PRIVATE_KEY,provider),account=readOnly?manifest.admin:await signer.getAddress();
   assert.equal(BigInt(await provider.send('eth_chainId',[])),97n);
   const {TESTNET_EXECUTION_ABI,CAPITAL_EXECUTION_ABI}=await import('../runtime/real-trading-order-intent.mjs');
   const a=manifest.addresses,interfaces=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[k,new Interface([...v,...(CAPITAL_EXECUTION_ABI[k]||[])])]));
@@ -269,9 +280,11 @@ async function publicTestnetBrowserQA(){
   await verifyTestFeeds();
   const oracleInterface=new Interface(['function set(int256,uint256)']);
   const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4182',root=new URL(base).origin;
-  const out='artifacts/11520-testnet-browser-qa';await fs.mkdir(out,{recursive:true});
+  const out=readOnly?'artifacts/11520-testnet-readonly-qa':'artifacts/11520-testnet-browser-qa';await fs.mkdir(out,{recursive:true});
+  const brokerFailures=[];
   const persist=()=>fs.writeFile(`${out}/transactions.json`,JSON.stringify({chainId:97,testOnly:true,signerMode:'NODE_ONLY_CONFIGURED_TESTNET_SIGNER',account,gasBudget:'0.005 tBNB',receipts},null,2));
   async function send(to,data,method){
+    assert.equal(readOnly,false,'read-only QA cannot broadcast');
     assert.equal(sending,false,'single transaction at a time');sending=true;
     try{
       assert.equal(BigInt(await provider.send('eth_chainId',[])),97n);
@@ -305,6 +318,7 @@ async function publicTestnetBrowserQA(){
     }
     assert.ok(['eth_getBalance','eth_call','eth_estimateGas','eth_getCode','eth_getStorageAt','eth_blockNumber','eth_getLogs','eth_getTransactionReceipt','eth_getBlockByNumber','eth_getBlockByHash'].includes(method),'read method allowlist');
     if(method==='eth_call'||method==='eth_estimateGas')assert.ok(allowed.has(lower(params[0].to)),'read destination allowlist');
+    if(method==='eth_getLogs'){assert.ok(allowed.has(lower(params[0].address)),'log destination allowlist');return logProvider.send(method,params)}
     return provider.send(method,params);
   }
   const browser=await chromium.launch({headless:true});
@@ -317,13 +331,13 @@ async function publicTestnetBrowserQA(){
   async function observe(method,id){await send(a.orderTriggerEngine,interfaces.orderTriggerEngine.encodeFunctionData(method,[BigInt(id)]),method)}
   try{
     for(const [width,height] of [[390,844],[844,390]]){
-      await tick(100000);
+      if(!readOnly)await tick(100000);
       Object.assign(walletBoundary,{chain:'0x38',connected:true,rejectNext:false});
       const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
       const errors=[];page.on('pageerror',e=>errors.push(String(e)));
       let stage='BOOT';
       try{
-      await page.exposeBinding('__testnetBroker',async(source,args)=>{assert.equal(source.frame,source.page.mainFrame());assert.equal(new URL(source.frame.url()).origin,root);try{return {ok:true,value:await broker(args)}}catch(error){return {ok:false,code:Number(error?.code)===4001?4001:-32603,reason:Number(error?.code)===4001?'USER_REJECTED':'TESTNET_BROKER_REQUEST_FAILED'}}});
+      await page.exposeBinding('__testnetBroker',async(source,args)=>{assert.equal(source.frame,source.page.mainFrame());assert.equal(new URL(source.frame.url()).origin,root);try{return {ok:true,value:await broker(args)}}catch(error){brokerFailures.push({method:args.method,code:String(error?.code||'UNKNOWN').replace(/[^A-Z_0-9-]/gi,'').slice(0,60),assertion:error?.code==='ERR_ASSERTION'?String(error.message).slice(0,120):null});await fs.writeFile(`${out}/broker-failures.json`,JSON.stringify(brokerFailures,null,2));return {ok:false,code:Number(error?.code)===4001?4001:-32603,reason:Number(error?.code)===4001?'USER_REJECTED':'TESTNET_BROKER_REQUEST_FAILED'}}});
       await page.addInitScript(()=>{const listeners=new Map(),emit=(name,value)=>{for(const fn of listeners.get(name)||[])fn(value)};window.__testnetWalletEvents={emit};window.ethereum={request:async args=>{const response=await window.__testnetBroker(args);if(!response.ok)throw Object.assign(new Error(response.reason),{code:response.code});if(args.method==='wallet_switchEthereumChain')emit('chainChanged','0x61');return response.value},on:(name,fn)=>{if(!listeners.has(name))listeners.set(name,new Set());listeners.get(name).add(fn)},removeListener:(name,fn)=>listeners.get(name)?.delete(fn)}});
       await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile(`node_modules/three/${route.request().url().slice(prefix.length)}`,'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);await route.fulfill({status:200,contentType:'text/javascript',body})});
       await page.goto(`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
@@ -339,7 +353,8 @@ async function publicTestnetBrowserQA(){
       await shot('wrong-chain');assert.equal((await snapshot()).wallet,null);
       stage='SWITCH_CHAIN_AND_RECOVER';await page.locator('#testnetSwitch').click();
       await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().status==='READY',null,{timeout:120000});
-      await shot('connected');stage='FAUCET_APPROVE_DEPOSIT';
+      await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('connected');stage='FAUCET_APPROVE_DEPOSIT';
+      if(readOnly){await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({status:'READY',writes:receipts.length,snapshot:await snapshot()},null,2));await page.close();continue}
       assert.equal((await snapshot()).pnlModel,'INDEX_DELTA_C_LOTS_V1');assert.ok((await snapshot()).capital);
       // The faucet is one-shot per address. Reuse the100 test tokens returned
       // by the first orientation's withdrawal instead of asking twice for1000.
@@ -359,6 +374,7 @@ async function publicTestnetBrowserQA(){
       await page.locator('#testnetDeposit').click();
       await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().transaction?.method==='depositMargin'&&__K11520_EXECUTION__.snapshot().transaction?.status==='RECEIPT_CONFIRMED',null,{timeout:120000});
       assert.equal((await snapshot()).wallet.principal,principalBeforeDeposit+100);
+      await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('wallet-metrics');
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});await shot('deposit');
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await page.locator('#walletToggle').click();await page.locator('#k11520UtilityMaster').click();
       for(let i=0;i<3&&(await page.evaluate(()=>__K11520_TRADE_AXIS_API__.current()))!=='KX';i++){await page.locator('#joy').tap();await page.waitForTimeout(200)}
@@ -406,6 +422,6 @@ async function publicTestnetBrowserQA(){
       }
       await page.close();
     }
-    console.log('PASS: PUBLIC BSC97 browser approval/deposit/order/fill/close/liquidation/reload; inspect screenshots separately');
-  }finally{await browser.close();provider.destroy();await persist()}
+    console.log(readOnly?'PASS: PUBLIC BSC97 read-only network recovery, zero broadcasts; inspect screenshots separately':'PASS: PUBLIC BSC97 browser approval/deposit/order/fill/close/liquidation/reload; inspect screenshots separately');
+  }finally{await browser.close();if(logProvider!==provider)logProvider.destroy();provider.destroy();await persist()}
 }

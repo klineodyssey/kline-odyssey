@@ -5,7 +5,7 @@
     "date": "2026-09-29",
     "authority": "Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE",
     "baseMain": "12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8",
-    "status": "CANDIDATE_VALIDATION_IN_PROGRESS_NOT_DEPLOYED",
+    "status": "PUBLIC_TESTNET_CONTRACT_SMOKE_PASS_BROWSER_AND_RELEASE_PENDING",
     "pnlModel": "INDEX_DELTA_C_LOTS_V1",
     "pnlFormula": "(mark index - entry index) * signed C * positive lots; no division by entry",
     "marginFormula": "1 KGEN per lot; isolated position loss cannot consume unrelated available principal",
@@ -19,8 +19,22 @@
     "custody": "Principal/reward/insurance/free settlement capital/reserved settlement liability are custodied cash; unfunded claim debt additionally blocks surplus spending and new risk without blocking solvent principal withdrawal",
     "brainUpgrade": "Append-only storage; six slots consume gap35 to gap29; regression pinned to actual pre-capital source at baseMain",
     "upgradeDelaySeconds": 86400,
-    "publicTestnetCompatibility": "Historical deployment below has old bytecode and NOTIONAL_RETURN_V1 semantics. It is NOT evidence that this capital candidate is publicly deployed. Candidate UI calls are capability-gated.",
-    "mainnetBroadcast": false
+    "publicTestnetCompatibility": "Successor capital-20260929 is now publicly deployed on97 with confirmed mock-token/feed receipts; historical predecessor remains archived in the Testnet manifest. No Mainnet readiness claim.",
+    "mainnetBroadcast": false,
+    "publicSuccessor": {
+      "addresses": {
+        "testToken": "0x91ac96ff5f6B5D63aab0d6F17DF8D70AC295dBc3",
+        "brainImplementation": "0xcfa333b0890a08C0eF2616e2C1CDf38cC474641A",
+        "brainProxy": "0x60e3801CDf885830ca45Def76a6141f841B0521d",
+        "positionEngine": "0xeca295273D0B0ef24e7282b15F8cC1F52B147417",
+        "orderTriggerEngine": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+        "oracle": "0x9825B4eE7AFEEd9529306489Cc1D5454e19331Ee"
+      },
+      "receipts": 75,
+      "gasSpentTestBnb": "0.0027142114",
+      "pnlModel": "INDEX_DELTA_C_LOTS_V1",
+      "accountingModel": "ISOLATED_SETTLEMENT_CAPITAL_V1"
+    }
   },
   "testnetAuthorizationUpdate": {
     "date": "2026-09-26",
@@ -35,14 +49,14 @@
     "registry": "K線西遊記/temples/11520/runtime/real-trading-feed-provenance.mjs",
     "network": "BNB Smart Chain / 56",
     "quoteBasis": "USD feeds are candidates, not approved USDT settlement inputs",
-    "verificationDate": "2026-09-26",
+    "verificationDate": "2026-09-29",
     "chainlink": {
       "BTC_USD": "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf",
       "ETH_USD": "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
       "BNB_USD": "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE",
       "decimals": 8,
       "freshness": "Per-feed heartbeat and latest complete round require fresh verification",
-      "provenance": "Existing reviewed registry; official data.chain.link pages returned HTTP403 during this run, not freshly reconfirmed"
+      "provenance": "Read-only chain56 block124658676: all three descriptions match USD,decimals8,complete rounds; ages49/61/32seconds. Not USDT feeds or approved production configuration."
     },
     "redstone": {
       "BTC_USD": {
@@ -60,12 +74,81 @@
         "heartbeatSeconds": 60,
         "deviationBps": 10
       },
-      "decimals": "Must verify directly from candidate contracts; not assumed",
+      "decimals": 8,
       "provenance": "https://app.redstone.finance/push-feeds?networks=bnb&testnets=true",
-      "independence": "Distinct provider from Chainlink; upstream source correlation not certified"
+      "independence": "Distinct provider from Chainlink; upstream source correlation not certified",
+      "compatibility": "BLOCKED_DIRECT_INTEGRATION: live BTC roundId=answeredInRound=1 across changed answer/timestamp; PositionEngine rightly rejects same-round mutation. Requires source-specific timestamp adapter, not removal of generic replay protection. ETH observed age6743s exceeds testmaxAge3600s."
     },
     "thirdProvider": "NOT_APPROVED",
-    "readiness": "BLOCKED: third independent source, USD/USDT conversion policy, live rounds/decimals/freshness, production roles/risk parameters and explicit activation manifest outstanding"
+    "readiness": "BLOCKED: RedStone timestamp adapter, third-provider/keeper service approval and verified adapter, USD/USDT depeg policy, exact fresh per-market source/risk configuration outstanding. Never reuse mock feeds or weaken replay guards.",
+    "liveReadback": {
+      "chainId": 56,
+      "block": 124658676,
+      "blockTimestamp": 1790658784,
+      "decimalsAllSixFeeds": 8,
+      "chainlinkAgesSeconds": {
+        "BTC": 49,
+        "ETH": 61,
+        "BNB": 32
+      },
+      "redstoneAgesSeconds": {
+        "BTC": 41,
+        "ETH": 6743,
+        "BNB": 41
+      },
+      "redstoneBtcSameRoundEvidence": [
+        {
+          "block": 124658676,
+          "roundId": "1",
+          "answer": "8321167628970",
+          "updatedAt": 1790658743
+        },
+        {
+          "block": 124658796,
+          "roundId": "1",
+          "answer": "8321919260490",
+          "updatedAt": 1790658805
+        }
+      ],
+      "writes": false
+    },
+    "thirdProviderCandidates": {
+      "pyth": {
+        "status": "RESEARCH_CANDIDATE_NOT_APPROVED_NOT_ADAPTED",
+        "chainId": 56,
+        "core": "0xdF21D137Aadc95588205586636710ca2890538d5",
+        "source": "https://docs.pyth.network/price-feeds/core/upgrade/contracts",
+        "btcUsdId": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+        "readback": {
+          "codeBytes": 177,
+          "price": "8450046728407",
+          "confidence": "1373771843",
+          "exponent": -8,
+          "publishTime": 1790339917,
+          "ageSeconds": 318867
+        },
+        "requirements": [
+          "Verify ETH/BNB IDs and source independence",
+          "Reviewed publishTime/confidence/exponent adapter",
+          "Approved keeper/update fee and API service route; no assumed value-zero update",
+          "Freshness and depeg-aware USD/USDT conversion"
+        ],
+        "sources": [
+          "https://docs.pyth.network/price-feeds/core/upgrade/preparing",
+          "https://api-reference.pyth.network/price-feeds/evm/getPriceNoOlderThan",
+          "https://api-reference.pyth.network/price-feeds/evm/updatePriceFeeds"
+        ]
+      },
+      "api3": {
+        "status": "UNVERIFIED_ADDRESS_ADAPTER_REQUIRED",
+        "reason": "18 decimals; no round lifecycle compatible with current round watermark; no approved market proxy addresses",
+        "source": "https://docs.api3.org/dapps/integration/aggregatorv2v3interface.html"
+      },
+      "binanceOracle": {
+        "status": "UNVERIFIED_ADDRESS_ACCESS_APPROVAL_REQUIRED",
+        "source": "https://oracle.binance.com/docs/price-feeds/feeds-available/"
+      }
+    }
   },
   "sourceMainAtStart": "3c136a30865a43a6222f5e199495a176140be139",
   "TARGET_CHAIN": "BNB Smart Chain candidate; no execution approval",
@@ -154,24 +237,25 @@
     "chainId": 97,
     "approved": true,
     "testAssetsOnly": true,
-    "status": "PUBLIC_CONTRACT_SMOKE_PASS_UI_QA_PENDING",
+    "status": "CAPITAL_SUCCESSOR_CONTRACT_SMOKE_PASS_BROWSER_PENDING",
     "manifest": "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json",
     "deployerPublicAddress": "0x3a909988E4d5c9C2326A7a0596714482AB25eE0A",
     "contracts": {
-      "testToken": "0x41103CB10b71AB3041093f428Beb7baB38404B42",
-      "brainImplementation": "0x079F8C2C517ea7B772F803C345A787Bb84E97B3F",
-      "brainProxy": "0x53FE723c12f748fd7E974eDD8d36D9F4A0241c83",
-      "positionEngine": "0xAABF67ec8C9a50F4c757a8A2A33049840b310b10",
-      "orderTriggerEngine": "0x43801B48BFb91C8e80edcD342b6be7b9143d6532",
-      "oracle": "0x8Db53699F6c8Ac520ca9b5E6d3B16e3B0433a3e7"
+      "testToken": "0x91ac96ff5f6B5D63aab0d6F17DF8D70AC295dBc3",
+      "brainImplementation": "0xcfa333b0890a08C0eF2616e2C1CDf38cC474641A",
+      "brainProxy": "0x60e3801CDf885830ca45Def76a6141f841B0521d",
+      "positionEngine": "0xeca295273D0B0ef24e7282b15F8cC1F52B147417",
+      "orderTriggerEngine": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+      "oracle": "0x9825B4eE7AFEEd9529306489Cc1D5454e19331Ee"
     },
-    "gasSpentTestBnb": "0.0024634971",
-    "receiptCount": 74
+    "gasSpentTestBnb": "0.0027142114",
+    "receiptCount": 75
   },
   "BLOCKERS": [
+    "Production RedStone constant-round updates are incompatible with current replay watermark; source-specific adapter required. Pyth candidate observed stale and needs approved update-fee/API route; production source selection is not approved.",
     "Production three-independent-provider USDT settlement oracle set not approved; third provider, USD/USDT basis, decimals/freshness/round validation outstanding",
     "Production admin/upgrade/pauser/keeper identities and risk parameters not approved",
-    "Capital candidate actual EVM/browser validation, exact-head CI and Pages publication must pass; old public Testnet receipts do not validate new bytecode",
+    "Final public Testnet browser and exact-head CI/Pages publication pending at authoring; contract successor has75 confirmed receipts",
     "Concrete signer public address, actual KGEN funding amount, Settlement Capital/Insurance allocation, gas/value caps and calldata-bound execution manifest not yet approved",
     "Mainnet execution manifest requires Human approval; no Mainnet writes authorized"
   ],
@@ -215,6 +299,24 @@
         "three verified feed addresses and policy per market"
       ],
       "mainnetAllowed": false
+    },
+    "preCapitalPublicDeployment": {
+      "chainId": 97,
+      "approved": true,
+      "testAssetsOnly": true,
+      "status": "PUBLIC_CONTRACT_SMOKE_PASS_UI_QA_PENDING",
+      "manifest": "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json",
+      "deployerPublicAddress": "0x3a909988E4d5c9C2326A7a0596714482AB25eE0A",
+      "contracts": {
+        "testToken": "0x41103CB10b71AB3041093f428Beb7baB38404B42",
+        "brainImplementation": "0x079F8C2C517ea7B772F803C345A787Bb84E97B3F",
+        "brainProxy": "0x53FE723c12f748fd7E974eDD8d36D9F4A0241c83",
+        "positionEngine": "0xAABF67ec8C9a50F4c757a8A2A33049840b310b10",
+        "orderTriggerEngine": "0x43801B48BFb91C8e80edcD342b6be7b9143d6532",
+        "oracle": "0x8Db53699F6c8Ac520ca9b5E6d3B16e3B0433a3e7"
+      },
+      "gasSpentTestBnb": "0.0024634971",
+      "receiptCount": 74
     }
   }
 }
