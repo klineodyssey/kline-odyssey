@@ -47,7 +47,15 @@
   test feeds only. Brain proxy0x60e3801CDf885830ca45Def76a6141f841B0521d;
   complete addresses, code hashes and receipts are in the Testnet manifest.
   Actual contract touch/cross, one-shot, isolated loss and insurance tests PASS.
-  Browser completion remains separately gated; no contract-only visual PASS.
+  Public Chromium now also passes390x844 profit50 close/withdraw/reload and
+  844x390 gap raw loss220 / isolated loss100 / withdraw/reload at100C100lots.
+  Additional37 confirmed browser-attempt/lifecycle transactions are preserved
+  in the manifest, separate from75 deployment/smoke receipts. Final source
+  reloaded both orientations read-only with zero broadcasts; direct screenshots
+  verify wallet metrics, actual receipt history and historic liquidation boundary.
+  EIP1193 uses a bounded Node-only configured Testnet signer broker, not a claim
+  that a Human MetaMask extension was tested. Historical failed captures stay
+  archived as failures, not final visual evidence.
 - Release remains pending fresh exact-head CI, direct mobile screenshots and
   Pages verification. Use PR/Actions/artifacts for final status, not this entry.
 - Mainnet remains blocked pending concrete contract/role/oracle/funding/gas

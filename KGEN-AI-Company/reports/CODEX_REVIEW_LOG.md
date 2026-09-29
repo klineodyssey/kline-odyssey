@@ -27,6 +27,14 @@
   eth_getLogs. A same-chain public log index is independently checked and its
   events verified against primary RPC receipts/blocks. Diagnostics can run in
   read-only mode without constructing a signer. Failed attempt receipts retained.
+- Final public Chromium passes390x844 normal close(+50 testKGEN),844x390 gap
+  liquidation(raw-220,isolated-100), available-only withdrawal and receipt/account
+  reload. All37 additional browser receipts confirmed;112 including deployment.
+  Direct screenshots exposed historic position liquidation price0; now restored
+  from its actual settlement receipt, including legitimate zero. Adapter32 tests
+  and both final-source read-only browsers pass; no extra broadcast for this fix.
+  Display-only preview cache is bounded5s with fresh wallet/oracle identity;
+  submission never uses it and always performs full fresh execution validation.
 - Final exact-head CI, merge, normal Pages publication and public smoke remain
   mandatory. Payroll/ATM/advance has no task payment receipt: HOLD.
 

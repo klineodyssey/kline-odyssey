@@ -5,7 +5,7 @@
     "date": "2026-09-29",
     "authority": "Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE",
     "baseMain": "12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8",
-    "status": "PUBLIC_TESTNET_CONTRACT_SMOKE_PASS_BROWSER_AND_RELEASE_PENDING",
+    "status": "PUBLIC_TESTNET_CONTRACT_AND_BROWSER_PASS_RELEASE_CI_PENDING",
     "pnlModel": "INDEX_DELTA_C_LOTS_V1",
     "pnlFormula": "(mark index - entry index) * signed C * positive lots; no division by entry",
     "marginFormula": "1 KGEN per lot; isolated position loss cannot consume unrelated available principal",
@@ -31,6 +31,8 @@
         "oracle": "0x9825B4eE7AFEEd9529306489Cc1D5454e19331Ee"
       },
       "receipts": 75,
+      "additionalBrowserReceipts": 37,
+      "publicBrowser": "PASS390x844 profit50 close/withdraw/reload; PASS844x390 gap rawLoss220 isolatedLoss100/withdraw/reload; direct screenshot review and final-source read-only recovery PASS",
       "gasSpentTestBnb": "0.0027142114",
       "pnlModel": "INDEX_DELTA_C_LOTS_V1",
       "accountingModel": "ISOLATED_SETTLEMENT_CAPITAL_V1"

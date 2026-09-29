@@ -254,6 +254,9 @@ async function publicTestnetBrowserQA(){
   assert.equal(manifest.pnlModel,'INDEX_DELTA_C_LOTS_V1','public candidate QA must not target legacy percentage-PnL deployment');
   assert.equal(manifest.capabilities?.settlementCapital,'ISOLATED_V1','candidate isolated capital capability required');
   const readOnly=process.argv.includes('--read-only');
+  const resumeArg=process.argv.find(x=>x.startsWith('--resume-order='));
+  const resumeOrderId=resumeArg?.slice('--resume-order='.length);
+  if(resumeArg)assert.match(resumeOrderId,/^[1-9][0-9]*$/,'exact existing QA order required');
   assert.ok(process.env.BSC_TESTNET_RPC_URL&&(readOnly||process.env.BSC_TESTNET_PRIVATE_KEY),'SIGNER_BLOCKED');
   // Public BSC endpoints differ in batch support; EIP-1193 forwards individual
   // requests, so keep the Node test broker's transport equivalent to a wallet.
@@ -279,6 +282,7 @@ async function publicTestnetBrowserQA(){
   }
   await verifyTestFeeds();
   const oracleInterface=new Interface(['function set(int256,uint256)']);
+  const keeperInterface=new Interface(['function observeOrder(uint256) returns(bool)','function observePosition(uint256) returns(bool)']);
   const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4182',root=new URL(base).origin;
   const out=readOnly?'artifacts/11520-testnet-readonly-qa':'artifacts/11520-testnet-browser-qa';await fs.mkdir(out,{recursive:true});
   const brokerFailures=[];
@@ -328,10 +332,11 @@ async function publicTestnetBrowserQA(){
     const timestamp=(await provider.getBlock('latest')).timestamp;
     for(const feed of feeds)await send(feed,oracleInterface.encodeFunctionData('set',[parseEther(String(price)),timestamp]),'TEST_ORACLE.set');
   }
-  async function observe(method,id){await send(a.orderTriggerEngine,interfaces.orderTriggerEngine.encodeFunctionData(method,[BigInt(id)]),method)}
+  async function observe(method,id){assert.equal(lower(account),lower(manifest.keeper),'keeper identity');await send(a.orderTriggerEngine,keeperInterface.encodeFunctionData(method,[BigInt(id)]),method)}
   try{
     for(const [width,height] of [[390,844],[844,390]]){
-      if(!readOnly)await tick(100000);
+      const resume=width===390&&resumeOrderId;
+      if(!readOnly&&!resume)await tick(100000);
       Object.assign(walletBoundary,{chain:'0x38',connected:true,rejectNext:false});
       const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
       const errors=[];page.on('pageerror',e=>errors.push(String(e)));
@@ -354,8 +359,20 @@ async function publicTestnetBrowserQA(){
       stage='SWITCH_CHAIN_AND_RECOVER';await page.locator('#testnetSwitch').click();
       await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().status==='READY',null,{timeout:120000});
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('connected');stage='FAUCET_APPROVE_DEPOSIT';
-      if(readOnly){await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({status:'READY',writes:receipts.length,snapshot:await snapshot()},null,2));await page.close();continue}
+      if(readOnly){
+        const recovered=await snapshot();
+        for(const position of recovered.positions.filter(p=>p.status==='CLOSED'||p.status==='LIQUIDATED')){
+          const settlement=recovered.receipts.find(r=>r.receiptId===`SETTLEMENT-${position.positionId}`);
+          assert.ok(settlement,'historical position requires its actual settlement receipt');
+          assert.equal(position.liquidationPrice,settlement.liquidationPrice,'historical liquidation boundary comes from its receipt');
+        }
+        await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});await shot('wallet-details');
+        await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await page.locator('#walletToggle').click();
+        await organ('positions');await shot('historical-positions');await organ('history');await shot('recovered-receipts');
+        await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({status:'READY',writes:receipts.length,historicalBoundary:'ACTUAL_SETTLEMENT_RECEIPT',snapshot:recovered},null,2));await page.close();continue
+      }
       assert.equal((await snapshot()).pnlModel,'INDEX_DELTA_C_LOTS_V1');assert.ok((await snapshot()).capital);
+      if(!resume){
       // The faucet is one-shot per address. Reuse the100 test tokens returned
       // by the first orientation's withdrawal instead of asking twice for1000.
       if((await snapshot()).wallet.testTokenBalance<100){await page.locator('#testnetFaucet').click();await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance>=100,null,{timeout:120000})}
@@ -376,15 +393,26 @@ async function publicTestnetBrowserQA(){
       assert.equal((await snapshot()).wallet.principal,principalBeforeDeposit+100);
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('wallet-metrics');
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});await shot('deposit');
+      }
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await page.locator('#walletToggle').click();await page.locator('#k11520UtilityMaster').click();
       for(let i=0;i<3&&(await page.evaluate(()=>__K11520_TRADE_AXIS_API__.current()))!=='KX';i++){await page.locator('#joy').tap();await page.waitForTimeout(200)}
       await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
       stage='CREATE_ORDER';const before=new Set((await snapshot()).orders.map(o=>o.orderId));
       const accountBeforeOrder=(await snapshot()).wallet,capitalBeforeOrder=(await snapshot()).capital;
+      let order;
+      if(resume){
+        order=(await snapshot()).orders.find(o=>o.orderId===resumeOrderId);
+        assert.ok(order,'resume order must belong to the connected account');
+        assert.equal(order.status,'PENDING');assert.equal(order.market,'BTCUSDT');
+        assert.equal(order.c,100);assert.equal(order.lots,100);assert.equal(order.triggerPrice,100000.001);
+        assert.equal((await snapshot()).observations.BTCUSDT.price,100000.002,'resume preserves already confirmed crossing observation');
+        await organ('orders');await shot('pending-resumed');
+      }else{
       await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100000.001');await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('INDEX_DELTA_C_LOTS_V1')&&!document.querySelector('#confirmOrder').disabled,null,{timeout:120000});await page.locator('#confirm').evaluate(e=>e.scrollTop=0);await page.locator('#confirmBody').evaluate(e=>e.scrollTop=0);await shot('preview');await page.locator('#confirmOrder').click();
       await page.waitForFunction(n=>__K11520_EXECUTION__.snapshot().orders.length>n,before.size,{timeout:120000});
-      const order=(await snapshot()).orders.find(o=>!before.has(o.orderId));assert.equal(order.status,'PENDING');await shot('pending');
-      stage='KEEPER_FILL';await tick(100000.002);await observe('observeOrder',order.orderId);
+      order=(await snapshot()).orders.find(o=>!before.has(o.orderId));assert.equal(order.status,'PENDING');await shot('pending');
+      }
+      stage='KEEPER_FILL';if(!resume)await tick(100000.002);await observe('observeOrder',order.orderId);
       await page.waitForFunction(id=>__K11520_EXECUTION__.snapshot().orders.find(o=>o.orderId===id)?.status==='FILLED',order.orderId,{timeout:120000});
       let position=(await snapshot()).positions.find(p=>p.orderId===order.orderId);assert.equal(position.status,'OPEN');
       assert.equal(position.c,100);assert.equal(position.lots,100);assert.equal(position.margin,100);
@@ -410,7 +438,7 @@ async function publicTestnetBrowserQA(){
       for(const id of recoveredIds)assert.ok((await snapshot()).receipts.some(r=>r.receiptId===id),'reload receipt recovery');
       assert.equal((await snapshot()).wallet.principal,recoveredAccount.principal);assert.equal((await snapshot()).wallet.lockedMargin,recoveredAccount.lockedMargin);assert.equal((await snapshot()).wallet.claimable,recoveredAccount.claimable);
       await wallet();await shot('reload');assert.deepEqual(errors,[]);
-      await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',chainId:97,broker:'NODE_ONLY_CONFIGURED_SIGNER_NOT_HUMAN_METAMASK',walletBoundaryFixtures:['USER_REJECTED_NO_BROADCAST','WRONG_CHAIN_NO_BROADCAST','EXPLICIT_CHAIN_SWITCH','DISCONNECT_CLEARS_STATE','PAGE_RELOAD_RECOVERY'],oracleCodeIdentity:'THREE_FEED_RUNTIME_HASHES_RECHECKED_BEFORE_EACH_WRITE_BATCH',snapshot:await snapshot()},null,2));
+      await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',chainId:97,broker:'NODE_ONLY_CONFIGURED_SIGNER_NOT_HUMAN_METAMASK',walletBoundaryFixtures:[...(!resume&&width===390?['USER_REJECTED_NO_BROADCAST']:[]),'WRONG_CHAIN_NO_BROADCAST','EXPLICIT_CHAIN_SWITCH','DISCONNECT_CLEARS_STATE','PAGE_RELOAD_RECOVERY'],oracleCodeIdentity:'THREE_FEED_RUNTIME_HASHES_RECHECKED_BEFORE_EACH_WRITE_BATCH',snapshot:await snapshot()},null,2));
       }catch(error){
         // Explicitly select public product fields; never serialize a provider,
         // signer, RPC URL, raw error object or the Node environment.

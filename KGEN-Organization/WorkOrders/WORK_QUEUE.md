@@ -2,7 +2,7 @@
 
 ## K11520 complete product capital and wallet — 2026-09-29
 
-- Task K11520-COMPLETE-PRODUCT-20260929; IN_PROGRESS; owner codex-gm-01.
+- Task K11520-COMPLETE-PRODUCT-20260929; RELEASE_VALIDATION; owner codex-gm-01.
 - Human COMPLETE_PRODUCT_HANDOFF V1 and CONTINUE_EXECUTION_ACK authorize source,
   local EVM, browser, tests, commits, PR and safe merge; Mainnet remains gated.
 - Fresh main 12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8; continue preserved
@@ -18,8 +18,11 @@
   CI, real 390x844/844x390 screenshots, production smoke, non-secret offline ZIP.
 - Prior Testnet receipts remain historical verified evidence. The separately
   authorized BSC97 successor capital-20260929 now has75 confirmed candidate
-  receipts for INDEX_DELTA_C_LOTS_V1 / ISOLATED_V1; public browser and final
-  exact-head release verification remain separate acceptance gates.
+  receipts for INDEX_DELTA_C_LOTS_V1 / ISOLATED_V1, plus37 confirmed public
+  browser receipts. Both mobile orientations pass actual fill/close or gap
+  liquidation, withdrawal and reload; final-source zero-write recovery and
+  direct screenshots pass. Final exact-head CI/Pages verification remains a
+  release gate; Mainnet oracle policy/adapter/execution manifest remains blocked.
 - Payroll/ATM/advance: no new payment receipt; HOLD, not PAID or RECEIVED.
 
 ## K11520 public BSC97 rehearsal — 2026-09-26

@@ -254,6 +254,15 @@ test('recovery groups settlement event queries per pinned refresh and filters ex
   f.calls.length=0;assert.equal((await adapter.refresh()).ok,true);assert.ok(f.calls.some(c=>c.method==='eth_getLogs'),'cache cannot cross refresh snapshot');
  }
 });
+test('historical position liquidation boundary comes from its canonical settlement receipt including genuine zero',async()=>{
+ for(const liquidated of [false,true])for(const boundary of ['99.5','0']){
+  const f=testnetFixture();f.settledOrders(1,liquidated);const request=f.provider.request,face=new codec.Interface(TESTNET_EXECUTION_ABI.positionEngine);
+  f.provider.request=async args=>{const raw=await request(args);if(args.method==='eth_call'&&args.params[0].to===f.deployment.addresses.positionEngine&&args.params[0].data.startsWith(face.getSighash('settlementReceipt'))){const [s]=face.decodeFunctionResult('settlementReceipt',raw),values=Array.from(s);values[6]=codec.parseUnits(boundary,18);return face.encodeFunctionResult('settlementReceipt',[values])}return raw};
+  const adapter=f.make();assert.equal((await adapter.recover()).ok,true);const position=adapter.snapshot().positions[0],receipt=adapter.snapshot().receipts.find(r=>r.kind==='SETTLEMENT');
+  assert.equal(position.status,liquidated?'LIQUIDATED':'CLOSED');assert.equal(position.liquidationPrice,Number(boundary));assert.equal(position.liquidationPrice,receipt.liquidationTrigger);
+  assert.equal(f.calls.some(c=>c.method==='eth_call'&&c.params[0].to===f.deployment.addresses.positionEngine&&c.params[0].data.startsWith(face.getSighash('liquidationBoundary'))),false,'historical boundary must not be recomputed from a live oracle');
+ }
+});
 test('BSC97 adapter refuses unverified/local/mainnet/empty deployment without RPC',async()=>{
  for(const override of [{verified:false},{publicNetwork:false},{chainId:56},{status:'PREPARED_NOT_DEPLOYED'},{addresses:{}},{codeHashes:{}}]){
   const f=testnetFixture(),adapter=f.make({deployment:{...f.deployment,...override}});assert.equal(adapter.enabled,false);

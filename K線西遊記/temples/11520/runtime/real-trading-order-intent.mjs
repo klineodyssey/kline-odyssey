@@ -368,6 +368,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       receipts.push({...fillEvidence,...order,id:`FILL-${id}`,receiptId:`FILL-${id}`,kind:'FILL',
         walletBefore:num(fill.walletBefore),marginLocked:num(fill.marginLocked),walletAfter:num(fill.walletAfter),previousPrice:num(fill.previousPrice)});
       if(!isOpen){const [s]=await call('positionEngine','settlementReceipt',[pid],tag),event=position.status==='LIQUIDATED'?'PositionLiquidated':'PositionClosed',settled=await lf('positionEngine',event,[pid],height);
+        position.liquidationPrice=num(s.liquidationTrigger);
         if(settled.length>1)fail('SETTLEMENT_RECEIPT_INCONSISTENT');
         const settlementEvidence=settled.length===1?await txEvidence(settled[0],event):{status:'STATE_RECOVERED',transactionStatus:'RPC_LOG_INDEX_UNAVAILABLE',executionMode:'BSC_TESTNET'};
         receipts.push({...settlementEvidence,...position,id:`SETTLEMENT-${pid}`,receiptId:`SETTLEMENT-${pid}`,kind:'SETTLEMENT',

@@ -1899,8 +1899,322 @@
   "completedAt": "2026-09-29T05:13:46.727Z",
   "executionSourceCommit": "3a9bcf7c199efbbf1818b042c4a6fbcb020eca52",
   "browserQA": {
-    "status": "PENDING_CANDIDATE_PUBLIC_BROWSER_QA",
+    "status": "PASS_PUBLIC_CHAIN_FUNCTIONAL_AND_DIRECT_SCREENSHOT_REVIEW",
+    "date": "2026-09-29",
     "localCandidate": "PASS_390x844_844x390",
+    "publicPortrait": "PASS_100C_100LOTS_FILL_PROFIT50_CLOSE_WITHDRAW_RELOAD",
+    "publicLandscape": "PASS_100C_100LOTS_GAP_LIQUIDATION_LOSS100_WITHDRAW_RELOAD",
+    "rawGapLossTestKgen": 220,
+    "isolatedMarginLossTestKgen": 100,
+    "remainingPrincipalAfterLandscapeTestKgen": 1049,
+    "lockedMarginAfter": 0,
+    "readonlyFinalSource": "PASS_BOTH_ORIENTATIONS_ZERO_BROADCAST_HISTORICAL_BOUNDARY_FROM_RECEIPT",
+    "walletBoundary": "Chromium EIP1193 broker with configured Node-only Testnet signer; not a human MetaMask extension test",
+    "rpcRecovery": "Primary configured chain97 RPC; same-chain PublicNode eth_getLogs index; adapter verifies canonical receipts and blocks",
+    "evidencePaths": [
+      "artifacts/11520-testnet-browser-qa",
+      "artifacts/11520-testnet-readonly-qa",
+      "artifacts/11520-testnet-browser-attempts"
+    ],
+    "receiptCount": 37,
+    "receipts": [
+      {
+        "txHash": "0x551d0473da8bf4d147aa7c107e7cbe6cece7832533ac0478eb69b744fd0c991e",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133804254,
+        "timestamp": 1790658861
+      },
+      {
+        "txHash": "0xa2624d34396172e7cca35bd3f51196fedf9ec07d3c64b622229420a88b067b51",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133804257,
+        "timestamp": 1790658862
+      },
+      {
+        "txHash": "0x34c7508be9cb2b0264ace2a11968b0059884104a52f86e8cc119c0fd88d243af",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133804262,
+        "timestamp": 1790658865
+      },
+      {
+        "txHash": "0xfff101670445676def5d4b12ae5c4fa6a01cc10e8c783d01c4bb2b6d22fdff1d",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133807177,
+        "timestamp": 1790660177
+      },
+      {
+        "txHash": "0x057ce978a2f1dd9b3385ef5bb3306c7eea6a264ab2d6edf4c8c86d694e7e0769",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133807180,
+        "timestamp": 1790660178
+      },
+      {
+        "txHash": "0x9daba9eff58b3d4c05b8758056cf4fc343f9dfff50f7a1c2b74f5faa4f210eb5",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133807186,
+        "timestamp": 1790660181
+      },
+      {
+        "txHash": "0xddd5124bc203385c756cc8303587e7a556bf799ca56fc329afa5d40c4245169f",
+        "contract": "0x91ac96ff5f6B5D63aab0d6F17DF8D70AC295dBc3",
+        "method": "faucet",
+        "status": "CONFIRMED",
+        "block": 133807320,
+        "timestamp": 1790660241
+      },
+      {
+        "txHash": "0xb34148251176bde97729ee50c3dc8042c0e47510890ade30852973bf3bdc212e",
+        "contract": "0x91ac96ff5f6B5D63aab0d6F17DF8D70AC295dBc3",
+        "method": "approve",
+        "status": "CONFIRMED",
+        "block": 133807375,
+        "timestamp": 1790660266
+      },
+      {
+        "txHash": "0x2dd8b2d9ab2f683c07aa9d513c7174e550878fbb11f10dbdf499cb774f321895",
+        "contract": "0x60e3801CDf885830ca45Def76a6141f841B0521d",
+        "method": "depositMargin",
+        "status": "CONFIRMED",
+        "block": 133807449,
+        "timestamp": 1790660299
+      },
+      {
+        "txHash": "0x39a4a6ce6be55a7644d7e8e0407aa013249d0393885cd8fc6535dd4bd4738864",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133808334,
+        "timestamp": 1790660698
+      },
+      {
+        "txHash": "0x95ac01ce127db0377ffb77d816031ab3c08489d3fed9b9d2e1f8467a7a514d66",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133808338,
+        "timestamp": 1790660700
+      },
+      {
+        "txHash": "0x71b3a4c5205ab9c1e2e0e9274dcafb005d7cc55f7fcf04f0dd462be986f6b88f",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133808343,
+        "timestamp": 1790660702
+      },
+      {
+        "txHash": "0xbe6b751b307f0ecc76ee092bfc832a8ceef53dfeefb2b2da8e6e39c523cb97f6",
+        "contract": "0x60e3801CDf885830ca45Def76a6141f841B0521d",
+        "method": "depositMargin",
+        "status": "CONFIRMED",
+        "block": 133808454,
+        "timestamp": 1790660752
+      },
+      {
+        "txHash": "0xb72998def2df3b3d4f05532db47f0b842fdf0fdc97a9dc082fb1614f39934aac",
+        "contract": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+        "method": "createOrder",
+        "status": "CONFIRMED",
+        "block": 133808573,
+        "timestamp": 1790660805
+      },
+      {
+        "txHash": "0xe1510b29e7aee92eb22442aa57556e0ff687da524847d1974d039bc06a314f9d",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133808600,
+        "timestamp": 1790660817
+      },
+      {
+        "txHash": "0x5ed45dcd3906cfea0b5a895bd5e91baa15fe615cbe24e8fa55570440f8fd6a63",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133808605,
+        "timestamp": 1790660820
+      },
+      {
+        "txHash": "0x931e23dd5014eca851026507bbb799765d7970c361b7f29636004e9b9c22f300",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133808616,
+        "timestamp": 1790660825
+      },
+      {
+        "txHash": "0x5dd10aabe0224b6b3ce951705964e0142effb99fffdfc8a2024d70de95e37e2f",
+        "contract": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+        "method": "observeOrder",
+        "status": "CONFIRMED",
+        "block": 133808976,
+        "timestamp": 1790660987
+      },
+      {
+        "txHash": "0xf12fa4a3ecef580b690ada45ff3671eceaf9178f9ef74bd594c2d91c25c7edf8",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809061,
+        "timestamp": 1790661025
+      },
+      {
+        "txHash": "0x03e5c6adf58d01f770e726fa9c45d70e51dd9d4c7e68032bfb4d64229d69697a",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809068,
+        "timestamp": 1790661028
+      },
+      {
+        "txHash": "0x600d1ad5587f9e705a5f2d9f2274cecd7a509a3b80f7a09da31f2d22da144e93",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809073,
+        "timestamp": 1790661030
+      },
+      {
+        "txHash": "0x66e6e8dcc1ace98cf892837deffcb4bfd9693762d807175375e59c4c771bcd3d",
+        "contract": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+        "method": "closePosition",
+        "status": "CONFIRMED",
+        "block": 133809200,
+        "timestamp": 1790661087
+      },
+      {
+        "txHash": "0x03f2d08af0921e79abba58b9a1e1a2691fe80423f40d233717ada445e720b117",
+        "contract": "0x60e3801CDf885830ca45Def76a6141f841B0521d",
+        "method": "withdrawMargin",
+        "status": "CONFIRMED",
+        "block": 133809248,
+        "timestamp": 1790661109
+      },
+      {
+        "txHash": "0x1f536a6d1cca548599b50bacadbfef6be69ccf2ec109664165c2918e856cadec",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809336,
+        "timestamp": 1790661149
+      },
+      {
+        "txHash": "0x172b42667867e8670f3cc3444713ffc60584c196478c46feea643769028add45",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809341,
+        "timestamp": 1790661151
+      },
+      {
+        "txHash": "0x28d623c1ac667ad58a8ea1902b18ef7843d6d0dca107d3fa9f4d6442abb4a43f",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809345,
+        "timestamp": 1790661153
+      },
+      {
+        "txHash": "0xc2d53cbc642cb52381a13149a73d4ff26757d56a5fe61328a4461001d73f338e",
+        "contract": "0x60e3801CDf885830ca45Def76a6141f841B0521d",
+        "method": "depositMargin",
+        "status": "CONFIRMED",
+        "block": 133809408,
+        "timestamp": 1790661181
+      },
+      {
+        "txHash": "0x71260aa84933e0a3ad85f130fff2b17eef328b29dc914a5a5fef8494d259e839",
+        "contract": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+        "method": "createOrder",
+        "status": "CONFIRMED",
+        "block": 133809558,
+        "timestamp": 1790661249
+      },
+      {
+        "txHash": "0x93e09ec48619902db16dcf219cd3e5b4951933ce96ca135800d0cab23cd44464",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809626,
+        "timestamp": 1790661279
+      },
+      {
+        "txHash": "0xb3ec7238f30d0fd6f9bd924a0ee997dfd613a79e550af010d5a7828045f9a167",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809631,
+        "timestamp": 1790661282
+      },
+      {
+        "txHash": "0xa59eaf3ef07ebb58691b9b0cb540f8bdf0b8a07c806d5c0b6b67bb98803aca0f",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809635,
+        "timestamp": 1790661283
+      },
+      {
+        "txHash": "0xd66ae2ac9036139c05224bae0a6b239b6ec32d3e0b136b80d4f32d25d83c12c9",
+        "contract": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+        "method": "observeOrder",
+        "status": "CONFIRMED",
+        "block": 133809640,
+        "timestamp": 1790661286
+      },
+      {
+        "txHash": "0x2e749a356556c95f30d6664df8e5963a553e9e9b1370daf9dd2a9a61251191bc",
+        "contract": "0x19Dd99e05a0303B52A904cA6EC3a58194E7110A8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809734,
+        "timestamp": 1790661328
+      },
+      {
+        "txHash": "0x17bec70c854f1a8e9d2b0d975155b6d2f405807e0973c30d68b5dbc2de250255",
+        "contract": "0x76f0d0D46E52C53e125FB2DFc0A0352971F834E8",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809739,
+        "timestamp": 1790661330
+      },
+      {
+        "txHash": "0xf05e6e530a364f111ff58dc5fd586d7219742f1f5264bba0ab679e25dc88976c",
+        "contract": "0xF7CedC8af9cE9b0c9E69475b36B73241f9b46222",
+        "method": "TEST_ORACLE.set",
+        "status": "CONFIRMED",
+        "block": 133809743,
+        "timestamp": 1790661332
+      },
+      {
+        "txHash": "0x3dff2fdf6dd151f1347373617bf43c24f9db84c671c3082969c56eb8de4df9f7",
+        "contract": "0x1Ae72b845532F186f955cFeFC4C677bC6CbE0F23",
+        "method": "observePosition",
+        "status": "CONFIRMED",
+        "block": 133809746,
+        "timestamp": 1790661333
+      },
+      {
+        "txHash": "0xbec5c8fb40d3c7f58b7543a253fa38fd244b8c7aa9d88e266c4091aee5c0bfeb",
+        "contract": "0x60e3801CDf885830ca45Def76a6141f841B0521d",
+        "method": "withdrawMargin",
+        "status": "CONFIRMED",
+        "block": 133809847,
+        "timestamp": 1790661379
+      }
+    ],
     "noMainnet": true
   }
 }
