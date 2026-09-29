@@ -28,6 +28,20 @@
 - Wallet adapter reads allowance, requires explicit max-approval confirmation,
   supports Deposit/Available-only Withdraw, and uses capability-gated candidate
   claims/preview. Old deployments cannot invent Claimable0 or call absent ABI.
+- PR #445 checkpoint2fb4e5 passed actual-pair/capital Trading Readiness,
+  candidate-wallet Chromium, Responsive and Universal CI. Game Product exposed
+  historical percentage-return and version-label assertions, updated to test
+  the Human-approved index model and V2.6.25 rather than changing product math.
+- Actual local contracts and both390x844/844x390 browsers exercised100C100lots,
+  approve/deposit, pending/cross/fill, PnL, close/liquidation, withdraw, A/B/C
+  isolation and reload. Populated previews were directly image-reviewed after
+  awaiting asynchronous validation; blank loading-state captures are not PASS.
+- Existing rehearsal runner supports explicit, separately archived successors:
+  `--prepare-successor97=<run-id>` compiles/snapshots without provider/signer;
+  `--deploy97 --successor97=<same-run-id>` is a separately authorized public
+  action, verifies predecessor chain/code/roles/proxy/all receipts and refuses
+  reused candidates/runs. Original deployment records remain immutable; a
+  prepared successor is not a deployment receipt. No public successor executed.
 - Release remains pending fresh exact-head CI, direct mobile screenshots and
   Pages verification. Use PR/Actions/artifacts for final status, not this entry.
 - Mainnet remains blocked pending concrete contract/role/oracle/funding/gas

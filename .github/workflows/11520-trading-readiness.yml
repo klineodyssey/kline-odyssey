@@ -130,6 +130,9 @@ jobs:
       - name: Validate testnet deployment package locally (never public broadcast)
         run: node KGEN/scripts/rehearse_bsc_testnet.mjs --local
 
+      - name: Verify successor preparation and duplicate-deployment guards (no provider or signer)
+        run: node KGEN/scripts/rehearse_bsc_testnet.mjs --test-successor-guards
+
       - name: Reject tracked drift and parallel contract aliases
         shell: bash
         run: |
