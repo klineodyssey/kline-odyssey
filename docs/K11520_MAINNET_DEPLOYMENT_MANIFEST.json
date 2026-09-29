@@ -5,7 +5,7 @@
     "date": "2026-09-29",
     "authority": "Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE",
     "baseMain": "12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8",
-    "status": "PUBLIC_TESTNET_CONTRACT_AND_BROWSER_PASS_RELEASE_CI_PENDING",
+    "status": "PUBLIC_TESTNET_PRODUCT_RELEASED_PR445_PR446_OFFLINE_FOLLOWUP_PENDING_CI",
     "pnlModel": "INDEX_DELTA_C_LOTS_V1",
     "pnlFormula": "(mark index - entry index) * signed C * positive lots; no division by entry",
     "marginFormula": "1 KGEN per lot; isolated position loss cannot consume unrelated available principal",
@@ -79,10 +79,10 @@
       "decimals": 8,
       "provenance": "https://app.redstone.finance/push-feeds?networks=bnb&testnets=true",
       "independence": "Distinct provider from Chainlink; upstream source correlation not certified",
-      "compatibility": "BLOCKED_DIRECT_INTEGRATION: live BTC roundId=answeredInRound=1 across changed answer/timestamp; PositionEngine rightly rejects same-round mutation. Requires source-specific timestamp adapter, not removal of generic replay protection. ETH observed age6743s exceeds testmaxAge3600s."
+      "compatibility": "DIRECT_INTEGRATION_FORBIDDEN: live BTC roundId=answeredInRound=1 across changed answer/timestamp. Candidate KGEN_OracleSourceAdapter now tested locally with unchanged Position replay guard; no production adapter address/source policy approved. ETH observed age6743s requires explicit freshness choice."
     },
     "thirdProvider": "NOT_APPROVED",
-    "readiness": "BLOCKED: RedStone timestamp adapter, third-provider/keeper service approval and verified adapter, USD/USDT depeg policy, exact fresh per-market source/risk configuration outstanding. Never reuse mock feeds or weaken replay guards.",
+    "readiness": "BLOCKED: generic timestamp/Pyth adapters are implemented and locally tested, but actual provider/keeper service, production adapter deployment/readback, USD/USDT depeg/conversion policy and exact per-market risk configuration remain unapproved. No USD-to-USDT assumption or mock feed reuse.",
     "liveReadback": {
       "chainId": 56,
       "block": 124658676,
@@ -196,6 +196,19 @@
   "EXPECTED_GAS": null,
   "executionManifestTemplate": {
     "status": "UNSIGNED_TEMPLATE_NOT_EXECUTABLE",
+    "builder": "KGEN/scripts/rehearse_bsc_testnet.mjs --build-mainnet-unsigned=<public-input.json>",
+    "builderTests": "--test-mainnet-package; deterministic synthetic constructors/atomic proxy/roles/disabled-market config/funding/nonces/caps/digest; no provider, signer or broadcast",
+    "transactionRoute": "DIRECT_EOA_UNSIGNED only; Safe/contract-wallet routes require a separate reviewed envelope and cannot reuse EOA nonces",
+    "packageInspector": "runtime/real-trading-preflight-ui.mjs inspectMainnetUnsignedPackage checks pinned digest and envelope metadata but always returns ready=false and broadcast=false; integrity is not approval",
+    "candidateOracleAdapter": {
+      "source": "KGEN/contracts/KGEN_OracleSourceAdapter.sol",
+      "status": "LOCAL_EVM_PASS_NOT_DEPLOYED_NOT_PROVIDER_APPROVAL",
+      "modes": ["TIMESTAMP_AGGREGATOR", "PYTH"],
+      "policy": "Immutable explicit source/feedId/decimals/maxAge/confidence; exact WAD scaling; raw confidence before scaling; source publishTime identity; existing Position same-time mutation and rollback protection unchanged",
+      "quotePolicy": "Preserves source denomination. USD feeds remain USD. No USD/USDT conversion or depeg policy invented.",
+      "apiProvenance": "https://api-reference.pyth.network/price-feeds/evm/getPriceNoOlderThan",
+      "broadcast": false
+    },
     "signerPublicAddress": null,
     "chainId": 56,
     "nativeValuePerTransactionWei": "0",
@@ -215,7 +228,7 @@
     "expectedTransactions": [
       "Deploy exact candidate Brain implementation (no initializer on implementation)",
       "Deploy ordinary OpenZeppelin ERC1967Proxy with atomic Brain.initialize(token,admin,brainKeeper,pauser,upgradeAuthority,treasury,nextPayrollAt); never deploy chain97-only test proxy on56",
-      "Deploy PositionEngine(admin,temporaryExecutor,brainProxy); no EOA receives Brain settlement role",
+      "Deploy PositionEngine(admin,predictedTriggerAddress,brainProxy); no temporary EOA executor or Brain settlement role",
       "Deploy OrderTriggerEngine(positionEngine,approvedKeeper)",
       "Set Position.executor to reviewed Trigger; grant Brain.SETTLEMENT_ROLE only to reviewed Position; verify all role memberships and remove any explicitly recorded bootstrap grant",
       "Configure each approved market and its three approved feeds; keep new risk paused until readbacks pass",
@@ -255,10 +268,10 @@
     "additionalBrowserReceiptCount": 37
   },
   "BLOCKERS": [
-    "Production RedStone constant-round updates are incompatible with current replay watermark; source-specific adapter required. Pyth candidate observed stale and needs approved update-fee/API route; production source selection is not approved.",
+    "Generic timestamp/Pyth adapter and unsigned builder locally tested; exact live provider/feed configuration and adapter addresses/readbacks are not approved. Pyth requires an approved keeper/update-fee/API route; no paid update path was activated.",
     "Production three-independent-provider USDT settlement oracle set not approved; third provider, USD/USDT basis, decimals/freshness/round validation outstanding",
     "Production admin/upgrade/pauser/keeper identities and risk parameters not approved",
-    "Exact-head CI/Pages release must be verified from PR445 and Actions; public Testnet browser already PASS, with75 deployment/smoke plus37 additional confirmed browser receipts",
+    "PR445/446 product released; this offline-only follow-up still requires fresh exact-head CI/Pages evidence. Public Testnet browser PASS has75 deployment/smoke plus37 additional confirmed browser receipts",
     "Concrete signer public address, actual KGEN funding amount, Settlement Capital/Insurance allocation, gas/value caps and calldata-bound execution manifest not yet approved",
     "Mainnet execution manifest requires Human approval; no Mainnet writes authorized"
   ],

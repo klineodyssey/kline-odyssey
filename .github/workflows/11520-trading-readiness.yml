@@ -7,6 +7,7 @@ on:
       - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
       - "KGEN/contracts/KGEN_PositionEngine.sol"
       - "KGEN/contracts/KGEN_OrderTriggerEngine.sol"
+      - "KGEN/contracts/KGEN_OracleSourceAdapter.sol"
       - "KGEN/scripts/rehearse_bsc_testnet.mjs"
       - "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
@@ -29,6 +30,7 @@ on:
       - "KGEN/contracts/KGEN_MarketRiskKernel.sol"
       - "KGEN/contracts/KGEN_PositionEngine.sol"
       - "KGEN/contracts/KGEN_OrderTriggerEngine.sol"
+      - "KGEN/contracts/KGEN_OracleSourceAdapter.sol"
       - "KGEN/scripts/rehearse_bsc_testnet.mjs"
       - "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json"
       - "KGEN/contracts/tests/brain-v4-static-invariants.mjs"
@@ -94,7 +96,8 @@ jobs:
             KGEN/contracts/KGEN_BrainExchange.sol \
             KGEN/contracts/KGEN_MarketRiskKernel.sol \
             KGEN/contracts/KGEN_PositionEngine.sol \
-            KGEN/contracts/KGEN_OrderTriggerEngine.sol
+            KGEN/contracts/KGEN_OrderTriggerEngine.sol \
+            KGEN/contracts/KGEN_OracleSourceAdapter.sol
           test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_BrainExchange_sol_KGEN_BrainExchange_V4_0_0.bin
           test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_PositionEngine_sol_KGEN_PositionEngine_V1_0_0.bin
 
@@ -132,6 +135,9 @@ jobs:
 
       - name: Verify successor preparation and duplicate-deployment guards (no provider or signer)
         run: node KGEN/scripts/rehearse_bsc_testnet.mjs --test-successor-guards
+
+      - name: Verify unsigned Mainnet package construction (synthetic inputs; no provider or signer)
+        run: node KGEN/scripts/rehearse_bsc_testnet.mjs --test-mainnet-package
 
       - name: Reject tracked drift and parallel contract aliases
         shell: bash

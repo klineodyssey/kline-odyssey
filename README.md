@@ -6,6 +6,20 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### K11520 offline Mainnet preparation (2026-09-29; no broadcast)
+
+`KGEN/contracts/KGEN_OracleSourceAdapter.sol` is a read-only candidate adapter
+for timestamp aggregators and Pyth. Explicit immutable freshness/confidence
+parameters preserve source identity and existing replay guards. USD remains
+USD; this is not approval of any production provider or conversion policy.
+
+The existing `KGEN/scripts/rehearse_bsc_testnet.mjs` accepts
+`--build-mainnet-unsigned=<public-input.json>` to create an unsigned chain56
+package without provider, signer or broadcast. Missing input produces a blocked
+package, not guessed defaults. `--test-mainnet-package` uses synthetic fixtures
+only. Direct-EOA envelopes do not substitute for a reviewed multisig/Safe route.
+Live activation and real asset transactions still require exact Human approval.
+
 ### K11520 BSC Testnet rehearsal (2026-09-26)
 
 `KGEN/scripts/rehearse_bsc_testnet.mjs` prepares the existing settlement organs,

@@ -7,6 +7,7 @@ import { BrowserProvider, ContractFactory, Contract, parseEther } from 'ethers';
 
 const enginePath = 'KGEN/contracts/KGEN_PositionEngine.sol';
 const kernelPath = 'KGEN/contracts/KGEN_MarketRiskKernel.sol';
+const adapterPath = 'KGEN/contracts/KGEN_OracleSourceAdapter.sol';
 const harnessPath = 'KGEN/contracts/tests/PositionSettlementHarness.sol';
 const harnessSource = `// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
@@ -91,6 +92,34 @@ interface IObservationSequence {
     function marketObservationSequence(uint8 market) external view returns (uint256);
 }
 
+contract TimestampSource {
+    uint8 public decimals = 8;
+    int256 public answer = 100e8;
+    uint256 public at;
+    uint80 public round = 1;
+    uint80 public completed = 1;
+    constructor() { at = block.timestamp; }
+    function set(int256 value, uint256 time) external { answer = value; at = time; }
+    function setDecimals(uint8 value) external { decimals = value; }
+    function setRound(uint80 value, uint80 complete) external { round = value; completed = complete; }
+    function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
+        return (round, answer, at, at, completed);
+    }
+}
+
+contract PythSource {
+    struct Price { int64 price; uint64 conf; int32 expo; uint256 publishTime; }
+    Price public value;
+    bytes32 public constant ID = bytes32(uint256(1));
+    constructor() { value = Price(100e8, 1e6, -8, block.timestamp); }
+    function set(int64 price, uint64 conf, int32 expo, uint256 at) external { value = Price(price, conf, expo, at); }
+    // Deliberately omit freshness here: the adapter must independently check it.
+    function getPriceNoOlderThan(bytes32 id, uint256) external view returns (Price memory) {
+        require(id == ID, "NO_FEED");
+        return value;
+    }
+}
+
 // Adversarial view-only oracle: after the engine accepts the adverse round,
 // a second read in that same transaction returns a valid newer rebound round.
 contract AcceptanceSensitiveFeed {
@@ -116,6 +145,7 @@ contract AcceptanceSensitiveFeed {
 const sources = {
   [enginePath]: { content: fs.readFileSync(enginePath, 'utf8') },
   [kernelPath]: { content: fs.readFileSync(kernelPath, 'utf8') },
+  [adapterPath]: { content: fs.readFileSync(adapterPath, 'utf8') },
   [harnessPath]: { content: harnessSource },
 };
 
@@ -148,7 +178,8 @@ assert.ok(feedArtifact?.evm?.bytecode?.object, 'missing mock feed bytecode');
 assert.ok(artifact.evm.deployedBytecode.object.length / 2 < 24_576, 'position engine exceeds EIP-170 runtime size');
 
 const eip1193 = ganache.provider({ logging: { quiet: true }, miner: { timestampIncrement: 1 }, wallet: { totalAccounts: 5 } });
-const provider = new BrowserProvider(eip1193);
+// Local mined mutations must not reuse a rejected estimate from an earlier state.
+const provider = new BrowserProvider(eip1193, undefined, { cacheTimeout: -1 });
 provider.pollingInterval = 10;
 const [admin, executor, trader, stranger] = await Promise.all([0,1,2,3].map((i) => provider.getSigner(i)));
 
@@ -410,5 +441,129 @@ for (const c of ['0.001', '-0.001', '1', '-1', '100', '-100']) for (const lots o
     }
 }
 
-console.log('[position-engine-evm] PASS: authenticated 2-of-3 oracle quorum, freshness/round/deviation gates, KX/KY/KZ risk, atomic Brain settlement, bad debt, adversarial same-observation liquidation');
+// Generic source adaptation is local-only candidate QA, not provider approval.
+const adapterArtifact = output.contracts[adapterPath].KGEN_OracleSourceAdapter;
+assert.ok(adapterArtifact.evm.deployedBytecode.object.length / 2 < 24_576);
+const timestampSource = await deploy(output.contracts[harnessPath].TimestampSource, admin);
+const pythSource = await deploy(output.contracts[harnessPath].PythSource, admin);
+const zeroId = '0x' + '00'.repeat(32);
+const priceId = '0x' + '00'.repeat(31) + '01';
+const timestampArgs = [timestampSource.target, 0, 8, zeroId, 3600, 0];
+const pythArgs = [pythSource.target, 1, 0, priceId, 3600, 100];
+const timestampAdapter = await deploy(adapterArtifact, admin, timestampArgs);
+const pythAdapter = await deploy(adapterArtifact, admin, pythArgs);
+assert.equal(await timestampAdapter.decimals(), 18n);
+assert.equal((await timestampAdapter.latestRoundData())[1], px100);
+assert.equal((await pythAdapter.latestRoundData())[1], px100);
+assert.equal((await timestampAdapter.latestRoundData())[0], await timestampSource.at());
+
+async function expectCustom(promise, contract, name) {
+    let caught;
+    try { await promise; } catch (error) { caught = error; }
+    assert.ok(caught, `expected ${name}`);
+    const data = caught.data ?? caught.info?.error?.data?.result;
+    assert.equal(typeof data, 'string', `missing revert data for ${name}`);
+    assert.equal(data.slice(0, 10), contract.interface.getError(name).selector, name);
+}
+const sourceEngine = await deploy(artifact, admin, [await admin.getAddress(), await executor.getAddress(), mockBrain.target]);
+const plainFeed = await deploy(feedArtifact, admin, [px100, await latestTimestamp()]);
+await (await sourceEngine.configureMarket(0, 2000, 500, 3600, px50, px150, true)).wait();
+await (await sourceEngine.configureOracle(0, [timestampAdapter.target, pythAdapter.target, plainFeed.target], 2, 500)).wait();
+await (await sourceEngine.connect(executor).acceptMarketObservation(0)).wait();
+const firstSequence = await sourceEngine.marketObservationSequence(0);
+await (await sourceEngine.connect(executor).acceptMarketObservation(0)).wait();
+assert.equal(await sourceEngine.marketObservationSequence(0), firstSequence, 'same source time/data is stable across blocks');
+const progressedAt = await latestTimestamp();
+await (await timestampSource.set(101n * 10n ** 8n, progressedAt)).wait();
+await (await sourceEngine.connect(executor).acceptMarketObservation(0)).wait();
+assert.equal(await timestampSource.round(), 1n, 'constant underlying round fixture');
+assert.equal(await sourceEngine.marketObservationSequence(0), firstSequence + 1n);
+await (await timestampSource.set(102n * 10n ** 8n, progressedAt)).wait();
+await expectCustom(sourceEngine.connect(executor).acceptMarketObservation.staticCall(0), sourceEngine, 'OutOfOrderPrice');
+assert.equal(await sourceEngine.marketObservationSequence(0), firstSequence + 1n, 'same-time mutation never accepted');
+await (await timestampSource.set(100n * 10n ** 8n, progressedAt - 1n)).wait();
+await expectCustom(sourceEngine.connect(executor).acceptMarketObservation.staticCall(0), sourceEngine, 'OutOfOrderPrice');
+await (await timestampSource.set(101n * 10n ** 8n, progressedAt)).wait();
+const pythAt = await latestTimestamp();
+await (await pythSource.set(101n * 10n ** 8n, 1, -8, pythAt)).wait();
+await (await sourceEngine.connect(executor).acceptMarketObservation(0)).wait();
+await (await pythSource.set(102n * 10n ** 8n, 1, -8, pythAt)).wait();
+await expectCustom(sourceEngine.connect(executor).acceptMarketObservation.staticCall(0), sourceEngine, 'OutOfOrderPrice');
+
+for (const [price, confidence, exponent, expected] of [
+    [12345n, 1n, -2, parseEther('123.45')], [12n, 0n, 2, parseEther('1200')],
+    [10000n, 1n, -22, 1n], [10n ** 18n, 1n, -36, 1n],
+]) {
+    await (await pythSource.set(price, confidence, exponent, await latestTimestamp())).wait();
+    assert.equal((await pythAdapter.latestRoundData())[1], expected);
+}
+await (await pythSource.set(10001, 0, -22, await latestTimestamp())).wait();
+await expectCustom(pythAdapter.latestRoundData(), pythAdapter, 'InvalidScale');
+// conf=999 would truncate to zero if first scaled by 10^4, yet raw ratio is ~10% >1%.
+await (await pythSource.set(10001, 999, -22, await latestTimestamp())).wait();
+await expectCustom(pythAdapter.latestRoundData(), pythAdapter, 'InvalidConfidence');
+for (const exponent of [-2147483648, -37, 19, 2147483647]) {
+    await (await pythSource.set(1, 0, exponent, await latestTimestamp())).wait();
+    await expectCustom(pythAdapter.latestRoundData(), pythAdapter, 'InvalidExponent');
+}
+await (await pythSource.set(1, 0, -36, await latestTimestamp())).wait();
+await expectCustom(pythAdapter.latestRoundData(), pythAdapter, 'InvalidScale');
+for (const price of [0, -1]) {
+    await (await pythSource.set(price, 0, -8, await latestTimestamp())).wait();
+    await expectCustom(pythAdapter.latestRoundData(), pythAdapter, 'InvalidObservation');
+}
+for (const time of [0n, (await latestTimestamp()) - 4000n, (await latestTimestamp()) + 10000n]) {
+    await (await pythSource.set(100n * 10n ** 8n, 1, -8, time)).wait();
+    await expectCustom(pythAdapter.latestRoundData(), pythAdapter, 'InvalidObservation');
+    await (await timestampSource.set(100n * 10n ** 8n, time)).wait();
+    await expectCustom(timestampAdapter.latestRoundData(), timestampAdapter, 'InvalidObservation');
+}
+await (await timestampSource.set(2n ** 255n - 1n, await latestTimestamp())).wait();
+await expectCustom(timestampAdapter.latestRoundData(), timestampAdapter, 'InvalidScale');
+await (await timestampSource.set(0, await latestTimestamp())).wait();
+await expectCustom(timestampAdapter.latestRoundData(), timestampAdapter, 'InvalidObservation');
+await (await timestampSource.set(100n * 10n ** 8n, await latestTimestamp())).wait();
+await (await timestampSource.setRound(2, 1)).wait();
+await expectCustom(timestampAdapter.latestRoundData(), timestampAdapter, 'InvalidObservation');
+await (await timestampSource.setRound(1, 1)).wait();
+await (await timestampSource.setDecimals(18)).wait();
+await expectCustom(timestampAdapter.latestRoundData(), timestampAdapter, 'InvalidScale');
+await (await timestampSource.setDecimals(8)).wait();
+const preciseSource = await deploy(output.contracts[harnessPath].TimestampSource, admin);
+await (await preciseSource.setDecimals(22)).wait();
+await (await preciseSource.set(10000, await latestTimestamp())).wait();
+const preciseAdapter = await deploy(adapterArtifact, admin, [preciseSource.target, 0, 22, zeroId, 3600, 0]);
+assert.equal((await preciseAdapter.latestRoundData())[1], 1n);
+await (await preciseSource.set(10001, await latestTimestamp())).wait();
+await expectCustom(preciseAdapter.latestRoundData(), preciseAdapter, 'InvalidScale');
+await (await timestampSource.setRound(0, 0)).wait();
+await expectCustom(timestampAdapter.latestRoundData(), timestampAdapter, 'InvalidObservation');
+await (await timestampSource.setRound(1, 1)).wait();
+await (await timestampSource.set(-1, await latestTimestamp())).wait();
+await expectCustom(timestampAdapter.latestRoundData(), timestampAdapter, 'InvalidObservation');
+await (await timestampSource.set(100n * 10n ** 8n, (await latestTimestamp()) - 4000n)).wait();
+await expectRevert(deploy(adapterArtifact, admin, timestampArgs), 'constructor rejects stale aggregator');
+await (await timestampSource.set(100n * 10n ** 8n, await latestTimestamp())).wait();
+await (await pythSource.set(100n * 10n ** 8n, 1, -8, (await latestTimestamp()) - 4000n)).wait();
+await expectRevert(deploy(adapterArtifact, admin, pythArgs), 'constructor rejects stale Pyth');
+await (await pythSource.set(100n * 10n ** 8n, 1, -8, await latestTimestamp())).wait();
+for (const args of [
+    [await stranger.getAddress(), ...timestampArgs.slice(1)],
+    [mockBrain.target, ...timestampArgs.slice(1)],
+    [mockBrain.target, ...pythArgs.slice(1)],
+    [timestampSource.target, 2, 8, zeroId, 3600, 0],
+    [timestampSource.target, 0, 9, zeroId, 3600, 0],
+    [timestampSource.target, 0, 37, zeroId, 3600, 0],
+    [timestampSource.target, 0, 8, priceId, 3600, 0],
+    [timestampSource.target, 0, 8, zeroId, 0, 0],
+    [timestampSource.target, 0, 8, zeroId, 3600, 1],
+    [pythSource.target, 1, 8, priceId, 3600, 100],
+    [pythSource.target, 1, 0, zeroId, 3600, 100],
+    [pythSource.target, 1, 0, priceId, 0, 100],
+    [pythSource.target, 1, 0, priceId, 3600, 0],
+    [pythSource.target, 1, 0, priceId, 3600, 10001],
+    [pythSource.target, 1, 0, '0x' + '02'.repeat(32), 3600, 100],
+]) await expectRevert(deploy(adapterArtifact, admin, args), 'adapter constructor fail closed');
+
+console.log('[position-engine-evm] PASS: authenticated quorum/risk/atomic settlement, same-observation liquidation; immutable timestamp/Pyth adapters, actual engine same-time mutation rejection, raw confidence/exponent/scale/freshness and constructor gates');
 await eip1193.disconnect();

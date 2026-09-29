@@ -38,6 +38,14 @@ BOOT_POLICY: Fixed filename; update content cumulatively; never rename the forma
 
 ### K11520 settlement engineering registration (2026-09-25)
 
+2026-09-29 cumulative offline-readiness registration:
+`KGEN/contracts/KGEN_OracleSourceAdapter.sol` is the single read-only candidate
+adapter for timestamp aggregators/Pyth, preserving quote units, source time and
+Position replay guards. It is not deployed or approved production provenance.
+The existing rehearsal runner also builds unsigned chain56 packages; this mode
+never creates a provider/signer or authorizes broadcast. Missing real parameters
+stay blocked. Testnet execution remains explicit chain97-only.
+
 2026-09-26 cumulative Testnet-only registration (Human deployment order):
 `KGEN/scripts/rehearse_bsc_testnet.mjs` compiles/rehearses the existing organs and
 broadcasts only with explicit `--deploy97`, configured Testnet signer, chain97,

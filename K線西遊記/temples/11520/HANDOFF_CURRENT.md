@@ -2,6 +2,18 @@
 
 ## Complete-product capital/wallet continuation — 2026-09-29
 
+- PR446 merged6f567ca000113f5ffe9bd0887098d50c4fe3a149 after all exact-head
+  CI passed. Published source/rotation/PWA and actual chain97 read-only wallet,
+  receipt recovery/stale-price rejection passed. No further chain writes.
+- Offline follow-up adds one read-only candidate OracleSourceAdapter and extends
+  the existing runner with unsigned chain56 packages; no duplicate settlement
+  engine or public deployment. Timestamp/Pyth source-time mutation, freshness,
+  confidence-before-rounding, exact precision and constructor guards tested with
+  unchanged Position. USD is not USDT; actual source/risk policy remains open.
+  Package hashes bind roles/nonces/code/calldata/caps, not Human approval. Missing
+  parameters produce a blocked package. Frontend inspector never enables signing.
+  Existing four public organs and their receipt/bytecode lineage are unchanged.
+
 - PR445 merged at b433131756f046e9f4f3a3cce957316ba85da0ce; all exact-head
   and main Game/Responsive/Trading/Universal/Pages CI passed. Public source
   matched that merge; real no-asset-interception portrait/landscape/rotation and
