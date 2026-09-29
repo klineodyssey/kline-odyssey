@@ -7,14 +7,14 @@ import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-contr
 assert.equal(MAX_C_LEVERAGE,100);
 assert.equal(requiredMargin({lots:8}),8);
 assert.equal(requiredMargin({lots:100}),100);
-assert.equal(pnlForMove({entry:100,mark:101,side:'多',lots:100,c:100}),100);
-assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-100);
-assert.equal(pnlForMove({entry:100,mark:101,side:'空',lots:100,c:-100}),-100);
+assert.equal(pnlForMove({entry:100,mark:101,side:'多',lots:100,c:100}),10000);
+assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-10000);
+assert.equal(pnlForMove({entry:100,mark:101,side:'空',lots:100,c:-100}),-10000);
 assert.equal(signedCFromLegacyMagnitude(100,'空'),-100);
 assert.equal(normalizeSignedC(-0,{allowNeutral:true}),0);
 for(const c of C_DETENTS){
   assert.equal(normalizeSignedC(c,{allowNeutral:true}),c);
-  if(c!==0)assert.ok(Math.abs(pnlForMove({entry:100,mark:101,lots:1,c})-.01*c)<1e-12);
+  if(c!==0)assert.ok(Math.abs(pnlForMove({entry:100,mark:101,lots:1,c})-c)<1e-12);
 }
 for(const c of [.0001,-.0001,.3,-.3,3.742,-3.742,17.382,-17.382,99.6,-99.6]){
   assert.throws(()=>normalizeSignedC(c),/INVALID_C_DETENT/);
@@ -28,21 +28,21 @@ for(const lots of [0,-1,.5,100.1,101,NaN,Infinity])assert.throws(()=>requiredMar
 for(const [c,side] of [[100,'SHORT'],[-100,'LONG'],[1,'invalid']])assert.throws(()=>pnlForMove({entry:100,mark:101,lots:1,c,side}),/C_SIDE_MISMATCH|SIDE_NOT_SUPPORTED/);
 for(const c of [-100,100])for(const lots of [1,100])for(const change of [-.02,-.01,-.005,-.001,.001,.005,.01,.02]){
   const r=positionRisk({entry:10000,mark:10000*(1+change),c,lots});
-  assert.ok(Math.abs(r.rawPnl-change*c*lots)<1e-8);
+  assert.ok(Math.abs(r.rawPnl-10000*change*c*lots)<1e-5);
   assert.equal(r.remaining,Math.max(0,lots+r.pnl));
   assert.ok(r.pnl>=-lots,'isolated loss cannot consume other principal');
 }
-assert.equal(maxAdversePoints(100,100),1);
-assert.equal(maxAdversePoints(50,100),2);
+assert.equal(maxAdversePoints(100,100),.01);
+assert.equal(maxAdversePoints(50,100),.02);
 assert.throws(()=>pnlForMove({entry:100,mark:101,side:'多',lots:1,c:1000}),/C_LEVERAGE_OUT_OF_RANGE/);
 assert.throws(()=>pnlForMove({entry:100,mark:101,side:'多',lots:1,c:'not-a-number'}),/C_LEVERAGE_OUT_OF_RANGE/);
 assert.throws(()=>pnlForMove({entry:100,mark:Infinity,side:'多',lots:1,c:1}),/MARK_PRICE_MUST_BE_POSITIVE/);
 assert.throws(()=>pnlForMove({entry:100,mark:101,side:'多',lots:Infinity,c:1}),/LOTS_OUT_OF_RANGE/);
 assert.throws(()=>positionRisk({entry:100,mark:NaN,side:'多',lots:1,c:1}),/MARK_PRICE_MUST_BE_POSITIVE/);
 const blown=positionRisk({entry:100,mark:99,side:'多',lots:100,c:100});
-assert.equal(blown.principal,100);assert.equal(blown.pnl,-100);assert.equal(blown.remaining,0);assert.equal(blown.liquidated,true);assert.equal(blown.liquidationMark,99);
-const safe=positionRisk({entry:100,mark:99,side:'多',lots:100,c:50});
-assert.equal(safe.pnl,-50);assert.equal(safe.remaining,50);assert.equal(safe.liquidated,false);assert.equal(safe.liquidationMark,98);
+assert.equal(blown.principal,100);assert.equal(blown.pnl,-100);assert.equal(blown.remaining,0);assert.equal(blown.liquidated,true);assert.equal(blown.liquidationMark,99.99);
+const safe=positionRisk({entry:100,mark:99.99,side:'多',lots:100,c:50});
+assert.ok(Math.abs(safe.pnl+50)<1e-8);assert.ok(Math.abs(safe.remaining-50)<1e-8);assert.equal(safe.liquidated,false);assert.equal(safe.liquidationMark,99.98);
 
 const ledger=createKgenLedger(100);
 assert.equal(reserveOrder(ledger,10).ok,true);
@@ -80,12 +80,12 @@ for(const c of C_DETENTS.filter(c=>c!==0)){
   const filled=simulationSnapshot(l);
   assert.equal(filled.orders[0].c,c);assert.equal(filled.positions[0].c,c);assert.equal(filled.receipts[0].c,c);
   assert.equal(l.free,999);assert.equal(l.lockedMargin,1);
-  tick(l,100.01,1003);
-  assert.ok(Math.abs(l.unrealizedPnl-.0001*c)<1e-10);
+  tick(l,100.001,1003);
+  assert.ok(Math.abs(l.unrealizedPnl-.001*c)<1e-10);
   assert.equal(closeSimulationPosition(l,filled.positions[0].positionId,{now:1004}).ok,true);
   const closed=simulationSnapshot(l);
   assert.equal(closed.receipts[1].c,c);assert.equal(closed.receipts[1].status,'CLOSED');
-  assert.equal(l.lockedMargin,0);assert.ok(Math.abs(l.free-(1000+.0001*c))<1e-10);
+  assert.equal(l.lockedMargin,0);assert.ok(Math.abs(l.free-(1000+.001*c))<1e-10);
 }
 for(const c of [.3,-.3,3.742,17.382,99.6,100.001,-100.001,1000,-1000]){
   const l=createKgenLedger(1000);tick(l,99,1000);const before=structuredClone(l);
@@ -112,8 +112,8 @@ for(const c of [100,-100])for(const lots of [1,100]){
   const gap=c>0?98:102;assert.equal(tick(l,gap,1004).events[0].status,'LIQUIDATED');
   const dead=simulationSnapshot(l),receipt=dead.receipts[1];
   assert.equal(dead.positions[0].margin,0);assert.equal(dead.positions[0].status,'LIQUIDATED');
-  assert.equal(receipt.marginBefore,lots);assert.equal(receipt.marginAfter,0);assert.ok(Math.abs(receipt.badDebt-lots)<1e-9);
-  assert.equal(receipt.liquidationTrigger,c>0?99:101,'receipt boundary remains based on entry and C after margin is zeroed');
+  assert.equal(receipt.marginBefore,lots);assert.equal(receipt.marginAfter,0);assert.ok(Math.abs(receipt.badDebt-199*lots)<1e-9);
+  assert.equal(receipt.liquidationTrigger,c>0?99.99:100.01,'receipt boundary remains based on entry and C after margin is zeroed');
   assert.equal(l.free,1000-lots);assert.equal(l.lockedMargin,0);assert.equal(l.realizedPnl,-lots);assert.equal(l.unrealizedPnl,0);
   assert.equal(tick(l,100,1005).events.length,0);assert.equal(simulationSnapshot(l).receipts.length,2);
   assert.equal(closeSimulationPosition(l,position.positionId,{now:1006}).reason,'POSITION_NOT_OPEN');
@@ -128,12 +128,12 @@ for(const c of [100,-100])for(const lots of [1,100]){
   assert.equal(cancelSimulationOrder(l,o.order.orderId).ok,true);tick(l,102,1002);assert.equal(simulationSnapshot(l).receipts.length,0);assert.equal(l.free,1000);
 }
 {
-  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{stopPrice:99.5,takeProfitPrice:101});tick(l,100,1002);tick(l,99.5,1003);
-  assert.equal(simulationSnapshot(l).positions[0].status,'STOPPED');assert.equal(l.free,950);
+  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{stopPrice:99.995,takeProfitPrice:101});tick(l,100,1002);tick(l,99.995,1003);
+  assert.equal(simulationSnapshot(l).positions[0].status,'STOPPED');assert.ok(Math.abs(l.free-950)<1e-8);
 }
 {
-  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{c:-100,takeProfitPrice:99.5});tick(l,100,1002);tick(l,99.5,1003);
-  assert.equal(simulationSnapshot(l).positions[0].status,'TAKE_PROFIT');assert.equal(l.free,1050);
+  const l=createKgenLedger(1000);tick(l,100,1000);order(l,{c:-100,takeProfitPrice:99.995});tick(l,100,1002);tick(l,99.995,1003);
+  assert.equal(simulationSnapshot(l).positions[0].status,'TAKE_PROFIT');assert.ok(Math.abs(l.free-1050)<1e-8);
 }
 {
   const l=createKgenLedger(1000);tick(l,100,1000);order(l);tick(l,100,1002);tick(l,100.1,1003);

@@ -36,13 +36,20 @@ contract K11520TestOracle {
  function set(int256 price,uint256 timestamp) external {require(msg.sender==owner,"OWNER");answer=price;updatedAt=timestamp;roundId++;}
  function latestRoundData() external view returns(uint80,int256,uint256,uint256,uint80){return(roundId,answer,updatedAt,updatedAt,roundId);}
 }`;
-const sources = Object.fromEntries(sourcePaths.map(p => [p, { content: fs.readFileSync(p, 'utf8') }]));
-sources[harnessPath] = { content: harness };
+// Git stores LF while a Windows checkout may use CRLF. Compile/hash the same
+// canonical UTF-8 LF source on both hosts so metadata and bytecode reproduce.
+const canonicalSource = content => content.replace(/\r\n/g, '\n');
+const sources = Object.fromEntries(sourcePaths.map(p => [p, { content: canonicalSource(fs.readFileSync(p, 'utf8')) }]));
+sources[harnessPath] = { content: canonicalSource(harness) };
+const resolvedSources = { ...sources };
 const settings = { optimizer: { enabled: true, runs: 200 }, evmVersion: 'paris', outputSelection: { '*': { '*': ['abi', 'evm.bytecode', 'evm.deployedBytecode'] } } };
 assert.ok(solc.version().startsWith('0.8.24+'), 'Pinned solc 0.8.24 required');
 const compiled = JSON.parse(solc.compile(JSON.stringify({ language: 'Solidity', sources, settings }), { import: p => {
   const file = `node_modules/${p}`;
-  return fs.existsSync(file) ? { contents: fs.readFileSync(file, 'utf8') } : { error: 'Missing pinned import' };
+  if (!fs.existsSync(file)) return { error: 'Missing pinned import' };
+  const contents = canonicalSource(fs.readFileSync(file, 'utf8'));
+  resolvedSources[p] = { content: contents };
+  return { contents };
 } }));
 assert.deepEqual((compiled.errors ?? []).filter(e => e.severity === 'error'), []);
 function artifact(path, name) {
@@ -60,7 +67,15 @@ const artifacts = {
  oracle: artifact(harnessPath,'K11520TestOracle'),
 };
 const write = (name,value) => fs.writeFileSync(`${outDir}/${name}`, JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v,2)+'\n');
-write('build.json',{compiler:solc.version(),settings,artifacts,sourceHashes:Object.fromEntries(Object.entries(sources).map(([p,s])=>[p,createHash('sha256').update(s.content).digest('hex')]))});
+write('build.json',{
+ compiler:solc.version(),sourceEncoding:'UTF-8_LF',settings,artifacts,
+ dependencies:Object.fromEntries(['@openzeppelin/contracts','@openzeppelin/contracts-upgradeable'].map(name=>[name,JSON.parse(fs.readFileSync(`node_modules/${name}/package.json`,'utf8')).version])),
+ // Fully resolved standard JSON permits an offline compile with no import
+ // callback, network dependency fetch, signer or secret-bearing environment.
+ standardJsonInput:{language:'Solidity',sources:resolvedSources,settings},
+ productionProxyTemplate:{policy:'BUILD_ONLY_NOT_AUTHORIZED',source:'@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol',...artifact('@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol','ERC1967Proxy')},
+ sourceHashes:Object.fromEntries(Object.entries(sources).map(([p,s])=>[p,createHash('sha256').update(s.content).digest('hex')]))
+});
 const live = process.argv.includes('--deploy97');
 const local = process.argv.includes('--local');
 if (!live && !local) { console.log('PACKAGE_COMPILED; NO BROADCAST'); process.exit(0); }
@@ -71,7 +86,7 @@ if(live && fs.existsSync(`${outDir}/deployment.json`)) {
 let provider, signer, localRpc;
 if(local) {
  const {default:ganache}=await import('ganache');
- localRpc=ganache.provider({chain:{chainId:97},wallet:{totalAccounts:2},miner:{timestampIncrement:1},logging:{quiet:true}});
+ localRpc=ganache.provider({chain:{chainId:97},wallet:{totalAccounts:2},miner:{timestampIncrement:1,defaultGasPrice:100000000},logging:{quiet:true}});
  provider=new BrowserProvider(localRpc); provider.pollingInterval=20; signer=await provider.getSigner();
 } else {
  assert.ok(process.env.BSC_TESTNET_RPC_URL && process.env.BSC_TESTNET_PRIVATE_KEY,'SIGNER_BLOCKED');
@@ -89,6 +104,10 @@ manifest.triggerKeeper=admin;
 manifest.brainKeeper=ZeroAddress;
 manifest.runtimeCodeHashesByAddress={};
 manifest.brainKeeperPolicy='No Brain payroll/heart keeper authority is needed or granted for this rehearsal.';
+manifest.accountingModel='ISOLATED_SETTLEMENT_CAPITAL_V1';
+manifest.pnlModel='INDEX_DELTA_C_LOTS_V1';
+manifest.marginPerLotKgen=1;
+manifest.capabilities={settlementCapital:'ISOLATED_V1',reservedSettlementLiability:true,playerClaimable:true,withdraw:true};
 // Atomic reservation precedes the first broadcast. A second process cannot
 // overwrite receipts or deploy another stack after racing an existsSync check.
 if(live) {
@@ -98,7 +117,11 @@ if(live) {
 const persist=()=>write(live?'deployment.json':'local-rehearsal.json',manifest);
 async function feeGuard(gas) {
  assert.equal(BigInt(await provider.send('eth_chainId',[])),97n);
- const gasPrice=(await provider.getFeeData()).gasPrice;
+ let gasPrice=(await provider.getFeeData()).gasPrice;
+ // Ganache starts with a London base fee above its configured .1gwei quote.
+ // Local-only fee correction avoids mistaking that harness condition for a
+ // deployment failure; the public-network quote/caps remain unchanged.
+ if(local){const base=(await provider.getBlock('latest')).baseFeePerGas??0n;if(gasPrice<base*2n)gasPrice=base*2n;}
  assert.ok(gasPrice && gasPrice<=10000000000n,'GAS_PRICE_CAP');
  assert.ok(spent+gas*gasPrice<=budget,'TOTAL_GAS_BUDGET');
  return {gasLimit:gas,gasPrice};
@@ -169,12 +192,19 @@ try {
  const actualSlot='0x'+(BigInt(keccak256(new TextEncoder().encode('eip1967.proxy.implementation')))-1n).toString(16);
  assert.equal((await provider.getStorage(proxy.target,actualSlot)).slice(-40).toLowerCase(),impl.target.slice(2).toLowerCase());
  manifest.checks.CONFIG='PASS';manifest.status='DEPLOYED_CONFIG_VERIFIED';manifest.verified=true;persist();
- await send(token,'mint',[admin,parseEther('2000')]);
+ // Actual minted TEST token funding, segregated from the player's 1000 margin.
+ // Broad 0.01..1M market bounds need up to 9B reserve for KX 100C x100 lots.
+ await send(token,'mint',[admin,parseEther('10001001000')]);
  await send(token,'approve',[proxy.target,parseEther('1000')],'APPROVE_TEST_TOKEN');
  await send(brain,'depositMargin',[parseEther('1000')],'DEPOSIT_TEST_TOKEN');
  assert.equal(await brain.principalOf(admin),parseEther('1000'));
- await send(token,'transfer',[proxy.target,parseEther('1000')],'SEED_TEST_SURPLUS');
- await send(brain,'allocateInsuranceReserve',[parseEther('500')]);
+ await send(token,'approve',[proxy.target,parseEther('10001000000')],'APPROVE_EXCHANGE_TEST_CAPITAL');
+ await send(brain,'fundSettlementCapital',[parseEther('10000000000')],'FUND_ISOLATED_SETTLEMENT_CAPITAL');
+ await send(brain,'fundInsurance',[parseEther('1000000')],'FUND_ISOLATED_INSURANCE');
+ assert.equal(await brain.settlementCapital(),parseEther('10000000000'));
+ assert.equal(await brain.principalOf(admin),parseEther('1000'),'funding cannot become player principal');
+ assert.equal(await brain.reservedSettlementLiability(),0n);
+ manifest.funding={settlementCapitalTestKgen:'10000000000',insuranceTestKgen:'1000000',playerDepositTestKgen:'1000',testOnly:true};persist();
  async function tick(price,age=0) {
    if(local){await localRpc.request({method:'evm_increaseTime',params:[2]});await localRpc.request({method:'evm_mine',params:[]});}
    const timestamp=(await provider.getBlock('latest')).timestamp-age;
@@ -201,8 +231,12 @@ try {
  const liquidated=await position.positionSnapshot(liqId),receipt=await position.settlementReceipt(liqId);
  assert.equal(liquidated.status,3n);assert.equal(liquidated.collateralWad,0n);
  assert.equal(await brain.availablePrincipal(admin),before);
- assert.equal(receipt.settlementPrice,parseEther('98000'));assert.equal(receipt.badDebt,parseEther('1'));
- assert.equal(await brain.uncoveredBadDebt(),0n);assert.equal(await brain.insuranceReserve(),parseEther('499'));
+ assert.equal(receipt.settlementPrice,parseEther('98000'));
+ assert.equal(receipt.rawPnl,-parseEther('200000'));
+ assert.equal(receipt.badDebt,parseEther('199999'));
+ assert.equal(await brain.uncoveredBadDebt(),0n);assert.equal(await brain.insuranceReserve(),parseEther('800001'));
+ assert.equal(await brain.reservedSettlementLiability(),0n);
+ assert.equal(await brain.playerClaimable(admin),0n);
  await mustRevert(()=>trigger.observePosition.staticCall(liqId),'LIQUIDATION_REPLAY');
  await tick(parseEther('100000'));assert.equal((await position.positionSnapshot(liqId)).status,3n);
  const staleId=await order();await tick(parseEther('100000'),7200);
@@ -232,6 +266,10 @@ try {
    await check(adapter.approve(10),'ACTUAL_ADAPTER_APPROVE');
    await check(adapter.deposit(10),'ACTUAL_ADAPTER_DEPOSIT');
    assert.equal(adapter.snapshot().wallet.principal,1009);assert.equal(adapter.snapshot().wallet.testTokenBalance,990);
+   await check(adapter.withdraw(1),'ACTUAL_ADAPTER_WITHDRAW');
+   assert.equal(adapter.snapshot().wallet.principal,1008);assert.equal(adapter.snapshot().wallet.testTokenBalance,991);
+   assert.equal(adapter.snapshot().wallet.claimable,0);
+   assert.equal(adapter.snapshot().capital.reservedSettlementLiability,0);
    const submitted=await check(adapter.submit(input),'ACTUAL_ADAPTER_CREATE');
    assert.equal(submitted.status,'ON_CHAIN_ORDER_CREATED');
    await check(adapter.cancel(submitted.orderId),'ACTUAL_ADAPTER_CANCEL');
@@ -239,7 +277,7 @@ try {
    const reload=createExecutionAdapter({deployment:fixtureConfig,ethereum:localRpc,ethers:codec});
    await check(reload.recover(),'ACTUAL_ADAPTER_RELOAD');book=reload.snapshot();
    assert.equal(book.orders.find(o=>o.orderId===submitted.orderId).status,'CANCELLED');
-   assert.equal(book.positions.length,4);assert.equal(book.wallet.principal,1009);
+   assert.equal(book.positions.length,4);assert.equal(book.wallet.principal,1008);
    assert.equal(book.receipts.filter(r=>r.kind==='SETTLEMENT').length,4);reload.dispose();
    let forbiddenCalls=0;
    const blocked=createExecutionAdapter({deployment:{...fixtureConfig,chainId:56},ethers:codec,
@@ -249,7 +287,7 @@ try {
    manifest.checks.ACTUAL_ADAPTER_RECOVERY='PASS';manifest.checks.ACTUAL_ADAPTER_WALLET_TRANSACTIONS='PASS';
    manifest.checks.ACTUAL_ADAPTER_RELOAD='PASS';manifest.checks.ACTUAL_ADAPTER_MAINNET_BLOCK='PASS';
    manifest.localAdapterEvidence={fixture:'LOCAL_GANACHE_CHAIN97_NOT_PUBLIC',positionsRecovered:4,
-     settlementsRecovered:4,principalAfterTestDeposit:'1009',testTokenAfterDeposit:'990',
+     settlementsRecovered:4,principalAfterTestDepositAndWithdraw:'1008',testTokenAfterDepositAndWithdraw:'991',
      createdThenCancelledOrder:submitted.orderId,txHash:submitted.txHash};
    assert.equal(manifest.publicNetwork,false);persist();
  }

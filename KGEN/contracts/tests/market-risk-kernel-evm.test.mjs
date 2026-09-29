@@ -79,4 +79,20 @@ await expectRevert(kernel.validateOraclePrice(parseEther('121'), nowTs, nowTs, 6
 await expectRevert(kernel.notional(0n, WAD), 'zero position size');
 await expectRevert(kernel.maintenanceMargin(parseEther('1'), 0), 'zero maintenance bps');
 
+// Human Canon is index displacement times signed C times positive lots; not
+// percentage return divided by entry. Tiny detents retain full WAD precision.
+for (const c of ['0.001', '0.01', '0.1', '1', '5', '25', '50', '95', '100']) {
+  for (const sign of [1n, -1n]) for (const lots of [1n, 100n]) {
+    const signedC = parseEther(c) * sign;
+    assert.equal(await kernel.validateOrder(signedC, lots), parseEther(c));
+    assert.equal(await kernel.orderPnl(signedC, lots, px100, px120), signedC * 20n * lots);
+    assert.equal(await kernel.orderPnl(signedC, lots, parseEther('60000'), parseEther('60020')), signedC * 20n * lots, 'entry price never discounts index PnL');
+  }
+}
+for (const c of ['0', '0.0001', '0.3', '3.742', '100.001', '-100.001', '1000', '-1000']) {
+  await expectRevert(kernel.orderPnl(parseEther(c), 1, px100, px120), `noncanonical executable C ${c}`);
+}
+for (const lots of [0, 101]) await expectRevert(kernel.validateOrder(parseEther('1'), lots), `positive bounded lots ${lots}`);
+
 console.log('[market-risk-kernel-evm] PASS: PnL, notional, MM, liquidation boundary, oracle freshness/bounds');
+await eip1193.disconnect();

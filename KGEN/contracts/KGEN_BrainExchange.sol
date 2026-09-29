@@ -21,9 +21,10 @@ pragma solidity ^0.8.24;
  * - payroll / Heart / Treasury operations can spend surplus only
  * - pausable deposits and new risk while user exits/settlement remain available
  * - replay-safe position collateral reservation inside the single Brain ledger
- * - real insurance reserve funded only from already-existing surplus
+ * - explicit settlement capital and insurance funding, never player principal
+ * - aggregate funded exposure reservations and repayable player claims
  * - explicit uncovered bad debt that halts new risk without trapping exits
- * - UUPS upgrades protected by an explicit delay
+ * - UUPS upgrades protected by an explicit 24-hour minimum delay
  * - no fake settlement state: trading PnL must come from a separately reviewed engine
  */
 
@@ -56,7 +57,7 @@ contract KGEN_BrainExchange_V4_0_0 is
 
     uint256 public constant ACC_SCALE = 1e27;
     uint256 public constant MIN_PAYROLL_INTERVAL = 7 days;
-    uint256 public constant MIN_UPGRADE_DELAY = 2 days;
+    uint256 public constant MIN_UPGRADE_DELAY = 24 hours;
     uint256 public constant MAX_BPS = 10_000;
 
     uint8 private constant RESERVATION_ACTIVE = 1;
@@ -106,6 +107,39 @@ contract KGEN_BrainExchange_V4_0_0 is
 
     uint256 public insuranceReserve;
     uint256 public uncoveredBadDebt;
+
+    // Append-only UUPS storage: six former gap slots. Capital is funded cash,
+    // not player deposits, insurance, rewards, or unbacked settlement claims.
+    uint256 public settlementCapital;
+    uint256 public reservedSettlementLiability;
+    uint256 public totalPlayerClaimable;
+    struct RiskReservation {
+        uint256 liabilityWei;
+        uint256 orderId;
+        uint256 positionId;
+        bool released;
+        bool reserved;
+    }
+    struct SettlementClaim {
+        address user;
+        uint256 orderId;
+        uint256 positionId;
+        uint256 dueWei;
+        uint256 paidWei;
+        uint256 remainingWei;
+        uint256 createdAt;
+        uint256 updatedAt;
+    }
+    mapping(bytes32 => RiskReservation) public positionRiskReservations;
+    mapping(bytes32 => SettlementClaim) public settlementClaims;
+    mapping(address => uint256) public playerClaimable;
+
+    event SettlementCapitalFunded(address indexed contributor, uint256 requestedWei, uint256 receivedWei, uint256 capitalAfterWei);
+    event InsuranceFunded(address indexed contributor, uint256 requestedWei, uint256 receivedWei, uint256 insuranceAfterWei);
+    event PositionRiskReserved(bytes32 indexed positionKey, uint256 liabilityWei, uint256 orderId, uint256 positionId);
+    event PositionRiskReleased(bytes32 indexed positionKey, uint256 liabilityWei);
+    event SettlementClaimRecorded(bytes32 indexed positionKey, address indexed user, uint256 dueWei, uint256 paidWei, uint256 remainingWei);
+    event SettlementClaimPaid(bytes32 indexed positionKey, address indexed user, uint256 paidWei, uint256 remainingWei);
 
     event MarginDeposited(address indexed user, uint256 requestedWei, uint256 receivedWei);
     event MarginWithdrawn(address indexed user, uint256 amountWei);
@@ -174,10 +208,89 @@ contract KGEN_BrainExchange_V4_0_0 is
     function pendingProfit(address user) public view returns (uint256) { uint256 accumulated = (principalOf[user] * accRewardPerShare) / ACC_SCALE; uint256 unsettled = accumulated > rewardDebt[user] ? accumulated - rewardDebt[user] : 0; return rewardCredit[user] + unsettled; }
     function _accrue(address user) internal { uint256 accumulated = (principalOf[user] * accRewardPerShare) / ACC_SCALE; uint256 debt = rewardDebt[user]; if (accumulated > debt) { uint256 newlyAccrued = accumulated - debt; rewardCredit[user] += newlyAccrued; emit ProfitAccrued(user, newlyAccrued); } rewardDebt[user] = accumulated; }
 
-    function tradingHealthy() public view returns (bool) { return solvent() && uncoveredBadDebt == 0; }
+    function tradingHealthy() public view returns (bool) { return solvent() && uncoveredBadDebt == 0 && settlementCapital >= totalPlayerClaimable; }
+    function _receiveFunding(uint256 requestedWei) internal returns (uint256 receivedWei) {
+        require(requestedWei > 0, "AMOUNT_ZERO");
+        uint256 beforeBal = kgen.balanceOf(address(this));
+        kgen.safeTransferFrom(msg.sender, address(this), requestedWei);
+        uint256 afterBal = kgen.balanceOf(address(this));
+        require(afterBal > beforeBal, "NO_TOKENS_RECEIVED");
+        receivedWei = afterBal - beforeBal;
+    }
+    function fundSettlementCapital(uint256 requestedWei) external nonReentrant returns (uint256 receivedWei) {
+        receivedWei = _receiveFunding(requestedWei);
+        settlementCapital += receivedWei;
+        _assertSolvent();
+        emit SettlementCapitalFunded(msg.sender, requestedWei, receivedWei, settlementCapital);
+    }
+    function fundInsurance(uint256 requestedWei) external nonReentrant returns (uint256 receivedWei) {
+        receivedWei = _receiveFunding(requestedWei);
+        insuranceReserve += receivedWei;
+        _assertSolvent();
+        emit InsuranceFunded(msg.sender, requestedWei, receivedWei, insuranceReserve);
+    }
+    function availableRiskCapacity() public view returns (uint256) {
+        if (paused() || !tradingHealthy()) return 0;
+        return settlementCapital - totalPlayerClaimable;
+    }
+    function reservePositionRisk(bytes32 positionKey, uint256 liabilityWei, uint256 orderId, uint256 positionId) external onlyRole(SETTLEMENT_ROLE) nonReentrant whenNotPaused {
+        require(positionReservations[positionKey].status == RESERVATION_ACTIVE, "RESERVATION_NOT_ACTIVE");
+        require(!positionRiskReservations[positionKey].reserved, "RISK_ALREADY_RESERVED");
+        require(tradingHealthy(), "TRADING_UNHEALTHY");
+        require(liabilityWei <= availableRiskCapacity(), "SETTLEMENT_CAPITAL_INSUFFICIENT");
+        settlementCapital -= liabilityWei;
+        reservedSettlementLiability += liabilityWei;
+        positionRiskReservations[positionKey] = RiskReservation(liabilityWei, orderId, positionId, false, true);
+        emit PositionRiskReserved(positionKey, liabilityWei, orderId, positionId);
+    }
+    function _releasePositionRisk(bytes32 positionKey) internal returns (uint256 releasedWei) {
+        RiskReservation storage risk = positionRiskReservations[positionKey];
+        // Legacy reservations may predate this append-only upgrade. Their exits
+        // remain available; new engine entries atomically reserve both ledgers.
+        if (!risk.reserved || risk.released) return 0;
+        risk.released = true;
+        releasedWei = risk.liabilityWei;
+        reservedSettlementLiability -= releasedWei;
+        settlementCapital += releasedWei;
+        emit PositionRiskReleased(positionKey, releasedWei);
+    }
+    function _creditSettlementProfit(bytes32 positionKey, address user, uint256 profitWei, uint256 ownReleasedRisk) internal {
+        // Other claims may encumber free capital, never cash already earmarked
+        // for this position. Preserve the funded admission guarantee at exit.
+        uint256 priorFreeCapital = settlementCapital - ownReleasedRisk;
+        uint256 unencumberedCapital = ownReleasedRisk + (priorFreeCapital > totalPlayerClaimable ? priorFreeCapital - totalPlayerClaimable : 0);
+        uint256 paidWei = profitWei > unencumberedCapital ? unencumberedCapital : profitWei;
+        settlementCapital -= paidWei;
+        principalOf[user] += paidWei;
+        totalPrincipal += paidWei;
+        uint256 remainingWei = profitWei - paidWei;
+        playerClaimable[user] += remainingWei;
+        totalPlayerClaimable += remainingWei;
+        RiskReservation storage risk = positionRiskReservations[positionKey];
+        settlementClaims[positionKey] = SettlementClaim(user, risk.orderId, risk.positionId, profitWei, paidWei, remainingWei, block.timestamp, block.timestamp);
+        emit SettlementClaimRecorded(positionKey, user, profitWei, paidWei, remainingWei);
+    }
+    function claimSettlement(bytes32 positionKey) external nonReentrant returns (uint256 paidWei) {
+        SettlementClaim storage claim = settlementClaims[positionKey];
+        require(claim.user != address(0), "CLAIM_NOT_FOUND");
+        paidWei = claim.remainingWei > settlementCapital ? settlementCapital : claim.remainingWei;
+        if (paidWei == 0) return 0;
+        _accrue(claim.user);
+        settlementCapital -= paidWei;
+        claim.remainingWei -= paidWei;
+        claim.paidWei += paidWei;
+        claim.updatedAt = block.timestamp;
+        playerClaimable[claim.user] -= paidWei;
+        totalPlayerClaimable -= paidWei;
+        principalOf[claim.user] += paidWei;
+        totalPrincipal += paidWei;
+        rewardDebt[claim.user] = (principalOf[claim.user] * accRewardPerShare) / ACC_SCALE;
+        _assertSolvent();
+        emit SettlementClaimPaid(positionKey, claim.user, paidWei, claim.remainingWei);
+    }
     function allocateInsuranceReserve(uint256 amountWei) external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant { require(amountWei > 0, "AMOUNT_ZERO"); require(uncoveredBadDebt == 0, "BAD_DEBT_OUTSTANDING"); require(amountWei <= freeSurplus(), "SURPLUS_ONLY"); insuranceReserve += amountWei; _assertSolvent(); emit InsuranceAllocated(amountWei, insuranceReserve); }
     function recapitalizeBadDebt(uint256 requestedWei) external nonReentrant returns (uint256 receivedWei) {
-        require(requestedWei > 0, "AMOUNT_ZERO"); require(uncoveredBadDebt > 0, "NO_BAD_DEBT"); uint256 beforeBal = kgen.balanceOf(address(this)); kgen.safeTransferFrom(msg.sender, address(this), requestedWei); uint256 afterBal = kgen.balanceOf(address(this)); require(afterBal > beforeBal, "NO_TOKENS_RECEIVED"); receivedWei = afterBal - beforeBal; uint256 reduction = receivedWei > uncoveredBadDebt ? uncoveredBadDebt : receivedWei; uncoveredBadDebt -= reduction; emit BadDebtRecapitalized(msg.sender, requestedWei, receivedWei, uncoveredBadDebt);
+        require(uncoveredBadDebt > 0, "NO_BAD_DEBT"); receivedWei = _receiveFunding(requestedWei); uint256 reduction = receivedWei > uncoveredBadDebt ? uncoveredBadDebt : receivedWei; uncoveredBadDebt -= reduction; settlementCapital += receivedWei; _assertSolvent(); emit BadDebtRecapitalized(msg.sender, requestedWei, receivedWei, uncoveredBadDebt);
     }
 
     function reservePositionCollateral(bytes32 positionKey,address user,uint256 amountWei) external onlyRole(SETTLEMENT_ROLE) nonReentrant whenNotPaused {
@@ -186,22 +299,26 @@ contract KGEN_BrainExchange_V4_0_0 is
     }
 
     function releasePositionCollateral(bytes32 positionKey) external onlyRole(SETTLEMENT_ROLE) nonReentrant {
-        PositionReservation storage reservation = positionReservations[positionKey]; require(reservation.status == RESERVATION_ACTIVE, "RESERVATION_NOT_ACTIVE"); address user = reservation.user; uint256 amountWei = reservation.amountWei; reservation.status = RESERVATION_RELEASED; lockedPrincipalOf[user] -= amountWei; totalLockedPrincipal -= amountWei; emit PositionCollateralReleased(positionKey, user, amountWei);
+        PositionReservation storage reservation = positionReservations[positionKey]; require(reservation.status == RESERVATION_ACTIVE, "RESERVATION_NOT_ACTIVE"); address user = reservation.user; uint256 amountWei = reservation.amountWei; reservation.status = RESERVATION_RELEASED; lockedPrincipalOf[user] -= amountWei; totalLockedPrincipal -= amountWei; _releasePositionRisk(positionKey); emit PositionCollateralReleased(positionKey, user, amountWei);
     }
 
     function settlePositionCollateral(bytes32 positionKey,int256 realizedPnlWei,uint256 badDebtWei) external onlyRole(SETTLEMENT_ROLE) nonReentrant {
         PositionReservation storage reservation = positionReservations[positionKey]; require(reservation.status == RESERVATION_ACTIVE, "RESERVATION_NOT_ACTIVE"); address user = reservation.user; uint256 lockedWei = reservation.amountWei; _accrue(user); lockedPrincipalOf[user] -= lockedWei; totalLockedPrincipal -= lockedWei;
+        uint256 ownReleasedRisk = _releasePositionRisk(positionKey);
         uint256 lossWei;
-        if (realizedPnlWei > 0) { require(badDebtWei == 0, "BAD_DEBT_WITH_PROFIT"); uint256 profitWei = uint256(realizedPnlWei); require(profitWei <= freeSurplus(), "INSUFFICIENT_REAL_SURPLUS"); principalOf[user] += profitWei; totalPrincipal += profitWei; }
-        else if (realizedPnlWei < 0) { lossWei = uint256(-(realizedPnlWei + 1)) + 1; require(lossWei <= lockedWei, "LOSS_EXCEEDS_LOCKED_COLLATERAL"); require(principalOf[user] >= lossWei, "LOSS_EXCEEDS_PRINCIPAL"); if (badDebtWei > 0) require(lossWei == lockedWei, "BAD_DEBT_BEFORE_COLLATERAL_EXHAUSTED"); principalOf[user] -= lossWei; totalPrincipal -= lossWei; }
+        if (realizedPnlWei > 0) { require(badDebtWei == 0, "BAD_DEBT_WITH_PROFIT"); _creditSettlementProfit(positionKey, user, uint256(realizedPnlWei), ownReleasedRisk); }
+        else if (realizedPnlWei < 0) { lossWei = uint256(-(realizedPnlWei + 1)) + 1; require(lossWei <= lockedWei, "LOSS_EXCEEDS_LOCKED_COLLATERAL"); require(principalOf[user] >= lossWei, "LOSS_EXCEEDS_PRINCIPAL"); if (badDebtWei > 0) require(lossWei == lockedWei, "BAD_DEBT_BEFORE_COLLATERAL_EXHAUSTED"); principalOf[user] -= lossWei; totalPrincipal -= lossWei; settlementCapital += lossWei; }
         else { require(badDebtWei == 0, "BAD_DEBT_WITH_ZERO_PNL"); }
-        uint256 insuranceCoveredWei; if (badDebtWei > 0) { insuranceCoveredWei = badDebtWei > insuranceReserve ? insuranceReserve : badDebtWei; insuranceReserve -= insuranceCoveredWei; uint256 uncoveredWei = badDebtWei - insuranceCoveredWei; uncoveredBadDebt += uncoveredWei; emit BadDebtRecorded(positionKey, badDebtWei, insuranceCoveredWei, uncoveredBadDebt); }
+        uint256 insuranceCoveredWei; if (badDebtWei > 0) { insuranceCoveredWei = badDebtWei > insuranceReserve ? insuranceReserve : badDebtWei; insuranceReserve -= insuranceCoveredWei; settlementCapital += insuranceCoveredWei; uint256 uncoveredWei = badDebtWei - insuranceCoveredWei; uncoveredBadDebt += uncoveredWei; emit BadDebtRecorded(positionKey, badDebtWei, insuranceCoveredWei, uncoveredBadDebt); }
         reservation.realizedPnlWei = realizedPnlWei; reservation.status = RESERVATION_SETTLED; rewardDebt[user] = (principalOf[user] * accRewardPerShare) / ACC_SCALE; _assertSolvent(); emit PositionCollateralSettled(positionKey,user,lockedWei,realizedPnlWei,badDebtWei,insuranceCoveredWei,principalOf[user]);
     }
 
-    function reservedBalance() public view returns (uint256) { return totalPrincipal + totalRewardLiability + insuranceReserve; }
+    // Custodied cash must remain solvent even when an excess/gap profit creates
+    // unfunded debt. Debt blocks surplus spending/new risk, not principal exits.
+    function custodyReservedBalance() public view returns (uint256) { return totalPrincipal + totalRewardLiability + insuranceReserve + settlementCapital + reservedSettlementLiability; }
+    function reservedBalance() public view returns (uint256) { return custodyReservedBalance() + totalPlayerClaimable; }
     function freeSurplus() public view returns (uint256) { uint256 bal = kgen.balanceOf(address(this)); uint256 reserved = reservedBalance(); return bal > reserved ? bal - reserved : 0; }
-    function solvent() public view returns (bool) { return kgen.balanceOf(address(this)) >= reservedBalance(); }
+    function solvent() public view returns (bool) { return kgen.balanceOf(address(this)) >= custodyReservedBalance(); }
     function _assertSolvent() internal view { require(solvent(), "INSOLVENT"); }
 
     function rollPayroll() external onlyRole(KEEPER_ROLE) nonReentrant whenNotPaused {
@@ -233,5 +350,5 @@ contract KGEN_BrainExchange_V4_0_0 is
     function cancelUpgrade() external onlyRole(UPGRADE_ROLE) { address old = scheduledImplementation; scheduledImplementation = address(0); scheduledUpgradeEta = 0; emit UpgradeCancelled(old); }
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) { require(newImplementation == scheduledImplementation, "UPGRADE_NOT_SCHEDULED"); require(scheduledUpgradeEta != 0 && block.timestamp >= scheduledUpgradeEta, "UPGRADE_TIMELOCK"); scheduledImplementation = address(0); scheduledUpgradeEta = 0; }
 
-    uint256[35] private __gap;
+    uint256[29] private __gap;
 }

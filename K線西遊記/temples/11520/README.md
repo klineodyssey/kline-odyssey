@@ -1,5 +1,29 @@
 # 11520 Universal Exchange V3.9
 
+## Capital and complete-wallet candidate — 2026-09-29
+
+Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE governs this cumulative
+update. Existing Brain/Position/Trigger, wallet adapter and simulation ledger
+remain the only organs. Candidate C-order math is `ΔIndex * signed C * lots`,
+not percentage return. Details: `KGEN_TRADING_SPEC.md`, `GAME_UI_SPEC.md` and
+repository path `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json`.
+
+Actual-received Settlement Capital and Insurance are separate from player
+principal. New positions atomically reserve maximum favorable PnL within fixed
+oracle bounds; opposing trades do not offset admission liabilities. Settled
+unfunded profit remains Claimable and can be repaid after funding. Available
+principal withdrawal remains independent of unfunded claim debt.
+
+Wallet UI auto-reads allowance; maximum approval is explicit and still requires
+wallet confirmation. No approval occurs on Connect. Deposit once, trade multiple
+times, and withdraw only Available. Candidate claims and index-delta liquidation
+ABI require manifest capability `ISOLATED_V1`; the already deployed historical
+BSC97 rehearsal is still `NOTIONAL_RETURN_V1`, not this candidate deployment.
+
+Mainnet broadcast remains disabled pending a populated, explicitly approved
+execution manifest. Local Ganache receipts/screenshots are not public Testnet or
+Mainnet receipts. Earlier sections below are retained as historical lineage.
+
 ## C detents and physical distance — V2.6.23 / 2026-09-25
 
 Human-approved K11520 simulation calibration: **1 local spatial unit = 1 meter**.

@@ -2,6 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {classify11520OrderRoute} from '../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs';
 
+test('selected Testnet route reports Testnet without activating Mainnet or claiming a receipt',()=>{
+ const preflight={ready:false,blockers:['HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED']};
+ const testnet=classify11520OrderRoute({preflight,execution:{mode:'BSC_TESTNET',chainId:97,status:'READY'}});
+ assert.equal(testnet.route,'TESTNET_EXPLICIT_WALLET_ACTION');assert.equal(testnet.broadcast,false);assert.equal(testnet.signerRequested,false);
+ assert.match(testnet.label,/NO REAL VALUE/);
+ assert.equal(classify11520OrderRoute({preflight,execution:{mode:'ON_CHAIN',chainId:56}}).route,'LOCAL_SIMULATION_REAL_BLOCKED');
+ assert.equal(classify11520OrderRoute({preflight,execution:{mode:'BSC_TESTNET',chainId:56}}).route,'LOCAL_SIMULATION_REAL_BLOCKED');
+});
+
 test('routes to explicit wallet action only when preflight is ready',()=>{
   const route=classify11520OrderRoute({preflight:{ready:true,blockers:[]},localSimulationAvailable:true});
   assert.equal(route.route,'REAL_READY_FOR_EXPLICIT_WALLET_ACTION');

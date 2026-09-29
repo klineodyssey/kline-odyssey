@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
+if(process.argv.includes('--local-candidate')){
+  await localCandidateBrowserQA();process.exit(0);
+}
+
 if(process.argv.includes('--testnet97')){
   try{await publicTestnetBrowserQA();process.exit(0)}
   catch(error){console.error('TESTNET_BROWSER_QA_FAILED',/^[A-Z_0-9]+$/.test(String(error?.code||''))?error.code:'CHECK_PUBLIC_QA_ARTIFACTS');process.exit(1)}
@@ -142,6 +146,98 @@ try {
   }
   console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
 } finally {await browser.close()}
+
+// Actual candidate contracts in a disposable local EVM. No configured keys,
+// public RPC or public transactions; the manifest is intercepted only in QA.
+async function localCandidateBrowserQA(){
+  const {execFileSync}=await import('node:child_process');
+  execFileSync(process.execPath,['KGEN/scripts/rehearse_bsc_testnet.mjs'],{stdio:'pipe'});
+  const {default:ganache}=await import('ganache');
+  const {BrowserProvider,Contract,ContractFactory,Interface,parseEther,keccak256,ZeroAddress}=await import('ethers');
+  const rpc=ganache.provider({chain:{chainId:97},wallet:{totalAccounts:4},miner:{timestampIncrement:1},logging:{quiet:true}});
+  const provider=new BrowserProvider(rpc);provider.pollingInterval=10;
+  const signers=await Promise.all([0,1,2,3].map(i=>provider.getSigner(i))),accounts=await Promise.all(signers.map(s=>s.getAddress()));
+  const artifacts=JSON.parse(await fs.readFile('artifacts/bsc97/build.json','utf8')).artifacts;
+  const deployed={};
+  async function deploy(key,args=[]){const c=await new ContractFactory(artifacts[key].abi,artifacts[key].bytecode,signers[0]).deploy(...args);await c.waitForDeployment();deployed[key]=c;return c}
+  const send=async(c,method,args=[])=>{const tx=await c[method](...args);const receipt=await tx.wait();assert.equal(receipt.status,1);return receipt};
+  const token=await deploy('testToken'),impl=await deploy('brainImplementation');
+  const init=new Interface(artifacts.brainImplementation.abi).encodeFunctionData('initialize',[token.target,accounts[0],ZeroAddress,accounts[0],accounts[0],accounts[0],0]);
+  const proxy=await deploy('brainProxy',[impl.target,init]),brain=new Contract(proxy.target,artifacts.brainImplementation.abi,signers[0]);
+  const position=await deploy('positionEngine',[accounts[0],proxy.target,proxy.target]),trigger=await deploy('orderTriggerEngine',[position.target,accounts[0]]);
+  await send(position,'setExecutor',[trigger.target]);await send(brain,'grantRole',[await brain.SETTLEMENT_ROLE(),position.target]);
+  const feeds=[];
+  for(let market=0;market<3;market++){
+    const set=[];for(let i=0;i<3;i++)set.push(await deploy('oracle',[parseEther('100')]));feeds.push(set);
+    await send(position,'configureMarket',[market,100,10,3600,parseEther('98'),parseEther('102'),true]);
+    await send(position,'configureOracle',[market,set.map(f=>f.target),2,500]);
+  }
+  await send(token,'mint',[accounts[0],parseEther('200000')]);await send(token,'approve',[proxy.target,parseEther('200000')]);
+  await send(brain,'fundSettlementCapital',[parseEther('100000')]);await send(brain,'fundInsurance',[parseEther('10000')]);
+  for(const account of accounts.slice(1))await send(token,'mint',[account,parseEther('10000')]);
+  const addresses=Object.fromEntries(['testToken','brainImplementation','brainProxy','positionEngine','orderTriggerEngine'].map(k=>[k,deployed[k].target]));
+  const codeHashes=Object.fromEntries(await Promise.all(Object.entries(addresses).map(async([k,a])=>[k,keccak256(await provider.getCode(a))])));
+  // publicNetwork is an adapter gate exercised under isolated route interception;
+  // this synthetic QA manifest is never saved/published as a public deployment.
+  const fixtureManifest={mode:'BSC_TESTNET',status:'DEPLOYED_CONFIG_VERIFIED',chainId:97,testOnly:true,publicNetwork:true,verified:true,deploymentBlock:1,addresses,codeHashes,
+    capabilities:{settlementCapital:'ISOLATED_V1'},pnlModel:'INDEX_DELTA_C_LOTS_V1'};
+  const price=async(value)=>{const block=await rpc.request({method:'eth_getBlockByNumber',params:['latest',false]});for(const f of feeds[1])await send(f,'set',[parseEther(String(value)),Number(BigInt(block.timestamp))])};
+  const out='artifacts/11520-candidate-wallet-qa';await fs.mkdir(out,{recursive:true});
+  const browser=await chromium.launch({headless:true});let active=accounts[1],connected=false,writes=0;
+  try{for(const [width,height,player] of [[390,844,1],[844,390,2]]){
+    active=accounts[player];connected=false;await price(100);
+    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true}),errors=[];
+    page.on('pageerror',e=>errors.push(String(e)));let stage='boot';const rpcFailures=[];
+    await page.exposeBinding('candidateRpc',async(_source,{method,params=[]})=>{
+      if(method==='eth_accounts')return connected?[active]:[];
+      if(method==='eth_requestAccounts'){connected=true;return[active]}
+      if(method==='wallet_switchEthereumChain'){assert.equal(params[0].chainId,'0x61');return null}
+      if(method==='eth_sendTransaction'){
+        assert.equal(params[0].from.toLowerCase(),active.toLowerCase());assert.equal(BigInt(params[0].value||0),0n);
+        assert.ok(Object.values(addresses).some(a=>a.toLowerCase()===params[0].to.toLowerCase()));writes++;
+      }
+      const started=Date.now();try{return await rpc.request({method,params})}catch(error){rpcFailures.push({method,message:String(error?.message),data:error?.data});throw error}finally{if(Date.now()-started>5000)console.log('LOCAL_RPC_DURATION',method,params[0]?.data?.slice(0,10)||'',Date.now()-started)}
+    });
+    await page.addInitScript(()=>{const listeners=new Map();window.ethereum={request:r=>window.candidateRpc(r),on:(e,f)=>{if(!listeners.has(e))listeners.set(e,new Set());listeners.get(e).add(f)},removeListener:(e,f)=>listeners.get(e)?.delete(f)};window.candidateAccountChanged=a=>{for(const f of listeners.get('accountsChanged')||[])f([a])}});
+    await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',r=>r.fulfill({contentType:'application/json',body:JSON.stringify(fixtureManifest)}));
+    await page.route('https://data-api.binance.vision/**',r=>r.fulfill({contentType:'application/json',body:JSON.stringify([{symbol:'BTCUSDT',price:'100000'},{symbol:'ETHUSDT',price:'4000'},{symbol:'BNBUSDT',price:'600'}])}));
+    await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async r=>{const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile('node_modules/three/'+r.request().url().slice(prefix.length),'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);await r.fulfill({contentType:'text/javascript',body})});
+    const shot=async name=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`});
+    const snap=()=>page.evaluate(()=>globalThis.__K11520_EXECUTION__?.snapshot()??null);
+    // Fresh deploy + full receipt recovery competes with software WebGL on CI.
+    // Wait for actual state, never replace it with fabricated UI success.
+    const wait=fn=>page.waitForFunction(fn,null,{timeout:120000});
+    const wallet=async()=>{if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();if(!await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();if(await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click()};
+    const game=async()=>{if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();if(!await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click();if(await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click()};
+    const organ=async name=>{await wallet();await page.locator('#walletToggle').click();if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();await page.locator(`#dock [data-organ="${name}"]`).click()};
+    try{
+      await page.goto(`${process.env.K11520_BASE_URL||'http://127.0.0.1:4182'}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
+      await wait(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT);await page.locator('#intro11520').waitFor({state:'hidden'});
+      stage='wallet';await wallet();const before=writes;await page.locator('#walletConnect').click();await page.locator('#executionMode').click();await wait(()=>__K11520_EXECUTION__.snapshot().status==='READY');assert.equal(writes,before,'connect and mode read only');
+      assert.equal(await page.locator('#testnetUnlimited').isChecked(),true);await shot('connect-readonly');
+      await page.locator('[data-deposit-preset="1000"]').click();await page.locator('#testnetApprove').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.allowanceUnlimited===true);
+      await page.locator('#testnetDeposit').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===1000);assert.equal(await page.locator('#testnetApprove').isDisabled(),true);
+      await shot('deposit-controls');await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('brain-account');
+      stage='order';await game();await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
+await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100.001');await page.locator('#confirm').evaluate(el=>el.scrollTop=0);await shot('100c100lots-preview');await page.locator('#confirmOrder').click();await wait(()=>__K11520_EXECUTION__.snapshot().orders.some(o=>o.status==='PENDING'));
+      let book=await snap(),order=book.orders.at(-1);await shot('pending');await price(100.002);await send(trigger,'observeOrder',[BigInt(order.orderId)]);await wallet();await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.some(p=>p.status==='OPEN'));
+      book=await snap();const pid=book.positions.at(-1).positionId;assert.equal(book.wallet.lockedMargin,100);await price(100.007);await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet.unrealizedPnl>0);
+      await organ('positions');await shot('position-pnl');await page.locator(`[data-sim-close="${pid}"]`).click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.every(p=>p.status!=='OPEN'));assert.equal((await snap()).wallet.free,1050);
+      await organ('history');await page.locator('#sheetBody summary').first().click();await shot('close-receipt');
+      stage='liquidation';await price(100);await wallet();await page.locator('#walletRefresh').click();await game();await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100');await page.locator('#confirmOrder').click();await wait(()=>__K11520_EXECUTION__.snapshot().orders.some(o=>o.status==='PENDING'));
+      order=(await snap()).orders.at(-1);await send(trigger,'observeOrder',[BigInt(order.orderId)]);await price(99.98);await send(trigger,'observePosition',[BigInt((await trigger.order(order.orderId)).positionId)]);
+      await wallet();await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.some(p=>p.status==='LIQUIDATED'));book=await snap();assert.equal(book.wallet.free,950);assert.equal(book.wallet.lockedMargin,0);
+      await organ('history');await page.locator('#sheetBody summary').first().click();await shot('liquidation-receipt');
+      stage='withdraw';await wallet();await page.locator('#testnetAmount').fill('100');await page.locator('#testnetWithdraw').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet.free===850);await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('withdraw-account');
+      stage='multiplayer';active=accounts[3];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().account?.toLowerCase()===document.querySelector('#wAddr').textContent.toLowerCase()&&__K11520_EXECUTION__.snapshot().wallet?.free===0);
+      assert.equal((await snap()).orders.length,0);await shot('player-c-isolated');active=accounts[player];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===850);
+const receiptCount=(await snap()).receipts.length;await page.reload({waitUntil:'domcontentloaded'});await wait(()=>globalThis.__K11520_EXECUTION__?.snapshot().wallet?.free===850);assert.equal((await snap()).receipts.length,receiptCount);
+      await wallet();await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('reload-recovered');assert.deepEqual(errors,[]);
+      await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'LOCAL_ACTUAL_CANDIDATE_EVM_NOT_PUBLIC_TESTNET',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:await snap()},null,2));
+    }catch(error){await shot('FAILURE');await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,snapshot:await snap(),errors,rpcFailures,toast:await page.locator('#toast').textContent(),message:String(error?.message)},null,2));console.error('LOCAL_CANDIDATE_STAGE',stage);throw error}finally{await page.close()}
+  }console.log('PASS local actual candidate EVM + Chromium wallet/order/close/liquidation/withdraw/multiplayer/reload');
+  }finally{await browser.close();await rpc.disconnect()}
+}
 
 // Explicit opt-in public test-assets rehearsal. The configured signer stays in
 // Node; the browser receives only public account and EIP-1193 responses. This is

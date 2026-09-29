@@ -1,5 +1,39 @@
 # 11520 HANDOFF CURRENT
 
+## Complete-product capital/wallet continuation — 2026-09-29
+
+- TASK_ID K11520-COMPLETE-PRODUCT-20260929; Human DOCX handoff V1 and explicit
+  CONTINUE_TO_COMPLETE. Base main12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8 is
+  lineage only: always refetch. Preserved five inherited contract/test edits in
+  codex/k11520-wallet-permanent-approval; Human dirty main was not modified.
+- V2.6.25 / shell-v279. Signed canonical C-order PnL is absolute index delta
+  times C times lots, not divided by entry. One lot is still one KGEN margin.
+  KGEN_TRADING_SPEC, UI specification, manual, preview and tests are synchronized
+  under explicit Human authority. Existing public Testnet bytecode is legacy,
+  separately labeled; local candidate evidence does not update that deployment.
+- Brain uses actual token-received funding, distinct free settlement capital,
+  aggregate gross reserved liability and player claims. Position atomically
+  reserves maximum favorable PnL over configured bounds and locks configuration
+  while open. Claims cannot consume another position's earmarked reservation.
+  Settled profit uses its own reservation first; excess available capital pays
+  the rest, otherwise a persistent claim remains. Principal exits stay possible
+  under solvent custody even when legacy claim debt is unfunded.
+- Reviewed P1 found/fixed: an old unfunded claim must not turn another fully
+  funded position's reserved payout into a new claim. Actual Brain regression
+  proves reserved100 pays fundedA100 while legacyB100 remains pending, then
+  genuine funding repaysB; neither player principal finances the other.
+- Brain runtime21105bytes; append-only six-slot gap35→29 against pinned actual
+  pre-capital source. Actual ancestor proxy/timelock upgrade, partial claims,
+  fee-on-transfer actual funding, A/B/C and custody tests pass locally.
+- Wallet adapter reads allowance, requires explicit max-approval confirmation,
+  supports Deposit/Available-only Withdraw, and uses capability-gated candidate
+  claims/preview. Old deployments cannot invent Claimable0 or call absent ABI.
+- Release remains pending fresh exact-head CI, direct mobile screenshots and
+  Pages verification. Use PR/Actions/artifacts for final status, not this entry.
+- Mainnet remains blocked pending concrete contract/role/oracle/funding/gas
+  manifest approval. No private signer accessed or public transaction sent by
+  this continuation. Payroll/ATM/advance has no new real receipt: HOLD.
+
 ## Human spatial calibration / nonlinear C — 2026-09-25
 
 - TASK_ID: K11520-C-DETENTS-K-DISTANCE-20260925; Human explicitly approved

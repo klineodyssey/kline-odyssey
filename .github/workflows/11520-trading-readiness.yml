@@ -52,9 +52,12 @@ permissions:
 jobs:
   canonical-real-funds-candidate:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The UUPS regression compiles the pinned pre-capital implementation.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -141,4 +144,37 @@ jobs:
         with:
           name: settlement-local-evm-${{ github.sha }}
           path: artifacts/settlement-local-evm.json
+          if-no-files-found: error
+
+  candidate-wallet-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install pinned local EVM and Chromium dependencies
+        run: |
+          npm install --no-save --package-lock=false solc@0.8.24 \
+            @openzeppelin/contracts@5.0.2 @openzeppelin/contracts-upgradeable@5.0.2 \
+            ethers@6.15.0 ganache@7.9.2 playwright@1.51.1 three@0.180.0
+          npx playwright install --with-deps chromium
+      - name: Exercise candidate wallet against actual local contracts (never public broadcast)
+        env:
+          K11520_BASE_URL: http://127.0.0.1:4173
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-capital-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          node "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs" --local-candidate
+          git diff --exit-code
+      - name: Upload actual local EVM mobile wallet evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capital-wallet-local-evm-${{ github.sha }}
+          path: artifacts/11520-candidate-wallet-qa/
           if-no-files-found: error

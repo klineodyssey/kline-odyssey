@@ -1,6 +1,27 @@
 {
   "documentType": "K11520_MAINNET_DEPLOYMENT_MANIFEST",
   "status": "BLOCKED_NOT_EXECUTABLE",
+  "capitalCandidate": {
+    "date": "2026-09-29",
+    "authority": "Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE",
+    "baseMain": "12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8",
+    "status": "CANDIDATE_VALIDATION_IN_PROGRESS_NOT_DEPLOYED",
+    "pnlModel": "INDEX_DELTA_C_LOTS_V1",
+    "pnlFormula": "(mark index - entry index) * signed C * positive lots; no division by entry",
+    "marginFormula": "1 KGEN per lot; isolated position loss cannot consume unrelated available principal",
+    "capitalCapability": "ISOLATED_V1",
+    "funding": "Actual token balance delta only via fundSettlementCapital/fundInsurance; player deposits are not capital",
+    "settlementCapitalAmount": null,
+    "insuranceAmount": null,
+    "admission": "Gross sum of per-position maximum favorable PnL over configured oracle min/max bounds, without opposing-position netting; reserve atomically with collateral and position",
+    "configurationLock": "Market risk/bounds and oracle configuration cannot change while that market has open positions",
+    "claims": "Unfunded settled profit remains per-user/per-position debt; actual later funding can repay partially or fully to recorded user principal; no invented cash or other-player debit",
+    "custody": "Principal/reward/insurance/free settlement capital/reserved settlement liability are custodied cash; unfunded claim debt additionally blocks surplus spending and new risk without blocking solvent principal withdrawal",
+    "brainUpgrade": "Append-only storage; six slots consume gap35 to gap29; regression pinned to actual pre-capital source at baseMain",
+    "upgradeDelaySeconds": 86400,
+    "publicTestnetCompatibility": "Historical deployment below has old bytecode and NOTIONAL_RETURN_V1 semantics. It is NOT evidence that this capital candidate is publicly deployed. Candidate UI calls are capability-gated.",
+    "mainnetBroadcast": false
+  },
   "testnetAuthorizationUpdate": {
     "date": "2026-09-26",
     "authority": "Human 沈英明 BSC TESTNET ON-CHAIN REHEARSAL ORDER",
@@ -88,6 +109,36 @@
   "ORACLE_MAX_AGE": null,
   "ORACLE_MAX_DEVIATION": null,
   "EXPECTED_GAS": null,
+  "executionManifestTemplate": {
+    "status": "UNSIGNED_TEMPLATE_NOT_EXECUTABLE",
+    "signerPublicAddress": null,
+    "chainId": 56,
+    "nativeValuePerTransactionWei": "0",
+    "totalGasCostCapWei": null,
+    "maximumGasPriceWei": null,
+    "kgenFundingAmountWei": null,
+    "settlementCapitalAllocationWei": null,
+    "insuranceAllocationWei": null,
+    "requiredBeforeSignature": [
+      "Exact reviewed commit, reproducible compiler input and bytecode hashes",
+      "Fresh chain56 token code/18-decimals/tax and actual-received funding verification",
+      "Public signer, admin/upgrader/pauser/Trigger keeper/treasury identities approved",
+      "Per-market three-provider USDT oracle set, min/max price bounds, maintenance and freshness approved",
+      "Explicit KGEN amounts, capital/insurance allocation, gas limits/fee caps, full calldata and expected state deltas",
+      "Human approval bound to this populated manifest; no reuse of prior Testnet authority"
+    ],
+    "expectedTransactions": [
+      "Deploy exact candidate Brain implementation (no initializer on implementation)",
+      "Deploy ordinary OpenZeppelin ERC1967Proxy with atomic Brain.initialize(token,admin,brainKeeper,pauser,upgradeAuthority,treasury,nextPayrollAt); never deploy chain97-only test proxy on56",
+      "Deploy PositionEngine(admin,temporaryExecutor,brainProxy); no EOA receives Brain settlement role",
+      "Deploy OrderTriggerEngine(positionEngine,approvedKeeper)",
+      "Set Position.executor to reviewed Trigger; grant Brain.SETTLEMENT_ROLE only to reviewed Position; verify all role memberships and remove any explicitly recorded bootstrap grant",
+      "Configure each approved market and its three approved feeds; keep new risk paused until readbacks pass",
+      "Approve only explicitly approved funding amounts/spender from approved funding account; fundSettlementCapital and fundInsurance in separate calls; verify actual token deltas",
+      "Read back implementation slot, initializer identities, code hashes, bounds, roles, capital, insurance and pause state before a separately approved activation"
+    ],
+    "broadcast": false
+  },
   "gasEvidence": "artifacts/settlement-local-evm.json contains actual local tx gas only, NOT a Testnet/Mainnet estimate",
   "EXPECTED_STATE_CHANGES": [
     "Deploy reviewed Brain implementation and atomically initialized ERC1967 proxy against approved 18-decimal TEST token first",
@@ -98,7 +149,7 @@
     "Observe accepted liquidation crossing; isolated margin zero; Brain settlement; no replay or resurrection"
   ],
   "PAUSE_PATH": "Brain PAUSER_ROLE.pause(), Position admin.setPaused(true), Trigger admin.setPaused(true) stop new risk. Existing close/settlement remain available subject to valid oracle/solvency. Do not disable a market with open positions: that blocks its exits.",
-  "ROLLBACK_PATH": "No transaction undo. Pause new risk and settle/exit existing positions. Position/Trigger are non-upgradeable; replacement needs reviewed migration and explicit role approval. Brain uses existing scheduled UUPS upgrade authority and >=2-day delay, no bypass.",
+  "ROLLBACK_PATH": "No transaction undo. Pause new risk and settle/exit existing positions. Position/Trigger are non-upgradeable; replacement needs reviewed migration and explicit role approval. Candidate Brain uses Human-approved minimum24-hour scheduled UUPS delay, no bypass. An already deployed older Brain retains its own existing delay until an authorized upgrade executes.",
   "TESTNET": {
     "chainId": 97,
     "approved": true,
@@ -120,7 +171,8 @@
   "BLOCKERS": [
     "Production three-independent-provider USDT settlement oracle set not approved; third provider, USD/USDT basis, decimals/freshness/round validation outstanding",
     "Production admin/upgrade/pauser/keeper identities and risk parameters not approved",
-    "Public mobile adapter QA, exact-head CI and Pages publication pending",
+    "Capital candidate actual EVM/browser validation, exact-head CI and Pages publication must pass; old public Testnet receipts do not validate new bytecode",
+    "Concrete signer public address, actual KGEN funding amount, Settlement Capital/Insurance allocation, gas/value caps and calldata-bound execution manifest not yet approved",
     "Mainnet execution manifest requires Human approval; no Mainnet writes authorized"
   ],
   "NEXT_PROTECTED_ACTION": {

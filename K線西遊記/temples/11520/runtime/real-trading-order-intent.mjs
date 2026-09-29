@@ -83,7 +83,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
     if(!Number.isFinite(available)||available<margin)throw new Error('INSUFFICIENT_FREE_KGEN');
     return {ok:true,...intent,intent,requiredMargin:margin,available,
       estimatedLiquidationPrice:Math.max(0,liquidationMark({entry:intent.triggerPrice,c:intent.c,side:intent.side})),
-      liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
+      pnlModel:'INDEX_DELTA_C_LOTS_V1',liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
       currentPrice:quote.price,priceObservedAt:quote.at,executionMode:'SIMULATION'};
   });
   return Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,
@@ -132,8 +132,9 @@ export const TESTNET_EXECUTION_ABI=Object.freeze({
   brainProxy:['function kgen() view returns(address)','function principalOf(address) view returns(uint256)',
     'function lockedPrincipalOf(address) view returns(uint256)','function availablePrincipal(address) view returns(uint256)',
     'function SETTLEMENT_ROLE() view returns(bytes32)','function hasRole(bytes32,address) view returns(bool)',
-    'function depositMargin(uint256) returns(uint256)',
-    'event MarginDeposited(address indexed user,uint256 requestedWei,uint256 receivedWei)'],
+    'function depositMargin(uint256) returns(uint256)','function withdrawMargin(uint256)',
+    'event MarginDeposited(address indexed user,uint256 requestedWei,uint256 receivedWei)',
+    'event MarginWithdrawn(address indexed user,uint256 amountWei)'],
   orderTriggerEngine:['function brain() view returns(address)','function engine() view returns(address)','function nextOrderId() view returns(uint256)',
     'function createOrder(uint8,int256,uint256,uint256) returns(uint256)','function cancelOrder(uint256)',
     'function closePosition(uint256)',
@@ -153,6 +154,17 @@ export const TESTNET_EXECUTION_ABI=Object.freeze({
     'event PositionOpened(uint256 indexed positionId,address indexed trader,uint8 indexed market,int256 sizeWad,uint256 collateralWad,uint256 entryPriceWad,bytes32 positionKey)',
     'event PositionClosed(uint256 indexed positionId,uint256 exitPriceWad,int256 rawPnlWad,int256 realizedPnlWad,uint256 badDebtWad)',
     'event PositionLiquidated(uint256 indexed positionId,uint256 markPriceWad,int256 rawPnlWad,int256 realizedPnlWad,uint256 badDebtWad)']
+});
+// Opt-in only for a manifest-bound candidate deployment. Never call these on the
+// old public rehearsal or turn missing methods into fabricated zero balances.
+export const CAPITAL_EXECUTION_ABI=Object.freeze({
+  brainProxy:['function playerClaimable(address) view returns(uint256)','function settlementCapital() view returns(uint256)',
+    'function reservedSettlementLiability() view returns(uint256)','function availableRiskCapacity() view returns(uint256)',
+    'function settlementClaims(bytes32) view returns(address user,uint256 orderId,uint256 positionId,uint256 dueWei,uint256 paidWei,uint256 remainingWei,uint256 createdAt,uint256 updatedAt)',
+    'function claimSettlement(bytes32) returns(uint256)',
+    'event SettlementClaimRecorded(bytes32 indexed positionKey,address indexed user,uint256 dueWei,uint256 paidWei,uint256 remainingWei)',
+    'event SettlementClaimPaid(bytes32 indexed positionKey,address indexed user,uint256 paidWei,uint256 remainingWei)'],
+  positionEngine:['function previewLiquidationBoundary(uint8,int256,uint256,uint256) view returns(uint256)','function positionKey(uint256) view returns(bytes32)']
 });
 
 // A timed-out wallet prompt cannot be cancelled by JavaScript. Keep its write
@@ -180,12 +192,15 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   if(!configValid){
     const blocked=async()=>executionFailure(new Error('EVM_ADAPTER_NOT_DEPLOYED_OR_AUTHORIZED'));
     return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:false,snapshot,preview:blocked,submit:blocked,
-      close:blocked,cancel:blocked,approve:blocked,deposit:blocked,faucet:blocked,refresh:blocked,recover:blocked,switchChain:blocked,observe:blocked,dispose(){}});
+      close:blocked,cancel:blocked,approve:blocked,deposit:blocked,withdraw:blocked,claim:blocked,faucet:blocked,refresh:blocked,recover:blocked,switchChain:blocked,observe:blocked,dispose(){}});
   }
-  const fromBlock=deployment.deploymentBlock,abi=Object.fromEntries(keys.map(k=>[k,new ethers.Interface(TESTNET_EXECUTION_ABI[k])]));
-  const req=async(method,params=[])=>{
+  const capitalEnabled=deployment.capabilities?.settlementCapital==='ISOLATED_V1';
+  const pnlModel=deployment.pnlModel||'NOTIONAL_RETURN_V1';
+  if(!['NOTIONAL_RETURN_V1','INDEX_DELTA_C_LOTS_V1'].includes(pnlModel))throw new Error('UNSUPPORTED_PNL_MODEL');
+  const fromBlock=deployment.deploymentBlock,abi=Object.fromEntries(keys.map(k=>[k,new ethers.Interface([...TESTNET_EXECUTION_ABI[k],...(capitalEnabled?CAPITAL_EXECUTION_ABI[k]||[]:[])])]));
+  const req=async(method,params=[],timeoutOverride=null)=>{
     let timer;
-    const timeout=method==='eth_sendTransaction'||method.startsWith('wallet_')?walletRequestTimeoutMs:rpcTimeoutMs;
+    const timeout=timeoutOverride??(method==='eth_sendTransaction'||method.startsWith('wallet_')?walletRequestTimeoutMs:rpcTimeoutMs);
     let request;
     if(method==='eth_sendTransaction'){
       if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))throw new Error('WALLET_REQUEST_UNRESOLVED');
@@ -277,11 +292,12 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     try{
     const ticket=generation,account=await verify(),height=Number(BigInt(await req('eth_blockNumber'))),tag=hex(height),recoveryLogCache=new Map();
     const lf=(...args)=>logsFor(...args,recoveryLogCache);
-    const [balance,principal,locked,available,created,deposits,approvals,mints]=await Promise.all([
+    const [balance,principal,locked,available,created,deposits,approvals,mints,allowance,withdrawals]=await Promise.all([
       call('testToken','balanceOf',[account],tag),call('brainProxy','principalOf',[account],tag),
       call('brainProxy','lockedPrincipalOf',[account],tag),call('brainProxy','availablePrincipal',[account],tag),
       lf('orderTriggerEngine','OrderCreated',[null,account],height),lf('brainProxy','MarginDeposited',[account],height),
-      lf('testToken','Approval',[account,a.brainProxy],height),lf('testToken','Transfer',['0x'+'0'.repeat(40),account],height)]);
+      lf('testToken','Approval',[account,a.brainProxy],height),lf('testToken','Transfer',['0x'+'0'.repeat(40),account],height),
+      call('testToken','allowance',[account,a.brainProxy],tag),lf('brainProxy','MarginWithdrawn',[account],height)]);
     // Some public BSC97 RPC nodes return empty eth_getLogs for old ranges while
     // eth_call and transaction receipts remain available. Recover canonical
     // orders from enumerable contract state instead of treating empty logs as no history.
@@ -294,12 +310,25 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
         created.push({transactionHash:null,blockHash:null,address:a.orderTriggerEngine,parsed:{name:'OrderCreated',args:{orderId:id,trader:o.trader}},stateRecovered:true});
       }
     }
-    const orders=[],positions=[],receipts=[],observations={};let unrealized=0,realized=0,markUnavailable=false;
+    const orders=[],positions=[],receipts=[],observations={},claims=[];let unrealized=0,realized=0,markUnavailable=false,capital=null;
+    if(capitalEnabled){
+      const [claimable,funded,reserved,capacity,recorded,paid]=await Promise.all([
+        call('brainProxy','playerClaimable',[account],tag),call('brainProxy','settlementCapital',[],tag),
+        call('brainProxy','reservedSettlementLiability',[],tag),call('brainProxy','availableRiskCapacity',[],tag),
+        lf('brainProxy','SettlementClaimRecorded',[null,account],height),lf('brainProxy','SettlementClaimPaid',[null,account],height)]);
+      capital={claimable:num(claimable[0]),claimableWei:String(claimable[0]),settlementCapital:num(funded[0]),reservedSettlementLiability:num(reserved[0]),availableRiskCapacity:num(capacity[0])};
+      for(const key of new Set(recorded.map(log=>log.parsed.args.positionKey))){const claim=await call('brainProxy','settlementClaims',[key],tag);
+        if(lower(claim.user)!==lower(account))fail('CLAIM_TRADER_MISMATCH');
+        claims.push({key,orderId:String(claim.orderId),positionId:String(claim.positionId),due:num(claim.dueWei),paid:num(claim.paidWei),remaining:num(claim.remainingWei)});}
+      for(const log of [...recorded,...paid])receipts.push({...await txEvidence(log,log.parsed.name),id:log.transactionHash,receiptId:log.transactionHash,kind:log.parsed.name,
+        positionKey:log.parsed.args.positionKey,paid:num(log.parsed.args.paidWei),remaining:num(log.parsed.args.remainingWei)});
+    }
     for(let m=0;m<3;m++){
       try{const q=await call('positionEngine','readMarketPrice',[m],tag);observations[marketNames[m]]={price:num(q[0]),at:Number(q[1])*1000,validSources:Number(q[2]),source:'ON_CHAIN_ORACLE'}}
       catch{observations[marketNames[m]]={error:'ORACLE_STALE',source:'ON_CHAIN_ORACLE'}}
     }
-    for(const log of [...approvals,...deposits,...mints])receipts.push({...await txEvidence(log,log.parsed.name),id:log.transactionHash,receiptId:log.transactionHash,kind:log.parsed.name==='Transfer'?'TEST_TOKEN_MINT':log.parsed.name});
+    for(const log of [...approvals,...deposits,...mints,...withdrawals])receipts.push({...await txEvidence(log,log.parsed.name),id:log.transactionHash,receiptId:log.transactionHash,kind:log.parsed.name==='Transfer'?'TEST_TOKEN_MINT':log.parsed.name,
+      amount:log.parsed.args.amountWei!=null?num(log.parsed.args.amountWei):log.parsed.args.receivedWei!=null?num(log.parsed.args.receivedWei):log.parsed.args.value!=null?num(log.parsed.args.value):null});
     for(const log of created){
       const id=log.parsed.args.orderId,[o]=await call('orderTriggerEngine','order',[id],tag);
       if(lower(o.trader)!==lower(account))fail('ORDER_TRADER_MISMATCH');
@@ -320,8 +349,16 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       const position={id:String(pid),positionId:String(pid),orderId:String(id),axis:order.axis,market:order.market,side:order.side,c:num(terms.cWad),lots:Number(terms.lots),
         status:['NONE','OPEN','CLOSED','LIQUIDATED'][Number(p.status)],entry:num(p.entryPriceWad),mark:observations[order.market]?.price??null,
         margin:num(p.collateralWad),liquidationPrice:num(boundary),unrealizedPnl:metrics?num(metrics[0]):null,markError,realizedPnl:num(p.realizedPnlWad),
+        equity:metrics?num(p.collateralWad)+num(metrics[0]):null,deltaIndex:observations[order.market]?.price==null?null:observations[order.market].price-num(p.entryPriceWad),
+        observedAt:observations[order.market]?.at??null,observationSequence:String(terms.observationSequence),pnlModel,
         rawPnl:num(p.rawPnlWad),badDebt:num(p.badDebtWad),openedAt:Number(p.openedAt)*1000,closedAt:Number(p.closedAt)*1000};
       positions.push(position);if(position.unrealizedPnl!==null)unrealized+=position.unrealizedPnl;realized+=position.realizedPnl;
+      if(capitalEnabled){
+        const [key]=await call('positionEngine','positionKey',[pid],tag);
+        if(!claims.some(c=>c.key===key)){const claim=await call('brainProxy','settlementClaims',[key],tag);
+          if(claim.dueWei>0n){if(lower(claim.user)!==lower(account))fail('CLAIM_TRADER_MISMATCH');
+            claims.push({key,orderId:String(claim.orderId),positionId:String(claim.positionId),due:num(claim.dueWei),paid:num(claim.paidWei),remaining:num(claim.remainingWei),evidence:'CONTRACT_STATE'});}}
+      }
       const [fill]=await call('orderTriggerEngine','fillReceipt',[id],tag),fillLogs=await lf('orderTriggerEngine','OrderFilled',[id],height);
       if(fillLogs.length>1)fail('FILL_RECEIPT_INCONSISTENT');
       const fillEvidence=fillLogs.length===1?await txEvidence(fillLogs[0],'observeOrder'):{status:'STATE_RECOVERED',transactionStatus:'RPC_LOG_INDEX_UNAVAILABLE',executionMode:'BSC_TESTNET'};
@@ -349,9 +386,11 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     if(revision<appliedRefreshRevision)return {ok:true,superseded:true,executionMode:'BSC_TESTNET',...snapshot()};
     appliedRefreshRevision=revision;
     publish({account,chainId:97,error:null,status:markUnavailable||Object.values(observations).some(q=>q.error)?'ORACLE_STALE':'READY',wallet:{testTokenBalance:num(balance[0]),testTokenBalanceWei:String(balance[0]),
-      principal:num(principal[0]),principalWei:String(principal[0]),free:num(available[0]),availableWei:String(available[0]),locked:num(locked[0]),lockedMargin:num(locked[0]),
-      lockedWei:String(locked[0]),equity:markUnavailable?null:num(principal[0])+unrealized,unrealizedPnl:markUnavailable?null:unrealized,
-      markError:markUnavailable?'ORACLE_STALE':null,realizedPnl:realized},orders,positions,receipts,observations,block:height});
+      principal:num(principal[0]),total:num(principal[0]),principalWei:String(principal[0]),free:num(available[0]),availableWei:String(available[0]),withdrawable:num(available[0]),
+      allowanceWei:String(allowance[0]),allowance:num(allowance[0]),allowanceUnlimited:allowance[0]===(1n<<256n)-1n,
+      claimable:capital?.claimable??null,claimableStatus:capital?'VERIFIED':'UNSUPPORTED_LEGACY_DEPLOYMENT',locked:num(locked[0]),lockedMargin:num(locked[0]),
+      lockedWei:String(locked[0]),equity:markUnavailable?null:num(principal[0])+unrealized+(capital?.claimable||0),unrealizedPnl:markUnavailable?null:unrealized,
+      markError:markUnavailable?'ORACLE_STALE':null,realizedPnl:realized},capital,claims,pnlModel,orders,positions,receipts,observations,block:height});
     return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
     }catch(error){if(revision<appliedRefreshRevision)return {ok:true,superseded:true,...snapshot()};throw error}
   };
@@ -374,14 +413,22 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     const c=wad(Math.abs(intent.c)),margin=wad(intent.lots);
     if((c*BigInt(intent.lots)*BigInt(cfg.initialMarginBps)+9999n)/10000n>margin)fail('INSUFFICIENT_MARGIN');
     const mm=Number(cfg.maintenanceMarginBps)/10000,leverage=Math.abs(intent.c);
-    const estimate=intent.c>0?(leverage<=1?0:intent.triggerPrice*(leverage-1)/(leverage*(1-mm))):intent.triggerPrice*(leverage+1)/(leverage*(1+mm));
+    let estimate=intent.c>0?(leverage<=1?0:intent.triggerPrice*(leverage-1)/(leverage*(1-mm))):intent.triggerPrice*(leverage+1)/(leverage*(1+mm));
+    if(pnlModel==='INDEX_DELTA_C_LOTS_V1'){
+      if(!capitalEnabled)fail('CAPITAL_CAPABILITY_REQUIRED');
+      estimate=num((await call('positionEngine','previewLiquidationBoundary',[intent.contractMarket,wad(intent.c),BigInt(intent.lots),wad(intent.triggerPrice)]))[0]);
+    }
     return {ok:true,...intent,intent,currentPrice:quote.price,requiredMargin:intent.lots,available:state.wallet.free,
-      estimatedLiquidationPrice:estimate,liquidationModel:'ON_CHAIN_INITIAL_AND_MAINTENANCE_MARGIN_ESTIMATE',executionMode:'BSC_TESTNET'};
+      estimatedLiquidationPrice:estimate,pnlModel,liquidationModel:'ON_CHAIN_INITIAL_AND_MAINTENANCE_MARGIN_ESTIMATE',executionMode:'BSC_TESTNET'};
   };
   const send=async(k,method,args,expectedEvent)=>{
     const account=await verify(),ticket=generation,data=abi[k].encodeFunctionData(method,args);
-    await req('eth_call',[{from:account,to:a[k],data},'latest']); // preflight; does not mutate
-    const estimate=BigInt(await req('eth_estimateGas',[{from:account,to:a[k],data,value:'0x0'}]));
+    publish({transaction:{status:'PREFLIGHT',method}});
+    // Settlement estimation executes bounded risk/receipt calculations, often
+    // repeatedly. Keep a larger but finite budget than ordinary balance reads.
+    const preflightTimeout=Math.max(rpcTimeoutMs,60000);
+    await req('eth_call',[{from:account,to:a[k],data},'latest'],preflightTimeout); // no mutation
+    const estimate=BigInt(await req('eth_estimateGas',[{from:account,to:a[k],data,value:'0x0'}],preflightTimeout));
     if(estimate<=0n||estimate>3000000n)fail('TRANSACTION_GAS_LIMIT');
     await sameSession(account,ticket);publish({transaction:{status:'WALLET_REQUEST',method}});
     const hash=await req('eth_sendTransaction',[{from:account,to:a[k],data,value:'0x0',chainId:'0x61',gas:hex((estimate*12n+9n)/10n)}]);
@@ -408,12 +455,20 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     preview:input=>run(()=>previewInternal(input)),refresh:()=>run(refreshInternal),recover:()=>run(refreshInternal),
     submit:input=>mutate(async()=>{const checked=await previewInternal(input);return send('orderTriggerEngine','createOrder',
       [checked.contractMarket,wad(checked.c),BigInt(checked.lots),wad(checked.triggerPrice)],'OrderCreated')}),
-    approve:amount=>mutate(async()=>{const value=wad(finitePositive(amount,'AMOUNT'));return send('testToken','approve',[a.brainProxy,value],'Approval')}),
+    approve:(amount,{unlimited=false}={})=>mutate(async()=>{const value=unlimited?(1n<<256n)-1n:wad(finitePositive(amount,'AMOUNT'));return send('testToken','approve',[a.brainProxy,value],'Approval')}),
     faucet:()=>mutate(()=>send('testToken','faucet',[],'Transfer')),
     deposit:amount=>mutate(async()=>{const value=wad(finitePositive(amount,'AMOUNT')),account=await verify();
       if((await call('testToken','balanceOf',[account]))[0]<value)fail('INSUFFICIENT_BALANCE');
       if((await call('testToken','allowance',[account,a.brainProxy]))[0]<value)fail('APPROVAL_REQUIRED');
       return send('brainProxy','depositMargin',[value],'MarginDeposited')}),
+    withdraw:amount=>mutate(async()=>{const value=wad(finitePositive(amount,'AMOUNT')),account=await verify();
+      if((await call('brainProxy','availablePrincipal',[account]))[0]<value)fail('INSUFFICIENT_MARGIN');
+      return send('brainProxy','withdrawMargin',[value],'MarginWithdrawn')}),
+    claim:key=>mutate(async()=>{if(!capitalEnabled)fail('CLAIM_NOT_SUPPORTED_BY_DEPLOYMENT');
+      if(!/^0x[0-9a-fA-F]{64}$/.test(key||''))fail('INVALID_CLAIM_KEY');
+      const account=await verify(),claim=await call('brainProxy','settlementClaims',[key]);
+      if(lower(claim.user)!==lower(account)||claim.remainingWei<=0n)fail('CLAIM_NOT_AVAILABLE');
+      return send('brainProxy','claimSettlement',[key],'SettlementClaimPaid')}),
     close:id=>mutate(()=>send('orderTriggerEngine','closePosition',[BigInt(id)],'PositionClosed')),
     cancel:id=>mutate(()=>send('orderTriggerEngine','cancelOrder',[BigInt(id)],'OrderTerminated')),
     observe:async()=>executionFailure(new Error('KEEPER_OBSERVATION_REQUIRED')),

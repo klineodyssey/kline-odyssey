@@ -14,13 +14,22 @@ const mustContain = [
   'function solvent()',
   'BRAIN_CAPACITY_EXCEEDED',
   'require(amountWei <= freeSurplus(), "SURPLUS_ONLY")',
-  'MIN_UPGRADE_DELAY = 2 days',
+  'MIN_UPGRADE_DELAY = 24 hours',
   'function withdrawMargin(uint256 amountWei) external nonReentrant',
   'function claimProfit() external nonReentrant',
+  'function fundSettlementCapital(uint256 requestedWei)',
+  'function fundInsurance(uint256 requestedWei)',
+  'function reservePositionRisk(bytes32 positionKey',
+  'function claimSettlement(bytes32 positionKey) external nonReentrant',
+  'function custodyReservedBalance()',
+  'settlementCapital + reservedSettlementLiability',
+  'return custodyReservedBalance() + totalPlayerClaimable',
+  'return settlementCapital - totalPlayerClaimable',
+  'uint256[29] private __gap',
 ];
 for (const needle of mustContain) assert.ok(src.includes(needle), `missing invariant marker: ${needle}`);
 
-for (const fn of ['withdrawMargin', 'claimProfit']) {
+for (const fn of ['withdrawMargin', 'claimProfit', 'claimSettlement']) {
   const m = src.match(new RegExp(`function ${fn}\\([^)]*\\)[^{]*\\{`));
   assert.ok(m, `missing function header: ${fn}`);
   assert.ok(!m[0].includes('whenNotPaused'), `${fn} must remain available while paused`);
@@ -47,5 +56,12 @@ assert.ok(payroll.includes('_assertSolvent()'), 'payroll must assert solvency');
 assert.ok(src.includes('scheduledImplementation'), 'scheduled implementation state missing');
 assert.ok(src.includes('scheduledUpgradeEta'), 'scheduled upgrade ETA missing');
 assert.ok(src.includes('upgradeDelay'), 'upgrade delay missing');
+const funding = src.slice(src.indexOf('function _receiveFunding'), src.indexOf('function fundSettlementCapital'));
+assert.ok(funding.includes('receivedWei = afterBal - beforeBal'), 'funding must use actual received tokens');
+const settlement = src.slice(src.indexOf('function settlePositionCollateral'), src.indexOf('function custodyReservedBalance'));
+assert.ok(!settlement.includes('INSUFFICIENT_REAL_SURPLUS'), 'unfunded profit must become claimable rather than trapping exits');
+assert.ok(settlement.includes('_releasePositionRisk(positionKey)'), 'settlement must release liability exactly once');
+assert.ok(settlement.includes('settlementCapital += lossWei'), 'realized losses must remain isolated from Treasury');
+assert.match(src, /function solvent\(\)[^{]+\{ return kgen.balanceOf\(address\(this\)\) >= custodyReservedBalance\(\)/, 'unfunded debt must not freeze otherwise cash-backed principal exits');
 
 console.log('[brain-v4-static-invariants] PASS');

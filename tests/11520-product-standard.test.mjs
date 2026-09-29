@@ -9,9 +9,9 @@ import {PUBLIC_WALLET_IDENTITY_KEY,PLAYER_SESSION_KEY,readPublicWalletIdentity,s
 
 assert.equal(requiredMargin({lots:1}),1);
 assert.equal(requiredMargin({lots:100}),100);
-assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-100);
-assert.equal(maxAdversePoints(100,100),1);
-assert.equal(maxAdversePoints(50,100),2);
+assert.equal(pnlForMove({entry:100,mark:99,side:'多',lots:100,c:100}),-10000);
+assert.equal(maxAdversePoints(100,100),.01);
+assert.equal(maxAdversePoints(50,100),.02);
 const r=positionRisk({entry:100,mark:99,side:'多',lots:100,c:100});
 assert.equal(r.principal,100);assert.equal(r.pnl,-100);assert.equal(r.remaining,0);assert.equal(r.liquidated,true);
 
@@ -48,16 +48,16 @@ assert.ok(main.includes("joy.addEventListener('pointerdown'"));assert.ok(main.in
 for(const runtime of [main,signedC,shell,fixesV23])assert.ok(!runtime.includes('[0,.000001,.00001,.0001,.001,.01,.1,1,10,100,1000]'),'interactive C ladder must stop at 100C');
 for(const runtime of [legacyRuntime,nonlinearControls,backend])assert.ok(!runtime.includes('max:1000')&&!runtime.includes('<=1000'),'all executable 11520 C/leverage surfaces must stop at 100');
 assert.ok(!backend.includes('lots / leverage'),'off-chain backend must not discount principal by leverage');
-assert.ok(backend.includes('priceReturn*direction*lots*absC'),'off-chain backend metadata must disclose percentage-return PnL');
+assert.ok(backend.includes('deltaIndex*signedC*lots'),'off-chain backend metadata must disclose canonical index-delta PnL');
 assert.ok(legacyRuntime.includes("import {clampPositionPnl,pnlForMove,requiredMargin}"),'legacy UI runtime must reuse the canonical bounded margin engine');
 assert.ok(signedC.includes('cRange:[-100,100]'),'signed C numeric range must be capped at ±100C');
 assert.ok(signedC.includes("invalidCPolicy:'REJECT_OUTSIDE_100C_AND_KEEP_PREVIOUS'"),'out-of-range numeric C must fail closed');
-assert.ok(main.includes('每 1% 變動'),'order preview must explain percentage-return PnL');
-assert.ok(!main.includes('每點 ±'),'order preview must not claim absolute point PnL');
-assert.ok(guidance.includes('價格報酬率 × 口數 × C'),'customer guidance must match percentage-return PnL');
+assert.ok(main.includes('INDEX_DELTA_C_LOTS_V1')&&main.includes('每 1 index point 變動'),'candidate preview must explain index-delta PnL');
+assert.ok(main.includes('舊部署'),'old deployed bytecode retains explicit legacy model label');
+assert.ok(guidance.includes('ΔIndex × C × 口數'),'customer guidance must match index-delta PnL');
 assert.ok(!walletTrade.includes('<option value="1000">'),'standalone wallet trade UI must not expose 1000C');
-assert.ok(walletTrade.includes('PnL = 價格報酬率 × 口數 × C'),'standalone wallet trade formula must use percentage return');
-assert.ok(walletTrade.includes('每 1% 損益'),'standalone wallet trade preview must use percentage semantics');
+assert.ok(walletTrade.includes('PnL = ΔIndex × C × 口數'),'standalone wallet trade formula must use index delta');
+assert.ok(walletTrade.includes('每 1 index 損益'),'standalone wallet trade preview must use index semantics');
 for(const [temple,id] of [[temple12345,'12345'],[temple16888,'16888']]){
   assert.match(temple,new RegExp(`href="\.\./11520/game-5d\\.html\\?returnFrom=${id}"`),`${id} must return to canonical 11520 world`);
   assert.match(temple,/id="return-to-11520"[^>]*>返回宇宙｜11520 花果山世界</,`${id} must expose the visible return control`);

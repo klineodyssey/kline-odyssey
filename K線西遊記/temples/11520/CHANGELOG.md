@@ -1,5 +1,13 @@
 # 11520 Changelog
 
+## 2026-09-29 · Settlement capital candidate and wallet account integration
+
+- Human COMPLETE_PRODUCT_HANDOFF V1 and CONTINUE_TO_COMPLETE supersede percentage-return C-order math with `ΔIndex × signed C × lots`; fixed principal and canonical detents remain. Historical public Testnet bytecode keeps explicitly labeled legacy semantics.
+- Brain appends isolated actual-received capital, aggregate position liability reservations and per-player claims; preserves existing 24-hour upgrade change. Custody and unfunded debt are distinct; claim repayment never consumes another player's principal.
+- Position atomically reserves gross maximum favorable PnL within configured bounds, rejects insufficient capital, and freezes market/oracle reconfiguration while positions are open. Maintenance liquidation preview uses the same integer predicate as settlement.
+- Existing wallet adapter reads allowance, supports explicit maximum approval/deposit/available-only withdrawal and capability-gated claims. No connect-triggered approval, Mainnet activation or second settlement engine.
+- Added actual ancestor UUPS upgrade/storage validation, A/B/C isolation, signed detent/lot matrix, capital stress and local-EVM Chromium wallet QA. CI/visual/publication evidence, not this entry, establishes completion.
+
 ## 2026-09-21 · V2.6.20 public market K-space
 
 - Replaced fixed production K reference values with atomic validated public BTC/ETH/BNB batches, using existing deterministic/invertible anchors. WAIT and STALE are explicit; no partial/fabricated current K.
