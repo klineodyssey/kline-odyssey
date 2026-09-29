@@ -226,12 +226,12 @@
   },
   "gasEvidence": "artifacts/settlement-local-evm.json contains actual local tx gas only, NOT a Testnet/Mainnet estimate",
   "EXPECTED_STATE_CHANGES": [
-    "Deploy reviewed Brain implementation and atomically initialized ERC1967 proxy against approved 18-decimal TEST token first",
+    "Only after Human execution approval: deploy reviewed Brain implementation and atomically initialized ERC1967 proxy against verified approved18-decimal Mainnet KGEN; Testnet mock token is forbidden on56",
     "Deploy Position bound to proxy and Trigger bound to Position",
     "Configure three independently verified feeds per market with currency/unit/decimals/freshness/round/deviation/provenance checks",
     "Set Position.executor=Trigger and Brain.SETTLEMENT_ROLE=Position only; verify all grantees",
-    "Deposit test assets; pending order; cross; atomic single fill; verify collateral/position/receipts",
-    "Observe accepted liquidation crossing; isolated margin zero; Brain settlement; no replay or resurrection"
+    "Fund only the explicitly approved Settlement Capital and Insurance amounts; verify actual token deltas and custody; no implicit user deposit/trade authority",
+    "Enable live user order/settlement only under separately approved activation; rehearsed Testnet mechanics are not permission to create Mainnet test trades"
   ],
   "PAUSE_PATH": "Brain PAUSER_ROLE.pause(), Position admin.setPaused(true), Trigger admin.setPaused(true) stop new risk. Existing close/settlement remain available subject to valid oracle/solvency. Do not disable a market with open positions: that blocks its exits.",
   "ROLLBACK_PATH": "No transaction undo. Pause new risk and settle/exit existing positions. Position/Trigger are non-upgradeable; replacement needs reviewed migration and explicit role approval. Candidate Brain uses Human-approved minimum24-hour scheduled UUPS delay, no bypass. An already deployed older Brain retains its own existing delay until an authorized upgrade executes.",
@@ -239,7 +239,7 @@
     "chainId": 97,
     "approved": true,
     "testAssetsOnly": true,
-    "status": "CAPITAL_SUCCESSOR_CONTRACT_SMOKE_PASS_BROWSER_PENDING",
+    "status": "CAPITAL_SUCCESSOR_CONTRACT_AND_PUBLIC_BROWSER_PASS",
     "manifest": "docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json",
     "deployerPublicAddress": "0x3a909988E4d5c9C2326A7a0596714482AB25eE0A",
     "contracts": {
@@ -251,13 +251,14 @@
       "oracle": "0x9825B4eE7AFEEd9529306489Cc1D5454e19331Ee"
     },
     "gasSpentTestBnb": "0.0027142114",
-    "receiptCount": 75
+    "receiptCount": 75,
+    "additionalBrowserReceiptCount": 37
   },
   "BLOCKERS": [
     "Production RedStone constant-round updates are incompatible with current replay watermark; source-specific adapter required. Pyth candidate observed stale and needs approved update-fee/API route; production source selection is not approved.",
     "Production three-independent-provider USDT settlement oracle set not approved; third provider, USD/USDT basis, decimals/freshness/round validation outstanding",
     "Production admin/upgrade/pauser/keeper identities and risk parameters not approved",
-    "Final public Testnet browser and exact-head CI/Pages publication pending at authoring; contract successor has75 confirmed receipts",
+    "Exact-head CI/Pages release must be verified from PR445 and Actions; public Testnet browser already PASS, with75 deployment/smoke plus37 additional confirmed browser receipts",
     "Concrete signer public address, actual KGEN funding amount, Settlement Capital/Insurance allocation, gas/value caps and calldata-bound execution manifest not yet approved",
     "Mainnet execution manifest requires Human approval; no Mainnet writes authorized"
   ],
