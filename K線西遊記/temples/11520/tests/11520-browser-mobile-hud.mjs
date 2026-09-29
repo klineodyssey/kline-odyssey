@@ -10,7 +10,9 @@ const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 async function boot(){await page.goto(`${BASE}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'))}
 await boot();
-const box=async sel=>{const b=await page.locator(sel).boundingBox();assert.ok(b,`${sel} missing`);return b};
+// Market quote refresh replaces card nodes. Read geometry in one page task,
+// rather than retaining a CDP node across the refresh and getting a null box.
+const box=async sel=>page.locator(sel).evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);if(!el.isConnected||s.display==='none'||s.visibility==='hidden'||r.width<=0||r.height<=0)throw new Error('Visible geometry missing: '+el.outerHTML.slice(0,160));return{x:r.x,y:r.y,width:r.width,height:r.height}});
 const visible=async sel=>page.locator(sel).evaluate(el=>{const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&b.width>0&&b.height>0});
 const centerReachable=async sel=>page.locator(sel).evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return !!hit&&(hit===el||el.contains(hit))});
 const rectsClose=(a,b,tol=1)=>Math.abs(a.x-b.x)<=tol&&Math.abs(a.y-b.y)<=tol&&Math.abs(a.width-b.width)<=tol&&Math.abs(a.height-b.height)<=tol;

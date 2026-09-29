@@ -18,6 +18,18 @@ test('slow order preview is not starved by polling and newer input invalidates s
  const disconnected=context.paintOrderPreview();context.pending=null;resolvers[2]({ok:true});await disconnected;assert.equal(button.disabled,true,'closed or disconnected preview cannot re-enable confirm');
 });
 
+test('public browser QA fails closed on legacy manifest before touching signer and retains bounded candidate writes',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/tests/11520-browser-settlement.mjs',import.meta.url),'utf8');
+ const publicSource=source.slice(source.indexOf('async function publicTestnetBrowserQA(){'));
+ assert.ok(publicSource.indexOf("assert.equal(manifest.pnlModel,'INDEX_DELTA_C_LOTS_V1'")<publicSource.indexOf('process.env.BSC_TESTNET_PRIVATE_KEY'));
+ assert.ok(publicSource.indexOf("assert.equal(manifest.capabilities?.settlementCapital,'ISOLATED_V1'")<publicSource.indexOf('process.env.BSC_TESTNET_PRIVATE_KEY'));
+ assert.match(publicSource,/docs\/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST\.json/);
+ assert.match(publicSource,/budget=parseEther\('0\.005'\)/);assert.match(publicSource,/value:0n,chainId:97/);
+ assert.match(publicSource,/WITHDRAW_TEST_AMOUNT_CAP/);assert.match(publicSource,/DEPOSIT_TEST_AMOUNT_CAP/);
+ assert.match(publicSource,/wallet\.allowanceWei\)<parseEther\('100'\)/);
+ assert.match(publicSource,/candidate raw PnL is delta index times100C times100lots/);
+});
+
 test('selected Testnet route reports Testnet without activating Mainnet or claiming a receipt',()=>{
  const preflight={ready:false,blockers:['HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED']};
  const testnet=classify11520OrderRoute({preflight,execution:{mode:'BSC_TESTNET',chainId:97,status:'READY'}});
