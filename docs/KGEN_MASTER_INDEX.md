@@ -1,5 +1,14 @@
 # KGEN MASTER_INDEX
 
+## K11520 offline Mainnet preparation — 2026-09-29
+
+- `KGEN/contracts/KGEN_OracleSourceAdapter.sol`: unique versionless read-only
+  timestamp/Pyth source adapter candidate; immutable explicit policy, no payment,
+  no USD/USDT substitution, no live source activation.
+- `KGEN/scripts/rehearse_bsc_testnet.mjs`: existing compiler gains unsigned-only
+  chain56 package construction and synthetic self-tests; public execution still
+  chain97-only. Exact roles/economics/provenance/nonce/caps are mandatory.
+
 ## K11520 BSC97 rehearsal registration — 2026-09-26
 
 - `KGEN/scripts/rehearse_bsc_testnet.mjs`: existing actual organs, pinned compiler,

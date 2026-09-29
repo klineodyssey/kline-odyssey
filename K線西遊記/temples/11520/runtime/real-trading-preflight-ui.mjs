@@ -8,6 +8,63 @@ import {getRealTradingBinding,assertRealTradingAxisMarket,realTradingEligibility
 
 const $=s=>document.querySelector(s);
 
+// Offline package inspection only. A digest proves content identity, not Human
+// approval, deployed bytecode, oracle independence, funding or permission to sign.
+// This function deliberately cannot make the live UI/Mainnet adapter ready.
+function canonicalPackageJson(value){
+  if(value===null||typeof value==='string'||typeof value==='boolean')return JSON.stringify(value);
+  if(typeof value==='number'&&Number.isFinite(value))return JSON.stringify(value);
+  if(Array.isArray(value))return '['+value.map(canonicalPackageJson).join(',')+']';
+  if(value&&Object.getPrototypeOf(value)===Object.prototype)return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonicalPackageJson(value[k])).join(',')+'}';
+  throw new Error('NON_JSON_PACKAGE');
+}
+
+export async function inspectMainnetUnsignedPackage(candidate,{expectedDigest}={}){
+  const errors=[];
+  const check=(ok,code)=>{if(!ok)errors.push(code)};
+  const address=v=>typeof v==='string'&&/^0x[0-9a-fA-F]{40}$/.test(v)&&!/^0x0{40}$/i.test(v);
+  const decimal=v=>typeof v==='string'&&/^(0|[1-9][0-9]*)$/.test(v);
+  let digest=null;
+  try{
+    const p=JSON.parse(canonicalPackageJson(candidate));
+    const {packageDigest,...payload}=p;
+    const bytes=await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonicalPackageJson(payload)));
+    digest='sha256:'+Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+    check(digest===packageDigest,'PACKAGE_DIGEST_MISMATCH');
+    check(typeof expectedDigest==='string'&&digest===expectedDigest,'EXPECTED_PACKAGE_DIGEST_REQUIRED_OR_MISMATCH');
+    check(p.documentType==='K11520_MAINNET_UNSIGNED_EXECUTION_PACKAGE'&&p.schemaVersion===1,'PACKAGE_SCHEMA_INVALID');
+    check(p.chainId===56&&p.mode==='BUILD_ONLY'&&p.broadcast===false&&p.executionAuthorized===false,'BUILD_ONLY_MAINNET_BOUNDARY_REQUIRED');
+    check(p.status==='UNSIGNED_REQUIRES_HUMAN_APPROVAL'&&Array.isArray(p.blockers)&&p.blockers.length===0,'PACKAGE_INPUTS_BLOCKED');
+    check(p.deploymentReadbacks==='NOT_PERFORMED','UNSIGNED_PACKAGE_CANNOT_CLAIM_DEPLOYMENT');
+    check(!p.signature&&!p.signedTransaction&&!p.approvalReceipt,'UNSIGNED_PACKAGE_REQUIRED');
+    const input=p.input||{},token=input.token||{},gas=input.gas||{},funding=input.funding||{};
+    check(input.chainId===56&&token.chainId===56&&token.testOnly===false&&token.decimals===18&&address(token.address),'PRODUCTION_TOKEN_METADATA_REQUIRED');
+    check(/^0x[0-9a-fA-F]{64}$/.test(token.codeHash||'')&&typeof token.provenance==='string'&&token.provenance.length>0,'TOKEN_CODE_PROVENANCE_REQUIRED');
+    check(address(funding.account)&&['settlementCapitalWei','insuranceWei','totalKgenWei'].every(k=>decimal(funding[k])),'EXPLICIT_FUNDING_REQUIRED');
+    if(['settlementCapitalWei','insuranceWei','totalKgenWei'].every(k=>decimal(funding[k])))check(BigInt(funding.totalKgenWei)===BigInt(funding.settlementCapitalWei)+BigInt(funding.insuranceWei),'FUNDING_SUM_MISMATCH');
+    check(decimal(gas.maximumGasPriceWei)&&BigInt(gas.maximumGasPriceWei)>0n&&decimal(gas.totalGasCostCapWei)&&BigInt(gas.totalGasCostCapWei)>0n&&gas.nativeValuePerTransactionWei==='0','EXPLICIT_GAS_VALUE_CAPS_REQUIRED');
+    const predicted=p.predictedAddresses||{};
+    check(address(predicted.brainProxy)&&address(predicted.brainImplementation)&&predicted.brainProxy.toLowerCase()!==predicted.brainImplementation.toLowerCase(),'BRAIN_PROXY_IMPLEMENTATION_SEPARATION_REQUIRED');
+    check(p.sourceHashes&&Object.keys(p.sourceHashes).length>0&&p.artifactDigests&&Object.keys(p.artifactDigests).length>0,'SOURCE_BYTECODE_BINDING_REQUIRED');
+    check(Array.isArray(p.transactions)&&p.transactions.length>=4,'UNSIGNED_TRANSACTIONS_REQUIRED');
+    const nonces=new Map();let totalGas=0n;
+    for(const tx of p.transactions||[]){
+      check(tx.chainId===56&&tx.type===0&&tx.value==='0'&&address(tx.from)&&(tx.to===null||address(tx.to)),'TRANSACTION_BOUNDARY_INVALID');
+      check(typeof tx.data==='string'&&/^0x(?:[0-9a-fA-F]{2})+$/.test(tx.data),'CALLDATA_REQUIRED');
+      check(!tx.signature&&!tx.signedTransaction&&!tx.r&&!tx.s,'SIGNED_TRANSACTION_FORBIDDEN');
+      check(decimal(tx.gasLimit)&&BigInt(tx.gasLimit)>0n&&decimal(tx.gasPrice)&&tx.gasPrice===gas.maximumGasPriceWei,'TRANSACTION_GAS_INVALID');
+      if(decimal(tx.gasLimit)&&decimal(tx.gasPrice))totalGas+=BigInt(tx.gasLimit)*BigInt(tx.gasPrice);
+      const sender=String(tx.from).toLowerCase(),expected=nonces.get(sender)??input.startingNonces?.[sender];
+      check(Number.isSafeInteger(tx.nonce)&&tx.nonce>=0&&tx.nonce===expected,'TRANSACTION_NONCE_SEQUENCE_INVALID');
+      nonces.set(sender,tx.nonce+1);
+    }
+    if(decimal(gas.totalGasCostCapWei))check(totalGas<=BigInt(gas.totalGasCostCapWei),'TOTAL_GAS_CAP_EXCEEDED');
+  }catch{errors.push('PACKAGE_INVALID_OR_DIGEST_UNAVAILABLE')}
+  return Object.freeze({reviewable:errors.length===0,ready:false,packageDigest:digest,
+    blockers:Object.freeze([...new Set(errors),'HUMAN_EXACT_MANIFEST_APPROVAL_REQUIRED','FRESH_CHAIN_CODE_NONCE_ORACLE_FUNDING_READBACK_REQUIRED']),
+    signerRequested:false,transactionPayload:null,broadcast:false});
+}
+
 const BLOCKER_TEXT=Object.freeze({
   PRODUCTION_FEED_PROVENANCE_REQUIRED:'正式價格來源尚未驗證',
   BRAIN_DEPLOYED_ADDRESS_REQUIRED:'Brain 真實交易合約尚未部署/綁定',

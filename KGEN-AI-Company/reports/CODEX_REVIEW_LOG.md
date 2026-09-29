@@ -2,6 +2,13 @@
 
 ## 2026-09-29 · Complete-product settlement capital / PR #445
 
+- PR446 merged6f567ca0, exact-head checks PASS and production feedback/recovery
+  fixed. Offline follow-up fills generic timestamp/Pyth source adaptation and
+  unsigned deployment-package construction, without pretending that missing
+  production provider/economic choices are approved. One new versionless adapter
+  is indexed in current Boot, README and Master Index; V1.4 and deployed organs
+  unchanged. Local adapter EVM and synthetic unsigned package tests pass; fresh
+  CI is still required. Human Mainnet gate and task payroll HOLD remain intact.
 - PR446 CI exposed ethers' 250ms rejected-estimate cache after synchronous
   local funding. The actual-pair test disables provider caching and asserts
   identical post-funding estimates each reach the EVM. This test-only repair

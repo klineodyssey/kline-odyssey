@@ -7,13 +7,19 @@ import os from 'node:os';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import solc from 'solc';
-import { Wallet, JsonRpcProvider, BrowserProvider, Contract, ContractFactory, Interface, parseEther, formatEther, keccak256, ZeroAddress, ZeroHash } from 'ethers';
+import { Wallet, JsonRpcProvider, BrowserProvider, Contract, ContractFactory, Interface, getCreateAddress, getAddress, id, parseEther, formatEther, keccak256, ZeroAddress, ZeroHash } from 'ethers';
 
 const live = process.argv.includes('--deploy97');
 const local = process.argv.includes('--local');
 const oneArgument = prefix => {const values=process.argv.filter(v=>v.startsWith(prefix));assert.ok(values.length<=1,'DUPLICATE_SUCCESSOR_ARGUMENT');assert.ok(!values.length || values[0].length>prefix.length,'EMPTY_SUCCESSOR_ARGUMENT');return values[0]?.slice(prefix.length)};
 const successorId=oneArgument('--successor97=');
 const prepareId=oneArgument('--prepare-successor97=');
+// This mode is an offline compiler/transaction encoder, not an execution route.
+const unsignedInput=oneArgument('--build-mainnet-unsigned=');
+const unsignedTest=process.argv.includes('--test-mainnet-package');
+const unsignedMode=Boolean(unsignedInput || unsignedTest);
+assert.ok(!unsignedMode || (!live && !local && !successorId && !prepareId && !process.argv.includes('--test-successor-guards')),'UNSIGNED_MODE_MUST_BE_OFFLINE_ONLY');
+assert.ok(!(unsignedInput && unsignedTest),'CHOOSE_UNSIGNED_INPUT_OR_TEST');
 assert.ok(!(successorId && prepareId),'CHOOSE_PREPARE_OR_DEPLOY');
 assert.ok(!successorId || (live && !local),'SUCCESSOR_REQUIRES_EXPLICIT_DEPLOY97');
 assert.ok(!prepareId || (!live && !local),'PREPARATION_MUST_NOT_BROADCAST');
@@ -54,7 +60,7 @@ const runId=successorId??prepareId;
 const predecessorPath=path.resolve('artifacts/bsc97/deployment.json');
 const predecessorBytes=runId?fs.readFileSync(predecessorPath):null;
 const predecessor=runId?validatePredecessor(JSON.parse(predecessorBytes)):null;
-const outDir = runId?successorDirectory(runId):'artifacts/bsc97';
+const outDir = unsignedMode?'artifacts/mainnet-unsigned':runId?successorDirectory(runId):'artifacts/bsc97';
 assert.ok(!runId || !fs.existsSync(`${outDir}/deployment.json`),'SUCCESSOR_RUN_ALREADY_RESERVED');
 assert.ok(!prepareId || !fs.existsSync(`${outDir}/preparation.json`),'SUCCESSOR_ALREADY_PREPARED');
 fs.mkdirSync(outDir, { recursive: true });
@@ -90,6 +96,10 @@ contract K11520TestOracle {
 const canonicalSource = content => content.replace(/\r\n/g, '\n');
 const sources = Object.fromEntries(sourcePaths.map(p => [p, { content: canonicalSource(fs.readFileSync(p, 'utf8')) }]));
 sources[harnessPath] = { content: canonicalSource(harness) };
+const candidateAdapterPath='KGEN/contracts/KGEN_OracleSourceAdapter.sol';
+// Preserve the exact historical chain97 compiler input/metadata. The adapter is
+// an offline candidate artifact only; no address or constructor policy is chosen.
+if(unsignedMode)sources[candidateAdapterPath]={content:canonicalSource(fs.readFileSync(candidateAdapterPath,'utf8'))};
 const resolvedSources = { ...sources };
 const settings = { optimizer: { enabled: true, runs: 200 }, evmVersion: 'paris', outputSelection: { '*': { '*': ['abi', 'evm.bytecode', 'evm.deployedBytecode'] } } };
 assert.ok(solc.version().startsWith('0.8.24+'), 'Pinned solc 0.8.24 required');
@@ -125,6 +135,152 @@ const build={
  productionProxyTemplate:{policy:'BUILD_ONLY_NOT_AUTHORIZED',source:'@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol',...artifact('@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol','ERC1967Proxy')},
  sourceHashes:Object.fromEntries(Object.entries(sources).map(([p,s])=>[p,createHash('sha256').update(s.content).digest('hex')]))
 };
+if(unsignedMode)build.candidateOracleAdapter={policy:'BUILD_ONLY_NOT_DEPLOYED_NOT_PRODUCTION_READY',source:candidateAdapterPath,...artifact(candidateAdapterPath,'KGEN_OracleSourceAdapter')};
+
+// Canonical JSON (sorted object keys, unchanged array order) is shared with the
+// read-only review validator. No wallet, provider or environment is accessed.
+function canonicalJson(value) {
+ if(Array.isArray(value))return '['+value.map(canonicalJson).join(',')+']';
+ if(value!==null && typeof value==='object')return '{'+Object.keys(value).sort().map(key=>JSON.stringify(key)+':'+canonicalJson(value[key])).join(',')+'}';
+ return JSON.stringify(value);
+}
+function packageDigest(value){const {packageDigest:ignored,...body}=value;return 'sha256:'+sha256(canonicalJson(body));}
+function shape(value,keys,label) {
+ assert.ok(value && typeof value==='object' && !Array.isArray(value),'MISSING_'+label);
+ const missing=keys.filter(key=>!Object.hasOwn(value,key));
+ assert.equal(missing.length,0,'MISSING_'+label+'_FIELDS:'+missing.join(','));
+ assert.deepEqual(Object.keys(value).sort(),keys.slice().sort(),'INVALID_FIELDS_'+label);
+}
+function uintString(value,label,{zero=false,max=(1n<<256n)-1n}={}) {
+ assert.ok(typeof value==='string' && /^(0|[1-9][0-9]*)$/.test(value),'INVALID_'+label);
+ const n=BigInt(value);assert.ok((zero || n>0n) && n<=max,'OUT_OF_RANGE_'+label);return n;
+}
+function address(value,label,zero=false){assert.ok(typeof value==='string' && /^0x[0-9a-fA-F]{40}$/.test(value),'INVALID_'+label);const a=getAddress(value);assert.ok(zero || a!==ZeroAddress,'ZERO_'+label);return a;}
+function publicUrl(value){assert.ok(typeof value==='string','INVALID_PROVENANCE');const u=new URL(value);assert.ok(u.protocol==='https:' && !u.username && !u.password && !u.search && !u.hash,'NONPUBLIC_PROVENANCE');}
+function validateUnsignedInput(input) {
+ shape(input,['chainId','transactionRoute','sourceHashes','reviewedCommit','deployer','startingNonces','roles','token','funding','gas','markets','nextPayrollAt','cMax','lotsMax','settlementAuthority','positionExecutor'],'INPUT');
+ assert.equal(input.chainId,56,'WRONG_CHAIN');
+ assert.equal(input.transactionRoute,'DIRECT_EOA_UNSIGNED','CONTRACT_WALLET_ENVELOPE_REQUIRES_SEPARATE_REVIEW');
+ assert.equal(input.cMax,100,'C_MAX');assert.equal(input.lotsMax,100,'LOTS_MAX');
+ assert.equal(input.settlementAuthority,'POSITION_ENGINE_ONLY','SETTLEMENT_ROLE_FORBIDDEN');
+ assert.equal(input.positionExecutor,'ORDER_TRIGGER_ENGINE_ONLY','EXECUTOR_ROLE_FORBIDDEN');
+ assert.ok(/^[0-9a-f]{40}$/.test(input.reviewedCommit),'REVIEWED_COMMIT_REQUIRED');
+ assert.deepEqual(input.sourceHashes,build.sourceHashes,'SOURCE_HASH_MISMATCH');
+ const deployer=address(input.deployer,'DEPLOYER');
+ shape(input.roles,['brainAdmin','positionAdmin','triggerAdmin','upgradeAuthority','pauser','triggerKeeper','brainKeeper','treasury'],'ROLES');
+ for(const [key,value]of Object.entries(input.roles))address(value,key,key==='brainKeeper');
+ assert.equal(input.roles.triggerAdmin.toLowerCase(),deployer.toLowerCase(),'TRIGGER_ADMIN_IS_DEPLOYER_IMMUTABLE');
+ shape(input.token,['address','chainId','decimals','testOnly','codeHash','provenance'],'TOKEN');
+ address(input.token.address,'TOKEN');assert.equal(input.token.chainId,56,'TOKEN_WRONG_CHAIN');assert.equal(input.token.decimals,18,'TOKEN_DECIMALS');assert.equal(input.token.testOnly,false,'MOCK_TOKEN_FORBIDDEN');
+ assert.ok(/^0x[0-9a-f]{64}$/i.test(input.token.codeHash) && input.token.codeHash!==ZeroHash,'TOKEN_CODEHASH_REQUIRED');publicUrl(input.token.provenance);
+ shape(input.funding,['account','settlementCapitalWei','insuranceWei','totalKgenWei'],'FUNDING');address(input.funding.account,'FUNDER');
+ const capital=uintString(input.funding.settlementCapitalWei,'CAPITAL'),insurance=uintString(input.funding.insuranceWei,'INSURANCE',{zero:true});
+ assert.equal(uintString(input.funding.totalKgenWei,'FUNDING_TOTAL'),capital+insurance,'FUNDING_ALLOCATION_MISMATCH');
+ shape(input.gas,['maximumGasPriceWei','totalGasCostCapWei','nativeValuePerTransactionWei','gasLimits'],'GAS');assert.equal(input.gas.nativeValuePerTransactionWei,'0','NATIVE_VALUE_FORBIDDEN');
+ uintString(input.gas.maximumGasPriceWei,'GAS_PRICE');uintString(input.gas.totalGasCostCapWei,'TOTAL_GAS_CAP');
+ shape(input.gas.gasLimits,['deployment','configuration','funding','approval'],'GAS_LIMITS');for(const value of Object.values(input.gas.gasLimits))uintString(value,'GAS_LIMIT',{max:100000000n});
+ uintString(input.nextPayrollAt,'PAYROLL_TIMESTAMP',{zero:true});
+ assert.ok(input.startingNonces && typeof input.startingNonces==='object' && !Array.isArray(input.startingNonces),'NONCES_REQUIRED');
+ const senders=[deployer,input.roles.brainAdmin,input.roles.positionAdmin,input.roles.pauser,input.funding.account].map(a=>a.toLowerCase());
+ assert.deepEqual(Object.keys(input.startingNonces).sort(),[...new Set(senders)].sort(),'EXACT_SENDER_NONCES_REQUIRED');
+ for(const [key,nonce]of Object.entries(input.startingNonces)){address(key,'NONCE_ACCOUNT');assert.ok(Number.isSafeInteger(nonce) && nonce>=0 && nonce<Number.MAX_SAFE_INTEGER-100,'INVALID_STARTING_NONCE');}
+ assert.ok(Array.isArray(input.markets) && input.markets.length===3,'THREE_MARKETS_REQUIRED');
+ input.markets.forEach((market,index)=>{
+  shape(market,['axis','symbol','initialMarginBps','maintenanceMarginBps','maxOracleAge','minPriceWad','maxPriceWad','minValidSources','maxDeviationBps','feeds'],'MARKET');
+  assert.equal(market.axis,['KX','KY','KZ'][index],'MARKET_AXIS');assert.equal(market.symbol,['BTC/USDT','ETH/USDT','BNB/USDT'][index],'MARKET_SYMBOL');
+  assert.ok(Number.isInteger(market.initialMarginBps) && market.initialMarginBps===100,'100C_REQUIRES_INITIAL_MARGIN_100BPS');
+  assert.ok(Number.isInteger(market.maintenanceMarginBps) && market.maintenanceMarginBps>0 && market.maintenanceMarginBps<market.initialMarginBps,'MAINTENANCE_MARGIN');
+  assert.ok(Number.isInteger(market.maxOracleAge) && market.maxOracleAge>0 && market.maxOracleAge<=4294967295,'ORACLE_MAX_AGE');
+  assert.ok(uintString(market.minPriceWad,'MIN_PRICE')<uintString(market.maxPriceWad,'MAX_PRICE',{max:10n**36n}),'PRICE_BOUNDS');
+  assert.equal(market.minValidSources,2,'TWO_OF_THREE_QUORUM');
+  assert.ok(Number.isInteger(market.maxDeviationBps) && market.maxDeviationBps>0 && market.maxDeviationBps<=2000,'MAX_DEVIATION');
+  assert.ok(Array.isArray(market.feeds) && market.feeds.length===3,'THREE_FEEDS_REQUIRED');
+  for(const feed of market.feeds){
+   shape(feed,['address','provider','independenceGroup','chainId','quote','decimals','testOnly','codeHash','roundMode','provenance'],'FEED');
+   address(feed.address,'FEED');assert.equal(feed.chainId,56,'FEED_WRONG_CHAIN');assert.equal(feed.quote,'USDT','USD_IS_NOT_USDT');assert.equal(feed.testOnly,false,'MOCK_FEED_FORBIDDEN');
+   for(const key of ['provider','independenceGroup'])assert.ok(typeof feed[key]==='string' && /^[a-zA-Z][a-zA-Z0-9 _.-]{1,79}$/.test(feed[key]) && !/mock|test|simulation/i.test(feed[key]),'INVALID_PROVIDER');
+   assert.ok(Number.isInteger(feed.decimals) && feed.decimals>=0 && feed.decimals<=18,'FEED_DECIMALS');
+   assert.ok(/^0x[0-9a-f]{64}$/i.test(feed.codeHash) && feed.codeHash!==ZeroHash,'FEED_CODEHASH_REQUIRED');
+   assert.ok(['MONOTONIC_COMPLETE_ROUNDS','REVIEWED_TIMESTAMP_ADAPTER','REVIEWED_PYTH_ADAPTER'].includes(feed.roundMode),'UNSUPPORTED_ROUND_MODE');publicUrl(feed.provenance);
+  }
+  for(const key of ['address','provider','independenceGroup'])assert.equal(new Set(market.feeds.map(feed=>feed[key].toLowerCase())).size,3,'NONINDEPENDENT_FEEDS');
+ });
+}
+async function buildUnsignedPackage(input) {
+ const result={documentType:'K11520_MAINNET_UNSIGNED_EXECUTION_PACKAGE',schemaVersion:1,chainId:56,mode:'BUILD_ONLY',broadcast:false,executionAuthorized:false,status:'BLOCKED_MISSING_OR_INVALID_INPUT',blockers:[],input:null,sourceHashes:build.sourceHashes,compiler:build.compiler,artifactDigests:{},predictedAddresses:{},transactions:[],deploymentReadbacks:'NOT_PERFORMED',preExecutionRequirements:['HUMAN_EXACT_MANIFEST_APPROVAL_REQUIRED','EXACT_HEAD_CI_AND_SOURCE_REVIEW_REQUIRED','ALL_TRANSACTION_SENDERS_EOA_CODE_AND_PENDING_NONCES_READBACK_REQUIRED','FRESH_CHAIN56_CODE_ROLE_NONCE_AND_TOKEN_TAX_READBACKS_REQUIRED','FRESH_GAS_ESTIMATES_WITHIN_EXPLICIT_LIMITS_AND_CAPS_REQUIRED','FRESH_ORACLE_PROVENANCE_INDEPENDENCE_QUOTE_ROUND_AND_FRESHNESS_READBACKS_REQUIRED','ACTUAL_RECEIVED_CAPITAL_AND_INSURANCE_READBACKS_REQUIRED','SEPARATE_LIVE_ACTIVATION_APPROVAL_REQUIRED']};
+ try {
+  validateUnsignedInput(input);result.input=structuredClone(input);
+  const keys=['brainImplementation','brainProxy','positionEngine','orderTriggerEngine'];
+  const productionArtifacts={...artifacts,brainProxy:build.productionProxyTemplate};
+  for(const key of keys)result.artifactDigests[key]=keccak256(productionArtifacts[key].bytecode);
+  const nonces={...input.startingNonces},deployer=address(input.deployer,'DEPLOYER'),start=nonces[deployer.toLowerCase()];
+  keys.forEach((key,index)=>result.predictedAddresses[key]=getCreateAddress({from:deployer,nonce:start+index}));
+  const predicted=result.predictedAddresses,roles=input.roles;
+  // Predict Trigger up front: Position never temporarily trusts an EOA executor.
+  const init=new Interface(artifacts.brainImplementation.abi).encodeFunctionData('initialize',[input.token.address,roles.brainAdmin,roles.brainKeeper,roles.pauser,roles.upgradeAuthority,roles.treasury,input.nextPayrollAt]);
+  const constructors=[[],[predicted.brainImplementation,init],[roles.positionAdmin,predicted.orderTriggerEngine,predicted.brainProxy],[predicted.positionEngine,roles.triggerKeeper]];
+  const add=(txId,from,to,data,category,method,expectedState)=>{
+   const normalized=address(from,'SENDER'),nonce=nonces[normalized.toLowerCase()]++;
+   result.transactions.push({id:txId,from:normalized,nonce,type:0,chainId:56,to,data,value:'0',gasLimit:input.gas.gasLimits[category],gasPrice:input.gas.maximumGasPriceWei,method,expectedState,calldataKeccak256:keccak256(data)});
+  };
+  for(let i=0;i<keys.length;i++){
+   const key=keys[i],a=productionArtifacts[key];
+   const tx=await new ContractFactory(a.abi,a.bytecode).getDeployTransaction(...constructors[i]);
+   add('DEPLOY_'+key,deployer,null,tx.data,'deployment','constructor',{createdAddress:predicted[key],initCodeKeccak256:keccak256(tx.data)});
+  }
+  const call=(txId,from,key,method,args,category='configuration',expectedState={})=>add(txId,from,predicted[key],new Interface(artifacts[key==='brainProxy'?'brainImplementation':key].abi).encodeFunctionData(method,args),category,method,expectedState);
+  call('PAUSE_BRAIN',roles.pauser,'brainProxy','pause',[],undefined,{paused:true});
+  call('PAUSE_POSITION',roles.positionAdmin,'positionEngine','setPaused',[true],undefined,{paused:true});
+  call('PAUSE_TRIGGER',roles.triggerAdmin,'orderTriggerEngine','setPaused',[true],undefined,{paused:true});
+  call('SET_EXECUTOR_TRIGGER',roles.positionAdmin,'positionEngine','setExecutor',[predicted.orderTriggerEngine],undefined,{executor:predicted.orderTriggerEngine});
+  call('GRANT_SETTLEMENT_POSITION_ONLY',roles.brainAdmin,'brainProxy','grantRole',[id('SETTLEMENT_ROLE'),predicted.positionEngine],undefined,{settlementAuthority:predicted.positionEngine});
+  for(let index=0;index<3;index++){
+   const market=input.markets[index];
+   call('CONFIGURE_'+market.axis,roles.positionAdmin,'positionEngine','configureMarket',[index,market.initialMarginBps,market.maintenanceMarginBps,market.maxOracleAge,market.minPriceWad,market.maxPriceWad,false],undefined,{market:market.axis,enabled:false});
+   call('ORACLES_'+market.axis,roles.positionAdmin,'positionEngine','configureOracle',[index,market.feeds.map(f=>f.address),market.minValidSources,market.maxDeviationBps],undefined,{market:market.axis,feedAddresses:market.feeds.map(f=>f.address),quorum:2});
+  }
+  const approve=new Interface(['function approve(address,uint256) returns(bool)']);
+  const approval=(txId,amount)=>add(txId,input.funding.account,input.token.address,approve.encodeFunctionData('approve',[predicted.brainProxy,amount]),'approval','approve',{spender:predicted.brainProxy,allowance:amount});
+  approval('RESET_EXISTING_ALLOWANCE','0');approval('APPROVE_EXACT_FUNDING',input.funding.totalKgenWei);
+  call('FUND_SETTLEMENT_CAPITAL',input.funding.account,'brainProxy','fundSettlementCapital',[input.funding.settlementCapitalWei],'funding',{requested:input.funding.settlementCapitalWei,credited:'ACTUAL_TOKEN_BALANCE_DELTA_ONLY'});
+  if(BigInt(input.funding.insuranceWei)>0n)call('FUND_INSURANCE',input.funding.account,'brainProxy','fundInsurance',[input.funding.insuranceWei],'funding',{requested:input.funding.insuranceWei,credited:'ACTUAL_TOKEN_BALANCE_DELTA_ONLY'});
+  approval('REVOKE_REMAINING_ALLOWANCE','0');
+  const cap=result.transactions.reduce((sum,tx)=>sum+BigInt(tx.gasLimit)*BigInt(tx.gasPrice),0n);
+  assert.ok(cap<=BigInt(input.gas.totalGasCostCapWei),'TOTAL_GAS_CAP_EXCEEDED');
+  result.maximumGasCostWei=cap.toString();result.status='UNSIGNED_REQUIRES_HUMAN_APPROVAL';
+ }catch(error){
+  // Never echo arbitrary input, paths, credential values or raw decoder errors.
+  const reason=error.code==='ERR_ASSERTION'?String(error.message).split('\n')[0]:'INVALID_PUBLIC_INPUT';
+  result.blockers=[reason];result.input=null;result.predictedAddresses={};result.transactions=[];
+ }
+ result.packageDigest=packageDigest(result);return result;
+}
+if(unsignedMode) {
+ if(unsignedTest){
+  const a=n=>'0x'+n.toString(16).padStart(40,'0'),deployer=a(1),fixture={chainId:56,sourceHashes:build.sourceHashes,reviewedCommit:'1'.repeat(40),deployer,startingNonces:{[deployer]:7,[a(2)]:10,[a(3)]:20},roles:{brainAdmin:a(2),positionAdmin:a(2),triggerAdmin:deployer,upgradeAuthority:a(4),pauser:a(2),triggerKeeper:a(5),brainKeeper:ZeroAddress,treasury:a(6)},token:{address:a(7),chainId:56,decimals:18,testOnly:false,codeHash:'0x'+'11'.repeat(32),provenance:'https://example.invalid/synthetic-fixture-not-production'},funding:{account:a(3),settlementCapitalWei:parseEther('1000').toString(),insuranceWei:parseEther('10').toString(),totalKgenWei:parseEther('1010').toString()},gas:{maximumGasPriceWei:'1000000000',totalGasCostCapWei:'1000000000000000000',nativeValuePerTransactionWei:'0',gasLimits:{deployment:'7000000',configuration:'500000',funding:'500000',approval:'100000'}},nextPayrollAt:'0',cMax:100,lotsMax:100,settlementAuthority:'POSITION_ENGINE_ONLY',positionExecutor:'ORDER_TRIGGER_ENGINE_ONLY',markets:['KX','KY','KZ'].map((axis,index)=>({axis,symbol:['BTC/USDT','ETH/USDT','BNB/USDT'][index],initialMarginBps:100,maintenanceMarginBps:10,maxOracleAge:60,minPriceWad:parseEther('1').toString(),maxPriceWad:parseEther('200000').toString(),minValidSources:2,maxDeviationBps:100,feeds:[0,1,2].map(n=>({address:a(100+index*3+n),provider:'Provider'+n,independenceGroup:'Independent'+n,chainId:56,quote:'USDT',decimals:8,testOnly:false,codeHash:'0x'+'22'.repeat(32),roundMode:'MONOTONIC_COMPLETE_ROUNDS',provenance:'https://example.invalid/synthetic-fixture-not-production'}))}))};
+  fixture.transactionRoute='DIRECT_EOA_UNSIGNED';
+  const packageValue=await buildUnsignedPackage(fixture);assert.equal(packageValue.status,'UNSIGNED_REQUIRES_HUMAN_APPROVAL',packageValue.blockers.join(','));
+  assert.equal(packageValue.transactions.length,20);assert.equal(packageDigest(packageValue),packageValue.packageDigest);
+  assert.deepEqual(await buildUnsignedPackage(fixture),packageValue,'DETERMINISTIC_PACKAGE');
+  assert.notEqual(packageValue.artifactDigests.brainProxy,keccak256(artifacts.brainProxy.bytecode),'NEVER_TEST_PROXY');
+  for(let index=0;index<4;index++)assert.equal(packageValue.transactions[index].expectedState.createdAddress,getCreateAddress({from:deployer,nonce:7+index}));
+  const seen={...fixture.startingNonces};for(const tx of packageValue.transactions){assert.equal(tx.nonce,seen[tx.from.toLowerCase()]++);assert.equal(tx.value,'0');assert.equal(tx.calldataKeccak256,keccak256(tx.data));}
+  const constructorTx=await new ContractFactory(build.productionProxyTemplate.abi,build.productionProxyTemplate.bytecode).getDeployTransaction(packageValue.predictedAddresses.brainImplementation,new Interface(artifacts.brainImplementation.abi).encodeFunctionData('initialize',[fixture.token.address,fixture.roles.brainAdmin,ZeroAddress,fixture.roles.pauser,fixture.roles.upgradeAuthority,fixture.roles.treasury,0]));
+  assert.equal(constructorTx.data,packageValue.transactions[1].data,'ATOMIC_PROXY_INITIALIZATION');
+  const tampered=structuredClone(packageValue);tampered.transactions[0].data+='00';assert.notEqual(packageDigest(tampered),packageValue.packageDigest);
+  for(const change of [v=>v.chainId=97,v=>v.token.testOnly=true,v=>v.roles.triggerAdmin=a(2),v=>v.settlementAuthority=a(1),v=>v.gas.totalGasCostCapWei='1',v=>v.gas.nativeValuePerTransactionWei='1',v=>v.funding.totalKgenWei='1',v=>v.markets[0].feeds[0].testOnly=true,v=>v.markets[0].feeds[0].quote='USD',v=>v.markets[0].feeds[0].roundMode='CONSTANT_ROUND',v=>v.markets[0].feeds[1].independenceGroup='Independent0',v=>v.sourceHashes={},v=>delete v.startingNonces[a(3)],v=>v.cMax=1000,v=>v.token.provenance='https://user:secret@example.invalid/',v=>v.privateKey='NOT_A_SECRET_SYNTHETIC_REJECTION_TEST']){
+   const bad=structuredClone(fixture);change(bad);const output=await buildUnsignedPackage(bad);assert.equal(output.status,'BLOCKED_MISSING_OR_INVALID_INPUT');assert.equal(output.transactions.length,0);assert.equal(output.input,null);
+  }
+  const missing=await buildUnsignedPackage({});assert.equal(missing.status,'BLOCKED_MISSING_OR_INVALID_INPUT');
+  write('synthetic-test-package.json',{...packageValue,syntheticFixture:true,packageDigest:packageDigest({...packageValue,syntheticFixture:true})});write('build.json',build);
+  console.log('MAINNET_UNSIGNED_PACKAGE_TEST_PASS; SYNTHETIC_ONLY; NO_PROVIDER_SIGNER_OR_BROADCAST');
+ }else{
+  let input;try{const raw=fs.readFileSync(unsignedInput,'utf8');assert.ok(raw.length<1000000);input=JSON.parse(raw);}catch{input=null;}
+  const packageValue=await buildUnsignedPackage(input);write('execution-package.json',packageValue);write('build.json',build);
+  console.log(`${packageValue.status}; NO_PROVIDER_SIGNER_OR_BROADCAST`);
+ }
+ process.exit(0);
+}
 if(runId) {
  ensureFreshCandidate(predecessor.sourceHashes,build.sourceHashes);
  const fingerprint=sha256(JSON.stringify(Object.fromEntries(Object.entries(build.sourceHashes).sort(([a],[b])=>a.localeCompare(b)))));
