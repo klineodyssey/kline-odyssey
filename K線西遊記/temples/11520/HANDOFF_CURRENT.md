@@ -2,6 +2,14 @@
 
 ## Complete-product capital/wallet continuation — 2026-09-29
 
+- PR445 merged at b433131756f046e9f4f3a3cce957316ba85da0ce; all exact-head
+  and main Game/Responsive/Trading/Universal/Pages CI passed. Public source
+  matched that merge; real no-asset-interception portrait/landscape/rotation and
+  PWA smoke passed. Post-release stale mock-feed QA found a secondary route
+  toast overwriting the correct ORACLE_STALE rejection. The bounded follow-up
+  preserves execution-owned Testnet feedback; it changes no oracle, order,
+  settlement, wallet or transaction authority. Fresh checks remain required for
+  this follow-up; no new chain transactions are needed.
 - TASK_ID K11520-COMPLETE-PRODUCT-20260929; Human DOCX handoff V1 and explicit
   CONTINUE_TO_COMPLETE. Base main12adee3fbc53fa2c2d05706b54b7246ccfb7e9e8 is
   lineage only: always refetch. Preserved five inherited contract/test edits in

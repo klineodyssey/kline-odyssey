@@ -86,10 +86,13 @@ function notifyOrderRoute(){
   const preflight=renderPreflight();
   const route=classify11520OrderRoute({preflight,localSimulationAvailable:true,execution:globalThis.__K11520_EXECUTION__?.snapshot?.()});
   globalThis.__K11520_ORDER_ROUTE__={...route,checkedAt:new Date().toISOString()};
+  // The Testnet execution UI owns validation, confirmation and receipt feedback.
+  // This deferred routing observer must not overwrite ORACLE_STALE (or another
+  // actual order failure) with a generic instruction to confirm in the wallet.
+  if(route.route==='TESTNET_EXPLICIT_WALLET_ACTION')return route;
   const toast=$('#toast');
   if(!toast)return route;
-  if(route.route==='TESTNET_EXPLICIT_WALLET_ACTION')toast.textContent='BSC TESTNET 97 · NO REAL VALUE；下單需錢包明確確認，receipt 前不算成功';
-  else if(route.route==='REAL_READY_FOR_EXPLICIT_WALLET_ACTION')toast.textContent='真實交易條件已齊；下一步仍需錢包明確確認';
+  if(route.route==='REAL_READY_FOR_EXPLICIT_WALLET_ACTION')toast.textContent='真實交易條件已齊；下一步仍需錢包明確確認';
   else toast.textContent='目前下單走本機模擬；真實交易仍封鎖';
   toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);
   return route
