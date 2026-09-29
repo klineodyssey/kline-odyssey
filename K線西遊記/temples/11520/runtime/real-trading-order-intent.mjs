@@ -179,7 +179,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   pollMs=1500,rpcTimeoutMs=15000,walletRequestTimeoutMs=120000,onState=()=>{}}={}){
   const blank=()=>({mode:'BSC_TESTNET',label:'TESTNET · NO REAL VALUE',status:'NOT_DEPLOYED_OR_AUTHORIZED',
     chainId:97,account:null,wallet:null,orders:[],positions:[],receipts:[],observations:{},transaction:null});
-  let state=blank(),busy=false,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null;
+  let state=blank(),busy=false,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null;
   const copy=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
   const snapshot=()=>copy({...state,writeBlocked:!!ethereum&&TESTNET_PENDING_WALLET_REQUESTS.has(ethereum)});
   const publish=patch=>{state={...state,...patch};try{onState(snapshot())}catch{}return snapshot()};
@@ -394,6 +394,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       claimable:capital?.claimable??null,claimableStatus:capital?'VERIFIED':'UNSUPPORTED_LEGACY_DEPLOYMENT',locked:num(locked[0]),lockedMargin:num(locked[0]),
       lockedWei:String(locked[0]),equity:markUnavailable?null:num(principal[0])+unrealized+(capital?.claimable||0),unrealizedPnl:markUnavailable?null:unrealized,
       markError:markUnavailable?'ORACLE_STALE':null,realizedPnl:realized},capital,claims,pnlModel,orders,positions,receipts,observations,block:height});
+    lastReadyRefresh=state.status==='READY'?{at:Date.now(),account,ticket}:null;
     return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
     }catch(error){if(revision<appliedRefreshRevision)return {ok:true,superseded:true,...snapshot()};throw error}
   };
@@ -403,14 +404,22 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     const flight=refreshRead();refreshFlight=flight;
     try{return await flight}finally{if(refreshFlight===flight)refreshFlight=null}
   };
-  const run=async fn=>{try{return await fn()}catch(error){const failure=executionFailure(error),lost=['WRONG_CHAIN','DISCONNECTED'].includes(failure.code);
+  const run=async fn=>{try{return await fn()}catch(error){lastReadyRefresh=null;const failure=executionFailure(error),lost=['WRONG_CHAIN','DISCONNECTED'].includes(failure.code);
     publish({...lost?blank():{},status:failure.code,error:failure.reason,
       transaction:state.transaction?{...state.transaction,status:failure.code}:null});return failure}};
-  const previewInternal=async(input)=>{
-    await refreshInternal();const intent=buildExecutionOrderIntent(input),quote=state.observations[intent.market];
-    if(!quote?.price)fail('ORACLE_STALE');
+  const previewInternal=async(input,{forceRefresh=false}={})=>{
+    const intent=buildExecutionOrderIntent(input),ticket=generation,account=await identity(),recent=lastReadyRefresh;
+    // Display-only history reuse avoids repeating a just-completed RPC recovery.
+    // Identity and oracle are always live; a write always forces full recovery.
+    const age=recent?Date.now()-recent.at:Infinity;
+    const reuse=!forceRefresh&&recent&&age>=0&&age<=5000&&recent.ticket===ticket&&state.status==='READY'&&state.wallet&&lower(recent.account)===lower(account)&&lower(state.account)===lower(account);
+    if(!reuse)await refreshInternal(forceRefresh);
+    await sameSession(account,ticket);if(state.status!=='READY'||!state.wallet)fail(state.status==='ORACLE_STALE'?'ORACLE_STALE':'DISCONNECTED');
+    const wallet=state.wallet;
+    let quote;try{quote=await call('positionEngine','readMarketPrice',[intent.contractMarket])}catch{fail('ORACLE_STALE')}
+    if(quote[0]<=0n)fail('ORACLE_STALE');
     if(intent.stopPrice!==null||intent.takeProfitPrice!==null)fail('ONCHAIN_STOP_TP_NOT_SUPPORTED');
-    if(BigInt(state.wallet.availableWei)<wad(intent.lots))fail('INSUFFICIENT_MARGIN');
+    if(BigInt(wallet.availableWei)<wad(intent.lots))fail('INSUFFICIENT_MARGIN');
     const cfg=await call('positionEngine','marketConfig',[intent.contractMarket]);
     if(!cfg.enabled)fail('MARKET_DISABLED');
     const c=wad(Math.abs(intent.c)),margin=wad(intent.lots);
@@ -421,7 +430,8 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       if(!capitalEnabled)fail('CAPITAL_CAPABILITY_REQUIRED');
       estimate=num((await call('positionEngine','previewLiquidationBoundary',[intent.contractMarket,wad(intent.c),BigInt(intent.lots),wad(intent.triggerPrice)]))[0]);
     }
-    return {ok:true,...intent,intent,currentPrice:quote.price,requiredMargin:intent.lots,available:state.wallet.free,
+    await sameSession(account,ticket);if(state.status!=='READY')fail(state.status==='ORACLE_STALE'?'ORACLE_STALE':'DISCONNECTED');
+    return {ok:true,...intent,intent,currentPrice:num(quote[0]),requiredMargin:intent.lots,available:wallet.free,
       estimatedLiquidationPrice:estimate,pnlModel,liquidationModel:'ON_CHAIN_INITIAL_AND_MAINTENANCE_MARGIN_ESTIMATE',executionMode:'BSC_TESTNET'};
   };
   const send=async(k,method,args,expectedEvent)=>{
@@ -452,11 +462,11 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       orderId:event?.args?.orderId==null?null:String(event.args.orderId),executionMode:'BSC_TESTNET'};
   };
   const mutate=fn=>run(async()=>{if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{return await fn()}finally{busy=false}});
-  const invalidate=()=>{generation++;appliedRefreshRevision=++refreshRevision;publish({...blank(),status:'RECONNECT_REQUIRED'})};
+  const invalidate=()=>{lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision;publish({...blank(),status:'RECONNECT_REQUIRED'})};
   for(const event of ['accountsChanged','chainChanged','disconnect'])ethereum.on?.(event,invalidate);
   return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:true,snapshot,
     preview:input=>run(()=>previewInternal(input)),refresh:()=>run(refreshInternal),recover:()=>run(refreshInternal),
-    submit:input=>mutate(async()=>{const checked=await previewInternal(input);return send('orderTriggerEngine','createOrder',
+    submit:input=>mutate(async()=>{const checked=await previewInternal(input,{forceRefresh:true});return send('orderTriggerEngine','createOrder',
       [checked.contractMarket,wad(checked.c),BigInt(checked.lots),wad(checked.triggerPrice)],'OrderCreated')}),
     approve:(amount,{unlimited=false}={})=>mutate(async()=>{const value=unlimited?(1n<<256n)-1n:wad(finitePositive(amount,'AMOUNT'));return send('testToken','approve',[a.brainProxy,value],'Approval')}),
     faucet:()=>mutate(()=>send('testToken','faucet',[],'Transfer')),

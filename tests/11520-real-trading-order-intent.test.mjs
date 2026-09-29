@@ -267,6 +267,31 @@ test('BSC97 vendored ethers5 adapter validates deployment and reads only real-co
  assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
  assert.equal((await adapter.observe({price:1})).reason,'KEEPER_OBSERVATION_REQUIRED');
 });
+test('display preview reuses only a bounded fresh READY recovery and still reads live identity and oracle',async t=>{
+ let now=Date.now();t.mock.method(Date,'now',()=>now);const f=testnetFixture(),adapter=f.make();assert.equal((await adapter.refresh()).ok,true);
+ f.calls.length=0;now+=5000;assert.equal((await adapter.preview(onchainInput)).ok,true);
+ assert.equal(f.calls.some(c=>c.method==='eth_getLogs'),false,'fresh preview must not recover history again');
+ assert.ok(f.calls.some(c=>c.method==='eth_chainId'));assert.ok(f.calls.some(c=>c.method==='eth_accounts'));
+ const face=new codec.Interface(TESTNET_EXECUTION_ABI.positionEngine);
+ assert.ok(f.calls.some(c=>c.method==='eth_call'&&c.params[0].data.startsWith(face.getSighash('readMarketPrice'))),'selected oracle is checked at latest even inside TTL');
+ f.calls.length=0;now++;assert.equal((await adapter.preview(onchainInput)).ok,true);assert.ok(f.calls.some(c=>c.method==='eth_getLogs'),'5001ms forces history refresh');
+ f.setStale();assert.equal((await adapter.preview(onchainInput)).code,'ORACLE_STALE','recent READY is not permission to ignore a newly stale oracle');
+});
+test('display preview cache never survives changed account, wrong chain, or mid-preview session invalidation',async()=>{
+ const f=testnetFixture(),adapter=f.make();await adapter.refresh();f.calls.length=0;
+ const other='0x'+'77'.repeat(20);f.setAccount(other);assert.equal((await adapter.preview(onchainInput)).ok,true);assert.equal(adapter.snapshot().account,other);assert.ok(f.calls.some(c=>c.method==='eth_getLogs'));
+ f.setChain('0x38');assert.equal((await adapter.preview(onchainInput)).code,'WRONG_CHAIN');assert.equal(adapter.snapshot().wallet,null);
+ const g=testnetFixture(),second=g.make();await second.refresh();const request=g.provider.request;
+ const face=new codec.Interface(TESTNET_EXECUTION_ABI.positionEngine);
+ g.provider.request=async args=>{const result=await request(args);if(args.method==='eth_call'&&args.params[0].data.startsWith(face.getSighash('marketConfig')))g.setAccount(null);return result};
+ assert.equal((await second.preview(onchainInput)).code,'DISCONNECTED');assert.equal(second.snapshot().wallet,null);
+});
+test('submit never uses display snapshot cache and rejects changed margin before any wallet request',async()=>{
+ const f=testnetFixture(),adapter=f.make();await adapter.refresh();assert.equal((await adapter.preview(onchainInput)).ok,true);
+ f.setAmount(0);f.calls.length=0;const sent=await adapter.submit(onchainInput);assert.equal(sent.code,'INSUFFICIENT_MARGIN');
+ assert.ok(f.calls.some(c=>c.method==='eth_getLogs'),'submit performs a fresh full recovery even within5seconds');
+ assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);assert.equal(adapter.snapshot().wallet.free,0);
+});
 test('onchain order only confirms after successful receipt; reload rebuilds pending and fill from events/state',async()=>{
  const f=testnetFixture(),states=[],adapter=f.make({onState:s=>states.push(s)});f.setPending(2);
  const submitted=await adapter.submit(onchainInput);assert.equal(submitted.ok,true);assert.equal(submitted.status,'ON_CHAIN_ORDER_CREATED');
