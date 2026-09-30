@@ -12,6 +12,22 @@ test('V1 magnitude mode preserves short direction, zero journey and high-C produ
   for(const c of [NaN,Infinity,1000,-1000])assert.equal(resolveCMode(c).canTrade,false);
   assert.equal(resolveCMode(-.01).side,'SHORT');assert.throws(()=>requireV1TradingC(.002));
 });
+test('KGEN is the cross-market settlement currency and KAIOS is the loot currency',()=>{
+  assert.equal(WORLD_RULES.settlement,'KGEN');
+  assert.equal(WORLD_RULES.tradeSettlement,'KGEN');
+  assert.equal(WORLD_RULES.lootCurrency,'KAIOS');
+});
+
+test('wallet-bound KAIOS rewards and progression stay local until distribution is authorized',()=>{
+  const data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
+  const guestLedger=createKgenLedger(),guest=createSimulationPlayerStore({ledger:guestLedger,storage});guest.activate(null);
+  guest.record('MONSTER_KILL');guest.record('LOOT_DROP',{reward:5});
+  let g=guest.snapshot();assert.equal(g.kaios,5);assert.equal(g.claimableKaios,0);assert.equal(g.kaiosRewardStatus,'LOCAL_ONLY_CONNECT_WALLET_TO_BIND');assert.ok(g.xp>=15);
+  const wallet='0x'+'a'.repeat(40),ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});store.activate(wallet);
+  store.record('MONSTER_KILL');store.record('LOOT_DROP',{reward:5});store.record('TRADE_FILL');store.record('TRADE_CLOSE');
+  const p=store.snapshot();assert.equal(p.kaios,5);assert.equal(p.claimableKaios,5);assert.equal(p.kaiosRewardStatus,'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION');assert.ok(p.level>=2);assert.ok(p.engineLevel>=2);assert.ok(p.nextLevelXp>p.xp);assert.ok(p.nextEngineXp>p.engineXp);
+});
+
 test('V1 address profiles recover existing ledger without cross-account receipts; stale preserves margin',()=>{
   const data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
   const ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});
@@ -51,6 +67,24 @@ test('offline 0C journey attacks, drops local-only loot once, respawns without s
   tickWorld(world,player,time+6000);assert.equal(kCombatSnapshot(world,player).target.state,'GUARD');
   assert.equal(kCombatSnapshot(world,player).target.hp,120);
 });
+test('journey encounter cycles through common guardian, KAIOS courier and three-market boss',()=>{
+  const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const player={x:0,y:0,z:0},guardian=world.monsters.find(m=>m.simulationCombat);
+  let now=10000;
+  for(let cycle=1;cycle<=5;cycle++){
+    guardian.state='DEAD';guardian.defeatedAt=now;tickWorld(world,player,now+6000);now+=7000;
+    if(cycle===3){assert.equal(guardian.name,'KAIOS 運鈔妖');assert.equal(guardian.journeyTier,'RARE');assert.equal(guardian.rewardKaios,8);assert.equal(guardian.hp,180)}
+    if(cycle===5){assert.equal(guardian.name,'三市場魔王');assert.equal(guardian.journeyTier,'EPIC');assert.equal(guardian.rewardKaios,20);assert.equal(guardian.hp,300)}
+  }
+});
+
+test('player level increases boss combat power without changing market leverage rules',()=>{
+  const make=()=>{const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const g=world.monsters.find(m=>m.simulationCombat);g.hp=g.maxHp=300;for(const b of Object.values(g.bodies))b.hp=b.maxHp=50;return world};
+  const player={x:0,y:0,z:6},low=make(),high=make();
+  const a=attackKSpace(low,player,{plane:'XZ',c:0,skill:'slash',now:1000,powerLevel:1});
+  const b=attackKSpace(high,player,{plane:'XZ',c:0,skill:'slash',now:1000,powerLevel:10});
+  assert.ok(b.damage>a.damage);assert.equal(resolveCMode(5).mode,'LOCKED_HIGH_SPEED_MODE');
+});
+
 test('V1 revalidates old high-C pending records; sequence replay cannot fill or liquidate',()=>{
   const ledger=createKgenLedger(100),sim=createExecutionAdapter({ledger});
   sim.observe({market:'BTCUSDT',price:100,observedAt:1000,now:1000,sequence:10});
@@ -62,7 +96,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
   assert.equal(v1.snapshot().orders[0].status,'REJECTED');assert.equal(v1.snapshot().positions.length,0);assert.equal(v1.snapshot().wallet.free,100);
 });
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
-import {createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
+import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
 import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';

@@ -17,7 +17,7 @@ import {gameUnitsToK,localPositionToK,composePhysicalK} from './spatial-coordina
 import {resolveCMode} from '../controls/nonlinear-controls.mjs';
 
 export const WORLD_RULES=Object.freeze({
-  placeId:'11520',settlement:'KAIOS',
+  placeId:'11520',settlement:'KGEN',tradeSettlement:'KGEN',lootCurrency:'KAIOS',
   worldBounds:Object.freeze({minX:-60,maxX:60,minZ:-60,maxZ:60,minY:0,maxY:40}),
   playerRadius:.45,meleeRange:2.2,monsterAggroRange:8,monsterAttackRange:1.55,
   monsterAttackCooldownMs:1200,respawnMs:8000,marketLifeDecisionMs:1600,sourceSlots:24,
@@ -128,8 +128,8 @@ export function createKSpaceEncounter(world,reference=KSPACE_REFERENCE){
   const K=kPositionFromReference(reference);
   world.kSpace={reference:copy(reference),playerK:K,targetId:'SIM-K-GUARDIAN',lastAttackAt:null,lastResult:null};
   // A local practice entity is never a registered Life or a source settlement.
-  const guardian={id:'SIM-K-GUARDIAN',lifeId:null,species:'STONE_APE',name:'K-Guardian · 模擬',baseName:'K-Guardian · 模擬',
-    simulationCombat:true,sourceManaged:false,state:'GUARD',attack:0,rewardKaios:0,
+  const guardian={id:'SIM-K-GUARDIAN',lifeId:null,species:'STONE_APE',name:'取經守關猿',baseName:'取經守關猿',
+    simulationCombat:true,sourceManaged:false,state:'GUARD',attack:0,rewardKaios:5,journeyTier:'COMMON',lootName:'取經碎片',
     kPosition:{...K,KZ:K.KZ+1},localPosition:{x:0,y:0,z:7},x:0,y:0,z:7,
     hp:600,maxHp:600,exposed:'KY-',bodies:Object.fromEntries(KSPACE_PHASES.map(id=>[id,{hp:100,maxHp:100,defense:id==='KY-'?0:4}]))};
   // Preserve the existing rendered 7m spawn without turning its independent
@@ -155,7 +155,7 @@ export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
     target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies)},
     lastResult:space.lastResult?copy(space.lastResult):null};
 }
-export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),heading=0}={}){
+export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),heading=0,powerLevel=1}={}){
   const snapshot=kCombatSnapshot(world,player,{plane,c}),spec=KSPACE_SKILLS[skill],space=world.kSpace;
   const result={ok:false,hit:false,simulationOnly:true,rewardKaios:0,skill,body:snapshot?.selection?.body||null,hits:[],damage:0};
   const finish=reason=>{result.reason=reason;if(space)space.lastResult={...result,at:now};return result};
@@ -180,12 +180,13 @@ export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),
     const body=target.bodies[id];if(body.hp<=0)continue;
     const state=id===target.exposed?'EXPOSED':id.slice(0,2)===target.exposed.slice(0,2)?'GUARDED':'RESIST';
     const multiplier=state==='EXPOSED'?1.5:state==='GUARDED'?.25:.75;
-    const damage=Math.min(body.hp,Math.max(1,Math.round((spec.damage-body.defense)*multiplier)));
+    const level=Math.max(1,Math.min(10,Math.floor(Number(powerLevel)||1))),powerMultiplier=1+Math.min(.45,(level-1)*.05);
+    const damage=Math.min(body.hp,Math.max(1,Math.round((spec.damage-body.defense)*multiplier*powerMultiplier)));
     body.hp-=damage;result.hits.push({body:id,damage,state});result.damage+=damage;
   }
   if(!result.hits.length)return finish('BODY_DISABLED');
   target.hp=Object.values(target.bodies).reduce((sum,b)=>sum+b.hp,0);
-  if(!target.hp){target.state='DEAD';target.defeatedAt=now;if(world.journeyEnabled&&!target.rewardSuppressed){result.rewardKaios=5;result.loot={name:'取經碎片',quantity:1,localOnly:true,noRealValue:true}}}
+  if(!target.hp){target.state='DEAD';target.defeatedAt=now;if(world.journeyEnabled&&!target.rewardSuppressed){result.rewardKaios=Math.max(1,Number(target.rewardKaios)||5);result.loot={name:target.lootName||'取經碎片',quantity:1,rarity:target.journeyTier||'COMMON',localOnly:true,noRealValue:true}}}
   result.ok=true;result.hit=true;result.defeated=target.state==='DEAD';
   return finish(result.hits.some(h=>h.state==='EXPOSED')?'WEAK_POINT':result.hits.every(h=>h.state==='GUARDED')?'BLOCKED_RESIST':'HIT');
 }
@@ -311,8 +312,13 @@ export function tickWorld(world,player,now=Date.now()){
     const cycle=(world.journeyCycle||0)+1;world.journeyCycle=cycle;
     const angle=cycle*Math.PI/3;
     guardian.localPosition={x:player.x+Math.sin(angle)*5,y:player.y,z:player.z+Math.cos(angle)*5};
-    Object.assign(guardian,guardian.localPosition,{state:'GUARD',hp:120,maxHp:120,rewardSuppressed:false});
-    for(const b of Object.values(guardian.bodies))b.hp=b.maxHp=20;
+    const boss=cycle>0&&cycle%5===0,courier=!boss&&cycle>0&&cycle%3===0;
+    const profile=boss
+      ?{name:'三市場魔王',tier:'EPIC',hp:300,bodyHp:50,reward:20,loot:'三界 KAIOS 寶箱'}
+      :courier?{name:'KAIOS 運鈔妖',tier:'RARE',hp:180,bodyHp:30,reward:8,loot:'KAIOS 運鈔箱'}
+      :{name:'取經守關猿',tier:'COMMON',hp:120,bodyHp:20,reward:5,loot:'取經碎片'};
+    Object.assign(guardian,guardian.localPosition,{name:profile.name,baseName:profile.name,journeyTier:profile.tier,lootName:profile.loot,rewardKaios:profile.reward,state:'GUARD',hp:profile.hp,maxHp:profile.hp,rewardSuppressed:false});
+    for(const b of Object.values(guardian.bodies))b.hp=b.maxHp=profile.bodyHp;
     world.kSpace.lastAttackAt=null;
   }
   const events=[];events.push(...applyMarketLifeSourceEvents(world,drainMarketLifeSourceEvents()));const playerAxes=readPlayerAxesFromGame(),quotes=readQuotesFromGame();

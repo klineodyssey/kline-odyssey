@@ -9,6 +9,7 @@ const read=p=>readFileSync(resolve(here,p),'utf8');
 const html=read('../game-5d.html');
 const main=read('../runtime/game-5d-main.mjs');
 const fixes=read('../runtime/game-ui-product-fixes.mjs');
+const productFixesV23=read('../runtime/game-ui-product-fixes-v23.mjs');
 const controls=read('../runtime/game-controls-v251.mjs');
 const xyzControl=read('../runtime/joystick-xzxy.mjs');
 const xyzAuthority=read('../runtime/xyz-input-authority-runtime.mjs');
@@ -20,6 +21,41 @@ const signedC=read('../runtime/mobile-signed-c-immersive-runtime.mjs');
 const actionRail=read('../runtime/mobile-action-rail-clearance-runtime.mjs');
 const publicMarketQuotes=read('../runtime/public-market-quotes.mjs');
 const source=[html,main,fixes,controls,xyzControl,xyzAuthority,driveLive,driveAdapter,massScale,characterStatus].join('\n');
+
+test('new players enter the 5D world in 0C journey mode before trading',()=>{
+  assert.match(main,/KX:\{market:'BTCUSDT',side:'多',lots:1,c:0,pos:null\}/);
+  assert.match(main,/KY:\{market:'ETHUSDT',side:'多',lots:1,c:0,pos:null\}/);
+  assert.match(main,/KZ:\{market:'BNBUSDT',side:'多',lots:1,c:0,pos:null\}/);
+  assert.ok(main.includes("mode.mode==='MONSTER_MODE'?'取經 / MONSTER'"));
+});
+
+test('entry hook explains the journey-to-trading loop without requiring a wallet',()=>{
+  assert.ok(productFixesV23.includes('先取經，再交易。你的市場冒險從 0C 開始。'));
+  assert.ok(productFixesV23.includes('走路取經'));
+  assert.ok(productFixesV23.includes('斬妖掉寶'));
+  assert.ok(productFixesV23.includes('0.001C'));
+  assert.ok(productFixesV23.includes('不用連錢包也能先玩'));
+  assert.ok(productFixesV23.includes('開始取經'));
+});
+
+test('player economy UI separates KGEN settlement from KAIOS loot and exposes engine progression',()=>{
+  assert.ok(main.includes('KGEN 跨市場結算'));
+  assert.ok(main.includes('KAIOS 掉寶／運鈔獎勵'));
+  assert.ok(main.includes('WALLET-BOUND CLAIMABLE'));
+  assert.ok(main.includes('多空運算引擎'));
+  assert.ok(main.includes("settlementCurrency:'KGEN'"));
+  assert.ok(main.includes("authority:'PLAYER_DECIDES_NO_AUTO_ORDER'"));
+});
+
+test('market and ATM organs surface cross-market engine and wallet-bound KAIOS custody',()=>{
+  assert.ok(main.includes('多空運算引擎 · Lv.'));
+  assert.ok(main.includes('CROSS-MARKET SCORE'));
+  assert.ok(main.includes('DOMINANT_MARKET'));
+  assert.ok(main.includes('DIVERGENCE_SCAN'));
+  assert.ok(main.includes('CROSS_MARKET_ALIGNMENT'));
+  assert.ok(main.includes('KAIOS 運鈔 ATM'));
+  assert.ok(main.includes('正式 KAIOS 發放合約／地址與 Human 轉帳授權完成前'));
+});
 
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
