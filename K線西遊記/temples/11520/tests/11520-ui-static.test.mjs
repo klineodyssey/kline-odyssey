@@ -82,6 +82,12 @@ test('combat loot and trade events are wired to the shared audio FX engine',()=>
   assert.ok(main.includes("e.status==='LIQUIDATED'?'liquidation'"));
 });
 
+test('11520 always exposes a return to the KAIOS world portal',()=>{
+  assert.ok(productFixesV23.includes("id='kaiosPortalButton'"));
+  assert.ok(productFixesV23.includes("title='回 KAIOS 總世界'"));
+  assert.ok(productFixesV23.includes("location.href='../../../index.html'"));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
