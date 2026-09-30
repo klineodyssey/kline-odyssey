@@ -157,7 +157,7 @@ function monsterScreenGuide(snapshot){
   if(!rec?.root){monsterGuide.textContent=`正在召喚 ${snapshot.target.name}…`;monsterGuide.style.display='block';return}
   const p=new THREE.Vector3();rec.root.getWorldPosition(p);p.y+=1.5;p.project(camera);
   const inFront=p.z>=-1&&p.z<=1,onScreen=inFront&&Math.abs(p.x)<=.88&&Math.abs(p.y)<=.78;
-  if(onScreen){monsterGuide.textContent=`🎯 ${snapshot.target.name} · ${Math.round(snapshot.target.hp)}/${snapshot.target.maxHp}HP · ${snapshot.distance.toFixed(1)}m${snapshot.distance<=KSPACE_SKILLS.slash.radius?' · ⚔ 可攻擊':' · 靠近再攻擊'}`;monsterGuide.style.left=`${Math.max(18,Math.min(innerWidth-18,(p.x*.5+.5)*innerWidth))}px`;monsterGuide.style.top=`${Math.max(310,Math.min(innerHeight-245,(-p.y*.5+.5)*innerHeight-36))}px`;monsterGuide.style.transform='translate(-50%,-100%)';monsterGuide.style.display='block';return}
+  if(onScreen){const phase=snapshot.selection?.body?` · 攻 ${snapshot.selection.body}`:' · 0C 自動取經';monsterGuide.textContent=`🎯 ${snapshot.target.name} · ${Math.round(snapshot.target.hp)}/${snapshot.target.maxHp}HP · ${snapshot.distance.toFixed(1)}m${phase}${snapshot.distance<=KSPACE_SKILLS.slash.radius?' · ⚔ 可攻擊':' · 靠近再攻擊'}`;monsterGuide.style.left=`${Math.max(18,Math.min(innerWidth-18,(p.x*.5+.5)*innerWidth))}px`;monsterGuide.style.top=`${Math.max(310,Math.min(innerHeight-245,(-p.y*.5+.5)*innerHeight-36))}px`;monsterGuide.style.transform='translate(-50%,-100%)';monsterGuide.style.display='block';return}
   const rel=snapshot.relative,angle=Math.atan2(rel.x,rel.z)-S.camYaw,side=Math.sin(angle),forward=Math.cos(angle);
   const arrow=forward<-.15?(side>=0?'↙':'↘'):(side>.22?'←':side<-.22?'→':'↑');
   monsterGuide.textContent=`${arrow} 怪物：${snapshot.target.name} · ${snapshot.distance.toFixed(1)}m · 用左下搖桿靠近`;
@@ -166,7 +166,7 @@ function monsterScreenGuide(snapshot){
 function renderCombatTarget(){
   const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;monsterGuide.style.display='none';return}targetHud.hidden=false;
   const t=s.target,body=s.selection?.body||'0C 取經',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED · 6s':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
-  targetHud.textContent=`◎ ${t.name} · ${body}\n${s.distance.toFixed(1)}m · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} ▾`;
+  targetHud.textContent=`◎ ${t.name} · ${body}\n${s.distance.toFixed(1)}m · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} · XZ→KY / XY→KZ / YZ→KX ▾`;
   monsterScreenGuide(s);
   globalThis.__K11520_KSPACE_COMBAT__=s;
   const info=$('#combatKValues');if(info){const tuple=v=>['KX','KY','KZ'].map(a=>formatKCoordinate(v[a])).join(' / ');info.textContent=`PLAYER K（正規化）：${tuple(s.playerK)}\nMONSTER K（正規化）：${tuple(s.monsterK)}\nΔK（正規化）：${tuple(s.deltaK)}\nLOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}\n局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}\n${s.market.status}`}
