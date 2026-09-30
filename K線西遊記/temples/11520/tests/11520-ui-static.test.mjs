@@ -65,6 +65,14 @@ test('journey monster has an always-visible find-and-attack guide',()=>{
   assert.ok(main.includes('KAIOS 戰利品已記帳'));
 });
 
+test('entry gesture unlocks BGM and AI customer service has zh-TW voice control',()=>{
+  assert.ok(productFixesV23.includes("startBgm();speakAi('歡迎來到花果山"));
+  assert.ok(productFixesV23.includes("new SpeechSynthesisUtterance(text)"));
+  assert.ok(productFixesV23.includes("u.lang='zh-TW'"));
+  assert.ok(productFixesV23.includes('id="aiVoice"'));
+  assert.ok(productFixesV23.includes("voice.textContent=aiVoiceOn?'🔊':'🔇'"));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
