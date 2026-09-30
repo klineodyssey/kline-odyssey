@@ -155,11 +155,11 @@ function monsterScreenGuide(snapshot){
   if(!rec?.root){monsterGuide.textContent=`正在召喚 ${snapshot.target.name}…`;monsterGuide.style.display='block';return}
   const p=new THREE.Vector3();rec.root.getWorldPosition(p);p.y+=1.5;p.project(camera);
   const inFront=p.z>=-1&&p.z<=1,onScreen=inFront&&Math.abs(p.x)<=.88&&Math.abs(p.y)<=.78;
-  if(onScreen){monsterGuide.textContent=`🎯 ${snapshot.target.name} · ${Math.round(snapshot.target.hp)}/${snapshot.target.maxHp}HP · ${snapshot.distance.toFixed(1)}m${snapshot.distance<=KSPACE_SKILLS.slash.radius?' · ⚔ 可攻擊':' · 靠近再攻擊'}`;monsterGuide.style.left=`${Math.max(18,Math.min(innerWidth-18,(p.x*.5+.5)*innerWidth))}px`;monsterGuide.style.top=`${Math.max(190,Math.min(innerHeight-230,(-p.y*.5+.5)*innerHeight-48))}px`;monsterGuide.style.transform='translate(-50%,-100%)';monsterGuide.style.display='block';return}
+  if(onScreen){monsterGuide.textContent=`🎯 ${snapshot.target.name} · ${Math.round(snapshot.target.hp)}/${snapshot.target.maxHp}HP · ${snapshot.distance.toFixed(1)}m${snapshot.distance<=KSPACE_SKILLS.slash.radius?' · ⚔ 可攻擊':' · 靠近再攻擊'}`;monsterGuide.style.left=`${Math.max(18,Math.min(innerWidth-18,(p.x*.5+.5)*innerWidth))}px`;monsterGuide.style.top=`${Math.max(310,Math.min(innerHeight-245,(-p.y*.5+.5)*innerHeight-36))}px`;monsterGuide.style.transform='translate(-50%,-100%)';monsterGuide.style.display='block';return}
   const rel=snapshot.relative,angle=Math.atan2(rel.x,rel.z)-S.camYaw,side=Math.sin(angle),forward=Math.cos(angle);
   const arrow=forward<-.15?(side>=0?'↙':'↘'):(side>.22?'←':side<-.22?'→':'↑');
   monsterGuide.textContent=`${arrow} 怪物：${snapshot.target.name} · ${snapshot.distance.toFixed(1)}m · 用左下搖桿靠近`;
-  monsterGuide.style.left='50%';monsterGuide.style.top='52%';monsterGuide.style.transform='translate(-50%,-50%)';monsterGuide.style.display='block';
+  monsterGuide.style.left='50%';monsterGuide.style.top='62%';monsterGuide.style.transform='translate(-50%,-50%)';monsterGuide.style.display='block';
 }
 function renderCombatTarget(){
   const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;monsterGuide.style.display='none';return}targetHud.hidden=false;
