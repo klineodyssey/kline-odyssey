@@ -4,6 +4,7 @@ STATUS: CANDIDATE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
 */
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
+import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot} from './kgen-margin-runtime.mjs';
 
@@ -73,8 +74,9 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
         orders:[],positions:[],receipts:[],observations:{}})});
   }
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
-  const run=(fn)=>{try{const result=fn();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
+  const run=(fn,mutating=false)=>{try{if(mutating)options.beforeMutation?.();const result=fn();if(result.ok&&mutating)options.afterMutation?.();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
   const preview=(input,{now=Date.now()}={})=>run(()=>{
+    if(options.productV1)requireV1TradingC(input.c);
     const intent=buildExecutionOrderIntent({...input,now}),book=simulationSnapshot(ledger);
     const quote=book.observations[intent.market];
     if(!quote||now<quote.at||now-quote.at>15000)throw new Error('STALE_PRICE');
@@ -91,10 +93,10 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
       const checked=preview(input,{now});if(!checked.ok)return checked;
       const result=placeSimulationOrder(ledger,checked.intent);
       return result.ok?{...result,status:'PENDING_TRIGGER'}:result;
-    }),
-    observe:(observation)=>run(()=>observeSimulationPrice(ledger,observation)),
-    close:(positionId,options)=>run(()=>closeSimulationPosition(ledger,positionId,options)),
-    cancel:(orderId)=>run(()=>cancelSimulationOrder(ledger,orderId)),
+    },true),
+    observe:(observation)=>run(()=>observeSimulationPrice(ledger,{...observation,productV1:options.productV1===true}),true),
+    close:(positionId,options)=>run(()=>closeSimulationPosition(ledger,positionId,options),true),
+    cancel:(orderId)=>run(()=>cancelSimulationOrder(ledger,orderId),true),
     snapshot:()=>simulationSnapshot(ledger)});
 }
 
@@ -108,7 +110,7 @@ export function buildRealTradingOrderIntent({
   const eligibility=realTradingEligibility({axis,market,chainId,feedProvenanceVerified,brainAddress,positionEngineAddress,humanMainnetAuthorization});
   if(!eligibility.eligible)throw new Error(`REAL_TRADING_BLOCKED:${eligibility.blockers.join(',')}`);
   const normalizedLots=integerRange(lots,'LOTS',1,100);
-  const signedC=normalizeSignedC(c),leverage=Math.abs(signedC);
+  const signedC=requireV1TradingC(normalizeSignedC(c)),leverage=Math.abs(signedC);
   const observedPrice=finitePositive(price,'PRICE');
   const direction=signedPositionSide(signedC,side);
   return Object.freeze({

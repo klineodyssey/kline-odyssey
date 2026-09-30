@@ -20,7 +20,8 @@ try {
   for(const [width,height] of [[390,844],[844,390]]) {
     let eth=4000;
     const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
-    const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+    page.setDefaultTimeout(20000);
+    const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
     // Ordinary simulation QA must remain independent of a public rehearsal.
     // An unverified manifest may not silently activate wallet transactions.
     await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
@@ -44,7 +45,12 @@ try {
         throw new Error('Forbidden fixture wallet method '+method);
       }};
     });
-    await page.route('https://data-api.binance.vision/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{symbol:'BTCUSDT',price:'100000'},{symbol:'ETHUSDT',price:String(eth)},{symbol:'BNBUSDT',price:'600'}])}));
+    let quoteStale=false,tradeSequence=0;
+    await page.route('https://data-api.binance.vision/**',route=>{
+      const u=new URL(route.request().url()),prices={BTCUSDT:100000,ETHUSDT:eth,BNBUSDT:600};
+      const payload=u.pathname.endsWith('/aggTrades')?[{p:String(prices[u.searchParams.get('symbol')]),T:Date.now()-(quoteStale?60000:0),a:++tradeSequence}]:Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)}));
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
+    });
     await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{
       const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';
       let body=await fs.readFile(`node_modules/three/${route.request().url().slice(prefix.length)}`,'utf8');
@@ -57,7 +63,8 @@ try {
     assert.equal(await page.locator('#intro11520 .introSkip').count(),0,'late legacy UI must not recreate an intro over the live game');
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
-    await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');
+    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+    await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
     await page.locator('#lotsNumericInput').fill('10');await page.locator('#lotsNumericInput').press('Enter');
     const organ=async name=>{
       if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();
@@ -111,10 +118,16 @@ try {
     await page.evaluate(()=>{__walletFixture.chain='0x1';__walletFixture.emit('chainChanged','0x1')});
     await page.waitForFunction(()=>document.querySelector('#walletMsg').textContent.includes('WRONG_CHAIN'));
     assert.equal(await page.locator('#wKgen').innerText(),'--');
-    assert.equal((await snap()).positions[0].positionId,openId,'wallet events must not reload or reset simulation');
+    assert.equal((await snap()).positions.length,0,'address B must not see A positions');
+    await page.evaluate(()=>{__walletFixture.account='0x1111111111111111111111111111111111111111';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
+    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.length===1);
+    assert.equal((await snap()).positions[0].positionId,openId,'address A restores its own position');
     await page.evaluate(()=>{__walletFixture.chain='0x38';__walletFixture.emit('chainChanged','0x38')});
     await page.waitForFunction(()=>document.querySelector('#wKgen').textContent==='12345');
-    eth=3920;
+    quoteStale=true;eth=3920;await page.waitForTimeout(6000);
+    assert.equal((await snap()).positions[0].status,'OPEN','stale liquidation must not mutate position');
+    assert.match(await page.locator('#feed').innerText(),/MARKET DATA STALE/);await shot('stale-position-preserved');
+    quoteStale=false;
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().positions[0]?.status==='LIQUIDATED',null,{timeout:15000});
     s=await snap();assert.equal(s.positions[0].margin,0);assert.equal(s.wallet.free,90);assert.equal(s.wallet.lockedMargin,0);
     assert.equal(s.receipts.filter(r=>r.kind==='SETTLEMENT').length,1);assert.ok(s.receipts.at(-1).badDebt>0);
@@ -137,9 +150,36 @@ try {
     await organ('history');await page.locator('#sheetBody summary').first().click();await shot('close-receipt');
     await page.evaluate(()=>__walletFixture.emit('disconnect',{}));
     await page.waitForFunction(()=>document.querySelector('#wAddr').textContent==='DISCONNECTED');
-    assert.equal((await snap()).receipts.length,4);
-    assert.equal(await page.evaluate(()=>__walletFixture.calls.some(m=>!/^(eth_requestAccounts|eth_accounts|eth_chainId|eth_getBalance|eth_call)$/.test(m))),false);
+    assert.equal((await snap()).receipts.length,0,'disconnect switches to guest, not A receipts');
     await page.locator('#sheetClose').click();
+    if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+    await page.locator('#walletToggle').click();await page.locator('#walletConnect').click();
+    await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===4);
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===4,null,{timeout:15000});
+    assert.equal((await snap()).positions[1].status,'CLOSED','reload recovers exact account ledger');
+    await shot('reload-recovery');
+    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+    await page.locator('#cNumericInput').fill('5');await page.locator('#cNumericInput').press('Enter');
+    await page.locator('#orderFire').click();
+    await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('V1_HIGH_SPEED_PRODUCTION_LOCKED'));
+    assert.equal(await page.locator('#confirmOrder').isDisabled(),true);await shot('high-c-locked');
+    await page.locator('#cancelOrder').click();
+    await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+    const joy=await page.locator('#joy').boundingBox(),jx=joy.x+joy.width/2,jy=joy.y+joy.height/2;
+    const knobBefore=await page.locator('#knob').boundingBox();
+    await page.mouse.move(jx,jy);await page.mouse.down();await page.mouse.move(jx,jy-40,{steps:5});
+    const knobMoved=await page.locator('#knob').boundingBox();assert.ok(knobMoved.y<knobBefore.y,'joystick thumb follows finger');
+    try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
+    await shot('journey-approach');
+    for(let i=0;i<30&&await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot===0);i++){await page.locator('#attack').click();await page.waitForTimeout(400)}
+    assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot),1);
+    assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().kaios),5);
+    await shot('journey-loot');
+    await organ('records');await shot('local-product-metrics');await page.locator('#sheetClose').click();
+    await page.locator('#backpackButton').click();assert.match(await page.locator('#backpackStats').innerText(),/取經碎片 1/);await shot('journey-backpack');await page.locator('#backpackButton').click();
+    assert.equal(await page.evaluate(()=>__walletFixture.calls.some(m=>!/^(eth_requestAccounts|eth_accounts|eth_chainId|eth_getBalance|eth_call)$/.test(m))),false);
+    if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();
     if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     for(let i=0;i<3;i++){await page.setViewportSize({width:390,height:844});await page.waitForTimeout(120);await page.setViewportSize({width:844,height:390});await page.waitForTimeout(120)}
     await page.setViewportSize({width,height});await page.waitForTimeout(200);await shot('rotation');

@@ -1,4 +1,10 @@
 import assert from 'node:assert/strict';
+function freeQuotePayload(route,rows){
+  const url=new URL(route.request().url());
+  if(!url.pathname.endsWith('/aggTrades'))return rows;
+  const row=rows.find(r=>r.symbol===url.searchParams.get('symbol'));
+  return row?[{p:String(row.price),T:Date.now(),a:Date.now()}]:[];
+}
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {C_ABS_DETENTS,signedTravelFromC,formatSignedC} from '../controls/nonlinear-controls.mjs';
@@ -16,7 +22,7 @@ if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
       await route.fulfill({status:200,contentType:'text/javascript; charset=utf-8',body});
     }catch{await route.abort()}
   });
-  await page.route('https://data-api.binance.vision/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price:'3500'},{symbol:'BNBUSDT',price:'600'}])}));
+  await page.route('https://data-api.binance.vision/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price:'3500'},{symbol:'BNBUSDT',price:'600'}]))}));
   await page.route('https://raw.githubusercontent.com/**',route=>route.abort());
 }
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
@@ -233,10 +239,8 @@ await page.locator('#orderFire').evaluate(el=>el.click());
 await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
 await page.waitForTimeout(240);
 const preview=(await page.locator('#confirmBody').innerText()).replace(/\s+/g,' ').trim();
-assert.match(preview,/100C/,'confirmation must show the bounded leverage');
-assert.match(preview,/PnL MODEL INDEX_DELTA_C_LOTS_V1/,'confirmation must identify the approved index-delta model');
-assert.match(preview,/每 1 index point 變動 700 KGEN/,'100C times seven lots must expose 700 KGEN per index point');
-assert.match(preview,/反向歸零 0\.01 index points/,'100C confirmation must disclose the absolute-index isolated margin boundary');
+assert.match(preview,/V1_HIGH_SPEED_PRODUCTION_LOCKED/,'100C must stay visibly locked in the V1 product');
+assert.equal(await page.locator('#confirmOrder').isDisabled(),true);
 assert.doesNotMatch(preview,/每 1% 變動|反向歸零 1(?:\.0+)?%/,'the retired percentage-return formula must not describe candidate execution');
 assert.match(preview,/PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈/,'confirmation must disclose pending touch/cross execution and retain the no-chain safety boundary');
 const confirmGeometry=await page.locator('#confirm').boundingBox();

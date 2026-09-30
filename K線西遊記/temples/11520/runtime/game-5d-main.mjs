@@ -5,20 +5,20 @@ PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collisio
 */
 import * as THREE from 'three';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
-import {createWorldState,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES,KSPACE_SKILLS} from './world-runtime.mjs';
+import {createWorldState,createKSpaceEncounter,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES,KSPACE_SKILLS} from './world-runtime.mjs';
 import {createKgenLedger,positionRisk,snapshot} from './kgen-margin-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from './real-trading-order-intent.mjs';
 import {getWalletSession11520} from './wallet-game-bridge.mjs';
-import {readPublicWalletIdentity,readPlayerSession,savePlayerSession} from './evm-wallet-runtime.mjs';
+import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimulationPlayerStore} from './evm-wallet-runtime.mjs';
 import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK} from './spatial-coordinate-runtime.mjs';
 import {collectInspectableEntities,inspectMapPoint,waypointSummary} from './map-object-navigation-runtime.mjs';
 import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
 import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
 import {create11520CombatFx} from './combat-fx-runtime.mjs';
 import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D} from './xyz-map-navigation-runtime.mjs';
-import {warpC} from '../controls/nonlinear-controls.mjs';
-import {fetchPublicMarketQuotes} from './public-market-quotes.mjs';
+import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
+import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const AXIS_MARKETS=Object.freeze({KX:'BTCUSDT',KY:'ETHUSDT',KZ:'BNBUSDT'});
@@ -30,7 +30,13 @@ const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:.001,pos:null}
 const restoredSession=readPlayerSession();if(restoredSession){S.xyz={...restoredSession.xyz};S.intentXYZ={...restoredSession.intentXYZ}}
 let lastSessionSave=0,lastSessionSnapshot='';function persistPlayerSession(force=false){const now=Date.now(),snapshot=JSON.stringify([S.xyz,S.intentXYZ]);if(!force&&(snapshot===lastSessionSnapshot||now-lastSessionSave<750))return;lastSessionSave=now;lastSessionSnapshot=snapshot;savePlayerSession({xyz:S.xyz,intentXYZ:S.intentXYZ})}addEventListener('pagehide',()=>persistPlayerSession(true));addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistPlayerSession(true)});
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
-const simulationExecution=createExecutionAdapter({ledger});
+const playerStore=createSimulationPlayerStore({ledger});playerStore.activate(null);
+world.journeyEnabled=true;createKSpaceEncounter(world);
+const simulationExecution=createExecutionAdapter({ledger,productV1:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
+function productEvent(event,details){try{playerStore.record(event,details)}catch{toast('另一頁已更新玩家紀錄，請重新載入')}S.kaios=playerStore.snapshot().kaios}
+S.kaios=playerStore.snapshot().kaios;
+setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elapsedMs:10000})},10000);
+globalThis.__K11520_PRODUCT__=Object.freeze({snapshot:()=>({...playerStore.snapshot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED'})});
 let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';
 const executionLabel=()=>isTestnet()?'BSC TESTNET · NO REAL VALUE':'SIMULATION';
@@ -40,7 +46,8 @@ async function executionAction(action){
   try{return await action()}catch(error){return {ok:false,code:'ORDER_REJECTED',reason:/^[A-Z_]+$/.test(error?.message)?error.message:'WALLET_REQUEST_FAILED'}}
   finally{executionBusy=false;syncSimulationPositions();renderWallet();refreshSimulationSheet();renderAxes()}
 }
-// No synthetic production K position: the encounter starts after valid public quotes arrive.
+// Journey remains playable offline. Its initial reference frame is explicitly
+// WAIT, never a fabricated live price or execution observation.
 const fmt=(n,d=4)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:d});
 function toast(t,combat=false){const el=$('#toast');if(!el)return;el.dataset.kspaceFeedback=String(combat);el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
 function axis(){return S.axes[S.axis]}function price(){return S.quotes[axis().market]||0}
@@ -53,9 +60,21 @@ function renderAxes(){
   $$('[data-market-card]').forEach(card=>card.onclick=()=>openMarketCard(card.dataset.marketCard));
   syncMarketKLabels();
 }
-function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">即時參考價：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
-let quotePending=false;
-async function quotes(){if(quotePending)return;quotePending=true;try{const next=await fetchPublicMarketQuotes({symbols:MARKETS});updateKMarketReference(world,next,Date.now());Object.assign(S.quotes,next);const observedAt=Date.now();if(!isTestnet())for(const market of MARKETS){const result=execution.observe({market,price:next[market],observedAt,now:observedAt});if(result.ok)recordSimulationEvents(result.events)}syncSimulationPositions();if(pending&&!isTestnet())paintOrderPreview();$('#feed').textContent='LIVE · Binance public data'}catch{if(world.kSpace)world.kSpace.quoteFailed=true;$('#feed').textContent=world.kSpace?'STALE · Binance public data':'WAIT · 行情未就緒'}finally{quotePending=false;if(pending&&!isTestnet())paintOrderPreview();renderAxes()}}
+function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">參考價（非結算 Oracle）：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">V1: |C| 0.001–1，0 fee，SIMULATION。免費 REST USDT 參考價不是 USD 結算 Oracle，不假設 USD=USDT。交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
+let quotePending=false,publicObservations={};
+async function quotes(){
+  if(quotePending)return;quotePending=true;
+  try{
+    publicObservations=await fetchPublicMarketObservations({symbols:MARKETS});
+    const rows=Object.values(publicObservations),next=Object.fromEntries(rows.map(r=>[r.market,r.price]));
+    if(rows.every(r=>!r.stale)){
+      updateKMarketReference(world,next,Math.min(...rows.map(r=>r.updatedAt)));Object.assign(S.quotes,next);
+      if(!isTestnet())for(const r of rows){const result=execution.observe({market:r.market,price:r.price,observedAt:r.updatedAt,sequence:r.sequence,now:Date.now()});if(result.ok)recordSimulationEvents(result.events)}
+    }else world.kSpace.quoteFailed=true;
+    syncSimulationPositions();if(pending&&!isTestnet())paintOrderPreview();
+  }catch{world.kSpace.quoteFailed=true}
+  finally{quotePending=false;if(pending&&!isTestnet())paintOrderPreview();renderAxes()}
+}
 function syncMarketKLabels(){
   if(!$('#marketKLabelsStyle')){const style=document.createElement('style');style.id='marketKLabelsStyle';style.textContent='.axis:has(.marketKValue) .universeFloorBadge{display:none!important}';document.head.append(style)}
   const market=kMarketSnapshot(world);
@@ -67,7 +86,10 @@ function syncMarketKLabels(){
     const info=$('#marketReferenceDetail');if(info?.dataset.marketInfoAxis===row.axis)info.textContent=`${market.status} · $${row.price.toFixed(2)} · ${row.axis} ${formatKCoordinate(row.k)} norm`;
     const ref=$(`[data-k-reference="${row.axis}"]`);if(ref)ref.textContent=`${row.axis} ${row.symbol}: P=${row.price}, P0=${row.anchor}`;
   }
-  if(market.status==='STALE')$('#feed').textContent='STALE · 最後有效行情';
+  const mode=resolveCMode(combatSelection().c),label=mode.mode==='MONSTER_MODE'?'取經 / MONSTER':mode.canTrade?'FREE TRADE · 0 FEE':'HIGH C LOCKED';
+  $('#feed').textContent=`${label} · ${market.status==='LIVE'?'參考價 / SIM':'MARKET DATA STALE'}`;
+  $('#feed').title='V1 · |C| 0.001–1 · SIMULATION ONLY · >1C production locked · 免費 REST 參考行情，非低延遲結算 Oracle';
+  globalThis.__K11520_FREE_ORACLE__=Object.fromEntries(Object.entries(publicObservations).map(([m,o])=>[m,publicObservationStatus(o)]));
   globalThis.__K11520_MARKET_K__=market;
 }
 function controlState(){return globalThis.__K11520_3D_CONTROL__||globalThis.__K11520_JOYSTICK_XZXY__||null}
@@ -81,7 +103,7 @@ function syncTradeAxisFromPlane(){
 }
 globalThis.__K11520_TRADE_AXIS_API__=Object.freeze({version:'1.0.0',authority:'PLANE_NORMAL_AXIS',current:()=>syncTradeAxisFromPlane(),market:()=>axis().market,snapshot:()=>({axis:syncTradeAxisFromPlane(),market:axis().market,mode:controlState()?.mode||'XZ'})})
 function controlVector(){const c=controlState(),v=c?.vector;if(v)return{x:Number(v.x)||0,y:Number(v.y)||0,z:Number(v.z)||0};return{x:S.joy.x,y:0,z:S.joy.z}}
-function hud(){syncTradeAxisFromPlane();const s=execution.snapshot().wallet||{},c=controlState(),rail=c?.railAxis||'Y',ri=rail.toLowerCase();$('#topFree').textContent=s.free==null?'--':fmt(s.free,3);$('#topFree').previousElementSibling.textContent=isTestnet()?'TESTNET Brain Available':'KGEN Local Free';$('#topKaios').textContent=fmt(S.kaios,1);$('#xyz').textContent=`LOCAL X ${formatGameDistanceK(S.intentXYZ.x)} · Y ${formatGameDistanceK(S.intentXYZ.y)} · Z ${formatGameDistanceK(S.intentXYZ.z)}`;$('#yRead').textContent=formatGameDistanceK(S.intentXYZ[ri],{compact:true});$('#hp').textContent=Math.max(0,Math.round(S.hp));$('#hpbar').style.width=Math.max(0,S.hp)+'%';$('#monsterList').innerHTML=world.monsters.filter(m=>m.state!=='DEAD'&&(m.name||m.baseName)).map(m=>`<div>${m.name||m.baseName} · ${Math.round(m.hp)}/${m.maxHp}</div>`).join('')||'<div class="muted">等待 Market Life</div>';const xyzNav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;if(xyzNav?.target){const t=xyzNav.target,d=Math.hypot((t.x||0)-S.xyz.x,(t.y||0)-S.xyz.y,(t.z||0)-S.xyz.z);$('#navState').textContent=`${xyzNav.active?'XYZ 前往中':'XYZ 目標'} ${xyzNav.source||xyzNav.mode||''} · ${formatGameDistanceK(d)} · X ${formatGameDistanceK(t.x)} Y ${formatGameDistanceK(t.y)} Z ${formatGameDistanceK(t.z)}`}else if(S.navTarget){const w=waypointSummary(S.xyz,S.navTarget);$('#navState').textContent=`${S.navActive?'前往中':'目標'} ${w.direction} · ${formatGameDistanceK(w.distance)} · X ${formatGameDistanceK(w.targetX)} Z ${formatGameDistanceK(w.targetZ)}`}else $('#navState').textContent='雙指縮放 · 點圖選目標';globalThis.__K11520_WORLD_COORDS__={intent:{...S.intentXYZ},physical:{...S.xyz},physicalK:localPositionToK(S.xyz),distanceUnit:'METERS',mode:c?.mode||'XZ',unboundedIntent:true}}
+function hud(){syncTradeAxisFromPlane();const s=execution.snapshot().wallet||{},c=controlState(),rail=c?.railAxis||'Y',ri=rail.toLowerCase();$('#topFree').textContent=s.free==null?'--':fmt(s.free,3);$('#topFree').previousElementSibling.textContent=isTestnet()?'TESTNET Brain Available':'KGEN Local Free';$('#topKaios').textContent=fmt(S.kaios,1);$('#topKaios').previousElementSibling.textContent='KAIOS LOCAL';$('#xyz').textContent=`LOCAL X ${formatGameDistanceK(S.intentXYZ.x)} · Y ${formatGameDistanceK(S.intentXYZ.y)} · Z ${formatGameDistanceK(S.intentXYZ.z)}`;$('#yRead').textContent=formatGameDistanceK(S.intentXYZ[ri],{compact:true});$('#hp').textContent=Math.max(0,Math.round(S.hp));$('#hpbar').style.width=Math.max(0,S.hp)+'%';$('#monsterList').innerHTML=world.monsters.filter(m=>m.state!=='DEAD'&&(m.name||m.baseName)).map(m=>`<div>${m.name||m.baseName} · ${Math.round(m.hp)}/${m.maxHp}</div>`).join('')||'<div class="muted">等待 Market Life</div>';const xyzNav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;if(xyzNav?.target){const t=xyzNav.target,d=Math.hypot((t.x||0)-S.xyz.x,(t.y||0)-S.xyz.y,(t.z||0)-S.xyz.z);$('#navState').textContent=`${xyzNav.active?'XYZ 前往中':'XYZ 目標'} ${xyzNav.source||xyzNav.mode||''} · ${formatGameDistanceK(d)} · X ${formatGameDistanceK(t.x)} Y ${formatGameDistanceK(t.y)} Z ${formatGameDistanceK(t.z)}`}else if(S.navTarget){const w=waypointSummary(S.xyz,S.navTarget);$('#navState').textContent=`${S.navActive?'前往中':'目標'} ${w.direction} · ${formatGameDistanceK(w.distance)} · X ${formatGameDistanceK(w.targetX)} Z ${formatGameDistanceK(w.targetZ)}`}else $('#navState').textContent='雙指縮放 · 點圖選目標';globalThis.__K11520_WORLD_COORDS__={intent:{...S.intentXYZ},physical:{...S.xyz},physicalK:localPositionToK(S.xyz),distanceUnit:'METERS',mode:c?.mode||'XZ',unboundedIntent:true}}
 function setThumb(el,t){el.style.top=(100-Math.max(0,Math.min(1,t))*100)+'%'}
 function syncControls(){const a=axis();$('#lotsRead').textContent=`${a.lots}口`;setThumb($('#lotsThumb'),Math.min(1,a.lots/100));globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api?.paintSignedC?.(S.axis);if(!controlState())setThumb($('#yThumb'),.5)}
 function bindVertical(sel,fn){const el=$(sel);let pid=null;const calc=e=>{const r=el.getBoundingClientRect(),t=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));fn(t);e.preventDefault()};el.addEventListener('pointerdown',e=>{pid=e.pointerId;try{el.setPointerCapture?.(pid)}catch{}calc(e)});el.addEventListener('pointermove',e=>{if(e.pointerId===pid)calc(e)});['pointerup','pointercancel'].forEach(ev=>el.addEventListener(ev,e=>{if(e.pointerId===pid)pid=null}))}
@@ -117,6 +139,7 @@ function attackFeedback(r){
 function performCombat(skill){
   const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now()});
   toast(attackFeedback(r),true);
+  if(r.defeated){productEvent('MONSTER_KILL');if(r.loot){productEvent('LOOT_DROP',{reward:r.rewardKaios});toast(`掉寶：取經碎片 +1 / 本機 KAIOS +${r.rewardKaios}（非鏈上資產）`,true)}}
   if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace?.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
   renderCombatTarget();return r;
 }
@@ -127,8 +150,8 @@ $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
 const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 模擬守衛：點擊展開座標與六相部位';document.body.appendChild(targetHud);
 function renderCombatTarget(){
   const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;return}targetHud.hidden=false;
-  const t=s.target,body=s.selection?.body||'0C 中性',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
-  targetHud.textContent=`◎ 模擬守衛 · ${body}\n${formatGameDistanceK(s.distance)} · ${part?part.hp+'HP':'±C'}\n${status} · 弱點 ${t.exposed} ▾`;
+  const t=s.target,body=s.selection?.body||'0C 取經',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED · 6s':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
+  targetHud.textContent=`◎ 模擬守衛 · ${body}\n${formatGameDistanceK(s.distance)} · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} ▾`;
   globalThis.__K11520_KSPACE_COMBAT__=s;
   const info=$('#combatKValues');if(info){const tuple=v=>['KX','KY','KZ'].map(a=>formatKCoordinate(v[a])).join(' / ');info.textContent=`PLAYER K（正規化）：${tuple(s.playerK)}\nMONSTER K（正規化）：${tuple(s.monsterK)}\nΔK（正規化）：${tuple(s.deltaK)}\nLOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}\n局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}\n${s.market.status}`}
 }
@@ -136,19 +159,20 @@ function showCombatTarget(){
   const s=combatSnapshot(),t=s?.target;if(!t)return;
   const vec=(v,keys)=>keys.map(k=>`${k} ${Number(v[k]).toFixed(2)}`).join(' · ');
   $('#sheetTitle').textContent='TARGET LOCK · K-Guardian（模擬）';
-  $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${formatGameDistanceK(s.distance,{detail:true})} · ${s.selection?.body||'0C NEUTRAL'}</b><p>Plane 決定軸，C 正負選部位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash ${formatGameDistanceK(KSPACE_SKILLS.slash.radius)}：單部位<br>天罡金陣 ${formatGameDistanceK(KSPACE_SKILLS.goldenRain.radius)}：切面兩軸同相<br>盤古幻斧 ${formatGameDistanceK(KSPACE_SKILLS.phantomAxe.radius)}：前方半圓三軸同相</p><p id="combatKValues" style="white-space:pre-line">PLAYER K：${vec(s.playerK,['KX','KY','KZ'])}<br>MONSTER K：${vec(s.monsterK,['KX','KY','KZ'])}<br>市場 ΔK（正規化）：${vec(s.deltaK,['KX','KY','KZ'])}<br>LOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}<br>局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}</p><p>LOCAL：1 遊戲單位 = 1 公尺，依 CURRENT 換算 K。市場正規化不是公尺；未設定市場→物理 transform，不與 XYZ 直接相加。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，公開報價同步 K 基準（${s.market.status}），LOCAL XYZ 不變。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div data-k-reference="${a}">${a} ${v.market}: P=${v.price}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/100 ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
-  $('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=600;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
+  $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${formatGameDistanceK(s.distance,{detail:true})} · ${s.selection?.body||'0C NEUTRAL'}</b><p>0C 取經：自動攻擊存活部位、掉落本機取經碎片；Plane 決定交易軸，C 正負選相位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash ${formatGameDistanceK(KSPACE_SKILLS.slash.radius)}：單部位<br>天罡金陣 ${formatGameDistanceK(KSPACE_SKILLS.goldenRain.radius)}：切面兩軸同相<br>盤古幻斧 ${formatGameDistanceK(KSPACE_SKILLS.phantomAxe.radius)}：前方半圓三軸同相</p><p id="combatKValues" style="white-space:pre-line">PLAYER K：${vec(s.playerK,['KX','KY','KZ'])}<br>MONSTER K：${vec(s.monsterK,['KX','KY','KZ'])}<br>市場 ΔK（正規化）：${vec(s.deltaK,['KX','KY','KZ'])}<br>LOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}<br>局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}</p><p>LOCAL：1 遊戲單位 = 1 公尺，依 CURRENT 換算 K。市場正規化不是公尺；未設定市場→物理 transform，不與 XYZ 直接相加。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，公開報價同步 K 基準（${s.market.status}），LOCAL XYZ 不變。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div data-k-reference="${a}">${a} ${v.market}: P=${v.price}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/${t.bodies[id].maxHp} ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
+  $('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=Object.values(m.bodies).reduce((n,b)=>n+b.hp,0);m.rewardSuppressed=true;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
 }
 targetHud.onclick=showCombatTarget;
 globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,simulationOnly:true});
 setInterval(syncMarketKLabels,1000);
 function syncSimulationPositions(){const exchange=execution.snapshot();for(const id of Object.keys(S.axes))S.axes[id].pos=exchange.positions.find(p=>p.axis===id&&p.status==='OPEN')||null;if(['assets','positions'].includes($('#sheetBody')?.dataset.simOrgan))refreshSimulationSheet()}
-function recordSimulationEvents(events){for(const e of events){S.history.unshift({time:new Date(e.triggeredAt??Date.now()).toLocaleTimeString(),axis:e.axis||'',event:`${executionLabel()} ${e.status||e.kind} ${e.orderId||''}`});toast(`${executionLabel()} ${e.status||e.kind}｜${e.axis||''} ${e.c??''}C`)}if(events.length)refreshSimulationSheet()}
+function recordSimulationEvents(events){for(const e of events){productEvent(e.kind==='FILL'?'TRADE_FILL':e.status==='LIQUIDATED'?'LIQUIDATION':e.kind==='SETTLEMENT'?'TRADE_CLOSE':'ERROR');S.history.unshift({time:new Date(e.triggeredAt??Date.now()).toLocaleTimeString(),axis:e.axis||'',event:`${executionLabel()} ${e.status||e.kind} ${e.orderId||''}`});toast(`${executionLabel()} ${e.status||e.kind}｜${e.axis||''} ${e.c??''}C`)}if(events.length)refreshSimulationSheet()}
 const escapeUI=value=>String(value??'--').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const receiptTime=value=>value==null?'--':new Date(value).toISOString();
 function receiptRows(rows){return '<dl class="exchangeRows">'+rows.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+escapeUI(value)+'</dd></div>').join('')+'</dl>'}
 function walletMetrics(w){if(!w)return '<p>尚未驗證鏈上帳戶 / UNVERIFIED</p>';const value=n=>n==null?'UNAVAILABLE':fmt(n,6);return receiptRows([['BRAIN TOTAL',value(w.total??w.principal??(w.free+w.lockedMargin))],['AVAILABLE',value(w.free)],['LOCKED MARGIN',value(w.lockedMargin)],['UNREALIZED PNL',value(w.unrealizedPnl)],['EQUITY',value(w.equity)],['REALIZED PNL',value(w.realizedPnl)],['PLAYER CLAIMABLE',w.claimableStatus==='UNSUPPORTED_LEGACY_DEPLOYMENT'?'此舊部署未支援':value(w.claimable)],['WITHDRAWABLE',value(w.withdrawable??(isTestnet()?null:w.free))]])}
 function simulationOrganHTML(id){
+  if(id==='records'){const p=playerStore.snapshot();return '<div class="card"><b>V1 本機遊玩紀錄（非真人／鏈上成交 KPI）</b>'+receiptRows([['PLAYER',p.owner],['STORAGE',p.persistent?'LOCAL SAVED':'MEMORY ONLY'],['PLAY TIME',Math.round(p.playedMs/1000)+' s'],['取經碎片',p.loot],['LOCAL KAIOS / NO REAL VALUE',p.kaios],...Object.entries(p.events)])+'<p>僅此裝置、此玩家的模擬事件；未上傳個資，不能據此宣稱真人玩家數或真實成交量。</p></div>'}
   const x=execution.snapshot(),w=x.wallet,tag=isTestnet()?'<p class="muted">BSC TESTNET 97 · NO REAL VALUE · 僅合約狀態／已確認收據，瀏覽器報價不結算。<br>MODEL: '+escapeUI(x.pnlModel||'UNVERIFIED')+(x.pnlModel==='NOTIONAL_RETURN_V1'?'（舊部署比例模型；不是新 ΔIndex 模型）':'')+'</p>':'<p class="muted">SIMULATION WALLET · 本頁模擬記帳，非鏈上 KGEN / Brain 資產。</p>';
   if(id==='assets')return tag+'<div class="card">'+walletMetrics(w)+(isTestnet()?'<hr>TEST TOKEN · NO REAL VALUE<br>'+escapeUI(w?.testTokenBalance??'UNVERIFIED'):'<hr>ON-CHAIN KGEN · READ ONLY<br>'+escapeUI(S.walletKgen??'未連線或尚未驗證'))+'</div>';
   if(id==='orders')return tag+(x.orders.slice().reverse().map(o=>{
@@ -159,7 +183,7 @@ function simulationOrganHTML(id){
     const risk=isTestnet()?{liquidationMark:p.liquidationPrice,pnl:p.unrealizedPnl}:positionRisk(p),r=x.receipts.find(r=>r.positionId===p.positionId&&r.kind==='SETTLEMENT');
 return '<div class="card"><b>'+p.positionId+' · '+(p.status==='OPEN'?'POSITION OPEN':p.status==='LIQUIDATED'?'斷頭 / LIQUIDATED':p.status)+'</b>'+receiptRows([['MARKET',p.market],['SIDE / C / LOTS',p.side+' / '+p.c+'C / '+p.lots],['ENTRY / MARK',fmt(p.entry,6)+' / '+fmt(p.mark,6)],['LIQUIDATION',risk.liquidationMark==null?'UNAVAILABLE':fmt(Math.max(0,risk.liquidationMark),6)],['ΔINDEX',p.deltaIndex==null?'--':fmt(p.deltaIndex,8)],['POSITION EQUITY',p.equity==null?'--':fmt(p.equity,6)],['ORACLE TIME',receiptTime(p.observedAt)],['POSITION OBSERVATION SEQUENCE',p.observationSequence??'--'],['MARGIN',fmt(p.margin,6)],['UNREALIZED PNL',p.status==='OPEN'&&risk.pnl==null?'UNAVAILABLE':fmt(p.status==='OPEN'?risk.pnl:0,6)],...(r?[['REALIZED PNL',fmt(r.realizedPnl,6)],['SETTLED AT',receiptTime(r.settledAt)],['RECEIPT ID',r.receiptId]]:[])])+(p.status==='OPEN'?'<button class="btn" data-sim-close="'+p.positionId+'">CLOSE · 平倉（'+executionLabel()+'）</button>':'')+'</div>';
   }).join('')||'<p>尚無部位</p>');
-  if(id==='history')return tag+(isTestnet()?'<p>CHAIN RECEIPTS · 重新載入後由合約／events／receipts 恢復，不使用模擬帳本。</p>':'<p>ORDER / SETTLEMENT RECEIPTS · 本次頁面工作階段紀錄；重新載入會重設模擬帳本。</p>')+(x.receipts.slice().reverse().map(r=>{
+  if(id==='history')return tag+(isTestnet()?'<p>CHAIN RECEIPTS · 重新載入後由合約／events／receipts 恢復，不使用模擬帳本。</p>':'<p>ORDER / SETTLEMENT RECEIPTS · 依地址保存於本機；reload 恢復。非鏈上收據，可被本機修改；清除網站資料會刪除此模擬紀錄。</p>')+(x.receipts.slice().reverse().map(r=>{
     if(isTestnet()&&['Approval','MarginDeposited','MarginWithdrawn','TEST_TOKEN_MINT','SettlementClaimRecorded','SettlementClaimPaid'].includes(r.kind))return '<details class="card" data-receipt="'+escapeUI(r.receiptId)+'"><summary>'+escapeUI(r.kind)+' · '+escapeUI(r.status)+'</summary>'+receiptRows([['TX HASH',r.txHash],['BLOCK',r.block],['TIME',receiptTime(r.timestamp)],['CONTRACT',r.contract],['METHOD',r.method],['AMOUNT',r.amount??'--'],['CLAIM PAID',r.paid??'--'],['CLAIM REMAINING',r.remaining??'--'],['TX STATUS',r.transactionStatus]])+'</details>';
     const order=x.orders.find(o=>o.orderId===r.orderId),fill=x.receipts.find(f=>f.positionId===r.positionId&&f.kind==='FILL');
     const rows=[...(isTestnet()?[['TX HASH',r.txHash],['BLOCK',r.block],['CONTRACT',r.contract],['METHOD',r.method],['TX STATUS',r.transactionStatus||r.status]]:[]),['ORDER ID',r.orderId],['POSITION ID',r.positionId],['MARKET',r.market],['SIDE / C / LOTS',r.side+' / '+r.c+'C / '+r.lots],['CREATED AT',receiptTime(order?.createdAt)],['TRIGGERED AT',receiptTime(r.triggeredAt)],['TRIGGER / FILL',order?.triggerPrice+' / '+fill?.fillPrice],['PREVIOUS / OBSERVED',r.previousPrice+' / '+r.observedPrice]];
@@ -193,7 +217,7 @@ function openOrder(){
   paintOrderPreview();$('#confirm').classList.add('open');
 }
 $('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};
-$('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜收據已確認');openOrgan('orders');renderAxes();hud()};
+$('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜收據已確認');openOrgan('orders');renderAxes();hud()};
 async function closePos(){const p=axis().pos;if(!p){toast(`${S.axis} 空倉`);return}const r=await executionAction(()=>execution.close(p.positionId));if(!r.ok){toast(r.reason);return}if(r.receipt)recordSimulationEvents([r.receipt]);syncSimulationPositions();renderAxes();hud()}
 
 const dock=$('#dock');$('#dockToggle').onclick=()=>dock.classList.toggle('open');$('#rail').innerHTML=RAIL_ORGANS.map(([id,ic,n])=>`<button data-organ="${id}" title="${n}">${ic}</button>`).join('');$$('[data-organ]').forEach(b=>b.onclick=()=>openOrgan(b.dataset.organ));$('#sheetClose').onclick=()=>{$('#sheet').classList.remove('open');fullMapCanvas=null};
@@ -267,7 +291,15 @@ function renderWallet(value=walletSession.snapshot()){
 const summary=$('#walletSimulation');if(summary)summary.innerHTML='<b>'+executionLabel()+(isTestnet()?' · BRAIN ACCOUNT':' WALLET')+'</b>'+walletMetrics(chain.wallet)+(chain.capital?'<details><summary>Exchange Capital（非玩家本金）</summary>'+receiptRows([['FREE SETTLEMENT CAPITAL',fmt(chain.capital.settlementCapital,6)],['RESERVED LIABILITY',fmt(chain.capital.reservedSettlementLiability,6)],['ADMISSION CAPACITY',fmt(chain.capital.availableRiskCapacity,6)]])+'</details>':'')+(isTestnet()?receiptRows([['TEST TOKEN BALANCE',chain.wallet?.testTokenBalance??'UNVERIFIED'],['TX STATUS',chain.transaction?.status||chain.status],['TX HASH',chain.transaction?.txHash||'--']]):'');
   if($('#sheetBody')?.dataset.simOrgan==='assets')refreshSimulationSheet();
 }
-walletSession.subscribe(value=>{renderWallet(value);if(isTestnet())void refreshTestnet()});renderWallet();void loadTestnetManifest();
+walletSession.subscribe(value=>{
+  if(value.account||['DISCONNECTED','NO_WALLET'].includes(value.status)){
+    if(playerStore.activate(value.account)){
+      pending=null;$('#confirm').classList.remove('open');S.history=[];S.kaios=playerStore.snapshot().kaios;
+      syncSimulationPositions();renderAxes();refreshSimulationSheet();if(!isTestnet())void quotes();
+    }
+  }
+  renderWallet(value);if(isTestnet())void refreshTestnet();
+});renderWallet();void walletSession.refresh();void loadTestnetManifest();
 $('#walletConnect').onclick=()=>{$('#walletPanel').classList.remove('collapsed');return walletSession.connect()};
 $('#walletRefresh').onclick=async()=>{await walletSession.refresh();await refreshTestnet()};
 $('#executionMode').onclick=selectExecutionMode;

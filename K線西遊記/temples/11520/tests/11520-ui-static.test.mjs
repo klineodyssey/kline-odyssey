@@ -32,7 +32,8 @@ test('current dynamic organ actions are wired',()=>{for(const token of ['data-or
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','attackKSpace'])assert.ok(main.includes(token),token);assert.equal(main.includes('S.kaios+=r.rewardKaios'),false)});
 
 test('public reference quotes use the browser-safe market-data origin without credentials',()=>{
-  assert.ok(main.includes("import {fetchPublicMarketQuotes} from './public-market-quotes.mjs'"));
+  assert.ok(main.includes("import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs'"));
+  assert.ok(main.includes('observedAt:r.updatedAt'),'execution must use provider time, never fetch time');
   assert.ok(publicMarketQuotes.includes("origin:'https://data-api.binance.vision'"));
   assert.ok(publicMarketQuotes.includes("credentials:'omit'"));
   assert.equal(main.includes('https://api.binance.com'),false,'CORS-hostile general API origin returned');

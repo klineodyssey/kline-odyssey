@@ -8,6 +8,20 @@ export function clampSigned(v){ return Math.max(-1, Math.min(1, Number(v)||0)); 
 // validate without snapping. Exact midpoints choose the lower absolute leverage.
 export const C_MAX=100;
 export const C_MIN_NONZERO=0.001;
+// V1 mode uses magnitude; the sign remains the sole LONG/SHORT authority.
+// This is a capability ceiling, never permission to broadcast real funds.
+export const V1_TRADING_C_MAX=1;
+export function resolveCMode(value){
+  const c=Number(value);
+  if(!Number.isFinite(c)||Math.abs(c)>C_MAX)return Object.freeze({mode:'INVALID',canTrade:false});
+  const magnitude=Math.abs(c),mode=magnitude<C_MIN_NONZERO?'MONSTER_MODE':magnitude<=V1_TRADING_C_MAX?'FREE_TRADING_MODE':'LOCKED_HIGH_SPEED_MODE';
+  return Object.freeze({mode,c:c===0?0:c,magnitude,side:c===0?'NEUTRAL':c>0?'LONG':'SHORT',canTrade:mode==='FREE_TRADING_MODE',feeBps:0,productionMaxC:V1_TRADING_C_MAX});
+}
+export function requireV1TradingC(value){
+  const c=requireCanonicalC(value,{allowZero:false});
+  if(!resolveCMode(c).canTrade)throw new RangeError('V1_HIGH_SPEED_PRODUCTION_LOCKED');
+  return c;
+}
 export const C_ABS_DETENTS=Object.freeze([0,0.001,0.01,0.1,1,...Array.from({length:20},(_,i)=>(i+1)*5)]);
 export const C_DETENTS=Object.freeze([...C_ABS_DETENTS.slice(1).reverse().map(n=>-n),...C_ABS_DETENTS]);
 export function isCanonicalC(value,{allowZero=true}={}){

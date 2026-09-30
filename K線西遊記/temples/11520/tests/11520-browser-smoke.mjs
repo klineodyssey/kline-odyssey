@@ -17,7 +17,7 @@ if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
       await route.fulfill({status:200,contentType:'text/javascript; charset=utf-8',body});
     }catch{await route.abort()}
   });
-  await page.route('https://data-api.binance.vision/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price:'3500'},{symbol:'BNBUSDT',price:'600'}])}));
+  await page.route('https://data-api.binance.vision/**',route=>{const u=new URL(route.request().url()),prices={BTCUSDT:65000,ETHUSDT:3500,BNBUSDT:600};return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(u.pathname.endsWith('/aggTrades')?[{p:String(prices[u.searchParams.get('symbol')]),T:Date.now(),a:Date.now()}]:Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)}))})});
   await page.route('https://raw.githubusercontent.com/**',route=>route.abort());
 }
 await page.addInitScript(()=>{
