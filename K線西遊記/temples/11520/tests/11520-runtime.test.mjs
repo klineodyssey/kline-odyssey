@@ -77,8 +77,8 @@ test('journey encounter cycles through common guardian, KAIOS courier and three-
   }
 });
 
-test('player level increases journey combat power without changing market leverage rules',()=>{
-  const make=()=>{const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);return world};
+test('player level increases boss combat power without changing market leverage rules',()=>{
+  const make=()=>{const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const g=world.monsters.find(m=>m.simulationCombat);g.hp=g.maxHp=300;for(const b of Object.values(g.bodies))b.hp=b.maxHp=50;return world};
   const player={x:0,y:0,z:6},low=make(),high=make();
   const a=attackKSpace(low,player,{plane:'XZ',c:0,skill:'slash',now:1000,powerLevel:1});
   const b=attackKSpace(high,player,{plane:'XZ',c:0,skill:'slash',now:1000,powerLevel:10});
