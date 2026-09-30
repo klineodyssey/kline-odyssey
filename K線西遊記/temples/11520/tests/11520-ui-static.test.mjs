@@ -57,6 +57,14 @@ test('market and ATM organs surface cross-market engine and wallet-bound KAIOS c
   assert.ok(main.includes('正式 KAIOS 發放合約／地址與 Human 轉帳授權完成前'));
 });
 
+test('journey monster has an always-visible find-and-attack guide',()=>{
+  assert.ok(main.includes('k11520MonsterGuide'));
+  assert.ok(main.includes('用左下搖桿靠近'));
+  assert.ok(main.includes('靠近再攻擊'));
+  assert.ok(main.includes('⚔ 可攻擊'));
+  assert.ok(main.includes('KAIOS 戰利品已記帳'));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
