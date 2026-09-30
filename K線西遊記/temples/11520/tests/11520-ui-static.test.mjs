@@ -88,7 +88,7 @@ test('11520 always exposes a return to the KAIOS world portal',()=>{
   assert.ok(productFixesV23.includes("location.href='../../../index.html'"));
 });
 
-const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
+test('live HUD teaches the KX/KY/KZ six-phase combat mapping',()=>{\n  assert.ok(main.includes('XZ→KY / XY→KZ / YZ→KX'));\n  assert.ok(main.includes('0C 自動取經'));\n  assert.ok(main.includes('snapshot.selection?.body'));\n});\n\nconst organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
 test('all formal organs remain present in production source',()=>{for(const id of organs)assert.ok(main.includes(`['${id}'`),id)});
