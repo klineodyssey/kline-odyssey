@@ -137,9 +137,11 @@ function attackFeedback(r){
   return r.hit?`${r.reason==='WEAK_POINT'?'WEAK POINT 弱點':r.reason==='BLOCKED_RESIST'?'BLOCKED 抵抗':'HIT 命中'} · ${r.hits.map(h=>`${h.body} −${h.damage}`).join(' / ')}${r.defeated?' · 擊倒 · KAIOS 戰利品記帳':''}`:reasons[r.reason]||'MISS';
 }
 function performCombat(skill){
-  const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now(),powerLevel:playerStore.snapshot().level});
+  const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now(),powerLevel:playerStore.snapshot().level}),audioFx=globalThis.__K11520_AUDIO_FX__;
   toast(attackFeedback(r),true);
-  if(r.defeated){productEvent('MONSTER_KILL');if(r.loot){const p=productEvent('LOOT_DROP',{reward:r.rewardKaios}),rewardLabel=p.owner==='guest'?'本機 KAIOS':'錢包綁定 KAIOS 待發放';toast(`掉寶：${r.loot.name} ×${r.loot.quantity} · ${r.loot.rarity} / ${rewardLabel} +${r.rewardKaios} · Lv.${p.level}`,true)}}
+  if(r.reason!=='COOLDOWN')audioFx?.play?.('attack');
+  if(r.hit)audioFx?.play?.(r.reason==='WEAK_POINT'?'weak':'hit');
+  if(r.defeated){productEvent('MONSTER_KILL');if(r.loot){const p=productEvent('LOOT_DROP',{reward:r.rewardKaios}),rewardLabel=p.owner==='guest'?'本機 KAIOS':'錢包綁定 KAIOS 待發放';audioFx?.play?.('loot');audioFx?.speak?.(`擊倒${r.loot.name||'妖怪'}，獲得 ${r.rewardKaios} KAIOS`);toast(`掉寶：${r.loot.name} ×${r.loot.quantity} · ${r.loot.rarity} / ${rewardLabel} +${r.rewardKaios} · Lv.${p.level}`,true)}}
   if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace?.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
   renderCombatTarget();return r;
 }
@@ -196,7 +198,7 @@ function crossMarketSnapshot(){
   return {settlementCurrency:'KGEN',sharedWallet:true,openPositions:open.length,byAxis,free:Number(x.wallet?.free??0),lockedMargin:Number(x.wallet?.lockedMargin??0),realizedPnl:Number(x.wallet?.realizedPnl??0),unrealizedPnl:Number(x.wallet?.unrealizedPnl??0)};
 }
 function syncSimulationPositions(){const exchange=execution.snapshot();for(const id of Object.keys(S.axes))S.axes[id].pos=exchange.positions.find(p=>p.axis===id&&p.status==='OPEN')||null;if(['assets','positions'].includes($('#sheetBody')?.dataset.simOrgan))refreshSimulationSheet()}
-function recordSimulationEvents(events){for(const e of events){productEvent(e.kind==='FILL'?'TRADE_FILL':e.status==='LIQUIDATED'?'LIQUIDATION':e.kind==='SETTLEMENT'?'TRADE_CLOSE':'ERROR');S.history.unshift({time:new Date(e.triggeredAt??Date.now()).toLocaleTimeString(),axis:e.axis||'',event:`${executionLabel()} ${e.status||e.kind} ${e.orderId||''}`});toast(`${executionLabel()} ${e.status||e.kind}｜${e.axis||''} ${e.c??''}C`)}if(events.length)refreshSimulationSheet()}
+function recordSimulationEvents(events){for(const e of events){productEvent(e.kind==='FILL'?'TRADE_FILL':e.status==='LIQUIDATED'?'LIQUIDATION':e.kind==='SETTLEMENT'?'TRADE_CLOSE':'ERROR');const audioFx=globalThis.__K11520_AUDIO_FX__;audioFx?.play?.(e.status==='LIQUIDATED'?'liquidation':e.kind==='FILL'?'fill':e.kind==='SETTLEMENT'?'close':'hit');S.history.unshift({time:new Date(e.triggeredAt??Date.now()).toLocaleTimeString(),axis:e.axis||'',event:`${executionLabel()} ${e.status||e.kind} ${e.orderId||''}`});toast(`${executionLabel()} ${e.status||e.kind}｜${e.axis||''} ${e.c??''}C`)}if(events.length)refreshSimulationSheet()}
 const escapeUI=value=>String(value??'--').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const receiptTime=value=>value==null?'--':new Date(value).toISOString();
 function receiptRows(rows){return '<dl class="exchangeRows">'+rows.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+escapeUI(value)+'</dd></div>').join('')+'</dl>'}
