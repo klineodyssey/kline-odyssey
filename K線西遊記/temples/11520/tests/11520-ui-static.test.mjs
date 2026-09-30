@@ -50,6 +50,9 @@ test('player economy UI separates KGEN settlement from KAIOS loot and exposes en
 test('market and ATM organs surface cross-market engine and wallet-bound KAIOS custody',()=>{
   assert.ok(main.includes('多空運算引擎 · Lv.'));
   assert.ok(main.includes('CROSS-MARKET SCORE'));
+  assert.ok(main.includes('DOMINANT_MARKET'));
+  assert.ok(main.includes('DIVERGENCE_SCAN'));
+  assert.ok(main.includes('CROSS_MARKET_ALIGNMENT'));
   assert.ok(main.includes('KAIOS 運鈔 ATM'));
   assert.ok(main.includes('正式 KAIOS 發放合約／地址與 Human 轉帳授權完成前'));
 });
