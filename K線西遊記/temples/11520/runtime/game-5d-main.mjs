@@ -137,9 +137,9 @@ function attackFeedback(r){
   return r.hit?`${r.reason==='WEAK_POINT'?'WEAK POINT 弱點':r.reason==='BLOCKED_RESIST'?'BLOCKED 抵抗':'HIT 命中'} · ${r.hits.map(h=>`${h.body} −${h.damage}`).join(' / ')}${r.defeated?' · 擊倒 · KAIOS 戰利品記帳':''}`:reasons[r.reason]||'MISS';
 }
 function performCombat(skill){
-  const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now()});
+  const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now(),powerLevel:playerStore.snapshot().level});
   toast(attackFeedback(r),true);
-  if(r.defeated){productEvent('MONSTER_KILL');if(r.loot){const p=productEvent('LOOT_DROP',{reward:r.rewardKaios}),rewardLabel=p.owner==='guest'?'本機 KAIOS':'錢包綁定 KAIOS 待發放';toast(`掉寶：取經碎片 +1 / ${rewardLabel} +${r.rewardKaios} · Lv.${p.level}`,true)}}
+  if(r.defeated){productEvent('MONSTER_KILL');if(r.loot){const p=productEvent('LOOT_DROP',{reward:r.rewardKaios}),rewardLabel=p.owner==='guest'?'本機 KAIOS':'錢包綁定 KAIOS 待發放';toast(`掉寶：${r.loot.name} ×${r.loot.quantity} · ${r.loot.rarity} / ${rewardLabel} +${r.rewardKaios} · Lv.${p.level}`,true)}}
   if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace?.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
   renderCombatTarget();return r;
 }
@@ -151,7 +151,7 @@ const targetHud=document.createElement('button');targetHud.id='kspaceTarget';tar
 function renderCombatTarget(){
   const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;return}targetHud.hidden=false;
   const t=s.target,body=s.selection?.body||'0C 取經',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED · 6s':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
-  targetHud.textContent=`◎ 模擬守衛 · ${body}\n${formatGameDistanceK(s.distance)} · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} ▾`;
+  targetHud.textContent=`◎ ${t.name} · ${body}\n${formatGameDistanceK(s.distance)} · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} ▾`;
   globalThis.__K11520_KSPACE_COMBAT__=s;
   const info=$('#combatKValues');if(info){const tuple=v=>['KX','KY','KZ'].map(a=>formatKCoordinate(v[a])).join(' / ');info.textContent=`PLAYER K（正規化）：${tuple(s.playerK)}\nMONSTER K（正規化）：${tuple(s.monsterK)}\nΔK（正規化）：${tuple(s.deltaK)}\nLOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}\n局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}\n${s.market.status}`}
 }
