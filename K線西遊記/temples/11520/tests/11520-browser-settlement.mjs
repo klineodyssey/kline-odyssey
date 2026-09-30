@@ -245,7 +245,13 @@ async function localCandidateBrowserQA(){
     });
     await page.addInitScript(()=>{const listeners=new Map();window.ethereum={request:r=>window.candidateRpc(r),on:(e,f)=>{if(!listeners.has(e))listeners.set(e,new Set());listeners.get(e).add(f)},removeListener:(e,f)=>listeners.get(e)?.delete(f)};window.candidateAccountChanged=a=>{for(const f of listeners.get('accountsChanged')||[])f([a])}});
     await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',r=>r.fulfill({contentType:'application/json',body:JSON.stringify(fixtureManifest)}));
-    await page.route('https://data-api.binance.vision/**',r=>r.fulfill({contentType:'application/json',body:JSON.stringify([{symbol:'BTCUSDT',price:'100000'},{symbol:'ETHUSDT',price:'4000'},{symbol:'BNBUSDT',price:'600'}])}));
+    await page.route('https://data-api.binance.vision/**',r=>{
+      const url=new URL(r.request().url()),prices={BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600};
+      const payload=url.pathname.endsWith('/aggTrades')
+        ? [{p:String(prices[url.searchParams.get('symbol')]),T:Date.now(),a:Date.now()}]
+        : Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)}));
+      return r.fulfill({contentType:'application/json',body:JSON.stringify(payload)});
+    });
     await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async r=>{const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile('node_modules/three/'+r.request().url().slice(prefix.length),'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);await r.fulfill({contentType:'text/javascript',body})});
     const shot=async name=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`});
     const snap=()=>page.evaluate(()=>globalThis.__K11520_EXECUTION__?.snapshot()??null);
