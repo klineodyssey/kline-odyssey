@@ -17,7 +17,7 @@ import {gameUnitsToK,localPositionToK,composePhysicalK} from './spatial-coordina
 import {resolveCMode} from '../controls/nonlinear-controls.mjs';
 
 export const WORLD_RULES=Object.freeze({
-  placeId:'11520',settlement:'KAIOS',
+  placeId:'11520',settlement:'KGEN',tradeSettlement:'KGEN',lootCurrency:'KAIOS',
   worldBounds:Object.freeze({minX:-60,maxX:60,minZ:-60,maxZ:60,minY:0,maxY:40}),
   playerRadius:.45,meleeRange:2.2,monsterAggroRange:8,monsterAttackRange:1.55,
   monsterAttackCooldownMs:1200,respawnMs:8000,marketLifeDecisionMs:1600,sourceSlots:24,
