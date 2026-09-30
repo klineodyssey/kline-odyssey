@@ -38,6 +38,15 @@ test('entry hook explains the journey-to-trading loop without requiring a wallet
   assert.ok(productFixesV23.includes('開始取經'));
 });
 
+test('player economy UI separates KGEN settlement from KAIOS loot and exposes engine progression',()=>{
+  assert.ok(main.includes('KGEN 跨市場結算'));
+  assert.ok(main.includes('KAIOS 掉寶／運鈔獎勵'));
+  assert.ok(main.includes('WALLET-BOUND CLAIMABLE'));
+  assert.ok(main.includes('多空運算引擎'));
+  assert.ok(main.includes("settlementCurrency:'KGEN'"));
+  assert.ok(main.includes("authority:'PLAYER_DECIDES_NO_AUTO_ORDER'"));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
