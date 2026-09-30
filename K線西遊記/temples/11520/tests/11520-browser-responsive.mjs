@@ -217,8 +217,7 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
   ok(state.axisArt.repeat==='no-repeat','normal-axis artwork unexpectedly repeats');
   const overlap=(a,c)=>a?.visible&&c?.visible&&a.x<c.right&&a.right>c.x&&a.y<c.bottom&&a.bottom>c.y;
   const combatHidden=landscape&&expanded;
-  const target=b['#kspaceTarget'];ok(target?.visible&&target.hit,'K-space target is not pointer-reachable');
-  if(target){ok(target.x>=0&&target.y>=0&&target.right<=state.width&&target.bottom<=state.height,'K-space target clipped');for(const other of ['.minimapWrap','.tele','.monsterHud','#joy','#yControl','#cControl','#lotsControl','#attack','#orderFire','#skill','#tradeSword','#k11520UtilityMaster'])ok(!overlap(target,b[other]),'K-space target overlaps '+other)}
+  const target=b['#kspaceTarget'];ok(!target?.visible,'legacy K-space detail card must stay folded into monster HUD');
   for(const s of ['.top','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#k11520UtilityMaster',...(combatHidden?[]:['#orderFire','#attack'])]){const r=b[s];ok(r?.visible,`${s} missing/hidden`);if(r?.visible)ok(r.x>=-1&&r.y>=-1&&r.right<=state.width+1&&r.bottom<=state.height+1,`${s} outside viewport`)}
   for(const s of ['#joy','#cControl','#lotsControl','#yControl','#k11520UtilityMaster',...(combatHidden?[]:['#tradeSword','#orderFire','#attack'])])ok(b[s]?.hit,`${s} cannot receive a real click: ${JSON.stringify(b[s]?.blocker)}`);
   const clock=b['#brandClockV250'];if(clock){ok(clock.right<=Math.min(...state.balances.map(r=>r.x))-4,'header clock crosses into balances');ok(clock.bottom<=b['.top'].bottom-4,'header clock escapes header')}
