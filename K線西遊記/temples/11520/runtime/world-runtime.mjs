@@ -132,11 +132,16 @@ export function createKSpaceEncounter(world,reference=KSPACE_REFERENCE){
     simulationCombat:true,sourceManaged:false,state:'GUARD',attack:0,rewardKaios:5,journeyTier:'COMMON',lootName:'取經碎片',
     kPosition:{...K,KZ:K.KZ+1},localPosition:{x:0,y:0,z:7},x:0,y:0,z:7,
     hp:600,maxHp:600,exposed:'KY-',bodies:Object.fromEntries(KSPACE_PHASES.map(id=>[id,{hp:100,maxHp:100,defense:id==='KY-'?0:4}]))};
-  // Preserve the existing rendered 7m spawn without turning its independent
-  // market KZ+1 phase coordinate into a meter. Collision is local, not market.
+  // Keep the first journey encounter close enough to be immediately visible.
   for(const axis of XYZ)guardian[axis]=guardian.localPosition[axis];
   if(world.journeyEnabled){guardian.hp=guardian.maxHp=120;for(const b of Object.values(guardian.bodies))b.hp=b.maxHp=20}
-  world.monsters.push(guardian);return world.kSpace;
+  const ambient=[
+    {id:'SIM-JOURNEY-APE-2',species:'STONE_APE',name:'暗影猿',x:-5,z:8,hp:120,rewardKaios:5,exposed:'KX+'},
+    {id:'SIM-JOURNEY-WISP-1',species:'FIRE_WISP',name:'火靈',x:6,z:9,hp:90,rewardKaios:4,exposed:'KY-'},
+    {id:'SIM-JOURNEY-WISP-2',species:'FIRE_WISP',name:'火靈',x:-8,z:12,hp:90,rewardKaios:4,exposed:'KZ+'},
+    {id:'SIM-JOURNEY-APE-3',species:'STONE_APE',name:'暗影猿',x:9,z:14,hp:120,rewardKaios:5,exposed:'KX-'}
+  ].map((m,i)=>({id:m.id,lifeId:null,species:m.species,name:m.name,baseName:m.name,simulationCombat:false,ambientJourney:true,sourceManaged:false,state:'ROAM',attack:0,rewardKaios:m.rewardKaios,speed:.004+(i*.001),journeyTier:'COMMON',lootName:'取經碎片',spawnX:m.x,spawnY:0,spawnZ:m.z,x:m.x,y:0,z:m.z,hp:m.hp,maxHp:m.hp,exposed:m.exposed,visualMode:'ROAM',roamPhase:i*.9}));
+  world.monsters.push(guardian,...ambient);return world.kSpace;
 }
 export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
   const space=world.kSpace;if(!space||!validVec(player))return null;
@@ -321,6 +326,7 @@ export function tickWorld(world,player,now=Date.now()){
     for(const b of Object.values(guardian.bodies))b.hp=b.maxHp=profile.bodyHp;
     world.kSpace.lastAttackAt=null;
   }
+  for(const m of world.monsters){if(!m.ambientJourney||m.state==='DEAD')continue;const phase=(now*.00035)+(m.roamPhase||0),radius=1.5;m.x=m.spawnX+Math.sin(phase)*radius;m.z=m.spawnZ+Math.cos(phase*.83)*radius;m.y=Math.max(0,m.spawnY+(m.species==='FIRE_WISP'?1.1+.45*Math.sin(phase*1.7):0));m.localPosition={x:m.x,y:m.y,z:m.z}}
   const events=[];events.push(...applyMarketLifeSourceEvents(world,drainMarketLifeSourceEvents()));const playerAxes=readPlayerAxesFromGame(),quotes=readQuotesFromGame();
   if(now-(world.lastMarketLifeTick||0)>=WORLD_RULES.marketLifeDecisionMs){const ml=tickMarketLives(world,{playerAxes,quotes,now,deltaMs,availableMarkets:['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']});events.push(...ml.events)}
   else for(const m of world.monsters){if(!m.sourceManaged||m.state==='DEAD')continue;tickSourceManagedLife(m,{playerAxes,quotes,now,deltaMs,makeDecision:false})}
