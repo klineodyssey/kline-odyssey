@@ -13,6 +13,30 @@ export const PUBLIC_MARKET_QUOTE_SOURCE=Object.freeze({
   readOnly:true,
 });
 
+export const FREE_ORACLE_MAX_AGE_MS=15000;
+// Public REST references are simulation/world inputs, not authenticated USD
+// settlement reports. Never manufacture provider time from receipt time.
+export function publicObservationStatus(observation,now=Date.now()){
+  const age=observation?now-observation.updatedAt:null;
+  const stale=!observation||!Number.isFinite(age)||age<0||age>FREE_ORACLE_MAX_AGE_MS;
+  return {...observation,age,stale,staleThreshold:FREE_ORACLE_MAX_AGE_MS,
+    sourceStatus:stale?'MARKET DATA STALE':'REFERENCE_FRESH',fallbackStatus:'NONE_FAIL_CLOSED',
+    settlementAuthority:false,quoteCurrency:'USDT',subSecond:false};
+}
+export async function fetchPublicMarketObservations({symbols,fetchImpl=globalThis.fetch,now=Date.now,timeoutMs=8000}={}){
+  const expected=normalizeSymbols(symbols),controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{return Object.fromEntries(await Promise.all(expected.map(async market=>{
+    const url=new URL('/api/v3/aggTrades',PUBLIC_MARKET_QUOTE_SOURCE.origin);
+    url.searchParams.set('symbol',market);url.searchParams.set('limit','1');
+    const response=await fetchImpl(url.href,{method:'GET',mode:'cors',cache:'no-store',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal});
+    if(!response?.ok)throw new Error('PUBLIC_REFERENCE_UNAVAILABLE');
+    const rows=await response.json(),row=Array.isArray(rows)&&rows.length===1?rows[0]:null;
+    if(!row||!Number.isFinite(Number(row.p))||Number(row.p)<=0||!Number.isSafeInteger(row.T)||row.T<=0||!Number.isSafeInteger(row.a)||row.a<0)throw new Error('INVALID_PROVIDER_OBSERVATION');
+    return [market,publicObservationStatus({market,price:Number(row.p),updatedAt:row.T,sequence:row.a,receivedAt:now(),source:PUBLIC_MARKET_QUOTE_SOURCE.id},now())];
+  })))}finally{controller.abort();clearTimeout(timer)}
+}
+
 function normalizeSymbols(symbols){
   if(!Array.isArray(symbols)||symbols.length<1||symbols.length>20)throw new TypeError('symbols must contain 1..20 public market symbols');
   const normalized=[...new Set(symbols.map(symbol=>String(symbol||'').trim().toUpperCase()))];

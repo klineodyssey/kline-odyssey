@@ -1,5 +1,29 @@
 # 11520 HANDOFF CURRENT
 
+## Active V1 product scope — 2026-09-30
+
+- Human changed priority to journey/gameplay and free0.001–1C trading capability.
+  Paid Chainlink450USD and100C production activation are HOLD/FUTURE_UNLOCK.
+- `controls/nonlinear-controls.mjs::resolveCMode` uses abs(C) for mode and
+  sign(C) for direction. Public simulation entry and unsigned Mainnet intent
+  enforce1C; existing100C simulation/Testnet evidence remains historical.
+- Free REST observations now use provider time, not fetch time.15s stale limit
+  is unchanged. No stale fills or liquidation; offline journey remains playable.
+- Account-keyed local simulation persistence is distinct from on-chain recovery.
+  Local journey loot and metrics are not chain KAIOS, real trades or human KPI.
+- Production Mainnet remains NOT_ACTIVATED. Do not label this source release
+  real-volume ready or relax USD Oracle/approval gates to manufacture completion.
+- Candidate evidence: existing `tests/11520-browser-settlement.mjs` now covers
+  both mobile orientations, stale liquidation preservation, A/B switching,
+  read-only reconnect/reload, high-C rejection, joystick approach, zero-C kill,
+  local loot/backpack and local metrics. Screenshots live in the existing
+  `artifacts/11520-settlement-qa/` CI artifact. Responsive evidence remains in
+  `artifacts/11520-responsive-qa/`; direct review covered portrait, short warm
+  viewport, landscape, Slash, Golden Rain and Phantom Axe.
+- First-party source/test changes only; no new external assets or music.
+  Added-line credential-pattern scan returned zero matches. No signer access,
+  payment, transaction, salary receipt or real trading volume was produced.
+
 ## P0 range-exit / capability candidate — 2026-09-30
 
 - Human range-exit policy is now approved for source changes. Position admits

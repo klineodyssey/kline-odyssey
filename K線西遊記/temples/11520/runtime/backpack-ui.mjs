@@ -48,6 +48,8 @@ function render(){
   if(typeof document==='undefined')return;
   const stats=document.getElementById('backpackStats'),grid=document.getElementById('backpackGrid');if(!stats||!grid)return;
   const s=backpackSnapshot(backpack);stats.textContent=`格數 ${s.usedSlots}/${s.capacitySlots} · 重量 ${s.usedWeight.toFixed(1)}/${s.capacityWeight}`;
+  const journey=globalThis.__K11520_PRODUCT__?.snapshot();
+  if(journey)stats.textContent+=` · 取經碎片 ${journey.loot}（本機）`;
   grid.innerHTML=s.items.length?s.items.map(i=>{const d=itemVisualDescriptor(i);return `<div class="bpSlot" data-item="${esc(i.itemId)}"><canvas class="bp3d" width="88" height="88" data-item-id="${esc(i.itemId)}"></canvas><span class="shape">${esc(d.label)}</span><b>${esc(i.name)}${i.qty>1?` ×${i.qty}`:''}</b><small>${esc(i.kind)}${i.lifeId?` · ${esc(i.lifeId)}`:''}</small><button class="${i.kind==='LIVING_CARGO'?'':'discard'}" data-action="${i.kind==='LIVING_CARGO'?'release':'discard'}" data-item-id="${esc(i.itemId)}">${i.kind==='LIVING_CARGO'?'放出':'丟棄'}</button></div>`}).join(''):`<div class="bpEmpty">背包目前是空的。靠近可採集生命或取得寶物後才會放入，不預塞假物品。</div>`;
   grid.querySelectorAll('[data-action]').forEach(b=>b.onclick=async()=>{const item=backpack.items.find(i=>i.itemId===b.dataset.itemId);if(!item)return;if(b.dataset.action==='release')await requestLivingRelease(item);else{removeItem(backpack,item.itemId,1);save();render();notice(`${item.name} 已丟棄`)}});
   void render3dPreviews(s.items);

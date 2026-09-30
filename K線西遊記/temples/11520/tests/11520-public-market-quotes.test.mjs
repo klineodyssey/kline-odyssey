@@ -1,5 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {fetchPublicMarketObservations,publicObservationStatus} from '../runtime/public-market-quotes.mjs';
+
+test('free oracle uses provider event timestamp, not fetch time; stale/future/missing times fail closed',async()=>{
+  const fetchImpl=async()=>({ok:true,json:async()=>[{p:'100',T:1000,a:42}]});
+  const rows=await fetchPublicMarketObservations({symbols:['BTCUSDT','ETHUSDT','BNBUSDT'],fetchImpl,now:()=>20000});
+  for(const o of Object.values(rows)){assert.equal(o.updatedAt,1000);assert.equal(o.receivedAt,20000);assert.equal(o.stale,true);assert.equal(o.settlementAuthority,false);assert.equal(o.fallbackStatus,'NONE_FAIL_CLOSED')}
+  assert.equal(publicObservationStatus(rows.BTCUSDT,1001).stale,false);
+  assert.equal(publicObservationStatus(rows.BTCUSDT,999).stale,true);
+  assert.equal(publicObservationStatus(null).stale,true);
+  await assert.rejects(fetchPublicMarketObservations({symbols:['BTCUSDT'],fetchImpl:async()=>({ok:true,json:async()=>[{p:'100',a:1}]})}),/INVALID_PROVIDER/);
+});
 import {PUBLIC_MARKET_QUOTE_SOURCE,buildPublicMarketQuoteUrl,parsePublicMarketQuotes,fetchPublicMarketQuotes} from '../runtime/public-market-quotes.mjs';
 
 const SYMBOLS=['BTCUSDT','ETHUSDT','BNBUSDT'];

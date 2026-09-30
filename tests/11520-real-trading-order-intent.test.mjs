@@ -10,15 +10,16 @@ const WALLET='0x3333333333333333333333333333333333333333';
 const BRAIN='0x1111111111111111111111111111111111111111';
 const ENGINE='0x2222222222222222222222222222222222222222';
 const base={
- axis:'KX',market:'BTCUSDT',chainId:56,side:'多',lots:2,c:100,price:65000,
+ axis:'KX',market:'BTCUSDT',chainId:56,side:'多',lots:2,c:1,price:65000,
  walletAddress:WALLET,brainAddress:BRAIN,positionEngineAddress:ENGINE,
  feedProvenanceVerified:true,humanMainnetAuthorization:true
 };
 
-test('builds unsigned non-broadcast exact-market intent at 100C hard cap only after all protected gates',()=>{
+test('V1 unsigned intent has 1C ceiling after all protected gates; 100C simulation is not production authority',()=>{
  const intent=buildRealTradingOrderIntent(base);
  assert.equal(intent.axis,'KX');assert.equal(intent.market,'BTCUSDT');assert.equal(intent.contractMarket,0);
- assert.equal(intent.c,100);assert.equal(intent.leverage,100);assert.equal(intent.side,'LONG');
+ assert.equal(intent.c,1);assert.equal(intent.leverage,1);assert.equal(intent.side,'LONG');
+ for(const c of [5,-5,100,-100])assert.throws(()=>buildRealTradingOrderIntent({...base,c}),/V1_HIGH_SPEED_PRODUCTION_LOCKED/);
  assert.equal(intent.lots,2);assert.equal(intent.transactionPayload,null);assert.equal(intent.calldata,null);
  assert.equal(intent.signerRequested,false);assert.equal(intent.broadcast,false);
  assert.equal(intent.status,'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED');
@@ -39,12 +40,12 @@ test('rejects invalid order values, leverage above 100C and wallet identity',()=
  assert.throws(()=>buildRealTradingOrderIntent({...base,walletAddress:'0xdead'}),/WALLET_ADDRESS_INVALID/);
 });
 test('signed C alone supplies direction; contradictory side and negative lots cannot execute',()=>{
- for(const c of [-100,-.001,.001,100]){
+ for(const c of [-1,-.001,.001,1]){
   const intent=buildRealTradingOrderIntent({...base,c,side:undefined});
   assert.equal(intent.c,c);assert.equal(intent.leverage,Math.abs(c));assert.equal(intent.side,c<0?'SHORT':'LONG');
   assert.equal(intent.broadcast,false);assert.equal(intent.signerRequested,false);
  }
- for(const [c,side] of [[100,'SHORT'],[-100,'LONG']])assert.throws(()=>buildRealTradingOrderIntent({...base,c,side}),/C_SIDE_MISMATCH/);
+ for(const [c,side] of [[1,'SHORT'],[-1,'LONG']])assert.throws(()=>buildRealTradingOrderIntent({...base,c,side}),/C_SIDE_MISMATCH/);
  for(const c of [-0,-100.0001,-1000,Infinity])assert.throws(()=>buildRealTradingOrderIntent({...base,c}),/C_/);
  for(const lots of [-1,0,1.5,101,Infinity])assert.throws(()=>buildRealTradingOrderIntent({...base,lots}),/LOTS_OUT_OF_RANGE/);
 });
@@ -54,6 +55,7 @@ function fixture(){const ledger=createKgenLedger(1000),adapter=createExecutionAd
 test('all canonical signed C detents retain precision across common and unsigned EVM intents',()=>{
  for(const c of C_DETENTS.filter(c=>c!==0)){
   const common=buildExecutionOrderIntent({...simulationInput,c,now:1001});
+  if(Math.abs(c)>1){assert.throws(()=>buildRealTradingOrderIntent({...base,c,side:undefined}),/V1_HIGH_SPEED_PRODUCTION_LOCKED/);assert.equal(common.c,c);continue}
   const evm=buildRealTradingOrderIntent({...base,c,side:undefined});
   assert.equal(common.c,c);assert.equal(evm.c,c);assert.equal(common.leverage,Math.abs(c));
   assert.equal(common.side,evm.side);assert.equal(evm.broadcast,false);

@@ -1,6 +1,22 @@
 {
   "documentType": "K11520_MAINNET_DEPLOYMENT_MANIFEST",
   "status": "BLOCKED_NOT_EXECUTABLE",
+  "productV1Decision20260930": {
+    "status": "PRODUCT_CANDIDATE_NOT_MAINNET_AUTHORIZATION",
+    "precedence": "V1 free-reference journey/product scope supersedes paid Data Streams and 100C launch target below. Historical evidence and unsigned envelopes are retained, not executable approval.",
+    "modeAuthority": "K線西遊記/temples/11520/controls/nonlinear-controls.mjs::resolveCMode",
+    "productionMagnitudeCeiling": 1,
+    "minimumTradingMagnitude": 0.001,
+    "tradingFeeBps": 0,
+    "paidDataStreamsRequiredForV1": false,
+    "chainlink450Purchase": "HOLD_NOT_AUTHORIZED",
+    "highCProduction": "LOCKED_FUTURE_UNLOCK",
+    "currentPublicExecution": "SIMULATION_ONLY",
+    "freeReference": "BINANCE_PUBLIC_AGGREGATE_TRADES_USDT; provider timestamp; 15000ms max age; not an authenticated USD settlement oracle",
+    "mainnetBroadcast": false,
+    "realKgenTransfer": false,
+    "remainingLiveGate": "Reviewed free on-chain USD settlement Oracle configuration/evidence and specific Human execution manifest approval; no real-volume completion claim."
+  },
   "nonOraclePreparation20260930": {
     "status": "ORACLE_ONLY_BLOCKED_ENGINEERING_CANDIDATE_NOT_AUTHORIZED",
     "precedence": "This cumulative preparation section and providerDecision20260930 supersede older template-only USD/USDT and missing-role/capital/cap wording below; historical sections are retained as lineage, not current execution authority.",

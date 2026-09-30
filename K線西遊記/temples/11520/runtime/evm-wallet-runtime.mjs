@@ -1,10 +1,50 @@
-import {normalizeSignedC,signedPositionSide,requiredMargin} from './kgen-margin-runtime.mjs';
+import {normalizeSignedC,signedPositionSide,requiredMargin,createKgenLedger} from './kgen-margin-runtime.mjs';
+import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 const ERC20_BALANCE_OF='0x70a08231';
 export const PUBLIC_WALLET_IDENTITY_KEY='klineodyssey.public-wallet-identity.v1';
 export const PLAYER_SESSION_KEY='k11520.player-session.v1';
 export const KGEN_TOKEN_ADDRESS='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 export const KGEN_CHAIN_ID=56;
 const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
+export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
+// Local, unauthenticated simulation progress only. No cross-device identity,
+// real-player KPI, chain claim, secret or wallet-provider object is stored here.
+export function createSimulationPlayerStore({ledger,storage}={}){
+  if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
+  let owner=null,key=null,revision=0,progress=null,persistent=true;
+  const read=()=>{try{return JSON.parse(storage?.getItem(key)||'null')}catch{return null}};
+  const fresh=()=>({kaios:0,loot:0,events:{},playedMs:0});
+  function check(){if(!persistent)return;if((read()?.revision??0)!==revision)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED')}
+  function save(){
+    check();const value={schema:'K11520_LOCAL_SIMULATION_V1',owner,revision:revision+1,ledger,progress};
+    try{storage?.setItem(key,JSON.stringify(value));revision++;persistent=!!storage}catch{persistent=false}
+  }
+  function activate(address){
+    const next=EVM_ADDRESS.test(address||'')?address.toLowerCase():'guest';if(owner===next)return false;
+    // Never overwrite another tab's newer revision when changing account.
+    owner=next;key='k11520.local-product.v1:'+owner;persistent=true;
+    const value=read();revision=value?.revision??0;progress=fresh();
+    for(const k of Object.keys(ledger))delete ledger[k];Object.assign(ledger,createKgenLedger(100));
+    const encoded=JSON.stringify(value);
+    const saved=value?.schema==='K11520_LOCAL_SIMULATION_V1'&&value.owner===owner&&encoded.length<2000000&&!/[<>&]/.test(encoded)?value:null;
+    if(saved&&['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'].every(k=>Number.isFinite(saved.ledger?.[k]))){
+      for(const k of ['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'])ledger[k]=saved.ledger[k];
+      const b=saved.ledger.simulation;
+      if(b&&Number.isSafeInteger(b.sequence)&&['orders','positions','receipts'].every(k=>Array.isArray(b[k]))&&b.observations&&typeof b.observations==='object')ledger.simulation=structuredClone(b);
+      if(saved.progress){for(const k of ['kaios','loot','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0)}
+    }
+    ledger.owner=owner;
+    progress.events.UNIQUE_PLAYER=1;
+    if(progress.events.SESSION)progress.events.RETURNING_PLAYER=(progress.events.RETURNING_PLAYER||0)+1;
+    progress.events.SESSION=(progress.events.SESSION||0)+1;save();return true;
+  }
+  function record(event,{reward=0,elapsedMs=0}={}){
+    check();if(LOCAL_PRODUCT_EVENTS.includes(event))progress.events[event]=(progress.events[event]||0)+1;
+    if(event==='LOOT_DROP'){progress.loot++;progress.kaios+=Math.max(0,Math.min(10,Number(reward)||0))}
+    progress.playedMs+=Math.max(0,Math.min(10000,Number(elapsedMs)||0));save();
+  }
+  return {activate,check,save,record,snapshot:()=>({owner,persistent,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...structuredClone(progress)})};
+}
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){if(typeof hex!=='string'||!/^0x[0-9a-fA-F]+$/.test(hex))throw new Error('INVALID_BALANCE_RESPONSE');return BigInt(hex);}
 function parseChainId(value){if(typeof value!=='string'||!/^0x[0-9a-fA-F]+$/.test(value))throw new Error('INVALID_CHAIN_ID');const n=Number(BigInt(value));if(!Number.isSafeInteger(n)||n<=0)throw new Error('INVALID_CHAIN_ID');return n;}
@@ -150,7 +190,7 @@ export function assertExecutableOrder({wallet,chainId,marketAdapter,order}){
   if(wallet.chainId!==chainId)return {ok:false,reason:'WRONG_CHAIN'};
   if(!marketAdapter?.preview||!marketAdapter?.submit)return {ok:false,reason:'NO_VERIFIED_MARKET_ADAPTER'};
   if(!order?.axis||!order?.side||!(Number(order?.notional)>0))return {ok:false,reason:'INVALID_ORDER'};
-  try{normalizeSignedC(order.c);signedPositionSide(order.c,order.side);requiredMargin({lots:order.lots})}catch(e){return {ok:false,reason:e.message}}
+  try{normalizeSignedC(order.c);if(chainId===56)requireV1TradingC(order.c);signedPositionSide(order.c,order.side);requiredMargin({lots:order.lots})}catch(e){return {ok:false,reason:e.message}}
   if(!['KX','KY','KZ'].includes(order.axis)||!Number.isFinite(Number(order.notional)))return {ok:false,reason:'INVALID_ORDER'};
   return {ok:true};
 }

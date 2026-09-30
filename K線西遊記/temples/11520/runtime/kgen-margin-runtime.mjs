@@ -1,4 +1,4 @@
-import {C_MAX,requireCanonicalC} from '../controls/nonlinear-controls.mjs';
+import {C_MAX,requireCanonicalC,resolveCMode} from '../controls/nonlinear-controls.mjs';
 // REVISION 2026-09-29: Human-approved absolute index delta, not percentage return.
 export const C_PNL_MODEL='INDEX_DELTA_C_LOTS_V1';
 
@@ -167,7 +167,7 @@ export function placeSimulationOrder(ledger,{axis,market,c,side,lots,triggerPric
     if(!quote||createdAt<quote.at||createdAt-quote.at>SIM_MAX_AGE)throw new RangeError('STALE_PRICE');
     if(book.orders.some(o=>o.axis===axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===axis&&p.status==='OPEN'))throw new RangeError('AXIS_ALREADY_ACTIVE');
     if(!Number.isFinite(draft.free)||draft.free<margin)throw new RangeError('INSUFFICIENT_FREE_KGEN');
-    const order={orderId:`SIM-O-${++book.sequence}`,trader:'SIMULATION_LOCAL_PLAYER',axis,market,side:direction,c:signedC,lots:Number(lots),triggerPrice:trigger,stopPrice:stop,takeProfitPrice:takeProfit,createdAt,triggeredAt:null,observedPrice:null,fillPrice:null,positionId:null,status:'PENDING'};
+    const order={orderId:`SIM-O-${++book.sequence}`,trader:ledger.owner||'SIMULATION_LOCAL_PLAYER',axis,market,side:direction,c:signedC,lots:Number(lots),triggerPrice:trigger,stopPrice:stop,takeProfitPrice:takeProfit,createdAt,triggeredAt:null,observedPrice:null,fillPrice:null,positionId:null,status:'PENDING'};
     book.orders.push(order);commitSimulation(ledger,draft,book);return {ok:true,order:{...order}};
   }catch(e){return {ok:false,reason:e.message}}
 }
@@ -182,21 +182,23 @@ function settleSimulationPosition(draft,book,position,{previousPrice,observedPri
   const realizedPnl=status==='LIQUIDATED'?-marginBefore:risk.pnl;
   closeMargin(draft,{margin:marginBefore,pnl:realizedPnl});
   position.status=status;position.margin=0;position.mark=observedPrice;position.settledAt=at;
-  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,positionId:position.positionId,orderId:position.orderId,market:position.market,axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,liquidationTrigger:liquidationMark(position),previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
+  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,trader:position.trader,positionId:position.positionId,orderId:position.orderId,market:position.market,axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,liquidationTrigger:liquidationMark(position),previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
   book.receipts.push(receipt);return receipt;
 }
-export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(),now=Date.now()}={}){
+export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(),now=Date.now(),sequence=null,productV1=false}={}){
   try{
     if(!Object.values(SIM_MARKETS).includes(market))throw new RangeError('MARKET_NOT_SUPPORTED');
     const observedPrice=positivePrice(price),at=timestamp(observedAt),receivedAt=timestamp(now);
     if(at>receivedAt||receivedAt-at>SIM_MAX_AGE)throw new RangeError('STALE_PRICE');
     const {draft,book}=simulationDraft(ledger),previous=book.observations[market];
     if(previous&&at<=previous.at)throw new RangeError('OUT_OF_ORDER_PRICE');
+    if(sequence!==null&&(!Number.isSafeInteger(sequence)||sequence<0||(previous?.sequence!=null&&sequence<=previous.sequence)))throw new RangeError('OUT_OF_ORDER_PRICE');
     const previousPrice=previous?.price??observedPrice,events=[];
-    book.observations[market]={price:observedPrice,at};
+    book.observations[market]={price:observedPrice,at,...(sequence!==null?{sequence}:{})};
     for(const order of book.orders){
       if(order.market!==market||order.status!=='PENDING'||at<order.createdAt||!touchedOrCrossed(previousPrice,order.triggerPrice,observedPrice))continue;
       // Revalidate persisted/injected pending records before any reserve or receipt.
+      if(productV1&&!resolveCMode(order.c).canTrade){order.status='REJECTED';order.reason='V1_HIGH_SPEED_PRODUCTION_LOCKED';events.push({kind:'REJECTED',orderId:order.orderId});continue}
       signedPositionSide(order.c,order.side);
       const margin=requiredMargin(order);
       if(draft.free<margin){order.status='REJECTED';order.reason='INSUFFICIENT_FREE_KGEN';events.push({kind:'REJECTED',orderId:order.orderId});continue}
@@ -204,14 +206,14 @@ export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(
       const reserved=reserveOrder(draft,margin),locked=reserved.ok&&activateMargin(draft,margin);
       if(!reserved.ok||!locked?.ok||locked.amount!==margin)throw new RangeError('COLLATERAL_INVARIANT');
       const positionId=`SIM-P-${++book.sequence}`;
-      const position={positionId,orderId:order.orderId,axis:order.axis,market,side:order.side,c:order.c,signedC:order.c,lots:order.lots,entry:observedPrice,mark:observedPrice,principal:margin,margin,stopPrice:order.stopPrice,takeProfitPrice:order.takeProfitPrice,status:'OPEN',openedAt:at};
+      const position={trader:order.trader,positionId,orderId:order.orderId,axis:order.axis,market,side:order.side,c:order.c,signedC:order.c,lots:order.lots,entry:observedPrice,mark:observedPrice,principal:margin,margin,stopPrice:order.stopPrice,takeProfitPrice:order.takeProfitPrice,status:'OPEN',openedAt:at};
       book.positions.push(position);Object.assign(order,{status:'FILLED',triggeredAt:at,observedPrice,fillPrice:observedPrice,positionId});
-      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,orderId:order.orderId,positionId,market,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
+      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,trader:order.trader,orderId:order.orderId,positionId,market,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
       book.receipts.push(receipt);events.push({...receipt});
     }
     for(const position of book.positions){
       if(position.market!==market||position.status!=='OPEN')continue;
-      const risk=positionRisk({...position,mark:observedPrice});position.mark=observedPrice;
+      const risk=positionRisk({...position,mark:observedPrice});position.mark=observedPrice;position.observedAt=at;position.observationSequence=sequence;position.deltaIndex=observedPrice-position.entry;position.equity=position.margin+risk.pnl;
       const long=position.c>0,liquidated=long?observedPrice<=risk.liquidationMark:observedPrice>=risk.liquidationMark;
       const stopped=position.stopPrice!==null&&(long?observedPrice<=position.stopPrice:observedPrice>=position.stopPrice);
       const takeProfit=position.takeProfitPrice!==null&&(long?observedPrice>=position.takeProfitPrice:observedPrice<=position.takeProfitPrice);

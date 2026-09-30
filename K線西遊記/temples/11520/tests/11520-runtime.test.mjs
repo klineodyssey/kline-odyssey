@@ -1,5 +1,66 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
+import {createSimulationPlayerStore} from '../runtime/evm-wallet-runtime.mjs';
+import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
+import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
+
+test('V1 magnitude mode preserves short direction, zero journey and high-C production lock',()=>{
+  for(const c of [0,.0009,-.0009])assert.equal(resolveCMode(c).mode,'MONSTER_MODE');
+  for(const c of [.001,.01,.1,1,-.001,-.01,-.1,-1]){assert.equal(resolveCMode(c).mode,'FREE_TRADING_MODE');assert.equal(requireV1TradingC(c),c);assert.equal(resolveCMode(c).feeBps,0)}
+  for(const c of [5,-5,100,-100]){assert.equal(resolveCMode(c).mode,'LOCKED_HIGH_SPEED_MODE');assert.throws(()=>requireV1TradingC(c))}
+  for(const c of [NaN,Infinity,1000,-1000])assert.equal(resolveCMode(c).canTrade,false);
+  assert.equal(resolveCMode(-.01).side,'SHORT');assert.throws(()=>requireV1TradingC(.002));
+});
+test('V1 address profiles recover existing ledger without cross-account receipts; stale preserves margin',()=>{
+  const data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
+  const ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});
+  const a='0x'+'1'.repeat(40),b='0x'+'2'.repeat(40);store.activate(a);
+  const adapter=createExecutionAdapter({ledger,productV1:true,beforeMutation:store.check,afterMutation:store.save});
+  assert.ok(adapter.observe({market:'ETHUSDT',price:100,observedAt:1000,now:1000}).ok);
+  const input={axis:'KY',market:'ETHUSDT',c:1,lots:1,currentPrice:100,triggerPrice:101};
+  assert.equal(adapter.submit({...input,c:5},{now:1001}).ok,false);
+  assert.ok(adapter.submit(input,{now:1001}).ok);
+  assert.ok(adapter.observe({market:'ETHUSDT',price:102,observedAt:1002,now:1002}).ok);
+  assert.equal(adapter.snapshot().positions[0].trader,a);
+  const before=adapter.snapshot();
+  assert.equal(adapter.observe({market:'ETHUSDT',price:50,observedAt:1003,now:20000}).ok,false);
+  assert.deepEqual(adapter.snapshot(),before);assert.equal(adapter.close(before.positions[0].positionId,{now:20000}).ok,false);
+  store.activate(b);assert.equal(adapter.snapshot().positions.length,0);assert.equal(adapter.snapshot().wallet.free,100);
+  store.activate(a);assert.deepEqual(adapter.snapshot(),before);
+  const restoredLedger=createKgenLedger(),restored=createSimulationPlayerStore({ledger:restoredLedger,storage});restored.activate(a);
+  const reloaded=createExecutionAdapter({ledger:restoredLedger,productV1:true,beforeMutation:restored.check,afterMutation:restored.save});
+  assert.deepEqual(reloaded.snapshot(),before);
+  assert.throws(()=>store.check(),/RELOAD_REQUIRED/,'same account stale tab may not overwrite recovered state');
+  assert.ok(reloaded.observe({market:'ETHUSDT',price:103,observedAt:20001,now:20001}).ok);
+  assert.ok(reloaded.close(before.positions[0].positionId,{now:20002}).ok);
+  assert.equal(reloaded.snapshot().positions[0].status,'CLOSED');
+  assert.equal(reloaded.snapshot().wallet.lockedMargin,0);
+  assert.equal(reloaded.snapshot().receipts[1].trader,a);
+});
+test('offline 0C journey attacks, drops local-only loot once, respawns without settlement',()=>{
+  const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);
+  const player={x:0,y:0,z:6};let time=1000,drops=0;
+  for(let i=0;i<60;i++){
+    const r=attackKSpace(world,player,{plane:'XZ',c:0,skill:'slash',now:time});time+=400;
+    if(r.loot){drops++;assert.equal(r.loot.noRealValue,true);assert.equal(r.rewardKaios,5)}
+    if(r.defeated)break;
+  }
+  assert.equal(drops,1);assert.equal(kMarketSnapshot(world).status,'WAIT');
+  assert.equal(attackKSpace(world,player,{plane:'XZ',c:0,now:time}).reason,'NO_TARGET');
+  tickWorld(world,player,time+6000);assert.equal(kCombatSnapshot(world,player).target.state,'GUARD');
+  assert.equal(kCombatSnapshot(world,player).target.hp,120);
+});
+test('V1 revalidates old high-C pending records; sequence replay cannot fill or liquidate',()=>{
+  const ledger=createKgenLedger(100),sim=createExecutionAdapter({ledger});
+  sim.observe({market:'BTCUSDT',price:100,observedAt:1000,now:1000,sequence:10});
+  sim.submit({axis:'KX',market:'BTCUSDT',c:100,lots:1,currentPrice:100,triggerPrice:101},{now:1001});
+  const v1=createExecutionAdapter({ledger,productV1:true}),before=v1.snapshot();
+  assert.equal(v1.observe({market:'BTCUSDT',price:102,observedAt:1002,now:1002,sequence:9}).ok,false);
+  assert.deepEqual(v1.snapshot(),before);
+  assert.ok(v1.observe({market:'BTCUSDT',price:102,observedAt:1002,now:1002,sequence:11}).ok);
+  assert.equal(v1.snapshot().orders[0].status,'REJECTED');assert.equal(v1.snapshot().positions.length,0);assert.equal(v1.snapshot().wallet.free,100);
+});
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';

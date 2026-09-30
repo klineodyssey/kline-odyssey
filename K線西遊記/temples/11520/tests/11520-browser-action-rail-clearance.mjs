@@ -1,4 +1,10 @@
 import assert from 'node:assert/strict';
+function freeQuotePayload(route,rows){
+  const url=new URL(route.request().url());
+  if(!url.pathname.endsWith('/aggTrades'))return rows;
+  const row=rows.find(r=>r.symbol===url.searchParams.get('symbol'));
+  return row?[{p:String(row.price),T:Date.now(),a:Date.now()}]:[];
+}
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
@@ -7,11 +13,11 @@ await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.route('https://data-api.binance.vision/api/v3/ticker/price*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([
+await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[
   {symbol:'BTCUSDT',price:'65000.25'},
   {symbol:'ETHUSDT',price:'3500.5'},
   {symbol:'BNBUSDT',price:'600.75'}
-])}));
+]))}));
 await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1900);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});

@@ -14,6 +14,7 @@ import {deriveMarketRelations,animationIntentForRelations} from './market-relati
 import {drainMarketLifeSourceEvents,installMarketLifeSourceListeners} from './market-life-source-runtime.mjs';
 import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-runtime.mjs';
 import {gameUnitsToK,localPositionToK,composePhysicalK} from './spatial-coordinate-runtime.mjs';
+import {resolveCMode} from '../controls/nonlinear-controls.mjs';
 
 export const WORLD_RULES=Object.freeze({
   placeId:'11520',settlement:'KAIOS',
@@ -134,6 +135,7 @@ export function createKSpaceEncounter(world,reference=KSPACE_REFERENCE){
   // Preserve the existing rendered 7m spawn without turning its independent
   // market KZ+1 phase coordinate into a meter. Collision is local, not market.
   for(const axis of XYZ)guardian[axis]=guardian.localPosition[axis];
+  if(world.journeyEnabled){guardian.hp=guardian.maxHp=120;for(const b of Object.values(guardian.bodies))b.hp=b.maxHp=20}
   world.monsters.push(guardian);return world.kSpace;
 }
 export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
@@ -159,7 +161,8 @@ export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),
   const finish=reason=>{result.reason=reason;if(space)space.lastResult={...result,at:now};return result};
   if(!snapshot||!spec||!Number.isFinite(now)||!Number.isFinite(heading))return finish('INVALID_INPUT');
   if(!snapshot.target||snapshot.target.state==='DEAD')return finish('NO_TARGET');
-  if(!snapshot.selection?.body)return finish('NEUTRAL_PHASE');
+  const journey=world.journeyEnabled&&resolveCMode(c).mode==='MONSTER_MODE';
+  if(!snapshot.selection?.body&&!journey)return finish('NEUTRAL_PHASE');
   if(space.lastAttackAt!==null&&now-space.lastAttackAt<space.cooldownMs)return finish('COOLDOWN');
   space.lastAttackAt=now;space.cooldownMs=spec.cooldownMs;
   if(snapshot.distanceK>gameUnitsToK(spec.radius))return finish('OUT_OF_RANGE');
@@ -171,7 +174,8 @@ export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),
   }
   // Slash: exactly the chosen body. Rain: two tangent-plane axes, same phase.
   // Axe: three neighboring same-sign bodies in the forward semicircle.
-  const ids=skill==='slash'?[snapshot.selection.body]:K_AXES.filter(a=>skill==='phantomAxe'||a!==axis).map(a=>a+sign);
+  const availableBodies=KSPACE_PHASES.filter(id=>target.bodies[id].hp>0);
+  const ids=journey?availableBodies.slice(0,skill==='slash'?1:skill==='goldenRain'?2:3):skill==='slash'?[snapshot.selection.body]:K_AXES.filter(a=>skill==='phantomAxe'||a!==axis).map(a=>a+sign);
   for(const id of ids){
     const body=target.bodies[id];if(body.hp<=0)continue;
     const state=id===target.exposed?'EXPOSED':id.slice(0,2)===target.exposed.slice(0,2)?'GUARDED':'RESIST';
@@ -181,7 +185,7 @@ export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),
   }
   if(!result.hits.length)return finish('BODY_DISABLED');
   target.hp=Object.values(target.bodies).reduce((sum,b)=>sum+b.hp,0);
-  if(!target.hp){target.state='DEAD';target.defeatedAt=now}
+  if(!target.hp){target.state='DEAD';target.defeatedAt=now;if(world.journeyEnabled&&!target.rewardSuppressed){result.rewardKaios=5;result.loot={name:'取經碎片',quantity:1,localOnly:true,noRealValue:true}}}
   result.ok=true;result.hit=true;result.defeated=target.state==='DEAD';
   return finish(result.hits.some(h=>h.state==='EXPOSED')?'WEAK_POINT':result.hits.every(h=>h.state==='GUARDED')?'BLOCKED_RESIST':'HIT');
 }
@@ -302,6 +306,15 @@ export function tickMarketLives(world,{playerAxes={},quotes={},now=Date.now(),ra
 export function tickWorld(world,player,now=Date.now()){
   if(now&&typeof now==='object')now=Number(now.now)||Date.now();
   const previous=Number(world.lastTick)||now,deltaMs=Math.max(0,now-previous);
+  const guardian=world.journeyEnabled&&world.monsters.find(m=>m.simulationCombat);
+  if(guardian?.state==='DEAD'&&now-guardian.defeatedAt>=6000){
+    const cycle=(world.journeyCycle||0)+1;world.journeyCycle=cycle;
+    const angle=cycle*Math.PI/3;
+    guardian.localPosition={x:player.x+Math.sin(angle)*5,y:player.y,z:player.z+Math.cos(angle)*5};
+    Object.assign(guardian,guardian.localPosition,{state:'GUARD',hp:120,maxHp:120,rewardSuppressed:false});
+    for(const b of Object.values(guardian.bodies))b.hp=b.maxHp=20;
+    world.kSpace.lastAttackAt=null;
+  }
   const events=[];events.push(...applyMarketLifeSourceEvents(world,drainMarketLifeSourceEvents()));const playerAxes=readPlayerAxesFromGame(),quotes=readQuotesFromGame();
   if(now-(world.lastMarketLifeTick||0)>=WORLD_RULES.marketLifeDecisionMs){const ml=tickMarketLives(world,{playerAxes,quotes,now,deltaMs,availableMarkets:['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']});events.push(...ml.events)}
   else for(const m of world.monsters){if(!m.sourceManaged||m.state==='DEAD')continue;tickSourceManagedLife(m,{playerAxes,quotes,now,deltaMs,makeDecision:false})}

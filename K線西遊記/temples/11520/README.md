@@ -1,5 +1,48 @@
 # 11520 Universal Exchange V3.9
 
+## V1 journey / free-reference product — 2026-09-30
+
+Human V1 decision supersedes the paid-Oracle/100C launch target, not historical
+contract evidence. The sole C-mode resolver is in
+`controls/nonlinear-controls.mjs`: magnitude below0.001 is MONSTER_MODE,
+0.001–1 is FREE_TRADING_MODE, above1 is LOCKED_HIGH_SPEED_MODE.
+The sign still supplies LONG/SHORT; canonical detents and positive1–100 lots
+remain unchanged. Zero is the initial journey mode; ordinary XYZ movement never
+depends on trading eligibility.
+
+The public page remains **SIMULATION**, not real-money trading. Its existing
+execution adapter uses the V1 ceiling and zero fee. The unsigned Mainnet intent
+also rejects above1C, even if other gates are satisfied. The100C engine and
+explicit BSC97 rehearsal remain historical simulation/test infrastructure, not
+permission for production liquidation.
+
+Free Binance aggregate-trade references carry provider event time and sequence.
+The game polls every5s with the existing15s stale limit, no credential, paid
+subscription, synthetic fresh timestamp or stale fallback. Invalid/stale data
+cannot fill/liquidate; existing positions remain. World exploration/combat
+continues offline with a clearly waiting simulation reference frame.
+USDT public reference quotes are **not** the USD production settlement index;
+there is no implicit USD/USDT parity or on-chain Oracle activation.
+
+The existing practice guardian now supports a repeatable0C journey encounter:
+approach, attack surviving parts, defeat, earn local-only fragments/+5 local
+KAIOS, then a new encounter after6s. Manual practice reset suppresses rewards.
+No registered Life is killed for funds, and no chain asset is minted.
+
+The existing simulation ledger is saved per lowercase connected address (guest
+separate), restored only after read-only wallet identity confirmation, and kept
+separate from on-chain balances/claimable. Same-account stale-tab writes fail
+closed; this is not cross-device authenticated multiplayer. Local receipts and
+progress can be edited/cleared by the device owner and are never financial proof.
+The stats organ shows local sessions, play time, kills, drops and trading events;
+they are **not** verified human-player, retention or real-volume analytics.
+The backpack shows local journey fragments alongside its existing inventory.
+
+Chainlink450USD purchase HOLD; paid Data Streams not required for this candidate.
+Mainnet broadcast, real KGEN movement and production Oracle activation remain
+unauthorized. Real-volume release still requires a reviewed free on-chain
+settlement source/configuration, exact deployment approval and real receipts.
+
 ## Capital and complete-wallet candidate — 2026-09-29
 
 Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE governs this cumulative

@@ -1,4 +1,10 @@
 import assert from 'node:assert/strict';
+function freeQuotePayload(route,rows){
+  const url=new URL(route.request().url());
+  if(!url.pathname.endsWith('/aggTrades'))return rows;
+  const row=rows.find(r=>r.symbol===url.searchParams.get('symbol'));
+  return row?[{p:String(row.price),T:Date.now(),a:Date.now()}]:[];
+}
 import fs from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -23,8 +29,8 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourceSha=bytes=>sha(Buffer.from(Buffer.from(bytes).toString('utf8').replace(/\r\n?/g,'\n'),'utf8'));
 async function verifyInitialQuoteWait(){
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
-  const pattern='https://data-api.binance.vision/api/v3/ticker/price*';let ready=false;
-  await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(ready?[{symbol:'BTCUSDT',price:'81185'},{symbol:'ETHUSDT',price:'2631.54'},{symbol:'BNBUSDT',price:'767.8'}]:[])}));
+  const pattern='https://data-api.binance.vision/api/v3/aggTrades*';let ready=false;
+  await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,ready?[{symbol:'BTCUSDT',price:'81185'},{symbol:'ETHUSDT',price:'2631.54'},{symbol:'BNBUSDT',price:'767.8'}]:[]))}));
   try{
     await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_MARKET_K__?.status==='WAIT');
     if(await page.locator('#enter11520').isVisible()){
@@ -32,7 +38,7 @@ async function verifyInitialQuoteWait(){
       catch(error){if(await page.locator('#intro11520').isVisible())throw error}
     }
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
-    assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot()),null);
+    assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot().market.status),'WAIT');
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;
     await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
@@ -110,8 +116,8 @@ async function verifyMarketSync(page,report){
   }
   report.marketReference={initial:first,mode:PRODUCTION?'PUBLIC_READ_ONLY':'CONTROLLED_REFERENCE_FAILURE_RECOVERY'};
   if(PRODUCTION)return;
-  const pattern='https://data-api.binance.vision/api/v3/ticker/price*';
-  const setBatch=async rows=>{await page.unroute(pattern);await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(rows)}))};
+  const pattern='https://data-api.binance.vision/api/v3/aggTrades*';
+  const setBatch=async rows=>{await page.unroute(pattern);await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,rows))}))};
   const batch=[{symbol:'BTCUSDT',price:'83000'},{symbol:'ETHUSDT',price:'2800'},{symbol:'BNBUSDT',price:'750'}];
   await setBatch(batch);await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets[0]?.price===83000,null,{timeout:15000});
   const changed=await read();assert.notDeepEqual(changed.combat.playerK,first.combat.playerK);
@@ -127,9 +133,9 @@ async function verifyKSpaceGameplay(page,report){
   const input=async value=>{await page.locator('#cNumericInput').fill(value);await page.locator('#cNumericInput').press('Enter');await page.waitForTimeout(100)};
   await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.target);
   for(let i=0;i<3&&(await state()).selection.axis!=='KY';i++){await page.locator('#joy').tap();await page.waitForTimeout(150)}
-  await input('0');await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'NEUTRAL_PHASE');
+  await input('0');await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');
   await input('-1');const start=await state();assert.equal(start.selection.body,'KY-');
-  await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');assert.equal((await state()).target.hp,600);
+  await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');assert.equal((await state()).target.hp,120);
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40);
   try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
@@ -146,6 +152,7 @@ async function verifyKSpaceGameplay(page,report){
     ['#attack','slash-positive','1',45,400,['KY+']],
     ['#skill','goldenRain','-1',300,1500,['KX-','KZ-']],
     ['#tradeSword','phantomAxe','-1',180,2000,['KX-','KY-','KZ-']]]){
+    await page.locator('#kspaceTarget').click();await page.locator('#kspacePracticeReset').click();await page.locator('#sheetClose').click();
     await input(sign);await page.waitForTimeout(400);
     const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
@@ -255,7 +262,7 @@ try{
     // profile's CDP combat captures and repeated mobile rotations. Keep every assertion.
     await browser.close();browser=await launchBrowser();
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:true,hasTouch:true});const page=await context.newPage();const errors=[],warnings=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(['warning','error'].includes(m.type()))warnings.push(m.text().slice(0,300))});
-    if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/ticker/price*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify([{symbol:'BTCUSDT',price:'77564.83000000'},{symbol:'ETHUSDT',price:'2511.16000000'},{symbol:'BNBUSDT',price:'724.23000000'}])}));
+    if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:'77564.83000000'},{symbol:'ETHUSDT',price:'2511.16000000'},{symbol:'BNBUSDT',price:'724.23000000'}]))}));
     if(profile.warm)await page.addInitScript(()=>{localStorage.setItem('11520.play.cleanMode','1');localStorage.setItem('k11520.joystick.plane','XZ');localStorage.setItem('klineodyssey.public-wallet-identity.v1',JSON.stringify({version:1,address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345',updatedAt:new Date().toISOString()}))});
     const report={profile,mode:PRODUCTION?'PUBLIC_PAGES_READ_ONLY':'LOCAL_REALISTIC_QUOTE_FIXTURE',errors,warnings,states:{}};reports.push(report);
     try{await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded',timeout:35000});await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_KSPACE_COMBAT__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__&&document.getElementById('k11520UtilityMaster'),null,{timeout:45000});await page.waitForTimeout(7500);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click();
@@ -269,7 +276,7 @@ try{
       // Open a simulation preview directly; neither order nor combat needs arming.
       const quotePresent=await page.locator('[data-axis="KX"] .q').textContent().then(s=>Number(String(s).replace(/[$,]/g,''))>0);
       if(PRODUCTION)assert.equal(quotePresent,true,'Public Pages market-data-only quote source must be LIVE');
-      if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
+      if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
       if(profile.width===390||profile.landscape){await verifyMarketSync(page,report);await verifyKSpaceMap(page,report);await verifyKSpaceGameplay(page,report)}
       if(profile.landscape)await finalizeLandscape(page,report);
       if(PRODUCTION&&warnings.some(message=>/blocked by CORS|data-api\.binance\.vision.*ERR_FAILED/i.test(message)))failures.push(`${profile.name}: public quote CORS regression`);
