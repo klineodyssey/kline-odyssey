@@ -2,7 +2,7 @@
 
 ## K11520 P0 range exits / Oracle capability — 2026-09-30
 
-- Task K11520-P0-EXIT-ORACLE-20260930; IN_PROGRESS; owner codex-gm-01 ACTIVE T5.
+- Task K11520-P0-EXIT-ORACLE-20260930; RELEASE_VALIDATION; owner codex-gm-01 ACTIVE T5.
 - Source: Human Shen Ying-Ming `KAIOS_K11520_P0_BLOCKER_RESOLUTION_DECISION_V1`
   in the current conversation; explicit contract/code/test/PR/safe-merge authority.
 - Base main 48d22e0188baa307baca6af531d5dd04a9d79118; isolated branch
@@ -12,6 +12,15 @@
 - Preserve quorum/freshness/replay/deviation, capital gate, principal/claim debt.
 - Acceptance: actual proxy/Position/Trigger EVM, range close/liquidation receipts,
   capability rejection without exit deadlock, local Chromium and exact-head CI.
+- PR #448: local actual-pair EVM PASS (96 C/lot combinations, 32 stress cases,
+  12 exact-boundary cases, 9 exit/capability/claim groups); actual candidate
+  Chromium 390x844/844x390 wallet, settlement and reload PASS with direct images.
+- Game QA found a fixed-pixel test assuming moving entities cannot cross it.
+  Bounded ground discovery retains strict GROUND/navigation and player-routing
+  assertions without modifying product behavior. Fresh CI remains the merge gate.
+- Production Oracle capability is unverified; keep NO_NEW_RISK and Mainnet
+  manifest blocked. Range-policy approval is no longer a blocker. Public source
+  measurements and hashes are preserved in the manifest and PR evidence.
 - Provenance/IP: original modification of existing MIT repository code; no
   external asset, copied implementation, secret or new parallel runtime.
 - Mainnet broadcast, funding, roles and production activation NOT APPROVED.
