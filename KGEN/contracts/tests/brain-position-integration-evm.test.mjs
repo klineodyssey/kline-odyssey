@@ -179,6 +179,11 @@ const engine = await deploy(engineArtifact, admin, [await admin.getAddress(), aw
 
 await (await engine.configureMarket(0, 2000, 500, 60, px50, px150, true)).wait();
 await (await engine.configureOracle(0, [feed0.target, feed1.target, feed2.target], 2, 500)).wait();
+async function mockCapability(market=0) {
+  // Synthetic local feeds only: never reuse this attestation in production.
+  await (await engine.configureTradingCapability(market,[parseEther('100'),(await latestTimestamp())+31536000n,60,60,parseEther('1000000'),'0x'+'11'.repeat(32)])).wait();
+}
+await mockCapability();
 
 // Production authority shape: the reviewed Engine contract is the sole settlement caller in this harness.
 const settlementRole = await brain.SETTLEMENT_ROLE();
@@ -300,6 +305,7 @@ await (await engine.setExecutor(trigger.target)).wait();
 assert.equal(await brain.hasRole(settlementRole, trigger.target), false);
 await expectRevert(engine.connect(executor).openPosition(await trader.getAddress(), 0, size1, parseEther('20')), 'former EOA executor revoked');
 await (await engine.configureMarket(0, 100, 10, 60, px50, px150, true)).wait();
+await mockCapability();
 await expectRevert(engine.configureMarket(0, 99, 10, 60, px50, px150, true), '100x hard risk ceiling');
 await (await token.mint(await trader.getAddress(), parseEther('10000'))).wait();
 await (await token.connect(trader).approve(proxy.target, parseEther('10000'))).wait();
@@ -478,6 +484,7 @@ await tick(px100); await observe(oid); await closeAtEntry((await trigger.order(o
 for (const market of [1, 2]) {
   await (await engine.configureMarket(market, 100, 10, 60, px50, px150, true)).wait();
   await (await engine.configureOracle(market, [feed0.target, feed1.target, feed2.target], 2, 500)).wait();
+  await mockCapability(market);
   await tick(px100); const id = await trigger.nextOrderId();
   await (await trigger.connect(trader).createOrder(market, parseEther('-100'), 1, px100)).wait();
   await observe(id); const receipt = await trigger.fillReceipt(id);
@@ -593,6 +600,7 @@ let realisticBoundaryCases = 0;
 for (const entryText of ['60000', '4000', '600']) {
   const entry = parseEther(entryText);
   await (await engine.configureMarket(0, 100, 10, 60, entry / 2n, entry * 2n, true)).wait();
+  await mockCapability();
   for (const c of ['100', '-100']) for (const lots of [1, 100]) {
     await tick(entry); const id = await create(c, lots, entry); await observe(id);
     const positionId = (await trigger.order(id)).positionId;
@@ -607,6 +615,7 @@ for (const entryText of ['60000', '4000', '600']) {
   }
 }
 await (await engine.configureMarket(0, 100, 10, 60, px50, px150, true)).wait();
+await mockCapability();
 
 // Brain pause forces reserve failure; Trigger / Position / receipt all revert.
 await tick(px100); oid = await create();
@@ -622,6 +631,100 @@ assert.equal(await brain.availablePrincipal(await trader.getAddress()), availabl
 await (await brain.connect(admin).unpause()).wait();
 await observe(oid); await closeAtEntry((await trigger.order(oid)).positionId);
 console.log(`[brain-position-trigger-integration-evm] PASS: real proxy pair + Trigger, touch/cross, one-shot, immutable receipts, isolation, ${stressCases} 100C stress cases, first observed boundary, rollback`);
+
+// Human 2026-09-30: admission range is NOT an exit-price clamp.
+const exitOnlyChecks=[];
+const capabilityEvidence='0x'+'22'.repeat(32); // LOCAL MOCK evidence, not production certification.
+async function capability(c='100',overrides={}) {
+  const value={maxCWad:parseEther(c),validUntil:(await latestTimestamp())+3600n,maxAge:60,maxTimeSkew:60,maxSpreadWad:parseEther('1'),evidenceHash:capabilityEvidence,...overrides};
+  await (await engine.configureTradingCapability(0,value)).wait();
+}
+async function rangePosition(c='1',lots=1) {
+  await tick(px100); const orderId=await create(c,lots); await observe(orderId);
+  return (await trigger.order(orderId)).positionId;
+}
+await (await engine.configureMarket(0,100,10,60,parseEther('90'),parseEther('110'),true)).wait();
+await tick(px100);
+await expectRevert(create('1'), 'unconfigured capability rejects new order');
+await expectRevert(engine.connect(stranger).configureTradingCapability(0,[parseEther('1'),(await latestTimestamp())+1000n,60,60,1,capabilityEvidence]),'unauthorized capability');
+await capability('1'); await expectRevert(create('100'),'100C exceeds attested 1C');
+await capability(); await tick(px100); const reducedPending=await create('100');
+await capability('1');
+await expectRevert(trigger.connect(keeper).observeOrder(reducedPending),'pending fill revalidates reduced capability');
+assert.equal((await trigger.order(reducedPending)).status,1n);
+await (await trigger.connect(trader).cancelOrder(reducedPending)).wait();
+const rangeLong=await rangePosition();
+await capability('0'); await tick(parseEther('120'));
+assert.equal(await engine.marketTradingState(0),2n);
+await expectRevert(create('1',1,parseEther('120')),'range breach prevents new order');
+smokeReceipts.push(receiptRecord('range100to120Close',await (await trigger.connect(trader).closePosition(rangeLong)).wait()));
+const rangeClose=await engine.settlementReceipt(rangeLong);
+assert.equal(rangeClose.observedPrice,parseEther('120')); assert.equal(rangeClose.settlementPrice,parseEther('120'));
+assert.equal(rangeClose.rawPnl,parseEther('20')); assert.equal(rangeClose.status,2n);
+exitOnlyChecks.push('100_TO_120_CLOSE_REAL_PRICE_WITH_CAPABILITY_DISABLED');
+await capability(); const rangeShort=await rangePosition();
+const untouchedAvailable=await brain.availablePrincipal(await trader.getAddress());
+await tick(parseEther('80'));
+smokeReceipts.push(receiptRecord('range100to80Liquidation',await (await trigger.connect(keeper).observePosition(rangeShort)).wait()));
+const rangeLiquidation=await engine.settlementReceipt(rangeShort);
+assert.equal(rangeLiquidation.settlementPrice,parseEther('80')); assert.equal(rangeLiquidation.rawPnl,-parseEther('20'));
+assert.equal(rangeLiquidation.marginAfter,0n); assert.equal(rangeLiquidation.badDebt,parseEther('19'));
+assert.equal(await brain.availablePrincipal(await trader.getAddress()),untouchedAvailable);
+await expectRevert(trigger.connect(keeper).observePosition(rangeShort),'range liquidation one shot');
+exitOnlyChecks.push('100_TO_80_LIQUIDATION_RECEIPT_ISOLATION');
+await tick(px100); const pendingBreach=await create('1',1,parseEther('120'));
+await tick(parseEther('120')); const nextBeforeBreach=await engine.nextPositionId();
+await expectRevert(trigger.connect(keeper).observeOrder(pendingBreach),'pending cross cannot fill beyond admission range');
+assert.equal(await engine.nextPositionId(),nextBeforeBreach); assert.equal((await trigger.order(pendingBreach)).status,1n);
+await (await trigger.connect(trader).cancelOrder(pendingBreach)).wait();
+exitOnlyChecks.push('RANGE_BREACH_BLOCKS_NEW_POSITION_ATOMICALLY');
+const expiryPosition=await rangePosition();
+await capability('1',{validUntil:(await latestTimestamp())+10n});
+await eip1193.request({method:'evm_increaseTime',params:[11]}); await tick(px100);
+await expectRevert(create('1'),'expired capability rejects new risk');
+await (await trigger.connect(trader).closePosition(expiryPosition)).wait();
+exitOnlyChecks.push('EXPIRED_CAPABILITY_DOES_NOT_BLOCK_EXIT');
+await capability(); const spreadPosition=await rangePosition();
+await capability('1',{maxSpreadWad:0n}); await tick(px100);
+await (await feed2.set(parseEther('100.1'),(await latestTimestamp())+1n)).wait();
+await expectRevert(create('1'),'absolute quality spread tighter than unchanged exit deviation');
+await (await trigger.connect(trader).closePosition(spreadPosition)).wait();
+exitOnlyChecks.push('QUALITY_SPREAD_GATE_PRESERVES_EXIT_QUORUM');
+await capability(); const skewPosition=await rangePosition();
+await capability('1',{maxTimeSkew:0}); await tick(px100);
+await (await feed2.set(px100,(await latestTimestamp())+1n)).wait();
+await expectRevert(create('1'),'source timestamp skew prevents admission');
+await (await trigger.connect(trader).closePosition(skewPosition)).wait();
+exitOnlyChecks.push('QUALITY_TIMESTAMP_SKEW_GATE_PRESERVES_EXIT');
+await capability(); const agePosition=await rangePosition();
+await capability('1',{maxAge:1}); await tick(px100);
+await eip1193.request({method:'evm_increaseTime',params:[5]}); await eip1193.request({method:'evm_mine',params:[]});
+await expectRevert(create('1'),'admission age stricter than unchanged exit age');
+await (await trigger.connect(trader).closePosition(agePosition)).wait();
+exitOnlyChecks.push('QUALITY_AGE_GATE_PRESERVES_EXIT');
+await capability(); const stalePosition=await rangePosition();
+const beforeStale=await brain.principalOf(await trader.getAddress());
+await tick(px100,(await latestTimestamp())-120n);
+await expectRevert(trigger.connect(trader).closePosition(stalePosition),'exit never bypasses stale oracle');
+assert.equal((await engine.positionSnapshot(stalePosition)).status,1n);
+assert.equal(await brain.principalOf(await trader.getAddress()),beforeStale);
+await tick(px100); await (await trigger.connect(trader).closePosition(stalePosition)).wait();
+exitOnlyChecks.push('ORACLE_FAILURE_PRESERVES_PRINCIPAL_AND_POSITION');
+// Beyond the reserved admission envelope, actual profit is owed, not clamped.
+await capability(); const claimPosition=await rangePosition('100',100);
+await tick(parseEther('200000'));
+await (await trigger.connect(trader).closePosition(claimPosition)).wait();
+const claimReceipt=await engine.settlementReceipt(claimPosition);
+assert.equal(claimReceipt.rawPnl,parseEther('1999000000')); assert.equal(claimReceipt.settlementPrice,parseEther('200000'));
+assert.ok(await brain.playerClaimable(await trader.getAddress())>0n);
+const claimKey=await engine.positionKey(claimPosition),owedBefore=await brain.playerClaimable(await trader.getAddress());
+await (await token.mint(await admin.getAddress(),parseEther('100'))).wait();
+await (await token.approve(brain.target,parseEther('100'))).wait();
+await (await brain.fundSettlementCapital(parseEther('100'))).wait();
+await (await brain.claimSettlement(claimKey)).wait();
+assert.equal(await brain.playerClaimable(await trader.getAddress()),owedBefore-parseEther('100'));
+exitOnlyChecks.push('UNFUNDED_RANGE_PROFIT_PERSISTS_AS_PLAYER_CLAIMABLE');
+console.log('[exit-only-oracle-capability] PASS: '+exitOnlyChecks.join(', '));
 fs.mkdirSync('artifacts', { recursive: true });
 fs.writeFileSync('artifacts/settlement-local-evm.json', JSON.stringify({
   evidenceClass: 'LOCAL_GANACHE_TEST_ASSETS_NOT_TESTNET',
@@ -634,7 +737,7 @@ fs.writeFileSync('artifacts/settlement-local-evm.json', JSON.stringify({
   authorities: { admin: await admin.getAddress(), upgradeAuthority: await upgrader.getAddress(), pauser: await pauser.getAddress(),
     keeper: await keeper.getAddress(), positionExecutor: trigger.target, brainSettlementRole: engine.target, trader: await trader.getAddress() },
   configuration: { cMax: 100, lotsMax: 100, initialMarginBps: 100, maintenanceMarginBps: 10, oracleMaxAge: 60, oracleMaxDeviationBps: 500, oracleSources: 3, oracleQuorum: 2 },
-  canonicalCDetents: C_DETENTS.filter(c => c !== 0), canonicalLots: [1, 100], stressCases, realisticBoundaryCases,
+  canonicalCDetents: C_DETENTS.filter(c => c !== 0), canonicalLots: [1, 100], stressCases, realisticBoundaryCases, exitOnlyChecks,
   capitalAccounting: { fundedTestTokensOnly: true, reservedSettlementLiability: (await brain.reservedSettlementLiability()).toString(), playerClaims: (await brain.totalPlayerClaimable()).toString(), noOptimisticNetting: true, concurrentPlayers: 3, withdrawalsVerified: true }, deploymentReceipts, smokeReceipts,
   testnetDeployment: 'NOT_EXECUTED', mainnetExecution: 'NOT_AUTHORIZED_OR_EXECUTED',
   limitations: ['Mock token and feeds are local only.', 'No production oracle provenance or live-network deployment is certified.', 'Gas is measured local EVM gas, not a production gas-price estimate.']

@@ -1,5 +1,22 @@
 # KGEN Organization V2.0 WorkQueue
 
+## K11520 P0 range exits / Oracle capability — 2026-09-30
+
+- Task K11520-P0-EXIT-ORACLE-20260930; IN_PROGRESS; owner codex-gm-01 ACTIVE T5.
+- Source: Human Shen Ying-Ming `KAIOS_K11520_P0_BLOCKER_RESOLUTION_DECISION_V1`
+  in the current conversation; explicit contract/code/test/PR/safe-merge authority.
+- Base main 48d22e0188baa307baca6af531d5dd04a9d79118; isolated branch
+  codex/k11520-exit-only-oracle-capability; Human checkout untouched.
+- Existing Position/Trigger only: range restricts new risk, never clamps exits;
+  expiring, evidence-bound Oracle capability applies at order and fill time.
+- Preserve quorum/freshness/replay/deviation, capital gate, principal/claim debt.
+- Acceptance: actual proxy/Position/Trigger EVM, range close/liquidation receipts,
+  capability rejection without exit deadlock, local Chromium and exact-head CI.
+- Provenance/IP: original modification of existing MIT repository code; no
+  external asset, copied implementation, secret or new parallel runtime.
+- Mainnet broadcast, funding, roles and production activation NOT APPROVED.
+- Payroll/ATM/advance HOLD; no new payment receipt or employee claimed.
+
 ## K11520 complete product capital and wallet — 2026-09-29
 
 - Task K11520-COMPLETE-PRODUCT-20260929; RELEASE_VALIDATION; owner codex-gm-01.

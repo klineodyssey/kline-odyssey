@@ -17,8 +17,8 @@ interface IKGENPriceFeedV1 {
 
 /**
  * KGEN_PositionEngine
- * VERSION: 1.1.0
- * REVISION: 2026-09-29.CAPITAL_ADMISSION_INDEX_PNL
+ * VERSION: 1.2.0
+ * REVISION: 2026-09-30.EXIT_ONLY_ORACLE_CAPABILITY
  * STATUS: DRAFT_REAL_FUNDS_CANDIDATE
  * SOURCE_OF_TRUTH: CANDIDATE
  * Formal organ filename is versionless; version remains metadata.
@@ -59,6 +59,14 @@ contract KGEN_PositionEngine_V1_0_0 {
     mapping(uint256 => bool) public usedOrderIds;
     bool public paused;
     mapping(Market => uint256) public openPositionCount;
+    // Admission-only attestation. Zero/unconfigured/expired means NO_NEW_RISK.
+    // Evidence must establish source independence/latency/precision off chain;
+    // setting a hash does not by itself prove those facts.
+    struct TradingCapability { uint256 maxCWad; uint64 validUntil; uint32 maxAge; uint32 maxTimeSkew; uint256 maxSpreadWad; bytes32 evidenceHash; }
+    mapping(Market => TradingCapability) public tradingCapability;
+    enum TradingState { NO_NEW_RISK, OPEN, EXIT_ONLY }
+    error AdmissionRangeExceeded(); error OracleCapabilityUnavailable(); error OracleCapabilityExceeded();
+    event TradingCapabilitySet(Market indexed market, uint256 maxCWad, uint64 validUntil, bytes32 evidenceHash);
     error Paused(); error OrderAlreadyUsed(); error OutOfOrderPrice();
 
     function setPaused(bool value) external onlyAdmin { paused = value; }
@@ -68,7 +76,7 @@ contract KGEN_PositionEngine_V1_0_0 {
     function openCPosition(address trader, Market market, int256 cWad, uint256 lots, uint256 orderId, uint256 expectedSequence) external onlyExecutor returns (uint256 id) {
         if (orderId == 0 || usedOrderIds[orderId]) revert OrderAlreadyUsed();
         uint256 leverage = KGEN_MarketRiskKernel_V1_0_0.validateOrder(cWad, lots);
-        (uint256 price,uint256 observedAt,uint256 sequence) = _acceptMarketObservation(market);
+        (uint256 price,uint256 observedAt,uint256 sequence) = _acceptNewRiskObservation(market, leverage);
         if (sequence != expectedSequence) revert OutOfOrderPrice();
         uint256 margin = lots * 1e18;
         if ((leverage * lots * _config(market).initialMarginBps + BPS - 1) / BPS > margin) revert InitialMarginTooLow();
@@ -106,6 +114,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         require(openPositionCount[market] == 0, "OPEN_POSITIONS_CONFIG_LOCKED");
         if (initialMarginBps < 100 || maintenanceMarginBps == 0 || maintenanceMarginBps >= initialMarginBps || initialMarginBps > BPS || maxOracleAge == 0 || minPriceWad == 0 || maxPriceWad <= minPriceWad || maxPriceWad > 1e36) revert InvalidRiskConfig();
         marketConfig[market] = MarketConfig(initialMarginBps,maintenanceMarginBps,maxOracleAge,minPriceWad,maxPriceWad,enabled);
+        delete tradingCapability[market];
         emit MarketConfigured(market,initialMarginBps,maintenanceMarginBps,maxOracleAge,minPriceWad,maxPriceWad,enabled);
     }
 
@@ -115,6 +124,7 @@ contract KGEN_PositionEngine_V1_0_0 {
         OracleConfig storage cfg = _oracleConfig[market]; for (uint256 i=0;i<MAX_ORACLE_SOURCES;i++) cfg.feeds[i]=address(0);
         for (uint256 i=0;i<feeds.length;i++) { if (feeds[i]==address(0)) revert ZeroAddress(); for (uint256 j=0;j<i;j++) if (feeds[i]==feeds[j]) revert InvalidOracleConfig(); cfg.feeds[i]=feeds[i]; }
         cfg.feedCount=uint8(feeds.length); cfg.minValidSources=minValidSources; cfg.maxDeviationBps=maxDeviationBps;
+        delete tradingCapability[market];
         emit OracleConfigured(market,cfg.feeds[0],cfg.feeds[1],cfg.feeds[2],cfg.feedCount,cfg.minValidSources,cfg.maxDeviationBps);
     }
 
@@ -122,8 +132,69 @@ contract KGEN_PositionEngine_V1_0_0 {
     function readMarketPrice(Market market) external view returns (uint256 priceWad,uint256 observedAt,uint8 validSources) { return _readOracle(market); }
     function acceptMarketObservation(Market market) external onlyExecutor returns (uint256 priceWad,uint256 observedAt,uint256 sequence) { return _acceptMarketObservation(market); }
 
+    function configureTradingCapability(Market market, TradingCapability calldata capability) external onlyAdmin {
+        if (capability.maxCWad != 0) {
+            KGEN_MarketRiskKernel_V1_0_0.validateOrder(int256(capability.maxCWad),1);
+            if (capability.maxCWad > 100e18 || capability.validUntil <= block.timestamp || capability.maxAge == 0 ||
+                capability.maxAge > marketConfig[market].maxOracleAge || capability.maxSpreadWad > 1e36 ||
+                capability.evidenceHash == bytes32(0)) revert InvalidOracleConfig();
+        }
+        tradingCapability[market]=capability;
+        emit TradingCapabilitySet(market,capability.maxCWad,capability.validUntil,capability.evidenceHash);
+    }
+
+    function acceptNewRiskObservation(Market market,int256 cWad,uint256 lots) external onlyExecutor returns (uint256,uint256,uint256) {
+        uint256 leverage=KGEN_MarketRiskKernel_V1_0_0.validateOrder(cWad,lots);
+        return _acceptNewRiskObservation(market,leverage);
+    }
+
+    function newRiskPrice(Market market,uint256 leverage) external view returns (uint256) {
+        OracleObservation memory observation=_collectObservation(market);
+        _validateNewRisk(market,leverage,observation);
+        return observation.price;
+    }
+
+    // Oracle failures are NO_NEW_RISK; valid but inadmissible observations are
+    // EXIT_ONLY. Neither state bypasses any exit Oracle check.
+    function marketTradingState(Market market) external view returns (TradingState) {
+        try this.readMarketPrice(market) returns (uint256,uint256,uint8) {
+            try this.newRiskPrice(market,1e15) returns (uint256) { return TradingState.OPEN; }
+            catch { return TradingState.EXIT_ONLY; }
+        } catch { return TradingState.NO_NEW_RISK; }
+    }
+
+    function _acceptNewRiskObservation(Market market,uint256 leverage) internal returns (uint256,uint256,uint256) {
+        OracleObservation memory observation=_collectObservation(market);
+        _validateNewRisk(market,leverage,observation);
+        return _acceptObservation(market,observation);
+    }
+
+    function _validateNewRisk(Market market,uint256 leverage,OracleObservation memory observation) internal view {
+        if (paused) revert Paused();
+        MarketConfig memory cfg=_config(market);
+        if (observation.price<cfg.minPriceWad || observation.price>cfg.maxPriceWad) revert AdmissionRangeExceeded();
+        TradingCapability memory capability=tradingCapability[market];
+        if (capability.maxCWad==0 || capability.validUntil<block.timestamp || capability.evidenceHash==bytes32(0)) revert OracleCapabilityUnavailable();
+        if (leverage==0 || leverage>capability.maxCWad || block.timestamp-observation.oldestAt>capability.maxAge) revert OracleCapabilityExceeded();
+        uint256 minAnswer=type(uint256).max; uint256 maxAnswer; uint256 newestAt;
+        for (uint256 i=0;i<observation.count;i++) {
+            OracleSample memory sample=observation.samples[i];
+            if(sample.answer<minAnswer) minAnswer=sample.answer;
+            if(sample.answer>maxAnswer) maxAnswer=sample.answer;
+            if(sample.updatedAt>newestAt) newestAt=sample.updatedAt;
+        }
+        if(maxAnswer-minAnswer>capability.maxSpreadWad || newestAt-observation.oldestAt>capability.maxTimeSkew) revert OracleCapabilityExceeded();
+    }
+
     function openPosition(address trader,Market market,int256 sizeWad,uint256 collateralWad) external onlyExecutor returns (uint256 positionId) {
-        (uint256 price,,)=_acceptMarketObservation(market);
+        // Legacy size-based positions must remain arithmetically settleable at
+        // every accepted price, not merely inside today's admission interval.
+        if(_abs(sizeWad)>uint256(type(int256).max)/1e36) revert KGEN_MarketRiskKernel_V1_0_0.SignedOverflow();
+        OracleObservation memory observation=_collectObservation(market);
+        if(collateralWad==0) revert InvalidCollateral();
+        uint256 notional=KGEN_MarketRiskKernel_V1_0_0.notional(_abs(sizeWad),observation.price);
+        _validateNewRisk(market,(notional*1e18+collateralWad-1)/collateralWad,observation);
+        (uint256 price,,)=_acceptObservation(market,observation);
         positionId = _openPosition(trader,market,sizeWad,collateralWad,price);
         MarketConfig memory cfg = _config(market);
         uint256 favorable = sizeWad > 0 ? cfg.maxPriceWad : cfg.minPriceWad;
@@ -266,6 +337,10 @@ contract KGEN_PositionEngine_V1_0_0 {
     // Independent feeds may update without moving that minimum timestamp.
     function _acceptMarketObservation(Market market) internal returns (uint256 priceWad,uint256 observedAt,uint256 sequence) {
         OracleObservation memory observation=_collectObservation(market);
+        return _acceptObservation(market,observation);
+    }
+
+    function _acceptObservation(Market market,OracleObservation memory observation) internal returns (uint256 priceWad,uint256 observedAt,uint256 sequence) {
         bytes32 snapshot=keccak256(abi.encode(observation.samples));
         if(snapshot!=_observationHash[market]) {
             _observationHash[market]=snapshot;
@@ -314,9 +389,11 @@ contract KGEN_PositionEngine_V1_0_0 {
         try feed.latestRoundData() returns (uint80 roundId,int256 answer,uint256,uint256 updatedAt,uint80 answeredInRound) {
             if(roundId==0 || answer<=0 || updatedAt==0 || updatedAt>block.timestamp || answeredInRound<roundId || block.timestamp-updatedAt>cfg.maxOracleAge) return sample;
             // Invalid sources must not overflow normalization and disable a healthy quorum.
-            if(decimalsValue<18 && uint256(answer)>cfg.maxPriceWad/(10**uint256(18-decimalsValue))) return sample;
+            // Arithmetic ceiling, NOT admission bounds. Existing positions exit
+            // at the actual authenticated price, never a range-clamped price.
+            if(decimalsValue<18 && uint256(answer)>1e36/(10**uint256(18-decimalsValue))) return sample;
             uint256 normalized=_normalizeToWad(uint256(answer),decimalsValue);
-            if(normalized<cfg.minPriceWad || normalized>cfg.maxPriceWad) return sample;
+            if(normalized==0 || normalized>1e36) return sample;
             return OracleSample(feedAddress,roundId,updatedAt,normalized);
         } catch { return sample; }
     }

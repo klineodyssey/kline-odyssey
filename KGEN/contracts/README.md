@@ -1,5 +1,32 @@
 # KGEN Contracts (V7.5.2)
 
+## P0 admission/exit separation — 2026-09-30
+
+Human `KAIOS_K11520_P0_BLOCKER_RESOLUTION_DECISION_V1` authorizes this source
+candidate, not deployment. Market min/max are admission bounds, not an Oracle
+validity filter or payout cap. Authenticated, fresh, complete, ordered quorum
+observations outside those bounds remain usable for actual-price exits. Numeric
+prices remain within the RiskKernel arithmetic domain (positive, at most 1e36
+WAD). Gross capital reservation covers the configured admission envelope, not
+unbounded future profit: beyond-envelope unpaid profit remains PlayerClaimable.
+
+`configureTradingCapability` records canonical max C, expiry, tighter admission
+age, absolute source spread, timestamp skew and a public evidence digest.
+Missing/expired/zero capability rejects new orders and both position-entry paths;
+pending fills revalidate it. It never relaxes the existing exit Oracle policy.
+Changing risk/Oracle configuration invalidates capability. Governance may lower
+or revoke capability with positions open without disabling their valid exits.
+The evidence digest is an attestation, not an on-chain proof of source quality.
+Three wrappers around one upstream do not establish independence.
+
+Production capability currently remains zero pending verified source quality.
+The unsigned builder uses explicit USD INDEX; no implicit USD/USDT parity.
+Mock capability in EVM/browser/rehearsal fixtures is TEST ONLY. Existing public
+BSC97 contracts are unchanged and must not be described as having this patch.
+
+Current math is INDEX_DELTA_C_LOTS_V1 (`deltaIndex * signedC * lots`), as defined
+in the active trading spec; the older percentage-model prose below is lineage.
+
 ## K11520 settlement candidate — 2026-09-25
 
 Existing versionless Brain custody + Risk + Position are extended by

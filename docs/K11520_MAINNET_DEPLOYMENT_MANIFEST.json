@@ -1,6 +1,54 @@
 {
   "documentType": "K11520_MAINNET_DEPLOYMENT_MANIFEST",
   "status": "BLOCKED_NOT_EXECUTABLE",
+  "p0Resolution20260930": {
+    "authority": "Human KAIOS_K11520_P0_BLOCKER_RESOLUTION_DECISION_V1",
+    "baseMain": "48d22e0188baa307baca6af531d5dd04a9d79118",
+    "candidateSourceHashesUtf8Lf": {
+      "KGEN_BrainExchange": "f11d8cc7aa221a3598deec323acd324f8b2a5625665f9646b566be0bf3d9ec61",
+      "KGEN_PositionEngine": "d5469cdf0b83d020244029b9654f542784f092678dcd374f6ea6b686e5c27cfd",
+      "KGEN_OrderTriggerEngine": "a2eb6bc92036c10a5eb61dcfdfb4d07cecce2fa6f3a20462a4efb2b3e15ad12b",
+      "KGEN_MarketRiskKernel": "6c078a3d55a5f3e0e61de88bb25c7b6760e8699268d80e31c5513a13c12bac54",
+      "KGEN_OracleSourceAdapter": "64924566c4e93b61641b763f0baeb5d175b06bcaa4800249e83ca6f2ec2f7de6"
+    },
+    "rangePolicy": "Admission-only min/max; out-of-range accepted observations permit exits at actual prices, never clamp; new orders/positions rejected",
+    "liabilityPolicy": "Gross reserve remains admission-envelope based, NOT a maximum payout. Additional actual profit remains owed; unpaid amount uses existing PlayerClaimable. Principal and Insurance remain isolated.",
+    "oracleCapability": {
+      "contractMethod": "configureTradingCapability(uint8,(uint256,uint64,uint32,uint32,uint256,bytes32))",
+      "markets": ["KX", "KY", "KZ"],
+      "state": "NO_NEW_RISK",
+      "tuple": {"maxCWad":"0","validUntil":"0","maxAge":0,"maxTimeSkew":0,"maxSpreadWad":"0","evidenceHash":"0x0000000000000000000000000000000000000000000000000000000000000000"},
+      "meaning": "Executable fail-closed configuration tuple, not verified live trading capability or authorization to submit it",
+      "scope": "Applies to order creation, pending fill, C entry and legacy size entry; not to existing valid exits",
+      "activationRequirements": ["Verified independent source sets", "Latency, precision/confidence and adversarial-selection evidence at proposed C", "Source/config-bound evidence digest and expiry", "Strict admission age/spread/time-skew thresholds", "Exact-head configuration review and Human Mainnet approval"],
+      "sourceOrRiskReconfiguration": "Invalidates capability; must re-attest",
+      "exitSafety": "Original source authentication, quorum, freshness, complete rounds, timestamp/sequence and deviation remain mandatory"
+    },
+    "quotePolicy": {"settlement":"USD_INDEX","symbols":["BTC/USD INDEX","ETH/USD INDEX","BNB/USD INDEX"],"basisSource":null,"implicitUsdUsdtParity":false,"liveUiActivated":false},
+    "capitalCandidateKgen": {"settlementCapital":"20000000","insurance":"5000000","total":"25000000","transferApproved":false},
+    "sourceResearch": {
+      "observedBlocks": [124819171,124819219,124819267],
+      "observationTimestamps": [1790731054,1790731076,1790731098],
+      "localRawEvidence": "artifacts/oracle-quality-observations.json",
+      "rawEvidenceSha256": "6bf2cb31a6eed7bcd7d2dcd455dae445b603ec46733cbf2ac4dca3a93c550f33",
+      "chainlinkDecimals":8,"redstoneDecimals":8,
+      "chainlinkAgeRangesSeconds":{"BTC":[12,55],"ETH":[0,44],"BNB":[7,28]},
+      "redstoneAgeRangesSeconds":{"BTC":[15,59],"ETH":[3990,4034],"BNB":[15,59]},
+      "configuredPythBtcAgeRangeSeconds":[391137,391181],
+      "configuredPythBtcConfidenceUsd":"13.73771843",
+      "btcCrossSourceSpreadsUsd":["11.14464833","16.52947365","16.52947365"],
+      "interpretation":"Observed update age and spread, not a certified latency bound or accuracy guarantee. Provider-level identities differ; actual upstream independence not established. Do not infer all Pyth services are stale from this configured core.",
+      "officialSources":["https://docs.chain.link/data-feeds/overview","https://docs.chain.link/data-streams/overview","https://docs.chain.link/data-streams/tutorials/ts-sdk-fetch","https://docs.pyth.network/price-feeds/core/best-practices","https://docs.redstone.finance/"],
+      "researchConclusion":"Push feeds are not streaming guarantees; pull feeds require authenticated update verification and latency/adversarial-selection defenses. Pyth confidence is an uncertainty indicator, not zero error. Short read-only samples and three provider names cannot certify a safe nonzero C.",
+      "productionCapabilityVerified":false
+    },
+    "knownRemainingBlocker":"PRODUCTION_ORACLE_CAPABILITY_NOT_VERIFIED; executable no-new-risk config is available, real-trading execution manifest is not READY",
+    "deploymentState":"SOURCE_CANDIDATE_ONLY_NOT_PUBLICLY_DEPLOYED",
+    "mainnetBroadcastApproved":false,
+    "mainnetBroadcasts":0,
+    "realKgenTransferred":"0",
+    "olderSections":"Retained cumulative lineage; this range/quote/capability decision supersedes earlier range-exit and USD/USDT unresolved policy wording, not historical receipts"
+  },
   "capitalCandidate": {
     "date": "2026-09-29",
     "authority": "Human COMPLETE_PRODUCT_HANDOFF V1 + CONTINUE_TO_COMPLETE",

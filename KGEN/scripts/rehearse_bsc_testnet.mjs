@@ -186,18 +186,30 @@ function validateUnsignedInput(input) {
  for(const [key,nonce]of Object.entries(input.startingNonces)){address(key,'NONCE_ACCOUNT');assert.ok(Number.isSafeInteger(nonce) && nonce>=0 && nonce<Number.MAX_SAFE_INTEGER-100,'INVALID_STARTING_NONCE');}
  assert.ok(Array.isArray(input.markets) && input.markets.length===3,'THREE_MARKETS_REQUIRED');
  input.markets.forEach((market,index)=>{
-  shape(market,['axis','symbol','initialMarginBps','maintenanceMarginBps','maxOracleAge','minPriceWad','maxPriceWad','minValidSources','maxDeviationBps','feeds'],'MARKET');
-  assert.equal(market.axis,['KX','KY','KZ'][index],'MARKET_AXIS');assert.equal(market.symbol,['BTC/USDT','ETH/USDT','BNB/USDT'][index],'MARKET_SYMBOL');
+  shape(market,['axis','symbol','initialMarginBps','maintenanceMarginBps','maxOracleAge','minPriceWad','maxPriceWad','minValidSources','maxDeviationBps','feeds','tradingCapability'],'MARKET');
+  assert.equal(market.axis,['KX','KY','KZ'][index],'MARKET_AXIS');assert.equal(market.symbol,['BTC/USD INDEX','ETH/USD INDEX','BNB/USD INDEX'][index],'EXPLICIT_USD_SETTLEMENT_INDEX_REQUIRED');
   assert.ok(Number.isInteger(market.initialMarginBps) && market.initialMarginBps===100,'100C_REQUIRES_INITIAL_MARGIN_100BPS');
   assert.ok(Number.isInteger(market.maintenanceMarginBps) && market.maintenanceMarginBps>0 && market.maintenanceMarginBps<market.initialMarginBps,'MAINTENANCE_MARGIN');
   assert.ok(Number.isInteger(market.maxOracleAge) && market.maxOracleAge>0 && market.maxOracleAge<=4294967295,'ORACLE_MAX_AGE');
+  const capability=market.tradingCapability;
+  shape(capability,['maxCWad','validUntil','maxAge','maxTimeSkew','maxSpreadWad','evidenceHash'],'TRADING_CAPABILITY');
+  const maxC=uintString(capability.maxCWad,'CAPABILITY_C',{zero:true,max:100n*10n**18n});
+  uintString(capability.validUntil,'CAPABILITY_EXPIRY',{zero:maxC===0n,max:(1n<<64n)-1n});
+  uintString(capability.maxSpreadWad,'CAPABILITY_SPREAD',{zero:true,max:10n**36n});
+  assert.ok(Number.isInteger(capability.maxAge) && capability.maxAge>=0 && capability.maxAge<=market.maxOracleAge,'CAPABILITY_AGE');
+  assert.ok(Number.isInteger(capability.maxTimeSkew) && capability.maxTimeSkew>=0 && capability.maxTimeSkew<=4294967295,'CAPABILITY_SKEW');
+  assert.ok(/^0x[0-9a-f]{64}$/i.test(capability.evidenceHash),'CAPABILITY_EVIDENCE_HASH');
+  if(maxC>0n){
+   assert.ok([10n**15n,10n**16n,10n**17n,10n**18n].includes(maxC) || (maxC>=5n*10n**18n && maxC%(5n*10n**18n)===0n),'CAPABILITY_CANONICAL_C');
+   assert.ok(capability.maxAge>0 && capability.evidenceHash!==ZeroHash,'CAPABILITY_EVIDENCE_REQUIRED');
+  }
   assert.ok(uintString(market.minPriceWad,'MIN_PRICE')<uintString(market.maxPriceWad,'MAX_PRICE',{max:10n**36n}),'PRICE_BOUNDS');
   assert.equal(market.minValidSources,2,'TWO_OF_THREE_QUORUM');
   assert.ok(Number.isInteger(market.maxDeviationBps) && market.maxDeviationBps>0 && market.maxDeviationBps<=2000,'MAX_DEVIATION');
   assert.ok(Array.isArray(market.feeds) && market.feeds.length===3,'THREE_FEEDS_REQUIRED');
   for(const feed of market.feeds){
    shape(feed,['address','provider','independenceGroup','chainId','quote','decimals','testOnly','codeHash','roundMode','provenance'],'FEED');
-   address(feed.address,'FEED');assert.equal(feed.chainId,56,'FEED_WRONG_CHAIN');assert.equal(feed.quote,'USDT','USD_IS_NOT_USDT');assert.equal(feed.testOnly,false,'MOCK_FEED_FORBIDDEN');
+   address(feed.address,'FEED');assert.equal(feed.chainId,56,'FEED_WRONG_CHAIN');assert.equal(feed.quote,'USD','NO_IMPLICIT_USD_USDT_CONVERSION');assert.equal(feed.testOnly,false,'MOCK_FEED_FORBIDDEN');
    for(const key of ['provider','independenceGroup'])assert.ok(typeof feed[key]==='string' && /^[a-zA-Z][a-zA-Z0-9 _.-]{1,79}$/.test(feed[key]) && !/mock|test|simulation/i.test(feed[key]),'INVALID_PROVIDER');
    assert.ok(Number.isInteger(feed.decimals) && feed.decimals>=0 && feed.decimals<=18,'FEED_DECIMALS');
    assert.ok(/^0x[0-9a-f]{64}$/i.test(feed.codeHash) && feed.codeHash!==ZeroHash,'FEED_CODEHASH_REQUIRED');
@@ -238,6 +250,7 @@ async function buildUnsignedPackage(input) {
    const market=input.markets[index];
    call('CONFIGURE_'+market.axis,roles.positionAdmin,'positionEngine','configureMarket',[index,market.initialMarginBps,market.maintenanceMarginBps,market.maxOracleAge,market.minPriceWad,market.maxPriceWad,false],undefined,{market:market.axis,enabled:false});
    call('ORACLES_'+market.axis,roles.positionAdmin,'positionEngine','configureOracle',[index,market.feeds.map(f=>f.address),market.minValidSources,market.maxDeviationBps],undefined,{market:market.axis,feedAddresses:market.feeds.map(f=>f.address),quorum:2});
+   call('CAPABILITY_'+market.axis,roles.positionAdmin,'positionEngine','configureTradingCapability',[index,market.tradingCapability],undefined,{market:market.axis,capability:market.tradingCapability,newRiskEnabled:false});
   }
   const approve=new Interface(['function approve(address,uint256) returns(bool)']);
   const approval=(txId,amount)=>add(txId,input.funding.account,input.token.address,approve.encodeFunctionData('approve',[predicted.brainProxy,amount]),'approval','approve',{spender:predicted.brainProxy,allowance:amount});
@@ -259,8 +272,9 @@ if(unsignedMode) {
  if(unsignedTest){
   const a=n=>'0x'+n.toString(16).padStart(40,'0'),deployer=a(1),fixture={chainId:56,sourceHashes:build.sourceHashes,reviewedCommit:'1'.repeat(40),deployer,startingNonces:{[deployer]:7,[a(2)]:10,[a(3)]:20},roles:{brainAdmin:a(2),positionAdmin:a(2),triggerAdmin:deployer,upgradeAuthority:a(4),pauser:a(2),triggerKeeper:a(5),brainKeeper:ZeroAddress,treasury:a(6)},token:{address:a(7),chainId:56,decimals:18,testOnly:false,codeHash:'0x'+'11'.repeat(32),provenance:'https://example.invalid/synthetic-fixture-not-production'},funding:{account:a(3),settlementCapitalWei:parseEther('1000').toString(),insuranceWei:parseEther('10').toString(),totalKgenWei:parseEther('1010').toString()},gas:{maximumGasPriceWei:'1000000000',totalGasCostCapWei:'1000000000000000000',nativeValuePerTransactionWei:'0',gasLimits:{deployment:'7000000',configuration:'500000',funding:'500000',approval:'100000'}},nextPayrollAt:'0',cMax:100,lotsMax:100,settlementAuthority:'POSITION_ENGINE_ONLY',positionExecutor:'ORDER_TRIGGER_ENGINE_ONLY',markets:['KX','KY','KZ'].map((axis,index)=>({axis,symbol:['BTC/USDT','ETH/USDT','BNB/USDT'][index],initialMarginBps:100,maintenanceMarginBps:10,maxOracleAge:60,minPriceWad:parseEther('1').toString(),maxPriceWad:parseEther('200000').toString(),minValidSources:2,maxDeviationBps:100,feeds:[0,1,2].map(n=>({address:a(100+index*3+n),provider:'Provider'+n,independenceGroup:'Independent'+n,chainId:56,quote:'USDT',decimals:8,testOnly:false,codeHash:'0x'+'22'.repeat(32),roundMode:'MONOTONIC_COMPLETE_ROUNDS',provenance:'https://example.invalid/synthetic-fixture-not-production'}))}))};
   fixture.transactionRoute='DIRECT_EOA_UNSIGNED';
+  fixture.markets.forEach((market,index)=>{market.symbol=['BTC/USD INDEX','ETH/USD INDEX','BNB/USD INDEX'][index];market.feeds.forEach(feed=>feed.quote='USD');market.tradingCapability={maxCWad:'0',validUntil:'0',maxAge:0,maxTimeSkew:0,maxSpreadWad:'0',evidenceHash:ZeroHash};});
   const packageValue=await buildUnsignedPackage(fixture);assert.equal(packageValue.status,'UNSIGNED_REQUIRES_HUMAN_APPROVAL',packageValue.blockers.join(','));
-  assert.equal(packageValue.transactions.length,20);assert.equal(packageDigest(packageValue),packageValue.packageDigest);
+  assert.equal(packageValue.transactions.length,23);assert.equal(packageDigest(packageValue),packageValue.packageDigest);
   assert.deepEqual(await buildUnsignedPackage(fixture),packageValue,'DETERMINISTIC_PACKAGE');
   assert.notEqual(packageValue.artifactDigests.brainProxy,keccak256(artifacts.brainProxy.bytecode),'NEVER_TEST_PROXY');
   for(let index=0;index<4;index++)assert.equal(packageValue.transactions[index].expectedState.createdAddress,getCreateAddress({from:deployer,nonce:7+index}));
@@ -268,7 +282,7 @@ if(unsignedMode) {
   const constructorTx=await new ContractFactory(build.productionProxyTemplate.abi,build.productionProxyTemplate.bytecode).getDeployTransaction(packageValue.predictedAddresses.brainImplementation,new Interface(artifacts.brainImplementation.abi).encodeFunctionData('initialize',[fixture.token.address,fixture.roles.brainAdmin,ZeroAddress,fixture.roles.pauser,fixture.roles.upgradeAuthority,fixture.roles.treasury,0]));
   assert.equal(constructorTx.data,packageValue.transactions[1].data,'ATOMIC_PROXY_INITIALIZATION');
   const tampered=structuredClone(packageValue);tampered.transactions[0].data+='00';assert.notEqual(packageDigest(tampered),packageValue.packageDigest);
-  for(const change of [v=>v.chainId=97,v=>v.token.testOnly=true,v=>v.roles.triggerAdmin=a(2),v=>v.settlementAuthority=a(1),v=>v.gas.totalGasCostCapWei='1',v=>v.gas.nativeValuePerTransactionWei='1',v=>v.funding.totalKgenWei='1',v=>v.markets[0].feeds[0].testOnly=true,v=>v.markets[0].feeds[0].quote='USD',v=>v.markets[0].feeds[0].roundMode='CONSTANT_ROUND',v=>v.markets[0].feeds[1].independenceGroup='Independent0',v=>v.sourceHashes={},v=>delete v.startingNonces[a(3)],v=>v.cMax=1000,v=>v.token.provenance='https://user:secret@example.invalid/',v=>v.privateKey='NOT_A_SECRET_SYNTHETIC_REJECTION_TEST']){
+  for(const change of [v=>v.chainId=97,v=>v.token.testOnly=true,v=>v.roles.triggerAdmin=a(2),v=>v.settlementAuthority=a(1),v=>v.gas.totalGasCostCapWei='1',v=>v.gas.nativeValuePerTransactionWei='1',v=>v.funding.totalKgenWei='1',v=>v.markets[0].feeds[0].testOnly=true,v=>v.markets[0].feeds[0].quote='USDT',v=>v.markets[0].feeds[0].roundMode='CONSTANT_ROUND',v=>v.markets[0].feeds[1].independenceGroup='Independent0',v=>delete v.markets[0].tradingCapability,v=>v.markets[0].tradingCapability.maxCWad=parseEther('1000').toString(),v=>v.sourceHashes={},v=>delete v.startingNonces[a(3)],v=>v.cMax=1000,v=>v.token.provenance='https://user:secret@example.invalid/',v=>v.privateKey='NOT_A_SECRET_SYNTHETIC_REJECTION_TEST']){
    const bad=structuredClone(fixture);change(bad);const output=await buildUnsignedPackage(bad);assert.equal(output.status,'BLOCKED_MISSING_OR_INVALID_INPUT');assert.equal(output.transactions.length,0);assert.equal(output.input,null);
   }
   const missing=await buildUnsignedPackage({});assert.equal(missing.status,'BLOCKED_MISSING_OR_INVALID_INPUT');
@@ -430,6 +444,8 @@ try {
    feedSets.push(feeds);manifest.oracles.push({axis:['KX','KY','KZ'][market],market:['BTC/USDT','ETH/USDT','BNB/USDT'][market],feeds:feeds.map(f=>f.target),provider:'ONE TEST OPERATOR; NOT INDEPENDENT',decimals:18});persist();
    await send(position,'configureMarket',[market,100,10,3600,parseEther('0.01'),parseEther('1000000'),true]);
    await send(position,'configureOracle',[market,feeds.map(f=>f.target),2,500]);
+   // Testnet mock capability only. Never production provenance/readiness.
+   await send(position,'configureTradingCapability',[market,[parseEther('100'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1000000'),id('TEST_ONLY_MOCK_ORACLE_CAPABILITY')]]);
  }
  assert.equal(await position.executor(),trigger.target);
  assert.equal(await brain.hasRole(role,position.target),true);

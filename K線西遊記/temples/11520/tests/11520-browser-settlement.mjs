@@ -175,6 +175,7 @@ async function localCandidateBrowserQA(){
     const set=[];for(let i=0;i<3;i++)set.push(await deploy('oracle',[parseEther('100')]));feeds.push(set);
     await send(position,'configureMarket',[market,100,10,3600,parseEther('98'),parseEther('102'),true]);
     await send(position,'configureOracle',[market,set.map(f=>f.target),2,500]);
+    await send(position,'configureTradingCapability',[market,[parseEther('100'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1'),'0x'+'11'.repeat(32)]]); // local mock evidence only
   }
   await send(token,'mint',[accounts[0],parseEther('200000')]);await send(token,'approve',[proxy.target,parseEther('200000')]);
   await send(brain,'fundSettlementCapital',[parseEther('100000')]);await send(brain,'fundInsurance',[parseEther('10000')]);
