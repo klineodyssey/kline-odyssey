@@ -50,8 +50,23 @@ assert.equal(playerTap?.route,'PLAYER','avatar center tap must remain classified
 assert.equal(playerTap?.source,'CAMERA_LOCKED_PLAYER_HITBOX','player priority layer must win before nearby entity touch tolerance');
 
 await page.locator('#sheetClose').click();
-await tapCanvas(.12,.78,72);
-assert.equal(await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAPS__?.at(-1)?.route),'GROUND','non-avatar canvas tap must remain routed to canonical world interaction');
+// Living entities move through screen coordinates. A fixed pixel is not a
+// ground fixture: a legitimate ENTITY hit must not be mistaken for interception.
+// Keep the strict GROUND assertion, but locate open ground using bounded taps.
+let groundTap=null;
+for(const [index,[fx,fy]] of [[.12,.78],[.88,.78],[.2,.7],[.8,.7],[.3,.82],[.7,.82],[.12,.65],[.88,.65]].entries()){
+  await page.evaluate(()=>{globalThis.__K11520_TEST_WORLD_TAPS__=[]});
+  await tapCanvas(fx,fy,72+index);
+  const route=await page.evaluate(()=>globalThis.__K11520_TEST_WORLD_TAPS__?.at(-1));
+  assert.ok(route&&['GROUND','ENTITY'].includes(route.route),'non-avatar tap must reach the canonical world router');
+  if(route.route==='GROUND'){groundTap=route;break}
+  assert.ok(route.entityId!=null,'ENTITY route must identify the intercepted world entity');
+  assert.equal(await page.locator('#k11520CharacterCard').isVisible(),false,'world entity must not be mistaken for player');
+  if(await page.locator('#sheet.open').count())await page.locator('#sheetClose').click();
+}
+assert.equal(groundTap?.route,'GROUND','at least one non-avatar tap must reach actual ground');
+assert.ok(['x','y','z'].every(axis=>Number.isFinite(groundTap[axis])),'ground route must retain its actual world coordinates');
+assert.equal(await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source),'WORLD_GROUND','ground route must use canonical navigation');
 assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'ground tap must not be consumed as a character-card tap');
 await browser.close();
 console.log('11520 character status PASS: real organ, camera-locked avatar priority, world tap routing, and open-card visual evidence verified at 390x844');

@@ -1,5 +1,20 @@
 # 11520 HANDOFF CURRENT
 
+## P0 range-exit / capability candidate — 2026-09-30
+
+- Human range-exit policy is now approved for source changes. Position admits
+  new risk only inside bounds and within a current attested Oracle capability;
+  valid out-of-range exits settle at actual observations, never clamped prices.
+- Existing Oracle exit checks and Brain principal/claims/insurance remain intact.
+  Source and risk reconfiguration invalidate capability; reduced/expired caps
+  revalidate pending fills, while legitimate exits remain available.
+- Production capability remains NO_NEW_RISK until latency/precision/independence
+  evidence is verified. USD INDEX is the unsigned Mainnet package quote policy;
+  no USD/USDT parity assumption. Public Testnet deployment is not upgraded by
+  this repository change. No Mainnet broadcast or funding authorized.
+- Local/CI results belong to their exact source hashes and are not public chain
+  receipts. Review PR checks and the execution manifest before release claims.
+
 ## Complete-product capital/wallet continuation — 2026-09-29
 
 - PR446 merged6f567ca000113f5ffe9bd0887098d50c4fe3a149 after all exact-head

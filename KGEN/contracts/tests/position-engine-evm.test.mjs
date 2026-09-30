@@ -239,6 +239,11 @@ async function setFeeds(a, b, c, timestamp = null) {
 for (const market of [0, 1, 2]) {
   await (await engine.configureMarket(market, 2000, 500, 60, px50, px150, true)).wait();
   await (await engine.configureOracle(market, feeds, 2, 500)).wait();
+  await mockCapability(engine,market,60);
+}
+
+async function mockCapability(target,market,age) {
+  await (await target.configureTradingCapability(market,[parseEther('100'),(await latestTimestamp())+31536000n,age,age,parseEther('1000000'),'0x'+'11'.repeat(32)])).wait();
 }
 
 // The executor cannot manufacture price/timestamp calldata; quorum price is on-chain.
@@ -396,6 +401,7 @@ const sensitiveArtifact = output.contracts[harnessPath].AcceptanceSensitiveFeed;
 const sensitiveFeeds = await Promise.all([0, 1, 2].map(() => deploy(sensitiveArtifact, admin, [snapshotEngine.target])));
 await (await snapshotEngine.configureMarket(0, 100, 50, 60, px50, px150, true)).wait();
 await (await snapshotEngine.configureOracle(0, sensitiveFeeds.map(feed => feed.target), 2, 500)).wait();
+await mockCapability(snapshotEngine,0,60);
 // First accept and open happen in separate blocks, so prime feeds with stable
 // adverseAt only after opening; initial expected sequence starts at one.
 await (await snapshotEngine.connect(executor).openCPosition(await trader.getAddress(), 0, parseEther('100'), 1, 9001, 1, { gasLimit: 2_000_000 })).wait();
@@ -469,6 +475,7 @@ const sourceEngine = await deploy(artifact, admin, [await admin.getAddress(), aw
 const plainFeed = await deploy(feedArtifact, admin, [px100, await latestTimestamp()]);
 await (await sourceEngine.configureMarket(0, 2000, 500, 3600, px50, px150, true)).wait();
 await (await sourceEngine.configureOracle(0, [timestampAdapter.target, pythAdapter.target, plainFeed.target], 2, 500)).wait();
+await mockCapability(sourceEngine,0,3600);
 await (await sourceEngine.connect(executor).acceptMarketObservation(0)).wait();
 const firstSequence = await sourceEngine.marketObservationSequence(0);
 await (await sourceEngine.connect(executor).acceptMarketObservation(0)).wait();

@@ -2,7 +2,7 @@
 
 ## Metadata
 - STATUS: ACTIVE / SOURCE_OF_TRUTH
-- REVISION: 2026-09-29.1
+- REVISION: 2026-09-30.1
 - HUMAN_AUTHORITY: 沈英明
 - CHANGE_RULE: CODE MUST IMPLEMENT SPEC; CODE DOES NOT REDEFINE SPEC.
 
@@ -11,6 +11,24 @@
 - 下單幾口，就必須配置幾 KGEN 作為該筆交易本金／保證金。
 - `principalKgen = abs(lots)`。
 - C 不得用來減少本金／保證金。
+
+### Human P0 admission / exit policy — 2026-09-30
+
+- AUTHORITY: `KAIOS_K11520_P0_BLOCKER_RESOLUTION_DECISION_V1`。
+- minPrice/maxPrice 是新增風險區間，不是既有權益的結算價格截斷。
+- 超界進入 EXIT_ONLY；新 Order/Position 拒絕。既有倉位依實際 accepted
+  observation 平倉／清算，120 不得截成110，80不得截成90。
+- Oracle source/quorum/freshness/complete round/timestamp/sequence/deviation
+  保持有效；Oracle 失效不准偽造結算，也不消除 Principal/Position/Claimable。
+- Oracle Trading Capability 為可到期、可撤銷的 max acceptable C 證據核定，
+  加上更嚴格新增風險 age、absolute spread、source timestamp skew。
+  未核定、到期、0C能力或超過能力時 NO_NEW_RISK；不影響合法退出。
+- 已 pending 的訂單成交前重驗 capability 和 range；玩家解鎖100C不保證可開倉。
+- Reserved Settlement Liability 仍為原 admission envelope 的 gross reserve；
+  真實價格超界的額外確定盈利不得消失，資金不足部分依原 Brain claim accounting
+  記帳並於補資後清償，不挪用他人本金，不宣稱有限資本保證無限行情。
+- Mainnet candidate 使用 USD INDEX；不得把現有 USDT reference UI 或 Testnet
+  route 無聲改成真資金 USD 執行。正式 activation 仍須 exact manifest 核准。
 
 ## 2. C 槓桿與損益
 - AUTHORITY: Human `KAIOS_K11520_COMPLETE_PRODUCT_HANDOFF_TO_CODEX_GM_V1` 第六、七節及 `CONTINUE_TO_COMPLETE` 明確核定本節；不是以程式倒推正典。

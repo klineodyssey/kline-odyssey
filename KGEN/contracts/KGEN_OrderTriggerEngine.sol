@@ -64,7 +64,7 @@ contract KGEN_OrderTriggerEngine is ReentrancyGuard {
     function createOrder(PositionEngine.Market market,int256 c,uint256 lots,uint256 triggerPrice) external nonReentrant returns(uint256 id){
         if(paused)revert Paused(); Risk.validateOrder(c,lots);
         if(triggerPrice==0 || triggerPrice>1e36)revert InvalidOrder();
-        (uint256 previous,uint256 observedAt,uint256 sequence)=engine.acceptMarketObservation(market);
+        (uint256 previous,uint256 observedAt,uint256 sequence)=engine.acceptNewRiskObservation(market,c,lots);
         id=nextOrderId++;
         Order storage o=_orders[id]; o.orderId=id;o.trader=msg.sender;o.market=market;
         o.c=c;o.lots=lots;o.triggerPrice=triggerPrice;o.createdAt=block.timestamp;
@@ -84,7 +84,7 @@ contract KGEN_OrderTriggerEngine is ReentrancyGuard {
     function observeOrder(uint256 id) external onlyKeeper nonReentrant returns(bool filled){
         if(paused)revert Paused();Order storage o=_orders[id];
         if(o.status!=Status.PENDING)revert InvalidOrder();
-        (uint256 price,uint256 observedAt,uint256 sequence)=engine.acceptMarketObservation(o.market);
+        (uint256 price,uint256 observedAt,uint256 sequence)=engine.acceptNewRiskObservation(o.market,o.c,o.lots);
         // Same observation is only meaningful for an exact touch on creation.
         if(sequence<o.observationSequence || (sequence==o.observationSequence && (price!=o.previousPrice || price!=o.triggerPrice)))revert InvalidObservation();
         if(!touches(o.previousPrice,o.triggerPrice,price)){
