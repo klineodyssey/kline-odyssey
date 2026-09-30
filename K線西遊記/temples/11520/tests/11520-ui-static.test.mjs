@@ -94,6 +94,12 @@ test('live HUD teaches the KX/KY/KZ six-phase combat mapping',()=>{
   assert.ok(main.includes('snapshot.selection?.body'));
 });
 
+test('mobile combat uses contextual disclosure instead of a second persistent K-space card',()=>{
+  assert.ok(main.includes("targetHud.hidden=true"));
+  assert.ok(main.includes("monsterHud.title='點擊查看 K-space 六相戰鬥詳情'"));
+  assert.ok(main.includes("monsterHud.addEventListener('click'"));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
