@@ -9,6 +9,7 @@ const read=p=>readFileSync(resolve(here,p),'utf8');
 const html=read('../game-5d.html');
 const main=read('../runtime/game-5d-main.mjs');
 const fixes=read('../runtime/game-ui-product-fixes.mjs');
+const productFixesV23=read('../runtime/game-ui-product-fixes-v23.mjs');
 const controls=read('../runtime/game-controls-v251.mjs');
 const xyzControl=read('../runtime/joystick-xzxy.mjs');
 const xyzAuthority=read('../runtime/xyz-input-authority-runtime.mjs');
@@ -29,12 +30,12 @@ test('new players enter the 5D world in 0C journey mode before trading',()=>{
 });
 
 test('entry hook explains the journey-to-trading loop without requiring a wallet',()=>{
-  assert.ok(fixes.includes('先取經，再交易。你的市場冒險從 0C 開始。'));
-  assert.ok(fixes.includes('走路取經'));
-  assert.ok(fixes.includes('斬妖掉寶'));
-  assert.ok(fixes.includes('0.001C'));
-  assert.ok(fixes.includes('不用連錢包也能先玩'));
-  assert.ok(fixes.includes('開始取經'));
+  assert.ok(productFixesV23.includes('先取經，再交易。你的市場冒險從 0C 開始。'));
+  assert.ok(productFixesV23.includes('走路取經'));
+  assert.ok(productFixesV23.includes('斬妖掉寶'));
+  assert.ok(productFixesV23.includes('0.001C'));
+  assert.ok(productFixesV23.includes('不用連錢包也能先玩'));
+  assert.ok(productFixesV23.includes('開始取經'));
 });
 
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
