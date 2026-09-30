@@ -105,7 +105,8 @@
       "command": "pwsh -File artifacts/package-offline.ps1 -Commit <exact-commit> -NonOracle",
       "verify": "pwsh -File artifacts/verify-offline.ps1 -ArchivePath <explicit-artifacts-zip>",
       "contents": "Allowlisted tracked source, ABI/compiler standard input, pinned solc WASM/licenses, source hashes, storage layout, read-only/fork evidence, unsigned calldata and governance envelopes. Never env/signers/Gmail/provider secrets.",
-      "status": "GENERATE_AND_VERIFY_FOR_FINAL_DOCUMENT_COMMIT; regenerate again after Oracle integration"
+      "status": "LOCAL_ARCHIVE_HASHES_AND_OFFLINE_BYTECODE_PASS; final archived commit/digest recorded in PR closeout; regenerate after Oracle integration",
+      "verifiedSnapshot": {"commit":"443b2b16de4b93161cb1b6789db178a6002a7a82","files":526,"archiveSha256":"8c785f8b359b4222858face73f0e19c183a3dba6718778a26eb6977f14605b5d","offlineRecompilation":"PASS_BYTECODE_MATCH"}
     },
     "remainingEngineeringDependency": "Production Oracle entitlement/credentials, authenticated observations, signed-report adapter integration, time alignment/independence/100C capability and Oracle-dependent full gas/transaction envelope",
     "notAnEngineeringWaiver": "ORACLE_ONLY_BLOCKED describes the prepared non-Oracle candidate, not signature readiness. Final role/cap approval, safe signer access, fresh nonces/readbacks, full exact-head CI and Human Mainnet execution approval remain mandatory.",
