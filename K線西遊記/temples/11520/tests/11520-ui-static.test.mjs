@@ -28,6 +28,15 @@ test('new players enter the 5D world in 0C journey mode before trading',()=>{
   assert.ok(main.includes("mode.mode==='MONSTER_MODE'?'取經 / MONSTER'"));
 });
 
+test('entry hook explains the journey-to-trading loop without requiring a wallet',()=>{
+  assert.ok(fixes.includes('先取經，再交易。你的市場冒險從 0C 開始。'));
+  assert.ok(fixes.includes('走路取經'));
+  assert.ok(fixes.includes('斬妖掉寶'));
+  assert.ok(fixes.includes('0.001C'));
+  assert.ok(fixes.includes('不用連錢包也能先玩'));
+  assert.ok(fixes.includes('開始取經'));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
