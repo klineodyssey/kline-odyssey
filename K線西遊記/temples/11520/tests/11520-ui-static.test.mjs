@@ -21,6 +21,13 @@ const actionRail=read('../runtime/mobile-action-rail-clearance-runtime.mjs');
 const publicMarketQuotes=read('../runtime/public-market-quotes.mjs');
 const source=[html,main,fixes,controls,xyzControl,xyzAuthority,driveLive,driveAdapter,massScale,characterStatus].join('\n');
 
+test('new players enter the 5D world in 0C journey mode before trading',()=>{
+  assert.match(main,/KX:\{market:'BTCUSDT',side:'多',lots:1,c:0,pos:null\}/);
+  assert.match(main,/KY:\{market:'ETHUSDT',side:'多',lots:1,c:0,pos:null\}/);
+  assert.match(main,/KZ:\{market:'BNBUSDT',side:'多',lots:1,c:0,pos:null\}/);
+  assert.ok(main.includes("mode.mode==='MONSTER_MODE'?'取經 / MONSTER'"));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
