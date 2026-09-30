@@ -147,11 +147,25 @@ $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performC
 $('#tradeSword').onclick=()=>performCombat('phantomAxe');
 $('#dodge').onclick=()=>{cancelNavigation('閃避');const next={x:S.xyz.x+Math.sin(S.heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(S.heading)*1.4},r=resolvePlayerMove(S.xyz,next);if(!r.blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast('閃避')}};
 $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
-const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 模擬守衛：點擊展開座標與六相部位';document.body.appendChild(targetHud);
+const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';document.body.appendChild(targetHud);
+const monsterGuide=document.createElement('div');monsterGuide.id='k11520MonsterGuide';monsterGuide.setAttribute('aria-live','polite');monsterGuide.style.cssText='position:fixed;z-index:520;left:50%;top:52%;transform:translate(-50%,-50%);pointer-events:none;max-width:min(76vw,330px);padding:7px 11px;border:1px solid #68e4ff88;border-radius:12px;background:#071018dd;color:#eafaff;font:800 12px/1.35 system-ui;text-align:center;box-shadow:0 8px 24px #0009';document.body.appendChild(monsterGuide);
+function monsterScreenGuide(snapshot){
+  const target=world.monsters.find(m=>m.id===world.kSpace?.targetId&&m.simulationCombat),rec=target&&lifeVisuals.get(target.id);
+  if(!snapshot?.target||snapshot.target.state==='DEAD'){monsterGuide.textContent='擊倒！KAIOS 戰利品已記帳 · 下一隻 6 秒後出現';monsterGuide.style.display='block';return}
+  if(!rec?.root){monsterGuide.textContent=`正在召喚 ${snapshot.target.name}…`;monsterGuide.style.display='block';return}
+  const p=new THREE.Vector3();rec.root.getWorldPosition(p);p.y+=1.5;p.project(camera);
+  const inFront=p.z>=-1&&p.z<=1,onScreen=inFront&&Math.abs(p.x)<=.88&&Math.abs(p.y)<=.78;
+  if(onScreen){monsterGuide.textContent=`🎯 ${snapshot.target.name} · ${Math.round(snapshot.target.hp)}/${snapshot.target.maxHp}HP · ${snapshot.distance.toFixed(1)}m${snapshot.distance<=KSPACE_SKILLS.slash.radius?' · ⚔ 可攻擊':' · 靠近再攻擊'}`;monsterGuide.style.left=`${Math.max(18,Math.min(innerWidth-18,(p.x*.5+.5)*innerWidth))}px`;monsterGuide.style.top=`${Math.max(310,Math.min(innerHeight-245,(-p.y*.5+.5)*innerHeight-36))}px`;monsterGuide.style.transform='translate(-50%,-100%)';monsterGuide.style.display='block';return}
+  const rel=snapshot.relative,angle=Math.atan2(rel.x,rel.z)-S.camYaw,side=Math.sin(angle),forward=Math.cos(angle);
+  const arrow=forward<-.15?(side>=0?'↙':'↘'):(side>.22?'←':side<-.22?'→':'↑');
+  monsterGuide.textContent=`${arrow} 怪物：${snapshot.target.name} · ${snapshot.distance.toFixed(1)}m · 用左下搖桿靠近`;
+  monsterGuide.style.left='50%';monsterGuide.style.top='62%';monsterGuide.style.transform='translate(-50%,-50%)';monsterGuide.style.display='block';
+}
 function renderCombatTarget(){
-  const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;return}targetHud.hidden=false;
+  const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;monsterGuide.style.display='none';return}targetHud.hidden=false;
   const t=s.target,body=s.selection?.body||'0C 取經',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED · 6s':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
-  targetHud.textContent=`◎ ${t.name} · ${body}\n${formatGameDistanceK(s.distance)} · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} ▾`;
+  targetHud.textContent=`◎ ${t.name} · ${body}\n${s.distance.toFixed(1)}m · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} ▾`;
+  monsterScreenGuide(s);
   globalThis.__K11520_KSPACE_COMBAT__=s;
   const info=$('#combatKValues');if(info){const tuple=v=>['KX','KY','KZ'].map(a=>formatKCoordinate(v[a])).join(' / ');info.textContent=`PLAYER K（正規化）：${tuple(s.playerK)}\nMONSTER K（正規化）：${tuple(s.monsterK)}\nΔK（正規化）：${tuple(s.deltaK)}\nLOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}\n局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}\n${s.market.status}`}
 }
