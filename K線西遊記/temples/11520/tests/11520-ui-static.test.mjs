@@ -73,6 +73,15 @@ test('entry gesture unlocks BGM and AI customer service has zh-TW voice control'
   assert.ok(productFixesV23.includes("voice.textContent=aiVoiceOn?'🔊':'🔇'"));
 });
 
+test('combat loot and trade events are wired to the shared audio FX engine',()=>{
+  assert.ok(productFixesV23.includes('__K11520_AUDIO_FX__'));
+  assert.ok(productFixesV23.includes("liquidation:[150,55,.35]"));
+  assert.ok(main.includes("audioFx?.play?.('attack')"));
+  assert.ok(main.includes("r.reason==='WEAK_POINT'?'weak':'hit'"));
+  assert.ok(main.includes("audioFx?.play?.('loot')"));
+  assert.ok(main.includes("e.status==='LIQUIDATED'?'liquidation'"));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
