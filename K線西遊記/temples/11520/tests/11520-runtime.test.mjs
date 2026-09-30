@@ -67,6 +67,13 @@ test('offline 0C journey attacks, drops local-only loot once, respawns without s
   tickWorld(world,player,time+6000);assert.equal(kCombatSnapshot(world,player).target.state,'GUARD');
   assert.equal(kCombatSnapshot(world,player).target.hp,120);
 });
+test('journey world starts with a nearby moving ecology and six-phase combat metadata',()=>{
+  const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const ambient=world.monsters.filter(m=>m.ambientJourney);
+  assert.equal(ambient.length,4);assert.deepEqual(new Set(ambient.map(m=>m.species)),new Set(['STONE_APE','FIRE_WISP']));
+  const before=ambient.map(m=>[m.x,m.y,m.z]);tickWorld(world,{x:0,y:0,z:0},5000);assert.ok(ambient.some((m,i)=>m.x!==before[i][0]||m.y!==before[i][1]||m.z!==before[i][2]));
+  const snap=kCombatSnapshot(world,{x:0,y:0,z:0},{plane:'XZ',c:-.1});assert.equal(snap.target.phaseRule,'XZ→KY · XY→KZ · YZ→KX');assert.equal(snap.target.selectedBody,'KY-');assert.ok(snap.distance<=8);
+});
+
 test('journey encounter cycles through common guardian, KAIOS courier and three-market boss',()=>{
   const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const player={x:0,y:0,z:0},guardian=world.monsters.find(m=>m.simulationCombat);
   let now=10000;
