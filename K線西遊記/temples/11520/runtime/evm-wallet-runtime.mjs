@@ -51,6 +51,7 @@ export function createSimulationPlayerStore({ledger,storage}={}){
   function snapshot(){
     const p=structuredClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));
     return {owner,persistent,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,
+      nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,
       kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'};
   }
   return {activate,check,save,record,snapshot};
