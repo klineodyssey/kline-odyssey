@@ -141,7 +141,7 @@ export function createKSpaceEncounter(world,reference=KSPACE_REFERENCE){
     {id:'SIM-JOURNEY-WISP-2',species:'FIRE_WISP',name:'火靈',x:-8,z:12,hp:90,rewardKaios:4,exposed:'KZ+'},
     {id:'SIM-JOURNEY-APE-3',species:'STONE_APE',name:'暗影猿',x:9,z:14,hp:120,rewardKaios:5,exposed:'KX-'}
   ].map((m,i)=>({id:m.id,lifeId:null,species:m.species,name:m.name,baseName:m.name,simulationCombat:false,ambientJourney:true,sourceManaged:false,state:'ROAM',attack:0,rewardKaios:m.rewardKaios,speed:.004+(i*.001),journeyTier:'COMMON',lootName:'取經碎片',spawnX:m.x,spawnY:0,spawnZ:m.z,x:m.x,y:0,z:m.z,hp:m.hp,maxHp:m.hp,exposed:m.exposed,visualMode:'ROAM',roamPhase:i*.9}));
-  world.monsters.push(guardian,...ambient);return world.kSpace;
+  world.monsters.push(guardian,...ambient);world.journeyAmbient=ambient.map(m=>m.id);return world.kSpace;
 }
 export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
   const space=world.kSpace;if(!space||!validVec(player))return null;
@@ -157,7 +157,7 @@ export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
     monsterK:copy(target.kPosition),monsterLocal:{...target.localPosition},monsterWorld:targetWorld,deltaK,relative,
     distance,distanceK:gameUnitsToK(distance),relativePhysicalK:localPositionToK(relative),
     worldSpace:'PHYSICAL_K',distanceSpace:'LOCAL_METERS',marketSpace:'MARKET_NORMALIZED',marketPhysicalTransform:'NOT_CONFIGURED',selection,
-    target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies)},
+    target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies),phaseRule:'XZ→KY · XY→KZ · YZ→KX',selectedBody:selection?.body||null},
     lastResult:space.lastResult?copy(space.lastResult):null};
 }
 export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),heading=0,powerLevel=1}={}){
