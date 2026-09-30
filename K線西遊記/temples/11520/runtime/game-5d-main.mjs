@@ -149,7 +149,8 @@ $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performC
 $('#tradeSword').onclick=()=>performCombat('phantomAxe');
 $('#dodge').onclick=()=>{cancelNavigation('閃避');const next={x:S.xyz.x+Math.sin(S.heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(S.heading)*1.4},r=resolvePlayerMove(S.xyz,next);if(!r.blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast('閃避')}};
 $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
-const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';document.body.appendChild(targetHud);
+const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';targetHud.hidden=true;document.body.appendChild(targetHud);
+const monsterHud=document.querySelector('.monsterHud');if(monsterHud){monsterHud.style.cursor='pointer';monsterHud.title='點擊查看 K-space 六相戰鬥詳情';monsterHud.addEventListener('click',e=>{if(e.target.closest('details'))return;showCombatTarget()})}
 const monsterGuide=document.createElement('div');monsterGuide.id='k11520MonsterGuide';monsterGuide.setAttribute('aria-live','polite');monsterGuide.style.cssText='position:fixed;z-index:520;left:50%;top:52%;transform:translate(-50%,-50%);pointer-events:none;max-width:min(76vw,330px);padding:7px 11px;border:1px solid #68e4ff88;border-radius:12px;background:#071018dd;color:#eafaff;font:800 12px/1.35 system-ui;text-align:center;box-shadow:0 8px 24px #0009';document.body.appendChild(monsterGuide);
 function monsterScreenGuide(snapshot){
   const target=world.monsters.find(m=>m.id===world.kSpace?.targetId&&m.simulationCombat),rec=target&&lifeVisuals.get(target.id);
@@ -164,7 +165,7 @@ function monsterScreenGuide(snapshot){
   monsterGuide.style.left='50%';monsterGuide.style.top='62%';monsterGuide.style.transform='translate(-50%,-50%)';monsterGuide.style.display='block';
 }
 function renderCombatTarget(){
-  const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;monsterGuide.style.display='none';return}targetHud.hidden=false;
+  const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;monsterGuide.style.display='none';return}targetHud.hidden=true;
   const t=s.target,body=s.selection?.body||'0C 取經',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED · 6s':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
   targetHud.textContent=`◎ ${t.name} · ${body}\n${s.distance.toFixed(1)}m · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} · XZ→KY / XY→KZ / YZ→KX ▾`;
   monsterScreenGuide(s);
