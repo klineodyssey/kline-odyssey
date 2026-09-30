@@ -13,7 +13,7 @@ export function createSimulationPlayerStore({ledger,storage}={}){
   if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
   let owner=null,key=null,revision=0,progress=null,persistent=true;
   const read=()=>{try{return JSON.parse(storage?.getItem(key)||'null')}catch{return null}};
-  const fresh=()=>({kaios:0,loot:0,events:{},playedMs:0});
+  const fresh=()=>({kaios:0,claimableKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0});
   function check(){if(!persistent)return;if((read()?.revision??0)!==revision)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED')}
   function save(){
     check();const value={schema:'K11520_LOCAL_SIMULATION_V1',owner,revision:revision+1,ledger,progress};
@@ -31,7 +31,7 @@ export function createSimulationPlayerStore({ledger,storage}={}){
       for(const k of ['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'])ledger[k]=saved.ledger[k];
       const b=saved.ledger.simulation;
       if(b&&Number.isSafeInteger(b.sequence)&&['orders','positions','receipts'].every(k=>Array.isArray(b[k]))&&b.observations&&typeof b.observations==='object')ledger.simulation=structuredClone(b);
-      if(saved.progress){for(const k of ['kaios','loot','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0)}
+      if(saved.progress){for(const k of ['kaios','claimableKaios','loot','xp','engineXp','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0)}
     }
     ledger.owner=owner;
     progress.events.UNIQUE_PLAYER=1;
@@ -40,10 +40,20 @@ export function createSimulationPlayerStore({ledger,storage}={}){
   }
   function record(event,{reward=0,elapsedMs=0}={}){
     check();if(LOCAL_PRODUCT_EVENTS.includes(event))progress.events[event]=(progress.events[event]||0)+1;
-    if(event==='LOOT_DROP'){progress.loot++;progress.kaios+=Math.max(0,Math.min(10,Number(reward)||0))}
+    const boundedReward=Math.max(0,Math.min(100,Number(reward)||0));
+    if(event==='MONSTER_KILL')progress.xp+=10;
+    if(event==='LOOT_DROP'){progress.loot++;progress.kaios+=boundedReward;progress.xp+=5;if(owner!=='guest')progress.claimableKaios+=boundedReward}
+    if(event==='TRADE_FILL'){progress.xp+=4;progress.engineXp+=6}
+    if(event==='TRADE_CLOSE'){progress.xp+=12;progress.engineXp+=18}
+    if(event==='LIQUIDATION'){progress.xp+=2;progress.engineXp+=4}
     progress.playedMs+=Math.max(0,Math.min(10000,Number(elapsedMs)||0));save();
   }
-  return {activate,check,save,record,snapshot:()=>({owner,persistent,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...structuredClone(progress)})};
+  function snapshot(){
+    const p=structuredClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));
+    return {owner,persistent,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,
+      kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'};
+  }
+  return {activate,check,save,record,snapshot};
 }
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){if(typeof hex!=='string'||!/^0x[0-9a-fA-F]+$/.test(hex))throw new Error('INVALID_BALANCE_RESPONSE');return BigInt(hex);}
