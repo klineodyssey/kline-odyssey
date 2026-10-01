@@ -80,3 +80,27 @@ change does not claim to redesign those worlds. The legacy external WalletConnec
 not hidden or treated as a new shared-audio error. No live wallet transaction was
 attempted. Automated audio checks establish lifecycle/mixing, not human listening
 quality or physical iOS speaker validation.
+
+## Public mobile audio correction (2026-10-01)
+
+Human reported inaudible mobile playback after #460. A fresh PUBLIC Heart page
+reproduced the defect: one real touch unlocked the context but left music disabled.
+The earlier browser test pressed an extra Play button and missed first-tap UX.
+All primary controls now enable/unmute music on the first activation; compact
+world controls open advanced settings only on a subsequent tap while playing.
+New documents still require gesture; mute and intentional zero volumes persist.
+
+The old Portal sampled peak/RMS was approximately 0.009/0.0047 (-46.6 dBFS RMS),
+not proof of phone speaker audibility. New unsaved Music defaults to 65%, Master
+remains 65%, and the first-party theme bus has gain 3 (about +13.3 dB combined
+versus old unsaved defaults). Existing saved volumes are not overwritten. Music
+envelopes/fade and node limits remain bounded. Browser QA measures destination
+PCM with nonzero floor and clipping checks, rather than only checking the clock.
+This is digital output evidence, not calibrated speaker SPL or a physical Android
+device listening test. Voice depends on an installed browser/OS speech voice.
+
+Context state changes stop suspended/interrupted scheduling and refresh UI;
+zero Master/Music never reports playing. Portal shows theme/status outside its
+settings panel. Real touch, reload, back/forward, four worlds, zero-volume/mute,
+background/foreground and saved preferences remain the acceptance scope.
+No commercial media, payment, financial logic or protected chain action changes.

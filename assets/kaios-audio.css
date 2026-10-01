@@ -3,3 +3,4 @@
 .kaios-audio-compact{position:static!important;display:contents!important}.kaios-audio-compact .kaios-audio-panel{position:fixed;top:50%;left:50%;right:auto;bottom:auto;margin:0;transform:translate(-50%,-50%);max-height:calc(100dvh - 32px);z-index:2147483000}
 .kaios-audio-panel,.kaios-audio-panel label,.kaios-audio-panel strong{color:#e6f5ff;font-family:system-ui,sans-serif}
 @media(prefers-reduced-motion:reduce){.kaios-audio *{scroll-behavior:auto!important}}
+.kaios-audio-summary{position:absolute;top:100%;right:0;width:220px;max-width:55vw;font-size:10px;line-height:1.35;text-align:right;color:#bcd8e8;pointer-events:none}
