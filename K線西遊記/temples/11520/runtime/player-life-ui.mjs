@@ -74,7 +74,7 @@ export function installPlayerLifeUI({store,getXYZ,saveSession,onChange=()=>{},be
     $('#playerLifeNew').onclick=act(()=>{if(!confirm('建立新本機玩家並重新載入？原玩家存檔保留；本機切換不是安全登入。'))return;saveSession();store.createPlayer({lastXYZ:{x:0,y:0,z:0}});beforePlayerChange();location.reload()});
     $('#playerLifeSwitch').onclick=act(()=>{if(!confirm('切換本機玩家並重新載入？此操作不是安全登入。'))return;saveSession();store.activatePlayer($('#playerLifePlayers').value);beforePlayerChange();location.reload()});
     $('#playerLifeContinue').onclick=close;
-    $('#playerLifeBag').onclick=()=>{close();if(!$('#backpackPanel')?.classList.contains('open'))$('#backpackButton')?.click()};
+    $('#playerLifeBag').onclick=()=>{close();if(!document.documentElement.classList.contains('k11520UtilitiesOpen'))$('#k11520UtilityMaster')?.click();if(!$('#backpackPanel')?.classList.contains('open'))$('#backpackButton')?.click()};
     for(const button of document.querySelectorAll('[data-player-wallet-unlink]'))button.onclick=act(()=>{if(!confirm('只移除此本機角色連結，不撤銷 token allowance、不轉移資產。確定？'))return;store.unlinkWallet(button.dataset.playerWalletUnlink,{confirmLocalOnly:true});render();toast('本機錢包連結已移除；鏈上資產與授權未變')});
     $('#playerLifeBind').onclick=act(async()=>{if(binding)return;binding=true;$('#playerLifeBind').disabled=true;try{
       const session=wallet.snapshot();if(session.status!=='CONNECTED'||!session.account)throw new Error('CONNECT_WALLET_FIRST');
