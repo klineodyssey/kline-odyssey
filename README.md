@@ -1108,8 +1108,8 @@ Where the Market Becomes the Myth.
 
 ## 🔥 Latest Video｜最新發布
 
-▶ #悟空新文 #K線西遊記 #花果山台灣 #KAIOS #KGEN9月19日，借李白《將進酒》敬我姐一杯。真正的千金不是黃金，是家人；真正的美酒，是還能相聚的時間。姐，生日快樂！人生還長，我們繼續走。  
-👉 https://www.youtube.com/watch?v=cZBeJO7_qc8
+▶ #悟空新文#K線西遊記 #花果山台灣 #KAIOS #KGEN如果K線能走進去呢？悟空從K11520花果山出發，打怪、掉寶、升級；六相讓市場成為戰場。  
+👉 https://www.youtube.com/watch?v=-FnvzFEoN34
 
 （本區由 GitHub Actions 自動更新；首頁 iframe 保持固定世界觀主軸影片）
 <!-- LATEST_VIDEO_END -->
