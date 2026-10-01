@@ -6,7 +6,7 @@ const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'
 const OUT='artifacts/kaios-portal-qa';await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,args:['--autoplay-policy=user-gesture-required']});
 const reports=[];
-try{for(const id of ['12345','16888'])for(const [width,height]of [[390,844],[844,390]]){
+try{for(const id of (process.argv.includes('--layout-only')?[]:['12345','16888']))for(const [width,height]of [[390,844],[844,390]]){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
  const errors=[],commercialRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('request',r=>{if(/\/music\/.*(?:\.mp3|playlist\.json)/i.test(r.url()))commercialRequests.push(r.url());});
  await page.addInitScript(()=>{const Real=window.AudioContext||window.webkitAudioContext;window.__qaAudioContexts=[];window.__qaAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const analyser=this.context.createAnalyser();connect.call(this,analyser);window.__qaAnalysers.push(analyser);}return result;};if(Real){window.AudioContext=class extends Real{constructor(...args){super(...args);window.__qaAudioContexts.push(this);}};window.webkitAudioContext=window.AudioContext;}});
@@ -50,12 +50,24 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
   await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html',{waitUntil:'domcontentloaded'});
   await page.locator('#kgen-land-panel-open').waitFor();await page.waitForTimeout(1600);
   assert.equal(await page.evaluate(()=>innerWidth),width,'mobile viewport must not be a scaled 980px desktop');
-  for(const s of ['.nav-music','[data-kaios-return=PORTAL]','#kgen-land-panel-open','#kgen-land-info-panel-open']){const r=await hit(s);assert.ok(r.w>=44&&r.h>=44,'44px utility/land targets');}
+  await page.waitForSelector('html.k12345-composed');
+  for(const s of ['.nav-music','[data-kaios-return=PORTAL]','#kgen-land-panel-open','#kgen-ai-toggle','#k12345-more-open','#kgen-v30-wish-btn','#kgen-v30-vow-btn']){const r=await hit(s);assert.ok(r.w>=44&&r.h>=44,'44px primary targets');}
+  assert.equal(await page.locator('#kgen-land-info-panel-open').count(),0,'one Land entry, not two persistent buttons');
+  const composition=await page.evaluate(()=>{
+   const r=document.querySelector('#core-anchor').getBoundingClientRect();
+   const center=Math.abs(r.x+r.width/2-(document.querySelector('#k12345-world').getBoundingClientRect().x+document.querySelector('#k12345-world').clientWidth/2));
+   const secondary=['.ga-matrix','#kline-engine-panel','#universe-nav','.footer-terminal'].map(s=>document.querySelector(s).checkVisibility());
+   const occupied=[...document.querySelectorAll('#k12345-primary button,.warp-engine,#move-joystick-wrap,#wheel-wrap,#kgen-v30-ritual-dock')].some(el=>{const b=el.getBoundingClientRect();return b.left<r.right&&b.right>r.left&&b.top<r.bottom&&b.bottom>r.top;});
+   return{center,secondary,occupied,width:r.width,height:r.height};
+  });
+  assert.ok(composition.center<1,'Heart centered in world slot');assert.ok(!composition.occupied,'Heart free of persistent controls');
+  assert.ok(composition.width>=190&&composition.height>=190,'Heart remains primary visual, not a thumbnail');
+  assert.deepEqual(composition.secondary,[false,false,false,false],'secondary information is disclosed on demand');
   await hit('.warp-rail');await hit('#move-joystick-wrap');await shot('closed');
   const warp=await page.locator('.warp-engine').boundingBox(),readout=await page.locator('#warp-txt').boundingBox();
   assert.ok(readout.y>=warp.y&&readout.y+readout.height<=warp.y+warp.height+1,'Warp readout must remain inside its stacking region');
   const initial=await geometry();
-  for(const s of ['#kgen-land-panel-open','#kgen-land-info-panel-open'])for(let cycle=0;cycle<2;cycle++){
+  for(const s of ['#kgen-land-panel-open'])for(let cycle=0;cycle<2;cycle++){
    await page.locator(s).tap();assert.equal(await page.locator('#k12345-land-dialog').evaluate(el=>el.open),true);
    assert.deepEqual(await geometry(),initial,'land open cannot push HUD');await hit('.k12345-land-close');
    assert.equal(await page.locator('#kgen-land-panel .kgen-land-body').isVisible(),true,'not an empty overlay');
@@ -68,7 +80,16 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
   await page.locator('.nav-music').tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().musicPlaying);
   await page.locator('.nav-music').tap();await shot('audio');await page.getByRole('button',{name:'關閉設定',exact:true}).tap();
   await page.locator('#kgen-ai-toggle').tap();await shot('ai');await page.getByRole('button',{name:'關閉 AI 客服',exact:true}).tap();
+  await page.locator('#k12345-more-open').tap();await shot('more');
+  assert.equal(await page.locator('.footer-terminal button').count(),8,'all original secondary actions retained');
+  assert.equal(await page.locator('.ga-matrix').isVisible(),true);
+  await page.locator('.footer-terminal').scrollIntoViewIfNeeded();await shot('more-controls');
+  for(const button of await page.locator('.footer-terminal button').all()){
+   await button.scrollIntoViewIfNeeded();assert.ok(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),'original footer action reachable');
+  }
+  await hit('#k12345-more-close');
   await page.locator('#kgen-v102-festival-panel h3').scrollIntoViewIfNeeded();await page.locator('#kgen-v102-festival-panel h3').tap();await shot('festival');await hit('#k12345-festival-close');await page.locator('#k12345-festival-close').tap();
+  assert.equal(await page.locator('#k12345-more').evaluate(el=>el.open),false,'More relinquishes top layer to existing organs');
   await page.locator('#kgen-heart-toggle').tap();await shot('heart');await hit('#kgen-heart-toggle');
   const heart=await page.locator('#kgen-heart-live-panel').boundingBox();assert.ok(heart.x>=0&&heart.y>=0&&heart.x+heart.width<=width+1&&heart.y+heart.height<=height+1,'Heart stays in viewport');
   await page.locator('#kgen-heart-toggle').tap();
@@ -78,13 +99,33 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
     await page.setViewportSize(size);await page.waitForTimeout(120);await hit('.nav-music');await hit('[data-kaios-return=PORTAL]');await hit('#kgen-land-panel-open');
    }
    assert.deepEqual(await geometry(),initial,'rotation cannot accumulate offsets');
+   // Original nodes and bindings survive crossing the desktop breakpoint too.
+   await page.setViewportSize({width:1280,height:900});await page.waitForTimeout(120);
+   assert.equal(await page.locator('html.k12345-composed').count(),0);
+   assert.equal(await page.locator('#k12345-more .footer-terminal').count(),0);
+   await page.setViewportSize({width:390,height:844});await page.waitForTimeout(120);
+   assert.deepEqual(await geometry(),initial,'desktop restoration cannot duplicate or drift organs');
   }
   assert.equal(await page.locator('[data-kaios-return=PORTAL]').count(),1);
   assert.equal(new URL(await page.locator('[data-kaios-return=PORTAL]').getAttribute('href'),page.url()).href,BASE+'/');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await shot('final');
+  if(width===390||width===844){
+   const core=page.locator('#core-window'),beforeMove=await core.getAttribute('style');
+   const base=await page.locator('#move-joystick-base').boundingBox();
+   await page.mouse.move(base.x+base.width/2,base.y+base.height/2);await page.mouse.down();
+   await page.mouse.move(base.x+base.width/2+12,base.y+base.height/2-8);await page.mouse.up();
+   assert.notEqual(await core.getAttribute('style'),beforeMove,'MOVE changes actual Heart position');
+   assert.equal(await page.locator('#move-joystick-knob').evaluate(el=>el.style.transform),'translate(0px, 0px)','joystick thumb returns without resetting world position');
+   const beforeDrive=await page.locator('#steer-input-val').inputValue(),wheel=await page.locator('#wheel').boundingBox();
+   await page.mouse.click(wheel.x+wheel.width-8,wheel.y+wheel.height/2);
+   assert.notEqual(await page.locator('#steer-input-val').inputValue(),beforeDrive,'DRIVE retains original steering handler');
+   const beforeWarp=await page.locator('#warp-input-val').inputValue();await page.locator('#warp-input-val').tap();
+   assert.notEqual(await page.locator('#warp-input-val').inputValue(),beforeWarp,'WARP input still changes');
+   await shot('movement');
+  }
   // Known pre-existing optional CDN defect, not a blanket allow-list for application errors.
   assert.ok(errors.every(e=>e.includes('process is not defined')&&e.includes('@walletconnect/ethereum-provider@2.12.2')),'no new runtime errors');
-  reports.push({id:'12345-mobile',width,height,landStable:'PASS',modalContent:'PASS',utilityTargets:'PASS',panels:'PASS',rotation:width===390?'PASS':'NOT_APPLICABLE',legacyPageErrors:errors});
+  reports.push({id:'12345-mobile',width,height,composition,landStable:'PASS',modalContent:'PASS',utilityTargets:'PASS',panels:'PASS',rotation:width===390?'PASS':'NOT_APPLICABLE',legacyPageErrors:errors});
  }catch(error){await shot('FAIL');throw error;}finally{await context.close();}
 }
 }finally{await fs.writeFile(`${OUT}/world-audio-report.json`,JSON.stringify(reports,null,2));await browser.close();console.log(JSON.stringify(reports));}

@@ -686,6 +686,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
     safeRun("HeartOverlay.init", function(){ HeartOverlay.init(); });
     safeRun("PanelOverlay.init", function(){ PanelOverlay.init(); });
     safeRun("Ritual.init", function(){ Ritual.init(); });
+    safeRun("LayoutRuntime composition", function(){ window.KGEN_RUNTIME_CORE.modules.LayoutRuntime.mountComposition(); });
     safeRun("Overlay.ensureQuota", function(){ Overlay.ensureQuota(); });
     safeRun("Overlay.ensureLeaderboard", function(){ Overlay.ensureLeaderboard(); });
     safeRun("startRuntimeHandleGuard", startRuntimeHandleGuard);
