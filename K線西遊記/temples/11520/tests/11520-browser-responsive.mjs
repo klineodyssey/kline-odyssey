@@ -29,6 +29,8 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourceSha=bytes=>sha(Buffer.from(Buffer.from(bytes).toString('utf8').replace(/\r\n?/g,'\n'),'utf8'));
 async function verifyInitialQuoteWait(){
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+  // A returning player must keep the saved location, not walk 281m back to origin.
+  await page.addInitScript(()=>{const xyz={x:210,y:.013172,z:186};localStorage.setItem('k11520.player-session.v1',JSON.stringify({version:1,world:'K11520',xyz,intentXYZ:xyz}));});
   const pattern='https://data-api.binance.vision/api/v3/aggTrades*';let ready=false;
   await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,ready?[{symbol:'BTCUSDT',price:'81185'},{symbol:'ETHUSDT',price:'2631.54'},{symbol:'BNBUSDT',price:'767.8'}]:[]))}));
   try{
@@ -38,6 +40,21 @@ async function verifyInitialQuoteWait(){
       catch(error){if(await page.locator('#intro11520').isVisible())throw error}
     }
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
+    const returning=await page.evaluate(()=>({combat:globalThis.__K11520_KSPACE_API__.snapshot(),coords:globalThis.__K11520_WORLD_COORDS__}));
+    assert.equal(returning.coords.physical.x,210);assert.equal(returning.coords.physical.z,186);
+    assert.ok(Math.abs(returning.combat.distance-7)<.1,'restored XYZ must receive the guardian at 7m');
+    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.7.0'));
+    await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
+    await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
+    const lifeBefore=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot());
+    await page.screenshot({path:`${OUT}/returning-390-7m.png`});
+    await page.waitForTimeout(2400);
+    const lifeAfter=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot());
+    assert.equal(lifeAfter.length,4);assert.ok(lifeAfter.every(m=>m.sourceManaged===false));
+    assert.ok(lifeAfter.every((m,i)=>Math.hypot(m.position.x-lifeBefore[i].position.x,m.position.z-lifeBefore[i].position.z)>.01),'ambient life must actually move');
+    await fs.writeFile(`${OUT}/returning-player.json`,JSON.stringify({returning,lifeBefore,lifeAfter},null,2));
+    await page.screenshot({path:`${OUT}/returning-390-ambient-moving.png`});
+    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.7\.0/,'legacy runtime must not overwrite release stamp');
     assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot().market.status),'WAIT');
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;

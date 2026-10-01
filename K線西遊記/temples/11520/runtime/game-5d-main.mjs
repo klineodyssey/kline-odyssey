@@ -31,7 +31,7 @@ const restoredSession=readPlayerSession();if(restoredSession){S.xyz={...restored
 let lastSessionSave=0,lastSessionSnapshot='';function persistPlayerSession(force=false){const now=Date.now(),snapshot=JSON.stringify([S.xyz,S.intentXYZ]);if(!force&&(snapshot===lastSessionSnapshot||now-lastSessionSave<750))return;lastSessionSave=now;lastSessionSnapshot=snapshot;savePlayerSession({xyz:S.xyz,intentXYZ:S.intentXYZ})}addEventListener('pagehide',()=>persistPlayerSession(true));addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistPlayerSession(true)});
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
 const playerStore=createSimulationPlayerStore({ledger});playerStore.activate(null);
-world.journeyEnabled=true;createKSpaceEncounter(world);
+world.journeyEnabled=true;createKSpaceEncounter(world,undefined,S.xyz);
 const simulationExecution=createExecutionAdapter({ledger,productV1:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
 function productEvent(event,details){try{playerStore.record(event,details)}catch{toast('另一頁已更新玩家紀錄，請重新載入')}const p=playerStore.snapshot();S.kaios=p.kaios;return p}
 S.kaios=playerStore.snapshot().kaios;
@@ -416,7 +416,16 @@ function visibleLifeCanvasHitPoints(){
   }
   return Object.freeze([]);
 }
-globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints,visibleLifeCanvasHitPoints});
+// Read-only render evidence, separate from canonical source-managed Life slots.
+function journeyLifeSnapshot(){
+  const rect=renderer.domElement.getBoundingClientRect();
+  return (world.ambientLife||[]).map(m=>{
+    const root=lifeVisuals.get(m.id)?.root,p=new THREE.Vector3(m.x,m.y+.8,m.z).project(camera);
+    const x=rect.left+(renderer.domElement.dataset.xVisualMirror==='1'?1-p.x:1+p.x)*rect.width/2,y=rect.top+(1-p.y)*rect.height/2;
+    return {id:m.id,position:{x:m.x,y:m.y,z:m.z},sourceManaged:m.sourceManaged,visible:!!root?.visible,screen:{x,y},inView:p.z>=-1&&p.z<=1&&Math.abs(p.x)<=1&&Math.abs(p.y)<=1,uncovered:document.elementFromPoint(x,y)===renderer.domElement};
+  });
+}
+globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints,visibleLifeCanvasHitPoints,journeyLifeSnapshot});
 
 const raycaster=new THREE.Raycaster(),tapPointer=new THREE.Vector2(),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);let worldTapStart=null;
 function ancestorData(obj,key){let n=obj;while(n){if(n.userData&&n.userData[key]!=null)return n.userData[key];n=n.parent}return null}
@@ -430,6 +439,6 @@ function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){cons
 }
 renderer.domElement.addEventListener('pointerdown',e=>{worldTapStart={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY)}},{passive:true});renderer.domElement.addEventListener('pointerup',e=>{const s=worldTapStart;worldTapStart=null;if(!s||s.id!==e.pointerId)return;if(Math.hypot(e.clientX-s.x,e.clientY-s.y)>10||performance.now()-s.t>420)return;worldTapAt(e.clientX,e.clientY,s.monster)},{passive:true});renderer.domElement.addEventListener('pointercancel',()=>{worldTapStart=null},{passive:true});
 
-function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);if(S.navActive)moveNavigation();else moveManual();persistPlayerSession();avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play((S.navActive||(groundMode&&moving))?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();const dist=8.5;camera.position.set(S.xyz.x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2,S.xyz.z-Math.cos(S.camYaw)*dist);camera.lookAt(S.xyz.x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,S.xyz.z+Math.cos(S.camYaw)*1.8);combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
+function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);if(S.navActive)moveNavigation();else moveManual();persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play((S.navActive||(groundMode&&moving))?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();const dist=8.5;camera.position.set(S.xyz.x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2,S.xyz.z-Math.cos(S.camYaw)*dist);camera.lookAt(S.xyz.x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,S.xyz.z+Math.cos(S.camYaw)*1.8);combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
 
 renderAxes();syncControls();quotes();setInterval(quotes,5000);install11520ProductFixes();requestAnimationFrame(frame);$('#charState').textContent='3D LOADING';toast('11520 canonical runtime 已啟動');

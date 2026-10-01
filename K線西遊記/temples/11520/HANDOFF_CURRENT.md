@@ -1,5 +1,21 @@
 # 11520 HANDOFF CURRENT
 
+## V2.7.0 returning-player encounter closeout — 2026-10-01
+
+- PR455 preserves restored XYZ and creates the first guardian at player Z +7m.
+  Ambient apes/wisps spawn and roam in the nearby camera footprint, separately
+  from canonical source-managed Life slots and all settlement authorities.
+- Returning-player Chromium inspection additionally found the bootstrap still
+  overwrote V2.7.0 with V2.6.25, and the finite ground disappeared outside origin.
+  Bootstrap now guards V2.7.0; the render-only ground follows local player X/Z
+  without moving the player, buildings, collision objects or market coordinates.
+- Existing responsive QA now seeds XYZ (210, .013172, 186), checks the 7m target,
+  observes visible/moving ambient meshes, and saves screenshots plus read-only
+  projection evidence. Release still requires exact-head CI and Pages verification.
+- First-party implementation/test changes only; no external assets, signer,
+  token payout, payment or Oracle subscription. Added-line secret scan: no matches.
+  Payroll/ATM has no new receipt: HOLD. >1C production and Mainnet remain HOLD.
+
 ## Active V1 product scope — 2026-09-30
 
 - Human changed priority to journey/gameplay and free0.001–1C trading capability.
