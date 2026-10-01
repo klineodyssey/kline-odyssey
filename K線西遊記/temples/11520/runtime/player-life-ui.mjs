@@ -20,13 +20,13 @@ export function createPlayerLife({lastXYZ}={}){
   globalThis.__K11520_PLAYER_LIFE__=Object.freeze({snapshot:()=>store.snapshot()});
   return store;
 }
-export function installPlayerLifeUI({store,getXYZ,saveSession,onChange=()=>{},beforePlayerChange=()=>{},navigate,toast=()=>{},wallet}){
+export function installPlayerLifeUI({store,getXYZ,saveSession,onChange=()=>{},beforePlayerChange=()=>{},navigate,toast=()=>{},wallet,startEncounter=()=>{},claimDaily=()=>{}}){
   let binding=false;
   const act=fn=>async()=>{try{await fn();onChange()}catch(e){toast(String(e?.message||'PLAYER_SAVE_FAILED'));const el=$('#playerLifeMessage');if(el)el.textContent=String(e?.message||'PLAYER_SAVE_FAILED')}};
   function close(){ $('#sheet').classList.remove('open') }
   function render(){
     const state=store.snapshot(),p=state.player;if(!p)return;
-    const home=state.home||{},appearance=p.characterAppearance||'WUKONG';
+    const home=state.home||{},appearance=p.characterAppearance||'WUKONG',game=store.gameplayProfile(),daily=game.daily;
     $('#k11520UiSettings')?.classList.remove('open');$('#dock')?.classList.remove('open');
     if(document.documentElement.classList.contains('k11520UtilitiesOpen'))$('#k11520UtilityMaster')?.click();
     $('#sheetTitle').textContent='Player Life · 玩家與起家地';$('#sheetBody').dataset.simOrgan='';
@@ -39,7 +39,12 @@ export function installPlayerLifeUI({store,getXYZ,saveSession,onChange=()=>{},be
       <label>遊戲稱謂（可略過）<input id="playerLifePronoun" maxlength="24" value="${escape(p.pronoun||'')}" placeholder="旅人 / 她 / 他 / 自訂"></label>
       <label>遊戲出生世界<select id="playerLifeWorld"><option value="11520">花果山 K11520</option><option value="12345">心世界 K12345</option><option value="16888">宇宙 K16888</option></select></label>
       <p class="muted">出生世界為遊戲背景；本輪在花果山呈現起家地投影，不會瞬移或改變既有 XYZ。建屋後背景固定。</p><button class="btn" id="playerLifeSave">保存角色</button></div>
-      <div class="card"><h3>成長與背包</h3><p id="playerLifeProgress">Lv.${escape(p.level)} · XP ${escape(p.xp)} · Engine ${escape(p.engineLevel)} / ${escape(p.engineXp)} XP</p>
+      <div class="card" id="gameplayProgression"><h3>PLAYER · 成長與解鎖</h3><p id="playerLifeProgress">Lv.${escape(p.level)} · XP ${escape(p.xp)}${game.nextPlayerLevel?' / '+game.nextPlayerLevel.xp:''}</p>
+      <p id="ga600Progress">GA600 · ENGINE Lv.${p.engineLevel} · ENGINE XP ${p.engineXp}${game.nextEngineLevel?' / '+game.nextEngineLevel.xp:''}</p>
+      <p>GAME TRAINING ONLY · 完整 GA600 引擎未整合。遊戲成長不提高真實槓桿、資本或交易權限。</p>
+      <ul id="gameplayUnlocks">${game.unlockTable.map(u=>`<li>${u.unlocked?'✓':'🔒'} ${escape(u.label)} · 玩家 Lv.${u.playerLevel} / 引擎 Lv.${u.engineLevel}</li>`).join('')}</ul>
+      <div id="dailyJourney"><h3>今日取經 · ${daily.day} UTC</h3><p>擊倒 ${Math.min(daily.kills,3)}/3 · 六相命中 ${Math.min(daily.sixPhase,1)}/1 · 探索 ${Math.min(daily.distanceMeters,50)}/50 m</p><p>完成：25 XP + 20 ENGINE XP + 星塵（遊戲道具）</p><button class="btn" id="dailyJourneyClaim" ${!daily.ready?'disabled':''}>${daily.claimed?'XP 已領 · 檢查道具交付':'領取今日獎勵'}</button></div>
+      <details><summary>遭遇 / 歷史市場訓練</summary><p>遊戲化市場型態，不是歷史績效、預測或投資建議。選擇遭遇將替換目前遊戲怪物，不改市場生命來源或金融帳本。</p>${[['GUARDIAN','取經守關猿',true],['COURIER','KAIOS 運鈔妖',game.unlocks.STRONG_MONSTERS],['MARKET_BOSS','三市場守關 Boss',game.unlocks.BOSS],['TREND_BOSS','趨勢 Boss',game.unlocks.HISTORICAL_TRAINING],['CRASH_BOSS','急跌 Boss',game.unlocks.HISTORICAL_TRAINING],['RANGE_BOSS','盤整 Boss',game.unlocks.HISTORICAL_TRAINING]].map(([id,label,enabled])=>`<button class="btn" data-journey-encounter="${id}" ${enabled?'':'disabled'}>${enabled?'':'🔒 '}${label}</button>`).join('')}</details>
       <p>遊戲進度僅本機候選；不是安全經濟帳本或鏈上 KAIOS。</p><pre id="playerLifeInventory">${escape((globalThis.K11520Backpack?.get?.().items||[]).map(i=>`${i.name} ×${i.qty}`).join('\n')||'背包目前是空的')}</pre><button class="btn" id="playerLifeBag">開啟原有背包</button></div>
       <div class="card"><h3>🏡 起家地</h3><p id="playerLifeHome">${escape(home.homePlotId||home.plotId||p.homePlotId||'尚未分配')} · HOUSE ${escape(home.houseLevel??0)}</p>
       <p>遊戲資料，不是 NFT／土地所有權。空地 → 草屋 → 房屋 → 洞府，後續升級依資料規則。</p>
@@ -74,6 +79,8 @@ export function installPlayerLifeUI({store,getXYZ,saveSession,onChange=()=>{},be
     $('#playerLifeNew').onclick=act(()=>{if(!confirm('建立新本機玩家並重新載入？原玩家存檔保留；本機切換不是安全登入。'))return;saveSession();store.createPlayer({lastXYZ:{x:0,y:0,z:0}});beforePlayerChange();location.reload()});
     $('#playerLifeSwitch').onclick=act(()=>{if(!confirm('切換本機玩家並重新載入？此操作不是安全登入。'))return;saveSession();store.activatePlayer($('#playerLifePlayers').value);beforePlayerChange();location.reload()});
     $('#playerLifeContinue').onclick=close;
+    $('#dailyJourneyClaim').onclick=act(()=>{claimDaily();render()});
+    for(const b of document.querySelectorAll('[data-journey-encounter]'))b.onclick=act(()=>{startEncounter(b.dataset.journeyEncounter);close()});
     $('#playerLifeBag').onclick=()=>{close();if(!document.documentElement.classList.contains('k11520UtilitiesOpen'))$('#k11520UtilityMaster')?.click();if(!$('#backpackPanel')?.classList.contains('open'))$('#backpackButton')?.click()};
     for(const button of document.querySelectorAll('[data-player-wallet-unlink]'))button.onclick=act(()=>{if(!confirm('只移除此本機角色連結，不撤銷 token allowance、不轉移資產。確定？'))return;store.unlinkWallet(button.dataset.playerWalletUnlink,{confirmLocalOnly:true});render();toast('本機錢包連結已移除；鏈上資產與授權未變')});
     $('#playerLifeBind').onclick=act(async()=>{if(binding)return;binding=true;$('#playerLifeBind').disabled=true;try{

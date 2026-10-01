@@ -1,5 +1,21 @@
 # 11520 HANDOFF CURRENT
 
+## V2.9 gameplay candidate — 2026-10-01
+
+- Base refetched from origin/main `69c6045fbd7e06f16cf71ad1f6443abf9e227a9b`
+  (#461 public audio fix). Branch `codex/k11520-v29-gameplay`.
+- Human: GAMEPLAY FIRST. Extend existing Player Life, World, Backpack and
+  Shared Audio authorities; no parallel game or financial engine.
+- Progression, Boss/rarity, Daily Journey and GA600 synthetic game training
+  are documented cumulatively in `docs/K11520_PLAYER_LIFE.md`.
+- Real gameplay and screenshot review must pass before READY_FOR_SECOND_REVIEW.
+  This heading is implementation status, not a claim of completed browser QA.
+- Actual bounded engineering sessions: `v29_progression`, `v29_boss`,
+  `v29_audio` under codex-gm-01; no registry employees or payroll invented.
+  No payment receipt exists: payroll/rewards remain HOLD, not PAID.
+- No Mainnet, paid Oracle/cloud/music, on-chain KAIOS payout or automatic
+  trading/cap increase. Human receives the PR for second-layer review.
+
 ## V2.8 Player Life candidate — 2026-10-01
 
 - Human work order: guest-first permanent local Player ID, provider-neutral

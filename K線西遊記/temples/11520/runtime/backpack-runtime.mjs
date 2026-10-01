@@ -5,14 +5,16 @@ PURPOSE: Player backpack / storage runtime for 11520 living world.
 */
 
 export const BACKPACK_VERSION='11520-BACKPACK-V1';
+export const BACKPACK_REWARD_RECEIPT_LIMIT=10000;
 export const ITEM_KINDS=Object.freeze(['TREASURE','MATERIAL','FOOD','LIVING_CARGO']);
 export const LIVING_SPECIES=Object.freeze(['COW','FISH','SHRIMP','CHICKEN','DUCK']);
 
 function assertPositiveInt(n,name){n=Number(n);if(!Number.isInteger(n)||n<1)throw new Error(`${name}_MUST_BE_POSITIVE_INT`);return n}
 function clone(v){return JSON.parse(JSON.stringify(v))}
+const validRewardId=id=>typeof id==='string'&&id.length>0&&id.length<=128&&!/[\x00-\x1f<>]/.test(id);
 
 export function createBackpack({capacitySlots=24,capacityWeight=120,ownerId='PLAYER-11520'}={}){
-  return {version:BACKPACK_VERSION,ownerId,capacitySlots:assertPositiveInt(capacitySlots,'CAPACITY_SLOTS'),capacityWeight:Number(capacityWeight)>0?Number(capacityWeight):120,items:[],updatedAt:Date.now()};
+  return {version:BACKPACK_VERSION,ownerId,capacitySlots:assertPositiveInt(capacitySlots,'CAPACITY_SLOTS'),capacityWeight:Number(capacityWeight)>0?Number(capacityWeight):120,items:[],rewardReceipts:[],updatedAt:Date.now()};
 }
 
 export function normalizeItem(input={}){
@@ -23,6 +25,7 @@ export function normalizeItem(input={}){
   if(kind==='LIVING_CARGO'&&qty!==1)throw new Error('LIVING_CARGO_QUANTITY_ONE');
   const species=input.species?String(input.species).toUpperCase():null;
   if(kind==='LIVING_CARGO'&&species&&!LIVING_SPECIES.includes(species))throw new Error('UNSUPPORTED_LIVING_SPECIES');
+  if(input.rewardId!=null&&!validRewardId(input.rewardId))throw new Error('INVALID_REWARD_ID');
   return {
     itemId:String(input.itemId||cryptoRandomId(kind)),
     name:String(input.name||species||kind),kind,species,qty,
@@ -30,6 +33,7 @@ export function normalizeItem(input={}){
     stackable:kind!=='LIVING_CARGO'&&input.stackable!==false,
     treasureClass:input.treasureClass?String(input.treasureClass):null,
     lifeId:input.lifeId?String(input.lifeId):null,
+    rewardId:input.rewardId??null,
     meta:input.meta&&typeof input.meta==='object'?clone(input.meta):{},
   };
 }
@@ -40,6 +44,11 @@ export function backpackSnapshot(backpack){return {...clone(backpack),usedSlots:
 
 export function canStore(backpack,itemInput){
   const item=normalizeItem(itemInput),existing=item.stackable?backpack.items.find(i=>i.stackable&&i.kind===item.kind&&i.name===item.name&&i.species===item.species):null;
+  // These are inventory insertion receipts, not currency, XP or payout records.
+  // Never evict old receipts: a full bounded history blocks new reward insertion.
+  const receipts=backpack.rewardReceipts||[];
+  if(item.rewardId&&receipts.includes(item.rewardId))return {ok:false,reason:'REWARD_ALREADY_CLAIMED',item};
+  if(item.rewardId&&receipts.length>=BACKPACK_REWARD_RECEIPT_LIMIT)return {ok:false,reason:'REWARD_RECEIPT_LIMIT',item};
   if(backpack.items.some(i=>i.itemId===item.itemId||(item.lifeId&&i.lifeId===item.lifeId)))return{ok:false,reason:'DUPLICATE_ITEM',item};
   if(existing&&existing.qty+item.qty>1000000)return{ok:false,reason:'ITEM_QUANTITY_LIMIT',item};
   const slotCost=existing?0:1,weightCost=item.weightEach*item.qty;
@@ -51,6 +60,7 @@ export function canStore(backpack,itemInput){
 export function storeItem(backpack,itemInput){
   const check=canStore(backpack,itemInput);if(!check.ok)return check;
   if(check.existing)check.existing.qty+=check.item.qty;else backpack.items.push(check.item);
+  if(check.item.rewardId)(backpack.rewardReceipts??=[]).push(check.item.rewardId);
   backpack.updatedAt=Date.now();return{ok:true,item:check.existing||check.item,snapshot:backpackSnapshot(backpack)};
 }
 
@@ -69,6 +79,8 @@ export function storeLivingLife(backpack,life,{weightEach=1}={}){
 /** Local candidate validation only; never economic proof. Legacy owner migrates once via scoped storage. */
 export function restoreBackpack(value,ownerId){
   if(!value||!Array.isArray(value.items)||value.items.length>24||value.version!==BACKPACK_VERSION||![ownerId,'PLAYER-11520'].includes(value.ownerId))throw new Error('INVALID_BACKPACK_OWNER_OR_SCHEMA');
+  const receipts=value.rewardReceipts===undefined?[]:value.rewardReceipts;
+  if(!Array.isArray(receipts)||receipts.length>BACKPACK_REWARD_RECEIPT_LIMIT||receipts.some(id=>!validRewardId(id))||new Set(receipts).size!==receipts.length)throw new Error('INVALID_REWARD_RECEIPTS');
   const result=createBackpack({ownerId}),ids=new Set(),lives=new Set();
   for(const item of value.items){
     if(typeof item.itemId!=='string'||!item.itemId||item.itemId.length>256)throw new Error('INVALID_ITEM_ID');
@@ -77,5 +89,7 @@ export function restoreBackpack(value,ownerId){
     ids.add(item.itemId);if(item.lifeId)lives.add(item.lifeId);
     const added=storeItem(result,item);if(!added.ok)throw new Error(added.reason);
   }
+  result.rewardReceipts=[...new Set([...receipts,...result.rewardReceipts])];
+  if(result.rewardReceipts.length>BACKPACK_REWARD_RECEIPT_LIMIT)throw new Error('INVALID_REWARD_RECEIPTS');
   return result;
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createBackpack,backpackSnapshot,restoreBackpack,storeItem} from '../runtime/backpack-runtime.mjs';
+import {createBackpack,backpackSnapshot,restoreBackpack,storeItem,removeItem,BACKPACK_REWARD_RECEIPT_LIMIT} from '../runtime/backpack-runtime.mjs';
 import {createWildEcology} from '../runtime/wild-ecology-source-runtime.mjs';
 import {captureLifeToBackpack,releaseLifeFromBackpack,collectTreasureToBackpack,nearestCollectableLife} from '../runtime/living-world-inventory-runtime.mjs';
 import {captureNearestLife,releaseItem} from '../runtime/living-world-browser-bridge.mjs';
@@ -110,4 +110,59 @@ test('restore requires stable item identity, living species and LIFE_ID',()=>{
 test('duplicate runtime insertion does not mutate valid backpack',()=>{
   const bag=createBackpack({ownerId:LOCAL_OWNER});storeItem(bag,material('id'));
   const before=JSON.stringify(bag);assert.equal(storeItem(bag,material('id')).reason,'DUPLICATE_ITEM');assert.equal(JSON.stringify(bag),before);
+});
+
+const reward=(id)=>({...material(id,'取經碎片'),rewardId:id,meta:{scope:'LOCAL_GAME_ONLY',rarity:'COMMON'}});
+test('reward receipts survive stack merge, reload and item discard without a second inventory ledger',()=>{
+  const bag=createBackpack({ownerId:LOCAL_OWNER});
+  assert.equal(storeItem(bag,reward('kill:1:loot')).ok,true);
+  assert.equal(storeItem(bag,reward('kill:2:loot')).ok,true);
+  assert.equal(bag.items.length,1);assert.equal(bag.items[0].qty,2);
+  assert.deepEqual(bag.rewardReceipts,['kill:1:loot','kill:2:loot']);
+  assert.equal(storeItem(bag,reward('kill:2:loot')).reason,'REWARD_ALREADY_CLAIMED');
+  const restored=restoreBackpack(JSON.parse(JSON.stringify(bag)),LOCAL_OWNER);
+  assert.deepEqual(restored.rewardReceipts,bag.rewardReceipts);
+  assert.equal(removeItem(restored,restored.items[0].itemId,2).ok,true);assert.equal(restored.items.length,0);
+  for(const id of bag.rewardReceipts)assert.equal(storeItem(restored,reward(id)).reason,'REWARD_ALREADY_CLAIMED');
+  assert.equal(storeItem(restored,reward('kill:3:loot')).ok,true);
+  const second=restoreBackpack(restored,LOCAL_OWNER);assert.equal(second.rewardReceipts.length,3);
+});
+
+test('inventory receipt migration is compatible, bounded and fails closed without evicting replay protection',()=>{
+  const legacy=savedBackpack([material('legacy')]);delete legacy.rewardReceipts;
+  assert.deepEqual(restoreBackpack(legacy,LOCAL_OWNER).rewardReceipts,[]);
+  for(const receipts of [null,{},['x','x'],[''],['<x>'],Array.from({length:10001},(_,i)=>'r'+i)]){
+    // Missing legacy property is allowed; explicit null or malformed receipts are not.
+    assert.throws(()=>restoreBackpack({...legacy,rewardReceipts:receipts},LOCAL_OWNER),/INVALID_REWARD_RECEIPTS/);
+  }
+  const full=createBackpack({ownerId:LOCAL_OWNER});full.rewardReceipts=Array.from({length:BACKPACK_REWARD_RECEIPT_LIMIT},(_,i)=>'reward:'+i);
+  const before=JSON.stringify(full);assert.equal(storeItem(full,reward('new')).reason,'REWARD_RECEIPT_LIMIT');assert.equal(JSON.stringify(full),before);
+  assert.equal(storeItem(full,reward('reward:0')).reason,'REWARD_ALREADY_CLAIMED');
+  const overweight=createBackpack({ownerId:LOCAL_OWNER,capacityWeight:.1});assert.equal(storeItem(overweight,reward('failed')).reason,'BACKPACK_OVERWEIGHT');assert.deepEqual(overweight.rewardReceipts,[]);
+});
+
+test('backpack UI distinguishes persisted, session-only, corrupt and cross-player results',async()=>{
+  const previous={storage:Object.getOwnPropertyDescriptor(globalThis,'localStorage'),life:globalThis.__K11520_PLAYER_LIFE__,api:globalThis.K11520Backpack};
+  const data=new Map(),key=p=>`k11520.player:${p}:11520.backpack.v1`;let failWrites=false;
+  const storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>{if(failWrites)throw Error('QUOTA_EXCEEDED');data.set(k,v)},removeItem:k=>data.delete(k)};
+  let active=LOCAL_OWNER,persistent=true;
+  globalThis.__K11520_PLAYER_LIFE__={snapshot:()=>({player:{playerId:active},persistent})};
+  Object.defineProperty(globalThis,'localStorage',{configurable:true,value:storage});
+  try{
+    const ui=await import('../runtime/backpack-ui.mjs?inventory-receipt-test');
+    const saved=ui.addBackpackItem(reward('saved'));assert.equal(saved.ok,true);assert.equal(saved.persistent,true);assert.equal(saved.storageStatus,'READY');
+    failWrites=true;const session=ui.addBackpackItem(reward('session'));assert.equal(session.ok,true);assert.equal(session.persistent,false);assert.equal(session.storageStatus,'SESSION_ONLY');
+    assert.equal(JSON.parse(data.get(key(active))).items[0].qty,1,'failed write cannot be reported durable');
+    assert.equal(ui.addBackpackItem(reward('session')).reason,'REWARD_ALREADY_CLAIMED');
+    const second='KAIOS-P-'+'b'.repeat(32);active=second;persistent=false;
+    assert.equal(ui.getBackpack().items.length,0);assert.equal(ui.getBackpack().rewardReceipts.length,0);
+    assert.equal(ui.addBackpackItem(reward('saved')).ok,true,'different player has an isolated receipt namespace');
+    assert.equal(ui.getBackpack().persistent,false);
+    failWrites=false;persistent=true;active='KAIOS-P-'+'c'.repeat(32);data.set(key(active),'{corrupt');
+    const corrupt=ui.addBackpackItem(reward('never'));assert.equal(corrupt.ok,false);assert.equal(corrupt.reason,'CORRUPT_SAVE');assert.equal(corrupt.persistent,false);
+    assert.equal(ui.getBackpack().items.length,0);assert.equal(data.get(key(active)),'{corrupt','preserve corrupt original, do not overwrite');
+  }finally{
+    if(previous.storage)Object.defineProperty(globalThis,'localStorage',previous.storage);else delete globalThis.localStorage;
+    for(const [k,v] of [['__K11520_PLAYER_LIFE__',previous.life],['K11520Backpack',previous.api]]){if(v===undefined)delete globalThis[k];else globalThis[k]=v}
+  }
 });

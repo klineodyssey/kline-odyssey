@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
-import {createLocalPlayerStore,createCloudPlayerStore,getActivePlayerId,PLAYER_LIFE_STORAGE_KEY,HOME_STAGES} from '../runtime/player-life-runtime.mjs';
+import {createLocalPlayerStore,createCloudPlayerStore,getActivePlayerId,PLAYER_LIFE_STORAGE_KEY,HOME_STAGES,gameplayProfile,GAMEPLAY_UNLOCKS,DAILY_JOURNEY_RULES,PLAYER_EVENT_REWARDS} from '../runtime/player-life-runtime.mjs';
 import {createSimulationPlayerStore} from '../runtime/evm-wallet-runtime.mjs';
 import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 
@@ -115,4 +115,112 @@ test('corrupt scoped simulation ledger is not silently overwritten during Player
    try{sim.activate(null)}catch{}
    assert.equal(storage.getItem(key),corrupt);
  }
+});
+
+test('V2.9 gameplay progression is configured and never grants financial authority',()=>{
+ const s=make();s.createPlayer();let p=s.gameplayProfile();
+ assert.equal(p.unlocks.SLASH,true);assert.equal(p.unlocks.GOLDEN_RAIN,false);assert.equal(p.engineMode,'GAME_TRAINING_ONLY');assert.equal(p.fullEngine,'NOT_INTEGRATED');
+ assert.equal(p.nextUnlock.id,'GOLDEN_RAIN');assert.equal(p.nextUnlock.label,'天罡金陣');
+ assert.deepEqual(p.nextPlayerLevel,{level:2,xp:25,remaining:25});assert.equal(p.nextEngineLevel.xp,20);
+ for(let i=0;i<3;i++)event(s,'JOURNEY_MONSTER_KILL','guardian:'+i);
+ p=s.gameplayProfile();assert.equal(p.level,2);assert.equal(p.engineXp,12);assert.equal(p.unlocks.GOLDEN_RAIN,true);assert.equal(p.unlocks.BOSS,false);
+ for(let i=0;i<37;i++)event(s,'JOURNEY_MONSTER_KILL','strong:'+i);
+ p=s.gameplayProfile();assert.equal(p.level,5);assert.equal(p.unlocks.BOSS,true);assert.equal(p.unlocks.HISTORICAL_TRAINING,true);
+ assert.ok(Object.isFrozen(GAMEPLAY_UNLOCKS[0]));assert.ok(Object.isFrozen(PLAYER_EVENT_REWARDS.BOSS_DEFEAT));
+ for(const prohibited of ['cMax','realLeverage','principal','claimable','mainnet','payout'])assert.equal(p[prohibited],undefined);
+});
+
+test('gameplay player and engine XP persist; boss and practice replay cannot double reward',()=>{
+ const storage=memory(),s=make({storage}),player=s.createPlayer();
+ event(s,'BOSS_DEFEAT','encounter:boss:1');event(s,'SIX_PHASE_PRACTICE','encounter:boss:1:KY-');
+ assert.equal(s.activePlayer().xp,55);assert.equal(s.activePlayer().engineXp,38);assert.equal(s.activePlayer().engineLevel,2);
+ const restored=make({storage});assert.equal(restored.activePlayer().playerId,player.playerId);assert.equal(restored.activePlayer().xp,55);
+ assert.throws(()=>event(restored,'BOSS_DEFEAT','encounter:boss:1'),/EVENT_REPLAY/);
+ assert.throws(()=>event(restored,'SIX_PHASE_PRACTICE','encounter:boss:1:KY-'),/EVENT_REPLAY/);
+ assert.deepEqual(restored.activePlayer().achievements,['FIRST_MONSTER']);
+ const newDevice=make();newDevice.importPlayer(restored.exportPlayer(),{confirmLocalCandidate:true});
+ assert.throws(()=>event(newDevice,'BOSS_DEFEAT','encounter:boss:1'),/EVENT_REPLAY/);
+});
+
+function finishDaily(s){
+ for(let i=0;i<3;i++)event(s,'JOURNEY_MONSTER_KILL','daily:'+s.gameplayProfile().daily.day+':kill:'+i);
+ event(s,'SIX_PHASE_PRACTICE','daily:'+s.gameplayProfile().daily.day+':phase');
+ for(let i=0;i<10;i++)s.recordExplorationStep();
+}
+test('Daily Journey awards once after actual event goals, persists, resets next UTC day',()=>{
+ let now=Date.UTC(2026,9,1,12);const storage=memory(),s=make({storage,now:()=>now});s.createPlayer();
+ assert.throws(()=>s.claimDailyJourney(),/DAILY_NOT_COMPLETE/);finishDaily(s);
+ assert.equal(s.gameplayProfile().daily.ready,true);assert.equal(s.gameplayProfile().daily.distanceMeters,50);
+ const before=s.activePlayer(),revision=s.snapshot().revision;s.recordExplorationStep();assert.equal(s.snapshot().revision,revision);
+ s.claimDailyJourney();assert.equal(s.activePlayer().xp,before.xp+25);assert.equal(s.activePlayer().engineXp,before.engineXp+20);
+ assert.equal(s.gameplayProfile().daily.claimed,true);assert.throws(()=>s.claimDailyJourney(),/DAILY_ALREADY_CLAIMED/);
+ const restored=make({storage,now:()=>now});assert.throws(()=>restored.claimDailyJourney(),/DAILY_ALREADY_CLAIMED/);
+ assert.throws(()=>event(restored,'DAILY_JOURNEY','alternative-id'),/INVALID_DAILY_CLAIM/);
+ now+=86400000;assert.equal(restored.gameplayProfile().daily.kills,0);assert.equal(restored.gameplayProfile().daily.claimed,false);
+ assert.throws(()=>restored.claimDailyJourney(),/DAILY_NOT_COMPLETE/);finishDaily(restored);restored.claimDailyJourney();
+ assert.equal(restored.activePlayer().events.filter(e=>e.type==='DAILY_JOURNEY').length,2);
+});
+
+test('Daily progress is per player and cannot borrow another player or previous day goals',()=>{
+ let now=Date.UTC(2026,9,1);const s=make({now:()=>now}),a=s.createPlayer();finishDaily(s);s.claimDailyJourney();
+ const b=s.createPlayer();assert.equal(s.gameplayProfile().daily.ready,false);assert.equal(s.gameplayProfile().daily.claimed,false);assert.throws(()=>s.claimDailyJourney(),/DAILY_NOT_COMPLETE/);
+ s.activatePlayer(a.playerId);assert.equal(s.gameplayProfile().daily.claimed,true);s.activatePlayer(b.playerId);assert.equal(s.activePlayer().xp,0);
+ now+=86400000;s.activatePlayer(a.playerId);assert.equal(s.gameplayProfile().daily.distanceMeters,0);assert.equal(s.gameplayProfile().daily.ready,false);
+});
+
+test('daily and exploration fixed event shapes reject forged amounts, IDs, and unsatisfied claims',()=>{
+ const s=make({now:()=>Date.UTC(2026,9,1)});s.createPlayer();
+ assert.throws(()=>event(s,'DAILY_JOURNEY','DAILY_JOURNEY:2026-10-01'),/INVALID_DAILY_CLAIM/);
+ assert.throws(()=>event(s,'EXPLORATION_STEP','explore:2026-10-01:99'),/INVALID_EXPLORATION_STEP/);
+ assert.throws(()=>s.recordEvent({id:'explore:2026-10-01:1',type:'EXPLORATION_STEP',distanceMeters:500}),/INVALID_EVENT/);
+ assert.throws(()=>event(s,'QUEST_COMPLETE','quest:UNLIMITED_MONEY'),/INVALID_QUEST/);
+ event(s,'QUEST_COMPLETE','quest:FIRST_JOURNEY');assert.equal(s.activePlayer().xp,15);
+ assert.throws(()=>event(s,'QUEST_COMPLETE','quest:FIRST_JOURNEY'),/EVENT_REPLAY/);
+ assert.equal(DAILY_JOURNEY_RULES.clock,'UTC_LOCAL_CANDIDATE');
+});
+
+test('daily saved claim must remain supported by prior goals and exact date on reload',()=>{
+ const storage=memory(),s=make({storage,now:()=>Date.UTC(2026,9,1)}),p=s.createPlayer();finishDaily(s);s.claimDailyJourney();
+ const envelope=JSON.parse(storage.getItem(PLAYER_LIFE_STORAGE_KEY));envelope.players[p.playerId].events.at(-1).id='DAILY_JOURNEY:2026-10-02';
+ const corrupt=JSON.stringify(envelope);storage.setItem(PLAYER_LIFE_STORAGE_KEY,corrupt);
+ assert.equal(make({storage}).snapshot().status,'CORRUPT_SAVE');assert.equal(storage.getItem(PLAYER_LIFE_STORAGE_KEY),corrupt);
+});
+
+test('projection leaves V2.8 legacy XP weights and save shape unchanged',()=>{
+ const storage=memory(),s=make({storage});s.createPlayer();event(s,'MONSTER_KILL','old-kill');event(s,'TRADE_FILL','old-fill');
+ assert.equal(s.activePlayer().xp,14);assert.equal(s.activePlayer().engineXp,6);
+ const restored=make({storage});assert.equal(restored.snapshot().status,'READY');const before=storage.getItem(PLAYER_LIFE_STORAGE_KEY);
+ const p=gameplayProfile(restored.activePlayer());assert.equal(p.xp,14);assert.equal(storage.getItem(PLAYER_LIFE_STORAGE_KEY),before);
+ assert.throws(()=>gameplayProfile({...restored.activePlayer(),engineXp:999}),/INVALID_DERIVED_PROGRESSION/);
+});
+
+test('daily persistence failure grants neither XP nor claim; storage remains recoverable',()=>{
+ const storage=memory(),s=make({storage});s.createPlayer();finishDaily(s);const before=s.activePlayer(),raw=storage.getItem(PLAYER_LIFE_STORAGE_KEY);
+ storage.setItem=()=>{throw Error('quota')};assert.throws(()=>s.claimDailyJourney(),/STORAGE_WRITE_FAILED/);
+ assert.equal(s.activePlayer().xp,before.xp);assert.equal(s.gameplayProfile().daily.claimed,false);assert.equal(storage.getItem(PLAYER_LIFE_STORAGE_KEY),raw);
+});
+
+test('bounded atomic event bundle persists kill loot and practice in one revision',()=>{
+ const storage=memory(),s=make({storage});s.createPlayer();const revision=s.snapshot().revision;
+ s.recordEvents([{id:'bundle:kill',type:'JOURNEY_MONSTER_KILL'},{id:'bundle:loot',type:'LOOT_DROP'},{id:'bundle:phase',type:'SIX_PHASE_PRACTICE'}]);
+ assert.equal(s.snapshot().revision,revision+1);assert.equal(s.activePlayer().xp,20);assert.equal(s.activePlayer().engineXp,12);
+ assert.equal(make({storage}).activePlayer().events.length,3);
+ for(const batch of [[],null,Array.from({length:9},(_,i)=>({id:'large:'+i,type:'LOOT_DROP'}))])assert.throws(()=>s.recordEvents(batch),/INVALID_EVENT_BATCH/);
+});
+
+test('invalid or replayed later event rolls back entire batch, including first event XP',()=>{
+ const storage=memory(),s=make({storage});s.createPlayer();event(s,'LOOT_DROP','existing');
+ const raw=storage.getItem(PLAYER_LIFE_STORAGE_KEY),before=s.snapshot();
+ for(const batch of [
+   [{id:'new:kill',type:'JOURNEY_MONSTER_KILL'},{id:'existing',type:'LOOT_DROP'}],
+   [{id:'same',type:'BOSS_DEFEAT'},{id:'same',type:'LOOT_DROP'}],
+   [{id:'new:kill',type:'JOURNEY_MONSTER_KILL'},{id:'bad',type:'LOOT_DROP',xp:999}],
+   [{id:'new:kill',type:'JOURNEY_MONSTER_KILL'},{id:'bad-daily',type:'DAILY_JOURNEY'}]
+ ]){assert.throws(()=>s.recordEvents(batch));assert.equal(storage.getItem(PLAYER_LIFE_STORAGE_KEY),raw);assert.deepEqual(s.snapshot(),before)}
+});
+
+test('quota failure cannot persist half of kill and loot reward batch',()=>{
+ const storage=memory(),s=make({storage});s.createPlayer();const before=s.activePlayer(),raw=storage.getItem(PLAYER_LIFE_STORAGE_KEY);
+ storage.setItem=()=>{throw Error('quota')};assert.throws(()=>s.recordEvents([{id:'kill',type:'JOURNEY_MONSTER_KILL'},{id:'loot',type:'LOOT_DROP'}]),/STORAGE_WRITE_FAILED/);
+ assert.deepEqual(s.activePlayer(),before);assert.equal(storage.getItem(PLAYER_LIFE_STORAGE_KEY),raw);
 });

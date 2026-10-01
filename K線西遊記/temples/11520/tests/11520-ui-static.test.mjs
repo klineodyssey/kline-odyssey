@@ -79,9 +79,9 @@ test('entry gesture unlocks BGM and AI customer service has zh-TW voice control'
 test('combat loot and trade events are wired to the shared audio FX engine',()=>{
   assert.ok(productFixesV23.includes('__K11520_AUDIO_FX__'));
   assert.ok(productFixesV23.includes('getKaiosAudio().play(kind)'));
-  assert.ok(main.includes("audioFx?.play?.('attack')"));
-  assert.ok(main.includes("r.reason==='WEAK_POINT'?'weak':'hit'"));
-  assert.ok(main.includes("audioFx?.play?.('loot')"));
+  assert.ok(main.includes("skill==='slash'?'SLASH':'ATTACK'"));
+  assert.ok(main.includes("if(r.reason==='WEAK_POINT')emit11520WorldFeedback('WEAK_POINT');else audioFx?.play?.(r.reason==='BLOCKED_RESIST'?'BLOCKED':'HIT')"));
+  assert.ok(main.includes("r.loot.rarity+'_LOOT':'COMMON_LOOT'"));
   assert.ok(main.includes("e.status==='LIQUIDATED'?'liquidation'"));
 });
 
@@ -104,9 +104,9 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.8.0 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.8.0 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.8.0'"));
+test('V2.9.0 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.0 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.0'"));
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
@@ -121,8 +121,8 @@ test('accepted world state produces one feedback per transition, never reload aw
   assert.deepEqual(observe({...next,phase:'KY-'}),['BOSS_PHASE_CHANGE']);
   assert.deepEqual(observe({...next,playerId:'B',level:8,houseLevel:7}),[],'player switching must not invent level-up or home events');
   for(const event of emitted)assert.ok(WORLD_FEEDBACK[event]);
-  assert.deepEqual(Object.keys(WORLD_FEEDBACK).sort(),['BOSS_SPAWN','BOSS_PHASE_CHANGE','RARE_LOOT','PLAYER_LEVEL_UP','ENGINE_LEVEL_UP','HOME_BUILD','HOME_UPGRADE','PORTAL_OPEN','WORLD_ENTER','QUEST_COMPLETE'].sort());
-  assert.ok(main.includes("['RARE','EPIC'].includes(r.loot.rarity)"));
+  assert.deepEqual(Object.keys(WORLD_FEEDBACK).sort(),['MONSTER_DETECTED','WEAK_POINT','BOSS_SPAWN','BOSS_PHASE_CHANGE','BOSS_RAGE','BOSS_LOW_HP','BOSS_DEFEAT','COMMON_LOOT','RARE_LOOT','EPIC_LOOT','LEGENDARY_LOOT','PLAYER_LEVEL_UP','ENGINE_LEVEL_UP','GA600_LEVEL_UP','HOME_BUILD','HOME_UPGRADE','PORTAL_OPEN','WORLD_ENTER','QUEST_COMPLETE'].sort());
+  assert.ok(main.includes("['RARE','EPIC','LEGENDARY'].includes(r.loot.rarity)"));
   assert.ok(main.includes("if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE')"));
 });
 

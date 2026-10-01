@@ -4,7 +4,8 @@ import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs
 import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
 import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
-import {createJourneyTutorial} from '../runtime/world-runtime.mjs';
+import {createJourneyTutorial,JOURNEY_ENCOUNTER_PROFILES,GAME_LOOT_TABLE,GA600_GAME_TRAINING,selectJourneyLoot,selectJourneyEncounter,drainJourneyEvents,serializeWorld} from '../runtime/world-runtime.mjs';
+import {GAMEPLAY_UNLOCKS} from '../runtime/player-life-runtime.mjs';
 
 test('blocked browser storage getter cannot abort identity or game session boot',()=>{
   const before=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
@@ -133,12 +134,77 @@ test('journey world starts with a nearby moving ecology and six-phase combat met
 
 test('journey encounter cycles through common guardian, KAIOS courier and three-market boss',()=>{
   const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const player={x:0,y:0,z:0},guardian=world.monsters.find(m=>m.simulationCombat);
+  world.playerLevel=5;world.engineLevel=2;
   let now=10000;
   for(let cycle=1;cycle<=5;cycle++){
     guardian.state='DEAD';guardian.defeatedAt=now;tickWorld(world,player,now+6000);now+=7000;
     if(cycle===3){assert.equal(guardian.name,'KAIOS 運鈔妖');assert.equal(guardian.journeyTier,'RARE');assert.equal(guardian.rewardKaios,8);assert.equal(guardian.hp,180)}
     if(cycle===5){assert.equal(guardian.name,'三市場魔王');assert.equal(guardian.journeyTier,'EPIC');assert.equal(guardian.rewardKaios,20);assert.equal(guardian.hp,300)}
   }
+});
+
+test('V2.9 Boss admission is game progression only and automatic respawn remains locked for new guests',()=>{
+  const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const player={x:210,y:4,z:186},g=world.monsters.find(m=>m.simulationCombat);
+  const before=serializeWorld(world),count=world.monsters.length;
+  assert.equal(selectJourneyEncounter(world,player,{profileId:'MARKET_BOSS',playerLevel:4,engineLevel:10}).reason,'PROGRESSION_LOCKED');
+  assert.equal(selectJourneyEncounter(world,player,{profileId:'TREND_BOSS',playerLevel:10,engineLevel:1}).reason,'PROGRESSION_LOCKED');
+  assert.equal(serializeWorld(world).kSpace.targetId,before.kSpace.targetId);
+  world.journeyCycle=4;g.state='DEAD';g.defeatedAt=0;tickWorld(world,player,6000);
+  assert.equal(g.profileId,'GUARDIAN');assert.equal(g.boss,false);
+  const selected=selectJourneyEncounter(world,player,{profileId:'MARKET_BOSS',playerLevel:5,engineLevel:2,now:10000});
+  assert.equal(selected.ok,true);assert.equal(g.boss,true);assert.equal(g.level,5);
+  assert.equal(kCombatSnapshot(world,player).distance,7);assert.equal(world.monsters.length,count);
+  assert.equal(world.monsters.filter(m=>m.species==='SOURCE_SLOT').length,24);
+  assert.equal(g.lifeId,null);assert.equal(g.sourceManaged,false);
+  const snapshot=kCombatSnapshot(world,player).target;assert.equal(snapshot.profileId,'MARKET_BOSS');assert.equal(snapshot.phase,1);
+  assert.equal(resolveCMode(100).canTrade,false);assert.equal(GA600_GAME_TRAINING.realTradingAuthority,false);
+});
+
+test('Boss six-body phases, rage, low HP, defeat, loot and reward key occur once without financial settlement',()=>{
+  const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const player={x:0,y:0,z:6};
+  selectJourneyEncounter(world,{x:0,y:0,z:0},{profileId:'MARKET_BOSS',playerLevel:5,engineLevel:2,now:1000});
+  const encounter=kCombatSnapshot(world,player).target.encounterId;
+  assert.equal(drainJourneyEvents(world).filter(e=>e.type==='BOSS_SPAWN').length,1);assert.equal(drainJourneyEvents(world).length,0);
+  const events=[],rewards=[];let now=2000;
+  for(let i=0;i<100;i++,now+=400){const result=attackKSpace(world,player,{plane:'YZ',c:0,skill:'slash',now});events.push(...result.events);if(result.rewardId)rewards.push(result);if(result.defeated)break}
+  assert.equal(events.filter(e=>e.type==='BOSS_PHASE_CHANGE').length,2);
+  for(const type of ['BOSS_RAGE','BOSS_LOW_HP','BOSS_DEFEAT'])assert.equal(events.filter(e=>e.type===type).length,1,type);
+  assert.equal(rewards.length,1);assert.equal(rewards[0].rewardId,`journey:${encounter}`);
+  assert.equal(rewards[0].rewardXp,undefined);assert.equal(rewards[0].rewardEngineXp,undefined,'Player Life owns all XP projection, not the encounter');
+  assert.equal(rewards[0].loot.kind,'GAME_ITEM');assert.equal(rewards[0].loot.tokenized,false);assert.equal(rewards[0].loot.noRealValue,true);
+  const again=attackKSpace(world,player,{plane:'YZ',c:0,now:now+1000});assert.equal(again.rewardId,null);assert.equal(again.reason,'NO_TARGET');assert.equal(again.events.length,0);
+  assert.equal(drainJourneyEvents(world).length,0,'attack events are not duplicated in the spawn queue');
+  selectJourneyEncounter(world,player,{profileId:'MARKET_BOSS',playerLevel:5,engineLevel:2,now:now+2000});
+  assert.notEqual(kCombatSnapshot(world,player).target.encounterId,encounter,'replayable encounter gets a distinct actual-spawn identity');
+});
+
+test('Boss strike range and rage cadence are local gameplay; defeat stops attacks',()=>{
+  const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);
+  selectJourneyEncounter(world,{x:0,y:0,z:0},{profileId:'MARKET_BOSS',playerLevel:5,engineLevel:2,now:1000});
+  assert.equal(tickWorld(world,{x:0,y:0,z:0},3000).playerDamage,0);
+  assert.equal(tickWorld(world,{x:0,y:0,z:6},3001).playerDamage,7);
+  assert.equal(tickWorld(world,{x:0,y:0,z:6},3002).playerDamage,0);
+  const g=world.monsters.find(m=>m.simulationCombat);g.rage=true;
+  const hit=tickWorld(world,{x:0,y:0,z:6},3851);assert.equal(hit.playerDamage,12);assert.equal(hit.events.find(e=>e.type==='PLAYER_HIT').simulationOnly,true);
+  g.state='DEAD';g.defeatedAt=3851;assert.equal(tickWorld(world,{x:0,y:0,z:6},5000).playerDamage,0);
+});
+
+test('seeded game loot is deterministic and covers every configured rarity without token metadata',()=>{
+  const levels={playerLevel:6,engineLevel:2},found=new Set();for(let i=0;i<1000;i++){const item=selectJourneyLoot(`seed-${i}`,'MARKET_BOSS',levels);found.add(item.rarity);assert.deepEqual(item,selectJourneyLoot(`seed-${i}`,'MARKET_BOSS',levels));assert.equal(item.quantity,1);assert.equal(item.localOnly,true);assert.equal(item.tokenized,false);assert.equal(item.contract,undefined)}
+  assert.deepEqual(found,new Set(GAME_LOOT_TABLE.map(i=>i.rarity)));
+  for(let i=0;i<50;i++)assert.ok(['COMMON','UNCOMMON'].includes(selectJourneyLoot(i).rarity));
+  assert.throws(()=>selectJourneyLoot('seed','UNKNOWN'),/UNKNOWN_ENCOUNTER/);
+  assert.equal(GA600_GAME_TRAINING.fullEngine,'NOT_INTEGRATED');assert.match(GA600_GAME_TRAINING.dataSource,/SYNTHETIC/);
+});
+
+test('encounter gates derive from Player Life unlocks and rare loot fails closed before its unlock',()=>{
+  for(const p of Object.values(JOURNEY_ENCOUNTER_PROFILES)){const gate=GAMEPLAY_UNLOCKS.find(u=>u.id===p.unlock);assert.equal(p.minPlayerLevel,gate.playerLevel);assert.equal(p.minEngineLevel,gate.engineLevel)}
+  for(const levels of [{playerLevel:5,engineLevel:9},{playerLevel:10,engineLevel:1},{playerLevel:Infinity,engineLevel:10}]){
+    for(let seed=0;seed<100;seed++)assert.ok(['COMMON','UNCOMMON'].includes(selectJourneyLoot(seed,'MARKET_BOSS',levels).rarity));
+  }
+  const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const player={x:0,y:0,z:0};
+  assert.equal(selectJourneyEncounter(world,player,{profileId:'MARKET_BOSS',playerLevel:5,engineLevel:1}).ok,true);
+  for(const profileId of ['TREND_BOSS','CRASH_BOSS','RANGE_BOSS'])assert.equal(selectJourneyEncounter(world,player,{profileId,playerLevel:5,engineLevel:2}).ok,true);
 });
 
 test('player level increases boss combat power without changing market leverage rules',()=>{

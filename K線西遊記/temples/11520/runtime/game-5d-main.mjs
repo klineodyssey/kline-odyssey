@@ -1,11 +1,12 @@
 /* KGEN_META
-VERSION: 2.3.0
+VERSION: 2.9.0
 STATUS: ACTIVE
 PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collision-constrained physical body, plane-aware maps, canonical XYZ world/entity navigation and 3D Life visuals. Signed-C rendering is delegated to its canonical runtime; game state exposes one direct canonical trade-side setter.
 */
 import * as THREE from 'three';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js';
-import {createWorldState,createKSpaceEncounter,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES,KSPACE_SKILLS} from './world-runtime.mjs';
+import {createWorldState,createKSpaceEncounter,selectJourneyEncounter,resolvePlayerMove,tickWorld,WORLD_OBJECTS,updateKMarketReference,kMarketSnapshot,formatKCoordinate,kCombatSnapshot,attackKSpace,KSPACE_PHASES,KSPACE_SKILLS} from './world-runtime.mjs';
+import {getKaiosAudio} from '../../../../assets/kaios-audio.mjs';
 import {createKgenLedger,positionRisk,snapshot} from './kgen-margin-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from './real-trading-order-intent.mjs';
@@ -52,7 +53,33 @@ S.kaios=playerStore.snapshot().kaios;
 setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elapsedMs:10000})},10000);
 function playerProgressSnapshot(){const p=playerLife.activePlayer();return {playerId:p.playerId,xp:p.xp,level:p.level,engineXp:p.engineXp,engineLevel:p.engineLevel,nextLevelXp:p.level>=10?null:25*p.level*p.level,nextEngineXp:p.engineLevel>=10?null:20*p.engineLevel*p.engineLevel}}
 const observeWorldFeedback=createWorldFeedbackObserver(emit11520WorldFeedback);
-function syncWorldFeedback(){const target=world.monsters.find(m=>m.simulationCombat),p=playerLife.activePlayer();observeWorldFeedback({playerId:p.playerId,level:p.level,engineLevel:p.engineLevel,houseLevel:playerLife.loadHomePlot().houseLevel,bossAlive:target?.journeyTier==='EPIC'&&target.state!=='DEAD',encounter:String(target?.id)+':'+(world.journeyCycle||0),phase:String(target?.exposed)+':'+(target?.hp/target?.maxHp<=.33?'LAST_STAND':target?.hp/target?.maxHp<=.66?'WOUNDED':'GUARD')})}
+let quotePending=false,publicObservations={};
+let progressCache=playerLife.gameplayProfile(),progressKey='',musicHoldUntil=0,lastCombatAt=0,explorationMeters=0,lastExplorationPosition={...S.xyz};
+function showJourneyRecovery(){
+  if($('#journeyRecover')){$('#sheet').classList.add('open');return}
+  $('#sheetTitle').textContent='休整後再出發';$('#sheetBody').innerHTML='<div class="card"><h3>旅人暫時倒下</h3><p>遊戲 HP 已耗盡。休整會退回怪物外圍，不扣 KGEN、KAIOS、XP 或背包，不產生任何交易。</p><button id="journeyRecover" class="btn" style="min-height:44px">休整並退回安全距離</button></div>';
+  $('#sheet').classList.add('open');$('#journeyRecover').onclick=()=>{const target=combatSnapshot()?.monsterLocal;if(target){S.xyz={x:target.x,y:Math.max(0,target.y),z:target.z-7};S.intentXYZ={...S.xyz}}S.hp=100;lastExplorationPosition={...S.xyz};explorationMeters=0;cancelNavigation('休整');$('#sheet').classList.remove('open');$('#sheetBody').innerHTML='';toast('已休整 · 用走位與閃避接近怪物')};
+}
+function holdMusic(state,milliseconds=2400){getKaiosAudio().setMusicState(state);musicHoldUntil=Date.now()+milliseconds}
+function syncWorldFeedback(){const p=playerLife.activePlayer(),key=p.playerId+':'+p.events.length;world.playerLevel=p.level;world.engineLevel=p.engineLevel;
+  if(key!==progressKey){progressKey=key;progressCache=playerLife.gameplayProfile();for(const [id,unlock,label] of [['skill','GOLDEN_RAIN','天罡金陣'],['tradeSword','PHANTOM_AXE','盤古幻斧']]){const b=$('#'+id);if(b){b.dataset.gameplayUnlocked=String(progressCache.unlocks[unlock]);b.setAttribute('aria-label',label+(progressCache.unlocks[unlock]?'':` · 玩家 Lv.${unlock==='GOLDEN_RAIN'?2:3} 解鎖`));b.title=b.getAttribute('aria-label')}}}
+  const events=observeWorldFeedback({playerId:p.playerId,level:p.level,engineLevel:p.engineLevel,houseLevel:playerLife.loadHomePlot().houseLevel});
+  if(events.includes('PLAYER_LEVEL_UP'))holdMusic('LEVEL_UP');else if(events.includes('ENGINE_LEVEL_UP'))holdMusic('GA600_LEVEL_UP');
+  if(Date.now()>=musicHoldUntil){const target=combatSnapshot()?.target,distance=combatSnapshot()?.distance??Infinity;getKaiosAudio().setMusicState(target?.state==='DEAD'?'EXPLORE':target?.boss&&distance<20?(target.lowHp?'BOSS_LOW_HP':'BOSS'):Date.now()-lastCombatAt<4500?'COMBAT':playerHomeFraming?'HOME':distance<10?'ENCOUNTER':'EXPLORE')}
+}
+function trackJourneyMovement(){if(playerLifeSwitching)return;const d=Math.hypot(S.xyz.x-lastExplorationPosition.x,S.xyz.y-lastExplorationPosition.y,S.xyz.z-lastExplorationPosition.z);lastExplorationPosition={...S.xyz};if(d>0&&d<=2)explorationMeters+=d;if(explorationMeters>=5){explorationMeters-=5;try{playerLife.recordExplorationStep()}catch(error){toast('探索保存：'+error.message)}}}
+function startJourneyEncounter(profileId){const p=playerLife.activePlayer(),result=selectJourneyEncounter(world,S.xyz,{profileId,playerLevel:p.level,engineLevel:p.engineLevel,now:Date.now()});if(!result.ok)throw new Error(result.reason||'ENCOUNTER_LOCKED');toast('新遭遇在附近 · 搖桿靠近後攻擊')}
+function claimDailyJourney(){
+  const already=playerLife.gameplayProfile().daily.claimed;
+  if(!already)playerLife.claimDailyJourney();
+  const d=playerLife.gameplayProfile().daily,result=globalThis.K11520Backpack?.addItem?.({itemId:d.rewardId,rewardId:d.rewardId,kind:'MATERIAL',name:'每日星塵',qty:1,weightEach:.02,meta:{scope:'LOCAL_GAME_ONLY',playerId,rarity:'UNCOMMON'}});
+  const xpStatus=playerLife.snapshot().persistent?'每日 XP 已保存':'每日 XP 僅本次記憶體';
+  if(!already)emit11520WorldFeedback('QUEST_COMPLETE');
+  if(['DUPLICATE_ITEM','REWARD_ALREADY_CLAIMED'].includes(result?.reason))toast('今日道具已交付，不重複領取');
+  else if(!result?.ok)toast(xpStatus+'；星塵待交付：'+(result?.reason||'BACKPACK_UNAVAILABLE')+' · 清理背包後可重試');
+  else toast(xpStatus+' · 星塵'+(result.persistent?'已保存':'僅本次記憶體'));
+  syncWorldFeedback();
+}
 syncWorldFeedback();
 globalThis.__K11520_PRODUCT__=Object.freeze({snapshot:()=>({...playerStore.snapshot(),...playerProgressSnapshot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED',crossMarket:crossMarketSnapshot(),marketEngine:marketEngineSnapshot()})});
 let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
@@ -79,7 +106,6 @@ function renderAxes(){
   syncMarketKLabels();
 }
 function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">參考價（非結算 Oracle）：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">V1: |C| 0.001–1，0 fee，SIMULATION。免費 REST USDT 參考價不是 USD 結算 Oracle，不假設 USD=USDT。交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}
-let quotePending=false,publicObservations={};
 async function quotes(){
   if(quotePending)return;quotePending=true;
   try{
@@ -156,14 +182,23 @@ function attackFeedback(r){
 }
 function performCombat(skill){
   if(playerLifeSwitching||playerLife.activePlayer().playerId!==playerId)return {hit:false,reason:'PLAYER_SWITCH_IN_PROGRESS'};
+  if(S.hp<=0){showJourneyRecovery();return {hit:false,reason:'PLAYER_KNOCKED_OUT'}}
+  const unlock={slash:'SLASH',goldenRain:'GOLDEN_RAIN',phantomAxe:'PHANTOM_AXE'}[skill];
+  if(!progressCache.unlocks[unlock]){toast(`${skill==='goldenRain'?'天罡金陣 · Lv.2':'盤古幻斧 · Lv.3'} 解鎖；先用普通攻擊取經升級`);return {hit:false,reason:'GAMEPLAY_LEVEL_LOCKED'}}
   const r=attackKSpace(world,S.xyz,{...combatSelection(),skill,heading:S.heading,now:Date.now(),powerLevel:playerLife.activePlayer().level}),audioFx=globalThis.__K11520_AUDIO_FX__;
   toast(attackFeedback(r),true);
   if(r.hit)journey.event('HIT');if(r.loot)journey.event('LOOT');
-  if(r.reason!=='COOLDOWN')audioFx?.play?.('attack');
-  if(r.hit)audioFx?.play?.(r.reason==='WEAK_POINT'?'weak':'hit');
-  if(r.defeated){const eventId='combat:'+crypto.randomUUID();try{playerLife.recordEvent({id:eventId,type:'MONSTER_KILL'});if(r.loot){playerLife.recordEvent({id:eventId+':loot',type:'LOOT_DROP'});globalThis.K11520Backpack?.addItem?.({itemId:eventId+':loot',kind:'MATERIAL',name:r.loot.name||'取經碎片',qty:1,weightEach:.05,meta:{scope:'LOCAL_GAME_ONLY',playerId}})}}catch{}productEvent('MONSTER_KILL');if(r.loot){const p=productEvent('LOOT_DROP',{reward:r.rewardKaios}),rewardLabel=p.owner==='guest'?'本機 KAIOS':'錢包綁定 KAIOS 待發放';audioFx?.play?.('loot');audioFx?.speak?.(`擊倒${r.loot.name||'妖怪'}，獲得 ${r.rewardKaios} KAIOS`);toast(`掉寶：${r.loot.name} ×${r.loot.quantity} · ${r.loot.rarity} / ${rewardLabel} +${r.rewardKaios} · Lv.${playerLife.activePlayer().level}`,true)}}
+  if(r.reason!=='COOLDOWN'){audioFx?.play?.(skill==='slash'?'SLASH':'ATTACK');lastCombatAt=Date.now()}
+  if(r.hit){if(r.reason==='WEAK_POINT')emit11520WorldFeedback('WEAK_POINT');else audioFx?.play?.(r.reason==='BLOCKED_RESIST'?'BLOCKED':'HIT');const target=world.monsters.find(m=>m.id===world.kSpace?.targetId);if(combatSelection().c!==0&&target&&!target.rewardSuppressed){try{playerLife.recordEvent({id:'practice:'+target.encounterId,type:'SIX_PHASE_PRACTICE'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}}}else if(r.reason!=='COOLDOWN')audioFx?.play?.('MISS');
+  for(const e of r.events||[])emit11520WorldFeedback(e.type);
+  if(r.defeated&&r.rewardId&&r.loot){try{
+    const target=combatSnapshot()?.target;playerLife.recordEvents([{id:r.rewardId,type:target?.boss?'BOSS_DEFEAT':'JOURNEY_MONSTER_KILL'},{id:r.rewardId+':loot',type:'LOOT_DROP'}]);
+    const stored=globalThis.K11520Backpack?.addItem?.({itemId:r.rewardId+':loot',rewardId:r.rewardId+':loot',kind:'MATERIAL',name:r.loot.name,qty:r.loot.quantity,weightEach:.05,meta:{scope:'LOCAL_GAME_ONLY',playerId,rarity:r.loot.rarity,catalogItemId:r.loot.itemId}});
+    productEvent('MONSTER_KILL');const p=productEvent('LOOT_DROP',{reward:r.rewardKaios}),rewardLabel=p.owner==='guest'?'本機 KAIOS':'錢包綁定 KAIOS 待發放';
+    emit11520WorldFeedback(['RARE','EPIC','LEGENDARY'].includes(r.loot.rarity)?r.loot.rarity+'_LOOT':'COMMON_LOOT');holdMusic(['RARE','EPIC','LEGENDARY'].includes(r.loot.rarity)?'RARE_LOOT':'VICTORY');
+    toast(`擊倒！${r.loot.name} · ${r.loot.rarity} · ${stored?.ok?(stored.persistent?'背包已保存':'背包僅本次記憶體'):'未收入背包 '+(stored?.reason||'UNAVAILABLE')} / ${rewardLabel}（候選帳本）`,true);
+  }catch(error){toast('獎勵保存失敗：'+error.message+'；不重複記帳')}}
   if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace?.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
-  if(r.loot&&['RARE','EPIC'].includes(r.loot.rarity))emit11520WorldFeedback('RARE_LOOT');
   syncWorldFeedback();renderCombatTarget();return r;
 }
 $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performCombat('goldenRain');
@@ -196,6 +231,7 @@ function renderCombatTarget(){
   const tutorial=journey.snapshot();
   syncWorldFeedback();
   if(tutorial.hint)monsterGuide.textContent=`${t.name} · ${Math.round(t.hp)}HP · ${s.distance.toFixed(1)}m\n${tutorial.hint}\n點此看故事／教學`;
+  if(t.boss)monsterGuide.textContent=`BOSS Lv.${t.level} · ${t.name} · ${Math.round(t.hp)}/${t.maxHp}HP\nPHASE ${t.phase} · 弱點 ${t.exposed}${t.rage?' · RAGE 狂暴':''}${t.lowHp?' · LOW HP':''} · ${s.distance.toFixed(1)}m`;
   Object.assign(monsterGuide.style,{whiteSpace:tutorial.hint?'pre-line':'normal',boxSizing:'border-box',minHeight:'44px',pointerEvents:'auto'});
   monsterGuide.onclick=showCombatTarget;monsterGuide.setAttribute('role','button');monsterGuide.tabIndex=0;
   monsterGuide.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showCombatTarget()}};
@@ -211,7 +247,7 @@ function renderCombatTarget(){
 function showCombatTarget(){
   const s=combatSnapshot(),t=s?.target;if(!t)return;
   const vec=(v,keys)=>keys.map(k=>`${k} ${Number(v[k]).toFixed(2)}`).join(' · ');
-  $('#sheetTitle').textContent='TARGET LOCK · K-Guardian（模擬）';
+  $('#sheetTitle').textContent=`TARGET LOCK · ${t.name}（遊戲模擬）`;
   $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${formatGameDistanceK(s.distance,{detail:true})} · ${s.selection?.body||'0C NEUTRAL'}</b><p>0C 取經：自動攻擊存活部位、掉落本機取經碎片；Plane 決定交易軸，C 正負選相位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash ${formatGameDistanceK(KSPACE_SKILLS.slash.radius)}：單部位<br>天罡金陣 ${formatGameDistanceK(KSPACE_SKILLS.goldenRain.radius)}：切面兩軸同相<br>盤古幻斧 ${formatGameDistanceK(KSPACE_SKILLS.phantomAxe.radius)}：前方半圓三軸同相</p><p id="combatKValues" style="white-space:pre-line">PLAYER K：${vec(s.playerK,['KX','KY','KZ'])}<br>MONSTER K：${vec(s.monsterK,['KX','KY','KZ'])}<br>市場 ΔK（正規化）：${vec(s.deltaK,['KX','KY','KZ'])}<br>LOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}<br>局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}</p><p>LOCAL：1 遊戲單位 = 1 公尺，依 CURRENT 換算 K。市場正規化不是公尺；未設定市場→物理 transform，不與 XYZ 直接相加。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，公開報價同步 K 基準（${s.market.status}），LOCAL XYZ 不變。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div data-k-reference="${a}">${a} ${v.market}: P=${v.price}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/${t.bodies[id].maxHp} ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
   if(!journey.snapshot().complete){const story=document.createElement('div');story.className='card';story.id='journeyStory';story.innerHTML='<h3>序章 · 悟空落地花果山</h3><p>三市場的六相失衡，守關猿擋住取經路。先走近、揮劍、收集碎片，再認識 KX／KY／KZ；不用登入或連錢包。</p><p>'+journey.snapshot().hint+'</p><p>XZ→KY · XY→KZ · YZ→KX；+C 多方、−C 空方，0C 自動取經。KAIOS 掉寶是本機候選紀錄，不是鏈上發放。</p><button id="journeyPlayerLife" class="btn">領起家地 / 角色（可略過）</button><button id="journeyContinue" class="btn">繼續取經</button> <button id="journeySkip" class="btn">略過教學</button>';$('#sheetBody').prepend(story);$('#journeyPlayerLife').onclick=()=>playerLifeUI.open();$('#journeyContinue').onclick=()=>$('#sheet').classList.remove('open');$('#journeySkip').onclick=()=>{journey.skip();$('#sheet').classList.remove('open')}}
   $('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=Object.values(m.bodies).reduce((n,b)=>n+b.hp,0);m.rewardSuppressed=true;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
@@ -286,7 +322,7 @@ function openOrder(){
   $('#confirmBody').innerHTML='<div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈、不簽名。</p>';
   if(isTestnet()){$('#confirmBody details').hidden=true;$('#confirmBody .bad').textContent='BSC TESTNET 97 · NO REAL VALUE。CONFIRM ORDER → WALLET CONFIRM → TX → RECEIPT CONFIRMED；其後仍為 PENDING，只有 keeper 有效 observation 才能成交。'}
   for(const input of $$('#confirmBody input'))input.addEventListener('input',paintOrderPreview);
-  paintOrderPreview();$('#confirm').classList.add('open');if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE');toast('序章完成 · 可繼續探索；錢包稍後再連，不需確認下單')}
+  paintOrderPreview();$('#confirm').classList.add('open');if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE');try{playerLife.recordEvent({id:'quest:FIRST_JOURNEY',type:'QUEST_COMPLETE'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}toast('序章完成 · 可繼續探索；錢包稍後再連，不需確認下單')}
 }
 $('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};
 $('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜收據已確認');openOrgan('orders');renderAxes();hud()};
@@ -397,7 +433,7 @@ function syncPlayerHome(){const p=playerLife.activePlayer(),h=playerLife.loadHom
   if(h.houseLevel>0){const wall=new THREE.Mesh(new THREE.BoxGeometry(2,1.6,1.7),new THREE.MeshStandardMaterial({color:h.houseLevel>1?0xd7c79c:0x9b6d38}));wall.position.y=.8;const roof=new THREE.Mesh(new THREE.ConeGeometry(1.65,.9,4),new THREE.MeshStandardMaterial({color:0xb79b46}));roof.rotation.y=Math.PI/4;roof.position.y=2.05;const door=new THREE.Mesh(new THREE.PlaneGeometry(.6,1.05),new THREE.MeshStandardMaterial({color:0x392614,side:THREE.DoubleSide}));door.position.set(0,.525,-.856);playerHome.add(wall,roof,door)}
   playerHome.traverse(n=>{n.userData.playerHome=true});
 }
-const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching)syncPlayerHome()},beforePlayerChange:()=>{playerLifeSwitching=true},toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;S.navTarget=null;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
+const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching){syncPlayerHome();syncWorldFeedback()}},beforePlayerChange:()=>{playerLifeSwitching=true;explorationMeters=0},startEncounter:startJourneyEncounter,claimDaily:claimDailyJourney,toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;S.navTarget=null;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
 syncPlayerHome();
 const lifeVisuals=new Map(),lifeVisualPending=new Set();async function ensureLifeVisual(m){if(m.state==='DEAD'||!(m.name||m.baseName))return null;const key=`${m.lifeId||m.id}|${m.species}`;const current=lifeVisuals.get(m.id);if(current?.key===key)return current.root;if(current){scene.remove(current.root);lifeVisuals.delete(m.id)}if(lifeVisualPending.has(m.id))return null;lifeVisualPending.add(m.id);try{const v=await createLifeVisual(THREE,{species:m.species,name:m.baseName||m.name,scale:.75});v.root.userData.worldMonsterId=m.id;v.root.userData.lifeId=m.lifeId||null;v.root.traverse?.(n=>{n.userData.worldMonsterId=m.id;n.userData.lifeId=m.lifeId||null});scene.add(v.root);lifeVisuals.set(m.id,{key,root:v.root,mode:v.mode});return v.root}finally{lifeVisualPending.delete(m.id)}}
 function syncLifeVisuals(){renderCombatTarget();for(const m of [...world.monsters,...(world.ambientLife||[])]){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m);if(m.simulationCombat)syncPhaseBody(rec.root,m)}}
@@ -490,4 +526,12 @@ renderer.domElement.addEventListener('pointerdown',e=>{worldTapStart={id:e.point
 
 function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);if(S.navActive)moveNavigation();else moveManual();persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play((S.navActive||(groundMode&&moving))?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();const dist=8.5;camera.position.set(S.xyz.x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2,S.xyz.z-Math.cos(S.camYaw)*dist);camera.userData.k11520NavigationFocus=playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;camera.lookAt(S.xyz.x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,S.xyz.z+Math.cos(S.camYaw)*1.8);combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
 
+// Movement and encounter presentation observe the existing world loop; neither
+// can submit a trade or mint an economic reward. Bounded observer, cleared on exit.
+let lastSpawnKey='';
+function observeGameplay(){if(document.visibilityState!=='visible'||playerLifeSwitching)return;trackJourneyMovement();const t=combatSnapshot()?.target,key=t?.encounterId;if(key&&key!==lastSpawnKey){lastSpawnKey=key;emit11520WorldFeedback(t.boss?'BOSS_SPAWN':'MONSTER_DETECTED')}}
+let gameplayObserver=setInterval(observeGameplay,100);
+addEventListener('pagehide',()=>{clearInterval(gameplayObserver);gameplayObserver=null});
+addEventListener('pageshow',()=>{if(gameplayObserver===null){lastExplorationPosition={...S.xyz};gameplayObserver=setInterval(observeGameplay,100)}});
+globalThis.__K11520_GAMEPLAY__=Object.freeze({snapshot:()=>({progress:playerLife.gameplayProfile(),target:combatSnapshot()?.target,music:getKaiosAudio().snapshot().musicState,ga600FullEngine:'NOT_INTEGRATED',realTradingCapUnchanged:true})});
 renderAxes();syncControls();quotes();setInterval(quotes,5000);install11520ProductFixes();requestAnimationFrame(frame);$('#charState').textContent='3D LOADING';toast('11520 canonical runtime 已啟動');

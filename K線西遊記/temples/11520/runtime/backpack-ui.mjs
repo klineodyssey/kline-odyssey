@@ -10,10 +10,17 @@ function ensureOwner(){
   const next=snapshot?.player?.playerId||getActivePlayerId();
   if(!next||next===owner)return;
   owner=next;backpack=createBackpack({ownerId:owner});
-  scoped=createPlayerScopedStorage(snapshot&&!snapshot.persistent?null:undefined,owner);storageStatus='READY';
-  try{const raw=scoped.getItem(KEY);if(raw)backpack=restoreBackpack(JSON.parse(raw),owner)}catch{storageStatus='CORRUPT_SAVE';}
+  scoped=createPlayerScopedStorage(snapshot&&!snapshot.persistent?null:undefined,owner);storageStatus=snapshot&&!snapshot.persistent?'SESSION_ONLY':'READY';
+  let raw;try{raw=scoped.getItem(KEY)}catch{storageStatus='SESSION_ONLY';return}
+  try{if(raw)backpack=restoreBackpack(JSON.parse(raw),owner)}catch{storageStatus='CORRUPT_SAVE';}
 }
-function save(){try{if(storageStatus==='CORRUPT_SAVE')return;scoped?.setItem(KEY,JSON.stringify(backpack))}catch{storageStatus='SESSION_ONLY'}}
+function persistence(){return {persistent:storageStatus==='READY'&&!!scoped,storageStatus}}
+function mutationBlocked(){return !owner?'PLAYER_ID_NOT_READY':storageStatus==='CORRUPT_SAVE'?'CORRUPT_SAVE':null}
+function save(){
+  if(mutationBlocked())return persistence();
+  try{const encoded=JSON.stringify(backpack);scoped?.setItem(KEY,encoded);if(!scoped||scoped.getItem(KEY)!==encoded)throw new Error('STORAGE_WRITE_FAILED');storageStatus='READY'}catch{storageStatus='SESSION_ONLY'}
+  return persistence();
+}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function notice(text){const n=document.getElementById('backpackNotice');if(!n)return;n.textContent=text;n.hidden=false;clearTimeout(notice.t);notice.t=setTimeout(()=>{n.hidden=true},2400)}
 
@@ -57,7 +64,7 @@ function render(){
   ensureOwner();
   if(typeof document==='undefined')return;
   const stats=document.getElementById('backpackStats'),grid=document.getElementById('backpackGrid');if(!stats||!grid)return;
-  const s=backpackSnapshot(backpack);stats.textContent=`格數 ${s.usedSlots}/${s.capacitySlots} · 重量 ${s.usedWeight.toFixed(1)}/${s.capacityWeight}`;
+  const s=backpackSnapshot(backpack);stats.textContent=`格數 ${s.usedSlots}/${s.capacitySlots} · 重量 ${s.usedWeight.toFixed(1)}/${s.capacityWeight}${storageStatus==='READY'?'':storageStatus==='CORRUPT_SAVE'?' · 存檔損壞／唯讀':' · 僅本次遊玩，尚未保存'}`;
   const journey=globalThis.__K11520_PRODUCT__?.snapshot();
   if(journey)stats.textContent+=` · 取經碎片 ${journey.loot}（本機）`;
   grid.innerHTML=s.items.length?s.items.map(i=>{const d=itemVisualDescriptor(i);return `<div class="bpSlot" data-item="${esc(i.itemId)}"><canvas class="bp3d" width="88" height="88" data-item-id="${esc(i.itemId)}"></canvas><span class="shape">${esc(d.label)}</span><b>${esc(i.name)}${i.qty>1?` ×${i.qty}`:''}</b><small>${esc(i.kind)}${i.lifeId?` · ${esc(i.lifeId)}`:''}</small><button class="${i.kind==='LIVING_CARGO'?'':'discard'}" data-action="${i.kind==='LIVING_CARGO'?'release':'discard'}" data-item-id="${esc(i.itemId)}">${i.kind==='LIVING_CARGO'?'放出':'丟棄'}</button></div>`}).join(''):`<div class="bpEmpty">背包目前是空的。靠近可採集生命或取得寶物後才會放入，不預塞假物品。</div>`;
@@ -65,10 +72,10 @@ function render(){
   void render3dPreviews(s.items);
 }
 
-export function addBackpackItem(item){ensureOwner();const r=storeItem(backpack,item);if(r.ok){save();render()}return r}
-export function captureLifeToBackpack(life,options){ensureOwner();const r=storeLivingLife(backpack,life,options);if(r.ok){save();render()}return r}
-export function getBackpack(){ensureOwner();return {...backpackSnapshot(backpack),storageStatus}}
-export function removeBackpackItem(itemId,qty=1){ensureOwner();const r=removeItem(backpack,itemId,qty);if(r.ok){save();render()}return r}
+export function addBackpackItem(item){ensureOwner();const blocked=mutationBlocked();if(blocked)return {ok:false,reason:blocked,...persistence()};const r=storeItem(backpack,item);if(r.ok){save();render()}return {...r,...persistence()}}
+export function captureLifeToBackpack(life,options){ensureOwner();const blocked=mutationBlocked();if(blocked)return {ok:false,reason:blocked,...persistence()};const r=storeLivingLife(backpack,life,options);if(r.ok){save();render()}return {...r,...persistence()}}
+export function getBackpack(){ensureOwner();return {...backpackSnapshot(backpack),...persistence()}}
+export function removeBackpackItem(itemId,qty=1){ensureOwner();const blocked=mutationBlocked();if(blocked)return {ok:false,reason:blocked,...persistence()};const r=removeItem(backpack,itemId,qty);if(r.ok){save();render()}return {...r,...persistence()}}
 
 if(typeof document!=='undefined')install();
 if(typeof globalThis!=='undefined')globalThis.K11520Backpack={addItem:addBackpackItem,captureLife:captureLifeToBackpack,get:getBackpack,remove:removeBackpackItem};
