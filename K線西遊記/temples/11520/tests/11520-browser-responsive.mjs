@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {formatKCoordinate} from '../runtime/world-runtime.mjs';
 function freeQuotePayload(route,rows){
   const url=new URL(route.request().url());
   if(!url.pathname.endsWith('/aggTrades'))return rows;
@@ -19,7 +20,7 @@ const profiles=PRODUCTION?[{name:'pages-360',width:360,height:740},{name:'pages-
   {name:'warm-412',width:412,height:772,warm:true},{name:'cold-360',width:360,height:740},{name:'cold-landscape-844',width:844,height:390,landscape:true},
   {name:'cold-480',width:480,height:900}
 ];
-const selectors=['#kspaceTarget','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack'];
+const selectors=['#kspaceTarget','#k11520MonsterGuide','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack'];
 const utilities=['#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll'];
 await fs.mkdir(OUT,{recursive:true});
 const launchBrowser=()=>chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
@@ -110,7 +111,10 @@ async function verifyKSpaceMap(page,report){
     for(let i=0;i<3&&(await read()).plane!==plane;i++){await page.locator('#joy').tap();await page.waitForTimeout(180)}
     await page.locator('#cNumericInput').fill(c);await page.locator('#cNumericInput').press('Enter');
     await page.waitForFunction(([axis,c])=>globalThis.__K11520_KSPACE_MAP__?.phase===axis+(c==='1'?'+':'−'),[axis,c]);
-    const model=await read(),runtime=await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());
+    // Sample one rendered quote generation; two CDP reads can straddle a live tick.
+    // Keep exact equality and a bounded render-sync deadline, never freeze live prices.
+    const sample=await page.waitForFunction(()=>{const model=globalThis.__K11520_KSPACE_MAP__,runtime=globalThis.__K11520_KSPACE_API__.snapshot();return ['KX','KY','KZ'].every(a=>model.player[a]===runtime.playerK[a]&&model.monster[a]===runtime.monsterK[a])?structuredClone({model,runtime}):false},null,{timeout:2500});
+    const {model,runtime}=await sample.jsonValue();await sample.dispose();
     assert.equal(model.normal,axis);assert.equal(model.targetId,runtime.target.id);assert.deepEqual(model.monster,runtime.monsterK);assert.deepEqual(model.player,runtime.playerK);assert.deepEqual(model.delta,runtime.deltaK);assert.equal(model.distance,1);
     await shot(name);await page.locator('#kspaceViewK').click();await shot(name+'-detail');await page.locator('#sheetClose').click();rows.push(model);
   }
@@ -128,7 +132,7 @@ async function verifyMarketSync(page,report){
   const first=await read();assert.equal(first.market.markets.length,3);
   for(const m of first.market.markets){
     assert.ok(Math.abs(m.k-100*(m.price/m.anchor-1))<1e-9);
-    const card=first.cards.find(c=>c.axis===m.axis);assert.equal(Number(card.price.replace(/[^0-9.]/g,'')),m.price);assert.ok(card.k.includes(m.k.toFixed(2)));
+    const card=first.cards.find(c=>c.axis===m.axis);assert.equal(Number(card.price.replace(/[^0-9.]/g,'')),m.price);assert.equal(card.k,`${m.axis} ${formatKCoordinate(m.k)} norm`);
     assert.equal(first.combat.playerK[m.axis],m.k);assert.equal(first.map.player[m.axis],m.k);
   }
   report.marketReference={initial:first,mode:PRODUCTION?'PUBLIC_READ_ONLY':'CONTROLLED_REFERENCE_FAILURE_RECOVERY'};
@@ -235,6 +239,7 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
   const overlap=(a,c)=>a?.visible&&c?.visible&&a.x<c.right&&a.right>c.x&&a.y<c.bottom&&a.bottom>c.y;
   const combatHidden=landscape&&expanded;
   const target=b['#kspaceTarget'];ok(!target?.visible,'legacy K-space detail card must stay folded into monster HUD');
+  if(!expanded)for(const other of ['.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#attack','#orderFire'])ok(!overlap(b['#k11520MonsterGuide'],b[other]),`contextual target overlaps ${other}`);
   for(const s of ['.top','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#k11520UtilityMaster',...(combatHidden?[]:['#orderFire','#attack'])]){const r=b[s];ok(r?.visible,`${s} missing/hidden`);if(r?.visible)ok(r.x>=-1&&r.y>=-1&&r.right<=state.width+1&&r.bottom<=state.height+1,`${s} outside viewport`)}
   for(const s of ['#joy','#cControl','#lotsControl','#yControl','#k11520UtilityMaster',...(combatHidden?[]:['#tradeSword','#orderFire','#attack'])])ok(b[s]?.hit,`${s} cannot receive a real click: ${JSON.stringify(b[s]?.blocker)}`);
   const clock=b['#brandClockV250'];if(clock){ok(clock.right<=Math.min(...state.balances.map(r=>r.x))-4,'header clock crosses into balances');ok(clock.bottom<=b['.top'].bottom-4,'header clock escapes header')}

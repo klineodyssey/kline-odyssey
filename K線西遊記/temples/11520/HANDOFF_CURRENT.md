@@ -1,5 +1,21 @@
 # 11520 HANDOFF CURRENT
 
+## Live-market display QA rounding — 2026-10-01
+
+- Public Pages verification after PR456 exposed a test-only half-cent mismatch.
+  Deterministic reproduction: ETH reference 2501 gives normalized K -37.475; the existing canonical formatter
+  displays -37.47 while raw Number.toFixed(2) expects -37.48. The market price
+  itself is unchanged. Browser QA now checks the exact canonical formatted label,
+  with a deterministic regression for that boundary. No product runtime, price,
+  Oracle policy, financial logic or precision was changed to satisfy the test.
+- Post-release anonymous play also exposed the older non-tutorial target label
+  crossing landscape C/lots after reload. The existing label now shares the
+  tutorial's bounded mobile placement in both states and remains tappable for
+  target detail. Responsive QA checks map/control clearance; no additional card.
+- Live map/runtime assertions now sample one matching rendered quote generation
+  atomically (2.5s deadline, exact equality retained). Separate browser reads can
+  straddle a legitimate live tick; prices must not be frozen to satisfy QA.
+
 ## V2.7.0 journey onboarding continuation — 2026-10-01
 
 - Continues merged PR455 (518ec114), without resetting restored XYZ or changing
