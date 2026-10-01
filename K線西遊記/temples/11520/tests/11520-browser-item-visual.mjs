@@ -9,7 +9,9 @@ const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
 const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
 await page.addInitScript(()=>{
-  localStorage.setItem('11520.backpack.v1',JSON.stringify({version:'11520-BACKPACK-V1',ownerId:'QA',capacitySlots:24,capacityWeight:120,updatedAt:Date.now(),items:[
+  // Seed the actual pre-Player-Life guest owner; arbitrary foreign owners must
+  // remain rejected by V2.8's backpack ownership validation.
+  localStorage.setItem('11520.backpack.v1',JSON.stringify({version:'11520-BACKPACK-V1',ownerId:'PLAYER-11520',capacitySlots:24,capacityWeight:120,updatedAt:Date.now(),items:[
     {itemId:'QA-TREASURE',name:'火眼晶石',kind:'TREASURE',species:null,qty:1,weightEach:.5,stackable:true,treasureClass:'RARE',lifeId:null,meta:{}},
     {itemId:'QA-KGEN',name:'KGEN 貨筒',kind:'MATERIAL',species:null,qty:2,weightEach:1,stackable:true,treasureClass:null,lifeId:null,meta:{cargoKind:'KGEN'}},
     {itemId:'QA-CASH',name:'KAIOS 現鈔',kind:'MATERIAL',species:null,qty:1,weightEach:1,stackable:true,treasureClass:null,lifeId:null,meta:{cargoKind:'CASH',unit:'KAIOS'}},
@@ -26,6 +28,8 @@ await page.click('#k11520UtilityMaster');
 await page.waitForSelector('#backpackButton',{timeout:30000});
 await page.click('#backpackButton');
 await page.waitForSelector('#backpackPanel.open');
+const migrated=await page.evaluate(()=>({bag:K11520Backpack.get(),playerId:__K11520_PLAYER_LIFE__.snapshot().player.playerId}));
+if(migrated.bag.ownerId!==migrated.playerId||migrated.bag.items.length!==5)throw new Error('LEGACY_GUEST_BACKPACK_MIGRATION_FAILED');
 await page.waitForFunction(()=>document.querySelectorAll('canvas.bp3d[data-item3d="ready"]').length>=5,null,{timeout:30000});
 const shapes=await page.$$eval('canvas.bp3d[data-item3d="ready"]',els=>els.map(e=>e.dataset.itemShape));
 for(const expected of ['CRYSTAL','KGEN_CYLINDER','CASH_BUNDLE','FOOD','LIFE_CRATE'])if(!shapes.includes(expected))throw new Error(`MISSING_3D_ITEM_SHAPE:${expected}`);

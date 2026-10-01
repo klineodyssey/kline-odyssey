@@ -5,6 +5,7 @@ AUTHORITY: Synthetic local browser profiles only; no cloud, real wallet or chain
 */
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
 import {Wallet, getBytes} from 'ethers';
 
@@ -16,7 +17,9 @@ await fs.mkdir(out,{recursive:true});
 // persisted, exported or used against a public network.
 const walletA=Wallet.createRandom(),walletB=Wallet.createRandom();
 const startedAt=Date.now();
-const report={head:process.env.GITHUB_SHA||'LOCAL_CANDIDATE',scope:'LOCAL_UNTRUSTED_GAME_DATA',functional:'RUNNING',visual:'SCREENSHOTS_REQUIRE_DIRECT_REVIEW',profiles:[],failures:[]};
+const head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const trackedDirty=Boolean(execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim());
+const report={head,ciHead:process.env.GITHUB_SHA||null,sourceState:trackedDirty?'HEAD_PLUS_UNCOMMITTED_TRACKED_CHANGES':'CLEAN_TRACKED_HEAD',selection:{viewport:process.env.K11520_PLAYER_QA_VIEW||'BOTH',storageScenario:process.env.K11520_PLAYER_QA_SCENARIO||'ALL'},scope:'LOCAL_UNTRUSTED_GAME_DATA',functional:'RUNNING',visual:'SCREENSHOTS_REQUIRE_DIRECT_REVIEW',profiles:[],failures:[]};
 const browser=await chromium.launch({headless:true});
 const snap=page=>page.evaluate(()=>globalThis.__K11520_PLAYER_LIFE__.snapshot());
 
@@ -86,8 +89,13 @@ async function reachable(page,selector){
   return box;
 }
 async function shot(page,tag){await page.screenshot({path:out+'/'+tag+'.png'});}
+async function modalLayout(page){return page.evaluate(()=>({viewport:{width:innerWidth,height:innerHeight},visibility:document.visibilityState,layout:['#sheet','#sheetBody','#sheet .sheetHead','#playerLifePanel','#playerLifeNew'].map(selector=>{const el=document.querySelector(selector);if(!el)return {selector};const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {selector,x:r.x,y:r.y,width:r.width,height:r.height,scrollTop:el.scrollTop,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,display:s.display,visibility:s.visibility,contentVisibility:s.contentVisibility,overflow:s.overflow,transform:s.transform,cssHeight:s.height,maxHeight:s.maxHeight,detailsOpen:el.closest('details')?.open}})}))}
 async function reloadAction(page,selector){
-  await page.bringToFront();await reachable(page,selector);
+  if(selector==='#playerLifeNew'){report.focusDiagnostics??=[];report.focusDiagnostics.push({stage:'before-foreground',state:await modalLayout(page)})}
+  await page.bringToFront();
+  if(selector==='#playerLifeNew')report.focusDiagnostics.push({stage:'after-foreground',state:await modalLayout(page)});
+  await reachable(page,selector);
+  if(selector==='#playerLifeNew')report.focusDiagnostics.push({stage:'after-scroll',state:await modalLayout(page)});
   await Promise.all([page.waitForEvent('domcontentloaded',{timeout:30000}),page.locator(selector).click()]);
   await page.waitForFunction(()=>globalThis.__K11520_PLAYER_LIFE__?.snapshot?.().player&&globalThis.K11520Backpack?.get&&globalThis.__K11520_SIMULATION_EXCHANGE__);
 }
@@ -181,11 +189,11 @@ try{
       await page.waitForFunction(()=>{const h=__K11520_PLAYER_LIFE__.snapshot().home.xyz,p=__K11520_WORLD_COORDS__.physical;return Math.hypot(h.x-p.x,h.y-p.y,h.z-2.2-p.z)<.8&&!__K11520_XYZ_MAP_NAVIGATION__.active},null,{timeout:20000});
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));profile.homeVisual=await page.evaluate(()=>__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot());
-      await shot(page,`${width}x${height}-home-navigation`);profile.checks.push('REAL_HOME_NAVIGATION');
+      await shot(page,`${width}x${height}-home-navigation`);assert.equal(profile.homeVisual.homeScreen.inView,true,'home center must remain visible after navigation');assert.equal(profile.homeVisual.playerScreen.inView,true,'player must remain visible after home navigation');profile.checks.push('REAL_HOME_NAVIGATION');
       const calls=await page.evaluate(()=>__playerLifeWalletFixture.calls);assert.equal(calls.some(m=>!/^(eth_accounts|eth_requestAccounts|eth_chainId|eth_getBalance|eth_call|personal_sign)$/.test(m)),false,'no transaction or approval method allowed');
       assert.deepEqual(await page.evaluate(()=>__playerLifeWalletFixture.sensorCalls),[],'Player Life does not request location');
       assert.deepEqual(profile.pageErrors,[],'Player Life paths must not throw uncaught browser errors');
-    }catch(error){profile.failureState=await page.evaluate(()=>({life:globalThis.__K11520_PLAYER_LIFE__?.snapshot(),xyz:globalThis.__K11520_WORLD_COORDS__,nav:globalThis.__K11520_XYZ_MAP_NAVIGATION__,visibility:document.visibilityState,message:document.querySelector('#playerLifeMessage')?.textContent,sheetTitle:document.querySelector('#sheetTitle')?.textContent,sheetChildren:document.querySelector('#sheetBody')?.children.length})).catch(()=>null);await shot(page,`${width}x${height}-failure`).catch(()=>{});throw error}
+    }catch(error){profile.failureState=await page.evaluate(()=>({life:globalThis.__K11520_PLAYER_LIFE__?.snapshot(),xyz:globalThis.__K11520_WORLD_COORDS__,nav:globalThis.__K11520_XYZ_MAP_NAVIGATION__,visibility:document.visibilityState,message:document.querySelector('#playerLifeMessage')?.textContent,sheetTitle:document.querySelector('#sheetTitle')?.textContent,sheetChildren:document.querySelector('#sheetBody')?.children.length,layout:['#sheet','#sheetBody','.sheetHead','#playerLifePanel','#playerLifeNew'].map(selector=>{const el=document.querySelector(selector);if(!el)return {selector};const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {selector,x:r.x,y:r.y,width:r.width,height:r.height,scrollTop:el.scrollTop,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,display:s.display,visibility:s.visibility,overflow:s.overflow,transform:s.transform,cssHeight:s.height,maxHeight:s.maxHeight,detailsOpen:el.closest('details')?.open}})})).catch(()=>null);await shot(page,`${width}x${height}-failure`).catch(()=>{});throw error}
     finally{await context.close()}
   }
   for(const scenario of ['CORRUPT_SAVE','STORAGE_UNAVAILABLE','QUOTA_EXCEEDED'].filter(s=>!process.env.K11520_PLAYER_QA_SCENARIO||s===process.env.K11520_PLAYER_QA_SCENARIO)){
