@@ -1,5 +1,23 @@
 # 11520 Universal Exchange V3.9
 
+## K11520 V2.8 Player Life
+
+Guest-first local game candidate implementation; no cloud provisioning, Mainnet
+transaction, NFT or payout authority. Canonical specification and cloud comparison:
+`docs/K11520_PLAYER_LIFE.md`.
+
+| Path | Purpose |
+|---|---|
+| `K線西遊記/temples/11520/runtime/player-life-runtime.mjs` | Provider-neutral schema, random Player ID, local store, validated progression/home and wallet proofs. |
+| `K線西遊記/temples/11520/runtime/player-life-ui.mjs` | Contextual profile, starter home, privacy, local switching and backup UI. |
+| `K線西遊記/temples/11520/tests/11520-player-life.test.mjs` | Storage, isolation, ownership, replay, privacy and wallet-proof security regressions. |
+| `K線西遊記/temples/11520/tests/11520-browser-player-life.mjs` | Real Chromium mobile, recovery, account-switch and backup evidence. |
+
+Existing `evm-wallet-runtime.mjs` and `backpack-runtime.mjs` / `backpack-ui.mjs`
+retain simulation-wallet and captured-item authority with Player ID namespaces.
+Cloud identity and authoritative economics remain NOT_CONFIGURED.
+
+
 ## V1 journey / free-reference product — 2026-09-30
 
 Human V1 decision supersedes the paid-Oracle/100C launch target, not historical

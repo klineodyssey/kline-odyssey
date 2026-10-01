@@ -1,5 +1,30 @@
 # 11520 HANDOFF CURRENT
 
+## V2.8 Player Life candidate — 2026-10-01
+
+- Human work order: guest-first permanent local Player ID, provider-neutral
+  Player Life domain and replaceable cloud ports. Source base was refetched
+  `37269353e4e1677b287c4419d1bcf9faf9ff47e4`, not assumed from chat.
+- Read `docs/K11520_PLAYER_LIFE.md`. Existing backpack and simulation ledger
+  remain sole owners; their data is scoped by Player ID, then wallet where
+  applicable. Connecting/changing a wallet does not rename the player.
+- Profile, home, data-driven house, event-derived progression, optional signed
+  wallet links, local backup/import and contextual UI are candidate code.
+  No persistent extra K-space card, paid cloud, payout or Mainnet action.
+- Security review found and repaired duplicate item IDs hidden by stack merge,
+  missing persisted item identity, corrupt simulation-save overwrite and legacy
+  guest XP reset. Malformed saves remain untouched; local data is NOT trusted
+  authentication or an authoritative economic ledger.
+- Local Chromium uses disposable fixture wallets/signatures and public quote
+  fixtures for reproducibility. This is not evidence of real wallet custody,
+  real player counts, real funds or cloud authentication. Exact-head CI and
+  screenshots must accompany the PR; Human forwards it for second-layer review.
+- Cloud interface: NOT_CONFIGURED. Recommendation only: evaluate Supabase /
+  PostgreSQL for future authenticated ownership and transactional events.
+- Session helpers `player_domain`, `player_ui`, `player_qa` are actual bounded
+  work sessions under codex-gm-01, not new registry employees. No salary or
+  reward receipt was produced: payroll/payout remains HOLD, never PAID.
+
 ## Live-market display QA rounding — 2026-10-01
 
 - Public Pages verification after PR456 exposed a test-only half-cent mismatch.

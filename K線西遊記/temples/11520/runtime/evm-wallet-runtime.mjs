@@ -7,27 +7,52 @@ export const KGEN_TOKEN_ADDRESS='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 export const KGEN_CHAIN_ID=56;
 const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
+// A namespace is isolation against application mix-ups, NOT authentication of
+// another person sharing this browser. Player IDs never authorize chain assets.
+export function createPlayerScopedStorage(storage,playerId){
+  if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
+  if(!/^KAIOS-P-[a-zA-Z0-9-]{16,80}$/.test(playerId||''))throw new Error('INVALID_PLAYER_ID');
+  const prefix='k11520.player:'+playerId+':',claimKey='k11520.player-life.legacy-owner';
+  const allowed=new Set([PLAYER_SESSION_KEY,'k11520.journey.tutorial','11520.backpack.v1','k11520.local-product.v1:guest']);
+  // Claim precedes copying. A failed storage write must never silently claim
+  // the same old save for every newly-created guest. Originals remain intact.
+  let legacyOwner=null;
+  try{legacyOwner=storage?.getItem(claimKey);if(!legacyOwner&&storage){storage.setItem(claimKey,playerId);legacyOwner=storage.getItem(claimKey)}}catch{}
+  return Object.freeze({
+    getItem(key){
+      const saved=storage?.getItem(prefix+key);if(saved!=null)return saved;
+      if(legacyOwner===playerId&&allowed.has(key)){const old=storage?.getItem(key);if(old!=null){storage.setItem(prefix+key,old);return old}}
+      return null;
+    },
+    setItem(key,value){if(!storage)throw new Error('STORAGE_UNAVAILABLE');storage.setItem(prefix+key,value)},
+    removeItem(key){storage?.removeItem(prefix+key)}
+  });
+}
 // Local, unauthenticated simulation progress only. No cross-device identity,
 // real-player KPI, chain claim, secret or wallet-provider object is stored here.
-export function createSimulationPlayerStore({ledger,storage}={}){
+export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
   if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
-  let owner=null,key=null,revision=0,progress=null,persistent=true;
-  const read=()=>{try{return JSON.parse(storage?.getItem(key)||'null')}catch{return null}};
+  if(playerId)storage=createPlayerScopedStorage(storage,playerId);
+  let owner=null,key=null,revision=0,progress=null,persistent=true,storageStatus='READY',rawPresent=false;
+  const read=()=>{try{const raw=storage?.getItem(key);rawPresent=raw!=null;return JSON.parse(raw||'null')}catch{storageStatus='CORRUPT_SAVE';return null}};
   const fresh=()=>({kaios:0,claimableKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0});
   function check(){if(!persistent)return;if((read()?.revision??0)!==revision)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED')}
   function save(){
+    if(storageStatus==='CORRUPT_SAVE')return;
     check();const value={schema:'K11520_LOCAL_SIMULATION_V1',owner,revision:revision+1,ledger,progress};
     try{storage?.setItem(key,JSON.stringify(value));revision++;persistent=!!storage}catch{persistent=false}
   }
   function activate(address){
     const next=EVM_ADDRESS.test(address||'')?address.toLowerCase():'guest';if(owner===next)return false;
     // Never overwrite another tab's newer revision when changing account.
-    owner=next;key='k11520.local-product.v1:'+owner;persistent=true;
+    owner=next;key='k11520.local-product.v1:'+owner;persistent=true;storageStatus='READY';rawPresent=false;
     const value=read();revision=value?.revision??0;progress=fresh();
     for(const k of Object.keys(ledger))delete ledger[k];Object.assign(ledger,createKgenLedger(100));
     const encoded=JSON.stringify(value);
     const saved=value?.schema==='K11520_LOCAL_SIMULATION_V1'&&value.owner===owner&&encoded.length<2000000&&!/[<>&]/.test(encoded)?value:null;
-    if(saved&&['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'].every(k=>Number.isFinite(saved.ledger?.[k]))){
+    const validSaved=saved&&['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'].every(k=>Number.isFinite(saved.ledger?.[k]));
+    if((rawPresent&&!validSaved)||storageStatus==='CORRUPT_SAVE'){storageStatus='CORRUPT_SAVE';persistent=false}
+    if(validSaved){
       for(const k of ['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'])ledger[k]=saved.ledger[k];
       const b=saved.ledger.simulation;
       if(b&&Number.isSafeInteger(b.sequence)&&['orders','positions','receipts'].every(k=>Array.isArray(b[k]))&&b.observations&&typeof b.observations==='object')ledger.simulation=structuredClone(b);
@@ -50,7 +75,7 @@ export function createSimulationPlayerStore({ledger,storage}={}){
   }
   function snapshot(){
     const p=structuredClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));
-    return {owner,persistent,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,
+    return {owner,playerId,persistent,storageStatus,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,
       nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,
       kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'};
   }
@@ -70,13 +95,13 @@ export function savePublicWalletIdentity({address,chainId=null,sourceWorld='UNKN
   try{storage?.setItem(PUBLIC_WALLET_IDENTITY_KEY,JSON.stringify(value));return value}catch{return null}
 }
 function validXYZ(value){return value&&['x','y','z'].every(axis=>Number.isFinite(Number(value[axis]))&&Math.abs(Number(value[axis]))<=1e9)}
-export function readPlayerSession(storage=globalThis.localStorage){
-  try{const value=JSON.parse(storage?.getItem(PLAYER_SESSION_KEY)||'null');return value?.version===1&&value.world==='K11520'&&validXYZ(value.xyz)&&validXYZ(value.intentXYZ)?value:null}catch{return null}
+export function readPlayerSession(storage){
+  try{if(storage===undefined)storage=globalThis.localStorage;const value=JSON.parse(storage?.getItem(PLAYER_SESSION_KEY)||'null');return value?.version===1&&value.world==='K11520'&&validXYZ(value.xyz)&&validXYZ(value.intentXYZ)?value:null}catch{return null}
 }
-export function savePlayerSession({xyz,intentXYZ},storage=globalThis.localStorage){
+export function savePlayerSession({xyz,intentXYZ},storage){
   if(!validXYZ(xyz)||!validXYZ(intentXYZ))return null;
   const value={version:1,world:'K11520',xyz:{x:Number(xyz.x),y:Number(xyz.y),z:Number(xyz.z)},intentXYZ:{x:Number(intentXYZ.x),y:Number(intentXYZ.y),z:Number(intentXYZ.z)},savedAt:new Date().toISOString()};
-  try{storage?.setItem(PLAYER_SESSION_KEY,JSON.stringify(value));return value}catch{return null}
+  try{if(storage===undefined)storage=globalThis.localStorage;storage?.setItem(PLAYER_SESSION_KEY,JSON.stringify(value));return value}catch{return null}
 }
 export async function bindTempleReturnWalletContinuity({linkId='return-to-11520',statusId='return-wallet-continuity',sourceWorld='UNKNOWN',ethereum,storage=globalThis.localStorage}={}){
   const provider=detectInjectedWallet(ethereum),link=globalThis.document?.getElementById(linkId),status=globalThis.document?.getElementById(statusId);

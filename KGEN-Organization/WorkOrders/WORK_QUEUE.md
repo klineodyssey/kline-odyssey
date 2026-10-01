@@ -1,5 +1,29 @@
 # KGEN Organization V2.0 WorkQueue
 
+## K11520 V2.8 Player Life — 2026-10-01
+
+- task_id: K11520-PLAYER-LIFE-20261001; status: IN_PROGRESS; priority: P0.
+- task_source_type: HUMAN_WORK_ORDER; task_source_id: KAIOS_V2_8_PLAYER_LIFE_SYSTEM;
+  task_source_actor: human-primeforge; task_source_file: current conversation;
+  task_source_commit: 37269353e4e1677b287c4419d1bcf9faf9ff47e4.
+- task_source_reason: guest-first stable Player Life, local persistence and cloud
+  interface, home and progression, verified optional wallet links, mobile QA.
+- created_by / owner: codex-gm-01; created_at: 2026-10-01;
+  reviewer: codex-gm-01 technical integration, Human/ChatGPT second-layer handoff.
+- risk_level: LOCAL_GAME_ONLY; dependencies: V2.7.0 accepted main, existing
+  simulation wallet/settlement, Browser QA and exact-head CI.
+- Isolated branch: codex/k11520-v28-player-life. Human dirty checkout untouched.
+- Bounded session helpers player_domain (identity/profile/store/security),
+  player_ui (home/world/mobile integration), player_qa (privacy/QA/cloud research)
+  work under GM accountability. They are not new registered employees or payroll
+  recipients. No Cursor Cloud/API or third-party paid worker is launched.
+- Scope: local game records only, not secure multiplayer/server economic truth.
+  Existing blockchain holdings/settlement remain outside PlayerStore. Production
+  cloud, Mainnet, real rewards/payouts and all purchases remain NOT_AUTHORIZED.
+- Provenance: original first-party code and geometry; no copied assets. Added-line
+  secret scan and explicit-file staging are required before push.
+- Payroll/ATM/advance HOLD: no new verified funding or payment receipt.
+
 ## K11520 P0 range exits / Oracle capability — 2026-09-30
 
 - Task K11520-P0-EXIT-ORACLE-20260930; RELEASE_VALIDATION; owner codex-gm-01 ACTIVE T5.

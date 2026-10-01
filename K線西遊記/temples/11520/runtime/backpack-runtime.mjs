@@ -18,7 +18,9 @@ export function createBackpack({capacitySlots=24,capacityWeight=120,ownerId='PLA
 export function normalizeItem(input={}){
   const kind=String(input.kind||'MATERIAL').toUpperCase();
   if(!ITEM_KINDS.includes(kind))throw new Error('INVALID_ITEM_KIND');
-  const qty=assertPositiveInt(input.qty||1,'QTY');
+  const qty=assertPositiveInt(input.qty??1,'QTY');
+  if(qty>1000000||!Number.isFinite(Number(input.weightEach??1))||Number(input.weightEach??1)<0)throw new Error('INVALID_ITEM_QUANTITY_OR_WEIGHT');
+  if(kind==='LIVING_CARGO'&&qty!==1)throw new Error('LIVING_CARGO_QUANTITY_ONE');
   const species=input.species?String(input.species).toUpperCase():null;
   if(kind==='LIVING_CARGO'&&species&&!LIVING_SPECIES.includes(species))throw new Error('UNSUPPORTED_LIVING_SPECIES');
   return {
@@ -38,6 +40,8 @@ export function backpackSnapshot(backpack){return {...clone(backpack),usedSlots:
 
 export function canStore(backpack,itemInput){
   const item=normalizeItem(itemInput),existing=item.stackable?backpack.items.find(i=>i.stackable&&i.kind===item.kind&&i.name===item.name&&i.species===item.species):null;
+  if(backpack.items.some(i=>i.itemId===item.itemId||(item.lifeId&&i.lifeId===item.lifeId)))return{ok:false,reason:'DUPLICATE_ITEM',item};
+  if(existing&&existing.qty+item.qty>1000000)return{ok:false,reason:'ITEM_QUANTITY_LIMIT',item};
   const slotCost=existing?0:1,weightCost=item.weightEach*item.qty;
   if(backpackSlots(backpack)+slotCost>backpack.capacitySlots)return{ok:false,reason:'BACKPACK_SLOT_FULL',item};
   if(backpackWeight(backpack)+weightCost>backpack.capacityWeight)return{ok:false,reason:'BACKPACK_OVERWEIGHT',item};
@@ -60,4 +64,18 @@ export function storeLivingLife(backpack,life,{weightEach=1}={}){
   if(!life?.lifeId)return{ok:false,reason:'LIFE_ID_REQUIRED'};
   const species=String(life.species||'').toUpperCase();if(!LIVING_SPECIES.includes(species))return{ok:false,reason:'UNSUPPORTED_LIVING_SPECIES'};
   return storeItem(backpack,{kind:'LIVING_CARGO',name:life.name||species,species,qty:1,weightEach,stackable:false,lifeId:life.lifeId,meta:{hp:life.hp,maxHp:life.maxHp,growth:life.growth,sourceClass:life.sourceClass||'WILD_ECOLOGY'}});
+}
+
+/** Local candidate validation only; never economic proof. Legacy owner migrates once via scoped storage. */
+export function restoreBackpack(value,ownerId){
+  if(!value||!Array.isArray(value.items)||value.items.length>24||value.version!==BACKPACK_VERSION||![ownerId,'PLAYER-11520'].includes(value.ownerId))throw new Error('INVALID_BACKPACK_OWNER_OR_SCHEMA');
+  const result=createBackpack({ownerId}),ids=new Set(),lives=new Set();
+  for(const item of value.items){
+    if(typeof item.itemId!=='string'||!item.itemId||item.itemId.length>256)throw new Error('INVALID_ITEM_ID');
+    if(ids.has(item.itemId)||(item.lifeId&&lives.has(item.lifeId)))throw new Error('DUPLICATE_ITEM');
+    if(item.kind==='LIVING_CARGO'&&(typeof item.lifeId!=='string'||!item.lifeId||!LIVING_SPECIES.includes(item.species)))throw new Error('INVALID_LIVING_IDENTITY');
+    ids.add(item.itemId);if(item.lifeId)lives.add(item.lifeId);
+    const added=storeItem(result,item);if(!added.ok)throw new Error(added.reason);
+  }
+  return result;
 }
