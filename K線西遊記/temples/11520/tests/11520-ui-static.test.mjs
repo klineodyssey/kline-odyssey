@@ -100,6 +100,11 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
+test('V2.7.0 release stamp and restored-player encounter boot are production wired',()=>{
+  assert.ok(fixes.includes('V2.7.0 · 5D K線西遊記'));
+  assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
