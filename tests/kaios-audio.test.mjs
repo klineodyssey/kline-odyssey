@@ -31,6 +31,9 @@ test('zero master/music and browser interruption never report music playing',asy
  const h=harness();await h.audio.unlock();h.audio.setMusicEnabled(true);
  for(const channel of ['master','music']){h.audio.setVolume(channel,0);assert.equal(h.audio.snapshot().musicPlaying,false);h.audio.setVolume(channel,.65);assert.equal(h.audio.snapshot().musicPlaying,true);}
  h.contexts[0].state='interrupted';h.contexts[0].onstatechange();assert.equal(h.audio.snapshot().musicPlaying,false);assert.equal(h.audio.snapshot().needsGesture,true);assert.equal(h.intervals.size,0);
+ // Chrome can implicitly resume before the click handler runs. Preserve the
+ // visible recovery intent so that this first recovery tap does not mute again.
+ h.contexts[0].state='running';h.contexts[0].onstatechange();assert.equal(h.audio.snapshot().needsGesture,true);assert.equal(h.intervals.size,0);
  await h.audio.unlock();assert.equal(h.intervals.size,1);assert.equal(h.audio.snapshot().musicPlaying,true);await h.audio.dispose();
 });
 test('mobile volume defaults do not overwrite saved low/zero volume or mute',()=>{const h=harness({master:0,music:.42,muted:true});assert.equal(h.audio.snapshot().settings.master,0);assert.equal(h.audio.snapshot().settings.music,.42);assert.equal(h.audio.snapshot().settings.muted,true);assert.equal(harness().audio.snapshot().settings.music,.65);});

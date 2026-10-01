@@ -35,10 +35,17 @@ try{
     const signal=await page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<25;i++){for(const a of __audioAnalysers){const v=new Float32Array(a.fftSize);a.getFloatTimeDomainData(v);let sum=0;for(const x of v){peak=Math.max(peak,Math.abs(x));sum+=x*x;}rms=Math.max(rms,Math.sqrt(sum/v.length));}await new Promise(r=>setTimeout(r,100));}return{peak,rms};});
     assert.ok(signal.rms>.008&&signal.peak>.02&&signal.peak<.95,'Portal destination PCM must be measurable above near-silence without clipping');
     await shot(page,`portal-playing-${width}x${height}`);
+    await page.evaluate(()=>__audioAnalysers[0].context.suspend());
+    await page.waitForFunction(async()=>{const m=await import('./assets/kaios-audio.mjs');return m.getKaiosAudio().snapshot().needsGesture&&!m.getKaiosAudio().snapshot().musicPlaying;});
+    await page.locator('[data-kaios-audio-toggle]').tap();
+    await page.waitForFunction(async()=>{const m=await import('./assets/kaios-audio.mjs');return m.getKaiosAudio().snapshot().musicPlaying;});
+    await page.waitForTimeout(150);assert.equal((await audio(page)).settings.muted,false,'recovery tap must not become an accidental mute');
     await page.locator('[data-audio-action=settings]').click();
     assert.ok(await page.locator('.kaios-audio-panel').isVisible());
     for(const channel of ['master','music','sfx','voice']){
-      const input=page.locator(`[data-audio-volume=${channel}]`);await input.fill('35');await input.dispatchEvent('input');
+      const input=page.locator(`[data-audio-volume=${channel}]`);
+      if(channel==='master'||channel==='music'){await input.fill('0');await input.dispatchEvent('input');assert.equal((await audio(page)).musicPlaying,false);assert.match(await page.locator('[data-audio-status]').innerText(),/音量為 0/);}
+      await input.fill('35');await input.dispatchEvent('input');
       assert.equal((await audio(page)).settings[channel],.35);
     }
     await shot(page,`audio-settings-${width}x${height}`);

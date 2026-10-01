@@ -101,6 +101,8 @@ device listening test. Voice depends on an installed browser/OS speech voice.
 
 Context state changes stop suspended/interrupted scheduling and refresh UI;
 zero Master/Music never reports playing. Portal shows theme/status outside its
-settings panel. Real touch, reload, back/forward, four worlds, zero-volume/mute,
+settings panel. A recovery-gesture latch prevents Chrome's implicit pre-click
+context resume from turning a visible "enable sound" tap into an accidental mute.
+Real touch, reload, back/forward, four worlds, zero-volume/mute,
 background/foreground and saved preferences remain the acceptance scope.
 No commercial media, payment, financial logic or protected chain action changes.
