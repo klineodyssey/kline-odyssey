@@ -203,7 +203,7 @@ function performCombat(skill){
 }
 $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performCombat('goldenRain');
 $('#tradeSword').onclick=()=>performCombat('phantomAxe');
-$('#dodge').onclick=()=>{cancelNavigation('閃避');const next={x:S.xyz.x+Math.sin(S.heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(S.heading)*1.4},r=resolvePlayerMove(S.xyz,next);if(!r.blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast('閃避')}};
+$('#dodge').onclick=()=>{cancelNavigation('閃避');if(S.hp<=0){showJourneyRecovery();return}for(const turn of [0,Math.PI/2,-Math.PI/2,Math.PI]){const heading=S.heading+turn,next={x:S.xyz.x+Math.sin(heading)*1.4,y:S.xyz.y,z:S.xyz.z+Math.cos(heading)*1.4},mid={x:(S.xyz.x+next.x)/2,y:S.xyz.y,z:(S.xyz.z+next.z)/2};if(!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked){S.xyz=next;S.intentXYZ={...S.xyz};toast(turn?'側向閃避 · 避開障礙':'閃避');return}}toast('閃避受阻 · 先用搖桿離開障礙')};
 $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
 const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';targetHud.hidden=true;document.body.appendChild(targetHud);
 const monsterHud=document.querySelector('.monsterHud');if(monsterHud){monsterHud.style.cursor='pointer';monsterHud.title='點擊查看 K-space 六相戰鬥詳情';monsterHud.addEventListener('click',e=>{if(e.target.closest('details'))return;showCombatTarget()})}
