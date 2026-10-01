@@ -1,5 +1,28 @@
 # 11520 HANDOFF CURRENT
 
+## V2.9 public playtest / fade-out correction — 2026-10-01
+
+- Human-approved #462 head `f9b05c714c4970471f65460d92969dfc1cff9458`
+  merged as `3c15472c44136452e05815e0e483cbc301f09eac`.
+- Unmocked public Pages Chromium: fresh 390x844 player earned 27 kills,
+  Player Lv.5, Engine Lv.3, daily eligibility, then defeated the three-phase
+  Boss through actual controls. Final XP 490 / Engine XP 166; same Player ID,
+  house and inventory survived reload. No direct XP mutation was used.
+- Portrait/landscape Boss and once-only reward checks passed. Separate rarity
+  tests use explicitly seeded Lv.6 and random fixtures, actual attack controls,
+  and real public runtime: not organic drop-rate evidence or economic authority.
+- Public shared audio: 11 music states and 14 SFX have nonzero destination PCM;
+  mute produces zero signal. Digital browser output is not a physical-speaker
+  listening claim. First-party synthesis only; no commercial media requests.
+- Screenshot inspection caught loot text jumping onto the HUD during its final
+  opacity fade. New per-frame responsive assertion reproduced the pre-fix error
+  (`toast x moved during visible fade`, opacity 1 after dismiss). Keep the single
+  toast's placement until its next message/pagehide; add no timer or DOM owner.
+- Follow-up branch `codex/k11520-v29-toast-fade` must pass fresh exact-head CI,
+  screenshot review and public deployment verification before final closeout.
+- No protected transaction, payment, payout, cloud/Oracle/music purchase or
+  automatic real-trading risk increase. No payment receipt: payroll stays HOLD.
+
 ## V2.9 gameplay candidate — 2026-10-01
 
 - Base refetched from origin/main `69c6045fbd7e06f16cf71ad1f6443abf9e227a9b`
