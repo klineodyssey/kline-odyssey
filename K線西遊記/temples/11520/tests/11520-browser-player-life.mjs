@@ -131,6 +131,16 @@ try{
       await page.waitForFunction(()=>__K11520_PLAYER_LIFE__.snapshot().player.displayName==='取經測試員');
       assert.equal((await snap(page)).player.characterAppearance,'STARGAZER');assert.equal((await snap(page)).player.ageRange,null);
       await shot(page,`${width}x${height}-profile`);profile.checks.push('NEW_GUEST_PROFILE');
+      // Exercise the actual two legacy cleanup owners deterministically. Neither
+      // may classify an aria-labelled profile or its contextual action as a HUD bag.
+      assert.equal(await page.locator('#playerLifePanel').isVisible(),true);
+      await page.evaluate(async()=>{const fixes=await import('./runtime/game-ui-product-fixes.mjs'),ux=await import('./runtime/human-ux-runtime.mjs');fixes.placeOnlyRealBag();ux.normalizeBackpack()});
+      assert.equal(await page.locator('#playerLifePanel').isVisible(),true,'legacy cleanup must not hide Player Life');
+      assert.equal(await page.locator('#playerLifeBag').evaluate(el=>Boolean(el.closest('#playerLifePanel'))),true,'contextual backpack action stays in its profile');
+      assert.equal(await page.locator('body > #backpackButton').count(),1,'exactly one canonical floating backpack');
+      await reachable(page,'#playerLifeBag');await page.locator('#playerLifeBag').click();await page.locator('#backpackPanel').waitFor({state:'visible'});
+      if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+      await page.locator('#backpackButton').click();await page.locator('#backpackPanel').waitFor({state:'hidden'});profile.checks.push('LEGACY_CLEANUP_PRESERVES_PROFILE_AND_CONTEXTUAL_BACKPACK');
       const progressed=await killFirstMonster(page);await shot(page,`${width}x${height}-progression`);profile.checks.push('REAL_COMBAT_XP_INVENTORY');
       await openLife(page);await reachable(page,'#playerLifeBuild');await page.locator('#playerLifeBuild').click();
       await page.waitForFunction(()=>__K11520_PLAYER_LIFE__.snapshot().home.houseLevel===1);
