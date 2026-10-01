@@ -9,6 +9,12 @@ const here=dirname(fileURLToPath(import.meta.url));
 const read=p=>readFileSync(resolve(here,p),'utf8');
 const html=read('../game-5d.html');
 const main=read('../runtime/game-5d-main.mjs');
+test('dodge tries safe alternatives without bypassing midpoint or endpoint collision',()=>{
+  const dodge=main.split("$('#dodge').onclick=")[1]?.split('\n')[0]||'';
+  assert.ok(dodge.includes('[0,Math.PI/2,-Math.PI/2,Math.PI]'));
+  assert.ok(dodge.includes('!resolvePlayerMove(S.xyz,mid).blocked&&!resolvePlayerMove(S.xyz,next).blocked'));
+  assert.ok(dodge.includes('閃避受阻'));
+});
 const fixes=read('../runtime/game-ui-product-fixes.mjs');
 const productFixesV23=read('../runtime/game-ui-product-fixes-v23.mjs');
 const controls=read('../runtime/game-controls-v251.mjs');

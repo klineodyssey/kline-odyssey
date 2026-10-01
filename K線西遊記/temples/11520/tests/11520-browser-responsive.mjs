@@ -21,6 +21,9 @@ const profiles=PRODUCTION?[{name:'pages-360',width:360,height:740},{name:'pages-
   {name:'warm-412',width:412,height:772,warm:true},{name:'cold-360',width:360,height:740},{name:'cold-landscape-844',width:844,height:390,landscape:true},
   {name:'cold-480',width:480,height:900}
 ];
+// Optional local diagnosis only; default CI still exercises every profile.
+const selectedProfiles=process.env.K11520_RESPONSIVE_PROFILE?profiles.filter(p=>p.name===process.env.K11520_RESPONSIVE_PROFILE):profiles;
+assert.ok(selectedProfiles.length,'Unknown K11520_RESPONSIVE_PROFILE');
 const selectors=['#kspaceTarget','#k11520MonsterGuide','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack'];
 const utilities=['#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll'];
 await fs.mkdir(OUT,{recursive:true});
@@ -303,7 +306,7 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
 try{
   if(PRODUCTION)await verifyProductionSource();
   else await verifyInitialQuoteWait();
-  for(const profile of profiles){
+  for(const profile of selectedProfiles){
     // Cold profiles must not inherit Chromium process/emulation state after the preceding
     // profile's CDP combat captures and repeated mobile rotations. Keep every assertion.
     await browser.close();browser=await launchBrowser();
