@@ -4,6 +4,7 @@
 - Land details use the existing Land organ inside a bounded dialog; summary controls retain their layout positions.
 - One compact Portal/audio rail, canonical root return, real mobile viewport and orientation-safe HUD.
 - Public screenshot follow-up (`20261002-MOBILE-LAND-UTILITY-R2`): keep the complete Warp multiplier inside its control region; add a browser geometry assertion. No speed/engine semantics changed.
+- Align the Land Info opener to its internal scroll viewport, not the document offset, so the information heading stays visible in landscape.
 - No contract, role, wallet signature, purchase or asset transfer changes.
 
 # 2026-10-01｜KAIOS shared audio component

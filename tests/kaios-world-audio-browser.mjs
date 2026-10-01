@@ -60,6 +60,7 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
    assert.deepEqual(await geometry(),initial,'land open cannot push HUD');await hit('.k12345-land-close');
    assert.equal(await page.locator('#kgen-land-panel .kgen-land-body').isVisible(),true,'not an empty overlay');
    assert.equal(await page.locator('#kgen-land-info-panel .kgen-land-info-body').isVisible(),true);
+   if(s.includes('info')){const panel=await page.locator('#kgen-land-info-panel').boundingBox(),scroll=await page.locator('.k12345-land-scroll').boundingBox();assert.ok(panel.y>=scroll.y-1,'info heading must not scroll above the detail viewport');}
    assert.ok(await page.locator('.k12345-land-scroll').evaluate(el=>getComputedStyle(el).overflowY==='auto'));
    await shot(s.includes('info')?'land-info':'land-map');await page.locator('.k12345-land-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);
    await page.locator('.k12345-land-close').tap();assert.deepEqual(await geometry(),initial,'land close cannot move HUD');
