@@ -176,6 +176,8 @@ try {
     const knobMoved=await page.locator('#knob').boundingBox();assert.ok(knobMoved.y<knobBefore.y,'joystick thumb follows finger');
     try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
     await shot('journey-approach');
+    const tutorialLayout=await page.locator('#k11520MonsterGuide').evaluate(el=>{const r=el.getBoundingClientRect(),overlaps=['.minimapWrap','#cControl','#lotsControl','#yControl','#joy','#attack','#orderFire'].filter(s=>{const q=document.querySelector(s)?.getBoundingClientRect();return q&&r.left<q.right&&r.right>q.left&&r.top<q.bottom&&r.bottom>q.top});return {inViewport:r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight,overlaps}});
+    assert.equal(tutorialLayout.inViewport,true);assert.deepEqual(tutorialLayout.overlaps,[],'tutorial must not cover map or controls');
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'HIT');
     assert.equal(await page.evaluate(()=>__K11520_BGM__.playing),true,'real joystick gesture unlocks the original BGM');
     for(let i=0;i<30&&await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot===0);i++){await page.locator('#attack').click();await page.waitForTimeout(400)}
