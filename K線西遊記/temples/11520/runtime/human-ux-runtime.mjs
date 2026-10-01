@@ -72,9 +72,11 @@ function patchAvatarFacing(){
   THREE.WebGLRenderer.prototype.__k11520HumanFacingV5=true;
 }
 
-function normalizeBackpack(){
+export function normalizeBackpack(){
   const canonical=$('#backpackButton');
-  const candidates=[...document.querySelectorAll('button,[role="button"],[title],[aria-label]')].filter(el=>/背包|🎒/.test(`${el.textContent||''} ${el.title||''} ${el.getAttribute('aria-label')||''}`));
+  // Only the established floating launchers are duplicates. Accessible sheets
+  // and contextual actions may mention 背包 without becoming HUD launchers.
+  const candidates=[...document.querySelectorAll('button#backpackButton,button#bagQuickV246,button#bagQuickV247')];
   if(!canonical&&!candidates.length)return false;
   const real=candidates.find(el=>el.classList.contains('bagRelocatedV258'))||candidates.find(el=>el.classList.contains('bagRelocatedV250'))||canonical||candidates[0];
   real.dataset.k11520RealBag='1';

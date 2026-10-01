@@ -1,0 +1,136 @@
+# K11520 Player Life — canonical local domain
+
+STATUS: IMPLEMENTATION_CANDIDATE
+VERSION: 2.8.0
+OWNER: codex-gm-01
+SOURCE: Human KAIOS V2.8 PLAYER LIFE SYSTEM work order, 2026-10-01
+BASE: 37269353e4e1677b287c4419d1bcf9faf9ff47e4
+SCOPE: LOCAL_GAME_CANDIDATE / NO_CHAIN_AUTHORITY
+
+## Authority and reuse
+
+Player Life is a game identity, not an EVM account, employee Life, NFT or title.
+The domain owns profile, appearance, progression, local home, inventory and
+journey records. Provider-specific authentication and storage are adapters.
+`runtime/player-life-runtime.mjs` under `K線西遊記/temples/11520/` is its single
+versionless schema/transition/store authority. Its cloud interface stays
+NOT_CONFIGURED; no Firebase/Supabase/Cloudflare account or dependency is required.
+The existing `evm-wallet-runtime.mjs`, backpack, tutorial and settlement organs
+remain their respective owners; this is not a second trading or reward ledger.
+
+The older `docs/constitution/09_Player_Genesis.md` is a design candidate for
+server-authoritative genesis. Human's 2026-10-01 decision authorizes guest-first
+local game plots without email, wallet, GPS or real birthday. It does not grant
+real ownership, server authority or economic value to client-created records.
+
+## Identity and privacy contract
+
+- Random, crypto-generated `KAIOS-P-...` identity, independent of wallet addresses.
+  It persists on this browser while storage remains available. Clearing browser
+  data loses local records unless a player retained a backup. A random identifier
+  is not a login secret, authorization capability or global uniqueness registry.
+- One player may deliberately link multiple EVM wallets by an explicit wallet
+  signature challenge bound to player, domain, chain, nonce and expiry. Merely
+  connecting a wallet or changing accounts never creates verified ownership.
+- Account changes switch the existing wallet-specific simulation view within
+  the same Player ID, not the character, home or inventory. A deliberate local
+  player change saves and reloads all runtime owners; no cross-player caches.
+- Shared-device local profiles are not confidential against another person with
+  device access, browser DevTools or XSS. Future cloud authentication must enforce
+  server ACL/RLS, ownership constraints and revocable sessions on every request.
+- Real birthday, birthplace, gender, location history and private credentials
+  are not required. Optional pronoun/appearance is a character choice. Reality
+  journey consent is disabled initially, revocable, and grants no browser sensor
+  permission in this phase. No GPS/motion prompt or raw track collection occurs.
+
+## Schema and consistency
+
+Canonical record: playerId, displayName, createdAt, lastSeenAt,
+characterAppearance, optional pronoun/ageRange, homeWorld, homePlotId,
+level/xp, engineLevel/engineXp, inventory, achievements, journeyProgress,
+lastWorld/lastXYZ, walletLinks, settings, privacyConsent.
+Home: homePlotId, worldId, ownerPlayerId, xyz, plotLevel, houseLevel.
+Executable validation is exported by the domain; profile patching cannot set
+XP, levels, reward totals, foreign ownership or binding evidence.
+
+Local events are bounded and deduplicated. Levels derive from XP rather than
+accepting a caller's arbitrary level. House stages are a data table (empty,
+hut, house, cave, warehouse, shop, ATM, portal) and not contracts or NFT tiers.
+Future service buildings are game stages, not permission to move any asset.
+The inventory field references `SCOPED_BACKPACK` plus ownerPlayerId; captured
+items are not duplicated into a second Player Life ledger. A bounded, once-only
+legacy guest XP/engine-XP baseline is explicitly unverified local migration.
+
+The local envelope uses a revision guard to reject stale-tab writes and one
+serialized save per domain transition. Invalid/corrupt saves are preserved,
+not silently overwritten as valid. Storage failures keep gameplay in a clearly
+labelled memory-only session; persistence must not be claimed in that state.
+Schema validation catches malformed/tampered structures and inconsistent state,
+but a device owner can forge a consistent local history. It is never economic
+proof or a substitute for a server signature/receipt.
+
+## Migration and backup
+
+One migration claimant may copy preserved V2.7 guest XYZ/tutorial/backpack and
+guest simulation data into its player namespace. Originals are retained.
+No address string imports another old wallet ledger or links a wallet.
+Other new players get empty separate records. Account-specific economic data
+remains in the existing ledger, additionally namespaced by Player ID.
+
+Export/import is an explicitly untrusted local game backup, not cloud login.
+The UI bundle includes the validated existing backpack beside the profile;
+import rejects mismatched ownership, duplicate identities and malformed items.
+The domain save and companion backpack save are separate local writes. A quota
+failure between them is explicitly IMPORT_INCOMPLETE_STORAGE_FAILURE, not a
+successful restore; retain the source backup and reload/recover storage.
+Wallet ownership proofs, real holdings, trading ledger and payable claimable
+are excluded. Imported records cannot authorize KGEN/KAIOS, and wallet links
+must be freshly proven. Same-device import must not clone a reward/plot grant.
+Automatic cross-device restore requires a future selected/authenticated cloud;
+the local adapter can only restore a user-carried valid local backup.
+
+## Cloud decision (research only; checked 2026-10-01)
+
+| Area | Firebase / Google Cloud | Supabase / PostgreSQL | Cloudflare |
+|---|---|---|---|
+| Authentication | Firebase Auth; strong mobile SDKs | Auth + Postgres RLS | Application-managed consumer auth or chosen identity provider |
+| Database / realtime | Firestore documents/listeners | SQL, transactions, constraints, Realtime | D1 SQLite plus custom Durable Object WebSockets |
+| Offline | Native/Web SDK sync; web opt-in, last-write-wins conflicts | Application outbox/cache/conflict policy needed | Application outbox/cache/conflict policy needed |
+| Backup | Firestore backup/PITR requires billing | Free manual offsite backup; Pro daily7days; blobs separate | D1 Time Travel free7days / paid30days; export separately |
+| Free tier | Firestore1GiB,50kreads/day,20kwrites/day,10GiB/month egress | 500MB DB,50kMAU,1GB storage,2M realtime messages,200 connections | D1 5M rows read/day,100k rows written/day,5GB |
+| Paid baseline | Usage-priced Blaze; not approved | Pro fromUS$25/month plus usage; not approved | Workers paid fromUS$5/month plus usage; not approved |
+| Web/PWA/mobile | Web, Android, Apple SDKs | Web/mobile SDKs and HTTP | Web/HTTP; native app integration must be built |
+| Security / migration | Rules/server validation; document/rule portability work | RLS + server functions; SQL/data portability strongest here | Worker auth/ownership validation; SQLite portable, DO state logic less portable |
+
+Recommendation: evaluate Supabase/Postgres first for future authenticated
+ownership, unique wallet links and transactional game events. This is an
+engineering recommendation, not a vendor selection or spending approval.
+Firebase is attractive for rapid offline/native integration; Cloudflare for
+edge deployment when the team can own auth and synchronization. None of these
+make offline client XP or financial claims authoritative automatically.
+Free quotas are not a capacity guarantee; estimate MAU, traffic, storage,
+backups and realtime before selecting a plan. Cost overruns, privacy/data
+location and restore drills require a separate Human-approved deployment plan.
+
+Official sources:
+- https://firebase.google.com/pricing
+- https://firebase.google.com/docs/firestore/pricing
+- https://firebase.google.com/docs/firestore/manage-data/enable-offline
+- https://supabase.com/pricing
+- https://supabase.com/docs/guides/platform/backups
+- https://supabase.com/docs/guides/database/postgres/row-level-security
+- https://supabase.com/docs/guides/self-hosting/restore-from-platform
+- https://developers.cloudflare.com/d1/platform/pricing/
+- https://developers.cloudflare.com/workers/platform/pricing/
+- https://developers.cloudflare.com/d1/reference/time-travel/
+- https://developers.cloudflare.com/durable-objects/best-practices/websockets/
+
+## Delivery / second-layer review
+
+Required: domain/security tests, preserved settlement tests, actual Chromium
+390x844/844x390, direct screenshot inspection, all responsive profiles and
+exact-head Game/Responsive/Universal CI. Include guest/reload/offline/corrupt
+storage/two players/home/XP/wallet proofs/account switch/export-import.
+GM provides PR/head/evidence to Human for ChatGPT second-layer review; it must
+not claim that second review already occurred. No automatic cross-thread
+message, cloud purchase, Mainnet write or KAIOS payout is part of this release.

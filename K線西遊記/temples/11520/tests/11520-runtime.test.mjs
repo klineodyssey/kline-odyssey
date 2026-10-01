@@ -1,10 +1,35 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
-import {createSimulationPlayerStore} from '../runtime/evm-wallet-runtime.mjs';
+import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
 import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
 import {createJourneyTutorial} from '../runtime/world-runtime.mjs';
+
+test('blocked browser storage getter cannot abort identity or game session boot',()=>{
+  const before=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
+  Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw new Error('STORAGE_DENIED')}});
+  try{
+    assert.equal(readPublicWalletIdentity(),null);assert.equal(readPlayerSession(),null);
+    assert.equal(savePublicWalletIdentity({address:'0x'+'a'.repeat(40)}),null);
+    assert.equal(savePlayerSession({xyz:{x:0,y:0,z:0},intentXYZ:{x:0,y:0,z:0}}),null);
+  }finally{if(before)Object.defineProperty(globalThis,'localStorage',before);else delete globalThis.localStorage}
+});
+
+test('Player Life namespaces isolate identical wallet, guest session and first-owner migration',()=>{
+  const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};
+  const a='KAIOS-P-11111111-1111-4111-8111-111111111111',b='KAIOS-P-22222222-2222-4222-8222-222222222222';
+  storage.setItem(PLAYER_SESSION_KEY,'legacy-XYZ');
+  const as=createPlayerScopedStorage(storage,a),bs=createPlayerScopedStorage(storage,b);
+  assert.equal(as.getItem(PLAYER_SESSION_KEY),'legacy-XYZ');assert.equal(bs.getItem(PLAYER_SESSION_KEY),null);
+  as.setItem('11520.backpack.v1','A-only');assert.equal(bs.getItem('11520.backpack.v1'),null);
+  const wa='0x'+'a'.repeat(40),sa=createSimulationPlayerStore({ledger:createKgenLedger(),storage,playerId:a}),sb=createSimulationPlayerStore({ledger:createKgenLedger(),storage,playerId:b});
+  sa.activate(wa);sa.record('LOOT_DROP',{reward:5});sb.activate(wa);
+  assert.equal(sa.snapshot().kaios,5);assert.equal(sb.snapshot().kaios,0);assert.equal(sb.snapshot().claimableKaios,0);
+  assert.throws(()=>createPlayerScopedStorage(storage,'guest'),/INVALID_PLAYER_ID/);
+  const unavailable=createSimulationPlayerStore({ledger:createKgenLedger(),storage:null,playerId:a});unavailable.activate(null);
+  assert.equal(unavailable.snapshot().persistent,false);
+});
 
 test('journey tutorial follows actual play, survives reload and never grants rewards or trades',()=>{
   const data=new Map(),storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};

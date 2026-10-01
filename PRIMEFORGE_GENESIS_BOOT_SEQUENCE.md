@@ -18,6 +18,25 @@ permalink: /PRIMEFORGE_GENESIS_BOOT_SEQUENCE/
 
 # PRIMEFORGE_GENESIS_BOOT_SEQUENCE
 
+## K11520 V2.8 Player Life (2026-10-01)
+
+Provider-neutral, guest-first local game candidate domain. No server authentication,
+cloud provisioning, NFT, Mainnet transaction or payout authority is introduced.
+
+| Path | Purpose |
+|---|---|
+| `docs/K11520_PLAYER_LIFE.md` | Canonical Player Life schema, migration/privacy boundaries and official-source cloud comparison. |
+| `K線西遊記/temples/11520/runtime/player-life-runtime.mjs` | Random Player ID, validated local store, progression/home ownership, wallet proof and unconfigured cloud ports. |
+| `K線西遊記/temples/11520/runtime/player-life-ui.mjs` | Existing contextual sheet integration for profile, home, privacy, local-player switching and candidate backup. |
+| `K線西遊記/temples/11520/tests/11520-player-life.test.mjs` | Domain, replay, ownership, tamper, storage, wallet-proof and isolation regressions. |
+| `K線西遊記/temples/11520/tests/11520-browser-player-life.mjs` | Real Chromium portrait/landscape, recovery, player-switch and wallet-link evidence. |
+
+Existing `evm-wallet-runtime.mjs` namespaces simulation records by Player ID and wallet.
+Existing `backpack-runtime.mjs` / `backpack-ui.mjs` remain the sole captured-item inventory;
+the Player Life profile references that scoped store, rather than inventing a second ledger.
+Cloud production identity and authoritative rewards remain NOT_CONFIGURED.
+
+
 ## Stable Current Entry Metadata
 
 STATUS: ACTIVE  

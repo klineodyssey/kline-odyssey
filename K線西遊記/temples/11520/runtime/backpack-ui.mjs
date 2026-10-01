@@ -1,10 +1,19 @@
-import {createBackpack,storeItem,removeItem,storeLivingLife,backpackSnapshot} from './backpack-runtime.mjs';
+import {createBackpack,storeItem,removeItem,storeLivingLife,backpackSnapshot,restoreBackpack} from './backpack-runtime.mjs';
 import {itemVisualDescriptor,renderItemPreview} from './item-visual-runtime.mjs';
+import {getActivePlayerId} from './player-life-runtime.mjs';
+import {createPlayerScopedStorage} from './evm-wallet-runtime.mjs';
 
 const KEY='11520.backpack.v1';
-function load(){try{const raw=JSON.parse(localStorage.getItem(KEY)||'null');if(raw?.items&&raw?.capacitySlots)return raw}catch{}return createBackpack()}
-let backpack=typeof localStorage!=='undefined'?load():createBackpack();
-function save(){if(typeof localStorage!=='undefined')localStorage.setItem(KEY,JSON.stringify(backpack));}
+let backpack=createBackpack(),owner=null,scoped=null,storageStatus='SESSION_ONLY';
+function ensureOwner(){
+  const snapshot=globalThis.__K11520_PLAYER_LIFE__?.snapshot();
+  const next=snapshot?.player?.playerId||getActivePlayerId();
+  if(!next||next===owner)return;
+  owner=next;backpack=createBackpack({ownerId:owner});
+  scoped=createPlayerScopedStorage(snapshot&&!snapshot.persistent?null:undefined,owner);storageStatus='READY';
+  try{const raw=scoped.getItem(KEY);if(raw)backpack=restoreBackpack(JSON.parse(raw),owner)}catch{storageStatus='CORRUPT_SAVE';}
+}
+function save(){try{if(storageStatus==='CORRUPT_SAVE')return;scoped?.setItem(KEY,JSON.stringify(backpack))}catch{storageStatus='SESSION_ONLY'}}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function notice(text){const n=document.getElementById('backpackNotice');if(!n)return;n.textContent=text;n.hidden=false;clearTimeout(notice.t);notice.t=setTimeout(()=>{n.hidden=true},2400)}
 
@@ -45,6 +54,7 @@ async function requestLivingRelease(item){
 }
 
 function render(){
+  ensureOwner();
   if(typeof document==='undefined')return;
   const stats=document.getElementById('backpackStats'),grid=document.getElementById('backpackGrid');if(!stats||!grid)return;
   const s=backpackSnapshot(backpack);stats.textContent=`格數 ${s.usedSlots}/${s.capacitySlots} · 重量 ${s.usedWeight.toFixed(1)}/${s.capacityWeight}`;
@@ -55,10 +65,10 @@ function render(){
   void render3dPreviews(s.items);
 }
 
-export function addBackpackItem(item){const r=storeItem(backpack,item);if(r.ok){save();render()}return r}
-export function captureLifeToBackpack(life,options){const r=storeLivingLife(backpack,life,options);if(r.ok){save();render()}return r}
-export function getBackpack(){return backpackSnapshot(backpack)}
-export function removeBackpackItem(itemId,qty=1){const r=removeItem(backpack,itemId,qty);if(r.ok){save();render()}return r}
+export function addBackpackItem(item){ensureOwner();const r=storeItem(backpack,item);if(r.ok){save();render()}return r}
+export function captureLifeToBackpack(life,options){ensureOwner();const r=storeLivingLife(backpack,life,options);if(r.ok){save();render()}return r}
+export function getBackpack(){ensureOwner();return {...backpackSnapshot(backpack),storageStatus}}
+export function removeBackpackItem(itemId,qty=1){ensureOwner();const r=removeItem(backpack,itemId,qty);if(r.ok){save();render()}return r}
 
 if(typeof document!=='undefined')install();
 if(typeof globalThis!=='undefined')globalThis.K11520Backpack={addItem:addBackpackItem,captureLife:captureLifeToBackpack,get:getBackpack,remove:removeBackpackItem};

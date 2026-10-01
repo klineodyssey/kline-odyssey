@@ -44,7 +44,7 @@ async function verifyInitialQuoteWait(){
     const returning=await page.evaluate(()=>({combat:globalThis.__K11520_KSPACE_API__.snapshot(),coords:globalThis.__K11520_WORLD_COORDS__}));
     assert.equal(returning.coords.physical.x,210);assert.equal(returning.coords.physical.z,186);
     assert.ok(Math.abs(returning.combat.distance-7)<.1,'restored XYZ must receive the guardian at 7m');
-    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.7.0'));
+    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.8.0'));
     await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
     await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
     const lifeBefore=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot());
@@ -55,7 +55,7 @@ async function verifyInitialQuoteWait(){
     assert.ok(lifeAfter.every((m,i)=>Math.hypot(m.position.x-lifeBefore[i].position.x,m.position.z-lifeBefore[i].position.z)>.01),'ambient life must actually move');
     await fs.writeFile(`${OUT}/returning-player.json`,JSON.stringify({returning,lifeBefore,lifeAfter},null,2));
     await page.screenshot({path:`${OUT}/returning-390-ambient-moving.png`});
-    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.7\.0/,'legacy runtime must not overwrite release stamp');
+    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.8\.0/,'legacy runtime must not overwrite release stamp');
     assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot().market.status),'WAIT');
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;

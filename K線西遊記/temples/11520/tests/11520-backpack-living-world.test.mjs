@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createBackpack,backpackSnapshot} from '../runtime/backpack-runtime.mjs';
+import {createBackpack,backpackSnapshot,restoreBackpack,storeItem} from '../runtime/backpack-runtime.mjs';
 import {createWildEcology} from '../runtime/wild-ecology-source-runtime.mjs';
 import {captureLifeToBackpack,releaseLifeFromBackpack,collectTreasureToBackpack,nearestCollectableLife} from '../runtime/living-world-inventory-runtime.mjs';
 import {captureNearestLife,releaseItem} from '../runtime/living-world-browser-bridge.mjs';
@@ -76,4 +76,38 @@ test('nearest collectable life can be discovered by player XZ position',()=>{
   const result=nearestCollectableLife(ecology,{x:target.x,z:target.z,maxDistance:.1});
   assert.equal(result.ok,true);
   assert.equal(result.life.lifeId,target.lifeId);
+});
+
+const LOCAL_OWNER='KAIOS-P-'+'a'.repeat(32);
+function savedBackpack(items=[]){return {...createBackpack({ownerId:LOCAL_OWNER}),items}}
+const material=(itemId,name='wood')=>({itemId,kind:'MATERIAL',name,qty:1,weightEach:1,stackable:true});
+
+test('backpack restore accepts same owner and isolates returned storage object',()=>{
+  const value=savedBackpack([material('item-1')]),original=JSON.stringify(value);
+  const restored=restoreBackpack(value,LOCAL_OWNER);restored.items[0].qty=2;
+  assert.equal(JSON.stringify(value),original);assert.equal(restored.ownerId,LOCAL_OWNER);
+  assert.throws(()=>restoreBackpack(value,'KAIOS-P-'+'b'.repeat(32)),/INVALID_BACKPACK_OWNER/);
+});
+test('backpack restore rejects duplicate item IDs and duplicate LIFE_ID',()=>{
+  assert.throws(()=>restoreBackpack(savedBackpack([material('same'),material('same','stone')]),LOCAL_OWNER),/DUPLICATE/);
+  const cow=id=>({itemId:id,kind:'LIVING_CARGO',species:'COW',lifeId:'COW-ONE',qty:1,weightEach:8});
+  assert.throws(()=>restoreBackpack(savedBackpack([cow('cow-a'),cow('cow-b')]),LOCAL_OWNER),/DUPLICATE/);
+});
+test('backpack duplicate IDs cannot hide behind a merged stack during restore',()=>{
+  // id-b is merged into id-a before the third item; original input IDs must
+  // still be remembered for duplicate rejection.
+  assert.throws(()=>restoreBackpack(savedBackpack([material('id-a'),material('id-b'),material('id-b','stone')]),LOCAL_OWNER),/DUPLICATE/);
+});
+test('backpack restore rejects non-finite, negative and over-limit quantities/weight',()=>{
+  for(const qty of [0,-1,1.5,Infinity,NaN,1000001])assert.throws(()=>restoreBackpack(savedBackpack([{...material('bad'),qty}]),LOCAL_OWNER));
+  for(const weightEach of [NaN,Infinity,-1])assert.throws(()=>restoreBackpack(savedBackpack([{...material('bad'),weightEach}]),LOCAL_OWNER));
+  assert.throws(()=>restoreBackpack(savedBackpack([{...material('heavy'),weightEach:121}]),LOCAL_OWNER),/OVERWEIGHT/);
+  assert.throws(()=>restoreBackpack(savedBackpack(Array.from({length:25},(_,i)=>material('slot-'+i))),LOCAL_OWNER),/INVALID_BACKPACK/);
+});
+test('restore requires stable item identity, living species and LIFE_ID',()=>{
+  for(const item of [{kind:'MATERIAL',qty:1,weightEach:1},{...material('a'),itemId:''},{itemId:'cow',kind:'LIVING_CARGO',species:'COW',qty:1,weightEach:8},{itemId:'cow',kind:'LIVING_CARGO',lifeId:'cow-1',qty:1,weightEach:8}])assert.throws(()=>restoreBackpack(savedBackpack([item]),LOCAL_OWNER));
+});
+test('duplicate runtime insertion does not mutate valid backpack',()=>{
+  const bag=createBackpack({ownerId:LOCAL_OWNER});storeItem(bag,material('id'));
+  const before=JSON.stringify(bag);assert.equal(storeItem(bag,material('id')).reason,'DUPLICATE_ITEM');assert.equal(JSON.stringify(bag),before);
 });
