@@ -106,6 +106,17 @@ test('V2.7.0 release stamp and restored-player encounter boot are production wir
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
+test('journey teaching reuses contextual HUD and starts audio only from a real gesture',()=>{
+  const boot=read('../runtime/game-5d-bootstrap.mjs'),settings=read('../runtime/mobile-ui-settings.mjs');
+  assert.ok(boot.includes('if(e?.isTrusted)unlockJourneyAudio()'));
+  assert.ok(boot.includes('e.isTrusted&&e.target.closest'));
+  assert.ok(!boot.includes('setTimeout(optionalAudio'));
+  assert.ok(main.includes("journey.event('HIT')"));assert.ok(main.includes("journey.event('LOOT')"));
+  assert.ok(main.includes("journey.event('PREVIEW',{c})"));
+  assert.ok(settings.includes('重播取經序章'));
+  assert.ok(main.includes('LOCAL_TUTORIAL')||read('../runtime/world-runtime.mjs').includes('LOCAL_TUTORIAL_NO_REWARD'));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 

@@ -166,16 +166,30 @@ try {
     assert.equal(await page.locator('#confirmOrder').isDisabled(),true);await shot('high-c-locked');
     await page.locator('#cancelOrder').click();
     await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+    if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+    await page.locator('#gameModeToggle').click();await page.locator('#journeyReplay').click();
+    assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'MOVE');
+    await shot('journey-story');await page.locator('#journeyContinue').click();
     const joy=await page.locator('#joy').boundingBox(),jx=joy.x+joy.width/2,jy=joy.y+joy.height/2;
     const knobBefore=await page.locator('#knob').boundingBox();
     await page.mouse.move(jx,jy);await page.mouse.down();await page.mouse.move(jx,jy-40,{steps:5});
     const knobMoved=await page.locator('#knob').boundingBox();assert.ok(knobMoved.y<knobBefore.y,'joystick thumb follows finger');
     try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
     await shot('journey-approach');
+    assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'HIT');
+    assert.equal(await page.evaluate(()=>__K11520_BGM__.playing),true,'real joystick gesture unlocks the original BGM');
     for(let i=0;i<30&&await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot===0);i++){await page.locator('#attack').click();await page.waitForTimeout(400)}
     assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot),1);
     assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().kaios),5);
     await shot('journey-loot');
+    assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'PHASE');
+    await page.locator('#cNumericInput').fill('.001');await page.locator('#cNumericInput').press('Enter');
+    await page.locator('#joy').tap();
+    await page.locator('#cNumericInput').fill('-.001');await page.locator('#cNumericInput').press('Enter');
+    await page.waitForFunction(()=>__K11520_JOURNEY__.snapshot().stage==='PREVIEW');await shot('journey-sixphase');
+    const ordersBefore=(await snap()).orders.length;await page.locator('#orderFire').click();await shot('journey-preview');
+    assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().complete),true);
+    await page.locator('#cancelOrder').click();assert.equal((await snap()).orders.length,ordersBefore,'tutorial must never submit an order');
     await organ('records');await shot('local-product-metrics');await page.locator('#sheetClose').click();
     await page.locator('#backpackButton').click();assert.match(await page.locator('#backpackStats').innerText(),/取經碎片 1/);await shot('journey-backpack');await page.locator('#backpackButton').click();
     assert.equal(await page.evaluate(()=>__walletFixture.calls.some(m=>!/^(eth_requestAccounts|eth_accounts|eth_chainId|eth_getBalance|eth_call)$/.test(m))),false);
