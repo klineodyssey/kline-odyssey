@@ -16,6 +16,32 @@ import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-r
 import {gameUnitsToK,localPositionToK,composePhysicalK} from './spatial-coordinate-runtime.mjs';
 import {resolveCMode} from '../controls/nonlinear-controls.mjs';
 
+// Browser-local teaching state only: never grants XP, loot, orders or wallet authority.
+export function createJourneyTutorial({storage,returning=false}={}){
+  if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
+  const key='k11520.journey.tutorial',steps=['MOVE','HIT','LOOT','PHASE','PREVIEW','DONE'];
+  let saved;try{saved=JSON.parse(storage?.getItem(key)||'null')}catch{}
+  let stage=steps.includes(saved?.stage)?saved.stage:returning?'DONE':'MOVE',planes=[],signs=[];
+  const texts={MOVE:'序章 1/5 · 悟空落地！拉搖桿走近守關猿',HIT:'序章 2/5 · 2.2m 內按打怪，0C 也可戰鬥',LOOT:'序章 3/5 · 擊倒守關猿，收集本機掉寶',PHASE:'序章 4/5 · 切平面，試 C ±0.001',PREVIEW:'序章 5/5 · 開下單預覽，不需確認成交',DONE:''};
+  const save=()=>{try{storage?.setItem(key,JSON.stringify({stage}))}catch{}};
+  save(); // A first visit reloaded before moving must not be mistaken for a returning graduate.
+  function event(type,data={}){
+    const old=stage;
+    if(stage==='MOVE'&&type==='MOVE'&&data.distance>=2)stage='HIT';
+    else if(stage==='HIT'&&type==='HIT')stage='LOOT';
+    else if(stage==='LOOT'&&type==='LOOT')stage='PHASE';
+    else if(stage==='PHASE'&&type==='CONTROL'){
+      if(['XZ','XY','YZ'].includes(data.plane)&&!planes.includes(data.plane))planes.push(data.plane);
+      if(resolveCMode(data.c).canTrade&&!signs.includes(Math.sign(data.c)))signs.push(Math.sign(data.c));
+      if(planes.length>=2&&signs.includes(1)&&signs.includes(-1))stage='PREVIEW';
+    }else if(stage==='PREVIEW'&&type==='PREVIEW'&&resolveCMode(data.c).canTrade)stage='DONE';
+    if(old!==stage)save();return old!==stage;
+  }
+  function replay(){stage='MOVE';planes=[];signs=[];save()}
+  function skip(){stage='DONE';save()}
+  return {event,replay,skip,snapshot:()=>({stage,hint:texts[stage],complete:stage==='DONE',scope:'LOCAL_TUTORIAL_NO_REWARD'})};
+}
+
 export const WORLD_RULES=Object.freeze({
   placeId:'11520',settlement:'KGEN',tradeSettlement:'KGEN',lootCurrency:'KAIOS',
   worldBounds:Object.freeze({minX:-60,maxX:60,minZ:-60,maxZ:60,minY:0,maxY:40}),

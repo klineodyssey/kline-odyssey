@@ -4,6 +4,26 @@ import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs
 import {createSimulationPlayerStore} from '../runtime/evm-wallet-runtime.mjs';
 import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
+import {createJourneyTutorial} from '../runtime/world-runtime.mjs';
+
+test('journey tutorial follows actual play, survives reload and never grants rewards or trades',()=>{
+  const data=new Map(),storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};
+  const t=createJourneyTutorial({storage});assert.equal(t.snapshot().stage,'MOVE');
+  assert.equal(createJourneyTutorial({storage,returning:true}).snapshot().stage,'MOVE','reload before moving preserves the first lesson');
+  t.event('LOOT');t.event('PREVIEW',{c:.001});assert.equal(t.snapshot().stage,'MOVE');
+  t.event('MOVE',{distance:1});assert.equal(t.snapshot().stage,'MOVE');
+  t.event('MOVE',{distance:2});t.event('HIT');t.event('LOOT');assert.equal(t.snapshot().stage,'PHASE');
+  t.event('CONTROL',{plane:'XZ',c:100});t.event('CONTROL',{plane:'YZ',c:-100});assert.equal(t.snapshot().stage,'PHASE');
+  t.event('CONTROL',{plane:'XZ',c:.001});t.event('CONTROL',{plane:'YZ',c:-.001});assert.equal(t.snapshot().stage,'PREVIEW');
+  const restored=createJourneyTutorial({storage,returning:true});assert.equal(restored.snapshot().stage,'PREVIEW');
+  restored.event('PREVIEW',{c:100});assert.equal(restored.snapshot().complete,false);
+  restored.event('PREVIEW',{c:.001});assert.equal(restored.snapshot().complete,true);
+  restored.replay();assert.equal(restored.snapshot().stage,'MOVE');restored.skip();assert.equal(restored.snapshot().complete,true);
+  assert.equal(createJourneyTutorial({storage:null,returning:true}).snapshot().complete,true);
+  const blocked=createJourneyTutorial({storage:{getItem(){throw Error('blocked')},setItem(){throw Error('blocked')}}});
+  blocked.event('MOVE',{distance:3});assert.equal(blocked.snapshot().stage,'HIT');
+  assert.equal(blocked.snapshot().scope,'LOCAL_TUTORIAL_NO_REWARD');
+});
 
 test('V1 magnitude mode preserves short direction, zero journey and high-C production lock',()=>{
   for(const c of [0,.0009,-.0009])assert.equal(resolveCMode(c).mode,'MONSTER_MODE');

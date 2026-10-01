@@ -1,5 +1,26 @@
 # 11520 HANDOFF CURRENT
 
+## V2.7.0 journey onboarding continuation — 2026-10-01
+
+- Continues merged PR455 (518ec114), without resetting restored XYZ or changing
+  market, wallet, position, settlement, payout or canonical Life-slot authority.
+- Existing world runtime now owns browser-local tutorial stages: walk, hit,
+  loot, plane/positive-negative C practice, preview only, done. Stages follow
+  real gameplay events; the tutorial never awards loot or submits an order.
+  Existing players continue normally. Settings can replay/skip the short story.
+- Existing contextual monster guide carries the current step and opens story
+  detail on demand; no second persistent K-space card. Replay closes utilities
+  so landscape combat is usable immediately. Real player gestures unlock the
+  existing original BGM and zh-TW welcome, not automatic page load.
+- Existing simulation-browser suite exercises the tutorial alongside wallet,
+  liquidation, receipts and account/reload recovery in both mobile orientations.
+  Screenshots remain in artifacts/11520-settlement-qa; responsive checks use
+  the existing six-profile suite. Release requires fresh exact-head CI and
+  direct visual inspection, then deployed Pages verification.
+- First-party code/text/test changes only, no new assets or runtime files.
+  KAIOS remains a local/wallet-bound candidate, not a paid receipt. No payroll
+  receipt produced: HOLD. Mainnet, paid Oracle and >1C production remain HOLD.
+
 ## V2.7.0 returning-player encounter closeout — 2026-10-01
 
 - PR455 preserves restored XYZ and creates the first guardian at player Z +7m.
