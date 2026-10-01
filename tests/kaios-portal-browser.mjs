@@ -61,6 +61,13 @@ try{
   await shot(page,'returning-player-390x844');
   for(let i=0;i<3;i++)for(const viewport of [{width:844,height:390},{width:390,height:844}]){await page.setViewportSize(viewport);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);const r=await reachable(page,'#primaryPlay');assert.ok(r.inView&&r.hit);}
   report.checks.push('new guest, validated returning player, allowlisted continue, read-only private profile, three rotation cycles');
+  for(let i=0;i<2;i++){
+    await page.locator('#primaryPlay').click();await page.waitForURL(/temples\/11520\/game-5d\.html/,{waitUntil:'domcontentloaded'});
+    await page.goBack({waitUntil:'networkidle'});await page.locator('#primaryPlay').waitFor();
+    // Exercise the persisted pageshow path even when a headless browser disables bfcache.
+    await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
+  }
+  report.checks.push('two real world-entry/back cycles and persisted pageshow navigation reset');
   await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/index.html',{waitUntil:'networkidle'});assert.equal(new URL(page.url()).pathname,new URL(BASE+'/').pathname,'legacy Portal converges to root');
   await page.evaluate(()=>localStorage.setItem('KAIOS_PLAYER_LIFE_V1','{corrupt'));
   await page.reload({waitUntil:'networkidle'});assert.ok(await page.locator('#primaryPlay').isVisible());assert.equal(await page.evaluate(()=>localStorage.getItem('KAIOS_PLAYER_LIFE_V1')),'{corrupt');

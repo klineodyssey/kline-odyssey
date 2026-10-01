@@ -45,6 +45,7 @@ if(typeof document!=='undefined'){
  // Audio failure must not prevent navigation or Player Life. No autoplay attempt.
  import('./kaios-audio-ui.mjs').then(({mountAudioControl})=>mountAudioControl({container:document.querySelector('#portalAudio'),worldId:'PORTAL'})).catch(()=>{document.querySelector('#portalAudio').textContent='聲音暫不可用 · 可靜音遊玩'});
  let navigating=false;
+ window.addEventListener('pageshow',()=>{navigating=false});
  document.addEventListener('click',async event=>{
   const a=event.target.closest?.('a[data-world-id]');
   if(!a||event.defaultPrevented||event.button!==0||event.ctrlKey||event.metaKey||event.altKey||event.shiftKey||a.target||a.download)return;
