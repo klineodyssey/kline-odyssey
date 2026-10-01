@@ -3152,7 +3152,11 @@ test("V4.0 Voice errors are visible and text fallback always remains available",
   const appSource = await fs.readFile(new URL("../K線西遊記/temples/11520/app.mjs", import.meta.url), "utf8");
   assert.match(appSource, /getUserMedia\(\{ audio: true \}\)/);
   assert.match(appSource, /webkitSpeechRecognition/);
-  assert.match(appSource, /speechSynthesis\.speak/);
+  assert.match(appSource, /getKaiosAudio/);
+  assert.match(appSource, /audio\.speak\(text,/);
+  const audioSource = await fs.readFile(new URL("../assets/kaios-audio.mjs", import.meta.url), "utf8");
+  assert.match(audioSource, /speechSynthesis\.speak/);
+  assert.match(audioSource, /settings\.muted/);
   assert.match(appSource, /target\(\)\?\.focus\(\)/);
   assert.doesNotMatch(appSource, /start && \(start\.disabled = true\)/);
 });

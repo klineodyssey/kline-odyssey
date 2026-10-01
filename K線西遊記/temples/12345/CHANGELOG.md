@@ -1,3 +1,10 @@
+# 2026-10-01｜KAIOS shared audio component
+
+- Preserve Heart gameplay/runtime version; register `KAIOS-AUDIO-1` integration.
+- Replace active independent MP3 player with the shared gesture-unlocked synth
+  player; preserve historical assets without asserting distribution rights.
+- Canonical world return goes to the root KAIOS Portal.
+
 # V10.48.1｜INDEX ROLLCALL GOVERNANCE
 
 - 在 `index.html` 最前面加入 `PRIMEFORGE_RUNTIME_DEPENDENCY_ROLLCALL_V1`。

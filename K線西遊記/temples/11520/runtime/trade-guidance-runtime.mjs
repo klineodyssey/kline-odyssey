@@ -13,9 +13,10 @@ export function buildOrderSpeech({stage,axis,symbol,side,lots,c,margin,freeKgen,
   return '';
 }
 
+import {getKaiosAudio} from '../../../../assets/kaios-audio.mjs';
 export function speakTrade(text,{enabled=true,lang='zh-TW',rate=1,pitch=1}={}){
   if(!enabled||!text||typeof window==='undefined'||!('speechSynthesis' in window))return {ok:false,reason:'SPEECH_UNAVAILABLE'};
-  window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=rate;u.pitch=pitch;window.speechSynthesis.speak(u);return {ok:true};
+  const ok=getKaiosAudio().speak(text,{lang,rate,pitch});return {ok,reason:ok?undefined:'VOICE_MUTED_OR_GESTURE_REQUIRED'};
 }
 
 export function visualTradeState(stage){

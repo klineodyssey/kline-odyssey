@@ -1,0 +1,68 @@
+name: KAIOS Portal Product QA
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'assets/kaios-*'
+      - 'K線西遊記/index.html'
+      - 'K線西遊記/temples/12345/**'
+      - 'K線西遊記/temples/16888/**'
+      - 'K線西遊記/temples/11520/**'
+      - 'tests/kaios-*'
+      - '.github/workflows/kaios-portal-product-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'assets/kaios-*'
+      - 'K線西遊記/**'
+      - 'tests/kaios-*'
+      - '.github/workflows/kaios-portal-product-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: portal-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  portal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Registry, audio and domain regressions
+        run: |
+          node --test tests/kaios-portal.test.mjs tests/kaios-audio.test.mjs
+          node tests/kaios-portal-link-audit.mjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0 ethers@6.15.0
+          npx playwright install --with-deps chromium
+      - name: Real browser product QA
+        env:
+          KAIOS_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/portal-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          node tests/kaios-portal-browser.mjs
+          node tests/kaios-world-audio-browser.mjs
+          node 'K線西遊記/temples/11520/tests/11520-browser-audio-world.mjs'
+      - name: Reviewable screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: kaios-portal-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/kaios-portal-qa/
+            artifacts/11520-audio-world-qa/
+          if-no-files-found: error
+          retention-days: 14

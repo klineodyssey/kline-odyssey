@@ -6,7 +6,8 @@ Site root: C:\Desktop\kline-odyssey\K線西遊記
 ## Frontend Entry Points
 | Role | Full path | Notes |
 |---|---|---|
-| Galaxy portal | C:\Desktop\kline-odyssey\K線西遊記\index.html | Main static frontend portal. |
+| Canonical KAIOS Portal | C:\Desktop\kline-odyssey\index.html | Playable-first official world entry, shared audio and privacy-limited Player Life welcome. |
+| Galaxy compatibility entry | C:\Desktop\kline-odyssey\K線西遊記\index.html | Redirect/compatibility link to the canonical root Portal. |
 | Temple 12345 | C:\Desktop\kline-odyssey\K線西遊記\temples\12345\index.html | Core temple runtime. |
 | Temple 16888 | C:\Desktop\kline-odyssey\K線西遊記\temples\16888\index.html | UFO / Guanghan temple runtime. |
 | Temple 11520 | C:\Desktop\kline-odyssey\K線西遊記\temples\11520\index.html | Exchange prototype. |
@@ -16,6 +17,14 @@ Site root: C:\Desktop\kline-odyssey\K線西遊記
 | Legacy Wukong temple | C:\Desktop\kline-odyssey\wukong-temple\index.html | Legacy frontend. |
 
 ## Frontend File Inventory
+
+2026-10-01 Portal organs: `assets/kaios-world-registry.mjs`,
+`assets/kaios-portal.mjs`, `assets/kaios-portal.css`, `assets/kaios-audio.mjs`,
+`assets/kaios-audio-ui.mjs`, `assets/kaios-audio.css`,
+`assets/kaios-world-audio.mjs` (Heart/Universe legacy audio bridge).
+Specification and provenance: `docs/KAIOS_WORLD_PORTAL.md`,
+`docs/KAIOS_AUDIO_PROVENANCE.md`. Test/workflow paths are registered in
+`docs/KGEN_MASTER_INDEX.md` and README. No duplicate Portal or new Physics runtime.
 | # | Full path | Category | Purpose | Status | Protection | Referenced by |
 |---:|---|---|---|---|---|---|
 | 1 | C:\Desktop\kline-odyssey\12345.html | Frontend | Static frontend page. | active/support | Check Boot, Runtime CURRENT, Universe Map, AGENTS and existing function before editing. | count=42: DEPLOY_STRUCTURE.md<br>Index.html<br>KGEN_BOOT_GRAPH.md<br>KGEN_MASTER_INDEX.md<br>KGEN_MODULE_MAP.md<br>... |
