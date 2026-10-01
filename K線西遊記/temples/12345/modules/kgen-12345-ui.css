@@ -676,6 +676,7 @@ html.kgen-v30 #k12345-ai-dialog #kgen-ai-body { position:static!important;inset:
  html.kgen-v30 #kgen-ai-toggle { min-width:44px;min-height:44px; }
  html.kgen-v30 .warp-engine { top:auto!important;bottom:168px!important;right:8px!important;width:60px!important;height:180px!important;max-height:180px!important; }
  html.kgen-v30 .warp-rail { height:140px!important;max-height:140px!important; }
+ html.kgen-v30 #warp-txt { font-size:13px!important;line-height:1.2!important;margin-top:6px!important; }
  html.kgen-v30 #move-joystick-wrap { left:12px!important;bottom:174px!important;top:auto!important;width:94px!important;height:94px!important; }
  html.kgen-v30 .steer-zone { bottom:146px!important;left:8px!important;width:calc(100vw - 84px)!important; }
  html.kgen-v30 #k12345-slider-status { bottom:134px!important; }

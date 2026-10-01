@@ -52,6 +52,8 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
   assert.equal(await page.evaluate(()=>innerWidth),width,'mobile viewport must not be a scaled 980px desktop');
   for(const s of ['.nav-music','[data-kaios-return=PORTAL]','#kgen-land-panel-open','#kgen-land-info-panel-open']){const r=await hit(s);assert.ok(r.w>=44&&r.h>=44,'44px utility/land targets');}
   await hit('.warp-rail');await hit('#move-joystick-wrap');await shot('closed');
+  const warp=await page.locator('.warp-engine').boundingBox(),readout=await page.locator('#warp-txt').boundingBox();
+  assert.ok(readout.y>=warp.y&&readout.y+readout.height<=warp.y+warp.height+1,'Warp readout must remain inside its stacking region');
   const initial=await geometry();
   for(const s of ['#kgen-land-panel-open','#kgen-land-info-panel-open'])for(let cycle=0;cycle<2;cycle++){
    await page.locator(s).tap();assert.equal(await page.locator('#k12345-land-dialog').evaluate(el=>el.open),true);
