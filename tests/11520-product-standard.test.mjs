@@ -60,8 +60,13 @@ assert.ok(walletTrade.includes('PnL = ΔIndex × C × 口數'),'standalone walle
 assert.ok(walletTrade.includes('每 1 index 損益'),'standalone wallet trade preview must use index semantics');
 for(const [temple,id] of [[temple12345,'12345'],[temple16888,'16888']]){
   assert.ok(temple.includes('href="../../../" id="return-to-11520" data-kaios-return="PORTAL"'),`${id} must return to the single canonical root Portal`);
-  assert.match(temple,/data-kaios-return="PORTAL"[^>]*>🌌 回 KAIOS 總世界</,`${id} must expose the visible return control`);
-  assert.match(temple,new RegExp(`bindTempleReturnWalletContinuity\\(\\{sourceWorld:'K${id}'\\}\\)`),`${id} must retain safe public wallet identity`);
+  if(id==='12345'){
+    assert.match(temple,/data-kaios-return="PORTAL" aria-label="回 KAIOS 總世界" title="回 KAIOS">🌌</,'12345 approved compact Portal icon retains accessible destination');
+    assert.ok(temple.includes("bindTempleReturnWalletContinuity({sourceWorld:'K12345',returnTitle:'回 KAIOS'})"),'12345 preserves continuity with explicit compact tooltip');
+  }else{
+    assert.match(temple,/data-kaios-return="PORTAL"[^>]*>🌌 回 KAIOS 總世界</,`${id} must expose the visible return control`);
+    assert.match(temple,new RegExp(`bindTempleReturnWalletContinuity\\(\\{sourceWorld:'K${id}'\\}\\)`),`${id} must retain safe public wallet identity`);
+  }
 }
 const values=new Map(),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
 const walletIdentity=savePublicWalletIdentity({address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345'},storage);

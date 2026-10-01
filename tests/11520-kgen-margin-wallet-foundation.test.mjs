@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activateMargin,closeMargin,snapshot,pnlForMove,maxAdversePoints,positionRisk,MAX_C_LEVERAGE,normalizeSignedC,signedCFromLegacyMagnitude} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
-import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
+import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY,bindTempleReturnWalletContinuity} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 
@@ -165,6 +165,23 @@ function walletProvider(){
   };return provider;
 }
 const microtasks=async()=>{for(let i=0;i<30;i++)await Promise.resolve()};
+{
+  const previousDocument=globalThis.document;
+  try{
+    const link={dataset:{kaiosReturn:'PORTAL'}},status={},p=walletProvider(),data=new Map();
+    const storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
+    globalThis.document={getElementById:id=>id==='return-to-11520'?link:status};
+    await bindTempleReturnWalletContinuity({sourceWorld:'K12345',returnTitle:'回 KAIOS',ethereum:p,storage});
+    assert.equal(link.title,'回 KAIOS');assert.equal(link.dataset.walletContinuity,'retained');
+    p.accounts=[accountB];p.emit('accountsChanged',p.accounts);await microtasks();
+    assert.equal(link.title,'回 KAIOS','account changes must not overwrite the Portal tooltip');
+    assert.equal(JSON.parse(data.get(PUBLIC_WALLET_IDENTITY_KEY)).address,accountB,'tooltip cannot change wallet continuity');
+    assert.ok(status.textContent.includes('0002'));
+    await bindTempleReturnWalletContinuity({sourceWorld:'K16888',ethereum:walletProvider(),storage});
+    assert.match(link.title,/返回 KAIOS 總世界 並保留公開錢包識別/,'other worlds retain their default tooltip');
+    assert.ok(p.calls.every(({method})=>['eth_accounts','eth_chainId'].includes(method)),'tooltip change is read-only');
+  }finally{if(previousDocument===undefined)delete globalThis.document;else globalThis.document=previousDocument;}
+}
 {
   const p=walletProvider(),data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
   const s=createWalletSession({ethereum:p,storage}),states=[];const unsubscribe=s.subscribe(value=>states.push(value));

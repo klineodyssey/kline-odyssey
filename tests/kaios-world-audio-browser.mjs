@@ -53,6 +53,10 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
   await page.waitForSelector('html.k12345-composed');
   for(const s of ['.nav-music','[data-kaios-return=PORTAL]','#kgen-land-panel-open','#kgen-ai-toggle','#k12345-more-open','#kgen-v30-wish-btn','#kgen-v30-vow-btn']){const r=await hit(s);assert.ok(r.w>=44&&r.h>=44,'44px primary targets');}
   assert.equal(await page.locator('#kgen-land-info-panel-open').count(),0,'one Land entry, not two persistent buttons');
+  assert.equal(await page.locator('[data-kaios-return=PORTAL]').getAttribute('title'),'回 KAIOS');
+  assert.equal(await page.locator('[data-kaios-return=PORTAL]').getAttribute('aria-label'),'回 KAIOS 總世界');
+  for(const s of ['#kgen-heart-toggle','#kgen-land-panel-open','#kgen-ai-toggle','#k12345-more-open']){const r=await hit(s);assert.ok(r.w>=44&&r.h>=44,'compact utility retains full touch target');}
+  if(height===390)assert.ok((await page.locator('#k12345-primary').boundingBox()).width<=144,'landscape utility footprint remains compact');
   const composition=await page.evaluate(()=>{
    const r=document.querySelector('#core-anchor').getBoundingClientRect();
    const center=Math.abs(r.x+r.width/2-(document.querySelector('#k12345-world').getBoundingClientRect().x+document.querySelector('#k12345-world').clientWidth/2));

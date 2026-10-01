@@ -672,9 +672,11 @@ html.k12345-composed {
  /* Reuse the existing Heart toggle layer; do not trap it below its scrim. */
  #k12345-primary { position:relative;z-index:calc(var(--kgen-v30-overlay-z) + 2);display:grid;grid-template-columns:1.4fr .8fr .7fr 1.1fr;gap:6px;pointer-events:auto; }
  html.k12345-composed #k12345-primary > button {
-  position:static!important;inset:auto!important;transform:none!important;min-width:0!important;width:auto!important;max-width:none!important;height:44px!important;min-height:44px!important;margin:0!important;padding:6px!important;border:1px solid #486876!important;border-radius:12px!important;
-  color:#e5f4f8!important;background:#102630!important;box-shadow:none!important;font-size:13px!important;display:flex!important;align-items:center;justify-content:center;overflow:hidden;
+  position:relative!important;inset:auto!important;transform:none!important;min-width:0!important;width:auto!important;max-width:none!important;height:44px!important;min-height:44px!important;margin:0!important;padding:4px 6px!important;border:0!important;border-radius:10px!important;
+  color:#e5f4f8!important;background:transparent!important;box-shadow:none!important;font-size:13px!important;display:flex!important;align-items:center;justify-content:center;overflow:hidden;
  }
+ /* Smaller painted surface; the full 44px button remains the hit target. */
+ html.k12345-composed #k12345-primary > button::before { content:'';position:absolute;inset:4px 0;border:1px solid #486876;border-radius:10px;background:#102630;z-index:-1;pointer-events:none; }
  html.k12345-composed #kgen-heart-toggle .kgen-heart-title { font-size:0!important; }
  html.k12345-composed #kgen-heart-toggle .kgen-heart-title::after { content:'Heart / 錢包';font-size:13px; }
  html.k12345-composed #k12345-primary #kgen-heart-toggle .kgen-heart-sub,html.k12345-composed #k12345-primary #kgen-heart-toggle .kgen-heart-state { display:none!important; }
@@ -723,7 +725,9 @@ html.k12345-composed {
 }
 @media (max-width:900px) and (max-height:500px) {
  html.k12345-composed #k12345-composition { inset:64px 12px 8px;grid-template-columns:160px minmax(0,1fr) 220px;grid-template-rows:1fr 48px;column-gap:16px; }
- #k12345-primary { grid-column:1;grid-row:1;align-content:start;grid-template-columns:1fr 1fr; }
+ #k12345-primary { grid-column:1;grid-row:1;align-content:start;grid-template-columns:1.2fr 1fr;width:144px;gap:4px; }
+ html.k12345-composed #k12345-primary > button { padding:2px 3px!important;font-size:11px!important; }
+ html.k12345-composed #kgen-heart-toggle .kgen-heart-title::after,html.k12345-composed #kgen-ai-toggle::after { font-size:11px; }
  #k12345-status-slot { grid-column:1;grid-row:2;align-self:center; }
  #k12345-world { grid-column:2;grid-row:1; }
  html.k12345-composed #core-anchor { width:min(25vw,200px)!important;height:min(25vw,200px)!important; }

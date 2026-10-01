@@ -564,7 +564,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <!-- === Universe Navigation Buttons V2.04 === -->
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
-<a class="nav-btn" href="../../../" id="return-to-11520" data-kaios-return="PORTAL" aria-label="回 KAIOS 總世界" title="回 KAIOS 總世界">🌌</a>
+<a class="nav-btn" href="../../../" id="return-to-11520" data-kaios-return="PORTAL" aria-label="回 KAIOS 總世界" title="回 KAIOS">🌌</a>
 <span id="return-wallet-continuity" style="position:fixed;right:8px;top:60px;z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.72);color:#d7faff;font-size:11px;line-height:1.35;overflow-wrap:anywhere;text-align:center;">錢包延續：檢查中</span>
 <button class="nav-btn nav-swap" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN" id="btn-swap-bnb" type="button">用 BNB 換 KGEN</button>
 <button class="nav-btn nav-swap" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）" id="btn-swap-usdt" type="button">用 USDT 換 KGEN</button>
@@ -1876,7 +1876,7 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 import {bindTempleReturnWalletContinuity} from '../11520/runtime/evm-wallet-runtime.mjs';
 import {bindWorldAudio} from '../../../assets/kaios-world-audio.mjs';
 bindWorldAudio('12345');
-void bindTempleReturnWalletContinuity({sourceWorld:'K12345'});
+void bindTempleReturnWalletContinuity({sourceWorld:'K12345',returnTitle:'回 KAIOS'});
 </script>
 
 </body>
