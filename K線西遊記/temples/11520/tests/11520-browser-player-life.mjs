@@ -216,7 +216,13 @@ async function runV29(width,height){
     assert(boss.phases.includes(2)&&boss.phases.includes(3),'actual damage crosses Boss phases');assert(defeated.player.xp>before.player.xp);assert.equal(defeated.player.events.filter(e=>e.type==='BOSS_DEFEAT').length,1);
     for(let i=0;i<3;i++)await bossPage.locator('#attack').click();assert.equal((await snap(bossPage)).player.xp,defeated.player.xp,'Boss reward once-only');
     boss.events=await bossPage.evaluate(()=>__K11520_WORLD_AUDIO__.snapshot().events.map(e=>e.event));for(const e of ['BOSS_SPAWN','BOSS_PHASE_CHANGE','BOSS_RAGE','BOSS_LOW_HP','BOSS_DEFEAT'])assert(boss.events.includes(e),e+' feedback from actual combat');
-    await shot(bossPage,`${width}x${height}-v29-boss-victory`);boss.checks.push('BOSS_SELECTED_THROUGH_CONTEXT_UI','REAL_BOSS_PHASE_RAGE_DEFEAT','ONCE_ONLY_REWARD','NONZERO_BOSS_PCM');
+    boss.victoryToast=await bossPage.evaluate(()=>{
+      const toast=document.querySelector('#toast'),guide=document.querySelector('#monsterGuide');
+      const a=toast.getBoundingClientRect(),b=guide.getBoundingClientRect();
+      return {visible:toast.classList.contains('show')&&a.width>0&&a.height>0,toast:{x:a.x,y:a.y,width:a.width,height:a.height},monsterGuide:{x:b.x,y:b.y,width:b.width,height:b.height},overlap:Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)};
+    });
+    assert.equal(boss.victoryToast.visible,true,'actual post-defeat toast must be visible for layout QA');assert.equal(boss.victoryToast.overlap,false,'victory feedback must not overlap compact monster HUD');
+    await shot(bossPage,`${width}x${height}-v29-boss-victory`);boss.checks.push('BOSS_SELECTED_THROUGH_CONTEXT_UI','REAL_BOSS_PHASE_RAGE_DEFEAT','ONCE_ONLY_REWARD','NONZERO_BOSS_PCM','VICTORY_TOAST_NO_MONSTER_HUD_OVERLAP');
     // An automatic next encounter can legitimately create a new cue while the
     // old one expires. Verify the specific node's lifetime and bounded count.
     await bossPage.evaluate(()=>{globalThis.__v29LastFx=document.querySelector('#journeyEventFx')});

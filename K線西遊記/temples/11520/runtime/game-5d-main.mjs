@@ -22,7 +22,7 @@ import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
 import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs';
 import {createJourneyTutorial} from './world-runtime.mjs';
 import {createPlayerLife,installPlayerLifeUI} from './player-life-ui.mjs';
-import {createWorldFeedbackObserver,emit11520WorldFeedback} from './game-ui-product-fixes-v23.mjs';
+import {createWorldFeedbackObserver,emit11520WorldFeedback,show11520Toast} from './game-ui-product-fixes-v23.mjs';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const AXIS_MARKETS=Object.freeze({KX:'BTCUSDT',KY:'ETHUSDT',KZ:'BNBUSDT'});
@@ -94,7 +94,7 @@ async function executionAction(action){
 // Journey remains playable offline. Its initial reference frame is explicitly
 // WAIT, never a fabricated live price or execution observation.
 const fmt=(n,d=4)=>Number(n||0).toLocaleString(undefined,{maximumFractionDigits:d});
-function toast(t,combat=false){const el=$('#toast');if(!el)return;el.dataset.kspaceFeedback=String(combat);el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
+function toast(t,combat=false){show11520Toast(t,{combat})}
 function axis(){return S.axes[S.axis]}function price(){return S.quotes[axis().market]||0}
 function normalizeTradeSide(value){return /空|SHORT|SELL/i.test(String(value||''))?'空':'多'}
 function setTradeSide(axisId,value){const id=String(axisId||'').toUpperCase(),target=S.axes[id];if(!target)return false;const next=normalizeTradeSide(value);if(target.side!==next){target.side=next;document.dispatchEvent(new CustomEvent('k11520:trade-side-change',{detail:{axis:id,side:next,source:'SIGNED_C'}}))}return true}

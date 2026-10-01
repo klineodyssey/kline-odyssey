@@ -31,14 +31,22 @@ export function createWorldFeedbackObserver(emit){
   };
 }
 const feedbackHistory=[];
+// One placement/timer owner for ordinary gameplay and world-event messages.
+export function show11520Toast(text,{combat=false,event='',duration=1700}={}){
+  if(typeof document==='undefined')return;
+  const toast=document.getElementById('toast');if(!toast)return;
+  clearTimeout(show11520Toast.timer);toast.textContent=text;toast.dataset.kspaceFeedback=String(combat);
+  if(event)toast.dataset.worldEvent=event;else delete toast.dataset.worldEvent;
+  toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.classList.add('show');toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
+  const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
+  if(guide?.width>0)for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
+  show11520Toast.timer=setTimeout(()=>{toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)},duration);
+}
 export function emit11520WorldFeedback(event){
   const label=WORLD_FEEDBACK[event];if(!label)return false;
   getKaiosAudio().play(event);feedbackHistory.push({event,at:Date.now()});if(feedbackHistory.length>32)feedbackHistory.shift();
   if(typeof document!=='undefined'){
-    const toast=document.getElementById('toast');if(toast){toast.textContent=label;toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.classList.add('show');toast.dataset.worldEvent=event;toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
-      const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
-      if(guide&&guide.width>0){for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important')}
-      clearTimeout(emit11520WorldFeedback.timer);emit11520WorldFeedback.timer=setTimeout(()=>{toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)},2000)}
+    show11520Toast(label,{event,duration:2000});
     const stage=document.getElementById('three');if(stage&&!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches){emit11520WorldFeedback.animation?.cancel();emit11520WorldFeedback.animation=stage.animate?.([{filter:'brightness(1)'},{filter:'brightness(1.12)'},{filter:'brightness(1)'}],{duration:420})}
     // One disposable visual cue, not a permanent HUD or pointer interceptor.
     document.getElementById('journeyEventFx')?.remove();clearTimeout(emit11520WorldFeedback.fxTimer);
@@ -51,7 +59,7 @@ export function emit11520WorldFeedback(event){
   return true;
 }
 globalThis.__K11520_WORLD_AUDIO__=Object.freeze({snapshot:()=>({events:feedbackHistory.map(row=>({...row})),authority:'PRESENTATION_ONLY'})});
-if(typeof document!=='undefined')addEventListener('pagehide',()=>{clearTimeout(emit11520WorldFeedback.timer);clearTimeout(emit11520WorldFeedback.fxTimer);emit11520WorldFeedback.animation?.cancel();document.getElementById('journeyEventFx')?.remove();const toast=document.getElementById('toast');if(toast){toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)}});
+if(typeof document!=='undefined')addEventListener('pagehide',()=>{clearTimeout(show11520Toast.timer);clearTimeout(emit11520WorldFeedback.fxTimer);emit11520WorldFeedback.animation?.cancel();document.getElementById('journeyEventFx')?.remove();const toast=document.getElementById('toast');if(toast){toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)}});
 
 function installCss(){
   if(document.getElementById('k11520ProductFixesStyleV23'))return;
