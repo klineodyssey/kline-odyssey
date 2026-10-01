@@ -40,7 +40,10 @@ export function show11520Toast(text,{combat=false,event='',duration=1700}={}){
   toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.style.transition='opacity .2s';toast.classList.add('show');toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
   const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
   if(guide?.width>0)for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
-  show11520Toast.timer=setTimeout(()=>{toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)},duration);
+  // Keep placement while opacity fades. Clearing it at dismissal moves still-
+  // visible loot text back into the HUD. The next message replaces placement;
+  // pagehide remains the cleanup owner. No extra timer or DOM node is needed.
+  show11520Toast.timer=setTimeout(()=>{toast.classList.remove('show');delete toast.dataset.worldEvent},duration);
 }
 export function emit11520WorldFeedback(event){
   const label=WORLD_FEEDBACK[event];if(!label)return false;

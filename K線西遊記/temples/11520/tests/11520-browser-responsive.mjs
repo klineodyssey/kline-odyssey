@@ -212,6 +212,22 @@ async function verifyWorldFeedbackLayout(page,label){
   if(sample){assert.equal(sample.transitionProperty,'opacity',`${label} visible feedback must not animate layout across gameplay controls`);assert.deepEqual(sample.collisions,[],`${label} world feedback obscures gameplay controls: ${JSON.stringify(sample)}`);assert.ok(sample.toast.left>=0&&sample.toast.top>=0&&sample.toast.right<=sample.viewport.width&&sample.toast.bottom<=sample.viewport.height,`${label} world feedback clipped: ${JSON.stringify(sample)}`)}
   return sample;
 }
+async function verifyFeedbackFade(page,report){
+  // Presentation-only regression: a completed loot toast must fade in place,
+  // not jump back across the HUD when its placement styles are cleared.
+  report.feedbackFade=await page.evaluate(async()=>{
+    const {show11520Toast}=await import('./runtime/game-ui-product-fixes-v23.mjs');
+    show11520Toast('擊倒！Heart Fragment · EPIC · 背包已保存 / 本機 KAIOS（候選帳本）',{combat:true,duration:450});
+    const toast=document.getElementById('toast'),frames=[],start=performance.now();
+    await new Promise(resolve=>{function sample(){const r=toast.getBoundingClientRect(),opacity=Number(getComputedStyle(toast).opacity);frames.push({at:performance.now()-start,show:toast.classList.contains('show'),opacity,x:r.x,y:r.y,width:r.width,height:r.height});if(performance.now()-start<800)requestAnimationFrame(sample);else resolve()}requestAnimationFrame(sample)});
+    return frames;
+  });
+  const visible=report.feedbackFade.filter(f=>f.opacity>0.01),first=visible[0];
+  assert(first,'toast must actually become visible');
+  assert(visible.some(f=>!f.show),'sample real opacity fade after dismiss timer');
+  for(const f of visible)for(const key of ['x','y','width','height'])assert(Math.abs(f[key]-first[key])<1,`toast ${key} moved during visible fade: ${JSON.stringify(f)}`);
+  assert.equal(report.feedbackFade.at(-1).opacity,0,'toast must finish fading');
+}
 async function finalizeLandscape(page,report){
   await page.locator('#confirm').waitFor({state:'hidden'});
   await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
@@ -320,6 +336,7 @@ try{
     try{await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded',timeout:35000});await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_KSPACE_COMBAT__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__&&document.getElementById('k11520UtilityMaster'),null,{timeout:45000});await page.waitForTimeout(7500);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click();
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
       report.states.cold=await snapshot(page);await page.screenshot({path:`${OUT}/${profile.name}-collapsed.png`,fullPage:true});check(profile.name,report.states.cold,{landscape:!!profile.landscape});
+      await verifyFeedbackFade(page,report);
       const authorityBefore=await page.evaluate(()=>({axis:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.activeAxis,order:document.querySelector('#orderFire')?.getAttribute('aria-label')}));
       const inspectedAxis=authorityBefore.axis==='KX'?'KY':'KX';await page.locator(`[data-axis="${inspectedAxis}"]`).click();await page.waitForTimeout(100);
       const authorityAfter=await page.evaluate(()=>({axis:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.activeAxis,order:document.querySelector('#orderFire')?.getAttribute('aria-label')}));
