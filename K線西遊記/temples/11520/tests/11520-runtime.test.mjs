@@ -67,6 +67,13 @@ test('offline 0C journey attacks, drops local-only loot once, respawns without s
   tickWorld(world,player,time+6000);assert.equal(kCombatSnapshot(world,player).target.state,'GUARD');
   assert.equal(kCombatSnapshot(world,player).target.hp,120);
 });
+test('returning player receives the first journey encounter locally instead of hundreds of meters away',()=>{
+  const world=createWorldState(0);world.journeyEnabled=true;const player={x:-12.0715,y:.013172,z:2.91112};createKSpaceEncounter(world,undefined,player);
+  const snap=kCombatSnapshot(world,player,{plane:'XZ',c:0});assert.ok(snap.distance>=6.9&&snap.distance<=7.1);
+  assert.equal(snap.monsterLocal.x,player.x);assert.equal(snap.monsterLocal.z,player.z+7);
+  assert.ok((world.ambientLife||[]).every(m=>Math.hypot(m.x-player.x,m.z-player.z)<=17));
+});
+
 test('journey world starts with a nearby moving ecology and six-phase combat metadata',()=>{
   const world=createWorldState(0);world.journeyEnabled=true;createKSpaceEncounter(world);const ambient=world.ambientLife||[];
   assert.equal(ambient.length,4);assert.deepEqual(new Set(ambient.map(m=>m.species)),new Set(['STONE_APE','FIRE_WISP']));
