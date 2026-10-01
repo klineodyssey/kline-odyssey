@@ -96,7 +96,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
       badge.id = 'kgen-12345-release-badge';
       badge.setAttribute('role','status');
       badge.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:2147483646;max-width:min(360px,calc(100vw - 16px));padding:7px 10px;border:1px solid rgba(255,215,120,.55);border-radius:10px;background:rgba(5,7,11,.88);color:#ffe28a;font:600 11px/1.45 system-ui,-apple-system,BlinkMacSystemFont,Noto Sans TC,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.28);pointer-events:none';
-      document.body.appendChild(badge);
+      (document.getElementById('kgen-heart-live-panel') || document.body).appendChild(badge);
     }
     badge.textContent = '12345 ' + RELEASE.frontend + '｜TempleHeart ' + RELEASE.templeHeartTarget + ' 程式已整合｜鏈上版本檢查中';
     return badge;

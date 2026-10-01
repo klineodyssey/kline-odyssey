@@ -623,3 +623,90 @@ html.kgen-v30 #kgen-ai-service-panel {
     padding: 10px 8px !important;
   }
 }
+
+/* Mobile presentation build 20261002. Existing organs/state remain the owners. */
+#k12345-utility-rail { position:fixed;top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));display:flex;gap:6px;z-index:10040; }
+#k12345-utility-rail .nav-btn { position:static!important;display:grid!important;place-items:center;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;margin:0!important;font-size:21px!important;border-radius:12px!important;background:#0a2534!important;color:#dff!important;border:1px solid #43778b!important;box-shadow:none!important; }
+.k12345-wallet-continuity { display:block;position:static!important;font-size:12px;color:#bdf;overflow-wrap:anywhere; }
+#k12345-land-dialog { box-sizing:border-box;width:min(460px,calc(100vw - 24px));max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:14px;color:#dff;background:#081723;border:1px solid #5599ac;border-radius:16px;overflow:hidden; }
+#k12345-land-dialog::backdrop { background:#000b; }
+.k12345-detail-dialog { box-sizing:border-box;width:min(460px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;padding:16px;color:#dff;background:#081723;border:1px solid #5599ac;border-radius:16px; }
+.k12345-detail-dialog::backdrop { background:#000b; }
+.k12345-detail-dialog button { min-height:44px;max-width:100%;margin:6px 0; }
+.k12345-detail-dialog .kgen-v102-festival-body { display:block!important;font-size:13px;line-height:1.6; }
+#k12345-land-dialog h2 { font-size:17px;margin:0 0 10px; }
+#k12345-land-dialog .k12345-land-close { min-height:44px;padding:8px 16px;margin-bottom:8px;color:#fff;background:#173747;border:1px solid #7aa;border-radius:8px; }
+#k12345-land-dialog .k12345-land-scroll { max-height:calc(100dvh - 162px);overflow:auto;overscroll-behavior:contain; }
+#k12345-land-dialog #kgen-land-panel,#k12345-land-dialog #kgen-land-info-panel { width:100%!important;max-width:100%!important;margin:0 0 12px!important; }
+#k12345-land-dialog #kgen-land-panel .kgen-land-body,#k12345-land-dialog #kgen-land-info-panel .kgen-land-info-body { display:block!important; }
+#k12345-land-dialog .kgen-land-tool,#k12345-land-dialog .kgen-land-buy { min-height:44px!important; }
+#k12345-land-dialog p { font-size:12px;line-height:1.6; }
+html.kgen-v30 #k12345-ai-dialog #kgen-ai-body { position:static!important;inset:auto!important;width:auto!important;max-height:none!important;overflow:visible!important;border:0!important;padding:0!important; }
+#universe-nav .k12345-land-summary { order:-10!important;width:100%!important;max-width:100%!important;min-width:0!important; }
+#k12345-festival-close { min-height:44px;margin-bottom:8px; }
+#kgen-heart-live-panel #kgen-12345-release-badge,#k12345-world-diagnostics > * { position:static!important;inset:auto!important;transform:none!important;max-width:100%!important;width:auto!important; }
+#kgen-heart-live-panel #kgen-12345-release-badge { margin-top:12px; }
+#k12345-world-diagnostics summary { min-height:44px;padding:8px;cursor:pointer; }
+#k12345-world-diagnostics #kline-chart-panel { display:block!important; }
+@media (max-width:900px) {
+ html.kgen-v30 { --kgen-v10-dock-h:88px; }
+ html.kgen-v30 .hud-top { top:8px!important;height:64px!important;display:block!important;pointer-events:none; }
+ html.kgen-v30 .hud-top .brand-section { max-width:calc(100vw - 112px)!important; }
+ html.kgen-v30 .hud-top .brand-name { font-size:14px!important;min-height:0!important;line-height:1.3!important; }
+ html.kgen-v30 .hud-top .monitor-data { display:none!important; }
+ html.kgen-v30 #kgen-heart-toggle { top:78px!important;left:8px!important;width:calc(100vw - 16px)!important;max-width:none!important;min-height:44px!important;height:44px!important;padding:6px 10px!important; }
+ html.kgen-v30 #kgen-heart-toggle .kgen-heart-title { font-size:13px!important; }
+ html.kgen-v30 #kgen-v902-left-status { top:126px!important;left:8px!important;width:calc(100vw - 16px)!important;max-height:26px!important;font-size:10px!important;overflow:hidden!important; }
+ html.kgen-v30 .resource-bars { top:156px!important;left:8px!important;width:calc(100vw - 16px)!important;max-width:none!important; }
+ html.kgen-v30 #universe-nav { top:252px!important;right:8px!important;left:auto!important;width:154px!important;max-width:154px!important;max-height:204px!important;overflow:auto!important;gap:6px!important;padding:0!important; }
+ html.kgen-v30 #universe-nav > * { flex-shrink:0; }
+ html.kgen-v30 #universe-nav > .nav-btn { min-height:44px!important;width:100%!important;font-size:11px!important; }
+ html.kgen-v30 #universe-nav .nav-audio { display:none!important; }
+ html.kgen-v30 #kgen-v102-festival-panel { width:100%!important;max-width:100%!important; }
+ html.kgen-v30 #kgen-v102-festival-panel h3 { min-height:44px!important;line-height:1.3!important;display:flex;align-items:center; }
+ html.kgen-v30 #kline-engine-panel { top:252px!important;left:8px!important;width:calc(100vw - 178px)!important;max-width:230px!important;max-height:155px!important;overflow:auto!important; }
+ html.kgen-v30 #kline-chart-panel { display:none!important; }
+ html.kgen-v30 .ga-matrix { top:auto!important;bottom:292px!important;left:8px!important;right:auto!important;transform:none!important;width:108px!important;max-height:90px!important;padding:6px!important;font-size:9px!important;overflow:auto!important; }
+ html.kgen-v30 #wheel-wrap { top:auto!important;bottom:174px!important;right:80px!important;width:82px!important;height:82px!important;transform:none!important; }
+ html.kgen-v30 #wheel { width:82px!important;height:82px!important; }
+ html.kgen-v30 #core-anchor { top:57%!important;left:50%!important; }
+ html.kgen-v30 #core-window { width:min(64vw,270px)!important;height:min(64vw,270px)!important; }
+ html.kgen-v30 #fairy-img { max-width:100%!important;max-height:100%!important; }
+ html.kgen-v30 #kgen-heart-toggle .kgen-heart-sub { display:none!important; }
+ html.kgen-v30 #kgen-ai-toggle { min-width:44px;min-height:44px; }
+ html.kgen-v30 .warp-engine { top:auto!important;bottom:168px!important;right:8px!important;width:60px!important;height:180px!important;max-height:180px!important; }
+ html.kgen-v30 .warp-rail { height:140px!important;max-height:140px!important; }
+ html.kgen-v30 #move-joystick-wrap { left:12px!important;bottom:174px!important;top:auto!important;width:94px!important;height:94px!important; }
+ html.kgen-v30 .steer-zone { bottom:146px!important;left:8px!important;width:calc(100vw - 84px)!important; }
+ html.kgen-v30 #k12345-slider-status { bottom:134px!important; }
+ html.kgen-v30 .footer-terminal { bottom:0!important;height:88px!important;min-height:88px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important;padding:4px!important; }
+ html.kgen-v30 .footer-terminal > * { min-width:0!important;min-height:38px!important;font-size:10px!important;padding:4px!important; }
+ html.kgen-v30 #kgen-v30-ritual-dock { right:8px!important;bottom:92px!important;width:174px!important; }
+ html.kgen-v30 #kgen-v30-ritual-dock button { min-height:44px!important;padding:5px!important;font-size:12px!important; }
+ html.kgen-v30 #kgen-ai-service-panel { left:8px!important;bottom:92px!important;width:calc(100vw - 196px)!important;max-width:none!important; }
+ html.kgen-v30 #kgen-ai-service-panel .kgen-ai-head { min-height:44px!important; }
+ html.kgen-v30 #kgen-ai-service-panel .kgen-ai-sub { display:none; }
+ html.kgen-v30 #kgen-ai-body { position:fixed!important;left:8px!important;right:8px!important;bottom:144px!important;width:auto!important;max-height:55dvh!important;overflow:auto!important;background:#081723!important;border:1px solid #4793aa;border-radius:12px;padding:12px!important; }
+ html.kgen-v30 body.k12345-heart-open #kgen-heart-live-panel { position:fixed!important;transform:none!important;top:128px!important;bottom:144px!important;left:8px!important;width:calc(100vw - 16px)!important;max-width:none!important;max-height:calc(100dvh - 272px)!important;overflow:auto!important;z-index:2147483540!important; }
+ html.kgen-v30 #kgen-v102-festival-panel:not(.kgen-festival-closed) .kgen-v102-festival-body { position:fixed!important;inset:140px 12px 144px!important;width:auto!important;max-height:calc(100dvh - 284px)!important;overflow:auto!important;z-index:2147483560!important;background:#081723!important;border:1px solid #8c6c34;border-radius:12px;padding:12px!important; }
+}
+@media (max-width:900px) and (max-height:500px) {
+ html.kgen-v30 #kgen-heart-toggle { top:76px!important;width:220px!important; }
+ html.kgen-v30 #kgen-v902-left-status { top:124px!important;width:220px!important; }
+ html.kgen-v30 .resource-bars { top:154px!important;width:220px!important;min-width:0!important;box-sizing:border-box!important; }
+ html.kgen-v30 #kgen-v902-left-status { min-width:0!important;box-sizing:border-box!important; }
+ html.kgen-v30 #universe-nav { top:62px!important;right:80px!important;width:154px!important;max-height:182px!important; }
+ html.kgen-v30 #wheel-wrap { right:auto!important;left:344px!important;bottom:174px!important; }
+ html.kgen-v30 #kline-engine-panel { top:202px!important;max-height:44px!important;width:220px!important;min-width:0!important;box-sizing:border-box!important; }
+ html.kgen-v30 .ga-matrix { left:420px!important;top:64px!important;bottom:auto!important;max-height:66px!important; }
+ html.kgen-v30 .warp-engine { top:64px!important;bottom:auto!important;height:162px!important; }
+ html.kgen-v30 .warp-rail { height:120px!important; }
+ html.kgen-v30 #move-joystick-wrap { left:244px!important;bottom:174px!important;width:80px!important;height:80px!important; }
+ html.kgen-v30 .steer-zone { left:244px!important;width:330px!important;bottom:130px!important; }
+ html.kgen-v30 .resource-bars { max-height:48px!important;overflow:auto!important; }
+ html.kgen-v30 #core-anchor { top:40%!important; }
+ html.kgen-v30 #kgen-ai-service-panel { width:220px!important; }
+ html.kgen-v30 #kgen-ai-body { bottom:142px!important;max-height:calc(100dvh - 162px)!important; }
+ html.kgen-v30 body.k12345-heart-open #kgen-heart-live-panel { top:128px!important;bottom:92px!important;max-height:calc(100dvh - 220px)!important; }
+ html.kgen-v30 #kgen-v102-festival-panel:not(.kgen-festival-closed) .kgen-v102-festival-body { inset:62px 90px 92px 240px!important;max-height:calc(100dvh - 154px)!important; }
+}

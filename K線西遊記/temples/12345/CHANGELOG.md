@@ -1,3 +1,10 @@
+# 2026-10-02｜Mobile land / utility presentation
+
+- Preserve V10.50.0 gameplay and V3.2.6-compatible transactions; UI build `20261002-MOBILE-LAND-UTILITY`.
+- Land details use the existing Land organ inside a bounded dialog; summary controls retain their layout positions.
+- One compact Portal/audio rail, canonical root return, real mobile viewport and orientation-safe HUD.
+- No contract, role, wallet signature, purchase or asset transfer changes.
+
 # 2026-10-01｜KAIOS shared audio component
 
 - Preserve Heart gameplay/runtime version; register `KAIOS-AUDIO-1` integration.

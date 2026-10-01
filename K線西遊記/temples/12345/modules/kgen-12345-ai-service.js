@@ -149,9 +149,9 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
         '    <div class="kgen-ai-title">AI客服</div>',
         '    <div class="kgen-ai-sub">前端版｜常見問題</div>',
         '  </div>',
-        '  <button type="button" id="kgen-ai-toggle" class="kgen-ai-toggle">收合</button>',
+        '  <button type="button" id="kgen-ai-toggle" class="kgen-ai-toggle">展開</button>',
         '</div>',
-        '<div class="kgen-ai-body" id="kgen-ai-body">',
+        '<div class="kgen-ai-body" id="kgen-ai-body" style="display:none">',
         '  <div class="kgen-ai-log" id="kgen-ai-log"></div>',
         '  <div class="kgen-ai-tools">',
         '    <label class="kgen-ai-voice-label"><input type="checkbox" id="kgen-ai-voice" checked> 語音開關</label>',
@@ -175,9 +175,14 @@ PURPOSE: Frontend AI customer service (FAQ + Web Speech + button voice delegate)
       const guide = $("kgen-ai-guide");
       if(toggle && body){
         toggle.addEventListener("click", function(){
-          const open = body.style.display !== "none";
-          body.style.display = open ? "none" : "block";
-          toggle.textContent = open ? "展開" : "收合";
+          let dialog=$("k12345-ai-dialog");
+          if(!dialog){
+            dialog=document.createElement('dialog');dialog.id='k12345-ai-dialog';dialog.className='k12345-detail-dialog';dialog.setAttribute('aria-label','AI 客服');
+            const close=document.createElement('button');close.type='button';close.textContent='關閉 AI 客服';close.addEventListener('click',()=>dialog.close());
+            dialog.append(close,body);document.body.append(dialog);body.style.display='block';
+            dialog.addEventListener('close',()=>{toggle.textContent='展開';toggle.focus({preventScroll:true});});
+          }
+          if(dialog.open)dialog.close();else{dialog.showModal();toggle.textContent='收合';}
         });
       }
       if(voice){

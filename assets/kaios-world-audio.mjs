@@ -28,6 +28,14 @@ export function bindWorldAudio(worldId){
     const oldAudio=document.querySelector('.nav-audio');if(oldAudio){oldAudio.hidden=true;oldAudio.style.display='none';}
     if(globalThis.templeAudio)Object.assign(globalThis.templeAudio,{playBgm:start,stopBgm:app.musicStop,toggleMini:()=>control.openSettings(),setVolume:app.musicSetVolume});
     const home=document.querySelector('[data-kaios-return="PORTAL"]');
+    const compactHeart=worldId==='12345';
+    if(compactHeart){
+      let rail=document.getElementById('k12345-utility-rail');
+      if(!rail){rail=document.createElement('nav');rail.id='k12345-utility-rail';rail.setAttribute('aria-label','聲音與 KAIOS 世界');document.body.append(rail);}
+      rail.append(button);if(home)rail.append(home);
+      const continuity=document.getElementById('return-wallet-continuity');
+      if(continuity){document.getElementById('kgen-heart-live-panel')?.append(continuity);continuity.classList.add('k12345-wallet-continuity');}
+    }
     function sizeControls(){
       const scale=1/(globalThis.visualViewport?.scale||1),visibleWidth=(globalThis.visualViewport?.width||innerWidth)/scale;
       const inset=(globalThis.visualViewport?.height||innerHeight)/scale<480?110:8; // preserve the legacy right-edge Warp rail in landscape
@@ -35,6 +43,10 @@ export function bindWorldAudio(worldId){
       if(home)Object.assign(home.style,{right:`${inset*scale}px`,top:`${8*scale}px`,width:`${140*scale}px`,minWidth:'0',height:`${44*scale}px`,minHeight:`${44*scale}px`,fontSize:`${11.5*scale}px`,padding:`${9*scale}px`,lineHeight:'1.4'});
       const continuity=document.getElementById('return-wallet-continuity');if(continuity)Object.assign(continuity.style,{top:`${58*scale}px`,right:`${inset*scale}px`,width:`${140*scale}px`,fontSize:`${9*scale}px`});
       const settings=control.root.querySelector('.kaios-audio-panel');if(settings){settings.style.transform=`translate(-50%,-50%) scale(${scale})`;settings.style.width=`${Math.min(310,visibleWidth-24)}px`;settings.style.maxHeight=`${Math.max(160,(globalThis.visualViewport?.height||innerHeight)/scale-32)}px`;}
+      if(compactHeart){
+        for(const el of [button,home].filter(Boolean))el.removeAttribute('style');
+        document.getElementById('return-wallet-continuity')?.removeAttribute('style');
+      }
     }
     sizeControls();if(!button.dataset.kaiosSizeBound){button.dataset.kaiosSizeBound='1';globalThis.visualViewport?.addEventListener('resize',sizeControls);globalThis.addEventListener('resize',sizeControls);}
     if(home&&!home.dataset.kaiosFadeBound){home.dataset.kaiosFadeBound='1';home.addEventListener('click',async event=>{if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||home.target)return;event.preventDefault();await Promise.race([audio.transitionToWorld('PORTAL'),new Promise(resolve=>setTimeout(resolve,450))]);location.assign(home.href);});}
