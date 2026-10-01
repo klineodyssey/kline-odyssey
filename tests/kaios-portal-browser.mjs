@@ -13,6 +13,7 @@ async function reachable(page,selector){return page.locator(selector).evaluate(e
 try{
   for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage();
+    await page.addInitScript(()=>{globalThis.__audioAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const a=this.context.createAnalyser();connect.call(this,a);__audioAnalysers.push(a);}return result;};});
     const errors=[];page.on('pageerror',e=>errors.push(String(e)));
     await page.goto(BASE+'/',{waitUntil:'networkidle'});await page.locator('#primaryPlay').waitFor();
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Portal horizontal overflow');
@@ -28,13 +29,23 @@ try{
     await shot(page,`research-${width}x${height}`);await page.locator('#researchArchive > summary').click();
     await page.locator('#worlds').scrollIntoViewIfNeeded();await shot(page,`worlds-${width}x${height}`);
     await page.evaluate(()=>scrollTo(0,0));
-    await page.locator('[data-kaios-audio-toggle]').click();
+    await page.locator('[data-kaios-audio-toggle]').tap();
     await page.waitForFunction(async()=>{const m=await import('./assets/kaios-audio.mjs');return m.getKaiosAudio().snapshot().musicPlaying;});
     let state=await audio(page);assert.equal(state.contextState,'running');assert.equal(state.activeMusicLayers,1);
+    const signal=await page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<25;i++){for(const a of __audioAnalysers){const v=new Float32Array(a.fftSize);a.getFloatTimeDomainData(v);let sum=0;for(const x of v){peak=Math.max(peak,Math.abs(x));sum+=x*x;}rms=Math.max(rms,Math.sqrt(sum/v.length));}await new Promise(r=>setTimeout(r,100));}return{peak,rms};});
+    assert.ok(signal.rms>.008&&signal.peak>.02&&signal.peak<.95,'Portal destination PCM must be measurable above near-silence without clipping');
+    await shot(page,`portal-playing-${width}x${height}`);
+    await page.evaluate(()=>__audioAnalysers[0].context.suspend());
+    await page.waitForFunction(async()=>{const m=await import('./assets/kaios-audio.mjs');return m.getKaiosAudio().snapshot().needsGesture&&!m.getKaiosAudio().snapshot().musicPlaying;});
+    await page.locator('[data-kaios-audio-toggle]').tap();
+    await page.waitForFunction(async()=>{const m=await import('./assets/kaios-audio.mjs');return m.getKaiosAudio().snapshot().musicPlaying;});
+    await page.waitForTimeout(150);assert.equal((await audio(page)).settings.muted,false,'recovery tap must not become an accidental mute');
     await page.locator('[data-audio-action=settings]').click();
     assert.ok(await page.locator('.kaios-audio-panel').isVisible());
     for(const channel of ['master','music','sfx','voice']){
-      const input=page.locator(`[data-audio-volume=${channel}]`);await input.fill('35');await input.dispatchEvent('input');
+      const input=page.locator(`[data-audio-volume=${channel}]`);
+      if(channel==='master'||channel==='music'){await input.fill('0');await input.dispatchEvent('input');assert.equal((await audio(page)).musicPlaying,false);assert.match(await page.locator('[data-audio-status]').innerText(),/音量為 0/);}
+      await input.fill('35');await input.dispatchEvent('input');
       assert.equal((await audio(page)).settings[channel],.35);
     }
     await shot(page,`audio-settings-${width}x${height}`);
@@ -43,13 +54,15 @@ try{
     await page.locator('[data-kaios-audio-toggle]').click();state=await audio(page);assert.equal(state.settings.muted,false);assert.equal(state.activeMusicLayers,1,'unmute resumes only one theme');
     await page.locator('[data-kaios-audio-toggle]').click();assert.equal((await audio(page)).settings.muted,true);
     await page.reload({waitUntil:'networkidle'});state=await audio(page);assert.equal(state.settings.muted,true);assert.equal(state.settings.master,.35);assert.equal(state.contextState,'NOT_CREATED');
-    assert.deepEqual(errors,[]);report.profiles.push({width,height,primary,toggle,links:links.length,audio:'PASS',reload:'PASS'});
+    assert.deepEqual(errors,[]);report.profiles.push({width,height,primary,toggle,signal,links:links.length,audio:'PASS',reload:'PASS'});
     await context.close();
   }
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
   await page.goto(BASE+'/',{waitUntil:'networkidle'});
   await page.evaluate(async()=>{const {mountAudioControl}=await import('./assets/kaios-audio-ui.mjs');const button=document.createElement('button');button.id='qa-remount-audio';document.body.prepend(button);const first=mountAudioControl({existingButton:button});first.destroy();first.destroy();window.__qaRemount=mountAudioControl({existingButton:button});});
   await page.locator('#qa-remount-audio').click();await page.waitForTimeout(100);
+  assert.equal((await audio(page)).musicPlaying,true,'remounted primary control starts music on first tap');
+  await page.locator('#qa-remount-audio').click();
   assert.equal(await page.locator('.kaios-audio-panel:visible').count(),1,'destroy/remount preserves one handler');
   await page.evaluate(()=>{window.__qaRemount.destroy();document.getElementById('qa-remount-audio').remove();delete window.__qaRemount;});
   report.checks.push('existing-button audio control destroy/remount lifecycle');

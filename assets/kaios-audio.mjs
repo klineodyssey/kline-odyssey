@@ -1,6 +1,9 @@
 /** First-party synthesized world audio. No media assets, network, wallet or economic authority. */
 export const AUDIO_STORAGE_KEY = 'KAIOS_AUDIO_PREFERENCES_V1';
-export const DEFAULT_AUDIO_SETTINGS = Object.freeze({ master:.65, music:.42, sfx:.65, voice:.7, muted:false, musicEnabled:false });
+export const DEFAULT_AUDIO_SETTINGS = Object.freeze({ master:.65, music:.65, sfx:.65, voice:.7, muted:false, musicEnabled:false });
+// Synth envelopes were ~-47 dBFS at the old defaults. Preserve saved user gains;
+// raise the first-party theme bus, with bounded envelopes and output headroom.
+export const MUSIC_THEME_GAIN = 3;
 const clamp = value => Math.max(0, Math.min(1, Number(value)));
 const normalWorld = value => String(value || 'PORTAL').toUpperCase().replace(/^K(?=\d)/,'');
 const notes = { PORTAL:[196,261.63,293.66,392,349.23,293.66,261.63,220], '12345':[261.63,329.63,392,523.25,392,329.63,293.66,329.63], '16888':[146.83,220,293.66,349.23,440,349.23,293.66,220], '11520':[220,261.63,293.66,329.63,392,329.63,293.66,261.63] };
@@ -14,11 +17,12 @@ export function createKaiosAudio(options={}) {
   if (storage === undefined) { try { storage = env.localStorage; } catch { storage = null; } }
   let settings = {...DEFAULT_AUDIO_SETTINGS}, persistent=!!storage;
   try { const saved=JSON.parse(storage?.getItem(AUDIO_STORAGE_KEY)||'null'); if(saved && typeof saved==='object') { for(const key of ['master','music','sfx','voice']) if(Number.isFinite(saved[key])) settings[key]=clamp(saved[key]); for(const key of ['muted','musicEnabled']) if(typeof saved[key]==='boolean') settings[key]=saved[key]; } } catch { persistent=false; }
-  let context=null, master=null, channels=null, unlocked=false, world='PORTAL', timer=null, beat=0, themeBus=null, disposed=false, lastError=null, ownedSpeech=null;
+  let context=null, master=null, channels=null, unlocked=false, recoveryGesture=false, world='PORTAL', timer=null, beat=0, themeBus=null, disposed=false, lastError=null, ownedSpeech=null;
   const nodes=new Set(), listeners=new Set(), customThemes=new Map(), cooldown=new Map(), retiring=new Map();
   const timeout=options.setTimeout||env.setTimeout?.bind(env),clearTimeoutFn=options.clearTimeout||env.clearTimeout?.bind(env);
   const interval=options.setInterval||env.setInterval?.bind(env), clearIntervalFn=options.clearInterval||env.clearInterval?.bind(env);
-  const snapshot=()=>({world,theme:AUDIO_THEMES[world]||AUDIO_THEMES.PORTAL,settings:{...settings},unlocked,needsGesture:!unlocked||context?.state!=='running',contextState:context?.state||'NOT_CREATED',musicPlaying:timer!==null,playing:timer!==null,musicEnabled:settings.musicEnabled,activeMusicLayers:timer===null?0:1,activeVoices:nodes.size,activeNodes:nodes.size,persistent,lastError});
+  const musicActive=()=>timer!==null&&context?.state==='running'&&!doc?.hidden&&!settings.muted&&settings.musicEnabled&&settings.master>0&&settings.music>0;
+  const snapshot=()=>({world,theme:AUDIO_THEMES[world]||AUDIO_THEMES.PORTAL,settings:{...settings},unlocked,needsGesture:!unlocked||recoveryGesture||context?.state!=='running',contextState:context?.state||'NOT_CREATED',musicPlaying:musicActive(),playing:musicActive(),musicEnabled:settings.musicEnabled,activeMusicLayers:timer===null?0:1,activeVoices:nodes.size,activeNodes:nodes.size,persistent,lastError});
   function notify(){for(const listener of listeners) listener(snapshot());}
   function persist(){try{storage?.setItem(AUDIO_STORAGE_KEY,JSON.stringify(settings));}catch{persistent=false;} notify();}
   function gainTo(node,value,seconds=.08){if(!node||!context)return;const param=node.gain,t=context.currentTime;param.cancelScheduledValues(t);param.setValueAtTime(param.value,t);param.linearRampToValueAtTime(value,t+seconds);}
@@ -58,15 +62,15 @@ export function createKaiosAudio(options={}) {
     }
   }
   function startTheme(){
-    if(timer!==null||!unlocked||!settings.musicEnabled||settings.muted||doc?.hidden||context?.state!=='running'||disposed)return;
-    themeBus=context.createGain();themeBus.gain.setValueAtTime(0,context.currentTime);themeBus.connect(channels.music);gainTo(themeBus,1,.65);beat=0;step();
+    if(timer!==null||!unlocked||recoveryGesture||!settings.musicEnabled||settings.muted||doc?.hidden||context?.state!=='running'||disposed)return;
+    themeBus=context.createGain();themeBus.gain.setValueAtTime(0,context.currentTime);themeBus.connect(channels.music);gainTo(themeBus,MUSIC_THEME_GAIN,.65);beat=0;step();
     timer=interval?.(step,(customThemes.get(world)?.beatSeconds||(world==='11520'?.34:world==='16888'?.8:.58))*1000)??null;notify();
   }
   async function unlock(){
     if(disposed)return false;
     try {
-      if(!context){const C=options.AudioContext||env.AudioContext||env.webkitAudioContext;if(!C){lastError='AUDIO_UNAVAILABLE';notify();return false;}context=new C();master=context.createGain();master.gain.value=0;master.connect(context.destination);channels={};for(const channel of ['music','sfx','voice']){channels[channel]=context.createGain();channels[channel].connect(master);} }
-      await context.resume();unlocked=context.state==='running';lastError=unlocked?null:'USER_GESTURE_REQUIRED';applyVolumes();startTheme();notify();return unlocked;
+      if(!context){const C=options.AudioContext||env.AudioContext||env.webkitAudioContext;if(!C){lastError='AUDIO_UNAVAILABLE';notify();return false;}context=new C();master=context.createGain();master.gain.value=0;master.connect(context.destination);channels={};for(const channel of ['music','sfx','voice']){channels[channel]=context.createGain();channels[channel].connect(master);}context.onstatechange=()=>{if(disposed)return;if(context.state!=='running'){recoveryGesture=true;stopTheme();stopNodes();}else{applyVolumes();startTheme();}notify();}; }
+      await context.resume();unlocked=context.state==='running';if(unlocked)recoveryGesture=false;lastError=unlocked?null:'USER_GESTURE_REQUIRED';applyVolumes();startTheme();notify();return unlocked;
     }catch{lastError='USER_GESTURE_REQUIRED';notify();return false;}
   }
   function setWorld(value){const next=normalWorld(value);if(next===world)return;stopTheme(.24);world=next;startTheme();notify();}
@@ -76,7 +80,7 @@ export function createKaiosAudio(options={}) {
   function setVolume(channel,value){if(!['master','music','sfx','voice'].includes(channel)||!Number.isFinite(Number(value)))return false;settings[channel]=clamp(value);applyVolumes();persist();return true;}
   function play(event){const key=String(event),now=context?.currentTime||0;if(!unlocked||settings.muted)return false;if(cooldown.has(key)&&now-cooldown.get(key)<.07)return false;cooldown.set(key,now);const sequence=EVENT_NOTES[key];if(!sequence)return false;return sequence.map((frequency,i)=>tone({frequency,duration:.16,delay:i*.065,volume:.052,type:key.includes('BOSS')?'triangle':'sine'})).some(Boolean);}
   function speak(text,{lang='zh-TW',rate=1,pitch=1,onstart,onend,onerror}={}){if(!unlocked||settings.muted||!settings.voice||!settings.master||doc?.hidden||!env.speechSynthesis||!env.SpeechSynthesisUtterance)return false;if(ownedSpeech)env.speechSynthesis.cancel();const message=new env.SpeechSynthesisUtterance(String(text).slice(0,260));message.lang=lang;message.rate=Math.max(.5,Math.min(2,Number(rate)||1));message.pitch=Math.max(.5,Math.min(2,Number(pitch)||1));message.volume=settings.master*settings.voice;message.voice=env.speechSynthesis.getVoices?.().find(v=>v.lang===lang)||null;ownedSpeech=message;message.onstart=onstart;message.onend=event=>{if(ownedSpeech===message)ownedSpeech=null;onend?.(event);};message.onerror=event=>{if(ownedSpeech===message)ownedSpeech=null;onerror?.(event);};env.speechSynthesis.speak(message);return true;}
-  async function visibility(){if(!context)return;if(doc?.hidden){stopTheme();stopNodes();if(ownedSpeech)env.speechSynthesis?.cancel();ownedSpeech=null;await context.suspend().catch(()=>{});}else if(unlocked){try{await context.resume();applyVolumes();startTheme();}catch{lastError='USER_GESTURE_REQUIRED';}}notify();}
+  async function visibility(){if(!context)return;if(doc?.hidden){stopTheme();stopNodes();if(ownedSpeech)env.speechSynthesis?.cancel();ownedSpeech=null;await context.suspend().catch(()=>{});}else if(unlocked){try{await context.resume();recoveryGesture=context.state!=='running';applyVolumes();startTheme();}catch{lastError='USER_GESTURE_REQUIRED';}}notify();}
   function storageChanged(event){if(event.key!==AUDIO_STORAGE_KEY)return;try{const saved=JSON.parse(event.newValue);for(const key of ['master','music','sfx','voice'])if(Number.isFinite(saved?.[key]))settings[key]=clamp(saved[key]);for(const key of ['muted','musicEnabled'])if(typeof saved?.[key]==='boolean')settings[key]=saved[key];if(settings.muted||!settings.musicEnabled)stopTheme();applyVolumes();startTheme();notify();}catch{}}
   const pagehide=()=>{stopTheme();stopNodes();if(ownedSpeech)env.speechSynthesis?.cancel();ownedSpeech=null;context?.suspend().catch(()=>{});};
   const pageshow=event=>{if(event.persisted)void visibility();};

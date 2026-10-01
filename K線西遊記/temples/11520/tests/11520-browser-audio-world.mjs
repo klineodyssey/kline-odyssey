@@ -11,12 +11,15 @@ const audio=p=>p.evaluate(async()=>{const {getKaiosAudio}=await import('/assets/
 try{
  for(const [width,height]of [[390,844],[844,390]]){
   const context=await browser.newContext({viewport:{width,height},hasTouch:true,isMobile:true});
+  await context.addInitScript(()=>{globalThis.__audioAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const a=this.context.createAnalyser();connect.call(this,a);__audioAnalysers.push(a);}return result;};});
   await context.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile('node_modules/three/'+route.request().url().slice(prefix.length),'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);await route.fulfill({status:200,contentType:'text/javascript',body});});
   const page=await context.newPage(),row={width,height,errors:[]};report.rows.push(row);page.on('pageerror',e=>row.errors.push(String(e)));page.setDefaultTimeout(20000);
   await page.goto(base+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html');await ready(page);
   // Real controller gesture, not a programmatic unlock or synthetic award.
   await page.locator('#joy').click({position:{x:22,y:35}});await page.waitForFunction(()=>__K11520_BGM__.playing);
   assert.equal((await audio(page)).activeMusicLayers,1);
+  row.signal=await page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<30;i++){for(const a of __audioAnalysers){const v=new Float32Array(a.fftSize);a.getFloatTimeDomainData(v);let sum=0;for(const x of v){peak=Math.max(peak,Math.abs(x));sum+=x*x;}rms=Math.max(rms,Math.sqrt(sum/v.length));}await new Promise(r=>setTimeout(r,100));}return{peak,rms};});
+  assert.ok(row.signal.rms>.008&&row.signal.peak>.02&&row.signal.peak<.95,'11520 destination signal above near-silence and below clipping');
   await page.locator('#k11520UtilityMaster').click();await page.locator('#bgmButton').click();
   const panel=page.locator('.kaios-audio-panel');await panel.waitFor({state:'visible'});
   assert.equal(await page.locator('.kaios-audio-settings:visible').count(),0,'no second permanent settings button');
