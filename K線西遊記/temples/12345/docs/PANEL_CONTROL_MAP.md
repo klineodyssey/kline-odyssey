@@ -31,6 +31,13 @@ own portrait placement; `app` owns world/navigation/Warp and original audio;
 functions own panel disclosure. `#universe-nav` / `#return-to-11520` plus the
 wallet-continuity bridge own the existing return control.
 
+Earlier original template `7189d81f` already had one gold anchor inside
+`#universe-nav`: `返回 > K線西遊記｜銀河宇宙入口`, pointing to
+`K線西遊記/index.html`. Commit `ce990663` introduced the fixed return-to-11520
+wallet-continuity route; Portal subsequently reused that anchor. A future
+approved minimal restoration should reuse this original navigation ownership,
+not add a second return control.
+
 Before Portal baseline: `a6e65af31b7070425d44cdf08862ab26e26e0a9f`.
 Portal commit `ae9fc085` changed 12 index lines: shared-audio flag/guards,
 existing return destination to canonical Portal, removed duplicate homepage
@@ -51,6 +58,14 @@ in this recovery PR. Human confirmation is required before a minimal
 presentation restoration; commercial playlist playback must stay disabled.
 16888 release QA is portrait (390 primary; 360/412/432/480 compatibility).
 Landscape gameplay composition is explicitly not a release requirement.
+
+Read-only Chromium audit: all five portrait widths load; audio unlock/mute and
+canonical return PASS, one AudioContext, zero commercial media requests.
+390x844 destination signal measured peak 0.07052 / RMS 0.02640 (digital signal,
+not a physical-phone listening certification). Direct screenshots confirm the
+replacement top audio/Portal controls compete with original header information.
+Thus audio/return operation PASS does NOT mean original presentation preserved.
+16888 visual preservation remains awaiting Human decision, not a blanket PASS.
 
 Recovery QA scope: real Chromium 360/390/412/432/480 x 844 and 844x390,
 three Wish/Repay cycles, original form hash/option/amount dispatch, actual
