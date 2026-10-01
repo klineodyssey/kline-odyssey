@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {formatKCoordinate} from '../runtime/world-runtime.mjs';
 function freeQuotePayload(route,rows){
   const url=new URL(route.request().url());
   if(!url.pathname.endsWith('/aggTrades'))return rows;
@@ -128,7 +129,7 @@ async function verifyMarketSync(page,report){
   const first=await read();assert.equal(first.market.markets.length,3);
   for(const m of first.market.markets){
     assert.ok(Math.abs(m.k-100*(m.price/m.anchor-1))<1e-9);
-    const card=first.cards.find(c=>c.axis===m.axis);assert.equal(Number(card.price.replace(/[^0-9.]/g,'')),m.price);assert.ok(card.k.includes(m.k.toFixed(2)));
+    const card=first.cards.find(c=>c.axis===m.axis);assert.equal(Number(card.price.replace(/[^0-9.]/g,'')),m.price);assert.equal(card.k,`${m.axis} ${formatKCoordinate(m.k)} norm`);
     assert.equal(first.combat.playerK[m.axis],m.k);assert.equal(first.map.player[m.axis],m.k);
   }
   report.marketReference={initial:first,mode:PRODUCTION?'PUBLIC_READ_ONLY':'CONTROLLED_REFERENCE_FAILURE_RECOVERY'};

@@ -162,6 +162,9 @@ test('Human local meter calibration uses the CURRENT Moon K anchor without marke
 test('rounded market K coordinates never display negative zero',()=>{
   assert.equal(formatKCoordinate(-.0001),'0.00');assert.equal(formatKCoordinate(-0),'0.00');
   assert.equal(formatKCoordinate(1.01),'+1.01');assert.equal(formatKCoordinate(-18.816),'-18.82');
+  const halfCent=100*(2501/4000-1);
+  assert.equal(halfCent,-37.475);assert.equal(formatKCoordinate(halfCent),'-37.47');
+  assert.equal(halfCent.toFixed(2),'-37.48','plain toFixed is not the canonical display rounding authority');
 });
 
 test('public market K waits, validates atomically, rejects old batches and distinguishes stale last-good data',()=>{
