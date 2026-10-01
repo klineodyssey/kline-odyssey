@@ -84,7 +84,7 @@ async function verifyKSpaceMap(page,report){
   await page.locator('#kspaceMapValues').evaluate(el=>el.scrollIntoView({block:'end'}));
   await page.screenshot({path:`${OUT}/${report.profile.landscape?'K_DISTANCE_LANDSCAPE':'K_DISTANCE_PORTRAIT'}.png`});
   const ds=await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());assert.ok(Math.abs(ds.distanceK-ds.distance/(384400*1000/16888))<1e-12);assert.equal(ds.marketPhysicalTransform,'NOT_CONFIGURED');
-  assert.doesNotMatch(await page.locator('#kspaceTarget').textContent(),/\d(?:u|units)\b/);
+  assert.doesNotMatch(await page.locator('.monsterHud').textContent(),/\d(?:u|units)\b/);
   await page.locator('#sheetBody summary').click();await page.locator('#kspaceDetailMap').scrollIntoViewIfNeeded();
   assert.equal(await page.locator('#sheetClose').evaluate(el=>{const r=el.getBoundingClientRect();return r.width>=44&&r.height>=44&&r.top>=0&&el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,'expanded K-map close must remain visible and pointer-reachable while scrolling');
   await shot('01_NEAR_K_VECTOR');await page.locator('#sheetClose').click();
@@ -143,7 +143,7 @@ async function verifyKSpaceGameplay(page,report){
   for(const axis of ['KX','KY','KZ'])assert.ok(Math.abs(near.playerK[axis]-100*(near.reference[axis].price/near.reference[axis].anchor-1))<1e-9,'current K must follow normalized reference, not frozen startup quotes');
   assert.deepEqual(near.deltaK,{KX:0,KY:0,KZ:1});
   const prefix=report.profile.name;await page.screenshot({path:`${OUT}/${prefix}-kspace-target.png`});
-  await page.locator('#kspaceTarget').click();await page.locator('#sheet.open').waitFor();
+  await page.locator('.monsterHud').click({position:{x:12,y:12}});await page.locator('#sheet.open').waitFor();
   assert.match(await page.locator('#sheetBody').textContent(),/PLAYER K.*MONSTER K.*ΔK/s);
   await page.screenshot({path:`${OUT}/${prefix}-kspace-relative-coordinates.png`});await page.locator('#sheetClose').click();
   const cdp=await page.context().newCDPSession(page),results=[];
@@ -152,12 +152,12 @@ async function verifyKSpaceGameplay(page,report){
     ['#attack','slash-positive','1',45,400,['KY+']],
     ['#skill','goldenRain','-1',300,1500,['KX-','KZ-']],
     ['#tradeSword','phantomAxe','-1',180,2000,['KX-','KY-','KZ-']]]){
-    await page.locator('#kspaceTarget').click();await page.locator('#kspacePracticeReset').click();await page.locator('#sheetClose').click();
+    await page.locator('.monsterHud').click({position:{x:12,y:12}});await page.locator('#kspacePracticeReset').click();await page.locator('#sheetClose').click();
     await input(sign);await page.waitForTimeout(400);
     const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
-    if(report.profile.landscape)assert.equal(await page.evaluate(()=>{const a=document.getElementById('toast').getBoundingClientRect(),b=document.getElementById('kspaceTarget').getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}),false,'damage feedback obscures target HUD');
+    if(report.profile.landscape)assert.equal(await page.evaluate(()=>{const a=document.getElementById('toast').getBoundingClientRect(),b=document.querySelector('.monsterHud').getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}),false,'damage feedback obscures monster HUD');
     if(variant==='slash-negative')assert.equal(result.reason,'WEAK_POINT');if(variant==='slash-positive')assert.equal(result.reason,'BLOCKED_RESIST');
     const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(`${OUT}/${prefix}-kspace-${variant}.png`,Buffer.from(shot.data,'base64'));results.push(result);await page.waitForTimeout(pause);
   }
@@ -217,8 +217,7 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
   ok(state.axisArt.repeat==='no-repeat','normal-axis artwork unexpectedly repeats');
   const overlap=(a,c)=>a?.visible&&c?.visible&&a.x<c.right&&a.right>c.x&&a.y<c.bottom&&a.bottom>c.y;
   const combatHidden=landscape&&expanded;
-  const target=b['#kspaceTarget'];ok(target?.visible&&target.hit,'K-space target is not pointer-reachable');
-  if(target){ok(target.x>=0&&target.y>=0&&target.right<=state.width&&target.bottom<=state.height,'K-space target clipped');for(const other of ['.minimapWrap','.tele','.monsterHud','#joy','#yControl','#cControl','#lotsControl','#attack','#orderFire','#skill','#tradeSword','#k11520UtilityMaster'])ok(!overlap(target,b[other]),'K-space target overlaps '+other)}
+  const target=b['#kspaceTarget'];ok(!target?.visible,'legacy K-space detail card must stay folded into monster HUD');
   for(const s of ['.top','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#k11520UtilityMaster',...(combatHidden?[]:['#orderFire','#attack'])]){const r=b[s];ok(r?.visible,`${s} missing/hidden`);if(r?.visible)ok(r.x>=-1&&r.y>=-1&&r.right<=state.width+1&&r.bottom<=state.height+1,`${s} outside viewport`)}
   for(const s of ['#joy','#cControl','#lotsControl','#yControl','#k11520UtilityMaster',...(combatHidden?[]:['#tradeSword','#orderFire','#attack'])])ok(b[s]?.hit,`${s} cannot receive a real click: ${JSON.stringify(b[s]?.blocker)}`);
   const clock=b['#brandClockV250'];if(clock){ok(clock.right<=Math.min(...state.balances.map(r=>r.x))-4,'header clock crosses into balances');ok(clock.bottom<=b['.top'].bottom-4,'header clock escapes header')}

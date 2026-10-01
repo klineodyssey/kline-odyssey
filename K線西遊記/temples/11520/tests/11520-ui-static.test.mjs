@@ -65,6 +65,41 @@ test('journey monster has an always-visible find-and-attack guide',()=>{
   assert.ok(main.includes('KAIOS 戰利品已記帳'));
 });
 
+test('entry gesture unlocks BGM and AI customer service has zh-TW voice control',()=>{
+  assert.ok(productFixesV23.includes("startBgm();speakAi('歡迎來到花果山"));
+  assert.ok(productFixesV23.includes("new SpeechSynthesisUtterance(text)"));
+  assert.ok(productFixesV23.includes("u.lang='zh-TW'"));
+  assert.ok(productFixesV23.includes('id="aiVoice"'));
+  assert.ok(productFixesV23.includes("voice.textContent=aiVoiceOn?'🔊':'🔇'"));
+});
+
+test('combat loot and trade events are wired to the shared audio FX engine',()=>{
+  assert.ok(productFixesV23.includes('__K11520_AUDIO_FX__'));
+  assert.ok(productFixesV23.includes("liquidation:[150,55,.35]"));
+  assert.ok(main.includes("audioFx?.play?.('attack')"));
+  assert.ok(main.includes("r.reason==='WEAK_POINT'?'weak':'hit'"));
+  assert.ok(main.includes("audioFx?.play?.('loot')"));
+  assert.ok(main.includes("e.status==='LIQUIDATED'?'liquidation'"));
+});
+
+test('11520 always exposes a return to the KAIOS world portal',()=>{
+  assert.ok(productFixesV23.includes("id='kaiosPortalButton'"));
+  assert.ok(productFixesV23.includes("title='回 KAIOS 總世界'"));
+  assert.ok(productFixesV23.includes("location.href='../../../index.html'"));
+});
+
+test('live HUD teaches the KX/KY/KZ six-phase combat mapping',()=>{
+  assert.ok(main.includes('XZ→KY / XY→KZ / YZ→KX'));
+  assert.ok(main.includes('0C 自動取經'));
+  assert.ok(main.includes('snapshot.selection?.body'));
+});
+
+test('mobile combat uses contextual disclosure instead of a second persistent K-space card',()=>{
+  assert.ok(main.includes("targetHud.hidden=true"));
+  assert.ok(main.includes("monsterHud.title='點擊查看 K-space 六相戰鬥詳情'"));
+  assert.ok(main.includes("monsterHud.addEventListener('click'"));
+});
+
 const organs=['world','trade','positions','orders','history','assets','records','market','bag','character','worldmap','atm','settings','help'];
 const fixed=['three','lookPad','axes','walletPanel','walletToggle','walletConnect','walletRefresh','minimap','joy','knob','yControl','cControl','lotsControl','attack','skill','dodge','flat','orderFire','tradeSword','dock','dockToggle','rail','sheet','sheetClose','confirm','confirmOrder','cancelOrder'];
 
