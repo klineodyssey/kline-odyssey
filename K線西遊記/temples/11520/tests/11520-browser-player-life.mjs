@@ -15,6 +15,7 @@ await fs.mkdir(out,{recursive:true});
 // Disposable signatures are generated in memory. No private key is printed,
 // persisted, exported or used against a public network.
 const walletA=Wallet.createRandom(),walletB=Wallet.createRandom();
+const startedAt=Date.now();
 const report={head:process.env.GITHUB_SHA||'LOCAL_CANDIDATE',scope:'LOCAL_UNTRUSTED_GAME_DATA',functional:'RUNNING',visual:'SCREENSHOTS_REQUIRE_DIRECT_REVIEW',profiles:[],failures:[]};
 const browser=await chromium.launch({headless:true});
 const snap=page=>page.evaluate(()=>globalThis.__K11520_PLAYER_LIFE__.snapshot());
@@ -59,7 +60,7 @@ async function prepare(context,{storageFailure=false}={}){
       }
       throw new Error('FORBIDDEN_WALLET_METHOD_'+method);
     }};
-    if(storageFailure){for(const method of storageFailure==='QUOTA_EXCEEDED'?['setItem']:['getItem','setItem','removeItem'])Storage.prototype[method]=function(){throw new DOMException('QA storage denied',storageFailure==='QUOTA_EXCEEDED'?'QuotaExceededError':'SecurityError')}}
+    if(storageFailure){for(const method of storageFailure==='QUOTA_EXCEEDED'?['setItem']:['getItem','setItem','removeItem'])Storage.prototype[method]=function(){const error=new DOMException('QA storage denied',storageFailure==='QUOTA_EXCEEDED'?'QuotaExceededError':'SecurityError');error.stack=new Error('QA storage denied: '+method).stack;throw error}}
   },{addressA:walletA.address,addressB:walletB.address,storageFailure});
 }
 async function boot(page){
@@ -86,7 +87,8 @@ async function reachable(page,selector){
 }
 async function shot(page,tag){await page.screenshot({path:out+'/'+tag+'.png'});}
 async function reloadAction(page,selector){
-  await Promise.all([page.waitForEvent('domcontentloaded'),page.locator(selector).click()]);
+  await page.bringToFront();await reachable(page,selector);
+  await Promise.all([page.waitForEvent('domcontentloaded',{timeout:30000}),page.locator(selector).click()]);
   await page.waitForFunction(()=>globalThis.__K11520_PLAYER_LIFE__?.snapshot?.().player&&globalThis.K11520Backpack?.get&&globalThis.__K11520_SIMULATION_EXCHANGE__);
 }
 async function expandDetails(page,selector){const details=page.locator(selector).locator('xpath=ancestor::details[1]');if(!await details.evaluate(el=>el.open))await details.locator('summary').click();}
@@ -107,7 +109,7 @@ async function killFirstMonster(page){
 }
 
 try{
-  for(const [width,height] of [[390,844],[844,390]]){
+  for(const [width,height] of [[390,844],[844,390]].filter(([w])=>!process.env.K11520_PLAYER_QA_SCENARIO&&(!process.env.K11520_PLAYER_QA_VIEW||String(w)===process.env.K11520_PLAYER_QA_VIEW))){
     const context=await browser.newContext({viewport:{width,height},hasTouch:true,isMobile:true,acceptDownloads:true,serviceWorkers:'block'});
     await prepare(context);const page=await context.newPage();
     const profile={viewport:{width,height},checks:[],pageErrors:[]};report.profiles.push(profile);page.on('pageerror',error=>profile.pageErrors.push(String(error)));
@@ -146,7 +148,7 @@ try{
       await page.evaluate(()=>{const f=__playerLifeWalletFixture;f.account=f.addressB;f.emit('accountsChanged',[f.account])});
       await page.waitForFunction(()=>document.querySelector('#wAddr').textContent.toLowerCase()===__playerLifeWalletFixture.addressB.toLowerCase());
       current=await snap(page);assert.equal(current.player.playerId,initial.player.playerId);assert.equal(current.player.walletLinks.length,1);assert.equal(current.player.walletLinks[0].address,walletA.address.toLowerCase());
-      assert.equal(await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length),0);profile.checks.push('ACCOUNT_SWITCH_NO_IMPLICIT_BIND_OR_LEDGER_LEAK');
+      assert.equal(await page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length),0);assert.deepEqual(await page.evaluate(()=>{const p=__K11520_PRODUCT__.snapshot();return {xp:p.xp,level:p.level}}),{xp:current.player.xp,level:current.player.level});profile.checks.push('ACCOUNT_SWITCH_NO_IMPLICIT_BIND_OR_LEDGER_LEAK');
       await openLife(page);await expandDetails(page,'#playerLifeExport');await page.locator('#playerLifeExport').click();
       const backup=await page.locator('#playerLifeImportText').inputValue(),parsed=JSON.parse(backup);
       assert.equal(parsed.schema,'KAIOS_PLAYER_BACKUP_V1');assert.equal(parsed.player.player.walletLinks.length,0,'backup must not export wallet proof as authority');assert.equal(parsed.player.player.playerId,initial.player.playerId);
@@ -170,32 +172,34 @@ try{
       await openLife(page);await expandDetails(page,'#playerLifeBind');await page.locator('#playerLifeBind').click();await page.locator('#playerLifeMessage').filter({hasText:'DUPLICATE_WALLET_BINDING'}).waitFor();assert.equal((await snap(page)).player.walletLinks.length,0);profile.checks.push('CROSS_PLAYER_DUPLICATE_WALLET_REJECTED');
       await expandDetails(page,'#playerLifePlayers');await page.locator('#playerLifePlayers').selectOption(initial.player.playerId);await reloadAction(page,'#playerLifeSwitch');
       await page.waitForFunction(id=>globalThis.__K11520_PLAYER_LIFE__?.snapshot().player.playerId===id,initial.player.playerId);
-      assert.equal((await snap(page)).player.displayName,'取經測試員');assert.equal((await snap(page)).home.houseLevel,1);profile.checks.push('EXPLICIT_LOCAL_PROFILE_SWITCH');
+      assert.equal((await snap(page)).player.displayName,'取經測試員');assert.equal((await snap(page)).home.houseLevel,1);assert.deepEqual(await page.evaluate(()=>{const p=__K11520_PRODUCT__.snapshot();return {xp:p.xp,level:p.level}}),{xp:progressed.player.xp,level:progressed.player.level});profile.checks.push('EXPLICIT_LOCAL_PROFILE_SWITCH');
       await openLife(page);await context.setOffline(true);await page.locator('#playerLifeName').fill('離線取經測試員');await page.locator('#playerLifeSave').click();assert.equal((await snap(page)).player.displayName,'離線取經測試員');
       await shot(page,`${width}x${height}-offline-save`);await context.setOffline(false);profile.checks.push('OFFLINE_IN_SESSION_LOCAL_SAVE');
       await expandDetails(page,'#playerLifeConsent');await page.locator('#playerLifeConsent').click();assert.deepEqual((await snap(page)).player.privacyConsent,{location:false,motion:false,analytics:false});profile.checks.push('CONSENT_REVOCATION_NO_SENSOR_REQUEST');
       await openLife(page);await reachable(page,'#playerLifeHomeNav');await page.locator('#playerLifeHomeNav').click();
       await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active);
       await page.waitForFunction(()=>{const h=__K11520_PLAYER_LIFE__.snapshot().home.xyz,p=__K11520_WORLD_COORDS__.physical;return Math.hypot(h.x-p.x,h.y-p.y,h.z-2.2-p.z)<.8&&!__K11520_XYZ_MAP_NAVIGATION__.active},null,{timeout:20000});
+      await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));profile.homeVisual=await page.evaluate(()=>__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot());
       await shot(page,`${width}x${height}-home-navigation`);profile.checks.push('REAL_HOME_NAVIGATION');
       const calls=await page.evaluate(()=>__playerLifeWalletFixture.calls);assert.equal(calls.some(m=>!/^(eth_accounts|eth_requestAccounts|eth_chainId|eth_getBalance|eth_call|personal_sign)$/.test(m)),false,'no transaction or approval method allowed');
       assert.deepEqual(await page.evaluate(()=>__playerLifeWalletFixture.sensorCalls),[],'Player Life does not request location');
       assert.deepEqual(profile.pageErrors,[],'Player Life paths must not throw uncaught browser errors');
-    }catch(error){profile.failureState=await page.evaluate(()=>({life:globalThis.__K11520_PLAYER_LIFE__?.snapshot(),xyz:globalThis.__K11520_WORLD_COORDS__,nav:globalThis.__K11520_XYZ_MAP_NAVIGATION__})).catch(()=>null);await shot(page,`${width}x${height}-failure`).catch(()=>{});throw error}
+    }catch(error){profile.failureState=await page.evaluate(()=>({life:globalThis.__K11520_PLAYER_LIFE__?.snapshot(),xyz:globalThis.__K11520_WORLD_COORDS__,nav:globalThis.__K11520_XYZ_MAP_NAVIGATION__,visibility:document.visibilityState,message:document.querySelector('#playerLifeMessage')?.textContent,sheetTitle:document.querySelector('#sheetTitle')?.textContent,sheetChildren:document.querySelector('#sheetBody')?.children.length})).catch(()=>null);await shot(page,`${width}x${height}-failure`).catch(()=>{});throw error}
     finally{await context.close()}
   }
-  for(const scenario of ['CORRUPT_SAVE','STORAGE_UNAVAILABLE','QUOTA_EXCEEDED']){
+  for(const scenario of ['CORRUPT_SAVE','STORAGE_UNAVAILABLE','QUOTA_EXCEEDED'].filter(s=>!process.env.K11520_PLAYER_QA_SCENARIO||s===process.env.K11520_PLAYER_QA_SCENARIO)){
     const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,serviceWorkers:'block'});await prepare(context,{storageFailure:scenario==='CORRUPT_SAVE'?false:scenario});
     if(scenario==='CORRUPT_SAVE')await context.addInitScript(()=>{localStorage.setItem('KAIOS_PLAYER_LIFE_V1','{"broken":true}')});
-    const page=await context.newPage();
+    const page=await context.newPage(),errors=[],pageErrors=[];page.on('pageerror',error=>{const value=String(error.stack||error);errors.push(value);pageErrors.push(value)});page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
     try{
       await boot(page);const state=await snap(page);assert.equal(state.persistent,false);assert.match(state.status,/CORRUPT_SAVE|STORAGE_UNAVAILABLE|STORAGE_WRITE_FAILED|SESSION_ONLY/);
       if(scenario==='CORRUPT_SAVE')assert.equal(await page.evaluate(()=>localStorage.getItem('KAIOS_PLAYER_LIFE_V1')),'{"broken":true}','corrupt bytes must not be silently overwritten');
       await openLife(page);assert.match(await page.locator('#playerLifeStatus').innerText(),/僅本次記憶體|SESSION_ONLY/);await page.locator('#playerLifeName').fill('暫存旅人');await page.locator('#playerLifeSave').click();assert.equal((await snap(page)).player.displayName,'暫存旅人');
-      await shot(page,'390x844-'+scenario.toLowerCase());report.profiles.push({viewport:{width:390,height:844},checks:[scenario,'VISIBLE_NONPERSISTENT_WARNING','PLAYABLE_MEMORY_FALLBACK']});
-    }catch(error){await shot(page,'390x844-'+scenario.toLowerCase()+'-failure').catch(()=>{});throw error}
+      assert.deepEqual(pageErrors,[],'storage denial must not crash browser modules');await shot(page,'390x844-'+scenario.toLowerCase());report.profiles.push({viewport:{width:390,height:844},checks:[scenario,'VISIBLE_NONPERSISTENT_WARNING','PLAYABLE_MEMORY_FALLBACK']});
+    }catch(error){report.failures.push({scenario,errors,state:await page.evaluate(()=>({status:document.querySelector('#charState')?.textContent,life:globalThis.__K11520_PLAYER_LIFE__?.snapshot()})).catch(()=>null)});await shot(page,'390x844-'+scenario.toLowerCase()+'-failure').catch(()=>{});throw error}
     finally{await context.close()}
   }
   report.functional='PASS';console.log('PASS Player Life Chromium checks');
 }catch(error){report.functional='FAIL';report.failures.push(String(error.stack||error));throw error}
-finally{await fs.writeFile(out+'/report.json',JSON.stringify(report,null,2)+'\n');await browser.close()}
+finally{report.durationSeconds=(Date.now()-startedAt)/1000;await fs.writeFile(out+'/report.json',JSON.stringify(report,null,2)+'\n');await browser.close()}

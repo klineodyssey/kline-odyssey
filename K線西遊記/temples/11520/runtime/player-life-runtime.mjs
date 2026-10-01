@@ -84,7 +84,8 @@ export function createLocalPlayerStore({storage,now=Date.now,crypto=globalThis.c
   if(storage===undefined){try{storage=globalThis.localStorage}catch{status='STORAGE_UNAVAILABLE';storage=null}}
   let state={schema:PLAYER_LIFE_SCHEMA,scope:PLAYER_LIFE_SCOPE,revision:0,activePlayerId:null,players:{},legacyMigrated:false,usedNonces:[]};
   const challenges=new Map();
-  try{raw=storage?.getItem(PLAYER_LIFE_STORAGE_KEY)??null;if(raw!==null){if(raw.length>4000000)fail('CORRUPT_SAVE');state=validateEnvelope(JSON.parse(raw))}}catch{status=storage?'CORRUPT_SAVE':'STORAGE_UNAVAILABLE'}
+  let storageRead=false;
+  try{raw=storage?.getItem(PLAYER_LIFE_STORAGE_KEY)??null;storageRead=true;if(raw!==null){if(raw.length>4000000)fail('CORRUPT_SAVE');state=validateEnvelope(JSON.parse(raw))}}catch{status=storageRead?'CORRUPT_SAVE':'STORAGE_UNAVAILABLE'}
   if(!storage&&status==='READY')status='SESSION_ONLY';
   function token(){if(typeof crypto?.getRandomValues!=='function')fail('SECURE_RANDOM_UNAVAILABLE');const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);return [...bytes].map(v=>v.toString(16).padStart(2,'0')).join('')}
   const stamp=()=>{const t=now();if(!integer(t,Number.MAX_SAFE_INTEGER))fail('INVALID_CLOCK');return t};

@@ -1,10 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
-import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY} from '../runtime/evm-wallet-runtime.mjs';
+import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
 import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
 import {createJourneyTutorial} from '../runtime/world-runtime.mjs';
+
+test('blocked browser storage getter cannot abort identity or game session boot',()=>{
+  const before=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
+  Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw new Error('STORAGE_DENIED')}});
+  try{
+    assert.equal(readPublicWalletIdentity(),null);assert.equal(readPlayerSession(),null);
+    assert.equal(savePublicWalletIdentity({address:'0x'+'a'.repeat(40)}),null);
+    assert.equal(savePlayerSession({xyz:{x:0,y:0,z:0},intentXYZ:{x:0,y:0,z:0}}),null);
+  }finally{if(before)Object.defineProperty(globalThis,'localStorage',before);else delete globalThis.localStorage}
+});
 
 test('Player Life namespaces isolate identical wallet, guest session and first-owner migration',()=>{
   const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};

@@ -40,7 +40,9 @@ export const BASELINE_WILD_ECOLOGY=Object.freeze([
 ]);
 export function baselineWildEcology(){return BASELINE_WILD_ECOLOGY.map((w,i)=>({...w,lifeId:`LIFE-WILD-11520-${w.species}-${String(i+1).padStart(3,'0')}`,sourceId:'WILD-ECOLOGY-11520',y:0,vitality:100,collectable:['FISH','SHRIMP','COW','CHICKEN','DUCK'].includes(w.species)}))}
 function seedWildEcology(){
-  if(typeof sessionStorage==='undefined')return;const key='11520.wildEcology.seed.v2';if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1');
+  // Browser storage may be denied. The listener installation guard still
+  // seeds this existing non-financial ecology once in memory for this page.
+  try{if(typeof sessionStorage==='undefined')return;const key='11520.wildEcology.seed.v2';if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1')}catch{}
   baselineWildEcology().forEach(w=>memoryQueue.push(normalizeMarketLifeSourceEvent({type:'SPAWN',sourceId:w.sourceId,lifeId:w.lifeId,name:w.name,species:w.species,intelligence:w.species==='TREE'||w.species==='FLOWER'?1:2,markets:[],capital:0,vitality:100,maxHp:w.maxHp,attack:0,speed:w.species==='TREE'||w.species==='FLOWER'?0:.008,x:w.x,y:0,z:w.z,strategy:'WILD_ECOLOGY',meta:{sourceClass:'WILD_ECOLOGY',collectable:w.collectable,playerOwnable:true}})));
 }
 
