@@ -178,7 +178,17 @@ function renderCombatTarget(){
   monsterScreenGuide(s);
   journey.event('MOVE',{distance:Math.hypot(S.xyz.x-journeyOrigin.x,S.xyz.y-journeyOrigin.y,S.xyz.z-journeyOrigin.z)});
   journey.event('CONTROL',combatSelection());
-  const tutorial=journey.snapshot();if(tutorial.hint){monsterGuide.textContent=`${t.name} · ${Math.round(t.hp)}HP · ${s.distance.toFixed(1)}m\n${tutorial.hint}\n點此看故事／教學`;monsterGuide.style.whiteSpace='pre-line';monsterGuide.style.boxSizing='border-box';monsterGuide.style.pointerEvents='auto';monsterGuide.onclick=showCombatTarget;monsterGuide.setAttribute('role','button');monsterGuide.tabIndex=0;monsterGuide.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showCombatTarget()}};if(innerWidth<=600){monsterGuide.style.left='132px';monsterGuide.style.width='calc(100vw - 140px)';monsterGuide.style.maxWidth='330px';monsterGuide.style.transform='translateY(-100%)';const floor=document.querySelector('.tele')?.getBoundingClientRect().bottom||298;monsterGuide.style.top=`${Math.max(parseFloat(monsterGuide.style.top)||310,floor+monsterGuide.getBoundingClientRect().height+8)}px`}else if(innerHeight<=600){monsterGuide.style.left='346px';monsterGuide.style.width='280px';monsterGuide.style.top='310px';monsterGuide.style.transform='translateY(-100%)'}}else{monsterGuide.style.width='auto';monsterGuide.style.maxWidth='min(76vw,330px)';monsterGuide.style.whiteSpace='normal';monsterGuide.style.pointerEvents='none';monsterGuide.onclick=null;monsterGuide.onkeydown=null;monsterGuide.removeAttribute('role');monsterGuide.tabIndex=-1}
+  const tutorial=journey.snapshot();
+  if(tutorial.hint)monsterGuide.textContent=`${t.name} · ${Math.round(t.hp)}HP · ${s.distance.toFixed(1)}m\n${tutorial.hint}\n點此看故事／教學`;
+  Object.assign(monsterGuide.style,{whiteSpace:tutorial.hint?'pre-line':'normal',boxSizing:'border-box',minHeight:'44px',pointerEvents:'auto'});
+  monsterGuide.onclick=showCombatTarget;monsterGuide.setAttribute('role','button');monsterGuide.tabIndex=0;
+  monsterGuide.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showCombatTarget()}};
+  // The same contextual target label stays clear of controls after graduation/reload.
+  if(innerWidth<=600){
+    Object.assign(monsterGuide.style,{left:'132px',width:'calc(100vw - 140px)',maxWidth:'330px',transform:'translateY(-100%)'});
+    const floor=document.querySelector('.tele')?.getBoundingClientRect().bottom||298;
+    monsterGuide.style.top=`${floor+monsterGuide.getBoundingClientRect().height+8}px`;
+  }else if(innerHeight<=600){Object.assign(monsterGuide.style,{left:'346px',width:'280px',top:'310px',transform:'translateY(-100%)'})}
   globalThis.__K11520_KSPACE_COMBAT__=s;
   const info=$('#combatKValues');if(info){const tuple=v=>['KX','KY','KZ'].map(a=>formatKCoordinate(v[a])).join(' / ');info.textContent=`PLAYER K（正規化）：${tuple(s.playerK)}\nMONSTER K（正規化）：${tuple(s.monsterK)}\nΔK（正規化）：${tuple(s.deltaK)}\nLOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}\n局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}\n${s.market.status}`}
 }

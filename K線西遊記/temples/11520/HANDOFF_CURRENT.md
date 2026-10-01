@@ -8,6 +8,10 @@
   itself is unchanged. Browser QA now checks the exact canonical formatted label,
   with a deterministic regression for that boundary. No product runtime, price,
   Oracle policy, financial logic or precision was changed to satisfy the test.
+- Post-release anonymous play also exposed the older non-tutorial target label
+  crossing landscape C/lots after reload. The existing label now shares the
+  tutorial's bounded mobile placement in both states and remains tappable for
+  target detail. Responsive QA checks map/control clearance; no additional card.
 
 ## V2.7.0 journey onboarding continuation — 2026-10-01
 
