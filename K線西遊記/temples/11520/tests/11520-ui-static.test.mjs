@@ -102,6 +102,7 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
 
 test('V2.7.0 release stamp and restored-player encounter boot are production wired',()=>{
   assert.ok(fixes.includes('V2.7.0 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.7.0'"));
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
