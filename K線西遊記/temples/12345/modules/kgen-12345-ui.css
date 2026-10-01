@@ -648,66 +648,92 @@ html.kgen-v30 #k12345-ai-dialog #kgen-ai-body { position:static!important;inset:
 #kgen-heart-live-panel #kgen-12345-release-badge { margin-top:12px; }
 #k12345-world-diagnostics summary { min-height:44px;padding:8px;cursor:pointer; }
 #k12345-world-diagnostics #kline-chart-panel { display:block!important; }
+/* Canonical mobile composition: LayoutRuntime moves existing organs into these
+   grid areas. This replaces the R1/R2 fixed-coordinate mobile presentation. */
+#k12345-composition[hidden] { display:none; }
+#k12345-more h2 { font-size:18px;margin:0; }
+#k12345-more header { position:sticky;top:-16px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#081723;padding:8px 0;z-index:1; }
+#k12345-more-close { color:#dff;background:#173747;border:1px solid #7aa;border-radius:8px;padding:8px; }
+#k12345-more-content { display:grid;gap:16px; }
+html.k12345-composed {
+ --kgen-v10-dock-h:0px;
+}
 @media (max-width:900px) {
- html.kgen-v30 { --kgen-v10-dock-h:88px; }
- html.kgen-v30 .hud-top { top:8px!important;height:64px!important;display:block!important;pointer-events:none; }
- html.kgen-v30 .hud-top .brand-section { max-width:calc(100vw - 112px)!important; }
- html.kgen-v30 .hud-top .brand-name { font-size:14px!important;min-height:0!important;line-height:1.3!important; }
- html.kgen-v30 .hud-top .monitor-data { display:none!important; }
- html.kgen-v30 #kgen-heart-toggle { top:78px!important;left:8px!important;width:calc(100vw - 16px)!important;max-width:none!important;min-height:44px!important;height:44px!important;padding:6px 10px!important; }
- html.kgen-v30 #kgen-heart-toggle .kgen-heart-title { font-size:13px!important; }
- html.kgen-v30 #kgen-v902-left-status { top:126px!important;left:8px!important;width:calc(100vw - 16px)!important;max-height:26px!important;font-size:10px!important;overflow:hidden!important; }
- html.kgen-v30 .resource-bars { top:156px!important;left:8px!important;width:calc(100vw - 16px)!important;max-width:none!important; }
- html.kgen-v30 #universe-nav { top:252px!important;right:8px!important;left:auto!important;width:154px!important;max-width:154px!important;max-height:204px!important;overflow:auto!important;gap:6px!important;padding:0!important; }
- html.kgen-v30 #universe-nav > * { flex-shrink:0; }
- html.kgen-v30 #universe-nav > .nav-btn { min-height:44px!important;width:100%!important;font-size:11px!important; }
- html.kgen-v30 #universe-nav .nav-audio { display:none!important; }
- html.kgen-v30 #kgen-v102-festival-panel { width:100%!important;max-width:100%!important; }
- html.kgen-v30 #kgen-v102-festival-panel h3 { min-height:44px!important;line-height:1.3!important;display:flex;align-items:center; }
- html.kgen-v30 #kline-engine-panel { top:252px!important;left:8px!important;width:calc(100vw - 178px)!important;max-width:230px!important;max-height:155px!important;overflow:auto!important; }
- html.kgen-v30 #kline-chart-panel { display:none!important; }
- html.kgen-v30 .ga-matrix { top:auto!important;bottom:292px!important;left:8px!important;right:auto!important;transform:none!important;width:108px!important;max-height:90px!important;padding:6px!important;font-size:9px!important;overflow:auto!important; }
- html.kgen-v30 #wheel-wrap { top:auto!important;bottom:174px!important;right:80px!important;width:82px!important;height:82px!important;transform:none!important; }
- html.kgen-v30 #wheel { width:82px!important;height:82px!important; }
- html.kgen-v30 #core-anchor { top:57%!important;left:50%!important; }
- html.kgen-v30 #core-window { width:min(64vw,270px)!important;height:min(64vw,270px)!important; }
- html.kgen-v30 #fairy-img { max-width:100%!important;max-height:100%!important; }
- html.kgen-v30 #kgen-heart-toggle .kgen-heart-sub { display:none!important; }
- html.kgen-v30 #kgen-ai-toggle { min-width:44px;min-height:44px; }
- html.kgen-v30 .warp-engine { top:auto!important;bottom:168px!important;right:8px!important;width:60px!important;height:180px!important;max-height:180px!important; }
- html.kgen-v30 .warp-rail { height:140px!important;max-height:140px!important; }
- html.kgen-v30 #warp-txt { font-size:13px!important;line-height:1.2!important;margin-top:6px!important; }
- html.kgen-v30 #move-joystick-wrap { left:12px!important;bottom:174px!important;top:auto!important;width:94px!important;height:94px!important; }
- html.kgen-v30 .steer-zone { bottom:146px!important;left:8px!important;width:calc(100vw - 84px)!important; }
- html.kgen-v30 #k12345-slider-status { bottom:134px!important; }
- html.kgen-v30 .footer-terminal { bottom:0!important;height:88px!important;min-height:88px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important;padding:4px!important; }
- html.kgen-v30 .footer-terminal > * { min-width:0!important;min-height:38px!important;font-size:10px!important;padding:4px!important; }
- html.kgen-v30 #kgen-v30-ritual-dock { right:8px!important;bottom:92px!important;width:174px!important; }
- html.kgen-v30 #kgen-v30-ritual-dock button { min-height:44px!important;padding:5px!important;font-size:12px!important; }
- html.kgen-v30 #kgen-ai-service-panel { left:8px!important;bottom:92px!important;width:calc(100vw - 196px)!important;max-width:none!important; }
- html.kgen-v30 #kgen-ai-service-panel .kgen-ai-head { min-height:44px!important; }
- html.kgen-v30 #kgen-ai-service-panel .kgen-ai-sub { display:none; }
- html.kgen-v30 #kgen-ai-body { position:fixed!important;left:8px!important;right:8px!important;bottom:144px!important;width:auto!important;max-height:55dvh!important;overflow:auto!important;background:#081723!important;border:1px solid #4793aa;border-radius:12px;padding:12px!important; }
- html.kgen-v30 body.k12345-heart-open #kgen-heart-live-panel { position:fixed!important;transform:none!important;top:128px!important;bottom:144px!important;left:8px!important;width:calc(100vw - 16px)!important;max-width:none!important;max-height:calc(100dvh - 272px)!important;overflow:auto!important;z-index:2147483540!important; }
- html.kgen-v30 #kgen-v102-festival-panel:not(.kgen-festival-closed) .kgen-v102-festival-body { position:fixed!important;inset:140px 12px 144px!important;width:auto!important;max-height:calc(100dvh - 284px)!important;overflow:auto!important;z-index:2147483560!important;background:#081723!important;border:1px solid #8c6c34;border-radius:12px;padding:12px!important; }
+ html.k12345-composed .hud-top { top:max(8px,env(safe-area-inset-top))!important;left:12px!important;right:112px!important;width:auto!important;height:60px!important;display:block!important;pointer-events:none; }
+ html.k12345-composed .hud-top .brand-section { max-width:100%!important; }
+ html.k12345-composed .hud-top .brand-name { font-size:14px!important;line-height:1.3!important;min-height:0!important; }
+ html.k12345-composed .hud-top .monitor-data { display:none!important; }
+ html.k12345-composed #sys-clock .kgen-utc-sub { display:none; }
+ html.k12345-composed #k12345-composition {
+  position:absolute;inset:calc(76px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+  display:grid;grid-template-rows:44px 24px minmax(0,1fr) 174px 48px;gap:8px;
+  pointer-events:none;
+ }
+ /* Reuse the existing Heart toggle layer; do not trap it below its scrim. */
+ #k12345-primary { position:relative;z-index:calc(var(--kgen-v30-overlay-z) + 2);display:grid;grid-template-columns:1.4fr .8fr .7fr 1.1fr;gap:6px;pointer-events:auto; }
+ html.k12345-composed #k12345-primary > button {
+  position:relative!important;inset:auto!important;transform:none!important;min-width:0!important;width:auto!important;max-width:none!important;height:44px!important;min-height:44px!important;margin:0!important;padding:4px 6px!important;border:0!important;border-radius:10px!important;
+  color:#e5f4f8!important;background:transparent!important;box-shadow:none!important;font-size:13px!important;display:flex!important;align-items:center;justify-content:center;overflow:hidden;
+ }
+ /* Smaller painted surface; the full 44px button remains the hit target. */
+ html.k12345-composed #k12345-primary > button::before { content:'';position:absolute;inset:4px 0;border:1px solid #486876;border-radius:10px;background:#102630;z-index:-1;pointer-events:none; }
+ html.k12345-composed #kgen-heart-toggle .kgen-heart-title { font-size:0!important; }
+ html.k12345-composed #kgen-heart-toggle .kgen-heart-title::after { content:'Heart / 錢包';font-size:13px; }
+ html.k12345-composed #k12345-primary #kgen-heart-toggle .kgen-heart-sub,html.k12345-composed #k12345-primary #kgen-heart-toggle .kgen-heart-state { display:none!important; }
+ html.k12345-composed #kgen-heart-toggle .kgen-heart-copy { flex:1;white-space:nowrap; }
+ html.k12345-composed #kgen-heart-toggle::after { display:none!important; }
+ html.k12345-composed #k12345-primary #kgen-ai-toggle { font-size:0!important; }
+ html.k12345-composed #kgen-ai-toggle::after { content:'AI';font-size:13px; }
+ html.k12345-composed #kgen-ai-service-panel { display:none!important; }
+ html.k12345-composed #kgen-v902-left-status { position:static!important;inset:auto!important;transform:none!important;width:100%!important;min-width:0!important;max-width:100%!important;height:24px!important;min-height:0!important;max-height:24px!important;padding:4px 8px!important;margin:0!important;box-sizing:border-box!important;font-size:10px!important;white-space:nowrap;overflow:hidden!important;text-overflow:ellipsis; }
+ #k12345-world { display:grid;place-items:center;position:relative;z-index:2;min-height:0;min-width:0; }
+ #k12345-actions { position:relative;z-index:100; }
+ html.k12345-composed #core-anchor { position:relative!important;inset:auto!important;transform:none!important;width:min(72vw,280px)!important;height:min(72vw,280px)!important;pointer-events:none; }
+ html.k12345-composed #core-window { width:100%!important;height:100%!important;position:relative!important;inset:auto!important; }
+ html.k12345-composed #fairy-img { max-width:100%!important;max-height:100%!important; }
+ #k12345-drive { position:relative;z-index:100;display:grid;grid-template-columns:1fr 1fr 64px;grid-template-rows:112px 38px 16px;column-gap:12px;row-gap:4px;align-items:center;justify-items:center;pointer-events:none; }
+ html.k12345-composed #move-joystick-wrap,html.k12345-composed #wheel-wrap,html.k12345-composed .warp-engine,html.k12345-composed .steer-zone,html.k12345-composed #k12345-slider-status {
+  position:relative!important;inset:auto!important;transform:none!important;margin:0!important;min-width:0!important;pointer-events:auto;
+ }
+ html.k12345-composed #move-joystick-wrap { grid-column:1;grid-row:1;width:94px!important;height:94px!important; }
+ html.k12345-composed #move-joystick-knob { width:40px!important;height:40px!important;left:calc(50% - 20px)!important;top:calc(50% - 20px)!important;pointer-events:none!important; }
+ html.k12345-composed #wheel-wrap { grid-column:2;grid-row:1;width:90px!important;height:90px!important; }
+ html.k12345-composed #wheel { width:90px!important;height:90px!important; }
+ html.k12345-composed .warp-engine { grid-column:3;grid-row:1/4;width:64px!important;height:174px!important;max-height:174px!important;align-self:end; }
+ html.k12345-composed .warp-rail { height:132px!important;max-height:132px!important; }
+ html.k12345-composed #warp-txt { font-size:12px!important;line-height:1.2!important;margin-top:8px!important; }
+ html.k12345-composed .steer-zone { grid-column:1/3;grid-row:2;width:100%!important;max-width:none!important;height:38px!important;display:flex;align-items:center;gap:8px; }
+ html.k12345-composed #ang-val { font-size:20px!important;line-height:1!important;min-width:56px;text-shadow:none!important; }
+ html.k12345-composed .steer-slider { width:100%;min-width:0;height:32px; }
+ html.k12345-composed #wish-label { left:12px!important;right:12px!important;bottom:28px!important;font-size:15px!important;text-align:center; }
+ html.k12345-composed #k12345-slider-status { grid-column:1/3;grid-row:3;width:100%!important;font-size:10px!important;text-align:center; }
+ html.k12345-composed #kgen-v30-ritual-dock { position:static!important;inset:auto!important;transform:none!important;display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;max-width:none!important;gap:8px!important;pointer-events:auto; }
+ html.k12345-composed #kgen-v30-ritual-dock button { min-height:48px!important;padding:8px!important;font-size:14px!important; }
+ html.k12345-composed #k12345-more-content > * {
+  position:static!important;inset:auto!important;transform:none!important;z-index:auto!important;width:100%!important;min-width:0!important;max-width:100%!important;max-height:none!important;height:auto!important;margin:0!important;box-sizing:border-box!important;
+ }
+ html.k12345-composed #universe-nav { display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;overflow:visible!important;padding:0!important; }
+ html.k12345-composed #universe-nav > * { min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box; }
+ html.k12345-composed #universe-nav > .nav-btn { min-height:44px!important;font-size:12px!important;white-space:normal!important;overflow-wrap:anywhere;padding:8px!important; }
+ html.k12345-composed #universe-nav .nav-audio { display:none!important; }
+ html.k12345-composed #kgen-v102-festival-panel h3 { min-height:44px!important;line-height:1.3!important;display:flex;align-items:center;font-size:12px!important;margin:0!important; }
+ html.k12345-composed #k12345-more .footer-terminal { display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:0!important; }
+ html.k12345-composed #k12345-more .footer-terminal > * { min-width:0!important;min-height:44px!important;font-size:12px!important;padding:8px!important; }
+ html.k12345-composed #k12345-more .ga-matrix { padding:14px!important; }
+ html.k12345-composed #kline-chart-panel { display:none!important; }
+ html.k12345-composed body.k12345-heart-open #kgen-heart-live-panel { position:fixed!important;transform:none!important;top:132px!important;bottom:16px!important;left:10px!important;width:calc(100vw - 20px)!important;max-width:none!important;max-height:calc(100dvh - 148px)!important;overflow:auto!important; }
 }
 @media (max-width:900px) and (max-height:500px) {
- html.kgen-v30 #kgen-heart-toggle { top:76px!important;width:220px!important; }
- html.kgen-v30 #kgen-v902-left-status { top:124px!important;width:220px!important; }
- html.kgen-v30 .resource-bars { top:154px!important;width:220px!important;min-width:0!important;box-sizing:border-box!important; }
- html.kgen-v30 #kgen-v902-left-status { min-width:0!important;box-sizing:border-box!important; }
- html.kgen-v30 #universe-nav { top:62px!important;right:80px!important;width:154px!important;max-height:182px!important; }
- html.kgen-v30 #wheel-wrap { right:auto!important;left:344px!important;bottom:174px!important; }
- html.kgen-v30 #kline-engine-panel { top:202px!important;max-height:44px!important;width:220px!important;min-width:0!important;box-sizing:border-box!important; }
- html.kgen-v30 .ga-matrix { left:420px!important;top:64px!important;bottom:auto!important;max-height:66px!important; }
- html.kgen-v30 .warp-engine { top:64px!important;bottom:auto!important;height:162px!important; }
- html.kgen-v30 .warp-rail { height:120px!important; }
- html.kgen-v30 #move-joystick-wrap { left:244px!important;bottom:174px!important;width:80px!important;height:80px!important; }
- html.kgen-v30 .steer-zone { left:244px!important;width:330px!important;bottom:130px!important; }
- html.kgen-v30 .resource-bars { max-height:48px!important;overflow:auto!important; }
- html.kgen-v30 #core-anchor { top:40%!important; }
- html.kgen-v30 #kgen-ai-service-panel { width:220px!important; }
- html.kgen-v30 #kgen-ai-body { bottom:142px!important;max-height:calc(100dvh - 162px)!important; }
- html.kgen-v30 body.k12345-heart-open #kgen-heart-live-panel { top:128px!important;bottom:92px!important;max-height:calc(100dvh - 220px)!important; }
- html.kgen-v30 #kgen-v102-festival-panel:not(.kgen-festival-closed) .kgen-v102-festival-body { inset:62px 90px 92px 240px!important;max-height:calc(100dvh - 154px)!important; }
+ html.k12345-composed #k12345-composition { inset:64px 12px 8px;grid-template-columns:160px minmax(0,1fr) 220px;grid-template-rows:1fr 48px;column-gap:16px; }
+ #k12345-primary { grid-column:1;grid-row:1;align-content:start;grid-template-columns:1.2fr 1fr;width:144px;gap:4px; }
+ html.k12345-composed #k12345-primary > button { padding:2px 3px!important;font-size:11px!important; }
+ html.k12345-composed #kgen-heart-toggle .kgen-heart-title::after,html.k12345-composed #kgen-ai-toggle::after { font-size:11px; }
+ #k12345-status-slot { grid-column:1;grid-row:2;align-self:center; }
+ #k12345-world { grid-column:2;grid-row:1; }
+ html.k12345-composed #core-anchor { width:min(25vw,200px)!important;height:min(25vw,200px)!important; }
+ #k12345-drive { grid-column:3;grid-row:1/3;align-self:center;grid-template-columns:1fr 1fr 60px;column-gap:8px;grid-template-rows:100px 38px 16px; }
+ html.k12345-composed #move-joystick-wrap { width:74px!important;height:74px!important; }
+ html.k12345-composed #wheel-wrap,html.k12345-composed #wheel { width:74px!important;height:74px!important; }
+ #k12345-actions { grid-column:2;grid-row:2; }
+ html.k12345-composed body.k12345-heart-open #kgen-heart-live-panel { top:64px!important;left:184px!important;width:calc(100vw - 196px)!important;max-height:calc(100dvh - 80px)!important; }
 }

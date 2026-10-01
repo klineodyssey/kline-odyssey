@@ -1578,6 +1578,55 @@
 
   const LayoutRuntime = {
     inited: false,
+    // One composition owner. Original organs and bound controls are moved, never cloned.
+    mountComposition: function(){
+      if(this.composition){ this.syncComposition(); return; }
+      const shell=document.createElement('main');shell.id='k12345-composition';shell.setAttribute('aria-label','Heart 世界與駕駛');
+      shell.innerHTML='<nav id="k12345-primary" aria-label="主要功能"></nav><div id="k12345-status-slot"></div><section id="k12345-world" aria-label="Heart 世界"></section><section id="k12345-drive" aria-label="MOVE DRIVE WARP"></section><div id="k12345-actions"></div>';
+      document.body.append(shell);
+      const more=document.createElement('dialog');more.id='k12345-more';more.className='k12345-detail-dialog';more.setAttribute('aria-label','更多世界功能');
+      more.innerHTML='<header><h2>世界工具</h2><button type="button" id="k12345-more-close">回到世界 ✕</button></header><p>GA、市場、土地與記錄按需查看；不改變世界位置。</p><div id="k12345-more-content"></div>';
+      document.body.append(more);
+      const button=document.createElement('button');button.id='k12345-more-open';button.type='button';button.textContent='更多 · GA';button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls',more.id);button.setAttribute('aria-expanded','false');
+      $('k12345-primary').append(button);
+      button.addEventListener('click',()=>{button.setAttribute('aria-expanded','true');more.showModal();});
+      $('k12345-more-close').addEventListener('click',()=>more.close());
+      more.addEventListener('close',()=>{button.setAttribute('aria-expanded','false');button.focus({preventScroll:true});});
+      // Leave the native top layer BEFORE delegating to an existing organ's overlay.
+      more.addEventListener('click',event=>{
+        if(event.target.closest('.footer-terminal button,#universe-nav button,#universe-nav h3')) more.close();
+      },true);
+      const query=matchMedia('(max-width:900px)');
+      this.composition={shell,more,query,moved:new Map()};
+      query.addEventListener('change',()=>this.syncComposition());
+      this.syncComposition();
+    },
+    syncComposition: function(){
+      const c=this.composition;if(!c)return;
+      const move=(selector,target)=>{
+        const el=document.querySelector(selector);if(!el)return;
+        if(!c.moved.has(el)){const anchor=document.createComment('12345 original organ position');el.before(anchor);c.moved.set(el,anchor);}
+        $(target).append(el);
+      };
+      document.documentElement.classList.toggle('k12345-composed',c.query.matches);
+      c.shell.hidden=!c.query.matches;
+      if(!c.query.matches){
+        c.more.close();
+        for(const [el,anchor] of c.moved){anchor.replaceWith(el);}
+        c.moved.clear();return;
+      }
+      [['#kgen-heart-toggle','k12345-primary'],['#kgen-land-panel-open','k12345-primary'],['#kgen-ai-toggle','k12345-primary'],
+       ['#kgen-v902-left-status','k12345-status-slot'],['#core-anchor','k12345-world'],
+       ['#move-joystick-wrap','k12345-drive'],['#wheel-wrap','k12345-drive'],['.warp-engine','k12345-drive'],
+       ['.steer-zone','k12345-drive'],['#k12345-slider-status','k12345-drive'],
+       ['#kgen-v30-ritual-dock','k12345-actions'],
+       ['#universe-nav','k12345-more-content'],['.resource-bars','k12345-more-content'],
+       ['.ga-matrix','k12345-more-content'],['#kline-engine-panel','k12345-more-content'],
+       ['.footer-terminal','k12345-more-content']].forEach(([s,t])=>move(s,t));
+      $('k12345-primary').append($('k12345-more-open'));
+      $('kgen-ai-toggle')?.setAttribute('aria-label','AI 客服');
+      $('kgen-heart-toggle')?.setAttribute('aria-label','Heart / 錢包控制台');
+    },
     init: function(){
       if(this.inited) return;
       this.inited = true;
@@ -3850,16 +3899,17 @@
       const reset=function(){if(opener){opener.setAttribute("aria-expanded","false");opener.focus({preventScroll:true});}};
       close.addEventListener("click",()=>dialog.close());dialog.addEventListener("close",reset);
       dialog.addEventListener("click",function(e){if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+      const button=document.createElement('button');button.type='button';button.className='nav-btn k12345-land-summary';button.id='kgen-land-panel-open';button.textContent='土地';
+      button.setAttribute('aria-controls',dialog.id);button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-expanded','false');
+      $('kgen-land-panel').before(button);
+      button.addEventListener('click',function(){opener=button;button.setAttribute('aria-expanded','true');dialog.showModal();content.scrollTop=0;});
       ["kgen-land-panel","kgen-land-info-panel"].forEach(function(id){
         const panel=$(id);if(!panel)return;
-        const button=document.createElement("button");button.type="button";button.className="nav-btn k12345-land-summary";button.id=id+"-open";
-        button.textContent=id==="kgen-land-panel"?"土地地籍 / 地圖":"土地資訊 / Owner";
-        button.setAttribute("aria-controls",dialog.id);button.setAttribute("aria-haspopup","dialog");button.setAttribute("aria-expanded","false");
-        panel.replaceWith(button);content.append(panel);
+        content.append(panel);
         // Existing engine keeps IDs/data/listeners. Only move its view; never clone land state.
-        button.addEventListener("click",function(){opener=button;button.setAttribute("aria-expanded","true");dialog.showModal();content.scrollTop=id==="kgen-land-panel"?0:content.scrollTop+panel.getBoundingClientRect().top-content.getBoundingClientRect().top;});
       });
       const note=document.createElement("p");note.textContent="地籍是本機模擬資料；Warp / 宇宙電梯只導航，不改變 Owner 或自動購地。";content.append(note);
+      LayoutRuntime.syncComposition();
     }
   };
 
