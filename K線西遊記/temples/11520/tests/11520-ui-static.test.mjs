@@ -88,7 +88,8 @@ test('combat loot and trade events are wired to the shared audio FX engine',()=>
 test('11520 always exposes a return to the KAIOS world portal',()=>{
   assert.ok(productFixesV23.includes("id='kaiosPortalButton'"));
   assert.ok(productFixesV23.includes("title='回 KAIOS 總世界'"));
-  assert.ok(productFixesV23.includes("location.href='../../../index.html'"));
+  assert.ok(productFixesV23.includes("location.href='../../../'"));
+  assert.ok(productFixesV23.includes("addEventListener('pageshow',()=>{b.disabled=false})"));
 });
 
 test('live HUD teaches the KX/KY/KZ six-phase combat mapping',()=>{

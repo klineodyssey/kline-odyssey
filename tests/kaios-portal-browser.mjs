@@ -22,6 +22,10 @@ try{
     await shot(page,`portal-${width}x${height}`);
     const links=await page.locator('a[href]').evaluateAll(nodes=>nodes.map(a=>({href:a.href,label:a.textContent.trim()})));
     for(const link of links){const u=new URL(link.href);if(u.origin!==new URL(BASE).origin)continue;const response=await context.request.get(u.href);assert.ok(response.ok(),`broken Portal link: ${link.href}`);}
+    await page.locator('#researchArchive > summary').click();
+    assert.equal(await page.locator('#researchArchiveCards [data-status=RESEARCH]').count(),3);
+    assert.equal(await page.locator('#researchArchiveCards a[data-world-id]').count(),0,'research must not acquire play navigation authority');
+    await shot(page,`research-${width}x${height}`);await page.locator('#researchArchive > summary').click();
     await page.locator('#worlds').scrollIntoViewIfNeeded();await shot(page,`worlds-${width}x${height}`);
     await page.evaluate(()=>scrollTo(0,0));
     await page.locator('[data-kaios-audio-toggle]').click();

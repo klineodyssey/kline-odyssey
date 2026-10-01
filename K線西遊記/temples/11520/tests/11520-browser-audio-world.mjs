@@ -32,7 +32,13 @@ try{
   await page.screenshot({path:`${out}/${width}-home-muted-feedback.png`});
   await page.reload();await ready(page);assert.equal((await audio(page)).settings.muted,true);assert.equal((await audio(page)).settings.voice,.25);
   await page.waitForTimeout(500);assert.equal(await page.evaluate(()=>__K11520_WORLD_AUDIO__.snapshot().events.some(e=>e.event==='HOME_BUILD')),false,'reload must not replay house creation');
-  row.audio=await audio(page);row.result='PASS';assert.deepEqual(row.errors,[]);await context.close();
+  row.audio=await audio(page);
+  if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+  await page.screenshot({path:`${out}/${width}-portal-return.png`});
+  await page.locator('#kaiosPortalButton').click();await page.waitForURL(base+'/');await page.locator('#primaryPlay').waitFor();
+  await page.goBack({waitUntil:'domcontentloaded'});await ready(page);await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
+  assert.equal(await page.locator('#kaiosPortalButton').isEnabled(),true,'world return control reactivates after history recovery');
+  row.returnPortal='PASS';row.result='PASS';assert.deepEqual(row.errors,[]);await context.close();
  }
  report.result='PASS';
 }catch(error){report.result='FAIL';report.error=String(error.stack||error);for(const context of browser.contexts())for(const page of context.pages())await page.screenshot({path:out+'/failure.png'}).catch(()=>{});process.exitCode=1;}finally{await fs.writeFile(out+'/report.json',JSON.stringify(report,null,2));await browser.close();console.log(JSON.stringify(report));}

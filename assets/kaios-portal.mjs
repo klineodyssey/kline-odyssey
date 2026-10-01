@@ -24,10 +24,10 @@ export function renderPortal(document,{storage,base=portalBase()}={}){
   const tags=el(document,'div','capabilities');for(const c of world.capabilities)tags.append(el(document,'span','',c));card.append(tags);
   const play=link(world.cta,world.entryUrl,'card-cta');play.dataset.worldId=world.worldId;play.append(el(document,'span','','↗'));card.append(play);cards.append(card);
  }
- const explore=document.querySelector('#exploreCards');explore.replaceChildren();
+ const explore=document.querySelector('#exploreCards'),research=document.querySelector('#researchArchiveCards');explore.replaceChildren();research.replaceChildren();
  for(const world of WORLD_REGISTRY.filter(w=>w.status==='RESEARCH')){
-  const card=el(document,'article','explore-card');card.dataset.status=world.status;
-  card.append(el(document,'span','research-label',world.subtitle),el(document,'h3','',world.name),el(document,'p','',world.description),link('了解更多 ↗',world.entryUrl,'info-link'));explore.append(card);
+  const card=el(document,'article','explore-card');card.dataset.status=world.status;card.dataset.worldId=world.worldId;
+  card.append(el(document,'span','research-label',world.subtitle),el(document,'h3','',world.name),el(document,'p','',world.description),link('了解更多 ↗',world.entryUrl,'info-link'));(world.disclosure?research:explore).append(card);
  }
  const construction=document.querySelector('#constructionWorlds');construction.replaceChildren();
  for(const world of WORLD_REGISTRY.filter(w=>w.status==='UNDER_CONSTRUCTION')){const row=el(document,'div','construction-row');row.dataset.status=world.status;row.append(el(document,'span','',world.name),el(document,'span','','建設中'));construction.append(row)}

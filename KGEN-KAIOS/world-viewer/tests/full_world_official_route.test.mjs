@@ -1,16 +1,25 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import {findWorld,playableDestination} from "../../../assets/kaios-world-registry.mjs";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
-test("official homepage exposes distinct Full World and K280 routes", async () => {
+test("official Portal exposes distinct Full World and K280 informational routes", async () => {
   const homepage = await read("../../../index.html");
-  assert.match(homepage, /id="kaios-world"/);
-  assert.match(homepage, /href="\.\/world-viewer\/">進入 KAIOS World Viewer/);
-  assert.match(homepage, /href="\.\/world-viewer\/k280\/">進入 K280 數位生命世界/);
-  assert.match(homepage, /desktop-nav-label">KAIOS 世界/);
-  assert.match(homepage, /mobile-nav-label">KAIOS 完整世界/);
+  assert.match(homepage, /id="explore"/);
+  assert.match(homepage, /<details id="researchArchive"/);
+  assert.match(homepage, /id="researchArchiveCards"/);
+  assert.match(homepage, /src="assets\/kaios-portal\.mjs"/);
+  for(const [id,path] of [['full-world','world-viewer/'],['k280','world-viewer/k280/']]){
+    const world=findWorld(id);
+    assert.equal(world.entryUrl,path);
+    assert.equal(world.status,'RESEARCH');
+    assert.equal(world.disclosure,true);
+    assert.deepEqual(world.capabilities,['INFORMATION_ONLY']);
+    assert.equal(playableDestination(id),null);
+    await read('../../../'+path+'index.html');
+  }
 });
 
 test("public adapter reuses the canonical Full Viewer runtime", async () => {
