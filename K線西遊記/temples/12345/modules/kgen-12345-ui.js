@@ -3,6 +3,9 @@ FILE: modules/kgen-12345-ui.js
 PRODUCT_ID: KGEN-12345-HEART-UI
 VERSION: V3.0-OVERLAY-GAMEPLAY
 PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
+REVISION: 2026-10-02 original Heart Ritual wiring and panel inset restoration
+AUTHOR: codex-gm-01; SOURCE_BASE: e1de5dcf62d05b274f702f7edd5cc3e81ef497ad
+CHANGELOG: Outer shortcuts reuse the existing Heart form; no layout or financial authority change.
 */
 (function(){
   "use strict";
@@ -72,31 +75,23 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
     }catch(_){ }
   }
 
-  function openHeartWish(){
-    if(window.ActionRuntime && typeof window.ActionRuntime.toggleHeartPanel === "function"){
-      window.ActionRuntime.toggleHeartPanel(true);
-      setTimeout(function(){
-        const card = document.querySelector('#kgen-heart-live-panel [data-kh-card="wish"]');
-        if(card) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 120);
-      pushStatus("已開啟悟空控制台 — 許願");
-      return true;
-    }
-    return false;
+  function openHeartCard(section){
+    const action = window.KGEN_RUNTIME_CORE && window.KGEN_RUNTIME_CORE.modules.ActionRuntime;
+    const panel = $("kgen-heart-live-panel");
+    const card = panel && panel.querySelector('[data-kh-card="' + section + '"]');
+    if(!action || !card) return false;
+    action.toggleHeartPanel(true);
+    requestAnimationFrame(function(){
+      if(!action.isHeartPanelOpen()) return;
+      // Scroll the console only, never its fixed ancestors or the document.
+      panel.scrollTop += card.getBoundingClientRect().top - panel.getBoundingClientRect().top - 12;
+      const field = card.querySelector("textarea, input, select");
+      if(field) field.focus({ preventScroll: true });
+    });
+    return true;
   }
-
-  function openHeartVow(){
-    if(window.ActionRuntime && typeof window.ActionRuntime.toggleHeartPanel === "function"){
-      window.ActionRuntime.toggleHeartPanel(true);
-      setTimeout(function(){
-        const card = document.querySelector('#kgen-heart-live-panel [data-kh-card="vow"]');
-        if(card) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 120);
-      pushStatus("已開啟悟空控制台 — 還願");
-      return true;
-    }
-    return false;
-  }
+  function openHeartWish(){ return openHeartCard("wish"); }
+  function openHeartVow(){ return openHeartCard("vow"); }
 
   const Overlay = {
     ensureQuota: function(){
@@ -170,52 +165,9 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
       const el = $("kgen-v30-leaderboard-overlay");
       if(el) el.classList.remove("is-open");
     },
-    ensureWish: function(){
-      if($("kgen-v30-wish-overlay")) return;
-      const el = document.createElement("div");
-      el.id = "kgen-v30-wish-overlay";
-      el.innerHTML = [
-        '<div class="kgen-v30-modal" role="dialog" aria-label="許願">',
-        '  <div class="kgen-v30-modal-head">',
-        '    <div class="kgen-v30-modal-title">✨ 五指山許願</div>',
-        '    <button type="button" class="kgen-v30-modal-close" data-close="wish">關閉</button>',
-        '  </div>',
-        '  <div class="kgen-v30-note" style="margin-bottom:10px;">許願只上鏈 hash，不公開明文。請在下方輸入願望，或前往悟空控制台送出 makeWish。</div>',
-        '  <textarea id="kgen-v30-wish-text" rows="3" placeholder="輸入願望文字或 0x bytes32 hash" style="width:100%;box-sizing:border-box;border-radius:12px;border:1px solid rgba(255,215,120,.35);background:#05070b;color:#fff;padding:10px;font-size:13px;"></textarea>',
-        '  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">',
-        '    <button type="button" id="kgen-v30-wish-send" style="border-radius:12px;border:1px solid rgba(255,215,120,.55);background:rgba(255,215,120,.2);color:#ffe9b8;font-weight:900;padding:10px;cursor:pointer;">送出許願</button>',
-        '    <button type="button" id="kgen-v30-wish-console" style="border-radius:12px;border:1px solid rgba(0,242,255,.35);background:rgba(0,242,255,.12);color:#dff;font-weight:900;padding:10px;cursor:pointer;">開控制台</button>',
-        '  </div>',
-        '</div>'
-      ].join("");
-      document.body.appendChild(el);
-      el.addEventListener("click", function(e){
-        if(e.target === el || e.target.closest("[data-close]")) this.classList.remove("is-open");
-      }.bind(el));
-      $("kgen-v30-wish-send").addEventListener("click", function(){
-        const text = ($("kgen-v30-wish-text").value || "").trim();
-        const target = $("kh-wish-text");
-        if(target && text) target.value = text;
-        el.classList.remove("is-open");
-        if(window.templeOps && typeof window.templeOps.wish === "function"){
-          window.templeOps.wish();
-        }else if(openHeartWish()){
-          setTimeout(function(){
-            const btn = $("kh-wishbtn");
-            if(btn) btn.click();
-          }, 200);
-        }else{
-          Overlay.openStatus("許願 Coming Soon", "許願功能正在等待悟空控制台載入。請確認頁面完成啟動後再試一次。");
-        }
-      });
-      $("kgen-v30-wish-console").addEventListener("click", function(){
-        el.classList.remove("is-open");
-        openHeartWish();
-      });
-    },
+    ensureWish: function(){ return $("kgen-heart-live-panel"); },
     openWish: function(){
-      this.ensureWish();
-      $("kgen-v30-wish-overlay").classList.add("is-open");
+      if(!openHeartWish()) pushStatus("悟空控制台尚未就緒，請稍後再試。");
     },
     ensureStatus: function(){
       if($("kgen-v30-status-overlay")) return;
@@ -385,11 +337,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
       dock.innerHTML = '<button type="button" id="kgen-v30-wish-btn">✨ 許願</button><button type="button" id="kgen-v30-vow-btn">🙏 還願</button>';
       document.body.appendChild(dock);
       $("kgen-v30-wish-btn").addEventListener("click", function(){
-        if(window.templeOps && typeof window.templeOps.wish === "function"){
-          Overlay.openWish();
-        }else{
-          openHeartWish() || Overlay.openWish();
-        }
+        Overlay.openWish();
       });
       $("kgen-v30-vow-btn").addEventListener("click", function(){
         if(!openHeartVow()){
@@ -457,6 +405,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
   };
 
   const PanelOverlay = {
+    positions: new WeakMap(),
     panelIds: ["music-panel", "bet-live-panel", "chain-live-panel", "board-panel"],
     scrimId: "kgen-v30-panel-scrim",
     ensureScrim: function(){
@@ -483,6 +432,7 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
     open: function(id){
       const panel = $(id);
       if(!panel) return;
+      if(!this.positions.has(panel)) this.positions.set(panel, panel.getAttribute("style"));
       this.ensureScrim().classList.add("is-open");
       panel.classList.remove("kgen-v3-dead", "kgen-music-docked", "kgen-music-top", "kgen-music-modal");
       panel.classList.add("kgen-v30-overlay-open");
@@ -499,6 +449,12 @@ PURPOSE: 12345 Temple UI V3.0 — overlays, leaderboard, quota, guide, ritual
       panel.classList.remove("kgen-v30-overlay-open");
       panel.classList.add("kgen-v3-dead");
       panel.setAttribute("aria-hidden", "true");
+      if(this.positions.has(panel)){
+        const style = this.positions.get(panel);
+        if(style === null) panel.removeAttribute("style");
+        else panel.setAttribute("style", style);
+        this.positions.delete(panel);
+      }
       panel.style.display = "none";
       this.syncScrim();
     },

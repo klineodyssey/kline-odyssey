@@ -6,7 +6,8 @@ const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'
 const OUT='artifacts/kaios-portal-qa';await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,args:['--autoplay-policy=user-gesture-required']});
 const reports=[];
-try{for(const id of (process.argv.includes('--layout-only')?[]:['12345','16888']))for(const [width,height]of [[390,844],[844,390]]){
+const preservation=process.argv.includes('--preservation');
+try{for(const id of (process.argv.includes('--layout-only')?[]:preservation?['16888']:['12345','16888']))for(const [width,height]of (preservation?[[360,844],[390,844],[412,844],[432,844],[480,844]]:[[390,844],[844,390]])){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
  const errors=[],commercialRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('request',r=>{if(/\/music\/.*(?:\.mp3|playlist\.json)/i.test(r.url()))commercialRequests.push(r.url());});
  await page.addInitScript(()=>{const Real=window.AudioContext||window.webkitAudioContext;window.__qaAudioContexts=[];window.__qaAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const analyser=this.context.createAnalyser();connect.call(this,analyser);window.__qaAnalysers.push(analyser);}return result;};if(Real){window.AudioContext=class extends Real{constructor(...args){super(...args);window.__qaAudioContexts.push(this);}};window.webkitAudioContext=window.AudioContext;}});
@@ -71,6 +72,57 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
   const warp=await page.locator('.warp-engine').boundingBox(),readout=await page.locator('#warp-txt').boundingBox();
   assert.ok(readout.y>=warp.y&&readout.y+readout.height<=warp.y+warp.height+1,'Warp readout must remain inside its stacking region');
   const initial=await geometry();
+  // Original-function regression: real shortcuts, original form and original
+  // sendHeart button listeners. Replace only the final transaction boundary;
+  // NEVER connect a signer, approve, sign or broadcast during browser QA.
+  await page.evaluate(()=>{
+   const heart=KGEN_RUNTIME_CORE.modules.HeartRuntime;
+   window.__originalSendHeart=heart.sendHeart;window.__ritualCalls=[];
+   heart.sendHeart=(label,runner)=>runner({
+    makeWish:hash=>__ritualCalls.push({method:'makeWish',hash}),
+    vowTo:(option,amount)=>__ritualCalls.push({method:'vowTo',option,amount})
+   });
+  });
+  for(let cycle=0;cycle<3;cycle++){
+   await page.locator('#kgen-v30-wish-btn').tap();
+   await page.waitForTimeout(120);
+   assert.equal(await page.locator('#kgen-v30-wish-overlay').count(),0,'no duplicate wish form');
+   await hit('#kh-wish-text');
+   assert.equal(await page.evaluate(()=>__ritualCalls.length),cycle*2,'shortcut cannot submit');
+   await page.locator('#kh-wish-text').fill('願世界平安');await shot('canonical-wish');
+   await page.locator('#kh-wishbtn').tap();
+   await page.locator('#kgen-heart-toggle').tap();
+   assert.deepEqual(await geometry(),initial,'Wish cannot drift original positions');
+   await page.locator('#kgen-v30-vow-btn').tap();await page.waitForTimeout(120);
+   await hit('#kh-vow-option');await page.locator('#kh-vow-option').selectOption('2');
+   await page.locator('#kh-vow-amount').fill('9');await shot('canonical-vow');
+   assert.equal(await page.evaluate(()=>__ritualCalls.length),cycle*2+1,'Repay shortcut cannot submit');
+   await page.locator('#kh-vow').tap();await page.locator('#kgen-heart-toggle').tap();
+   assert.deepEqual(await geometry(),initial,'Repay cannot drift original positions');
+  }
+  assert.deepEqual(await page.evaluate(()=>__ritualCalls),await page.evaluate(()=>Array.from({length:3},()=>[
+   {method:'makeWish',hash:ethers.utils.keccak256(ethers.utils.toUtf8Bytes('願世界平安'))},
+   {method:'vowTo',option:2,amount:'9'}]).flat()),'exactly one original V3.2.6 action per explicit confirm button');
+  // Restore and exercise the REAL disconnected wallet gate, still without a provider.
+  await page.evaluate(()=>{KGEN_RUNTIME_CORE.modules.HeartRuntime.sendHeart=__originalSendHeart;window.__walletRequests=0;window.__originalWalletHub=web3.openWalletHub;web3.openWalletHub=()=>{__walletRequests++;};});
+  await page.locator('#kgen-v30-wish-btn').tap();await page.locator('#kh-wishbtn').tap();
+  assert.equal(await page.evaluate(()=>__walletRequests),1,'canonical Wallet gate invoked, not fake success');
+  await page.locator('#kgen-heart-toggle').tap();
+  await page.locator('#kgen-v30-vow-btn').tap();await page.locator('#kh-vow').tap();
+  assert.equal(await page.evaluate(()=>__walletRequests),2,'Repay uses same Wallet gate');
+  await page.locator('#kgen-heart-toggle').tap();
+  await page.evaluate(()=>{web3.openWalletHub=__originalWalletHub;});
+  // Legacy secondary panels retain manually supplied insets on every close.
+  const panelRestored=await page.evaluate(()=>{
+   const panel=document.getElementById('bet-live-panel'),original=panel.getAttribute('style');
+   panel.style.cssText='left:23px;top:117px;right:auto;bottom:auto;display:none';
+   const expected=panel.getAttribute('style');let valid=true;
+   for(let i=0;i<3;i++){toggleBetPanel();toggleBetPanel();valid&&=panel.getAttribute('style')===expected;}
+   if(original===null)panel.removeAttribute('style');else panel.setAttribute('style',original);
+   return valid;
+  });
+  assert.ok(panelRestored,'secondary disclosure restores original inline positions');
+  assert.deepEqual(await geometry(),initial,'all ritual cycles preserve world layout');
   for(const s of ['#kgen-land-panel-open'])for(let cycle=0;cycle<2;cycle++){
    await page.locator(s).tap();assert.equal(await page.locator('#k12345-land-dialog').evaluate(el=>el.open),true);
    assert.deepEqual(await geometry(),initial,'land open cannot push HUD');await hit('.k12345-land-close');
@@ -129,7 +181,7 @@ for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[
   }
   // Known pre-existing optional CDN defect, not a blanket allow-list for application errors.
   assert.ok(errors.every(e=>e.includes('process is not defined')&&e.includes('@walletconnect/ethereum-provider@2.12.2')),'no new runtime errors');
-  reports.push({id:'12345-mobile',width,height,composition,landStable:'PASS',modalContent:'PASS',utilityTargets:'PASS',panels:'PASS',rotation:width===390?'PASS':'NOT_APPLICABLE',legacyPageErrors:errors});
+  reports.push({id:'12345-mobile',width,height,composition,ritualCanonicalDispatch:'PASS',disconnectedWalletGate:'PASS',transactionBroadcast:'NOT_PERFORMED',panelInsetRestore:'PASS',landStable:'PASS',modalContent:'PASS',utilityTargets:'PASS',panels:'PASS',rotation:width===390?'PASS':'NOT_APPLICABLE',legacyPageErrors:errors});
  }catch(error){await shot('FAIL');throw error;}finally{await context.close();}
 }
 }finally{await fs.writeFile(`${OUT}/world-audio-report.json`,JSON.stringify(reports,null,2));await browser.close();console.log(JSON.stringify(reports));}
