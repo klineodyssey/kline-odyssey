@@ -191,6 +191,7 @@ async function verifyKSpaceGameplay(page,report){
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
     if(report.profile.landscape)assert.equal(await page.evaluate(()=>{const a=document.getElementById('toast').getBoundingClientRect(),b=document.querySelector('.monsterHud').getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}),false,'damage feedback obscures monster HUD');
     if(variant==='slash-negative')assert.equal(result.reason,'WEAK_POINT');if(variant==='slash-positive')assert.equal(result.reason,'BLOCKED_RESIST');
+    (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,variant+' before screenshot'));
     const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(`${OUT}/${prefix}-kspace-${variant}.png`,Buffer.from(shot.data,'base64'));
     (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,variant));results.push(result);await page.waitForTimeout(pause);
   }
@@ -198,7 +199,7 @@ async function verifyKSpaceGameplay(page,report){
 }
 async function verifyWorldFeedbackLayout(page,label){
   const sample=await page.evaluate(()=>{
-    const toast=document.getElementById('toast');if(!toast?.dataset.worldEvent||!toast.classList.contains('show'))return null;
+    const toast=document.getElementById('toast');if(!toast?.classList.contains('show'))return null;
     const box=el=>{const r=el.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
     const a=box(toast),collisions=[];
     for(const selector of ['#k11520MonsterGuide','.monsterHud','#attack','#skill','#tradeSword','#dodge','#flat','#orderFire','#joy','#cControl','#lotsControl','#yControl']){
@@ -206,9 +207,9 @@ async function verifyWorldFeedbackLayout(page,label){
       if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0||!b.width||!b.height)continue;
       if(a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top)collisions.push({selector,box:b});
     }
-    return {event:toast.dataset.worldEvent,toast:a,viewport:{width:innerWidth,height:innerHeight},collisions};
+    return {event:toast.dataset.worldEvent||'GAMEPLAY',transitionProperty:getComputedStyle(toast).transitionProperty,toast:a,viewport:{width:innerWidth,height:innerHeight},collisions};
   });
-  if(sample){assert.deepEqual(sample.collisions,[],`${label} world feedback obscures gameplay controls: ${JSON.stringify(sample)}`);assert.ok(sample.toast.left>=0&&sample.toast.top>=0&&sample.toast.right<=sample.viewport.width&&sample.toast.bottom<=sample.viewport.height,`${label} world feedback clipped: ${JSON.stringify(sample)}`)}
+  if(sample){assert.equal(sample.transitionProperty,'opacity',`${label} visible feedback must not animate layout across gameplay controls`);assert.deepEqual(sample.collisions,[],`${label} world feedback obscures gameplay controls: ${JSON.stringify(sample)}`);assert.ok(sample.toast.left>=0&&sample.toast.top>=0&&sample.toast.right<=sample.viewport.width&&sample.toast.bottom<=sample.viewport.height,`${label} world feedback clipped: ${JSON.stringify(sample)}`)}
   return sample;
 }
 async function finalizeLandscape(page,report){
@@ -224,6 +225,7 @@ async function finalizeLandscape(page,report){
     const b=initial[selector],pointer={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...pointer});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...pointer});await page.waitForTimeout(delay);
     const timing=await page.evaluate(()=>({variant:__K11520_COMBAT_FX__.variant,elapsed:Date.now()-__K11520_COMBAT_FX__.at}));assert.equal(timing.variant,variant);assert.ok(timing.elapsed<duration,`${variant} capture missed active window: ${timing.elapsed}ms`);
+    (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,'landscape-'+variant+' before screenshot'));
     // CDP captures the presented frame without Playwright waiting for fonts/layout animation settling.
     const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(`${OUT}/landscape-${variant}.png`,Buffer.from(shot.data,'base64'));
     (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,'landscape-'+variant));

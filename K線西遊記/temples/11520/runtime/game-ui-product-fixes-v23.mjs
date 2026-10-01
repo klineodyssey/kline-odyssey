@@ -37,7 +37,7 @@ export function show11520Toast(text,{combat=false,event='',duration=1700}={}){
   const toast=document.getElementById('toast');if(!toast)return;
   clearTimeout(show11520Toast.timer);toast.textContent=text;toast.dataset.kspaceFeedback=String(combat);
   if(event)toast.dataset.worldEvent=event;else delete toast.dataset.worldEvent;
-  toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.classList.add('show');toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
+  toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.style.transition='opacity .2s';toast.classList.add('show');toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
   const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
   if(guide?.width>0)for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
   show11520Toast.timer=setTimeout(()=>{toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)},duration);
