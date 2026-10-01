@@ -3857,7 +3857,7 @@
         button.setAttribute("aria-controls",dialog.id);button.setAttribute("aria-haspopup","dialog");button.setAttribute("aria-expanded","false");
         panel.replaceWith(button);content.append(panel);
         // Existing engine keeps IDs/data/listeners. Only move its view; never clone land state.
-        button.addEventListener("click",function(){opener=button;button.setAttribute("aria-expanded","true");dialog.showModal();content.scrollTop=id==="kgen-land-panel"?0:panel.offsetTop;});
+        button.addEventListener("click",function(){opener=button;button.setAttribute("aria-expanded","true");dialog.showModal();content.scrollTop=id==="kgen-land-panel"?0:content.scrollTop+panel.getBoundingClientRect().top-content.getBoundingClientRect().top;});
       });
       const note=document.createElement("p");note.textContent="地籍是本機模擬資料；Warp / 宇宙電梯只導航，不改變 Owner 或自動購地。";content.append(note);
     }
