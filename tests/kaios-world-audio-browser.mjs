@@ -1,4 +1,4 @@
-// Real browser, legacy world scripts unchanged except shared audio/return bridge.
+// Real browser: shared audio/return and canonical Heart mobile HUD regression.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
@@ -36,4 +36,52 @@ try{for(const id of ['12345','16888'])for(const [width,height]of [[390,844],[844
  assert.deepEqual(commercialRequests,[],'no unlicensed legacy song downloads');
  assert.ok(errors.every(e=>!e.includes('kaios-audio')&&!e.includes('kaios-world-audio')),'shared audio errors');
  reports.push({id,width,height,audio:'PASS',signal,returnPortal:'PASS',commercialRequests:0,legacyPageErrors:errors});await context.close();
-}}finally{await fs.writeFile(`${OUT}/world-audio-report.json`,JSON.stringify(reports,null,2));await browser.close();console.log(JSON.stringify(reports));}
+}
+for(const [width,height] of [[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]]){
+ const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
+ const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));
+ const shot=name=>page.screenshot({path:`${OUT}/heart-${width}-${name}.png`});
+ const geometry=()=>page.evaluate(()=>['#universe-nav','.warp-engine','#kgen-heart-toggle','#move-joystick-wrap','.resource-bars','.footer-terminal'].map(s=>document.querySelector(s).getBoundingClientRect().toJSON()));
+ const hit=async selector=>{
+  const result=await page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect(),target=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{w:r.width,h:r.height,inView:r.x>=0&&r.y>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1,hit:el===target||el.contains(target)};});
+  assert.ok(result.inView&&result.hit,`${selector}: ${JSON.stringify(result)}`);return result;
+ };
+ try{
+  await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#kgen-land-panel-open').waitFor();await page.waitForTimeout(1600);
+  assert.equal(await page.evaluate(()=>innerWidth),width,'mobile viewport must not be a scaled 980px desktop');
+  for(const s of ['.nav-music','[data-kaios-return=PORTAL]','#kgen-land-panel-open','#kgen-land-info-panel-open']){const r=await hit(s);assert.ok(r.w>=44&&r.h>=44,'44px utility/land targets');}
+  await hit('.warp-rail');await hit('#move-joystick-wrap');await shot('closed');
+  const initial=await geometry();
+  for(const s of ['#kgen-land-panel-open','#kgen-land-info-panel-open'])for(let cycle=0;cycle<2;cycle++){
+   await page.locator(s).tap();assert.equal(await page.locator('#k12345-land-dialog').evaluate(el=>el.open),true);
+   assert.deepEqual(await geometry(),initial,'land open cannot push HUD');await hit('.k12345-land-close');
+   assert.equal(await page.locator('#kgen-land-panel .kgen-land-body').isVisible(),true,'not an empty overlay');
+   assert.equal(await page.locator('#kgen-land-info-panel .kgen-land-info-body').isVisible(),true);
+   assert.ok(await page.locator('.k12345-land-scroll').evaluate(el=>getComputedStyle(el).overflowY==='auto'));
+   await shot(s.includes('info')?'land-info':'land-map');await page.locator('.k12345-land-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);
+   await page.locator('.k12345-land-close').tap();assert.deepEqual(await geometry(),initial,'land close cannot move HUD');
+  }
+  await page.locator('.nav-music').tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().musicPlaying);
+  await page.locator('.nav-music').tap();await shot('audio');await page.getByRole('button',{name:'關閉設定',exact:true}).tap();
+  await page.locator('#kgen-ai-toggle').tap();await shot('ai');await page.getByRole('button',{name:'關閉 AI 客服',exact:true}).tap();
+  await page.locator('#kgen-v102-festival-panel h3').scrollIntoViewIfNeeded();await page.locator('#kgen-v102-festival-panel h3').tap();await shot('festival');await hit('#k12345-festival-close');await page.locator('#k12345-festival-close').tap();
+  await page.locator('#kgen-heart-toggle').tap();await shot('heart');await hit('#kgen-heart-toggle');
+  const heart=await page.locator('#kgen-heart-live-panel').boundingBox();assert.ok(heart.x>=0&&heart.y>=0&&heart.x+heart.width<=width+1&&heart.y+heart.height<=height+1,'Heart stays in viewport');
+  await page.locator('#kgen-heart-toggle').tap();
+  await page.evaluate(()=>document.getElementById('universe-nav').scrollTop=0);
+  if(width===390){
+   for(let cycle=0;cycle<3;cycle++)for(const size of [{width:844,height:390},{width:390,height:844}]){
+    await page.setViewportSize(size);await page.waitForTimeout(120);await hit('.nav-music');await hit('[data-kaios-return=PORTAL]');await hit('#kgen-land-panel-open');
+   }
+   assert.deepEqual(await geometry(),initial,'rotation cannot accumulate offsets');
+  }
+  assert.equal(await page.locator('[data-kaios-return=PORTAL]').count(),1);
+  assert.equal(new URL(await page.locator('[data-kaios-return=PORTAL]').getAttribute('href'),page.url()).href,BASE+'/');
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await shot('final');
+  // Known pre-existing optional CDN defect, not a blanket allow-list for application errors.
+  assert.ok(errors.every(e=>e.includes('process is not defined')&&e.includes('@walletconnect/ethereum-provider@2.12.2')),'no new runtime errors');
+  reports.push({id:'12345-mobile',width,height,landStable:'PASS',modalContent:'PASS',utilityTargets:'PASS',panels:'PASS',rotation:width===390?'PASS':'NOT_APPLICABLE',legacyPageErrors:errors});
+ }catch(error){await shot('FAIL');throw error;}finally{await context.close();}
+}
+}finally{await fs.writeFile(`${OUT}/world-audio-report.json`,JSON.stringify(reports,null,2));await browser.close();console.log(JSON.stringify(reports));}

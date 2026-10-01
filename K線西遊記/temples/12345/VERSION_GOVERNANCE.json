@@ -1,5 +1,6 @@
 {
   "product_id": "KGEN-12345-HEART-UI",
+  "mobile_ui_build": "20261002-MOBILE-LAND-UTILITY",
   "shared_audio_component": {"version":"KAIOS-AUDIO-1","build":"20261001-KAIOS-SHARED-AUDIO","runtime":"../../../assets/kaios-audio.mjs","integration":"../../../assets/kaios-world-audio.mjs","legacy_media":"PRESERVED_NOT_SELECTED_LICENSE_UNVERIFIED"},
   "version": "KGEN-12345-V10.41.2_TEMPLE_FRONT_REPAIR_OPENING_READY",
   "build": "20260518-V10.41.2-TEMPLE-FRONT-REPAIR-OPENING-READY",

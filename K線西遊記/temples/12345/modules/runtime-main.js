@@ -1585,6 +1585,17 @@
       this.moveFestivalBelowAudio();
       this.closeRightRule();
       this.hideDeadPanels();
+      const heart=$("kgen-heart-live-panel");
+      if(heart){
+        const detail=document.createElement('details');detail.id='k12345-world-diagnostics';
+        const summary=document.createElement('summary');summary.textContent='世界席位 / 市場圖 / Runtime 診斷';detail.append(summary);heart.append(detail);
+        [document.querySelector('.monitor-data'),$("kline-chart-panel"),$("kgen-mother-runtime-hud")].filter(Boolean).forEach(el=>detail.append(el));
+      }
+      const festivalBody=document.querySelector('.kgen-v102-festival-body');
+      if(festivalBody&&!$("k12345-festival-close")){
+        const close=document.createElement('button');close.id='k12345-festival-close';close.type='button';close.textContent='關閉活動';
+        close.addEventListener('click',()=>LayoutRuntime.toggleFestivalPanel());festivalBody.prepend(close);
+      }
     },
     dedupeCupUI: function(){
       const panel = $("kgen-heart-live-panel");
@@ -1672,8 +1683,14 @@
         StatusRuntime.push("找不到規則活動面板");
         return;
       }
-      panel.classList.toggle("kgen-festival-closed");
-      const isOpen = !panel.classList.contains("kgen-festival-closed");
+      let dialog=$("k12345-festival-dialog");
+      if(!dialog){
+        dialog=document.createElement('dialog');dialog.id='k12345-festival-dialog';dialog.className='k12345-detail-dialog';dialog.setAttribute('aria-label','規則活動');
+        const body=panel.querySelector('.kgen-v102-festival-body');dialog.append(body);document.body.append(dialog);
+        dialog.addEventListener('close',()=>{const label=panel.querySelector('h3 span');if(label)label.textContent='展開';});
+      }
+      const isOpen=!dialog.open;
+      if(isOpen)dialog.showModal();else dialog.close();
       const toggle = panel.querySelector("h3 span");
       if(toggle) toggle.textContent = isOpen ? "收合" : "展開";
       StatusRuntime.push(isOpen ? "規則活動已展開" : "規則活動已收合");
@@ -3817,9 +3834,32 @@
       });
       window.KGEN_LAND_DEMO = this.instance;
       window.KGEN_LAND_RUNTIME = this.instance;
-      Promise.resolve(this.instance.init()).catch(function(error){
+      Promise.resolve(this.instance.init()).then(function(){ LandRuntime.mountDetails(); }).catch(function(error){
         console.warn("[KGEN Land Engine]", error);
       });
+    },
+    mountDetails: function(){
+      if($("k12345-land-dialog")) return;
+      const dialog=document.createElement("dialog");dialog.id="k12345-land-dialog";
+      dialog.setAttribute("aria-labelledby","k12345-land-title");
+      const title=document.createElement("h2");title.id="k12345-land-title";title.textContent="土地地籍 / 土地資訊";
+      const close=document.createElement("button");close.type="button";close.textContent="關閉土地";close.className="k12345-land-close";
+      const content=document.createElement("div");content.className="k12345-land-scroll";
+      dialog.append(title,close,content);document.body.append(dialog);
+      let opener=null;
+      const reset=function(){if(opener){opener.setAttribute("aria-expanded","false");opener.focus({preventScroll:true});}};
+      close.addEventListener("click",()=>dialog.close());dialog.addEventListener("close",reset);
+      dialog.addEventListener("click",function(e){if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+      ["kgen-land-panel","kgen-land-info-panel"].forEach(function(id){
+        const panel=$(id);if(!panel)return;
+        const button=document.createElement("button");button.type="button";button.className="nav-btn k12345-land-summary";button.id=id+"-open";
+        button.textContent=id==="kgen-land-panel"?"土地地籍 / 地圖":"土地資訊 / Owner";
+        button.setAttribute("aria-controls",dialog.id);button.setAttribute("aria-haspopup","dialog");button.setAttribute("aria-expanded","false");
+        panel.replaceWith(button);content.append(panel);
+        // Existing engine keeps IDs/data/listeners. Only move its view; never clone land state.
+        button.addEventListener("click",function(){opener=button;button.setAttribute("aria-expanded","true");dialog.showModal();content.scrollTop=id==="kgen-land-panel"?0:panel.offsetTop;});
+      });
+      const note=document.createElement("p");note.textContent="地籍是本機模擬資料；Warp / 宇宙電梯只導航，不改變 Owner 或自動購地。";content.append(note);
     }
   };
 
