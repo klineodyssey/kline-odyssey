@@ -12,6 +12,9 @@
   crossing landscape C/lots after reload. The existing label now shares the
   tutorial's bounded mobile placement in both states and remains tappable for
   target detail. Responsive QA checks map/control clearance; no additional card.
+- Live map/runtime assertions now sample one matching rendered quote generation
+  atomically (2.5s deadline, exact equality retained). Separate browser reads can
+  straddle a legitimate live tick; prices must not be frozen to satisfy QA.
 
 ## V2.7.0 journey onboarding continuation — 2026-10-01
 

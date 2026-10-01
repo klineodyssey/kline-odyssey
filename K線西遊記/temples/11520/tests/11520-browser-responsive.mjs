@@ -111,7 +111,10 @@ async function verifyKSpaceMap(page,report){
     for(let i=0;i<3&&(await read()).plane!==plane;i++){await page.locator('#joy').tap();await page.waitForTimeout(180)}
     await page.locator('#cNumericInput').fill(c);await page.locator('#cNumericInput').press('Enter');
     await page.waitForFunction(([axis,c])=>globalThis.__K11520_KSPACE_MAP__?.phase===axis+(c==='1'?'+':'−'),[axis,c]);
-    const model=await read(),runtime=await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());
+    // Sample one rendered quote generation; two CDP reads can straddle a live tick.
+    // Keep exact equality and a bounded render-sync deadline, never freeze live prices.
+    const sample=await page.waitForFunction(()=>{const model=globalThis.__K11520_KSPACE_MAP__,runtime=globalThis.__K11520_KSPACE_API__.snapshot();return ['KX','KY','KZ'].every(a=>model.player[a]===runtime.playerK[a]&&model.monster[a]===runtime.monsterK[a])?structuredClone({model,runtime}):false},null,{timeout:2500});
+    const {model,runtime}=await sample.jsonValue();await sample.dispose();
     assert.equal(model.normal,axis);assert.equal(model.targetId,runtime.target.id);assert.deepEqual(model.monster,runtime.monsterK);assert.deepEqual(model.player,runtime.playerK);assert.deepEqual(model.delta,runtime.deltaK);assert.equal(model.distance,1);
     await shot(name);await page.locator('#kspaceViewK').click();await shot(name+'-detail');await page.locator('#sheetClose').click();rows.push(model);
   }
