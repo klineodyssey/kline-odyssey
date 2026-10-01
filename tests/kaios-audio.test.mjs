@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {AUDIO_STORAGE_KEY,AUDIO_THEMES,createKaiosAudio} from '../assets/kaios-audio.mjs';
+import {AUDIO_STORAGE_KEY,AUDIO_THEMES,MUSIC_STATES,createKaiosAudio} from '../assets/kaios-audio.mjs';
 
 function harness(saved){
   const data=new Map(saved?[[AUDIO_STORAGE_KEY,JSON.stringify(saved)]]:[]),storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};
@@ -17,7 +17,7 @@ test('silent default: no AudioContext, nodes, autoplay or voice before gesture',
 test('persisted enabled preference does not bypass new-document gesture',()=>{const h=harness({musicEnabled:true,muted:false});assert.equal(h.audio.snapshot().needsGesture,true);assert.equal(h.contexts.length,0);assert.equal(h.intervals.size,0);});
 test('one context and one clock across repeated unlock/play calls',async()=>{const h=harness();await h.audio.unlock();await h.audio.unlock();h.audio.setMusicEnabled(true);h.audio.setMusicEnabled(true);assert.equal(h.contexts.length,1);assert.equal(h.intervals.size,1);assert.equal(h.audio.snapshot().activeMusicLayers,1);await h.audio.dispose();});
 test('world identity plus bounded crossfade replaces scheduler, not a second player',async()=>{const h=harness();await h.audio.unlock();h.audio.setMusicEnabled(true);h.audio.setWorld('K12345');assert.equal(h.audio.snapshot().theme,AUDIO_THEMES['12345']);assert.equal(h.intervals.size,1);assert.equal(h.timeouts.size,1);h.audio.setWorld('16888');assert.equal(h.intervals.size,1);assert.equal(h.timeouts.size,1);assert.equal(h.contexts.length,1);await h.audio.dispose();assert.equal(h.timeouts.size,0);});
-test('11520 original theme retains canonical motif and .34 second scheduling authority',async()=>{const h=harness();h.audio.setWorld('11520');await h.audio.unlock();h.audio.setMusicEnabled(true);const frequencies=h.contexts[0].osc.map(o=>o.frequency.events[0]?.[1]);assert(frequencies.includes(220));assert(frequencies.includes(55));assert(frequencies.includes(110));assert(frequencies.includes(92));await h.audio.dispose();});
+test('11520 explore retains canonical motif and .34 second musical pulse',async()=>{const h=harness();h.audio.setWorld('11520');await h.audio.unlock();h.audio.setMusicEnabled(true);const frequencies=h.contexts[0].osc.map(o=>o.frequency.events[0]?.[1]);assert(frequencies.includes(220));assert(frequencies.includes(55));assert(frequencies.includes(110));assert(frequencies.includes(92));assert.equal(h.audio.snapshot().musicMix.pulse,.34);await h.audio.dispose();});
 test('mute stops clock and survives preference reload without enabling sound',async()=>{const h=harness();await h.audio.unlock();h.audio.setMusicEnabled(true);h.audio.setMuted(true);assert.equal(h.intervals.size,0);assert.equal(h.audio.play('HIT'),false);assert.equal(JSON.parse(h.data.get(AUDIO_STORAGE_KEY)).muted,true);h.audio.setMuted(false);assert.equal(h.intervals.size,1);await h.audio.dispose();});
 test('volume channels clamp safely and reject unknown or nonfinite input',()=>{const h=harness();assert.equal(h.audio.setVolume('music',4),true);assert.equal(h.audio.snapshot().settings.music,1);assert.equal(h.audio.setVolume('voice',-.2),true);assert.equal(h.audio.setVolume('wallet',1),false);assert.equal(h.audio.setVolume('master',NaN),false);assert.equal(h.audio.snapshot().settings.voice,0);});
 test('setting voice or master to zero immediately cancels owned speech',async()=>{for(const channel of ['voice','master']){const h=harness();await h.audio.unlock();h.audio.speak('說明');h.audio.setVolume(channel,0);assert.equal(h.env.speechSynthesis.cancelled,true);assert.equal(h.audio.speak('靜音時不得說話'),false);await h.audio.dispose();}});
@@ -37,3 +37,68 @@ test('zero master/music and browser interruption never report music playing',asy
  await h.audio.unlock();assert.equal(h.intervals.size,1);assert.equal(h.audio.snapshot().musicPlaying,true);await h.audio.dispose();
 });
 test('mobile volume defaults do not overwrite saved low/zero volume or mute',()=>{const h=harness({master:0,music:.42,muted:true});assert.equal(h.audio.snapshot().settings.master,0);assert.equal(h.audio.snapshot().settings.music,.42);assert.equal(h.audio.snapshot().settings.muted,true);assert.equal(harness().audio.snapshot().settings.music,.65);});
+
+test('all gameplay music states cross-blend on the same continuing scheduler',async()=>{
+ const h=harness();h.audio.setWorld('11520');await h.audio.unlock();h.audio.setMusicEnabled(true);
+ const clock=[...h.intervals.keys()][0];
+ for(const state of Object.keys(MUSIC_STATES)){
+  const before=h.audio.snapshot().musicMix;
+  assert.equal(h.audio.setMusicState(state),true);assert.equal(h.audio.snapshot().musicState,state);
+  assert.equal([...h.intervals.keys()][0],clock,'must not restart clock at '+state);
+  assert.deepEqual(h.audio.snapshot().musicMix,before,'no immediate hard cut at '+state);
+  for(let tick=0;tick<20;tick++){h.finish();h.contexts[0].currentTime+=.7;h.intervals.get(clock)();}
+  for(const key of Object.keys(before))assert(Math.abs(h.audio.snapshot().musicMix[key]-MUSIC_STATES[state][key])<.002,state+' '+key+' converges');
+  assert.equal(h.audio.snapshot().activeMusicLayers,1);assert(h.audio.snapshot().activeNodes<16);assert.equal(h.timeouts.size,0);
+ }
+ assert.equal(h.audio.setMusicState('REAL_LEVERAGE'),false);assert.equal(h.contexts.length,1);await h.audio.dispose();assert.equal(h.intervals.size,0);assert.equal(h.audio.snapshot().activeNodes,0);
+});
+
+test('automatic gameplay states and events never bypass pre-gesture or mute',async()=>{
+ const h=harness();h.audio.setWorld('11520');h.audio.setMusicEnabled(true);h.audio.setMusicState('BOSS');assert.equal(h.contexts.length,0);
+ assert.equal(h.audio.play('BOSS_RAGE'),false);await h.audio.unlock();h.audio.play('LEGENDARY_LOOT');assert(h.timeouts.size>0);h.audio.setMuted(true);
+ for(const state of Object.keys(MUSIC_STATES)){h.audio.setMusicState(state);assert.equal(h.audio.play('GA600_LEVEL_UP'),false);}
+ assert.equal(h.audio.snapshot().activeNodes,0);assert.equal(h.intervals.size,0);assert.equal(h.timeouts.size,0);assert.equal(h.audio.snapshot().duckFactor,1);
+ h.audio.setMuted(false);assert.equal(h.intervals.size,1);assert.equal(h.audio.snapshot().musicState,'PORTAL');await h.audio.dispose();
+});
+
+test('SFX identities have distinct bounded first-party synthesis and canonical alias cooldown',async()=>{
+ const h=harness();await h.audio.unlock();const signatures=new Map();
+ for(const event of ['MONSTER_DETECTED','ATTACK','SLASH','HIT','CRITICAL','WEAK_POINT','BLOCKED','MISS','BOSS_SPAWN','BOSS_PHASE_CHANGE','BOSS_RAGE','BOSS_LOW_HP','BOSS_DEFEAT','COMMON_LOOT','UNCOMMON_LOOT','RARE_LOOT','EPIC_LOOT','LEGENDARY_LOOT','PLAYER_LEVEL_UP','GA600_LEVEL_UP','QUEST_COMPLETE','HOME_BUILD','HOME_UPGRADE','PORTAL_OPEN','WORLD_ENTER']){
+  h.contexts[0].currentTime+=1;const before=h.contexts[0].osc.length;
+  assert.equal(h.audio.play(event),true,event);
+  const created=h.contexts[0].osc.slice(before);assert(created.length<=7,event+' finite voices');
+  signatures.set(event,JSON.stringify(created.map(o=>[o.type,o.frequency.events])));h.finish();assert.equal(h.audio.snapshot().activeNodes,0);assert(h.timeouts.size<=1);
+ }
+ for(const pair of [['ATTACK','SLASH'],['SLASH','HIT'],['BLOCKED','MISS'],['RARE_LOOT','LEGENDARY_LOOT'],['PLAYER_LEVEL_UP','GA600_LEVEL_UP'],['BOSS_SPAWN','BOSS_DEFEAT']])assert.notEqual(signatures.get(pair[0]),signatures.get(pair[1]),pair.join('/'));
+ h.contexts[0].currentTime+=1;assert(h.audio.play('ENGINE_LEVEL_UP'));assert.equal(h.audio.play('GA600_LEVEL_UP'),false,'alias cannot bypass cooldown');
+ await h.audio.dispose();assert.equal(h.timeouts.size,0);
+});
+
+test('important SFX duck once and recover without changing persisted music setting',async()=>{
+ const h=harness();await h.audio.unlock();h.audio.setMusicEnabled(true);const volume=h.audio.snapshot().settings.music;
+ for(let n=0;n<10;n++){h.contexts[0].currentTime+=.2;h.audio.play('BOSS_RAGE');h.finish();assert.equal(h.timeouts.size,1);}
+ assert.equal(h.audio.snapshot().duckFactor,.38);assert.equal(h.audio.snapshot().settings.music,volume);assert.equal(h.intervals.size,1);
+ const [id,restore]=[...h.timeouts][0];h.timeouts.delete(id);restore();assert.equal(h.audio.snapshot().duckFactor,1);assert.equal(h.timeouts.size,0);await h.audio.dispose();
+});
+
+test('voice has priority ducking, stale callback cannot unduck newer speech, watchdog cleans up',async()=>{
+ const h=harness();await h.audio.unlock();h.audio.setMusicEnabled(true);h.audio.play('RARE_LOOT');h.audio.speak('第一句');const first=h.env.speechSynthesis.spoken[0];
+ assert.equal(h.audio.snapshot().duckFactor,.22);h.audio.speak('第二句');first.onend();assert.equal(h.audio.snapshot().duckFactor,.22);assert.equal(h.timeouts.size,2);
+ const second=h.env.speechSynthesis.spoken[1];second.onerror({error:'interrupted'});assert.equal(h.audio.snapshot().duckFactor,.38);assert.equal(h.timeouts.size,1);
+ h.audio.speak('瀏覽器遺失回呼');for(const [id,fn] of [...h.timeouts]){h.timeouts.delete(id);fn();}
+ assert.equal(h.audio.snapshot().duckFactor,1);assert.equal(h.timeouts.size,0);assert.equal(h.env.speechSynthesis.cancelled,true);
+ await h.audio.dispose();
+});
+
+test('background and pagehide clear dynamic SFX/voice watchdogs and all nodes',async()=>{
+ for(const type of ['visibility','pagehide']){const h=harness();await h.audio.unlock();h.audio.setMusicEnabled(true);h.audio.setMusicState('BOSS_LOW_HP');h.audio.play('EPIC_LOOT');h.audio.speak('Boss 出現');
+  if(type==='visibility')await h.visibility(true);else{h.env.dispatchEvent(new Event('pagehide'));await Promise.resolve();}
+  assert.equal(h.intervals.size,0);assert.equal(h.timeouts.size,0);assert.equal(h.audio.snapshot().activeNodes,0);assert.equal(h.audio.snapshot().duckFactor,1);await h.audio.dispose();
+ }
+});
+
+test('Portal Heart Universe identities are unaffected by gameplay state changes',async()=>{
+ for(const world of ['PORTAL','12345','16888']){const h=harness();h.audio.setWorld(world);h.audio.setMusicState('BOSS_LOW_HP');await h.audio.unlock();h.audio.setMusicEnabled(true);
+  assert.equal(h.audio.snapshot().theme,AUDIO_THEMES[world]);assert.equal(h.intervals.size,1);assert.equal(h.audio.snapshot().musicMix.pulse,.34);assert.equal(h.audio.snapshot().activeMusicLayers,1);await h.audio.dispose();
+ }
+});

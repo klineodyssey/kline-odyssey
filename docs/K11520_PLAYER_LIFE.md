@@ -125,6 +125,53 @@ Official sources:
 - https://developers.cloudflare.com/d1/reference/time-travel/
 - https://developers.cloudflare.com/durable-objects/best-practices/websockets/
 
+## V2.9 gameplay-first extension (2026-10-01)
+
+The existing `runtime/player-life-runtime.mjs` remains the sole XP/level
+projection. Old V2.8 event weights, schema and level formulas are unchanged.
+`recordEvents` commits a bounded batch atomically; replay or storage failure
+cannot save only half of a kill/loot XP batch. This remains untrusted local
+candidate data, not authentication, economic authority or proof of play.
+
+- `GAMEPLAY_UNLOCKS`: Slash at Lv1; Golden Rain Lv2; Phantom Axe/stronger
+  monsters Lv3; Boss Lv5; synthetic market training Lv5/Engine2; rare
+  encounters/loot Lv6/Engine2. Home stages retain their existing rules.
+- `JOURNEY_MONSTER_KILL`: 10 player XP / 4 engine XP; `BOSS_DEFEAT`: 50/30;
+  six-phase practice: 5/8 once per encounter; quest: 15/12 once per allowed ID.
+  Existing loot event remains 5/0. Values live in one configuration table.
+- Daily Journey uses UTC local-candidate time: 3 kills, one signed-phase hit,
+  50m actual accumulated movement. Ten bounded 5m samples/day; no GPS or
+  teleport credit. Claim grants 25/20 plus a game item, once per day. Clock
+  and local storage are not a server-authenticated anti-cheat authority.
+- The existing Player Life sheet contains PLAYER and GA600 XP, content
+  unlocks, daily progress, encounter selection and existing inventory/home.
+  No second persistent HUD card, inventory or settlement ledger is added.
+- `runtime/world-runtime.mjs` owns encounter profiles, six body phases,
+  Boss rage/low-HP/strikes and deterministic local item rarity. It reads
+  unlocks from Player Life, never produces an independent XP balance.
+- Existing backpack owns game items and bounded consumed reward identifiers;
+  stacking/discarding must not make a consumed reward redeemable again.
+  XP and backpack are separate local stores, not one economic transaction.
+  Capacity or storage failure is reported, never called chain settlement.
+- `assets/kaios-audio.mjs` owns dynamic music states, original synth event
+  identities and ducking. One scheduler/context; mute, visibility and #461
+  gesture-recovery semantics remain. Bounded visual cues complement sound.
+
+### GA600 inventory and boundary
+
+Repository inventory found conceptual lineage in
+`K線西遊記/temples/16888/README.md`,
+`K線西遊記/temples/11520/RUNTIME_GENOME.json`, and legacy whitepapers
+`whitepaper/KGEN_主白皮書_Genesis_v1.0.md`,
+`whitepaper/KGEN_系統框架白皮書_v1.0.md`,
+`whitepaper/KlineApp_KGEN_募資白皮書_5000萬正式版.md`.
+These are not a verified full engine or historical dataset adapter.
+`GA600_FULL_ENGINE = NOT_INTEGRATED`.
+Trend/Crash/Range Boss use explicitly synthetic regime game profiles;
+they are not historical returns, forecasts, fund performance or advice.
+Game/Engine levels never alter C production caps, real funds, Oracle policy,
+treasury, signer authority or automatic trading. Production >1C remains locked.
+
 ## Delivery / second-layer review
 
 Required: domain/security tests, preserved settlement tests, actual Chromium

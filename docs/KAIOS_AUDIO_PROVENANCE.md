@@ -46,6 +46,15 @@ music, SFX and AI voice, with visual feedback retained in the world UI.
 
 ## Validation
 
+V2.9 extends this same synthesizer with first-party dynamic game arrangements:
+EXPLORE, ENCOUNTER, COMBAT, BOSS, BOSS_LOW_HP, VICTORY, RARE_LOOT,
+LEVEL_UP, GA600_LEVEL_UP, HOME and PORTAL. Tempo/motif/bass/percussion blends
+continue on one scheduler rather than starting competing BGM players.
+Combat, Boss, rarity and upgrade identities use generated sine/triangle/saw
+envelopes and glides, not commercial recordings or copied melodies.
+Priority SFX and speech duck music with bounded restoration. No new asset
+download, paid music, sample pack or external composition is introduced.
+
 `tests/kaios-audio.test.mjs` covers silence before gesture, preference restoration,
 single context/scheduler, identity switching, crossfade bounds, canonical 11520
 motif, mute, volume validation, speech callbacks, visibility, bounded cleanup,

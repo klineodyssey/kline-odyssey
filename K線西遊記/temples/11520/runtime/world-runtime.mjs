@@ -1,11 +1,11 @@
 /*
 KGEN_META
-VERSION: 1.9.0
-REVISION: 2026-09-21.PUBLIC-MARKET-K
+VERSION: 2.9.0
+REVISION: 2026-10-01.GAMEPLAY-BOSS-LOOT
 STATUS: ACTIVE / SIMULATION-FIRST
-LAST_UPDATED: 2026-09-21
+LAST_UPDATED: 2026-10-01
 UPDATED_BY: codex-gm-01
-CHANGE_REASON: Feed normalized simulation K from complete public quote batches; preserve local XYZ, relative combat geometry, source-managed Life and settlement boundaries.
+CHANGE_REASON: Add local-only Boss phases and deterministic game loot; derive unlocks from Player Life while preserving local XYZ, market/source Life and settlement boundaries.
 SOURCE_OF_TRUTH: TRUE
 */
 
@@ -15,6 +15,7 @@ import {drainMarketLifeSourceEvents,installMarketLifeSourceListeners} from './ma
 import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-runtime.mjs';
 import {gameUnitsToK,localPositionToK,composePhysicalK} from './spatial-coordinate-runtime.mjs';
 import {resolveCMode} from '../controls/nonlinear-controls.mjs';
+import {GAMEPLAY_UNLOCKS} from './player-life-runtime.mjs';
 
 // Browser-local teaching state only: never grants XP, loot, orders or wallet authority.
 export function createJourneyTutorial({storage,returning=false}={}){
@@ -99,6 +100,72 @@ export const KSPACE_SKILLS=Object.freeze({
   goldenRain:Object.freeze({radius:6,damage:22,cooldownMs:1400}),
   phantomAxe:Object.freeze({radius:4,damage:18,cooldownMs:1900}),
 });
+// V2.9 local game configuration. No token, financial reward or trading authority.
+export const JOURNEY_ENCOUNTER_PROFILES=Object.freeze(Object.fromEntries(Object.entries({
+  GUARDIAN:{name:'取經守關猿',level:1,unlock:'SLASH',hp:120,tier:'COMMON',reward:5,boss:false,training:false,weakPoints:['KY-','KX+','KZ-']},
+  COURIER:{name:'KAIOS 運鈔妖',level:3,unlock:'STRONG_MONSTERS',hp:180,tier:'RARE',reward:8,boss:false,training:false,weakPoints:['KX+','KZ-','KY+']},
+  MARKET_BOSS:{name:'三市場魔王',level:5,unlock:'BOSS',hp:300,tier:'EPIC',reward:20,boss:true,training:false,weakPoints:['KX+','KY-','KZ+']},
+  TREND_BOSS:{name:'趨勢龍王 · GA600 訓練',level:6,unlock:'HISTORICAL_TRAINING',hp:360,tier:'EPIC',reward:20,boss:true,training:true,regime:'TREND',weakPoints:['KX+','KY+','KZ+']},
+  CRASH_BOSS:{name:'風暴牛魔 · GA600 訓練',level:7,unlock:'HISTORICAL_TRAINING',hp:420,tier:'EPIC',reward:24,boss:true,training:true,regime:'CRASH',weakPoints:['KX-','KY-','KZ-']},
+  RANGE_BOSS:{name:'六相星龜 · GA600 訓練',level:8,unlock:'HISTORICAL_TRAINING',hp:480,tier:'LEGENDARY',reward:25,boss:true,training:true,regime:'RANGE',weakPoints:['KY+','KX-','KZ+']},
+}).map(([id,p])=>{const gate=GAMEPLAY_UNLOCKS.find(u=>u.id===p.unlock);return [id,Object.freeze({...p,id,minPlayerLevel:gate.playerLevel,minEngineLevel:gate.engineLevel,weakPoints:Object.freeze(p.weakPoints),scope:'GAME_TRAINING_ONLY'})]})));
+export const GAME_LOOT_TABLE=Object.freeze([
+  Object.freeze({itemId:'journey-fragment',name:'取經碎片',rarity:'COMMON',weight:55}),
+  Object.freeze({itemId:'phase-crystal',name:'六相晶石',rarity:'UNCOMMON',weight:25}),
+  Object.freeze({itemId:'wukong-mark',name:'悟空戰紋',rarity:'RARE',weight:12}),
+  Object.freeze({itemId:'heart-fragment',name:'Heart Fragment',rarity:'EPIC',weight:6}),
+  Object.freeze({itemId:'ga600-core-fragment',name:'GA600 Core Fragment',rarity:'LEGENDARY',weight:2}),
+]);
+export const GA600_GAME_TRAINING=Object.freeze({scope:'GAME_TRAINING_ONLY',fullEngine:'NOT_INTEGRATED',
+  dataSource:'SYNTHETIC_REGIME_GAME_PROFILES_NOT_HISTORICAL_PERFORMANCE',
+  disclaimer:'遊戲訓練，不代表歷史績效、未來績效或投資建議。',realTradingAuthority:false});
+function lootHash(seed){let h=2166136261;for(const c of String(seed))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;return h}
+export function selectJourneyLoot(seed,profileId='GUARDIAN',{playerLevel=1,engineLevel=1}={}){
+  const p=JOURNEY_ENCOUNTER_PROFILES[profileId];if(!p)throw new RangeError('UNKNOWN_ENCOUNTER');
+  const rare=GAMEPLAY_UNLOCKS.find(u=>u.id==='RARE_ENCOUNTERS');
+  const rareUnlocked=Number.isFinite(playerLevel)&&Number.isFinite(engineLevel)&&playerLevel>=rare.playerLevel&&engineLevel>=rare.engineLevel;
+  const table=rareUnlocked?(p.boss?GAME_LOOT_TABLE:p.id==='COURIER'?GAME_LOOT_TABLE.slice(0,3):GAME_LOOT_TABLE.slice(0,2)):GAME_LOOT_TABLE.slice(0,2);
+  let roll=lootHash(`${profileId}:${seed}`)%table.reduce((sum,item)=>sum+item.weight,0),selected=table[0];
+  for(const item of table){if(roll<item.weight){selected=item;break}roll-=item.weight}
+  const {weight,...item}=selected;return {...item,quantity:1,kind:'GAME_ITEM',localOnly:true,noRealValue:true,tokenized:false};
+}
+function journeyEvent(world,type,target,now,extra={},queued=true){
+  const event={type,monsterId:target.id,encounterId:target.encounterId,profileId:target.profileId,at:now,simulationOnly:true,...extra};
+  if(queued)world.journeyEvents=[...(world.journeyEvents||[]),event].slice(-64);return event;
+}
+export function drainJourneyEvents(world){const events=world.journeyEvents||[];world.journeyEvents=[];return events}
+function configureJourneyEncounter(world,target,profileId,now){
+  const p=JOURNEY_ENCOUNTER_PROFILES[profileId],sequence=(world.journeyEncounterSequence||0)+1;
+  world.journeyEncounterSequence=sequence;
+  world.journeySessionId??=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  Object.assign(target,{profileId,encounterId:`${world.journeySessionId}:${sequence}`,name:p.name,baseName:p.name,level:p.level,
+    journeyTier:p.tier,rewardKaios:p.reward,state:'GUARD',hp:p.hp,maxHp:p.hp,rewardSuppressed:false,rewardClaimed:false,defeatedAt:null,
+    boss:p.boss,training:p.training,phase:1,rage:false,lowHp:false,exposed:p.weakPoints[0],lastBossAttackAt:now});
+  for(const [id,b] of Object.entries(target.bodies)){b.hp=b.maxHp=p.hp/6;b.defense=id===target.exposed?0:4}
+  journeyEvent(world,p.boss?'BOSS_SPAWN':'MONSTER_DETECTED',target,now,{level:p.level});
+  return target;
+}
+export function selectJourneyEncounter(world,player,{profileId='GUARDIAN',playerLevel=1,engineLevel=1,now=Date.now()}={}){
+  const p=JOURNEY_ENCOUNTER_PROFILES[profileId],target=world.monsters.find(m=>m.simulationCombat);
+  if(!world.journeyEnabled||!world.kSpace||!target||!validVec(player)||!Number.isFinite(now)||!p)return {ok:false,reason:'INVALID_ENCOUNTER'};
+  if(!Number.isFinite(playerLevel)||!Number.isFinite(engineLevel)||playerLevel<p.minPlayerLevel||engineLevel<p.minEngineLevel)return {ok:false,reason:'PROGRESSION_LOCKED'};
+  // Explicit training selection never changes the 24 financial source slots.
+  configureJourneyEncounter(world,target,profileId,now);
+  target.localPosition={x:player.x,y:player.y,z:player.z+7};Object.assign(target,target.localPosition);
+  world.kSpace.targetId=target.id;world.kSpace.lastAttackAt=null;world.kSpace.lastResult=null;
+  return {ok:true,encounterId:target.encounterId,profileId,training:p.training,scope:'GAME_TRAINING_ONLY'};
+}
+function advanceBoss(world,target,now){
+  if(!target.boss||target.hp<=0)return [];
+  const events=[],ratio=target.hp/target.maxHp,next=ratio<=1/3?3:ratio<=2/3?2:1,p=JOURNEY_ENCOUNTER_PROFILES[target.profileId];
+  if(next>target.phase){target.phase=next;target.exposed=p.weakPoints[next-1];
+    if(!target.bodies[target.exposed]?.hp)target.exposed=KSPACE_PHASES.find(id=>target.bodies[id].hp>0)||target.exposed;
+    for(const [id,b] of Object.entries(target.bodies))b.defense=id===target.exposed?0:4;
+    events.push(journeyEvent(world,'BOSS_PHASE_CHANGE',target,now,{phase:next,weakPoint:target.exposed},false));}
+  if(ratio<=1/3&&!target.rage){target.rage=true;events.push(journeyEvent(world,'BOSS_RAGE',target,now,{},false))}
+  if(ratio<=.18&&!target.lowHp){target.lowHp=true;events.push(journeyEvent(world,'BOSS_LOW_HP',target,now,{},false))}
+  return events;
+}
 const K_AXES=['KX','KY','KZ'],XYZ=['x','y','z'];
 const validVec=v=>v&&XYZ.every(k=>typeof v[k]==='number'&&Number.isFinite(v[k]));
 export function normalizeKPrice(price,anchor){
@@ -167,7 +234,9 @@ export function createKSpaceEncounter(world,reference=KSPACE_REFERENCE,player={x
     {id:'SIM-JOURNEY-WISP-2',species:'FIRE_WISP',name:'火靈',x:-1.6,z:3,hp:90,rewardKaios:4,exposed:'KZ+'},
     {id:'SIM-JOURNEY-APE-3',species:'STONE_APE',name:'暗影猿',x:2,z:5,hp:120,rewardKaios:5,exposed:'KX-'}
   ].map((m,i)=>({id:m.id,lifeId:null,species:m.species,name:m.name,baseName:m.name,simulationCombat:false,ambientJourney:true,sourceManaged:false,state:'ROAM',attack:0,rewardKaios:m.rewardKaios,speed:.004+(i*.001),journeyTier:'COMMON',lootName:'取經碎片',spawnX:player.x+m.x,spawnY:player.y,spawnZ:player.z+m.z,x:player.x+m.x,y:player.y,z:player.z+m.z,hp:m.hp,maxHp:m.hp,exposed:m.exposed,visualMode:'ROAM',roamPhase:i*.9}));
-  world.monsters.push(guardian);world.ambientLife=ambient;world.journeyAmbient=ambient.map(m=>m.id);return world.kSpace;
+  world.monsters.push(guardian);world.ambientLife=ambient;world.journeyAmbient=ambient.map(m=>m.id);
+  if(world.journeyEnabled)configureJourneyEncounter(world,guardian,'GUARDIAN',world.lastTick||0);
+  return world.kSpace;
 }
 export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
   const space=world.kSpace;if(!space||!validVec(player))return null;
@@ -183,12 +252,13 @@ export function kCombatSnapshot(world,player,{plane='XZ',c=0}={}){
     monsterK:copy(target.kPosition),monsterLocal:{...target.localPosition},monsterWorld:targetWorld,deltaK,relative,
     distance,distanceK:gameUnitsToK(distance),relativePhysicalK:localPositionToK(relative),
     worldSpace:'PHYSICAL_K',distanceSpace:'LOCAL_METERS',marketSpace:'MARKET_NORMALIZED',marketPhysicalTransform:'NOT_CONFIGURED',selection,
-    target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies),phaseRule:'XZ→KY · XY→KZ · YZ→KX',selectedBody:selection?.body||null},
+    target:{id:target.id,name:target.baseName,hp:target.hp,maxHp:target.maxHp,state:target.state,exposed:target.exposed,bodies:copy(target.bodies),phaseRule:'XZ→KY · XY→KZ · YZ→KX',selectedBody:selection?.body||null,
+      encounterId:target.encounterId||null,profileId:target.profileId||null,level:target.level||1,boss:!!target.boss,training:!!target.training,phase:target.phase||1,rage:!!target.rage,lowHp:!!target.lowHp},
     lastResult:space.lastResult?copy(space.lastResult):null};
 }
 export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),heading=0,powerLevel=1}={}){
   const snapshot=kCombatSnapshot(world,player,{plane,c}),spec=KSPACE_SKILLS[skill],space=world.kSpace;
-  const result={ok:false,hit:false,simulationOnly:true,rewardKaios:0,skill,body:snapshot?.selection?.body||null,hits:[],damage:0};
+  const result={ok:false,hit:false,simulationOnly:true,rewardKaios:0,skill,body:snapshot?.selection?.body||null,hits:[],damage:0,events:[],rewardId:null};
   const finish=reason=>{result.reason=reason;if(space)space.lastResult={...result,at:now};return result};
   if(!snapshot||!spec||!Number.isFinite(now)||!Number.isFinite(heading))return finish('INVALID_INPUT');
   if(!snapshot.target||snapshot.target.state==='DEAD')return finish('NO_TARGET');
@@ -217,7 +287,15 @@ export function attackKSpace(world,player,{plane,c,skill='slash',now=Date.now(),
   }
   if(!result.hits.length)return finish('BODY_DISABLED');
   target.hp=Object.values(target.bodies).reduce((sum,b)=>sum+b.hp,0);
-  if(!target.hp){target.state='DEAD';target.defeatedAt=now;if(world.journeyEnabled&&!target.rewardSuppressed){result.rewardKaios=Math.max(1,Number(target.rewardKaios)||5);result.loot={name:target.lootName||'取經碎片',quantity:1,rarity:target.journeyTier||'COMMON',localOnly:true,noRealValue:true}}}
+  result.events.push(...advanceBoss(world,target,now));
+  if(!target.hp){target.state='DEAD';target.defeatedAt=now;
+    if(world.journeyEnabled&&!target.rewardSuppressed&&!target.rewardClaimed){
+      target.rewardClaimed=true;const p=JOURNEY_ENCOUNTER_PROFILES[target.profileId||'GUARDIAN'];
+      result.rewardKaios=Math.max(1,Number(target.rewardKaios)||5);result.rewardId=`journey:${target.encounterId}`;
+      result.loot=selectJourneyLoot(target.encounterId,p.id,{playerLevel:world.playerLevel,engineLevel:world.engineLevel});
+      result.events.push(journeyEvent(world,target.boss?'BOSS_DEFEAT':'MONSTER_DEFEAT',target,now,{rewardId:result.rewardId},false));
+    }
+  }
   result.ok=true;result.hit=true;result.defeated=target.state==='DEAD';
   return finish(result.hits.some(h=>h.state==='EXPOSED')?'WEAK_POINT':result.hits.every(h=>h.state==='GUARDED')?'BLOCKED_RESIST':'HIT');
 }
@@ -344,16 +422,24 @@ export function tickWorld(world,player,now=Date.now()){
     const angle=cycle*Math.PI/3;
     guardian.localPosition={x:player.x+Math.sin(angle)*5,y:player.y,z:player.z+Math.cos(angle)*5};
     const boss=cycle>0&&cycle%5===0,courier=!boss&&cycle>0&&cycle%3===0;
-    const profile=boss
-      ?{name:'三市場魔王',tier:'EPIC',hp:300,bodyHp:50,reward:20,loot:'三界 KAIOS 寶箱'}
-      :courier?{name:'KAIOS 運鈔妖',tier:'RARE',hp:180,bodyHp:30,reward:8,loot:'KAIOS 運鈔箱'}
-      :{name:'取經守關猿',tier:'COMMON',hp:120,bodyHp:20,reward:5,loot:'取經碎片'};
-    Object.assign(guardian,guardian.localPosition,{name:profile.name,baseName:profile.name,journeyTier:profile.tier,lootName:profile.loot,rewardKaios:profile.reward,state:'GUARD',hp:profile.hp,maxHp:profile.hp,rewardSuppressed:false});
-    for(const b of Object.values(guardian.bodies))b.hp=b.maxHp=profile.bodyHp;
+    let profileId=boss?'MARKET_BOSS':courier?'COURIER':'GUARDIAN';
+    const level=Number(world.playerLevel)||1,engineLevel=Number(world.engineLevel)||1,profile=JOURNEY_ENCOUNTER_PROFILES[profileId];
+    // Progress is projected by the sole Player Life authority; no profile means
+    // level 1 rather than silently unlocking harder content for a new guest.
+    if(level<profile.minPlayerLevel||engineLevel<profile.minEngineLevel)profileId='GUARDIAN';
+    configureJourneyEncounter(world,guardian,profileId,now);Object.assign(guardian,guardian.localPosition);
     world.kSpace.lastAttackAt=null;
   }
   for(const m of world.ambientLife||[]){if(m.state==='DEAD')continue;const phase=(now*.00035)+(m.roamPhase||0),radius=.65;m.x=m.spawnX+Math.sin(phase)*radius;m.z=m.spawnZ+Math.cos(phase*.83)*radius;m.y=Math.max(0,m.spawnY+(m.species==='FIRE_WISP'?1.1+.45*Math.sin(phase*1.7):0));m.localPosition={x:m.x,y:m.y,z:m.z}}
-  const events=[];events.push(...applyMarketLifeSourceEvents(world,drainMarketLifeSourceEvents()));const playerAxes=readPlayerAxesFromGame(),quotes=readQuotesFromGame();
+  const events=drainJourneyEvents(world);events.push(...applyMarketLifeSourceEvents(world,drainMarketLifeSourceEvents()));const playerAxes=readPlayerAxesFromGame(),quotes=readQuotesFromGame();
+  if(guardian?.boss&&guardian.state!=='DEAD'&&validVec(player)){
+    const distance=Math.hypot(guardian.x-player.x,guardian.y-player.y,guardian.z-player.z),cooldown=guardian.rage?850:1400;
+    if(distance<=2.4&&now-guardian.lastBossAttackAt>=cooldown){
+      guardian.lastBossAttackAt=now;
+      events.push({type:'PLAYER_HIT',monsterId:guardian.id,encounterId:guardian.encounterId,damage:guardian.rage?12:7,
+        phase:guardian.phase,reason:guardian.rage?'BOSS_RAGE_STRIKE':'BOSS_STRIKE',simulationOnly:true});
+    }
+  }
   if(now-(world.lastMarketLifeTick||0)>=WORLD_RULES.marketLifeDecisionMs){const ml=tickMarketLives(world,{playerAxes,quotes,now,deltaMs,availableMarkets:['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']});events.push(...ml.events)}
   else for(const m of world.monsters){if(!m.sourceManaged||m.state==='DEAD')continue;tickSourceManagedLife(m,{playerAxes,quotes,now,deltaMs,makeDecision:false})}
   for(const m of world.monsters){

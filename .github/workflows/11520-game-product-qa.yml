@@ -174,7 +174,8 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-player-life-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" || true' EXIT
-          timeout 300s node "K線西遊記/temples/11520/tests/11520-browser-player-life.mjs"
+          # V2.8 isolation/recovery plus V2.9 real combat/Boss/audio in two orientations.
+          timeout 540s node "K線西遊記/temples/11520/tests/11520-browser-player-life.mjs"
       - name: Upload Player Life mobile and recovery evidence
         if: always()
         uses: actions/upload-artifact@v4

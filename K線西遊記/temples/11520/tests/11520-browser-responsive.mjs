@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {formatKCoordinate} from '../runtime/world-runtime.mjs';
+import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../runtime/player-life-runtime.mjs';
 function freeQuotePayload(route,rows){
   const url=new URL(route.request().url());
   if(!url.pathname.endsWith('/aggTrades'))return rows;
@@ -20,12 +21,22 @@ const profiles=PRODUCTION?[{name:'pages-360',width:360,height:740},{name:'pages-
   {name:'warm-412',width:412,height:772,warm:true},{name:'cold-360',width:360,height:740},{name:'cold-landscape-844',width:844,height:390,landscape:true},
   {name:'cold-480',width:480,height:900}
 ];
+// Optional local diagnosis only; default CI still exercises every profile.
+const selectedProfiles=process.env.K11520_RESPONSIVE_PROFILE?profiles.filter(p=>p.name===process.env.K11520_RESPONSIVE_PROFILE):profiles;
+assert.ok(selectedProfiles.length,'Unknown K11520_RESPONSIVE_PROFILE');
 const selectors=['#kspaceTarget','#k11520MonsterGuide','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack'];
 const utilities=['#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll'];
 await fs.mkdir(OUT,{recursive:true});
 const launchBrowser=()=>chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
 let browser=await launchBrowser();
 const reports=[],failures=[],sourceChecks=[];
+// Skill FX regression requires an earned Lv.3 player in this isolated QA
+// browser. Build the save via the actual event authority, not fabricated XP.
+// New-guest lock/progression coverage remains in browser-player-life.mjs.
+const skillStorage=new Map(),skillStore=createLocalPlayerStore({storage:{getItem:k=>skillStorage.get(k)??null,setItem:(k,v)=>skillStorage.set(k,v)}});
+skillStore.createPlayer();for(let i=0;i<10;i++)skillStore.recordEvent({id:`qa-skill-unlock:${i}`,type:'JOURNEY_MONSTER_KILL'});
+assert.equal(skillStore.activePlayer().level,3);
+const skillFixture={key:PLAYER_LIFE_STORAGE_KEY,encoded:skillStorage.get(PLAYER_LIFE_STORAGE_KEY)};
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourceSha=bytes=>sha(Buffer.from(Buffer.from(bytes).toString('utf8').replace(/\r\n?/g,'\n'),'utf8'));
 async function verifyInitialQuoteWait(){
@@ -44,7 +55,7 @@ async function verifyInitialQuoteWait(){
     const returning=await page.evaluate(()=>({combat:globalThis.__K11520_KSPACE_API__.snapshot(),coords:globalThis.__K11520_WORLD_COORDS__}));
     assert.equal(returning.coords.physical.x,210);assert.equal(returning.coords.physical.z,186);
     assert.ok(Math.abs(returning.combat.distance-7)<.1,'restored XYZ must receive the guardian at 7m');
-    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.8.0'));
+    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.9.0'));
     await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
     await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
     const lifeBefore=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot());
@@ -55,7 +66,7 @@ async function verifyInitialQuoteWait(){
     assert.ok(lifeAfter.every((m,i)=>Math.hypot(m.position.x-lifeBefore[i].position.x,m.position.z-lifeBefore[i].position.z)>.01),'ambient life must actually move');
     await fs.writeFile(`${OUT}/returning-player.json`,JSON.stringify({returning,lifeBefore,lifeAfter},null,2));
     await page.screenshot({path:`${OUT}/returning-390-ambient-moving.png`});
-    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.8\.0/,'legacy runtime must not overwrite release stamp');
+    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.9\.0/,'legacy runtime must not overwrite release stamp');
     assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot().market.status),'WAIT');
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;
@@ -180,9 +191,26 @@ async function verifyKSpaceGameplay(page,report){
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
     if(report.profile.landscape)assert.equal(await page.evaluate(()=>{const a=document.getElementById('toast').getBoundingClientRect(),b=document.querySelector('.monsterHud').getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}),false,'damage feedback obscures monster HUD');
     if(variant==='slash-negative')assert.equal(result.reason,'WEAK_POINT');if(variant==='slash-positive')assert.equal(result.reason,'BLOCKED_RESIST');
-    const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(`${OUT}/${prefix}-kspace-${variant}.png`,Buffer.from(shot.data,'base64'));results.push(result);await page.waitForTimeout(pause);
+    (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,variant+' before screenshot'));
+    const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(`${OUT}/${prefix}-kspace-${variant}.png`,Buffer.from(shot.data,'base64'));
+    (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,variant));results.push(result);await page.waitForTimeout(pause);
   }
   await cdp.detach();report.kspace={start,near,results,status:'FUNCTIONAL_PASS_SCREENSHOTS_REQUIRE_VISUAL_REVIEW'};
+}
+async function verifyWorldFeedbackLayout(page,label){
+  const sample=await page.evaluate(()=>{
+    const toast=document.getElementById('toast');if(!toast?.classList.contains('show'))return null;
+    const box=el=>{const r=el.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
+    const a=box(toast),collisions=[];
+    for(const selector of ['#k11520MonsterGuide','.monsterHud','#attack','#skill','#tradeSword','#dodge','#flat','#orderFire','#joy','#cControl','#lotsControl','#yControl']){
+      const el=document.querySelector(selector);if(!el)continue;const style=getComputedStyle(el),b=box(el);
+      if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0||!b.width||!b.height)continue;
+      if(a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top)collisions.push({selector,box:b});
+    }
+    return {event:toast.dataset.worldEvent||'GAMEPLAY',transitionProperty:getComputedStyle(toast).transitionProperty,toast:a,viewport:{width:innerWidth,height:innerHeight},collisions};
+  });
+  if(sample){assert.equal(sample.transitionProperty,'opacity',`${label} visible feedback must not animate layout across gameplay controls`);assert.deepEqual(sample.collisions,[],`${label} world feedback obscures gameplay controls: ${JSON.stringify(sample)}`);assert.ok(sample.toast.left>=0&&sample.toast.top>=0&&sample.toast.right<=sample.viewport.width&&sample.toast.bottom<=sample.viewport.height,`${label} world feedback clipped: ${JSON.stringify(sample)}`)}
+  return sample;
 }
 async function finalizeLandscape(page,report){
   await page.locator('#confirm').waitFor({state:'hidden'});
@@ -197,8 +225,10 @@ async function finalizeLandscape(page,report){
     const b=initial[selector],pointer={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...pointer});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...pointer});await page.waitForTimeout(delay);
     const timing=await page.evaluate(()=>({variant:__K11520_COMBAT_FX__.variant,elapsed:Date.now()-__K11520_COMBAT_FX__.at}));assert.equal(timing.variant,variant);assert.ok(timing.elapsed<duration,`${variant} capture missed active window: ${timing.elapsed}ms`);
+    (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,'landscape-'+variant+' before screenshot'));
     // CDP captures the presented frame without Playwright waiting for fonts/layout animation settling.
     const shot=await cdp.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(`${OUT}/landscape-${variant}.png`,Buffer.from(shot.data,'base64'));
+    (report.worldFeedbackLayouts??=[]).push(await verifyWorldFeedbackLayout(page,'landscape-'+variant));
     report.combat.push({...timing,realClick:true});await page.waitForTimeout(1300);
   }
   await cdp.detach();
@@ -278,15 +308,17 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
 try{
   if(PRODUCTION)await verifyProductionSource();
   else await verifyInitialQuoteWait();
-  for(const profile of profiles){
+  for(const profile of selectedProfiles){
     // Cold profiles must not inherit Chromium process/emulation state after the preceding
     // profile's CDP combat captures and repeated mobile rotations. Keep every assertion.
     await browser.close();browser=await launchBrowser();
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:true,hasTouch:true});const page=await context.newPage();const errors=[],warnings=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(['warning','error'].includes(m.type()))warnings.push(m.text().slice(0,300))});
+    await page.addInitScript(({key,encoded})=>{if(!localStorage.getItem(key))localStorage.setItem(key,encoded)},skillFixture);
     if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:'77564.83000000'},{symbol:'ETHUSDT',price:'2511.16000000'},{symbol:'BNBUSDT',price:'724.23000000'}]))}));
     if(profile.warm)await page.addInitScript(()=>{localStorage.setItem('11520.play.cleanMode','1');localStorage.setItem('k11520.joystick.plane','XZ');localStorage.setItem('klineodyssey.public-wallet-identity.v1',JSON.stringify({version:1,address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345',updatedAt:new Date().toISOString()}))});
-    const report={profile,mode:PRODUCTION?'PUBLIC_PAGES_READ_ONLY':'LOCAL_REALISTIC_QUOTE_FIXTURE',errors,warnings,states:{}};reports.push(report);
+    const report={profile,mode:PRODUCTION?'PUBLIC_PAGES_READ_ONLY':'LOCAL_REALISTIC_QUOTE_FIXTURE',playerFixture:'LOCAL_QA_PLAYER_LEVEL_3_CANONICAL_EVENTS_NO_ECONOMIC_AUTHORITY',errors,warnings,states:{}};reports.push(report);
     try{await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded',timeout:35000});await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_KSPACE_COMBAT__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__&&document.getElementById('k11520UtilityMaster'),null,{timeout:45000});await page.waitForTimeout(7500);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click();
+      await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
       report.states.cold=await snapshot(page);await page.screenshot({path:`${OUT}/${profile.name}-collapsed.png`,fullPage:true});check(profile.name,report.states.cold,{landscape:!!profile.landscape});
       const authorityBefore=await page.evaluate(()=>({axis:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.activeAxis,order:document.querySelector('#orderFire')?.getAttribute('aria-label')}));
       const inspectedAxis=authorityBefore.axis==='KX'?'KY':'KX';await page.locator(`[data-axis="${inspectedAxis}"]`).click();await page.waitForTimeout(100);

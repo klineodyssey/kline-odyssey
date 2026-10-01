@@ -6,6 +6,15 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### K11520 V2.9 gameplay candidate
+
+Player/GA600 game progression, Boss encounters, rarity loot and Daily Journey
+extend the existing Player Life and World runtimes. Dynamic original music
+uses the shared audio authority; no extra wallet/settlement engine is created.
+Specification and boundaries: `docs/K11520_PLAYER_LIFE.md`.
+GA600 is game training only; the full research engine is not integrated.
+No progression unlock changes production leverage or financial authority.
+
 ## KAIOS World Portal
 
 The single public entry is [KAIOS 世界入口](https://klineodyssey.github.io/kline-odyssey/):

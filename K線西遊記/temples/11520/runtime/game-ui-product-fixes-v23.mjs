@@ -12,7 +12,7 @@ const MIN_GAP=14;
 
 // Presentation only. This observes already-accepted game state; it never awards
 // XP, loot, wallet credit, economic claims or changes combat outcomes.
-export const WORLD_FEEDBACK=Object.freeze({BOSS_SPAWN:'三市場魔王現身',BOSS_PHASE_CHANGE:'魔王進入下一戰鬥階段',RARE_LOOT:'稀有 KAIOS 戰利品 · 本機候選',PLAYER_LEVEL_UP:'玩家等級提升',ENGINE_LEVEL_UP:'曲速引擎等級提升',HOME_BUILD:'第一間草屋落成',HOME_UPGRADE:'起家地升級',PORTAL_OPEN:'返回 KAIOS 總世界',WORLD_ENTER:'花果山 · 旅程開始',QUEST_COMPLETE:'取經序章完成'});
+export const WORLD_FEEDBACK=Object.freeze({MONSTER_DETECTED:'附近有取經怪物',WEAK_POINT:'WEAK POINT · 六相弱點命中',BOSS_SPAWN:'三市場魔王現身',BOSS_PHASE_CHANGE:'魔王進入下一戰鬥階段',BOSS_RAGE:'魔王狂暴 · 留意距離',BOSS_LOW_HP:'魔王瀕危 · 最後攻勢',BOSS_DEFEAT:'BOSS DEFEATED · 取經勝利',COMMON_LOOT:'掉寶出現 · 遊戲道具',RARE_LOOT:'RARE · 稀有遊戲戰利品',EPIC_LOOT:'EPIC · 史詩遊戲戰利品',LEGENDARY_LOOT:'LEGENDARY · 傳說遊戲戰利品',PLAYER_LEVEL_UP:'LEVEL UP! · 玩家內容解鎖',ENGINE_LEVEL_UP:'GA600 LEVEL UP! · 遊戲訓練成長',GA600_LEVEL_UP:'GA600 LEVEL UP! · 遊戲訓練成長',HOME_BUILD:'第一間草屋落成',HOME_UPGRADE:'起家地升級',PORTAL_OPEN:'返回 KAIOS 總世界',WORLD_ENTER:'花果山 · 旅程開始',QUEST_COMPLETE:'取經任務完成'});
 export function createWorldFeedbackObserver(emit){
   let previous=null;
   return state=>{
@@ -31,16 +31,35 @@ export function createWorldFeedbackObserver(emit){
   };
 }
 const feedbackHistory=[];
+// One placement/timer owner for ordinary gameplay and world-event messages.
+export function show11520Toast(text,{combat=false,event='',duration=1700}={}){
+  if(typeof document==='undefined')return;
+  const toast=document.getElementById('toast');if(!toast)return;
+  clearTimeout(show11520Toast.timer);toast.textContent=text;toast.dataset.kspaceFeedback=String(combat);
+  if(event)toast.dataset.worldEvent=event;else delete toast.dataset.worldEvent;
+  toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.style.transition='opacity .2s';toast.classList.add('show');toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
+  const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
+  if(guide?.width>0)for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
+  show11520Toast.timer=setTimeout(()=>{toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)},duration);
+}
 export function emit11520WorldFeedback(event){
   const label=WORLD_FEEDBACK[event];if(!label)return false;
   getKaiosAudio().play(event);feedbackHistory.push({event,at:Date.now()});if(feedbackHistory.length>32)feedbackHistory.shift();
   if(typeof document!=='undefined'){
-    const toast=document.getElementById('toast');if(toast){toast.textContent=label;toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.classList.add('show');toast.dataset.worldEvent=event;toast.style.pointerEvents='none';toast.style.zIndex='2147482000';clearTimeout(emit11520WorldFeedback.timer);emit11520WorldFeedback.timer=setTimeout(()=>{toast.classList.remove('show');delete toast.dataset.worldEvent;toast.style.removeProperty('z-index')},2000)}
+    show11520Toast(label,{event,duration:2000});
     const stage=document.getElementById('three');if(stage&&!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches){emit11520WorldFeedback.animation?.cancel();emit11520WorldFeedback.animation=stage.animate?.([{filter:'brightness(1)'},{filter:'brightness(1.12)'},{filter:'brightness(1)'}],{duration:420})}
+    // One disposable visual cue, not a permanent HUD or pointer interceptor.
+    document.getElementById('journeyEventFx')?.remove();clearTimeout(emit11520WorldFeedback.fxTimer);
+    const fx=document.createElement('div');fx.id='journeyEventFx';fx.setAttribute('aria-hidden','true');fx.dataset.event=event;
+    const engine=/ENGINE|GA600/.test(event),rare=/RARE|EPIC|LEGENDARY/.test(event),boss=event.startsWith('BOSS'),color=engine?'#7dfbff':rare?'#d59cff':boss?'#ff9b69':'#ffe89d';
+    fx.style.cssText=`position:fixed;pointer-events:none;z-index:510;left:50%;top:47%;width:${rare?34:150}px;height:${rare?160:150}px;border:3px solid ${color};border-radius:${rare?'45%':'50%'};transform:translate(-50%,-50%);box-shadow:0 0 24px ${color}88,inset 0 0 18px ${color}44;opacity:.8`;
+    document.body.append(fx);if(!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches)fx.animate?.([{opacity:.8,transform:'translate(-50%,-50%) scale(.45)'},{opacity:0,transform:'translate(-50%,-50%) scale(1.4)'}],{duration:900,fill:'forwards'});
+    emit11520WorldFeedback.fxTimer=setTimeout(()=>fx.remove(),1000);
   }
   return true;
 }
 globalThis.__K11520_WORLD_AUDIO__=Object.freeze({snapshot:()=>({events:feedbackHistory.map(row=>({...row})),authority:'PRESENTATION_ONLY'})});
+if(typeof document!=='undefined')addEventListener('pagehide',()=>{clearTimeout(show11520Toast.timer);clearTimeout(emit11520WorldFeedback.fxTimer);emit11520WorldFeedback.animation?.cancel();document.getElementById('journeyEventFx')?.remove();const toast=document.getElementById('toast');if(toast){toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)}});
 
 function installCss(){
   if(document.getElementById('k11520ProductFixesStyleV23'))return;
