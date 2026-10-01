@@ -6,6 +6,27 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+## KAIOS World Portal
+
+The single public entry is [KAIOS 世界入口](https://klineodyssey.github.io/kline-odyssey/):
+play K11520, K12345 Heart or K16888 Universe; research and unfinished worlds are
+labelled separately. Audio starts only after a player gesture and shares mute,
+music, SFX and voice preferences. No wallet is needed to start a journey.
+
+Implementation paths: `index.html`, compatibility `K線西遊記/index.html`,
+`assets/kaios-world-registry.mjs`, `assets/kaios-portal.mjs`,
+`assets/kaios-portal.css`, `assets/kaios-audio.mjs`,
+`assets/kaios-audio-ui.mjs`, `assets/kaios-audio.css`.
+`assets/kaios-world-audio.mjs` integrates the Heart/Universe legacy controls.
+Specification: `docs/KAIOS_WORLD_PORTAL.md`;
+provenance: `docs/KAIOS_AUDIO_PROVENANCE.md`.
+QA: `tests/kaios-portal.test.mjs`, `tests/kaios-audio.test.mjs`,
+`tests/kaios-portal-browser.mjs`, `tests/kaios-portal-link-audit.mjs`,
+`.github/workflows/kaios-portal-product-qa.yml`.
+World QA: `tests/kaios-world-audio-browser.mjs` and
+`K線西遊記/temples/11520/tests/11520-browser-audio-world.mjs`.
+These are frontend organs, not Mainnet activation or reward-payment authority.
+
 ## K11520 V2.8 Player Life
 
 Guest-first local game candidate implementation; no cloud provisioning, Mainnet

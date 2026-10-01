@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import {findWorld,playableDestination} from "../../../assets/kaios-world-registry.mjs";
 
 const root = new URL("../../../", import.meta.url);
 const text = (path) => readFile(new URL(path, root), "utf8");
@@ -11,14 +12,21 @@ const apiNames = [
   "civilization", "population", "listing", "rights"
 ];
 
-test("official homepage exposes K280 in navigation, product content, and footer", async () => {
+test("official Portal preserves K280 as folded research, not a playable world", async () => {
   const html = await text("index.html");
-  assert.match(html, /href="\.\/world-viewer\/k280\/".*K280 世界.*K280 數位生命世界/);
-  assert.match(html, /id="k280-world"/);
-  assert.match(html, />進入 K280 World Viewer</);
-  assert.match(html, />查看數位生命資料</);
-  assert.match(html, /KAIOS-RAPTOR-K280-001/);
-  assert.match(html, />K280 World Viewer<\/a>/);
+  assert.match(html, /id="explore"/);
+  assert.match(html, /<details id="researchArchive"/);
+  assert.match(html, /id="researchArchiveCards"/);
+  assert.match(html, /src="assets\/kaios-portal\.mjs"/);
+  const world=findWorld('k280');
+  assert.equal(world.entryUrl,'world-viewer/k280/');
+  assert.equal(world.status,'RESEARCH');
+  assert.equal(world.disclosure,true);
+  assert.deepEqual(world.capabilities,['INFORMATION_ONLY']);
+  assert.equal(playableDestination(world.worldId),null);
+  const viewer=await text(world.entryUrl+'index.html');
+  assert.match(viewer,/K280/);
+  assert.match(viewer,/api\/kaios\/k280|k280-viewer\.js/);
 });
 
 test("canonical Viewer route uses shared assets and GitHub Pages-safe paths", async () => {

@@ -266,6 +266,7 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 -->
 <head>
+<script>window.KAIOS_SHARED_AUDIO=true;</script>
 
 
 <meta content="website" property="og:type"/>
@@ -562,9 +563,8 @@ PRIMEFORGE_LIFE_HEADER_V1:
 
 <!-- === Universe Navigation Buttons V2.04 === -->
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
-<a class="nav-btn nav-gold" href="../11520/game-5d.html?returnFrom=12345" id="return-to-11520" style="position:fixed;right:8px;top:max(8px,env(safe-area-inset-top));z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;">返回宇宙｜11520 花果山世界</a>
+<a class="nav-btn nav-gold" href="../../../" id="return-to-11520" data-kaios-return="PORTAL" style="position:fixed;right:8px;top:max(8px,env(safe-area-inset-top));z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;">🌌 回 KAIOS 總世界</a>
 <span id="return-wallet-continuity" style="position:fixed;right:8px;top:60px;z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.72);color:#d7faff;font-size:11px;line-height:1.35;overflow-wrap:anywhere;text-align:center;">錢包延續：檢查中</span>
-<a class="nav-btn nav-cyan" href="https://klineodyssey.github.io/kline-odyssey/" rel="noopener" target="_blank">官方宇宙首頁入口</a>
 <button class="nav-btn nav-swap" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN" id="btn-swap-bnb" type="button">用 BNB 換 KGEN</button>
 <button class="nav-btn nav-swap" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）" id="btn-swap-usdt" type="button">用 USDT 換 KGEN</button>
 <button class="nav-btn nav-audio" onclick="app.enableAudio()">開啟音效/說明</button>
@@ -1873,6 +1873,8 @@ KGEN 12345 V9.2.0｜LAYOUT FINAL POLISH
 <script src="modules/kgen-12345-ui.js?v=159c4bc"></script>
 <script type="module">
 import {bindTempleReturnWalletContinuity} from '../11520/runtime/evm-wallet-runtime.mjs';
+import {bindWorldAudio} from '../../../assets/kaios-world-audio.mjs';
+bindWorldAudio('12345');
 void bindTempleReturnWalletContinuity({sourceWorld:'K12345'});
 </script>
 

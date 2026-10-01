@@ -345,6 +345,7 @@
       playlistLoaded: false
     },
     init: function(){
+      if(window.KAIOS_SHARED_AUDIO)return;
       if(this.inited) return;
       this.inited = true;
       window.KGEN_MEDIA_RUNTIME = this;

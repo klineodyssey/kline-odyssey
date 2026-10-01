@@ -3,11 +3,13 @@ on:
   pull_request:
     paths:
       - 'K線西遊記/temples/11520/**'
+      - 'assets/kaios-audio*'
       - '.github/workflows/11520-responsive-qa.yml'
   push:
     branches: [main]
     paths:
       - 'K線西遊記/temples/11520/**'
+      - 'assets/kaios-audio*'
       - '.github/workflows/11520-responsive-qa.yml'
   workflow_run:
     workflows: ['Deploy Pages Static']

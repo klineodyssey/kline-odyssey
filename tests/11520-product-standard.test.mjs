@@ -59,8 +59,8 @@ assert.ok(!walletTrade.includes('<option value="1000">'),'standalone wallet trad
 assert.ok(walletTrade.includes('PnL = ΔIndex × C × 口數'),'standalone wallet trade formula must use index delta');
 assert.ok(walletTrade.includes('每 1 index 損益'),'standalone wallet trade preview must use index semantics');
 for(const [temple,id] of [[temple12345,'12345'],[temple16888,'16888']]){
-  assert.match(temple,new RegExp(`href="\.\./11520/game-5d\\.html\\?returnFrom=${id}"`),`${id} must return to canonical 11520 world`);
-  assert.match(temple,/id="return-to-11520"[^>]*>返回宇宙｜11520 花果山世界</,`${id} must expose the visible return control`);
+  assert.ok(temple.includes('href="../../../" id="return-to-11520" data-kaios-return="PORTAL"'),`${id} must return to the single canonical root Portal`);
+  assert.match(temple,/data-kaios-return="PORTAL"[^>]*>🌌 回 KAIOS 總世界</,`${id} must expose the visible return control`);
   assert.match(temple,new RegExp(`bindTempleReturnWalletContinuity\\(\\{sourceWorld:'K${id}'\\}\\)`),`${id} must retain safe public wallet identity`);
 }
 const values=new Map(),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};

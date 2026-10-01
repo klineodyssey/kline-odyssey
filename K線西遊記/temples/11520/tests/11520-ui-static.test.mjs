@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
+import {createWorldFeedbackObserver,WORLD_FEEDBACK} from '../runtime/game-ui-product-fixes-v23.mjs';
 
 const here=dirname(fileURLToPath(import.meta.url));
 const read=p=>readFileSync(resolve(here,p),'utf8');
@@ -67,15 +68,17 @@ test('journey monster has an always-visible find-and-attack guide',()=>{
 
 test('entry gesture unlocks BGM and AI customer service has zh-TW voice control',()=>{
   assert.ok(productFixesV23.includes("startBgm();speakAi('歡迎來到花果山"));
-  assert.ok(productFixesV23.includes("new SpeechSynthesisUtterance(text)"));
-  assert.ok(productFixesV23.includes("u.lang='zh-TW'"));
+  assert.ok(productFixesV23.includes('getKaiosAudio().speak')||productFixesV23.includes('audio.speak(text)'));
+  const shared=read('../../../../assets/kaios-audio.mjs');
+  assert.ok(shared.includes("lang='zh-TW'"));
+  assert.ok(shared.includes('settings.master*settings.voice'));
   assert.ok(productFixesV23.includes('id="aiVoice"'));
   assert.ok(productFixesV23.includes("voice.textContent=aiVoiceOn?'🔊':'🔇'"));
 });
 
 test('combat loot and trade events are wired to the shared audio FX engine',()=>{
   assert.ok(productFixesV23.includes('__K11520_AUDIO_FX__'));
-  assert.ok(productFixesV23.includes("liquidation:[150,55,.35]"));
+  assert.ok(productFixesV23.includes('getKaiosAudio().play(kind)'));
   assert.ok(main.includes("audioFx?.play?.('attack')"));
   assert.ok(main.includes("r.reason==='WEAK_POINT'?'weak':'hit'"));
   assert.ok(main.includes("audioFx?.play?.('loot')"));
@@ -85,7 +88,8 @@ test('combat loot and trade events are wired to the shared audio FX engine',()=>
 test('11520 always exposes a return to the KAIOS world portal',()=>{
   assert.ok(productFixesV23.includes("id='kaiosPortalButton'"));
   assert.ok(productFixesV23.includes("title='回 KAIOS 總世界'"));
-  assert.ok(productFixesV23.includes("location.href='../../../index.html'"));
+  assert.ok(productFixesV23.includes("location.href='../../../'"));
+  assert.ok(productFixesV23.includes("addEventListener('pageshow',()=>{b.disabled=false})"));
 });
 
 test('live HUD teaches the KX/KY/KZ six-phase combat mapping',()=>{
@@ -104,6 +108,22 @@ test('V2.8.0 release stamp preserves restored-player encounter boot',()=>{
   assert.ok(fixes.includes('V2.8.0 · 5D K線西遊記'));
   assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.8.0'"));
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
+});
+
+test('accepted world state produces one feedback per transition, never reload awards',()=>{
+  const emitted=[],observe=createWorldFeedbackObserver(e=>emitted.push(e));
+  const base={playerId:'A',level:1,engineLevel:1,houseLevel:0,bossAlive:false,encounter:'guardian:0',phase:'KX+'};
+  assert.deepEqual(observe(base),[]);
+  assert.deepEqual(observe({...base,level:2,engineLevel:2,houseLevel:1}),['PLAYER_LEVEL_UP','ENGINE_LEVEL_UP','HOME_BUILD']);
+  const next={...base,level:2,engineLevel:2,houseLevel:2,bossAlive:true,encounter:'guardian:5'};
+  assert.deepEqual(observe(next),['HOME_UPGRADE','BOSS_SPAWN']);
+  assert.deepEqual(observe(next),[]);
+  assert.deepEqual(observe({...next,phase:'KY-'}),['BOSS_PHASE_CHANGE']);
+  assert.deepEqual(observe({...next,playerId:'B',level:8,houseLevel:7}),[],'player switching must not invent level-up or home events');
+  for(const event of emitted)assert.ok(WORLD_FEEDBACK[event]);
+  assert.deepEqual(Object.keys(WORLD_FEEDBACK).sort(),['BOSS_SPAWN','BOSS_PHASE_CHANGE','RARE_LOOT','PLAYER_LEVEL_UP','ENGINE_LEVEL_UP','HOME_BUILD','HOME_UPGRADE','PORTAL_OPEN','WORLD_ENTER','QUEST_COMPLETE'].sort());
+  assert.ok(main.includes("['RARE','EPIC'].includes(r.loot.rarity)"));
+  assert.ok(main.includes("if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE')"));
 });
 
 test('journey teaching reuses contextual HUD and starts audio only from a real gesture',()=>{

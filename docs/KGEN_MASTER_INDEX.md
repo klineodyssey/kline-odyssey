@@ -1,5 +1,28 @@
 # KGEN MASTER_INDEX
 
+## KAIOS canonical World Portal / Audio (2026-10-01)
+
+| Path | Purpose |
+|---|---|
+| `index.html` | Unique official playable-first Portal. |
+| `K線西遊記/index.html` | Compatibility navigation to the root Portal. |
+| `assets/kaios-world-registry.mjs` | World status and entry authority. |
+| `assets/kaios-portal.mjs` / `assets/kaios-portal.css` | Registry presentation, privacy-limited returning-player view and responsive Portal. |
+| `assets/kaios-audio.mjs` | Shared gesture-gated synthesized audio lifecycle and persistent bus settings. |
+| `assets/kaios-audio-ui.mjs` / `assets/kaios-audio.css` | Shared accessible audio control and settings. |
+| `assets/kaios-world-audio.mjs` | Heart/Universe compatibility bridge disabling legacy double playback. |
+| `docs/KAIOS_WORLD_PORTAL.md` | Entry/product/QA and authority specification. |
+| `docs/KAIOS_AUDIO_PROVENANCE.md` | Existing audio provenance audit and original themes. |
+| `tests/kaios-portal.test.mjs` / `tests/kaios-audio.test.mjs` | Registry/privacy and audio lifecycle invariants. |
+| `tests/kaios-portal-browser.mjs` | Actual Chromium responsive, navigation, guest and audio QA. |
+| `tests/kaios-world-audio-browser.mjs` | Heart/Universe real-browser music and return navigation. |
+| `K線西遊記/temples/11520/tests/11520-browser-audio-world.mjs` | 11520 shared audio and accepted home/event visual regression. |
+| `tests/kaios-portal-link-audit.mjs` | Reproducible old main-CTA inventory, preserved as review evidence. |
+| `.github/workflows/kaios-portal-product-qa.yml` | Exact-head Portal Product QA and screenshot artifacts. |
+
+No new economic, chain, cloud, payout or Physics authority. Boot files remain
+unchanged under their separately reserved edit rule.
+
 ## K11520 V2.8 Player Life
 
 Guest-first local game candidate implementation; no cloud provisioning, Mainnet

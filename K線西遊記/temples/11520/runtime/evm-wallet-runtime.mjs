@@ -106,7 +106,7 @@ export function savePlayerSession({xyz,intentXYZ},storage){
 export async function bindTempleReturnWalletContinuity({linkId='return-to-11520',statusId='return-wallet-continuity',sourceWorld='UNKNOWN',ethereum,storage=globalThis.localStorage}={}){
   const provider=detectInjectedWallet(ethereum),link=globalThis.document?.getElementById(linkId),status=globalThis.document?.getElementById(statusId);
   if(globalThis.document?.body){if(link)document.body.appendChild(link);if(status)document.body.appendChild(status)}
-  const render=value=>{const label=value?.address?`${value.address.slice(0,6)}…${value.address.slice(-4)}`:'尚未連結';if(status)status.textContent=`錢包延續：${label}`;if(link){link.dataset.walletContinuity=value?.address?'retained':'none';link.title=value?.address?`返回 11520 並保留公開錢包識別 ${label}`:'返回 11520；尚無公開錢包識別'}};
+  const render=value=>{const label=value?.address?`${value.address.slice(0,6)}…${value.address.slice(-4)}`:'尚未連結';if(status)status.textContent=`錢包延續：${label}`;if(link){const destination=link.dataset.kaiosReturn==='PORTAL'?'KAIOS 總世界':'11520';link.dataset.walletContinuity=value?.address?'retained':'none';link.title=value?.address?`返回 ${destination} 並保留公開錢包識別 ${label}`:`返回 ${destination}；尚無公開錢包識別`}};
   const refresh=async accounts=>{let value=readPublicWalletIdentity(storage);const list=accounts||await provider?.request?.({method:'eth_accounts'}).catch(()=>[])||[];if(EVM_ADDRESS.test(list[0]||'')){const chainHex=await provider?.request?.({method:'eth_chainId'}).catch(()=>null);value=savePublicWalletIdentity({address:list[0],chainId:chainHex?Number.parseInt(chainHex,16):null,sourceWorld},storage)}render(value);return value};
   await refresh();
   if(provider?.on)provider.on('accountsChanged',accounts=>{void refresh(accounts)});

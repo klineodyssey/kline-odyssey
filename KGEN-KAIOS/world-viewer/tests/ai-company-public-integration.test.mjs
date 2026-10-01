@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
+import {findWorld,playableDestination} from "../../../assets/kaios-world-registry.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const read = (relativePath) => readFile(path.join(root, relativePath), "utf8");
@@ -15,13 +16,22 @@ const API_FILES = [
   "status.json", "cursor-queue.json"
 ];
 
-test("official homepage exposes AI Company navigation, feature card, API and footer routes", async () => {
+test("official Portal preserves AI Company as folded informational research", async () => {
   const html = await read("index.html");
-  assert.match(html, /id="ai-company-runtime"/);
-  assert.match(html, /KAIOS AI 公司創造中心/);
-  assert.match(html, /href="\.\/world-viewer\/ai-company-v1\/"/);
-  assert.match(html, /href="\.\/api\/kaios\/ai-company\/v1\/"/);
-  assert.match(html, /NO EXTERNAL AUTONOMY/);
+  assert.match(html, /id="explore"/);
+  assert.match(html, /<details id="researchArchive"/);
+  assert.match(html, /id="researchArchiveCards"/);
+  assert.match(html, /src="assets\/kaios-portal\.mjs"/);
+  const world=findWorld('ai-company');
+  assert.equal(world.entryUrl,'world-viewer/ai-company-v1/');
+  assert.equal(world.status,'RESEARCH');
+  assert.equal(world.disclosure,true);
+  assert.deepEqual(world.capabilities,['INFORMATION_ONLY']);
+  assert.equal(playableDestination(world.worldId),null);
+  assert.match(world.subtitle,/NO EXTERNAL AUTONOMY/);
+  const viewer=await read(world.entryUrl+'index.html');
+  assert.match(viewer,/NO EXTERNAL AUTONOMY/);
+  assert.match(viewer,/api\/kaios\/ai-company\/v1/);
 });
 
 test("full World Viewer exposes the stable AI Company route", async () => {

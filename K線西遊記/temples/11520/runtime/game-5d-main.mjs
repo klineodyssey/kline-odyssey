@@ -21,6 +21,7 @@ import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
 import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs';
 import {createJourneyTutorial} from './world-runtime.mjs';
 import {createPlayerLife,installPlayerLifeUI} from './player-life-ui.mjs';
+import {createWorldFeedbackObserver,emit11520WorldFeedback} from './game-ui-product-fixes-v23.mjs';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const AXIS_MARKETS=Object.freeze({KX:'BTCUSDT',KY:'ETHUSDT',KZ:'BNBUSDT'});
@@ -50,6 +51,9 @@ function productEvent(event,details){try{playerStore.record(event,details)}catch
 S.kaios=playerStore.snapshot().kaios;
 setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elapsedMs:10000})},10000);
 function playerProgressSnapshot(){const p=playerLife.activePlayer();return {playerId:p.playerId,xp:p.xp,level:p.level,engineXp:p.engineXp,engineLevel:p.engineLevel,nextLevelXp:p.level>=10?null:25*p.level*p.level,nextEngineXp:p.engineLevel>=10?null:20*p.engineLevel*p.engineLevel}}
+const observeWorldFeedback=createWorldFeedbackObserver(emit11520WorldFeedback);
+function syncWorldFeedback(){const target=world.monsters.find(m=>m.simulationCombat),p=playerLife.activePlayer();observeWorldFeedback({playerId:p.playerId,level:p.level,engineLevel:p.engineLevel,houseLevel:playerLife.loadHomePlot().houseLevel,bossAlive:target?.journeyTier==='EPIC'&&target.state!=='DEAD',encounter:String(target?.id)+':'+(world.journeyCycle||0),phase:String(target?.exposed)+':'+(target?.hp/target?.maxHp<=.33?'LAST_STAND':target?.hp/target?.maxHp<=.66?'WOUNDED':'GUARD')})}
+syncWorldFeedback();
 globalThis.__K11520_PRODUCT__=Object.freeze({snapshot:()=>({...playerStore.snapshot(),...playerProgressSnapshot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED',crossMarket:crossMarketSnapshot(),marketEngine:marketEngineSnapshot()})});
 let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';
@@ -159,7 +163,8 @@ function performCombat(skill){
   if(r.hit)audioFx?.play?.(r.reason==='WEAK_POINT'?'weak':'hit');
   if(r.defeated){const eventId='combat:'+crypto.randomUUID();try{playerLife.recordEvent({id:eventId,type:'MONSTER_KILL'});if(r.loot){playerLife.recordEvent({id:eventId+':loot',type:'LOOT_DROP'});globalThis.K11520Backpack?.addItem?.({itemId:eventId+':loot',kind:'MATERIAL',name:r.loot.name||'取經碎片',qty:1,weightEach:.05,meta:{scope:'LOCAL_GAME_ONLY',playerId}})}}catch{}productEvent('MONSTER_KILL');if(r.loot){const p=productEvent('LOOT_DROP',{reward:r.rewardKaios}),rewardLabel=p.owner==='guest'?'本機 KAIOS':'錢包綁定 KAIOS 待發放';audioFx?.play?.('loot');audioFx?.speak?.(`擊倒${r.loot.name||'妖怪'}，獲得 ${r.rewardKaios} KAIOS`);toast(`掉寶：${r.loot.name} ×${r.loot.quantity} · ${r.loot.rarity} / ${rewardLabel} +${r.rewardKaios} · Lv.${playerLife.activePlayer().level}`,true)}}
   if(r.reason!=='COOLDOWN'){playAttack();const m=world.monsters.find(m=>m.id===world.kSpace?.targetId);combatFx?.trigger({variant:skill,heading:S.heading,target:r.hit&&m?{x:m.x,y:m.y,z:m.z}:null})}
-  renderCombatTarget();return r;
+  if(r.loot&&['RARE','EPIC'].includes(r.loot.rarity))emit11520WorldFeedback('RARE_LOOT');
+  syncWorldFeedback();renderCombatTarget();return r;
 }
 $('#attack').onclick=()=>performCombat('slash');$('#skill').onclick=()=>performCombat('goldenRain');
 $('#tradeSword').onclick=()=>performCombat('phantomAxe');
@@ -189,6 +194,7 @@ function renderCombatTarget(){
   journey.event('MOVE',{distance:Math.hypot(S.xyz.x-journeyOrigin.x,S.xyz.y-journeyOrigin.y,S.xyz.z-journeyOrigin.z)});
   journey.event('CONTROL',combatSelection());
   const tutorial=journey.snapshot();
+  syncWorldFeedback();
   if(tutorial.hint)monsterGuide.textContent=`${t.name} · ${Math.round(t.hp)}HP · ${s.distance.toFixed(1)}m\n${tutorial.hint}\n點此看故事／教學`;
   Object.assign(monsterGuide.style,{whiteSpace:tutorial.hint?'pre-line':'normal',boxSizing:'border-box',minHeight:'44px',pointerEvents:'auto'});
   monsterGuide.onclick=showCombatTarget;monsterGuide.setAttribute('role','button');monsterGuide.tabIndex=0;
@@ -280,7 +286,7 @@ function openOrder(){
   $('#confirmBody').innerHTML='<div class="card" id="simulationOrderPreview" aria-live="polite"></div><div class="card"><label>TRIGGER · 觸發價格<input id="simulationTriggerPrice" type="number" min="0" step="any" value="'+p+'"></label><details><summary>選填停損 / 止盈</summary><label>停損價<input id="simulationStopPrice" type="number" min="0" step="any"></label><label>止盈價<input id="simulationTakeProfitPrice" type="number" min="0" step="any"></label></details></div><p class="bad">CONFIRM ORDER → PENDING_TRIGGER。PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈、不簽名。</p>';
   if(isTestnet()){$('#confirmBody details').hidden=true;$('#confirmBody .bad').textContent='BSC TESTNET 97 · NO REAL VALUE。CONFIRM ORDER → WALLET CONFIRM → TX → RECEIPT CONFIRMED；其後仍為 PENDING，只有 keeper 有效 observation 才能成交。'}
   for(const input of $$('#confirmBody input'))input.addEventListener('input',paintOrderPreview);
-  paintOrderPreview();$('#confirm').classList.add('open');if(journey.event('PREVIEW',{c}))toast('序章完成 · 可繼續探索；錢包稍後再連，不需確認下單');
+  paintOrderPreview();$('#confirm').classList.add('open');if(journey.event('PREVIEW',{c})){emit11520WorldFeedback('QUEST_COMPLETE');toast('序章完成 · 可繼續探索；錢包稍後再連，不需確認下單')}
 }
 $('#cancelOrder').onclick=$('#confirmX').onclick=()=>{pending=null;$('#confirm').classList.remove('open')};
 $('#confirmOrder').onclick=async()=>{if(!pending||executionBusy)return;$('#confirmOrder').disabled=true;const input=orderInput();const r=await executionAction(()=>execution.submit(input));if(!r.ok){toast(r.code+' · '+r.reason);paintOrderPreview();return}productEvent('TRADE_OPEN');pending=null;$('#confirm').classList.remove('open');toast(executionLabel()+' '+(r.order?.orderId||r.orderId||'')+' PENDING_TRIGGER｜收據已確認');openOrgan('orders');renderAxes();hud()};

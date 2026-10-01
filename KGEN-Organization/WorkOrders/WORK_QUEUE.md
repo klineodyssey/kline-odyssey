@@ -1,5 +1,20 @@
 # KGEN Organization V2.0 WorkQueue
 
+## KAIOS World Portal / shared audio — 2026-10-01
+
+- Task: KAIOS-PORTAL-AUDIO-20261001; IMPLEMENTED_LOCAL_QA_PASS / PENDING_EXACT_HEAD_CI_AND_SECOND_REVIEW; P0; owner codex-gm-01.
+- Source: Human official Portal + Audio World System work order, current conversation.
+- Base: a6e65af31b7070425d44cdf08862ab26e26e0a9f; isolated branch
+  `codex/kaios-world-portal-audio`; Human dirty main and Physics PR #459 untouched.
+- Bounded session helpers: portal (registry/IA/profile), audio (shared lifecycle,
+  provenance, Heart/Universe), game_audio (11520 events). These are GM subtasks,
+  not new employees or compensation claims. GM owns integration and browser QA.
+- Delivery: one canonical root Portal, original synthetic audio, six responsive
+  sizes, real Chromium screenshot review, exact-head CI, PR for second review.
+- Safety: no paid music/cloud/Oracle, no chain writes or KAIOS payout. Legacy
+  commercial songs are not licensed by mere repository presence and are excluded.
+- Payroll/ATM advance: HOLD, no new verified funding/payment receipt.
+
 ## K11520 V2.8 Player Life — 2026-10-01
 
 - task_id: K11520-PLAYER-LIFE-20261001; status: IN_PROGRESS; priority: P0.

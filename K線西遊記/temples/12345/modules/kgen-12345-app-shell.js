@@ -741,6 +741,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
     // ===== Audio / Voice (mobile needs user gesture) =====
     audioOn:false, audioCtx:null, audioNodes:[],
     enableAudio(){
+        if(window.KAIOS_SHARED_AUDIO){return window.KAIOS_AUDIO?.unlock().then(()=>window.KAIOS_AUDIO.setMusicEnabled(true));}
         try{
             const btn = document.querySelector('.nav-audio');
             if(this.audioOn){
@@ -814,6 +815,7 @@ const ri=document.getElementById('rec-ind'); if(ri) ri.style.display = 'none';
         }catch(_){}
     },
 speak(m){
+      if(window.KAIOS_SHARED_AUDIO)return window.KAIOS_AUDIO?.speak(m);
       try{
         if(!m) return;
         const u = new SpeechSynthesisUtterance(ui.sanitize(m));
@@ -865,6 +867,7 @@ speak(m){
     }catch(_){}
   },
   musicInit(){
+    if(window.KAIOS_SHARED_AUDIO)return;
     try{
       this._music = this._music || {};
       const audio=document.getElementById('music-audio');

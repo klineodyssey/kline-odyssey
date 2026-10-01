@@ -1,4 +1,5 @@
 import { createResilientBrowserUniverseStore, createUniverseRuntime, loadCanonicalSeed } from "../../../core/registry/universe-runtime.mjs?v=11520-v4.1.2-storage-fallback";
+import {getKaiosAudio} from '../../../assets/kaios-audio.mjs';
 import { createListing } from "../../../core/market/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { buildPortfolio } from "../../../core/portfolio/index.mjs?v=11520-v4.1-ai-ant-bank";
 import { createLifeDraft } from "../../../core/life/factory.mjs?v=11520-v4.1-ai-ant-bank";
@@ -730,16 +731,16 @@ function speakText(text, status, root = document) {
     return false;
   }
   try {
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = {};
     utterance.lang = voiceLocale;
     const selected = chooseVoice(voiceLocale);
     if (selected) utterance.voice = selected;
     utterance.onstart = () => { if (status) status.textContent = "VOICE_OUTPUT_SPEAKING"; setConciergeState("SPEAKING", null, root); };
     utterance.onend = () => { if (status) status.textContent = "VOICE_OUTPUT_COMPLETE"; setConciergeState("IDLE", null, root); recordLocalPlayerMetric("voice_output_success"); };
     utterance.onerror = (event) => { if (status) status.textContent = `VOICE_OUTPUT_ERROR · ${event.error ?? "UNKNOWN"}`; setConciergeState("ERROR", "VOICE_OUTPUT_ERROR", root); recordLocalPlayerMetric("voice_failure"); };
-    globalThis.speechSynthesis.cancel();
-    globalThis.speechSynthesis.resume();
-    globalThis.speechSynthesis.speak(utterance);
+    const audio=getKaiosAudio();
+    if(globalThis.navigator?.userActivation?.isActive)audio.unlock().then(ok=>{if(ok)audio.speak(text,utterance)});
+    else if(!audio.speak(text,utterance)){if(status)status.textContent='VOICE_MUTED_OR_GESTURE_REQUIRED';return false;}
     return true;
   } catch (error) {
     if (status) status.textContent = `VOICE_OUTPUT_ERROR · ${error.name ?? "UNKNOWN"}`;

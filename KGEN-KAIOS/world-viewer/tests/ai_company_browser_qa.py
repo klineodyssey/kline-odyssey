@@ -54,20 +54,35 @@ def main() -> int:
                     homepage.on("pageerror", lambda error: homepage_errors.append(str(error)))
                     homepage.goto(f"{args.base_url}/", wait_until="domcontentloaded", timeout=20000)
                     homepage.wait_for_function(
-                        "document.querySelector('#ai-company-runtime') !== null", timeout=10000
+                        "document.querySelector('#researchArchiveCards [data-world-id=\"ai-company\"]') !== null",
+                        timeout=10000,
                     )
-                    if not homepage.locator("#ai-company-runtime").is_visible():
-                        failures.append(f"{label}: homepage AI Company section hidden")
-                    if homepage.get_by_text("KAIOS AI 公司創造中心", exact=True).count() < 1:
-                        failures.append(f"{label}: homepage marker missing")
-                    if homepage.locator('a[href="./world-viewer/ai-company-v1/"]').count() < 2:
-                        failures.append(f"{label}: homepage navigation/card links missing")
+                    archive = homepage.locator("#researchArchive")
+                    if archive.get_attribute("open") is not None:
+                        failures.append(f"{label}: research should not dominate first-screen playable worlds")
+                    homepage.locator("#researchArchive > summary").click()
+                    card = homepage.locator('#researchArchiveCards [data-world-id="ai-company"]')
+                    if not card.is_visible() or card.get_attribute("data-status") != "RESEARCH":
+                        failures.append(f"{label}: informational AI Company disclosure unavailable")
+                    if "NO EXTERNAL AUTONOMY" not in card.inner_text():
+                        failures.append(f"{label}: informational authority boundary missing")
+                    info_link = card.get_by_role("link", name="了解更多 ↗", exact=True)
+                    if info_link.count() != 1 or not info_link.get_attribute("href").endswith(
+                        "/world-viewer/ai-company-v1/"
+                    ):
+                        failures.append(f"{label}: canonical AI Company informational route missing")
+                    if card.locator('[data-world-id="ai-company"]').count() or "PLAYABLE" in card.inner_text():
+                        failures.append(f"{label}: research falsely promoted as playable")
                     if homepage.evaluate(
                         "document.documentElement.scrollWidth > document.documentElement.clientWidth + 1"
                     ):
                         failures.append(f"{label}: homepage horizontal overflow")
                     if homepage_errors:
                         failures.append(f"{label}: homepage console errors: {' | '.join(homepage_errors)}")
+                    info_link.click()
+                    homepage.wait_for_url("**/world-viewer/ai-company-v1/")
+                    if not homepage.get_by_role("heading", name="KAIOS AI Company").is_visible():
+                        failures.append(f"{label}: Portal research link did not reach the actual Viewer")
                     homepage.close()
 
                     page = context.new_page()
