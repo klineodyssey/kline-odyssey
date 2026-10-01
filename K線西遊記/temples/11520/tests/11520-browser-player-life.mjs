@@ -217,7 +217,7 @@ async function runV29(width,height){
     for(let i=0;i<3;i++)await bossPage.locator('#attack').click();assert.equal((await snap(bossPage)).player.xp,defeated.player.xp,'Boss reward once-only');
     boss.events=await bossPage.evaluate(()=>__K11520_WORLD_AUDIO__.snapshot().events.map(e=>e.event));for(const e of ['BOSS_SPAWN','BOSS_PHASE_CHANGE','BOSS_RAGE','BOSS_LOW_HP','BOSS_DEFEAT'])assert(boss.events.includes(e),e+' feedback from actual combat');
     boss.victoryToast=await bossPage.evaluate(()=>{
-      const toast=document.querySelector('#toast'),guide=document.querySelector('#monsterGuide');
+      const toast=document.querySelector('#toast'),guide=document.querySelector('#k11520MonsterGuide');
       const a=toast.getBoundingClientRect(),b=guide.getBoundingClientRect();
       return {visible:toast.classList.contains('show')&&a.width>0&&a.height>0,toast:{x:a.x,y:a.y,width:a.width,height:a.height},monsterGuide:{x:b.x,y:b.y,width:b.width,height:b.height},overlap:Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)};
     });
