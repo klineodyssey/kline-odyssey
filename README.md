@@ -6,6 +6,18 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### TempleHeart V3.4 completion candidate — not Mainnet activated
+
+Existing V3.4 source is preserved. Local adversarial EVM tests, unsigned fresh
+proxy deployment package and read-only legacy/V3.4 identity adapters continue in
+`KGEN-KAIOS/tests/templeheart.integration.test.mjs`,
+`KGEN-KAIOS/tools/validate-templeheart-storage.mjs` and
+`core/integrations/temple-heart-12345.mjs`.
+Current gaps and old-state continuity are recorded in
+`KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md`.
+Mainnet remains legacy V3.2.6; FortuneGame #133 stays HOLD. This is not a
+deployment, funding, role-change or new frontend activation authorization.
+
 ### K11520 V2.9 gameplay candidate
 
 Player/GA600 game progression, Boss encounters, rarity loot and Daily Journey

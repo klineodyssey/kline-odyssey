@@ -4,6 +4,67 @@ Status: REVIEW CANDIDATE — NOT MAINNET DEPLOYED
 Human canon date: 2026-08-09
 Executable source: `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol`
 
+## 2026-10-03 completion continuation (cumulative)
+
+This section supersedes historical execution suggestions below only for the new
+completion release. Existing source and historical rehearsal evidence are retained.
+PR #133 FortuneGame remains HOLD; PR #134 is historical reference, not a merge base.
+The original incident was multi-address abuse of the legacy user-selected maximum
+888 KGEN payout. The current proof-controlled maximum remains **8**, minimum burn
+**1**, wallet/civilization cooldown **30 days**, epoch cap **500**, and repayment is
+required after a prior claim. No contract economics or storage were changed here.
+
+| Completion item | Implemented path / current boundary |
+|---|---|
+| Fresh implementation + proxy package | `KGEN-KAIOS/tools/validate-templeheart-storage.mjs --deployment-package public-config.json`; unsigned creation calldata, atomic initializer, explicit roles, registry initialization, nonce predictions, hashes, gas/value caps; no broadcast route. |
+| Legacy continuity | `core/integrations/temple-heart-12345.mjs`: block-bound legacy balances, cooldowns, Lamp, Festival and New Year reads. Failed reads reject; no fictitious migrated storage or inherited allowance. |
+| V3.4 frontend adapter | Same integration module: chain97-only identity verification and unsigned allowlisted call preparation. **Not yet wired as a complete interactive V3.4 UI.** Mainnet writes remain the existing V3.2.6 runtime. |
+| Adversarial tests | `KGEN-KAIOS/tests/templeheart.integration.test.mjs`: proof/wallet/beneficiary/civilization attacks, repayment requirement, 501-wallet real-proof epoch test, 89-wallet Heartbeat/Ignite caps, initializer/roles/UUPS, callback reentrancy, fresh local proxy package. |
+| CI | `.github/workflows/kaios-portal-product-qa.yml`: exact-head local EVM job without RPC credentials or external signer secrets; existing browser regressions retained. |
+| Read-only live audit | Existing tool `--live-readonly`; authenticated RPC URLs and secrets are never included in output. |
+
+Read-only observations (not deployment authorization):
+
+- BSC56 block **125325738**: old Heart
+  `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972` has a zero ERC1967
+  implementation slot; it remains the known **direct V3.2.6 deployment**, never an
+  `upgradeToAndCall` target. Reserve at that block: **2792 KGEN**. This is not a
+  funding commitment and is below the new Heart's 20000 operational floor.
+- Registry `0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D` resolves 11520 to
+  `0xd0605F4EF10e5C1438F11AF9edc36926769239d6`; proof interface at
+  `0xD4E67B3a69e41524c424150E6b6e921b01D036db` accepts an empty-record read.
+  This does not certify proof issuance policy or new role assignments.
+- BSC97 block **134471434**: historical proxy
+  `0xa74F84942ADe7F668009BC4cB9E73C05ed5A3296` reports 3.4.0 and implementation
+  `0x52FFbEDAdD60c94a7FFc5B2EA36D57Cf666ab3f2` matches current compiled runtime
+  after compiler-declared immutable masking. Its nonzero FortuneGame binding
+  makes it **unsuitable as the fresh FortuneGame-disabled candidate**. Do not run
+  the historical V3.3.2/disposable-proxy rehearsal against it.
+
+### Remaining release gates — MAINNET_READY = NO
+
+1. Confirm public Admin/Upgrader/Operator/HolyCupSigner assignments and independent
+   proof/civilization issuance policy. A legacy owner is not automatically any new role.
+2. Confirm legacy Fortune/Heartbeat cooldown cutover policy, then implement and test
+   the chosen enforcement. The read-only adapter alone does **not** enforce cooldowns
+   on the new proxy. Do not activate with a silent cooldown reset.
+3. Complete isolated real BSC97 rehearsal without FortuneGame and the interactive
+   V3.4 candidate UI using the existing Wallet/Heart authority. Local chain97 tests
+   and historical BSC97 receipts are not new live rehearsal receipts.
+4. Confirm new funding source/amount and old reserve disposition; account for token
+   transfer behavior. No automatic sweep, transfer or approval. Old token allowances
+   cannot be migrated to a new spender.
+5. Produce a clean exact-head final manifest with live nonce/address predictions,
+   gas estimates, all code identities and postchecks; obtain one final Human
+   approval before any BSC56 execution. Current output is explicitly an unsigned
+   **candidate**, not a READY or executable authorization.
+
+Lamp, Festival and New Year remain legacy reads/actions because V3.4 lacks those
+legacy selectors. Wish/Vow history stays in original event logs; new V3.4 Wish
+requires civilization context. No legacy storage is fabricated. Pausing or a
+future storage-compatible proxy rollback requires its own authorized execution.
+No Mainnet transaction, KGEN transfer, role change or treasury change was performed.
+
 ## V3.3.2 baseline and upgrade rule
 
 V3.4.0 is an append-only UUPS candidate over the V3.3.2 custom storage layout. The executable filename remains version-free under repository governance. Solidity is pinned to 0.8.24 and both OpenZeppelin packages are pinned to 5.0.2.

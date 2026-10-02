@@ -3,6 +3,130 @@ import { invariant } from "../shared/errors.mjs";
 export const TEMPLE_HEART_ADDRESS = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
 export const HEART_ELIGIBILITY_SOURCE = "CLIENT_DERIVED";
 
+// Selective continuation of PR #134's resolver/ABI seam, not its obsolete UI,
+// Wallet or FortuneGame runtime. An allowed version alone is never identity.
+export const TEMPLE_HEART_V34_ABI = Object.freeze([
+  "function version() view returns (string)",
+  "function hasRole(bytes32,address) view returns (bool)",
+  "function kgen() view returns (address)",
+  "function organRegistry() view returns (address)",
+  "function kaiosAlchemyProofSource() view returns (address)",
+  "function fortuneGame() view returns (address)",
+  "function fortuneMaxWhole() view returns (uint256)",
+  "function fortuneEpochMaxClaims() view returns (uint256)",
+  "function nextFortuneEligibility(address) view returns (bool eligible,bool repaymentSatisfied,uint256 cooldownEndsAt)",
+  "function makeWish(bytes32 wishHash,bytes32 civilizationId)",
+  "function submitHolyCupProof(bytes32,bytes32,bytes32,uint256,bytes)",
+  "function recordBurnOffering(bytes32,uint8)",
+  "function fortuneClaim(bytes32 proofId)",
+  "function voluntaryRepayFortune(uint256 amount)",
+  "function heartbeatClaim()",
+  "function igniteAndClaim()"
+]);
+const HEART_IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
+const HEART_ZERO = "0x0000000000000000000000000000000000000000";
+
+export function resolveTempleHeartLineage({ chainId, mode = "LEGACY_V326", manifest = null } = {}) {
+  if (Number(chainId) === 56 && mode === "LEGACY_V326") return Object.freeze({
+    status:"LEGACY_V326", address:TEMPLE_HEART_ADDRESS, chainId:56,
+    useExistingWalletAndHeartRuntime:true, newAuthority:false
+  });
+  if (Number(chainId) !== 97 || mode !== "V34_CANDIDATE") return Object.freeze({status:"V34_NOT_ACTIVATED", writeEnabled:false});
+  if (!manifest || Number(manifest.chainId) !== 97 || String(manifest.proxy).toLowerCase() === TEMPLE_HEART_ADDRESS.toLowerCase()) {
+    return Object.freeze({status:"CANDIDATE_MANIFEST_REQUIRED", writeEnabled:false});
+  }
+  return Object.freeze({status:"IDENTITY_VERIFICATION_REQUIRED", address:manifest.proxy, chainId:97, writeEnabled:false});
+}
+
+// Read-only, block-bound identity verification. No wallet prompt, switch, signer,
+// approve or automatic submission. The UI's existing explicit action gate must
+// still confirm each prepared transaction. BSC56 candidate activation is absent.
+export async function verifyTempleHeartCandidate({ ethers, provider, manifest }) {
+  const lineage = resolveTempleHeartLineage({chainId:manifest?.chainId, mode:"V34_CANDIDATE", manifest});
+  invariant(lineage.status === "IDENTITY_VERIFICATION_REQUIRED", "V34_NOT_ACTIVATED");
+  const utils = ethers.utils ?? ethers;
+  const network = await provider.getNetwork();
+  invariant(Number(network.chainId) === 97, "BSC97_REQUIRED");
+  for (const key of ["proxy", "implementation", "kgen", "registry", "proofSource"]) {
+    invariant(utils.isAddress(manifest[key]) && manifest[key].toLowerCase() !== HEART_ZERO, "INVALID_MANIFEST_ADDRESS");
+  }
+  const block = await provider.getBlock("latest"), tag = block.number;
+  const [proxyCode, implementationCode, slot] = await Promise.all([
+    provider.getCode(manifest.proxy, tag), provider.getCode(manifest.implementation, tag),
+    provider.getStorageAt ? provider.getStorageAt(manifest.proxy, HEART_IMPLEMENTATION_SLOT, tag) : provider.getStorage(manifest.proxy, HEART_IMPLEMENTATION_SLOT, tag)
+  ]);
+  invariant(proxyCode !== "0x" && implementationCode !== "0x", "NO_CODE");
+  invariant(utils.keccak256(proxyCode) === manifest.proxyCodeHash, "PROXY_CODE_MISMATCH");
+  invariant(utils.keccak256(implementationCode) === manifest.implementationCodeHash, "IMPLEMENTATION_CODE_MISMATCH");
+  invariant(`0x${slot.slice(-40)}`.toLowerCase() === manifest.implementation.toLowerCase(), "IMPLEMENTATION_SLOT_MISMATCH");
+  const contract = new ethers.Contract(manifest.proxy, TEMPLE_HEART_V34_ABI, provider);
+  const read = {blockTag:tag};
+  invariant(await contract.version(read) === "3.4.0", "VERSION_MISMATCH");
+  for (const [getter,key] of [["kgen","kgen"],["organRegistry","registry"],["kaiosAlchemyProofSource","proofSource"]]) {
+    invariant((await contract[getter](read)).toLowerCase() === manifest[key].toLowerCase(), "BINDING_MISMATCH");
+  }
+  invariant((await contract.fortuneGame(read)).toLowerCase() === HEART_ZERO, "FORTUNEGAME_133_HOLD");
+  invariant(String(await contract.fortuneMaxWhole(read)) === "8", "FORTUNE_MAX_MISMATCH");
+  invariant(String(await contract.fortuneEpochMaxClaims(read)) === "500", "FORTUNE_CAP_MISMATCH");
+  for (const role of ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "OPERATOR_ROLE", "HOLY_CUP_SIGNER_ROLE"]) {
+    const account = manifest.roles?.[role];
+    invariant(utils.isAddress(account) && account.toLowerCase() !== HEART_ZERO, "ROLE_MANIFEST_REQUIRED");
+    invariant(await contract.hasRole(role === "DEFAULT_ADMIN_ROLE" ? `0x${"00".repeat(32)}` : utils.id(role), account, read), "ROLE_MISMATCH");
+  }
+  return Object.freeze({status:"CANDIDATE_READ_VERIFIED", chainId:97, address:manifest.proxy, blockNumber:tag,
+    blockHash:block.hash, implementation:manifest.implementation, writeEnabled:false, contract});
+}
+
+export function prepareTempleHeartCandidateCall({ethers, chainId, manifest, action, args = []}) {
+  invariant(resolveTempleHeartLineage({chainId,mode:"V34_CANDIDATE",manifest}).status === "IDENTITY_VERIFICATION_REQUIRED", "V34_NOT_ACTIVATED");
+  const utils = ethers.utils ?? ethers;
+  const signatures = {
+    WISH:"makeWish(bytes32,bytes32)", HOLY_CUP:"submitHolyCupProof(bytes32,bytes32,bytes32,uint256,bytes)",
+    OFFERING:"recordBurnOffering(bytes32,uint8)", FORTUNE:"fortuneClaim(bytes32)",
+    REPAY_FORTUNE:"voluntaryRepayFortune(uint256)", HEARTBEAT:"heartbeatClaim()", IGNITE:"igniteAndClaim()"
+  };
+  invariant(Boolean(signatures[action]), "UNSUPPORTED_V34_ACTION_USE_LEGACY");
+  invariant(utils.isAddress(manifest.proxy), "INVALID_PROXY");
+  if (action === "REPAY_FORTUNE") invariant(/^[1-9][0-9]*$/.test(String(args[0] ?? "")), "POSITIVE_BASE_UNIT_AMOUNT_REQUIRED");
+  const iface = new utils.Interface(TEMPLE_HEART_V34_ABI);
+  const data = iface.encodeFunctionData(signatures[action], args);
+  return Object.freeze({chainId:97,to:manifest.proxy,data,value:"0",action,
+    status:"PREPARED_NOT_SIGNED", requiresFreshIdentityCheck:true, requiresExplicitWalletConfirmation:true});
+}
+
+// Non-mutating continuity adapter. State is read from the original contract at
+// one block, not copied into a fictitious new-proxy ledger. Missing reads fail
+// as a unit; an RPC failure is not a zero/never-claimed value.
+export async function readTempleHeartLegacyContinuity({ethers, provider, walletAddress}) {
+  const utils = ethers.utils ?? ethers;
+  invariant(utils.isAddress(walletAddress), "INVALID_WALLET_ADDRESS", "有效的公開錢包地址為必填");
+  invariant(Number((await provider.getNetwork()).chainId) === 56, "BSC56_REQUIRED", "舊 Heart 歷史須從 BSC56 讀取");
+  const block = await provider.getBlock("latest"), read = {blockTag:block.number};
+  const heart = new ethers.Contract(TEMPLE_HEART_ADDRESS, [...TEMPLE_HEART_READ_ABI,
+    "function festivalClaimed(uint8,uint256,address) view returns(bool)",
+    "function newYearCountdownClaimed(uint256,address,uint8) view returns(bool)"
+  ], provider);
+  const year = new Date(block.timestamp * 1000).getUTCFullYear();
+  const [kgen, fortune, heartbeat, ignite, lamp, festival520, festival1111, newYear] = await Promise.all([
+    heart.kgen(read), heart.lastFortuneAt(walletAddress,read), heart.lastHeartbeatAt(walletAddress,read),
+    heart.lastIgniteDay(walletAddress,read), heart.lampExpireAt(walletAddress,read),
+    heart.festivalClaimed(1,year,walletAddress,read), heart.festivalClaimed(2,year,walletAddress,read),
+    Promise.all(Array.from({length:10},(_,slot)=>heart.newYearCountdownClaimed(year,walletAddress,slot,read)))
+  ]);
+  invariant(kgen.toLowerCase() === "0xba3d3810e58735cb6813bc1cdc5458c0d71432be", "LEGACY_KGEN_MISMATCH", "舊 Heart KGEN 綁定不符");
+  const token = new ethers.Contract(kgen, ERC20_READ_ABI, provider);
+  const [walletBalance, heartReserve, oldAllowance] = await Promise.all([
+    token.balanceOf(walletAddress,read), token.balanceOf(TEMPLE_HEART_ADDRESS,read), token.allowance(walletAddress,TEMPLE_HEART_ADDRESS,read)
+  ]);
+  return Object.freeze({status:"LEGACY_READ_ONLY",chainId:56,legacyHeart:TEMPLE_HEART_ADDRESS,walletAddress,
+    blockNumber:block.number,blockHash:block.hash,blockTimestamp:block.timestamp,year,
+    lastFortuneAt:String(fortune),lastHeartbeatAt:String(heartbeat),lastIgniteDay:String(ignite),lampExpireAt:String(lamp),
+    festivalClaimed:{1:festival520,2:festival1111},newYearCountdownClaimed:newYear,
+    walletKgen:String(walletBalance),oldHeartReserve:String(heartReserve),legacyAllowance:String(oldAllowance),
+    newProxyAllowance:"NOT_INHERITED",newProxyStorageWritten:false,
+    wishAndVowHistory:"RETAIN_ORIGINAL_EVENT_LOGS_NOT_SYNTHESIZED",cooldownCutover:"HUMAN_POLICY_REQUIRED"});
+}
+
 export const TEMPLE_HEART_READ_ABI = Object.freeze([
   "function configLocked() view returns (bool)",
   "function kgen() view returns (address)",

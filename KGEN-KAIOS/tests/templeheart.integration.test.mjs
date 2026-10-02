@@ -1,4 +1,9 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import * as ethers from "ethers";
+import { resolveTempleHeartLineage, verifyTempleHeartCandidate, prepareTempleHeartCandidateCall, readTempleHeartLegacyContinuity } from "../../core/integrations/temple-heart-12345.mjs";
 import test, { afterEach } from "node:test";
 import { AbiCoder, Contract, Wallet, id, keccak256, toBeHex, zeroPadValue } from "ethers";
 import {
@@ -13,6 +18,126 @@ import {
 } from "./helpers.mjs";
 
 afterEach(cleanupProviders);
+
+test("legacy continuity is block-bound and never resets claims or invents new-proxy allowance", async () => {
+  const account = "0x0000000000000000000000000000000000000001";
+  const token = "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be";
+  const calls = [];
+  let failRead = false;
+  const fake = {...ethers, Contract:class {
+    constructor(){return new Proxy({}, {get:(_,name)=>async(...args)=>{
+      assert.equal(args.at(-1).blockTag,123);
+      calls.push(name);
+      if (failRead && name === "lampExpireAt") throw new Error("READ_UNAVAILABLE");
+      if (name === "kgen") return token;
+      if (name === "festivalClaimed") return args[0] === 1;
+      if (name === "newYearCountdownClaimed") return args[2] === 7;
+      return 99n;
+    }});}
+  }};
+  const provider = {getNetwork:async()=>({chainId:56}),getBlock:async()=>({number:123,hash:id("BLOCK"),timestamp:1790959101})};
+  const state = await readTempleHeartLegacyContinuity({ethers:fake,provider,walletAddress:account});
+  assert.equal(state.festivalClaimed[1],true);
+  assert.equal(state.newYearCountdownClaimed[7],true);
+  assert.equal(state.lampExpireAt,"99");
+  assert.equal(state.newProxyAllowance,"NOT_INHERITED");
+  assert.equal(state.newProxyStorageWritten,false);
+  assert.equal(calls.filter(n=>n === "newYearCountdownClaimed").length,10);
+  failRead = true;
+  await assert.rejects(readTempleHeartLegacyContinuity({ethers:fake,provider,walletAddress:account}),/READ_UNAVAILABLE/);
+});
+
+test("reward-token callback cannot reenter heartbeat or alter Fortune accounting", async () => {
+  const context = await setupLineage();
+  context.kgen = await deploy("ReentrantMockKGEN",context.owner,[await context.owner.getAddress()]);
+  const {heart} = await deployTempleHeart(context);
+  const user = context.signers[2];
+  await (await context.kgen.transfer(await heart.getAddress(),21000n * ETHER)).wait();
+  await (await heart.connect(user).makeWish(id("REENTRANT-WISH"),id("REENTRANT-CIV"))).wait();
+  await (await context.kgen.arm(await heart.getAddress(),heart.interface.encodeFunctionData("heartbeatClaim"))).wait();
+  await (await heart.connect(user).heartbeatClaim()).wait();
+  assert.equal(await context.kgen.attackRejected(),true);
+  assert.equal(await context.kgen.attackError(),id("ReentrancyGuardReentrantCall()").slice(0,10));
+  assert.equal(await heart.totalHeartbeats(),1n);
+  assert.equal(await heart.totalFortuneClaimants(),0n);
+});
+
+test("fresh V3.4 package deploys locally with atomic proxy initializer, distinct roles and no FortuneGame", async () => {
+  const context = await setupLineage({chainId:97});
+  const root = path.resolve(import.meta.dirname, "..");
+  const owner = await context.owner.getAddress();
+  const roleAddresses = await Promise.all(context.signers.slice(1,5).map((s) => s.getAddress()));
+  const config = {chainId:97, deployer:owner, admin:roleAddresses[0], upgrader:roleAddresses[1],
+    operator:roleAddresses[2], holyCupSigner:roleAddresses[3], kgen:await context.kgen.getAddress(),
+    legacyBrainVault:owner, proofSource:await context.kaios.getAddress(), registry:await context.registry.getAddress(),
+    treasury11520:await context.exchangeTreasury11520.getAddress(), startNonce:await context.provider.getTransactionCount(owner),
+    gasCaps:{implementation:6000000,proxy:1500000,registryInitialization:300000}, maxGasPriceWei:"10000000000"};
+  const input = path.join(root, "artifacts", "templeheart-local-package-input.json");
+  fs.writeFileSync(input, JSON.stringify(config));
+  execFileSync(process.execPath, ["tools/validate-templeheart-storage.mjs", "--deployment-package", input], {cwd:root});
+  const pkg = JSON.parse(fs.readFileSync(path.join(root,"artifacts","TEMPLEHEART_DEPLOYMENT_PACKAGE.json")));
+  assert.equal(pkg.broadcast,false);
+  assert.equal(pkg.caps.kgenTransfer,"0");
+  assert.equal(pkg.status,"UNSIGNED_CANDIDATE_NOT_MAINNET_READY");
+  for (const [change, expected] of [
+    [{chainId:1}, "UNSUPPORTED_CHAIN"],
+    [{admin:ethers.ZeroAddress}, "ZERO_ADDRESS:admin"],
+    [{fortuneGame:owner}, "FORTUNEGAME_133_HOLD"],
+    [{gasCaps:{}}, "MISSING_GAS_CAP:implementation"],
+    [{chainId:56}, "KGEN_IDENTITY_MISMATCH"]
+  ]) {
+    fs.writeFileSync(input, JSON.stringify({...config,...change}));
+    assert.throws(() => execFileSync(process.execPath,
+      ["tools/validate-templeheart-storage.mjs","--deployment-package",input],
+      {cwd:root,stdio:"pipe"}), error => String(error.stderr).includes(expected));
+  }
+  fs.writeFileSync(input, JSON.stringify(config));
+  assert.throws(() => execFileSync(process.execPath,
+    ["tools/validate-templeheart-storage.mjs","--deployment-package",input,"--testnet-rehearsal"],
+    {cwd:root,stdio:"pipe"}), error => String(error.stderr).includes("ONE_OPERATION_ONLY"));
+  for(const [i, step] of pkg.transactions.entries()) {
+    const signer = i === 2 ? context.signers[1] : context.owner;
+    // LOCAL EVM ONLY. No production/provider URLs or external signers.
+    const receipt = await (await signer.sendTransaction({to:step.to,data:step.data,value:0,gasLimit:step.gasLimit})).wait();
+    assert.equal(receipt.status,1);
+    if(i === 0) assert.equal(receipt.contractAddress,pkg.implementation);
+    if(i === 1) assert.equal(receipt.contractAddress,pkg.proxy);
+  }
+  const roles = Object.fromEntries(["DEFAULT_ADMIN_ROLE","UPGRADER_ROLE","OPERATOR_ROLE","HOLY_CUP_SIGNER_ROLE"].map((r,i) => [r,roleAddresses[i]]));
+  const manifest = {chainId:97,proxy:pkg.proxy,implementation:pkg.implementation,roles,
+    kgen:config.kgen,registry:config.registry,proofSource:config.proofSource,
+    proxyCodeHash:keccak256(await context.provider.getCode(pkg.proxy)),
+    implementationCodeHash:keccak256(await context.provider.getCode(pkg.implementation))};
+  const verified = await verifyTempleHeartCandidate({ethers,provider:context.provider,manifest});
+  assert.equal(verified.status,"CANDIDATE_READ_VERIFIED");
+  assert.equal(verified.writeEnabled,false);
+  assert.equal(resolveTempleHeartLineage({chainId:56}).address,"0xB016D4d8f1aED1339101b30722cad6dbA9B8C972");
+  assert.equal(resolveTempleHeartLineage({chainId:56,mode:"V34_CANDIDATE",manifest}).writeEnabled,false);
+  const interfaces = new ethers.Interface(artifact("KGEN_TempleHeart_Upgradeable").abi);
+  for(const [action,args,name] of [["WISH",[id("W"),id("C")],"makeWish"],["FORTUNE",[id("P")],"fortuneClaim"],
+    ["REPAY_FORTUNE",["9"],"voluntaryRepayFortune"],["HEARTBEAT",[],"heartbeatClaim"],["IGNITE",[],"igniteAndClaim"]]) {
+    const call = prepareTempleHeartCandidateCall({ethers,chainId:97,manifest,action,args});
+    assert.equal(interfaces.parseTransaction(call).name,name);
+    assert.equal(call.status,"PREPARED_NOT_SIGNED");
+  }
+  for(const action of ["LIGHT","VOW","FESTIVAL","NEW_YEAR","GAME_PAYOUT"]) {
+    assert.throws(() => prepareTempleHeartCandidateCall({ethers,chainId:97,manifest,action}),{code:"UNSUPPORTED_V34_ACTION_USE_LEGACY"});
+  }
+  await assert.rejects(verifyTempleHeartCandidate({ethers,provider:context.provider,manifest:{...manifest,implementationCodeHash:id("FAKE")}}),{code:"IMPLEMENTATION_CODE_MISMATCH"});
+  await assert.rejects(verifyTempleHeartCandidate({ethers,provider:context.provider,manifest:{...manifest,roles:{...roles,UPGRADER_ROLE:owner}}}),{code:"ROLE_MISMATCH"});
+  const heart = new Contract(pkg.proxy,artifact("KGEN_TempleHeart_Upgradeable").abi,context.signers[1]);
+  await rejectsHeart(heart.initializeV340.staticCall(config.registry),heart,"InvalidInitialization");
+});
+
+// Decode the named contract error: a generic rejection could hide an unrelated
+// balance, RPC or setup failure and would not prove the anti-bot gate.
+async function rejectsHeart(call, heart, name) {
+  await assert.rejects(call, (error) => {
+    const data = error.data ?? error.info?.error?.data?.result;
+    assert.equal(heart.interface.parseError(data)?.name, name);
+    return true;
+  });
+}
 
 async function deployTempleHeart(context) {
   const implementation = await deploy("KGEN_TempleHeart_Upgradeable", context.owner);
@@ -97,6 +222,92 @@ async function moveToNextUtcDay(context, secondOfDay = 0) {
   await setTimeRaw(context, target);
   return target - secondOfDay;
 }
+
+test("BOT_001..005/009: proof reuse, wallet substitution, beneficiary/civilization mismatch and unpaid repeat claim reject", async () => {
+  const context = await setupLineage();
+  const { heart, implementation } = await deployTempleHeart(context);
+  const [user, other] = [context.signers[2], context.signers[3]];
+  const civ = id("BOT-CIV"), wish = id("BOT-WISH");
+  await mintKaiosByBurningKgen(context, 2n * ETHER);
+  await (await context.kgen.transfer(await heart.getAddress(), 21_000n * ETHER)).wait();
+  await makeWishAndHolyCup(context, heart, user, civ, wish, "BOT-A");
+  await makeWishAndHolyCup(context, heart, other, civ, wish, "BOT-B");
+  const proof = await createFortuneProof(context, heart, user, civ, wish, "BOT");
+  await rejectsHeart(heart.connect(other).fortuneClaim.staticCall(proof), heart, "BurnerMismatch");
+  const redirect = await createFortuneProof(context, heart, user, civ, wish, "REDIRECT", other);
+  await rejectsHeart(heart.connect(user).fortuneClaim.staticCall(redirect), heart, "BeneficiaryMismatch");
+  await makeWishAndHolyCup(context, heart, user, id("OTHER-CIV"), wish, "BOT-C");
+  await rejectsHeart(heart.connect(user).fortuneClaim.staticCall(proof), heart, "CivilizationMismatch");
+  await makeWishAndHolyCup(context, heart, user, civ, wish, "BOT-D");
+  await (await heart.connect(user).fortuneClaim(proof)).wait();
+  await rejectsHeart(heart.connect(user).fortuneClaim.staticCall(proof), heart, "ProofAlreadyConsumed");
+  await rejectsHeart(heart.connect(other).fortuneClaim.staticCall(proof), heart, "ProofAlreadyConsumed");
+  await advanceTime(context.provider, 30 * 86_400 + 1);
+  await makeWishAndHolyCup(context, heart, user, civ, wish, "BOT-E");
+  const second = await createFortuneProof(context, heart, user, civ, wish, "SECOND");
+  await rejectsHeart(heart.connect(user).fortuneClaim.staticCall(second), heart, "RepaymentRequired");
+  assert.equal(await heart.fortuneMaxWhole(), 8n);
+  assert.equal(await heart.minimumBurnWholeForFortune(), 1n);
+  assert.equal(heart.interface.getFunction("fortuneClaim").format(), "fortuneClaim(bytes32)");
+  assert.equal(heart.interface.getFunction("fortuneClaim(uint256)"), null);
+  assert.equal(await heart.fortuneGame(), "0x0000000000000000000000000000000000000000");
+  // No implementation takeover and no repeated proxy initialization.
+  const initArgs = [await context.owner.getAddress(), await context.owner.getAddress(),
+    await context.owner.getAddress(), await context.signers[4].getAddress(),
+    await context.kgen.getAddress(), await context.owner.getAddress(), await context.kaios.getAddress()];
+  await rejectsHeart(implementation.initialize.staticCall(...initArgs), heart, "InvalidInitialization");
+  await rejectsHeart(heart.initialize.staticCall(...initArgs), heart, "InvalidInitialization");
+  await rejectsHeart(heart.connect(other).upgradeToAndCall.staticCall(await implementation.getAddress(), "0x"), heart, "AccessControlUnauthorizedAccount");
+});
+
+test("BOT_007/008: 89 distinct wallets cannot bypass real 88-per-hour/day global caps", async () => {
+  const context = await setupLineage({ totalAccounts: 95 });
+  const { heart } = await deployTempleHeart(context);
+  await (await context.kgen.transfer(await heart.getAddress(), 22_000n * ETHER)).wait();
+  const users = context.signers.slice(5, 94);
+  for (const [i, user] of users.entries()) {
+    await (await heart.connect(user).makeWish(id(`MASS-WISH-${i}`), id(`MASS-CIV-${i}`))).wait();
+  }
+  // Only the local EVM clock is fixed. No counter/storage injection.
+  const start = await moveToNextUtcDay(context, 1);
+  for (const user of users.slice(0, 88)) {
+    await setTimeRaw(context, start + 1);
+    await (await heart.connect(user).heartbeatClaim({ gasLimit: 600_000 })).wait();
+    await (await heart.connect(user).igniteAndClaim({ gasLimit: 600_000 })).wait();
+  }
+  await setTimeRaw(context, start + 1);
+  await rejectsHeart(heart.connect(users[88]).heartbeatClaim.staticCall(), heart, "HeartbeatHourFull");
+  await rejectsHeart(heart.connect(users[88]).igniteAndClaim.staticCall(), heart, "IgniteDayFull");
+  assert.equal(await heart.heartbeatHourClaims(BigInt(Math.floor(start / 3600))), 88n);
+  assert.equal(await heart.igniteDayClaims(BigInt(Math.floor(start / 86400))), 88n);
+  assert.equal(await heart.totalHeartbeatPaid(), 88n * ETHER);
+  assert.equal(await heart.totalIgnitePaid(), 704n * ETHER);
+  assert.equal(await context.kgen.balanceOf(await users[88].getAddress()), 0n);
+});
+
+test("BOT_006: 501 wallets and real holder-bound proofs cannot bypass the global 500 Fortune epoch cap", async () => {
+  const context = await setupLineage({ totalAccounts: 507 });
+  const { heart } = await deployTempleHeart(context);
+  await mintKaiosByBurningKgen(context, ETHER);
+  await (await context.kgen.transfer(await heart.getAddress(), 22_000n * ETHER)).wait();
+  const start = Math.floor((await latestTimestamp(context)) / (30 * 86400)) * (30 * 86400) + 3600;
+  for (const [i, user] of context.signers.slice(5, 506).entries()) {
+    await setTimeRaw(context, start);
+    const civ = id(`FORTUNE-CIV-${i}`), wish = id(`FORTUNE-WISH-${i}`);
+    await makeWishAndHolyCup(context, heart, user, civ, wish, `MASS-${i}`);
+    const proof = await createFortuneProof(context, heart, user, civ, wish, `MASS-${i}`);
+    if (i < 500) {
+      await (await heart.connect(user).fortuneClaim(proof, { gasLimit: 900_000 })).wait();
+    } else {
+      await rejectsHeart(heart.connect(user).fortuneClaim.staticCall(proof), heart, "FortuneEpochFull");
+      assert.equal(await heart.fortuneBurnProofConsumed(proof), false);
+      assert.equal(await context.kgen.balanceOf(await user.getAddress()), 0n);
+    }
+  }
+  assert.equal(await heart.fortuneEpochClaims(BigInt(Math.floor(start / (30 * 86400)))), 500n);
+  assert.equal(await heart.totalFortuneClaimants(), 500n);
+  assert.equal(await heart.totalFortunePaid(), 500n * ETHER);
+});
 
 async function latestTimestamp(context) {
   const block = await context.eip1193.request({ method: "eth_getBlockByNumber", params: ["latest", false] });

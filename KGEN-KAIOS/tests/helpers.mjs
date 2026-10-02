@@ -25,9 +25,9 @@ export async function deploy(name, signer, args = []) {
   return contract;
 }
 
-export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAccounts = 10 } = {}) {
+export async function setupLineage({ delay = 3600, epochSeconds = 100, totalAccounts = 10, chainId = 31337 } = {}) {
   const eip1193 = ganache.provider({
-    chain: { chainId: 31337, hardfork: "shanghai" },
+    chain: { chainId, hardfork: "shanghai" },
     logging: { quiet: true },
     wallet: { deterministic: true, totalAccounts },
   });

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import {
   Contract,
@@ -12,11 +13,17 @@ import {
   ZeroAddress,
   formatEther,
   getAddress,
+  getCreateAddress,
   id,
   keccak256,
   parseUnits,
 } from "ethers";
 import solc from "solc";
+
+const operationFlags = ["--testnet-preflight", "--testnet-rehearsal", "--testnet-bootstrap-rehearsal", "--deployment-package", "--live-readonly"];
+if (operationFlags.filter((flag) => process.argv.includes(flag)).length > 1) {
+  throw new Error("ONE_OPERATION_ONLY_READ_AND_EXECUTION_MODES_MUST_NOT_MIX");
+}
 
 const root = path.resolve(import.meta.dirname, "..");
 const artifactPath = path.join(root, "artifacts", "KGEN_TempleHeart_Upgradeable.json");
@@ -1122,4 +1129,151 @@ if (process.argv.includes("--testnet-rehearsal")) {
 if (process.argv.includes("--testnet-bootstrap-rehearsal")) {
   await bootstrapBscTestnetUniverse();
   await runTestnetRehearsal();
+}
+
+// Offline generation only. This path has no Wallet, RPC, signing or broadcast
+// call; old direct deployments are never upgrade targets. Values are supplied
+// explicitly rather than inferring that a deployer is entitled to every role.
+async function buildFreshDeploymentPackage(config) {
+  const legacy = "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972";
+  if (config.chainId !== 56 && config.chainId !== 97) throw new Error("UNSUPPORTED_CHAIN");
+  if (config.fortuneGame != null && config.fortuneGame !== ZeroAddress) throw new Error("FORTUNEGAME_133_HOLD");
+  const addresses = {};
+  for (const key of ["deployer", "admin", "upgrader", "operator", "holyCupSigner", "kgen", "legacyBrainVault", "proofSource", "registry", "treasury11520"]) {
+    if (typeof config[key] !== "string") throw new Error(`MISSING_PUBLIC_ADDRESS:${key}`);
+    addresses[key] = getAddress(config[key]);
+    if (addresses[key] === ZeroAddress) throw new Error(`ZERO_ADDRESS:${key}`);
+  }
+  if (!Number.isSafeInteger(config.startNonce) || config.startNonce < 0 || config.startNonce > Number.MAX_SAFE_INTEGER - 2) throw new Error("INVALID_NONCE");
+  if (config.chainId === 56 && addresses.kgen.toLowerCase() !== "0xba3d3810e58735cb6813bc1cdc5458c0d71432be") throw new Error("KGEN_IDENTITY_MISMATCH");
+  for (const key of ["implementation", "proxy", "registryInitialization"]) {
+    if (!Number.isSafeInteger(config.gasCaps?.[key]) || config.gasCaps[key] <= 0) throw new Error(`MISSING_GAS_CAP:${key}`);
+  }
+  if (!/^[1-9][0-9]*$/.test(String(config.maxGasPriceWei ?? ""))) throw new Error("MISSING_GAS_PRICE_CAP");
+  const implementation = getCreateAddress({ from: addresses.deployer, nonce: config.startNonce });
+  const proxy = getCreateAddress({ from: addresses.deployer, nonce: config.startNonce + 1 });
+  if ([implementation, proxy].some((a) => a.toLowerCase() === legacy.toLowerCase())) throw new Error("LEGACY_TARGET_FORBIDDEN");
+  const heart = artifact("KGEN_TempleHeart_Upgradeable");
+  const proxyArtifact = artifact("ERC1967Proxy");
+  const iface = new Interface(heart.abi);
+  const initArgs = [addresses.admin, addresses.upgrader, addresses.operator, addresses.holyCupSigner,
+    addresses.kgen, addresses.legacyBrainVault, addresses.proofSource];
+  const initializer = iface.encodeFunctionData("initialize", initArgs);
+  const proxyDeployment = await new ContractFactory(proxyArtifact.abi, proxyArtifact.bytecode).getDeployTransaction(implementation, initializer);
+  const registryInitialization = iface.encodeFunctionData("initializeV340", [addresses.registry]);
+  const sha256 = (data) => createHash("sha256").update(data).digest("hex");
+  const sourcePaths = [baselinePath, "KGEN-KAIOS/package-lock.json", "KGEN-KAIOS/tools/compile-contracts.mjs", "KGEN-KAIOS/tools/validate-templeheart-storage.mjs"];
+  const sourceHashes = Object.fromEntries(sourcePaths.map((file) => [file, sha256(fs.readFileSync(path.resolve(root, "..", file)))]));
+  const compiledSourceHash = sha256(fs.readFileSync(path.resolve(root, "..", baselinePath)));
+  if (heart.sourceSha256 !== compiledSourceHash) throw new Error("STALE_COMPILED_HEART_RUN_COMPILE");
+  const tx = (label, from, to, data, gas, nonce = null) => ({ label, chainId:config.chainId, from, to, data,
+    calldataHash:keccak256(data), value:"0", gasLimit:String(gas), maxGasPriceWei:String(config.maxGasPriceWei), nonce });
+  return {
+    status:"UNSIGNED_CANDIDATE_NOT_MAINNET_READY", executionAuthorized:false, sourceHashes,
+    sourceHead:execFileSync("git", ["rev-parse", "HEAD"], {cwd:root, encoding:"utf8"}).trim(),
+    sourceDirty:Boolean(execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], {cwd:root, encoding:"utf8"}).trim()),
+    compiler:heart.compiler, openzeppelin:"5.0.2", chainId:config.chainId,
+    implementation, proxy, legacyHeart:legacy, legacyIsProxy:false, roles:addresses, initializer, initArgs,
+    implementationCreationCodeHash:keccak256(heart.bytecode), proxyCreationCodeHash:keccak256(proxyDeployment.data),
+    implementationRuntimeTemplateHash:keccak256(heart.deployedBytecode), immutableReferences:heart.immutableReferences,
+    fortuneMaxWhole:8, fortuneEpochMaxClaims:500, fortuneGame:ZeroAddress,
+    caps:{gas:config.gasCaps, maxGasPriceWei:String(config.maxGasPriceWei), nativeValue:"0", kgenTransfer:"0"},
+    transactions:[
+      tx("DEPLOY_IMPLEMENTATION", addresses.deployer, null, heart.bytecode, config.gasCaps.implementation, config.startNonce),
+      tx("DEPLOY_PROXY_WITH_INITIALIZER", addresses.deployer, null, proxyDeployment.data, config.gasCaps.proxy, config.startNonce + 1),
+      tx("ADMIN_INITIALIZE_REGISTRY", addresses.admin, proxy, registryInitialization, config.gasCaps.registryInitialization)
+    ],
+    preconditions:["EXACT_HEAD_AND_SOURCE_HASHES", "HUMAN_APPROVAL_OF_THIS_EXACT_PACKAGE", "FRESH_CHAIN_AND_NONCE_CHECK",
+      "ROLE_ADDRESS_AUTHORITY_CONFIRMED", "TOKEN_REGISTRY_PROOF_SOURCE_CODE_IDENTITIES_VERIFIED", "REGISTRY_TREASURY_MATCH", "GAS_ESTIMATES_WITHIN_CAPS"],
+    postconditions:["ERC1967_IMPLEMENTATION_SLOT_MATCH", "RUNTIME_BYTECODE_WITH_IMMUTABLES_MATCH", "VERSION_3_4_0", "ALL_FOUR_ROLES_MATCH",
+      "REGISTRY_AND_TREASURY_MATCH", "FORTUNE_MAX_8_EPOCH_500", "HEARTBEAT_AND_IGNITE_CAP_88", "FORTUNEGAME_ZERO", "SECOND_INITIALIZATION_REJECTED"],
+    funding:{status:"SEPARATE_HUMAN_FUNDING_DECISION_REQUIRED", operationalReserveWhole:20000, normalCapWhole:108000, automaticTransfer:false},
+    continuity:{
+      festivalClaims:"LEGACY_READ_AND_EXISTING_LEGACY_ACTION_ONLY", newYearClaims:"LEGACY_READ_AND_EXISTING_LEGACY_ACTION_ONLY",
+      lampState:"LEGACY_READ_AND_EXISTING_LEGACY_ACTION_ONLY", wishEvents:"LEGACY_EVENT_HISTORY_NEW_WISH_REQUIRED",
+      vowHistory:"LEGACY_EVENT_HISTORY", walletKgen:"UNCHANGED_TOKEN_BALANCE", oldHeartReserve:"RETAIN_OLD_HEART_NO_AUTOMATIC_SWEEP",
+      tokenAllowances:"NOT_MIGRATABLE_NEW_SPENDER_EXPLICIT_APPROVAL_ONLY",
+      fortuneCooldown:"CUTOVER_POLICY_REQUIRED_NO_AUTOMATIC_RESET", heartbeatState:"CUTOVER_POLICY_REQUIRED_NO_AUTOMATIC_RESET"
+    },
+    emergency:["DO_NOT_SWITCH_FRONTEND_UNTIL_POSTCHECKS_PASS", "PAUSE_NEW_HEART_BY_CONFIRMED_OPERATOR_IF_APPROVED",
+      "PRESERVE_LEGACY_ADDRESS_AND_HISTORY", "FUTURE_UUPS_ROLLBACK_REQUIRES_STORAGE_COMPATIBLE_IMPLEMENTATION_AND_APPROVAL"],
+    broadcast:false, signerLoaded:false, mainnetTransactionsSent:0
+  };
+}
+
+if (process.argv.includes("--deployment-package")) {
+  // Public JSON only: never an .env/key file. Generated data remains unsigned.
+  const input = process.argv[process.argv.indexOf("--deployment-package") + 1];
+  if (!input || !input.endsWith(".json")) throw new Error("PUBLIC_CONFIG_JSON_REQUIRED");
+  const config = JSON.parse(fs.readFileSync(input, "utf8"));
+  if (/private.?key|mnemonic|secret|token.?credential/i.test(JSON.stringify(Object.keys(config)))) throw new Error("SECRET_CONFIG_FORBIDDEN");
+  const result = await buildFreshDeploymentPackage(config);
+  const output = path.join(root, "artifacts", "TEMPLEHEART_DEPLOYMENT_PACKAGE.json");
+  fs.writeFileSync(output, `${JSON.stringify(result, null, 2)}\n`);
+  console.log(JSON.stringify({status:result.status, path:output, mainnetTransactionsSent:0}));
+}
+
+if (process.argv.includes("--live-readonly")) {
+  const evidence = {status:"READ_ONLY_EVIDENCE", sourceHead:execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim(), networks:[], mainnetTransactionsSent:0, signerLoaded:false};
+  for (const chainId of [56,97]) {
+    const rpc = process.env[chainId === 56 ? "BSC_MAINNET_RPC_URL" : "BSC_TESTNET_RPC_URL"];
+    if (!rpc) { evidence.networks.push({chainId,status:"RPC_NOT_PRESENT"}); continue; }
+    const provider = new JsonRpcProvider(rpc);
+    try {
+      if ((await provider.getNetwork()).chainId !== BigInt(chainId)) throw new Error("WRONG_CHAIN");
+      const block = await provider.getBlock("latest"), tag = block.number, read = {blockTag:tag};
+      const addresses = chainId === 56 ? {
+        heart:"0xB016D4d8f1aED1339101b30722cad6dbA9B8C972", kgen:"0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
+        registry:"0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D", proofSource:"0xD4E67B3a69e41524c424150E6b6e921b01D036db"
+      } : {
+        heart:"0xa74F84942ADe7F668009BC4cB9E73C05ed5A3296", kgen:"0x79b65388e6fd7e0b171147914384A0455c7A16E6",
+        registry:"0x577eb07d3d24aC26f3393771F0E48608C4871DeA", proofSource:"0x74f7A95B40bB9a1Aa2ebCc680166e9A45494C225"
+      };
+      const entry = {chainId,blockNumber:tag,blockHash:block.hash,blockTimestamp:block.timestamp,addresses,codeHashes:{}};
+      for (const [name,address] of Object.entries(addresses)) {
+        const code = await provider.getCode(address,tag);
+        if (code === "0x") throw new Error("MISSING_CODE");
+        entry.codeHashes[name] = keccak256(code);
+      }
+      entry.implementationSlot = await provider.getStorage(addresses.heart,IMPLEMENTATION_SLOT,tag);
+      entry.heartReserve = String(await new Contract(addresses.kgen,BASIC_ERC20_ABI,provider).balanceOf(addresses.heart,read));
+      const registry = new Contract(addresses.registry,REGISTRY_ABI,provider);
+      entry.treasury11520 = await registry.organ(ORGAN_EXCHANGE_TREASURY_11520,read);
+      entry.furnace = await registry.organ(ORGAN_FURNACE_18911,read);
+      if (chainId === 97) {
+        const heart = new Contract(addresses.heart,currentArtifact.abi,provider);
+        entry.version = await heart.version(read);
+        entry.implementation = getAddress(`0x${entry.implementationSlot.slice(-40)}`);
+        const code = await provider.getCode(entry.implementation,tag);
+        entry.implementationCodeHash = keccak256(code);
+        entry.currentSourceRuntimeMatch = runtimeMatchesArtifact(code,currentArtifact);
+        entry.fortuneGame = await heart.fortuneGame(read);
+        entry.fortuneGameReleaseBlocked = entry.fortuneGame !== ZeroAddress;
+        entry.roles = {};
+        for (const [name,role] of REQUIRED_SIGNER_ROLES) entry.roles[name] = {
+          historicalPublicSigner:"0x3a909988E4d5c9C2326A7a0596714482AB25eE0A",
+          hasRole:await heart.hasRole(role,"0x3a909988E4d5c9C2326A7a0596714482AB25eE0A",read)
+        };
+      } else {
+        entry.classification = entry.implementationSlot === `0x${"00".repeat(32)}` ? "LEGACY_DIRECT_DEPLOYMENT_NO_UUPS" : "UNEXPECTED_SLOT_STOP";
+        const legacy = new Contract(addresses.heart,["function owner() view returns(address)","function brainVault() view returns(address)"],provider);
+        entry.legacyOwner = await legacy.owner(read);
+        entry.legacyBrainVault = await legacy.brainVault(read);
+        entry.newHeartRoleAssignments = "NOT_AUTHORIZED_OR_INFERRED_FROM_LEGACY_OWNER";
+      }
+      // Verify the supported proof return shape without issuing a proof or burn.
+      const source = new Contract(addresses.proofSource,["function alchemyBurnRecord(bytes32) view returns(tuple(address owner,address beneficiary,address furnace,uint256 kaiosBurned,uint256 expectedKufo,bytes32 lifeId,bytes32 destinationCode,uint256 blockNumber,uint256 timestamp))"],provider);
+      await source.alchemyBurnRecord(`0x${"00".repeat(32)}`,read);
+      entry.proofInterfaceRead = "PASS_EMPTY_RECORD_ONLY_NOT_PROOF_ISSUANCE";
+      evidence.networks.push(entry);
+    } catch (error) {
+      // RPC exception objects can contain authenticated URLs. Never log them.
+      evidence.networks.push({chainId,status:"READ_FAILED",code:typeof error.code === "string" ? error.code : "READ_CHECK_FAILED"});
+      evidence.status = "INCOMPLETE_READ_ONLY_EVIDENCE";
+      process.exitCode = 1;
+    } finally { await provider.destroy(); }
+  }
+  const output = path.join(root,"artifacts","TEMPLEHEART_LIVE_READONLY.json");
+  fs.writeFileSync(output,`${JSON.stringify(evidence,null,2)}\n`);
+  console.log(JSON.stringify({status:evidence.status,path:output,mainnetTransactionsSent:0}));
 }

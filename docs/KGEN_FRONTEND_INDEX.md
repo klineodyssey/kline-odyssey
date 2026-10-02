@@ -4,6 +4,13 @@ Generated: 2026-07-05
 Site root: C:\Desktop\kline-odyssey\K線西遊記
 
 ## Frontend Entry Points
+
+2026-10-03: `core/integrations/temple-heart-12345.mjs` additionally provides a
+read-only legacy continuity snapshot and chain97-only V3.4 candidate adapter.
+It does not switch the active Temple UI, Wallet, layout or Mainnet write target.
+Historical PR #134 UI is not wholesale imported. Full V3.4 UI integration remains
+a release gate in `KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md`.
+
 | Role | Full path | Notes |
 |---|---|---|
 | Canonical KAIOS Portal | C:\Desktop\kline-odyssey\index.html | Playable-first official world entry, shared audio and privacy-limited Player Life welcome. |

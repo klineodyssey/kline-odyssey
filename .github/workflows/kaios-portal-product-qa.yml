@@ -9,6 +9,14 @@ on:
       - 'K線西遊記/temples/16888/**'
       - 'K線西遊記/temples/11520/**'
       - 'tests/kaios-*'
+      - 'core/integrations/temple-heart-12345.mjs'
+      - 'KGEN-KAIOS/tests/templeheart.integration.test.mjs'
+      - 'KGEN-KAIOS/tests/helpers.mjs'
+      - 'KGEN-KAIOS/tests/contracts/**'
+      - 'KGEN-KAIOS/package*.json'
+      - 'KGEN-KAIOS/tools/compile-contracts.mjs'
+      - 'KGEN-KAIOS/tools/validate-templeheart-storage.mjs'
+      - 'KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol'
       - '.github/workflows/kaios-portal-product-qa.yml'
   push:
     branches: [main]
@@ -17,6 +25,14 @@ on:
       - 'assets/kaios-*'
       - 'K線西遊記/**'
       - 'tests/kaios-*'
+      - 'core/integrations/temple-heart-12345.mjs'
+      - 'KGEN-KAIOS/tests/templeheart.integration.test.mjs'
+      - 'KGEN-KAIOS/tests/helpers.mjs'
+      - 'KGEN-KAIOS/tests/contracts/**'
+      - 'KGEN-KAIOS/package*.json'
+      - 'KGEN-KAIOS/tools/compile-contracts.mjs'
+      - 'KGEN-KAIOS/tools/validate-templeheart-storage.mjs'
+      - 'KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol'
       - '.github/workflows/kaios-portal-product-qa.yml'
   workflow_dispatch:
 permissions:
@@ -25,6 +41,40 @@ concurrency:
   group: portal-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
+  templeheart-candidate:
+    name: TempleHeart local EVM / no broadcast
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install pinned existing contract toolchain
+        working-directory: KGEN-KAIOS
+        run: npm install --ignore-scripts --no-package-lock --omit=optional --no-audit --no-fund
+      - name: Compile and validate storage
+        working-directory: KGEN-KAIOS
+        run: |
+          npm run compile
+          npm run storage:validate
+      - name: Local EVM adversarial and unsigned package tests
+        working-directory: KGEN-KAIOS
+        # No RPC credentials or signer secrets are provided to this job.
+        run: node --test --test-reporter=spec tests/templeheart.integration.test.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: templeheart-local-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json
+            KGEN-KAIOS/reports/TEMPLEHEART_STORAGE_LAYOUT_VALIDATION.json
+            KGEN-KAIOS/artifacts/TEMPLEHEART_DEPLOYMENT_PACKAGE.json
+          if-no-files-found: error
   portal:
     runs-on: ubuntu-latest
     timeout-minutes: 15

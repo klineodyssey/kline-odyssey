@@ -1,5 +1,17 @@
 # KGEN MASTER_INDEX
 
+## TempleHeart V3.4 continuation (2026-10-03)
+
+Existing paths only; no new Runtime, bootstrap or Boot change:
+
+- `KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md`: cumulative completion gaps and continuity decisions.
+- `KGEN-KAIOS/tools/validate-templeheart-storage.mjs`: storage validation plus unsigned fresh proxy package / separate read-only live audit.
+- `core/integrations/temple-heart-12345.mjs`: legacy continuity reader and chain97 candidate identity/call adapter, not a second Wallet.
+- `KGEN-KAIOS/tests/templeheart.integration.test.mjs`: real-proof multi-wallet caps, local deployment package and security regressions.
+- `.github/workflows/kaios-portal-product-qa.yml`: existing browser QA plus no-broadcast contract job.
+
+Mainnet candidate remains NOT READY; production Heart stays V3.2.6.
+
 ## KAIOS canonical World Portal / Audio (2026-10-01)
 
 | Path | Purpose |

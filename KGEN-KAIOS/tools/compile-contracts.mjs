@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import solc from "solc";
 
@@ -92,6 +93,7 @@ for (const [sourceName, sourceContracts] of Object.entries(output.contracts ?? {
         contractName,
         sourceName,
         compiler: solc.version(),
+        sourceSha256: sources[sourceName] ? createHash("sha256").update(sources[sourceName].content).digest("hex") : null,
         abi: artifact.abi,
         bytecode: `0x${artifact.evm.bytecode.object}`,
         deployedBytecode: `0x${artifact.evm.deployedBytecode.object}`,
