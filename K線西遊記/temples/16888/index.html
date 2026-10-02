@@ -3663,8 +3663,8 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <!-- === Universe Navigation Buttons V2.04 === -->
 <div id="universe-nav" style="position:fixed; right:18px; top:125px; z-index:200; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
-  <a class="nav-btn nav-gold" href="../../../" id="return-to-11520" data-kaios-return="PORTAL" style="position:fixed;right:8px;top:max(8px,env(safe-area-inset-top));z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;">🌌 回 KAIOS 總世界</a>
-  <span id="return-wallet-continuity" style="position:fixed;right:8px;top:60px;z-index:10020;width:min(280px,calc(100vw - 16px));max-width:calc(100vw - 16px);box-sizing:border-box;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.72);color:#d7faff;font-size:11px;line-height:1.35;overflow-wrap:anywhere;text-align:center;">錢包延續：檢查中</span>
+  <a class="nav-btn nav-gold" href="../../../" id="return-to-11520" data-kaios-return="PORTAL" title="回 KAIOS" aria-label="回 KAIOS 總世界">返回 &gt; KAIOS｜銀河宇宙入口</a>
+  <span id="return-wallet-continuity" style="font-size:11px;line-height:1.35;color:#d7faff;">錢包延續：檢查中</span>
 
   <button class="nav-btn nav-swap" id="btn-swap-bnb" type="button" data-hint="用 BNB（暗物質燃料）前往 PancakeSwap 交換 KGEN">用 BNB 換 KGEN</button>
   <button class="nav-btn nav-swap" id="btn-swap-usdt" type="button" data-hint="用 USDT 交換 KGEN：將引導至 PancakeSwap（可能需路由/先換 WBNB）">用 USDT 換 KGEN</button>
@@ -3680,46 +3680,46 @@ setTimeout(()=>{const hub=document.getElementById('walletHub'); if(hub){hub.addE
 
 <div id="music-panel" class="hud-box" style="position:fixed; right:18px; top:410px; z-index:210; width:min(340px, 86vw); display:none;">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <div style="font-weight:900; letter-spacing:0.5px;">飛碟音響（MP3）</div>
+    <div style="font-weight:900; letter-spacing:0.5px;">飛碟音響 · 星海</div>
     <button class="tiny-btn" type="button" onclick="app.openMusic(false)">關閉</button>
   </div>
 
   <div style="margin-top:10px; font-size:12px; opacity:0.85; line-height:1.4;">
-    安裝 MP3：選擇檔案後即可播放（僅在本裝置本頁面有效，不會上傳）。
+    KAIOS 第一方 Universe 合成音樂。保留原音響操作；權利未確認的商業歌曲不播放。
   </div>
 
   <div style="margin-top:10px;">
-    <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;"/>
-    <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">未載入音檔</div>
+    <input id="music-file" type="file" accept="audio/*" multiple style="width:100%;" disabled hidden />
+    <div id="music-name" style="margin-top:6px; font-size:12px; opacity:0.85;">星海 · Universe</div>
   </div>
 
   
   <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPrev()">上一首</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPrev()" disabled title="目前提供一首第一方 Universe 編曲">上一首</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPlay()">播放</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicPause()">暫停</button>
     <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicStop()">停止</button>
-    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicNext()">下一首</button>
-    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicLoadBuiltIn && app.musicLoadBuiltIn(true)">載入內建歌單</button>
+    <button class="nav-btn nav-music-ctl" type="button" onclick="app.musicNext()" disabled title="目前提供一首第一方 Universe 編曲">下一首</button>
+    <button class="nav-btn nav-music-ctl" type="button" id="music-mute">靜音</button>
 
   </div>
 
   <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
     <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
-      <input id="music-shuffle" type="checkbox" checked />
+      <input id="music-shuffle" type="checkbox" disabled />
       S（隨機）
     </label>
     <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
-      <input id="music-loop" type="checkbox" />
+      <input id="music-loop" type="checkbox" checked disabled />
       循環
     </label>
-    <div style="font-size:12px; opacity:0.7;">提示：可一次選多首 MP3｜也可從 GitHub music/playlist.json 或 playlist.json 自動載入內建歌單</div>
+    <div style="font-size:12px; opacity:0.7;">單一持續編曲，不下載歷史 MP3 歌單。</div>
   </div>
 
   <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
     <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.9;">
-      <input id="music-bgm-auto" type="checkbox" checked />
-      BGM 自動（點一下啟動）
+      <input id="music-bgm-auto" type="checkbox" disabled />
+      不自動播放（請點播放）
     </label>
 
     <label style="display:flex; align-items:center; gap:8px; font-size:12px; opacity:0.9;">
@@ -8372,6 +8372,8 @@ import {bindTempleReturnWalletContinuity} from '../11520/runtime/evm-wallet-runt
 import {bindWorldAudio} from '../../../assets/kaios-world-audio.mjs';
 bindWorldAudio('16888');
 void bindTempleReturnWalletContinuity({sourceWorld:'K16888'});
+// Continuity binds the existing control; Universe retains its original nav placement.
+document.getElementById('universe-nav').prepend(document.getElementById('return-to-11520'),document.getElementById('return-wallet-continuity'));
 </script>
 </body>
 </html>
