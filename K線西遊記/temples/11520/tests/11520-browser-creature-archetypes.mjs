@@ -3,11 +3,12 @@ import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
 const OUT='artifacts/11520-visual-qa';
+const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(1200);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
 await page.waitForTimeout(500);
@@ -15,8 +16,8 @@ await page.waitForTimeout(500);
 const result=await page.evaluate(async()=>{
   const THREE=await import('three');
   const {createProceduralLifeBody,creatureArchetypeForSpecies}=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/life-visual-runtime.mjs');
-  const species=['DIGITAL_ANT','BULL_DEMON','STONE_APE','FIRE_WISP','FISH','SHRIMP','COW','SHEEP','CHICKEN','DUCK','TREE','FLOWER'];
-  const display=s=>({DIGITAL_ANT:'Digital Ant',BULL_DEMON:'牛魔王',STONE_APE:'暗影猿',FIRE_WISP:'火靈',FISH:'魚',SHRIMP:'蝦',COW:'牛',SHEEP:'羊',CHICKEN:'雞',DUCK:'鴨',TREE:'樹',FLOWER:'花'}[s]||s);
+  const species=['DIGITAL_ANT','DIGITAL_ANT_ATM_UFO','BULL_DEMON','STONE_APE','FIRE_WISP','FISH','SHRIMP','COW','SHEEP','CHICKEN','DUCK','TREE','FLOWER'];
+  const display=s=>({DIGITAL_ANT:'Digital Ant',DIGITAL_ANT_ATM_UFO:'ATM UFO',BULL_DEMON:'牛魔王',STONE_APE:'暗影猿',FIRE_WISP:'火靈',FISH:'魚',SHRIMP:'蝦',COW:'牛',SHEEP:'羊',CHICKEN:'雞',DUCK:'鴨',TREE:'樹',FLOWER:'花'}[s]||s);
   const renderCanvas=document.createElement('canvas');renderCanvas.width=180;renderCanvas.height=180;
   const renderer=new THREE.WebGLRenderer({canvas:renderCanvas,antialias:true,alpha:false,preserveDrawingBuffer:true});renderer.setSize(180,180,false);renderer.setPixelRatio(1);renderer.setClearColor(0x0a1720,1);
 
@@ -35,7 +36,7 @@ const result=await page.evaluate(async()=>{
 
   const host=document.createElement('section');host.id='qaCreatureGallery';host.style.cssText='position:fixed;inset:0;z-index:99999;background:#071016;padding:9px;box-sizing:border-box;color:#fff;font:11px system-ui;overflow:hidden';
   const title=document.createElement('div');title.textContent='11520 生物／妖怪 3D 識別 QA';title.style.cssText='font-size:15px;font-weight:800;color:#f5d77c;text-align:center;height:27px';host.appendChild(title);
-  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:6px;height:790px;align-content:stretch';host.appendChild(grid);document.body.appendChild(host);
+  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,1fr);gap:5px;height:790px;align-content:stretch';host.appendChild(grid);document.body.appendChild(host);
 
   const labels=[];
   for(const [i,s] of species.entries()){
@@ -58,7 +59,7 @@ const result=await page.evaluate(async()=>{
     renderer.setRenderTarget(null);
 
     const card=document.createElement('div');card.style.cssText='border:1px solid #ffffff22;border-radius:10px;background:#0a1720;padding:4px;text-align:center;min-width:0;overflow:hidden';
-    const canvas=document.createElement('canvas');canvas.width=180;canvas.height=180;canvas.setAttribute('aria-label',s);canvas.style.cssText='width:100%;height:168px;display:block;margin:auto';
+    const canvas=document.createElement('canvas');canvas.width=180;canvas.height=180;canvas.setAttribute('aria-label',s);canvas.style.cssText='width:100%;height:120px;display:block;margin:auto';
     const ctx=canvas.getContext('2d');const image=ctx.createImageData(180,180);
     for(let y=0;y<180;y++){const src=(179-y)*180*4,dst=y*180*4;image.data.set(pixels.subarray(src,src+180*4),dst)}
     ctx.putImageData(image,0,0);card.appendChild(canvas);
@@ -73,8 +74,8 @@ const result=await page.evaluate(async()=>{
 await page.waitForTimeout(300);
 await page.screenshot({path:`${OUT}/11520-creature-archetypes-390x844.png`,fullPage:true});
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
-assert.equal(result.length,12);
-assert.equal(new Set(result.map(x=>x.archetype)).size,12,'all canonical species should retain distinct archetype IDs');
+assert.equal(result.length,13);
+assert.equal(new Set(result.map(x=>x.archetype)).size,13,'all canonical species and the ATM UFO vehicle should retain distinct archetype IDs');
 assert.ok(result.every(x=>x.childCount>=3),'each creature must render as a multi-part 3D body');
 assert.ok(result.every(x=>x.foregroundPixels>=100),'each creature render target must contain visible foreground pixels: '+JSON.stringify(result));
 await browser.close();

@@ -14,7 +14,7 @@ export const LIFE_VISUAL_POLICY=Object.freeze({
 
 const finite=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 const SPECIES_PALETTE=Object.freeze({
-  ANT:0xd89a28,BULL_DEMON:0x8b3f2f,APE:0x6f7882,WISP:0xff7a24,
+  ANT:0xd89a28,UFO:0x71d9ef,BULL_DEMON:0x8b3f2f,APE:0x6f7882,WISP:0xff7a24,
   FISH:0x3f86d8,SHRIMP:0xe45b4f,COW:0xb88452,SHEEP:0xe8dfc9,
   CHICKEN:0xd9a62e,DUCK:0x4f9f85,TREE:0x3f8b4a,FLOWER:0xd95fa5,
 });
@@ -34,6 +34,7 @@ function limb(THREE,root,name,{x=0,y=.5,z=0,len=.5,r=.04,rx=0,ry=0,rz=0,color=0x
 
 export function creatureArchetypeForSpecies(species='LIFE'){
   const s=String(species).toUpperCase();
+  if(s.includes('ATM_UFO')||s==='UFO')return'UFO';
   if(s.includes('DIGITAL_ANT')||s==='ANT')return'ANT';
   if(s.includes('BULL')||s.includes('DEMON'))return'BULL_DEMON';
   if(s.includes('STONE_APE')||s.includes('APE')||s.includes('MONKEY'))return'APE';
@@ -72,6 +73,17 @@ function buildAnt(THREE,root,main,dark){
   for(const side of[-1,1])for(const [i,y] of[.5,.68,.86].entries())limb(THREE,root,`ANT_LEG_${side}_${i}`,{x:side*.32,y,z:.05-(i*.18),len:.62,r:.025,rz:side*(1.0+i*.08),color:0x18202a});
   for(const side of[-1,1])limb(THREE,root,`ANT_ANTENNA_${side}`,{x:side*.1,y:.93,z:.75,len:.38,r:.018,rx:.9,rz:side*.28,color:0x18202a});
   root.scale.setScalar(.9);
+}
+function buildUfo(THREE,root,main,dark){
+  const hull=add(root,'ATM_UFO_HULL',new THREE.Mesh(new THREE.SphereGeometry(.72,24,12),main));hull.scale.set(1,.28,1);hull.position.y=.82;
+  const rim=add(root,'ATM_UFO_RIM',new THREE.Mesh(new THREE.TorusGeometry(.7,.11,10,32),dark));rim.rotation.x=Math.PI/2;rim.position.y=.82;
+  const canopy=add(root,'ATM_UFO_CANOPY',new THREE.Mesh(new THREE.SphereGeometry(.35,18,10),mat(THREE,0x8ceaff,{roughness:.18,metalness:.55,emissive:0x0d3d52})));canopy.scale.y=.65;canopy.position.y=1.05;
+  const vault=add(root,'ATM_UFO_CASH_VAULT',new THREE.Mesh(new THREE.BoxGeometry(.52,.24,.38),mat(THREE,0xe7c75f,{roughness:.35,metalness:.62,emissive:0x392a08})));vault.position.set(0,.61,0);
+  for(const [i,[x,z]] of [[.42,.28],[-.42,.28],[.42,-.28],[-.42,-.28]].entries()){
+    const engine=add(root,`ATM_UFO_ENGINE_${i}`,new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,.28,9),mat(THREE,0x6fe5ff,{roughness:.2,metalness:.4,emissive:0x1e6275})));
+    engine.position.set(x,.52,z);
+  }
+  root.scale.setScalar(1.08);
 }
 function buildBull(THREE,root,main,dark){
   const torso=add(root,'BULL_TORSO',new THREE.Mesh(new THREE.CapsuleGeometry(.48,.88,6,12),main));torso.position.y=.92;
@@ -164,7 +176,7 @@ export function createProceduralLifeBody(THREE,{species='LIFE',name='Market Life
   const root=new THREE.Group();const archetype=creatureArchetypeForSpecies(species);
   root.name=`LIFE:${name}`;root.userData={lifeVisual:true,species,name,archetype,visualMode:'PROCEDURAL_3D',baseScale:Number(scale)||1};
   const color=colorForSpecies(species),main=mat(THREE,color),dark=mat(THREE,0x15202b,{roughness:.8});
-  const builders={ANT:buildAnt,BULL_DEMON:buildBull,APE:buildApe,WISP:buildWisp,FISH:buildFish,SHRIMP:buildShrimp,
+  const builders={ANT:buildAnt,UFO:buildUfo,BULL_DEMON:buildBull,APE:buildApe,WISP:buildWisp,FISH:buildFish,SHRIMP:buildShrimp,
     COW:(T,r,m,d)=>buildQuadruped(T,r,m,d,{kind:'COW'}),SHEEP:(T,r,m,d)=>buildQuadruped(T,r,m,d,{kind:'SHEEP'}),
     CHICKEN:(T,r,m,d)=>buildBird(T,r,m,d,{kind:'CHICKEN'}),DUCK:(T,r,m,d)=>buildBird(T,r,m,d,{kind:'DUCK'}),TREE:buildTree,FLOWER:buildFlower,HUMANOID:buildHumanoid};
   (builders[archetype]||buildHumanoid)(THREE,root,main,dark);

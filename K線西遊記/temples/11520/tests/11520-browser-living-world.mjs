@@ -3,21 +3,42 @@ import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
 const OUT='artifacts/11520-visual-qa';
+const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(2200);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
 await page.waitForTimeout(700);
 
+await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
+await page.evaluate(()=>document.querySelector('[data-organ="atm"]')?.click());
+await page.waitForSelector('#atmMovementC',{timeout:3000});
+await page.locator('#atmMovementC').selectOption('0.1');
+await page.locator('#atmAmount').fill('1000');
+const initialY=await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot().position.y);
+await page.locator('#atmDispatch').click();
+await page.locator('#atmLoad').click();
+await page.waitForFunction(y=>{
+  const snapshot=globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.();
+  return snapshot?.mission?.transportMode==='ATM_UFO_5D'&&snapshot.position.y>y;
+},initialY,{timeout:4000});
+const liveFlight=await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot());
+assert.equal(liveFlight.lifeId,'DIGITAL_ANT_0001');
+assert.equal(liveFlight.vehicle.type,'ATM_UFO_5D');
+assert.equal(liveFlight.mission.amount,1000);
+assert.equal(liveFlight.mission.unit,'KAIOS');
+assert.equal(liveFlight.mission.flightPlan.flatRoute,false);
+assert.ok(liveFlight.position.y>initialY,'production ATM UI must move the real Digital Ant UFO upward in XYZ');
+
 await page.evaluate(async()=>{
   const src=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/market-life-source-runtime.mjs');
   const now=Date.now();
-  src.publishMarketLifeSourceEvent({type:'SPAWN',sourceId:'QA-LIVING-WORLD',lifeId:'LIFE-QA-DIGITAL-ANT-VISUAL',name:'Digital Ant 運鈔員',species:'DIGITAL_ANT',intelligence:6,markets:['BTCUSDT'],capital:60,vitality:100,maxHp:100,attack:0,rewardKaios:0,speed:.012,positions:{},x:-1.3,y:0,z:2.2,strategy:'DELIVERY',cargo:{kind:'CASH',amount:18,unit:'KAIOS'},mission:{missionId:'QA-VISUAL-CASH-RUN',status:'IN_TRANSIT',destinationAtmId:'ATM-11520-001',quote:{net:5,freight:4,tip:1}},meta:{retirementReserve:12,targetRetirementReserve:100},at:now},{persistLocal:false,broadcast:false});
+  src.publishMarketLifeSourceEvent({type:'SPAWN',sourceId:'QA-LIVING-WORLD',lifeId:'LIFE-QA-DIGITAL-ANT-VISUAL',name:'Digital Ant 5D ATM 飛碟運鈔員',species:'DIGITAL_ANT_ATM_UFO',intelligence:6,markets:['BTCUSDT'],capital:60,vitality:100,maxHp:100,attack:0,rewardKaios:0,speed:.012,positions:{},x:-1.3,y:4,z:2.2,strategy:'DELIVERY',cargo:{kind:'CASH',amount:18,unit:'KAIOS'},mission:{missionId:'QA-VISUAL-CASH-RUN',status:'IN_TRANSIT',transportMode:'ATM_UFO_5D',flightPhase:'CRUISE_5D',destinationAtmId:'ATM-11520-001',quote:{net:5,freight:4,tip:1}},meta:{retirementReserve:12,targetRetirementReserve:100,motionAuthority:'DIGITAL_ANT_LOGISTICS_RUNTIME'},at:now},{persistLocal:false,broadcast:false});
 });
-await page.waitForFunction(()=>document.querySelector('#monsterList')?.textContent?.includes('Digital Ant 運鈔員'),null,{timeout:4000});
+await page.waitForFunction(()=>document.querySelector('#monsterList')?.textContent?.includes('Digital Ant 5D ATM 飛碟運鈔員'),null,{timeout:4000});
 await page.waitForTimeout(1100);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 assert.ok((await page.locator('#monsterList').textContent()).includes('WORK'),'Digital Ant should expose WORK lifestyle in living-world HUD');

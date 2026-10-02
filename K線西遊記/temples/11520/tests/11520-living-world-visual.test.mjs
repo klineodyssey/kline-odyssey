@@ -32,11 +32,11 @@ test('Market Life travel, rest and retirement are distinguishable',()=>{
 
 test('all canonical monsters and wild ecology species map to recognizable 3D archetypes',()=>{
   const expected={
-    DIGITAL_ANT:'ANT',BULL_DEMON:'BULL_DEMON',STONE_APE:'APE',FIRE_WISP:'WISP',
+    DIGITAL_ANT:'ANT',DIGITAL_ANT_ATM_UFO:'UFO',BULL_DEMON:'BULL_DEMON',STONE_APE:'APE',FIRE_WISP:'WISP',
     FISH:'FISH',SHRIMP:'SHRIMP',COW:'COW',SHEEP:'SHEEP',CHICKEN:'CHICKEN',DUCK:'DUCK',TREE:'TREE',FLOWER:'FLOWER'
   };
   for(const [species,archetype] of Object.entries(expected))assert.equal(creatureArchetypeForSpecies(species),archetype,`${species} must keep a dedicated silhouette`);
-  assert.equal(new Set(Object.values(expected)).size,12,'canonical creature families must not collapse into one generic body');
+  assert.equal(new Set(Object.values(expected)).size,13,'canonical creature and vehicle families must not collapse into one generic body');
 });
 
 test('runtime sync preserves the archetype-specific silhouette scale',()=>{
