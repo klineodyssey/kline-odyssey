@@ -228,7 +228,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -429,6 +429,67 @@ test('Digital Ant CFO can reject loss-making freight and choose positive EV deli
   assert.equal(chosen.mission.missionId,'GOOD');
 });
 
+test('Digital Ant calculates physical K XYZ distance, C speed, ETA and cargo scale without creating an order',()=>{
+  const route=calculateKRouteKinematics({origin:{x:0,y:0,z:0},destination:{x:1,y:1,z:1},c:1,lots:1});
+  assert.equal(route.ok,true);
+  assert.ok(Math.abs(route.distanceK-Math.sqrt(3))<1e-12);
+  assert.ok(Math.abs(route.distanceKm-Math.sqrt(3)*K_INDEX_KM)<1e-12);
+  assert.ok(Math.abs(route.etaSeconds-Math.sqrt(3)/.001)<1e-9);
+  assert.ok(Math.abs(route.velocityKPerSecond.x-.001/Math.sqrt(3))<1e-12);
+  assert.deepEqual(route.movementBattleAxes,{X:'LONG',Y:'LONG',Z:'LONG'});
+  assert.deepEqual(route.hedgeOrderAxes,{KX:'NOT_PLACED',KY:'NOT_PLACED',KZ:'NOT_PLACED'});
+  assert.equal(route.cSide,'LONG');
+  assert.deepEqual(route.cargo,{lots:1,kgen:1,indexUnits:1,kaios:1000,kmScalePerLot:K_INDEX_KM});
+  assert.equal(route.marketOrderCreated,false);
+});
+
+test('route direction and market C side stay explicit and zero C cannot claim a calculated ETA',()=>{
+  const mixed=calculateKRouteKinematics({origin:{x:2,y:0,z:-1},destination:{x:1,y:3,z:-1},c:-1,lots:2});
+  assert.deepEqual(mixed.movementBattleAxes,{X:'SHORT',Y:'LONG',Z:'HOLD'});
+  assert.equal(mixed.cSide,'SHORT');
+  assert.equal(mixed.cargo.kaios,2000);
+  const zero=calculateKRouteKinematics({origin:{x:0,y:0,z:0},destination:{x:1,y:0,z:0},c:0,lots:1});
+  assert.equal(zero.etaSeconds,null);
+  assert.equal(zero.status,'LOCAL_WALK_RATE_REQUIRED');
+  assert.equal(zero.cSide,'NO_ORDER');
+});
+
+test('ATM UFO uses a real XYZ climb, cruise and descent plan at the declared C speed',()=>{
+  const plan=buildAtmUfoFlightPlan({x:0,y:0,z:0},{x:8,y:0,z:5},{flightAltitude:6,arrivalOffsetY:1.1});
+  assert.equal(plan.transportMode,'ATM_UFO_5D');assert.equal(plan.fullXYZ,true);assert.equal(plan.flatRoute,false);
+  assert.deepEqual(plan.waypoints.map(x=>x.phase),['ASCEND','CRUISE_5D','DESCEND']);
+  assert.equal(plan.waypoints[0].y,6);assert.equal(plan.waypoints[1].x,8);assert.equal(plan.waypoints[1].z,5);assert.equal(plan.waypoints[2].y,1.1);
+  assert.ok(plan.distanceWorld>Math.hypot(8,5),'5D flight distance includes ascent and descent');
+  assert.ok(Math.abs(cSpeedMetersPerSecond(1)-K_INDEX_KM)<1e-12);
+  assert.ok(Math.abs(cSpeedMetersPerSecond(-.1)-K_INDEX_KM*.1)<1e-12);
+});
+
+test('Digital Ant is a market guardian: aligned players escort, opposition waits for settlement, and cargo is never loot',()=>{
+  const aligned=planDigitalAntEncounter({
+    playerAxes:{KX:{market:'BTCUSDT',side:-1}},antExposures:[{axis:'KX',market:'BTCUSDT',side:1,lots:2,c:.001}],
+    playerMovement:{x:1,y:0,z:1},antMovement:{x:1,y:0,z:1},cargoAmount:1080000
+  });
+  assert.equal(aligned.action,'ESCORT');assert.equal(aligned.cargoLootable,false);assert.equal(aligned.playerAssetTheft,false);
+  assert.equal(aligned.hedgeRelations.overall,'OPPOSED','opposed hedge orders do not create movement combat');
+  const opposed=planDigitalAntEncounter({
+    playerAxes:{KX:{market:'BTCUSDT',side:1}},antExposures:[{axis:'KX',market:'BTCUSDT',side:1,lots:2,c:.001}],
+    playerMovement:{x:-1,y:0,z:1},antMovement:{x:1,y:0,z:1},cargoAmount:1080000
+  });
+  assert.equal(opposed.action,'MOVEMENT_LONG_SHORT_DUEL_WAIT_SETTLEMENT');assert.equal(opposed.settlementRequired,true);assert.equal(opposed.cargoPrincipalAtRisk,false);
+  assert.equal(opposed.hedgeRelations.overall,'ALIGNED','aligned hedge orders do not cancel opposing XYZ combat');
+  const reroute=planDigitalAntEncounter({cargoAmount:1080000,threat:.9,routeRisk:.9});
+  assert.equal(reroute.action,'DEFEND_AND_REROUTE');assert.equal(reroute.combatScope,'SIMULATION_ONLY');
+});
+
+test('cash cargo hedge is exposure-based, capped, separately funded, and never uses cargo principal',()=>{
+  const matched=planCargoHedge({cargoAsset:'KAIOS',cargoAmount:1080000,deliveryLiabilityAsset:'KAIOS'});
+  assert.equal(matched.action,'NO_HEDGE');assert.equal(matched.reason,'MATCHED_ASSET_AND_LIABILITY');
+  const blocked=planCargoHedge({cargoAsset:'KAIOS',cargoAmount:1080000,deliveryLiabilityAsset:'KAIOS',variableCostExposure:{asset:'BNB',notional:100,market:'BNBKAIOS',type:'PAYABLE'},marketAvailable:true,authorized:false,operatingRiskReserve:100});
+  assert.equal(blocked.action,'HOLD');assert.equal(blocked.reason,'HEDGE_AUTHORIZATION_REQUIRED');
+  const planned=planCargoHedge({cargoAsset:'KAIOS',cargoAmount:1080000,deliveryLiabilityAsset:'KAIOS',variableCostExposure:{asset:'BNB',notional:100,market:'BNBKAIOS',type:'PAYABLE'},marketAvailable:true,authorized:true,operatingRiskReserve:30,maxHedgeRatio:.5,maxOrderLeverage:4});
+  assert.equal(planned.action,'HEDGE_CANDIDATE');assert.equal(planned.hedge.side,'LONG');assert.equal(planned.hedgeNotional,30);assert.ok(planned.hedgeNotional<=planned.exposure.notional);assert.equal(planned.hedge.orderLeverage,1);assert.equal(planned.cargoPrincipalAsMargin,false);assert.equal(planned.realOrderCreated,false);
+});
+
 test('OBSERVE delivery earns no market tip while favorable LONG can earn one',()=>{
   const ant=createDigitalAnt({capital:20});
   const atm={atmId:'ATM-Q',x:3,y:4,z:0,online:true};
@@ -439,15 +500,17 @@ test('OBSERVE delivery earns no market tip while favorable LONG can earn one',()
 });
 
 test('Digital Ant travels full XYZ and requires verified receipt before delivery settlement',()=>{
-  const ant=createDigitalAnt({capital:20,cargoCapacity:100});
+  const ant=createDigitalAnt({lifeId:'DIGITAL_ANT_0001',capital:20,cargoCapacity:100});
   const atms=buildAtmRegistry([{id:'ATM-XYZ',type:'ATM',x:1,y:1,z:1}]);
   const mission=createDeliveryMission({missionId:'XYZ',amount:10,destinationAtmId:'ATM-XYZ',freightOffer:10,demand:1,speedMetersPerSecond:1});
   assert.equal(assignDelivery(ant,mission,atms).ok,true);
   assert.equal(loadCargo(ant).ok,true);
-  let result;
-  for(let i=0;i<20;i++){result=tickDigitalAntDelivery(ant,{deltaMs:100,speed:.02});if(result.arrived)break;}
+  let result,maxY=ant.y;const phases=new Set();
+  for(let i=0;i<40;i++){result=tickDigitalAntDelivery(ant,{deltaMs:100,speed:.02});maxY=Math.max(maxY,ant.y);if(result.flightPhase)phases.add(result.flightPhase);if(result.arrived)break;}
   assert.equal(result.arrived,true);
-  assert.ok(ant.y>0,'Y must move during XYZ delivery');
+  assert.ok(maxY>=6,'ATM UFO must climb into the Y axis instead of moving on a plane');
+  assert.ok(phases.has('ASCEND'));assert.ok(phases.has('CRUISE_5D'));assert.ok(phases.has('DESCEND'));
+  assert.equal(ant.vehicle.type,'ATM_UFO_5D');
   assert.equal(ant.mission.status,'ARRIVED_AWAITING_RECEIPT');
   assert.equal(verifyDeliveryReceipt(ant,{receiptId:null,verified:false}).ok,false);
   const settled=verifyDeliveryReceipt(ant,{receiptId:'QA-RECEIPT-001',verified:true});

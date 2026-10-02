@@ -1,5 +1,22 @@
 # 11520 Changelog
 
+## 2026-10-03 — Digital Ant 5D ATM UFO cash delivery
+
+- Connected `DIGITAL_ANT_0001` to the live 11520 Market Life source loop instead of updating only a text HUD.
+- Added a visible procedural ATM UFO with cash vault and four drive units; this is a vehicle/equipment projection, not a second Life.
+- Added authoritative `ASCEND -> CRUISE_5D -> DESCEND -> LANDED_AWAITING_RECEIPT` XYZ delivery phases.
+- Calibrated movement speed from `abs(C) * 0.001 K/sec` and kept C sign as the movement long/short battle side.
+- Kept KX/KY/KZ orders isolated as separately authorized cargo-cost hedges; physical motion cannot create a hedge order.
+- Kept cargo principal non-lootable and receipt-gated; arrival alone is not chain delivery or revenue.
+
+## 2026-10-03 · Digital Ant armored courier / Market Guardian policy
+
+- Kept the existing Digital Ant Market Life source and 11520 world; no second exchange or settlement engine was created.
+- Defined source-managed Digital Ant as an armored cash courier / Market Guardian: aligned positions escort, opposing positions wait for market settlement, and high route threat causes defend-and-reroute.
+- Prohibited player-asset theft, cargo-principal loot, intentional feeder death and unfunded rewards. Ordinary combat still cannot settle or kill a source-managed Life.
+- Separated physical XYZ routing from K-space orders. A logistics event now defaults to neutral K-space instead of fabricating a `KY+` position.
+- Added fail-closed cargo hedge planning: matched KAIOS cargo/liability needs no hedge; verified variable-cost exposure needs a market, authority and separate operating risk reserve, with no cargo principal used as margin.
+
 ## 2026-09-29 · Settlement capital candidate and wallet account integration
 
 - Human COMPLETE_PRODUCT_HANDOFF V1 and CONTINUE_TO_COMPLETE supersede percentage-return C-order math with `ΔIndex × signed C × lots`; fixed principal and canonical detents remain. Historical public Testnet bytecode keeps explicitly labeled legacy semantics.
