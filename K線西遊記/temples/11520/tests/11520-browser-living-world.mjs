@@ -14,7 +14,11 @@ if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.loc
 await page.waitForTimeout(700);
 
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
-await page.evaluate(()=>document.querySelector('[data-organ="atm"]')?.click());
+assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),true,'missile interception must be visible in the first mobile viewport instead of being buried in the ATM sheet');
+const missileButtonBox=await page.locator('#cargoInterceptionButton').boundingBox();
+assert.ok(missileButtonBox&&missileButtonBox.x>=0&&missileButtonBox.y>=0&&missileButtonBox.x+missileButtonBox.width<=390&&missileButtonBox.y+missileButtonBox.height<=844,'missile interception entry must remain inside 390x844');
+await page.screenshot({path:`${OUT}/11520-missile-entry-visible.png`});
+await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.open());
 await page.waitForSelector('#atmMovementC',{timeout:3000});
 await page.locator('#atmMovementC').selectOption('0.1');
 await page.locator('#atmAmount').fill('1000');
@@ -43,12 +47,16 @@ await page.evaluate(()=>document.dispatchEvent(new CustomEvent('k11520:cargo-rob
 await page.waitForTimeout(30);
 assert.equal(await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),kaiosBeforeForgedRaid,'caller-invented raid event cannot mint local KAIOS');
 await page.locator('#atmRaid').click();
-assert.match(await page.locator('#atmInsuranceStatus').textContent(),/攔截未成立|最近結果/,'raid control must provide visible feedback instead of silently doing nothing');
-assert.match(await page.locator('#atmInsuranceStatus').textContent(),/本機|5m|reserve/i,'risk panel must explain its simulation/range/reserve boundary');
+await page.locator('#missileKaiosMass').waitFor({state:'visible'});
+assert.match(await page.locator('#sheetTitle').textContent(),/導彈攔截/);
+assert.match(await page.locator('#sheetBody').textContent(),/撞擊動能/,'missile panel must show a physics preview');
+await page.locator('#atmMissileLaunch').click();
+assert.match(await page.locator('#logisticsActionToast').textContent(),/不能發射：INSUFFICIENT_LOCAL_KAIOS_AMMUNITION/,'zero local KAIOS must fail visibly instead of creating free ammunition');
 await page.waitForTimeout(80);
 assert.equal(await page.locator('#logisticsActionToast').getAttribute('role'),'status');
 assert.equal(await page.locator('#logisticsActionToast').evaluate(node=>node.classList.contains('show')),true,'raid feedback must remain visibly announced after the next animation frame');
-await page.screenshot({path:`${OUT}/11520-cargo-raid-feedback.png`,fullPage:true});
+await page.screenshot({path:`${OUT}/11520-missile-physics-panel.png`});
+await page.locator('#sheetClose').click();
 
 await page.evaluate(async()=>{
   const src=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/market-life-source-runtime.mjs');
