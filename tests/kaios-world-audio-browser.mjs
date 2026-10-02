@@ -141,7 +141,7 @@ async function heartV34QA(){
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  const page=await context.newPage();let broadcasts=0,reject=false,manifestPresent=true,confirmMutation=null;
  const fixture={account:address(1),authorized:true,chain:'0x61',repayment:false,claimed:false,binding:manifest.legacyHeart,switchTo:null,lateSwitchTo:null};
- const calls=[],walletRequests=[];
+ const calls=[],walletRequests=[],injectedTransactions=[];
  const reply=q=>{
   if(/sendTransaction|sendRawTransaction|sign|wallet_/i.test(q.method)){broadcasts++;throw Error('NO_BROADCAST');}
   let result='0x0';const timestamp=1790959101;
@@ -150,6 +150,7 @@ async function heartV34QA(){
   if(q.method==='eth_accounts')result=[fixture.account];
   if(q.method==='eth_blockNumber')result='0x100';
   if(q.method==='eth_getBalance')result='0xde0b6b3a7640000';
+  if(q.method==='eth_estimateGas')result='0x493e0';
   if(q.method==='eth_getStorageAt')result='0x'+manifest.implementation.slice(2).padStart(64,'0');
   if(q.method==='eth_getCode')result=q.params[0].toLowerCase()===manifest.proxy.toLowerCase()?'0x6001':'0x6002';
   if(q.method==='eth_getBlockByNumber')result={hash:'0x'+'22'.repeat(32),parentHash:'0x'+'11'.repeat(32),number:'0x100',timestamp:'0x'+timestamp.toString(16),nonce:'0x0000000000000000',difficulty:'0x0',gasLimit:'0x1c9c380',gasUsed:'0x0',miner:address(0),extraData:'0x',transactions:[]};
@@ -181,6 +182,16 @@ async function heartV34QA(){
  });
  await page.exposeFunction('__v34Rpc',async q=>{
   walletRequests.push({method:q.method,params:q.params});
+  if(q.method==='eth_sendTransaction'){
+   // Final injected-provider boundary is a local stub, never a real wallet.
+   // Exercise ethers' real gas/serialization path so the chain pin must survive
+   // all asynchronous preparation and reach the wallet signing request.
+   const tx=q.params[0];
+   assert.equal(tx.chainId,'0x61','candidate signing request is pinned to BSC97');
+   assert.equal(BigInt(tx.value??'0x0'),0n,'candidate sends no native value');
+   injectedTransactions.push(tx);
+   return '0x'+'33'.repeat(32);
+  }
   if(q.method==='eth_chainId')return fixture.chain;
   if(q.method==='eth_accounts')return fixture.authorized?[fixture.account]:[];
   if(q.method==='eth_requestAccounts'){fixture.authorized=true;return[fixture.account];}
@@ -206,8 +217,11 @@ async function heartV34QA(){
  const installBoundaryStub=()=>page.evaluate(()=>{
   window.__v34Tx=[];
   ethers.providers.JsonRpcSigner.prototype.sendTransaction=async function(tx){
-   window.__v34Tx.push({to:tx.to,data:tx.data});
-   return{hash:'0x'+'33'.repeat(32),wait:async()=>{
+   if(Number(tx.chainId)!==97)throw Error('QA_CANDIDATE_CHAIN_PIN_MISSING');
+   if(!ethers.BigNumber.from(tx.value??0).isZero())throw Error('QA_CANDIDATE_NATIVE_VALUE');
+   const hash=await this.sendUncheckedTransaction(tx);
+   window.__v34Tx.push({to:tx.to,data:tx.data,chainId:Number(tx.chainId),value:ethers.BigNumber.from(tx.value??0).toString()});
+   return{hash,wait:async()=>{
     if(window.__v34HoldReceipt)await new Promise(resolve=>{window.__v34ReleaseReceipt=resolve;});
     return{blockNumber:257,status:1,logs:[],transactionHash:'0x'+'33'.repeat(32)};
    }};
@@ -269,6 +283,7 @@ async function heartV34QA(){
    await page.waitForFunction(n=>window.__v34Tx.length===n+1,before);
    await page.waitForFunction(id=>document.getElementById(id).dataset.heartPending!=='1',id);
    const tx=await page.evaluate(()=>__v34Tx.at(-1));assert.equal(tx.to.toLowerCase(),manifest.proxy.toLowerCase());
+   assert.equal(tx.chainId,97);assert.equal(tx.value,'0');
    const decoded=abi.parseTransaction(tx);assert.equal(decoded.name,name);return decoded;
   };
   const wish=await press('kh-wishbtn','makeWish');assert.equal(wish.args[0],selectorId('世界平安'));assert.equal(wish.args[1],selectorId('civilization'));
@@ -339,7 +354,10 @@ async function heartV34QA(){
   assert.equal(await page.evaluate(()=>__v34Tx.length),approvalBefore+1,'fresh explicit approval exactly once');
   const approvalTx=await page.evaluate(()=>__v34Tx.at(-1)),approval=abi.parseTransaction(approvalTx);
   assert.equal(approvalTx.to.toLowerCase(),manifest.kgen.toLowerCase());assert.equal(approval.name,'approve');
+  assert.equal(approvalTx.chainId,97);assert.equal(approvalTx.value,'0');
   assert.equal(approval.args[0].toLowerCase(),manifest.proxy.toLowerCase());assert.equal(approval.args[1],parseUnits('9',18));
+  assert.equal(injectedTransactions.length,approvalBefore+1,'every successful candidate action reaches the local injected signing-request stub exactly once');
+  assert.ok(injectedTransactions.every(tx=>tx.chainId==='0x61'),'all Heart and approval RPC payloads retain BSC97 chain pin');
   await page.screenshot({path:`${OUT}/heart-v34-390.png`});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   // A fresh candidate document without its identity manifest cannot fall back
@@ -352,7 +370,7 @@ async function heartV34QA(){
   await page.locator('#kgen-v30-wish-btn').tap();
   await noSend('kh-wishbtn','kh-wish-feedback',/乾淨 BSC97|fallback/);
   assert.equal(broadcasts,0);
-  reports.push({id:'12345-v34',width:390,height:844,binding:'PASS',canonicalSendHeart:'PASS',receipt:'PASS',walletSwitch:'PASS',civilizationSwitch:'PASS',repaymentRequired:'PASS',cancel:'PASS',identityFailure:'PASS',legacySmartConnect:'PASS',wrongChain:'PASS',accountChangeOnConfirm:'PASS',delayedAccountEvent:'PASS',pendingDuplicate:'PASS',approvalAccountGuard:'PASS',approvalExactAmount:'PASS',missingManifest:'FAIL_CLOSED_PASS',passiveNoPrompt:'PASS',backgroundResume:'PASS',khSwitch:'PASS',binanceCandidateQuery:'PASS',transactionBoundary:'STUB_NO_BROADCAST',broadcasts,calls});
+  reports.push({id:'12345-v34',width:390,height:844,binding:'PASS',canonicalSendHeart:'PASS',receipt:'PASS',walletSwitch:'PASS',civilizationSwitch:'PASS',repaymentRequired:'PASS',cancel:'PASS',identityFailure:'PASS',legacySmartConnect:'PASS',wrongChain:'PASS',accountChangeOnConfirm:'PASS',delayedAccountEvent:'PASS',pendingDuplicate:'PASS',approvalAccountGuard:'PASS',approvalExactAmount:'PASS',missingManifest:'FAIL_CLOSED_PASS',passiveNoPrompt:'PASS',backgroundResume:'PASS',khSwitch:'PASS',binanceCandidateQuery:'PASS',candidateChainPin:'PASS',injectedRpcChainId:'0x61',candidateNativeValue:'0',injectedTransactionStubCalls:injectedTransactions.length,transactionBoundary:'STUB_NO_BROADCAST',broadcasts,calls});
  }catch(error){await page.screenshot({path:`${OUT}/heart-v34-FAIL.png`});throw error;}finally{await context.close();}
 }
 async function heartActionQA(){

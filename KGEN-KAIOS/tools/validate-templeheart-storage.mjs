@@ -1577,6 +1577,11 @@ async function runCleanTestnetRehearsal() {
       if(evidence.checks.FIVE_HUNDRED_DISTINCT_CLAIMS!=="PASS")for(let i=1;i<=500;i++) {
         if(BigInt((await provider.getBlock("latest")).timestamp)/await heart.fortuneEpochSeconds()!==epoch)fail("CLEAN_EPOCH_CHANGED_STOP");
         const item=await prepare(i);
+        // Reconcile this wallet's existing intent before choosing a fresh cap
+        // probe. A restart after claim 500 must not probe a consumed proof.
+        if(evidence.operations[`FORTUNE_STRESS_${i}`]) {
+          await actorCall(`FORTUNE_STRESS_${i}`,item.a,heart,"fortuneClaim",[item.p.proofId]);continue;
+        }
         if(await heart.fortuneEpochClaims(epoch)<500n)await actorCall(`FORTUNE_STRESS_${i}`,item.a,heart,"fortuneClaim",[item.p.proofId]);
         else {await rejection("BOT_501_EPOCH_CAP",heart,"fortuneClaim",[item.p.proofId],item.a.target,"FortuneEpochFull");evidence.epochRejectedActor=item.a.target;persist();break;}
       }
@@ -1598,6 +1603,9 @@ async function runCleanTestnetRehearsal() {
       if(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS")for(let i=510;i<599;i++) {
         if(Math.floor((await provider.getBlock("latest")).timestamp/3600)!==hour)fail("CLEAN_HOUR_CHANGED_STOP");
         const a=await actor(i);
+        if(evidence.operations[`HEARTBEAT_STRESS_${hour}_${i}`]) {
+          await actorCall(`HEARTBEAT_STRESS_${hour}_${i}`,a,heart,"heartbeatClaim");continue;
+        }
         const current=await heart.heartbeatHourClaims(hour);
         if(current<88n)await actorCall(`HEARTBEAT_STRESS_${hour}_${i}`,a,heart,"heartbeatClaim");
         else await rejection("BOT_89_HEARTBEAT_CAP",heart,"heartbeatClaim",[],a.target,"HeartbeatHourFull");
@@ -1612,6 +1620,9 @@ async function runCleanTestnetRehearsal() {
         if(Math.floor(now.timestamp/86400)!==day||now.timestamp%86400>=600)fail("CLEAN_IGNITE_WINDOW_ENDED_STOP");
         if(!evidence.actors[i])fail("CLEAN_IGNITE_ACTORS_MUST_BE_PREPARED_BEFORE_WINDOW");
         const a=await actor(i);
+        if(evidence.operations[`IGNITE_STRESS_${day}_${i}`]) {
+          await actorCall(`IGNITE_STRESS_${day}_${i}`,a,heart,"igniteAndClaim");continue;
+        }
         const count=await heart.igniteDayClaims(day);
         if(count<88n)await actorCall(`IGNITE_STRESS_${day}_${i}`,a,heart,"igniteAndClaim");
         else {await rejection("BOT_89_IGNITE_CAP",heart,"igniteAndClaim",[],a.target,"IgniteDayFull");break;}

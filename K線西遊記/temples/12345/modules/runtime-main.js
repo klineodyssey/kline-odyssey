@@ -1952,8 +1952,11 @@
         if(fortune){ fortune.disabled = true; fortune.value = "8"; }
         setNodeText(document.querySelector('label[for="kh-fortune-amount"]'), "V3.4：由 proof 決定 payout，上限 8 TEST KGEN（不可自選）");
         setNodeText($("kh-vow"), "voluntaryRepayFortune 自願還願（TEST）");
+        const vowOption = $("kh-vow-option");
+        if(vowOption){ vowOption.value = "1"; vowOption.disabled = true; setNodeText(vowOption.options[0], "V3.4：僅還願至 TEST Heart，無 legacy 分配選項"); }
         setNodeText($("kh-wishbtn"), "V3.4 許願（hash + civilization）");
         setNodeText($("kh-lamp"), "點燈僅在正式 V3.2.6 提供");
+        if($("kh-lamp-days")) $("kh-lamp-days").disabled = true;
         const target = $("kh-approve-target");
         if(target){ target.value = "vow"; Array.from(target.options).forEach(function(option){ option.disabled = option.value !== "vow"; }); }
         ["kh-cup-1","kh-cup-2","kh-cup-3","kh-cup-reset"].forEach(function(id){ if($(id)) $(id).disabled = true; });
@@ -1976,8 +1979,11 @@
       const self = this;
       const methods = {WISH:"makeWish", HOLY_CUP:"submitHolyCupProof", OFFERING:"recordBurnOffering", FORTUNE:"fortuneClaim", REPAY_FORTUNE:"voluntaryRepayFortune", HEARTBEAT:"heartbeatClaim", IGNITE:"igniteAndClaim"};
       let wholeAmount;
-      return this.sendHeart("V3.4 TEST " + methods[action], function(contract, args){
-        return contract[methods[action]].apply(contract, args);
+      return this.sendHeart("V3.4 TEST " + methods[action], async function(contract, args){
+        const unsigned = await contract.populateTransaction[methods[action]].apply(contract.populateTransaction, args.concat([{value:0}]));
+        // ethers v5 Contract overrides exclude chainId. Pin the domain on the
+        // same canonical signer's populated request, not a parallel wallet.
+        return contract.signer.sendTransaction(Object.assign({},unsigned,{chainId:97}));
       }, {button:button, feedback:feedback || "kh-v34-feedback", candidate:true,
         describeError:function(error){
           const raw = asErrorMessage(error);
@@ -2945,7 +2951,11 @@
         }
         const token = new ethers.Contract(HeartRuntime.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, HeartRuntime.state.signer);
         StatusRuntime.push("送出中：Approve " + slot.label + " " + amountWhole + " KGEN");
-        const tx = await token.approve(CHAIN.HEART, amount);
+        let tx;
+        if(V34_REQUESTED){
+          const unsigned = await token.populateTransaction.approve(CHAIN.HEART, amount, {value:0});
+          tx = await token.signer.sendTransaction(Object.assign({},unsigned,{chainId:97}));
+        }else tx = await token.approve(CHAIN.HEART, amount);
         StatusRuntime.push("Tx sent：" + tx.hash);
         await tx.wait();
         StatusRuntime.push("成功：Approve " + slot.label + " " + amountWhole + " KGEN");
