@@ -15,9 +15,17 @@ await page.waitForTimeout(700);
 
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
 assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),true,'missile interception must be visible in the first mobile viewport instead of being buried in the ATM sheet');
+assert.equal(await page.locator('#homeDeliveryButton').isVisible(),true,'cash/goods home delivery must be visible in the first mobile viewport');
 const missileButtonBox=await page.locator('#cargoInterceptionButton').boundingBox();
 assert.ok(missileButtonBox&&missileButtonBox.x>=0&&missileButtonBox.y>=0&&missileButtonBox.x+missileButtonBox.width<=390&&missileButtonBox.y+missileButtonBox.height<=844,'missile interception entry must remain inside 390x844');
+const homeButtonBox=await page.locator('#homeDeliveryButton').boundingBox();
+assert.ok(homeButtonBox&&homeButtonBox.x>=0&&homeButtonBox.y>=0&&homeButtonBox.x+homeButtonBox.width<=390&&homeButtonBox.y+homeButtonBox.height<=844,'home delivery entry must remain inside 390x844');
 await page.screenshot({path:`${OUT}/11520-missile-entry-visible.png`});
+await page.locator('#homeDeliveryButton').click();
+await page.locator('#homeRequest').waitFor({state:'visible'});
+assert.match(await page.locator('#sheetBody').textContent(),/玩家下單 → 飛碟送到家 → 玩家驗收 → 入帳/);
+assert.match(await page.locator('#sheetBody').textContent(),/貨物本金是受限庫存，不是公司收入/);
+await page.locator('#sheetClose').click();
 await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.open());
 await page.waitForSelector('#atmMovementC',{timeout:3000});
 await page.locator('#atmMovementC').selectOption('0.1');
@@ -57,6 +65,32 @@ assert.equal(await page.locator('#logisticsActionToast').getAttribute('role'),'s
 assert.equal(await page.locator('#logisticsActionToast').evaluate(node=>node.classList.contains('show')),true,'raid feedback must remain visibly announced after the next animation frame');
 await page.screenshot({path:`${OUT}/11520-missile-physics-panel.png`});
 await page.locator('#sheetClose').click();
+
+// Browser-complete home delivery uses an explicitly QA-seeded local-game balance;
+// this never touches a provider, wallet balance or chain state.
+await page.evaluate(()=>{
+  const p=globalThis.__K11520_PRODUCT__.snapshot(),key=`k11520.player:${p.playerId}:k11520.local-product.v1:guest`,saved=JSON.parse(localStorage.getItem(key));
+  saved.progress.kaios=50;saved.progress.claimableKaios=0;localStorage.setItem(key,JSON.stringify(saved));
+});
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);
+if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
+await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
+const deliveryKaiosBefore=await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios);
+await page.locator('#homeDeliveryButton').click();await page.locator('#homeRequest').waitFor({state:'visible'});
+await page.locator('#homeAmount').fill('1000');await page.locator('#homeMovementC').selectOption('1');await page.locator('#homeRequest').click();
+const assignedHome=await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot());
+assert.equal(assignedHome.mission.serviceType,'PLAYER_HOME_CASH_DELIVERY');assert.equal(assignedHome.finance.earned,0);assert.equal(assignedHome.payroll.paid,0);
+await page.locator('#homeLaunch').click();
+await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.mission?.status==='ARRIVED_AWAITING_RECEIPT',null,{timeout:15000});
+assert.equal((await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot())).payroll.paid,0,'arrival alone must not pay salary');
+await page.locator('#sheetClose').click();await page.evaluate(()=>document.getElementById('playerLifeOpen')?.click());await page.locator('#playerLifeHomeNav').click();
+await page.waitForFunction(()=>{const p=globalThis.__K11520_PRODUCT__.snapshot(),x=globalThis.__K11520_WORLD_COORDS__?.physical,h=p.home?.xyz;return h&&Math.hypot(x.x-h.x,x.y-h.y,x.z-h.z)<=2.5},null,{timeout:10000});
+await page.locator('#homeDeliveryButton').click();await page.locator('#homeAccept').click();
+await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.mission?.status==='DELIVERED',null,{timeout:3000});
+const deliveredHome=await page.evaluate(()=>({ant:globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot(),player:globalThis.__K11520_PRODUCT__.snapshot()}));
+assert.equal(deliveredHome.ant.mission.accounting.cargoPrincipalRecognizedAsRevenue,false);assert.ok(deliveredHome.ant.mission.accounting.freightRevenue>0);assert.ok(deliveredHome.ant.payroll.paid>0);assert.equal(deliveredHome.player.kaios,deliveryKaiosBefore-deliveredHome.ant.mission.accounting.freightRevenue);assert.match(deliveredHome.ant.mission.receiptId,/^HOME-RECEIPT-/);
+assert.match(await page.locator('#homeDeliveryReceipt').textContent(),/DELIVERY VERIFIED/);
+await page.screenshot({path:`${OUT}/11520-player-home-delivery-receipt.png`});await page.locator('#sheetClose').click();
 
 await page.evaluate(async()=>{
   const src=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/market-life-source-runtime.mjs');

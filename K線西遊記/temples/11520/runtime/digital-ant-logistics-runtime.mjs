@@ -1,10 +1,10 @@
 /*
 KGEN_META
-VERSION: 1.4.0
-REVISION: 2026-10-03.DIGITAL-ANT-MISSILE-INTERCEPTION-GAME
+VERSION: 1.5.0
+REVISION: 2026-10-03.DIGITAL-ANT-PLAYER-HOME-DELIVERY
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
-CHANGE_REASON: Define Digital Ant as an armored cash courier / Market Life guardian, separate physical route from K-space positions, and add fail-closed cargo hedge planning without risking cargo principal or player assets.
+CHANGE_REASON: Add player-originated cash/goods delivery to the canonical home XYZ, ATM-UFO transport, receiver acceptance, and receipt-gated freight/payroll accounting without treating cargo principal as revenue.
 */
 
 import {universeLevel,routeFromAnchor,logisticsDecision,LOGISTICS_ANCHOR} from './logistics-universe-runtime.mjs';
@@ -25,6 +25,7 @@ export const CARGO_RISK_CAUSES=Object.freeze(['THEFT_ROBBERY','NATURAL_DISASTER'
 export const CARGO_INSURANCE_MODES=Object.freeze(['BROKERAGE_QUOTE_ONLY','UNDERWRITING_READY','LOCAL_SIMULATION_COVERED']);
 export const CARGO_RAID_RANGE_METERS=5;
 export const MISSILE_MAX_RANGE_METERS=120;
+export const HOME_DELIVERY_ACCEPTANCE_RANGE_METERS=2.5;
 export const KAIOS_MASS_KG=1;
 // Gameplay hull normalization. It converts simulated joules into the UFO's
 // bounded 0..100 operational-energy meter; it is not a real materials claim.
@@ -128,6 +129,15 @@ export function buildAtmRegistry(worldObjects=[]){
   }));
 }
 
+export function createPlayerHomeDestination({requestId,requesterLifeId,homePlotId,position={}}={}){
+  const requester=String(requesterLifeId||'').trim(),plot=String(homePlotId||'').trim(),id=String(requestId||'').trim();
+  if(!requester||!plot||!id)return {ok:false,reason:'PLAYER_HOME_IDENTITY_REQUIRED'};
+  const coordinates={x:Number(position.x),y:Number(position.y),z:Number(position.z)};
+  if(Object.values(coordinates).some(value=>!Number.isFinite(value)))return {ok:false,reason:'PLAYER_HOME_XYZ_REQUIRED'};
+  const suffix=raidHash(`${requester}:${plot}:${id}`).toString(16).padStart(8,'0');
+  return {ok:true,destination:{atmId:`PLAYER-HOME-${suffix}`,kind:'PLAYER_HOME',name:'玩家住家到府收貨點',requestId:id,requesterLifeId:requester,homePlotId:plot,...coordinates,online:true,cashDemand:0,kgenDemand:0,kaiosDemand:0,dynamic:true}};
+}
+
 export function createDigitalAnt({
   lifeId='LIFE-DIGITAL-ANT-11520-001',name='Digital Ant',capital=20,vitality=100,cargoCapacity=100,
   retirementReserve=0,targetRetirementReserve=100,x=0,y=0,z=0,
@@ -140,6 +150,7 @@ export function createDigitalAnt({
     cargo:{kind:null,amount:0,unit:null},mission:null,state:'IDLE',x:n(x),y:n(y),z:n(z),
     vehicle:{vehicleId:String(vehicle?.vehicleId||'ATM-UFO-DIGITAL-ANT-0001'),type:String(vehicle?.type||ATM_UFO_TRANSPORT_MODE),lifeId:vehicle?.lifeId||null,independentLife:false,maxOperationalEnergy:ATM_UFO_MAX_OPERATIONAL_ENERGY,operationalEnergy:ATM_UFO_MAX_OPERATIONAL_ENERGY,propulsion:'ONLINE'},
     finance:{earned:0,spent:0,tips:0,freight:0,fuel:0,salary:0,maintenance:0,risk:0,time:0,lastNet:0},
+    payroll:{earned:0,paid:0,balance:0,currency:'KAIOS',scope:'LOCAL_SIMULATION_ONLY',lastReceiptId:null},
     cargoRisk:{desk:'AI_ANT_COMPANY_CARGO_RISK_DESK',policy:null,reserveKaios:0,incidents:[],replayKeys:[],lastRaidAt:0},
   };
 }
@@ -150,7 +161,7 @@ export function createDeliveryMission({
   distanceMeters=null,metersPerWorldUnit=1,baseFreight=0,distanceRate=0,loadRate=0,riskRate=0,
   fuelPerMeter=0,salaryPerSecond=0,maintenancePerMeter=0,timeCostPerSecond=0,riskProbability=0,riskLoss=0,
   speedMetersPerSecond=null,tipRate=0,movementC=1,flightAltitude=6,arrivalOffsetY=1.1,transportMode=ATM_UFO_TRANSPORT_MODE,
-  gameplayRiskPool=0,maxRaidLoss=100
+  gameplayRiskPool=0,maxRaidLoss=100,workerSalaryOffer=0
 }={}){
   const normalizedMode=DELIVERY_MODES.includes(String(mode).toUpperCase())?String(mode).toUpperCase():'OBSERVE';
   const explicitDistance=distanceMeters===null||distanceMeters===undefined||distanceMeters===''?null:Math.max(0,n(distanceMeters));
@@ -158,11 +169,30 @@ export function createDeliveryMission({
   return {
     missionId,cargoKind,amount:Math.max(0,n(amount)),unit:String(unit||'KAIOS'),destinationAtmId:String(destinationAtmId||''),
     price:n(price,LOGISTICS_ANCHOR),demand:n(demand),mode:normalizedMode,marketEdge:n(marketEdge),freightOffer:Math.max(0,n(freightOffer)),
-    economics:{distanceMeters:explicitDistance,metersPerWorldUnit:Math.max(0.000001,n(metersPerWorldUnit,1)),baseFreight:Math.max(0,n(baseFreight)),distanceRate:Math.max(0,n(distanceRate)),loadRate:Math.max(0,n(loadRate)),riskRate:Math.max(0,n(riskRate)),fuelPerMeter:Math.max(0,n(fuelPerMeter)),salaryPerSecond:Math.max(0,n(salaryPerSecond)),maintenancePerMeter:Math.max(0,n(maintenancePerMeter)),timeCostPerSecond:Math.max(0,n(timeCostPerSecond)),riskProbability:clamp(riskProbability,0,1),riskLoss:Math.max(0,n(riskLoss)),speedMetersPerSecond:explicitSpeed,tipRate:Math.max(0,n(tipRate))},
+    economics:{distanceMeters:explicitDistance,metersPerWorldUnit:Math.max(0.000001,n(metersPerWorldUnit,1)),baseFreight:Math.max(0,n(baseFreight)),distanceRate:Math.max(0,n(distanceRate)),loadRate:Math.max(0,n(loadRate)),riskRate:Math.max(0,n(riskRate)),fuelPerMeter:Math.max(0,n(fuelPerMeter)),salaryPerSecond:Math.max(0,n(salaryPerSecond)),workerSalaryOffer:Math.max(0,n(workerSalaryOffer)),maintenancePerMeter:Math.max(0,n(maintenancePerMeter)),timeCostPerSecond:Math.max(0,n(timeCostPerSecond)),riskProbability:clamp(riskProbability,0,1),riskLoss:Math.max(0,n(riskLoss)),speedMetersPerSecond:explicitSpeed,tipRate:Math.max(0,n(tipRate))},
     movementC:n(movementC,1),flightAltitude:Math.max(1,n(flightAltitude,6)),arrivalOffsetY:Math.max(0,n(arrivalOffsetY,1.1)),transportMode:String(transportMode||ATM_UFO_TRANSPORT_MODE),
     gameplayRiskPool:whole(gameplayRiskPool,'GAMEPLAY_RISK_POOL'),gameplayRiskPoolRemaining:whole(gameplayRiskPool,'GAMEPLAY_RISK_POOL'),maxRaidLoss:whole(maxRaidLoss,'MAX_RAID_LOSS'),lastMovement:{x:0,y:0,z:0},
     status:'CREATED',createdAt:Date.now(),pickedUpAt:null,deliveredAt:null,failedAt:null,crashedAt:null,receiptVerified:false,
   };
+}
+
+export function createPlayerHomeDeliveryRequest({
+  requestId=`HOME-DELIVERY-${Date.now()}`,requesterLifeId,homePlotId,homePosition={},origin={},cargoKind='CASH',amount=1000,unit='KAIOS',movementC=1,freightFee=null,workerSalary=null,price=LOGISTICS_ANCHOR
+}={}){
+  const cargo=String(cargoKind||'').toUpperCase();
+  if(!['CASH','GOODS'].includes(cargo))return {ok:false,reason:'UNSUPPORTED_HOME_CARGO'};
+  let cargoAmount;try{cargoAmount=whole(amount,'CARGO_AMOUNT')}catch(error){return {ok:false,reason:error.message}}
+  if(cargoAmount<1)return {ok:false,reason:'CARGO_AMOUNT_REQUIRED'};
+  const home=createPlayerHomeDestination({requestId,requesterLifeId,homePlotId,position:homePosition});
+  if(!home.ok)return home;
+  const distanceWorld=buildAtmUfoFlightPlan(origin,home.destination,{flightAltitude:6,arrivalOffsetY:1.1}).distanceWorld;
+  const calculatedFee=Math.max(1,Math.ceil(2+distanceWorld*.05+cargoAmount/1000));
+  let fee,salary;
+  try{fee=freightFee==null?calculatedFee:whole(freightFee,'FREIGHT_FEE');salary=workerSalary==null?Math.max(1,Math.floor(fee*.4)):whole(workerSalary,'WORKER_SALARY')}catch(error){return {ok:false,reason:error.message}}
+  if(salary>fee)return {ok:false,reason:'SALARY_EXCEEDS_FREIGHT_FEE'};
+  const mission=createDeliveryMission({missionId:String(requestId),cargoKind:cargo,amount:cargoAmount,unit,destinationAtmId:home.destination.atmId,price,movementC,flightAltitude:6,arrivalOffsetY:1.1,transportMode:ATM_UFO_TRANSPORT_MODE,demand:1,freightOffer:fee,workerSalaryOffer:salary,fuelPerMeter:.002,maintenancePerMeter:.003,riskProbability:.01,riskLoss:Math.max(1,Math.ceil(cargoAmount*.001))});
+  Object.assign(mission,{serviceType:cargo==='CASH'?'PLAYER_HOME_CASH_DELIVERY':'PLAYER_HOME_GOODS_DELIVERY',requesterLifeId:String(requesterLifeId),homePlotId:String(homePlotId),customerAcceptanceRequired:true,acceptanceRangeMeters:HOME_DELIVERY_ACCEPTANCE_RANGE_METERS,cargoCustody:'RESTRICTED_INVENTORY_WITH_MATCHING_LIABILITY',cargoPrincipalRevenue:false,paymentScope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'});
+  return {ok:true,request:{requestId:String(requestId),requesterLifeId:String(requesterLifeId),homePlotId:String(homePlotId),cargoKind:cargo,amount:cargoAmount,unit:String(unit),freightFeeKaios:fee,workerSalaryKaios:salary,status:'REQUESTED_BY_PLAYER',createdAt:mission.createdAt,scope:'LOCAL_SIMULATION_ONLY'},destination:home.destination,mission};
 }
 
 export function distance3d(a={},b={}){
@@ -230,7 +260,7 @@ export function quoteDeliveryEconomics(ant,mission,atm){
   const travelSeconds=speed>0?distanceMeters/speed:null;
   const freight=Math.max(0,n(mission.freightOffer))||Math.max(0,n(e.baseFreight)+distanceMeters*n(e.distanceRate)+mission.amount*n(e.loadRate)+distanceMeters*n(e.riskRate));
   const fuel=distanceMeters*n(e.fuelPerMeter);
-  const salary=(travelSeconds??0)*n(e.salaryPerSecond);
+  const salary=n(e.workerSalaryOffer)>0?n(e.workerSalaryOffer):(travelSeconds??0)*n(e.salaryPerSecond);
   const maintenance=distanceMeters*n(e.maintenancePerMeter);
   const time=(travelSeconds??0)*n(e.timeCostPerSecond);
   const risk=n(e.riskProbability)*n(e.riskLoss);
@@ -499,17 +529,43 @@ export function verifyDeliveryReceipt(ant,{receiptId=null,verified=false,now=Dat
   const q=m.quote||quoteDeliveryEconomics(ant,m,m.destination);
   ant.finance.earned+=q.revenue;ant.finance.spent+=q.cost;ant.finance.tips+=q.tip;ant.finance.freight+=q.freight;
   ant.finance.fuel+=q.fuel;ant.finance.salary+=q.salary;ant.finance.maintenance+=q.maintenance;ant.finance.risk+=q.risk;ant.finance.time+=q.time;ant.finance.lastNet=q.net;
+  ant.payroll??={earned:0,paid:0,balance:0,currency:'KAIOS',scope:'LOCAL_SIMULATION_ONLY',lastReceiptId:null};
+  ant.payroll.earned+=q.salary;ant.payroll.paid+=q.salary;ant.payroll.balance+=q.salary;ant.payroll.lastReceiptId=m.receiptId;
+  m.accounting={scope:'LOCAL_SIMULATION_ONLY',currency:'KAIOS',cargoPrincipal:m.amount,cargoPrincipalRecognizedAsRevenue:false,freightRevenue:q.freight,tipRevenue:q.tip,workerSalary:q.salary,operatingCost:q.cost-q.salary,companyNet:q.net,chainTransfer:false};
   ant.capital=Math.max(0,ant.capital+q.net);
   if(q.net>0){const reserve=q.net*0.2;ant.retirementReserve+=reserve;ant.capital=Math.max(0,ant.capital-reserve);}
-  return {ok:true,delivered:true,atmId:m.destination.atmId,cargo:delivered,missionId:m.missionId,receiptId:m.receiptId,quote:q,retirementReserve:ant.retirementReserve};
+  return {ok:true,delivered:true,atmId:m.destination.atmId,cargo:delivered,missionId:m.missionId,receiptId:m.receiptId,quote:q,accounting:structuredClone(m.accounting),payroll:structuredClone(ant.payroll),retirementReserve:ant.retirementReserve};
+}
+
+export function previewPlayerHomeAcceptance(ant,{requesterLifeId,playerPosition={}}={}){
+  const m=ant?.mission;
+  if(!m||m.status!=='ARRIVED_AWAITING_RECEIPT')return {ok:false,reason:'NOT_AWAITING_RECEIPT'};
+  if(!m.customerAcceptanceRequired||!String(m.serviceType||'').startsWith('PLAYER_HOME_'))return {ok:false,reason:'NOT_PLAYER_HOME_DELIVERY'};
+  if(String(requesterLifeId||'')!==String(m.requesterLifeId||''))return {ok:false,reason:'RECEIVER_IDENTITY_MISMATCH'};
+  const position={x:Number(playerPosition.x),y:Number(playerPosition.y),z:Number(playerPosition.z)};
+  if(Object.values(position).some(value=>!Number.isFinite(value)))return {ok:false,reason:'RECEIVER_XYZ_REQUIRED'};
+  const distance=distance3d(position,m.destination),limit=Math.max(0.1,n(m.acceptanceRangeMeters,HOME_DELIVERY_ACCEPTANCE_RANGE_METERS));
+  if(distance>limit)return {ok:false,reason:'RECEIVER_NOT_AT_HOME',distance,acceptanceRangeMeters:limit};
+  return {ok:true,missionId:m.missionId,requesterLifeId:m.requesterLifeId,distance,acceptanceRangeMeters:limit,freightFeeKaios:whole(m.quote?.freight??m.freightOffer,'FREIGHT_FEE'),paymentScope:m.paymentScope};
+}
+
+export function acceptPlayerHomeDelivery(ant,{requesterLifeId,playerPosition={},paymentEvidence=null,now=Date.now()}={}){
+  const preview=previewPlayerHomeAcceptance(ant,{requesterLifeId,playerPosition});
+  if(!preview.ok)return preview;
+  let paidAmount=null;
+  try{paidAmount=whole(paymentEvidence?.amount,'FREIGHT_PAYMENT')}catch{return {ok:false,reason:'VERIFIED_LOCAL_FREIGHT_PAYMENT_REQUIRED',freightFeeKaios:preview.freightFeeKaios}}
+  if(preview.freightFeeKaios>0&&(!paymentEvidence?.ok||paidAmount!==preview.freightFeeKaios||paymentEvidence.scope!=='LOCAL_SIMULATION_NO_CHAIN_TRANSFER'))return {ok:false,reason:'VERIFIED_LOCAL_FREIGHT_PAYMENT_REQUIRED',freightFeeKaios:preview.freightFeeKaios};
+  const receiptId=`HOME-RECEIPT-${raidHash(`${ant.mission.missionId}:${requesterLifeId}:${now}`).toString(16).padStart(8,'0')}`;
+  ant.mission.customerAcceptance={requesterLifeId:String(requesterLifeId),acceptedAt:now,position:{x:Number(playerPosition.x),y:Number(playerPosition.y),z:Number(playerPosition.z)},distance:preview.distance,payment:{amount:preview.freightFeeKaios,scope:preview.paymentScope},receiptAuthority:'RUNTIME_GENERATED_FROM_PLAYER_ACCEPTANCE'};
+  return verifyDeliveryReceipt(ant,{receiptId,verified:true,now});
 }
 
 export function deliverySnapshot(ant){
   const m=ant.mission;
   return {
     lifeId:ant.lifeId,name:ant.name,species:ant.species,role:ant.role,state:ant.state,
-    position:{x:ant.x,y:ant.y,z:ant.z},vehicle:{...ant.vehicle},vitality:ant.vitality,capital:ant.capital,retirementReserve:ant.retirementReserve,targetRetirementReserve:ant.targetRetirementReserve,cargo:{...ant.cargo},finance:{...ant.finance},cargoRisk:structuredClone(ant.cargoRisk),
-    mission:m?{missionId:m.missionId,status:m.status,destinationAtmId:m.destinationAtmId,route:m.route,level:m.level,cargoKind:m.cargoKind,amount:m.amount,unit:m.unit,mode:m.mode,movementC:m.movementC,transportMode:m.transportMode,flightPhase:m.flightPhase,flightWaypointIndex:m.flightWaypointIndex,flightPlan:m.flightPlan,quote:m.quote,gameplayRiskPool:m.gameplayRiskPool,gameplayRiskPoolRemaining:m.gameplayRiskPoolRemaining,lastMovement:m.lastMovement,receiptVerified:Boolean(m.receiptVerified)}:null,
+    position:{x:ant.x,y:ant.y,z:ant.z},vehicle:{...ant.vehicle},vitality:ant.vitality,capital:ant.capital,retirementReserve:ant.retirementReserve,targetRetirementReserve:ant.targetRetirementReserve,cargo:{...ant.cargo},finance:{...ant.finance},payroll:structuredClone(ant.payroll),cargoRisk:structuredClone(ant.cargoRisk),
+    mission:m?{missionId:m.missionId,status:m.status,destinationAtmId:m.destinationAtmId,route:m.route,level:m.level,cargoKind:m.cargoKind,amount:m.amount,unit:m.unit,mode:m.mode,movementC:m.movementC,transportMode:m.transportMode,flightPhase:m.flightPhase,flightWaypointIndex:m.flightWaypointIndex,flightPlan:m.flightPlan,quote:m.quote,serviceType:m.serviceType,requesterLifeId:m.requesterLifeId,homePlotId:m.homePlotId,customerAcceptanceRequired:Boolean(m.customerAcceptanceRequired),customerAcceptance:m.customerAcceptance,accounting:m.accounting,gameplayRiskPool:m.gameplayRiskPool,gameplayRiskPoolRemaining:m.gameplayRiskPoolRemaining,lastMovement:m.lastMovement,receiptVerified:Boolean(m.receiptVerified),receiptId:m.receiptId}:null,
     simulation:true,realAssetTransfer:false,mainnetWrite:false,
   };
 }
