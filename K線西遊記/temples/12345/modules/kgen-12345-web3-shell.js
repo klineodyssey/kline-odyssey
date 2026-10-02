@@ -71,9 +71,7 @@ const web3 = {
   ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html",
   OFFICIAL_DAPP: "https://klineodyssey.github.io/kline-odyssey/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html",
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
-  METAMASK_DAPP_URL: "https://klineodyssey.github.io/kline-odyssey/12345.html",
-  // Official format (2026): domain+path ONLY, no https:// prefix, no encodeURIComponent
-  METAMASK_DEEPLINK: "https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1",
+  // Runtime WalletRuntime owns MetaMask routing; no second fallback URL set.
   async ensureBSC(){
     if(!window.ethereum) return true;
     try{
@@ -366,7 +364,12 @@ async autoDetect(){
   },
 
 
-  async connect(){
+  connect(options){
+    if(this._connectPromise) return this._connectPromise;
+    this._connectPromise = this.connectInjected(options).finally(()=>{ this._connectPromise = null; });
+    return this._connectPromise;
+  },
+  async connectInjected(options = {}){
     walletDbgConnectEntered(true);
     walletDbgAction("connect()");
     try{
@@ -374,10 +377,11 @@ async autoDetect(){
       if(!window.ethereum){
         walletDbgAction("connect()", "no injected → openWalletHub only");
         this.openWalletHub();
-        return;
+        return false;
       }
       walletDbgAction("connect()", "eth_requestAccounts");
-      await window.ethereum.request({ method:"eth_requestAccounts" });
+      const accounts = await window.ethereum.request({ method: options.passive ? "eth_accounts" : "eth_requestAccounts" });
+      if(!accounts || !accounts.length) return false;
       try{
         const accts = await window.ethereum.request({ method:"eth_accounts" });
         if(window.KGEN_WALLET_DEBUG && window.KGEN_WALLET_DEBUG.state){
@@ -385,11 +389,13 @@ async autoDetect(){
           window.KGEN_WALLET_DEBUG.render();
         }
       }catch(_){}
-      const okChain = await this.ensureBSC();
+      const okChain = options.passive
+        ? Number(await window.ethereum.request({ method:"eth_chainId" })) === 56
+        : await this.ensureBSC();
       if(!okChain){
         walletDbgError("ensureBSC failed");
-        alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
-        return;
+        if(!options.passive) alert("請切到 BNB Smart Chain (BSC)。目前錢包在 Ethereum 或其他鏈，會導致顯示 ethereum 並無法續玩。");
+        return false;
       }
       this.provider = new ethers.providers.Web3Provider(window.ethereum);
       try{ const net = await this.provider.getNetwork(); const ch = document.getElementById("w3-chain"); if(ch) ch.innerText = (net && (net.name||"") ? (net.name + " (" + net.chainId + ")") : ("chain " + (net?net.chainId:"--"))); }catch(_){ }
@@ -409,11 +415,13 @@ await this.bindEvents();
       this.startPolling();
       await this._syncRuntimeAfterConnect();
       this.closeWalletHub();
-      app.speak("錢包已連線。五指山誓約引擎已啟動。");
+      if(!options.passive) app.speak("錢包已連線。五指山誓約引擎已啟動。");
+      return true;
     }catch(e){
       console.error(e);
       walletDbgError(e && e.message ? e.message : e);
-      alert("錢包連線失敗：" + (e && e.message ? e.message : e));
+      if(!options.passive) alert("錢包連線失敗：" + (e && e.message ? e.message : e));
+      return false;
     }
   },
 
@@ -749,9 +757,11 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       const asciiNoScheme = ascii.replace(/^https?:\/\//, "");
       let link = ascii;
       if(kind === 'metamask'){
-        link = this.METAMASK_DEEPLINK || 'https://link.metamask.io/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1';
+        this.toast && this.toast('錢包入口尚未就緒，請稍候再試');
+        return;
       } else if(kind === 'metamask2'){
-        link = 'https://metamask.app.link/dapp/klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1';
+        this.toast && this.toast('錢包入口尚未就緒，請稍候再試');
+        return;
       } else if(kind === 'direct'){
         link = ascii;
       } else if(kind === 'bridge'){
