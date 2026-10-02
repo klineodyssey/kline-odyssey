@@ -1,7 +1,7 @@
 /*
 KGEN_META
-VERSION: 1.1.0
-REVISION: 2026-10-03.DIGITAL-ANT-MARKET-GUARDIAN-ADAPTER
+VERSION: 1.2.0
+REVISION: 2026-10-03.DIGITAL-ANT-CARGO-RISK-ADAPTER
 STATUS: ACTIVE
 PURPOSE: Let Digital Ant / Exchange Brain logistics publish visible Market Life into 11520 without treating physical movement as a market order.
 */
@@ -14,7 +14,13 @@ function axisPositions({axis='KY',market='BTCUSDT',side=1,lots=1,c=.001,pnl=0}={
 }
 
 function visualSpecies(ant){return ant?.vehicle?.type==='ATM_UFO_5D'?'DIGITAL_ANT_ATM_UFO':ant?.species||'DIGITAL_ANT'}
-function sourceMeta(ant){return {role:ant.role||null,origin:'DIGITAL_ANT_ADAPTER',vehicle:ant.vehicle||null,cargoLootable:false,playerAssetTheft:false,physicalRouteIsMarketOrder:false,motionAuthority:'DIGITAL_ANT_LOGISTICS_RUNTIME'}}
+function sourceMeta(ant){return {
+  role:ant.role||null,origin:'DIGITAL_ANT_ADAPTER',vehicle:ant.vehicle||null,
+  restrictedCargoDirectlyLootable:false,robberyChallengeAllowed:Boolean(ant.mission?.status==='IN_TRANSIT'),
+  robberyRewardSource:'DECLARED_LOCAL_GAME_RISK_POOL_ONLY',playerAssetTheft:false,
+  cargoRiskDesk:ant.cargoRisk?.desk||'AI_ANT_COMPANY_CARGO_RISK_DESK',insuranceMode:ant.cargoRisk?.policy?.mode||'BROKERAGE_QUOTE_ONLY',
+  physicalRouteIsMarketOrder:false,motionAuthority:'DIGITAL_ANT_LOGISTICS_RUNTIME'
+}}
 
 export function publishDigitalAntSpawn(ant,{sourceId='DIGITAL-ANT-EXCHANGE-BRAIN',axis='KY',market='BTCUSDT',side=0,lots=0,c=0,mission=null,route=null}={}){
   if(!ant?.lifeId)throw new Error('DIGITAL_ANT_LIFE_ID_REQUIRED');
