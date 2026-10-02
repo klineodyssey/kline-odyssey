@@ -1374,6 +1374,21 @@ function guardAbandonedCleanHash(hash,abandoned) {
 function publicUnsignedCleanTransaction(request) {
   return {chainId:Number(request.chainId),from:request.from,to:request.to??null,data:request.data,value:String(request.value),nonce:Number(request.nonce),gasLimit:String(request.gasLimit),gasPrice:String(request.gasPrice),type:Number(request.type)};
 }
+function boundedCleanSpend(balanceDelta,backendFees,frontendFees){const receipts=BigInt(backendFees)+BigInt(frontendFees);return BigInt(balanceDelta)>receipts?BigInt(balanceDelta):receipts;}
+function validateCleanCapRows({cohort,rows,kind,index,globalCount,complete=false,rejectedActor=null}) {
+  const addresses=cohort.map(a=>a.toLowerCase()),users=new Set(),hashes=new Set(),counters=new Set();
+  if(addresses.length!==89||new Set(addresses).size!==89)throw new Error("CLEAN_CAP_COHORT_NOT_89_DISTINCT");
+  for(const row of rows) {
+    const user=row.user.toLowerCase();
+    if(!addresses.includes(user)||users.has(user)||hashes.has(row.hash)||row.status!==1||row.to.toLowerCase()!==user||row.eventUser.toLowerCase()!==user||row.eventIndex!==index)throw new Error("CLEAN_CAP_RECEIPT_IDENTITY");
+    if(Math.floor(row.timestamp/(kind==="HEARTBEAT"?3600:86400))!==index||(kind==="IGNITE"&&row.timestamp%86400>=600))throw new Error("CLEAN_CAP_RECEIPT_OUTSIDE_WINDOW");
+    if(row.blockHash!==row.receiptBlockHash||row.eventCounter<1||row.eventCounter>88||counters.has(row.eventCounter))throw new Error("CLEAN_CAP_RECEIPT_BLOCK_OR_COUNTER");
+    users.add(user);hashes.add(row.hash);counters.add(row.eventCounter);
+  }
+  if(globalCount!==rows.length||[...counters].some(n=>n>rows.length))throw new Error("CLEAN_CAP_UNRELATED_OR_MISSING_CLAIM");
+  if(complete&&(rows.length!==88||!rejectedActor||users.has(rejectedActor.toLowerCase())||!addresses.includes(rejectedActor.toLowerCase())))throw new Error("CLEAN_CAP_INCOMPLETE_OR_INVALID_89TH");
+  return {confirmedDistinctCohortClaims:users.size,confirmedDistinctReceipts:hashes.size,windowIndex:index,globalCount};
+}
 function runCleanContinuationSelfTest() {
   let checks=0;const ok=(v)=>{if(!v)throw new Error("CLEAN_CONTINUATION_SELF_TEST");checks++;};
   const rejects=(f)=>{let rejected=false;try{f();}catch{rejected=true;}ok(rejected);};
@@ -1390,6 +1405,21 @@ function runCleanContinuationSelfTest() {
   const unsigned=publicUnsignedCleanTransaction({...request,from:ZeroAddress,gasLimit:337000n,gasPrice:100000000n,type:0});
   ok(Object.keys(unsigned).sort().join(",")==="chainId,data,from,gasLimit,gasPrice,nonce,to,type,value");
   ok(unsigned.gasPrice==="100000000"&&unsigned.value==="0"&&!JSON.stringify(unsigned).includes("private"));
+  ok(boundedCleanSpend(0n,10n,5n)===15n);ok(boundedCleanSpend(-100n,10n,5n)===15n);ok(boundedCleanSpend(30n,10n,5n)===30n);
+  const addresses=Array.from({length:89},(_,i)=>`0x${(i+1).toString(16).padStart(40,"0")}`);
+  const rows=addresses.slice(0,88).map((user,i)=>({user,to:user,eventUser:user,status:1,hash:id(`receipt${i}`),blockHash:id(`block${i}`),receiptBlockHash:id(`block${i}`),timestamp:36000+i,eventIndex:10,eventCounter:i+1}));
+  const candidate={cohort:addresses,rows,kind:"HEARTBEAT",index:10,globalCount:88,complete:true,rejectedActor:addresses[88]};
+  ok(validateCleanCapRows(candidate).confirmedDistinctCohortClaims===88);
+  rejects(()=>validateCleanCapRows({...candidate,rows:rows.slice(0,87)}));
+  rejects(()=>validateCleanCapRows({...candidate,globalCount:89}));
+  rejects(()=>validateCleanCapRows({...candidate,rejectedActor:addresses[0]}));
+  rejects(()=>validateCleanCapRows({...candidate,rows:[rows[0],...rows.slice(0,87)]}));
+  rejects(()=>validateCleanCapRows({...candidate,rows:rows.map((r,i)=>i? r:{...r,timestamp:39600})}));
+  rejects(()=>validateCleanCapRows({...candidate,rows:rows.map((r,i)=>i? r:{...r,eventUser:addresses[88]})}));
+  rejects(()=>validateCleanCapRows({...candidate,rows:rows.map((r,i)=>i? r:{...r,receiptBlockHash:id("reorg")})}));
+  const igniteRows=rows.map((r,i)=>({...r,eventIndex:10,timestamp:864000+i}));
+  ok(validateCleanCapRows({...candidate,kind:"IGNITE",rows:igniteRows}).globalCount===88);
+  rejects(()=>validateCleanCapRows({...candidate,kind:"IGNITE",rows:igniteRows.map((r,i)=>i?r:{...r,timestamp:864600})}));
   console.log(JSON.stringify({status:"CLEAN_CONTINUATION_SELF_TEST_PASS",checks,chainWrites:0,artifactWrites:0}));
 }
 async function validateLocalContinuationGasBound() {
@@ -1478,7 +1508,7 @@ async function runCleanTestnetRehearsal() {
     if(process.argv.includes("--continue-caps")&&(!historical.cleanRehearsal||evidence.checks.FIVE_HUNDRED_DISTINCT_CLAIMS!=="PASS"||evidence.checks.BOT_501_EPOCH_CAP?.status!=="PASS"))fail("CLEAN_CONTINUATION_REQUIRES_FINAL_FORTUNE_PASS");
     evidence.sourceDirty=true;
     evidence.executionRuns??=[];
-    evidence.executionRuns.push({at:new Date().toISOString(),sourceHead:head,sourceDirty:true,toolSha256:createHash("sha256").update(fs.readFileSync(import.meta.filename)).digest("hex"),contractSourceSha256:currentSourceHash,mode:process.argv.includes("--ignite")?"IGNITE":process.argv.includes("--stress")?"STRESS":"CORE"});
+    evidence.executionRuns.push({at:new Date().toISOString(),sourceHead:head,sourceDirty:true,toolSha256:createHash("sha256").update(fs.readFileSync(import.meta.filename)).digest("hex"),contractSourceSha256:currentSourceHash,mode:process.argv.includes("--ignite")?"IGNITE":process.argv.includes("--continue-caps")?"CONTINUE_CAPS":process.argv.includes("--stress")?"STRESS":"CORE"});
     persist();
     const allowed = new Set(Object.values(evidence.contracts).map((c)=>c.address.toLowerCase()));
     for (const a of evidence.actors.filter(Boolean)) allowed.add(a.address.toLowerCase());
@@ -1511,7 +1541,8 @@ async function runCleanTestnetRehearsal() {
       if(!freshFees.gasPrice||freshFees.gasPrice>BigInt(caps.gasPriceWei)) fail("CLEAN_GAS_PRICE_CAP");
       const signerBalance=await provider.getBalance(wallet.address);
       const aggregateSpend=parseUnits(evidence.startingBalanceTBNB,18)-signerBalance;
-      const boundedSpend=aggregateSpend>BigInt(evidence.totalFeeWei)?aggregateSpend:BigInt(evidence.totalFeeWei);
+      const frontendFeeFloor=(evidence.frontendLive?.receipts??[]).reduce((n,r)=>n+BigInt(r.feeWei),0n);
+      const boundedSpend=boundedCleanSpend(aggregateSpend,evidence.totalFeeWei,frontendFeeFloor);
       if(boundedSpend+gasLimit*freshFees.gasPrice>BigInt(caps.totalFeeWei)) fail("CLEAN_TOTAL_TEST_GAS_CAP");
       if(signerBalance<gasLimit*freshFees.gasPrice)fail("CLEAN_TEST_GAS_INSUFFICIENT");
       const nonce=await provider.getTransactionCount(wallet.address,"pending");
@@ -1545,16 +1576,16 @@ async function runCleanTestnetRehearsal() {
     };
     const call = (label,contract,method,args=[]) => transact(label,{to:contract.target,data:contract.interface.encodeFunctionData(method,args)});
     const assert = (ok,label) => {if(!ok)fail(label);evidence.checks[label]="PASS";persist();};
-    const rejection = async (label,contract,method,args=[],from=wallet.address,expected=null) => {
-      if(evidence.checks[label]?.status==="PASS")return;
-      try {await provider.call({to:contract.target,from,data:contract.interface.encodeFunctionData(method,args)});}
+    const rejection = async (label,contract,method,args=[],from=wallet.address,expected=null,pinnedBlock=null) => {
+      if(evidence.checks[label]?.status==="PASS"&&!pinnedBlock)return;
+      try {await provider.call({to:contract.target,from,data:contract.interface.encodeFunctionData(method,args),...(pinnedBlock?{blockTag:pinnedBlock.number}:{})});}
       catch(error) {
         if(error.code!=="CALL_EXCEPTION")fail(`CLEAN_NON_REVERT_READ_FAILURE_${label}`);
         let data=error.data??error.info?.error?.data;
         if(typeof data==="object")data=data?.data??data?.result;
         let parsed;try{parsed=contract.interface.parseError(data);}catch{}
         if(!parsed||!expected||parsed.name!==expected)fail(`CLEAN_WRONG_REVERT_${label}`);
-        evidence.checks[label]={status:"PASS",kind:"LIVE_ETH_CALL_REJECTION_NO_WRITE",error:parsed?.name??"REVERT",block:await provider.getBlockNumber()};persist();return;
+        evidence.checks[label]={status:"PASS",kind:"LIVE_ETH_CALL_REJECTION_NO_WRITE",error:parsed?.name??"REVERT",block:pinnedBlock?.number??await provider.getBlockNumber(),...(pinnedBlock?{blockHash:pinnedBlock.hash,blockTimestamp:pinnedBlock.timestamp,pinnedBlockTag:true,from,to:contract.target,method}:{})};persist();return;
       }
       fail(`CLEAN_EXPECTED_REJECTION_${label}`);
     };
@@ -1640,7 +1671,7 @@ async function runCleanTestnetRehearsal() {
       const continuation=evidence.capContinuation;
       if(JSON.stringify(continuation.cohort)!==JSON.stringify(cleanCapCohort()))fail("CLEAN_CONTINUATION_COHORT_MISMATCH");
       continuation.writerPid=process.pid;continuation.status="RUNNING";evidence.status="CAP_CONTINUATION_RUNNING";persist();
-      {
+      const refreshForecast=async()=>{
         const localValidation=continuation.gasForecast?.localValidation??await validateLocalContinuationGasBound();
         const confirmed=Object.values(evidence.operations).filter(o=>o.status==="CONFIRMED");
         const observedMax=(prefix)=>confirmed.filter(o=>o.label.startsWith(prefix)).reduce((n,o)=>BigInt(o.gasLimit)>n?BigInt(o.gasLimit):n,0n);
@@ -1656,13 +1687,14 @@ async function runCleanTestnetRehearsal() {
         if(!freshGasPrice||freshGasPrice>BigInt(caps.gasPriceWei))fail("CLEAN_GAS_PRICE_CAP");
         const combinedReceiptFees=BigInt(evidence.totalFeeWei)+(evidence.frontendLive?.receipts??[]).reduce((n,r)=>n+BigInt(r.feeWei),0n);
         const balanceSpend=parseUnits(evidence.startingBalanceTBNB,18)-await provider.getBalance(wallet.address);
-        const alreadySpent=balanceSpend>combinedReceiptFees?balanceSpend:combinedReceiptFees;
+        const alreadySpent=boundedCleanSpend(balanceSpend,combinedReceiptFees,0n);
         const projected=alreadySpent+remainingGas*freshGasPrice;
         continuation.gasForecastHistory??=[];
         if(continuation.gasForecast)continuation.gasForecastHistory.push(continuation.gasForecast);
         continuation.gasForecast={at:new Date().toISOString(),localValidation,alreadySpentWei:String(alreadySpent),includesFrontendReceiptFees:true,newActors,missingWishes,preparationCalls,heartbeatClaims,igniteClaims,deployGasLimit:String(deployLimit),wishGasLimit:String(wishLimit),heartbeatGasLimit:String(heartbeatLimit),remainingGasBound:String(remainingGas),gasPriceWei:String(freshGasPrice),projectedTotalWei:String(projected),fixedTotalCapWei:caps.totalFeeWei};persist();
         if(projected>BigInt(caps.totalFeeWei))fail("CLEAN_CONTINUATION_WHOLE_RUN_GAS_CAP");
-      }
+      };
+      await refreshForecast();
       if(BigInt(continuation.gasForecast.projectedTotalWei)>BigInt(caps.totalFeeWei))fail("CLEAN_CONTINUATION_WHOLE_RUN_GAS_CAP");
       const waitForBlock=async(target,label)=>{
         continuation.status=label;continuation.waitUntilBlockTimestamp=target;persist();
@@ -1672,6 +1704,50 @@ async function runCleanTestnetRehearsal() {
           await new Promise(resolve=>setTimeout(resolve,15000));block=await provider.getBlock("latest");
         }
         continuation.status="RUNNING";persist();return block;
+      };
+      const runCohortCap=async(kind,index)=>{
+        const heartbeat=kind==="HEARTBEAT",method=heartbeat?"heartbeatClaim":"igniteAndClaim";
+        const eventName=heartbeat?"HeartbeatClaimed":"IgniteClaimed",counter=heartbeat?"heartbeatHourClaims":"igniteDayClaims";
+        const expected=heartbeat?"HeartbeatHourFull":"IgniteDayFull",check=heartbeat?"BOT_89_HEARTBEAT_CAP":"BOT_89_IGNITE_CAP";
+        const slot=heartbeat?"heartbeat":"ignite",cohort=continuation.cohort.map(i=>evidence.actors[i].address),rows=[];
+        const inWindow=block=>{if(Math.floor(block.timestamp/(heartbeat?3600:86400))!==index||(!heartbeat&&block.timestamp%86400>=600))fail("CLEAN_CAP_REAL_WINDOW_ENDED_STOP");};
+        const verifyReceipt=async(i,receipt)=>{
+          const user=evidence.actors[i].address,label=`${kind}_STRESS_${index}_${i}`,op=evidence.operations[label];
+          if(!receipt||receipt.status!==1||receipt.hash!==op?.hash||receipt.from.toLowerCase()!==wallet.address.toLowerCase())fail("CLEAN_CAP_CONFIRMED_RECEIPT_REQUIRED");
+          const block=await provider.getBlock(receipt.blockNumber);inWindow(block);
+          const events=receipt.logs.filter(log=>log.address.toLowerCase()===heart.target.toLowerCase()).map(log=>{try{return heart.interface.parseLog(log);}catch{return null;}}).filter(log=>log?.name===eventName);
+          if(events.length!==1)fail("CLEAN_CAP_EXACTLY_ONE_CLAIM_EVENT_REQUIRED");
+          const args=events[0].args;
+          return {actorIndex:i,user,to:receipt.to,eventUser:args.user,eventIndex:Number(heartbeat?args.hourIndex:args.dayIndex),eventCounter:Number(heartbeat?args.hourClaims:args.dayClaims),status:receipt.status,hash:receipt.hash,blockNumber:block.number,blockHash:block.hash,receiptBlockHash:receipt.blockHash,timestamp:block.timestamp};
+        };
+        // One initial reconciliation, then only each newly confirmed receipt is
+        // fetched. Never perform O(n²) RPC scans inside the ten-minute window.
+        for(const i of continuation.cohort){const op=evidence.operations[`${kind}_STRESS_${index}_${i}`];if(op){if(op.status!=="CONFIRMED")fail("CLEAN_CAP_UNRESOLVED_INTENT_STOP");rows.push(await verifyReceipt(i,await provider.getTransactionReceipt(op.hash)));}}
+        continuation[slot]={status:"VERIFYING_REAL_COHORT",windowIndex:index,receiptEvidence:rows};persist();
+        for(const i of continuation.cohort){
+          const block=await provider.getBlock("latest");inWindow(block);
+          const globalCount=Number(await heart[counter](index,{blockTag:block.number}));
+          validateCleanCapRows({cohort,rows,kind,index,globalCount});
+          const a=await actor(i);
+          if(rows.some(row=>row.user.toLowerCase()===a.target.toLowerCase()))continue;
+          if(rows.length<88){
+            const receipt=await actorCall(`${kind}_STRESS_${index}_${i}`,a,heart,method);
+            rows.push(await verifyReceipt(i,receipt));
+            validateCleanCapRows({cohort,rows,kind,index,globalCount:rows.length});
+            continuation[slot].receiptEvidence=rows;persist();
+          }else{
+            const summary=validateCleanCapRows({cohort,rows,kind,index,globalCount,complete:true,rejectedActor:a.target});
+            // The exact cap revert proves earlier wallet/civilization/window
+            // gates passed. Pin both eth_call and global counter to this block.
+            await rejection(check,heart,method,[],a.target,expected,block);
+            if((await provider.getBlock(block.number)).hash!==block.hash)fail("CLEAN_CAP_REJECTION_BLOCK_REORG_STOP");
+            const reject=evidence.checks[check];
+            if(!reject.pinnedBlockTag||reject.block!==block.number||reject.blockHash!==block.hash)fail("CLEAN_CAP_REJECTION_NOT_EXACT_PINNED_BLOCK");
+            continuation[slot]={status:"PASS",...summary,successfulClaims:summary.confirmedDistinctCohortClaims,receiptEvidence:rows,rejectedActor:a.target,rejection:expected,rejectionBlock:{number:block.number,hash:block.hash,timestamp:block.timestamp},earlierHour61NotCounted:heartbeat};persist();
+            return continuation[slot];
+          }
+        }
+        fail("CLEAN_CAP_MISSING_89TH_REJECTION");
       };
       if(!process.argv.includes("--ignite")) {
         const firstCohortActor=await actor(510);
@@ -1698,38 +1774,23 @@ async function runCleanTestnetRehearsal() {
           continuation.heartbeatEligibleAt=eligibleAt;persist();
         }
         const hour=continuation.heartbeatHour;
-        if(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS") {
+        if(continuation.heartbeat?.status!=="PASS") {
           await waitForBlock(hour*3600,"WAITING_REAL_HEARTBEAT_COHORT_HOUR");
-          for(const i of continuation.cohort) {
-            if(Math.floor((await provider.getBlock("latest")).timestamp/3600)!==hour)fail("CLEAN_CONTINUATION_HEARTBEAT_HOUR_EXPIRED_STOP");
-            const a=await actor(i),label=`HEARTBEAT_STRESS_${hour}_${i}`;
-            if(evidence.operations[label]){await actorCall(label,a,heart,"heartbeatClaim");continue;}
-            const count=await heart.heartbeatHourClaims(hour);
-            if(count<88n)await actorCall(label,a,heart,"heartbeatClaim");
-            else {await rejection("BOT_89_HEARTBEAT_CAP",heart,"heartbeatClaim",[],a.target,"HeartbeatHourFull");continuation.heartbeatRejectedActor=a.target;persist();break;}
-          }
-          assert(await heart.heartbeatHourClaims(hour)===88n,"EIGHTY_EIGHT_SAME_HOUR_HEARTBEATS");
-          continuation.heartbeat={status:"PASS",hour,successfulClaims:88,rejection:"HeartbeatHourFull",earlierHour61NotCounted:true};persist();
+          await refreshForecast();
+          await runCohortCap("HEARTBEAT",hour);
         }
       } else {
-        if(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS"||continuation.preparedActors!==89)fail("CLEAN_CONTINUATION_IGNITE_PREPARATION_INCOMPLETE");
+        if(continuation.heartbeat?.status!=="PASS"||continuation.preparedActors!==89)fail("CLEAN_CONTINUATION_IGNITE_PREPARATION_INCOMPLETE");
         const now=(await provider.getBlock("latest")).timestamp;
         continuation.igniteDay??=now%86400<600?Math.floor(now/86400):Math.floor(now/86400)+1;persist();
         const day=continuation.igniteDay;
         await waitForBlock(day*86400,"WAITING_REAL_UTC_IGNITE_WINDOW");
-        for(const i of continuation.cohort) {
-          const block=await provider.getBlock("latest");
-          if(Math.floor(block.timestamp/86400)!==day||block.timestamp%86400>=600)fail("CLEAN_IGNITE_WINDOW_ENDED_STOP");
-          const a=await actor(i),label=`IGNITE_STRESS_${day}_${i}`;
-          if(evidence.operations[label]){await actorCall(label,a,heart,"igniteAndClaim");continue;}
-          if(await heart.igniteDayClaims(day)<88n)await actorCall(label,a,heart,"igniteAndClaim");
-          else {await rejection("BOT_89_IGNITE_CAP",heart,"igniteAndClaim",[],a.target,"IgniteDayFull");continuation.igniteRejectedActor=a.target;persist();break;}
-        }
-        assert(await heart.igniteDayClaims(day)===88n,"EIGHTY_EIGHT_LIVE_IGNITES");
+        await refreshForecast();
+        await runCohortCap("IGNITE",day);
         evidence.checks.IGNITE={status:"PASS",kind:"REAL_BSC97_UTC_WINDOW",dayIndex:day};
-        continuation.ignite={status:"PASS",day,successfulClaims:88,rejection:"IgniteDayFull"};persist();
+        persist();
       }
-      evidence.status=evidence.checks.BOT_89_HEARTBEAT_CAP?.status==="PASS"&&evidence.checks.BOT_89_IGNITE_CAP?.status==="PASS"?"CLEAN_REHEARSAL_PASS":"CORE_AND_FORTUNE_PASS_REAL_CAP_WINDOW_PENDING";
+      evidence.status=continuation.heartbeat?.status==="PASS"&&continuation.ignite?.status==="PASS"?"CLEAN_REHEARSAL_PASS":"CORE_AND_FORTUNE_PASS_REAL_CAP_WINDOW_PENDING";
       continuation.status=evidence.status;continuation.writerPid=null;evidence.updatedAt=new Date().toISOString();persist();
       console.log(JSON.stringify({status:evidence.status,proxy:heart.target,totalTestGasTBNB:formatEther(BigInt(evidence.totalFeeWei)),mainnetTransactionsSent:0}));return;
     }
