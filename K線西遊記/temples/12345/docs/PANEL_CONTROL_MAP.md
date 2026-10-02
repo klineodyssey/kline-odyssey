@@ -3,6 +3,79 @@ VERSION: V10.39.1_TEMPLE_ARCHITECTURE_MASTER
 
 ## Active entry reconciliation — 2026-10-02 candidate
 
+### Original-function recovery audit — 2026-10-02 (Draft, no merge)
+
+Source baseline: `e1de5dcf62d05b274f702f7edd5cc3e81ef497ad`.
+History `159c4bc2` already contains the broken outer Ritual bridge; #466
+relocated the original dock but did not introduce this missing global.
+Real Chromium reproduction: `window.ActionRuntime === undefined`, while
+`KGEN_RUNTIME_CORE.modules.ActionRuntime` exists. Outer Repay displays
+`還願 Coming Soon` instead of opening the existing vow form. Outer Wish has
+a duplicate textarea/submit overlay, bypassing the visible canonical form.
+
+Canonical route: outer shortcut -> existing ActionRuntime -> same Heart card
+(`wish` / `vow`) -> explicit `kh-wishbtn` / `kh-vow` -> HeartRuntime.sendHeart
+-> existing WalletRuntime. No shortcut may submit a transaction. Keep original
+amount, option, hash, allowance and wallet confirmation semantics. Scroll only
+the Heart console, not its fixed ancestors/document. PanelOverlay previously
+removed original inset styles without restoring them; preserve the exact inline
+position through repeated disclosure cycles. LayoutRuntime remains placement
+authority; no Heart/MOVE/DRIVE/WARP geometry or CSS redesign is authorized.
+
+### K16888 original architecture / read-only comparison
+
+`K線西遊記/temples/16888/index.html` is the original active monolithic runtime
+(OG Engine V3.7.12), not the 12345 module graph. Its inline CSS/media queries
+own portrait placement; `app` owns world/navigation/Warp and original audio;
+`web3` and later inline compatibility wrappers own wallet; inline panel toggle
+functions own panel disclosure. `#universe-nav` / `#return-to-11520` plus the
+wallet-continuity bridge own the existing return control.
+
+Earlier original template `7189d81f` already had one gold anchor inside
+`#universe-nav`: `返回 > K線西遊記｜銀河宇宙入口`, pointing to
+`K線西遊記/index.html`. Commit `ce990663` introduced the fixed return-to-11520
+wallet-continuity route; Portal subsequently reused that anchor. A future
+approved minimal restoration should reuse this original navigation ownership,
+not add a second return control.
+
+Before Portal baseline: `a6e65af31b7070425d44cdf08862ab26e26e0a9f`.
+Portal commit `ae9fc085` changed 12 index lines: shared-audio flag/guards,
+existing return destination to canonical Portal, removed duplicate homepage
+link, and shared bridge import. Original gameplay, Warp, wallet and inline
+portrait CSS are unchanged. No 12345 composition engine is loaded by 16888.
+
+Intentional safety changes: disable legacy playlist/autoplay/commercial music,
+reuse one AudioContext and first-party synthesis, one canonical return URL.
+Presentation regression against Human preservation policy: shared
+`assets/kaios-world-audio.mjs` reparents `.nav-music` out of `#universe-nav`,
+renames it, hides `#music-panel` and `.nav-audio`, replaces the old audio controls
+and resizes/repositions the return control. Original `app.openMusic`,
+musicPlay/Pause/Stop/Prev/Next and volume no longer present the original console.
+This is a verified behavior change, not evidence that Warp/wallet broke.
+
+Disposition: KEEP_ORIGINAL / audit only. Do not edit 16888 or the shared bridge
+in this recovery PR. Human confirmation is required before a minimal
+presentation restoration; commercial playlist playback must stay disabled.
+16888 release QA is portrait (390 primary; 360/412/432/480 compatibility).
+Landscape gameplay composition is explicitly not a release requirement.
+
+Read-only Chromium audit: all five portrait widths load; audio unlock/mute and
+canonical return PASS, one AudioContext, zero commercial media requests.
+390x844 destination signal measured peak 0.07052 / RMS 0.02640 (digital signal,
+not a physical-phone listening certification). Direct screenshots confirm the
+replacement top audio/Portal controls compete with original header information.
+Thus audio/return operation PASS does NOT mean original presentation preserved.
+16888 visual preservation remains awaiting Human decision, not a blanket PASS.
+
+Recovery QA scope: real Chromium 360/390/412/432/480 x 844 and 844x390,
+three Wish/Repay cycles, original form hash/option/amount dispatch, actual
+disconnected Wallet gate, original secondary-panel insets, Land/AI/More/
+Festival and MOVE/DRIVE/WARP regressions. Final transaction boundary is stubbed
+only for dispatch tests: this is NOT on-chain transaction or signed-wallet QA.
+Known pre-existing limitation: WalletConnect 2.12.2 CDN UMD emits
+`ReferenceError: process is not defined`; QR-wallet connection is not certified
+by this repair. No wallet library or Mainnet execution is changed here.
+
 The historical table below is retained as lineage, not a second active router.
 See `RUNTIME_ARCHITECTURE.md` → `12345_LAYOUT_AUTHORITY_MAP` for the verified
 entry load graph and Human-overridden #464/#465 visual QA result.
