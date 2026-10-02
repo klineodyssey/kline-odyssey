@@ -20,7 +20,7 @@ import {
 } from "ethers";
 import solc from "solc";
 
-const operationFlags = ["--testnet-preflight", "--testnet-rehearsal", "--testnet-bootstrap-rehearsal", "--deployment-package", "--live-readonly"];
+const operationFlags = ["--storage-self-test", "--testnet-preflight", "--testnet-rehearsal", "--testnet-bootstrap-rehearsal", "--testnet-clean-rehearsal", "--deployment-package", "--mainnet-manifest", "--live-readonly"];
 if (operationFlags.filter((flag) => process.argv.includes(flag)).length > 1) {
   throw new Error("ONE_OPERATION_ONLY_READ_AND_EXECUTION_MODES_MUST_NOT_MIX");
 }
@@ -39,6 +39,7 @@ const bscTestnetEvidenceMarkdownPath = path.join(
   "BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.md",
 );
 const baselineRef = process.env.TEMPLEHEART_V332_BASE_REF ?? "7344d231837d40b504622c8c8b4376ed25110e20";
+const continuityBaselineRef = "805ac20c4507b109e3792f2abf074cc0e9665db5";
 const baselinePath = "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol";
 
 function findImports(importPath) {
@@ -48,8 +49,8 @@ function findImports(importPath) {
     : { error: `Import not found: ${importPath}` };
 }
 
-function compileBaselineLayout() {
-  const source = execFileSync("git", ["show", `${baselineRef}:${baselinePath}`], {
+function compileBaselineLayout(ref = baselineRef) {
+  const source = execFileSync("git", ["show", `${ref}:${baselinePath}`], {
     cwd: path.resolve(root, ".."),
     encoding: "utf8",
   });
@@ -64,6 +65,19 @@ function compileBaselineLayout() {
   return output.contracts[baselinePath].KGEN_TempleHeart_Upgradeable.storageLayout;
 }
 
+function typeShape(layout, typeId, parents = []) {
+  const type = layout.types[typeId];
+  if (!type) throw new Error("STORAGE_TYPE_DEFINITION_MISSING");
+  const shape = { label:type.label, encoding:type.encoding, bytes:type.numberOfBytes };
+  // Solidity type ids include unstable AST ids; compare recursively resolved
+  // structure, not those ids. Recursive structs retain an explicit cycle marker.
+  if(parents.includes(typeId))return {...shape,recursiveReference:type.label};
+  const next=[...parents,typeId];
+  for(const child of ["key","value","base"])if(type[child])shape[child]=typeShape(layout,type[child],next);
+  if(type.members)shape.members=type.members.map(member=>({label:member.label,slot:member.slot,offset:member.offset,type:typeShape(layout,member.type,next)}));
+  return shape;
+}
+
 function normalize(layout) {
   return layout.storage.map((entry) => ({
     label: entry.label,
@@ -71,6 +85,7 @@ function normalize(layout) {
     offset: entry.offset,
     encoding: layout.types[entry.type].encoding,
     bytes: layout.types[entry.type].numberOfBytes,
+    typeShape:typeShape(layout,entry.type),
   }));
 }
 
@@ -101,6 +116,74 @@ for (let index = 0; index < baseline.entries.length; index += 1) {
   if (newEntry.label !== expectedLabel) {
     failures.push({ index, reason: "UNAPPROVED_LABEL_CHANGE", oldEntry, newEntry });
   }
+  if(JSON.stringify(oldEntry.typeShape)!==JSON.stringify(newEntry.typeShape)) {
+    failures.push({index,reason:"CHANGED_RECURSIVE_TYPE_SHAPE",oldEntry,newEntry});
+  }
+}
+
+function sameStorageEntry(previous,next) {
+  return Boolean(next)&&JSON.stringify(previous)===JSON.stringify(next);
+}
+
+function runStorageShapeSelfTest() {
+  const layout={storage:[{label:"records",slot:"0",offset:0,type:"outer"}],types:{
+    address:{label:"address",encoding:"inplace",numberOfBytes:"20"},
+    uint160:{label:"uint160",encoding:"inplace",numberOfBytes:"20"},
+    uint8:{label:"uint8",encoding:"inplace",numberOfBytes:"1"},
+    uint64:{label:"uint64",encoding:"inplace",numberOfBytes:"8"},
+    int64:{label:"int64",encoding:"inplace",numberOfBytes:"8"},
+    uint256:{label:"uint256",encoding:"inplace",numberOfBytes:"32"},
+    bytes32:{label:"bytes32",encoding:"inplace",numberOfBytes:"32"},
+    inner:{label:"mapping(uint8 => bytes32)",encoding:"mapping",numberOfBytes:"32",key:"uint8",value:"bytes32"},
+    entry:{label:"struct Entry",encoding:"inplace",numberOfBytes:"64",members:[
+      {label:"xp",slot:"0",offset:0,type:"uint64"},{label:"owner",slot:"0",offset:8,type:"address"},{label:"proofs",slot:"1",offset:0,type:"inner"}]},
+    array:{label:"struct Entry[]",encoding:"dynamic_array",numberOfBytes:"32",base:"entry"},
+    outer:{label:"mapping(address => struct Entry[])",encoding:"mapping",numberOfBytes:"32",key:"address",value:"array"}
+  }};
+  const baselineEntry=normalize(layout)[0];
+  const cases=[
+    ["nested mapping key semantic mutation",x=>{x.types.outer.key="uint160";}],
+    ["nested mapping value same-width mutation",x=>{x.types.inner.value="uint256";}],
+    ["array base mutation",x=>{x.types.array.base="bytes32";}],
+    ["struct member signedness mutation",x=>{x.types.entry.members[0].type="int64";}],
+    ["struct member packed offset mutation",x=>{x.types.entry.members[1].offset=9;}],
+    ["struct member slot mutation",x=>{x.types.entry.members[2].slot="2";}],
+    ["struct member deletion",x=>{x.types.entry.members.pop();}],
+    ["top-level slot mutation",x=>{x.storage[0].slot="1";}],
+    ["nested encoding mutation",x=>{x.types.inner.encoding="inplace";}]
+  ];
+  for(const [label,mutate]of cases) {
+    const changed=structuredClone(layout);mutate(changed);
+    if(sameStorageEntry(baselineEntry,normalize(changed)[0]))throw new Error(`STORAGE_SELF_TEST_FAILED:${label}`);
+  }
+  const renumbered=structuredClone(layout),types={};
+  for(const [key,value]of Object.entries(renumbered.types)) {
+    for(const child of ["key","value","base"])if(value[child])value[child]=`${value[child]}_different_ast_id`;
+    for(const member of value.members??[])member.type=`${member.type}_different_ast_id`;
+    types[`${key}_different_ast_id`]=value;
+  }
+  renumbered.types=types;renumbered.storage[0].type="outer_different_ast_id";
+  if(!sameStorageEntry(baselineEntry,normalize(renumbered)[0]))throw new Error("STORAGE_SELF_TEST_AST_ID_FALSE_POSITIVE");
+  // Recursive mapping value must terminate deterministically and still detect
+  // mutations in members outside the cycle.
+  const recursive=structuredClone(layout);recursive.types.inner.value="entry";
+  const recursiveEntry=normalize(recursive)[0];
+  recursive.types.entry.members[0].type="int64";
+  if(sameStorageEntry(recursiveEntry,normalize(recursive)[0]))throw new Error("STORAGE_SELF_TEST_RECURSIVE_MUTATION_MISSED");
+  console.log(JSON.stringify({status:"STORAGE_SELF_TEST_PASS",checks:cases.length+2,chainWrites:0,artifactWrites:0}));
+}
+
+const continuityBaseline = normalize(compileBaselineLayout(continuityBaselineRef));
+if(continuityBaseline.length!==73)throw new Error("PINNED_V34_STORAGE_BASELINE_MUST_HAVE_73_ENTRIES");
+for(let index=0;index<continuityBaseline.length;index++) {
+  const oldEntry=continuityBaseline[index],newEntry=current[index];
+  if(!sameStorageEntry(oldEntry,newEntry)) {
+    failures.push({baseline:"V3.4.0_PRE_CONTINUITY",index,reason:"CHANGED_PINNED_V34_ENTRY_OR_RECURSIVE_TYPE",oldEntry,newEntry});
+  }
+}
+const continuityAppend=current.slice(continuityBaseline.length);
+if(continuityAppend.length!==1||continuityAppend[0].label!=="legacyHeart") {
+  failures.push({baseline:"V3.4.0_PRE_CONTINUITY",reason:"EXPECTED_ONLY_LEGACY_HEART_APPEND",appended:continuityAppend});
 }
 
 const appended = current.slice(baseline.entries.length);
@@ -118,12 +201,16 @@ const report = {
     appendedSlots: appended.map((entry) => ({ label: entry.label, slot: entry.slot })),
   },
   approvedRenames: Object.fromEntries(allowedRename),
+  continuityBaseline:{version:"3.4.0",ref:continuityBaselineRef,path:baselinePath,preservedEntries:continuityBaseline.length,appendedEntries:continuityAppend.map(({label,slot})=>({label,slot})),recursiveTypeShapeComparison:true},
   failures,
 };
-fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
-console.log(`TempleHeart storage layout: ${report.status} (${baseline.entries.length} preserved, ${appended.length} appended)`);
+if(!process.argv.includes("--storage-self-test")) {
+  fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+  fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+}
+console.log(`TempleHeart storage layout: ${report.status} (${baseline.entries.length} V3.3.2 preserved, ${appended.length} appended; ${continuityBaseline.length} V3.4 preserved, legacyHeart-only append; recursive types checked)`);
 if (failures.length) process.exit(1);
+if(process.argv.includes("--storage-self-test"))runStorageShapeSelfTest();
 
 const TESTNET_CHAIN_ID = 97n;
 const TESTNET_EXECUTION_ACK = "BSC_TESTNET_REHEARSAL_ONLY";
@@ -1139,14 +1226,15 @@ async function buildFreshDeploymentPackage(config) {
   if (config.chainId !== 56 && config.chainId !== 97) throw new Error("UNSUPPORTED_CHAIN");
   if (config.fortuneGame != null && config.fortuneGame !== ZeroAddress) throw new Error("FORTUNEGAME_133_HOLD");
   const addresses = {};
-  for (const key of ["deployer", "admin", "upgrader", "operator", "holyCupSigner", "kgen", "legacyBrainVault", "proofSource", "registry", "treasury11520"]) {
+  for (const key of ["deployer", "admin", "upgrader", "operator", "holyCupSigner", "kgen", "legacyBrainVault", "proofSource", "registry", "treasury11520", "legacyHeart"]) {
     if (typeof config[key] !== "string") throw new Error(`MISSING_PUBLIC_ADDRESS:${key}`);
     addresses[key] = getAddress(config[key]);
     if (addresses[key] === ZeroAddress) throw new Error(`ZERO_ADDRESS:${key}`);
   }
   if (!Number.isSafeInteger(config.startNonce) || config.startNonce < 0 || config.startNonce > Number.MAX_SAFE_INTEGER - 2) throw new Error("INVALID_NONCE");
   if (config.chainId === 56 && addresses.kgen.toLowerCase() !== "0xba3d3810e58735cb6813bc1cdc5458c0d71432be") throw new Error("KGEN_IDENTITY_MISMATCH");
-  for (const key of ["implementation", "proxy", "registryInitialization"]) {
+  if (config.chainId === 56 && addresses.legacyHeart !== legacy) throw new Error("LEGACY_CONTINUITY_IDENTITY_MISMATCH");
+  for (const key of ["implementation", "proxy", "registryInitialization", "legacyContinuity"]) {
     if (!Number.isSafeInteger(config.gasCaps?.[key]) || config.gasCaps[key] <= 0) throw new Error(`MISSING_GAS_CAP:${key}`);
   }
   if (!/^[1-9][0-9]*$/.test(String(config.maxGasPriceWei ?? ""))) throw new Error("MISSING_GAS_PRICE_CAP");
@@ -1161,6 +1249,7 @@ async function buildFreshDeploymentPackage(config) {
   const initializer = iface.encodeFunctionData("initialize", initArgs);
   const proxyDeployment = await new ContractFactory(proxyArtifact.abi, proxyArtifact.bytecode).getDeployTransaction(implementation, initializer);
   const registryInitialization = iface.encodeFunctionData("initializeV340", [addresses.registry]);
+  const legacyContinuity = iface.encodeFunctionData("bindLegacyContinuity", [addresses.legacyHeart]);
   const sha256 = (data) => createHash("sha256").update(data).digest("hex");
   const sourcePaths = [baselinePath, "KGEN-KAIOS/package-lock.json", "KGEN-KAIOS/tools/compile-contracts.mjs", "KGEN-KAIOS/tools/validate-templeheart-storage.mjs"];
   const sourceHashes = Object.fromEntries(sourcePaths.map((file) => [file, sha256(fs.readFileSync(path.resolve(root, "..", file)))]));
@@ -1173,7 +1262,7 @@ async function buildFreshDeploymentPackage(config) {
     sourceHead:execFileSync("git", ["rev-parse", "HEAD"], {cwd:root, encoding:"utf8"}).trim(),
     sourceDirty:Boolean(execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], {cwd:root, encoding:"utf8"}).trim()),
     compiler:heart.compiler, openzeppelin:"5.0.2", chainId:config.chainId,
-    implementation, proxy, legacyHeart:legacy, legacyIsProxy:false, roles:addresses, initializer, initArgs,
+    implementation, proxy, legacyHeart:addresses.legacyHeart, historicalMainnetHeart:legacy, legacyIsProxy:false, roles:addresses, initializer, initArgs,
     implementationCreationCodeHash:keccak256(heart.bytecode), proxyCreationCodeHash:keccak256(proxyDeployment.data),
     implementationRuntimeTemplateHash:keccak256(heart.deployedBytecode), immutableReferences:heart.immutableReferences,
     fortuneMaxWhole:8, fortuneEpochMaxClaims:500, fortuneGame:ZeroAddress,
@@ -1181,19 +1270,22 @@ async function buildFreshDeploymentPackage(config) {
     transactions:[
       tx("DEPLOY_IMPLEMENTATION", addresses.deployer, null, heart.bytecode, config.gasCaps.implementation, config.startNonce),
       tx("DEPLOY_PROXY_WITH_INITIALIZER", addresses.deployer, null, proxyDeployment.data, config.gasCaps.proxy, config.startNonce + 1),
-      tx("ADMIN_INITIALIZE_REGISTRY", addresses.admin, proxy, registryInitialization, config.gasCaps.registryInitialization)
+      tx("ADMIN_INITIALIZE_REGISTRY", addresses.admin, proxy, registryInitialization, config.gasCaps.registryInitialization),
+      tx("ADMIN_BIND_LEGACY_CONTINUITY", addresses.admin, proxy, legacyContinuity, config.gasCaps.legacyContinuity)
     ],
     preconditions:["EXACT_HEAD_AND_SOURCE_HASHES", "HUMAN_APPROVAL_OF_THIS_EXACT_PACKAGE", "FRESH_CHAIN_AND_NONCE_CHECK",
       "ROLE_ADDRESS_AUTHORITY_CONFIRMED", "TOKEN_REGISTRY_PROOF_SOURCE_CODE_IDENTITIES_VERIFIED", "REGISTRY_TREASURY_MATCH", "GAS_ESTIMATES_WITHIN_CAPS"],
     postconditions:["ERC1967_IMPLEMENTATION_SLOT_MATCH", "RUNTIME_BYTECODE_WITH_IMMUTABLES_MATCH", "VERSION_3_4_0", "ALL_FOUR_ROLES_MATCH",
-      "REGISTRY_AND_TREASURY_MATCH", "FORTUNE_MAX_8_EPOCH_500", "HEARTBEAT_AND_IGNITE_CAP_88", "FORTUNEGAME_ZERO", "SECOND_INITIALIZATION_REJECTED"],
-    funding:{status:"SEPARATE_HUMAN_FUNDING_DECISION_REQUIRED", operationalReserveWhole:20000, normalCapWhole:108000, automaticTransfer:false},
+      "REGISTRY_AND_TREASURY_MATCH", "FORTUNE_MAX_8_EPOCH_500", "HEARTBEAT_AND_IGNITE_CAP_88", "FORTUNEGAME_ZERO", "SECOND_INITIALIZATION_REJECTED", "ONE_TIME_LEGACY_BINDING_MATCH", "LIVE_LEGACY_COOLDOWNS_ENFORCED"],
+    funding:{status:"SEPARATE_HUMAN_FUNDING_DECISION_REQUIRED", operationalReserveWhole:20000, normalCapWhole:108000, automaticTransfer:false,
+      tokenTaxExemption:"READ_ONLY_INSPECT_NO_CHANGES",accounting:"MEASURE_RECIPIENT_BALANCE_BEFORE_AND_AFTER_NEVER_ASSUME_GROSS_EQUALS_NET",reserveGate:"ACTUAL_RECEIVED_BALANCE_MUST_SATISFY_OPERATIONAL_FLOOR"},
     continuity:{
       festivalClaims:"LEGACY_READ_AND_EXISTING_LEGACY_ACTION_ONLY", newYearClaims:"LEGACY_READ_AND_EXISTING_LEGACY_ACTION_ONLY",
       lampState:"LEGACY_READ_AND_EXISTING_LEGACY_ACTION_ONLY", wishEvents:"LEGACY_EVENT_HISTORY_NEW_WISH_REQUIRED",
       vowHistory:"LEGACY_EVENT_HISTORY", walletKgen:"UNCHANGED_TOKEN_BALANCE", oldHeartReserve:"RETAIN_OLD_HEART_NO_AUTOMATIC_SWEEP",
       tokenAllowances:"NOT_MIGRATABLE_NEW_SPENDER_EXPLICIT_APPROVAL_ONLY",
-      fortuneCooldown:"CUTOVER_POLICY_REQUIRED_NO_AUTOMATIC_RESET", heartbeatState:"CUTOVER_POLICY_REQUIRED_NO_AUTOMATIC_RESET"
+      fortuneCooldown:"ONCHAIN_MAX_LOCAL_AND_LIVE_LEGACY_COOLDOWN", heartbeatState:"ONCHAIN_LIVE_LEGACY_COOLDOWN", igniteState:"ONCHAIN_LIVE_LEGACY_DAY_REJECTION",
+      humanFinalPolicy:"CONFIRM_ENFORCED_CONTINUITY_NO_AUTOMATIC_RESET"
     },
     emergency:["DO_NOT_SWITCH_FRONTEND_UNTIL_POSTCHECKS_PASS", "PAUSE_NEW_HEART_BY_CONFIRMED_OPERATOR_IF_APPROVED",
       "PRESERVE_LEGACY_ADDRESS_AND_HISTORY", "FUTURE_UUPS_ROLLBACK_REQUIRES_STORAGE_COMPATIBLE_IMPLEMENTATION_AND_APPROVAL"],
@@ -1212,6 +1304,335 @@ if (process.argv.includes("--deployment-package")) {
   fs.writeFileSync(output, `${JSON.stringify(result, null, 2)}\n`);
   console.log(JSON.stringify({status:result.status, path:output, mainnetTransactionsSent:0}));
 }
+
+if(process.argv.includes("--mainnet-manifest")) {
+  // Template is complete and executable through the strict materializer, but
+  // unknown Human addresses are never replaced with test roles/zero addresses.
+  const sourceHead=execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim();
+  const sourcePaths=[baselinePath,"KGEN-KAIOS/tools/validate-templeheart-storage.mjs","KGEN-KAIOS/tools/compile-contracts.mjs","KGEN-KAIOS/package-lock.json"];
+  const sourceHashes=Object.fromEntries(sourcePaths.map(file=>[file,createHash("sha256").update(fs.readFileSync(path.resolve(root,"..",file))).digest("hex")]));
+  if(currentArtifact.sourceSha256!==sourceHashes[baselinePath])throw new Error("STALE_COMPILED_HEART_RUN_COMPILE");
+  const manifest={
+    status:"UNSIGNED_MANIFEST_READY_FOR_HUMAN_PARAMETERS",chainId:56,sourceHead,sourceHashes,
+    sourceDirty:Boolean(execFileSync("git",["status","--porcelain","--untracked-files=no"],{cwd:root,encoding:"utf8"}).trim()),
+    compiler:currentArtifact.compiler,openzeppelin:"5.0.2",implementationCreationCodeHash:keccak256(currentArtifact.bytecode),
+    implementationRuntimeTemplateHash:keccak256(currentArtifact.deployedBytecode),immutableReferences:currentArtifact.immutableReferences,
+    parameters:{ADMIN:"HUMAN_FINAL",UPGRADER:"HUMAN_FINAL",OPERATOR:"HUMAN_FINAL",HOLY_CUP_SIGNER:"HUMAN_FINAL",INITIAL_HEART_FUNDING:"HUMAN_FINAL",OLD_HEART_RESERVE_ACTION:"HUMAN_FINAL_RECOMMENDED_RETAIN",COOLDOWN_CONTINUITY_POLICY:"HUMAN_FINAL_CONFIRM_LIVE_LEGACY_ENFORCEMENT"},
+    verifiedCanonicalAddresses:{legacyHeart:"0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",kgen:"0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",registry:"0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",proofSource:"0xD4E67B3a69e41524c424150E6b6e921b01D036db",treasury11520:"0xd0605F4EF10e5C1438F11AF9edc36926769239d6",fortuneGame:ZeroAddress},
+    deploymentKind:"NEW_ERC1967_PROXY_NOT_UPGRADE_OF_OLD_DIRECT_HEART",
+    transactionSequence:[
+      {step:1,label:"DEPLOY_IMPLEMENTATION",from:"DEPLOYER_PUBLIC_ADDRESS",to:null,artifact:"KGEN_TempleHeart_Upgradeable",gasCap:8000000,value:"0"},
+      {step:2,label:"DEPLOY_PROXY_WITH_ATOMIC_INITIALIZER",from:"DEPLOYER_PUBLIC_ADDRESS",to:null,artifact:"ERC1967Proxy",initializer:"initialize(address,address,address,address,address,address,address)",args:["ADMIN","UPGRADER","OPERATOR","HOLY_CUP_SIGNER","kgen","treasury11520","proofSource"],gasCap:1500000,value:"0"},
+      {step:3,label:"ADMIN_INITIALIZE_REGISTRY",from:"ADMIN",to:"EXPECTED_NEW_PROXY",method:"initializeV340(address)",args:["registry"],gasCap:500000,value:"0"},
+      {step:4,label:"ADMIN_BIND_LEGACY_CONTINUITY",from:"ADMIN",to:"EXPECTED_NEW_PROXY",method:"bindLegacyContinuity(address)",args:["legacyHeart"],gasCap:250000,value:"0"},
+      {step:5,label:"READ_ONLY_POSTCHECKS",broadcast:false},
+      {step:6,label:"HUMAN_FINAL_EXACT_FUNDING_ONLY",enabled:false,amount:"INITIAL_HEART_FUNDING",separateCalldataMaterializationRequired:true}
+    ],
+    caps:{maxGasPriceWei:"1000000000",maxNativeValue:"0",maxKgenTransfer:"0_UNTIL_HUMAN_FINAL_FUNDING",unlimitedApproval:false},
+    materialization:{command:"node KGEN-KAIOS/tools/validate-templeheart-storage.mjs --deployment-package PUBLIC_CONFIG.json",requires:["HUMAN_FINAL_PARAMETERS","FRESH_PUBLIC_DEPLOYER_AND_PENDING_NONCE","READ_ONLY_CHAIN56_CODE_AND_BINDING_CHECKS"],output:"KGEN-KAIOS/artifacts/TEMPLEHEART_DEPLOYMENT_PACKAGE.json",calldata:"GENERATED_ONLY_AFTER_REAL_PARAMETERS_NO_PLACEHOLDER_HEX",predictedAddresses:"DERIVED_FROM_REAL_DEPLOYER_NONCE_NO_INVENTED_ADDRESS"},
+    migration:{mode:"LIVE_READ_NO_STORAGE_FABRICATION",fortuneCooldown:"max(local.lastFortuneAt,legacy.lastFortuneAt)+30days",heartbeatCooldown:"bothLocalAndLegacyPlusOneHour",ignite:"legacyDayAndNewDayBothEnforced",failure:"LEGACY_READ_FAILURE_REVERTS_CLAIM",festival:"LEGACY_READ_AND_LEGACY_ACTION",newYear:"LEGACY_READ_AND_LEGACY_ACTION",lamp:"LEGACY_READ_AND_LEGACY_ACTION",wishVow:"PRESERVE_LEGACY_EVENT_HISTORY_NEW_V34_WISH",tokenBalance:"UNCHANGED",allowance:"NEW_SPENDER_EXPLICIT_APPROVAL_ONLY",oldReserve:"NO_AUTOMATIC_TRANSFER"},
+    preconditions:["EXACT_HEAD_SOURCE_HASHES_AND_COMPILER_MATCH","BSC97_CLEAN_REHEARSAL_PASS","FRONTEND_CANDIDATE_AND_REGRESSIONS_PASS","ROLE_OWNERSHIP_CONFIRMED","REGISTRY_TREASURY_FURNACE_PROOF_SOURCE_VERIFIED","GAS_ESTIMATES_WITHIN_CAPS","TOKEN_TAX_EXEMPTION_READ_ONLY_INSPECTED_NO_CHANGES","FUNDING_BALANCE_BASELINE_RECORDED","HUMAN_FINAL_APPROVAL_BEFORE_ANY_CHAIN56_SIGNATURE"],
+    postconditions:["ERC1967_SLOT_AND_IMPLEMENTATION_BYTECODE_MATCH","VERSION3.4.0","FOUR_ROLES_MATCH","LEGACY_BINDING_IMMUTABLE_MATCH","FORTUNEGAME_ZERO","FORTUNE_MAX8_EPOCH500","HEARTBEAT_IGNITE_CAP88","AUTHORIZED_FUNDING_ACTUAL_NET_RECEIVED_VERIFIED_NEVER_ASSUME_GROSS_EQUALS_NET","OPERATIONAL_RESERVE_FLOOR_CHECKED_AGAINST_ACTUAL_BALANCE","NO_FRONTEND_PRODUCTION_CUTOVER_UNTIL_ALL_PASS"],
+    emergency:["STOP_ON_FIRST_FAILURE_NO_BLIND_RESEND","KEEP_LEGACY_ROUTE_AND_HISTORY","PAUSE_NEW_HEART_ONLY_WITH_AUTHORIZED_OPERATOR","NEVER_CALL_UPGRADE_ON_OLD_DIRECT_HEART","FUTURE_PROXY_UPGRADE_REQUIRES_STORAGE_COMPATIBILITY"],
+    humanApproval:false,broadcast:false,signerLoaded:false,mainnetTransactionsSent:0
+  };
+  const evidence=JSON.parse(fs.readFileSync(bscTestnetEvidenceJsonPath,"utf8"));
+  evidence.unsignedMainnetManifest=manifest;
+  fs.writeFileSync(bscTestnetEvidenceJsonPath,`${JSON.stringify(evidence,null,2)}\n`);
+  console.log(JSON.stringify({status:manifest.status,sourceHead,mainnetTransactionsSent:0}));
+}
+
+// Fresh disposable TEST-only lineage. This never reads targets from execution
+// environment variables and never mutates the historical rehearsal proxy.
+// Receipts are checkpointed before waiting; uncertain broadcasts must be
+// resolved from their recorded hash, never blindly resent.
+async function runCleanTestnetRehearsal() {
+  const provider = new JsonRpcProvider(env("BSC_TESTNET_RPC_URL"));
+  provider.pollingInterval = 1000;
+  let evidence;
+  const historical = JSON.parse(fs.readFileSync(bscTestnetEvidenceJsonPath, "utf8"));
+  const persist = () => {
+    historical.cleanRehearsal = evidence;
+    const temporary=`${bscTestnetEvidenceJsonPath}.pending`;
+    const serialized=`${JSON.stringify(historical, null, 2)}\n`;
+    // Windows readers may hold a brief deny-write handle. Atomic replacement
+    // keeps the previous durable INTENT intact rather than truncating it.
+    for(let attempt=0;attempt<40;attempt++) {
+      try {fs.writeFileSync(temporary,serialized);fs.renameSync(temporary,bscTestnetEvidenceJsonPath);return;}
+      catch {Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,50);}
+    }
+    throw new Error("CLEAN_JOURNAL_WRITE_BLOCKED_STOP");
+  };
+  const fail = (code) => { throw new Error(code); };
+  try {
+    if (BigInt(await provider.send("eth_chainId", [])) !== 97n) fail("CLEAN_CHAIN_97_ONLY");
+    const wallet = new Wallet(env("BSC_TESTNET_PRIVATE_KEY", { allowSecret:true }), provider);
+    const signer = new NonceManager(wallet);
+    const balance = await provider.getBalance(wallet.address);
+    const fees = await provider.getFeeData();
+    const gasPrice = fees.gasPrice;
+    const caps = { transactionGas:8000000, gasPriceWei:"1000000000", totalFeeWei:parseUnits("0.10",18).toString(), nativeValue:"0", testKgenFundingWhole:108000 };
+    if (!gasPrice || gasPrice > BigInt(caps.gasPriceWei)) fail("CLEAN_GAS_PRICE_CAP");
+    console.log(JSON.stringify({operation:"CLEAN_TESTNET_PREFLIGHT",chainId:97,publicSigner:wallet.address,balanceTBNB:formatEther(balance),gasPriceWei:String(gasPrice),caps,mainnetTransactionsSent:0}));
+    if (process.env.BSC_TESTNET_EXECUTE !== "BSC97_FRESH_ISOLATED_V34_ONLY") return;
+    if (balance < parseUnits("0.01",18)) fail("CLEAN_TEST_GAS_INSUFFICIENT");
+    const head = execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim();
+    const compiled = artifact("KGEN_TempleHeart_Upgradeable");
+    const currentSourceHash = createHash("sha256").update(fs.readFileSync(path.resolve(root,"..",baselinePath))).digest("hex");
+    if (compiled.sourceSha256 !== currentSourceHash) fail("STALE_COMPILED_HEART_RUN_COMPILE");
+    evidence = historical.cleanRehearsal ?? {
+      schemaVersion:"1.0.0", executionClass:"REAL_BSC_TESTNET_FRESH_ISOLATED", status:"RUNNING",
+      chainId:97, sourceHead:head, sourceSha256:currentSourceHash, publicSigner:wallet.address,
+      startingBalanceTBNB:formatEther(balance), startedAt:new Date().toISOString(), caps,
+      contracts:{}, operations:{}, checks:{}, actors:[], totalFeeWei:"0", mainnetTransactionsSent:0,
+      fortuneGame:ZeroAddress, fortuneGame133:"DISABLED", clockMutation:false,
+      legacyHistoricalRehearsalPreserved:true,sourceDirty:true
+    };
+    if (evidence.chainId !== 97 || evidence.publicSigner !== wallet.address || evidence.sourceSha256 !== currentSourceHash) fail("CLEAN_RESUME_IDENTITY_OR_SOURCE_MISMATCH");
+    evidence.sourceDirty=true;
+    evidence.executionRuns??=[];
+    evidence.executionRuns.push({at:new Date().toISOString(),sourceHead:head,sourceDirty:true,toolSha256:createHash("sha256").update(fs.readFileSync(import.meta.filename)).digest("hex"),contractSourceSha256:currentSourceHash,mode:process.argv.includes("--ignite")?"IGNITE":process.argv.includes("--stress")?"STRESS":"CORE"});
+    persist();
+    const allowed = new Set(Object.values(evidence.contracts).map((c)=>c.address.toLowerCase()));
+    for (const a of evidence.actors.filter(Boolean)) allowed.add(a.address.toLowerCase());
+    const recordReceipt = (op, receipt) => {
+      if (!receipt || receipt.status !== 1) fail("CLEAN_RECEIPT_FAILED_STOP");
+      op.status="CONFIRMED"; op.blockNumber=receipt.blockNumber; op.gasUsed=String(receipt.gasUsed);
+      op.gasPriceWei=String(receipt.gasPrice); op.feeWei=String(receipt.gasUsed*receipt.gasPrice);
+      evidence.totalFeeWei=String(Object.values(evidence.operations).filter(o=>o.status==="CONFIRMED").reduce((n,o)=>n+BigInt(o.feeWei),0n));
+      persist();
+    };
+    const transact = async (label, request, deployment=false) => {
+      const dataHash=keccak256(request.data);
+      const existing=evidence.operations[label];
+      if(existing) {
+        if(existing.dataHash!==dataHash || existing.to!==(request.to??null)) fail("CLEAN_RESUME_CALLDATA_MISMATCH");
+        const receipt=await provider.getTransactionReceipt(existing.hash);
+        if(!receipt) fail("CLEAN_PENDING_TRANSACTION_STOP_NO_RESEND");
+        if(existing.status!=="CONFIRMED") recordReceipt(existing,receipt);
+        return receipt;
+      }
+      if (BigInt(await provider.send("eth_chainId",[]))!==97n) fail("CLEAN_CHAIN_CHANGED");
+      if (request.value != null && BigInt(request.value)!==0n) fail("CLEAN_NATIVE_VALUE_FORBIDDEN");
+      if (!deployment && (!request.to || !allowed.has(request.to.toLowerCase()))) fail("CLEAN_TARGET_NOT_FRESH_ALLOWLIST");
+      if(deployment && request.to) fail("CLEAN_DEPLOY_TARGET_FORBIDDEN");
+      const estimate=await provider.estimateGas({...request,from:wallet.address,value:0n});
+      const gasLimit=estimate*120n/100n+10000n;
+      if(gasLimit>BigInt(caps.transactionGas)) fail("CLEAN_TRANSACTION_GAS_CAP");
+      const freshFees=await provider.getFeeData();
+      if(!freshFees.gasPrice||freshFees.gasPrice>BigInt(caps.gasPriceWei)) fail("CLEAN_GAS_PRICE_CAP");
+      const signerBalance=await provider.getBalance(wallet.address);
+      const aggregateSpend=parseUnits(evidence.startingBalanceTBNB,18)-signerBalance;
+      const boundedSpend=aggregateSpend>BigInt(evidence.totalFeeWei)?aggregateSpend:BigInt(evidence.totalFeeWei);
+      if(boundedSpend+gasLimit*freshFees.gasPrice>BigInt(caps.totalFeeWei)) fail("CLEAN_TOTAL_TEST_GAS_CAP");
+      if(signerBalance<gasLimit*freshFees.gasPrice)fail("CLEAN_TEST_GAS_INSUFFICIENT");
+      const nonce=await provider.getTransactionCount(wallet.address,"pending");
+      const raw=await wallet.signTransaction({...request,value:0n,gasLimit,gasPrice:freshFees.gasPrice,chainId:97,nonce,type:0});
+      const op={label,to:request.to??null,dataHash,hash:keccak256(raw),nonce,status:"INTENT_RECORDED",gasLimit:String(gasLimit)};
+      evidence.operations[label]=op;persist();
+      const tx=await provider.broadcastTransaction(raw);
+      if(tx.hash!==op.hash)fail("CLEAN_BROADCAST_HASH_MISMATCH");
+      op.status="SUBMITTED";persist();
+      const receipt=await tx.wait(1);recordReceipt(op,receipt);
+      console.log(`${label}: ${tx.hash} confirmed ${receipt.blockNumber}`);
+      return receipt;
+    };
+    const deploy = async (key,name,args=[]) => {
+      const a=artifact(name);
+      const request=await new ContractFactory(a.abi,a.bytecode).getDeployTransaction(...args);
+      const receipt=await transact(`DEPLOY_${key}`,request,true);
+      const address=receipt.contractAddress;
+      if(!address) fail("CLEAN_DEPLOY_ADDRESS_MISSING");
+      const code=await provider.getCode(address);
+      if(!runtimeMatchesArtifact(code,a)) fail("CLEAN_DEPLOY_BYTECODE_MISMATCH");
+      evidence.contracts[key]={address,artifact:name,codeHash:keccak256(code)};
+      allowed.add(address.toLowerCase());persist();
+      return new Contract(address,a.abi,provider);
+    };
+    const call = (label,contract,method,args=[]) => transact(label,{to:contract.target,data:contract.interface.encodeFunctionData(method,args)});
+    const assert = (ok,label) => {if(!ok)fail(label);evidence.checks[label]="PASS";persist();};
+    const rejection = async (label,contract,method,args=[],from=wallet.address,expected=null) => {
+      if(evidence.checks[label]?.status==="PASS")return;
+      try {await provider.call({to:contract.target,from,data:contract.interface.encodeFunctionData(method,args)});}
+      catch(error) {
+        if(error.code!=="CALL_EXCEPTION")fail(`CLEAN_NON_REVERT_READ_FAILURE_${label}`);
+        let data=error.data??error.info?.error?.data;
+        if(typeof data==="object")data=data?.data??data?.result;
+        let parsed;try{parsed=contract.interface.parseError(data);}catch{}
+        if(!parsed||!expected||parsed.name!==expected)fail(`CLEAN_WRONG_REVERT_${label}`);
+        evidence.checks[label]={status:"PASS",kind:"LIVE_ETH_CALL_REJECTION_NO_WRITE",error:parsed?.name??"REVERT",block:await provider.getBlockNumber()};persist();return;
+      }
+      fail(`CLEAN_EXPECTED_REJECTION_${label}`);
+    };
+    const registry=await deploy("registry","KAIOSOrganRegistry",[wallet.address,3600]);
+    const kgen=await deploy("kgen","MockKGEN",[wallet.address]);
+    const kaios=await deploy("proofSource","KAIOS",[kgen.target,wallet.address,registry.target]);
+    const furnace=await deploy("furnace","KAIOSAlchemyFurnace",[kaios.target,registry.target,100]);
+    const treasury=await deploy("treasury11520","MockOrgan");
+    const legacy=await deploy("legacyHeart","MockLegacyHeart",[kgen.target]);
+    await call("REGISTER_FURNACE",registry,"bootstrapOrgan",[ORGAN_FURNACE_18911,furnace.target]);
+    await call("REGISTER_TREASURY",registry,"bootstrapOrgan",[ORGAN_EXCHANGE_TREASURY_11520,treasury.target]);
+    await call("SEAL_REGISTRY",registry,"sealBootstrap");
+    const implementation=await deploy("implementation","KGEN_TempleHeart_Upgradeable");
+    const init=implementation.interface.encodeFunctionData("initialize",[wallet.address,wallet.address,wallet.address,wallet.address,kgen.target,treasury.target,kaios.target]);
+    const proxy=await deploy("proxy","ERC1967Proxy",[implementation.target,init]);
+    const heart=new Contract(proxy.target,compiled.abi,provider);
+    await call("INITIALIZE_V340",heart,"initializeV340",[registry.target]);
+    await call("BIND_LEGACY_CONTINUITY",heart,"bindLegacyContinuity",[legacy.target]);
+    await call("FUND_TEST_HEART",kgen,"transfer",[heart.target,parseUnits("108000",18)]);
+    await call("BURN_TEST_KGEN",kgen,"burn",[parseUnits("3",18)]);
+    await call("SETTLE_TEST_KAIOS",kaios,"settleWhiteHoleMass");
+    assert(await heart.fortuneGame()===ZeroAddress,"FORTUNEGAME_ZERO");
+    assert(await heart.version()==="3.4.0","VERSION_3_4_0");
+    assert(await heart.legacyHeart()===legacy.target,"LEGACY_CONTINUITY_BOUND");
+    assert(await heart.fortuneMaxWhole()===8n&&await heart.fortuneEpochMaxClaims()===500n,"FORTUNE_CANON_8_500");
+    assert(!compiled.abi.some(entry=>entry.type==="function"&&entry.name==="fortuneClaim"&&entry.inputs?.[0]?.type==="uint256"),"BOT_009_NO_AMOUNT_CONTROLLED_FORTUNE_SELECTOR");
+    assert(implementationAddressFromSlot(await provider.getStorage(heart.target,IMPLEMENTATION_SLOT))===implementation.target,"IMPLEMENTATION_SLOT_MATCH");
+    for(const [name,role]of REQUIRED_SIGNER_ROLES)assert(await heart.hasRole(role,wallet.address),`TEST_ROLE_${name}`);
+    const manifest={chainId:97,proxy:heart.target,implementation:implementation.target,kgen:kgen.target,registry:registry.target,proofSource:kaios.target,legacyHeart:legacy.target,furnace:furnace.target,
+      roles:Object.fromEntries(REQUIRED_SIGNER_ROLES.map(([name])=>[name,wallet.address])),
+      proxyCodeHash:evidence.contracts.proxy.codeHash,implementationCodeHash:evidence.contracts.implementation.codeHash,
+      codeHashes:Object.fromEntries(Object.entries(evidence.contracts).map(([k,v])=>[k,v.codeHash])),fortuneGame:ZeroAddress};
+    evidence.frontendManifest=manifest;persist();
+    const browserEvidencePath=path.resolve(root,"..","artifacts/kaios-portal-qa/heart-v34-live-report.json");
+    if(fs.existsSync(browserEvidencePath)) {
+      const browser=JSON.parse(fs.readFileSync(browserEvidencePath,"utf8"));
+      if(browser.status==="PASS_REAL_BSC97_UI_CORE"&&browser.chainId===97&&browser.proxy===heart.target&&browser.signer===wallet.address) {
+        const receipts=[];
+        for(const [label,item]of Object.entries(browser.transactions??{})) {
+          const receipt=await provider.getTransactionReceipt(item.hash);
+          if(!receipt||receipt.status!==1)fail("CLEAN_BROWSER_RECEIPT_NOT_CONFIRMED");
+          receipts.push({label,hash:item.hash,to:receipt.to,blockNumber:receipt.blockNumber,gasUsed:String(receipt.gasUsed),feeWei:String(receipt.gasUsed*receipt.gasPrice)});
+        }
+        evidence.frontendLive={status:browser.status,chainId:97,proxy:heart.target,publicSigner:wallet.address,
+          scope:browser.scope,physicalMetaMask:"NOT_USED_CONTROLLED_TEST_SIGNER",receipts,mainnetTransactionsSent:0};persist();
+      }
+    }
+    const actorAbi=artifact("RehearsalActor").abi;
+    const actor = async (index) => {
+      if(!evidence.actors[index]) {
+        const c=await deploy(`actor${index}`,"RehearsalActor");
+        evidence.actors[index]={address:c.target};persist();
+      }
+      return new Contract(evidence.actors[index].address,actorAbi,provider);
+    };
+    const actorCall=(label,a,target,method,args=[])=>call(label,a,"execute",[target.target,target.interface.encodeFunctionData(method,args)]);
+    const prepare = async (index,suffix="FIRST",options={}) => {
+      const a=await actor(index);const row=evidence.actors[index];
+      const p=row[suffix]??{civilizationId:id(`CLEAN_CIV_${heart.target}_${index}_${suffix}`),wishHash:id(`CLEAN_WISH_${heart.target}_${index}_${suffix}`),holyCupProofId:id(`CLEAN_CUP_${heart.target}_${index}_${suffix}`)};
+      row[suffix]=p;persist();
+      await call(`FUND_KAIOS_${index}_${suffix}`,kaios,"transfer",[a.target,parseUnits("1",18)]);
+      if(!p.deadline){p.deadline=(await provider.getBlock("latest")).timestamp+86400;persist();}
+      const signature=await wallet.signTypedData({name:"KGEN TempleHeart 12345",version:"3.4.0",chainId:97,verifyingContract:heart.target},
+        {HolyCupProof:[{name:"claimant",type:"address"},{name:"civilizationId",type:"bytes32"},{name:"wishHash",type:"bytes32"},{name:"proofId",type:"bytes32"},{name:"deadline",type:"uint256"}]},
+        {claimant:a.target,civilizationId:p.civilizationId,wishHash:p.wishHash,proofId:p.holyCupProofId,deadline:p.deadline});
+      await call(`WISH_CUP_APPROVE_${index}_${suffix}`,a,"executeBatch",[
+        [heart.target,heart.target,kaios.target],
+        [heart.interface.encodeFunctionData("makeWish",[p.wishHash,p.civilizationId]),heart.interface.encodeFunctionData("submitHolyCupProof",[p.holyCupProofId,p.civilizationId,p.wishHash,p.deadline,signature]),kaios.interface.encodeFunctionData("approve",[furnace.target,parseUnits("1",18)])]]);
+      const destination=await heart.alchemyDestinationCode(await heart.fortunePurposeCode(),p.wishHash);
+      const receipt=await actorCall(`ALCHEMY_${index}_${suffix}`,a,furnace,"burnForKufo",[parseUnits("1",18),options.beneficiary??a.target,options.civilizationId??p.civilizationId,destination]);
+      for(const log of receipt.logs){try{const x=furnace.interface.parseLog(log);if(x?.name==="AlchemyProofCreated")p.proofId=x.args.proofId;}catch{}}
+      if(!p.proofId)fail("CLEAN_PROOF_EVENT_MISSING");persist();return{a,p};
+    };
+    const first=await prepare(0);
+    await actorCall("FORTUNE_FIRST",first.a,heart,"fortuneClaim",[first.p.proofId]);
+    const ledger=await heart.fortuneLedger(first.a.target);
+    assert(ledger.claimCount===1n,"FORTUNE_FIRST_LEDGER");
+    const second=await prepare(0,"SECOND");
+    if(!evidence.operations.VOLUNTARY_REPAYMENT)await rejection("REPAYMENT_REQUIRED",heart,"fortuneClaim",[second.p.proofId],first.a.target,"RepaymentRequired");
+    await actorCall("APPROVE_REPAYMENT",first.a,kgen,"approve",[heart.target,parseUnits("1",18)]);
+    await actorCall("VOLUNTARY_REPAYMENT",first.a,heart,"voluntaryRepayFortune",[parseUnits("1",18)]);
+    assert((await heart.fortuneLedger(first.a.target)).repaidAfterLastClaim,"VOLUNTARY_REPAYMENT_RESTORES_CONDITION");
+    const eligibility=await heart.nextFortuneEligibility(first.a.target);
+    assert(eligibility.repaymentSatisfied&&!eligibility.eligible,"REPAYMENT_TRUE_NOT_COOLDOWN_BYPASS");
+    evidence.checks.FORTUNE_AGAIN_ELIGIBILITY={status:"PASS_REPAYMENT_TRUE_30_DAY_COOLDOWN_REMAINS",cooldownEndsAt:String(eligibility.cooldownEndsAt),observedBlock:await provider.getBlockNumber()};persist();
+    await rejection("CIVILIZATION_SWITCH_STILL_WALLET_COOLDOWN",heart,"fortuneClaim",[second.p.proofId],first.a.target,"FortuneCooldown");
+    await actorCall("HEARTBEAT_FIRST",first.a,heart,"heartbeatClaim");
+    assert(await heart.lastHeartbeatAt(first.a.target)>0n,"HEARTBEAT_LIVE");
+    const wrong=await prepare(501,"REDIRECT",{beneficiary:wallet.address});
+    await rejection("BENEFICIARY_MISMATCH",heart,"fortuneClaim",[wrong.p.proofId],wrong.a.target,"BeneficiaryMismatch");
+    const wrongCiv=await prepare(502,"WRONG_CIV",{civilizationId:id("WRONG_CIVILIZATION")});
+    await rejection("CIVILIZATION_MISMATCH",heart,"fortuneClaim",[wrongCiv.p.proofId],wrongCiv.a.target,"CivilizationMismatch");
+    await rejection("WALLET_SWITCH_CANNOT_CLAIM_OTHER_PROOF",heart,"fortuneClaim",[wrongCiv.p.proofId],wrong.a.target,"BurnerMismatch");
+    await rejection("PROOF_REPLAY",heart,"fortuneClaim",[first.p.proofId],first.a.target,"ProofAlreadyConsumed");
+    await rejection("UNAUTHORIZED_UPGRADE",heart,"upgradeToAndCall",[implementation.target,"0x"],wrong.a.target,"AccessControlUnauthorizedAccount");
+    const continuity=await prepare(503,"LEGACY");
+    if(!evidence.legacyTestTimestamp){evidence.legacyTestTimestamp=(await provider.getBlock("latest")).timestamp;persist();}
+    await call("SET_TEST_LEGACY_HISTORY",legacy,"setHistory",[continuity.a.target,evidence.legacyTestTimestamp,evidence.legacyTestTimestamp,Math.floor(evidence.legacyTestTimestamp/86400)]);
+    await rejection("LEGACY_FORTUNE_COOLDOWN",heart,"fortuneClaim",[continuity.p.proofId],continuity.a.target,"FortuneCooldown");
+    await rejection("LEGACY_HEARTBEAT_COOLDOWN",heart,"heartbeatClaim",[],continuity.a.target,"HeartbeatCooldown");
+    const reserveProxy=await deploy("reserveProbeProxy","ERC1967Proxy",[implementation.target,init]);
+    const reserveHeart=new Contract(reserveProxy.target,compiled.abi,provider);
+    await call("RESERVE_INITIALIZE",reserveHeart,"initializeV340",[registry.target]);
+    await call("RESERVE_LEGACY_BIND",reserveHeart,"bindLegacyContinuity",[legacy.target]);
+    await call("RESERVE_FUND_EXACT_FLOOR",kgen,"transfer",[reserveHeart.target,parseUnits("20000",18)]);
+    await call("RESERVE_WISH",reserveHeart,"makeWish",[id("RESERVE_WISH"),id("RESERVE_CIV")]);
+    await rejection("RESERVE_PROTECTION",reserveHeart,"heartbeatClaim",[],wallet.address,"HeartInsufficientFunds");
+    const latest=await provider.getBlock("latest");
+    if(evidence.checks.IGNITE?.status!=="PASS")evidence.checks.IGNITE=latest.timestamp%86400<600 ? "WINDOW_OPEN_PENDING_STRESS" : {status:"WAITING_REAL_UTC_WINDOW",nextWindowUtc:new Date((Math.floor(latest.timestamp/86400)+1)*86400000).toISOString()};
+    persist();
+    if(process.argv.includes("--stress")) {
+      const epoch=BigInt((await provider.getBlock("latest")).timestamp)/await heart.fortuneEpochSeconds();
+      evidence.stressEpoch??=String(epoch);if(evidence.stressEpoch!==String(epoch))fail("CLEAN_EPOCH_CHANGED_STOP");
+      if(evidence.checks.FIVE_HUNDRED_DISTINCT_CLAIMS!=="PASS")for(let i=1;i<=500;i++) {
+        if(BigInt((await provider.getBlock("latest")).timestamp)/await heart.fortuneEpochSeconds()!==epoch)fail("CLEAN_EPOCH_CHANGED_STOP");
+        const item=await prepare(i);
+        if(await heart.fortuneEpochClaims(epoch)<500n)await actorCall(`FORTUNE_STRESS_${i}`,item.a,heart,"fortuneClaim",[item.p.proofId]);
+        else {await rejection("BOT_501_EPOCH_CAP",heart,"fortuneClaim",[item.p.proofId],item.a.target,"FortuneEpochFull");evidence.epochRejectedActor=item.a.target;persist();break;}
+      }
+      assert(await heart.fortuneEpochClaims(epoch)===500n,"FIVE_HUNDRED_DISTINCT_CLAIMS");
+      // Prepare the 89 contract wallets before choosing the assertion hour.
+      // They remain usable for the real daily Ignite window without deployments
+      // consuming that short window. Never adjust the canonical clock/caps.
+      if(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS")for(let i=510;i<599;i++) {
+        const a=await actor(i);
+        await actorCall(`CAP_WISH_${i}`,a,heart,"makeWish",[id(`HB_WISH_${heart.target}_${i}`),id(`HB_CIV_${heart.target}_${i}`)]);
+      }
+      let clock=await provider.getBlock("latest");
+      while(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS"&&3600-clock.timestamp%3600<600) {
+        console.log("CLEAN_HEARTBEAT_WAIT_FOR_SAFE_REAL_HOUR_WINDOW");
+        await new Promise(resolve=>setTimeout(resolve,30000));clock=await provider.getBlock("latest");
+      }
+      const hour=Math.floor(clock.timestamp/3600);
+      // 89 unused addresses: no reliance on the earlier control claim's hour.
+      if(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS")for(let i=510;i<599;i++) {
+        if(Math.floor((await provider.getBlock("latest")).timestamp/3600)!==hour)fail("CLEAN_HOUR_CHANGED_STOP");
+        const a=await actor(i);
+        const current=await heart.heartbeatHourClaims(hour);
+        if(current<88n)await actorCall(`HEARTBEAT_STRESS_${hour}_${i}`,a,heart,"heartbeatClaim");
+        else await rejection("BOT_89_HEARTBEAT_CAP",heart,"heartbeatClaim",[],a.target,"HeartbeatHourFull");
+      }
+    }
+    if(process.argv.includes("--ignite")) {
+      const block=await provider.getBlock("latest");
+      if(block.timestamp%86400>=600)fail("CLEAN_IGNITE_REAL_UTC_WINDOW_NOT_OPEN");
+      const day=Math.floor(block.timestamp/86400);
+      for(let i=510;i<599;i++) {
+        const now=await provider.getBlock("latest");
+        if(Math.floor(now.timestamp/86400)!==day||now.timestamp%86400>=600)fail("CLEAN_IGNITE_WINDOW_ENDED_STOP");
+        if(!evidence.actors[i])fail("CLEAN_IGNITE_ACTORS_MUST_BE_PREPARED_BEFORE_WINDOW");
+        const a=await actor(i);
+        const count=await heart.igniteDayClaims(day);
+        if(count<88n)await actorCall(`IGNITE_STRESS_${day}_${i}`,a,heart,"igniteAndClaim");
+        else {await rejection("BOT_89_IGNITE_CAP",heart,"igniteAndClaim",[],a.target,"IgniteDayFull");break;}
+      }
+      assert(await heart.igniteDayClaims(day)===88n,"EIGHTY_EIGHT_LIVE_IGNITES");
+      evidence.checks.IGNITE={status:"PASS",kind:"REAL_BSC97_UTC_WINDOW",dayIndex:day};persist();
+    }
+    evidence.status=evidence.checks.FIVE_HUNDRED_DISTINCT_CLAIMS==="PASS"&&evidence.checks.BOT_89_HEARTBEAT_CAP?.status==="PASS"&&evidence.checks.BOT_89_IGNITE_CAP?.status==="PASS"
+      ?"CLEAN_REHEARSAL_PASS":"CORE_PASS_STRESS_OR_REAL_WINDOW_PENDING";
+    evidence.updatedAt=new Date().toISOString();persist();
+    console.log(JSON.stringify({status:evidence.status,proxy:heart.target,totalTestGasTBNB:formatEther(BigInt(evidence.totalFeeWei)),mainnetTransactionsSent:0}));
+  } catch(error) {
+    // Do not serialize ethers exception payloads (may contain authenticated RPC
+    // URLs), transaction objects, Wallet objects or private key material.
+    const safe=/^(CLEAN_|STALE_)/.test(error.message??"") ? error.message : (typeof error.code==="string"?error.code:"CLEAN_OPERATION_FAILED");
+    if(evidence){evidence.status="STOPPED";evidence.lastFailure={code:safe,at:new Date().toISOString()};try{persist();}catch{}}
+    console.error(JSON.stringify({status:"CLEAN_REHEARSAL_STOPPED",code:safe,mainnetTransactionsSent:0}));process.exitCode=1;
+  } finally {await provider.destroy();}
+}
+
+if(process.argv.includes("--testnet-clean-rehearsal"))await runCleanTestnetRehearsal();
 
 if (process.argv.includes("--live-readonly")) {
   const evidence = {status:"READ_ONLY_EVIDENCE", sourceHead:execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim(), networks:[], mainnetTransactionsSent:0, signerLoaded:false};

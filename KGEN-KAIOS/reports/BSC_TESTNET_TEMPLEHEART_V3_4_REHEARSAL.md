@@ -1,5 +1,36 @@
 # BSC Testnet TempleHeart V3.4 Rehearsal
 
+## Current isolated continuation — 2026-10-03
+
+The older upgrade evidence below is retained as history. It is **not** the new
+FortuneGame-disabled candidate. The canonical cumulative machine-readable
+results are in this report's sibling JSON under `cleanRehearsal`.
+
+- Fresh BSC97 proxy: `0x80e8A8A25195a8604ECc11805268Eda60b5A87D2`.
+- Fresh implementation: `0x14A9fD67C5A0aA6a1901A468ee23E95c18ae56CD`.
+- FortuneGame: zero / PR #133 disabled.
+- All token funding and roles are freshly deployed TEST-only resources.
+- Real Wish → signed Holy Cup → KAIOS Alchemy proof → Fortune receipt: PASS.
+- RepaymentRequired rejection → voluntary repayment → repayment condition
+  restored with 30-day cooldown still enforced: PASS.
+- Real Heartbeat receipt: PASS.
+- Proof replay, wrong beneficiary, wrong civilization, wallet switch,
+  unauthorized upgrade, live legacy cooldown and operational reserve rejection:
+  PASS, decoded custom errors from live BSC97 calls.
+- Core test gas paid: `0.0017856403` tBNB over 45 confirmed transactions.
+- 501-claimant epoch / 89-claimant hourly stress: pending the subsequent stress
+  phase; this section does not claim they have passed yet.
+- Actual Ignite: pending the real UTC 00:00–00:09:59 window. No clock mutation.
+- Unsigned Mainnet manifest: sibling JSON `unsignedMainnetManifest`;
+  `READY_FOR_HUMAN_PARAMETERS`, not permission to broadcast.
+- Mainnet transactions, KGEN transfers and role changes: zero.
+
+Exact receipts, block numbers, source hash and testnet identity manifest are
+preserved in the JSON. Temporary local I/O interruption after repayment was
+recovered from its existing transaction hash without resubmission.
+
+## Historical V3.3.2 → V3.4 upgrade evidence (not current deployment route)
+
 Status: **TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS**
 
 Execution class: **REAL_BSC_TESTNET**

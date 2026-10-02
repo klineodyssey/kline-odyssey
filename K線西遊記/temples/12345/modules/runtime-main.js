@@ -9,6 +9,8 @@
   const KLINE_CACHE_KEY = "kgen12345_kline_cache_v205";
   const HEART_CONTRACT = "KGEN_TempleHeart_V3_2_6.sol";
   const CONFIG = window.KGEN_12345_CONFIG || {};
+  // Explicit TESTNET candidate only. No automatic promotion of BSC56 writes.
+  const V34_REQUESTED = new URLSearchParams(location.search).get("heart") === "v34-testnet";
   const CHAIN = Object.assign({
     KGEN: "0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",
     HEART: "0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",
@@ -37,6 +39,7 @@
   });
   METAMASK_DAPP_URL.searchParams.set("wallet", "metamask");
   METAMASK_DAPP_URL.searchParams.set("autoconnect", "1");
+  if(V34_REQUESTED) METAMASK_DAPP_URL.searchParams.set("heart", "v34-testnet");
   const METAMASK_DAPP_PATH = METAMASK_DAPP_URL.href.replace(/^https:\/\//, "");
   const WALLET_BRIDGE = {
     ROOT_ENTRY: "https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1",
@@ -52,6 +55,16 @@
     BITGET_DEEPLINK: "https://web3.bitget.com/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/12345.html?autoconnect=1&bridge=1"),
     BINANCE_DEEPLINK: "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent("https://klineodyssey.github.io/kline-odyssey/wallet-12345.html?autoconnect=1&bridge=1")
   };
+  if(V34_REQUESTED){
+    const candidateUrl = METAMASK_DAPP_URL.href;
+    WALLET_BRIDGE.ROOT_ENTRY = candidateUrl;
+    WALLET_BRIDGE.OFFICIAL_DAPP = candidateUrl;
+    WALLET_BRIDGE.BRIDGE_PAGE = candidateUrl;
+    WALLET_BRIDGE.TRUST_OPEN_URL = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(candidateUrl);
+    WALLET_BRIDGE.OKX_DEEPLINK = "okx://wallet/dapp/url?dappUrl=" + encodeURIComponent(candidateUrl);
+    WALLET_BRIDGE.BITGET_DEEPLINK = "https://web3.bitget.com/dapp?url=" + encodeURIComponent(candidateUrl);
+    WALLET_BRIDGE.BINANCE_DEEPLINK = "bnc://app.binance.com/cedefi/dapp?url=" + encodeURIComponent(candidateUrl);
+  }
 
   const HEART_VIEW_ABI = [
     "function lastFortuneAt(address) view returns (uint256)",
@@ -1873,6 +1886,9 @@
 
   const HeartRuntime = {
     inited: false,
+    candidate: null,
+    candidatePromise: null,
+    candidateEpoch: 0,
     readPromise: null,
     roProvider: null,
     state: {
@@ -1896,6 +1912,134 @@
       this.inited = true;
       this.bindButtons();
       this.bindFields();
+      if(V34_REQUESTED){
+        const ethereum = this.getEthereum();
+        if(ethereum?.on){
+          const invalidate = function(){
+            HeartRuntime.candidateEpoch++;
+            Object.assign(HeartRuntime.state,{address:null,signer:null,provider:null,kgenBal:null,bnbBal:null,allowance:null,v34:null});
+            HeartRuntime.statusTick();
+          };
+          let listening = false;
+          const bind = function(){ if(listening)return; listening=true; ["accountsChanged","chainChanged","disconnect"].forEach(function(event){ ethereum.on(event,invalidate); }); };
+          bind();
+          window.addEventListener("pagehide",function(){ listening=false; ["accountsChanged","chainChanged","disconnect"].forEach(function(event){ ethereum.removeListener?.(event,invalidate); }); });
+          window.addEventListener("pageshow",bind);
+        }
+        this.loadCandidate().catch(function(error){ StatusRuntime.push("V3.4 測試版停止：" + asErrorMessage(error)); });
+      }
+    },
+    loadCandidate: function(){
+      if(!V34_REQUESTED) return Promise.resolve(null);
+      if(this.candidatePromise) return this.candidatePromise;
+      const self = this;
+      this.candidatePromise = (async function(){
+        const api = await import("../../../../core/integrations/temple-heart-12345.mjs");
+        const response = await fetch(new URL("../../../KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json", document.baseURI), {cache:"no-store"});
+        if(!response.ok) throw new Error("缺少乾淨 BSC97 deployment manifest");
+        const manifest = (await response.json()).cleanRehearsal?.frontendManifest;
+        if(!manifest) throw new Error("乾淨 BSC97 Proxy 尚未配置；禁止 fallback 至舊 Heart");
+        const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.bnbchain.org:8545");
+        await api.verifyTempleHeartCandidate({ethers:ethers, provider:provider, manifest:manifest});
+        self.candidate = {api:api, manifest:manifest};
+        Object.assign(CHAIN, {BSC:"0x61", RPC:"https://data-seed-prebsc-1-s1.bnbchain.org:8545", HEART:manifest.proxy, KGEN:manifest.kgen});
+        self.roProvider = provider;
+        self.state.tokenAddress = manifest.kgen;
+        self.state.heartData = null;
+        const form = $("kh-v34-candidate");
+        if(form) form.hidden = false;
+        const fortune = $("kh-fortune-amount");
+        if(fortune){ fortune.disabled = true; fortune.value = "8"; }
+        setNodeText(document.querySelector('label[for="kh-fortune-amount"]'), "V3.4：由 proof 決定 payout，上限 8 TEST KGEN（不可自選）");
+        setNodeText($("kh-vow"), "voluntaryRepayFortune 自願還願（TEST）");
+        setNodeText($("kh-wishbtn"), "V3.4 許願（hash + civilization）");
+        setNodeText($("kh-lamp"), "點燈僅在正式 V3.2.6 提供");
+        const target = $("kh-approve-target");
+        if(target){ target.value = "vow"; Array.from(target.options).forEach(function(option){ option.disabled = option.value !== "vow"; }); }
+        ["kh-cup-1","kh-cup-2","kh-cup-3","kh-cup-reset"].forEach(function(id){ if($(id)) $(id).disabled = true; });
+        StatusRuntime.push("BSC97 V3.4 TEST ONLY｜FortuneGame DISABLED｜原 Mainnet Heart 未切換");
+        return self.candidate;
+      })();
+      return this.candidatePromise;
+    },
+    verifyCandidate: async function(){
+      const candidate = await this.loadCandidate();
+      if(!candidate) throw new Error("V3.4 candidate 未啟用");
+      return candidate.api.verifyTempleHeartCandidate({ethers:ethers, provider:this.state.provider || this.providerRO(), manifest:candidate.manifest});
+    },
+    candidateBytes32: function(id, label){
+      const value = String($(id)?.value || "").trim();
+      if(!/^0x[0-9a-fA-F]{64}$/.test(value) || value === ethers.constants.HashZero) throw new Error("請輸入有效非零 " + label + " bytes32");
+      return value;
+    },
+    sendCandidate: function(action, button, feedback){
+      const self = this;
+      const methods = {WISH:"makeWish", HOLY_CUP:"submitHolyCupProof", OFFERING:"recordBurnOffering", FORTUNE:"fortuneClaim", REPAY_FORTUNE:"voluntaryRepayFortune", HEARTBEAT:"heartbeatClaim", IGNITE:"igniteAndClaim"};
+      let wholeAmount;
+      return this.sendHeart("V3.4 TEST " + methods[action], function(contract, args){
+        return contract[methods[action]].apply(contract, args);
+      }, {button:button, feedback:feedback || "kh-v34-feedback", candidate:true,
+        describeError:function(error){
+          const raw = asErrorMessage(error);
+          const messages = {WishNotReady:"願望尚未就緒或已完成；請先建立新的願望",RepaymentRequired:"領取後尚未還願，請先自願還願",FortuneCooldown:"Fortune 30 日冷卻尚未結束",CivilizationCooldown:"此文明仍在冷卻，換錢包不能繞過",HeartbeatCooldown:"心跳仍在一小時冷卻",IgniteWindowClosed:"轉日窗口尚未開放：UTC 00:00–00:09:59",IgniteDayFull:"本日 88 次全域限額已滿",HeartbeatHourFull:"本小時 88 次全域限額已滿",FortuneEpochFull:"本期 500 次全域限額已滿",HeartInsufficientFunds:"Heart 操作準備金不足，禁止領取",ProofAlreadyConsumed:"Alchemy proof 已使用，不可重播",HolyCupProofAlreadyConsumed:"HolyCup proof 已使用",ProofExpired:"HolyCup proof 已過期",InvalidProofSigner:"HolyCup 簽署者不符",BeneficiaryMismatch:"proof 受益人與目前錢包不符",CivilizationMismatch:"proof 文明與目前願望不符",PurposeMismatch:"proof 用途不符",LegacyContinuityRequired:"舊 Heart 冷卻來源尚未綁定，停止領取"};
+          const name = Object.keys(messages).find(function(key){ return raw.includes(key) || error.errorName===key; });
+          return name ? messages[name]+"（"+name+"）" : raw;
+        },
+        prepare:function(){
+          if(action === "WISH") return [self.getWishHash(), self.candidateBytes32("kh-v34-civilization", "civilizationId")];
+          if(action === "REPAY_FORTUNE") { wholeAmount = self.getVowAmount(); return [ethers.utils.parseUnits(wholeAmount, self.state.tokenDecimals).toString()]; }
+          if(action === "FORTUNE") return [self.candidateBytes32("kh-v34-alchemy-proof", "Alchemy proofId")];
+          if(action === "OFFERING") return [self.candidateBytes32("kh-v34-alchemy-proof", "Alchemy proofId"), Number($("kh-v34-offering-type").value)];
+          if(action === "HOLY_CUP"){
+            let proof; try{ proof = JSON.parse($("kh-v34-cup-proof").value); }catch(_){ throw new Error("請輸入已簽署 HolyCup proof JSON；本機三聖盃不能代替正式簽章"); }
+            if(!ethers.utils.isHexString(proof.signature,65)) throw new Error("HolyCup signature 格式錯誤");
+            return [proof.proofId, proof.civilizationId, proof.wishHash, proof.deadline, proof.signature];
+          }
+          return [];
+        },
+        preflight:async function(args){
+          await self.verifyCandidate();
+          self.candidate.api.prepareTempleHeartCandidateCall({ethers:ethers,chainId:97,manifest:self.candidate.manifest,action:action,args:args});
+          if(action === "REPAY_FORTUNE") await ApproveRuntime.checkRitualFunding("vow", wholeAmount);
+          // Authoritative eth_call catches wrong proof/civilization, replay,
+          // reserve, cooldown and global caps before any wallet confirmation.
+          const read = new ethers.Contract(CHAIN.HEART, self.candidate.api.TEMPLE_HEART_V34_ABI, self.state.signer);
+          await read.callStatic[methods[action]].apply(read.callStatic, args);
+        }
+      });
+    },
+    refreshCandidate: async function(){
+      const self = this;
+      if(this.readPromise) return this.readPromise;
+      this.readPromise = (async function(){
+        try{
+          const epoch = self.candidateEpoch;
+          await self.loadCandidate();
+          const provider = self.providerRO();
+          const verified = await self.candidate.api.verifyTempleHeartCandidate({ethers:ethers,provider:provider,manifest:self.candidate.manifest});
+          const block = await provider.getBlock(verified.blockNumber), read = {blockTag:verified.blockNumber};
+          self.state.blockTs = block.timestamp; self.state.readAtMs = Date.now();
+          const injected = self.getEthereum();
+          if(injected){ const accounts = await injected.request({method:"eth_accounts"}); self.state.address = accounts[0] || null; self.state.chainId = await injected.request({method:"eth_chainId"}); }
+          const account = self.state.address;
+          const token = new ethers.Contract(CHAIN.KGEN, ERC20_VIEW_ABI, provider);
+          self.state.tokenDecimals = Number(await token.decimals(read));
+          self.state.heartBal = await token.balanceOf(CHAIN.HEART,read);
+          self.state.kgenBal = null; self.state.allowance = null; self.state.bnbBal = null;
+          self.state.v34 = null;
+          if(account){
+            const values = await Promise.all([token.balanceOf(account,read),token.allowance(account,CHAIN.HEART,read),provider.getBalance(account,verified.blockNumber),verified.contract.activeWish(account,read),verified.contract.fortuneLedger(account,read),verified.contract.nextFortuneEligibility(account,read)]);
+            const latestAccounts = await injected.request({method:"eth_accounts"});
+            const latestChain = await injected.request({method:"eth_chainId"});
+            if(epoch !== self.candidateEpoch || account.toLowerCase() !== String(latestAccounts[0]||"").toLowerCase() || Number(latestChain)!==97) throw new Error("錢包／鏈切換中，請重新讀取 BSC97");
+            [self.state.kgenBal,self.state.allowance,self.state.bnbBal] = values;
+            self.state.v34 = {wish:values[3],ledger:values[4],eligibility:values[5]};
+          }
+          self.state.readError = null;
+        }catch(error){ self.state.readError = error; self.state.v34 = null; self.state.kgenBal=null; self.state.bnbBal=null; self.state.allowance=null; }
+        finally{ self.readPromise = null; self.statusTick(); }
+      })();
+      return this.readPromise;
     },
     getEthereum: function(){
       let provider = window.ethereum || window.BinanceChain || null;
@@ -1914,6 +2058,7 @@
       return this.roProvider;
     },
     syncLegacyWeb3Bridge: function(){
+      if(V34_REQUESTED) return; // TEST identities must not poison legacy write targets.
       try{
         if(window.web3){
           window.web3.KGEN = CHAIN.KGEN;
@@ -1926,6 +2071,7 @@
       }catch(_){ }
     },
     syncFromWeb3: function(){
+      if(V34_REQUESTED) return !!this.state.address;
       const w3 = window.web3;
       if(!w3) return false;
       if(w3.provider) this.state.provider = w3.provider;
@@ -1966,10 +2112,10 @@
             method: "wallet_addEthereumChain",
             params: [{
               chainId: CHAIN.BSC,
-              chainName: "BNB Smart Chain",
+              chainName: V34_REQUESTED ? "BNB Smart Chain Testnet" : "BNB Smart Chain",
               nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
               rpcUrls: [CHAIN.RPC],
-              blockExplorerUrls: ["https://bscscan.com"]
+              blockExplorerUrls: [V34_REQUESTED ? "https://testnet.bscscan.com" : "https://bscscan.com"]
             }]
           });
           await ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN.BSC }] });
@@ -1982,23 +2128,36 @@
     },
     ensureConnected: async function(){
       this.ensureEthers();
+      if(V34_REQUESTED) await this.loadCandidate();
       const ethereum = this.getEthereum();
       if(!ethereum) throw new Error("未偵測到 EVM 錢包");
       await this.ensureBSC();
-      await ethereum.request({ method: "eth_requestAccounts" });
+      const authorizedAccounts = await ethereum.request({ method: "eth_requestAccounts" });
       this.state.provider = new ethers.providers.Web3Provider(ethereum);
-      this.state.signer = this.state.provider.getSigner();
+      if(V34_REQUESTED && !authorizedAccounts?.[0]) throw new Error("錢包尚未授權帳號");
+      this.state.signer = V34_REQUESTED ? this.state.provider.getSigner(authorizedAccounts[0]) : this.state.provider.getSigner();
       this.state.address = await this.state.signer.getAddress();
       this.state.chainId = await ethereum.request({ method: "eth_chainId" });
+      if(V34_REQUESTED) await this.assertCandidateWallet(this.state.address, this.candidateEpoch);
       this.syncLegacyWeb3Bridge();
       this.updateWalletDom();
       return this.state.signer;
+    },
+    assertCandidateWallet: async function(account, epoch){
+      const injected = this.getEthereum();
+      const accounts = await injected.request({method:"eth_accounts"});
+      const chain = await injected.request({method:"eth_chainId"});
+      if(epoch!==this.candidateEpoch || String(accounts[0]||"").toLowerCase()!==String(account||"").toLowerCase() || Number(chain)!==97) throw new Error("錢包帳號／鏈已變更，請重新確認 BSC97 操作");
     },
     connectWallet: async function(){
       return WalletRuntime.connect();
     },
     heartContract: async function(){
       await this.ensureConnected();
+      if(V34_REQUESTED){
+        await this.verifyCandidate();
+        return new ethers.Contract(CHAIN.HEART, this.candidate.api.TEMPLE_HEART_V34_ABI, this.state.signer);
+      }
       return new ethers.Contract(CHAIN.HEART, HEART_ABI_V326, this.state.signer);
     },
     currentBlockTs: function(){
@@ -2060,7 +2219,8 @@
       const waiting = "等待鏈上資料";
       const hasAddr = !!this.state.address;
       setNodeText($("kh-wallet"), hasAddr ? short(this.state.address) + "｜" + this.state.address : "未連線");
-      setNodeText($("kh-chain"), String(this.state.chainId || "").toLowerCase() === String(CHAIN.BSC).toLowerCase() ? "BSC 56" : this.state.chainId || "BSC 56");
+      if(V34_REQUESTED) setNodeText($("w3-addr"), this.state.address || "BSC97 TEST 未連線");
+      setNodeText($("kh-chain"), String(this.state.chainId || "").toLowerCase() === String(CHAIN.BSC).toLowerCase() ? (V34_REQUESTED ? "BSC 97 TEST ONLY" : "BSC 56") : this.state.chainId || (V34_REQUESTED ? "BSC97 未連線" : "BSC 56"));
 
       if(this.state.heartBal != null){
         const heartText = this.formatToken(this.state.heartBal);
@@ -2112,6 +2272,7 @@
       }
     },
     refreshChainData: async function(verbose){
+      if(V34_REQUESTED) return this.refreshCandidate();
       if(this.readPromise) return this.readPromise;
       if(!hasEthers5()){
         this.state.readError = new Error("ethers.js 尚未載入");
@@ -2417,6 +2578,15 @@
     updateFortuneStatus: function(){
       const status = $("kh-fortune-status");
       if(!status) return;
+      if(V34_REQUESTED){
+        const state = this.state.v34;
+        status.textContent = this.state.readError ? "V3.4 無法驗證鏈上資料，禁止送出" : !state ? "V3.4：請連接 BSC97 測試錢包" :
+          !state.eligibility.repaymentSatisfied ? "RepaymentRequired：需先完成自願還願" :
+          !state.eligibility.eligible ? "冷卻至 UTC " + new Date(Number(state.eligibility.cooldownEndsAt) * 1000).toISOString() :
+          "還願／冷卻已通過；仍須有效 HolyCup、Alchemy proof、civilization、epoch cap 及 reserve 驗證";
+        setNodeText($("kh-cup-status"), state ? "V3.4 Wish 狀態：" + state.wish.status + "｜簽署 HolyCup proof 才是 authority" : "V3.4：本機三聖盃不是鏈上簽章");
+        return;
+      }
       if(!HolyCupRuntime.isComplete()){
         status.textContent = "發財金：需要聖盃（" + HolyCupRuntime.count + "/3）";
         return;
@@ -2446,6 +2616,11 @@
     statusTick: function(){
       this.updateWalletDom();
       ApproveRuntime.renderStatus();
+      if(V34_REQUESTED){
+        this.updateFortuneStatus();
+        setNodeText($("kh-wish-onchain-status"), "BSC97 V3.4：makeWish(wishHash,civilizationId)；願望原文不上鏈。HolyCup / Alchemy proof / receipt 均以鏈上驗證為準。");
+        return;
+      }
       this.updateHeartbeatStatus();
       this.updateIgniteStatus();
       this.updateFortuneStatus();
@@ -2472,9 +2647,13 @@
       };
       if(button){ button.dataset.heartPending = "1"; button.setAttribute("aria-busy", "true"); }
       try{
+        if(V34_REQUESTED){
+          await this.loadCandidate();
+          if(!action?.candidate) throw new Error("此操作不屬於 V3.4 測試版；請回正式 V3.2.6 使用。未送交易。");
+        }
         const args = action ? action.prepare() : undefined;
         if(action) report(label + "：檢查錢包／輸入，請稍候…");
-        if(/fortuneClaim/.test(label) && !HolyCupRuntime.isComplete()){
+        if(!V34_REQUESTED && /fortuneClaim/.test(label) && !HolyCupRuntime.isComplete()){
           StatusRuntime.push("發財金：三聖盃未完成（" + HolyCupRuntime.count + "/3）");
           return;
         }
@@ -2488,11 +2667,12 @@
         }
         await this.ensureConnected();
         if(!this.isOnBSC()){
-          report(label + "：請切換至 BSC（鏈 ID 56）");
+          report(label + (V34_REQUESTED ? "：請切換至 BSC97 TEST" : "：請切換至 BSC（鏈 ID 56）"));
           return;
         }
         const account = this.state.address;
-        if(action && action.preflight) await action.preflight();
+        const candidateEpoch = this.candidateEpoch;
+        if(action && action.preflight) await action.preflight(args);
         if(action && action.funding){
           report(label + "：正在讀取 KGEN 餘額與 Allowance…");
           await ApproveRuntime.checkRitualFunding(action.funding, args[args.length - 1]);
@@ -2503,6 +2683,7 @@
         }
         const contract = await this.heartContract();
         if(action && this.state.address !== account) throw new Error("錢包帳號已變更，請重新確認操作");
+        if(V34_REQUESTED) await this.assertCandidateWallet(account, candidateEpoch);
         report("送出中：" + label + (action ? "，請在錢包確認；尚未成交" : ""));
         const tx = await runner(contract, args);
         report("Tx sent：" + tx.hash);
@@ -2512,7 +2693,7 @@
         await this.refreshChainData(false);
       }catch(error){
         const msg = action && action.describeError ? action.describeError(error) : asErrorMessage(error);
-        if(/fortuneClaim/i.test(label) && /FORTUNE_COOLDOWN|cooldown/i.test(msg)){
+        if(!V34_REQUESTED && /fortuneClaim/i.test(label) && /FORTUNE_COOLDOWN|cooldown/i.test(msg)){
           const snap = this.evaluateFortuneClaim();
           ClaimDebugRuntime.update(Object.assign(snap, { fortuneRevertReason: msg, txReady: "no" }));
           StatusRuntime.push("發財金冷卻中，剩餘 " + snap.fortuneCooldownRemain);
@@ -2554,6 +2735,17 @@
         "kgen-v102-festival-1111": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[2], function(contract){ return contract.festivalClaim(2); }, CountdownRuntime.action(2,"kgen-v102-festival-1111")); },
         "kgen-v102-newyear": function(){ self.sendHeart("newYearCountdownClaim 跨年倒數", function(contract){ return contract.newYearCountdownClaim(); }, CountdownRuntime.action(3,"kgen-v102-newyear")); }
       };
+      if(V34_REQUESTED){
+        Object.assign(actions, {
+          "kh-wishbtn":function(){ return self.sendCandidate("WISH","kh-wishbtn","kh-wish-feedback"); },
+          "kh-vow":function(){ return self.sendCandidate("REPAY_FORTUNE","kh-vow","kh-vow-feedback"); },
+          "kh-fortune":function(){ return self.sendCandidate("FORTUNE","kh-fortune"); },
+          "kh-heartbeat":function(){ return self.sendCandidate("HEARTBEAT","kh-heartbeat"); },
+          "kh-ignite":function(){ return self.sendCandidate("IGNITE","kh-ignite"); },
+          "kh-v34-submit-cup":function(){ return self.sendCandidate("HOLY_CUP","kh-v34-submit-cup"); },
+          "kh-v34-offering":function(){ return self.sendCandidate("OFFERING","kh-v34-offering"); }
+        });
+      }
       Object.keys(actions).forEach(function(id){
         const button = $(id);
         if(!button) return;
@@ -2607,6 +2799,7 @@
       return Number(ethers.utils.formatUnits(HeartRuntime.state.allowance, HeartRuntime.state.tokenDecimals || 18));
     },
     getNeedAmount: function(key){
+      if(V34_REQUESTED && key !== "vow") throw new Error("V3.4 只使用自願還願的明確數量授權");
       const slot = this.slots.find(function(entry){ return entry.key === key; });
       if(!slot) return null;
       return slot.getter();
@@ -2719,11 +2912,14 @@
       return this.approveSlot("fortune");
     },
     approveSlot: async function(key){
+      if(V34_REQUESTED && key !== "vow"){ StatusRuntime.push("V3.4 不使用此 legacy approval"); return; }
+      if(V34_REQUESTED && this.candidateApprovalPending){ StatusRuntime.push("TEST 授權處理中，請勿重複提交"); return; }
       const slot = this.slots.find(function(entry){ return entry.key === key; });
       if(!slot){
         StatusRuntime.push("Approve：未知功能 " + key);
         return;
       }
+      if(V34_REQUESTED) this.candidateApprovalPending=true;
       try{
         if(!HeartRuntime.hasInjectedWallet() && !HeartRuntime.state.address){
           StatusRuntime.push("Approve " + slot.label + "：未連錢包");
@@ -2731,12 +2927,21 @@
         }
         await HeartRuntime.ensureConnected();
         await HeartRuntime.refreshChainData(false);
+        if(V34_REQUESTED) await HeartRuntime.verifyCandidate();
         if(key === "lamp") await this.readLampPrice();
         const amountWhole = slot.getter();
         const amount = ethers.utils.parseUnits(String(amountWhole), HeartRuntime.state.tokenDecimals || 18);
+        const approvingAccount = HeartRuntime.state.address;
+        const approvingEpoch = HeartRuntime.candidateEpoch;
         if(!window.confirm("確認授權【" + slot.label + "】金額：" + amountWhole + " KGEN")){
           StatusRuntime.push("已取消：Approve " + slot.label);
           return;
+        }
+        if(V34_REQUESTED){
+          await HeartRuntime.ensureConnected();
+          await HeartRuntime.verifyCandidate();
+          if(HeartRuntime.state.address!==approvingAccount) throw new Error("錢包／鏈已變更，取消授權");
+          await HeartRuntime.assertCandidateWallet(approvingAccount, approvingEpoch);
         }
         const token = new ethers.Contract(HeartRuntime.state.tokenAddress || CHAIN.KGEN, ERC20_VIEW_ABI, HeartRuntime.state.signer);
         StatusRuntime.push("送出中：Approve " + slot.label + " " + amountWhole + " KGEN");
@@ -2747,12 +2952,15 @@
         await HeartRuntime.refreshChainData(false);
       }catch(error){
         StatusRuntime.push("Approve 失敗：" + asErrorMessage(error));
+      }finally{
+        if(V34_REQUESTED) this.candidateApprovalPending=false;
       }
     },
     approveSelected: async function(){
       return this.approveSlot(this.getSelectedKey());
     },
     approveUnlimited: async function(){
+      if(V34_REQUESTED){ StatusRuntime.push("V3.4 測試版僅允許明確數量授權"); return; }
       try{
         if(!HeartRuntime.hasInjectedWallet() && !HeartRuntime.state.address){
           StatusRuntime.push("無限授權：未連錢包");
@@ -3105,6 +3313,7 @@
         "kh-approve-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
         "kh-unlimited": function(){ return WalletRuntime.approveUnlimited(); },
         "kh-switch": function(){
+          if(V34_REQUESTED) return WalletRuntime.switchWallet();
           if(window.web3 && typeof window.web3.switchWallet === "function"){
             return window.web3.switchWallet();
           }
@@ -3594,6 +3803,7 @@
       });
     },
     primeWeb3Shell: function(){
+      if(V34_REQUESTED) return; // Never retarget the legacy transaction authority.
       try{
         if(window.web3){
           window.web3.KGEN = CHAIN.KGEN;
@@ -3644,7 +3854,7 @@
       try{
         const accounts = await eth.request({ method: "eth_accounts" });
         const chain = await eth.request({ method: "eth_chainId" });
-        if(!accounts.length || Number(chain) !== 56){
+        if(!accounts.length || Number(chain) !== (V34_REQUESTED ? 97 : 56)){
           this.clearWalletSession(chain);
           WalletDebugRuntime.setConnectResult(!accounts.length ? "disconnected" : "wrong chain");
           return;
@@ -3664,6 +3874,29 @@
         WalletDebugRuntime.logAction("connect()", "window.ethereum yes → eth_requestAccounts");
         StatusRuntime.push(options.passive ? "正在同步已授權錢包" : "準備連結錢包 / 切 BSC，請在錢包視窗確認");
         try{
+          if(V34_REQUESTED){
+            if(options.passive){
+              // Focus/pageshow may read an existing grant, never request accounts
+              // or a chain switch. Explicit connect remains the only prompt path.
+              await HeartRuntime.loadCandidate();
+              const epoch = HeartRuntime.candidateEpoch;
+              const accounts = await ethereum.request({method:"eth_accounts"});
+              const chain = await ethereum.request({method:"eth_chainId"});
+              if(!accounts.length || Number(chain)!==97){ this.clearWalletSession(chain); return false; }
+              const provider = new ethers.providers.Web3Provider(ethereum);
+              const signer = provider.getSigner(accounts[0]);
+              const current = await ethereum.request({method:"eth_accounts"});
+              const currentChain = await ethereum.request({method:"eth_chainId"});
+              if(epoch!==HeartRuntime.candidateEpoch || String(current[0]||"").toLowerCase()!==accounts[0].toLowerCase() || Number(currentChain)!==97){ this.clearWalletSession(currentChain); return false; }
+              Object.assign(HeartRuntime.state,{provider:provider,signer:signer,address:accounts[0],chainId:chain});
+            }else await HeartRuntime.ensureConnected();
+            await HeartRuntime.verifyCandidate();
+            await HeartRuntime.refreshChainData(true);
+            if(HeartRuntime.state.readError) throw HeartRuntime.state.readError;
+            WalletRuntime.closeWalletHub();
+            StatusRuntime.push("BSC97 TEST 錢包已同步；Mainnet 未切換");
+            return true;
+          }
           if(window.web3 && typeof window.web3.connect === "function"){
             const connected = await window.web3.connect(options);
             const chainId = await ethereum.request({ method: "eth_chainId" });
@@ -3721,6 +3954,7 @@
       return false;
     },
     refresh: async function(){
+      if(V34_REQUESTED) return HeartRuntime.refreshChainData(true);
       StatusRuntime.push("刷新餘額中…");
       try{
         if(window.web3 && typeof window.web3.refreshUser === "function"){
@@ -3744,7 +3978,7 @@
       return ApproveRuntime.approveUnlimited();
     },
     switchWallet: async function(){
-      if(window.web3 && typeof window.web3.switchWallet === "function"){
+      if(!V34_REQUESTED && window.web3 && typeof window.web3.switchWallet === "function"){
         return window.web3.switchWallet();
       }
       const eth = HeartRuntime.getEthereum();
@@ -3766,7 +4000,7 @@
           return false;
         }
         await eth.request({ method: "eth_requestAccounts" });
-        if(window.web3 && typeof window.web3.connect === "function"){
+        if(!V34_REQUESTED && window.web3 && typeof window.web3.connect === "function"){
           await window.web3.connect();
         }else{
           await HeartRuntime.ensureConnected();

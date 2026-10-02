@@ -11,7 +11,7 @@
   "openzeppelinContracts": "5.0.2",
   "openzeppelinContractsUpgradeable": "5.0.2",
   "sourceCount": 16,
-  "contractCount": 28,
+  "contractCount": 30,
   "eip170MaximumDeployedBytecodeBytes": 24576,
   "oversizedContracts": [],
   "warnings": 0,
@@ -19,8 +19,8 @@
     {
       "contractName": "KGEN_TempleHeart_Upgradeable",
       "sourceName": "../KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
-      "bytecodeBytes": 23768,
-      "deployedBytecodeBytes": 23553
+      "bytecodeBytes": 24516,
+      "deployedBytecodeBytes": 24301
     },
     {
       "contractName": "ERC1967Proxy",
@@ -155,10 +155,22 @@
       "deployedBytecodeBytes": 1819
     },
     {
+      "contractName": "MockLegacyHeart",
+      "sourceName": "tests/contracts/MockKGEN.sol",
+      "bytecodeBytes": 841,
+      "deployedBytecodeBytes": 687
+    },
+    {
       "contractName": "ReentrantMockKGEN",
       "sourceName": "tests/contracts/MockKGEN.sol",
       "bytecodeBytes": 4968,
       "deployedBytecodeBytes": 3501
+    },
+    {
+      "contractName": "RehearsalActor",
+      "sourceName": "tests/contracts/MockKGEN.sol",
+      "bytecodeBytes": 1056,
+      "deployedBytecodeBytes": 1002
     },
     {
       "contractName": "MockMintOrgan",

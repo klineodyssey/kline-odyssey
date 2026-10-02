@@ -67,11 +67,12 @@ test("fresh V3.4 package deploys locally with atomic proxy initializer, distinct
   const root = path.resolve(import.meta.dirname, "..");
   const owner = await context.owner.getAddress();
   const roleAddresses = await Promise.all(context.signers.slice(1,5).map((s) => s.getAddress()));
+  const legacy = await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
   const config = {chainId:97, deployer:owner, admin:roleAddresses[0], upgrader:roleAddresses[1],
     operator:roleAddresses[2], holyCupSigner:roleAddresses[3], kgen:await context.kgen.getAddress(),
     legacyBrainVault:owner, proofSource:await context.kaios.getAddress(), registry:await context.registry.getAddress(),
-    treasury11520:await context.exchangeTreasury11520.getAddress(), startNonce:await context.provider.getTransactionCount(owner),
-    gasCaps:{implementation:6000000,proxy:1500000,registryInitialization:300000}, maxGasPriceWei:"10000000000"};
+    treasury11520:await context.exchangeTreasury11520.getAddress(), legacyHeart:await legacy.getAddress(), startNonce:await context.provider.getTransactionCount(owner),
+    gasCaps:{implementation:6000000,proxy:1500000,registryInitialization:300000,legacyContinuity:150000}, maxGasPriceWei:"10000000000"};
   const input = path.join(root, "artifacts", "templeheart-local-package-input.json");
   fs.writeFileSync(input, JSON.stringify(config));
   execFileSync(process.execPath, ["tools/validate-templeheart-storage.mjs", "--deployment-package", input], {cwd:root});
@@ -79,11 +80,16 @@ test("fresh V3.4 package deploys locally with atomic proxy initializer, distinct
   assert.equal(pkg.broadcast,false);
   assert.equal(pkg.caps.kgenTransfer,"0");
   assert.equal(pkg.status,"UNSIGNED_CANDIDATE_NOT_MAINNET_READY");
+  assert.equal(pkg.transactions.length,4);
+  assert.equal(pkg.legacyHeart,config.legacyHeart);
+  assert.equal(pkg.transactions[3].label ?? pkg.transactions[3].step,"ADMIN_BIND_LEGACY_CONTINUITY");
   for (const [change, expected] of [
     [{chainId:1}, "UNSUPPORTED_CHAIN"],
     [{admin:ethers.ZeroAddress}, "ZERO_ADDRESS:admin"],
+    [{legacyHeart:ethers.ZeroAddress}, "ZERO_ADDRESS:legacyHeart"],
     [{fortuneGame:owner}, "FORTUNEGAME_133_HOLD"],
     [{gasCaps:{}}, "MISSING_GAS_CAP:implementation"],
+    [{gasCaps:{...config.gasCaps,legacyContinuity:undefined}}, "MISSING_GAS_CAP:legacyContinuity"],
     [{chainId:56}, "KGEN_IDENTITY_MISMATCH"]
   ]) {
     fs.writeFileSync(input, JSON.stringify({...config,...change}));
@@ -96,7 +102,7 @@ test("fresh V3.4 package deploys locally with atomic proxy initializer, distinct
     ["tools/validate-templeheart-storage.mjs","--deployment-package",input,"--testnet-rehearsal"],
     {cwd:root,stdio:"pipe"}), error => String(error.stderr).includes("ONE_OPERATION_ONLY"));
   for(const [i, step] of pkg.transactions.entries()) {
-    const signer = i === 2 ? context.signers[1] : context.owner;
+    const signer = i >= 2 ? context.signers[1] : context.owner;
     // LOCAL EVM ONLY. No production/provider URLs or external signers.
     const receipt = await (await signer.sendTransaction({to:step.to,data:step.data,value:0,gasLimit:step.gasLimit})).wait();
     assert.equal(receipt.status,1);
@@ -105,7 +111,7 @@ test("fresh V3.4 package deploys locally with atomic proxy initializer, distinct
   }
   const roles = Object.fromEntries(["DEFAULT_ADMIN_ROLE","UPGRADER_ROLE","OPERATOR_ROLE","HOLY_CUP_SIGNER_ROLE"].map((r,i) => [r,roleAddresses[i]]));
   const manifest = {chainId:97,proxy:pkg.proxy,implementation:pkg.implementation,roles,
-    kgen:config.kgen,registry:config.registry,proofSource:config.proofSource,
+    kgen:config.kgen,registry:config.registry,proofSource:config.proofSource,legacyHeart:config.legacyHeart,
     proxyCodeHash:keccak256(await context.provider.getCode(pkg.proxy)),
     implementationCodeHash:keccak256(await context.provider.getCode(pkg.implementation))};
   const verified = await verifyTempleHeartCandidate({ethers,provider:context.provider,manifest});
@@ -124,6 +130,7 @@ test("fresh V3.4 package deploys locally with atomic proxy initializer, distinct
     assert.throws(() => prepareTempleHeartCandidateCall({ethers,chainId:97,manifest,action}),{code:"UNSUPPORTED_V34_ACTION_USE_LEGACY"});
   }
   await assert.rejects(verifyTempleHeartCandidate({ethers,provider:context.provider,manifest:{...manifest,implementationCodeHash:id("FAKE")}}),{code:"IMPLEMENTATION_CODE_MISMATCH"});
+  await assert.rejects(verifyTempleHeartCandidate({ethers,provider:context.provider,manifest:{...manifest,legacyHeart:owner}}),{code:"BINDING_MISMATCH"});
   await assert.rejects(verifyTempleHeartCandidate({ethers,provider:context.provider,manifest:{...manifest,roles:{...roles,UPGRADER_ROLE:owner}}}),{code:"ROLE_MISMATCH"});
   const heart = new Contract(pkg.proxy,artifact("KGEN_TempleHeart_Upgradeable").abi,context.signers[1]);
   await rejectsHeart(heart.initializeV340.staticCall(config.registry),heart,"InvalidInitialization");
@@ -318,6 +325,177 @@ async function setTimeRaw(context, timestamp) {
   await context.eip1193.request({ method: "evm_setTime", params: [timestamp * 1_000] });
   await context.eip1193.request({ method: "evm_mine", params: [] });
 }
+
+test("legacy onchain binding is admin-only, token-bound and irreversible", async () => {
+  const context = await setupLineage({chainId:97});
+  const {heart} = await deployTempleHeart(context);
+  const legacy = await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
+  const wrongToken = await deploy("MockKGEN",context.owner,[await context.owner.getAddress()]);
+  const wrongLegacy = await deploy("MockLegacyHeart",context.owner,[await wrongToken.getAddress()]);
+  await rejectsHeart(heart.connect(context.signers[2]).bindLegacyContinuity.staticCall(await legacy.getAddress()),heart,"AccessControlUnauthorizedAccount");
+  for (const source of [ethers.ZeroAddress,await context.owner.getAddress(),await heart.getAddress(),await wrongLegacy.getAddress()]) {
+    await rejectsHeart(heart.bindLegacyContinuity.staticCall(source),heart,"InvalidRange");
+  }
+  const receipt = await (await heart.bindLegacyContinuity(await legacy.getAddress())).wait();
+  assert.equal(eventArgs(receipt,heart,"LegacyContinuityBound")[0],await legacy.getAddress());
+  assert.equal(await heart.legacyHeart(),await legacy.getAddress());
+  const replacement = await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
+  await rejectsHeart(heart.bindLegacyContinuity.staticCall(await legacy.getAddress()),heart,"InvalidRange");
+  await rejectsHeart(heart.bindLegacyContinuity.staticCall(await replacement.getAddress()),heart,"InvalidRange");
+  await rejectsHeart(heart.bindLegacyContinuity.staticCall(ethers.ZeroAddress),heart,"InvalidRange");
+});
+
+test("TEST rehearsal actor executes only controller calls and bubbles failures without forging wallet identity", async () => {
+  const context=await setupLineage();
+  const actor=await deploy("RehearsalActor",context.owner);
+  const token=await context.kgen.getAddress(),address=await actor.getAddress(),recipient=await context.signers[2].getAddress();
+  await (await context.kgen.transfer(address,2n*ETHER)).wait();
+  const transfer=context.kgen.interface.encodeFunctionData("transfer",[recipient,ETHER]);
+  await rejectsHeart(actor.connect(context.signers[2]).execute.staticCall(token,transfer),actor,"ControllerOnly");
+  await rejectsHeart(actor.connect(context.signers[2]).executeBatch.staticCall([token],[transfer]),actor,"ControllerOnly");
+  await rejectsHeart(actor.executeBatch.staticCall([token],[]),actor,"BatchLengthMismatch");
+  await (await actor.execute(token,transfer)).wait();
+  assert.equal(await context.kgen.balanceOf(recipient),ETHER);
+  assert.equal(await context.kgen.balanceOf(address),ETHER);
+  const overdraw=context.kgen.interface.encodeFunctionData("transfer",[recipient,3n*ETHER]);
+  await rejectsHeart(actor.execute.staticCall(token,overdraw),context.kgen,"ERC20InsufficientBalance");
+  await rejectsHeart(actor.executeBatch.staticCall([token,token],[transfer,overdraw]),context.kgen,"ERC20InsufficientBalance");
+  assert.equal(await context.kgen.balanceOf(recipient),ETHER);
+  await (await actor.executeBatch([token],[transfer])).wait();
+  assert.equal(await context.kgen.balanceOf(recipient),2n*ETHER);
+});
+
+test("legacy onchain Mainnet policy rejects missing continuity and noncanonical source (local chain56 simulation only)", async () => {
+  const context = await setupLineage({chainId:56});
+  const {heart} = await deployTempleHeart(context);
+  const user = context.signers[2];
+  const address = await user.getAddress();
+  const legacy = await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
+  await rejectsHeart(heart.bindLegacyContinuity.staticCall(await legacy.getAddress()),heart,"InvalidRange");
+  await (await context.kgen.transfer(await heart.getAddress(),21000n*ETHER)).wait();
+  await (await heart.connect(user).makeWish(id("LEGACY-REQUIRED-WISH"),id("LEGACY-REQUIRED-CIV"))).wait();
+  await rejectsHeart(heart.nextFortuneEligibility(address),heart,"LegacyContinuityRequired");
+  await rejectsHeart(heart.connect(user).heartbeatClaim.staticCall(),heart,"LegacyContinuityRequired");
+  await moveToNextUtcDay(context,1);
+  await rejectsHeart(heart.connect(user).igniteAndClaim.staticCall(),heart,"LegacyContinuityRequired");
+  assert.equal(await context.kgen.balanceOf(address),0n);
+});
+
+test("legacy onchain Fortune reads live history and enforces max legacy/new cooldown without consuming blocked proofs", async () => {
+  const context = await setupLineage();
+  const {heart} = await deployTempleHeart(context);
+  const legacy = await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
+  await (await heart.bindLegacyContinuity(await legacy.getAddress())).wait();
+  const user = context.signers[2], address = await user.getAddress();
+  await mintKaiosByBurningKgen(context,2n*ETHER);
+  await (await context.kgen.transfer(await heart.getAddress(),21000n*ETHER)).wait();
+  const civ=id("LEGACY-FORTUNE-CIV"), wish=id("LEGACY-FORTUNE-WISH");
+  await makeWishAndHolyCup(context,heart,user,civ,wish,"LEGACY-FORTUNE-1");
+  const proof = await createFortuneProof(context,heart,user,civ,wish,"LEGACY-FORTUNE-1");
+  const cooldown = await heart.fortuneCooldownSeconds();
+  const before = await heart.nextFortuneEligibility(address);
+  assert.equal(before.eligible,true);
+  // A claim made at the still-live old Heart AFTER binding must be observed;
+  // deployment-time snapshots are insufficient for this migration policy.
+  const oldClaim=BigInt(await latestTimestamp(context));
+  await (await legacy.setHistory(address,oldClaim,0,0)).wait();
+  assert.equal((await heart.nextFortuneEligibility(address)).cooldownEndsAt,oldClaim+cooldown);
+  await rejectsHeart(heart.connect(user).fortuneClaim.staticCall(proof),heart,"FortuneCooldown");
+  assert.equal(await heart.fortuneBurnProofConsumed(proof),false);
+  assert.equal(await heart.totalFortuneClaimants(),0n);
+  await setTimeRaw(context,Number(oldClaim+cooldown-1n));
+  await rejectsHeart(heart.connect(user).fortuneClaim.staticCall(proof),heart,"FortuneCooldown");
+  await setTimeRaw(context,Number(oldClaim+cooldown));
+  // Re-select the same civilization and obtain a new signed Holy Cup proof;
+  // neither interaction is permitted to reset the production cooldown.
+  await makeWishAndHolyCup(context,heart,user,civ,wish,"LEGACY-FORTUNE-2");
+  await (await heart.connect(user).fortuneClaim(proof,{gasLimit:900000})).wait();
+  const newClaim = await heart.lastFortuneAt(address);
+  let eligibility = await heart.nextFortuneEligibility(address);
+  assert.equal(eligibility.cooldownEndsAt,newClaim+cooldown);
+  assert.equal(eligibility.repaymentSatisfied,false);
+  await (await context.kgen.connect(user).approve(await heart.getAddress(),ETHER)).wait();
+  await (await heart.connect(user).voluntaryRepayFortune(ETHER)).wait();
+  eligibility=await heart.nextFortuneEligibility(address);
+  assert.equal(eligibility.repaymentSatisfied,true);
+  assert.equal(eligibility.eligible,false);
+  const newerLegacy=newClaim+100n;
+  await setTimeRaw(context,Number(newerLegacy));
+  await (await legacy.setHistory(address,newerLegacy,0,0)).wait();
+  assert.equal((await heart.nextFortuneEligibility(address)).cooldownEndsAt,newerLegacy+cooldown);
+});
+
+test("legacy onchain Heartbeat cooldown survives civilization switching and unlocks at its boundary", async () => {
+  const context = await setupLineage();
+  const {heart}=await deployTempleHeart(context);
+  const legacy=await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
+  await (await heart.bindLegacyContinuity(await legacy.getAddress())).wait();
+  const user=context.signers[2],address=await user.getAddress();
+  await (await context.kgen.transfer(await heart.getAddress(),21000n*ETHER)).wait();
+  await (await heart.connect(user).makeWish(id("LEGACY-HB-WISH"),id("LEGACY-HB-CIV"))).wait();
+  const oldClaim=await latestTimestamp(context),cooldown=Number(await heart.heartbeatCooldownSeconds());
+  await (await legacy.setHistory(address,0,oldClaim,0)).wait();
+  await rejectsHeart(heart.connect(user).heartbeatClaim.staticCall(),heart,"HeartbeatCooldown");
+  await (await heart.connect(user).makeWish(id("LEGACY-HB-NEW-WISH"),id("LEGACY-HB-NEW-CIV"))).wait();
+  await rejectsHeart(heart.connect(user).heartbeat.staticCall(),heart,"HeartbeatCooldown");
+  await setTimeRaw(context,oldClaim+cooldown-1);
+  await rejectsHeart(heart.connect(user).heartbeatClaim.staticCall(),heart,"HeartbeatCooldown");
+  await setTimeRaw(context,oldClaim+cooldown);
+  await (await heart.connect(user).heartbeatClaim({gasLimit:600000})).wait();
+  assert.equal(await context.kgen.balanceOf(address),ETHER);
+  assert.equal(await heart.totalHeartbeats(),1n);
+  await rejectsHeart(heart.connect(user).heartbeat.staticCall(),heart,"HeartbeatCooldown");
+});
+
+test("legacy onchain Ignite blocks same-day claim across civilizations and allows the next UTC window", async () => {
+  const context=await setupLineage();
+  const {heart}=await deployTempleHeart(context);
+  const legacy=await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
+  await (await heart.bindLegacyContinuity(await legacy.getAddress())).wait();
+  const user=context.signers[2],address=await user.getAddress();
+  await (await context.kgen.transfer(await heart.getAddress(),21000n*ETHER)).wait();
+  await (await heart.connect(user).makeWish(id("LEGACY-IGNITE-WISH"),id("LEGACY-IGNITE-CIV"))).wait();
+  const start=await moveToNextUtcDay(context,1),day=BigInt(Math.floor(start/86400));
+  await (await legacy.setHistory(address,0,0,day)).wait();
+  await rejectsHeart(heart.connect(user).igniteAndClaim.staticCall(),heart,"BreathAlreadyTaken");
+  await (await heart.connect(user).makeWish(id("LEGACY-IGNITE-NEW-WISH"),id("LEGACY-IGNITE-NEW-CIV"))).wait();
+  await rejectsHeart(heart.connect(user).crossDayBreath.staticCall(),heart,"BreathAlreadyTaken");
+  assert.equal(await heart.igniteDayClaims(day),0n);
+  await setTimeRaw(context,start+86401);
+  await (await heart.connect(user).igniteAndClaim({gasLimit:600000})).wait();
+  assert.equal(await context.kgen.balanceOf(address),8n*ETHER);
+  assert.equal(await heart.igniteDayClaims(day+1n),1n);
+  await rejectsHeart(heart.connect(user).crossDayBreath.staticCall(),heart,"BreathAlreadyTaken");
+});
+
+test("legacy onchain read failure is fail-closed for all rewards and eligibility without counter or proof mutation", async () => {
+  const context=await setupLineage();
+  const {heart}=await deployTempleHeart(context);
+  const legacy=await deploy("MockLegacyHeart",context.owner,[await context.kgen.getAddress()]);
+  await (await heart.bindLegacyContinuity(await legacy.getAddress())).wait();
+  const user=context.signers[2],address=await user.getAddress();
+  await mintKaiosByBurningKgen(context,2n*ETHER);
+  await (await context.kgen.transfer(await heart.getAddress(),21000n*ETHER)).wait();
+  const civ=id("LEGACY-FAIL-CIV"),wish=id("LEGACY-FAIL-WISH");
+  await makeWishAndHolyCup(context,heart,user,civ,wish,"LEGACY-FAIL");
+  const proof=await createFortuneProof(context,heart,user,civ,wish,"LEGACY-FAIL");
+  await assert.rejects(legacy.connect(user).setReadFailure.staticCall(true));
+  await (await legacy.setReadFailure(true)).wait();
+  await moveToNextUtcDay(context,1);
+  for(const call of [()=>heart.nextFortuneEligibility(address),()=>heart.connect(user).fortuneClaim.staticCall(proof),
+    ()=>heart.connect(user).heartbeatClaim.staticCall(),()=>heart.connect(user).igniteAndClaim.staticCall()]) {
+    await rejectsHeart(call(),legacy,"LegacyReadUnavailable");
+  }
+  assert.equal(await heart.fortuneBurnProofConsumed(proof),false);
+  assert.equal(await heart.totalFortuneClaimants(),0n);
+  assert.equal(await heart.totalHeartbeats(),0n);
+  assert.equal(await heart.totalIgnites(),0n);
+  assert.equal(await context.kgen.balanceOf(address),0n);
+  await (await legacy.setReadFailure(false)).wait();
+  assert.equal((await heart.nextFortuneEligibility(address)).eligible,true);
+  await (await heart.connect(user).heartbeatClaim()).wait();
+  assert.equal(await heart.totalHeartbeats(),1n);
+});
 
 async function setUintMappingValue(context, heart, mappingLabel, key, value) {
   const compiled = artifact("KGEN_TempleHeart_Upgradeable");

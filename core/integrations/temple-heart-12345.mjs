@@ -12,6 +12,15 @@ export const TEMPLE_HEART_V34_ABI = Object.freeze([
   "function organRegistry() view returns (address)",
   "function kaiosAlchemyProofSource() view returns (address)",
   "function fortuneGame() view returns (address)",
+  "function legacyHeart() view returns (address)",
+  "function activeWish(address) view returns (tuple(bytes32 wishHash,bytes32 civilizationId,uint64 createdAt,uint64 updatedAt,uint8 status))",
+  "function fortuneLedger(address) view returns (tuple(uint256 totalClaimed,uint256 totalVoluntaryRepaid,uint256 lastClaimAmount,uint256 lastClaimAt,uint256 lastVoluntaryRepaymentAmount,uint256 lastVoluntaryRepaymentAt,uint64 claimCount,uint64 repaymentCount,bool repaidAfterLastClaim))",
+  "function heartbeatCooldownSeconds() view returns (uint256)",
+  "function lastHeartbeatAt(address) view returns (uint256)",
+  "function lastBreathDay(address) view returns (uint256)",
+  "function fortuneBurnProofConsumed(bytes32) view returns (bool)",
+  "function holyCupProofConsumed(bytes32) view returns (bool)",
+  "function paused() view returns (bool)",
   "function fortuneMaxWhole() view returns (uint256)",
   "function fortuneEpochMaxClaims() view returns (uint256)",
   "function nextFortuneEligibility(address) view returns (bool eligible,bool repaymentSatisfied,uint256 cooldownEndsAt)",
@@ -21,7 +30,8 @@ export const TEMPLE_HEART_V34_ABI = Object.freeze([
   "function fortuneClaim(bytes32 proofId)",
   "function voluntaryRepayFortune(uint256 amount)",
   "function heartbeatClaim()",
-  "function igniteAndClaim()"
+  "function igniteAndClaim()",
+  ...["LegacyContinuityRequired","InvalidRange","InvalidWish","InvalidCivilization","InvalidAlchemyProof","ProofAlreadyConsumed","HolyCupProofAlreadyConsumed","WishNotReady","FortuneCooldown","CivilizationCooldown","FortuneEpochFull","HeartInsufficientFunds","BurnTooSmall","PurposeMismatch","BurnerMismatch","BeneficiaryMismatch","CivilizationMismatch","KUFOAmountMismatch","InvalidProofSigner","ProofExpired","HeartbeatCooldown","BreathAlreadyTaken","InvalidOfferingType","OrganRegistryNotSet","CanonicalTreasuryNotSet","HeartbeatHourFull","IgniteWindowClosed","IgniteDayFull","RepaymentRequired"].map(name=>`error ${name}()`)
 ]);
 const HEART_IMPLEMENTATION_SLOT = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 const HEART_ZERO = "0x0000000000000000000000000000000000000000";
@@ -47,7 +57,7 @@ export async function verifyTempleHeartCandidate({ ethers, provider, manifest })
   const utils = ethers.utils ?? ethers;
   const network = await provider.getNetwork();
   invariant(Number(network.chainId) === 97, "BSC97_REQUIRED");
-  for (const key of ["proxy", "implementation", "kgen", "registry", "proofSource"]) {
+  for (const key of ["proxy", "implementation", "kgen", "registry", "proofSource", "legacyHeart"]) {
     invariant(utils.isAddress(manifest[key]) && manifest[key].toLowerCase() !== HEART_ZERO, "INVALID_MANIFEST_ADDRESS");
   }
   const block = await provider.getBlock("latest"), tag = block.number;
@@ -62,7 +72,7 @@ export async function verifyTempleHeartCandidate({ ethers, provider, manifest })
   const contract = new ethers.Contract(manifest.proxy, TEMPLE_HEART_V34_ABI, provider);
   const read = {blockTag:tag};
   invariant(await contract.version(read) === "3.4.0", "VERSION_MISMATCH");
-  for (const [getter,key] of [["kgen","kgen"],["organRegistry","registry"],["kaiosAlchemyProofSource","proofSource"]]) {
+  for (const [getter,key] of [["kgen","kgen"],["organRegistry","registry"],["kaiosAlchemyProofSource","proofSource"],["legacyHeart","legacyHeart"]]) {
     invariant((await contract[getter](read)).toLowerCase() === manifest[key].toLowerCase(), "BINDING_MISMATCH");
   }
   invariant((await contract.fortuneGame(read)).toLowerCase() === HEART_ZERO, "FORTUNEGAME_133_HOLD");

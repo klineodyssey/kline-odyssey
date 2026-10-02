@@ -2,7 +2,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
-import {Interface, parseUnits, id as selectorId, AbiCoder} from 'ethers';
+import * as ethers6 from 'ethers';
+import {Interface, parseUnits, id as selectorId, AbiCoder, keccak256} from 'ethers';
+import {TEMPLE_HEART_V34_ABI, verifyTempleHeartCandidate} from '../core/integrations/temple-heart-12345.mjs';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const OUT='artifacts/kaios-portal-qa';await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,args:['--autoplay-policy=user-gesture-required']});
@@ -10,6 +12,349 @@ const reports=[];
 const preservation=process.argv.includes('--preservation');
 const heartOnly=process.argv.includes('--heart-only');
 const walletOnly=process.argv.includes('--wallet-only');
+const v34Only=process.argv.includes('--v34-only');
+const v34Live=process.argv.includes('--v34-live');
+async function liveHeartV34QA(){
+ // Only an explicitly requested local TESTNET rehearsal can use the already
+ // configured TEST signer. The key stays in Node, never browser/RPC/log/artifact.
+ assert.equal(process.env.BSC_TESTNET_BROWSER_EXECUTE,'BSC97_FRESH_UI_ONLY');
+ const source=JSON.parse(await fs.readFile('KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json','utf8')).cleanRehearsal;
+ const manifest=source.frontendManifest;
+ const provider=new ethers6.JsonRpcProvider(process.env.BSC_TESTNET_RPC_URL);
+ provider.pollingInterval=1000;
+ const signer=new ethers6.Wallet(process.env.BSC_TESTNET_PRIVATE_KEY,provider);
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ const page=await context.newPage(),output=`${OUT}/heart-v34-live-report.json`;
+ let evidence;try{evidence=JSON.parse(await fs.readFile(output,'utf8'));}catch{evidence={status:'RUNNING',chainId:97,proxy:manifest.proxy,signer:signer.address,transactions:{},mainnetTransactionsSent:0,physicalMetaMask:'NOT_USED_CONTROLLED_TEST_SIGNER'};}
+ const persist=()=>fs.writeFile(output,JSON.stringify(evidence,null,2));
+ const requireTest=async()=>{
+  if(Number(await provider.send('eth_chainId',[]))!==97 || manifest.chainId!==97 || signer.address!==source.publicSigner || evidence.proxy!==manifest.proxy)throw Error('LIVE_TEST_IDENTITY_MISMATCH');
+  await verifyTempleHeartCandidate({ethers:ethers6,provider,manifest});
+ };
+ const budget=ethers6.parseEther('0.01');
+ const send=async(label,to,data)=>{
+  await requireTest();
+  if(![manifest.proxy,manifest.kgen,manifest.proofSource,manifest.furnace].some(a=>a.toLowerCase()===to.toLowerCase()))throw Error('LIVE_TARGET_FORBIDDEN');
+  const dataHash=keccak256(data),old=evidence.transactions[label];
+  if(old){
+   if(old.dataHash!==dataHash||old.to!==to)throw Error('LIVE_RESUME_IDENTITY_MISMATCH');
+   const receipt=await provider.getTransactionReceipt(old.hash);if(!receipt||receipt.status!==1)throw Error('LIVE_UNCERTAIN_STOP_NO_RESEND');return receipt;
+  }
+  const gasPrice=(await provider.getFeeData()).gasPrice;
+  const gasLimit=(await provider.estimateGas({from:signer.address,to,data,value:0}))*12n/10n+10000n;
+  if(!gasPrice||gasPrice>1000000000n||gasLimit>1500000n)throw Error('LIVE_GAS_CAP');
+  const spent=Object.values(evidence.transactions).reduce((n,t)=>n+BigInt(t.feeWei||0),0n);
+  if(spent+gasPrice*gasLimit>budget)throw Error('LIVE_TOTAL_TEST_GAS_CAP');
+  const nonce=await provider.getTransactionCount(signer.address,'pending');
+  const raw=await signer.signTransaction({to,data,value:0,chainId:97,nonce,gasPrice,gasLimit,type:0});
+  const hash=keccak256(raw);evidence.transactions[label]={to,dataHash,nonce,hash,status:'INTENT'};await persist();
+  const tx=await provider.broadcastTransaction(raw);const receipt=await tx.wait();
+  if(receipt.status!==1)throw Error('LIVE_RECEIPT_FAILED');
+  Object.assign(evidence.transactions[label],{status:'CONFIRMED',blockNumber:receipt.blockNumber,feeWei:String(receipt.gasUsed*receipt.gasPrice)});await persist();return receipt;
+ };
+ const iface=new Interface(TEMPLE_HEART_V34_ABI);
+ let expected=null;
+ const reads=new Set(['eth_chainId','net_version','eth_blockNumber','eth_call','eth_getBalance','eth_getCode','eth_getStorageAt','eth_getBlockByNumber','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getTransactionCount','eth_gasPrice','eth_estimateGas','eth_feeHistory']);
+ const rpc=async q=>{
+  if(q.method==='eth_accounts'||q.method==='eth_requestAccounts')return[signer.address];
+  if(q.method==='eth_sendTransaction'){
+   const tx=q.params?.[0];
+   if(!expected||tx.from?.toLowerCase()!==signer.address.toLowerCase()||tx.to?.toLowerCase()!==expected.to.toLowerCase()||tx.data!==expected.data||BigInt(tx.value||0)!==0n)throw Error('LIVE_UNEXPECTED_CALLDATA');
+   const receipt=await send(expected.label,expected.to,expected.data);return receipt.hash;
+  }
+  if(!reads.has(q.method))throw Error('LIVE_METHOD_FORBIDDEN');
+  try{return await provider.send(q.method,q.params||[]);}catch(error){
+   let data=error.data??error.info?.error?.data;if(typeof data==='object')data=data?.data??data?.result;
+   let parsed;try{parsed=iface.parseError(data);}catch{}
+   throw Error(parsed?.name||'LIVE_READ_FAILED');
+  }
+ };
+ try{
+  await requireTest();
+  const wishHash=selectorId('KAIOS V34 controlled browser TEST wish '+manifest.proxy),civilizationId=selectorId('KAIOS V34 controlled browser TEST civilization '+manifest.proxy);
+  evidence.deadline??=(await provider.getBlock('latest')).timestamp+86400;await persist();
+  const proofId=selectorId('KAIOS V34 controlled browser TEST cup '+manifest.proxy);
+  const signature=await signer.signTypedData({name:'KGEN TempleHeart 12345',version:'3.4.0',chainId:97,verifyingContract:manifest.proxy},{HolyCupProof:[{name:'claimant',type:'address'},{name:'civilizationId',type:'bytes32'},{name:'wishHash',type:'bytes32'},{name:'proofId',type:'bytes32'},{name:'deadline',type:'uint256'}]},{claimant:signer.address,civilizationId,wishHash,proofId,deadline:evidence.deadline});
+  await page.exposeFunction('__testRpc',rpc);
+  await page.addInitScript(()=>{window.ethereum={isMetaMask:true,request:q=>window.__testRpc(q),on:()=>{},removeListener:()=>{}};});
+  await context.route('**/*',async route=>{
+   if(route.request().method()!=='POST')return route.continue();
+   let q;try{q=route.request().postDataJSON();}catch{return route.continue();}
+   if(!q?.method&&!Array.isArray(q))return route.continue();
+   const respond=async item=>{try{return{jsonrpc:'2.0',id:item.id,result:await rpc(item)};}catch{return{jsonrpc:'2.0',id:item.id,error:{code:-32000,message:'TESTNET_READ_UNAVAILABLE'}};}};
+   await route.fulfill({json:Array.isArray(q)?await Promise.all(q.map(respond)):await respond(q)});
+  });
+  page.on('dialog',async d=>{if(d.type()==='confirm'&&expected)await d.accept();else await d.dismiss();});
+  await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?heart=v34-testnet',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>KGEN_RUNTIME_CORE?.modules.HeartRuntime.candidate);
+  await page.evaluate(()=>web3.smartConnect());
+  await page.locator('#kgen-v30-wish-btn').tap();
+  await page.locator('#kh-wish-text').fill(wishHash);await page.locator('#kh-v34-civilization').fill(civilizationId);
+  const press=async(id,name,args,feedback,suffix='')=>{
+   const label='BROWSER_'+name+suffix;
+   expected={label,to:manifest.proxy,data:iface.encodeFunctionData(name,args)};
+   if(evidence.transactions[label]){await send(label,expected.to,expected.data);expected=null;return;}
+   await page.locator('#'+id).scrollIntoViewIfNeeded();await page.locator('#'+id).tap();
+   await page.waitForFunction(({id,feedback})=>!document.getElementById(id).dataset.heartPending&&/成功：|失敗：|已取消/.test(document.getElementById(feedback).textContent),{id,feedback},{timeout:60000});
+   assert.match(await page.locator('#'+feedback).innerText(),/成功：/);
+   assert.equal(evidence.transactions[label]?.status,'CONFIRMED');expected=null;
+  };
+  await press('kh-wishbtn','makeWish',[wishHash,civilizationId],'kh-wish-feedback');
+  await page.locator('#kh-v34-cup-proof').fill(JSON.stringify({proofId,civilizationId,wishHash,deadline:evidence.deadline,signature}));
+  await press('kh-v34-submit-cup','submitHolyCupProof',[proofId,civilizationId,wishHash,evidence.deadline,signature],'kh-v34-feedback');
+  const token=new Interface(['function approve(address,uint256) returns(bool)']);
+  const furnace=new Interface(['function burnForKufo(uint256,address,bytes32,bytes32)','event AlchemyProofCreated(bytes32 indexed proofId,address indexed owner,address indexed beneficiary,uint256 kaiosBurned,uint256 expectedKufo,bytes32 lifeId,bytes32 destinationCode)']);
+  await send('BROWSER_KAIOS_APPROVE',manifest.proofSource,token.encodeFunctionData('approve',[manifest.furnace,parseUnits('1',18)]));
+  const heart=new ethers6.Contract(manifest.proxy,['function fortunePurposeCode() view returns(bytes32)','function alchemyDestinationCode(bytes32,bytes32) pure returns(bytes32)'],provider);
+  const destination=await heart.alchemyDestinationCode(await heart.fortunePurposeCode(),wishHash);
+  const receipt=await send('BROWSER_ALCHEMY',manifest.furnace,furnace.encodeFunctionData('burnForKufo',[parseUnits('1',18),signer.address,civilizationId,destination]));
+  // Canonical compiled Furnace ABI, not an invented event shape.
+  const artifact=JSON.parse(await fs.readFile('KGEN-KAIOS/artifacts/KAIOSAlchemyFurnace.json','utf8'));
+  const proofABI=new Interface(artifact.abi);let alchemyProof;
+  for(const log of receipt.logs){try{const p=proofABI.parseLog(log);if(p?.name==='AlchemyProofCreated')alchemyProof=p.args.proofId;}catch{}}
+  assert.ok(alchemyProof);await page.locator('#kh-v34-alchemy-proof').fill(alchemyProof);
+  await press('kh-fortune','fortuneClaim',[alchemyProof],'kh-v34-feedback');
+  // Read RepaymentRequired after the real payout; never send a knowingly failing transaction.
+  await page.locator('#kh-fortune').tap();await page.waitForFunction(()=>document.getElementById('kh-v34-feedback').textContent.includes('失敗'));
+  await page.locator('#kh-vow-amount').fill('1');
+  await send('BROWSER_REPAY_APPROVE',manifest.kgen,token.encodeFunctionData('approve',[manifest.proxy,parseUnits('1',18)]));
+  await press('kh-vow','voluntaryRepayFortune',[parseUnits('1',18)],'kh-vow-feedback');
+  // Fulfilled wishes cannot claim Heartbeat. Start a new genuine wish rather
+  // than changing contract policy or fabricating an active state.
+  const nextWish=selectorId('NEXT '+wishHash);await page.locator('#kh-wish-text').fill(nextWish);
+  await press('kh-wishbtn','makeWish',[nextWish,civilizationId],'kh-wish-feedback','_NEXT');
+  await press('kh-heartbeat','heartbeatClaim',[],'kh-v34-feedback');
+  await page.screenshot({path:`${OUT}/heart-v34-live-390.png`});
+  if(evidence.failureCode){ evidence.priorAttemptFailure=evidence.failureCode;delete evidence.failureCode; }
+  evidence.status='PASS_REAL_BSC97_UI_CORE';evidence.scope='WISH_HOLYCUP_ALCHEMY_FORTUNE_REPAY_HEARTBEAT_REAL_RECEIPTS';evidence.ignite='SEPARATE_REAL_UTC_WINDOW';
+  evidence.addressDisplay=await page.locator('#kh-wallet').innerText();await persist();reports.push(evidence);
+ }catch(error){
+  evidence.status='STOPPED';evidence.failureCode=/^LIVE_/.test(error.message||'')?error.message:'LIVE_UI_CHECK_FAILED';await persist();await page.screenshot({path:`${OUT}/heart-v34-live-FAIL.png`});
+  throw Error(evidence.failureCode); // Do not serialize authenticated RPC errors.
+ }finally{await context.close();await provider.destroy();}
+}
+async function heartV34QA(){
+ const address=n=>'0x'+n.toString(16).padStart(40,'0');
+ const roles=Object.fromEntries(['DEFAULT_ADMIN_ROLE','UPGRADER_ROLE','OPERATOR_ROLE','HOLY_CUP_SIGNER_ROLE'].map((r,i)=>[r,address(20+i)]));
+ const manifest={chainId:97,proxy:address(10),implementation:address(11),kgen:address(12),registry:address(13),proofSource:address(14),legacyHeart:address(15),roles,proxyCodeHash:keccak256('0x6001'),implementationCodeHash:keccak256('0x6002')};
+ const abi=new Interface([...TEMPLE_HEART_V34_ABI,'function decimals() view returns(uint8)','function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)','function approve(address,uint256) returns(bool)']);
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ const page=await context.newPage();let broadcasts=0,reject=false,manifestPresent=true,confirmMutation=null;
+ const fixture={account:address(1),authorized:true,chain:'0x61',repayment:false,claimed:false,binding:manifest.legacyHeart,switchTo:null,lateSwitchTo:null};
+ const calls=[],walletRequests=[];
+ const reply=q=>{
+  if(/sendTransaction|sendRawTransaction|sign|wallet_/i.test(q.method)){broadcasts++;throw Error('NO_BROADCAST');}
+  let result='0x0';const timestamp=1790959101;
+  if(q.method==='eth_chainId')result='0x61';
+  if(q.method==='net_version')result='97';
+  if(q.method==='eth_accounts')result=[fixture.account];
+  if(q.method==='eth_blockNumber')result='0x100';
+  if(q.method==='eth_getBalance')result='0xde0b6b3a7640000';
+  if(q.method==='eth_getStorageAt')result='0x'+manifest.implementation.slice(2).padStart(64,'0');
+  if(q.method==='eth_getCode')result=q.params[0].toLowerCase()===manifest.proxy.toLowerCase()?'0x6001':'0x6002';
+  if(q.method==='eth_getBlockByNumber')result={hash:'0x'+'22'.repeat(32),parentHash:'0x'+'11'.repeat(32),number:'0x100',timestamp:'0x'+timestamp.toString(16),nonce:'0x0000000000000000',difficulty:'0x0',gasLimit:'0x1c9c380',gasUsed:'0x0',miner:address(0),extraData:'0x',transactions:[]};
+  if(q.method==='eth_call'){
+   let d;try{d=abi.parseTransaction({data:q.params[0].data});}catch{}
+   if(d){
+    // Simulate a wallet that delays/omits accountsChanged while the final
+    // identity role read is in flight, AFTER the Human confirmation gate.
+    if(d.name==='hasRole'&&d.args[0]===selectorId('HOLY_CUP_SIGNER_ROLE')&&fixture.lateSwitchTo){fixture.account=fixture.lateSwitchTo;fixture.lateSwitchTo=null;}
+    const values={version:'3.4.0',hasRole:true,kgen:manifest.kgen,organRegistry:manifest.registry,kaiosAlchemyProofSource:manifest.proofSource,legacyHeart:fixture.binding,fortuneGame:address(0),fortuneMaxWhole:8,fortuneEpochMaxClaims:500,decimals:18,balanceOf:parseUnits('22000',18),allowance:parseUnits('100',18),paused:false,heartbeatCooldownSeconds:3600,lastHeartbeatAt:0,lastBreathDay:0,fortuneBurnProofConsumed:false,holyCupProofConsumed:false,
+     activeWish:[selectorId('wish'),selectorId('civilization'),timestamp,timestamp,2],fortuneLedger:[8,1,8,timestamp,1,timestamp,fixture.claimed?1:0,fixture.repayment?1:0,fixture.repayment]};
+    if(d.name==='nextFortuneEligibility')result=abi.encodeFunctionResult(d.name,[!fixture.claimed,fixture.repayment||!fixture.claimed,timestamp+(fixture.claimed?2592000:0)]);
+    else if(d.fragment.stateMutability==='view')result=abi.encodeFunctionResult(d.name,[values[d.name]]);
+    else {
+     calls.push({name:d.name,args:Array.from(d.args).map(String)});
+     if(d.name==='fortuneClaim'&&fixture.claimed&&!fixture.repayment)return {jsonrpc:'2.0',id:q.id,error:{code:3,message:'RepaymentRequired',data:selectorId('RepaymentRequired()').slice(0,10)}};
+     result='0x';
+    }
+   }else result='0x'+'0'.repeat(64);
+  }
+  return {jsonrpc:'2.0',id:q.id,result};
+ };
+ await context.route('**/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json',route=>route.fulfill({json:manifestPresent?{cleanRehearsal:{frontendManifest:manifest}}:{}}));
+ await context.route('**/*',async route=>{
+  if(route.request().method()!=='POST')return route.fallback();
+  let q;try{q=route.request().postDataJSON();}catch{return route.fallback();}
+  if(!q?.method&&!Array.isArray(q))return route.fallback();
+  await route.fulfill({json:Array.isArray(q)?q.map(reply):reply(q)});
+ });
+ await page.exposeFunction('__v34Rpc',async q=>{
+  walletRequests.push({method:q.method,params:q.params});
+  if(q.method==='eth_chainId')return fixture.chain;
+  if(q.method==='eth_accounts')return fixture.authorized?[fixture.account]:[];
+  if(q.method==='eth_requestAccounts'){fixture.authorized=true;return[fixture.account];}
+  if(q.method==='wallet_requestPermissions'){
+   if(fixture.switchTo){fixture.account=fixture.switchTo;fixture.switchTo=null;}
+   return[{parentCapability:'eth_accounts'}];
+  }
+  // A refused switch is simulated locally. No wallet or chain write is sent.
+  if(q.method==='wallet_switchEthereumChain')throw Error('QA_CHAIN_SWITCH_REJECTED');
+  const r=reply(q);if(r.error)throw Error(r.error.message);return r.result;
+ });
+ await page.addInitScript(()=>{
+  const handlers=new Map();
+  window.ethereum={isMetaMask:true,request:q=>window.__v34Rpc(q),
+   on:(name,fn)=>{if(!handlers.has(name))handlers.set(name,new Set());handlers.get(name).add(fn);},
+   removeListener:(name,fn)=>handlers.get(name)?.delete(fn)};
+  window.__v34Emit=(name,value)=>{for(const fn of handlers.get(name)||[])fn(value);};
+ });
+ page.on('dialog',async dialog=>{
+  if(confirmMutation){Object.assign(fixture,confirmMutation);confirmMutation=null;}
+  if(reject)await dialog.dismiss();else await dialog.accept();
+ });
+ const installBoundaryStub=()=>page.evaluate(()=>{
+  window.__v34Tx=[];
+  ethers.providers.JsonRpcSigner.prototype.sendTransaction=async function(tx){
+   window.__v34Tx.push({to:tx.to,data:tx.data});
+   return{hash:'0x'+'33'.repeat(32),wait:async()=>{
+    if(window.__v34HoldReceipt)await new Promise(resolve=>{window.__v34ReleaseReceipt=resolve;});
+    return{blockNumber:257,status:1,logs:[],transactionHash:'0x'+'33'.repeat(32)};
+   }};
+  };
+ });
+ try{
+  await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html?heart=v34-testnet',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.KGEN_RUNTIME_CORE?.modules.HeartRuntime.candidate,{timeout:30000});
+  await installBoundaryStub();
+  assert.equal(await page.evaluate(()=>web3.smartConnect()),true,'original smartConnect delegates to candidate WalletRuntime');
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.HeartRuntime.state.chainId),'0x61');
+  assert.notEqual((await page.evaluate(()=>web3.UNIVERSE)).toLowerCase(),manifest.proxy.toLowerCase(),'TEST proxy never poisons legacy web3 target');
+  assert.equal(await page.evaluate(()=>{try{web3.cUNI();return false;}catch{return true;}}),true,'legacy financial contract factory blocked in TEST mode');
+  assert.equal(await page.evaluate(()=>{try{web3.cKGEN();return false;}catch{return true;}}),true,'legacy token factory blocked in TEST mode');
+  const noPromptSince=start=>assert.deepEqual(walletRequests.slice(start).filter(q=>q.method==='eth_requestAccounts'||q.method.startsWith('wallet_')),[],'passive/background only reads; never prompts or switches chains');
+  let passiveStart=walletRequests.length;
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.WalletRuntime.connect({passive:true})),true);
+  noPromptSince(passiveStart);
+  fixture.chain='0x38';passiveStart=walletRequests.length;
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.WalletRuntime.connect({passive:true})),false,'passive candidate cannot accept Mainnet');
+  noPromptSince(passiveStart);
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.HeartRuntime.state.signer),null);
+  fixture.chain='0x61';fixture.authorized=false;passiveStart=walletRequests.length;
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.WalletRuntime.connect({passive:true})),false,'passive cannot request missing wallet permission');
+  noPromptSince(passiveStart);
+  fixture.authorized=true;await page.evaluate(()=>web3.smartConnect());
+  passiveStart=walletRequests.length;
+  await page.evaluate(()=>{
+   Object.defineProperty(document,'visibilityState',{configurable:true,value:'hidden'});
+   document.dispatchEvent(new Event('visibilitychange'));
+   Object.defineProperty(document,'visibilityState',{configurable:true,value:'visible'});
+   document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForFunction(()=>!KGEN_RUNTIME_CORE.modules.WalletRuntime._resuming);
+  await page.evaluate(()=>{
+   dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));
+   dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));
+  });
+  await page.waitForFunction(()=>!KGEN_RUNTIME_CORE.modules.WalletRuntime._resuming);
+  noPromptSince(passiveStart);
+  assert.ok((await page.locator('#kh-wallet').innerText()).includes(fixture.account));
+  const binanceLink=await page.evaluate(async()=>{
+   // Use the real routing decision but social-browser refusal before external
+   // navigation; no installed wallet or protocol handler is ever launched.
+   const runtime=KGEN_RUNTIME_CORE.modules.WalletRuntime,eth=window.ethereum,social=runtime.isSocialInAppBrowser;
+   try{window.ethereum=undefined;runtime.isSocialInAppBrowser=()=>true;await runtime.walletDeepLink('binance');return KGEN_WALLET_DEBUG.state.lastDeeplink;}
+   finally{window.ethereum=eth;runtime.isSocialInAppBrowser=social;runtime.closeWalletHub();}
+  });
+  const binanceTarget=new URL(new URL(binanceLink).searchParams.get('url'));
+  assert.equal(binanceTarget.searchParams.get('heart'),'v34-testnet');
+  assert.equal(binanceTarget.searchParams.get('autoconnect'),'1');
+  assert.ok(decodeURIComponent(binanceTarget.pathname).endsWith('/K線西遊記/temples/12345/index.html'));
+  await page.locator('#kgen-v30-wish-btn').tap();
+  await page.locator('#kh-wish-text').fill('世界平安');
+  await page.locator('#kh-v34-civilization').fill(selectorId('civilization'));
+  const press=async(id,name)=>{
+   const before=await page.evaluate(()=>__v34Tx.length);
+   await page.locator('#'+id).scrollIntoViewIfNeeded();await page.locator('#'+id).tap();
+   await page.waitForFunction(n=>window.__v34Tx.length===n+1,before);
+   await page.waitForFunction(id=>document.getElementById(id).dataset.heartPending!=='1',id);
+   const tx=await page.evaluate(()=>__v34Tx.at(-1));assert.equal(tx.to.toLowerCase(),manifest.proxy.toLowerCase());
+   const decoded=abi.parseTransaction(tx);assert.equal(decoded.name,name);return decoded;
+  };
+  const wish=await press('kh-wishbtn','makeWish');assert.equal(wish.args[0],selectorId('世界平安'));assert.equal(wish.args[1],selectorId('civilization'));
+  await page.locator('#kh-v34-cup-proof').fill(JSON.stringify({proofId:selectorId('cup'),civilizationId:selectorId('civilization'),wishHash:selectorId('世界平安'),deadline:1790962701,signature:'0x'+'11'.repeat(65)}));
+  await press('kh-v34-submit-cup','submitHolyCupProof');
+  await page.locator('#kh-v34-alchemy-proof').fill(selectorId('alchemy'));
+  await press('kh-v34-offering','recordBurnOffering');
+  await press('kh-fortune','fortuneClaim');fixture.claimed=true;
+  const before=await page.evaluate(()=>__v34Tx.length);
+  await page.locator('#kh-fortune').tap();await page.waitForFunction(()=>document.getElementById('kh-v34-feedback').textContent.includes('失敗'));
+  assert.equal(await page.evaluate(()=>__v34Tx.length),before,'RepaymentRequired must prevent send');
+  await page.locator('#kh-vow-amount').fill('9');const repay=await press('kh-vow','voluntaryRepayFortune');assert.equal(repay.args[0],parseUnits('9',18));fixture.repayment=true;
+  await press('kh-heartbeat','heartbeatClaim');await press('kh-ignite','igniteAndClaim');
+  reject=true;await page.locator('#kh-wishbtn').tap();await page.waitForFunction(()=>document.getElementById('kh-wish-feedback').textContent.includes('已取消'));reject=false;
+  fixture.binding=address(19);await page.locator('#kh-wishbtn').tap();await page.waitForFunction(()=>document.getElementById('kh-wish-feedback').textContent.includes('失敗'));fixture.binding=manifest.legacyHeart;
+  assert.equal(await page.evaluate(()=>__v34Tx.length),7,'cancel/mismatched identity cannot submit');
+  fixture.account=address(2);await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.HeartRuntime.refreshChainData(false));
+  assert.ok((await page.locator('#kh-wallet').innerText()).includes(address(2)),'wallet switch does not reuse old identity');
+  fixture.switchTo=address(5);
+  await page.evaluate(()=>{
+   window.__v34LegacySwitchCalls=0;window.__v34OriginalSwitch=web3.switchWallet;
+   web3.switchWallet=async()=>{window.__v34LegacySwitchCalls++;return false;};
+   document.getElementById('kh-switch').click();
+  });
+  await page.waitForFunction(account=>KGEN_RUNTIME_CORE.modules.HeartRuntime.state.address?.toLowerCase()===account,address(5));
+  assert.equal(await page.evaluate(()=>__v34LegacySwitchCalls),0,'kh-switch uses candidate WalletRuntime, not legacy shell');
+  await page.evaluate(()=>{web3.switchWallet=__v34OriginalSwitch;});
+  assert.ok(walletRequests.some(q=>q.method==='wallet_requestPermissions'),'explicit switch uses original permission flow');
+  await page.locator('#kh-v34-civilization').fill(selectorId('second-civilization'));await press('kh-wishbtn','makeWish');
+  const noSend=async(id,feedback,pattern)=>{
+   const count=await page.evaluate(()=>__v34Tx.length);
+   await page.locator('#'+feedback).evaluate(node=>node.textContent='');
+   await page.locator('#'+id).scrollIntoViewIfNeeded();await page.locator('#'+id).tap();
+   await page.waitForFunction(({id,feedback})=>!document.getElementById(id).dataset.heartPending&&/失敗：|已取消/.test(document.getElementById(feedback).textContent),{id,feedback});
+   assert.match(await page.locator('#'+feedback).innerText(),pattern);
+   assert.equal(await page.evaluate(()=>__v34Tx.length),count,'unsafe candidate action never reaches signer boundary');
+  };
+  fixture.chain='0x38';
+  await page.evaluate(()=>__v34Emit('chainChanged','0x38'));
+  await noSend('kh-wishbtn','kh-wish-feedback',/QA_CHAIN_SWITCH_REJECTED|BSC97/);
+  assert.equal(walletRequests.filter(q=>q.method==='wallet_switchEthereumChain').at(-1).params[0].chainId,'0x61','candidate never requests a switch to Mainnet');
+  fixture.chain='0x61';await page.evaluate(()=>__v34Emit('chainChanged','0x61'));
+  await page.evaluate(()=>web3.smartConnect());
+  confirmMutation={account:address(3)};
+  await noSend('kh-wishbtn','kh-wish-feedback',/帳號已變更|錢包.*變更/);
+  confirmMutation={lateSwitchTo:address(6)};
+  await noSend('kh-wishbtn','kh-wish-feedback',/帳號|錢包|ACCOUNT/);
+  await page.evaluate(()=>__v34Emit('accountsChanged',[]));
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.HeartRuntime.state.signer),null,'account event immediately invalidates signer');
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.HeartRuntime.state.kgenBal),null,'account event clears previous balances');
+  await page.evaluate(()=>web3.smartConnect());
+  // Hold the first receipt: a second real DOM click must not queue another tx.
+  const duplicateBefore=await page.evaluate(()=>{window.__v34HoldReceipt=true;return __v34Tx.length;});
+  await page.locator('#kh-wishbtn').tap();
+  await page.waitForFunction(n=>__v34Tx.length===n+1&&typeof __v34ReleaseReceipt==='function',duplicateBefore);
+  await page.locator('#kh-wishbtn').evaluate(button=>button.click());
+  assert.equal(await page.evaluate(()=>__v34Tx.length),duplicateBefore+1,'pending duplicate prevented');
+  await page.evaluate(()=>{window.__v34HoldReceipt=false;__v34ReleaseReceipt();});
+  await page.waitForFunction(()=>document.getElementById('kh-wishbtn').dataset.heartPending!=='1');
+  const approvalBefore=await page.evaluate(()=>__v34Tx.length);
+  confirmMutation={account:address(4)};
+  await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.ApproveRuntime.approveSlot('vow'));
+  assert.equal(await page.evaluate(()=>__v34Tx.length),approvalBefore,'account switch at approval confirmation cancels approval');
+  confirmMutation={lateSwitchTo:address(7)};
+  await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.ApproveRuntime.approveSlot('vow'));
+  assert.equal(await page.evaluate(()=>__v34Tx.length),approvalBefore,'delayed account event during approval identity reads cancels approval');
+  await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.ApproveRuntime.approveSlot('vow'));
+  assert.equal(await page.evaluate(()=>__v34Tx.length),approvalBefore+1,'fresh explicit approval exactly once');
+  const approvalTx=await page.evaluate(()=>__v34Tx.at(-1)),approval=abi.parseTransaction(approvalTx);
+  assert.equal(approvalTx.to.toLowerCase(),manifest.kgen.toLowerCase());assert.equal(approval.name,'approve');
+  assert.equal(approval.args[0].toLowerCase(),manifest.proxy.toLowerCase());assert.equal(approval.args[1],parseUnits('9',18));
+  await page.screenshot({path:`${OUT}/heart-v34-390.png`});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  // A fresh candidate document without its identity manifest cannot fall back
+  // to the legacy Heart, even through the original web3 connect entrypoint.
+  manifestPresent=false;await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.KGEN_RUNTIME_CORE?.modules.HeartRuntime.inited);
+  await installBoundaryStub();
+  assert.equal(await page.evaluate(()=>web3.smartConnect()),false);
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.HeartRuntime.candidate),null);
+  await page.locator('#kgen-v30-wish-btn').tap();
+  await noSend('kh-wishbtn','kh-wish-feedback',/乾淨 BSC97|fallback/);
+  assert.equal(broadcasts,0);
+  reports.push({id:'12345-v34',width:390,height:844,binding:'PASS',canonicalSendHeart:'PASS',receipt:'PASS',walletSwitch:'PASS',civilizationSwitch:'PASS',repaymentRequired:'PASS',cancel:'PASS',identityFailure:'PASS',legacySmartConnect:'PASS',wrongChain:'PASS',accountChangeOnConfirm:'PASS',delayedAccountEvent:'PASS',pendingDuplicate:'PASS',approvalAccountGuard:'PASS',approvalExactAmount:'PASS',missingManifest:'FAIL_CLOSED_PASS',passiveNoPrompt:'PASS',backgroundResume:'PASS',khSwitch:'PASS',binanceCandidateQuery:'PASS',transactionBoundary:'STUB_NO_BROADCAST',broadcasts,calls});
+ }catch(error){await page.screenshot({path:`${OUT}/heart-v34-FAIL.png`});throw error;}finally{await context.close();}
+}
 async function heartActionQA(){
 // Exercise the REAL sendHeart + ensureConnected + ethers V3.2.6 Contract path.
 // Only signer.sendTransaction is replaced. No private key or broadcast provider.
@@ -287,9 +632,11 @@ async function walletRoundTripQA(){
  }finally{await context.close();}
 }
 try{
-if(!preservation&&!heartOnly)await walletRoundTripQA();
-if(!preservation&&!walletOnly)await heartActionQA();
-for(const id of (walletOnly||heartOnly||process.argv.includes('--layout-only')?[]:preservation?['16888']:['12345','16888']))for(const [width,height]of (preservation?[[360,844],[390,844],[412,844],[432,844],[480,844]]:[[390,844],[844,390]])){
+if(v34Live)await liveHeartV34QA();
+if(v34Only)await heartV34QA();
+if(!v34Live&&!v34Only&&!preservation&&!heartOnly)await walletRoundTripQA();
+if(!v34Live&&!v34Only&&!preservation&&!walletOnly)await heartActionQA();
+for(const id of (v34Live||v34Only||walletOnly||heartOnly||process.argv.includes('--layout-only')?[]:preservation?['16888']:['12345','16888']))for(const [width,height]of (preservation?[[360,844],[390,844],[412,844],[432,844],[480,844]]:[[390,844],[844,390]])){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
  const errors=[],commercialRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('request',r=>{if(/\/music\/.*(?:\.mp3|playlist\.json)/i.test(r.url()))commercialRequests.push(r.url());});
  await page.addInitScript(()=>{const Real=window.AudioContext||window.webkitAudioContext;window.__qaAudioContexts=[];window.__qaAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const analyser=this.context.createAnalyser();connect.call(this,analyser);window.__qaAnalysers.push(analyser);}return result;};if(Real){window.AudioContext=class extends Real{constructor(...args){super(...args);window.__qaAudioContexts.push(this);}};window.webkitAudioContext=window.AudioContext;}});
@@ -320,7 +667,7 @@ for(const id of (walletOnly||heartOnly||process.argv.includes('--layout-only')?[
  assert.ok(errors.every(e=>!e.includes('kaios-audio')&&!e.includes('kaios-world-audio')),'shared audio errors');
  reports.push({id,width,height,audio:'PASS',signal,returnPortal:'PASS',commercialRequests:0,legacyPageErrors:errors});await context.close();
 }
-for(const [width,height] of (walletOnly||heartOnly?[]:[[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]])){
+for(const [width,height] of (v34Live||v34Only||walletOnly||heartOnly?[]:[[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]])){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));
  const shot=name=>page.screenshot({path:`${OUT}/heart-${width}-${name}.png`});
@@ -466,4 +813,4 @@ for(const [width,height] of (walletOnly||heartOnly?[]:[[360,844],[390,844],[412,
   reports.push({id:'12345-mobile',width,height,composition,ritualCanonicalDispatch:'PASS',disconnectedWalletGate:'PASS',transactionBroadcast:'NOT_PERFORMED',panelInsetRestore:'PASS',landStable:'PASS',modalContent:'PASS',utilityTargets:'PASS',panels:'PASS',rotation:width===390?'PASS':'NOT_APPLICABLE',legacyPageErrors:errors});
  }catch(error){await shot('FAIL');throw error;}finally{await context.close();}
 }
-}finally{await fs.writeFile(`${OUT}/world-audio-report.json`,JSON.stringify(reports,null,2));await browser.close();console.log(JSON.stringify(reports));}
+}finally{if(!v34Live)await fs.writeFile(`${OUT}/${v34Only?'heart-v34-report':'world-audio-report'}.json`,JSON.stringify(reports,null,2));await browser.close();console.log(JSON.stringify(reports));}
