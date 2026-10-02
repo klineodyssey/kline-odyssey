@@ -118,6 +118,16 @@ ATM 不是只用文字名稱指定；必須由 ATM registry 中的正式 `ATM_ID
 
 目前正式世界已有 `ATM-11520-001 / LIFE-ATM-11520-001 / 行動 ATM 飛碟站`，可作第一個核爆場配送目的地。新增 ATM 時必須進同一 registry，不得在 UI 另外硬編一份名單。
 
+## 6.2 XYZ 攔截戰與 Cargo Risk Desk
+
+運鈔不是無敵動畫。玩家可在任務 `IN_TRANSIT` 時以自己的 XYZ 位置與近期移動向量接近 Digital Ant；至少一個物理軸與飛碟反向，且距離、能量、Life ID、replay key 全部通過，才可發動土匪攔截。每次攔截形成 append-only incident evidence，結果可以是 `ROBBERY_REPELLED`、`ROBBERY_SUCCESS_LOCAL_REWARD` 或 fail-closed rejection。
+
+Restricted inventory 的鏈上本金與 browser gameplay 分離。成功攔截可消耗任務預先聲明的 `LOCAL_GAME_RISK_POOL` 並產生本機 KAIOS reward/claimable 候選；不得由前端直接扣除真實 wallet balance、轉移 custody，或把未出資 reward 冒充收入。
+
+AI Ant Company 既有公司架構內設 `CARGO_RISK_DESK`，不建立第二家公司。Cargo insurance 使用整數 KAIOS 與 basis points 計算，至少包含 coverage、deductible、theft/natural-disaster/damage/interruption expected loss、claim operations、capital charge 與 margin。Reserve 不足時狀態只能是 `BROKERAGE_QUOTE_ONLY`；只有獨立的 local-simulation reserve 或未來可驗證正式 reserve 才能承保。Cargo principal、客戶資產與受限制庫存永遠不能當 reserve。
+
+保險事故與玩家戰利品分帳：玩家 reward 來自 game risk pool；保險 claim 只補償 carrier/insured 的 verified incident loss。真實保費、理賠與鏈上貨物仍需獨立 signer/receipt/settlement authority。
+
 ## 7. 一圖一目了然
 正式遊戲畫面以 3D 世界為主。怪物／物流生命頭頂可顯示：
 - LIFE_ID/名稱（精簡）

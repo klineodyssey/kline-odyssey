@@ -1,5 +1,13 @@
 # 11520 Changelog
 
+## 2026-10-03 — Digital Ant XYZ cargo raid and Cargo Risk Desk
+
+- Added a playable XYZ cargo interception gate for `DIGITAL_ANT_0001`: the player must be within range, provide recent opposing physical movement, spend local game energy, use a distinct Life ID and pass replay/cooldown checks.
+- Added a bounded mission-declared local game risk pool. A successful robbery awards only from that pool; restricted KAIOS custody principal and chain balances are never mutated by browser combat.
+- Added the AI Ant Company Cargo Risk Desk to the existing logistics runtime with integer KAIOS/basis-point quotes, deductible, independent reserve gate, covered causes and evidence-gated local-simulation claims.
+- Kept KX/KY/KZ as independent hedging axes and XYZ as actual movement/combat. No market order, token transfer, Mainnet write, insurer company, exchange or settlement engine was created.
+- Removed the `V1` suffix from the public Digital Ant logistics runtime identifier; version history remains in metadata/changelog rather than the formal program identity.
+
 ## 2026-10-03 — Digital Ant 5D ATM UFO cash delivery
 
 - Connected `DIGITAL_ANT_0001` to the live 11520 Market Life source loop instead of updating only a text HUD.
