@@ -14,27 +14,32 @@ async function heartActionQA(){
 // Exercise the REAL sendHeart + ensureConnected + ethers V3.2.6 Contract path.
 // Only signer.sendTransaction is replaced. No private key or broadcast provider.
 if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
- const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36'});
- const page=await context.newPage(),txABI=new Interface(['function heartbeatClaim()','function makeWish(bytes32)','function vowTo(uint8,uint256)','function lightLamp(uint256)']);
- const readABI=new Interface(['function kgen() view returns(address)','function lampPricePerDay() view returns(uint256)','function decimals() view returns(uint8)','function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)']);
- const fixture={allowance:'1000',balance:'1000',price:'1',readError:false};let broadcasts=0,confirmations=0,accept=true;
+ const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,timezoneId:width===390?'Asia/Taipei':'America/New_York',userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36'});
+ const page=await context.newPage(),txABI=new Interface(['function heartbeatClaim()','function makeWish(bytes32)','function vowTo(uint8,uint256)','function lightLamp(uint256)','function festivalClaim(uint8)','function newYearCountdownClaim()']);
+ const rules={festivalEnabled:true,festivalWindowStart:0,festivalWindowEnd:600,newYearCountdownEnabled:true,newYearWindowStart:85800,newYearWindowEnd:86400};
+ const readABI=new Interface(['function kgen() view returns(address)','function lampPricePerDay() view returns(uint256)','function decimals() view returns(uint8)','function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)',...Object.entries(rules).map(([name,value])=>`function ${name}() view returns(${typeof value==='boolean'?'bool':'uint256'})`),'function festivalClaimed(uint8,uint256,address) view returns(bool)','function newYearCountdownClaimed(uint256,address,uint8) view returns(bool)']);
+ const fixture={allowance:'1000',balance:'1000',price:'1',readError:false,timestamp:Date.parse('2026-10-02T10:00:00Z')/1000,claims:new Set()};let broadcasts=0,confirmations=0,accept=true;
  const reply=q=>{
    if(/sendTransaction|sendRawTransaction|sign|wallet_/i.test(q.method)){broadcasts++;return{jsonrpc:'2.0',id:q.id,error:{code:-32000,message:'QA forbids writes'}};}
    let result='0x0';
    if(q.method==='eth_chainId')result='0x38';
    if(q.method==='net_version')result='56';
    if(q.method==='eth_blockNumber')result='0x100';
+   if(q.method==='eth_getBlockByNumber')result={hash:'0x'+'22'.repeat(32),parentHash:'0x'+'11'.repeat(32),number:'0x100',timestamp:'0x'+fixture.timestamp.toString(16),nonce:'0x0000000000000000',difficulty:'0x0',gasLimit:'0x1c9c380',gasUsed:'0x0',miner:'0x'+'00'.repeat(20),extraData:'0x',transactions:[]};
    if(q.method==='eth_call'){
     let decoded;try{decoded=readABI.parseTransaction({data:q.params[0].data});}catch{}
     if(decoded){
      if(fixture.readError)return{jsonrpc:'2.0',id:q.id,error:{code:-32000,message:'QA read unavailable'}};
-     const values={kgen:'0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',lampPricePerDay:fixture.price,decimals:18,balanceOf:parseUnits(fixture.balance,18),allowance:parseUnits(fixture.allowance,18)};
+     const values={...rules,kgen:'0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',lampPricePerDay:fixture.price,decimals:18,balanceOf:parseUnits(fixture.balance,18),allowance:parseUnits(fixture.allowance,18)};
+     if(decoded.name==='festivalClaimed')values.festivalClaimed=fixture.claims.has(`festival:${decoded.args[0]}:${decoded.args[1]}`);
+     if(decoded.name==='newYearCountdownClaimed')values.newYearCountdownClaimed=fixture.claims.has(`ny:${decoded.args[0]}:${decoded.args[2]}`);
      result=readABI.encodeFunctionResult(decoded.name,[values[decoded.name]]);
     }else result='0x'+'0'.repeat(64);
    }
    return{jsonrpc:'2.0',id:q.id,result};
  };
  await page.exposeFunction('__heartRead',q=>{const r=reply(q);if(r.error)throw Error(r.error.message);return r.result;});
+ await page.exposeFunction('__fixtureReceipt',tx=>{const d=txABI.parseTransaction(tx),year=new Date(fixture.timestamp*1000).getUTCFullYear();if(d.name==='festivalClaim')fixture.claims.add(`festival:${d.args[0]}:${year}`);if(d.name==='newYearCountdownClaim')fixture.claims.add(`ny:${year}:${Math.floor((fixture.timestamp%86400)/60)-Math.floor(rules.newYearWindowStart/60)}`);});
  await context.route('**/*',async route=>{
   const req=route.request();if(req.method()!=='POST')return route.continue();
   let payload;try{payload=req.postDataJSON();}catch{return route.continue();}
@@ -49,6 +54,10 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
  const baseline=await geometry();
  await page.evaluate(()=>{
   window.__heartTx=[];window.__txFailure=null;window.__holdTx=false;window.__walletReads=[];
+  window.__heartInputEvents=[];
+  for(const type of ['touchstart','touchend','click'])document.addEventListener(type,e=>{
+   __heartInputEvents.push({type,target:e.target.closest('button')?.id||e.target.id,value:document.getElementById('kh-vow-amount')?.value,tx:__heartTx.length,time:performance.now()});
+  },true);
   window.ethereum={isMetaMask:true,request:async({method,params})=>{
    __walletReads.push(method);
    if(method==='eth_chainId')return '0x38';
@@ -60,11 +69,20 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
    const request={to:await tx.to,data:await tx.data};__heartTx.push(request);
    if(__holdTx)await new Promise(resolve=>{window.__releaseTx=resolve;});
    if(__txFailure)throw Object.assign(Error(__txFailure.message),{code:__txFailure.code});
-   return{hash:'0x'+'11'.repeat(32),wait:async()=>({blockNumber:1,logs:[]})};
+   return{hash:'0x'+'11'.repeat(32),wait:async()=>{await window.__fixtureReceipt(request);return{blockNumber:1,logs:[]};}};
   };
  });
  const feedback=id=>page.locator('#'+id+'-feedback');
- const click=async id=>{await page.locator('#'+id).tap();await page.waitForFunction(id=>document.getElementById(id).dataset.heartPending!=='1',id);};
+ const tapDiagnostics=[];
+ const click=async id=>{
+  const before=await page.evaluate(()=>__heartInputEvents.length);
+  await page.locator('#'+id).tap();
+  const tapState=await page.evaluate(({id,before})=>({clickSeen:__heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id),idle:document.getElementById(id).dataset.heartPending!=='1'}),{id,before});
+  tapDiagnostics.push({id,...tapState});
+  // An idle flag alone can already be true before a mobile synthetic click.
+  // Require this tap's actual click (no retry/force), then completed handling.
+  await page.waitForFunction(({id,before})=>__heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id)&&document.getElementById(id).dataset.heartPending!=='1',{id,before});
+ };
  const count=()=>page.evaluate(()=>__heartTx.length);
  const open=async id=>{if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();await page.locator(id).tap();};
  try{
@@ -82,9 +100,25 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.screenshot({path:`${OUT}/heart-action-${width}-wish-error.png`});
   await page.locator('#kh-wish-text').fill('0x'+'0'.repeat(64));await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/不可為零/);
   await open('#kgen-v30-vow-btn');
-  for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
-   await page.locator('#'+id).fill(value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);assert.match(await feedback(action).innerText(),pattern);
+  const invalidInputs=[];
+  for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','   ',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-vow-amount','1.5',/正整數/],['kh-vow-amount','-1',/正整數/],['kh-vow-amount','abc',/正整數/],['kh-lamp-days','',/請輸入/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
+   const before=await count(),prompts=confirmations;
+   await page.locator('#'+id).fill(value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);
+   const message=await feedback(action).innerText();assert.match(message,pattern,JSON.stringify(await page.evaluate(()=>({events:__heartInputEvents.slice(-15),tx:__heartTx,value:document.getElementById('kh-vow-amount').value}))));
+   assert.equal(await count(),before,`invalid ${id} ${JSON.stringify(value)} cannot reach signer`);
+   assert.equal(confirmations,prompts,'invalid amount cannot request confirmation');
+   invalidInputs.push({id,value,message,transactions:0,confirmations:0});
   }
+  // Audit all old fallback-helper callers: UI defaults are not submit defaults.
+  const amountAudit=await page.evaluate(()=>{
+   const r=KGEN_RUNTIME_CORE.modules.HeartRuntime,field=document.getElementById('kh-fortune-amount'),original=field.value,results=[];
+   for(const value of ['', '   ', '0', '-1', '1.5', '889']){field.value=value;try{results.push({value,result:r.getFortuneAmount()});}catch(e){results.push({value,error:e.message});}}
+   field.value='8';results.push({value:'8',result:r.getFortuneAmount()});field.value=original;
+   try{r.getWishAmount();results.push({missingWishAmount:'ACCEPTED'});}catch(e){results.push({missingWishAmount:e.message});}
+   return results;
+  });
+  assert.ok(amountAudit.slice(0,6).every(x=>x.error),'Fortune invalid input fails closed');assert.equal(amountAudit[6].result,'8');assert.match(amountAudit[7].missingWishAmount,/請輸入/);
+  await fs.writeFile(`${OUT}/heart-input-${width}.json`,JSON.stringify({invalidInputs,amountAudit,tapDiagnostics},null,2));
   await page.locator('#kh-vow-amount').fill('9');await page.locator('#kh-lamp-days').fill('8');
   await page.locator('#kh-vow-option').evaluate(e=>e.selectedIndex=-1);await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/選擇還願項目/);await page.locator('#kh-vow-option').selectOption('2');
   fixture.allowance='0';
@@ -98,6 +132,7 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   fixture.allowance='1000';fixture.balance='1';await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/餘額不足/);
   fixture.balance='1000';fixture.readError=true;await click('kh-lamp');assert.match(await feedback('kh-lamp').innerText(),/失敗/);fixture.readError=false;
   assert.equal(await count(),4,'read failure and low balance fail closed');
+  accept=false;await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/已取消/);assert.equal(await count(),4);accept=true;
   await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('世界平安');
   accept=false;await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/已取消/);assert.equal(await count(),4);accept=true;
   await page.evaluate(()=>{__txFailure={code:4001,message:'User rejected'};});await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/交易已取消/);
@@ -107,8 +142,75 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.screenshot({path:`${OUT}/heart-action-${width}-confirmed-stub.png`});
   for(let i=0;i<10;i++){await open('#kgen-v30-vow-btn');await page.locator('#kgen-heart-toggle').tap();await open('#kgen-v30-wish-btn');await page.locator('#kgen-heart-toggle').tap();}
   assert.deepEqual(await geometry(),baseline,'form status and ten cycles never move world composition');
+  // Festival clock injection is local to the read-only UI observer. No chain
+  // time changes, no replacement of the actual shared sendHeart transaction path.
+  const cases=await page.evaluate(rules=>{
+   const runtime=KGEN_RUNTIME_CORE.modules.CountdownRuntime;
+   const snapshot={rules,account:'0x0000000000000000000000000000000000000001',claims:{'festival:1:2026':false,'festival:2:2026':false}};
+   for(let i=0;i<10;i++)snapshot.claims['ny:2026:'+i]=false;
+   const cases=[
+    [1,'2026-05-19T23:59:59Z','NOT_OPEN'],[1,'2026-05-20T00:00:00+08:00','NOT_OPEN'],[1,'2026-05-20T00:00:00Z','READY'],[1,'2026-05-20T00:10:00Z','READY'],[1,'2026-05-20T00:10:01Z','NOT_OPEN'],
+    [2,'2026-11-10T23:59:59Z','NOT_OPEN'],[2,'2026-11-11T00:00:00+08:00','NOT_OPEN'],[2,'2026-11-11T00:00:00Z','READY'],[2,'2026-11-11T00:10:00Z','READY'],[2,'2026-11-11T00:10:01Z','NOT_OPEN'],
+    [3,'2026-12-31T23:49:59Z','NOT_OPEN'],[3,'2026-12-31T23:50:00Z','READY'],[3,'2026-12-31T23:59:59Z','READY'],[3,'2027-01-01T00:00:00Z','NOT_OPEN'],[3,'2027-01-01T07:50:00+08:00','READY']
+   ].map(([kind,date,expected])=>({kind,date,expected,actual:runtime.evaluate(kind,snapshot,Date.parse(date)/1000).code}));
+   const shifted={...snapshot,rules:{...rules,festivalWindowStart:3600,festivalWindowEnd:4200,newYearWindowStart:1001,newYearWindowEnd:1601}};
+   for(const kind of [1,2])for(const[clock,expected]of[['00:59:59','NOT_OPEN'],['01:00:00','READY'],['01:10:01','NOT_OPEN']]){const date=`2026-${kind===1?'05-20':'11-11'}T${clock}Z`;cases.push({kind,date,expected,actual:runtime.evaluate(kind,shifted,Date.parse(date)/1000).code});}
+   cases.push({kind:3,date:'non-minute-aligned NY end',expected:'NOT_OPEN',actual:runtime.evaluate(3,shifted,Date.parse('2026-12-31T00:26:00Z')/1000).code});
+   return cases;
+  },rules);
+  for(const c of cases)assert.equal(c.actual,c.expected,JSON.stringify(c));
+  const sync=async date=>{fixture.timestamp=Date.parse(date)/1000;await page.evaluate(async()=>{await KGEN_RUNTIME_CORE.modules.CountdownRuntime.refresh(true);});};
+  const claimClick=async id=>{await page.locator('#'+id).tap();await page.waitForFunction(id=>!document.getElementById(id).dataset.heartPending,id);};
+  const festivalStart=await count();
+  await page.locator('#kgen-heart-toggle').tap();await sync('2026-10-02T10:00:00Z');
+  for(const id of ['kh-festival1','kh-festival2','kh-newyear']){await claimClick(id);assert.match(await feedback(id).innerText(),/尚未開放/);assert.match(await page.locator('#'+id+'-status').innerText(),/台灣時間.*\nUTC/);}
+  assert.equal(await count(),festivalStart,'outside window never reaches signer');
+  await page.screenshot({path:`${OUT}/festival-${width}-not-open.png`});
+  for(const [id,date,kind]of [['kh-festival1','2026-05-20T00:00:01Z',1],['kh-festival2','2026-11-11T00:00:01Z',2],['kh-newyear','2026-12-31T23:50:01Z',3]]){
+   await sync(date);assert.equal(await page.locator('#'+id).getAttribute('data-festival-state'),'READY');
+   await claimClick(id);assert.match(await feedback(id).innerText(),/成功/);
+   assert.equal(await page.locator('#'+id).getAttribute('data-festival-state'),'ALREADY_CLAIMED');
+   const n=await count();await claimClick(id);assert.equal(await count(),n,'claimed scope cannot send twice');assert.match(await feedback(id).innerText(),/本期已領取/);
+  }
+  const festivalCalls=(await page.evaluate(n=>__heartTx.slice(n),festivalStart)).map(tx=>{const d=txABI.parseTransaction(tx);return{name:d.name,args:[...d.args].map(String)};});
+  assert.deepEqual(festivalCalls,[{name:'festivalClaim',args:['1']},{name:'festivalClaim',args:['2']},{name:'newYearCountdownClaim',args:[]}]);
+  await page.screenshot({path:`${OUT}/festival-${width}-claimed.png`});
+  // Existing one-second timer transitions without a reload; each send still
+  // performs a fresh block-bound preflight (the UI clock never authorizes it).
+  fixture.claims.clear();await sync('2026-12-31T23:49:59Z');
+  fixture.timestamp=Date.parse('2026-12-31T23:50:00Z')/1000;
+  await page.evaluate(()=>{const c=KGEN_RUNTIME_CORE.modules.CountdownRuntime;window.__festivalClock=c.snapshot.observedAt;c.now=()=>__festivalClock;__festivalClock+=2000;});
+  await page.waitForFunction(()=>document.getElementById('kh-newyear').dataset.festivalState==='READY');
+  await page.evaluate(()=>{__festivalClock+=1000;});await page.waitForTimeout(1100);assert.match(await page.locator('#kh-ny-slot').innerText(),/開放中/);
+  await claimClick('kh-newyear');await sync('2026-12-31T23:51:00Z');assert.equal(await page.locator('#kh-newyear').getAttribute('data-festival-state'),'READY','next minute has a different once-only scope');
+  fixture.timestamp=Date.parse('2027-01-01T00:00:00Z')/1000;
+  await page.evaluate(()=>{__festivalClock+=13000;});
+  await page.waitForFunction(()=>document.getElementById('kh-newyear').dataset.festivalState==='NOT_OPEN');
+  await page.evaluate(()=>{__festivalClock+=31000;KGEN_RUNTIME_CORE.modules.CountdownRuntime.render();});assert.equal(await page.locator('#kh-newyear').getAttribute('data-festival-state'),'SYNC_REQUIRED','stale observation cannot claim READY');
+  await sync('2027-01-01T00:00:00Z');assert.equal(await page.locator('#kh-newyear').getAttribute('data-festival-state'),'SYNC_REQUIRED','re-reading frozen head cannot reset freshness');
+  fixture.readError=true;await sync('2026-11-11T00:00:01Z');const noData=await count();await claimClick('kh-festival2');assert.equal(await count(),noData);assert.match(await feedback('kh-festival2').innerText(),/鏈上活動資料無法確認/);fixture.readError=false;
+  rules.festivalEnabled=false;await sync('2026-11-11T00:00:01Z');await claimClick('kh-festival2');assert.match(await feedback('kh-festival2').innerText(),/尚未啟用/);rules.festivalEnabled=true;
+  await sync('2026-11-11T00:00:01Z');await page.evaluate(()=>{__txFailure={code:'CALL_EXCEPTION',message:'execution reverted: FESTIVAL_WINDOW'};});await claimClick('kh-festival2');assert.match(await feedback('kh-festival2').innerText(),/合約時間窗/);
+  await page.evaluate(()=>{__txFailure={code:4001,message:'User rejected'};});await claimClick('kh-festival2');assert.match(await feedback('kh-festival2').innerText(),/交易已取消/);await page.evaluate(()=>{__txFailure=null;});
+  await page.evaluate(()=>{__txFailure={code:'CALL_EXCEPTION',message:'execution reverted: FESTIVAL_CLAIMED'};});await claimClick('kh-festival2');assert.match(await feedback('kh-festival2').innerText(),/本期已領取/);await page.evaluate(()=>{__txFailure=null;});
+  const wrongChainCount=await count();
+  await page.evaluate(()=>{window.__originalRequest=ethereum.request;ethereum.request=async q=>q.method==='eth_chainId'?'0x1':q.method==='wallet_switchEthereumChain'?null:__originalRequest(q);});
+  await claimClick('kh-festival2');assert.match(await feedback('kh-festival2').innerText(),/請切換至 BSC/);assert.equal(await count(),wrongChainCount);
+  await page.evaluate(()=>{ethereum.request=__originalRequest;});
+  await page.locator('#kgen-heart-toggle').tap();await page.locator('#k12345-more-open').tap();await page.locator('#kgen-v102-festival-panel h3').tap();
+  for(const [id,date]of [['kgen-v102-festival-520','2026-05-20T00:00:01Z'],['kgen-v102-festival-1111','2026-11-11T00:00:01Z'],['kgen-v102-newyear','2026-12-31T23:59:01Z']]){
+   fixture.claims.clear();await sync(date);const before=await count();await claimClick(id);assert.equal(await count(),before+1,'existing secondary dialog listener sends once');assert.match(await feedback(id).innerText(),/成功/);
+  }
+  await sync('2026-10-02T10:00:00Z');await claimClick('kgen-v102-festival-520');await page.screenshot({path:`${OUT}/festival-${width}-dialog.png`});
+  await page.locator('#k12345-festival-close').tap();assert.deepEqual(await geometry(),baseline,'festival disclosure cannot shift Heart/MOVE/DRIVE/WARP');
+  await page.evaluate(()=>{window.ethereum=null;KGEN_RUNTIME_CORE.modules.HeartRuntime.state.address='';});await sync('2026-05-20T00:00:01Z');
+  await page.locator('#kgen-heart-toggle').tap();assert.equal(await page.locator('#kh-festival1').getAttribute('data-festival-state'),'WALLET_REQUIRED');const disconnectedCount=await count();await claimClick('kh-festival1');assert.match(await feedback('kh-festival1').innerText(),/錢包尚未連線/);assert.equal(await count(),disconnectedCount);
+  reports.push({id:'12345-festival',width,height,clockCases:cases,transactionBoundary:festivalCalls,notOpen:'PASS',claimedOnce:'PASS',minuteTransition:'PASS',staleRead:'PASS',disabled:'PASS',cancellationAndRevert:'PASS',walletAndChainGate:'PASS',secondaryButtons:'PASS',broadcasts});
   assert.equal(broadcasts,0);reports.push({id:'12345-heart-actions',width,height,connectedOriginalTransactionPath:decoded,allowanceGate:'PASS',validation:'PASS',rejectionAndRevert:'PASS',pendingDuplicate:'PASS',positionStable:'PASS',broadcasts:0,physicalMetaMask:'HUMAN_RETEST_REQUIRED'});
- }catch(error){await page.screenshot({path:`${OUT}/heart-action-${width}-FAIL.png`});throw error;}finally{await context.close();}
+ }catch(error){
+  await fs.writeFile(`${OUT}/heart-action-${width}-FAIL.json`,JSON.stringify({error:String(error),tapDiagnostics,state:await page.evaluate(()=>({events:window.__heartInputEvents,transactions:window.__heartTx,value:document.getElementById('kh-vow-amount')?.value}))},null,2));
+  await page.screenshot({path:`${OUT}/heart-action-${width}-FAIL.png`});throw error;
+ }finally{await context.close();}
 }
 }
 async function walletRoundTripQA(){
