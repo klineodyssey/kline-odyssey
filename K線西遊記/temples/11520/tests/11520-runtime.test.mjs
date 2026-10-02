@@ -74,6 +74,14 @@ test('wallet-bound KAIOS rewards and progression stay local until distribution i
   const p=store.snapshot();assert.equal(p.kaios,5);assert.equal(p.claimableKaios,5);assert.equal(p.kaiosRewardStatus,'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION');assert.ok(p.level>=2);assert.ok(p.engineLevel>=2);assert.ok(p.nextLevelXp>p.xp);assert.ok(p.nextEngineXp>p.engineXp);
 });
 
+test('local KAIOS ammunition spend is exact, persistent and never creates a chain transfer',()=>{
+  const data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)},store=createSimulationPlayerStore({ledger:createKgenLedger(),storage});
+  store.activate(null);store.record('LOOT_DROP',{reward:8});
+  assert.deepEqual(store.spendKaios(3,{purpose:'KAIOS_MISSILE_GAME_AMMUNITION'}),{ok:true,amount:3,purpose:'KAIOS_MISSILE_GAME_AMMUNITION',remainingKaios:5,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'});
+  assert.equal(store.snapshot().spentKaios,3);assert.equal(store.snapshot().kaios,5);
+  assert.equal(store.spendKaios(6).reason,'INSUFFICIENT_LOCAL_KAIOS');
+});
+
 test('V1 address profiles recover existing ledger without cross-account receipts; stale preserves margin',()=>{
   const data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
   const ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage});
@@ -228,7 +236,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -559,6 +567,33 @@ test('Cargo raid fails closed without proximity, energy, distinct identity, or o
   assert.equal(attemptCargoRobbery(build(),{attackerLifeId:'KAIOS-P-OTHER-1234567890',playerPosition:{x:99,y:0,z:0},playerMovement:{x:-1},attackPower:10,energySpent:1,replayKey:'far'}).reason,'OUT_OF_RAID_RANGE');
   assert.equal(attemptCargoRobbery(build(),{attackerLifeId:'KAIOS-P-OTHER-1234567890',playerPosition:{x:1,y:0,z:0},playerMovement:{x:1},attackPower:10,energySpent:1,replayKey:'aligned'}).reason,'OPPOSING_XYZ_MOVEMENT_REQUIRED');
   assert.equal(attemptCargoRobbery(build(),{attackerLifeId:'KAIOS-P-OTHER-1234567890',playerPosition:{x:1,y:0,z:0},playerMovement:{x:-1},attackPower:10,energySpent:0,replayKey:'energy'}).reason,'RAID_ENERGY_REQUIRED');
+});
+
+test('KAIOS missile separates impact energy from drag and uses opposite C relative velocity',()=>{
+  const vacuum=calculateMissileImpact({kaiosMass:1,attackC:-1,targetC:1,targetDirection:{x:1,y:0,z:0},flightDistanceMeters:20});
+  assert.equal(vacuum.ok,true);assert.equal(vacuum.energyFormula,'CLASSICAL_0_5_M_V2');assert.equal(vacuum.dragWorkJ,0);assert.ok(vacuum.kineticEnergyJ>0);assert.ok(vacuum.operationalDamage>0);
+  const air=calculateMissileImpact({kaiosMass:1,attackC:-1,targetC:1,targetDirection:{x:1,y:0,z:0},flightDistanceMeters:20,atmosphereDensityKgM3:1.225});
+  assert.ok(air.dragWorkJ>0);assert.ok(air.impactEnergyJ<vacuum.impactEnergyJ);assert.equal(air.dragModel,'SEPARATE_EN_ROUTE_LOSS');
+  assert.equal(calculateMissileImpact({kaiosMass:1,attackC:1,targetC:1}).reason,'OPPOSITE_C_REQUIRED');
+});
+
+test('missile interception consumes declared game ammunition, disables propulsion, crashes and yields bounded local loot',()=>{
+  const ant=createDigitalAnt({lifeId:'DIGITAL_ANT_0001',x:0,y:6,z:0,cargoCapacity:1000});
+  const mission=createDeliveryMission({missionId:'MISSILE-GAME',amount:1000,destinationAtmId:'ATM-M',freightOffer:10,demand:1,speedMetersPerSecond:1,movementC:1,gameplayRiskPool:25,maxRaidLoss:100});
+  assert.equal(assignDelivery(ant,mission,[{atmId:'ATM-M',x:8,y:1,z:0,online:true}]).ok,true);assert.equal(loadCargo(ant).ok,true);ant.mission.lastMovement={x:1,y:0,z:0};
+  const preview=previewMissileInterception(ant,{attackerLifeId:'KAIOS-P-MISSILE-1234567890',playerPosition:{x:1,y:6,z:0},kaiosMass:100,availableKaios:100,attackC:-1,replayKey:'missile:1',now:2000});
+  assert.equal(preview.ok,true);const result=resolveMissileInterception(ant,preview);
+  assert.equal(result.destroyed,true);assert.equal(result.ammoConsumedKaios,100);assert.equal(ant.vehicle.operationalEnergy,0);assert.equal(ant.vehicle.propulsion,'OFFLINE');assert.equal(ant.mission.status,'CRASHING');assert.equal(result.rewardKaios,0,'loot remains pending until ground impact');
+  let tick;for(let i=0;i<20;i++){tick=tickDigitalAntDelivery(ant,{deltaMs:100});if(tick.crashed)break}
+  assert.equal(tick.crashed,true);assert.equal(ant.mission.status,'CRASHED');assert.equal(tick.incident.outcome,'UFO_CRASHED_LOCAL_LOOT');assert.equal(tick.incident.rewardKaios,25);assert.deepEqual(tick.incident.loot.map(item=>item.treasureClass),['KUFO_GAME_FUEL_FRAGMENT','KSHIP_GAME_FEED_MASS','UFO_TECH_FRAGMENT']);assert.equal(tick.incident.custodyPrincipalChanged,false);assert.equal(tick.incident.chainBalanceChanged,false);
+});
+
+test('missile interception fails closed without local KAIOS, range, opposite C, or fresh replay key',()=>{
+  const build=()=>{const ant=createDigitalAnt({lifeId:'DIGITAL_ANT_0001',x:0,y:1,z:0,cargoCapacity:100});const mission=createDeliveryMission({missionId:'MISSILE-GATE',amount:10,destinationAtmId:'ATM-M',freightOffer:10,demand:1,speedMetersPerSecond:1,movementC:1,gameplayRiskPool:5});assignDelivery(ant,mission,[{atmId:'ATM-M',x:8,y:1,z:0,online:true}]);loadCargo(ant);ant.mission.lastMovement={x:1,y:0,z:0};return ant};
+  assert.equal(previewMissileInterception(build(),{attackerLifeId:'KAIOS-P-MISSILE-1234567890',playerPosition:{x:1,y:1,z:0},kaiosMass:1,availableKaios:0,attackC:-1,replayKey:'no-money'}).reason,'INSUFFICIENT_LOCAL_KAIOS_AMMUNITION');
+  assert.equal(previewMissileInterception(build(),{attackerLifeId:'KAIOS-P-MISSILE-1234567890',playerPosition:{x:999,y:1,z:0},kaiosMass:1,availableKaios:1,attackC:-1,replayKey:'far'}).reason,'OUT_OF_MISSILE_RANGE');
+  assert.equal(previewMissileInterception(build(),{attackerLifeId:'KAIOS-P-MISSILE-1234567890',playerPosition:{x:1,y:1,z:0},kaiosMass:1,availableKaios:1,attackC:1,replayKey:'same-c'}).reason,'OPPOSITE_C_REQUIRED');
+  const ant=build(),p=previewMissileInterception(ant,{attackerLifeId:'KAIOS-P-MISSILE-1234567890',playerPosition:{x:1,y:1,z:0},kaiosMass:1,availableKaios:1,attackC:-1,replayKey:'once',now:3000});assert.equal(p.ok,true);resolveMissileInterception(ant,p);assert.equal(previewMissileInterception(ant,{attackerLifeId:'KAIOS-P-MISSILE-1234567890',playerPosition:{x:1,y:1,z:0},kaiosMass:1,availableKaios:1,attackC:-1,replayKey:'once',now:5000}).reason,'RAID_REPLAY_BLOCKED');
 });
 
 test('Market Life may work, travel, rest, or retire instead of being forced into combat',()=>{

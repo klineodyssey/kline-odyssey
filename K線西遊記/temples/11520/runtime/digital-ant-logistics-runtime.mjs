@@ -1,7 +1,7 @@
 /*
 KGEN_META
-VERSION: 1.3.0
-REVISION: 2026-10-03.DIGITAL-ANT-CARGO-RISK-GAME
+VERSION: 1.4.0
+REVISION: 2026-10-03.DIGITAL-ANT-MISSILE-INTERCEPTION-GAME
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
 CHANGE_REASON: Define Digital Ant as an armored cash courier / Market Life guardian, separate physical route from K-space positions, and add fail-closed cargo hedge planning without risking cargo principal or player assets.
@@ -24,6 +24,13 @@ export const ATM_UFO_TRANSPORT_MODE='ATM_UFO_5D';
 export const CARGO_RISK_CAUSES=Object.freeze(['THEFT_ROBBERY','NATURAL_DISASTER','CARGO_DAMAGE','DELIVERY_INTERRUPTION']);
 export const CARGO_INSURANCE_MODES=Object.freeze(['BROKERAGE_QUOTE_ONLY','UNDERWRITING_READY','LOCAL_SIMULATION_COVERED']);
 export const CARGO_RAID_RANGE_METERS=5;
+export const MISSILE_MAX_RANGE_METERS=120;
+export const KAIOS_MASS_KG=1;
+// Gameplay hull normalization. It converts simulated joules into the UFO's
+// bounded 0..100 operational-energy meter; it is not a real materials claim.
+export const JOULES_PER_OPERATIONAL_ENERGY=250;
+export const ATM_UFO_MAX_OPERATIONAL_ENERGY=100;
+export const LIGHT_SPEED_METERS_PER_SECOND=299792458;
 
 const n=(v,fallback=0)=>Number.isFinite(Number(v))?Number(v):fallback;
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,n(v)));
@@ -131,7 +138,7 @@ export function createDigitalAnt({
     capital:Math.max(0,n(capital)),vitality:clamp(vitality,0,100),cargoCapacity:Math.max(0,n(cargoCapacity)),
     retirementReserve:Math.max(0,n(retirementReserve)),targetRetirementReserve:Math.max(1,n(targetRetirementReserve,100)),
     cargo:{kind:null,amount:0,unit:null},mission:null,state:'IDLE',x:n(x),y:n(y),z:n(z),
-    vehicle:{vehicleId:String(vehicle?.vehicleId||'ATM-UFO-DIGITAL-ANT-0001'),type:String(vehicle?.type||ATM_UFO_TRANSPORT_MODE),lifeId:vehicle?.lifeId||null,independentLife:false},
+    vehicle:{vehicleId:String(vehicle?.vehicleId||'ATM-UFO-DIGITAL-ANT-0001'),type:String(vehicle?.type||ATM_UFO_TRANSPORT_MODE),lifeId:vehicle?.lifeId||null,independentLife:false,maxOperationalEnergy:ATM_UFO_MAX_OPERATIONAL_ENERGY,operationalEnergy:ATM_UFO_MAX_OPERATIONAL_ENERGY,propulsion:'ONLINE'},
     finance:{earned:0,spent:0,tips:0,freight:0,fuel:0,salary:0,maintenance:0,risk:0,time:0,lastNet:0},
     cargoRisk:{desk:'AI_ANT_COMPANY_CARGO_RISK_DESK',policy:null,reserveKaios:0,incidents:[],replayKeys:[],lastRaidAt:0},
   };
@@ -154,7 +161,7 @@ export function createDeliveryMission({
     economics:{distanceMeters:explicitDistance,metersPerWorldUnit:Math.max(0.000001,n(metersPerWorldUnit,1)),baseFreight:Math.max(0,n(baseFreight)),distanceRate:Math.max(0,n(distanceRate)),loadRate:Math.max(0,n(loadRate)),riskRate:Math.max(0,n(riskRate)),fuelPerMeter:Math.max(0,n(fuelPerMeter)),salaryPerSecond:Math.max(0,n(salaryPerSecond)),maintenancePerMeter:Math.max(0,n(maintenancePerMeter)),timeCostPerSecond:Math.max(0,n(timeCostPerSecond)),riskProbability:clamp(riskProbability,0,1),riskLoss:Math.max(0,n(riskLoss)),speedMetersPerSecond:explicitSpeed,tipRate:Math.max(0,n(tipRate))},
     movementC:n(movementC,1),flightAltitude:Math.max(1,n(flightAltitude,6)),arrivalOffsetY:Math.max(0,n(arrivalOffsetY,1.1)),transportMode:String(transportMode||ATM_UFO_TRANSPORT_MODE),
     gameplayRiskPool:whole(gameplayRiskPool,'GAMEPLAY_RISK_POOL'),gameplayRiskPoolRemaining:whole(gameplayRiskPool,'GAMEPLAY_RISK_POOL'),maxRaidLoss:whole(maxRaidLoss,'MAX_RAID_LOSS'),lastMovement:{x:0,y:0,z:0},
-    status:'CREATED',createdAt:Date.now(),pickedUpAt:null,deliveredAt:null,failedAt:null,receiptVerified:false,
+    status:'CREATED',createdAt:Date.now(),pickedUpAt:null,deliveredAt:null,failedAt:null,crashedAt:null,receiptVerified:false,
   };
 }
 
@@ -276,6 +283,86 @@ function axisBattle(playerMovement={},antMovement={}){
   return {axes,opposed,aligned};
 }
 
+function vectorMagnitude(value={}){return Math.hypot(n(value.x),n(value.y),n(value.z))}
+function normalizedOpposite(value={}){
+  const length=vectorMagnitude(value);
+  return length>0?{x:-n(value.x)/length,y:-n(value.y)/length,z:-n(value.z)/length}:{x:-1,y:0,z:0};
+}
+
+/**
+ * Local game physics preview. KAIOS supplies inertial mass at the CURRENT
+ * 1 KAIOS = 1 kg scale. Impact kinetic energy and atmospheric drag are kept
+ * separate: drag is a flight loss, never a substitute for impact damage.
+ */
+export function calculateMissileImpact({
+  kaiosMass=0,attackC=0,targetC=0,attackDirection={},targetDirection={},
+  atmosphereDensityKgM3=0,dragCoefficient=.3,frontalAreaM2=.02,flightDistanceMeters=0,
+  couplingBps=3500,joulesPerOperationalEnergy=JOULES_PER_OPERATIONAL_ENERGY
+}={}){
+  const massKaios=whole(kaiosMass,'KAIOS_MASS');
+  if(massKaios<1||massKaios>100)return {ok:false,reason:'KAIOS_MISSILE_MASS_OUT_OF_RANGE'};
+  const signedAttackC=n(attackC),signedTargetC=n(targetC);
+  if(!signedAttackC||Math.abs(signedAttackC)>100)return {ok:false,reason:'INVALID_ATTACK_C'};
+  if(signedTargetC&&Math.sign(signedAttackC)===Math.sign(signedTargetC))return {ok:false,reason:'OPPOSITE_C_REQUIRED'};
+  const attackSpeed=cSpeedMetersPerSecond(signedAttackC),targetSpeed=cSpeedMetersPerSecond(signedTargetC);
+  const fallbackTarget={x:1,y:0,z:0};
+  const targetUnit=vectorMagnitude(targetDirection)>0?Object.fromEntries(['x','y','z'].map(axis=>[axis,n(targetDirection[axis])/vectorMagnitude(targetDirection)])):fallbackTarget;
+  const attackUnit=vectorMagnitude(attackDirection)>0?Object.fromEntries(['x','y','z'].map(axis=>[axis,n(attackDirection[axis])/vectorMagnitude(attackDirection)])):normalizedOpposite(targetUnit);
+  const relativeVelocity={x:attackUnit.x*attackSpeed-targetUnit.x*targetSpeed,y:attackUnit.y*attackSpeed-targetUnit.y*targetSpeed,z:attackUnit.z*attackSpeed-targetUnit.z*targetSpeed};
+  const relativeSpeed=vectorMagnitude(relativeVelocity),beta=Math.min(.999999999999,relativeSpeed/LIGHT_SPEED_METERS_PER_SECOND);
+  const massKg=massKaios*KAIOS_MASS_KG;
+  const kineticEnergyJ=beta<.01?.5*massKg*relativeSpeed**2:(1/Math.sqrt(1-beta**2)-1)*massKg*LIGHT_SPEED_METERS_PER_SECOND**2;
+  const density=Math.max(0,n(atmosphereDensityKgM3)),cd=Math.max(0,n(dragCoefficient)),area=Math.max(0,n(frontalAreaM2)),distance=Math.max(0,n(flightDistanceMeters));
+  const dragForceN=.5*density*cd*area*attackSpeed**2,dragWorkJ=Math.min(kineticEnergyJ,dragForceN*distance);
+  const impactEnergyJ=Math.max(0,kineticEnergyJ-dragWorkJ),coupling=bps(couplingBps,'COUPLING_BPS');
+  const coupledEnergyJ=impactEnergyJ*coupling/10000,normalizer=Math.max(1,n(joulesPerOperationalEnergy,JOULES_PER_OPERATIONAL_ENERGY));
+  const operationalDamage=Math.max(1,Math.floor(coupledEnergyJ/normalizer));
+  return {ok:true,simulation:true,weapon:'KAIOS_MASS_MISSILE_GAME_SIMULATION',massKaios,massKg,attackC:signedAttackC,targetC:signedTargetC,attackSpeedMetersPerSecond:attackSpeed,targetSpeedMetersPerSecond:targetSpeed,relativeVelocity,relativeSpeedMetersPerSecond:relativeSpeed,beta,energyFormula:beta<.01?'CLASSICAL_0_5_M_V2':'RELATIVISTIC_GAMMA_MINUS_1_M_C2',kineticEnergyJ,dragModel:'SEPARATE_EN_ROUTE_LOSS',dragForceN,dragWorkJ,impactEnergyJ,couplingBps:coupling,coupledEnergyJ,joulesPerOperationalEnergy:normalizer,operationalDamage,realWeapon:false,mainnetWrite:false};
+}
+
+export function previewMissileInterception(ant,{
+  attackerLifeId,attackerController='PLAYER_LOCAL',playerPosition={},kaiosMass=1,availableKaios=0,attackC=-1,
+  replayKey,now=Date.now(),maxDistance=MISSILE_MAX_RANGE_METERS,atmosphereDensityKgM3=0
+}={}){
+  const mission=ant?.mission,risk=ant?.cargoRisk;
+  if(!mission||mission.status!=='IN_TRANSIT')return {ok:false,reason:'IN_TRANSIT_MISSION_REQUIRED'};
+  if(!attackerLifeId||String(attackerLifeId)===String(ant.lifeId))return {ok:false,reason:'DISTINCT_ATTACKER_LIFE_REQUIRED'};
+  if(String(attackerController)==='DIGITAL_ANT_0001')return {ok:false,reason:'SAME_CONTROLLER_RAID_BLOCKED'};
+  if(!replayKey)return {ok:false,reason:'REPLAY_KEY_REQUIRED'};
+  if(risk.replayKeys.includes(String(replayKey)))return {ok:false,reason:'RAID_REPLAY_BLOCKED'};
+  if(now-risk.lastRaidAt<1500)return {ok:false,reason:'RAID_COOLDOWN'};
+  const mass=whole(kaiosMass,'KAIOS_MASS');
+  if(whole(availableKaios,'AVAILABLE_KAIOS')<mass)return {ok:false,reason:'INSUFFICIENT_LOCAL_KAIOS_AMMUNITION'};
+  const distance=distance3d(playerPosition,ant),range=Math.max(1,n(maxDistance,MISSILE_MAX_RANGE_METERS));
+  if(distance>range)return {ok:false,reason:'OUT_OF_MISSILE_RANGE',distance,maxDistance:range};
+  const targetDirection=mission.lastMovement,attackDirection=normalizedOpposite(targetDirection);
+  const physics=calculateMissileImpact({kaiosMass:mass,attackC,targetC:mission.movementC,attackDirection,targetDirection,flightDistanceMeters:distance,atmosphereDensityKgM3});
+  if(!physics.ok)return physics;
+  return {ok:true,replayKey:String(replayKey),now,distance,attackerLifeId:String(attackerLifeId),attackerController:String(attackerController),physics,expectedEnergyBefore:whole(Math.max(0,Math.round(ant.vehicle.operationalEnergy)),'UFO_ENERGY'),simulation:true};
+}
+
+export function resolveMissileInterception(ant,preview={}){
+  const mission=ant?.mission,risk=ant?.cargoRisk;
+  if(!preview?.ok||!preview.physics)return {ok:false,reason:'VALID_MISSILE_PREVIEW_REQUIRED'};
+  if(!mission||mission.status!=='IN_TRANSIT')return {ok:false,reason:'IN_TRANSIT_MISSION_REQUIRED'};
+  if(risk.replayKeys.includes(String(preview.replayKey)))return {ok:false,reason:'RAID_REPLAY_BLOCKED'};
+  const energyBefore=Math.max(0,n(ant.vehicle.operationalEnergy,ATM_UFO_MAX_OPERATIONAL_ENERGY));
+  if(Math.round(energyBefore)!==preview.expectedEnergyBefore)return {ok:false,reason:'MISSILE_PREVIEW_STALE'};
+  const damage=Math.min(Math.ceil(energyBefore),Math.max(1,whole(preview.physics.operationalDamage,'OPERATIONAL_DAMAGE'))),energyAfter=Math.max(0,energyBefore-damage),destroyed=energyAfter<=0;
+  const pool=whole(mission.gameplayRiskPoolRemaining,'GAMEPLAY_RISK_POOL_REMAINING');
+  const rewardKaios=destroyed?Math.min(pool,mission.maxRaidLoss):0;
+  const loot=destroyed?[
+    {itemId:`${preview.replayKey}:KUFO`,name:'KUFO 仙丹碎晶',kind:'FOOD',qty:1,weightEach:.001,stackable:true,treasureClass:'KUFO_GAME_FUEL_FRAGMENT'},
+    {itemId:`${preview.replayKey}:KSHIP`,name:'KSHIP 飯物質能燃料',kind:'MATERIAL',qty:1,weightEach:.001,stackable:true,treasureClass:'KSHIP_GAME_FEED_MASS'},
+    {itemId:`${preview.replayKey}:TECH`,name:'ATM UFO 製造科技碎片',kind:'TREASURE',qty:1,weightEach:.25,stackable:true,treasureClass:'UFO_TECH_FRAGMENT'},
+  ]:[];
+  const incidentLossKaios=destroyed?Math.min(whole(mission.amount,'CARGO_AMOUNT'),mission.maxRaidLoss):0;
+  const incident={incidentId:`RAID-${raidHash(preview.replayKey).toString(16).padStart(8,'0')}`,missionId:mission.missionId,replayKey:String(preview.replayKey),cause:'MISSILE_INTERCEPTION',occurredAt:preview.now,attackerLifeId:preview.attackerLifeId,distance:preview.distance,physics:structuredClone(preview.physics),energyBefore,damage,energyAfter,destroyed,outcome:destroyed?'UFO_CRASHING_LOCAL_LOOT_PENDING':'MISSILE_HIT_UFO_STILL_FLYING',rewardKaios,loot,incidentLossKaios,custodyPrincipalChanged:false,chainBalanceChanged:false,evidenceStatus:'LOCAL_GAME_EVIDENCE',claimStatus:destroyed&&risk.policy?.status==='ACTIVE'?'CLAIM_ELIGIBLE':'NOT_COVERED_OR_NO_LOSS'};
+  ant.vehicle.operationalEnergy=energyAfter;ant.vitality=clamp(energyAfter,0,100);risk.replayKeys.push(String(preview.replayKey));risk.lastRaidAt=preview.now;risk.incidents.push(incident);
+  if(destroyed){mission.status='CRASHING';mission.flightPhase='CRASHING';mission.lastMovement={x:0,y:0,z:0};ant.vehicle.propulsion='OFFLINE';ant.state='CRASHING'}
+  return {ok:true,success:true,destroyed,rewardKaios:0,ammoConsumedKaios:preview.physics.massKaios,incident:structuredClone(incident),cargoPrincipalChanged:false,mainnetWrite:false};
+}
+
 export function attemptCargoRobbery(ant,{
   attackerLifeId,attackerController='PLAYER_LOCAL',playerPosition={},playerMovement={},attackPower=1,energySpent=1,
   replayKey,now=Date.now(),maxDistance=CARGO_RAID_RANGE_METERS
@@ -375,7 +462,14 @@ export function loadCargo(ant){
 
 export function tickDigitalAntDelivery(ant,{deltaMs=16,speed=null}={}){
   const m=ant.mission;
-  if(!m||m.status!=='IN_TRANSIT')return {ok:false,reason:'NOT_IN_TRANSIT',state:ant.state};
+  if(!m||!['IN_TRANSIT','CRASHING'].includes(m.status))return {ok:false,reason:'NOT_IN_TRANSIT',state:ant.state};
+  if(m.status==='CRASHING'){
+    const descent=Math.max(.01,n(deltaMs)*.008);ant.y=Math.max(0,ant.y-descent);m.lastMovement={x:0,y:-descent,z:0};
+    if(ant.y>0)return {ok:true,arrived:false,delivered:false,crashing:true,state:'CRASHING',remainingAltitude:ant.y};
+    m.status='CRASHED';m.flightPhase='CRASHED';m.crashedAt=Date.now();ant.state='CRASHED';
+    const incident=ant.cargoRisk.incidents.at(-1);if(incident?.destroyed){incident.outcome='UFO_CRASHED_LOCAL_LOOT';incident.lootAvailable=true;m.gameplayRiskPoolRemaining=Math.max(0,whole(m.gameplayRiskPoolRemaining)-incident.rewardKaios)}
+    return {ok:true,arrived:false,delivered:false,crashed:true,state:'CRASHED',incident:incident?structuredClone(incident):null};
+  }
   if(ant.vitality<=15){ant.state='RETREAT';return {ok:false,reason:'LOW_VITALITY',state:ant.state}};
   if(ant.capital<=0){ant.state='RETURN';return {ok:false,reason:'NO_CAPITAL',state:ant.state}};
   const waypoints=m.flightPlan?.waypoints||[m.destination];

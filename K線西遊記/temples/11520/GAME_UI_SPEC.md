@@ -115,10 +115,13 @@
 
 ### Digital Ant 運鈔攔截與貨物保險
 
-- `DIGITAL_ANT_0001` 是可見的 Market Life 與 ATM UFO 運鈔生命；玩家可在真正 XYZ 距離內選擇護送或發動土匪攔截。
-- 攔截方向以玩家與運鈔飛碟的 XYZ movement vector 比較；相反軸形成多空對戰。KX/KY/KZ 仍只表示金融避險，不得拿來偽造實際位移。
+- `DIGITAL_ANT_0001` 是可見的 Market Life 與 ATM UFO 運鈔生命。正式遊戲 HUD 必須在第一個 390×844 viewport 直接顯示「導彈攔截」，不得只藏在 ATM 長表單底部。
+- 物理攻擊使用 XYZ 與反向 signed C：`1 KAIOS = 1 kg` 是本機遊戲彈體質量，相對速度決定撞擊動能。KX/KY/KZ 仍只是金融避險委託，不得拿來偽造實際位移或導彈命中。
+- 低相對速度的撞擊能量為 `E_impact = ½ m v_relative²`；若真正進入相對論區間則用 `(γ-1)mc²`。空氣阻力 `½ρCdAv²` 只是導彈航程損失，不是取代撞擊傷害的公式。
+- 飛碟 `operational energy = 0` 表示推進離線、停止原任務並沿 Y 軸墜落；不表示 `mc² = 0`，也不表示質量消失。
 - 受限制 KAIOS 庫存不得由瀏覽器戰鬥直接改寫鏈上 ownership/balance。成功攔截只可取得有明示來源與上限的本機遊戲 risk-pool reward；真實貨物損失、保險理賠或轉帳必須另經正式 receipt/settlement。
-- 攔截必須驗證在途任務、距離、近期 movement evidence、不同 Life ID、能量成本與 replay key；同一事件不得重播領獎。
+- 導彈必須驗證在途任務、範圍、反向 C、不同 Life ID、本機 KAIOS 彈體支出與 replay key；同一事件不得重播領獎。掉寶只能在飛碟真正落地後發生。
+- 現階段 KUFO、KSHIP、ATM UFO 製造科技皆為清楚標示的本機遊戲物品，不是鏈上 Token mint、真實核材料或真實武器教程。
 - AI Ant Company 可在既有公司內提供 Cargo Risk Desk。保單至少分開盜竊／強劫、天災、貨損與運送中斷，並顯示保額、免賠額、保費、reserve、理賠狀態與 `LOCAL SIMULATION / NO CHAIN SETTLEMENT`。
 - Cargo principal、客戶資產與受限制庫存不得充作保險 reserve。沒有可驗證 reserve 時只能報價／經紀，不得假裝已承保或已理賠。
 

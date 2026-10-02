@@ -54,11 +54,13 @@ document.addEventListener('k11520:cargo-robbery-resolved',event=>{
   const detail=event.detail||{},reward=Math.max(0,Math.min(100,Number(detail.rewardKaios)||0)),incidentId=String(detail.incidentId||'');
   const cargoSnapshot=globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.();
   const incident=cargoSnapshot?.cargoRisk?.incidents?.find(item=>item.incidentId===incidentId);
-  if(!reward||!/^RAID-[0-9a-f]{8}$/i.test(incidentId)||cargoRaidRewardReceipts.has(incidentId)||incident?.outcome!=='ROBBERY_SUCCESS_LOCAL_REWARD'||incident.rewardKaios!==reward)return;
+  const verifiedOutcome=['ROBBERY_SUCCESS_LOCAL_REWARD','UFO_CRASHED_LOCAL_LOOT'].includes(incident?.outcome);
+  if(!/^RAID-[0-9a-f]{8}$/i.test(incidentId)||cargoRaidRewardReceipts.has(incidentId)||!verifiedOutcome||incident.rewardKaios!==reward)return;
   cargoRaidRewardReceipts.add(incidentId);
-  productEvent('LOOT_DROP',{reward});
+  if(reward)productEvent('LOOT_DROP',{reward});
+  for(const item of incident.loot||[])globalThis.K11520Backpack?.addItem?.({...item,rewardId:`cargo-crash:${incidentId}:${item.itemId}`});
   try{playerLife.recordEvent({id:`cargo-raid:${incidentId}`,type:'LOOT_DROP'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}
-  toast(`攔截成功 · 本機風險池 ${reward} KAIOS · 非鏈上貨物轉帳`,true);
+  toast(incident.outcome==='UFO_CRASHED_LOCAL_LOOT'?`飛碟墜落 · 本機掉寶已驗證 · ${reward} KAIOS 風險池獎勵`:`攔截成功 · 本機風險池 ${reward} KAIOS · 非鏈上貨物轉帳`,true);
 });
 S.kaios=playerStore.snapshot().kaios;
 setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elapsedMs:10000})},10000);
@@ -92,7 +94,10 @@ function claimDailyJourney(){
   syncWorldFeedback();
 }
 syncWorldFeedback();
-globalThis.__K11520_PRODUCT__=Object.freeze({snapshot:()=>({...playerStore.snapshot(),...playerProgressSnapshot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED',crossMarket:crossMarketSnapshot(),marketEngine:marketEngineSnapshot()})});
+globalThis.__K11520_PRODUCT__=Object.freeze({
+  snapshot:()=>({...playerStore.snapshot(),...playerProgressSnapshot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED',crossMarket:crossMarketSnapshot(),marketEngine:marketEngineSnapshot()}),
+  spendLocalKaios:(amount,purpose='LOCAL_GAME_PURCHASE')=>{const result=playerStore.spendKaios(amount,{purpose});S.kaios=playerStore.snapshot().kaios;hud();return result}
+});
 let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';
 const executionLabel=()=>isTestnet()?'BSC TESTNET · NO REAL VALUE':'SIMULATION';

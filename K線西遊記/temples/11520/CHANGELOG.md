@@ -1,5 +1,13 @@
 # 11520 Changelog
 
+## 2026-10-03 — Visible KAIOS missile interception and ATM UFO crash loop
+
+- Promoted the Digital Ant interception action from the bottom of a long ATM sheet to a persistent, pointer-reachable mobile HUD button.
+- Added local-game KAIOS missile mass accounting at the CURRENT `1 KAIOS = 1 kg` scale, opposite signed-C targeting, relative-velocity kinetic energy, a separate atmospheric-drag work term and a public gameplay-energy normalization.
+- Added ATM UFO operational energy, propulsion shutdown, Y-axis crash motion and ground-impact-gated loot. Energy reaching zero means loss of propulsion, never disappearance of mass.
+- Added exact local KAIOS ammunition spending and bounded, replay-protected crash rewards: mission risk-pool KAIOS plus local-game KUFO, KSHIP and UFO technology fragments. Restricted cargo principal and chain balances remain unchanged.
+- Kept KX/KY/KZ orders exclusively in the hedge domain; XYZ/C missile combat does not place or settle a market order and does not perform a Mainnet write.
+
 ## 2026-10-03 — Digital Ant XYZ cargo raid and Cargo Risk Desk
 
 - Added a playable XYZ cargo interception gate for `DIGITAL_ANT_0001`: the player must be within range, provide recent opposing physical movement, spend local game energy, use a distinct Life ID and pass replay/cooldown checks.

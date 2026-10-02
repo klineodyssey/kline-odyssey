@@ -128,6 +128,23 @@ AI Ant Company 既有公司架構內設 `CARGO_RISK_DESK`，不建立第二家�
 
 保險事故與玩家戰利品分帳：玩家 reward 來自 game risk pool；保險 claim 只補償 carrier/insured 的 verified incident loss。真實保費、理賠與鏈上貨物仍需獨立 signer/receipt/settlement authority。
 
+### 6.3 KAIOS 質量導彈與飛碟墜落（遊戲模擬）
+
+「導彈攔截」必須是主遊戲 HUD 的可見動作，不能藏在 ATM 長表單底部。但這個動作只是 11520 local game simulation，不授權真實武器、鏈上 KAIOS 支出、真實貨物轉移或 Mainnet write。
+
+彈體質量依 CURRENT 使用 `1 KAIOS = 1 kg`。玩家需用可驗證的本機 KAIOS 遊戲進度支付彈體，且只能在任務 `IN_TRANSIT`、距離小於導彈範圍、attacker Life ID 不同、signed C 與飛碟反向、replay key 未使用時發射。
+
+衝擊物理分為：
+
+- 低相對速度：`E_kinetic = 1/2 × m × v_relative²`。
+- 相對論速度：`E_kinetic = (γ - 1) × m × c²`。
+- 大氣航程損耗：`F_drag = 1/2 × ρ × Cd × A × v²`，`W_drag = F_drag × distance`。
+- 有效撞擊能量：`E_impact = max(0, E_kinetic - W_drag)`。
+
+空氣阻力是航程損耗，不是撞擊傷害的替代公式。Runtime 使用公開的 gameplay normalization 把 joule 投影到飛碟 `0..100 operational energy`；此 normalization 是遊戲平衡，不是對真實材料或核武器的工程主張。
+
+當 `operational energy = 0`，飛碟只是推進離線，停止原路線後沿 Y 軸墜落到地面。這不是 `E = 0 = mc²`，質量不會消失。只有墜落完成後才可產生 `UFO_CRASHED_LOCAL_LOOT`，且戰利品只能包含任務先前宣告的 local risk-pool KAIOS 以及明確標記為本機遊戲物品的 KUFO 碎晶、KSHIP 飯物質能燃料與 ATM UFO 製造科技碎片。Restricted cargo principal 與 chain balance 不改變。
+
 ## 7. 一圖一目了然
 正式遊戲畫面以 3D 世界為主。怪物／物流生命頭頂可顯示：
 - LIFE_ID/名稱（精簡）
