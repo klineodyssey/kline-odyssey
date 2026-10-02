@@ -60,6 +60,7 @@
     "function fortuneMin() view returns (uint256)",
     "function fortuneMax() view returns (uint256)",
     "function kgen() view returns (address)",
+    "function lampPricePerDay() view returns (uint256)",
     "function timeOfDaySeconds() view returns (uint256)",
     "function currentDayIndex() view returns (uint256)"
   ];
@@ -276,6 +277,7 @@
       }
       const rendered = options && options.full ? this.lines.join(" | ") : text;
       this.targets.forEach(function(id){
+        if(options && options.heartOnly && id !== "kh-log") return;
         const el = $(id);
         if(el && !el.dataset.kgenBusMute) el.textContent = rendered;
       });
@@ -1904,10 +1906,24 @@
       return String(amount);
     },
     getVowAmount: function(){
-      return this.readWholeAmount("kh-vow-amount", "8", "還願");
+      return this.readRitualInteger("kh-vow-amount", "還願數量");
     },
     getLampDays: function(){
-      return this.readWholeAmount("kh-lamp-days", "8", "點燈");
+      return this.readRitualInteger("kh-lamp-days", "點燈天數", "3650");
+    },
+    readRitualInteger: function(id, label, max){
+      this.ensureEthers();
+      const value = String($(id) && $(id).value || "").trim();
+      if(!value) throw new Error("請輸入" + label);
+      if(!/^\d+$/.test(value)) throw new Error(label + "需為正整數");
+      const amount = ethers.BigNumber.from(value);
+      if(amount.isZero() || amount.gt(max || ethers.constants.MaxUint256)) throw new Error(label + "超出範圍（1–" + (max || "uint256") + "）");
+      return amount.toString();
+    },
+    getVowOption: function(){
+      const value = String($("kh-vow-option") && $("kh-vow-option").value || "");
+      if(!/^[123]$/.test(value)) throw new Error("請選擇還願項目");
+      return Number(value);
     },
     getWishAmount: function(){
       return this.readWholeAmount("kh-wish-amount", "1", "許願");
@@ -1918,7 +1934,10 @@
     getWishHash: function(){
       this.ensureEthers();
       const raw = String(($("kh-wish-text") && $("kh-wish-text").value) || ($("kh-wish") && $("kh-wish").value) || "").trim();
-      if(/^0x[0-9a-fA-F]{64}$/.test(raw)) return raw;
+      if(/^0x[0-9a-fA-F]{64}$/.test(raw)){
+        if(raw === ethers.constants.HashZero) throw new Error("願望 hash 不可為零");
+        return raw;
+      }
       if(!raw) throw new Error("請輸入許願文字或 bytes32 hash");
       return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(raw));
     },
@@ -2322,35 +2341,57 @@
       if(!status) return;
       status.textContent = "許願原文是否上鏈：只有 hash｜合約 makeWish(bytes32) 不收 KGEN、不需 approve｜鏈上事件 WishMade(user,wishHash)｜BscScan → Contract → Events → WishMade 可查 wishHash；原文請本地保存或上 IPFS";
     },
-    sendHeart: async function(label, runner){
+    sendHeart: async function(label, runner, action){
+      // Original transaction authority. Only the three form actions opt into
+      // local feedback/preflight; the known-good Heartbeat path is unchanged.
+      const button = action && $(action.button);
+      if(button && button.dataset.heartPending === "1") return;
+      const report = function(message){
+        StatusRuntime.push(message, action ? {heartOnly:true} : undefined);
+        const output = action && $(action.feedback);
+        if(output){
+          output.textContent = message;
+          // Scroll only the existing open form, never move/re-mount the HUD.
+          if(output.getClientRects().length && !document.body.classList.contains("k12345-heart-collapsed")) output.scrollIntoView({block:"nearest"});
+        }
+      };
+      if(button){ button.dataset.heartPending = "1"; button.setAttribute("aria-busy", "true"); }
       try{
+        const args = action ? action.prepare() : undefined;
+        if(action) report(label + "：檢查錢包／輸入，請稍候…");
         if(/fortuneClaim/.test(label) && !HolyCupRuntime.isComplete()){
           StatusRuntime.push("發財金：三聖盃未完成（" + HolyCupRuntime.count + "/3）");
           return;
         }
         if(!this.hasInjectedWallet() && !this.state.address){
-          StatusRuntime.push(label + "：未連錢包");
+          report(label + "：錢包尚未連線，請先連接錢包");
           if(window.web3 && typeof window.web3.openWalletHub === "function") window.web3.openWalletHub();
           return;
         }
         if(!this.state.heartData && this.state.readError){
-          StatusRuntime.push(label + "：功能等待鏈上資料");
+          report(label + "：功能等待鏈上資料");
         }
         await this.ensureConnected();
         if(!this.isOnBSC()){
-          StatusRuntime.push(label + "：請切換至 BSC（鏈 ID 56）");
+          report(label + "：請切換至 BSC（鏈 ID 56）");
           return;
         }
+        const account = this.state.address;
+        if(action && action.funding){
+          report(label + "：正在讀取 KGEN 餘額與 Allowance…");
+          await ApproveRuntime.checkRitualFunding(action.funding, args[args.length - 1]);
+        }
         if(!window.confirm("確認送出交易：" + label + "\n\n會花 BNB gas，鏈上交易不可逆。")){
-          StatusRuntime.push("已取消：" + label);
+          report("已取消：" + label);
           return;
         }
         const contract = await this.heartContract();
-        StatusRuntime.push("送出中：" + label);
-        const tx = await runner(contract);
-        StatusRuntime.push("Tx sent：" + tx.hash);
+        if(action && this.state.address !== account) throw new Error("錢包帳號已變更，請重新確認操作");
+        report("送出中：" + label + (action ? "，請在錢包確認；尚未成交" : ""));
+        const tx = await runner(contract, args);
+        report("Tx sent：" + tx.hash);
         const receipt = await tx.wait();
-        StatusRuntime.push("成功：" + label + "｜Block " + receipt.blockNumber);
+        report("成功：" + label + "｜Block " + receipt.blockNumber);
         await this.refreshChainData(false);
       }catch(error){
         const msg = asErrorMessage(error);
@@ -2364,7 +2405,9 @@
           StatusRuntime.push("BNB Gas 不足");
           return;
         }
-        StatusRuntime.push("失敗：" + label + "｜" + msg);
+        report((error && (error.code === 4001 || error.code === "ACTION_REJECTED") ? "交易已取消：" : "失敗：") + label + "｜" + msg);
+      }finally{
+        if(button){ delete button.dataset.heartPending; button.removeAttribute("aria-busy"); }
       }
     },
     bindFields: function(){
@@ -2384,9 +2427,9 @@
         },
         "kh-heartbeat": function(){ self.sendHeart("heartbeatClaim 整點心跳", function(contract){ return contract.heartbeatClaim(); }); },
         "kh-ignite": function(){ self.sendHeart("igniteAndClaim 轉日呼吸", function(contract){ return contract.igniteAndClaim(); }); },
-        "kh-vow": function(){ self.sendHeart("vowTo 還願", function(contract){ return contract.vowTo(Number($("kh-vow-option") && $("kh-vow-option").value || 1), self.getVowAmount()); }); },
-        "kh-lamp": function(){ self.sendHeart("lightLamp 點燈", function(contract){ return contract.lightLamp(self.getLampDays()); }); },
-        "kh-wishbtn": function(){ self.sendHeart("makeWish 許願", function(contract){ return contract.makeWish(self.getWishHash()); }); },
+        "kh-vow": function(){ self.sendHeart("vowTo 還願", function(contract, args){ return contract.vowTo(args[0], args[1]); }, {button:"kh-vow", feedback:"kh-vow-feedback", funding:"vow", prepare:function(){ return [self.getVowOption(), self.getVowAmount()]; }}); },
+        "kh-lamp": function(){ self.sendHeart("lightLamp 點燈", function(contract, args){ return contract.lightLamp(args[0]); }, {button:"kh-lamp", feedback:"kh-lamp-feedback", funding:"lamp", prepare:function(){ return [self.getLampDays()]; }}); },
+        "kh-wishbtn": function(){ self.sendHeart("makeWish 許願", function(contract, args){ return contract.makeWish(args[0]); }, {button:"kh-wishbtn", feedback:"kh-wish-feedback", prepare:function(){ return [self.getWishHash()]; }}); },
         "kh-festival1": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[1], function(contract){ return contract.festivalClaim(1); }); },
         "kh-festival2": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[2], function(contract){ return contract.festivalClaim(2); }); },
         "kh-newyear": function(){ self.sendHeart("newYearCountdownClaim 跨年倒數", function(contract){ return contract.newYearCountdownClaim(); }); },
@@ -2429,7 +2472,10 @@
     slots: [
       { key: "fortune", label: "發財金", getter: function(){ return HeartRuntime.getFortuneAmount(); } },
       { key: "vow", label: "還願", getter: function(){ return HeartRuntime.getVowAmount(); } },
-      { key: "lamp", label: "點燈", getter: function(){ return HeartRuntime.getLampDays(); } }
+      { key: "lamp", label: "點燈", getter: function(){
+        if(HeartRuntime.state.lampPricePerDay == null) throw new Error("點燈單價尚待鏈上確認");
+        return ethers.BigNumber.from(HeartRuntime.state.lampPricePerDay).mul(HeartRuntime.getLampDays()).toString();
+      } }
     ],
     init: function(){
       if(this.inited) return;
@@ -2527,6 +2573,31 @@
     refresh: function(){
       return HeartRuntime.refreshChainData(true);
     },
+    readLampPrice: async function(){
+      const heart = new ethers.Contract(CHAIN.HEART, HEART_VIEW_ABI, HeartRuntime.state.provider);
+      HeartRuntime.state.lampPricePerDay = (await heart.lampPricePerDay()).toString();
+      return HeartRuntime.state.lampPricePerDay;
+    },
+    checkRitualFunding: async function(key, whole){
+      // Read only. Insufficient approval never auto-approves or sends a ritual.
+      const state = HeartRuntime.state;
+      const heart = new ethers.Contract(CHAIN.HEART, HEART_VIEW_ABI, state.provider);
+      const tokenAddress = await heart.kgen();
+      if(tokenAddress.toLowerCase() !== CHAIN.KGEN.toLowerCase()) throw new Error("Heart KGEN 地址不符，停止交易");
+      const token = new ethers.Contract(tokenAddress, ERC20_VIEW_ABI, state.provider);
+      const values = await Promise.all([token.decimals(), token.balanceOf(state.address), token.allowance(state.address, CHAIN.HEART)]);
+      const cost = key === "lamp" ? ethers.BigNumber.from(await this.readLampPrice()).mul(whole).toString() : whole;
+      const required = ethers.utils.parseUnits(cost, values[0]);
+      state.tokenDecimals = values[0]; state.kgenBal = values[1]; state.allowance = values[2];
+      this.renderStatus();
+      if(values[1].lt(required)) throw new Error("KGEN 餘額不足；需要 " + cost + " KGEN");
+      if(values[2].lt(required)){
+        const select = $("kh-approve-target");
+        if(select) select.value = key;
+        this.updateApproveButtonLabel();
+        throw new Error("Approve required：需要 " + cost + " KGEN 授權；請到原 Approve 區按「Approve " + (key === "lamp" ? "點燈" : "還願") + "金額」，授權完成後再按本操作。未自動送出任何交易。");
+      }
+    },
     approveFortune: async function(){
       return this.approveSlot("fortune");
     },
@@ -2543,6 +2614,7 @@
         }
         await HeartRuntime.ensureConnected();
         await HeartRuntime.refreshChainData(false);
+        if(key === "lamp") await this.readLampPrice();
         const amountWhole = slot.getter();
         const amount = ethers.utils.parseUnits(String(amountWhole), HeartRuntime.state.tokenDecimals || 18);
         if(!window.confirm("確認授權【" + slot.label + "】金額：" + amountWhole + " KGEN")){
