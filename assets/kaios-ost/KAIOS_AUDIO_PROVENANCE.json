@@ -1,0 +1,255 @@
+{
+  "tracks": [
+    {
+      "TRACK_ID": "11520_THEME",
+      "TITLE": "花果山戰歌 · 雲起金箍",
+      "WORLD": "K11520",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "01-huaguoshan-battle-song.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "01-huaguoshan-battle-song.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/01-huaguoshan-battle-song.master.wav",
+      "masterSha256": "83ed6e3bc7b195c52476e0d64a9c5f38027e6de7f58ece28766e31be2ac6bbb9",
+      "sha256": "7b293e376446dea28422cfb767b8005afd1f88797de51ae38a2e3b5805ab23b6",
+      "bytes": 1512044,
+      "bpm": 112,
+      "qa": {
+        "peakDbFS": -3.59,
+        "rmsDbFS": -16.49,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 17.142857142857142,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    },
+    {
+      "TRACK_ID": "12345_THEME",
+      "TITLE": "心光 · 願火長明",
+      "WORLD": "K12345",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "02-heart-light.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "02-heart-light.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/02-heart-light.master.wav",
+      "masterSha256": "1e653e0fb4db9f40a8ed1136c2ecc699f33e1277d70fe9e67e11f9d490fd0990",
+      "sha256": "25036956c2d88c227824a4db3f3c0dac92835098ee9be8cb26830e1ae646ad1e",
+      "bytes": 2116844,
+      "bpm": 80,
+      "qa": {
+        "peakDbFS": -3.1,
+        "rmsDbFS": -16.48,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 24.0,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    },
+    {
+      "TRACK_ID": "16888_THEME",
+      "TITLE": "星海 · 文明遠航",
+      "WORLD": "K16888",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "03-sea-of-stars.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "03-sea-of-stars.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/03-sea-of-stars.master.wav",
+      "masterSha256": "b3c66ba0491a37b137eb63658504f777b1d9aa3f8dcf23afeeee6b8cb676cfe1",
+      "sha256": "52124369b641a9fbd718822d95706dc2a86ae29c335b18afd4a5dc800cd93666",
+      "bytes": 2228256,
+      "bpm": 76,
+      "qa": {
+        "peakDbFS": -4.22,
+        "rmsDbFS": -16.48,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 25.263174603174605,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    },
+    {
+      "TRACK_ID": "BOSS_THEME",
+      "TITLE": "六相天劫 · 破界",
+      "WORLD": "K11520 / BOSS",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "04-six-phase-titan.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "04-six-phase-titan.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/04-six-phase-titan.master.wav",
+      "masterSha256": "e573a783d4b58afd8122be326c5d14bb290828e259510a4d82e49f2718db1d56",
+      "sha256": "0f35bc511f7b3115cd5cd4b200451a96cb3a39630479a50c9ccf274166caf304",
+      "bytes": 1245220,
+      "bpm": 136,
+      "qa": {
+        "peakDbFS": -3.99,
+        "rmsDbFS": -16.49,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 14.117641723356009,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    },
+    {
+      "TRACK_ID": "VICTORY_THEME",
+      "TITLE": "雲開 · 凱旋",
+      "WORLD": "SHARED / VICTORY",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "05-dawn-after-battle.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "05-dawn-after-battle.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/05-dawn-after-battle.master.wav",
+      "masterSha256": "b5b67f165ff68af43e8424ee335b80e7a47fc59ef087de8e7edcad819ab8bfd4",
+      "sha256": "8468065136e509b47fd200f13aaf28dd439be1ad671c743d25eaa7adaa7e7875",
+      "bytes": 1568044,
+      "bpm": 108,
+      "qa": {
+        "peakDbFS": -3.22,
+        "rmsDbFS": -16.49,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 17.77777777777778,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    },
+    {
+      "TRACK_ID": "LEVEL_UP_MOTIF",
+      "TITLE": "升光 · 星核覺醒",
+      "WORLD": "SHARED / PLAYER + GA600",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "06-light-of-ascent.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "06-light-of-ascent.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/06-light-of-ascent.master.wav",
+      "masterSha256": "a640c56c0ed7e513f4b95c7deba874c6fc82bc67bde42d5cd28070538f063ee6",
+      "sha256": "44ac95bf456e70d61e90016ccf3b4c79246f6e57784c180bb49935668776fc7a",
+      "bytes": 814200,
+      "bpm": 104,
+      "qa": {
+        "peakDbFS": -5.19,
+        "rmsDbFS": -16.48,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 9.23079365079365,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    },
+    {
+      "TRACK_ID": "JOURNEY_THEME",
+      "TITLE": "雲徑 · 取經晨行",
+      "WORLD": "K11520",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "07-mountain-path.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "07-mountain-path.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/07-mountain-path.master.wav",
+      "masterSha256": "5ed0710d6e8167c2ba47b2678625f2aba1003ea42c5355881112cca84f4c7072",
+      "sha256": "94fc7c00398946118371cc8c3da4949891751d72a7ffdb4a2ac51a57bc7461a8",
+      "bytes": 1840740,
+      "bpm": 92,
+      "qa": {
+        "peakDbFS": -3.85,
+        "rmsDbFS": -16.48,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 20.86956916099773,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    },
+    {
+      "TRACK_ID": "DEEP_SPACE_THEME",
+      "TITLE": "星航 · 歸途微光",
+      "WORLD": "K16888",
+      "COMPOSER": "KAIOS / codex-gm-01",
+      "CREATION_DATE": "2026-10-02",
+      "CREATION_METHOD": "Original symbolic composition; deterministic additive/FM/noise synthesis. Circular tail/reverb game loop; complete video master.",
+      "SOURCE_ASSETS": [
+        "render.py",
+        "08-starlight-home.score.json"
+      ],
+      "THIRD_PARTY_RECORDING": "NO",
+      "THIRD_PARTY_SAMPLE": "NO",
+      "COMMERCIAL_MELODY_COPIED": "NO",
+      "GAME_USE": "YES",
+      "VIDEO_USE": "YES",
+      "loop": "08-starlight-home.loop.wav",
+      "master": "artifacts/kaios-original-ost/game-masters/08-starlight-home.master.wav",
+      "masterSha256": "1313be152e454446caed44e222a537078da63a6bd8f5cfee53e10647a357a0da",
+      "sha256": "729086b7220ae51dcc3c9f0d89f1aa7c60e2bf78029adbda4cbe58f199d93d84",
+      "bytes": 2490396,
+      "bpm": 68,
+      "qa": {
+        "peakDbFS": -4.32,
+        "rmsDbFS": -16.48,
+        "clippedSamples": 0,
+        "seamDelta": 0,
+        "durationSeconds": 28.235283446712018,
+        "humanListening": "PENDING_HUMAN_REVIEW"
+      }
+    }
+  ],
+  "sourcePolicy": "KAIOS_FIRST_PARTY_OST_ONLY",
+  "authority": "../kaios-audio.mjs",
+  "rendererSha256": "36fbbb81d384714535dcdcdd4b0e53480d6ee501a71c5412530793ae91196819"
+}

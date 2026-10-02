@@ -86,6 +86,8 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
  const count=()=>page.evaluate(()=>__heartTx.length);
  const open=async id=>{if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();await page.locator(id).tap();};
  try{
+  await page.locator('.nav-music').tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().musicPlaying);
+  await page.evaluate(()=>{window.__heartAudio=[];const play=KAIOS_AUDIO.play;KAIOS_AUDIO.play=event=>{__heartAudio.push(event);return play(event);};});
   await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('世界平安');
   assert.equal(await count(),0,'shortcut only opens the canonical form');
   for(const id of ['kh-wishbtn','kh-heartbeat']){await click(id);await page.waitForTimeout(50);}
@@ -95,6 +97,7 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   const requests=await page.evaluate(()=>__heartTx),decoded=requests.map(tx=>{assert.equal(tx.to.toLowerCase(),'0xb016d4d8f1aed1339101b30722cad6dba9b8c972');const d=txABI.parseTransaction(tx);return{name:d.name,args:[...d.args].map(String)};});
   assert.deepEqual(decoded,[{name:'makeWish',args:[await page.evaluate(()=>ethers.utils.id('世界平安'))]},{name:'heartbeatClaim',args:[]},{name:'vowTo',args:['2','9']},{name:'lightLamp',args:['8']}]);
   assert.equal(confirmations,4,'four original confirmations, no bypass of sendHeart');
+  await page.waitForFunction(()=>__heartAudio.length===4);assert.deepEqual(await page.evaluate(()=>__heartAudio),['WISH','HEARTBEAT','REPAY','LIGHT_LAMP'],'motifs follow confirmed canonical receipts, not button taps');
   await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('');await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/請輸入許願/);assert.equal(confirmations,4,'invalid input before wallet confirmation');
   assert.ok(await feedback('kh-wish').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}),'validation must be visible, not only written below the viewport');
   await page.screenshot({path:`${OUT}/heart-action-${width}-wish-error.png`});
@@ -289,21 +292,55 @@ async function walletRoundTripQA(){
 try{
 if(!preservation&&!heartOnly)await walletRoundTripQA();
 if(!preservation&&!walletOnly)await heartActionQA();
-for(const id of (walletOnly||heartOnly||process.argv.includes('--layout-only')?[]:preservation?['16888']:['12345','16888']))for(const [width,height]of (preservation?[[360,844],[390,844],[412,844],[432,844],[480,844]]:[[390,844],[844,390]])){
+for(const id of (walletOnly||heartOnly||process.argv.includes('--layout-only')?[]:preservation?['16888']:['12345','16888']))for(const [width,height]of (id==='16888'?[[360,844],[390,844],[412,844],[432,844],[480,844]]:[[390,844],[844,390]])){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
  const errors=[],commercialRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('request',r=>{if(/\/music\/.*(?:\.mp3|playlist\.json)/i.test(r.url()))commercialRequests.push(r.url());});
+ if(id==='16888'){
+  // Deterministic transport for the exact same immutable original image (Git
+  // blob 34569785d74e6959f206e1904a8987221dcb851e). A stalled raw GitHub image
+  // otherwise holds the original window.onload/app.init hostage. No app stub.
+  await page.route('https://raw.githubusercontent.com/klineodyssey/kline-odyssey/62dd71c64630001cc7d067079cfc63093fd64413/**/assets/fairy.png',route=>route.fulfill({path:'K線西遊記/temples/16888/assets/fairy.png',contentType:'image/png'}));
+ }
  await page.addInitScript(()=>{const Real=window.AudioContext||window.webkitAudioContext;window.__qaAudioContexts=[];window.__qaAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const analyser=this.context.createAnalyser();connect.call(this,analyser);window.__qaAnalysers.push(analyser);}return result;};if(Real){window.AudioContext=class extends Real{constructor(...args){super(...args);window.__qaAudioContexts.push(this);}};window.webkitAudioContext=window.AudioContext;}});
  await page.goto(BASE+`/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/${id}/index.html`,{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.KAIOS_AUDIO_CONTROL,{timeout:45000});
+ if(id==='16888')await page.waitForLoadState('load',{timeout:45000});
  await page.waitForTimeout(2500); // Legacy optional visual modules settle after DOMContentLoaded.
  const read=()=>page.evaluate(()=>window.KAIOS_AUDIO.snapshot());
  assert.equal((await read()).contextState,'NOT_CREATED');assert.equal((await read()).world,id);
+ if(id==='16888'){
+  if(await page.locator('#btn-guide-close').isVisible())await page.locator('#btn-guide-close').tap();
+  assert.equal(await page.locator('#universe-nav > .nav-music').count(),1,'original audio parent');
+  assert.equal(await page.locator('#universe-nav > [data-kaios-return=PORTAL]').count(),1,'original return parent');
+  assert.equal(await page.locator('.kaios-audio-panel').count(),0,'no replacement audio UI');
+  assert.equal(await page.locator('.nav-music').textContent(),'飛碟音響');
+  assert.equal(await page.locator('[data-kaios-return=PORTAL]').evaluate(el=>getComputedStyle(el).position),'static','not a floating header card');
+  assert.equal(await page.locator('.nav-audio').isVisible(),true);
+  const nav=await page.locator('#universe-nav').boundingBox();assert.ok(Math.abs(nav.y-125)<.01,'original nav top retained');
+  assert.equal(await page.locator('#music-file').isDisabled(),true);
+  // Exercise original non-financial controls, never connect/sign a wallet.
+  const chainBefore=await page.evaluate(()=>chainLive);await page.locator('#chainToggleBtn').tap();assert.equal(await page.evaluate(()=>chainLive),!chainBefore);
+  await page.locator('#chainToggleBtn').tap();assert.equal(await page.evaluate(()=>chainLive),chainBefore,'original read-only chain status toggle, not a panel opener');
+  for(const [button,panel]of [['#betToggleBtn','#bet-live-panel'],['#boardToggleBtn','#board-panel']]){
+   const before=await page.locator(panel).evaluate(el=>el.style.display);
+   await page.locator(button).tap();assert.notEqual(await page.locator(panel).evaluate(el=>el.style.display),before,`${button}: original panel opens`);
+   await page.locator(button).tap();assert.equal(await page.locator(panel).evaluate(el=>el.style.display),before,`${button}: original panel closes`);
+   assert.deepEqual(await page.locator('#universe-nav').boundingBox(),nav,'panel cycle retains navigation');
+  }
+  await page.evaluate(()=>web3.openWalletHub());assert.equal(await page.locator('#walletHub').isVisible(),true);await page.evaluate(()=>web3.closeWalletHub());
+  const before=await page.locator('#warp-input-val').inputValue();await page.locator('#warp-input-val').tap();assert.notEqual(await page.locator('#warp-input-val').inputValue(),before,'original Warp input');
+ }
  await page.screenshot({path:`${OUT}/world-${id}-${width}x${height}.png`});
  await page.locator('.nav-music').tap({timeout:15000});
- await page.waitForTimeout(400);
+ await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().musicPlaying);
  assert.equal((await read()).musicPlaying,true,'FIRST TAP must enable audible music, not only open settings');
- await page.locator('.nav-music').tap();
- await page.locator('.kaios-audio-panel').waitFor({state:'visible'});
+ if(id==='16888'){
+  await page.locator('#music-panel').waitFor({state:'visible'});
+  for(let cycle=0;cycle<3;cycle++){await page.locator('#music-panel button').filter({hasText:'關閉'}).tap();await page.locator('.nav-music').tap();}
+ }else{
+  await page.locator('.nav-music').tap();
+  await page.locator('.kaios-audio-panel').waitFor({state:'visible'});
+ }
  await page.waitForFunction(()=>window.KAIOS_AUDIO.snapshot().musicPlaying);
  assert.equal(await page.evaluate(()=>window.__qaAudioContexts.length),1,'single AudioContext per world');
  assert.equal((await read()).activeMusicLayers,1);
@@ -311,8 +348,28 @@ for(const id of (walletOnly||heartOnly||process.argv.includes('--layout-only')?[
  assert.ok(signal.rms>.008&&signal.peak>.02&&signal.peak<.95,'destination signal: audible digital headroom, not just scheduler state');
  assert.equal(await page.locator('audio').evaluateAll(nodes=>nodes.filter(n=>!n.paused).length),0,'legacy HTML media must not play alongside shared synth');
  await page.screenshot({path:`${OUT}/world-${id}-audio-${width}x${height}.png`});
- await page.locator('[data-audio-action=mute]').click();assert.equal((await read()).settings.muted,true);assert.equal((await read()).activeMusicLayers,0);
- await page.getByRole('button',{name:'關閉設定',exact:true}).click();
+ if(id==='16888'){
+  const originalTrack=(await read()).trackId;
+  await page.getByRole('button',{name:'下一首',exact:true}).tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().trackId==='DEEP_SPACE_THEME');
+  await page.getByRole('button',{name:'上一首',exact:true}).tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().trackId==='16888_THEME');
+  await page.locator('#music-shuffle').check();await page.getByRole('button',{name:'下一首',exact:true}).tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().trackId==='DEEP_SPACE_THEME');
+  await page.locator('#music-loop').uncheck();assert.equal((await read()).loopTrack,false);await page.locator('#music-loop').check();
+  await page.getByRole('button',{name:'停止',exact:true}).tap();assert.equal((await read()).trackOffset,0);
+  await page.getByRole('button',{name:'播放',exact:true}).tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().musicPlaying);
+  await page.waitForTimeout(500);
+  await page.locator('#music-panel button').filter({hasText:'暫停'}).tap();assert.ok((await read()).trackOffset>0);assert.equal((await read()).musicPlaying,false);
+  await page.locator('#music-panel button').filter({hasText:'播放'}).tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().musicPlaying);
+  await page.locator('#music-vol').evaluate(el=>el.value='50');await page.locator('#music-vol').dispatchEvent('input');assert.equal((await read()).settings.music,.5);
+  assert.equal(await page.evaluate(()=>ui.beep(660,.1)),true); // original SFX route, shared backend
+  await page.locator('#music-mute').tap();assert.equal((await read()).settings.muted,true);assert.equal((await read()).activeMusicLayers,0);
+  assert.equal(await page.evaluate(()=>KAIOS_AUDIO.tone({frequency:660})),false,'mute gates SFX');
+  await page.locator('#music-mute').tap();await page.waitForFunction(()=>KAIOS_AUDIO.snapshot().musicPlaying);
+  await page.locator('#music-mute').tap();
+  await page.locator('#music-panel button').filter({hasText:'關閉'}).tap();
+ }else{
+  await page.locator('[data-audio-action=mute]').click();assert.equal((await read()).settings.muted,true);assert.equal((await read()).activeMusicLayers,0);
+  await page.getByRole('button',{name:'關閉設定',exact:true}).click();
+ }
  const home=page.locator('[data-kaios-return=PORTAL]');assert.equal(await home.count(),1);assert.equal(new URL(await home.getAttribute('href'),page.url()).href,BASE+'/');
  await home.click();await page.waitForURL(BASE+'/');await page.locator('#primaryPlay').waitFor();
  const state=await page.evaluate(async()=>{const m=await import('./assets/kaios-audio.mjs');return m.getKaiosAudio().snapshot();});assert.equal(state.settings.muted,true);assert.equal(state.contextState,'NOT_CREATED');
