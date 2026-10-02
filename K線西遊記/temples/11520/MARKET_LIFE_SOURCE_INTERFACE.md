@@ -106,3 +106,18 @@ Digital Ant 不需要修改 `game-5d.html`，也不需要知道 Three.js mesh �
 6. source-managed 生命不被 11520 內建 AI 覆寫；
 7. 不以普通攻擊鍵冒充市場 settlement；
 8. 來源 interface 有版本，可追 Git commit。
+
+## 11. Digital Ant 運鈔與對戰法
+
+`DIGITAL_ANT_0001` 的遊戲定位是 `ARMORED_CASH_COURIER_MARKET_GUARDIAN`，不是搶夾家財的土匪，也不是故意死亡餵玩家的魚肉。
+
+- 同向 XYZ 運鈔移動：`ESCORT / TRAVEL_TOGETHER`。
+- 反向 XYZ 運鈔移動：`MOVEMENT_LONG_SHORT_DUEL_WAIT_SETTLEMENT`，畫面可對戰，勝負只能來自正式市場／模擬結算證據。
+- 高威脅或高路線風險：`DEFEND_AND_REROUTE`。
+- 運鈔本金、玩家 Wallet 資產與限制庫存永遠不是戰利品。遊戲獎勵只能來自預先編列的 reward pool。
+
+Physical XYZ/路線方向是運鈔多空對戰的依據，但不得自動變成 KX/KY/KZ 委託。KX/KY/KZ position 只能來自可驗證的貨物／運費／燃料成本避險曝險；沒有曝險時 adapter 發出 neutral positions。
+
+11520 內的 Digital Ant 以 `ATM_UFO_5D` 載具運鈔，路徑必須依序顯示 `ASCEND -> CRUISE_5D -> DESCEND -> LANDED_AWAITING_RECEIPT`。載具是 DIGITAL_ANT_0001 的工作設備，不因顯示新外觀而暗中創生第二個 Life ID。
+
+運鈔對沖只保護已驗證曝險：KAIOS 貨物對 KAIOS 交付負債為 matched asset/liability，預設 `NO_HEDGE`。只有 BNB／KUFO 等可驗證變動成本曝險、存在可用市場、獨立風險準備與正式授權時，才能建立不超過曝險的 hedge candidate。貨物本金不得當保證金，規劃也不等於已下單。

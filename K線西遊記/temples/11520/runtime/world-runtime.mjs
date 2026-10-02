@@ -385,7 +385,7 @@ export function tickSourceManagedLife(m,{playerAxes={},quotes={},now=Date.now(),
   }
   const action=life.lifestyle?.action||'REST';
   const traveling=Boolean(life.world.destination)&&['TRAVEL','EXPLORE','WORK'].includes(action);
-  if(traveling){travelMarketLife(life,{deltaMs,speed:Math.max(.004,finite(m.speed,.01))});}
+  if(traveling&&m.sourceMeta?.motionAuthority!=='DIGITAL_ANT_LOGISTICS_RUNTIME'){travelMarketLife(life,{deltaMs,speed:Math.max(.004,finite(m.speed,.01))});}
   tickMarketLifeNeeds(life,{deltaHours:Math.max(0,finite(deltaMs))/3600000,working:action==='WORK',traveling,resting:action==='REST'||action==='RETIRE',eating:action==='EAT',socializing:action==='SOCIAL'});
   syncSlotFromLife(m);
   if(['TRAVEL','EXPLORE','WORK','REST','RETIRE','EAT','SOCIAL'].includes(action)&&m.visualMode==='OBSERVE')m.visualMode=action;
