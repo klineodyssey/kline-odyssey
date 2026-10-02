@@ -1,8 +1,8 @@
 # 11520 花果山 5D K 線西遊記｜遊戲畫面與器官施工規格
 
 ## Metadata
-- VERSION: 1.2.0
-- REVISION: 2026-09-29.1
+- VERSION: 1.3.0
+- REVISION: 2026-10-03.2
 - STATUS: ACTIVE / SOURCE_OF_TRUTH
 - HUMAN_AUTHORITY: 沈英明
 - FORMAL_RULE: 正式檔名固定不帶版本；版本與 revision 寫在文件內。
@@ -19,6 +19,13 @@
 - HANDOFF: `JIEYAO_HANDOFF_CURRENT.md`
 
 程式與正典衝突時，程式判定為 regression；不得偷偷修改正典來配合錯誤程式。
+
+## 1.1 玩家到府外送閉環
+- 玩家必須先從遊戲 HUD 主動選擇鈔票或一般貨物，才能建立需求；UI 不得憑空造訂單。
+- 收貨點使用該 Player Life 既有 `homePlotId` 與 home XYZ，不建立第二套地址或座標。
+- Digital Ant 使用既有 ATM UFO 完成 XYZ 升空、巡航、降落。抵達只進入 `ARRIVED_AWAITING_RECEIPT`，不自動宣告交付。
+- 只有原下單 Player Life 在住家驗收範圍內，並完成本機遊戲運費支付後，runtime 才產生收據並進入 `DELIVERED`。
+- 收據分列貨物本金、運費收入、員工薪資、營運成本與公司淨額；貨物本金永不列收入。第一階段全部明示 `LOCAL_SIMULATION_ONLY`，不送 Mainnet 交易。
 
 ## 2. 生命／器官施工法
 - 後續施工不得靜默刪除已存在器官。

@@ -267,7 +267,7 @@ function pin11520WalletToggle(){
 if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'')){
   import('./life-visual-bootstrap.mjs').catch(()=>{});
   pin11520WalletToggle();
-  import('./game-mobile-shell.mjs').catch(()=>{});
+  import('./game-mobile-shell.mjs').catch(error=>console.warn('[11520 mobile shell] optional UI degraded',error));
   import('./backpack-ui.mjs').then(()=>import('./living-world-browser-bridge.mjs')).catch(()=>{});
   import('./game-ui-product-fixes.mjs').catch(()=>{});
   import('./real-trading-preflight-ui.mjs').then(({install11520RealTradingPreflightUi})=>install11520RealTradingPreflightUi()).catch(()=>{});
