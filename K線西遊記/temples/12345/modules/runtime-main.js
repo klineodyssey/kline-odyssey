@@ -61,6 +61,14 @@
     "function fortuneMax() view returns (uint256)",
     "function kgen() view returns (address)",
     "function lampPricePerDay() view returns (uint256)",
+    "function festivalEnabled() view returns (bool)",
+    "function festivalWindowStart() view returns (uint256)",
+    "function festivalWindowEnd() view returns (uint256)",
+    "function newYearCountdownEnabled() view returns (bool)",
+    "function newYearWindowStart() view returns (uint256)",
+    "function newYearWindowEnd() view returns (uint256)",
+    "function festivalClaimed(uint8,uint256,address) view returns (bool)",
+    "function newYearCountdownClaimed(uint256,address,uint8) view returns (bool)",
     "function timeOfDaySeconds() view returns (uint256)",
     "function currentDayIndex() view returns (uint256)"
   ];
@@ -161,15 +169,6 @@
     return days > 0 ? days + "天 " + clock : clock;
   }
 
-  function nextLocal(month, day, hour, minute, second){
-    const now = new Date();
-    let target = new Date(now.getFullYear(), month - 1, day, hour || 0, minute || 0, second || 0, 0);
-    if(target <= now){
-      target = new Date(now.getFullYear() + 1, month - 1, day, hour || 0, minute || 0, second || 0, 0);
-    }
-    return target;
-  }
-
   function setText(ids, text){
     ids.forEach(function(id){
       const el = $(id);
@@ -217,17 +216,6 @@
     if(hours && hours.textContent !== parts.hours) hours.textContent = parts.hours;
     if(minutes && minutes.textContent !== parts.minutes) minutes.textContent = parts.minutes;
     if(seconds && seconds.textContent !== parts.seconds) seconds.textContent = parts.seconds;
-  }
-
-  function getFestivalWindowLabel(date){
-    const now = date || new Date();
-    const month = now.getUTCMonth() + 1;
-    const day = now.getUTCDate();
-    const tod = now.getUTCHours() * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();
-    if(month === 5 && day === 20 && tod >= 0 && tod <= 600) return "OPEN 5/20";
-    if(month === 11 && day === 11 && tod >= 0 && tod <= 600) return "OPEN 11/11";
-    if(month === 12 && day === 31 && tod >= 85800 && tod <= 86399) return "OPEN 12/31";
-    return "CLOSED";
   }
 
   const Events = {
@@ -1022,6 +1010,115 @@
   const CountdownRuntime = {
     inited: false,
     shells: [],
+    snapshot: null,
+    refreshing: null,
+    lastAttempt: -Infinity,
+    readError: "",
+    now: function(){ return performance.now(); },
+    controls: [
+      {id:"kh-festival1", kind:1, label:"5/20 悟空生日"},
+      {id:"kh-festival2", kind:2, label:"11/11 孤勇日"},
+      {id:"kh-newyear", kind:3, label:"12/31 跨年領取"},
+      {id:"kgen-v102-festival-520", kind:1, label:"領取 5/20 悟空生日"},
+      {id:"kgen-v102-festival-1111", kind:2, label:"領取 11/11 孤勇日"},
+      {id:"kgen-v102-newyear", kind:3, label:"領取跨年倒數"}
+    ],
+    // Pure UTC projection of the CURRENT contract rules. No Date.now/local-zone
+    // eligibility, no invented default window, and no on-chain state mutation.
+    evaluate: function(kind, snapshot, timestamp){
+      if(!snapshot || !Number.isFinite(timestamp)) return {code:"SYNC_REQUIRED"};
+      const r = snapshot.rules, date = new Date(timestamp * 1000), year = date.getUTCFullYear();
+      const ny = kind === 3, month = ny ? 12 : kind === 1 ? 5 : 11, day = ny ? 31 : kind === 1 ? 20 : 11;
+      const start = ny ? r.newYearWindowStart : r.festivalWindowStart;
+      // Festival uses <= end; NY uses < end AND the first ten UTC minute slots.
+      const end = ny ? Math.min(r.newYearWindowEnd, (Math.floor(start / 60) + 10) * 60, 86400) : Math.min(r.festivalWindowEnd + 1, 86400);
+      const base = Date.UTC(year, month - 1, day) / 1000;
+      const openAt = base + start, closeAt = base + end;
+      const minuteIndex = Math.floor((timestamp - base) / 60) - Math.floor(start / 60);
+      const scope = ny ? "ny:" + year + ":" + minuteIndex : "festival:" + kind + ":" + year;
+      const inside = timestamp >= openAt && timestamp < closeAt;
+      const claimed = snapshot.claims[scope];
+      let nextOpen = timestamp < closeAt ? openAt : Date.UTC(year + 1, month - 1, day) / 1000 + start;
+      if(inside && claimed === true){
+        const nextMinute = base + (Math.floor((timestamp - base) / 60) + 1) * 60;
+        nextOpen = ny && nextMinute < closeAt ? nextMinute : Date.UTC(year + 1, month - 1, day) / 1000 + start;
+      }
+      const enabled = ny ? r.newYearCountdownEnabled : r.festivalEnabled;
+      const code = !enabled ? "DISABLED" : !inside ? "NOT_OPEN" : !snapshot.account ? "WALLET_REQUIRED" : claimed === true ? "ALREADY_CLAIMED" : claimed !== false ? "SYNC_REQUIRED" : "READY";
+      return {code, kind, year, minuteIndex, scope, openAt, closeAt, nextOpen, timestamp};
+    },
+    state: function(kind){
+      const s = this.snapshot;
+      if(!s || this.readError || s.account !== (HeartRuntime.state.address || "") || this.now() - s.observedAt > 30000) return {code:"SYNC_REQUIRED"};
+      return this.evaluate(kind, s, s.timestamp + Math.max(0, Math.floor((this.now() - s.observedAt) / 1000)));
+    },
+    describe: function(state){
+      const labels = {SYNC_REQUIRED:"鏈上活動資料同步中／無法確認，暫不送出", DISABLED:"活動尚未啟用", NOT_OPEN:"尚未開放", ALREADY_CLAIMED:"本期已領取", WALLET_REQUIRED:"活動時間內，請先連接錢包", READY:"可領取（交易仍以鏈上判定為準）"};
+      let text = labels[state.code] || state.code;
+      if(state.nextOpen && ["NOT_OPEN","ALREADY_CLAIMED"].includes(state.code)){
+        const next = new Date(state.nextOpen * 1000);
+        text += "\n下一次開放：台灣時間 " + formatTaipei(next) + "\nUTC " + formatUTC(next) + "\n倒數 " + formatSpan((state.nextOpen - state.timestamp) * 1000);
+      }
+      return text;
+    },
+    refresh: async function(force){
+      if(this.refreshing){ await this.refreshing; if(!force) return; }
+      this.lastAttempt = this.now();
+      const self = this, account = HeartRuntime.state.address || "";
+      this.refreshing = (async function(){
+        try{
+          const provider = HeartRuntime.providerRO();
+          if(!provider || (await provider.getNetwork()).chainId !== 56) throw new Error("WRONG_CHAIN");
+          const block = await provider.getBlock("latest");
+          if(!block || !Number.isSafeInteger(block.timestamp)) throw new Error("BLOCK_UNAVAILABLE");
+          // Re-reading a frozen RPC head must not make an old observation fresh.
+          const previous = self.snapshot;
+          const observedAt = previous && previous.block === block.number && previous.timestamp === block.timestamp ? previous.observedAt : self.now();
+          const overrides = {blockTag:block.number};
+          const heart = new ethers.Contract(CHAIN.HEART, HEART_VIEW_ABI, provider);
+          const names = ["festivalEnabled","festivalWindowStart","festivalWindowEnd","newYearCountdownEnabled","newYearWindowStart","newYearWindowEnd"];
+          const values = await Promise.all(names.map(function(name){ return heart[name](overrides); }));
+          const rules = {};
+          names.forEach(function(name, i){ rules[name] = typeof values[i] === "boolean" ? values[i] : values[i].toNumber(); });
+          if(!(rules.festivalWindowStart >= 0 && rules.festivalWindowEnd > rules.festivalWindowStart && rules.festivalWindowEnd <= 86400 && rules.newYearWindowStart >= 0 && rules.newYearWindowEnd <= 86400 && rules.newYearWindowEnd - rules.newYearWindowStart === 600)) throw new Error("INVALID_WINDOW_CONFIG");
+          const snapshot = {rules, timestamp:block.timestamp, block:block.number, observedAt, account, claims:{}};
+          if(account){
+            const year = new Date(block.timestamp * 1000).getUTCFullYear();
+            const yearly = await Promise.all([heart.festivalClaimed(1,year,account,overrides), heart.festivalClaimed(2,year,account,overrides)]);
+            snapshot.claims["festival:1:" + year] = yearly[0]; snapshot.claims["festival:2:" + year] = yearly[1];
+            const ny = self.evaluate(3,snapshot,block.timestamp);
+            if(block.timestamp >= ny.openAt && block.timestamp < ny.closeAt){
+              snapshot.claims[ny.scope] = await heart.newYearCountdownClaimed(year,account,ny.minuteIndex,overrides);
+            }
+          }
+          // A late response must never project the previous wallet's claims.
+          if(account !== (HeartRuntime.state.address || "")) return;
+          self.snapshot = snapshot; self.readError = "";
+        }catch(error){ self.readError = asErrorMessage(error); }
+      })();
+      try{ await this.refreshing; }finally{ this.refreshing = null; this.render(); }
+    },
+    action: function(kind, id){
+      const self = this;
+      return {button:id, feedback:id + "-feedback", prepare:function(){return [];},
+        preflight:async function(){
+          await self.refresh(true);
+          if(self.readError || !self.snapshot || self.snapshot.account !== HeartRuntime.state.address || self.now() - self.snapshot.observedAt > 30000) throw new Error("SYNC_REQUIRED：鏈上活動資料無法確認，請稍後再試");
+          // Gate against the accepted block timestamp, not a projected countdown.
+          const state = self.evaluate(kind,self.snapshot,self.snapshot.timestamp);
+          if(state.code !== "READY") throw new Error(state.code + "：" + self.describe(state).split("\n")[0] + "；請查看下方活動時間說明");
+        },
+        afterReceipt:async function(){ await self.refresh(true); },
+        describeError:function(error){
+          const message = asErrorMessage(error);
+          if(/FESTIVAL_CLAIMED|NY_CLAIMED/.test(message)) return "本期已領取（ALREADY_CLAIMED）";
+          if(/FESTIVAL_WINDOW|NY_WINDOW|NY_MINUTE|NOT_520|NOT_1111|NOT_1231/.test(message)) return "尚未開放或已離開合約時間窗（WRONG_WINDOW）；請看 UTC／台灣時間說明";
+          if(/FESTIVAL_OFF|NY_OFF/.test(message)) return "活動尚未啟用（NOT_OPEN）";
+          if(/HEART_INSUFFICIENT_FUNDS/.test(message)) return "Heart 活動獎勵餘額不足（CONTRACT_REVERT）";
+          return message;
+        }
+      };
+    },
     init: function(){
       if(this.inited) return;
       this.inited = true;
@@ -1036,33 +1133,42 @@
         shells.push(ensureNyShell(el, false));
       });
       this.shells = shells;
+      this.controls.forEach(function(control){
+        const button = $(control.id);
+        if(!button) return;
+        ["status", "feedback"].forEach(function(suffix){
+          if($(control.id + "-" + suffix)) return;
+          const output = document.createElement("p"); output.id = control.id + "-" + suffix;
+          output.style.cssText = "font-size:12px;line-height:1.45;white-space:pre-line;overflow-wrap:anywhere;margin:6px 0";
+          if(suffix === "feedback"){ output.setAttribute("role","status"); output.setAttribute("aria-live","polite"); }
+          button.insertAdjacentElement("afterend",output);
+        });
+        button.setAttribute("aria-describedby",control.id + "-status " + control.id + "-feedback");
+      });
       this.tick();
     },
-    tick: function(){
-      const nowMs = Date.now();
-      const parts = nyDiffParts(nextLocal(12, 31, 23, 59, 59) - nowMs);
-      this.shells.forEach(function(root){
-        updateNyShell(root, parts);
+    render: function(){
+      const self = this;
+      this.controls.forEach(function(control){
+        const state = self.state(control.kind), button = $(control.id);
+        if(!button) return;
+        button.dataset.festivalState = state.code;
+        const shortLabel = {READY:"可領取",ALREADY_CLAIMED:"本期已領",NOT_OPEN:"尚未開放",DISABLED:"未啟用",WALLET_REQUIRED:"需連錢包",SYNC_REQUIRED:"同步中"}[state.code];
+        setNodeText(button,control.label + " · " + shortLabel);
+        setNodeText($(control.id + "-status"),self.describe(state));
       });
-      setNodeText($("kgen-v102-festival-countdown"), [
-        "跨年 " + formatSpan(nextLocal(12, 31, 23, 59, 59) - nowMs),
-        "520 " + formatSpan(nextLocal(5, 20, 0, 0, 0) - nowMs),
-        "1111 " + formatSpan(nextLocal(11, 11, 0, 0, 0) - nowMs)
-      ].join("｜"));
-      const festLabel = getFestivalWindowLabel(new Date());
-      const festEl = $("kh-festival-open");
-      if(festEl){
-        if(festLabel === "CLOSED"){
-          const nextFest = Math.min(
-            nextLocal(5, 20, 0, 0, 0).getTime() - nowMs,
-            nextLocal(11, 11, 0, 0, 0).getTime() - nowMs,
-            nextLocal(12, 31, 23, 59, 59).getTime() - nowMs
-          );
-          festEl.textContent = "倒數 " + formatSpan(nextFest);
-        }else{
-          festEl.textContent = festLabel;
-        }
-      }
+      const ny = this.state(3), ready = ny.code === "READY" || ny.code === "WALLET_REQUIRED";
+      this.shells.forEach(function(root){
+        setNodeText(root.querySelector(".kgen-ny-prefix"), ready ? "跨年領取開放中，剩餘：" : ny.nextOpen ? "距跨年領取開放：" : "跨年鏈上時間同步中：");
+        updateNyShell(root,nyDiffParts(ny.nextOpen ? ((ready ? ny.closeAt : ny.nextOpen) - ny.timestamp) * 1000 : 0));
+      });
+      setNodeText($("kgen-v102-festival-countdown"),"活動以 BSC 區塊 UTC 時間判定；下方同步顯示台灣時間。倒數不代表交易已領取。");
+      setNodeText($("kh-festival-open"),this.readError ? "鏈上活動資料無法確認" : [1,2,3].map(function(kind){return (kind===1?"520":kind===2?"1111":"跨年")+" "+self.state(kind).code;}).join("｜"));
+    },
+    tick: function(){
+      this.render();
+      const needsClaims = [1,2,3].some((kind)=>this.state(kind).code === "SYNC_REQUIRED");
+      if(!this.refreshing && (this.now() - this.lastAttempt >= 12000 || needsClaims && !this.readError && this.snapshot && this.now() - this.lastAttempt >= 1000)) this.refresh();
     }
   };
 
@@ -2352,7 +2458,7 @@
         if(output){
           output.textContent = message;
           // Scroll only the existing open form, never move/re-mount the HUD.
-          if(output.getClientRects().length && !document.body.classList.contains("k12345-heart-collapsed")) output.scrollIntoView({block:"nearest"});
+          if(output.getClientRects().length && (!document.body.classList.contains("k12345-heart-collapsed") || output.closest("dialog[open]"))) output.scrollIntoView({block:"nearest"});
         }
       };
       if(button){ button.dataset.heartPending = "1"; button.setAttribute("aria-busy", "true"); }
@@ -2377,6 +2483,7 @@
           return;
         }
         const account = this.state.address;
+        if(action && action.preflight) await action.preflight();
         if(action && action.funding){
           report(label + "：正在讀取 KGEN 餘額與 Allowance…");
           await ApproveRuntime.checkRitualFunding(action.funding, args[args.length - 1]);
@@ -2392,9 +2499,10 @@
         report("Tx sent：" + tx.hash);
         const receipt = await tx.wait();
         report("成功：" + label + "｜Block " + receipt.blockNumber);
+        if(action && action.afterReceipt) await action.afterReceipt();
         await this.refreshChainData(false);
       }catch(error){
-        const msg = asErrorMessage(error);
+        const msg = action && action.describeError ? action.describeError(error) : asErrorMessage(error);
         if(/fortuneClaim/i.test(label) && /FORTUNE_COOLDOWN|cooldown/i.test(msg)){
           const snap = this.evaluateFortuneClaim();
           ClaimDebugRuntime.update(Object.assign(snap, { fortuneRevertReason: msg, txReady: "no" }));
@@ -2430,12 +2538,12 @@
         "kh-vow": function(){ self.sendHeart("vowTo 還願", function(contract, args){ return contract.vowTo(args[0], args[1]); }, {button:"kh-vow", feedback:"kh-vow-feedback", funding:"vow", prepare:function(){ return [self.getVowOption(), self.getVowAmount()]; }}); },
         "kh-lamp": function(){ self.sendHeart("lightLamp 點燈", function(contract, args){ return contract.lightLamp(args[0]); }, {button:"kh-lamp", feedback:"kh-lamp-feedback", funding:"lamp", prepare:function(){ return [self.getLampDays()]; }}); },
         "kh-wishbtn": function(){ self.sendHeart("makeWish 許願", function(contract, args){ return contract.makeWish(args[0]); }, {button:"kh-wishbtn", feedback:"kh-wish-feedback", prepare:function(){ return [self.getWishHash()]; }}); },
-        "kh-festival1": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[1], function(contract){ return contract.festivalClaim(1); }); },
-        "kh-festival2": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[2], function(contract){ return contract.festivalClaim(2); }); },
-        "kh-newyear": function(){ self.sendHeart("newYearCountdownClaim 跨年倒數", function(contract){ return contract.newYearCountdownClaim(); }); },
-        "kgen-v102-festival-520": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[1], function(contract){ return contract.festivalClaim(1); }); },
-        "kgen-v102-festival-1111": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[2], function(contract){ return contract.festivalClaim(2); }); },
-        "kgen-v102-newyear": function(){ self.sendHeart("newYearCountdownClaim 跨年倒數", function(contract){ return contract.newYearCountdownClaim(); }); }
+        "kh-festival1": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[1], function(contract){ return contract.festivalClaim(1); }, CountdownRuntime.action(1,"kh-festival1")); },
+        "kh-festival2": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[2], function(contract){ return contract.festivalClaim(2); }, CountdownRuntime.action(2,"kh-festival2")); },
+        "kh-newyear": function(){ self.sendHeart("newYearCountdownClaim 跨年倒數", function(contract){ return contract.newYearCountdownClaim(); }, CountdownRuntime.action(3,"kh-newyear")); },
+        "kgen-v102-festival-520": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[1], function(contract){ return contract.festivalClaim(1); }, CountdownRuntime.action(1,"kgen-v102-festival-520")); },
+        "kgen-v102-festival-1111": function(){ self.sendHeart("festivalClaim " + FESTIVAL_LABELS[2], function(contract){ return contract.festivalClaim(2); }, CountdownRuntime.action(2,"kgen-v102-festival-1111")); },
+        "kgen-v102-newyear": function(){ self.sendHeart("newYearCountdownClaim 跨年倒數", function(contract){ return contract.newYearCountdownClaim(); }, CountdownRuntime.action(3,"kgen-v102-newyear")); }
       };
       Object.keys(actions).forEach(function(id){
         const button = $(id);
