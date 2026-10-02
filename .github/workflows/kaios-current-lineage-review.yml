@@ -138,6 +138,7 @@ jobs:
           npm run compile
           npm run storage:validate
           node tools/validate-templeheart-storage.mjs --storage-self-test
+          node tools/validate-templeheart-storage.mjs --clean-continuation-self-test
       - name: Mandatory full local EVM V3.4 safety suite
         if: steps.boundary.outputs.solidity == 'true'
         working-directory: KGEN-KAIOS
@@ -150,7 +151,25 @@ jobs:
         working-directory: KGEN-KAIOS
         # Offline template only; unknown Human parameters remain explicit.
         # Publish as an artifact to avoid a self-referential committed SHA.
-        run: node tools/validate-templeheart-storage.mjs --mainnet-manifest
+        run: |
+          node tools/validate-templeheart-storage.mjs --mainnet-manifest
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const report = JSON.parse(fs.readFileSync('reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json'));
+          const m = report.unsignedMainnetManifest;
+          assert.equal(m.sourceHead, execFileSync('git', ['rev-parse', 'HEAD'], {encoding:'utf8'}).trim());
+          assert.equal(m.chainId, 56);
+          assert.equal(m.broadcast, false);
+          assert.equal(m.signerLoaded, false);
+          assert.equal(m.mainnetTransactionsSent, 0);
+          assert.equal(m.initializerBinding.initializerCalldataHash, null);
+          assert.equal(m.initializerBinding.status, 'HUMAN_PARAMETERS_REQUIRED_FOR_ACTUAL_CALLDATA_HASH');
+          assert.equal(m.testnetReference.mainnetParameterSource, false);
+          assert.ok(Object.values(m.parameters).every(value => value.startsWith('HUMAN_FINAL')));
+          console.log('EXACT_HEAD_UNSIGNED_MANIFEST_BINDING_PASS');
+          NODE
       - name: Preserve exact-head safety and unsigned manifest evidence
         if: steps.boundary.outputs.solidity == 'true'
         uses: actions/upload-artifact@v4

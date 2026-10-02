@@ -63,6 +63,7 @@ jobs:
           npm run compile
           npm run storage:validate
           node tools/validate-templeheart-storage.mjs --storage-self-test
+          node tools/validate-templeheart-storage.mjs --clean-continuation-self-test
       - name: Local EVM adversarial and unsigned package tests
         working-directory: KGEN-KAIOS
         # No RPC credentials or signer secrets are provided to this job.

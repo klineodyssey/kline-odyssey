@@ -81,6 +81,12 @@ test("fresh V3.4 package deploys locally with atomic proxy initializer, distinct
   assert.equal(pkg.caps.kgenTransfer,"0");
   assert.equal(pkg.status,"UNSIGNED_CANDIDATE_NOT_MAINNET_READY");
   assert.equal(pkg.transactions.length,4);
+  assert.equal(pkg.initializerCalldataHash,keccak256(pkg.initializer));
+  for(const step of pkg.transactions) {
+    assert.equal(step.chainId,97);
+    assert.equal(step.calldataHash,keccak256(step.data));
+    assert.equal(step.value,"0");
+  }
   assert.equal(pkg.legacyHeart,config.legacyHeart);
   assert.equal(pkg.transactions[3].label ?? pkg.transactions[3].step,"ADMIN_BIND_LEGACY_CONTINUITY");
   for (const [change, expected] of [

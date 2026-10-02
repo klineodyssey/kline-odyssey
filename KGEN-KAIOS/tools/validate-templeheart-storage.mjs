@@ -19,8 +19,9 @@ import {
   parseUnits,
 } from "ethers";
 import solc from "solc";
+const ABANDONED_CLEAN_INTENT_HASH="0xe00e782aadefeb31750d6e36f41f67f7e499806f5bdea18f4e6f8814fa34207a";
 
-const operationFlags = ["--storage-self-test", "--testnet-preflight", "--testnet-rehearsal", "--testnet-bootstrap-rehearsal", "--testnet-clean-rehearsal", "--deployment-package", "--mainnet-manifest", "--live-readonly"];
+const operationFlags = ["--storage-self-test", "--clean-continuation-self-test", "--testnet-preflight", "--testnet-rehearsal", "--testnet-bootstrap-rehearsal", "--testnet-clean-rehearsal", "--deployment-package", "--mainnet-manifest", "--live-readonly"];
 if (operationFlags.filter((flag) => process.argv.includes(flag)).length > 1) {
   throw new Error("ONE_OPERATION_ONLY_READ_AND_EXECUTION_MODES_MUST_NOT_MIX");
 }
@@ -204,13 +205,17 @@ const report = {
   continuityBaseline:{version:"3.4.0",ref:continuityBaselineRef,path:baselinePath,preservedEntries:continuityBaseline.length,appendedEntries:continuityAppend.map(({label,slot})=>({label,slot})),recursiveTypeShapeComparison:true},
   failures,
 };
-if(!process.argv.includes("--storage-self-test")) {
+if(!process.argv.includes("--storage-self-test")&&!process.argv.includes("--clean-continuation-self-test")) {
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 }
 console.log(`TempleHeart storage layout: ${report.status} (${baseline.entries.length} V3.3.2 preserved, ${appended.length} appended; ${continuityBaseline.length} V3.4 preserved, legacyHeart-only append; recursive types checked)`);
 if (failures.length) process.exit(1);
 if(process.argv.includes("--storage-self-test"))runStorageShapeSelfTest();
+if(process.argv.includes("--clean-continuation-self-test")) {
+  runCleanContinuationSelfTest();
+  if(process.argv.includes("--local-gas"))console.log(JSON.stringify(await validateLocalContinuationGasBound()));
+}
 
 const TESTNET_CHAIN_ID = 97n;
 const TESTNET_EXECUTION_ACK = "BSC_TESTNET_REHEARSAL_ONLY";
@@ -1262,7 +1267,7 @@ async function buildFreshDeploymentPackage(config) {
     sourceHead:execFileSync("git", ["rev-parse", "HEAD"], {cwd:root, encoding:"utf8"}).trim(),
     sourceDirty:Boolean(execFileSync("git", ["status", "--porcelain", "--untracked-files=no"], {cwd:root, encoding:"utf8"}).trim()),
     compiler:heart.compiler, openzeppelin:"5.0.2", chainId:config.chainId,
-    implementation, proxy, legacyHeart:addresses.legacyHeart, historicalMainnetHeart:legacy, legacyIsProxy:false, roles:addresses, initializer, initArgs,
+    implementation, proxy, legacyHeart:addresses.legacyHeart, historicalMainnetHeart:legacy, legacyIsProxy:false, roles:addresses, initializer, initializerCalldataHash:keccak256(initializer), initArgs,
     implementationCreationCodeHash:keccak256(heart.bytecode), proxyCreationCodeHash:keccak256(proxyDeployment.data),
     implementationRuntimeTemplateHash:keccak256(heart.deployedBytecode), immutableReferences:heart.immutableReferences,
     fortuneMaxWhole:8, fortuneEpochMaxClaims:500, fortuneGame:ZeroAddress,
@@ -1312,11 +1317,23 @@ if(process.argv.includes("--mainnet-manifest")) {
   const sourcePaths=[baselinePath,"KGEN-KAIOS/tools/validate-templeheart-storage.mjs","KGEN-KAIOS/tools/compile-contracts.mjs","KGEN-KAIOS/package-lock.json"];
   const sourceHashes=Object.fromEntries(sourcePaths.map(file=>[file,createHash("sha256").update(fs.readFileSync(path.resolve(root,"..",file))).digest("hex")]));
   if(currentArtifact.sourceSha256!==sourceHashes[baselinePath])throw new Error("STALE_COMPILED_HEART_RUN_COMPILE");
+  const evidence=JSON.parse(fs.readFileSync(bscTestnetEvidenceJsonPath,"utf8"));
+  const initializerTemplate={chainId:56,signature:"initialize(address,address,address,address,address,address,address)",args:["ADMIN","UPGRADER","OPERATOR","HOLY_CUP_SIGNER","kgen","treasury11520","proofSource"]};
   const manifest={
     status:"UNSIGNED_MANIFEST_READY_FOR_HUMAN_PARAMETERS",chainId:56,sourceHead,sourceHashes,
     sourceDirty:Boolean(execFileSync("git",["status","--porcelain","--untracked-files=no"],{cwd:root,encoding:"utf8"}).trim()),
     compiler:currentArtifact.compiler,openzeppelin:"5.0.2",implementationCreationCodeHash:keccak256(currentArtifact.bytecode),
     implementationRuntimeTemplateHash:keccak256(currentArtifact.deployedBytecode),immutableReferences:currentArtifact.immutableReferences,
+    initializerBinding:{
+      template:initializerTemplate,templateSha256:createHash("sha256").update(JSON.stringify(initializerTemplate)).digest("hex"),
+      initializerCalldataHash:null,status:"HUMAN_PARAMETERS_REQUIRED_FOR_ACTUAL_CALLDATA_HASH",
+      materializedField:"initializerCalldataHash",algorithm:"keccak256(ABI_ENCODED_INITIALIZE_WITH_FINAL_ADDRESSES)",
+      placeholderHashIsNotCalldataHash:true
+    },
+    testnetReference:{chainId:97,proxy:evidence.cleanRehearsal?.contracts?.proxy?.address??null,
+      implementation:evidence.cleanRehearsal?.contracts?.implementation?.address??null,
+      deployedImplementationCodeHash:evidence.cleanRehearsal?.contracts?.implementation?.codeHash??null,
+      rehearsalStatus:evidence.cleanRehearsal?.status??"NOT_AVAILABLE",mainnetParameterSource:false},
     parameters:{ADMIN:"HUMAN_FINAL",UPGRADER:"HUMAN_FINAL",OPERATOR:"HUMAN_FINAL",HOLY_CUP_SIGNER:"HUMAN_FINAL",INITIAL_HEART_FUNDING:"HUMAN_FINAL",OLD_HEART_RESERVE_ACTION:"HUMAN_FINAL_RECOMMENDED_RETAIN",COOLDOWN_CONTINUITY_POLICY:"HUMAN_FINAL_CONFIRM_LIVE_LEGACY_ENFORCEMENT"},
     verifiedCanonicalAddresses:{legacyHeart:"0xB016D4d8f1aED1339101b30722cad6dbA9B8C972",kgen:"0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be",registry:"0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D",proofSource:"0xD4E67B3a69e41524c424150E6b6e921b01D036db",treasury11520:"0xd0605F4EF10e5C1438F11AF9edc36926769239d6",fortuneGame:ZeroAddress},
     deploymentKind:"NEW_ERC1967_PROXY_NOT_UPGRADE_OF_OLD_DIRECT_HEART",
@@ -1336,7 +1353,6 @@ if(process.argv.includes("--mainnet-manifest")) {
     emergency:["STOP_ON_FIRST_FAILURE_NO_BLIND_RESEND","KEEP_LEGACY_ROUTE_AND_HISTORY","PAUSE_NEW_HEART_ONLY_WITH_AUTHORIZED_OPERATOR","NEVER_CALL_UPGRADE_ON_OLD_DIRECT_HEART","FUTURE_PROXY_UPGRADE_REQUIRES_STORAGE_COMPATIBILITY"],
     humanApproval:false,broadcast:false,signerLoaded:false,mainnetTransactionsSent:0
   };
-  const evidence=JSON.parse(fs.readFileSync(bscTestnetEvidenceJsonPath,"utf8"));
   evidence.unsignedMainnetManifest=manifest;
   fs.writeFileSync(bscTestnetEvidenceJsonPath,`${JSON.stringify(evidence,null,2)}\n`);
   console.log(JSON.stringify({status:manifest.status,sourceHead,mainnetTransactionsSent:0}));
@@ -1346,11 +1362,78 @@ if(process.argv.includes("--mainnet-manifest")) {
 // environment variables and never mutates the historical rehearsal proxy.
 // Receipts are checkpointed before waiting; uncertain broadcasts must be
 // resolved from their recorded hash, never blindly resent.
+function cleanCapCohort(){return [...Array.from({length:61},(_,i)=>510+i),...Array.from({length:28},(_,i)=>600+i)];}
+function guardAbandonedCleanRequest(request,abandoned) {
+  if(BigInt(request.chainId)!==97n||BigInt(request.value)!==0n)throw new Error("CLEAN_CONTINUATION_CHAIN_OR_VALUE");
+  for(const old of abandoned)if(Number(request.nonce)===old.nonce&&(request.to??null)===(old.to??null)&&keccak256(request.data)===old.dataHash)
+    throw new Error("CLEAN_ABANDONED_UNSIGNED_REQUEST_FORBIDDEN");
+}
+function guardAbandonedCleanHash(hash,abandoned) {
+  if(hash===ABANDONED_CLEAN_INTENT_HASH||abandoned.some(o=>o.hash===hash))throw new Error("CLEAN_ABANDONED_SIGNED_HASH_FORBIDDEN");
+}
+function publicUnsignedCleanTransaction(request) {
+  return {chainId:Number(request.chainId),from:request.from,to:request.to??null,data:request.data,value:String(request.value),nonce:Number(request.nonce),gasLimit:String(request.gasLimit),gasPrice:String(request.gasPrice),type:Number(request.type)};
+}
+function runCleanContinuationSelfTest() {
+  let checks=0;const ok=(v)=>{if(!v)throw new Error("CLEAN_CONTINUATION_SELF_TEST");checks++;};
+  const rejects=(f)=>{let rejected=false;try{f();}catch{rejected=true;}ok(rejected);};
+  const old={hash:ABANDONED_CLEAN_INTENT_HASH,nonce:3054,to:null,dataHash:keccak256("0x1234")};
+  const request={chainId:97,value:0,nonce:3054,to:null,data:"0x1234"};
+  rejects(()=>guardAbandonedCleanRequest(request,[old]));
+  rejects(()=>guardAbandonedCleanRequest({...request,chainId:56},[old]));
+  rejects(()=>guardAbandonedCleanRequest({...request,value:1},[old]));
+  guardAbandonedCleanRequest({...request,to:ZeroAddress,data:"0x5678"},[old]);ok(true);
+  guardAbandonedCleanRequest({...request,nonce:3055},[old]);ok(true);
+  rejects(()=>guardAbandonedCleanHash(old.hash,[old]));
+  guardAbandonedCleanHash(id("new allowed test action"),[old]);ok(true);
+  const cohort=cleanCapCohort();ok(cohort.length===89&&new Set(cohort).size===89);ok(!cohort.includes(571));ok(cohort.filter(i=>i<=570).length===61&&cohort.filter(i=>i>=600).length===28);
+  const unsigned=publicUnsignedCleanTransaction({...request,from:ZeroAddress,gasLimit:337000n,gasPrice:100000000n,type:0});
+  ok(Object.keys(unsigned).sort().join(",")==="chainId,data,from,gasLimit,gasPrice,nonce,to,type,value");
+  ok(unsigned.gasPrice==="100000000"&&unsigned.value==="0"&&!JSON.stringify(unsigned).includes("private"));
+  console.log(JSON.stringify({status:"CLEAN_CONTINUATION_SELF_TEST_PASS",checks,chainWrites:0,artifactWrites:0}));
+}
+async function validateLocalContinuationGasBound() {
+  // In-memory Ganache only. Never attach this clock helper to an external RPC.
+  const {setupLineage,deploy:localDeploy,artifact:localArtifact,cleanupProviders,ETHER}=await import("../tests/helpers.mjs");
+  try {
+    const context=await setupLineage({chainId:31337});
+    if((await context.provider.getNetwork()).chainId!==31337n)throw new Error("CLEAN_LOCAL_GAS_TEST_CHAIN");
+    const owner=await context.owner.getAddress(),implementation=await localDeploy("KGEN_TempleHeart_Upgradeable",context.owner);
+    const init=implementation.interface.encodeFunctionData("initialize",[owner,owner,owner,owner,context.kgen.target,owner,context.kaios.target]);
+    const proxy=await localDeploy("ERC1967Proxy",context.owner,[implementation.target,init]);
+    const heart=new Contract(proxy.target,localArtifact("KGEN_TempleHeart_Upgradeable").abi,context.owner);
+    const legacy=await localDeploy("MockLegacyHeart",context.owner,[context.kgen.target]);
+    await(await heart.initializeV340(context.registry.target)).wait();
+    await(await heart.bindLegacyContinuity(legacy.target)).wait();
+    await(await context.kgen.transfer(heart.target,21000n*ETHER)).wait();
+    const actor=await localDeploy("RehearsalActor",context.owner);
+    const makeWish=(name)=>actor.execute(heart.target,heart.interface.encodeFunctionData("makeWish",[id(name),id("LOCAL_CAP_CIV")]),{gasLimit:500000});
+    await(await makeWish("LOCAL_PREP_A")).wait();
+    await(await actor.execute(heart.target,heart.interface.encodeFunctionData("heartbeatClaim"),{gasLimit:500000})).wait();
+    const prior=await heart.lastHeartbeatAt(actor.target);
+    await(await makeWish("LOCAL_PREP_B")).wait();
+    if(await heart.lastHeartbeatAt(actor.target)!==prior)throw new Error("CLEAN_LOCAL_PREP_RESET_COOLDOWN");
+    const freshActor=await localDeploy("RehearsalActor",context.owner);
+    await(await freshActor.execute(heart.target,heart.interface.encodeFunctionData("makeWish",[id("LOCAL_IGNITE_WISH"),id("LOCAL_IGNITE_CIV")]),{gasLimit:500000})).wait();
+    const now=(await context.provider.getBlock("latest")).timestamp;
+    await context.provider.send("evm_setTime",[(Math.floor(now/86400)+1)*86400000]);
+    await context.provider.send("evm_mine",[]);
+    const data=heart.interface.encodeFunctionData("igniteAndClaim");
+    const estimate=await freshActor.execute.estimateGas(heart.target,data);
+    const gasLimitBound=500000n;
+    if(estimate*120n/100n+10000n>gasLimitBound)throw new Error("CLEAN_LOCAL_IGNITE_GAS_BOUND");
+    const receipt=await(await freshActor.execute(heart.target,data,{gasLimit:gasLimitBound})).wait();
+    if(receipt.status!==1||receipt.gasUsed>gasLimitBound)throw new Error("CLEAN_LOCAL_IGNITE_RECEIPT_BOUND");
+    return {status:"PASS",environment:"LOCAL_GANACHE_31337_NO_EXTERNAL_CLOCK_MUTATION",sameCivilizationWishPreservesHeartbeat:true,igniteGasUsed:String(receipt.gasUsed),igniteEstimatedGas:String(estimate),igniteGasLimitBound:String(gasLimitBound)};
+  } finally {cleanupProviders();}
+}
 async function runCleanTestnetRehearsal() {
   const provider = new JsonRpcProvider(env("BSC_TESTNET_RPC_URL"));
   provider.pollingInterval = 1000;
   let evidence;
-  const historical = JSON.parse(fs.readFileSync(bscTestnetEvidenceJsonPath, "utf8"));
+  let writerLock;
+  const writerLockPath=`${bscTestnetEvidenceJsonPath}.writer-lock`;
+  let historical = JSON.parse(fs.readFileSync(bscTestnetEvidenceJsonPath, "utf8"));
   const persist = () => {
     historical.cleanRehearsal = evidence;
     const temporary=`${bscTestnetEvidenceJsonPath}.pending`;
@@ -1375,6 +1458,9 @@ async function runCleanTestnetRehearsal() {
     if (!gasPrice || gasPrice > BigInt(caps.gasPriceWei)) fail("CLEAN_GAS_PRICE_CAP");
     console.log(JSON.stringify({operation:"CLEAN_TESTNET_PREFLIGHT",chainId:97,publicSigner:wallet.address,balanceTBNB:formatEther(balance),gasPriceWei:String(gasPrice),caps,mainnetTransactionsSent:0}));
     if (process.env.BSC_TESTNET_EXECUTE !== "BSC97_FRESH_ISOLATED_V34_ONLY") return;
+    try {writerLock=fs.openSync(writerLockPath,"wx");fs.writeFileSync(writerLock,JSON.stringify({pid:process.pid,chainId:97,startedAt:new Date().toISOString()}));}
+    catch {fail("CLEAN_WRITER_ALREADY_ACTIVE_CHECK_LOCK_READ_ONLY");}
+    historical=JSON.parse(fs.readFileSync(bscTestnetEvidenceJsonPath,"utf8"));
     if (balance < parseUnits("0.01",18)) fail("CLEAN_TEST_GAS_INSUFFICIENT");
     const head = execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim();
     const compiled = artifact("KGEN_TempleHeart_Upgradeable");
@@ -1389,6 +1475,7 @@ async function runCleanTestnetRehearsal() {
       legacyHistoricalRehearsalPreserved:true,sourceDirty:true
     };
     if (evidence.chainId !== 97 || evidence.publicSigner !== wallet.address || evidence.sourceSha256 !== currentSourceHash) fail("CLEAN_RESUME_IDENTITY_OR_SOURCE_MISMATCH");
+    if(process.argv.includes("--continue-caps")&&(!historical.cleanRehearsal||evidence.checks.FIVE_HUNDRED_DISTINCT_CLAIMS!=="PASS"||evidence.checks.BOT_501_EPOCH_CAP?.status!=="PASS"))fail("CLEAN_CONTINUATION_REQUIRES_FINAL_FORTUNE_PASS");
     evidence.sourceDirty=true;
     evidence.executionRuns??=[];
     evidence.executionRuns.push({at:new Date().toISOString(),sourceHead:head,sourceDirty:true,toolSha256:createHash("sha256").update(fs.readFileSync(import.meta.filename)).digest("hex"),contractSourceSha256:currentSourceHash,mode:process.argv.includes("--ignite")?"IGNITE":process.argv.includes("--stress")?"STRESS":"CORE"});
@@ -1406,6 +1493,7 @@ async function runCleanTestnetRehearsal() {
       const dataHash=keccak256(request.data);
       const existing=evidence.operations[label];
       if(existing) {
+        if(existing.status==="ABANDONED_UNBROADCAST_INTENT")fail("CLEAN_ABANDONED_INTENT_MUST_NOT_EXECUTE");
         if(existing.dataHash!==dataHash || existing.to!==(request.to??null)) fail("CLEAN_RESUME_CALLDATA_MISMATCH");
         const receipt=await provider.getTransactionReceipt(existing.hash);
         if(!receipt) fail("CLEAN_PENDING_TRANSACTION_STOP_NO_RESEND");
@@ -1427,8 +1515,14 @@ async function runCleanTestnetRehearsal() {
       if(boundedSpend+gasLimit*freshFees.gasPrice>BigInt(caps.totalFeeWei)) fail("CLEAN_TOTAL_TEST_GAS_CAP");
       if(signerBalance<gasLimit*freshFees.gasPrice)fail("CLEAN_TEST_GAS_INSUFFICIENT");
       const nonce=await provider.getTransactionCount(wallet.address,"pending");
-      const raw=await wallet.signTransaction({...request,value:0n,gasLimit,gasPrice:freshFees.gasPrice,chainId:97,nonce,type:0});
-      const op={label,to:request.to??null,dataHash,hash:keccak256(raw),nonce,status:"INTENT_RECORDED",gasLimit:String(gasLimit)};
+      const latestNonce=await provider.getTransactionCount(wallet.address,"latest");
+      if(latestNonce!==nonce)fail("CLEAN_PENDING_NONCE_DIFFERS_FROM_CONFIRMED_STOP");
+      const unsigned={...request,from:wallet.address,value:0n,gasLimit,gasPrice:freshFees.gasPrice,chainId:97,nonce,type:0};
+      const abandoned=Object.values(evidence.operations).filter(o=>o.status==="ABANDONED_UNBROADCAST_INTENT");
+      guardAbandonedCleanRequest(unsigned,abandoned);
+      const raw=await wallet.signTransaction(unsigned);
+      guardAbandonedCleanHash(keccak256(raw),abandoned);
+      const op={label,to:request.to??null,dataHash,hash:keccak256(raw),nonce,status:"INTENT_RECORDED",gasLimit:String(gasLimit),gasPriceWei:String(freshFees.gasPrice),unsignedTransaction:publicUnsignedCleanTransaction(unsigned),nonceSource:"LIVE_LATEST_EQUALS_PENDING_NOT_FORCED"};
       evidence.operations[label]=op;persist();
       const tx=await provider.broadcastTransaction(raw);
       if(tx.hash!==op.hash)fail("CLEAN_BROADCAST_HASH_MISMATCH");
@@ -1517,6 +1611,128 @@ async function runCleanTestnetRehearsal() {
       return new Contract(evidence.actors[index].address,actorAbi,provider);
     };
     const actorCall=(label,a,target,method,args=[])=>call(label,a,"execute",[target.target,target.interface.encodeFunctionData(method,args)]);
+    if(process.argv.includes("--continue-caps")) {
+      const abandoned=evidence.operations.DEPLOY_actor571;
+      if(!abandoned||abandoned.hash!==ABANDONED_CLEAN_INTENT_HASH)fail("CLEAN_CONTINUATION_INCIDENT_IDENTITY");
+      // The explicit Human continuation order abandons an uncertain intent; it
+      // does not assert that the failed RPC request never left the process.
+      const originalReceipt=await provider.getTransactionReceipt(abandoned.hash);
+      const originalTransaction=await provider.getTransaction(abandoned.hash);
+      if(originalReceipt||originalTransaction)fail("CLEAN_ABANDONED_INTENT_OBSERVED_RECONCILE_BEFORE_CONTINUATION");
+      if(!evidence.capContinuation) {
+        if(process.env.BSC_TESTNET_CONTINUATION!=="ABANDON_ACTOR571_NO_REPLAY")fail("CLEAN_CONTINUATION_HUMAN_ACK_REQUIRED");
+        const independent=new JsonRpcProvider("https://data-seed-prebsc-1-s1.bnbchain.org:8545");
+        let observation;
+        try {
+          if(BigInt(await independent.send("eth_chainId",[]))!==97n)fail("CLEAN_CONTINUATION_INDEPENDENT_CHAIN");
+          if(await independent.getTransaction(abandoned.hash)||await independent.getTransactionReceipt(abandoned.hash))fail("CLEAN_ABANDONED_INTENT_OBSERVED_INDEPENDENT_NODE");
+          const latestNonce=await independent.getTransactionCount(wallet.address,"latest"),pendingNonce=await independent.getTransactionCount(wallet.address,"pending");
+          if(latestNonce!==pendingNonce)fail("CLEAN_CONTINUATION_PENDING_TRANSACTION_PRESENT");
+          observation={at:new Date().toISOString(),source:"INDEPENDENT_PUBLIC_BSC97",receipt:null,transactionPresent:false,latestNonce,pendingNonce};
+        } finally {await independent.destroy();}
+        abandoned.status="ABANDONED_UNBROADCAST_INTENT";
+        abandoned.abandonedAt=new Date().toISOString();
+        abandoned.abandonment={authority:"EXPLICIT_HUMAN_CONTINUATION_ORDER",meaning:"ABANDONED_UNCERTAIN_RPC_INTENT_NOT_PROOF_OF_NEVER_BROADCAST",noReconstruction:true,noReplay:true,observation};
+        evidence.executionBlocker.resolution={at:new Date().toISOString(),authority:"EXPLICIT_HUMAN_CONTINUATION_ORDER",action:"ABANDON_ORIGINAL_INTENT_NO_REPLAY_CONTINUE_NEW_VALID_TEST_ACTIONS",originalIncidentPreserved:true};
+        evidence.capContinuation={authority:"EXPLICIT_HUMAN_CONTINUATION_ORDER",startedAt:new Date().toISOString(),cohort:cleanCapCohort(),fortune:"FINAL_PASS_NO_RERUN",originalIncidentPreserved:true,originalIntentHash:abandoned.hash,status:"PREPARING",writerPid:process.pid};
+        persist();
+      }
+      const continuation=evidence.capContinuation;
+      if(JSON.stringify(continuation.cohort)!==JSON.stringify(cleanCapCohort()))fail("CLEAN_CONTINUATION_COHORT_MISMATCH");
+      continuation.writerPid=process.pid;continuation.status="RUNNING";evidence.status="CAP_CONTINUATION_RUNNING";persist();
+      {
+        const localValidation=continuation.gasForecast?.localValidation??await validateLocalContinuationGasBound();
+        const confirmed=Object.values(evidence.operations).filter(o=>o.status==="CONFIRMED");
+        const observedMax=(prefix)=>confirmed.filter(o=>o.label.startsWith(prefix)).reduce((n,o)=>BigInt(o.gasLimit)>n?BigInt(o.gasLimit):n,0n);
+        const deployLimit=observedMax("DEPLOY_actor"),wishLimit=observedMax("HEARTBEAT_WISH_"),heartbeatLimit=observedMax("HEARTBEAT_");
+        if(!deployLimit||!wishLimit||!heartbeatLimit)fail("CLEAN_CONTINUATION_GAS_HISTORY_MISSING");
+        const newActors=continuation.cohort.filter(i=>!evidence.actors[i]).length;
+        const missingWishes=continuation.cohort.filter(i=>i>=600&&!evidence.operations[`CAP_CONTINUATION_WISH_${i}`]).length;
+        const preparationCalls=evidence.operations.CAP_CONTINUATION_PREPARE_ACTOR_510?0:1;
+        const heartbeatClaims=evidence.checks.BOT_89_HEARTBEAT_CAP?.status==="PASS"?0:88-confirmed.filter(o=>o.label.startsWith(`HEARTBEAT_STRESS_${continuation.heartbeatHour}_`)).length;
+        const igniteClaims=evidence.checks.BOT_89_IGNITE_CAP?.status==="PASS"?0:88-confirmed.filter(o=>o.label.startsWith(`IGNITE_STRESS_${continuation.igniteDay}_`)).length;
+        const remainingGas=BigInt(newActors)*deployLimit+BigInt(missingWishes+preparationCalls)*wishLimit+BigInt(heartbeatClaims)*heartbeatLimit+BigInt(igniteClaims)*BigInt(localValidation.igniteGasLimitBound);
+        const freshGasPrice=(await provider.getFeeData()).gasPrice;
+        if(!freshGasPrice||freshGasPrice>BigInt(caps.gasPriceWei))fail("CLEAN_GAS_PRICE_CAP");
+        const combinedReceiptFees=BigInt(evidence.totalFeeWei)+(evidence.frontendLive?.receipts??[]).reduce((n,r)=>n+BigInt(r.feeWei),0n);
+        const balanceSpend=parseUnits(evidence.startingBalanceTBNB,18)-await provider.getBalance(wallet.address);
+        const alreadySpent=balanceSpend>combinedReceiptFees?balanceSpend:combinedReceiptFees;
+        const projected=alreadySpent+remainingGas*freshGasPrice;
+        continuation.gasForecastHistory??=[];
+        if(continuation.gasForecast)continuation.gasForecastHistory.push(continuation.gasForecast);
+        continuation.gasForecast={at:new Date().toISOString(),localValidation,alreadySpentWei:String(alreadySpent),includesFrontendReceiptFees:true,newActors,missingWishes,preparationCalls,heartbeatClaims,igniteClaims,deployGasLimit:String(deployLimit),wishGasLimit:String(wishLimit),heartbeatGasLimit:String(heartbeatLimit),remainingGasBound:String(remainingGas),gasPriceWei:String(freshGasPrice),projectedTotalWei:String(projected),fixedTotalCapWei:caps.totalFeeWei};persist();
+        if(projected>BigInt(caps.totalFeeWei))fail("CLEAN_CONTINUATION_WHOLE_RUN_GAS_CAP");
+      }
+      if(BigInt(continuation.gasForecast.projectedTotalWei)>BigInt(caps.totalFeeWei))fail("CLEAN_CONTINUATION_WHOLE_RUN_GAS_CAP");
+      const waitForBlock=async(target,label)=>{
+        continuation.status=label;continuation.waitUntilBlockTimestamp=target;persist();
+        let block=await provider.getBlock("latest"),lastNotice=0;
+        while(block.timestamp<target){
+          if(block.timestamp-lastNotice>=300){console.log(JSON.stringify({status:label,currentBlockTimestamp:block.timestamp,targetBlockTimestamp:target}));lastNotice=block.timestamp;}
+          await new Promise(resolve=>setTimeout(resolve,15000));block=await provider.getBlock("latest");
+        }
+        continuation.status="RUNNING";persist();return block;
+      };
+      if(!process.argv.includes("--ignite")) {
+        const firstCohortActor=await actor(510);
+        if(!continuation.firstPreparation) {
+          const wish=await heart.activeWish(firstCohortActor.target);
+          continuation.firstPreparation={actorIndex:510,civilizationId:wish.civilizationId,wishHash:id(`CAP_CONTINUATION_${heart.target}_510`),heartbeatBefore:String(await heart.lastHeartbeatAt(firstCohortActor.target))};persist();
+        }
+        const prep=continuation.firstPreparation;
+        await actorCall("CAP_CONTINUATION_PREPARE_ACTOR_510",firstCohortActor,heart,"makeWish",[prep.wishHash,prep.civilizationId]);
+        if(!continuation.firstPreparationVerified) {
+          assert(String(await heart.lastHeartbeatAt(firstCohortActor.target))===prep.heartbeatBefore,"CONTINUATION_PREPARATION_DOES_NOT_RESET_HEARTBEAT");
+          continuation.firstPreparationVerified=true;persist();
+        }
+        for(const i of continuation.cohort.filter(i=>i>=600)) {
+          const a=await actor(i);
+          await actorCall(`CAP_CONTINUATION_WISH_${i}`,a,heart,"makeWish",[id(`CAP_WISH_${heart.target}_${i}`),id(`CAP_CIV_${heart.target}_${i}`)]);
+        }
+        continuation.preparedActors=continuation.cohort.length;persist();
+        if(continuation.heartbeatHour==null) {
+          let eligibleAt=0;
+          for(const i of continuation.cohort)eligibleAt=Math.max(eligibleAt,Number(await heart.lastHeartbeatAt(evidence.actors[i].address))+3600);
+          const now=(await provider.getBlock("latest")).timestamp;
+          continuation.heartbeatHour=Math.ceil(Math.max(now,eligibleAt)/3600);
+          continuation.heartbeatEligibleAt=eligibleAt;persist();
+        }
+        const hour=continuation.heartbeatHour;
+        if(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS") {
+          await waitForBlock(hour*3600,"WAITING_REAL_HEARTBEAT_COHORT_HOUR");
+          for(const i of continuation.cohort) {
+            if(Math.floor((await provider.getBlock("latest")).timestamp/3600)!==hour)fail("CLEAN_CONTINUATION_HEARTBEAT_HOUR_EXPIRED_STOP");
+            const a=await actor(i),label=`HEARTBEAT_STRESS_${hour}_${i}`;
+            if(evidence.operations[label]){await actorCall(label,a,heart,"heartbeatClaim");continue;}
+            const count=await heart.heartbeatHourClaims(hour);
+            if(count<88n)await actorCall(label,a,heart,"heartbeatClaim");
+            else {await rejection("BOT_89_HEARTBEAT_CAP",heart,"heartbeatClaim",[],a.target,"HeartbeatHourFull");continuation.heartbeatRejectedActor=a.target;persist();break;}
+          }
+          assert(await heart.heartbeatHourClaims(hour)===88n,"EIGHTY_EIGHT_SAME_HOUR_HEARTBEATS");
+          continuation.heartbeat={status:"PASS",hour,successfulClaims:88,rejection:"HeartbeatHourFull",earlierHour61NotCounted:true};persist();
+        }
+      } else {
+        if(evidence.checks.BOT_89_HEARTBEAT_CAP?.status!=="PASS"||continuation.preparedActors!==89)fail("CLEAN_CONTINUATION_IGNITE_PREPARATION_INCOMPLETE");
+        const now=(await provider.getBlock("latest")).timestamp;
+        continuation.igniteDay??=now%86400<600?Math.floor(now/86400):Math.floor(now/86400)+1;persist();
+        const day=continuation.igniteDay;
+        await waitForBlock(day*86400,"WAITING_REAL_UTC_IGNITE_WINDOW");
+        for(const i of continuation.cohort) {
+          const block=await provider.getBlock("latest");
+          if(Math.floor(block.timestamp/86400)!==day||block.timestamp%86400>=600)fail("CLEAN_IGNITE_WINDOW_ENDED_STOP");
+          const a=await actor(i),label=`IGNITE_STRESS_${day}_${i}`;
+          if(evidence.operations[label]){await actorCall(label,a,heart,"igniteAndClaim");continue;}
+          if(await heart.igniteDayClaims(day)<88n)await actorCall(label,a,heart,"igniteAndClaim");
+          else {await rejection("BOT_89_IGNITE_CAP",heart,"igniteAndClaim",[],a.target,"IgniteDayFull");continuation.igniteRejectedActor=a.target;persist();break;}
+        }
+        assert(await heart.igniteDayClaims(day)===88n,"EIGHTY_EIGHT_LIVE_IGNITES");
+        evidence.checks.IGNITE={status:"PASS",kind:"REAL_BSC97_UTC_WINDOW",dayIndex:day};
+        continuation.ignite={status:"PASS",day,successfulClaims:88,rejection:"IgniteDayFull"};persist();
+      }
+      evidence.status=evidence.checks.BOT_89_HEARTBEAT_CAP?.status==="PASS"&&evidence.checks.BOT_89_IGNITE_CAP?.status==="PASS"?"CLEAN_REHEARSAL_PASS":"CORE_AND_FORTUNE_PASS_REAL_CAP_WINDOW_PENDING";
+      continuation.status=evidence.status;continuation.writerPid=null;evidence.updatedAt=new Date().toISOString();persist();
+      console.log(JSON.stringify({status:evidence.status,proxy:heart.target,totalTestGasTBNB:formatEther(BigInt(evidence.totalFeeWei)),mainnetTransactionsSent:0}));return;
+    }
     const prepare = async (index,suffix="FIRST",options={}) => {
       const a=await actor(index);const row=evidence.actors[index];
       const p=row[suffix]??{civilizationId:id(`CLEAN_CIV_${heart.target}_${index}_${suffix}`),wishHash:id(`CLEAN_WISH_${heart.target}_${index}_${suffix}`),holyCupProofId:id(`CLEAN_CUP_${heart.target}_${index}_${suffix}`)};
@@ -1640,7 +1856,13 @@ async function runCleanTestnetRehearsal() {
     const safe=/^(CLEAN_|STALE_)/.test(error.message??"") ? error.message : (typeof error.code==="string"?error.code:"CLEAN_OPERATION_FAILED");
     if(evidence){evidence.status="STOPPED";evidence.lastFailure={code:safe,at:new Date().toISOString()};try{persist();}catch{}}
     console.error(JSON.stringify({status:"CLEAN_REHEARSAL_STOPPED",code:safe,mainnetTransactionsSent:0}));process.exitCode=1;
-  } finally {await provider.destroy();}
+  } finally {
+    if(writerLock!==undefined){
+      if(evidence?.capContinuation){evidence.capContinuation.writerPid=null;evidence.capContinuation.writerReleasedAt=new Date().toISOString();try{persist();}catch{}}
+      fs.closeSync(writerLock);fs.unlinkSync(writerLockPath);
+    }
+    await provider.destroy();
+  }
 }
 
 if(process.argv.includes("--testnet-clean-rehearsal"))await runCleanTestnetRehearsal();

@@ -368,6 +368,17 @@ Registry initialization, one-time legacy binding, then read-only verification.
 Funding remains a separately approved exact transaction. No Mainnet signer is
 loaded or transaction sent by either package-generation mode.
 
+The materialized package includes `initializerCalldataHash = keccak256(initializer)`
+and a separate calldata hash for each unsigned transaction. Before final Human
+role addresses exist, the template records a reproducible initializer recipe hash
+and `initializerCalldataHash: null` with an explicit parameters-required status;
+it never represents a placeholder hash as executable calldata. The compiled
+implementation runtime template hash includes immutable-reference metadata, while
+the observed BSC97 implementation code hash is kept in `testnetReference` only,
+never promoted into Mainnet role/config parameters. CI publishes this unsigned
+template as an artifact named for the tested head, avoiding a self-referential
+commit SHA in a committed report.
+
 ### Current 12345 frontend continuation (no parallel Wallet or Heart)
 
 The existing `K線西遊記/temples/12345/modules/runtime-main.js` owns the candidate
