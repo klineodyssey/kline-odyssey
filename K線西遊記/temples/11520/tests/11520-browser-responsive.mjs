@@ -24,7 +24,7 @@ const profiles=PRODUCTION?[{name:'pages-360',width:360,height:740},{name:'pages-
 // Optional local diagnosis only; default CI still exercises every profile.
 const selectedProfiles=process.env.K11520_RESPONSIVE_PROFILE?profiles.filter(p=>p.name===process.env.K11520_RESPONSIVE_PROFILE):profiles;
 assert.ok(selectedProfiles.length,'Unknown K11520_RESPONSIVE_PROFILE');
-const selectors=['#kspaceTarget','#k11520MonsterGuide','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack'];
+const selectors=['#kspaceTarget','#k11520MonsterGuide','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack','#cargoInterceptionButton'];
 const utilities=['#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll'];
 await fs.mkdir(OUT,{recursive:true});
 const launchBrowser=()=>chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
@@ -165,7 +165,7 @@ async function verifyKSpaceGameplay(page,report){
   const input=async value=>{await page.locator('#cNumericInput').fill(value);await page.locator('#cNumericInput').press('Enter');await page.waitForTimeout(100)};
   await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.target);
   for(let i=0;i<3&&(await state()).selection.axis!=='KY';i++){await page.locator('#joy').tap();await page.waitForTimeout(150)}
-  await input('0');await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');
+  await input('0');await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');await page.waitForTimeout(380);
   await input('-1');const start=await state();assert.equal(start.selection.body,'KY-');
   await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');assert.equal((await state()).target.hp,120);
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;

@@ -1,4 +1,4 @@
-const CACHE='k11520-shell-v29-gameplay-20261001';
+const CACHE='k11520-shell-v29-gameplay-20261003-missile';
 const SHARED=['../../../assets/kaios-audio.mjs','../../../assets/kaios-audio-ui.mjs','../../../assets/kaios-audio.css'];
 const SHELL=['./game-5d.html','./manifest.webmanifest','./runtime/game-5d-bootstrap.mjs','./runtime/game-5d-main.mjs','./runtime/combat-fx-runtime.mjs','./assets/ui/k11520-pwa-192.png','./assets/ui/k11520-pwa-512.png',...SHARED];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
