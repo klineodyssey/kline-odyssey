@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {isCanonicalC,signedTravelFromC} from '../controls/nonlinear-controls.mjs';
 import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 
-const is11520Game=typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(location.pathname);
+const is11520Game=typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(decodeURI(location.pathname));
 
 // Preferences are optional; denied/quota-full storage must not stop the world.
 function readLocalPreference(key){try{return globalThis.localStorage?.getItem(key)??null}catch{return null}}

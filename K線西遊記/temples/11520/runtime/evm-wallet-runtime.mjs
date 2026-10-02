@@ -264,7 +264,7 @@ function pin11520WalletToggle(){
   }
 }
 
-if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'')){
+if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(decodeURI(globalThis.location?.pathname||''))){
   import('./life-visual-bootstrap.mjs').catch(()=>{});
   pin11520WalletToggle();
   import('./game-mobile-shell.mjs').catch(error=>console.warn('[11520 mobile shell] optional UI degraded',error));
