@@ -145,6 +145,22 @@ jobs:
         # UUPS/roles, replay, beneficiary/civilization mismatch, Fortune anti-bot,
         # repayment, reserve protection, Heartbeat and Ignite global caps.
         run: node --test --test-reporter=spec tests/templeheart.integration.test.mjs
+      - name: Materialize unsigned manifest at the tested exact head
+        if: steps.boundary.outputs.solidity == 'true'
+        working-directory: KGEN-KAIOS
+        # Offline template only; unknown Human parameters remain explicit.
+        # Publish as an artifact to avoid a self-referential committed SHA.
+        run: node tools/validate-templeheart-storage.mjs --mainnet-manifest
+      - name: Preserve exact-head safety and unsigned manifest evidence
+        if: steps.boundary.outputs.solidity == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: templeheart-lineage-${{ github.event.pull_request.head.sha }}
+          path: |
+            KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json
+            KGEN-KAIOS/reports/TEMPLEHEART_STORAGE_LAYOUT_VALIDATION.json
+            KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json
+          if-no-files-found: error
       - name: Check patch whitespace
         shell: bash
         env:
