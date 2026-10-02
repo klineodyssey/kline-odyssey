@@ -228,7 +228,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -464,12 +464,12 @@ test('ATM UFO uses a real XYZ climb, cruise and descent plan at the declared C s
   assert.ok(Math.abs(cSpeedMetersPerSecond(-.1)-K_INDEX_KM*.1)<1e-12);
 });
 
-test('Digital Ant is a market guardian: aligned players escort, opposition waits for settlement, and cargo is never loot',()=>{
+test('Digital Ant supports XYZ opposition while restricted custody is never direct browser loot',()=>{
   const aligned=planDigitalAntEncounter({
     playerAxes:{KX:{market:'BTCUSDT',side:-1}},antExposures:[{axis:'KX',market:'BTCUSDT',side:1,lots:2,c:.001}],
     playerMovement:{x:1,y:0,z:1},antMovement:{x:1,y:0,z:1},cargoAmount:1080000
   });
-  assert.equal(aligned.action,'ESCORT');assert.equal(aligned.cargoLootable,false);assert.equal(aligned.playerAssetTheft,false);
+  assert.equal(aligned.action,'ESCORT');assert.equal(aligned.cargoLootable,false);assert.equal(aligned.robberyChallengeAllowed,true);assert.equal(aligned.playerAssetTheft,false);
   assert.equal(aligned.hedgeRelations.overall,'OPPOSED','opposed hedge orders do not create movement combat');
   const opposed=planDigitalAntEncounter({
     playerAxes:{KX:{market:'BTCUSDT',side:1}},antExposures:[{axis:'KX',market:'BTCUSDT',side:1,lots:2,c:.001}],
@@ -517,6 +517,48 @@ test('Digital Ant travels full XYZ and requires verified receipt before delivery
   assert.equal(settled.ok,true);
   assert.equal(ant.mission.status,'DELIVERED');
   assert.ok(ant.retirementReserve>=0);
+});
+
+test('Cargo Risk Desk quotes exact integer KAIOS and never uses cargo principal as insurance reserve',()=>{
+  const quote=quoteCargoInsurance({cargoAmount:1000,reserveKaios:0});
+  assert.equal(Number.isSafeInteger(quote.premiumKaios),true);
+  assert.equal(quote.mode,'BROKERAGE_QUOTE_ONLY');
+  assert.equal(quote.coveredAmountKaios,800);
+  assert.equal(quote.deductibleKaios,80);
+  assert.equal(quote.maxClaimKaios,720);
+  assert.equal(quote.cargoPrincipalAsReserve,false);
+  const funded=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000});
+  assert.equal(funded.mode,'UNDERWRITING_READY');
+  const ant=createDigitalAnt();
+  assert.equal(activateCargoInsurance(ant,funded,{premiumPaidKaios:funded.premiumKaios,reserveSource:'LOCAL_GAME_INSURANCE_RESERVE'}).reason,'MISSION_REQUIRED');
+});
+
+test('XYZ-opposed player can raid only the declared local risk pool while restricted cargo principal stays unchanged',()=>{
+  const ant=createDigitalAnt({lifeId:'DIGITAL_ANT_0001',x:0,y:0,z:0,capital:20,cargoCapacity:1000});
+  const mission=createDeliveryMission({missionId:'RAID-GAME',amount:1000,destinationAtmId:'ATM-R',freightOffer:10,demand:1,speedMetersPerSecond:1,gameplayRiskPool:25,maxRaidLoss:100});
+  assert.equal(assignDelivery(ant,mission,[{atmId:'ATM-R',x:8,y:1,z:0,online:true}]).ok,true);
+  assert.equal(loadCargo(ant).ok,true);
+  ant.mission.lastMovement={x:1,y:1,z:0};
+  const quote=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000});
+  assert.equal(activateCargoInsurance(ant,quote,{policyId:'LOCAL-RAID-GAME',premiumPaidKaios:quote.premiumKaios,reserveSource:'LOCAL_GAME_INSURANCE_RESERVE'}).ok,true);
+  const beforeCargo=structuredClone(ant.cargo);
+  const result=attemptCargoRobbery(ant,{attackerLifeId:'KAIOS-P-RAIDER-1234567890',attackerController:'PLAYER_LOCAL',playerPosition:{x:1,y:0,z:0},playerMovement:{x:-1,y:-1,z:0},attackPower:100,energySpent:3,replayKey:'raid-game:1',now:2000});
+  assert.equal(result.ok,true);assert.equal(result.success,true);assert.ok(result.rewardKaios>0);assert.ok(result.rewardKaios<=25);
+  assert.equal(result.cargoPrincipalChanged,false);assert.deepEqual(ant.cargo,beforeCargo);assert.equal(result.mainnetWrite,false);
+  assert.equal(ant.mission.gameplayRiskPoolRemaining,25-result.rewardKaios);
+  const replay=attemptCargoRobbery(ant,{attackerLifeId:'KAIOS-P-RAIDER-1234567890',playerPosition:{x:1,y:0,z:0},playerMovement:{x:-1,y:0,z:0},attackPower:100,energySpent:3,replayKey:'raid-game:1',now:5000});
+  assert.equal(replay.reason,'RAID_REPLAY_BLOCKED');
+  const claim=settleCargoInsuranceClaim(ant,{incidentId:result.incident.incidentId});
+  assert.equal(claim.ok,true);assert.equal(claim.payoutKaios,20);assert.equal(claim.mainnetWrite,false);
+  assert.equal(settleCargoInsuranceClaim(ant,{incidentId:result.incident.incidentId}).reason,'CLAIM_REPLAY_BLOCKED');
+});
+
+test('Cargo raid fails closed without proximity, energy, distinct identity, or opposing XYZ movement',()=>{
+  const build=()=>{const ant=createDigitalAnt({lifeId:'DIGITAL_ANT_0001',x:0,y:0,z:0,cargoCapacity:100});const mission=createDeliveryMission({missionId:'RAID-GATE',amount:10,destinationAtmId:'ATM-R',freightOffer:10,demand:1,speedMetersPerSecond:1,gameplayRiskPool:5});assignDelivery(ant,mission,[{atmId:'ATM-R',x:8,y:1,z:0,online:true}]);loadCargo(ant);ant.mission.lastMovement={x:1,y:0,z:0};return ant};
+  assert.equal(attemptCargoRobbery(build(),{attackerLifeId:'DIGITAL_ANT_0001',playerPosition:{x:0,y:0,z:0},playerMovement:{x:-1},attackPower:10,energySpent:1,replayKey:'same'}).reason,'DISTINCT_ATTACKER_LIFE_REQUIRED');
+  assert.equal(attemptCargoRobbery(build(),{attackerLifeId:'KAIOS-P-OTHER-1234567890',playerPosition:{x:99,y:0,z:0},playerMovement:{x:-1},attackPower:10,energySpent:1,replayKey:'far'}).reason,'OUT_OF_RAID_RANGE');
+  assert.equal(attemptCargoRobbery(build(),{attackerLifeId:'KAIOS-P-OTHER-1234567890',playerPosition:{x:1,y:0,z:0},playerMovement:{x:1},attackPower:10,energySpent:1,replayKey:'aligned'}).reason,'OPPOSING_XYZ_MOVEMENT_REQUIRED');
+  assert.equal(attemptCargoRobbery(build(),{attackerLifeId:'KAIOS-P-OTHER-1234567890',playerPosition:{x:1,y:0,z:0},playerMovement:{x:-1},attackPower:10,energySpent:0,replayKey:'energy'}).reason,'RAID_ENERGY_REQUIRED');
 });
 
 test('Market Life may work, travel, rest, or retire instead of being forced into combat',()=>{

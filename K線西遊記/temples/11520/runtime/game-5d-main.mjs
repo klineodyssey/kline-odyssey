@@ -49,6 +49,17 @@ addEventListener('k11520:replay-journey',replayJourney);
 globalThis.__K11520_JOURNEY__=Object.freeze({snapshot:journey.snapshot});
 const simulationExecution=createExecutionAdapter({ledger,productV1:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
 function productEvent(event,details){try{playerStore.record(event,details)}catch{toast('另一頁已更新玩家紀錄，請重新載入')}const p=playerStore.snapshot();S.kaios=p.kaios;return p}
+const cargoRaidRewardReceipts=new Set();
+document.addEventListener('k11520:cargo-robbery-resolved',event=>{
+  const detail=event.detail||{},reward=Math.max(0,Math.min(100,Number(detail.rewardKaios)||0)),incidentId=String(detail.incidentId||'');
+  const cargoSnapshot=globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.();
+  const incident=cargoSnapshot?.cargoRisk?.incidents?.find(item=>item.incidentId===incidentId);
+  if(!reward||!/^RAID-[0-9a-f]{8}$/i.test(incidentId)||cargoRaidRewardReceipts.has(incidentId)||incident?.outcome!=='ROBBERY_SUCCESS_LOCAL_REWARD'||incident.rewardKaios!==reward)return;
+  cargoRaidRewardReceipts.add(incidentId);
+  productEvent('LOOT_DROP',{reward});
+  try{playerLife.recordEvent({id:`cargo-raid:${incidentId}`,type:'LOOT_DROP'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}
+  toast(`攔截成功 · 本機風險池 ${reward} KAIOS · 非鏈上貨物轉帳`,true);
+});
 S.kaios=playerStore.snapshot().kaios;
 setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elapsedMs:10000})},10000);
 function playerProgressSnapshot(){const p=playerLife.activePlayer();return {playerId:p.playerId,xp:p.xp,level:p.level,engineXp:p.engineXp,engineLevel:p.engineLevel,nextLevelXp:p.level>=10?null:25*p.level*p.level,nextEngineXp:p.engineLevel>=10?null:20*p.engineLevel*p.engineLevel}}

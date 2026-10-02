@@ -20,6 +20,9 @@ await page.locator('#atmMovementC').selectOption('0.1');
 await page.locator('#atmAmount').fill('1000');
 const initialY=await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.snapshot().position.y);
 await page.locator('#atmDispatch').click();
+assert.match(await page.locator('#atmInsuranceStatus').textContent(),/UNDERWRITING_READY/,'independent local reserve should produce a visible underwriting-ready quote');
+await page.locator('#atmInsure').click();
+assert.match(await page.locator('#atmInsuranceStatus').textContent(),/LOCAL_SIMULATION_COVERED/,'insurance activation must remain explicitly local simulation');
 await page.locator('#atmLoad').click();
 await page.waitForFunction(y=>{
   const snapshot=globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.();
@@ -32,6 +35,20 @@ assert.equal(liveFlight.mission.amount,1000);
 assert.equal(liveFlight.mission.unit,'KAIOS');
 assert.equal(liveFlight.mission.flightPlan.flatRoute,false);
 assert.ok(liveFlight.position.y>initialY,'production ATM UI must move the real Digital Ant UFO upward in XYZ');
+assert.equal(liveFlight.cargoRisk.policy.mode,'LOCAL_SIMULATION_COVERED');
+assert.equal(liveFlight.cargoRisk.policy.cargoPrincipalAsReserve,false);
+assert.equal(await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.runtimeId),'DIGITAL_ANT_5D_ATM_UFO');
+const kaiosBeforeForgedRaid=await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios);
+await page.evaluate(()=>document.dispatchEvent(new CustomEvent('k11520:cargo-robbery-resolved',{detail:{rewardKaios:100,incidentId:'RAID-deadbeef',outcome:'ROBBERY_SUCCESS_LOCAL_REWARD'}})));
+await page.waitForTimeout(30);
+assert.equal(await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),kaiosBeforeForgedRaid,'caller-invented raid event cannot mint local KAIOS');
+await page.locator('#atmRaid').click();
+assert.match(await page.locator('#atmInsuranceStatus').textContent(),/攔截未成立|最近結果/,'raid control must provide visible feedback instead of silently doing nothing');
+assert.match(await page.locator('#atmInsuranceStatus').textContent(),/本機|5m|reserve/i,'risk panel must explain its simulation/range/reserve boundary');
+await page.waitForTimeout(80);
+assert.equal(await page.locator('#logisticsActionToast').getAttribute('role'),'status');
+assert.equal(await page.locator('#logisticsActionToast').evaluate(node=>node.classList.contains('show')),true,'raid feedback must remain visibly announced after the next animation frame');
+await page.screenshot({path:`${OUT}/11520-cargo-raid-feedback.png`,fullPage:true});
 
 await page.evaluate(async()=>{
   const src=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/market-life-source-runtime.mjs');

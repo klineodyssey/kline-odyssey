@@ -1,7 +1,7 @@
 /*
 KGEN_META
-VERSION: 1.2.0
-REVISION: 2026-10-03.DIGITAL-ANT-MARKET-GUARDIAN
+VERSION: 1.3.0
+REVISION: 2026-10-03.DIGITAL-ANT-CARGO-RISK-GAME
 STATUS: ACTIVE / SIMULATION-FIRST
 SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPAPER.md
 CHANGE_REASON: Define Digital Ant as an armored cash courier / Market Life guardian, separate physical route from K-space positions, and add fail-closed cargo hedge planning without risking cargo principal or player assets.
@@ -21,9 +21,16 @@ export const K_INDEX_KM=384400/16888;
 export const C_SPEED_K_PER_SECOND=.001;
 export const KAIOS_PER_CARGO_LOT=1000;
 export const ATM_UFO_TRANSPORT_MODE='ATM_UFO_5D';
+export const CARGO_RISK_CAUSES=Object.freeze(['THEFT_ROBBERY','NATURAL_DISASTER','CARGO_DAMAGE','DELIVERY_INTERRUPTION']);
+export const CARGO_INSURANCE_MODES=Object.freeze(['BROKERAGE_QUOTE_ONLY','UNDERWRITING_READY','LOCAL_SIMULATION_COVERED']);
+export const CARGO_RAID_RANGE_METERS=5;
 
 const n=(v,fallback=0)=>Number.isFinite(Number(v))?Number(v):fallback;
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,n(v)));
+const whole=(value,label='AMOUNT')=>{const parsed=Number(value);if(!Number.isSafeInteger(parsed)||parsed<0)throw new Error(`INVALID_${label}`);return parsed};
+const bps=(value,label='BPS')=>{const parsed=whole(value,label);if(parsed>10000)throw new Error(`INVALID_${label}`);return parsed};
+const mulBpsCeil=(amount,rate)=>Number((BigInt(amount)*BigInt(rate)+9999n)/10000n);
+const raidHash=value=>{let h=2166136261;for(const ch of String(value||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
 
 function exposurePositions(exposures=[]){
   const out={};
@@ -65,7 +72,7 @@ export function planDigitalAntEncounter({
   return {
     role:DIGITAL_ANT_GAME_ROLE,action,reason,movementRelations:movement,hedgeRelations,
     cargoCustody,carryingRestricted,
-    cargoLootable:false,playerAssetTheft:false,cargoPrincipalAtRisk:false,
+    cargoLootable:false,restrictedCargoDirectlyLootable:false,robberyChallengeAllowed:true,gameplayRewardPoolRequired:true,playerAssetTheft:false,cargoPrincipalAtRisk:false,
     combatScope:'SIMULATION_ONLY',settlementRequired:action==='MOVEMENT_LONG_SHORT_DUEL_WAIT_SETTLEMENT',
     rewardPolicy:'FUNDED_GAME_REWARD_POOL_ONLY',physicalRouteAuthority:'UNIVERSE_MAP_XYZ',
     battleDirectionAuthority:'XYZ_MOVEMENT_ONLY',marketDirectionAuthority:'VERIFIED_KSPACE_HEDGE_EXPOSURE_ONLY',
@@ -126,6 +133,7 @@ export function createDigitalAnt({
     cargo:{kind:null,amount:0,unit:null},mission:null,state:'IDLE',x:n(x),y:n(y),z:n(z),
     vehicle:{vehicleId:String(vehicle?.vehicleId||'ATM-UFO-DIGITAL-ANT-0001'),type:String(vehicle?.type||ATM_UFO_TRANSPORT_MODE),lifeId:vehicle?.lifeId||null,independentLife:false},
     finance:{earned:0,spent:0,tips:0,freight:0,fuel:0,salary:0,maintenance:0,risk:0,time:0,lastNet:0},
+    cargoRisk:{desk:'AI_ANT_COMPANY_CARGO_RISK_DESK',policy:null,reserveKaios:0,incidents:[],replayKeys:[],lastRaidAt:0},
   };
 }
 
@@ -134,7 +142,8 @@ export function createDeliveryMission({
   price=LOGISTICS_ANCHOR,demand=1,mode='OBSERVE',marketEdge=0,freightOffer=0,
   distanceMeters=null,metersPerWorldUnit=1,baseFreight=0,distanceRate=0,loadRate=0,riskRate=0,
   fuelPerMeter=0,salaryPerSecond=0,maintenancePerMeter=0,timeCostPerSecond=0,riskProbability=0,riskLoss=0,
-  speedMetersPerSecond=null,tipRate=0,movementC=1,flightAltitude=6,arrivalOffsetY=1.1,transportMode=ATM_UFO_TRANSPORT_MODE
+  speedMetersPerSecond=null,tipRate=0,movementC=1,flightAltitude=6,arrivalOffsetY=1.1,transportMode=ATM_UFO_TRANSPORT_MODE,
+  gameplayRiskPool=0,maxRaidLoss=100
 }={}){
   const normalizedMode=DELIVERY_MODES.includes(String(mode).toUpperCase())?String(mode).toUpperCase():'OBSERVE';
   const explicitDistance=distanceMeters===null||distanceMeters===undefined||distanceMeters===''?null:Math.max(0,n(distanceMeters));
@@ -144,6 +153,7 @@ export function createDeliveryMission({
     price:n(price,LOGISTICS_ANCHOR),demand:n(demand),mode:normalizedMode,marketEdge:n(marketEdge),freightOffer:Math.max(0,n(freightOffer)),
     economics:{distanceMeters:explicitDistance,metersPerWorldUnit:Math.max(0.000001,n(metersPerWorldUnit,1)),baseFreight:Math.max(0,n(baseFreight)),distanceRate:Math.max(0,n(distanceRate)),loadRate:Math.max(0,n(loadRate)),riskRate:Math.max(0,n(riskRate)),fuelPerMeter:Math.max(0,n(fuelPerMeter)),salaryPerSecond:Math.max(0,n(salaryPerSecond)),maintenancePerMeter:Math.max(0,n(maintenancePerMeter)),timeCostPerSecond:Math.max(0,n(timeCostPerSecond)),riskProbability:clamp(riskProbability,0,1),riskLoss:Math.max(0,n(riskLoss)),speedMetersPerSecond:explicitSpeed,tipRate:Math.max(0,n(tipRate))},
     movementC:n(movementC,1),flightAltitude:Math.max(1,n(flightAltitude,6)),arrivalOffsetY:Math.max(0,n(arrivalOffsetY,1.1)),transportMode:String(transportMode||ATM_UFO_TRANSPORT_MODE),
+    gameplayRiskPool:whole(gameplayRiskPool,'GAMEPLAY_RISK_POOL'),gameplayRiskPoolRemaining:whole(gameplayRiskPool,'GAMEPLAY_RISK_POOL'),maxRaidLoss:whole(maxRaidLoss,'MAX_RAID_LOSS'),lastMovement:{x:0,y:0,z:0},
     status:'CREATED',createdAt:Date.now(),pickedUpAt:null,deliveredAt:null,failedAt:null,receiptVerified:false,
   };
 }
@@ -226,6 +236,95 @@ export function quoteDeliveryEconomics(ant,mission,atm){
   return {distanceWorld:worldDistance,distanceMeters,travelSeconds,speedMetersPerSecond:speed,freight,tip,revenue,fuel,salary,maintenance,time,risk,cost,net,mode,marketEdge:n(mission.marketEdge),direction:sixDirectionVector(ant,atm),flightPlan,simulation:true};
 }
 
+export function quoteCargoInsurance({
+  cargoAmount=0,coverageBps=8000,deductibleBps=1000,theftRateBps=120,disasterRateBps=30,
+  damageRateBps=50,interruptionRateBps=40,claimsOpsRateBps=20,capitalChargeRateBps=25,
+  marginRateBps=20,reserveKaios=0
+}={}){
+  const cargo=whole(cargoAmount,'CARGO_AMOUNT'),coverage=bps(coverageBps,'COVERAGE_BPS'),deductible=bps(deductibleBps,'DEDUCTIBLE_BPS');
+  const covered=mulBpsCeil(cargo,coverage),deductibleAmount=mulBpsCeil(covered,deductible);
+  const rates={theft:theftRateBps,disaster:disasterRateBps,damage:damageRateBps,interruption:interruptionRateBps,claimsOps:claimsOpsRateBps,capitalCharge:capitalChargeRateBps,margin:marginRateBps};
+  for(const [key,value] of Object.entries(rates))rates[key]=bps(value,key.toUpperCase()+'_BPS');
+  const components=Object.fromEntries(Object.entries(rates).map(([key,rate])=>[key,mulBpsCeil(covered,rate)]));
+  const premiumKaios=Object.values(components).reduce((sum,value)=>sum+value,0),maxClaimKaios=Math.max(0,covered-deductibleAmount),reserve=whole(reserveKaios,'RESERVE_KAIOS');
+  return {
+    desk:'AI_ANT_COMPANY_CARGO_RISK_DESK',currency:'KAIOS',cargoAmount:cargo,coverageBps:coverage,deductibleBps:deductible,
+    coveredAmountKaios:covered,deductibleKaios:deductibleAmount,maxClaimKaios,premiumKaios,components,reserveKaios:reserve,
+    mode:reserve>=maxClaimKaios?'UNDERWRITING_READY':'BROKERAGE_QUOTE_ONLY',cargoPrincipalAsReserve:false,
+    coveredCauses:[...CARGO_RISK_CAUSES],settlement:'LOCAL_SIMULATION_ONLY',mainnetWrite:false,
+  };
+}
+
+export function activateCargoInsurance(ant,quote,{policyId=`CARGO-POLICY-${Date.now()}`,premiumPaidKaios=0,reserveSource=''}={}){
+  if(!ant?.mission)return {ok:false,reason:'MISSION_REQUIRED'};
+  if(!quote||quote.mode!=='UNDERWRITING_READY')return {ok:false,reason:'INDEPENDENT_RESERVE_REQUIRED'};
+  if(String(reserveSource)!=='LOCAL_GAME_INSURANCE_RESERVE')return {ok:false,reason:'CARGO_PRINCIPAL_CANNOT_BE_RESERVE'};
+  if(whole(premiumPaidKaios,'PREMIUM_PAID')!==quote.premiumKaios)return {ok:false,reason:'EXACT_PREMIUM_REQUIRED'};
+  ant.cargoRisk.reserveKaios=quote.reserveKaios;
+  ant.cargoRisk.policy={...structuredClone(quote),policyId:String(policyId),mode:'LOCAL_SIMULATION_COVERED',premiumPaidKaios:quote.premiumKaios,activatedAt:Date.now(),claimsPaidKaios:0,status:'ACTIVE'};
+  return {ok:true,policy:structuredClone(ant.cargoRisk.policy)};
+}
+
+function axisBattle(playerMovement={},antMovement={}){
+  const axes={};let opposed=0,aligned=0;
+  for(const axis of ['x','y','z']){
+    const player=Math.sign(n(playerMovement[axis])),ant=Math.sign(n(antMovement[axis]));
+    const relation=!player||!ant?'NEUTRAL':player===ant?'ALIGNED':'OPPOSED';
+    if(relation==='OPPOSED')opposed++;if(relation==='ALIGNED')aligned++;
+    axes[axis.toUpperCase()]={player,ant,relation};
+  }
+  return {axes,opposed,aligned};
+}
+
+export function attemptCargoRobbery(ant,{
+  attackerLifeId,attackerController='PLAYER_LOCAL',playerPosition={},playerMovement={},attackPower=1,energySpent=1,
+  replayKey,now=Date.now(),maxDistance=CARGO_RAID_RANGE_METERS
+}={}){
+  const mission=ant?.mission,risk=ant?.cargoRisk;
+  if(!mission||mission.status!=='IN_TRANSIT')return {ok:false,reason:'IN_TRANSIT_MISSION_REQUIRED'};
+  if(!attackerLifeId||String(attackerLifeId)===String(ant.lifeId))return {ok:false,reason:'DISTINCT_ATTACKER_LIFE_REQUIRED'};
+  if(String(attackerController)==='DIGITAL_ANT_0001')return {ok:false,reason:'SAME_CONTROLLER_RAID_BLOCKED'};
+  if(!replayKey)return {ok:false,reason:'REPLAY_KEY_REQUIRED'};
+  if(risk.replayKeys.includes(String(replayKey)))return {ok:false,reason:'RAID_REPLAY_BLOCKED'};
+  if(now-risk.lastRaidAt<1500)return {ok:false,reason:'RAID_COOLDOWN'};
+  const distance=distance3d(playerPosition,ant);
+  if(distance>Math.max(.1,n(maxDistance,CARGO_RAID_RANGE_METERS)))return {ok:false,reason:'OUT_OF_RAID_RANGE',distance,maxDistance};
+  const energy=whole(energySpent,'RAID_ENERGY');if(energy<1)return {ok:false,reason:'RAID_ENERGY_REQUIRED'};
+  const power=whole(attackPower,'ATTACK_POWER');if(power<1||power>100)return {ok:false,reason:'INVALID_ATTACK_POWER'};
+  const battle=axisBattle(playerMovement,mission.lastMovement);
+  if(battle.opposed<1)return {ok:false,reason:'OPPOSING_XYZ_MOVEMENT_REQUIRED',battle};
+  const attackScore=power+energy*3+battle.opposed*12;
+  const defenseScore=35+Math.round(clamp(ant.vitality,0,100)*.25)+(risk.policy?.status==='ACTIVE'?8:0);
+  const variance=(raidHash(replayKey)%21)-10,success=attackScore+variance>defenseScore;
+  const pool=whole(mission.gameplayRiskPoolRemaining,'GAMEPLAY_RISK_POOL_REMAINING');
+  const rewardKaios=success?Math.min(pool,Math.max(1,Math.min(mission.maxRaidLoss,Math.floor((attackScore+variance-defenseScore)/2)+1))):0;
+  const incidentLossKaios=success?Math.min(whole(mission.amount,'CARGO_AMOUNT'),mission.maxRaidLoss):0;
+  const incident={
+    incidentId:`RAID-${raidHash(replayKey).toString(16).padStart(8,'0')}`,missionId:mission.missionId,replayKey:String(replayKey),
+    cause:'THEFT_ROBBERY',occurredAt:now,attackerLifeId:String(attackerLifeId),distance,battle,attackScore,defenseScore,variance,
+    outcome:success?'ROBBERY_SUCCESS_LOCAL_REWARD':'ROBBERY_REPELLED',rewardKaios,incidentLossKaios,
+    custodyPrincipalChanged:false,chainBalanceChanged:false,evidenceStatus:'LOCAL_GAME_EVIDENCE',claimStatus:incidentLossKaios>0&&risk.policy?.status==='ACTIVE'?'CLAIM_ELIGIBLE':'NOT_COVERED_OR_NO_LOSS',
+  };
+  risk.replayKeys.push(String(replayKey));risk.lastRaidAt=now;risk.incidents.push(incident);
+  mission.gameplayRiskPoolRemaining=Math.max(0,pool-rewardKaios);
+  ant.vitality=clamp(ant.vitality-(success?12:4),0,100);
+  return {ok:true,success,rewardKaios,incident:structuredClone(incident),cargoPrincipalChanged:false,mainnetWrite:false};
+}
+
+export function settleCargoInsuranceClaim(ant,{incidentId}={}){
+  const risk=ant?.cargoRisk,policy=risk?.policy,incident=risk?.incidents?.find(item=>item.incidentId===incidentId);
+  if(!incident)return {ok:false,reason:'INCIDENT_NOT_FOUND'};
+  if(incident.evidenceStatus!=='LOCAL_GAME_EVIDENCE'||incident.missionId!==ant?.mission?.missionId)return {ok:false,reason:'VERIFIED_INCIDENT_EVIDENCE_REQUIRED'};
+  if(policy?.status!=='ACTIVE')return {ok:false,reason:'ACTIVE_POLICY_REQUIRED'};
+  if(incident.claimStatus==='PAID')return {ok:false,reason:'CLAIM_REPLAY_BLOCKED'};
+  if(!policy.coveredCauses.includes(incident.cause))return {ok:false,reason:'CAUSE_NOT_COVERED'};
+  const afterDeductible=Math.max(0,incident.incidentLossKaios-policy.deductibleKaios),remainingLimit=Math.max(0,policy.maxClaimKaios-policy.claimsPaidKaios);
+  const payoutKaios=Math.min(afterDeductible,remainingLimit,risk.reserveKaios);
+  if(payoutKaios<=0)return {ok:false,reason:'NO_PAYABLE_CLAIM'};
+  risk.reserveKaios-=payoutKaios;policy.claimsPaidKaios+=payoutKaios;incident.claimStatus='PAID';incident.claimPayoutKaios=payoutKaios;
+  return {ok:true,incidentId,payoutKaios,reserveRemainingKaios:risk.reserveKaios,settlement:'LOCAL_SIMULATION_ONLY',mainnetWrite:false};
+}
+
 export function cfoEvaluateDelivery(ant,mission,atm,{minimumProfit=0,requoteMargin=0.08}={}){
   if(!atm)return {action:'REJECT',reason:'ATM_NOT_FOUND',quote:null};
   if(!atm.online)return {action:'REJECT',reason:'ATM_OFFLINE',quote:null};
@@ -292,6 +391,7 @@ export function tickDigitalAntDelivery(ant,{deltaMs=16,speed=null}={}){
   m.flightPhase=target.phase||'CRUISE_5D';ant.state=m.flightPhase;
   const speedWorldPerMs=speed===null||speed===undefined?(cSpeedMetersPerSecond(m.movementC)/Math.max(.000001,n(m.economics?.metersPerWorldUnit,1)))/1000:Math.max(0,n(speed));
   const dx=target.x-ant.x,dy=target.y-ant.y,dz=target.z-ant.z,len=Math.hypot(dx,dy,dz)||1,step=Math.min(d,speedWorldPerMs*n(deltaMs));
+  m.lastMovement={x:dx/len*step,y:dy/len*step,z:dz/len*step};
   ant.x+=dx/len*step;ant.y+=dy/len*step;ant.z+=dz/len*step;
   return {ok:true,arrived:false,delivered:false,state:ant.state,flightPhase:m.flightPhase,waypointIndex:index,remaining:distance3d(ant,target),direction:sixDirectionVector(ant,target),route:m.route};
 }
@@ -314,8 +414,8 @@ export function deliverySnapshot(ant){
   const m=ant.mission;
   return {
     lifeId:ant.lifeId,name:ant.name,species:ant.species,role:ant.role,state:ant.state,
-    position:{x:ant.x,y:ant.y,z:ant.z},vehicle:{...ant.vehicle},vitality:ant.vitality,capital:ant.capital,retirementReserve:ant.retirementReserve,targetRetirementReserve:ant.targetRetirementReserve,cargo:{...ant.cargo},finance:{...ant.finance},
-    mission:m?{missionId:m.missionId,status:m.status,destinationAtmId:m.destinationAtmId,route:m.route,level:m.level,cargoKind:m.cargoKind,amount:m.amount,unit:m.unit,mode:m.mode,movementC:m.movementC,transportMode:m.transportMode,flightPhase:m.flightPhase,flightWaypointIndex:m.flightWaypointIndex,flightPlan:m.flightPlan,quote:m.quote,receiptVerified:Boolean(m.receiptVerified)}:null,
+    position:{x:ant.x,y:ant.y,z:ant.z},vehicle:{...ant.vehicle},vitality:ant.vitality,capital:ant.capital,retirementReserve:ant.retirementReserve,targetRetirementReserve:ant.targetRetirementReserve,cargo:{...ant.cargo},finance:{...ant.finance},cargoRisk:structuredClone(ant.cargoRisk),
+    mission:m?{missionId:m.missionId,status:m.status,destinationAtmId:m.destinationAtmId,route:m.route,level:m.level,cargoKind:m.cargoKind,amount:m.amount,unit:m.unit,mode:m.mode,movementC:m.movementC,transportMode:m.transportMode,flightPhase:m.flightPhase,flightWaypointIndex:m.flightWaypointIndex,flightPlan:m.flightPlan,quote:m.quote,gameplayRiskPool:m.gameplayRiskPool,gameplayRiskPoolRemaining:m.gameplayRiskPoolRemaining,lastMovement:m.lastMovement,receiptVerified:Boolean(m.receiptVerified)}:null,
     simulation:true,realAssetTransfer:false,mainnetWrite:false,
   };
 }
