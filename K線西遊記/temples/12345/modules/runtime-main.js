@@ -2010,9 +2010,10 @@
       return Number(ethers.utils.formatUnits(value, this.state.tokenDecimals || 18)).toFixed(4) + " KGEN";
     },
     readWholeAmount: function(id, defaultValue, label){
-      const value = String($(id) && $(id).value || defaultValue || "8").trim();
-      if(!/^\d+$/.test(value)) throw new Error((label || "金額") + "請輸入整數");
-      return String(Math.floor(Number(value)));
+      // Defaults belong only to initial HTML field values. Never replace an
+      // explicitly cleared/missing field at submission or approval time.
+      // Keep the old signature for callers, but do not use defaultValue.
+      return this.readRitualInteger(id, label || "金額");
     },
     getFortuneAmount: function(){
       const amount = Number(this.readWholeAmount("kh-fortune-amount", "8", "發財金"));

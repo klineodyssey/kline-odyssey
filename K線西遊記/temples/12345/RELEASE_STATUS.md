@@ -6,6 +6,13 @@ DATE: 2026-08-09 (UTC+8)
 
 ## Integrated mainline
 
+### Explicit amount validation / #471 release hold follow-up (2026-10-02)
+
+- Audited the actual held head `d0cbd7e17c3fe39198d671c9ad4714405d575461`: Vow already uses `readRitualInteger`, which rejects cleared input before wallet confirmation. The failed assertion showing an earlier success string alone does **not** establish a new `vowTo` call. The old browser helper checked only idle state, which may already be true before a touch-generated click is handled. Updated QA requires the actual click followed by idle, without forced clicks, retries, or relaxed validation assertions, and captures input/event/transaction evidence on failure.
+- Removed the real fallback hazard in `readWholeAmount`: blank/missing input no longer becomes a default 8/1. Existing HTML initial values remain; Fortune and the unused legacy Wish-amount getter now reuse positive uint256 validation without `Number` rounding. Vow and Lamp retain their canonical validation/transaction path. Actual `makeWish(bytes32)` has no amount input or KGEN debit.
+- Contract authority: V3.2.6 `vowTo` requires amount > 0; `lightLamp` requires 1–3650 days. Browser matrix checks blank, spaces, zero, decimal, negative, nonnumeric Vow input with zero confirmations/transactions; valid `vowTo(2,9)` exactly once; cancellation feedback; Fortune/missing-field audit; existing four-action and Festival regressions at both mobile viewports. RPC writes remain blocked and only the signer transaction boundary is stubbed.
+- Festival block/UTC authority, claim IDs/windows, claim reads, countdown and all original Wallet/Heartbeat/Wish/Repay/Lamp authorities remain unchanged. #468 remains frozen. A new exact-head CI run is required; the old failed head is not rerun for release.
+
 Release consolidation continuation: #470 merged at `8c25e7954c40005164f338bd1a8ed35f2353e124`. #471 is now based on main with Wallet, Heart and Festival tests retained together; its reviewed Festival runtime is unchanged. Human authorized sequential release after exact-head CI and public read-only QA. Historical candidate statuses below describe their original review stages, not current PR state.
 
 ### Festival / New Year recovery candidate — 2026-10-02 (Draft; no deployment)

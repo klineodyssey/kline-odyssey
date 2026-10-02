@@ -54,6 +54,10 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
  const baseline=await geometry();
  await page.evaluate(()=>{
   window.__heartTx=[];window.__txFailure=null;window.__holdTx=false;window.__walletReads=[];
+  window.__heartInputEvents=[];
+  for(const type of ['touchstart','touchend','click'])document.addEventListener(type,e=>{
+   __heartInputEvents.push({type,target:e.target.closest('button')?.id||e.target.id,value:document.getElementById('kh-vow-amount')?.value,tx:__heartTx.length,time:performance.now()});
+  },true);
   window.ethereum={isMetaMask:true,request:async({method,params})=>{
    __walletReads.push(method);
    if(method==='eth_chainId')return '0x38';
@@ -69,7 +73,16 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   };
  });
  const feedback=id=>page.locator('#'+id+'-feedback');
- const click=async id=>{await page.locator('#'+id).tap();await page.waitForFunction(id=>document.getElementById(id).dataset.heartPending!=='1',id);};
+ const tapDiagnostics=[];
+ const click=async id=>{
+  const before=await page.evaluate(()=>__heartInputEvents.length);
+  await page.locator('#'+id).tap();
+  const tapState=await page.evaluate(({id,before})=>({clickSeen:__heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id),idle:document.getElementById(id).dataset.heartPending!=='1'}),{id,before});
+  tapDiagnostics.push({id,...tapState});
+  // An idle flag alone can already be true before a mobile synthetic click.
+  // Require this tap's actual click (no retry/force), then completed handling.
+  await page.waitForFunction(({id,before})=>__heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id)&&document.getElementById(id).dataset.heartPending!=='1',{id,before});
+ };
  const count=()=>page.evaluate(()=>__heartTx.length);
  const open=async id=>{if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();await page.locator(id).tap();};
  try{
@@ -87,9 +100,25 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.screenshot({path:`${OUT}/heart-action-${width}-wish-error.png`});
   await page.locator('#kh-wish-text').fill('0x'+'0'.repeat(64));await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/不可為零/);
   await open('#kgen-v30-vow-btn');
-  for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
-   await page.locator('#'+id).fill(value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);assert.match(await feedback(action).innerText(),pattern);
+  const invalidInputs=[];
+  for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','   ',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-vow-amount','1.5',/正整數/],['kh-vow-amount','-1',/正整數/],['kh-vow-amount','abc',/正整數/],['kh-lamp-days','',/請輸入/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
+   const before=await count(),prompts=confirmations;
+   await page.locator('#'+id).fill(value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);
+   const message=await feedback(action).innerText();assert.match(message,pattern,JSON.stringify(await page.evaluate(()=>({events:__heartInputEvents.slice(-15),tx:__heartTx,value:document.getElementById('kh-vow-amount').value}))));
+   assert.equal(await count(),before,`invalid ${id} ${JSON.stringify(value)} cannot reach signer`);
+   assert.equal(confirmations,prompts,'invalid amount cannot request confirmation');
+   invalidInputs.push({id,value,message,transactions:0,confirmations:0});
   }
+  // Audit all old fallback-helper callers: UI defaults are not submit defaults.
+  const amountAudit=await page.evaluate(()=>{
+   const r=KGEN_RUNTIME_CORE.modules.HeartRuntime,field=document.getElementById('kh-fortune-amount'),original=field.value,results=[];
+   for(const value of ['', '   ', '0', '-1', '1.5', '889']){field.value=value;try{results.push({value,result:r.getFortuneAmount()});}catch(e){results.push({value,error:e.message});}}
+   field.value='8';results.push({value:'8',result:r.getFortuneAmount()});field.value=original;
+   try{r.getWishAmount();results.push({missingWishAmount:'ACCEPTED'});}catch(e){results.push({missingWishAmount:e.message});}
+   return results;
+  });
+  assert.ok(amountAudit.slice(0,6).every(x=>x.error),'Fortune invalid input fails closed');assert.equal(amountAudit[6].result,'8');assert.match(amountAudit[7].missingWishAmount,/請輸入/);
+  await fs.writeFile(`${OUT}/heart-input-${width}.json`,JSON.stringify({invalidInputs,amountAudit,tapDiagnostics},null,2));
   await page.locator('#kh-vow-amount').fill('9');await page.locator('#kh-lamp-days').fill('8');
   await page.locator('#kh-vow-option').evaluate(e=>e.selectedIndex=-1);await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/選擇還願項目/);await page.locator('#kh-vow-option').selectOption('2');
   fixture.allowance='0';
@@ -103,6 +132,7 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   fixture.allowance='1000';fixture.balance='1';await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/餘額不足/);
   fixture.balance='1000';fixture.readError=true;await click('kh-lamp');assert.match(await feedback('kh-lamp').innerText(),/失敗/);fixture.readError=false;
   assert.equal(await count(),4,'read failure and low balance fail closed');
+  accept=false;await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/已取消/);assert.equal(await count(),4);accept=true;
   await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('世界平安');
   accept=false;await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/已取消/);assert.equal(await count(),4);accept=true;
   await page.evaluate(()=>{__txFailure={code:4001,message:'User rejected'};});await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/交易已取消/);
@@ -177,7 +207,10 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.locator('#kgen-heart-toggle').tap();assert.equal(await page.locator('#kh-festival1').getAttribute('data-festival-state'),'WALLET_REQUIRED');const disconnectedCount=await count();await claimClick('kh-festival1');assert.match(await feedback('kh-festival1').innerText(),/錢包尚未連線/);assert.equal(await count(),disconnectedCount);
   reports.push({id:'12345-festival',width,height,clockCases:cases,transactionBoundary:festivalCalls,notOpen:'PASS',claimedOnce:'PASS',minuteTransition:'PASS',staleRead:'PASS',disabled:'PASS',cancellationAndRevert:'PASS',walletAndChainGate:'PASS',secondaryButtons:'PASS',broadcasts});
   assert.equal(broadcasts,0);reports.push({id:'12345-heart-actions',width,height,connectedOriginalTransactionPath:decoded,allowanceGate:'PASS',validation:'PASS',rejectionAndRevert:'PASS',pendingDuplicate:'PASS',positionStable:'PASS',broadcasts:0,physicalMetaMask:'HUMAN_RETEST_REQUIRED'});
- }catch(error){await page.screenshot({path:`${OUT}/heart-action-${width}-FAIL.png`});throw error;}finally{await context.close();}
+ }catch(error){
+  await fs.writeFile(`${OUT}/heart-action-${width}-FAIL.json`,JSON.stringify({error:String(error),tapDiagnostics,state:await page.evaluate(()=>({events:window.__heartInputEvents,transactions:window.__heartTx,value:document.getElementById('kh-vow-amount')?.value}))},null,2));
+  await page.screenshot({path:`${OUT}/heart-action-${width}-FAIL.png`});throw error;
+ }finally{await context.close();}
 }
 }
 async function walletRoundTripQA(){
