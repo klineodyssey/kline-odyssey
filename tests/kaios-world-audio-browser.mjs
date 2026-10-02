@@ -2,13 +2,115 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
-import {id as selectorId, AbiCoder} from 'ethers';
+import {Interface, parseUnits, id as selectorId, AbiCoder} from 'ethers';
 const BASE=(process.env.KAIOS_BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const OUT='artifacts/kaios-portal-qa';await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,args:['--autoplay-policy=user-gesture-required']});
 const reports=[];
 const preservation=process.argv.includes('--preservation');
+const heartOnly=process.argv.includes('--heart-only');
 const walletOnly=process.argv.includes('--wallet-only');
+async function heartActionQA(){
+// Exercise the REAL sendHeart + ensureConnected + ethers V3.2.6 Contract path.
+// Only signer.sendTransaction is replaced. No private key or broadcast provider.
+if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
+ const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36'});
+ const page=await context.newPage(),txABI=new Interface(['function heartbeatClaim()','function makeWish(bytes32)','function vowTo(uint8,uint256)','function lightLamp(uint256)']);
+ const readABI=new Interface(['function kgen() view returns(address)','function lampPricePerDay() view returns(uint256)','function decimals() view returns(uint8)','function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)']);
+ const fixture={allowance:'1000',balance:'1000',price:'1',readError:false};let broadcasts=0,confirmations=0,accept=true;
+ const reply=q=>{
+   if(/sendTransaction|sendRawTransaction|sign|wallet_/i.test(q.method)){broadcasts++;return{jsonrpc:'2.0',id:q.id,error:{code:-32000,message:'QA forbids writes'}};}
+   let result='0x0';
+   if(q.method==='eth_chainId')result='0x38';
+   if(q.method==='net_version')result='56';
+   if(q.method==='eth_blockNumber')result='0x100';
+   if(q.method==='eth_call'){
+    let decoded;try{decoded=readABI.parseTransaction({data:q.params[0].data});}catch{}
+    if(decoded){
+     if(fixture.readError)return{jsonrpc:'2.0',id:q.id,error:{code:-32000,message:'QA read unavailable'}};
+     const values={kgen:'0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',lampPricePerDay:fixture.price,decimals:18,balanceOf:parseUnits(fixture.balance,18),allowance:parseUnits(fixture.allowance,18)};
+     result=readABI.encodeFunctionResult(decoded.name,[values[decoded.name]]);
+    }else result='0x'+'0'.repeat(64);
+   }
+   return{jsonrpc:'2.0',id:q.id,result};
+ };
+ await page.exposeFunction('__heartRead',q=>{const r=reply(q);if(r.error)throw Error(r.error.message);return r.result;});
+ await context.route('**/*',async route=>{
+  const req=route.request();if(req.method()!=='POST')return route.continue();
+  let payload;try{payload=req.postDataJSON();}catch{return route.continue();}
+  if(!payload?.method&&!Array.isArray(payload))return route.continue();
+  await route.fulfill({json:Array.isArray(payload)?payload.map(reply):reply(payload)});
+ });
+ page.on('dialog',async d=>{confirmations++;if(accept)await d.accept();else await d.dismiss();});
+ await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html',{waitUntil:'domcontentloaded'});
+ await page.waitForFunction(()=>window.KGEN_RUNTIME_CORE?.modules.HeartRuntime.inited);
+ await page.waitForTimeout(1200);
+ const geometry=()=>page.evaluate(()=>['#core-anchor','#move-joystick-wrap','.warp-engine','#kgen-v30-wish-btn'].map(s=>document.querySelector(s).getBoundingClientRect().toJSON()));
+ const baseline=await geometry();
+ await page.evaluate(()=>{
+  window.__heartTx=[];window.__txFailure=null;window.__holdTx=false;window.__walletReads=[];
+  window.ethereum={isMetaMask:true,request:async({method,params})=>{
+   __walletReads.push(method);
+   if(method==='eth_chainId')return '0x38';
+   if(method==='eth_accounts'||method==='eth_requestAccounts')return ['0x0000000000000000000000000000000000000001'];
+   if(method==='eth_call'||method==='eth_blockNumber')return window.__heartRead({method,params,id:1});
+   throw Error('QA blocks injected RPC: '+method);
+  }};
+  ethers.providers.JsonRpcSigner.prototype.sendTransaction=async function(tx){
+   const request={to:await tx.to,data:await tx.data};__heartTx.push(request);
+   if(__holdTx)await new Promise(resolve=>{window.__releaseTx=resolve;});
+   if(__txFailure)throw Object.assign(Error(__txFailure.message),{code:__txFailure.code});
+   return{hash:'0x'+'11'.repeat(32),wait:async()=>({blockNumber:1,logs:[]})};
+  };
+ });
+ const feedback=id=>page.locator('#'+id+'-feedback');
+ const click=async id=>{await page.locator('#'+id).tap();await page.waitForFunction(id=>document.getElementById(id).dataset.heartPending!=='1',id);};
+ const count=()=>page.evaluate(()=>__heartTx.length);
+ const open=async id=>{if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();await page.locator(id).tap();};
+ try{
+  await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('世界平安');
+  assert.equal(await count(),0,'shortcut only opens the canonical form');
+  for(const id of ['kh-wishbtn','kh-heartbeat']){await click(id);await page.waitForTimeout(50);}
+  await open('#kgen-v30-vow-btn');await page.locator('#kh-vow-option').selectOption('2');await page.locator('#kh-vow-amount').fill('9');await click('kh-vow');
+  await page.locator('#kh-lamp-days').fill('8');await click('kh-lamp');
+  await page.waitForFunction(()=>__heartTx.length===4);
+  const requests=await page.evaluate(()=>__heartTx),decoded=requests.map(tx=>{assert.equal(tx.to.toLowerCase(),'0xb016d4d8f1aed1339101b30722cad6dba9b8c972');const d=txABI.parseTransaction(tx);return{name:d.name,args:[...d.args].map(String)};});
+  assert.deepEqual(decoded,[{name:'makeWish',args:[await page.evaluate(()=>ethers.utils.id('世界平安'))]},{name:'heartbeatClaim',args:[]},{name:'vowTo',args:['2','9']},{name:'lightLamp',args:['8']}]);
+  assert.equal(confirmations,4,'four original confirmations, no bypass of sendHeart');
+  await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('');await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/請輸入許願/);assert.equal(confirmations,4,'invalid input before wallet confirmation');
+  assert.ok(await feedback('kh-wish').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}),'validation must be visible, not only written below the viewport');
+  await page.screenshot({path:`${OUT}/heart-action-${width}-wish-error.png`});
+  await page.locator('#kh-wish-text').fill('0x'+'0'.repeat(64));await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/不可為零/);
+  await open('#kgen-v30-vow-btn');
+  for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
+   await page.locator('#'+id).fill(value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);assert.match(await feedback(action).innerText(),pattern);
+  }
+  await page.locator('#kh-vow-amount').fill('9');await page.locator('#kh-lamp-days').fill('8');
+  await page.locator('#kh-vow-option').evaluate(e=>e.selectedIndex=-1);await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/選擇還願項目/);await page.locator('#kh-vow-option').selectOption('2');
+  fixture.allowance='0';
+  for(const id of ['kh-vow','kh-lamp']){await click(id);assert.match(await feedback(id).innerText(),/Approve required/);assert.equal(await page.locator('#kh-approve-target').inputValue(),id==='kh-vow'?'vow':'lamp');}
+  assert.equal(await count(),4,'insufficient allowance cannot send action or auto-approve');
+  assert.ok(await feedback('kh-lamp').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}),'allowance reason visible beside original form');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'detailed error must not stretch the HUD');
+  await page.screenshot({path:`${OUT}/heart-action-${width}-approve-required.png`});
+  fixture.price='3';await click('kh-lamp');assert.match(await feedback('kh-lamp').innerText(),/24 KGEN/,'lamp price comes from chain, not days=cost');
+  assert.equal(await page.evaluate(()=>KGEN_RUNTIME_CORE.modules.ApproveRuntime.getNeedAmount('lamp')),'24','same canonical approval amount');
+  fixture.allowance='1000';fixture.balance='1';await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/餘額不足/);
+  fixture.balance='1000';fixture.readError=true;await click('kh-lamp');assert.match(await feedback('kh-lamp').innerText(),/失敗/);fixture.readError=false;
+  assert.equal(await count(),4,'read failure and low balance fail closed');
+  await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('世界平安');
+  accept=false;await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/已取消/);assert.equal(await count(),4);accept=true;
+  await page.evaluate(()=>{__txFailure={code:4001,message:'User rejected'};});await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/交易已取消/);
+  await page.evaluate(()=>{__txFailure={code:'CALL_EXCEPTION',message:'execution reverted: TEST_REVERT'};});await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/TEST_REVERT/);
+  await page.evaluate(()=>{__txFailure=null;__holdTx=true;});await page.locator('#kh-wishbtn').tap();await page.waitForFunction(()=>!!window.__releaseTx);const pending=await count();await page.locator('#kh-wishbtn').tap();assert.equal(await count(),pending,'rapid repeat tap cannot duplicate transaction');
+  await page.evaluate(()=>{__holdTx=false;__releaseTx();});await page.waitForFunction(()=>!document.getElementById('kh-wishbtn').dataset.heartPending);
+  await page.screenshot({path:`${OUT}/heart-action-${width}-confirmed-stub.png`});
+  for(let i=0;i<10;i++){await open('#kgen-v30-vow-btn');await page.locator('#kgen-heart-toggle').tap();await open('#kgen-v30-wish-btn');await page.locator('#kgen-heart-toggle').tap();}
+  assert.deepEqual(await geometry(),baseline,'form status and ten cycles never move world composition');
+  assert.equal(broadcasts,0);reports.push({id:'12345-heart-actions',width,height,connectedOriginalTransactionPath:decoded,allowanceGate:'PASS',validation:'PASS',rejectionAndRevert:'PASS',pendingDuplicate:'PASS',positionStable:'PASS',broadcasts:0,physicalMetaMask:'HUMAN_RETEST_REQUIRED'});
+ }catch(error){await page.screenshot({path:`${OUT}/heart-action-${width}-FAIL.png`});throw error;}finally{await context.close();}
+}
+}
 async function walletRoundTripQA(){
  const temple='/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/12345/index.html',canonical='https://klineodyssey.github.io/kline-odyssey'+temple;
  const context=await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',isMobile:true,hasTouch:true});
@@ -60,7 +162,7 @@ async function walletRoundTripQA(){
   });
   await open(destination.search);
   await page.waitForFunction(()=>document.querySelector('#kh-kgen-bal').textContent==='123.0000 KGEN',null,{timeout:30000});
-  assert.equal(new URL(page.url()).pathname,temple);
+  assert.equal(new URL(page.url()).pathname,new URL(BASE+temple).pathname);
   assert.ok((await page.locator('#kh-wallet').textContent()).includes(account));
   assert.equal(await page.locator('#userBNB').textContent(),'1.0000 BNB');assert.equal(await page.locator('#kh-heart-bal').textContent(),'8000.0000 KGEN');assert.equal(await page.locator('#kh-chain').textContent(),'BSC 56');
   assert.ok(await page.evaluate(()=>__walletFixture.requests.includes('wallet_switchEthereumChain')));await page.waitForFunction(()=>!web3._connectPromise);
@@ -83,8 +185,9 @@ async function walletRoundTripQA(){
  }finally{await context.close();}
 }
 try{
-if(!preservation)await walletRoundTripQA();
-for(const id of (walletOnly||process.argv.includes('--layout-only')?[]:preservation?['16888']:['12345','16888']))for(const [width,height]of (preservation?[[360,844],[390,844],[412,844],[432,844],[480,844]]:[[390,844],[844,390]])){
+if(!preservation&&!heartOnly)await walletRoundTripQA();
+if(!preservation&&!walletOnly)await heartActionQA();
+for(const id of (walletOnly||heartOnly||process.argv.includes('--layout-only')?[]:preservation?['16888']:['12345','16888']))for(const [width,height]of (preservation?[[360,844],[390,844],[412,844],[432,844],[480,844]]:[[390,844],[844,390]])){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
  const errors=[],commercialRequests=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));page.on('request',r=>{if(/\/music\/.*(?:\.mp3|playlist\.json)/i.test(r.url()))commercialRequests.push(r.url());});
  await page.addInitScript(()=>{const Real=window.AudioContext||window.webkitAudioContext;window.__qaAudioContexts=[];window.__qaAnalysers=[];const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const analyser=this.context.createAnalyser();connect.call(this,analyser);window.__qaAnalysers.push(analyser);}return result;};if(Real){window.AudioContext=class extends Real{constructor(...args){super(...args);window.__qaAudioContexts.push(this);}};window.webkitAudioContext=window.AudioContext;}});
@@ -115,7 +218,7 @@ for(const id of (walletOnly||process.argv.includes('--layout-only')?[]:preservat
  assert.ok(errors.every(e=>!e.includes('kaios-audio')&&!e.includes('kaios-world-audio')),'shared audio errors');
  reports.push({id,width,height,audio:'PASS',signal,returnPortal:'PASS',commercialRequests:0,legacyPageErrors:errors});await context.close();
 }
-for(const [width,height] of (walletOnly?[]:[[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]])){
+for(const [width,height] of (walletOnly||heartOnly?[]:[[360,844],[390,844],[412,844],[432,844],[480,844],[844,390]])){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true}),page=await context.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e)));
  const shot=name=>page.screenshot({path:`${OUT}/heart-${width}-${name}.png`});
@@ -150,15 +253,15 @@ for(const [width,height] of (walletOnly?[]:[[360,844],[390,844],[412,844],[432,8
   assert.ok(readout.y>=warp.y&&readout.y+readout.height<=warp.y+warp.height+1,'Warp readout must remain inside its stacking region');
   const initial=await geometry();
   // Original-function regression: real shortcuts, original form and original
-  // sendHeart button listeners. Replace only the final transaction boundary;
-  // NEVER connect a signer, approve, sign or broadcast during browser QA.
+  // sendHeart button listeners. This is shortcut/layout coverage only; the
+  // connected four-action suite above keeps sendHeart intact through ethers.
   await page.evaluate(()=>{
    const heart=KGEN_RUNTIME_CORE.modules.HeartRuntime;
    window.__originalSendHeart=heart.sendHeart;window.__ritualCalls=[];
-   heart.sendHeart=(label,runner)=>runner({
+   heart.sendHeart=(label,runner,action)=>runner({
     makeWish:hash=>__ritualCalls.push({method:'makeWish',hash}),
     vowTo:(option,amount)=>__ritualCalls.push({method:'vowTo',option,amount})
-   });
+   },action&&action.prepare());
   });
   for(let cycle=0;cycle<3;cycle++){
    await page.locator('#kgen-v30-wish-btn').tap();
