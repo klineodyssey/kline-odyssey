@@ -1,5 +1,22 @@
 # 11520 Changelog
 
+## 2026-10-04 — Canonical signed market address candidate
+
+- Restore the existing price-floor lineage with shared `(k, alpha, theta)`
+  display, a common alpha map and Prime Gate 5.11111; distinguish USDT reference
+  quotes, WORLD 11520 land address and local physical XYZ.
+- Preserve PR421 relative-percent simulation values, monster translation,
+  combat ranges/phase and all trading math. Relative indicators are advanced
+  information, not canonical K coordinates or physical distances.
+- Reuse the existing spatial organ and skin floor function; CURRENT zero is
+  K0/ORIGIN. No canonical documents/data, new runtime or second coordinate
+  authority. Lineage and dependency matrix are in HANDOFF_CURRENT.md.
+- Release remains Draft-only pending exact-head functional and visual QA.
+- Browser coverage includes market decade boundaries/shared Gate without
+  movement or combat changes, and map captures at all six viewport sizes.
+  Existing toast fade QA now observes completion with a 2s bound instead of
+  sampling only an arbitrary 800ms frame; exact-zero/geometry checks remain.
+
 ## 2026-10-03 — Player Courier public bandit and insurance completion
 
 - Wired the existing Player Courier `BANDIT_MODE`, `CARGO_RAID_ACTION`, `raid()` and one-shot loot receipt into the public game shell without creating another logistics engine.

@@ -13,7 +13,7 @@ import {createMarketLife,perceiveMarketLife,decideMarketLife,decideMarketLifeLif
 import {deriveMarketRelations,animationIntentForRelations} from './market-relation-runtime.mjs';
 import {drainMarketLifeSourceEvents,installMarketLifeSourceListeners} from './market-life-source-runtime.mjs';
 import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-runtime.mjs';
-import {gameUnitsToK,localPositionToK,composePhysicalK} from './spatial-coordinate-runtime.mjs';
+import {gameUnitsToK,localPositionToK,composePhysicalK,signedUniverseAddress} from './spatial-coordinate-runtime.mjs';
 import {resolveCMode} from '../controls/nonlinear-controls.mjs';
 import {GAMEPLAY_UNLOCKS} from './player-life-runtime.mjs';
 
@@ -203,6 +203,8 @@ export function kMarketSnapshot(world,now=Date.now()){
   const s=world.kSpace;if(!s||!Number.isFinite(s.receivedAt))return {status:'WAIT',receivedAt:null,markets:[]};
   const status=s.quoteFailed||now-s.receivedAt>15000?'STALE':'LIVE';
   const markets=K_AXES.map(axis=>{const v=s.reference[axis],k=s.playerK[axis];return {axis,symbol:v.market,price:v.price,anchor:v.anchor,k,
+    universe:signedUniverseAddress(v.price),quoteUnit:'USDT',relativePercent:k,
+    relativeIndicatorAuthority:'SIMULATION_REFERENCE_NOT_CANONICAL_COORDINATE',
     // A scalar market has one axis intercept, not three invented independent coordinates.
     point:Object.fromEntries(K_AXES.map(a=>[a,a===axis?k:0]))}});
   return {status,receivedAt:s.receivedAt,source:s.reference.source,markets};

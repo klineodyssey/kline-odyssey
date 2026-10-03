@@ -12,6 +12,26 @@ export const SPATIAL_CALIBRATION=Object.freeze({
   source:'docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md#161',
 });
 function finiteSpatial(value){if(typeof value!=='number'||!Number.isFinite(value))throw new RangeError('INVALID_SPATIAL_VALUE');return Object.is(value,-0)?0:value}
+// Physics CURRENT §§150–153, 169, 210. Scalar address only: never XYZ,
+// an execution price conversion, a leverage phase or a movement instruction.
+export const PRIME_GATE_ALPHA=5.11111;
+export function signedUniverseAddress(x){
+  finiteSpatial(x);
+  if(x===0)return {kind:'ORIGIN',k:'ORIGIN',alpha:'ORIGIN',theta:'ORIGIN'};
+  const m=Math.abs(x);let k=Math.floor(Math.log10(m));
+  // Scientific notation also supports subnormal JS numbers (10**-324 is zero).
+  const [coefficient,exponent]=m.toExponential().split('e');
+  let alpha=k>=-323?m/10**k:Number(coefficient)*10**(Number(exponent)-k);
+  // log10 may round to the neighboring integer immediately below a power of ten.
+  if(alpha<1){k--;alpha*=10}else if(alpha>=10){k++;alpha/=10}
+  return {kind:'SIGNED_UNIVERSE',k,alpha,theta:x<0?Math.PI:0};
+}
+export function formatUniverseAddress(address){
+  if(address.kind==='ORIGIN')return 'K0 / ORIGIN';
+  // Do not round a value just below 10 into a false next-layer boundary.
+  const alpha=Math.min(9.999999,Math.floor(address.alpha*1e6)/1e6);
+  return `k=${address.k} · α=${alpha} · θ=${address.theta===0?'0':'π'}`;
+}
 const converted=value=>finiteSpatial(value);
 export const gameUnitsToMeters=value=>converted(finiteSpatial(value)*SPATIAL_CALIBRATION.metersPerGameUnit);
 export const metersToGameUnits=value=>converted(finiteSpatial(value)/SPATIAL_CALIBRATION.metersPerGameUnit);

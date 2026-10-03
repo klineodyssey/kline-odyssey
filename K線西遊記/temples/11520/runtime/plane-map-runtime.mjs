@@ -8,7 +8,7 @@ PURPOSE: Project the validated public-market/combat K snapshot and local XYZ in 
 
 import {WORLD_OBJECTS,formatKCoordinate} from './world-runtime.mjs';
 import {install11520XyzMapNavigation} from './xyz-map-navigation-runtime.mjs';
-import {formatGameDistanceK,gameUnitsToK,localPositionToK} from './spatial-coordinate-runtime.mjs';
+import {formatGameDistanceK,gameUnitsToK,localPositionToK,signedUniverseAddress,formatUniverseAddress,PRIME_GATE_ALPHA} from './spatial-coordinate-runtime.mjs';
 
 const MODE_SPECS=Object.freeze({
   XZ:Object.freeze({h:'X',v:'Z',depth:'Y',normal:'KY'}),
@@ -104,56 +104,62 @@ function paintKMap(canvas,model){
   kMarker(ctx,p.player,false);kMarker(ctx,{x:p.depthX,y:p.depthPlayer},false);
   ctx.fillStyle='#60edff';ctx.fillText('P',p.player.x-12,p.player.y+2);
   if(p.monster){ctx.fillStyle='#ffca69';ctx.fillText('M',p.monster.x+6,p.monster.y-12)}
-  ctx.fillStyle='#cde8ef';ctx.fillText(model.distance===null?'無市場目標':`ΔK ${model.distance.toFixed(1)} norm`,4,h-12);
+  ctx.fillStyle='#cde8ef';ctx.fillText(model.distance===null?'無市場目標':`相對差 ${model.distance.toFixed(1)} pp（非正典座標）`,4,h-12);
   if(large){ctx.fillStyle='#60edff';ctx.fillText('● PLAYER',8,3);ctx.fillStyle='#ffca69';ctx.fillText('◆ MONSTER',100,3);ctx.fillStyle='#e6dbbb';ctx.fillText(`${model.phase} · ${model.neutral?'NO ATTACK PHASE':'ACTIVE'}`,w-170,3);ctx.fillStyle='#adc4d5';ctx.fillText('normal / depth',w-93,h-12)}
   canvas.setAttribute('aria-label',`Market normalized K-space ${model.plane}: ${model.h} horizontal, ${model.v} vertical, ${model.normal} depth; ${model.phase}; ${model.targetId||'no target'}; normalized delta ${model.distance??'unavailable'}; not physical K distance`);
 }
-// Overview uses absolute market-axis intercepts. The existing close-range plot remains
-// below it in details so a normalized combat vector is never lost to the market-wide scale.
+// All markets share alpha [1,10); rows only separate labels, never create P0 maps.
 export function projectMarketKMap(model,width,height){
-  const raw=p=>({x:p[model.h]-.48*p[model.normal],y:-p[model.v]+.32*p[model.normal]});
-  const points=[{KX:0,KY:0,KZ:0},model.player,...(model.monster?[model.monster]:[]),...model.market.markets.map(m=>m.point)];
-  const values=points.map(raw),xs=values.map(p=>p.x),ys=values.map(p=>p.y);
-  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
-  const scale=Math.min((width-44)/Math.max(1,maxX-minX),(height-42)/Math.max(1,maxY-minY));
-  const point=p=>{const v=raw(p);return{x:width/2+(v.x-(minX+maxX)/2)*scale,y:height/2+(v.y-(minY+maxY)/2)*scale}};
-  return {point,origin:point({KX:0,KY:0,KZ:0}),player:point(model.player),monster:model.monster?point(model.monster):null};
+  const alphaX=alpha=>10+(alpha-1)/9*(width-20);
+  return {gateX:alphaX(PRIME_GATE_ALPHA),points:model.market.markets.map((m,i)=>{
+    const universe=m.universe||signedUniverseAddress(m.price);
+    return {axis:m.axis,universe,x:universe.kind==='ORIGIN'?null:alphaX(universe.alpha),y:34+i*(height-43)/3};
+  })};
 }
 function paintMarketOverview(canvas,model){
   const w=canvas.clientWidth||300,h=canvas.clientHeight||200,ratio=Math.min(3,devicePixelRatio||1);
   if(canvas.width!==Math.round(w*ratio)||canvas.height!==Math.round(h*ratio)){canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio)}
   const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#06131c';ctx.fillRect(0,0,w,h);ctx.textBaseline='top';
   if(!model?.market.markets.length){ctx.fillStyle='#ccdce8';ctx.font='10px system-ui';ctx.fillText('K 市場 · WAIT',4,4);canvas.setAttribute('aria-label','K 市場 WAIT · 尚無有效行情');return}
-  const p=projectMarketKMap(model,w,h),small=w<180,colors=['#ffbf4d','#4cecaa','#50aaff'];
-  ctx.font=`bold ${small?8:11}px system-ui`;ctx.textBaseline='top';ctx.strokeStyle='#294d62';ctx.lineWidth=1;
-  for(let x=0;x<w;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
-  model.market.markets.forEach((m,i)=>{const v=p.point(m.point);ctx.strokeStyle=colors[i];ctx.fillStyle=colors[i];arrow(ctx,p.origin,v);ctx.beginPath();ctx.arc(v.x,v.y,small?3:5,0,Math.PI*2);ctx.fill();
-    const name=m.symbol.replace('USDT',''),label=`${m.axis} / ${name}`;
-    if(small){ctx.fillText(`${m.axis} ${name}`,2+i*(w/3),h-10)}else{const tw=ctx.measureText(label).width,x=Math.max(2,Math.min(w-tw-2,v.x+8)),y=Math.max(15,Math.min(h-14,v.y>h/2?v.y+7:v.y-14));ctx.fillStyle='#06131c';ctx.fillRect(x-1,y-1,tw+2,14);ctx.fillStyle=colors[i];ctx.fillText(label,x,y)}});
-  if(p.monster){ctx.strokeStyle='#ff798a';ctx.fillStyle='#ff798a';arrow(ctx,p.player,p.monster);kMarker(ctx,p.monster,true)}kMarker(ctx,p.player,false);
-  ctx.fillStyle='#60edff';ctx.fillText('P',Math.max(2,p.player.x-11),Math.min(h-12,p.player.y+4));if(p.monster){ctx.fillStyle='#ffca69';ctx.fillText('M',Math.min(w-9,p.monster.x+6),Math.max(15,p.monster.y-10))}
-  ctx.fillStyle='#ecf4ff';ctx.fillText(`${model.phase} · ${model.market.status}`,3,2);
-  canvas.setAttribute('aria-label',`市場 K-space ${model.market.status}; BTC KX, ETH KY, BNB KZ; PLAYER P; MONSTER M; ${model.plane} + ${model.normal} depth`);
+  const small=w<180,colors=['#ffbf4d','#4cecaa','#50aaff'],left=10,right=w-10;
+  const alphaX=a=>left+(a-1)/9*(right-left),projection=projectMarketKMap(model,w,h),gateX=projection.gateX;
+  ctx.font=`bold ${small?8:11}px system-ui`;ctx.strokeStyle='#294d62';ctx.lineWidth=1;
+  ctx.fillStyle='#ecf4ff';ctx.fillText(`α 共用圖 · ${model.market.status}`,3,2);
+  for(let a=1;a<=10;a++){const x=alphaX(a);ctx.beginPath();ctx.moveTo(x,18);ctx.lineTo(x,h-16);ctx.stroke()}
+  ctx.strokeStyle='#f5d58d';ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(gateX,18);ctx.lineTo(gateX,h-16);ctx.stroke();ctx.setLineDash([]);
+  model.market.markets.forEach((m,i)=>{
+    const u=m.universe||signedUniverseAddress(m.price),y=22+i*(h-43)/3;
+    ctx.fillStyle=colors[i];ctx.fillText(`${m.symbol.replace('USDT','')} ${u.kind==='ORIGIN'?'K0 / ORIGIN':`k${u.k} θ${u.theta===0?'0':'π'}`}`,3,y);
+    if(u.kind!=='ORIGIN'){ctx.beginPath();ctx.arc(projection.points[i].x,projection.points[i].y,small?3:4,0,Math.PI*2);ctx.fill()}
+  });
+  ctx.fillStyle='#e6dbbb';ctx.fillText('1',left-2,h-12);ctx.fillText('10',right-10,h-12);
+  ctx.fillText(small?'Gate 5.11111':'Prime Gate α 5.11111',Math.max(18,gateX-(small?25:55)),h-12);
+  canvas.setAttribute('aria-label',`共用 α 地圖 [1,10); Gate α ${PRIME_GATE_ALPHA}; ${model.market.markets.map(m=>`${m.axis} ${m.symbol} ${formatUniverseAddress(m.universe||signedUniverseAddress(m.price))}`).join('; ')}; k 樓層與 θ 相位分開，不代表玩家 XYZ`);
 }
 const kNumber=formatKCoordinate;
 export function kSpaceMapDetails(model){
   if(!model)return 'K-space snapshot unavailable';
-  const tuple=p=>p?['KX','KY','KZ'].map(a=>kNumber(p[a])).join(' / '):'—';
   const localTuple=model.local?['x','y','z'].map(a=>`${a.toUpperCase()} ${formatGameDistanceK(model.local[a],{detail:true})}`).join(' / '):'—';
-  const lines=[`PLAYER K（正規化）: ${tuple(model.player)}`,`MONSTER K（正規化）: ${tuple(model.monster)}`,`ΔK（正規化）: ${tuple(model.delta)}`,`NORM DIST: ${model.distance===null?'—':model.distance.toFixed(2)+' norm'}`,`LOCAL DIST: ${model.localDistance===null?'—':formatGameDistanceK(model.localDistance,{detail:true})}`,`LOCAL XYZ K: ${localTuple}`,`PLANE: ${model.plane} · NORMAL: ${model.normal}`,`ACTIVE: ${model.phase}${model.neutral?' / NEUTRAL / NO ATTACK PHASE':''}`,`TARGET: ${model.targetId||'NONE'}`];
-  const markets=model.market.markets.map(m=>`${m.axis}/${m.symbol.replace('USDT','')} $${m.price.toFixed(2)} → ${kNumber(m.k)} norm`);
-  const distances=model.market.markets.map(m=>`${m.symbol.replace('USDT','')} ${Math.hypot(...['KX','KY','KZ'].map(a=>m.point[a]-model.player[a])).toFixed(1)}`).join(' · ');
-  return [`${model.market.status} · UTC ${model.market.receivedAt?new Date(model.market.receivedAt).toISOString().slice(11,19):'WAIT'}`,...markets,`市場正規化差值: ${distances}`,...lines,'市場 → 物理距離轉換：未設定（不得換算）'].join('\n');
+  const lines=[`LOCAL DIST: ${model.localDistance===null?'—':formatGameDistanceK(model.localDistance,{detail:true})}`,`LOCAL XYZ K: ${localTuple}`,`PLANE: ${model.plane} · NORMAL: ${model.normal}`,`COMBAT: ${model.phase}${model.neutral?' / NEUTRAL / NO ATTACK PHASE':''}（不是 θ）`,`TARGET: ${model.targetId||'NONE'}`];
+  const markets=model.market.markets.map(m=>`${m.axis}/${m.symbol.replace('USDT','')} $${m.price.toFixed(2)} USDT\n${formatUniverseAddress(m.universe||signedUniverseAddress(m.price))}`);
+  return ['WORLD 11520 花果山 · k=4 / α=1.152 / θ=0（地點地址）',`${model.market.status} · UTC ${model.market.receivedAt?new Date(model.market.receivedAt).toISOString().slice(11,19):'WAIT'}`,...markets,...lines,'市場 → 物理距離轉換：未設定（不得換算）'].join('\n');
 }
 function updateKDetails(model){
   const canvas=document.querySelector('#kspaceDetailMap');if(!canvas||!document.querySelector('#sheet.open'))return;
   paintKMap(canvas,model);const body=document.querySelector('#kspaceMapValues');if(!body)return;
   paintMarketOverview(document.querySelector('#kspaceMarketMap'),model);
   body.textContent=kSpaceMapDetails(model);
+  const advanced=document.querySelector('#kspaceRelativeValues');if(advanced)advanced.textContent=[
+    '相對基準百分比 Ni(P)=100×(P/P0−1)，非正典 K 座標；pp = 百分點。',
+    ...model.market.markets.map(m=>`${m.symbol}: P0=${m.anchor} USDT · 相對基準 ${kNumber(m.k)}%`),
+    `模擬 Player → Monster 相對差: ${model.distance===null?'—':model.distance.toFixed(2)} pp`,
+    'k=floor(log10(|x|)); α=|x|/10^k; θ=0/π；x=0 → K0 / ORIGIN。',
+    '行情 x=USDT 報價，不是 USD 指數、不作 settlement Oracle；Gate 僅標示位置，不提供通行權限。'
+  ].join('\n');
 }
 function showKDetails(){
-  document.querySelector('#sheetTitle').textContent='K-SPACE · 市場座標';
-  document.querySelector('#sheetBody').innerHTML='<style>#sheet:has(#kspaceMapValues){display:flex;flex-direction:column;overflow:hidden}#sheet:has(#kspaceMapValues) .sheetHead{flex-shrink:0;z-index:6;background:#101923}#sheet:has(#kspaceMapValues) #sheetBody{min-height:0;flex:1;overflow:auto}#sheet:has(#kspaceMapValues) .close{min-width:44px;min-height:44px}</style><p style="margin:0 0 8px">● PLAYER / ◆ MONSTER · KX / KY / KZ（市場正規化）</p><canvas id="kspaceMarketMap" style="display:block;width:100%;height:180px;border-radius:8px" role="img"></canvas><pre id="kspaceMapValues" style="font:12px/1.55 system-ui;white-space:pre-wrap;overflow-wrap:anywhere"></pre><details><summary style="min-height:44px;cursor:pointer">Player → Monster 正規化投影 ▾</summary><canvas id="kspaceDetailMap" style="display:block;width:100%;height:180px;border-radius:8px" role="img"></canvas></details><p class="muted">KX / KY / KZ 為公開報價正規化座標（模擬用途），不是物理 K 距離。LOCAL XYZ 自主移動採 1 遊戲單位 = 1 公尺，以 K 距離顯示並附公尺明細。三市場點為各軸截距；箭頭與深度為市場正規化向量，不是實際攻擊距離。市場 → 物理距離轉換尚未設定，禁止直接相加或換算。</p><button id="kspaceShowLocal" class="btn" style="min-height:44px">切換 LOCAL XYZ 導航圖</button>';
+  document.querySelector('#sheetTitle').textContent='宇宙地址 · 共用 α 地圖';
+  document.querySelector('#sheetBody').innerHTML='<style>#sheet:has(#kspaceMapValues){display:flex;flex-direction:column;overflow:hidden}#sheet:has(#kspaceMapValues) .sheetHead{flex-shrink:0;z-index:6;background:#101923}#sheet:has(#kspaceMapValues) #sheetBody{min-height:0;flex:1;overflow:auto}#sheet:has(#kspaceMapValues) .close{min-width:44px;min-height:44px}</style><p style="margin:0 0 8px">k：尺度樓層 · α：共用位置 · θ：正負相位<br>三市場共用 α [1,10)；價格樓層不等於土地樓層。</p><canvas id="kspaceMarketMap" style="display:block;width:100%;height:180px;border-radius:8px" role="img"></canvas><pre id="kspaceMapValues" style="font:12px/1.55 system-ui;white-space:pre-wrap;overflow-wrap:anywhere"></pre><details><summary style="min-height:44px;cursor:pointer">進階資訊：公式 / 相對基準 / 模擬向量 ▾</summary><pre id="kspaceRelativeValues" style="font:12px/1.55 system-ui;white-space:pre-wrap;overflow-wrap:anywhere"></pre><canvas id="kspaceDetailMap" style="display:block;width:100%;height:180px;border-radius:8px" role="img"></canvas></details><p class="muted">KX=BTC、KY=ETH、KZ=BNB 為市場綁定；市場地址不與玩家 XYZ 相加。XYZ 的正負是局部方向，不代表負價格或鏡相宇宙。戰鬥 ±C 也不是宇宙 θ。LOCAL 1 遊戲單位 = 1 公尺，依既有尺度顯示 K 距離。</p><button id="kspaceShowLocal" class="btn" style="min-height:44px">切換 LOCAL XYZ 導航圖</button>';
   document.querySelector('#sheet').classList.add('open');
   document.querySelector('#sheetBody').scrollTop=0;
   document.querySelector('#kspaceShowLocal').onclick=()=>{miniView='XYZ';document.querySelector('#sheet').classList.remove('open')};
