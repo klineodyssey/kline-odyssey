@@ -6,6 +6,7 @@
 - Read canonical claim state, current DOM visibility, scroll position, geometry and hit testing in one browser turn. Retained the 44 px minimum, full content width, viewport containment and pointer-reachability assertions; crossed an actual panel replacement and both orientations without a fixed sleep.
 - Added exact premium debit, paid-claim reload/no duplicate credit, explicit `UNINSURED` zero payout, deterministic failed public raid, ordinary PvP ownership protection and canonical duplicate-loot rejection checks. Relative QA imports also support the public Pages base path.
 - Test-only repair: no production CSS, courier runtime, economics, Wallet, TempleHeart or Mainnet changes. Browser fixtures and balances are explicitly local gameplay, not real token transfers or cross-device multiplayer evidence.
+- Added a manual trigger to the existing read-only/local-EVM Trading Readiness workflow for exact-head release validation; unchanged jobs, safety assertions and permissions.
 
 ## 2026-10-03 — Player Courier public bandit and insurance completion
 
