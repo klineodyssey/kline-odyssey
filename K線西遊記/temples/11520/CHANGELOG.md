@@ -1,5 +1,13 @@
 # 11520 Changelog
 
+## 2026-10-04 — Player Courier insurance browser-test synchronization
+
+- Reproduced the #480 main Game CI failure at `a42eb12c`: the 500 ms courier-panel refresh replaces an already-visible `APPROVED` claim between Playwright locator resolution and its separate geometry request. The current button remains 308×44 in portrait while the detached handle returns null.
+- Read canonical claim state, current DOM visibility, scroll position, geometry and hit testing in one browser turn. Retained the 44 px minimum, full content width, viewport containment and pointer-reachability assertions; crossed an actual panel replacement and both orientations without a fixed sleep.
+- Added exact premium debit, paid-claim reload/no duplicate credit, explicit `UNINSURED` zero payout, deterministic failed public raid, ordinary PvP ownership protection and canonical duplicate-loot rejection checks. Relative QA imports also support the public Pages base path.
+- Test-only repair: no production CSS, courier runtime, economics, Wallet, TempleHeart or Mainnet changes. Browser fixtures and balances are explicitly local gameplay, not real token transfers or cross-device multiplayer evidence.
+- Added a manual trigger to the existing read-only/local-EVM Trading Readiness workflow for exact-head release validation; unchanged jobs, safety assertions and permissions.
+
 ## 2026-10-03 — Player Courier public bandit and insurance completion
 
 - Wired the existing Player Courier `BANDIT_MODE`, `CARGO_RAID_ACTION`, `raid()` and one-shot loot receipt into the public game shell without creating another logistics engine.

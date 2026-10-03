@@ -1,6 +1,7 @@
 name: 11520 Trading Readiness
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "KGEN/contracts/KGEN_BrainExchange.sol"
