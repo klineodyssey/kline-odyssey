@@ -1,5 +1,13 @@
 # 11520 Changelog
 
+## 2026-10-03 — Player-requested cash and goods delivery to the canonical home
+
+- Added a first-viewport “鈔票／貨物外送到家” action. A delivery now begins with an actual player action and targets that Player Life’s existing home-plot XYZ instead of an invented destination.
+- Reused the existing Digital Ant ATM UFO and authoritative `ASCEND -> CRUISE_5D -> DESCEND` route. No second exchange, delivery engine, coordinate system or Life was created.
+- Added receiver identity, home proximity and runtime-generated receipt gates. Arrival alone remains unpaid; only the requesting player at the home can accept the cargo.
+- Separated restricted cargo principal, freight revenue, worker salary, operating cost and company net. Digital Ant’s local-game salary is recognized only after acceptance; cargo principal never becomes revenue.
+- Kept the entire first release in `LOCAL_SIMULATION_ONLY`: the player’s local KAIOS pays the freight fee, while no wallet transfer, Mainnet write or real salary claim is performed.
+
 ## 2026-10-03 — Visible KAIOS missile interception and ATM UFO crash loop
 
 - Promoted the Digital Ant interception action from the bottom of a long ATM sheet to a persistent, pointer-reachable mobile HUD button.

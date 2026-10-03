@@ -236,7 +236,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -525,6 +525,28 @@ test('Digital Ant travels full XYZ and requires verified receipt before delivery
   assert.equal(settled.ok,true);
   assert.equal(ant.mission.status,'DELIVERED');
   assert.ok(ant.retirementReserve>=0);
+});
+
+test('player action creates one home-delivery demand at the canonical player-home XYZ',()=>{
+  const destination=createPlayerHomeDestination({requestId:'HOME-QA-1',requesterLifeId:'KAIOS-P-HOME-1234567890',homePlotId:'KAIOS-H-HOME-1234567890',position:{x:4,y:0,z:-3}});
+  assert.equal(destination.ok,true);assert.equal(destination.destination.kind,'PLAYER_HOME');assert.deepEqual({x:destination.destination.x,y:destination.destination.y,z:destination.destination.z},{x:4,y:0,z:-3});
+  const request=createPlayerHomeDeliveryRequest({requestId:'HOME-QA-1',requesterLifeId:'KAIOS-P-HOME-1234567890',homePlotId:'KAIOS-H-HOME-1234567890',homePosition:{x:4,y:0,z:-3},origin:{x:0,y:1,z:0},cargoKind:'CASH',amount:1000,movementC:.1});
+  assert.equal(request.ok,true);assert.equal(request.request.status,'REQUESTED_BY_PLAYER');assert.equal(request.mission.serviceType,'PLAYER_HOME_CASH_DELIVERY');assert.equal(request.mission.cargoCustody,'RESTRICTED_INVENTORY_WITH_MATCHING_LIABILITY');assert.equal(request.mission.cargoPrincipalRevenue,false);assert.ok(request.request.freightFeeKaios>0);assert.ok(request.request.workerSalaryKaios>0);
+});
+
+test('home delivery pays no revenue or salary until arrival, correct-player acceptance and exact local freight payment',()=>{
+  const requester='KAIOS-P-HOME-DELIVERY-1234567890',home={x:1,y:0,z:1},ant=createDigitalAnt({lifeId:'DIGITAL_ANT_0001',x:0,y:0,z:0,capital:20,cargoCapacity:2000});
+  const request=createPlayerHomeDeliveryRequest({requestId:'HOME-QA-SETTLEMENT',requesterLifeId:requester,homePlotId:'KAIOS-H-HOME-DELIVERY',homePosition:home,origin:ant,cargoKind:'GOODS',amount:1000,movementC:1,freightFee:8,workerSalary:3});
+  assert.equal(assignDelivery(ant,request.mission,[request.destination]).ok,true);assert.equal(ant.finance.earned,0);assert.equal(ant.payroll.paid,0);
+  assert.equal(loadCargo(ant).ok,true);let tick;for(let i=0;i<80;i++){tick=tickDigitalAntDelivery(ant,{deltaMs:100,speed:.2});if(tick.arrived)break}
+  assert.equal(tick.arrived,true);assert.equal(ant.mission.status,'ARRIVED_AWAITING_RECEIPT');assert.equal(ant.finance.earned,0);assert.equal(ant.payroll.paid,0,'arrival alone is not salary evidence');
+  assert.equal(previewPlayerHomeAcceptance(ant,{requesterLifeId:'KAIOS-P-WRONG-RECEIVER',playerPosition:home}).reason,'RECEIVER_IDENTITY_MISMATCH');
+  assert.equal(previewPlayerHomeAcceptance(ant,{requesterLifeId:requester,playerPosition:{x:99,y:0,z:99}}).reason,'RECEIVER_NOT_AT_HOME');
+  assert.equal(acceptPlayerHomeDelivery(ant,{requesterLifeId:requester,playerPosition:home,paymentEvidence:null}).reason,'VERIFIED_LOCAL_FREIGHT_PAYMENT_REQUIRED');
+  assert.equal(acceptPlayerHomeDelivery(ant,{requesterLifeId:requester,playerPosition:home,paymentEvidence:{ok:true,amount:'not-an-integer',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}}).reason,'VERIFIED_LOCAL_FREIGHT_PAYMENT_REQUIRED');
+  const settled=acceptPlayerHomeDelivery(ant,{requesterLifeId:requester,playerPosition:home,paymentEvidence:{ok:true,amount:8,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'},now:5000});
+  assert.equal(settled.ok,true);assert.match(settled.receiptId,/^HOME-RECEIPT-[0-9a-f]{8}$/);assert.equal(settled.accounting.cargoPrincipal,1000);assert.equal(settled.accounting.cargoPrincipalRecognizedAsRevenue,false);assert.equal(settled.accounting.freightRevenue,8);assert.equal(settled.accounting.workerSalary,3);assert.equal(settled.accounting.chainTransfer,false);assert.equal(ant.payroll.paid,3);assert.equal(ant.finance.earned,8);
+  assert.equal(acceptPlayerHomeDelivery(ant,{requesterLifeId:requester,playerPosition:home,paymentEvidence:{ok:true,amount:8,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}}).reason,'NOT_AWAITING_RECEIPT','receipt cannot be replayed');
 });
 
 test('Cargo Risk Desk quotes exact integer KAIOS and never uses cargo principal as insurance reserve',()=>{

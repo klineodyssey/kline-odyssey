@@ -1,8 +1,8 @@
 # 11520 倉儲物流宇宙｜Logistics Universe Spec
 
 ## Metadata
-- VERSION: 1.2.0
-- REVISION: 2026-10-03.1
+- VERSION: 1.3.0
+- REVISION: 2026-10-03.2
 - STATUS: ACTIVE / PRODUCT CONCEPT
 - PLACE_ID: 11520
 - RELATION: MARKET_LIFE_AI_SPEC.md
@@ -19,6 +19,17 @@ Digital Ant 是既有已知生命物種，不得在 11520 重新發明成另一�
 - 倉儲出貨／回庫；
 - 多個 Digital Ant 分散式協同配送；
 - 依生命、資本、需求與路線風險自主決定 WAIT / LOAD / UP_ROUTE / DOWN_ROUTE / REROUTE / RETURN / RETREAT。
+
+## 1.2 玩家住家鈔票／貨物外送
+正式服務狀態機：
+
+`PLAYER_REQUEST -> CFO_QUOTE -> ASSIGNED -> LOAD -> ASCEND -> CRUISE_5D -> DESCEND -> ARRIVED_AWAITING_RECEIPT -> PLAYER_ACCEPTANCE -> DELIVERED`
+
+- `PLAYER_REQUEST` 必須包含 requester Life ID、既有 home plot、home XYZ、貨物種類與數量。
+- 到府服務可配送 `CASH` 或 `GOODS`；貨物始終是受限庫存及相應負債，不是 Digital Ant 或公司的營收。
+- 玩家只支付經 CFO 報價的運費。員工薪資是運費成本的一部分，必須在到家、正確收貨人驗收與收據成立後才入帳。
+- 正確收貨條件是 requester Life ID 一致且玩家位於 home acceptance range；他人、遠端按鍵或單純抵達均不得完成交割。
+- 現階段 payment、receipt、salary 與 accounting 都是明示的本機遊戲模擬；不得冒充鏈上 KAIOS 轉帳或真實收入。
 
 ## 2. 價格 = 宇宙層級
 市場價格可映射到 K-space 的十進位宇宙層級。對正數價格 p：
