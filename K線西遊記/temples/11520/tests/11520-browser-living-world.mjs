@@ -23,9 +23,14 @@ assert.ok(homeButtonBox&&homeButtonBox.x>=0&&homeButtonBox.y>=0&&homeButtonBox.x
 await page.screenshot({path:`${OUT}/11520-missile-entry-visible.png`});
 await page.locator('#homeDeliveryButton').click();
 await page.locator('#homeRequest').waitFor({state:'visible'});
-assert.match(await page.locator('#sheetBody').textContent(),/玩家下單 → 飛碟送到家 → 玩家驗收 → 入帳/);
-assert.match(await page.locator('#sheetBody').textContent(),/貨物本金是受限庫存，不是公司收入/);
-await page.locator('#sheetClose').click();
+assert.match(await page.locator('#sheetBody').textContent(),/二選一物流玩法/);
+assert.match(await page.locator('#sheetBody').textContent(),/貨物本金是受限/);
+await page.locator('#homeDeliveryMode').selectOption('PLAYER_COURIER');await page.locator('#homeAmount').fill('2400');await page.locator('#homeInsurance').selectOption('YES');await page.locator('#homeRequest').click();
+assert.match(await page.locator('#homeDeliveryReceipt').textContent(),/Player Courier/);await page.locator('#homeLaunch').click();
+await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='ACTIVE',null,{timeout:3000});
+const courierMission=await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active());assert.equal(courierMission.backgroundMission,true);assert.equal(courierMission.blocksMovement,false);assert.equal(courierMission.blocksCombat,false);assert.equal(courierMission.blocksExploration,false);assert.equal(courierMission.cargo.ownerState,'OWNED_BY_COURIER');assert.equal(courierMission.insurance.status,'ACTIVE');
+assert.equal(await page.locator('#playerCourierChip').isVisible(),true);const courierChipBox=await page.locator('#playerCourierChip').boundingBox();assert.ok(courierChipBox&&courierChipBox.x>=0&&courierChipBox.y>=0&&courierChipBox.x+courierChipBox.width<=390&&courierChipBox.y+courierChipBox.height<=844,'Player Courier chip must remain inside 390x844');
+await page.locator('#playerCourierChip').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),true);assert.match(await page.locator('#playerCourierDetails').textContent(),/不鎖定移動、戰鬥、探索或回家/);await page.screenshot({path:`${OUT}/11520-player-courier-390x844.png`});await page.locator('#playerCourierChip').click();
 await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.open());
 await page.waitForSelector('#atmMovementC',{timeout:3000});
 await page.locator('#atmMovementC').selectOption('0.1');
@@ -75,6 +80,8 @@ await page.evaluate(()=>{
 await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
+await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='ACTIVE',null,{timeout:3000});
+assert.equal((await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active())).missionId,courierMission.missionId,'Player Courier mission must survive reload without resetting its timer');
 const deliveryKaiosBefore=await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios);
 await page.locator('#homeDeliveryButton').click();await page.locator('#homeRequest').waitFor({state:'visible'});
 await page.locator('#homeAmount').fill('1000');await page.locator('#homeMovementC').selectOption('1');await page.locator('#homeRequest').click();
@@ -162,6 +169,9 @@ assert.ok(selectedBox,'selected Life HUD must have a rendered box');
 assert.ok(selectedBox.x>=0&&selectedBox.y>=0&&selectedBox.x+selectedBox.width<=390&&selectedBox.y+selectedBox.height<=844,'selected Life HUD must remain fully inside 390x844 viewport');
 await page.screenshot({path:`${OUT}/11520-selected-life-hud.png`,fullPage:true});
 assert.deepEqual(errors,[],'page errors after selected-Life click: '+errors.join('\n'));
+
+if(await page.locator('#sheet').evaluate(sheet=>sheet.classList.contains('open')))await page.locator('#sheetClose').click();
+await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);assert.equal(await page.locator('#playerCourierChip').isVisible(),true,'background courier indicator remains visible in 844x390');const landscapeCourierBox=await page.locator('#playerCourierChip').boundingBox();assert.ok(landscapeCourierBox&&landscapeCourierBox.x>=0&&landscapeCourierBox.y>=0&&landscapeCourierBox.x+landscapeCourierBox.width<=844&&landscapeCourierBox.y+landscapeCourierBox.height<=390,'Player Courier chip must remain inside 844x390');await page.locator('#playerCourierChip').click();const landscapeDetails=await page.locator('#playerCourierDetails').boundingBox();assert.ok(landscapeDetails&&landscapeDetails.x>=0&&landscapeDetails.y>=0&&landscapeDetails.x+landscapeDetails.width<=844&&landscapeDetails.y+landscapeDetails.height<=390,'expanded Player Courier details must remain inside 844x390');await page.screenshot({path:`${OUT}/11520-player-courier-844x390.png`});
 
 await browser.close();
 console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);

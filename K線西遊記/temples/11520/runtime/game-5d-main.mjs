@@ -62,6 +62,15 @@ document.addEventListener('k11520:cargo-robbery-resolved',event=>{
   try{playerLife.recordEvent({id:`cargo-raid:${incidentId}`,type:'LOOT_DROP'})}catch(error){if(error.message!=='EVENT_REPLAY')toast(error.message)}
   toast(incident.outcome==='UFO_CRASHED_LOCAL_LOOT'?`飛碟墜落 · 本機掉寶已驗證 · ${reward} KAIOS 風險池獎勵`:`攔截成功 · 本機風險池 ${reward} KAIOS · 非鏈上貨物轉帳`,true);
 });
+document.addEventListener('k11520:courier-settlement',event=>{
+  const detail=event.detail||{},missionId=String(detail.missionId||''),receiptId=String(detail.receiptId||''),reward=Number(detail.rewardKaios),courier=String(detail.courierLifeId||'');
+  const mission=globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(missionId)?.mission,activeLife=playerLife.activePlayer().playerId;
+  const verified=mission?.status==='DELIVERED'&&mission?.settlement?.outcome==='DELIVERED'&&mission.settlement.receiptId===receiptId&&mission.settlement.rewardKaios===reward&&mission.courierLifeId===courier&&courier===activeLife&&mission.settlement.chainTransfer===false;
+  if(!verified)return;
+  let result;try{result=playerStore.recordCourierSettlement({receiptId,reward})}catch{toast('另一頁已更新運送報酬，請重新載入');return}
+  if(!result.ok){if(result.reason!=='COURIER_REWARD_REPLAY_BLOCKED')toast(`運送報酬未入帳：${result.reason}`);return}
+  S.kaios=playerStore.snapshot().kaios;hud();toast(`運送完成 · 薪資與運費分成 ${reward} KAIOS 已進入本機玩家帳`,true);
+});
 S.kaios=playerStore.snapshot().kaios;
 setInterval(()=>{if(document.visibilityState==='visible')productEvent(null,{elapsedMs:10000})},10000);
 function playerProgressSnapshot(){const p=playerLife.activePlayer();return {playerId:p.playerId,xp:p.xp,level:p.level,engineXp:p.engineXp,engineLevel:p.engineLevel,nextLevelXp:p.level>=10?null:25*p.level*p.level,nextEngineXp:p.engineLevel>=10?null:20*p.engineLevel*p.engineLevel}}

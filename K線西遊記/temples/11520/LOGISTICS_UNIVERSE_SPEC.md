@@ -1,8 +1,8 @@
 # 11520 倉儲物流宇宙｜Logistics Universe Spec
 
 ## Metadata
-- VERSION: 1.3.0
-- REVISION: 2026-10-03.2
+- VERSION: 1.4.0
+- REVISION: 2026-10-03.3
 - STATUS: ACTIVE / PRODUCT CONCEPT
 - PLACE_ID: 11520
 - RELATION: MARKET_LIFE_AI_SPEC.md
@@ -30,6 +30,19 @@ Digital Ant 是既有已知生命物種，不得在 11520 重新發明成另一�
 - 玩家只支付經 CFO 報價的運費。員工薪資是運費成本的一部分，必須在到家、正確收貨人驗收與收據成立後才入帳。
 - 正確收貨條件是 requester Life ID 一致且玩家位於 home acceptance range；他人、遠端按鍵或單純抵達均不得完成交割。
 - 現階段 payment、receipt、salary 與 accounting 都是明示的本機遊戲模擬；不得冒充鏈上 KAIOS 轉帳或真實收入。
+
+## 1.3 Player Courier 背景運鈔任務
+
+既有 Digital Ant 物流提供兩種相容載體，兩者共享同一套貨物、風險、保險及會計規則：
+
+- `DIGITAL_ANT_DELIVERY`：既有 `ATM_UFO_5D` 自主配送。
+- `PLAYER_COURIER`：玩家明確接單後，單一 canonical cargo 綁定該玩家的 Life ID，配送倒數在背景持續。
+
+Player Courier 不會鎖定玩家的移動、戰鬥、探索、回家或一般 HUD。時間由 `startedAt`／`dueAt` 的 canonical runtime timestamp 計算；`setInterval` 只刷新顯示，不是時間權威。重新整理或頁面背景恢復時必須讀取持久 mission journal，以原 `missionId`、`cargoId` 和 `dueAt` 繼續，不能重設倒數。
+
+貨物所有權只有一個狀態：`OWNED_BY_COURIER`、`LOOT_CRATE` 或已完成／失敗的終局 custody。一般怪物攻擊只能增加風險或降低 durability，不能直接搶貨；只有不同 Life ID 明確進入 `BANDIT_MODE` 並發出合格 `CARGO_RAID_ACTION`，通過攻擊窗、冷卻與勝負結算後，才能使任務成為 `ROBBED`。同一 mission 只能終結為 `DELIVERED`、`ROBBED` 或 `FAILED` 一次；薪資、運費、保險理賠及 loot receipt 均採 one-shot 防重播。
+
+目前所有 cargo、salary、freight、insurance 和 loot 都是本機遊戲帳務。貨物本金不是收入；只有 `DELIVERED` receipt 成立後，玩家才取得約定的 courier salary 與 freight share，公司才認列 company net。搶劫不 mint、不 burn、不轉移任何 Mainnet KGEN／KAIOS，也不代表實體物流已發生。
 
 ## 2. 價格 = 宇宙層級
 市場價格可映射到 K-space 的十進位宇宙層級。對正數價格 p：

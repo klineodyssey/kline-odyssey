@@ -236,7 +236,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createPlayerCourierStore,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -547,6 +547,61 @@ test('home delivery pays no revenue or salary until arrival, correct-player acce
   const settled=acceptPlayerHomeDelivery(ant,{requesterLifeId:requester,playerPosition:home,paymentEvidence:{ok:true,amount:8,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'},now:5000});
   assert.equal(settled.ok,true);assert.match(settled.receiptId,/^HOME-RECEIPT-[0-9a-f]{8}$/);assert.equal(settled.accounting.cargoPrincipal,1000);assert.equal(settled.accounting.cargoPrincipalRecognizedAsRevenue,false);assert.equal(settled.accounting.freightRevenue,8);assert.equal(settled.accounting.workerSalary,3);assert.equal(settled.accounting.chainTransfer,false);assert.equal(ant.payroll.paid,3);assert.equal(ant.finance.earned,8);
   assert.equal(acceptPlayerHomeDelivery(ant,{requesterLifeId:requester,playerPosition:home,paymentEvidence:{ok:true,amount:8,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}}).reason,'NOT_AWAITING_RECEIPT','receipt cannot be replayed');
+});
+
+test('Player Courier salary and freight-share receipt credits local KAIOS exactly once across reload',()=>{
+  const data=new Map(),storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)},playerId='KAIOS-P-COURIER-REWARD-1234567890',ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage,playerId});store.activate(null);
+  const receiptId='COURIER-RECEIPT-1a2b3c4d';assert.equal(store.recordCourierSettlement({receiptId,reward:4}).ok,true);assert.equal(store.snapshot().kaios,4);assert.equal(store.snapshot().events.COURIER_SETTLEMENT,1);assert.equal(store.recordCourierSettlement({receiptId,reward:4}).reason,'COURIER_REWARD_REPLAY_BLOCKED');
+  const reloaded=createSimulationPlayerStore({ledger:createKgenLedger(),storage,playerId});reloaded.activate(null);assert.equal(reloaded.snapshot().kaios,4);assert.equal(reloaded.recordCourierSettlement({receiptId,reward:4}).reason,'COURIER_REWARD_REPLAY_BLOCKED');assert.equal(reloaded.snapshot().claimableKaios,0,'guest-mode courier reward remains local and never becomes a chain claim');
+});
+
+function courierStorage(){const data=new Map();return {data,getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)}}
+function courierOffer(overrides={}){return createPlayerCourierOffer({missionId:'COURIER-QA-1',requesterLifeId:'KAIOS-P-REQUESTER-1234567890',cargoId:'CARGO-QA-1',cargoKind:'CASH',cargoAmount:2400,cargoUnit:'KAIOS',origin:{x:0,y:0,z:0},destination:{x:25_000,y:0,z:0},distanceMeters:25_000,risk:.2,freightFeeKaios:8,courierSalaryKaios:3,estimatedDurationMs:1_800_000,createdAt:1_000,...overrides})}
+
+test('Player Courier derives a 30-minute route and remains a background mission during movement, combat, exploration and home play',()=>{
+  const duration=estimatePlayerCourierDuration({distanceMeters:25_000,cargoAmount:0,risk:0,missionType:'GOODS',speedMetersPerSecond:13.8888888889,baseDurationMs:0,minDurationMs:1,maxDurationMs:7_200_000});
+  assert.ok(Math.abs(duration-1_800_000)<2,'25km at 50km/h must remain approximately thirty minutes');
+  const offer=courierOffer();assert.equal(offer.estimatedDurationMs,1_800_000);assert.equal(offer.backgroundMission,true);assert.equal(offer.blocksMovement,false);assert.equal(offer.blocksCombat,false);assert.equal(offer.blocksExploration,false);assert.equal(offer.blocksHome,false);
+  const store=createPlayerCourierStore({storage:courierStorage(),now:()=>2_000,monotonicNow:()=>10,sessionId:'SESSION-A'}),mission=store.accept(offer,{courierLifeId:'KAIOS-P-COURIER-1234567890'});
+  assert.equal(mission.status,'ACTIVE');assert.equal(mission.cargo.ownerState,'OWNED_BY_COURIER');assert.equal(mission.cargo.ownerLifeId,mission.courierLifeId);assert.equal(mission.dueAt,1_802_000);
+});
+
+test('Player Courier reload/background resume uses canonical timestamps and one-shot salary/freight accounting',()=>{
+  const storage=courierStorage(),courier='KAIOS-P-COURIER-1234567890';
+  const first=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'SESSION-A'}),accepted=first.accept(courierOffer({missionId:'COURIER-RESUME'}),{courierLifeId:courier});
+  assert.equal(first.settleDue(accepted.missionId,{courierLifeId:courier,wallNow:accepted.dueAt-1,monoNow:1_799_999}).reason,'DELIVERY_TIMER_ACTIVE');
+  const reloaded=createPlayerCourierStore({storage,now:()=>accepted.dueAt,monotonicNow:()=>5,sessionId:'SESSION-B'}),active=reloaded.activeMission(courier);
+  assert.equal(active.missionId,accepted.missionId);assert.equal(active.status,'ACTIVE','reload restores the attached cargo instead of resetting the timer');
+  const settled=reloaded.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:5});
+  assert.equal(settled.ok,true);assert.equal(settled.mission.status,'DELIVERED');assert.equal(settled.mission.cargo.ownerState,'DELIVERED_TO_DESTINATION');assert.equal(settled.mission.economics.cargoPrincipalRecognizedAsRevenue,false);assert.equal(settled.mission.settlement.salaryKaios,3);assert.equal(settled.mission.settlement.freightShareKaios,1);assert.equal(settled.mission.settlement.rewardKaios,4);assert.equal(settled.mission.settlement.chainTransfer,false);
+  assert.throws(()=>reloaded.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt+1,monoNow:6}),/MISSION_ALREADY_SETTLED/,'salary and freight reward cannot be paid twice');
+});
+
+test('Player Courier ordinary combat degrades cargo without theft while explicit Bandit raid transfers canonical ownership once',()=>{
+  const storage=courierStorage(),courier='KAIOS-P-COURIER-1234567890',bandit='KAIOS-P-BANDIT-1234567890';
+  const store=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'SESSION-A'}),mission=store.accept(courierOffer({missionId:'COURIER-ROBBERY'}),{courierLifeId:courier});
+  const damaged=store.applyCombatDamage(mission.missionId,{courierLifeId:courier,damage:99,source:'COMMON_MONSTER',wallNow:20_000});assert.equal(damaged.status,'ACTIVE');assert.equal(damaged.cargo.durability,1);assert.equal(damaged.cargo.ownerLifeId,courier,'ordinary combat never steals cargo');
+  assert.throws(()=>store.raid(mission.missionId,{attackerLifeId:bandit,banditMode:false,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,replayKey:'RAID-A',wallNow:mission.bandit.attackWindowStartsAt}),/BANDIT_MODE_AND_RAID_ACTION_REQUIRED/);
+  const robbed=store.raid(mission.missionId,{attackerLifeId:bandit,banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,replayKey:'RAID-A',wallNow:mission.bandit.attackWindowStartsAt});
+  assert.equal(robbed.mission.status,'ROBBED');assert.equal(robbed.mission.cargo.ownerState,'LOOT_CRATE');assert.equal(robbed.mission.cargo.ownerLifeId,bandit);assert.equal(robbed.mission.settlement.insurancePayoutKaios,0);assert.equal(robbed.mission.realKaiosTransfer,false);
+  const loot=store.claimLoot(mission.missionId,{attackerLifeId:bandit});assert.equal(loot.cargo.ownerState,'CLAIMED_BY_BANDIT');assert.equal(loot.chainTransfer,false);
+  assert.throws(()=>store.claimLoot(mission.missionId,{attackerLifeId:bandit}),/LOOT_NOT_AVAILABLE/,'loot is one shot');assert.throws(()=>store.settleDue(mission.missionId,{courierLifeId:courier,wallNow:mission.dueAt}),/MISSION_ALREADY_SETTLED/,'courier and robber cannot both settle cargo');
+});
+
+test('Player Courier insured robbery pays only policy evidence while old 80% test value is not a Lamp tier',()=>{
+  const storage=courierStorage(),quote=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000}),courier='KAIOS-P-COURIER-1234567890';
+  const store=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'SESSION-A'}),mission=store.accept(courierOffer({missionId:'COURIER-INSURED',cargoAmount:1000,insuranceQuote:quote}),{courierLifeId:courier});
+  const robbed=store.raid(mission.missionId,{attackerLifeId:'KAIOS-P-BANDIT-INSURED-1234567890',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,replayKey:'RAID-INSURED',wallNow:mission.bandit.attackWindowStartsAt});
+  assert.equal(quote.coveredAmountKaios,800);assert.equal(robbed.mission.insurance.coverageBps,8000);assert.equal(robbed.mission.insurance.claimStatus,'PAID');assert.equal(robbed.mission.settlement.insurancePayoutKaios,720);assert.equal(robbed.mission.settlement.chainTransfer,false);
+});
+
+test('Player Courier rejects clock tampering, player switching and stale-tab double settlement',()=>{
+  const storage=courierStorage(),courier='KAIOS-P-COURIER-1234567890',offer=courierOffer({missionId:'COURIER-ANTI-CHEAT'}),a=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'SESSION-A'}),mission=a.accept(offer,{courierLifeId:courier});
+  assert.throws(()=>a.settleDue(mission.missionId,{courierLifeId:'KAIOS-P-OTHER-1234567890',wallNow:mission.dueAt,monoNow:1_800_100}),/COURIER_LIFE_MISMATCH/);
+  const drift=a.settleDue(mission.missionId,{courierLifeId:courier,wallNow:mission.lastWallAt+60_000,monoNow:101});assert.equal(drift.ok,false);assert.equal(drift.reason,'CLOCK_DRIFT_DETECTED');assert.equal(a.snapshot(mission.missionId).mission.status,'CLOCK_REVIEW');
+  const cleanStorage=courierStorage(),tabA=createPlayerCourierStore({storage:cleanStorage,now:()=>20_000,monotonicNow:()=>200,sessionId:'TAB-A'}),active=tabA.accept(courierOffer({missionId:'COURIER-TABS'}),{courierLifeId:courier}),tabB=createPlayerCourierStore({storage:cleanStorage,now:()=>active.dueAt,monotonicNow:()=>1,sessionId:'TAB-B'});
+  assert.equal(tabA.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1_800_200}).ok,true);
+  assert.throws(()=>tabB.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1}),/REVISION_CONFLICT_RELOAD_REQUIRED/);tabB.reload();assert.equal(tabB.snapshot(active.missionId).mission.status,'DELIVERED');
 });
 
 test('Cargo Risk Desk quotes exact integer KAIOS and never uses cargo principal as insurance reserve',()=>{
