@@ -4,6 +4,7 @@ STATUS: ACTIVE
 PURPOSE: Playable 11520 product behavior: mobile clearance, center-Y, fixed Y/C/Lots controls, canonical floors, compass, local AI help, BGM and intro.
 */
 import {C_DETENTS,signedTravelFromC} from '../controls/nonlinear-controls.mjs';
+import {signedUniverseAddress} from './spatial-coordinate-runtime.mjs';
 import {getKaiosAudio} from '../../../../assets/kaios-audio.mjs';
 import {mountAudioControl} from '../../../../assets/kaios-audio-ui.mjs';
 const isGame=typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(globalThis.location?.pathname||'');
@@ -95,7 +96,7 @@ function stopY(){if(yTimer)clearInterval(yTimer);if(tapTimer)clearTimeout(tapTim
 function startY(dir){stopY();paint(dir>0?'Y+':'Y−',dir);const tick=()=>{const y=currentY(),next=Math.max(0,Math.min(40,Math.round((y+dir*.5)*10)/10));if(next===y)return stopY();dispatchVertical(document.getElementById('yControl'),next/40)};tick();yTimer=setInterval(tick,180)}
 function installCenterY(){const b=center(),joy=document.getElementById('joy');if(!b||!joy)return false;if(b.dataset.yCenterInstalled)return true;b.dataset.yCenterInstalled='1';paint('Y');let down=null,moved=false;b.addEventListener('pointerdown',e=>{e.stopPropagation();down={x:e.clientX,y:e.clientY};moved=false});b.addEventListener('pointermove',e=>{e.stopPropagation();if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>8)moved=true});b.addEventListener('pointerup',e=>{e.stopPropagation();if(moved){down=null;stopY();return}down=null;if(yTimer)return stopY();taps++;if(tapTimer)clearTimeout(tapTimer);paint(taps>=2?'Y− 1s':'Y+ 1s');tapTimer=setTimeout(()=>{const n=taps;taps=0;tapTimer=null;startY(n>=2?-1:1)},1000)});joy.addEventListener('pointerdown',e=>{if(e.target!==b)stopY()},{capture:true});return true}
 
-function floorOf(x){const m=Math.abs(Number(x));if(!Number.isFinite(m)||m<=0)return null;const k=Math.floor(Math.log10(m)),alpha=m/10**k;return{k,alpha,label:k<0?`B${-k}`:`k=${k}`}}
+function floorOf(x){const n=Number(x);if(!Number.isFinite(n)||n===0)return null;const {k,alpha}=signedUniverseAddress(n);return{k,alpha,label:k<0?`B${-k}`:`k=${k}`}}
 function updateFloors(){const cards=[...document.querySelectorAll('#axes [data-axis]')];if(!cards.length)return false;for(const c of cards){let b=c.querySelector('.universeFloorBadge');if(!b){b=document.createElement('span');b.className='universeFloorBadge';c.appendChild(b)}const q=Number((c.querySelector('.q')?.textContent||'').replace(/[$,]/g,'')),f=floorOf(q),market=c.querySelector('select')?.value||'--';const next=f?`宇宙層：<b>${f.label}</b> · <em>${market}</em> · α ${f.alpha.toFixed(4)}`:'宇宙層：<b>WAIT</b>';if(b.innerHTML!==next)b.innerHTML=next}return true}
 function watchFloors(){const a=document.getElementById('axes');if(!a)return false;if(!a.dataset.floorWatch){a.dataset.floorWatch='1';new MutationObserver(()=>queueMicrotask(updateFloors)).observe(a,{childList:true,subtree:true,characterData:true})}return updateFloors()}
 function compass(){const w=document.querySelector('.minimapWrap');if(!w||!document.getElementById('minimap'))return false;if(!document.getElementById('minimapCompass')){const c=document.createElement('div');c.id='minimapCompass';c.innerHTML='<i class="h"></i><i class="v"></i><b class="mcN">N·Z+</b><b class="mcE">E·X+</b><b class="mcS">S·Z−</b><b class="mcW">W·X−</b>';w.appendChild(c)}return true}

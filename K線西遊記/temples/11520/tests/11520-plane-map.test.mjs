@@ -1,15 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {planeSpec,projectPlanePoint,kSpaceMapModel,kSpaceMapDetails,projectKSpaceMap,projectMarketKMap} from '../runtime/plane-map-runtime.mjs';
-import {gameUnitsToK,formatGameDistanceK} from '../runtime/spatial-coordinate-runtime.mjs';
+import {gameUnitsToK,formatGameDistanceK,signedUniverseAddress,formatUniverseAddress,PRIME_GATE_ALPHA} from '../runtime/spatial-coordinate-runtime.mjs';
 
-test('market overview fits all three axis intercepts and player/target in every plane',()=>{
+test('market overview shares alpha across scales and never plots player XYZ as a price',()=>{
   const playerK={KX:-18.815,KY:-34.2115,KZ:27.9667};
-  const market={status:'LIVE',markets:['KX','KY','KZ'].map(axis=>({axis,point:Object.fromEntries(['KX','KY','KZ'].map(a=>[a,a===axis?playerK[a]:0]))}))};
+  const market={status:'LIVE',markets:['KX','KY','KZ'].map((axis,i)=>({axis,price:[51111.1,5111.11,511.111][i]}))};
   for(const plane of ['XZ','XY','YZ'])for(const [width,height] of [[106,80],[340,180]]){
     const model=kSpaceMapModel({playerK,monsterK:{...playerK,KZ:playerK.KZ+1},target:{id:'guardian'},market,selection:{sign:-1}},plane),p=projectMarketKMap(model,width,height);
-    for(const v of [p.origin,p.player,p.monster,...market.markets.map(m=>p.point(m.point))])assert.ok(v.x>=0&&v.x<=width&&v.y>=0&&v.y<=height,JSON.stringify(v));
-    assert.notDeepEqual(p.player,p.monster,'overview retains depth instead of flattening third axis');
+    for(const v of p.points){assert.ok(v.x>=0&&v.x<=width&&v.y>=0&&v.y<=height,JSON.stringify(v));assert.ok(Math.abs(v.x-p.gateX)<1e-9)}
+    assert.deepEqual(p.points.map(v=>v.universe.k),[4,3,2]);
+    assert.equal(p.player,undefined);assert.equal(p.monster,undefined);
   }
 });
 
@@ -64,7 +65,8 @@ test('local physical distances and XYZ K never reuse market-normalized delta',()
   assert.equal(m.localK.x,gameUnitsToK(31));
   assert.equal(m.marketPhysicalTransform,'NOT_CONFIGURED');
   const text=kSpaceMapDetails(m);
-  assert.match(text,/NORM DIST: 1.00 norm/);
+  assert.doesNotMatch(text,/NORM DIST|norm|正規化/);
+  assert.match(text,/WORLD 11520 花果山/);
   assert.ok(text.includes(`LOCAL DIST: ${formatGameDistanceK(900,{detail:true})}`));
   assert.ok(text.includes(`LOCAL XYZ K: X ${formatGameDistanceK(31,{detail:true})}`));
   assert.match(text,/市場 → 物理距離轉換：未設定/);
@@ -73,4 +75,24 @@ test('local physical distances and XYZ K never reuse market-normalized delta',()
   assert.equal(missing.localDistance,null);
   assert.equal(missing.localDistanceK,null);
   assert.match(kSpaceMapDetails(missing),/LOCAL DIST: —/);
+});
+
+test('canonical signed address: shared alpha, scale boundaries, mirror and K0',()=>{
+  for(const k of [-12,-4,-1,0,1,2,4,5,12]){
+    for(const alpha of [1,1.152,5.11111,9.999999])for(const sign of [-1,1]){
+      const u=signedUniverseAddress(sign*alpha*10**k);
+      assert.equal(u.k,k);assert.ok(Math.abs(u.alpha-alpha)<1e-12);
+      assert.equal(u.theta,sign<0?Math.PI:0);assert.ok(u.alpha>=1&&u.alpha<10);
+    }
+  }
+  for(const x of [Number.MIN_VALUE,1e-323,Number.MAX_VALUE,999.9999999999999,0.09999999999999999]){
+    const u=signedUniverseAddress(x);assert.ok(u.alpha>=1&&u.alpha<10,JSON.stringify(u));
+  }
+  assert.equal(signedUniverseAddress(999.9999999999999).k,2);
+  assert.deepEqual(signedUniverseAddress(-0),{kind:'ORIGIN',k:'ORIGIN',alpha:'ORIGIN',theta:'ORIGIN'});
+  assert.equal(formatUniverseAddress(signedUniverseAddress(0)),'K0 / ORIGIN');
+  assert.equal(PRIME_GATE_ALPHA,5.11111);
+  for(const bad of [NaN,Infinity,-Infinity,'11520',null])assert.throws(()=>signedUniverseAddress(bad));
+  assert.deepEqual(signedUniverseAddress(11520),{kind:'SIGNED_UNIVERSE',k:4,alpha:1.152,theta:0});
+  assert.equal(signedUniverseAddress(-37.63).theta,Math.PI);
 });

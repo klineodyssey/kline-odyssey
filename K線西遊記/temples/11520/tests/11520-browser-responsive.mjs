@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {formatKCoordinate} from '../runtime/world-runtime.mjs';
+import {formatUniverseAddress,signedUniverseAddress} from '../runtime/spatial-coordinate-runtime.mjs';
 import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../runtime/player-life-runtime.mjs';
 function freeQuotePayload(route,rows){
   const url=new URL(route.request().url());
@@ -18,7 +18,7 @@ const ROUTE='/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html';
 const PRODUCTION=process.env.K11520_PRODUCTION_QA==='1';
 const profiles=PRODUCTION?[{name:'pages-360',width:360,height:740},{name:'pages-390',width:390,height:844},{name:'pages-432',width:432,height:856},{name:'pages-landscape-844',width:844,height:390,landscape:true}]:[
   {name:'cold-390',width:390,height:844},{name:'cold-432',width:432,height:856},
-  {name:'warm-412',width:412,height:772,warm:true},{name:'cold-360',width:360,height:740},{name:'cold-landscape-844',width:844,height:390,landscape:true},
+  {name:'warm-412',width:412,height:772,warm:true},{name:'cold-360',width:360,height:844},{name:'cold-landscape-844',width:844,height:390,landscape:true},
   {name:'cold-480',width:480,height:900}
 ];
 // Optional local diagnosis only; default CI still exercises every profile.
@@ -106,8 +106,11 @@ async function verifyKSpaceMap(page,report){
     assert.equal(await page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,selector+' pointer blocker');
   }
   await page.locator('#minimap').tap();await page.locator('#kspaceMarketMap').waitFor();
-  await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('PLAYER K'));
-  assert.match(await page.locator('#kspaceMapValues').textContent(),/PLAYER K.*MONSTER K.*ΔK.*NORM DIST: 1.00 norm.*LOCAL DIST: .*K.*LOCAL XYZ K/s);
+  await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('WORLD 11520'));
+  assert.match(await page.locator('#kspaceMapValues').textContent(),/WORLD 11520.*KX\/BTC.*k=.*α=.*θ=.*KY\/ETH.*KZ\/BNB.*LOCAL DIST: .*K.*LOCAL XYZ K/s);
+  assert.match(await page.locator('#kspaceMarketMap').getAttribute('aria-label'),/共用 α 地圖 \[1,10\).*Gate α 5.11111/);
+  assert.doesNotMatch(await page.locator('#kspaceMapValues').textContent(),/norm|正規化/);
+  assert.match(await page.locator('#kspaceRelativeValues').textContent(),/P0=100000 USDT.*P0=4000 USDT.*P0=600 USDT.*1.00 pp/s);
   await shot('01_PLAYER_MONSTER_KSPACE');
   // A short landscape sheet must scroll to the actual distance values for evidence.
   await page.locator('#kspaceMapValues').evaluate(el=>el.scrollIntoView({block:'end'}));
@@ -143,13 +146,25 @@ async function verifyMarketSync(page,report){
   const first=await read();assert.equal(first.market.markets.length,3);
   for(const m of first.market.markets){
     assert.ok(Math.abs(m.k-100*(m.price/m.anchor-1))<1e-9);
-    const card=first.cards.find(c=>c.axis===m.axis);assert.equal(Number(card.price.replace(/[^0-9.]/g,'')),m.price);assert.equal(card.k,`${m.axis} ${formatKCoordinate(m.k)} norm`);
+    const card=first.cards.find(c=>c.axis===m.axis);assert.equal(Number(card.price.replace(/[^0-9.]/g,'')),m.price);assert.equal(card.k,formatUniverseAddress(signedUniverseAddress(m.price)));
+    assert.deepEqual(m.universe,signedUniverseAddress(m.price));assert.equal(m.quoteUnit,'USDT');assert.equal(m.relativePercent,m.k);
     assert.equal(first.combat.playerK[m.axis],m.k);assert.equal(first.map.player[m.axis],m.k);
   }
   report.marketReference={initial:first,mode:PRODUCTION?'PUBLIC_READ_ONLY':'CONTROLLED_REFERENCE_FAILURE_RECOVERY'};
   if(PRODUCTION)return;
   const pattern='https://data-api.binance.vision/api/v3/aggTrades*';
   const setBatch=async rows=>{await page.unroute(pattern);await page.route(pattern,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,rows))}))};
+  report.marketReference.boundaries=[];
+  for(const prices of [[99999.99,9999.99,999.99],[100000,10000,1000],[51111.1,5111.11,511.111]]){
+    await setBatch(['BTCUSDT','ETHUSDT','BNBUSDT'].map((symbol,i)=>({symbol,price:String(prices[i])})));
+    await page.waitForFunction(prices=>globalThis.__K11520_MARKET_K__?.markets.every((m,i)=>m.price===prices[i])&&[...document.querySelectorAll('.marketKValue')].every(el=>el.textContent.includes('α=')),prices,{timeout:15000});
+    const sample=await read();
+    for(const m of sample.market.markets){assert.deepEqual(m.universe,signedUniverseAddress(m.price));assert.equal(sample.cards.find(c=>c.axis===m.axis).k,formatUniverseAddress(m.universe))}
+    assert.deepEqual(sample.combat.playerLocal,first.combat.playerLocal);assert.deepEqual(sample.combat.deltaK,first.combat.deltaK);assert.deepEqual(sample.combat.target,first.combat.target);
+    report.marketReference.boundaries.push(sample);
+  }
+  await page.locator('#kspaceViewK').click();await page.waitForFunction(()=>document.querySelector('#kspaceMapValues')?.textContent.includes('$51111.10'));
+  await page.screenshot({path:`${OUT}/${report.profile.name}-shared-gate.png`});await page.locator('#sheetClose').click();
   const batch=[{symbol:'BTCUSDT',price:'83000'},{symbol:'ETHUSDT',price:'2800'},{symbol:'BNBUSDT',price:'750'}];
   await setBatch(batch);await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.markets[0]?.price===83000,null,{timeout:15000});
   const changed=await read();assert.notDeepEqual(changed.combat.playerK,first.combat.playerK);
@@ -176,7 +191,7 @@ async function verifyKSpaceGameplay(page,report){
   assert.deepEqual(near.deltaK,{KX:0,KY:0,KZ:1});
   const prefix=report.profile.name;await page.screenshot({path:`${OUT}/${prefix}-kspace-target.png`});
   await page.locator('.monsterHud').click({position:{x:12,y:12}});await page.locator('#sheet.open').waitFor();
-  assert.match(await page.locator('#sheetBody').textContent(),/PLAYER K.*MONSTER K.*ΔK/s);
+  assert.match(await page.locator('#sheetBody').textContent(),/Player 相對基準.*Monster 模擬相對基準.*模擬相對差/s);
   await page.screenshot({path:`${OUT}/${prefix}-kspace-relative-coordinates.png`});await page.locator('#sheetClose').click();
   const cdp=await page.context().newCDPSession(page),results=[];
   for(const [selector,variant,sign,delay,pause,bodies] of [
@@ -219,7 +234,9 @@ async function verifyFeedbackFade(page,report){
     const {show11520Toast}=await import('./runtime/game-ui-product-fixes-v23.mjs');
     show11520Toast('擊倒！Heart Fragment · EPIC · 背包已保存 / 本機 KAIOS（候選帳本）',{combat:true,duration:450});
     const toast=document.getElementById('toast'),frames=[],start=performance.now();
-    await new Promise(resolve=>{function sample(){const r=toast.getBoundingClientRect(),opacity=Number(getComputedStyle(toast).opacity);frames.push({at:performance.now()-start,show:toast.classList.contains('show'),opacity,x:r.x,y:r.y,width:r.width,height:r.height});if(performance.now()-start<800)requestAnimationFrame(sample);else resolve()}requestAnimationFrame(sample)});
+    // Observe the completed transition, not an arbitrary frame at exactly 800ms.
+    // Retain exact zero and all geometry assertions; a stuck toast fails at 2s.
+    await new Promise(resolve=>{function sample(){const r=toast.getBoundingClientRect(),opacity=Number(getComputedStyle(toast).opacity),at=performance.now()-start;frames.push({at,show:toast.classList.contains('show'),opacity,x:r.x,y:r.y,width:r.width,height:r.height});if(at<2000&&(at<800||toast.classList.contains('show')||opacity!==0))requestAnimationFrame(sample);else resolve()}requestAnimationFrame(sample)});
     return frames;
   });
   const visible=report.feedbackFade.filter(f=>f.opacity>0.01),first=visible[0];
@@ -347,6 +364,10 @@ try{
       const quotePresent=await page.locator('[data-axis="KX"] .q').textContent().then(s=>Number(String(s).replace(/[$,]/g,''))>0);
       if(PRODUCTION)assert.equal(quotePresent,true,'Public Pages market-data-only quote source must be LIVE');
       if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
+      await page.locator('#kspaceViewK').click();await page.locator('#kspaceMarketMap').waitFor();
+      assert.match(await page.locator('#kspaceMapValues').textContent(),/WORLD 11520.*KX\/BTC.*KY\/ETH.*KZ\/BNB.*LOCAL XYZ/s);
+      assert.equal(await page.locator('#sheetClose').evaluate(el=>{const r=el.getBoundingClientRect();return r.width>=44&&r.height>=44&&r.top>=0&&el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true);
+      await page.screenshot({path:`${OUT}/${profile.name}-canonical-map.png`});await page.locator('#sheetClose').click();
       if(profile.width===390||profile.landscape){await verifyMarketSync(page,report);await verifyKSpaceMap(page,report);await verifyKSpaceGameplay(page,report)}
       if(profile.landscape)await finalizeLandscape(page,report);
       if(PRODUCTION&&warnings.some(message=>/blocked by CORS|data-api\.binance\.vision.*ERR_FAILED/i.test(message)))failures.push(`${profile.name}: public quote CORS regression`);

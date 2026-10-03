@@ -1,5 +1,61 @@
 # 11520 HANDOFF CURRENT
 
+## Canonical coordinate restoration candidate — 2026-10-04
+
+- TASK_ID: K11520-CANONICAL-COORDINATE; Human explicit audit → minimal Draft PR
+  order. Worker codex-gm-01 ACTIVE/T5; branch codex/k11520-canonical-coordinate.
+  Refetched base a42eb12c8080e6f881798968a28a868efb14d04a is lineage only.
+- BOOT / MUST READ: stable Boot, Physics CURRENT V3.8, UniverseMap V10.2,
+  Signed Universe V7.5, root/11520 AGENTS and both CURRENT handoffs. Current
+  authority wins over historical cumulative text. No new coordinate runtime.
+- CANONICAL INPUT: CURRENT §§169/183 defines priceFloor=floor(log10(P_USDT))
+  and priceAlpha=P_USDT/10^priceFloor, with KGEN examples. Existing 11520
+  `game-ui-product-fixes-v23.mjs::floorOf/updateFloors` already applied the
+  same mapping directly to market-card prices (3aac2099, 2026-09-06).
+  This restoration keeps that existing market-price input, not CT energy or
+  normalization. BTCUSDT/ETHUSDT/BNBUSDT are USDT reference observations,
+  NOT an attested USD execution index and NOT the player's physical position.
+- SIGNED ADDRESS: CURRENT §§150–153, 210 and Signed Universe law give
+  nonzero x → (floor(log10(abs(x))), abs(x)/10^k, 0/π). Zero is K0 / ORIGIN,
+  never k=0/alpha=0. Prime Gate alpha=5.11111 remains a location marker;
+  this display grants no Gate transit, energy or Autopilot capability.
+- WORLD: map point 11520 花果山 is land/address k4/alpha1.152/theta0;
+  market price floors and player LOCAL XYZ are separate. Negative XYZ means
+  local direction, not negative price. UniverseMap's historical profit_axis
+  Z-KZ is superseded by CURRENT §12; it is not restored as settlement math.
+- NORM ORIGIN: PR421 / bc3db907aa92e1668edbc07c358ebd2360a61a02,
+  merged 2026-09-21 01:32:41 UTC+8, introduced six-phase simulation combat
+  Ni(P)=100*(P/P0-1). BTC P0=100000, ETH=4000, BNB=600. Source explicitly says
+  simulation reference, NOT Canon constants. PR425 / 3900740bb68d7267a23655651cc5ccef726e2ebf
+  connected public quotes and replaced visible floor badges with norm labels.
+
+### Norm dependency matrix / migration boundary
+
+| Consumer | Existing dependency | Candidate handling |
+|---|---|---|
+| market cards / detail | norm label | signed price address; explicit USDT |
+| market overview | three relative axis intercepts | one shared alpha [1,10) map; per-market k/θ indicators |
+| world market snapshot | playerK/anchors/inverse helpers | retain compatibility values; add typed universe/relativePercent metadata |
+| practice monster | relative kPosition and frame translation | unchanged; advanced simulated vector, not canonical address |
+| combat range / movement | local meters and physical K | unchanged; no market-to-meter conversion |
+| combat phase / weak points | plane normal and signed C | unchanged; explicitly not signed-universe θ |
+| GA600 game profiles | existing synthetic encounter profiles | unchanged, no new price/alpha training authority |
+| trading / settlement | raw accepted price/index differences | unchanged; no alpha/norm in PnL |
+| browser/unit tests | norm equality and relative-vector invariants | retain numerical compatibility checks; display tests now assert signed address |
+| Courier / Life / Wallet / other worlds | no new dependency | untouched |
+
+- EXECUTION: reuse existing spatial-coordinate-runtime for the scalar mapping;
+  replace its existing skin floor calculation with the shared function. Keep
+  relative percentage indicators in advanced disclosure; internal compatibility
+  names do not grant Canon authority. No save migration or gameplay rebalance.
+- PROTECTED PATH CHECK: Boot, Physics CURRENT, map data, Signed Law, token,
+  settlement, Wallet, Life, 12345/16888, Courier/Logistics and audio unchanged.
+- FINAL REPORT: candidate requires exact-head CI and real Chromium screenshots
+  at 360x844, 390x844, 412x772, 432x856, 480x900 and 844x390. Formula tests cover
+  scale boundaries, signs, zero, subnormal numbers, Gate and XYZ separation.
+  This entry records scope, not a premature QA PASS. No merge authorized.
+  No Mainnet or asset transaction; no salary/payment receipt created.
+
 ## V2.9 public playtest / fade-out correction — 2026-10-01
 
 - Human-approved #462 head `f9b05c714c4970471f65460d92969dfc1cff9458`
