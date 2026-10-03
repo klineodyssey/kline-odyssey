@@ -105,7 +105,8 @@ function claimDailyJourney(){
 syncWorldFeedback();
 globalThis.__K11520_PRODUCT__=Object.freeze({
   snapshot:()=>({...playerStore.snapshot(),...playerProgressSnapshot(),home:playerLife.loadHomePlot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED',crossMarket:crossMarketSnapshot(),marketEngine:marketEngineSnapshot()}),
-  spendLocalKaios:(amount,purpose='LOCAL_GAME_PURCHASE')=>{const result=playerStore.spendKaios(amount,{purpose});S.kaios=playerStore.snapshot().kaios;hud();return result}
+  spendLocalKaios:(amount,purpose='LOCAL_GAME_PURCHASE')=>{const result=playerStore.spendKaios(amount,{purpose});S.kaios=playerStore.snapshot().kaios;hud();return result},
+  recordCourierInsurancePayout:(receiptId,rewardKaios)=>{const result=playerStore.recordCourierInsurancePayout({receiptId,reward:rewardKaios});S.kaios=playerStore.snapshot().kaios;hud();return result}
 });
 let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';

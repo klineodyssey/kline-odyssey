@@ -10,6 +10,8 @@ const read=p=>readFileSync(resolve(here,p),'utf8');
 const html=read('../game-5d.html');
 const main=read('../runtime/game-5d-main.mjs');
 const mobileShell=read('../runtime/game-mobile-shell.mjs');
+const logistics=read('../runtime/digital-ant-logistics-runtime.mjs');
+const walletRuntime=read('../runtime/evm-wallet-runtime.mjs');
 test('dodge tries safe alternatives without bypassing midpoint or endpoint collision',()=>{
   const dodge=main.split("$('#dodge').onclick=")[1]?.split('\n')[0]||'';
   assert.ok(dodge.includes('[0,Math.PI/2,-Math.PI/2,Math.PI]'));
@@ -158,6 +160,9 @@ test('Player Courier exposes explicit local-only Bandit mode, raid action and on
   assert.ok(mobileShell.includes('distance>8'),'Player Courier robbery must fail visibly outside the local raid distance');
   assert.ok(mobileShell.includes('一般 PvE／PvP 不會偷貨'),'ordinary combat must remain separate from explicit cargo robbery');
   assert.ok(mobileShell.includes('未實作跨裝置 realtime multiplayer'),'local gameplay must not claim a realtime multiplayer backend');
+  for(const token of ['TARGET_POSITION_UNVERIFIED','previewLoot','BACKPACK_DELIVERY_EVIDENCE_REQUIRED','confirmInsurancePayout'])assert.ok(logistics.includes(token),`missing fail-closed courier settlement gate: ${token}`);
+  for(const token of ['recordCourierInsurancePayout','courierInsuranceReceipts','COURIER_INSURANCE_RECEIPT_CONFLICT'])assert.ok(walletRuntime.includes(token),`missing replay-protected local insurance ledger: ${token}`);
+  assert.ok(mobileShell.includes("kind:'TREASURE',treasureClass:'CARGO_CRATE'"),'loot crate must use the existing backpack item model');
 });
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','attackKSpace'])assert.ok(main.includes(token),token);assert.equal(main.includes('S.kaios+=r.rewardKaios'),false)});
 
