@@ -364,6 +364,8 @@ try{
       const quotePresent=await page.locator('[data-axis="KX"] .q').textContent().then(s=>Number(String(s).replace(/[$,]/g,''))>0);
       if(PRODUCTION)assert.equal(quotePresent,true,'Public Pages market-data-only quote source must be LIVE');
       if(report.states.cold.boxes['#orderFire']?.hit){await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click({timeout:2500});await page.locator('#confirm.open').waitFor({timeout:2500});await page.screenshot({path:`${OUT}/${profile.name}-order-preview.png`,fullPage:true});await page.locator('#cancelOrder').click({timeout:2500});report.orderPreview='OPENED_AND_CANCELLED'}
+      // The preceding cancelled-order feedback is transient, not map content.
+      await page.waitForFunction(()=>{const el=document.getElementById('toast');return !el||(!el.classList.contains('show')&&Number(getComputedStyle(el).opacity)===0)},null,{timeout:5000});
       await page.locator('#kspaceViewK').click();await page.locator('#kspaceMarketMap').waitFor();
       assert.match(await page.locator('#kspaceMapValues').textContent(),/WORLD 11520.*KX\/BTC.*KY\/ETH.*KZ\/BNB.*LOCAL XYZ/s);
       assert.equal(await page.locator('#sheetClose').evaluate(el=>{const r=el.getBoundingClientRect();return r.width>=44&&r.height>=44&&r.top>=0&&el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true);
