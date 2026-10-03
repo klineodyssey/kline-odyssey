@@ -1204,6 +1204,21 @@ KGEN 12345 Heart Live Patch V7.3.0
 <div class="kh-card-body">
 <div class="kh-claim-status" id="kh-wish-onchain-status">許願原文是否上鏈：只有 hash（等待載入合約說明）</div>
 <textarea id="kh-wish-text" placeholder="許願文字或 0x bytes32 hash（鏈上只存 hash）" rows="2"></textarea>
+<section id="kh-v34-candidate" hidden aria-label="V3.4 BSC97 測試表單">
+<p>BSC97 TEST ONLY · FortuneGame DISABLED · Mainnet 仍為 V3.2.6</p>
+<label class="kh-field-label" for="kh-v34-civilization">Civilization ID（已登記 bytes32，不可用換 ID 繞過冷卻）</label>
+<input id="kh-v34-civilization" placeholder="0x… civilizationId" autocomplete="off"/>
+<label class="kh-field-label" for="kh-v34-cup-proof">HolyCup 已簽署 proof JSON（非私鑰；綁定 claimant / civilization / wish / nonce / deadline）</label>
+<textarea id="kh-v34-cup-proof" rows="3" placeholder="proofId, civilizationId, wishHash, deadline, signature"></textarea>
+<button id="kh-v34-submit-cup" type="button">提交 HolyCup proof</button>
+<label class="kh-field-label" for="kh-v34-alchemy-proof">Alchemy proofId（由正式 proof source 產生，非手造領款資格）</label>
+<input id="kh-v34-alchemy-proof" placeholder="0x… Alchemy proofId" autocomplete="off"/>
+<label for="kh-v34-offering-type">供奉類型</label>
+<select id="kh-v34-offering-type"><option value="1">香火</option><option value="2">紙錢</option><option value="3">祈福燈</option><option value="4">財運符</option><option value="5">還願供奉</option></select>
+<button id="kh-v34-offering" type="button">登記 Alchemy 供奉</button>
+<p>Fortune 使用上方 proofId；自願還願使用原還願數量欄。先按原 Approve 還願金額，再明確按還願。不同用途 proof 不可互換。</p>
+<output id="kh-v34-feedback" role="status" aria-live="polite"></output>
+</section>
 <div class="kh-actions kh-actions-wish">
 <button class="kh-gold kh-btn-lg kh-btn-wide" id="kh-wishbtn" type="button">makeWish 許願上鏈（僅 BNB gas）</button>
 </div>

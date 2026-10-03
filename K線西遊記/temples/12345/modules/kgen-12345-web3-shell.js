@@ -56,6 +56,9 @@ function walletRuntime(){
     return null;
   }
 }
+function heartTestCandidate(){
+  return new URLSearchParams(location.search).get("heart") === "v34-testnet";
+}
 
 const web3 = {
   provider: null,
@@ -73,6 +76,7 @@ const web3 = {
   BRIDGE_PAGE: "https://klineodyssey.github.io/kline-odyssey/wallet-12345.html",
   // Runtime WalletRuntime owns MetaMask routing; no second fallback URL set.
   async ensureBSC(){
+    if(heartTestCandidate()) throw new Error("V3.4 TEST 使用原 HeartRuntime 的 BSC97 gate；禁止 legacy Mainnet 路徑");
     if(!window.ethereum) return true;
     try{
       const cid = await window.ethereum.request({ method:"eth_chainId" });
@@ -182,8 +186,8 @@ const web3 = {
   ],
 
   // ===== helpers =====
-  cKGEN(){ return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
-  cUNI(){ return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
+  cKGEN(){ if(heartTestCandidate()) throw new Error("TEST candidate 禁止 legacy token write"); return new ethers.Contract(this.KGEN, this.abiERC20, this.signer); },
+  cUNI(){ if(heartTestCandidate()) throw new Error("TEST candidate 禁止 legacy / FortuneGame write"); return new ethers.Contract(this.UNIVERSE, this.abiUniverse, this.signer); },
 
   load(){
   try{
@@ -370,6 +374,11 @@ async autoDetect(){
     return this._connectPromise;
   },
   async connectInjected(options = {}){
+    if(heartTestCandidate()){
+      const runtime = walletRuntime();
+      if(!runtime){ walletDbgError("V3.4 resolver 尚未就緒；不 fallback 至 Mainnet"); return false; }
+      return runtime.connect(options);
+    }
     walletDbgConnectEntered(true);
     walletDbgAction("connect()");
     try{
@@ -796,6 +805,10 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
     wcProjectId: "ed256d3118a9c971d550ed5ee522b4d9",
     wcProvider: null,
     async connectWalletConnect(){
+      if(heartTestCandidate()){
+        this.toast && this.toast('V3.4 BSC97 測試版請使用注入式錢包；不啟動正式鏈 QR 連線');
+        return false;
+      }
       try{
         if(!window.WalletConnectEthereumProvider){
           this.toast && this.toast('WalletConnect 載入失敗');
@@ -833,6 +846,11 @@ const w3b2=document.getElementById('prog-fill'); if(w3b2) w3b2.style.width = pct
       }
     },
     async setProvider(provider, label){
+      if(heartTestCandidate()){
+        const runtime = walletRuntime();
+        if(!runtime) throw new Error('V3.4 resolver 尚未就緒');
+        return runtime.connect();
+      }
       // unify with existing ethers flow
       try{
         this.provider = provider;

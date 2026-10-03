@@ -32,6 +32,13 @@ interface IKAIOSOrganRegistryForTempleHeart {
     function organ(bytes32 organId) external view returns (address);
 }
 
+interface ILegacyTempleHeart {
+    function kgen() external view returns (address);
+    function lastFortuneAt(address) external view returns (uint256);
+    function lastHeartbeatAt(address) external view returns (uint256);
+    function lastIgniteDay(address) external view returns (uint256);
+}
+
 /**
  * @title KGEN_TempleHeart_Upgradeable
  * @notice Point 12345 TempleHeart UUPS review candidate aligned to the KAIOS Alchemy lineage.
@@ -177,6 +184,12 @@ contract KGEN_TempleHeart_Upgradeable is
     mapping(uint256 => uint256) public dailyNewCustomerWallets;
     mapping(uint256 => uint256) public dailyActiveCustomerWallets;
     mapping(uint256 => mapping(address => bool)) private _activeCustomerSeenOnDay;
+
+    // Completion append-only: live legacy reads, never fabricated/imported balances.
+    // Once bound, this source cannot be changed or cleared by an admin.
+    ILegacyTempleHeart public legacyHeart;
+    event LegacyContinuityBound(address indexed source);
+    error LegacyContinuityRequired();
 
     event TempleHeartInitialized(
         address indexed admin,
@@ -362,6 +375,27 @@ contract KGEN_TempleHeart_Upgradeable is
         return "3.4.0";
     }
 
+    function bindLegacyContinuity(address source) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (address(legacyHeart) != address(0) || source == address(this) || source.code.length == 0) revert InvalidRange();
+        if (block.chainid == 56 && source != 0xB016D4d8f1aED1339101b30722cad6dbA9B8C972) revert InvalidRange();
+        if (ILegacyTempleHeart(source).kgen() != address(kgen)) revert InvalidRange();
+        legacyHeart = ILegacyTempleHeart(source);
+        emit LegacyContinuityBound(source);
+    }
+
+    function _legacyTimestamp(address user, uint8 action) private view returns (uint256) {
+        if (address(legacyHeart) == address(0)) {
+            // Historical/local test fixtures remain usable. Mainnet must bind
+            // canonical legacy before any reward. Candidate manifests also
+            // require a nonzero binding on BSC97 before frontend activation.
+            if (block.chainid == 56) revert LegacyContinuityRequired();
+            return 0;
+        }
+        if (action == 0) return legacyHeart.lastFortuneAt(user);
+        if (action == 1) return legacyHeart.lastHeartbeatAt(user);
+        return legacyHeart.lastIgniteDay(user);
+    }
+
     function pause() external onlyRole(OPERATOR_ROLE) { _pause(); }
     function unpause() external onlyRole(OPERATOR_ROLE) { _unpause(); }
 
@@ -518,6 +552,7 @@ contract KGEN_TempleHeart_Upgradeable is
         if (wish.status == WishStatus.None || wish.status == WishStatus.Fulfilled) revert WishNotReady();
         bytes32 civilizationId = wish.civilizationId;
         if (block.timestamp < lastHeartbeatAt[msg.sender] + heartbeatCooldownSeconds) revert HeartbeatCooldown();
+        if (block.timestamp < _legacyTimestamp(msg.sender, 1) + heartbeatCooldownSeconds) revert HeartbeatCooldown();
         if (block.timestamp < lastCivilizationHeartbeatAt[civilizationId] + heartbeatCooldownSeconds) {
             revert HeartbeatCooldown();
         }
@@ -570,6 +605,7 @@ contract KGEN_TempleHeart_Upgradeable is
         uint256 dayIndex = block.timestamp / 1 days;
         if (block.timestamp % 1 days >= IGNITE_WINDOW_SECONDS) revert IgniteWindowClosed();
         if (lastBreathDay[msg.sender] == dayIndex) revert BreathAlreadyTaken();
+        if (_legacyTimestamp(msg.sender, 2) == dayIndex) revert BreathAlreadyTaken();
         if (lastCivilizationBreathDay[civilizationId] == dayIndex) revert BreathAlreadyTaken();
         if (igniteDayClaims[dayIndex] >= igniteMaxClaimsPerDay) revert IgniteDayFull();
         uint256 rewardAmount = _scale(IGNITE_REWARD_WHOLE);
@@ -620,6 +656,7 @@ contract KGEN_TempleHeart_Upgradeable is
         );
         if (record.kaiosBurned < _scale(minimumBurnWholeForFortune)) revert BurnTooSmall();
         if (block.timestamp < lastFortuneAt[msg.sender] + fortuneCooldownSeconds) revert FortuneCooldown();
+        if (block.timestamp < _legacyTimestamp(msg.sender, 0) + fortuneCooldownSeconds) revert FortuneCooldown();
         if (block.timestamp < lastCivilizationFortuneAt[wish.civilizationId] + fortuneCooldownSeconds) {
             revert CivilizationCooldown();
         }
@@ -710,6 +747,8 @@ contract KGEN_TempleHeart_Upgradeable is
         FortuneLedger storage ledger = _fortuneLedgerByWallet[user];
         repaymentSatisfied = ledger.claimCount == 0 || ledger.repaidAfterLastClaim;
         cooldownEndsAt = lastFortuneAt[user] + fortuneCooldownSeconds;
+        uint256 legacyEndsAt = _legacyTimestamp(user, 0) + fortuneCooldownSeconds;
+        if (legacyEndsAt > cooldownEndsAt) cooldownEndsAt = legacyEndsAt;
         eligible = repaymentSatisfied && block.timestamp >= cooldownEndsAt;
     }
 

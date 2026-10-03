@@ -4,6 +4,13 @@ Generated: 2026-07-05
 Site root: C:\Desktop\kline-odyssey\K線西遊記
 
 ## Frontend Entry Points
+
+2026-10-03: `core/integrations/temple-heart-12345.mjs` additionally provides a
+read-only legacy continuity snapshot and chain97-only V3.4 candidate adapter.
+It does not switch the active Temple UI, Wallet, layout or Mainnet write target.
+Historical PR #134 UI is not wholesale imported. Full V3.4 UI integration remains
+a release gate in `KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md`.
+
 | Role | Full path | Notes |
 |---|---|---|
 | Canonical KAIOS Portal | C:\Desktop\kline-odyssey\index.html | Playable-first official world entry, shared audio and privacy-limited Player Life welcome. |
@@ -431,3 +438,4 @@ Specification and provenance: `docs/KAIOS_WORLD_PORTAL.md`,
 | `C:\Desktop\kline-odyssey\K線西遊記\game\kline-5d\index.html` | `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.css`, `C:\Desktop\kline-odyssey\K線西遊記\modules\kgen-game-core.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\organ-economy.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\temple-hub.js`, `C:\Desktop\kline-odyssey\K線西遊記\modules\universe-runtime\kline-5d-engine.js` | PASS: all local targets exist. |
 | V0.2 temple pages | Shared core CSS/JS and V0.2 universe-runtime modules | PASS: registered in temple map and dependency index. |
 | `K線西遊記/temples/11520/index.html` | `app.mjs`, `styles.css`, `core/index.mjs`, `core/data/canonical.json`, `runtime/worker-status.json`, `runtime/life-events/DIGITAL_ANT_0001_FIRST_HEARTBEAT_AND_KGEN_V3_6.json` | V4.0 Player First web app; animated 3D/2D Wukong Hair concierge, user-gesture Voice/Speech with visible error/Text fallback, local membership/first mission, 8888 exploration, primary Gatekeeper duty and evidence-derived shared status. The private signer is not a frontend dependency. |
+| `K線西遊記/temples/12345/index.html?heart=v34-testnet` | Existing `modules/runtime-main.js`, `modules/kgen-12345-web3-shell.js`, `core/integrations/temple-heart-12345.mjs`, `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json#cleanRehearsal.frontendManifest` | Explicit BSC97 candidate only; original UI/Wallet/receipt owner retained. Code, proxy, roles and bindings verified before writes; missing identity fails closed. Normal URL remains V3.2.6 Mainnet. |

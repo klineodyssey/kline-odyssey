@@ -4,6 +4,75 @@ Status: REVIEW CANDIDATE — NOT MAINNET DEPLOYED
 Human canon date: 2026-08-09
 Executable source: `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol`
 
+## 2026-10-03 completion continuation (cumulative)
+
+**Historical first-pass snapshot:** the gap table and five release gates in this
+section record the initial continuation assessment, before the clean BSC97 and
+interactive frontend work below. They are retained as audit history, not as the
+current implementation status. The later "On-chain legacy continuity" and
+"interactive" completion sections supersede their implementation gaps. Final
+live test outcomes are in `BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json`; a pending
+real UTC Ignite window or running stress test must never be read as PASS.
+
+This section supersedes historical execution suggestions below only for the new
+completion release. Existing source and historical rehearsal evidence are retained.
+PR #133 FortuneGame remains HOLD; PR #134 is historical reference, not a merge base.
+The original incident was multi-address abuse of the legacy user-selected maximum
+888 KGEN payout. The current proof-controlled maximum remains **8**, minimum burn
+**1**, wallet/civilization cooldown **30 days**, epoch cap **500**, and repayment is
+required after a prior claim. No contract economics or storage were changed here.
+
+| Completion item | Implemented path / current boundary |
+|---|---|
+| Fresh implementation + proxy package | `KGEN-KAIOS/tools/validate-templeheart-storage.mjs --deployment-package public-config.json`; unsigned creation calldata, atomic initializer, explicit roles, registry initialization, nonce predictions, hashes, gas/value caps; no broadcast route. |
+| Legacy continuity | `core/integrations/temple-heart-12345.mjs`: block-bound legacy balances, cooldowns, Lamp, Festival and New Year reads. Failed reads reject; no fictitious migrated storage or inherited allowance. |
+| V3.4 frontend adapter | Same integration module: chain97-only identity verification and unsigned allowlisted call preparation. **Not yet wired as a complete interactive V3.4 UI.** Mainnet writes remain the existing V3.2.6 runtime. |
+| Adversarial tests | `KGEN-KAIOS/tests/templeheart.integration.test.mjs`: proof/wallet/beneficiary/civilization attacks, repayment requirement, 501-wallet real-proof epoch test, 89-wallet Heartbeat/Ignite caps, initializer/roles/UUPS, callback reentrancy, fresh local proxy package. |
+| CI | `.github/workflows/kaios-portal-product-qa.yml`: exact-head local EVM job without RPC credentials or external signer secrets; existing browser regressions retained. |
+| Read-only live audit | Existing tool `--live-readonly`; authenticated RPC URLs and secrets are never included in output. |
+
+Read-only observations (not deployment authorization):
+
+- BSC56 block **125325738**: old Heart
+  `0xB016D4d8f1aED1339101b30722cad6dbA9B8C972` has a zero ERC1967
+  implementation slot; it remains the known **direct V3.2.6 deployment**, never an
+  `upgradeToAndCall` target. Reserve at that block: **2792 KGEN**. This is not a
+  funding commitment and is below the new Heart's 20000 operational floor.
+- Registry `0xA9e7CbF161E39E556f4B5b8E41397Ac4B87a932D` resolves 11520 to
+  `0xd0605F4EF10e5C1438F11AF9edc36926769239d6`; proof interface at
+  `0xD4E67B3a69e41524c424150E6b6e921b01D036db` accepts an empty-record read.
+  This does not certify proof issuance policy or new role assignments.
+- BSC97 block **134471434**: historical proxy
+  `0xa74F84942ADe7F668009BC4cB9E73C05ed5A3296` reports 3.4.0 and implementation
+  `0x52FFbEDAdD60c94a7FFc5B2EA36D57Cf666ab3f2` matches current compiled runtime
+  after compiler-declared immutable masking. Its nonzero FortuneGame binding
+  makes it **unsuitable as the fresh FortuneGame-disabled candidate**. Do not run
+  the historical V3.3.2/disposable-proxy rehearsal against it.
+
+### Remaining release gates — MAINNET_READY = NO
+
+1. Confirm public Admin/Upgrader/Operator/HolyCupSigner assignments and independent
+   proof/civilization issuance policy. A legacy owner is not automatically any new role.
+2. Confirm legacy Fortune/Heartbeat cooldown cutover policy, then implement and test
+   the chosen enforcement. The read-only adapter alone does **not** enforce cooldowns
+   on the new proxy. Do not activate with a silent cooldown reset.
+3. Complete isolated real BSC97 rehearsal without FortuneGame and the interactive
+   V3.4 candidate UI using the existing Wallet/Heart authority. Local chain97 tests
+   and historical BSC97 receipts are not new live rehearsal receipts.
+4. Confirm new funding source/amount and old reserve disposition; account for token
+   transfer behavior. No automatic sweep, transfer or approval. Old token allowances
+   cannot be migrated to a new spender.
+5. Produce a clean exact-head final manifest with live nonce/address predictions,
+   gas estimates, all code identities and postchecks; obtain one final Human
+   approval before any BSC56 execution. Current output is explicitly an unsigned
+   **candidate**, not a READY or executable authorization.
+
+Lamp, Festival and New Year remain legacy reads/actions because V3.4 lacks those
+legacy selectors. Wish/Vow history stays in original event logs; new V3.4 Wish
+requires civilization context. No legacy storage is fabricated. Pausing or a
+future storage-compatible proxy rollback requires its own authorized execution.
+No Mainnet transaction, KGEN transfer, role change or treasury change was performed.
+
 ## V3.3.2 baseline and upgrade rule
 
 V3.4.0 is an append-only UUPS candidate over the V3.3.2 custom storage layout. The executable filename remains version-free under repository governance. Solidity is pinned to 0.8.24 and both OpenZeppelin packages are pinned to 5.0.2.
@@ -235,3 +304,122 @@ PR_131 = READY_FOR_REVIEW_AFTER_RELEASE_GATES
 TEMPLEHEART_V3_4_TESTNET_REHEARSAL = PASS
 MAINNET_DEPLOY = BLOCKED
 ```
+
+## 2026-10-03 cumulative continuation: fresh V3.4 without FortuneGame
+
+The historical upgrade/rehearsal sections above are preserved as history, not the
+current release route. In particular their `setFortuneGame` step and the old
+`0xa74F84942ADe7F668009BC4cB9E73C05ed5A3296` rehearsal proxy must **not** be used
+for the clean candidate. PR #133 remains disabled. The V3.2.6 Mainnet Heart is a
+direct deployment and is never an UUPS upgrade target.
+
+The existing tool now owns the fresh, isolated test route:
+
+```text
+node KGEN-KAIOS/tools/validate-templeheart-storage.mjs --testnet-clean-rehearsal
+```
+
+Without an execution acknowledgment this is a read-only chain/balance preflight.
+The Human-authorized BSC97-only acknowledgment is
+`BSC_TESTNET_EXECUTE=BSC97_FRESH_ISOLATED_V34_ONLY`. It uses the already configured
+test signer and RPC, never logs either secret, and deploys fresh TEST KGEN,
+Registry, KAIOS, Furnace, Treasury, legacy-read fixture, V3.4 implementation and
+ERC1967Proxy. All test role assignments are explicitly test-only. FortuneGame is
+zero. Native transaction value is zero; gas is bounded to 8 million per
+transaction, 1 gwei and 0.10 tBNB total. Only freshly deployed addresses are write
+targets. Mainnet and historical rehearsal addresses are not accepted targets.
+
+`--stress` adds distinct controller-bound TEST contract wallets with actual
+Wish/HolyCup/Alchemy proof lineage, without directly seeding Heart claim storage.
+It fills the canonical 500-claim epoch and 88-claim heartbeat hour, then checks
+the next wallet's exact custom-error rejection. Existing successful EOA frontend
+claims count toward the same real global cap. `--ignite` requires the actual
+BSC97 UTC 00:00–00:09:59 window and previously prepared wallets. It cannot change
+chain time or loosen the window. A missing real-window result is pending, never
+PASS. Repayment restores the repayment condition, **not** the 30-day cooldown.
+
+The cumulative public journal is
+`KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json`, under
+`cleanRehearsal`; its old top-level evidence remains unchanged.
+`cleanRehearsal.frontendManifest` is the chain97-only frontend identity input.
+Each transaction's nonce, target, calldata hash and signed transaction hash are
+durably recorded before broadcast. Uncertain results are resolved by that hash;
+the tool never blindly resends an uncertain transaction. Rejection evidence
+requires a decoded contract revert, not an RPC failure.
+
+### On-chain legacy continuity and unsigned deployment package
+
+`legacyHeart` is appended storage. `bindLegacyContinuity(address)` is a one-time
+Admin operation requiring matching KGEN; on BSC56 its source is fixed to the real
+V3.2.6 address. Missing binding on BSC56, failed legacy reads, or a recent legacy
+Fortune/Heartbeat/Ignite claim fail closed. Fortune uses the later local/legacy
+30-day cooldown; Heartbeat respects both one-hour cooldowns; Ignite rejects an
+already-used legacy day. No historical storage or assets are fabricated/copied.
+Festival, New Year, Lamp and historical Wish/Vow records remain legacy reads and
+legacy actions. Existing allowances do not authorize the new spender.
+
+`--mainnet-manifest` generates the unsigned manifest template into the same
+report's `unsignedMainnetManifest`. Human-final roles, funding, old reserve action
+and continuity policy are named parameters, not invented addresses. The strict
+`--deployment-package PUBLIC_CONFIG.json` materializer creates exact calldata and
+nonce-derived implementation/proxy addresses only from complete real public
+parameters. Its sequence is implementation deployment, atomic proxy initializer,
+Registry initialization, one-time legacy binding, then read-only verification.
+Funding remains a separately approved exact transaction. No Mainnet signer is
+loaded or transaction sent by either package-generation mode.
+
+The materialized package includes `initializerCalldataHash = keccak256(initializer)`
+and a separate calldata hash for each unsigned transaction. Before final Human
+role addresses exist, the template records a reproducible initializer recipe hash
+and `initializerCalldataHash: null` with an explicit parameters-required status;
+it never represents a placeholder hash as executable calldata. The compiled
+implementation runtime template hash includes immutable-reference metadata, while
+the observed BSC97 implementation code hash is kept in `testnetReference` only,
+never promoted into Mainnet role/config parameters. CI publishes this unsigned
+template as an artifact named for the tested head, avoiding a self-referential
+commit SHA in a committed report.
+
+### Current 12345 frontend continuation (no parallel Wallet or Heart)
+
+The existing `K線西遊記/temples/12345/modules/runtime-main.js` owns the candidate
+form bindings and uses its original `HeartRuntime.sendHeart`, explicit confirm,
+Wallet gate, pending-action guard, error/status and receipt flow. The ordinary
+URL remains V3.2.6/BSC56. Only `?heart=v34-testnet` opts into the fresh BSC97
+manifest; a missing or mismatched manifest stops rather than falling back to
+Mainnet. The existing `core/integrations/temple-heart-12345.mjs` verifies proxy
+and implementation code/slot, four roles, KGEN/Registry/proof/legacy bindings,
+8/500 limits and zero FortuneGame at one block before candidate transactions.
+
+Original Wish, Repay, Fortune, Heartbeat and Ignite buttons dispatch V3.4 methods
+only in this mode. Signed HolyCup and Alchemy proof inputs live inside the
+existing scrollable Heart form. The local three-cup game is never a signature.
+Fortune amount is not player-controlled; repayment converts the explicit whole
+amount to token base units. Approval reuses the original bounded amount flow;
+unlimited/cross-purpose approvals and unsupported legacy actions are denied in
+the candidate. Normal V3.2.6 actions, layout and external wallet flow remain
+unchanged. Candidate handoff preserves its testnet query; candidate addresses
+are not copied into the legacy write object. Account/network changes invalidate
+balance state and require re-verification.
+
+V3.4 deliberately rejects Heartbeat on a fulfilled Wish. After a Fortune payout,
+a player creates the next Wish before continuing Heartbeat. Voluntary repayment
+does not itself reset a fulfilled Wish, the wallet/civilization cooldown or the
+epoch cap. Existing V3.4 accepts any positive base-unit repayment; this is a
+repayment condition, **not** a newly invented full-debt repayment rule.
+
+`tests/kaios-world-audio-browser.mjs --v34-only` is a real Chromium 390×844
+no-broadcast transaction-boundary regression. It verifies actual UI bindings,
+unsigned calldata, wallet/civilization changes, repayment blocking, identity
+failure, cancellation and receipts. `--v34-live` is separate, explicitly guarded
+by `BSC_TESTNET_BROWSER_EXECUTE=BSC97_FRESH_UI_ONLY`. Its already-configured TEST
+key stays in Node; the browser receives only an EIP-1193 relay allowing exactly
+the expected calldata to the verified fresh test addresses. It uses actual
+BSC97 receipts, native value zero, at most 1.5M gas/transaction, 1 gwei and
+0.01 tBNB. A signed hash is durably journaled before broadcast; an uncertain
+transaction is never blindly repeated. No browser bundle, Pages file or CI job
+receives a private key. The live browser run is not a physical MetaMask claim.
+
+The clean rehearsal report preserves the sanitized live-browser receipt evidence
+alongside core and cap tests. Pending real UTC Ignite coverage is not replaced by
+the local injected-clock test. Mainnet human-final addresses remain parameters;
+the above engineering and BSC97 flows do not depend on choosing them.

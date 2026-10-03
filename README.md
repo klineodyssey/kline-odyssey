@@ -6,6 +6,18 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### TempleHeart V3.4 completion candidate — not Mainnet activated
+
+Existing V3.4 source is preserved. Local adversarial EVM tests, unsigned fresh
+proxy deployment package and read-only legacy/V3.4 identity adapters continue in
+`KGEN-KAIOS/tests/templeheart.integration.test.mjs`,
+`KGEN-KAIOS/tools/validate-templeheart-storage.mjs` and
+`core/integrations/temple-heart-12345.mjs`.
+Current gaps and old-state continuity are recorded in
+`KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md`.
+Mainnet remains legacy V3.2.6; FortuneGame #133 stays HOLD. This is not a
+deployment, funding, role-change or new frontend activation authorization.
+
 ### K11520 V2.9 gameplay candidate
 
 Player/GA600 game progression, Boss encounters, rarity loot and Daily Journey
@@ -1382,3 +1394,22 @@ V3.6 verifies the first `heartbeatClaim()` and first 1 KGEN reward from one succ
 - Shared request entry: `.github/ISSUE_TEMPLATE/civilization-request.yml`
 - Production report: `KGEN-AI-Company/reports/DIGITAL_ANT_V3_5_WUKONG_GATEKEEPER_DUTY_REPORT.md`
 - Settlement and company treasury remain gated; no automatic chain write is introduced by the gateway.
+
+### TempleHeart V3.4 completion candidate (BSC97 only)
+
+The current 12345 UI retains the Human-verified V3.2.6 Mainnet path. The explicit
+`?heart=v34-testnet` candidate reuses the same Heart/Wallet/receipt authority and
+verifies the fresh BSC97 manifest before Wish, signed HolyCup, Alchemy proof,
+Fortune, voluntary repayment, Heartbeat or Ignite. FortuneGame #133 is zero and
+disabled. The new implementation enforces live legacy wallet cooldowns on-chain;
+the old non-proxy Mainnet Heart is never an upgrade target.
+
+- Contract and continuity owner: `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol`
+- Frontend resolver: `core/integrations/temple-heart-12345.mjs`
+- Existing UI bindings: `K線西遊記/temples/12345/modules/runtime-main.js`
+- Fresh TEST-only rehearsal / unsigned package: `KGEN-KAIOS/tools/validate-templeheart-storage.mjs`
+- Cumulative public evidence: `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json`
+- Current specification and remaining release gates: `KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md`
+
+Unsigned Mainnet roles/funding/cutover parameters still require Human decisions.
+No Mainnet deployment, role write, KGEN transfer or production cutover is authorized.

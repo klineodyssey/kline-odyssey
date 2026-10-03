@@ -8,7 +8,7 @@
   },
   "candidate": {
     "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
-    "slots": 73,
+    "slots": 74,
     "appendedSlots": [
       {
         "label": "organRegistry",
@@ -69,11 +69,28 @@
       {
         "label": "_activeCustomerSeenOnDay",
         "slot": "72"
+      },
+      {
+        "label": "legacyHeart",
+        "slot": "73"
       }
     ]
   },
   "approvedRenames": {
     "kaiosBurnProofGenesis": "deprecatedProofSource"
+  },
+  "continuityBaseline": {
+    "version": "3.4.0",
+    "ref": "805ac20c4507b109e3792f2abf074cc0e9665db5",
+    "path": "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol",
+    "preservedEntries": 73,
+    "appendedEntries": [
+      {
+        "label": "legacyHeart",
+        "slot": "73"
+      }
+    ],
+    "recursiveTypeShapeComparison": true
   },
   "failures": []
 }
