@@ -6,7 +6,7 @@ export const PLAYER_SESSION_KEY='k11520.player-session.v1';
 export const KGEN_TOKEN_ADDRESS='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 export const KGEN_CHAIN_ID=56;
 const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
-export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','COURIER_SETTLEMENT','KAIOS_SPEND','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
+export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','COURIER_SETTLEMENT','COURIER_INSURANCE_PAYOUT','KAIOS_SPEND','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
 // A namespace is isolation against application mix-ups, NOT authentication of
 // another person sharing this browser. Player IDs never authorize chain assets.
 export function createPlayerScopedStorage(storage,playerId){
@@ -35,7 +35,7 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
   if(playerId)storage=createPlayerScopedStorage(storage,playerId);
   let owner=null,key=null,revision=0,progress=null,persistent=true,storageStatus='READY',rawPresent=false;
   const read=()=>{try{const raw=storage?.getItem(key);rawPresent=raw!=null;return JSON.parse(raw||'null')}catch{storageStatus='CORRUPT_SAVE';return null}};
-  const fresh=()=>({kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0,courierReceipts:[]});
+  const fresh=()=>({kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0,courierReceipts:[],courierInsuranceReceipts:{}});
   function check(){if(!persistent)return;if((read()?.revision??0)!==revision)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED')}
   function save(){
     if(storageStatus==='CORRUPT_SAVE')return;
@@ -56,7 +56,7 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
       for(const k of ['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'])ledger[k]=saved.ledger[k];
       const b=saved.ledger.simulation;
       if(b&&Number.isSafeInteger(b.sequence)&&['orders','positions','receipts'].every(k=>Array.isArray(b[k]))&&b.observations&&typeof b.observations==='object')ledger.simulation=structuredClone(b);
-      if(saved.progress){for(const k of ['kaios','claimableKaios','spentKaios','loot','xp','engineXp','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0);if(Array.isArray(saved.progress.courierReceipts)&&saved.progress.courierReceipts.length<=1000&&saved.progress.courierReceipts.every(value=>/^COURIER-RECEIPT-[0-9a-f]{8}$/i.test(value))&&new Set(saved.progress.courierReceipts).size===saved.progress.courierReceipts.length)progress.courierReceipts=[...saved.progress.courierReceipts]}
+      if(saved.progress){for(const k of ['kaios','claimableKaios','spentKaios','loot','xp','engineXp','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0);if(Array.isArray(saved.progress.courierReceipts)&&saved.progress.courierReceipts.length<=1000&&saved.progress.courierReceipts.every(value=>/^COURIER-RECEIPT-[0-9a-f]{8}$/i.test(value))&&new Set(saved.progress.courierReceipts).size===saved.progress.courierReceipts.length)progress.courierReceipts=[...saved.progress.courierReceipts];const insurance=saved.progress.courierInsuranceReceipts;if(insurance&&typeof insurance==='object'&&!Array.isArray(insurance)){const entries=Object.entries(insurance);if(entries.length<=1000&&entries.every(([id,value])=>/^COURIER-INSURANCE-[0-9a-f]{8}$/i.test(id)&&Number.isSafeInteger(value)&&value>=0&&value<=1080000))progress.courierInsuranceReceipts=Object.fromEntries(entries)}}
     }
     ledger.owner=owner;
     progress.events.UNIQUE_PLAYER=1;
@@ -89,13 +89,22 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
     progress.courierReceipts.push(id);progress.events.COURIER_SETTLEMENT=(progress.events.COURIER_SETTLEMENT||0)+1;progress.kaios+=value;progress.xp+=12;if(owner!=='guest')progress.claimableKaios+=value;save();
     return {ok:true,receiptId:id,rewardKaios:value,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
   }
+  function recordCourierInsurancePayout({receiptId,reward=0}={}){
+    check();const id=String(receiptId||''),value=Number(reward);
+    if(!/^COURIER-INSURANCE-[0-9a-f]{8}$/i.test(id))return {ok:false,reason:'INVALID_COURIER_INSURANCE_RECEIPT'};
+    if(!Number.isSafeInteger(value)||value<0||value>1080000)return {ok:false,reason:'INVALID_COURIER_INSURANCE_PAYOUT'};
+    const recorded=progress.courierInsuranceReceipts[id];
+    if(recorded!==undefined)return recorded===value?{ok:true,replayed:true,receiptId:id,rewardKaios:value,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}:{ok:false,reason:'COURIER_INSURANCE_RECEIPT_CONFLICT'};
+    progress.courierInsuranceReceipts[id]=value;progress.events.COURIER_INSURANCE_PAYOUT=(progress.events.COURIER_INSURANCE_PAYOUT||0)+1;progress.kaios+=value;if(owner!=='guest')progress.claimableKaios+=value;save();
+    return {ok:true,replayed:false,receiptId:id,rewardKaios:value,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
+  }
   function snapshot(){
     const p=structuredClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));
     return {owner,playerId,persistent,storageStatus,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,
       nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,
       kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'};
   }
-  return {activate,check,save,record,spendKaios,recordCourierSettlement,snapshot};
+  return {activate,check,save,record,spendKaios,recordCourierSettlement,recordCourierInsurancePayout,snapshot};
 }
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){if(typeof hex!=='string'||!/^0x[0-9a-fA-F]+$/.test(hex))throw new Error('INVALID_BALANCE_RESPONSE');return BigInt(hex);}

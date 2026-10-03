@@ -1,5 +1,17 @@
 # 11520 Changelog
 
+## 2026-10-03 — Player Courier public bandit and insurance completion
+
+- Wired the existing Player Courier `BANDIT_MODE`, `CARGO_RAID_ACTION`, `raid()` and one-shot loot receipt into the public game shell without creating another logistics engine.
+- Added a compact cash-target chip that appears only for a different eligible local Player Life; the expanded panel reports attack-window, distance, cooldown, insurance and exact rejection reasons.
+- Kept ordinary PvE/PvP separate from robbery. Cargo ownership changes only through the explicit raid action, and a claimed loot crate cannot be claimed twice.
+- Exposed both uninsured zero-payout and exact-premium `QUOTE_ONLY -> ACTIVE` insured robbery paths in real Chromium QA at 390×844 and 844×390.
+- Made proximity fail closed when either Life position is unavailable, and enforced the 8 m local raid limit inside the canonical courier runtime rather than only in UI.
+- Made loot delivery two-phase: the backpack must persist the exact reward receipt before the courier journal transfers the single cargo ownership state.
+- Made insured robbery create an `APPROVED` entitlement first; only the original courier's replay-protected local-ledger credit can advance it to `PAID`, and the same receipt cannot add KAIOS twice.
+- Added a durable pending-premium recovery record and mutually exclusive expanded courier/bandit panels so interrupted activation and compact HUD layout remain visible and recoverable.
+- Labeled the feature `LOCAL GAMEPLAY`: no cross-device realtime multiplayer, TempleHeart change, token transfer, custody or Mainnet write is claimed.
+
 ## 2026-10-03 — Player Courier background delivery and explicit bandit raids
 
 - Extended the existing Digital Ant logistics runtime with `PLAYER_COURIER`, preserving the autonomous ATM UFO path and creating no second delivery system.
