@@ -173,5 +173,42 @@ assert.deepEqual(errors,[],'page errors after selected-Life click: '+errors.join
 if(await page.locator('#sheet').evaluate(sheet=>sheet.classList.contains('open')))await page.locator('#sheetClose').click();
 await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);assert.equal(await page.locator('#playerCourierChip').isVisible(),true,'background courier indicator remains visible in 844x390');const landscapeCourierBox=await page.locator('#playerCourierChip').boundingBox();assert.ok(landscapeCourierBox&&landscapeCourierBox.x>=0&&landscapeCourierBox.y>=0&&landscapeCourierBox.x+landscapeCourierBox.width<=844&&landscapeCourierBox.y+landscapeCourierBox.height<=390,'Player Courier chip must remain inside 844x390');await page.locator('#playerCourierChip').click();const landscapeDetails=await page.locator('#playerCourierDetails').boundingBox();assert.ok(landscapeDetails&&landscapeDetails.x>=0&&landscapeDetails.y>=0&&landscapeDetails.x+landscapeDetails.width<=844&&landscapeDetails.y+landscapeDetails.height<=390,'expanded Player Courier details must remain inside 844x390');await page.screenshot({path:`${OUT}/11520-player-courier-844x390.png`});
 
+// Public Player Courier bandit flow is intentionally same-browser LOCAL
+// GAMEPLAY. A second local Life can raid the first Life's persisted cargo;
+// this does not claim a realtime multiplayer backend.
+await page.setViewportSize({width:390,height:844});
+const localLives=await page.evaluate(async()=>{
+  const {createLocalPlayerStore}=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/player-life-runtime.mjs');
+  const store=createLocalPlayerStore(),courierLifeId=store.activePlayer().playerId,position=globalThis.__K11520_WORLD_COORDS__?.physical||{x:0,y:0,z:0};
+  const attacker=store.createPlayer({lastXYZ:{x:position.x,y:position.y,z:position.z}});
+  return {courierLifeId,attackerLifeId:attacker.playerId};
+});
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);
+if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
+await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.banditTarget?.()?.status==='ACTIVE',null,{timeout:5000});
+assert.equal(await page.locator('#playerBanditTarget').isVisible(),true,'a distinct local Life courier mission must expose the compact cash target chip');
+await page.locator('#playerBanditTarget').click();assert.match(await page.locator('#playerBanditPanel').textContent(),/LOCAL GAMEPLAY/);assert.match(await page.locator('#playerBanditPanel').textContent(),/未實作跨裝置 realtime multiplayer/);assert.equal(await page.locator('#banditRaidButton').isDisabled(),true,'ordinary combat cannot raid cargo before explicit Bandit mode');
+await page.locator('#banditModeButton').click();assert.equal(await page.locator('#banditRaidButton').isDisabled(),false);await page.locator('#banditRaidButton').click();assert.match(await page.locator('#playerBanditPanel').textContent(),/搶鈔未成立：搶鈔窗口尚未開放/,'closed attack window must return a visible reason');
+
+// Open a deterministic QA attack window without waiting minutes. The action
+// and settlement still go through the public buttons and canonical raid().
+await page.evaluate(id=>{const e=JSON.parse(localStorage.getItem('K11520_PLAYER_COURIER')),m=e.missions[id];m.bandit.attackWindowStartsAt=Date.now()-1000;m.bandit.lastRaidAt=0;m.cargo.durability=1;localStorage.setItem('K11520_PLAYER_COURIER',JSON.stringify(e))},courierMission.missionId);
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
+await page.locator('#playerBanditTarget').click();await page.locator('#banditModeButton').click();await page.locator('#banditRaidButton').click();await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.banditTarget?.()?.status==='ROBBED');
+let robbed=await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.banditTarget());assert.equal(robbed.cargo.ownerLifeId,localLives.attackerLifeId);assert.equal(robbed.cargo.ownerState,'LOOT_CRATE');assert.equal(robbed.settlement.rewardKaios,0,'cargo principal and robbery must not become courier salary');assert.equal(robbed.settlement.insurancePayoutKaios,0,'QUOTE_ONLY robbery is uninsured and pays no claim');
+await page.locator('#banditLootButton').click();assert.equal((await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.banditTarget())).cargo.ownerState,'CLAIMED_BY_BANDIT');await page.locator('#banditLootButton').click();assert.match(await page.locator('#logisticsActionToast').textContent(),/掉寶拒絕：目前沒有可領掉寶/,'double loot claim must fail visibly');
+
+// Return to the original courier and pay an exact local premium through the
+// real public Player Courier acceptance path.
+await page.evaluate(async id=>{const {createLocalPlayerStore}=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/player-life-runtime.mjs');createLocalPlayerStore().activatePlayer(id)},localLives.courierLifeId);
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
+await page.locator('#homeDeliveryButton').click();await page.locator('#homeRequest').waitFor({state:'visible'});await page.locator('#homeDeliveryMode').selectOption('PLAYER_COURIER');await page.locator('#homeAmount').fill('1000');await page.locator('#homeInsurance').selectOption('YES');await page.locator('#homeRequest').click();await page.locator('#homeLaunch').click();
+await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.insurance?.status==='ACTIVE',null,{timeout:3000});const insuredMission=await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active());assert.ok(insuredMission.insurance.premiumPaidKaios>0,'public flow must move QUOTE_ONLY to ACTIVE after exact local premium payment');
+await page.evaluate(async({attackerLifeId,missionId})=>{const e=JSON.parse(localStorage.getItem('K11520_PLAYER_COURIER')),m=e.missions[missionId];m.bandit.attackWindowStartsAt=Date.now()-1000;m.bandit.lastRaidAt=0;m.cargo.durability=1;localStorage.setItem('K11520_PLAYER_COURIER',JSON.stringify(e));const {createLocalPlayerStore}=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/player-life-runtime.mjs');createLocalPlayerStore().activatePlayer(attackerLifeId)},{attackerLifeId:localLives.attackerLifeId,missionId:insuredMission.missionId});
+await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
+await page.locator('#playerBanditTarget').click();await page.locator('#banditModeButton').click();await page.locator('#banditRaidButton').click();await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.status==='ROBBED',insuredMission.missionId);
+robbed=await page.evaluate(id=>globalThis.__K11520_PLAYER_COURIER__.snapshot(id).mission,insuredMission.missionId);assert.equal(robbed.insurance.status,'ACTIVE');assert.equal(robbed.insurance.claimStatus,'PAID');assert.ok(robbed.settlement.insurancePayoutKaios>0,'insured robbery must show a verified local payout');assert.equal(robbed.economics.cargoPrincipalRecognizedAsRevenue,false);
+const banditBox=await page.locator('#playerBanditPanel').boundingBox();assert.ok(banditBox&&banditBox.x>=0&&banditBox.y>=0&&banditBox.x+banditBox.width<=390&&banditBox.y+banditBox.height<=844,'Bandit panel must remain inside 390x844');await page.screenshot({path:`${OUT}/11520-player-courier-bandit-390x844.png`});await page.setViewportSize({width:844,height:390});await page.waitForTimeout(200);const banditLandscape=await page.locator('#playerBanditPanel').boundingBox();assert.ok(banditLandscape&&banditLandscape.x>=0&&banditLandscape.y>=0&&banditLandscape.x+banditLandscape.width<=844&&banditLandscape.y+banditLandscape.height<=390,'Bandit panel must remain inside 844x390');await page.screenshot({path:`${OUT}/11520-player-courier-bandit-844x390.png`});
+
 await browser.close();
 console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);

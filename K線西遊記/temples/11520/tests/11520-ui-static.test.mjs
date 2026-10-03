@@ -9,6 +9,7 @@ const here=dirname(fileURLToPath(import.meta.url));
 const read=p=>readFileSync(resolve(here,p),'utf8');
 const html=read('../game-5d.html');
 const main=read('../runtime/game-5d-main.mjs');
+const mobileShell=read('../runtime/game-mobile-shell.mjs');
 test('dodge tries safe alternatives without bypassing midpoint or endpoint collision',()=>{
   const dodge=main.split("$('#dodge').onclick=")[1]?.split('\n')[0]||'';
   assert.ok(dodge.includes('[0,Math.PI/2,-Math.PI/2,Math.PI]'));
@@ -151,6 +152,13 @@ test('all current fixed control surfaces exist in shell HTML',()=>{for(const id 
 test('core controls have runtime event wiring',()=>{for(const token of ["joy.addEventListener('pointerdown'","$('#lookPad').addEventListener('pointerdown'","$('#attack').onclick","$('#skill').onclick","$('#dodge').onclick","$('#tradeSword').onclick","$('#flat').onclick","$('#orderFire').onclick","$('#dockToggle').onclick","$('#walletConnect').onclick","$('#walletRefresh').onclick","$('#walletToggle').onclick","bindVertical('#lotsControl'","bindVertical('#cControl'"])assert.ok(main.includes(token),token);for(const token of ['function bindDisc()','function bindRail()','__K11520_3D_CONTROL__','railAxis','discAxes'])assert.ok(xyzControl.includes(token),token);assert.equal(main.includes("bindVertical('#yControl'"),false,'remaining-axis rail must not use legacy bounded Y slider wiring')});
 test('0C walking remains independent from C control',()=>{assert.equal(source.includes('D.warp===0?0'),false);assert.ok(main.includes('function moveManual()'));assert.ok(main.includes('const speed=.10'))});
 test('current dynamic organ actions are wired',()=>{for(const token of ['data-organ','openOrgan(','data-axis','data-market','openOrder()','closePos','setWaypoint','bindMap','PLANE_TRADE_AXIS','syncTradeAxisFromPlane'])assert.ok(main.includes(token),token)});
+
+test('Player Courier exposes explicit local-only Bandit mode, raid action and one-shot loot UI',()=>{
+  for(const token of ['playerBanditTarget','playerBanditPanel','BANDIT_MODE','CARGO_RAID_ACTION','banditLootButton','LOCAL GAMEPLAY','LOOT_REPLAY_BLOCKED'])assert.ok(mobileShell.includes(token),`missing Player Courier public bandit wiring: ${token}`);
+  assert.ok(mobileShell.includes('distance>8'),'Player Courier robbery must fail visibly outside the local raid distance');
+  assert.ok(mobileShell.includes('一般 PvE／PvP 不會偷貨'),'ordinary combat must remain separate from explicit cargo robbery');
+  assert.ok(mobileShell.includes('未實作跨裝置 realtime multiplayer'),'local gameplay must not claim a realtime multiplayer backend');
+});
 test('economy boundaries remain visibly separate',()=>{assert.ok(html.includes('KGEN Local Free'));assert.ok(html.includes('KAIOS'));for(const token of ['requiredMargin','positionRisk','attackKSpace'])assert.ok(main.includes(token),token);assert.equal(main.includes('S.kaios+=r.rewardKaios'),false)});
 
 test('public reference quotes use the browser-safe market-data origin without credentials',()=>{
