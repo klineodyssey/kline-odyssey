@@ -129,7 +129,11 @@ async function verifyKSpaceMap(page,report){
     // Keep exact equality and a bounded render-sync deadline, never freeze live prices.
     const sample=await page.waitForFunction(()=>{const model=globalThis.__K11520_KSPACE_MAP__,runtime=globalThis.__K11520_KSPACE_API__.snapshot();return ['KX','KY','KZ'].every(a=>model.player[a]===runtime.playerK[a]&&model.monster[a]===runtime.monsterK[a])?structuredClone({model,runtime}):false},null,{timeout:2500});
     const {model,runtime}=await sample.jsonValue();await sample.dispose();
-    assert.equal(model.normal,axis);assert.equal(model.targetId,runtime.target.id);assert.deepEqual(model.monster,runtime.monsterK);assert.deepEqual(model.player,runtime.playerK);assert.deepEqual(model.delta,runtime.deltaK);assert.equal(model.distance,1);
+    assert.equal(model.normal,axis);assert.equal(model.targetId,runtime.target.id);assert.deepEqual(model.monster,runtime.monsterK);assert.deepEqual(model.player,runtime.playerK);assert.deepEqual(model.delta,runtime.deltaK);
+    // Only this approximate distance tolerates IEEE-754 drift from live market-frame
+    // translations (observed 1.0000000000000036). Snapshot/state assertions stay exact.
+    const distanceEpsilon=1e-12; // Absolute tolerance for the expected unit distance; no runtime rounding.
+    assert.ok(Math.abs(model.distance-1)<=distanceEpsilon,`K-space distance must be 1 within ${distanceEpsilon}; got ${model.distance}`);
     await shot(name);await page.locator('#kspaceViewK').click();await shot(name+'-detail');await page.locator('#sheetClose').click();rows.push(model);
   }
   await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>globalThis.__K11520_KSPACE_MAP__?.neutral===true);
