@@ -42,7 +42,7 @@ Player Courier 不會鎖定玩家的移動、戰鬥、探索、回家或一般 H
 
 貨物所有權只有一個狀態：`OWNED_BY_COURIER`、`LOOT_CRATE` 或已完成／失敗的終局 custody。一般怪物攻擊只能增加風險或降低 durability，不能直接搶貨；只有不同 Life ID 明確進入 `BANDIT_MODE` 並發出合格 `CARGO_RAID_ACTION`，通過攻擊窗、冷卻與勝負結算後，才能使任務成為 `ROBBED`。同一 mission 只能終結為 `DELIVERED`、`ROBBED` 或 `FAILED` 一次；薪資、運費、保險理賠及 loot receipt 均採 one-shot 防重播。
 
-目前所有 cargo、salary、freight、insurance 和 loot 都是本機遊戲帳務。貨物本金不是收入；只有 `DELIVERED` receipt 成立後，玩家才取得約定的 courier salary 與 freight share，公司才認列 company net。搶劫不 mint、不 burn、不轉移任何 Mainnet KGEN／KAIOS，也不代表實體物流已發生。
+目前所有 cargo、salary、freight、insurance 和 loot 都是本機遊戲帳務。保險報價不是有效承保；只有精確本機保費扣款證據成立後，policy 才可由 `QUOTE_ONLY` 進入 `ACTIVE`。貨物本金不是收入；只有 `DELIVERED` receipt 成立後，玩家才取得約定的 courier salary 與 freight share，公司才認列 company net。搶劫不 mint、不 burn、不轉移任何 Mainnet KGEN／KAIOS，也不代表實體物流已發生。
 
 ## 2. 價格 = 宇宙層級
 市場價格可映射到 K-space 的十進位宇宙層級。對正數價格 p：

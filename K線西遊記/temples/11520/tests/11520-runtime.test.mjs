@@ -591,6 +591,9 @@ test('Player Courier ordinary combat degrades cargo without theft while explicit
 test('Player Courier insured robbery pays only policy evidence while old 80% test value is not a Lamp tier',()=>{
   const storage=courierStorage(),quote=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000}),courier='KAIOS-P-COURIER-1234567890';
   const store=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'SESSION-A'}),mission=store.accept(courierOffer({missionId:'COURIER-INSURED',cargoAmount:1000,insuranceQuote:quote}),{courierLifeId:courier});
+  assert.equal(mission.insurance.status,'QUOTE_ONLY','underwriting-ready quote is not active coverage');
+  assert.throws(()=>store.activateInsurance(mission.missionId,{courierLifeId:courier,paymentEvidence:{ok:true,amount:quote.premiumKaios-1,purpose:'PLAYER_COURIER_INSURANCE_PREMIUM',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}}),/EXACT_LOCAL_PREMIUM_EVIDENCE_REQUIRED/);
+  const covered=store.activateInsurance(mission.missionId,{courierLifeId:courier,paymentEvidence:{ok:true,amount:quote.premiumKaios,purpose:'PLAYER_COURIER_INSURANCE_PREMIUM',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}});assert.equal(covered.insurance.status,'ACTIVE');assert.equal(covered.insurance.premiumPaidKaios,quote.premiumKaios);
   const robbed=store.raid(mission.missionId,{attackerLifeId:'KAIOS-P-BANDIT-INSURED-1234567890',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,replayKey:'RAID-INSURED',wallNow:mission.bandit.attackWindowStartsAt});
   assert.equal(quote.coveredAmountKaios,800);assert.equal(robbed.mission.insurance.coverageBps,8000);assert.equal(robbed.mission.insurance.claimStatus,'PAID');assert.equal(robbed.mission.settlement.insurancePayoutKaios,720);assert.equal(robbed.mission.settlement.chainTransfer,false);
 });

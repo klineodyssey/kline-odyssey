@@ -6,7 +6,7 @@
 - Attached one canonical cargo to the accepting Player Life while a timestamp-authoritative background timer runs; movement, combat, exploration, home actions and the normal HUD remain available.
 - Added durable local mission journals, reload/background resume, clock-rollback review, stale-tab conflict detection and one-shot terminal receipts for delivery, robbery, salary and loot.
 - Added explicit `BANDIT_MODE` plus `CARGO_RAID_ACTION`; ordinary combat can reduce cargo durability but cannot transfer ownership. A successful eligible raid moves the single cargo into one loot crate without minting or transferring tokens.
-- Reused the existing Cargo Risk Desk for insured and uninsured robbery accounting. Coverage examples remain insurance math and are not the future Lamp 500/800 policy.
+- Reused the existing Cargo Risk Desk for insured and uninsured robbery accounting. An underwriting-ready quote stays `QUOTE_ONLY` until exact local premium evidence activates it; coverage examples remain insurance math and are not the future Lamp 500/800 policy.
 - Added compact collapsible portrait/landscape courier HUD and local player reward posting after a verified delivered receipt. Everything remains `LOCAL_GAME_ONLY`: no TempleHeart change, custody, physical delivery, KGEN/KAIOS transfer or Mainnet transaction.
 
 ## 2026-10-03 — Player-requested cash and goods delivery to the canonical home
