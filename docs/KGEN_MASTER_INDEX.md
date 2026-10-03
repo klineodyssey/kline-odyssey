@@ -1,6 +1,23 @@
 # KGEN MASTER_INDEX
 
+## First-party OST integration candidate — 2026-10-02
+
+`C:/Desktop/kline-odyssey/assets/kaios-ost/` contains eight enumerated score/PCM
+loop pairs, `render.py` and `KAIOS_AUDIO_PROVENANCE.json`. Exact paths and purposes
+are registered in cumulative `docs/KAIOS_AUDIO_PROVENANCE.md`.
+`C:/Desktop/kline-odyssey/tests/kaios-ost-browser.mjs` is the real decode/signal/
+state/lifecycle gate. Existing `assets/kaios-audio.mjs` remains sole playback
+authority. Generated full masters: `artifacts/kaios-original-ost/game-masters/`.
+README and Frontend Index also register this content. Boot V1.4 is unchanged
+under its explicit-update rule. This supersedes listening-only status below.
+
 ## KAIOS canonical World Portal / Audio (2026-10-01)
+
+2026-10-02 OST candidate inventory: `artifacts/kaios-original-ost/` is a local
+generated listening package (six WAV/MP3/MIDI themes, score JSON, offline renderer,
+audition sheet and provenance hashes). It is not a runtime or public world entry.
+The existing `docs/KAIOS_AUDIO_PROVENANCE.md` owns the cumulative source record.
+No active game file or Boot gateway is changed by this candidate delivery.
 
 | Path | Purpose |
 |---|---|

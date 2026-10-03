@@ -2,11 +2,27 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {webcrypto} from 'node:crypto';
+import {webcrypto,createHash} from 'node:crypto';
 import {WORLD_REGISTRY,WORLD_STATUSES,findWorld,isPlayable,playableDestination,portalBase,worldUrl,validateWorldRegistry} from '../assets/kaios-world-registry.mjs';
 import {readPortalPlayer} from '../assets/kaios-portal.mjs';
 import {createLocalPlayerStore,PLAYER_LIFE_STORAGE_KEY} from '../K線西遊記/temples/11520/runtime/player-life-runtime.mjs';
 const root=new URL('../',import.meta.url);
+test('16888 retains original portrait CSS and classic gameplay/Wallet scripts',()=>{
+ const html=readFileSync(new URL('../K線西遊記/temples/16888/index.html',import.meta.url),'utf8').replaceAll('\r','');
+ const digest=pattern=>createHash('sha256').update([...html.matchAll(pattern)].map(m=>m[0]).join('\n')).digest('hex');
+ assert.equal(digest(/<style[^>]*>[\s\S]*?<\/style>/g),'c213c34f2ea9337a38cabbb1d8d3d54b08a642788b69e4fcb09713653630f663');
+ assert.equal(digest(/<script(?![^>]*module)[^>]*>[\s\S]*?<\/script>/g),'158c645d8543d3097782f7b0125855f2803144d2f6ee14ab9294928e8b0ea859');
+});
+test('eight OST loops match provenance, bounded PCM and reproducible authoring source',()=>{
+ const base=new URL('../assets/kaios-ost/',import.meta.url),manifest=JSON.parse(readFileSync(new URL('KAIOS_AUDIO_PROVENANCE.json',base)));
+ assert.equal(manifest.tracks.length,8);assert.equal(manifest.rendererSha256,createHash('sha256').update(readFileSync(new URL('render.py',base))).digest('hex'));
+ for(const t of manifest.tracks){
+  assert.equal(t.THIRD_PARTY_RECORDING,'NO');assert.equal(t.THIRD_PARTY_SAMPLE,'NO');assert.equal(t.COMMERCIAL_MELODY_COPIED,'NO');
+  const pcm=readFileSync(new URL(t.loop,base));assert.equal(createHash('sha256').update(pcm).digest('hex'),t.sha256);assert(pcm.length<4000000);assert.equal(pcm.readUInt32LE(24),22050);assert.equal(pcm.readUInt16LE(22),2);
+  for(let ch=0;ch<2;ch++){assert.equal(pcm.readInt16LE(44+ch*2),0);assert.equal(pcm.readInt16LE(pcm.length-4+ch*2),0);}
+  assert.equal(t.qa.clippedSamples,0);assert(t.qa.peakDbFS<-2);assert(t.qa.rmsDbFS>-20);
+ }
+});
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)}};
 test('one registry exposes exactly the three Human-designated playable worlds',()=>{
  assert.equal(validateWorldRegistry(),true);assert.deepEqual(WORLD_REGISTRY.filter(isPlayable).map(w=>w.worldId),['11520','12345','16888']);

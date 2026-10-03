@@ -6,6 +6,16 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### KAIOS Original OST integration candidate
+
+Eight first-party tracks connect to existing shared audio: 11520 gameplay states,
+12345 receipt-only motifs, 16888 original 飛碟音響 / two-track safe playlist.
+`assets/kaios-ost/` contains eight score/loop pairs, `render.py` and per-track
+`KAIOS_AUDIO_PROVENANCE.json`. Full file inventory and rights/QA boundaries:
+`docs/KAIOS_AUDIO_PROVENANCE.md`. Reproduce masters with
+`python assets/kaios-ost/render.py`; outputs stay in local review artifacts.
+`tests/kaios-ost-browser.mjs` verifies real signal/loop/lifecycle. No new authority.
+
 ### K11520 V2.9 gameplay candidate
 
 Player/GA600 game progression, Boss encounters, rarity loot and Daily Journey
@@ -16,6 +26,11 @@ GA600 is game training only; the full research engine is not integrated.
 No progression unlock changes production leverage or financial authority.
 
 ## KAIOS World Portal
+
+Original OST listening candidates (not deployed): six first-party instrumental
+themes and reproducible scores in the local `artifacts/kaios-original-ost/`
+review package; provenance and the production boundary are recorded cumulatively
+in `docs/KAIOS_AUDIO_PROVENANCE.md`. Human listening approval precedes integration.
 
 The single public entry is [KAIOS 世界入口](https://klineodyssey.github.io/kline-odyssey/):
 play K11520, K12345 Heart or K16888 Universe; research and unfinished worlds are

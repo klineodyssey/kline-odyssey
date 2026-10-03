@@ -2,16 +2,37 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {AUDIO_STORAGE_KEY,AUDIO_THEMES,MUSIC_STATES,createKaiosAudio} from '../assets/kaios-audio.mjs';
 
-function harness(saved){
+function harness(saved,ost=false){
   const data=new Map(saved?[[AUDIO_STORAGE_KEY,JSON.stringify(saved)]]:[]),storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};
   const intervals=new Map(),timeouts=new Map();let next=0,contexts=[];
   class Param{value=0;events=[];cancelScheduledValues(){}setValueAtTime(value){this.value=value;this.events.push(['set',value]);}linearRampToValueAtTime(value){this.value=value;this.events.push(['ramp',value]);}exponentialRampToValueAtTime(value){this.value=value;}}
   class Node{gain=new Param();frequency=new Param();connect(){}disconnect(){this.disconnected=true;}start(){this.started=true;}stop(){this.stopped=true;}end(){this.onended?.();}}
   class Context{state='suspended';currentTime=1;destination={};osc=[];constructor(){contexts.push(this);}createGain(){return new Node();}createOscillator(){const node=new Node();this.osc.push(node);return node;}async resume(){this.state='running';}async suspend(){this.state='suspended';}async close(){this.state='closed';}}
   const doc=new EventTarget();doc.hidden=false;const env=new EventTarget();env.speechSynthesis={spoken:[],cancel(){this.cancelled=true;},getVoices:()=>[{lang:'zh-TW'}],speak(message){this.spoken.push(message);}};env.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
+  const requests=[];
+  if(ost){Context.prototype.createBufferSource=function(){return new Node();};Context.prototype.decodeAudioData=async()=>({duration:20,numberOfChannels:2});env.fetch=(url,{signal})=>new Promise((resolve,reject)=>{requests.push({url,resolve:()=>resolve({ok:true,arrayBuffer:async()=>new ArrayBuffer(20)})});signal.addEventListener('abort',()=>reject(Object.assign(Error('abort'),{name:'AbortError'})));});}
   const audio=createKaiosAudio({env,document:doc,storage,AudioContext:Context,setInterval(fn){const id=++next;intervals.set(id,fn);return id;},clearInterval:id=>intervals.delete(id),setTimeout(fn){const id=++next;timeouts.set(id,fn);return id;},clearTimeout:id=>timeouts.delete(id)});
-  return{audio,contexts,intervals,timeouts,doc,env,storage,data,finish(){for(const ctx of contexts)for(const node of ctx.osc)node.end();},async visibility(hidden){doc.hidden=hidden;doc.dispatchEvent(new Event('visibilitychange'));await Promise.resolve();await Promise.resolve();}};
+  return{audio,requests,contexts,intervals,timeouts,doc,env,storage,data,finish(){for(const ctx of contexts)for(const node of ctx.osc)node.end();},async visibility(hidden){doc.hidden=hidden;doc.dispatchEvent(new Event('visibilitychange'));await Promise.resolve();await Promise.resolve();}};
 }
+
+const settle=()=>new Promise(resolve=>setImmediate(resolve));
+test('OST is lazy, truthfully pending; stale loads cannot play after mute or state switch',async()=>{
+ const h=harness(null,true);h.audio.setWorld('11520');h.audio.setMusicEnabled(true);assert.equal(h.requests.length,0);
+ await h.audio.unlock();assert.equal(h.requests.length,1);assert.equal(h.audio.snapshot().musicPlaying,false);assert.equal(h.audio.snapshot().loadingTrack,'JOURNEY_THEME');
+ h.audio.setMusicState('BOSS');assert.equal(h.requests.length,2);h.requests[0].resolve();await settle();assert.equal(h.audio.snapshot().trackId,null);
+ h.requests[1].resolve();await settle();assert.equal(h.audio.snapshot().trackId,'BOSS_THEME');assert.equal(h.audio.snapshot().musicPlaying,true);assert.equal(h.intervals.size,0);
+ h.audio.setMusicState('VICTORY');const pending=h.requests.at(-1);h.audio.setMusicState('BOSS');pending.resolve();await settle();assert.equal(h.audio.snapshot().trackId,'BOSS_THEME','return to playing track invalidates pending replacement');assert.equal(h.audio.snapshot().loadingTrack,null);
+ h.audio.setMusicState('VICTORY');h.audio.setMuted(true);h.requests.at(-1).resolve();await settle();assert.equal(h.audio.snapshot().bufferSources,0);assert.equal(h.audio.snapshot().musicPlaying,false);assert.equal(h.audio.play('WISH'),false);
+ await h.audio.dispose();assert.equal(h.timeouts.size,0);
+});
+test('OST selected-only cache bound, pause offset, stop reset and playlist allowlist',async()=>{
+ const h=harness(null,true);h.audio.setWorld('11520');await h.audio.unlock();h.audio.setMusicEnabled(true);
+ for(const state of ['EXPLORE','COMBAT','BOSS','VICTORY','LEVEL_UP']){h.audio.setMusicState(state);h.requests.at(-1).resolve();await settle();assert(h.audio.snapshot().cachedTracks<=3);assert(h.audio.snapshot().bufferSources<=2);}
+ h.contexts[0].currentTime+=3;h.audio.setMusicEnabled(false);assert.equal(h.audio.snapshot().trackOffset,3);h.audio.setMusicEnabled(true);await settle();assert.equal(h.audio.snapshot().trackOffset,3);
+ h.audio.stopMusic();assert.equal(h.audio.snapshot().trackOffset,0);assert.equal(h.audio.selectTrack('DEEP_SPACE_THEME'),false);
+ h.audio.setWorld('16888');assert.equal(h.audio.selectTrack('https://commercial.example/song.mp3'),false);assert.equal(h.audio.selectTrack('DEEP_SPACE_THEME'),true);
+ await h.audio.dispose();assert.equal(h.audio.snapshot().bufferSources,0);
+});
 
 test('silent default: no AudioContext, nodes, autoplay or voice before gesture',()=>{const h=harness();h.audio.setWorld('PORTAL');assert.equal(h.contexts.length,0);assert.equal(h.audio.play('BOSS_SPAWN'),false);assert.equal(h.audio.speak('hello'),false);assert.equal(h.audio.snapshot().musicPlaying,false);});
 test('persisted enabled preference does not bypass new-document gesture',()=>{const h=harness({musicEnabled:true,muted:false});assert.equal(h.audio.snapshot().needsGesture,true);assert.equal(h.contexts.length,0);assert.equal(h.intervals.size,0);});

@@ -64,7 +64,8 @@ for(const [temple,id] of [[temple12345,'12345'],[temple16888,'16888']]){
     assert.match(temple,/data-kaios-return="PORTAL" aria-label="回 KAIOS 總世界" title="回 KAIOS">🌌</,'12345 approved compact Portal icon retains accessible destination');
     assert.ok(temple.includes("bindTempleReturnWalletContinuity({sourceWorld:'K12345',returnTitle:'回 KAIOS'})"),'12345 preserves continuity with explicit compact tooltip');
   }else{
-    assert.match(temple,/data-kaios-return="PORTAL"[^>]*>🌌 回 KAIOS 總世界</,`${id} must expose the visible return control`);
+    assert.equal((temple.match(/data-kaios-return="PORTAL"/g)||[]).length,1,'16888 must retain one return authority');
+    assert.match(temple,/<div id="universe-nav"[^>]*>\s*<a class="nav-btn nav-gold"[^>]*data-kaios-return="PORTAL" title="回 KAIOS" aria-label="回 KAIOS 總世界">返回 &gt; KAIOS｜銀河宇宙入口<\/a>/,'16888 retains its original visible return inside universe-nav, with accessible canonical destination');
     assert.match(temple,new RegExp(`bindTempleReturnWalletContinuity\\(\\{sourceWorld:'K${id}'\\}\\)`),`${id} must retain safe public wallet identity`);
   }
 }

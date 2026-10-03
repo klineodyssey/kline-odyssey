@@ -4,6 +4,7 @@ on:
     paths:
       - 'index.html'
       - 'assets/kaios-*'
+      - 'assets/kaios-ost/**'
       - 'K線西遊記/index.html'
       - 'K線西遊記/temples/12345/**'
       - 'K線西遊記/temples/16888/**'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'index.html'
       - 'assets/kaios-*'
+      - 'assets/kaios-ost/**'
       - 'K線西遊記/**'
       - 'tests/kaios-*'
       - '.github/workflows/kaios-portal-product-qa.yml'
@@ -54,6 +56,7 @@ jobs:
           trap 'kill "$SERVER_PID" || true' EXIT
           sleep 2
           node tests/kaios-portal-browser.mjs
+          node tests/kaios-ost-browser.mjs
           node tests/kaios-world-audio-browser.mjs
           node 'K線西遊記/temples/11520/tests/11520-browser-audio-world.mjs'
       - name: Reviewable screenshots and results
@@ -64,5 +67,6 @@ jobs:
           path: |
             artifacts/kaios-portal-qa/
             artifacts/11520-audio-world-qa/
+            artifacts/kaios-ost-qa/
           if-no-files-found: error
           retention-days: 14

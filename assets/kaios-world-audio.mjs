@@ -1,5 +1,5 @@
 /** Legacy Heart/Universe entry bridge: one shared player, no legacy media downloads. */
-import {getKaiosAudio} from './kaios-audio.mjs';
+import {getKaiosAudio,UNIVERSE_PLAYLIST} from './kaios-audio.mjs';
 import {mountAudioControl} from './kaios-audio-ui.mjs';
 export function bindWorldAudio(worldId){
   const audio=getKaiosAudio();audio.setWorld(worldId);globalThis.KAIOS_AUDIO=audio;
@@ -9,6 +9,13 @@ export function bindWorldAudio(worldId){
     // Target only the two known legacy music organs, not arbitrary page media.
     for(const media of [document.getElementById('music-audio'),app._music?.audio,app._musicAudio]){try{media?.pause();media?.removeAttribute('src');media?.load();}catch{}}
     app._stopAudio?.();
+    // Universe owns its original presentation; sharing a synthesizer does not
+    // authorize reparenting its navigation or replacing its music organ.
+    if(worldId==='16888'){
+      if(!control)control=bindUniversePresentation(app,audio);
+      globalThis.KAIOS_AUDIO_CONTROL=control;
+      return;
+    }
     const legacyConsole=document.getElementById('temple-audio-console');if(legacyConsole)legacyConsole.hidden=true;
     const panel=document.getElementById('music-panel');if(panel){panel.hidden=true;panel.style.setProperty('display','none','important');}
     const button=document.querySelector('.nav-music');if(!button)return;
@@ -16,7 +23,7 @@ export function bindWorldAudio(worldId){
     // rescale or restructure the Heart/Universe gameplay surface itself.
     document.body.append(button);button.classList.add('kaios-world-audio-button');
     button.removeAttribute('onclick');button.textContent='♪';button.title='KAIOS 聲音設定';
-    if(!control)control=mountAudioControl({button,world:worldId});
+    if(!control){control=mountAudioControl({button,world:worldId});if(worldId==='12345')bindHeartSoundFeedback(audio);}
     globalThis.KAIOS_AUDIO_CONTROL=control;
     const start=async()=>{if(await audio.unlock())audio.setMusicEnabled(true);};
     app.enableAudio=start;app.musicInit=()=>{};app.openMusic=()=>control.openSettings();
@@ -54,4 +61,61 @@ export function bindWorldAudio(worldId){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
   if(document.readyState!=='complete')globalThis.addEventListener('load',install,{once:true});
   return audio;
+}
+
+function bindUniversePresentation(app,audio){
+  const panel=document.getElementById('music-panel'),button=document.querySelector('.nav-music'),toggle=document.querySelector('.nav-audio');
+  const volume=document.getElementById('music-vol');
+  const start=async()=>{if(await audio.unlock()){audio.setMuted(false);audio.setMusicEnabled(true);}};
+  const openSettings=force=>{
+    const show=typeof force==='boolean'?force:panel.style.display==='none';
+    panel.style.display=show?'block':'none';button.setAttribute('aria-expanded',String(show));
+    if(show&&audio.snapshot().needsGesture)void start();
+  };
+  button.setAttribute('aria-controls','music-panel');button.setAttribute('aria-expanded','false');
+  app.openMusic=openSettings;
+  app.enableAudio=async()=>{const state=audio.snapshot();if(state.needsGesture||state.settings.muted||!state.settings.musicEnabled)await start();else audio.setMuted(true);};
+  app.musicInit=()=>{};app.musicPlay=start;
+  app.musicPause=()=>audio.setMusicEnabled(false);app.musicStop=()=>audio.stopMusic();
+  const shuffle=document.getElementById('music-shuffle'),loop=document.getElementById('music-loop');
+  shuffle.disabled=UNIVERSE_PLAYLIST.length<2;loop.disabled=false;
+  const change=direction=>{const current=audio.snapshot().requestedTrack,index=UNIVERSE_PLAYLIST.indexOf(current);const next=shuffle.checked?UNIVERSE_PLAYLIST.filter(id=>id!==current)[Math.floor(Math.random()*(UNIVERSE_PLAYLIST.length-1))]:UNIVERSE_PLAYLIST[(index+direction+UNIVERSE_PLAYLIST.length)%UNIVERSE_PLAYLIST.length];audio.selectTrack(next);};
+  app.musicPrev=()=>change(-1);app.musicNext=()=>change(1);
+  loop.addEventListener('change',()=>audio.setLoop(loop.checked));
+  app.musicLoadBuiltIn=app.musicLoadBuiltin=async()=>[];
+  app.musicSetVolume=value=>audio.setVolume('music',Number(value)/100);
+  app.speak=text=>audio.speak(text);
+  volume.addEventListener('input',()=>app.musicSetVolume(volume.value));
+  document.getElementById('music-mute').addEventListener('click',()=>audio.setMuted(!audio.snapshot().settings.muted));
+  audio.subscribe(state=>{
+    toggle.classList.toggle('on',state.musicPlaying);toggle.setAttribute('aria-pressed',String(state.musicPlaying));
+    toggle.textContent=state.needsGesture?'開啟音效/說明':state.settings.muted?'開啟音效/說明':state.musicPlaying?'關閉音效/說明':'開啟音效/說明';
+    document.getElementById('music-name').textContent=state.theme;
+    document.getElementById('music-now').textContent=state.needsGesture?'請點播放以開啟聲音':state.settings.muted?'已靜音':state.loadingTrack?'載入所選原創曲目…':state.musicPlaying?'播放中':state.trackOffset?'已暫停':'已停止';
+    document.getElementById('music-status').textContent=state.lastError?'音樂載入未成功，請按播放重試':'KAIOS_FIRST_PARTY_OST_ONLY · 不載入商業 MP3';
+    document.getElementById('music-mute').textContent=state.settings.muted?'取消靜音':'靜音';
+    volume.value=String(Math.round(state.settings.music*100));document.getElementById('music-vol-txt').textContent=volume.value+'%';
+  });
+  const home=document.querySelector('[data-kaios-return="PORTAL"]');
+  home.addEventListener('click',async event=>{
+    if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||home.target)return;
+    event.preventDefault();await Promise.race([audio.transitionToWorld('PORTAL'),new Promise(resolve=>setTimeout(resolve,450))]);location.assign(home.href);
+  });
+  return{audio,root:panel,openSettings};
+}
+
+// AUDIO ONLY: observe the canonical, already-rendered receipt feedback. Never
+// wrap sendHeart, synthesize clicks, read input amounts, or change eligibility.
+function bindHeartSoundFeedback(audio){
+  const log=document.getElementById('kh-log');if(!log)return;
+  let previous=log.textContent;
+  const observer=new MutationObserver(()=>{
+    const text=log.textContent;if(text===previous)return;previous=text;
+    if(!/^成功：.+｜Block \d+/.test(text))return;
+    const events={makeWish:'WISH',vowTo:'REPAY',heartbeatClaim:'HEARTBEAT',lightLamp:'LIGHT_LAMP',festivalClaim:'FESTIVAL',newYearCountdownClaim:'NEW_YEAR'};
+    const key=Object.keys(events).find(method=>text.startsWith('成功：'+method));
+    if(key)audio.play(events[key]);
+  });
+  const observe=()=>{previous=log.textContent;observer.observe(log,{childList:true,characterData:true,subtree:true});};
+  observe();globalThis.addEventListener('pagehide',()=>observer.disconnect());globalThis.addEventListener('pageshow',observe);
 }

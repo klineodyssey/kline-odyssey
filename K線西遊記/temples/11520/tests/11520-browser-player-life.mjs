@@ -126,7 +126,7 @@ async function audioProbe(context){await context.addInitScript(()=>{
   AudioNode.prototype.connect=function(destination,...args){const result=connect.call(this,destination,...args);if(destination===this.context.destination){const analyser=this.context.createAnalyser();connect.call(this,analyser);__v29Probes.push(analyser)}return result};
   window.AudioContext=class extends Real{constructor(...args){super(...args);__v29Contexts.push(this)}};window.webkitAudioContext=window.AudioContext;
 })}
-async function audioState(page){return page.evaluate(async()=>{const {getKaiosAudio}=await import('../../../assets/kaios-audio.mjs');return getKaiosAudio().snapshot()})}
+async function audioState(page){return page.evaluate(async()=>{const {getKaiosAudio}=await import('../../../assets/kaios-audio.mjs');if(!window.__ostTrace){window.__ostTrace=[];getKaiosAudio().subscribe(s=>{const row={state:s.musicState,track:s.trackId,playing:s.musicPlaying};if(JSON.stringify(row)!==JSON.stringify(__ostTrace.at(-1))){__ostTrace.push(row);if(__ostTrace.length>100)__ostTrace.shift();}});}return getKaiosAudio().snapshot()})}
 async function signal(page){return page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<16;i++){for(const probe of __v29Probes){const values=new Float32Array(probe.fftSize);probe.getFloatTimeDomainData(values);let sum=0;for(const v of values){peak=Math.max(peak,Math.abs(v));sum+=v*v}rms=Math.max(rms,Math.sqrt(sum/values.length))}await new Promise(r=>setTimeout(r,90))}return {peak,rms}})}
 async function approachEncounter(page){
   await closePanels(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
@@ -162,6 +162,7 @@ async function runV29(width,height){
   try{
     await boot(page);await page.waitForFunction(()=>globalThis.__K11520_GAMEPLAY__);
     const fresh=await snap(page);assert.equal(fresh.player.level,1);assert.equal(fresh.player.engineLevel,1);
+    await audioState(page);
     await page.waitForFunction(()=>document.querySelector('#skill').dataset.gameplayUnlocked==='false');
     assert.equal(await page.locator('#tradeSword').getAttribute('data-gameplay-unlocked'),'false');
     const originalHp=await page.evaluate(()=>__K11520_KSPACE_COMBAT__.target.hp);await page.locator('#skill').click();
@@ -173,6 +174,9 @@ async function runV29(width,height){
     const inventory=await page.evaluate(()=>K11520Backpack.get().items);assert(inventory.length>0);assert(inventory.every(i=>['COMMON','UNCOMMON','RARE','EPIC','LEGENDARY'].includes(i.meta.rarity)));
     for(let i=0;i<3;i++)await page.locator('#attack').click();assert.equal((await snap(page)).player.xp,xp,'dead target reward only once');
     await shot(page,`${width}x${height}-v29-first-loot`);profile.checks.push('JOYSTICK_APPROACH_SLASH_KILL_XP_ENGINE_XP_LOOT_ONCE');
+    await page.waitForTimeout(300);profile.ostTrace=await page.evaluate(()=>__ostTrace);
+    assert(profile.ostTrace.some(s=>s.state==='COMBAT'&&s.track==='11520_THEME'&&s.playing),'real attack -> Combat OST');
+    assert(profile.ostTrace.some(s=>s.state==='VICTORY'&&s.track==='VICTORY_THEME'&&s.playing),'real defeat -> Victory OST');
     await boot(page);assert.equal((await snap(page)).player.xp,xp);assert.equal((await snap(page)).player.engineXp,engineXp);assert.deepEqual(await page.evaluate(()=>K11520Backpack.get().items),inventory);profile.checks.push('RELOAD_XP_ENGINE_INVENTORY_PERSISTENCE');
     await approachEncounter(page);await defeatUsingSlash(page,{tag:'second guardian'});await page.waitForFunction(()=>document.querySelector('#skill').dataset.gameplayUnlocked==='true');assert((await snap(page)).player.level>=2);profile.checks.push('REAL_LEVEL_UP_UNLOCKS_SECOND_SKILL');
     await openLife(page);await page.locator('#ga600Progress').scrollIntoViewIfNeeded();assert.match(await page.locator('#ga600Progress').innerText(),/GA600.*ENGINE Lv/);await shot(page,`${width}x${height}-v29-ga600-progression`);
@@ -208,7 +212,9 @@ async function runV29(width,height){
     await selectEncounterUI(bossPage,'MARKET_BOSS');
     await shot(bossPage,`${width}x${height}-v29-boss-spawn`);await approachEncounter(bossPage);
     await bossPage.waitForFunction(()=>__K11520_GAMEPLAY__.snapshot().music==='BOSS');
+    await audioState(bossPage);
     let a=await audioState(bossPage);if(a.needsGesture||!a.musicEnabled||a.settings.muted){if(!await bossPage.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await bossPage.locator('#k11520UtilityMaster').click();await bossPage.locator('#bgmButton').click();await closePanels(bossPage);await bossPage.waitForTimeout(400)}
+    await bossPage.waitForFunction(()=>__ostTrace.some(s=>s.state==='BOSS'&&s.track==='BOSS_THEME'&&s.playing));
     a=await audioState(bossPage);assert.equal(a.contextState,'running');assert.equal(a.activeMusicLayers,1);boss.signal=await signal(bossPage);assert(boss.signal.rms>.001&&boss.signal.peak<.95,'Boss BGM must have nonzero unclipped digital signal');
     const before=await snap(bossPage);boss.recoveries=[];const defeated=await defeatUsingSlash(bossPage,{tag:'MARKET_BOSS',recoveryEvidence:boss.recoveries,onAttack:async()=>{
       const t=await bossPage.evaluate(()=>__K11520_KSPACE_COMBAT__.target);if(!boss.phases.includes(t.phase)){boss.phases.push(t.phase);await shot(bossPage,`${width}x${height}-v29-boss-phase-${t.phase}`)}
@@ -223,6 +229,7 @@ async function runV29(width,height){
     });
     assert.equal(boss.victoryToast.visible,true,'actual post-defeat toast must be visible for layout QA');assert.equal(boss.victoryToast.overlap,false,'victory feedback must not overlap compact monster HUD');
     await shot(bossPage,`${width}x${height}-v29-boss-victory`);boss.checks.push('BOSS_SELECTED_THROUGH_CONTEXT_UI','REAL_BOSS_PHASE_RAGE_DEFEAT','ONCE_ONLY_REWARD','NONZERO_BOSS_PCM','VICTORY_TOAST_NO_MONSTER_HUD_OVERLAP');
+    boss.ostTrace=await bossPage.evaluate(()=>__ostTrace);assert(boss.ostTrace.some(s=>s.state==='BOSS_LOW_HP'&&s.track==='BOSS_THEME'&&s.playing));
     // An automatic next encounter can legitimately create a new cue while the
     // old one expires. Verify the specific node's lifetime and bounded count.
     await bossPage.evaluate(()=>{globalThis.__v29LastFx=document.querySelector('#journeyEventFx')});

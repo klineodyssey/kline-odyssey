@@ -1,1 +1,3 @@
 assets/kaios/*.svg -text
+assets/kaios-ost/*.wav -text
+assets/kaios-ost/*.py text eol=lf
