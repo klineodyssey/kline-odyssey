@@ -71,10 +71,11 @@ PlayerProfile (`/player/me`) contains playerId, lifeId (the canonical Player Lif
 not an employee or browser fingerprint), verified wallet projection, createdAt,
 updatedAt, schemaVersion, revision, gameProgress, level, XP, lastWorld, LOCAL XYZ,
 homePlotId and settings. Wallet address plus chain context has a unique binding.
-An existing Player Life ID cannot be claimed with another wallet. A new device's
-requested guest ID is resolved to its already-verified wallet binding.
+Account sessions select the independently enrolled Life. Wallet signatures cannot
+claim a public ID. Legacy migration requires a trusted ownership proof adapter;
+without one, preserve local saves and refuse enrollment rather than guessing ownership.
 
-State is schemaVersion 1 plus the canonical game-only player, completed monster
+State is schemaVersion 2 plus the canonical game-only player, completed monster
 training growth, game receipts and completed logistics missions. Player profile PII
 is omitted/reset before transport and server persistence. Events, XP/level/home
 constraints are validated by the existing Player Life validator; no new XP formula
@@ -122,3 +123,19 @@ README and `docs/KGEN_MASTER_INDEX.md` register the candidate and its file inven
 Boot CURRENT is a protected authority and this task did not explicitly authorize a
 Boot update; it remains unchanged. GM may register an approved service activation
 in Boot under a separate explicit authorization after independent review.
+
+
+Identity remediation adds Account/AccountSession/AccountLife ownership independently
+of game snapshots. EmailProviderAdapter and TestEmailProvider remain portable. Private
+SQL outbox dispatch is separate from request responses; credentials and PII never enter
+game backup/export. `0002_identity.sql` is additive, not a second backend. Legacy
+wallet sessions are invalid for Account access. Fresh signup creates a new Life;
+it does not silently relabel/import existing local guest data as verified ownership.
+
+Coordinate schema 2 uses `coordinates.universe` (KGEN_UNIVERSE_XYZ, xyz=null,
+UNRESOLVED, explicit address anchor and no transform) and `coordinates.local`
+(LOCAL_RENDER_SCENE, world ID, legacy scene units, lastXYZ/home XYZ). Existing
+`player.lastXYZ`/`homePlot.xyz` remain compatibility aliases explicitly local-only.
+No API promotes client-supplied universe triples. Human address examples are decimal
+anchor metadata, not 3-axis position or currency exchange rates. A future authoritative
+position adapter must supply provenance/frame/transform before coordinates can resolve.

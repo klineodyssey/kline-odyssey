@@ -5,14 +5,21 @@ From repository root:
 
 ```sh
 npm ci --prefix KAIOS/backend --ignore-scripts
-npm run --prefix KAIOS/backend dev
+KAIOS_TEST_EMAIL=1 npm run --prefix KAIOS/backend dev
 ```
 
 The single dev command starts API, durable SQLite database, immutable file objects,
 local room/queue adapters and Recovery Center at http://127.0.0.1:8787/recovery.
-Choose **體驗本機測試玩家** for a labelled stub signer, or use a human-controlled
-BSC97 wallet signature. Neither sends a transaction. Data persists in ignored
-`KAIOS/backend/.local/`; never commit it. Do not expose this demo port publicly.
+Choose **體驗本機測試玩家** to run verified-email signup against TestEmailProvider,
+then server-assigned Player Life enrollment. This is test mail, never real delivery.
+The explicit `KAIOS_TEST_EMAIL=1` enables a loopback-only test mailbox route; never
+expose this port or adapter publicly. Without that flag the mailbox route is absent.
+Wallet signing is a separate Account-authenticated binding, requiring fresh login
+and one offline recovery code, never a way to claim a public Player ID.
+Download recovery codes privately; do not include them in screenshots or reports.
+Data persists in ignored `KAIOS/backend/.local/`; never commit it. The local identity
+key is generated into a mode-0600 private file, not printed; preserve it with private
+DB backups or encrypted email lookup/outbox data cannot be read after restart.
 Same-browser local game data shares the origin only if gameplay is served at that
 same origin. GitHub Pages does not acquire a backend automatically; the game entry
 links to a candidate Recovery Center which reports unavailable until an authorized
@@ -43,7 +50,9 @@ these as artifacts and never deploys. All dependencies are pinned with a lockfil
 | KAIOS_DOMAIN | Configured HTTPS origin | Signed challenge domain; one canonical API origin |
 | KAIOS_ALLOWED_ORIGINS | JSON HTTPS origin array | Explicit browser Origin allowlist; no wildcard |
 | KAIOS_CHAIN_IDS | `[97]` | Allowed identity chain contexts; not trading authorization |
-| DB | D1 binding candidate | Private relational data; migration `deploy/0001.sql` |
+| DB | D1 binding candidate | Apply additive `deploy/0001.sql`, then `deploy/0002_identity.sql` |
+| KAIOS_IDENTITY_KEY | Private 256-bit hexadecimal key binding | HMAC lookup/AES-GCM derived keys; never public vars or chat |
+| KAIOS_TEST_EMAIL | Local dev `1` only | In-memory provider and loopback test mailbox; never production |
 | BACKUPS | R2 binding candidate | Private immutable snapshot objects |
 | WORLD_ROOMS | Durable Object binding | Internal authoritative room foundation |
 | JOBS | Queue binding | Diagnostic background jobs |
@@ -65,8 +74,26 @@ this example unchanged. Live provider execution remains NOT_VERIFIED.
 5. Only after separate authorization promote the candidate. No automatic deploy workflow.
 
 Rollback: stop new writes first, retain immutable objects and all state revisions;
-route back to the previous API bundle. Do not roll back a DB file while accepting
+route only to an identity-safe compatible API bundle. Never reactivate pre-remediation wallet-first signup or legacy wallet sessions. Do not roll back a DB file while accepting
 new revisions. This first candidate only adds tables; do not drop them during rollback.
 A failed schema migration or restore must leave previous CURRENT untouched. Inspect
 staging phase counts; preserve orphan objects until published references and receipt
 journals are reconciled. Never "repair" a financial balance using backend data.
+
+
+Identity retention: `api.pruneIdentity()` removes expired tokens after 24h, all encrypted
+outbox payloads after 24h, expired sessions, old throttle buckets and consumed recovery codes
+after 30 days. It is private maintenance tooling; no public trigger. An authorized
+production scheduler and PII policy are still prerequisites, not deployed here.
+Undelivered mail remains encrypted until the same 24h purge; operators must inspect
+non-PII delivery status and request a new token rather than retain expired secrets. Full account deletion remains unavailable
+pending an approved retention/ownership policy; email change replaces live lookup
+and ciphertext without changing Account/Life IDs. No support-agent bypass exists.
+
+`LifeEnrollmentAuthority` defaults to reject. A legacy local save that predates
+verifiable migration credentials cannot be safely claimed by its public ID, wallet
+or email. Preserve/export it locally; a trusted migration issuer must establish
+prior ownership and issue account-bound proof before enabling this adapter. Test
+fixtures explicitly provision trusted grants; this does not pretend a production
+issuer exists. Existing pre-remediation cloud ownership needs the same adjudication;
+legacy wallet sessions are invalid, and no auto-binding migration runs.

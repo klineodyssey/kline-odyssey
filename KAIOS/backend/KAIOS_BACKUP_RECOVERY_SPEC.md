@@ -82,3 +82,20 @@ partial DB transaction rollback, DB outage, timeout outbox retry, export/import/
 migration failure, strict nonfinancial projections, local recovery and room replay.
 `npm run test:browser`: Chromium touch viewport 390×844 full recovery workflow,
 plus 360×740, 412×772, 844×390; screenshots under ignored `evidence/` and CI artifacts.
+
+
+## Identity / coordinate migration safety
+
+Game payload schema 1 migrates to 2 by preserving every local player coordinate and
+adding explicit local-frame metadata plus unresolved universe position. It does not
+apply a made-up meter/universe scale. A schema1 CURRENT is backed up with reason
+pre-migration before a schema2 sync commits. Existing hashed blobs are never rewritten.
+Restoring schema1 previews a migrated candidate, protects current and source versions,
+and increments revision; cross-device conflict stays exact. Rollback means restoring
+game content through the identity-safe service, not reviving wallet-first authentication.
+
+Identity tables, encrypted email/outbox, recovery hashes and sessions are deliberately
+excluded from player game snapshots. Restoring a game snapshot cannot replace Account,
+wallet ownership or recovery evidence. Legacy ownership unverified by the old service
+must be adjudicated by a trusted migration authority, never grandfathered from its
+vulnerable first-claim binding.

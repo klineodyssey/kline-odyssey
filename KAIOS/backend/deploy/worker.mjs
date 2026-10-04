@@ -14,6 +14,7 @@ export default {
     if (!new URL(request.url).pathname.startsWith("/api/v1/"))
       return env.ASSETS.fetch(request);
     const config = {
+      identityKey: env.KAIOS_IDENTITY_KEY,
       domain: env.KAIOS_DOMAIN,
       origins: JSON.parse(env.KAIOS_ALLOWED_ORIGINS),
       chainIds: JSON.parse(env.KAIOS_CHAIN_IDS ?? "[97]"),

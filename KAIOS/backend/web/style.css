@@ -158,3 +158,22 @@ input:focus-visible {
     text-align: left;
   }
 }
+
+label:not(.confirm) {
+  display: block;
+  margin: 12px 0;
+}
+input[type="email"],
+input[type="password"],
+select {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  margin: 6px 0 12px;
+  border: 1px solid #52776b;
+  border-radius: 8px;
+  background: #08151d;
+  color: #e5f3ee;
+  font: inherit;
+}

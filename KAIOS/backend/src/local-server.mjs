@@ -1,3 +1,4 @@
+import { TestEmailProvider } from "./identity.mjs";
 import { createServer } from "node:http";
 import { readFile, mkdir } from "node:fs/promises";
 import { resolve, dirname, extname } from "node:path";
@@ -20,17 +21,29 @@ const dataDir = resolve(
 await mkdir(dataDir, { recursive: true });
 const database = new SQLiteDatabaseAdapter(resolve(dataDir, "kaios.sqlite"));
 database.migrate(await readFile(resolve(backend, "deploy/0001.sql"), "utf8"));
+database.migrate(
+  await readFile(resolve(backend, "deploy/0002_identity.sql"), "utf8"),
+);
+const testMail = process.env.KAIOS_TEST_EMAIL === "1";
+const emailProvider = new TestEmailProvider();
+const identityKeyPath = resolve(dataDir, "identity-key");
+let identityKey;
+try {
+  identityKey = await readFile(identityKeyPath, "utf8");
+} catch {
+  identityKey = Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
+  const { writeFile } = await import("node:fs/promises");
+  await writeFile(identityKeyPath, identityKey, { mode: 0o600, flag: "wx" });
+}
 const api = createBackend({
+  emailProvider,
   database,
   objects: new FileObjectStorageAdapter(resolve(dataDir, "objects")),
   realtime: new AuthoritativeRooms(),
   queue: new LocalQueueAdapter(),
-  signatureVerifier: async (message, signature, wallet, challengeId) => {
-    if (
-      signature === `LOCAL_DEMO:${challengeId}` &&
-      wallet === "0x0000000000000000000000000000000000000097"
-    )
-      return true;
+  signatureVerifier: async (message, signature, wallet) => {
     try {
       return verifyMessage(message, signature).toLowerCase() === wallet;
     } catch {
@@ -38,11 +51,12 @@ const api = createBackend({
     }
   },
   config: {
+    identityKey,
     domain: origin,
     origins: [origin],
     chainIds: [97],
     maxRequestBytes: 512000,
-    localDemo: true,
+    localDemo: testMail,
     secureCookies: false,
   },
   logger: (r) => console.log(JSON.stringify(r)),
@@ -50,6 +64,18 @@ const api = createBackend({
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, origin);
+    if (testMail && url.pathname === "/__test/mail" && req.method === "GET") {
+      res.writeHead(200, {
+        "content-type": "application/json",
+        "cache-control": "no-store",
+      });
+      res.end(
+        JSON.stringify(
+          emailProvider.messages.filter((m) => m.type === "VERIFY_EMAIL"),
+        ),
+      );
+      return;
+    }
     if (url.pathname.startsWith("/api/v1/")) {
       const chunks = [];
       let size = 0;
@@ -70,6 +96,7 @@ const server = createServer(async (req, res) => {
           : Buffer.concat(chunks),
       });
       const response = await api.fetch(request);
+      if (testMail) await api.flushEmail();
       res.writeHead(response.status, Object.fromEntries(response.headers));
       res.end(Buffer.from(await response.arrayBuffer()));
       return;

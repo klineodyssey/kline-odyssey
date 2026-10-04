@@ -14,6 +14,7 @@ const server = spawn(process.execPath, ["src/local-server.mjs"], {
   env: {
     ...process.env,
     KAIOS_LOCAL_PORT: String(port),
+    KAIOS_TEST_EMAIL: "1",
     KAIOS_LOCAL_DATA_DIR: dataDir,
   },
   stdio: ["ignore", "pipe", "pipe"],
@@ -48,10 +49,27 @@ try {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(origin + "/recovery");
   await page.locator("#demo").waitFor({ state: "visible" });
-  await page.locator("#demo").click();
+  await page.screenshot({
+    path: new URL("390x844-account-enrollment.png", dir).pathname,
+    fullPage: true,
+  });
+  const testEmail = "browser-" + crypto.randomUUID() + "@example.test";
+  await page.locator("#email").fill(testEmail);
+  await page.locator("#requestEmail").click();
+  await page.waitForFunction(() =>
+    document.querySelector("#message").textContent.includes("若符合條件"),
+  );
+  const testMessages = await (
+    await context.request.get(origin + "/__test/mail")
+  ).json();
+  await page
+    .locator("#emailToken")
+    .fill(testMessages.findLast((m) => m.to === testEmail).token);
+  await page.locator("#verifyEmail").click();
   await page.locator("#dashboard").waitFor({ state: "visible" });
   await page.locator("#snapshots li").first().waitFor();
   assert.equal(await page.locator("#revision").innerText(), "1");
+  assert.equal(await page.locator("#health").innerText(), "健康，備份可用");
   await page.screenshot({
     path: new URL("390x844-current.png", dir).pathname,
     fullPage: true,
@@ -116,6 +134,7 @@ try {
   await page.evaluate(async () => {
     const current = await (await fetch("/api/v1/player/state")).json();
     current.state.player.lastXYZ = { x: 88, y: 0, z: 0 };
+    current.state.coordinates.local.lastXYZ = { x: 88, y: 0, z: 0 };
     const r = await fetch("/api/v1/player/state/sync", {
       method: "POST",
       headers: {
@@ -233,6 +252,15 @@ try {
   const walletPage = await walletContext.newPage();
   walletPage.on("pageerror", (e) => errors.push(e.message));
   await walletPage.goto(origin + "/recovery");
+  const signupResponse = walletPage.waitForResponse(
+    (r) =>
+      r.url().endsWith("/account/email/verify") &&
+      r.request().method() === "POST",
+  );
+  await walletPage.locator("#demo").click();
+  const accountData = await (await signupResponse).json();
+  await walletPage.locator("#dashboard").waitFor({ state: "visible" });
+  await walletPage.locator("#walletCode").fill(accountData.recoveryCodes[0]);
   await walletPage.locator("#wallet").click();
   await walletPage.waitForFunction(() =>
     document.querySelector("#message").textContent.includes("已驗證錢包身分"),

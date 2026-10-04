@@ -7,7 +7,7 @@ import {
   canonical,
   hash,
 } from "./primitives.mjs";
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 export function gamePlayer(input) {
   validatePlayerLifePlayer(input);
   const p = clone(input);
@@ -93,10 +93,16 @@ export function validateState(v, owner) {
     "monsterHistory",
     "gameReceipts",
     "missions",
+    "coordinates",
   ]);
-  requireThat(v.schemaVersion === 1, "MIGRATION_REQUIRED", 422);
+  requireThat(v.schemaVersion === 2, "MIGRATION_REQUIRED", 422);
   requireThat(v.player?.playerId === owner, "WRONG_PLAYER", 403);
   const player = gamePlayer(v.player);
+  requireThat(
+    canonical(v.coordinates) === canonical(coordinateProjection(player)),
+    "COORDINATE_AUTHORITY_REQUIRED",
+    403,
+  );
   const monsterHistory = v.monsterHistory ?? [];
   requireThat(
     Array.isArray(monsterHistory) && monsterHistory.length <= 32,
@@ -142,7 +148,8 @@ export function validateState(v, owner) {
     "PROJECTION_CAPACITY",
   );
   const result = {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    coordinates: coordinateProjection(player),
     player,
     monsterHistory: clone(monsterHistory),
     gameReceipts: gameReceipts.map((r) => receipt(r, owner)),
@@ -159,7 +166,39 @@ export function validateState(v, owner) {
     );
   return result;
 }
+export function coordinateProjection(player) {
+  return {
+    universe: {
+      frame: "KGEN_UNIVERSE_XYZ",
+      status: "UNRESOLVED",
+      xyz: null,
+      anchorAddress:
+        { 11520: "0.00011520", 18888: "0.00018888" }[player.lastWorld] ?? null,
+      anchorSource: "HUMAN_PR489_XYZ_REMEDIATION",
+      transform: null,
+    },
+    local: {
+      frame: "LOCAL_RENDER_SCENE",
+      worldId: player.lastWorld,
+      units: "LEGACY_SCENE_UNITS",
+      lastXYZ: clone(player.lastXYZ),
+      homePlot: {
+        worldId: player.homePlot.worldId,
+        xyz: clone(player.homePlot.xyz),
+      },
+    },
+    legacyAliases: "player.lastXYZ_and_homePlot.xyz_ARE_LOCAL_ONLY",
+  };
+}
 export const migrations = new Map([
+  [
+    1,
+    (v) => ({
+      ...v,
+      schemaVersion: 2,
+      coordinates: coordinateProjection(v.player),
+    }),
+  ],
   [
     0,
     (v) => {

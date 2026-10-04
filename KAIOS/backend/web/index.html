@@ -14,15 +14,44 @@
         <p>保留旅程，安全備份與恢復。</p>
       </header>
       <section id="login">
-        <h2>連結你的玩家生命</h2>
-        <p>簽章只用於登入，不會送出交易。私鑰永遠留在你的錢包。</p>
-        <button id="wallet" disabled>使用錢包登入</button
-        ><button id="demo" hidden>體驗本機測試玩家</button>
+        <h2>登入 KAIOS Account</h2>
+        <p>
+          帳號管理登入與復原；Player Life 保存旅程。錢包簽章不能認領他人的生命。
+        </p>
+        <label
+          >Email<input id="email" type="email" autocomplete="email"
+        /></label>
+        <select id="emailPurpose">
+          <option value="signup">建立帳號</option>
+          <option value="login">登入帳號</option>
+          <option value="recovery">復原帳號</option>
+        </select>
+        <button id="requestEmail">取得驗證信</button>
+        <label
+          >驗證碼<input id="emailToken" type="password" autocomplete="off"
+        /></label>
+        <label
+          >離線復原碼（復原時必填）<input
+            id="recoveryCode"
+            type="password"
+            autocomplete="off"
+        /></label>
+        <button id="verifyEmail">確認登入</button>
+        <p>登入後可另行綁定錢包。簽章不會送出交易，私鑰永遠留在你的錢包。</p>
+        <button id="demo" hidden>體驗本機測試玩家</button>
         <p id="mode"></p>
       </section>
       <p id="message" role="status" aria-live="polite">正在確認服務…</p>
       <section id="dashboard" hidden>
         <h2>目前 Player Life</h2>
+        <button id="saveCodes">下載離線復原碼（請私下保存）</button>
+        <label
+          >綁定錢包所需的一次性復原碼<input
+            id="walletCode"
+            type="password"
+            autocomplete="off"
+        /></label>
+        <button id="wallet">綁定錢包（不轉帳）</button>
         <p id="identity" class="identifier"></p>
         <dl>
           <div>

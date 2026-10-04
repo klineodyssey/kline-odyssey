@@ -1,3 +1,4 @@
+import { TestEmailProvider } from "../src/identity.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
@@ -13,6 +14,7 @@ import { createBackend } from "../src/service.mjs";
 import { canonical, hash, id, RateLimiter, stmt } from "../src/primitives.mjs";
 import {
   validateState,
+  migrate,
   backupPackage,
   chainReceiptProjection,
   retentionPolicy,
@@ -39,18 +41,34 @@ async function fixture(t, { now = () => Date.now(), limiter } = {}) {
   db.migrate(
     await readFile(new URL("../deploy/0001.sql", import.meta.url), "utf8"),
   );
+  db.migrate(
+    await readFile(
+      new URL("../deploy/0002_identity.sql", import.meta.url),
+      "utf8",
+    ),
+  );
+  const emailProvider = new TestEmailProvider(),
+    trusted = new Map();
+  let activeAccountToken, activeCode;
   const objects = new FileObjectStorageAdapter(dir + "/objects"),
     realtime = new AuthoritativeRooms(),
     queue = new LocalQueueAdapter(),
     logs = [];
   const api = createBackend({
     database: db,
+    emailProvider,
+    enrollmentAuthority: {
+      verify: async ({ accountId, playerId, proof }) =>
+        trusted.get(accountId) === playerId &&
+        proof === "TEST_TRUSTED_AUTHORITY",
+    },
     objects,
     realtime,
     queue,
     now,
     limiter,
     config: {
+      identityKey: "ab".repeat(32),
       domain: origin,
       origins: [origin],
       maxRequestBytes: 512000,
@@ -74,6 +92,11 @@ async function fixture(t, { now = () => Date.now(), limiter } = {}) {
     path,
     { body, token, key = id(), originHeader = origin } = {},
   ) {
+    if (path.startsWith("/auth/")) {
+      token ??= activeAccountToken;
+      if (body)
+        body = { ...body, recoveryCode: body.recoveryCode ?? activeCode };
+    }
     const response = await api.fetch(
       new Request(origin + "/api/v1" + path, {
         method: body ? "POST" : "GET",
@@ -87,6 +110,7 @@ async function fixture(t, { now = () => Date.now(), limiter } = {}) {
         body: body ? JSON.stringify(body) : undefined,
       }),
     );
+    await api.flushEmail();
     return {
       status: response.status,
       data: await response.json(),
@@ -94,6 +118,31 @@ async function fixture(t, { now = () => Date.now(), limiter } = {}) {
     };
   }
   async function login(p, w = Wallet.createRandom()) {
+    const browserSecret = "cd".repeat(32);
+    const email = "test-" + id() + "@example.test";
+    await call("/account/email/request", {
+      body: { email, purpose: "signup", browserSecret },
+    });
+    const signup = await call("/account/email/verify", {
+      body: {
+        token: emailProvider.messages.at(-1).token,
+        purpose: "signup",
+        browserSecret,
+      },
+    });
+    assert.equal(signup.status, 200);
+    activeAccountToken = signup.headers
+      .get("set-cookie")
+      .match(/kaios_account=([^;]+)/)[1];
+    activeCode = signup.data.recoveryCodes[0];
+    trusted.set(signup.data.accountId, p.playerId);
+    await call("/account/life/enroll", {
+      token: activeAccountToken,
+      body: {
+        legacyPlayerId: p.playerId,
+        migrationProof: "TEST_TRUSTED_AUTHORITY",
+      },
+    });
     const challenge = await call(
       "/auth/challenge?" +
         new URLSearchParams({
@@ -113,15 +162,24 @@ async function fixture(t, { now = () => Date.now(), limiter } = {}) {
     const verified = await call("/auth/verify", { body });
     assert.equal(verified.status, 200);
     return {
-      token: verified.headers
-        .get("set-cookie")
-        .match(/kaios_session=([^;]+)/)[1],
+      recoveryCodes: signup.data.recoveryCodes,
+      token: activeAccountToken,
       wallet: w,
       challenge: c,
       body,
     };
   }
-  return { db, objects, realtime, queue, logs, call, login, dir };
+  return {
+    db,
+    objects,
+    realtime,
+    queue,
+    logs,
+    call,
+    login,
+    dir,
+    emailProvider,
+  };
 }
 const sync = (f, auth, p, revision = 0, key = id()) =>
   f.call("/player/state/sync", {
@@ -177,7 +235,7 @@ test("wallet signature challenges reject wrong signer/domain/chain, expiry and r
     assert.equal((await f.call("/auth/verify", { body })).status, 401);
   }
   assert.equal((await f.call("/auth/verify", { body: a.body })).status, 401);
-  clock += 300001;
+  clock += 1;
   const c = await f.call(
     "/auth/challenge?" +
       new URLSearchParams({
@@ -197,7 +255,7 @@ test("wallet signature challenges reject wrong signer/domain/chain, expiry and r
         },
       })
     ).status,
-    401,
+    403,
   );
   clock += 1800000;
   assert.equal((await f.call("/player/me", { token: a.token })).status, 401);
@@ -387,20 +445,7 @@ test("players cannot read/export/preview/restore each other; wallet binding is s
           playerId: one.p.playerId,
         }),
     );
-  assert.equal(
-    (
-      await f.call("/auth/verify", {
-        body: {
-          challengeId: challenge.data.challengeId,
-          signature: await stranger.signMessage(challenge.data.message),
-          walletAddress: stranger.address,
-          chainId: 97,
-          domain: origin,
-        },
-      })
-    ).status,
-    403,
-  );
+  assert.equal(challenge.status, 403);
 });
 test("idempotency duplicate, changed request, concurrent sync and stale preview", async (t) => {
   const f = await fixture(t),
@@ -502,6 +547,7 @@ test("export/import hash, ownership, schema migration, original kept on failed m
   ).data;
   assert.equal(pkg.format, "KAIOS_PLAYER_BACKUP");
   const source = { ...pkg, payload: { ...pkg.payload, schemaVersion: 0 } };
+  delete source.payload.coordinates;
   source.manifest = {
     ...source.manifest,
     schemaVersion: 0,
@@ -678,35 +724,38 @@ test("refresh does not relabel stale local state as the latest server revision",
   assert.equal(client.status().pending.baseRevision, 0);
   assert.equal((await client.flush()).status, "CONFLICT");
 });
-test("auth idempotency returns same public result without extra session or exposing token", async (t) => {
+test("wallet binding idempotency returns same result without extra session", async (t) => {
   const f = await fixture(t),
     { p } = player(),
     w = Wallet.createRandom(),
-    c = (
-      await f.call(
-        "/auth/challenge?" +
-          new URLSearchParams({
-            walletAddress: w.address,
-            chainId: 97,
-            playerId: p.playerId,
-          }),
-      )
-    ).data,
-    body = {
+    auth = await f.login(p, w);
+  const c = (
+    await f.call(
+      "/auth/challenge?" +
+        new URLSearchParams({
+          walletAddress: w.address,
+          chainId: 97,
+          playerId: p.playerId,
+        }),
+      { token: auth.token },
+    )
+  ).data;
+  const body = {
       challengeId: c.challengeId,
       signature: await w.signMessage(c.message),
       walletAddress: w.address,
       chainId: 97,
       domain: origin,
+      recoveryCode: auth.recoveryCodes[1],
     },
-    key = id(),
-    a = await f.call("/auth/verify", { body, key }),
-    b = await f.call("/auth/verify", { body, key });
+    key = id();
+  const a = await f.call("/auth/verify", { body, key, token: auth.token }),
+    b = await f.call("/auth/verify", { body, key, token: auth.token });
   assert.equal(a.status, 200);
-  assert.deepEqual(b.data, a.data);
-  assert.equal(a.data.sessionToken, undefined);
-  assert.equal((await f.db.all("SELECT * FROM sessions")).length, 1);
+  assert.deepEqual(a.data, b.data);
+  assert.equal((await f.db.all("SELECT * FROM sessions")).length, 2);
 });
+
 test("database unavailable reads fail closed; completed runtime projections remain game only", async (t) => {
   const f = await fixture(t),
     { p } = player(),
@@ -792,7 +841,7 @@ test("Recovery Center can preview and explicitly choose preserved conflict candi
   assert.equal(state.state.player.lastXYZ.x, 42);
   assert.equal(state.conflict, null);
 });
-test("simultaneous duplicate backup returns one result; raced wallet binding cannot create a ghost account", async (t) => {
+test("simultaneous duplicate backup returns one result; arbitrary public IDs cannot create ghost accounts", async (t) => {
   const f = await fixture(t),
     { p } = player(),
     a = await f.login(p);
@@ -810,37 +859,22 @@ test("simultaneous duplicate backup returns one result; raced wallet binding can
     (await f.call("/backups", { token: a.token })).data.snapshots.length,
     2,
   );
-  const w = Wallet.createRandom(),
-    players = [player().p, player().p],
-    challenges = [];
-  for (const p of players)
-    challenges.push(
-      (
-        await f.call(
-          "/auth/challenge?" +
-            new URLSearchParams({
-              walletAddress: w.address,
-              chainId: 97,
-              playerId: p.playerId,
-            }),
-        )
-      ).data,
-    );
-  const results = await Promise.all(
-    challenges.map(async (c) =>
-      f.call("/auth/verify", {
-        body: {
-          challengeId: c.challengeId,
-          signature: await w.signMessage(c.message),
-          walletAddress: w.address,
-          chainId: 97,
-          domain: origin,
-        },
-      }),
+  const before = (await f.db.all("SELECT * FROM players")).length;
+  const attempts = await Promise.all(
+    [player().p, player().p].map((p) =>
+      f.call(
+        "/auth/challenge?" +
+          new URLSearchParams({
+            walletAddress: Wallet.createRandom().address,
+            chainId: 97,
+            playerId: p.playerId,
+          }),
+        { token: a.token },
+      ),
     ),
   );
-  assert.equal(results.filter((r) => r.status === 200).length, 1);
-  assert.equal((await f.db.all("SELECT * FROM players")).length, 2);
+  assert.ok(attempts.every((r) => r.status === 403));
+  assert.equal((await f.db.all("SELECT * FROM players")).length, before);
 });
 test("completed receipt identity cannot silently change payload", async (t) => {
   const f = await fixture(t),

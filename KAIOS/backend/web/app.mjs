@@ -155,19 +155,80 @@ async function showPreview(source) {
     `目前：等級 ${a.level} / XP ${a.xp} / 世界 ${a.lastWorld}；恢復後：等級 ${b.level} / XP ${b.xp} / 世界 ${b.lastWorld}。位置 ${`X ${a.lastXYZ.x}、Y ${a.lastXYZ.y}、Z ${a.lastXYZ.z}`} → ${`X ${b.lastXYZ.x}、Y ${b.lastXYZ.y}、Z ${b.lastXYZ.z}`}`;
   $("preview").scrollIntoView({ behavior: "smooth", block: "start" });
 }
+let enrollmentSecret,
+  savedRecoveryCodes = [];
+const newSecret = () =>
+  Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
+async function finishAccount(data) {
+  savedRecoveryCodes =
+    data.recoveryCodes ?? (data.recoveryCode ? [data.recoveryCode] : []);
+  let me = await api("/account/me");
+  if (!me.playerId) {
+    const enrollment = await api("/account/life/enroll", {});
+    local.importPlayer(
+      JSON.stringify({
+        schema: PLAYER_LIFE_SCHEMA,
+        scope: PLAYER_LIFE_SCOPE,
+        player: enrollment.initialPlayer,
+      }),
+      { confirmLocalCandidate: true },
+    );
+    const sync = createPlayerCloudSync({
+      localStore: local,
+      storage: localStorage,
+    });
+    sync.enqueue();
+    await sync.flush();
+  }
+  await refresh();
+  message(
+    "已登入 Account。復原碼只顯示這一次，請下載並離線保存；Email 不是高強度 MFA。",
+  );
+}
+async function requestEmail() {
+  enrollmentSecret = newSecret();
+  await api("/account/email/request", {
+    email: $("email").value,
+    purpose: $("emailPurpose").value,
+    browserSecret: enrollmentSecret,
+  });
+  message(
+    "若符合條件，驗證信將送出。請在此瀏覽器確認；正式 Email provider 尚未配置。",
+  );
+}
+async function verifyEmail() {
+  const data = await api("/account/email/verify", {
+    token: $("emailToken").value,
+    purpose: $("emailPurpose").value,
+    browserSecret: enrollmentSecret,
+    recoveryCode: $("recoveryCode").value || undefined,
+  });
+  $("emailToken").value = "";
+  $("recoveryCode").value = "";
+  await finishAccount(data);
+}
 async function login(demo) {
-  let p = local.ensurePlayer(),
-    wallet,
-    chainId;
   if (demo) {
     if (!allowDemo) throw new Error("本機測試未啟用");
-    wallet = "0x0000000000000000000000000000000000000097";
-    chainId = 97;
-  } else {
-    if (!window.ethereum) throw new Error("請使用支援錢包的瀏覽器。");
-    [wallet] = await ethereum.request({ method: "eth_requestAccounts" });
-    chainId = Number(await ethereum.request({ method: "eth_chainId" }));
+    $("email").value = "demo-" + crypto.randomUUID() + "@example.test";
+    $("emailPurpose").value = "signup";
+    await requestEmail();
+    const messages = await (await fetch("/__test/mail")).json();
+    $("emailToken").value = messages.findLast(
+      (m) => m.to === $("email").value,
+    ).token;
+    await verifyEmail();
+    return;
   }
+  let p = local.activePlayer(),
+    wallet,
+    chainId;
+  if (!p) throw new Error("請先登入 Account");
+  if (!window.ethereum) throw new Error("請使用支援錢包的瀏覽器。");
+  [wallet] = await ethereum.request({ method: "eth_requestAccounts" });
+  chainId = Number(await ethereum.request({ method: "eth_chainId" }));
   const challenge = await api(
     "/auth/challenge?" +
       new URLSearchParams({
@@ -176,18 +237,16 @@ async function login(demo) {
         playerId: p.playerId,
       }),
   );
-  const signature = demo
-    ? "LOCAL_DEMO:" + challenge.challengeId
-    : await ethereum.request({
-        method: "personal_sign",
-        params: [
-          "0x" +
-            Array.from(new TextEncoder().encode(challenge.message), (byte) =>
-              byte.toString(16).padStart(2, "0"),
-            ).join(""),
-          wallet,
-        ],
-      });
+  const signature = await ethereum.request({
+    method: "personal_sign",
+    params: [
+      "0x" +
+        Array.from(new TextEncoder().encode(challenge.message), (byte) =>
+          byte.toString(16).padStart(2, "0"),
+        ).join(""),
+      wallet,
+    ],
+  });
   if (!demo) {
     const accounts = await ethereum.request({ method: "eth_accounts" }),
       activeChain = Number(await ethereum.request({ method: "eth_chainId" }));
@@ -203,25 +262,28 @@ async function login(demo) {
     walletAddress: wallet,
     chainId,
     domain: challenge.domain,
+    recoveryCode: $("walletCode").value,
   });
-  const state = await api("/player/state");
-  if (!state.state && challenge.playerId === p.playerId) {
-    const initialCloud = createPlayerCloudSync({
-      localStore: local,
-      storage: localStorage,
-    });
-    if (!initialCloud.status().pending) initialCloud.enqueue();
-    const initial = await initialCloud.flush();
-    if (initial.status !== "SYNCED")
-      throw new Error("初次同步未完成；本機候選已保留。");
-  }
+  $("walletCode").value = "";
   await refresh();
   message(
-    demo
-      ? "本機示範模式：測試資料，不是已驗證的真實錢包。"
-      : "已驗證錢包身分，沒有送出交易。",
+    "已驗證錢包身分並建立綁定；Account 與 Player Life 不變，沒有送出交易。",
   );
 }
+$("requestEmail").onclick = () => run(requestEmail);
+$("verifyEmail").onclick = () => run(verifyEmail);
+$("saveCodes").onclick = () =>
+  run(async () => {
+    if (!savedRecoveryCodes.length) throw new Error("本次沒有新的復原碼。");
+    const url = URL.createObjectURL(
+      new Blob([savedRecoveryCodes.join("\n")], { type: "text/plain" }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "KAIOS-private-recovery-codes.txt";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
 $("conflictPreview").onclick = () =>
   run(() => showPreview({ conflictId: current.conflict.conflictId }));
 $("demo").onclick = () => run(() => login(true));
@@ -321,7 +383,7 @@ $("apply").onclick = () =>
 run(async () => {
   const h = await api("/health");
   allowDemo = h.localDemo === true;
-  $("wallet").disabled = false;
+
   $("demo").hidden = !allowDemo;
   $("mode").textContent = allowDemo
     ? "僅限本機測試，無真實錢包權限。"

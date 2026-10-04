@@ -1,32 +1,54 @@
 # KAIOS Backend security boundary
 
-## Wallet and sessions
+## Account, Life and wallet separation (P1 remediation)
 
-GET challenge binds a cryptographically random nonce to the configured domain,
-wallet, allowed chain (reference 97), canonical Player Life ID, issuedAt and expiresAt.
-The message is UTF-8 hex encoded for human-controlled EIP-1193 `personal_sign`; ethers recovers
-the signer on the server. Atomic challenge consumption and unique session challenge
-prevent replay. Signature verification does not grant token allowance, send a
-transaction, prove a balance, or change a local wallet proof to a server proof.
+`src/identity.mjs` owns random Account IDs, private verified email lookup and
+short-lived Account sessions. `account_lives` uniquely attaches one Life to its
+Account. Signup never accepts a client-chosen Life ID; enrollment generates a fresh
+Life through the existing canonical player factory. `LifeEnrollmentAuthority`
+rejects legacy claims unless a trusted migration adapter independently verifies
+prior ownership; email, a local save, public ID and a new wallet signature are not
+that evidence. The old wallet-first sessions do not authenticate any API anymore.
 
-Sessions last 30 minutes, use random tokens stored only as hashes, and are delivered
-in HttpOnly SameSite=Strict cookies (Secure in the Workers candidate). Server-side
-idempotency responses contain no bearer token. The optional Authorization header
-supports non-browser clients; the UI does not put session tokens in localStorage.
-Existing bindings determine identity across devices; another wallet cannot seize an
-existing Player ID. Unique wallet/chain binding plus SQL session-binding guard protects
-concurrent first-login attempts. V1 has no unverified account recovery or admin binding
-rewrite. Losing access to the bound wallet requires a later separately reviewed recovery
-mechanism; a display name, fingerprint or localStorage ID alone is insufficient.
+Game-only email verification is explicitly not high-strength MFA or NIST AAL.
+Email request uses keyed lookup and encrypted address/outbox, browser-bound 256-bit
+hashed single-use tokens, 10-minute expiry, persistent per-address resend limits,
+consistent response, and transactional consumption. Delivery is a separate private
+outbox operation, not an account-existence-dependent synchronous response. Resends
+invalidate prior purpose/address tokens. The local reference uses TestEmailProvider.
+Production delivery and production enumeration/timing measurements are not configured.
 
-A fixed stub wallet/challenge signer is enabled only in the loopback local Node dev
-server, visibly labelled 本機測試. It is absent from the Workers verifier. Test signers
-are generated in memory; no existing secret/private key is read, exported or logged.
-Never expose the local demo server to the internet or forward it as a production API.
+Account sessions last 30 minutes, use random hashed tokens and HttpOnly Strict Secure
+cookies; session revision is checked on every authentication. Recovery requires the
+established mailbox plus a previously saved single-use recovery code. Email change
+requires fresh existing session, a saved code and new-mailbox confirmation; old/new
+addresses receive notifications. Both revoke prior sessions and rotate one consumed
+code. No support-agent, wallet-only or public-ID recovery bypass exists. Losing all
+established recovery evidence remains blocked. Save the eight initial recovery codes
+privately; auth idempotency replay never returns secret material or a new cookie.
+
+Wallet binding separately requires fresh Account login (5 minutes), a saved recovery
+code, and ethers-verified EIP-191 challenge signature with domain/chain/player/nonce/
+expiry. SQL guards prevent concurrent wallet ownership collision and consume the
+code only on successful transaction. Binding cannot switch Accounts/Lives, replace a
+primary wallet, authorize transfers or unlock assets. Legacy `sessions` rows remain
+as wallet-proof compatibility records only and never authenticate game APIs.
+
+Passkey/WebAuthn is preferred for future asset assurance but deliberately not adopted
+as an implemented V1 authenticator. Unsupported credential/asset actions fail closed;
+there is no fake WebAuthn verifier, TOTP/SMS fallback or KYC collection. KYC adapter
+returns NOT_CONFIGURED. See KAIOS_IDENTITY_AUTH_RESEARCH.md for the method matrix,
+future UV/RP/origin/credential lifecycle requirements and attack/residual-risk matrix.
+
+The loopback test mailbox exists only with KAIOS_TEST_EMAIL=1. Test emails, codes and
+signers are generated for local tests; no real mail is sent. Never expose the local
+server or test mailbox publicly. Production requires secure identity-key binding,
+approved mail/retention/abuse policy and independent review. No wallet private key
+or seed is requested, read or logged.
 
 ## Abuse and privacy
 
-Origin allowlist, mandatory session except health/auth, bounded streaming request
+Origin allowlist, mandatory session except health/account bootstrap, bounded streaming request
 body (512 KB), field whitelists, canonical Player Life validation, revision guards,
 idempotency content hashes and per-client rate limits protect the API. Local ingress
 binds 127.0.0.1 only. Workers use the trusted CF connecting-IP header; the local
@@ -57,7 +79,7 @@ There is no settlement, treasury, Mainnet role, contract or token change in this
 Logistics projections reuse runtime IDs/status/receipt references and completed
 nonfinancial cargo metadata. They do not validate payments or instantiate another
 logistics engine. XP/game receipts are not redeemable balances or economic proofs.
-A signed wallet identifies the player but does not make uploaded game progress
+A wallet binding proves a wallet signature, not Life ownership, and does not make uploaded game progress
 trustworthy for competitive/economic rewards. Anti-cheat and transaction verification
 are separate future authorities.
 
