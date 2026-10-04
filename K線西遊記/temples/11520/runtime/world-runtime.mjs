@@ -10,6 +10,8 @@ SOURCE_OF_TRUTH: TRUE
 */
 
 import {createMarketLife,perceiveMarketLife,decideMarketLife,decideMarketLifeLifestyle,tickMarketLifeNeeds,travelMarketLife,advanceMarketLifeCycle,maybeGrowMarketLife,snapshotMarketLife,remember} from './market-life-runtime.mjs';
+import {observeTrainingMarket} from './market-life-runtime.mjs';
+import {vectorForAxis} from './market-life-kspace-visual.mjs';
 import {deriveMarketRelations,animationIntentForRelations} from './market-relation-runtime.mjs';
 import {drainMarketLifeSourceEvents,installMarketLifeSourceListeners} from './market-life-source-runtime.mjs';
 import {chaseStep,maybeMonsterHit,isHostileMonster} from './monster-aggression-runtime.mjs';
@@ -415,14 +417,44 @@ export function tickMarketLives(world,{playerAxes={},quotes={},now=Date.now(),ra
   world.lastMarketLifeTick=now;return{world,events};
 }
 
+export function trainingMonsterSnapshot(world){
+  return [...world.monsters,...(world.ambientLife||[])].filter(m=>m.marketLife?.training).map(m=>({
+    id:m.id,name:m.baseName||m.name,level:m.level||1,alive:m.state!=='DEAD',position:{x:m.x,y:m.y,z:m.z},
+    intent:copy(m.marketLife.training.intent),growth:copy(m.marketLife.growth),
+    observationScope:'LOCAL_GAME_OBSERVATIONS',persisted:world.trainingMemory?.status().persisted===true,fullGA600:'NOT_INTEGRATED',
+    gameTrainingLevel:1+Math.floor(m.marketLife.growth.experience/10),movement:m.marketMovement||null,
+  }));
+}
+function tickTrainingMonsters(world,now,deltaMs){
+  const market=kMarketSnapshot(world,now);
+  const actors=[...world.monsters.filter(m=>m.simulationCombat),...(world.ambientLife||[])];
+  for(const [i,m] of actors.entries()){
+    if(m.state==='DEAD')continue;
+    if(!m.marketLife){m.marketLife=createMarketLife({lifeId:m.id,name:m.baseName||m.name,species:m.species,markets:['BTCUSDT','ETHUSDT','BNBUSDT'],capital:0,position:{x:m.x,y:m.y,z:m.z}});world.trainingMemory?.restore(m.marketLife)}
+    const intent=observeTrainingMarket(m.marketLife,market,{now,contrarian:m.species==='FIRE_WISP'});
+    world.trainingMemory?.save(m.marketLife);
+    // A combat encounter without fresh data has no market direction to enact.
+    if(m.simulationCombat&&!intent)continue;
+    const origin=m.marketRoamOrigin??={x:m.x,y:m.y,z:m.z};
+    const v=vectorForAxis(intent?.axis,intent?.sign),sign=intent?.sign||0;
+    // Existing visual axis vectors are GAME PRESENTATION, never k/alpha/theta metres.
+    // Neutral lives patrol a small home radius; directional lives remain reachable.
+    const phase=now*.0002+i,destination=sign?{x:origin.x+v.x*2,y:Math.max(0,origin.y+v.y*2),z:origin.z+v.z*2}:{x:origin.x+Math.sin(phase)*.65,y:origin.y,z:origin.z+Math.cos(phase)*.65};
+    m.marketLife.world.position={x:m.x,y:m.y,z:m.z};
+    const result=travelMarketLife(m.marketLife,{destination,deltaMs:Math.min(100,deltaMs),speed:.00035});
+    if(result.ok){Object.assign(m,result.position);m.localPosition={...result.position}}
+    m.marketMovement={scope:'GAME_PRESENTATION_ONLY',axis:intent?.axis||null,direction:intent?.direction||'NEUTRAL',vector:sign?v:{x:0,y:0,z:0},destination};
+  }
+}
 export function tickWorld(world,player,now=Date.now()){
   if(now&&typeof now==='object')now=Number(now.now)||Date.now();
-  const previous=Number(world.lastTick)||now,deltaMs=Math.max(0,now-previous);
+  const previous=Number.isFinite(world.lastTick)?world.lastTick:now,deltaMs=Math.max(0,now-previous);
   const guardian=world.journeyEnabled&&world.monsters.find(m=>m.simulationCombat);
   if(guardian?.state==='DEAD'&&now-guardian.defeatedAt>=6000){
     const cycle=(world.journeyCycle||0)+1;world.journeyCycle=cycle;
     const angle=cycle*Math.PI/3;
     guardian.localPosition={x:player.x+Math.sin(angle)*5,y:player.y,z:player.z+Math.cos(angle)*5};
+    guardian.marketRoamOrigin={...guardian.localPosition};
     const boss=cycle>0&&cycle%5===0,courier=!boss&&cycle>0&&cycle%3===0;
     let profileId=boss?'MARKET_BOSS':courier?'COURIER':'GUARDIAN';
     const level=Number(world.playerLevel)||1,engineLevel=Number(world.engineLevel)||1,profile=JOURNEY_ENCOUNTER_PROFILES[profileId];
@@ -432,7 +464,7 @@ export function tickWorld(world,player,now=Date.now()){
     configureJourneyEncounter(world,guardian,profileId,now);Object.assign(guardian,guardian.localPosition);
     world.kSpace.lastAttackAt=null;
   }
-  for(const m of world.ambientLife||[]){if(m.state==='DEAD')continue;const phase=(now*.00035)+(m.roamPhase||0),radius=.65;m.x=m.spawnX+Math.sin(phase)*radius;m.z=m.spawnZ+Math.cos(phase*.83)*radius;m.y=Math.max(0,m.spawnY+(m.species==='FIRE_WISP'?1.1+.45*Math.sin(phase*1.7):0));m.localPosition={x:m.x,y:m.y,z:m.z}}
+  if(world.journeyEnabled)tickTrainingMonsters(world,now,deltaMs);
   const events=drainJourneyEvents(world);events.push(...applyMarketLifeSourceEvents(world,drainMarketLifeSourceEvents()));const playerAxes=readPlayerAxesFromGame(),quotes=readQuotesFromGame();
   if(guardian?.boss&&guardian.state!=='DEAD'&&validVec(player)){
     const distance=Math.hypot(guardian.x-player.x,guardian.y-player.y,guardian.z-player.z),cooldown=guardian.rage?850:1400;

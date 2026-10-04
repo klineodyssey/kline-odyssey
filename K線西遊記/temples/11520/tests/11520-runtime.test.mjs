@@ -6,6 +6,45 @@ import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
 import {createJourneyTutorial,JOURNEY_ENCOUNTER_PROFILES,GAME_LOOT_TABLE,GA600_GAME_TRAINING,selectJourneyLoot,selectJourneyEncounter,drainJourneyEvents,serializeWorld} from '../runtime/world-runtime.mjs';
 import {GAMEPLAY_UNLOCKS} from '../runtime/player-life-runtime.mjs';
+import {observeTrainingMarket,createTrainingMemory} from '../runtime/market-life-runtime.mjs';
+
+test('training history reload restores only existing growth, never pending predictions or financial authority',()=>{
+  const values=new Map(),storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
+  const life=createMarketLife({lifeId:'TRAIN-1',capital:0});
+  Object.assign(life.growth,{wins:2,losses:1,flat:1,predictionCount:4,streak:1,experience:2});
+  life.training={pending:{price:100,sign:1},intent:{direction:'LONG'}};
+  assert.equal(createTrainingMemory(storage).save(life),true);
+  const restored=createMarketLife({lifeId:'TRAIN-1',capital:0});
+  assert.equal(createTrainingMemory(storage).restore(restored),true);
+  assert.deepEqual(restored.growth,life.growth);assert.equal(restored.training,undefined);assert.equal(restored.capital,0);assert.deepEqual(restored.positions,{});
+  assert.equal(createTrainingMemory(null).save(life),false);
+  assert.equal(createTrainingMemory(storage).restore(createMarketLife({lifeId:'ANOTHER'})),false);
+  const corrupt={getItem:()=>JSON.stringify({scope:'LOCAL_GAME_OBSERVATIONS',actors:[{id:'TRAIN-1',growth:{...life.growth,wins:999}}]})};
+  assert.equal(createTrainingMemory(corrupt).restore(createMarketLife({lifeId:'TRAIN-1'})),false);
+});
+
+test('training observation is one-shot, causal, gap-safe and cannot mutate capital or positions',()=>{
+  const life=createMarketLife({lifeId:'SIM-TRAINING',markets:['BTCUSDT','ETHUSDT','BNBUSDT'],capital:25});
+  const quote=(at,price,status='LIVE')=>({receivedAt:at,status,markets:[{axis:'KX',symbol:'BTCUSDT',price},{axis:'KY',symbol:'ETHUSDT',price:20},{axis:'KZ',symbol:'BNBUSDT',price:3}]});
+  assert.equal(observeTrainingMarket(life,quote(1000,100),{now:1000}).direction,'NEUTRAL');
+  assert.equal(observeTrainingMarket(life,quote(6000,101),{now:6000}).direction,'LONG');
+  assert.equal(life.training.pending.price,101);
+  for(let at=11000;at<=61000;at+=5000)observeTrainingMarket(life,quote(at,102),{now:at});
+  assert.equal(life.growth.predictionCount,undefined,'no future information before horizon');
+  observeTrainingMarket(life,quote(66000,103),{now:66000});
+  assert.equal(life.growth.wins,1);assert.equal(life.growth.predictionCount,1);assert.equal(life.growth.experience,1);
+  observeTrainingMarket(life,quote(66000,1000),{now:66000});
+  assert.equal(life.growth.predictionCount,1,'same timestamp must not settle twice');
+  assert.equal(life.training.quotes.BTCUSDT,103);
+  assert.equal(observeTrainingMarket(life,quote(71000,1,'STALE'),{now:71000}),null);
+  observeTrainingMarket(life,quote(200000,110),{now:200000});
+  assert.equal(life.growth.predictionCount,1,'stale horizon is discarded, not a win');
+  assert.equal(life.capital,25);assert.deepEqual(life.positions,{});
+  const counter=createMarketLife({lifeId:'SIM-COUNTER'});
+  observeTrainingMarket(counter,quote(1000,100),{now:1000,contrarian:true});
+  assert.equal(observeTrainingMarket(counter,quote(6000,101),{now:6000,contrarian:true}).direction,'SHORT');
+  assert.equal(counter.training.intent.fullGA600,'NOT_INTEGRATED');
+});
 
 test('blocked browser storage getter cannot abort identity or game session boot',()=>{
   const before=Object.getOwnPropertyDescriptor(globalThis,'localStorage');

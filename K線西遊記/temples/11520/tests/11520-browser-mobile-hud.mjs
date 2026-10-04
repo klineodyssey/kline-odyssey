@@ -7,6 +7,9 @@ const BASE=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+// This suite verifies the optional full-information layout. Default world-first
+// visibility and touch gestures have their own six-profile responsive coverage.
+await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 async function boot(){await page.goto(`${BASE}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);assert.deepEqual(errors,[],'page errors: '+errors.join('\n'))}
 await boot();

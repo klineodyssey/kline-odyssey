@@ -27,6 +27,39 @@ concurrency:
   group: responsive-11520-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.production || false }}
   cancel-in-progress: true
 jobs:
+  world-first:
+    if: github.event_name != 'workflow_run' && inputs.production != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Minimal world / camera / market-life real-input QA
+        env:
+          K11520_WORLD_FIRST_QA: '1'
+          K11520_SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-world-first-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          node 'K線西遊記/temples/11520/tests/11520-browser-responsive.mjs'
+      - name: Preserve world visibility and gesture evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-world-first-${{ github.sha }}
+          path: artifacts/11520-responsive-qa/
+          if-no-files-found: error
+          retention-days: 14
   responsive:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest

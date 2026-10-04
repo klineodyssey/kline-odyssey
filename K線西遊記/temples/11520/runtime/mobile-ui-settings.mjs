@@ -23,9 +23,45 @@ const SURFACES=[
 ];
 const PROTECTED=['#walletPanel','#walletToggle','#walletConnect','#backpackButton'];
 let state=Object.fromEntries(SURFACES.map(([k])=>[k,true])),allOn=true;
+const HUD_PROFILES=['MINIMAL','STANDARD','FULL'];
+const MARKET_IDLE_MS=15000;
+let profile='MINIMAL',marketOpen=false,marketTimer=0,marketPointers=new Set();
+// Visibility stays in this existing owner; geometry remains in Mobile Control Layout.
+export const WORLD_FIRST_HUD_POLICY=Object.freeze({
+  ALWAYS_VISIBLE:['player/world','movement','combat','market row','map','utility launcher'],
+  CONTEXTUAL:['market cards','target details','missile details','delivery details'],
+  EVENT_ONLY:['warning','arrival','robbery','insurance','mission complete'],
+  MANUAL:['wallet','backpack','settings','chat','audio'],
+});
 
-function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn}catch{}}
-function save(){try{localStorage.setItem(STORE,JSON.stringify({...state,allOn}))}catch{}}
+function load(){try{const raw=localStorage.getItem(STORE)||localStorage.getItem(LEGACY_STORE)||'{}',x=JSON.parse(raw);for(const k of Object.keys(state))if(typeof x[k]==='boolean')state[k]=x[k];if(typeof x.allOn==='boolean')allOn=x.allOn;if(HUD_PROFILES.includes(x.profile))profile=x.profile}catch{}}
+function save(){try{localStorage.setItem(STORE,JSON.stringify({...state,allOn,profile}))}catch{}}
+function syncWorldFirst(){
+  const root=document.documentElement;root.dataset.k11520HudProfile=profile;
+  root.classList.toggle('k11520MarketOpen',marketOpen);
+  const row=$('#k11520MarketRow');if(row){row.hidden=!(allOn&&state.markets);row.setAttribute('aria-expanded',String(marketOpen));}
+}
+function scheduleMarketHide(){
+  clearTimeout(marketTimer);if(!marketOpen||marketPointers.size)return;
+  marketTimer=setTimeout(()=>{marketOpen=false;syncWorldFirst()},MARKET_IDLE_MS);
+}
+function showMarketCards(){marketOpen=true;syncWorldFirst();scheduleMarketHide()}
+function installWorldFirst(){
+  if($('#k11520MarketRow'))return;
+  const row=document.createElement('button');row.id='k11520MarketRow';row.type='button';
+  row.textContent='KX BTC · KY ETH · KZ BNB ▾';row.setAttribute('aria-controls','axes');
+  row.onclick=()=>{marketOpen=!marketOpen;syncWorldFirst();scheduleMarketHide()};document.body.appendChild(row);
+  const panel=$('#k11520UiSettings'),picker=document.createElement('select');picker.id='k11520HudProfile';picker.className='full';picker.setAttribute('aria-label','HUD 顯示模式');
+  for(const value of HUD_PROFILES){const opt=document.createElement('option');opt.value=value;opt.textContent={MINIMAL:'MINIMAL · 世界優先',STANDARD:'STANDARD · 狀態資訊',FULL:'FULL HUD · 完整資訊'}[value];picker.appendChild(opt)}
+  picker.value=profile;picker.onchange=()=>{profile=picker.value;save();apply()};panel?.appendChild(picker);
+  const axes=$('#axes');
+  axes?.addEventListener('pointerdown',e=>{marketPointers.add(e.pointerId);clearTimeout(marketTimer)});
+  for(const type of ['pointerup','pointercancel'])document.addEventListener(type,e=>{if(marketPointers.delete(e.pointerId))scheduleMarketHide()});
+  // Key/input activity restarts the idle interval; a held pointer never loses its card.
+  for(const type of ['keydown','input','focusin','pointermove'])axes?.addEventListener(type,scheduleMarketHide);
+  document.addEventListener('click',e=>{if(e.target.closest?.('#axes,#kspaceMapViews [data-map-view="K"]'))showMarketCards()});
+  addEventListener('blur',()=>{marketPointers.clear();scheduleMarketHide()});syncWorldFirst();
+}
 function retireLegacyCleanMode(){if(document.body?.classList.contains('game-clean-mode'))document.body.classList.remove('game-clean-mode');try{if(localStorage.getItem(LEGACY_CLEAN)!=='0')localStorage.setItem(LEGACY_CLEAN,'0')}catch{}}
 function retireLegacyDrawerToggles(){for(const btn of document.querySelectorAll('.hud-drawer-toggle')){btn.hidden=true;btn.setAttribute('aria-hidden','true');btn.tabIndex=-1}for(const el of document.querySelectorAll('.axes,.tele,.monsterHud,.minimapWrap,.sliderDock'))el.classList.remove('hud-collapsed-left','hud-collapsed-right','hud-collapsed-top')}
 function style(){if($('#k11520UiSettingsStyle'))return;const s=document.createElement('style');s.id='k11520UiSettingsStyle';s.textContent=`
@@ -49,7 +85,7 @@ document.head.appendChild(s)}
 function targets(sel){try{return [...document.querySelectorAll(sel)]}catch{return[]}}
 function applyOne(key,on){const spec=SURFACES.find(x=>x[0]===key);if(!spec)return;for(const el of targets(spec[2])){const hidden=!on;if(el.classList.contains('k11520HiddenBySettings')!==hidden)el.classList.toggle('k11520HiddenBySettings',hidden);if(key==='chat'&&hidden&&el.id==='gameChat')el.classList.remove('open')}}
 function protectWalletBackpack(){for(const sel of PROTECTED)for(const el of targets(sel)){el.classList.remove('k11520HiddenBySettings');el.removeAttribute('aria-hidden')}const bag=$('#backpackButton');if(bag){bag.dataset.k11520ProtectedOrgan='1';bag.style.removeProperty('display')}const wallet=$('#walletPanel');if(wallet)wallet.dataset.k11520ProtectedOrgan='1'}
-function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]);protectWalletBackpack();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.16',allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
+function apply(){retireLegacyCleanMode();retireLegacyDrawerToggles();for(const [k] of SURFACES)applyOne(k,allOn&&state[k]);protectWalletBackpack();syncWorldFirst();const p=$('#k11520UiSettings');if(p)for(const b of p.querySelectorAll('[data-ui-key]')){const k=b.dataset.uiKey,v=String(k==='all'?allOn:state[k]);if(b.getAttribute('aria-checked')!==v)b.setAttribute('aria-checked',v)}globalThis.__K11520_UI_SETTINGS__={organ:'Mobile UI Settings',version:'2.6.16',profile,marketIdleMs:MARKET_IDLE_MS,policy:WORLD_FIRST_HUD_POLICY,allOn,state:{...state},legacyDrawerTogglesRetired:true,protectedOrgans:['wallet','backpack'],chatReplacesY:true,walletHitTargetProtected:true,chatToggleExplicit:true}}
 function toggleKey(key){if(key==='all')allOn=!allOn;else{state[key]=!state[key];if(state[key])allOn=true}save();apply()}
 async function toggleFullscreen(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.();else await document.exitFullscreen?.()}catch{}syncFullscreen()}
 function syncFullscreen(){const b=$('#k11520FullscreenSwitch');if(b)b.setAttribute('aria-checked',String(!!document.fullscreenElement))}
@@ -61,4 +97,4 @@ function ensureBackpack(){const canonical=$('#backpackButton');if(!canonical)ret
 function ensureChatToggle(){const handle=$('#chatHandle'),panel=$('#gameChat');if(!handle||!panel)return false;if(handle.dataset.k11520ChatToggle)return true;handle.dataset.k11520ChatToggle='1';handle.setAttribute('aria-controls','gameChat');const sync=()=>{const open=panel.classList.contains('open');handle.setAttribute('aria-expanded',String(open));handle.title=open?'收合聊天':'展開聊天'};handle.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();panel.classList.toggle('open');sync()},{capture:true});sync();return true}
 function criticalNode(n){return n?.nodeType===1&&(n.id==='gameModeToggle'||n.id==='walletPanel'||n.id==='walletToggle'||n.id==='walletConnect'||n.id==='backpackButton'||n.id==='chatHandle'||n.id==='gameChat'||n.classList?.contains('hud-drawer-toggle')||n.querySelector?.('#gameModeToggle,#walletPanel,#walletToggle,#walletConnect,#backpackButton,#chatHandle,#gameChat,.hud-drawer-toggle'))}
 function boot(){style();load();retireLegacyCleanMode();retireLegacyDrawerToggles();installPanel();ensureWallet();ensureBackpack();ensureChatToggle();apply();document.addEventListener('fullscreenchange',syncFullscreen);for(const delay of [120,400,1000,2200])setTimeout(()=>{installPanel();retireLegacyDrawerToggles();ensureWallet();ensureBackpack();ensureChatToggle();apply()},delay);try{globalThis.__K11520_UI_SETTINGS_OBSERVER__?.disconnect()}catch{}let timer=0;const mo=new MutationObserver(mutations=>{const relevant=mutations.some(m=>(m.type==='attributes'&&m.target===document.body&&document.body.classList.contains('game-clean-mode'))||(m.type==='childList'&&[...m.addedNodes,...m.removedNodes].some(criticalNode)));if(!relevant||timer)return;timer=setTimeout(()=>{timer=0;retireLegacyCleanMode();retireLegacyDrawerToggles();installPanel();ensureWallet();ensureBackpack();ensureChatToggle();apply()},100)});mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});globalThis.__K11520_UI_SETTINGS_OBSERVER__=mo;return globalThis.__K11520_UI_SETTINGS__}
-export function install11520MobileUiSettings(){return boot()}
+export function install11520MobileUiSettings(){const result=boot();installWorldFirst();return result}

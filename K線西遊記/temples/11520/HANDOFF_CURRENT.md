@@ -1,5 +1,49 @@
 # 11520 HANDOFF CURRENT
 
+## World-first / Market Life — local candidate, 2026-10-04
+
+- Authority: Human `KAIOS_K11520_HUMAN_CENTERED_WORLD_AND_MARKET_LIFE_V1`.
+  Canonical branch `codex/k11520-world-first-market-life`, isolated worktree;
+  base `e6dbf366341ef88f3f2b8fbbcd2d95704ad3f85f`. Draft review only, no merge.
+  Do not fold #484 epsilon, #485 empty repay, #473 Heart, Lamp, OST or 16888
+  into this task; their existing release gates remain independent.
+- Visual audit: large interception/delivery and permanent market cards occupy
+  the playfield despite passing viewport bounds. Existing HUD settings and
+  layout owners implement minimal disclosure, not a second manager. Classify
+  essential controls ALWAYS_VISIBLE, detail CONTEXTUAL, notices EVENT_ONLY,
+  wallet/settings/chat MANUAL. MINIMAL is default; preference persists.
+- Map lineage: PR #423, commit `924050045f26c1560eba6be80fb2a5eb64f9c0ae`
+  (2026-09-21 +08) changed `plane-map-runtime.mjs` default to K and captured
+  pointer events to show K details. Prior parent
+  `6709b92e18cea76f87113fcc57a95fe9260df535` retained normal local navigation.
+  The original `bindMap -> mapTap -> setWaypoint -> startNavigation` remains.
+  Restore default XYZ, retain explicit K detail and XY/YZ canonical navigation.
+- Camera: existing renderer only; zoom .65–1.8, pan bounded ±12 local units,
+  reset, no persistence or Player XYZ writes. HUD origins are excluded; raycast
+  actionable origins do not start pan. Pinch wins over canvas single-pointer
+  gestures; release never becomes an accidental movement tap.
+- Market Life: reuse market-life growth/memory/travel and the existing visual
+  `vectorForAxis` mapping. Directional travel stays within 2m of its local home;
+  neutral actors patrol .65m. These are GAME_PRESENTATION parameters, not
+  k/alpha/theta-to-meter conversion. Combat rule/settlement owners are unchanged.
+- Training: prospective 60s observation with 15s freshness/gap limit; duplicate
+  batches cannot settle twice. Completed local game observations persist in the
+  existing Player ID scoped storage; pending predictions never survive reload.
+  No reward payout, capital/position mutation or real trade. Full GA600 is
+  NOT_INTEGRATED; UI does not mislabel local momentum as formal GA600 output.
+- Follow: read-only intent/distance cue; free manual movement, cancel/switch and
+  existing guardian attack remain. Follow itself cannot navigate or transact.
+- Gates IN_PROGRESS: local unit suite 217/217 and Universal 302/302 passed.
+  Focused six-viewport Chromium passed MINIMAL, idle/held-pointer disclosure,
+  pan/pinch/reset/XYZ separation, market intent/movement, follow/cancel, map
+  navigation and persisted HUD preference. FULL 390x844 regression passed with
+  actual joystick pursuit of the moving guardian before strikes (range rule
+  unchanged). Landscape chip overlap was repaired and screenshot inspected.
+  Character centre-hit priority additionally yields to pinch/manual camera;
+  final exact-head CI must validate that last integration. Do not report full
+  VISUAL_QA or exact-head CI PASS from intermediate screenshots. No Mainnet,
+  public Testnet transaction, transfer, release or merge performed.
+
 ## Canonical coordinate restoration candidate — 2026-10-04
 
 - TASK_ID: K11520-CANONICAL-COORDINATE; Human explicit audit → minimal Draft PR
