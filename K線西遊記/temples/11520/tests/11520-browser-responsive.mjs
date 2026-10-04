@@ -102,6 +102,15 @@ async function verifyWorldFirst(){
       await page.screenshot({path:`${OUT}/camera-${profile.name}-recenter.png`});
       await page.waitForFunction(original=>{const p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return Math.abs(p.x-original.x)<.5&&Math.abs(p.y-original.y)<.5},result.visibility.player,{timeout:3000});
       await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),true);
+      const marketReadability=await page.locator('#axes').evaluate(el=>{
+        const cards=[...el.querySelectorAll('.axis')];
+        return cards.map(card=>{const r=card.getBoundingClientRect(),symbol=card.querySelector('.marketName'),price=card.querySelector('.q'),address=card.querySelector('.marketKValue'),style=address?getComputedStyle(address):null;return{width:r.width,symbol:symbol?.textContent?.trim(),symbolFits:!!symbol&&symbol.scrollWidth<=symbol.clientWidth+1&&symbol.scrollHeight<=parseFloat(getComputedStyle(symbol).lineHeight)+1,price:price?.textContent?.trim(),priceFits:!!price&&price.scrollWidth<=price.clientWidth+1&&price.scrollHeight<=parseFloat(getComputedStyle(price).lineHeight)+1,address:address?.textContent?.trim(),addressFits:!!address&&address.scrollWidth<=address.clientWidth+1,overflowWrap:style?.overflowWrap,wordBreak:style?.wordBreak}});
+      });
+      assert.deepEqual(marketReadability.map(x=>x.symbol),['BTC/USDT','ETH/USDT','BNB/USDT']);
+      assert.ok(Math.max(...marketReadability.map(x=>x.width))-Math.min(...marketReadability.map(x=>x.width))<1,'expanded market cards must remain equal width');
+      assert.ok(marketReadability.every(x=>x.width>=94),`expanded market cards must retain readable width: ${JSON.stringify(marketReadability)}`);
+      for(const card of marketReadability){assert.equal(card.symbolFits,true,card.symbol+' must remain complete on one line');assert.equal(card.priceFits,true,card.symbol+' price must remain complete on one line');assert.match(card.address,/k\s*=\s*-?\d+/);assert.match(card.address,/α\s*=\s*\d/);assert.match(card.address,/θ\s*=\s*(?:0|π)/);assert.equal(card.addressFits,true,card.symbol+' universe address must not overflow its card');assert.equal(card.overflowWrap,'normal');assert.equal(card.wordBreak,'keep-all')}
+      await page.screenshot({path:`${OUT}/market-expanded-${profile.width}x${profile.height}.png`});
       // Quotes replace card DOM; read the currently attached visible card and
       // its rectangle atomically instead of using a transient element handle.
       const card=await page.locator('#axes').evaluate(el=>{const card=el.querySelector('.axis');if(!card)return null;const r=card.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}});

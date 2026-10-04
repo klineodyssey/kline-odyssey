@@ -3,9 +3,9 @@ import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.12
-REVISION: 2026-10-05.CONTEXT-ACTION-RAIL
-PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and measure actual market-card content before placing status. Raid/courier action geometry is owned by the existing Market/Wallet utility rail. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
+VERSION: 1.3.13
+REVISION: 2026-10-05.READABLE-EXPANDED-MARKET
+PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and keep expanded KX/KY/KZ market cards equally wide and readable. Raid/courier action geometry is owned by the existing Market/Wallet utility rail. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
@@ -26,7 +26,7 @@ function installStyle(){
   .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
   .pill{padding:5px 6px!important}.pill b{font-size:12px!important}
   .axes{top:70px!important;left:6px!important;right:6px!important;height:auto!important;min-height:104px!important;gap:4px!important;align-items:stretch!important;z-index:250!important}
-  .axis{min-width:0!important;padding:5px!important}.axis select{font-size:8px!important;padding:5px 3px!important}.axis .q{font-size:12px!important}.axis .pos{font-size:7px!important}
+  .axis{min-width:0!important;padding:5px!important}.axis select{font-size:8px!important;padding:5px 3px!important}.axis .marketName,.axis .q{display:block!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}.axis .marketName{font-size:12px!important;line-height:14px!important}.axis .q{font-size:12px!important;line-height:15px!important}.axis .pos{font-size:7px!important}.axis .marketKValue{white-space:normal!important;overflow-wrap:normal!important;word-break:keep-all!important;line-height:1.25!important}
   .universeFloorBadge{font-size:6px!important;overflow:hidden;text-overflow:ellipsis}
   #joy.joyWrap{left:14px!important;width:min(146px,calc(50vw - 44px))!important;height:min(146px,calc(50vw - 44px))!important;bottom:max(16px,env(safe-area-inset-bottom))!important}
   #joy{--guideSize:98px;--knobSize:62px}
@@ -93,10 +93,11 @@ function installStyle(){
 #k11520PlaneLabel{overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
 html[data-k11520-hud-profile]:not([data-k11520-hud-profile="FULL"]):not(.k11520MarketOpen) .axes{display:none!important}
 html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
-/* Camera owns the left segment of the 116px row. Context-sensitive raid and
-   courier actions belong to the existing right utility rail. */
-html[data-k11520-hud-profile] .axes{top:116px!important;left:54px!important;right:170px!important;z-index:610!important}
-html.k11520UtilitiesOpen[data-k11520-hud-profile="FULL"] .axes{right:58px!important}
+/* Camera owns the 44px left segment. Raid/courier left this row for the right
+   utility rail, so the former 164px action reservation must not compress the
+   three equal-width market cards into unreadable columns. */
+html[data-k11520-hud-profile] .axes{top:116px!important;left:54px!important;right:6px!important;z-index:610!important}
+html.k11520UtilitiesOpen[data-k11520-hud-profile="FULL"] .axes{right:6px!important}
 html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:auto!important;bottom:268px!important;height:134px!important}
 html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:168px!important;left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;min-height:44px;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
 html[data-k11520-hud-profile="MINIMAL"].k11520MarketOpen #k11520MonsterGuide{top:230px!important}
