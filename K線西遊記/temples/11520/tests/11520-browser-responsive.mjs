@@ -192,7 +192,15 @@ async function verifyKSpaceGameplay(page,report){
   try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
   const near=await state();assert.ok(near.playerLocal.z>start.playerLocal.z,'negative phase must not reverse XYZ');
   for(const axis of ['KX','KY','KZ'])assert.ok(Math.abs(near.playerK[axis]-100*(near.reference[axis].price/near.reference[axis].anchor-1))<1e-9,'current K must follow normalized reference, not frozen startup quotes');
-  assert.deepEqual(near.deltaK,{KX:0,KY:0,KZ:1});
+  // Derived displacement can accumulate IEEE-754 error as live market frames translate
+  // (observed KZ 1.0000000000000036 / 0.9999999999999929). Do not round runtime state.
+  const deltaKEpsilon=1e-12; // Absolute tolerance only for this computed unit-displacement vector.
+  const expectedDeltaK={KX:0,KY:0,KZ:1};
+  assert.deepEqual(Object.keys(near.deltaK).sort(),Object.keys(expectedDeltaK).sort());
+  for(const axis of Object.keys(expectedDeltaK)){
+    assert.equal(typeof near.deltaK[axis],'number');
+    assert.ok(Math.abs(near.deltaK[axis]-expectedDeltaK[axis])<=deltaKEpsilon,`derived deltaK.${axis} must be ${expectedDeltaK[axis]} within ${deltaKEpsilon}; got ${near.deltaK[axis]}`);
+  }
   const prefix=report.profile.name;await page.screenshot({path:`${OUT}/${prefix}-kspace-target.png`});
   await page.locator('.monsterHud').click({position:{x:12,y:12}});await page.locator('#sheet.open').waitFor();
   assert.match(await page.locator('#sheetBody').textContent(),/Player 相對基準.*Monster 模擬相對基準.*模擬相對差/s);
