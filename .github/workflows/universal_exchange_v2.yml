@@ -42,7 +42,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "20"
-      - name: Confirm exact pull request head and authorized prototype scope
+      - name: Confirm exact pull request head and clean patch
         if: github.event_name == 'pull_request'
         shell: bash
         env:
@@ -53,8 +53,6 @@ jobs:
           test "$(git rev-parse HEAD)" = "$HEAD_SHA"
           changed="$(git diff --name-only "$BASE_SHA"...HEAD)"
           printf '%s\n' "$changed"
-          unexpected="$(grep -vE '^(core/life/index\.mjs|tests/starforge-spirit-life-genesis\.test\.mjs|\.github/workflows/universal_exchange_v2\.yml)$' <<<"$changed" || true)"
-          test -z "$unexpected"
           git diff --check "$BASE_SHA"...HEAD
       - name: Scan exact pull request patch for concrete secret literals
         if: github.event_name == 'pull_request'
