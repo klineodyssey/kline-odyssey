@@ -21,7 +21,11 @@ permissions:
 jobs:
   product-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Full mobile + settlement + Player Life passed on 0610eef3, but the
+    # aggregate reached 20 minutes during artifact/post-job cleanup. Keep
+    # every per-script timeout below unchanged; reserve 5 minutes for runner
+    # variability and evidence upload rather than skipping assertions.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
