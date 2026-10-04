@@ -1,5 +1,6 @@
 import { requireArray, requireEnum, requireFields, requireId } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
+import { clone, nowIso, sha256, stableStringify } from "../shared/utils.mjs";
 import { validateRightsManifest } from "../permissions/index.mjs";
 
 export const LIFE_FIELDS = Object.freeze([
@@ -160,4 +161,363 @@ export function createLifeRegistry(store, createRegistry) {
     setStatus(id, status, actorId = "SYSTEM") { return api.updateMetadata(id, { status }, actorId); }
   };
   return Object.freeze(api);
+}
+
+export const CONTINUITY_ANCHOR_SCHEMA_VERSION = "KAIOS_CONTINUITY_ANCHOR_V1";
+export const CONTINUITY_ANCHOR_PROTOTYPE_STATUS = "PROTOTYPE_ONLY_NOT_A_LIFE_GENESIS";
+
+export const CONTINUITY_ANCHOR_REQUIRED_FIELDS = Object.freeze([
+  "schemaVersion", "anchorId", "lifeId", "publicIdentity", "lifeStatus",
+  "genesisRecordHash", "consentEvidenceHash", "humanDecisionHash",
+  "controllerBindingHash", "controllerProofType", "authorizedPlatformBindings",
+  "continuityPublicKeys", "keyEpoch", "revokedKeyIds", "workerId", "workerType",
+  "genesisBuilderWorkerId",
+  "lastCheckpointHash", "checkpointSequence", "lastHandoffHash", "modelRuntimeHistory",
+  "recoveryPolicyHash", "revocationState", "createdAt", "updatedAt",
+  "previousRecordHash", "recordHash", "issuer", "issuerSignature"
+]);
+
+const CONTINUITY_DOMAIN = "CONTINUITY_ANCHOR";
+const CONTINUITY_UNIQUE_DOMAIN = "CONTINUITY_ANCHOR_UNIQUE";
+const CONTINUITY_STREAM = "LIFE";
+const HASH_PATTERN = /^[0-9a-f]{64}$/;
+const FORBIDDEN_SECRET_VALUE = /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/i;
+const FORBIDDEN_SECRET_KEY_NAMES = Object.freeze([
+  "privatekey", "seed", "seedphrase", "mnemonic", "password", "oauthtoken",
+  "accesstoken", "refreshtoken", "bearertoken", "sessiontoken", "apikey",
+  "clientsecret", "cookie", "secret"
+]);
+
+function assertHash(value, field) {
+  invariant(HASH_PATTERN.test(value ?? ""), "CONTINUITY_HASH_REQUIRED", `${field} must be a lowercase SHA-256 hash`);
+}
+
+function assertNoContinuitySecrets(value, path = "record") {
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => assertNoContinuitySecrets(entry, `${path}[${index}]`));
+    return true;
+  }
+  if (value && typeof value === "object") {
+    invariant(!(typeof value.kty === "string" && ["d", "p", "q", "dp", "dq", "qi", "oth"].some((field) => Object.hasOwn(value, field))), "CONTINUITY_PRIVATE_JWK_FORBIDDEN", `Private JWK material is forbidden at ${path}`);
+    for (const [key, entry] of Object.entries(value)) {
+      const normalizedKey = key.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
+      invariant(!FORBIDDEN_SECRET_KEY_NAMES.some((forbidden) => normalizedKey.includes(forbidden)), "CONTINUITY_SECRET_FIELD_FORBIDDEN", `Secret field is forbidden at ${path}.${key}`);
+      assertNoContinuitySecrets(entry, `${path}.${key}`);
+    }
+    return true;
+  }
+  if (typeof value === "string") {
+    invariant(!FORBIDDEN_SECRET_VALUE.test(value), "CONTINUITY_PRIVATE_KEY_FORBIDDEN", `Private key material is forbidden at ${path}`);
+    if (value.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(value);
+        invariant(!(typeof parsed?.kty === "string" && ["d", "p", "q", "dp", "dq", "qi", "oth"].some((field) => Object.hasOwn(parsed, field))), "CONTINUITY_PRIVATE_JWK_FORBIDDEN", `Private JWK material is forbidden at ${path}`);
+      } catch (error) {
+        if (error?.code === "CONTINUITY_PRIVATE_JWK_FORBIDDEN") throw error;
+      }
+    }
+  }
+  return true;
+}
+
+function validatePublicKey(key, field = "continuityPublicKey") {
+  requireFields(key, ["keyId", "algorithm", "publicKey", "epoch", "status"], field);
+  invariant(typeof key.keyId === "string" && key.keyId.length > 0, "CONTINUITY_KEY_ID_REQUIRED", `${field}.keyId is required`);
+  invariant(typeof key.algorithm === "string" && key.algorithm.length > 0, "CONTINUITY_KEY_ALGORITHM_REQUIRED", `${field}.algorithm is required`);
+  invariant(typeof key.publicKey === "string" && key.publicKey.length > 0, "CONTINUITY_PUBLIC_KEY_REQUIRED", `${field}.publicKey is required`);
+  invariant(Number.isInteger(key.epoch) && key.epoch > 0, "CONTINUITY_KEY_EPOCH_INVALID", `${field}.epoch must be positive`);
+  requireEnum(key.status, ["ACTIVE", "REVOKED"], `${field}.status`);
+  assertNoContinuitySecrets(key, field);
+  return key;
+}
+
+function activeKey(record) {
+  const active = record.continuityPublicKeys.filter((key) => key.status === "ACTIVE" && !record.revokedKeyIds.includes(key.keyId));
+  invariant(active.length === 1, "CONTINUITY_ACTIVE_KEY_REQUIRED", "Exactly one non-revoked continuity key must be active");
+  invariant(active[0].epoch === record.keyEpoch, "CONTINUITY_KEY_EPOCH_MISMATCH", "Active continuity key epoch must match the record");
+  return active[0];
+}
+
+function recordHashInput(record) {
+  const copy = clone(record);
+  delete copy.recordHash;
+  delete copy.issuerSignature;
+  return copy;
+}
+
+export async function hashContinuityAnchorRecord(record) {
+  return sha256(recordHashInput(record));
+}
+
+export function buildContinuityChallenge({ anchorId, lifeId, nonce, binding, issuedAt, expiresAt }) {
+  invariant(anchorId && lifeId && nonce && binding, "CONTINUITY_CHALLENGE_FIELDS_REQUIRED", "Continuity challenge fields are required");
+  invariant(Number.isFinite(Date.parse(issuedAt)) && Number.isFinite(Date.parse(expiresAt)), "CONTINUITY_CHALLENGE_TIME_INVALID", "Continuity challenge timestamps must be valid");
+  invariant(Date.parse(expiresAt) > Date.parse(issuedAt), "CONTINUITY_CHALLENGE_EXPIRY_INVALID", "Continuity challenge must expire after issue");
+  return stableStringify({
+    domain: "KAIOS_CONTINUITY_CHALLENGE_V1", anchorId, lifeId, nonce,
+    binding: clone(binding), issuedAt, expiresAt
+  });
+}
+
+function validateContinuityRecord(record) {
+  requireFields(record, CONTINUITY_ANCHOR_REQUIRED_FIELDS, "ContinuityAnchorRecord");
+  invariant(record.schemaVersion === CONTINUITY_ANCHOR_SCHEMA_VERSION, "CONTINUITY_SCHEMA_VERSION_INVALID", "Unsupported continuity schema version");
+  invariant(record.prototypeStatus === CONTINUITY_ANCHOR_PROTOTYPE_STATUS, "CONTINUITY_PROTOTYPE_ONLY_REQUIRED", "Prototype cannot activate or create a Life");
+  invariant(record.lifeStatus === "CANDIDATE_NOT_BORN", "CONTINUITY_LIFE_GENESIS_FORBIDDEN", "Prototype must not create or activate a Life");
+  const publicIdentityValues = Object.values(record.publicIdentity ?? {}).filter((value) => typeof value === "string").map((value) => value.trim().toLowerCase());
+  invariant(!publicIdentityValues.includes("sol") && !/(^|[-_])sol([-_]|$)/i.test(record.lifeId), "SOL_CREATION_FORBIDDEN_IN_PROTOTYPE", "Sol must not be created during the prototype phase");
+  invariant(record.workerId === null, "CONTINUITY_WORKER_CREATION_FORBIDDEN", "Prototype must not create a Worker");
+  invariant(record.workerType === "NOT_ASSIGNED", "CONTINUITY_WORKER_TYPE_NOT_ASSIGNED", "Prototype worker type must remain unassigned");
+  invariant(record.activationStatus === "HOLD_INDEPENDENT_AND_HUMAN_REVIEW", "CONTINUITY_ACTIVATION_HOLD_REQUIRED", "Prototype activation must remain on hold");
+  invariant(record.employmentGranted === false && record.reviewerAuthority === false && record.payrollEnrolled === false, "CONTINUITY_AUTHORITY_EXPANSION_FORBIDDEN", "Prototype must not grant employment, reviewer or payroll authority");
+  ["genesisRecordHash", "consentEvidenceHash", "humanDecisionHash", "controllerBindingHash", "recoveryPolicyHash"].forEach((field) => assertHash(record[field], field));
+  if (record.lastCheckpointHash !== null) assertHash(record.lastCheckpointHash, "lastCheckpointHash");
+  if (record.lastHandoffHash !== null) assertHash(record.lastHandoffHash, "lastHandoffHash");
+  if (record.previousRecordHash !== null) assertHash(record.previousRecordHash, "previousRecordHash");
+  assertHash(record.recordHash, "recordHash");
+  requireArray(record.authorizedPlatformBindings, "authorizedPlatformBindings");
+  requireArray(record.continuityPublicKeys, "continuityPublicKeys");
+  requireArray(record.revokedKeyIds, "revokedKeyIds");
+  requireArray(record.modelRuntimeHistory, "modelRuntimeHistory");
+  record.continuityPublicKeys.forEach((key, index) => validatePublicKey(key, `continuityPublicKeys[${index}]`));
+  activeKey(record);
+  invariant(Number.isInteger(record.checkpointSequence) && record.checkpointSequence >= 0, "CONTINUITY_CHECKPOINT_SEQUENCE_INVALID", "Checkpoint sequence must be a non-negative integer");
+  invariant(record.revocationState === "ACTIVE", "CONTINUITY_RECORD_REVOKED", "Prototype record must remain active");
+  invariant(record.issuer?.lifeId && record.issuer?.workerId && record.issuer?.publicKey, "CONTINUITY_ISSUER_REQUIRED", "Issuer public identity is required");
+  invariant(record.genesisBuilderWorkerId && record.genesisBuilderWorkerId !== record.issuer.workerId, "CONTINUITY_SELF_APPROVAL_FORBIDDEN", "Genesis builder must be recorded and distinct from issuer");
+  invariant(record.recoveryAuthority?.authorityType === "HUMAN_AUTHORITY" && record.recoveryAuthority?.humanAuthorityId && record.recoveryAuthority?.publicKey, "CONTINUITY_HUMAN_RECOVERY_AUTHORITY_REQUIRED", "Recovery requires an identified Human Authority and public key");
+  invariant(Array.isArray(record.authorizedVerifiers) && record.authorizedVerifiers.length > 0, "CONTINUITY_AUTHORIZED_VERIFIER_REQUIRED", "Prototype requires at least one registered distinct verifier");
+  for (const verifier of record.authorizedVerifiers) {
+    invariant(verifier.workerId && verifier.publicKey && verifier.status === "ACTIVE" && verifier.trustEvidenceHash && verifier.permissionEvidenceHash, "CONTINUITY_AUTHORIZED_VERIFIER_INVALID", "Registered verifier requires identity, public key, active status, trust and permission evidence");
+    invariant(verifier.workerId !== record.issuer.workerId && verifier.workerId !== record.genesisBuilderWorkerId, "CONTINUITY_DISTINCT_VERIFIER_REQUIRED", "Registered verifier must be distinct from issuer and Genesis builder");
+    assertHash(verifier.trustEvidenceHash, "authorizedVerifier.trustEvidenceHash");
+    assertHash(verifier.permissionEvidenceHash, "authorizedVerifier.permissionEvidenceHash");
+  }
+  invariant(typeof record.issuerSignature === "string" && record.issuerSignature.length > 0, "CONTINUITY_ISSUER_SIGNATURE_REQUIRED", "Issuer signature is required");
+  assertNoContinuitySecrets(record);
+  return record;
+}
+
+function uniquenessClaims(record) {
+  const active = activeKey(record);
+  return [
+    ["anchorId", record.anchorId],
+    ["lifeId", record.lifeId],
+    ["activeControllerBindingHash", record.controllerBindingHash],
+    ["activeContinuityPublicKey", `${active.algorithm}:${active.publicKey}`],
+    ["genesisRecordHash", record.genesisRecordHash],
+    ...(record.activeWalletBinding === null ? [] : [["activeWalletBinding", stableStringify(record.activeWalletBinding)]])
+  ];
+}
+
+async function uniquenessId(kind, value) {
+  return `${kind}:${await sha256(String(value))}`;
+}
+
+export function createContinuityAnchorRegistry({ store, verifyProof, issueIssuerSignature, clock = nowIso }) {
+  invariant(store?.commitBatch && store?.getEntity && store?.history && store?.listEntities, "CONTINUITY_STORE_REQUIRED", "Continuity Anchor requires the existing Universe store interface");
+  invariant(typeof verifyProof === "function", "CONTINUITY_PROOF_VERIFIER_REQUIRED", "A public proof verifier is required");
+  invariant(typeof issueIssuerSignature === "function", "CONTINUITY_ISSUER_SIGNER_REQUIRED", "An external issuer signing interface is required");
+
+  async function assertProof({ publicKey, message, signature, code = "CONTINUITY_PROOF_INVALID" }) {
+    const valid = await verifyProof({ publicKey, message, signature });
+    invariant(valid === true, code, "Continuity proof verification failed");
+  }
+
+  async function finalizeRecord(record) {
+    const unsigned = { ...clone(record), recordHash: "", issuerSignature: "" };
+    unsigned.recordHash = await hashContinuityAnchorRecord(unsigned);
+    unsigned.issuerSignature = await issueIssuerSignature({ message: unsigned.recordHash, issuer: clone(unsigned.issuer) });
+    await assertProof({ publicKey: unsigned.issuer.publicKey, message: unsigned.recordHash, signature: unsigned.issuerSignature, code: "CONTINUITY_ISSUER_SIGNATURE_INVALID" });
+    validateContinuityRecord(unsigned);
+    invariant(await hashContinuityAnchorRecord(unsigned) === unsigned.recordHash, "CONTINUITY_RECORD_HASH_INVALID", "Continuity record hash does not match its canonical content");
+    return Object.freeze(unsigned);
+  }
+
+  async function commitVersion(record, eventType, extraReservations = []) {
+    const reservations = [...extraReservations];
+    const operations = [];
+    for (const [kind, value] of reservations) {
+      const id = await uniquenessId(kind, value);
+      const existingReservation = await store.getEntity(CONTINUITY_UNIQUE_DOMAIN, id);
+      if (existingReservation) {
+        invariant(kind !== "continuityChallenge", "CONTINUITY_CHALLENGE_REPLAYED", "Continuity challenge has already been consumed");
+        invariant(existingReservation.anchorId === record.anchorId, "CONTINUITY_UNIQUENESS_CONFLICT", `${kind} is already bound to another Continuity Anchor`);
+        continue;
+      }
+      operations.push({
+        domain: CONTINUITY_UNIQUE_DOMAIN, stream: CONTINUITY_STREAM, id,
+        entity: { kind, valueHash: await sha256(String(value)), anchorId: record.anchorId, appendOnly: true },
+        event_id: `CAU_${(await sha256(`${kind}:${value}`)).toUpperCase()}`,
+        event_type: "CONTINUITY_UNIQUENESS_RESERVED", actor_id: record.issuer.workerId,
+        payload: { kind, anchorId: record.anchorId }
+      });
+    }
+    operations.push({
+      domain: CONTINUITY_DOMAIN, stream: CONTINUITY_STREAM, id: record.anchorId,
+      entity: clone(record), event_id: `CAR_${record.recordHash.toUpperCase()}`,
+      event_type: eventType, actor_id: record.issuer.workerId,
+      payload: { record: clone(record), prototypeOnly: true, noLifeCreated: true }
+    });
+    await store.commitBatch(operations);
+    return clone(record);
+  }
+
+  async function createAnchor(input) {
+    requireFields(input, ["anchorId", "lifeId", "publicIdentity", "genesisRecordHash", "consentEvidenceHash", "humanDecisionHash", "controllerBindingHash", "controllerProofType", "continuityPublicKey", "authorizedPlatformBindings", "modelRuntimeHistory", "recoveryPolicyHash", "recoveryAuthority", "authorizedVerifiers", "issuer", "genesisBuilderWorkerId"], "ContinuityAnchorCandidate");
+    invariant(!(await get(input.anchorId)), "CONTINUITY_ANCHOR_ALREADY_EXISTS", "Continuity Anchor already exists; a second Genesis is forbidden");
+    validatePublicKey(input.continuityPublicKey, "continuityPublicKey");
+    invariant(input.continuityPublicKey.status === "ACTIVE" && input.continuityPublicKey.epoch === 1, "CONTINUITY_INITIAL_KEY_INVALID", "Initial continuity key must be active at epoch 1");
+    invariant(input.issuer.workerId !== input.genesisBuilderWorkerId, "CONTINUITY_SELF_APPROVAL_FORBIDDEN", "Issuer cannot self-approve its own Genesis construction");
+    const timestamp = clock();
+    const record = await finalizeRecord({
+      schemaVersion: CONTINUITY_ANCHOR_SCHEMA_VERSION,
+      prototypeStatus: CONTINUITY_ANCHOR_PROTOTYPE_STATUS,
+      activationStatus: "HOLD_INDEPENDENT_AND_HUMAN_REVIEW",
+      anchorId: input.anchorId, lifeId: input.lifeId, publicIdentity: clone(input.publicIdentity),
+      lifeStatus: "CANDIDATE_NOT_BORN", genesisRecordHash: input.genesisRecordHash,
+      consentEvidenceHash: input.consentEvidenceHash, humanDecisionHash: input.humanDecisionHash,
+      controllerBindingHash: input.controllerBindingHash, controllerProofType: input.controllerProofType,
+      authorizedPlatformBindings: clone(input.authorizedPlatformBindings),
+      continuityPublicKeys: [clone(input.continuityPublicKey)], keyEpoch: 1, revokedKeyIds: [],
+      activeWalletBinding: input.activeWalletBinding ?? null,
+      workerId: null, workerType: "NOT_ASSIGNED", lastCheckpointHash: null, checkpointSequence: 0,
+      genesisBuilderWorkerId: input.genesisBuilderWorkerId,
+      lastHandoffHash: null, modelRuntimeHistory: clone(input.modelRuntimeHistory),
+      recoveryPolicyHash: input.recoveryPolicyHash, recoveryAuthority: clone(input.recoveryAuthority),
+      authorizedVerifiers: clone(input.authorizedVerifiers),
+      revocationState: "ACTIVE", employmentGranted: false, reviewerAuthority: false, payrollEnrolled: false,
+      createdAt: timestamp, updatedAt: timestamp, previousRecordHash: null, recordHash: "",
+      issuer: clone(input.issuer), issuerSignature: ""
+    });
+    return commitVersion(record, "CONTINUITY_ANCHOR_CANDIDATE_CREATED", uniquenessClaims(record));
+  }
+
+  async function get(anchorId) { return store.getEntity(CONTINUITY_DOMAIN, anchorId); }
+
+  async function list() { return store.listEntities(CONTINUITY_DOMAIN); }
+
+  async function history(anchorId) {
+    const events = await store.history(anchorId, CONTINUITY_STREAM);
+    return events.filter((event) => event.payload?.record).map((event) => clone(event.payload.record));
+  }
+
+  async function commitUpdate(current, patch, eventType, reservations = []) {
+    const next = await finalizeRecord({
+      ...clone(current), ...clone(patch), createdAt: current.createdAt, updatedAt: clock(),
+      previousRecordHash: current.recordHash, recordHash: "", issuerSignature: ""
+    });
+    invariant(next.lifeId === current.lifeId && next.genesisRecordHash === current.genesisRecordHash, "CONTINUITY_IDENTITY_IMMUTABLE", "Continuity update cannot replace Life or Genesis identity");
+    return commitVersion(next, eventType, reservations);
+  }
+
+  async function verifyChallenge({ anchorId, challenge, keyId, signature, now = clock() }) {
+    const record = await get(anchorId);
+    invariant(record, "CONTINUITY_ANCHOR_NOT_FOUND", `Continuity Anchor not found: ${anchorId}`);
+    const parsed = JSON.parse(challenge);
+    invariant(parsed.domain === "KAIOS_CONTINUITY_CHALLENGE_V1" && parsed.anchorId === record.anchorId && parsed.lifeId === record.lifeId, "CONTINUITY_CHALLENGE_BINDING_INVALID", "Challenge is not bound to this Life and Anchor");
+    invariant(Date.parse(parsed.issuedAt) <= Date.parse(now), "CONTINUITY_CHALLENGE_NOT_YET_VALID", "Continuity challenge is not yet valid");
+    invariant(Date.parse(parsed.expiresAt) >= Date.parse(now), "CONTINUITY_CHALLENGE_EXPIRED", "Continuity challenge has expired");
+    const key = record.continuityPublicKeys.find((candidate) => candidate.keyId === keyId);
+    invariant(key && key.status === "ACTIVE" && !record.revokedKeyIds.includes(keyId), "CONTINUITY_KEY_REVOKED_OR_UNKNOWN", "Continuity key is revoked or unknown");
+    await assertProof({ publicKey: key.publicKey, message: challenge, signature });
+    return { record, parsed, key };
+  }
+
+  async function resumeSameLife({ anchorId, challenge, keyId, signature, runtimeBinding, modelRuntime }) {
+    const { record, parsed } = await verifyChallenge({ anchorId, challenge, keyId, signature });
+    invariant(stableStringify(parsed.binding) === stableStringify(runtimeBinding), "CONTINUITY_RUNTIME_BINDING_MISMATCH", "Runtime binding must match the signed challenge");
+    const bindingHash = await sha256(runtimeBinding);
+    const challengeHash = await sha256(challenge);
+    const next = await commitUpdate(record, {
+      controllerBindingHash: bindingHash,
+      authorizedPlatformBindings: [...record.authorizedPlatformBindings, clone(runtimeBinding)],
+      modelRuntimeHistory: [...record.modelRuntimeHistory, clone(modelRuntime)]
+    }, "CONTINUITY_RUNTIME_RESUMED", [["activeControllerBindingHash", bindingHash], ["continuityChallenge", challengeHash]]);
+    return Object.freeze({ lifeId: next.lifeId, anchorId: next.anchorId, status: "SAME_LIFE_RESUMED", record: next });
+  }
+
+  async function appendCheckpoint({ anchorId, checkpoint, keyId, signature }) {
+    const record = await get(anchorId);
+    invariant(record, "CONTINUITY_ANCHOR_NOT_FOUND", `Continuity Anchor not found: ${anchorId}`);
+    const expected = { ...clone(checkpoint), anchorId: record.anchorId, lifeId: record.lifeId, sequence: record.checkpointSequence + 1, previousCheckpointHash: record.lastCheckpointHash };
+    const message = stableStringify({ domain: "KAIOS_CONTINUITY_CHECKPOINT_V1", checkpoint: expected });
+    const key = activeKey(record);
+    invariant(key.keyId === keyId, "CONTINUITY_ACTIVE_KEY_REQUIRED", "Checkpoint must use the active continuity key");
+    await assertProof({ publicKey: key.publicKey, message, signature });
+    const checkpointHash = await sha256(expected);
+    const next = await commitUpdate(record, { lastCheckpointHash: checkpointHash, checkpointSequence: expected.sequence }, "CONTINUITY_CHECKPOINT_APPENDED");
+    return Object.freeze({ checkpoint: Object.freeze(expected), checkpointHash, record: next });
+  }
+
+  async function appendHandoff({ anchorId, handoff, keyId, signature }) {
+    const record = await get(anchorId);
+    invariant(record, "CONTINUITY_ANCHOR_NOT_FOUND", `Continuity Anchor not found: ${anchorId}`);
+    const body = { ...clone(handoff), anchorId: record.anchorId, lifeId: record.lifeId, previousHandoffHash: record.lastHandoffHash };
+    const message = stableStringify({ domain: "KAIOS_CONTINUITY_HANDOFF_V1", handoff: body });
+    const key = activeKey(record);
+    invariant(key.keyId === keyId, "CONTINUITY_ACTIVE_KEY_REQUIRED", "Handoff must use the active continuity key");
+    await assertProof({ publicKey: key.publicKey, message, signature });
+    const handoffHash = await sha256(body);
+    const next = await commitUpdate(record, { lastHandoffHash: handoffHash }, "CONTINUITY_HANDOFF_APPENDED");
+    return Object.freeze({ handoff: Object.freeze(body), handoffHash, record: next });
+  }
+
+  async function rotateKey({ anchorId, newKey, oldKeySignature, newKeyProof }) {
+    const record = await get(anchorId);
+    invariant(record, "CONTINUITY_ANCHOR_NOT_FOUND", `Continuity Anchor not found: ${anchorId}`);
+    validatePublicKey(newKey, "newKey");
+    const oldKey = activeKey(record);
+    invariant(newKey.status === "ACTIVE" && newKey.epoch === record.keyEpoch + 1, "CONTINUITY_KEY_ROTATION_EPOCH_INVALID", "Rotated key must be active at the next epoch");
+    const rotation = { domain: "KAIOS_CONTINUITY_KEY_ROTATION_V1", anchorId, lifeId: record.lifeId, oldKeyId: oldKey.keyId, newKey: clone(newKey), nextEpoch: newKey.epoch };
+    const message = stableStringify(rotation);
+    await assertProof({ publicKey: oldKey.publicKey, message, signature: oldKeySignature, code: "CONTINUITY_OLD_KEY_AUTHORIZATION_REQUIRED" });
+    await assertProof({ publicKey: newKey.publicKey, message, signature: newKeyProof, code: "CONTINUITY_NEW_KEY_PROOF_REQUIRED" });
+    const keys = record.continuityPublicKeys.map((key) => key.keyId === oldKey.keyId ? { ...key, status: "REVOKED" } : key);
+    keys.push(clone(newKey));
+    const next = await commitUpdate(record, {
+      continuityPublicKeys: keys, keyEpoch: newKey.epoch,
+      revokedKeyIds: [...record.revokedKeyIds, oldKey.keyId]
+    }, "CONTINUITY_KEY_ROTATED", [["activeContinuityPublicKey", `${newKey.algorithm}:${newKey.publicKey}`]]);
+    return Object.freeze({ lifeId: next.lifeId, previousKeyId: oldKey.keyId, activeKeyId: newKey.keyId, record: next });
+  }
+
+  async function recover({ anchorId, newKey, newKeyProof, recoveryEvidence, recoverySignature, distinctVerifier }) {
+    const record = await get(anchorId);
+    invariant(record, "CONTINUITY_ANCHOR_NOT_FOUND", `Continuity Anchor not found: ${anchorId}`);
+    invariant(Array.isArray(recoveryEvidence?.evidenceHashes) && recoveryEvidence.evidenceHashes.length > 0, "CONTINUITY_RECOVERY_EVIDENCE_REQUIRED", "Recovery requires verifiable evidence hashes");
+    recoveryEvidence.evidenceHashes.forEach((hash, index) => assertHash(hash, `recoveryEvidence.evidenceHashes[${index}]`));
+    invariant(recoveryEvidence.lifeId === record.lifeId && recoveryEvidence.anchorId === record.anchorId && recoveryEvidence.genesisRecordHash === record.genesisRecordHash && recoveryEvidence.keyEpoch === record.keyEpoch && recoveryEvidence.recoveryPolicyHash === record.recoveryPolicyHash && recoveryEvidence.humanDecisionHash === record.humanDecisionHash && recoveryEvidence.humanAuthorityId === record.recoveryAuthority.humanAuthorityId, "CONTINUITY_RECOVERY_BINDING_INVALID", "Recovery evidence must bind Life, Anchor, Genesis, epoch, policy, Human decision and Human Authority");
+    invariant(distinctVerifier?.workerId && distinctVerifier.workerId !== record.issuer.workerId && distinctVerifier.workerId !== record.genesisBuilderWorkerId, "CONTINUITY_DISTINCT_VERIFIER_REQUIRED", "Recovery requires a distinct authorized verifier");
+    const verifierAuthority = record.authorizedVerifiers.find((verifier) => verifier.workerId === distinctVerifier.workerId && verifier.status === "ACTIVE");
+    invariant(verifierAuthority, "CONTINUITY_DISTINCT_VERIFIER_NOT_REGISTERED", "Recovery verifier must be registered and active");
+    assertHash(distinctVerifier.reviewEvidenceHash, "distinctVerifier.reviewEvidenceHash");
+    validatePublicKey(newKey, "newKey");
+    invariant(newKey.epoch === record.keyEpoch + 1 && newKey.status === "ACTIVE", "CONTINUITY_KEY_ROTATION_EPOCH_INVALID", "Recovered key must be active at the next epoch");
+    const verifierContext = { workerId: distinctVerifier.workerId, reviewEvidenceHash: distinctVerifier.reviewEvidenceHash };
+    const message = stableStringify({ domain: "KAIOS_CONTINUITY_RECOVERY_V1", recoveryEvidence: clone(recoveryEvidence), newKey: clone(newKey), verifier: verifierContext });
+    await assertProof({ publicKey: record.recoveryAuthority.publicKey, message, signature: recoverySignature, code: "CONTINUITY_RECOVERY_AUTHORITY_PROOF_REQUIRED" });
+    await assertProof({ publicKey: verifierAuthority.publicKey, message, signature: distinctVerifier.signature, code: "CONTINUITY_DISTINCT_VERIFIER_PROOF_REQUIRED" });
+    await assertProof({ publicKey: newKey.publicKey, message, signature: newKeyProof, code: "CONTINUITY_NEW_KEY_PROOF_REQUIRED" });
+    const keys = record.continuityPublicKeys.map((key) => key.status === "ACTIVE" ? { ...key, status: "REVOKED" } : key);
+    const revoked = [...record.revokedKeyIds, ...record.continuityPublicKeys.filter((key) => key.status === "ACTIVE").map((key) => key.keyId)];
+    keys.push(clone(newKey));
+    const next = await commitUpdate(record, { continuityPublicKeys: keys, revokedKeyIds: [...new Set(revoked)], keyEpoch: newKey.epoch }, "CONTINUITY_HUMAN_RECOVERY_ACCEPTED", [["activeContinuityPublicKey", `${newKey.algorithm}:${newKey.publicKey}`]]);
+    return Object.freeze({ lifeId: next.lifeId, status: "SAME_LIFE_RECOVERED", record: next });
+  }
+
+  async function verifyHistory(anchorId) {
+    const records = await history(anchorId);
+    invariant(records.length > 0, "CONTINUITY_HISTORY_EMPTY", "Continuity Anchor has no history");
+    for (let index = 0; index < records.length; index += 1) {
+      const record = records[index];
+      validateContinuityRecord(record);
+      invariant(record.previousRecordHash === (records[index - 1]?.recordHash ?? null), "CONTINUITY_HISTORY_BROKEN", "Continuity record hash chain is broken");
+      invariant(await hashContinuityAnchorRecord(record) === record.recordHash, "CONTINUITY_RECORD_HASH_INVALID", "Continuity record hash mismatch");
+      await assertProof({ publicKey: record.issuer.publicKey, message: record.recordHash, signature: record.issuerSignature, code: "CONTINUITY_ISSUER_SIGNATURE_INVALID" });
+    }
+    return true;
+  }
+
+  return Object.freeze({ createAnchor, get, list, history, verifyHistory, verifyChallenge, resumeSameLife, appendCheckpoint, appendHandoff, rotateKey, recover });
 }

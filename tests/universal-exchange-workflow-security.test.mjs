@@ -14,6 +14,11 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.equal((workflow.match(/uses: actions\/checkout@v7/g) || []).length, 2);
   assert.equal((workflow.match(/uses: actions\/setup-node@v7/g) || []).length, 2);
   assert.equal((workflow.match(/timeout-minutes:\s*10/g) || []).length, 2);
+  assert.match(workflow, /Confirm exact pull request head and clean patch/);
+  assert.match(workflow, /test "\$\(git rev-parse HEAD\)" = "\$HEAD_SHA"/);
+  assert.match(workflow, /git diff --check "\$BASE_SHA"\.\.\.HEAD/);
+  assert.doesNotMatch(workflow, /authorized prototype scope/);
+  assert.doesNotMatch(workflow, /unexpected=.*core\/life\/index/);
 
   assert.doesNotMatch(workflow, /contents:\s*write/);
   assert.doesNotMatch(workflow, /actions:\s*write/);
