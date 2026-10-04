@@ -76,14 +76,20 @@ async function verifyWorldFirst(){
       // raycast actors, not just DOM HUD. A moving actor at a point's edge can
       // enter between selection and real CDP pointerdown; that is correctly
       // rejected by the product's actor-origin gesture exclusion.
-      const point=await page.evaluate(()=>{for(let y=innerHeight<500?125:250;y<innerHeight*.6;y+=20)for(let x=innerWidth*.4;x<innerWidth-90;x+=20)if([0,30,60].every(dx=>[-24,0,24].every(pad=>[-24,0,24].every(py=>document.elementFromPoint(x+dx+pad,y+py)?.id==='three'&&globalThis.__K11520_CAMERA__.canPanAt(x+dx+pad,y+py)))))return{x,y};return null});
+      // Search the full visible width: the central lane can legitimately hold
+      // trees/lives, especially at 412px. Do not move those objects for QA.
+      const point=await page.evaluate(()=>{for(let y=innerHeight<500?80:250;y<innerHeight*.6;y+=20)for(let x=40;x<innerWidth-90;x+=20)if([0,30,60].every(dx=>[-24,0,24].every(pad=>[-24,0,24].every(py=>document.elementFromPoint(x+dx+pad,y+py)?.id==='three'&&globalThis.__K11520_CAMERA__.canPanAt(x+dx+pad,y+py)))))return{x,y};return null});
       assert.ok(point,'an unobstructed world gesture surface must exist');
       const start=await read(),{x,y}=point;
       await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
       await touch('touchStart',[[1,x,y]]);await touch('touchMove',[[1,x+30,y]]);await touch('touchMove',[[1,x+60,y]]);await touch('touchEnd',[]);
       result.pointerTrace=await page.evaluate(()=>({events:worldFirstPointerTrace,touchAction:getComputedStyle(document.querySelector('#three')).touchAction,scale:visualViewport.scale}));result.panOrigin=point;
       const pan=await read();assert.notEqual(pan.panX,start.panX,'world drag pans');assert.deepEqual(pan.playerXYZ,start.playerXYZ,'camera pan never moves XYZ');
-      await touch('touchStart',[[1,x-35,y],[2,x+35,y]]);await touch('touchMove',[[1,x-60,y],[2,x+60,y]]);await touch('touchEnd',[]);
+      // Pinch has a different footprint than the one-sided pan. Both actual
+      // finger origins and endpoints must hit canvas, not a left-side HUD.
+      const pinchPoint=await page.evaluate(y=>{for(let x=80;x<innerWidth-80;x+=20)if([-60,-35,35,60].every(dx=>document.elementFromPoint(x+dx,y)?.id==='three'))return{x,y};return null},y);
+      assert.ok(pinchPoint,'both pinch fingers must originate on world canvas');result.pinchOrigin=pinchPoint;
+      await touch('touchStart',[[1,pinchPoint.x-35,y],[2,pinchPoint.x+35,y]]);await touch('touchMove',[[1,pinchPoint.x-60,y],[2,pinchPoint.x+60,y]]);await touch('touchEnd',[]);
       const zoom=await read();assert.ok(zoom.zoom>pan.zoom&&zoom.zoom<=zoom.bounds.maxZoom);assert.deepEqual(zoom.playerXYZ,start.playerXYZ);
       await page.locator('#k11520CameraReset').click();assert.deepEqual(await read(),start);
       await page.waitForFunction(original=>{const p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return Math.abs(p.x-original.x)<.5&&Math.abs(p.y-original.y)<.5},result.visibility.player,{timeout:3000});
