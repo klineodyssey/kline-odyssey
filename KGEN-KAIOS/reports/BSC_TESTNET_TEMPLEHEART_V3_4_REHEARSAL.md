@@ -1,5 +1,148 @@
 # BSC Testnet TempleHeart V3.4 Rehearsal
 
+## Current isolated continuation — 2026-10-03
+
+The older upgrade evidence below is retained as history. It is **not** the new
+FortuneGame-disabled candidate. The canonical cumulative machine-readable
+results are in this report's sibling JSON under `cleanRehearsal`.
+
+- Fresh BSC97 proxy: `0x80e8A8A25195a8604ECc11805268Eda60b5A87D2`.
+- Fresh implementation: `0x14A9fD67C5A0aA6a1901A468ee23E95c18ae56CD`.
+- FortuneGame: zero / PR #133 disabled.
+- All token funding and roles are freshly deployed TEST-only resources.
+- Real Wish → signed Holy Cup → KAIOS Alchemy proof → Fortune receipt: PASS.
+- RepaymentRequired rejection → voluntary repayment → repayment condition
+  restored with 30-day cooldown still enforced: PASS.
+- Real Heartbeat receipt: PASS.
+- Proof replay, wrong beneficiary, wrong civilization, wallet switch,
+  unauthorized upgrade, live legacy cooldown and operational reserve rejection:
+  PASS, decoded custom errors from live BSC97 calls.
+- Core test gas paid: `0.0017856403` tBNB over 45 confirmed transactions.
+- Fortune epoch 690: 500 distinct successful claimants (499 TEST contract wallets
+  and one controlled browser TEST signer); a fresh eligible 501st claimant was
+  rejected with `FortuneEpochFull` at block `134504620`: PASS.
+- Heartbeat hour `497494`: **88 distinct confirmed cohort claims / 89th rejected
+  with `HeartbeatHourFull`: PASS**. The earlier 61 claims in hour `497492` remain
+  historical evidence and are not included in this cap result.
+- Actual Ignite day `20729`: **88 distinct confirmed cohort claims / 89th
+  rejected with `IgniteDayFull`: PASS**, within the unchanged real UTC
+  00:00–00:09:59 window. No BSC97 clock mutation or window relaxation occurred.
+- Overall fresh rehearsal: **CLEAN_REHEARSAL_PASS**. This does not authorize
+  Mainnet execution or assert that the final release-head CI has completed.
+  The original incident and its explicit resolution remain below.
+- Total test gas: tool `0.0817700062` + controlled browser `0.0001594203` =
+  **`0.0819294265` tBNB**, below the unchanged aggregate `0.10` tBNB ceiling.
+- Unsigned Mainnet manifest: sibling JSON `unsignedMainnetManifest`;
+  `READY_FOR_HUMAN_PARAMETERS`, not permission to broadcast. The committed
+  snapshot names its generation head; the final release-head manifest is
+  regenerated and published by CI in `templeheart-lineage-<exact-head>`.
+- Mainnet transactions, KGEN transfers and role changes: zero.
+
+Exact receipts, block numbers, source hash and testnet identity manifest are
+preserved in the JSON. Temporary local I/O interruption after repayment was
+recovered from its existing transaction hash without resubmission.
+
+### Historical halted intent — 2026-10-02 20:57:18 UTC
+
+An `ECONNRESET` interrupted broadcast of `DEPLOY_actor571` after its durable
+`INTENT_RECORDED` checkpoint. Both the configured BSC97 node and an independent
+public BSC97 node still returned no transaction or receipt after bounded
+propagation checks; both returned latest/pending nonce `3054`. This is not proof
+that the original request was never broadcast. The original gas price was not
+saved in that intent, and the signed raw transaction existed only in the ended
+process's memory. The no-resend guard was preserved; no replacement, new signing,
+rehearsal restart or automatic Ignite waiter was executed.
+
+- Hash: `0xe00e782aadefeb31750d6e36f41f67f7e499806f5bdea18f4e6f8814fa34207a`.
+- Nonce: `3054`; deployment target: null; gas limit: `337000`.
+- Creation data hash:
+  `0xe5c5970d346cbf85cae8fb2ddc9692ab92a7842cd9760f98eb2cb154ccd32502`.
+- Recorded creation data hash matches the existing `RehearsalActor` artifact.
+- Confirmed tool transactions: `2722`; tool gas: `0.0767700346` tBNB.
+- Controlled browser gas: `0.0001594203` tBNB; combined: `0.0769294549` tBNB,
+  below the unchanged aggregate `0.10` tBNB cap.
+- All previous successes and the unresolved intent remain in the cumulative JSON.
+- Further scheduled checks may only reconcile the recorded hash/read CI until
+  this exact recovery decision is explicitly resolved. Do not combine Heartbeat
+  successes from different UTC hours to claim the hourly cap test passed.
+
+### Explicitly authorized continuation — 2026-10-02 21:xx UTC
+
+Human authorized marking the old intent `ABANDONED_UNBROADCAST_INTENT`, while
+preserving the uncertainty that an RPC attempt had occurred. It was not replayed,
+reconstructed, replaced or cancelled. A new legitimate `makeWish` call using
+actor 510's existing civilization was sent using the node's fresh latest/pending
+nonce, without forcing a nonce. It confirmed in block `134509665`, hash
+`0xd6585f21580a76fb435d71a11907f8abe25ee2b9a35327bfcab72a8061aaa02d`.
+The existing Heartbeat timestamp was verified unchanged.
+
+The continuation cohort is actors 510–570 plus new actors 600–627: 89 distinct
+TEST contract wallets, with valid wishes. Actor 571 is excluded. Preparation is
+confirmed once; resume only verifies its existing receipts. Combined tool and
+controlled-browser fees after preparation are `0.0784303865` tBNB, within the
+unchanged `0.10` total ceiling.
+
+Before the target hour, the writer was deliberately stopped without pending
+transactions to harden evidence checks. The resumed runner requires 88 distinct
+cohort receipts and matching events in one real hour/day, equality between the
+cohort count and the pinned on-chain counter, and an exact block-pinned cap
+rejection from the unclaimed 89th actor. Earlier 61 Heartbeats do not count.
+Whole-run gas forecasts are refreshed after each real window wait; every
+transaction's fee floor includes both tool and browser receipts. Actual Ignite
+subsequently completed in its natural UTC window; no chain clock was changed.
+
+### Final real-window completion — 2026-10-03 00:03:45 UTC
+
+Both cap results derive from 88 distinct successful transaction receipts,
+matching Heart claim events, matching block hashes and timestamps, and an
+on-chain global count equal to those 88 cohort claims. The unclaimed 89th actor
+is `0x12C6Db9A06cb7c3F1aA18f2f89D0BDA65364f461`. Its two rejection probes used
+read-only `eth_call` pinned to the explicit blocks below; neither sent a failing
+transaction. Detailed per-receipt evidence remains in the cumulative JSON at
+`cleanRehearsal.capContinuation.heartbeat` and `.ignite`.
+
+| Test | Real receipt interval (UTC) | Receipt blocks | Pinned 89th rejection |
+|---|---|---|---|
+| Heartbeat, hour `497494` | 2026-10-02 22:00:03–22:03:26 | `134514323`–`134514776` | `HeartbeatHourFull`, block `134514778`, 22:03:27 |
+| Ignite, day `20729` | 2026-10-03 00:00:16–00:03:45 | `134530353`–`134530816` | `IgniteDayFull`, block `134530818`, 00:03:45 |
+
+The Heartbeat rejection block hash is
+`0x65625ca17af32dd7164577dfa0b03c35d03aeac6b1b212aa9ff81072c1757284`.
+The Ignite rejection block hash is
+`0x4ebcccb577f559f9a2c973fc3c1822d787d0fad25d2f86f85694899efa5513eb`.
+Both hashes were rechecked after the pinned rejection calls. Ignite receipts
+and its rejection all occurred within seconds 16–225 of the canonical day.
+Fortune's completed 500/501 result was retained without repeating its claims.
+
+The final journal contains 2,955 confirmed tool transactions plus nine confirmed
+controlled-browser transactions, and no unresolved `INTENT_RECORDED` or
+`SUBMITTED` operations. The historical actor-571 intent remains preserved as
+`ABANDONED_UNBROADCAST_INTENT`, not deleted or recast as a confirmed transaction.
+Session `80511` exited successfully; the final writer PID exited and its lock
+was released. No writer or transaction work was restarted during closeout.
+
+The execution-run records bind the deployed contract source hash and tool hash
+to the run's actual source head. They are not a claim that a later evidence
+commit has already passed exact-head CI. Mainnet deployment, KGEN transfers,
+role changes and treasury changes remain **NO**; Human-final parameters and the
+separate unsigned execution manifest remain the Mainnet decision boundary.
+
+Final independent public-node readback at block `134532727` confirmed version
+`3.4.0`, FortuneGame zero, Fortune maximum 8, and counters 500 / 88 / 88.
+The implementation code hash still matched its deployment evidence. Latest and
+pending signer nonces were both `3287`; no transaction was signed or sent.
+The readback is retained under `cleanRehearsal.capContinuation.finalIndependentReadback`.
+
+Independent closeout review checked all recorded fee calculations, unique
+confirmed transaction hashes/nonces, distinct claimant identities, event counters
+and receipt windows. It also read both rejection blocks and four first/last
+receipt samples from a separate public BSC97 node. That node could not replay
+historical `eth_call` because the historical state was pruned (`missing trie
+node`); this is not presented as an independent rerun of the original pinned
+rejection probes. Their original evidence remains preserved without alteration.
+
+## Historical V3.3.2 → V3.4 upgrade evidence (not current deployment route)
+
 Status: **TEMPLEHEART_V3_4_TESTNET_REHEARSAL_PASS**
 
 Execution class: **REAL_BSC_TESTNET**

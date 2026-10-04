@@ -18,6 +18,10 @@ on:
       - "K線西遊記/data/kgen-5d-world-map.json"
       - "KGEN-KAIOS/contracts/KAIOS.sol"
       - "KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol"
+      - "KGEN-KAIOS/tests/contracts/MockKGEN.sol"
+      - "KGEN-KAIOS/tests/templeheart.integration.test.mjs"
+      - "KGEN-KAIOS/tools/validate-templeheart-storage.mjs"
+      - "KGEN-KAIOS/tools/compile-contracts.mjs"
 
 permissions:
   contents: read
@@ -29,7 +33,7 @@ concurrency:
 jobs:
   current-lineage:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,22 +46,76 @@ jobs:
       - name: Confirm exact pull request head
         shell: bash
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
-      - name: Enforce review-only boundary
+      - name: Enforce lineage boundary and narrowly authorized V3.4 routing
+        id: boundary
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          changed="$(git diff --name-only "$BASE_SHA" HEAD)"
-          printf '%s\n' "$changed"
-          if grep -E '\.sol$' <<<"$changed"; then
-            echo "Solidity changes are outside this review-only workflow." >&2
-            exit 1
-          fi
-          if grep -E '(^|/)(archive|archives)(/|$)|_ARCHIVE' <<<"$changed"; then
-            echo "Historical archive changes are outside this review-only workflow." >&2
-            exit 1
-          fi
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          // Human authorization 2026-10-03 is limited to this completion PR,
+          // not a standing exemption for Solidity or future branches.
+          const authorized = {
+            number: 473, repo: 'klineodyssey/kline-odyssey',
+            head: 'codex/k12345-v34-completion', base: 'main'
+          };
+          const allowedSolidity = new Set([
+            'KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol',
+            'KGEN-KAIOS/tests/contracts/MockKGEN.sol'
+          ]);
+          function classify(changes, identity) {
+            let solidity = false;
+            for (const { status, path } of changes) {
+              if (/(^|\/)(archive|archives)(\/|$)|_ARCHIVE/i.test(path)) {
+                throw new Error(`Historical archive changes prohibited: ${path}`);
+              }
+              if (!/\.sol$/i.test(path)) continue;
+              solidity = true;
+              if (!Object.keys(authorized).every(k => identity[k] === authorized[k]) ||
+                  !allowedSolidity.has(path) || status !== 'M') {
+                throw new Error(`Unauthorized Solidity change: ${status} ${path}`);
+              }
+            }
+            return solidity;
+          }
+          // Exercise the same decision function used below, including fail-closed
+          // PR identity, historical sources, deletion and rename (as delete/add).
+          const allowed = [...allowedSolidity].map(path => ({ status: 'M', path }));
+          assert.equal(classify([], authorized), false);
+          assert.equal(classify(allowed, authorized), true);
+          for (const key of Object.keys(authorized)) {
+            assert.throws(() => classify(allowed, { ...authorized, [key]: 'not-authorized' }));
+          }
+          for (const path of ['KGEN-KAIOS/contracts/KAIOS.sol',
+            'KGEN/contracts/KGEN_Token_V7_5_2.sol',
+            'KGEN/contracts/KGEN_TempleHeart_V3_2_6.sol',
+            'archive/source.md', 'docs/archives/old.md', 'docs/OLD_ARCHIVE.md']) {
+            assert.throws(() => classify([{ status: 'M', path }], authorized));
+          }
+          for (const status of ['A', 'D', 'T']) {
+            assert.throws(() => classify([{ ...allowed[0], status }], authorized));
+          }
+          const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+          const pr = event.pull_request;
+          const identity = { number: pr.number, repo: pr.head.repo.full_name,
+            head: pr.head.ref, base: pr.base.ref };
+          assert.equal(pr.base.repo.full_name, authorized.repo);
+          const fields = execFileSync('git', ['diff', '--no-renames', '--name-status', '-z',
+            process.env.BASE_SHA, 'HEAD'], { encoding: 'utf8' }).split('\0');
+          fields.pop();
+          assert.equal(fields.length % 2, 0);
+          const changes = [];
+          for (let i = 0; i < fields.length; i += 2) {
+            changes.push({ status: fields[i], path: fields[i + 1] });
+          }
+          const solidity = classify(changes, identity);
+          console.log(JSON.stringify({ boundary: 'PASS', solidity, changes }, null, 2));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `solidity=${solidity}\n`);
+          NODE
       - name: Validate verifier syntax
         run: node --check KGEN-KAIOS/tools/verify-current-lineage.mjs
       - name: Preserve Physics CURRENT and V3.8 identity
@@ -69,6 +127,59 @@ jobs:
         run: node KGEN-KAIOS/tools/verify-current-lineage.mjs
       - name: Require reproducible committed report
         run: git diff --exit-code -- KGEN-KAIOS/reports/CURRENT_LINEAGE_RECONCILIATION.json
+      - name: Install pinned local contract toolchain for authorized Solidity changes
+        if: steps.boundary.outputs.solidity == 'true'
+        working-directory: KGEN-KAIOS
+        run: npm install --ignore-scripts --no-package-lock --omit=optional --no-audit --no-fund
+      - name: Mandatory compile, storage compatibility and storage negative tests
+        if: steps.boundary.outputs.solidity == 'true'
+        working-directory: KGEN-KAIOS
+        run: |
+          npm run compile
+          npm run storage:validate
+          node tools/validate-templeheart-storage.mjs --storage-self-test
+          node tools/validate-templeheart-storage.mjs --clean-continuation-self-test
+      - name: Mandatory full local EVM V3.4 safety suite
+        if: steps.boundary.outputs.solidity == 'true'
+        working-directory: KGEN-KAIOS
+        # No credentials, chain RPC, signer secrets or broadcast step. Includes
+        # UUPS/roles, replay, beneficiary/civilization mismatch, Fortune anti-bot,
+        # repayment, reserve protection, Heartbeat and Ignite global caps.
+        run: node --test --test-reporter=spec tests/templeheart.integration.test.mjs
+      - name: Materialize unsigned manifest at the tested exact head
+        if: steps.boundary.outputs.solidity == 'true'
+        working-directory: KGEN-KAIOS
+        # Offline template only; unknown Human parameters remain explicit.
+        # Publish as an artifact to avoid a self-referential committed SHA.
+        run: |
+          node tools/validate-templeheart-storage.mjs --mainnet-manifest
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const report = JSON.parse(fs.readFileSync('reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json'));
+          const m = report.unsignedMainnetManifest;
+          assert.equal(m.sourceHead, execFileSync('git', ['rev-parse', 'HEAD'], {encoding:'utf8'}).trim());
+          assert.equal(m.chainId, 56);
+          assert.equal(m.broadcast, false);
+          assert.equal(m.signerLoaded, false);
+          assert.equal(m.mainnetTransactionsSent, 0);
+          assert.equal(m.initializerBinding.initializerCalldataHash, null);
+          assert.equal(m.initializerBinding.status, 'HUMAN_PARAMETERS_REQUIRED_FOR_ACTUAL_CALLDATA_HASH');
+          assert.equal(m.testnetReference.mainnetParameterSource, false);
+          assert.ok(Object.values(m.parameters).every(value => value.startsWith('HUMAN_FINAL')));
+          console.log('EXACT_HEAD_UNSIGNED_MANIFEST_BINDING_PASS');
+          NODE
+      - name: Preserve exact-head safety and unsigned manifest evidence
+        if: steps.boundary.outputs.solidity == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: templeheart-lineage-${{ github.event.pull_request.head.sha }}
+          path: |
+            KGEN-KAIOS/reports/SOLIDITY_COMPILE_EVIDENCE.json
+            KGEN-KAIOS/reports/TEMPLEHEART_STORAGE_LAYOUT_VALIDATION.json
+            KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json
+          if-no-files-found: error
       - name: Check patch whitespace
         shell: bash
         env:

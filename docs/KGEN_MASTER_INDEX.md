@@ -1,5 +1,17 @@
 # KGEN MASTER_INDEX
 
+## TempleHeart V3.4 continuation (2026-10-03)
+
+Existing paths only; no new Runtime, bootstrap or Boot change:
+
+- `KGEN/docs/TEMPLEHEART_V3_4_0_CIVILIZATION_CREDIT_SPEC.md`: cumulative completion gaps and continuity decisions.
+- `KGEN-KAIOS/tools/validate-templeheart-storage.mjs`: storage validation plus unsigned fresh proxy package / separate read-only live audit.
+- `core/integrations/temple-heart-12345.mjs`: legacy continuity reader and chain97 candidate identity/call adapter, not a second Wallet.
+- `KGEN-KAIOS/tests/templeheart.integration.test.mjs`: real-proof multi-wallet caps, local deployment package and security regressions.
+- `.github/workflows/kaios-portal-product-qa.yml`: existing browser QA plus no-broadcast contract job.
+
+Mainnet candidate remains NOT READY; production Heart stays V3.2.6.
+
 ## KAIOS canonical World Portal / Audio (2026-10-01)
 
 | Path | Purpose |
@@ -979,3 +991,18 @@ Runtime V1 implementation:
 | `core/data/canonical.json` | Player-first, membership, no-new-Life, Zhang Cuiyun, remote Gatekeeper and evidence-based 8888 audit projections. |
 | `K線西遊記/temples/11520/app.mjs` | First-screen concierge, working Voice/Speech/Text fallback, Join, first mission and return flow. |
 | `K線西遊記/temples/11520/styles.css` | Animated CSS 3D character and visible 2D/reduced-motion fallback. |
+
+### TempleHeart V3.4 clean completion — existing authorities only
+
+| Path | Active responsibility |
+|---|---|
+| `KGEN/contracts/KGEN_TempleHeart_Upgradeable.sol` | V3.4 proof/repayment economy plus appended immutable legacy cooldown source; no old direct-contract UUPS upgrade. |
+| `core/integrations/temple-heart-12345.mjs` | BSC97 exact identity/ABI resolver and read-only V3.2.6 history adapter. |
+| `K線西遊記/temples/12345/modules/runtime-main.js` | Existing Heart transaction authority, candidate form, amount approval, receipts and account isolation. |
+| `K線西遊記/temples/12345/modules/kgen-12345-web3-shell.js` | Existing Wallet entrypoints; explicit test candidate delegates without contaminating legacy Mainnet targets. |
+| `KGEN-KAIOS/tools/validate-templeheart-storage.mjs` | Fresh TEST97 rehearsal, one-time legacy binding, unsigned Mainnet template/materialization. |
+| `KGEN-KAIOS/reports/BSC_TESTNET_TEMPLEHEART_V3_4_REHEARSAL.json` | Preserved historical evidence plus separate cleanRehearsal / frontendManifest / unsignedMainnetManifest. |
+| `tests/kaios-world-audio-browser.mjs` | Original mobile regression, no-broadcast V3.4 UI test and separately acknowledged real TEST97 browser rehearsal. |
+
+FortuneGame #133 remains disabled. Mainnet roles, capital and cutover remain
+Human-final parameters. A pending real UTC-window test is never reported as PASS.
