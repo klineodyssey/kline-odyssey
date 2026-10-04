@@ -62,19 +62,22 @@ The sign still supplies LONG/SHORT; canonical detents and positive1–100 lots
 remain unchanged. Zero is the initial journey mode; ordinary XYZ movement never
 depends on trading eligibility.
 
-The public page remains **SIMULATION**, not real-money trading. Its existing
-execution adapter uses the V1 ceiling and zero fee. The unsigned Mainnet intent
-also rejects above1C, even if other gates are satisfied. The100C engine and
-explicit BSC97 rehearsal remain historical simulation/test infrastructure, not
-permission for production liquidation.
+The public page defaults to **SIMULATION**. An explicit wallet action may select
+the separately labelled BSC97 `TESTNET · NO REAL VALUE` adapter. Both boundaries
+use the V1 ceiling; the BSC97 transaction boundary additionally reads each
+market's on-chain `TradingCapability.maxCWad == 1e18` before accepting an order.
+The unsigned Mainnet intent also rejects above1C. Earlier100C BSC97 receipts are
+historical evidence only and cannot authorize the current adapter.
 
 Free Binance aggregate-trade references carry provider event time and sequence.
 The game polls every5s with the existing15s stale limit, no credential, paid
-subscription, synthetic fresh timestamp or stale fallback. Invalid/stale data
-cannot fill/liquidate; existing positions remain. World exploration/combat
-continues offline with a clearly waiting simulation reference frame.
-USDT public reference quotes are **not** the USD production settlement index;
-there is no implicit USD/USDT parity or on-chain Oracle activation.
+subscription, synthetic fresh timestamp or stale fallback. For BSC97 they are a
+new-risk availability gate only: LIVE may preview/submit; STALE, WAIT and INVALID
+reject before any wallet request. They never set a fill or settlement price.
+Existing on-chain test positions use the manifest-bound BSC97 quorum Oracle;
+simulation positions retain their existing simulation observation. World
+exploration/combat continues offline with a clearly waiting reference frame.
+USDT public quotes are **not** a Mainnet USD Oracle and imply no USD/USDT parity.
 
 The existing practice guardian now supports a repeatable0C journey encounter:
 approach, attack surviving parts, defeat, earn local-only fragments/+5 local
@@ -112,12 +115,16 @@ principal withdrawal remains independent of unfunded claim debt.
 Wallet UI auto-reads allowance; maximum approval is explicit and still requires
 wallet confirmation. No approval occurs on Connect. Deposit once, trade multiple
 times, and withdraw only Available. Candidate claims and index-delta liquidation
-ABI require manifest capability `ISOLATED_V1`; the already deployed historical
-BSC97 rehearsal is still `NOTIONAL_RETURN_V1`, not this candidate deployment.
+ABI require manifest capability `ISOLATED_V1`. The current BSC97 manifest binds
+the clean `wallet-1c-20261004` successor stack, `INDEX_DELTA_C_LOTS_V1`,
+`cMin=0.001`, `cMax=1`, three test feeds per market, isolated settlement capital
+and insurance. Its token, balances and receipts are test assets only.
 
 Mainnet broadcast remains disabled pending a populated, explicitly approved
-execution manifest. Local Ganache receipts/screenshots are not public Testnet or
-Mainnet receipts. Earlier sections below are retained as historical lineage.
+execution manifest. The automated BSC97 browser signer stays in Node and never
+enters the browser or evidence; it is not Human MetaMask acceptance. Android /
+MetaMask remains a separate Human device check. Local Ganache evidence is never
+reported as public Testnet or Mainnet. Earlier sections remain as lineage.
 
 ## C detents and physical distance — V2.6.23 / 2026-09-25
 

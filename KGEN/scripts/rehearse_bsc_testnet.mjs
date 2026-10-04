@@ -362,7 +362,7 @@ try {
   assert.equal(sha256(fs.readFileSync(predecessorPath)),sha256(predecessorBytes),'PREDECESSOR_FILE_CHANGED');
  }
 }catch(error){console.error(`DEPLOYMENT_PREFLIGHT_BLOCKED: ${error.code==='ERR_ASSERTION'?error.message.split('\n')[0]:(error.code??error.name)}`);await localRpc?.disconnect();provider.destroy();process.exit(1);}
-const manifest={documentType:'K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST',mode:'BSC_TESTNET',chainId:97,testOnly:true,verified:false,status:'DEPLOYING',publicNetwork:live,admin,upgradeAuthority:admin,pauser:admin,keeper:admin,settlementAuthority:null,addresses:{},codeHashes:{},oracles:[],oracleMode:'TEST_ORACLE_MOCK',productionOracleReady:false,cMax:100,lotsMax:100,initialMarginBps:100,maintenanceMarginBps:10,oracleMaxAge:3600,oracleMaxDeviationBps:500,gasBudgetTestBnb:'0.05',maximumGasPriceGwei:10,rolePolicy:'Single test operator admin/upgrader/pauser/keeper; not production design. Settlement only Position, executor only Trigger. No EOA settlement role.',receipts:[],checks:{},sourceHashes:JSON.parse(fs.readFileSync(`${outDir}/build.json`)).sourceHashes};
+const manifest={documentType:'K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST',mode:'BSC_TESTNET',chainId:97,testOnly:true,verified:false,status:'DEPLOYING',publicNetwork:live,admin,upgradeAuthority:admin,pauser:admin,keeper:admin,settlementAuthority:null,addresses:{},codeHashes:{},oracles:[],oracleMode:'TEST_ORACLE_MOCK',productionOracleReady:false,cMin:0.001,cMax:1,lotsMax:100,initialMarginBps:100,maintenanceMarginBps:10,oracleMaxAge:3600,oracleMaxDeviationBps:500,gasBudgetTestBnb:'0.05',maximumGasPriceGwei:10,rolePolicy:'Single test operator admin/upgrader/pauser/keeper; not production design. Settlement only Position, executor only Trigger. No EOA settlement role.',receipts:[],checks:{},sourceHashes:JSON.parse(fs.readFileSync(`${outDir}/build.json`)).sourceHashes};
 let spent=0n;
 manifest.triggerKeeper=admin;
 manifest.brainKeeper=ZeroAddress;
@@ -371,7 +371,8 @@ manifest.brainKeeperPolicy='No Brain payroll/heart keeper authority is needed or
 manifest.accountingModel='ISOLATED_SETTLEMENT_CAPITAL_V1';
 manifest.pnlModel='INDEX_DELTA_C_LOTS_V1';
 manifest.marginPerLotKgen=1;
-manifest.capabilities={settlementCapital:'ISOLATED_V1',reservedSettlementLiability:true,playerClaimable:true,withdraw:true};
+manifest.publicQuotePolicy={source:'BINANCE_PUBLIC_MARKET_DATA_ONLY',markets:['BTCUSDT','ETHUSDT','BNBUSDT'],maximumAgeMs:15000,newRiskGateOnly:true,settlementAuthority:false,statuses:{LIVE:'ALLOW_NEW_RISK',STALE:'BLOCK_NEW_RISK',WAIT:'BLOCK_NEW_RISK',INVALID:'BLOCK_NEW_RISK'}};
+manifest.capabilities={settlementCapital:'ISOLATED_V1',reservedSettlementLiability:true,playerClaimable:true,withdraw:true,authoritativeCMax:'1e18',minimumC:'1e15'};
 if(predecessor)manifest.successor={runId,strategy:'NEW_STACK_NO_OLD_CONTRACT_WRITES',predecessorSha256:sha256(predecessorBytes),predecessorSnapshot:predecessor,readbacks:'CHAIN_CODE_ADMIN_PROXY_AND_ALL_RECEIPTS_VERIFIED'};
 // Atomic reservation precedes the first broadcast. A second process cannot
 // overwrite receipts or deploy another stack after racing an existsSync check.
@@ -415,7 +416,7 @@ async function send(c,method,args=[],label=method) {
  return record(label,await c[method](...args,await feeGuard(gas)),c.target,method);
 }
 async function mustRevert(call,label) {
- const errors={DUPLICATE_FILL:'InvalidOrder()',LIQUIDATION_REPLAY:'PositionNotOpen()',ORACLE_STALE:'OracleQuorumUnavailable()'};
+ const errors={DUPLICATE_FILL:'InvalidOrder()',LIQUIDATION_REPLAY:'PositionNotOpen()',ORACLE_STALE:'OracleQuorumUnavailable()',C_ABOVE_1_REJECTED:'OracleCapabilityExceeded()'};
  const expected=keccak256(new TextEncoder().encode(errors[label])).slice(0,10);
  let rejected=false;try{await call();}catch(error){
    if(error.code!=='CALL_EXCEPTION'||typeof error.data!=='string'||!error.data.startsWith(expected))throw error;
@@ -445,7 +446,7 @@ try {
    await send(position,'configureMarket',[market,100,10,3600,parseEther('0.01'),parseEther('1000000'),true]);
    await send(position,'configureOracle',[market,feeds.map(f=>f.target),2,500]);
    // Testnet mock capability only. Never production provenance/readiness.
-   await send(position,'configureTradingCapability',[market,[parseEther('100'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1000000'),id('TEST_ONLY_MOCK_ORACLE_CAPABILITY')]]);
+   await send(position,'configureTradingCapability',[market,[parseEther('1'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1000000'),id('BSC97_1C_FREE_REFERENCE_GATE_TEST_ONLY')]]);
  }
  assert.equal(await position.executor(),trigger.target);
  assert.equal(await brain.hasRole(role,position.target),true);
@@ -477,7 +478,7 @@ try {
    const timestamp=(await provider.getBlock('latest')).timestamp-age;
    for(const feed of feedSets[0]) await send(feed,'set',[price,timestamp],'TEST_ORACLE_TICK');
  }
- async function order(c='100',lots=1,price=parseEther('100000')) {
+ async function order(c='1',lots=1,price=parseEther('100000')) {
    const id=await trigger.nextOrderId();await send(trigger,'createOrder',[0,parseEther(c),lots,price],'CREATE_ORDER');
    assert.equal((await trigger.order(id)).status,1n);return id;
  }
@@ -487,6 +488,10 @@ try {
    assert.equal(r.walletBefore-r.walletAfter,r.marginLocked);
    await mustRevert(()=>trigger.observeOrder.staticCall(id),'DUPLICATE_FILL');return o.positionId;
  }
+ await tick(parseEther('100000'));
+ const minimumOrder=await order('0.001');await send(trigger,'cancelOrder',[minimumOrder],'CANCEL_MINIMUM_C_ORDER');
+ assert.equal((await trigger.order(minimumOrder)).status,3n);manifest.checks.MINIMUM_0_001C='PASS';persist();
+ await mustRevert(()=>trigger.createOrder.staticCall(0,parseEther('5'),1,parseEther('100000')),'C_ABOVE_1_REJECTED');
  for(const [previous,current,name] of [['99900','100050','UPWARD_CROSS'],['100050','99900','DOWNWARD_CROSS'],['100000','100000','EXACT_TOUCH']]) {
    await tick(parseEther(previous));const id=await order();await tick(parseEther(current));const pid=await fill(id);
    await send(trigger,'closePosition',[pid],'NORMAL_CLOSE');assert.equal((await position.positionSnapshot(pid)).status,2n);
@@ -499,9 +504,9 @@ try {
  assert.equal(liquidated.status,3n);assert.equal(liquidated.collateralWad,0n);
  assert.equal(await brain.availablePrincipal(admin),before);
  assert.equal(receipt.settlementPrice,parseEther('98000'));
- assert.equal(receipt.rawPnl,-parseEther('200000'));
- assert.equal(receipt.badDebt,parseEther('199999'));
- assert.equal(await brain.uncoveredBadDebt(),0n);assert.equal(await brain.insuranceReserve(),parseEther('800001'));
+ assert.equal(receipt.rawPnl,-parseEther('2000'));
+ assert.equal(receipt.badDebt,parseEther('1999'));
+ assert.equal(await brain.uncoveredBadDebt(),0n);assert.equal(await brain.insuranceReserve(),parseEther('998001'));
  assert.equal(await brain.reservedSettlementLiability(),0n);
  assert.equal(await brain.playerClaimable(admin),0n);
  await mustRevert(()=>trigger.observePosition.staticCall(liqId),'LIQUIDATION_REPLAY');
@@ -521,13 +526,14 @@ try {
    const check=async(promise,label)=>{const result=await promise;if(!result.ok)console.error(`${label}: ${result.reason??result.status}`);assert.equal(result.ok,true,`${label}: ${result.reason??result.status}`);return result};
    await check(adapter.recover(),'ACTUAL_ADAPTER_RECOVERY');
    let book=adapter.snapshot();
-   assert.equal(book.positions.length,4);assert.equal(book.orders.length,5);
+   assert.equal(book.positions.length,4);assert.equal(book.orders.length,6);
    assert.equal(book.positions.filter(p=>p.status==='CLOSED').length,3);
    assert.equal(book.positions.filter(p=>p.status==='LIQUIDATED').length,1);
    assert.equal(book.wallet.principal,999);assert.equal(book.wallet.lockedMargin,0);
    assert.equal(book.receipts.filter(r=>r.kind==='FILL').length,4);
    assert.equal(book.receipts.filter(r=>r.kind==='SETTLEMENT').length,4);
-   const input={axis:'KX',market:'BTCUSDT',c:100,lots:1,currentPrice:100000,triggerPrice:100100};
+   const input={axis:'KX',market:'BTCUSDT',c:1,lots:1,currentPrice:100000,triggerPrice:100100,
+     publicReference:{market:'BTCUSDT',price:100000,updatedAt:Date.now(),receivedAt:Date.now(),source:'BINANCE_PUBLIC_MARKET_DATA_ONLY',sourceStatus:'REFERENCE_FRESH',stale:false,settlementAuthority:false}};
    assert.equal((await check(adapter.preview(input),'ACTUAL_ADAPTER_PREVIEW')).requiredMargin,1);
    await check(adapter.faucet(),'ACTUAL_ADAPTER_TEST_FAUCET');
    await check(adapter.approve(10),'ACTUAL_ADAPTER_APPROVE');

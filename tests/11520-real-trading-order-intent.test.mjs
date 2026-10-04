@@ -156,8 +156,9 @@ const codec=vendored.ethers.utils;
 function testnetFixture({capital=false}={}){
  const addresses={testToken:'0x'+'11'.repeat(20),brainProxy:'0x'+'22'.repeat(20),positionEngine:'0x'+'33'.repeat(20),orderTriggerEngine:'0x'+'44'.repeat(20),brainImplementation:'0x'+'55'.repeat(20)};
  const code='0x60006000',codeHashes=Object.fromEntries(Object.keys(addresses).map(k=>[k,codec.keccak256(code)]));
- const deployment={mode:'BSC_TESTNET',status:'DEPLOYED_CONFIG_VERIFIED',chainId:97,testOnly:true,publicNetwork:true,verified:true,deploymentBlock:1,addresses,codeHashes};
- if(capital){deployment.capabilities={settlementCapital:'ISOLATED_V1'};deployment.pnlModel='INDEX_DELTA_C_LOTS_V1'}
+ const deployment={mode:'BSC_TESTNET',status:'DEPLOYED_CONFIG_VERIFIED',chainId:97,testOnly:true,publicNetwork:true,verified:true,deploymentBlock:1,addresses,codeHashes,
+  cMin:0.001,cMax:1,publicQuotePolicy:{source:'BINANCE_PUBLIC_MARKET_DATA_ONLY',maximumAgeMs:15000,newRiskGateOnly:true,settlementAuthority:false}};
+ if(capital){deployment.capabilities={settlementCapital:'ISOLATED_V1',authoritativeCMax:'1000000000000000000',minimumC:'1000000000000000'};deployment.pnlModel='INDEX_DELTA_C_LOTS_V1'}
  const abi=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[k,new codec.Interface([...v,...(capital?CAPITAL_EXECUTION_ABI[k]||[]:[])])]));
  const keyFor=address=>Object.keys(addresses).find(k=>addresses[k].toLowerCase()===address.toLowerCase());
  const role='0x'+'aa'.repeat(32),blockHash='0x'+'bb'.repeat(32),hash='0x'+'cc'.repeat(32),wad=v=>codec.parseUnits(String(v),18);
@@ -209,6 +210,8 @@ function testnetFixture({capital=false}={}){
     case 'positionKey':out=['0x'+'dd'.repeat(32)];break;
     case 'settlementClaims':out=[account,1,1,wad(50),wad(50-claimable),wad(claimable),100,100];break;
     case 'claimSettlement':out=[wad(claimable)];break;
+    case 'tradingCapability':out=[wad(1),9999999999,3600,3600,wad(1),'0x'+'11'.repeat(32)];break;
+    case 'marketTradingState':out=[1];break;
     case 'readMarketPrice':if(stale)throw {code:'CALL_EXCEPTION'};out=[wad(100),100,3];break;
     case 'marketConfig':out=[100,50,3600,1,wad(1000000),true];break;
     case 'nextOrderId':out=[phase==='none'?1:2];break;
@@ -239,7 +242,8 @@ function testnetFixture({capital=false}={}){
   settledOrders(count,liquidated=false){phase=liquidated?'liquidated':'closed';for(let id=1;id<=count;id++){record('orderTriggerEngine','OrderCreated',[id,account]);record('orderTriggerEngine','OrderFilled',[id,id,wad(100)]);record('positionEngine',liquidated?'PositionLiquidated':'PositionClosed',[id,wad(99),wad(-2),wad(-2),0])}record('orderTriggerEngine','OrderFilled',[999,999,wad(100)]);record('positionEngine',liquidated?'PositionLiquidated':'PositionClosed',[999,wad(99),wad(-2),wad(-2),0])},
   fill(){phase='filled';record('orderTriggerEngine','OrderFilled',[1,1,wad(100)])}};
 }
-const onchainInput={axis:'KX',market:'BTCUSDT',c:100,lots:2,currentPrice:100,triggerPrice:100};
+const onchainInput={axis:'KX',market:'BTCUSDT',c:1,lots:2,currentPrice:100,triggerPrice:100,
+ get publicReference(){const now=Date.now();return {market:'BTCUSDT',price:100,updatedAt:now,receivedAt:now,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY',sourceStatus:'REFERENCE_FRESH',stale:false,settlementAuthority:false}}};
 test('recovery groups settlement event queries per pinned refresh and filters exact position IDs',async()=>{
  for(const liquidated of [false,true]){
   const f=testnetFixture();f.settledOrders(3,liquidated);const adapter=f.make();assert.equal((await adapter.recover()).ok,true);
@@ -277,6 +281,24 @@ test('BSC97 vendored ethers5 adapter validates deployment and reads only real-co
  const preview=await adapter.preview(onchainInput);assert.equal(preview.ok,true);assert.equal(preview.requiredMargin,2);
  assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
  assert.equal((await adapter.observe({price:1})).reason,'KEEPER_OBSERVATION_REQUIRED');
+});
+test('BSC97 new-risk boundary accepts 0.001C/1C only with LIVE public reference and never broadcasts rejected risk',async()=>{
+ const f=testnetFixture(),adapter=f.make();
+ for(const c of [0.001,-0.001,1,-1])assert.equal((await adapter.preview({...onchainInput,c})).ok,true,`${c}C`);
+ for(const c of [1.0001,-1.0001,5,-5]){
+  f.calls.length=0;const result=await adapter.submit({...onchainInput,c});assert.equal(result.ok,false);assert.match(result.reason,/(?:INVALID_C_DETENT|V1_HIGH_SPEED_PRODUCTION_LOCKED)/);
+  assert.equal(f.calls.some(call=>call.method==='eth_sendTransaction'),false);assert.equal(f.calls.length,0,'C gate precedes every RPC');
+ }
+ const now=Date.now(),baseReference={market:'BTCUSDT',price:100,updatedAt:now,receivedAt:now,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY',sourceStatus:'REFERENCE_FRESH',stale:false,settlementAuthority:false};
+ for(const publicReference of [
+  {...baseReference,updatedAt:now-15001,stale:true},
+  {...baseReference,sourceStatus:'WAIT'},
+  {...baseReference,sourceStatus:'INVALID'},
+  {...baseReference,price:0}
+ ]){
+  f.calls.length=0;const result=await adapter.submit({...onchainInput,publicReference});assert.equal(result.ok,false);
+  assert.equal(f.calls.some(call=>call.method==='eth_sendTransaction'),false);assert.equal(f.calls.length,0,'public reference gate precedes every RPC');
+ }
 });
 test('display preview reuses only a bounded fresh READY recovery and still reads live identity and oracle',async t=>{
  let now=Date.now();t.mock.method(Date,'now',()=>now);const f=testnetFixture(),adapter=f.make();assert.equal((await adapter.refresh()).ok,true);

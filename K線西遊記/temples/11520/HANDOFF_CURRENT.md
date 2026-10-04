@@ -1,5 +1,31 @@
 # 11520 HANDOFF CURRENT
 
+## BSC97 real-wallet beta 0.001–1C — candidate, 2026-10-04
+
+- Authority: Human `KAIOS GM — EXECUTION ORDER`. This is a separate branch and
+  Draft PR based on main `14c6937078518e8026f31f642e82221ad0e3ab82` after
+  PR #487. Camera, HUD and coordinate presentation are frozen and unchanged.
+- Reused organs only: `KGEN_BrainExchange`, `KGEN_PositionEngine`,
+  `KGEN_MarketRiskKernel`, `KGEN_OrderTriggerEngine`, the existing EIP-1193
+  execution adapter and receipt recovery. No second exchange or ledger exists.
+- The clean successor run `wallet-1c-20261004` deploys current source on BSC97.
+  Manifest authority is `cMin=0.001`, `cMax=1`; each on-chain market capability
+  is exactly `1e18`. The rehearsal proves 0.001C admission/cancel and direct
+  above-1C rejection before opening, plus touch/cross, close, liquidation,
+  replay, stale Oracle, reserve and isolated-capital rules.
+- Free BTC/ETH/BNB Binance market-data-only observations are credential-free and
+  never settlement authority. LIVE may admit new BSC97 test risk. STALE, WAIT or
+  INVALID blocks before wallet dispatch. Fill, PnL and liquidation remain the
+  manifest-bound on-chain test Oracle's responsibility.
+- Public browser QA uses a configured Node-only BSC97 signer and an in-memory,
+  deterministic second TEST actor; no private key reaches browser or artifacts.
+  Wallet A is LONG and Wallet B is SHORT, with independent principal, orders,
+  positions, PnL, liquidation, claimable and withdrawals. Zero claimable after
+  a fully reserved settlement is asserted rather than fabricating unpaid debt.
+- Mainnet deployment, BSC56 transaction, real KGEN/KAIOS transfer and treasury
+  changes remain NO. Android / MetaMask is prepared but requires Human physical
+  device acceptance; automated Node brokerage is not labelled Human MetaMask.
+
 ## World-first / Market Life — local candidate, 2026-10-04
 
 - Authority: Human `KAIOS_K11520_HUMAN_CENTERED_WORLD_AND_MARKET_LIFE_V1`.
