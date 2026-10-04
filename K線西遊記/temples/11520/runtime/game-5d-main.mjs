@@ -38,8 +38,9 @@ let playerHomeFraming=false;
 // Camera state is presentation only, deliberately not persisted with Player XYZ.
 const cameraView={zoom:1,panX:0,panZ:0,manual:false};
 let cameraRecenterPending=false;
-const CAMERA_BOUNDS=Object.freeze({minZoom:.65,maxZoom:1.8,maxPan:12});
+const CAMERA_BOUNDS=Object.freeze({minZoom:.4,maxZoom:2.5,maxPan:24});
 const clampCamera=(n,min,max)=>Math.max(min,Math.min(max,n));
+const cameraPanLimit=()=>clampCamera(12/cameraView.zoom,4,CAMERA_BOUNDS.maxPan);
 const legacySession=readPlayerSession(),playerLife=createPlayerLife({lastXYZ:legacySession?.xyz});
 const playerId=playerLife.activePlayer().playerId,playerLifeStorage=playerLife.snapshot().persistent?undefined:null,scopedStorage=createPlayerScopedStorage(playerLifeStorage,playerId);
 const restoredSession=readPlayerSession(scopedStorage);const localLifePosition=playerLife.activePlayer().lastXYZ;
@@ -582,7 +583,7 @@ function routeMonsterTap(m){if(!m||m.state==='DEAD')return null;if(m.simulationC
 function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){const routed=routeMonsterTap(latchedMonster);if(routed)return routed}const rect=renderer.domElement.getBoundingClientRect();tapPointer.x=((clientX-rect.left)/rect.width)*2-1;tapPointer.y=-((clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);const hits=raycaster.intersectObjects(scene.children,true);for(const hit of hits){if(ancestorData(hit.object,'playerHome')){playerLifeUI.open();return emitWorldTapRoute('ENTITY',{entityType:'PLAYER_HOME'})}if(ancestorData(hit.object,'isPlayer')){renderer.domElement.dispatchEvent(new CustomEvent('k11520:player-tap',{detail:{source:'WORLD_RAYCAST'}}));return emitWorldTapRoute('PLAYER')}const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null){const m=[...world.monsters,...(world.ambientLife||[])].find(x=>String(x.id)===String(mid));const routed=routeMonsterTap(m);if(routed)return routed}const oid=ancestorData(hit.object,'worldObjectId');if(oid!=null){const o=WORLD_OBJECTS.find(x=>String(x.id)===String(oid));if(o){showEntityInfo(objectEntity(o));toast(`發現 ${o.name||o.label||o.kind||'物件'}`);return emitWorldTapRoute('ENTITY',{entityType:'WORLD_OBJECT',entityId:String(oid)})}}}
   let pointHit=hits.find(h=>ancestorData(h.object,'isGround'));let p=pointHit?.point;if(!p){const q=new THREE.Vector3();if(raycaster.ray.intersectPlane(groundPlane,q))p=q}if(p){cancelNavigation('切換世界目標');S.navTarget=null;document.getElementById('waypointAction')?.remove();setWorldTarget3D({x:p.x,y:p.y,z:p.z},{mode:'WORLD',source:'WORLD_GROUND'});startWorldNavigation3D();toast(`XYZ 前往 X ${fmt(p.x,1)} · Y ${fmt(p.y,1)} · Z ${fmt(p.z,1)}`);return emitWorldTapRoute('GROUND',{x:p.x,y:p.y,z:p.z})}toast('這裡沒有可到達目標');return emitWorldTapRoute('NONE')
 }
-const cameraPointers=new Map();let pinchDistance=null,pinchZoom=1,cameraGesture=false;
+const cameraPointers=new Map();let pinchDistance=null,pinchZoom=1,cameraGesture=false,cameraStatusTimer=0;
 function canPanAt(x,y){
   if(document.elementFromPoint(x,y)!==renderer.domElement)return false;
   const r=renderer.domElement.getBoundingClientRect(),rayX=renderer.domElement.dataset.xVisualMirror==='1'?r.left+r.width-(x-r.left):x;
@@ -593,8 +594,14 @@ function canPanAt(x,y){
     if(ancestorData(hit.object,'isGround'))return true;
   }return true;
 }
+function isWorldGestureArea(x,y,radius=10){
+  const r=clampCamera(Number(radius)||10,4,20);
+  return[-r,0,r].every(dx=>[-r,0,r].every(dy=>document.elementFromPoint(x+dx,y+dy)===renderer.domElement&&canPanAt(x+dx,y+dy)));
+}
 const cameraReset=document.createElement('button');cameraReset.id='k11520CameraReset';cameraReset.type='button';cameraReset.textContent='◎';cameraReset.title='回到玩家';cameraReset.setAttribute('aria-label','Camera 回到玩家');document.body.appendChild(cameraReset);
-cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false};
+const cameraStatus=document.createElement('output');cameraStatus.id='k11520CameraZoomStatus';cameraStatus.setAttribute('aria-live','polite');cameraStatus.setAttribute('aria-atomic','true');document.body.appendChild(cameraStatus);
+function showCameraStatus(){cameraStatus.textContent=`🔍 ${cameraView.zoom.toFixed(2)}×`;cameraStatus.classList.add('show');clearTimeout(cameraStatusTimer);cameraStatusTimer=setTimeout(()=>cameraStatus.classList.remove('show'),1500)}
+cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false;showCameraStatus()};
 // Retire the transparent half-screen yaw interceptor. HUD controls above the
 // canvas keep their own pointer owners; only world-origin pointers enter here.
 $('#lookPad').style.setProperty('pointer-events','none','important');
@@ -613,16 +620,18 @@ renderer.domElement.addEventListener('pointermove',e=>{
   const old=cameraPointers.get(e.pointerId);if(!old)return;
   cameraPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(cameraPointers.size>=2){
-    if(pinchDistance>0)cameraView.zoom=clampCamera(pinchZoom*pointerDistance()/pinchDistance,CAMERA_BOUNDS.minZoom,CAMERA_BOUNDS.maxZoom);
+    if(pinchDistance>0){cameraView.zoom=clampCamera(pinchZoom*pointerDistance()/pinchDistance,CAMERA_BOUNDS.minZoom,CAMERA_BOUNDS.maxZoom);const panLimit=cameraPanLimit();cameraView.panX=clampCamera(cameraView.panX,-panLimit,panLimit);cameraView.panZ=clampCamera(cameraView.panZ,-panLimit,panLimit);showCameraStatus()}
     cameraView.manual=true;cameraGesture=true;return;
   }
   // A gesture started on an actionable monster remains a monster interaction.
   if(!worldTapStart?.panAllowed||pinchDistance!==null)return;
   if(!cameraGesture&&Math.hypot(e.clientX-worldTapStart.x,e.clientY-worldTapStart.y)<=10)return;
   cameraGesture=true;cameraView.manual=true;playerHomeFraming=false;
-  const scale=.022/cameraView.zoom,dx=(e.clientX-old.x)*scale,dy=(e.clientY-old.y)*scale;
-  cameraView.panX=clampCamera(cameraView.panX+dx*Math.cos(S.camYaw)+dy*Math.sin(S.camYaw),-CAMERA_BOUNDS.maxPan,CAMERA_BOUNDS.maxPan);
-  cameraView.panZ=clampCamera(cameraView.panZ+dx*Math.sin(S.camYaw)-dy*Math.cos(S.camYaw),-CAMERA_BOUNDS.maxPan,CAMERA_BOUNDS.maxPan);
+  const scale=.022/cameraView.zoom,dx=(e.clientX-old.x)*scale,dy=(e.clientY-old.y)*scale,panLimit=cameraPanLimit();
+  // Direct manipulation: move the camera focus opposite the finger delta so
+  // rendered world content stays under the finger. This never changes XYZ.
+  cameraView.panX=clampCamera(cameraView.panX-dx*Math.cos(S.camYaw)-dy*Math.sin(S.camYaw),-panLimit,panLimit);
+  cameraView.panZ=clampCamera(cameraView.panZ-dx*Math.sin(S.camYaw)+dy*Math.cos(S.camYaw),-panLimit,panLimit);
 },{passive:true});
 function finishCameraPointer(e){
   if(!cameraPointers.has(e.pointerId))return;
@@ -665,7 +674,7 @@ function revealPlayerBehindOccluders(){
     for(const material of occlusionMaterials.get(mesh)){if(fadedMaterials.has(material))continue;fadedMaterials.set(material,{opacity:material.opacity,transparent:material.transparent,depthWrite:material.depthWrite});material.opacity=Math.min(material.opacity,.18);material.transparent=true;material.depthWrite=false}
   });
 }
-globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:CAMERA_BOUNDS,playerXYZ:{...S.xyz},authority:'CAMERA_ONLY'}),canPanAt});
+globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:{...CAMERA_BOUNDS,currentPan:cameraPanLimit()},playerXYZ:{...S.xyz},authority:'CAMERA_ONLY'}),canPanAt,isWorldGestureArea});
 
 function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);if(S.navActive)moveNavigation();else moveManual();persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play((S.navActive||(groundMode&&moving))?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();applyWorldCamera();combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
 

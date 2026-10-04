@@ -56,9 +56,14 @@ await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD tar
 // A fixed screen pixel is not a ground fixture once market-life actors roam.
 // Select actual empty world through the existing read-only hit-test, then send
 // a real browser click. Keep the canonical WORLD_GROUND and XYZ assertions.
-const tap0=await coords(),ground=await page.evaluate(()=>{for(let y=innerHeight*.4;y<innerHeight*.65;y+=20)for(let x=innerWidth*.35;x<innerWidth*.8;x+=20)if(Math.abs(x-innerWidth/2)>40&&globalThis.__K11520_CAMERA__?.canPanAt(x,y))return{x,y};return null});
-assert.ok(ground,'an actual empty world target must exist');await page.mouse.click(ground.x,ground.y);
-await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',null,{timeout:2500});
+const tap0=await coords();let groundNavigationActive=false;
+for(let attempt=0;attempt<8&&!groundNavigationActive;attempt++){
+  const ground=await page.evaluate(()=>{for(let y=innerHeight*.4;y<innerHeight*.65;y+=20)for(let x=innerWidth*.35;x<innerWidth*.8;x+=20)if(Math.abs(x-innerWidth/2)>40&&globalThis.__K11520_CAMERA__?.isWorldGestureArea(x,y,10))return{x,y};return null});
+  assert.ok(ground,'an actual empty world target must exist');await page.mouse.click(ground.x,ground.y);
+  groundNavigationActive=await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',null,{timeout:750}).then(()=>true,()=>false);
+  if(!groundNavigationActive&&await page.locator('#sheet.open').isVisible())await page.locator('#sheetClose').click();
+}
+assert.equal(groundNavigationActive,true,'a fresh empty-world click must start canonical WORLD_GROUND navigation');
 const groundTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(groundTarget.y.toFixed(3)),0);assert.ok(Math.abs(groundTarget.x-tap0.x)>.1||Math.abs(groundTarget.z-tap0.z)>.1,'world tap did not create a distinct XYZ target');
 await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.12},[tap0.x,tap0.y,tap0.z],{timeout:4000});
 await page.screenshot({path:`${OUT}/11520-world-tap-xyz.png`,fullPage:true});

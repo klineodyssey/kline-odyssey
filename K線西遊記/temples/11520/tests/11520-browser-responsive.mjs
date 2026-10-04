@@ -71,27 +71,35 @@ async function verifyWorldFirst(){
       const read=()=>page.evaluate(()=>globalThis.__K11520_CAMERA__.snapshot());
       const cdp=await context.newCDPSession(page);
       const touch=(type,points)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:points.map(([id,x,y])=>({id,x,y,radiusX:3,radiusY:3,force:1}))});
-      // Pick an actually empty canvas origin, not a hard-coded monster/UFO pixel.
-      // Reserve a 24px empty-world margin around the entire drag, including
-      // raycast actors, not just DOM HUD. A moving actor at a point's edge can
-      // enter between selection and real CDP pointerdown; that is correctly
-      // rejected by the product's actor-origin gesture exclusion.
-      // Search the full visible width: the central lane can legitimately hold
-      // trees/lives, especially at 412px. Do not move those objects for QA.
-      const point=await page.evaluate(()=>{for(let y=innerHeight<500?80:250;y<innerHeight*.6;y+=20)for(let x=40;x<innerWidth-90;x+=20)if([0,30,60].every(dx=>[-24,0,24].every(pad=>[-24,0,24].every(py=>document.elementFromPoint(x+dx+pad,y+py)?.id==='three'&&globalThis.__K11520_CAMERA__.canPanAt(x+dx+pad,y+py)))))return{x,y};return null});
+      // Search the rendered canvas for a real 20px clear gesture origin and
+      // four unobstructed drag endpoints. Actors may cross the later path; only
+      // the origin is an actionable-target exclusion in the product contract.
+      const point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,10)&&[[60,0],[-60,0],[0,60],[0,-60]].every(([dx,dy])=>document.elementFromPoint(x+dx,y+dy)===canvas))return{x,y};return null});
       assert.ok(point,'an unobstructed world gesture surface must exist');
       const start=await read(),{x,y}=point;
       await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
-      await touch('touchStart',[[1,x,y]]);await touch('touchMove',[[1,x+30,y]]);await touch('touchMove',[[1,x+60,y]]);await touch('touchEnd',[]);
-      result.pointerTrace=await page.evaluate(()=>({events:worldFirstPointerTrace,touchAction:getComputedStyle(document.querySelector('#three')).touchAction,scale:visualViewport.scale}));result.panOrigin=point;
-      const pan=await read();assert.notEqual(pan.panX,start.panX,'world drag pans');assert.deepEqual(pan.playerXYZ,start.playerXYZ,'camera pan never moves XYZ');
+      const directions=[];
+      for(const [name,dx,dy,screenAxis,sign] of [['right',60,0,'x',1],['left',-60,0,'x',-1],['down',0,60,'y',1],['up',0,-60,'y',-1]]){
+        await page.locator('#k11520CameraReset').click();await page.waitForTimeout(80);
+        const before=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
+        await touch('touchStart',[[1,x,y]]);await touch('touchMove',[[1,x+dx/2,y+dy/2]]);await touch('touchMove',[[1,x+dx,y+dy]]);await touch('touchEnd',[]);await page.waitForTimeout(80);
+        const after=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
+        assert.ok((after.player[screenAxis]-before.player[screenAxis])*sign>8,`drag ${name} must move world content ${name}`);
+        assert.deepEqual(after.camera.playerXYZ,start.playerXYZ,'camera pan never moves XYZ');
+        directions.push({name,finger:{dx,dy},content:{dx:after.player.x-before.player.x,dy:after.player.y-before.player.y},camera:after.camera});
+        await page.screenshot({path:`${OUT}/camera-${profile.name}-pan-${name}.png`});
+      }
+      result.pointerTrace=await page.evaluate(()=>({events:worldFirstPointerTrace,touchAction:getComputedStyle(document.querySelector('#three')).touchAction,scale:visualViewport.scale}));result.panOrigin=point;result.cameraDirections=directions;
       // Pinch has a different footprint than the one-sided pan. Both actual
       // finger origins and endpoints must hit canvas, not a left-side HUD.
-      const pinchPoint=await page.evaluate(y=>{for(let x=80;x<innerWidth-80;x+=20)if([-60,-35,35,60].every(dx=>document.elementFromPoint(x+dx,y)?.id==='three'))return{x,y};return null},y);
+      const pinchPoint=await page.evaluate(y=>{for(let x=100;x<innerWidth-100;x+=12)if([-90,-30,30,90].every(dx=>document.elementFromPoint(x+dx,y)?.id==='three'))return{x,y};return null},y);
       assert.ok(pinchPoint,'both pinch fingers must originate on world canvas');result.pinchOrigin=pinchPoint;
-      await touch('touchStart',[[1,pinchPoint.x-35,y],[2,pinchPoint.x+35,y]]);await touch('touchMove',[[1,pinchPoint.x-60,y],[2,pinchPoint.x+60,y]]);await touch('touchEnd',[]);
-      const zoom=await read();assert.ok(zoom.zoom>pan.zoom&&zoom.zoom<=zoom.bounds.maxZoom);assert.deepEqual(zoom.playerXYZ,start.playerXYZ);
+      await page.locator('#k11520CameraReset').click();await touch('touchStart',[[1,pinchPoint.x-30,y],[2,pinchPoint.x+30,y]]);await touch('touchMove',[[1,pinchPoint.x-90,y],[2,pinchPoint.x+90,y]]);await touch('touchEnd',[]);await page.waitForTimeout(80);
+      const zoomMax=await read();assert.equal(zoomMax.zoom,zoomMax.bounds.maxZoom);assert.deepEqual(zoomMax.playerXYZ,start.playerXYZ);assert.match(await page.locator('#k11520CameraZoomStatus').textContent(),/2\.50×/);await page.screenshot({path:`${OUT}/camera-${profile.name}-zoom-max.png`});
+      await page.locator('#k11520CameraReset').click();await touch('touchStart',[[1,pinchPoint.x-90,y],[2,pinchPoint.x+90,y]]);await touch('touchMove',[[1,pinchPoint.x-30,y],[2,pinchPoint.x+30,y]]);await touch('touchEnd',[]);await page.waitForTimeout(80);
+      const zoomMin=await read();assert.equal(zoomMin.zoom,zoomMin.bounds.minZoom);assert.deepEqual(zoomMin.playerXYZ,start.playerXYZ);assert.match(await page.locator('#k11520CameraZoomStatus').textContent(),/0\.40×/);await page.screenshot({path:`${OUT}/camera-${profile.name}-zoom-min.png`});
       await page.locator('#k11520CameraReset').click();assert.deepEqual(await read(),start);
+      await page.screenshot({path:`${OUT}/camera-${profile.name}-recenter.png`});
       await page.waitForFunction(original=>{const p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return Math.abs(p.x-original.x)<.5&&Math.abs(p.y-original.y)<.5},result.visibility.player,{timeout:3000});
       await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),true);
       // Quotes replace card DOM; read the currently attached visible card and
@@ -117,10 +125,19 @@ async function verifyWorldFirst(){
       const followed=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId);
       if(profile.name==='cold-390'){
         // Exclude the existing avatar priority ellipse, not an arbitrary entire
-        // vertical strip that can reject clearly visible moving actors.
-        const other=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().find(m=>m.visible&&m.inView&&m.uncovered&&((m.screen.x-innerWidth/2)/34)**2+((m.screen.y-innerHeight/2)/62)**2>1.1&&__K11520_MONSTER_FOLLOW__.snapshot().actors.some(a=>a.id===m.id&&a.alive)));
-        assert.ok(other,'a second market-life actor must be selectable');
-        await page.mouse.click(other.screen.x,other.screen.y);await page.locator('#monsterFollowAction').waitFor({state:'visible'});await page.locator('#monsterFollowAction').click();
+        // vertical strip that can reject clearly visible moving actors. Read a
+        // fresh projection for each real click because market-life actors keep
+        // moving while a slower browser runner is dispatching pointer input.
+        let switchControlVisible=false;
+        for(let attempt=0;attempt<8&&!switchControlVisible;attempt++){
+          const other=await page.evaluate(current=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().find(m=>m.id!==current&&m.visible&&m.inView&&m.uncovered&&((m.screen.x-innerWidth/2)/34)**2+((m.screen.y-innerHeight/2)/62)**2>1.1&&__K11520_MONSTER_FOLLOW__.snapshot().actors.some(a=>a.id===m.id&&a.alive)),followed);
+          assert.ok(other,'a second market-life actor must be selectable');
+          await page.mouse.click(other.screen.x,other.screen.y);
+          switchControlVisible=await page.locator('#monsterFollowAction').waitFor({state:'visible',timeout:750}).then(()=>true,()=>false);
+          if(!switchControlVisible&&await page.locator('#sheet.open').isVisible())await page.locator('#sheetClose').click();
+        }
+        assert.equal(switchControlVisible,true,'a fresh moving-actor world tap must expose follow control');
+        await page.locator('#monsterFollowAction').click();
         assert.notEqual(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),followed,'player can switch the followed actor');
         await page.locator('#k11520FollowMonster').click();await page.locator('#k11520MonsterGuide').click();await page.locator('#monsterFollowAction').click();
         result.checks.followSwitch='ACTUAL WORLD TAP / SWITCH / CANCEL PASS';
@@ -314,7 +331,11 @@ async function verifyKSpaceGameplay(page,report){
   try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
   const near=await state();assert.ok(near.playerLocal.z>start.playerLocal.z,'negative phase must not reverse XYZ');
   for(const axis of ['KX','KY','KZ'])assert.ok(Math.abs(near.playerK[axis]-100*(near.reference[axis].price/near.reference[axis].anchor-1))<1e-9,'current K must follow normalized reference, not frozen startup quotes');
-  assert.deepEqual(near.deltaK,{KX:0,KY:0,KZ:1});
+  // Derived displacement can accumulate IEEE-754 error as live market frames
+  // translate. Keep exact assertions everywhere else and do not round runtime.
+  const deltaKEpsilon=1e-12,expectedDeltaK={KX:0,KY:0,KZ:1};
+  assert.deepEqual(Object.keys(near.deltaK).sort(),Object.keys(expectedDeltaK).sort());
+  for(const axis of Object.keys(expectedDeltaK))assert.ok(Math.abs(near.deltaK[axis]-expectedDeltaK[axis])<=deltaKEpsilon,`derived deltaK.${axis} outside ${deltaKEpsilon}: ${near.deltaK[axis]}`);
   const prefix=report.profile.name;await page.screenshot({path:`${OUT}/${prefix}-kspace-target.png`});
   await page.locator('.monsterHud').click({position:{x:12,y:12}});await page.locator('#sheet.open').waitFor();
   assert.match(await page.locator('#sheetBody').textContent(),/Player 相對基準.*Monster 模擬相對基準.*模擬相對差/s);
