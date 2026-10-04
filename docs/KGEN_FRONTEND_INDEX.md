@@ -1,5 +1,14 @@
 # KGEN_FRONTEND_INDEX
 
+## Original OST integration candidate — 2026-10-02
+
+`C:/Desktop/kline-odyssey/assets/kaios-ost/` is content, not a second runtime:
+eight score/loop pairs, `render.py`, `KAIOS_AUDIO_PROVENANCE.json`. Full enumerated
+paths and purposes: `docs/KAIOS_AUDIO_PROVENANCE.md`.
+`C:/Desktop/kline-odyssey/tests/kaios-ost-browser.mjs` verifies real PCM and lifecycle.
+11520 state audio, 12345 receipt-only motifs and 16888 original 飛碟音響 remain
+world-owned presentations. Boot V1.4 and financial authorities are unchanged.
+
 Generated: 2026-07-05
 Site root: C:\Desktop\kline-odyssey\K線西遊記
 

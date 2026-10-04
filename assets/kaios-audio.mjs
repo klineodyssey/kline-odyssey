@@ -1,4 +1,4 @@
-/** First-party synthesized world audio. No media assets, network, wallet or economic authority. */
+/** One first-party audio authority. Selected-only same-origin OST; no wallet/economic authority. */
 export const AUDIO_STORAGE_KEY = 'KAIOS_AUDIO_PREFERENCES_V1';
 export const DEFAULT_AUDIO_SETTINGS = Object.freeze({ master:.65, music:.65, sfx:.65, voice:.7, muted:false, musicEnabled:false });
 // Synth envelopes were ~-47 dBFS at the old defaults. Preserve saved user gains;
@@ -7,7 +7,19 @@ export const MUSIC_THEME_GAIN = 3;
 const clamp = value => Math.max(0, Math.min(1, Number(value)));
 const normalWorld = value => String(value || 'PORTAL').toUpperCase().replace(/^K(?=\d)/,'');
 const notes = { PORTAL:[196,261.63,293.66,392,349.23,293.66,261.63,220], '12345':[261.63,329.63,392,523.25,392,329.63,293.66,329.63], '16888':[146.83,220,293.66,349.23,440,349.23,293.66,220], '11520':[220,261.63,293.66,329.63,392,329.63,293.66,261.63] };
-export const AUDIO_THEMES = Object.freeze({ PORTAL:'KAIOS Universe Theme', '11520':'花果山・星際戰場', '12345':'Heart / Life — 心光', '16888':'Universe / Space — 星海' });
+export const AUDIO_THEMES = Object.freeze({ PORTAL:'KAIOS Universe Theme', '11520':'花果山戰歌 · 雲起金箍', '12345':'心光 · 願火長明', '16888':'星海 · 文明遠航' });
+export const OST_TRACKS=Object.freeze(Object.fromEntries([
+ ['11520_THEME','01-huaguoshan-battle-song','花果山戰歌 · 雲起金箍'],
+ ['12345_THEME','02-heart-light','心光 · 願火長明'],
+ ['16888_THEME','03-sea-of-stars','星海 · 文明遠航'],
+ ['BOSS_THEME','04-six-phase-titan','六相天劫 · 破界'],
+ ['VICTORY_THEME','05-dawn-after-battle','雲開 · 凱旋'],
+ ['LEVEL_UP_MOTIF','06-light-of-ascent','升光 · 星核覺醒'],
+ ['JOURNEY_THEME','07-mountain-path','雲徑 · 取經晨行'],
+ ['DEEP_SPACE_THEME','08-starlight-home','星航 · 歸途微光']
+].map(([id,file,title])=>[id,Object.freeze({id,title,url:new URL('./kaios-ost/'+file+'.loop.wav',import.meta.url).href})])));
+export const UNIVERSE_PLAYLIST=Object.freeze(['16888_THEME','DEEP_SPACE_THEME']);
+export const OST_STATE_TRACKS=Object.freeze({EXPLORE:'JOURNEY_THEME',ENCOUNTER:'11520_THEME',COMBAT:'11520_THEME',BOSS:'BOSS_THEME',BOSS_LOW_HP:'BOSS_THEME',VICTORY:'VICTORY_THEME',RARE_LOOT:'LEVEL_UP_MOTIF',LEVEL_UP:'LEVEL_UP_MOTIF',GA600_LEVEL_UP:'LEVEL_UP_MOTIF',HOME:'JOURNEY_THEME',PORTAL:'DEEP_SPACE_THEME'});
 const EVENT_NOTES = Object.freeze({ attack:[220,110], slash:[220,110], hit:[160,80], weak:[440,660], loot:[523,659,784], fill:[392,523], close:[523,392], liquidation:[196,110], boss:[110,146,196], golden:[392,523,784], axe:[110,73], BOSS_SPAWN:[110,146,196], BOSS_PHASE_CHANGE:[146,220,294], RARE_LOOT:[523,659,784,1046], PLAYER_LEVEL_UP:[392,523,659,784], ENGINE_LEVEL_UP:[294,440,587,880], HOME_BUILD:[261,329,392], HOME_UPGRADE:[329,392,523], PORTAL_OPEN:[196,294,392], WORLD_ENTER:[261,392,523], QUEST_COMPLETE:[392,523,659], WEAK_POINT:[440,660], GOLDEN_RAIN:[392,523,784], PHANTOM_AXE:[110,73], SLASH:[220,110], HIT:[160,80], LOOT:[523,659,784], FILL:[392,523], CLOSE:[523,392], LIQUIDATION:[196,110] });
 // First-party arrangements sharing one continuing musical clock. Layer values
 // cross-blend on each pulse; changing gameplay state never starts another BGM.
@@ -26,6 +38,13 @@ export const MUSIC_STATES = Object.freeze(Object.fromEntries(Object.entries({
 }).map(([key,value])=>[key,Object.freeze(value)])));
 const EVENT_ALIASES = Object.freeze({attack:'ATTACK',slash:'SLASH',hit:'HIT',weak:'WEAK_POINT',loot:'COMMON_LOOT',LOOT:'COMMON_LOOT',boss:'BOSS_SPAWN',golden:'GOLDEN_RAIN',axe:'PHANTOM_AXE',ENGINE_LEVEL_UP:'GA600_LEVEL_UP'});
 const SOUND_DESIGNS = Object.freeze({
+  WISH:{notes:[294,330,440],type:'sine',length:.3,space:true,duck:true},
+  REPAY:{notes:[440,370,294],type:'triangle',length:.24,space:true,duck:true},
+  HEARTBEAT:{notes:[147,110],type:'sine',length:.25,sweep:.6},
+  LIGHT_LAMP:{notes:[294,440,587],type:'sine',length:.35,metal:true,duck:true},
+  FESTIVAL:{notes:[294,370,440,587],type:'triangle',space:true,duck:true},
+  NEW_YEAR:{notes:[220,294,440,587,880],type:'sine',space:true,duck:true},
+  WARP:{notes:[147,294,587],type:'triangle',sweep:1.6,space:true,duck:true},
   MONSTER_DETECTED:{notes:[165,247],type:'triangle',sweep:1.3},
   ATTACK:{notes:[310,190],type:'sawtooth',sweep:.3,metal:true},
   SLASH:{notes:[660,330],type:'triangle',sweep:.18,metal:true},
@@ -58,12 +77,25 @@ export function createKaiosAudio(options={}) {
   try { const saved=JSON.parse(storage?.getItem(AUDIO_STORAGE_KEY)||'null'); if(saved && typeof saved==='object') { for(const key of ['master','music','sfx','voice']) if(Number.isFinite(saved[key])) settings[key]=clamp(saved[key]); for(const key of ['muted','musicEnabled']) if(typeof saved[key]==='boolean') settings[key]=saved[key]; } } catch { persistent=false; }
   let context=null, master=null, channels=null, unlocked=false, recoveryGesture=false, world='PORTAL', timer=null, beat=0, themeBus=null, disposed=false, lastError=null, ownedSpeech=null;
   let musicState='EXPLORE',musicMix={...MUSIC_STATES.EXPLORE},nextPulse=0,duckTimer=null,voiceTimer=null,sfxDuck=false,voiceDuck=false;
+  let trackSource=null,trackId=null,loadingTrack=null,loadAbort=null,loadEpoch=0,universeTrack='16888_THEME',trackOffset=0,trackStarted=0,loopTrack=true;
+  const trackCache=new Map(),trackRetiring=new Set();
+  const fetchAudio=options.fetch||env.fetch?.bind(env);
+  // Test/old-browser fallback retains the same original synthesizer. Production
+  // uses decoded PCM in THIS context, never HTMLAudio or a second player.
+  const usesOST=()=>!!fetchAudio&&typeof context?.createBufferSource==='function';
+  const desiredTrack=()=>world==='11520'?OST_STATE_TRACKS[musicState]:world==='12345'?'12345_THEME':world==='16888'?universeTrack:null;
+  function applyTrackMood(){
+    if(!trackSource)return;
+    // Same score clock, intensity only; no extra percussion/BGM scheduler.
+    const target=world==='11520'?(musicState==='BOSS_LOW_HP'?.78:musicState==='ENCOUNTER'?.53:.68):.68;
+    gainTo(trackSource.gain,target,.4);
+  }
   const nodes=new Set(), listeners=new Set(), customThemes=new Map(), cooldown=new Map(), retiring=new Map();
   const timeout=options.setTimeout||env.setTimeout?.bind(env),clearTimeoutFn=options.clearTimeout||env.clearTimeout?.bind(env);
   const interval=options.setInterval||env.setInterval?.bind(env), clearIntervalFn=options.clearInterval||env.clearInterval?.bind(env);
-  const musicActive=()=>timer!==null&&context?.state==='running'&&!doc?.hidden&&!settings.muted&&settings.musicEnabled&&settings.master>0&&settings.music>0;
+  const musicActive=()=>(timer!==null||trackSource!==null)&&context?.state==='running'&&!doc?.hidden&&!settings.muted&&settings.musicEnabled&&settings.master>0&&settings.music>0;
   const duckFactor=()=>voiceDuck?.22:sfxDuck?.38:1;
-  const snapshot=()=>({world,theme:AUDIO_THEMES[world]||AUDIO_THEMES.PORTAL,musicState,musicMix:{...musicMix},duckFactor:duckFactor(),settings:{...settings},unlocked,needsGesture:!unlocked||recoveryGesture||context?.state!=='running',contextState:context?.state||'NOT_CREATED',musicPlaying:musicActive(),playing:musicActive(),musicEnabled:settings.musicEnabled,activeMusicLayers:timer===null?0:1,activeVoices:nodes.size,activeNodes:nodes.size,persistent,lastError});
+  const snapshot=()=>({world,theme:OST_TRACKS[trackId||desiredTrack()]?.title||AUDIO_THEMES[world]||AUDIO_THEMES.PORTAL,trackId,requestedTrack:desiredTrack(),loadingTrack,trackOffset,loopTrack,bufferSources:(trackSource?1:0)+trackRetiring.size,cachedTracks:trackCache.size,musicState,musicMix:{...musicMix},duckFactor:duckFactor(),settings:{...settings},unlocked,needsGesture:!unlocked||recoveryGesture||context?.state!=='running',contextState:context?.state||'NOT_CREATED',musicPlaying:musicActive(),playing:musicActive(),musicEnabled:settings.musicEnabled,activeMusicLayers:timer===null&&!trackSource?0:1,activeVoices:nodes.size,activeNodes:nodes.size+(trackSource?1:0)+trackRetiring.size,persistent,lastError});
   function notify(){for(const listener of listeners) listener(snapshot());}
   function persist(){try{storage?.setItem(AUDIO_STORAGE_KEY,JSON.stringify(settings));}catch{persistent=false;} notify();}
   function gainTo(node,value,seconds=.08){if(!node||!context)return;const param=node.gain,t=context.currentTime;param.cancelScheduledValues(t);param.setValueAtTime(param.value,t);param.linearRampToValueAtTime(value,t+seconds);}
@@ -74,7 +106,37 @@ export function createKaiosAudio(options={}) {
   function applyVolumes(){gainTo(master,settings.muted?0:settings.master);musicVolume();for(const channel of ['sfx','voice'])gainTo(channels?.[channel],settings[channel]);if(ownedSpeech){ownedSpeech.volume=settings.master*settings.voice;if(settings.muted||!settings.master||!settings.voice){env.speechSynthesis?.cancel();ownedSpeech=null;releaseVoice();}}}
   function removeNode(record){if(!nodes.delete(record))return;try{record.osc.disconnect();record.gain.disconnect();}catch{}}
   function stopNodes(channel){for(const record of [...nodes])if(!channel||record.channel===channel){try{record.osc.stop();}catch{}removeNode(record);}}
-  function stopTheme(fade=0){if(timer!==null){clearIntervalFn?.(timer);timer=null;}
+  function stopTrack(record){if(!record)return;try{record.source.stop();record.source.disconnect();record.gain.disconnect();}catch{}trackRetiring.delete(record);}
+  function stopOST(preserve=true,fade=0){
+    loadEpoch++;loadAbort?.abort();loadAbort=null;loadingTrack=null;
+    if(trackSource&&preserve)trackOffset=(context.currentTime-trackStarted+trackOffset)%trackSource.buffer.duration;
+    for(const record of [...trackRetiring])stopTrack(record);
+    const old=trackSource;trackSource=null;
+    if(old&&fade>0&&context?.state==='running'){trackRetiring.add(old);gainTo(old.gain,0,fade);old.source.stop(context.currentTime+fade+.02);}else stopTrack(old);
+  }
+  async function startOST(id){
+    if(trackSource&&trackId===id){
+      if(loadingTrack&&loadingTrack!==id){loadEpoch++;loadAbort?.abort();loadingTrack=null;loadAbort=null;}
+      applyTrackMood();return;
+    }if(loadingTrack===id)return;
+    const epoch=++loadEpoch;loadAbort?.abort();const abort=new AbortController();loadAbort=abort;loadingTrack=id;notify();
+    const watchdog=timeout?.(()=>abort.abort(),12000);
+    try{
+      let buffer=trackCache.get(id);
+      if(!buffer){const response=await fetchAudio(OST_TRACKS[id].url,{signal:abort.signal,credentials:'same-origin'});if(!response.ok)throw Error('OST_HTTP');const data=await response.arrayBuffer();if(data.byteLength>4000000)throw Error('OST_TOO_LARGE');buffer=await context.decodeAudioData(data);}
+      if(epoch!==loadEpoch||id!==desiredTrack()||disposed||!settings.musicEnabled||settings.muted||doc?.hidden||context.state!=='running')return;
+      if(!buffer.duration||buffer.duration>40||buffer.numberOfChannels!==2)throw Error('OST_FORMAT');
+      trackCache.delete(id);trackCache.set(id,buffer);while(trackCache.size>3)trackCache.delete(trackCache.keys().next().value);
+      for(const old of [...trackRetiring])stopTrack(old); // rapid selection bounded to two voices
+      if(trackSource){const old=trackSource;trackRetiring.add(old);gainTo(old.gain,0,.4);old.source.stop(context.currentTime+.42);}
+      const source=context.createBufferSource(),gain=context.createGain();source.buffer=buffer;source.loop=loopTrack;source.connect(gain);gain.connect(channels.music);
+      const record={source,gain,buffer};source.onended=()=>{try{source.disconnect();gain.disconnect();}catch{}trackRetiring.delete(record);if(trackSource===record){trackSource=null;trackOffset=0;settings.musicEnabled=false;persist();}notify();};
+      if(trackId!==id)trackOffset=0;trackId=id;trackSource=record;trackStarted=context.currentTime;
+      gain.gain.setValueAtTime(0,context.currentTime);applyTrackMood();source.start(0,trackOffset%buffer.duration);lastError=null;
+    }catch(error){if(epoch===loadEpoch&&!disposed)lastError=error.name==='AbortError'?'OST_LOAD_TIMEOUT':'OST_LOAD_FAILED';}
+    finally{clearTimeoutFn?.(watchdog);if(epoch===loadEpoch){loadingTrack=null;loadAbort=null;notify();}}
+  }
+  function stopTheme(fade=0){stopOST(true,fade);if(timer!==null){clearIntervalFn?.(timer);timer=null;}
     for(const [bus,handle]of retiring){clearTimeoutFn?.(handle);try{bus.disconnect();}catch{}retiring.delete(bus);}
     if(fade>0&&themeBus&&context?.state==='running'){
       const old=themeBus;gainTo(old,0,fade);for(const record of [...nodes])if(record.channel==='music')try{record.osc.stop(context.currentTime+fade+.025);}catch{}
@@ -114,6 +176,7 @@ export function createKaiosAudio(options={}) {
   }
   function startTheme(){
     if(timer!==null||!unlocked||recoveryGesture||!settings.musicEnabled||settings.muted||doc?.hidden||context?.state!=='running'||disposed)return;
+    const selected=desiredTrack();if(selected&&usesOST()){void startOST(selected);return;}
     themeBus=context.createGain();themeBus.gain.setValueAtTime(0,context.currentTime);themeBus.connect(channels.music);gainTo(themeBus,MUSIC_THEME_GAIN,.65);beat=0;nextPulse=0;step();
     timer=interval?.(step,(customThemes.get(world)?.beatSeconds||(world==='11520'?.05:world==='16888'?.8:.58))*1000)??null;notify();
   }
@@ -124,9 +187,12 @@ export function createKaiosAudio(options={}) {
       await context.resume();unlocked=context.state==='running';if(unlocked)recoveryGesture=false;lastError=unlocked?null:'USER_GESTURE_REQUIRED';applyVolumes();startTheme();notify();return unlocked;
     }catch{lastError='USER_GESTURE_REQUIRED';notify();return false;}
   }
-  function setWorld(value){const next=normalWorld(value);if(next===world)return;stopTheme(.24);world=next;startTheme();notify();}
-  function setMusicState(value){const next=String(value).toUpperCase();if(!Object.hasOwn(MUSIC_STATES,next)||disposed)return false;if(next!==musicState){musicState=next;notify();}return true;}
-  async function transitionToWorld(value){stopTheme(.16);if(context?.state==='running')await new Promise(resolve=>timeout(resolve,190));world=normalWorld(value);notify();}
+  function setWorld(value){const next=normalWorld(value);if(next===world)return;stopTheme(.24);world=next;trackId=null;trackOffset=0;startTheme();notify();}
+  function setMusicState(value){const next=String(value).toUpperCase();if(!Object.hasOwn(MUSIC_STATES,next)||disposed)return false;if(next!==musicState){musicState=next;if(world==='11520')startTheme();notify();}return true;}
+  function selectTrack(id){if(world!=='16888'||!UNIVERSE_PLAYLIST.includes(id))return false;universeTrack=id;startTheme();notify();return true;}
+  function setLoop(value){loopTrack=!!value;if(trackSource)trackSource.source.loop=loopTrack;notify();}
+  function stopMusic(){setMusicEnabled(false);trackOffset=0;notify();}
+  async function transitionToWorld(value){stopTheme(.16);if(context?.state==='running')await new Promise(resolve=>timeout(resolve,190));world=normalWorld(value);trackId=null;trackOffset=0;notify();}
   function setMuted(value){settings.muted=!!value;if(settings.muted){stopTheme();stopNodes();clearDucking();}applyVolumes();if(!settings.muted)startTheme();persist();}
   function setMusicEnabled(value){settings.musicEnabled=!!value;if(settings.musicEnabled)startTheme();else stopTheme();persist();}
   function setVolume(channel,value){if(!['master','music','sfx','voice'].includes(channel)||!Number.isFinite(Number(value)))return false;settings[channel]=clamp(value);applyVolumes();persist();return true;}
@@ -145,8 +211,8 @@ export function createKaiosAudio(options={}) {
   const pagehide=()=>{stopTheme();stopNodes();clearDucking();if(ownedSpeech)env.speechSynthesis?.cancel();ownedSpeech=null;context?.suspend().catch(()=>{});};
   const pageshow=event=>{if(event.persisted)void visibility();};
   doc?.addEventListener('visibilitychange',visibility);env.addEventListener?.('storage',storageChanged);env.addEventListener?.('pagehide',pagehide);env.addEventListener?.('pageshow',pageshow);
-  async function dispose(){disposed=true;stopTheme();stopNodes();clearDucking();doc?.removeEventListener('visibilitychange',visibility);env.removeEventListener?.('storage',storageChanged);env.removeEventListener?.('pagehide',pagehide);env.removeEventListener?.('pageshow',pageshow);if(ownedSpeech)env.speechSynthesis?.cancel();ownedSpeech=null;await context?.close();listeners.clear();}
-  const api={unlock,resume:unlock,setWorld,setMusicState,transitionToWorld,setMuted,setMusicEnabled,setVolume,tone,play,speak,snapshot,subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn);},registerTheme(id,theme){if(!theme||typeof theme.step!=='function'||!Number.isFinite(theme.beatSeconds)||theme.beatSeconds<.1)throw new TypeError('INVALID_THEME');customThemes.set(normalWorld(id),theme);},dispose};
+  async function dispose(){disposed=true;stopTheme();stopNodes();clearDucking();doc?.removeEventListener('visibilitychange',visibility);env.removeEventListener?.('storage',storageChanged);env.removeEventListener?.('pagehide',pagehide);env.removeEventListener?.('pageshow',pageshow);if(ownedSpeech)env.speechSynthesis?.cancel();ownedSpeech=null;await context?.close();trackCache.clear();listeners.clear();}
+  const api={unlock,resume:unlock,setWorld,setMusicState,selectTrack,setLoop,stopMusic,transitionToWorld,setMuted,setMusicEnabled,setVolume,tone,play,speak,snapshot,subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn);},registerTheme(id,theme){if(!theme||typeof theme.step!=='function'||!Number.isFinite(theme.beatSeconds)||theme.beatSeconds<.1)throw new TypeError('INVALID_THEME');customThemes.set(normalWorld(id),theme);},dispose};
   return api;
 }
 let singleton;
