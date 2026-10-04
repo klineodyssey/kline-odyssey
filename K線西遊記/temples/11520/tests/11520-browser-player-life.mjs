@@ -75,7 +75,7 @@ async function boot(page){
   // button is fine only after its owning intro really became hidden.
   if(await page.locator('#enter11520').isVisible())try{await page.locator('#enter11520').click({timeout:2000})}catch(error){if(await page.locator('#intro11520').isVisible())throw error}
   await page.locator('#intro11520').waitFor({state:'hidden'});
-  await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+  await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
 }
 async function openLife(page){
   if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
@@ -113,7 +113,7 @@ async function killFirstMonster(page){
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40,{steps:5});
   try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
   const before=(await snap(page)).player.xp;
-  for(let i=0;i<30&&(await snap(page)).player.xp===before;i++){await page.locator('#attack').click();await page.waitForTimeout(400)}
+  for(let i=0;i<30&&(await snap(page)).player.xp===before;i++){await pursueMovingEncounter(page);await page.locator('#attack').click();await page.waitForTimeout(400)}
   const after=await snap(page);assert.ok(after.player.xp>before,'real monster interaction must grant canonical XP');assert.equal(after.player.inventory.ownerPlayerId,after.player.playerId);assert.ok(await page.evaluate(()=>K11520Backpack.get().items.length>0),'loot appears in the single scoped backpack');
   return after;
 }
@@ -141,10 +141,23 @@ async function selectEncounterUI(page,id){
   await openLife(page);const button=page.locator(`[data-journey-encounter="${id}"]`);await expandDetails(page,`[data-journey-encounter="${id}"]`);assert.equal(await button.isEnabled(),true,id+' unlocked');await button.scrollIntoViewIfNeeded();await button.click();
   await page.waitForFunction(expected=>__K11520_KSPACE_COMBAT__?.target?.profileId===expected,id);
 }
-async function defeatUsingSlash(page,{tag,onAttack,recoveryEvidence=[]}={}){
+async function pursueMovingEncounter(page){
+  const state=await page.evaluate(()=>__K11520_KSPACE_COMBAT__);
+  if(state.target.state==='DEAD'||state.distance<=1.2||await page.locator('#journeyRecover').isVisible())return;
+  // Roaming lives are no longer stationary. Use the existing physical joystick,
+  // not a teleport/frozen target or wider attack radius. Keep all strike limits.
+  const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
+  const d=Math.hypot(state.relative.x,state.relative.z)||1;
+  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+state.relative.x/d*35,y-state.relative.z/d*35,{steps:4});
+  try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__.distance<.8||document.querySelector('#journeyRecover')?.getBoundingClientRect().width>0,null,{timeout:5000})}finally{await page.mouse.up()}
+}
+async function defeatUsingSlash(page,{tag,onAttack,recoveryEvidence=[],attackTrace=[]}={}){
   for(let i=0;i<55;i++){
     if(await page.evaluate(()=>__K11520_KSPACE_COMBAT__?.target?.state==='DEAD'))break;
-    await page.locator('#attack').click();await page.waitForTimeout(380);
+    await pursueMovingEncounter(page);
+    await page.locator('#attack').click();
+    attackTrace.push(await page.evaluate(()=>{const s=__K11520_KSPACE_COMBAT__;return {distance:s.distance,hp:s.target.hp,result:s.lastResult}}));
+    await page.waitForTimeout(380);
     if(await page.locator('#journeyRecover').isVisible()){
       const before=await snap(page),targetHp=await page.evaluate(()=>__K11520_KSPACE_COMBAT__.target.hp);
       await page.locator('#journeyRecover').click();await page.locator('#sheet').waitFor({state:'hidden'});assert.equal((await snap(page)).player.xp,before.player.xp,'recovery never grants XP');
@@ -210,7 +223,7 @@ async function runV29(width,height){
     await bossPage.waitForFunction(()=>__K11520_GAMEPLAY__.snapshot().music==='BOSS');
     let a=await audioState(bossPage);if(a.needsGesture||!a.musicEnabled||a.settings.muted){if(!await bossPage.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await bossPage.locator('#k11520UtilityMaster').click();await bossPage.locator('#bgmButton').click();await closePanels(bossPage);await bossPage.waitForTimeout(400)}
     a=await audioState(bossPage);assert.equal(a.contextState,'running');assert.equal(a.activeMusicLayers,1);boss.signal=await signal(bossPage);assert(boss.signal.rms>.001&&boss.signal.peak<.95,'Boss BGM must have nonzero unclipped digital signal');
-    const before=await snap(bossPage);boss.recoveries=[];const defeated=await defeatUsingSlash(bossPage,{tag:'MARKET_BOSS',recoveryEvidence:boss.recoveries,onAttack:async()=>{
+    const before=await snap(bossPage);boss.recoveries=[];boss.attackTrace=[];const defeated=await defeatUsingSlash(bossPage,{tag:'MARKET_BOSS',recoveryEvidence:boss.recoveries,attackTrace:boss.attackTrace,onAttack:async()=>{
       const t=await bossPage.evaluate(()=>__K11520_KSPACE_COMBAT__.target);if(!boss.phases.includes(t.phase)){boss.phases.push(t.phase);await shot(bossPage,`${width}x${height}-v29-boss-phase-${t.phase}`)}
     }});
     assert(boss.phases.includes(2)&&boss.phases.includes(3),'actual damage crosses Boss phases');assert(defeated.player.xp>before.player.xp);assert.equal(defeated.player.events.filter(e=>e.type==='BOSS_DEFEAT').length,1);
@@ -222,6 +235,7 @@ async function runV29(width,height){
       return {visible:toast.classList.contains('show')&&a.width>0&&a.height>0,toast:{x:a.x,y:a.y,width:a.width,height:a.height},monsterGuide:{x:b.x,y:b.y,width:b.width,height:b.height},overlap:Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)};
     });
     assert.equal(boss.victoryToast.visible,true,'actual post-defeat toast must be visible for layout QA');assert.equal(boss.victoryToast.overlap,false,'victory feedback must not overlap compact monster HUD');
+    const toastBox=boss.victoryToast.toast;assert.ok(toastBox.x>=0&&toastBox.y>=0&&toastBox.x+toastBox.width<=width&&toastBox.y+toastBox.height<=height,'actual victory feedback must remain entirely inside the viewport');
     await shot(bossPage,`${width}x${height}-v29-boss-victory`);boss.checks.push('BOSS_SELECTED_THROUGH_CONTEXT_UI','REAL_BOSS_PHASE_RAGE_DEFEAT','ONCE_ONLY_REWARD','NONZERO_BOSS_PCM','VICTORY_TOAST_NO_MONSTER_HUD_OVERLAP');
     // An automatic next encounter can legitimately create a new cue while the
     // old one expires. Verify the specific node's lifetime and bounded count.
@@ -316,7 +330,9 @@ try{
       await openLife(page);await reachable(page,'#playerLifeHomeNav');await page.locator('#playerLifeHomeNav').click();
       await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active);
       await page.waitForFunction(()=>{const h=__K11520_PLAYER_LIFE__.snapshot().home.xyz,p=__K11520_WORLD_COORDS__.physical;return Math.hypot(h.x-p.x,h.y-p.y,h.z-2.2-p.z)<.8&&!__K11520_XYZ_MAP_NAVIGATION__.active},null,{timeout:20000});
-      await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+      // MINIMAL hides telemetry, not the loaded character. Assert readiness
+      // text in the attached node without requiring a diagnostic HUD to show.
+      await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));profile.homeVisual=await page.evaluate(()=>__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot());
       await shot(page,`${width}x${height}-home-navigation`);assert.equal(profile.homeVisual.homeScreen.inView,true,'home center must remain visible after navigation');assert.equal(profile.homeVisual.playerScreen.inView,true,'player must remain visible after home navigation');profile.checks.push('REAL_HOME_NAVIGATION');
       const calls=await page.evaluate(()=>__playerLifeWalletFixture.calls);assert.equal(calls.some(m=>!/^(eth_accounts|eth_requestAccounts|eth_chainId|eth_getBalance|eth_call|personal_sign)$/.test(m)),false,'no transaction or approval method allowed');

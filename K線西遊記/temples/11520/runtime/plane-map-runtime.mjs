@@ -17,7 +17,8 @@ const MODE_SPECS=Object.freeze({
 });
 const RANGE=34;
 const overlays=new WeakMap();
-let miniView='K';
+// Navigation is the default again; the separate K button retains canonical market details.
+let miniView='XYZ';
 
 const finite=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 export function planeSpec(mode='XZ'){return MODE_SPECS[mode]||MODE_SPECS.XZ}
@@ -168,7 +169,7 @@ function ensureMapViews(base){
   const wrap=base.closest('.minimapWrap');if(!wrap)return;
   let views=document.querySelector('#kspaceMapViews');
   if(!views){views=document.createElement('div');views.id='kspaceMapViews';Object.assign(views.style,{position:'absolute',left:'5px',right:'5px',bottom:'3px',height:'44px',display:'flex',zIndex:'5'});
-    for(const view of ['K','XYZ']){const b=document.createElement('button');b.type='button';b.id='kspaceView'+view;b.textContent=view==='K'?'K圖 ↗':'XYZ';b.setAttribute('aria-label',view==='K'?'K-space 地圖 / 展開':'LOCAL XYZ 導航圖');Object.assign(b.style,{width:'50%',minHeight:'44px',padding:'0',font:'bold 11px system-ui',background:'#102332',color:'#d4f1ff',border:'1px solid #3a5568',borderRadius:'6px'});b.onclick=()=>{if(view==='K'&&miniView==='K')showKDetails();miniView=view};views.append(b)}wrap.append(views);
+    for(const view of ['K','XYZ']){const b=document.createElement('button');b.type='button';b.id='kspaceView'+view;b.dataset.mapView=view;b.textContent=view==='K'?'K圖 ↗':'XYZ';b.setAttribute('aria-label',view==='K'?'K-space 地圖 / 展開':'LOCAL XYZ 導航圖');Object.assign(b.style,{width:'50%',minHeight:'44px',padding:'0',font:'bold 11px system-ui',background:'#102332',color:'#d4f1ff',border:'1px solid #3a5568',borderRadius:'6px'});b.onclick=()=>{miniView=view;if(view==='K')showKDetails()};views.append(b)}wrap.append(views);
     for(const event of ['pointerdown','pointermove','pointerup'])base.addEventListener(event,e=>{if(miniView!=='K')return;e.preventDefault();e.stopImmediatePropagation();if(event==='pointerup')showKDetails()},true);
     base.tabIndex=0;base.addEventListener('keydown',e=>{if(miniView==='K'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();showKDetails()}});
   }

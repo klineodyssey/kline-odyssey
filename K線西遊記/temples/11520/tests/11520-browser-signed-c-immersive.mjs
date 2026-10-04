@@ -13,6 +13,9 @@ const OUT='artifacts/11520-visual-qa';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+// This suite checks FULL HUD/immersive transitions. MINIMAL's default hiding
+// is independently covered by the world-first six-viewport browser suite.
+await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
 if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
   await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{
     const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/',relative=route.request().url().slice(prefix.length);

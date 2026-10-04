@@ -39,8 +39,128 @@ assert.equal(skillStore.activePlayer().level,3);
 const skillFixture={key:PLAYER_LIFE_STORAGE_KEY,encoded:skillStorage.get(PLAYER_LIFE_STORAGE_KEY)};
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourceSha=bytes=>sha(Buffer.from(Buffer.from(bytes).toString('utf8').replace(/\r\n?/g,'\n'),'utf8'));
+// Default-policy coverage is separate from the existing FULL HUD geometry suite.
+async function verifyWorldFirst(){
+  const results=[];
+  for(const profile of selectedProfiles){
+    const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];
+    page.on('pageerror',e=>errors.push(e.message));
+    let quoteStep=0;
+    if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:80000+quoteStep},{symbol:'ETHUSDT',price:2600},{symbol:'BNBUSDT',price:780}]))}));
+    const result={profile,checks:{}};results.push(result);
+    try{
+      await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__&&globalThis.__K11520_MONSTER_FOLLOW__);
+      if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(async error=>{if(await page.locator('#intro11520').isVisible())throw error});
+      await page.locator('#intro11520').waitFor({state:'hidden'});
+      // MINIMAL deliberately hides diagnostic telemetry; readiness is state, not visibility.
+      await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),null,{timeout:45000});
+      assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.profile),'MINIMAL');
+      assert.equal(await page.locator('#axes').isVisible(),false);
+      for(const selector of ['#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#k11520CameraReset']){
+        const box=await page.locator(selector).boundingBox();assert.ok(box&&box.height>=44&&box.width>=44,selector+' accessible compact target');
+        assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=profile.width&&box.y+box.height<=profile.height);
+      }
+      result.visibility=await page.evaluate(()=>{
+        const p=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;
+        return{player:p,playerUncovered:document.elementFromPoint(p.x,p.y)?.id==='three',monsters:globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot()};
+      });
+      assert.equal(result.visibility.player.inView,true);assert.equal(result.visibility.playerUncovered,true,'HUD cannot cover player');
+      assert.ok(result.visibility.monsters.filter(m=>m.visible&&m.inView&&m.uncovered).length>=2,'at least two living monsters must be visibly playable');
+      await page.screenshot({path:`${OUT}/world-first-${profile.width}x${profile.height}.png`});
+      const read=()=>page.evaluate(()=>globalThis.__K11520_CAMERA__.snapshot());
+      const cdp=await context.newCDPSession(page);
+      const touch=(type,points)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:points.map(([id,x,y])=>({id,x,y,radiusX:3,radiusY:3,force:1}))});
+      // Pick an actually empty canvas origin, not a hard-coded monster/UFO pixel.
+      // Reserve a 24px empty-world margin around the entire drag, including
+      // raycast actors, not just DOM HUD. A moving actor at a point's edge can
+      // enter between selection and real CDP pointerdown; that is correctly
+      // rejected by the product's actor-origin gesture exclusion.
+      // Search the full visible width: the central lane can legitimately hold
+      // trees/lives, especially at 412px. Do not move those objects for QA.
+      const point=await page.evaluate(()=>{for(let y=innerHeight<500?80:250;y<innerHeight*.6;y+=20)for(let x=40;x<innerWidth-90;x+=20)if([0,30,60].every(dx=>[-24,0,24].every(pad=>[-24,0,24].every(py=>document.elementFromPoint(x+dx+pad,y+py)?.id==='three'&&globalThis.__K11520_CAMERA__.canPanAt(x+dx+pad,y+py)))))return{x,y};return null});
+      assert.ok(point,'an unobstructed world gesture surface must exist');
+      const start=await read(),{x,y}=point;
+      await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
+      await touch('touchStart',[[1,x,y]]);await touch('touchMove',[[1,x+30,y]]);await touch('touchMove',[[1,x+60,y]]);await touch('touchEnd',[]);
+      result.pointerTrace=await page.evaluate(()=>({events:worldFirstPointerTrace,touchAction:getComputedStyle(document.querySelector('#three')).touchAction,scale:visualViewport.scale}));result.panOrigin=point;
+      const pan=await read();assert.notEqual(pan.panX,start.panX,'world drag pans');assert.deepEqual(pan.playerXYZ,start.playerXYZ,'camera pan never moves XYZ');
+      // Pinch has a different footprint than the one-sided pan. Both actual
+      // finger origins and endpoints must hit canvas, not a left-side HUD.
+      const pinchPoint=await page.evaluate(y=>{for(let x=80;x<innerWidth-80;x+=20)if([-60,-35,35,60].every(dx=>document.elementFromPoint(x+dx,y)?.id==='three'))return{x,y};return null},y);
+      assert.ok(pinchPoint,'both pinch fingers must originate on world canvas');result.pinchOrigin=pinchPoint;
+      await touch('touchStart',[[1,pinchPoint.x-35,y],[2,pinchPoint.x+35,y]]);await touch('touchMove',[[1,pinchPoint.x-60,y],[2,pinchPoint.x+60,y]]);await touch('touchEnd',[]);
+      const zoom=await read();assert.ok(zoom.zoom>pan.zoom&&zoom.zoom<=zoom.bounds.maxZoom);assert.deepEqual(zoom.playerXYZ,start.playerXYZ);
+      await page.locator('#k11520CameraReset').click();assert.deepEqual(await read(),start);
+      await page.waitForFunction(original=>{const p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return Math.abs(p.x-original.x)<.5&&Math.abs(p.y-original.y)<.5},result.visibility.player,{timeout:3000});
+      await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),true);
+      // Quotes replace card DOM; read the currently attached visible card and
+      // its rectangle atomically instead of using a transient element handle.
+      const card=await page.locator('#axes').evaluate(el=>{const card=el.querySelector('.axis');if(!card)return null;const r=card.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}});
+      assert.ok(card&&card.width>0&&card.height>0,'expanded market must render a visible card');
+      await touch('touchStart',[[1,card.x+10,card.y+12]]);
+      // Real deadline test: a held pointer must survive the entire 15s idle interval.
+      await page.waitForTimeout(15100);assert.equal(await page.locator('#axes').isVisible(),true);
+      await touch('touchMove',[[1,card.x+20,card.y+12]]);await touch('touchEnd',[]);
+      if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
+      await page.waitForFunction(()=>getComputedStyle(document.getElementById('axes')).display==='none',null,{timeout:17000});
+      assert.deepEqual(await read(),start,'card gestures must not pan camera');
+      result.checks.marketIdle='15s / held-pointer / resume PASS';result.checks.camera='PAN / PINCH / RESET / XYZ ISOLATION PASS';
+      quoteStep=100;
+      await page.waitForFunction(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some(m=>m.intent?.direction==='LONG'),null,{timeout:15000});
+      const before=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot());
+      await page.locator('#k11520MonsterGuide').click();
+      if(profile.name==='cold-390')await page.screenshot({path:`${OUT}/world-first-follow-details-390.png`});
+      await page.locator('#monsterFollowAction').click();
+      assert.equal(await page.locator('#k11520FollowMonster').isVisible(),true);
+      await page.waitForFunction(old=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some((m,i)=>Math.hypot(m.position.x-old[i].position.x,m.position.y-old[i].position.y,m.position.z-old[i].position.z)>.02),before.actors);
+      const followed=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId);
+      if(profile.name==='cold-390'){
+        // Exclude the existing avatar priority ellipse, not an arbitrary entire
+        // vertical strip that can reject clearly visible moving actors.
+        const other=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().find(m=>m.visible&&m.inView&&m.uncovered&&((m.screen.x-innerWidth/2)/34)**2+((m.screen.y-innerHeight/2)/62)**2>1.1&&__K11520_MONSTER_FOLLOW__.snapshot().actors.some(a=>a.id===m.id&&a.alive)));
+        assert.ok(other,'a second market-life actor must be selectable');
+        await page.mouse.click(other.screen.x,other.screen.y);await page.locator('#monsterFollowAction').waitFor({state:'visible'});await page.locator('#monsterFollowAction').click();
+        assert.notEqual(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),followed,'player can switch the followed actor');
+        await page.locator('#k11520FollowMonster').click();await page.locator('#k11520MonsterGuide').click();await page.locator('#monsterFollowAction').click();
+        result.checks.followSwitch='ACTUAL WORLD TAP / SWITCH / CANCEL PASS';
+      }
+      assert.equal(await page.locator('#minimap').getAttribute('data-coordinate-space'),'XYZ');
+      const map=await page.locator('#minimap').boundingBox();await page.mouse.click(map.x+map.width*.85,map.y+map.height*.8);
+      await page.locator('#waypointAction').waitFor({state:'visible'});await page.locator('#waypointAction').click();
+      await page.waitForFunction(old=>Math.hypot(globalThis.__K11520_CAMERA__.snapshot().playerXYZ.x-old.x,globalThis.__K11520_CAMERA__.snapshot().playerXYZ.z-old.z)>.5,start.playerXYZ);
+      // Canonical joystick remains the movement owner and cancels waypoint navigation.
+      const joy=await page.locator('#joy').boundingBox();await page.mouse.move(joy.x+joy.width*.5,joy.y+joy.height*.5);await page.mouse.down();await page.mouse.move(joy.x+joy.width*.7,joy.y+joy.height*.5);await page.mouse.up();
+      assert.equal((await read()).panX,0);assert.equal((await read()).zoom,1);
+      assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),followed,'manual navigation must remain free while following');
+      await page.locator('#k11520FollowMonster').click();assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),null);
+      await page.locator('#attack').click();result.checks.navigation='MAP WAYPOINT / MOVEMENT / JOYSTICK CAMERA CONFLICT PASS';result.checks.monster='INTENT / MOVEMENT / FOLLOW / CANCEL / ATTACK CONTROL PASS';
+      let completedGrowth=null;
+      if(profile.name==='cold-390'){
+        // Actual 60s prospective observation, no clock jump or score injection.
+        quoteStep=200;
+        await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id)?.growth.wins>=1,followed,{timeout:70000});
+        completedGrowth=await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed);
+        assert.equal(completedGrowth.experience,completedGrowth.wins);assert.equal(completedGrowth.predictionCount,completedGrowth.wins+completedGrowth.losses+(completedGrowth.flat||0));
+        result.completedGrowth=completedGrowth;
+        result.checks.performance='REAL 60s / CAUSAL RESULT / EXISTING GROWTH PASS';
+      }
+      await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('STANDARD');
+      await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.profile==='STANDARD');
+      if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
+      assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
+      assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
+    }catch(error){result.error=String(error);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
+    finally{await context.close();await fs.writeFile(`${OUT}/world-first-report.json`,JSON.stringify({results,head:process.env.K11520_SOURCE_SHA||null},null,2))}
+  }
+}
+if(process.env.K11520_WORLD_FIRST_QA==='1'){
+  try{await verifyWorldFirst();console.log('WORLD_FIRST functional Chromium QA PASS; visual review remains mandatory')}finally{await browser.close()}
+  process.exit(0);
+}
 async function verifyInitialQuoteWait(){
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+  await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
   // A returning player must keep the saved location, not walk 281m back to origin.
   await page.addInitScript(()=>{const xyz={x:210,y:.013172,z:186};localStorage.setItem('k11520.player-session.v1',JSON.stringify({version:1,world:'K11520',xyz,intentXYZ:xyz}));});
   const pattern='https://data-api.binance.vision/api/v3/aggTrades*';let ready=false;
@@ -142,6 +262,8 @@ async function verifyKSpaceMap(page,report){
   assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false);
   await page.locator('#kspaceViewK').click();await page.waitForFunction(()=>globalThis.__K11520_KSPACE_MAP__?.view==='K');
   if(report.profile.landscape)await shot('06_LANDSCAPE_KSPACE');
+  // The K control now deliberately opens its information sheet on every entry.
+  await page.locator('#sheetClose').click();await page.locator('#sheet.open').waitFor({state:'hidden'});
   report.kspaceMap={rows,status:'FUNCTIONAL_PASS_SCREENSHOTS_REQUIRE_DIRECT_REVIEW'};
 }
 async function verifyMarketSync(page,report){
@@ -205,6 +327,11 @@ async function verifyKSpaceGameplay(page,report){
     ['#tradeSword','phantomAxe','-1',180,2000,['KX-','KY-','KZ-']]]){
     await page.locator('.monsterHud').click({position:{x:12,y:12}});await page.locator('#kspacePracticeReset').click();await page.locator('#sheetClose').click();
     await input(sign);await page.waitForTimeout(400);
+    // Market lives now move. Pursue via the real joystick before each strike;
+    // never freeze/teleport the target or relax the actual combat range rule.
+    const relative=(await state()).relative,distance=Math.hypot(relative.x,relative.z)||1;
+    await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+relative.x/distance*35,y-relative.z/distance*35);
+    try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__.distance<.8,null,{timeout:5000})}finally{await page.mouse.up()}
     const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
@@ -350,6 +477,8 @@ try{
     // profile's CDP combat captures and repeated mobile rotations. Keep every assertion.
     await browser.close();browser=await launchBrowser();
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},isMobile:true,hasTouch:true});const page=await context.newPage();const errors=[],warnings=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(['warning','error'].includes(m.type()))warnings.push(m.text().slice(0,300))});
+    // Explicit full-information preference; default MINIMAL is covered by verifyWorldFirst.
+    await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
     await page.addInitScript(({key,encoded})=>{if(!localStorage.getItem(key))localStorage.setItem(key,encoded)},skillFixture);
     if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:'77564.83000000'},{symbol:'ETHUSDT',price:'2511.16000000'},{symbol:'BNBUSDT',price:'724.23000000'}]))}));
     if(profile.warm)await page.addInitScript(()=>{localStorage.setItem('11520.play.cleanMode','1');localStorage.setItem('k11520.joystick.plane','XZ');localStorage.setItem('klineodyssey.public-wallet-identity.v1',JSON.stringify({version:1,address:'0x1234567890123456789012345678901234567890',chainId:56,sourceWorld:'K12345',updatedAt:new Date().toISOString()}))});

@@ -1,5 +1,39 @@
 # 11520 Universal Exchange V3.9
 
+## World-first / market-life candidate — 2026-10-04
+
+Independent Human-requested candidate, **not a released or QA-passed build**.
+Existing `runtime/mobile-ui-settings.mjs` owns MINIMAL (default), STANDARD and
+FULL preferences. Markets disclose on demand and close after 15 idle seconds;
+held pointers defer closing. Existing `mobile-control-layout.mjs` owns compact
+missile/delivery, market row and camera/follow controls. No second HUD manager.
+
+`runtime/plane-map-runtime.mjs` defaults to local XYZ navigation again. The
+explicit K button still opens the canonical signed market address map. Camera
+pan/pinch in `runtime/game-5d-main.mjs` changes camera offsets only, not Player
+XYZ, market coordinates, navigation ownership or order authority. Reset returns
+to the player. Camera/follow selections are intentionally session-only.
+
+Existing `runtime/market-life-runtime.mjs` growth/memory and travel behavior
+power local training observations in `runtime/world-runtime.mjs`. Fresh public
+quotes select a simulated momentum/countertrend market direction; a prospective
+60-second observation produces correct/wrong/flat outcomes. Stale/gapped data
+and reload discard unfinished predictions. Completed growth is saved through the
+existing player-scoped storage, never accepted as financial or identity proof.
+No second performance balance or reward ledger is created. Full GA600 remains
+**NOT_INTEGRATED**; displayed confidence/fitness is the observed game hit-rate,
+not a validated predictive probability, backtest, or investment performance.
+Following is observation and a direction cue: it does not move the player,
+open positions, sign, pay, or change leverage. Source-managed Life is untouched.
+
+Focused six-profile Chromium QA:
+`K11520_WORLD_FIRST_QA=1 node K線西遊記/temples/11520/tests/11520-browser-responsive.mjs`.
+Use `K11520_BASE_URL` for the local HTTP server. Screenshots and functional
+evidence are generated under `artifacts/11520-responsive-qa/`; visual review
+remains required. The existing full-information regression suite separately
+selects the FULL preference. Canonical Physics/UniverseMap and other worlds
+are not modified. See `HANDOFF_CURRENT.md` for lineage and current gates.
+
 ## K11520 V2.8 Player Life
 
 Guest-first local game candidate implementation; no cloud provisioning, Mainnet

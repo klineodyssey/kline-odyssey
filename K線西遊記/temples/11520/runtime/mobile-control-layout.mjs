@@ -87,6 +87,34 @@ function installStyle(){
 @media(max-width:380px){
   html[data-k11520-layout-owner] #k11520PlaneLabel{width:calc(100vw - 252px)!important}
 }
+/* WORLD_FIRST_HUD_POLICY: disclosure never changes coordinates or control owners. */
+#k11520MarketRow{position:fixed;top:68px;left:6px;right:6px;min-height:44px;z-index:310;border:1px solid #68e4ff66;border-radius:12px;background:#071018e8;color:#dffaff;font:700 12px system-ui;touch-action:manipulation}
+#k11520HudProfile{min-height:44px;background:#102332;color:#dffaff;border:1px solid #68e4ff66;border-radius:8px}
+#k11520PlaneLabel{overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
+html[data-k11520-hud-profile]:not([data-k11520-hud-profile="FULL"]):not(.k11520MarketOpen) .axes{display:none!important}
+html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
+html[data-k11520-hud-profile] .axes{top:116px!important;z-index:610!important}
+html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:auto!important;bottom:268px!important;height:134px!important}
+html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:168px!important;left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;min-height:44px;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
+html[data-k11520-hud-profile] #cargoInterceptionButton,html[data-k11520-hud-profile] #homeDeliveryButton{top:116px!important;bottom:auto!important;min-height:44px!important;height:44px!important;width:76px!important;padding:4px!important;font-size:11px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;z-index:590!important}
+html[data-k11520-hud-profile] #cargoInterceptionButton{right:88px!important}
+html[data-k11520-hud-profile] #homeDeliveryButton{right:6px!important;display:block!important}
+html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
+#k11520CameraReset{position:fixed;left:6px;top:116px;width:44px;height:44px;z-index:590;border-radius:50%;border:1px solid #68e4ff88;background:#071018dd;color:#dffaff;font-size:22px;touch-action:manipulation}
+#k11520FollowMonster{position:fixed;left:54px;top:116px;width:calc(100vw - 224px);height:44px;z-index:590;border:1px solid #68e4ff88;border-radius:10px;background:#071018dd;color:#dffaff;font:700 10px system-ui;overflow:hidden;text-overflow:ellipsis}
+#k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
+@media(orientation:landscape) and (max-height:600px){
+  #k11520MarketRow{top:6px;left:346px;right:58px;min-height:44px}
+  html[data-k11520-hud-profile] .axes{top:54px!important;left:346px!important;right:58px!important}
+  html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:66px!important;bottom:auto!important;left:6px!important}
+  html[data-k11520-hud-profile="MINIMAL"] .top>.pill{display:none!important}
+  html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:auto!important;bottom:8px!important;left:346px!important;right:180px!important}
+  html[data-k11520-hud-profile] #cargoInterceptionButton{top:54px!important;left:196px!important;right:auto!important}
+  html[data-k11520-hud-profile] #homeDeliveryButton{top:54px!important;left:278px!important;right:auto!important}
+  #k11520CameraReset{left:148px;top:66px}
+  #k11520FollowMonster{left:360px;top:54px;width:calc(100vw - 540px)}
+  #k11520UiSettings{top:54px!important;max-height:calc(100dvh - 64px);overflow:auto}
+}
 `;
   if(s.textContent!==css)s.textContent=css;
 }
@@ -154,13 +182,16 @@ function apply(){installStyle();document.documentElement.dataset.k11520LayoutOwn
 function overlap(a,b,pad=0){return !!a&&!!b&&a.left<b.right-pad&&a.right>b.left+pad&&a.top<b.bottom-pad&&a.bottom>b.top+pad}
 function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}}
 function measure(){
+  const isVisible=sel=>{const el=$(sel);if(!el)return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0};
+  const statusVisible=isVisible('.tele')||isVisible('.monsterHud'),marketVisible=isVisible('.axes');
   const report={version:'1.3.10',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.axisRailCentered=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
   report.axisEnergyGeometryAligned=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&report.axisTrack&&report.axisThumb&&Math.abs((report.axisTrack.left+report.axisTrack.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&Math.abs((report.axisThumb.left+report.axisThumb.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&report.axisTrack.left>=report.axisRail.left&&report.axisTrack.right<=report.axisRail.right);
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.axisRail.right<=report.warp.left&&report.warp.right<=report.lots.left);
-  report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
-  report.statusBelowMarket=innerWidth>MOBILE_MAX||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
-  report.mapBelowStatus=innerWidth>MOBILE_MAX||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
+  report.hudProfile=document.documentElement.dataset.k11520HudProfile||'FULL';report.statusVisible=statusVisible;report.marketVisible=marketVisible;
+  report.equalWorldLifeWidth=innerWidth>MOBILE_MAX||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&Math.abs(report.worldHud.width-report.lifeHud.width)<2);
+  report.statusBelowMarket=innerWidth>MOBILE_MAX||!statusVisible||!marketVisible||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
+  report.mapBelowStatus=innerWidth>MOBILE_MAX||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
   report.overlaps={joyRail:overlap(report.joy,report.axisRail),warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
   report.collapsed=hudCollapsed();
   report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v));

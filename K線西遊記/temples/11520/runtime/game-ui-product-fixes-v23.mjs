@@ -40,7 +40,13 @@ export function show11520Toast(text,{combat=false,event='',duration=1700}={}){
   if(event)toast.dataset.worldEvent=event;else delete toast.dataset.worldEvent;
   toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.style.transition='opacity .2s';toast.classList.add('show');toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
   const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
-  if(guide?.width>0)for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
+  if(guide?.width>0){
+    for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
+    // MINIMAL landscape places the guide at the bottom. Measure the actual
+    // wrapped message and use the free space above it, never below the screen.
+    const height=toast.getBoundingClientRect().height;
+    if(guide.bottom+6+height>innerHeight-6)toast.style.setProperty('top',Math.max(6,guide.top-6-height)+'px','important');
+  }
   // Keep placement while opacity fades. Clearing it at dismissal moves still-
   // visible loot text back into the HUD. The next message replaces placement;
   // pagehide remains the cleanup owner. No extra timer or DOM node is needed.

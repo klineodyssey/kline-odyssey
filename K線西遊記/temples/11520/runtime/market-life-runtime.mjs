@@ -34,7 +34,7 @@ export function createMarketLife({
     vitality:clamp(vitality,0,100),fear:clamp(fear,0,1),profitDrive:clamp(profitDrive,0,1),
     positions:copy(positions),memory:[],memoryCapacity:Math.max(4,Math.floor(memoryCapacity)),
     state:isInactiveSourceSlot?'DEAD':'ALIVE',strategy:isInactiveSourceSlot?'HIDDEN':isWildEcology?'WILD_ECOLOGY':'HOLD',confidence:isInactiveSourceSlot?0:0.5,lastDecisionAt:0,
-    growth:{experience:0,wins:0,losses:0,dimensionUnlocks:0},lifecycle:{diedAt:null,naiheAt:null,mengpoAt:null,rebornAt:null},
+    growth:{experience:0,wins:0,losses:0,dimensionUnlocks:0,predictionCount:0,flat:0,streak:0},lifecycle:{diedAt:null,naiheAt:null,mengpoAt:null,rebornAt:null},
     world:{home:copy(home),position:copy(position),destination:null,lastTravelAt:null},
     needs:{hunger:clamp(needs?.hunger,0,1),fatigue:clamp(needs?.fatigue,0,1),social:clamp(needs?.social,0,1),curiosity:clamp(needs?.curiosity,0,1)},
     preferences:{travel:clamp(preferences?.travel,0,1),work:clamp(preferences?.work,0,1),comfort:clamp(preferences?.comfort,0,1)},
@@ -54,6 +54,65 @@ export function perceiveMarketLife(life,{playerAxes={},quotes={},now=Date.now()}
 }
 
 function exposureScore(perception){return Object.values(perception.visiblePlayerAxes||{}).reduce((s,p)=>s+Math.abs(Number(p.lots)||0)*Math.max(0.000001,Math.abs(Number(p.c)||0)),0);}
+
+// Persistence of this owner's growth only, not a second score/reward ledger.
+// Caller supplies the existing Player Life scoped store. Pending predictions,
+// positions, capital, identity and execution authority are NEVER restored.
+export function createTrainingMemory(storage){
+  const key='k11520.market-life.training',records=new Map();
+  let persisted=false;
+  try{const data=JSON.parse(storage?.getItem(key)||'null');if(data?.scope==='LOCAL_GAME_OBSERVATIONS'&&Array.isArray(data.actors))for(const row of data.actors.slice(0,32)){
+    const g=row?.growth,fields=['predictionCount','wins','losses','flat','streak','experience','dimensionUnlocks'];
+    if(typeof row?.id!=='string'||!g||!fields.every(k=>Number.isSafeInteger(g[k])&&g[k]>=0)||g.predictionCount!==g.wins+g.losses+g.flat||g.experience!==g.wins||g.streak>g.wins)continue;
+    records.set(row.id,{growth:Object.fromEntries(fields.map(k=>[k,g[k]]))});
+  }persisted=!!data}catch{}
+  return Object.freeze({
+    restore(life){const saved=records.get(life.lifeId);if(saved)Object.assign(life.growth,saved.growth);return !!saved},
+    save(life){
+      const g=life.growth,growth=Object.fromEntries(['predictionCount','wins','losses','flat','streak','experience','dimensionUnlocks'].map(k=>[k,g[k]||0]));
+      if(JSON.stringify(records.get(life.lifeId)?.growth)===JSON.stringify(growth))return persisted;
+      records.set(life.lifeId,{growth});
+      try{if(!storage)throw new Error('NO_STORAGE');storage.setItem(key,JSON.stringify({scope:'LOCAL_GAME_OBSERVATIONS',actors:[...records].slice(-32).map(([id,r])=>({id,...r}))}));persisted=true}catch{persisted=false}
+      return persisted;
+    },
+    status:()=>({scope:'LOCAL_GAME_OBSERVATIONS',persisted,authority:'NON_FINANCIAL_UNTRUSTED_LOCAL_SAVE'})
+  });
+}
+
+// Training extension of this owner, not an order engine or a GA600 backtest.
+// One prediction spans 60s of fresh observations. Missing/stale gaps invalidate
+// it rather than manufacturing a win. Growth/memory remain the only score state.
+export function observeTrainingMarket(life,market,{now=Date.now(),contrarian=false}={}){
+  const t=life.training??={scope:'GAME_TRAINING_ONLY',lastAt:null,quotes:{},intent:null,pending:null};
+  if(market?.status!=='LIVE'||!Number.isFinite(market.receivedAt)||now-market.receivedAt>15000||now<market.receivedAt){t.pending=null;t.intent=null;return null}
+  if(t.lastAt!==null&&market.receivedAt<=t.lastAt)return t.intent;
+  const rows=(market.markets||[]).filter(r=>life.marketDimensions.includes(r.symbol)&&Number.isFinite(r.price)&&r.price>0);
+  if(!rows.length){t.pending=null;t.intent=null;return null}
+  const gap=t.lastAt===null?Infinity:market.receivedAt-t.lastAt;
+  if(gap>15000)t.pending=null;
+  const pending=t.pending,g=life.growth;
+  if(pending&&market.receivedAt>=pending.deadline){
+    const result=rows.find(r=>r.symbol===pending.market);
+    if(result){
+      const change=Math.sign(result.price-pending.price),win=change===pending.sign;
+      g.predictionCount=(g.predictionCount||0)+1;
+      if(change===0){g.flat=(g.flat||0)+1;g.streak=0}
+      else if(win){g.wins++;g.streak=(g.streak||0)+1;g.experience++}
+      else{g.losses++;g.streak=0}
+      remember(life,{type:'GAME_PREDICTION_RESULT',at:market.receivedAt,market:pending.market,sign:pending.sign,entry:pending.price,exit:result.price,outcome:change===0?'FLAT':win?'CORRECT':'WRONG',scope:t.scope});
+    }
+    t.pending=null;
+  }
+  const signals=rows.map(r=>({...r,change:gap<=15000&&t.quotes[r.symbol]>0?r.price/t.quotes[r.symbol]-1:0})).sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
+  const selected=signals[0],sign=Math.sign(selected.change)*(contrarian?-1:1);
+  // A displayed confidence is an observed session hit-rate, never a fabricated model probability.
+  const measured=g.wins+g.losses,confidence=measured?g.wins/measured:null;
+  t.intent={scope:t.scope,market:selected.symbol,axis:selected.axis,direction:sign>0?'LONG':sign<0?'SHORT':'NEUTRAL',sign,confidence,fitness:confidence,at:market.receivedAt,reason:gap>15000?'WARMUP':contrarian?'LOCAL_COUNTERTREND':'LOCAL_MOMENTUM',fullGA600:'NOT_INTEGRATED'};
+  if(!t.pending&&sign)t.pending={market:selected.symbol,price:selected.price,sign,deadline:market.receivedAt+60000};
+  t.lastAt=market.receivedAt;t.quotes=Object.fromEntries(rows.map(r=>[r.symbol,r.price]));
+  life.strategy=sign?'FOLLOW':'HOLD';life.confidence=confidence;life.lastDecisionAt=now;
+  return t.intent;
+}
 
 export function decideMarketLife(life,perception,{random=()=>0.5}={}){
   if(life.state==='DEAD'||life.state==='NAIHE'||life.state==='MENGPO_RECOVERY')return decision(life,'HOLD',0,'LIFECYCLE_LOCK',perception.now);

@@ -1,5 +1,20 @@
 # Work Queue
 
+## KAIOS-11520-WORLD-FIRST-MARKET-LIFE-20261004
+
+- Status: IN_PROGRESS / LOCAL_CANDIDATE; owner codex-gm-01 / 衡曜.
+- Source: Human 沈英明 `KAIOS_K11520_HUMAN_CENTERED_WORLD_AND_MARKET_LIFE_V1`.
+- Branch: codex/k11520-world-first-market-life; base e6dbf366341ef88f3f2b8fbbcd2d95704ad3f85f.
+- Reuse existing HUD/map/camera/market-life owners. No second GA600, XYZ,
+  monster, HUD, identity or financial authority. Full GA600 remains NOT_INTEGRATED.
+- Scope: minimal HUD, compact status, 15s idle disclosure, XYZ map tap,
+  camera-only gestures, local training intent/movement/history and follow cue.
+- Acceptance: six real Chromium viewports, direct world/player/monster/occlusion
+  screenshot review, functional/input-conflict tests, exact-head CI and Draft PR.
+- Prohibited: merge, chain writes, real trades/transfers, other worlds, Heart,
+  Lamp, logistics economics, coordinate epsilon or empty-repay changes.
+- Evidence/current limits: temple HANDOFF_CURRENT.md; no release PASS yet.
+
 ## KAIOS-11520-LIVE-MARKET-MAP-20260921
 
 - Status: IN_PROGRESS; task_source_type: HUMAN_OWNER_EXECUTION_ORDER; task_source_id: 5D WORLD COORDINATES + REAL MARKET POSITION + GAME INTEGRATION; task_source_actor: 沈英明; task_source_file: Human image order dated 2025-09-21 supplied in current conversation (date preserved verbatim); task_source_commit: 924050045f26c1560eba6be80fb2a5eb64f9c0ae (fresh base lineage).

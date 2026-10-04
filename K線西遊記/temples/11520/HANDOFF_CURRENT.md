@@ -1,5 +1,110 @@
 # 11520 HANDOFF CURRENT
 
+## World-first / Market Life — local candidate, 2026-10-04
+
+- Authority: Human `KAIOS_K11520_HUMAN_CENTERED_WORLD_AND_MARKET_LIFE_V1`.
+  Canonical branch `codex/k11520-world-first-market-life`, isolated worktree;
+  base `e6dbf366341ef88f3f2b8fbbcd2d95704ad3f85f`. Draft review only, no merge.
+  Do not fold #484 epsilon, #485 empty repay, #473 Heart, Lamp, OST or 16888
+  into this task; their existing release gates remain independent.
+- Visual audit: large interception/delivery and permanent market cards occupy
+  the playfield despite passing viewport bounds. Existing HUD settings and
+  layout owners implement minimal disclosure, not a second manager. Classify
+  essential controls ALWAYS_VISIBLE, detail CONTEXTUAL, notices EVENT_ONLY,
+  wallet/settings/chat MANUAL. MINIMAL is default; preference persists.
+- Map lineage: PR #423, commit `924050045f26c1560eba6be80fb2a5eb64f9c0ae`
+  (2026-09-21 +08) changed `plane-map-runtime.mjs` default to K and captured
+  pointer events to show K details. Prior parent
+  `6709b92e18cea76f87113fcc57a95fe9260df535` retained normal local navigation.
+  The original `bindMap -> mapTap -> setWaypoint -> startNavigation` remains.
+  Restore default XYZ, retain explicit K detail and XY/YZ canonical navigation.
+- Camera: existing renderer only; zoom .65–1.8, pan bounded ±12 local units,
+  reset, no persistence or Player XYZ writes. HUD origins are excluded; raycast
+  actionable origins do not start pan. Pinch wins over canvas single-pointer
+  gestures; release never becomes an accidental movement tap.
+- Market Life: reuse market-life growth/memory/travel and the existing visual
+  `vectorForAxis` mapping. Directional travel stays within 2m of its local home;
+  neutral actors patrol .65m. These are GAME_PRESENTATION parameters, not
+  k/alpha/theta-to-meter conversion. Combat rule/settlement owners are unchanged.
+- Training: prospective 60s observation with 15s freshness/gap limit; duplicate
+  batches cannot settle twice. Completed local game observations persist in the
+  existing Player ID scoped storage; pending predictions never survive reload.
+  No reward payout, capital/position mutation or real trade. Full GA600 is
+  NOT_INTEGRATED; UI does not mislabel local momentum as formal GA600 output.
+- Follow: read-only intent/distance cue; free manual movement, cancel/switch and
+  existing guardian attack remain. Follow itself cannot navigate or transact.
+- Gates IN_PROGRESS: local unit suite 217/217 and Universal 302/302 passed.
+  Focused six-viewport Chromium passed MINIMAL, idle/held-pointer disclosure,
+  pan/pinch/reset/XYZ separation, market intent/movement, follow/cancel, map
+  navigation and persisted HUD preference. FULL 390x844 regression passed with
+  actual joystick pursuit of the moving guardian before strikes (range rule
+  unchanged). Landscape chip overlap was repaired and screenshot inspected.
+  Character centre-hit priority additionally yields to pinch/manual camera;
+  final exact-head CI must validate that last integration. Do not report full
+  VISUAL_QA or exact-head CI PASS from intermediate screenshots. No Mainnet,
+  public Testnet transaction, transfer, release or merge performed.
+- PR #486 initial head `ce376ba8c08a7689e41389c43f7c97514a3944d6`:
+  Universal and Portal PASS; Game/Responsive caught integration defects, not a
+  release PASS. Camera down/up use the existing mirrored raycast coordinate,
+  whereas moves use physical screen coordinates; normalize only camera input.
+  Clear consumed avatar gestures, retain ground routing. Card geometry reads
+  must use current DOM after quote replacement. FULL regression explicitly
+  selects FULL, and post-reload utility clearance checks current rectangles
+  with the same 8px gap (including the existing side-by-side utility lane).
+- Visual follow-up: occluding world visuals fade in the camera-to-player line
+  only, with independent materials; identity, position, hit targets and combat
+  state remain untouched. Restore materials before applying current phase
+  visibility. This is not a physics or collision correction.
+- Candidate follow-up local gates: character routing, FULL mobile HUD and
+  signed-C immersive browser tests PASS; core runtime 69/69 PASS. Final six-size
+  run and new exact-head CI still required. Responsive CI now checks out and
+  labels the PR's actual head, not GitHub's synthetic merge SHA.
+- Head `dca6832b863abd78430692e46f7488346f8d5322`: Responsive (including
+  six-size world-first), Universal and Portal PASS. Game progressed through
+  controls/combat to an old plane-map test's fixed-pixel GROUND assumption;
+  roaming entities can legitimately occupy that pixel. The follow-up selects
+  actual empty canvas before a real click; canonical ground route and movement
+  assertions stay exact. Local plane-map and full Digital Ant/insurance/bandit
+  browser regressions PASS after that test correction.
+- Added actual actor-follow switching, manual movement while following, a real
+  60-second prospective observation, and exact growth reload checks at 390x844.
+  Local PASS, including correct/wrong/flat counters and XP. Initialize all
+  counters as zero so fresh and restored growth have the same schema. No
+  injected scores or changed clocks. Character-ready tests use attached READY
+  or FALLBACK telemetry rather than requiring MINIMAL to reveal hidden HUD.
+  Final updated-head CI remains the release-review gate.
+
+- Head `a4897825`: exact-head Responsive/world-first, Portal and Universal
+  PASS. Six CI screenshots and follow details directly inspected. Local full
+  Player Life and settlement regressions passed, but geometry inspection found
+  a landscape event toast below the viewport. Existing toast placement now
+  measures its wrapped height and uses space above the bottom-anchored guide;
+  the real boss-victory browser test also requires full viewport containment.
+  This follow-up requires a new exact-head CI result; old green gates are not
+  evidence for the revised candidate.
+
+- Game's Player Life Boss regression was reproduced with per-strike evidence:
+  42 of 55 clicks returned OUT_OF_RANGE as the live target moved to 3.18m.
+  The old test only approached at start/recovery. Use the actual existing
+  joystick to pursue before strikes; retain 30/55 strike limits, original range,
+  damage, recovery and exact DEAD/one-shot assertions. No combat change.
+
+- Game also exposed the pre-existing insurance geometry race: countdown render
+  replaces the claim subtree between visible wait and boundingBox. The test now
+  reads APPROVED state, current connected visible control and geometry in one
+  browser task. The 44px assertion is unchanged and is not a polling predicate;
+  undersized controls still fail. No Courier/insurance product logic changed.
+
+- Reset regression: zeroing camera pan/zoom did not reset the existing dead-zone
+  focus retained from manual gestures. Recenter now uses that owner's existing
+  bypass for one rendered frame and resets its focus; Player XYZ is untouched.
+  Browser QA requires the projected player position to return within .5px of
+  the pre-gesture point. Follow-switch selection excludes the actual avatar
+  priority ellipse, not an arbitrary whole vertical strip.
+- Head `1cd57081` Portal failed the independently scoped 12345 empty-repay case
+  (expected input rejection, observed stub vowTo amount 9). #485 remains Draft;
+  do not import its repair into #486, blind-rerun Portal, or claim all gates PASS.
+
 ## Canonical coordinate restoration candidate — 2026-10-04
 
 - TASK_ID: K11520-CANONICAL-COORDINATE; Human explicit audit → minimal Draft PR

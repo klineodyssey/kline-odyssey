@@ -21,6 +21,8 @@ import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D} from './x
 import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
 import {fetchPublicMarketObservations,publicObservationStatus} from './public-market-quotes.mjs';
 import {createJourneyTutorial} from './world-runtime.mjs';
+import {trainingMonsterSnapshot} from './world-runtime.mjs';
+import {createTrainingMemory} from './market-life-runtime.mjs';
 import {createPlayerLife,installPlayerLifeUI} from './player-life-ui.mjs';
 import {createWorldFeedbackObserver,emit11520WorldFeedback,show11520Toast} from './game-ui-product-fixes-v23.mjs';
 
@@ -33,12 +35,18 @@ const RAIL_ORGANS=ORGANS.filter(([id])=>id!=='bag');
 const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:0,pos:null},KY:{market:'ETHUSDT',side:'多',lots:1,c:0,pos:null},KZ:{market:'BNBUSDT',side:'多',lots:1,c:0,pos:null}},quotes:{},kaios:1000,hp:100,xyz:{x:0,y:0,z:0},intentXYZ:{x:0,y:0,z:0},heading:0,camYaw:0,joy:{sx:0,sy:0,x:0,z:0},history:[],walletKgen:null,mapZoom:1.3,navTarget:null,navActive:false};
 // Explicit home navigation keeps its subject framed until the player takes control.
 let playerHomeFraming=false;
+// Camera state is presentation only, deliberately not persisted with Player XYZ.
+const cameraView={zoom:1,panX:0,panZ:0,manual:false};
+let cameraRecenterPending=false;
+const CAMERA_BOUNDS=Object.freeze({minZoom:.65,maxZoom:1.8,maxPan:12});
+const clampCamera=(n,min,max)=>Math.max(min,Math.min(max,n));
 const legacySession=readPlayerSession(),playerLife=createPlayerLife({lastXYZ:legacySession?.xyz});
 const playerId=playerLife.activePlayer().playerId,playerLifeStorage=playerLife.snapshot().persistent?undefined:null,scopedStorage=createPlayerScopedStorage(playerLifeStorage,playerId);
 const restoredSession=readPlayerSession(scopedStorage);const localLifePosition=playerLife.activePlayer().lastXYZ;
 if(restoredSession){S.xyz={...restoredSession.xyz};S.intentXYZ={...restoredSession.intentXYZ}}else{S.xyz={...localLifePosition};S.intentXYZ={...localLifePosition}}
 let playerLifeSwitching=false,lastSessionSave=0,lastSessionSnapshot='',lastLifeSaveError='';function persistPlayerSession(force=false){if(playerLifeSwitching)return;const now=Date.now(),snapshot=JSON.stringify([S.xyz,S.intentXYZ]);if(!force&&(snapshot===lastSessionSnapshot||now-lastSessionSave<750))return;lastSessionSave=now;lastSessionSnapshot=snapshot;savePlayerSession({xyz:S.xyz,intentXYZ:S.intentXYZ},scopedStorage);try{playerLife.saveProgress({lastXYZ:{...S.xyz},lastWorld:'11520',journeyProgress:{...playerLife.activePlayer().journeyProgress,tutorialStage:journey.snapshot().stage}})}catch(error){if(lastLifeSaveError!==error.message){lastLifeSaveError=error.message;toast('Player Life '+error.message+' · 請保存備份')}}}addEventListener('pagehide',()=>persistPlayerSession(true));addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persistPlayerSession(true)});
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
+world.trainingMemory=createTrainingMemory(scopedStorage);
 let legacyGuestCandidate=null;try{legacyGuestCandidate=scopedStorage.getItem('k11520.local-product.v1:guest')}catch{}
 const playerStore=createSimulationPlayerStore({ledger,storage:playerLifeStorage,playerId});playerStore.activate(null);
 world.journeyEnabled=true;createKSpaceEncounter(world,undefined,S.xyz);
@@ -148,6 +156,7 @@ async function quotes(){
 function syncMarketKLabels(){
   if(!$('#marketKLabelsStyle')){const style=document.createElement('style');style.id='marketKLabelsStyle';style.textContent='.axis:has(.marketKValue) .universeFloorBadge{display:none!important}';document.head.append(style)}
   const market=kMarketSnapshot(world);
+  const marketRow=$('#k11520MarketRow');if(marketRow)marketRow.textContent=`KX BTC · KY ETH · KZ BNB · ${market.status} ▾`;
   for(const row of market.markets){
     const card=$(`[data-market-card="${row.axis}"]`);if(!card)continue;
     let label=card.querySelector('.marketKValue');if(!label){label=document.createElement('span');label.className='marketKValue';label.style.cssText='display:block;font:600 10px system-ui;color:#b9e7fa;white-space:nowrap';card.append(label)}
@@ -235,6 +244,28 @@ $('#flat').onclick=closePos;$('#orderFire').onclick=openOrder;
 const targetHud=document.createElement('button');targetHud.id='kspaceTarget';targetHud.className='panel';targetHud.type='button';targetHud.title='K-space 取經目標：點擊展開座標與六相部位';targetHud.hidden=true;document.body.appendChild(targetHud);
 const monsterHud=document.querySelector('.monsterHud');if(monsterHud){monsterHud.style.cursor='pointer';monsterHud.title='點擊查看 K-space 六相戰鬥詳情';monsterHud.addEventListener('click',e=>{if(e.target.closest('details'))return;showCombatTarget()})}
 const monsterGuide=document.createElement('div');monsterGuide.id='k11520MonsterGuide';monsterGuide.setAttribute('aria-live','polite');monsterGuide.style.cssText='position:fixed;z-index:520;left:50%;top:52%;transform:translate(-50%,-50%);pointer-events:none;max-width:min(76vw,330px);padding:7px 11px;border:1px solid #68e4ff88;border-radius:12px;background:#071018dd;color:#eafaff;font:800 12px/1.35 system-ui;text-align:center;box-shadow:0 8px 24px #0009';document.body.appendChild(monsterGuide);
+let followedMonsterId=null;
+const followChip=document.createElement('button');followChip.id='k11520FollowMonster';followChip.type='button';followChip.hidden=true;followChip.setAttribute('aria-label','取消跟怪');document.body.appendChild(followChip);
+followChip.onclick=()=>{followedMonsterId=null;renderFollowMonster()};
+function renderFollowMonster(){
+  const m=trainingMonsterSnapshot(world).find(m=>m.id===followedMonsterId&&m.alive);
+  if(!m)followedMonsterId=null;
+  followChip.hidden=!m;
+  if(m){const intent=m.intent,dx=m.position.x-S.xyz.x,dz=m.position.z-S.xyz.z;followChip.textContent=`👣 ${m.name} · ${intent?.market?.replace('USDT','')||'WAIT'} ${intent?.direction||'NEUTRAL'} · ${Math.hypot(dx,dz).toFixed(1)}m ×`;followChip.title='跟怪僅方向觀察；走路與攻擊不受限。點擊取消。'}
+}
+function appendMarketLifeDetails(id){
+  const m=trainingMonsterSnapshot(world).find(m=>m.id===id);if(!m)return;
+  $('#monsterMarketDetails')?.remove();
+  const block=document.createElement('section');block.id='monsterMarketDetails';block.className='card';
+  const p=document.createElement('p'),g=m.growth,intent=m.intent,measured=g.wins+g.losses;
+  p.textContent=`${m.name} · 遊戲 Lv.${m.level} · 訓練 Lv.${m.gameTrainingLevel}\n${intent?.market||'等待報價'} / ${intent?.direction||'NEUTRAL'}\n遊戲觀測 ${g.predictionCount||0} 次：正確 ${g.wins} / 錯誤 ${g.losses} / 持平 ${g.flat||0}\n已判定勝率 ${measured?(100*g.wins/measured).toFixed(1)+'%':'尚無樣本'} · streak ${g.streak||0} · XP ${g.experience}\nconfidence / fitness：${intent?.confidence==null?'尚無樣本':intent.confidence.toFixed(3)}（本機觀測比例）\n移動 ${m.movement?.axis||'巡遊'} ${m.movement?.direction||'NEUTRAL'} · GAME PRESENTATION\n完整 GA600：NOT_INTEGRATED。每 60 秒比較報價；非歷史投資績效，不會自動下單或發放資產。${m.persisted?'已判定紀錄保存在此玩家的本機存檔':'僅記憶體，儲存不可用'}；重新載入會捨棄尚未判定的預測。`;
+  p.style.whiteSpace='pre-line';block.appendChild(p);
+  const follow=document.createElement('button');follow.id='monsterFollowAction';follow.className='btn';follow.style.minHeight='44px';follow.textContent=followedMonsterId===id?'取消跟怪':'👣 跟怪';follow.disabled=!m.alive;
+  follow.onclick=()=>{followedMonsterId=followedMonsterId===id?null:id;renderFollowMonster();$('#sheet').classList.remove('open')};block.appendChild(follow);
+  if(id===world.kSpace?.targetId){const attack=document.createElement('button');attack.id='monsterAttackAction';attack.className='btn';attack.style.minHeight='44px';attack.textContent='⚔ 攻擊';attack.onclick=()=>{$('#sheet').classList.remove('open');performCombat('slash')};block.appendChild(attack)}
+  $('#sheetBody').prepend(block);
+}
+globalThis.__K11520_MONSTER_FOLLOW__=Object.freeze({snapshot:()=>({scope:'GAME_TRAINING_ONLY',followedMonsterId,actors:trainingMonsterSnapshot(world),controlsPlayer:false,automatesTrading:false})});
 function monsterScreenGuide(snapshot){
   const target=world.monsters.find(m=>m.id===world.kSpace?.targetId&&m.simulationCombat),rec=target&&lifeVisuals.get(target.id);
   if(!snapshot?.target||snapshot.target.state==='DEAD'){monsterGuide.textContent='擊倒！KAIOS 戰利品已記帳 · 下一隻 6 秒後出現';monsterGuide.style.display='block';return}
@@ -248,6 +279,7 @@ function monsterScreenGuide(snapshot){
   monsterGuide.style.left='50%';monsterGuide.style.top='62%';monsterGuide.style.transform='translate(-50%,-50%)';monsterGuide.style.display='block';
 }
 function renderCombatTarget(){
+  renderFollowMonster();
   const s=combatSnapshot();if(!s?.target){targetHud.hidden=true;monsterGuide.style.display='none';return}targetHud.hidden=true;
   const t=s.target,body=s.selection?.body||'0C 取經',part=t.bodies[body],status=t.state==='DEAD'?'DEFEATED · 6s':body===t.exposed?'EXPOSED':body.slice(0,2)===t.exposed.slice(0,2)?'GUARDED':'RESIST';
   targetHud.textContent=`◎ ${t.name} · ${body}\n${s.distance.toFixed(1)}m · ${part?part.hp+'HP':t.hp+'HP'}\n${status} · 弱點 ${t.exposed} · XZ→KY / XY→KZ / YZ→KX ▾`;
@@ -259,6 +291,7 @@ function renderCombatTarget(){
   syncWorldFeedback();
   if(tutorial.hint)monsterGuide.textContent=`${t.name} · ${Math.round(t.hp)}HP · ${s.distance.toFixed(1)}m\n${tutorial.hint}\n點此看故事／教學`;
   if(t.boss)monsterGuide.textContent=`BOSS Lv.${t.level} · ${t.name} · ${Math.round(t.hp)}/${t.maxHp}HP\nPHASE ${t.phase} · 弱點 ${t.exposed}${t.rage?' · RAGE 狂暴':''}${t.lowHp?' · LOW HP':''} · ${s.distance.toFixed(1)}m`;
+  if(document.documentElement.dataset.k11520HudProfile==='MINIMAL')monsterGuide.textContent=`${t.boss?'BOSS':'🎯'} ${t.name} · ${Math.round(t.hp)}HP · ${s.distance.toFixed(1)}m · ⚔ / 👣`;
   Object.assign(monsterGuide.style,{whiteSpace:tutorial.hint?'pre-line':'normal',boxSizing:'border-box',minHeight:'44px',pointerEvents:'auto'});
   monsterGuide.onclick=showCombatTarget;monsterGuide.setAttribute('role','button');monsterGuide.tabIndex=0;
   monsterGuide.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showCombatTarget()}};
@@ -277,7 +310,7 @@ function showCombatTarget(){
   $('#sheetTitle').textContent=`TARGET LOCK · ${t.name}（遊戲模擬）`;
   $('#sheetBody').innerHTML=`<div class="card"><b>距離 ${formatGameDistanceK(s.distance,{detail:true})} · ${s.selection?.body||'0C NEUTRAL'}</b><p>0C 取經：自動攻擊存活部位、掉落本機取經碎片；Plane 決定交易軸，C 正負選相位；靠近後攻擊。EXPOSED 弱點 ${t.exposed}。</p><p>Slash ${formatGameDistanceK(KSPACE_SKILLS.slash.radius)}：單部位<br>天罡金陣 ${formatGameDistanceK(KSPACE_SKILLS.goldenRain.radius)}：切面兩軸同相<br>盤古幻斧 ${formatGameDistanceK(KSPACE_SKILLS.phantomAxe.radius)}：前方半圓三軸同相</p><p id="combatKValues" style="white-space:pre-line">Player 相對基準 (%)：${vec(s.playerK,['KX','KY','KZ'])}<br>Monster 模擬相對基準 (%)：${vec(s.monsterK,['KX','KY','KZ'])}<br>市場 模擬相對差 (pp)：${vec(s.deltaK,['KX','KY','KZ'])}<br>LOCAL XYZ (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.playerLocal[a])).join(' / ')}<br>局部相對位移 (K)：${['x','y','z'].map(a=>formatGameDistanceK(s.relative[a])).join(' / ')}</p><p>LOCAL：1 遊戲單位 = 1 公尺，依 CURRENT 換算 K。相對基準百分比不是正典 K 座標，也不是公尺；未設定市場→物理 transform，不與 XYZ 直接相加。來源 ${s.source}<br>Ni(P)=100×(P/P0−1)，公開報價同步相對基準（${s.market.status}），LOCAL XYZ 不變。</p>${Object.entries(s.reference).filter(([a])=>a!=='source').map(([a,v])=>`<div data-k-reference="${a}">${a} ${v.market}: P=${v.price}, P0=${v.anchor}</div>`).join('')}<p>${KSPACE_PHASES.map(id=>`${id}: ${t.bodies[id].hp}/${t.bodies[id].maxHp} ${id===t.exposed?'EXPOSED':''}`).join('<br>')}</p><button id="kspacePracticeReset" class="btn">重置模擬守衛（無獎勵）</button></div>`;
   if(!journey.snapshot().complete){const story=document.createElement('div');story.className='card';story.id='journeyStory';story.innerHTML='<h3>序章 · 悟空落地花果山</h3><p>三市場的六相失衡，守關猿擋住取經路。先走近、揮劍、收集碎片，再認識 KX／KY／KZ；不用登入或連錢包。</p><p>'+journey.snapshot().hint+'</p><p>XZ→KY · XY→KZ · YZ→KX；+C 多方、−C 空方，0C 自動取經。KAIOS 掉寶是本機候選紀錄，不是鏈上發放。</p><button id="journeyPlayerLife" class="btn">領起家地 / 角色（可略過）</button><button id="journeyContinue" class="btn">繼續取經</button> <button id="journeySkip" class="btn">略過教學</button>';$('#sheetBody').prepend(story);$('#journeyPlayerLife').onclick=()=>playerLifeUI.open();$('#journeyContinue').onclick=()=>$('#sheet').classList.remove('open');$('#journeySkip').onclick=()=>{journey.skip();$('#sheet').classList.remove('open')}}
-  $('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=Object.values(m.bodies).reduce((n,b)=>n+b.hp,0);m.rewardSuppressed=true;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
+  appendMarketLifeDetails(t.id);$('#sheet').classList.add('open');$('#kspacePracticeReset').onclick=()=>{const m=world.monsters.find(m=>m.id===t.id);for(const b of Object.values(m.bodies))b.hp=b.maxHp;m.hp=Object.values(m.bodies).reduce((n,b)=>n+b.hp,0);m.rewardSuppressed=true;m.state='GUARD';world.kSpace.lastResult=null;renderCombatTarget();showCombatTarget()};
 }
 targetHud.onclick=showCombatTarget;
 globalThis.__K11520_KSPACE_API__=Object.freeze({snapshot:combatSnapshot,simulationOnly:true});
@@ -463,7 +496,7 @@ function syncPlayerHome(){const p=playerLife.activePlayer(),h=playerLife.loadHom
 const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching){syncPlayerHome();syncWorldFeedback()}},beforePlayerChange:()=>{playerLifeSwitching=true;explorationMeters=0},startEncounter:startJourneyEncounter,claimDaily:claimDailyJourney,toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;S.navTarget=null;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
 syncPlayerHome();
 const lifeVisuals=new Map(),lifeVisualPending=new Set();async function ensureLifeVisual(m){if(m.state==='DEAD'||!(m.name||m.baseName))return null;const key=`${m.lifeId||m.id}|${m.species}`;const current=lifeVisuals.get(m.id);if(current?.key===key)return current.root;if(current){scene.remove(current.root);lifeVisuals.delete(m.id)}if(lifeVisualPending.has(m.id))return null;lifeVisualPending.add(m.id);try{const v=await createLifeVisual(THREE,{species:m.species,name:m.baseName||m.name,scale:.75});v.root.userData.worldMonsterId=m.id;v.root.userData.lifeId=m.lifeId||null;v.root.traverse?.(n=>{n.userData.worldMonsterId=m.id;n.userData.lifeId=m.lifeId||null});scene.add(v.root);lifeVisuals.set(m.id,{key,root:v.root,mode:v.mode});return v.root}finally{lifeVisualPending.delete(m.id)}}
-function syncLifeVisuals(){renderCombatTarget();for(const m of [...world.monsters,...(world.ambientLife||[])]){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m);if(m.simulationCombat)syncPhaseBody(rec.root,m)}}
+function syncLifeVisuals(){restoreOcclusionMaterials();renderCombatTarget();for(const m of [...world.monsters,...(world.ambientLife||[])]){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m);if(m.simulationCombat)syncPhaseBody(rec.root,m)}}
 function syncPhaseBody(root,m){
   if(!root.userData.phaseMarkers){
     const markers={};const offsets=[[-.8,1.2,0],[.8,1.2,0],[-.55,1.75,0],[.55,1.75,0],[-.55,.65,0],[.55,.65,0]];
@@ -544,14 +577,97 @@ function ancestorData(obj,key){let n=obj;while(n){if(n.userData&&n.userData[key]
 function objectEntity(o){return{objectName:o.name||o.label||o.id||o.kind||'世界物件',objectType:o.kind||'WORLD_OBJECT',lifeId:o.lifeId||null,x:Number(o.x)||0,y:Number(o.y)||0,z:Number(o.z)||0,functionText:o.functionText||o.purpose||'11520 世界設施／物件',interactionText:o.interactionText||'查看、導航、接近後互動'}}
 function monsterEntity(m){return{objectName:m.name||m.baseName||m.species||'Market Life',objectType:m.species||m.sourceType||'MARKET_LIFE',lifeId:m.lifeId||null,x:Number(m.x)||0,y:Number(m.y)||0,z:Number(m.z)||0,functionText:`Living World 生命 · HP ${Math.round(m.hp||0)}/${Math.round(m.maxHp||0)}`,interactionText:'查看、導航、接近後依生命規則互動／捕捉／戰鬥'}}
 function emitWorldTapRoute(route,detail={}){renderer.domElement.dispatchEvent(new CustomEvent('k11520:world-tap',{detail:{route,...detail}}));return route}
-function monsterAt(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect(),radii=[0,6,12,18],samples=[];for(const radius of radii){if(!radius)samples.push([0,0]);else for(let i=0;i<8;i++){const angle=i*Math.PI/4;samples.push([Math.cos(angle)*radius,Math.sin(angle)*radius])}}for(const [dx,dy] of samples){const x=clientX+dx,y=clientY+dy;if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)continue;tapPointer.x=((x-rect.left)/rect.width)*2-1;tapPointer.y=-((y-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);for(const hit of raycaster.intersectObjects(scene.children,true)){if(ancestorData(hit.object,'isPlayer'))break;const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null)return world.monsters.find(item=>String(item.id)===String(mid))||null;if(ancestorData(hit.object,'worldObjectId')!=null)break}}return null}
-function routeMonsterTap(m){if(!m||m.state==='DEAD')return null;if(m.simulationCombat){showCombatTarget();return emitWorldTapRoute('ENTITY',{entityType:'SIMULATION_TARGET',entityId:m.id})}showEntityInfo(monsterEntity(m));toast(`發現 ${m.name||m.baseName||m.species||'生命'}`);return emitWorldTapRoute('ENTITY',{entityType:'MONSTER',entityId:String(m.id),lifeId:String(m.lifeId||'')})}
-function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){const routed=routeMonsterTap(latchedMonster);if(routed)return routed}const rect=renderer.domElement.getBoundingClientRect();tapPointer.x=((clientX-rect.left)/rect.width)*2-1;tapPointer.y=-((clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);const hits=raycaster.intersectObjects(scene.children,true);for(const hit of hits){if(ancestorData(hit.object,'playerHome')){playerLifeUI.open();return emitWorldTapRoute('ENTITY',{entityType:'PLAYER_HOME'})}if(ancestorData(hit.object,'isPlayer')){renderer.domElement.dispatchEvent(new CustomEvent('k11520:player-tap',{detail:{source:'WORLD_RAYCAST'}}));return emitWorldTapRoute('PLAYER')}const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null){const m=world.monsters.find(x=>String(x.id)===String(mid));const routed=routeMonsterTap(m);if(routed)return routed}const oid=ancestorData(hit.object,'worldObjectId');if(oid!=null){const o=WORLD_OBJECTS.find(x=>String(x.id)===String(oid));if(o){showEntityInfo(objectEntity(o));toast(`發現 ${o.name||o.label||o.kind||'物件'}`);return emitWorldTapRoute('ENTITY',{entityType:'WORLD_OBJECT',entityId:String(oid)})}}}
+function monsterAt(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect(),radii=[0,6,12,18],samples=[];for(const radius of radii){if(!radius)samples.push([0,0]);else for(let i=0;i<8;i++){const angle=i*Math.PI/4;samples.push([Math.cos(angle)*radius,Math.sin(angle)*radius])}}for(const [dx,dy] of samples){const x=clientX+dx,y=clientY+dy;if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)continue;tapPointer.x=((x-rect.left)/rect.width)*2-1;tapPointer.y=-((y-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);for(const hit of raycaster.intersectObjects(scene.children,true)){if(ancestorData(hit.object,'isPlayer'))break;const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null)return [...world.monsters,...(world.ambientLife||[])].find(item=>String(item.id)===String(mid))||null;if(ancestorData(hit.object,'worldObjectId')!=null)break}}return null}
+function routeMonsterTap(m){if(!m||m.state==='DEAD')return null;if(m.simulationCombat){showCombatTarget();return emitWorldTapRoute('ENTITY',{entityType:'SIMULATION_TARGET',entityId:m.id})}showEntityInfo(monsterEntity(m));appendMarketLifeDetails(m.id);toast(`發現 ${m.name||m.baseName||m.species||'生命'}`);return emitWorldTapRoute('ENTITY',{entityType:'MONSTER',entityId:String(m.id),lifeId:String(m.lifeId||'')})}
+function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){const routed=routeMonsterTap(latchedMonster);if(routed)return routed}const rect=renderer.domElement.getBoundingClientRect();tapPointer.x=((clientX-rect.left)/rect.width)*2-1;tapPointer.y=-((clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(tapPointer,camera);const hits=raycaster.intersectObjects(scene.children,true);for(const hit of hits){if(ancestorData(hit.object,'playerHome')){playerLifeUI.open();return emitWorldTapRoute('ENTITY',{entityType:'PLAYER_HOME'})}if(ancestorData(hit.object,'isPlayer')){renderer.domElement.dispatchEvent(new CustomEvent('k11520:player-tap',{detail:{source:'WORLD_RAYCAST'}}));return emitWorldTapRoute('PLAYER')}const mid=ancestorData(hit.object,'worldMonsterId');if(mid!=null){const m=[...world.monsters,...(world.ambientLife||[])].find(x=>String(x.id)===String(mid));const routed=routeMonsterTap(m);if(routed)return routed}const oid=ancestorData(hit.object,'worldObjectId');if(oid!=null){const o=WORLD_OBJECTS.find(x=>String(x.id)===String(oid));if(o){showEntityInfo(objectEntity(o));toast(`發現 ${o.name||o.label||o.kind||'物件'}`);return emitWorldTapRoute('ENTITY',{entityType:'WORLD_OBJECT',entityId:String(oid)})}}}
   let pointHit=hits.find(h=>ancestorData(h.object,'isGround'));let p=pointHit?.point;if(!p){const q=new THREE.Vector3();if(raycaster.ray.intersectPlane(groundPlane,q))p=q}if(p){cancelNavigation('切換世界目標');S.navTarget=null;document.getElementById('waypointAction')?.remove();setWorldTarget3D({x:p.x,y:p.y,z:p.z},{mode:'WORLD',source:'WORLD_GROUND'});startWorldNavigation3D();toast(`XYZ 前往 X ${fmt(p.x,1)} · Y ${fmt(p.y,1)} · Z ${fmt(p.z,1)}`);return emitWorldTapRoute('GROUND',{x:p.x,y:p.y,z:p.z})}toast('這裡沒有可到達目標');return emitWorldTapRoute('NONE')
 }
-renderer.domElement.addEventListener('pointerdown',e=>{worldTapStart={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY)}},{passive:true});renderer.domElement.addEventListener('pointerup',e=>{const s=worldTapStart;worldTapStart=null;if(!s||s.id!==e.pointerId)return;if(Math.hypot(e.clientX-s.x,e.clientY-s.y)>10||performance.now()-s.t>420)return;worldTapAt(e.clientX,e.clientY,s.monster)},{passive:true});renderer.domElement.addEventListener('pointercancel',()=>{worldTapStart=null},{passive:true});
+const cameraPointers=new Map();let pinchDistance=null,pinchZoom=1,cameraGesture=false;
+function canPanAt(x,y){
+  if(document.elementFromPoint(x,y)!==renderer.domElement)return false;
+  const r=renderer.domElement.getBoundingClientRect(),rayX=renderer.domElement.dataset.xVisualMirror==='1'?r.left+r.width-(x-r.left):x;
+  if(monsterAt(rayX,y))return false;
+  tapPointer.set((rayX-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);raycaster.setFromCamera(tapPointer,camera);
+  for(const hit of raycaster.intersectObjects(scene.children,true)){
+    if(ancestorData(hit.object,'isPlayer')||ancestorData(hit.object,'playerHome')||ancestorData(hit.object,'worldObjectId')!=null)return false;
+    if(ancestorData(hit.object,'isGround'))return true;
+  }return true;
+}
+const cameraReset=document.createElement('button');cameraReset.id='k11520CameraReset';cameraReset.type='button';cameraReset.textContent='◎';cameraReset.title='回到玩家';cameraReset.setAttribute('aria-label','Camera 回到玩家');document.body.appendChild(cameraReset);
+cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false};
+// Retire the transparent half-screen yaw interceptor. HUD controls above the
+// canvas keep their own pointer owners; only world-origin pointers enter here.
+$('#lookPad').style.setProperty('pointer-events','none','important');
+function pointerDistance(){const [a,b]=[...cameraPointers.values()];return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0}
+// The existing mirror owner converts down/up to raycast space, but leaves
+// pointermove in physical screen space. Camera deltas must use screen space
+// throughout; worldTapAt still receives the canonical raycast coordinates.
+function cameraScreenX(e){const r=renderer.domElement.getBoundingClientRect();return renderer.domElement.dataset.xVisualMirror==='1'&&e.type!=='pointermove'?r.left+r.width-(e.clientX-r.left):e.clientX}
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(e.button!==0)return;
+  const x=cameraScreenX(e);e.preventDefault();cameraPointers.set(e.pointerId,{x,y:e.clientY});try{renderer.domElement.setPointerCapture?.(e.pointerId)}catch{}
+  if(cameraPointers.size===1){cameraGesture=false;worldTapStart={id:e.pointerId,x,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed:canPanAt(x,e.clientY)}}
+  else{pinchDistance=pointerDistance();pinchZoom=cameraView.zoom;worldTapStart=null;cameraGesture=true}
+},{passive:false});
+renderer.domElement.addEventListener('pointermove',e=>{
+  const old=cameraPointers.get(e.pointerId);if(!old)return;
+  cameraPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(cameraPointers.size>=2){
+    if(pinchDistance>0)cameraView.zoom=clampCamera(pinchZoom*pointerDistance()/pinchDistance,CAMERA_BOUNDS.minZoom,CAMERA_BOUNDS.maxZoom);
+    cameraView.manual=true;cameraGesture=true;return;
+  }
+  // A gesture started on an actionable monster remains a monster interaction.
+  if(!worldTapStart?.panAllowed||pinchDistance!==null)return;
+  if(!cameraGesture&&Math.hypot(e.clientX-worldTapStart.x,e.clientY-worldTapStart.y)<=10)return;
+  cameraGesture=true;cameraView.manual=true;playerHomeFraming=false;
+  const scale=.022/cameraView.zoom,dx=(e.clientX-old.x)*scale,dy=(e.clientY-old.y)*scale;
+  cameraView.panX=clampCamera(cameraView.panX+dx*Math.cos(S.camYaw)+dy*Math.sin(S.camYaw),-CAMERA_BOUNDS.maxPan,CAMERA_BOUNDS.maxPan);
+  cameraView.panZ=clampCamera(cameraView.panZ+dx*Math.sin(S.camYaw)-dy*Math.cos(S.camYaw),-CAMERA_BOUNDS.maxPan,CAMERA_BOUNDS.maxPan);
+},{passive:true});
+function finishCameraPointer(e){
+  if(!cameraPointers.has(e.pointerId))return;
+  const start=worldTapStart;cameraPointers.delete(e.pointerId);worldTapStart=null;
+  if(e.type==='pointerup'&&!cameraGesture&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
+  if(!cameraPointers.size){pinchDistance=null;cameraGesture=false}
+}
+for(const type of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(type,finishCameraPointer,{passive:true});
+// Character priority consumes pointerup before the world listener. Clear its
+// completed gesture too, so a later world tap cannot become a phantom pinch.
+renderer.domElement.addEventListener('k11520:player-tap',()=>{cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false});
+function applyWorldCamera(){
+  const dist=8.5/cameraView.zoom,x=S.xyz.x+cameraView.panX,z=S.xyz.z+cameraView.panZ;
+  camera.position.set(x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2/cameraView.zoom,z-Math.cos(S.camYaw)*dist);
+  // Recenter must also reset the existing dead-zone's remembered focus. A zero
+  // pan alone leaves the old manual-camera focus inside its hysteresis region.
+  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
+  camera.lookAt(x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,z+Math.cos(S.camYaw)*1.8);
+  cameraRecenterPending=false;
+  revealPlayerBehindOccluders();
+}
+// Camera-only obstruction treatment: retain meshes, hit targets, Life IDs and
+// XYZ, but fade only the visual groups between this camera and the player.
+// Material clones prevent a shared asset material from fading unrelated actors.
+const occlusionRay=new THREE.Raycaster(),occlusionPoint=new THREE.Vector3(),occlusionDirection=new THREE.Vector3(),occlusionMaterials=new WeakMap(),fadedMaterials=new Map();
+function restoreOcclusionMaterials(){for(const [material,original] of fadedMaterials)Object.assign(material,original);fadedMaterials.clear()}
+function revealPlayerBehindOccluders(){
+  occlusionPoint.set(S.xyz.x,S.xyz.y+.8,S.xyz.z);occlusionDirection.copy(occlusionPoint).sub(camera.position);
+  const distance=occlusionDirection.length();if(distance<=.1)return;
+  camera.updateMatrixWorld();scene.updateMatrixWorld(true);occlusionRay.set(camera.position,occlusionDirection.normalize());occlusionRay.camera=camera;occlusionRay.far=distance-.1;
+  const roots=new Set();
+  for(const hit of occlusionRay.intersectObjects(scene.children,true)){
+    if(ancestorData(hit.object,'isPlayer')||ancestorData(hit.object,'isGround'))continue;
+    let root=hit.object;while(root.parent&&root.parent!==scene)root=root.parent;
+    if(ancestorData(hit.object,'worldMonsterId')!=null||ancestorData(hit.object,'worldObjectId')!=null||ancestorData(hit.object,'playerHome'))roots.add(root);
+  }
+  for(const root of roots)root.traverse(mesh=>{
+    if(!mesh.material)return;
+    if(!occlusionMaterials.has(mesh)){const materials=(Array.isArray(mesh.material)?mesh.material:[mesh.material]).map(m=>m.clone());mesh.material=Array.isArray(mesh.material)?materials:materials[0];occlusionMaterials.set(mesh,materials)}
+    for(const material of occlusionMaterials.get(mesh)){if(fadedMaterials.has(material))continue;fadedMaterials.set(material,{opacity:material.opacity,transparent:material.transparent,depthWrite:material.depthWrite});material.opacity=Math.min(material.opacity,.18);material.transparent=true;material.depthWrite=false}
+  });
+}
+globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:CAMERA_BOUNDS,playerXYZ:{...S.xyz},authority:'CAMERA_ONLY'}),canPanAt});
 
-function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);if(S.navActive)moveNavigation();else moveManual();persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play((S.navActive||(groundMode&&moving))?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();const dist=8.5;camera.position.set(S.xyz.x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2,S.xyz.z-Math.cos(S.camYaw)*dist);camera.userData.k11520NavigationFocus=playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;camera.lookAt(S.xyz.x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,S.xyz.z+Math.cos(S.camYaw)*1.8);combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
+function resize(){renderer.setSize(innerWidth,innerHeight,true);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;mixer?.update(dt);if(S.navActive)moveNavigation();else moveManual();persistPlayerSession();ground.position.set(S.xyz.x,0,S.xyz.z);avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z);appearanceRing.position.set(S.xyz.x,S.xyz.y+.06,S.xyz.z);avatar.rotation.y=-S.heading;const ctl=controlState(),v=controlVector(),groundMode=(ctl?.mode||'XZ')==='XZ',moving=Math.abs(v.x)+Math.abs(v.y)+Math.abs(v.z)>.05;play((S.navActive||(groundMode&&moving))?'walk':'idle');const tr=tickWorld(world,S.xyz,Date.now());for(const e of tr.events)if(e.type==='PLAYER_HIT')S.hp=Math.max(0,S.hp-e.damage);syncLifeVisuals();applyWorldCamera();combatFx?.tick(now,S.xyz);combatFx?.applyCameraShake(now);hud();drawAllMaps();renderer.render(scene,camera)}
 
 // Movement and encounter presentation observe the existing world loop; neither
 // can submit a trade or mint an economic reward. Bounded observer, cleared on exit.
