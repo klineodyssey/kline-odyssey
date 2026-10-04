@@ -125,10 +125,19 @@ async function verifyWorldFirst(){
       const followed=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId);
       if(profile.name==='cold-390'){
         // Exclude the existing avatar priority ellipse, not an arbitrary entire
-        // vertical strip that can reject clearly visible moving actors.
-        const other=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().find(m=>m.visible&&m.inView&&m.uncovered&&((m.screen.x-innerWidth/2)/34)**2+((m.screen.y-innerHeight/2)/62)**2>1.1&&__K11520_MONSTER_FOLLOW__.snapshot().actors.some(a=>a.id===m.id&&a.alive)));
-        assert.ok(other,'a second market-life actor must be selectable');
-        await page.mouse.click(other.screen.x,other.screen.y);await page.locator('#monsterFollowAction').waitFor({state:'visible'});await page.locator('#monsterFollowAction').click();
+        // vertical strip that can reject clearly visible moving actors. Read a
+        // fresh projection for each real click because market-life actors keep
+        // moving while a slower browser runner is dispatching pointer input.
+        let switchControlVisible=false;
+        for(let attempt=0;attempt<8&&!switchControlVisible;attempt++){
+          const other=await page.evaluate(current=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().find(m=>m.id!==current&&m.visible&&m.inView&&m.uncovered&&((m.screen.x-innerWidth/2)/34)**2+((m.screen.y-innerHeight/2)/62)**2>1.1&&__K11520_MONSTER_FOLLOW__.snapshot().actors.some(a=>a.id===m.id&&a.alive)),followed);
+          assert.ok(other,'a second market-life actor must be selectable');
+          await page.mouse.click(other.screen.x,other.screen.y);
+          switchControlVisible=await page.locator('#monsterFollowAction').waitFor({state:'visible',timeout:750}).then(()=>true,()=>false);
+          if(!switchControlVisible&&await page.locator('#sheet.open').isVisible())await page.locator('#sheetClose').click();
+        }
+        assert.equal(switchControlVisible,true,'a fresh moving-actor world tap must expose follow control');
+        await page.locator('#monsterFollowAction').click();
         assert.notEqual(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),followed,'player can switch the followed actor');
         await page.locator('#k11520FollowMonster').click();await page.locator('#k11520MonsterGuide').click();await page.locator('#monsterFollowAction').click();
         result.checks.followSwitch='ACTUAL WORLD TAP / SWITCH / CANCEL PASS';
