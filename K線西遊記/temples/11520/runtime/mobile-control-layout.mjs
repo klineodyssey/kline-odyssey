@@ -94,6 +94,7 @@ function installStyle(){
 html[data-k11520-hud-profile]:not([data-k11520-hud-profile="FULL"]):not(.k11520MarketOpen) .axes{display:none!important}
 html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
 html[data-k11520-hud-profile] .axes{top:116px!important;z-index:610!important}
+html.k11520UtilitiesOpen[data-k11520-hud-profile="FULL"] .axes{right:58px!important}
 html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:auto!important;bottom:268px!important;height:134px!important}
 html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:168px!important;left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;min-height:44px;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
 html[data-k11520-hud-profile] #cargoInterceptionButton,html[data-k11520-hud-profile] #homeDeliveryButton{top:116px!important;bottom:auto!important;min-height:44px!important;height:44px!important;width:76px!important;padding:4px!important;font-size:11px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;z-index:590!important}
@@ -101,6 +102,8 @@ html[data-k11520-hud-profile] #cargoInterceptionButton{right:88px!important}
 html[data-k11520-hud-profile] #homeDeliveryButton{right:6px!important;display:block!important}
 html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 #k11520CameraReset{position:fixed;left:6px;top:116px;width:44px;height:44px;z-index:590;border-radius:50%;border:1px solid #68e4ff88;background:#071018dd;color:#dffaff;font-size:22px;touch-action:manipulation}
+#k11520CameraZoomStatus{position:fixed;z-index:589;left:50%;top:176px;transform:translate(-50%,-6px);padding:6px 10px;border:1px solid #68e4ff66;border-radius:999px;background:#071018e8;color:#dffaff;font:800 11px system-ui;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+#k11520CameraZoomStatus.show{opacity:1;transform:translate(-50%,0)}
 #k11520FollowMonster{position:fixed;left:54px;top:116px;width:calc(100vw - 224px);height:44px;z-index:590;border:1px solid #68e4ff88;border-radius:10px;background:#071018dd;color:#dffaff;font:700 10px system-ui;overflow:hidden;text-overflow:ellipsis}
 #k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
 @media(orientation:landscape) and (max-height:600px){
@@ -112,6 +115,7 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   html[data-k11520-hud-profile] #cargoInterceptionButton{top:54px!important;left:196px!important;right:auto!important}
   html[data-k11520-hud-profile] #homeDeliveryButton{top:54px!important;left:278px!important;right:auto!important}
   #k11520CameraReset{left:148px;top:66px}
+  #k11520CameraZoomStatus{top:112px}
   #k11520FollowMonster{left:360px;top:54px;width:calc(100vw - 540px)}
   #k11520UiSettings{top:54px!important;max-height:calc(100dvh - 64px);overflow:auto}
 }
