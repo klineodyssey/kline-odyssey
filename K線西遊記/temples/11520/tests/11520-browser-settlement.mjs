@@ -181,7 +181,21 @@ try {
     assert.equal(tutorialLayout.inViewport,true);assert.deepEqual(tutorialLayout.overlaps,[],'tutorial must not cover map or controls');
     assert.equal(await page.evaluate(()=>__K11520_JOURNEY__.snapshot().stage),'HIT');
     assert.equal(await page.evaluate(()=>__K11520_BGM__.playing),true,'real joystick gesture unlocks the original BGM');
-    for(let i=0;i<30&&await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot===0);i++){await page.locator('#attack').click();await page.waitForTimeout(400)}
+    const journeyAttackTrace=[];
+    for(let i=0;i<30&&await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot===0);i++){
+      const target=await page.evaluate(()=>__K11520_KSPACE_COMBAT__);
+      // A roaming target may leave slash range after the initial approach.
+      // Pursue with the physical joystick; retain the 30-strike limit, actual
+      // attack radius/damage, exact loot count and settlement assertions.
+      if(target.distance>1.2){
+        const d=Math.hypot(target.relative.x,target.relative.z)||1;
+        await page.mouse.move(jx,jy);await page.mouse.down();await page.mouse.move(jx+target.relative.x/d*35,jy-target.relative.z/d*35,{steps:4});
+        try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__.distance<.8,null,{timeout:5000})}finally{await page.mouse.up()}
+      }
+      await page.locator('#attack').click();await page.waitForTimeout(400);
+      journeyAttackTrace.push(await page.evaluate(()=>{const s=__K11520_KSPACE_COMBAT__;return {distance:s.distance,hp:s.target.hp,result:s.lastResult}}));
+    }
+    await fs.writeFile(`${out}/${width}x${height}-journey-attacks.json`,JSON.stringify(journeyAttackTrace,null,2));
     assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().loot),1);
     assert.equal(await page.evaluate(()=>__K11520_PRODUCT__.snapshot().kaios),5);
     await shot('journey-loot');
