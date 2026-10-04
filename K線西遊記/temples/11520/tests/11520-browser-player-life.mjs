@@ -222,6 +222,7 @@ async function runV29(width,height){
       return {visible:toast.classList.contains('show')&&a.width>0&&a.height>0,toast:{x:a.x,y:a.y,width:a.width,height:a.height},monsterGuide:{x:b.x,y:b.y,width:b.width,height:b.height},overlap:Math.min(a.right,b.right)>Math.max(a.left,b.left)&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)};
     });
     assert.equal(boss.victoryToast.visible,true,'actual post-defeat toast must be visible for layout QA');assert.equal(boss.victoryToast.overlap,false,'victory feedback must not overlap compact monster HUD');
+    const toastBox=boss.victoryToast.toast;assert.ok(toastBox.x>=0&&toastBox.y>=0&&toastBox.x+toastBox.width<=width&&toastBox.y+toastBox.height<=height,'actual victory feedback must remain entirely inside the viewport');
     await shot(bossPage,`${width}x${height}-v29-boss-victory`);boss.checks.push('BOSS_SELECTED_THROUGH_CONTEXT_UI','REAL_BOSS_PHASE_RAGE_DEFEAT','ONCE_ONLY_REWARD','NONZERO_BOSS_PCM','VICTORY_TOAST_NO_MONSTER_HUD_OVERLAP');
     // An automatic next encounter can legitimately create a new cue while the
     // old one expires. Verify the specific node's lifetime and bounded count.

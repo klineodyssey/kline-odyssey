@@ -74,6 +74,15 @@
   or FALLBACK telemetry rather than requiring MINIMAL to reveal hidden HUD.
   Final updated-head CI remains the release-review gate.
 
+- Head `a4897825`: exact-head Responsive/world-first, Portal and Universal
+  PASS. Six CI screenshots and follow details directly inspected. Local full
+  Player Life and settlement regressions passed, but geometry inspection found
+  a landscape event toast below the viewport. Existing toast placement now
+  measures its wrapped height and uses space above the bottom-anchored guide;
+  the real boss-victory browser test also requires full viewport containment.
+  This follow-up requires a new exact-head CI result; old green gates are not
+  evidence for the revised candidate.
+
 ## Canonical coordinate restoration candidate — 2026-10-04
 
 - TASK_ID: K11520-CANONICAL-COORDINATE; Human explicit audit → minimal Draft PR
