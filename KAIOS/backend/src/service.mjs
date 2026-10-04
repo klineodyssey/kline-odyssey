@@ -449,8 +449,7 @@ export function createBackend({
         expiresAt = now() + 1800000;
       const result = {
         playerId: c.player_id,
-        expiresAt,
-        scope: "BACKEND_GAME_ONLY",
+        scope: "WALLET_BINDING_ONLY_NOT_LOGIN",
       };
       const statements = [
         ...recoveryStatements,
@@ -497,18 +496,8 @@ export function createBackend({
         stmt("DELETE FROM recovery_guards"),
         stmt("DELETE FROM account_guards"),
       ];
-      // Idempotent public response never contains the bearer token. Retry a lost cookie with a new challenge.
-      const response = await commit(statements, result);
-      if (
-        await db.get("SELECT 1 FROM sessions WHERE token_hash=?", [
-          await hash(token),
-        ])
-      )
-        response.headers.set(
-          "set-cookie",
-          `kaios_session=${token}; HttpOnly; SameSite=Strict; Path=/api/v1/; Max-Age=1800${config.secureCookies ? "; Secure" : ""}`,
-        );
-      return response;
+      // Retain the SQL binding guard/proof record, but never mint an Account cookie.
+      return commit(statements, result);
     }
     if (path === "/player/me" && method === "GET") {
       const profile = await db.get("SELECT * FROM players WHERE player_id=?", [
