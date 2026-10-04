@@ -25,10 +25,18 @@ const api = createBackend({
   objects: new FileObjectStorageAdapter(resolve(dataDir, "objects")),
   realtime: new AuthoritativeRooms(),
   queue: new LocalQueueAdapter(),
-  signatureVerifier: async (message, signature, wallet, challengeId) =>
-    (signature === `LOCAL_DEMO:${challengeId}` &&
-      wallet === "0x0000000000000000000000000000000000000097") ||
-    verifyMessage(message, signature).toLowerCase() === wallet,
+  signatureVerifier: async (message, signature, wallet, challengeId) => {
+    if (
+      signature === `LOCAL_DEMO:${challengeId}` &&
+      wallet === "0x0000000000000000000000000000000000000097"
+    )
+      return true;
+    try {
+      return verifyMessage(message, signature).toLowerCase() === wallet;
+    } catch {
+      return false;
+    }
+  },
   config: {
     domain: origin,
     origins: [origin],

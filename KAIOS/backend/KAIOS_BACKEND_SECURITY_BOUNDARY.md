@@ -4,7 +4,7 @@
 
 GET challenge binds a cryptographically random nonce to the configured domain,
 wallet, allowed chain (reference 97), canonical Player Life ID, issuedAt and expiresAt.
-The entire message is signed with human-controlled `personal_sign`; ethers recovers
+The message is UTF-8 hex encoded for human-controlled EIP-1193 `personal_sign`; ethers recovers
 the signer on the server. Atomic challenge consumption and unique session challenge
 prevent replay. Signature verification does not grant token allowance, send a
 transaction, prove a balance, or change a local wallet proof to a server proof.

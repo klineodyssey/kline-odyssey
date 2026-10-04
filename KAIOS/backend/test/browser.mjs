@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+import { Wallet, getBytes } from "ethers";
 import { spawn } from "node:child_process";
 import { mkdir, writeFile, mkdtemp, rm } from "node:fs/promises";
 import assert from "node:assert/strict";
@@ -195,6 +196,68 @@ try {
       minimumTouchTarget: 44,
     });
   }
+  const signer = Wallet.createRandom(),
+    walletContext = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+      isMobile: true,
+    }),
+    rpc = [];
+  await walletContext.exposeFunction(
+    "__signKAIOSFixture",
+    async (hex, address) => {
+      assert.equal(address, signer.address);
+      assert.match(hex, /^0x[0-9a-f]+$/);
+      return signer.signMessage(getBytes(hex));
+    },
+  );
+  await walletContext.exposeFunction("__recordKAIOSRPC", (method) =>
+    rpc.push(method),
+  );
+  await walletContext.addInitScript(
+    ({ address }) => {
+      globalThis.ethereum = {
+        request: async ({ method, params = [] }) => {
+          await globalThis.__recordKAIOSRPC(method);
+          if (method === "eth_requestAccounts" || method === "eth_accounts")
+            return [address];
+          if (method === "eth_chainId") return "0x61";
+          if (method === "personal_sign")
+            return globalThis.__signKAIOSFixture(params[0], params[1]);
+          throw new Error("TRANSACTION_RPC_FORBIDDEN:" + method);
+        },
+      };
+    },
+    { address: signer.address },
+  );
+  const walletPage = await walletContext.newPage();
+  walletPage.on("pageerror", (e) => errors.push(e.message));
+  await walletPage.goto(origin + "/recovery");
+  await walletPage.locator("#wallet").click();
+  await walletPage.waitForFunction(() =>
+    document.querySelector("#message").textContent.includes("已驗證錢包身分"),
+  );
+  assert.equal(await walletPage.locator("#revision").innerText(), "1");
+  assert.ok(rpc.includes("personal_sign"));
+  assert.ok(
+    rpc.every((method) =>
+      [
+        "eth_requestAccounts",
+        "eth_accounts",
+        "eth_chainId",
+        "personal_sign",
+      ].includes(method),
+    ),
+  );
+  assert.notEqual(
+    await walletPage.locator("#identity").innerText(),
+    await page.locator("#identity").innerText(),
+  );
+  await walletPage.screenshot({
+    path: new URL("390x844-signed-wallet.png", dir).pathname,
+    fullPage: true,
+  });
+  await walletContext.close();
   assert.deepEqual(errors, []);
   await writeFile(
     new URL("browser-result.json", dir),
@@ -220,7 +283,12 @@ try {
           "restore",
           "pre-restore-snapshot",
           "game-receipt",
+          "cross-device-conflict-preview-restore",
+          "export-import-consent",
+          "EIP-1193-hex-signature-server-verification",
+          "no-transaction-RPC",
         ],
+        walletRPC: rpc,
         viewports: results,
         pageErrors: errors,
       },

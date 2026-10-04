@@ -180,7 +180,13 @@ async function login(demo) {
     ? "LOCAL_DEMO:" + challenge.challengeId
     : await ethereum.request({
         method: "personal_sign",
-        params: [challenge.message, wallet],
+        params: [
+          "0x" +
+            Array.from(new TextEncoder().encode(challenge.message), (byte) =>
+              byte.toString(16).padStart(2, "0"),
+            ).join(""),
+          wallet,
+        ],
       });
   if (!demo) {
     const accounts = await ethereum.request({ method: "eth_accounts" }),

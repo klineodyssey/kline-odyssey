@@ -4,8 +4,9 @@ CURRENT is `player_state`; every accepted sync increments its revision and write
 state revision plus immutable versioned snapshot. Snapshot metadata contains
 snapshotId, playerId, schemaVersion, createdAt, sourceRevision, SHA-256 contentHash,
 reason and payloadReference. Reasons: sync, manual, milestone, pre-migration,
-pre-restore, import-candidate, conflict-candidate. Caller-controlled milestone requests are supported;
-they are not emitted each frame. Retention policy recommends 30 recent versions
+pre-restore, import-candidate, conflict-candidate. Milestone snapshots are automatically selected on synchronized level increases,
+house upgrades or first story completion; explicit milestone requests are also supported.
+They are not emitted each frame. Retention policy recommends 30 recent versions
 while protecting pre-restore/pre-migration copies; automatic deletion is disabled.
 No delete API or administrator edit-XP endpoint exists in V1.
 

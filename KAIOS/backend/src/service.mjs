@@ -577,7 +577,20 @@ export function createBackend({
           409,
         );
       }
-      const backup = await stage(p, candidate, revision + 1, "sync");
+      const previousPlayer = current?.state.player;
+      const milestone =
+        previousPlayer &&
+        (candidate.player.level > previousPlayer.level ||
+          candidate.player.homePlot.houseLevel >
+            previousPlayer.homePlot.houseLevel ||
+          (candidate.player.journeyProgress.storyComplete === true &&
+            previousPlayer.journeyProgress.storyComplete !== true));
+      const backup = await stage(
+        p,
+        candidate,
+        revision + 1,
+        milestone ? "milestone" : "sync",
+      );
       return commit(
         [
           guard(p, revision),

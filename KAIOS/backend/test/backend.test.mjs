@@ -878,3 +878,20 @@ test("completed receipt identity cannot silently change payload", async (t) => {
     1,
   );
 });
+test("milestone synchronization automatically writes a milestone snapshot", async (t) => {
+  const f = await fixture(t),
+    { p } = player(),
+    a = await f.login(p);
+  await sync(f, a, p);
+  const milestone = {
+    ...p,
+    journeyProgress: { ...p.journeyProgress, storyComplete: true },
+  };
+  const result = await sync(f, a, milestone, 1);
+  assert.equal(result.status, 200);
+  assert.equal(result.data.snapshot.reason, "milestone");
+  assert.equal(
+    (await f.call("/backups", { token: a.token })).data.snapshots.length,
+    2,
+  );
+});
