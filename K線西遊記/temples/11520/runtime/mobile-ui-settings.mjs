@@ -60,6 +60,11 @@ function installWorldFirst(){
   // Key/input activity restarts the idle interval; a held pointer never loses its card.
   for(const type of ['keydown','input','focusin','pointermove'])axes?.addEventListener(type,scheduleMarketHide);
   document.addEventListener('click',e=>{if(e.target.closest?.('#axes,#kspaceMapViews [data-map-view="K"]'))showMarketCards()});
+  // Reuse the canonical plane/market selection event. Restoring a saved plane
+  // at boot is not user intent to expand HUD; a real control gesture arms it.
+  let hasPlaneInput=false;
+  document.addEventListener('pointerdown',e=>{if(e.target.closest?.('#joy'))hasPlaneInput=true},true);
+  document.addEventListener('k11520:trade-axis-change',()=>{if(hasPlaneInput)showMarketCards()});
   addEventListener('blur',()=>{marketPointers.clear();scheduleMarketHide()});syncWorldFirst();
 }
 function retireLegacyCleanMode(){if(document.body?.classList.contains('game-clean-mode'))document.body.classList.remove('game-clean-mode');try{if(localStorage.getItem(LEGACY_CLEAN)!=='0')localStorage.setItem(LEGACY_CLEAN,'0')}catch{}}

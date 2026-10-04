@@ -83,7 +83,10 @@ async function verifyWorldFirst(){
       const zoom=await read();assert.ok(zoom.zoom>pan.zoom&&zoom.zoom<=zoom.bounds.maxZoom);assert.deepEqual(zoom.playerXYZ,start.playerXYZ);
       await page.locator('#k11520CameraReset').click();assert.deepEqual(await read(),start);
       await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),true);
-      const card=await page.locator('#axes .axis').first().boundingBox();
+      // Quotes replace card DOM; read the currently attached visible card and
+      // its rectangle atomically instead of using a transient element handle.
+      const card=await page.locator('#axes').evaluate(el=>{const card=el.querySelector('.axis');if(!card)return null;const r=card.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}});
+      assert.ok(card&&card.width>0&&card.height>0,'expanded market must render a visible card');
       await touch('touchStart',[[1,card.x+10,card.y+12]]);
       // Real deadline test: a held pointer must survive the entire 15s idle interval.
       await page.waitForTimeout(15100);assert.equal(await page.locator('#axes').isVisible(),true);
@@ -98,7 +101,7 @@ async function verifyWorldFirst(){
       await page.locator('#k11520MonsterGuide').click();await page.locator('#monsterFollowAction').click();
       assert.equal(await page.locator('#k11520FollowMonster').isVisible(),true);
       await page.waitForFunction(old=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some((m,i)=>Math.hypot(m.position.x-old[i].position.x,m.position.y-old[i].position.y,m.position.z-old[i].position.z)>.02),before.actors);
-      await page.locator('#k11520FollowMonster').click();assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),null);
+      const followed=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId);
       assert.equal(await page.locator('#minimap').getAttribute('data-coordinate-space'),'XYZ');
       const map=await page.locator('#minimap').boundingBox();await page.mouse.click(map.x+map.width*.85,map.y+map.height*.8);
       await page.locator('#waypointAction').waitFor({state:'visible'});await page.locator('#waypointAction').click();
@@ -106,6 +109,8 @@ async function verifyWorldFirst(){
       // Canonical joystick remains the movement owner and cancels waypoint navigation.
       const joy=await page.locator('#joy').boundingBox();await page.mouse.move(joy.x+joy.width*.5,joy.y+joy.height*.5);await page.mouse.down();await page.mouse.move(joy.x+joy.width*.7,joy.y+joy.height*.5);await page.mouse.up();
       assert.equal((await read()).panX,0);assert.equal((await read()).zoom,1);
+      assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),followed,'manual navigation must remain free while following');
+      await page.locator('#k11520FollowMonster').click();assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),null);
       await page.locator('#attack').click();result.checks.navigation='MAP WAYPOINT / MOVEMENT / JOYSTICK CAMERA CONFLICT PASS';result.checks.monster='INTENT / MOVEMENT / FOLLOW / CANCEL / ATTACK CONTROL PASS';
       await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('STANDARD');
       await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.profile==='STANDARD');

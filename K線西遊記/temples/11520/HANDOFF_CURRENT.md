@@ -43,6 +43,22 @@
   final exact-head CI must validate that last integration. Do not report full
   VISUAL_QA or exact-head CI PASS from intermediate screenshots. No Mainnet,
   public Testnet transaction, transfer, release or merge performed.
+- PR #486 initial head `ce376ba8c08a7689e41389c43f7c97514a3944d6`:
+  Universal and Portal PASS; Game/Responsive caught integration defects, not a
+  release PASS. Camera down/up use the existing mirrored raycast coordinate,
+  whereas moves use physical screen coordinates; normalize only camera input.
+  Clear consumed avatar gestures, retain ground routing. Card geometry reads
+  must use current DOM after quote replacement. FULL regression explicitly
+  selects FULL, and post-reload utility clearance checks current rectangles
+  with the same 8px gap (including the existing side-by-side utility lane).
+- Visual follow-up: occluding world visuals fade in the camera-to-player line
+  only, with independent materials; identity, position, hit targets and combat
+  state remain untouched. Restore materials before applying current phase
+  visibility. This is not a physics or collision correction.
+- Candidate follow-up local gates: character routing, FULL mobile HUD and
+  signed-C immersive browser tests PASS; core runtime 69/69 PASS. Final six-size
+  run and new exact-head CI still required. Responsive CI now checks out and
+  labels the PR's actual head, not GitHub's synthetic merge SHA.
 
 ## Canonical coordinate restoration candidate — 2026-10-04
 

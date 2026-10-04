@@ -34,6 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -45,7 +46,7 @@ jobs:
       - name: Minimal world / camera / market-life real-input QA
         env:
           K11520_WORLD_FIRST_QA: '1'
-          K11520_SOURCE_SHA: ${{ github.sha }}
+          K11520_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-world-first-http.log 2>&1 &
@@ -56,7 +57,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: 11520-world-first-${{ github.sha }}
+          name: 11520-world-first-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/11520-responsive-qa/
           if-no-files-found: error
           retention-days: 14
@@ -67,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -79,7 +80,7 @@ jobs:
       - name: Test real-entry mobile layouts
         env:
           PUBLIC_QA: ${{ inputs.production || github.event_name == 'workflow_run' }}
-          K11520_SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          K11520_SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-responsive-http.log 2>&1 &
@@ -99,7 +100,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: 11520-responsive-${{ github.event.workflow_run.head_sha || github.sha }}-${{ github.event_name }}
+          name: 11520-responsive-${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}-${{ github.event_name }}
           path: artifacts/11520-responsive-qa/
           if-no-files-found: error
           retention-days: 14

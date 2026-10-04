@@ -495,7 +495,7 @@ function syncPlayerHome(){const p=playerLife.activePlayer(),h=playerLife.loadHom
 const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching){syncPlayerHome();syncWorldFeedback()}},beforePlayerChange:()=>{playerLifeSwitching=true;explorationMeters=0},startEncounter:startJourneyEncounter,claimDaily:claimDailyJourney,toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;S.navTarget=null;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
 syncPlayerHome();
 const lifeVisuals=new Map(),lifeVisualPending=new Set();async function ensureLifeVisual(m){if(m.state==='DEAD'||!(m.name||m.baseName))return null;const key=`${m.lifeId||m.id}|${m.species}`;const current=lifeVisuals.get(m.id);if(current?.key===key)return current.root;if(current){scene.remove(current.root);lifeVisuals.delete(m.id)}if(lifeVisualPending.has(m.id))return null;lifeVisualPending.add(m.id);try{const v=await createLifeVisual(THREE,{species:m.species,name:m.baseName||m.name,scale:.75});v.root.userData.worldMonsterId=m.id;v.root.userData.lifeId=m.lifeId||null;v.root.traverse?.(n=>{n.userData.worldMonsterId=m.id;n.userData.lifeId=m.lifeId||null});scene.add(v.root);lifeVisuals.set(m.id,{key,root:v.root,mode:v.mode});return v.root}finally{lifeVisualPending.delete(m.id)}}
-function syncLifeVisuals(){renderCombatTarget();for(const m of [...world.monsters,...(world.ambientLife||[])]){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m);if(m.simulationCombat)syncPhaseBody(rec.root,m)}}
+function syncLifeVisuals(){restoreOcclusionMaterials();renderCombatTarget();for(const m of [...world.monsters,...(world.ambientLife||[])]){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m);if(m.simulationCombat)syncPhaseBody(rec.root,m)}}
 function syncPhaseBody(root,m){
   if(!root.userData.phaseMarkers){
     const markers={};const offsets=[[-.8,1.2,0],[.8,1.2,0],[-.55,1.75,0],[.55,1.75,0],[-.55,.65,0],[.55,.65,0]];
@@ -583,8 +583,10 @@ function worldTapAt(clientX,clientY,latchedMonster=null){if(latchedMonster){cons
 }
 const cameraPointers=new Map();let pinchDistance=null,pinchZoom=1,cameraGesture=false;
 function canPanAt(x,y){
-  if(document.elementFromPoint(x,y)!==renderer.domElement||monsterAt(x,y))return false;
-  const r=renderer.domElement.getBoundingClientRect();tapPointer.set((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);raycaster.setFromCamera(tapPointer,camera);
+  if(document.elementFromPoint(x,y)!==renderer.domElement)return false;
+  const r=renderer.domElement.getBoundingClientRect(),rayX=renderer.domElement.dataset.xVisualMirror==='1'?r.left+r.width-(x-r.left):x;
+  if(monsterAt(rayX,y))return false;
+  tapPointer.set((rayX-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);raycaster.setFromCamera(tapPointer,camera);
   for(const hit of raycaster.intersectObjects(scene.children,true)){
     if(ancestorData(hit.object,'isPlayer')||ancestorData(hit.object,'playerHome')||ancestorData(hit.object,'worldObjectId')!=null)return false;
     if(ancestorData(hit.object,'isGround'))return true;
@@ -596,10 +598,14 @@ cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:f
 // canvas keep their own pointer owners; only world-origin pointers enter here.
 $('#lookPad').style.setProperty('pointer-events','none','important');
 function pointerDistance(){const [a,b]=[...cameraPointers.values()];return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0}
+// The existing mirror owner converts down/up to raycast space, but leaves
+// pointermove in physical screen space. Camera deltas must use screen space
+// throughout; worldTapAt still receives the canonical raycast coordinates.
+function cameraScreenX(e){const r=renderer.domElement.getBoundingClientRect();return renderer.domElement.dataset.xVisualMirror==='1'&&e.type!=='pointermove'?r.left+r.width-(e.clientX-r.left):e.clientX}
 renderer.domElement.addEventListener('pointerdown',e=>{
   if(e.button!==0)return;
-  e.preventDefault();cameraPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});renderer.domElement.setPointerCapture?.(e.pointerId);
-  if(cameraPointers.size===1){cameraGesture=false;worldTapStart={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed:canPanAt(e.clientX,e.clientY)}}
+  const x=cameraScreenX(e);e.preventDefault();cameraPointers.set(e.pointerId,{x,y:e.clientY});try{renderer.domElement.setPointerCapture?.(e.pointerId)}catch{}
+  if(cameraPointers.size===1){cameraGesture=false;worldTapStart={id:e.pointerId,x,y:e.clientY,t:performance.now(),monster:monsterAt(e.clientX,e.clientY),panAllowed:canPanAt(x,e.clientY)}}
   else{pinchDistance=pointerDistance();pinchZoom=cameraView.zoom;worldTapStart=null;cameraGesture=true}
 },{passive:false});
 renderer.domElement.addEventListener('pointermove',e=>{
@@ -620,15 +626,40 @@ renderer.domElement.addEventListener('pointermove',e=>{
 function finishCameraPointer(e){
   if(!cameraPointers.has(e.pointerId))return;
   const start=worldTapStart;cameraPointers.delete(e.pointerId);worldTapStart=null;
-  if(e.type==='pointerup'&&!cameraGesture&&start?.id===e.pointerId&&Math.hypot(e.clientX-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
+  if(e.type==='pointerup'&&!cameraGesture&&start?.id===e.pointerId&&Math.hypot(cameraScreenX(e)-start.x,e.clientY-start.y)<=10&&performance.now()-start.t<=420)worldTapAt(e.clientX,e.clientY,start.monster);
   if(!cameraPointers.size){pinchDistance=null;cameraGesture=false}
 }
 for(const type of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(type,finishCameraPointer,{passive:true});
+// Character priority consumes pointerup before the world listener. Clear its
+// completed gesture too, so a later world tap cannot become a phantom pinch.
+renderer.domElement.addEventListener('k11520:player-tap',()=>{cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false});
 function applyWorldCamera(){
   const dist=8.5/cameraView.zoom,x=S.xyz.x+cameraView.panX,z=S.xyz.z+cameraView.panZ;
   camera.position.set(x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2/cameraView.zoom,z-Math.cos(S.camYaw)*dist);
   camera.userData.k11520NavigationFocus=cameraView.manual?'MANUAL_CAMERA':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
   camera.lookAt(x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,z+Math.cos(S.camYaw)*1.8);
+  revealPlayerBehindOccluders();
+}
+// Camera-only obstruction treatment: retain meshes, hit targets, Life IDs and
+// XYZ, but fade only the visual groups between this camera and the player.
+// Material clones prevent a shared asset material from fading unrelated actors.
+const occlusionRay=new THREE.Raycaster(),occlusionPoint=new THREE.Vector3(),occlusionDirection=new THREE.Vector3(),occlusionMaterials=new WeakMap(),fadedMaterials=new Map();
+function restoreOcclusionMaterials(){for(const [material,original] of fadedMaterials)Object.assign(material,original);fadedMaterials.clear()}
+function revealPlayerBehindOccluders(){
+  occlusionPoint.set(S.xyz.x,S.xyz.y+.8,S.xyz.z);occlusionDirection.copy(occlusionPoint).sub(camera.position);
+  const distance=occlusionDirection.length();if(distance<=.1)return;
+  camera.updateMatrixWorld();scene.updateMatrixWorld(true);occlusionRay.set(camera.position,occlusionDirection.normalize());occlusionRay.camera=camera;occlusionRay.far=distance-.1;
+  const roots=new Set();
+  for(const hit of occlusionRay.intersectObjects(scene.children,true)){
+    if(ancestorData(hit.object,'isPlayer')||ancestorData(hit.object,'isGround'))continue;
+    let root=hit.object;while(root.parent&&root.parent!==scene)root=root.parent;
+    if(ancestorData(hit.object,'worldMonsterId')!=null||ancestorData(hit.object,'worldObjectId')!=null||ancestorData(hit.object,'playerHome'))roots.add(root);
+  }
+  for(const root of roots)root.traverse(mesh=>{
+    if(!mesh.material)return;
+    if(!occlusionMaterials.has(mesh)){const materials=(Array.isArray(mesh.material)?mesh.material:[mesh.material]).map(m=>m.clone());mesh.material=Array.isArray(mesh.material)?materials:materials[0];occlusionMaterials.set(mesh,materials)}
+    for(const material of occlusionMaterials.get(mesh)){if(fadedMaterials.has(material))continue;fadedMaterials.set(material,{opacity:material.opacity,transparent:material.transparent,depthWrite:material.depthWrite});material.opacity=Math.min(material.opacity,.18);material.transparent=true;material.depthWrite=false}
+  });
 }
 globalThis.__K11520_CAMERA__=Object.freeze({snapshot:()=>({...cameraView,bounds:CAMERA_BOUNDS,playerXYZ:{...S.xyz},authority:'CAMERA_ONLY'}),canPanAt});
 
