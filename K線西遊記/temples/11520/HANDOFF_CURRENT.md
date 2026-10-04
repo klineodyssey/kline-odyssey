@@ -83,6 +83,18 @@
   This follow-up requires a new exact-head CI result; old green gates are not
   evidence for the revised candidate.
 
+- Game's Player Life Boss regression was reproduced with per-strike evidence:
+  42 of 55 clicks returned OUT_OF_RANGE as the live target moved to 3.18m.
+  The old test only approached at start/recovery. Use the actual existing
+  joystick to pursue before strikes; retain 30/55 strike limits, original range,
+  damage, recovery and exact DEAD/one-shot assertions. No combat change.
+
+- Game also exposed the pre-existing insurance geometry race: countdown render
+  replaces the claim subtree between visible wait and boundingBox. The test now
+  reads APPROVED state, current connected visible control and geometry in one
+  browser task. The 44px assertion is unchanged and is not a polling predicate;
+  undersized controls still fail. No Courier/insurance product logic changed.
+
 ## Canonical coordinate restoration candidate — 2026-10-04
 
 - TASK_ID: K11520-CANONICAL-COORDINATE; Human explicit audit → minimal Draft PR
