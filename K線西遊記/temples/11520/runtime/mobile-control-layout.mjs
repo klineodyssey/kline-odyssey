@@ -3,9 +3,9 @@ import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.11
-REVISION: 2026-10-04.FULL-HUD-HIT-OWNERSHIP
-PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, reserve a dedicated Camera/mission row outside market hit regions, and measure actual market-card content before placing status. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
+VERSION: 1.3.12
+REVISION: 2026-10-05.CONTEXT-ACTION-RAIL
+PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and measure actual market-card content before placing status. Raid/courier action geometry is owned by the existing Market/Wallet utility rail. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
@@ -93,17 +93,13 @@ function installStyle(){
 #k11520PlaneLabel{overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
 html[data-k11520-hud-profile]:not([data-k11520-hud-profile="FULL"]):not(.k11520MarketOpen) .axes{display:none!important}
 html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
-/* Camera/mission controls own the outer segments of the 116px row; market
-   cards use only its middle segment. This preserves the established vertical
-   world budget and fixes hit ownership by geometry, not a z-index escalation. */
+/* Camera owns the left segment of the 116px row. Context-sensitive raid and
+   courier actions belong to the existing right utility rail. */
 html[data-k11520-hud-profile] .axes{top:116px!important;left:54px!important;right:170px!important;z-index:610!important}
 html.k11520UtilitiesOpen[data-k11520-hud-profile="FULL"] .axes{right:58px!important}
 html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:auto!important;bottom:268px!important;height:134px!important}
 html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:168px!important;left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;min-height:44px;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
 html[data-k11520-hud-profile="MINIMAL"].k11520MarketOpen #k11520MonsterGuide{top:230px!important}
-html[data-k11520-hud-profile] #cargoInterceptionButton,html[data-k11520-hud-profile] #homeDeliveryButton{top:116px!important;bottom:auto!important;min-height:44px!important;height:44px!important;width:76px!important;padding:4px!important;font-size:11px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;z-index:590!important}
-html[data-k11520-hud-profile] #cargoInterceptionButton{right:88px!important}
-html[data-k11520-hud-profile] #homeDeliveryButton{right:6px!important;display:block!important}
 html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 #k11520CameraReset{position:fixed;left:6px;top:116px;width:44px;height:44px;z-index:590;border-radius:50%;border:1px solid #68e4ff88;background:#071018dd;color:#dffaff;font-size:22px;touch-action:manipulation}
 /* 170px keeps the compact status below the 360x740 FULL minimap while
@@ -118,8 +114,6 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:66px!important;bottom:auto!important;left:6px!important}
   html[data-k11520-hud-profile="MINIMAL"] .top>.pill{display:none!important}
   html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:auto!important;bottom:8px!important;left:346px!important;right:180px!important}
-  html[data-k11520-hud-profile] #cargoInterceptionButton{top:54px!important;left:196px!important;right:auto!important}
-  html[data-k11520-hud-profile] #homeDeliveryButton{top:54px!important;left:278px!important;right:auto!important}
   #k11520CameraReset{left:148px;top:66px}
   #k11520CameraZoomStatus{left:6px;right:auto;top:184px;bottom:auto;width:126px;max-width:126px;transform:translateY(6px)}
   #k11520CameraZoomStatus.show{transform:translateY(0)}
