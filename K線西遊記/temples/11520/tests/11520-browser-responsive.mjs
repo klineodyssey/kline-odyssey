@@ -72,7 +72,11 @@ async function verifyWorldFirst(){
       const cdp=await context.newCDPSession(page);
       const touch=(type,points)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:points.map(([id,x,y])=>({id,x,y,radiusX:3,radiusY:3,force:1}))});
       // Pick an actually empty canvas origin, not a hard-coded monster/UFO pixel.
-      const point=await page.evaluate(()=>{for(let y=innerHeight<500?125:250;y<innerHeight*.6;y+=20)for(let x=innerWidth*.4;x<innerWidth-90;x+=20)if([0,30,60].every(dx=>[-24,0,24].every(pad=>[-24,0,24].every(py=>document.elementFromPoint(x+dx+pad,y+py)?.id==='three'))&&globalThis.__K11520_CAMERA__.canPanAt(x+dx,y)))return{x,y};return null});
+      // Reserve a 24px empty-world margin around the entire drag, including
+      // raycast actors, not just DOM HUD. A moving actor at a point's edge can
+      // enter between selection and real CDP pointerdown; that is correctly
+      // rejected by the product's actor-origin gesture exclusion.
+      const point=await page.evaluate(()=>{for(let y=innerHeight<500?125:250;y<innerHeight*.6;y+=20)for(let x=innerWidth*.4;x<innerWidth-90;x+=20)if([0,30,60].every(dx=>[-24,0,24].every(pad=>[-24,0,24].every(py=>document.elementFromPoint(x+dx+pad,y+py)?.id==='three'&&globalThis.__K11520_CAMERA__.canPanAt(x+dx+pad,y+py)))))return{x,y};return null});
       assert.ok(point,'an unobstructed world gesture surface must exist');
       const start=await read(),{x,y}=point;
       await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
