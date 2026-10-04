@@ -54,12 +54,13 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
  const baseline=await geometry();
  await page.evaluate(()=>{
   window.__heartTx=[];window.__txFailure=null;window.__holdTx=false;window.__walletReads=[];
-  window.__heartInputEvents=[];
-  for(const type of ['touchstart','touchend','click'])document.addEventListener(type,e=>{
-   __heartInputEvents.push({type,target:e.target.closest('button')?.id||e.target.id,value:document.getElementById('kh-vow-amount')?.value,tx:__heartTx.length,time:performance.now()});
+  window.__heartInputEvents=[];window.__repayTrace=[];window.__heartBoundaries=[];
+  for(const type of ['touchstart','touchend','click','focusin','focusout','keydown','beforeinput','input','change'])document.addEventListener(type,e=>{
+   __heartInputEvents.push({type,target:e.target.closest('button')?.id||e.target.id,key:e.key,inputType:e.inputType,active:document.activeElement?.id,value:document.getElementById('kh-vow-amount')?.value,tx:__heartTx.length,time:performance.now()});
   },true);
   window.ethereum={isMetaMask:true,request:async({method,params})=>{
    __walletReads.push(method);
+   window.__activeHeartBoundary?.providerRequests.push(method);
    if(method==='eth_chainId')return '0x38';
    if(method==='eth_accounts'||method==='eth_requestAccounts')return ['0x0000000000000000000000000000000000000001'];
    if(method==='eth_call'||method==='eth_blockNumber')return window.__heartRead({method,params,id:1});
@@ -67,9 +68,27 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   }};
   ethers.providers.JsonRpcSigner.prototype.sendTransaction=async function(tx){
    const request={to:await tx.to,data:await tx.data};__heartTx.push(request);
+   __repayTrace.push({stage:'transaction-stub',raw:document.getElementById('kh-vow-amount').value,...request});
    if(__holdTx)await new Promise(resolve=>{window.__releaseTx=resolve;});
    if(__txFailure)throw Object.assign(Error(__txFailure.message),{code:__txFailure.code});
    return{hash:'0x'+'11'.repeat(32),wait:async()=>{await window.__fixtureReceipt(request);return{blockNumber:1,logs:[]};}};
+  };
+  const heart=KGEN_RUNTIME_CORE.modules.HeartRuntime,read=heart.readRitualInteger;
+  heart.readRitualInteger=function(id,...args){
+   if(id!=='kh-vow-amount')return read.call(this,id,...args);
+   const row={stage:'readRitualInteger',raw:document.getElementById(id)?.value};__repayTrace.push(row);
+   try{row.result=read.call(this,id,...args);return row.result;}catch(error){row.error=error.message;throw error;}
+  };
+  // Scope observations to the actual submit call, not unrelated wallet polling.
+  // Invalid prepare() must throw synchronously before the first await/connection.
+  const send=heart.sendHeart,connect=heart.ensureConnected;
+  heart.ensureConnected=function(...args){if(window.__activeHeartBoundary)__activeHeartBoundary.connectionCalls++;return connect.apply(this,args);};
+  heart.sendHeart=function(label,runner,action){
+   const row={button:action?.button,providerRequests:[],connectionCalls:0,runnerCalls:0,prepareError:null,settled:false};
+   __heartBoundaries.push(row);const previous=window.__activeHeartBoundary;window.__activeHeartBoundary=row;
+   const observed=action&&{...action,prepare(){try{return action.prepare();}catch(error){row.prepareError=error.message;throw error;}}};
+   try{return send.call(this,label,(...args)=>{row.runnerCalls++;return runner(...args);},observed).finally(()=>{row.settled=true;});}
+   finally{window.__activeHeartBoundary=previous;}
   };
  });
  const feedback=id=>page.locator('#'+id+'-feedback');
@@ -84,8 +103,50 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.waitForFunction(({id,before})=>__heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id)&&document.getElementById(id).dataset.heartPending!=='1',{id,before});
  };
  const count=()=>page.evaluate(()=>__heartTx.length);
- const open=async id=>{if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();await page.locator(id).tap();};
+ const rejectedBoundary=async button=>{
+  const row=await page.evaluate(()=>__heartBoundaries.at(-1));
+  assert.equal(row.button,button);assert.ok(row.prepareError,'canonical prepare rejects before async transaction work');
+  assert.equal(row.settled,true);assert.equal(row.connectionCalls,0);assert.equal(row.runnerCalls,0);
+  assert.deepEqual(row.providerRequests,[],'invalid submit itself cannot request a provider');
+ };
+ const open=async id=>{
+  if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();
+  await page.locator(id).tap();
+  // openHeartCard schedules focus in rAF. Without waiting, that focus can steal
+  // Playwright fill('')'s Delete and leave the previous amount intact. No sleep/retry.
+  const field=id==='#kgen-v30-vow-btn'?'kh-vow-option':'kh-wish-text';
+  await page.waitForFunction(field=>document.activeElement===document.getElementById(field)&&document.getElementById('kgen-heart-live-panel').getAttribute('aria-hidden')==='false',field);
+ };
+ const fillRitual=async(id,value)=>{
+  const input=page.locator('#'+id+':visible');assert.equal(await input.count(),1,'one active visible input');
+  assert.equal(await page.locator('#'+id).count(),1,'no duplicate input IDs');
+  await input.fill(value);
+  assert.equal(await input.inputValue(),value,'fill must reach the active DOM before submit');
+  assert.equal(await input.evaluate(el=>document.activeElement===el),true,'edited input owns focus');
+ };
  try{
+  // Diagnostic interleaving: execute the real queued shortcut focus between
+  // Playwright's select-all and Delete. No transaction is submitted here.
+  if(process.argv.includes('--repay-focus-race')){
+   await open('#kgen-v30-vow-btn');await page.locator('#kh-vow-amount').fill('9');
+   await page.locator('#kgen-heart-toggle').tap();
+   await page.evaluate(()=>{
+    window.__nativeHeartRAF=window.requestAnimationFrame;
+    window.requestAnimationFrame=function(callback){
+     if(String(callback).includes('action.isHeartPanelOpen')){window.__queuedHeartFocus=callback;return 0;}
+     return __nativeHeartRAF.call(window,callback);
+    };
+    window.__flushHeartFocus=function(e){if(e.key==='Delete'&&window.__queuedHeartFocus){const callback=__queuedHeartFocus;delete window.__queuedHeartFocus;callback(performance.now());}};
+    document.addEventListener('keydown',__flushHeartFocus,true);
+   });
+   await page.locator('#kgen-v30-vow-btn').tap();
+   await page.waitForFunction(()=>!!window.__queuedHeartFocus);
+   await page.locator('#kh-vow-amount').fill('');
+   const race=await page.evaluate(()=>({value:document.getElementById('kh-vow-amount').value,active:document.activeElement.id,events:__heartInputEvents.slice(-20),readAmount:KGEN_RUNTIME_CORE.modules.HeartRuntime.getVowAmount(),tx:__heartTx.length}));
+   await fs.writeFile(`${OUT}/repay-focus-race-${width}.json`,JSON.stringify(race,null,2));
+   assert.equal(race.value,'9');assert.equal(race.readAmount,'9');assert.equal(race.active,'kh-vow-option');assert.equal(race.tx,0);
+   await page.evaluate(()=>{window.requestAnimationFrame=__nativeHeartRAF;document.removeEventListener('keydown',__flushHeartFocus,true);});
+  }
   await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('世界平安');
   assert.equal(await count(),0,'shortcut only opens the canonical form');
   for(const id of ['kh-wishbtn','kh-heartbeat']){await click(id);await page.waitForTimeout(50);}
@@ -100,14 +161,17 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.screenshot({path:`${OUT}/heart-action-${width}-wish-error.png`});
   await page.locator('#kh-wish-text').fill('0x'+'0'.repeat(64));await click('kh-wishbtn');assert.match(await feedback('kh-wish').innerText(),/不可為零/);
   await open('#kgen-v30-vow-btn');
+  assert.equal(await page.evaluate(()=>!!window.ethereum&&!!KGEN_RUNTIME_CORE.modules.HeartRuntime.state.address),true,'connected-wallet validation matrix');
   const invalidInputs=[];
-  for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','   ',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-vow-amount','1.5',/正整數/],['kh-vow-amount','-1',/正整數/],['kh-vow-amount','abc',/正整數/],['kh-lamp-days','',/請輸入/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
+  for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','   ',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-vow-amount','0.5',/正整數/],['kh-vow-amount','1.5',/正整數/],['kh-vow-amount','-1',/正整數/],['kh-vow-amount','abc',/正整數/],['kh-vow-amount','NaN',/正整數/],['kh-lamp-days','',/請輸入/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
    const before=await count(),prompts=confirmations;
-   await page.locator('#'+id).fill(value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);
+   await fillRitual(id,value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);
    const message=await feedback(action).innerText();assert.match(message,pattern,JSON.stringify(await page.evaluate(()=>({events:__heartInputEvents.slice(-15),tx:__heartTx,value:document.getElementById('kh-vow-amount').value}))));
    assert.equal(await count(),before,`invalid ${id} ${JSON.stringify(value)} cannot reach signer`);
    assert.equal(confirmations,prompts,'invalid amount cannot request confirmation');
-   invalidInputs.push({id,value,message,transactions:0,confirmations:0});
+   await rejectedBoundary(action);
+   assert.equal(await page.locator('#'+id).inputValue(),value,'submit cannot restore a previous/default value');
+   invalidInputs.push({id,value,message,transactions:0,confirmations:0,providerRequests:0});
   }
   // Audit all old fallback-helper callers: UI defaults are not submit defaults.
   const amountAudit=await page.evaluate(()=>{
@@ -142,6 +206,23 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.screenshot({path:`${OUT}/heart-action-${width}-confirmed-stub.png`});
   for(let i=0;i<10;i++){await open('#kgen-v30-vow-btn');await page.locator('#kgen-heart-toggle').tap();await open('#kgen-v30-wish-btn');await page.locator('#kgen-heart-toggle').tap();}
   assert.deepEqual(await geometry(),baseline,'form status and ten cycles never move world composition');
+  const reopenCases=[];
+  for(const successfulFirst of [false,true]){
+   await open('#kgen-v30-vow-btn');await fillRitual('kh-vow-amount','9');
+   const before=await count();
+   if(successfulFirst){
+    await click('kh-vow');assert.equal(await count(),before+1,'valid 9 sends exactly once');
+    const tx=await page.evaluate(()=>__heartTx.at(-1)),d=txABI.parseTransaction(tx);
+    assert.equal(d.name,'vowTo');assert.deepEqual([...d.args].map(String),['2','9']);
+   }
+   await open('#kgen-v30-vow-btn');await fillRitual('kh-vow-amount','');
+   const afterValid=await count();
+   await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/請輸入/);
+   assert.equal(await count(),afterValid);await rejectedBoundary('kh-vow');
+   reopenCases.push({successfulFirst,validTransactions:successfulFirst?1:0,emptyNewTransactions:0});
+  }
+  await page.screenshot({path:`${OUT}/repay-${width}-reopen-empty.png`});
+  await page.locator('#kgen-heart-toggle').tap();
   // Festival clock injection is local to the read-only UI observer. No chain
   // time changes, no replacement of the actual shared sendHeart transaction path.
   const cases=await page.evaluate(rules=>{
@@ -205,6 +286,19 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.locator('#k12345-festival-close').tap();assert.deepEqual(await geometry(),baseline,'festival disclosure cannot shift Heart/MOVE/DRIVE/WARP');
   await page.evaluate(()=>{window.ethereum=null;KGEN_RUNTIME_CORE.modules.HeartRuntime.state.address='';});await sync('2026-05-20T00:00:01Z');
   await page.locator('#kgen-heart-toggle').tap();assert.equal(await page.locator('#kh-festival1').getAttribute('data-festival-state'),'WALLET_REQUIRED');const disconnectedCount=await count();await claimClick('kh-festival1');assert.match(await feedback('kh-festival1').innerText(),/錢包尚未連線/);assert.equal(await count(),disconnectedCount);
+  // The preceding disconnected Festival check intentionally opens the wallet hub.
+  await page.locator('#walletHubClose').tap();
+  await open('#kgen-v30-vow-btn');const disconnectedInputs=[];
+  assert.equal(await page.evaluate(()=>!window.ethereum&&!KGEN_RUNTIME_CORE.modules.HeartRuntime.state.address),true,'disconnected-wallet validation matrix');
+  for(const value of ['', '   ', '0', '-1', '0.5', 'abc', 'NaN']){
+   await fillRitual('kh-vow-amount',value);const before=await count(),prompts=confirmations;
+   await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/請輸入|正整數|範圍/);
+   assert.equal(await count(),before);assert.equal(confirmations,prompts);await rejectedBoundary('kh-vow');
+   assert.equal(await page.locator('#kh-vow-amount').inputValue(),value);
+   disconnectedInputs.push({value,transactions:0,providerRequests:0,confirmations:0});
+  }
+  await fillRitual('kh-vow-amount','');await click('kh-vow');await page.screenshot({path:`${OUT}/repay-${width}-disconnected-empty.png`});
+  await fs.writeFile(`${OUT}/repay-boundary-${width}.json`,JSON.stringify({base:BASE,width,height,invalidInputs,reopenCases,disconnectedInputs,boundaries:await page.evaluate(()=>__heartBoundaries),trace:await page.evaluate(()=>__repayTrace),events:await page.evaluate(()=>__heartInputEvents),broadcasts},null,2));
   reports.push({id:'12345-festival',width,height,clockCases:cases,transactionBoundary:festivalCalls,notOpen:'PASS',claimedOnce:'PASS',minuteTransition:'PASS',staleRead:'PASS',disabled:'PASS',cancellationAndRevert:'PASS',walletAndChainGate:'PASS',secondaryButtons:'PASS',broadcasts});
   assert.equal(broadcasts,0);reports.push({id:'12345-heart-actions',width,height,connectedOriginalTransactionPath:decoded,allowanceGate:'PASS',validation:'PASS',rejectionAndRevert:'PASS',pendingDuplicate:'PASS',positionStable:'PASS',broadcasts:0,physicalMetaMask:'HUMAN_RETEST_REQUIRED'});
  }catch(error){
