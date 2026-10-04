@@ -59,6 +59,20 @@
   signed-C immersive browser tests PASS; core runtime 69/69 PASS. Final six-size
   run and new exact-head CI still required. Responsive CI now checks out and
   labels the PR's actual head, not GitHub's synthetic merge SHA.
+- Head `dca6832b863abd78430692e46f7488346f8d5322`: Responsive (including
+  six-size world-first), Universal and Portal PASS. Game progressed through
+  controls/combat to an old plane-map test's fixed-pixel GROUND assumption;
+  roaming entities can legitimately occupy that pixel. The follow-up selects
+  actual empty canvas before a real click; canonical ground route and movement
+  assertions stay exact. Local plane-map and full Digital Ant/insurance/bandit
+  browser regressions PASS after that test correction.
+- Added actual actor-follow switching, manual movement while following, a real
+  60-second prospective observation, and exact growth reload checks at 390x844.
+  Local PASS, including correct/wrong/flat counters and XP. Initialize all
+  counters as zero so fresh and restored growth have the same schema. No
+  injected scores or changed clocks. Character-ready tests use attached READY
+  or FALLBACK telemetry rather than requiring MINIMAL to reveal hidden HUD.
+  Final updated-head CI remains the release-review gate.
 
 ## Canonical coordinate restoration candidate — 2026-10-04
 

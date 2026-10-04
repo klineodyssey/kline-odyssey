@@ -53,7 +53,11 @@ const publishedTarget=await page.evaluate(()=>structuredClone(globalThis.__K1152
 await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.16},[world0.x,world0.y,world0.z],{timeout:4000});
 await page.evaluate(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__.stop('WORLD target QA stop'));
 
-const tap0=await coords();await worldCanvasTap(.72,.53,731);
+// A fixed screen pixel is not a ground fixture once market-life actors roam.
+// Select actual empty world through the existing read-only hit-test, then send
+// a real browser click. Keep the canonical WORLD_GROUND and XYZ assertions.
+const tap0=await coords(),ground=await page.evaluate(()=>{for(let y=innerHeight*.4;y<innerHeight*.65;y+=20)for(let x=innerWidth*.35;x<innerWidth*.8;x+=20)if(Math.abs(x-innerWidth/2)>40&&globalThis.__K11520_CAMERA__?.canPanAt(x,y))return{x,y};return null});
+assert.ok(ground,'an actual empty world target must exist');await page.mouse.click(ground.x,ground.y);
 await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active===true&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='WORLD_GROUND'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='WORLD',null,{timeout:2500});
 const groundTarget=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.equal(Number(groundTarget.y.toFixed(3)),0);assert.ok(Math.abs(groundTarget.x-tap0.x)>.1||Math.abs(groundTarget.z-tap0.z)>.1,'world tap did not create a distinct XYZ target');
 await page.waitForFunction(([x,y,z])=>{const p=globalThis.__K11520_WORLD_COORDS__?.physical||{};return Math.hypot((p.x||0)-x,(p.y||0)-y,(p.z||0)-z)>.12},[tap0.x,tap0.y,tap0.z],{timeout:4000});

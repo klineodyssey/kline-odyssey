@@ -30,7 +30,7 @@ test('training observation is one-shot, causal, gap-safe and cannot mutate capit
   assert.equal(observeTrainingMarket(life,quote(6000,101),{now:6000}).direction,'LONG');
   assert.equal(life.training.pending.price,101);
   for(let at=11000;at<=61000;at+=5000)observeTrainingMarket(life,quote(at,102),{now:at});
-  assert.equal(life.growth.predictionCount,undefined,'no future information before horizon');
+  assert.equal(life.growth.predictionCount,0,'no future information before horizon');
   observeTrainingMarket(life,quote(66000,103),{now:66000});
   assert.equal(life.growth.wins,1);assert.equal(life.growth.predictionCount,1);assert.equal(life.growth.experience,1);
   observeTrainingMarket(life,quote(66000,1000),{now:66000});

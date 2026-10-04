@@ -63,7 +63,8 @@ try {
     assert.equal(await page.locator('#intro11520 .introSkip').count(),0,'late legacy UI must not recreate an intro over the live game');
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
     await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
-    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+    // Character readiness is independent of the MINIMAL telemetry visibility.
+    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
     await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
     await page.locator('#lotsNumericInput').fill('10');await page.locator('#lotsNumericInput').press('Enter');
     const organ=async name=>{
@@ -159,7 +160,7 @@ try {
     await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===4,null,{timeout:15000});
     assert.equal((await snap()).positions[1].status,'CLOSED','reload recovers exact account ledger');
     await shot('reload-recovery');
-    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+    await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
     await page.locator('#cNumericInput').fill('5');await page.locator('#cNumericInput').press('Enter');
     await page.locator('#orderFire').click();
     await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('V1_HIGH_SPEED_PRODUCTION_LOCKED'));

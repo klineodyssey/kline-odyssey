@@ -98,10 +98,20 @@ async function verifyWorldFirst(){
       quoteStep=100;
       await page.waitForFunction(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some(m=>m.intent?.direction==='LONG'),null,{timeout:15000});
       const before=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot());
-      await page.locator('#k11520MonsterGuide').click();await page.locator('#monsterFollowAction').click();
+      await page.locator('#k11520MonsterGuide').click();
+      if(profile.name==='cold-390')await page.screenshot({path:`${OUT}/world-first-follow-details-390.png`});
+      await page.locator('#monsterFollowAction').click();
       assert.equal(await page.locator('#k11520FollowMonster').isVisible(),true);
       await page.waitForFunction(old=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.some((m,i)=>Math.hypot(m.position.x-old[i].position.x,m.position.y-old[i].position.y,m.position.z-old[i].position.z)>.02),before.actors);
       const followed=await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId);
+      if(profile.name==='cold-390'){
+        const other=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().find(m=>m.visible&&m.inView&&m.uncovered&&Math.abs(m.screen.x-innerWidth/2)>50&&__K11520_MONSTER_FOLLOW__.snapshot().actors.some(a=>a.id===m.id&&a.alive)));
+        assert.ok(other,'a second market-life actor must be selectable');
+        await page.mouse.click(other.screen.x,other.screen.y);await page.locator('#monsterFollowAction').waitFor({state:'visible'});await page.locator('#monsterFollowAction').click();
+        assert.notEqual(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),followed,'player can switch the followed actor');
+        await page.locator('#k11520FollowMonster').click();await page.locator('#k11520MonsterGuide').click();await page.locator('#monsterFollowAction').click();
+        result.checks.followSwitch='ACTUAL WORLD TAP / SWITCH / CANCEL PASS';
+      }
       assert.equal(await page.locator('#minimap').getAttribute('data-coordinate-space'),'XYZ');
       const map=await page.locator('#minimap').boundingBox();await page.mouse.click(map.x+map.width*.85,map.y+map.height*.8);
       await page.locator('#waypointAction').waitFor({state:'visible'});await page.locator('#waypointAction').click();
@@ -112,8 +122,19 @@ async function verifyWorldFirst(){
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),followed,'manual navigation must remain free while following');
       await page.locator('#k11520FollowMonster').click();assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().followedMonsterId),null);
       await page.locator('#attack').click();result.checks.navigation='MAP WAYPOINT / MOVEMENT / JOYSTICK CAMERA CONFLICT PASS';result.checks.monster='INTENT / MOVEMENT / FOLLOW / CANCEL / ATTACK CONTROL PASS';
+      let completedGrowth=null;
+      if(profile.name==='cold-390'){
+        // Actual 60s prospective observation, no clock jump or score injection.
+        quoteStep=200;
+        await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id)?.growth.wins>=1,followed,{timeout:70000});
+        completedGrowth=await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed);
+        assert.equal(completedGrowth.experience,completedGrowth.wins);assert.equal(completedGrowth.predictionCount,completedGrowth.wins+completedGrowth.losses+(completedGrowth.flat||0));
+        result.completedGrowth=completedGrowth;
+        result.checks.performance='REAL 60s / CAUSAL RESULT / EXISTING GROWTH PASS';
+      }
       await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('STANDARD');
       await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__?.profile==='STANDARD');
+      if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
       assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
     }catch(error){result.error=String(error);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}

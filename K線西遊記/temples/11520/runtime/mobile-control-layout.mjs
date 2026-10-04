@@ -90,6 +90,7 @@ function installStyle(){
 /* WORLD_FIRST_HUD_POLICY: disclosure never changes coordinates or control owners. */
 #k11520MarketRow{position:fixed;top:68px;left:6px;right:6px;min-height:44px;z-index:310;border:1px solid #68e4ff66;border-radius:12px;background:#071018e8;color:#dffaff;font:700 12px system-ui;touch-action:manipulation}
 #k11520HudProfile{min-height:44px;background:#102332;color:#dffaff;border:1px solid #68e4ff66;border-radius:8px}
+#k11520PlaneLabel{overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
 html[data-k11520-hud-profile]:not([data-k11520-hud-profile="FULL"]):not(.k11520MarketOpen) .axes{display:none!important}
 html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
 html[data-k11520-hud-profile] .axes{top:116px!important;z-index:610!important}

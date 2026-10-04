@@ -34,7 +34,7 @@ export function createMarketLife({
     vitality:clamp(vitality,0,100),fear:clamp(fear,0,1),profitDrive:clamp(profitDrive,0,1),
     positions:copy(positions),memory:[],memoryCapacity:Math.max(4,Math.floor(memoryCapacity)),
     state:isInactiveSourceSlot?'DEAD':'ALIVE',strategy:isInactiveSourceSlot?'HIDDEN':isWildEcology?'WILD_ECOLOGY':'HOLD',confidence:isInactiveSourceSlot?0:0.5,lastDecisionAt:0,
-    growth:{experience:0,wins:0,losses:0,dimensionUnlocks:0},lifecycle:{diedAt:null,naiheAt:null,mengpoAt:null,rebornAt:null},
+    growth:{experience:0,wins:0,losses:0,dimensionUnlocks:0,predictionCount:0,flat:0,streak:0},lifecycle:{diedAt:null,naiheAt:null,mengpoAt:null,rebornAt:null},
     world:{home:copy(home),position:copy(position),destination:null,lastTravelAt:null},
     needs:{hunger:clamp(needs?.hunger,0,1),fatigue:clamp(needs?.fatigue,0,1),social:clamp(needs?.social,0,1),curiosity:clamp(needs?.curiosity,0,1)},
     preferences:{travel:clamp(preferences?.travel,0,1),work:clamp(preferences?.work,0,1),comfort:clamp(preferences?.comfort,0,1)},
