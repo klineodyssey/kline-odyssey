@@ -95,6 +95,16 @@
   browser task. The 44px assertion is unchanged and is not a polling predicate;
   undersized controls still fail. No Courier/insurance product logic changed.
 
+- Reset regression: zeroing camera pan/zoom did not reset the existing dead-zone
+  focus retained from manual gestures. Recenter now uses that owner's existing
+  bypass for one rendered frame and resets its focus; Player XYZ is untouched.
+  Browser QA requires the projected player position to return within .5px of
+  the pre-gesture point. Follow-switch selection excludes the actual avatar
+  priority ellipse, not an arbitrary whole vertical strip.
+- Head `1cd57081` Portal failed the independently scoped 12345 empty-repay case
+  (expected input rejection, observed stub vowTo amount 9). #485 remains Draft;
+  do not import its repair into #486, blind-rerun Portal, or claim all gates PASS.
+
 ## Canonical coordinate restoration candidate — 2026-10-04
 
 - TASK_ID: K11520-CANONICAL-COORDINATE; Human explicit audit → minimal Draft PR

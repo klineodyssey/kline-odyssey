@@ -37,6 +37,7 @@ const S={axis:'KX',axes:{KX:{market:'BTCUSDT',side:'多',lots:1,c:0,pos:null},KY
 let playerHomeFraming=false;
 // Camera state is presentation only, deliberately not persisted with Player XYZ.
 const cameraView={zoom:1,panX:0,panZ:0,manual:false};
+let cameraRecenterPending=false;
 const CAMERA_BOUNDS=Object.freeze({minZoom:.65,maxZoom:1.8,maxPan:12});
 const clampCamera=(n,min,max)=>Math.max(min,Math.min(max,n));
 const legacySession=readPlayerSession(),playerLife=createPlayerLife({lastXYZ:legacySession?.xyz});
@@ -593,7 +594,7 @@ function canPanAt(x,y){
   }return true;
 }
 const cameraReset=document.createElement('button');cameraReset.id='k11520CameraReset';cameraReset.type='button';cameraReset.textContent='◎';cameraReset.title='回到玩家';cameraReset.setAttribute('aria-label','Camera 回到玩家');document.body.appendChild(cameraReset);
-cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false};
+cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false};
 // Retire the transparent half-screen yaw interceptor. HUD controls above the
 // canvas keep their own pointer owners; only world-origin pointers enter here.
 $('#lookPad').style.setProperty('pointer-events','none','important');
@@ -636,8 +637,11 @@ renderer.domElement.addEventListener('k11520:player-tap',()=>{cameraPointers.cle
 function applyWorldCamera(){
   const dist=8.5/cameraView.zoom,x=S.xyz.x+cameraView.panX,z=S.xyz.z+cameraView.panZ;
   camera.position.set(x+Math.sin(S.camYaw)*dist,S.xyz.y+4.2/cameraView.zoom,z-Math.cos(S.camYaw)*dist);
-  camera.userData.k11520NavigationFocus=cameraView.manual?'MANUAL_CAMERA':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
+  // Recenter must also reset the existing dead-zone's remembered focus. A zero
+  // pan alone leaves the old manual-camera focus inside its hysteresis region.
+  camera.userData.k11520NavigationFocus=cameraView.manual||cameraRecenterPending?'MANUAL_CAMERA':playerHomeFraming&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLAYER_HOME'?'PLAYER_HOME':null;
   camera.lookAt(x-Math.sin(S.camYaw)*1.8,S.xyz.y+.8,z+Math.cos(S.camYaw)*1.8);
+  cameraRecenterPending=false;
   revealPlayerBehindOccluders();
 }
 // Camera-only obstruction treatment: retain meshes, hit targets, Life IDs and
