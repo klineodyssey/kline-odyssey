@@ -54,12 +54,13 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
  const baseline=await geometry();
  await page.evaluate(()=>{
   window.__heartTx=[];window.__txFailure=null;window.__holdTx=false;window.__walletReads=[];
-  window.__heartInputEvents=[];window.__repayTrace=[];
+  window.__heartInputEvents=[];window.__repayTrace=[];window.__heartBoundaries=[];
   for(const type of ['touchstart','touchend','click','focusin','focusout','keydown','beforeinput','input','change'])document.addEventListener(type,e=>{
    __heartInputEvents.push({type,target:e.target.closest('button')?.id||e.target.id,key:e.key,inputType:e.inputType,active:document.activeElement?.id,value:document.getElementById('kh-vow-amount')?.value,tx:__heartTx.length,time:performance.now()});
   },true);
   window.ethereum={isMetaMask:true,request:async({method,params})=>{
    __walletReads.push(method);
+   window.__activeHeartBoundary?.providerRequests.push(method);
    if(method==='eth_chainId')return '0x38';
    if(method==='eth_accounts'||method==='eth_requestAccounts')return ['0x0000000000000000000000000000000000000001'];
    if(method==='eth_call'||method==='eth_blockNumber')return window.__heartRead({method,params,id:1});
@@ -78,6 +79,17 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
    const row={stage:'readRitualInteger',raw:document.getElementById(id)?.value};__repayTrace.push(row);
    try{row.result=read.call(this,id,...args);return row.result;}catch(error){row.error=error.message;throw error;}
   };
+  // Scope observations to the actual submit call, not unrelated wallet polling.
+  // Invalid prepare() must throw synchronously before the first await/connection.
+  const send=heart.sendHeart,connect=heart.ensureConnected;
+  heart.ensureConnected=function(...args){if(window.__activeHeartBoundary)__activeHeartBoundary.connectionCalls++;return connect.apply(this,args);};
+  heart.sendHeart=function(label,runner,action){
+   const row={button:action?.button,providerRequests:[],connectionCalls:0,runnerCalls:0,prepareError:null,settled:false};
+   __heartBoundaries.push(row);const previous=window.__activeHeartBoundary;window.__activeHeartBoundary=row;
+   const observed=action&&{...action,prepare(){try{return action.prepare();}catch(error){row.prepareError=error.message;throw error;}}};
+   try{return send.call(this,label,(...args)=>{row.runnerCalls++;return runner(...args);},observed).finally(()=>{row.settled=true;});}
+   finally{window.__activeHeartBoundary=previous;}
+  };
  });
  const feedback=id=>page.locator('#'+id+'-feedback');
  const tapDiagnostics=[];
@@ -91,6 +103,12 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.waitForFunction(({id,before})=>__heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id)&&document.getElementById(id).dataset.heartPending!=='1',{id,before});
  };
  const count=()=>page.evaluate(()=>__heartTx.length);
+ const rejectedBoundary=async button=>{
+  const row=await page.evaluate(()=>__heartBoundaries.at(-1));
+  assert.equal(row.button,button);assert.ok(row.prepareError,'canonical prepare rejects before async transaction work');
+  assert.equal(row.settled,true);assert.equal(row.connectionCalls,0);assert.equal(row.runnerCalls,0);
+  assert.deepEqual(row.providerRequests,[],'invalid submit itself cannot request a provider');
+ };
  const open=async id=>{
   if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();
   await page.locator(id).tap();
@@ -146,12 +164,12 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   assert.equal(await page.evaluate(()=>!!window.ethereum&&!!KGEN_RUNTIME_CORE.modules.HeartRuntime.state.address),true,'connected-wallet validation matrix');
   const invalidInputs=[];
   for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','   ',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-vow-amount','0.5',/正整數/],['kh-vow-amount','1.5',/正整數/],['kh-vow-amount','-1',/正整數/],['kh-vow-amount','abc',/正整數/],['kh-vow-amount','NaN',/正整數/],['kh-lamp-days','',/請輸入/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
-   const before=await count(),prompts=confirmations,requests=await page.evaluate(()=>__walletReads.length);
+   const before=await count(),prompts=confirmations;
    await fillRitual(id,value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);
    const message=await feedback(action).innerText();assert.match(message,pattern,JSON.stringify(await page.evaluate(()=>({events:__heartInputEvents.slice(-15),tx:__heartTx,value:document.getElementById('kh-vow-amount').value}))));
    assert.equal(await count(),before,`invalid ${id} ${JSON.stringify(value)} cannot reach signer`);
    assert.equal(confirmations,prompts,'invalid amount cannot request confirmation');
-   assert.equal(await page.evaluate(()=>__walletReads.length),requests,'validation precedes provider requests');
+   await rejectedBoundary(action);
    assert.equal(await page.locator('#'+id).inputValue(),value,'submit cannot restore a previous/default value');
    invalidInputs.push({id,value,message,transactions:0,confirmations:0,providerRequests:0});
   }
@@ -198,9 +216,9 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
     assert.equal(d.name,'vowTo');assert.deepEqual([...d.args].map(String),['2','9']);
    }
    await open('#kgen-v30-vow-btn');await fillRitual('kh-vow-amount','');
-   const afterValid=await count(),requests=await page.evaluate(()=>__walletReads.length);
+   const afterValid=await count();
    await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/請輸入/);
-   assert.equal(await count(),afterValid);assert.equal(await page.evaluate(()=>__walletReads.length),requests);
+   assert.equal(await count(),afterValid);await rejectedBoundary('kh-vow');
    reopenCases.push({successfulFirst,validTransactions:successfulFirst?1:0,emptyNewTransactions:0});
   }
   await page.screenshot({path:`${OUT}/repay-${width}-reopen-empty.png`});
@@ -273,14 +291,14 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await open('#kgen-v30-vow-btn');const disconnectedInputs=[];
   assert.equal(await page.evaluate(()=>!window.ethereum&&!KGEN_RUNTIME_CORE.modules.HeartRuntime.state.address),true,'disconnected-wallet validation matrix');
   for(const value of ['', '   ', '0', '-1', '0.5', 'abc', 'NaN']){
-   await fillRitual('kh-vow-amount',value);const before=await count(),requests=await page.evaluate(()=>__walletReads.length),prompts=confirmations;
+   await fillRitual('kh-vow-amount',value);const before=await count(),prompts=confirmations;
    await click('kh-vow');assert.match(await feedback('kh-vow').innerText(),/請輸入|正整數|範圍/);
-   assert.equal(await count(),before);assert.equal(confirmations,prompts);assert.equal(await page.evaluate(()=>__walletReads.length),requests);
+   assert.equal(await count(),before);assert.equal(confirmations,prompts);await rejectedBoundary('kh-vow');
    assert.equal(await page.locator('#kh-vow-amount').inputValue(),value);
    disconnectedInputs.push({value,transactions:0,providerRequests:0,confirmations:0});
   }
   await fillRitual('kh-vow-amount','');await click('kh-vow');await page.screenshot({path:`${OUT}/repay-${width}-disconnected-empty.png`});
-  await fs.writeFile(`${OUT}/repay-boundary-${width}.json`,JSON.stringify({base:BASE,width,height,invalidInputs,reopenCases,disconnectedInputs,trace:await page.evaluate(()=>__repayTrace),events:await page.evaluate(()=>__heartInputEvents),broadcasts},null,2));
+  await fs.writeFile(`${OUT}/repay-boundary-${width}.json`,JSON.stringify({base:BASE,width,height,invalidInputs,reopenCases,disconnectedInputs,boundaries:await page.evaluate(()=>__heartBoundaries),trace:await page.evaluate(()=>__repayTrace),events:await page.evaluate(()=>__heartInputEvents),broadcasts},null,2));
   reports.push({id:'12345-festival',width,height,clockCases:cases,transactionBoundary:festivalCalls,notOpen:'PASS',claimedOnce:'PASS',minuteTransition:'PASS',staleRead:'PASS',disabled:'PASS',cancellationAndRevert:'PASS',walletAndChainGate:'PASS',secondaryButtons:'PASS',broadcasts});
   assert.equal(broadcasts,0);reports.push({id:'12345-heart-actions',width,height,connectedOriginalTransactionPath:decoded,allowanceGate:'PASS',validation:'PASS',rejectionAndRevert:'PASS',pendingDuplicate:'PASS',positionStable:'PASS',broadcasts:0,physicalMetaMask:'HUMAN_RETEST_REQUIRED'});
  }catch(error){
