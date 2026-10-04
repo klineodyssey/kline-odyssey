@@ -1,0 +1,55 @@
+name: KAIOS Backend Recovery QA
+on:
+  pull_request:
+    paths:
+      - 'KAIOS/backend/**'
+      - 'K線西遊記/temples/11520/runtime/player-life-runtime.mjs'
+      - 'K線西遊記/temples/11520/runtime/player-cloud-sync.mjs'
+      - 'K線西遊記/temples/11520/runtime/player-life-ui.mjs'
+      - '.github/workflows/kaios-backend-recovery-qa.yml'
+  push:
+    branches: [main, codex/kaios-backend-recovery-v1]
+    paths:
+      - 'KAIOS/backend/**'
+      - 'K線西遊記/temples/11520/runtime/player-life-runtime.mjs'
+      - 'K線西遊記/temples/11520/runtime/player-cloud-sync.mjs'
+      - 'K線西遊記/temples/11520/runtime/player-life-ui.mjs'
+      - '.github/workflows/kaios-backend-recovery-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backend-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: KAIOS/backend/package-lock.json
+      - name: Install backend development dependencies
+        run: npm ci --prefix KAIOS/backend --ignore-scripts
+      - name: Syntax, unit, database, API and recovery integration
+        run: |
+          npm run --prefix KAIOS/backend check
+          npm run --prefix KAIOS/backend test
+          node --test 'K線西遊記/temples/11520/tests/11520-player-life.test.mjs'
+      - name: Build portable Workers deployment candidate (no deploy)
+        run: npm run --prefix KAIOS/backend candidate
+      - name: Install Chromium
+        working-directory: KAIOS/backend
+        run: npx playwright install --with-deps chromium
+      - name: Chromium Recovery Center QA
+        run: npm run --prefix KAIOS/backend test:browser
+      - name: Upload independent review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaios-backend-recovery-browser-${{ github.sha }}
+          path: KAIOS/backend/evidence/
+          if-no-files-found: warn

@@ -1,0 +1,23 @@
+{
+  "name": "kaios-backend-recovery-v1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node src/local-server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node test/syntax.mjs",
+    "test:browser": "node test/browser.mjs",
+    "candidate": "node deploy/build.mjs"
+  },
+  "dependencies": {
+    "ethers": "6.17.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright": "1.58.2",
+    "prettier": "3.8.1"
+  }
+}

@@ -1,0 +1,160 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #08151d;
+  color: #e5f3ee;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 720px;
+  margin: auto;
+  padding: 28px 18px 40px;
+}
+h1 {
+  font-size: clamp(24px, 7vw, 36px);
+  margin: 8px 0;
+}
+h2 {
+  font-size: 20px;
+  margin: 22px 0 12px;
+}
+p,
+dt,
+dd,
+label {
+  line-height: 1.65;
+}
+header p {
+  color: #b9cec7;
+}
+.eyebrow {
+  letter-spacing: 0.12em;
+  color: #75dfb8;
+}
+section {
+  border: 1px solid #25433f;
+  border-radius: 16px;
+  padding: 18px;
+  margin: 20px 0;
+  background: #10232a;
+}
+section section {
+  background: #142f32;
+}
+button,
+.upload {
+  font: inherit;
+  min-height: 44px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #86e6bf;
+  color: #102820;
+  font-weight: 650;
+  cursor: pointer;
+  margin: 4px 4px 4px 0;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.secondary {
+  background: #294047;
+  color: #e5f3ee;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+}
+dl {
+  margin: 14px 0;
+}
+dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #294047;
+  padding: 8px 0;
+}
+dt {
+  color: #b9cec7;
+}
+dd {
+  margin: 0;
+  text-align: right;
+}
+ul {
+  padding: 0;
+  list-style: none;
+}
+li {
+  border: 1px solid #35534c;
+  padding: 14px;
+  border-radius: 12px;
+  margin: 12px 0;
+}
+li p {
+  margin: 6px 0;
+}
+.identifier {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: #a8c9ba;
+}
+.notice,
+footer,
+#mode {
+  color: #a8c9ba;
+  font-size: 14px;
+}
+.upload {
+  display: block;
+  background: #294047;
+  color: #e5f3ee;
+}
+.upload input {
+  display: block;
+  max-width: 100%;
+  margin-top: 8px;
+}
+.confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+}
+.confirm input {
+  width: 22px;
+  height: 22px;
+}
+#message {
+  min-height: 28px;
+  overflow-wrap: anywhere;
+}
+[hidden] {
+  display: none !important;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+@media (max-width: 380px) {
+  main {
+    padding: 20px 12px;
+  }
+  section {
+    padding: 14px;
+  }
+  dl div {
+    display: block;
+  }
+  dd {
+    text-align: left;
+  }
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>KAIOS Recovery Center</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">KAIOS · 玩家生命</p>
+        <h1>Recovery Center</h1>
+        <p>保留旅程，安全備份與恢復。</p>
+      </header>
+      <section id="login">
+        <h2>連結你的玩家生命</h2>
+        <p>簽章只用於登入，不會送出交易。私鑰永遠留在你的錢包。</p>
+        <button id="wallet" disabled>使用錢包登入</button
+        ><button id="demo" hidden>體驗本機測試玩家</button>
+        <p id="mode"></p>
+      </section>
+      <p id="message" role="status" aria-live="polite">正在確認服務…</p>
+      <section id="dashboard" hidden>
+        <h2>目前 Player Life</h2>
+        <p id="identity" class="identifier"></p>
+        <dl>
+          <div>
+            <dt>資料健康</dt>
+            <dd id="health"></dd>
+          </div>
+          <div>
+            <dt>目前版本</dt>
+            <dd id="revision"></dd>
+          </div>
+          <div>
+            <dt>最後同步</dt>
+            <dd id="lastSync"></dd>
+          </div>
+          <div>
+            <dt>最後備份</dt>
+            <dd id="lastBackup"></dd>
+          </div>
+        </dl>
+        <p id="progress"></p>
+        <div class="actions">
+          <button id="sync">同步本機旅程</button
+          ><button id="backup">立即備份</button
+          ><button id="refresh" class="secondary">重新整理</button>
+        </div>
+        <p class="notice">
+          這裡只管理遊戲資料。KGEN、KAIOS 餘額與真實交易以區塊鏈／結算系統為準。
+        </p>
+        <section id="conflict" hidden>
+          <h2>版本衝突</h2>
+          <p id="conflictSummary"></p>
+          <button id="conflictPreview">預覽本機候選恢復</button>
+          <p>兩份資料都已保存。選擇版本後仍需預覽並確認，不會自動覆蓋。</p>
+        </section>
+        <h2>歷史備份</h2>
+        <p>選擇版本後先驗證、預覽，再確認恢復。</p>
+        <ul id="snapshots"></ul>
+        <label class="upload"
+          >匯入自己的遊戲備份<input
+            id="import"
+            type="file"
+            accept="application/json,.json"
+        /></label>
+        <section id="preview" hidden>
+          <h2>恢復預覽</h2>
+          <p id="summary"></p>
+          <p>恢復前會另外保存目前版本。恢復只會變更後端遊戲資料。</p>
+          <label class="confirm"
+            ><input id="confirm" type="checkbox" />我已檢查版本，確認恢復</label
+          ><button id="restore" disabled>確認恢復此版本</button
+          ><button id="cancel" class="secondary">取消</button>
+        </section>
+        <p id="receipt" role="status"></p>
+        <button id="apply" hidden>將已確認的雲端版本載入本機</button>
+      </section>
+      <footer>
+        Blockchain：財務／鏈上真實<br />Backend：遊戲／同步／恢復<br />GitHub：程式／規格
+      </footer>
+    </main>
+    <script type="module" src="./app.mjs"></script>
+  </body>
+</html>

@@ -213,6 +213,20 @@ export function createLocalPlayerStore({storage,now=Date.now,crypto=globalThis.c
     if(!keys(b,['schema','scope','player'])||b.schema!==PLAYER_LIFE_SCHEMA||b.scope!==PLAYER_LIFE_SCOPE)fail('INVALID_BACKUP');validatePlayerLifePlayer(b.player);
     return mutate(e=>{if(e.players[b.player.playerId])fail('PLAYER_ALREADY_EXISTS_NO_OVERWRITE');if(b.player.walletLinks.length)fail('BACKUP_WALLET_PROOF_NOT_TRUSTED');const p=clone(b.player);p.migration='BACKUP_LOCAL_CANDIDATE';e.players[p.playerId]=p;e.activePlayerId=p.playerId;return p});
   }
+  /** Explicit game-only cloud recovery, through the existing local owner. */
+  function restoreGameBackup(candidate,{expectedRevision,confirmGameRestore=false}={}){
+    if(!confirmGameRestore)fail('EXPLICIT_GAME_RESTORE_REQUIRED');
+    if(expectedRevision!==state.revision)fail('REVISION_CONFLICT_RELOAD_REQUIRED');
+    validatePlayerLifePlayer(candidate);const current=readActive();
+    if(candidate.playerId!==current.playerId)fail('WRONG_PLAYER');
+    if(candidate.walletLinks.length)fail('BACKUP_WALLET_PROOF_NOT_TRUSTED');
+    const next=clone(candidate);
+    for(const field of ['displayName','pronoun','ageRange','privacyConsent','walletLinks'])next[field]=clone(current[field]);
+    next.migration='BACKUP_LOCAL_CANDIDATE';validatePlayerLifePlayer(next);
+    // Separate immutable local protection copy; a failure stops the restore.
+    if(storage){if(storage.getItem(PLAYER_LIFE_STORAGE_KEY)!==raw)fail('REVISION_CONFLICT_RELOAD_REQUIRED');storage.setItem('KAIOS_PLAYER_PRE_RESTORE_V1:'+current.playerId+':'+state.revision,exportPlayer());}
+    return mutate(e=>{e.players[current.playerId]=next;return next});
+  }
   function migrateLegacy({lastXYZ,journeyProgress,legacyProgress={xp:0,engineXp:0}}={}){
     if(!keys(legacyProgress,['xp','engineXp'])||!integer(legacyProgress.xp)||!integer(legacyProgress.engineXp))fail('INVALID_LEGACY_PROGRESS');
     return mutate(e=>{if(e.legacyMigrated||Object.keys(e.players).length!==1)fail('LEGACY_MIGRATION_ALREADY_USED');const p=readActive(e);if(p.events.length||p.migration!=='NONE')fail('LEGACY_MIGRATION_NOT_FRESH');if(lastXYZ){if(!xyz(lastXYZ))fail('INVALID_XYZ');p.lastXYZ=clone(lastXYZ);p.homePlot.xyz={x:lastXYZ.x+5,y:lastXYZ.y,z:lastXYZ.z}}if(journeyProgress)p.journeyProgress=clone(journeyProgress);p.migration='LEGACY_LOCAL_CANDIDATE';p.legacyProgress={...clone(legacyProgress),source:'LOCAL_UNVERIFIED_GUEST'};Object.assign(p,projectEvents(p.events,p.legacyProgress));e.legacyMigrated=true;return p});
@@ -227,7 +241,7 @@ export function createLocalPlayerStore({storage,now=Date.now,crypto=globalThis.c
     recordEvent,recordEvents,claimDailyJourney,recordExplorationStep,gameplayProfile(){return gameplayProfile(readActive(),{now:stamp()})},loadHomePlot(){return clone(readActive().homePlot)},
     saveHomePlot(plot){if(JSON.stringify(plot)!==JSON.stringify(readActive().homePlot))fail('HOME_MUTATION_REQUIRES_PROGRESSION');return clone(plot)},
     buildStarterHouse(){return advanceHouse(true)},upgradeHouse(){return advanceHouse(false)},
-    beginWalletBinding,bindWallet,unlinkWallet,exportPlayer,importPlayer,migrateLegacy,
+    beginWalletBinding,bindWallet,unlinkWallet,exportPlayer,importPlayer,restoreGameBackup,migrateLegacy,
     snapshot(){return {player:state.activePlayerId?clone(readActive()):null,home:state.activePlayerId?clone(readActive().homePlot):null,revision:state.revision,status,scope:PLAYER_LIFE_SCOPE,persistent:!!storage&&status==='READY'}}
   });
 }
