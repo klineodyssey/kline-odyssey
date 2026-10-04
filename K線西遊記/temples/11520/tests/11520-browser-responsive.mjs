@@ -18,13 +18,13 @@ const ROUTE='/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html';
 const PRODUCTION=process.env.K11520_PRODUCTION_QA==='1';
 const profiles=PRODUCTION?[{name:'pages-360',width:360,height:740},{name:'pages-390',width:390,height:844},{name:'pages-432',width:432,height:856},{name:'pages-landscape-844',width:844,height:390,landscape:true}]:[
   {name:'cold-390',width:390,height:844},{name:'cold-432',width:432,height:856},
-  {name:'warm-412',width:412,height:772,warm:true},{name:'cold-360',width:360,height:844},{name:'cold-landscape-844',width:844,height:390,landscape:true},
+  {name:'warm-412',width:412,height:772,warm:true},{name:'cold-360',width:360,height:740},{name:'cold-landscape-844',width:844,height:390,landscape:true},
   {name:'cold-480',width:480,height:900}
 ];
 // Optional local diagnosis only; default CI still exercises every profile.
 const selectedProfiles=process.env.K11520_RESPONSIVE_PROFILE?profiles.filter(p=>p.name===process.env.K11520_RESPONSIVE_PROFILE):profiles;
 assert.ok(selectedProfiles.length,'Unknown K11520_RESPONSIVE_PROFILE');
-const selectors=['#kspaceTarget','#k11520MonsterGuide','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack','#cargoInterceptionButton'];
+const selectors=['#kspaceTarget','#k11520MonsterGuide','.top','.axes','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#cRead','#lotsRead','#yRead','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat','#brandClockV250','#k11520RealTradePreflightBtn','#k11520UtilityMaster','#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll','#orderFire','#attack','#cargoInterceptionButton','#homeDeliveryButton','#k11520CameraReset','#k11520CameraZoomStatus'];
 const utilities=['#dock','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#gameModeToggle','#k11520HudCollapseAll'];
 await fs.mkdir(OUT,{recursive:true});
 const launchBrowser=()=>chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
@@ -230,10 +230,47 @@ async function verifyProductionSource(){
   }
 }
 async function snapshot(page){return page.evaluate(sels=>{
-  const box=el=>{if(!el)return null;const r=el.getBoundingClientRect(),s=getComputedStyle(el);const visible=s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&r.width>0&&r.height>0;const h=visible?document.elementFromPoint(r.x+r.width/2,r.y+r.height/2):null;return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,visible,hit:!!h&&(h===el||el.contains(h)),pointer:s.pointerEvents,blocker:h?{id:h.id,classes:String(h.className),pointer:getComputedStyle(h).pointerEvents}:null,scroll:el.scrollHeight,client:el.clientHeight,text:(el.textContent||'').trim().slice(0,240)}};
+  const box=el=>{if(!el)return null;const r=el.getBoundingClientRect(),s=getComputedStyle(el);const visible=s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&r.width>0&&r.height>0;const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=visible?points.map(([x,y])=>{const h=document.elementFromPoint(x,y);return{owned:!!h&&(h===el||el.contains(h)),id:h?.id||'',classes:String(h?.className||'')}}):[],h=visible?document.elementFromPoint(r.x+r.width/2,r.y+r.height/2):null;return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,visible,hit:!!h&&(h===el||el.contains(h)),ownedHitFraction:owners.length?owners.filter(x=>x.owned).length/owners.length:0,hitOwners:owners,pointer:s.pointerEvents,blocker:h?{id:h.id,classes:String(h.className),pointer:getComputedStyle(h).pointerEvents}:null,scroll:el.scrollHeight,client:el.clientHeight,text:(el.textContent||'').trim().slice(0,240)}};
   const yThumbStyle=getComputedStyle(document.querySelector('#yThumb'));
   return{width:innerWidth,height:innerHeight,boxes:Object.fromEntries(sels.map(s=>[s,box(document.querySelector(s))])),cards:[...document.querySelectorAll('#axes .axis')].map(box),balances:[...document.querySelectorAll('.top>.pill')].map(box),drawers:[...document.querySelectorAll('.hud-drawer-toggle')].map(box),axisArt:{image:yThumbStyle.backgroundImage,position:yThumbStyle.backgroundPosition,size:yThumbStyle.backgroundSize,repeat:yThumbStyle.backgroundRepeat},settingsInstalled:!!globalThis.__K11520_UI_SETTINGS__,layoutInstalled:!!globalThis.__K11520_MOBILE_CONTROL_LAYOUT__,xyzInstalled:!!globalThis.__K11520_3D_CONTROL__,utilityOpen:document.documentElement.classList.contains('k11520UtilitiesOpen'),version:document.querySelector('.brandMetaV250')?.textContent};
 },selectors)}
+async function verifyFullHudControlOwnership(page,report){
+  const controls=['#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#gameModeToggle','#k11520UtilityMaster'];
+  await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__?.profile==='FULL'&&['k11520CameraReset','cargoInterceptionButton','homeDeliveryButton','k11520MarketRow'].every(id=>document.getElementById(id)),null,{timeout:45000});
+  const ownership=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{const el=document.querySelector(selector),r=el?.getBoundingClientRect(),style=el?getComputedStyle(el):null;if(!r||style.display==='none'||style.visibility==='hidden')return[selector,null];const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=points.map(([x,y])=>{const hit=document.elementFromPoint(x,y);return{owned:hit===el||el.contains(hit),id:hit?.id||'',classes:String(hit?.className||'')}});return[selector,{rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height},owners,ownedHitFraction:owners.filter(x=>x.owned).length/owners.length}]})),selectors);
+  for(const selector of controls){const item=ownership[selector];if(!item)continue;assert.ok(item.rect.width>=44&&item.rect.height>=44,selector+' must remain a 44px touch target in FULL HUD');assert.ok(item.ownedHitFraction>0,selector+' has no owned hit area: '+JSON.stringify(item.owners))}
+  for(const selector of ['#k11520CameraReset','#cargoInterceptionButton'])assert.equal(ownership[selector]?.ownedHitFraction,1,selector+' must own center and primary hit region in FULL HUD');
+
+  const readCamera=()=>page.evaluate(()=>globalThis.__K11520_CAMERA__.snapshot());
+  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+60;y<r.bottom-60;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,8)&&document.elementFromPoint(x+42,y)===canvas)return{x,y};return null});
+  assert.ok(point,'FULL HUD must leave an actual world gesture area for Recenter QA');
+  const pointer=(type,id,x,y,buttons)=>page.dispatchEvent('#three',type,{pointerId:id,pointerType:'touch',clientX:x,clientY:y,button:0,buttons});
+  await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);await page.waitForTimeout(80);
+  assert.notEqual((await readCamera()).panX,0,'FULL HUD pan precondition must move Camera before Recenter');
+  await page.locator('#k11520CameraReset').click();await page.waitForTimeout(60);
+  const recentered=await readCamera();assert.equal(recentered.panX,0);assert.equal(recentered.panZ,0);assert.equal(recentered.zoom,1);assert.deepEqual(recentered.playerXYZ,start.playerXYZ,'FULL Recenter must not mutate Player XYZ');
+  assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'FULL Recenter must not open a market detail sheet');
+  await page.screenshot({path:`${OUT}/${report.profile.name}-full-recenter-hit-owner.png`});
+
+  const pinch=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),clear=(x,y)=>document.elementFromPoint(x,y)===canvas;for(const end of[60,48,40])for(const vertical of[false,true])for(let y=r.top+end+8;y<r.bottom-end-8;y+=8)for(let x=r.left+end+8;x<r.right-end-8;x+=8){const sx=vertical?0:Math.round(end/3),sy=vertical?Math.round(end/3):0,ex=vertical?0:end,ey=vertical?end:0;if([[x-sx,y-sy],[x+sx,y+sy],[x-ex,y-ey],[x+ex,y+ey]].every(([px,py])=>clear(px,py)))return{x,y,sx,sy,ex,ey}}return null});
+  assert.ok(pinch,'FULL HUD must leave an actual pinch surface');
+  await pointer('pointerdown',11,pinch.x-pinch.sx,pinch.y-pinch.sy,1);await pointer('pointerdown',12,pinch.x+pinch.sx,pinch.y+pinch.sy,1);
+  await pointer('pointermove',11,pinch.x-pinch.ex,pinch.y-pinch.ey,1);await pointer('pointermove',12,pinch.x+pinch.ex,pinch.y+pinch.ey,1);
+  await page.waitForTimeout(40);
+  const zoomSafety=await page.evaluate(()=>{const status=document.querySelector('#k11520CameraZoomStatus'),r=status.getBoundingClientRect(),overlap=b=>r.left<b.right&&r.right>b.left&&r.top<b.bottom&&r.bottom>b.top,controls=['#k11520MonsterGuide','#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','.axes','.minimapWrap','#joy'].map(selector=>{const el=document.querySelector(selector),b=el?.getBoundingClientRect(),s=el?getComputedStyle(el):null;return{selector,overlap:!!b&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&overlap(b),rect:b?{left:b.left,top:b.top,right:b.right,bottom:b.bottom}:null}}),player=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen,monsters=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().filter(m=>m.visible&&m.inView).map(m=>m.screen);return{shown:status.classList.contains('show'),pointerEvents:getComputedStyle(status).pointerEvents,controls,playerOverlap:player.x>=r.left&&player.x<=r.right&&player.y>=r.top&&player.y<=r.bottom,monsterOverlaps:monsters.filter(p=>p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom).length,rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}});
+  assert.equal(zoomSafety.shown,true,'zoom status must be visible during FULL HUD pinch');assert.equal(zoomSafety.pointerEvents,'none','zoom status must stay non-blocking');assert.deepEqual(zoomSafety.controls.filter(x=>x.overlap),[],'zoom status overlaps a visible HUD/world control');assert.equal(zoomSafety.playerOverlap,false,'zoom status overlaps Player');assert.equal(zoomSafety.monsterOverlaps,0,'zoom status overlaps a visible Monster target');
+  await page.screenshot({path:`${OUT}/${report.profile.name}-zoom-status-safe.png`});await pointer('pointerup',11,pinch.x-pinch.ex,pinch.y-pinch.ey,0);await pointer('pointerup',12,pinch.x+pinch.ex,pinch.y+pinch.ey,0);
+
+  await page.locator('#cargoInterceptionButton').click();await page.locator('#sheet.open').waitFor();
+  // Waiting state routes to the canonical ATM dispatch surface; an airborne
+  // target routes to the missile surface. Either proves the compact control
+  // retained its own owner and was not intercepted by a market card.
+  assert.match(await page.locator('#sheetTitle').textContent(),/ATM|導彈攔截/,'FULL Missile must open its state-appropriate logistics/interception surface');
+  assert.doesNotMatch(await page.locator('#sheetTitle').textContent(),/市場/,'FULL Missile must not open a market detail surface');
+  await page.screenshot({path:`${OUT}/${report.profile.name}-full-missile-hit-owner.png`});await page.locator('#sheetClose').click();await page.waitForTimeout(250);
+  assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'Missile/ATM evidence sheet must remain closed after QA cleanup');
+  report.fullHudHitOwnership={ownership,recentered,zoomSafety,missile:'OPENED_OWN_SURFACE'};
+}
 async function verifyKSpaceMap(page,report){
   const read=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_MAP__);
   const shot=async name=>page.screenshot({path:`${OUT}/${report.profile.name}-${name}.png`});
@@ -506,6 +543,7 @@ try{
     const report={profile,mode:PRODUCTION?'PUBLIC_PAGES_READ_ONLY':'LOCAL_REALISTIC_QUOTE_FIXTURE',playerFixture:'LOCAL_QA_PLAYER_LEVEL_3_CANONICAL_EVENTS_NO_ECONOMIC_AUTHORITY',errors,warnings,states:{}};reports.push(report);
     try{await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded',timeout:35000});await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_KSPACE_COMBAT__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__&&document.getElementById('k11520UtilityMaster'),null,{timeout:45000});await page.waitForTimeout(7500);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click();
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
+      await verifyFullHudControlOwnership(page,report);
       report.states.cold=await snapshot(page);await page.screenshot({path:`${OUT}/${profile.name}-collapsed.png`,fullPage:true});check(profile.name,report.states.cold,{landscape:!!profile.landscape});
       await verifyFeedbackFade(page,report);
       const authorityBefore=await page.evaluate(()=>({axis:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.activeAxis,order:document.querySelector('#orderFire')?.getAttribute('aria-label')}));
