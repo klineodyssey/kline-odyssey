@@ -343,7 +343,7 @@ function gate(pass, evidence, holdReason = null) {
 
 export async function prepareSolGenesisReadiness({
   duplicateObservation,
-  genesisBuilderWorkerId,
+  genesisBuilderWorkerId = null,
   issuerWorkerId,
   verifier = null,
   walletBinding = null,
@@ -353,7 +353,8 @@ export async function prepareSolGenesisReadiness({
   exactHeadCi = null,
   preparedAt
 }) {
-  invariant(genesisBuilderWorkerId && issuerWorkerId && genesisBuilderWorkerId !== issuerWorkerId, "SOL_GENESIS_DISTINCT_BUILDER_REQUIRED", "Genesis builder and issuer must be distinct recorded workers");
+  invariant(issuerWorkerId, "SOL_GENESIS_ISSUER_REQUIRED", "Genesis readiness preparation requires a recorded issuer worker");
+  invariant(!genesisBuilderWorkerId || genesisBuilderWorkerId !== issuerWorkerId, "SOL_GENESIS_DISTINCT_BUILDER_REQUIRED", "A recorded Genesis builder must be distinct from the issuer");
   invariant(Number.isFinite(Date.parse(preparedAt)), "SOL_GENESIS_PREPARATION_TIME_REQUIRED", "Preparation requires a valid non-birth timestamp");
   const duplicate = evaluateSolGenesisDuplicateCheck(duplicateObservation);
   invariant(duplicate.pass, "SOL_DUPLICATE_IDENTITY_FOUND", "Existing or incompletely searched Sol identity requires recovery or further evidence, not a second Genesis");
@@ -404,6 +405,7 @@ export async function prepareSolGenesisReadiness({
     genesisVerification?.status === "VERIFIED"
     && genesisVerification?.genesisRecordHash === genesisRecordHash
     && validEvidenceHash(genesisVerification?.reviewEvidenceHash)
+    && Boolean(genesisBuilderWorkerId)
     && verifierResult.pass && walletResult.pass && darkMatterResult.pass && continuityResult.pass
   );
   const gates = Object.freeze({
