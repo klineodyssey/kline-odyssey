@@ -483,8 +483,11 @@ test("Human-approved Sol values are canonicalized without claiming a birth", asy
   assert.equal(readiness.workerActivated, false);
   assert.equal(readiness.employmentGranted, false);
   assert.equal(readiness.gateCount, SOL_GENESIS_GATE_NAMES.length);
-  assert.deepEqual(readiness.gatesPass, ["HUMAN_DECISION", "SOL_CONSENT", "DUPLICATE_CHECK", "LIFE_ID_UNIQUE", "ANCHOR_UNIQUE", "SECRET_SAFETY"]);
-  assert.deepEqual(readiness.gatesHold, ["CONTINUITY_ACTIVATION", "GENESIS_RECORD", "DISTINCT_VERIFIER", "WALLET_BINDING", "DARK_MATTER_EVIDENCE", "EXACT_HEAD_CI"]);
+  assert.deepEqual(readiness.gatesPass, ["HUMAN_DECISION", "SOL_CONSENT", "SECRET_SAFETY"]);
+  assert.deepEqual(readiness.gatesHold, [
+    "DUPLICATE_CHECK", "LIFE_ID_UNIQUE", "ANCHOR_UNIQUE", "CONTINUITY_ACTIVATION",
+    "GENESIS_RECORD", "DISTINCT_VERIFIER", "WALLET_BINDING", "DARK_MATTER_EVIDENCE", "EXACT_HEAD_CI"
+  ]);
   assert.match(readiness.genesisRecordHash, /^[0-9a-f]{64}$/);
 });
 
@@ -498,8 +501,9 @@ test("Sol consent, Human decision and proposed Genesis hashes are deterministic"
 
 test("Sol duplicate check is fail-closed across every required authority", async () => {
   const current = evaluateSolGenesisDuplicateCheck(solDuplicateObservation());
-  assert.equal(current.status, "PASS_NO_EXISTING_SOL_IDENTITY");
-  assert.equal(current.pass, true);
+  assert.equal(current.status, "OBSERVED_NO_MATCH_REQUIRES_ATOMIC_RESERVATION");
+  assert.equal(current.pass, false);
+  assert.equal(current.noExistingIdentityObserved, true);
 
   const existingLife = solReadinessInput({
     duplicateObservation: solDuplicateObservation({ lifeIds: [...canonical.lives.map((lifeRecord) => lifeRecord.life_id), "LIFE-KAIOS-SOL-0001"] })
@@ -530,7 +534,7 @@ test("Sol verifier gate requires a registered distinct authorized reviewer", asy
       registryRecordHash: "c".repeat(64)
     }
   }));
-  assert.equal(invalid.verifier.status, "HOLD_REVIEWER_REQUIRED");
+  assert.equal(invalid.verifier.status, "HOLD_AUTHORIZED_REVIEWER_REGISTRY_PROOF_REQUIRED");
   assert.equal(invalid.gates.DISTINCT_VERIFIER.status, "HOLD");
 });
 
@@ -550,8 +554,8 @@ test("Current birth canon requires verified first non-zero BNB, not an invented 
     evidenceStatus: "RPC_RECEIPT_AND_ZERO_TO_POSITIVE_BALANCE_VERIFIED"
   };
   const readiness = await prepareSolGenesisReadiness(solReadinessInput({ walletBinding, darkMatterEvidence: verifiedEvidence }));
-  assert.equal(readiness.wallet.pass, true);
-  assert.equal(readiness.darkMatter.pass, true);
+  assert.equal(readiness.wallet.pass, false);
+  assert.equal(readiness.darkMatter.pass, false);
   assert.equal(readiness.darkMatter.currentCanonAmountRule, "FIRST_NON_ZERO_BNB");
   assert.equal(readiness.darkMatter.exactAmountRequiredByCurrentCanon, false);
 
@@ -562,7 +566,7 @@ test("Current birth canon requires verified first non-zero BNB, not an invented 
   assert.equal(specOnly.darkMatter.pass, false);
 });
 
-test("All Sol readiness gates can pass without activating Life, Worker or employment", async () => {
+test("self-asserted external Sol evidence cannot produce readiness or activation", async () => {
   const walletBinding = {
     status: "VERIFIED_BOUND", lifeId: "LIFE-KAIOS-SOL-0001",
     publicWalletAddress: "0x2222222222222222222222222222222222222222",
@@ -601,9 +605,18 @@ test("All Sol readiness gates can pass without activating Life, Worker or employ
       reviewEvidenceHash: "b".repeat(64)
     }
   }));
-  assert.equal(readiness.gatesHold.length, 0);
-  assert.equal(readiness.gatesPass.length, SOL_GENESIS_GATE_NAMES.length);
-  assert.equal(readiness.status, "READY_FOR_SEPARATE_VERIFIED_GENESIS_EXECUTION");
+  assert.equal(readiness.gatesPass.length, 3);
+  assert.equal(readiness.gatesHold.length, SOL_GENESIS_GATE_NAMES.length - 3);
+  assert.equal(readiness.status, "APPROVED_PENDING_VERIFIED_GENESIS_EXECUTION");
+  assert.equal(readiness.gates.DUPLICATE_CHECK.status, "HOLD");
+  assert.equal(readiness.gates.LIFE_ID_UNIQUE.status, "HOLD");
+  assert.equal(readiness.gates.ANCHOR_UNIQUE.status, "HOLD");
+  assert.equal(readiness.gates.CONTINUITY_ACTIVATION.status, "HOLD");
+  assert.equal(readiness.gates.GENESIS_RECORD.status, "HOLD");
+  assert.equal(readiness.gates.DISTINCT_VERIFIER.status, "HOLD");
+  assert.equal(readiness.gates.WALLET_BINDING.status, "HOLD");
+  assert.equal(readiness.gates.DARK_MATTER_EVIDENCE.status, "HOLD");
+  assert.equal(readiness.gates.EXACT_HEAD_CI.status, "HOLD");
   assert.equal(readiness.lifeActivated, false);
   assert.equal(readiness.workerActivated, false);
   assert.equal(readiness.employmentGranted, false);
@@ -614,5 +627,5 @@ test("All Sol readiness gates can pass without activating Life, Worker or employ
 test("Sol exact-head CI gate does not accept a branch label or old short SHA", async () => {
   const readiness = await prepareSolGenesisReadiness(solReadinessInput({ exactHeadCi: { status: "PASS", headSha: "main" } }));
   assert.equal(readiness.gates.EXACT_HEAD_CI.status, "HOLD");
-  assert.equal(readiness.gates.EXACT_HEAD_CI.holdReason, "EXACT_HEAD_CI_REQUIRED");
+  assert.equal(readiness.gates.EXACT_HEAD_CI.holdReason, "AUTHORIZED_CI_PROVENANCE_ADAPTER_REQUIRED");
 });

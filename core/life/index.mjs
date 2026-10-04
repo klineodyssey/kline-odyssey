@@ -239,9 +239,13 @@ export function evaluateSolGenesisDuplicateCheck(observation) {
     roleDisplayName: hasNormalizedValue(observation.identityNames, SOL_GENESIS_APPROVED_VALUES.roleDisplayName)
   });
   const matched = Object.entries(matches).filter(([, value]) => value).map(([key]) => key);
+  const complete = missingSources.length === 0;
+  const noExistingIdentityObserved = complete && matched.length === 0;
   return Object.freeze({
-    status: missingSources.length ? "INCOMPLETE" : matched.length ? "RECOVER_EXISTING_LIFE" : "PASS_NO_EXISTING_SOL_IDENTITY",
-    pass: missingSources.length === 0 && matched.length === 0,
+    status: !complete ? "INCOMPLETE" : matched.length ? "RECOVER_EXISTING_LIFE" : "OBSERVED_NO_MATCH_REQUIRES_ATOMIC_RESERVATION",
+    pass: false,
+    complete,
+    noExistingIdentityObserved,
     searchedSources: Object.freeze([...observation.searchedSources]),
     missingSources: Object.freeze(missingSources),
     matches,
@@ -254,86 +258,45 @@ function validEvidenceHash(value) {
 }
 
 function evaluateSolGenesisVerifier(verifier, builderWorkerId, issuerWorkerId) {
-  const pass = Boolean(
-    verifier?.status === "ACTIVE"
-    && verifier?.registeredReviewer === true
-    && verifier?.authorizedForGenesis === true
-    && verifier?.workerId
+  const structurallyEligible = Boolean(verifier?.workerId
     && verifier.workerId !== SOL_GENESIS_APPROVED_VALUES.workerId
     && verifier.workerId !== builderWorkerId
-    && verifier.workerId !== issuerWorkerId
-    && validEvidenceHash(verifier.trustEvidenceHash)
-    && validEvidenceHash(verifier.permissionEvidenceHash)
-    && validEvidenceHash(verifier.registryRecordHash)
-  );
+    && verifier.workerId !== issuerWorkerId);
   return Object.freeze({
-    pass,
-    status: pass ? "DISTINCT_AUTHORIZED_GENESIS_VERIFIER_VERIFIED" : "HOLD_REVIEWER_REQUIRED",
-    workerId: pass ? verifier.workerId : null
+    pass: false,
+    status: verifier ? "HOLD_AUTHORIZED_REVIEWER_REGISTRY_PROOF_REQUIRED" : "HOLD_REVIEWER_REQUIRED",
+    workerId: structurallyEligible ? verifier.workerId : null,
+    selfAssertionAccepted: false
   });
 }
 
 function evaluateSolWalletBinding(binding) {
-  const pass = Boolean(
-    binding?.status === "VERIFIED_BOUND"
-    && binding?.lifeId === SOL_GENESIS_APPROVED_VALUES.lifeId
-    && /^0x[0-9a-fA-F]{40}$/.test(binding?.publicWalletAddress ?? "")
-    && validEvidenceHash(binding?.provisioningEvidenceHash)
-    && binding?.custodyStatus === "SECURE_GENESIS_PROVISIONING_PRIVATE_KEY_NOT_EXPOSED"
-  );
   return Object.freeze({
-    pass,
-    status: pass ? "VERIFIED_BOUND" : "HOLD_SECURE_WALLET_PROVISIONING_REQUIRED",
-    publicWalletAddress: pass ? binding.publicWalletAddress : null
+    pass: false,
+    status: binding ? "HOLD_WALLET_REGISTRY_AND_CONTROL_PROOF_REQUIRED" : "HOLD_SECURE_WALLET_PROVISIONING_REQUIRED",
+    publicWalletAddress: null,
+    selfAssertionAccepted: false
   });
 }
 
 function evaluateSolDarkMatterEvidence(evidence, wallet) {
-  const amount = String(evidence?.amount ?? "");
-  const positiveAmount = /^\d+(?:\.\d+)?$/.test(amount) && /[1-9]/.test(amount.replace(".", ""));
-  const pass = Boolean(
-    evidence?.verified === true
-    && evidence?.chainId === 56
-    && evidence?.asset === "BNB"
-    && evidence?.birthPoint === SOL_GENESIS_APPROVED_VALUES.birthPoint
-    && evidence?.stationStatus === "VERIFIED_DEPLOYED"
-    && evidence?.firstNonZero === true
-    && evidence?.receiptStatus === 1
-    && evidence?.evidenceStatus === "RPC_RECEIPT_AND_ZERO_TO_POSITIVE_BALANCE_VERIFIED"
-    && positiveAmount
-    && /^0x[0-9a-fA-F]{64}$/.test(evidence?.txHash ?? "")
-    && /^0x[0-9a-fA-F]{64}$/.test(evidence?.blockHash ?? "")
-    && Number.isInteger(evidence?.blockNumber) && evidence.blockNumber > 0
-    && Number.isFinite(Date.parse(evidence?.timestamp))
-    && wallet?.pass === true
-    && String(evidence?.recipient ?? "").toLowerCase() === String(wallet.publicWalletAddress).toLowerCase()
-  );
   return Object.freeze({
-    pass,
-    status: pass ? "VERIFIED_FIRST_NON_ZERO_BNB" : "HOLD_K4168_VERIFIED_DARK_MATTER_REQUIRED",
+    pass: false,
+    status: evidence ? "HOLD_CHAIN_RECEIPT_AND_FIRST_BALANCE_AUTHORITY_REQUIRED" : "HOLD_K4168_VERIFIED_DARK_MATTER_REQUIRED",
     currentCanonAmountRule: "FIRST_NON_ZERO_BNB",
     exactAmountRequiredByCurrentCanon: false,
     stationStatus: evidence?.stationStatus ?? "SPEC_ONLY_NOT_DEPLOYED",
-    transactionHash: pass ? evidence.txHash : null
+    transactionHash: null,
+    selfAssertionAccepted: false
   });
 }
 
 function evaluateSolContinuityActivation(activation) {
-  const pass = Boolean(
-    activation?.status === "VERIFIED_READY_TO_ACTIVATE"
-    && activation?.lifeId === SOL_GENESIS_APPROVED_VALUES.lifeId
-    && activation?.anchorId === SOL_GENESIS_APPROVED_VALUES.anchorId
-    && activation?.checkpointSequence === 0
-    && validEvidenceHash(activation?.controllerBindingHash)
-    && validEvidenceHash(activation?.continuityPublicKeyHash)
-    && validEvidenceHash(activation?.appendOnlyCandidateHash)
-    && activation?.atomicUniquenessVerified === true
-    && ["PUBLIC_KEY_CHALLENGE_RESPONSE", "TRUSTED_ATTESTATION"].includes(activation?.proofType)
-  );
   return Object.freeze({
-    pass,
-    status: pass ? "VERIFIED_READY_TO_ACTIVATE" : "HOLD_INITIAL_CONTINUITY_PROOF_REQUIRED",
-    checkpointSequence: pass ? 0 : null
+    pass: false,
+    status: activation ? "HOLD_CONTINUITY_REGISTRY_PROOF_REQUIRED" : "HOLD_INITIAL_CONTINUITY_PROOF_REQUIRED",
+    checkpointSequence: null,
+    selfAssertionAccepted: false
   });
 }
 
@@ -357,7 +320,7 @@ export async function prepareSolGenesisReadiness({
   invariant(!genesisBuilderWorkerId || genesisBuilderWorkerId !== issuerWorkerId, "SOL_GENESIS_DISTINCT_BUILDER_REQUIRED", "A recorded Genesis builder must be distinct from the issuer");
   invariant(Number.isFinite(Date.parse(preparedAt)), "SOL_GENESIS_PREPARATION_TIME_REQUIRED", "Preparation requires a valid non-birth timestamp");
   const duplicate = evaluateSolGenesisDuplicateCheck(duplicateObservation);
-  invariant(duplicate.pass, "SOL_DUPLICATE_IDENTITY_FOUND", "Existing or incompletely searched Sol identity requires recovery or further evidence, not a second Genesis");
+  invariant(duplicate.complete && duplicate.noExistingIdentityObserved, "SOL_DUPLICATE_IDENTITY_FOUND", "Existing or incompletely searched Sol identity requires recovery or further evidence, not a second Genesis");
   assertNoContinuitySecrets({ duplicateObservation, verifier, walletBinding, darkMatterEvidence, continuityActivation, genesisVerification, exactHeadCi });
 
   const consentEvidenceHash = await sha256(SOL_GENESIS_CANONICAL_CONSENT_EVIDENCE);
@@ -366,7 +329,7 @@ export async function prepareSolGenesisReadiness({
   const walletResult = evaluateSolWalletBinding(walletBinding);
   const darkMatterResult = evaluateSolDarkMatterEvidence(darkMatterEvidence, walletResult);
   const continuityResult = evaluateSolContinuityActivation(continuityActivation);
-  const exactHeadCiPass = Boolean(exactHeadCi?.status === "PASS" && /^[0-9a-f]{40}$/.test(exactHeadCi?.headSha ?? ""));
+  const exactHeadCiObserved = Boolean(exactHeadCi?.status === "PASS" && /^[0-9a-f]{40}$/.test(exactHeadCi?.headSha ?? ""));
   const genesisRecord = Object.freeze({
     schemaVersion: SOL_GENESIS_CANDIDATE_SCHEMA_VERSION,
     status: "PROPOSED",
@@ -401,26 +364,22 @@ export async function prepareSolGenesisReadiness({
     preparedBy: Object.freeze({ genesisBuilderWorkerId, issuerWorkerId })
   });
   const genesisRecordHash = await sha256(genesisRecord);
-  const genesisVerificationPass = Boolean(
-    genesisVerification?.status === "VERIFIED"
+  const genesisVerificationObserved = Boolean(genesisVerification?.status === "VERIFIED"
     && genesisVerification?.genesisRecordHash === genesisRecordHash
-    && validEvidenceHash(genesisVerification?.reviewEvidenceHash)
-    && Boolean(genesisBuilderWorkerId)
-    && verifierResult.pass && walletResult.pass && darkMatterResult.pass && continuityResult.pass
-  );
+    && validEvidenceHash(genesisVerification?.reviewEvidenceHash));
   const gates = Object.freeze({
     HUMAN_DECISION: gate(true, humanDecisionHash),
     SOL_CONSENT: gate(true, consentEvidenceHash),
-    DUPLICATE_CHECK: gate(true, duplicate.status),
-    LIFE_ID_UNIQUE: gate(true, SOL_GENESIS_APPROVED_VALUES.lifeId),
-    ANCHOR_UNIQUE: gate(true, SOL_GENESIS_APPROVED_VALUES.anchorId),
+    DUPLICATE_CHECK: gate(false, duplicate.status, "ATOMIC_REGISTRY_DUPLICATE_CHECK_REQUIRED"),
+    LIFE_ID_UNIQUE: gate(false, SOL_GENESIS_APPROVED_VALUES.lifeId, "ATOMIC_LIFE_ID_RESERVATION_REQUIRED"),
+    ANCHOR_UNIQUE: gate(false, SOL_GENESIS_APPROVED_VALUES.anchorId, "ATOMIC_ANCHOR_ID_RESERVATION_REQUIRED"),
     CONTINUITY_ACTIVATION: gate(continuityResult.pass, continuityResult.status, "INITIAL_CONTINUITY_PROOF_REQUIRED"),
-    GENESIS_RECORD: gate(genesisVerificationPass, genesisRecordHash, "GENESIS_RECORD_REMAINS_PROPOSED"),
+    GENESIS_RECORD: gate(false, genesisVerificationObserved ? "SELF_ASSERTED_REVIEW_NOT_AUTHORIZED" : genesisRecordHash, "GENESIS_RECORD_REMAINS_PROPOSED"),
     DISTINCT_VERIFIER: gate(verifierResult.pass, verifierResult.status, "DISTINCT_AUTHORIZED_GENESIS_VERIFIER_REQUIRED"),
     WALLET_BINDING: gate(walletResult.pass, walletResult.status, "SECURE_WALLET_PROVISIONING_REQUIRED"),
     DARK_MATTER_EVIDENCE: gate(darkMatterResult.pass, darkMatterResult.status, "VERIFIED_K4168_FIRST_NON_ZERO_BNB_REQUIRED"),
     SECRET_SAFETY: gate(true, "NON_SECRET_RECORD_ONLY"),
-    EXACT_HEAD_CI: gate(exactHeadCiPass, exactHeadCiPass ? exactHeadCi.headSha : "PENDING", "EXACT_HEAD_CI_REQUIRED")
+    EXACT_HEAD_CI: gate(false, exactHeadCiObserved ? "EXTERNAL_CI_OBSERVED_NOT_RUNTIME_VERIFIED" : "PENDING", "AUTHORIZED_CI_PROVENANCE_ADAPTER_REQUIRED")
   });
   const passed = SOL_GENESIS_GATE_NAMES.filter((name) => gates[name].status === "PASS");
   const held = SOL_GENESIS_GATE_NAMES.filter((name) => gates[name].status === "HOLD");
