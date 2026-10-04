@@ -80,7 +80,11 @@ async function verifyWorldFirst(){
       await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
       const directions=[];
       for(const [name,dx,dy,screenAxis,sign] of [['right',60,0,'x',1],['left',-60,0,'x',-1],['down',0,60,'y',1],['up',0,-60,'y',-1]]){
-        await page.locator('#k11520CameraReset').click();await page.waitForTimeout(80);
+        await page.locator('#k11520CameraReset').click();
+        // Recenter mutates Camera state immediately, while the projected world
+        // catches up on the next rendered frame. Wait for that canonical visual
+        // state instead of racing a fixed sleep on a busy landscape runner.
+        await page.waitForFunction(origin=>{const c=__K11520_CAMERA__.snapshot(),p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return c.zoom===1&&c.panX===0&&c.panZ===0&&c.manual===false&&Math.abs(p.x-origin.x)<.5&&Math.abs(p.y-origin.y)<.5},result.visibility.player,{timeout:3000});
         const before=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
         await touch('touchStart',[[1,x,y]]);await touch('touchMove',[[1,x+dx/2,y+dy/2]]);await touch('touchMove',[[1,x+dx,y+dy]]);await touch('touchEnd',[]);await page.waitForTimeout(80);
         const after=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
