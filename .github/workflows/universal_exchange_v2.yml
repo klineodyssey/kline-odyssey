@@ -36,12 +36,46 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: "20"
+      - name: Confirm exact pull request head and authorized prototype scope
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          changed="$(git diff --name-only "$BASE_SHA"...HEAD)"
+          printf '%s\n' "$changed"
+          unexpected="$(grep -vE '^(core/life/index\.mjs|tests/starforge-spirit-life-genesis\.test\.mjs|\.github/workflows/universal_exchange_v2\.yml)$' <<<"$changed" || true)"
+          test -z "$unexpected"
+          git diff --check "$BASE_SHA"...HEAD
+      - name: Scan exact pull request patch for concrete secret literals
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          patch="$RUNNER_TEMP/continuity-anchor.patch"
+          git diff --unified=0 "$BASE_SHA"...HEAD > "$patch"
+          if grep -Eiq -- '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|sk-[A-Za-z0-9_-]{20,}|(ghp_|github_pat_)[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|bearer[[:space:]]+[A-Za-z0-9._~-]{20,}' "$patch"; then
+            echo "Concrete secret-like literal detected in exact-head patch." >&2
+            exit 1
+          fi
       - name: Validate ES modules
         shell: bash
         run: find core tests -name '*.mjs' -print0 | xargs -0 -n1 node --check
+      - name: Run Continuity Anchor targeted tests
+        run: node --test tests/starforge-spirit-life-genesis.test.mjs
+      - name: Run full existing Node tests
+        shell: bash
+        run: node --test tests/*.test.mjs
       - name: Run Universal Exchange tests
         shell: bash
         run: |
