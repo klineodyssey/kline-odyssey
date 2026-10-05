@@ -49,11 +49,11 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 
 ## KAIOS multi-project engineering coordination snapshot
 
-Snapshot:2026-10-05T08:32:24Z; base `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
+Snapshot:2026-10-05T08:35:18Z; base `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
 
 Twenty meaningful work packages are listed below, including substreams of the same project. They are not twenty or twenty-nine simultaneous workers. IN_PROGRESS identifies active coordination/QA/recovery as described, not a pending CI job running code. Existing projects remain tracked when new tasks arrive.
 
-1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Diagnose exact-head Game Product failure; inspect responsive and active-Courier landscape screenshots; rerun only after grounded repair. Evidence: 77cc3adf: Responsive, Portal, Universal and Trading pass; Game Product failed. V2.9.1 remains candidate; public V2.9.0 per parent checkpoint. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
+1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Complete narrow #gameChat.open selector fix and real More/chat/Raid regression; inspect new exact-head screenshots and rerun all applicable gates. Evidence: 77cc3adf: Responsive, Portal, Universal and Trading pass; Game Product failed. Parent checkpoint08:35:18Z confirms root cause: landscape More forces CLOSED chat transform:none, letting its input intercept Raid. Narrow selector/test fix actively underway, not idle CI pending. V2.9.1 remains candidate; public V2.9.0. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
 
 2. **P1 / IN_PROGRESS — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Finish bounded same-mission/same-player recovery candidate and no-double-charge/reward tests; preserve real user data. Evidence: Parent-confirmed active separate recovery candidate; conservative duration requires user confirmation. No production recovery performed. Source: [1](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/K線西遊記/temples/11520/runtime/logistics-universe-runtime.mjs)
 
@@ -104,7 +104,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
 ```json
 {
   "schema": "DOT_ENGINEERING_QUEUE_SNAPSHOT_V1",
-  "snapshot_at": "2026-10-05T08:32:24Z",
+  "snapshot_at": "2026-10-05T08:35:18Z",
   "base_sha": "27a21b031afad333468d9d3847d1933bc053487e",
   "branch": "dot/engineering-work-queue-20261005",
   "owner": "dot",
@@ -120,7 +120,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     "parallel": "Independent read, review, test and isolated-branch work may proceed concurrently. Do not stop or reassign existing workers.",
     "serialization": "One write owner per overlapping file; serialize shared-file integration and all main merges. Rebase/revalidate later candidates against newly merged main.",
     "merge_hold": "This queue Draft must not merge ahead of#498 or invalidate its current QA base. No merge/deploy performed by this work.",
-    "selection": "P1 HUD exact-head Game failure, Courier recovery and public390 diagnosis first; continue independent V2 review and queue persistence.",
+    "selection": "P1 HUD closed-chat interception fix, Courier recovery and public390 diagnosis first; continue independent V2 review and queue persistence.",
     "refill": "When a package completes, choose the highest-priority authorized ready item. If all close, inspect roadmap and evidence for useful gaps; never invent tasks solely to consume capacity."
   },
   "items": [
@@ -130,13 +130,13 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P1",
       "status": "IN_PROGRESS",
       "dependencies": [],
-      "next_action": "Diagnose exact-head Game Product failure; inspect responsive and active-Courier landscape screenshots; rerun only after grounded repair.",
+      "next_action": "Complete narrow #gameChat.open selector fix and real More/chat/Raid regression; inspect new exact-head screenshots and rerun all applicable gates.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693"
       ],
-      "evidence": "77cc3adf: Responsive, Portal, Universal and Trading pass; Game Product failed. V2.9.1 remains candidate; public V2.9.0 per parent checkpoint.",
-      "activity": "ACTIVE_QA_COORDINATION_NOT_CI_RUNNING"
+      "evidence": "77cc3adf: Responsive, Portal, Universal and Trading pass; Game Product failed. Parent checkpoint08:35:18Z confirms root cause: landscape More forces CLOSED chat transform:none, letting its input intercept Raid. Narrow selector/test fix actively underway, not idle CI pending. V2.9.1 remains candidate; public V2.9.0.",
+      "activity": "ACTIVE_NARROW_FIX_PARENT_CHECKPOINT"
     },
     {
       "id": "Q02",
