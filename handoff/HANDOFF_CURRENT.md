@@ -74,3 +74,11 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 - Next action: publish verified tested tree, run exact-head gates, directly inspect six-size evidence, parent technical review. No worker merge.
 - Time:2026-10-05T09:56:00Z.
 - Source-review refinements: landscape follows existing More ownership rather than forcing a context action visible; boot evidence waits for intro dismissal and READY/FALLBACK world; full stored Courier envelope is checked across disclosure/reload. Identical paused markup is suppressed using an ephemeral DOM cache, with a two-tick node-identity assertion to protect live-region reading. None of these alter mission persistence or timer authority.
+
+### 2026-10-05T10:40Z candidate QA correction
+- PR505 published at `d87bd43cddd6e7cd610125080a207a1c1ec59696`. PR Product run37294933065 SUCCESS on verified merge tree `f0200fa9b5488e3461bf507d9a50011b03d0f83f` (parents main765d and d87); Responsive/Portal/Universal also passed.
+- Push Product run37294836971 FAILED: ordinary living-world reached the unchanged90s cap while waiting for insurance APPROVED restoration after courier profile reload, before claim click. PR equivalent ran approximately89.68s. Root cause remains unconfirmed; no insurance economics conclusion.
+- All12 explanation screenshots directly reviewed. Compact states and portrait details clear; landscape expanded details overlap parameter rails. VISUAL_QA:FAIL at d87; no ready/merge claim.
+- Separate test-only diagnostic commit adds stage elapsed/remaining budget, bounded read-only local-game state before timeout/restoration, failure screenshot. Original90s cap and APPROVED/PAID/replay assertions unchanged.
+- Narrow paused-details-only landscape scroll bound now clears the lower parameter rails; active Courier/Raid layout unchanged. Browser assertions require non-overlap, native trial clicks on Y/C/Lots thumbs and scroll-accessible44px Logistics action.
+- Revised local169/169 tests, syntax and diff PASS; revised exact-head browser/visual QA PENDING. Parent owns release serialization. PR503 remains blocked; no recovery enabling.

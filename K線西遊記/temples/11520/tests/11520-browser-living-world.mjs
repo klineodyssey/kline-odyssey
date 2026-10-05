@@ -392,6 +392,16 @@ if(reviewOnly){
       assert.equal(await page.locator('#courierRecoveryConfirm,#courierRecoveryPrepare').count(),0,'explanation-only UI must not expose a recovery action');
       if(width===390&&height===844)assert.equal(await page.evaluate(async()=>{const node=document.querySelector('[data-courier-clock-guidance]');await new Promise(resolve=>setTimeout(resolve,1200));return node?.isConnected&&node===document.querySelector('[data-courier-clock-guidance]')}),true,'paused guidance node remains stable across two countdown render ticks');
       const panel=await page.locator('#playerCourierDetails').boundingBox();assert.ok(panel&&panel.x>=0&&panel.y>=0&&panel.x+panel.width<=width&&panel.y+panel.height<=height,`details stay inside ${width}x${height}`);
+      if(width>height){
+        await page.locator('#playerCourierDetails').evaluate(el=>{el.scrollTop=0});
+        await page.screenshot({path:`${OUT}/11520-courier-review-details-initial-${width}x${height}.png`});
+        const controls=await page.evaluate(()=>['yControl','cControl','lotsControl','joy','attack','orderFire','k11520CameraReset','k11520MarketRow'].map(id=>{const el=document.getElementById(id),r=el.getBoundingClientRect();return{id,x:r.x,y:r.y,width:r.width,height:r.height}}));
+        for(const control of controls)assert.ok(panel.x+panel.width<=control.x||control.x+control.width<=panel.x||panel.y+panel.height<=control.y||control.y+control.height<=panel.y,`paused details must not cover ${control.id}`);
+        for(const selector of ['#yThumb','#cThumb','#lotsThumb'])await page.locator(selector).click({trial:true,timeout:2000});
+        await page.locator('#courierOpenLogistics').scrollIntoViewIfNeeded();
+        const action=await page.locator('#courierOpenLogistics').evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{height:r.height,hit:hit===el||el.contains(hit)}});
+        assert.ok(action.height>=44&&action.hit,'scrolling retains a reachable44px Logistics action');
+      }
       await page.locator('[data-courier-clock-guidance]').scrollIntoViewIfNeeded();await page.screenshot({path:`${OUT}/11520-courier-review-details-${width}x${height}.png`});screenshots.push(`${width}x${height}`);
       await page.locator('#homeDeliveryButton').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),false);
       if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();

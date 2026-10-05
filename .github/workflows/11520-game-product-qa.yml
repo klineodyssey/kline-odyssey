@@ -223,6 +223,7 @@ jobs:
               test -s "artifacts/11520-visual-qa/11520-courier-review-$STATE-$SIZE.png" || { echo "[11520-QA] missing Courier explanation screenshot $STATE-$SIZE"; exit 1; }
             done
           done
+          test -s artifacts/11520-visual-qa/11520-courier-review-details-initial-844x390.png
           test -s artifacts/11520-visual-qa/11520-courier-review-report.json
           if [ ! -s "$LIVING" ]; then echo "[11520-QA] QA_RED: living-world screenshot missing: $LIVING"; exit 1; fi
           ITEMS="artifacts/11520-visual-qa/11520-backpack-item-3d.png"
