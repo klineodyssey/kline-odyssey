@@ -286,7 +286,8 @@ const banditBox=await page.locator('#playerBanditPanel').boundingBox();assert.ok
 // local player-ledger credit. The raid itself never marks it paid.
 await page.evaluate(async id=>{const {createLocalPlayerStore}=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/player-life-runtime.mjs');createLocalPlayerStore().activatePlayer(id)},localLives.courierLifeId);
 await page.setViewportSize({width:390,height:844});await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='APPROVED',insuredMission.missionId);await page.locator('#homeDeliveryButton').click();
-// Existing renderCourier replaces the details subtree on its countdown tick.
+// Read the existing claim node and current mission together; timer updates may
+// change its eligibility or visibility.
 // Read canonical eligibility, current visibility and geometry in one browser
 // task; a handle captured by a previous wait can already be detached. Do not
 // wait for compliant dimensions: the unchanged 44px assertion must still fail
@@ -297,7 +298,29 @@ const claimGeometry=await page.waitForFunction(id=>{
   const style=getComputedStyle(el),r=el.getBoundingClientRect();if(style.visibility==='hidden'||style.display==='none'||!r.width||!r.height)return false;
   return {x:r.x,y:r.y,width:r.width,height:r.height};
 },insuredMission.missionId);
-const insuranceClaimBox=await claimGeometry.jsonValue();await claimGeometry.dispose();assert.ok(insuranceClaimBox&&insuranceClaimBox.height>=44&&insuranceClaimBox.x>=0&&insuranceClaimBox.x+insuranceClaimBox.width<=390,'insurance claim must be a full-width 44px mobile touch target');await page.locator('#courierInsuranceClaim').click();await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='PAID',insuredMission.missionId);
+const insuranceClaimBox=await claimGeometry.jsonValue();await claimGeometry.dispose();assert.ok(insuranceClaimBox&&insuranceClaimBox.height>=44&&insuranceClaimBox.x>=0&&insuranceClaimBox.x+insuranceClaimBox.width<=390,'insurance claim must be a full-width 44px mobile touch target');
+// Observe the existing public action without intercepting it or changing payouts.
+const claimDiagnostic={sourceSha:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||'LOCAL',stage:'BEFORE_CLICK',samples:[]};
+const sampleClaim=async stage=>page.evaluate(({id,expectedCourier,stage})=>{
+  const api=globalThis.__K11520_PLAYER_COURIER__,snapshot=api?.snapshot?.(id),m=snapshot?.mission,p=globalThis.__K11520_PRODUCT__?.snapshot?.()||{},button=document.getElementById('courierInsuranceClaim'),r=button?.getBoundingClientRect(),hit=r?document.elementFromPoint(r.x+r.width/2,r.y+r.height/2):null;
+  let saved=null;try{saved=JSON.parse(localStorage.getItem(`k11520.player:${p.playerId}:k11520.local-product.v1:${p.owner||'guest'}`)||'null')}catch{}
+  return {stage,at:Date.now(),missionStatus:m?.status,claimStatus:m?.insurance?.claimStatus,policyStatus:m?.insurance?.status,payoutReceiptId:m?.insurance?.payoutReceiptId,payoutKaios:m?.insurance?.payoutKaios,courierMatches:p.playerId===expectedCourier,activeMissionMatches:api?.active?.()?.missionId===id,storeRevision:snapshot?.revision,productKaios:p.kaios,storedKaios:saved?.progress?.kaios,storedRevision:saved?.revision,insuranceEventCount:p.events?.COURIER_INSURANCE_PAYOUT,receiptAmount:saved?.progress?.courierInsuranceReceipts?.[m?.insurance?.payoutReceiptId],storageStatus:p.storageStatus,payoutApiAvailable:typeof globalThis.__K11520_PRODUCT__?.recordCourierInsurancePayout==='function',toast:document.getElementById('logisticsActionToast')?.textContent,button:button?{connected:button.isConnected,disabled:button.disabled,rect:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,hitOwned:hit===button||button.contains(hit),hitId:hit?.id||null}:null};
+},{id:insuredMission.missionId,expectedCourier:localLives.courierLifeId,stage});
+await page.evaluate(()=>{
+  const trace={events:[],feedback:[]};globalThis.__qaInsuranceTrace=trace;
+  const capture=event=>{if(trace.events.length<20&&event.target.closest?.('#courierInsuranceClaim'))trace.events.push({type:event.type,phase:event.eventPhase,trusted:event.isTrusted,defaultPrevented:event.defaultPrevented,target:event.target.id,at:performance.now()})};
+  for(const type of ['pointerdown','pointerup','click']){document.addEventListener(type,capture,true);document.addEventListener(type,capture,false)}
+  const toast=document.getElementById('logisticsActionToast'),observer=new MutationObserver(()=>{if(trace.feedback.length<20)trace.feedback.push(toast.textContent)});if(toast)observer.observe(toast,{childList:true,subtree:true,characterData:true});
+  globalThis.__qaInsuranceCleanup=()=>{observer.disconnect();for(const type of ['pointerdown','pointerup','click']){document.removeEventListener(type,capture,true);document.removeEventListener(type,capture,false)}};
+});
+claimDiagnostic.samples.push(await sampleClaim('BEFORE_CLICK'));
+try{
+  await page.locator('#courierInsuranceClaim').click({timeout:5000});claimDiagnostic.samples.push(await sampleClaim('AFTER_CLICK'));
+  await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='PAID',insuredMission.missionId,{timeout:5000});
+  claimDiagnostic.stage='PAID';claimDiagnostic.samples.push(await sampleClaim('PAID'));
+}catch(error){claimDiagnostic.stage='FAILED';claimDiagnostic.error=String(error);claimDiagnostic.samples.push(await sampleClaim('FAILED').catch(captureError=>({stage:'FAILED_CAPTURE',error:String(captureError)})));await page.screenshot({path:`${OUT}/11520-courier-insurance-claim-failure.png`}).catch(captureError=>{claimDiagnostic.screenshotError=String(captureError)});throw error}
+finally{claimDiagnostic.trace=await page.evaluate(()=>{globalThis.__qaInsuranceCleanup?.();return globalThis.__qaInsuranceTrace}).catch(captureError=>({captureError:String(captureError)}));await fs.writeFile(`${OUT}/11520-courier-insurance-claim-diagnostic.json`,JSON.stringify(claimDiagnostic,null,2))}
+
 const insuranceAfter=await page.evaluate(id=>({mission:globalThis.__K11520_PLAYER_COURIER__.snapshot(id).mission,kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}),insuredMission.missionId);assert.equal(insuranceAfter.kaios,insuredBeforeKaios+insuranceAfter.mission.insurance.payoutKaios,'approved insurance payout credits the original courier local ledger exactly once');const replayResult=await page.evaluate(m=>globalThis.__K11520_PRODUCT__.recordCourierInsurancePayout(m.insurance.payoutReceiptId,m.insurance.payoutKaios),insuranceAfter.mission);assert.equal(replayResult.replayed,true);assert.equal(await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),insuranceAfter.kaios,'replaying the insurance receipt never credits twice');assert.equal(await page.locator('#courierInsuranceClaim').count(),0,'paid claim action disappears after one-shot settlement');
 
 // Recovery runs in a fresh, disposable browser profile. These are QA local-game
