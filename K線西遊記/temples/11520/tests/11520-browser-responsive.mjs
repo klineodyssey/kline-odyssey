@@ -665,6 +665,6 @@ try{
       if(errors.length)failures.push(`${profile.name}: ${errors.join('; ')}`);
     }catch(error){report.error=String(error);report.errorStack=error?.stack;report.failureFullHudInput=await page.evaluate(()=>({pointerTrace:globalThis.fullHudPointerTrace||[],camera:globalThis.__K11520_CAMERA__?.snapshot?.(),statusShown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show')})).catch(()=>null);failures.push(`${profile.name}: ${String(error)}`);await page.screenshot({path:`${OUT}/${profile.name}-failure.png`,fullPage:true,timeout:5000}).catch(()=>{})}finally{await context.close()}
   }
-}finally{await browser.close();await fs.writeFile(`${OUT}/report.json`,JSON.stringify({capturedAt:new Date().toISOString(),base:BASE,head:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||null,sourceChecks,reports,failures},null,2))}
+}finally{await browser.close();await fs.writeFile(`${OUT}/report.json`,JSON.stringify({capturedAt:new Date().toISOString(),base:BASE,head:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||null,publicAssetHead:process.env.K11520_PUBLIC_ASSET_SHA||null,sourceChecks,reports,failures},null,2))}
 assert.deepEqual(failures,[],'Responsive product failures; inspect screenshots and report.json');
 console.log('11520 real-entry responsive/cold-warm/realistic-quotes/real-hit-targets/bounded-thumbs/order-preview/utility-cycles PASS');
