@@ -188,7 +188,8 @@ STATUS: MEDIUM_RISK_DRAFT / INTEGRATION_AND_RELEASE_BLOCKED
 TASK: DOT-LOCAL-STORE-INTEGRITY-20261005
 BASE: 765d0e24e3fbe7353a80329c99bc3b5c3025fd12
 IDENTITY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-DEPENDS_ON: PR #505 / c14801ae9eb0b78f08da1e32a914251060fbeb75 / DRAFT_DEPENDENCY_NOT_RELEASED
+DEPENDS_ON: PR #505 / cc2358101a99d11c369fb22c47d203c2e17c8e4e / DRAFT_DEPENDENCY_NOT_RELEASED
+INTEGRATED_MAIN: b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720
 
 This bounded local-game experiment is not an approved single-tab product policy,
 live migration, merge decision or release. No Worker/Life/Employee identity,
@@ -258,6 +259,23 @@ clear this hold. Some existing players therefore need reviewed migration/UX
 before final release; original bytes remain unchanged. New receipts are
 refused at the supported capacity; old evidence is not evicted. Unsupported,
 malformed, conflicting, oversized or wrong-namespace records remain untouched.
+
+### Expanded Player Life acceptance (2026-10-05)
+
+The current implementation and native cases cover product/Courier persistence,
+not the complete Player Life/backpack save boundary. The requested Player Life
+stale-tab guarantee is an open P0 acceptance gate. Prior green checks do not
+close that gate. Requiring old tabs to close is insufficient as its final remedy.
+
+A reviewed canonical migration/cutover design is required before expanding the
+write boundary. It must retain original data and avoid a second parallel ledger.
+Real Chromium acceptance must show two tabs reading revision N, one committing
+N+1, and the stale writer preserving N+1 with visible conflict feedback and safe
+reload/reconciliation. The final matrix must also cover simultaneous writes,
+retry, reload/current-state delivery, browser restart, legacy/schema migration,
+corrupt saves, backup/recovery, player switching and Life isolation, including
+pre-protocol clients. These whole-Player-Life cases remain GAP/HOLD until tested
+against the reviewed integrated implementation.
 
 ### Review and release gates
 
