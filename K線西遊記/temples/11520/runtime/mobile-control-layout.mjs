@@ -3,9 +3,9 @@ import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.11
-REVISION: 2026-10-04.FULL-HUD-HIT-OWNERSHIP
-PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, reserve a dedicated Camera/mission row outside market hit regions, and measure actual market-card content before placing status. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
+VERSION: 1.3.14
+REVISION: 2026-10-05.FULL-WIDTH-MARKET-CAMERA-CONTEXT
+PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and keep expanded KX/KY/KZ market cards equally wide and readable. Raid/courier action geometry is owned by the existing Market/Wallet utility rail. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
 const $=s=>document.querySelector(s);
 const MOBILE_MAX=600;
@@ -26,7 +26,7 @@ function installStyle(){
   .brand .hqDistrictV111{color:#f1ca73!important;font-weight:900!important}
   .pill{padding:5px 6px!important}.pill b{font-size:12px!important}
   .axes{top:70px!important;left:6px!important;right:6px!important;height:auto!important;min-height:104px!important;gap:4px!important;align-items:stretch!important;z-index:250!important}
-  .axis{min-width:0!important;padding:5px!important}.axis select{font-size:8px!important;padding:5px 3px!important}.axis .q{font-size:12px!important}.axis .pos{font-size:7px!important}
+  .axis{min-width:0!important;padding:5px!important}.axis select{font-size:8px!important;padding:5px 3px!important}.axis .marketName,.axis .q{display:block!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}.axis .marketName{font-size:12px!important;line-height:14px!important}.axis .q{font-size:12px!important;line-height:15px!important}.axis .pos{font-size:7px!important}.axis .marketKValue{white-space:normal!important;overflow-wrap:normal!important;word-break:keep-all!important;line-height:1.25!important}
   .universeFloorBadge{font-size:6px!important;overflow:hidden;text-overflow:ellipsis}
   #joy.joyWrap{left:14px!important;width:min(146px,calc(50vw - 44px))!important;height:min(146px,calc(50vw - 44px))!important;bottom:max(16px,env(safe-area-inset-bottom))!important}
   #joy{--guideSize:98px;--knobSize:62px}
@@ -93,22 +93,18 @@ function installStyle(){
 #k11520PlaneLabel{overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
 html[data-k11520-hud-profile]:not([data-k11520-hud-profile="FULL"]):not(.k11520MarketOpen) .axes{display:none!important}
 html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
-/* Camera/mission controls own the outer segments of the 116px row; market
-   cards use only its middle segment. This preserves the established vertical
-   world budget and fixes hit ownership by geometry, not a z-index escalation. */
-html[data-k11520-hud-profile] .axes{top:116px!important;left:54px!important;right:170px!important;z-index:610!important}
-html.k11520UtilitiesOpen[data-k11520-hud-profile="FULL"] .axes{right:58px!important}
+/* Expanded Market owns the full available row. Camera controls live in their
+   own compact context cluster instead of consuming a fourth market column. */
+html[data-k11520-hud-profile] .axes{top:116px!important;left:6px!important;right:6px!important;z-index:610!important}
+html.k11520UtilitiesOpen[data-k11520-hud-profile="FULL"] .axes{right:6px!important}
 html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:auto!important;bottom:268px!important;height:134px!important}
 html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:168px!important;left:6px!important;right:6px!important;width:auto!important;max-width:none!important;transform:none!important;min-height:44px;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
 html[data-k11520-hud-profile="MINIMAL"].k11520MarketOpen #k11520MonsterGuide{top:230px!important}
-html[data-k11520-hud-profile] #cargoInterceptionButton,html[data-k11520-hud-profile] #homeDeliveryButton{top:116px!important;bottom:auto!important;min-height:44px!important;height:44px!important;width:76px!important;padding:4px!important;font-size:11px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;z-index:590!important}
-html[data-k11520-hud-profile] #cargoInterceptionButton{right:88px!important}
-html[data-k11520-hud-profile] #homeDeliveryButton{right:6px!important;display:block!important}
 html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
-#k11520CameraReset{position:fixed;left:6px;top:116px;width:44px;height:44px;z-index:590;border-radius:50%;border:1px solid #68e4ff88;background:#071018dd;color:#dffaff;font-size:22px;touch-action:manipulation}
+#k11520CameraReset{position:fixed;left:6px;top:auto;bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));width:44px;height:44px;z-index:590;border-radius:50%;border:1px solid #68e4ff88;background:#071018dd;color:#dffaff;font-size:22px;touch-action:manipulation}
 /* 170px keeps the compact status below the 360x740 FULL minimap while
    retaining a clear gap above the 44px movement controls. */
-#k11520CameraZoomStatus{position:fixed;z-index:589;left:6px;right:auto;top:auto;bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));width:116px;transform:translateY(6px);padding:6px 8px;border:1px solid #68e4ff66;border-radius:999px;background:#071018e8;color:#dffaff;font:800 11px system-ui;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+#k11520CameraZoomStatus{position:fixed;z-index:589;left:54px;right:auto;top:auto;bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));width:116px;transform:translateY(6px);padding:6px 8px;border:1px solid #68e4ff66;border-radius:999px;background:#071018e8;color:#dffaff;font:800 11px system-ui;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
 #k11520CameraZoomStatus.show{opacity:1;transform:translateY(0)}
 #k11520FollowMonster{position:fixed;left:54px;right:auto;top:116px;width:calc(100vw - 224px);height:44px;z-index:620;border:1px solid #68e4ff88;border-radius:10px;background:#071018dd;color:#dffaff;font:700 10px system-ui;overflow:hidden;text-overflow:ellipsis}
 #k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
@@ -118,10 +114,8 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:66px!important;bottom:auto!important;left:6px!important}
   html[data-k11520-hud-profile="MINIMAL"] .top>.pill{display:none!important}
   html[data-k11520-hud-profile="MINIMAL"] #k11520MonsterGuide{top:auto!important;bottom:8px!important;left:346px!important;right:180px!important}
-  html[data-k11520-hud-profile] #cargoInterceptionButton{top:54px!important;left:196px!important;right:auto!important}
-  html[data-k11520-hud-profile] #homeDeliveryButton{top:54px!important;left:278px!important;right:auto!important}
-  #k11520CameraReset{left:148px;top:66px}
-  #k11520CameraZoomStatus{left:6px;right:auto;top:184px;bottom:auto;width:126px;max-width:126px;transform:translateY(6px)}
+  #k11520CameraReset{left:160px;top:66px;bottom:auto}
+  #k11520CameraZoomStatus{left:160px;right:auto;top:114px;bottom:auto;width:126px;max-width:126px;transform:translateY(6px)}
   #k11520CameraZoomStatus.show{transform:translateY(0)}
   #k11520FollowMonster{left:360px;top:54px;width:calc(100vw - 540px)}
   #k11520UiSettings{top:54px!important;max-height:calc(100dvh - 64px);overflow:auto}
@@ -195,7 +189,7 @@ function rect(sel){const e=$(sel);if(!e)return null;const r=e.getBoundingClientR
 function measure(){
   const isVisible=sel=>{const el=$(sel);if(!el)return false;const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0};
   const statusVisible=isVisible('.tele')||isVisible('.monsterHud'),marketVisible=isVisible('.axes');
-  const report={version:'1.3.10',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
+  const report={version:'1.3.14',viewport:{width:innerWidth,height:innerHeight},joy:rect('#joy'),axisRail:rect('#yControl'),axisTrack:rect('#yControl .track'),axisThumb:rect('#yThumb'),warp:rect('#cControl'),lots:rect('#lotsControl'),attack:rect('#attack'),order:rect('#orderFire'),minimap:rect('.minimapWrap'),wallet:rect('#walletPanel'),backpack:rect('.bagRelocatedV250'),chat:rect('#chatHandle'),dock:rect('#dock'),marketHud:rect('.axes'),worldHud:rect('.tele'),lifeHud:rect('.monsterHud'),masterCollapse:rect('#k11520HudCollapseAll')};
   report.axisRailCentered=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&Math.abs((report.axisRail.left+report.axisRail.width/2)-innerWidth/2)<2);
   report.axisEnergyGeometryAligned=innerWidth>MOBILE_MAX||Boolean(report.axisRail&&report.axisTrack&&report.axisThumb&&Math.abs((report.axisTrack.left+report.axisTrack.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&Math.abs((report.axisThumb.left+report.axisThumb.width/2)-(report.axisRail.left+report.axisRail.width/2))<1&&report.axisTrack.left>=report.axisRail.left&&report.axisTrack.right<=report.axisRail.right);
   report.threeRailAligned=innerWidth>MOBILE_MAX||Boolean(report.warp&&report.lots&&report.axisRail&&Math.abs(report.warp.top-report.lots.top)<2&&Math.abs(report.lots.top-report.axisRail.top)<2&&report.axisRail.right<=report.warp.left&&report.warp.right<=report.lots.left);

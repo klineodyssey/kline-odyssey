@@ -131,7 +131,7 @@ function renderPreflight(){
   if(state){
     const wallet=identity?.address?`${identity.address.slice(0,6)}…${identity.address.slice(-4)}`:'未連錢包';
     const expected=`${binding.axis}=${binding.display}`;
-    state.textContent=result.ready?`真實交易預檢 READY · ${expected} · ${wallet}`:`真實交易未啟用 · ${expected} · ${wallet}`;
+    state.textContent=result.ready?`BSC97 TESTNET READY · ${expected} · ${wallet}`:`SIMULATION · ${expected} · ${wallet}`;
     state.title=result.blockers.map(blockerLabel).join('；');
   }
   host.dataset.blockers=result.blockers.join(',');
@@ -158,7 +158,7 @@ function notifyOrderRoute(){
 export function install11520RealTradingPreflightUi(){
   ensureStyle();
   let host=$('#k11520RealTradePreflight');
-  if(!host){host=document.createElement('div');host.id='k11520RealTradePreflight';host.innerHTML='<button type="button" id="k11520RealTradePreflightBtn">真實交易預檢</button><div class="state">真實交易未啟用</div>';document.body.appendChild(host)}
+  if(!host){host=document.createElement('div');host.id='k11520RealTradePreflight';host.innerHTML='<button type="button" id="k11520RealTradePreflightBtn">⚡ 交易模式</button><div class="state">SIMULATION</div>';document.body.appendChild(host)}
   const btn=$('#k11520RealTradePreflightBtn');if(btn&&!btn.dataset.bound){btn.dataset.bound='1';btn.addEventListener('click',()=>{const result=renderPreflight();const message=result?.ready?'真實交易條件已齊；仍需由錢包明確確認交易':'真實交易仍封鎖：'+(result?.blockers||[]).map(blockerLabel).join('、');const toast=$('#toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2600)}})}
   const order=$('#orderFire');if(order&&!order.dataset.realTradeRouteBound){order.dataset.realTradeRouteBound='1';order.addEventListener('click',()=>setTimeout(notifyOrderRoute,0))}
   for(const el of document.querySelectorAll('[data-market]'))el.addEventListener('change',renderPreflight);
