@@ -358,7 +358,11 @@ async function verifyContextualHud(){
     if(!PRODUCTION)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:'77564.83'},{symbol:'ETHUSDT',price:'2511.16'},{symbol:'BNBUSDT',price:'724.23'}]))}));
     try{
       await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__&&globalThis.__K11520_PLAYER_COURIER__?.snapshot?.());
-      if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();await page.locator('#intro11520').waitFor({state:'hidden'});
+      // Bootstrap may disable/remove the intro during its native pointerdown or
+      // fail-open transition. Match the existing world-first/returning-player
+      // entry contract: a click error is acceptable only after intro dismissal.
+      if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500}).catch(async error=>{if(await page.locator('#intro11520').isVisible())throw error});
+      await page.locator('#intro11520').waitFor({state:'hidden'});
       await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
       assert.equal(await page.locator('#axes').isVisible(),false);assert.equal(await page.locator('#k11520CameraReset').isVisible(),false);
       for(const id of ['cargoInterceptionButton','homeDeliveryButton'])assert.equal(await page.locator('#'+id).isVisible(),false,'idle action is absent from World');

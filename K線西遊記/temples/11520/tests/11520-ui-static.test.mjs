@@ -487,3 +487,31 @@ test('responsive event routing retains standalone mobile-HUD coverage and refere
   for(const field of ["'head':head","'tree':subprocess.check_output", "'scriptSha256':hashlib.sha256", "'requiredWorkflow':'11520 Game Product QA'", "'requiredJob':'product-qa'", "'requiredConclusion':'success'", "'evidenceIsReferenceOnly':True",'11520-mobile-hud-3rail.png','11520-mobile-hud-collapsed.png'])assert.ok(script.includes(field),field);
   assert.ok(script.includes("assert head==os.environ['K11520_SOURCE_SHA']"));
 });
+
+test('contextual entry tolerates only a completed intro transition and still requires character readiness',async()=>{
+  const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
+  const contextual=browserSource.slice(browserSource.indexOf('async function verifyContextualHud(){'));
+  const entry=contextual.slice(contextual.indexOf("if(await page.locator('#enter11520')"),contextual.indexOf("      assert.equal(await page.locator('#axes')"));
+  assert.ok(entry.includes("await page.waitForFunction(()=>/READY|FALLBACK/.test"),'runtime readiness remains mandatory after intro dismissal');
+  for(const scenario of [
+    {name:'native click',button:true,dismiss:true},
+    {name:'already entered',button:false},
+    {name:'removed during click',button:true,dismiss:true,clickError:true},
+    {name:'click blocked while intro remains',button:true,clickError:true,expected:'native click failed'},
+    {name:'click returned but intro remains',button:true,expected:'intro still visible'},
+    {name:'button missing but intro remains',button:false,intro:true,expected:'intro still visible'},
+    {name:'dismissed but character unready',button:true,dismiss:true,ready:false,expected:'character not ready'},
+  ]){
+    let intro=scenario.intro??scenario.button,clicks=0,hiddenChecks=0,readinessChecks=0;
+    const context={document:{querySelector:()=>({textContent:scenario.ready===false?'LOADING':'READY'})},page:{
+      locator(selector){
+        if(selector==='#enter11520')return{isVisible:async()=>scenario.button,click:async options=>{clicks++;assert.equal(options.timeout,1500);assert.equal('force' in options,false);if(scenario.dismiss)intro=false;if(scenario.clickError)throw new Error('native click failed')}};
+        assert.equal(selector,'#intro11520');return{isVisible:async()=>intro,waitFor:async options=>{hiddenChecks++;assert.equal(options.state,'hidden');if(intro)throw new Error('intro still visible')}};
+      },
+      waitForFunction:async fn=>{readinessChecks++;if(!fn())throw new Error('character not ready')},
+    }};
+    const run=runInNewContext('(async()=>{'+entry+'})()',context);
+    if(scenario.expected)await assert.rejects(run,new RegExp(scenario.expected),scenario.name);else{await run;assert.equal(hiddenChecks,1);assert.equal(readinessChecks,1)}
+    assert.equal(clicks,Number(scenario.button),scenario.name+' keeps the ordinary native-click path');
+  }
+});
