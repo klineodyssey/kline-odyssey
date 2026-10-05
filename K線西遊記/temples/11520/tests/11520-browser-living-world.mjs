@@ -6,8 +6,11 @@ const OUT='artifacts/11520-visual-qa';
 const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
+const recoveryOnly=process.env.K11520_COURIER_RECOVERY_ONLY==='1';
+const errors=[];
+if(!recoveryOnly){
 let page=await browser.newPage({viewport:{width:1280,height:800},isMobile:false,hasTouch:false});
-const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(2200);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
@@ -323,15 +326,29 @@ finally{claimDiagnostic.trace=await page.evaluate(()=>{globalThis.__qaInsuranceC
 
 const insuranceAfter=await page.evaluate(id=>({mission:globalThis.__K11520_PLAYER_COURIER__.snapshot(id).mission,kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}),insuredMission.missionId);assert.equal(insuranceAfter.kaios,insuredBeforeKaios+insuranceAfter.mission.insurance.payoutKaios,'approved insurance payout credits the original courier local ledger exactly once');const replayResult=await page.evaluate(m=>globalThis.__K11520_PRODUCT__.recordCourierInsurancePayout(m.insurance.payoutReceiptId,m.insurance.payoutKaios),insuranceAfter.mission);assert.equal(replayResult.replayed,true);assert.equal(await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),insuranceAfter.kaios,'replaying the insurance receipt never credits twice');assert.equal(await page.locator('#courierInsuranceClaim').count(),0,'paid claim action disappears after one-shot settlement');
 
+assert.deepEqual(errors,[],'ordinary courier/insurance tail must remain free of page errors');
+console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);
+}
+
+if(recoveryOnly){
 // Recovery runs in a fresh, disposable browser profile. These are QA local-game
 // records only; no connected player's storage, provider or real balance is used.
 let recoveryPage=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
-recoveryPage.on('pageerror',e=>errors.push(String(e)));
+const recoveryConsole=[];recoveryPage.on('pageerror',e=>errors.push(String(e)));recoveryPage.on('console',message=>{if(['error','warning'].includes(message.type())&&recoveryConsole.length<30)recoveryConsole.push(message.text())});
 await recoveryPage.clock.install({time:new Date('2026-10-05T08:00:00Z')});
+let recoveryBootCount=0;
 const recoveryBoot=async()=>{
-  await recoveryPage.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
-  await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.()&&globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId&&document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.2');
-  if(await recoveryPage.locator('#intro11520').isVisible().catch(()=>false))await recoveryPage.locator('#enter11520').click();
+  const boot=++recoveryBootCount;console.log(`[Courier recovery] boot ${boot}`);
+  try{
+    await recoveryPage.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:15000});
+    await recoveryPage.waitForFunction(()=>document.getElementById('enter11520')||globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId,null,{timeout:10000});
+    if(await recoveryPage.locator('#intro11520').isVisible().catch(()=>false))await recoveryPage.locator('#enter11520').click({timeout:5000});
+    await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.()&&globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId&&document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.2',null,{timeout:15000});
+  }catch(error){
+    const state=await recoveryPage.evaluate(()=>({readyState:document.readyState,bootStatus:document.getElementById('boot11520Status')?.textContent,productAvailable:Boolean(globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId),courierAvailable:Boolean(globalThis.__K11520_PLAYER_COURIER__?.snapshot?.()),visibleVersion:document.querySelector('.brandMetaV250')?.textContent,versionDataset:document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion,wallNow:Date.now(),monoNow:performance.now()})).catch(captureError=>({captureError:String(captureError)}));
+    await recoveryPage.screenshot({path:`${OUT}/11520-courier-recovery-boot-${boot}-failure.png`}).catch(()=>{});
+    await fs.writeFile(`${OUT}/11520-courier-recovery-boot-failure.json`,JSON.stringify({boot,error:String(error),state,errors,console:recoveryConsole},null,2));throw error;
+  }
 };
 await recoveryBoot();
 await recoveryPage.evaluate(()=>{const p=globalThis.__K11520_PRODUCT__.snapshot(),key=`k11520.player:${p.playerId}:k11520.local-product.v1:guest`,saved=JSON.parse(localStorage.getItem(key));saved.progress.kaios=100;saved.progress.claimableKaios=0;localStorage.setItem(key,JSON.stringify(saved))});
@@ -404,7 +421,8 @@ await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.acti
 const completed=await recoveryPage.evaluate(()=>({mission:globalThis.__K11520_PLAYER_COURIER__.active(),kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}));assert.equal(completed.mission.settlement.rewardKaios,8);assert.equal(completed.kaios,reviewFixture.kaios+8);assert.equal(completed.mission.settlement.receiptId,restarted.mission.clockRecovery.receiptId);
 await recoveryPage.screenshot({path:`${OUT}/11520-courier-clock-delivered-390x844.png`});
 await recoveryBoot();await recoveryPage.clock.fastForward(5_000);assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),completed.kaios,'completion reload cannot replay the reward');
-assert.equal(await recoveryPage.locator('#courierRecoveryPrepare').count(),0);assert.deepEqual(errors,[]);await recoveryPage.close();
+assert.equal(await recoveryPage.locator('#courierRecoveryPrepare').count(),0);assert.deepEqual(errors,[]);await fs.writeFile(`${OUT}/11520-courier-recovery-report.json`,JSON.stringify({sourceSha:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||'LOCAL',version:'V2.9.2',actualSharedContextTabs:true,exactlyOneOwner:true,followerCannotPauseOrAward:true,ownerReloadRequiresConfirmation:true,pendingPremiumChargedAgain:false,fullDurationRequired:true,rewardKaios:completed.mission.settlement.rewardKaios,rewardCount:1,confirmationSizes:['390x844','844x390'],bootCount:recoveryBootCount,errors},null,2));await recoveryPage.close();
 
+console.log('11520 Courier recovery QA PASS: confirmed restart, shared-context admission, passive follower, insurance reconciliation, reload pause and one reward');
+}
 await browser.close();
-console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);

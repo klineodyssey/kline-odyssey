@@ -94,3 +94,10 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 - Latest head: resolve PR head; exact remote tree equality and current CI are recorded in PR body. Next: exact-head Chromium, screenshots and parent review. No merge by worker.
 - Candidate visible version reserved: V2.9.2 (main currently V2.9.1). Existing bootstrap, legacy stamp, Portal registry and exact-version assertions updated together; no new version owner. Not claimed live.
 - Latest related+Portal aggregate185/185 PASS. UI source review found no new runtime blocker; async test completion waits were added. Playwright clock is context-wide, so the real-tab test installs it once and changes only the follower's Date.now reading for the skew case.
+
+### Bounded browser-harness split, 2026-10-05T09:25Z
+- ac76b3ec exact-head Responsive (both jobs), Portal and Universal PASS. Product failed with outer rc124 during the first new recoveryBoot wait; its preceding insurance PAID, payout and replay assertions completed. Main765d insurance uncertainty is not classified as an economic defect.
+- Preserve native claim diagnostics in a separate test-only commit: before/after sanitized mission/local-ledger state, native event phases, toast history, unchanged PAID condition with informative5s wait, failure screenshot and JSON. No payout calls or runtime behavior are added by diagnostics.
+- Ordinary living-world and recovery-only modes now reuse the same existing harness with separate mandatory90s CI invocations. The additional recovery invocation runs independently even if ordinary smoke fails. Potential total CI time increases by90s; this is not an unchanged global budget. Original ordinary coverage/cap and all recovery assertions remain mandatory.
+- Recovery boot now has bounded readiness waits plus failure screenshot/state/console evidence. Missing recovery screenshots/report fail the existing mandatory evidence gate.
+- Local related+Portal185/185, syntax, diff and YAML parse PASS. New exact-head browser/multi-tab/visual outcomes PENDING. If either90s cap fails, diagnose rather than blindly extend it.
