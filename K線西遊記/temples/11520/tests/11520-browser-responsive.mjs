@@ -301,10 +301,10 @@ async function verifyFullHudControlOwnership(page,report){
   // of synthetic DOM pointer events. Keep failed preconditions diagnosable.
   const fullCdp=await page.context().newCDPSession(page),fullTouches=new Map();
   const pointer=async(type,id,x,y)=>{if(type==='pointerup')fullTouches.delete(id);else fullTouches.set(id,{id,x,y,radiusX:3,radiusY:3,force:1});await fullCdp.send('Input.dispatchTouchEvent',{type:type==='pointerdown'?'touchStart':type==='pointerup'?'touchEnd':'touchMove',touchPoints:[...fullTouches.values()]})};
-  await page.evaluate(()=>{globalThis.fullHudPointerTrace=[];const state=()=>({camera:__K11520_CAMERA__.snapshot(),status:{shown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show'),text:document.querySelector('#k11520CameraZoomStatus')?.textContent}});for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(fullHudPointerTrace.length>=120)return;const sample={type,at:performance.now(),pointerId:e.pointerId,isTrusted:e.isTrusted,isPrimary:e.isPrimary,button:e.button,buttons:e.buttons,x:e.clientX,y:e.clientY,width:e.width,height:e.height,target:e.target.id,classes:String(e.target.className||''),canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY),before:state()};fullHudPointerTrace.push(sample);queueMicrotask(()=>{sample.after=state();sample.afterAt=performance.now()})},true)});
+  await page.evaluate(()=>{globalThis.fullHudPointerTrace=[];const state=()=>({camera:__K11520_CAMERA__.snapshot(),status:{shown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show'),text:document.querySelector('#k11520CameraZoomStatus')?.textContent}});for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(fullHudPointerTrace.length>=120)return;const sample={type,at:performance.now(),pointerId:e.pointerId,isTrusted:e.isTrusted,isPrimary:e.isPrimary,button:e.button,buttons:e.buttons,x:e.clientX,y:e.clientY,width:e.width,height:e.height,target:e.target.id,classes:String(e.target.className||''),canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY),world:e.type==='pointerdown'?{actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot(),combat:globalThis.__K11520_KSPACE_API__?.snapshot?.(),footprint:[-20,-10,0,10,20].flatMap(dx=>[-20,-10,0,10,20].map(dy=>({x:e.clientX+dx,y:e.clientY+dy,owner:document.elementFromPoint(e.clientX+dx,e.clientY+dy)?.id,canPan:__K11520_CAMERA__.canPanAt(e.clientX+dx,e.clientY+dy)})))}:null,before:state()};fullHudPointerTrace.push(sample);queueMicrotask(()=>{sample.after=state();sample.afterAt=performance.now()})},true)});
   // Native session and tracing are ready before selecting a live-world origin;
   // intervening setup awaits previously let an actor occupy the chosen ground.
-  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.bottom-60;y>r.top+60;y-=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,20)&&document.elementFromPoint(x+42,y)===canvas)return{x,y,selectedAt:performance.now()};return null});
+  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.bottom-60;y>r.top+60;y-=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,20)&&document.elementFromPoint(x+42,y)===canvas)return{x,y,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()};return null});
   assert.ok(point,'FULL HUD must leave an actual world gesture area for Recenter QA');
   report.fullHudPanPrecondition={origin:point,before:start};
   await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+21,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);
@@ -439,14 +439,22 @@ async function verifyMarketSync(page,report){
 async function verifyKSpaceGameplay(page,report){
   const state=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot());
   const input=async value=>{await page.locator('#cNumericInput').fill(value);await page.locator('#cNumericInput').press('Enter');await page.waitForTimeout(100)};
+  // Preserve the real input and moving target evidence even when a precondition
+  // times out. This observer never mutates input, actors, camera or game state.
+  const observeApproach=async label=>{
+    await page.evaluate(label=>{const read=()=>({at:performance.now(),combat:__K11520_KSPACE_API__.snapshot(),joyRect:(()=>{const r=document.querySelector('#joy').getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}})()});const trace={label,started:performance.now(),samples:[read()],pointers:[]};globalThis.kspaceApproachTrace=trace;globalThis.kspaceApproachRead=read;const listener=e=>{if(trace.pointers.length<60)trace.pointers.push({at:performance.now(),type:e.type,isTrusted:e.isTrusted,pointerId:e.pointerId,x:e.clientX,y:e.clientY,target:e.target.id,buttons:e.buttons})};for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(t,listener,true);trace.timer=setInterval(()=>{if(trace.samples.length<160)trace.samples.push(read())},100);globalThis.kspaceApproachStop=()=>{clearInterval(trace.timer);delete trace.timer;for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.removeEventListener(t,listener,true);trace.samples.push(read());return trace}},label);
+  };
+  const finishApproach=async()=>{(report.kspaceApproaches??=[]).push(await page.evaluate(()=>kspaceApproachStop()))};
+
   await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.target);
   for(let i=0;i<3&&(await state()).selection.axis!=='KY';i++){await page.locator('#joy').tap();await page.waitForTimeout(150)}
   await input('0');await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');await page.waitForTimeout(380);
   await input('-1');const start=await state();assert.equal(start.selection.body,'KY-');
   await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');assert.equal((await state()).target.hp,120);
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
+  await observeApproach('initial-fixed-positive-Z');
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40);
-  try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
+  try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up();await finishApproach()}
   const near=await state();assert.ok(near.playerLocal.z>start.playerLocal.z,'negative phase must not reverse XYZ');
   for(const axis of ['KX','KY','KZ'])assert.ok(Math.abs(near.playerK[axis]-100*(near.reference[axis].price/near.reference[axis].anchor-1))<1e-9,'current K must follow normalized reference, not frozen startup quotes');
   // Derived displacement can accumulate IEEE-754 error as live market frames
@@ -468,9 +476,10 @@ async function verifyKSpaceGameplay(page,report){
     await input(sign);await page.waitForTimeout(400);
     // Market lives now move. Pursue via the real joystick before each strike;
     // never freeze/teleport the target or relax the actual combat range rule.
+    await observeApproach(variant);
     const relative=(await state()).relative,distance=Math.hypot(relative.x,relative.z)||1;
     await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+relative.x/distance*35,y-relative.z/distance*35);
-    try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__.distance<.8,null,{timeout:5000})}finally{await page.mouse.up()}
+    try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__.distance<.8,null,{timeout:5000})}finally{await page.mouse.up();await finishApproach()}
     const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
@@ -654,7 +663,7 @@ try{
       if(profile.landscape)await finalizeLandscape(page,report);
       if(PRODUCTION&&warnings.some(message=>/blocked by CORS|data-api\.binance\.vision.*ERR_FAILED/i.test(message)))failures.push(`${profile.name}: public quote CORS regression`);
       if(errors.length)failures.push(`${profile.name}: ${errors.join('; ')}`);
-    }catch(error){report.error=String(error);report.failureFullHudInput=await page.evaluate(()=>({pointerTrace:globalThis.fullHudPointerTrace||[],camera:globalThis.__K11520_CAMERA__?.snapshot?.(),statusShown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show')})).catch(()=>null);failures.push(`${profile.name}: ${String(error)}`);await page.screenshot({path:`${OUT}/${profile.name}-failure.png`,fullPage:true,timeout:5000}).catch(()=>{})}finally{await context.close()}
+    }catch(error){report.error=String(error);report.errorStack=error?.stack;report.failureFullHudInput=await page.evaluate(()=>({pointerTrace:globalThis.fullHudPointerTrace||[],camera:globalThis.__K11520_CAMERA__?.snapshot?.(),statusShown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show')})).catch(()=>null);failures.push(`${profile.name}: ${String(error)}`);await page.screenshot({path:`${OUT}/${profile.name}-failure.png`,fullPage:true,timeout:5000}).catch(()=>{})}finally{await context.close()}
   }
 }finally{await browser.close();await fs.writeFile(`${OUT}/report.json`,JSON.stringify({capturedAt:new Date().toISOString(),base:BASE,head:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||null,sourceChecks,reports,failures},null,2))}
 assert.deepEqual(failures,[],'Responsive product failures; inspect screenshots and report.json');
