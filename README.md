@@ -1,4 +1,31 @@
 <!-- =========================================================
+
+## Automated Handoff V2 research/design (2026-10-05)
+
+Human-requested research only; no identity issuance, worker registration, runtime,
+dispatch, credentials, service provisioning or production authority. Historical
+PR #177 is not refreshed or merged. K11520 product engineering retains priority.
+
+| Full repository path | Purpose |
+|---|---|
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_001_IDENTITY.md` | Proposed ADR Adr 001 Identity. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_002_TRANSPORT.md` | Proposed ADR Adr 002 Transport. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_003_DELIVERY_SEMANTICS.md` | Proposed ADR Adr 003 Delivery Semantics. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_004_INBOX_OUTBOX.md` | Proposed ADR Adr 004 Inbox Outbox. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_005_REVIEWER_INDEPENDENCE.md` | Proposed ADR Adr 005 Reviewer Independence. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_006_HUMAN_ESCALATION.md` | Proposed ADR Adr 006 Human Escalation. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_007_GITHUB_CANON.md` | Proposed ADR Adr 007 Github Canon. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ADR_008_COST_CONTROL.md` | Proposed ADR Adr 008 Cost Control. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_ARCHITECTURE.md` | Durable ownership, inbox/outbox, recovery and real demo gates. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_IDENTITY_MODEL.md` | Life/Worker/Instance/Session/controller binding and review independence. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_RESEARCH.md` | Primary-source research, historical PR177 audit and boundaries. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_STATE_MACHINE.md` | Typed envelope, atomic legal transitions and ACK semantics. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_THREAT_MODEL.md` | Trust boundaries, attack matrix and negative-test requirements. |
+| `docs/KAIOS_AUTOMATED_HANDOFF_V2_TRANSPORT_MATRIX.md` | Verified platform features and unconfigured adapter gaps. |
+
+Boot CURRENT remains protected and unchanged. The precise metadata-only Boot
+inventory gap is documented in `docs/KAIOS_AUTOMATED_HANDOFF_V2_RESEARCH.md`.
+
 KLINE ODYSSEY ｜ KGEN OFFICIAL HOMEPAGE
 Purpose: Official project homepage for GitHub Pages, BscScan, CMC, CoinGecko, GeckoTerminal review.
 Last optimized: 2026-06-11
