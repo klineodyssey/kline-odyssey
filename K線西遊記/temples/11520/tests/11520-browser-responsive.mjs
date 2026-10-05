@@ -303,10 +303,26 @@ async function verifyFullHudControlOwnership(page,report){
   const pointer=async(type,id,x,y)=>{if(type==='pointerup')fullTouches.delete(id);else fullTouches.set(id,{id,x,y,radiusX:3,radiusY:3,force:1});await fullCdp.send('Input.dispatchTouchEvent',{type:type==='pointerdown'?'touchStart':type==='pointerup'?'touchEnd':'touchMove',touchPoints:[...fullTouches.values()]})};
   await page.evaluate(()=>{globalThis.fullHudPointerTrace=[];const state=()=>({camera:__K11520_CAMERA__.snapshot(),status:{shown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show'),text:document.querySelector('#k11520CameraZoomStatus')?.textContent}});for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(fullHudPointerTrace.length>=120)return;const sample={type,at:performance.now(),pointerId:e.pointerId,isTrusted:e.isTrusted,isPrimary:e.isPrimary,button:e.button,buttons:e.buttons,x:e.clientX,y:e.clientY,width:e.width,height:e.height,target:e.target.id,classes:String(e.target.className||''),canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY),world:e.type==='pointerdown'?{actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot(),combat:globalThis.__K11520_KSPACE_API__?.snapshot?.(),footprint:[-20,-10,0,10,20].flatMap(dx=>[-20,-10,0,10,20].map(dy=>({x:e.clientX+dx,y:e.clientY+dy,owner:document.elementFromPoint(e.clientX+dx,e.clientY+dy)?.id,canPan:__K11520_CAMERA__.canPanAt(e.clientX+dx,e.clientY+dy)})))}:null,before:state()};fullHudPointerTrace.push(sample);queueMicrotask(()=>{sample.after=state();sample.afterAt=performance.now()})},true)});
   // Native session and tracing are ready before selecting a live-world origin;
-  // intervening setup awaits previously let an actor occupy the chosen ground.
-  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.bottom-60;y>r.top+60;y-=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,20)&&document.elementFromPoint(x+42,y)===canvas)return{x,y,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()};return null});
-  assert.ok(point,'FULL HUD must leave an actual world gesture area for Recenter QA');
-  report.fullHudPanPrecondition={origin:point,before:start};
+  // intervening setup awaits previously let eligibility change. Require a dense
+  //30px neighborhood stable150ms within2s, then one gesture only; never retry
+  // a failed drag or freeze actors. Native pointerdown eligibility remains asserted.
+  const start=await readCamera(),readiness=await page.evaluate(async()=>{
+    const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),began=performance.now(),history=[];
+    const clear=(x,y)=>[-30,-20,-10,0,10,20,30].every(dx=>[-30,-20,-10,0,10,20,30].every(dy=>document.elementFromPoint(x+dx,y+dy)===canvas&&__K11520_CAMERA__.canPanAt(x+dx,y+dy)))&&document.elementFromPoint(x+42,y)===canvas;
+    let point=null,since=0;
+    while(performance.now()-began<2000){
+      if(point&&!clear(point.x,point.y)){history.push({event:'ELIGIBILITY_CHANGED',at:performance.now(),...point});point=null}
+      if(!point){
+        search:for(let y=r.bottom-60;y>r.top+60;y-=10)for(let x=r.left+60;x<r.right-60;x+=10)if(clear(x,y)){point={x,y};since=performance.now();history.push({event:'CANDIDATE',at:since,...point});break search}
+      }
+      if(point&&performance.now()-since>=150&&performance.now()-began<2000)return{point:{...point,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()},elapsedMs:performance.now()-began,stableMs:performance.now()-since,radius:30,history};
+      await new Promise(requestAnimationFrame);
+    }
+    return{point:null,elapsedMs:performance.now()-began,radius:30,history,actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()};
+  });
+  report.fullHudPanPrecondition={readiness,origin:readiness.point,before:start};
+  const point=readiness.point;
+  assert.ok(point,'FULL HUD must leave a stable actual world gesture area within2s for one Recenter QA drag');
   await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+21,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);
   try{await page.waitForFunction(()=>__K11520_CAMERA__.snapshot().panX!==0,null,{timeout:3000})}
   finally{report.fullHudPanPrecondition.after=await readCamera();report.fullHudPanPrecondition.pointerTrace=await page.evaluate(()=>fullHudPointerTrace)}
@@ -445,6 +461,26 @@ async function verifyKSpaceGameplay(page,report){
     await page.evaluate(label=>{const read=()=>({at:performance.now(),combat:__K11520_KSPACE_API__.snapshot(),joyRect:(()=>{const r=document.querySelector('#joy').getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}})()});const trace={label,started:performance.now(),samples:[read()],pointers:[]};globalThis.kspaceApproachTrace=trace;globalThis.kspaceApproachRead=read;const listener=e=>{if(trace.pointers.length<60)trace.pointers.push({at:performance.now(),type:e.type,isTrusted:e.isTrusted,pointerId:e.pointerId,x:e.clientX,y:e.clientY,target:e.target.id,buttons:e.buttons})};for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(t,listener,true);trace.timer=setInterval(()=>{if(trace.samples.length<160)trace.samples.push(read())},100);globalThis.kspaceApproachStop=()=>{clearInterval(trace.timer);delete trace.timer;for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.removeEventListener(t,listener,true);trace.samples.push(read());return trace}},label);
   };
   const finishApproach=async()=>{(report.kspaceApproaches??=[]).push(await page.evaluate(()=>kspaceApproachStop()))};
+  const pursue=async(label,limit,timeoutMs,magnitude)=>{
+    await observeApproach(label);
+    const deadline=Date.now()+timeoutMs;let reached=false;
+    await page.mouse.move(x,y);await page.mouse.down();
+    try{
+      while(Date.now()<deadline){
+        const current=await state();
+        if(current.distance<limit&&Date.now()<=deadline){reached=true;break}
+        const relative=current.relative,planar=Math.hypot(relative.x,relative.z);
+        // Follow the live target instead of driving past an airborne target
+        // along one stale heading. Center the real joystick when horizontally
+        // aligned; its natural descent must still satisfy the same 3D deadline.
+        const travel=planar<.15?0:Math.min(magnitude,planar*70);
+        await page.mouse.move(x+(planar?relative.x/planar*travel:0),y-(planar?relative.z/planar*travel:0));
+        await page.waitForTimeout(75);
+      }
+    }finally{await page.mouse.up();await finishApproach()}
+    assert.equal(reached,true,`${label}: real joystick must reach 3D distance <${limit} within ${timeoutMs}ms; inspect kspaceApproaches`);
+  };
+
 
   await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.target);
   for(let i=0;i<3&&(await state()).selection.axis!=='KY';i++){await page.locator('#joy').tap();await page.waitForTimeout(150)}
@@ -452,9 +488,7 @@ async function verifyKSpaceGameplay(page,report){
   await input('-1');const start=await state();assert.equal(start.selection.body,'KY-');
   await page.locator('#attack').click();assert.equal((await state()).lastResult.reason,'OUT_OF_RANGE');assert.equal((await state()).target.hp,120);
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
-  await observeApproach('initial-fixed-positive-Z');
-  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40);
-  try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up();await finishApproach()}
+  await pursue('initial-live-relative',2,15000,40);
   const near=await state();assert.ok(near.playerLocal.z>start.playerLocal.z,'negative phase must not reverse XYZ');
   for(const axis of ['KX','KY','KZ'])assert.ok(Math.abs(near.playerK[axis]-100*(near.reference[axis].price/near.reference[axis].anchor-1))<1e-9,'current K must follow normalized reference, not frozen startup quotes');
   // Derived displacement can accumulate IEEE-754 error as live market frames
@@ -476,10 +510,7 @@ async function verifyKSpaceGameplay(page,report){
     await input(sign);await page.waitForTimeout(400);
     // Market lives now move. Pursue via the real joystick before each strike;
     // never freeze/teleport the target or relax the actual combat range rule.
-    await observeApproach(variant);
-    const relative=(await state()).relative,distance=Math.hypot(relative.x,relative.z)||1;
-    await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+relative.x/distance*35,y-relative.z/distance*35);
-    try{await page.waitForFunction(()=>globalThis.__K11520_KSPACE_COMBAT__.distance<.8,null,{timeout:5000})}finally{await page.mouse.up();await finishApproach()}
+    await pursue(variant,.8,5000,35);
     const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
