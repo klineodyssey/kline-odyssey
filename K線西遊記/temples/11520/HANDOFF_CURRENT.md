@@ -1,5 +1,31 @@
 # 11520 HANDOFF CURRENT
 
+## M1 bounded balance reads and shared QA dependency — 2026-10-05
+
+- Read-only M1 now exits early inside the existing adapter: exactly23 RPC calls
+  per successful recovery in focused tests. Deployment code, proxy storage and
+  links are checked at the balance block, then native/token balances and the
+  canonical block hash/account generation are rechecked. No event logs, orders,
+  oracle prices, position snapshots or transaction receipts are requested.
+- Snapshot readScope is BALANCES_ONLY. History, positions, PnL, claims and oracle
+  are NOT_REQUESTED; financial metrics are null. Wallet, market cards, financial
+  organs, records and close-action guidance retain that distinction rather than
+  showing zero or an empty recovered position book. Read failures clear M1
+  balances/provenance to UNKNOWN. Existing legacy recovery, receipt cache and
+  unresolved wallet-request leases are preserved.
+- Browser checks reject history/non-balance calls during the M1 phase, record
+  per-phase method counts and verify the23-call bound. Legacy return is a
+  separate explicit selection with separately labelled history-query cost.
+  The local-EVM lane retains its legacy close/withdraw assertions while the M1
+  phase asserts token balances and no writes, not recovered financial metrics.
+- Exact two-file shared #507 test dependency (source20ede27b5b2ff33cec0ee4afe9ceb500d765a414)
+  is preserved as a separate commit. Desktop and mobile Courier suites each
+  retain a mandatory90s invocation, original assertions and read-only timing
+  diagnostics. No HUD/version/gameplay or other owner's facing patch imported.
+- Root439 and UI-static37 tests PASS; independent technical source review clear.
+  Fresh exact-head six-size Chromium and direct image review remain PENDING.
+  Financial release HOLD remains; public signed transactions NO.
+
 ## M1 six-viewport acceptance preparation — 2026-10-05
 
 - Remote PR #509 repair head `9c21d0ac4f9e1568f6aa8e7f26f9d4fd91391509`

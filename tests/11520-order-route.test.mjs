@@ -146,3 +146,23 @@ test('wallet identity hints distinguish restored live identity, disconnect and c
  context.value={account:null,chainId:null};render();assert.equal(nodes.walletRetained.hidden,false);assert.doesNotMatch(nodes.walletMsg.textContent,/WRONG NETWORK/);
  context.value={account:'0xabc',chainId:1};render();assert.match(nodes.walletMsg.textContent,/WRONG NETWORK/);
 });
+
+
+test('M1 financial displays are explicitly NOT_REQUESTED and never infer zero positions or PnL',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const wallet={readScope:'BALANCES_ONLY',testBnbBalance:'0.1',testTokenBalance:1000,free:null};
+ const context=vm.createContext({execution:{readOnly:true},walletExecutionView:()=>({readOnly:true,wallet,positions:[]}),receiptRows:rows=>JSON.stringify(rows)});
+ vm.runInContext(source.slice(source.indexOf('function crossMarketSnapshot(){'),source.indexOf('function syncSimulationPositions(){')),context);
+ const cross=vm.runInContext('crossMarketSnapshot()',context);assert.equal(cross.status,'NOT_REQUESTED');for(const key of ['openPositions','free','lockedMargin','realizedPnl','unrealizedPnl'])assert.equal(cross[key],null);
+ vm.runInContext(source.slice(source.indexOf('function simulationOrganHTML(id){'),source.indexOf('function bindSimulationSheet(')),context);
+ for(const organ of ['assets','orders','positions','history']){const html=vm.runInContext('simulationOrganHTML("'+organ+'")',context);assert.match(html,/NOT_REQUESTED/);assert.doesNotMatch(html,/尚無部位|尚無委託|尚無成交/)}
+});
+
+
+test('M1 market cards and close action never interpret unrequested positions as empty',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ assert.match(source,/execution\.readOnly\?'NOT_REQUESTED':x\.pos/);assert.match(source,/持倉：\$\{execution\.readOnly\?'NOT_REQUESTED':p/);
+ const fn=source.slice(source.indexOf('async function closePos(){'),source.indexOf("$('#closeAll')",source.indexOf('async function closePos(){')));
+ const prefix=fn.slice(0,fn.indexOf('const p=axis().pos;'))+'}';let message;
+ const context=vm.createContext({execution:{readOnly:true},toast:x=>{message=x}});vm.runInContext(prefix,context);await vm.runInContext('closePos()',context);assert.match(message,/NOT_REQUESTED/);
+});

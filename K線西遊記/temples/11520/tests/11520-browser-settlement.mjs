@@ -317,11 +317,11 @@ async function localCandidateBrowserQA(){
         assert.equal((await snap()).wallet.free,1001);await shot('legacy-close-preserved');
         await wallet();await page.locator('#testnetAmount').fill('100');await page.locator('#testnetWithdraw').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===901);await shot('legacy-withdraw-preserved');
         const beforeViewWrites=writes,legacyPreference=await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode'));
-        await page.locator('#walletM1ReadOnly').click();await wait(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().wallet?.free===901);
+        await page.locator('#walletM1ReadOnly').click();await wait(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===9100);
         assert.equal(await page.locator('#testnetFinancialControls').isVisible(),false);await shot('m1-readonly');
-        active=accounts[3];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().account?.toLowerCase()===document.querySelector('#wAddr').textContent.toLowerCase()&&__K11520_EXECUTION__.snapshot().wallet?.free===0);assert.equal((await snap()).orders.length,0);await shot('m1-other-wallet');
-        active=accounts[player];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===901);
-        await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});await wait(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().wallet?.free===901);await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await shot('m1-reload');
+        active=accounts[3];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().account?.toLowerCase()===document.querySelector('#wAddr').textContent.toLowerCase()&&__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===10000);assert.equal((await snap()).historyStatus,'NOT_REQUESTED');await shot('m1-other-wallet');
+        active=accounts[player];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===9100);
+        await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});await wait(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===9100);await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await shot('m1-reload');
         assert.equal(writes,beforeViewWrites,'M1 never broadcasts');assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
         await page.locator('#walletM1ReadOnly').click();await wait(()=>__K11520_EXECUTION__.snapshot().exitOnly&&__K11520_EXECUTION__.snapshot().wallet?.free===901);await shot('legacy-return');assert.deepEqual(errors,[]);
         await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'LOCAL_ACTUAL_EVM_M1_READ_ONLY_WITH_LEGACY_EXITS',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',m1Writes:0,legacyClose:'PASS',legacyWithdraw:'PASS',newRisk:'BLOCKED',snapshot:await snap()},null,2));
@@ -594,7 +594,7 @@ async function m1ReadOnlyBrowserQA(){
       await absent.screenshot({path:`${out}/390x844-no-injected-wallet.png`});
     }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message)},null,2));throw error}finally{await absent.close()}
     for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
-      const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[];let logFallbacks=0;
+      const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[],phaseCounts={M1:{},LEGACY:{},INITIAL:{}};let logFallbacks=0,phase='INITIAL';
       const consoleErrors=[],requestFailures=[];let stage='BOOT';
       const safeText=value=>String(value).replace(/https?:\/\/[^\s"']+/g,url=>{try{return new URL(url).origin}catch{return '[URL]'}});
       const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
@@ -602,7 +602,8 @@ async function m1ReadOnlyBrowserQA(){
       page.on('console',m=>{if(m.type()==='error')consoleErrors.push(safeText(m.text()))});
       page.on('requestfailed',r=>requestFailures.push({url:safeText(r.url()),resourceType:r.resourceType(),error:safeText(r.failure()?.errorText||'REQUEST_FAILED')}));await routeThree(page);
       await page.exposeBinding('__m1ReadBroker',async(source,{method,params=[]})=>{
-        assert.equal(source.frame,source.page.mainFrame());assert.equal(new URL(source.frame.url()).origin,origin);methods.push(method);
+        assert.equal(source.frame,source.page.mainFrame());assert.equal(new URL(source.frame.url()).origin,origin);methods.push(method);phaseCounts[phase][method]=(phaseCounts[phase][method]||0)+1;
+        if(phase==='M1'){assert.ok(!['eth_getLogs','eth_getTransactionReceipt'].includes(method),'M1 must never request history');if(method==='eth_call'){const allowed=new Set(['kgen()','brainSettlement()','executor()','engine()','brain()','decimals()','SETTLEMENT_ROLE()','hasRole(bytes32,address)','balanceOf(address)'].map(x=>new Interface(['function '+x]).getFunction(x).selector));assert.ok(allowed.has(params[0].data.slice(0,10)),'M1 must not enumerate financial/oracle state')}}
         if(/eth_send|personal_sign|eth_sign|signTypedData/.test(method)){forbidden.push(method);throw Error('M1_WRITE_OR_SIGN_FORBIDDEN')}
         if(method==='eth_accounts'||method==='eth_requestAccounts')return state.connected?[state.account]:[];
         if(method==='eth_chainId')return state.chain;
@@ -612,7 +613,7 @@ async function m1ReadOnlyBrowserQA(){
         if(method==='eth_getLogs'){assert.ok(allowedAddresses.has(params[0].address.toLowerCase()));try{return await provider.send(method,params)}catch{logFallbacks++;return []}}
         return provider.send(method,params);
       });
-      await page.addInitScript(()=>{const listeners=new Map();window.__m1WalletEvents={emit:(name,value)=>{for(const fn of listeners.get(name)||[])fn(value)}};window.ethereum={request:async args=>{const result=await window.__m1ReadBroker(args);if(args.method==='wallet_switchEthereumChain')window.__m1WalletEvents.emit('chainChanged','0x61');return result},on:(n,f)=>{if(!listeners.has(n))listeners.set(n,new Set());listeners.get(n).add(f)},removeListener:(n,f)=>listeners.get(n)?.delete(f)};if(!sessionStorage.getItem('k11520.execution-mode'))sessionStorage.setItem('k11520.execution-mode','BSC_TESTNET')});
+      await page.addInitScript(()=>{const listeners=new Map();window.__m1WalletEvents={emit:(name,value)=>{for(const fn of listeners.get(name)||[])fn(value)}};window.ethereum={request:async args=>{const result=await window.__m1ReadBroker(args);if(args.method==='wallet_switchEthereumChain')window.__m1WalletEvents.emit('chainChanged','0x61');return result},on:(n,f)=>{if(!listeners.has(n))listeners.set(n,new Set());listeners.get(n).add(f)},removeListener:(n,f)=>listeners.get(n)?.delete(f)};if(!sessionStorage.getItem('k11520.execution-mode'))sessionStorage.setItem('k11520.execution-mode','SIMULATION')});
       const snap=()=>page.evaluate(()=>globalThis.__K11520_EXECUTION__?.snapshot()??null),shot=name=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`});
       const wallet=async()=>{if(!await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();if(await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click()};
       const verify=async expected=>{
@@ -620,7 +621,8 @@ async function m1ReadOnlyBrowserQA(){
         const s=await snap(),tag='0x'+s.block.toString(16),native=await provider.send('eth_getBalance',[expected,tag]);
         const [token]=tokenAbi.decodeFunctionResult('balanceOf',await provider.send('eth_call',[{to:candidate.addresses.testToken,data:tokenAbi.encodeFunctionData('balanceOf',[expected])},tag]));
         assert.equal(s.wallet.testBnbBalanceWei,BigInt(native).toString());assert.equal(s.wallet.testBnbBalance,formatUnits(native,18));assert.equal(s.wallet.testTokenBalanceWei,token.toString());
-        for(const order of s.orders){const [o]=orderAbi.decodeFunctionResult('order',await provider.send('eth_call',[{to:candidate.addresses.orderTriggerEngine,data:orderAbi.encodeFunctionData('order',[order.orderId])},tag]));assert.equal(o.trader.toLowerCase(),expected.toLowerCase())}
+        assert.equal(s.readScope,'BALANCES_ONLY');assert.equal(s.historyStatus,'NOT_REQUESTED');assert.equal(s.positionsStatus,'NOT_REQUESTED');assert.equal(s.balanceStatus,'VERIFIED');assert.ok(s.rpcReadCount<=23,'bounded M1 recovery');assert.equal(s.wallet.free,null);
+        assert.deepEqual(s.orders,[]);assert.deepEqual(s.positions,[]);assert.deepEqual(s.receipts,[]);
         await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});
         await page.waitForFunction(a=>document.querySelector('#wAddr').textContent.toLowerCase()===a.toLowerCase(),expected);
         assert.equal(await page.locator('#walletRetained').isVisible(),false,'cached hint must not contradict a live provider identity');
@@ -632,12 +634,12 @@ async function m1ReadOnlyBrowserQA(){
           await page.waitForFunction(()=>{const next=globalThis.__K11520_MARKET_ORIGIN_RUNTIME__;if(!next||next===globalThis.__m1ObservedLayout)return false;globalThis.__m1ObservedLayout=next;return true});
           for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,'wallet view owns peer utility surface after owner tick '+tick+' '+selector);
         }
-        return {account:expected,block:s.block,blockHash:s.blockHash,status:s.status,nativeWei:s.wallet.testBnbBalanceWei,testTokenWei:s.wallet.testTokenBalanceWei,orders:s.orders.map(o=>o.orderId),context:s.deploymentContext};
+        return {account:expected,block:s.block,blockHash:s.blockHash,status:s.status,nativeWei:s.wallet.testBnbBalanceWei,testTokenWei:s.wallet.testTokenBalanceWei,historyStatus:s.historyStatus,positionsStatus:s.positionsStatus,rpcReadCount:s.rpcReadCount,context:s.deploymentContext};
       };
       try{
         await boot(page);await wallet();await page.locator('#walletConnect').click();await page.waitForFunction(()=>!document.querySelector('#walletM1ReadOnly').disabled);
         const legacyPreference=await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode'));
-        await page.locator('#walletM1ReadOnly').click();await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().status==='WRONG_CHAIN');assert.equal((await snap()).wallet,null);await shot('wrong-chain');
+        phase='M1';await page.locator('#walletM1ReadOnly').click();await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().status==='WRONG_CHAIN');assert.equal((await snap()).wallet,null);await shot('wrong-chain');
         await page.locator('#testnetSwitch').click();const evidence=[await verify(state.account)];await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('connected');stage='ACCOUNT_SWITCH';
         state.account=state.account.toLowerCase()===accounts[0].toLowerCase()?accounts[1]:accounts[0];await page.evaluate(a=>__m1WalletEvents.emit('accountsChanged',[a]),state.account);
         evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('account-switched');stage='RELOAD';
@@ -645,16 +647,16 @@ async function m1ReadOnlyBrowserQA(){
         state.connected=false;await page.evaluate(()=>__m1WalletEvents.emit('disconnect',{}));await page.waitForFunction(()=>!__K11520_EXECUTION__.snapshot().wallet);await page.waitForFunction(()=>document.querySelector('#wBnb').textContent==='UNVERIFIED');assert.equal((await page.locator('#walletMsg').textContent()).includes('WRONG NETWORK'),false,'unknown network is not a confirmed wrong network');await shot('disconnected');stage='RECONNECT';
         state.connected=true;await page.locator('#walletConnect').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reconnected');stage='RETURN_LEGACY';
         assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
-        await page.locator('#walletM1ReadOnly').click();await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===a.toLowerCase()},state.account,{timeout:150000});
+        phase='LEGACY';await page.locator('#walletM1ReadOnly').click();assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);await page.locator('#executionMode').click();await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===a.toLowerCase()},state.account,{timeout:150000});
         const legacy=await snap(),legacyTag='0x'+legacy.block.toString(16),brainAbi=new Interface(['function principalOf(address) view returns(uint256)','function availablePrincipal(address) view returns(uint256)']);
         const readLegacy=async name=>brainAbi.decodeFunctionResult(name,await provider.send('eth_call',[{to:manifest.addresses.brainProxy,data:brainAbi.encodeFunctionData(name,[state.account])},legacyTag]))[0].toString();
         assert.equal(legacy.deploymentContext,'97:'+manifest.addresses.brainProxy.toLowerCase());assert.equal(legacy.wallet.principalWei,await readLegacy('principalOf'));assert.equal(legacy.wallet.availableWei,await readLegacy('availablePrincipal'));
         const legacyExitEvidence={account:state.account,block:legacy.block,context:legacy.deploymentContext,principalWei:legacy.wallet.principalWei,availableWei:legacy.wallet.availableWei};
-        assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);await shot('legacy-exit-preserved');
+        assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),'BSC_TESTNET');await shot('legacy-exit-preserved');
         const closeHit=await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(closeHit,true,'wallet close is reachable');
         await page.locator('#walletToggle').click();await page.waitForFunction(()=>document.querySelector('#walletPanel').classList.contains('collapsed')&&getComputedStyle(document.querySelector('#dock')).display!=='none');
         for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton'])assert.equal(await page.locator(selector).isVisible(),true,'wallet close restores peer '+selector);await shot('wallet-close-restores-tray');
-        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,logFallbacks,evidence,methods:[...new Set(methods)]});
+        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
         await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify(results.at(-1),null,2));
       }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,forbidden,errors,consoleErrors,requestFailures,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
     }

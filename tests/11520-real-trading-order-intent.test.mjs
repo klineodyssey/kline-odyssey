@@ -506,3 +506,29 @@ test('M1 pinned recovery exposes canonical block hash and rejects a reorg during
  g.provider.request=async args=>{const result=await request(args);if(args.method==='eth_getBlockByNumber'&&++reads>1)return {...result,hash:'0x'+'99'.repeat(32)};return result};
  const changed=g.make({readOnly:true});assert.equal((await changed.recover()).reason,'RECOVERY_BLOCK_CHANGED');assert.equal(changed.snapshot().wallet,null);assert.equal(g.calls.some(c=>c.method==='eth_sendTransaction'),false);
 });
+
+test('M1 balances-only recovery has a fixed RPC bound and never enumerates financial history',async()=>{
+ const f=testnetFixture({capital:true}),request=f.provider.request,allowed=new Set(['kgen','brainSettlement','executor','engine','brain','decimals','SETTLEMENT_ROLE','hasRole','balanceOf']);
+ const faces=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[f.deployment.addresses[k].toLowerCase(),new codec.Interface([...v,...(CAPITAL_EXECUTION_ABI[k]||[])]) ]));
+ f.provider.request=async args=>{assert.ok(!['eth_getLogs','eth_getTransactionReceipt'].includes(args.method),'no history RPC');if(args.method==='eth_call'){const name=faces[args.params[0].to.toLowerCase()].parseTransaction(args.params[0]).name;assert.ok(allowed.has(name),'no financial state enumeration '+name);assert.equal(args.params[1],'0x2')}if(args.method==='eth_getCode')assert.equal(args.params[1],'0x2');if(args.method==='eth_getStorageAt')assert.equal(args.params[2],'0x2');return request(args)};
+ const view=f.make({readOnly:true});for(let i=0;i<2;i++){const before=f.calls.length;assert.equal((await view.recover()).ok,true);assert.equal(f.calls.length-before,23,'fixed23 RPC requests per successful recovery');}
+ const s=view.snapshot();assert.equal(s.readScope,'BALANCES_ONLY');assert.equal(s.balanceStatus,'VERIFIED');for(const key of ['historyStatus','positionsStatus','pnlStatus','claimsStatus','oracleStatus'])assert.equal(s[key],'NOT_REQUESTED');
+ for(const key of ['free','principal','lockedMargin','unrealizedPnl','realizedPnl','claimable','withdrawable','equity'])assert.equal(s.wallet[key],null);assert.deepEqual(s.receipts,[]);assert.equal(s.capital,null);
+});
+
+test('M1 failed balance reread clears prior value to UNKNOWN and keeps a verified zero distinct',async()=>{
+ for(const method of ['eth_getBalance','eth_call']){
+  const f=testnetFixture(),request=f.provider.request,view=f.make({readOnly:true});assert.equal((await view.recover()).ok,true);
+  f.provider.request=async args=>{if(args.method===method)throw Error('RPC_UNAVAILABLE');return request(args)};
+  assert.equal((await view.recover()).ok,false);assert.equal(view.snapshot().wallet,null);assert.equal(view.snapshot().balanceStatus,'UNKNOWN');assert.equal(view.snapshot().historyStatus,'NOT_REQUESTED');
+ }
+ const f=testnetFixture(),request=f.provider.request;f.provider.request=args=>args.method==='eth_getBalance'?'0x0':request(args);const view=f.make({readOnly:true});assert.equal((await view.recover()).ok,true);assert.equal(view.snapshot().wallet.testBnbBalanceWei,'0');assert.equal(view.snapshot().balanceStatus,'VERIFIED');
+});
+
+test('M1 balances-only A B reload and A B A fencing retain one canonical account',async()=>{
+ const f=testnetFixture(),request=f.provider.request,other='0x'+'77'.repeat(20);let release,entered;
+ const gate=new Promise(r=>{release=r}),started=new Promise(r=>{entered=r});let delay=false;
+ f.provider.request=async args=>{if(args.method==='eth_getBalance'){if(delay){entered();await gate;}return args.params[0].toLowerCase()===WALLET.toLowerCase()?'0x1':'0x2'}return request(args)};
+ let view=f.make({readOnly:true});await view.recover();assert.equal(view.snapshot().wallet.testBnbBalanceWei,'1');f.setAccount(other);await view.recover();assert.equal(view.snapshot().wallet.testBnbBalanceWei,'2');view.dispose();view=f.make({readOnly:true});await view.recover();assert.equal(view.snapshot().account,other);
+ delay=true;const old=view.recover();await started;f.setAccount(WALLET);f.setAccount(other);release();assert.equal((await old).superseded,true);assert.equal(view.snapshot().wallet,null);delay=false;await view.recover();assert.equal(view.snapshot().account,other);assert.equal(view.snapshot().wallet.testBnbBalanceWei,'2');
+});

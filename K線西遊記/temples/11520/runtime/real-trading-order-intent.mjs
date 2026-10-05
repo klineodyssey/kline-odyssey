@@ -181,8 +181,8 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   pollMs=1500,rpcTimeoutMs=15000,walletRequestTimeoutMs=120000,onState=()=>{},readOnly=false,exitOnly=false}={}){
   const blank=()=>({mode:'BSC_TESTNET',label:'TESTNET · NO REAL VALUE',status:'NOT_DEPLOYED_OR_AUTHORIZED',
     chainId:97,account:null,wallet:null,orders:[],positions:[],receipts:[],observations:{},transaction:null,
-    readOnly:readOnly===true,exitOnly:exitOnly===true,deploymentContext:'97:'+String(deployment?.addresses?.brainProxy||'').toLowerCase()});
-  let state=blank(),busy=false,displayActive=true,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null;
+    readOnly:readOnly===true,...readOnly?{readScope:'BALANCES_ONLY',block:null,blockHash:null,rpcReadCount:null,balanceStatus:'UNKNOWN',historyStatus:'NOT_REQUESTED',positionsStatus:'NOT_REQUESTED',pnlStatus:'NOT_REQUESTED',claimsStatus:'NOT_REQUESTED',oracleStatus:'NOT_REQUESTED'}:{},exitOnly:exitOnly===true,deploymentContext:'97:'+String(deployment?.addresses?.brainProxy||'').toLowerCase()});
+  let rpcRequestCount=0,state=blank(),busy=false,displayActive=true,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null;
   const copy=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
   const snapshot=()=>copy({...state,writeBlocked:readOnly===true||!!ethereum&&TESTNET_PENDING_WALLET_REQUESTS.has(ethereum)});
   const publish=patch=>{state={...state,...patch};try{onState(snapshot())}catch{}return snapshot()};
@@ -202,7 +202,8 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   if(!['NOTIONAL_RETURN_V1','INDEX_DELTA_C_LOTS_V1'].includes(pnlModel))throw new Error('UNSUPPORTED_PNL_MODEL');
   const fromBlock=deployment.deploymentBlock,abi=Object.fromEntries(keys.map(k=>[k,new ethers.Interface([...TESTNET_EXECUTION_ABI[k],...(capitalEnabled?CAPITAL_EXECUTION_ABI[k]||[]:[])])]));
   const req=async(method,params=[],timeoutOverride=null)=>{
-    if(readOnly&&!['eth_chainId','eth_accounts','eth_getCode','eth_getStorageAt','eth_blockNumber','eth_getBlockByNumber','eth_getTransactionReceipt','eth_getLogs','eth_getBalance','eth_call','wallet_switchEthereumChain'].includes(method))throw new Error('M1_READ_ONLY_WALLET');
+    rpcRequestCount++;
+    if(readOnly&&!['eth_chainId','eth_accounts','eth_getCode','eth_getStorageAt','eth_blockNumber','eth_getBlockByNumber','eth_getBalance','eth_call','wallet_switchEthereumChain'].includes(method))throw new Error('M1_READ_ONLY_WALLET');
     let timer;
     const timeout=timeoutOverride??(method==='eth_sendTransaction'||method.startsWith('wallet_')?walletRequestTimeoutMs:rpcTimeoutMs);
     let request;
@@ -237,15 +238,15 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     const accounts=await req('eth_accounts');if(!validAddress(accounts?.[0]))fail('DISCONNECTED');return accounts[0];
   };
   const sameSession=async(account,ticket)=>{if(ticket!==generation||lower(await identity())!==lower(account))fail('DISCONNECTED')};
-  const verify=async()=>{
+  const verify=async(block='latest')=>{
     const account=await identity();
-    for(const k of [...keys,'brainImplementation']){const code=await req('eth_getCode',[a[k],'latest']);if(code==='0x'||lower(ethers.keccak256(code))!==lower(hashes[k]))fail('DEPLOYMENT_CODE_MISMATCH')}
-    const implementation=await req('eth_getStorageAt',[a.brainProxy,'0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc','latest']);
+    for(const k of [...keys,'brainImplementation']){const code=await req('eth_getCode',[a[k],block]);if(code==='0x'||lower(ethers.keccak256(code))!==lower(hashes[k]))fail('DEPLOYMENT_CODE_MISMATCH')}
+    const implementation=await req('eth_getStorageAt',[a.brainProxy,'0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',block]);
     if(lower(`0x${implementation.slice(-40)}`)!==lower(a.brainImplementation))fail('PROXY_IMPLEMENTATION_MISMATCH');
-    const links=await Promise.all([call('brainProxy','kgen'),call('positionEngine','brainSettlement'),call('positionEngine','executor'),
-      call('orderTriggerEngine','engine'),call('orderTriggerEngine','brain'),call('testToken','decimals'),call('brainProxy','SETTLEMENT_ROLE')]);
+    const links=await Promise.all([call('brainProxy','kgen',[],block),call('positionEngine','brainSettlement',[],block),call('positionEngine','executor',[],block),
+      call('orderTriggerEngine','engine',[],block),call('orderTriggerEngine','brain',[],block),call('testToken','decimals',[],block),call('brainProxy','SETTLEMENT_ROLE',[],block)]);
     if([a.testToken,a.brainProxy,a.orderTriggerEngine,a.positionEngine,a.brainProxy].some((v,i)=>lower(v)!==lower(links[i][0]))||Number(links[5][0])!==18)fail('DEPLOYMENT_LINK_MISMATCH');
-    if(!(await call('brainProxy','hasRole',[links[6][0],a.positionEngine]))[0])fail('SETTLEMENT_ROLE_MISSING');
+    if(!(await call('brainProxy','hasRole',[links[6][0],a.positionEngine],block))[0])fail('SETTLEMENT_ROLE_MISSING');
     return account;
   };
   const marketNames=['BTCUSDT','ETHUSDT','BNBUSDT'],axes=['KX','KY','KZ'];
@@ -298,6 +299,25 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   const refreshRead=async()=>{
     const revision=++refreshRevision;
     try{
+    if(readOnly){
+      const rpcStart=rpcRequestCount,ticket=generation,height=Number(BigInt(await req('eth_blockNumber'))),tag=hex(height);
+      const pinned=await req('eth_getBlockByNumber',[tag,false]);
+      if(!/^0x[0-9a-f]{64}$/i.test(pinned?.hash||''))fail('RECOVERY_BLOCK_UNVERIFIED');
+      const account=await verify(tag);
+      const [native,balance]=await Promise.all([req('eth_getBalance',[account,tag]),call('testToken','balanceOf',[account],tag)]);
+      if(typeof native!=='string'||!/^0x[0-9a-f]{1,64}$/i.test(native))fail('INVALID_NATIVE_BALANCE_RESPONSE');
+      const canonical=await req('eth_getBlockByNumber',[tag,false]);
+      if(lower(canonical?.hash)!==lower(pinned.hash))fail('RECOVERY_BLOCK_CHANGED');
+      await sameSession(account,ticket);
+      if(ticket!==generation)fail('DISCONNECTED');
+      if(revision<appliedRefreshRevision||height<(state.block??0))return {ok:true,superseded:true,...snapshot()};
+      appliedRefreshRevision=revision;
+      publish({account,chainId:97,status:'M1_BALANCES_VERIFIED',rpcReadCount:rpcRequestCount-rpcStart,balanceStatus:'VERIFIED',error:null,block:height,blockHash:pinned.hash,
+        wallet:{readScope:'BALANCES_ONLY',testBnbBalance:ethers.formatUnits(BigInt(native),18),testBnbBalanceWei:String(BigInt(native)),testTokenBalance:num(balance[0]),testTokenBalanceWei:String(balance[0]),
+          principal:null,total:null,principalWei:null,free:null,availableWei:null,withdrawable:null,allowanceWei:null,allowance:null,allowanceUnlimited:null,claimable:null,claimableStatus:'NOT_REQUESTED',locked:null,lockedMargin:null,lockedWei:null,equity:null,unrealizedPnl:null,realizedPnl:null},
+        capital:null,claims:[],orders:[],positions:[],receipts:[],observations:{},transaction:null});
+      return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
+    }
     const ticket=generation,account=await verify(),height=Number(BigInt(await req('eth_blockNumber'))),tag=hex(height),recoveryLogCache=new Map();
     const pinnedBlock=readOnly?await req('eth_getBlockByNumber',[tag,false]):null;
     if(readOnly&&!/^0x[0-9a-f]{64}$/i.test(pinnedBlock?.hash||''))fail('RECOVERY_BLOCK_UNVERIFIED');
@@ -421,7 +441,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     try{return await flight}finally{if(refreshFlight===flight)refreshFlight=null}
   };
   const run=async fn=>{try{return await fn()}catch(error){lastReadyRefresh=null;const failure=executionFailure(error),lost=['WRONG_CHAIN','DISCONNECTED'].includes(failure.code);
-    publish({...lost?blank():{},status:failure.code,error:failure.reason,
+    publish({...lost||readOnly?blank():{},status:failure.code,error:failure.reason,
       transaction:state.transaction?{...state.transaction,status:failure.code}:null});return failure}};
   const previewInternal=async(input,{forceRefresh=false}={})=>{
     const intent=buildExecutionOrderIntent(input),ticket=generation,account=await identity(),recent=lastReadyRefresh;
