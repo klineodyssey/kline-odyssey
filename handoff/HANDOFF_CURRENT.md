@@ -49,17 +49,17 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 
 ## KAIOS multi-project engineering coordination snapshot
 
-Current checkpoint: 2026-10-05T12:01:22Z; observed main `b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720`. Documentation branch original base remains `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
+Current checkpoint: 2026-10-05T13:09:11Z; observed main `b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720`. Documentation branch original base remains `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
 
 Twenty meaningful work packages are listed below, including substreams of the same project. The Human clarified the target as 20; obvious typographical mistakes are normalized in current coordination text. The target is 20 work packages, not a claim that 20 workers execute simultaneously. IN_PROGRESS identifies active coordination/QA/recovery as described, not a pending CI job running code. Existing projects remain tracked when new tasks arrive.
 
-1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Track required postrelease gameplay acceptance through #507, plus integrated #505 explanation-only checks. Preserve proven public version facts and separate inherited P2 observations. Evidence: #498 V2.9.1 remains publicly live. #504 test-only successor merged at b513d4e7 at11:08 UTC, without a product-version change. Pages is live, but postmerge public pointblank-facing failure is unresolved in successor #507; no blanket behavioral QA pass. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693) Child checkpoints: Q01.release=COMPLETE; Q01.behavioral_gates=IN_PROGRESS.
+1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Prioritize confirmed contextual-HUD P1 child through canonical control owners while507 follow-up stays separately queued; C M1 owns next heavy slot. Evidence: Public V2.9.1 remains live;504 closed/merged b513. Confirmed contextual-HUD P1 has local V2.9.5 candidate with no heavy/native release evidence yet.507 latest batch has Game PASS but Responsive public coasting FAIL. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693) Child checkpoints: Q01.release=COMPLETE; Q01.behavioral_gates=IN_PROGRESS.
 
-2. **P0 / BLOCKED / RELEASE_BLOCKED — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Prioritize whole-Player-Life successor Stage1 local review, then request heavy slot when READY. Retain P0 release hold despite scoped506 CI. #505 is independently ready for parent release queue; #503 HOLD unchanged. Evidence: Fresh506 head8db98fb9 integrates505cc235/mainb513. Parent checkpoint: all seven CI workflows and15 scoped native cases PASS, but full Player Life, legacy-client/BFCache and visual release gates remain incomplete. Whole-Life successor is in Stage1 local review.505cc235 exact CI and13 explanation images PASS; no live V2.9.3 or production-data impact claimed. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/503) · [2](https://github.com/klineodyssey/kline-odyssey/pull/505) · [3](https://github.com/klineodyssey/kline-odyssey/pull/506) Child checkpoints: Q02.recovery_candidate=BLOCKED; Q02.explanation_only_ux=READY_FOR_REVIEW; Q02.canonical_writer_design=IN_PROGRESS.
+2. **P0 / BLOCKED / RELEASE_BLOCKED — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Continue A Stage2 model/validator work and small tests while preserving whole-Life P0 release gates.508 foundation is inert, not integrated protection; do not trigger another heavy batch ahead of C M1.503 recovery HOLD remains. Evidence: 50800fdf is an inert Life-only IndexedDB foundation with zero application callers. Backend/Responsive/Portal/Universal PASS; both Product lanes FAIL shared browser baseline. Local Stage2 model/validators work is not full P0 closure. Retained5068db partial evidence does not establish whole-Life acceptance. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/503) · [2](https://github.com/klineodyssey/kline-odyssey/pull/505) · [3](https://github.com/klineodyssey/kline-odyssey/pull/506) · [4](https://github.com/klineodyssey/kline-odyssey/pull/508) Child checkpoints: Q02.recovery_candidate=BLOCKED; Q02.explanation_only_ux=READY_FOR_REVIEW; Q02.canonical_writer_design=IN_PROGRESS.
 
-3. **P1 / IN_PROGRESS — Public main responsive 390 timeout**. Dependencies: none. Next: Inspect published50720ede27b exact-head CI and direct evidence in the admitted heavy slot; no second new heavy batch before completion/resource handoff. Evidence: 504 closed/merged b513.507 prior195 Product PR90s failure retained. Prepared split91572879 is now published as20ede27b with tested tree2f81d0c8. One heavy slot admitted11:58; fresh exact PR workflows show Responsive/Game/Portal running and Universal PASS at12:01:22. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/504) · [2](https://github.com/klineodyssey/kline-odyssey/pull/507) Child checkpoints: Q03.pursuit=COMPLETE; Q03.pan=COMPLETE; Q03.facing=IN_PROGRESS.
+3. **P1 / IN_PROGRESS — Public main responsive 390 timeout**. Dependencies: none. Next: Retain queued507 fix and scoped HUD small tests; request resource slot only after C M1 and parent sequencing. Evidence: 507 remote e4b33676c251ba291a7faafce144ed762cc176a3 batch terminal: Game Product both PASS, Responsive public coasting FAIL. Local correction dcf7b69fbc499f998c4223816a8356a2ff8fd71f unpublished; no new heavy slot.504 remains engineering CLOSED. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/504) · [2](https://github.com/klineodyssey/kline-odyssey/pull/507) Child checkpoints: Q03.pursuit=COMPLETE; Q03.pan=COMPLETE; Q03.facing=IN_PROGRESS.
 
-4. **P2 / IN_PROGRESS — BSC97 stale-quote dispatch race**. Dependencies: none. Next: Review clean local successor59ce7c61 and read-only BSC97 readiness; no transaction. Queue any new heavy tests after A; preserve financial merge HOLD. Evidence: 488 remote89d6af11 unchanged. Parent-reported clean local successor59ce7c613611574f539988ab90714ea198e7a31a has62 focused tests PASS and no PR yet. Block135008706 confirms14 code hashes and83 historical receipts; three capabilities expired, OracleQuorumUnavailable, new risk FAIL_CLOSED. No transaction. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
+4. **P1 / IN_PROGRESS — M1 read-only wallet and retained financial engineering**. Dependencies: none. Next: Finish bounded M1 source/review and publish one exact head into the single reserved heavy batch; no new authority or financial merge. Evidence: Separate clean M1 source work on mainb513; no own candidate commit or PR yet at checkpoint.86 focused tests PASS confirmed by owner; read-only browser harness under source review, no actual browser run. Existing canonical adapter supports explicit read-only candidate view with legacy EXIT-ONLY and preserved existing test principal. Broader financial source retained separately at e7b9bf82 with no PR. No signing or Mainnet action. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488) Child checkpoints: Q04.m1_read_only=IN_PROGRESS; Q04.broader_financial=IN_PROGRESS.
 
 5. **P2 / BLOCKED — Real financial release readiness gate**. Dependencies: Q04. Next: Keep release on Human hold; assemble current exact-head safety evidence and concrete protected-action scope before requesting any execution. Evidence: Engineering readiness is not financial authority. No real funds, signer, deployment, Treasury or chain execution authorized by this queue. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
 
@@ -81,13 +81,13 @@ Twenty meaningful work packages are listed below, including substreams of the sa
 
 14. **P2 / QUEUED — Multiplayer foundation**. Dependencies: Q17. Next: Inspect existing room/queue interfaces; define game-only synchronization and conflict acceptance criteria before external infrastructure. Evidence: User roadmap substream; backend candidate is merged, not proof of deployed multiplayer or provider provisioning. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/489) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/backend/KAIOS_BACKEND_ARCHITECTURE.md)
 
-15. **P2 / QUEUED — Graphics and performance baseline**. Dependencies: Q01, Q03. Next: After required gameplay QA, verify reachability and provenance of bounded inherited P2 visual observations before proposing fixes; keep performance work based on measured evidence. Evidence: Inherited visual observations are not confirmed new P1 defects or #505 regressions. Actual control click reachability remains unknown where noted. Keep required gameplay priority. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/AGENTS.md) Child checkpoints: Q15.more_guide=QUEUED; Q15.summary_balance=QUEUED; Q15.desktop_controls=QUEUED.
+15. **P1 / IN_PROGRESS — Graphics and performance baseline**. Dependencies: Q01, Q03. Next: Continue confirmed contextual-HUD P1 native-test preparation and small reviews; retain separate507 ownership and505 explanation copy. No publication/heavy run until resource release after C. Evidence: Owner confirmed local87f7e41859e075646c74f0a2366c8060e6150420 on dot/11520-contextual-hud-20261005, V2.9.5 candidate. Runtime revision8e34aeca had181 aggregate/50 focused PASS; later41dc and87f are test/workflow-only with syntax/YAML/diff PASS. True hide, settings inertness and contextual recenter use actual Camera owner. No PR, push, heavy CI or native-browser acceptance. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/AGENTS.md) Child checkpoints: Q15.more_guide=QUEUED; Q15.summary_balance=QUEUED; Q15.desktop_controls=QUEUED; Q15.contextual_hud_p1=IN_PROGRESS.
 
 16. **P2 / QUEUED — First-party SFX and media provenance**. Dependencies: none. Next: Review uncovered effects and runtime lifecycle against current audio provenance; use original or affirmatively licensed assets only. Evidence: Existing shared WebAudio owner and first-party arrangements are documented; historical commercial media is not a license. Source: [1](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/docs/KAIOS_AUDIO_PROVENANCE.md)
 
 17. **P2 / QUEUED — Recovery and authentication hardening**. Dependencies: none. Next: Audit merged recovery/auth boundaries and regression gaps; keep production email/passkey/KYC disabled without separately approved setup. Evidence: #489 merged at53692530; completion of that merge does not activate production identity providers. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/489) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/backend/KAIOS_BACKEND_SECURITY_BOUNDARY.md)
 
-18. **P1 / IN_PROGRESS — Visible product version and public release proof**. Dependencies: Q01. Next: Parent may sequence independently ready505 explanation-only release while required507 gameplay validation continues; maintain public SHA/version proof and separate provenance proposal. Evidence: Main/live Pages b513d4e7 remains V2.9.1.505cc235 V2.9.3 explanation-only candidate is ready for parent release queue after exact CI/13 image PASS. Required gameplay acceptance follows50720ede27b running CI. No current provenance mismatch proven. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml) Child checkpoints: Q18.public_provenance=COMPLETE; Q18.behavioral_acceptance=IN_PROGRESS; Q18.next_explanation_release=READY_FOR_REVIEW; Q18.checkout_hardening=QUEUED.
+18. **P1 / IN_PROGRESS — Visible product version and public release proof**. Dependencies: Q01. Next: Preserve public V2.9.1 proof and independently ready505 candidate while C M1 product priority, contextual HUD P1 and A integrity progress; parent alone sequences release. Evidence: Main/live Pages b513d4e7 remains V2.9.1.505cc235 V2.9.3 explanation-only candidate is ready for parent release queue after exact CI/13 image PASS. Required gameplay acceptance follows50720ede27b running CI. No current provenance mismatch proven. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml) Child checkpoints: Q18.public_provenance=COMPLETE; Q18.behavioral_acceptance=IN_PROGRESS; Q18.next_explanation_release=READY_FOR_REVIEW; Q18.checkout_hardening=QUEUED.
 
 19. **P2 / READY_FOR_REVIEW / READY_PLAN — Observability and cost budgets**. Dependencies: Q06. Next: Review PR/branch-scoped stale development-run concurrency first; preserve distinct push/PR lanes, main, deploy, public QA and scheduled workers. Review tree-aware dedup separately before any implementation. Evidence: Parent-forwarded completed three-head read-only audit:45m08s of95m26s measured runner-job elapsed was a second push lane over an identical tested Git tree. This is not billing/dollar savings or a claim that PR integration lanes are generally redundant. Overlapping stale-run cancellation opportunity30m28s must not be added to45m08s. No workflow change. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/500) · [2](https://github.com/klineodyssey/kline-odyssey/pull/501) · [3](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280006707) · [4](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280012000) · [5](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280455413) · [6](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280461320) · [7](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282991668) · [8](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
 
@@ -101,27 +101,27 @@ KAIOS is a next-generation operating-system design goal that makes customer drea
 
 Before each work cycle, refresh main and read current Boot, Company Boot, applicable instructions and ownership. This checkpoint preserves the Human long-term KAIOS wish-to-verified-customer-outcome vision; no formal identity or authority follows from that vision.
 
-Game-first selection: #506 whole-Player-Life integrity and its P0 release blocker now lead. #505 explanation-only work continues independently; #504 engineering is closed and #507 owns remaining public gameplay QA. After required integrity/gameplay gates and as dependencies permit, multiplayer, graphics/performance and original audio can precede secondary financial-release work. Trading stays in the queue with its existing safety holds. Reprioritization does not start extra tasks or interrupt active work.
+Latest Human selection: C M1 read-only wallet is highest product priority, alongside confirmed HUD P1 and A whole-Player-Life data integrity.505 remains independently ready at lower product priority;504 engineering is closed and507 owns remaining public gameplay QA. After required integrity/gameplay gates and as dependencies permit, multiplayer, graphics/performance and original audio can precede secondary financial-release work. Trading stays in the queue with its existing safety holds. Reprioritization does not start extra tasks or interrupt active work.
 
 Independent read/test/review work may run in parallel up to actual capacity. Shared-file changes have one write owner; all main merges serialize. PR #498 is merged; this documentation Draft remains unmerged and requires current-main/shared-handoff reconciliation before separately authorized integration. Failed or pending gates remain visible; no blind retries, skipped tests, invented P0, discarded projects, formal employee reassignment or credential creation. Once a package closes, choose an existing ready priority; if all close, research a concrete roadmap gap before proposing more work. No money, chain, production identity or external AI authority is granted.
 
 ### Six-track resource checkpoint
 
-The six tracks map to the existing20 parents; they do not create new projects, a dispatcher or parallel runtime.
+Human12:43 priority: C M1 is highest product priority, alongside confirmed HUD P1 and A data-integrity P0. Six tracks still map to existing20 parents; no new runtime or authority.
 
-A — IN_PROGRESS_RELEASE_BLOCKED; parents Q02. Whole-Player-Life successor Stage1 local review. Retained5068db98fb9 has seven CI workflows PASS and15 scoped native cases per parent; this is partial coverage, with legacy-client/BFCache/visual release holds. Next: Complete Stage1 local review and whole-Life acceptance readiness before requesting the next heavy slot.
+A — STAGE2_LOCAL_WORK_P0_RELEASE_BLOCKED; parents Q02. 50800fdf is an inert Life-only IndexedDB foundation with zero application callers. Backend/Responsive/Portal/Universal PASS; both Product lanes FAIL shared browser baseline. Local Stage2 model/validators work is not full P0 closure. Retained5068db partial evidence does not establish whole-Life acceptance. Next: Continue scoped Stage2 local review and small tests; no new heavy batch while C slot is reserved.
 
-B — READY_FOR_RELEASE_QUEUE; parents Q02, Q18. 505 exact-head CI and13 explanation images PASS; V2.9.3 candidate only; parent serializes release. Independent of A engineering. Next: Parent scoped release decision; no new heavy batch.
+B — READY_FOR_RELEASE_QUEUE; parents Q02, Q18. 505 exact-head CI and13 explanation images PASS; V2.9.3 candidate only; parent serializes release. Independent of A engineering. Next: Remain independently ready in lower-priority parent release queue; do not block C or trigger heavy reruns.
 
-C — LOCAL_SUCCESSOR_MERGE_HOLD; parents Q04, Q05. 488 unchanged. Parent reports clean local successor, no PR yet,62 focused tests PASS. Fresh BSC97 block135008706:14 code hashes and83 historical receipts valid; three capabilities expired and OracleQuorumUnavailable; new risk fails closed. No transaction. Next: Continue bounded engineering/read-only readiness; heavy queue after A; retain financial merge HOLD.
+C — M1_READ_ONLY_SOURCE_IN_PROGRESS; parents Q04, Q05. Separate clean M1 source work on mainb513; no own candidate commit or PR yet at checkpoint.86 focused tests PASS confirmed by owner; read-only browser harness under source review, no actual browser run. Existing canonical adapter supports explicit read-only candidate view with legacy EXIT-ONLY and preserved existing test principal. Broader financial source retained separately at e7b9bf82 with no PR. No signing or Mainnet action. Next: Finish bounded M1 source/review and publish one exact head into the single reserved heavy batch; no new authority or financial merge.
 
 D — RESEARCH_OFFLINE_DRAFT_REVIEW; parents Q06, Q07, Q08, Q09. 500acb4276e and501012acd95 unchanged; offline tests/CI do not establish real closed-loop delivery. Real closed loop NOT_RUN. Next: Review scoped research and offline evidence without credential or external infrastructure setup.
 
 E — ASSIGNED_ACTIVITY_NOT_VERIFIED; parents Q10, Q11, Q12, Q13. Assignment source read and verified. No ACK or visible implementation branch/PR established by parent audit; activity NOT_VERIFIED. Next: Reconcile owner evidence without duplicate implementation or reassignment.
 
-F — HEAVY_BATCH_RUNNING; parents Q01, Q03, Q18. 504 closed/merged b513.507 prior195 Product PR90s failure retained. Prepared split91572879 is now published as20ede27b with tested tree2f81d0c8. One heavy slot admitted11:58; fresh exact PR workflows show Responsive/Game/Portal running and Universal PASS at12:01:22. Next: Inspect current exact-head CI and direct evidence; old195 results are historical only.
+F — PR_TERMINAL_WITH_LOCAL_FOLLOWUP_AND_HUD_P1; parents Q01, Q03, Q18. 504 remains closed/merged.507e4b batch terminal: Product both PASS, Responsive public coasting FAIL; local dcf7b69f correction remains unpublished. Separate confirmed contextual-HUD P1 owner has local87f7e418 V2.9.5 candidate, no PR/heavy QA. No claim of complete gameplay acceptance. Next: Retain queued507 fix and scoped HUD small tests; request resource slot only after C M1 and parent sequencing.
 
-Resource rule: one new heavy batch at a time. F507 admitted at11:58 after prior batches became terminal;20ede27b publication and running exact-head CI verified at12:01:22. Next A when READY, then C. Light research/code/small tests can run in parallel. Shared-file/main merges serialize. Financial merge HOLD and503 HOLD remain. No Human keys needed for current bounded work.
+Resource rule: reserve ONE next heavy batch for a single C M1 head. No C run yet verified; no parallel new heavy batches. A/HUD/F small tests and review may continue. B ready release queue must not block C. Financial merge and503 recovery HOLD unchanged. No Human keys needed; no signing/Mainnet.
 
 ### Machine-readable checkpoint
 
@@ -145,8 +145,8 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     "capacity": "Use actual available execution slots and confirmed scopes; 20 packages is backlog breadth, not 20 simultaneously executing workers. Pending CI is not running local code.",
     "parallel": "Independent read, review, test and isolated-branch work may proceed concurrently. Do not stop or reassign existing workers.",
     "serialization": "One write owner per overlapping file; serialize shared-file integration and all main merges. Rebase/revalidate later candidates against newly merged main.",
-    "merge_hold": "This queue remains Draft. Parent serializes later integration around active #507 gameplay QA and #505 explanation-only release, reconciling shared handoff edits. This worker does not merge main.",
-    "selection": "Six-track coordination: A whole-Player-Life P0 is highest engineering priority; B explanation-only release is ready and independent; C financial engineering stays read-only/local with merge HOLD; D research/offline review; E assigned owner activity unverified, no duplicate implementation; F closes remaining gameplay QA. One new heavy batch at a time: F507 slot admitted11:58, then A when ready, then C. Light research/code/small tests may run in parallel.",
+    "merge_hold": "Queue stays Draft. Parent serializes integration around C M1, confirmed HUD P1 and A integrity; this worker does not merge or change release authority.",
+    "selection": "Latest Human priority: C M1 read-only wallet is highest product priority, with confirmed contextual-HUD P1 work alongside A whole-Player-Life P0 integrity. B ready explanation-only release is lower priority and must not block C. One new heavy batch is reserved for a single C M1 head; A/HUD/F light work continues without parallel new heavy runs. Existing financial merge and503 recovery HOLD remain.",
     "refill": "When a package completes, choose the highest-priority authorized ready item. If all close, inspect roadmap and evidence for useful gaps; never invent tasks solely to consume capacity.",
     "reprioritization": "No new task, canceled project, interrupted active work or dependency removal. Q04 and Q05 remain tracked as secondary P2 engineering/release work; blocked financial execution stays blocked.",
     "boot_before_each_cycle": "Refresh latest main and read current Boot/Company Boot, applicable AGENTS and ownership before each work cycle; never infer employee identity or authority from reading."
@@ -158,12 +158,12 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P1",
       "status": "IN_PROGRESS",
       "dependencies": [],
-      "next_action": "Track required postrelease gameplay acceptance through #507, plus integrated #505 explanation-only checks. Preserve proven public version facts and separate inherited P2 observations.",
+      "next_action": "Prioritize confirmed contextual-HUD P1 child through canonical control owners while507 follow-up stays separately queued; C M1 owns next heavy slot.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693"
       ],
-      "evidence": "#498 V2.9.1 remains publicly live. #504 test-only successor merged at b513d4e7 at11:08 UTC, without a product-version change. Pages is live, but postmerge public pointblank-facing failure is unresolved in successor #507; no blanket behavioral QA pass.",
+      "evidence": "Public V2.9.1 remains live;504 closed/merged b513. Confirmed contextual-HUD P1 has local V2.9.5 candidate with no heavy/native release evidence yet.507 latest batch has Game PASS but Responsive public coasting FAIL.",
       "activity": "POSTMERGE_QA_COORDINATION",
       "children": [
         {
@@ -174,7 +174,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
         {
           "id": "Q01.behavioral_gates",
           "status": "IN_PROGRESS",
-          "evidence": "Postmerge public facing issue follows50720ede27b; exact-head CI running, not complete."
+          "evidence": "507e4b terminal partial success; localdcf7 queued. Separate contextual HUD P1 local87f under Q15, no heavy acceptance."
         }
       ]
     },
@@ -184,13 +184,14 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P0",
       "status": "BLOCKED",
       "dependencies": [],
-      "next_action": "Prioritize whole-Player-Life successor Stage1 local review, then request heavy slot when READY. Retain P0 release hold despite scoped506 CI. #505 is independently ready for parent release queue; #503 HOLD unchanged.",
+      "next_action": "Continue A Stage2 model/validator work and small tests while preserving whole-Life P0 release gates.508 foundation is inert, not integrated protection; do not trigger another heavy batch ahead of C M1.503 recovery HOLD remains.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/503",
         "https://github.com/klineodyssey/kline-odyssey/pull/505",
-        "https://github.com/klineodyssey/kline-odyssey/pull/506"
+        "https://github.com/klineodyssey/kline-odyssey/pull/506",
+        "https://github.com/klineodyssey/kline-odyssey/pull/508"
       ],
-      "evidence": "Fresh506 head8db98fb9 integrates505cc235/mainb513. Parent checkpoint: all seven CI workflows and15 scoped native cases PASS, but full Player Life, legacy-client/BFCache and visual release gates remain incomplete. Whole-Life successor is in Stage1 local review.505cc235 exact CI and13 explanation images PASS; no live V2.9.3 or production-data impact claimed.",
+      "evidence": "50800fdf is an inert Life-only IndexedDB foundation with zero application callers. Backend/Responsive/Portal/Universal PASS; both Product lanes FAIL shared browser baseline. Local Stage2 model/validators work is not full P0 closure. Retained5068db partial evidence does not establish whole-Life acceptance.",
       "activity": "HIGHEST_PRIORITY_LOCAL_GAME_INTEGRITY_RELEASE_BLOCKED",
       "readiness": "RELEASE_BLOCKED",
       "risk": "MEDIUM",
@@ -210,7 +211,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "pr": 505,
           "version": "V2.9.3_CANDIDATE_NOT_LIVE",
           "scope": "Explanation-only505cc235 exact CI and13 explanation images PASS. V2.9.3 candidate, not live; parent release serialization, no new heavy run.",
-          "scheduling": "Independent explanation-only task; does not gate starting or continuing #506 integrity engineering.",
+          "scheduling": "Independent ready release queue, lower product priority than C M1; must not block C/A engineering.",
           "readiness": "READY_FOR_RELEASE_QUEUE"
         },
         {
@@ -221,7 +222,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "pr": 506,
           "head": "8db98fb9d50828e9024daa2d811498c4e05201dd",
           "depends_on_pr": 505,
-          "evidence": "Retained506 seven workflows and15 scoped native cases PASS per parent, not full Player Life acceptance. Legacy-client/BFCache/visual holds remain. Separate whole-Life successor Stage1 local review; no production-data impact claimed.",
+          "evidence": "50800fdf is an inert Life-only IndexedDB foundation with zero application callers. Backend/Responsive/Portal/Universal PASS; both Product lanes FAIL shared browser baseline. Local Stage2 model/validators work is not full P0 closure. Retained5068db partial evidence does not establish whole-Life acceptance.",
           "priority": "P0",
           "acceptance_scope": [
             "Whole Player Life: stale revision N from an old tab must never overwrite accepted N+1",
@@ -237,7 +238,10 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
             "integrated_main": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
             "engineering_scheduling": "505 release does not block continued whole-Life integrity engineering."
           },
-          "stage": "WHOLE_LIFE_SUCCESSOR_STAGE1_LOCAL_REVIEW"
+          "stage": "STAGE2_LOCAL_MODEL_VALIDATORS",
+          "successor_pr": 508,
+          "successor_head": "00fdf4b97d5c48f6bfd78ec94fb66c89e919fe80",
+          "application_callers": 0
         }
       ]
     },
@@ -247,17 +251,17 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P1",
       "status": "IN_PROGRESS",
       "dependencies": [],
-      "next_action": "Inspect published50720ede27b exact-head CI and direct evidence in the admitted heavy slot; no second new heavy batch before completion/resource handoff.",
+      "next_action": "Retain queued507 fix and scoped HUD small tests; request resource slot only after C M1 and parent sequencing.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/504",
         "https://github.com/klineodyssey/kline-odyssey/pull/507"
       ],
-      "evidence": "504 closed/merged b513.507 prior195 Product PR90s failure retained. Prepared split91572879 is now published as20ede27b with tested tree2f81d0c8. One heavy slot admitted11:58; fresh exact PR workflows show Responsive/Game/Portal running and Universal PASS at12:01:22.",
+      "evidence": "507 remote e4b33676c251ba291a7faafce144ed762cc176a3 batch terminal: Game Product both PASS, Responsive public coasting FAIL. Local correction dcf7b69fbc499f998c4223816a8356a2ff8fd71f unpublished; no new heavy slot.504 remains engineering CLOSED.",
       "activity": "TEST_ONLY_SUCCESSOR_EXACT_HEAD_QA",
       "phase_status": {
         "successor504": "MERGED_B513D4E7",
         "public_postmerge_behavior": "FAIL_FACING_PRECONDITION",
-        "successor507": "PUBLISHED20EDE27B_EXACT_HEAD_CI_RUNNING"
+        "successor507": "TERMINAL_PARTIAL_PASS_LOCAL_CORRECTION_QUEUED"
       },
       "children": [
         {
@@ -276,24 +280,46 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "id": "Q03.facing",
           "status": "IN_PROGRESS",
           "pr": 507,
-          "head": "20ede27b5b2ff33cec0ee4afe9ceb500d765a414",
-          "stage": "EXACT_HEAD_CI_RUNNING"
+          "head": "e4b33676c251ba291a7faafce144ed762cc176a3",
+          "stage": "PUBLIC_COASTING_FAIL_LOCAL_DCF7B69F_QUEUED"
         }
       ]
     },
     {
       "id": "Q04",
-      "title": "BSC97 stale-quote dispatch race",
-      "priority": "P2",
+      "title": "M1 read-only wallet and retained financial engineering",
+      "priority": "P1",
       "status": "IN_PROGRESS",
       "dependencies": [],
-      "next_action": "Review clean local successor59ce7c61 and read-only BSC97 readiness; no transaction. Queue any new heavy tests after A; preserve financial merge HOLD.",
+      "next_action": "Finish bounded M1 source/review and publish one exact head into the single reserved heavy batch; no new authority or financial merge.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/488"
       ],
-      "evidence": "488 remote89d6af11 unchanged. Parent-reported clean local successor59ce7c613611574f539988ab90714ea198e7a31a has62 focused tests PASS and no PR yet. Block135008706 confirms14 code hashes and83 historical receipts; three capabilities expired, OracleQuorumUnavailable, new risk FAIL_CLOSED. No transaction.",
-      "activity": "LOCAL_ENGINEERING_READ_ONLY_REVALIDATION",
-      "local_successor": "59ce7c613611574f539988ab90714ea198e7a31a"
+      "evidence": "Separate clean M1 source work on mainb513; no own candidate commit or PR yet at checkpoint.86 focused tests PASS confirmed by owner; read-only browser harness under source review, no actual browser run. Existing canonical adapter supports explicit read-only candidate view with legacy EXIT-ONLY and preserved existing test principal. Broader financial source retained separately at e7b9bf82 with no PR. No signing or Mainnet action.",
+      "activity": "M1_SOURCE_LOCAL_WORK_HEAVY_SLOT_RESERVED",
+      "local_successor": null,
+      "product_priority": "HIGHEST",
+      "children": [
+        {
+          "id": "Q04.m1_read_only",
+          "priority": "P1",
+          "product_priority": "HIGHEST",
+          "status": "IN_PROGRESS",
+          "branch": "codex/k11520-m1-readonly-20261005",
+          "candidate_head": null,
+          "pr": null,
+          "evidence": "86 focused tests confirmed PASS; read-only harness review and source in progress on mainb513; no own committed candidate or heavy acceptance.",
+          "scope": "Same canonical adapter; explicit read-only candidate view, legacy EXIT-ONLY, existing test principal preserved. No signing/Mainnet."
+        },
+        {
+          "id": "Q04.broader_financial",
+          "status": "IN_PROGRESS",
+          "release": "HOLD",
+          "local_head": "e7b9bf82aba5373ba4173efe6a3af563fc582f8f",
+          "pr": null,
+          "scope": "Preserved separately; prior full readiness and expired-capability findings remain bounded to their original scope, not M1 release claims."
+        }
+      ]
     },
     {
       "id": "Q05",
@@ -460,18 +486,18 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     {
       "id": "Q15",
       "title": "Graphics and performance baseline",
-      "priority": "P2",
-      "status": "QUEUED",
+      "priority": "P1",
+      "status": "IN_PROGRESS",
       "dependencies": [
         "Q01",
         "Q03"
       ],
-      "next_action": "After required gameplay QA, verify reachability and provenance of bounded inherited P2 visual observations before proposing fixes; keep performance work based on measured evidence.",
+      "next_action": "Continue confirmed contextual-HUD P1 native-test preparation and small reviews; retain separate507 ownership and505 explanation copy. No publication/heavy run until resource release after C.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/AGENTS.md"
       ],
-      "evidence": "Inherited visual observations are not confirmed new P1 defects or #505 regressions. Actual control click reachability remains unknown where noted. Keep required gameplay priority.",
+      "evidence": "Owner confirmed local87f7e41859e075646c74f0a2366c8060e6150420 on dot/11520-contextual-hud-20261005, V2.9.5 candidate. Runtime revision8e34aeca had181 aggregate/50 focused PASS; later41dc and87f are test/workflow-only with syntax/YAML/diff PASS. True hide, settings inertness and contextual recenter use actual Camera owner. No PR, push, heavy CI or native-browser acceptance.",
       "activity": "NOT_RUNNING",
       "children": [
         {
@@ -491,6 +517,18 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "priority": "P2",
           "status": "QUEUED",
           "scope": "Optional white collapse button after rotation and AI-settings center occlusion; actual click reachability unknown; verify before assigning severity."
+        },
+        {
+          "id": "Q15.contextual_hud_p1",
+          "priority": "P1",
+          "status": "IN_PROGRESS",
+          "owner_task": "repair_contextual_hud_controls",
+          "local_head": "87f7e41859e075646c74f0a2366c8060e6150420",
+          "version": "V2.9.5_CANDIDATE_NOT_LIVE",
+          "pr": null,
+          "heavy_qa": "NOT_RUN",
+          "scope": "Confirmed contextual controls: true hide, inert closed settings, recenter through canonical Camera owner.",
+          "validation": "Runtime181 aggregate/50focused PASS; later test/workflow-only commits syntax/YAML/diff PASS; native acceptance not run."
         }
       ]
     },
@@ -529,7 +567,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "dependencies": [
         "Q01"
       ],
-      "next_action": "Parent may sequence independently ready505 explanation-only release while required507 gameplay validation continues; maintain public SHA/version proof and separate provenance proposal.",
+      "next_action": "Preserve public V2.9.1 proof and independently ready505 candidate while C M1 product priority, contextual HUD P1 and A integrity progress; parent alone sequences release.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml"
@@ -637,8 +675,8 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
   ],
   "clarification_at": "2026-10-05T08:40:33Z",
   "product_vision": "KAIOS is a next-generation operating-system design goal that makes customer dreams real: customer/player wish → KGEN AI Company project → verified customer outcome. K11520 is currently game-first, with exchange/trading secondary and contextual. These are priorities and intended behavior, not implemented autonomous-service or execution-authority claims.",
-  "checkpoint_at": "2026-10-05T12:01:22Z",
-  "priority_clarification_at": "2026-10-05T11:31:00Z",
+  "checkpoint_at": "2026-10-05T13:09:11Z",
+  "priority_clarification_at": "2026-10-05T12:43:00Z",
   "audit_checkpoint_at": "2026-10-05T08:51:09Z",
   "observed_main_sha": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
   "branch_base_note": "Documentation branch retains original base27a21b03; current main b513d4e7 and Boot/Company Boot were read before this checkpoint. No main merge or rebase performed.",
@@ -656,7 +694,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
   },
   "six_track_scheduler": {
     "directive_at": "2026-10-05T11:39:00Z",
-    "checkpoint_at": "2026-10-05T12:01:22Z",
+    "checkpoint_at": "2026-10-05T13:09:11Z",
     "kind": "Coordination mapping only, not runtime, formal dispatch, identity or additional parent packages",
     "tracks": [
       {
@@ -665,10 +703,10 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "Q02"
         ],
         "priority": "P0",
-        "status": "IN_PROGRESS_RELEASE_BLOCKED",
-        "evidence": "Whole-Player-Life successor Stage1 local review. Retained5068db98fb9 has seven CI workflows PASS and15 scoped native cases per parent; this is partial coverage, with legacy-client/BFCache/visual release holds.",
-        "remote_head": "8db98fb9d50828e9024daa2d811498c4e05201dd",
-        "next": "Complete Stage1 local review and whole-Life acceptance readiness before requesting the next heavy slot."
+        "status": "STAGE2_LOCAL_WORK_P0_RELEASE_BLOCKED",
+        "evidence": "50800fdf is an inert Life-only IndexedDB foundation with zero application callers. Backend/Responsive/Portal/Universal PASS; both Product lanes FAIL shared browser baseline. Local Stage2 model/validators work is not full P0 closure. Retained5068db partial evidence does not establish whole-Life acceptance.",
+        "remote_head": "00fdf4b97d5c48f6bfd78ec94fb66c89e919fe80",
+        "next": "Continue scoped Stage2 local review and small tests; no new heavy batch while C slot is reserved."
       },
       {
         "track": "B",
@@ -680,7 +718,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
         "status": "READY_FOR_RELEASE_QUEUE",
         "remote_head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
         "evidence": "505 exact-head CI and13 explanation images PASS; V2.9.3 candidate only; parent serializes release. Independent of A engineering.",
-        "next": "Parent scoped release decision; no new heavy batch."
+        "next": "Remain independently ready in lower-priority parent release queue; do not block C or trigger heavy reruns."
       },
       {
         "track": "C",
@@ -688,12 +726,15 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "Q04",
           "Q05"
         ],
-        "priority": "P2",
-        "status": "LOCAL_SUCCESSOR_MERGE_HOLD",
-        "remote_head": "89d6af11860db277504df95f81c28997025da31f",
-        "local_successor": "59ce7c613611574f539988ab90714ea198e7a31a",
-        "evidence": "488 unchanged. Parent reports clean local successor, no PR yet,62 focused tests PASS. Fresh BSC97 block135008706:14 code hashes and83 historical receipts valid; three capabilities expired and OracleQuorumUnavailable; new risk fails closed. No transaction.",
-        "next": "Continue bounded engineering/read-only readiness; heavy queue after A; retain financial merge HOLD."
+        "priority": "P1",
+        "status": "M1_READ_ONLY_SOURCE_IN_PROGRESS",
+        "remote_head": null,
+        "local_successor": null,
+        "evidence": "Separate clean M1 source work on mainb513; no own candidate commit or PR yet at checkpoint.86 focused tests PASS confirmed by owner; read-only browser harness under source review, no actual browser run. Existing canonical adapter supports explicit read-only candidate view with legacy EXIT-ONLY and preserved existing test principal. Broader financial source retained separately at e7b9bf82 with no PR. No signing or Mainnet action.",
+        "next": "Finish bounded M1 source/review and publish one exact head into the single reserved heavy batch; no new authority or financial merge.",
+        "product_priority": "HIGHEST",
+        "branch": "codex/k11520-m1-readonly-20261005",
+        "preserved_financial_head": "e7b9bf82aba5373ba4173efe6a3af563fc582f8f"
       },
       {
         "track": "D",
@@ -731,25 +772,26 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "Q18"
         ],
         "priority": "P1",
-        "status": "HEAVY_BATCH_RUNNING",
-        "remote_head": "20ede27b5b2ff33cec0ee4afe9ceb500d765a414",
-        "local_split_commit": "91572879",
-        "evidence": "504 closed/merged b513.507 prior195 Product PR90s failure retained. Prepared split91572879 is now published as20ede27b with tested tree2f81d0c8. One heavy slot admitted11:58; fresh exact PR workflows show Responsive/Game/Portal running and Universal PASS at12:01:22.",
-        "next": "Inspect current exact-head CI and direct evidence; old195 results are historical only."
+        "status": "PR_TERMINAL_WITH_LOCAL_FOLLOWUP_AND_HUD_P1",
+        "remote_head": "e4b33676c251ba291a7faafce144ed762cc176a3",
+        "local_split_commit": "dcf7b69fbc499f998c4223816a8356a2ff8fd71f",
+        "evidence": "504 remains closed/merged.507e4b batch terminal: Product both PASS, Responsive public coasting FAIL; local dcf7b69f correction remains unpublished. Separate confirmed contextual-HUD P1 owner has local87f7e418 V2.9.5 candidate, no PR/heavy QA. No claim of complete gameplay acceptance.",
+        "next": "Retain queued507 fix and scoped HUD small tests; request resource slot only after C M1 and parent sequencing."
       }
     ],
     "resources": {
       "max_new_heavy_batches": 1,
-      "current_admission": "F507 at2026-10-05T11:58:00Z",
-      "current_execution": "F50720ede27b published and exact-head heavy batch RUNNING, verified at12:01:22; no second new batch admitted.",
+      "current_admission": "Reserved for ONE C M1 head batch",
+      "current_execution": "No C candidate head or run verified; reservation is not running CI.507 previous batch terminal.",
       "next": [
-        "A when READY",
-        "C after A"
+        "C M1 single exact-head batch",
+        "Parent sequences A/HUD/F after C based on readiness and priority"
       ],
-      "light_work": "Research, code and small scoped tests may parallelize within actual capacity",
-      "release": "Shared-file integration and main merges serialize; queue worker does not merge",
-      "secrets": "No Human keys needed for current bounded work; no credential request or new authority"
-    }
+      "light_work": "A Stage2 and HUD/F code/review/small tests can continue; no parallel new heavy runs",
+      "release": "Shared-file/main merges serialize; financial merge HOLD and503 HOLD unchanged",
+      "secrets": "No Human signing keys needed; no signing/Mainnet action or credential request"
+    },
+    "latest_priority_at": "2026-10-05T12:43:00Z"
   }
 }
 ```
