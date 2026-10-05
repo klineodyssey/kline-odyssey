@@ -1,5 +1,30 @@
 # 11520 HANDOFF CURRENT
 
+## M1 first CI evidence and repair checkpoint — 2026-10-05
+
+- Draft PR #509 initial remote head `0ce7b9c6c1e576711afeb4165c77188eb5ce9e1d`
+  failed its browser/version gates. Preserve that evidence; M1 is not accepted.
+  Portal/version assertions still expected V2.9.1; Game/Responsive also retained
+  escaped old-version regular expressions. These consumers now follow V2.9.4,
+  with an active-consumer consistency guard to detect recurrence.
+- Public BSC97 read-only Chromium reached account-switch checks, but its reload
+  wait accessed the execution global before boot. Failure capture could mask the
+  original error. Reload now waits for the actual owner, and captures retain
+  original stack, console and sanitized network failures with nullable snapshots.
+  The injected provider's A/B account state remains in the Node broker across
+  documents. This is not physical MetaMask verification.
+- Direct screenshot inspection found peer utility occlusion and duplicate return
+  controls. The existing utility owner now masks peers while the wallet is open,
+  preserves wallet close and global HUD restore, and recomputes current context
+  eligibility on close. Saved hidden preferences remain hidden. One canonical
+  return control remains. Unit coverage exercises repeated owner ticks and
+  changing eligibility; browser assertions wait for two actual timer generations.
+- Cheap repaired-source checks: root unit suite 433/433 and UI-static 37/37 PASS.
+  New exact-head Chromium/visual and CI acceptance remain PENDING. The first
+  canonical local-EVM CI job passed; both browser jobs failed before completion.
+  Public signed transactions remain NO; legacy exits retain their existing
+  financial-review boundary. No financial release or merge approval is implied.
+
 ## V2.9.4 M1 independent read-only wallet candidate — 2026-10-05
 
 - Human-authorized M1 split from #488; temporary external engineering maintainer
@@ -70,7 +95,7 @@
   import the wider #488 async mutation-ticket/direct-receipt repairs. The
   read-only view cannot exercise those legacy write paths; it must not be called
   a completed financial execution release. Full financial review stays HOLD.
-- `M1_FUNCTIONAL_QA=FOCUSED_PASS_BROWSER_PENDING`; `M1_VISUAL_QA=PENDING`;
+- `M1_FUNCTIONAL_QA=INITIAL_BROWSER_FAILED_REPAIR_PENDING`; `M1_VISUAL_QA=INITIAL_FAILED_REPAIR_PENDING`;
   `SIGNED_TX=NO`; `MAINNET_TX=NO`; `REAL_MAINNET_KGEN_TRANSFER=NO`.
   No merge/publication readiness is claimed until exact-head gates and direct
   screenshot inspection are complete and the parent classifies release scope.

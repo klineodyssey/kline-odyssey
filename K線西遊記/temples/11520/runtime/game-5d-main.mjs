@@ -490,6 +490,7 @@ function renderWallet(value=walletSession.snapshot()){
   const busy=executionBusy||['CONNECTING','READING'].includes(value.status);
   $('#walletConnect').disabled=busy;$('#walletRefresh').disabled=busy;
   $('#walletConnect').textContent=value.account?'重新連線':'Connect Wallet';
+  $('#executionMode').hidden=execution.readOnly===true;
   $('#executionMode').disabled=busy||(!isTestnet()&&!deploymentManifest);$('#executionMode').textContent=isTestnet()?'返回 SIMULATION':'切換 BSC TESTNET 97';
   $('#walletM1ReadOnly').disabled=busy||!readOnlyDeployment;
   $('#walletM1ReadOnly').textContent=execution.readOnly?'返回原錢包檢視':'1C TESTNET · 唯讀 M1';

@@ -112,3 +112,25 @@ test('M1 candidate config is additive and legacy principal exit context is prese
  assert.match(view,/readOnly:true/);assert.doesNotMatch(view,/executionPreferenceKey|dispose|localStorage/);
  assert.match(source,/exitOnly:true/);assert.match(source,/legacyExecution\|\|createExecutionAdapter/);
 });
+
+test('existing utility owner gives expanded wallet an unobstructed view and restores peers on close',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/market-origin-wallet-layout-runtime.mjs',import.meta.url),'utf8');
+ const fn=source.slice(source.indexOf('function syncUtilityMaster(){'),source.indexOf('function walletAnchor(){'));
+ let walletClosed=false,hudHidden=false,utilitiesOpen=true;const hiddenPreferences=new Set();
+ const nodes={};for(const id of ['walletPanel','walletToggle','dock','aiChatButton','chatHandle','bgmButton','backpackButton','gameModeToggle','k11520HudCollapseAll','kaiosPortalButton','cargoInterceptionButton','homeDeliveryButton'])nodes[id]={id,style:{values:{},setProperty(k,v){this.values[k]=v},removeProperty(k){delete this.values[k]}},classList:{contains:name=>name==='k11520HiddenBySettings'?hiddenPreferences.has(id):id==='walletPanel'&&name==='collapsed'?walletClosed:false},dataset:{},getAttribute:()=>''};
+ const toggle={dataset:{},setAttribute(){},textContent:'',title:''},selectors=Object.keys(nodes).filter(k=>!['cargoInterceptionButton','homeDeliveryButton'].includes(k)).map(k=>'#'+k);
+ const context=vm.createContext({walletWasOpen:false,put:(el,k,v)=>el.style.setProperty(k,v),installUtilityMaster:()=>toggle,document:{documentElement:{classList:{contains:name=>(name==='k11520UtilitiesOpen'&&utilitiesOpen)||(name==='k11520HudCollapsed'&&hudHidden)}},querySelectorAll:s=>nodes[s.slice(1)]?[nodes[s.slice(1)]]:[]},$:s=>nodes[s.slice(1)],OPTIONAL_UTILITIES:selectors,matchMedia:()=>({matches:false})});
+ vm.runInContext(source.slice(source.indexOf('function pinMobileUtilityStack(){'),source.indexOf('function installUtilityMaster(){')),context);vm.runInContext(fn,context);vm.runInContext('syncUtilityMaster()',context);
+ for(const id of ['dock','aiChatButton','chatHandle','bgmButton','backpackButton'])assert.equal(nodes[id].style.values.display,'none');
+ assert.notEqual(nodes.walletPanel.style.values.display,'none');assert.notEqual(nodes.walletToggle.style.values.display,'none');
+ for(const id of ['cargoInterceptionButton','homeDeliveryButton'])assert.equal(nodes[id].style.values.display,'none');
+ // Exercise the real owner sequence across repeated ticks and changed context eligibility.
+ for(const [cargo,home] of [['cruise','idle'],['raid','delivery'],['cruise','delivery']]){nodes.cargoInterceptionButton.dataset.contextState=cargo;nodes.homeDeliveryButton.dataset.contextState=home;for(let tick=0;tick<2;tick++){vm.runInContext('pinMobileUtilityStack();syncUtilityMaster()',context);for(const id of ['cargoInterceptionButton','homeDeliveryButton','dock'])assert.equal(nodes[id].style.values.display,'none')}}
+ hiddenPreferences.add('chatHandle');
+ hudHidden=true;vm.runInContext('syncUtilityMaster()',context);assert.notEqual(nodes.k11520HudCollapseAll.style.values.display,'none','HUD restore remains reachable');hudHidden=false;vm.runInContext('pinMobileUtilityStack();syncUtilityMaster()',context);
+ walletClosed=true;vm.runInContext('syncUtilityMaster()',context);for(const id of ['dock','aiChatButton','bgmButton','backpackButton'])assert.notEqual(nodes[id].style.values.display,'none');
+ for(const id of ['cargoInterceptionButton','homeDeliveryButton'])assert.equal(nodes[id].style.values.display,'grid');
+ assert.equal(nodes.chatHandle.style.values.display,'none','current hidden chat preference survives wallet close');
+ utilitiesOpen=false;vm.runInContext('pinMobileUtilityStack();syncUtilityMaster()',context);assert.equal(nodes.cargoInterceptionButton.style.values.display,'none','now-idle cargo stays hidden');assert.equal(nodes.homeDeliveryButton.style.values.display,'grid','currently eligible delivery remains visible');
+ assert.match(source,/walletOpen\?\['#k11520UtilityMaster',\.\.\.visibleContextActions,'#walletToggle'\]/);
+});
