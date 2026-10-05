@@ -74,7 +74,7 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
         orders:[],positions:[],receipts:[],observations:{}})});
   }
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
-  const run=(fn,mutating=false)=>{try{if(mutating)options.beforeMutation?.();const result=fn();if(result.ok&&mutating)options.afterMutation?.();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
+  const run=(fn,mutating=false)=>{const before=mutating&&!options.transaction?structuredClone(ledger):null;try{let result;if(mutating&&options.transaction)result=options.transaction(fn);else{if(mutating)options.beforeMutation?.();result=fn();if(result.ok&&mutating)options.afterMutation?.();}if(before&&!result.ok){for(const key of Object.keys(ledger))delete ledger[key];Object.assign(ledger,before);}return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){if(before){for(const key of Object.keys(ledger))delete ledger[key];Object.assign(ledger,before);}return executionFailure(error)}};
   const preview=(input,{now=Date.now()}={})=>run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
     const intent=buildExecutionOrderIntent({...input,now}),book=simulationSnapshot(ledger);

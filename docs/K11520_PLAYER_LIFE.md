@@ -181,3 +181,102 @@ storage/two players/home/XP/wallet proofs/account switch/export-import.
 GM provides PR/head/evidence to Human for ChatGPT second-layer review; it must
 not claim that second review already occurred. No automatic cross-thread
 message, cloud purchase, Mainnet write or KAIOS payout is part of this release.
+
+## Local product/Courier integrity Draft experiment (2026-10-05)
+
+STATUS: MEDIUM_RISK_DRAFT / INTEGRATION_AND_RELEASE_BLOCKED
+TASK: DOT-LOCAL-STORE-INTEGRITY-20261005
+BASE: 765d0e24e3fbe7353a80329c99bc3b5c3025fd12
+IDENTITY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+
+This bounded local-game experiment is not an approved single-tab product policy,
+live migration, merge decision or release. No Worker/Life/Employee identity,
+signer, deployment or real-asset authority is adopted. Frozen clock-recovery
+PR #503 is not imported. Rewards, insurance amounts, clock thresholds, canonical
+XYZ and real-wallet/on-chain settlement behavior are unchanged.
+
+### BOOT, scope and canonical writers
+
+Root/11520 AGENTS, repository/AI Company Boot, Canon/Physics/Map, workspace and
+workforce rules, WorkQueue, protected paths, manifests and open PR ownership were
+checked from clean main. Human's temporary external-maintainer exception is the
+contribution authority. No registry record or company claim is created.
+
+The existing product and Courier envelopes remain their sole storage owners:
+
+- Player-scoped k11520.local-product.v1:<owner> in evm-wallet-runtime.mjs.
+- Origin-wide K11520_PLAYER_COURIER in digital-ant-logistics-runtime.mjs.
+
+Product activation/session, events/playtime, loot/XP, spend, reward/insurance,
+scoped legacy migration and simulation submit/observe/close/cancel share the
+writer guard. The production simulation adapter wraps its entire synchronous
+mutation in transactLedger. All Courier writes reload the full shared envelope.
+No second ledger, backend, reward authority or mission-specific store is added.
+
+### Coordination and failure contract
+
+One stable Web Lock, k11520.local-game-writer, covers both envelopes and ALL
+player/wallet namespaces on this origin. Same-realm consumers share a refcounted
+lease using underlying storage identity. Lock order is the lifetime origin lease,
+then one synchronous transaction; no nested mission/global lock is acquired.
+Reentrant writes and account changes during a transaction are rejected.
+
+Factories expose ready, snapshot().writeCapability, requestWriter and dispose.
+Product refresh and Courier reload explicitly recover canonical state. Acquisition
+is asynchronous, exclusive and ifAvailable. Followers can read these stores but
+cannot persist their activation or mutations. Missing locks/storage fail closed.
+Disposal revokes that consumer; last-reference disposal releases the shared lock.
+pagehide revokes the generation. BFCache return requires explicit reacquisition
+and refresh. Browser destruction releases the native lock, not pending credit.
+
+Guarded writes reload, validate, draft, persist and verify exact readback before
+acknowledging success. Failed/uncertain persistence rolls back live memory and
+blocks further writes until explicit refresh. Old bytes are never written back
+as compensation. This protocol is cooperative, not a global localStorage CAS or
+an atomic transaction spanning multiple keys.
+
+### Delivery, insurance and migration
+
+Eligible ordinary ACTIVE delivery first stores DELIVERY_PENDING_CREDIT in the
+existing mission. resolveCreditPort(courierLifeId) explicitly supplies the
+canonical product store port. Player ID, current settlement-time owner namespace,
+mission, original receipt, amount and purpose become immutable at first pending
+intent. Missing owner/port preserves the mission and cargo. Exact durable product
+receipt evidence is required before DELIVERED and destination ownership.
+reconcileCredit retries the same bound intent. claimInsurancePayout similarly
+uses pending intent, existing product credit and receipt-verified PAID acknowledgement.
+No historical DELIVERED mission is automatically converted or backpaid.
+
+Schema V2 stays at the existing product key. New receipt metadata and dedupe
+indexes persist together. Legacy IDs remain replay tombstones without invented
+amounts or backpay. Supported unknown fields survive already-scoped migration. An absent scoped guest
+record alongside any unscoped product save stays LEGACY_PRODUCT_REVIEW_REQUIRED,
+regardless of another store's legacy-owner claim. Product wrappers do not claim
+that ownership. Refresh, account roundtrips and writer takeover cannot silently
+clear this hold. Some existing players therefore need reviewed migration/UX
+before final release; original bytes remain unchanged. New receipts are
+refused at the supported capacity; old evidence is not evicted. Unsupported,
+malformed, conflicting, oversized or wrong-namespace records remain untouched.
+
+### Review and release gates
+
+- Shell resolver, pending retry and insurance routing require coordinated,
+  separately reviewed integration. Missing integration fails closed.
+- Different-player tabs also contend for this lease. The resulting product/UX
+  tradeoff needs Human review before release.
+- Player Life, backpack, world state and preferences remain outside this lease.
+  No whole-game read-only or cross-store atomicity claim is made. Existing combat
+  ordering and reward feedback need separate integration validation.
+- Mixed-version rollout is unsupported. Evaluation requires closing/reloading
+  old tabs. Rollback must preserve V2 evidence for a compatible reader; reverting
+  code is not a data downgrade or permission to delete receipts.
+- Node coverage includes ownership/lifecycle, concurrent consumers, durability,
+  pending-credit retries, namespace binding, migration and capacity boundaries.
+  Local Chromium cannot start because socket() is not permitted; no bypass was
+  attempted. FUNCTIONAL_QA is store/Node only; VISUAL_QA is NOT_RUN.
+- Real multi-tab, close/crash/takeover, BFCache, mixed-version, account switches,
+  interrupted credit/ack, existing browser suites and inspected mobile/landscape
+  screenshots remain required at the final integrated head.
+
+FINAL: MEDIUM_RISK_DRAFT / HOLD. Unit results do not authorize merge, live player
+migration, expansion to other stores, or real KGEN/KAIOS/chain actions.

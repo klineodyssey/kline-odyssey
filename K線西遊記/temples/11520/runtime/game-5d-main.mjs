@@ -49,14 +49,14 @@ let playerLifeSwitching=false,lastSessionSave=0,lastSessionSnapshot='',lastLifeS
 const ledger=createKgenLedger(100),world=createWorldState();let pending=null,combatFx=null;
 world.trainingMemory=createTrainingMemory(scopedStorage);
 let legacyGuestCandidate=null;try{legacyGuestCandidate=scopedStorage.getItem('k11520.local-product.v1:guest')}catch{}
-const playerStore=createSimulationPlayerStore({ledger,storage:playerLifeStorage,playerId});playerStore.activate(null);
+const playerStore=createSimulationPlayerStore({ledger,storage:playerLifeStorage,playerId});await playerStore.ready;playerStore.activate(null);
 world.journeyEnabled=true;createKSpaceEncounter(world,undefined,S.xyz);
 const journey=createJourneyTutorial({storage:scopedStorage,returning:!!restoredSession});let journeyOrigin={...S.xyz};
 if(playerLife.snapshot().createdThisBoot&&playerLife.snapshot().persistent&&(restoredSession||legacyGuestCandidate)){try{const guest=playerStore.snapshot();playerLife.migrateLegacy({lastXYZ:{...S.xyz},journeyProgress:{tutorialStage:journey.snapshot().stage},legacyProgress:{xp:guest.xp||0,engineXp:guest.engineXp||0}})}catch{}}
 function replayJourney(){journey.replay();journeyOrigin={...S.xyz};showCombatTarget()}
 addEventListener('k11520:replay-journey',replayJourney);
 globalThis.__K11520_JOURNEY__=Object.freeze({snapshot:journey.snapshot});
-const simulationExecution=createExecutionAdapter({ledger,productV1:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
+const simulationExecution=createExecutionAdapter({ledger,productV1:true,transaction:fn=>playerStore.transactLedger(fn)});
 function productEvent(event,details){try{playerStore.record(event,details)}catch{toast('另一頁已更新玩家紀錄，請重新載入')}const p=playerStore.snapshot();S.kaios=p.kaios;return p}
 const cargoRaidRewardReceipts=new Set();
 document.addEventListener('k11520:cargo-robbery-resolved',event=>{
@@ -76,7 +76,7 @@ document.addEventListener('k11520:courier-settlement',event=>{
   const mission=globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(missionId)?.mission,activeLife=playerLife.activePlayer().playerId;
   const verified=mission?.status==='DELIVERED'&&mission?.settlement?.outcome==='DELIVERED'&&mission.settlement.receiptId===receiptId&&mission.settlement.rewardKaios===reward&&mission.courierLifeId===courier&&courier===activeLife&&mission.settlement.chainTransfer===false;
   if(!verified)return;
-  let result;try{result=playerStore.recordCourierSettlement({receiptId,reward})}catch{toast('另一頁已更新運送報酬，請重新載入');return}
+  let result;try{result=playerStore.recordCourierSettlement({...mission.settlement.credit,receiptId,reward})}catch{toast('另一頁已更新運送報酬，請重新載入');return}
   if(!result.ok){if(result.reason!=='COURIER_REWARD_REPLAY_BLOCKED')toast(`運送報酬未入帳：${result.reason}`);return}
   S.kaios=playerStore.snapshot().kaios;hud();toast(`運送完成 · 薪資與運費分成 ${reward} KAIOS 已進入本機玩家帳`,true);
 });
@@ -113,6 +113,7 @@ function claimDailyJourney(){
 }
 syncWorldFeedback();
 globalThis.__K11520_PRODUCT__=Object.freeze({
+  courierCreditPort:Object.freeze({snapshot:playerStore.snapshot,recordCourierSettlement:playerStore.recordCourierSettlement,recordCourierInsurancePayout:playerStore.recordCourierInsurancePayout}),
   snapshot:()=>({...playerStore.snapshot(),...playerProgressSnapshot(),home:playerLife.loadHomePlot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED',crossMarket:crossMarketSnapshot(),marketEngine:marketEngineSnapshot()}),
   spendLocalKaios:(amount,purpose='LOCAL_GAME_PURCHASE')=>{const result=playerStore.spendKaios(amount,{purpose});S.kaios=playerStore.snapshot().kaios;hud();return result},
   recordCourierInsurancePayout:(receiptId,rewardKaios)=>{const result=playerStore.recordCourierInsurancePayout({receiptId,reward:rewardKaios});S.kaios=playerStore.snapshot().kaios;hud();return result}
