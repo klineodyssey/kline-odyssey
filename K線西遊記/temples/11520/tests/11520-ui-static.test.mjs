@@ -113,10 +113,10 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.4 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.4 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.4'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.4'"),'Portal registry must advertise the same K11520 release');
+test('V2.9.5 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.5 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.5'"));
+  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.5'"),'Portal registry must advertise the same K11520 release');
   // Reuse the canonical release guard established by the Courier QA repair;
   // check literal AND escaped active consumers, never historical documents.
   const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
@@ -277,4 +277,213 @@ test('landscape More positions chat only when its existing open state is set',()
   const entry=read('../game-5d.html');
   assert.ok(entry.includes('html.k11520UtilitiesOpen #gameChat.open,'));
   assert.ok(!entry.includes('html.k11520UtilitiesOpen #gameChat,'));
+});
+
+test('Settings context preserves organ states and restores only its temporary inert ownership',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const ui=read('../runtime/mobile-ui-settings.mjs');
+  const element=(id,inert=false)=>({id,inert,attributes:{},classList:{values:new Set(),contains(v){return this.values.has(v)},toggle(v,on){if(on)this.values.add(v);else this.values.delete(v)}},hasAttribute(name){return name==='inert'&&this.inert},setAttribute(name,value){this.attributes[name]=value},focus(){focused=this.id}});
+  let focused=null;const root=element('root'),panel=element('k11520UiSettings'),launcher=element('gameModeToggle'),close=element('k11520UiSettingsClose'),courier=element('homeDeliveryButton'),rail=element('yControl'),preexisting=element('bgmButton',true);
+  courier.dataset={contextState:'active'};const nodes=[launcher,courier,rail,preexisting],byId=Object.fromEntries([panel,launcher,close,...nodes].map(el=>['#'+el.id,el]));
+  const context={document:{documentElement:root,querySelector:s=>byId[s]||null,querySelectorAll:()=>nodes,dispatchEvent(){}},CustomEvent:class{constructor(type,{detail}){this.type=type;this.detail=detail}}};
+  runInNewContext("const $=s=>document.querySelector(s);"+ui.slice(ui.indexOf('const SETTINGS_BACKGROUND='),ui.indexOf('// Visibility stays'))+'globalThis.openSettings=setSettingsOpen;globalThis.syncSettings=syncSettingsContext;',context);
+  context.openSettings(true);assert.equal(focused,'k11520UiSettingsClose');assert.ok(nodes.every(el=>el.inert));assert.equal(root.classList.contains('k11520SettingsOpen'),true);
+  // The mission can finish while the dialog is open. Closing must never restore
+  // a stale state, toggle More, or make an already-inert organ interactive.
+  courier.dataset.contextState='arrived';context.syncSettings();context.openSettings(false);
+  assert.equal(courier.dataset.contextState,'arrived');assert.equal(courier.inert,false);assert.equal(rail.inert,false);assert.equal(preexisting.inert,true);assert.equal(launcher.inert,false);assert.equal(focused,'gameModeToggle');assert.equal(root.classList.contains('k11520SettingsOpen'),false);
+  context.openSettings(true);context.openSettings(false);assert.equal(preexisting.inert,true);
+  assert.ok(ui.includes("e.key==='Escape'"));assert.ok(ui.includes("e.key==='Tab'"));
+});
+
+test('the existing Market owner collapses every HUD profile after a real 15-second idle interval',async()=>{
+  const {runInNewContext}=await import('node:vm');const ui=read('../runtime/mobile-ui-settings.mjs');let timer=null;
+  const row={hidden:false,attributes:{},setAttribute(k,v){this.attributes[k]=v}},root={dataset:{},classList:{toggle(k,v){this[k]=v}}};
+  const context={document:{documentElement:root},row,setTimeout:(fn,ms)=>{timer={fn,ms};return 1},clearTimeout:()=>{timer=null}};
+  runInNewContext("const $=()=>row;const MARKET_IDLE_MS=15000;let profile='FULL',marketOpen=false,marketTimer=0,marketPointers=new Set(),allOn=true,state={markets:true};"+ui.slice(ui.indexOf('function syncWorldFirst()'),ui.indexOf('function installWorldFirst()'))+"globalThis.openMarket=showMarketCards;globalThis.holdMarket=()=>{marketPointers.add(1);scheduleMarketHide()};globalThis.releaseMarket=()=>{marketPointers.clear();scheduleMarketHide()};",context);
+  context.openMarket();assert.equal(row.attributes['aria-expanded'],'true');assert.equal(timer.ms,15000);assert.equal(row.textContent,'⌃');context.holdMarket();assert.equal(timer,null);context.releaseMarket();assert.equal(timer.ms,15000);timer.fn();assert.equal(root.classList.k11520MarketOpen,false);assert.equal(row.attributes['aria-expanded'],'false');assert.equal(row.textContent,'📈');
+  const layout=read('../runtime/mobile-control-layout.mjs');assert.ok(layout.includes('html[data-k11520-hud-profile]:not(.k11520MarketOpen) .axes{display:none!important}'));assert.equal(main.includes('KX BTC · KY ETH · KZ BNB ·'),false,'quotes must not recreate the persistent ticker');
+});
+
+test('Camera Recenter is context-only and never gains movement or settlement authority',async()=>{
+  const {runInNewContext}=await import('node:vm');const context={cameraView:{manual:false,zoom:1,panX:0,panZ:0},cameraReset:{dataset:{}}};
+  runInNewContext(main.slice(main.indexOf('function syncCameraResetContext()'),main.indexOf("const cameraStatus=document.createElement"))+'globalThis.sync=syncCameraResetContext;',context);
+  context.sync();assert.equal(context.cameraReset.hidden,true);assert.equal(context.cameraReset.inert,true);context.cameraView.manual=true;context.sync();assert.equal(context.cameraReset.hidden,false);assert.equal(context.cameraReset.inert,false);context.cameraView.manual=false;context.sync();assert.equal(context.cameraReset.hidden,true);
+  assert.ok(main.includes('cameraView.manual=true;cameraGesture=true;syncCameraResetContext();return;'),'existing pinch owner must reveal Recenter');assert.ok(main.includes('showCameraStatus();syncCameraResetContext()};'),'existing Recenter handler must hide its own control again');
+});
+
+test('World context uses existing mission eligibility, not idle or settled history',async()=>{
+  const {runInNewContext}=await import('node:vm');const context={};runInNewContext(mobileShell.slice(mobileShell.indexOf('function contextActionWorldVisibility('),mobileShell.indexOf('function style(){'))+'globalThis.visibility=contextActionWorldVisibility;',context);
+  const input={target:null,courier:null,digital:null,playerLifeId:'PLAYER-A',playerPosition:{x:0,y:0,z:0},raidDistance:5,now:2000};const visible=patch=>context.visibility({...input,...patch});
+  assert.equal(visible({}).raid,false);assert.equal(visible({}).courier,false);
+  for(const status of ['ACTIVE','CLOCK_REVIEW'])assert.equal(visible({courier:{status}}).courier,true);
+  for(const status of ['DELIVERED','ROBBED','FAILED'])assert.equal(visible({courier:{status}}).courier,false);
+  assert.equal(visible({courier:{status:'ROBBED',insurance:{claimStatus:'APPROVED'}}}).courier,true);
+  assert.equal(visible({courier:{status:'DELIVERED'},digital:{status:'IN_TRANSIT'}}).courier,false,'keep existing courier-before-digital selection precedence');
+  const target={status:'ACTIVE',courierLifeId:'PLAYER-B',dueAt:5000,bandit:{attackWindowStartsAt:1000,lastRaidAt:0,cooldownMs:1000}};
+  assert.equal(visible({target}).raid,true);for(const raidDistance of [-1,8.01,NaN,Infinity])assert.equal(visible({target,raidDistance}).raid,false);
+  assert.equal(visible({target,playerPosition:{x:0,y:0}}).raid,false);assert.equal(visible({target,now:900}).raid,false);assert.equal(visible({target,now:5000}).raid,false);assert.equal(visible({target:{...target,courierLifeId:'PLAYER-A'}}).raid,false);
+  assert.equal(visible({target:{...target,bandit:{...target.bandit,lastRaidAt:1500}}}).raid,false);
+  assert.equal(visible({target,digitalInterceptionEligible:true,raidDistance:20}).raid,false,'target-before-digital selection stays canonical');
+  assert.equal(visible({digital:{status:'IN_TRANSIT'}}).raid,false,'a flight alone does not pass canonical missile eligibility');assert.equal(visible({digitalInterceptionEligible:true}).raid,true);
+  assert.equal(visible({target:{status:'ROBBED',cargo:{ownerState:'LOOT_CRATE',ownerLifeId:'PLAYER-A'}}}).raid,true);
+});
+
+test('existing rail owners cancel capture on Settings and require a fresh pointer after close',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  for(const owner of ['lots','C','Y']){
+    let settings=false,commits=[],clears=0;
+    const listeners=new Map(),documentListeners=new Map(),captured=new Set();
+    const el={dataset:{},classList:{contains:()=>false},closest:()=>el,getBoundingClientRect:()=>({top:0,height:100}),addEventListener(type,fn){const a=listeners.get(type)||[];a.push(fn);listeners.set(type,a)},setPointerCapture:id=>captured.add(id),hasPointerCapture:id=>captured.has(id),releasePointerCapture:id=>captured.delete(id)};
+    const root={classList:{contains:()=>settings}},doc={documentElement:root,addEventListener(type,fn){const a=documentListeners.get(type)||[];a.push(fn);documentListeners.set(type,a)}};
+    const ctx={$:()=>el,ROOT:root,document:doc,el,record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
+    if(owner==='lots')runInNewContext(main.slice(main.indexOf('function bindVertical('),main.indexOf("bindVertical('#lotsControl'"))+"bindVertical('#lotsControl',record);",ctx);
+    if(owner==='C')runInNewContext('let cPointer=null,internalNative=false;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+signedC.slice(signedC.indexOf('function bindC()'),signedC.indexOf('function publish()'))+'bindC();',ctx);
+    if(owner==='Y')runInNewContext('let railPid=null,rail={active:false,value:0};function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    const emit=(type,pointerId,clientY=25)=>{const e={type,pointerId,clientY,target:el,preventDefault(){},stopImmediatePropagation(){}};for(const fn of listeners.get(type)||[])fn(e)};
+    const context=open=>{settings=open;for(const fn of documentListeners.get('k11520:settings-context')||[])fn({detail:{open}})};
+    emit('pointerdown',1);assert.equal(commits.length,1,owner+' fresh down');assert.ok(captured.has(1));
+    emit('pointerdown',2);assert.equal(commits.length,1,owner+' second contact must not steal current ownership');assert.equal(captured.has(2),false);
+    context(true);assert.equal(captured.size,0,owner+' releases capture on Settings open');const previous=commits.at(-1);
+    emit('pointermove',1,80);emit('pointerdown',3,80);assert.equal(commits.length,1,owner+' hidden gestures cannot edit values');
+    context(false);emit('pointermove',1,80);emit('pointerup',1,80);assert.equal(commits.length,1,owner+' old input cannot resume after close');assert.equal(commits.at(-1),previous);
+    emit('pointerdown',4,40);assert.equal(commits.length,2,owner+' fresh input works after close');emit('lostpointercapture',4);assert.equal(captured.size,0);emit('pointermove',4,90);assert.equal(commits.length,2,owner+' lost capture ends ownership');
+    if(owner==='Y')assert.ok(clears>=2,'remaining-axis transient movement is cleared without writing XYZ');
+  }
+});
+
+test('numeric editors preserve ordinary blur but cannot commit after Settings suppresses geometry',async()=>{
+  const {runInNewContext}=await import('node:vm');let settings=false,commits=[],syncs=0;const listeners={};
+  const input={dataset:{},value:'12',addEventListener:(type,fn)=>listeners[type]=fn,blur:()=>listeners.blur()};
+  const ctx={input,commit:v=>commits.push(v),ROOT:{classList:{contains:()=>settings}},syncNumericEditors:()=>syncs++};
+  runInNewContext(signedC.slice(signedC.indexOf('function bindNumericEditor('),signedC.indexOf('function ensureNumericEditors('))+'bindNumericEditor(input,commit);',ctx);
+  listeners.blur();assert.deepEqual(commits,['12'],'normal blur-before-open still commits');settings=true;input.value='99';listeners.change();listeners.blur();listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12'],'Settings-active change/blur/Enter cannot dispatch into hidden rails');assert.ok(syncs>=2);
+  settings=false;input.value='7';listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12','7'],'a fresh Enter after close commits normally');
+});
+
+test('shared Wallet foreground guard composes with Settings and current hidden preferences',async()=>{
+  const {runInNewContext}=await import('node:vm');const layout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
+  const flags=new Set(['k11520UtilitiesOpen']),node=id=>({id,textContent:'',title:'',dataset:{},attrs:{},classes:new Set(),classList:{contains(name){return this.owner.classes.has(name)}},style:{values:{},setProperty(k,v){this.values[k]=v},removeProperty(k){delete this.values[k]},getPropertyValue(k){return this.values[k]||''},getPropertyPriority(k){return k in this.values?'important':''}},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]}});
+  const ids=['k11520UtilityMaster','cargoInterceptionButton','homeDeliveryButton','dock','gameModeToggle','walletToggle','walletPanel','chatHandle','bgmButton','aiChatButton','backpackButton','k11520HudCollapseAll','kaiosPortalButton'];const nodes=Object.fromEntries(ids.map(id=>{const el=node(id);el.classList.owner=el;return['#'+id,el]}));nodes['#walletPanel'].classes.add('collapsed');nodes['#chatHandle'].classes.add('k11520HiddenBySettings');
+  const ctx={$:s=>nodes[s]||null,document:{documentElement:{classList:{contains:k=>flags.has(k)}},querySelectorAll:s=>nodes[s]?[nodes[s]]:[]},settingsOpen:()=>flags.has('k11520SettingsOpen'),installUtilityMaster:()=>nodes['#k11520UtilityMaster'],matchMedia:q=>({matches:q.includes('(max-width:600px)')&&!q.includes('landscape')})};
+  runInNewContext('let walletWasOpen=false;'+layout.slice(layout.indexOf('function put('),layout.indexOf('function installStyle()'))+layout.slice(layout.indexOf('function pinMobileUtilityStack()'),layout.indexOf('function closeUtilitySurfaces()'))+layout.slice(layout.indexOf('function syncUtilityMaster()'),layout.indexOf('function walletAnchor()'))+'globalThis.sync=()=>{pinMobileUtilityStack();syncUtilityMaster();pinMobileUtilityStack();syncUtilityMaster()};',ctx);
+  ctx.sync();assert.equal(nodes['#chatHandle'].style.values.display,'none');assert.notEqual(nodes['#gameModeToggle'].style.values.display,'none');
+  nodes['#cargoInterceptionButton'].dataset.worldContext='true';nodes['#homeDeliveryButton'].dataset.worldContext='true';nodes['#walletPanel'].classes.delete('collapsed');ctx.sync();assert.equal(nodes['#gameModeToggle'].style.values.display,'none');assert.equal(nodes['#dock'].style.values.display,'none');assert.notEqual(nodes['#walletToggle'].style.values.display,'none');for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(nodes[id].style.values.display,'none','active context peer stays hidden across owner ticks');
+  flags.add('k11520HudCollapsed');ctx.sync();assert.notEqual(nodes['#k11520HudCollapseAll'].style.values.display,'none','whole-HUD restore remains available');flags.delete('k11520HudCollapsed');
+  flags.add('k11520SettingsOpen');ctx.sync();assert.equal(nodes['#walletToggle'].style.values.display,'none');assert.equal(nodes['#walletPanel'].style.values.display,'none');assert.equal(nodes['#walletPanel'].classes.has('collapsed'),false,'Settings never rewrites Wallet state');
+  flags.delete('k11520SettingsOpen');ctx.sync();assert.notEqual(nodes['#walletPanel'].style.values.display,'none');assert.equal(nodes['#gameModeToggle'].style.values.display,'none','Wallet remains the foreground owner after Settings closes');
+  nodes['#walletPanel'].classes.add('collapsed');ctx.sync();assert.notEqual(nodes['#gameModeToggle'].style.values.display,'none');assert.equal(nodes['#chatHandle'].style.values.display,'none','Wallet close does not override a hidden chat preference');
+  flags.delete('k11520UtilitiesOpen');for(const eligible of [true,false,true]){for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])nodes[id].dataset.worldContext=String(eligible);ctx.sync();for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(nodes[id].style.values.display,eligible?'grid':'none','closed tray uses current eligibility after Wallet close')}
+});
+
+test('browser control inspection preserves per-control hit checks with one bounded frame settle',async()=>{
+  const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
+  const source=browserSource.slice(browserSource.indexOf('async function verifyScrolledControlCenters('),browserSource.indexOf('async function verifySettingsContext('));
+  async function inspect({hidden=false,wallet=false,blocked=false,unstable=false,stalled=false}={}){
+    let current=null,clock=0,frames=0;const scrolled=[];
+    const nodes=Array.from({length:15},(_,i)=>({id:'control-'+i,dataset:{},isConnected:true,hidden:hidden&&i===4,getBoundingClientRect(){return{x:10+(unstable&&i===7?clock:0),y:20+i,width:this.hidden?0:44,height:this.hidden?0:44}},scrollIntoView(options){assert.equal(options.behavior,'instant');scrolled.push(this.id);current=this},contains(hit){return hit===this}}));
+    const context={assert,performance:{now:()=>clock},document:{elementFromPoint:(x,y)=>{const r=current.getBoundingClientRect();assert.equal(x,r.x+r.width/2);assert.equal(y,r.y+r.height/2);return blocked&&current===nodes[7]?{id:'overlay'}:current}},getComputedStyle:el=>({display:el.hidden?'none':'block',visibility:'visible'}),setTimeout:stalled?(fn)=>{queueMicrotask(fn);return 1}:setTimeout,clearTimeout:stalled?()=>{}:clearTimeout,requestAnimationFrame:fn=>{frames++;clock+=16;if(!stalled)queueMicrotask(fn)}};
+    runInNewContext(source+'globalThis.verify=verifyScrolledControlCenters;',context);
+    const run=context.verify({locator:selector=>({evaluateAll:fn=>fn(nodes.filter(el=>!selector.includes(':visible')||!el.hidden))})},wallet?'controls:visible':'controls',wallet?'Wallet':'Settings');
+    if(blocked)await assert.rejects(run,/owns its actual center.*control-7/);
+    else if(hidden&&!wallet)await assert.rejects(run,/control is visible.*control-4/);
+    else if(unstable)await assert.rejects(run,/stable geometry/);
+    else if(stalled)await assert.rejects(run,/animation frame stalled/);
+    else await run;
+    return{scrolled,frames};
+  }
+  const all=await inspect();assert.equal(all.scrolled.length,15);assert.equal(all.frames,3,'one dialog settle, never three animation frames per control');
+  const wallet=await inspect({hidden:true,wallet:true});assert.equal(wallet.scrolled.length,14);assert.equal(wallet.frames,3);
+  await inspect({hidden:true});await inspect({blocked:true});await inspect({unstable:true});await inspect({stalled:true});
+  assert.match(browserSource,/for\(const \[cycle,closeWith\] of \['button','Escape','button'\]\.entries\(\)\)/,'all three original native close cycles remain');
+  assert.match(browserSource,/if\(cycle===2\)await page\.screenshot/,'retain the final screenshot without overwriting an earlier identical-path capture');
+});
+
+test('tiny landscape Market reserves its own lane and browser regression rejects covered balance text',async()=>{
+  const {runInNewContext}=await import('node:vm'),layout=read('../runtime/mobile-control-layout.mjs'),browserSource=read('./11520-browser-responsive.mjs');
+  assert.match(layout,/html\[data-k11520-hud-profile\] \.top\{right:calc\(max\(6px, env\(safe-area-inset-right\)\) \+ 52px\)!important\}/);
+  assert.match(layout,/#k11520MarketRow\{top:6px;left:auto;right:max\(6px, env\(safe-area-inset-right\)\);width:44px;min-height:44px\}/);
+  const source=browserSource.slice(browserSource.indexOf('async function verifyMarketHeaderSeparation('),browserSource.indexOf('async function verifySettingsInterruptedRails('));
+  async function inspect({covered=false,clipped=false,blocked=false}={}){
+    const node=(text,x,y,width,height)=>({textContent:text,getBoundingClientRect(){return{x,y,width,height,right:x+width,bottom:y+height}}});
+    const edge=node('Market',794,6,44,44);edge.contains=hit=>hit===edge;
+    const balances={};for(const [id,x] of [['topFree',612],['topKaios',covered?764:696]]){const pill=node('',x,10,covered&&id==='topKaios'?72:84,38),label=node('LOCAL',x+6,14,clipped&&id==='topKaios'?100:52,8),value=node('100',x+16,25,30,16);pill.querySelector=()=>label;value.closest=()=>pill;balances[id]=value}
+    const context={assert,innerWidth:844,innerHeight:390,document:{querySelector:()=>edge,getElementById:id=>balances[id],elementFromPoint:()=>blocked?{}:edge}};runInNewContext(source+'globalThis.verify=verifyMarketHeaderSeparation;',context);
+    const report={},run=context.verify({evaluate:fn=>fn()},report,'full-idle-hidden');
+    if(covered)await assert.rejects(run,/must not cover balance label\/value/);
+    else if(clipped)await assert.rejects(run,/fits its own pill/);
+    else if(blocked)await assert.rejects(run,/actual pointer ownership/);
+    else{await run;assert.equal(report.marketHeaderSeparation['full-idle-hidden'].balances.length,2)}
+  }
+  await inspect();await inspect({covered:true});await inspect({clipped:true});await inspect({blocked:true});
+  for(const state of ['full-explicit-collapse','full-expanded','full-idle-hidden'])assert.ok(browserSource.includes("verifyMarketHeaderSeparation(page,report,'"+state+"')"));
+});
+
+test('wrapped Wallet help links require ownership of every rendered fragment without accepting paragraph whitespace',async()=>{
+  const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
+  const source=browserSource.slice(browserSource.indexOf('async function verifyScrolledControlCenters('),browserSource.indexOf('async function verifySettingsContext('));
+  async function inspect(blockedFragment=-1,blockedOwner='overlay'){
+    let now=0;const probes=[],fragments=[{x:200,y:10,width:60,height:16},{x:20,y:26,width:40,height:16}],paragraph={id:'walletProviderHelp'},overlay={id:'overlay'};
+    const anchor={id:'help',tagName:'A',dataset:{},isConnected:true,scrollIntoView(options){assert.equal(options.behavior,'instant')},getBoundingClientRect:()=>({x:20,y:10,width:240,height:32}),getClientRects:()=>[...fragments,{x:20,y:10,width:0,height:0}],contains:el=>el===anchor};
+    const context={assert,performance:{now:()=>now},getComputedStyle:()=>({visibility:'visible'}),document:{elementFromPoint(x,y){probes.push([x,y]);const index=fragments.findIndex(r=>x===r.x+r.width/2&&y===r.y+r.height/2);return index<0?paragraph:index===blockedFragment?(blockedOwner==='paragraph'?paragraph:overlay):anchor}},setTimeout,clearTimeout,requestAnimationFrame:fn=>{now+=16;queueMicrotask(fn)}};
+    runInNewContext(source+'globalThis.verify=verifyScrolledControlCenters;',context);
+    const run=context.verify({locator:()=>({evaluateAll:fn=>fn([anchor])})},'a:visible','Wallet');
+    if(blockedFragment>=0)await assert.rejects(run,/owns its actual center/);else await run;
+    assert.deepEqual(probes,[[140,26],[230,18],[40,34]],'inspect union only for diagnostics, then each real fragment; no parent acceptance or occluded-fragment skip');
+  }
+  await inspect();await inspect(0);await inspect(1);await inspect(0,'paragraph');await inspect(1,'paragraph');
+});
+
+test('signed-C quote fixture is loopback-only and retains missing-quote rejection and 100C no-chain guards',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-signed-c-immersive.mjs');
+  const config=source.slice(source.indexOf('const BASE='),source.indexOf('await fs.mkdir'));
+  const payload=source.slice(source.indexOf('function freeQuotePayload('),source.indexOf("import fs from 'node:fs/promises'"));
+  for(const [base,expected] of [[undefined,true],['http://127.0.0.1:4173',true],['http://localhost:4173',true],['https://klineodyssey.github.io/kline-odyssey',false],['https://example.com',false]]){
+    const context={URL,Date:{now:()=>40000},process:{env:base?{K11520_BASE_URL:base}:{}}};
+    runInNewContext(config+payload+'globalThis.result={local:LOCAL_SIMULATION_QA,rows:quoteFixtureRows,ready:quoteFixtureReady};globalThis.payload=freeQuotePayload;',context);
+    assert.equal(context.result.local,expected);assert.equal(context.result.ready,false,'start with WAIT rather than masking quote rejection');
+    const route={request:()=>({url:()=> 'https://data-api.binance.vision/api/v3/aggTrades?symbol=ETHUSDT'})};
+    assert.equal(context.payload(route,[]).length,0);const row=context.payload(route,context.result.rows)[0];assert.equal(row.p,'3500');assert.equal(row.T,40000);assert.equal(row.a,40000);
+  }
+  assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*'"));
+  assert.ok(source.includes("status==='WAIT'"));assert.ok(source.includes("/ORACLE_STALE/"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
+  assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000})"),'final fixture readiness is local-only');
+  for(const guard of ['V1_HIGH_SPEED_PRODUCTION_LOCKED',"'#confirmOrder').isDisabled(),true",'PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈'])assert.ok(source.includes(guard),guard);
+  assert.ok(source.includes("page.locator('#confirm').waitFor({state:'visible',timeout:2500})"),'confirmation timeout remains unchanged');
+});
+
+test('signed-C WAIT evidence survives the separate deferred route toast and cleans up its observer',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-signed-c-immersive.mjs');
+  const block=source.slice(source.indexOf('if(LOCAL_SIMULATION_QA){'),source.indexOf('// Human 12:43'));
+  for(const clickFails of [false,true]){
+    let observer=null,saved=null,text='',disconnected=false;const market={status:'WAIT'};
+    const toast={get textContent(){return text},set textContent(value){text=value;if(observer)queueMicrotask(()=>observer?.())}};
+    const context={assert,LOCAL_SIMULATION_QA:true,BASE:'http://127.0.0.1:4173',OUT:'evidence',quoteFixtureRows:[],document:{getElementById:()=>toast},__K11520_MARKET_K__:market,__K11520_EXECUTION__:{snapshot:()=>({mode:'SIMULATION_WALLET'})},MutationObserver:class{constructor(fn){this.fn=fn}observe(){observer=this.fn}disconnect(){observer=null;disconnected=true}},fs:{writeFile:async(path,value)=>{saved=JSON.parse(value)}},page:{evaluate:async fn=>fn(),waitForFunction:async fn=>assert.ok(fn()),locator:selector=>selector==='#confirm'?{isVisible:async()=>false}:{click:async()=>{if(clickFails)throw new Error('native click failed');toast.textContent='ORACLE_STALE · 行情未就緒';await Promise.resolve();toast.textContent='目前下單走本機模擬；真實交易仍封鎖';await Promise.resolve()}}}};
+    Object.defineProperty(context,'quoteFixtureReady',{set(value){market.status=value?'LIVE':'WAIT'}});
+    const run=runInNewContext('(async()=>{'+block+'})()',context);
+    if(clickFails)await assert.rejects(run,/native click failed/);else{await run;assert.equal(saved.waitRejected,true);assert.ok(saved.waitMessages.some(message=>message.includes('ORACLE_STALE')));assert.ok(saved.waitMessages.some(message=>message.includes('本機模擬')));assert.equal(saved.realMarketValidation,false)}
+    assert.equal(disconnected,true);assert.equal('__SIGNED_C_WAIT_EVIDENCE__' in context,false);
+  }
+});
+
+test('responsive event routing retains standalone mobile-HUD coverage and references only its required exact-tree Game owner',async()=>{
+  const {mkdtempSync,mkdirSync,rmSync}=await import('node:fs'),{tmpdir}=await import('node:os'),{spawnSync}=await import('node:child_process');
+  const responsive=read('../../../../.github/workflows/11520-responsive-qa.yml'),game=read('../../../../.github/workflows/11520-game-product-qa.yml');
+  const paths=(source,event)=>source.split('  '+event+':\n')[1].split(/\n  [a-z_]+:/)[0].split('\n').map(line=>line.match(/^      - ['"](.+)['"]$/)?.[1]).filter(Boolean);
+  for(const event of ['pull_request','push'])for(const path of paths(responsive,event))assert.ok(paths(game,event).includes(path),event+' Game owner must trigger for '+path);
+  assert.ok(game.includes('timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs"'));
+  assert.ok(game.includes('RC=${PIPESTATUS[0]}'));assert.ok(game.includes('mobile HUD three-rail/collapse screenshots missing'));
+  const start=responsive.indexOf('          if [ "$PUBLIC_QA" != true ]; then'),end=responsive.indexOf('      - name: Preserve screenshots and focused failure logs',start);
+  const script=responsive.slice(start,end).replace(/^          /gm,'');
+  for(const [event,production,reference,mobile] of [['pull_request','false',true,false],['push','false',true,false],['workflow_dispatch','false',false,true],['workflow_dispatch','true',false,false],['workflow_run','true',false,false]]){
+    const directory=mkdtempSync(resolve(tmpdir(),'k11520-hud-routing-'));try{
+      mkdirSync(resolve(directory,'artifacts/11520-responsive-qa'),{recursive:true});const trace=resolve(directory,'trace');
+      const mocked='set -euo pipefail\ntimeout(){ printf "%s\\n" "$*" >> "$TRACE"; }\npython3(){ printf "REFERENCE\\n" >> "$TRACE"; cat >/dev/null; }\n';
+      const result=spawnSync('bash',['-c',mocked+script],{cwd:directory,env:{PATH:process.env.PATH,TRACE:trace,GITHUB_EVENT_NAME:event,PUBLIC_QA:production},encoding:'utf8'});
+      assert.equal(result.status,0,result.stderr);const observed=existsSync(trace)?readFileSync(trace,'utf8'):'';
+      assert.equal(observed.includes('REFERENCE'),reference,event+'/'+production+' ownership reference');assert.equal(observed.includes('11520-browser-mobile-hud.mjs'),mobile,event+'/'+production+' local mobile-HUD execution');assert.equal(observed.includes('11520-browser-character-status.mjs'),production==='false','character coverage remains unchanged');
+    }finally{rmSync(directory,{recursive:true,force:true})}
+  }
+  for(const field of ["'head':head","'tree':subprocess.check_output", "'scriptSha256':hashlib.sha256", "'requiredWorkflow':'11520 Game Product QA'", "'requiredJob':'product-qa'", "'requiredConclusion':'success'", "'evidenceIsReferenceOnly':True",'11520-mobile-hud-3rail.png','11520-mobile-hud-collapsed.png'])assert.ok(script.includes(field),field);
+  assert.ok(script.includes("assert head==os.environ['K11520_SOURCE_SHA']"));
 });

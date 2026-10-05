@@ -158,7 +158,6 @@ async function quotes(){
 function syncMarketKLabels(){
   if(!$('#marketKLabelsStyle')){const style=document.createElement('style');style.id='marketKLabelsStyle';style.textContent='.axis:has(.marketKValue) .universeFloorBadge{display:none!important}';document.head.append(style)}
   const market=kMarketSnapshot(world);
-  const marketRow=$('#k11520MarketRow');if(marketRow)marketRow.textContent=`KX BTC · KY ETH · KZ BNB · ${market.status} ▾`;
   for(const row of market.markets){
     const card=$(`[data-market-card="${row.axis}"]`);if(!card)continue;
     let label=card.querySelector('.marketKValue');if(!label){label=document.createElement('span');label.className='marketKValue';label.style.cssText='display:block;font:600 10px system-ui;color:#b9e7fa;white-space:nowrap';card.append(label)}
@@ -190,7 +189,17 @@ function controlVector(){const c=controlState(),v=c?.vector;if(v)return{x:Number
 function hud(){syncTradeAxisFromPlane();const s=walletExecutionView().wallet||{},c=controlState(),rail=c?.railAxis||'Y',ri=rail.toLowerCase();$('#topFree').textContent=s.free==null?'--':fmt(s.free,3);$('#topFree').previousElementSibling.textContent=isTestnet()?'TESTNET Brain Available':'KGEN Local Free';$('#topKaios').textContent=fmt(S.kaios,1);$('#topKaios').previousElementSibling.textContent='KAIOS LOCAL';$('#xyz').textContent=`LOCAL X ${formatGameDistanceK(S.intentXYZ.x)} · Y ${formatGameDistanceK(S.intentXYZ.y)} · Z ${formatGameDistanceK(S.intentXYZ.z)}`;$('#yRead').textContent=formatGameDistanceK(S.intentXYZ[ri],{compact:true});$('#hp').textContent=Math.max(0,Math.round(S.hp));$('#hpbar').style.width=Math.max(0,S.hp)+'%';$('#monsterList').innerHTML=world.monsters.filter(m=>m.state!=='DEAD'&&(m.name||m.baseName)).map(m=>`<div>${m.name||m.baseName} · ${Math.round(m.hp)}/${m.maxHp}</div>`).join('')||'<div class="muted">等待 Market Life</div>';const xyzNav=globalThis.__K11520_XYZ_MAP_NAVIGATION__;if(xyzNav?.target){const t=xyzNav.target,d=Math.hypot((t.x||0)-S.xyz.x,(t.y||0)-S.xyz.y,(t.z||0)-S.xyz.z);$('#navState').textContent=`${xyzNav.active?'XYZ 前往中':'XYZ 目標'} ${xyzNav.source||xyzNav.mode||''} · ${formatGameDistanceK(d)} · X ${formatGameDistanceK(t.x)} Y ${formatGameDistanceK(t.y)} Z ${formatGameDistanceK(t.z)}`}else if(S.navTarget){const w=waypointSummary(S.xyz,S.navTarget);$('#navState').textContent=`${S.navActive?'前往中':'目標'} ${w.direction} · ${formatGameDistanceK(w.distance)} · X ${formatGameDistanceK(w.targetX)} Z ${formatGameDistanceK(w.targetZ)}`}else $('#navState').textContent='雙指縮放 · 點圖選目標';globalThis.__K11520_WORLD_COORDS__={intent:{...S.intentXYZ},physical:{...S.xyz},physicalK:localPositionToK(S.xyz),distanceUnit:'METERS',mode:c?.mode||'XZ',unboundedIntent:true}}
 function setThumb(el,t){el.style.top=(100-Math.max(0,Math.min(1,t))*100)+'%'}
 function syncControls(){const a=axis();$('#lotsRead').textContent=`${a.lots}口`;setThumb($('#lotsThumb'),Math.min(1,a.lots/100));globalThis.__K11520_SIGNED_C_IMMERSIVE__?.api?.paintSignedC?.(S.axis);if(!controlState())setThumb($('#yThumb'),.5)}
-function bindVertical(sel,fn){const el=$(sel);let pid=null;const calc=e=>{const r=el.getBoundingClientRect(),t=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));fn(t);e.preventDefault()};el.addEventListener('pointerdown',e=>{pid=e.pointerId;try{el.setPointerCapture?.(pid)}catch{}calc(e)});el.addEventListener('pointermove',e=>{if(e.pointerId===pid)calc(e)});['pointerup','pointercancel'].forEach(ev=>el.addEventListener(ev,e=>{if(e.pointerId===pid)pid=null}))}
+function bindVertical(sel,fn){
+  const el=$(sel);let pid=null;
+  const blocked=()=>document.documentElement.classList.contains('k11520SettingsOpen');
+  // Settings ends transient ownership, never the last committed C/lots value.
+  const cancel=()=>{const previous=pid;pid=null;if(previous!==null)try{if(el.hasPointerCapture?.(previous))el.releasePointerCapture(previous)}catch{}};
+  const calc=e=>{if(blocked())return;const r=el.getBoundingClientRect(),t=1-Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));fn(t);e.preventDefault()};
+  el.addEventListener('pointerdown',e=>{if(blocked()||(pid!==null&&pid!==e.pointerId))return;pid=e.pointerId;try{el.setPointerCapture?.(pid)}catch{}calc(e)});
+  el.addEventListener('pointermove',e=>{if(e.pointerId===pid)calc(e)});
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(type,e=>{if(e.pointerId===pid)cancel()});
+  document.addEventListener('k11520:settings-context',e=>{if(e.detail?.open)cancel()});
+}
 bindVertical('#lotsControl',t=>{axis().lots=Math.max(1,Math.round(t*100));syncControls()});bindVertical('#cControl',t=>{axis().c=warpC(t);syncControls()});
 
 const joy=$('#joy'),knob=$('#knob');let joyPid=null;
@@ -656,10 +665,11 @@ function isWorldGestureArea(x,y,radius=10){
   const r=clampCamera(Number(radius)||10,4,20);
   return[-r,0,r].every(dx=>[-r,0,r].every(dy=>document.elementFromPoint(x+dx,y+dy)===renderer.domElement&&canPanAt(x+dx,y+dy)));
 }
-const cameraReset=document.createElement('button');cameraReset.id='k11520CameraReset';cameraReset.type='button';cameraReset.textContent='◎';cameraReset.title='回到玩家';cameraReset.setAttribute('aria-label','Camera 回到玩家');document.body.appendChild(cameraReset);
+const cameraReset=document.createElement('button');cameraReset.id='k11520CameraReset';cameraReset.type='button';cameraReset.textContent='◎';cameraReset.title='回到玩家';cameraReset.setAttribute('aria-label','Camera 回到玩家');cameraReset.hidden=true;cameraReset.inert=true;document.body.appendChild(cameraReset);
+function syncCameraResetContext(){const contextual=cameraView.manual;cameraReset.hidden=!contextual;cameraReset.inert=!contextual;cameraReset.dataset.contextState=contextual?'manual':'following'}
 const cameraStatus=document.createElement('output');cameraStatus.id='k11520CameraZoomStatus';cameraStatus.setAttribute('aria-live','polite');cameraStatus.setAttribute('aria-atomic','true');document.body.appendChild(cameraStatus);
 function showCameraStatus(){cameraStatus.textContent=`🔍 ${cameraView.zoom.toFixed(2)}×`;cameraStatus.classList.add('show');clearTimeout(cameraStatusTimer);cameraStatusTimer=setTimeout(()=>cameraStatus.classList.remove('show'),1500)}
-cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false;showCameraStatus()};
+cameraReset.onclick=()=>{Object.assign(cameraView,{zoom:1,panX:0,panZ:0,manual:false});cameraRecenterPending=true;cameraPointers.clear();worldTapStart=null;pinchDistance=null;cameraGesture=false;showCameraStatus();syncCameraResetContext()};
 // Retire the transparent half-screen yaw interceptor. HUD controls above the
 // canvas keep their own pointer owners; only world-origin pointers enter here.
 $('#lookPad').style.setProperty('pointer-events','none','important');
@@ -679,7 +689,7 @@ renderer.domElement.addEventListener('pointermove',e=>{
   cameraPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(cameraPointers.size>=2){
     if(pinchDistance>0){cameraView.zoom=clampCamera(pinchZoom*pointerDistance()/pinchDistance,CAMERA_BOUNDS.minZoom,CAMERA_BOUNDS.maxZoom);const panLimit=cameraPanLimit();cameraView.panX=clampCamera(cameraView.panX,-panLimit,panLimit);cameraView.panZ=clampCamera(cameraView.panZ,-panLimit,panLimit);showCameraStatus()}
-    cameraView.manual=true;cameraGesture=true;return;
+    cameraView.manual=true;cameraGesture=true;syncCameraResetContext();return;
   }
   // A gesture started on an actionable monster remains a monster interaction.
   if(!worldTapStart?.panAllowed||pinchDistance!==null)return;
@@ -690,6 +700,7 @@ renderer.domElement.addEventListener('pointermove',e=>{
   // rendered world content stays under the finger. This never changes XYZ.
   cameraView.panX=clampCamera(cameraView.panX-dx*Math.cos(S.camYaw)-dy*Math.sin(S.camYaw),-panLimit,panLimit);
   cameraView.panZ=clampCamera(cameraView.panZ-dx*Math.sin(S.camYaw)+dy*Math.cos(S.camYaw),-panLimit,panLimit);
+  syncCameraResetContext();
 },{passive:true});
 function finishCameraPointer(e){
   if(!cameraPointers.has(e.pointerId))return;
