@@ -165,11 +165,12 @@ function testnetFixture({capital=false}={}){
  const listeners=new Map(),calls=[],logs=[],receipts=new Map();let claimable=0;
  function log(k,name,args){const ev=abi[k].encodeEventLog(abi[k].getEvent(name),args),value={...ev,address:addresses[k],blockNumber:'0x2',blockHash,transactionHash:hash,logIndex:'0x0',removed:false};logs.push(value);return value}
  function record(k,event,args){const eventLog=log(k,event,args);receipts.set(hash,{transactionHash:hash,blockNumber:'0x2',blockHash,status:reverted?'0x0':'0x1',to:addresses[k],from:account,logs:[eventLog]})}
- const provider={on(event,fn){listeners.set(event,fn)},removeListener(event){listeners.delete(event)},async request({method,params=[]}){
+ const provider={on(event,fn){if(!listeners.has(event))listeners.set(event,new Set());listeners.get(event).add(fn)},removeListener(event,fn){listeners.get(event)?.delete(fn)},async request({method,params=[]}){
   calls.push({method,params});
   if(method==='eth_chainId')return chain;if(method==='eth_accounts')return account?[account]:[];
   if(method==='wallet_switchEthereumChain'){chain=params[0].chainId;return null}
   if(method==='eth_getCode')return code;
+  if(method==='eth_getBalance')return '0x58d15e17628000';
   if(method==='eth_estimateGas')return '0x20000';
   if(method==='eth_getStorageAt')return '0x'+addresses.brainImplementation.slice(2).padStart(64,'0');
   if(method==='eth_blockNumber')return '0x2';
@@ -230,7 +231,7 @@ function testnetFixture({capital=false}={}){
   throw new Error(`fixture missing RPC ${method}`);
  }};
  return {deployment,provider,calls,make:(extra={})=>createExecutionAdapter({deployment,ethereum:provider,ethers:codec,pollMs:1,receiptTimeoutMs:3000,...extra}),
-  setChain:v=>{chain=v},setAccount:v=>{account=v;listeners.get('accountsChanged')?.(v?[v]:[])},
+  setChain:v=>{chain=v},setAccount:v=>{account=v;for(const fn of listeners.get('accountsChanged')||[])fn(v?[v]:[])},
   setReject:()=>{sendError={code:4001}},setRevert:()=>{reverted=true},setPending:n=>{pendingReceipts=n},setStale:()=>{stale=true},
   setCloseLiquidates:()=>{closeLiquidates=true},setAmount:v=>{amount=v},setSuppressLogs:v=>{suppressLogs=!!v},
   claimFixture(){claimable=50;record('brainProxy','SettlementClaimRecorded',['0x'+'dd'.repeat(32),account,wad(50),0,wad(50)])},
@@ -414,4 +415,120 @@ test('candidate claims remain actionable when the RPC log index is empty and can
  assert.equal(reload.snapshot().wallet.claimable,50);assert.equal(reload.snapshot().claims[0].remaining,50);
  assert.equal(reload.snapshot().claims[0].evidence,'CONTRACT_STATE');
  assert.equal(reload.snapshot().receipts.some(r=>r.kind==='SettlementClaimRecorded'),false,'no fabricated event receipt');
+});
+
+test('M1 chain97 reads native gas and test token balances without approval and isolates A B reload',async()=>{
+ const f=testnetFixture(),request=f.provider.request,other='0x'+'77'.repeat(20),nativeCalls=[],tokenFace=new codec.Interface(TESTNET_EXECUTION_ABI.testToken);
+ f.provider.request=async args=>{
+  if(args.method==='eth_getBalance'){nativeCalls.push(args.params);return codec.parseUnits(args.params[0].toLowerCase()===WALLET.toLowerCase()?'0.025':'0.05',18).toHexString()}
+  if(args.method==='eth_call'&&args.params[0].to===f.deployment.addresses.testToken&&args.params[0].data.startsWith(tokenFace.getSighash('balanceOf'))){const [owner]=tokenFace.decodeFunctionData('balanceOf',args.params[0].data);return tokenFace.encodeFunctionResult('balanceOf',[codec.parseUnits(owner.toLowerCase()===WALLET.toLowerCase()?'5000':'6000',18)])}
+  return request(args);
+ };
+ let adapter=f.make();assert.equal((await adapter.recover()).ok,true);
+ assert.equal(adapter.snapshot().account,WALLET);assert.equal(adapter.snapshot().chainId,97);
+ assert.equal(adapter.snapshot().wallet.testBnbBalance,'0.025');assert.equal(adapter.snapshot().wallet.testTokenBalance,5000);
+ assert.equal(adapter.snapshot().wallet.allowanceWei,'0');assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
+ f.setAccount(other);assert.equal(adapter.snapshot().wallet,null);assert.equal((await adapter.recover()).ok,true);
+ assert.equal(adapter.snapshot().account,other);assert.equal(adapter.snapshot().wallet.testBnbBalance,'0.05');assert.equal(adapter.snapshot().wallet.testTokenBalance,6000);
+ adapter.dispose();adapter=f.make();assert.equal((await adapter.recover()).ok,true);assert.equal(adapter.snapshot().account,other);assert.equal(adapter.snapshot().wallet.testBnbBalance,'0.05');
+ f.setAccount(WALLET);await adapter.recover();assert.equal(adapter.snapshot().wallet.testBnbBalance,'0.025');assert.equal(adapter.snapshot().wallet.testTokenBalance,5000);
+ assert.ok(nativeCalls.length>=4);assert.ok(nativeCalls.every(([,tag])=>tag==='0x2'),'native balance is pinned to the same recovered block');
+ f.setChain('0x38');assert.equal((await adapter.recover()).code,'WRONG_CHAIN');assert.equal(adapter.snapshot().wallet,null);
+ assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
+});
+
+
+test('M1 zero native balance is verified but missing or malformed RPC balance remains unavailable',async()=>{
+ for(const native of ['0x0','0x',null,'NaN','0x'+'f'.repeat(65)]){
+  const f=testnetFixture(),request=f.provider.request;f.setStale();
+  f.provider.request=async args=>args.method==='eth_getBalance'?native:request(args);
+  const adapter=f.make(),result=await adapter.recover();
+  if(native==='0x0'){assert.equal(result.ok,true);assert.equal(adapter.snapshot().wallet.testBnbBalance,'0.0');assert.equal(adapter.snapshot().status,'ORACLE_STALE')}
+  else{assert.equal(result.reason,'INVALID_NATIVE_BALANCE_RESPONSE');assert.equal(adapter.snapshot().wallet,null)}
+  assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
+ }
+});
+
+test('M1 late Wallet A native read cannot repaint after B switch and one wei stays exact',async()=>{
+ const f=testnetFixture(),request=f.provider.request,other='0x'+'77'.repeat(20),states=[];let release,started;
+ const gate=new Promise(r=>{release=r}),entered=new Promise(r=>{started=r});
+ f.provider.request=async args=>{if(args.method==='eth_getBalance'){if(args.params[0]===WALLET){started();await gate;return codec.parseUnits('9',18).toHexString()}return '0x1'}return request(args)};
+ const adapter=f.make({onState:s=>states.push(s)}),old=adapter.recover();await entered;f.setAccount(other);const marker=states.length;release();await old;
+ assert.equal(states.slice(marker).some(s=>s.wallet?.testBnbBalance==='9.0'),false);
+ assert.equal((await adapter.recover()).ok,true);assert.equal(adapter.snapshot().account,other);assert.equal(adapter.snapshot().wallet.testBnbBalance,'0.000000000000000001');assert.equal(adapter.snapshot().wallet.testBnbBalanceWei,'1');
+ assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
+});
+
+test('M1 immutable read-only capability rejects every mutation before any provider request',async()=>{
+ const f=testnetFixture({capital:true}),adapter=f.make({readOnly:true});
+ const forbidden=[];const request=f.provider.request;f.provider.request=async args=>{if(/eth_send|personal_sign|eth_sign|signTypedData/.test(args.method))forbidden.push(args.method);return request(args)};
+ for(const action of [()=>adapter.preview(onchainInput),()=>adapter.submit(onchainInput),()=>adapter.submit({...onchainInput,c:100}),()=>adapter.approve(1),()=>adapter.deposit(1),()=>adapter.faucet(),()=>adapter.withdraw(1),()=>adapter.claim('0x'+'dd'.repeat(32)),()=>adapter.close('1'),()=>adapter.cancel('1')]){
+  assert.equal((await action()).reason,'M1_READ_ONLY_WALLET');
+ }
+ assert.equal(f.calls.length,0);assert.deepEqual(forbidden,[]);assert.equal(adapter.readOnly,true);assert.equal(adapter.snapshot().writeBlocked,true);
+ assert.equal((await adapter.recover()).ok,true);assert.equal(adapter.snapshot().wallet.testTokenBalance,5000);assert.deepEqual(forbidden,[]);
+});
+test('legacy EXIT-ONLY preserves owner principal and claim exits but cannot enable any C new risk',async()=>{
+ for(const action of ['withdraw','claim','close']){
+  const f=testnetFixture({capital:true});if(action==='claim')f.claimFixture();if(action==='close'){const old=f.make();await old.submit(onchainInput);f.fill();old.dispose()}
+  const adapter=f.make({exitOnly:true});f.calls.length=0;
+  for(const c of [0.001,1,-1,5,100])assert.equal((await adapter.submit({...onchainInput,c})).reason,'LEGACY_EXIT_ONLY_NO_NEW_RISK');
+  for(const method of ['approve','deposit','faucet'])assert.equal((await adapter[method](1)).reason,'LEGACY_EXIT_ONLY_NO_NEW_RISK');
+  assert.equal(f.calls.length,0,'new-risk and funding capabilities reject before RPC');
+  const result=await(action==='withdraw'?adapter.withdraw(1):action==='claim'?adapter.claim('0x'+'dd'.repeat(32)):adapter.close('1'));
+  assert.equal(result.ok,true,action+': '+result.reason);
+ }
+});
+test('read-only recovery cannot consume a legacy unresolved lease or mutate its recovered cache',async()=>{
+ const f=testnetFixture(),release=f.delaySend(),legacy=f.make({walletRequestTimeoutMs:10});
+ assert.equal((await legacy.submit(onchainInput)).code,'RECEIPT_TIMEOUT');release();await new Promise(r=>setTimeout(r,10));
+ const before=JSON.stringify(legacy.snapshot()),view=f.make({readOnly:true});assert.equal((await view.recover()).ok,true);
+ assert.equal(JSON.stringify(legacy.snapshot()),before,'legacy cache and lease remain byte-for-byte unchanged');
+ assert.equal(legacy.snapshot().writeBlocked,true);assert.equal((await legacy.submit(onchainInput)).reason,'WALLET_REQUEST_UNRESOLVED');
+ assert.equal((await legacy.recover()).ok,true);assert.equal(legacy.snapshot().writeBlocked,false);
+ assert.equal(f.calls.filter(c=>c.method==='eth_sendTransaction').length,1);
+});
+
+
+test('M1 fan-out account events fence operations without erasing an inactive legacy receipt cache',async()=>{
+ const f=testnetFixture(),legacy=f.make({exitOnly:true});f.settledOrders(1);await legacy.recover();
+ const before=JSON.stringify(legacy.snapshot());legacy.setDisplayActive(false);
+ const view=f.make({readOnly:true});await view.recover();f.setAccount('0x'+'77'.repeat(20));await view.recover();
+ assert.equal(JSON.stringify(legacy.snapshot()),before,'inactive legacy book remains byte-for-byte unchanged');
+ assert.notEqual(view.snapshot().account,legacy.snapshot().account);assert.equal(f.calls.some(c=>c.method==='eth_sendTransaction'),false);
+ legacy.setDisplayActive(true);await legacy.recover();assert.equal(legacy.snapshot().account,'0x'+'77'.repeat(20));
+});
+
+
+test('M1 pinned recovery exposes canonical block hash and rejects a reorg during reads',async()=>{
+ const f=testnetFixture(),view=f.make({readOnly:true});await view.recover();assert.equal(view.snapshot().blockHash,'0x'+'bb'.repeat(32));
+ const g=testnetFixture(),request=g.provider.request;let reads=0;
+ g.provider.request=async args=>{const result=await request(args);if(args.method==='eth_getBlockByNumber'&&++reads>1)return {...result,hash:'0x'+'99'.repeat(32)};return result};
+ const changed=g.make({readOnly:true});assert.equal((await changed.recover()).reason,'RECOVERY_BLOCK_CHANGED');assert.equal(changed.snapshot().wallet,null);assert.equal(g.calls.some(c=>c.method==='eth_sendTransaction'),false);
+});
+
+test('M1 balances-only recovery has a fixed RPC bound and never enumerates financial history',async()=>{
+ const f=testnetFixture({capital:true}),request=f.provider.request,allowed=new Set(['kgen','brainSettlement','executor','engine','brain','decimals','SETTLEMENT_ROLE','hasRole','balanceOf']);
+ const faces=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[f.deployment.addresses[k].toLowerCase(),new codec.Interface([...v,...(CAPITAL_EXECUTION_ABI[k]||[])]) ]));
+ f.provider.request=async args=>{assert.ok(!['eth_getLogs','eth_getTransactionReceipt'].includes(args.method),'no history RPC');if(args.method==='eth_call'){const name=faces[args.params[0].to.toLowerCase()].parseTransaction(args.params[0]).name;assert.ok(allowed.has(name),'no financial state enumeration '+name);assert.equal(args.params[1],'0x2')}if(args.method==='eth_getCode')assert.equal(args.params[1],'0x2');if(args.method==='eth_getStorageAt')assert.equal(args.params[2],'0x2');return request(args)};
+ const view=f.make({readOnly:true});for(let i=0;i<2;i++){const before=f.calls.length;assert.equal((await view.recover()).ok,true);assert.equal(f.calls.length-before,23,'fixed23 RPC requests per successful recovery');}
+ const s=view.snapshot();assert.equal(s.readScope,'BALANCES_ONLY');assert.equal(s.balanceStatus,'VERIFIED');for(const key of ['historyStatus','positionsStatus','pnlStatus','claimsStatus','oracleStatus'])assert.equal(s[key],'NOT_REQUESTED');
+ for(const key of ['free','principal','lockedMargin','unrealizedPnl','realizedPnl','claimable','withdrawable','equity'])assert.equal(s.wallet[key],null);assert.deepEqual(s.receipts,[]);assert.equal(s.capital,null);
+});
+
+test('M1 failed balance reread clears prior value to UNKNOWN and keeps a verified zero distinct',async()=>{
+ for(const method of ['eth_getBalance','eth_call']){
+  const f=testnetFixture(),request=f.provider.request,view=f.make({readOnly:true});assert.equal((await view.recover()).ok,true);
+  f.provider.request=async args=>{if(args.method===method)throw Error('RPC_UNAVAILABLE');return request(args)};
+  assert.equal((await view.recover()).ok,false);assert.equal(view.snapshot().wallet,null);assert.equal(view.snapshot().balanceStatus,'UNKNOWN');assert.equal(view.snapshot().historyStatus,'NOT_REQUESTED');
+ }
+ const f=testnetFixture(),request=f.provider.request;f.provider.request=args=>args.method==='eth_getBalance'?'0x0':request(args);const view=f.make({readOnly:true});assert.equal((await view.recover()).ok,true);assert.equal(view.snapshot().wallet.testBnbBalanceWei,'0');assert.equal(view.snapshot().balanceStatus,'VERIFIED');
+});
+
+test('M1 balances-only A B reload and A B A fencing retain one canonical account',async()=>{
+ const f=testnetFixture(),request=f.provider.request,other='0x'+'77'.repeat(20);let release,entered;
+ const gate=new Promise(r=>{release=r}),started=new Promise(r=>{entered=r});let delay=false;
+ f.provider.request=async args=>{if(args.method==='eth_getBalance'){if(delay){entered();await gate;}return args.params[0].toLowerCase()===WALLET.toLowerCase()?'0x1':'0x2'}return request(args)};
+ let view=f.make({readOnly:true});await view.recover();assert.equal(view.snapshot().wallet.testBnbBalanceWei,'1');f.setAccount(other);await view.recover();assert.equal(view.snapshot().wallet.testBnbBalanceWei,'2');view.dispose();view=f.make({readOnly:true});await view.recover();assert.equal(view.snapshot().account,other);
+ delay=true;const old=view.recover();await started;f.setAccount(WALLET);f.setAccount(other);release();assert.equal((await old).superseded,true);assert.equal(view.snapshot().wallet,null);delay=false;await view.recover();assert.equal(view.snapshot().account,other);assert.equal(view.snapshot().wallet.testBnbBalanceWei,'2');
 });

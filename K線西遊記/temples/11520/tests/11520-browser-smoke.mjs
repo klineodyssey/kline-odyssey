@@ -69,7 +69,12 @@ const rect=async selector=>page.locator(selector).evaluate(el=>{const r=el.getBo
 for(const id of ['joy','attack','skill','dodge','k11520UtilityMaster'])await assertVisible('#'+id);assert.equal(await page.locator('#k11520HudCollapseAll').isVisible(),false,'whole-HUD collapse must boot behind the single utility master');await assertVisible('#knob img');
 for(const id of ['dockToggle','gameModeToggle','walletToggle','chatHandle','aiChatButton','bgmButton','backpackButton'])assert.equal(await page.locator('#'+id).isVisible(),false,`${id} must boot behind the utility master`);
 let a=await xyz();await dragReal('#joy',.9,.5);let b=await xyz();assert.ok(b.x>a.x,'right must X+');await assertVisible('#knob img');await page.screenshot({path:`${ARTIFACT_DIR}/11520-mobile-x-right.png`,fullPage:true});
-assert.ok(a.x>=3.9&&a.y>=1.9&&a.z<=-2.9,`11520 must restore last valid XYZ: ${JSON.stringify(a)}`);assert.match(await page.locator('#walletRetained').textContent(),/未驗證連線.*0x1234567890123456789012345678901234567890/,'11520 must visibly retain the same public wallet identity');
+assert.ok(a.x>=3.9&&a.y>=1.9&&a.z<=-2.9,`11520 must restore last valid XYZ: ${JSON.stringify(a)}`);assert.match(await page.locator('#walletRetained').textContent(),/已保留公開錢包紀錄.*目前未連接錢包/,'retained record must not impersonate a connected wallet');
+assert.doesNotMatch(await page.locator('#walletRetained').textContent(),/0x[0-9a-fA-F]{40}/,'disconnected hint must not display a stale current address');
+assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('klineodyssey.public-wallet-identity.v1')).address),'0x1234567890123456789012345678901234567890','stored public continuity remains preserved');
+assert.equal(await page.locator('#wAddr').textContent(),'DISCONNECTED');
+assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-identity-scope'),'DISCONNECTED');
+assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-address'),'');
 const canvasTransform=await page.locator('#three').evaluate(el=>getComputedStyle(el).transform);assert.ok(canvasTransform&&canvasTransform!=='none'&&/^matrix\(-1(?:\.0+)?,/.test(canvasTransform),`X visual mirror missing: ${canvasTransform}`);
 await dragReal('#joy',.1,.5);let c=await xyz();assert.ok(c.x<b.x,'left must X-');await assertVisible('#knob img');await page.screenshot({path:`${ARTIFACT_DIR}/11520-mobile-x-left.png`,fullPage:true});await dragReal('#joy',.5,.1);let d=await xyz();assert.ok(d.z>c.z,'up must Z+');await dragReal('#joy',.5,.9);let e=await xyz();assert.ok(e.z<d.z,'down must Z-');await assertVisible('#knob img');
 

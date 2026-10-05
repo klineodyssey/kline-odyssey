@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
+if(process.argv.includes('--m1-read-only')){
+  await m1ReadOnlyBrowserQA();process.exit(0);
+}
+
 if(process.argv.includes('--local-candidate')){
   await localCandidateBrowserQA();process.exit(0);
 }
@@ -246,7 +250,7 @@ async function localCandidateBrowserQA(){
     const set=[];for(let i=0;i<3;i++)set.push(await deploy('oracle',[parseEther('100')]));feeds.push(set);
     await send(position,'configureMarket',[market,100,10,3600,parseEther('98'),parseEther('102'),true]);
     await send(position,'configureOracle',[market,set.map(f=>f.target),2,500]);
-    await send(position,'configureTradingCapability',[market,[parseEther('100'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1'),'0x'+'11'.repeat(32)]]); // local mock evidence only
+    await send(position,'configureTradingCapability',[market,[parseEther('1'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1'),'0x'+'11'.repeat(32)]]); // local mock evidence only
   }
   await send(token,'mint',[accounts[0],parseEther('200000')]);await send(token,'approve',[proxy.target,parseEther('200000')]);
   await send(brain,'fundSettlementCapital',[parseEther('100000')]);await send(brain,'fundInsurance',[parseEther('10000')]);
@@ -257,13 +261,15 @@ async function localCandidateBrowserQA(){
   // this synthetic QA manifest is never saved/published as a public deployment.
   const fixtureManifest={mode:'BSC_TESTNET',status:'DEPLOYED_CONFIG_VERIFIED',chainId:97,testOnly:true,publicNetwork:true,verified:true,deploymentBlock:1,addresses,codeHashes,
     capabilities:{settlementCapital:'ISOLATED_V1'},pnlModel:'INDEX_DELTA_C_LOTS_V1'};
+  fixtureManifest.readOnlyCandidates={wallet1c:{...fixtureManifest,cMin:0.001,cMax:1,viewCapability:'READ_ONLY_M1'}};
   const price=async(value)=>{const block=await rpc.request({method:'eth_getBlockByNumber',params:['latest',false]});for(const f of feeds[1])await send(f,'set',[parseEther(String(value)),Number(BigInt(block.timestamp))])};
   const out='artifacts/11520-candidate-wallet-qa';await fs.mkdir(out,{recursive:true});
   const browser=await chromium.launch({headless:true});let active=accounts[1],connected=false,writes=0;
   try{for(const [width,height,player] of [[390,844,1],[844,390,2]]){
     active=accounts[player];connected=false;await price(100);
-    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true}),errors=[];
-    page.on('pageerror',e=>errors.push(String(e)));let stage='boot';const rpcFailures=[];
+    const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true}),errors=[],consoleErrors=[],requestFailures=[];
+    const safeText=value=>String(value).replace(/https?:\/\/[^\s"']+/g,url=>{try{return new URL(url).origin}catch{return '[URL]'}});
+    page.on('pageerror',e=>errors.push(safeText(e.stack||e)));page.on('console',m=>{if(m.type()==='error')consoleErrors.push(safeText(m.text()))});page.on('requestfailed',r=>requestFailures.push({url:safeText(r.url()),error:safeText(r.failure()?.errorText||'REQUEST_FAILED')}));let stage='boot';const rpcFailures=[];
     await page.exposeBinding('candidateRpc',async(_source,{method,params=[]})=>{
       if(method==='eth_accounts')return connected?[active]:[];
       if(method==='eth_requestAccounts'){connected=true;return[active]}
@@ -296,6 +302,31 @@ async function localCandidateBrowserQA(){
       await page.goto(`${process.env.K11520_BASE_URL||'http://127.0.0.1:4182'}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
       await wait(()=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().observations.ETHUSDT);await page.locator('#intro11520').waitFor({state:'hidden'});
       stage='wallet';await wallet();const before=writes;await page.locator('#walletConnect').click();await page.locator('#executionMode').click();await wait(()=>__K11520_EXECUTION__.snapshot().status==='READY');assert.equal(writes,before,'connect and mode read only');
+      if((await snap()).exitOnly){
+        stage='legacy-exit-only-fixture';
+        // Local fixture setup establishes existing principal/position; the UI
+        // may only close/withdraw it, never approve/deposit/create new risk.
+        await send(token.connect(signers[player]),'approve',[proxy.target,parseEther('1000')]);
+        await send(brain.connect(signers[player]),'depositMargin',[parseEther('1000')]);
+        const oid=await trigger.nextOrderId();await send(trigger.connect(signers[player]),'createOrder',[1,parseEther('1'),2,parseEther('100')]);await send(trigger,'observeOrder',[oid]);
+        const pid=(await trigger.order(oid)).positionId;await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.lockedMargin===2);
+        assert.equal(await page.locator('#testnetApprove').isDisabled(),true);assert.equal(await page.locator('#testnetDeposit').isDisabled(),true);await shot('legacy-exit-only');
+        await game();await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#orderFire').click();
+        await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('LEGACY_EXIT_ONLY_NO_NEW_RISK'));assert.equal(await page.locator('#confirmOrder').isDisabled(),true);await page.locator('#cancelOrder').click();
+        await price(100.5);await organ('positions');await page.locator(`[data-sim-close="${pid}"]`).click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.every(p=>p.status!=='OPEN'));
+        assert.equal((await snap()).wallet.free,1001);await shot('legacy-close-preserved');
+        await wallet();await page.locator('#testnetAmount').fill('100');await page.locator('#testnetWithdraw').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===901);await shot('legacy-withdraw-preserved');
+        const beforeViewWrites=writes,legacyPreference=await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode'));
+        await page.locator('#walletM1ReadOnly').click();await wait(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===9100);
+        assert.equal(await page.locator('#testnetFinancialControls').isVisible(),false);await shot('m1-readonly');
+        active=accounts[3];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().account?.toLowerCase()===document.querySelector('#wAddr').textContent.toLowerCase()&&__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===10000);assert.equal((await snap()).historyStatus,'NOT_REQUESTED');await shot('m1-other-wallet');
+        active=accounts[player];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===9100);
+        await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});await wait(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance===9100);await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await shot('m1-reload');
+        assert.equal(writes,beforeViewWrites,'M1 never broadcasts');assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
+        await page.locator('#walletM1ReadOnly').click();await wait(()=>__K11520_EXECUTION__.snapshot().exitOnly&&__K11520_EXECUTION__.snapshot().wallet?.free===901);await shot('legacy-return');assert.deepEqual(errors,[]);
+        await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'LOCAL_ACTUAL_EVM_M1_READ_ONLY_WITH_LEGACY_EXITS',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',m1Writes:0,legacyClose:'PASS',legacyWithdraw:'PASS',newRisk:'BLOCKED',snapshot:await snap()},null,2));
+        continue;
+      }
       assert.equal(await page.locator('#testnetUnlimited').isChecked(),true);await shot('connect-readonly');
       await page.locator('[data-deposit-preset="1000"]').click();await page.locator('#testnetApprove').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.allowanceUnlimited===true);
       await page.locator('#testnetDeposit').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===1000);assert.equal(await page.locator('#testnetApprove').isDisabled(),true);
@@ -316,7 +347,7 @@ await page.locator('#orderFire').click();await page.locator('#simulationTriggerP
 const receiptCount=(await snap()).receipts.length;await page.reload({waitUntil:'domcontentloaded'});await wait(()=>globalThis.__K11520_EXECUTION__?.snapshot().wallet?.free===850);assert.equal((await snap()).receipts.length,receiptCount);
       await wallet();await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('reload-recovered');assert.deepEqual(errors,[]);
       await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'LOCAL_ACTUAL_CANDIDATE_EVM_NOT_PUBLIC_TESTNET',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:await snap()},null,2));
-    }catch(error){await shot('FAILURE');await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,snapshot:await snap(),errors,rpcFailures,toast:await page.locator('#toast').textContent(),message:String(error?.message)},null,2));console.error('LOCAL_CANDIDATE_STAGE',stage);throw error}finally{await page.close()}
+    }catch(error){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null),toast=await page.locator('#toast').textContent().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,snapshot,errors,rpcFailures,consoleErrors,requestFailures,toast,message:safeText(error?.message),stack:safeText(error?.stack||error)},null,2));console.error('LOCAL_CANDIDATE_STAGE',stage);throw error}finally{await page.close()}
   }console.log('PASS local actual candidate EVM + Chromium wallet/order/close/liquidation/withdraw/multiplayer/reload');
   }finally{await browser.close();await rpc.disconnect()}
 }
@@ -530,4 +561,115 @@ async function publicTestnetBrowserQA(){
     }
     console.log(readOnly?'PASS: PUBLIC BSC97 read-only network recovery, zero broadcasts; inspect screenshots separately':'PASS: PUBLIC BSC97 browser approval/deposit/order/fill/close/liquidation/reload; inspect screenshots separately');
   }finally{await browser.close();if(logProvider!==provider)logProvider.destroy();provider.destroy();await persist()}
+}
+
+
+// M1 uses real public chain97 reads through a synthetic injected EIP-1193
+// transport. No Wallet/signer is constructed; this is not Human MetaMask QA.
+async function m1ReadOnlyBrowserQA(){
+  const {JsonRpcProvider,Interface,formatUnits}=await import('ethers');
+  const manifest=JSON.parse(await fs.readFile('docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json','utf8'));
+  const candidate=manifest.readOnlyCandidates?.wallet1c;
+  assert.equal(candidate?.viewCapability,'READ_ONLY_M1');assert.equal(candidate.chainId,97);assert.equal(candidate.cMax,1);
+  const raw=process.argv.find(v=>v.startsWith('--read-only-accounts='))?.slice('--read-only-accounts='.length);
+  const accounts=raw?.split(',')||[];assert.equal(new Set(accounts.map(a=>a.toLowerCase())).size,2);assert.ok(accounts.every(a=>/^0x[0-9a-fA-F]{40}$/.test(a)));
+  const provider=new JsonRpcProvider(process.env.BSC_TESTNET_RPC_URL||'https://bsc-testnet-dataseed.bnbchain.org',undefined,{batchMaxCount:1});
+  assert.equal(BigInt(await provider.send('eth_chainId',[])),97n);
+  const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173',origin=new URL(base).origin,out='artifacts/11520-m1-readonly-qa';await fs.mkdir(out,{recursive:true});
+  const {TESTNET_EXECUTION_ABI}=await import('../runtime/real-trading-order-intent.mjs'),tokenAbi=new Interface(TESTNET_EXECUTION_ABI.testToken),orderAbi=new Interface(TESTNET_EXECUTION_ABI.orderTriggerEngine);
+  const allowedAddresses=new Set([...Object.values(manifest.addresses),...Object.values(candidate.addresses)].map(a=>a.toLowerCase()));
+  const browser=await chromium.launch({headless:true});const results=[];
+  const routeThree=page=>page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile(`node_modules/three/${route.request().url().slice(prefix.length)}`,'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);await route.fulfill({contentType:'text/javascript',body})});
+  const url=`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`;
+  const boot=async page=>{await page.goto(url,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();await page.locator('#intro11520').waitFor({state:'hidden'});};
+  try{
+    const absent=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+    try{
+      await routeThree(absent);await boot(absent);
+      await absent.waitForFunction(()=>document.querySelector('#walletProviderHelp')?.hidden===false);
+      if(!await absent.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await absent.locator('#k11520UtilityMaster').click();
+      if(await absent.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await absent.locator('#walletToggle').click();
+      assert.equal(await absent.locator('#walletProviderHelp').isVisible(),true);
+      assert.equal(await absent.locator('#wAddr').textContent(),'DISCONNECTED');
+      await absent.screenshot({path:`${out}/390x844-no-injected-wallet.png`});
+    }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message)},null,2));throw error}finally{await absent.close()}
+    for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
+      const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[],phaseCounts={M1:{},LEGACY:{},INITIAL:{}};let logFallbacks=0,phase='INITIAL';
+      const consoleErrors=[],requestFailures=[];let stage='BOOT';
+      const safeText=value=>String(value).replace(/https?:\/\/[^\s"']+/g,url=>{try{return new URL(url).origin}catch{return '[URL]'}});
+      const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
+      page.on('pageerror',e=>errors.push(safeText(e.stack||e)));
+      page.on('console',m=>{if(m.type()==='error')consoleErrors.push(safeText(m.text()))});
+      page.on('requestfailed',r=>requestFailures.push({url:safeText(r.url()),resourceType:r.resourceType(),error:safeText(r.failure()?.errorText||'REQUEST_FAILED')}));await routeThree(page);
+      await page.exposeBinding('__m1ReadBroker',async(source,{method,params=[]})=>{
+        assert.equal(source.frame,source.page.mainFrame());assert.equal(new URL(source.frame.url()).origin,origin);methods.push(method);phaseCounts[phase][method]=(phaseCounts[phase][method]||0)+1;
+        if(phase==='M1'){assert.ok(!['eth_getLogs','eth_getTransactionReceipt'].includes(method),'M1 must never request history');if(method==='eth_call'){const allowed=new Set(['kgen()','brainSettlement()','executor()','engine()','brain()','decimals()','SETTLEMENT_ROLE()','hasRole(bytes32,address)','balanceOf(address)'].map(x=>new Interface(['function '+x]).getFunction(x).selector));assert.ok(allowed.has(params[0].data.slice(0,10)),'M1 must not enumerate financial/oracle state')}}
+        if(/eth_send|personal_sign|eth_sign|signTypedData/.test(method)){forbidden.push(method);throw Error('M1_WRITE_OR_SIGN_FORBIDDEN')}
+        if(method==='eth_accounts'||method==='eth_requestAccounts')return state.connected?[state.account]:[];
+        if(method==='eth_chainId')return state.chain;
+        if(method==='wallet_switchEthereumChain'){assert.equal(params[0]?.chainId,'0x61');state.chain='0x61';return null}
+        assert.ok(['eth_getBalance','eth_call','eth_getCode','eth_getStorageAt','eth_blockNumber','eth_getLogs','eth_getTransactionReceipt','eth_getBlockByNumber'].includes(method),'read-only RPC allowlist');
+        if(method==='eth_call')assert.ok(allowedAddresses.has(params[0].to.toLowerCase()));
+        if(method==='eth_getLogs'){assert.ok(allowedAddresses.has(params[0].address.toLowerCase()));try{return await provider.send(method,params)}catch{logFallbacks++;return []}}
+        return provider.send(method,params);
+      });
+      await page.addInitScript(()=>{const listeners=new Map();window.__m1WalletEvents={emit:(name,value)=>{for(const fn of listeners.get(name)||[])fn(value)}};window.ethereum={request:async args=>{const result=await window.__m1ReadBroker(args);if(args.method==='wallet_switchEthereumChain')window.__m1WalletEvents.emit('chainChanged','0x61');return result},on:(n,f)=>{if(!listeners.has(n))listeners.set(n,new Set());listeners.get(n).add(f)},removeListener:(n,f)=>listeners.get(n)?.delete(f)};if(!sessionStorage.getItem('k11520.execution-mode'))sessionStorage.setItem('k11520.execution-mode','SIMULATION')});
+      const snap=()=>page.evaluate(()=>globalThis.__K11520_EXECUTION__?.snapshot()??null),shot=name=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`});
+      const wallet=async()=>{if(!await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();if(await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click()};
+      const verify=async expected=>{
+        await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.readOnly&&s.account?.toLowerCase()===a.toLowerCase()&&s.wallet},expected,{timeout:150000});
+        const s=await snap(),tag='0x'+s.block.toString(16),native=await provider.send('eth_getBalance',[expected,tag]);
+        const [token]=tokenAbi.decodeFunctionResult('balanceOf',await provider.send('eth_call',[{to:candidate.addresses.testToken,data:tokenAbi.encodeFunctionData('balanceOf',[expected])},tag]));
+        assert.equal(s.wallet.testBnbBalanceWei,BigInt(native).toString());assert.equal(s.wallet.testBnbBalance,formatUnits(native,18));assert.equal(s.wallet.testTokenBalanceWei,token.toString());
+        assert.equal(s.readScope,'BALANCES_ONLY');assert.equal(s.historyStatus,'NOT_REQUESTED');assert.equal(s.positionsStatus,'NOT_REQUESTED');assert.equal(s.balanceStatus,'VERIFIED');assert.ok(s.rpcReadCount<=23,'bounded M1 recovery');assert.equal(s.wallet.free,null);
+        assert.deepEqual(s.orders,[]);assert.deepEqual(s.positions,[]);assert.deepEqual(s.receipts,[]);
+        await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});
+        await page.waitForFunction(a=>document.querySelector('#wAddr').textContent.toLowerCase()===a.toLowerCase(),expected);
+        assert.equal(await page.locator('#walletRetained').isVisible(),false,'cached hint must not contradict a live provider identity');
+        const preflight=page.locator('#k11520RealTradePreflight');
+        await page.waitForFunction(a=>document.querySelector('#k11520RealTradePreflight')?.dataset.walletAddress?.toLowerCase()===a.toLowerCase(),expected);
+        assert.equal(await preflight.getAttribute('data-wallet-identity-scope'),'ACTIVE_SESSION');
+        assert.equal((await preflight.getAttribute('data-wallet-address')).toLowerCase(),expected.toLowerCase());
+        const addressLabels=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden').map(el=>el.textContent).flatMap(text=>text.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]));
+        const expectedShort=expected.slice(0,6)+'…'+expected.slice(-4);assert.ok(addressLabels.length>0);
+        for(const label of addressLabels)assert.ok([expected.toLowerCase(),expectedShort.toLowerCase()].includes(label.toLowerCase()),'every visible address label belongs to active account: '+label);
+        assert.equal(await page.locator('#wBnb').textContent(),s.wallet.testBnbBalance);assert.equal(await page.locator('#wKgen').textContent(),String(s.wallet.testTokenBalance));
+        assert.equal(await page.locator('#testnetFinancialControls').isVisible(),false);assert.equal(await page.locator('#executionMode').isVisible(),false);assert.equal(s.writeBlocked,true);
+        // Observe two real canonical-owner timer ticks; no sleep or forced UI success.
+        await page.evaluate(()=>{globalThis.__m1ObservedLayout=globalThis.__K11520_MARKET_ORIGIN_RUNTIME__});
+        for(let tick=0;tick<2;tick++){
+          await page.waitForFunction(()=>{const next=globalThis.__K11520_MARKET_ORIGIN_RUNTIME__;if(!next||next===globalThis.__m1ObservedLayout)return false;globalThis.__m1ObservedLayout=next;return true});
+          for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,'wallet view owns peer utility surface after owner tick '+tick+' '+selector);
+        }
+        return {account:expected,block:s.block,blockHash:s.blockHash,status:s.status,nativeWei:s.wallet.testBnbBalanceWei,testTokenWei:s.wallet.testTokenBalanceWei,historyStatus:s.historyStatus,positionsStatus:s.positionsStatus,rpcReadCount:s.rpcReadCount,context:s.deploymentContext};
+      };
+      try{
+        await boot(page);await wallet();await page.locator('#walletConnect').click();await page.waitForFunction(()=>!document.querySelector('#walletM1ReadOnly').disabled);
+        const legacyPreference=await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode'));
+        phase='M1';await page.locator('#walletM1ReadOnly').click();await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().status==='WRONG_CHAIN');assert.equal((await snap()).wallet,null);await shot('wrong-chain');
+        await page.locator('#testnetSwitch').click();const evidence=[await verify(state.account)];await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('connected');stage='ACCOUNT_SWITCH';
+        state.account=state.account.toLowerCase()===accounts[0].toLowerCase()?accounts[1]:accounts[0];await page.evaluate(a=>__m1WalletEvents.emit('accountsChanged',[a]),state.account);
+        evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('account-switched');stage='RELOAD';
+        await page.reload({waitUntil:'domcontentloaded'});evidence.push(await verify(state.account));await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reloaded');stage='DISCONNECT';
+        state.connected=false;await page.evaluate(()=>__m1WalletEvents.emit('disconnect',{}));await page.waitForFunction(()=>!__K11520_EXECUTION__.snapshot().wallet);await page.waitForFunction(()=>document.querySelector('#wBnb').textContent==='UNVERIFIED');assert.equal((await page.locator('#walletMsg').textContent()).includes('WRONG NETWORK'),false,'unknown network is not a confirmed wrong network');
+        assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-identity-scope'),'DISCONNECTED');
+        assert.equal(await page.locator('#k11520RealTradePreflight').getAttribute('data-wallet-address'),'');
+        const disconnectedAddresses=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden').flatMap(el=>el.textContent.match(/0x[0-9a-fA-F]{40}|0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4}/g)||[]));assert.deepEqual(disconnectedAddresses,[],'disconnect must clear all visible current-address labels');await shot('disconnected');stage='RECONNECT';
+        state.connected=true;await page.locator('#walletConnect').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reconnected');stage='RETURN_LEGACY';
+        assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
+        phase='LEGACY';await page.locator('#walletM1ReadOnly').click();assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);await page.locator('#executionMode').click();await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===a.toLowerCase()},state.account,{timeout:150000});
+        const legacy=await snap(),legacyTag='0x'+legacy.block.toString(16),brainAbi=new Interface(['function principalOf(address) view returns(uint256)','function availablePrincipal(address) view returns(uint256)']);
+        const readLegacy=async name=>brainAbi.decodeFunctionResult(name,await provider.send('eth_call',[{to:manifest.addresses.brainProxy,data:brainAbi.encodeFunctionData(name,[state.account])},legacyTag]))[0].toString();
+        assert.equal(legacy.deploymentContext,'97:'+manifest.addresses.brainProxy.toLowerCase());assert.equal(legacy.wallet.principalWei,await readLegacy('principalOf'));assert.equal(legacy.wallet.availableWei,await readLegacy('availablePrincipal'));
+        const legacyExitEvidence={account:state.account,block:legacy.block,context:legacy.deploymentContext,principalWei:legacy.wallet.principalWei,availableWei:legacy.wallet.availableWei};
+        assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),'BSC_TESTNET');await shot('legacy-exit-preserved');
+        const closeHit=await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(closeHit,true,'wallet close is reachable');
+        await page.locator('#walletToggle').click();await page.waitForFunction(()=>document.querySelector('#walletPanel').classList.contains('collapsed')&&getComputedStyle(document.querySelector('#dock')).display!=='none');
+        for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton'])assert.equal(await page.locator(selector).isVisible(),true,'wallet close restores peer '+selector);await shot('wallet-close-restores-tray');
+        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
+        await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify(results.at(-1),null,2));
+      }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,forbidden,errors,consoleErrors,requestFailures,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
+    }
+    console.log('M1 signer-free public BSC97 read-only browser PASS; Human MetaMask NOT_VERIFIED');
+  }finally{await browser.close();provider.destroy()}
 }

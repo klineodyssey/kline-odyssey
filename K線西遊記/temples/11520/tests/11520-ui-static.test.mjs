@@ -117,6 +117,14 @@ test('V2.9.5 release stamp preserves restored-player encounter boot',()=>{
   assert.ok(fixes.includes('V2.9.5 · 5D K線西遊記'));
   assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.5'"));
   assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.5'"),'Portal registry must advertise the same K11520 release');
+  // Reuse the canonical release guard established by the Courier QA repair;
+  // check literal AND escaped active consumers, never historical documents.
+  const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
+  for(const path of ['./11520-browser-responsive.mjs','./11520-browser-smoke.mjs']){
+    const source=read(path);assert.ok(source.includes(escaped),`${path} exact regex must match canonical release ${release}`);
+    for(const version of source.match(/V2(?:\\)?\.9(?:\\)?\.\d+/g)||[])assert.equal(version.replaceAll('\\',''),release,`${path} stale active version ${version}`);
+  }
+  assert.ok(read('../../../../tests/kaios-portal.test.mjs').includes(`'${release}'`),'Portal unit consumer must match canonical release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
@@ -389,4 +397,24 @@ test('browser control inspection preserves per-control hit checks with one bound
   await inspect({hidden:true});await inspect({blocked:true});await inspect({unstable:true});await inspect({stalled:true});
   assert.match(browserSource,/for\(const \[cycle,closeWith\] of \['button','Escape','button'\]\.entries\(\)\)/,'all three original native close cycles remain');
   assert.match(browserSource,/if\(cycle===2\)await page\.screenshot/,'retain the final screenshot without overwriting an earlier identical-path capture');
+});
+
+test('tiny landscape Market reserves its own lane and browser regression rejects covered balance text',async()=>{
+  const {runInNewContext}=await import('node:vm'),layout=read('../runtime/mobile-control-layout.mjs'),browserSource=read('./11520-browser-responsive.mjs');
+  assert.match(layout,/html\[data-k11520-hud-profile\] \.top\{right:calc\(max\(6px, env\(safe-area-inset-right\)\) \+ 52px\)!important\}/);
+  assert.match(layout,/#k11520MarketRow\{top:6px;left:auto;right:max\(6px, env\(safe-area-inset-right\)\);width:44px;min-height:44px\}/);
+  const source=browserSource.slice(browserSource.indexOf('async function verifyMarketHeaderSeparation('),browserSource.indexOf('async function verifySettingsInterruptedRails('));
+  async function inspect({covered=false,clipped=false,blocked=false}={}){
+    const node=(text,x,y,width,height)=>({textContent:text,getBoundingClientRect(){return{x,y,width,height,right:x+width,bottom:y+height}}});
+    const edge=node('Market',794,6,44,44);edge.contains=hit=>hit===edge;
+    const balances={};for(const [id,x] of [['topFree',612],['topKaios',covered?764:696]]){const pill=node('',x,10,covered&&id==='topKaios'?72:84,38),label=node('LOCAL',x+6,14,clipped&&id==='topKaios'?100:52,8),value=node('100',x+16,25,30,16);pill.querySelector=()=>label;value.closest=()=>pill;balances[id]=value}
+    const context={assert,innerWidth:844,innerHeight:390,document:{querySelector:()=>edge,getElementById:id=>balances[id],elementFromPoint:()=>blocked?{}:edge}};runInNewContext(source+'globalThis.verify=verifyMarketHeaderSeparation;',context);
+    const report={},run=context.verify({evaluate:fn=>fn()},report,'full-idle-hidden');
+    if(covered)await assert.rejects(run,/must not cover balance label\/value/);
+    else if(clipped)await assert.rejects(run,/fits its own pill/);
+    else if(blocked)await assert.rejects(run,/actual pointer ownership/);
+    else{await run;assert.equal(report.marketHeaderSeparation['full-idle-hidden'].balances.length,2)}
+  }
+  await inspect();await inspect({covered:true});await inspect({clipped:true});await inspect({blocked:true});
+  for(const state of ['full-explicit-collapse','full-expanded','full-idle-hidden'])assert.ok(browserSource.includes("verifyMarketHeaderSeparation(page,report,'"+state+"')"));
 });

@@ -124,3 +124,44 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
   "TIMESTAMP": "2026-10-05T15:58:00Z"
 }
 ```
+
+### Exact-head six-size completion and landscape balance release blocker
+
+- The bounded test correction published as c31e783c29bde5cfb59ce2d9855793ecf8fedf1a, tree 0e605e98052e4ccfc9dd16e48baaf26d1dd68d03, identical to reviewed local 19275ff50b64a4f708e32f201688c748851a7b1e. Responsive run 37338094348 passed contextual-hud, ordinary responsive and world-first. Both six-profile reports have zero failures; native three-contact interruption passes at 390x844 and 844x390.
+- Measured runner duration: contextual 7m55s total / 7m13s verification; ordinary responsive 8m54s total / 8m15s test step. The existing 12-minute caps are unchanged. The helper measured 18.0–23.0s in contextual idle passes and 12.6–17.5s in ordinary FULL passes. These are actual CI measurements, not predicted improvement.
+- Exact-head artifacts: contextual 11357616623 (SHA-256 f6259813d1b85d711c916699b30086334830750a35efdec235a23aacd0521594), ordinary 11357169001 (2e66e9004283a74d2e79e65bfbec6735b8a67b1befeeaad584575d0b4961e3a0), world-first 11357856939 (98e192a7e3539960b76246a6330ffcf34e7225bbbb626419d1d35fa20c177994). Direct review covered 30 world/market/camera images and 54 contextual Settings/Wallet/Courier images at all six sizes. Settings and Wallet ownership were clear.
+- RELEASE HOLD / VISUAL_QA NOT_COMPLETE: direct review of cold-landscape-844-contextual-full-idle-hidden.png found the tiny Market edge covering the rightmost KAIOS header label/value in FULL landscape. The parent classified this as a readability regression and release blocker, despite passing functional checks. The manual Recenter circle's overlap with the noninteractive XZ label, transient zoom-feedback artwork overlap and landscape More-dot clarity remain disclosed P2 items outside this correction.
+- Minimal local correction: the existing Mobile Control Layout short-landscape rule reserves one 44px Market lane plus 8px gap beside the header, using the same safe-area right inset. No new manager, balance data logic, handlers, portrait geometry, Recenter polish, permissions or financial behavior changed. Additive browser assertions inspect both labels and values, their pill/viewport bounds, complete pill separation and actual Market hit ownership in FULL expanded, explicit-collapse and idle-hidden states across all six profiles. The exact-helper VM rejects covered values, clipped text and lost hit ownership.
+- Local source review found no blocking issue; aggregate 186/186 and UI/Portal 55/55 PASS. This header correction has not been published or browser-tested. The parent reserved the next resource slot for another work item; no third HUD batch may start without resource approval. The prior c31e Game PR is PASS; its push Game lane was still running Player Life at 2026-10-05T16:25:54Z. No merge or release occurred.
+- The Draft PR body records the release HOLD. A status-update denial incorrectly associated this worker with a read-only hourly report; the exact retry succeeded after Human's explicit clarification that reporting does not revoke separately authorized engineering. No alternate publication route was used for that denial.
+
+```json
+{
+  "WORK_ID": "DOT-11520-CONTEXTUAL-HUD-20261005",
+  "OWNER": "dot",
+  "BASE": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
+  "BRANCH": "dot/11520-contextual-hud-20261005",
+  "PR": 510,
+  "TESTED_HEAD": "c31e783c29bde5cfb59ce2d9855793ecf8fedf1a",
+  "HEAD_BINDING": "Header correction is the local commit containing this report; not a self-hash",
+  "STATUS": "HOLD_LANDSCAPE_BALANCE_READABILITY_LOCAL_CORRECTION",
+  "COMPLETED": "Six-size contextual and ordinary functional QA, direct screenshot review, source-reviewed minimal header correction",
+  "BLOCKED": "Final header correction still requires exact-head Chromium and direct pixel verification",
+  "TESTS": "186 aggregate / 55 UI-Portal PASS locally",
+  "CI": "c31e contextual/ordinary/world-first/Game-PR/Exchange/Portal PASS; Game-push pending; local header correction NOT_RUN",
+  "SCREENSHOTS": "Complete six-size c31e artifacts preserved; visible header regression explicitly blocks release",
+  "SECURITY": "No wallet execution, settlement, identity, permission, secret or live-user save changes",
+  "NEXT_ACTION": "Finish prior CI observation, then wait for parent-reviewed header head and its resource slot",
+  "NEEDS_HUMAN_DECISION": false,
+  "TIMESTAMP": "2026-10-05T16:26:00Z"
+}
+```
+
+### Compatibility refresh after merged M1/#509
+
+- New base: main b2a349c36d3670327aa419802f6a80a4ed339a4e, merging #509 head 1b432d348783f6778ce795578d50347bff0dc35f. Local reconciliation merges main into the existing HUD branch; it does not force-push, replace another branch, or claim a release. Candidate product stamps stay V2.9.5 above main's V2.9.4.
+- Eight textual conflicts were reviewed: four product-version consumers, responsive/smoke version assertions, shared utility-owner guards, and the UI-static release guard. Retained M1's canonical active-version consumer test, disconnected-address smoke expectations, and every new Wallet assertion. The shared owner retains Wallet masking of cargo/home and utility peers, close-time context recomputation, HUD restore, and current preferences, with the HUD Settings precedence added.
+- Byte comparison against new main confirms unchanged HTML, read-only order-intent and preflight modules, M1 settlement/browser harness, deployment manifest, temple financial documentation, Game/Trading workflows and financial test modules. In game-main, all source from orderInput through the beginning of Camera controls is identical; early execution initialization and hud's walletExecutionView consumer also match. Only the approved HUD Market, transient pointer-ownership and Camera-context hunks differ.
+- One root VM fixture needed its new dependency: the existing Wallet-owner test in tests/11520-order-route.test.mjs now evaluates the actual Settings helper and provides read-only worldContext eligibility flags alongside its old labels. All repeated-owner-tick, peer masking, saved-preference, HUD-restore and close-restoration assertions remain. The M1 owner reviewed this fixture-only adjustment; financial and identity tests outside that block are byte-identical.
+- Combined local tests: 186/186 runtime/UI aggregate and 441/441 root tests PASS. Syntax and diff checks PASS. No browser or heavy CI ran during main/Pages publication. The header readability correction and this combined source require a new exact-head six-size Chromium batch and direct screenshots before the release HOLD can clear. The previous c31e eight-job functional pass remains valid only for that previous source tree.
+- Existing published PR head remains c31e783c29bde5cfb59ce2d9855793ecf8fedf1a until a parent-authorized fast-forward publication. A connector commit must retain that published head and merged main as parents while matching this reviewed tree; local/API commit identities are not interchangeable evidence.

@@ -223,6 +223,24 @@ async function ensureExpandedMarket(page){
   // for a desired margin or weakening any retained clearance threshold.
   await page.evaluate(async()=>{for(let i=0;i<3;i++)await new Promise(requestAnimationFrame)});
 }
+async function verifyMarketHeaderSeparation(page,report,state){
+  const observation=await page.evaluate(()=>{
+    const rect=el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}},edge=document.querySelector('#k11520MarketRow'),edgeRect=rect(edge),hit=document.elementFromPoint(edgeRect.x+edgeRect.width/2,edgeRect.y+edgeRect.height/2);
+    return{edge:edgeRect,edgeHit:hit===edge||edge.contains(hit),width:innerWidth,height:innerHeight,balances:['topFree','topKaios'].map(id=>{const value=document.getElementById(id),pill=value.closest('.pill');return{id,pill:rect(pill),fields:[pill.querySelector('small'),value].map(el=>({text:el.textContent.trim(),rect:rect(el)}))}})};
+  });
+  assert.equal(observation.edgeHit,true,'Market edge keeps its actual pointer ownership');
+  for(const balance of observation.balances){
+    assert.ok(balance.pill.width>0&&balance.pill.height>0,'FULL keeps both header balances visible');
+    for(const field of balance.fields){const r=field.rect,e=observation.edge,p=balance.pill;
+      assert.ok(field.text.length>0&&r.width>0&&r.height>0,'balance label/value remains rendered');
+      assert.ok(r.x>=p.x&&r.right<=p.right&&r.y>=p.y&&r.bottom<=p.bottom,'balance label/value fits its own pill: '+JSON.stringify(field));
+      assert.ok(r.x>=0&&r.right<=observation.width&&r.y>=0&&r.bottom<=observation.height,'balance label/value remains inside the viewport');
+      assert.ok(!(r.x<e.right&&r.right>e.x&&r.y<e.bottom&&r.bottom>e.y),'Market edge must not cover balance label/value: '+balance.id+' '+JSON.stringify(field));
+    }
+    const e=observation.edge,p=balance.pill;assert.ok(!(p.x<e.right&&p.right>e.x&&p.y<e.bottom&&p.bottom>e.y),'Market edge keeps a separate lane from the full balance pill');
+  }
+  (report.marketHeaderSeparation||={})[state]=observation;
+}
 async function verifySettingsInterruptedRails(page,report){
   if(!await page.locator('#gameModeToggle').isVisible())await page.locator('#k11520UtilityMaster').click();
   const cdp=await page.context().newCDPSession(page),selectors=['#cControl','#lotsControl','#yControl'];
@@ -371,9 +389,9 @@ async function verifyContextualHud(){
       const activeReport={profile:{...profile,name:profile.name+'-active-courier'}};await verifySettingsContext(page,activeReport);
       assert.equal(await page.evaluate(()=>__K11520_PLAYER_COURIER__.active().missionId),missionId,'Settings never cancels or replaces the mission');report.activeCourier=activeReport.settingsContext;
       await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520HudProfile').selectOption('FULL');await page.locator('#k11520UiSettingsClose').click();await page.locator('#k11520UtilityMaster').click();
-      assert.equal(await page.locator('#axes').isVisible(),false,'FULL cannot override an explicit Market collapse');await ensureExpandedMarket(page);
+      assert.equal(await page.locator('#axes').isVisible(),false,'FULL cannot override an explicit Market collapse');await verifyMarketHeaderSeparation(page,report,'full-explicit-collapse');await ensureExpandedMarket(page);await verifyMarketHeaderSeparation(page,report,'full-expanded');
       await page.waitForTimeout(15100);await page.locator('#axes').waitFor({state:'hidden',timeout:2000});assert.equal(await page.locator('#k11520MarketRow').getAttribute('aria-expanded'),'false');
-      report.market={cards,idleMs:15000,fullRespectsCollapse:true};report.camera='DEFAULT_HIDDEN / MANUAL_ONLY / RECENTER_HIDES / XYZ_UNCHANGED';assert.deepEqual(errors,[]);
+      await verifyMarketHeaderSeparation(page,report,'full-idle-hidden');report.market={cards,idleMs:15000,fullRespectsCollapse:true};report.camera='DEFAULT_HIDDEN / MANUAL_ONLY / RECENTER_HIDES / XYZ_UNCHANGED';assert.deepEqual(errors,[]);
       await page.screenshot({path:`${OUT}/${profile.name}-contextual-full-idle-hidden.png`});
     }catch(error){report.error=String(error);failures.push(profile.name+': '+error);await page.screenshot({path:`${OUT}/${profile.name}-contextual-FAIL.png`}).catch(()=>{})}
     finally{await context.close();await fs.writeFile(`${OUT}/contextual-report.json`,JSON.stringify({head:process.env.K11520_SOURCE_SHA||null,base:BASE,production:PRODUCTION,sourceChecks,reports,failures},null,2))}
@@ -911,7 +929,7 @@ try{
     try{await page.goto(BASE+ROUTE,{waitUntil:'domcontentloaded',timeout:35000});await page.waitForFunction(()=>globalThis.__K11520_3D_CONTROL__&&globalThis.__K11520_KSPACE_COMBAT__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__&&document.getElementById('k11520UtilityMaster'),null,{timeout:45000});await page.waitForTimeout(7500);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click();
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({timeout:45000});
       await verifyFullHudControlOwnership(page,report);
-      await verifySettingsContext(page,report);await ensureExpandedMarket(page);
+      await verifySettingsContext(page,report);await ensureExpandedMarket(page);await verifyMarketHeaderSeparation(page,report,'full-expanded');
       report.states.cold=await snapshot(page);await page.screenshot({path:`${OUT}/${profile.name}-collapsed.png`,fullPage:true});check(profile.name,report.states.cold,{landscape:!!profile.landscape});
       await verifyFeedbackFade(page,report);
       const authorityBefore=await page.evaluate(()=>({axis:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.activeAxis,order:document.querySelector('#orderFire')?.getAttribute('aria-label')}));

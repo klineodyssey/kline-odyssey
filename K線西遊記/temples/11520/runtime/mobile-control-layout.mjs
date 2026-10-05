@@ -3,7 +3,7 @@ import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.16
+VERSION: 1.3.17
 REVISION: 2026-10-05.BOUNDED-EXPANDED-LANDSCAPE-CONTEXT
 PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and keep expanded KX/KY/KZ market cards equally wide and readable. Raid/courier action geometry is owned by the existing Market/Wallet utility rail. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
@@ -110,7 +110,10 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 #k11520FollowMonster{position:fixed;left:54px;right:auto;top:116px;width:calc(100vw - 224px);height:44px;z-index:620;border:1px solid #68e4ff88;border-radius:10px;background:#071018dd;color:#dffaff;font:700 10px system-ui;overflow:hidden;text-overflow:ellipsis}
 #k11520CameraReset[hidden],#k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
 @media(orientation:landscape) and (max-height:600px){
-  #k11520MarketRow{top:6px;left:auto;right:6px;width:44px;min-height:44px}
+  /* The tiny Market edge has its own 44px lane plus an 8px gap. Reserve that
+     lane beside the header so FULL balance labels/values stay readable. */
+  html[data-k11520-hud-profile] .top{right:calc(max(6px, env(safe-area-inset-right)) + 52px)!important}
+  #k11520MarketRow{top:6px;left:auto;right:max(6px, env(safe-area-inset-right));width:44px;min-height:44px}
   html[data-k11520-hud-profile] .axes{top:54px!important;left:360px!important;right:58px!important;width:auto!important;max-width:none!important;transform:none!important}
   /* Realistic quotes may wrap k/alpha/theta onto two lines. Size to content,
      then flow diagnostic HUD below it instead of leaking past a 74px card. */
