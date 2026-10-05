@@ -352,8 +352,12 @@ test("prepaid payroll distinguishes the 9/5 payment for 10/5 salary from employe
   assert.equal(schedule.payment_executed, false);
 });
 
-test("salary advance is separate credit backed only by verified future salary and ATM fees", () => {
-  const plan = createSalaryAdvanceCreditPlan({
+test("salary advance is separate credit backed only by verified future salary and ATM fees", (t) => {
+  // This scenario owns its clock; the historical payroll fixture must not expire
+  // with the machine's wall clock. TestContext restores Date.now after this test.
+  const now = Date.parse("2026-09-05T00:00:00Z");
+  t.mock.method(Date, "now", () => now);
+  const input = {
     plan_id: "SALARY_ADVANCE_001", employee_life_id: "LIFE-ATM-11520-001", future_salary_due_date: "2026-10-05T00:00:00Z",
     verified_future_salary_atomic: "100000", requested_advance_atomic: "50000", maximum_advance_bps: 6000, service_fee_bps: 100,
     repayment_sources: ["VERIFIED_FUTURE_SALARY", "VERIFIED_ATM_SERVICE_FEES"], employee_consent: true,
@@ -361,13 +365,26 @@ test("salary advance is separate credit backed only by verified future salary an
     salary_receivable_evidence: { employee_life_id: "LIFE-ATM-11520-001", status: "VERIFIED", amount_atomic: "100000" },
     loan_escrow_status: "FUNDED_AND_SEGREGATED",
     exact_action_authorization: { action_id: "ADVANCE_001", policy_hash: "P", replay_key: "R", expires_at: "2026-09-20T00:00:00Z" }
-  });
+  };
+  const plan = createSalaryAdvanceCreditPlan(input);
   assert.equal(plan.status, "READY_FOR_EXACT_CREDIT_EXECUTION");
   assert.equal(plan.maximum_advance_atomic, "60000");
   assert.equal(plan.service_fee_atomic, "500");
   assert.equal(plan.automatic_salary_deduction, false);
   assert.equal(plan.customer_deposits_may_fund_advance, false);
   assert.equal(plan.mainnet_write_executed, false);
+
+  // Preserve the production rule: only a valid date strictly after now passes.
+  for (const dueDate of ["not-a-date", new Date(now - 1).toISOString(), new Date(now).toISOString()]) {
+    assert.throws(
+      () => createSalaryAdvanceCreditPlan({ ...input, future_salary_due_date: dueDate }),
+      (error) => error.code === "SALARY_ADVANCE_DUE_DATE_INVALID"
+    );
+  }
+  assert.equal(
+    createSalaryAdvanceCreditPlan({ ...input, future_salary_due_date: new Date(now + 1).toISOString() }).status,
+    "READY_FOR_EXACT_CREDIT_EXECUTION"
+  );
 });
 
 test("ATM expansion ranks mapped sites but creates no branch without observed demand", () => {
