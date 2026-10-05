@@ -6,7 +6,7 @@ const OUT='artifacts/11520-visual-qa';
 const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
-const page=await browser.newPage({viewport:{width:1280,height:800},isMobile:true,hasTouch:true});
+let page=await browser.newPage({viewport:{width:1280,height:800},isMobile:false,hasTouch:false});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(2200);
@@ -29,7 +29,20 @@ await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150
 await page.locator('#k11520UtilityMaster').click();await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(150);
 assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),false,'rotated desktop idle Raid hidden');
 assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'rotated desktop idle Courier hidden');
-await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
+// Native desktop verifies actual context clicks with its own isolated local mission.
+await page.locator('#k11520UtilityMaster').click();
+await page.locator('#cargoInterceptionButton').click();await page.locator('#sheet.open').waitFor();assert.match(await page.locator('#sheetTitle').textContent(),/ATM|導彈攔截/);await page.locator('#sheetClose').click();
+await page.locator('#homeDeliveryButton').click();await page.locator('#homeRequest').waitFor({state:'visible'});
+await page.locator('#homeDeliveryMode').selectOption('PLAYER_COURIER');await page.locator('#homeAmount').fill('2400');await page.locator('#homeRequest').click();await page.locator('#homeLaunch').click();
+await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='ACTIVE');
+await page.locator('#k11520UtilityMaster').click();assert.equal(await page.locator('#homeDeliveryButton').isVisible(),true,'native desktop active Courier visible with More closed');
+await page.locator('#homeDeliveryButton').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),true);await page.screenshot({path:`${OUT}/desktop-native-active-courier-1280x800.png`});
+await page.close();
+// Preserve the original mobile touch context and fresh state for all mobile QA.
+page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});page.on('pageerror',e=>errors.push(String(e)));
+await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
+await page.waitForTimeout(2200);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});await page.waitForTimeout(700);
+await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
 assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),false,'inactive Raid stays out of the world');
 assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'inactive Courier stays out of the world');
 await page.locator('#k11520UtilityMaster').click();
