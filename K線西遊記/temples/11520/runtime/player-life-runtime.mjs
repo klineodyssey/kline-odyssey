@@ -250,3 +250,167 @@ export function createCloudPlayerStore(){
   const unavailable=()=>fail('CLOUD_NOT_CONFIGURED');
   return Object.freeze({status:'NOT_CONFIGURED',scope:'SERVER_AUTH_REQUIRED',createPlayer:unavailable,loadPlayer:unavailable,savePlayer:unavailable,updateProfile:unavailable,saveProgress:unavailable,loadProgress:unavailable,bindWallet:unavailable,loadHomePlot:unavailable,saveHomePlot:unavailable});
 }
+
+/**
+ * Inert Stage1 storage primitive. NO production caller or automatic cutover.
+ * Coverage is deliberately PLAYER_LIFE only; partial markers are not a complete
+ * local-game migration. Other domains and restore fail closed until reviewed.
+ * IndexedDB replaces authority only after explicit future integration. Existing
+ * localStorage functions above are unchanged by import/construction/open.
+ */
+export const LOCAL_GAME_AUTHORITY_DATABASE='KAIOS_LOCAL_GAME';
+const AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_AUTHORITY_STAGE1';
+const AUTHORITY_INTEGRATION='UNINTEGRATED_DRAFT';
+const AUTHORITY_DOMAIN='PLAYER_LIFE';
+const AUTHORITY_STORE='records';
+const AUTHORITY_READ_KEYS=['$authority',AUTHORITY_DOMAIN,'$initialized','$keys'];
+const equalData=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+function authorityDomain(domain){if(domain!==AUTHORITY_DOMAIN)fail('DOMAIN_NOT_IMPLEMENTED')}
+function authorityEnvelope(value){
+  try{validateEnvelope(value);if(JSON.stringify(value).length>4000000)fail('STORE_CAPACITY')}
+  catch{fail('CORRUPT_AUTHORITY')}
+  return value;
+}
+function authoritySnapshot(meta,envelope){
+  if(meta===undefined&&envelope===undefined)return {status:'UNINITIALIZED',coverage:[AUTHORITY_DOMAIN],integration:AUTHORITY_INTEGRATION};
+  if(!keys(meta,['schema','integration','coverage','authorityEpoch','selectionEpoch','activePlayerId'])||meta.schema!==AUTHORITY_SCHEMA||meta.integration!==AUTHORITY_INTEGRATION||!equalData(meta.coverage,[AUTHORITY_DOMAIN])||!/^[a-f0-9]{32}$/.test(meta.authorityEpoch)||!integer(meta.selectionEpoch,Number.MAX_SAFE_INTEGER))fail('CORRUPT_AUTHORITY');
+  authorityEnvelope(envelope);
+  if(meta.activePlayerId!==envelope.activePlayerId)fail('CORRUPT_AUTHORITY');
+  return clone({status:'READY',coverage:meta.coverage,integration:meta.integration,authorityEpoch:meta.authorityEpoch,selectionEpoch:meta.selectionEpoch,revision:envelope.revision,activePlayerId:envelope.activePlayerId,envelope});
+}
+export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GAME_AUTHORITY_DATABASE}={}){
+  // No global storage getter, DB request, event listener, or random generation
+  // occurs here. Explicit open is the first interaction with browser storage.
+  if(databaseName!==LOCAL_GAME_AUTHORITY_DATABASE&&!/^KAIOS_LOCAL_GAME_TEST:[a-zA-Z0-9_-]{1,100}$/.test(databaseName))fail('INVALID_AUTHORITY_DATABASE');
+  let db=null,opening=null,generation=0,reducing=false;
+  const transactions=new Set();
+  const requireOpen=()=>{if(!db)fail('AUTHORITY_OPEN_REQUIRED');return db};
+  const secureCrypto=()=>crypto??globalThis.crypto;
+  const token=()=>{const c=secureCrypto();if(typeof c?.getRandomValues!=='function')fail('SECURE_RANDOM_UNAVAILABLE');const b=new Uint8Array(16);c.getRandomValues(b);return [...b].map(v=>v.toString(16).padStart(2,'0')).join('')};
+  async function hash(raw){const c=secureCrypto();if(typeof c?.subtle?.digest!=='function')fail('HASH_UNAVAILABLE');const b=await c.subtle.digest('SHA-256',new TextEncoder().encode(raw));return [...new Uint8Array(b)].map(v=>v.toString(16).padStart(2,'0')).join('')}
+  function close(){generation++;opening=null;for(const tx of transactions){try{tx.abort()}catch{}}db?.close();db=null}
+  function open(){
+    if(db)return Promise.resolve();if(opening)return opening;
+    const admitted=generation;
+    opening=new Promise((resolve,reject)=>{
+      let request,settled=false;
+      const rejectOnce=error=>{if(!settled){settled=true;reject(error)}};
+      try{const factory=indexedDB??globalThis.indexedDB;if(!factory?.open)fail('INDEXEDDB_UNAVAILABLE');request=factory.open(databaseName,1)}catch(error){rejectOnce(error);return}
+      request.onblocked=()=>rejectOnce(new Error('AUTHORITY_OPEN_BLOCKED'));
+      request.onerror=()=>rejectOnce(request.error||new Error('AUTHORITY_OPEN_FAILED'));
+      request.onupgradeneeded=event=>{try{if(settled||admitted!==generation)fail('AUTHORITY_CLOSED');if(event.oldVersion!==0)fail('AUTHORITY_SCHEMA_UNSUPPORTED');request.result.createObjectStore(AUTHORITY_STORE)}catch(error){request.transaction?.abort();rejectOnce(error)}};
+      request.onsuccess=()=>{
+        const connection=request.result;
+        if(settled||admitted!==generation){connection.close();rejectOnce(new Error('AUTHORITY_CLOSED'));return}
+        if(connection.objectStoreNames.length!==1||!connection.objectStoreNames.contains(AUTHORITY_STORE)){connection.close();rejectOnce(new Error('AUTHORITY_SCHEMA_UNSUPPORTED'));return}
+        db=connection;db.onversionchange=()=>close();db.onclose=()=>{if(db===connection)close()};settled=true;resolve();
+      };
+    }).finally(()=>{if(admitted===generation)opening=null});
+    return opening;
+  }
+  function transaction(mode,recordKeys,work){
+    const connection=requireOpen(),admitted=generation;
+    return new Promise((resolve,reject)=>{
+      let tx,result,workError=null;
+      const abort=error=>{workError??=error;try{tx.abort()}catch{reject(workError)}};
+      try{tx=connection.transaction(AUTHORITY_STORE,mode,{durability:'strict'});transactions.add(tx)}catch(error){reject(error);return}
+      // Request success is not commit acknowledgement. Install all terminal
+      // handlers before the first request, and never suppress a request error.
+      tx.oncomplete=()=>{transactions.delete(tx);if(admitted!==generation||connection!==db){reject(new Error('AUTHORITY_CLOSED'));return}resolve(clone(result))};
+      tx.onabort=()=>{transactions.delete(tx);reject(workError||tx.error||new Error('AUTHORITY_TRANSACTION_ABORTED'))};
+      tx.onerror=()=>{workError??=tx.error||new Error('AUTHORITY_TRANSACTION_FAILED')};
+      const store=tx.objectStore(AUTHORITY_STORE),values={};let remaining=recordKeys.length;
+      try{for(const key of recordKeys){const request=key==='$keys'?store.getAllKeys():store.get(key);request.onsuccess=()=>{values[key]=request.result;if(--remaining===0){try{if(admitted!==generation||connection!==db)fail('AUTHORITY_CLOSED');result=work(values,store);if(result&&typeof result.then==='function')fail('ASYNC_TRANSACTION_REDUCER')}catch(error){abort(error)}}}}}catch(error){abort(error)}
+    });
+  }
+  const loaded=values=>{
+    const meta=values.$authority,envelope=values[AUTHORITY_DOMAIN],marker=values.$initialized;
+    const history=values.$keys?.some(key=>typeof key==='string'&&key.startsWith('archive:'));
+    if(meta===undefined&&envelope===undefined){if(marker!==undefined||history)fail('CORRUPT_AUTHORITY')}
+    else if(!keys(marker,['authorityEpoch','coverage'])||marker.authorityEpoch!==meta?.authorityEpoch||!equalData(marker.coverage,[AUTHORITY_DOMAIN])||!values.$keys?.includes('archive:'+meta.authorityEpoch))fail('CORRUPT_AUTHORITY');
+    return authoritySnapshot(meta,envelope);
+  };
+  function read({domain=AUTHORITY_DOMAIN}={}){authorityDomain(domain);return transaction('readonly',AUTHORITY_READ_KEYS,loaded)}
+  function initialRecords(envelope,epoch){
+    const data=clone(envelope);authorityEnvelope(data);
+    const meta={schema:AUTHORITY_SCHEMA,integration:AUTHORITY_INTEGRATION,coverage:[AUTHORITY_DOMAIN],authorityEpoch:epoch,selectionEpoch:0,activePlayerId:data.activePlayerId};
+    return {data,meta};
+  }
+  function initialize(input={}){
+    authorityDomain(input.domain);if(!keys(input,['domain','envelope','confirmLifeOnlyDraft']))fail('INVALID_INITIALIZATION');if(input.confirmLifeOnlyDraft!==true)fail('EXPLICIT_DRAFT_CONFIRMATION_REQUIRED');
+    const {data,meta}=initialRecords(input.envelope,token());
+    return transaction('readwrite',AUTHORITY_READ_KEYS,(values,store)=>{
+      if(loaded(values).status!=='UNINITIALIZED')fail('AUTHORITY_ALREADY_INITIALIZED');
+      store.add({kind:'INITIAL_LIFE_DRAFT',raw:JSON.stringify(data),coverage:[AUTHORITY_DOMAIN]},'archive:'+meta.authorityEpoch);
+      store.add({authorityEpoch:meta.authorityEpoch,coverage:[AUTHORITY_DOMAIN]},'$initialized');store.add(meta,'$authority');store.add(data,AUTHORITY_DOMAIN);return authoritySnapshot(meta,data);
+    });
+  }
+  // Reducers are trusted existing domain-transition code, not arbitrary user
+  // patches. Structural validation does not replace import/wallet-proof policy.
+  function command(input={},reducer){
+    if(reducing)fail('REENTRANT_COMMAND');authorityDomain(input.domain);
+    if(!keys(input,['domain','kind','playerId','expected'])||!['UPDATE','CREATE','IMPORT','SWITCH'].includes(input.kind))fail('INVALID_AUTHORITY_COMMAND');
+    input=clone(input);const expectations=input.expected;
+    return transaction('readwrite',AUTHORITY_READ_KEYS,(values,store)=>{
+      const before=loaded(values);if(before.status!=='READY')fail('AUTHORITY_UNINITIALIZED');
+      if(!keys(expectations,['authorityEpoch','selectionEpoch','revision'])||expectations.authorityEpoch!==before.authorityEpoch||expectations.selectionEpoch!==before.selectionEpoch||expectations.revision!==before.revision)fail('REVISION_CONFLICT_RELOAD_REQUIRED');
+      const previous=before.envelope,next=clone(previous),meta=clone(values.$authority),oldIds=Object.keys(previous.players);
+      if(!ID.test(input.playerId||''))fail('INVALID_PLAYER_ID');
+      if(input.kind==='SWITCH'){
+        if(reducer!==undefined)fail('SWITCH_REDUCER_FORBIDDEN');if(!Object.hasOwn(next.players,input.playerId))fail('PLAYER_NOT_FOUND');next.activePlayerId=input.playerId;
+      }else{
+        if(typeof reducer!=='function')fail('SYNCHRONOUS_REDUCER_REQUIRED');
+        if(reducer.constructor?.name==='AsyncFunction')fail('ASYNC_TRANSACTION_REDUCER');
+        if(input.kind==='UPDATE'&&input.playerId!==previous.activePlayerId)fail('PLAYER_NOT_ACTIVE');
+        reducing=true;let result;
+        try{result=reducer(next)}finally{reducing=false}
+        if(result&&typeof result.then==='function'){Promise.resolve(result).catch(()=>{});fail('ASYNC_TRANSACTION_REDUCER')}
+        if(next.revision!==previous.revision)fail('REVISION_MUTATION_FORBIDDEN');
+        const nextIds=Object.keys(next.players);
+        if(input.kind==='UPDATE'){
+          if(!equalData(nextIds,oldIds))fail('PLAYER_REGISTRY_MUTATION_FORBIDDEN');if(next.activePlayerId!==previous.activePlayerId)fail('SELECTION_MUTATION_FORBIDDEN');
+          for(const id of oldIds)if(id!==input.playerId&&!equalData(next.players[id],previous.players[id]))fail('NON_TARGET_PLAYER_MUTATION');
+          const oldEvents=previous.players[input.playerId].events;
+          if(!equalData(next.players[input.playerId].events.slice(0,oldEvents.length),oldEvents))fail('CONSUMED_EVENTS_MUTATION_FORBIDDEN');
+        }else{
+          if(oldIds.includes(input.playerId)||nextIds.length!==oldIds.length+1||next.activePlayerId!==input.playerId||!Object.hasOwn(next.players,input.playerId))fail('INVALID_PLAYER_REGISTRY_CHANGE');
+          for(const id of oldIds)if(!equalData(next.players[id],previous.players[id]))fail('NON_TARGET_PLAYER_MUTATION');
+        }
+        if(!equalData(next.usedNonces.slice(0,previous.usedNonces.length),previous.usedNonces))fail('CONSUMED_NONCES_MUTATION_FORBIDDEN');
+        if(next.schema!==previous.schema||next.scope!==previous.scope||next.legacyMigrated!==previous.legacyMigrated)fail('GLOBAL_AUTHORITY_MUTATION_FORBIDDEN');
+      }
+      if(previous.revision>=Number.MAX_SAFE_INTEGER)fail('REVISION_CAPACITY');next.revision=previous.revision+1;
+      if(next.activePlayerId!==previous.activePlayerId){if(meta.selectionEpoch>=Number.MAX_SAFE_INTEGER)fail('SELECTION_EPOCH_CAPACITY');meta.selectionEpoch++;meta.activePlayerId=next.activePlayerId}
+      authorityEnvelope(next);const after=authoritySnapshot(meta,next);
+      store.put(next,AUTHORITY_DOMAIN);store.put(meta,'$authority');return after;
+    });
+  }
+  function validateCandidate(candidate){
+    if(!keys(candidate,['schema','id','coverage','sourceKey','raw','sha256','ownerIds','activePlayerId'])||candidate.schema!=='LIFE_DRAFT_MIGRATION_CANDIDATE'||!/^[a-f0-9]{32}$/.test(candidate.id)||!equalData(candidate.coverage,[AUTHORITY_DOMAIN])||candidate.sourceKey!==PLAYER_LIFE_STORAGE_KEY||typeof candidate.raw!=='string'||candidate.raw.length>4000000||!/^[a-f0-9]{64}$/.test(candidate.sha256))fail('INVALID_MIGRATION_CANDIDATE');
+    let parsed;try{parsed=JSON.parse(candidate.raw)}catch{fail('INVALID_MIGRATION_CANDIDATE')}authorityEnvelope(parsed);
+    if(candidate.activePlayerId!==parsed.activePlayerId||!equalData(candidate.ownerIds,Object.keys(parsed.players).sort()))fail('INVALID_MIGRATION_OWNER');return parsed;
+  }
+  async function prepareMigration(input={}){
+    authorityDomain(input.domain);if(!keys(input,['domain','sourceStorage']))fail('INVALID_MIGRATION_CANDIDATE');requireOpen();const admitted=generation;
+    const raw=input.sourceStorage?.getItem(PLAYER_LIFE_STORAGE_KEY);if(typeof raw!=='string')fail('LEGACY_SOURCE_MISSING');if(raw.length>4000000)fail('STORE_CAPACITY');
+    let envelope;try{envelope=JSON.parse(raw)}catch{fail('INVALID_MIGRATION_CANDIDATE')}authorityEnvelope(envelope);
+    const candidate={schema:'LIFE_DRAFT_MIGRATION_CANDIDATE',id:token(),coverage:[AUTHORITY_DOMAIN],sourceKey:PLAYER_LIFE_STORAGE_KEY,raw,sha256:await hash(raw),ownerIds:Object.keys(envelope.players).sort(),activePlayerId:envelope.activePlayerId};
+    if(admitted!==generation)fail('AUTHORITY_CLOSED');
+    return transaction('readwrite',AUTHORITY_READ_KEYS,(values,store)=>{if(loaded(values).status!=='UNINITIALIZED')fail('AUTHORITY_ALREADY_INITIALIZED');store.add(candidate,'candidate:'+candidate.id);return candidate});
+  }
+  function readCandidate(id){if(!/^[a-f0-9]{32}$/.test(id||''))fail('INVALID_MIGRATION_CANDIDATE');return transaction('readonly',['candidate:'+id],values=>{const value=values['candidate:'+id];validateCandidate(value);if(value.id!==id)fail('MIGRATION_CANDIDATE_ID_MISMATCH');return value})}
+  async function commitMigration(input={}){
+    authorityDomain(input.domain);if(!keys(input,['domain','candidateId','sha256','sourceStorage','confirmLifeOnlyDraft']))fail('INVALID_MIGRATION_CANDIDATE');if(input.confirmLifeOnlyDraft!==true)fail('EXPLICIT_DRAFT_CONFIRMATION_REQUIRED');requireOpen();const admitted=generation;
+    input={...input};const candidate=await readCandidate(input.candidateId);if(candidate.sha256!==input.sha256||await hash(candidate.raw)!==candidate.sha256)fail('MIGRATION_CONTENT_MISMATCH');
+    if(input.sourceStorage?.getItem(PLAYER_LIFE_STORAGE_KEY)!==candidate.raw)fail('LEGACY_SOURCE_DIVERGED_HOLD');if(admitted!==generation)fail('AUTHORITY_CLOSED');
+    const {data,meta}=initialRecords(validateCandidate(candidate),token());
+    return transaction('readwrite',[...AUTHORITY_READ_KEYS,'candidate:'+input.candidateId],(values,store)=>{
+      if(loaded(values).status!=='UNINITIALIZED')fail('AUTHORITY_ALREADY_INITIALIZED');if(!equalData(values['candidate:'+input.candidateId],candidate))fail('MIGRATION_CONTENT_MISMATCH');
+      // This recheck detects observed divergence only. It is NOT an atomic
+      // multi-key legacy snapshot or a lock on uncooperative old clients.
+      if(input.sourceStorage?.getItem(PLAYER_LIFE_STORAGE_KEY)!==candidate.raw)fail('LEGACY_SOURCE_DIVERGED_HOLD');
+      store.add({kind:'MIGRATED_LIFE_DRAFT',candidate},'archive:'+meta.authorityEpoch);store.add({authorityEpoch:meta.authorityEpoch,coverage:[AUTHORITY_DOMAIN]},'$initialized');store.add(meta,'$authority');store.add(data,AUTHORITY_DOMAIN);return authoritySnapshot(meta,data);
+    });
+  }
+  return Object.freeze({open,close,read,initialize,command,prepareMigration,readCandidate,commitMigration,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
+}

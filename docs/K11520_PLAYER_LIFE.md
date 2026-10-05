@@ -181,3 +181,91 @@ storage/two players/home/XP/wallet proofs/account switch/export-import.
 GM provides PR/head/evidence to Human for ChatGPT second-layer review; it must
 not claim that second review already occurred. No automatic cross-thread
 message, cloud purchase, Mainnet write or KAIOS payout is part of this release.
+
+## Atomic local authority successor: inert Stage1 (2026-10-05)
+
+STATUS: MEDIUM_RISK_DRAFT / UNINTEGRATED_LIFE_ONLY / P0_ACCEPTANCE_INCOMPLETE
+BASE_MAIN: b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720
+SOURCE_PR: #506
+SOURCE_HEAD: 8db98fb9d50828e9024daa2d811498c4e05201dd
+REASON: Broaden reviewed local-store protection to the requested canonical Player
+Life boundary; preserve the cooperative-lock prototype and its evidence unchanged.
+
+This clean-main successor is not stacked on explanation-only #505 and does not
+copy its UI/version changes. Stage1 adds an inert primitive inside the existing
+player-life-runtime.mjs and tests inside the existing Player Life suite. No
+production caller uses it. Existing game persistence remains unchanged. It does
+not authorize real-user migration, release, backend provisioning, or chain action.
+
+### Canonical replacement design and current limits
+
+The intended reviewed endpoint is one IndexedDB write authority for existing Life,
+backpack, local simulation product and Courier records, including session/tutorial
+inputs that can flow back into Life. Their domain owners remain canonical. There
+will be no parallel authoritative ledger, dual-writing, or post-cutover fallback
+to legacy localStorage. The current Stage1 supports only PLAYER_LIFE; other domains
+fail DOMAIN_NOT_IMPLEMENTED. Its marker explicitly records coverage PLAYER_LIFE
+and integration UNINTEGRATED_DRAFT. A full-system integrator must reject this
+partial marker as incomplete, never infer completed migration from its existence.
+
+The constructor/import are inert. Explicit open creates structural schema only.
+Explicit initialize or confirmed migration is separate. Commands carry complete
+authority epoch, shared-selection epoch and expected Life revision; stale commands
+conflict rather than silently rebase. Existing Life validation applies to every
+loaded/drafted envelope. The adapter owns monotonic revisions and selection epoch;
+ordinary commands cannot modify another player, registry, selection or consumed
+event/nonce history. Snapshot clones do not expose stored state.
+
+One readwrite transaction coordinates the records. Success is acknowledged only
+on transaction completion, never on an individual put. Exceptions/validation and
+request failures abort the transaction. Reducers are trusted existing domain-transition
+code, not user patches; structural validation does not replace import/profile/wallet-proof
+policy. Stage2 must retain those original exclusions. Reducers are synchronous and
+cannot receive IDB handles or replace validation. Closure/versionchange fences pending admission.
+A retained initialization sentinel and archive identity distinguish missing canonical
+records from a genuinely empty database. Whole-origin deletion cannot be detected
+from erased local evidence. Missing/corrupt canonical data stays blocked. Unsupported/open failures never
+delete the database or initialize a fallback identity.
+
+Prepared migration candidates preserve exact raw Life source, SHA-256, source key
+and validated owner/selection summary. Immutable candidate and protection identities
+use add, not overwrite. Observed legacy source divergence holds the commit; originals
+remain untouched. This source recheck cannot prove an atomic multi-key legacy
+snapshot. The eventual full migration requires an explicit preserved candidate and
+cross-domain validation. Restore currently fails RESTORE_NOT_IMPLEMENTED: replay
+retention and atomic cross-domain restore must be reviewed before it is enabled.
+Sanitized user/cloud exports have not changed.
+
+### Evidence and remaining gates
+
+Regression-first tests use fake-indexeddb 6.2.5, Apache-2.0, from its
+[official repository](https://github.com/dumbmatter/fakeIndexedDB) and the npm registry.
+Recorded npm integrity is
+`sha512-CGnyrvbhPlWYMngksqrSSUT1BAVP49dZocrHuK0SvtR0D5TMs5wP0o3j7jexDJW01KSadjBp1M/71o/KR3nD1w==`.
+Both existing Product and Backend Node steps install this exact test-only version
+with scripts disabled. No jobs, triggers, permission scope or timeout budgets are
+added. This adds one small package install per affected existing invocation.
+Missing dependencies fail; tests are not silently skipped. In-memory results are
+not native concurrency, disk durability, browser restart, or old-client proof.
+
+The browser platform explicitly provides no localStorage locking assumption;
+Web Locks coordinate participating scripts. IndexedDB supplies atomic transactions
+with overlapping readwrite serialization. Strict durability remains a browser hint,
+not a guarantee against device loss. Sources: [Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html),
+[Web Locks](https://www.w3.org/TR/web-locks/),
+[IndexedDB transaction model](https://www.w3.org/TR/IndexedDB/#transaction-concept).
+
+Stage2 must route every writer/read projection through the replacement authority,
+retain receipt tombstones, implement safe restore, and preserve real-wallet behavior.
+Required native proof includes N/N conflict/reload/retry, exact pinned-old Life,
+backpack/product/Courier/session/tutorial interference after cutover, migration and
+restore interruption, real persistent-profile restart, schema/corruption/quota,
+selection/Life isolation, and actual production conflict/recovery feedback. Missing
+BFCache evidence remains explicit. Separate direct visual QA is required.
+
+FINAL: Life-only authority primitive; production persistence unchanged;
+Player Life/backpack/product/Courier cutover and P0 acceptance incomplete.
+
+```json
+{"WORK_ID":"DOT-PLAYER-LIFE-ATOMIC-20261005","TRACK":"A_LOCAL_SAVE_INTEGRITY","RISK":"MEDIUM","BASE_MAIN":"b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720","SOURCE_PR":506,"SOURCE_HEAD":"8db98fb9d50828e9024daa2d811498c4e05201dd","STAGE":"LIFE_ONLY_AUTHORITY_PRIMITIVE","INTEGRATION":"UNINTEGRATED_DRAFT","SUPPORTED_DOMAINS":["PLAYER_LIFE"],"OTHER_DOMAINS":"DOMAIN_NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","PRODUCTION_CALLERS":0,"PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","NATIVE_QA":"NOT_RUN","SELF_MERGE":false}
+```

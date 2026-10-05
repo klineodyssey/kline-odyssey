@@ -224,3 +224,115 @@ test('quota failure cannot persist half of kill and loot reward batch',()=>{
  storage.setItem=()=>{throw Error('quota')};assert.throws(()=>s.recordEvents([{id:'kill',type:'JOURNEY_MONSTER_KILL'},{id:'loot',type:'LOOT_DROP'}]),/STORAGE_WRITE_FAILED/);
  assert.deepEqual(s.activePlayer(),before);assert.equal(storage.getItem(PLAYER_LIFE_STORAGE_KEY),raw);
 });
+
+// Stage1 is an IN-MEMORY IndexedDB model, not Chromium/disk/old-tab evidence.
+// fake-indexeddb6.2.5 (Apache-2.0), official dumbmatter/fakeIndexedDB package.
+// npm integrity: sha512-CGnyrvbhPlWYMngksqrSSUT1BAVP49dZocrHuK0SvtR0D5TMs5wP0o3j7jexDJW01KSadjBp1M/71o/KR3nD1w==
+import {IDBFactory} from 'fake-indexeddb';
+import * as lifeAuthorityModule from '../runtime/player-life-runtime.mjs';
+const authorityName='KAIOS_LOCAL_GAME_TEST:life-stage1';
+function lifeFixture(){const storage=memory(),s=make({storage});s.createPlayer();return {storage,envelope:JSON.parse(storage.getItem(PLAYER_LIFE_STORAGE_KEY))}}
+function newAuthority(indexedDB=new IDBFactory(),extra={}){return lifeAuthorityModule.createLocalGameAuthority({indexedDB,databaseName:authorityName,...extra})}
+const expected=s=>({authorityEpoch:s.authorityEpoch,selectionEpoch:s.selectionEpoch,revision:s.revision});
+const change=(s,extra={})=>({domain:'PLAYER_LIFE',kind:'UPDATE',playerId:s.activePlayerId,expected:expected(s),...extra});
+async function initialized(indexedDB=new IDBFactory()){const a=newAuthority(indexedDB);await a.open();await a.initialize({domain:'PLAYER_LIFE',envelope:lifeFixture().envelope,confirmLifeOnlyDraft:true});return a}
+async function rawDb(indexedDB){return new Promise((resolve,reject)=>{const r=indexedDB.open(authorityName,1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function rawWrite(db,key,value){return new Promise((resolve,reject)=>{const tx=db.transaction('records','readwrite');tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error);value===undefined?tx.objectStore('records').delete(key):tx.objectStore('records').put(value,key)})}
+
+test('atomic Life Stage1 import/constructor inert; explicit open creates no authority',async()=>{
+ assert.equal(typeof lifeAuthorityModule.createLocalGameAuthority,'function');let opens=0;const a=newAuthority({open(){opens++;throw Error('unexpected open')}});assert.equal(opens,0);a.close();assert.equal(opens,0);
+ const b=newAuthority();await b.open();assert.equal((await b.read()).status,'UNINITIALIZED');b.close();assert.throws(()=>b.read(),/AUTHORITY_OPEN_REQUIRED/);
+});
+test('atomic Life Stage1 N/N conflict, refresh and explicit retry',async()=>{
+ const idb=new IDBFactory(),a=await initialized(idb),b=newAuthority(idb);await b.open();const n=await a.read();assert.deepEqual(await b.read(),n);
+ const saved=await a.command(change(n),d=>{d.players[n.activePlayerId].displayName='A latest'});assert.equal(saved.revision,n.revision+1);
+ await assert.rejects(b.command(change(n),d=>{d.players[n.activePlayerId].displayName='B stale'}),/REVISION_CONFLICT/);assert.deepEqual(await a.read(),saved);
+ const fresh=await b.read();const retried=await b.command(change(fresh),d=>{d.players[fresh.activePlayerId].pronoun='safe retry'});assert.equal(retried.envelope.players[fresh.activePlayerId].displayName,'A latest');assert.equal(retried.revision,n.revision+2);a.close();b.close();
+});
+test('atomic Life Stage1 simultaneous CAS yields one accepted write and one conflict',async()=>{
+ const idb=new IDBFactory(),a=await initialized(idb),b=newAuthority(idb);await b.open();const s=await a.read();const results=await Promise.allSettled([a.command(change(s),d=>{d.players[s.activePlayerId].displayName='A'}),b.command(change(s),d=>{d.players[s.activePlayerId].displayName='B'})]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.match(results.find(r=>r.status==='rejected').reason.message,/REVISION_CONFLICT/);assert.equal((await a.read()).revision,s.revision+1);a.close();b.close();
+});
+test('atomic Life Stage1 concurrent initialize, confirmation and domain fail closed',async()=>{
+ const idb=new IDBFactory(),a=newAuthority(idb),b=newAuthority(idb);await Promise.all([a.open(),b.open()]);const data={domain:'PLAYER_LIFE',envelope:lifeFixture().envelope,confirmLifeOnlyDraft:true};assert.throws(()=>a.initialize({...data,confirmLifeOnlyDraft:false}),/EXPLICIT_DRAFT_CONFIRMATION/);const r=await Promise.allSettled([a.initialize(data),b.initialize(data)]);assert.equal(r.filter(x=>x.status==='fulfilled').length,1);assert.match(r.find(x=>x.status==='rejected').reason.message,/AUTHORITY_ALREADY_INITIALIZED/);
+ const ready=await a.read();for(const domain of ['BACKPACK','PRODUCT','COURIER']){assert.throws(()=>a.read({domain}),/DOMAIN_NOT_IMPLEMENTED/);assert.throws(()=>a.initialize({...data,domain}),/DOMAIN_NOT_IMPLEMENTED/);assert.throws(()=>a.command({...change(ready),domain},()=>{}),/DOMAIN_NOT_IMPLEMENTED/)}
+ assert.throws(()=>a.initialize({...data,backpack:{}}),/INVALID_INITIALIZATION/);a.close();b.close();
+});
+test('atomic Life Stage1 reducer throw/thenable/corruption abort without partial writes',async()=>{
+ const a=await initialized(),s=await a.read();for(const reducer of [d=>{d.players[s.activePlayerId].displayName='bad';throw Error('REDUCER_FAIL')},()=>Promise.resolve(),d=>{d.revision++},d=>{d.players[s.activePlayerId].xp=999},d=>{d.players[s.activePlayerId].homePlot.ownerPlayerId='other'}]){await assert.rejects(a.command(change(s),reducer));assert.deepEqual(await a.read(),s)}a.close();
+});
+test('atomic Life Stage1 complete expectation and player isolation are mandatory',async()=>{
+ const f=lifeFixture(),legacy=make({storage:f.storage});const first=legacy.activePlayer().playerId,second=legacy.createPlayer().playerId;const envelope=JSON.parse(f.storage.getItem(PLAYER_LIFE_STORAGE_KEY));const a=newAuthority();await a.open();await a.initialize({domain:'PLAYER_LIFE',envelope,confirmLifeOnlyDraft:true});const s=await a.read();
+ for(const c of [change(s,{playerId:first}),change(s,{expected:{revision:s.revision}}),change(s,{expected:{...expected(s),authorityEpoch:'wrong'}})])await assert.rejects(a.command(c,()=>{}));
+ await assert.rejects(a.command(change(s),d=>{d.players[first].displayName='wrong Life'}),/NON_TARGET_PLAYER/);await assert.rejects(a.command(change(s),d=>{d.activePlayerId=first}),/SELECTION_MUTATION/);
+ const switched=await a.command({domain:'PLAYER_LIFE',kind:'SWITCH',playerId:first,expected:expected(s)});assert.equal(switched.activePlayerId,first);assert.equal(switched.selectionEpoch,s.selectionEpoch+1);assert.equal(switched.envelope.players[second].playerId,second);await assert.rejects(a.command(change(s),()=>{}),/REVISION_CONFLICT/);a.close();
+});
+test('atomic Life Stage1 immutable cloned snapshots and recursive mutation rejection',async()=>{
+ const a=await initialized(),s=await a.read();s.envelope.players[s.activePlayerId].displayName='outside';assert.notEqual((await a.read()).envelope.players[s.activePlayerId].displayName,'outside');const fresh=await a.read();await assert.rejects(a.command(change(fresh),()=>a.command(change(fresh),()=>{})),/REENTRANT_COMMAND/);assert.deepEqual(await a.read(),fresh);assert.throws(()=>a.restore(),/RESTORE_NOT_IMPLEMENTED/);a.close();
+});
+test('atomic Life Stage1 explicit migration preserves raw source and holds observed divergence',async()=>{
+ const {storage,envelope}=lifeFixture(),original=storage.getItem(PLAYER_LIFE_STORAGE_KEY),a=newAuthority();await a.open();const candidate=await a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage});assert.equal(candidate.raw,original);assert.equal((await a.read()).status,'UNINITIALIZED');assert.equal(candidate.sha256.length,64);
+ storage.setItem(PLAYER_LIFE_STORAGE_KEY,original+' ');await assert.rejects(a.commitMigration({domain:'PLAYER_LIFE',candidateId:candidate.id,sha256:candidate.sha256,sourceStorage:storage,confirmLifeOnlyDraft:true}),/LEGACY_SOURCE_DIVERGED_HOLD/);assert.equal((await a.read()).status,'UNINITIALIZED');assert.equal((await a.readCandidate(candidate.id)).raw,original);
+ storage.setItem(PLAYER_LIFE_STORAGE_KEY,original);const migrated=await a.commitMigration({domain:'PLAYER_LIFE',candidateId:candidate.id,sha256:candidate.sha256,sourceStorage:storage,confirmLifeOnlyDraft:true});assert.deepEqual(migrated.envelope,envelope);assert.equal(storage.getItem(PLAYER_LIFE_STORAGE_KEY),original);assert.deepEqual(migrated.coverage,['PLAYER_LIFE']);assert.equal(migrated.integration,'UNINTEGRATED_DRAFT');a.close();
+});
+test('atomic Life Stage1 missing/corrupt canonical state never falls back',async()=>{
+ for(const mutate of [async db=>rawWrite(db,'PLAYER_LIFE',undefined),async db=>rawWrite(db,'PLAYER_LIFE',{bad:true}),async db=>rawWrite(db,'$authority',{schema:'unsupported'})]){const idb=new IDBFactory(),a=await initialized(idb),db=await rawDb(idb);await mutate(db);await assert.rejects(a.read(),/CORRUPT_AUTHORITY/);await assert.rejects(a.initialize({domain:'PLAYER_LIFE',envelope:lifeFixture().envelope,confirmLifeOnlyDraft:true}),/CORRUPT_AUTHORITY|AUTHORITY_ALREADY_INITIALIZED/);db.close();a.close()}
+});
+
+test('atomic Life Stage1 rejects malformed migration and tampered candidate hash',async()=>{
+ const {storage}=lifeFixture(),a=newAuthority();await a.open();await assert.rejects(a.prepareMigration({domain:'COURIER',sourceStorage:storage}),/DOMAIN_NOT_IMPLEMENTED/);await assert.rejects(a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage,backpack:{}}),/INVALID_MIGRATION_CANDIDATE/);const c=await a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage});await assert.rejects(a.commitMigration({domain:'PLAYER_LIFE',candidateId:c.id,sha256:'0'.repeat(64),sourceStorage:storage,confirmLifeOnlyDraft:true}),/MIGRATION_CONTENT_MISMATCH/);assert.equal((await a.read()).status,'UNINITIALIZED');a.close();
+});
+test('atomic Life Stage1 immutable candidate identities cannot overwrite',async()=>{
+ const {storage}=lifeFixture(),a=newAuthority(new IDBFactory(),{crypto:{getRandomValues:b=>b.fill(7),subtle:globalThis.crypto.subtle}});await a.open();const first=await a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage});await assert.rejects(a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage}));assert.deepEqual(await a.readCandidate(first.id),first);assert.equal((await a.read()).status,'UNINITIALIZED');a.close();
+});
+test('atomic Life Stage1 put success followed by abort never acknowledges or partially commits',async()=>{
+ const idb=new IDBFactory(),a=await initialized(idb),s=await a.read(),db=await rawDb(idb);const probe=db.transaction('records','readonly').objectStore('records'),prototype=Object.getPrototypeOf(probe),original=prototype.put;let successObserved=false;
+ prototype.put=function(value,key){const request=original.call(this,value,key);if(key==='PLAYER_LIFE'){const tx=this.transaction;request.addEventListener('success',()=>{successObserved=true;tx.abort()})}return request};
+ try{await assert.rejects(a.command(change(s),d=>{d.players[s.activePlayerId].displayName='abort after put'}));assert.equal(successObserved,true)}finally{prototype.put=original}
+ assert.deepEqual(await a.read(),s);db.close();a.close();
+});
+test('atomic Life Stage1 partial initialization puts abort as one transaction',async()=>{
+ const idb=new IDBFactory(),a=newAuthority(idb);await a.open();const db=await rawDb(idb),prototype=Object.getPrototypeOf(db.transaction('records','readonly').objectStore('records')),original=prototype.add;
+ prototype.add=function(value,key){if(key==='PLAYER_LIFE')throw new DOMException('fixture quota','QuotaExceededError');return original.call(this,value,key)};
+ try{await assert.rejects(a.initialize({domain:'PLAYER_LIFE',envelope:lifeFixture().envelope,confirmLifeOnlyDraft:true}),/quota/)}finally{prototype.add=original}
+ assert.equal((await a.read()).status,'UNINITIALIZED');const all=await new Promise((resolve,reject)=>{const tx=db.transaction('records','readonly'),r=tx.objectStore('records').getAllKeys();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});assert.deepEqual(all,[]);db.close();a.close();
+});
+test('atomic Life Stage1 close aborts admitted transaction and reopen is explicit',async()=>{
+ const a=await initialized(),s=await a.read(),pending=a.command(change(s),d=>{d.players[s.activePlayerId].displayName='never committed'});a.close();await assert.rejects(pending);assert.throws(()=>a.read(),/AUTHORITY_OPEN_REQUIRED/);await a.open();assert.deepEqual(await a.read(),s);a.close();
+});
+test('atomic Life Stage1 versionchange closes connection and never recreates newer schema',async()=>{
+ const idb=new IDBFactory(),a=await initialized(idb);const newer=await new Promise((resolve,reject)=>{const r=idb.open(authorityName,2);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});assert.throws(()=>a.read(),/AUTHORITY_OPEN_REQUIRED/);await assert.rejects(a.open(),/version|Version/i);newer.close();a.close();
+});
+test('atomic Life Stage1 close while opening fences delayed admission',async()=>{
+ const a=newAuthority(),opening=a.open();a.close();await assert.rejects(opening,/AUTHORITY_CLOSED|Abort/);assert.throws(()=>a.read(),/AUTHORITY_OPEN_REQUIRED/);await a.open();assert.equal((await a.read()).status,'UNINITIALIZED');a.close();
+});
+test('atomic Life Stage1 CREATE validates new player and never mutates another Life',async()=>{
+ const a=await initialized(),s=await a.read(),other=lifeFixture().envelope,player=other.players[other.activePlayerId];const added=await a.command({domain:'PLAYER_LIFE',kind:'CREATE',playerId:player.playerId,expected:expected(s)},d=>{d.players[player.playerId]=player;d.activePlayerId=player.playerId});assert.equal(added.selectionEpoch,s.selectionEpoch+1);assert.deepEqual(added.envelope.players[s.activePlayerId],s.envelope.players[s.activePlayerId]);a.close();
+});
+test('atomic Life Stage1 consumed event and nonce histories cannot be dropped',async()=>{
+ const f=lifeFixture(),legacy=make({storage:f.storage});legacy.recordEvent({id:'consumed',type:'LOOT_DROP'});const a=newAuthority();await a.open();await a.initialize({domain:'PLAYER_LIFE',envelope:JSON.parse(f.storage.getItem(PLAYER_LIFE_STORAGE_KEY)),confirmLifeOnlyDraft:true});const s=await a.read();await assert.rejects(a.command(change(s),d=>{d.players[s.activePlayerId].events=[];d.players[s.activePlayerId].xp=0;d.players[s.activePlayerId].level=1}),/CONSUMED_EVENTS/);assert.deepEqual(await a.read(),s);a.close();
+});
+
+test('atomic Life Stage1 actual fresh module import never reads storage globals',async()=>{
+ const names=['indexedDB','localStorage'],descriptors=new Map(names.map(n=>[n,Object.getOwnPropertyDescriptor(globalThis,n)]));let touches=0;
+ try{for(const n of names)Object.defineProperty(globalThis,n,{configurable:true,get(){touches++;throw Error('inert import touched '+n)}});const fresh=await import('../runtime/player-life-runtime.mjs?inert-stage1-test');const a=fresh.createLocalGameAuthority();assert.equal(touches,0);a.close();assert.equal(touches,0)}finally{for(const n of names){const d=descriptors.get(n);if(d)Object.defineProperty(globalThis,n,d);else delete globalThis[n]}}
+});
+test('atomic Life Stage1 queued command freezes caller expectation and selected owner',async()=>{
+ const a=await initialized(),s=await a.read(),c=change(s),pending=a.command(c,d=>{d.players[s.activePlayerId].displayName='admitted'});c.expected.revision=999;c.playerId='wrong';assert.equal((await pending).envelope.players[s.activePlayerId].displayName,'admitted');a.close();
+});
+test('atomic Life Stage1 no success before transaction complete',async()=>{
+ const idb=new IDBFactory(),a=await initialized(idb),s=await a.read(),db=await rawDb(idb),prototype=Object.getPrototypeOf(db.transaction('records','readonly').objectStore('records')),original=prototype.put;let resolved=false,putSucceeded=false,observedBeforeCommit=false;
+ prototype.put=function(value,key){const r=original.call(this,value,key);if(key==='PLAYER_LIFE')r.addEventListener('success',()=>{putSucceeded=true;observedBeforeCommit=!resolved});return r};
+ try{await a.command(change(s),d=>{d.players[s.activePlayerId].displayName='committed'}).then(()=>{resolved=true});assert.equal(putSucceeded,true);assert.equal(observedBeforeCommit,true);assert.equal(resolved,true)}finally{prototype.put=original;db.close();a.close()}
+});
+
+test('atomic Life Stage1 candidate key and confirmed identity cannot be substituted',async()=>{
+ const idb=new IDBFactory(),a=newAuthority(idb),{storage}=lifeFixture();await a.open();const one=await a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage}),two=await a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage}),db=await rawDb(idb);await rawWrite(db,'candidate:'+one.id,two);await assert.rejects(a.readCandidate(one.id),/MIGRATION_CANDIDATE_ID_MISMATCH/);await assert.rejects(a.commitMigration({domain:'PLAYER_LIFE',candidateId:one.id,sha256:one.sha256,sourceStorage:storage,confirmLifeOnlyDraft:true}),/MIGRATION_CANDIDATE_ID_MISMATCH/);assert.equal((await a.read()).status,'UNINITIALIZED');db.close();a.close();
+});
+
+test('atomic Life Stage1 missing canonical pair with protected history cannot initialize again',async()=>{
+ for(const deleteMarker of [false,true]){const idb=new IDBFactory(),a=await initialized(idb),db=await rawDb(idb);await rawWrite(db,'$authority',undefined);await rawWrite(db,'PLAYER_LIFE',undefined);if(deleteMarker)await rawWrite(db,'$initialized',undefined);await assert.rejects(a.read(),/CORRUPT_AUTHORITY/);await assert.rejects(a.initialize({domain:'PLAYER_LIFE',envelope:lifeFixture().envelope,confirmLifeOnlyDraft:true}),/CORRUPT_AUTHORITY/);await assert.rejects(a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:lifeFixture().storage}),/CORRUPT_AUTHORITY/);db.close();a.close()}
+});
+
+test('atomic Life Stage1 oversized raw legacy source is never archived or initialized',async()=>{
+ const {storage}=lifeFixture();storage.setItem(PLAYER_LIFE_STORAGE_KEY,storage.getItem(PLAYER_LIFE_STORAGE_KEY)+' '.repeat(4000000));const a=newAuthority();await a.open();await assert.rejects(a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage}),/STORE_CAPACITY/);assert.equal((await a.read()).status,'UNINITIALIZED');assert.ok(storage.getItem(PLAYER_LIFE_STORAGE_KEY).length>4000000);a.close();
+});
