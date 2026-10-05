@@ -559,13 +559,17 @@ class V2OfflineStore {
       { sql: "DELETE FROM v2_guard" }
     ];
   }
-  async commit(before, after, event, now, fault = false) {
+  async commit(before, after, event, now, fault = false, authorize = () => {}) {
     const statements = this.statements(before, after, event, now);
     if (fault) statements.splice(2, 0, { sql: "INSERT INTO v2_guard VALUES(0)" });
+    // Recheck fixture authority after every awaited read, immediately before the synchronous SQLite batch.
+    // There is no await between this check and BEGIN IMMEDIATE; this is only a single-process fake catalog.
+    authorize();
     await this.db.atomic(statements);
     return after;
   }
   async queue(wire, now = 0, fault = false) {
+    wire = v2Copy(wire);
     const { message } = this.verifier.verify(wire, now);
     v2Require(now >= message.created && now < message.expires && now < V2_BUDGET.age, "MESSAGE_EXPIRED");
     v2Require(message.type === "TASK" && message.action === "LOCAL_RECEIPT" && message.work === "FAKE-WORK-1", "SCOPE_DENIED");
@@ -573,11 +577,13 @@ class V2OfflineStore {
     v2Require(before.work === "READY" && before.delivery === "EMPTY", "OUTBOX_TERMINAL");
     v2Require(!before.message && message.head === before.head && message.revision === before.revision, "STALE_OR_ALREADY_QUEUED");
     after.message = v2Copy(wire); after.delivery = "QUEUED"; after.revision++;
-    return this.commit(before, after, "OUTBOX_COMMITTED", now, fault);
+    return this.commit(before, after, "OUTBOX_COMMITTED", now, fault, () => this.verifier.verify(wire, now));
   }
   async receive(wire, now = 1, fault = false, retries = 1) {
+    wire = v2Copy(wire);
     const { message, digest } = this.verifier.verify(wire, now, true);
     const before = await this.checked();
+    this.verifier.verify(wire, now, true); // historical read permission may change during the awaited read
     v2Require(message.recipient === V2_REVIEWER.principal, "WRONG_RECIPIENT");
     if (before.inbox && (before.inbox.id === message.id || before.inbox.key === message.key)) {
       v2Require(before.inbox.digest === digest, "DUPLICATE_CONFLICT");
@@ -588,7 +594,8 @@ class V2OfflineStore {
     v2Require(before.message && before.message.bytes === wire.bytes, "UNKNOWN_MESSAGE");
     v2Require(message.head === before.head, "STALE_HEAD");
     v2Require(now >= message.created && now < message.expires && now < V2_BUDGET.age && message.action === "LOCAL_RECEIPT", "STALE_OR_SCOPE");
-    v2Require(!before.inbox && before.work !== "CANCELLED", "INBOX_TERMINAL");
+    v2Require(!before.inbox && before.work === "READY" && ["QUEUED", "RETRY_WAIT"].includes(before.delivery), "INBOX_TERMINAL");
+    v2Require(before.revision === message.revision + 1, "STALE_RECEIPT_REVISION");
     const after = v2Copy(before), commitRef = `FAKE-INBOX-COMMIT-${before.seq + 1}`;
     after.inbox = { id: message.id, key: message.key, digest, commitRef, accepted: now, revision: before.revision + 1 };
     after.effects++; after.revision++;
@@ -597,7 +604,10 @@ class V2OfflineStore {
       original: message.id, digest, work: message.work, requestedRevision: message.revision,
       acceptedRevision: after.revision, recipient: message.recipient, commitRef, accepted: now }), V2_REVIEWER);
     try {
-      await this.commit(before, after, "INBOX_EFFECT_ACK_OUTBOX_COMMITTED", now, fault);
+      await this.commit(before, after, "INBOX_EFFECT_ACK_OUTBOX_COMMITTED", now, fault, () => {
+        this.verifier.verify(wire, now);
+        this.verifier.actor(V2_REVIEWER.principal, V2_REVIEWER.instance, now);
+      });
     } catch (error) {
       // At most one full reread after a CAS race; injected failures are never retried.
       if (!fault && retries > 0 && /CHECK constraint/.test(error.message)) return this.receive(wire, now, false, retries - 1);
@@ -606,8 +616,10 @@ class V2OfflineStore {
     return v2Copy(after.ack);
   }
   async acknowledge(wire, now = 2) {
+    wire = v2Copy(wire);
     const { message: ack, actor } = this.verifier.verify(wire, now, true);
     const before = await this.checked();
+    this.verifier.verify(wire, now, true);
     v2Require(actor.principal === V2_REVIEWER.principal && ack.type === "ACK", "ACK_ACTOR");
     const original = JSON.parse(before.message.bytes), inbox = before.inbox;
     v2Require(inbox && ack.original === original.id && ack.digest === v2Hash(before.message.bytes) &&
@@ -625,7 +637,8 @@ class V2OfflineStore {
     after.seenAck = wire.bytes;
     if (deadlinePassed && !["DEAD_LETTER", "CANCELLED"].includes(after.delivery)) after.delivery = "DEAD_LETTER";
     if (!late) after.delivery = "AUTHENTICATED_FAKE_ACK";
-    await this.commit(before, after, late ? "LATE_ACK_RECONCILIATION_REQUIRED" : "FAKE_ACK_ACCEPTED", now);
+    await this.commit(before, after, late ? "LATE_ACK_RECONCILIATION_REQUIRED" : "FAKE_ACK_ACCEPTED", now, false,
+      () => this.verifier.verify(wire, now, late));
     return late ? "LATE_ACK_RECONCILIATION_REQUIRED" : after.delivery;
   }
   async attempt(now, jitter = 0.5) {
@@ -643,6 +656,7 @@ class V2OfflineStore {
     return this.commit(before, after, after.delivery, now);
   }
   async claim(actor, now) {
+    actor = v2Copy(actor);
     v2Require(Number.isSafeInteger(now) && now >= 0 && now < V2_BUDGET.age, "SERVER_TIME_BUDGET");
     this.verifier.actor(actor.principal, actor.instance, now);
     v2Require([V2_BUILDER.principal, V2_STEALER.principal].includes(actor.principal), "CLAIM_NOT_ASSIGNED");
@@ -651,7 +665,8 @@ class V2OfflineStore {
     const after = v2Copy(before); after.fence++;
     after.lease = { principal: actor.principal, instance: actor.instance, epoch: before.epoch, counter: after.fence,
       until: Math.min(now + V2_BUDGET.lease, V2_BUDGET.age), heartbeat: now };
-    await this.commit(before, after, "FAKE_CLAIM", now);
+    await this.commit(before, after, "FAKE_CLAIM", now, false,
+      () => this.verifier.actor(actor.principal, actor.instance, now));
     return v2Copy(after.lease);
   }
   async owner(actor, fence, now) {
@@ -662,17 +677,21 @@ class V2OfflineStore {
     return before;
   }
   async heartbeat(actor, fence, now) {
+    actor = v2Copy(actor); fence = v2Copy(fence);
     const before = await this.owner(actor, fence, now), after = v2Copy(before);
     v2Require(now >= before.lease.heartbeat + V2_BUDGET.heartbeat && before.heartbeats < V2_BUDGET.heartbeats, "HEARTBEAT_BUDGET");
     after.heartbeats++; after.lease.heartbeat = now; after.lease.until = Math.min(now + V2_BUDGET.lease, V2_BUDGET.age);
-    return this.commit(before, after, "HEARTBEAT", now);
+    return this.commit(before, after, "HEARTBEAT", now, false,
+      () => this.verifier.actor(actor.principal, actor.instance, now));
   }
   async result(actor, fence, head, now) {
+    actor = v2Copy(actor); fence = v2Copy(fence);
     const before = await this.owner(actor, fence, now);
     v2Require(before.work === "READY", "RESULT_TERMINAL");
     v2Require(head === before.head, "STALE_HEAD");
     const after = v2Copy(before); after.work = "RESULT_RECORDED"; after.lease = null; after.revision++;
-    return this.commit(before, after, "LOCAL_RESULT_ONLY", now);
+    return this.commit(before, after, "LOCAL_RESULT_ONLY", now, false,
+      () => this.verifier.actor(actor.principal, actor.instance, now));
   }
   async cancel(now) {
     const before = await this.checked(), after = v2Copy(before);
@@ -1064,4 +1083,50 @@ v2Test("reconciliation clock cannot admit a new effect or promote an ACK-first t
   const durable = await (await g.reopen()).checked();
   assert.equal(durable.delivery, "DEAD_LETTER"); assert.equal(durable.work, "READY");
   assert.equal(durable.effects, 1);
+});
+
+v2Test("first receipt cannot execute after DLQ, a recorded result or an advanced revision", async (t) => {
+  for (const terminal of ["DEAD_LETTER", "RESULT_RECORDED", "REVISION_ADVANCED"]) {
+    const f = await v2Fixture(t), wire = v2Task(f.verifier);
+    await f.model.queue(wire);
+    if (terminal === "DEAD_LETTER") {
+      for (let i = 0; i < V2_BUDGET.attempts; i++) await f.model.attempt(0, 0);
+    } else if (terminal === "RESULT_RECORDED") {
+      const lease = await f.model.claim(V2_BUILDER, 0);
+      await f.model.result(V2_BUILDER, lease, V2_HEAD, 0);
+    } else {
+      const before = await f.model.checked(), after = v2Copy(before); after.revision++;
+      await f.model.commit(before, after, "FAKE_AUTHORIZED_REVISION_CHANGE", 0);
+    }
+    const before = await f.model.checked();
+    await assert.rejects(f.model.receive(wire, 1), /INBOX_TERMINAL|STALE_RECEIPT_REVISION/);
+    const durable = await (await f.reopen()).checked();
+    assert.deepEqual(durable, before);
+    assert.equal(durable.effects, 0); assert.equal(durable.inbox, null); assert.equal(durable.ack, null);
+  }
+});
+
+v2Test("revocation during awaited state reads denies every new privileged mutation", async (t) => {
+  for (const operation of ["queue", "receive", "claim", "heartbeat", "result", "acknowledge"]) {
+    const f = await v2Fixture(t), wire = v2Task(f.verifier);
+    let lease, ack;
+    if (operation !== "queue") await f.model.queue(wire);
+    if (["heartbeat", "result"].includes(operation)) lease = await f.model.claim(V2_BUILDER, 0);
+    if (operation === "acknowledge") ack = await f.model.receive(wire, 1);
+    const before = await f.model.checked(), originalChecked = f.model.checked.bind(f.model);
+    const principal = operation === "acknowledge" ? V2_REVIEWER.principal : V2_BUILDER.principal;
+    f.model.checked = async () => {
+      const state = await originalChecked();
+      f.verifier.actors.get(principal).revoked = true; // injected while caller awaits the durable read
+      return state;
+    };
+    const call = operation === "queue" ? () => f.model.queue(wire, 30)
+      : operation === "receive" ? () => f.model.receive(wire, 30)
+      : operation === "claim" ? () => f.model.claim(V2_BUILDER, 30)
+      : operation === "heartbeat" ? () => f.model.heartbeat(V2_BUILDER, lease, 30)
+      : operation === "result" ? () => f.model.result(V2_BUILDER, lease, V2_HEAD, 30)
+      : () => f.model.acknowledge(ack, 30);
+    await assert.rejects(call(), /EXPIRED_OR_REVOKED_FIXTURE/);
+    assert.deepEqual(await (await f.reopen()).checked(), before);
+  }
 });
