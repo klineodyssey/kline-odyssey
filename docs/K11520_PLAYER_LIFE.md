@@ -621,3 +621,21 @@ Result scope is NATIVE_ADAPTER_DIAGNOSTICS. Full migration, restore, live truste
 command integration, conflict/recovery UI and world/custody behavior remain
 INCOMPLETE. The ordinary product functional/visual gates and the user's
 whole-Player-Life P0 requirements remain separate release blockers.
+
+### Narrow shared-QA prerequisites for the queued native batch
+
+The clean-main candidate reuses only the reviewed Courier desktop/mobile split
+and bounded read-only timing/restoration diagnostics. Provenance is #507 local
+91572879e324f670cb1826d8baa95f88eaca019e (published20ede27b), subsequently reused
+unchanged by Track C in fe6ee6f6fcbb94b7664e7267afe980965a64e128
+(published #509 head7e0b1d1d537c55fde58e625e9f21d8a2f2308383). This is a selective
+test-only prerequisite, not a merge of #507 or any wallet/HUD runtime branch.
+
+The original desktop block gets its own mandatory90-second invocation. The
+ordinary mobile block retains its90-second cap, original gameplay assertions and
+wait predicates. This adds up to90 seconds of aggregate Product QA time. Required
+desktop screenshots and both timing reports are checked. Diagnostics preserve
+failed restoration state without altering timers, authority or receipt behavior.
+The native-IDB job and all authority code remain unchanged by this prerequisite.
+Exact-candidate browser evidence is still required; prior passes do not validate
+this candidate, and production cutover remains HOLD.
