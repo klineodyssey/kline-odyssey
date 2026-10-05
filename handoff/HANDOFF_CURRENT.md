@@ -49,15 +49,15 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 
 ## KAIOS multi-project engineering coordination snapshot
 
-Current checkpoint: 2026-10-05T09:47:09Z; observed main `765d0e24e3fbe7353a80329c99bc3b5c3025fd12`. Documentation branch original base remains `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
+Current checkpoint: 2026-10-05T11:26:48Z; observed main `b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720`. Documentation branch original base remains `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
 
 Twenty meaningful work packages are listed below, including substreams of the same project. The Human clarified the target as 20; obvious typographical mistakes are normalized in current coordination text. The target is 20 work packages, not a claim that 20 workers execute simultaneously. IN_PROGRESS identifies active coordination/QA/recovery as described, not a pending CI job running code. Existing projects remain tracked when new tasks arrive.
 
-1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Close postmerge behavioral gates through separately tracked #504 and Courier/insurance diagnostics; retain public release facts without claiming full QA success. Evidence: #498 merged at765d0e24; V2.9.1 public source verified and Pages PASS. Three postmerge behavioral gates remain RED: main Responsive pan readiness, public Responsive pursuit, and Game Product insurance PAID wait. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693) Child checkpoints: Q01.release=COMPLETE; Q01.behavioral_gates=IN_PROGRESS.
+1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Track required postrelease gameplay acceptance through #507, plus integrated #505 explanation-only checks. Preserve proven public version facts and separate inherited P2 observations. Evidence: #498 V2.9.1 remains publicly live. #504 test-only successor merged at b513d4e7 at11:08 UTC, without a product-version change. Pages is live, but postmerge public pointblank-facing failure is unresolved in successor #507; no blanket behavioral QA pass. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693) Child checkpoints: Q01.release=COMPLETE; Q01.behavioral_gates=IN_PROGRESS.
 
-2. **P1 / BLOCKED / RELEASE_BLOCKED — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Hold #503 release even if UI tests pass. Complete separate explanation-only CLOCK_REVIEW UX successor on clean latest main and review canonical local-store writer serialization design before authorizing any recovery mutation. Evidence: Fresh #503 head4916c833ad0fe148d53e24385b54d4819956dc51. Parent technical review identifies concurrent-tab ledger revision collision that can erase a credited receipt, receipt lookup bound only by ID rather than owner/amount, memory-only continuation on persistence failure, and a Courier envelope shared-store lock gap. High-priority local-game data integrity; no real on-chain loss is claimed. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/503) Child checkpoints: Q02.recovery_candidate=BLOCKED (RELEASE_BLOCKED); Q02.explanation_only_ux=IN_PROGRESS; Q02.canonical_writer_design=IN_PROGRESS.
+2. **P1 / BLOCKED / RELEASE_BLOCKED — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Keep #503 recovery and #506 medium-risk integrity stack on HOLD. Validate explanation-only #505 at integrated cc235810 separately; reconcile refreshed dependency/main before final #506 QA, then resolve its remaining release gates. Evidence: Fresh #5034916c833 remains RELEASE_BLOCKED for additional local-game integrity validation. No actual player data or real assets changed. #505cc235810 integrates main b513; explanation-only V2.9.3 remains candidate. Prior c148 had all CI and13 explanation screenshots PASS; current exact CI pending. #506afb3f9e0 remains a Draft stack with medium-risk lifecycle, compatibility, migration and follower-UX holds despite14 native cases PASS reported by parent. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/503) · [2](https://github.com/klineodyssey/kline-odyssey/pull/505) · [3](https://github.com/klineodyssey/kline-odyssey/pull/506) Child checkpoints: Q02.recovery_candidate=BLOCKED; Q02.explanation_only_ux=IN_PROGRESS; Q02.canonical_writer_design=BLOCKED.
 
-3. **P1 / IN_PROGRESS — Public main responsive 390 timeout**. Dependencies: none. Next: Inspect exact-a92a1bce local/public CI, native pan traces and screenshots; preserve unchanged pursuit thresholds and real inputs. Coordinate merge only after required evidence. Evidence: Fresh #504 a92a1bced146fdcc5c4ff5c957bc5363c70f4f2b is test-only on main765d0e24. Traces diagnose stale pursuit heading overshooting a moving airborne target; real joystick now tracks live relativeXZ every75ms, preserving3D<0.8 within5s and initial<2 within15s. Pan uses stable clear-contact readiness; specific rejecting entity remains unproven. 227/227 local tests PASS; exact CI pending. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/504) · [2](https://github.com/klineodyssey/kline-odyssey/pull/498) Child checkpoints: Q03.pursuit=IN_PROGRESS; Q03.pan=IN_PROGRESS.
+3. **P1 / IN_PROGRESS — Public main responsive 390 timeout**. Dependencies: none. Next: Inspect exact #507195aa504 local/public CI and native facing evidence; retain required gameplay assertions and bounded deadlines before any parent-coordinated merge. Evidence: #504 merged b513d4e7 from5c3aa2af. Public postmerge pointblank-facing precondition failed before an attack. Draft #507195aa504df2c3f6c4044dd753afc03b310b4b55d is a clean test-only successor using native standoff/facing feedback; runtime and original gameplay assertions unchanged. 227 local tests PASS; exact CI pending. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/504) · [2](https://github.com/klineodyssey/kline-odyssey/pull/507) Child checkpoints: Q03.pursuit=COMPLETE; Q03.pan=COMPLETE; Q03.facing=IN_PROGRESS.
 
 4. **P2 / QUEUED — BSC97 stale-quote dispatch race**. Dependencies: Q01. Next: Reproduce quote-age change across awaited dispatch on latest main; prepare fail-closed engineering fix with no signer or transaction. Evidence: Draft89d6af11 is based on older main; parent audit identified quote-before-dispatch race. Existing PR PASS claims do not clear this gap. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
 
@@ -81,13 +81,13 @@ Twenty meaningful work packages are listed below, including substreams of the sa
 
 14. **P2 / QUEUED — Multiplayer foundation**. Dependencies: Q17. Next: Inspect existing room/queue interfaces; define game-only synchronization and conflict acceptance criteria before external infrastructure. Evidence: User roadmap substream; backend candidate is merged, not proof of deployed multiplayer or provider provisioning. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/489) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/backend/KAIOS_BACKEND_ARCHITECTURE.md)
 
-15. **P2 / QUEUED — Graphics and performance baseline**. Dependencies: Q01, Q03. Next: Measure representative mobile/desktop scenes and resource budgets after release blockers; prioritize observed regressions. Evidence: User roadmap; no claimed benchmark or speculative graphics rewrite. Functional and direct screenshot QA remain separate. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/AGENTS.md)
+15. **P2 / QUEUED — Graphics and performance baseline**. Dependencies: Q01, Q03. Next: After required gameplay QA, verify reachability and provenance of bounded inherited P2 visual observations before proposing fixes; keep performance work based on measured evidence. Evidence: Inherited visual observations are not confirmed new P1 defects or #505 regressions. Actual control click reachability remains unknown where noted. Keep required gameplay priority. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/AGENTS.md) Child checkpoints: Q15.more_guide=QUEUED; Q15.summary_balance=QUEUED; Q15.desktop_controls=QUEUED.
 
 16. **P2 / QUEUED — First-party SFX and media provenance**. Dependencies: none. Next: Review uncovered effects and runtime lifecycle against current audio provenance; use original or affirmatively licensed assets only. Evidence: Existing shared WebAudio owner and first-party arrangements are documented; historical commercial media is not a license. Source: [1](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/docs/KAIOS_AUDIO_PROVENANCE.md)
 
 17. **P2 / QUEUED — Recovery and authentication hardening**. Dependencies: none. Next: Audit merged recovery/auth boundaries and regression gaps; keep production email/passkey/KYC disabled without separately approved setup. Evidence: #489 merged at53692530; completion of that merge does not activate production identity providers. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/489) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/backend/KAIOS_BACKEND_SECURITY_BOUNDARY.md)
 
-18. **P1 / IN_PROGRESS — Visible product version and public release proof**. Dependencies: Q01. Next: Retain verified Pages checkout/public V2.9.1 evidence, close separate behavioral gates, then review separate event-SHA checkout pin plus actual-HEAD assertion without changing this docs-only scope. Evidence: #498 Pages37286920918 PASS with actual checkout765d0e24 and public version V2.9.1 verified. Three postmerge behavioral gates remain RED. Floating-main/event-SHA hardening proposal remains separate; no current provenance mismatch proven. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml) Child checkpoints: Q18.public_provenance=COMPLETE; Q18.behavioral_acceptance=IN_PROGRESS; Q18.checkout_hardening=QUEUED.
+18. **P1 / IN_PROGRESS — Visible product version and public release proof**. Dependencies: Q01. Next: Maintain current public SHA/version proof, finish #507 gameplay acceptance and #505 integrated-head candidate checks, and keep separate Pages provenance hardening proposal for review. Evidence: Current main/live Pages b513d4e7 retains V2.9.1 after test-only #504 merge. #505 V2.9.3 is candidate only. Public facing failure remains open via #507. No present checkout/stamp mismatch proven. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml) Child checkpoints: Q18.public_provenance=COMPLETE; Q18.behavioral_acceptance=IN_PROGRESS; Q18.next_explanation_release=IN_PROGRESS; Q18.checkout_hardening=QUEUED.
 
 19. **P2 / READY_FOR_REVIEW / READY_PLAN — Observability and cost budgets**. Dependencies: Q06. Next: Review PR/branch-scoped stale development-run concurrency first; preserve distinct push/PR lanes, main, deploy, public QA and scheduled workers. Review tree-aware dedup separately before any implementation. Evidence: Parent-forwarded completed three-head read-only audit:45m08s of95m26s measured runner-job elapsed was a second push lane over an identical tested Git tree. This is not billing/dollar savings or a claim that PR integration lanes are generally redundant. Overlapping stale-run cancellation opportunity30m28s must not be added to45m08s. No workflow change. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/500) · [2](https://github.com/klineodyssey/kline-odyssey/pull/501) · [3](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280006707) · [4](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280012000) · [5](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280455413) · [6](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280461320) · [7](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282991668) · [8](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
 
@@ -127,8 +127,8 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     "capacity": "Use actual available execution slots and confirmed scopes; 20 packages is backlog breadth, not 20 simultaneously executing workers. Pending CI is not running local code.",
     "parallel": "Independent read, review, test and isolated-branch work may proceed concurrently. Do not stop or reassign existing workers.",
     "serialization": "One write owner per overlapping file; serialize shared-file integration and all main merges. Rebase/revalidate later candidates against newly merged main.",
-    "merge_hold": "#498 is merged; this queue remains Draft with no main merge authorized to this worker. Parent serializes later integration around active #504/game release QA and checks current file ownership.",
-    "selection": "Game-first: prioritize postmerge behavioral QA through test-only #504 and high-priority local-game integrity blockers in #503. Continue bounded explanation-only CLOCK_REVIEW UX and canonical local-store writer serialization design as separate child work, without competing mutation owners. Independent review remains permitted; financial release stays secondary and blocked.",
+    "merge_hold": "This queue remains Draft. Parent serializes later integration around active #507 gameplay QA and #505 explanation-only release, reconciling shared handoff edits. This worker does not merge main.",
+    "selection": "Game-first: required gameplay QA in #507 and exact integrated-head #505 checks lead. #503 recovery and medium-risk #506 store-integrity stack stay held. Inherited P2 visual observations are bounded follow-up children, not confirmed P1 or #505 regressions. Preserve active work and existing dependencies; no blind retries or competing runtime.",
     "refill": "When a package completes, choose the highest-priority authorized ready item. If all close, inspect roadmap and evidence for useful gaps; never invent tasks solely to consume capacity.",
     "reprioritization": "No new task, canceled project, interrupted active work or dependency removal. Q04 and Q05 remain tracked as secondary P2 engineering/release work; blocked financial execution stays blocked.",
     "boot_before_each_cycle": "Refresh latest main and read current Boot/Company Boot, applicable AGENTS and ownership before each work cycle; never infer employee identity or authority from reading."
@@ -140,23 +140,23 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P1",
       "status": "IN_PROGRESS",
       "dependencies": [],
-      "next_action": "Close postmerge behavioral gates through separately tracked #504 and Courier/insurance diagnostics; retain public release facts without claiming full QA success.",
+      "next_action": "Track required postrelease gameplay acceptance through #507, plus integrated #505 explanation-only checks. Preserve proven public version facts and separate inherited P2 observations.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693"
       ],
-      "evidence": "#498 merged at765d0e24; V2.9.1 public source verified and Pages PASS. Three postmerge behavioral gates remain RED: main Responsive pan readiness, public Responsive pursuit, and Game Product insurance PAID wait.",
+      "evidence": "#498 V2.9.1 remains publicly live. #504 test-only successor merged at b513d4e7 at11:08 UTC, without a product-version change. Pages is live, but postmerge public pointblank-facing failure is unresolved in successor #507; no blanket behavioral QA pass.",
       "activity": "POSTMERGE_QA_COORDINATION",
       "children": [
         {
           "id": "Q01.release",
           "status": "COMPLETE",
-          "evidence": "#498 merged; Pages37286920918 PASS and checkout765d0e24; V2.9.1 public verified."
+          "evidence": "#498 released V2.9.1; #504 test-only merge b513d4e7 is live without a version change."
         },
         {
           "id": "Q01.behavioral_gates",
           "status": "IN_PROGRESS",
-          "evidence": "Main Responsive37286921193 FAIL; public Responsive37286984937 FAIL; Game Product37286920914 FAIL; successor checks do not yet close them."
+          "evidence": "Postmerge public facing failure follows #507195aa504; current exact-head evidence pending."
         }
       ]
     },
@@ -166,12 +166,14 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P1",
       "status": "BLOCKED",
       "dependencies": [],
-      "next_action": "Hold #503 release even if UI tests pass. Complete separate explanation-only CLOCK_REVIEW UX successor on clean latest main and review canonical local-store writer serialization design before authorizing any recovery mutation.",
+      "next_action": "Keep #503 recovery and #506 medium-risk integrity stack on HOLD. Validate explanation-only #505 at integrated cc235810 separately; reconcile refreshed dependency/main before final #506 QA, then resolve its remaining release gates.",
       "sources": [
-        "https://github.com/klineodyssey/kline-odyssey/pull/503"
+        "https://github.com/klineodyssey/kline-odyssey/pull/503",
+        "https://github.com/klineodyssey/kline-odyssey/pull/505",
+        "https://github.com/klineodyssey/kline-odyssey/pull/506"
       ],
-      "evidence": "Fresh #503 head4916c833ad0fe148d53e24385b54d4819956dc51. Parent technical review identifies concurrent-tab ledger revision collision that can erase a credited receipt, receipt lookup bound only by ID rather than owner/amount, memory-only continuation on persistence failure, and a Courier envelope shared-store lock gap. High-priority local-game data integrity; no real on-chain loss is claimed.",
-      "activity": "RELEASE_BLOCKED_WITH_SEPARATE_SCOPED_CHILDREN",
+      "evidence": "Fresh #5034916c833 remains RELEASE_BLOCKED for additional local-game integrity validation. No actual player data or real assets changed. #505cc235810 integrates main b513; explanation-only V2.9.3 remains candidate. Prior c148 had all CI and13 explanation screenshots PASS; current exact CI pending. #506afb3f9e0 remains a Draft stack with medium-risk lifecycle, compatibility, migration and follower-UX holds despite14 native cases PASS reported by parent.",
+      "activity": "RELEASE_HOLDS_WITH_SEPARATE_EXPLANATION_QA",
       "readiness": "RELEASE_BLOCKED",
       "risk": "MEDIUM",
       "children": [
@@ -181,19 +183,25 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "readiness": "RELEASE_BLOCKED",
           "risk": "MEDIUM",
           "head": "4916c833ad0fe148d53e24385b54d4819956dc51",
-          "gate": "Local-game integrity gaps remain blocking regardless of UI-test outcomes."
+          "gate": "Additional local-game integrity validation required; no actual player data or real assets changed."
         },
         {
           "id": "Q02.explanation_only_ux",
           "status": "IN_PROGRESS",
-          "owner_task": "repair_courier_clock_recovery",
-          "scope": "Separate CLOCK_REVIEW explanation-only UX successor on clean latest main; no resume, credit or new authority. PR/head not yet verified."
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "pr": 505,
+          "version": "V2.9.3_CANDIDATE_NOT_LIVE",
+          "scope": "Explanation only; no recovery action. Integrated main b513; fresh exact-head CI pending. Prior c148 all CI and13 explanation images PASS, not current-head approval."
         },
         {
           "id": "Q02.canonical_writer_design",
-          "status": "IN_PROGRESS",
-          "owner_task": "review_courier_credit_recovery",
-          "scope": "Finish bounded design for serialization of existing canonical local-store writers; no blind prototype, parallel ledger or new runtime."
+          "status": "BLOCKED",
+          "readiness": "DRAFT_STACK_HOLD",
+          "risk": "MEDIUM",
+          "pr": 506,
+          "head": "afb3f9e0e59c6ebd7310c68de80766cda78ae6f9",
+          "depends_on_pr": 505,
+          "evidence": "Parent-reported14 real-native cases PASS. BFCache not exercised; old-client fencing not established. Follower UX, migration and mixed-version compatibility remain held. Refreshed505/main reconciliation pending; no release approval."
         }
       ]
     },
@@ -203,30 +211,37 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P1",
       "status": "IN_PROGRESS",
       "dependencies": [],
-      "next_action": "Inspect exact-a92a1bce local/public CI, native pan traces and screenshots; preserve unchanged pursuit thresholds and real inputs. Coordinate merge only after required evidence.",
+      "next_action": "Inspect exact #507195aa504 local/public CI and native facing evidence; retain required gameplay assertions and bounded deadlines before any parent-coordinated merge.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/504",
-        "https://github.com/klineodyssey/kline-odyssey/pull/498"
+        "https://github.com/klineodyssey/kline-odyssey/pull/507"
       ],
-      "evidence": "Fresh #504 a92a1bced146fdcc5c4ff5c957bc5363c70f4f2b is test-only on main765d0e24. Traces diagnose stale pursuit heading overshooting a moving airborne target; real joystick now tracks live relativeXZ every75ms, preserving3D<0.8 within5s and initial<2 within15s. Pan uses stable clear-contact readiness; specific rejecting entity remains unproven. 227/227 local tests PASS; exact CI pending.",
+      "evidence": "#504 merged b513d4e7 from5c3aa2af. Public postmerge pointblank-facing precondition failed before an attack. Draft #507195aa504df2c3f6c4044dd753afc03b310b4b55d is a clean test-only successor using native standoff/facing feedback; runtime and original gameplay assertions unchanged. 227 local tests PASS; exact CI pending.",
       "activity": "TEST_ONLY_SUCCESSOR_EXACT_HEAD_QA",
       "phase_status": {
-        "original_read_only_diagnosis": "COMPLETE",
-        "upstream498_integration": "COMPLETE",
-        "test_only_correction": "PUBLISHED",
-        "exact_head_validation": "PENDING"
+        "successor504": "MERGED_B513D4E7",
+        "public_postmerge_behavior": "FAIL_FACING_PRECONDITION",
+        "successor507": "DRAFT_EXACT_HEAD_QA_PENDING"
       },
       "children": [
         {
           "id": "Q03.pursuit",
-          "status": "IN_PROGRESS",
-          "stage": "DIAGNOSED_TEST_CORRECTION_PUBLISHED_EXACT_CI_PENDING"
+          "status": "COMPLETE",
+          "stage": "TEST_ONLY504_MERGED",
+          "limit": "Does not close later facing failure."
         },
         {
           "id": "Q03.pan",
+          "status": "COMPLETE",
+          "stage": "TEST_ONLY504_MERGED",
+          "limit": "Later intermittent landscape clearance finding remains separately unresolved/not reproduced."
+        },
+        {
+          "id": "Q03.facing",
           "status": "IN_PROGRESS",
-          "stage": "STABLE_CONTACT_TEST_CORRECTION_PUBLISHED_EXACT_CI_PENDING",
-          "limit": "Specific rejecting entity not proven."
+          "pr": 507,
+          "head": "195aa504df2c3f6c4044dd753afc03b310b4b55d",
+          "stage": "EXACT_HEAD_QA_PENDING"
         }
       ]
     },
@@ -415,13 +430,33 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
         "Q01",
         "Q03"
       ],
-      "next_action": "Measure representative mobile/desktop scenes and resource budgets after release blockers; prioritize observed regressions.",
+      "next_action": "After required gameplay QA, verify reachability and provenance of bounded inherited P2 visual observations before proposing fixes; keep performance work based on measured evidence.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/AGENTS.md"
       ],
-      "evidence": "User roadmap; no claimed benchmark or speculative graphics rewrite. Functional and direct screenshot QA remain separate.",
-      "activity": "NOT_RUNNING"
+      "evidence": "Inherited visual observations are not confirmed new P1 defects or #505 regressions. Actual control click reachability remains unknown where noted. Keep required gameplay priority.",
+      "activity": "NOT_RUNNING",
+      "children": [
+        {
+          "id": "Q15.more_guide",
+          "priority": "P2",
+          "status": "QUEUED",
+          "scope": "Inherited short-portrait More-over-guide overlap; verify dismissal/access and source lineage."
+        },
+        {
+          "id": "Q15.summary_balance",
+          "priority": "P2",
+          "status": "QUEUED",
+          "scope": "Inherited landscape summary over local balance; assess reading/access impact."
+        },
+        {
+          "id": "Q15.desktop_controls",
+          "priority": "P2",
+          "status": "QUEUED",
+          "scope": "Optional white collapse button after rotation and AI-settings center occlusion; actual click reachability unknown; verify before assigning severity."
+        }
+      ]
     },
     {
       "id": "Q16",
@@ -458,33 +493,41 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "dependencies": [
         "Q01"
       ],
-      "next_action": "Retain verified Pages checkout/public V2.9.1 evidence, close separate behavioral gates, then review separate event-SHA checkout pin plus actual-HEAD assertion without changing this docs-only scope.",
+      "next_action": "Maintain current public SHA/version proof, finish #507 gameplay acceptance and #505 integrated-head candidate checks, and keep separate Pages provenance hardening proposal for review.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml"
       ],
-      "evidence": "#498 Pages37286920918 PASS with actual checkout765d0e24 and public version V2.9.1 verified. Three postmerge behavioral gates remain RED. Floating-main/event-SHA hardening proposal remains separate; no current provenance mismatch proven.",
+      "evidence": "Current main/live Pages b513d4e7 retains V2.9.1 after test-only #504 merge. #505 V2.9.3 is candidate only. Public facing failure remains open via #507. No present checkout/stamp mismatch proven.",
       "activity": "PUBLIC_PROVENANCE_VERIFIED_BEHAVIORAL_QA_OPEN",
       "provenance_hardening": "PROPOSED_NOT_IMPLEMENTED_NO_CURRENT_MISMATCH_PROVEN",
       "children": [
         {
           "id": "Q18.public_provenance",
           "status": "COMPLETE",
-          "evidence": "Actual checkout765d0e24 and public V2.9.1 verified."
+          "evidence": "Parent checkpoint: Pages live b513d4e7, product V2.9.1 unchanged after test-only504."
         },
         {
           "id": "Q18.behavioral_acceptance",
           "status": "IN_PROGRESS",
           "dependencies": [
             "Q01",
-            "Q02",
             "Q03"
-          ]
+          ],
+          "evidence": "Required public facing gate follows507; no blanket pass."
+        },
+        {
+          "id": "Q18.next_explanation_release",
+          "status": "IN_PROGRESS",
+          "dependencies": [
+            "Q02"
+          ],
+          "evidence": "505cc235810 integrated latest main; V2.9.3 not live; exact QA pending."
         },
         {
           "id": "Q18.checkout_hardening",
           "status": "QUEUED",
-          "scope": "Separate reviewed workflow proposal; not implemented."
+          "scope": "Separate reviewed workflow proposal, not implemented."
         }
       ]
     },
@@ -557,14 +600,14 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
   ],
   "clarification_at": "2026-10-05T08:40:33Z",
   "product_vision": "KAIOS is a next-generation operating-system design goal that makes customer dreams real: customer/player wish → KGEN AI Company project → verified customer outcome. K11520 is currently game-first, with exchange/trading secondary and contextual. These are priorities and intended behavior, not implemented autonomous-service or execution-authority claims.",
-  "checkpoint_at": "2026-10-05T09:47:09Z",
+  "checkpoint_at": "2026-10-05T11:26:48Z",
   "priority_clarification_at": "2026-10-05T08:43:35Z",
   "audit_checkpoint_at": "2026-10-05T08:51:09Z",
-  "observed_main_sha": "765d0e24e3fbe7353a80329c99bc3b5c3025fd12",
-  "branch_base_note": "Documentation branch retains original base27a21b03; latest main765d0e24 was read before this checkpoint. No main merge or rebase performed.",
+  "observed_main_sha": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
+  "branch_base_note": "Documentation branch retains original base27a21b03; current main b513d4e7 and Boot/Company Boot were read before this checkpoint. No main merge or rebase performed.",
   "boot_checkpoint": {
     "read_before_work_cycle": true,
-    "main_sha": "765d0e24e3fbe7353a80329c99bc3b5c3025fd12",
+    "main_sha": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
     "sources": [
       "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
       "KGEN-AI-Company/CURSOR_EMPLOYEE_BOOT.md",
