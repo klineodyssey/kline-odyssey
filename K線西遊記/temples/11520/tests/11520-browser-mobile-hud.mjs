@@ -51,8 +51,24 @@ async function pressEnergy(sign){
 }
 let releaseEnergy=await pressEnergy(1);assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'nonnegative');const nonnegativeColor=await page.locator('#yControl .read').evaluate(el=>getComputedStyle(el).color);await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-positive.png`,fullPage:true});await releaseEnergy();
 await page.reload({waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1900);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});await page.locator('#intro11520').waitFor({state:'hidden',timeout:3000}).catch(()=>{});await page.waitForTimeout(900);await setPlane('XZ');releaseEnergy=await pressEnergy(-1);assert.equal(await page.locator('#yControl').getAttribute('data-energy-sign'),'negative');const negativeColor=await page.locator('#yControl .read').evaluate(el=>getComputedStyle(el).color);assert.notEqual(nonnegativeColor,negativeColor);await page.screenshot({path:`${OUT}/11520-mobile-hud-energy-negative.png`,fullPage:true});await releaseEnergy();
-await page.locator('#k11520UtilityMaster').click();await page.waitForTimeout(480);assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')),true,'utility master must expand independently');const wallet=await box('#walletToggle'),chat=await box('#chatHandle');assert.ok(wallet.x>=280);assert.ok(chat.x>=280);for(const sel of ['#walletToggle','#chatHandle','#aiChatButton','#bgmButton','.bagRelocatedV250','#gameModeToggle','#dockToggle','#k11520HudCollapseAll']){assert.equal(await visible(sel),true,`${sel} must be visible after utility expansion`);assert.equal(await centerReachable(sel),true,`${sel} center must be reachable and not covered`)}await page.waitForFunction(()=>{const el=document.querySelector('[data-axis="KZ"]');if(!el)return false;const rect=el.getBoundingClientRect(),style=getComputedStyle(el);return style.display!=='none'&&style.visibility!=='hidden'&&rect.width>0&&rect.height>0},{timeout:5000});
-const kz=await box('[data-axis="KZ"]');
+await page.locator('#k11520UtilityMaster').click();await page.waitForTimeout(480);assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')),true,'utility master must expand independently');const wallet=await box('#walletToggle'),chat=await box('#chatHandle');assert.ok(wallet.x>=280);assert.ok(chat.x>=280);for(const sel of ['#walletToggle','#chatHandle','#aiChatButton','#bgmButton','.bagRelocatedV250','#gameModeToggle','#dockToggle','#k11520HudCollapseAll']){assert.equal(await visible(sel),true,`${sel} must be visible after utility expansion`);assert.equal(await centerReachable(sel),true,`${sel} center must be reachable and not covered`)}// Market refresh may replace the locator node after visibility resolves.
+// Consume plain geometry from that same browser task, not a later node handle.
+let kz;
+try{
+  const geometry=await page.waitForFunction(()=>{
+    const el=document.querySelector('[data-axis="KZ"]'),r=el?.getBoundingClientRect(),style=el?getComputedStyle(el):null;
+    const sample={at:performance.now(),found:!!el,connected:el?.isConnected||false,display:style?.display||null,visibility:style?.visibility||null,rect:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null};
+    globalThis.__K11520_QA_KZ_GEOMETRY__=sample;
+    return sample.connected&&sample.display!=='none'&&sample.visibility!=='hidden'&&r.width>0&&r.height>0?sample.rect:false;
+  },null,{timeout:5000});
+  kz=await geometry.jsonValue();await geometry.dispose();
+  await fs.writeFile(`${OUT}/11520-mobile-kz-geometry.json`,JSON.stringify({status:'VISIBLE_GEOMETRY_SNAPSHOT',geometry:kz},null,2));
+}catch(error){
+  const diagnostic=await page.evaluate(()=>globalThis.__K11520_QA_KZ_GEOMETRY__||null).catch(()=>null);
+  await fs.writeFile(`${OUT}/11520-mobile-kz-geometry.json`,JSON.stringify({status:'FAIL',error:String(error),diagnostic},null,2));
+  await page.screenshot({path:`${OUT}/11520-mobile-kz-geometry-failure.png`,timeout:1500}).catch(()=>{});
+  throw error;
+}
 // Reload and utility expansion change status geometry. Measure the current
 // rectangles, not pre-reload boxes. Retain an 8px gap in either dimension:
 // the existing utility lane can sit beside the narrowed status cards.

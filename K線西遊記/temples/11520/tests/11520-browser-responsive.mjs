@@ -270,10 +270,22 @@ async function verifyProductionSource(){
     assert.equal(observed,expected,'Public Pages source is not the checked-out deployment: '+name);
   }
 }
-async function snapshot(page){return page.evaluate(sels=>{
+async function snapshot(page){return page.evaluate(async sels=>{
+  // ResizeObserver status flow follows card-height changes after render. Sample
+  // geometry stability, never a desired gap: a stable2px gap still fails check().
+  const started=performance.now(),frames=[],requiredConsecutive=3,maxWaitMs=500;
+  let consecutive=0,previous=null;
+  do{
+    const geometry={viewport:{width:innerWidth,height:innerHeight},rects:[...document.querySelectorAll('#axes .axis,.tele,.monsterHud')].map(el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el);return{identity:el.dataset.axis||el.className,x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,display:style.display,visibility:style.visibility}})};
+    const signature=JSON.stringify(geometry);consecutive=signature===previous?consecutive+1:1;previous=signature;
+    frames.push({at:performance.now(),geometry});
+    if(consecutive>=requiredConsecutive||performance.now()-started>=maxWaitMs)break;
+    await new Promise(requestAnimationFrame);
+  }while(performance.now()-started<maxWaitMs);
+  const elapsedMs=performance.now()-started,layoutStability={stable:consecutive>=requiredConsecutive&&elapsedMs<=maxWaitMs,requiredConsecutive,maxWaitMs,elapsedMs,frames};
   const box=el=>{if(!el)return null;const r=el.getBoundingClientRect(),s=getComputedStyle(el);const visible=s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&r.width>0&&r.height>0;const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=visible?points.map(([x,y])=>{const h=document.elementFromPoint(x,y);return{owned:!!h&&(h===el||el.contains(h)),id:h?.id||'',classes:String(h?.className||'')}}):[],h=visible?document.elementFromPoint(r.x+r.width/2,r.y+r.height/2):null;return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,visible,hit:!!h&&(h===el||el.contains(h)),ownedHitFraction:owners.length?owners.filter(x=>x.owned).length/owners.length:0,hitOwners:owners,pointer:s.pointerEvents,blocker:h?{id:h.id,classes:String(h.className),pointer:getComputedStyle(h).pointerEvents}:null,scroll:el.scrollHeight,client:el.clientHeight,text:(el.textContent||'').trim().slice(0,240)}};
   const yThumbStyle=getComputedStyle(document.querySelector('#yThumb'));
-  return{width:innerWidth,height:innerHeight,boxes:Object.fromEntries(sels.map(s=>[s,box(document.querySelector(s))])),cards:[...document.querySelectorAll('#axes .axis')].map(box),balances:[...document.querySelectorAll('.top>.pill')].map(box),drawers:[...document.querySelectorAll('.hud-drawer-toggle')].map(box),axisArt:{image:yThumbStyle.backgroundImage,position:yThumbStyle.backgroundPosition,size:yThumbStyle.backgroundSize,repeat:yThumbStyle.backgroundRepeat},settingsInstalled:!!globalThis.__K11520_UI_SETTINGS__,layoutInstalled:!!globalThis.__K11520_MOBILE_CONTROL_LAYOUT__,xyzInstalled:!!globalThis.__K11520_3D_CONTROL__,utilityOpen:document.documentElement.classList.contains('k11520UtilitiesOpen'),version:document.querySelector('.brandMetaV250')?.textContent};
+  return{layoutStability,width:innerWidth,height:innerHeight,boxes:Object.fromEntries(sels.map(s=>[s,box(document.querySelector(s))])),cards:[...document.querySelectorAll('#axes .axis')].map(box),balances:[...document.querySelectorAll('.top>.pill')].map(box),drawers:[...document.querySelectorAll('.hud-drawer-toggle')].map(box),axisArt:{image:yThumbStyle.backgroundImage,position:yThumbStyle.backgroundPosition,size:yThumbStyle.backgroundSize,repeat:yThumbStyle.backgroundRepeat},settingsInstalled:!!globalThis.__K11520_UI_SETTINGS__,layoutInstalled:!!globalThis.__K11520_MOBILE_CONTROL_LAYOUT__,xyzInstalled:!!globalThis.__K11520_3D_CONTROL__,utilityOpen:document.documentElement.classList.contains('k11520UtilitiesOpen'),version:document.querySelector('.brandMetaV250')?.textContent};
 },selectors)}
 async function verifyFullHudControlOwnership(page,report){
   const controls=['#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#gameModeToggle','#k11520UtilityMaster'];
@@ -660,6 +672,7 @@ async function finalizeLandscape(page,report){
   report.landscapeFinalization='PASS';
 }
 function check(label,state,{expanded=false,landscape=false}={}){const b=state.boxes;const ok=(value,message)=>{if(!value)failures.push(`${label}: ${message}`)};
+  ok(state.layoutStability?.stable===true,'relevant HUD geometry did not settle across3 consecutive frames within500ms');
   ok(/wukong-y-control\.jpg/i.test(state.axisArt.image),'normal-axis thumb lost approved Wukong artwork');
   ok(state.axisArt.position==='31.5% 46.3%','normal-axis artwork focal point drifted: '+state.axisArt.position);
   ok(/^426\.5%(?: auto)?$/.test(state.axisArt.size),'normal-axis artwork is not the upright face crop: '+state.axisArt.size);
