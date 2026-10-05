@@ -270,10 +270,22 @@ async function verifyProductionSource(){
     assert.equal(observed,expected,'Public Pages source is not the checked-out deployment: '+name);
   }
 }
-async function snapshot(page){return page.evaluate(sels=>{
+async function snapshot(page){return page.evaluate(async sels=>{
+  // ResizeObserver status flow follows card-height changes after render. Sample
+  // geometry stability, never a desired gap: a stable2px gap still fails check().
+  const started=performance.now(),frames=[],requiredConsecutive=3,maxWaitMs=500;
+  let consecutive=0,previous=null;
+  do{
+    const geometry={viewport:{width:innerWidth,height:innerHeight},rects:[...document.querySelectorAll('#axes .axis,.tele,.monsterHud')].map(el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el);return{identity:el.dataset.axis||el.className,x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,display:style.display,visibility:style.visibility}})};
+    const signature=JSON.stringify(geometry);consecutive=signature===previous?consecutive+1:1;previous=signature;
+    frames.push({at:performance.now(),geometry});
+    if(consecutive>=requiredConsecutive||performance.now()-started>=maxWaitMs)break;
+    await new Promise(requestAnimationFrame);
+  }while(performance.now()-started<maxWaitMs);
+  const elapsedMs=performance.now()-started,layoutStability={stable:consecutive>=requiredConsecutive&&elapsedMs<=maxWaitMs,requiredConsecutive,maxWaitMs,elapsedMs,frames};
   const box=el=>{if(!el)return null;const r=el.getBoundingClientRect(),s=getComputedStyle(el);const visible=s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&r.width>0&&r.height>0;const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=visible?points.map(([x,y])=>{const h=document.elementFromPoint(x,y);return{owned:!!h&&(h===el||el.contains(h)),id:h?.id||'',classes:String(h?.className||'')}}):[],h=visible?document.elementFromPoint(r.x+r.width/2,r.y+r.height/2):null;return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,visible,hit:!!h&&(h===el||el.contains(h)),ownedHitFraction:owners.length?owners.filter(x=>x.owned).length/owners.length:0,hitOwners:owners,pointer:s.pointerEvents,blocker:h?{id:h.id,classes:String(h.className),pointer:getComputedStyle(h).pointerEvents}:null,scroll:el.scrollHeight,client:el.clientHeight,text:(el.textContent||'').trim().slice(0,240)}};
   const yThumbStyle=getComputedStyle(document.querySelector('#yThumb'));
-  return{width:innerWidth,height:innerHeight,boxes:Object.fromEntries(sels.map(s=>[s,box(document.querySelector(s))])),cards:[...document.querySelectorAll('#axes .axis')].map(box),balances:[...document.querySelectorAll('.top>.pill')].map(box),drawers:[...document.querySelectorAll('.hud-drawer-toggle')].map(box),axisArt:{image:yThumbStyle.backgroundImage,position:yThumbStyle.backgroundPosition,size:yThumbStyle.backgroundSize,repeat:yThumbStyle.backgroundRepeat},settingsInstalled:!!globalThis.__K11520_UI_SETTINGS__,layoutInstalled:!!globalThis.__K11520_MOBILE_CONTROL_LAYOUT__,xyzInstalled:!!globalThis.__K11520_3D_CONTROL__,utilityOpen:document.documentElement.classList.contains('k11520UtilitiesOpen'),version:document.querySelector('.brandMetaV250')?.textContent};
+  return{layoutStability,width:innerWidth,height:innerHeight,boxes:Object.fromEntries(sels.map(s=>[s,box(document.querySelector(s))])),cards:[...document.querySelectorAll('#axes .axis')].map(box),balances:[...document.querySelectorAll('.top>.pill')].map(box),drawers:[...document.querySelectorAll('.hud-drawer-toggle')].map(box),axisArt:{image:yThumbStyle.backgroundImage,position:yThumbStyle.backgroundPosition,size:yThumbStyle.backgroundSize,repeat:yThumbStyle.backgroundRepeat},settingsInstalled:!!globalThis.__K11520_UI_SETTINGS__,layoutInstalled:!!globalThis.__K11520_MOBILE_CONTROL_LAYOUT__,xyzInstalled:!!globalThis.__K11520_3D_CONTROL__,utilityOpen:document.documentElement.classList.contains('k11520UtilitiesOpen'),version:document.querySelector('.brandMetaV250')?.textContent};
 },selectors)}
 async function verifyFullHudControlOwnership(page,report){
   const controls=['#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#gameModeToggle','#k11520UtilityMaster'];
@@ -480,17 +492,18 @@ async function verifyKSpaceGameplay(page,report){
     const rx=rail.x+rail.width/2,ry=rail.y+rail.height/2;
     const send=async(type,id,px,py)=>{if(type==='touchEnd')contacts.delete(id);else contacts.set(id,{id,x:px,y:py,radiusX:3,radiusY:3,force:1});await native.send('Input.dispatchTouchEvent',{type,touchPoints:[...contacts.values()]})};
     await observeApproach(label);
-    const deadline=Date.now()+timeoutMs;let reached=false;
+    const deadline=Date.now()+timeoutMs,standoff=label==='phantomAxe';let reached=false;
     try{
       while(Date.now()<deadline){
         const current=await state();
-        if(current.distance<limit&&Date.now()<=deadline){reached=true;break}
         const relative=current.relative,planar=Math.hypot(relative.x,relative.z);
+        if(current.distance<limit&&(!standoff||(planar>=.45&&planar<=.65&&Math.abs(relative.y)<=.25))&&Date.now()<=deadline){reached=true;break}
         // Real two-finger XZ joystick + normal Y rail follow the live 3D target.
         // Do not press an already-in-range joystick: a tap cycles its plane.
-        const travel=planar<.15?0:Math.min(magnitude,planar*70);
+        const error=standoff?planar-.55:planar;
+        const travel=Math.abs(error)<(standoff?.08:.15)?0:Math.sign(error)*Math.min(magnitude,Math.max(12,Math.abs(error)*70));
         const vertical=Math.abs(relative.y)<.15?0:Math.max(-1,Math.min(1,relative.y*1.5));
-        if(travel>0&&!contacts.has(31))await send('touchStart',31,x,y);
+        if(travel!==0&&!contacts.has(31))await send('touchStart',31,x,y);
         if(vertical!==0&&!contacts.has(32))await send('touchStart',32,rx,ry);
         if(contacts.has(31))contacts.set(31,{id:31,x:x+(planar?relative.x/planar*travel:0),y:y-(planar?relative.z/planar*travel:0),radiusX:3,radiusY:3,force:1});
         if(contacts.has(32))contacts.set(32,{id:32,x:rx,y:ry-vertical*rail.height*.36,radiusX:3,radiusY:3,force:1});
@@ -501,7 +514,7 @@ async function verifyKSpaceGameplay(page,report){
       try{if(contacts.size)await native.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})}
       finally{await finishApproach();await native.detach()}
     }
-    const trace=report.kspaceApproaches.at(-1),downs=trace.pointers.filter(e=>e.type==='pointerdown');
+    const trace=report.kspaceApproaches.at(-1);trace.goal={distanceBelow:limit,deadlineMs:timeoutMs,standoff:standoff?{horizontalMin:.45,horizontalMax:.65,verticalMax:.25}:null};const downs=trace.pointers.filter(e=>e.type==='pointerdown');
     assert.ok(downs.every(e=>e.isTrusted&&['joy','yControl'].includes(e.control)),'pursuit contacts must hit actual joystick/Y control owners through trusted input');
     assert.equal(reached,true,`${label}: real XYZ controls must reach 3D distance <${limit} within ${timeoutMs}ms; inspect kspaceApproaches`);
   };
@@ -535,13 +548,15 @@ async function verifyKSpaceGameplay(page,report){
     await input(sign);await page.waitForTimeout(400);
     // Market lives now move. Pursue via the real joystick before each strike;
     // never freeze/teleport the target or relax the actual combat range rule.
+    const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     const beforePursuit=await state();
     await pursue(variant,.8,5000,35);
     if(variant==='phantomAxe'){
       // The axe has a forward-half-plane sweep. Being close is insufficient;
       // face it with a real >8px joystick drag, never a direct heading setter.
-      const target=await state(),horizontal=Math.hypot(target.relative.x,target.relative.z),ux=horizontal?target.relative.x/horizontal:0,uz=horizontal?target.relative.z/horizontal:1;
       await observeApproach('phantomAxe-facing');
+      const target=await state(),horizontal=Math.hypot(target.relative.x,target.relative.z),ux=horizontal?target.relative.x/horizontal:0,uz=horizontal?target.relative.z/horizontal:1;
+      assert.ok(horizontal>=.35&&target.distance<.8,'real approach must leave usable facing separation inside unchanged3D range');
       await page.mouse.move(x,y);await page.mouse.down();
       try{
         await page.mouse.move(x+ux*12,y-uz*12);
@@ -558,7 +573,12 @@ async function verifyKSpaceGameplay(page,report){
     (report.kspaceStrikePreconditions??=[]).push({variant,beforePursuit,beforeStrike});
     assert.deepEqual(beforeStrike.selection,beforePursuit.selection,'pursuit must not accidentally tap-cycle plane or clear signed C');
     assert.equal(beforeStrike.selection.body,'KY'+(sign==='1'?'+':'-'));
-    const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
+    if(variant==='phantomAxe'){
+      const d=Math.hypot(beforeStrike.relative.x,beforeStrike.relative.z),f=report.axeFacing.forward;
+      report.axeFacing.preStrike={combat:beforeStrike,forward:f,dot:d>.001?(f.x*beforeStrike.relative.x+f.z*beforeStrike.relative.z)/d:1};
+      assert.ok(report.axeFacing.preStrike.dot>=.8,'fresh target must remain safely in established forward half-plane immediately before strike');
+      assert.ok(beforeStrike.distance<.8,'standoff/facing must preserve original3D approach range');
+    }
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
     if(report.profile.landscape)assert.equal(await page.evaluate(()=>{const a=document.getElementById('toast').getBoundingClientRect(),b=document.querySelector('.monsterHud').getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}),false,'damage feedback obscures monster HUD');
@@ -652,6 +672,7 @@ async function finalizeLandscape(page,report){
   report.landscapeFinalization='PASS';
 }
 function check(label,state,{expanded=false,landscape=false}={}){const b=state.boxes;const ok=(value,message)=>{if(!value)failures.push(`${label}: ${message}`)};
+  ok(state.layoutStability?.stable===true,'relevant HUD geometry did not settle across3 consecutive frames within500ms');
   ok(/wukong-y-control\.jpg/i.test(state.axisArt.image),'normal-axis thumb lost approved Wukong artwork');
   ok(state.axisArt.position==='31.5% 46.3%','normal-axis artwork focal point drifted: '+state.axisArt.position);
   ok(/^426\.5%(?: auto)?$/.test(state.axisArt.size),'normal-axis artwork is not the upright face crop: '+state.axisArt.size);
