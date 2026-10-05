@@ -53,11 +53,11 @@ Snapshot:2026-10-05T08:35:18Z; base `27a21b031afad333468d9d3847d1933bc053487e`. 
 
 Twenty meaningful work packages are listed below, including substreams of the same project. The Human clarified the target as 20; obvious typographical mistakes are normalized in current coordination text. The target is 20 work packages, not a claim that 20 workers execute simultaneously. IN_PROGRESS identifies active coordination/QA/recovery as described, not a pending CI job running code. Existing projects remain tracked when new tasks arrive.
 
-1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Complete narrow #gameChat.open selector fix and real More/chat/Raid regression; inspect new exact-head screenshots and rerun all applicable gates. Evidence: 77cc3adf: Responsive, Portal, Universal and Trading pass; Game Product failed. Parent checkpoint08:35:18Z confirms root cause: landscape More forces CLOSED chat transform:none, letting its input intercept Raid. Narrow selector/test fix actively underway, not idle CI pending. V2.9.1 remains candidate; public V2.9.0. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
+1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Verify exact 4f226036 closed-chat selector repair through current CI and direct screenshots; complete all release gates before approved integration. Evidence: Current HUD head 4f226036e10a700723611351205137c36b020ba3 freshly verified. Closed-chat selector repair published; CI running per parent checkpoint08:42:38Z. Prior77cc3adf Game failure was closed-chat input intercepting Raid. V2.9.1 remains candidate; public V2.9.0. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
 
 2. **P1 / IN_PROGRESS — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Finish bounded same-mission/same-player recovery candidate and no-double-charge/reward tests; preserve real user data. Evidence: Parent-confirmed active separate recovery candidate; conservative duration requires user confirmation. No production recovery performed. Source: [1](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/K線西遊記/temples/11520/runtime/logistics-universe-runtime.mjs)
 
-3. **P1 / IN_PROGRESS — Public main responsive 390 timeout**. Dependencies: none. Next: Diagnose run37279131404 independently of candidate HUD; establish root cause before retry or runtime repair. Evidence: Parent-reported public-main responsive390 timeout; no root cause asserted. Source: [1](https://github.com/klineodyssey/kline-odyssey/actions/runs/37279131404)
+3. **P1 / QUEUED — Public main responsive 390 timeout**. Dependencies: Q01. Next: After #498 latest-main integration releases the shared responsive harness, add trajectory, relative-target and control diagnostics; reproduce before choosing a grounded fix. Evidence: Read-only diagnosis COMPLETE: run37279131404 failed a15-second distance<2 approach with fixed-forward joystick against a moving target. Leading causal hypothesis remains unproven. #499 retains Portal/Pages/HTTP success but explicitly marks public Responsive FAIL. Instrumentation/fix is waiting on upstream, not canceled or actively coding. Source: [1](https://github.com/klineodyssey/kline-odyssey/actions/runs/37279131404)
 
 4. **P1 / QUEUED — BSC97 stale-quote dispatch race**. Dependencies: Q01. Next: Reproduce quote-age change across awaited dispatch on latest main; prepare fail-closed engineering fix with no signer or transaction. Evidence: Draft89d6af11 is based on older main; parent audit identified quote-before-dispatch race. Existing PR PASS claims do not clear this gap. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
 
@@ -124,7 +124,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     "parallel": "Independent read, review, test and isolated-branch work may proceed concurrently. Do not stop or reassign existing workers.",
     "serialization": "One write owner per overlapping file; serialize shared-file integration and all main merges. Rebase/revalidate later candidates against newly merged main.",
     "merge_hold": "This queue Draft must not merge ahead of#498 or invalidate its current QA base. No merge/deploy performed by this work.",
-    "selection": "P1 HUD closed-chat interception fix, Courier recovery and public390 diagnosis first; continue independent V2 review and queue persistence.",
+    "selection": "P1 HUD exact-head QA and Courier recovery continue. Public390 read-only diagnosis is complete; instrumentation/fix is ready next after #498 integration. Independent V2 reviews continue.",
     "refill": "When a package completes, choose the highest-priority authorized ready item. If all close, inspect roadmap and evidence for useful gaps; never invent tasks solely to consume capacity."
   },
   "items": [
@@ -134,13 +134,13 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "priority": "P1",
       "status": "IN_PROGRESS",
       "dependencies": [],
-      "next_action": "Complete narrow #gameChat.open selector fix and real More/chat/Raid regression; inspect new exact-head screenshots and rerun all applicable gates.",
+      "next_action": "Verify exact 4f226036 closed-chat selector repair through current CI and direct screenshots; complete all release gates before approved integration.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/498",
         "https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693"
       ],
-      "evidence": "77cc3adf: Responsive, Portal, Universal and Trading pass; Game Product failed. Parent checkpoint08:35:18Z confirms root cause: landscape More forces CLOSED chat transform:none, letting its input intercept Raid. Narrow selector/test fix actively underway, not idle CI pending. V2.9.1 remains candidate; public V2.9.0.",
-      "activity": "ACTIVE_NARROW_FIX_PARENT_CHECKPOINT"
+      "evidence": "Current HUD head 4f226036e10a700723611351205137c36b020ba3 freshly verified. Closed-chat selector repair published; CI running per parent checkpoint08:42:38Z. Prior77cc3adf Game failure was closed-chat input intercepting Raid. V2.9.1 remains candidate; public V2.9.0.",
+      "activity": "EXACT_HEAD_QA_COORDINATION_CI_RUNNING_NOT_LOCAL_CODING"
     },
     {
       "id": "Q02",
@@ -159,14 +159,21 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "id": "Q03",
       "title": "Public main responsive 390 timeout",
       "priority": "P1",
-      "status": "IN_PROGRESS",
-      "dependencies": [],
-      "next_action": "Diagnose run37279131404 independently of candidate HUD; establish root cause before retry or runtime repair.",
+      "status": "QUEUED",
+      "dependencies": [
+        "Q01"
+      ],
+      "next_action": "After #498 latest-main integration releases the shared responsive harness, add trajectory, relative-target and control diagnostics; reproduce before choosing a grounded fix.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/actions/runs/37279131404"
       ],
-      "evidence": "Parent-reported public-main responsive390 timeout; no root cause asserted.",
-      "activity": "ACTIVE_DIAGNOSIS_PARENT_CHECKPOINT"
+      "evidence": "Read-only diagnosis COMPLETE: run37279131404 failed a15-second distance<2 approach with fixed-forward joystick against a moving target. Leading causal hypothesis remains unproven. #499 retains Portal/Pages/HTTP success but explicitly marks public Responsive FAIL. Instrumentation/fix is waiting on upstream, not canceled or actively coding.",
+      "activity": "WAITING_UPSTREAM",
+      "phase_status": {
+        "read_only_diagnosis": "COMPLETE",
+        "instrumentation_and_fix": "WAITING_UPSTREAM",
+        "ready_when": "#498 integrated into latest main and shared responsive harness ownership released"
+      }
     },
     {
       "id": "Q04",
@@ -434,6 +441,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     }
   ],
   "clarification_at": "2026-10-05T08:40:33Z",
-  "product_vision": "KAIOS is a next-generation operating-system design goal: a customer/player wish becomes a KGEN AI Company project and proceeds to verified delivery. This describes intended product behavior, not an implemented autonomous service or a grant of authority."
+  "product_vision": "KAIOS is a next-generation operating-system design goal: a customer/player wish becomes a KGEN AI Company project and proceeds to verified delivery. This describes intended product behavior, not an implemented autonomous service or a grant of authority.",
+  "checkpoint_at": "2026-10-05T08:42:38Z"
 }
 ```
