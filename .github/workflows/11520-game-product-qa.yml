@@ -271,3 +271,59 @@ jobs:
           path: artifacts/11520-visual-qa/
           if-no-files-found: error
           retention-days: 14
+
+  local-store-integrity:
+    name: Native local-store integrity (mandatory)
+    runs-on: ubuntu-latest
+    # Separate from product-qa: no existing aggregate/script budget is consumed.
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Prepare native browser and immutable old-client sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0
+          npx playwright install --with-deps chromium
+          # Read-only exact historical object, never mutable main or old runtime execution in Node.
+          git fetch --no-tags --depth=1 origin 765d0e24e3fbe7353a80329c99bc3b5c3025fd12
+          test "$(git rev-parse '765d0e24e3fbe7353a80329c99bc3b5c3025fd12^{commit}')" = "765d0e24e3fbe7353a80329c99bc3b5c3025fd12"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs"
+      - name: Run isolated native multi-tab local-store scenarios
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/11520-local-store-integrity
+          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/11520-local-store-integrity/http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          timeout --signal=TERM --kill-after=10s 240s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" --local-store-integrity-only 2>&1 | tee artifacts/11520-local-store-integrity/browser.log
+      - name: Verify mandatory independent JSON and runtime screenshots
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for FILE in report.json local-store-390x844.png local-store-844x390.png; do
+            test -s "artifacts/11520-local-store-integrity/$FILE" || { echo "QA_RED: missing local-store evidence $FILE"; exit 1; }
+          done
+          for MODE in knight fallback; do
+            for STATE in initial cleared dismissed; do
+              for SIZE in 390x844 844x390; do
+                FILE="artifacts/11520-local-store-integrity/local-store-$MODE-$STATE-$SIZE.png"
+                test -s "$FILE" || { echo "QA_RED: missing labeled runtime evidence $FILE"; exit 1; }
+              done
+            done
+          done
+          node --input-type=module -e "import fs from 'node:fs';import assert from 'node:assert/strict';const r=JSON.parse(fs.readFileSync('artifacts/11520-local-store-integrity/report.json','utf8'));assert.equal(r.functionalQA,'PASS');assert.equal(r.ciHead,process.env.GITHUB_SHA);assert.equal(r.head,process.env.GITHUB_SHA);assert.equal(r.trackedChanges,false);assert.ok(['PASS','NOT_EXERCISED'].includes(r.bfcacheAcceptance));if(r.bfcacheAcceptance!=='PASS')assert.equal(r.acceptanceCompleteness,'INCOMPLETE');assert.equal(r.releaseStatus,'HOLD');assert.equal(r.screenshots.length,12);for(const avatarMode of ['KNIGHT_READY','FALLBACK_BLOCKED'])for(const state of ['initial','cleared','dismissed'])for(const width of [390,844])assert.ok(r.screenshots.some(s=>s.avatarMode===avatarMode&&s.state===state&&s.viewport.width===width));assert.ok(r.cases.length>=15&&r.cases.every(c=>c.status==='PASS'));assert.ok(r.diagnostics.some(d=>d.pinnedHead==='765d0e24e3fbe7353a80329c99bc3b5c3025fd12'&&d.executionComplete===true));"
+      - name: Upload native local-store evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-local-store-integrity-${{ github.sha }}
+          path: artifacts/11520-local-store-integrity/
+          if-no-files-found: error
+          retention-days: 14

@@ -7,6 +7,7 @@ SOURCE_OF_TRUTH: LOGISTICS_UNIVERSE_SPEC.md / HUAGUOSHAN_TAIWAN_EXCHANGE_WHITEPA
 CHANGE_REASON: Extend the existing Digital Ant logistics runtime with persistent background Player Courier missions, explicit bandit raids, canonical cargo ownership and one-shot local-game settlement while preserving ATM-UFO delivery and keeping cargo principal out of revenue.
 */
 
+import {acquireLocalGameWriter} from './evm-wallet-runtime.mjs';
 import {universeLevel,routeFromAnchor,logisticsDecision,LOGISTICS_ANCHOR} from './logistics-universe-runtime.mjs';
 import {deriveMarketRelations} from './market-relation-runtime.mjs';
 
@@ -29,7 +30,7 @@ export const HOME_DELIVERY_ACCEPTANCE_RANGE_METERS=2.5;
 export const PLAYER_COURIER_STORAGE_KEY='K11520_PLAYER_COURIER';
 export const PLAYER_COURIER_SCHEMA='K11520_PLAYER_COURIER';
 export const PLAYER_COURIER_TERMINAL_STATES=Object.freeze(['DELIVERED','ROBBED','FAILED']);
-export const PLAYER_COURIER_ACTIVE_STATES=Object.freeze(['ACTIVE','CLOCK_REVIEW']);
+export const PLAYER_COURIER_ACTIVE_STATES=Object.freeze(['ACTIVE','CLOCK_REVIEW','DELIVERY_PENDING_CREDIT']);
 export const PLAYER_COURIER_MIN_DURATION_MS=60_000;
 export const PLAYER_COURIER_MAX_DURATION_MS=7_200_000;
 export const PLAYER_COURIER_RAID_COOLDOWN_MS=30_000;
@@ -618,9 +619,18 @@ export function createPlayerCourierOffer({
 function validateCourierMission(mission){
   if(!mission||mission.schema!==PLAYER_COURIER_SCHEMA)throw new Error('INVALID_COURIER_MISSION');
   courierId(mission.missionId,'MISSION_ID');courierId(mission.requesterLifeId,'REQUESTER_LIFE_ID');courierId(mission.cargo?.cargoId,'CARGO_ID');
-  if(!['OFFERED','ACTIVE','CLOCK_REVIEW',...PLAYER_COURIER_TERMINAL_STATES].includes(mission.status))throw new Error('INVALID_COURIER_STATUS');
+  if(!['OFFERED','ACTIVE','CLOCK_REVIEW','DELIVERY_PENDING_CREDIT',...PLAYER_COURIER_TERMINAL_STATES].includes(mission.status))throw new Error('INVALID_COURIER_STATUS');
   if(!Number.isSafeInteger(mission.cargo?.amount)||mission.cargo.amount<1||!Number.isFinite(mission.cargo?.durability)||mission.cargo.durability<0||mission.cargo.durability>100)throw new Error('INVALID_COURIER_CARGO');
-  if(courierTerminal(mission.status)!==Boolean(mission.settlement))throw new Error('INVALID_COURIER_SETTLEMENT');
+  if((courierTerminal(mission.status)||mission.status==='DELIVERY_PENDING_CREDIT')!==Boolean(mission.settlement))throw new Error('INVALID_COURIER_SETTLEMENT');
+  const deliveryCredit=mission.settlement?.credit,insuranceCredit=mission.insurance?.credit;
+  for(const [credit,insurance] of [[deliveryCredit,false],[insuranceCredit,true]])if(credit){
+    const expectedAmount=insurance?mission.insurance.payoutKaios:mission.settlement.rewardKaios,expectedId=insurance?mission.insurance.payoutReceiptId:mission.settlement.receiptId;
+    const expectedStatus=insurance?(mission.insurance.claimStatus==='PAID'?'CONFIRMED':mission.insurance.claimStatus==='APPROVED'?'PENDING':null):(mission.status==='DELIVERED'?'CONFIRMED':mission.status==='DELIVERY_PENDING_CREDIT'?'PENDING':null);
+    if(!expectedStatus||credit.status!==expectedStatus||credit.playerId!==mission.courierLifeId||credit.missionId!==mission.missionId||credit.receiptId!==expectedId||credit.rewardKaios!==expectedAmount||!Number.isSafeInteger(expectedAmount)||expectedAmount<0||expectedAmount>(insurance?1080000:1000)||!(credit.owner==='guest'||/^0x[0-9a-f]{40}$/.test(credit.owner||''))||credit.purpose!==(insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD')||mission.scope!=='LOCAL_GAME_CARGO_ONLY'||mission.realKaiosTransfer!==false||mission.realKgenTransfer!==false||mission.mainnetWrite!==false||mission.settlement?.chainTransfer!==false)throw new Error('INVALID_PENDING_COURIER_CREDIT');
+    if(insurance){if(mission.status!=='ROBBED'||mission.settlement.outcome!=='ROBBED'||mission.insurance.status!=='ACTIVE'||expectedAmount!==mission.settlement.insurancePayoutKaios)throw new Error('INVALID_PENDING_COURIER_CREDIT')}
+    else if(mission.settlement.outcome!==mission.status||expectedAmount!==mission.economics?.courierPayout||expectedAmount!==mission.settlement.salaryKaios+mission.settlement.freightShareKaios)throw new Error('INVALID_PENDING_COURIER_CREDIT');
+  }
+  if(mission.status==='DELIVERY_PENDING_CREDIT'&&(!deliveryCredit||mission.cargo.ownerState!=='OWNED_BY_COURIER'||mission.cargo.ownerLifeId!==mission.courierLifeId))throw new Error('INVALID_PENDING_COURIER_CREDIT');
   if(mission.status==='ROBBED'&&!['LOOT_CRATE','CLAIMED_BY_BANDIT'].includes(mission.cargo.ownerState))throw new Error('INVALID_ROBBED_OWNERSHIP');
   if(mission.status==='DELIVERED'&&mission.cargo.ownerState!=='DELIVERED_TO_DESTINATION')throw new Error('INVALID_DELIVERED_OWNERSHIP');
   return mission;
@@ -628,19 +638,21 @@ function validateCourierMission(mission){
 
 function freshCourierEnvelope(){return {schema:PLAYER_COURIER_SCHEMA,revision:0,missions:{},activeByCourier:{},settledReceipts:[],lootReceipts:[]}}
 function validateCourierEnvelope(value){
-  if(!value||value.schema!==PLAYER_COURIER_SCHEMA||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.missions!=='object'||!value.missions||Array.isArray(value.missions)||typeof value.activeByCourier!=='object'||!Array.isArray(value.settledReceipts)||!Array.isArray(value.lootReceipts))throw new Error('CORRUPT_COURIER_SAVE');
+  if(!value||value.schema!==PLAYER_COURIER_SCHEMA||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.missions!=='object'||!value.missions||Array.isArray(value.missions)||typeof value.activeByCourier!=='object'||!value.activeByCourier||Array.isArray(value.activeByCourier)||!Array.isArray(value.settledReceipts)||!Array.isArray(value.lootReceipts))throw new Error('CORRUPT_COURIER_SAVE');
   for(const [id,mission] of Object.entries(value.missions)){if(id!==mission.missionId)throw new Error('CORRUPT_COURIER_SAVE');validateCourierMission(mission)}
   if(new Set(value.settledReceipts).size!==value.settledReceipts.length||new Set(value.lootReceipts).size!==value.lootReceipts.length)throw new Error('CORRUPT_COURIER_SAVE');
   return value;
 }
 
-export function createPlayerCourierStore({storage,now=Date.now,monotonicNow=()=>globalThis.performance?.now?.()??0,sessionId=`SESSION-${Math.random().toString(16).slice(2)}`}={}){
+export function createPlayerCourierStore({storage,now=Date.now,monotonicNow=()=>globalThis.performance?.now?.()??0,sessionId=`SESSION-${Math.random().toString(16).slice(2)}`,locks,coordinationScope,resolveCreditPort}={}){
   if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
-  let raw=null,state=freshCourierEnvelope(),status=storage?'READY':'SESSION_ONLY';
-  function reload(){try{raw=storage?.getItem(PLAYER_COURIER_STORAGE_KEY)??null;state=raw?validateCourierEnvelope(JSON.parse(raw)):freshCourierEnvelope();status=storage?'READY':'SESSION_ONLY'}catch{status='CORRUPT_SAVE';throw new Error(status)}return snapshot()}
-  reload();
-  function persist(next){validateCourierEnvelope(next);const encoded=JSON.stringify(next);if(encoded.length>2_000_000)throw new Error('COURIER_STORE_CAPACITY');if(storage){const current=storage.getItem(PLAYER_COURIER_STORAGE_KEY);if(current!==raw)throw new Error('REVISION_CONFLICT_RELOAD_REQUIRED');storage.setItem(PLAYER_COURIER_STORAGE_KEY,encoded)}state=next;raw=encoded}
-  function mutate(fn){if(!['READY','SESSION_ONLY'].includes(status))throw new Error(status);const next=courierClone(state),result=fn(next);next.revision++;persist(next);return courierClone(result)}
+  const writer=acquireLocalGameWriter({storage,locks,coordinationScope});
+  let raw=null,state=freshCourierEnvelope(),status=storage?'READY':'STORAGE_UNAVAILABLE';
+  function readState(){try{raw=storage?.getItem(PLAYER_COURIER_STORAGE_KEY)??null;if(raw&&raw.length>2_000_000)throw new Error('COURIER_STORE_CAPACITY');state=raw?validateCourierEnvelope(JSON.parse(raw)):freshCourierEnvelope();status=storage?'READY':'STORAGE_UNAVAILABLE'}catch{status='CORRUPT_SAVE';throw new Error(status)}return snapshot()}
+  function reload(){writer.assertIdle();return readState()}
+  try{readState()}catch(error){writer.dispose();throw error}
+  function persist(next){validateCourierEnvelope(next);const encoded=JSON.stringify(next);if(encoded.length>2_000_000)throw new Error('COURIER_STORE_CAPACITY');writer.assert();if(storage.getItem(PLAYER_COURIER_STORAGE_KEY)!==raw)throw new Error('REVISION_CONFLICT_RELOAD_REQUIRED');try{storage.setItem(PLAYER_COURIER_STORAGE_KEY,encoded);if(storage.getItem(PLAYER_COURIER_STORAGE_KEY)!==encoded)throw new Error('READBACK_FAILED');writer.assert()}catch{status='PERSISTENCE_UNCERTAIN';throw new Error('COURIER_SAVE_NOT_CONFIRMED')}state=next;raw=encoded}
+  function mutate(fn){return writer.run(()=>{if(status!=='READY')throw new Error(status);readState();const next=courierClone(state),result=fn(next);if(result&&typeof result.then==='function')throw new Error('ASYNC_LOCAL_MUTATION_FORBIDDEN');next.revision++;next.writeProtocol='LOCAL_GAME_SINGLE_WRITER';persist(next);return courierClone(result)})}
   function missionIn(envelope,missionId){const mission=envelope.missions[String(missionId||'')];if(!mission)throw new Error('COURIER_MISSION_NOT_FOUND');return mission}
   function activeMission(courierLifeId){const id=state.activeByCourier[String(courierLifeId||'')],mission=id?state.missions[id]:null;return mission?courierClone(mission):null}
   function accept(offer,{courierLifeId,wallNow=now(),monoNow=monotonicNow()}={}){
@@ -658,9 +670,28 @@ export function createPlayerCourierStore({storage,now=Date.now,monotonicNow=()=>
     if(reason){mission.status='CLOCK_REVIEW';mission.clockState=reason}
     return {ok:!reason,reason,wall};
   }
-  function observe(missionId,options={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(courierTerminal(mission.status))return mission;observeClock(mission,options);return mission})}
+  function observe(missionId,options={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(courierTerminal(mission.status)||mission.status==='DELIVERY_PENDING_CREDIT')return mission;observeClock(mission,options);return mission})}
+  function creditPort(courierLifeId){
+    const port=resolveCreditPort?.(courierLifeId),selected=port?.snapshot?.();
+    if(!port||typeof port.recordCourierSettlement!=='function'||selected?.playerId!==courierLifeId||selected.storageStatus!=='READY'||!selected.persistent||!selected.writeCapability?.writeEnabled||!(selected.owner==='guest'||/^0x[0-9a-f]{40}$/.test(selected.owner||'')))throw new Error('COURIER_CREDIT_OWNER_UNAVAILABLE');
+    return {port,selected};
+  }
+  function durableCredit(credit,insurance=false){
+    const key=`k11520.player:${credit.playerId}:k11520.local-product.v1:${credit.owner}`,saved=JSON.parse(storage.getItem(key)||'null'),binding=saved?.progress?.[insurance?'courierInsuranceBindings':'courierReceiptBindings']?.[credit.receiptId];
+    return saved?.schema==='K11520_LOCAL_SIMULATION_V2'&&saved.playerId===credit.playerId&&saved.owner===credit.owner&&binding&&Object.keys(credit).filter(k=>k!=='status').every(k=>credit[k]===binding[k]);
+  }
+  function reconcileCredit(missionId){
+    writer.assert();reload();const mission=missionIn(state,missionId),credit=mission.settlement?.credit;
+    if(mission.status!=='DELIVERY_PENDING_CREDIT'||credit?.status!=='PENDING')throw new Error('PENDING_COURIER_CREDIT_REQUIRED');
+    let evidence;
+    try{const {port,selected}=creditPort(mission.courierLifeId);if(selected.owner!==credit.owner||selected.playerId!==credit.playerId)return {ok:false,reason:'COURIER_REWARD_OWNER_MISMATCH',mission:courierClone(mission)};evidence=port.recordCourierSettlement({...credit,reward:credit.rewardKaios})}catch(error){return {ok:false,reason:error.message,mission:courierClone(mission)}}
+    if(!evidence?.ok)return {ok:false,reason:evidence?.reason||'COURIER_CREDIT_NOT_CONFIRMED',mission:courierClone(mission)};
+    return mutate(envelope=>{const latest=missionIn(envelope,missionId),pending=latest.settlement?.credit;const {selected}=creditPort(latest.courierLifeId);if(latest.status!=='DELIVERY_PENDING_CREDIT'||!durableCredit(pending)||selected.owner!==pending.owner||selected.playerId!==pending.playerId||Object.keys(pending).filter(k=>k!=='status').some(k=>pending[k]!==evidence[k])||evidence.scope!=='LOCAL_SIMULATION_NO_CHAIN_TRANSFER')throw new Error('EXACT_COURIER_CREDIT_EVIDENCE_REQUIRED');pending.status='CONFIRMED';latest.status='DELIVERED';latest.settlement.outcome='DELIVERED';latest.cargo.ownerState='DELIVERED_TO_DESTINATION';latest.cargo.ownerLifeId=null;delete envelope.activeByCourier[latest.courierLifeId];return {ok:true,mission:latest,credit:evidence}});
+  }
   function settleDue(missionId,{courierLifeId,wallNow=now(),monoNow=monotonicNow()}={}){
-    return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(courierTerminal(mission.status))throw new Error('MISSION_ALREADY_SETTLED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');const clock=observeClock(mission,{wallNow,monoNow});if(!clock.ok)return {ok:false,reason:clock.reason,mission};if(clock.wall<mission.dueAt)return {ok:false,reason:'DELIVERY_TIMER_ACTIVE',remainingMs:mission.dueAt-clock.wall,mission};if(mission.status!=='ACTIVE'||mission.cargo.ownerState!=='OWNED_BY_COURIER'||mission.cargo.ownerLifeId!==mission.courierLifeId)throw new Error('CARGO_SURVIVAL_CHECK_FAILED');const receiptId=`COURIER-RECEIPT-${raidHash(`${mission.missionId}:${mission.courierLifeId}:${mission.dueAt}`).toString(16).padStart(8,'0')}`;if(envelope.settledReceipts.includes(receiptId))throw new Error('SETTLEMENT_REPLAY_BLOCKED');mission.status='DELIVERED';mission.cargo.ownerState='DELIVERED_TO_DESTINATION';mission.cargo.ownerLifeId=null;mission.settlement={outcome:'DELIVERED',receiptId,settledAt:clock.wall,courierLifeId:mission.courierLifeId,rewardKaios:mission.economics.courierPayout,salaryKaios:mission.economics.courierSalary,freightShareKaios:mission.economics.courierFreightShare,insurancePayoutKaios:0,scope:'LOCAL_SIMULATION_ONLY',chainTransfer:false};envelope.settledReceipts.push(receiptId);delete envelope.activeByCourier[mission.courierLifeId];return {ok:true,mission}})
+    writer.assert();reload();const existing=missionIn(state,missionId);if(String(existing.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');if(existing.status==='DELIVERY_PENDING_CREDIT')return reconcileCredit(missionId);
+    const pending=mutate(envelope=>{const mission=missionIn(envelope,missionId);if(courierTerminal(mission.status))throw new Error('MISSION_ALREADY_SETTLED');const clock=observeClock(mission,{wallNow,monoNow});if(!clock.ok)return {ok:false,reason:clock.reason,mission};if(clock.wall<mission.dueAt)return {ok:false,reason:'DELIVERY_TIMER_ACTIVE',remainingMs:mission.dueAt-clock.wall,mission};if(mission.status!=='ACTIVE'||mission.cargo.ownerState!=='OWNED_BY_COURIER'||mission.cargo.ownerLifeId!==mission.courierLifeId)throw new Error('CARGO_SURVIVAL_CHECK_FAILED');const {selected}=creditPort(mission.courierLifeId),receiptId=`COURIER-RECEIPT-${raidHash(`${mission.missionId}:${mission.courierLifeId}:${mission.dueAt}`).toString(16).padStart(8,'0')}`;if(envelope.settledReceipts.includes(receiptId))throw new Error('SETTLEMENT_REPLAY_BLOCKED');mission.status='DELIVERY_PENDING_CREDIT';mission.settlement={outcome:'DELIVERY_PENDING_CREDIT',receiptId,settledAt:clock.wall,courierLifeId:mission.courierLifeId,rewardKaios:mission.economics.courierPayout,salaryKaios:mission.economics.courierSalary,freightShareKaios:mission.economics.courierFreightShare,insurancePayoutKaios:0,scope:'LOCAL_SIMULATION_ONLY',chainTransfer:false,credit:{status:'PENDING',receiptId,missionId:mission.missionId,playerId:selected.playerId,owner:selected.owner,rewardKaios:mission.economics.courierPayout,purpose:'PLAYER_COURIER_REWARD'}};envelope.settledReceipts.push(receiptId);return {ok:true,mission}});
+    return pending.ok?reconcileCredit(missionId):pending;
   }
   function applyCombatDamage(missionId,{courierLifeId,damage=0,source='MONSTER',eligibleCargoRaid=false,wallNow=now()}={}){
     return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.status!=='ACTIVE')throw new Error('ACTIVE_COURIER_MISSION_REQUIRED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');const amount=Math.min(100,whole(damage,'CARGO_DAMAGE')),special=Boolean(eligibleCargoRaid)&&['BOSS_SPECIAL_RAID','BANDIT_CARGO_RAID'].includes(String(source));mission.cargo.durability=Math.max(special?0:1,mission.cargo.durability-amount);mission.risk=clamp(mission.risk+amount/500,0,1);if(mission.cargo.durability<=0){mission.status='FAILED';mission.cargo.ownerState='DESTROYED';mission.cargo.ownerLifeId=null;mission.settlement={outcome:'FAILED',reason:'CARGO_DESTROYED_BY_ELIGIBLE_RAID',receiptId:`COURIER-FAILED-${raidHash(`${mission.missionId}:${wallNow}`).toString(16).padStart(8,'0')}`,settledAt:courierClock(wallNow,'CLOCK'),rewardKaios:0,scope:'LOCAL_SIMULATION_ONLY',chainTransfer:false};envelope.settledReceipts.push(mission.settlement.receiptId);delete envelope.activeByCourier[mission.courierLifeId]}return mission})
@@ -678,9 +709,20 @@ export function createPlayerCourierStore({storage,now=Date.now,monotonicNow=()=>
   }
   function previewLoot(missionId,{attackerLifeId}={}){const mission=missionIn(state,missionId);if(mission.status!=='ROBBED'||mission.cargo.ownerState!=='LOOT_CRATE')throw new Error('LOOT_NOT_AVAILABLE');if(String(attackerLifeId)!==mission.cargo.ownerLifeId)throw new Error('LOOT_OWNER_MISMATCH');const receiptId=mission.bandit.lootReceiptId;if(state.lootReceipts.includes(receiptId))throw new Error('LOOT_REPLAY_BLOCKED');return {missionId:mission.missionId,cargo:courierClone(mission.cargo),receiptId,scope:'LOCAL_GAME_CARGO_ONLY',chainTransfer:false}}
   function claimLoot(missionId,{attackerLifeId,backpackEvidence}={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.status!=='ROBBED'||mission.cargo.ownerState!=='LOOT_CRATE')throw new Error('LOOT_NOT_AVAILABLE');if(String(attackerLifeId)!==mission.cargo.ownerLifeId)throw new Error('LOOT_OWNER_MISMATCH');const receiptId=mission.bandit.lootReceiptId;if(envelope.lootReceipts.includes(receiptId))throw new Error('LOOT_REPLAY_BLOCKED');if(backpackEvidence?.ok!==true||backpackEvidence?.rewardId!==receiptId||backpackEvidence?.scope!=='LOCAL_PLAYER_BACKPACK')throw new Error('BACKPACK_DELIVERY_EVIDENCE_REQUIRED');mission.cargo.ownerState='CLAIMED_BY_BANDIT';mission.cargo.lootClaimedAt=courierClock(now(),'CLOCK');envelope.lootReceipts.push(receiptId);return {missionId:mission.missionId,cargo:courierClone(mission.cargo),receiptId,scope:'LOCAL_GAME_CARGO_ONLY',chainTransfer:false}})}
-  function confirmInsurancePayout(missionId,{courierLifeId,paymentEvidence,wallNow=now()}={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.status!=='ROBBED'||mission.insurance.status!=='ACTIVE')throw new Error('INSURED_ROBBERY_REQUIRED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');if(mission.insurance.claimStatus!=='APPROVED')throw new Error(mission.insurance.claimStatus==='PAID'?'INSURANCE_PAYOUT_REPLAY_BLOCKED':'INSURANCE_PAYOUT_NOT_APPROVED');const value=Number(paymentEvidence?.rewardKaios),receiptId=String(paymentEvidence?.receiptId||'');if(paymentEvidence?.ok!==true||receiptId!==mission.insurance.payoutReceiptId||value!==mission.insurance.payoutKaios||paymentEvidence?.purpose!=='PLAYER_COURIER_INSURANCE_PAYOUT'||paymentEvidence?.scope!=='LOCAL_SIMULATION_NO_CHAIN_TRANSFER')throw new Error('EXACT_LOCAL_INSURANCE_PAYOUT_EVIDENCE_REQUIRED');mission.insurance.claimStatus='PAID';mission.insurance.paidAt=courierClock(wallNow,'CLOCK');mission.insurance.payoutEvidence={receiptId,rewardKaios:value,scope:paymentEvidence.scope,replayed:Boolean(paymentEvidence.replayed)};return mission})}
-  function snapshot(missionId=null){const mission=missionId?state.missions[String(missionId)]||null:null;return {schema:PLAYER_COURIER_SCHEMA,status,revision:state.revision,mission:courierClone(mission),missions:courierClone(state.missions),activeByCourier:courierClone(state.activeByCourier)}}
-  return Object.freeze({accept,activeMission,observe,settleDue,applyCombatDamage,previewInsuranceActivation,activateInsurance,raid,previewLoot,claimLoot,confirmInsurancePayout,snapshot,reload});
+  function claimInsurancePayout(missionId,{courierLifeId,wallNow=now()}={}){
+    writer.assert();reload();let mission=missionIn(state,missionId);
+    if(mission.courierLifeId!==courierLifeId)throw new Error('COURIER_LIFE_MISMATCH');
+    if(mission.status!=='ROBBED'||mission.insurance.status!=='ACTIVE'||mission.insurance.claimStatus!=='APPROVED')throw new Error('INSURANCE_PAYOUT_NOT_APPROVED');
+    if(!mission.insurance.credit)mission=mutate(envelope=>{const current=missionIn(envelope,missionId),{selected}=creditPort(courierLifeId);current.insurance.credit={status:'PENDING',receiptId:current.insurance.payoutReceiptId,missionId,playerId:selected.playerId,owner:selected.owner,rewardKaios:current.insurance.payoutKaios,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT'};return current});
+    const credit=mission.insurance.credit,{port,selected}=creditPort(courierLifeId);
+    if(selected.owner!==credit.owner||selected.playerId!==credit.playerId)return {ok:false,reason:'COURIER_REWARD_OWNER_MISMATCH'};
+    const evidence=port.recordCourierInsurancePayout?.({...credit,reward:credit.rewardKaios});
+    if(!evidence?.ok)return {ok:false,reason:evidence?.reason||'COURIER_INSURANCE_CREDIT_NOT_CONFIRMED'};
+    return {ok:true,evidence,mission:confirmInsurancePayout(missionId,{courierLifeId,paymentEvidence:evidence,wallNow})};
+  }
+  function confirmInsurancePayout(missionId,{courierLifeId,paymentEvidence,wallNow=now()}={}){return mutate(envelope=>{const mission=missionIn(envelope,missionId);if(mission.status!=='ROBBED'||mission.insurance.status!=='ACTIVE')throw new Error('INSURED_ROBBERY_REQUIRED');if(String(mission.courierLifeId)!==String(courierLifeId))throw new Error('COURIER_LIFE_MISMATCH');if(mission.insurance.claimStatus!=='APPROVED')throw new Error(mission.insurance.claimStatus==='PAID'?'INSURANCE_PAYOUT_REPLAY_BLOCKED':'INSURANCE_PAYOUT_NOT_APPROVED');const credit=mission.insurance.credit,{selected}=creditPort(mission.courierLifeId);if(!credit||selected.owner!==credit.owner||selected.playerId!==credit.playerId||!durableCredit(credit,true))throw new Error('DURABLE_INSURANCE_CREDIT_REQUIRED');const value=Number(paymentEvidence?.rewardKaios),receiptId=String(paymentEvidence?.receiptId||'');if(Object.keys(credit).filter(k=>k!=='status').some(k=>credit[k]!==paymentEvidence?.[k])||paymentEvidence?.ok!==true||receiptId!==mission.insurance.payoutReceiptId||value!==mission.insurance.payoutKaios||paymentEvidence?.purpose!=='PLAYER_COURIER_INSURANCE_PAYOUT'||paymentEvidence?.scope!=='LOCAL_SIMULATION_NO_CHAIN_TRANSFER')throw new Error('EXACT_LOCAL_INSURANCE_PAYOUT_EVIDENCE_REQUIRED');credit.status='CONFIRMED';mission.insurance.claimStatus='PAID';mission.insurance.paidAt=courierClock(wallNow,'CLOCK');mission.insurance.payoutEvidence={receiptId,rewardKaios:value,scope:paymentEvidence.scope,replayed:Boolean(paymentEvidence.replayed)};return mission})}
+  function snapshot(missionId=null){const mission=missionId?state.missions[String(missionId)]||null:null;return {schema:PLAYER_COURIER_SCHEMA,status,writeCapability:writer.capability(),revision:state.revision,mission:courierClone(mission),missions:courierClone(state.missions),activeByCourier:courierClone(state.activeByCourier)}}
+  return Object.freeze({accept,activeMission,observe,settleDue,applyCombatDamage,previewInsuranceActivation,activateInsurance,raid,previewLoot,claimLoot,confirmInsurancePayout,claimInsurancePayout,reconcileCredit,snapshot,reload,get ready(){return writer.ready},requestWriter:writer.requestWriter,dispose:writer.dispose});
 }
 
 export function deliverySnapshot(ant){

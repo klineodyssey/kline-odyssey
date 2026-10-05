@@ -274,7 +274,9 @@ test('landscape More positions chat only when its existing open state is set',()
 
 test('Courier CLOCK_REVIEW explanation is presentation-only and exposes no unsafe recovery action',()=>{
   for(const text of ["badge:'暫停'",'暫停／時間待核對','尚未完成或發獎','目前沒有安全的恢復操作','重新整理不會解除此暫停','勿清除本機儲存或重複接單','仍可繼續移動、戰鬥與探索'])assert.ok(mobileShell.includes(text),`missing truthful review guidance: ${text}`);
-  for(const token of ['courierRecoveryConfirm','resumeClockReview','previewClockRecovery','DELIVERY_PENDING_CREDIT'])assert.ok(!mobileShell.includes(token),`explanation-only successor must not enable ${token}`);
+  for(const token of ['courierRecoveryConfirm','resumeClockReview','previewClockRecovery'])assert.ok(!mobileShell.includes(token),`CLOCK_REVIEW must not enable ${token}`);
+  const pausedPresentation=mobileShell.slice(mobileShell.indexOf('  const renderCourier='),mobileShell.indexOf('  const settleCourierIfDue='));
+  assert.ok(pausedPresentation&&!pausedPresentation.includes('DELIVERY_PENDING_CREDIT'),'paused presentation cannot introduce ordinary-delivery pending credit');
   assert.ok(mobileShell.includes('#playerCourierDetails[data-clock-review="true"]{top:54px;left:50%;max-height:calc(100dvh - 238px);overscroll-behavior:contain}'),'only paused landscape details use the bounded scroll area above controls');
   const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
   for(const path of ['./11520-browser-responsive.mjs','./11520-browser-smoke.mjs'])assert.ok(read(path).includes(escaped),`${path} must match canonical release ${release}`);

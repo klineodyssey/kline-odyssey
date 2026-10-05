@@ -1,12 +1,55 @@
 import test from 'node:test';
+import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
-import {createSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
+import {createSimulationPlayerStore as rawSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
 import {createKgenLedger} from '../runtime/kgen-margin-runtime.mjs';
 import {createExecutionAdapter} from '../runtime/real-trading-order-intent.mjs';
 import {createJourneyTutorial,JOURNEY_ENCOUNTER_PROFILES,GAME_LOOT_TABLE,GA600_GAME_TRAINING,selectJourneyLoot,selectJourneyEncounter,drainJourneyEvents,serializeWorld} from '../runtime/world-runtime.mjs';
-import {GAMEPLAY_UNLOCKS} from '../runtime/player-life-runtime.mjs';
+import {GAMEPLAY_UNLOCKS,createLocalPlayerStore} from '../runtime/player-life-runtime.mjs';
 import {observeTrainingMarket,createTrainingMemory} from '../runtime/market-life-runtime.mjs';
+
+// Deterministic lock provider for isolated Node fixtures. Browser Web Locks are
+// asynchronous; real multi-tab/BFCache QA is a separate required release gate.
+function fakeLocks(){const held=new Set();return {request(name,options,callback){if(held.has(name))return Promise.resolve(callback(null));held.add(name);return Promise.resolve(callback({name})).finally(()=>held.delete(name))}}}
+const fixtureLocks=new WeakMap();
+function locksFor(storage){if(!storage)return null;if(!fixtureLocks.has(storage))fixtureLocks.set(storage,fakeLocks());return fixtureLocks.get(storage)}
+function createSimulationPlayerStore(options){return rawSimulationPlayerStore({...options,locks:locksFor(options.storage)})}
+function fixtureCreditPort(storage,courier){const store=createSimulationPlayerStore({storage,ledger:createKgenLedger(),playerId:courier});store.activate(null);return store}
+function createPlayerCourierStore(options){const port=options.resolveCreditPort?null:fixtureCreditPort(options.storage,'KAIOS-P-COURIER-1234567890');return rawPlayerCourierStore({...options,locks:locksFor(options.storage),resolveCreditPort:options.resolveCreditPort??(()=>port)})}
+function seedPendingCredit(storage,{playerId,owner='guest',receiptId='COURIER-RECEIPT-abcdef01',reward=4,missionId='COURIER-CREDIT-FIXTURE',insurance=false}){
+  const binding={status:'PENDING',receiptId,missionId,playerId,owner,rewardKaios:reward,purpose:insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD'};
+  const envelope=JSON.parse(storage.getItem('K11520_PLAYER_COURIER')||'null')||{schema:'K11520_PLAYER_COURIER',revision:0,missions:{},activeByCourier:{},settledReceipts:[],lootReceipts:[]};
+  const mission=createPlayerCourierOffer({missionId,requesterLifeId:playerId,cargoAmount:1000,freightFeeKaios:reward,courierSalaryKaios:reward,estimatedDurationMs:60000});
+  Object.assign(mission,{status:insurance?'ROBBED':'DELIVERY_PENDING_CREDIT',courierLifeId:playerId});Object.assign(mission.cargo,{ownerState:insurance?'LOOT_CRATE':'OWNED_BY_COURIER',ownerLifeId:insurance?'BANDIT-FIXTURE':playerId});
+  mission.settlement={outcome:mission.status,receiptId,rewardKaios:insurance?0:reward,salaryKaios:insurance?0:reward,freightShareKaios:0,insurancePayoutKaios:insurance?reward:0,chainTransfer:false};
+  if(insurance)Object.assign(mission.insurance,{status:'ACTIVE',claimStatus:'APPROVED',payoutReceiptId:receiptId,payoutKaios:reward,credit:binding});else mission.settlement.credit=binding;
+  envelope.missions[missionId]=mission;storage.setItem('K11520_PLAYER_COURIER',JSON.stringify(envelope));return {...binding,reward};
+}
+
+
+test('local product persistence failure cannot acknowledge or retain a courier reward in memory',()=>{
+  const data=new Map();let fail=false;
+  const storage={getItem:key=>data.get(key)??null,setItem(key,value){if(fail)throw new Error('QUOTA_EXCEEDED');data.set(key,value)}};
+  const playerId='KAIOS-P-SAVE-FAILURE-1234567890',store=createSimulationPlayerStore({ledger:createKgenLedger(),storage,playerId});store.activate(null);
+  const credit=seedPendingCredit(storage,{playerId});const before=store.snapshot();fail=true;
+  let result;try{result=store.recordCourierSettlement(credit)}catch{}
+  assert.notEqual(result?.ok,true,'an unsuccessful durable save is never a successful reward');
+  assert.equal(store.snapshot().kaios,before.kaios,'failed mutation does not survive in memory');
+  assert.deepEqual(store.snapshot().courierReceipts,before.courierReceipts);
+});
+
+test('oversized legacy receipt evidence is preserved and cannot silently reopen deduplication',()=>{
+  const data=new Map(),storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};
+  const receipts=Array.from({length:1001},(_,i)=>'COURIER-RECEIPT-'+i.toString(16).padStart(8,'0'));
+  const key='k11520.local-product.v1:guest',saved=JSON.stringify({schema:'K11520_LOCAL_SIMULATION_V1',owner:'guest',revision:1,ledger:createKgenLedger(),progress:{kaios:1001,courierReceipts:receipts}});
+  storage.setItem(key,saved);
+  const store=createSimulationPlayerStore({ledger:createKgenLedger(),storage});
+  try{store.activate(null)}catch{}
+  let result;try{result=store.recordCourierSettlement({receiptId:receipts[0],reward:1})}catch{}
+  assert.notEqual(result?.ok,true,'receipt1001 cannot clear the first1000 replay guards');
+  assert.equal(storage.getItem(key),saved,'quarantined legacy evidence is never replaced by a fresh writable save');
+});
 
 test('training history reload restores only existing growth, never pending predictions or financial authority',()=>{
   const values=new Map(),storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
@@ -275,7 +318,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createPlayerCourierStore,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createPlayerCourierStore as rawPlayerCourierStore,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -588,11 +631,20 @@ test('home delivery pays no revenue or salary until arrival, correct-player acce
   assert.equal(acceptPlayerHomeDelivery(ant,{requesterLifeId:requester,playerPosition:home,paymentEvidence:{ok:true,amount:8,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}}).reason,'NOT_AWAITING_RECEIPT','receipt cannot be replayed');
 });
 
-test('Player Courier salary and freight-share receipt credits local KAIOS exactly once across reload',()=>{
-  const data=new Map(),storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)},playerId='KAIOS-P-COURIER-REWARD-1234567890',ledger=createKgenLedger(),store=createSimulationPlayerStore({ledger,storage,playerId});store.activate(null);
-  const receiptId='COURIER-RECEIPT-1a2b3c4d';assert.equal(store.recordCourierSettlement({receiptId,reward:4}).ok,true);assert.equal(store.snapshot().kaios,4);assert.equal(store.snapshot().events.COURIER_SETTLEMENT,1);assert.equal(store.recordCourierSettlement({receiptId,reward:4}).reason,'COURIER_REWARD_REPLAY_BLOCKED');
-  const reloaded=createSimulationPlayerStore({ledger:createKgenLedger(),storage,playerId});reloaded.activate(null);assert.equal(reloaded.snapshot().kaios,4);assert.equal(reloaded.recordCourierSettlement({receiptId,reward:4}).reason,'COURIER_REWARD_REPLAY_BLOCKED');assert.equal(reloaded.snapshot().claimableKaios,0,'guest-mode courier reward remains local and never becomes a chain claim');
-  const insuranceId='COURIER-INSURANCE-1a2b3c4d',paid=reloaded.recordCourierInsurancePayout({receiptId:insuranceId,reward:720});assert.equal(paid.ok,true);assert.equal(paid.replayed,false);assert.equal(reloaded.snapshot().kaios,724);const replay=reloaded.recordCourierInsurancePayout({receiptId:insuranceId,reward:720});assert.equal(replay.ok,true);assert.equal(replay.replayed,true);assert.equal(reloaded.snapshot().kaios,724,'insurance receipt replay never credits twice');assert.equal(reloaded.recordCourierInsurancePayout({receiptId:insuranceId,reward:719}).reason,'COURIER_INSURANCE_RECEIPT_CONFLICT');
+test('Player Courier immutable receipt credits local KAIOS once across reload and binds exact owner/amount/mission',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-COURIER-REWARD-1234567890',store=createSimulationPlayerStore({ledger:createKgenLedger(),storage,playerId});store.activate(null);
+  const credit=seedPendingCredit(storage,{playerId});
+  assert.equal(store.recordCourierSettlement(credit).ok,true);assert.equal(store.snapshot().kaios,4);assert.equal(store.snapshot().events.COURIER_SETTLEMENT,1);
+  const replay=store.recordCourierSettlement(credit);assert.equal(replay.ok,true);assert.equal(replay.replayed,true);assert.equal(store.snapshot().kaios,4);
+  assert.equal(store.recordCourierSettlement({...credit,reward:5}).reason,'COURIER_RECEIPT_CONFLICT');
+  assert.equal(store.recordCourierSettlement({...credit,missionId:'OTHER'}).reason,'COURIER_RECEIPT_CONFLICT');
+  const reloaded=createSimulationPlayerStore({ledger:createKgenLedger(),storage,playerId});reloaded.activate(null);
+  assert.equal(reloaded.recordCourierSettlement(credit).replayed,true);assert.equal(reloaded.snapshot().claimableKaios,0);
+  reloaded.activate('0x'+'a'.repeat(40));assert.equal(reloaded.recordCourierSettlement(credit).reason,'COURIER_REWARD_OWNER_MISMATCH');assert.equal(reloaded.snapshot().kaios,0);
+  reloaded.activate(null);
+  const insurance=seedPendingCredit(storage,{playerId,receiptId:'COURIER-INSURANCE-1a2b3c4d',missionId:'INSURED',reward:720,insurance:true});
+  assert.equal(reloaded.recordCourierInsurancePayout(insurance).ok,true);assert.equal(reloaded.recordCourierInsurancePayout(insurance).replayed,true);assert.equal(reloaded.snapshot().kaios,724);
+  assert.equal(reloaded.recordCourierInsurancePayout({...insurance,reward:719}).reason,'COURIER_INSURANCE_RECEIPT_CONFLICT');
 });
 
 function courierStorage(){const data=new Map();return {data,getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)}}
@@ -639,7 +691,7 @@ test('Player Courier insured robbery pays only policy evidence while old 80% tes
   const covered=store.activateInsurance(mission.missionId,{courierLifeId:courier,paymentEvidence:{ok:true,amount:quote.premiumKaios,purpose:'PLAYER_COURIER_INSURANCE_PREMIUM',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}});assert.equal(covered.insurance.status,'ACTIVE');assert.equal(covered.insurance.premiumPaidKaios,quote.premiumKaios);
   const robbed=store.raid(mission.missionId,{attackerLifeId:'KAIOS-P-BANDIT-INSURED-1234567890',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,distanceMeters:1,replayKey:'RAID-INSURED',wallNow:mission.bandit.attackWindowStartsAt});
   assert.equal(quote.coveredAmountKaios,800);assert.equal(robbed.mission.insurance.coverageBps,8000);assert.equal(robbed.mission.insurance.claimStatus,'APPROVED','robbery approves but does not falsely mark an unpaid claim as paid');assert.equal(robbed.mission.settlement.insurancePayoutKaios,720);assert.equal(robbed.mission.settlement.chainTransfer,false);
-  const evidence={ok:true,receiptId:robbed.mission.insurance.payoutReceiptId,rewardKaios:720,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'},paid=store.confirmInsurancePayout(mission.missionId,{courierLifeId:courier,paymentEvidence:evidence,wallNow:mission.bandit.attackWindowStartsAt+1});assert.equal(paid.insurance.claimStatus,'PAID');assert.throws(()=>store.confirmInsurancePayout(mission.missionId,{courierLifeId:courier,paymentEvidence:evidence}),/INSURANCE_PAYOUT_REPLAY_BLOCKED/);
+  const claimed=store.claimInsurancePayout(mission.missionId,{courierLifeId:courier,wallNow:mission.bandit.attackWindowStartsAt+1}),evidence=claimed.evidence,paid=claimed.mission;assert.equal(claimed.ok,true);assert.equal(paid.insurance.claimStatus,'PAID');assert.throws(()=>store.confirmInsurancePayout(mission.missionId,{courierLifeId:courier,paymentEvidence:evidence}),/INSURANCE_PAYOUT_REPLAY_BLOCKED/);
 });
 
 test('Player Courier rejects clock tampering, player switching and stale-tab double settlement',()=>{
@@ -648,7 +700,7 @@ test('Player Courier rejects clock tampering, player switching and stale-tab dou
   const drift=a.settleDue(mission.missionId,{courierLifeId:courier,wallNow:mission.lastWallAt+60_000,monoNow:101});assert.equal(drift.ok,false);assert.equal(drift.reason,'CLOCK_DRIFT_DETECTED');assert.equal(a.snapshot(mission.missionId).mission.status,'CLOCK_REVIEW');
   const cleanStorage=courierStorage(),tabA=createPlayerCourierStore({storage:cleanStorage,now:()=>20_000,monotonicNow:()=>200,sessionId:'TAB-A'}),active=tabA.accept(courierOffer({missionId:'COURIER-TABS'}),{courierLifeId:courier}),tabB=createPlayerCourierStore({storage:cleanStorage,now:()=>active.dueAt,monotonicNow:()=>1,sessionId:'TAB-B'});
   assert.equal(tabA.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1_800_200}).ok,true);
-  assert.throws(()=>tabB.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1}),/REVISION_CONFLICT_RELOAD_REQUIRED/);tabB.reload();assert.equal(tabB.snapshot(active.missionId).mission.status,'DELIVERED');
+  assert.throws(()=>tabB.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1}),/MISSION_ALREADY_SETTLED/);tabB.reload();assert.equal(tabB.snapshot(active.missionId).mission.status,'DELIVERED');
 });
 
 test('Cargo Risk Desk quotes exact integer KAIOS and never uses cargo principal as insurance reserve',()=>{
@@ -753,4 +805,242 @@ test('order execution rejects forged C, lots, side, margin and duplicate positio
  const state={kgen:1000,pos:{KX:null},history:[]};assert.equal(executeOrder(state,base).ok,true);
  const once=structuredClone(state);assert.equal(executeOrder(state,base).reason,'POSITION_EXISTS');assert.deepEqual(state,once);
  assert.equal(previewOrder({axis:'KX',fire:-1,leverage:1,price:100,kgen:1000}).reason,'BAD_LOTS');
+});
+
+// Store-boundary regressions. No fixture reaches real player/browser data.
+test('origin-wide writer lease rejects all follower writes including activation and cross-player namespaces',async()=>{
+  const storage=courierStorage(),locks=fakeLocks(),scopeA=new EventTarget(),scopeB=new EventTarget(),playerId='KAIOS-P-WRITER-LEASE-1234567890';
+  const a=rawSimulationPlayerStore({storage,locks,coordinationScope:scopeA,playerId,ledger:createKgenLedger()});await a.ready;a.activate(null);
+  const credit=seedPendingCredit(storage,{playerId});assert.equal(a.recordCourierSettlement(credit).ok,true);
+  const original=new Map(storage.data),b=rawSimulationPlayerStore({storage,locks,coordinationScope:scopeB,playerId,ledger:createKgenLedger()});await b.ready;b.activate(null);
+  assert.equal(b.snapshot().writeCapability.status,'FOLLOWER');assert.deepEqual(storage.data,original,'follower activation does not persist SESSION');
+  assert.throws(()=>b.record(null,{elapsedMs:1}),/LOCAL_GAME_FOLLOWER/);assert.equal(b.spendKaios(1).ok,false);assert.equal(b.recordCourierSettlement(credit).ok,false);assert.throws(()=>b.save(),/LOCAL_GAME_FOLLOWER/);
+  const other=rawSimulationPlayerStore({storage,locks,coordinationScope:scopeB,playerId:'KAIOS-P-ANOTHER-LEASE-1234567890',ledger:createKgenLedger()});other.activate(null);assert.equal(other.snapshot().writeCapability.writeEnabled,false);assert.deepEqual(storage.data,original);
+  a.dispose();await Promise.resolve();await Promise.resolve();await b.requestWriter();b.refresh();b.record(null,{elapsedMs:1});
+  assert.equal(b.snapshot().kaios,4);assert.equal(b.snapshot().courierReceipts.length,1);b.dispose();other.dispose();
+});
+
+test('same-tab refcounts revoke disposed consumers while retaining lease and fresh writes for other stores',async()=>{
+  const storage=courierStorage(),locks=fakeLocks(),scope=new EventTarget(),playerId='KAIOS-P-REFCOUNT-LEASE-1234567890';
+  const a=rawSimulationPlayerStore({storage,locks,coordinationScope:scope,playerId,ledger:createKgenLedger()}),b=rawSimulationPlayerStore({storage,locks,coordinationScope:scope,playerId,ledger:createKgenLedger()});await a.ready;a.activate(null);b.activate(null);
+  a.record('LOOT_DROP',{reward:4});b.record('LOOT_DROP',{reward:5});assert.equal(b.snapshot().kaios,9,'same-tab transactions reload canonical progress');
+  a.dispose();assert.throws(()=>a.record('LOOT_DROP',{reward:1}),/DISPOSED/);b.record('LOOT_DROP',{reward:1});assert.equal(b.snapshot().kaios,10);b.dispose();assert.equal(b.snapshot().writeCapability.writeEnabled,false);
+});
+
+test('pagehide fences every same-tab store and BFCache needs explicit acquisition and refresh',async()=>{
+  const storage=courierStorage(),locks=fakeLocks(),scope=new EventTarget(),playerId='KAIOS-P-BFCACHE-LEASE-1234567890';
+  const store=rawSimulationPlayerStore({storage,locks,coordinationScope:scope,playerId,ledger:createKgenLedger()});await store.ready;store.activate(null);store.record('LOOT_DROP',{reward:3});
+  scope.dispatchEvent(new Event('pagehide'));scope.dispatchEvent(new Event('pageshow'));assert.equal(store.snapshot().writeCapability.writeEnabled,false);assert.throws(()=>store.record('LOOT_DROP',{reward:1}),/PAGE_HIDDEN/);
+  await Promise.resolve();await Promise.resolve();await store.requestWriter();store.refresh();store.record(null,{elapsedMs:1});assert.equal(store.snapshot().kaios,3);store.dispose();
+});
+
+test('missing Web Locks never falls back to memory-only or unguarded product and courier writes',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-NO-WEBLOCKS-1234567890',store=rawSimulationPlayerStore({storage,locks:null,playerId,ledger:createKgenLedger()});store.activate(null);
+  assert.equal(store.snapshot().writeCapability.status,'LOCKS_UNAVAILABLE');assert.equal(store.spendKaios(1).ok,false);assert.throws(()=>store.record('LOOT_DROP',{reward:4}),/LOCKS_UNAVAILABLE/);
+  const courier=rawPlayerCourierStore({storage,locks:null});assert.throws(()=>courier.accept(courierOffer(),{courierLifeId:playerId}),/LOCKS_UNAVAILABLE/);assert.equal(storage.getItem('k11520.player:'+playerId+':k11520.local-product.v1:guest'),null);assert.equal(storage.getItem('K11520_PLAYER_COURIER'),null);
+});
+
+test('same-tab storage callback cannot reenter a product transaction or erase its receipt',()=>{
+  const data=new Map();let hook=null;const storage={getItem:k=>data.get(k)??null,setItem(k,v){if(hook){const fn=hook;hook=null;fn()}data.set(k,v)}};
+  const playerId='KAIOS-P-REENTRANCY-1234567890',a=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()}),b=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});a.activate(null);b.activate(null);const credit=seedPendingCredit(storage,{playerId});
+  hook=()=>assert.throws(()=>b.record(null,{elapsedMs:1}),/REENTRANT_WRITE/);
+  assert.equal(a.recordCourierSettlement(credit).ok,true);b.record(null,{elapsedMs:1});assert.equal(b.snapshot().kaios,4);assert.deepEqual(b.snapshot().courierReceipts,[credit.receiptId]);
+});
+
+test('write committed but readback failed is quarantined without compensation and reconciles exactly once',()=>{
+  const data=new Map();let fail=false,throwRead=false;const storage={getItem(k){if(throwRead&&k.includes('local-product')){throwRead=false;throw new Error('READBACK_DENIED')}return data.get(k)??null},setItem(k,v){data.set(k,v);if(fail&&k.includes('local-product')){fail=false;throwRead=true}}};
+  const playerId='KAIOS-P-UNCERTAIN-SAVE-1234567890',store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});store.activate(null);const credit=seedPendingCredit(storage,{playerId}),key=`k11520.player:${playerId}:k11520.local-product.v1:guest`;fail=true;
+  assert.equal(store.recordCourierSettlement(credit).ok,false);assert.equal(store.snapshot().kaios,0);assert.equal(store.snapshot().storageStatus,'PERSISTENCE_UNCERTAIN');assert.equal(JSON.parse(data.get(key)).progress.kaios,4,'never compensate by writing stale pre-credit bytes');
+  assert.equal(store.recordCourierSettlement(credit).ok,false);store.refresh();assert.equal(store.snapshot().kaios,4);assert.equal(store.recordCourierSettlement(credit).replayed,true);assert.equal(store.snapshot().kaios,4);
+});
+
+test('simulation engine mutations roll back nested book and balances when durable save fails',()=>{
+  const data=new Map();let fail=false;const storage={getItem:k=>data.get(k)??null,setItem(k,v){if(fail)throw new Error('QUOTA');data.set(k,v)}};
+  const ledger=createKgenLedger(),store=createSimulationPlayerStore({storage,ledger});store.activate(null);
+  const adapter=createExecutionAdapter({ledger,productV1:true,transaction:store.transactLedger});assert.equal(adapter.observe({market:'ETHUSDT',price:100,observedAt:1000,now:1000}).ok,true);
+  const before=structuredClone(ledger),bytes=storage.getItem('k11520.local-product.v1:guest');fail=true;
+  assert.equal(adapter.submit({axis:'KY',market:'ETHUSDT',c:1,lots:1,currentPrice:100,triggerPrice:101},{now:1001}).ok,false);assert.deepEqual(ledger,before);assert.equal(storage.getItem('k11520.local-product.v1:guest'),bytes);
+});
+
+test('shared courier envelope reload preserves different missions without cross-mission overwrite',()=>{
+  const storage=courierStorage(),a=createPlayerCourierStore({storage}),b=createPlayerCourierStore({storage});
+  a.accept(courierOffer({missionId:'CROSS-MISSION-A'}),{courierLifeId:'KAIOS-P-COURIER-1234567890',wallNow:1000,monoNow:0});b.accept(courierOffer({missionId:'CROSS-MISSION-B'}),{courierLifeId:'KAIOS-P-SECOND-1234567890',wallNow:1000,monoNow:0});
+  a.observe('CROSS-MISSION-A',{wallNow:1001,monoNow:1});b.observe('CROSS-MISSION-B',{wallNow:1001,monoNow:1});assert.equal(Object.keys(b.snapshot().missions).length,2);assert.equal(b.snapshot().missions['CROSS-MISSION-A'].lastWallAt,1001);
+});
+
+test('missing credit resolver preserves original mission and cargo instead of asserting delivery',()=>{
+  const storage=courierStorage(),store=rawPlayerCourierStore({storage,locks:locksFor(storage),sessionId:'MISSING',now:()=>1000,monotonicNow:()=>0}),courier='KAIOS-P-COURIER-1234567890';
+  const mission=store.accept(courierOffer(),{courierLifeId:courier}),before=storage.getItem('K11520_PLAYER_COURIER');assert.throws(()=>store.settleDue(mission.missionId,{courierLifeId:courier,wallNow:mission.dueAt,monoNow:mission.estimatedDurationMs}),/CREDIT_OWNER_UNAVAILABLE/);assert.equal(storage.getItem('K11520_PLAYER_COURIER'),before);assert.equal(store.snapshot(mission.missionId).mission.status,'ACTIVE');
+});
+
+test('pending courier credit stays bound through wallet change, quota recovery and repeated completion',()=>{
+  const data=new Map();let failProduct=false;const storage={getItem:k=>data.get(k)??null,setItem(k,v){if(failProduct&&k.includes('local-product'))throw new Error('QUOTA');data.set(k,v)}},playerId='KAIOS-P-PENDING-OWNER-1234567890';
+  const product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);const store=createPlayerCourierStore({storage,resolveCreditPort:()=>product,sessionId:'PENDING',now:()=>1000,monotonicNow:()=>0}),mission=store.accept(courierOffer(),{courierLifeId:playerId});failProduct=true;
+  const first=store.settleDue(mission.missionId,{courierLifeId:playerId,wallNow:mission.dueAt,monoNow:mission.estimatedDurationMs});assert.equal(first.ok,false);assert.equal(first.mission.status,'DELIVERY_PENDING_CREDIT');assert.equal(first.mission.settlement.outcome,'DELIVERY_PENDING_CREDIT');assert.equal(first.mission.cargo.ownerState,'OWNED_BY_COURIER');assert.equal(product.snapshot().kaios,0);
+  failProduct=false;product.activate('0x'+'b'.repeat(40));assert.equal(store.reconcileCredit(mission.missionId).reason,'COURIER_REWARD_OWNER_MISMATCH');assert.equal(product.snapshot().kaios,0);
+  product.activate(null);const result=store.reconcileCredit(mission.missionId);assert.equal(result.ok,true);assert.equal(result.mission.status,'DELIVERED');assert.equal(result.mission.settlement.credit.owner,'guest');assert.equal(product.snapshot().kaios,4);assert.throws(()=>store.settleDue(mission.missionId,{courierLifeId:playerId}),/MISSION_ALREADY_SETTLED/);assert.equal(product.snapshot().kaios,4);
+});
+
+test('receipt capacity refuses the next receipt without evicting prior replay evidence',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-RECEIPT-CAP-1234567890',store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});store.activate(null);
+  const key=`k11520.player:${playerId}:k11520.local-product.v1:guest`,saved=JSON.parse(storage.getItem(key));saved.progress.courierReceipts=Array.from({length:1000},(_,i)=>'COURIER-RECEIPT-'+i.toString(16).padStart(8,'0'));storage.setItem(key,JSON.stringify(saved));store.refresh();
+  const credit=seedPendingCredit(storage,{playerId,receiptId:'COURIER-RECEIPT-ffffffff'}),before=storage.getItem(key);assert.equal(store.recordCourierSettlement(credit).reason,'COURIER_RECEIPT_CAPACITY');assert.equal(storage.getItem(key),before);assert.equal(store.snapshot().courierReceipts.length,1000);
+});
+
+test('valid legacy receipt tombstones and unknown fields survive migration without inferred backpay',()=>{
+  const storage=courierStorage(),key='k11520.local-product.v1:guest',receipt='COURIER-RECEIPT-01020304';storage.setItem(key,JSON.stringify({schema:'K11520_LOCAL_SIMULATION_V1',owner:'guest',revision:7,ledger:{...createKgenLedger(),futureMetadata:{retained:true}},progress:{kaios:4,courierReceipts:[receipt],futureProgress:{retained:true}},futureTop:{retained:true}}));
+  const store=createSimulationPlayerStore({storage,ledger:createKgenLedger()});store.activate(null);const saved=JSON.parse(storage.getItem(key));assert.deepEqual(saved.futureTop,{retained:true});assert.deepEqual(saved.progress.futureProgress,{retained:true});assert.deepEqual(saved.ledger.futureMetadata,{retained:true});assert.deepEqual(saved.progress.courierReceipts,[receipt]);assert.deepEqual(saved.progress.courierReceiptBindings,{});assert.equal(saved.progress.kaios,4);assert.equal(saved.schema,'K11520_LOCAL_SIMULATION_V2');
+});
+
+
+test('guarded product refusal does not claim atomicity for separate Player Life progression',()=>{
+  const storage=courierStorage(),life=createLocalPlayerStore({storage}),player=life.createPlayer(),product=rawSimulationPlayerStore({storage,locks:null,playerId:player.playerId,ledger:createKgenLedger()});product.activate(null);
+  life.recordEvent({id:'OUTSIDE-LEASE-COMBAT',type:'MONSTER_KILL'});
+  assert.throws(()=>product.record('LOOT_DROP',{reward:5}),/LOCKS_UNAVAILABLE/);
+  assert.equal(life.activePlayer().xp,10,'Player Life is a separate unguarded store: integration remains a release blocker');assert.equal(product.snapshot().kaios,0);
+});
+
+test('reentrant account selection and refresh cannot retarget an in-flight product write',()=>{
+  const data=new Map();let hook=null;const storage={getItem:k=>data.get(k)??null,setItem(k,v){if(hook){const f=hook;hook=null;f()}data.set(k,v)}},playerId='KAIOS-P-SCOPE-FENCE-1234567890';
+  const store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});store.activate(null);const credit=seedPendingCredit(storage,{playerId});
+  hook=()=>{assert.throws(()=>store.activate('0x'+'a'.repeat(40)),/REENTRANT_WRITE/);assert.throws(()=>store.refresh(),/REENTRANT_WRITE/)};
+  assert.equal(store.recordCourierSettlement(credit).ok,true);assert.equal(store.snapshot().owner,'guest');assert.equal(store.snapshot().kaios,4);assert.equal(data.has(`k11520.player:${playerId}:k11520.local-product.v1:0x${'a'.repeat(40)}`),false);
+});
+
+test('last-writer disposal during readback cannot report committed credit as confirmed',()=>{
+  const data=new Map();let hook=null;const storage={getItem:k=>data.get(k)??null,setItem(k,v){data.set(k,v);if(hook){const f=hook;hook=null;f()}}},playerId='KAIOS-P-DISPOSE-CREDIT-1234567890';
+  const store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});store.activate(null);const credit=seedPendingCredit(storage,{playerId});hook=()=>store.dispose();
+  const result=store.recordCourierSettlement(credit);assert.equal(result.ok,false);assert.equal(store.snapshot().kaios,0);assert.equal(store.snapshot().storageStatus,'PERSISTENCE_UNCERTAIN');assert.equal(JSON.parse(data.get(`k11520.player:${playerId}:k11520.local-product.v1:guest`)).progress.kaios,4,'bytes remain for explicit recovery, never compensated');
+});
+
+test('disposed pending lock request cannot gain delayed write authority',async()=>{
+  let admit;const locks={request(name,options,callback){return new Promise(resolve=>{admit=()=>resolve(callback({name}))})}},storage=courierStorage(),store=rawSimulationPlayerStore({storage,locks,coordinationScope:new EventTarget(),ledger:createKgenLedger()});
+  const ready=store.ready;store.dispose();admit();await ready;assert.equal(store.snapshot().writeCapability.writeEnabled,false);assert.throws(()=>store.activate(null),/DISPOSED/);assert.equal(storage.data.size,0);
+});
+
+test('committed product credit survives failed courier acknowledgement and retries without double reward',()=>{
+  const data=new Map();let failAck=false;const storage={getItem:k=>data.get(k)??null,setItem(k,v){if(failAck&&k==='K11520_PLAYER_COURIER'&&Object.values(JSON.parse(v).missions).some(m=>m.status==='DELIVERED'))throw new Error('ACK_QUOTA');data.set(k,v)}},playerId='KAIOS-P-ACK-RECOVERY-1234567890';
+  const product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);const store=createPlayerCourierStore({storage,resolveCreditPort:()=>product,sessionId:'ACK',now:()=>1000,monotonicNow:()=>0}),mission=store.accept(courierOffer(),{courierLifeId:playerId});failAck=true;
+  assert.throws(()=>store.settleDue(mission.missionId,{courierLifeId:playerId,wallNow:mission.dueAt,monoNow:mission.estimatedDurationMs}),/COURIER_SAVE_NOT_CONFIRMED/);assert.equal(product.snapshot().kaios,4);assert.equal(store.snapshot(mission.missionId).mission.status,'DELIVERY_PENDING_CREDIT');assert.equal(store.snapshot().status,'PERSISTENCE_UNCERTAIN');
+  failAck=false;store.reload();assert.equal(store.reconcileCredit(mission.missionId).ok,true);assert.equal(product.snapshot().kaios,4);assert.equal(product.snapshot().events.COURIER_SETTLEMENT,1);assert.equal(store.snapshot(mission.missionId).mission.status,'DELIVERED');
+});
+
+test('corrupt binding/index conflicts and post-activation corruption never overwrite original bytes',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-CORRUPT-BINDING-1234567890',store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});store.activate(null);const credit=seedPendingCredit(storage,{playerId});assert.equal(store.recordCourierSettlement(credit).ok,true);
+  const key=`k11520.player:${playerId}:k11520.local-product.v1:guest`,saved=JSON.parse(storage.getItem(key));saved.progress.courierReceipts=[];const corrupt=JSON.stringify(saved);storage.setItem(key,corrupt);
+  assert.throws(()=>store.record(null,{elapsedMs:1}),/CORRUPT_RECEIPT_EVIDENCE/);assert.equal(storage.getItem(key),corrupt);assert.equal(store.snapshot().storageStatus,'CORRUPT_RECEIPT_EVIDENCE');
+  const other=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});other.activate(null);assert.equal(storage.getItem(key),corrupt);assert.equal(other.spendKaios(1).ok,false);
+});
+
+test('transaction-owned engine rollback retains refreshed canonical book for later compatibility save',()=>{
+  const storage=courierStorage(),la=createKgenLedger(),lb=createKgenLedger(),a=createSimulationPlayerStore({storage,ledger:la}),b=createSimulationPlayerStore({storage,ledger:lb});a.activate(null);b.activate(null);
+  const aa=createExecutionAdapter({ledger:la,productV1:true,transaction:a.transactLedger}),bb=createExecutionAdapter({ledger:lb,productV1:true,transaction:b.transactLedger});
+  assert.equal(aa.observe({market:'ETHUSDT',price:100,observedAt:1000,now:1000}).ok,true);assert.equal(bb.observe({market:'ETHUSDT',price:110,observedAt:1001,now:1001}).ok,true);
+  assert.equal(aa.submit({axis:'KY',market:'ETHUSDT',c:5,lots:1,currentPrice:110,triggerPrice:112},{now:1002}).ok,false);
+  assert.equal(aa.snapshot().observations.ETHUSDT.price,110);a.save();assert.equal(JSON.parse(storage.getItem('k11520.local-product.v1:guest')).ledger.simulation.observations.ETHUSDT.price,110);
+});
+
+test('canonical insurance policy and pending binding must agree before either store can credit',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-INSURANCE-VALIDATION-1234567890',product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);
+  const evidence=seedPendingCredit(storage,{playerId,missionId:'INSURANCE-VALIDATION',receiptId:'COURIER-INSURANCE-abcdef02',reward:720,insurance:true}),saved=JSON.parse(storage.getItem('K11520_PLAYER_COURIER'));
+  saved.missions[evidence.missionId].insurance.credit.rewardKaios=1000;const corrupted=JSON.stringify(saved);storage.setItem('K11520_PLAYER_COURIER',corrupted);
+  const before=storage.getItem(`k11520.player:${playerId}:k11520.local-product.v1:guest`);
+  assert.throws(()=>createPlayerCourierStore({storage,resolveCreditPort:()=>product}),/CORRUPT_SAVE/);
+  assert.equal(product.recordCourierInsurancePayout({...evidence,reward:1000}).reason,'CANONICAL_COURIER_CREDIT_REQUIRED');assert.equal(product.snapshot().kaios,0);assert.equal(storage.getItem(`k11520.player:${playerId}:k11520.local-product.v1:guest`),before);assert.equal(storage.getItem('K11520_PLAYER_COURIER'),corrupted);
+});
+
+test('product rejects partial courier envelopes and contradictory delivery semantics',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-CANONICAL-CREDIT-1234567890',product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);const evidence=seedPendingCredit(storage,{playerId});
+  const valid=JSON.parse(storage.getItem('K11520_PLAYER_COURIER'));
+  for(const bad of [{missions:valid.missions},{...valid,missions:{[evidence.missionId]:{...valid.missions[evidence.missionId],settlement:{...valid.missions[evidence.missionId].settlement,rewardKaios:99}}}},{...valid,missions:{[evidence.missionId]:{...valid.missions[evidence.missionId],realKaiosTransfer:true}}}]){
+    storage.setItem('K11520_PLAYER_COURIER',JSON.stringify(bad));assert.equal(product.recordCourierSettlement(evidence).reason,'CANONICAL_COURIER_CREDIT_REQUIRED');assert.equal(product.snapshot().kaios,0);
+  }
+});
+
+test('failed store constructors release their unreturned writer reference',async()=>{
+  const storage=courierStorage(),locks=fakeLocks();storage.setItem('K11520_PLAYER_COURIER','{corrupt');
+  assert.throws(()=>rawPlayerCourierStore({storage,locks,coordinationScope:new EventTarget()}),/CORRUPT_SAVE/);await Promise.resolve();await Promise.resolve();
+  const next=rawSimulationPlayerStore({storage,locks,coordinationScope:new EventTarget(),ledger:createKgenLedger()});await next.ready;assert.equal(next.snapshot().writeCapability.writeEnabled,true);next.dispose();await Promise.resolve();await Promise.resolve();
+  assert.throws(()=>rawSimulationPlayerStore({storage,locks,coordinationScope:new EventTarget(),playerId:'bad',ledger:createKgenLedger()}),/INVALID_PLAYER_ID/);await Promise.resolve();await Promise.resolve();
+  const after=rawSimulationPlayerStore({storage,locks,coordinationScope:new EventTarget(),ledger:createKgenLedger()});await after.ready;assert.equal(after.snapshot().writeCapability.writeEnabled,true);after.dispose();
+});
+
+test('product and courier share lease ownership without one disposal releasing the other',async()=>{
+  const storage=courierStorage(),locks=fakeLocks(),scope=new EventTarget(),product=rawSimulationPlayerStore({storage,locks,coordinationScope:scope,ledger:createKgenLedger()}),courier=rawPlayerCourierStore({storage,locks,coordinationScope:scope});await product.ready;product.activate(null);
+  const follower=rawSimulationPlayerStore({storage,locks,coordinationScope:new EventTarget(),ledger:createKgenLedger()});await follower.ready;assert.equal(follower.snapshot().writeCapability.writeEnabled,false);
+  product.dispose();assert.equal(courier.snapshot().writeCapability.writeEnabled,true);assert.equal(await follower.requestWriter(),'FOLLOWER');courier.dispose();await Promise.resolve();await Promise.resolve();assert.equal(await follower.requestWriter(),'WRITER');follower.dispose();
+});
+
+test('unscoped legacy product is quarantined independently of external claim and cannot be bypassed by refresh',async()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-LEGACY-QUARANTINE-1234567890',legacy=JSON.stringify({schema:'K11520_LOCAL_SIMULATION_V1',owner:'guest',revision:1,ledger:createKgenLedger(),progress:{kaios:10}}),key=`k11520.player:${playerId}:k11520.local-product.v1:guest`;
+  storage.setItem('k11520.local-product.v1:guest',legacy);
+  const store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});assert.equal(storage.getItem('k11520.player-life.legacy-owner'),null,'product factory does not claim legacy ownership');store.activate(null);assert.equal(store.snapshot().storageStatus,'LEGACY_PRODUCT_REVIEW_REQUIRED');
+  for(const claimant of [playerId,'KAIOS-P-OTHER-CLAIMANT-1234567890']){
+    storage.setItem('k11520.player-life.legacy-owner',claimant);assert.throws(()=>store.refresh(),/LEGACY_PRODUCT_REVIEW_REQUIRED/);assert.equal(store.spendKaios(1).ok,false);assert.throws(()=>store.save(),/LEGACY_PRODUCT_REVIEW_REQUIRED/);
+    store.activate('0x'+'c'.repeat(40));store.activate(null);await store.requestWriter();assert.throws(()=>store.refresh(),/LEGACY_PRODUCT_REVIEW_REQUIRED/);assert.equal(storage.getItem(key),null);assert.equal(storage.getItem('k11520.local-product.v1:guest'),legacy);
+  }
+});
+
+test('follower product construction cannot create a legacy claim before readiness',async()=>{
+  const storage=courierStorage(),locks=fakeLocks(),owner=rawPlayerCourierStore({storage,locks,coordinationScope:new EventTarget()});await owner.ready;
+  const product=rawSimulationPlayerStore({storage,locks,coordinationScope:new EventTarget(),playerId:'KAIOS-P-FOLLOWER-LEGACY-1234567890',ledger:createKgenLedger()});await product.ready;product.activate(null);
+  assert.equal(product.snapshot().writeCapability.status,'FOLLOWER');assert.equal(storage.getItem('k11520.player-life.legacy-owner'),null);assert.equal(storage.data.size,0);product.dispose();owner.dispose();
+});
+
+
+test('existing shell loader memoizes concurrent admissions and disposes failed initialization',async()=>{
+  const source=readFileSync(new URL('../runtime/game-mobile-shell.mjs',import.meta.url),'utf8');
+  let code=source.slice(source.indexOf('  const loadRuntime='),source.indexOf('  const observePlayerMotion='));
+  code=code.replace("import('./digital-ant-logistics-runtime.mjs')",'Promise.resolve(stubs.d)').replace("import('./world-runtime.mjs')",'Promise.resolve(stubs.w)').replace("import('./digital-ant-market-life-adapter.mjs')",'Promise.resolve(stubs.a)');
+  let created=0,disposed=0,releases=[],failPublish=false;
+  const stubs={d:{buildAtmRegistry:()=>[],createDigitalAnt:()=>({}),createPlayerCourierStore(){created++;return {ready:new Promise(resolve=>releases.push(resolve)),dispose(){disposed++}}}},w:{WORLD_OBJECTS:[]},a:{}};
+  const load=new Function('stubs','publish',`let runtime=null,adapter=null,registry=null,ant=null,courierStore=null;const courierSessionId='TEST',publishAnt=publish,startCourierTimer=()=>{};${code};return loadRuntime;`)(stubs,()=>{if(failPublish)throw new Error('PUBLISH_FAILED')});
+  const first=load(),second=load();assert.equal(first,second);await Promise.resolve();await Promise.resolve();assert.equal(created,1);releases.shift()();await first;assert.equal(disposed,0);assert.equal(load(),first);
+  const failing=new Function('stubs','publish',`let runtime=null,adapter=null,registry=null,ant=null,courierStore=null;const courierSessionId='TEST',publishAnt=publish,startCourierTimer=()=>{};${code};return loadRuntime;`)(stubs,()=>{if(failPublish)throw new Error('PUBLISH_FAILED')});
+  failPublish=true;const rejected=failing();await Promise.resolve();await Promise.resolve();releases.shift()();await assert.rejects(rejected,/PUBLISH_FAILED/);await Promise.resolve();assert.equal(disposed,1);
+  failPublish=false;const retry=failing();await Promise.resolve();await Promise.resolve();releases.shift()();await retry;assert.equal(created,3);assert.equal(disposed,1);
+});
+
+test('shell integration retries pending intent and uses the bound insurance handoff',()=>{
+  const source=readFileSync(new URL('../runtime/game-mobile-shell.mjs',import.meta.url),'utf8'),claim=source.slice(source.indexOf('  const claimCourierInsurance='),source.indexOf('  const renderCourier='));
+  assert.ok(source.includes("['ACTIVE','DELIVERY_PENDING_CREDIT'].includes(mission.status)"));assert.ok(claim.includes('courierStore.claimInsurancePayout('));assert.equal(claim.includes('recordCourierInsurancePayout'),false);assert.ok(source.includes('resolveCreditPort:()=>globalThis.__K11520_PRODUCT__?.courierCreditPort'));
+});
+
+test('ack-only retry verifies existing credit without requiring another product write',()=>{
+  const data=new Map();let failAck=false,denyProduct=false,productWrites=0;const storage={getItem:k=>data.get(k)??null,setItem(k,v){if(k.includes('local-product')){if(denyProduct)throw new Error('PRODUCT_READ_ONLY');productWrites++}if(failAck&&k==='K11520_PLAYER_COURIER'&&Object.values(JSON.parse(v).missions).some(m=>m.status==='DELIVERED'))throw new Error('ACK_QUOTA');data.set(k,v)}},playerId='KAIOS-P-ACK-ONLY-1234567890';
+  const product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);const courier=createPlayerCourierStore({storage,resolveCreditPort:()=>product,sessionId:'ACK-ONLY',now:()=>1000,monotonicNow:()=>0}),mission=courier.accept(courierOffer(),{courierLifeId:playerId});failAck=true;
+  assert.throws(()=>courier.settleDue(mission.missionId,{courierLifeId:playerId,wallNow:mission.dueAt,monoNow:mission.estimatedDurationMs}),/COURIER_SAVE_NOT_CONFIRMED/);const written=productWrites,before=data.get(`k11520.player:${playerId}:k11520.local-product.v1:guest`);
+  failAck=false;denyProduct=true;courier.reload();const result=courier.reconcileCredit(mission.missionId);assert.equal(result.ok,true);assert.equal(result.credit.replayed,true);assert.equal(productWrites,written);assert.equal(data.get(`k11520.player:${playerId}:k11520.local-product.v1:guest`),before);assert.equal(product.snapshot().kaios,4);assert.equal(result.mission.status,'DELIVERED');
+});
+
+test('fresh read-only defaults are not labeled as a persisted product save',()=>{
+  const storage=courierStorage(),store=rawSimulationPlayerStore({storage,locks:null,ledger:createKgenLedger()});store.activate(null);assert.equal(store.snapshot().persistent,false);assert.equal(store.snapshot().writeCapability.writeEnabled,false);
+});
+
+test('presentation failure cannot replace a durable courier credit-port result',()=>{
+  const source=readFileSync(new URL('../runtime/game-5d-main.mjs',import.meta.url),'utf8'),line=source.split('\n').find(line=>line.trim().startsWith('courierCreditPort:')),expression=line.trim().slice('courierCreditPort:'.length).replace(/,$/,'');
+  const evidence={ok:true,receiptId:'COURIER-RECEIPT-abcdef01'},S={},port=new Function('playerStore','S','hud',`return ${expression}`)({snapshot:()=>({kaios:4}),recordCourierSettlement:()=>evidence,recordCourierInsurancePayout:()=>evidence},S,()=>{throw new Error('HUD_UNAVAILABLE')});
+  assert.equal(port.recordCourierSettlement({}),evidence);assert.equal(port.recordCourierInsurancePayout({}),evidence);assert.equal(S.kaios,4);
+});
+
+test('explicit null receipt indexes quarantine V1/V2 saves without activation writes in either namespace',()=>{
+  for(const playerId of [null,'KAIOS-P-NULL-INDEX-1234567890'])for(const schema of ['K11520_LOCAL_SIMULATION_V1','K11520_LOCAL_SIMULATION_V2'])for(const field of ['courierReceipts','courierInsuranceReceipts']){
+    const storage=courierStorage(),key=(playerId?`k11520.player:${playerId}:`:'')+'k11520.local-product.v1:guest',raw=JSON.stringify({schema,owner:'guest',playerId,revision:9,ledger:createKgenLedger(),progress:{kaios:4,[field]:null}});storage.setItem(key,raw);
+    const store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});store.activate(null);assert.equal(store.snapshot().storageStatus,'CORRUPT_RECEIPT_EVIDENCE');assert.equal(storage.getItem(key),raw);assert.equal(store.spendKaios(1).ok,false);assert.equal(storage.getItem(key),raw);
+  }
+});
+
+test('post-activation null index cannot pass canonical transaction validation',()=>{
+  for(const field of ['courierReceipts','courierInsuranceReceipts']){
+    const storage=courierStorage(),store=createSimulationPlayerStore({storage,ledger:createKgenLedger()});store.activate(null);const key='k11520.local-product.v1:guest',saved=JSON.parse(storage.getItem(key));saved.progress[field]=null;const raw=JSON.stringify(saved);storage.setItem(key,raw);
+    assert.throws(()=>store.record(null,{elapsedMs:1}),/CORRUPT_RECEIPT_EVIDENCE/);assert.equal(storage.getItem(key),raw);assert.equal(store.snapshot().storageStatus,'CORRUPT_RECEIPT_EVIDENCE');
+  }
+});
+
+
+test('ordinary delivery pending-credit path cannot resume a CLOCK_REVIEW mission',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-CLOCK-HOLD-1234567890',product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);
+  const courier=createPlayerCourierStore({storage,resolveCreditPort:()=>product,sessionId:'CLOCK-HOLD',now:()=>1000,monotonicNow:()=>0}),mission=courier.accept(courierOffer({estimatedDurationMs:60000}),{courierLifeId:playerId});
+  courier.observe(mission.missionId,{wallNow:mission.dueAt,monoNow:1});assert.equal(courier.snapshot(mission.missionId).mission.status,'CLOCK_REVIEW');const before=storage.getItem('K11520_PLAYER_COURIER');
+  assert.throws(()=>courier.settleDue(mission.missionId,{courierLifeId:playerId,wallNow:mission.dueAt+1,monoNow:2}),/CARGO_SURVIVAL_CHECK_FAILED/);assert.equal(storage.getItem('K11520_PLAYER_COURIER'),before);assert.equal(courier.snapshot(mission.missionId).mission.settlement,null);assert.equal(product.snapshot().kaios,0);assert.deepEqual(product.snapshot().courierReceipts,[]);
 });

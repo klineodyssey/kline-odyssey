@@ -9,15 +9,15 @@ const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','COURIER_SETTLEMENT','COURIER_INSURANCE_PAYOUT','KAIOS_SPEND','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
 // A namespace is isolation against application mix-ups, NOT authentication of
 // another person sharing this browser. Player IDs never authorize chain assets.
-export function createPlayerScopedStorage(storage,playerId){
+export function createPlayerScopedStorage(storage,playerId,{claimLegacy=true}={}){
   if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
   if(!/^KAIOS-P-[a-zA-Z0-9-]{16,80}$/.test(playerId||''))throw new Error('INVALID_PLAYER_ID');
   const prefix='k11520.player:'+playerId+':',claimKey='k11520.player-life.legacy-owner';
-  const allowed=new Set([PLAYER_SESSION_KEY,'k11520.journey.tutorial','11520.backpack.v1','k11520.local-product.v1:guest']);
+  const allowed=new Set([PLAYER_SESSION_KEY,'k11520.journey.tutorial','11520.backpack.v1']);
   // Claim precedes copying. A failed storage write must never silently claim
   // the same old save for every newly-created guest. Originals remain intact.
   let legacyOwner=null;
-  try{legacyOwner=storage?.getItem(claimKey);if(!legacyOwner&&storage){storage.setItem(claimKey,playerId);legacyOwner=storage.getItem(claimKey)}}catch{}
+  try{legacyOwner=storage?.getItem(claimKey);if(claimLegacy&&!legacyOwner&&storage){storage.setItem(claimKey,playerId);legacyOwner=storage.getItem(claimKey)}}catch{}
   return Object.freeze({
     getItem(key){
       const saved=storage?.getItem(prefix+key);if(saved!=null)return saved;
@@ -28,83 +28,163 @@ export function createPlayerScopedStorage(storage,playerId){
     removeItem(key){storage?.removeItem(prefix+key)}
   });
 }
-// Local, unauthenticated simulation progress only. No cross-device identity,
-// real-player KPI, chain claim, secret or wallet-provider object is stored here.
-export function createSimulationPlayerStore({ledger,storage,playerId=null}={}){
+// Cooperative, origin-wide single-writer lease for the TWO existing local-game
+// envelopes. It is not authentication, a localStorage CAS, or an old-client lock.
+export const LOCAL_GAME_WRITE_LOCK='k11520.local-game-writer';
+const localGameCoordinators=new WeakMap();
+export function acquireLocalGameWriter({storage,locks=globalThis.navigator?.locks,coordinationScope=globalThis}={}){
+  let entries=localGameCoordinators.get(coordinationScope);
+  if(!entries){entries=new WeakMap();localGameCoordinators.set(coordinationScope,entries)}
+  const identity=storage&&typeof storage==='object'?storage:coordinationScope;
+  let c=entries.get(identity);
+  if(!c){
+    c={refs:0,status:storage?'LOCK_PENDING':'STORAGE_UNAVAILABLE',generation:0,busy:false,release:null,ready:Promise.resolve(),locks};
+    entries.set(identity,c);
+    c.stop=reason=>{c.generation++;c.status=reason;c.ready=Promise.resolve(reason);c.requesting=false;const release=c.release;c.release=null;release?.()};
+    c.request=()=>{
+      if(c.status==='WRITER')return Promise.resolve(c.status);
+      if(c.status==='LOCK_PENDING'&&c.requesting)return c.ready;
+      if(!storage)return Promise.resolve(c.status='STORAGE_UNAVAILABLE');
+      if(typeof locks?.request!=='function')return Promise.resolve(c.status='LOCKS_UNAVAILABLE');
+      const generation=++c.generation;c.status='LOCK_PENDING';c.requesting=true;
+      let finish;c.ready=new Promise(resolve=>finish=resolve);
+      try{Promise.resolve(locks.request(LOCAL_GAME_WRITE_LOCK,{mode:'exclusive',ifAvailable:true},lock=>{
+        if(generation!==c.generation||!c.refs){finish(c.status);return}
+        c.requesting=false;
+        if(!lock){c.status='FOLLOWER';finish(c.status);return}
+        c.status='WRITER';finish(c.status);
+        return new Promise(resolve=>{c.release=resolve});
+      })).catch(()=>{if(generation===c.generation){c.requesting=false;c.status='LOCK_FAILED'}finish(c.status)})}
+      catch{c.requesting=false;c.status='LOCK_FAILED';finish(c.status)}
+      return c.ready;
+    };
+    // BFCache restore never silently reacquires a lease. A fresh explicit
+    // requestWriter plus store refresh is required before another mutation.
+    coordinationScope.addEventListener?.('pagehide',()=>c.stop('PAGE_HIDDEN'));
+  }
+  c.refs++;let disposed=false;
+  const assert=()=>{if(disposed)throw new Error('LOCAL_GAME_STORE_DISPOSED');if(c.status!=='WRITER'||!c.release)throw new Error('LOCAL_GAME_'+c.status)};
+  if(c.refs===1&&!c.release)void c.request();
+  return Object.freeze({
+    get ready(){return c.ready},
+    capability:()=>({status:disposed?'DISPOSED':c.status,writeEnabled:!disposed&&c.status==='WRITER'&&!!c.release,scope:'ORIGIN_WIDE_PRODUCT_AND_COURIER',cooperativeOnly:true}),
+    requestWriter:()=>disposed?Promise.resolve('DISPOSED'):c.request(),assert,
+    assertIdle(){if(disposed)throw new Error('LOCAL_GAME_STORE_DISPOSED');if(c.busy)throw new Error('LOCAL_GAME_REENTRANT_WRITE')},
+    run(fn){assert();if(c.busy)throw new Error('LOCAL_GAME_REENTRANT_WRITE');c.busy=true;try{return fn()}finally{c.busy=false}},
+    dispose(){if(disposed)return;disposed=true;if(--c.refs===0)c.stop('RELEASED')}
+  });
+}
+const PRODUCT_SCHEMA='K11520_LOCAL_SIMULATION_V2';
+const PRODUCT_MAX_RECEIPTS=1000;
+const productClone=value=>structuredClone(value);
+const productOwner=value=>value==='guest'||EVM_ADDRESS.test(value||'');
+const productReceipt=/^COURIER-RECEIPT-[0-9a-f]{8}$/i;
+const insuranceReceipt=/^COURIER-INSURANCE-[0-9a-f]{8}$/i;
+const productProgress=()=>({kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0,courierReceipts:[],courierInsuranceReceipts:{},courierReceiptBindings:{},courierInsuranceBindings:{}});
+// Local, unauthenticated simulation progress only. No chain/provider operations.
+export function createSimulationPlayerStore({ledger,storage,playerId=null,locks,coordinationScope}={}){
   if(storage===undefined){try{storage=globalThis.localStorage}catch{storage=null}}
-  if(playerId)storage=createPlayerScopedStorage(storage,playerId);
-  let owner=null,key=null,revision=0,progress=null,persistent=true,storageStatus='READY',rawPresent=false;
-  const read=()=>{try{const raw=storage?.getItem(key);rawPresent=raw!=null;return JSON.parse(raw||'null')}catch{storageStatus='CORRUPT_SAVE';return null}};
-  const fresh=()=>({kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,events:{},playedMs:0,courierReceipts:[],courierInsuranceReceipts:{}});
-  function check(){if(!persistent)return;if((read()?.revision??0)!==revision)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED')}
-  function save(){
-    if(storageStatus==='CORRUPT_SAVE')return;
-    check();const value={schema:'K11520_LOCAL_SIMULATION_V1',owner,revision:revision+1,ledger,progress};
-    try{storage?.setItem(key,JSON.stringify(value));revision++;persistent=!!storage}catch{persistent=false}
+  const underlying=storage,writer=acquireLocalGameWriter({storage:underlying,locks,coordinationScope});
+  try{if(playerId)storage=createPlayerScopedStorage(storage,playerId,{claimLegacy:false})}catch(error){writer.dispose();throw error}
+  let owner=null,key=null,raw=null,value=null,progress=productProgress(),storageStatus='READY',disposed=false;
+  const replaceLedger=next=>{for(const k of Object.keys(ledger))delete ledger[k];Object.assign(ledger,productClone(next))};
+  const fresh=()=>({schema:PRODUCT_SCHEMA,owner,playerId,revision:0,ledger:{...createKgenLedger(100),owner},progress:productProgress()});
+  function validate(saved){
+    const encoded=JSON.stringify(saved),p=saved?.progress;
+    if(!saved||!['K11520_LOCAL_SIMULATION_V1',PRODUCT_SCHEMA].includes(saved.schema)||saved.owner!==owner||!productOwner(owner)||!Number.isSafeInteger(saved.revision)||saved.revision<0||encoded.length>2_000_000||/[<>&]/.test(encoded)||!p||typeof p!=='object'||Array.isArray(p)||!['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'].every(k=>Number.isFinite(saved.ledger?.[k])))throw new Error('CORRUPT_SAVE');
+    if(saved.schema===PRODUCT_SCHEMA&&saved.playerId!==playerId)throw new Error('PRODUCT_NAMESPACE_MISMATCH');
+    for(const k of ['kaios','claimableKaios','spentKaios','loot','xp','engineXp','playedMs'])if(p[k]!==undefined&&(!Number.isFinite(p[k])||p[k]<0||p[k]>Number.MAX_SAFE_INTEGER))throw new Error('CORRUPT_SAVE');
+    const receipts=p.courierReceipts===undefined?[]:p.courierReceipts,insurance=p.courierInsuranceReceipts===undefined?{}:p.courierInsuranceReceipts;
+    if(!Array.isArray(receipts)||receipts.length>PRODUCT_MAX_RECEIPTS||!receipts.every(id=>productReceipt.test(id))||new Set(receipts).size!==receipts.length||!insurance||typeof insurance!=='object'||Array.isArray(insurance)||Object.keys(insurance).length>PRODUCT_MAX_RECEIPTS||!Object.entries(insurance).every(([id,amount])=>insuranceReceipt.test(id)&&Number.isSafeInteger(amount)&&amount>=0&&amount<=1080000))throw new Error('CORRUPT_RECEIPT_EVIDENCE');
+    const next=productClone(saved);next.schema=PRODUCT_SCHEMA;next.playerId=playerId;next.progress={...productProgress(),...next.progress};
+    if(!next.progress.events||typeof next.progress.events!=='object'||Array.isArray(next.progress.events)||!Object.values(next.progress.events).every(n=>Number.isFinite(n)&&n>=0&&n<=Number.MAX_SAFE_INTEGER))throw new Error('CORRUPT_SAVE');
+    for(const [field,ids] of [['courierReceiptBindings',receipts],['courierInsuranceBindings',Object.keys(insurance)]]){
+      const bindings=next.progress[field];if(!bindings||typeof bindings!=='object'||Array.isArray(bindings))throw new Error('CORRUPT_RECEIPT_EVIDENCE');
+      for(const [id,b] of Object.entries(bindings))if(b?.purpose!==(field==='courierInsuranceBindings'?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD')||b?.rewardKaios>(field==='courierInsuranceBindings'?1080000:1000)||!ids.includes(id)||(field==='courierInsuranceBindings'&&b?.rewardKaios!==insurance[id])||b?.receiptId!==id||b.playerId!==playerId||b.owner!==owner||!Number.isSafeInteger(b.rewardKaios)||b.rewardKaios<0||typeof b.missionId!=='string'||!b.missionId)throw new Error('CORRUPT_RECEIPT_EVIDENCE');
+    }
+    return next;
+  }
+  function read(){
+    let bytes;try{bytes=storage?.getItem(key)??null}catch{storageStatus='STORAGE_READ_FAILED';throw new Error(storageStatus)}
+    try{if(bytes==null&&playerId&&owner==='guest'&&underlying?.getItem(key)!=null)throw new Error('LEGACY_PRODUCT_REVIEW_REQUIRED');if(bytes&&bytes.length>2_000_000)throw new Error('CORRUPT_SAVE');return {raw:bytes,value:bytes==null?fresh():validate(JSON.parse(bytes))}}catch(error){storageStatus=['CORRUPT_RECEIPT_EVIDENCE','LEGACY_PRODUCT_REVIEW_REQUIRED','STORAGE_READ_FAILED'].includes(error.message)?error.message:'CORRUPT_SAVE';throw new Error(storageStatus)}
+  }
+  function apply(saved){value=productClone(saved);progress=value.progress;replaceLedger(value.ledger)}
+  function refresh(){
+    writer.assertIdle();if(!key)return snapshot();
+    try{const current=read();raw=current.raw;apply(current.value);storageStatus='READY'}catch(error){storageStatus=['CORRUPT_RECEIPT_EVIDENCE','LEGACY_PRODUCT_REVIEW_REQUIRED','STORAGE_READ_FAILED'].includes(error.message)?error.message:'CORRUPT_SAVE';throw new Error(storageStatus)}
+    return snapshot();
+  }
+  function check(){writer.assert();if(disposed)throw new Error('LOCAL_GAME_STORE_DISPOSED');if(!key||storageStatus!=='READY')throw new Error(storageStatus==='READY'?'PLAYER_NOT_ACTIVE':storageStatus);if((storage.getItem(key)??null)!==raw)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED')}
+  function persist(next,expected){
+    validate(next);writer.assert();if((storage.getItem(key)??null)!==expected)throw new Error('PLAYER_SESSION_CHANGED_RELOAD_REQUIRED');
+    if(!Number.isSafeInteger(next.revision+1))throw new Error('PRODUCT_REVISION_CAPACITY');next.revision++;const encoded=JSON.stringify(next);if(encoded.length>2_000_000)throw new Error('PRODUCT_STORE_CAPACITY');
+    try{storage.setItem(key,encoded);if(storage.getItem(key)!==encoded)throw new Error('LOCAL_SAVE_READBACK_FAILED');writer.assert()}
+    catch{storageStatus='PERSISTENCE_UNCERTAIN';throw new Error('LOCAL_SAVE_NOT_CONFIRMED')}
+    raw=encoded;apply(next);return true;
+  }
+  function transact(fn,{skipPersist=()=>false}={}){
+    return writer.run(()=>{
+      if(storageStatus!=='READY'||!key)throw new Error(storageStatus==='READY'?'PLAYER_NOT_ACTIVE':storageStatus);
+      let before={value:productClone(value),ledger:productClone(ledger),raw};
+      try{
+        const current=read();raw=current.raw;apply(current.value);before={value:productClone(value),ledger:productClone(ledger),raw};
+        const loaded=productClone(value);const result=fn();if(result&&typeof result.then==='function')throw new Error('ASYNC_LOCAL_MUTATION_FORBIDDEN');
+        if(result?.ok===false||skipPersist(result)){writer.assert();apply(loaded);return result;}
+        value.ledger=productClone(ledger);value.progress=productClone(progress);persist(value,current.raw);return result;
+      }catch(error){if(before.value){value=before.value;progress=value.progress}replaceLedger(before.ledger);raw=before.raw;throw error}
+    });
   }
   function activate(address){
-    const next=EVM_ADDRESS.test(address||'')?address.toLowerCase():'guest';if(owner===next)return false;
-    // Never overwrite another tab's newer revision when changing account.
-    owner=next;key='k11520.local-product.v1:'+owner;persistent=true;storageStatus='READY';rawPresent=false;
-    const value=read();revision=value?.revision??0;progress=fresh();
-    for(const k of Object.keys(ledger))delete ledger[k];Object.assign(ledger,createKgenLedger(100));
-    const encoded=JSON.stringify(value);
-    const saved=value?.schema==='K11520_LOCAL_SIMULATION_V1'&&value.owner===owner&&encoded.length<2000000&&!/[<>&]/.test(encoded)?value:null;
-    const validSaved=saved&&['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'].every(k=>Number.isFinite(saved.ledger?.[k]));
-    if((rawPresent&&!validSaved)||storageStatus==='CORRUPT_SAVE'){storageStatus='CORRUPT_SAVE';persistent=false}
-    if(validSaved){
-      for(const k of ['total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'])ledger[k]=saved.ledger[k];
-      const b=saved.ledger.simulation;
-      if(b&&Number.isSafeInteger(b.sequence)&&['orders','positions','receipts'].every(k=>Array.isArray(b[k]))&&b.observations&&typeof b.observations==='object')ledger.simulation=structuredClone(b);
-      if(saved.progress){for(const k of ['kaios','claimableKaios','spentKaios','loot','xp','engineXp','playedMs'])progress[k]=Math.max(0,Number(saved.progress[k])||0);for(const event of LOCAL_PRODUCT_EVENTS)progress.events[event]=Math.max(0,Number(saved.progress.events?.[event])||0);if(Array.isArray(saved.progress.courierReceipts)&&saved.progress.courierReceipts.length<=1000&&saved.progress.courierReceipts.every(value=>/^COURIER-RECEIPT-[0-9a-f]{8}$/i.test(value))&&new Set(saved.progress.courierReceipts).size===saved.progress.courierReceipts.length)progress.courierReceipts=[...saved.progress.courierReceipts];const insurance=saved.progress.courierInsuranceReceipts;if(insurance&&typeof insurance==='object'&&!Array.isArray(insurance)){const entries=Object.entries(insurance);if(entries.length<=1000&&entries.every(([id,value])=>/^COURIER-INSURANCE-[0-9a-f]{8}$/i.test(id)&&Number.isSafeInteger(value)&&value>=0&&value<=1080000))progress.courierInsuranceReceipts=Object.fromEntries(entries)}}
-    }
-    ledger.owner=owner;
-    progress.events.UNIQUE_PLAYER=1;
-    if(progress.events.SESSION)progress.events.RETURNING_PLAYER=(progress.events.RETURNING_PLAYER||0)+1;
-    progress.events.SESSION=(progress.events.SESSION||0)+1;save();return true;
+    writer.assertIdle();const next=EVM_ADDRESS.test(address||'')?address.toLowerCase():'guest';if(owner===next)return false;
+    owner=next;key='k11520.local-product.v1:'+owner;storageStatus='READY';apply(fresh());
+    try{refresh()}catch{return true}
+    // Read-only followers do not bump SESSION, claim legacy data or migrate.
+    if(!writer.capability().writeEnabled)return true;
+    try{transact(()=>{
+      progress.events.UNIQUE_PLAYER=1;if(progress.events.SESSION)progress.events.RETURNING_PLAYER=(progress.events.RETURNING_PLAYER||0)+1;progress.events.SESSION=(progress.events.SESSION||0)+1;
+    })}catch(error){if(storageStatus==='READY')storageStatus=error.message;}
+    return true;
   }
-  function record(event,{reward=0,elapsedMs=0}={}){
-    check();if(LOCAL_PRODUCT_EVENTS.includes(event))progress.events[event]=(progress.events[event]||0)+1;
+  // Compatibility save never reloads-and-replaces an externally changed ledger.
+  // Production simulation uses transactLedger around the entire engine call.
+  function save(){return writer.run(()=>{const before=productClone(value);try{check();persist({...productClone(value),ledger:productClone(ledger),progress:productClone(progress)},raw);return true}catch(error){apply(before);throw error}})}
+  function record(event,{reward=0,elapsedMs=0}={}){return transact(()=>{
+    if(LOCAL_PRODUCT_EVENTS.includes(event))progress.events[event]=(progress.events[event]||0)+1;
     const boundedReward=Math.max(0,Math.min(100,Number(reward)||0));
     if(event==='MONSTER_KILL')progress.xp+=10;
     if(event==='LOOT_DROP'){progress.loot++;progress.kaios+=boundedReward;progress.xp+=5;if(owner!=='guest')progress.claimableKaios+=boundedReward}
     if(event==='TRADE_FILL'){progress.xp+=4;progress.engineXp+=6}
     if(event==='TRADE_CLOSE'){progress.xp+=12;progress.engineXp+=18}
     if(event==='LIQUIDATION'){progress.xp+=2;progress.engineXp+=4}
-    progress.playedMs+=Math.max(0,Math.min(10000,Number(elapsedMs)||0));save();
-  }
-  function spendKaios(amount,{purpose='LOCAL_GAME_PURCHASE'}={}){
-    check();const value=Number(amount);
-    if(!Number.isSafeInteger(value)||value<1||value>1000000)return {ok:false,reason:'INVALID_LOCAL_KAIOS_SPEND'};
-    if(progress.kaios<value)return {ok:false,reason:'INSUFFICIENT_LOCAL_KAIOS',availableKaios:progress.kaios};
-    progress.kaios-=value;progress.claimableKaios=Math.max(0,progress.claimableKaios-value);progress.spentKaios+=value;
-    progress.events.KAIOS_SPEND=(progress.events.KAIOS_SPEND||0)+1;save();
-    return {ok:true,amount:value,purpose:String(purpose),remainingKaios:progress.kaios,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
-  }
-  function recordCourierSettlement({receiptId,reward=0}={}){
-    check();const id=String(receiptId||''),value=Number(reward);
-    if(!/^COURIER-RECEIPT-[0-9a-f]{8}$/i.test(id))return {ok:false,reason:'INVALID_COURIER_RECEIPT'};
-    if(progress.courierReceipts.includes(id))return {ok:false,reason:'COURIER_REWARD_REPLAY_BLOCKED'};
-    if(!Number.isSafeInteger(value)||value<0||value>1000)return {ok:false,reason:'INVALID_COURIER_REWARD'};
-    progress.courierReceipts.push(id);progress.events.COURIER_SETTLEMENT=(progress.events.COURIER_SETTLEMENT||0)+1;progress.kaios+=value;progress.xp+=12;if(owner!=='guest')progress.claimableKaios+=value;save();
-    return {ok:true,receiptId:id,rewardKaios:value,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
-  }
-  function recordCourierInsurancePayout({receiptId,reward=0}={}){
-    check();const id=String(receiptId||''),value=Number(reward);
-    if(!/^COURIER-INSURANCE-[0-9a-f]{8}$/i.test(id))return {ok:false,reason:'INVALID_COURIER_INSURANCE_RECEIPT'};
-    if(!Number.isSafeInteger(value)||value<0||value>1080000)return {ok:false,reason:'INVALID_COURIER_INSURANCE_PAYOUT'};
-    const recorded=progress.courierInsuranceReceipts[id];
-    if(recorded!==undefined)return recorded===value?{ok:true,replayed:true,receiptId:id,rewardKaios:value,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}:{ok:false,reason:'COURIER_INSURANCE_RECEIPT_CONFLICT'};
-    progress.courierInsuranceReceipts[id]=value;progress.events.COURIER_INSURANCE_PAYOUT=(progress.events.COURIER_INSURANCE_PAYOUT||0)+1;progress.kaios+=value;if(owner!=='guest')progress.claimableKaios+=value;save();
-    return {ok:true,replayed:false,receiptId:id,rewardKaios:value,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
-  }
-  function snapshot(){
-    const p=structuredClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));
-    return {owner,playerId,persistent,storageStatus,scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,
-      nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,
-      kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'};
-  }
-  return {activate,check,save,record,spendKaios,recordCourierSettlement,recordCourierInsurancePayout,snapshot};
+    progress.playedMs+=Math.max(0,Math.min(10000,Number(elapsedMs)||0));
+  })}
+  function spendKaios(amount,{purpose='LOCAL_GAME_PURCHASE'}={}){try{return transact(()=>{
+    const n=Number(amount);if(!Number.isSafeInteger(n)||n<1||n>1000000)return {ok:false,reason:'INVALID_LOCAL_KAIOS_SPEND'};
+    if(progress.kaios<n)return {ok:false,reason:'INSUFFICIENT_LOCAL_KAIOS',availableKaios:progress.kaios};
+    progress.kaios-=n;progress.claimableKaios=Math.max(0,progress.claimableKaios-n);progress.spentKaios+=n;progress.events.KAIOS_SPEND=(progress.events.KAIOS_SPEND||0)+1;
+    return {ok:true,amount:n,purpose:String(purpose),remainingKaios:progress.kaios,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
+  })}catch(error){return {ok:false,reason:error.message}}}
+  function credit({receiptId,reward=0,missionId,playerId:expectedPlayer,owner:expectedOwner}={},insurance=false){try{return transact(()=>{
+    const id=String(receiptId||''),amount=Number(reward),prefix=insurance?'COURIER_INSURANCE':'COURIER';
+    if(!(insurance?insuranceReceipt:productReceipt).test(id))return {ok:false,reason:'INVALID_'+prefix+'_RECEIPT'};
+    if(!Number.isSafeInteger(amount)||amount<0||amount>(insurance?1080000:1000))return {ok:false,reason:'INVALID_'+prefix+'_REWARD'};
+    if(expectedPlayer!==playerId||expectedOwner!==owner||!playerId||typeof missionId!=='string'||!missionId)return {ok:false,reason:'COURIER_REWARD_OWNER_MISMATCH'};
+    const binding={receiptId:id,missionId,playerId,owner,rewardKaios:amount,purpose:insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD'};
+    const bindings=insurance?progress.courierInsuranceBindings:progress.courierReceiptBindings,known=bindings[id],ids=insurance?Object.keys(progress.courierInsuranceReceipts):progress.courierReceipts;
+    if(known){if(Object.keys(binding).some(k=>known[k]!==binding[k]))return {ok:false,reason:insurance?'COURIER_INSURANCE_RECEIPT_CONFLICT':'COURIER_RECEIPT_CONFLICT'};return {ok:true,replayed:true,...binding,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}}
+    if(ids.includes(id))return {ok:false,reason:'LEGACY_COURIER_RECEIPT_REQUIRES_REVIEW'};
+    if(ids.length>=PRODUCT_MAX_RECEIPTS)return {ok:false,reason:'COURIER_RECEIPT_CAPACITY'};
+    // Verify the binding against the canonical mission, never caller data alone.
+    const courierBytes=underlying.getItem('K11520_PLAYER_COURIER');if(!courierBytes||courierBytes.length>2_000_000)return {ok:false,reason:'CANONICAL_COURIER_CREDIT_REQUIRED'};
+    const envelope=JSON.parse(courierBytes),mission=envelope?.missions?.[missionId],pending=insurance?mission?.insurance?.credit:mission?.settlement?.credit;
+    const semantic=insurance?mission?.status==='ROBBED'&&mission.settlement?.outcome==='ROBBED'&&mission.insurance?.status==='ACTIVE'&&['APPROVED','PAID'].includes(mission.insurance.claimStatus)&&mission.insurance.payoutReceiptId===id&&mission.insurance.payoutKaios===amount&&mission.settlement.insurancePayoutKaios===amount&&pending?.status===(mission.insurance.claimStatus==='PAID'?'CONFIRMED':'PENDING'):['DELIVERY_PENDING_CREDIT','DELIVERED'].includes(mission?.status)&&mission.settlement?.outcome===mission.status&&mission.settlement.receiptId===id&&mission.settlement.rewardKaios===amount&&mission.economics?.courierPayout===amount&&mission.settlement.salaryKaios+mission.settlement.freightShareKaios===amount&&pending?.status===(mission.status==='DELIVERED'?'CONFIRMED':'PENDING');
+    if(envelope.schema!=='K11520_PLAYER_COURIER'||!Number.isSafeInteger(envelope.revision)||envelope.revision<0||!semantic||mission.missionId!==missionId||mission.courierLifeId!==playerId||mission.scope!=='LOCAL_GAME_CARGO_ONLY'||mission.realKaiosTransfer!==false||mission.realKgenTransfer!==false||mission.mainnetWrite!==false||mission.settlement.chainTransfer!==false||!pending||Object.keys(binding).some(k=>pending[k]!==binding[k]))return {ok:false,reason:'CANONICAL_COURIER_CREDIT_REQUIRED'};
+    bindings[id]=binding;if(insurance)progress.courierInsuranceReceipts[id]=amount;else progress.courierReceipts.push(id);
+    const event=insurance?'COURIER_INSURANCE_PAYOUT':'COURIER_SETTLEMENT';progress.events[event]=(progress.events[event]||0)+1;progress.kaios+=amount;if(!insurance)progress.xp+=12;if(owner!=='guest')progress.claimableKaios+=amount;
+    return {ok:true,replayed:false,...binding,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
+  },{skipPersist:result=>result?.replayed===true})}catch(error){return {ok:false,reason:error.message}}}
+  function snapshot(){const p=productClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));return {owner,playerId,persistent:!!underlying&&raw!=null&&storageStatus==='READY',storageStatus,writeCapability:writer.capability(),scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'}}
+  return Object.freeze({activate,check,save,record,spendKaios,recordCourierSettlement:input=>credit(input),recordCourierInsurancePayout:input=>credit(input,true),snapshot,refresh,transactLedger:fn=>transact(fn),get ready(){return writer.ready},requestWriter:writer.requestWriter,dispose(){disposed=true;writer.dispose()}});
 }
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
 function hexToBigInt(hex){if(typeof hex!=='string'||!/^0x[0-9a-fA-F]+$/.test(hex))throw new Error('INVALID_BALANCE_RESPONSE');return BigInt(hex);}
