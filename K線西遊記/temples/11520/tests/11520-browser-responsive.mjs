@@ -480,17 +480,18 @@ async function verifyKSpaceGameplay(page,report){
     const rx=rail.x+rail.width/2,ry=rail.y+rail.height/2;
     const send=async(type,id,px,py)=>{if(type==='touchEnd')contacts.delete(id);else contacts.set(id,{id,x:px,y:py,radiusX:3,radiusY:3,force:1});await native.send('Input.dispatchTouchEvent',{type,touchPoints:[...contacts.values()]})};
     await observeApproach(label);
-    const deadline=Date.now()+timeoutMs;let reached=false;
+    const deadline=Date.now()+timeoutMs,standoff=label==='phantomAxe';let reached=false;
     try{
       while(Date.now()<deadline){
         const current=await state();
-        if(current.distance<limit&&Date.now()<=deadline){reached=true;break}
         const relative=current.relative,planar=Math.hypot(relative.x,relative.z);
+        if(current.distance<limit&&(!standoff||(planar>=.45&&planar<=.65&&Math.abs(relative.y)<=.25))&&Date.now()<=deadline){reached=true;break}
         // Real two-finger XZ joystick + normal Y rail follow the live 3D target.
         // Do not press an already-in-range joystick: a tap cycles its plane.
-        const travel=planar<.15?0:Math.min(magnitude,planar*70);
+        const error=standoff?planar-.55:planar;
+        const travel=Math.abs(error)<(standoff?.08:.15)?0:Math.sign(error)*Math.min(magnitude,Math.max(12,Math.abs(error)*70));
         const vertical=Math.abs(relative.y)<.15?0:Math.max(-1,Math.min(1,relative.y*1.5));
-        if(travel>0&&!contacts.has(31))await send('touchStart',31,x,y);
+        if(travel!==0&&!contacts.has(31))await send('touchStart',31,x,y);
         if(vertical!==0&&!contacts.has(32))await send('touchStart',32,rx,ry);
         if(contacts.has(31))contacts.set(31,{id:31,x:x+(planar?relative.x/planar*travel:0),y:y-(planar?relative.z/planar*travel:0),radiusX:3,radiusY:3,force:1});
         if(contacts.has(32))contacts.set(32,{id:32,x:rx,y:ry-vertical*rail.height*.36,radiusX:3,radiusY:3,force:1});
@@ -501,7 +502,7 @@ async function verifyKSpaceGameplay(page,report){
       try{if(contacts.size)await native.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})}
       finally{await finishApproach();await native.detach()}
     }
-    const trace=report.kspaceApproaches.at(-1),downs=trace.pointers.filter(e=>e.type==='pointerdown');
+    const trace=report.kspaceApproaches.at(-1);trace.goal={distanceBelow:limit,deadlineMs:timeoutMs,standoff:standoff?{horizontalMin:.45,horizontalMax:.65,verticalMax:.25}:null};const downs=trace.pointers.filter(e=>e.type==='pointerdown');
     assert.ok(downs.every(e=>e.isTrusted&&['joy','yControl'].includes(e.control)),'pursuit contacts must hit actual joystick/Y control owners through trusted input');
     assert.equal(reached,true,`${label}: real XYZ controls must reach 3D distance <${limit} within ${timeoutMs}ms; inspect kspaceApproaches`);
   };
@@ -535,13 +536,15 @@ async function verifyKSpaceGameplay(page,report){
     await input(sign);await page.waitForTimeout(400);
     // Market lives now move. Pursue via the real joystick before each strike;
     // never freeze/teleport the target or relax the actual combat range rule.
+    const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     const beforePursuit=await state();
     await pursue(variant,.8,5000,35);
     if(variant==='phantomAxe'){
       // The axe has a forward-half-plane sweep. Being close is insufficient;
       // face it with a real >8px joystick drag, never a direct heading setter.
-      const target=await state(),horizontal=Math.hypot(target.relative.x,target.relative.z),ux=horizontal?target.relative.x/horizontal:0,uz=horizontal?target.relative.z/horizontal:1;
       await observeApproach('phantomAxe-facing');
+      const target=await state(),horizontal=Math.hypot(target.relative.x,target.relative.z),ux=horizontal?target.relative.x/horizontal:0,uz=horizontal?target.relative.z/horizontal:1;
+      assert.ok(horizontal>=.35&&target.distance<.8,'real approach must leave usable facing separation inside unchanged3D range');
       await page.mouse.move(x,y);await page.mouse.down();
       try{
         await page.mouse.move(x+ux*12,y-uz*12);
@@ -558,7 +561,12 @@ async function verifyKSpaceGameplay(page,report){
     (report.kspaceStrikePreconditions??=[]).push({variant,beforePursuit,beforeStrike});
     assert.deepEqual(beforeStrike.selection,beforePursuit.selection,'pursuit must not accidentally tap-cycle plane or clear signed C');
     assert.equal(beforeStrike.selection.body,'KY'+(sign==='1'?'+':'-'));
-    const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
+    if(variant==='phantomAxe'){
+      const d=Math.hypot(beforeStrike.relative.x,beforeStrike.relative.z),f=report.axeFacing.forward;
+      report.axeFacing.preStrike={combat:beforeStrike,forward:f,dot:d>.001?(f.x*beforeStrike.relative.x+f.z*beforeStrike.relative.z)/d:1};
+      assert.ok(report.axeFacing.preStrike.dot>=.8,'fresh target must remain safely in established forward half-plane immediately before strike');
+      assert.ok(beforeStrike.distance<.8,'standoff/facing must preserve original3D approach range');
+    }
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
     if(report.profile.landscape)assert.equal(await page.evaluate(()=>{const a=document.getElementById('toast').getBoundingClientRect(),b=document.querySelector('.monsterHud').getBoundingClientRect();return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top}),false,'damage feedback obscures monster HUD');
