@@ -77,3 +77,105 @@ test('fails closed when no local or real route is available',()=>{
   assert.equal(route.route,'ORDER_BLOCKED');
   assert.equal(route.broadcast,false);
 });
+
+test('M1 wallet view never pairs another account or wrong network with recovered Testnet balances',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const fn=source.slice(source.indexOf('function walletExecutionView('),source.indexOf('function renderWallet('));
+ const account='0x'+'11'.repeat(20),chain={account,status:'READY',wallet:{testBnbBalance:'0.025',testTokenBalance:100},capital:{settlementCapital:1000},claims:[{remaining:10}]};
+ for(const value of [{account:'0x'+'22'.repeat(20),chainId:97},{account,chainId:56},{account:null,chainId:97}]){
+  const context=vm.createContext({execution:{snapshot:()=>chain},isTestnet:()=>true,value});const result=vm.runInContext(fn+';walletExecutionView(value)',context);
+  assert.equal(result.wallet,null);assert.equal(result.capital,null);assert.equal(result.claims.length,0);assert.equal(result.orders.length,0);assert.equal(result.positions.length,0);assert.equal(result.receipts.length,0);assert.equal(result.transaction,null);
+ }
+ const context=vm.createContext({execution:{snapshot:()=>chain},isTestnet:()=>true,value:{account,chainId:97}});
+ assert.equal(vm.runInContext(fn+';walletExecutionView(value)',context).wallet.testBnbBalance,'0.025');
+ assert.match(source, /TEST BNB · GAS ONLY/);assert.match(source,/testBnbBalance\?\?'UNVERIFIED'/);
+});
+
+
+test('M1 wallet-session READING clears cached financial surfaces before adapter recovery',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const start=source.indexOf('walletSession.subscribe(value=>{'),end=source.indexOf('});renderWallet();',start),fn=source.slice(start,end+3);
+ const calls=[];let callback;
+ const context=vm.createContext({walletSession:{subscribe:fn=>{callback=fn}},execution:{readOnly:true},readOnlyViewRequested:()=>true,playerStore:{activate:()=>false},renderWallet:()=>calls.push('wallet'),isTestnet:()=>true,syncSimulationPositions:()=>calls.push('positions'),refreshSimulationSheet:()=>calls.push('sheet'),refreshTestnet:()=>calls.push('recover')});
+ vm.runInContext(fn,context);callback({account:null,status:'READING'});
+ assert.deepEqual(calls,['wallet','positions','sheet','recover']);
+});
+
+test('M1 candidate config is additive and legacy principal exit context is preserved',async()=>{
+ const manifest=JSON.parse(await readFile(new URL('../docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',import.meta.url),'utf8'));
+ assert.equal(manifest.addresses.brainProxy,'0x60e3801CDf885830ca45Def76a6141f841B0521d');
+ assert.equal(manifest.addresses.testToken,'0x91ac96ff5f6B5D63aab0d6F17DF8D70AC295dBc3');
+ const candidate=manifest.readOnlyCandidates.wallet1c;
+ assert.equal(candidate.addresses.brainProxy,'0x8bb97Ab011b8983963F98aDEd8F8c93A54969667');assert.equal(candidate.viewCapability,'READ_ONLY_M1');assert.equal(candidate.cMax,1);assert.equal(candidate.chainId,97);
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const view=source.slice(source.indexOf('async function selectReadOnlyWalletView(){'),source.indexOf('async function refreshTestnet(){'));
+ assert.match(view,/readOnly:true/);assert.doesNotMatch(view,/executionPreferenceKey|dispose|localStorage/);
+ assert.match(source,/exitOnly:true/);assert.match(source,/legacyExecution\|\|createExecutionAdapter/);
+});
+
+test('existing utility owner gives expanded wallet an unobstructed view and restores peers on close',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/market-origin-wallet-layout-runtime.mjs',import.meta.url),'utf8');
+ const fn=source.slice(source.indexOf('function syncUtilityMaster(){'),source.indexOf('function walletAnchor(){'));
+ let walletClosed=false,hudHidden=false,utilitiesOpen=true;const hiddenPreferences=new Set();
+ const nodes={};for(const id of ['walletPanel','walletToggle','dock','aiChatButton','chatHandle','bgmButton','backpackButton','gameModeToggle','k11520HudCollapseAll','kaiosPortalButton','cargoInterceptionButton','homeDeliveryButton'])nodes[id]={id,style:{values:{},setProperty(k,v){this.values[k]=v},removeProperty(k){delete this.values[k]}},classList:{contains:name=>name==='k11520HiddenBySettings'?hiddenPreferences.has(id):id==='walletPanel'&&name==='collapsed'?walletClosed:false},dataset:{},getAttribute:()=>''};
+ const toggle={dataset:{},setAttribute(){},textContent:'',title:''},selectors=Object.keys(nodes).filter(k=>!['cargoInterceptionButton','homeDeliveryButton'].includes(k)).map(k=>'#'+k);
+ const context=vm.createContext({walletWasOpen:false,put:(el,k,v)=>el.style.setProperty(k,v),installUtilityMaster:()=>toggle,document:{documentElement:{classList:{contains:name=>(name==='k11520UtilitiesOpen'&&utilitiesOpen)||(name==='k11520HudCollapsed'&&hudHidden)}},querySelectorAll:s=>nodes[s.slice(1)]?[nodes[s.slice(1)]]:[]},$:s=>nodes[s.slice(1)],OPTIONAL_UTILITIES:selectors,matchMedia:()=>({matches:false})});
+ vm.runInContext(source.slice(source.indexOf('function pinMobileUtilityStack(){'),source.indexOf('function installUtilityMaster(){')),context);vm.runInContext(fn,context);vm.runInContext('syncUtilityMaster()',context);
+ for(const id of ['dock','aiChatButton','chatHandle','bgmButton','backpackButton'])assert.equal(nodes[id].style.values.display,'none');
+ assert.notEqual(nodes.walletPanel.style.values.display,'none');assert.notEqual(nodes.walletToggle.style.values.display,'none');
+ for(const id of ['cargoInterceptionButton','homeDeliveryButton'])assert.equal(nodes[id].style.values.display,'none');
+ // Exercise the real owner sequence across repeated ticks and changed context eligibility.
+ for(const [cargo,home] of [['cruise','idle'],['raid','delivery'],['cruise','delivery']]){nodes.cargoInterceptionButton.dataset.contextState=cargo;nodes.homeDeliveryButton.dataset.contextState=home;for(let tick=0;tick<2;tick++){vm.runInContext('pinMobileUtilityStack();syncUtilityMaster()',context);for(const id of ['cargoInterceptionButton','homeDeliveryButton','dock'])assert.equal(nodes[id].style.values.display,'none')}}
+ hiddenPreferences.add('chatHandle');
+ hudHidden=true;vm.runInContext('syncUtilityMaster()',context);assert.notEqual(nodes.k11520HudCollapseAll.style.values.display,'none','HUD restore remains reachable');hudHidden=false;vm.runInContext('pinMobileUtilityStack();syncUtilityMaster()',context);
+ walletClosed=true;vm.runInContext('syncUtilityMaster()',context);for(const id of ['dock','aiChatButton','bgmButton','backpackButton'])assert.notEqual(nodes[id].style.values.display,'none');
+ for(const id of ['cargoInterceptionButton','homeDeliveryButton'])assert.equal(nodes[id].style.values.display,'grid');
+ assert.equal(nodes.chatHandle.style.values.display,'none','current hidden chat preference survives wallet close');
+ utilitiesOpen=false;vm.runInContext('pinMobileUtilityStack();syncUtilityMaster()',context);assert.equal(nodes.cargoInterceptionButton.style.values.display,'none','now-idle cargo stays hidden');assert.equal(nodes.homeDeliveryButton.style.values.display,'grid','currently eligible delivery remains visible');
+ assert.match(source,/walletOpen\?\['#k11520UtilityMaster',\.\.\.visibleContextActions,'#walletToggle'\]/);
+});
+
+
+test('wallet identity hints distinguish restored live identity, disconnect and confirmed wrong chain',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const hint=source.split('\n').find(line=>line.includes("const retainedHint=$('#walletRetained')"));
+ const message=source.split('\n').find(line=>line.includes("$('#walletMsg').textContent=isTestnet()?"));
+ const nodes={walletRetained:{hidden:false},walletMsg:{textContent:''}};
+ const context=vm.createContext({$:selector=>nodes[selector.slice(1)],value:{account:'0xabc',chainId:97},chain:{status:'ORACLE_STALE'},isTestnet:()=>true,executionLabel:()=>'TESTNET'});
+ const render=()=>vm.runInContext("(()=>{"+hint+message+"})()",context);render();assert.equal(nodes.walletRetained.hidden,true);assert.doesNotMatch(nodes.walletMsg.textContent,/WRONG NETWORK/);
+ context.value={account:null,chainId:null};render();assert.equal(nodes.walletRetained.hidden,false);assert.doesNotMatch(nodes.walletMsg.textContent,/WRONG NETWORK/);
+ context.value={account:'0xabc',chainId:1};render();assert.match(nodes.walletMsg.textContent,/WRONG NETWORK/);
+});
+
+
+test('M1 financial displays are explicitly NOT_REQUESTED and never infer zero positions or PnL',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const wallet={readScope:'BALANCES_ONLY',testBnbBalance:'0.1',testTokenBalance:1000,free:null};
+ const context=vm.createContext({execution:{readOnly:true},walletExecutionView:()=>({readOnly:true,wallet,positions:[]}),receiptRows:rows=>JSON.stringify(rows)});
+ vm.runInContext(source.slice(source.indexOf('function crossMarketSnapshot(){'),source.indexOf('function syncSimulationPositions(){')),context);
+ const cross=vm.runInContext('crossMarketSnapshot()',context);assert.equal(cross.status,'NOT_REQUESTED');for(const key of ['openPositions','free','lockedMargin','realizedPnl','unrealizedPnl'])assert.equal(cross[key],null);
+ vm.runInContext(source.slice(source.indexOf('function simulationOrganHTML(id){'),source.indexOf('function bindSimulationSheet(')),context);
+ for(const organ of ['assets','orders','positions','history']){const html=vm.runInContext('simulationOrganHTML("'+organ+'")',context);assert.match(html,/NOT_REQUESTED/);assert.doesNotMatch(html,/尚無部位|尚無委託|尚無成交/)}
+});
+
+
+test('M1 market cards and close action never interpret unrequested positions as empty',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ assert.match(source,/execution\.readOnly\?'NOT_REQUESTED':x\.pos/);assert.match(source,/持倉：\$\{execution\.readOnly\?'NOT_REQUESTED':p/);
+ const fn=source.slice(source.indexOf('async function closePos(){'),source.indexOf("$('#closeAll')",source.indexOf('async function closePos(){')));
+ const prefix=fn.slice(0,fn.indexOf('const p=axis().pos;'))+'}';let message;
+ const context=vm.createContext({execution:{readOnly:true},toast:x=>{message=x}});vm.runInContext(prefix,context);await vm.runInContext('closePos()',context);assert.match(message,/NOT_REQUESTED/);
+});
+
+
+test('execution owner initializes before startup world feedback can synchronously render market axes',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const declaration=source.split('\n').find(line=>line.startsWith('let execution=simulationExecution,'));
+ assert.ok(source.indexOf(declaration)>source.indexOf('const simulationExecution='));assert.ok(source.indexOf(declaration)<source.indexOf('\nsyncWorldFeedback();'),'existing owner must be initialized before earliest synchronous HUD callback');
+ const render=source.slice(source.indexOf('function renderAxes(){'),source.indexOf('function openMarketCard('));
+ const nodes={axes:{innerHTML:''}},axis={market:'BTCUSDT',pos:null};
+ const context=vm.createContext({simulationExecution:{mode:'SIMULATION'},syncMarketKLabels:()=>{},S:{axis:'KX',axes:{KX:axis,KY:axis,KZ:axis},quotes:{}},$:selector=>nodes[selector.slice(1)],$$:()=>[],fmt:String});
+ const preInit=vm.createContext({S:context.S,$:context.$,$$:context.$$,syncMarketKLabels:()=>{}});assert.throws(()=>vm.runInContext(render+'renderAxes();'+declaration,preInit),/Cannot access 'execution' before initialization/,'reproduce the exact CI startup failure ordering');
+ vm.runInContext(declaration+render,context);vm.runInContext('renderAxes()',context);assert.match(nodes.axes.innerHTML,/空倉/);
+ vm.runInContext('execution={readOnly:true};renderAxes()',context);assert.match(nodes.axes.innerHTML,/NOT_REQUESTED/);assert.doesNotMatch(nodes.axes.innerHTML,/空倉/);
+});

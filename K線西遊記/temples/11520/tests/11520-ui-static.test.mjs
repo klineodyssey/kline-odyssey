@@ -113,10 +113,18 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.1 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.1 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.1'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.1'"),'Portal registry must advertise the same K11520 release');
+test('V2.9.4 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.4 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.4'"));
+  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.4'"),'Portal registry must advertise the same K11520 release');
+  // Reuse the canonical release guard established by the Courier QA repair;
+  // check literal AND escaped active consumers, never historical documents.
+  const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
+  for(const path of ['./11520-browser-responsive.mjs','./11520-browser-smoke.mjs']){
+    const source=read(path);assert.ok(source.includes(escaped),`${path} exact regex must match canonical release ${release}`);
+    for(const version of source.match(/V2(?:\\)?\.9(?:\\)?\.\d+/g)||[])assert.equal(version.replaceAll('\\',''),release,`${path} stale active version ${version}`);
+  }
+  assert.ok(read('../../../../tests/kaios-portal.test.mjs').includes(`'${release}'`),'Portal unit consumer must match canonical release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
