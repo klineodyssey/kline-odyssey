@@ -51,7 +51,7 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 
 Snapshot:2026-10-05T08:35:18Z; base `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
 
-Twenty meaningful work packages are listed below, including substreams of the same project. They are not twenty or twenty-nine simultaneous workers. IN_PROGRESS identifies active coordination/QA/recovery as described, not a pending CI job running code. Existing projects remain tracked when new tasks arrive.
+Twenty meaningful work packages are listed below, including substreams of the same project. The Human clarified the target as 20; obvious typographical mistakes are normalized in current coordination text. The target is 20 work packages, not a claim that 20 workers execute simultaneously. IN_PROGRESS identifies active coordination/QA/recovery as described, not a pending CI job running code. Existing projects remain tracked when new tasks arrive.
 
 1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Complete narrow #gameChat.open selector fix and real More/chat/Raid regression; inspect new exact-head screenshots and rerun all applicable gates. Evidence: 77cc3adf: Responsive, Portal, Universal and Trading pass; Game Product failed. Parent checkpoint08:35:18Z confirms root cause: landscape More forces CLOSED chat transform:none, letting its input intercept Raid. Narrow selector/test fix actively underway, not idle CI pending. V2.9.1 remains candidate; public V2.9.0. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
 
@@ -73,7 +73,7 @@ Twenty meaningful work packages are listed below, including substreams of the sa
 
 10. **P2 / QUEUED — Universal Market ownership and lineage audit**. Dependencies: none. Next: Confirm current owner (澄序 unverified), current branches and historical181/188/200 lineage before implementation. Evidence: Fresh GitHub:181 and188 Draft/nonmergeable;200 Draft stacked on195, not main. Historical tests are not current integration evidence. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/181) · [2](https://github.com/klineodyssey/kline-odyssey/pull/188) · [3](https://github.com/klineodyssey/kline-odyssey/pull/200)
 
-11. **P2 / QUEUED — Unified multi-asset market contract**. Dependencies: Q10. Next: Map KGEN/KAIOS/Land/AppLife/digital-goods requirements onto existing Asset/Market/Settlement owners; identify gaps only. Evidence: User roadmap supplied by parent; existing historical candidates must be reconciled. No competing exchange implementation. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/181) · [2](https://github.com/klineodyssey/kline-odyssey/pull/200) · [3](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/marketplace/creator-marketplace/KAIOS_AI_COMPANY_CREATOR_MARKETPLACE_V1_SPEC.md)
+11. **P2 / QUEUED — Unified multi-asset market and Life/organ application contract**. Dependencies: Q10. Next: Design a common Life/organ application interface for installation, composition and transplant, including dependencies, versions, permissions and compatibility; map tradable listing rights and bid/ask for KGEN/KAIOS/Land/AppLife/digital goods onto existing Asset/Market/Settlement owners after ownership audit. Evidence: Human-clarified design goals, not implemented capabilities. Reconcile historical candidates; no parallel runtime or new formal Life/Worker identity. Stock-like quotation grants no real equity, dividends or securities rights. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/181) · [2](https://github.com/klineodyssey/kline-odyssey/pull/200) · [3](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/marketplace/creator-marketplace/KAIOS_AI_COMPANY_CREATOR_MARKETPLACE_V1_SPEC.md)
 
 12. **P2 / QUEUED — Reservation matching and concurrency**. Dependencies: Q10, Q11. Next: Inspect existing price-time matching/reservation/replay semantics; design contention tests before scoped implementation. Evidence: Roadmap substream. Preserve actor/controller checks and MATCHED_UNSETTLED boundary; no payment side effect. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/181) · [2](https://github.com/klineodyssey/kline-odyssey/pull/188) · [3](https://github.com/klineodyssey/kline-odyssey/pull/200)
 
@@ -92,6 +92,10 @@ Twenty meaningful work packages are listed below, including substreams of the sa
 19. **P2 / QUEUED — Observability and cost budgets**. Dependencies: Q06. Next: Consolidate existing failure signals, CI artifacts, bounded retries and usage budgets; propose measured gaps without paid resources or recurring jobs. Evidence: User roadmap plus bounded offline model evidence; no paid monitoring or new automation authorized. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/500) · [2](https://github.com/klineodyssey/kline-odyssey/pull/501)
 
 20. **P2 / READY_FOR_REVIEW — Durable twenty-package coordination snapshot**. Dependencies: none. Next: Review this docs-only Draft and retain it behind #498 in the main merge lane; refresh exact-head observations before integration. Evidence: Current requested deliverable: human-readable status plus machine-readable queue in one existing handoff file. Completion is not runtime dispatch. Source: [1](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/handoff/HANDOFF_CURRENT.md)
+
+### Clarified product vision
+
+KAIOS is a next-generation operating-system design goal: a customer/player wish becomes a KGEN AI Company project and proceeds to verified delivery. This describes intended product behavior, not an implemented autonomous service or a grant of authority.
 
 ### Scheduling and release boundaries
 
@@ -113,10 +117,10 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
   "operational_dispatch": false,
   "package_count": 20,
   "authority": "Coordination report only; not formal WorkQueue, Worker claim, employment, Life, T5, reviewer or execution authority.",
-  "provenance": "Human request for concurrent additive work and twenty projects/work packages, provided to this task2026-10-05; roadmap and active-task context supplied by parent. Fresh GitHub metadata and tracked current-main paths verified; unverified ownership remains explicit.",
+  "provenance": "Human request for concurrent additive work and twenty projects/work packages, provided to this task2026-10-05; roadmap and active-task context supplied by parent. Fresh GitHub metadata and tracked current-main paths verified; unverified ownership remains explicit. Human clarification2026-10-05: target20 with obvious typos normalized; customer/player wish-to-project-to-verified-delivery OS vision and shared Life/organ interface are design goals.",
   "scheduling": {
     "new_work": "Append new work or update a matching package; never silently cancel prior projects. Preserve parked/blocked work and reasons. Completion requires evidence.",
-    "capacity": "Use actual available execution slots and confirmed scopes;20 packages is backlog breadth, not20 or29 simultaneously executing agents. CI pending is not running local code.",
+    "capacity": "Use actual available execution slots and confirmed scopes; 20 packages is backlog breadth, not 20 simultaneously executing workers. Pending CI is not running local code.",
     "parallel": "Independent read, review, test and isolated-branch work may proceed concurrently. Do not stop or reassign existing workers.",
     "serialization": "One write owner per overlapping file; serialize shared-file integration and all main merges. Rebase/revalidate later candidates against newly merged main.",
     "merge_hold": "This queue Draft must not merge ahead of#498 or invalidate its current QA base. No merge/deploy performed by this work.",
@@ -274,19 +278,19 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     },
     {
       "id": "Q11",
-      "title": "Unified multi-asset market contract",
+      "title": "Unified multi-asset market and Life/organ application contract",
       "priority": "P2",
       "status": "QUEUED",
       "dependencies": [
         "Q10"
       ],
-      "next_action": "Map KGEN/KAIOS/Land/AppLife/digital-goods requirements onto existing Asset/Market/Settlement owners; identify gaps only.",
+      "next_action": "Design a common Life/organ application interface for installation, composition and transplant, including dependencies, versions, permissions and compatibility; map tradable listing rights and bid/ask for KGEN/KAIOS/Land/AppLife/digital goods onto existing Asset/Market/Settlement owners after ownership audit.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/181",
         "https://github.com/klineodyssey/kline-odyssey/pull/200",
         "https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/marketplace/creator-marketplace/KAIOS_AI_COMPANY_CREATOR_MARKETPLACE_V1_SPEC.md"
       ],
-      "evidence": "User roadmap supplied by parent; existing historical candidates must be reconciled. No competing exchange implementation.",
+      "evidence": "Human-clarified design goals, not implemented capabilities. Reconcile historical candidates; no parallel runtime or new formal Life/Worker identity. Stock-like quotation grants no real equity, dividends or securities rights.",
       "activity": "NOT_RUNNING"
     },
     {
@@ -428,6 +432,8 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "evidence": "Current requested deliverable: human-readable status plus machine-readable queue in one existing handoff file. Completion is not runtime dispatch.",
       "activity": "NOT_RUNNING"
     }
-  ]
+  ],
+  "clarification_at": "2026-10-05T08:40:33Z",
+  "product_vision": "KAIOS is a next-generation operating-system design goal: a customer/player wish becomes a KGEN AI Company project and proceeds to verified delivery. This describes intended product behavior, not an implemented autonomous service or a grant of authority."
 }
 ```
