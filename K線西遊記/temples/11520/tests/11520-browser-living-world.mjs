@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
+assert.ok(!process.argv.includes('--local-store-integrity-only')||!(process.env.K11520_COURIER_REVIEW_ONLY==='1'||process.env.K11520_COURIER_DESKTOP_ONLY==='1'),'select only one isolated browser mode');
+if(!process.argv.includes('--local-store-integrity-only')){
 const OUT='artifacts/11520-visual-qa';
 const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 const processStarted=performance.now();
@@ -422,3 +424,249 @@ if(reviewOnly){
   finally{await context.close()}
 }
 await browser.close();
+
+}else{await runLocalStoreIntegrity()}
+
+// Independent native-browser suite. Every context is disposable CI data, and
+// every acceptance lease is Chromium's own navigator.locks implementation.
+async function runLocalStoreIntegrity(){
+  const {execFileSync}=await import('node:child_process');
+  const out='artifacts/11520-local-store-integrity';
+  const base=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
+  assert.ok(['127.0.0.1','localhost','[::1]'].includes(new URL(base).hostname),'native integrity QA only permits an isolated loopback server');
+  const root='/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/';
+  const pinned='765d0e24e3fbe7353a80329c99bc3b5c3025fd12';
+  const playerA='KAIOS-P-QA-INTEGRITY-A-1234567890',playerB='KAIOS-P-QA-INTEGRITY-B-1234567890';
+  const head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  const report={schema:'K11520_NATIVE_LOCAL_STORE_QA_V1',head,ciHead:process.env.GITHUB_SHA||null,tree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),trackedChanges:!!execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim(),scope:'SYNTHETIC_CI_PRODUCT_AND_COURIER_ONLY',functionalQA:'RUNNING',visualQA:'NOT_REVIEWED',startedAt:new Date().toISOString(),cases:[],diagnostics:[],screenshots:[],limitations:['Player Life, backpack, world state and preferences are outside this lease. No whole-game atomicity or read-only guarantee.','Mixed-version rollout is unsupported. Pinned-client observations are diagnostics, never safety acceptance.','Screenshots require direct human/agent image review; capture is not VISUAL_QA PASS.']};
+  await fs.mkdir(out,{recursive:true});
+  const save=()=>fs.writeFile(`${out}/report.json`,JSON.stringify(report,null,2));
+  await save();
+  let nativeBrowser;
+  const captureError=error=>({name:error.name,message:error.message,stack:error.stack});
+  // Faults wrap the real Storage prototype, never replace it with a Map or
+  // inject a fake lock. Checkpoint bytes and write attempts remain reviewable.
+  const instrument=({missingLocks=false,missingStorage=false,providerTrap=true}={})=>{
+    let storage;try{storage=globalThis.localStorage}catch{}
+    const get=Storage.prototype.getItem,set=Storage.prototype.setItem,remove=Storage.prototype.removeItem,clear=Storage.prototype.clear;
+    const protectedKey=key=>String(key).includes('k11520.local-product.v1:')||key==='K11520_PLAYER_COURIER';
+    const probe=globalThis.__lsiProbe={writes:[],events:[],providerCalls:[],fault:{},nativeLocks:!!navigator.locks&&/\[native code\]/.test(String(navigator.locks.request)),nativeStorage:/\[native code\]/.test(String(set)),documentId:crypto.randomUUID()};
+    const revision=bytes=>{try{return JSON.parse(bytes)?.revision??null}catch{return null}};
+    Storage.prototype.getItem=function(key){if(this===storage&&String(key).includes('local-product')&&probe.fault.readback){probe.fault.readback=false;throw new DOMException('QA native readback denial','SecurityError')}return get.call(this,key)};
+    Storage.prototype.setItem=function(key,value){
+      if(this!==storage||!protectedKey(key))return set.call(this,key,value);
+      const entry={key:String(key),beforeRevision:revision(get.call(this,key)),afterRevision:revision(value),outcome:'ATTEMPT'};probe.writes.push(entry);
+      const product=String(key).includes('local-product'),envelope=key==='K11520_PLAYER_COURIER'?JSON.parse(value):null,previous=envelope?JSON.parse(get.call(this,key)||'{"missions":{}}'):null;
+      const newAck=envelope&&Object.values(envelope.missions).some(m=>(m.status==='DELIVERED'&&previous.missions[m.missionId]?.status!=='DELIVERED')||(m.insurance?.claimStatus==='PAID'&&previous.missions[m.missionId]?.insurance?.claimStatus!=='PAID'));
+      if((product&&probe.fault.product)||(newAck&&probe.fault.ack)){entry.outcome='QUOTA_DENIED';throw new DOMException('QA native quota boundary','QuotaExceededError')}
+      const result=set.call(this,key,value);entry.outcome='COMMITTED';
+      if(product&&probe.fault.afterProduct){probe.fault.afterProduct=false;probe.fault.readback=true}
+      if(product&&probe.fault.afterWrite){const hook=probe.fault.afterWrite;delete probe.fault.afterWrite;hook()}
+      return result;
+    };
+    Storage.prototype.removeItem=function(key){if(this===storage&&protectedKey(key))probe.writes.push({key:String(key),outcome:'REMOVE'});return remove.call(this,key)};
+    Storage.prototype.clear=function(){if(this===storage)probe.writes.push({key:'*',outcome:'CLEAR'});return clear.call(this)};
+    addEventListener('storage',e=>{if(protectedKey(e.key))probe.events.push({key:e.key,oldRevision:revision(e.oldValue),newRevision:revision(e.newValue),trusted:e.isTrusted})});
+    globalThis.ethereum=providerTrap?{on(){},removeListener(){},async request(args){const method=String(args?.method||'UNKNOWN');probe.providerCalls.push(method);await globalThis.__lsiRecordProviderAttempt(method);throw new Error('QA_PROVIDER_FORBIDDEN')}}:undefined;
+    if(missingLocks)Object.defineProperty(navigator,'locks',{configurable:true,value:undefined});
+    if(missingStorage)Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw new DOMException('QA storage getter denied','SecurityError')}});
+  };
+  async function contextFor(caseReport,{production=false,...faults}={}){
+    const context=await nativeBrowser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
+    caseReport.requestsBlocked=[];caseReport.pageErrors=[];caseReport.providerCalls=[];caseReport.providerAttempts=[];
+    context.on('page',page=>{page.setDefaultTimeout(10000);page.on('pageerror',error=>caseReport.pageErrors.push(String(error)))});
+    await context.exposeBinding('__lsiRecordProviderAttempt',({page},method)=>{caseReport.providerAttempts.push({url:page.url(),method})});
+    await context.addInitScript(instrument,{...faults,providerTrap:!production});
+    await context.route('**/*',async route=>{
+      const url=new URL(route.request().url());
+      if(url.origin===new URL(base).origin){
+        if(url.pathname.startsWith('/__lsi_old__/')){
+          const path=decodeURIComponent(url.pathname.slice('/__lsi_old__/'.length));
+          if(!/^K線西遊記\/temples\/11520\/(runtime|controls)\/[a-z0-9-]+\.mjs$/.test(path))return route.abort('blockedbyclient');
+          try{const body=execFileSync('git',['show',`${pinned}:${path}`],{encoding:'utf8',maxBuffer:4000000});caseReport.pinnedSources??=[];if(!caseReport.pinnedSources.includes(path))caseReport.pinnedSources.push(path);return route.fulfill({status:200,contentType:'text/javascript',body})}catch(error){caseReport.pinnedReadError=String(error);return route.abort('failed')}
+        }
+        if(url.pathname.startsWith('/__lsi__/'))return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><title>Isolated native store QA</title><p>Disposable CI local-game store fixture</p>'});
+        if(production&&url.pathname.endsWith('K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json'))return route.fulfill({status:200,contentType:'application/json',body:'{"status":"PREPARED_NOT_DEPLOYED","chainId":97,"testOnly":true}'});
+        return route.continue();
+      }
+      if(production&&url.href.startsWith('https://cdn.jsdelivr.net/npm/three@0.180.0/')){
+        const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/',path=url.pathname.slice('/npm/three@0.180.0/'.length);
+        if(path.includes('..'))return route.abort();
+        let body=await fs.readFile(`node_modules/three/${path}`,'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);
+        return route.fulfill({status:200,contentType:'text/javascript',body});
+      }
+      if(production&&url.origin==='https://data-api.binance.vision'){
+        const prices={BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600},body=url.pathname.endsWith('/aggTrades')?[{p:String(prices[url.searchParams.get('symbol')]||100),T:Date.now(),a:Date.now()}]:Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)}));
+        return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});
+      }
+      caseReport.requestsBlocked.push({url:url.origin+url.pathname,method:route.request().method()});return route.abort('blockedbyclient');
+    });
+    return context;
+  }
+  async function fixture(context,playerId=playerA,{old=false,productOnly=false}={}){
+    const page=await context.newPage();await page.goto(`${base}/__lsi__/fixture.html`);
+    await initialize(page,playerId,{old,productOnly});return page;
+  }
+  async function initialize(page,playerId,{old=false,productOnly=false}={}){
+    return page.evaluate(async({moduleRoot,playerId,old,productOnly})=>{
+      const [wallet,margin,logistics]=await Promise.all([import(moduleRoot+'runtime/evm-wallet-runtime.mjs'),import(moduleRoot+'runtime/kgen-margin-runtime.mjs'),import(moduleRoot+'runtime/digital-ant-logistics-runtime.mjs')]);
+      const attempt=fn=>{try{return{value:fn()??null}}catch(error){return{error:error.message}}};
+      const q=globalThis.__lsi={wallet,margin,logistics,playerId,attempt,products:[],old};
+      q.newProduct=id=>{const p=wallet.createSimulationPlayerStore({playerId:id,ledger:margin.createKgenLedger()});q.products.push(p);return p};
+      q.p=q.newProduct(playerId);await q.p.ready;q.p.activate(null);q.current=q.p;
+      q.offer=(id,extra={})=>logistics.createPlayerCourierOffer({missionId:id,requesterLifeId:playerId,cargoAmount:1000,freightFeeKaios:8,courierSalaryKaios:3,estimatedDurationMs:60000,createdAt:10000,...extra});
+      q.newCourier=()=>logistics.createPlayerCourierStore({sessionId:'NATIVE-QA',now:()=>10000,monotonicNow:()=>0,resolveCreditPort:()=>q.current});
+      if(!productOnly){q.c=q.newCourier();await q.c.ready}
+      q.accept=(id,extra={})=>q.c.accept(q.offer(id,extra),{courierLifeId:playerId,wallNow:10000,monoNow:0});
+      q.due=m=>q.c.settleDue(m.missionId,{courierLifeId:playerId,wallNow:m.dueAt,monoNow:m.estimatedDurationMs});
+      q.bytes=()=>Object.fromEntries(Object.keys(localStorage).filter(k=>k.includes('local-product')||k==='K11520_PLAYER_COURIER'||k==='k11520.player-life.legacy-owner').sort().map(k=>[k,localStorage.getItem(k)]));
+      q.key=(id=playerId,owner='guest')=>`k11520.player:${id}:k11520.local-product.v1:${owner}`;
+      q.snapshot=()=>({product:q.p.snapshot(),courier:q.c?.snapshot(),bytes:q.bytes(),writes:structuredClone(__lsiProbe.writes),storageEvents:structuredClone(__lsiProbe.events),providerCalls:[...__lsiProbe.providerCalls]});
+      return{nativeLocks:__lsiProbe.nativeLocks,nativeStorage:__lsiProbe.nativeStorage,capability:q.p.snapshot().writeCapability};
+    },{moduleRoot:old?'/__lsi_old__/'+root.slice(1):root,playerId,old,productOnly});
+  }
+  async function run(name,fn,options={}){
+    const item={name,status:'RUNNING',startedAt:new Date().toISOString()};report.cases.push(item);await save();let context;
+    try{context=await contextFor(item,options);await fn(context,item);for(const page of context.pages()){const calls=await page.evaluate(()=>globalThis.__lsiProbe?.providerCalls||[]).catch(()=>[]);item.providerCalls.push(...calls)}assert.deepEqual(item.providerCalls,[],'no wallet/provider/sign/send calls');assert.deepEqual(item.providerAttempts,[],'no provider attempts across any document, including closed/reloaded pages');assert.deepEqual(item.pageErrors,[],'uncaught browser errors');item.status='PASS'}
+    catch(error){item.status='FAIL';item.error=captureError(error);if(context)for(const [index,page] of context.pages().entries()){if(page.isClosed())continue;item.failureState??=[];item.failureState.push(await page.evaluate(()=>globalThis.__lsi?.snapshot?.()||{product:globalThis.__K11520_PRODUCT__?.snapshot?.(),courier:globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(),writes:globalThis.__lsiProbe?.writes}).catch(()=>null));await page.screenshot({path:`${out}/failure-${report.cases.length}-${index}.png`,timeout:5000}).catch(()=>{})}}
+    finally{await context?.close();item.finishedAt=new Date().toISOString();console.log('[11520 LOCAL STORE]',name,item.status);await save()}
+  }
+  try{
+    nativeBrowser=await chromium.launch({headless:true,ignoreDefaultArgs:['--disable-back-forward-cache'],...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
+    report.browserVersion=nativeBrowser.version();
+    await run('simultaneous same-player admission; follower zero writes; owner close takeover',async(context,item)=>{
+      const pages=await Promise.all([context.newPage(),context.newPage()]);await Promise.all(pages.map(p=>p.goto(`${base}/__lsi__/simultaneous.html`)));
+      const admissions=await Promise.all(pages.map(p=>initialize(p,playerA)));item.admissions=admissions;assert.ok(admissions.every(x=>x.nativeLocks&&x.nativeStorage));assert.deepEqual(admissions.map(x=>x.capability.status).sort(),['FOLLOWER','WRITER']);
+      const owner=pages[admissions.findIndex(x=>x.capability.writeEnabled)],follower=pages.find(p=>p!==owner);
+      item.owner=await owner.evaluate(()=>{__lsi.p.record('LOOT_DROP',{reward:20});__lsi.accept('QA-SAME-PLAYER');return __lsi.snapshot()});
+      await follower.waitForFunction(()=>__lsiProbe.events.length>0);assert.equal(await follower.evaluate(()=>__lsiProbe.events.every(e=>e.trusted)),true);
+      item.follower=await follower.evaluate(()=>{const q=__lsi,before=q.bytes(),calls={record:q.attempt(()=>q.p.record('LOOT_DROP',{reward:5})),save:q.attempt(()=>q.p.save()),ledger:q.attempt(()=>q.p.transactLedger(()=>{})),spend:q.p.spendKaios(1),credit:q.p.recordCourierSettlement({}),insurance:q.p.recordCourierInsurancePayout({}),accept:q.attempt(()=>q.accept('QA-FOLLOWER')),observe:q.attempt(()=>q.c.observe('QA-SAME-PLAYER')),settle:q.attempt(()=>q.c.settleDue('QA-SAME-PLAYER',{courierLifeId:q.playerId})),damage:q.attempt(()=>q.c.applyCombatDamage('QA-SAME-PLAYER',{courierLifeId:q.playerId,damage:1})),raid:q.attempt(()=>q.c.raid('QA-SAME-PLAYER',{})),claim:q.attempt(()=>q.c.claimInsurancePayout('QA-SAME-PLAYER',{courierLifeId:q.playerId})),ack:q.attempt(()=>q.c.confirmInsurancePayout('QA-SAME-PLAYER',{})),loot:q.attempt(()=>q.c.claimLoot('QA-SAME-PLAYER',{}))};q.p.activate('0x'+'a'.repeat(40));q.p.activate(null);return{before,after:q.bytes(),calls,snapshot:q.snapshot()}});
+      assert.deepEqual(item.follower.after,item.follower.before);assert.deepEqual(item.follower.snapshot.writes,[],'not even a protected setItem attempt from follower activation/mutation');for(const result of Object.values(item.follower.calls))assert.match(result.error||result.reason,/LOCAL_GAME_FOLLOWER/);
+      await owner.close();await follower.waitForFunction(async()=>!(await navigator.locks.query()).held.some(x=>x.name==='k11520.local-game-writer'));
+      item.takeover=await follower.evaluate(async()=>{const status=await __lsi.p.requestWriter();__lsi.p.refresh();__lsi.c.reload();__lsi.p.record('LOOT_DROP',{reward:1});return{status,...__lsi.snapshot()}});assert.equal(item.takeover.status,'WRITER');assert.equal(item.takeover.product.kaios,21);assert.equal(item.takeover.courier.missions['QA-SAME-PLAYER'].status,'ACTIVE');
+    });
+    await run('different-player contention and shared same-tab product/Courier refcounts',async(context,item)=>{
+      const owner=await fixture(context),follower=await fixture(context,playerB);
+      item.initial=await follower.evaluate(()=>__lsi.snapshot());assert.equal(item.initial.product.writeCapability.status,'FOLLOWER');assert.deepEqual(item.initial.writes,[]);
+      item.sameTab=await owner.evaluate(async()=>{const q=__lsi,p2=q.newProduct(q.playerId);await p2.ready;p2.activate(null);q.p.record('LOOT_DROP',{reward:3});p2.record('LOOT_DROP',{reward:4});q.p.dispose();const disposed=q.attempt(()=>q.p.record('LOOT_DROP',{reward:1}));p2.record('LOOT_DROP',{reward:1});p2.dispose();return{disposed,second:p2.snapshot(),courier:q.c.snapshot()}});assert.match(item.sameTab.disposed.error,/DISPOSED/);assert.equal(item.sameTab.second.kaios,8);assert.equal(item.sameTab.courier.writeCapability.status,'WRITER');assert.equal(await follower.evaluate(()=>__lsi.p.requestWriter()),'FOLLOWER');
+      await owner.evaluate(()=>__lsi.c.dispose());await follower.waitForFunction(async()=>!(await navigator.locks.query()).held.some(x=>x.name==='k11520.local-game-writer'));
+      item.takeover=await follower.evaluate(async()=>{await __lsi.p.requestWriter();__lsi.p.refresh();__lsi.c.reload();__lsi.p.record('LOOT_DROP',{reward:2});__lsi.accept('QA-OTHER-PLAYER');return __lsi.snapshot()});assert.equal(item.takeover.product.kaios,2);assert.equal(JSON.parse(item.takeover.bytes[`k11520.player:${playerA}:k11520.local-product.v1:guest`]).progress.kaios,8);
+    });
+    await run('native pagehide fences old generation; history return and explicit reacquisition',async(context,item)=>{
+      const page=await fixture(context);await page.evaluate(()=>{const q=__lsi;q.p.record('LOOT_DROP',{reward:5});addEventListener('pagehide',event=>{const before=q.bytes(),attempt=q.attempt(()=>q.p.record('LOOT_DROP',{reward:99}));sessionStorage.setItem('qa-pagehide',JSON.stringify({trusted:event.isTrusted,persisted:event.persisted,capability:q.p.snapshot().writeCapability,attempt,unchanged:JSON.stringify(before)===JSON.stringify(q.bytes())}))});addEventListener('pageshow',event=>{globalThis.__lsiPageshow={trusted:event.isTrusted,persisted:event.persisted}})});
+      await page.goto(`${base}/__lsi__/away.html`);item.pagehide=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('qa-pagehide')));assert.equal(item.pagehide.trusted,true);assert.equal(item.pagehide.capability.status,'PAGE_HIDDEN');assert.match(item.pagehide.attempt.error,/PAGE_HIDDEN/);assert.equal(item.pagehide.unchanged,true);
+      await page.goBack();item.history=await page.evaluate(()=>({restored:!!globalThis.__lsi,pageshow:globalThis.__lsiPageshow||null,navigation:performance.getEntriesByType('navigation')[0]?.type,notRestoredReasons:performance.getEntriesByType('navigation')[0]?.notRestoredReasons?.toJSON?.()||null}));
+      if(item.history.pageshow?.persisted){assert.equal(await page.evaluate(()=>__lsi.p.snapshot().writeCapability.status),'PAGE_HIDDEN');item.bfcache='EXERCISED_NATIVE_PERSISTED_PAGESHOW'}else{item.bfcache='NOT_EXERCISED_BROWSER_DID_NOT_CACHE';report.diagnostics.push({name:'BFCache',status:'NOT_EXERCISED',evidence:item.history});await initialize(page,playerA)}
+      item.reacquired=await page.evaluate(async()=>{await __lsi.p.requestWriter();__lsi.p.refresh();__lsi.c.reload();__lsi.p.record('LOOT_DROP',{reward:1});return __lsi.snapshot()});assert.equal(item.reacquired.product.kaios,6);assert.equal(item.reacquired.product.writeCapability.status,'WRITER');
+      // Native asynchronous acquisition invalidated before callback admission.
+      await page.evaluate(()=>{__lsi.p.dispose();__lsi.c.dispose()});await page.waitForFunction(async()=>!(await navigator.locks.query()).held.some(x=>x.name==='k11520.local-game-writer'));
+      item.disposedPending=await page.evaluate(async()=>{const p=__lsi.newProduct(__lsi.playerId),ready=p.ready;p.dispose();await ready;return{snapshot:p.snapshot(),attempt:__lsi.attempt(()=>p.activate(null))}});assert.equal(item.disposedPending.snapshot.writeCapability.status,'DISPOSED');assert.match(item.disposedPending.attempt.error,/DISPOSED/);
+    });
+    await run('rapid native owner reload reacquires; no permanent ifAvailable follower',async(context,item)=>{
+      const page=await fixture(context);item.reloads=[];
+      for(let i=0;i<6;i++){
+        await page.reload({waitUntil:'domcontentloaded'});const admitted=await initialize(page,playerA);const state=await page.evaluate(async()=>({capability:__lsi.p.snapshot().writeCapability,locks:await navigator.locks.query(),writes:__lsiProbe.writes}));item.reloads.push({index:i,admitted,state});
+        if(state.capability.status!=='WRITER'){await page.waitForTimeout(250);item.reloads.at(-1).afterRelease=await page.evaluate(async()=>({capability:__lsi.p.snapshot().writeCapability,locks:await navigator.locks.query()}));throw new Error('RAPID_RELOAD_ONE_SHOT_ADMISSION_DID_NOT_ACQUIRE: '+JSON.stringify(item.reloads.at(-1)))}
+        assert.equal(state.locks.held.filter(x=>x.name==='k11520.local-game-writer').length,1);
+      }
+    });
+    await run('delivery pending intent, owner/player namespace mismatch, immutable retry',async(context,item)=>{
+      const page=await fixture(context);
+      item.failure=await page.evaluate(()=>{const q=__lsi,m=q.accept('QA-PENDING');__lsiProbe.fault.product=true;const result=q.due(m);return{result,snapshot:q.snapshot()}});assert.equal(item.failure.result.ok,false);assert.equal(item.failure.result.mission.status,'DELIVERY_PENDING_CREDIT');assert.equal(item.failure.result.mission.cargo.ownerState,'OWNED_BY_COURIER');assert.equal(item.failure.snapshot.product.kaios,0);
+      const binding=item.failure.result.mission.settlement.credit;
+      item.namespaces=await page.evaluate(async other=>{const q=__lsi;__lsiProbe.fault.product=false;q.p.activate('0x'+'b'.repeat(40));const wallet=q.c.reconcileCredit('QA-PENDING');const p2=q.newProduct(other);await p2.ready;p2.activate(null);q.current=p2;const player=q.c.reconcileCredit('QA-PENDING');q.current=q.p;q.p.activate(null);const final=q.c.reconcileCredit('QA-PENDING'),repeat=q.attempt(()=>q.due(final.mission));return{wallet,player,final,repeat,other:p2.snapshot(),snapshot:q.snapshot()}},playerB);
+      assert.equal(item.namespaces.wallet.reason,'COURIER_REWARD_OWNER_MISMATCH');assert.equal(item.namespaces.player.reason,'COURIER_CREDIT_OWNER_UNAVAILABLE');assert.equal(item.namespaces.other.kaios,0);assert.equal(item.namespaces.final.ok,true);assert.deepEqual({...item.namespaces.final.mission.settlement.credit,status:'PENDING'},binding);assert.equal(item.namespaces.final.mission.cargo.ownerState,'DELIVERED_TO_DESTINATION');assert.equal(item.namespaces.snapshot.product.kaios,binding.rewardKaios);assert.equal(item.namespaces.snapshot.product.courierReceipts.length,1);assert.match(item.namespaces.repeat.error,/MISSION_ALREADY_SETTLED/);
+    });
+    await run('uncertain product readback preserves committed bytes; ack-only retry writes no product',async(context,item)=>{
+      const page=await fixture(context);
+      item.uncertain=await page.evaluate(()=>{const q=__lsi,m=q.accept('QA-READBACK');__lsiProbe.fault.afterProduct=true;const result=q.due(m);return{result,snapshot:q.snapshot()}});assert.equal(item.uncertain.result.ok,false);assert.equal(item.uncertain.snapshot.product.storageStatus,'PERSISTENCE_UNCERTAIN');assert.equal(item.uncertain.snapshot.product.kaios,0);assert.equal(JSON.parse(item.uncertain.snapshot.bytes[`k11520.player:${playerA}:k11520.local-product.v1:guest`]).progress.kaios,4);
+      item.recovered=await page.evaluate(()=>{__lsi.p.refresh();const result=__lsi.c.reconcileCredit('QA-READBACK');return{result,snapshot:__lsi.snapshot()}});assert.equal(item.recovered.result.credit.replayed,true);assert.equal(item.recovered.snapshot.product.kaios,4);
+      item.ack=await page.evaluate(()=>{const q=__lsi,m=q.accept('QA-ACK');__lsiProbe.fault.ack=true;const attempt=q.attempt(()=>q.due(m));const before=q.bytes(),writes=__lsiProbe.writes.length;__lsiProbe.fault.ack=false;__lsiProbe.fault.product=true;q.c.reload();const result=q.c.reconcileCredit(m.missionId);return{attempt,before,after:q.bytes(),newWrites:__lsiProbe.writes.slice(writes),result,snapshot:q.snapshot()}});assert.match(item.ack.attempt.error,/COURIER_SAVE_NOT_CONFIRMED/);assert.equal(item.ack.result.ok,true);assert.equal(item.ack.result.credit.replayed,true);assert.equal(item.ack.newWrites.filter(x=>x.key.includes('local-product')).length,0);assert.equal(item.ack.after[`k11520.player:${playerA}:k11520.local-product.v1:guest`],item.ack.before[`k11520.player:${playerA}:k11520.local-product.v1:guest`]);assert.equal(item.ack.snapshot.product.kaios,8);assert.equal(item.ack.snapshot.product.courierReceipts.length,2);
+    });
+    await run('owner destruction preserves pending credit for native follower takeover',async(context,item)=>{
+      const owner=await fixture(context),follower=await fixture(context);
+      item.interrupted=await owner.evaluate(()=>{const q=__lsi,m=q.accept('QA-CLOSE-PENDING');__lsiProbe.fault.ack=true;const result=q.attempt(()=>q.due(m));return{result,snapshot:q.snapshot()}});assert.match(item.interrupted.result.error,/COURIER_SAVE_NOT_CONFIRMED/);assert.equal(item.interrupted.snapshot.courier.missions['QA-CLOSE-PENDING'].status,'DELIVERY_PENDING_CREDIT');assert.equal(item.interrupted.snapshot.product.kaios,4);
+      await owner.close();await follower.waitForFunction(async()=>!(await navigator.locks.query()).held.some(x=>x.name==='k11520.local-game-writer'));
+      item.recovered=await follower.evaluate(async()=>{const q=__lsi;await q.p.requestWriter();q.p.refresh();q.c.reload();const before=q.bytes(),count=__lsiProbe.writes.length;__lsiProbe.fault.product=true;const result=q.c.reconcileCredit('QA-CLOSE-PENDING');return{result,before,after:q.bytes(),writes:__lsiProbe.writes.slice(count),snapshot:q.snapshot()}});assert.equal(item.recovered.result.ok,true);assert.equal(item.recovered.result.credit.replayed,true);assert.equal(item.recovered.snapshot.product.kaios,4);assert.equal(item.recovered.snapshot.product.courierReceipts.length,1);assert.equal(item.recovered.writes.filter(w=>w.key.includes('local-product')).length,0);
+    });
+    await run('reentrant account changes and disposal during committed readback stay fenced',async(context,item)=>{
+      const page=await fixture(context);
+      item.reentrant=await page.evaluate(()=>{const q=__lsi,m=q.accept('QA-REENTRANT'),checks={};__lsiProbe.fault.afterWrite=()=>{checks.activate=q.attempt(()=>q.p.activate('0x'+'e'.repeat(40)));checks.refresh=q.attempt(()=>q.p.refresh());checks.record=q.attempt(()=>q.p.record('LOOT_DROP',{reward:100}))};const result=q.due(m);return{checks,result,snapshot:q.snapshot()}});for(const result of Object.values(item.reentrant.checks))assert.match(result.error,/REENTRANT_WRITE/);assert.equal(item.reentrant.result.ok,true);assert.equal(item.reentrant.snapshot.product.kaios,4);assert.equal(item.reentrant.snapshot.product.owner,'guest');
+      item.disposed=await page.evaluate(()=>{const q=__lsi,m=q.accept('QA-DISPOSE-READBACK');__lsiProbe.fault.afterWrite=()=>q.p.dispose();const result=q.due(m);return{result,snapshot:q.snapshot()}});assert.equal(item.disposed.result.ok,false);assert.equal(item.disposed.snapshot.product.writeCapability.status,'DISPOSED');assert.equal(item.disposed.snapshot.product.kaios,4);assert.equal(item.disposed.snapshot.product.storageStatus,'PERSISTENCE_UNCERTAIN');assert.equal(JSON.parse(item.disposed.snapshot.bytes[`k11520.player:${playerA}:k11520.local-product.v1:guest`]).progress.kaios,8);
+      item.recovered=await page.evaluate(async()=>{const q=__lsi,p=q.newProduct(q.playerId);await p.ready;p.activate(null);q.current=p;const result=q.c.reconcileCredit('QA-DISPOSE-READBACK');return{result,product:p.snapshot(),courier:q.c.snapshot()}});assert.equal(item.recovered.result.ok,true);assert.equal(item.recovered.result.credit.replayed,true);assert.equal(item.recovered.product.kaios,8);
+    });
+    await run('insurance pending owner binding and durable ack-only retry',async(context,item)=>{
+      const page=await fixture(context);
+      item.pending=await page.evaluate(()=>{const q=__lsi,quote=q.logistics.quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000}),m=q.accept('QA-INSURANCE',{insuranceQuote:quote});q.p.record('LOOT_DROP',{reward:100});const payment=q.p.spendKaios(quote.premiumKaios,{purpose:'PLAYER_COURIER_INSURANCE_PREMIUM'});q.c.activateInsurance(m.missionId,{courierLifeId:q.playerId,paymentEvidence:payment});q.c.raid(m.missionId,{attackerLifeId:'KAIOS-P-QA-BANDIT-1234567890',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,distanceMeters:1,replayKey:'QA-INSURANCE-RAID',wallNow:Math.max(m.bandit.attackWindowStartsAt,m.bandit.cooldownMs)});const balance=q.p.snapshot().kaios;__lsiProbe.fault.product=true;const result=q.c.claimInsurancePayout(m.missionId,{courierLifeId:q.playerId});return{balance,result,snapshot:q.snapshot()}});assert.equal(item.pending.result.ok,false);const pending=item.pending.snapshot.courier.missions['QA-INSURANCE'];assert.equal(pending.insurance.claimStatus,'APPROVED');assert.equal(pending.insurance.credit.status,'PENDING');assert.equal(item.pending.snapshot.product.kaios,item.pending.balance);
+      item.retry=await page.evaluate(async other=>{const q=__lsi;__lsiProbe.fault.product=false;q.p.activate('0x'+'c'.repeat(40));const mismatch=q.c.claimInsurancePayout('QA-INSURANCE',{courierLifeId:q.playerId});const otherProduct=q.newProduct(other);await otherProduct.ready;otherProduct.activate(null);q.current=otherProduct;const playerMismatch=q.attempt(()=>q.c.claimInsurancePayout('QA-INSURANCE',{courierLifeId:q.playerId}));q.current=q.p;q.p.activate(null);__lsiProbe.fault.ack=true;const failedAck=q.attempt(()=>q.c.claimInsurancePayout('QA-INSURANCE',{courierLifeId:q.playerId}));const before=q.bytes(),count=__lsiProbe.writes.length;__lsiProbe.fault.ack=false;__lsiProbe.fault.product=true;q.c.reload();const paid=q.c.claimInsurancePayout('QA-INSURANCE',{courierLifeId:q.playerId}),repeat=q.attempt(()=>q.c.claimInsurancePayout('QA-INSURANCE',{courierLifeId:q.playerId}));return{mismatch,playerMismatch,otherProduct:otherProduct.snapshot(),failedAck,paid,repeat,before,after:q.bytes(),newWrites:__lsiProbe.writes.slice(count),snapshot:q.snapshot()}},playerB);assert.equal(item.retry.mismatch.reason,'COURIER_REWARD_OWNER_MISMATCH');assert.match(item.retry.playerMismatch.error,/COURIER_CREDIT_OWNER_UNAVAILABLE/);assert.equal(item.retry.otherProduct.kaios,0);assert.match(item.retry.failedAck.error,/COURIER_SAVE_NOT_CONFIRMED/);assert.equal(item.retry.paid.ok,true);assert.equal(item.retry.paid.evidence.replayed,true);assert.equal(item.retry.paid.mission.insurance.claimStatus,'PAID');assert.equal(item.retry.newWrites.filter(x=>x.key.includes('local-product')).length,0);assert.equal(item.retry.snapshot.product.kaios,item.pending.balance+pending.insurance.payoutKaios);assert.match(item.retry.repeat.error,/INSURANCE_PAYOUT_NOT_APPROVED/);
+    });
+    for(const [name,options,expected] of [['missing native Web Locks',{missingLocks:true},'LOCKS_UNAVAILABLE'],['denied native localStorage getter',{missingStorage:true},'STORAGE_UNAVAILABLE']])await run(name,async(context,item)=>{
+      const page=await fixture(context);item.result=await page.evaluate(()=>({product:__lsi.p.snapshot(),courier:__lsi.c.snapshot(),record:__lsi.attempt(()=>__lsi.p.record('LOOT_DROP',{reward:2})),accept:__lsi.attempt(()=>__lsi.accept('QA-NO-CAPABILITY')),writes:__lsiProbe.writes}));assert.equal(item.result.product.writeCapability.status,expected);assert.equal(item.result.product.persistent,false);assert.match(item.result.record.error,new RegExp(expected));assert.match(item.result.accept.error,new RegExp(expected));assert.deepEqual(item.result.writes,[]);
+    },options);
+    await run('scoped legacy migration, replay tombstones/capacity, corrupt-byte preservation',async(context,item)=>{
+      const page=await fixture(context);
+      item.migration=await page.evaluate(()=>{const q=__lsi,key=q.key(),saved=JSON.parse(localStorage.getItem(key));saved.schema='K11520_LOCAL_SIMULATION_V1';delete saved.playerId;saved.futureTop={retained:true};saved.ledger.futureLedger={retained:true};saved.progress.futureProgress={retained:true};saved.progress.courierReceipts=['COURIER-RECEIPT-01020304'];saved.progress.kaios=9;localStorage.setItem(key,JSON.stringify(saved));q.p.refresh();q.p.record(null,{elapsedMs:1});const migrated=JSON.parse(localStorage.getItem(key));const tombstone=q.p.recordCourierSettlement({receiptId:'COURIER-RECEIPT-01020304',missionId:'QA-TOMBSTONE',playerId:q.playerId,owner:'guest',reward:1});migrated.progress.courierReceipts=Array.from({length:1000},(_,i)=>'COURIER-RECEIPT-'+i.toString(16).padStart(8,'0'));localStorage.setItem(key,JSON.stringify(migrated));q.p.refresh();const before=localStorage.getItem(key),capacity=q.p.recordCourierSettlement({receiptId:'COURIER-RECEIPT-ffffffff',missionId:'QA-CAPACITY',playerId:q.playerId,owner:'guest',reward:1});return{migrated,tombstone,capacity,before,after:localStorage.getItem(key),snapshot:q.p.snapshot()}});assert.equal(item.migration.migrated.schema,'K11520_LOCAL_SIMULATION_V2');assert.equal(item.migration.migrated.futureTop.retained,true);assert.equal(item.migration.migrated.ledger.futureLedger.retained,true);assert.equal(item.migration.migrated.progress.futureProgress.retained,true);assert.equal(item.migration.tombstone.reason,'LEGACY_COURIER_RECEIPT_REQUIRES_REVIEW');assert.equal(item.migration.capacity.reason,'COURIER_RECEIPT_CAPACITY');assert.equal(item.migration.after,item.migration.before);assert.equal(item.migration.snapshot.courierReceipts.length,1000);assert.equal(item.migration.snapshot.kaios,9);
+      item.corrupt=await page.evaluate(()=>{const q=__lsi,key=q.key(),saved=JSON.parse(localStorage.getItem(key));saved.progress.courierInsuranceReceipts=null;const bad=JSON.stringify(saved);localStorage.setItem(key,bad);const refresh=q.attempt(()=>q.p.refresh()),write=q.attempt(()=>q.p.record('LOOT_DROP',{reward:1}));return{bad,after:localStorage.getItem(key),refresh,write}});assert.match(item.corrupt.refresh.error,/CORRUPT/);assert.match(item.corrupt.write.error,/CORRUPT/);assert.equal(item.corrupt.after,item.corrupt.bad);
+    });
+    await run('unscoped legacy guest quarantine survives namespace roundtrip and takeover',async(context,item)=>{
+      const seed=await context.newPage();await seed.goto(`${base}/__lsi__/seed.html`);await seed.evaluate(async root=>{const {createKgenLedger}=await import(root+'runtime/kgen-margin-runtime.mjs');localStorage.setItem('k11520.local-product.v1:guest',JSON.stringify({schema:'K11520_LOCAL_SIMULATION_V1',owner:'guest',revision:1,ledger:createKgenLedger(),progress:{kaios:12}}))},root);
+      const owner=await fixture(context),follower=await fixture(context);
+      item.owner=await owner.evaluate(()=>{const q=__lsi,before=localStorage.getItem('k11520.local-product.v1:guest');localStorage.setItem('k11520.player-life.legacy-owner',q.playerId);const initial=q.p.snapshot();q.p.activate('0x'+'d'.repeat(40));q.p.activate(null);return{initial,refresh:q.attempt(()=>q.p.refresh()),write:q.p.spendKaios(1),before,after:localStorage.getItem('k11520.local-product.v1:guest'),scoped:localStorage.getItem(q.key())}});assert.equal(item.owner.initial.storageStatus,'LEGACY_PRODUCT_REVIEW_REQUIRED');assert.match(item.owner.refresh.error,/LEGACY_PRODUCT_REVIEW_REQUIRED/);assert.equal(item.owner.scoped,null);assert.equal(item.owner.after,item.owner.before);
+      await owner.close();await follower.waitForFunction(async()=>!(await navigator.locks.query()).held.some(x=>x.name==='k11520.local-game-writer'));item.takeover=await follower.evaluate(async()=>{await __lsi.p.requestWriter();return{refresh:__lsi.attempt(()=>__lsi.p.refresh()),bytes:__lsi.bytes(),scoped:localStorage.getItem(__lsi.key())}});assert.match(item.takeover.refresh.error,/LEGACY_PRODUCT_REVIEW_REQUIRED/);assert.equal(item.takeover.scoped,null);assert.equal(item.takeover.bytes['k11520.local-product.v1:guest'],item.owner.before);
+    });
+    // Mixed-version behavior is diagnostic only. In particular, an unsafe old
+    // write is never an assertion that must succeed or a passing invariant.
+    const mixed={name:'actual pinned old client on the same origin',pinnedHead:pinned,status:'RUNNING',excludedFromAcceptance:true,executionComplete:false};report.diagnostics.push(mixed);let mixedContext;
+    try{
+      assert.equal(execFileSync('git',['rev-parse',`${pinned}^{commit}`],{encoding:'utf8'}).trim(),pinned);
+      mixedContext=await contextFor(mixed);const current=await fixture(mixedContext);await current.evaluate(()=>__lsi.accept('QA-MIXED-ACTIVE'));
+      const old=await fixture(mixedContext,playerA,{old:true,productOnly:true});
+      mixed.before=await current.evaluate(async()=>({snapshot:__lsi.snapshot(),locks:await navigator.locks.query()}));
+      mixed.oldActive=await old.evaluate(()=>{const q=__lsi;let courier;const admission=q.attempt(()=>{courier=q.newCourier();return courier.snapshot()});const observation=courier?q.attempt(()=>courier.observe('QA-MIXED-ACTIVE',{wallNow:10001,monoNow:1})):null;return{admission,observation,product:q.p.snapshot(),bytes:q.bytes(),writes:__lsiProbe.writes,providerCalls:__lsiProbe.providerCalls}});
+      mixed.after=await current.evaluate(async()=>({bytes:__lsi.bytes(),locks:await navigator.locks.query()}));
+      mixed.observedOldWriteWhileCurrentLeaseHeld=mixed.oldActive.writes.some(w=>w.outcome==='COMMITTED')&&mixed.after.locks.held.some(l=>l.name==='k11520.local-game-writer');
+      await current.evaluate(()=>{__lsi.c.reload();__lsiProbe.fault.product=true;__lsi.c.settleDue('QA-MIXED-ACTIVE',{courierLifeId:__lsi.playerId,wallNow:70000,monoNow:60000})});
+      mixed.oldPending=await old.evaluate(()=>{const q=__lsi,before=q.bytes(),admission=q.attempt(()=>q.newCourier());return{admissionError:admission.error||null,before,after:q.bytes(),providerCalls:__lsiProbe.providerCalls}});
+      assert.deepEqual(mixed.oldActive.providerCalls,[]);assert.deepEqual(mixed.oldPending.providerCalls,[]);assert.deepEqual(mixed.providerAttempts,[]);assert.deepEqual(mixed.requestsBlocked,[],'minimal pinned store imports must not attempt external requests');assert.deepEqual(mixed.pageErrors,[]);
+      mixed.status='OBSERVED_UNSUPPORTED_MIXED_VERSION';mixed.executionComplete=true;
+      mixed.conclusion='These observations do not establish mixed-version safety. Evaluation requires closing/reloading old tabs.';
+    }catch(error){mixed.status='DIAGNOSTIC_NOT_COMPLETED';mixed.error=captureError(error)}finally{await mixedContext?.close();await save()}
+    await run('production shell pending retry after reload; portrait and landscape runtime evidence',async(context,item)=>{
+      const page=await context.newPage();
+      const boot=async()=>{
+        await page.goto(`${base}${root}game-5d.html`,{waitUntil:'domcontentloaded',timeout:20000});
+        await page.waitForFunction(()=>globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId&&globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(),null,{timeout:25000});
+        if(await page.locator('#enter11520').isVisible())try{await page.locator('#enter11520').click({timeout:2000})}catch(error){if(await page.locator('#intro11520').isVisible())throw error}
+        await page.locator('#intro11520').waitFor({state:'hidden',timeout:10000});
+        await page.waitForFunction(()=>/READY|FALLBACK/.test(document.getElementById('charState')?.textContent||''),null,{timeout:20000});
+      };
+      await boot();item.initial=await page.evaluate(async()=>({product:__K11520_PRODUCT__.snapshot(),courier:__K11520_PLAYER_COURIER__.snapshot(),locks:await navigator.locks.query()}));assert.equal(item.initial.product.writeCapability.status,'WRITER');assert.equal(item.initial.courier.writeCapability.status,'WRITER');
+      item.pending=await page.evaluate(async root=>{
+        const {createPlayerCourierOffer,createPlayerCourierStore}=await import(root+'runtime/digital-ant-logistics-runtime.mjs');const player=__K11520_PRODUCT__.snapshot(),at=Date.now()-120000,store=createPlayerCourierStore({sessionId:'QA-SHELL-PENDING',now:()=>at,monotonicNow:()=>0,resolveCreditPort:()=>__K11520_PRODUCT__.courierCreditPort});await store.ready;
+        try{const mission=store.accept(createPlayerCourierOffer({missionId:'QA-SHELL-PENDING-RELOAD',requesterLifeId:player.playerId,cargoAmount:1000,freightFeeKaios:8,courierSalaryKaios:3,estimatedDurationMs:60000,createdAt:at}),{courierLifeId:player.playerId});localStorage.setItem('11520.playerCourier.lastMission',mission.missionId);__lsiProbe.fault.product=true;const result=store.settleDue(mission.missionId,{courierLifeId:player.playerId,wallNow:mission.dueAt,monoNow:60000});return{result,balance:player.kaios,bytes:localStorage.getItem('K11520_PLAYER_COURIER'),product:__K11520_PRODUCT__.snapshot(),writes:__lsiProbe.writes}}finally{store.dispose()}
+      },root);assert.equal(item.pending.result.ok,false);assert.equal(item.pending.result.mission.status,'DELIVERY_PENDING_CREDIT');assert.equal(item.pending.product.kaios,item.pending.balance);
+      // Reload recreates the production owners. No test requestWriter/refresh
+      // intervention is allowed here: this probes real one-shot boot admission.
+      await boot();item.reloadAdmission=await page.evaluate(async()=>({product:__K11520_PRODUCT__.snapshot(),courier:__K11520_PLAYER_COURIER__.snapshot(),locks:await navigator.locks.query()}));assert.equal(item.reloadAdmission.product.writeCapability.status,'WRITER','production reload must acquire its native lease');
+      await page.waitForFunction(()=>__K11520_PLAYER_COURIER__.snapshot('QA-SHELL-PENDING-RELOAD').mission?.status==='DELIVERED',null,{timeout:10000});
+      item.delivered=await page.evaluate(()=>{const product=__K11520_PRODUCT__.snapshot(),mission=__K11520_PLAYER_COURIER__.snapshot('QA-SHELL-PENDING-RELOAD').mission;return{product,mission,persisted:JSON.parse(localStorage.getItem(`k11520.player:${product.playerId}:k11520.local-product.v1:${product.owner}`)),writes:__lsiProbe.writes}});const credit=item.delivered.mission.settlement.credit;assert.equal(credit.status,'CONFIRMED');assert.equal(item.delivered.product.kaios,item.pending.balance+credit.rewardKaios);assert.deepEqual(item.delivered.persisted.progress.courierReceiptBindings[credit.receiptId],Object.fromEntries(Object.entries(credit).filter(([key])=>key!=='status')));assert.equal(item.delivered.persisted.progress.courierReceipts.filter(id=>id===credit.receiptId).length,1);
+      item.viewports=[];
+      for(const [width,height] of [[390,844],[844,390]]){
+        if(await page.locator('#playerCourierDetails').isVisible())await page.locator('#homeDeliveryButton').click();
+        if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+        await page.setViewportSize({width,height});await page.waitForTimeout(250);
+        if(!await page.locator('#homeDeliveryButton').isVisible())await page.locator('#k11520UtilityMaster').click();
+        await page.locator('#homeDeliveryButton').click();await page.locator('#playerCourierDetails').waitFor({state:'visible'});assert.match(await page.locator('#playerCourierDetails').textContent(),/DELIVERED/);
+        const panel=await page.locator('#playerCourierDetails').boundingBox();assert.ok(panel&&panel.x>=0&&panel.y>=0&&panel.x+panel.width<=width&&panel.y+panel.height<=height,`Courier result must fit ${width}x${height}`);
+        const file=`local-store-${width}x${height}.png`;await page.screenshot({path:`${out}/${file}`});report.screenshots.push({file,viewport:{width,height},entry:'game-5d.html',state:'PRODUCTION_SHELL_RECONCILED_PENDING_CREDIT',visualQA:'REQUIRES_DIRECT_REVIEW'});item.viewports.push({width,height,panel});
+      }
+      item.afterRender=await page.evaluate(()=>__K11520_PRODUCT__.snapshot());assert.equal(item.afterRender.courierReceipts.filter(id=>id===credit.receiptId).length,1);assert.equal(item.afterRender.kaios,item.pending.balance+credit.rewardKaios);
+    },{production:true});
+    report.functionalQA=report.cases.every(c=>c.status==='PASS')?'PASS':'FAIL';
+    report.visualQA=report.screenshots.length===2?'CAPTURED_REQUIRES_DIRECT_REVIEW':'MISSING_REQUIRED_SCREENSHOTS';
+    if(!mixed.executionComplete)report.functionalQA='FAIL_DIAGNOSTIC_EXECUTION_INCOMPLETE';
+  }catch(error){report.functionalQA='FAIL';report.fatal=captureError(error)}
+  finally{await nativeBrowser?.close();report.finishedAt=new Date().toISOString();await save()}
+  console.log(JSON.stringify({functionalQA:report.functionalQA,visualQA:report.visualQA,cases:report.cases.map(({name,status})=>({name,status})),report:`${out}/report.json`}));
+  if(report.functionalQA!=='PASS'||report.screenshots.length!==2)process.exitCode=1;
+}

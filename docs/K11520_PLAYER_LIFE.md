@@ -277,6 +277,13 @@ malformed, conflicting, oversized or wrong-namespace records remain untouched.
   pending-credit retries, namespace binding, migration and capacity boundaries.
   Local Chromium cannot start because socket() is not permitted; no bypass was
   attempted. FUNCTIONAL_QA is store/Node only; VISUAL_QA is NOT_RUN.
+- The isolated native-browser mode has its own mandatory job in the existing
+  Product workflow: a 240-second scenario cap inside an 8-minute job. This adds
+  up to 8 runner-minutes per workflow invocation under existing push/PR triggers,
+  without reducing or sharing the original Product budgets. Evidence uploads
+  are attempted on failure; missing JSON/screenshots fail the job. Native BFCache
+  not exercised by Chromium remains explicitly unverified. Pinned old-client
+  observations are unsupported-compatibility diagnostics, not safety acceptance.
 - Real multi-tab, close/crash/takeover, BFCache, mixed-version, account switches,
   interrupted credit/ack, existing browser suites and inspected mobile/landscape
   screenshots remain required at the final integrated head.
