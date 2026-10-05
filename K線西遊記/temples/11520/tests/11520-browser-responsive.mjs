@@ -465,27 +465,40 @@ async function verifyKSpaceGameplay(page,report){
   // Preserve the real input and moving target evidence even when a precondition
   // times out. This observer never mutates input, actors, camera or game state.
   const observeApproach=async label=>{
-    await page.evaluate(label=>{const read=()=>({at:performance.now(),combat:__K11520_KSPACE_API__.snapshot(),joyRect:(()=>{const r=document.querySelector('#joy').getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}})()});const trace={label,started:performance.now(),samples:[read()],pointers:[]};globalThis.kspaceApproachTrace=trace;globalThis.kspaceApproachRead=read;const listener=e=>{if(trace.pointers.length<60)trace.pointers.push({at:performance.now(),type:e.type,isTrusted:e.isTrusted,pointerId:e.pointerId,x:e.clientX,y:e.clientY,target:e.target.id,buttons:e.buttons})};for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(t,listener,true);trace.timer=setInterval(()=>{if(trace.samples.length<160)trace.samples.push(read())},100);globalThis.kspaceApproachStop=()=>{clearInterval(trace.timer);delete trace.timer;for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.removeEventListener(t,listener,true);trace.samples.push(read());return trace}},label);
+    await page.evaluate(label=>{const read=()=>({at:performance.now(),combat:__K11520_KSPACE_API__.snapshot(),joyRect:(()=>{const r=document.querySelector('#joy').getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}})()});const trace={label,started:performance.now(),samples:[read()],pointers:[]};globalThis.kspaceApproachTrace=trace;globalThis.kspaceApproachRead=read;const listener=e=>{if(trace.pointers.length<60)trace.pointers.push({at:performance.now(),type:e.type,isTrusted:e.isTrusted,pointerId:e.pointerId,x:e.clientX,y:e.clientY,target:e.target.id,control:e.target.closest?.('#joy,#yControl')?.id||null,buttons:e.buttons})};for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(t,listener,true);trace.timer=setInterval(()=>{if(trace.samples.length<160)trace.samples.push(read())},100);globalThis.kspaceApproachStop=()=>{clearInterval(trace.timer);delete trace.timer;for(const t of ['pointerdown','pointermove','pointerup','pointercancel'])document.removeEventListener(t,listener,true);trace.samples.push(read());return trace}},label);
   };
   const finishApproach=async()=>{(report.kspaceApproaches??=[]).push(await page.evaluate(()=>kspaceApproachStop()))};
   const pursue=async(label,limit,timeoutMs,magnitude)=>{
+    const native=await page.context().newCDPSession(page),contacts=new Map();
+    const rail=await page.locator('#yControl').boundingBox();
+    assert.ok(rail,'3D pursuit needs the existing Y rail');
+    const rx=rail.x+rail.width/2,ry=rail.y+rail.height/2;
+    const send=async(type,id,px,py)=>{if(type==='touchEnd')contacts.delete(id);else contacts.set(id,{id,x:px,y:py,radiusX:3,radiusY:3,force:1});await native.send('Input.dispatchTouchEvent',{type,touchPoints:[...contacts.values()]})};
     await observeApproach(label);
-    const deadline=Date.now()+timeoutMs;let reached=false,pressed=false;
+    const deadline=Date.now()+timeoutMs;let reached=false;
     try{
       while(Date.now()<deadline){
         const current=await state();
         if(current.distance<limit&&Date.now()<=deadline){reached=true;break}
         const relative=current.relative,planar=Math.hypot(relative.x,relative.z);
-        // Follow the live target instead of driving past an airborne target
-        // along one stale heading. Center the real joystick when horizontally
-        // aligned; its natural descent must still satisfy the same 3D deadline.
+        // Real two-finger XZ joystick + normal Y rail follow the live 3D target.
+        // Do not press an already-in-range joystick: a tap cycles its plane.
         const travel=planar<.15?0:Math.min(magnitude,planar*70);
-        if(travel>0&&!pressed){await page.mouse.move(x,y);await page.mouse.down();pressed=true}
-        if(pressed)await page.mouse.move(x+(planar?relative.x/planar*travel:0),y-(planar?relative.z/planar*travel:0));
+        const vertical=Math.abs(relative.y)<.15?0:Math.max(-1,Math.min(1,relative.y*1.5));
+        if(travel>0&&!contacts.has(31))await send('touchStart',31,x,y);
+        if(vertical!==0&&!contacts.has(32))await send('touchStart',32,rx,ry);
+        if(contacts.has(31))contacts.set(31,{id:31,x:x+(planar?relative.x/planar*travel:0),y:y-(planar?relative.z/planar*travel:0),radiusX:3,radiusY:3,force:1});
+        if(contacts.has(32))contacts.set(32,{id:32,x:rx,y:ry-vertical*rail.height*.36,radiusX:3,radiusY:3,force:1});
+        if(contacts.size)await native.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[...contacts.values()]});
         await page.waitForTimeout(75);
       }
-    }finally{if(pressed)await page.mouse.up();await finishApproach()}
-    assert.equal(reached,true,`${label}: real joystick must reach 3D distance <${limit} within ${timeoutMs}ms; inspect kspaceApproaches`);
+    }finally{
+      try{if(contacts.size)await native.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})}
+      finally{await finishApproach();await native.detach()}
+    }
+    const trace=report.kspaceApproaches.at(-1),downs=trace.pointers.filter(e=>e.type==='pointerdown');
+    assert.ok(downs.every(e=>e.isTrusted&&['joy','yControl'].includes(e.control)),'pursuit contacts must hit actual joystick/Y control owners through trusted input');
+    assert.equal(reached,true,`${label}: real XYZ controls must reach 3D distance <${limit} within ${timeoutMs}ms; inspect kspaceApproaches`);
   };
 
 
