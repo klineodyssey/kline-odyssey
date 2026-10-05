@@ -593,7 +593,7 @@ async function m1ReadOnlyBrowserQA(){
       assert.equal(await absent.locator('#wAddr').textContent(),'DISCONNECTED');
       await absent.screenshot({path:`${out}/390x844-no-injected-wallet.png`});
     }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message)},null,2));throw error}finally{await absent.close()}
-    for(const [width,height]of[[390,844],[844,390]]){
+    for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
       const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[];let logFallbacks=0;
       const consoleErrors=[],requestFailures=[];let stage='BOOT';
       const safeText=value=>String(value).replace(/https?:\/\/[^\s"']+/g,url=>{try{return new URL(url).origin}catch{return '[URL]'}});
@@ -623,6 +623,7 @@ async function m1ReadOnlyBrowserQA(){
         for(const order of s.orders){const [o]=orderAbi.decodeFunctionResult('order',await provider.send('eth_call',[{to:candidate.addresses.orderTriggerEngine,data:orderAbi.encodeFunctionData('order',[order.orderId])},tag]));assert.equal(o.trader.toLowerCase(),expected.toLowerCase())}
         await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});
         await page.waitForFunction(a=>document.querySelector('#wAddr').textContent.toLowerCase()===a.toLowerCase(),expected);
+        assert.equal(await page.locator('#walletRetained').isVisible(),false,'cached hint must not contradict a live provider identity');
         assert.equal(await page.locator('#wBnb').textContent(),s.wallet.testBnbBalance);assert.equal(await page.locator('#wKgen').textContent(),String(s.wallet.testTokenBalance));
         assert.equal(await page.locator('#testnetFinancialControls').isVisible(),false);assert.equal(await page.locator('#executionMode').isVisible(),false);assert.equal(s.writeBlocked,true);
         // Observe two real canonical-owner timer ticks; no sleep or forced UI success.
@@ -641,7 +642,7 @@ async function m1ReadOnlyBrowserQA(){
         state.account=state.account.toLowerCase()===accounts[0].toLowerCase()?accounts[1]:accounts[0];await page.evaluate(a=>__m1WalletEvents.emit('accountsChanged',[a]),state.account);
         evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('account-switched');stage='RELOAD';
         await page.reload({waitUntil:'domcontentloaded'});evidence.push(await verify(state.account));await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reloaded');stage='DISCONNECT';
-        state.connected=false;await page.evaluate(()=>__m1WalletEvents.emit('disconnect',{}));await page.waitForFunction(()=>!__K11520_EXECUTION__.snapshot().wallet);await page.waitForFunction(()=>document.querySelector('#wBnb').textContent==='UNVERIFIED');await shot('disconnected');stage='RECONNECT';
+        state.connected=false;await page.evaluate(()=>__m1WalletEvents.emit('disconnect',{}));await page.waitForFunction(()=>!__K11520_EXECUTION__.snapshot().wallet);await page.waitForFunction(()=>document.querySelector('#wBnb').textContent==='UNVERIFIED');assert.equal((await page.locator('#walletMsg').textContent()).includes('WRONG NETWORK'),false,'unknown network is not a confirmed wrong network');await shot('disconnected');stage='RECONNECT';
         state.connected=true;await page.locator('#walletConnect').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reconnected');stage='RETURN_LEGACY';
         assert.equal(await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode')),legacyPreference);
         await page.locator('#walletM1ReadOnly').click();await page.waitForFunction(a=>{const s=globalThis.__K11520_EXECUTION__?.snapshot();return s?.exitOnly&&s.wallet&&s.account?.toLowerCase()===a.toLowerCase()},state.account,{timeout:150000});

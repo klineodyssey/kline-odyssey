@@ -1,5 +1,29 @@
 # 11520 HANDOFF CURRENT
 
+## M1 six-viewport acceptance preparation — 2026-10-05
+
+- Remote PR #509 repair head `9c21d0ac4f9e1568f6aa8e7f26f9d4fd91391509`
+  completed both public read-only and local-EVM wallet browser jobs successfully.
+  Actual public RPC + synthetic EIP-1193 evidence covers 390×844 and844×390:
+  A/B balances, chain97 switch, reload, disconnect/reconnect, legacy return and
+  wallet-close restoration. No public signed transaction or physical MetaMask
+  acceptance. Four additional requested sizes remain NOT_VERIFIED at this point.
+- Direct inspection found the wallet foreground repair effective in those two
+  sizes. A stale cached-address hint and an unknown-chain wrong-network label
+  were misleading; the narrow presentation repair hides the cached hint once a
+  current provider identity exists, and labels a network wrong only when known.
+  Provider identity is not cryptographic ownership proof.
+- The next bounded M1 browser lane includes 360×740,390×844,412×772,432×856,
+  480×900 and844×390 with the same A/B, pinned balance, reload, no-write and
+  foreground assertions. It does not add transaction authority or financial
+  lifecycle acceptance. Root434 and UI-static37 checks pass locally.
+- Public RPC log queries fell back during the two-size run. Current balances and
+  order-owner reads passed; complete receipt-history recovery and M5 are not
+  verified. The legacy principal return read remains independently checked;
+  local-EVM close/withdraw evidence is not a public-chain transaction claim.
+- New-head six-viewport functional/visual QA remains PENDING. The earlier
+  two-size success does not substitute for the Human's full wallet-open matrix.
+
 ## M1 first CI evidence and repair checkpoint — 2026-10-05
 
 - Draft PR #509 initial remote head `0ce7b9c6c1e576711afeb4165c77188eb5ce9e1d`

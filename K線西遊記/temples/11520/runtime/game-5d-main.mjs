@@ -478,6 +478,7 @@ function walletExecutionView(value){
 function renderWallet(value=walletSession.snapshot()){
   S.walletKgen=value.kgen;
   $('#wAddr').textContent=value.account||'DISCONNECTED';
+  const retainedHint=$('#walletRetained');if(retainedHint)retainedHint.hidden=!!value.account;
   $('#wChain').textContent=value.chainId==null?'--':(value.chainId===97?'BSC TESTNET':value.network)+' · '+value.chainId;
   $('#wBnb').textContent=value.bnb??'--';$('#wKgen').textContent=value.kgen??'--';
   const chain=walletExecutionView(value);
@@ -485,7 +486,7 @@ function renderWallet(value=walletSession.snapshot()){
   if(isTestnet())$('#wBnb').textContent=chain.wallet?.testBnbBalance??'UNVERIFIED';
   $('#wKgen').previousElementSibling.textContent=isTestnet()?'TEST TOKEN · NO REAL VALUE':'ON-CHAIN KGEN · READ ONLY';
   if(isTestnet())$('#wKgen').textContent=chain.wallet?.testTokenBalance??'UNVERIFIED';
-  $('#walletMsg').textContent=isTestnet()?executionLabel()+' · '+chain.status+(value.chainId!==97?' · WRONG NETWORK — switch to 97':''):(value.status+(value.error?' · '+value.error:'')+'｜ON-CHAIN BALANCE · READ ONLY。交易與結算維持 SIMULATION。');
+  $('#walletMsg').textContent=isTestnet()?executionLabel()+' · '+chain.status+(value.chainId!=null&&value.chainId!==97?' · WRONG NETWORK — switch to 97':''):(value.status+(value.error?' · '+value.error:'')+'｜ON-CHAIN BALANCE · READ ONLY。交易與結算維持 SIMULATION。');
   const help=$('#walletProviderHelp');help.hidden=value.status!=='NO_WALLET';
   const busy=executionBusy||['CONNECTING','READING'].includes(value.status);
   $('#walletConnect').disabled=busy;$('#walletRefresh').disabled=busy;

@@ -134,3 +134,15 @@ test('existing utility owner gives expanded wallet an unobstructed view and rest
  utilitiesOpen=false;vm.runInContext('pinMobileUtilityStack();syncUtilityMaster()',context);assert.equal(nodes.cargoInterceptionButton.style.values.display,'none','now-idle cargo stays hidden');assert.equal(nodes.homeDeliveryButton.style.values.display,'grid','currently eligible delivery remains visible');
  assert.match(source,/walletOpen\?\['#k11520UtilityMaster',\.\.\.visibleContextActions,'#walletToggle'\]/);
 });
+
+
+test('wallet identity hints distinguish restored live identity, disconnect and confirmed wrong chain',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const hint=source.split('\n').find(line=>line.includes("const retainedHint=$('#walletRetained')"));
+ const message=source.split('\n').find(line=>line.includes("$('#walletMsg').textContent=isTestnet()?"));
+ const nodes={walletRetained:{hidden:false},walletMsg:{textContent:''}};
+ const context=vm.createContext({$:selector=>nodes[selector.slice(1)],value:{account:'0xabc',chainId:97},chain:{status:'ORACLE_STALE'},isTestnet:()=>true,executionLabel:()=>'TESTNET'});
+ const render=()=>vm.runInContext("(()=>{"+hint+message+"})()",context);render();assert.equal(nodes.walletRetained.hidden,true);assert.doesNotMatch(nodes.walletMsg.textContent,/WRONG NETWORK/);
+ context.value={account:null,chainId:null};render();assert.equal(nodes.walletRetained.hidden,false);assert.doesNotMatch(nodes.walletMsg.textContent,/WRONG NETWORK/);
+ context.value={account:'0xabc',chainId:1};render();assert.match(nodes.walletMsg.textContent,/WRONG NETWORK/);
+});
