@@ -155,6 +155,30 @@ jobs:
             exit "$RC"
           fi
           echo "[11520-QA] XYZ browser smoke completed $(date -u +%FT%TZ)"
+      - name: Run isolated native desktop contextual Courier QA
+        # Preserve the full pre-existing desktop block in its own mandatory90s
+        # invocation. This adds up to90s aggregate budget; mobile stays90s.
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-courier-desktop-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          K11520_COURIER_DESKTOP_ONLY=1 timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" 2>&1 | tee /tmp/k11520-courier-desktop.log
+      - name: Run Courier review explanation at six mobile sizes
+        # New explanation-only cases add a separate bounded90s invocation;
+        # existing living-world coverage and its90s cap are unchanged.
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-courier-review-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          K11520_COURIER_REVIEW_ONLY=1 timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" 2>&1 | tee /tmp/k11520-courier-review.log
       - name: Run deterministic settlement lifecycle in real Chromium (portrait and landscape)
         shell: bash
         run: |
@@ -206,6 +230,17 @@ jobs:
             if [ ! -s "$F" ]; then echo "[11520-QA] QA_RED: plane map screenshot missing: $F"; exit 1; fi
           done
           LIVING="artifacts/11520-visual-qa/11520-living-world-digital-ant.png"
+          for SIZE in 390x844 844x390 432x856 412x772 480x900 360x740; do
+            for STATE in compact details; do
+              test -s "artifacts/11520-visual-qa/11520-courier-review-$STATE-$SIZE.png" || { echo "[11520-QA] missing Courier explanation screenshot $STATE-$SIZE"; exit 1; }
+            done
+          done
+          for IMAGE in desktop-context-idle-1280x800 desktop-context-fresh-open-1280x800 desktop-context-rotate-open-1280x800 desktop-native-active-courier-1280x800; do
+            test -s "artifacts/11520-visual-qa/$IMAGE.png" || { echo "[11520-QA] missing desktop screenshot $IMAGE"; exit 1; }
+          done
+          test -s artifacts/11520-visual-qa/11520-living-world-desktop-timings.json
+          test -s artifacts/11520-visual-qa/11520-courier-review-details-initial-844x390.png
+          test -s artifacts/11520-visual-qa/11520-courier-review-report.json
           if [ ! -s "$LIVING" ]; then echo "[11520-QA] QA_RED: living-world screenshot missing: $LIVING"; exit 1; fi
           ITEMS="artifacts/11520-visual-qa/11520-backpack-item-3d.png"
           if [ ! -s "$ITEMS" ]; then echo "[11520-QA] QA_RED: 3D item screenshot missing: $ITEMS"; exit 1; fi
