@@ -309,18 +309,23 @@ async function verifyFullHudControlOwnership(page,report){
   const start=await readCamera(),readiness=await page.evaluate(async()=>{
     const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),began=performance.now(),history=[];
     const offsets=[0,-10,10,-20,20,-30,30];
-    const clear=(x,y,cache=new Map())=>{
+    const clear=(x,y,cache=new Map(),domCache=new Map())=>{
       // Reject HUD cheaply before any scene raycast; cache only within this
       // synchronous search, never across rendered frames or stability samples.
       const points=offsets.flatMap(dx=>offsets.map(dy=>({x:x+dx,y:y+dy})));
-      if(document.elementFromPoint(x+42,y)!==canvas||!points.every(p=>document.elementFromPoint(p.x,p.y)===canvas))return false;
+      const canvasAt=(px,py)=>{const key=px+','+py;if(!domCache.has(key))domCache.set(key,document.elementFromPoint(px,py)===canvas);return domCache.get(key)};
+      if(!canvasAt(x+42,y)||!points.every(p=>canvasAt(p.x,p.y)))return false;
       return points.every(p=>{const key=p.x+','+p.y;if(!cache.has(key))cache.set(key,__K11520_CAMERA__.canPanAt(p.x,p.y));return cache.get(key)});
     };
     let point=null,since=0;
     while(performance.now()-began<2000){
       if(point&&!clear(point.x,point.y)){history.push({event:'ELIGIBILITY_CHANGED',at:performance.now(),...point});point=null}
       if(!point){
-        const cache=new Map();search:for(let y=r.top+60;y<r.bottom-60&&performance.now()-began<2000;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(clear(x,y,cache)){point={x,y};since=performance.now();history.push({event:'CANDIDATE',at:since,...point});break search}
+        const cache=new Map(),domCache=new Map(),landscape=innerWidth>innerHeight;
+        // Portrait HUD leaves lower-world gaps; landscape leaves upper-world
+        // gaps. Search those first instead of raycasting through occupied HUD.
+        const ys=[];for(let y=r.top+60;y<r.bottom-60;y+=10)ys.push(y);if(!landscape)ys.reverse();
+        search:for(const y of ys){if(performance.now()-began>=2000)break;for(let x=r.left+60;x<r.right-60;x+=10)if(clear(x,y,cache,domCache)){point={x,y};since=performance.now();history.push({event:'CANDIDATE',at:since,...point});break search}}
       }
       if(point&&performance.now()-since>=150&&performance.now()-began<2000)return{point:{...point,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()},elapsedMs:performance.now()-began,stableMs:performance.now()-since,radius:30,history};
       await new Promise(requestAnimationFrame);
