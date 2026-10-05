@@ -639,3 +639,12 @@ failed restoration state without altering timers, authority or receipt behavior.
 The native-IDB job and all authority code remain unchanged by this prerequisite.
 Exact-candidate browser evidence is still required; prior passes do not validate
 this candidate, and production cutover remains HOLD.
+
+The separate mobile-HUD prerequisite copies only #507
+e4b33676c251ba291a7faafce144ed762cc176a3's atomic KZ geometry test hunk. A's prior
+Product PR lane failed between a visibility wait and a second DOM lookup while
+market refresh replaced the node. The correction returns plain geometry from
+the same browser task, retains all existing8px clearance assertions, and passes
+the intended5-second timeout in the correct Playwright argument. It adds bounded
+failure evidence without changing runtime/controller behavior or retrying a
+failed assertion. No Responsive harness/public-controller changes are imported.
