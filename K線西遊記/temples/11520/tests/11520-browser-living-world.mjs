@@ -6,8 +6,11 @@ const OUT='artifacts/11520-visual-qa';
 const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
+const recoveryOnly=process.env.K11520_COURIER_RECOVERY_ONLY==='1';
+const errors=[];
+if(!recoveryOnly){
 let page=await browser.newPage({viewport:{width:1280,height:800},isMobile:false,hasTouch:false});
-const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(2200);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
@@ -286,7 +289,8 @@ const banditBox=await page.locator('#playerBanditPanel').boundingBox();assert.ok
 // local player-ledger credit. The raid itself never marks it paid.
 await page.evaluate(async id=>{const {createLocalPlayerStore}=await import('/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/runtime/player-life-runtime.mjs');createLocalPlayerStore().activatePlayer(id)},localLives.courierLifeId);
 await page.setViewportSize({width:390,height:844});await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800);if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='APPROVED',insuredMission.missionId);await page.locator('#homeDeliveryButton').click();
-// Existing renderCourier replaces the details subtree on its countdown tick.
+// Read the existing claim node and current mission together; timer updates may
+// change its eligibility or visibility.
 // Read canonical eligibility, current visibility and geometry in one browser
 // task; a handle captured by a previous wait can already be detached. Do not
 // wait for compliant dimensions: the unchanged 44px assertion must still fail
@@ -297,8 +301,128 @@ const claimGeometry=await page.waitForFunction(id=>{
   const style=getComputedStyle(el),r=el.getBoundingClientRect();if(style.visibility==='hidden'||style.display==='none'||!r.width||!r.height)return false;
   return {x:r.x,y:r.y,width:r.width,height:r.height};
 },insuredMission.missionId);
-const insuranceClaimBox=await claimGeometry.jsonValue();await claimGeometry.dispose();assert.ok(insuranceClaimBox&&insuranceClaimBox.height>=44&&insuranceClaimBox.x>=0&&insuranceClaimBox.x+insuranceClaimBox.width<=390,'insurance claim must be a full-width 44px mobile touch target');await page.locator('#courierInsuranceClaim').click();await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='PAID',insuredMission.missionId);
+const insuranceClaimBox=await claimGeometry.jsonValue();await claimGeometry.dispose();assert.ok(insuranceClaimBox&&insuranceClaimBox.height>=44&&insuranceClaimBox.x>=0&&insuranceClaimBox.x+insuranceClaimBox.width<=390,'insurance claim must be a full-width 44px mobile touch target');
+// Observe the existing public action without intercepting it or changing payouts.
+const claimDiagnostic={sourceSha:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||'LOCAL',stage:'BEFORE_CLICK',samples:[]};
+const sampleClaim=async stage=>page.evaluate(({id,expectedCourier,stage})=>{
+  const api=globalThis.__K11520_PLAYER_COURIER__,snapshot=api?.snapshot?.(id),m=snapshot?.mission,p=globalThis.__K11520_PRODUCT__?.snapshot?.()||{},button=document.getElementById('courierInsuranceClaim'),r=button?.getBoundingClientRect(),hit=r?document.elementFromPoint(r.x+r.width/2,r.y+r.height/2):null;
+  let saved=null;try{saved=JSON.parse(localStorage.getItem(`k11520.player:${p.playerId}:k11520.local-product.v1:${p.owner||'guest'}`)||'null')}catch{}
+  return {stage,at:Date.now(),missionStatus:m?.status,claimStatus:m?.insurance?.claimStatus,policyStatus:m?.insurance?.status,payoutReceiptId:m?.insurance?.payoutReceiptId,payoutKaios:m?.insurance?.payoutKaios,courierMatches:p.playerId===expectedCourier,activeMissionMatches:api?.active?.()?.missionId===id,storeRevision:snapshot?.revision,productKaios:p.kaios,storedKaios:saved?.progress?.kaios,storedRevision:saved?.revision,insuranceEventCount:p.events?.COURIER_INSURANCE_PAYOUT,receiptAmount:saved?.progress?.courierInsuranceReceipts?.[m?.insurance?.payoutReceiptId],storageStatus:p.storageStatus,payoutApiAvailable:typeof globalThis.__K11520_PRODUCT__?.recordCourierInsurancePayout==='function',toast:document.getElementById('logisticsActionToast')?.textContent,button:button?{connected:button.isConnected,disabled:button.disabled,rect:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,hitOwned:hit===button||button.contains(hit),hitId:hit?.id||null}:null};
+},{id:insuredMission.missionId,expectedCourier:localLives.courierLifeId,stage});
+await page.evaluate(()=>{
+  const trace={events:[],feedback:[]};globalThis.__qaInsuranceTrace=trace;
+  const capture=event=>{if(trace.events.length<20&&event.target.closest?.('#courierInsuranceClaim'))trace.events.push({type:event.type,phase:event.eventPhase,trusted:event.isTrusted,defaultPrevented:event.defaultPrevented,target:event.target.id,at:performance.now()})};
+  for(const type of ['pointerdown','pointerup','click']){document.addEventListener(type,capture,true);document.addEventListener(type,capture,false)}
+  const toast=document.getElementById('logisticsActionToast'),observer=new MutationObserver(()=>{if(trace.feedback.length<20)trace.feedback.push(toast.textContent)});if(toast)observer.observe(toast,{childList:true,subtree:true,characterData:true});
+  globalThis.__qaInsuranceCleanup=()=>{observer.disconnect();for(const type of ['pointerdown','pointerup','click']){document.removeEventListener(type,capture,true);document.removeEventListener(type,capture,false)}};
+});
+claimDiagnostic.samples.push(await sampleClaim('BEFORE_CLICK'));
+try{
+  await page.locator('#courierInsuranceClaim').click({timeout:5000});claimDiagnostic.samples.push(await sampleClaim('AFTER_CLICK'));
+  await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='PAID',insuredMission.missionId,{timeout:5000});
+  claimDiagnostic.stage='PAID';claimDiagnostic.samples.push(await sampleClaim('PAID'));
+}catch(error){claimDiagnostic.stage='FAILED';claimDiagnostic.error=String(error);claimDiagnostic.samples.push(await sampleClaim('FAILED').catch(captureError=>({stage:'FAILED_CAPTURE',error:String(captureError)})));await page.screenshot({path:`${OUT}/11520-courier-insurance-claim-failure.png`}).catch(captureError=>{claimDiagnostic.screenshotError=String(captureError)});throw error}
+finally{claimDiagnostic.trace=await page.evaluate(()=>{globalThis.__qaInsuranceCleanup?.();return globalThis.__qaInsuranceTrace}).catch(captureError=>({captureError:String(captureError)}));await fs.writeFile(`${OUT}/11520-courier-insurance-claim-diagnostic.json`,JSON.stringify(claimDiagnostic,null,2))}
+
 const insuranceAfter=await page.evaluate(id=>({mission:globalThis.__K11520_PLAYER_COURIER__.snapshot(id).mission,kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}),insuredMission.missionId);assert.equal(insuranceAfter.kaios,insuredBeforeKaios+insuranceAfter.mission.insurance.payoutKaios,'approved insurance payout credits the original courier local ledger exactly once');const replayResult=await page.evaluate(m=>globalThis.__K11520_PRODUCT__.recordCourierInsurancePayout(m.insurance.payoutReceiptId,m.insurance.payoutKaios),insuranceAfter.mission);assert.equal(replayResult.replayed,true);assert.equal(await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),insuranceAfter.kaios,'replaying the insurance receipt never credits twice');assert.equal(await page.locator('#courierInsuranceClaim').count(),0,'paid claim action disappears after one-shot settlement');
 
-await browser.close();
+assert.deepEqual(errors,[],'ordinary courier/insurance tail must remain free of page errors');
 console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);
+}
+
+if(recoveryOnly){
+// Recovery runs in a fresh, disposable browser profile. These are QA local-game
+// records only; no connected player's storage, provider or real balance is used.
+let recoveryPage=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+const recoveryConsole=[];recoveryPage.on('pageerror',e=>errors.push(String(e)));recoveryPage.on('console',message=>{if(['error','warning'].includes(message.type())&&recoveryConsole.length<30)recoveryConsole.push(message.text())});
+await recoveryPage.clock.install({time:new Date('2026-10-05T08:00:00Z')});
+let recoveryBootCount=0;
+const recoveryBoot=async()=>{
+  const boot=++recoveryBootCount;console.log(`[Courier recovery] boot ${boot}`);
+  try{
+    await recoveryPage.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:15000});
+    await recoveryPage.waitForFunction(()=>document.getElementById('enter11520')||globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId,null,{timeout:10000});
+    if(await recoveryPage.locator('#intro11520').isVisible().catch(()=>false))await recoveryPage.locator('#enter11520').click({timeout:5000});
+    await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.()&&globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId&&document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.2',null,{timeout:15000});
+  }catch(error){
+    const state=await recoveryPage.evaluate(()=>({readyState:document.readyState,bootStatus:document.getElementById('boot11520Status')?.textContent,productAvailable:Boolean(globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId),courierAvailable:Boolean(globalThis.__K11520_PLAYER_COURIER__?.snapshot?.()),visibleVersion:document.querySelector('.brandMetaV250')?.textContent,versionDataset:document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion,wallNow:Date.now(),monoNow:performance.now()})).catch(captureError=>({captureError:String(captureError)}));
+    await recoveryPage.screenshot({path:`${OUT}/11520-courier-recovery-boot-${boot}-failure.png`}).catch(()=>{});
+    await fs.writeFile(`${OUT}/11520-courier-recovery-boot-failure.json`,JSON.stringify({boot,error:String(error),state,errors,console:recoveryConsole},null,2));throw error;
+  }
+};
+await recoveryBoot();
+await recoveryPage.evaluate(()=>{const p=globalThis.__K11520_PRODUCT__.snapshot(),key=`k11520.player:${p.playerId}:k11520.local-product.v1:guest`,saved=JSON.parse(localStorage.getItem(key));saved.progress.kaios=100;saved.progress.claimableKaios=0;localStorage.setItem(key,JSON.stringify(saved))});
+await recoveryBoot();
+const reviewFixture=await recoveryPage.evaluate(async()=>{
+  const {createPlayerCourierOffer,createPlayerCourierStore,quoteCargoInsurance}=await import('./runtime/digital-ant-logistics-runtime.mjs');
+  const player=globalThis.__K11520_PRODUCT__.snapshot(),store=createPlayerCourierStore({sessionId:'QA-PAUSED',now:()=>Date.now(),monotonicNow:()=>100}),quote=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000});
+  const mission=store.accept(createPlayerCourierOffer({missionId:'QA-CLOCK-REVIEW-RECOVERY',requesterLifeId:player.playerId,cargoId:'QA-CLOCK-CARGO',cargoAmount:1000,freightFeeKaios:17,courierSalaryKaios:6,estimatedDurationMs:60_000,insuranceQuote:quote}),{courierLifeId:player.playerId});
+  store.applyCombatDamage(mission.missionId,{courierLifeId:player.playerId,damage:17});
+  const paymentEvidence=globalThis.__K11520_PRODUCT__.spendLocalKaios(quote.premiumKaios,'PLAYER_COURIER_INSURANCE_PREMIUM');if(!paymentEvidence.ok)throw new Error('QA premium fixture failed');
+  localStorage.setItem('11520.playerCourier.pendingInsurancePayment',JSON.stringify({missionId:mission.missionId,courierLifeId:player.playerId,paymentEvidence}));
+  store.observe(mission.missionId,{wallNow:mission.dueAt,monoNow:101});
+  localStorage.setItem('11520.playerCourier.lastMission',mission.missionId);
+  return {mission:store.snapshot(mission.missionId).mission,kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios,pending:localStorage.getItem('11520.playerCourier.pendingInsurancePayment')};
+});
+await recoveryBoot();
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='CLOCK_REVIEW');
+assert.match(await recoveryPage.locator('#homeDeliveryButton').getAttribute('aria-label'),/時間驗證暫停/);
+assert.doesNotMatch(await recoveryPage.locator('#homeDeliveryButton').textContent(),/00:00/);
+await recoveryPage.locator('#homeDeliveryButton').click();
+assert.match(await recoveryPage.locator('#playerCourierDetails').textContent(),/尚未完成或發獎/);
+assert.match(await recoveryPage.locator('#playerCourierDetails').textContent(),/完整 01:00 重新計時/);
+assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0,'opening details cannot itself approve recovery');
+await recoveryPage.locator('#courierRecoveryPrepare').click();
+for(const [width,height] of [[390,844],[844,390]]){
+  await recoveryPage.setViewportSize({width,height});await recoveryPage.waitForTimeout(200);
+  await recoveryPage.locator('#courierRecoveryConfirm').scrollIntoViewIfNeeded();
+  const box=await recoveryPage.locator('#courierRecoveryConfirm').evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:hit===el||el.contains(hit)}});
+  assert.ok(box.height>=44&&box.hit&&box.x>=0&&box.y>=0&&box.right<=width&&box.bottom<=height,`recovery confirmation visible and reachable ${width}x${height}: ${JSON.stringify(box)}`);
+  await recoveryPage.screenshot({path:`${OUT}/11520-courier-clock-confirm-${width}x${height}.png`});
+}
+await recoveryPage.setViewportSize({width:390,height:844});
+await recoveryPage.locator('#courierRecoveryCancel').click();assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0);
+assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'CLOCK_REVIEW');
+await recoveryPage.locator('#courierRecoveryPrepare').click();await recoveryPage.locator('#homeDeliveryButton').click();await recoveryPage.locator('#homeDeliveryButton').click();assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0,'close/reopen discards unsubmitted confirmation');
+await recoveryPage.locator('#courierRecoveryPrepare').click();
+await recoveryPage.evaluate(async()=>{const {createPlayerCourierStore}=await import('./runtime/digital-ant-logistics-runtime.mjs');const store=createPlayerCourierStore({sessionId:'QA-OTHER-TAB'}),m=globalThis.__K11520_PLAYER_COURIER__.active();store.observe(m.missionId)});
+await recoveryPage.locator('#courierRecoveryConfirm').click();await recoveryPage.waitForFunction(()=>/任務已更新|另一分頁已更新/.test(document.getElementById('logisticsActionToast')?.textContent||''));assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'CLOCK_REVIEW');assert.match(await recoveryPage.locator('#logisticsActionToast').textContent(),/任務已更新|另一分頁已更新/);
+assert.equal(await recoveryPage.evaluate(()=>localStorage.getItem('11520.playerCourier.pendingInsurancePayment')),reviewFixture.pending,'stale confirmation retains interrupted premium evidence');
+// Two actual cooperative pages share one origin/storage partition and race the
+// explicit confirmation. Only one Web Lock holder may run the recovered clock.
+const competingPage=await recoveryPage.context().newPage();competingPage.on('pageerror',e=>errors.push(String(e)));
+await competingPage.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
+await competingPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='CLOCK_REVIEW');
+if(await competingPage.locator('#intro11520').isVisible().catch(()=>false))await competingPage.locator('#enter11520').click();
+await competingPage.locator('#homeDeliveryButton').click();await competingPage.locator('#courierRecoveryPrepare').click();await recoveryPage.locator('#courierRecoveryPrepare').click();
+for(const contender of [recoveryPage,competingPage])await contender.evaluate(()=>document.addEventListener('click',event=>{if(event.target.id==='courierRecoveryConfirm')queueMicrotask(()=>{globalThis.__qaRecoveryCancelDisabled=document.getElementById('courierRecoveryCancel')?.disabled===true})}));
+await Promise.all([recoveryPage.locator('#courierRecoveryConfirm').click(),competingPage.locator('#courierRecoveryConfirm').click()]);
+for(const contender of [recoveryPage,competingPage])assert.equal(await contender.evaluate(()=>globalThis.__qaRecoveryCancelDisabled),true,'submitted confirmation cannot misleadingly offer cancellation while admission is pending');
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='ACTIVE');await competingPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='ACTIVE');
+const firstOwns=await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.ownsRecoveryClock()),secondOwns=await competingPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.ownsRecoveryClock());assert.notEqual(firstOwns,secondOwns,'exactly one actual tab holds the recovered mission clock');
+const follower=firstOwns?competingPage:recoveryPage;if(!firstOwns)recoveryPage=competingPage;
+assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().clockRecovery.count),1);
+await follower.reload({waitUntil:'domcontentloaded'});await follower.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='ACTIVE');
+// Playwright's clock is context-wide. Change only this follower's wall reading,
+// never fast-forward the shared clock (which would also finish the owner).
+await follower.evaluate(()=>{const originalNow=Date.now.bind(Date);Date.now=()=>originalNow()+120_000;document.dispatchEvent(new Event('visibilitychange'))});await follower.waitForTimeout(800);
+assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'ACTIVE','follower reload or its expired clock cannot re-pause or settle the active owner');assert.equal(await follower.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),reviewFixture.kaios,'follower never awards or repeats a premium charge');await follower.close();
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.insurance?.status==='ACTIVE');
+const restarted=await recoveryPage.evaluate(()=>({mission:globalThis.__K11520_PLAYER_COURIER__.active(),kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios,pending:localStorage.getItem('11520.playerCourier.pendingInsurancePayment')}));
+assert.equal(restarted.mission.status,'ACTIVE');assert.deepEqual(restarted.mission.cargo,reviewFixture.mission.cargo);assert.deepEqual(restarted.mission.economics,reviewFixture.mission.economics);assert.equal(restarted.kaios,reviewFixture.kaios,'resume reconciles already-paid insurance without another debit or reward');assert.equal(restarted.pending,null);assert.equal(restarted.mission.settlement,null);assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0);
+await recoveryPage.clock.fastForward(30_000);assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'ACTIVE');
+await recoveryBoot();await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='CLOCK_REVIEW');
+await recoveryPage.clock.fastForward(60_000);assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'CLOCK_REVIEW','reload plus expired wall deadline never completes recovered cargo');
+await recoveryPage.locator('#homeDeliveryButton').click();await recoveryPage.locator('#courierRecoveryPrepare').click();await recoveryPage.locator('#courierRecoveryConfirm').click();
+await recoveryPage.waitForFunction(()=>{const m=globalThis.__K11520_PLAYER_COURIER__.active();return m?.status==='ACTIVE'&&m.clockRecovery?.count===2});
+const secondRestart=await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active());assert.equal(secondRestart.clockRecovery.count,2);assert.equal(secondRestart.clockRecovery.receiptId,restarted.mission.clockRecovery.receiptId);
+await recoveryPage.clock.fastForward(60_001);
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='DELIVERED');
+const completed=await recoveryPage.evaluate(()=>({mission:globalThis.__K11520_PLAYER_COURIER__.active(),kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}));assert.equal(completed.mission.settlement.rewardKaios,8);assert.equal(completed.kaios,reviewFixture.kaios+8);assert.equal(completed.mission.settlement.receiptId,restarted.mission.clockRecovery.receiptId);
+await recoveryPage.screenshot({path:`${OUT}/11520-courier-clock-delivered-390x844.png`});
+await recoveryBoot();await recoveryPage.clock.fastForward(5_000);assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),completed.kaios,'completion reload cannot replay the reward');
+assert.equal(await recoveryPage.locator('#courierRecoveryPrepare').count(),0);assert.deepEqual(errors,[]);await fs.writeFile(`${OUT}/11520-courier-recovery-report.json`,JSON.stringify({sourceSha:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||'LOCAL',version:'V2.9.2',actualSharedContextTabs:true,exactlyOneOwner:true,followerCannotPauseOrAward:true,ownerReloadRequiresConfirmation:true,pendingPremiumChargedAgain:false,fullDurationRequired:true,rewardKaios:completed.mission.settlement.rewardKaios,rewardCount:1,confirmationSizes:['390x844','844x390'],bootCount:recoveryBootCount,errors},null,2));await recoveryPage.close();
+
+console.log('11520 Courier recovery QA PASS: confirmed restart, shared-context admission, passive follower, insurance reconciliation, reload pause and one reward');
+}
+await browser.close();

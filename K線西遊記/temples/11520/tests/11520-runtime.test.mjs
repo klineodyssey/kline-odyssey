@@ -275,7 +275,7 @@ test('V1 revalidates old high-C pending records; sequence replay cannot fill or 
 import {movementStep,defaultInventory,useInventoryItem,exchangeLocal,previewOrder,executeOrder,closePosition,tradeStats} from '../runtime/game-ui-runtime.mjs';
 import {WORLD_RULES,createWorldState,resolvePlayerMove,playerAttack,tickWorld,tickSourceManagedLife,applyMarketLifeSourceEvents} from '../runtime/world-runtime.mjs';
 import {createMarketLife,decideMarketLifeLifestyle,applyLifestyleEconomy,travelMarketLife} from '../runtime/market-life-runtime.mjs';
-import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createPlayerCourierStore,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
+import {createDigitalAnt,createDeliveryMission,createPlayerHomeDestination,createPlayerHomeDeliveryRequest,buildAtmRegistry,quoteDeliveryEconomics,cfoEvaluateDelivery,chooseBestDelivery,assignDelivery,loadCargo,tickDigitalAntDelivery,verifyDeliveryReceipt,previewPlayerHomeAcceptance,acceptPlayerHomeDelivery,planDigitalAntEncounter,planCargoHedge,calculateKRouteKinematics,buildAtmUfoFlightPlan,cSpeedMetersPerSecond,quoteCargoInsurance,activateCargoInsurance,attemptCargoRobbery,settleCargoInsuranceClaim,calculateMissileImpact,previewMissileInterception,resolveMissileInterception,estimatePlayerCourierDuration,createPlayerCourierOffer,createPlayerCourierStore as createPlayerCourierStoreCore,K_INDEX_KM} from '../runtime/digital-ant-logistics-runtime.mjs';
 import {publishMarketLifeSourceEvent} from '../runtime/market-life-source-runtime.mjs';
 import {SPATIAL_CALIBRATION,gameUnitsToMeters,metersToGameUnits,gameUnitsToK,kToGameUnits,kmToK,kToKm,formatGameDistanceK,localPositionToK,marketToPhysicalK} from '../runtime/spatial-coordinate-runtime.mjs';
 import {normalizeKPrice,inverseKPrice,kPositionFromReference,composeKWorld,combatPhase,createKSpaceEncounter,kCombatSnapshot,attackKSpace,KSPACE_REFERENCE,updateKMarketReference,kMarketSnapshot,formatKCoordinate} from '../runtime/world-runtime.mjs';
@@ -595,6 +595,8 @@ test('Player Courier salary and freight-share receipt credits local KAIOS exactl
   const insuranceId='COURIER-INSURANCE-1a2b3c4d',paid=reloaded.recordCourierInsurancePayout({receiptId:insuranceId,reward:720});assert.equal(paid.ok,true);assert.equal(paid.replayed,false);assert.equal(reloaded.snapshot().kaios,724);const replay=reloaded.recordCourierInsurancePayout({receiptId:insuranceId,reward:720});assert.equal(replay.ok,true);assert.equal(replay.replayed,true);assert.equal(reloaded.snapshot().kaios,724,'insurance receipt replay never credits twice');assert.equal(reloaded.recordCourierInsurancePayout({receiptId:insuranceId,reward:719}).reason,'COURIER_INSURANCE_RECEIPT_CONFLICT');
 });
 
+function courierLockManager(){const held=new Set();return {async request(name,options,callback){if(held.has(name))return callback(null);held.add(name);try{return await callback({name})}finally{held.delete(name)}}}}
+function createPlayerCourierStore(options={}){if(options.storage&&!options.storage.qaLocks)options.storage.qaLocks=courierLockManager();return createPlayerCourierStoreCore({...options,locks:options.storage?.qaLocks??courierLockManager()})}
 function courierStorage(){const data=new Map();return {data,getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)}}
 function courierOffer(overrides={}){return createPlayerCourierOffer({missionId:'COURIER-QA-1',requesterLifeId:'KAIOS-P-REQUESTER-1234567890',cargoId:'CARGO-QA-1',cargoKind:'CASH',cargoAmount:2400,cargoUnit:'KAIOS',origin:{x:0,y:0,z:0},destination:{x:25_000,y:0,z:0},distanceMeters:25_000,risk:.2,freightFeeKaios:8,courierSalaryKaios:3,estimatedDurationMs:1_800_000,createdAt:1_000,...overrides})}
 
@@ -649,6 +651,174 @@ test('Player Courier rejects clock tampering, player switching and stale-tab dou
   const cleanStorage=courierStorage(),tabA=createPlayerCourierStore({storage:cleanStorage,now:()=>20_000,monotonicNow:()=>200,sessionId:'TAB-A'}),active=tabA.accept(courierOffer({missionId:'COURIER-TABS'}),{courierLifeId:courier}),tabB=createPlayerCourierStore({storage:cleanStorage,now:()=>active.dueAt,monotonicNow:()=>1,sessionId:'TAB-B'});
   assert.equal(tabA.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1_800_200}).ok,true);
   assert.throws(()=>tabB.settleDue(active.missionId,{courierLifeId:courier,wallNow:active.dueAt,monoNow:1}),/REVISION_CONFLICT_RELOAD_REQUIRED/);tabB.reload();assert.equal(tabB.snapshot(active.missionId).mission.status,'DELIVERED');
+});
+
+test('Player Courier clock review remains paused across elapsed deadlines and reload until confirmed recovery',async()=>{
+  const storage=courierStorage(),courier='KAIOS-P-CLOCK-RECOVERY',a=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'CLOCK-A'}),mission=a.accept(courierOffer({missionId:'CLOCK-RECOVERY'}),{courierLifeId:courier});
+  a.observe(mission.missionId,{wallNow:mission.dueAt,monoNow:101});
+  assert.equal(a.activeMission(courier).status,'CLOCK_REVIEW');
+  const b=createPlayerCourierStore({storage,now:()=>mission.dueAt+100_000,monotonicNow:()=>10,sessionId:'CLOCK-B'});
+  b.observe(mission.missionId);assert.equal(b.activeMission(courier).status,'CLOCK_REVIEW','old deadline and reload must never grant completion');
+  assert.equal(typeof b.previewClockRecovery,'function','paused mission needs an explicit recovery path');
+  const preview=b.previewClockRecovery(mission.missionId,{courierLifeId:courier});
+  assert.equal(preview.restartDurationMs,mission.estimatedDurationMs);
+});
+
+function pausedCourier({storage=courierStorage(),id='RECOVERY-QA',sessionId='RECOVERY-SESSION',insured=false}={}){
+  const courier='KAIOS-P-RECOVERY-1234567890',store=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId});
+  const mission=store.accept(courierOffer({missionId:id,insuranceQuote:quoteCargoInsurance({cargoAmount:2400,reserveKaios:5000})}),{courierLifeId:courier});
+  if(insured){const premium=store.previewInsuranceActivation(id,{courierLifeId:courier});store.activateInsurance(id,{courierLifeId:courier,paymentEvidence:{ok:true,amount:premium.premiumKaios,purpose:premium.purpose,scope:premium.scope}})}
+  store.applyCombatDamage(id,{courierLifeId:courier,damage:17});
+  store.observe(id,{wallNow:mission.dueAt,monoNow:101});
+  return {store,storage,courier,id,mission:store.snapshot(id).mission};
+}
+function restartCourier(fixture,{wallNow=20_000,monoNow=200,...options}={}){
+  const {store,courier,id}=fixture,preview=store.previewClockRecovery(id,{courierLifeId:courier});
+  return store.resumeClockReview(id,{...preview,confirmed:true,wallNow,monoNow,...options});
+}
+
+test('Player Courier recovery requires explicit bound confirmation and rejects duplicate, stale and wrong-player calls',async()=>{
+  const f=pausedCourier(),{store,id,courier}=f,preview=store.previewClockRecovery(id,{courierLifeId:courier}),before=store.snapshot();
+  for(const confirmed of [undefined,false,'true',1])await assert.rejects(()=>store.resumeClockReview(id,{...preview,confirmed}),/PLAYER_CLOCK_RECOVERY_CONFIRMATION_REQUIRED/);
+  assert.deepEqual(store.snapshot(),before,'preview and missing approval change nothing');
+  assert.throws(()=>store.previewClockRecovery(id,{courierLifeId:'ANOTHER-PLAYER'}),/COURIER_LIFE_MISMATCH/);
+  await assert.rejects(()=>store.resumeClockReview(id,{...preview,confirmed:true,courierLifeId:'ANOTHER-PLAYER'}),/COURIER_LIFE_MISMATCH/);
+  await assert.rejects(()=>store.resumeClockReview(id,{...preview,confirmed:true,expectedRevision:preview.expectedRevision-1}),/RECOVERY_PREVIEW_STALE/);
+  await assert.rejects(()=>restartCourier(f,{monoNow:NaN}),/INVALID_MONOTONIC_CLOCK/);
+  const resumed=await restartCourier(f);assert.equal(resumed.status,'ACTIVE');assert.equal(resumed.dueAt,20_000+resumed.estimatedDurationMs);
+  await assert.rejects(()=>store.resumeClockReview(id,{...preview,confirmed:true}),/CLOCK_RECOVERY_IN_PROGRESS/);
+  await assert.rejects(()=>store.resumeClockReview(id,{...preview,confirmed:true,expectedRevision:store.snapshot().revision}),/CLOCK_RECOVERY_IN_PROGRESS/);
+});
+
+test('Player Courier recovery preserves cargo, economics, ownership, policy and pending premium evidence without charge or reward',async()=>{
+  for(const insured of [false,true]){
+    const f=pausedCourier({insured,id:`RECOVERY-POLICY-${insured}`}),{store,storage,id,mission,courier}=f;
+    const pendingKey='11520.playerCourier.pendingInsurancePayment',premium=mission.insurance.premiumKaios,paymentEvidence={ok:true,amount:premium,purpose:'PLAYER_COURIER_INSURANCE_PREMIUM',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
+    storage.setItem(pendingKey,JSON.stringify({missionId:id,courierLifeId:courier,paymentEvidence}));const pending=storage.getItem(pendingKey),resumed=await restartCourier(f);
+    for(const key of Object.keys(mission).filter(key=>!['status','clockState','dueAt','lastWallAt','lastMonotonicAt','clockSessionId'].includes(key)))assert.deepEqual(resumed[key],mission[key],`preserved ${key}`);
+    assert.equal(resumed.settlement,null);assert.equal(storage.getItem(pendingKey),pending);
+    if(!insured){const activated=store.activateInsurance(id,{courierLifeId:courier,paymentEvidence});assert.equal(activated.insurance.premiumPaidKaios,premium);assert.throws(()=>store.activateInsurance(id,{courierLifeId:courier,paymentEvidence}),/INSURANCE_QUOTE_REQUIRED/)}
+  }
+});
+
+test('Player Courier recovered deadline requires a full monotonic duration and retains original one-shot reward receipt',async()=>{
+  const f=pausedCourier(),{store,id,courier,mission}=f,resumed=await restartCourier(f),duration=resumed.estimatedDurationMs;
+  const early=store.settleDue(id,{courierLifeId:courier,wallNow:resumed.dueAt,monoNow:200+duration-1});assert.equal(early.ok,false);assert.equal(early.reason,'DELIVERY_TIMER_ACTIVE');assert.equal(early.remainingMs,1);
+  const result=store.settleDue(id,{courierLifeId:courier,wallNow:resumed.dueAt+1,monoNow:200+duration});assert.equal(result.ok,true);assert.equal(result.mission.settlement.receiptId,resumed.clockRecovery.receiptId);assert.equal(result.mission.settlement.rewardKaios,mission.economics.courierPayout);
+  // Exact key equivalence uses the same original mission ID and deadline.
+  const comparison=createPlayerCourierStore({storage:courierStorage(),now:()=>mission.startedAt,monotonicNow:()=>100,sessionId:'COMPARE'}),same=comparison.accept(courierOffer({missionId:id}),{courierLifeId:courier});
+  assert.equal(comparison.settleDue(id,{courierLifeId:courier,wallNow:same.dueAt,monoNow:100+duration}).mission.settlement.receiptId,result.mission.settlement.receiptId);
+  assert.throws(()=>store.settleDue(id,{courierLifeId:courier,wallNow:resumed.dueAt+2,monoNow:201+duration}),/MISSION_ALREADY_SETTLED/);
+  const ledger=createSimulationPlayerStore({ledger:createKgenLedger(),storage:f.storage,playerId:courier});ledger.activate(null);
+  assert.equal(ledger.recordCourierSettlement({receiptId:result.mission.settlement.receiptId,reward:result.mission.settlement.rewardKaios}).ok,true);
+  assert.equal(ledger.recordCourierSettlement({receiptId:result.mission.settlement.receiptId,reward:result.mission.settlement.rewardKaios}).reason,'COURIER_REWARD_REPLAY_BLOCKED');
+});
+
+test('Player Courier recovery rejects stale tabs and re-pauses after reload instead of trusting old expiry',async()=>{
+  const f=pausedCourier(),{store,storage,id,courier}=f,tab=createPlayerCourierStore({storage,now:()=>20_000,monotonicNow:()=>200,sessionId:'OTHER-TAB'}),preview=tab.previewClockRecovery(id,{courierLifeId:courier});
+  const resumed=await restartCourier(f);
+  await assert.rejects(()=>tab.resumeClockReview(id,{...preview,confirmed:true}),/COURIER_CLOCK_OWNED_BY_ANOTHER_TAB/);
+  tab.reload();assert.throws(()=>tab.observe(id),/COURIER_CLOCK_LEASE_REQUIRED/);assert.throws(()=>tab.settleDue(id,{courierLifeId:courier}),/COURIER_CLOCK_LEASE_REQUIRED/);
+  await store.dispose();
+  const loaded=createPlayerCourierStore({storage,now:()=>resumed.dueAt+1_000,monotonicNow:()=>1,sessionId:'RELOAD'});const result=await loaded.inspectRecoveredClock(id);
+  assert.equal(result.clockState,'CLOCK_SESSION_REVIEW_REQUIRED');assert.equal(result.status,'CLOCK_REVIEW');assert.equal(result.settlement,null);
+  const recovered=await restartCourier({...f,store:loaded},{wallNow:resumed.dueAt+2_000,monoNow:2});assert.equal(recovered.clockRecovery.receiptId,resumed.clockRecovery.receiptId);assert.equal(recovered.clockRecovery.originalDueAt,resumed.clockRecovery.originalDueAt);assert.equal(recovered.clockRecovery.count,2);assert.equal(recovered.dueAt,resumed.dueAt+2_000+resumed.estimatedDurationMs);
+});
+
+test('Player Courier repeated clock drift and rollback still pause recovery at original thresholds',async()=>{
+  for(const [wallDelta,monoDelta,reason] of [[6_001,1,'CLOCK_DRIFT_DETECTED'],[-1_001,0,'CLOCK_ROLLBACK_DETECTED']]){
+    const f=pausedCourier(),resumed=await restartCourier(f),result=f.store.settleDue(f.id,{courierLifeId:f.courier,wallNow:resumed.lastWallAt+wallDelta,monoNow:resumed.lastMonotonicAt+monoDelta});assert.equal(result.reason,reason);assert.equal(result.mission.status,'CLOCK_REVIEW');assert.equal(result.mission.settlement,null);
+    await f.store.dispose();const again=await restartCourier(f,{wallNow:30_000,monoNow:300});assert.equal(again.cargo.durability,resumed.cargo.durability);assert.equal(again.clockRecovery.receiptId,resumed.clockRecovery.receiptId);
+  }
+});
+
+test('Player Courier recovery cannot revive terminal or non-courier-owned cargo',async()=>{
+  for(const status of ['DELIVERED','ROBBED','FAILED']){
+    const f=pausedCourier({id:`TERMINAL-${status}`}),resumed=await restartCourier(f),{store,id,courier}=f;
+    if(status==='DELIVERED')store.settleDue(id,{courierLifeId:courier,wallNow:resumed.dueAt,monoNow:200+resumed.estimatedDurationMs});
+    if(status==='FAILED')store.applyCombatDamage(id,{courierLifeId:courier,damage:100,source:'BOSS_SPECIAL_RAID',eligibleCargoRaid:true});
+    if(status==='ROBBED')store.raid(id,{attackerLifeId:'BANDIT-TERMINAL',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,distanceMeters:1,replayKey:'TERMINAL-RAID',wallNow:20_000+Math.floor(resumed.estimatedDurationMs*.2),monoNow:200+Math.floor(resumed.estimatedDurationMs*.2)});
+    await store.dispose();const before=store.snapshot();assert.equal(before.mission,null);assert.equal(before.missions[id].status,status);
+    assert.throws(()=>store.previewClockRecovery(id,{courierLifeId:courier}),/MISSION_ALREADY_SETTLED/);
+    await assert.rejects(()=>store.resumeClockReview(id,{courierLifeId:courier,confirmed:true,expectedRevision:before.revision}),/MISSION_ALREADY_SETTLED/);assert.deepEqual(store.snapshot(),before);
+  }
+});
+
+test('Player Courier recovery blocks reentrant storage callbacks and interrupted writes remain retryable',async()=>{
+  const storage=courierStorage(),f=pausedCourier({storage}),preview=f.store.previewClockRecovery(f.id,{courierLifeId:f.courier}),write=storage.setItem;
+  let nested=0,nestedResult;storage.setItem=(key,value)=>{nested++;nestedResult=assert.rejects(()=>f.store.resumeClockReview(f.id,{...preview,confirmed:true}),/CLOCK_RECOVERY_IN_PROGRESS/);throw new Error('QA_STORAGE_INTERRUPTED')};
+  await assert.rejects(()=>restartCourier(f),/QA_STORAGE_INTERRUPTED/);await nestedResult;assert.equal(f.store.activeMission(f.courier).status,'CLOCK_REVIEW');assert.equal(nested,1);
+  storage.setItem=write;const resumed=await restartCourier(f);assert.equal(resumed.clockRecovery.count,1);assert.equal(resumed.settlement,null);
+});
+
+test('Player Courier recovery fails closed for lost ownership, nonlocal authority and corrupt timer records',async()=>{
+  for(const mutation of [m=>{m.cargo.ownerState='LOST'},m=>{m.cargo.ownerLifeId='OTHER'},m=>{m.cargo.durability=0},m=>{m.scope='REAL_PAYMENT'},m=>{m.realKaiosTransfer=true},m=>{m.estimatedDurationMs=0}]){
+    const f=pausedCourier(),raw=JSON.parse(f.storage.getItem('K11520_PLAYER_COURIER'));mutation(raw.missions[f.id]);f.storage.setItem('K11520_PLAYER_COURIER',JSON.stringify(raw));f.store.reload();
+    const before=f.store.snapshot();assert.throws(()=>f.store.previewClockRecovery(f.id,{courierLifeId:f.courier}),/CARGO_SURVIVAL_CHECK_FAILED|LOCAL_GAME_COURIER_REQUIRED|INVALID_ESTIMATED_DURATION/);assert.deepEqual(f.store.snapshot(),before);
+  }
+  const f=pausedCourier();await restartCourier(f);const raw=JSON.parse(f.storage.getItem('K11520_PLAYER_COURIER'));raw.missions[f.id].clockRecovery.receiptId='COURIER-RECEIPT-forged';f.storage.setItem('K11520_PLAYER_COURIER',JSON.stringify(raw));assert.throws(()=>f.store.reload(),/CORRUPT_SAVE/);
+});
+
+test('Player Courier recovery rejects malformed original deadline and duration before preview or lock mutation',async()=>{
+  for(const [field,value] of [['dueAt',null],['dueAt',false],['dueAt',''],['estimatedDurationMs','1800000'],['startedAt',null]]){
+    const f=pausedCourier(),raw=JSON.parse(f.storage.getItem('K11520_PLAYER_COURIER'));raw.missions[f.id][field]=value;f.storage.setItem('K11520_PLAYER_COURIER',JSON.stringify(raw));f.store.reload();const before=f.storage.getItem('K11520_PLAYER_COURIER');
+    assert.throws(()=>f.store.previewClockRecovery(f.id,{courierLifeId:f.courier}),/INVALID_ORIGINAL_COURIER_TIMELINE|INVALID_ESTIMATED_DURATION/);
+    await assert.rejects(()=>f.store.resumeClockReview(f.id,{courierLifeId:f.courier,confirmed:true,expectedRevision:f.store.snapshot().revision}),/INVALID_ORIGINAL_COURIER_TIMELINE|INVALID_ESTIMATED_DURATION/);assert.equal(f.storage.getItem('K11520_PLAYER_COURIER'),before);
+  }
+});
+
+test('Player Courier recovered mission time preserves raid window and cooldown through forward and backward corrections',async()=>{
+  for(const [originalWall,restartWall] of [[100_000,10_000_000],[10_000_000,20_000]]){
+    const storage=courierStorage(),courier='RECOVERY-RAID-OWNER',id=`MAPPED-${originalWall}`,store=createPlayerCourierStore({storage,now:()=>originalWall,monotonicNow:()=>100,sessionId:id}),mission=store.accept(courierOffer({missionId:id,estimatedDurationMs:60_000}),{courierLifeId:courier});
+    store.observe(id,{wallNow:originalWall+60_000,monoNow:101});const originalBandit=store.snapshot(id).mission.bandit;
+    const resumed=await restartCourier({store,courier,id},{wallNow:restartWall,monoNow:200});assert.deepEqual(resumed.bandit,originalBandit);
+    const raidAt=(elapsed,replayKey,attackPower=0)=>store.raid(id,{attackerLifeId:'MAPPED-BANDIT',banditMode:true,action:'CARGO_RAID_ACTION',attackPower,defensePower:100,distanceMeters:1,replayKey,wallNow:restartWall+elapsed,monoNow:200+elapsed});
+    assert.equal(store.missionTiming(id,{wallNow:restartWall,monoNow:200}).raidWindowRemainingMs,12_000);
+    assert.throws(()=>raidAt(11_999,'EARLY'),/RAID_WINDOW_NOT_OPEN/);
+    const failed=raidAt(12_000,'FIRST');assert.equal(failed.attempt.success,false);assert.equal(failed.attempt.at,mission.bandit.attackWindowStartsAt);assert.equal(failed.mission.bandit.cooldownMs,30_000);
+    assert.equal(store.missionTiming(id,{wallNow:restartWall+12_001,monoNow:12_201}).raidCooldownRemainingMs,29_999);
+    assert.throws(()=>raidAt(41_999,'COOLDOWN'),/RAID_COOLDOWN/);assert.equal(raidAt(42_000,'SECOND').attempt.success,false);
+    const before=store.snapshot(id).mission;store.observe(id,{wallNow:restartWall+48_001,monoNow:42_201});await store.dispose();
+    assert.throws(()=>store.previewClockRecovery(id,{courierLifeId:courier}),/RAID_HISTORY_CLOCK_REVIEW_REQUIRED/,'new attempts remain auditable; a later restart cannot erase or guess their cooldown');assert.deepEqual(store.snapshot(id).mission.bandit,before.bandit);
+  }
+});
+
+test('Player Courier legacy prior raid history stays paused without speculative cooldown reconstruction',async()=>{
+  const storage=courierStorage(),courier='LEGACY-RAID-OWNER',store=createPlayerCourierStore({storage,now:()=>100_000,monotonicNow:()=>100,sessionId:'LEGACY-RAID'}),m=store.accept(courierOffer({missionId:'LEGACY-RAID'}),{courierLifeId:courier});
+  store.raid(m.missionId,{attackerLifeId:'OTHER-BANDIT',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:0,defensePower:100,distanceMeters:1,replayKey:'FAILED-BEFORE-REVIEW',wallNow:m.bandit.attackWindowStartsAt});
+  store.observe(m.missionId,{wallNow:20_000,monoNow:101});const before=store.snapshot();
+  assert.throws(()=>store.previewClockRecovery(m.missionId,{courierLifeId:courier}),/RAID_HISTORY_CLOCK_REVIEW_REQUIRED/);await assert.rejects(()=>store.resumeClockReview(m.missionId,{courierLifeId:courier,confirmed:true,expectedRevision:before.revision}),/RAID_HISTORY_CLOCK_REVIEW_REQUIRED/);assert.deepEqual(store.snapshot(),before);
+});
+
+test('Player Courier recovery fails closed without locks and cooperative concurrent admission has one clock owner',async()=>{
+  const f=pausedCourier(),preview=f.store.previewClockRecovery(f.id,{courierLifeId:f.courier}),unsupported=createPlayerCourierStoreCore({storage:f.storage,locks:null});
+  await assert.rejects(()=>unsupported.resumeClockReview(f.id,{...preview,confirmed:true}),/COURIER_RECOVERY_LOCK_UNAVAILABLE/);
+  const other=createPlayerCourierStore({storage:f.storage,sessionId:'CONCURRENT-OTHER'}),calls=await Promise.allSettled([f.store.resumeClockReview(f.id,{...preview,confirmed:true,wallNow:20_000,monoNow:200}),other.resumeClockReview(f.id,{...preview,confirmed:true,wallNow:20_000,monoNow:200})]);
+  assert.equal(calls.filter(r=>r.status==='fulfilled').length,1);assert.match(calls.find(r=>r.status==='rejected').reason.message,/COURIER_CLOCK_OWNED_BY_ANOTHER_TAB/);other.reload();
+  await assert.rejects(()=>other.inspectRecoveredClock(f.id),/COURIER_CLOCK_OWNED_BY_ANOTHER_TAB/);assert.throws(()=>other.observe(f.id),/COURIER_CLOCK_LEASE_REQUIRED/);assert.throws(()=>other.settleDue(f.id,{courierLifeId:f.courier}),/COURIER_CLOCK_LEASE_REQUIRED/);assert.equal(f.store.activeMission(f.courier).status,'ACTIVE');
+  await f.store.dispose();const paused=await other.inspectRecoveredClock(f.id,{wallNow:20_001,monoNow:201});assert.equal(paused.status,'CLOCK_REVIEW');assert.equal(paused.settlement,null);assert.equal(other.ownsRecoveryClock(f.id),false);
+});
+
+test('Player Courier recovery rechecks stale preview inside the lock and releases ownership after persistence error',async()=>{
+  const f=pausedCourier(),preview=f.store.previewClockRecovery(f.id,{courierLifeId:f.courier}),other=createPlayerCourierStore({storage:f.storage,sessionId:'PREVIEW-UPDATE'});other.observe(f.id,{wallNow:30_000,monoNow:20});
+  await assert.rejects(()=>f.store.resumeClockReview(f.id,{...preview,confirmed:true}),/RECOVERY_PREVIEW_STALE/);assert.equal(f.store.ownsRecoveryClock(f.id),false);
+  const resumed=await restartCourier(f),write=f.storage.setItem;f.storage.setItem=()=>{throw new Error('QA_OWNER_WRITE_FAILED')};
+  assert.throws(()=>f.store.observe(f.id,{wallNow:20_001,monoNow:201}),/QA_OWNER_WRITE_FAILED/);f.storage.setItem=write;await f.store.dispose();
+  const checked=await other.inspectRecoveredClock(f.id,{wallNow:resumed.dueAt+1,monoNow:1});assert.equal(checked.status,'CLOCK_REVIEW');assert.equal(checked.settlement,null);assert.equal(other.ownsRecoveryClock(f.id),false);
+});
+
+test('Player Courier asynchronous lock admission is canceled by disposal before callback starts',async()=>{
+  const f=pausedCourier(),preview=f.store.previewClockRecovery(f.id,{courierLifeId:f.courier});let grant;
+  const delayed={request(name,options,callback){return new Promise((resolve,reject)=>{grant=()=>Promise.resolve(callback({name})).then(resolve,reject)})}},store=createPlayerCourierStoreCore({storage:f.storage,locks:delayed,sessionId:'DELAYED'}),before=store.snapshot();
+  const admission=store.resumeClockReview(f.id,{...preview,confirmed:true}),rejected=assert.rejects(()=>admission,/CLOCK_RECOVERY_INTERRUPTED/),disposed=store.dispose();await grant();await rejected;await disposed;
+  assert.deepEqual(store.snapshot(),before);assert.equal(store.ownsRecoveryClock(f.id),false);
+});
+
+test('Player Courier passive followers cannot mutate recovered active cargo or insurance',async()=>{
+  const f=pausedCourier(),resumed=await restartCourier(f),other=createPlayerCourierStore({storage:f.storage,sessionId:'PASSIVE'}),before=f.storage.getItem('K11520_PLAYER_COURIER');
+  assert.throws(()=>other.applyCombatDamage(f.id,{courierLifeId:f.courier,damage:1}),/COURIER_CLOCK_LEASE_REQUIRED/);
+  const preview=other.previewInsuranceActivation(f.id,{courierLifeId:f.courier});assert.throws(()=>other.activateInsurance(f.id,{courierLifeId:f.courier,paymentEvidence:{ok:true,amount:preview.premiumKaios,purpose:preview.purpose,scope:preview.scope}}),/COURIER_CLOCK_LEASE_REQUIRED/);
+  assert.equal(f.storage.getItem('K11520_PLAYER_COURIER'),before);assert.equal(f.store.observe(f.id,{wallNow:resumed.lastWallAt+1,monoNow:resumed.lastMonotonicAt+1}).status,'ACTIVE');await f.store.dispose();
 });
 
 test('Cargo Risk Desk quotes exact integer KAIOS and never uses cargo principal as insurance reserve',()=>{
