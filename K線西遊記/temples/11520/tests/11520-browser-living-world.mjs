@@ -300,5 +300,88 @@ const claimGeometry=await page.waitForFunction(id=>{
 const insuranceClaimBox=await claimGeometry.jsonValue();await claimGeometry.dispose();assert.ok(insuranceClaimBox&&insuranceClaimBox.height>=44&&insuranceClaimBox.x>=0&&insuranceClaimBox.x+insuranceClaimBox.width<=390,'insurance claim must be a full-width 44px mobile touch target');await page.locator('#courierInsuranceClaim').click();await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='PAID',insuredMission.missionId);
 const insuranceAfter=await page.evaluate(id=>({mission:globalThis.__K11520_PLAYER_COURIER__.snapshot(id).mission,kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}),insuredMission.missionId);assert.equal(insuranceAfter.kaios,insuredBeforeKaios+insuranceAfter.mission.insurance.payoutKaios,'approved insurance payout credits the original courier local ledger exactly once');const replayResult=await page.evaluate(m=>globalThis.__K11520_PRODUCT__.recordCourierInsurancePayout(m.insurance.payoutReceiptId,m.insurance.payoutKaios),insuranceAfter.mission);assert.equal(replayResult.replayed,true);assert.equal(await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),insuranceAfter.kaios,'replaying the insurance receipt never credits twice');assert.equal(await page.locator('#courierInsuranceClaim').count(),0,'paid claim action disappears after one-shot settlement');
 
+// Recovery runs in a fresh, disposable browser profile. These are QA local-game
+// records only; no connected player's storage, provider or real balance is used.
+let recoveryPage=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+recoveryPage.on('pageerror',e=>errors.push(String(e)));
+await recoveryPage.clock.install({time:new Date('2026-10-05T08:00:00Z')});
+const recoveryBoot=async()=>{
+  await recoveryPage.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
+  await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.()&&globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId&&document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.2');
+  if(await recoveryPage.locator('#intro11520').isVisible().catch(()=>false))await recoveryPage.locator('#enter11520').click();
+};
+await recoveryBoot();
+await recoveryPage.evaluate(()=>{const p=globalThis.__K11520_PRODUCT__.snapshot(),key=`k11520.player:${p.playerId}:k11520.local-product.v1:guest`,saved=JSON.parse(localStorage.getItem(key));saved.progress.kaios=100;saved.progress.claimableKaios=0;localStorage.setItem(key,JSON.stringify(saved))});
+await recoveryBoot();
+const reviewFixture=await recoveryPage.evaluate(async()=>{
+  const {createPlayerCourierOffer,createPlayerCourierStore,quoteCargoInsurance}=await import('./runtime/digital-ant-logistics-runtime.mjs');
+  const player=globalThis.__K11520_PRODUCT__.snapshot(),store=createPlayerCourierStore({sessionId:'QA-PAUSED',now:()=>Date.now(),monotonicNow:()=>100}),quote=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000});
+  const mission=store.accept(createPlayerCourierOffer({missionId:'QA-CLOCK-REVIEW-RECOVERY',requesterLifeId:player.playerId,cargoId:'QA-CLOCK-CARGO',cargoAmount:1000,freightFeeKaios:17,courierSalaryKaios:6,estimatedDurationMs:60_000,insuranceQuote:quote}),{courierLifeId:player.playerId});
+  store.applyCombatDamage(mission.missionId,{courierLifeId:player.playerId,damage:17});
+  const paymentEvidence=globalThis.__K11520_PRODUCT__.spendLocalKaios(quote.premiumKaios,'PLAYER_COURIER_INSURANCE_PREMIUM');if(!paymentEvidence.ok)throw new Error('QA premium fixture failed');
+  localStorage.setItem('11520.playerCourier.pendingInsurancePayment',JSON.stringify({missionId:mission.missionId,courierLifeId:player.playerId,paymentEvidence}));
+  store.observe(mission.missionId,{wallNow:mission.dueAt,monoNow:101});
+  localStorage.setItem('11520.playerCourier.lastMission',mission.missionId);
+  return {mission:store.snapshot(mission.missionId).mission,kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios,pending:localStorage.getItem('11520.playerCourier.pendingInsurancePayment')};
+});
+await recoveryBoot();
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='CLOCK_REVIEW');
+assert.match(await recoveryPage.locator('#homeDeliveryButton').getAttribute('aria-label'),/時間驗證暫停/);
+assert.doesNotMatch(await recoveryPage.locator('#homeDeliveryButton').textContent(),/00:00/);
+await recoveryPage.locator('#homeDeliveryButton').click();
+assert.match(await recoveryPage.locator('#playerCourierDetails').textContent(),/尚未完成或發獎/);
+assert.match(await recoveryPage.locator('#playerCourierDetails').textContent(),/完整 01:00 重新計時/);
+assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0,'opening details cannot itself approve recovery');
+await recoveryPage.locator('#courierRecoveryPrepare').click();
+for(const [width,height] of [[390,844],[844,390]]){
+  await recoveryPage.setViewportSize({width,height});await recoveryPage.waitForTimeout(200);
+  await recoveryPage.locator('#courierRecoveryConfirm').scrollIntoViewIfNeeded();
+  const box=await recoveryPage.locator('#courierRecoveryConfirm').evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:hit===el||el.contains(hit)}});
+  assert.ok(box.height>=44&&box.hit&&box.x>=0&&box.y>=0&&box.right<=width&&box.bottom<=height,`recovery confirmation visible and reachable ${width}x${height}: ${JSON.stringify(box)}`);
+  await recoveryPage.screenshot({path:`${OUT}/11520-courier-clock-confirm-${width}x${height}.png`});
+}
+await recoveryPage.setViewportSize({width:390,height:844});
+await recoveryPage.locator('#courierRecoveryCancel').click();assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0);
+assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'CLOCK_REVIEW');
+await recoveryPage.locator('#courierRecoveryPrepare').click();await recoveryPage.locator('#homeDeliveryButton').click();await recoveryPage.locator('#homeDeliveryButton').click();assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0,'close/reopen discards unsubmitted confirmation');
+await recoveryPage.locator('#courierRecoveryPrepare').click();
+await recoveryPage.evaluate(async()=>{const {createPlayerCourierStore}=await import('./runtime/digital-ant-logistics-runtime.mjs');const store=createPlayerCourierStore({sessionId:'QA-OTHER-TAB'}),m=globalThis.__K11520_PLAYER_COURIER__.active();store.observe(m.missionId)});
+await recoveryPage.locator('#courierRecoveryConfirm').click();await recoveryPage.waitForFunction(()=>/任務已更新|另一分頁已更新/.test(document.getElementById('logisticsActionToast')?.textContent||''));assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'CLOCK_REVIEW');assert.match(await recoveryPage.locator('#logisticsActionToast').textContent(),/任務已更新|另一分頁已更新/);
+assert.equal(await recoveryPage.evaluate(()=>localStorage.getItem('11520.playerCourier.pendingInsurancePayment')),reviewFixture.pending,'stale confirmation retains interrupted premium evidence');
+// Two actual cooperative pages share one origin/storage partition and race the
+// explicit confirmation. Only one Web Lock holder may run the recovered clock.
+const competingPage=await recoveryPage.context().newPage();competingPage.on('pageerror',e=>errors.push(String(e)));
+await competingPage.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded'});
+await competingPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='CLOCK_REVIEW');
+if(await competingPage.locator('#intro11520').isVisible().catch(()=>false))await competingPage.locator('#enter11520').click();
+await competingPage.locator('#homeDeliveryButton').click();await competingPage.locator('#courierRecoveryPrepare').click();await recoveryPage.locator('#courierRecoveryPrepare').click();
+for(const contender of [recoveryPage,competingPage])await contender.evaluate(()=>document.addEventListener('click',event=>{if(event.target.id==='courierRecoveryConfirm')queueMicrotask(()=>{globalThis.__qaRecoveryCancelDisabled=document.getElementById('courierRecoveryCancel')?.disabled===true})}));
+await Promise.all([recoveryPage.locator('#courierRecoveryConfirm').click(),competingPage.locator('#courierRecoveryConfirm').click()]);
+for(const contender of [recoveryPage,competingPage])assert.equal(await contender.evaluate(()=>globalThis.__qaRecoveryCancelDisabled),true,'submitted confirmation cannot misleadingly offer cancellation while admission is pending');
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='ACTIVE');await competingPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='ACTIVE');
+const firstOwns=await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.ownsRecoveryClock()),secondOwns=await competingPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.ownsRecoveryClock());assert.notEqual(firstOwns,secondOwns,'exactly one actual tab holds the recovered mission clock');
+const follower=firstOwns?competingPage:recoveryPage;if(!firstOwns)recoveryPage=competingPage;
+assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().clockRecovery.count),1);
+await follower.reload({waitUntil:'domcontentloaded'});await follower.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?.status==='ACTIVE');
+// Playwright's clock is context-wide. Change only this follower's wall reading,
+// never fast-forward the shared clock (which would also finish the owner).
+await follower.evaluate(()=>{const originalNow=Date.now.bind(Date);Date.now=()=>originalNow()+120_000;document.dispatchEvent(new Event('visibilitychange'))});await follower.waitForTimeout(800);
+assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'ACTIVE','follower reload or its expired clock cannot re-pause or settle the active owner');assert.equal(await follower.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),reviewFixture.kaios,'follower never awards or repeats a premium charge');await follower.close();
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.insurance?.status==='ACTIVE');
+const restarted=await recoveryPage.evaluate(()=>({mission:globalThis.__K11520_PLAYER_COURIER__.active(),kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios,pending:localStorage.getItem('11520.playerCourier.pendingInsurancePayment')}));
+assert.equal(restarted.mission.status,'ACTIVE');assert.deepEqual(restarted.mission.cargo,reviewFixture.mission.cargo);assert.deepEqual(restarted.mission.economics,reviewFixture.mission.economics);assert.equal(restarted.kaios,reviewFixture.kaios,'resume reconciles already-paid insurance without another debit or reward');assert.equal(restarted.pending,null);assert.equal(restarted.mission.settlement,null);assert.equal(await recoveryPage.locator('#courierRecoveryConfirm').count(),0);
+await recoveryPage.clock.fastForward(30_000);assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'ACTIVE');
+await recoveryBoot();await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='CLOCK_REVIEW');
+await recoveryPage.clock.fastForward(60_000);assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'CLOCK_REVIEW','reload plus expired wall deadline never completes recovered cargo');
+await recoveryPage.locator('#homeDeliveryButton').click();await recoveryPage.locator('#courierRecoveryPrepare').click();await recoveryPage.locator('#courierRecoveryConfirm').click();
+await recoveryPage.waitForFunction(()=>{const m=globalThis.__K11520_PLAYER_COURIER__.active();return m?.status==='ACTIVE'&&m.clockRecovery?.count===2});
+const secondRestart=await recoveryPage.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active());assert.equal(secondRestart.clockRecovery.count,2);assert.equal(secondRestart.clockRecovery.receiptId,restarted.mission.clockRecovery.receiptId);
+await recoveryPage.clock.fastForward(60_001);
+await recoveryPage.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__.active()?.status==='DELIVERED');
+const completed=await recoveryPage.evaluate(()=>({mission:globalThis.__K11520_PLAYER_COURIER__.active(),kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}));assert.equal(completed.mission.settlement.rewardKaios,8);assert.equal(completed.kaios,reviewFixture.kaios+8);assert.equal(completed.mission.settlement.receiptId,restarted.mission.clockRecovery.receiptId);
+await recoveryPage.screenshot({path:`${OUT}/11520-courier-clock-delivered-390x844.png`});
+await recoveryBoot();await recoveryPage.clock.fastForward(5_000);assert.equal(await recoveryPage.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),completed.kaios,'completion reload cannot replay the reward');
+assert.equal(await recoveryPage.locator('#courierRecoveryPrepare').count(),0);assert.deepEqual(errors,[]);await recoveryPage.close();
+
 await browser.close();
 console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);

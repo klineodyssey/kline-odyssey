@@ -81,3 +81,16 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 - Remaining: refresh main after #498, apply/review staged UI patch, test real shared-context concurrent tabs and owner closure/reload, inspect mobile/landscape screenshots, run exact-head CI. Parent technical/risk review required; worker must not merge.
 - User's actual stored mission is untouched; eligibility and recovery of that mission have not been established.
 - Updated: 2026-10-05T08:48:00Z.
+
+### UI integration checkpoint, 2026-10-05T09:00Z
+- PR: https://github.com/klineodyssey/kline-odyssey/pull/503, still Draft / NOT_READY_TO_MERGE.
+- Refreshed main `765d0e24e3fbe7353a80329c99bc3b5c3025fd12` includes approved #498 HUD ownership. Merged into this branch without conflicts; narrow UI patch applied to the existing owner, not copied over #498.
+- Existing Courier details now explain pause/no reward, the full-duration restart and open-tab/session limitation; existing contextual badge says 暫停. Recovery remains explicit two-step confirmation, with Cancel disabled once submitted. Existing panel only; no new floating status card.
+- Recovery lifetime ownership/passive-follower UI, page disposal, conservative raid timing display and prior-raid/unsupported-lock explanations are integrated.
+- Real shared-context simultaneous-page, stale-confirmation, interrupted-premium, owner reload, eventual single reward and portrait/landscape screenshot tests added to the existing living-world browser suite. Those new tests are NOT_RUN locally.
+- Local Chromium launch was attempted and failed with `socket() failed: Operation not permitted`; no workaround or security bypass attempted. Exact-head CI must run real Chromium and screenshots must be inspected before visual PASS.
+- Pre-integration UI/browser patch evidence persists in PR comments 5991201658 and5991203549, read-back byte-identical. Current committed integration supersedes those staging artifacts.
+- Core runtime85/85 PASS; integrated related aggregate176/176 PASS; syntax/diff PASS. No prior test result is represented as UI/browser/visual PASS.
+- Latest head: resolve PR head; exact remote tree equality and current CI are recorded in PR body. Next: exact-head Chromium, screenshots and parent review. No merge by worker.
+- Candidate visible version reserved: V2.9.2 (main currently V2.9.1). Existing bootstrap, legacy stamp, Portal registry and exact-version assertions updated together; no new version owner. Not claimed live.
+- Latest related+Portal aggregate185/185 PASS. UI source review found no new runtime blocker; async test completion waits were added. Playwright clock is context-wide, so the real-tab test installs it once and changes only the follower's Date.now reading for the skew case.

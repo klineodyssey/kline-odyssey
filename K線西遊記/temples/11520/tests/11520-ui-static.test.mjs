@@ -113,10 +113,10 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.1 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.1 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.1'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.1'"),'Portal registry must advertise the same K11520 release');
+test('V2.9.2 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.2 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.2'"));
+  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.2'"),'Portal registry must advertise the same K11520 release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
@@ -269,4 +269,16 @@ test('landscape More positions chat only when its existing open state is set',()
   const entry=read('../game-5d.html');
   assert.ok(entry.includes('html.k11520UtilitiesOpen #gameChat.open,'));
   assert.ok(!entry.includes('html.k11520UtilitiesOpen #gameChat,'));
+});
+
+test('Courier clock-review guidance requires explicit confirmation in the existing contextual panel',()=>{
+  for(const text of ['時間驗證暫停','尚未完成或發獎','courierRecoveryPrepare','courierRecoveryConfirm','courierRecoveryCancel','完整 ${courierTime(mission.estimatedDurationMs)} 重新計時','保持目前遊戲分頁開啟','無法保證離線或背景結算'])assert.ok(mobileShell.includes(text),`missing clock-recovery guidance: ${text}`);
+  assert.ok(mobileShell.includes("badge:'暫停'"),'existing contextual control shows pause rather than a zero countdown');
+  assert.ok(mobileShell.includes('const confirmCourierRecovery=async()=>'),'lock acquisition is awaited by the submitted-confirmation handler');
+  assert.equal((mobileShell.match(/courierStore\.resumeClockReview\(/g)||[]).length,1,'only the explicit confirmation handler starts recovery');
+  const confirm=mobileShell.split('const confirmCourierRecovery=async()=>{')[1]?.split('const observeRecoveredCourierClock=')[0]||'';
+  assert.ok(confirm.includes('confirmed:true'));assert.ok(confirm.includes('await courierStore.resumeClockReview'));assert.ok(!confirm.includes('spendLocalKaios'));assert.ok(!confirm.includes('courier-settlement'));
+  assert.ok(mobileShell.includes('cancel.disabled=courierRecoveryBusy'),'submitted confirmation must not offer a misleading pending cancel');
+  assert.ok(mobileShell.includes('courierStore.ownsRecoveryClock(mission.missionId)'),'followers do not observe or settle the owner clock');
+  assert.ok(mobileShell.includes("globalThis.addEventListener('pagehide',()=>{void courierStore.dispose()})"),'page closure releases or cancels pending clock admission');
 });
