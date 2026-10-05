@@ -91,3 +91,36 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 - Canonical-function model test verifies combined Wallet/Settings/preference precedence. Focused UI/portal 53/53 PASS; direct browser and visual evidence remain pending.
 
 - Superseding shared Wallet-owner patch: SHA-256 7335a626bc4e2c425a9e1b573b39e7a03d42eab50109a00f6da20fdfa549443c. Adds HUD-collapsed exclusion so restore remains usable, hides active cargo/Courier peers while Wallet owns the view, and invokes the existing stack owner on close to recompute current eligibility. Settings and saved-preference precedence remain. The model test executes actual pin+sync twice across eligibility states; 53/53 focused PASS. Browser checks span normal owner ticks before testing no-occlusion and restoration.
+
+### PR #510 first exact-head browser batch and bounded harness correction
+
+- Draft PR: https://github.com/klineodyssey/kline-odyssey/pull/510. Published head: 6e2860ab75a8be98b826c9baa1ca06e8bbb0a7fe; tree eb433229a31a17751a00ec0b9d2ff961ad6ada63 exactly matches reviewed local 91daa4170b37780658ad4c6c6efb5ad0f373c92a. Base remained b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720. Connector publication preserved the reviewed tree after native Git transport lacked credentials.
+- At that exact head, Game Product push and PR, Universal Exchange push and PR, Portal, and world-first jobs passed. Responsive run https://github.com/klineodyssey/kline-odyssey/actions/runs/37334353264 reached the unchanged 12-minute limits in its contextual-hud and ordinary responsive jobs. Both always-upload steps succeeded; this is not an overall browser PASS.
+- Contextual artifact 11356347783, SHA-256 c390dbce906341f23dbc128c599e93bda8d03e731e9444330448545ab57aa22b: 390/432/412/360 profiles completed with zero failures, including Settings restoration, preference retention, Wallet ownership, active Courier, manual Camera, and 15-second FULL Market hiding. The 390 native three-contact cancellation case passed. Landscape continued producing Settings, Wallet, camera, market, active-Courier and interruption screenshots until the deadline; its final assertions and the 480 profile are incomplete.
+- World-first artifact 11355079704, SHA-256 df52c2ca8d16dc6c68e5039a3436f2a48ac4e1cc3e097689cd5141c5bb78d487: all six sizes passed runtime coverage. Direct review of 31 screenshots confirms readable three-card fields, true Market hiding and contextual Recenter. A transient Camera zoom-feedback chip partially overlaps the portrait XZ badge and, at 360px, one round action icon; do not claim the entire HUD is overlap-free.
+- Contextual pixel review of 36 available screenshots confirms clear Settings close controls, hidden right utilities and unobstructed Wallet panels in the four completed portrait sizes and partial landscape captures. Portrait active Courier shows its compact truck/timer. Collapsed landscape uses the existing More gold-dot/accessible-title indication rather than a visible timer; the parent classified that as a disclosed P2 clarity item, queued separately. This correction stays test-only. The transient zoom-chip caveat remains disclosed; its actual hit-area impact must not be inferred solely from pixels.
+- Ordinary responsive artifact 11355688408, SHA-256 f34e3040212e38de0b1e821df6f71cabda52bfdfeb203f82b17ae213e765ef28: screenshots also show continuing progress through landscape, not a frozen failing assertion. No report completion or full responsive PASS is claimed.
+- Root cause of the budget regression: the new shared Settings inspection repeats 45 per-control scroll/actionability waits per invocation, plus Wallet inspection. Artifact timestamps show 76–98 seconds between the last pre-Settings and post-Settings ordinary screenshots. Contextual invokes that helper twice per viewport.
+- Local test-only correction: settle dialog geometry once with a bounded frame wait, then native instant scrolling and immediate actual-center hit inspection for each control. Preserve all native clicks, all three Settings cycles, keyboard/focus checks, rail values, preferences, Wallet owner ticks, every viewport and all gameplay assertions. Remove only the first screenshot overwritten by the third-cycle capture at the same path. No runtime, runner-budget or financial changes. Added VM tests reject hidden Settings controls, blocked centers, unstable geometry and stalled frames. Aggregate 185/185 and UI/Portal 54/54 PASS; performance and exact-head browser validation of this correction remain pending.
+
+```json
+{
+  "WORK_ID": "DOT-11520-CONTEXTUAL-HUD-20261005",
+  "OWNER": "dot",
+  "BASE": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
+  "BRANCH": "dot/11520-contextual-hud-20261005",
+  "PR": 510,
+  "TESTED_HEAD": "6e2860ab75a8be98b826c9baa1ca06e8bbb0a7fe",
+  "HEAD_BINDING": "Current correction head is the PR commit containing this report; not a self-hash",
+  "STATUS": "DRAFT_BROWSER_BUDGET_CORRECTION_PENDING",
+  "COMPLETED": "Source fix, local tests, first exact-head browser batch, partial direct screenshot review",
+  "BLOCKED": "Six-size contextual and ordinary responsive completion; next resource-coordinated batch",
+  "TESTS": "185 aggregate / 54 UI-Portal PASS locally",
+  "CI": "First head: six jobs PASS, two budget-cancelled; correction NOT_RUN",
+  "SCREENSHOTS": "Six-size world-first reviewed; contextual four complete plus partial landscape, 480 pending",
+  "SECURITY": "No financial execution, identity, permission, secret or live-user save changes",
+  "NEXT_ACTION": "Source-review bounded test-cost correction, then parent-coordinated exact-head CI and screenshot review",
+  "NEEDS_HUMAN_DECISION": false,
+  "TIMESTAMP": "2026-10-05T15:58:00Z"
+}
+```

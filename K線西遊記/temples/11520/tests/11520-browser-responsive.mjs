@@ -250,12 +250,44 @@ async function verifySettingsInterruptedRails(page,report){
   }finally{await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]}).catch(()=>{});await cdp.detach();if(await page.locator('#k11520UiSettings').isVisible())await page.locator('#k11520UiSettingsClose').click();if(await page.locator('#k11520UtilityMaster').getAttribute('aria-expanded')==='true')await page.locator('#k11520UtilityMaster').click()}
 }
 
+async function verifyScrolledControlCenters(page,selector,label){
+  // This is a read-only hit-ownership inspection, not an activation. Native
+  // scrolling plus stable rendered frames avoids repeating Playwright's input
+  // actionability wait for every item in every Settings cycle. Actual clicks,
+  // keyboard navigation and preference changes below remain native inputs.
+  const inspection=await page.locator(selector).evaluateAll(async controls=>{
+    const visible=el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>0&&r.height>0&&s.visibility==='visible'&&(!el.checkVisibility||el.checkVisibility())};
+    const results=[];
+    // Settle the dialog once. Instant scrolling and the subsequent layout read
+    // are synchronous, so inspecting each newly scrolled control needs no
+    // additional animation-frame/actionability wait.
+    const deadline=performance.now()+5000;let previous=null,stable=0;
+    while(controls.length&&performance.now()<deadline){
+      await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Control inspection animation frame stalled')),Math.max(1,deadline-performance.now()));requestAnimationFrame(()=>{clearTimeout(timer);resolve()})});
+      const rects=controls.map(el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}});
+      if(previous&&rects.every((rect,i)=>Object.keys(rect).every(key=>rect[key]===previous[i][key])))stable++;else stable=0;
+      previous=rects;if(stable>=2)break;
+    }
+    for(const el of controls){
+      el.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+      const r=el.getBoundingClientRect(),rect={x:r.x,y:r.y,width:r.width,height:r.height};
+      const hit=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);
+      results.push({id:el.id||el.dataset.uiKey||el.tagName,visible:visible(el),connected:el.isConnected,ownsCenter:hit===el||el.contains(hit),rect,hit:hit?.id||hit?.tagName||null});
+    }
+    return{stable:stable>=2,results};
+  });
+  const {results}=inspection;
+  assert.ok(results.length,label+' has visible controls');
+  assert.equal(inspection.stable,true,label+' dialog reaches stable geometry before inspection');
+  for(const result of results){assert.equal(result.connected,true,label+' control remains connected: '+JSON.stringify(result));assert.equal(result.visible,true,label+' control is visible: '+JSON.stringify(result));assert.equal(result.ownsCenter,true,label+' control owns its actual center: '+JSON.stringify(result))}
+}
 async function verifySettingsContext(page,report){
+  const started=Date.now();
   const ids=['k11520UtilityMaster','cargoInterceptionButton','homeDeliveryButton','dock','gameModeToggle','walletToggle','walletPanel','chatHandle','gameChat','bgmButton','aiChatButton','aiChatPanel','backpackButton','backpackPanel','k11520HudCollapseAll','kaiosPortalButton','playerCourierDetails','playerBanditPanel','cControl','lotsControl','yControl'];
   if(!await page.locator('#gameModeToggle').isVisible())await page.locator('#k11520UtilityMaster').click();
   const railValues=await page.locator('#cRead,#lotsRead,#yRead').allTextContents();
   const original=await page.evaluate(ids=>Object.fromEntries(ids.map(id=>{const el=document.getElementById(id);return[id,el?{inert:el.inert,open:el.classList.contains('open'),collapsed:el.classList.contains('collapsed'),display:getComputedStyle(el).display}:null]})),ids);
-  for(const closeWith of ['button','Escape','button']){
+  for(const [cycle,closeWith] of ['button','Escape','button'].entries()){
     let escapeMarketBefore=null;
     if(closeWith==='Escape'){await page.locator('#gameModeToggle').focus();await page.keyboard.press('Enter')}else await page.locator('#gameModeToggle').click();await page.locator('#k11520UiSettings').waitFor({state:'visible'});
     const keyboardWorld=await page.evaluate(()=>__K11520_CAMERA__.snapshot().playerXYZ);
@@ -265,13 +297,9 @@ async function verifySettingsContext(page,report){
     await page.keyboard.press('Shift+Tab');assert.equal(await page.evaluate(()=>document.querySelector('#k11520UiSettings').contains(document.activeElement)),true,'reverse Tab stays within Settings');await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement?.id),'k11520UiSettingsClose','forward Tab wraps to the dialog close control');
     const hidden=await page.evaluate(ids=>ids.map(id=>{const el=document.getElementById(id),r=el?.getBoundingClientRect(),s=el&&getComputedStyle(el),hit=r&&document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return{id,exists:!!el,inert:el?.inert,visible:!!s&&s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0,ownsHit:!!hit&&(el===hit||el.contains(hit))}}),ids);
     for(const control of hidden.filter(x=>x.exists)){assert.equal(control.inert,true,'Settings must inert '+control.id);assert.equal(control.visible,false,'Settings must hide '+control.id);assert.equal(control.ownsHit,false,'Settings must remove hit ownership from '+control.id)}
-    const controls=page.locator('#k11520UiSettings button,#k11520UiSettings select');
-    for(let i=0;i<await controls.count();i++){
-      const control=controls.nth(i);await control.scrollIntoViewIfNeeded();
-      assert.equal(await control.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit===el||el.contains(hit)}),true,'every Settings control owns its actual center');
-    }
+    await verifyScrolledControlCenters(page,'#k11520UiSettings button,#k11520UiSettings select','Settings');
     await page.locator('#k11520UiSettingsClose').scrollIntoViewIfNeeded();
-    if(closeWith==='button')await page.screenshot({path:`${OUT}/${report.profile.name}-settings-owned.png`});
+    if(cycle===2)await page.screenshot({path:`${OUT}/${report.profile.name}-settings-owned.png`});
     if(closeWith==='Escape'){escapeMarketBefore=await page.locator('#k11520MarketRow').getAttribute('aria-expanded');await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#k11520UiSettings').isVisible(),true);await page.keyboard.press('Escape')}else await page.locator('#k11520UiSettingsClose').click();
     await page.waitForFunction(()=>!document.documentElement.classList.contains('k11520SettingsOpen'));
     assert.equal(await page.evaluate(()=>document.activeElement?.id),'gameModeToggle','Settings close returns keyboard focus to its launcher');
@@ -294,12 +322,11 @@ async function verifySettingsContext(page,report){
   await page.waitForFunction(()=>document.querySelector('#gameModeToggle').style.display==='none');await page.waitForTimeout(150);
   // Cross at least two normal owner ticks; polling must not resurrect peers.
   for(const selector of ['#gameModeToggle','#dock','#chatHandle','#bgmButton','#aiChatButton','#backpackButton','#kaiosPortalButton','#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),false,selector+' must not cover Wallet');
-  const walletControls=page.locator('#walletPanel button:visible,#walletPanel select:visible,#walletPanel a:visible');
-  for(let i=0;i<await walletControls.count();i++){const control=walletControls.nth(i);await control.scrollIntoViewIfNeeded();assert.equal(await control.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit===el||el.contains(hit)}),true,'Wallet control owns its actual center without utility overlap')}
+  await verifyScrolledControlCenters(page,'#walletPanel button:visible,#walletPanel select:visible,#walletPanel a:visible','Wallet');
   assert.equal(await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===el}),true,'Wallet close toggle stays pointer reachable');
   await page.screenshot({path:`${OUT}/${report.profile.name}-wallet-restored.png`});await page.locator('#walletToggle').click();
   await page.locator('#gameModeToggle').waitFor({state:'visible'});for(const selector of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),true,selector+' returns to manual More access after Wallet closes');assert.equal(await page.locator('#walletPanel').isVisible(),false,'Wallet close restores the existing tray');
-  await page.locator('#k11520UtilityMaster').click();report.settingsContext='THREE_CYCLES / BUTTON_ESCAPE_FOCUS / ORIGINAL_STATES / WALLET_OWNERSHIP PASS';
+  await page.locator('#k11520UtilityMaster').click();report.settingsContext='THREE_CYCLES / BUTTON_ESCAPE_FOCUS / ORIGINAL_STATES / WALLET_OWNERSHIP PASS';report.settingsContextMs=Date.now()-started;
 }
 async function verifyContextualHud(){
   const contextualProfiles=PRODUCTION&&!process.env.K11520_RESPONSIVE_PROFILE?[{name:'pages-360',width:360,height:740},{name:'pages-390',width:390,height:844},{name:'pages-412',width:412,height:772},{name:'pages-432',width:432,height:856},{name:'pages-480',width:480,height:900},{name:'pages-landscape-844',width:844,height:390,landscape:true}]:selectedProfiles;

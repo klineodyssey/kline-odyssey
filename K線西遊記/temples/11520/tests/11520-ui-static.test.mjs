@@ -367,3 +367,26 @@ test('shared Wallet foreground guard composes with Settings and current hidden p
   nodes['#walletPanel'].classes.add('collapsed');ctx.sync();assert.notEqual(nodes['#gameModeToggle'].style.values.display,'none');assert.equal(nodes['#chatHandle'].style.values.display,'none','Wallet close does not override a hidden chat preference');
   flags.delete('k11520UtilitiesOpen');for(const eligible of [true,false,true]){for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])nodes[id].dataset.worldContext=String(eligible);ctx.sync();for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(nodes[id].style.values.display,eligible?'grid':'none','closed tray uses current eligibility after Wallet close')}
 });
+
+test('browser control inspection preserves per-control hit checks with one bounded frame settle',async()=>{
+  const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
+  const source=browserSource.slice(browserSource.indexOf('async function verifyScrolledControlCenters('),browserSource.indexOf('async function verifySettingsContext('));
+  async function inspect({hidden=false,wallet=false,blocked=false,unstable=false,stalled=false}={}){
+    let current=null,clock=0,frames=0;const scrolled=[];
+    const nodes=Array.from({length:15},(_,i)=>({id:'control-'+i,dataset:{},isConnected:true,hidden:hidden&&i===4,getBoundingClientRect(){return{x:10+(unstable&&i===7?clock:0),y:20+i,width:this.hidden?0:44,height:this.hidden?0:44}},scrollIntoView(options){assert.equal(options.behavior,'instant');scrolled.push(this.id);current=this},contains(hit){return hit===this}}));
+    const context={assert,performance:{now:()=>clock},document:{elementFromPoint:(x,y)=>{const r=current.getBoundingClientRect();assert.equal(x,r.x+r.width/2);assert.equal(y,r.y+r.height/2);return blocked&&current===nodes[7]?{id:'overlay'}:current}},getComputedStyle:el=>({display:el.hidden?'none':'block',visibility:'visible'}),setTimeout:stalled?(fn)=>{queueMicrotask(fn);return 1}:setTimeout,clearTimeout:stalled?()=>{}:clearTimeout,requestAnimationFrame:fn=>{frames++;clock+=16;if(!stalled)queueMicrotask(fn)}};
+    runInNewContext(source+'globalThis.verify=verifyScrolledControlCenters;',context);
+    const run=context.verify({locator:selector=>({evaluateAll:fn=>fn(nodes.filter(el=>!selector.includes(':visible')||!el.hidden))})},wallet?'controls:visible':'controls',wallet?'Wallet':'Settings');
+    if(blocked)await assert.rejects(run,/owns its actual center.*control-7/);
+    else if(hidden&&!wallet)await assert.rejects(run,/control is visible.*control-4/);
+    else if(unstable)await assert.rejects(run,/stable geometry/);
+    else if(stalled)await assert.rejects(run,/animation frame stalled/);
+    else await run;
+    return{scrolled,frames};
+  }
+  const all=await inspect();assert.equal(all.scrolled.length,15);assert.equal(all.frames,3,'one dialog settle, never three animation frames per control');
+  const wallet=await inspect({hidden:true,wallet:true});assert.equal(wallet.scrolled.length,14);assert.equal(wallet.frames,3);
+  await inspect({hidden:true});await inspect({blocked:true});await inspect({unstable:true});await inspect({stalled:true});
+  assert.match(browserSource,/for\(const \[cycle,closeWith\] of \['button','Escape','button'\]\.entries\(\)\)/,'all three original native close cycles remain');
+  assert.match(browserSource,/if\(cycle===2\)await page\.screenshot/,'retain the final screenshot without overwriting an earlier identical-path capture');
+});
