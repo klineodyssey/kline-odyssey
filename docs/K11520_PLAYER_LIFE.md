@@ -260,8 +260,10 @@ malformed, conflicting, oversized or wrong-namespace records remain untouched.
 
 ### Review and release gates
 
-- Shell resolver, pending retry and insurance routing require coordinated,
-  separately reviewed integration. Missing integration fails closed.
+- A separate glue commit wires the explicit shell resolver, pending retry and
+  insurance pending/credit/ack routing. The existing loader is memoized so
+  overlapping opens share one consumer; failed initialization disposes it. This
+  still needs final exact-head browser/integration QA.
 - Different-player tabs also contend for this lease. The resulting product/UX
   tradeoff needs Human review before release.
 - Player Life, backpack, world state and preferences remain outside this lease.

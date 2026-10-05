@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {resolveCMode,requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {createSimulationPlayerStore as rawSimulationPlayerStore,createPlayerScopedStorage,PLAYER_SESSION_KEY,readPublicWalletIdentity,savePublicWalletIdentity,readPlayerSession,savePlayerSession} from '../runtime/evm-wallet-runtime.mjs';
@@ -984,4 +985,40 @@ test('follower product construction cannot create a legacy claim before readines
   const storage=courierStorage(),locks=fakeLocks(),owner=rawPlayerCourierStore({storage,locks,coordinationScope:new EventTarget()});await owner.ready;
   const product=rawSimulationPlayerStore({storage,locks,coordinationScope:new EventTarget(),playerId:'KAIOS-P-FOLLOWER-LEGACY-1234567890',ledger:createKgenLedger()});await product.ready;product.activate(null);
   assert.equal(product.snapshot().writeCapability.status,'FOLLOWER');assert.equal(storage.getItem('k11520.player-life.legacy-owner'),null);assert.equal(storage.data.size,0);product.dispose();owner.dispose();
+});
+
+
+test('existing shell loader memoizes concurrent admissions and disposes failed initialization',async()=>{
+  const source=readFileSync(new URL('../runtime/game-mobile-shell.mjs',import.meta.url),'utf8');
+  let code=source.slice(source.indexOf('  const loadRuntime='),source.indexOf('  const observePlayerMotion='));
+  code=code.replace("import('./digital-ant-logistics-runtime.mjs')",'Promise.resolve(stubs.d)').replace("import('./world-runtime.mjs')",'Promise.resolve(stubs.w)').replace("import('./digital-ant-market-life-adapter.mjs')",'Promise.resolve(stubs.a)');
+  let created=0,disposed=0,releases=[],failPublish=false;
+  const stubs={d:{buildAtmRegistry:()=>[],createDigitalAnt:()=>({}),createPlayerCourierStore(){created++;return {ready:new Promise(resolve=>releases.push(resolve)),dispose(){disposed++}}}},w:{WORLD_OBJECTS:[]},a:{}};
+  const load=new Function('stubs','publish',`let runtime=null,adapter=null,registry=null,ant=null,courierStore=null;const courierSessionId='TEST',publishAnt=publish,startCourierTimer=()=>{};${code};return loadRuntime;`)(stubs,()=>{if(failPublish)throw new Error('PUBLISH_FAILED')});
+  const first=load(),second=load();assert.equal(first,second);await Promise.resolve();await Promise.resolve();assert.equal(created,1);releases.shift()();await first;assert.equal(disposed,0);assert.equal(load(),first);
+  const failing=new Function('stubs','publish',`let runtime=null,adapter=null,registry=null,ant=null,courierStore=null;const courierSessionId='TEST',publishAnt=publish,startCourierTimer=()=>{};${code};return loadRuntime;`)(stubs,()=>{if(failPublish)throw new Error('PUBLISH_FAILED')});
+  failPublish=true;const rejected=failing();await Promise.resolve();await Promise.resolve();releases.shift()();await assert.rejects(rejected,/PUBLISH_FAILED/);await Promise.resolve();assert.equal(disposed,1);
+  failPublish=false;const retry=failing();await Promise.resolve();await Promise.resolve();releases.shift()();await retry;assert.equal(created,3);assert.equal(disposed,1);
+});
+
+test('shell integration retries pending intent and uses the bound insurance handoff',()=>{
+  const source=readFileSync(new URL('../runtime/game-mobile-shell.mjs',import.meta.url),'utf8'),claim=source.slice(source.indexOf('  const claimCourierInsurance='),source.indexOf('  const renderCourier='));
+  assert.ok(source.includes("['ACTIVE','DELIVERY_PENDING_CREDIT'].includes(mission.status)"));assert.ok(claim.includes('courierStore.claimInsurancePayout('));assert.equal(claim.includes('recordCourierInsurancePayout'),false);assert.ok(source.includes('resolveCreditPort:()=>globalThis.__K11520_PRODUCT__?.courierCreditPort'));
+});
+
+test('ack-only retry verifies existing credit without requiring another product write',()=>{
+  const data=new Map();let failAck=false,denyProduct=false,productWrites=0;const storage={getItem:k=>data.get(k)??null,setItem(k,v){if(k.includes('local-product')){if(denyProduct)throw new Error('PRODUCT_READ_ONLY');productWrites++}if(failAck&&k==='K11520_PLAYER_COURIER'&&Object.values(JSON.parse(v).missions).some(m=>m.status==='DELIVERED'))throw new Error('ACK_QUOTA');data.set(k,v)}},playerId='KAIOS-P-ACK-ONLY-1234567890';
+  const product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);const courier=createPlayerCourierStore({storage,resolveCreditPort:()=>product,sessionId:'ACK-ONLY',now:()=>1000,monotonicNow:()=>0}),mission=courier.accept(courierOffer(),{courierLifeId:playerId});failAck=true;
+  assert.throws(()=>courier.settleDue(mission.missionId,{courierLifeId:playerId,wallNow:mission.dueAt,monoNow:mission.estimatedDurationMs}),/COURIER_SAVE_NOT_CONFIRMED/);const written=productWrites,before=data.get(`k11520.player:${playerId}:k11520.local-product.v1:guest`);
+  failAck=false;denyProduct=true;courier.reload();const result=courier.reconcileCredit(mission.missionId);assert.equal(result.ok,true);assert.equal(result.credit.replayed,true);assert.equal(productWrites,written);assert.equal(data.get(`k11520.player:${playerId}:k11520.local-product.v1:guest`),before);assert.equal(product.snapshot().kaios,4);assert.equal(result.mission.status,'DELIVERED');
+});
+
+test('fresh read-only defaults are not labeled as a persisted product save',()=>{
+  const storage=courierStorage(),store=rawSimulationPlayerStore({storage,locks:null,ledger:createKgenLedger()});store.activate(null);assert.equal(store.snapshot().persistent,false);assert.equal(store.snapshot().writeCapability.writeEnabled,false);
+});
+
+test('presentation failure cannot replace a durable courier credit-port result',()=>{
+  const source=readFileSync(new URL('../runtime/game-5d-main.mjs',import.meta.url),'utf8'),line=source.split('\n').find(line=>line.trim().startsWith('courierCreditPort:')),expression=line.trim().slice('courierCreditPort:'.length).replace(/,$/,'');
+  const evidence={ok:true,receiptId:'COURIER-RECEIPT-abcdef01'},S={},port=new Function('playerStore','S','hud',`return ${expression}`)({snapshot:()=>({kaios:4}),recordCourierSettlement:()=>evidence,recordCourierInsurancePayout:()=>evidence},S,()=>{throw new Error('HUD_UNAVAILABLE')});
+  assert.equal(port.recordCourierSettlement({}),evidence);assert.equal(port.recordCourierInsurancePayout({}),evidence);assert.equal(S.kaios,4);
 });

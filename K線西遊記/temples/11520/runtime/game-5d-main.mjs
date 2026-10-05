@@ -113,10 +113,10 @@ function claimDailyJourney(){
 }
 syncWorldFeedback();
 globalThis.__K11520_PRODUCT__=Object.freeze({
-  courierCreditPort:Object.freeze({snapshot:playerStore.snapshot,recordCourierSettlement:playerStore.recordCourierSettlement,recordCourierInsurancePayout:playerStore.recordCourierInsurancePayout}),
+  courierCreditPort:Object.freeze({snapshot:playerStore.snapshot,recordCourierSettlement:input=>{const result=playerStore.recordCourierSettlement(input);try{S.kaios=playerStore.snapshot().kaios;hud()}catch{}return result},recordCourierInsurancePayout:input=>{const result=playerStore.recordCourierInsurancePayout(input);try{S.kaios=playerStore.snapshot().kaios;hud()}catch{}return result}}),
   snapshot:()=>({...playerStore.snapshot(),...playerProgressSnapshot(),home:playerLife.loadHomePlot(),mode:resolveCMode(combatSelection().c),execution:'SIMULATION',productionTrading:'NOT_ACTIVATED',crossMarket:crossMarketSnapshot(),marketEngine:marketEngineSnapshot()}),
   spendLocalKaios:(amount,purpose='LOCAL_GAME_PURCHASE')=>{const result=playerStore.spendKaios(amount,{purpose});S.kaios=playerStore.snapshot().kaios;hud();return result},
-  recordCourierInsurancePayout:(receiptId,rewardKaios)=>{const result=playerStore.recordCourierInsurancePayout({receiptId,reward:rewardKaios});S.kaios=playerStore.snapshot().kaios;hud();return result}
+  recordCourierInsurancePayout:(receiptId,rewardKaios)=>{const binding=playerStore.snapshot().courierInsuranceBindings?.[receiptId],result=playerStore.recordCourierInsurancePayout({...binding,receiptId,reward:rewardKaios});S.kaios=playerStore.snapshot().kaios;hud();return result}
 });
 let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';

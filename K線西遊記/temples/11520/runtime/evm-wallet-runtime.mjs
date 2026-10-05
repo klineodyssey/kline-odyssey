@@ -122,14 +122,14 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null,locks,
     catch{storageStatus='PERSISTENCE_UNCERTAIN';throw new Error('LOCAL_SAVE_NOT_CONFIRMED')}
     raw=encoded;apply(next);return true;
   }
-  function transact(fn){
+  function transact(fn,{skipPersist=()=>false}={}){
     return writer.run(()=>{
       if(storageStatus!=='READY'||!key)throw new Error(storageStatus==='READY'?'PLAYER_NOT_ACTIVE':storageStatus);
       let before={value:productClone(value),ledger:productClone(ledger),raw};
       try{
         const current=read();raw=current.raw;apply(current.value);before={value:productClone(value),ledger:productClone(ledger),raw};
         const loaded=productClone(value);const result=fn();if(result&&typeof result.then==='function')throw new Error('ASYNC_LOCAL_MUTATION_FORBIDDEN');
-        if(result?.ok===false){apply(loaded);return result;}
+        if(result?.ok===false||skipPersist(result)){writer.assert();apply(loaded);return result;}
         value.ledger=productClone(ledger);value.progress=productClone(progress);persist(value,current.raw);return result;
       }catch(error){if(before.value){value=before.value;progress=value.progress}replaceLedger(before.ledger);raw=before.raw;throw error}
     });
@@ -182,8 +182,8 @@ export function createSimulationPlayerStore({ledger,storage,playerId=null,locks,
     bindings[id]=binding;if(insurance)progress.courierInsuranceReceipts[id]=amount;else progress.courierReceipts.push(id);
     const event=insurance?'COURIER_INSURANCE_PAYOUT':'COURIER_SETTLEMENT';progress.events[event]=(progress.events[event]||0)+1;progress.kaios+=amount;if(!insurance)progress.xp+=12;if(owner!=='guest')progress.claimableKaios+=amount;
     return {ok:true,replayed:false,...binding,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'};
-  })}catch(error){return {ok:false,reason:error.message}}}
-  function snapshot(){const p=productClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));return {owner,playerId,persistent:!!underlying&&storageStatus==='READY',storageStatus,writeCapability:writer.capability(),scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'}}
+  },{skipPersist:result=>result?.replayed===true})}catch(error){return {ok:false,reason:error.message}}}
+  function snapshot(){const p=productClone(progress),level=1+Math.min(9,Math.floor(Math.sqrt(p.xp/25))),engineLevel=1+Math.min(9,Math.floor(Math.sqrt(p.engineXp/20)));return {owner,playerId,persistent:!!underlying&&raw!=null&&storageStatus==='READY',storageStatus,writeCapability:writer.capability(),scope:'LOCAL_SIMULATION_NOT_VERIFIED_HUMAN_KPI',...p,level,engineLevel,nextLevelXp:level>=10?null:25*level*level,nextEngineXp:engineLevel>=10?null:20*engineLevel*engineLevel,kaiosRewardStatus:owner==='guest'?'LOCAL_ONLY_CONNECT_WALLET_TO_BIND':'WALLET_BOUND_CLAIMABLE_PENDING_DISTRIBUTION'}}
   return Object.freeze({activate,check,save,record,spendKaios,recordCourierSettlement:input=>credit(input),recordCourierInsurancePayout:input=>credit(input,true),snapshot,refresh,transactLedger:fn=>transact(fn),get ready(){return writer.ready},requestWriter:writer.requestWriter,dispose(){disposed=true;writer.dispose()}});
 }
 function padAddress(address){return String(address).toLowerCase().replace(/^0x/,'').padStart(64,'0');}
