@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import {EventEmitter} from 'node:events';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {inspectRealTradingUiPreflight,inspectMainnetUnsignedPackage} from '../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs';
@@ -89,4 +90,54 @@ test('every preflight identity follows the existing wallet session through A B r
  current={account:B,chainId:97};event({detail:{account:A}});assertAddress(B);assert.match(state.textContent,/0x2222/);assert.doesNotMatch(state.textContent,/0x1111/,'event payload cannot replace canonical session');
  vm.runInContext('install11520RealTradingPreflightUi()',context);assertAddress(B);
  current={account:null,chainId:null,status:'DISCONNECTED'};event();assertAddress('');assert.doesNotMatch(state.textContent,/0x/);
+});
+
+// Deployment QA proof regressions share this existing preflight test owner.
+{
+const source=await readFile(new URL('../K線西遊記/temples/11520/tests/11520-browser-settlement.mjs',import.meta.url),'utf8');
+const functionSource=source.slice(source.indexOf('function attachM1PageSourceProof('),source.indexOf('// M1 uses real public chain97 reads'));
+const base='https://klineodyssey.github.io/kline-odyssey',path='K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs',bytes=Buffer.from('reviewed module');
+const fixture=()=>{const page=new EventEmitter(),context=vm.createContext({assert,URL});vm.runInContext(functionSource,context);return{page,finish:context.attachM1PageSourceProof(page,{base,sourceSha:'a'.repeat(40),assets:[{path,sha256:createHash('sha256').update(bytes).digest('hex')}],createHash})}};
+const response=(body=bytes,query='?v=271')=>({url:()=>base+'/'+encodeURI(path)+query,status:()=>200,body:async()=>body,fromServiceWorker:()=>false});
+test('public proof binds observed browser response bytes including cache variants',async()=>{const f=fixture();f.page.emit('response',response());const proof=await f.finish();assert.equal(proof.status,'PASS');assert.equal(proof.actualBrowserResponses[0].query,'?v=271')});
+test('public proof rejects a stale browser variant even if a separate request matched',async()=>{const f=fixture();f.page.emit('response',response(Buffer.from('stale variant')));await assert.rejects(f.finish(),/actual public browser assets must match checkout/)});
+test('public proof rejects missing critical responses',async()=>{const f=fixture();await assert.rejects(f.finish(),/PUBLIC_BROWSER_ASSET_NOT_OBSERVED/)});
+test('public proof retains a mismatch across later matching reload responses',async()=>{const f=fixture();f.page.emit('response',response(Buffer.from('old')));f.page.emit('response',response());await assert.rejects(f.finish(),/actual public browser assets must match checkout/)});
+
+test('public proof drains response bodies that arrive while an earlier body is pending',async()=>{
+ const f=fixture();let first,second;const a=new Promise(r=>{first=r}),b=new Promise(r=>{second=r});
+ f.page.emit('response',{...response(),body:()=>a});const finished=f.finish();
+ f.page.emit('response',{...response(bytes,'?reload=1'),body:()=>b});first(bytes);
+ await new Promise(r=>setImmediate(r));let resolved=false;void finished.then(()=>{resolved=true},()=>{});await Promise.resolve();assert.equal(resolved,false);
+ second(Buffer.from('late stale response'));await assert.rejects(finished,/actual public browser assets must match checkout/);
+});
+}
+
+test('public M1 source allowlist covers current wallet visibility owners without claiming the whole module graph',async()=>{
+ const workflow=await readFile(new URL('../.github/workflows/11520-responsive-qa.yml',import.meta.url),'utf8');
+ for(const name of ['mobile-control-layout.mjs','mobile-ui-settings.mjs','game-mobile-shell.mjs'])assert.ok(workflow.includes("'"+name+"'"));
+ assert.match(workflow,/wholeModuleGraphVerified.*False/);
+ assert.match(workflow,/EXPLICIT_M1_WALLET_AND_HUD_ASSETS_ONLY/);
+});
+
+test('M1 public boot tolerates only completed entry races and requires execution and character readiness',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/tests/11520-browser-settlement.mjs',import.meta.url),'utf8');
+ const helper=source.slice(source.indexOf('async function bootM1ReadOnlyPage('),source.indexOf('function attachM1PageSourceProof('));
+ for(const scenario of [
+  {name:'native entry',button:true,dismiss:true},
+  {name:'already entered',button:false},
+  {name:'removed during click',button:true,dismiss:true,clickError:true},
+  {name:'blocked while visible',button:true,clickError:true,error:'native click failed'},
+  {name:'click did not enter',button:true,error:'intro still visible'},
+  {name:'missing button with visible intro',button:false,intro:true,error:'intro still visible'},
+  {name:'execution unready',button:false,execution:false,error:'execution not ready'},
+  {name:'character unready',button:false,character:false,error:'character not ready'},
+ ]){
+  let intro=scenario.intro??scenario.button,clicks=0,checks=0;
+  const page={goto:async()=>{},locator:selector=>selector==='#enter11520'?{isVisible:async()=>scenario.button,click:async options=>{clicks++;assert.deepEqual({...options},{timeout:1500});if(scenario.dismiss)intro=false;if(scenario.clickError)throw new Error('native click failed')}}:{isVisible:async()=>intro,waitFor:async options=>{assert.deepEqual({...options},{state:'hidden',timeout:5000});if(intro)throw new Error('intro still visible')}},
+   waitForFunction:async(fn,arg,options)=>{checks++;assert.equal(options.timeout,45000);if(!fn())throw new Error(checks===1?'execution not ready':'character not ready')}};
+  const context=vm.createContext({__K11520_EXECUTION__:scenario.execution!==false,document:{querySelector:()=>({textContent:scenario.character===false?'LOADING':'READY'})}});
+  vm.runInContext(helper,context);const pending=context.bootM1ReadOnlyPage(page,'https://example.test');
+  if(scenario.error)await assert.rejects(pending,new RegExp(scenario.error),scenario.name);else{await pending;assert.equal(checks,2);assert.equal(clicks,Number(scenario.button))}
+ }
 });
