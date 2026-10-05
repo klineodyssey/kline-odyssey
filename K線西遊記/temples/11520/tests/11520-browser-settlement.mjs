@@ -246,7 +246,7 @@ async function localCandidateBrowserQA(){
     const set=[];for(let i=0;i<3;i++)set.push(await deploy('oracle',[parseEther('100')]));feeds.push(set);
     await send(position,'configureMarket',[market,100,10,3600,parseEther('98'),parseEther('102'),true]);
     await send(position,'configureOracle',[market,set.map(f=>f.target),2,500]);
-    await send(position,'configureTradingCapability',[market,[parseEther('100'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1'),'0x'+'11'.repeat(32)]]); // local mock evidence only
+    await send(position,'configureTradingCapability',[market,[parseEther('1'),(await provider.getBlock('latest')).timestamp+86400,3600,3600,parseEther('1'),'0x'+'11'.repeat(32)]]); // local mock evidence only
   }
   await send(token,'mint',[accounts[0],parseEther('200000')]);await send(token,'approve',[proxy.target,parseEther('200000')]);
   await send(brain,'fundSettlementCapital',[parseEther('100000')]);await send(brain,'fundInsurance',[parseEther('10000')]);
@@ -256,7 +256,8 @@ async function localCandidateBrowserQA(){
   // publicNetwork is an adapter gate exercised under isolated route interception;
   // this synthetic QA manifest is never saved/published as a public deployment.
   const fixtureManifest={mode:'BSC_TESTNET',status:'DEPLOYED_CONFIG_VERIFIED',chainId:97,testOnly:true,publicNetwork:true,verified:true,deploymentBlock:1,addresses,codeHashes,
-    capabilities:{settlementCapital:'ISOLATED_V1'},pnlModel:'INDEX_DELTA_C_LOTS_V1'};
+    cMin:0.001,cMax:1,lotsMax:100,publicQuotePolicy:{source:'BINANCE_PUBLIC_MARKET_DATA_ONLY',maximumAgeMs:15000,newRiskGateOnly:true,settlementAuthority:false,states:{LIVE:'ALLOW_NEW_RISK',STALE:'BLOCK_NEW_RISK',WAIT:'BLOCK_NEW_RISK',INVALID:'BLOCK_NEW_RISK'}},
+    capabilities:{settlementCapital:'ISOLATED_V1',authoritativeCMax:'1e18',minimumC:'1e15'},pnlModel:'INDEX_DELTA_C_LOTS_V1'};
   const price=async(value)=>{const block=await rpc.request({method:'eth_getBlockByNumber',params:['latest',false]});for(const f of feeds[1])await send(f,'set',[parseEther(String(value)),Number(BigInt(block.timestamp))])};
   const out='artifacts/11520-candidate-wallet-qa';await fs.mkdir(out,{recursive:true});
   const browser=await chromium.launch({headless:true});let active=accounts[1],connected=false,writes=0;
@@ -300,20 +301,20 @@ async function localCandidateBrowserQA(){
       await page.locator('[data-deposit-preset="1000"]').click();await page.locator('#testnetApprove').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.allowanceUnlimited===true);
       await page.locator('#testnetDeposit').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===1000);assert.equal(await page.locator('#testnetApprove').isDisabled(),true);
       await shot('deposit-controls');await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('brain-account');
-      stage='order';await game();await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
-await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100.001');await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('INDEX_DELTA_C_LOTS_V1')&&!document.querySelector('#confirmOrder').disabled,null,{timeout:120000});await page.locator('#confirm').evaluate(el=>el.scrollTop=0);await page.locator('#confirmBody').evaluate(el=>el.scrollTop=0);await shot('100c100lots-preview');await page.locator('#confirmOrder').click();await wait(()=>__K11520_EXECUTION__.snapshot().orders.some(o=>o.status==='PENDING'));
+      stage='order';await game();await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
+await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100.001');await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('INDEX_DELTA_C_LOTS_V1')&&!document.querySelector('#confirmOrder').disabled,null,{timeout:120000});await page.locator('#confirm').evaluate(el=>el.scrollTop=0);await page.locator('#confirmBody').evaluate(el=>el.scrollTop=0);await shot('1c100lots-preview');await page.locator('#confirmOrder').click();await wait(()=>__K11520_EXECUTION__.snapshot().orders.some(o=>o.status==='PENDING'));
       let book=await snap(),order=book.orders.at(-1);await shot('pending');await price(100.002);await send(trigger,'observeOrder',[BigInt(order.orderId)]);await wallet();await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.some(p=>p.status==='OPEN'));
       book=await snap();const pid=book.positions.at(-1).positionId;assert.equal(book.wallet.lockedMargin,100);await price(100.007);await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet.unrealizedPnl>0);
-      await organ('positions');await shot('position-pnl');await page.locator(`[data-sim-close="${pid}"]`).click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.every(p=>p.status!=='OPEN'));assert.equal((await snap()).wallet.free,1050);
+      await organ('positions');await shot('position-pnl');await page.locator(`[data-sim-close="${pid}"]`).click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.every(p=>p.status!=='OPEN'));assert.ok(Math.abs((await snap()).wallet.free-1000.5)<1e-9);
       await organ('history');await page.locator('#sheetBody summary').first().click();await shot('close-receipt');
       stage='liquidation';await price(100);await wallet();await page.locator('#walletRefresh').click();await game();await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100');await page.locator('#confirmOrder').click();await wait(()=>__K11520_EXECUTION__.snapshot().orders.some(o=>o.status==='PENDING'));
-      order=(await snap()).orders.at(-1);await send(trigger,'observeOrder',[BigInt(order.orderId)]);await price(99.98);await send(trigger,'observePosition',[BigInt((await trigger.order(order.orderId)).positionId)]);
-      await wallet();await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.some(p=>p.status==='LIQUIDATED'));book=await snap();assert.equal(book.wallet.free,950);assert.equal(book.wallet.lockedMargin,0);
+      order=(await snap()).orders.at(-1);await send(trigger,'observeOrder',[BigInt(order.orderId)]);await price(98);await send(trigger,'observePosition',[BigInt((await trigger.order(order.orderId)).positionId)]);
+      await wallet();await page.locator('#walletRefresh').click();await wait(()=>__K11520_EXECUTION__.snapshot().positions.some(p=>p.status==='LIQUIDATED'));book=await snap();assert.ok(Math.abs(book.wallet.free-900.5)<1e-9);assert.equal(book.wallet.lockedMargin,0);
       await organ('history');await page.locator('#sheetBody summary').first().click();await shot('liquidation-receipt');
-      stage='withdraw';await wallet();await page.locator('#testnetAmount').fill('100');await page.locator('#testnetWithdraw').click();await wait(()=>__K11520_EXECUTION__.snapshot().wallet.free===850);await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('withdraw-account');
+      stage='withdraw';await wallet();await page.locator('#testnetAmount').fill('100');await page.locator('#testnetWithdraw').click();await wait(()=>Math.abs(__K11520_EXECUTION__.snapshot().wallet.free-800.5)<1e-9);await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('withdraw-account');
       stage='multiplayer';active=accounts[3];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().account?.toLowerCase()===document.querySelector('#wAddr').textContent.toLowerCase()&&__K11520_EXECUTION__.snapshot().wallet?.free===0);
-      assert.equal((await snap()).orders.length,0);await shot('player-c-isolated');active=accounts[player];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>__K11520_EXECUTION__.snapshot().wallet?.free===850);
-const receiptCount=(await snap()).receipts.length;await page.reload({waitUntil:'domcontentloaded'});await wait(()=>globalThis.__K11520_EXECUTION__?.snapshot().wallet?.free===850);assert.equal((await snap()).receipts.length,receiptCount);
+      assert.equal((await snap()).orders.length,0);await shot('player-c-isolated');active=accounts[player];await page.evaluate(a=>candidateAccountChanged(a),active);await wait(()=>Math.abs(__K11520_EXECUTION__.snapshot().wallet?.free-800.5)<1e-9);
+const receiptCount=(await snap()).receipts.length;await page.reload({waitUntil:'domcontentloaded'});await wait(()=>Math.abs(globalThis.__K11520_EXECUTION__?.snapshot().wallet?.free-800.5)<1e-9);assert.equal((await snap()).receipts.length,receiptCount);
       await wallet();await page.locator('#walletPanel').evaluate(e=>e.scrollTop=e.scrollHeight);await shot('reload-recovered');assert.deepEqual(errors,[]);
       await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'LOCAL_ACTUAL_CANDIDATE_EVM_NOT_PUBLIC_TESTNET',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:await snap()},null,2));
     }catch(error){await shot('FAILURE');await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,snapshot:await snap(),errors,rpcFailures,toast:await page.locator('#toast').textContent(),message:String(error?.message)},null,2));console.error('LOCAL_CANDIDATE_STAGE',stage);throw error}finally{await page.close()}
@@ -325,12 +326,15 @@ const receiptCount=(await snap()).receipts.length;await page.reload({waitUntil:'
 // Node; the browser receives only public account and EIP-1193 responses. This is
 // an automated signing broker, not a claim that a Human clicked MetaMask.
 async function publicTestnetBrowserQA(){
-  const {Wallet,JsonRpcProvider,Interface,parseEther,parseUnits,keccak256}=await import('ethers');
+  const {Wallet,JsonRpcProvider,Interface,parseEther,parseUnits,keccak256,id}=await import('ethers');
   const manifest=JSON.parse(await fs.readFile('docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json','utf8'));
   assert.equal(manifest.status,'DEPLOYED_CONFIG_VERIFIED');assert.equal(manifest.chainId,97);
   assert.equal(manifest.publicNetwork,true);assert.equal(manifest.testOnly,true);assert.equal(manifest.verified,true);
   assert.equal(manifest.pnlModel,'INDEX_DELTA_C_LOTS_V1','public candidate QA must not target legacy percentage-PnL deployment');
   assert.equal(manifest.capabilities?.settlementCapital,'ISOLATED_V1','candidate isolated capital capability required');
+  assert.equal(manifest.cMin,0.001);assert.equal(manifest.cMax,1);
+  assert.equal(manifest.capabilities?.authoritativeCMax,'1e18');assert.equal(manifest.capabilities?.minimumC,'1e15');
+  assert.equal(manifest.publicQuotePolicy?.newRiskGateOnly,true);assert.equal(manifest.publicQuotePolicy?.settlementAuthority,false);
   const readOnly=process.argv.includes('--read-only');
   const resumeArg=process.argv.find(x=>x.startsWith('--resume-order='));
   const resumeOrderId=resumeArg?.slice('--resume-order='.length);
@@ -343,7 +347,13 @@ async function publicTestnetBrowserQA(){
   // are still verified against transaction receipts/blocks by the real adapter.
   const logProvider=process.env.BSC_TESTNET_LOG_RPC_URL?new JsonRpcProvider(process.env.BSC_TESTNET_LOG_RPC_URL,undefined,{batchMaxCount:1}):provider;
   assert.equal(BigInt(await logProvider.send('eth_chainId',[])),97n);
-  const signer=readOnly?null:new Wallet(process.env.BSC_TESTNET_PRIVATE_KEY,provider),account=readOnly?manifest.admin:await signer.getAddress();
+  const signerA=readOnly?null:new Wallet(process.env.BSC_TESTNET_PRIVATE_KEY,provider);
+  // Deterministic in memory so an interrupted Testnet run does not strand a
+  // newly funded actor. The derived key is never serialized, logged or sent to
+  // the browser; only its public address enters evidence.
+  const signerB=readOnly?null:new Wallet(id(`K11520_BSC97_WALLET_B_V1:${process.env.BSC_TESTNET_PRIVATE_KEY}`),provider);
+  const accountA=readOnly?manifest.admin:await signerA.getAddress(),accountB=readOnly?null:await signerB.getAddress();
+  let signer=signerA,account=accountA;
   assert.equal(BigInt(await provider.send('eth_chainId',[])),97n);
   const {TESTNET_EXECUTION_ABI,CAPITAL_EXECUTION_ABI}=await import('../runtime/real-trading-order-intent.mjs');
   const a=manifest.addresses,interfaces=Object.fromEntries(Object.entries(TESTNET_EXECUTION_ABI).map(([k,v])=>[k,new Interface([...v,...(CAPITAL_EXECUTION_ABI[k]||[])])]));
@@ -351,6 +361,11 @@ async function publicTestnetBrowserQA(){
   const keys=['testToken','brainProxy','positionEngine','orderTriggerEngine','brainImplementation'];
   for(const k of keys)assert.equal(lower(keccak256(await provider.getCode(a[k]))),lower(manifest.codeHashes[k]),'deployed code identity');
   const allowed=new Map(keys.map(k=>[lower(a[k]),k]));
+  // The shared read-only wallet panel also probes the one canonical Mainnet
+  // KGEN token address. On chain97 this may return no code/zero and must never
+  // become a write destination; keeping it in a separate read set preserves
+  // the transaction allowlist above.
+  const readOnlyAllowed=new Set([...allowed.keys(),'0xba3d3810e58735cb6813bc1cdc5458c0d71432be']);
   const feeds=manifest.oracles.find(o=>o.axis==='KX').feeds;
   assert.equal(feeds.length,3);assert.equal(new Set(feeds.map(lower)).size,3);
   const feedCodeHashes=new Map(Object.entries(manifest.runtimeCodeHashesByAddress||{}).map(([address,hash])=>[lower(address),hash]));
@@ -363,24 +378,35 @@ async function publicTestnetBrowserQA(){
   const keeperInterface=new Interface(['function observeOrder(uint256) returns(bool)','function observePosition(uint256) returns(bool)']);
   const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4182',root=new URL(base).origin;
   const out=readOnly?'artifacts/11520-testnet-readonly-qa':'artifacts/11520-testnet-browser-qa';await fs.mkdir(out,{recursive:true});
-  const brokerFailures=[];
-  const persist=()=>fs.writeFile(`${out}/transactions.json`,JSON.stringify({chainId:97,testOnly:true,signerMode:'NODE_ONLY_CONFIGURED_TESTNET_SIGNER',account,gasBudget:'0.005 tBNB',receipts},null,2));
-  async function send(to,data,method){
+  const brokerFailures=[];let logIndexFallbacks=0;
+  const actorEvidence={};
+  const persist=()=>fs.writeFile(`${out}/transactions.json`,JSON.stringify({chainId:97,testOnly:true,signerMode:'NODE_ONLY_CONFIGURED_TESTNET_SIGNER_PLUS_DETERMINISTIC_SECOND_TEST_ACTOR',accounts:[accountA,accountB].filter(Boolean),gasBudget:'0.005 tBNB',receipts,actorEvidence},null,2));
+  async function send(to,data,method,actor=signer){
     assert.equal(readOnly,false,'read-only QA cannot broadcast');
     assert.equal(sending,false,'single transaction at a time');sending=true;
     try{
       assert.equal(BigInt(await provider.send('eth_chainId',[])),97n);
+      const from=await actor.getAddress();
       const price=(await provider.getFeeData()).gasPrice;assert.ok(price>0n&&price<=parseUnits('10','gwei'),'GAS_PRICE_CAP');
-      const estimate=await provider.estimateGas({from:account,to,data,value:0n}),gas=estimate*12n/10n+10000n;
+      const estimate=await provider.estimateGas({from,to,data,value:0n}),gas=estimate*12n/10n+10000n;
       assert.ok(reserved+gas*price<=budget,'TOTAL_GAS_CAP');reserved+=gas*price;
-      const tx=await signer.sendTransaction({to,data,value:0n,chainId:97,gasLimit:gas,gasPrice:price});
-      const item={txHash:tx.hash,contract:to,method,status:'SUBMITTED'};receipts.push(item);await persist();
+      const tx=await actor.sendTransaction({to,data,value:0n,chainId:97,gasLimit:gas,gasPrice:price});
+      const item={txHash:tx.hash,actor:from,contract:to,method,status:'SUBMITTED'};receipts.push(item);await persist();
       const receipt=await tx.wait(1,120000);assert.equal(receipt.status,1);const block=await provider.getBlock(receipt.blockNumber);
       Object.assign(item,{status:'CONFIRMED',block:receipt.blockNumber,timestamp:block.timestamp});await persist();return tx.hash;
     }finally{sending=false}
   }
   // Wallet-boundary failure fixtures never switch the actual RPC network and
   // are explicitly recorded separately from public chain transaction evidence.
+  if(!readOnly){
+    const balanceB=await provider.getBalance(accountB);
+    if(balanceB<parseEther('0.001')){
+      const price=(await provider.getFeeData()).gasPrice;assert.ok(price>0n&&price<=parseUnits('10','gwei'),'GAS_PRICE_CAP');
+      const tx=await signerA.sendTransaction({to:accountB,value:parseEther('0.0015'),chainId:97,gasLimit:21000n,gasPrice:price});
+      const item={txHash:tx.hash,actor:accountA,contract:accountB,method:'FUND_DETERMINISTIC_TEST_ACTOR_B',status:'SUBMITTED',value:'0.0015 tBNB'};receipts.push(item);await persist();
+      const receipt=await tx.wait(1,120000);assert.equal(receipt.status,1);Object.assign(item,{status:'CONFIRMED',block:receipt.blockNumber});await persist();
+    }
+  }
   const walletBoundary={chain:'0x61',connected:true,rejectNext:false};
   async function broker({method,params=[]}){
     if(method==='eth_accounts'||method==='eth_requestAccounts')return walletBoundary.connected?[account]:[];
@@ -399,20 +425,25 @@ async function publicTestnetBrowserQA(){
       return send(tx.to,tx.data,parsed.name);
     }
     assert.ok(['eth_getBalance','eth_call','eth_estimateGas','eth_getCode','eth_getStorageAt','eth_blockNumber','eth_getLogs','eth_getTransactionReceipt','eth_getBlockByNumber','eth_getBlockByHash'].includes(method),'read method allowlist');
-    if(method==='eth_call'||method==='eth_estimateGas')assert.ok(allowed.has(lower(params[0].to)),'read destination allowlist');
-    if(method==='eth_getLogs'){assert.ok(allowed.has(lower(params[0].address)),'log destination allowlist');return logProvider.send(method,params)}
+    if(method==='eth_call')assert.ok(readOnlyAllowed.has(lower(params[0].to)),`read destination allowlist ${lower(params[0].to)}`);
+    if(method==='eth_estimateGas')assert.ok(allowed.has(lower(params[0].to)),'estimate destination allowlist');
+    if(method==='eth_getLogs'){
+      assert.ok(allowed.has(lower(params[0].address)),'log destination allowlist');
+      try{return await logProvider.send(method,params)}catch{logIndexFallbacks++;return []}
+    }
     return provider.send(method,params);
   }
   const browser=await chromium.launch({headless:true});
   async function tick(price){
-    assert.equal(lower(account),lower(manifest.keeper),'keeper identity');
+    assert.equal(lower(accountA),lower(manifest.keeper),'keeper identity');
     await verifyTestFeeds(); // Re-read all three code hashes before every keeper write batch.
     const timestamp=(await provider.getBlock('latest')).timestamp;
-    for(const feed of feeds)await send(feed,oracleInterface.encodeFunctionData('set',[parseEther(String(price)),timestamp]),'TEST_ORACLE.set');
+    for(const feed of feeds)await send(feed,oracleInterface.encodeFunctionData('set',[parseEther(String(price)),timestamp]),'TEST_ORACLE.set',signerA);
   }
-  async function observe(method,id){assert.equal(lower(account),lower(manifest.keeper),'keeper identity');await send(a.orderTriggerEngine,keeperInterface.encodeFunctionData(method,[BigInt(id)]),method)}
+  async function observe(method,id){assert.equal(lower(accountA),lower(manifest.keeper),'keeper identity');await send(a.orderTriggerEngine,keeperInterface.encodeFunctionData(method,[BigInt(id)]),method,signerA)}
   try{
     for(const [width,height] of [[390,844],[844,390]]){
+      signer=readOnly?signerA:(width===390?signerA:signerB);account=readOnly?accountA:(width===390?accountA:accountB);
       const resume=width===390&&resumeOrderId;
       if(!readOnly&&!resume)await tick(100000);
       Object.assign(walletBoundary,{chain:'0x38',connected:true,rejectNext:false});
@@ -451,13 +482,14 @@ async function publicTestnetBrowserQA(){
       }
       assert.equal((await snapshot()).pnlModel,'INDEX_DELTA_C_LOTS_V1');assert.ok((await snapshot()).capital);
       if(!resume){
-      // The faucet is one-shot per address. Reuse the100 test tokens returned
-      // by the first orientation's withdrawal instead of asking twice for1000.
-      if((await snapshot()).wallet.testTokenBalance<100){await page.locator('#testnetFaucet').click();await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance>=100,null,{timeout:120000})}
-      await page.locator('#testnetAmount').fill('100');
-      if(BigInt((await snapshot()).wallet.allowanceWei)<parseEther('100')){
+      // The faucet is one-shot per address. Each actor reuses its returned test
+      // tokens on later runs instead of treating a faucet as repeatable funding.
+      const depositAmount=width===390?100:200;
+      if((await snapshot()).wallet.testTokenBalance<depositAmount){await page.locator('#testnetFaucet').click();await page.waitForFunction(amount=>__K11520_EXECUTION__.snapshot().wallet?.testTokenBalance>=amount,depositAmount,{timeout:120000})}
+      await page.locator('#testnetAmount').fill(String(depositAmount));
+      if(BigInt((await snapshot()).wallet.allowanceWei)<parseEther(String(depositAmount))){
         await page.locator('#testnetApprove').click();
-        await page.waitForFunction(()=>BigInt(__K11520_EXECUTION__.snapshot().wallet.allowanceWei)>=100n*10n**18n,null,{timeout:120000});
+        await page.waitForFunction(amount=>BigInt(__K11520_EXECUTION__.snapshot().wallet.allowanceWei)>=BigInt(amount)*10n**18n,depositAmount,{timeout:120000});
       }
       if(width===390){
         const beforeRejection=receipts.length,principalBeforeRejection=(await snapshot()).wallet.principal;
@@ -468,13 +500,14 @@ async function publicTestnetBrowserQA(){
       const principalBeforeDeposit=(await snapshot()).wallet.principal;
       await page.locator('#testnetDeposit').click();
       await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().transaction?.method==='depositMargin'&&__K11520_EXECUTION__.snapshot().transaction?.status==='RECEIPT_CONFIRMED',null,{timeout:120000});
-      assert.equal((await snapshot()).wallet.principal,principalBeforeDeposit+100);
+      assert.equal((await snapshot()).wallet.principal,principalBeforeDeposit+depositAmount);
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('wallet-metrics');
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});await shot('deposit');
       }
       await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await page.locator('#walletToggle').click();await page.locator('#k11520UtilityMaster').click();
       for(let i=0;i<3&&(await page.evaluate(()=>__K11520_TRADE_AXIS_API__.current()))!=='KX';i++){await page.locator('#joy').tap();await page.waitForTimeout(200)}
-      await page.locator('#cNumericInput').fill('100');await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
+      const orderC=width===390?1:-1,triggerPrice=width===390?100000.001:99999.999,fillPrice=width===390?100000.002:99999.998;
+      await page.locator('#cNumericInput').fill(String(orderC));await page.locator('#cNumericInput').press('Enter');await page.locator('#lotsNumericInput').fill('100');await page.locator('#lotsNumericInput').press('Enter');
       stage='CREATE_ORDER';const before=new Set((await snapshot()).orders.map(o=>o.orderId));
       const accountBeforeOrder=(await snapshot()).wallet,capitalBeforeOrder=(await snapshot()).capital;
       let order;
@@ -482,27 +515,27 @@ async function publicTestnetBrowserQA(){
         order=(await snapshot()).orders.find(o=>o.orderId===resumeOrderId);
         assert.ok(order,'resume order must belong to the connected account');
         assert.equal(order.status,'PENDING');assert.equal(order.market,'BTCUSDT');
-        assert.equal(order.c,100);assert.equal(order.lots,100);assert.equal(order.triggerPrice,100000.001);
-        assert.equal((await snapshot()).observations.BTCUSDT.price,100000.002,'resume preserves already confirmed crossing observation');
+        assert.equal(order.c,orderC);assert.equal(order.lots,100);assert.equal(order.triggerPrice,triggerPrice);
+        assert.equal((await snapshot()).observations.BTCUSDT.price,fillPrice,'resume preserves already confirmed crossing observation');
         await organ('orders');await shot('pending-resumed');
       }else{
-      await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill('100000.001');await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('INDEX_DELTA_C_LOTS_V1')&&!document.querySelector('#confirmOrder').disabled,null,{timeout:120000});await page.locator('#confirm').evaluate(e=>e.scrollTop=0);await page.locator('#confirmBody').evaluate(e=>e.scrollTop=0);await shot('preview');await page.locator('#confirmOrder').click();
+      await page.locator('#orderFire').click();await page.locator('#simulationTriggerPrice').fill(String(triggerPrice));await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('INDEX_DELTA_C_LOTS_V1')&&!document.querySelector('#confirmOrder').disabled,null,{timeout:120000});await page.locator('#confirm').evaluate(e=>e.scrollTop=0);await page.locator('#confirmBody').evaluate(e=>e.scrollTop=0);await shot('preview');await page.locator('#confirmOrder').click();
       await page.waitForFunction(n=>__K11520_EXECUTION__.snapshot().orders.length>n,before.size,{timeout:120000});
       order=(await snapshot()).orders.find(o=>!before.has(o.orderId));assert.equal(order.status,'PENDING');await shot('pending');
       }
-      stage='KEEPER_FILL';if(!resume)await tick(100000.002);await observe('observeOrder',order.orderId);
+      stage='KEEPER_FILL';if(!resume)await tick(fillPrice);await observe('observeOrder',order.orderId);
       await page.waitForFunction(id=>__K11520_EXECUTION__.snapshot().orders.find(o=>o.orderId===id)?.status==='FILLED',order.orderId,{timeout:120000});
       let position=(await snapshot()).positions.find(p=>p.orderId===order.orderId);assert.equal(position.status,'OPEN');
-      assert.equal(position.c,100);assert.equal(position.lots,100);assert.equal(position.margin,100);
+      assert.equal(position.c,orderC);assert.equal(position.lots,100);assert.equal(position.margin,100);
       assert.equal((await snapshot()).wallet.lockedMargin,accountBeforeOrder.lockedMargin+100);
       assert.ok((await snapshot()).capital.reservedSettlementLiability>capitalBeforeOrder.reservedSettlementLiability,'real funded risk reservation');
       await organ('positions');await shot('filled');
       stage=width===390?'NORMAL_CLOSE':'LIQUIDATION';if(width===390){
-        await tick(100000.007);await page.waitForFunction(id=>Math.abs((__K11520_EXECUTION__.snapshot().positions.find(p=>p.positionId===id)?.unrealizedPnl??0)-50)<1e-6,position.positionId,{timeout:120000});await shot('positive-pnl');
-        await page.locator(`[data-sim-close="${position.positionId}"]`).click();await page.waitForFunction(id=>__K11520_EXECUTION__.snapshot().positions.find(p=>p.positionId===id)?.status==='CLOSED',position.positionId,{timeout:120000});assert.equal((await snapshot()).wallet.principal,accountBeforeOrder.principal+50);
-      }else {await tick(99999.98);await observe('observePosition',position.positionId);await page.waitForFunction(id=>__K11520_EXECUTION__.snapshot().positions.find(p=>p.positionId===id)?.status==='LIQUIDATED',position.positionId,{timeout:120000});position=(await snapshot()).positions.find(p=>p.positionId===position.positionId);assert.equal(position.margin,0);assert.equal((await snapshot()).wallet.principal,accountBeforeOrder.principal-100);assert.ok((await snapshot()).wallet.free>0)}
+        await tick(100000.007);await page.waitForFunction(id=>Math.abs((__K11520_EXECUTION__.snapshot().positions.find(p=>p.positionId===id)?.unrealizedPnl??0)-0.5)<1e-6,position.positionId,{timeout:120000});await shot('positive-pnl');
+        await page.locator(`[data-sim-close="${position.positionId}"]`).click();await page.waitForFunction(id=>__K11520_EXECUTION__.snapshot().positions.find(p=>p.positionId===id)?.status==='CLOSED',position.positionId,{timeout:120000});assert.ok(Math.abs((await snapshot()).wallet.principal-(accountBeforeOrder.principal+0.5))<1e-9);
+      }else {await tick(100002);await observe('observePosition',position.positionId);await page.waitForFunction(id=>__K11520_EXECUTION__.snapshot().positions.find(p=>p.positionId===id)?.status==='LIQUIDATED',position.positionId,{timeout:120000});position=(await snapshot()).positions.find(p=>p.positionId===position.positionId);assert.equal(position.margin,0);assert.equal((await snapshot()).wallet.principal,accountBeforeOrder.principal-100);assert.ok((await snapshot()).wallet.free>0)}
       assert.equal((await snapshot()).wallet.lockedMargin,accountBeforeOrder.lockedMargin);assert.equal((await snapshot()).capital.reservedSettlementLiability,capitalBeforeOrder.reservedSettlementLiability);
-      const settled=(await snapshot()).positions.find(p=>p.positionId===position.positionId);assert.ok(Math.abs(settled.rawPnl-(width===390?50:-220))<1e-6,'candidate raw PnL is delta index times100C times100lots');
+      const settled=(await snapshot()).positions.find(p=>p.positionId===position.positionId);assert.ok(Math.abs(settled.rawPnl-(width===390?0.5:-200.2))<1e-6,'candidate raw PnL is delta index times signed 1C times 100 lots');
       const settlement=(await snapshot()).receipts.find(r=>r.receiptId===`SETTLEMENT-${position.positionId}`);assert.ok(settlement);assert.equal(settlement.marginAfter,0);assert.equal(settlement.executionMode,'BSC_TESTNET');
       await shot(width===390?'closed':'liquidated');await organ('history');await shot('receipts');
       stage='WITHDRAW_AVAILABLE';if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();await wallet();await page.locator('#testnetAmount').fill('100');const beforeWithdraw=(await snapshot()).wallet;
@@ -515,8 +548,22 @@ async function publicTestnetBrowserQA(){
       await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__?.snapshot().status==='READY',null,{timeout:120000});
       for(const id of recoveredIds)assert.ok((await snapshot()).receipts.some(r=>r.receiptId===id),'reload receipt recovery');
       assert.equal((await snapshot()).wallet.principal,recoveredAccount.principal);assert.equal((await snapshot()).wallet.lockedMargin,recoveredAccount.lockedMargin);assert.equal((await snapshot()).wallet.claimable,recoveredAccount.claimable);
+      const actorBook=await snapshot();assert.equal(actorBook.wallet.claimable,0,'fully reserved settlement leaves no unpaid claim');
+      actorEvidence[account]={side:orderC>0?'LONG':'SHORT',principal:actorBook.wallet.principal,lockedMargin:actorBook.wallet.lockedMargin,claimable:actorBook.wallet.claimable,orderIds:actorBook.orders.map(o=>o.orderId),positionIds:actorBook.positions.map(p=>p.positionId),receiptIds:actorBook.receipts.map(r=>r.receiptId)};await persist();
+      if(width===844){
+        const bAccount=account,bSigner=signer,bEvidence=structuredClone(actorEvidence[bAccount]);
+        account=accountA;signer=signerA;await page.evaluate(a=>__testnetWalletEvents.emit('accountsChanged',[a]),accountA);
+        await page.waitForFunction(a=>__K11520_EXECUTION__.snapshot().account?.toLowerCase()===a.toLowerCase(),accountA,{timeout:120000});
+        const recoveredA=await snapshot();assert.equal(recoveredA.wallet.principal,actorEvidence[accountA].principal);assert.equal(recoveredA.wallet.claimable,actorEvidence[accountA].claimable);
+        assert.deepEqual(recoveredA.orders.map(o=>o.orderId),actorEvidence[accountA].orderIds,'Wallet A order isolation');
+        assert.equal(recoveredA.orders.some(o=>bEvidence.orderIds.includes(o.orderId)),false,'Wallet B orders absent from Wallet A');
+        account=bAccount;signer=bSigner;await page.evaluate(a=>__testnetWalletEvents.emit('accountsChanged',[a]),bAccount);
+        await page.waitForFunction(a=>__K11520_EXECUTION__.snapshot().account?.toLowerCase()===a.toLowerCase(),bAccount,{timeout:120000});
+        const recoveredB=await snapshot();assert.equal(recoveredB.wallet.principal,bEvidence.principal);assert.deepEqual(recoveredB.orders.map(o=>o.orderId),bEvidence.orderIds,'Wallet B reload isolation');
+        actorEvidence.isolation='PASS';await persist();
+      }
       await wallet();await shot('reload');assert.deepEqual(errors,[]);
-      await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',chainId:97,broker:'NODE_ONLY_CONFIGURED_SIGNER_NOT_HUMAN_METAMASK',walletBoundaryFixtures:[...(!resume&&width===390?['USER_REJECTED_NO_BROADCAST']:[]),'WRONG_CHAIN_NO_BROADCAST','EXPLICIT_CHAIN_SWITCH','DISCONNECT_CLEARS_STATE','PAGE_RELOAD_RECOVERY'],oracleCodeIdentity:'THREE_FEED_RUNTIME_HASHES_RECHECKED_BEFORE_EACH_WRITE_BATCH',snapshot:await snapshot()},null,2));
+      await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',chainId:97,broker:'NODE_ONLY_CONFIGURED_SIGNER_NOT_HUMAN_METAMASK',walletBoundaryFixtures:[...(!resume&&width===390?['USER_REJECTED_NO_BROADCAST']:[]),'WRONG_CHAIN_NO_BROADCAST','EXPLICIT_CHAIN_SWITCH','DISCONNECT_CLEARS_STATE','PAGE_RELOAD_RECOVERY'],logIndexFallbacks,logRecovery:'EMPTY_LOG_INDEX_FALLS_BACK_TO_CANONICAL_CONTRACT_STATE_AND_RECEIPTS',oracleCodeIdentity:'THREE_FEED_RUNTIME_HASHES_RECHECKED_BEFORE_EACH_WRITE_BATCH',snapshot:await snapshot()},null,2));
       }catch(error){
         // Explicitly select public product fields; never serialize a provider,
         // signer, RPC URL, raw error object or the Node environment.

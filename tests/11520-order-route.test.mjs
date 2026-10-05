@@ -26,12 +26,12 @@ test('public browser QA fails closed on legacy manifest before touching signer a
  assert.match(publicSource,/docs\/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST\.json/);
  assert.match(publicSource,/budget=parseEther\('0\.005'\)/);assert.match(publicSource,/value:0n,chainId:97/);
  assert.match(publicSource,/WITHDRAW_TEST_AMOUNT_CAP/);assert.match(publicSource,/DEPOSIT_TEST_AMOUNT_CAP/);
- assert.match(publicSource,/wallet\.allowanceWei\)<parseEther\('100'\)/);
- assert.match(publicSource,/candidate raw PnL is delta index times100C times100lots/);
+ assert.match(publicSource,/wallet\.allowanceWei\)<parseEther\(String\(depositAmount\)\)/);
+ assert.match(publicSource,/candidate raw PnL is delta index times signed 1C times 100 lots/);
  assert.match(publicSource,/readOnly\?null:new Wallet/,'diagnostic mode does not construct a signer');
  assert.match(publicSource,/assert\.equal\(readOnly,false,'read-only QA cannot broadcast'\)/);
  assert.match(publicSource,/assert\.equal\(BigInt\(await logProvider\.send\('eth_chainId',\[\]\)\),97n\)/);
- assert.match(publicSource,/if\(method==='eth_getLogs'\).*logProvider\.send\(method,params\)/,'optional index serves only logs, never transactions');
+ assert.match(publicSource,/if\(method==='eth_getLogs'\)[\s\S]*?logProvider\.send\(method,params\)/,'optional index serves only logs, never transactions');
 });
 
 test('selected Testnet route reports Testnet without activating Mainnet or claiming a receipt',()=>{

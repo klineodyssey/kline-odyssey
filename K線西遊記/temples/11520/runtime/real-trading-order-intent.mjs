@@ -11,6 +11,15 @@ import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,place
 function finitePositive(value,label){const n=Number(value);if(!Number.isFinite(n)||n<=0)throw new Error(`${label}_MUST_BE_POSITIVE`);return n}
 function integerRange(value,label,min,max){const n=Number(value);if(!Number.isInteger(n)||n<min||n>max)throw new Error(`${label}_OUT_OF_RANGE`);return n}
 function normalizeAddress(value,label){const v=String(value??'');if(!/^0x[0-9a-fA-F]{40}$/.test(v))throw new Error(`${label}_INVALID`);return v}
+const TESTNET_PUBLIC_REFERENCE_SOURCE='BINANCE_PUBLIC_MARKET_DATA_ONLY';
+const TESTNET_PUBLIC_REFERENCE_MAX_AGE_MS=15000;
+function requireFreshPublicReference(reference,market,now=Date.now()){
+  if(!reference||reference.market!==market||reference.source!==TESTNET_PUBLIC_REFERENCE_SOURCE||reference.settlementAuthority!==false)throw new Error('PUBLIC_REFERENCE_INVALID');
+  const price=Number(reference.price),updatedAt=Number(reference.updatedAt),age=now-updatedAt;
+  if(!Number.isFinite(price)||price<=0||!Number.isSafeInteger(updatedAt)||updatedAt<=0||!Number.isFinite(age)||age<0)throw new Error('PUBLIC_REFERENCE_INVALID');
+  if(reference.stale===true||reference.sourceStatus!=='REFERENCE_FRESH'||age>TESTNET_PUBLIC_REFERENCE_MAX_AGE_MS)throw new Error('PUBLIC_REFERENCE_STALE');
+  return Object.freeze({market,price,updatedAt,age,source:reference.source,settlementAuthority:false});
+}
 
 // One order vocabulary for the game. Wallet identity is optional for simulation;
 // neither a connected account nor a browser quote grants on-chain authority.
@@ -146,6 +155,8 @@ export const TESTNET_EXECUTION_ABI=Object.freeze({
     'event OrderFilled(uint256 indexed orderId,uint256 indexed positionId,uint256 price)',
     'event OrderTerminated(uint256 indexed orderId,uint8 status)'],
   positionEngine:['function brainSettlement() view returns(address)','function executor() view returns(address)',
+    'function tradingCapability(uint8) view returns(uint256 maxCWad,uint64 validUntil,uint32 maxAge,uint32 maxTimeSkew,uint256 maxSpreadWad,bytes32 evidenceHash)',
+    'function marketTradingState(uint8) view returns(uint8)',
     'function readMarketPrice(uint8) view returns(uint256 priceWad,uint256 observedAt,uint8 validSources)',
     'function marketConfig(uint8) view returns(uint16 initialMarginBps,uint16 maintenanceMarginBps,uint32 maxOracleAge,uint256 minPriceWad,uint256 maxPriceWad,bool enabled)',
     'function positionSnapshot(uint256) view returns(tuple(address trader,uint8 market,int256 sizeWad,uint256 collateralWad,uint256 entryPriceWad,uint64 openedAt,uint64 closedAt,uint256 exitPriceWad,int256 rawPnlWad,int256 realizedPnlWad,uint256 badDebtWad,uint8 status))',
@@ -189,6 +200,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   const a=Object.freeze({...deployment?.addresses}),hashes=Object.freeze({...deployment?.codeHashes});
   const configValid=deployment?.mode==='BSC_TESTNET'&&deployment?.status==='DEPLOYED_CONFIG_VERIFIED'&&deployment?.publicNetwork===true&&deployment?.chainId===97&&deployment?.testOnly===true&&
     deployment?.verified===true&&Number.isSafeInteger(deployment?.deploymentBlock)&&deployment.deploymentBlock>=0&&
+    deployment?.cMin===0.001&&deployment?.cMax===1&&deployment?.publicQuotePolicy?.newRiskGateOnly===true&&deployment?.publicQuotePolicy?.settlementAuthority===false&&
     [...keys,'brainImplementation'].every(k=>validAddress(a[k])&&/^0x[0-9a-fA-F]{64}$/.test(hashes[k]||''))&&
     new Set([...keys,'brainImplementation'].map(k=>a[k]?.toLowerCase())).size===keys.length+1&&typeof ethereum?.request==='function'&&typeof ethers?.Interface==='function';
   if(!configValid){
@@ -244,6 +256,10 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       call('orderTriggerEngine','engine'),call('orderTriggerEngine','brain'),call('testToken','decimals'),call('brainProxy','SETTLEMENT_ROLE')]);
     if([a.testToken,a.brainProxy,a.orderTriggerEngine,a.positionEngine,a.brainProxy].some((v,i)=>lower(v)!==lower(links[i][0]))||Number(links[5][0])!==18)fail('DEPLOYMENT_LINK_MISMATCH');
     if(!(await call('brainProxy','hasRole',[links[6][0],a.positionEngine]))[0])fail('SETTLEMENT_ROLE_MISSING');
+    for(let market=0;market<3;market++){
+      const capability=await call('positionEngine','tradingCapability',[market]);
+      if(capability.maxCWad!==1000000000000000000n)fail('AUTHORITATIVE_C_CAP_MISMATCH');
+    }
     return account;
   };
   const marketNames=['BTCUSDT','ETHUSDT','BNBUSDT'],axes=['KX','KY','KZ'];
@@ -411,7 +427,10 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     publish({...lost?blank():{},status:failure.code,error:failure.reason,
       transaction:state.transaction?{...state.transaction,status:failure.code}:null});return failure}};
   const previewInternal=async(input,{forceRefresh=false}={})=>{
-    const intent=buildExecutionOrderIntent(input),ticket=generation,account=await identity(),recent=lastReadyRefresh;
+    const baseIntent=buildExecutionOrderIntent(input),validatedC=requireV1TradingC(baseIntent.c);
+    const intent=Object.freeze({...baseIntent,c:validatedC,leverage:Math.abs(validatedC)});
+    const publicReference=requireFreshPublicReference(input?.publicReference,intent.market);
+    const ticket=generation,account=await identity(),recent=lastReadyRefresh;
     // Display-only history reuse avoids repeating a just-completed RPC recovery.
     // Identity and oracle are always live; a write always forces full recovery.
     const age=recent?Date.now()-recent.at:Infinity;
@@ -434,7 +453,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       estimate=num((await call('positionEngine','previewLiquidationBoundary',[intent.contractMarket,wad(intent.c),BigInt(intent.lots),wad(intent.triggerPrice)]))[0]);
     }
     await sameSession(account,ticket);if(state.status!=='READY')fail(state.status==='ORACLE_STALE'?'ORACLE_STALE':'DISCONNECTED');
-    return {ok:true,...intent,intent,currentPrice:num(quote[0]),requiredMargin:intent.lots,available:wallet.free,
+    return {ok:true,...intent,intent,currentPrice:num(quote[0]),publicReference,requiredMargin:intent.lots,available:wallet.free,
       estimatedLiquidationPrice:estimate,pnlModel,liquidationModel:'ON_CHAIN_INITIAL_AND_MAINTENANCE_MARGIN_ESTIMATE',executionMode:'BSC_TESTNET'};
   };
   const send=async(k,method,args,expectedEvent)=>{
