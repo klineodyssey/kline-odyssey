@@ -1,5 +1,20 @@
 # 11520 Universal Exchange V3.9
 
+## V2.9.4 M1 read-only wallet candidate
+
+The existing wallet panel has an explicit 1C Testnet read-only view. It reads
+chain97 identity, native tBNB and testKGEN; it cannot approve, deposit, trade,
+claim or withdraw. The legacy deployment remains a separate EXIT-ONLY context
+for existing principal, with no new risk or funding. Root addresses, saved
+legacy preferences, transaction leases and receipt caches are preserved.
+
+The view uses injected EIP-1193. Ordinary mobile browsers without a provider
+remain disconnected; use MetaMask Mobile's Explore browser as described in the
+[official guide](https://support.metamask.io/configure/wallet/how-to-use-the-metamask-mobile-browser/).
+Synthetic browser providers and actual BSC97 reads do not establish physical
+MetaMask/Android acceptance. Full M2–M5 financial activation remains on HOLD.
+See `HANDOFF_CURRENT.md` for exact evidence, limitations and release gates.
+
 ## World-first / market-life candidate — 2026-10-04
 
 Independent Human-requested candidate, **not a released or QA-passed build**.

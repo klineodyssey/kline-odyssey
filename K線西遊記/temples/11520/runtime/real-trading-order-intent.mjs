@@ -178,12 +178,13 @@ const TESTNET_PENDING_WALLET_REQUESTS=new WeakMap();
  * mainnet switch, or simulation-ledger mutation is exposed here. Every mutation
  * requires a separate user action invoking one of the named methods below. */
 export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receiptTimeoutMs=90000,
-  pollMs=1500,rpcTimeoutMs=15000,walletRequestTimeoutMs=120000,onState=()=>{}}={}){
+  pollMs=1500,rpcTimeoutMs=15000,walletRequestTimeoutMs=120000,onState=()=>{},readOnly=false,exitOnly=false}={}){
   const blank=()=>({mode:'BSC_TESTNET',label:'TESTNET · NO REAL VALUE',status:'NOT_DEPLOYED_OR_AUTHORIZED',
-    chainId:97,account:null,wallet:null,orders:[],positions:[],receipts:[],observations:{},transaction:null});
-  let state=blank(),busy=false,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null;
+    chainId:97,account:null,wallet:null,orders:[],positions:[],receipts:[],observations:{},transaction:null,
+    readOnly:readOnly===true,exitOnly:exitOnly===true,deploymentContext:'97:'+String(deployment?.addresses?.brainProxy||'').toLowerCase()});
+  let state=blank(),busy=false,displayActive=true,generation=0,refreshRevision=0,appliedRefreshRevision=0,refreshFlight=null,lastReadyRefresh=null;
   const copy=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
-  const snapshot=()=>copy({...state,writeBlocked:!!ethereum&&TESTNET_PENDING_WALLET_REQUESTS.has(ethereum)});
+  const snapshot=()=>copy({...state,writeBlocked:readOnly===true||!!ethereum&&TESTNET_PENDING_WALLET_REQUESTS.has(ethereum)});
   const publish=patch=>{state={...state,...patch};try{onState(snapshot())}catch{}return snapshot()};
   const keys=Object.keys(TESTNET_EXECUTION_ABI),validAddress=v=>/^0x[0-9a-fA-F]{40}$/.test(v||'')&&!/^0x0{40}$/i.test(v);
   const a=Object.freeze({...deployment?.addresses}),hashes=Object.freeze({...deployment?.codeHashes});
@@ -201,6 +202,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
   if(!['NOTIONAL_RETURN_V1','INDEX_DELTA_C_LOTS_V1'].includes(pnlModel))throw new Error('UNSUPPORTED_PNL_MODEL');
   const fromBlock=deployment.deploymentBlock,abi=Object.fromEntries(keys.map(k=>[k,new ethers.Interface([...TESTNET_EXECUTION_ABI[k],...(capitalEnabled?CAPITAL_EXECUTION_ABI[k]||[]:[])])]));
   const req=async(method,params=[],timeoutOverride=null)=>{
+    if(readOnly&&!['eth_chainId','eth_accounts','eth_getCode','eth_getStorageAt','eth_blockNumber','eth_getBlockByNumber','eth_getTransactionReceipt','eth_getLogs','eth_getBalance','eth_call','wallet_switchEthereumChain'].includes(method))throw new Error('M1_READ_ONLY_WALLET');
     let timer;
     const timeout=timeoutOverride??(method==='eth_sendTransaction'||method.startsWith('wallet_')?walletRequestTimeoutMs:rpcTimeoutMs);
     let request;
@@ -289,6 +291,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     const r=await req('eth_getTransactionReceipt',[log.transactionHash]);
     if(!r||BigInt(r.status)!==1n||lower(r.blockHash)!==lower(log.blockHash))fail('RECEIPT_NOT_CANONICAL');
     const block=await req('eth_getBlockByNumber',[r.blockNumber,false]);
+    if(readOnly&&(!block||lower(block.hash)!==lower(r.blockHash)||lower(r.transactionHash)!==lower(log.transactionHash)||BigInt(r.blockNumber)!==BigInt(log.blockNumber)))fail('RECEIPT_NOT_CANONICAL');
     return {txHash:r.transactionHash,block:Number(BigInt(r.blockNumber)),timestamp:Number(BigInt(block.timestamp))*1000,
       contract:log.address,method,status:'RECEIPT_CONFIRMED',transactionStatus:'RECEIPT_CONFIRMED',executionMode:'BSC_TESTNET'};
   };
@@ -296,13 +299,17 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     const revision=++refreshRevision;
     try{
     const ticket=generation,account=await verify(),height=Number(BigInt(await req('eth_blockNumber'))),tag=hex(height),recoveryLogCache=new Map();
+    const pinnedBlock=readOnly?await req('eth_getBlockByNumber',[tag,false]):null;
+    if(readOnly&&!/^0x[0-9a-f]{64}$/i.test(pinnedBlock?.hash||''))fail('RECOVERY_BLOCK_UNVERIFIED');
     const lf=(...args)=>logsFor(...args,recoveryLogCache);
-    const [balance,principal,locked,available,created,deposits,approvals,mints,allowance,withdrawals]=await Promise.all([
+    const [nativeBalance,balance,principal,locked,available,created,deposits,approvals,mints,allowance,withdrawals]=await Promise.all([
+      req('eth_getBalance',[account,tag]),
       call('testToken','balanceOf',[account],tag),call('brainProxy','principalOf',[account],tag),
       call('brainProxy','lockedPrincipalOf',[account],tag),call('brainProxy','availablePrincipal',[account],tag),
       lf('orderTriggerEngine','OrderCreated',[null,account],height),lf('brainProxy','MarginDeposited',[account],height),
       lf('testToken','Approval',[account,a.brainProxy],height),lf('testToken','Transfer',['0x'+'0'.repeat(40),account],height),
       call('testToken','allowance',[account,a.brainProxy],tag),lf('brainProxy','MarginWithdrawn',[account],height)]);
+    if(typeof nativeBalance!=='string'||!/^0x[0-9a-f]{1,64}$/i.test(nativeBalance))fail('INVALID_NATIVE_BALANCE_RESPONSE');
     // Some public BSC97 RPC nodes return empty eth_getLogs for old ranges while
     // eth_call and transaction receipts remain available. Recover canonical
     // orders from enumerable contract state instead of treating empty logs as no history.
@@ -382,7 +389,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     await sameSession(account,ticket);
     if(revision<appliedRefreshRevision||height<(state.block??0))return {ok:true,superseded:true,executionMode:'BSC_TESTNET',...snapshot()};
     const lease=TESTNET_PENDING_WALLET_REQUESTS.get(ethereum);
-    if(lease?.hash&&/^0x[0-9a-fA-F]{64}$/.test(lease.hash)){
+    if(!readOnly&&lease?.hash&&/^0x[0-9a-fA-F]{64}$/.test(lease.hash)){
       const r=await req('eth_getTransactionReceipt',[lease.hash]);
       if(r&&['0x0','0x1'].includes(r.status)&&Number(BigInt(r.blockNumber))<=height&&
         lower(r.from)===lower(lease.from)&&lower(r.to)===lower(lease.to)&&lower(r.transactionHash)===lower(lease.hash)){
@@ -390,13 +397,19 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       }
     }
     if(revision<appliedRefreshRevision)return {ok:true,superseded:true,executionMode:'BSC_TESTNET',...snapshot()};
+    if(readOnly){
+      const canonical=await req('eth_getBlockByNumber',[tag,false]);
+      if(canonical?.hash?.toLowerCase()!==pinnedBlock.hash.toLowerCase())fail('RECOVERY_BLOCK_CHANGED');
+      await sameSession(account,ticket);
+      if(revision<appliedRefreshRevision)return {ok:true,superseded:true,...snapshot()};
+    }
     appliedRefreshRevision=revision;
-    publish({account,chainId:97,error:null,status:markUnavailable||Object.values(observations).some(q=>q.error)?'ORACLE_STALE':'READY',wallet:{testTokenBalance:num(balance[0]),testTokenBalanceWei:String(balance[0]),
+    publish({account,chainId:97,error:null,status:markUnavailable||Object.values(observations).some(q=>q.error)?'ORACLE_STALE':'READY',wallet:{testBnbBalance:ethers.formatUnits(BigInt(nativeBalance),18),testBnbBalanceWei:String(BigInt(nativeBalance)),testTokenBalance:num(balance[0]),testTokenBalanceWei:String(balance[0]),
       principal:num(principal[0]),total:num(principal[0]),principalWei:String(principal[0]),free:num(available[0]),availableWei:String(available[0]),withdrawable:num(available[0]),
       allowanceWei:String(allowance[0]),allowance:num(allowance[0]),allowanceUnlimited:allowance[0]===(1n<<256n)-1n,
       claimable:capital?.claimable??null,claimableStatus:capital?'VERIFIED':'UNSUPPORTED_LEGACY_DEPLOYMENT',locked:num(locked[0]),lockedMargin:num(locked[0]),
       lockedWei:String(locked[0]),equity:markUnavailable?null:num(principal[0])+unrealized+(capital?.claimable||0),unrealizedPnl:markUnavailable?null:unrealized,
-      markError:markUnavailable?'ORACLE_STALE':null,realizedPnl:realized},capital,claims,pnlModel,orders,positions,receipts,observations,block:height});
+      markError:markUnavailable?'ORACLE_STALE':null,realizedPnl:realized},capital,claims,pnlModel,orders,positions,receipts,observations,block:height,blockHash:pinnedBlock?.hash||null});
     lastReadyRefresh=state.status==='READY'?{at:Date.now(),account,ticket}:null;
     return {ok:true,executionMode:'BSC_TESTNET',...snapshot()};
     }catch(error){if(revision<appliedRefreshRevision)return {ok:true,superseded:true,...snapshot()};throw error}
@@ -464,11 +477,11 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     return {ok:true,status:method==='createOrder'?'ON_CHAIN_ORDER_CREATED':'RECEIPT_CONFIRMED',txHash:hash,
       orderId:event?.args?.orderId==null?null:String(event.args.orderId),executionMode:'BSC_TESTNET'};
   };
-  const mutate=fn=>run(async()=>{if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{return await fn()}finally{busy=false}});
-  const invalidate=()=>{lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision;publish({...blank(),status:'RECONNECT_REQUIRED'})};
+  const mutate=(fn,operation)=>run(async()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly&&!['close','cancel','withdraw','claim'].includes(operation))fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');if(busy)fail('TRANSACTION_IN_PROGRESS');if(TESTNET_PENDING_WALLET_REQUESTS.has(ethereum))fail('WALLET_REQUEST_UNRESOLVED');busy=true;try{return await fn()}finally{busy=false}});
+  const invalidate=()=>{lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision;if(displayActive)publish({...blank(),status:'RECONNECT_REQUIRED'})};
   for(const event of ['accountsChanged','chainChanged','disconnect'])ethereum.on?.(event,invalidate);
-  return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:true,snapshot,
-    preview:input=>run(()=>previewInternal(input)),refresh:()=>run(refreshInternal),recover:()=>run(refreshInternal),
+  return Object.freeze({name:'EVM_ADAPTER',mode:'BSC_TESTNET',enabled:true,readOnly:readOnly===true,exitOnly:exitOnly===true,snapshot,
+    preview:input=>run(()=>{if(readOnly)fail('M1_READ_ONLY_WALLET');if(exitOnly)fail('LEGACY_EXIT_ONLY_NO_NEW_RISK');return previewInternal(input)}),refresh:()=>run(refreshInternal),recover:()=>run(refreshInternal),
     submit:input=>mutate(async()=>{const checked=await previewInternal(input,{forceRefresh:true});return send('orderTriggerEngine','createOrder',
       [checked.contractMarket,wad(checked.c),BigInt(checked.lots),wad(checked.triggerPrice)],'OrderCreated')}),
     approve:(amount,{unlimited=false}={})=>mutate(async()=>{const value=unlimited?(1n<<256n)-1n:wad(finitePositive(amount,'AMOUNT'));return send('testToken','approve',[a.brainProxy,value],'Approval')}),
@@ -479,16 +492,24 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
       return send('brainProxy','depositMargin',[value],'MarginDeposited')}),
     withdraw:amount=>mutate(async()=>{const value=wad(finitePositive(amount,'AMOUNT')),account=await verify();
       if((await call('brainProxy','availablePrincipal',[account]))[0]<value)fail('INSUFFICIENT_MARGIN');
-      return send('brainProxy','withdrawMargin',[value],'MarginWithdrawn')}),
+      return send('brainProxy','withdrawMargin',[value],'MarginWithdrawn')},'withdraw'),
     claim:key=>mutate(async()=>{if(!capitalEnabled)fail('CLAIM_NOT_SUPPORTED_BY_DEPLOYMENT');
       if(!/^0x[0-9a-fA-F]{64}$/.test(key||''))fail('INVALID_CLAIM_KEY');
       const account=await verify(),claim=await call('brainProxy','settlementClaims',[key]);
       if(lower(claim.user)!==lower(account)||claim.remainingWei<=0n)fail('CLAIM_NOT_AVAILABLE');
-      return send('brainProxy','claimSettlement',[key],'SettlementClaimPaid')}),
-    close:id=>mutate(()=>send('orderTriggerEngine','closePosition',[BigInt(id)],'PositionClosed')),
-    cancel:id=>mutate(()=>send('orderTriggerEngine','cancelOrder',[BigInt(id)],'OrderTerminated')),
+      return send('brainProxy','claimSettlement',[key],'SettlementClaimPaid')},'claim'),
+    close:id=>mutate(()=>send('orderTriggerEngine','closePosition',[BigInt(id)],'PositionClosed'),'close'),
+    cancel:id=>mutate(()=>send('orderTriggerEngine','cancelOrder',[BigInt(id)],'OrderTerminated'),'cancel'),
     observe:async()=>executionFailure(new Error('KEEPER_OBSERVATION_REQUIRED')),
     switchChain:()=>run(async()=>{await req('wallet_switchEthereumChain',[{chainId:'0x61'}]);if(BigInt(await req('eth_chainId'))!==97n)fail('WRONG_CHAIN');return {ok:true,chainId:97}}),
+    // Presentation suspension never grants execution authority. Identity events
+    // still fence every pending operation but cannot erase an inactive book.
+    setDisplayActive(active){
+      if(typeof active!=='boolean')fail('INVALID_DISPLAY_STATE');
+      const wasActive=displayActive;displayActive=active;
+      if(!active){lastReadyRefresh=null;generation++;appliedRefreshRevision=++refreshRevision}
+      else if(!wasActive)invalidate()
+    },
     dispose(){generation++;for(const event of ['accountsChanged','chainChanged','disconnect'])ethereum.removeListener?.(event,invalidate)}
   });
 }

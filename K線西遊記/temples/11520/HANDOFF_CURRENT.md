@@ -1,5 +1,80 @@
 # 11520 HANDOFF CURRENT
 
+## V2.9.4 M1 independent read-only wallet candidate — 2026-10-05
+
+- Human-authorized M1 split from #488; temporary external engineering maintainer
+  dot, no formal Worker identity or financial release authority claimed.
+  Base main: `b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720` (after #504).
+  Branch: `codex/k11520-m1-readonly-20261005`. The broader financial successor is
+  preserved separately at `e7b9bf82aba5373ba4173efe6a3af563fc582f8f`; old #488 is
+  untouched. No force-push, deployment, signer use or public transaction.
+- The existing wallet panel adds one explicit `1C TESTNET · 唯讀 M1` view. It
+  uses the existing EIP-1193 session and adapter factory, not another wallet,
+  engine or balance authority. Native test BNB and testKGEN share the recovered
+  account/block; exact wei strings distinguish genuine zero from invalid data.
+  M1 records canonical block hash and rejects a block change during recovery.
+- The original manifest root/addresses remain unchanged. The named additive
+  `readOnlyCandidates.wallet1c` binds the already deployed 1C test stack and its
+  historical receipts. This configuration can only enter the M1 read-only view;
+  it does not migrate funds, change ownership, upgrade a proxy or authorize
+  trading. Browser quotes do not become a Mainnet oracle.
+- The read-only adapter rejects preview/approve/deposit/order/faucet/close/cancel/
+  claim/withdraw before any mutation RPC; its request allowlist excludes send and
+  sign methods. Connect and explicit chain97 switch are separate existing user
+  actions. M2–M5 are not enabled. Above1C remains locked; the retained legacy
+  route is EXIT-ONLY, including rejection of new risk even at0.001–1C.
+- Preserve the real historical test-principal exit path. Legacy root Brain
+  `0x60e3801CDf885830ca45Def76a6141f841B0521d` at block135017658,
+  hash`0x633e2cec5ddc6160cdd127c9bf392115603c5bc9631c6587ebbae21946701b3e`,
+  had1049 TESTKGEN principal,0 locked,0 claimable, no open positions or pending
+  orders for the recorded actor. Legacy close/cancel/claim/available withdrawal
+  remain explicit existing wallet actions; new approve/deposit/faucet/orders
+  are disabled. Contract exit rules, balances and Solidity are unchanged.
+- M1 uses a separate view preference and never overwrites the old execution-mode
+  key or automatically switches a user's saved stack. Returning restores the
+  prior view. Inactive books retain their receipt caches; suspension fences
+  pending refreshes and real fan-out identity events without erasing the book.
+  Explicit return invalidates stale display before fresh recovery. Read-only
+  recovery cannot consume a legacy unresolved transaction lease. M1 also skips
+  local player-store rebinding, preserving the shared-store owner's scope.
+- Actual chain97 M1 read evidence at block135016963,
+  hash`0x98457c864b396a51ae38911ab7ffa152560ff99c6d3729bfee3d02bcfeb98133`
+  (2026-10-05 12:49:54Z): actorA
+  `0x3a909988E4d5c9C2326A7a0596714482AB25eE0A` has0.20001304654 tBNB and1000
+  testKGEN; actorB `0x6BE8fb4320d46475e2C5e9ba55DFB9F3573FFE11` has
+  0.0013837041 tBNB and800 testKGEN. ActorB is established by actual order10's
+  public owner, signed -1C and100 lots; no private-key derivation was used.
+- Earlier fresh read-only audit at block135008706 verified14 runtime code hashes,
+  the proxy implementation, links/roles and all83 historical receipts against
+  canonical transaction/block/target evidence. All3 capabilities were expired
+  and the test oracle quorum unavailable: financial new-risk readiness remains
+  fail-closed. M1 read-only balances do not require healthy trading capabilities.
+- Mobile support is injected EIP-1193, not WalletConnect protocol. A browser
+  without a provider stays disconnected and shows official MetaMask Mobile
+  Explore-browser guidance inside the existing panel. No install, seed, private
+  key, project account or fabricated connected address is requested.
+- Source validation checkpoint:88 focused tests PASS, including native A/B,
+  reload, late-A reads, one wei, malformed/zero balance, no-RPC mutation guards,
+  legacy EXIT-ONLY, provider sign/write traps, byte-identical preserved legacy
+  cache/lease and fan-out event suspension. Syntax and diff checks PASS.
+  Local Chromium is blocked by `socket() Operation not permitted`; no security
+  bypass attempted. Browser/visual QA is NOT_RUN locally, not inferred from DOM.
+- The one planned publication batch triggers existing CI plus a bounded M1
+  signer-free browser job. That job uses actual BSC97 reads through a synthetic
+  injected provider, checks no-provider guidance, wrong chain, A/B, disconnect,
+  reload, immutable legacy preference and return to the old exit context.
+  Actual Human MetaMask/Android acceptance remains NOT_VERIFIED. The local EVM
+  browser lane tests existing principal/position exits and the read-only view;
+  it is not a claim of public-chain M2–M5 acceptance.
+- Known baseline financial debt is not hidden: this isolated M1 branch does not
+  import the wider #488 async mutation-ticket/direct-receipt repairs. The
+  read-only view cannot exercise those legacy write paths; it must not be called
+  a completed financial execution release. Full financial review stays HOLD.
+- `M1_FUNCTIONAL_QA=FOCUSED_PASS_BROWSER_PENDING`; `M1_VISUAL_QA=PENDING`;
+  `SIGNED_TX=NO`; `MAINNET_TX=NO`; `REAL_MAINNET_KGEN_TRANSFER=NO`.
+  No merge/publication readiness is claimed until exact-head gates and direct
+  screenshot inspection are complete and the parent classifies release scope.
+
 ## World-first / Market Life — local candidate, 2026-10-04
 
 - Authority: Human `KAIOS_K11520_HUMAN_CENTERED_WORLD_AND_MARKET_LIFE_V1`.
