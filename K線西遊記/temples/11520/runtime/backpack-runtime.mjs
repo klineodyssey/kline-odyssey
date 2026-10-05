@@ -93,3 +93,46 @@ export function restoreBackpack(value,ownerId){
   if(result.rewardReceipts.length>BACKPACK_REWARD_RECEIPT_LIMIT)throw new Error('INVALID_REWARD_RECEIPTS');
   return result;
 }
+
+/**
+ * Strict, inert canonical persistence validation. This is intentionally distinct
+ * from restoreBackpack's explicit legacy normalization. It does not migrate,
+ * refresh timestamps, generate IDs, coerce fields or discard unknown data.
+ * Owner consistency is local isolation, never authenticated asset ownership.
+ */
+export function validateCanonicalBackpack(value,{ownerId}={}){
+  const invalid=()=>{throw new Error('INVALID_CANONICAL_BACKPACK')};
+  const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+  const integer=(v,min=0)=>Number.isSafeInteger(v)&&v>=min;
+  const text=(v,max=256)=>typeof v==='string'&&v.length>0&&v.length<=max&&!/[\x00-\x1f<>]/.test(v);
+  const nullableText=v=>v===null||text(v);
+  // IDB payloads must also have an exact JSON archival representation. Reject
+  // non-finite/undefined/function/cyclic data instead of silently serializing it.
+  const seen=new Set();let bytes=0;
+  const add=text=>{for(const character of text){const cp=character.codePointAt(0);bytes+=cp<128?1:cp<2048?2:cp<65536?3:4}if(bytes>2_000_000)invalid()};
+  function jsonData(v,depth=0){
+    if(depth>128)invalid();
+    if(v===null||typeof v==='string'||typeof v==='boolean'){add(JSON.stringify(v));return}
+    if(typeof v==='number'){if(!Number.isFinite(v))invalid();add(JSON.stringify(v));return}
+    if(typeof v!=='object'||seen.has(v)||(!Array.isArray(v)&&![Object.prototype,null].includes(Object.getPrototypeOf(v))))invalid();
+    seen.add(v);const descriptors=Object.getOwnPropertyDescriptors(v),names=Reflect.ownKeys(descriptors);
+    if(Array.isArray(v)){
+      if(names.length!==v.length+1)invalid();add('[]');
+      for(let index=0;index<v.length;index++){const d=descriptors[index];if(!d||!d.enumerable||!Object.hasOwn(d,'value'))invalid();if(index)add(',');jsonData(d.value,depth+1)}
+    }else{
+      add('{}');for(let index=0;index<names.length;index++){const name=names[index],d=descriptors[name];if(typeof name!=='string'||!d.enumerable||!Object.hasOwn(d,'value'))invalid();if(index)add(',');add(JSON.stringify(name));add(':');jsonData(d.value,depth+1)}
+    }
+    seen.delete(v);
+  }
+  jsonData(value);
+  if(!object(value)||value.version!==BACKPACK_VERSION||!/^KAIOS-P-[a-zA-Z0-9-]{16,80}$/.test(ownerId||'')||value.ownerId!==ownerId||!integer(value.capacitySlots,1)||!Number.isFinite(value.capacityWeight)||value.capacityWeight<=0||!integer(value.updatedAt)||!Array.isArray(value.items)||value.items.length>24||value.items.length>value.capacitySlots||!Array.isArray(value.rewardReceipts)||value.rewardReceipts.length>BACKPACK_REWARD_RECEIPT_LIMIT||value.rewardReceipts.some(id=>!validRewardId(id))||new Set(value.rewardReceipts).size!==value.rewardReceipts.length)invalid();
+  const ids=new Set(),lives=new Set();let weight=0;
+  for(const item of value.items){
+    if(!object(item)||!text(item.itemId)||!text(item.name)||!ITEM_KINDS.includes(item.kind)||!integer(item.qty,1)||item.qty>1000000||!Number.isFinite(item.weightEach)||item.weightEach<0||typeof item.stackable!=='boolean'||!nullableText(item.species)||!nullableText(item.treasureClass)||!nullableText(item.lifeId)||(item.rewardId!==null&&!validRewardId(item.rewardId))||!item.meta||typeof item.meta!=='object')invalid();
+    if(ids.has(item.itemId)||(item.lifeId!==null&&lives.has(item.lifeId)))invalid();ids.add(item.itemId);if(item.lifeId!==null)lives.add(item.lifeId);
+    if(item.kind==='LIVING_CARGO'&&(item.qty!==1||item.stackable!==false||!text(item.lifeId)||!LIVING_SPECIES.includes(item.species)))invalid();
+    if(item.rewardId!==null&&!value.rewardReceipts.includes(item.rewardId))invalid();
+    weight+=item.weightEach*item.qty;if(!Number.isFinite(weight)||weight>value.capacityWeight)invalid();
+  }
+  return value;
+}

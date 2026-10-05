@@ -754,3 +754,89 @@ test('order execution rejects forged C, lots, side, margin and duplicate positio
  const once=structuredClone(state);assert.equal(executeOrder(state,base).reason,'POSITION_EXISTS');assert.deepEqual(state,once);
  assert.equal(previewOrder({axis:'KX',fire:-1,leverage:1,price:100,kgen:1000}).reason,'BAD_LOTS');
 });
+
+// Stage2A validators are inert and do not activate canonical storage or migration.
+import * as strictCourierDomain from '../runtime/digital-ant-logistics-runtime.mjs';
+const strictCourierPlayer='KAIOS-P-COURIER-1234567890';
+function strictCourierFixture(mode='ACTIVE'){
+ const storage=courierStorage(),insured=['ROBBED','PAID','LOOT_CLAIMED'].includes(mode),quote=insured?quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000}):null;
+ const store=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'STRICT-A'}),mission=store.accept(courierOffer({cargoAmount:1000,insuranceQuote:quote}),{courierLifeId:strictCourierPlayer});
+ if(insured)store.activateInsurance(mission.missionId,{courierLifeId:strictCourierPlayer,paymentEvidence:{ok:true,amount:quote.premiumKaios,purpose:'PLAYER_COURIER_INSURANCE_PREMIUM',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}});
+ if(mode==='CLOCK_REVIEW')store.observe(mission.missionId,{wallNow:70_000,monoNow:101});
+ if(['DELIVERED','PENDING'].includes(mode)){const next=createPlayerCourierStore({storage,now:()=>mission.dueAt,monotonicNow:()=>0,sessionId:'STRICT-B'});next.settleDue(mission.missionId,{courierLifeId:strictCourierPlayer})}
+ if(mode==='FAILED')store.applyCombatDamage(mission.missionId,{courierLifeId:strictCourierPlayer,damage:100,source:'BOSS_SPECIAL_RAID',eligibleCargoRaid:true});
+ if(insured){const robbed=store.raid(mission.missionId,{attackerLifeId:'BANDIT-QA',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,distanceMeters:1,replayKey:'STRICT-RAID',wallNow:mission.bandit.attackWindowStartsAt}).mission;
+  if(mode==='PAID')store.confirmInsurancePayout(mission.missionId,{courierLifeId:strictCourierPlayer,paymentEvidence:{ok:true,receiptId:robbed.insurance.payoutReceiptId,rewardKaios:robbed.insurance.payoutKaios,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}});
+  if(mode==='LOOT_CLAIMED')store.claimLoot(mission.missionId,{attackerLifeId:'BANDIT-QA',backpackEvidence:{ok:true,rewardId:robbed.bandit.lootReceiptId,scope:'LOCAL_PLAYER_BACKPACK'}});
+ }
+ const value=JSON.parse(storage.getItem('K11520_PLAYER_COURIER'));
+ if(mode==='PENDING'){const m=value.missions[mission.missionId];m.status='DELIVERY_PENDING_CREDIT';m.settlement.outcome=m.status;m.cargo.ownerState='OWNED_BY_COURIER';m.cargo.ownerLifeId=m.courierLifeId;value.activeByCourier[m.courierLifeId]=m.missionId;m.settlement.credit={status:'PENDING',receiptId:m.settlement.receiptId,missionId:m.missionId,playerId:m.courierLifeId,owner:'guest',rewardKaios:m.settlement.rewardKaios,purpose:'PLAYER_COURIER_REWARD'}}
+ return value;
+}
+const assertStrictCourier=value=>strictCourierDomain.validateCanonicalCourierEnvelope(value,{playerIds:[strictCourierPlayer]});
+test('strict canonical Courier accepts genuine current reducer states without rewriting bytes',()=>{
+ for(const mode of ['ACTIVE','CLOCK_REVIEW','DELIVERED','FAILED','ROBBED','PAID','LOOT_CLAIMED','PENDING']){const value=strictCourierFixture(mode),raw=JSON.stringify(value);assert.equal(assertStrictCourier(value),value);assert.equal(JSON.stringify(value),raw,mode)}
+});
+test('strict canonical Courier rejects index, cargo owner, clock, local-scope and receipt corruption',()=>{
+ const base=strictCourierFixture();for(const alter of [v=>v.activeByCourier={},v=>v.activeByCourier.other='missing',v=>v.missions['COURIER-QA-1'].cargo.ownerLifeId='other',v=>v.missions['COURIER-QA-1'].dueAt++,v=>v.missions['COURIER-QA-1'].startedAt='10000',v=>v.missions['COURIER-QA-1'].mainnetWrite=true,v=>v.missions['COURIER-QA-1'].economics.chainTransfer=true,v=>v.settledReceipts=null,v=>v.lootReceipts=['bad'],v=>v.missions['COURIER-QA-1'].courierLifeId='unknown']){const value=structuredClone(base);alter(value);const before=structuredClone(value);assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/);assert.deepEqual(value,before)}
+});
+test('strict canonical Courier binds pending credit to canonical mission amounts and owner',()=>{
+ const base=strictCourierFixture('PENDING');for(const alter of [m=>delete m.settlement.credit,m=>m.settlement.credit=null,m=>m.settlement.credit.rewardKaios++,m=>m.settlement.credit.playerId='other',m=>m.settlement.credit.status='CONFIRMED',m=>m.settlement.credit.purpose='PLAYER_COURIER_INSURANCE_PAYOUT',m=>m.economics.courierPayout++,m=>m.settlement.receiptId='COURIER-RECEIPT-00000000']){const value=structuredClone(base);alter(value.missions['COURIER-QA-1']);assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/)}
+});
+test('strict canonical Courier keeps historical delivered receipts as tombstones, never invented credit',()=>{
+ const value=strictCourierFixture('DELIVERED'),m=value.missions['COURIER-QA-1'];assert.equal(m.settlement.credit,undefined);assertStrictCourier(value);assert.equal(m.settlement.credit,undefined);value.settledReceipts=[];assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/);
+});
+test('strict canonical Courier rejects contradictory approved insurance and loot custody',()=>{
+ const base=strictCourierFixture('ROBBED');for(const alter of [m=>m.insurance.payoutKaios++,m=>m.settlement.insurancePayoutKaios++,m=>m.insurance.premiumPaidKaios++,m=>m.cargo.ownerLifeId='other',m=>m.bandit.lootReceiptId='LOOT-00000000',m=>m.insurance.credit={status:'PENDING',receiptId:m.insurance.payoutReceiptId,missionId:m.missionId,playerId:m.courierLifeId,owner:'guest',rewardKaios:1000,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT'}]){const value=structuredClone(base);alter(value.missions['COURIER-QA-1']);assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/)}
+});
+
+test('strict canonical Courier refuses contradictory insurance evidence and impossible raid times',()=>{
+ for(const [mode,alter] of [['ACTIVE',m=>m.insurance.payoutKaios=0],['ACTIVE',m=>m.insurance.paymentEvidence={amount:0}],['ROBBED',m=>m.insurance.paidAt=123],['ROBBED',m=>m.bandit.attempts[0].at=m.dueAt],['ROBBED',m=>m.cargo.durability=0]]){const value=strictCourierFixture(mode);alter(value.missions['COURIER-QA-1']);assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/)}
+});
+
+test('strict canonical Courier rejects accessor, hidden, symbol and sparse data without invoking getters',()=>{
+ let reads=0;for(const alter of [v=>Object.defineProperty(v,'extra',{enumerable:true,get(){reads++;return 1}}),v=>Object.defineProperty(v,'hidden',{value:1}),v=>v[Symbol('extra')]=1,v=>v.lootReceipts.length=1]){const value=strictCourierFixture();alter(value);assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/)}assert.equal(reads,0);
+});
+
+test('strict canonical Courier verifies existing economics derivation and cooldown history',()=>{
+ for(const alter of [m=>{m.economics.courierFreightShare=500;m.economics.courierPayout=503;m.economics.companyNet=999},m=>m.economics.operatingCost=0,m=>m.bandit.cooldownMs=1]){const value=strictCourierFixture();alter(value.missions['COURIER-QA-1']);assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/)}
+ const value=strictCourierFixture(),storage=courierStorage();storage.setItem('K11520_PLAYER_COURIER',JSON.stringify(value));const store=createPlayerCourierStore({storage,now:()=>10_000,monotonicNow:()=>100,sessionId:'STRICT-A'}),m=value.missions['COURIER-QA-1'];
+ for(let n=0;n<2;n++)store.raid(m.missionId,{attackerLifeId:'BANDIT-QA',banditMode:true,action:'CARGO_RAID_ACTION',attackPower:0,defensePower:100,distanceMeters:1,replayKey:'FAILED-RAID-'+n,wallNow:m.bandit.attackWindowStartsAt+n*30_000});
+ const saved=JSON.parse(storage.getItem('K11520_PLAYER_COURIER'));assertStrictCourier(saved);const bandit=saved.missions[m.missionId].bandit;bandit.attempts[1].at=bandit.attempts[0].at+1;bandit.lastRaidAt=bandit.attempts[1].at;assert.throws(()=>assertStrictCourier(saved),/INVALID_CANONICAL_COURIER/);
+});
+
+test('strict canonical Courier verifies terminal successful-raid evidence against unchanged durability',()=>{
+ const value=strictCourierFixture('ROBBED'),attempt=value.missions['COURIER-QA-1'].bandit.attempts.at(-1);attempt.attack=0;attempt.defense=10000;assert.throws(()=>assertStrictCourier(value),/INVALID_CANONICAL_COURIER/);
+});
+
+import * as strictProductDomain from '../runtime/kgen-margin-runtime.mjs';
+const strictProductPlayer='KAIOS-P-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const strictProductNamespace={playerId:strictProductPlayer,owner:'guest'};
+const strictProductFixture=()=>({schema:'K11520_LOCAL_SIMULATION_V2',playerId:strictProductPlayer,owner:'guest',revision:0,ledger:{...createKgenLedger(1000),owner:'guest'},progress:{kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,playedMs:0,events:{},courierReceipts:[],courierInsuranceReceipts:{},courierReceiptBindings:{},courierInsuranceBindings:{}}});
+const assertStrictProduct=value=>strictProductDomain.validateLocalSimulationProductRecord(value,strictProductNamespace);
+const strictProductTick=(value,price,at,extra={})=>{assert.equal(strictProductDomain.observeSimulationPrice(value.ledger,{market:'BTCUSDT',price,observedAt:at,now:at,...extra}).ok,true);assert.equal(assertStrictProduct(value),value)};
+const strictProductOrder=(value,extra={})=>{const r=strictProductDomain.placeSimulationOrder(value.ledger,{axis:'KX',market:'BTCUSDT',c:1,lots:1,triggerPrice:100,now:1001,...extra});assert.equal(r.ok,true);assertStrictProduct(value);return r.order};
+
+test('strict local product accepts engine states and preserves signed PnL',()=>{
+ for(const c of [-100,-1,-.001,.001,1,100]){const v=strictProductFixture();assertStrictProduct(v);strictProductTick(v,99,1000);strictProductOrder(v,{c});strictProductTick(v,100,1002);strictProductTick(v,100.001,1003);assert.equal(strictProductDomain.closeSimulationPosition(v.ledger,v.ledger.simulation.positions[0].positionId,{now:1004}).ok,true);const bytes=JSON.stringify(v);assert.equal(assertStrictProduct(v),v);assert.equal(JSON.stringify(v),bytes);if(c<0)assert.ok(v.ledger.realizedPnl<0)}
+ for(const [c,stopPrice,takeProfitPrice,price,status] of [[100,null,null,98,'LIQUIDATED'],[-100,null,null,102,'LIQUIDATED'],[1,99.9,null,99.9,'STOPPED'],[-1,100.1,null,100.1,'STOPPED'],[1,null,100.1,100.1,'TAKE_PROFIT'],[-1,null,99.9,99.9,'TAKE_PROFIT']]){const v=strictProductFixture();strictProductTick(v,99,1000);strictProductOrder(v,{c,stopPrice,takeProfitPrice});strictProductTick(v,100,1002);strictProductTick(v,price,1003);assert.equal(v.ledger.simulation.positions[0].status,status)}
+ const cancelled=strictProductFixture();strictProductTick(cancelled,99,1000);const o=strictProductOrder(cancelled);strictProductDomain.cancelSimulationOrder(cancelled.ledger,o.orderId);assertStrictProduct(cancelled);
+ for(const reason of ['INSUFFICIENT_FREE_KGEN','V1_HIGH_SPEED_PRODUCTION_LOCKED']){const v=strictProductFixture();strictProductTick(v,99,1000);strictProductOrder(v,{c:100});if(reason==='INSUFFICIENT_FREE_KGEN')v.ledger.free=0;strictProductTick(v,100,1002,{productV1:reason!=='INSUFFICIENT_FREE_KGEN'});assert.equal(v.ledger.simulation.orders[0].reason,reason)}
+});
+test('strict local product requires explicit indexes and never repairs malformed input',()=>{
+ const base=strictProductFixture();for(const key of Object.keys(base.progress))for(const absent of [true,false]){const v=structuredClone(base);if(absent)delete v.progress[key];else v.progress[key]=null;const before=structuredClone(v);assert.throws(()=>assertStrictProduct(v));assert.deepEqual(v,before)}
+ for(const alter of [v=>v.progress.kaios='2',v=>v.progress.events.SESSION=.5,v=>v.schema='K11520_LOCAL_SIMULATION_V1',v=>v.ledger.owner='other',v=>v.revision=-1,v=>v.ledger.simulation=null,v=>v.progress.courierReceipts=['COURIER-RECEIPT-ABCDEF01'],v=>v.extension='界'.repeat(700000)]){const v=structuredClone(base);alter(v);const before=structuredClone(v);assert.throws(()=>assertStrictProduct(v));assert.deepEqual(v,before)}
+ assert.throws(()=>strictProductDomain.validateLocalSimulationProductRecord(base));assert.throws(()=>strictProductDomain.validateLocalSimulationProductRecord(base,{...strictProductNamespace,owner:'0x'+'a'.repeat(40)}));
+});
+test('strict local product validates every nested engine field and reference',()=>{
+ const base=strictProductFixture();strictProductTick(base,99,1000);strictProductOrder(base);strictProductTick(base,100,1002);strictProductTick(base,99.99,1003);assert.ok(base.ledger.unrealizedPnl<0);
+ for(const kind of ['orders','positions','receipts'])for(const key of Object.keys(base.ledger.simulation[kind][0])){const v=structuredClone(base);delete v.ledger.simulation[kind][0][key];assert.throws(()=>assertStrictProduct(v),undefined,kind+'.'+key)}
+ for(const alter of [b=>b.positions[0].orderId='SIM-O-99',b=>b.positions[0].signedC=-1,b=>b.positions[0].margin=0,b=>b.receipts=[],b=>b.sequence++,b=>b.observations.BTCUSDT.price=2]){const v=structuredClone(base);alter(v.ledger.simulation);const before=structuredClone(v);assert.throws(()=>assertStrictProduct(v));assert.deepEqual(v,before)}
+ const closed=structuredClone(base);strictProductDomain.closeSimulationPosition(closed.ledger,closed.ledger.simulation.positions[0].positionId,{now:1004});assertStrictProduct(closed);for(const key of Object.keys(closed.ledger.simulation.receipts[1])){const v=structuredClone(closed);delete v.ledger.simulation.receipts[1][key];assert.throws(()=>assertStrictProduct(v),undefined,'settlement.'+key)}
+});
+test('strict local product keeps frozen legacy tombstones and opaque extensions unchanged',()=>{
+ const v=strictProductFixture(),id='COURIER-RECEIPT-abcdef01',old='COURIER-RECEIPT-00000000',insurance='COURIER-INSURANCE-abcdef01';v.progress.courierReceipts=[id,old];v.progress.courierReceiptBindings[id]={receiptId:id,missionId:'COURIER-ONE',playerId:strictProductPlayer,owner:'guest',rewardKaios:7,purpose:'PLAYER_COURIER_REWARD'};v.progress.courierInsuranceReceipts[insurance]=9;v.progress.courierInsuranceBindings[insurance]={receiptId:insurance,missionId:'COURIER-TWO',playerId:strictProductPlayer,owner:'guest',rewardKaios:9,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT'};v.progress.events.FUTURE_COUNT=.5;v.progress.kaios=.25;v.progress.playedMs=.125;v.extension={preserved:['opaque','界']};
+ for(const [index,field,bad] of [['courierReceiptBindings','owner','other'],['courierReceiptBindings','purpose','PLAYER_COURIER_INSURANCE_PAYOUT'],['courierInsuranceBindings','rewardKaios',8]]){const badValue=structuredClone(v);badValue.progress[index][index==='courierReceiptBindings'?id:insurance][field]=bad;assert.throws(()=>assertStrictProduct(badValue))}
+ const freeze=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value)}return value},bytes=JSON.stringify(v);freeze(v);assert.equal(assertStrictProduct(v),v);assert.equal(JSON.stringify(v),bytes);assert.equal(v.progress.courierReceiptBindings[old],undefined);
+ let invoked=0;const getter=strictProductFixture();Object.defineProperty(getter,'extension',{enumerable:true,get(){invoked++;return 1}});assert.throws(()=>assertStrictProduct(getter));assert.equal(invoked,0);
+});

@@ -166,3 +166,26 @@ test('backpack UI distinguishes persisted, session-only, corrupt and cross-playe
     for(const [k,v] of [['__K11520_PLAYER_LIFE__',previous.life],['K11520Backpack',previous.api]]){if(v===undefined)delete globalThis[k];else globalThis[k]=v}
   }
 });
+
+// Inert Stage2A strict persistence checks. These are not migration/normalization.
+import * as strictBackpackDomain from '../runtime/backpack-runtime.mjs';
+const canonicalBagOwner='KAIOS-P-'+'a'.repeat(32);
+const assertCanonicalBag=value=>strictBackpackDomain.validateCanonicalBackpack(value,{ownerId:canonicalBagOwner});
+test('strict canonical backpack validates reducer output without changing bytes or time',()=>{
+ const bag=createBackpack({ownerId:canonicalBagOwner});storeItem(bag,{itemId:'ore',name:'Ore',kind:'MATERIAL',qty:2,weightEach:1,rewardId:'reward-one'});const raw=JSON.stringify(bag);Object.freeze(bag.items[0]);Object.freeze(bag.items);Object.freeze(bag.rewardReceipts);Object.freeze(bag);assert.equal(assertCanonicalBag(bag),bag);assert.equal(JSON.stringify(bag),raw);
+});
+test('strict canonical backpack rejects wrong owner, legacy defaults and malformed histories unchanged',()=>{
+ const bag=createBackpack({ownerId:canonicalBagOwner});storeItem(bag,{itemId:'ore',kind:'MATERIAL',rewardId:'receipt-one'});
+ for(const alter of [b=>b.ownerId='PLAYER-11520',b=>b.ownerId='KAIOS-P-'+'b'.repeat(32),b=>delete b.rewardReceipts,b=>b.rewardReceipts=null,b=>b.rewardReceipts.push('receipt-one'),b=>b.rewardReceipts=[],b=>b.updatedAt='123',b=>b.capacitySlots=0,b=>b.items[0].qty='1',b=>b.items[0].weightEach=Infinity,b=>b.items.push({...b.items[0]}),b=>b.items[0].stackable='true',b=>b.items[0].meta={bad:NaN}]){const value=structuredClone(bag);alter(value);const before=structuredClone(value);assert.throws(()=>assertCanonicalBag(value));assert.deepEqual(value,before)}
+});
+test('strict canonical backpack retains consumed receipts after item removal and accepts custom bounded capacity',()=>{
+ const bag=createBackpack({ownerId:canonicalBagOwner,capacitySlots:2,capacityWeight:3});storeItem(bag,{itemId:'food',kind:'FOOD',weightEach:3,rewardId:'consumed'});removeItem(bag,'food');assert.equal(assertCanonicalBag(bag),bag);assert.deepEqual(bag.rewardReceipts,['consumed']);assert.equal(bag.capacitySlots,2);assert.equal(bag.capacityWeight,3);
+});
+test('strict canonical backpack verifies living identities and stored capacities',()=>{
+ const bag=createBackpack({ownerId:canonicalBagOwner});storeItem(bag,{itemId:'cow',name:'Cow',kind:'LIVING_CARGO',species:'COW',lifeId:'LIFE-COW',qty:1,weightEach:3});assertCanonicalBag(bag);
+ for(const alter of [b=>b.items[0].lifeId=null,b=>b.items[0].species='UNKNOWN',b=>b.items[0].qty=2,b=>b.items[0].stackable=true,b=>b.capacityWeight=2,b=>b.items.push({...b.items[0],itemId:'other'})]){const value=structuredClone(bag);alter(value);assert.throws(()=>assertCanonicalBag(value))}
+});
+
+test('strict canonical backpack rejects accessor, hidden, symbol and sparse data without invoking getters',()=>{
+ let reads=0;for(const alter of [b=>Object.defineProperty(b,'extra',{enumerable:true,get(){reads++;return 1}}),b=>Object.defineProperty(b,'hidden',{value:1}),b=>b[Symbol('extra')]=1,b=>b.items.length=1]){const bag=createBackpack({ownerId:canonicalBagOwner});alter(bag);assert.throws(()=>assertCanonicalBag(bag),/INVALID_CANONICAL_BACKPACK/)}assert.equal(reads,0);
+});

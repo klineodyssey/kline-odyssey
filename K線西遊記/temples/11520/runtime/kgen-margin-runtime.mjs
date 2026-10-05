@@ -233,3 +233,142 @@ export function closeSimulationPosition(ledger,positionId,{now=Date.now()}={}){
   }catch(e){return {ok:false,reason:e.message}}
 }
 export function simulationSnapshot(ledger){return {mode:'SIMULATION_WALLET',wallet:snapshot(ledger),...structuredClone(simulationBook(ledger))}}
+
+/**
+ * Inert LOCAL_SIMULATION_PRODUCT persistence boundary. No production caller,
+ * storage access, migration, defaults or authority over real funds. A valid
+ * record is returned by identity, including opaque JSON extension fields.
+ * Receipt IDs without bindings remain legacy replay tombstones, never credits.
+ */
+export function validateLocalSimulationProductRecord(value,{playerId,owner}={}){
+  const fail=reason=>{throw new Error(reason)};
+  const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&(Object.getPrototypeOf(v)===Object.prototype||Object.getPrototypeOf(v)===null);
+  const fields=(v,names)=>object(v)&&names.every(name=>Object.hasOwn(v,name));
+  const integer=v=>Number.isSafeInteger(v)&&v>=0;
+  const nonnegative=v=>Number.isFinite(v)&&v>=0;
+  const price=v=>Number.isFinite(v)&&v>0;
+  const optionalPrice=v=>v===null||price(v);
+  const namespaceOwner=v=>typeof v==='string'&&(v==='guest'||/^0x[0-9a-f]{40}$/.test(v));
+  const namespacePlayer=v=>typeof v==='string'&&/^KAIOS-P-[a-zA-Z0-9-]{16,80}$/.test(v);
+  // Count actual UTF-8 JSON bytes without coercing objects or invoking toJSON /
+  // accessors. Reject data that serialization would silently omit or transform.
+  let bytes=0;
+  const ancestors=new Set();
+  function add(text){
+    for(const character of text){const point=character.codePointAt(0);bytes+=point<0x80?1:point<0x800?2:point<0x10000?3:4;if(bytes>2_000_000)fail('LOCAL_SIMULATION_PRODUCT_CAPACITY')}
+  }
+  function json(v,depth=0){
+    if(depth>128)fail('INVALID_LOCAL_SIMULATION_PRODUCT_JSON');
+    if(typeof v==='string'&&v.length>2_000_000-bytes)fail('LOCAL_SIMULATION_PRODUCT_CAPACITY');
+    if(v===null||typeof v==='boolean'||typeof v==='string'){add(JSON.stringify(v));return}
+    if(typeof v==='number'){if(!Number.isFinite(v))fail('INVALID_LOCAL_SIMULATION_PRODUCT_JSON');add(JSON.stringify(v));return}
+    if((!object(v)&&!Array.isArray(v))||ancestors.has(v))fail('INVALID_LOCAL_SIMULATION_PRODUCT_JSON');
+    ancestors.add(v);
+    const descriptors=Object.getOwnPropertyDescriptors(v),names=Reflect.ownKeys(descriptors);
+    if(Array.isArray(v)){
+      if(names.length!==v.length+1)fail('INVALID_LOCAL_SIMULATION_PRODUCT_JSON');
+      add('[]');
+      for(let i=0;i<v.length;i++){
+        const d=descriptors[i];if(!d||!d.enumerable||!Object.hasOwn(d,'value'))fail('INVALID_LOCAL_SIMULATION_PRODUCT_JSON');
+        if(i)add(',');json(d.value,depth+1);
+      }
+    }else{
+      add('{}');
+      for(let i=0;i<names.length;i++){
+        const name=names[i],d=descriptors[name];
+        if(typeof name!=='string'||!d.enumerable||!Object.hasOwn(d,'value'))fail('INVALID_LOCAL_SIMULATION_PRODUCT_JSON');
+        if(name.length>2_000_000-bytes)fail('LOCAL_SIMULATION_PRODUCT_CAPACITY');
+        if(i)add(',');add(JSON.stringify(name));add(':');json(d.value,depth+1);
+      }
+    }
+    ancestors.delete(v);
+  }
+  json(value);
+  if(!namespacePlayer(playerId)||!namespaceOwner(owner)||!fields(value,['schema','playerId','owner','revision','ledger','progress'])||value.schema!=='K11520_LOCAL_SIMULATION_V2'||value.playerId!==playerId||value.owner!==owner)fail('LOCAL_SIMULATION_PRODUCT_NAMESPACE_MISMATCH');
+  if(!integer(value.revision))fail('INVALID_LOCAL_SIMULATION_PRODUCT_REVISION');
+  const ledger=value.ledger,p=value.progress;
+  if(!fields(ledger,['owner','total','free','lockedMargin','reservedOrders','realizedPnl','unrealizedPnl'])||ledger.owner!==owner||!['total','free','lockedMargin','reservedOrders'].every(k=>nonnegative(ledger[k]))||!['realizedPnl','unrealizedPnl'].every(k=>Number.isFinite(ledger[k])))fail('INVALID_LOCAL_SIMULATION_PRODUCT_LEDGER');
+  if(!fields(p,['kaios','claimableKaios','spentKaios','loot','xp','engineXp','playedMs','events','courierReceipts','courierInsuranceReceipts','courierReceiptBindings','courierInsuranceBindings'])||!['kaios','claimableKaios','playedMs'].every(k=>nonnegative(p[k])&&p[k]<=Number.MAX_SAFE_INTEGER)||!['spentKaios','loot','xp','engineXp'].every(k=>integer(p[k]))||!object(p.events))fail('INVALID_LOCAL_SIMULATION_PRODUCT_PROGRESS');
+  const knownEvents=['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','COURIER_SETTLEMENT','COURIER_INSURANCE_PAYOUT','KAIOS_SPEND','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR'];
+  for(const [event,count] of Object.entries(p.events))if(!event||!nonnegative(count)||count>Number.MAX_SAFE_INTEGER||(knownEvents.includes(event)&&!integer(count)))fail('INVALID_LOCAL_SIMULATION_PRODUCT_PROGRESS');
+  // Canonical spelling is exact. Historical variants need an explicit no-loss
+  // migration; accepting both spellings would split one replay identity.
+  const rewardId=/^COURIER-RECEIPT-[0-9a-f]{8}$/,insuranceId=/^COURIER-INSURANCE-[0-9a-f]{8}$/;
+  if(!Array.isArray(p.courierReceipts)||p.courierReceipts.length>1000||p.courierReceipts.some(id=>typeof id!=='string'||!rewardId.test(id))||new Set(p.courierReceipts).size!==p.courierReceipts.length||!object(p.courierInsuranceReceipts)||Object.keys(p.courierInsuranceReceipts).length>1000||Object.entries(p.courierInsuranceReceipts).some(([id,amount])=>!insuranceId.test(id)||!integer(amount)||amount>1080000))fail('INVALID_LOCAL_SIMULATION_PRODUCT_RECEIPTS');
+  for(const insurance of [false,true]){
+    const bindings=p[insurance?'courierInsuranceBindings':'courierReceiptBindings'],ids=new Set(insurance?Object.keys(p.courierInsuranceReceipts):p.courierReceipts),missions=new Set();
+    if(!object(bindings))fail('INVALID_LOCAL_SIMULATION_PRODUCT_RECEIPTS');
+    for(const [id,b] of Object.entries(bindings)){
+      if(!ids.has(id)||!fields(b,['receiptId','missionId','playerId','owner','rewardKaios','purpose'])||b.receiptId!==id||b.playerId!==playerId||b.owner!==owner||b.purpose!==(insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD')||typeof b.missionId!=='string'||!b.missionId||b.missionId.length>160||b.missionId!==b.missionId.trim()||/[<>\x00-\x1f]/.test(b.missionId)||!integer(b.rewardKaios)||b.rewardKaios>(insurance?1080000:1000)||(insurance&&b.rewardKaios!==p.courierInsuranceReceipts[id])||missions.has(b.missionId))fail('INVALID_LOCAL_SIMULATION_PRODUCT_RECEIPTS');
+      missions.add(b.missionId);
+    }
+  }
+  // A fresh ledger legitimately has no simulation book. Explicit null and
+  // partial books are corruption, not invitations to generate an empty book.
+  if(!Object.hasOwn(ledger,'simulation'))return value;
+  const book=ledger.simulation,invalid=()=>fail('INVALID_LOCAL_SIMULATION_PRODUCT_BOOK');
+  if(!fields(book,['sequence','orders','positions','receipts','observations'])||!integer(book.sequence)||!['orders','positions','receipts'].every(k=>Array.isArray(book[k]))||!object(book.observations))invalid();
+  const ids=new Set(),lastIds={O:0,P:0,R:0},orders=new Map(),positions=new Map(),fills=new Map(),settlements=new Map(),activeAxes=new Set();
+  const numericId=(id,kind)=>{
+    if(typeof id!=='string'||!new RegExp(`^SIM-${kind}-[1-9][0-9]*$`).test(id))invalid();
+    const n=Number(id.slice(6));if(!Number.isSafeInteger(n)||n>book.sequence||n<=lastIds[kind]||ids.has(n))invalid();ids.add(n);lastIds[kind]=n;return n;
+  };
+  const contract=v=>{
+    if(!fields(v,['trader','axis','market','side','c','lots'])||v.trader!==owner||!Object.hasOwn(SIM_MARKETS,v.axis)||SIM_MARKETS[v.axis]!==v.market||!Number.isFinite(v.c)||v.c===0||v.side!==(v.c<0?'SHORT':'LONG')||!Number.isInteger(v.lots)||v.lots<1||v.lots>MAX_LOTS)invalid();
+    try{if(normalizeSignedC(v.c)!==v.c)invalid()}catch{invalid()}
+  };
+  const sameContract=(a,b)=>['trader','axis','market','side','c','lots'].every(k=>a[k]===b[k]);
+  for(const [market,q] of Object.entries(book.observations))if(!Object.values(SIM_MARKETS).includes(market)||!fields(q,['price','at'])||!price(q.price)||!integer(q.at)||(Object.hasOwn(q,'sequence')&&!integer(q.sequence)))invalid();
+  for(const o of book.orders){
+    contract(o);numericId(o.orderId,'O');
+    if(!fields(o,['orderId','triggerPrice','stopPrice','takeProfitPrice','createdAt','triggeredAt','observedPrice','fillPrice','positionId','status'])||!price(o.triggerPrice)||!optionalPrice(o.stopPrice)||!optionalPrice(o.takeProfitPrice)||!integer(o.createdAt)||!['PENDING','CANCELLED','REJECTED','FILLED'].includes(o.status))invalid();
+    if(o.stopPrice!==null&&(o.c>0?o.stopPrice>=o.triggerPrice:o.stopPrice<=o.triggerPrice)||o.takeProfitPrice!==null&&(o.c>0?o.takeProfitPrice<=o.triggerPrice:o.takeProfitPrice>=o.triggerPrice))invalid();
+    const quote=book.observations[o.market];if(!Object.hasOwn(book.observations,o.market)||!quote||o.createdAt-quote.at>SIM_MAX_AGE)invalid();
+    if(o.status==='FILLED'){
+      if(!integer(o.triggeredAt)||o.triggeredAt<o.createdAt||!price(o.observedPrice)||o.fillPrice!==o.observedPrice||typeof o.positionId!=='string'||quote.at<o.triggeredAt)invalid();
+    }else if(o.triggeredAt!==null||o.observedPrice!==null||o.fillPrice!==null||o.positionId!==null)invalid();
+    if(o.status==='REJECTED'){if(!['INSUFFICIENT_FREE_KGEN','V1_HIGH_SPEED_PRODUCTION_LOCKED'].includes(o.reason)||quote.at<o.createdAt||(o.reason==='V1_HIGH_SPEED_PRODUCTION_LOCKED'&&resolveCMode(o.c).canTrade))invalid()}
+    else if(Object.hasOwn(o,'reason'))invalid();
+    if(o.status==='PENDING'){if(activeAxes.has(o.axis))invalid();activeAxes.add(o.axis)}
+    orders.set(o.orderId,o);
+  }
+  for(const position of book.positions){
+    contract(position);numericId(position.positionId,'P');
+    if(!fields(position,['positionId','orderId','signedC','entry','mark','principal','margin','stopPrice','takeProfitPrice','status','openedAt','observedAt','observationSequence','deltaIndex','equity'])||position.signedC!==position.c||!price(position.entry)||!price(position.mark)||position.principal!==position.lots||!integer(position.openedAt)||!integer(position.observedAt)||position.observedAt<position.openedAt||(position.observationSequence!==null&&!integer(position.observationSequence))||!Number.isFinite(position.deltaIndex)||!nonnegative(position.equity)||!['OPEN','CLOSED','LIQUIDATED','STOPPED','TAKE_PROFIT'].includes(position.status))invalid();
+    const o=orders.get(position.orderId),quote=book.observations[position.market];
+    if(!o||o.status!=='FILLED'||o.positionId!==position.positionId||!sameContract(o,position)||o.fillPrice!==position.entry||o.triggeredAt!==position.openedAt||o.stopPrice!==position.stopPrice||o.takeProfitPrice!==position.takeProfitPrice||!quote||quote.at<position.observedAt)invalid();
+    const risk=positionRisk(position);
+    if(position.deltaIndex!==position.mark-position.entry||position.equity!==position.principal+risk.pnl)invalid();
+    if(position.status==='OPEN'){
+      if(position.margin!==position.principal||Object.hasOwn(position,'settledAt')||activeAxes.has(position.axis)||position.observedAt!==quote.at||position.mark!==quote.price||position.observationSequence!==(Object.hasOwn(quote,'sequence')?quote.sequence:null))invalid();
+      if((position.c>0?position.mark<=risk.liquidationMark:position.mark>=risk.liquidationMark)||(position.stopPrice!==null&&(position.c>0?position.mark<=position.stopPrice:position.mark>=position.stopPrice))||(position.takeProfitPrice!==null&&(position.c>0?position.mark>=position.takeProfitPrice:position.mark<=position.takeProfitPrice)))invalid();
+      activeAxes.add(position.axis);
+    }else if(position.margin!==0||!integer(position.settledAt)||position.settledAt<position.observedAt)invalid();
+    positions.set(position.positionId,position);
+  }
+  for(const r of book.receipts){
+    contract(r);numericId(r.receiptId,'R');
+    if(!fields(r,['receiptId','kind','simulationOnly','orderId','positionId','triggeredAt','previousPrice','observedPrice','status'])||r.simulationOnly!==true||!integer(r.triggeredAt)||!price(r.previousPrice)||!price(r.observedPrice))invalid();
+    const o=orders.get(r.orderId),position=positions.get(r.positionId);
+    if(!o||!position||position.orderId!==r.orderId||!sameContract(r,position))invalid();
+    if(r.kind==='FILL'){
+      if(!fields(r,['createdAt','triggerPrice','fillPrice','walletBefore','marginLocked','walletAfter'])||r.status!=='FILLED'||r.createdAt!==o.createdAt||r.triggeredAt!==o.triggeredAt||r.triggerPrice!==o.triggerPrice||r.observedPrice!==o.observedPrice||r.fillPrice!==o.fillPrice||r.marginLocked!==position.principal||!nonnegative(r.walletBefore)||!nonnegative(r.walletAfter)||r.walletBefore<r.marginLocked||r.walletAfter!==r.walletBefore-r.marginLocked||!touchedOrCrossed(r.previousPrice,r.triggerPrice,r.observedPrice)||fills.has(r.positionId))invalid();
+      fills.set(r.positionId,r);
+    }else if(r.kind==='SETTLEMENT'){
+      if(!fields(r,['entryPrice','liquidationTrigger','settlementPrice','settledAt','marginBefore','marginAfter','rawPnl','realizedPnl','badDebt'])||position.status==='OPEN'||r.status!==position.status||r.entryPrice!==position.entry||r.observedPrice!==position.mark||r.settlementPrice!==position.mark||r.triggeredAt!==position.settledAt||r.settledAt!==position.settledAt||r.marginBefore!==position.principal||r.marginAfter!==0||!Number.isFinite(r.liquidationTrigger)||!Number.isFinite(r.rawPnl)||!Number.isFinite(r.realizedPnl)||!nonnegative(r.badDebt)||settlements.has(r.positionId))invalid();
+      const risk=positionRisk(position),liquidated=position.c>0?position.mark<=risk.liquidationMark:position.mark>=risk.liquidationMark;
+      const stopped=position.stopPrice!==null&&(position.c>0?position.mark<=position.stopPrice:position.mark>=position.stopPrice);
+      const takeProfit=position.takeProfitPrice!==null&&(position.c>0?position.mark>=position.takeProfitPrice:position.mark<=position.takeProfitPrice);
+      if(r.liquidationTrigger!==risk.liquidationMark||r.rawPnl!==risk.rawPnl||r.realizedPnl!==(r.status==='LIQUIDATED'?-position.principal:risk.pnl)||r.badDebt!==Math.max(0,-position.principal-risk.rawPnl)||(r.status==='LIQUIDATED'&&!liquidated)||(r.status==='STOPPED'&&(liquidated||!stopped))||(r.status==='TAKE_PROFIT'&&(liquidated||stopped||!takeProfit)))invalid();
+      if(r.status==='CLOSED'?(liquidated||stopped||takeProfit||r.previousPrice!==r.observedPrice||r.settledAt-position.observedAt>SIM_MAX_AGE):r.settledAt!==position.observedAt)invalid();
+      settlements.set(r.positionId,r);
+    }else invalid();
+  }
+  if(ids.size!==book.sequence)invalid();
+  for(const o of orders.values())if(o.status==='FILLED'&&!positions.has(o.positionId))invalid();
+  for(const position of positions.values()){
+    const fill=fills.get(position.positionId),settlement=settlements.get(position.positionId);
+    if(!fill||(position.status==='OPEN'?settlement!==undefined:!settlement)||Number(position.orderId.slice(6))>=Number(position.positionId.slice(6))||Number(position.positionId.slice(6))>=Number(fill.receiptId.slice(6))||(settlement&&Number(fill.receiptId.slice(6))>=Number(settlement.receiptId.slice(6))))invalid();
+  }
+  return value;
+}

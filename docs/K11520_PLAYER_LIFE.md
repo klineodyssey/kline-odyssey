@@ -269,3 +269,47 @@ Player Life/backpack/product/Courier cutover and P0 acceptance incomplete.
 ```json
 {"WORK_ID":"DOT-PLAYER-LIFE-ATOMIC-20261005","TRACK":"A_LOCAL_SAVE_INTEGRITY","RISK":"MEDIUM","BASE_MAIN":"b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720","SOURCE_PR":506,"SOURCE_HEAD":"8db98fb9d50828e9024daa2d811498c4e05201dd","STAGE":"LIFE_ONLY_AUTHORITY_PRIMITIVE","INTEGRATION":"UNINTEGRATED_DRAFT","SUPPORTED_DOMAINS":["PLAYER_LIFE"],"OTHER_DOMAINS":"DOMAIN_NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","PRODUCTION_CALLERS":0,"PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","NATIVE_QA":"NOT_RUN","SELF_MERGE":false}
 ```
+
+### Stage2A1: inert strict domain validators
+
+Additive validation APIs now reside in the existing pure owners:
+
+- `backpack-runtime.mjs`: `validateCanonicalBackpack` checks exact Player owner,
+  capacities, items/living identities and retained reward receipts. It does not
+  call the separate legacy `restoreBackpack` normalizer.
+- `kgen-margin-runtime.mjs`: `validateLocalSimulationProductRecord` checks only
+  LOCAL_SIMULATION_PRODUCT persistence, including existing simulation engine
+  records, namespace and receipt relationships. Existing formulas, settlement,
+  real-wallet behavior and evm product-transition ownership are unchanged.
+- `digital-ant-logistics-runtime.mjs`: `validateCanonicalCourierEnvelope` checks
+  stored mission/index/owner/clock/insurance/receipt consistency and the existing
+  economics/cooldown/terminal-raid derivations, without altering those reducers.
+
+These functions return the original valid object or throw. They neither coerce nor
+insert defaults, change timestamps, generate identifiers, discard extensions,
+read storage, or write data. Non-JSON values, accessors, hidden/symbol fields and
+sparse arrays are rejected without calling property getters. Canonical receipt
+spelling is exact; historical noncanonical spelling needs explicit, raw-preserving
+migration review rather than silent normalization.
+
+Historical terminal missions and receipt IDs without binding metadata are not
+proof of credit. The future authority wrapper must record migration-derived
+LEGACY_UNBOUND identifiers immutably and forbid downgrading an existing bound
+receipt by deleting metadata. It must compare product/Courier records in the same
+transaction. Neither validator success, DELIVERED nor PAID alone authorizes credit.
+No historical reward, missing binding or backpay is inferred here.
+
+Stage2A1 does not import these modules into the authority and adds no production
+callers. Therefore the Stage1 coverage marker still supports only PLAYER_LIFE;
+other domains remain DOMAIN_NOT_IMPLEMENTED and restore remains unavailable.
+Future loading must be explicit and use a fixed registry. Static new imports from
+Player Life would break Recovery Center's current two-file asset allowlist; its
+exact pure dependency graph must be tested and added separately before integration.
+
+Focused tests validate genuine existing reducer output, malformed records and
+frozen byte-preservation. Pending-credit fixtures are explicitly labeled shapes,
+not evidence that pending integration exists on this successor. Atomic multi-domain
+commands, immutable binding transitions, complete migration/cutover, asynchronous
+production integration, native old-client and browser-restart acceptance remain
+INCOMPLETE. The session/tutorial and pending-insurance-payment legacy keys must
+not become automatic post-cutover state inputs.
