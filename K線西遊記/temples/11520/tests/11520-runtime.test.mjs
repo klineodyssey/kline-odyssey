@@ -1022,3 +1022,17 @@ test('presentation failure cannot replace a durable courier credit-port result',
   const evidence={ok:true,receiptId:'COURIER-RECEIPT-abcdef01'},S={},port=new Function('playerStore','S','hud',`return ${expression}`)({snapshot:()=>({kaios:4}),recordCourierSettlement:()=>evidence,recordCourierInsurancePayout:()=>evidence},S,()=>{throw new Error('HUD_UNAVAILABLE')});
   assert.equal(port.recordCourierSettlement({}),evidence);assert.equal(port.recordCourierInsurancePayout({}),evidence);assert.equal(S.kaios,4);
 });
+
+test('explicit null receipt indexes quarantine V1/V2 saves without activation writes in either namespace',()=>{
+  for(const playerId of [null,'KAIOS-P-NULL-INDEX-1234567890'])for(const schema of ['K11520_LOCAL_SIMULATION_V1','K11520_LOCAL_SIMULATION_V2'])for(const field of ['courierReceipts','courierInsuranceReceipts']){
+    const storage=courierStorage(),key=(playerId?`k11520.player:${playerId}:`:'')+'k11520.local-product.v1:guest',raw=JSON.stringify({schema,owner:'guest',playerId,revision:9,ledger:createKgenLedger(),progress:{kaios:4,[field]:null}});storage.setItem(key,raw);
+    const store=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});store.activate(null);assert.equal(store.snapshot().storageStatus,'CORRUPT_RECEIPT_EVIDENCE');assert.equal(storage.getItem(key),raw);assert.equal(store.spendKaios(1).ok,false);assert.equal(storage.getItem(key),raw);
+  }
+});
+
+test('post-activation null index cannot pass canonical transaction validation',()=>{
+  for(const field of ['courierReceipts','courierInsuranceReceipts']){
+    const storage=courierStorage(),store=createSimulationPlayerStore({storage,ledger:createKgenLedger()});store.activate(null);const key='k11520.local-product.v1:guest',saved=JSON.parse(storage.getItem(key));saved.progress[field]=null;const raw=JSON.stringify(saved);storage.setItem(key,raw);
+    assert.throws(()=>store.record(null,{elapsedMs:1}),/CORRUPT_RECEIPT_EVIDENCE/);assert.equal(storage.getItem(key),raw);assert.equal(store.snapshot().storageStatus,'CORRUPT_RECEIPT_EVIDENCE');
+  }
+});
