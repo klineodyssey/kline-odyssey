@@ -841,6 +841,33 @@ test('strict local product keeps frozen legacy tombstones and opaque extensions 
  let invoked=0;const getter=strictProductFixture();Object.defineProperty(getter,'extension',{enumerable:true,get(){invoked++;return 1}});assert.throws(()=>assertStrictProduct(getter));assert.equal(invoked,0);
 });
 
+test('strict local product retains 1001 delivery and insurance receipt histories byte-for-byte',()=>{
+ const value=strictProductFixture(),p=value.progress;
+ for(let n=0;n<1001;n++){
+  const hex=n.toString(16).padStart(8,'0');p.courierReceipts.push('COURIER-RECEIPT-'+hex);p.courierInsuranceReceipts['COURIER-INSURANCE-'+hex]=n;
+ }
+ const receipt=p.courierReceipts.at(-1),insurance=Object.keys(p.courierInsuranceReceipts).at(-1);
+ p.courierReceiptBindings[receipt]={receiptId:receipt,missionId:'TAIL-DELIVERY',playerId:strictProductPlayer,owner:'guest',rewardKaios:1000,purpose:'PLAYER_COURIER_REWARD'};
+ p.courierInsuranceBindings[insurance]={receiptId:insurance,missionId:'TAIL-INSURANCE',playerId:strictProductPlayer,owner:'guest',rewardKaios:1000,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT'};
+ const freeze=v=>{if(v&&typeof v==='object'){Object.values(v).forEach(freeze);Object.freeze(v)}return v},raw=JSON.stringify(value);
+ freeze(value);assert.equal(assertStrictProduct(value),value);assert.equal(JSON.stringify(value),raw);
+ assert.equal(p.courierReceipts.length,1001);assert.equal(Object.keys(p.courierInsuranceReceipts).length,1001);
+ assert.deepEqual(Object.keys(p.courierReceiptBindings),[receipt]);assert.deepEqual(Object.keys(p.courierInsuranceBindings),[insurance]);
+});
+test('strict local product rejects duplicate IDs near the tail of receipt histories without truncation',()=>{
+ const value=strictProductFixture();value.progress.courierReceipts=Array.from({length:1001},(_,n)=>'COURIER-RECEIPT-'+n.toString(16).padStart(8,'0'));
+ value.progress.courierReceipts[1000]=value.progress.courierReceipts[999];const raw=JSON.stringify(value);
+ assert.throws(()=>assertStrictProduct(value),/INVALID_LOCAL_SIMULATION_PRODUCT_RECEIPTS/);assert.equal(JSON.stringify(value),raw);assert.equal(value.progress.courierReceipts.length,1001);
+});
+test('strict local product rejects oversized delivery and insurance receipt histories without mutation',()=>{
+ for(const insurance of [false,true]){
+  const value=strictProductFixture(),p=value.progress;
+  for(let n=0;n<(insurance?65000:80000);n++){const hex=n.toString(16).padStart(8,'0');if(insurance)p.courierInsuranceReceipts['COURIER-INSURANCE-'+hex]=0;else p.courierReceipts.push('COURIER-RECEIPT-'+hex)}
+  const raw=JSON.stringify(value);assert.ok(Buffer.byteLength(raw,'utf8')>2_000_000);
+  assert.throws(()=>assertStrictProduct(value),/LOCAL_SIMULATION_PRODUCT_CAPACITY/);assert.equal(JSON.stringify(value),raw);
+ }
+});
+
 function strictCreditFixture({insurance=false,owner='guest',rewardKaios=7}={}){
  const before=strictProductFixture();before.owner=owner;before.ledger.owner=owner;before.progress.kaios=2.5;before.progress.claimableKaios=1.5;before.extension={keep:['opaque']};
  const binding={receiptId:insurance?'COURIER-INSURANCE-abcdef01':'COURIER-RECEIPT-abcdef01',missionId:'COURIER-QA',playerId:strictProductPlayer,owner,rewardKaios,purpose:insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD'};

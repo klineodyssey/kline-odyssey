@@ -446,3 +446,112 @@ are left unchanged; an old hash is never silently reinterpreted. Synthetic tests
 show two source strings that direct TextEncoder would conflate now have different
 digests, and historical unsupported candidates cannot commit. This remains an
 inert, Life-only candidate correction with no new production callers or cutover.
+
+### Stage2B: inert full migration capture for review
+
+`prepareGameMigration({sourceStorage})` and `readGameCandidate(id)` require an
+explicit completed `openGame()`. They neither default to global localStorage nor
+install/promote a full authority. They do not restore, delete, copy back, normalize
+source strings, or change any production caller. Preparation rejects existing
+partial/full authority and unexpected initialization evidence before source reads,
+then rechecks inside the same transaction as add-only candidate insertion.
+
+The allowlist is restricted to existing local-game data: Life and shared Courier;
+exact scoped backpack, local-product, player-session and tutorial names; their
+recognized unscoped legacy equivalents; the legacy-owner claim; pending insurance
+payment; and lastMission. Scoped values are read only when their exact canonical
+Life ID exists in the valid captured Life registry. Owner suffixes are exactly
+guest or lowercase canonical wallet addresses. Wallet identity, providers,
+authentication and other unrelated keys are excluded. Unknown/orphan scoped key
+names remain unexamined HOLD evidence: their values are never read. The existing
+scoped/unscoped `k11520.market-life.training` companion is explicitly recognized
+but remains unread with UNSUPPORTED_TRAINING_COMPANION. This checkpoint does not
+expand that domain's authority.
+
+Preparation makes two bounded captures separated by first-pass hashing. It stores
+both sorted relevant-key censuses, the first exact allowed source strings and
+presence flags, second-pass presence/digests, and the direct string-comparison
+result. Observed changes yield an immutable SOURCE_DIVERGED_HOLD candidate. Native
+getItem null is absence; the present string `null` is invalid source data. Proposal
+catalog entries distinguish PRESENT, ABSENT and INVALID; INVALID is review-only
+and can never pass the full-authority catalog validator. Duplicate/disappearing
+enumeration entries, unreadable sources or unstable lengths reject preparation
+with a typed HOLD error and create no candidate. Corrupt strings successfully
+captured within budget remain preserved inside a HOLD candidate.
+
+The [HTML storage standard](https://html.spec.whatwg.org/multipage/webstorage.html#storage)
+does not provide a cross-tab locking assumption, and enumeration order can change
+with mutations. Two equal passes are only observed stability. REVIEWABLE_CAPTURE
+never means atomic snapshot, latest state, migration-ready or production-ready.
+No retry-until-quiet loop conceals this boundary. Source writes occurring after
+these observations are not fenced by this preparation API. A later cutover needs
+its separately reviewed explicit snapshot boundary and divergence handling.
+
+Candidate records bind `STRICT_SCOPED_REVIEW_V1`, exact source strings, lossless
+per-source encoding/digests, censuses, owner/coverage summaries, limits, HOLD
+reasons, legacy classifications and review proposals into one manifest digest.
+Per-source hashing uses JSON_SOURCE_STRING_V1 with the actual presence boolean and
+raw string (or null for absence). The manifest hashes the deterministic JSON body
+excluding its own digest. Reads verify source hashes, ID/schema/encoding, the
+manifest and deterministic interpretation before returning detached data.
+Unsupported policy/encoding versions HOLD; nothing is silently reinterpreted.
+Hashes prove integrity relative to the digest, not authenticated owner identity.
+Raw captures stay local and are never added to sanitized exports or public QA.
+
+V1 product conversion exists only as a review proposal. The original string stays
+unchanged. Existing schema, owner, revision, ledger, progress, events and every
+counter must be valid. A pre-existing playerId cannot conflict with the scoped
+key. Only these absent fields receive explicit defaults:
+
+- courierReceipts: []
+- courierInsuranceReceipts: {}
+- courierReceiptBindings: {}
+- courierInsuranceBindings: {}
+
+Explicit null or malformed recognized fields HOLD. No missing ledger/progress
+container or counter is manufactured. The proposed V2 adds playerId from the
+verified scoped-key/Life-registry relationship and preserves opaque JSON extension
+fields without treating them as authority. Receipt spelling is never normalized;
+IDs/amounts are not deduplicated or truncated. Valid unique histories above 1000
+entries now pass the pure read validator only within its existing 2MB UTF-8 record
+bound. This changes no production append policy, reward rule or backpay permission.
+Unbound histories remain immutable LEGACY_UNBOUND classifications. Canonical
+cross-domain references and unresolved duplicate living identities are checked.
+Generic item IDs, including per-Life daily rewards, remain scoped to their owner.
+
+Unscoped monetary/inventory/session data, generic legacy backpack ownership,
+conflicting owners, orphan namespaces, missing required records, session/tutorial
+mismatches, pending insurance-payment evidence, unsupported companions and
+invalid cross-domain records HOLD. The legacy-owner claim cannot assign monetary
+ownership. lastMission is only a hint and never proves custody or payment.
+Many existing users may therefore require explicit migration review; no release
+or migration UX approval is implied.
+
+Safeguards are intentionally explicit and reviewable:
+
+- 4096 names enumerated per pass; 512 relevant/source entries; relevant name length
+  at most 256 code units
+- 4,000,000 UTF-16 code units per source; 8,000,000 captured code units across both
+  passes combined, counting each observed string even when unchanged
+- 16,000,000 bytes for the UTF-8 encoded candidate JSON
+- At most 8 candidate records and 32,000,000 total encoded candidate bytes; count
+  and aggregate admission are checked atomically with insertion
+
+Capacity failures preserve all source data and existing candidates. There is no
+truncation, eviction or partial replacement; a rejected attempt has no new archive.
+Hashing occurs before the insertion transaction and close-generation fencing
+prevents abandoned work from writing. Transaction completion remains the only
+acknowledgement. Budget/count races, duplicate IDs and insertion aborts retain
+prior evidence.
+
+Synthetic fake-IndexedDB tests cover V1/V2 proposals,1001 histories, explicit null,
+corrupt/ambiguous/orphan sources, unread value boundaries, source/census races,
+authority appearing during capture, generation fencing, policy/manifest tampering,
+lossless surrogates, count/byte budgets and zero source writes. These are model
+checks only. Full migration/promotion/restore, trusted live command wrappers,
+custody/world replay, Chromium old-client tests, persistent restart and production
+conflict/recovery feedback remain incomplete. No new heavy CI batch is claimed.
+
+```json
+{"STAGE":"FULL_MIGRATION_CAPTURE_REVIEW_ONLY","INTEGRATION":"UNINTEGRATED_DRAFT","POLICY":"STRICT_SCOPED_REVIEW_V1","HASH_ENCODING":"JSON_SOURCE_STRING_V1","PRODUCTION_CALLERS":0,"AUTHORITY_INSTALLATION":false,"SOURCE_WRITES":0,"FULL_MIGRATION":"NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","CAPTURE_ATOMICITY":"NOT_CLAIMED","RAW_ARCHIVE_EXPORT":"LOCAL_ONLY","NATIVE_FULL_MODE_QA":"NOT_RUN","PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","SELF_MERGE":false}
+```

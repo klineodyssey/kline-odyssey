@@ -294,7 +294,7 @@ export function validateLocalSimulationProductRecord(value,{playerId,owner}={}){
   // Canonical spelling is exact. Historical variants need an explicit no-loss
   // migration; accepting both spellings would split one replay identity.
   const rewardId=/^COURIER-RECEIPT-[0-9a-f]{8}$/,insuranceId=/^COURIER-INSURANCE-[0-9a-f]{8}$/;
-  if(!Array.isArray(p.courierReceipts)||p.courierReceipts.length>1000||p.courierReceipts.some(id=>typeof id!=='string'||!rewardId.test(id))||new Set(p.courierReceipts).size!==p.courierReceipts.length||!object(p.courierInsuranceReceipts)||Object.keys(p.courierInsuranceReceipts).length>1000||Object.entries(p.courierInsuranceReceipts).some(([id,amount])=>!insuranceId.test(id)||!integer(amount)||amount>1080000))fail('INVALID_LOCAL_SIMULATION_PRODUCT_RECEIPTS');
+  if(!Array.isArray(p.courierReceipts)||p.courierReceipts.some(id=>typeof id!=='string'||!rewardId.test(id))||new Set(p.courierReceipts).size!==p.courierReceipts.length||!object(p.courierInsuranceReceipts)||Object.entries(p.courierInsuranceReceipts).some(([id,amount])=>!insuranceId.test(id)||!integer(amount)||amount>1080000))fail('INVALID_LOCAL_SIMULATION_PRODUCT_RECEIPTS');
   for(const insurance of [false,true]){
     const bindings=p[insurance?'courierInsuranceBindings':'courierReceiptBindings'],ids=new Set(insurance?Object.keys(p.courierInsuranceReceipts):p.courierReceipts),missions=new Set();
     if(!object(bindings))fail('INVALID_LOCAL_SIMULATION_PRODUCT_RECEIPTS');

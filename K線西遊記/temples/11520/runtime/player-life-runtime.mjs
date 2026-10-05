@@ -267,6 +267,9 @@ const AUTHORITY_READ_KEYS=['$authority',AUTHORITY_DOMAIN,'$initialized','$keys']
 const SOURCE_HASH_ENCODING='JSON_SOURCE_STRING_V1';
 const FULL_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_FULL_DRAFT_V1';
 const FULL_AUTHORITY_DOMAINS=['PLAYER_LIFE','BACKPACK','PRODUCT','COURIER'];
+const GAME_CAPTURE_SCHEMA='LOCAL_GAME_MIGRATION_CAPTURE_V1';
+const GAME_CAPTURE_POLICY='STRICT_SCOPED_REVIEW_V1';
+const GAME_CAPTURE_LIMITS=Object.freeze({enumeratedNames:4096,relevantEntries:512,sourceCodeUnits:4000000,capturedCodeUnits:8000000,candidateBytes:16000000,candidates:8,archiveBytes:32000000});
 const equalData=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function authorityDomain(domain){if(domain!==AUTHORITY_DOMAIN)fail('DOMAIN_NOT_IMPLEMENTED')}
 function exactAuthorityJson(value,limit=4000000){
@@ -621,5 +624,123 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     });
   }
 
-  return Object.freeze({open,openGame,close,read,readGame,initialize,command,commandGame,prepareMigration,readCandidate,commitMigration,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
+  // Capture/review only: no full initializer, promotion, source write or restore.
+  const captureFixed=[PLAYER_LIFE_STORAGE_KEY,'K11520_PLAYER_COURIER','k11520.player-life.legacy-owner','11520.backpack.v1','k11520.local-product.v1:guest','k11520.player-session.v1','k11520.journey.tutorial','11520.playerCourier.pendingInsurancePayment','11520.playerCourier.lastMission'];
+  const captureSuffixes=['11520.backpack.v1','k11520.local-product.v1:guest','k11520.player-session.v1','k11520.journey.tutorial'];
+  function captureRule(key){
+    if(typeof key!=='string')return null;
+    if(captureFixed.includes(key))return {capture:true,scope:'GLOBAL'};
+    if(key==='k11520.market-life.training')return {capture:false,reason:'UNSUPPORTED_TRAINING_COMPANION'};
+    if(/^k11520\.local-product\.v1:0x[0-9a-f]{40}$/.test(key))return {capture:true,scope:'GLOBAL'};
+    const match=/^k11520\.player:(KAIOS-P-[0-9a-f]{32}):(.+)$/.exec(key);
+    if(match){const [,playerId,suffix]=match;if(suffix==='k11520.market-life.training')return {capture:false,reason:'UNSUPPORTED_TRAINING_COMPANION',playerId};if(captureSuffixes.includes(suffix)||/^k11520\.local-product\.v1:0x[0-9a-f]{40}$/.test(suffix))return {capture:true,scope:'SCOPED',playerId,suffix};return {capture:false,reason:'UNKNOWN_SCOPED_SOURCE',playerId}}
+    if(key.startsWith('k11520.player:')||key.startsWith('k11520.local-product.v1:'))return {capture:false,reason:'UNKNOWN_SCOPED_SOURCE'};
+    return null;
+  }
+  function captureExpectedKeys(names,owners){
+    const keys=new Set(captureFixed);for(const id of owners)for(const suffix of captureSuffixes)keys.add('k11520.player:'+id+':'+suffix);
+    for(const key of names){const rule=captureRule(key);if(rule?.capture&&(rule.scope==='GLOBAL'||owners.includes(rule.playerId)))keys.add(key)}return [...keys].sort();
+  }
+  function captureEmpty(values){
+    if(values.$keys.some(key=>typeof key!=='string'||!/^candidate:[a-f0-9]{32}$/.test(key)))fail('AUTHORITY_OR_UNKNOWN_RECORDS_HOLD');
+    if(values.$keys.length>=GAME_CAPTURE_LIMITS.candidates)fail('CAPTURE_ARCHIVE_CAPACITY_HOLD');
+    return null;
+  }
+  const captureBytes=value=>new TextEncoder().encode(JSON.stringify(value)).byteLength;
+  function captureStorage(input){
+    if(!object(input)||![Object.prototype,null].includes(Object.getPrototypeOf(input)))fail('INVALID_CAPTURE_INPUT');
+    const descriptors=Object.getOwnPropertyDescriptors(input),d=descriptors.sourceStorage;if(Reflect.ownKeys(descriptors).length!==1||!d?.enumerable||!Object.hasOwn(d,'value')||!d.value)fail('INVALID_CAPTURE_INPUT');
+    const storage=d.value,method=name=>{let cursor=storage;for(let n=0;cursor&&n<8;n++,cursor=Object.getPrototypeOf(cursor)){const found=Object.getOwnPropertyDescriptor(cursor,name);if(found){if(!Object.hasOwn(found,'value')||typeof found.value!=='function')fail('INVALID_CAPTURE_STORAGE');return found.value.bind(storage)}}fail('INVALID_CAPTURE_STORAGE')};
+    return {getItem:method('getItem'),key:method('key'),length:()=>storage.length};
+  }
+  function capturePass(source,budget){
+    let length;try{length=source.length()}catch{fail('CAPTURE_READ_UNAVAILABLE_HOLD')}
+    if(!Number.isSafeInteger(length)||length<0||length>GAME_CAPTURE_LIMITS.enumeratedNames)fail('CAPTURE_ENUMERATION_CAPACITY_HOLD');
+    const all=new Set(),names=[];
+    for(let n=0;n<length;n++){let key;try{key=source.key(n)}catch{fail('CAPTURE_READ_UNAVAILABLE_HOLD')}if(typeof key!=='string'||all.has(key))fail('CAPTURE_CENSUS_UNSTABLE_HOLD');all.add(key);if(captureRule(key)){if(key.length>256)fail('CAPTURE_SOURCE_CAPACITY_HOLD');names.push(key)}}
+    let endLength;try{endLength=source.length()}catch{fail('CAPTURE_READ_UNAVAILABLE_HOLD')}if(endLength!==length)fail('CAPTURE_CENSUS_UNSTABLE_HOLD');names.sort();if(names.length>GAME_CAPTURE_LIMITS.relevantEntries)fail('CAPTURE_SOURCE_CAPACITY_HOLD');
+    const values=new Map(),read=key=>{if(values.has(key))return values.get(key);let raw;try{raw=source.getItem(key)}catch{fail('CAPTURE_READ_UNAVAILABLE_HOLD')}if(raw!==null&&typeof raw!=='string')fail('CAPTURE_READ_UNAVAILABLE_HOLD');if(raw!==null){budget.units+=raw.length;if(raw.length>GAME_CAPTURE_LIMITS.sourceCodeUnits||budget.units>GAME_CAPTURE_LIMITS.capturedCodeUnits)fail('CAPTURE_SOURCE_CAPACITY_HOLD')}values.set(key,raw);return raw};
+    const lifeRaw=read(PLAYER_LIFE_STORAGE_KEY);let owners=[];try{const life=JSON.parse(lifeRaw);authorityEnvelope(life);owners=Object.keys(life.players)}catch{}
+    const wanted=captureExpectedKeys(names,owners);if(wanted.length>GAME_CAPTURE_LIMITS.relevantEntries)fail('CAPTURE_SOURCE_CAPACITY_HOLD');
+    const sources=wanted.map(key=>{const raw=read(key);return {key,present:raw!==null,raw}});
+    return {names,sources};
+  }
+  const captureHash=entry=>hash(JSON.stringify({present:entry.present,raw:entry.raw}));
+  function interpretCapture(sources,observed,censuses){
+    const byKey=new Map(sources.map(e=>[e.key,e])),holds=[],add=(code,sourceKey=null)=>{if(!holds.some(h=>h.code===code&&h.sourceKey===sourceKey))holds.push({code,sourceKey})};
+    if(!censuses.sourceStringsEqual||!equalData(censuses.before,censuses.after)||!equalData(sources.map(e=>[e.key,e.present,e.sha256]),observed.map(e=>[e.key,e.present,e.sha256])))add('SOURCE_DIVERGED_HOLD');
+    for(const [entries,names] of [[sources,censuses.before],[observed,censuses.after]])for(const entry of entries)if(entry.present!==names.includes(entry.key))add('SOURCE_DIVERGED_HOLD',entry.key);
+    for(const key of new Set([...censuses.before,...censuses.after])){const rule=captureRule(key);if(rule&&!rule.capture)add(rule.reason,key);const entry=byKey.get(key);if(rule?.capture&&entry&&!entry.present)add('SOURCE_DIVERGED_HOLD',key)}
+    const parse=(key,required=false)=>{const e=byKey.get(key);if(!e?.present){if(required)add('INCOMPLETE_SOURCE',key);return null}try{return JSON.parse(e.raw)}catch{add('INVALID_SOURCE',key);return null}};
+    let life=parse(PLAYER_LIFE_STORAGE_KEY,true),courier=parse('K11520_PLAYER_COURIER',true),owners=[];try{authorityEnvelope(life);owners=Object.keys(life.players).sort()}catch{if(byKey.get(PLAYER_LIFE_STORAGE_KEY)?.present)add('INVALID_SOURCE',PLAYER_LIFE_STORAGE_KEY);life=null}
+    for(const key of new Set([...censuses.before,...censuses.after])){const rule=captureRule(key);if(rule?.playerId&&!owners.includes(rule.playerId))add('ORPHAN_SCOPED_SOURCE',key)}
+    try{if(courier!==null)gameRegistry.courier(courier,{playerIds:owners});else if(byKey.get('K11520_PLAYER_COURIER')?.present)add('INVALID_SOURCE','K11520_PLAYER_COURIER')}catch{add('INVALID_SOURCE','K11520_PLAYER_COURIER');courier=null}
+    for(const e of sources){const rule=captureRule(e.key);if(rule?.scope==='SCOPED'&&!owners.includes(rule.playerId))add('ORPHAN_SCOPED_SOURCE',e.key);if(e.present&&(e.key==='11520.backpack.v1'||e.key.startsWith('k11520.local-product.v1:')||e.key==='k11520.player-session.v1'||e.key==='k11520.journey.tutorial'))add('AMBIGUOUS_LEGACY_SOURCE',e.key)}
+    const claim=byKey.get('k11520.player-life.legacy-owner');if(claim?.present&&!owners.includes(claim.raw))add('LEGACY_OWNER_AMBIGUITY','k11520.player-life.legacy-owner');
+    if(byKey.get('11520.playerCourier.pendingInsurancePayment')?.present)add('PENDING_INSURANCE_RECONCILIATION_HOLD','11520.playerCourier.pendingInsurancePayment');
+    const hint=byKey.get('11520.playerCourier.lastMission');if(hint?.present&&(!courier||!Object.hasOwn(courier.missions,hint.raw)))add('UNRESOLVED_MISSION_HINT','11520.playerCourier.lastMission');
+    const records=[],catalog=[],legacyUnbound=[],addRecord=(ref,value,sourceKey)=>{catalog.push({ref,presence:value===null?(byKey.get(sourceKey)?.present?'INVALID':'ABSENT'):'PRESENT'});records.push({ref,sourceKey,value})};
+    if(life){addRecord({domain:'PLAYER_LIFE'},life,PLAYER_LIFE_STORAGE_KEY);addRecord({domain:'COURIER'},courier,'K11520_PLAYER_COURIER')}
+    for(const playerId of owners){
+      const prefix='k11520.player:'+playerId+':',bagKey=prefix+'11520.backpack.v1';let bag=parse(bagKey,true);
+      try{if(bag?.ownerId==='PLAYER-11520')add('AMBIGUOUS_LEGACY_BAG_OWNER',bagKey);if(bag!==null)gameRegistry.bag(bag,{ownerId:playerId});else if(byKey.get(bagKey)?.present)add('INVALID_SOURCE',bagKey)}catch{add('INVALID_SOURCE',bagKey);bag=null}addRecord({domain:'BACKPACK',playerId},bag,bagKey);
+      const productKeys=new Set([prefix+'k11520.local-product.v1:guest',...sources.filter(e=>{const r=captureRule(e.key);return r?.playerId===playerId&&r.suffix?.startsWith('k11520.local-product.v1:')}).map(e=>e.key)]);
+      for(const key of [...productKeys].sort()){
+        const owner=key.slice((prefix+'k11520.local-product.v1:').length);let product=parse(key,true);
+        try{
+          if(product?.schema==='K11520_LOCAL_SIMULATION_V1'){
+            if(product.owner!==owner||(product.playerId!==undefined&&product.playerId!==playerId)||!object(product.ledger)||!object(product.progress))fail('INVALID_SOURCE');
+            product=clone(product);product.schema='K11520_LOCAL_SIMULATION_V2';product.playerId=playerId;
+            for(const [field,fallback] of Object.entries({courierReceipts:[],courierInsuranceReceipts:{},courierReceiptBindings:{},courierInsuranceBindings:{}}))if(product.progress[field]===undefined)product.progress[field]=fallback;
+          }
+          if(product!==null)gameRegistry.product(product,{playerId,owner});else if(byKey.get(key)?.present)add('INVALID_SOURCE',key);
+        }catch{add('INVALID_SOURCE',key);product=null}addRecord({domain:'PRODUCT',playerId,owner},product,key);
+      }
+      const sessionKey=prefix+'k11520.player-session.v1',tutorialKey=prefix+'k11520.journey.tutorial',session=parse(sessionKey),tutorial=parse(tutorialKey),p=life.players[playerId];
+      if(byKey.get(sessionKey)?.present&&(!object(session)||session.version!==1||session.world!=='K11520'||!object(session.xyz)||!object(session.intentXYZ)||![session.xyz,session.intentXYZ].every(v=>['x','y','z'].every(k=>typeof v[k]==='number'&&Number.isFinite(v[k])&&Math.abs(v[k])<=1e9))||!equalData(session.xyz,p.lastXYZ)))add('SESSION_RECONCILIATION_HOLD',sessionKey);
+      if(byKey.get(tutorialKey)?.present&&(!object(tutorial)||!['MOVE','HIT','LOOT','PHASE','PREVIEW','DONE'].includes(tutorial.stage)||tutorial.stage!==p.journeyProgress?.tutorialStage))add('TUTORIAL_RECONCILIATION_HOLD',tutorialKey);
+    }
+    for(const record of records){const p=record.value?.progress;if(record.ref.domain==='PRODUCT'&&p)for(const insurance of [false,true])for(const id of insurance?Object.keys(p.courierInsuranceReceipts):p.courierReceipts)if(!p[insurance?'courierInsuranceBindings':'courierReceiptBindings'][id])legacyUnbound.push(legacyToken(record.ref,insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD',id))}
+    for(const m of Object.values(courier?.missions||{})){if(m.status==='DELIVERED'&&!m.settlement.credit)legacyUnbound.push(legacyToken({domain:'COURIER'},'PLAYER_COURIER_REWARD',m.settlement.receiptId,m.missionId));if(m.insurance.claimStatus==='PAID'&&!m.insurance.credit)legacyUnbound.push(legacyToken({domain:'COURIER'},'PLAYER_COURIER_INSURANCE_PAYOUT',m.insurance.payoutReceiptId,m.missionId))}legacyUnbound.sort();
+    // Generic item IDs (including daily rewards) are Life-scoped. Only the
+    // explicit living identity can signal unresolved cross-Life custody here.
+    const livingOwners=new Map();for(const r of records)if(r.ref.domain==='BACKPACK'&&r.value)for(const item of r.value.items)if(item.lifeId!==null){if(livingOwners.has(item.lifeId)&&livingOwners.get(item.lifeId)!==r.ref.playerId)add('CUSTODY_IDENTITY_CONFLICT',r.sourceKey);livingOwners.set(item.lifeId,r.ref.playerId)}
+    if(life){
+      const meta={schema:FULL_AUTHORITY_SCHEMA,integration:AUTHORITY_INTEGRATION,coverage:FULL_AUTHORITY_DOMAINS,authorityEpoch:'0'.repeat(32),selectionEpoch:0,activePlayerId:life.activePlayerId,catalogRevision:0,catalog,legacyUnbound};
+      const values={$authority:meta,$initialized:{authorityEpoch:meta.authorityEpoch,coverage:FULL_AUTHORITY_DOMAINS,catalogRevision:0},$keys:['$authority','$initialized','archive:'+meta.authorityEpoch]};for(const r of records)if(r.value!==null){const key=referenceKey(r.ref);values[key]=r.ref.domain==='BACKPACK'?{revision:0,data:r.value}:r.value;values.$keys.push(key)}
+      try{fullState(values)}catch{add('CROSS_DOMAIN_REVIEW_HOLD')}
+    }
+    holds.sort((a,b)=>{const x=a.code+'|'+a.sourceKey,y=b.code+'|'+b.sourceKey;return x<y?-1:x>y?1:0});
+    return {status:holds.length?'HOLD':'REVIEWABLE_CAPTURE',holds,owners,coverage:FULL_AUTHORITY_DOMAINS,legacyUnbound,proposal:life?{catalog,records}:null};
+  }
+  async function prepareGameMigration(input={}){
+    requireOpen();if(!gameRegistry)fail('GAME_VALIDATORS_NOT_READY');const source=captureStorage(input),admitted=generation,check=()=>{if(admitted!==generation||!db||!gameRegistry)fail('AUTHORITY_CLOSED')};
+    await transaction('readonly',['$keys'],captureEmpty);check();const budget={units:0},before=capturePass(source,budget);
+    const sources=await Promise.all(before.sources.map(async e=>({...e,sha256:await captureHash(e)})));check();const after=capturePass(source,budget),observed=await Promise.all(after.sources.map(async e=>({key:e.key,present:e.present,sha256:await captureHash(e)})));check();
+    const censuses={before:before.names,after:after.names,sourceStringsEqual:equalData(before.sources,after.sources)},analysis=interpretCapture(sources,observed,censuses),body={schema:GAME_CAPTURE_SCHEMA,id:token(),integration:'REVIEW_ONLY',hashEncoding:SOURCE_HASH_ENCODING,policy:GAME_CAPTURE_POLICY,limits:GAME_CAPTURE_LIMITS,sources,observed,censuses,...analysis};
+    if(captureBytes(body)>GAME_CAPTURE_LIMITS.candidateBytes)fail('CAPTURE_CANDIDATE_CAPACITY_HOLD');exactAuthorityJson(body,GAME_CAPTURE_LIMITS.candidateBytes);const candidate={...body,manifestSha256:await hash(JSON.stringify(body))};check();const bytes=captureBytes(candidate);if(bytes>GAME_CAPTURE_LIMITS.candidateBytes)fail('CAPTURE_CANDIDATE_CAPACITY_HOLD');
+    return transaction('readwrite',['$keys'],(values,store)=>{captureEmpty(values);let total=bytes;for(const key of values.$keys){exactAuthorityJson(values[key],GAME_CAPTURE_LIMITS.candidateBytes);total+=captureBytes(values[key])}if(total>GAME_CAPTURE_LIMITS.archiveBytes)fail('CAPTURE_ARCHIVE_CAPACITY_HOLD');store.add(candidate,'candidate:'+candidate.id);return candidate},values=>{captureEmpty(values);return values.$keys});
+  }
+  async function readGameCandidate(id){
+    if(typeof id!=='string'||!/^[a-f0-9]{32}$/.test(id))fail('INVALID_GAME_CANDIDATE');requireOpen();if(!gameRegistry)fail('GAME_VALIDATORS_NOT_READY');const admitted=generation;
+    const candidate=await transaction('readonly',['candidate:'+id],values=>{const value=values['candidate:'+id];if(value===undefined)fail('INVALID_GAME_CANDIDATE');exactAuthorityJson(value,GAME_CAPTURE_LIMITS.candidateBytes);return value});
+    exactAuthorityJson(candidate,GAME_CAPTURE_LIMITS.candidateBytes);
+    if(!keys(candidate,['schema','id','integration','hashEncoding','policy','limits','sources','observed','censuses','status','holds','owners','coverage','legacyUnbound','proposal','manifestSha256'])||Object.keys(candidate).length!==16||candidate.schema!==GAME_CAPTURE_SCHEMA||candidate.id!==id||candidate.integration!=='REVIEW_ONLY'||!equalData(candidate.limits,GAME_CAPTURE_LIMITS)||captureBytes(candidate)>GAME_CAPTURE_LIMITS.candidateBytes)fail('INVALID_GAME_CANDIDATE');
+    if(candidate.hashEncoding!==SOURCE_HASH_ENCODING)fail('UNSUPPORTED_MIGRATION_HASH_ENCODING_HOLD');
+    if(candidate.policy!==GAME_CAPTURE_POLICY)fail('UNSUPPORTED_CAPTURE_POLICY_HOLD');
+    if(!Array.isArray(candidate.sources)||candidate.sources.length>GAME_CAPTURE_LIMITS.relevantEntries||!Array.isArray(candidate.observed)||candidate.observed.length>GAME_CAPTURE_LIMITS.relevantEntries||!keys(candidate.censuses,['before','after','sourceStringsEqual'])||Object.keys(candidate.censuses).length!==3||typeof candidate.censuses.sourceStringsEqual!=='boolean')fail('INVALID_GAME_CANDIDATE');
+    const ordered=entries=>{let prior='';for(const entry of entries){if(typeof entry.key!=='string'||entry.key<=prior||!captureRule(entry.key)?.capture||typeof entry.present!=='boolean'||typeof entry.sha256!=='string'||!/^[a-f0-9]{64}$/.test(entry.sha256))fail('INVALID_GAME_CANDIDATE');prior=entry.key}};ordered(candidate.sources);ordered(candidate.observed);
+    if(captureFixed.some(key=>!candidate.sources.some(e=>e.key===key)||!candidate.observed.some(e=>e.key===key)))fail('INVALID_GAME_CANDIDATE');
+    let units=0;for(const entry of candidate.sources){if(!keys(entry,['key','present','raw','sha256'])||Object.keys(entry).length!==4||(entry.present?typeof entry.raw!=='string':entry.raw!==null))fail('INVALID_GAME_CANDIDATE');units+=entry.raw?.length||0;if((entry.raw?.length||0)>GAME_CAPTURE_LIMITS.sourceCodeUnits||units>GAME_CAPTURE_LIMITS.capturedCodeUnits||await captureHash(entry)!==entry.sha256)fail('GAME_CANDIDATE_CONTENT_MISMATCH')}
+    for(const entry of candidate.observed)if(!keys(entry,['key','present','sha256'])||Object.keys(entry).length!==3)fail('INVALID_GAME_CANDIDATE');
+    for(const names of [candidate.censuses.before,candidate.censuses.after])if(!Array.isArray(names)||names.length>GAME_CAPTURE_LIMITS.relevantEntries||names.some((key,n)=>typeof key!=='string'||key.length>256||!captureRule(key)||(n&&key<=names[n-1])))fail('INVALID_GAME_CANDIDATE');
+    const lifeSource=candidate.sources.find(e=>e.key===PLAYER_LIFE_STORAGE_KEY),lifeObserved=candidate.observed.find(e=>e.key===PLAYER_LIFE_STORAGE_KEY);let owners=[];try{const life=JSON.parse(lifeSource.raw);authorityEnvelope(life);owners=Object.keys(life.players)}catch{}
+    if(!equalData(captureExpectedKeys(candidate.censuses.before,owners),candidate.sources.map(e=>e.key)))fail('INVALID_GAME_CANDIDATE');
+    if(lifeSource.present===lifeObserved.present&&lifeSource.sha256===lifeObserved.sha256&&!equalData(captureExpectedKeys(candidate.censuses.after,owners),candidate.observed.map(e=>e.key)))fail('INVALID_GAME_CANDIDATE');
+    const {manifestSha256,...body}=candidate;if(typeof manifestSha256!=='string'||await hash(JSON.stringify(body))!==manifestSha256)fail('GAME_CANDIDATE_CONTENT_MISMATCH');
+    const analysis=interpretCapture(candidate.sources,candidate.observed,candidate.censuses);for(const key of Object.keys(analysis))if(!equalData(analysis[key],candidate[key]))fail('GAME_CANDIDATE_INTERPRETATION_MISMATCH');
+    if(admitted!==generation||!db||!gameRegistry)fail('AUTHORITY_CLOSED');return clone(candidate);
+  }
+
+  return Object.freeze({open,openGame,close,read,readGame,initialize,command,commandGame,prepareMigration,readCandidate,commitMigration,prepareGameMigration,readGameCandidate,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
 }
