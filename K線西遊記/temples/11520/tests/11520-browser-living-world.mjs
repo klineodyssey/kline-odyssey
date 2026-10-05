@@ -225,6 +225,10 @@ async function verifyActiveLandscapeContext(kind){
   assert.ok(hits.every(h=>h.owned),`active landscape context must not steal combat hits: ${JSON.stringify(hits)}`);
   await page.screenshot({path:`${OUT}/11520-${kind}-context-closed-844x390.png`});
   await page.locator('#k11520UtilityMaster').click();
+  const chatState=await page.locator('#gameChat').evaluate(el=>{const r=el.getBoundingClientRect();return{open:el.classList.contains('open'),inViewport:r.left<innerWidth&&r.right>0&&r.top<innerHeight&&r.bottom>0}});
+  assert.deepEqual(chatState,{open:false,inViewport:false},'More must not reveal closed chat or steal context-action input');
+  await page.locator('#chatHandle').click();await page.locator('#gameChat.open').waitFor();
+  await page.locator('#chatClose').click();await page.waitForFunction(()=>{const el=document.querySelector('#gameChat'),r=el.getBoundingClientRect();return!el.classList.contains('open')&&(r.top>=innerHeight||r.bottom<=0||r.left>=innerWidth||r.right<=0)},null,{timeout:2500});
   const open=await page.evaluate(()=>['#cargoInterceptionButton','#homeDeliveryButton'].map(selector=>{const el=document.querySelector(selector),r=el.getBoundingClientRect(),h=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{selector,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,hit:h===el||el.contains(h)}}));
   assert.ok(open.every(x=>x.width>=44&&x.height>=44&&x.hit),'both context actions remain usable inside existing More');
   const guide=await page.locator('#k11520MonsterGuide').boundingBox();assert.ok(open.every(x=>!guide||x.right<=guide.x||x.left>=guide.x+guide.width||x.bottom<=guide.y||x.top>=guide.y+guide.height),'open context actions remain clear of the world target');
