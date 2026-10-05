@@ -308,12 +308,19 @@ async function verifyFullHudControlOwnership(page,report){
   // a failed drag or freeze actors. Native pointerdown eligibility remains asserted.
   const start=await readCamera(),readiness=await page.evaluate(async()=>{
     const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),began=performance.now(),history=[];
-    const clear=(x,y)=>[-30,-20,-10,0,10,20,30].every(dx=>[-30,-20,-10,0,10,20,30].every(dy=>document.elementFromPoint(x+dx,y+dy)===canvas&&__K11520_CAMERA__.canPanAt(x+dx,y+dy)))&&document.elementFromPoint(x+42,y)===canvas;
+    const offsets=[0,-10,10,-20,20,-30,30];
+    const clear=(x,y,cache=new Map())=>{
+      // Reject HUD cheaply before any scene raycast; cache only within this
+      // synchronous search, never across rendered frames or stability samples.
+      const points=offsets.flatMap(dx=>offsets.map(dy=>({x:x+dx,y:y+dy})));
+      if(document.elementFromPoint(x+42,y)!==canvas||!points.every(p=>document.elementFromPoint(p.x,p.y)===canvas))return false;
+      return points.every(p=>{const key=p.x+','+p.y;if(!cache.has(key))cache.set(key,__K11520_CAMERA__.canPanAt(p.x,p.y));return cache.get(key)});
+    };
     let point=null,since=0;
     while(performance.now()-began<2000){
       if(point&&!clear(point.x,point.y)){history.push({event:'ELIGIBILITY_CHANGED',at:performance.now(),...point});point=null}
       if(!point){
-        search:for(let y=r.bottom-60;y>r.top+60;y-=10)for(let x=r.left+60;x<r.right-60;x+=10)if(clear(x,y)){point={x,y};since=performance.now();history.push({event:'CANDIDATE',at:since,...point});break search}
+        const cache=new Map();search:for(let y=r.top+60;y<r.bottom-60&&performance.now()-began<2000;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(clear(x,y,cache)){point={x,y};since=performance.now();history.push({event:'CANDIDATE',at:since,...point});break search}
       }
       if(point&&performance.now()-since>=150&&performance.now()-began<2000)return{point:{...point,selectedAt:performance.now(),actors:__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot(),home:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot()},elapsedMs:performance.now()-began,stableMs:performance.now()-since,radius:30,history};
       await new Promise(requestAnimationFrame);
@@ -463,8 +470,7 @@ async function verifyKSpaceGameplay(page,report){
   const finishApproach=async()=>{(report.kspaceApproaches??=[]).push(await page.evaluate(()=>kspaceApproachStop()))};
   const pursue=async(label,limit,timeoutMs,magnitude)=>{
     await observeApproach(label);
-    const deadline=Date.now()+timeoutMs;let reached=false;
-    await page.mouse.move(x,y);await page.mouse.down();
+    const deadline=Date.now()+timeoutMs;let reached=false,pressed=false;
     try{
       while(Date.now()<deadline){
         const current=await state();
@@ -474,10 +480,11 @@ async function verifyKSpaceGameplay(page,report){
         // along one stale heading. Center the real joystick when horizontally
         // aligned; its natural descent must still satisfy the same 3D deadline.
         const travel=planar<.15?0:Math.min(magnitude,planar*70);
-        await page.mouse.move(x+(planar?relative.x/planar*travel:0),y-(planar?relative.z/planar*travel:0));
+        if(travel>0&&!pressed){await page.mouse.move(x,y);await page.mouse.down();pressed=true}
+        if(pressed)await page.mouse.move(x+(planar?relative.x/planar*travel:0),y-(planar?relative.z/planar*travel:0));
         await page.waitForTimeout(75);
       }
-    }finally{await page.mouse.up();await finishApproach()}
+    }finally{if(pressed)await page.mouse.up();await finishApproach()}
     assert.equal(reached,true,`${label}: real joystick must reach 3D distance <${limit} within ${timeoutMs}ms; inspect kspaceApproaches`);
   };
 
@@ -510,7 +517,12 @@ async function verifyKSpaceGameplay(page,report){
     await input(sign);await page.waitForTimeout(400);
     // Market lives now move. Pursue via the real joystick before each strike;
     // never freeze/teleport the target or relax the actual combat range rule.
+    const beforePursuit=await state();
     await pursue(variant,.8,5000,35);
+    const beforeStrike=await state();
+    (report.kspaceStrikePreconditions??=[]).push({variant,beforePursuit,beforeStrike});
+    assert.deepEqual(beforeStrike.selection,beforePursuit.selection,'pursuit must not accidentally tap-cycle plane or clear signed C');
+    assert.equal(beforeStrike.selection.body,'KY'+(sign==='1'?'+':'-'));
     const b=await page.locator(selector).boundingBox(),point={x:b.x+b.width/2,y:b.y+b.height/2,button:'left',clickCount:1};
     await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...point});await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point});await page.waitForTimeout(delay);
     const result=(await state()).lastResult;assert.equal(result.hit,true,variant+': '+result.reason);assert.deepEqual(result.hits.map(h=>h.body),bodies);assert.equal(result.rewardKaios,0);
