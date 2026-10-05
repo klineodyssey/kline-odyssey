@@ -11,7 +11,7 @@ const storage=()=>{const data=new Map();return {getItem:k=>data.get(k)??null,set
 test('one registry exposes exactly the three Human-designated playable worlds',()=>{
  assert.equal(validateWorldRegistry(),true);assert.deepEqual(WORLD_REGISTRY.filter(isPlayable).map(w=>w.worldId),['11520','12345','16888']);
  assert.deepEqual(WORLD_STATUSES,['PLAYABLE','BETA','UNDER_CONSTRUCTION','RESEARCH','ARCHIVED']);
- assert.equal(findWorld('11520').version,'V2.9.0');
+ assert.equal(findWorld('11520').version,'V2.9.1');
  assert.equal(Object.isFrozen(WORLD_REGISTRY),true);assert.equal(Object.isFrozen(findWorld('11520').capabilities),true);
 });
 test('all registry destinations exist; construction worlds have no play destination',()=>{

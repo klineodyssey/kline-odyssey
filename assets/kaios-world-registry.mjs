@@ -3,7 +3,7 @@ export const WORLD_STATUSES=Object.freeze(['PLAYABLE','BETA','UNDER_CONSTRUCTION
 export const CANONICAL_PORTAL_URL='https://klineodyssey.github.io/kline-odyssey/';
 const entry=value=>Object.freeze({...value,capabilities:Object.freeze(value.capabilities||[])});
 export const WORLD_REGISTRY=Object.freeze([
- entry({worldId:'11520',name:'K11520',subtitle:'花果山 · 5D K線西遊記',status:'PLAYABLE',entryUrl:'K線西遊記/temples/11520/game-5d.html',version:'V2.9.0',audioTheme:'JOURNEY',description:'從第一隻守關猿開始，升級解鎖六相技能、Boss 與每日取經。',capabilities:['Guest first','取經與戰鬥','Player Life'],cta:'立即遊玩',tone:'jade'}),
+ entry({worldId:'11520',name:'K11520',subtitle:'花果山 · 5D K線西遊記',status:'PLAYABLE',entryUrl:'K線西遊記/temples/11520/game-5d.html',version:'V2.9.1',audioTheme:'JOURNEY',description:'從第一隻守關猿開始，升級解鎖六相技能、Boss 與每日取經。',capabilities:['Guest first','取經與戰鬥','Player Life'],cta:'立即遊玩',tone:'jade'}),
  entry({worldId:'12345',name:'K12345 Heart',subtitle:'Heart · 生命與信念',status:'PLAYABLE',entryUrl:'K線西遊記/temples/12345/index.html',version:'CURRENT',audioTheme:'HEART',description:'走進悟空財神殿，探索 Heart 的生命節奏與互動空間。',capabilities:['Heart','互動神殿'],cta:'進入 Heart',tone:'rose'}),
  entry({worldId:'16888',name:'K16888 Universe',subtitle:'Universe · 星際探索',status:'PLAYABLE',entryUrl:'K線西遊記/temples/16888/index.html',version:'CURRENT',audioTheme:'UNIVERSE',description:'前往廣寒宮，在 Universe 的星空中展開另一段探索。',capabilities:['Universe','星空探索'],cta:'進入 Universe',tone:'blue'}),
  entry({worldId:'kgen',name:'KGEN 生態系',subtitle:'制度與市場資訊',status:'RESEARCH',entryUrl:'markets/',version:'CURRENT',audioTheme:null,description:'了解 KGEN、公開市場資訊與資產安全邊界。',capabilities:['INFORMATION_ONLY']}),

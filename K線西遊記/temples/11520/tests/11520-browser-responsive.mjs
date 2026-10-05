@@ -55,12 +55,28 @@ async function verifyWorldFirst(){
       await page.locator('#intro11520').waitFor({state:'hidden'});
       // MINIMAL deliberately hides diagnostic telemetry; readiness is state, not visibility.
       await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),null,{timeout:45000});
+      await page.waitForFunction(()=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.1');
+      assert.match(await page.locator('.brandMetaV250 span:first-child').textContent(),/^V2\.9\.1 · 5D K線西遊記$/);
+      result.checks.visibleVersion='V2.9.1';
       assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.profile),'MINIMAL');
       assert.equal(await page.locator('#axes').isVisible(),false);
-      for(const selector of ['#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#k11520CameraReset']){
+      for(const selector of ['#k11520MarketRow','#k11520CameraReset']){
         const box=await page.locator(selector).boundingBox();assert.ok(box&&box.height>=44&&box.width>=44,selector+' accessible compact target');
         assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=profile.width&&box.y+box.height<=profile.height);
       }
+      const contextActions=['#cargoInterceptionButton','#homeDeliveryButton'];
+      {
+        const inactive=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{const el=document.querySelector(selector);return[selector,{state:el?.dataset.contextState||'',visible:!!el&&getComputedStyle(el).display!=='none'}]})),contextActions);
+        assert.deepEqual(inactive,{'#cargoInterceptionButton':{state:'cruise',visible:false},'#homeDeliveryButton':{state:'idle',visible:false}},'inactive context actions must not occupy the world');
+        await page.locator('#k11520UtilityMaster').click();
+        for(const selector of contextActions){const box=await page.locator(selector).boundingBox();assert.ok(box&&box.height>=44&&box.width>=44,selector+' must remain accessible in the existing utility rail');assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=profile.width&&box.y+box.height<=profile.height)}
+        await page.locator('#k11520UtilityMaster').click();
+        result.checks.contextActions='INACTIVE HIDDEN / EXISTING MORE RAIL ACCESSIBLE PASS';
+      }
+      // Ambient actors keep moving while the utility disclosure is exercised.
+      // Reuse the existing startup visual-readiness gate before sampling; a
+      // random instant can put otherwise playable actors behind the minimap.
+      await page.waitForFunction(()=>__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2,null,{timeout:5000});
       result.visibility=await page.evaluate(()=>{
         const p=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;
         return{player:p,playerUncovered:document.elementFromPoint(p.x,p.y)?.id==='three',monsters:globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot()};
@@ -80,13 +96,25 @@ async function verifyWorldFirst(){
       await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
       const directions=[];
       for(const [name,dx,dy,screenAxis,sign] of [['right',60,0,'x',1],['left',-60,0,'x',-1],['down',0,60,'y',1],['up',0,-60,'y',-1]]){
-        await page.locator('#k11520CameraReset').click();await page.waitForTimeout(80);
+        await page.locator('#k11520CameraReset').click();
+        // Recenter mutates Camera state immediately, while the projected world
+        // catches up on the next rendered frame. Wait for that canonical visual
+        // state instead of racing a fixed sleep on a busy landscape runner.
+        await page.waitForFunction(origin=>{const c=__K11520_CAMERA__.snapshot(),p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return c.zoom===1&&c.panX===0&&c.panZ===0&&c.manual===false&&Math.abs(p.x-origin.x)<.5&&Math.abs(p.y-origin.y)<.5},result.visibility.player,{timeout:3000});
+        // Actors keep moving between directions. Reusing the first origin may
+        // correctly select a newly arrived actor instead of starting camera pan.
+        const gesturePoint=await page.evaluate(({dx,dy})=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12)if(__K11520_CAMERA__.isWorldGestureArea(x,y,10)&&document.elementFromPoint(x+dx,y+dy)===canvas)return{x,y};return null},{dx,dy});
+        assert.ok(gesturePoint,`drag ${name} requires a fresh unobstructed world origin`);
         const before=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
-        await touch('touchStart',[[1,x,y]]);await touch('touchMove',[[1,x+dx/2,y+dy/2]]);await touch('touchMove',[[1,x+dx,y+dy]]);await touch('touchEnd',[]);await page.waitForTimeout(80);
-        const after=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
+        const gx=gesturePoint.x,gy=gesturePoint.y;
+        await touch('touchStart',[[1,gx,gy]]);await touch('touchMove',[[1,gx+dx/2,gy+dy/2]]);await touch('touchMove',[[1,gx+dx,gy+dy]]);await touch('touchEnd',[]);
+        const attempt={name,origin:gesturePoint,before,finger:{dx,dy}};(result.cameraAttempts??=[]).push(attempt);
+        try{await page.waitForFunction(({before,screenAxis,sign})=>(__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen[screenAxis]-before[screenAxis])*sign>8,{before:before.player,screenAxis,sign},{timeout:3000})}
+        finally{attempt.after=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));attempt.pointerTrace=await page.evaluate(()=>worldFirstPointerTrace)}
+        const after=attempt.after;
         assert.ok((after.player[screenAxis]-before.player[screenAxis])*sign>8,`drag ${name} must move world content ${name}`);
         assert.deepEqual(after.camera.playerXYZ,start.playerXYZ,'camera pan never moves XYZ');
-        directions.push({name,finger:{dx,dy},content:{dx:after.player.x-before.player.x,dy:after.player.y-before.player.y},camera:after.camera});
+        directions.push({name,origin:gesturePoint,finger:{dx,dy},content:{dx:after.player.x-before.player.x,dy:after.player.y-before.player.y},camera:after.camera});
         await page.screenshot({path:`${OUT}/camera-${profile.name}-pan-${name}.png`});
       }
       result.pointerTrace=await page.evaluate(()=>({events:worldFirstPointerTrace,touchAction:getComputedStyle(document.querySelector('#three')).touchAction,scale:visualViewport.scale}));result.panOrigin=point;result.cameraDirections=directions;
@@ -102,6 +130,19 @@ async function verifyWorldFirst(){
       await page.screenshot({path:`${OUT}/camera-${profile.name}-recenter.png`});
       await page.waitForFunction(original=>{const p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return Math.abs(p.x-original.x)<.5&&Math.abs(p.y-original.y)<.5},result.visibility.player,{timeout:3000});
       await page.locator('#k11520MarketRow').click();assert.equal(await page.locator('#axes').isVisible(),true);
+      const marketReadability=await page.locator('#axes').evaluate(el=>{
+        const cards=[...el.querySelectorAll('.axis')];
+        return cards.map(card=>{const r=card.getBoundingClientRect(),symbol=card.querySelector('.marketName'),price=card.querySelector('.q'),address=card.querySelector('.marketKValue'),style=address?getComputedStyle(address):null;return{width:r.width,symbol:symbol?.textContent?.trim(),symbolFits:!!symbol&&symbol.scrollWidth<=symbol.clientWidth+1&&symbol.scrollHeight<=parseFloat(getComputedStyle(symbol).lineHeight)+1,price:price?.textContent?.trim(),priceFits:!!price&&price.scrollWidth<=price.clientWidth+1&&price.scrollHeight<=parseFloat(getComputedStyle(price).lineHeight)+1,address:address?.textContent?.trim(),addressFits:!!address&&address.scrollWidth<=address.clientWidth+1&&address.getBoundingClientRect().bottom<=r.bottom-3,overflowWrap:style?.overflowWrap,wordBreak:style?.wordBreak}});
+      });
+      assert.deepEqual(marketReadability.map(x=>x.symbol),['BTC/USDT','ETH/USDT','BNB/USDT']);
+      assert.ok(Math.max(...marketReadability.map(x=>x.width))-Math.min(...marketReadability.map(x=>x.width))<1,'expanded market cards must remain equal width');
+      assert.ok(marketReadability.every(x=>x.width>=94),`expanded market cards must retain readable width: ${JSON.stringify(marketReadability)}`);
+      for(const card of marketReadability){assert.equal(card.symbolFits,true,card.symbol+' must remain complete on one line');assert.equal(card.priceFits,true,card.symbol+' price must remain complete on one line');assert.match(card.address,/k\s*=\s*-?\d+/);assert.match(card.address,/α\s*=\s*\d/);assert.match(card.address,/θ\s*=\s*(?:0|π)/);assert.equal(card.addressFits,true,card.symbol+' universe address must not overflow its card');assert.equal(card.overflowWrap,'normal');assert.equal(card.wordBreak,'keep-all')}
+      const expandedWorld=await page.evaluate(()=>{const guide=document.querySelector('#k11520MonsterGuide').getBoundingClientRect(),player=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return{guideHeight:guide.height,playerUncovered:document.elementFromPoint(player.x,player.y)?.id==='three'}});
+      assert.ok(expandedWorld.guideHeight<=52,'expanded Market must not stretch the compact monster guide across the world');
+      assert.equal(expandedWorld.playerUncovered,true,'expanded Market guide must not cover the player');
+      result.expandedWorld=expandedWorld;
+      await page.screenshot({path:`${OUT}/market-expanded-${profile.width}x${profile.height}.png`});
       // Quotes replace card DOM; read the currently attached visible card and
       // its rectangle atomically instead of using a transient element handle.
       const card=await page.locator('#axes').evaluate(el=>{const card=el.querySelector('.axis');if(!card)return null;const r=card.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}});
@@ -167,7 +208,7 @@ async function verifyWorldFirst(){
       if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
       assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
-    }catch(error){result.error=String(error);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
+    }catch(error){result.error=String(error);result.failureVisibility=await page.evaluate(()=>{const projection=globalThis.__K11520_WORLD_SELECTION_PROJECTION__;if(!projection)return null;return{player:projection.playerHomeSnapshot().playerScreen,monsters:projection.journeyLifeSnapshot().map(m=>{const hit=document.elementFromPoint(m.screen.x,m.screen.y);return{...m,hitOwner:hit?{id:hit.id,classes:String(hit.className),text:(hit.textContent||'').slice(0,100)}:null}})}}).catch(()=>null);result.failurePointerTrace=await page.evaluate(()=>globalThis.worldFirstPointerTrace||[]).catch(()=>[]);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
     finally{await context.close();await fs.writeFile(`${OUT}/world-first-report.json`,JSON.stringify({results,head:process.env.K11520_SOURCE_SHA||null},null,2))}
   }
 }
@@ -192,7 +233,7 @@ async function verifyInitialQuoteWait(){
     const returning=await page.evaluate(()=>({combat:globalThis.__K11520_KSPACE_API__.snapshot(),coords:globalThis.__K11520_WORLD_COORDS__}));
     assert.equal(returning.coords.physical.x,210);assert.equal(returning.coords.physical.z,186);
     assert.ok(Math.abs(returning.combat.distance-7)<.1,'restored XYZ must receive the guardian at 7m');
-    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.9.0'));
+    await page.waitForFunction(()=>document.querySelector('.brandMetaV250')?.textContent.includes('V2.9.1'));
     await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''));
     await page.waitForFunction(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2);
     const lifeBefore=await page.evaluate(()=>globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot());
@@ -203,7 +244,7 @@ async function verifyInitialQuoteWait(){
     assert.ok(lifeAfter.every((m,i)=>Math.hypot(m.position.x-lifeBefore[i].position.x,m.position.z-lifeBefore[i].position.z)>.01),'ambient life must actually move');
     await fs.writeFile(`${OUT}/returning-player.json`,JSON.stringify({returning,lifeBefore,lifeAfter},null,2));
     await page.screenshot({path:`${OUT}/returning-390-ambient-moving.png`});
-    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.9\.0/,'legacy runtime must not overwrite release stamp');
+    assert.match(await page.locator('.brandMetaV250').textContent(),/V2\.9\.1/,'legacy runtime must not overwrite release stamp');
     assert.equal(await page.evaluate(()=>globalThis.__K11520_KSPACE_API__.snapshot().market.status),'WAIT');
     assert.equal(await page.locator('.marketKValue').count(),0);await page.locator('#attack').click();
     await page.screenshot({path:`${OUT}/startup-WAIT-no-fake-market.png`});ready=true;
@@ -237,30 +278,66 @@ async function snapshot(page){return page.evaluate(sels=>{
 async function verifyFullHudControlOwnership(page,report){
   const controls=['#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#gameModeToggle','#k11520UtilityMaster'];
   await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__?.profile==='FULL'&&['k11520CameraReset','cargoInterceptionButton','homeDeliveryButton','k11520MarketRow'].every(id=>document.getElementById(id)),null,{timeout:45000});
+  await page.waitForFunction(()=>document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.1');
+  assert.match(await page.locator('.brandMetaV250 span:first-child').textContent(),/^V2\.9\.1 · 5D K線西遊記$/);
+  report.visibleVersion='V2.9.1';
   const ownership=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{const el=document.querySelector(selector),r=el?.getBoundingClientRect(),style=el?getComputedStyle(el):null;if(!r||style.display==='none'||style.visibility==='hidden')return[selector,null];const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=points.map(([x,y])=>{const hit=document.elementFromPoint(x,y);return{owned:hit===el||el.contains(hit),id:hit?.id||'',classes:String(hit?.className||'')}});return[selector,{rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height},owners,ownedHitFraction:owners.filter(x=>x.owned).length/owners.length}]})),selectors);
   for(const selector of controls){const item=ownership[selector];if(!item)continue;assert.ok(item.rect.width>=44&&item.rect.height>=44,selector+' must remain a 44px touch target in FULL HUD');assert.ok(item.ownedHitFraction>0,selector+' has no owned hit area: '+JSON.stringify(item.owners))}
-  for(const selector of ['#k11520CameraReset','#cargoInterceptionButton'])assert.equal(ownership[selector]?.ownedHitFraction,1,selector+' must own center and primary hit region in FULL HUD');
+  assert.equal(ownership['#k11520CameraReset']?.ownedHitFraction,1,'#k11520CameraReset must own center and primary hit region in FULL HUD');
+  if(ownership['#cargoInterceptionButton'])assert.equal(ownership['#cargoInterceptionButton'].ownedHitFraction,1,'visible #cargoInterceptionButton must own center and primary hit region in FULL HUD');
+
+  const marketGeometry=await page.evaluate(()=>{const axes=document.querySelector('.axes'),reset=document.querySelector('#k11520CameraReset'),a=axes.getBoundingClientRect(),r=reset.getBoundingClientRect(),cards=[...axes.querySelectorAll('.axis')].map(card=>{const b=card.getBoundingClientRect(),symbol=card.querySelector('.sym,.symbol,.pair')||[...card.querySelectorAll('*')].find(el=>/^(BTC|ETH|BNB)\/USDT$/.test(el.textContent?.trim()));return{left:b.left,right:b.right,width:b.width,scrollWidth:card.scrollWidth,clientWidth:card.clientWidth,addressFits:!!card.querySelector('.marketKValue')&&card.querySelector('.marketKValue').getBoundingClientRect().bottom<=b.bottom-3,text:(card.textContent||'').trim(),symbol:symbol?.textContent?.trim()||''}}),overlap=(x,y)=>x.left<y.right&&x.right>y.left&&x.top<y.bottom&&x.bottom>y.top;return{viewport:innerWidth,landscape:matchMedia('(orientation:landscape) and (max-height:600px)').matches,axes:{left:a.left,right:a.right,top:a.top,bottom:a.bottom,width:a.width},reset:{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height},resetOverlapsMarket:overlap(a,r),cards}});
+  assert.equal(marketGeometry.resetOverlapsMarket,false,'Camera Recenter must not consume or cover an Expanded Market column');
+  assert.equal(marketGeometry.cards.length,3,'Expanded Market must contain exactly three cards');
+  assert.ok(Math.max(...marketGeometry.cards.map(card=>card.width))-Math.min(...marketGeometry.cards.map(card=>card.width))<1,'Expanded Market cards must have equal widths');
+  assert.ok(marketGeometry.cards.every(card=>card.scrollWidth<=card.clientWidth+1),'Expanded Market card content must not horizontally clip');
+  assert.ok(marketGeometry.cards.every(card=>card.addressFits),'Realistic quote k/alpha/theta must stay inside card bottom');
+  for(const symbol of ['BTC/USDT','ETH/USDT','BNB/USDT'])assert.ok(marketGeometry.cards.some(card=>card.text.includes(symbol)),symbol+' must remain complete');
+  if(!marketGeometry.landscape){assert.ok(marketGeometry.axes.left<=7,'portrait Expanded Market must reach the left safe edge');assert.ok(marketGeometry.axes.right>=marketGeometry.viewport-7,'portrait Expanded Market must reach the right safe edge')}
+  report.expandedMarketGeometry=marketGeometry;
 
   const readCamera=()=>page.evaluate(()=>globalThis.__K11520_CAMERA__.snapshot());
-  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+60;y<r.bottom-60;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,8)&&document.elementFromPoint(x+42,y)===canvas)return{x,y};return null});
+  // Exercise the native browser touch route, as world-first QA does, instead
+  // of synthetic DOM pointer events. Keep failed preconditions diagnosable.
+  const fullCdp=await page.context().newCDPSession(page),fullTouches=new Map();
+  const pointer=async(type,id,x,y)=>{if(type==='pointerup')fullTouches.delete(id);else fullTouches.set(id,{id,x,y,radiusX:3,radiusY:3,force:1});await fullCdp.send('Input.dispatchTouchEvent',{type:type==='pointerdown'?'touchStart':type==='pointerup'?'touchEnd':'touchMove',touchPoints:[...fullTouches.values()]})};
+  await page.evaluate(()=>{globalThis.fullHudPointerTrace=[];const state=()=>({camera:__K11520_CAMERA__.snapshot(),status:{shown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show'),text:document.querySelector('#k11520CameraZoomStatus')?.textContent}});for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(fullHudPointerTrace.length>=120)return;const sample={type,at:performance.now(),pointerId:e.pointerId,isTrusted:e.isTrusted,isPrimary:e.isPrimary,button:e.button,buttons:e.buttons,x:e.clientX,y:e.clientY,width:e.width,height:e.height,target:e.target.id,classes:String(e.target.className||''),canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY),before:state()};fullHudPointerTrace.push(sample);queueMicrotask(()=>{sample.after=state();sample.afterAt=performance.now()})},true)});
+  // Native session and tracing are ready before selecting a live-world origin;
+  // intervening setup awaits previously let an actor occupy the chosen ground.
+  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.bottom-60;y>r.top+60;y-=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,20)&&document.elementFromPoint(x+42,y)===canvas)return{x,y,selectedAt:performance.now()};return null});
   assert.ok(point,'FULL HUD must leave an actual world gesture area for Recenter QA');
-  const pointer=(type,id,x,y,buttons)=>page.dispatchEvent('#three',type,{pointerId:id,pointerType:'touch',clientX:x,clientY:y,button:0,buttons});
-  await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);await page.waitForTimeout(80);
+  report.fullHudPanPrecondition={origin:point,before:start};
+  await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+21,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);
+  try{await page.waitForFunction(()=>__K11520_CAMERA__.snapshot().panX!==0,null,{timeout:3000})}
+  finally{report.fullHudPanPrecondition.after=await readCamera();report.fullHudPanPrecondition.pointerTrace=await page.evaluate(()=>fullHudPointerTrace)}
+  assert.equal(report.fullHudPanPrecondition.pointerTrace.find(e=>e.type==='pointerdown')?.canPan,true,'native FULL pan origin must still be eligible at pointerdown');
   assert.notEqual((await readCamera()).panX,0,'FULL HUD pan precondition must move Camera before Recenter');
   await page.locator('#k11520CameraReset').click();await page.waitForTimeout(60);
   const recentered=await readCamera();assert.equal(recentered.panX,0);assert.equal(recentered.panZ,0);assert.equal(recentered.zoom,1);assert.deepEqual(recentered.playerXYZ,start.playerXYZ,'FULL Recenter must not mutate Player XYZ');
   assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'FULL Recenter must not open a market detail sheet');
   await page.screenshot({path:`${OUT}/${report.profile.name}-full-recenter-hit-owner.png`});
 
-  const pinch=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),clear=(x,y)=>document.elementFromPoint(x,y)===canvas;for(const end of[60,48,40])for(const vertical of[false,true])for(let y=r.top+end+8;y<r.bottom-end-8;y+=8)for(let x=r.left+end+8;x<r.right-end-8;x+=8){const sx=vertical?0:Math.round(end/3),sy=vertical?Math.round(end/3):0,ex=vertical?0:end,ey=vertical?end:0;if([[x-sx,y-sy],[x+sx,y+sy],[x-ex,y-ey],[x+ex,y+ey]].every(([px,py])=>clear(px,py)))return{x,y,sx,sy,ex,ey}}return null});
+  const pinch=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),clear=(x,y)=>[-20,-10,0,10,20].every(dx=>[-20,-10,0,10,20].every(dy=>document.elementFromPoint(x+dx,y+dy)===canvas));for(const end of[60,48,40])for(const vertical of[false,true])for(let y=r.top+(vertical?end+20:20);y<r.bottom-(vertical?end+20:20);y+=8)for(let x=r.left+(vertical?20:end+20);x<r.right-(vertical?20:end+20);x+=8){const sx=vertical?0:Math.round(end/3),sy=vertical?Math.round(end/3):0,ex=vertical?0:end,ey=vertical?end:0;if([[x-sx,y-sy],[x+sx,y+sy],[x-ex,y-ey],[x+ex,y+ey]].every(([px,py])=>clear(px,py))){const owner=(px,py)=>{const el=document.elementFromPoint(px,py);return{x:px,y:py,id:el?.id||null,classes:String(el?.className||'')}};return{x,y,sx,sy,ex,ey,selectedAt:performance.now(),beforeCamera:__K11520_CAMERA__.snapshot(),contacts:[[x-sx,y-sy],[x+sx,y+sy],[x-ex,y-ey],[x+ex,y+ey]].map(([px,py])=>({center:owner(px,py),radius3:[[-3,0],[3,0],[0,-3],[0,3]].map(([dx,dy])=>owner(px+dx,py+dy)),radius20:[[-20,0],[20,0],[0,-20],[0,20]].map(([dx,dy])=>owner(px+dx,py+dy))}))}}}return null});
   assert.ok(pinch,'FULL HUD must leave an actual pinch surface');
+  report.fullHudPinch={geometry:pinch};
   await pointer('pointerdown',11,pinch.x-pinch.sx,pinch.y-pinch.sy,1);await pointer('pointerdown',12,pinch.x+pinch.sx,pinch.y+pinch.sy,1);
+  const nativePinchDowns=await page.evaluate(at=>fullHudPointerTrace.filter(e=>e.isTrusted&&e.type==='pointerdown'&&e.at>=at),pinch.selectedAt);
+  report.fullHudPinch.nativeDowns=nativePinchDowns;
+  assert.equal(nativePinchDowns.length,2,'FULL pinch must start two actual native contacts');
+  assert.ok(nativePinchDowns.every(e=>e.target==='three'),'both actual pinch contacts must hit canvas, not nearby HUD hit adjustment');
+
   await pointer('pointermove',11,pinch.x-pinch.ex,pinch.y-pinch.ey,1);await pointer('pointermove',12,pinch.x+pinch.ex,pinch.y+pinch.ey,1);
   await page.waitForTimeout(40);
-  const zoomSafety=await page.evaluate(()=>{const status=document.querySelector('#k11520CameraZoomStatus'),r=status.getBoundingClientRect(),overlap=b=>r.left<b.right&&r.right>b.left&&r.top<b.bottom&&r.bottom>b.top,controls=['#k11520MonsterGuide','#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','.axes','.minimapWrap','#joy'].map(selector=>{const el=document.querySelector(selector),b=el?.getBoundingClientRect(),s=el?getComputedStyle(el):null;return{selector,overlap:!!b&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&overlap(b),rect:b?{left:b.left,top:b.top,right:b.right,bottom:b.bottom}:null}}),player=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen,monsters=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().filter(m=>m.visible&&m.inView).map(m=>m.screen);return{shown:status.classList.contains('show'),pointerEvents:getComputedStyle(status).pointerEvents,controls,playerOverlap:player.x>=r.left&&player.x<=r.right&&player.y>=r.top&&player.y<=r.bottom,monsterOverlaps:monsters.filter(p=>p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom).length,rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}});
+  const zoomSafety=await page.evaluate(()=>{const status=document.querySelector('#k11520CameraZoomStatus'),r=status.getBoundingClientRect(),overlap=b=>r.left<b.right&&r.right>b.left&&r.top<b.bottom&&r.bottom>b.top,controls=['#k11520MonsterGuide','#k11520CameraReset','#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','.axes','.minimapWrap','#joy'].map(selector=>{const el=document.querySelector(selector),b=el?.getBoundingClientRect(),s=el?getComputedStyle(el):null;return{selector,overlap:!!b&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0&&overlap(b),rect:b?{left:b.left,top:b.top,right:b.right,bottom:b.bottom}:null}}),player=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen,monsters=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().filter(m=>m.visible&&m.inView).map(m=>m.screen);return{camera:__K11520_CAMERA__.snapshot(),capturedAt:performance.now(),pointerTrace:globalThis.fullHudPointerTrace,shown:status.classList.contains('show'),pointerEvents:getComputedStyle(status).pointerEvents,controls,playerOverlap:player.x>=r.left&&player.x<=r.right&&player.y>=r.top&&player.y<=r.bottom,monsterOverlaps:monsters.filter(p=>p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom).length,rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}});
+  report.fullHudPinch.after={camera:zoomSafety.camera,capturedAt:zoomSafety.capturedAt,statusShown:zoomSafety.shown,pointerTrace:zoomSafety.pointerTrace};
+  assert.notEqual(zoomSafety.camera.zoom,pinch.beforeCamera.zoom,'a lingering Recenter label must not masquerade as a successful pinch');
+  assert.equal(zoomSafety.camera.zoom,zoomSafety.camera.bounds.maxZoom,'FULL native pinch must reach the same maximum zoom bound as world-first');
+  assert.deepEqual(zoomSafety.camera.playerXYZ,start.playerXYZ,'FULL pinch changes Camera only, never Player XYZ');
   assert.equal(zoomSafety.shown,true,'zoom status must be visible during FULL HUD pinch');assert.equal(zoomSafety.pointerEvents,'none','zoom status must stay non-blocking');assert.deepEqual(zoomSafety.controls.filter(x=>x.overlap),[],'zoom status overlaps a visible HUD/world control');assert.equal(zoomSafety.playerOverlap,false,'zoom status overlaps Player');assert.equal(zoomSafety.monsterOverlaps,0,'zoom status overlaps a visible Monster target');
   await page.screenshot({path:`${OUT}/${report.profile.name}-zoom-status-safe.png`});await pointer('pointerup',11,pinch.x-pinch.ex,pinch.y-pinch.ey,0);await pointer('pointerup',12,pinch.x+pinch.ex,pinch.y+pinch.ey,0);
 
+  let openedUtilityForContextAction=false;
+  if(!await page.locator('#cargoInterceptionButton').isVisible()){await page.locator('#k11520UtilityMaster').click();await page.locator('#cargoInterceptionButton').waitFor({state:'visible'});openedUtilityForContextAction=true}
   await page.locator('#cargoInterceptionButton').click();await page.locator('#sheet.open').waitFor();
   // Waiting state routes to the canonical ATM dispatch surface; an airborne
   // target routes to the missile surface. Either proves the compact control
@@ -268,8 +345,12 @@ async function verifyFullHudControlOwnership(page,report){
   assert.match(await page.locator('#sheetTitle').textContent(),/ATM|導彈攔截/,'FULL Missile must open its state-appropriate logistics/interception surface');
   assert.doesNotMatch(await page.locator('#sheetTitle').textContent(),/市場/,'FULL Missile must not open a market detail surface');
   await page.screenshot({path:`${OUT}/${report.profile.name}-full-missile-hit-owner.png`});await page.locator('#sheetClose').click();await page.waitForTimeout(250);
+  if(openedUtilityForContextAction){await page.locator('#k11520UtilityMaster').click();await page.waitForFunction(()=>!document.documentElement.classList.contains('k11520UtilitiesOpen'))}
   assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'Missile/ATM evidence sheet must remain closed after QA cleanup');
-  report.fullHudHitOwnership={ownership,recentered,zoomSafety,missile:'OPENED_OWN_SURFACE'};
+  const landscapeContext=await page.evaluate(()=>{const read=id=>{const el=document.getElementById(id),style=getComputedStyle(el),r=el.getBoundingClientRect();return{state:el.dataset.contextState,visible:style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0&&r.width>0&&r.height>0,rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}};return{landscape:matchMedia('(orientation:landscape) and (max-height:600px)').matches,raid:read('cargoInterceptionButton'),courier:read('homeDeliveryButton')}});
+  {if(landscapeContext.raid.state==='cruise')assert.equal(landscapeContext.raid.visible,false,'inactive Raid must not occupy the world');if(landscapeContext.courier.state==='idle')assert.equal(landscapeContext.courier.visible,false,'inactive Courier must not occupy the world')}
+  await fullCdp.detach();
+  report.fullHudHitOwnership={ownership,recentered,zoomSafety,missile:'OPENED_OWN_SURFACE',landscapeContext};
 }
 async function verifyKSpaceMap(page,report){
   const read=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_MAP__);
@@ -490,16 +571,21 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
   ok(state.axisArt.repeat==='no-repeat','normal-axis artwork unexpectedly repeats');
   const overlap=(a,c)=>a?.visible&&c?.visible&&a.x<c.right&&a.right>c.x&&a.y<c.bottom&&a.bottom>c.y;
   const combatHidden=landscape&&expanded;
+  // On short portrait screens, opening More intentionally yields the scarce world area to
+  // the 44px utility tray. These two read-only status rows return as soon as More closes.
+  const compactUtilityTray=expanded&&!landscape&&state.height<=780;
   const target=b['#kspaceTarget'];ok(!target?.visible,'legacy K-space detail card must stay folded into monster HUD');
   if(!expanded)for(const other of ['.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#attack','#orderFire'])ok(!overlap(b['#k11520MonsterGuide'],b[other]),`contextual target overlaps ${other}`);
-  for(const s of ['.top','.tele','.monsterHud','.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#k11520UtilityMaster',...(combatHidden?[]:['#orderFire','#attack'])]){const r=b[s];ok(r?.visible,`${s} missing/hidden`);if(r?.visible)ok(r.x>=-1&&r.y>=-1&&r.right<=state.width+1&&r.bottom<=state.height+1,`${s} outside viewport`)}
+  if(landscape&&!expanded)for(const other of ['.tele','.monsterHud'])ok(!overlap(b['#k11520MonsterGuide'],b[other]),`landscape contextual target overlaps ${other}`);
+  for(const s of ['.top',...(compactUtilityTray?[]:['.tele','.monsterHud']),'.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#k11520UtilityMaster',...(combatHidden?[]:['#orderFire','#attack'])]){const r=b[s];ok(r?.visible,`${s} missing/hidden`);if(r?.visible)ok(r.x>=-1&&r.y>=-1&&r.right<=state.width+1&&r.bottom<=state.height+1,`${s} outside viewport`)}
+  if(compactUtilityTray){ok(!b['.tele']?.visible,'short portrait More tray must context-hide world telemetry');ok(!b['.monsterHud']?.visible,'short portrait More tray must context-hide monster status')}
   for(const s of ['#joy','#cControl','#lotsControl','#yControl','#k11520UtilityMaster',...(combatHidden?[]:['#tradeSword','#orderFire','#attack'])])ok(b[s]?.hit,`${s} cannot receive a real click: ${JSON.stringify(b[s]?.blocker)}`);
   const clock=b['#brandClockV250'];if(clock){ok(clock.right<=Math.min(...state.balances.map(r=>r.x))-4,'header clock crosses into balances');ok(clock.bottom<=b['.top'].bottom-4,'header clock escapes header')}
   for(const s of ['#attack','#orderFire','#tradeSword','#k11520PlaneLabel','#dockToggle','#skill','#dodge','#flat']){for(const other of ['#joy','#cControl','#lotsControl','#yControl'])ok(!overlap(b[s],b[other]),`${s} overlaps ${other}`)}
   for(const s of ['#attack','#orderFire'])ok(!overlap(b[s],b['#k11520RealTradePreflightBtn']),`${s} partly covered by preflight button`);
   ok(state.drawers.every(r=>!r?.visible),'legacy drawer controls visible');
   const maxCard=Math.max(...state.cards.map(r=>r.bottom));
-  for(const s of ['.tele','.monsterHud'])if(b[s]){ok(b[s].y>=maxCard+6,`${s} overlaps actual market cards`);ok(b[s].scroll<=b[s].client+1,`${s} clips text`)}
+  if(!compactUtilityTray)for(const s of ['.tele','.monsterHud'])if(b[s]){ok(b[s].y>=maxCard+6,`${s} overlaps actual market cards`);ok(b[s].scroll<=b[s].client+1,`${s} clips text`)}
   // Current mobile ownership intentionally centers the normal-axis energy rail, then places signed-C and positive lots to its right.
   const rails=['#yControl','#cControl','#lotsControl'].map(s=>b[s]);if(rails.every(Boolean)){ok(rails.every(r=>Math.abs(r.y-rails[0].y)<2),'three rails not aligned');ok(rails[0].right+5<=rails[1].x&&rails[1].right+5<=rails[2].x,'three rails overlap');if(!landscape)ok(Math.abs((rails[0].x+rails[0].width/2)-state.width/2)<2,'normal-axis energy rail not centered')}
   if(landscape)for(const rail of rails){ok(!overlap(rail,b['.monsterHud']),`parameter rail overlaps life HUD`);ok(!overlap(rail,b['.tele']),`parameter rail overlaps world HUD`)}
@@ -523,8 +609,10 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
       ok(r.x>=0&&r.y>=0&&r.right<=state.width&&r.bottom<=state.height,selector+' outside viewport');
       for(const other of ['.top','.axes','.tele','.monsterHud','#joy','#yControl','#cControl','#lotsControl','#tradeSword','#skill','#dodge','#flat','#attack','#orderFire'])ok(!overlap(r,b[other]),selector+' overlaps '+other);
     }
-    if(landscape){for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++)ok(!overlap(b[controls[i]],b[controls[j]]),controls[i]+' overlaps '+controls[j])}
-    else for(let i=0;i<controls.length-1;i++){const upper=b[controls[i]],lower=b[controls[i+1]];ok(upper?.bottom+4<=lower?.y,controls[i]+' needs a visible gap before '+controls[i+1])}
+    for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){
+      const first=b[controls[i]],second=b[controls[j]];ok(!overlap(first,second),controls[i]+' overlaps '+controls[j]);
+      if(!landscape&&first?.visible&&second?.visible){const horizontalGap=Math.max(first.x-second.right,second.x-first.right),verticalGap=Math.max(first.y-second.bottom,second.y-first.bottom);ok(horizontalGap>=4||verticalGap>=4,controls[i]+' and '+controls[j]+' need a visible 4px gap')}
+    }
   }
 }
 try{
@@ -566,7 +654,7 @@ try{
       if(profile.landscape)await finalizeLandscape(page,report);
       if(PRODUCTION&&warnings.some(message=>/blocked by CORS|data-api\.binance\.vision.*ERR_FAILED/i.test(message)))failures.push(`${profile.name}: public quote CORS regression`);
       if(errors.length)failures.push(`${profile.name}: ${errors.join('; ')}`);
-    }catch(error){report.error=String(error);failures.push(`${profile.name}: ${String(error)}`);await page.screenshot({path:`${OUT}/${profile.name}-failure.png`,fullPage:true,timeout:5000}).catch(()=>{})}finally{await context.close()}
+    }catch(error){report.error=String(error);report.failureFullHudInput=await page.evaluate(()=>({pointerTrace:globalThis.fullHudPointerTrace||[],camera:globalThis.__K11520_CAMERA__?.snapshot?.(),statusShown:document.querySelector('#k11520CameraZoomStatus')?.classList.contains('show')})).catch(()=>null);failures.push(`${profile.name}: ${String(error)}`);await page.screenshot({path:`${OUT}/${profile.name}-failure.png`,fullPage:true,timeout:5000}).catch(()=>{})}finally{await context.close()}
   }
 }finally{await browser.close();await fs.writeFile(`${OUT}/report.json`,JSON.stringify({capturedAt:new Date().toISOString(),base:BASE,head:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||null,sourceChecks,reports,failures},null,2))}
 assert.deepEqual(failures,[],'Responsive product failures; inspect screenshots and report.json');
