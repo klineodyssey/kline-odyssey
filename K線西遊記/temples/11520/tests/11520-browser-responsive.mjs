@@ -287,17 +287,20 @@ async function verifyFullHudControlOwnership(page,report){
   report.expandedMarketGeometry=marketGeometry;
 
   const readCamera=()=>page.evaluate(()=>globalThis.__K11520_CAMERA__.snapshot());
-  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+60;y<r.bottom-60;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,20)&&document.elementFromPoint(x+42,y)===canvas)return{x,y};return null});
-  assert.ok(point,'FULL HUD must leave an actual world gesture area for Recenter QA');
   // Exercise the native browser touch route, as world-first QA does, instead
   // of synthetic DOM pointer events. Keep failed preconditions diagnosable.
   const fullCdp=await page.context().newCDPSession(page),fullTouches=new Map();
   const pointer=async(type,id,x,y)=>{if(type==='pointerup')fullTouches.delete(id);else fullTouches.set(id,{id,x,y,radiusX:3,radiusY:3,force:1});await fullCdp.send('Input.dispatchTouchEvent',{type:type==='pointerdown'?'touchStart':type==='pointerup'?'touchEnd':'touchMove',touchPoints:[...fullTouches.values()]})};
+  await page.evaluate(()=>{globalThis.fullHudPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(fullHudPointerTrace.length<24)fullHudPointerTrace.push({type,at:performance.now(),x:e.clientX,y:e.clientY,target:e.target.id,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
+  // Native session and tracing are ready before selecting a live-world origin;
+  // intervening setup awaits previously let an actor occupy the chosen ground.
+  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.bottom-60;y>r.top+60;y-=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,20)&&document.elementFromPoint(x+42,y)===canvas)return{x,y,selectedAt:performance.now()};return null});
+  assert.ok(point,'FULL HUD must leave an actual world gesture area for Recenter QA');
   report.fullHudPanPrecondition={origin:point,before:start};
-  await page.evaluate(()=>{globalThis.fullHudPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(fullHudPointerTrace.length<24)fullHudPointerTrace.push({type,x:e.clientX,y:e.clientY,target:e.target.id,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
   await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+21,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);
   try{await page.waitForFunction(()=>__K11520_CAMERA__.snapshot().panX!==0,null,{timeout:3000})}
   finally{report.fullHudPanPrecondition.after=await readCamera();report.fullHudPanPrecondition.pointerTrace=await page.evaluate(()=>fullHudPointerTrace)}
+  assert.equal(report.fullHudPanPrecondition.pointerTrace.find(e=>e.type==='pointerdown')?.canPan,true,'native FULL pan origin must still be eligible at pointerdown');
   assert.notEqual((await readCamera()).panX,0,'FULL HUD pan precondition must move Camera before Recenter');
   await page.locator('#k11520CameraReset').click();await page.waitForTimeout(60);
   const recentered=await readCamera();assert.equal(recentered.panX,0);assert.equal(recentered.panZ,0);assert.equal(recentered.zoom,1);assert.deepEqual(recentered.playerXYZ,start.playerXYZ,'FULL Recenter must not mutate Player XYZ');
