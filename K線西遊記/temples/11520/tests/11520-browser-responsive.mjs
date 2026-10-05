@@ -532,6 +532,23 @@ async function verifyKSpaceGameplay(page,report){
     // never freeze/teleport the target or relax the actual combat range rule.
     const beforePursuit=await state();
     await pursue(variant,.8,5000,35);
+    if(variant==='phantomAxe'){
+      // The axe has a forward-half-plane sweep. Being close is insufficient;
+      // face it with a real >8px joystick drag, never a direct heading setter.
+      const target=await state(),horizontal=Math.hypot(target.relative.x,target.relative.z),ux=horizontal?target.relative.x/horizontal:0,uz=horizontal?target.relative.z/horizontal:1;
+      await observeApproach('phantomAxe-facing');
+      await page.mouse.move(x,y);await page.mouse.down();
+      try{
+        await page.mouse.move(x+ux*12,y-uz*12);
+        report.axeFacing=await page.evaluate(()=>{const combat=__K11520_KSPACE_API__.snapshot(),vector=__K11520_3D_CONTROL__.vector,h=Math.hypot(vector.x,vector.z),d=Math.hypot(combat.relative.x,combat.relative.z),forward={x:vector.x/h,z:vector.z/h};return{combat,forward,forwardMagnitude:h,dot:d>.001?(forward.x*combat.relative.x+forward.z*combat.relative.z)/d:1,at:performance.now()}});
+        assert.ok(report.axeFacing.forwardMagnitude>0,'real joystick must establish a forward vector');
+        assert.ok(report.axeFacing.dot>=0,'actual forward vector must include target inside axe half-plane');
+        assert.ok(report.axeFacing.combat.distance<.8,'facing must preserve actual 3D approach range');
+        assert.deepEqual(report.axeFacing.combat.selection,beforePursuit.selection,'facing drag must preserve signed phase');
+      }finally{await page.mouse.up();await finishApproach()}
+      const facingTrace=report.kspaceApproaches.at(-1);
+      assert.ok(facingTrace.pointers.some(e=>e.type==='pointerdown'&&e.isTrusted&&e.control==='joy'),'facing must use trusted joystick input');
+    }
     const beforeStrike=await state();
     (report.kspaceStrikePreconditions??=[]).push({variant,beforePursuit,beforeStrike});
     assert.deepEqual(beforeStrike.selection,beforePursuit.selection,'pursuit must not accidentally tap-cycle plane or clear signed C');
