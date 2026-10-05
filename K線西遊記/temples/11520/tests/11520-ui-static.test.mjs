@@ -117,6 +117,8 @@ test('V2.9.2 release stamp preserves restored-player encounter boot',()=>{
   assert.ok(fixes.includes('V2.9.2 · 5D K線西遊記'));
   assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.2'"));
   assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.2'"),'Portal registry must advertise the same K11520 release');
+  const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
+  for(const path of ['./11520-browser-responsive.mjs','./11520-browser-smoke.mjs'])assert.ok(read(path).includes(escaped),`${path} exact regex must match canonical release ${release}`);
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
