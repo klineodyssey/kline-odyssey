@@ -7,7 +7,7 @@ import {install11520MobileControlLayout} from './mobile-control-layout.mjs';
 const $=s=>document.querySelector(s);
 // Install the existing UI owner before asynchronous Three.js/legacy skin boot.
 install11520MobileControlLayout();
-const PRODUCT_VERSION='V2.9.0';
+const PRODUCT_VERSION='V2.9.1';
 const BOOT_FAIL_OPEN_MS=1400;
 let journeyAudioUnlocked=false;
 function unlockJourneyAudio(){const fx=globalThis.__K11520_AUDIO_FX__;if(journeyAudioUnlocked||!fx)return;journeyAudioUnlocked=!!fx.startBgm?.();if(journeyAudioUnlocked)fx.speak?.('歡迎來到花果山。先用左下搖桿取經，靠近守關猿後按打怪。錢包稍後再連。')}

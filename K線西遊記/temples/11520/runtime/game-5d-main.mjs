@@ -162,7 +162,9 @@ function syncMarketKLabels(){
     const card=$(`[data-market-card="${row.axis}"]`);if(!card)continue;
     let label=card.querySelector('.marketKValue');if(!label){label=document.createElement('span');label.className='marketKValue';label.style.cssText='display:block;font:600 10px system-ui;color:#b9e7fa;white-space:nowrap';card.append(label)}
     label.textContent=formatUniverseAddress(row.universe);label.title=`${row.axis} / ${row.symbol} · USDT 參考報價 · ${market.status} · ${new Date(market.receivedAt).toISOString()}`;
-    label.style.whiteSpace='normal';label.style.overflowWrap='anywhere';
+    // Market addresses may wrap only between semantic fields. Never split an
+    // alpha/price digit sequence merely to fit a narrow presentation column.
+    label.style.whiteSpace='normal';label.style.overflowWrap='normal';label.style.wordBreak='keep-all';
     card.querySelector('.axisHead b').textContent=market.status;
     const info=$('#marketReferenceDetail');if(info?.dataset.marketInfoAxis===row.axis)info.textContent=`${market.status} · $${row.price.toFixed(2)} USDT · ${row.axis} ${formatUniverseAddress(row.universe)}`;
     const ref=$(`[data-k-reference="${row.axis}"]`);if(ref)ref.textContent=`${row.axis} ${row.symbol}: P=${row.price}, P0=${row.anchor}`;
