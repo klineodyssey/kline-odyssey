@@ -290,7 +290,12 @@ async function verifyScrolledControlCenters(page,selector,label){
       el.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
       const r=el.getBoundingClientRect(),rect={x:r.x,y:r.y,width:r.width,height:r.height};
       const hit=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);
-      results.push({id:el.id||el.dataset.uiKey||el.tagName,visible:visible(el),connected:el.isConnected,ownsCenter:hit===el||el.contains(hit),rect,hit:hit?.id||hit?.tagName||null});
+      // A wrapped inline anchor has one rendered rectangle per line. Its
+      // union-box center can be whitespace in the parent paragraph, not part
+      // of the link. Inspect every positive fragment, without accepting the
+      // parent or filtering an occluded fragment. Other controls are unchanged.
+      const fragments=el.tagName==='A'?[...el.getClientRects()].filter(r=>r.width>0&&r.height>0).map(r=>{const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{rect:{x:r.x,y:r.y,width:r.width,height:r.height},ownsCenter:hit===el||el.contains(hit),hit:hit?.id||hit?.tagName||null}}):[{rect,ownsCenter:hit===el||el.contains(hit),hit:hit?.id||hit?.tagName||null}];
+      results.push({id:el.id||el.dataset.uiKey||el.tagName,visible:visible(el),connected:el.isConnected,ownsCenter:fragments.length>0&&fragments.every(fragment=>fragment.ownsCenter),rect,hit:hit?.id||hit?.tagName||null,unionOwnsCenter:hit===el||el.contains(hit),fragments});
     }
     return{stable:stable>=2,results};
   });

@@ -418,3 +418,50 @@ test('tiny landscape Market reserves its own lane and browser regression rejects
   await inspect();await inspect({covered:true});await inspect({clipped:true});await inspect({blocked:true});
   for(const state of ['full-explicit-collapse','full-expanded','full-idle-hidden'])assert.ok(browserSource.includes("verifyMarketHeaderSeparation(page,report,'"+state+"')"));
 });
+
+test('wrapped Wallet help links require ownership of every rendered fragment without accepting paragraph whitespace',async()=>{
+  const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
+  const source=browserSource.slice(browserSource.indexOf('async function verifyScrolledControlCenters('),browserSource.indexOf('async function verifySettingsContext('));
+  async function inspect(blockedFragment=-1,blockedOwner='overlay'){
+    let now=0;const probes=[],fragments=[{x:200,y:10,width:60,height:16},{x:20,y:26,width:40,height:16}],paragraph={id:'walletProviderHelp'},overlay={id:'overlay'};
+    const anchor={id:'help',tagName:'A',dataset:{},isConnected:true,scrollIntoView(options){assert.equal(options.behavior,'instant')},getBoundingClientRect:()=>({x:20,y:10,width:240,height:32}),getClientRects:()=>[...fragments,{x:20,y:10,width:0,height:0}],contains:el=>el===anchor};
+    const context={assert,performance:{now:()=>now},getComputedStyle:()=>({visibility:'visible'}),document:{elementFromPoint(x,y){probes.push([x,y]);const index=fragments.findIndex(r=>x===r.x+r.width/2&&y===r.y+r.height/2);return index<0?paragraph:index===blockedFragment?(blockedOwner==='paragraph'?paragraph:overlay):anchor}},setTimeout,clearTimeout,requestAnimationFrame:fn=>{now+=16;queueMicrotask(fn)}};
+    runInNewContext(source+'globalThis.verify=verifyScrolledControlCenters;',context);
+    const run=context.verify({locator:()=>({evaluateAll:fn=>fn([anchor])})},'a:visible','Wallet');
+    if(blockedFragment>=0)await assert.rejects(run,/owns its actual center/);else await run;
+    assert.deepEqual(probes,[[140,26],[230,18],[40,34]],'inspect union only for diagnostics, then each real fragment; no parent acceptance or occluded-fragment skip');
+  }
+  await inspect();await inspect(0);await inspect(1);await inspect(0,'paragraph');await inspect(1,'paragraph');
+});
+
+test('signed-C quote fixture is loopback-only and retains missing-quote rejection and 100C no-chain guards',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-signed-c-immersive.mjs');
+  const config=source.slice(source.indexOf('const BASE='),source.indexOf('await fs.mkdir'));
+  const payload=source.slice(source.indexOf('function freeQuotePayload('),source.indexOf("import fs from 'node:fs/promises'"));
+  for(const [base,expected] of [[undefined,true],['http://127.0.0.1:4173',true],['http://localhost:4173',true],['https://klineodyssey.github.io/kline-odyssey',false],['https://example.com',false]]){
+    const context={URL,Date:{now:()=>40000},process:{env:base?{K11520_BASE_URL:base}:{}}};
+    runInNewContext(config+payload+'globalThis.result={local:LOCAL_SIMULATION_QA,rows:quoteFixtureRows,ready:quoteFixtureReady};globalThis.payload=freeQuotePayload;',context);
+    assert.equal(context.result.local,expected);assert.equal(context.result.ready,false,'start with WAIT rather than masking quote rejection');
+    const route={request:()=>({url:()=> 'https://data-api.binance.vision/api/v3/aggTrades?symbol=ETHUSDT'})};
+    assert.equal(context.payload(route,[]).length,0);const row=context.payload(route,context.result.rows)[0];assert.equal(row.p,'3500');assert.equal(row.T,40000);assert.equal(row.a,40000);
+  }
+  assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*'"));
+  assert.ok(source.includes("status==='WAIT'"));assert.ok(source.includes("/ORACLE_STALE/"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
+  assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000})"),'final fixture readiness is local-only');
+  for(const guard of ['V1_HIGH_SPEED_PRODUCTION_LOCKED',"'#confirmOrder').isDisabled(),true",'PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈'])assert.ok(source.includes(guard),guard);
+  assert.ok(source.includes("page.locator('#confirm').waitFor({state:'visible',timeout:2500})"),'confirmation timeout remains unchanged');
+});
+
+test('signed-C WAIT evidence survives the separate deferred route toast and cleans up its observer',async()=>{
+  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-signed-c-immersive.mjs');
+  const block=source.slice(source.indexOf('if(LOCAL_SIMULATION_QA){'),source.indexOf('// Human 12:43'));
+  for(const clickFails of [false,true]){
+    let observer=null,saved=null,text='',disconnected=false;const market={status:'WAIT'};
+    const toast={get textContent(){return text},set textContent(value){text=value;if(observer)queueMicrotask(()=>observer?.())}};
+    const context={assert,LOCAL_SIMULATION_QA:true,BASE:'http://127.0.0.1:4173',OUT:'evidence',quoteFixtureRows:[],document:{getElementById:()=>toast},__K11520_MARKET_K__:market,__K11520_EXECUTION__:{snapshot:()=>({mode:'SIMULATION_WALLET'})},MutationObserver:class{constructor(fn){this.fn=fn}observe(){observer=this.fn}disconnect(){observer=null;disconnected=true}},fs:{writeFile:async(path,value)=>{saved=JSON.parse(value)}},page:{evaluate:async fn=>fn(),waitForFunction:async fn=>assert.ok(fn()),locator:selector=>selector==='#confirm'?{isVisible:async()=>false}:{click:async()=>{if(clickFails)throw new Error('native click failed');toast.textContent='ORACLE_STALE · 行情未就緒';await Promise.resolve();toast.textContent='目前下單走本機模擬；真實交易仍封鎖';await Promise.resolve()}}}};
+    Object.defineProperty(context,'quoteFixtureReady',{set(value){market.status=value?'LIVE':'WAIT'}});
+    const run=runInNewContext('(async()=>{'+block+'})()',context);
+    if(clickFails)await assert.rejects(run,/native click failed/);else{await run;assert.equal(saved.waitRejected,true);assert.ok(saved.waitMessages.some(message=>message.includes('ORACLE_STALE')));assert.ok(saved.waitMessages.some(message=>message.includes('本機模擬')));assert.equal(saved.realMarketValidation,false)}
+    assert.equal(disconnected,true);assert.equal('__SIGNED_C_WAIT_EVIDENCE__' in context,false);
+  }
+});
