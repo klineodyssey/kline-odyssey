@@ -166,3 +166,16 @@ test('M1 market cards and close action never interpret unrequested positions as 
  const prefix=fn.slice(0,fn.indexOf('const p=axis().pos;'))+'}';let message;
  const context=vm.createContext({execution:{readOnly:true},toast:x=>{message=x}});vm.runInContext(prefix,context);await vm.runInContext('closePos()',context);assert.match(message,/NOT_REQUESTED/);
 });
+
+
+test('execution owner initializes before startup world feedback can synchronously render market axes',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const declaration=source.split('\n').find(line=>line.startsWith('let execution=simulationExecution,'));
+ assert.ok(source.indexOf(declaration)>source.indexOf('const simulationExecution='));assert.ok(source.indexOf(declaration)<source.indexOf('\nsyncWorldFeedback();'),'existing owner must be initialized before earliest synchronous HUD callback');
+ const render=source.slice(source.indexOf('function renderAxes(){'),source.indexOf('function openMarketCard('));
+ const nodes={axes:{innerHTML:''}},axis={market:'BTCUSDT',pos:null};
+ const context=vm.createContext({simulationExecution:{mode:'SIMULATION'},syncMarketKLabels:()=>{},S:{axis:'KX',axes:{KX:axis,KY:axis,KZ:axis},quotes:{}},$:selector=>nodes[selector.slice(1)],$$:()=>[],fmt:String});
+ const preInit=vm.createContext({S:context.S,$:context.$,$$:context.$$,syncMarketKLabels:()=>{}});assert.throws(()=>vm.runInContext(render+'renderAxes();'+declaration,preInit),/Cannot access 'execution' before initialization/,'reproduce the exact CI startup failure ordering');
+ vm.runInContext(declaration+render,context);vm.runInContext('renderAxes()',context);assert.match(nodes.axes.innerHTML,/空倉/);
+ vm.runInContext('execution={readOnly:true};renderAxes()',context);assert.match(nodes.axes.innerHTML,/NOT_REQUESTED/);assert.doesNotMatch(nodes.axes.innerHTML,/空倉/);
+});

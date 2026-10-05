@@ -1,5 +1,20 @@
 # 11520 HANDOFF CURRENT
 
+## M1 startup-order repair — 2026-10-05
+
+- Exact remote `5c9e44f27354bc7f2450dfdfe06f2c25579da5d2` failed shared browser
+  startup. Retained console evidence identifies an execution-variable temporal
+  dead zone: initial world feedback calls the axis renderer before the existing
+  execution declaration. The new read-only position label exposed that ordering.
+  This was an introduced runtime defect, not a network or Courier-budget issue.
+- Initialize the same execution variable immediately after the existing
+  simulation adapter is created, before synchronous startup HUD callbacks.
+  No extra adapter, manager or financial capability is introduced. A focused
+  regression reproduces the original TDZ and verifies the corrected ordering.
+- Root440 and UI-static37 checks PASS. Fresh exact-head browser startup,
+  six-viewport M1 and direct visual acceptance remain PENDING. Failed5c9e
+  evidence remains retained; earlier two-size success does not validate this fix.
+
 ## M1 bounded balance reads and shared QA dependency — 2026-10-05
 
 - Read-only M1 now exits early inside the existing adapter: exactly23 RPC calls

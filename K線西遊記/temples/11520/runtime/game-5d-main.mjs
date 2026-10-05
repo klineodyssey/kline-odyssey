@@ -57,6 +57,8 @@ function replayJourney(){journey.replay();journeyOrigin={...S.xyz};showCombatTar
 addEventListener('k11520:replay-journey',replayJourney);
 globalThis.__K11520_JOURNEY__=Object.freeze({snapshot:journey.snapshot});
 const simulationExecution=createExecutionAdapter({ledger,productV1:true,beforeMutation:()=>playerStore.check(),afterMutation:()=>playerStore.save()});
+// Startup combat/HUD callbacks may render axes before the remaining boot completes.
+let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 function productEvent(event,details){try{playerStore.record(event,details)}catch{toast('另一頁已更新玩家紀錄，請重新載入')}const p=playerStore.snapshot();S.kaios=p.kaios;return p}
 const cargoRaidRewardReceipts=new Set();
 document.addEventListener('k11520:cargo-robbery-resolved',event=>{
@@ -117,7 +119,6 @@ globalThis.__K11520_PRODUCT__=Object.freeze({
   spendLocalKaios:(amount,purpose='LOCAL_GAME_PURCHASE')=>{const result=playerStore.spendKaios(amount,{purpose});S.kaios=playerStore.snapshot().kaios;hud();return result},
   recordCourierInsurancePayout:(receiptId,rewardKaios)=>{const result=playerStore.recordCourierInsurancePayout({receiptId,reward:rewardKaios});S.kaios=playerStore.snapshot().kaios;hud();return result}
 });
-let execution=simulationExecution,executionBusy=false,previewSequence=0,previewRequests=0;
 const isTestnet=()=>execution.mode==='BSC_TESTNET';
 const executionLabel=()=>isTestnet()?'BSC TESTNET · NO REAL VALUE':'SIMULATION';
 async function executionAction(action){
