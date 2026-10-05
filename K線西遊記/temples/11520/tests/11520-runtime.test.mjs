@@ -1036,3 +1036,11 @@ test('post-activation null index cannot pass canonical transaction validation',(
     assert.throws(()=>store.record(null,{elapsedMs:1}),/CORRUPT_RECEIPT_EVIDENCE/);assert.equal(storage.getItem(key),raw);assert.equal(store.snapshot().storageStatus,'CORRUPT_RECEIPT_EVIDENCE');
   }
 });
+
+
+test('ordinary delivery pending-credit path cannot resume a CLOCK_REVIEW mission',()=>{
+  const storage=courierStorage(),playerId='KAIOS-P-CLOCK-HOLD-1234567890',product=createSimulationPlayerStore({storage,playerId,ledger:createKgenLedger()});product.activate(null);
+  const courier=createPlayerCourierStore({storage,resolveCreditPort:()=>product,sessionId:'CLOCK-HOLD',now:()=>1000,monotonicNow:()=>0}),mission=courier.accept(courierOffer({estimatedDurationMs:60000}),{courierLifeId:playerId});
+  courier.observe(mission.missionId,{wallNow:mission.dueAt,monoNow:1});assert.equal(courier.snapshot(mission.missionId).mission.status,'CLOCK_REVIEW');const before=storage.getItem('K11520_PLAYER_COURIER');
+  assert.throws(()=>courier.settleDue(mission.missionId,{courierLifeId:playerId,wallNow:mission.dueAt+1,monoNow:2}),/CARGO_SURVIVAL_CHECK_FAILED/);assert.equal(storage.getItem('K11520_PLAYER_COURIER'),before);assert.equal(courier.snapshot(mission.missionId).mission.settlement,null);assert.equal(product.snapshot().kaios,0);assert.deepEqual(product.snapshot().courierReceipts,[]);
+});
