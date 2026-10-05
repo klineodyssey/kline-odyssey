@@ -155,6 +155,18 @@ jobs:
             exit "$RC"
           fi
           echo "[11520-QA] XYZ browser smoke completed $(date -u +%FT%TZ)"
+      - name: Run isolated native desktop contextual Courier QA
+        # Preserve the full pre-existing desktop block in its own mandatory90s
+        # invocation. This adds up to90s aggregate budget; mobile stays90s.
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-courier-desktop-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          K11520_COURIER_DESKTOP_ONLY=1 timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs" 2>&1 | tee /tmp/k11520-courier-desktop.log
       - name: Run deterministic settlement lifecycle in real Chromium (portrait and landscape)
         shell: bash
         run: |
@@ -192,6 +204,11 @@ jobs:
         shell: bash
         run: |
           set -e
+          for IMAGE in desktop-context-idle-1280x800 desktop-context-fresh-open-1280x800 desktop-context-rotate-open-1280x800 desktop-native-active-courier-1280x800; do
+            test -s "artifacts/11520-visual-qa/$IMAGE.png" || { echo "[11520-QA] missing desktop screenshot $IMAGE"; exit 1; }
+          done
+          test -s artifacts/11520-visual-qa/11520-living-world-desktop-timings.json
+          test -s artifacts/11520-visual-qa/11520-living-world-timings.json
           SCREENSHOT="artifacts/11520-visual-qa/11520-mobile-390x844.png"
           if [ ! -s "$SCREENSHOT" ]; then
             echo "[11520-QA] QA_RED: mandatory 390x844 runtime screenshot missing or empty: $SCREENSHOT"
