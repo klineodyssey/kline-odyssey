@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.8.2
+VERSION: 1.8.3
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: 11520 Market/XYZ Separation + Stable Wallet Layout Runtime
 PURPOSE: Own utility-lane geometry and visibility, including the existing context-sensitive raid and courier actions. Mobile Control Layout owns joystick/rails/status. Preserve wallet identity and distinct XYZ/K-market semantics across responsive widths.
@@ -51,8 +51,19 @@ function installStyle(){let s=$('#k11520StableWalletRailStyle');if(!s){s=documen
 function pinWalletToggle(){const b=$('#walletToggle');if(!b)return null;const landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches,portrait=globalThis.matchMedia?.('(max-width:600px)').matches,compact=portrait||landscape,size=compact?'44px':'48px',open=document.documentElement.classList.contains('k11520UtilitiesOpen'),bottom=landscape&&open?66:portrait&&open?294:MOBILE.walletBottom,right=landscape&&open?53:5;try{globalThis.__K11520_MOBILE_VISUAL_OBSERVER__?.disconnect?.()}catch{}if(b.parentElement!==document.body)document.body.appendChild(b);const hudCollapsed=document.documentElement.classList.contains('k11520HudCollapsed');for(const [k,v] of Object.entries({position:'fixed',right:landscape?`calc(max(5px, env(safe-area-inset-right)) + ${right-5}px)`:`${right}px`,top:'auto',bottom:landscape?`max(${bottom}px, calc(env(safe-area-inset-bottom) + ${bottom-18}px))`:`${bottom}px`,left:'auto',transform:'none',zIndex:'9990',width:size,height:size,minWidth:size,minHeight:size,maxWidth:size,maxHeight:size,boxSizing:'border-box',margin:'0',padding:'0',display:hudCollapsed?'none':'grid',placeItems:'center',pointerEvents:'auto',visibility:'visible',opacity:'1'}))put(b,k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),v);if(b.textContent!=='💰')b.textContent='💰';const label=($('#walletPanel')?.classList.contains('collapsed')?'開啟':'關閉')+' 11520 錢包';if(b.getAttribute('aria-label')!==label)b.setAttribute('aria-label',label);b.dataset.k11520ViewportPinned='1';return b}
 function pinMobileUtilityStack(){
   const portrait=globalThis.matchMedia?.('(max-width:600px)').matches,landscape=globalThis.matchMedia?.('(orientation:landscape) and (max-height:600px)').matches;
-  if(!portrait&&!landscape)return;
   const open=document.documentElement.classList.contains('k11520UtilitiesOpen');
+  if(!portrait&&!landscape){
+    // Restore a distinct desktop context lane, including after rotating out of
+    // compact mode. This same owner must clear every previous inline anchor.
+    const collapsed=document.documentElement.classList.contains('k11520HudCollapsed');
+    for(const [selector,top]of [['#k11520UtilityMaster',218],['#cargoInterceptionButton',274],['#homeDeliveryButton',330]]){
+      const el=$(selector);if(!el)continue;
+      const idle=(selector==='#cargoInterceptionButton'&&el.dataset.contextState==='cruise')||(selector==='#homeDeliveryButton'&&el.dataset.contextState==='idle');
+      const values={position:'fixed',top:`${top}px`,bottom:'auto',left:'auto',right:'64px',transform:'none',width:'44px',height:'44px',minWidth:'44px',minHeight:'44px',maxWidth:'44px',maxHeight:'44px',boxSizing:'border-box',margin:'0',padding:'0',zIndex:'9991',display:collapsed||(!open&&idle)?'none':'grid',placeItems:'center',visibility:'visible',opacity:'1',pointerEvents:'auto'};
+      for(const [key,value]of Object.entries(values))put(el,key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value);
+    }
+    return;
+  }
   const landscapeOpen=[['#k11520UtilityMaster',18,5,9993],['#cargoInterceptionButton',18,53,9991],['#homeDeliveryButton',18,101,9991],['#dock',18,149,9980],['#gameModeToggle',66,5,9979],['#walletToggle',66,53,9990],['#chatHandle',66,101,9978],['#bgmButton',66,149,9977],['#aiChatButton',114,5,9976],['#backpackButton',114,53,9975],['#k11520HudCollapseAll',114,101,9992],['#kaiosPortalButton',114,149,9974]];
   const landscapeClosed=[['#k11520UtilityMaster',18,5,9993],['#cargoInterceptionButton',66,5,9991],['#homeDeliveryButton',114,5,9991]];
   // FULL portrait uses the existing rail as a compact 3-column tray below the

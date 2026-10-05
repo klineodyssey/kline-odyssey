@@ -6,7 +6,7 @@ const OUT='artifacts/11520-visual-qa';
 const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
-const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+const page=await browser.newPage({viewport:{width:1280,height:800},isMobile:true,hasTouch:true});
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(2200);
@@ -14,6 +14,22 @@ if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.loc
 await page.waitForTimeout(700);
 
 await page.waitForFunction(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__?.snapshot?.()?.lifeId==='DIGITAL_ANT_0001',null,{timeout:5000});
+// Desktop starts fresh, then crosses the compact breakpoint in both tray states.
+const verifyDesktopContext=async(label)=>{
+  const boxes=await page.evaluate(()=>['cargoInterceptionButton','homeDeliveryButton'].map(id=>{const el=document.getElementById(id),r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{id,x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:el===hit||el.contains(hit)}}));
+  for(const box of boxes){assert.ok(box.width>=44&&box.height>=44&&box.hit,`${label}: ${box.id} owns its desktop touch target`);assert.ok(box.x>=0&&box.y>=0&&box.right<=1280&&box.bottom<=800)}
+  assert.ok(boxes[0].bottom<=boxes[1].y||boxes[1].bottom<=boxes[0].y,`${label}: desktop Courier/Raid cannot overlap`);
+  await page.screenshot({path:`${OUT}/desktop-context-${label}-1280x800.png`});
+};
+assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),false,'fresh desktop idle Raid hidden');
+assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'fresh desktop idle Courier hidden');
+await page.screenshot({path:`${OUT}/desktop-context-idle-1280x800.png`});
+await page.locator('#k11520UtilityMaster').click();await verifyDesktopContext('fresh-open');
+await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(150);await verifyDesktopContext('rotate-open');
+await page.locator('#k11520UtilityMaster').click();await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(150);
+assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),false,'rotated desktop idle Raid hidden');
+assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'rotated desktop idle Courier hidden');
+await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
 assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),false,'inactive Raid stays out of the world');
 assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'inactive Courier stays out of the world');
 await page.locator('#k11520UtilityMaster').click();
@@ -37,6 +53,11 @@ const courierMission=await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER_
 assert.equal(await page.locator('#playerCourierChip').isVisible(),false,'legacy top courier chip must not occupy the world area');
 await page.locator('#k11520UtilityMaster').click();
 assert.equal(await page.locator('#homeDeliveryButton').isVisible(),true,'active Courier remains visible after closing More');
+await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(150);
+assert.equal(await page.locator('#homeDeliveryButton').isVisible(),true,'active desktop Courier remains visible with More closed');
+await page.locator('#homeDeliveryButton').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),true);await page.screenshot({path:`${OUT}/desktop-context-active-courier-1280x800.png`});await page.locator('#homeDeliveryButton').click();
+await page.setViewportSize({width:390,height:844});await page.waitForTimeout(150);
+
 assert.match(await page.locator('#homeDeliveryButton').getAttribute('aria-label'),/Courier 外送中/);await page.locator('#homeDeliveryButton').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),true);assert.match(await page.locator('#playerCourierDetails').textContent(),/不鎖定移動、戰鬥、探索或回家/);await page.screenshot({path:`${OUT}/11520-player-courier-390x844.png`});await page.locator('#homeDeliveryButton').click();
 await page.evaluate(()=>globalThis.__K11520_DIGITAL_ANT_5D_LOGISTICS__.open());
 await page.waitForSelector('#atmMovementC',{timeout:3000});
