@@ -252,7 +252,17 @@ async function verifyFullHudControlOwnership(page,report){
   await page.waitForFunction(()=>globalThis.__K11520_CAMERA__&&globalThis.__K11520_UI_SETTINGS__?.profile==='FULL'&&['k11520CameraReset','cargoInterceptionButton','homeDeliveryButton','k11520MarketRow'].every(id=>document.getElementById(id)),null,{timeout:45000});
   const ownership=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{const el=document.querySelector(selector),r=el?.getBoundingClientRect(),style=el?getComputedStyle(el):null;if(!r||style.display==='none'||style.visibility==='hidden')return[selector,null];const inset=Math.min(10,Math.max(2,Math.min(r.width,r.height)/4)),points=[[r.left+r.width/2,r.top+r.height/2],[r.left+inset,r.top+r.height/2],[r.right-inset,r.top+r.height/2],[r.left+r.width/2,r.top+inset],[r.left+r.width/2,r.bottom-inset]],owners=points.map(([x,y])=>{const hit=document.elementFromPoint(x,y);return{owned:hit===el||el.contains(hit),id:hit?.id||'',classes:String(hit?.className||'')}});return[selector,{rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height},owners,ownedHitFraction:owners.filter(x=>x.owned).length/owners.length}]})),selectors);
   for(const selector of controls){const item=ownership[selector];if(!item)continue;assert.ok(item.rect.width>=44&&item.rect.height>=44,selector+' must remain a 44px touch target in FULL HUD');assert.ok(item.ownedHitFraction>0,selector+' has no owned hit area: '+JSON.stringify(item.owners))}
-  for(const selector of ['#k11520CameraReset','#cargoInterceptionButton'])assert.equal(ownership[selector]?.ownedHitFraction,1,selector+' must own center and primary hit region in FULL HUD');
+  assert.equal(ownership['#k11520CameraReset']?.ownedHitFraction,1,'#k11520CameraReset must own center and primary hit region in FULL HUD');
+  if(ownership['#cargoInterceptionButton'])assert.equal(ownership['#cargoInterceptionButton'].ownedHitFraction,1,'visible #cargoInterceptionButton must own center and primary hit region in FULL HUD');
+
+  const marketGeometry=await page.evaluate(()=>{const axes=document.querySelector('.axes'),reset=document.querySelector('#k11520CameraReset'),a=axes.getBoundingClientRect(),r=reset.getBoundingClientRect(),cards=[...axes.querySelectorAll('.axis')].map(card=>{const b=card.getBoundingClientRect(),symbol=card.querySelector('.sym,.symbol,.pair')||[...card.querySelectorAll('*')].find(el=>/^(BTC|ETH|BNB)\/USDT$/.test(el.textContent?.trim()));return{left:b.left,right:b.right,width:b.width,scrollWidth:card.scrollWidth,clientWidth:card.clientWidth,text:(card.textContent||'').trim(),symbol:symbol?.textContent?.trim()||''}}),overlap=(x,y)=>x.left<y.right&&x.right>y.left&&x.top<y.bottom&&x.bottom>y.top;return{viewport:innerWidth,landscape:matchMedia('(orientation:landscape) and (max-height:600px)').matches,axes:{left:a.left,right:a.right,top:a.top,bottom:a.bottom,width:a.width},reset:{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height},resetOverlapsMarket:overlap(a,r),cards}});
+  assert.equal(marketGeometry.resetOverlapsMarket,false,'Camera Recenter must not consume or cover an Expanded Market column');
+  assert.equal(marketGeometry.cards.length,3,'Expanded Market must contain exactly three cards');
+  assert.ok(Math.max(...marketGeometry.cards.map(card=>card.width))-Math.min(...marketGeometry.cards.map(card=>card.width))<1,'Expanded Market cards must have equal widths');
+  assert.ok(marketGeometry.cards.every(card=>card.scrollWidth<=card.clientWidth+1),'Expanded Market card content must not horizontally clip');
+  for(const symbol of ['BTC/USDT','ETH/USDT','BNB/USDT'])assert.ok(marketGeometry.cards.some(card=>card.text.includes(symbol)),symbol+' must remain complete');
+  if(!marketGeometry.landscape){assert.ok(marketGeometry.axes.left<=7,'portrait Expanded Market must reach the left safe edge');assert.ok(marketGeometry.axes.right>=marketGeometry.viewport-7,'portrait Expanded Market must reach the right safe edge')}
+  report.expandedMarketGeometry=marketGeometry;
 
   const readCamera=()=>page.evaluate(()=>globalThis.__K11520_CAMERA__.snapshot());
   const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+60;y<r.bottom-60;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,8)&&document.elementFromPoint(x+42,y)===canvas)return{x,y};return null});
@@ -274,6 +284,8 @@ async function verifyFullHudControlOwnership(page,report){
   assert.equal(zoomSafety.shown,true,'zoom status must be visible during FULL HUD pinch');assert.equal(zoomSafety.pointerEvents,'none','zoom status must stay non-blocking');assert.deepEqual(zoomSafety.controls.filter(x=>x.overlap),[],'zoom status overlaps a visible HUD/world control');assert.equal(zoomSafety.playerOverlap,false,'zoom status overlaps Player');assert.equal(zoomSafety.monsterOverlaps,0,'zoom status overlaps a visible Monster target');
   await page.screenshot({path:`${OUT}/${report.profile.name}-zoom-status-safe.png`});await pointer('pointerup',11,pinch.x-pinch.ex,pinch.y-pinch.ey,0);await pointer('pointerup',12,pinch.x+pinch.ex,pinch.y+pinch.ey,0);
 
+  let openedUtilityForContextAction=false;
+  if(!await page.locator('#cargoInterceptionButton').isVisible()){await page.locator('#k11520UtilityMaster').click();await page.locator('#cargoInterceptionButton').waitFor({state:'visible'});openedUtilityForContextAction=true}
   await page.locator('#cargoInterceptionButton').click();await page.locator('#sheet.open').waitFor();
   // Waiting state routes to the canonical ATM dispatch surface; an airborne
   // target routes to the missile surface. Either proves the compact control
@@ -281,8 +293,11 @@ async function verifyFullHudControlOwnership(page,report){
   assert.match(await page.locator('#sheetTitle').textContent(),/ATM|導彈攔截/,'FULL Missile must open its state-appropriate logistics/interception surface');
   assert.doesNotMatch(await page.locator('#sheetTitle').textContent(),/市場/,'FULL Missile must not open a market detail surface');
   await page.screenshot({path:`${OUT}/${report.profile.name}-full-missile-hit-owner.png`});await page.locator('#sheetClose').click();await page.waitForTimeout(250);
+  if(openedUtilityForContextAction){await page.locator('#k11520UtilityMaster').click();await page.waitForFunction(()=>!document.documentElement.classList.contains('k11520UtilitiesOpen'))}
   assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'Missile/ATM evidence sheet must remain closed after QA cleanup');
-  report.fullHudHitOwnership={ownership,recentered,zoomSafety,missile:'OPENED_OWN_SURFACE'};
+  const landscapeContext=await page.evaluate(()=>{const read=id=>{const el=document.getElementById(id),style=getComputedStyle(el),r=el.getBoundingClientRect();return{state:el.dataset.contextState,visible:style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0&&r.width>0&&r.height>0,rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}};return{landscape:matchMedia('(orientation:landscape) and (max-height:600px)').matches,raid:read('cargoInterceptionButton'),courier:read('homeDeliveryButton')}});
+  if(landscapeContext.landscape){if(landscapeContext.raid.state==='cruise')assert.equal(landscapeContext.raid.visible,false,'inactive landscape Raid must not occupy the world');if(landscapeContext.courier.state==='idle')assert.equal(landscapeContext.courier.visible,false,'inactive landscape Courier must not occupy the world')}
+  report.fullHudHitOwnership={ownership,recentered,zoomSafety,missile:'OPENED_OWN_SURFACE',landscapeContext};
 }
 async function verifyKSpaceMap(page,report){
   const read=()=>page.evaluate(()=>globalThis.__K11520_KSPACE_MAP__);
