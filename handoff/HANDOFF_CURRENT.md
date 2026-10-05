@@ -87,9 +87,9 @@ Twenty meaningful work packages are listed below, including substreams of the sa
 
 17. **P2 / QUEUED — Recovery and authentication hardening**. Dependencies: none. Next: Audit merged recovery/auth boundaries and regression gaps; keep production email/passkey/KYC disabled without separately approved setup. Evidence: #489 merged at53692530; completion of that merge does not activate production identity providers. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/489) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/KAIOS/backend/KAIOS_BACKEND_SECURITY_BOUNDARY.md)
 
-18. **P1 / QUEUED — Visible product version and public release proof**. Dependencies: Q01. Next: After approved merge/deploy, verify public source SHA, visible V2.9.1, expected assets and actual runtime screenshots. Evidence: Every product release must show its version. Candidate version is not a public release; no release done by this documentation task. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498)
+18. **P1 / QUEUED — Visible product version and public release proof**. Dependencies: Q01. Next: Parent freezes its main merges during HUD release and checks actual checkout log/public hashes. After HUD, separately review Pages checkout pin to event SHA plus actual HEAD assertion before build; retain public SHA/version/runtime verification. Evidence: Read-only provenance audit: current Pages checkout follows floating main while stamp uses event GITHUB_SHA; no present mismatch is proven. Proposed hardening only, no workflow edit. Current HUD4f226036 browser gates remain pending per parent; #499 public Responsive remains FAIL despite Portal/Pages/HTTP success. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml)
 
-19. **P2 / QUEUED — Observability and cost budgets**. Dependencies: Q06. Next: Consolidate existing failure signals, CI artifacts, bounded retries and usage budgets; propose measured gaps without paid resources or recurring jobs. Evidence: User roadmap plus bounded offline model evidence; no paid monitoring or new automation authorized. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/500) · [2](https://github.com/klineodyssey/kline-odyssey/pull/501)
+19. **P2 / READY_FOR_REVIEW / READY_PLAN — Observability and cost budgets**. Dependencies: Q06. Next: Review PR/branch-scoped stale development-run concurrency first; preserve distinct push/PR lanes, main, deploy, public QA and scheduled workers. Review tree-aware dedup separately before any implementation. Evidence: Parent-forwarded completed three-head read-only audit:45m08s of95m26s measured runner-job elapsed was a second push lane over an identical tested Git tree. This is not billing/dollar savings or a claim that PR integration lanes are generally redundant. Overlapping stale-run cancellation opportunity30m28s must not be added to45m08s. No workflow change. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/500) · [2](https://github.com/klineodyssey/kline-odyssey/pull/501) · [3](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280006707) · [4](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280012000) · [5](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280455413) · [6](https://github.com/klineodyssey/kline-odyssey/actions/runs/37280461320) · [7](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282991668) · [8](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693)
 
 20. **P2 / READY_FOR_REVIEW — Durable twenty-package coordination snapshot**. Dependencies: none. Next: Review this docs-only Draft and retain it behind #498 in the main merge lane; refresh exact-head observations before integration. Evidence: Current requested deliverable: human-readable status plus machine-readable queue in one existing handoff file. Completion is not runtime dispatch. Source: [1](https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/handoff/HANDOFF_CURRENT.md)
 
@@ -406,28 +406,67 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
       "dependencies": [
         "Q01"
       ],
-      "next_action": "After approved merge/deploy, verify public source SHA, visible V2.9.1, expected assets and actual runtime screenshots.",
+      "next_action": "Parent freezes its main merges during HUD release and checks actual checkout log/public hashes. After HUD, separately review Pages checkout pin to event SHA plus actual HEAD assertion before build; retain public SHA/version/runtime verification.",
       "sources": [
-        "https://github.com/klineodyssey/kline-odyssey/pull/498"
+        "https://github.com/klineodyssey/kline-odyssey/pull/498",
+        "https://github.com/klineodyssey/kline-odyssey/blob/27a21b031afad333468d9d3847d1933bc053487e/.github/workflows/deploy-pages-static.yml"
       ],
-      "evidence": "Every product release must show its version. Candidate version is not a public release; no release done by this documentation task.",
-      "activity": "NOT_RUNNING"
+      "evidence": "Read-only provenance audit: current Pages checkout follows floating main while stamp uses event GITHUB_SHA; no present mismatch is proven. Proposed hardening only, no workflow edit. Current HUD4f226036 browser gates remain pending per parent; #499 public Responsive remains FAIL despite Portal/Pages/HTTP success.",
+      "activity": "NOT_RUNNING",
+      "provenance_hardening": "PROPOSED_NOT_IMPLEMENTED_NO_CURRENT_MISMATCH_PROVEN"
     },
     {
       "id": "Q19",
       "title": "Observability and cost budgets",
       "priority": "P2",
-      "status": "QUEUED",
+      "status": "READY_FOR_REVIEW",
       "dependencies": [
         "Q06"
       ],
-      "next_action": "Consolidate existing failure signals, CI artifacts, bounded retries and usage budgets; propose measured gaps without paid resources or recurring jobs.",
+      "next_action": "Review PR/branch-scoped stale development-run concurrency first; preserve distinct push/PR lanes, main, deploy, public QA and scheduled workers. Review tree-aware dedup separately before any implementation.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/500",
-        "https://github.com/klineodyssey/kline-odyssey/pull/501"
+        "https://github.com/klineodyssey/kline-odyssey/pull/501",
+        "https://github.com/klineodyssey/kline-odyssey/actions/runs/37280006707",
+        "https://github.com/klineodyssey/kline-odyssey/actions/runs/37280012000",
+        "https://github.com/klineodyssey/kline-odyssey/actions/runs/37280455413",
+        "https://github.com/klineodyssey/kline-odyssey/actions/runs/37280461320",
+        "https://github.com/klineodyssey/kline-odyssey/actions/runs/37282991668",
+        "https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693"
       ],
-      "evidence": "User roadmap plus bounded offline model evidence; no paid monitoring or new automation authorized.",
-      "activity": "NOT_RUNNING"
+      "evidence": "Parent-forwarded completed three-head read-only audit:45m08s of95m26s measured runner-job elapsed was a second push lane over an identical tested Git tree. This is not billing/dollar savings or a claim that PR integration lanes are generally redundant. Overlapping stale-run cancellation opportunity30m28s must not be added to45m08s. No workflow change.",
+      "activity": "READ_ONLY_AUDIT_COMPLETE_PLAN_NOT_IMPLEMENTED",
+      "readiness": "READY_PLAN",
+      "audit": {
+        "scope": "Three completed #498 heads; parent-forwarded read-only audit checkpoint",
+        "measured_total_runner_job_elapsed_seconds": 5726,
+        "second_push_lane_identical_tested_tree_elapsed_seconds": 2708,
+        "overlapping_stale_run_cancellation_opportunity_seconds": 1828,
+        "opportunities_additive": false,
+        "billing_or_dollar_savings_claim": false,
+        "general_pr_integration_redundancy_claim": false,
+        "pairs": [
+          {
+            "head_label": "20c9a798",
+            "push_run": 37280006707,
+            "pr_run": 37280012000,
+            "tested_git_tree_equality": "PROVEN_BY_AUDIT"
+          },
+          {
+            "head_label": "3b1",
+            "push_run": 37280455413,
+            "pr_run": 37280461320,
+            "tested_git_tree_equality": "PROVEN_BY_AUDIT"
+          },
+          {
+            "head_label": "77cc3adf",
+            "push_run": 37282991668,
+            "pr_run": 37282998693,
+            "tested_git_tree_equality": "PROVEN_BY_AUDIT"
+          }
+        ],
+        "implementation": "NOT_STARTED"
+      }
     },
     {
       "id": "Q20",
@@ -446,6 +485,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
   "clarification_at": "2026-10-05T08:40:33Z",
   "product_vision": "KAIOS is a next-generation operating-system design goal that makes customer dreams real: customer/player wish → KGEN AI Company project → verified customer outcome. K11520 is currently game-first, with exchange/trading secondary and contextual. These are priorities and intended behavior, not implemented autonomous-service or execution-authority claims.",
   "checkpoint_at": "2026-10-05T08:42:38Z",
-  "priority_clarification_at": "2026-10-05T08:43:35Z"
+  "priority_clarification_at": "2026-10-05T08:43:35Z",
+  "audit_checkpoint_at": "2026-10-05T08:51:09Z"
 }
 ```
