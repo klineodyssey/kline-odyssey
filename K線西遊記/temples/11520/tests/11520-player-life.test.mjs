@@ -556,3 +556,73 @@ test('full migration lastMission cannot resolve inherited object properties',asy
 test('full migration session companions preserve the existing coordinate bounds',async()=>{
  const a=await captureAuthority(),f=gameCaptureFixture(),xyz=f.envelope.players[f.id].lastXYZ,key='k11520.player:'+f.id+':k11520.player-session.v1';f.data.set(key,JSON.stringify({version:1,world:'K11520',xyz,intentXYZ:{...xyz,x:1e100}}));const c=await a.prepareGameMigration({sourceStorage:f.sourceStorage});assert.equal(c.status,'HOLD');assert.ok(c.holds.some(h=>h.code==='SESSION_RECONCILIATION_HOLD'));a.close();
 });
+
+// Pure process-observation fixtures only; these do not launch Chromium or prove restart.
+const nativeHarnessSource=await (await import('node:fs/promises')).readFile(new URL('./11520-browser-player-life.mjs',import.meta.url),'utf8');
+const nativeObserverSource=nativeHarnessSource.split('// BEGIN NATIVE PROCESS OBSERVER: pure injected reads, also tested without Chromium.\n')[1]?.split('// END NATIVE PROCESS OBSERVER.')[0];
+assert.ok(nativeObserverSource,'the actual harness observer must be tested');
+const nativeObserver=(await import('node:vm')).runInNewContext('('+nativeObserverSource.trim()+')');
+function nativeProcessFixture(){
+ const files=new Map(),parentPid=100,profile='/tmp/kaios-native-idb-fixture',children='/proc/100/task/100/children';
+ const error=code=>Object.assign(Error(code),{code});
+ const stat=(pid,{start='900',parent=100,state='S',name='chrome (test) process'}={})=>`${pid} (${name}) ${[state,String(parent),...Array(17).fill('0'),start].join(' ')}\n`;
+ const process=(pid,{args=['chrome','--user-data-dir='+profile],...options}={})=>{files.set(`/proc/${pid}/stat`,stat(pid,options));files.set(`/proc/${pid}/cmdline`,args.join('\0')+'\0')};
+ files.set(children,'200 ');process(200);
+ const observer=nativeObserver({parentPid,readFile:async path=>{const value=files.get(path);if(value instanceof Error)throw value;if(typeof value==='function')return value();if(value===undefined)throw error('ENOENT');return value}});
+ return {files,parentPid,profile,children,error,stat,process,observer};
+}
+test('native process observer identifies one exact own-child main process without browser handles',async()=>{
+ const f=nativeProcessFixture();f.files.set(f.children,'200 201 202 ');f.process(201,{args:['chrome','--user-data-dir='+f.profile+'-other']});f.process(202,{args:['chrome','--user-data-dir='+f.profile,'--type=renderer']});
+ const id=await f.observer.find(f.profile);assert.equal(id.pid,200);assert.equal(id.parentPid,100);assert.equal(id.startTicks,'900');assert.equal(await f.observer.exists(id),true);
+ assert.equal(nativeHarnessSource.includes('context.browser()'),false);assert.equal(nativeHarnessSource.includes('ctx.browser()'),false);
+});
+test('native process observer rejects absent and ambiguous browser identity without silent success',async()=>{
+ const f=nativeProcessFixture();f.files.set(f.children,'');await assert.rejects(f.observer.find(f.profile),/NOT_UNIQUE/);assert.equal(await f.observer.find(f.profile,{allowAbsent:true}),null);
+ f.files.set(f.children,'200 201');f.process(201);await assert.rejects(f.observer.find(f.profile),/NOT_UNIQUE/);await assert.rejects(f.observer.find(f.profile,{allowAbsent:true}),/NOT_UNIQUE/);
+ f.process(201,{args:['chrome','--user-data-dir='+f.profile,'--type','renderer']});assert.equal((await f.observer.find(f.profile)).pid,200);
+});
+test('native process observer does not turn unreadable process evidence into an exit',async()=>{
+ for(const path of ['/proc/100/task/100/children','/proc/200/stat','/proc/200/cmdline']){const f=nativeProcessFixture();f.files.set(path,f.error('EACCES'));await assert.rejects(f.observer.find(f.profile),/EACCES/)}
+ const f=nativeProcessFixture(),id=await f.observer.find(f.profile);f.files.set('/proc/200/stat',f.error('EIO'));await assert.rejects(f.observer.exists(id),/EIO/);f.files.delete('/proc/200/stat');assert.equal(await f.observer.exists(id),false);
+});
+test('native process observer detects PID reuse and refuses unstable census or unreaped same-identity zombie',async()=>{
+ const f=nativeProcessFixture(),id=await f.observer.find(f.profile);f.files.set('/proc/200/stat',f.stat(200,{start:'901'}));assert.equal(await f.observer.exists(id),false);
+ f.files.set('/proc/200/stat',f.stat(200,{state:'Z'}));assert.equal(await f.observer.exists(id),true);
+ let reads=0;f.files.set('/proc/200/stat',()=>f.stat(200,{start:++reads===1?'900':'901'}));await assert.rejects(f.observer.find(f.profile),/UNSTABLE/);
+ f.files.set('/proc/200/stat',f.stat(200,{parent:99}));await assert.rejects(f.observer.find(f.profile),/UNSTABLE/);
+});
+test('native process observer fails closed on malformed child lists and incomplete process fields',async()=>{
+ for(const raw of ['200 x','200 200','-1','9007199254740993',Array(129).fill(200).join(' ')]){const f=nativeProcessFixture();f.files.set(f.children,raw);await assert.rejects(f.observer.find(f.profile),/INVALID_NATIVE_CHILDREN/)}
+ for(const raw of ['200 (chrome) S 100','wrong pid','201 (chrome) S 100 '+Array(18).fill('0').join(' ')]){const f=nativeProcessFixture();f.files.set('/proc/200/stat',raw);await assert.rejects(f.observer.find(f.profile),/INVALID_NATIVE_PROCESS_STAT/)}
+ const f=nativeProcessFixture();f.files.set('/proc/200/cmdline','chrome\0--user-data-dir='+f.profile);await assert.rejects(f.observer.find(f.profile),/UNSTABLE/);await assert.rejects(f.observer.find('relative'),/INVALID_NATIVE_PROFILE_PATH/);
+});
+
+function nativeLaunchFactory(){
+ const launchSource=nativeHarnessSource.slice(nativeHarnessSource.indexOf('  function launch(){'),nativeHarnessSource.indexOf('  async function page(ctx,label)'));assert.ok(launchSource.length>0);
+ return new Function('deps',`const {chromium,processObserver,routeContext,report,fs,assert}=deps;let context=null,profileDir='/tmp/fixture',launches=0,browserProcess=null,pendingLaunch=null,launchGeneration=0,shuttingDown=false;const ownedContexts=new Map(),bounded=async p=>p;${launchSource};return {launch,revoke:()=>{shuttingDown=true;launchGeneration++},state:()=>({context,launches,browserProcess,pendingLaunch}),close:()=>closeOwnedContext(context)};`);
+}
+test('native persistent launch supports a null Browser handle and retains cleanup ownership on setup failures',async()=>{
+ const factory=nativeLaunchFactory();
+ for(const failure of [null,'route','version']){
+  const observed={detached:0,probeClosed:0},version={product:'Chrome/fixture',revision:'fixture-revision',protocolVersion:'1.3'},report={processLaunches:[]};
+  const ctx={once(){},browser:()=>null,newPage:async()=>({close:async()=>observed.probeClosed++}),newCDPSession:async()=>({send:async method=>{assert.equal(method,'Browser.getVersion');if(failure==='version')throw Error('VERSION_FAILED');return version},detach:async()=>observed.detached++})};
+  const runner=factory({assert,report,chromium:{launchPersistentContext:async()=>ctx},processObserver:{find:async()=>({pid:200,parentPid:100,startTicks:'900'})},routeContext:async()=>{if(failure==='route')throw Error('ROUTE_FAILED')},fs:{readFile:async()=>'{"version":"1.51.1"}'}});
+  if(failure)await assert.rejects(runner.launch(),/FAILED/);else{assert.equal(await runner.launch(),ctx);assert.deepEqual(report.processLaunches[0].version,version);assert.equal(report.browserVersion,version.product)}
+  assert.equal(runner.state().context,ctx,'outer cleanup must own a context even when setup fails');assert.equal(runner.state().launches,1);
+  if(failure!=='route'){assert.equal(observed.detached,1);assert.equal(observed.probeClosed,1)}
+ }
+});
+
+test('native persistent launch closes a context acquired after shutdown and fences later acquisition',async()=>{
+ const factory=nativeLaunchFactory(),identity={pid:200,parentPid:100,startTicks:'900'};let resolveLaunch,closeEvent,alive=true,closes=0,launches=0;
+ const ctx={once:(event,fn)=>{assert.equal(event,'close');closeEvent=fn},close:async()=>{closes++;alive=false;closeEvent()}};
+ const runner=factory({assert,report:{processLaunches:[]},chromium:{launchPersistentContext:()=>{launches++;return new Promise(resolve=>resolveLaunch=resolve)}},processObserver:{find:async()=>alive?identity:null},routeContext:async()=>{throw Error('late context must never be routed')},fs:{}});
+ const pending=runner.launch();runner.revoke();assert.equal(runner.state().pendingLaunch,pending);resolveLaunch(ctx);await assert.rejects(pending,/NATIVE_LAUNCH_REVOKED/);
+ assert.equal(closes,1);assert.equal(runner.state().context,null);assert.equal(runner.state().pendingLaunch,null);await assert.rejects(runner.launch(),/NATIVE_LAUNCH_REVOKED/);assert.equal(launches,1);
+});
+test('native persistent cleanup reuses the acquisition close event after process inspection failure',async()=>{
+ const factory=nativeLaunchFactory(),identity={pid:200,parentPid:100,startTicks:'900'};let closeEvent,closes=0,alive=true,deny=true;
+ const ctx={once:(event,fn)=>{assert.equal(event,'close');closeEvent=fn},close:async()=>{closes++;alive=false;closeEvent()},newPage:async()=>({close:async()=>{}}),newCDPSession:async()=>({send:async()=>({product:'Chrome/fixture',revision:'fixture',protocolVersion:'1.3'}),detach:async()=>{}})};
+ const runner=factory({assert,report:{processLaunches:[]},chromium:{launchPersistentContext:async()=>ctx},processObserver:{find:async()=>identity,exists:async()=>{if(!alive&&deny)throw Error('EACCES');return alive}},routeContext:async()=>{},fs:{readFile:async()=>'{"version":"1.51.1"}'}});
+ await runner.launch();await assert.rejects(runner.close(),/EACCES/);assert.equal(closes,1);deny=false;const closed=await runner.close();assert.equal(closes,1);assert.equal(closed.contextCloseObserved,true);assert.equal(closed.oldProcessAbsent,true);assert.equal(runner.state().context,null);
+});

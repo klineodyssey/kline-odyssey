@@ -600,14 +600,29 @@ no shared-renderer pause or scheduling hook is represented as a passing atomicit
 case. BFCache and genuine disk/quota/power-loss tests also remain NOT_EXERCISED.
 
 For CLEAN_BROWSER_RESTART, all transaction acknowledgements complete first. The
-harness records canonical evidence, observes both persistent-context close and
-browser disconnection, verifies the old browser is disconnected, and relaunches
-with exactly the same profile directory and origin. No storageState import,
-reseeding, clearing or repair occurs after reopening. All canonical records,
-revision vectors and replay evidence must reopen unchanged. This is clean restart
-proof only. The pinned Playwright version uses close/disconnected events and
-browser.isConnected rather than APIs introduced in later versions. See the
-[Playwright persistent-context contract](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context).
+harness records canonical evidence, registers persistent-context close observation,
+awaits close, and independently verifies the exact Linux browser PID/starttime
+identity disappears before relaunching with the same profile directory and origin.
+Discovery reads only this harness's own child process list and exact NUL-delimited
+profile argument, excluding Chromium subprocesses. Ambiguity, permission errors,
+malformed evidence and an unreaped same-identity zombie fail closed. A new process
+identity and public CDP Browser.getVersion evidence are required for the second
+launch. No storageState import, reseeding, clearing or repair occurs after reopening.
+All canonical records, revision vectors and replay evidence must reopen unchanged.
+This proves requested shutdown and process replacement, not exit-code observation,
+crash or power-loss durability. It is explicitly Linux/Ubuntu CI diagnostics.
+
+The first native batch (head95181f4e, tree585e3abe) failed before all12 cases because
+Playwright1.51.1 persistent contexts do not expose the assumed Browser handle.
+Both failure artifacts are retained; zero source modules/cases/screenshots ran.
+The corrected harness avoids context.browser(), immediately owns acquired context
+cleanup, generation-fences late acquisitions after a case timeout, reuses each
+context close observation, and settles in-flight launch ownership before deleting
+the disposable profile. Cleanup or process-disappearance failure refuses PASS.
+Pure mocked-process regression tests do not substitute for the next native run.
+See the [persistent-context contract](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context),
+[public CDP sessions](https://playwright.dev/docs/api/class-browsercontext#browser-context-new-cdp-session)
+and [Linux process fields](https://docs.kernel.org/filesystems/proc.html).
 
 The independent report is checkpointed after each case and on failure, with
 HEAD/tree/dirty status, served source hashes, pinned source identity, browser and

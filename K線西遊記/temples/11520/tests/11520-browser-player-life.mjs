@@ -364,6 +364,43 @@ finally{report.durationSeconds=(Date.now()-startedAt)/1000;await fs.writeFile(ou
 
 } // End unchanged ordinary Player Life harness.
 
+// BEGIN NATIVE PROCESS OBSERVER: pure injected reads, also tested without Chromium.
+function createNativeProcessObserver({readFile,parentPid}){
+  if(!Number.isSafeInteger(parentPid)||parentPid<=0)throw Error('INVALID_NATIVE_PARENT_PID');
+  const stat=async pid=>{
+    let raw;try{raw=await readFile(`/proc/${pid}/stat`,'utf8')}catch(error){if(error.code==='ENOENT')return null;throw error}
+    const end=raw.lastIndexOf(') '),start=raw.indexOf(' ('),fields=raw.slice(end+2).trim().split(/\s+/);
+    if(start<1||end<=start||raw.slice(0,start)!==String(pid)||fields.length<20||!/^\d+$/.test(fields[1])||!Number.isSafeInteger(Number(fields[1]))||!/^\d+$/.test(fields[19]))throw Error('INVALID_NATIVE_PROCESS_STAT');
+    return {pid,parentPid:Number(fields[1]),startTicks:fields[19]};
+  };
+  const same=(a,b)=>Boolean(a&&b&&a.pid===b.pid&&a.startTicks===b.startTicks);
+  return {
+    async find(profileDir,{allowAbsent=false}={}){
+      if(typeof profileDir!=='string'||!profileDir.startsWith('/')||profileDir.includes('\0'))throw Error('INVALID_NATIVE_PROFILE_PATH');
+      // Only our own children, never a machine-wide command-line census.
+      const raw=await readFile(`/proc/${parentPid}/task/${parentPid}/children`,'utf8');
+      if(!/^(?:\d+\s*)*$/.test(raw))throw Error('INVALID_NATIVE_CHILDREN');
+      const ids=raw.trim()?raw.trim().split(/\s+/).map(Number):[];
+      if(ids.length>128||new Set(ids).size!==ids.length||ids.some(id=>!Number.isSafeInteger(id)||id<=0))throw Error('INVALID_NATIVE_CHILDREN');
+      const matches=[];
+      for(const pid of ids){
+        const before=await stat(pid);if(!before)continue;
+        let command;try{command=await readFile(`/proc/${pid}/cmdline`,'utf8')}catch(error){if(error.code==='ENOENT')continue;throw error}
+        const args=command.split('\0');
+        if(!args.includes('--user-data-dir='+profileDir)||args.some(arg=>arg==='--type'||arg.startsWith('--type=')))continue;
+        const after=await stat(pid);
+        if(!same(before,after)||after.parentPid!==parentPid||!command.endsWith('\0'))throw Error('UNSTABLE_NATIVE_PROCESS_IDENTITY');
+        matches.push(after);
+      }
+      if(allowAbsent&&matches.length===0)return null;
+      if(matches.length!==1)throw Error('NATIVE_BROWSER_PROCESS_NOT_UNIQUE');
+      return matches[0];
+    },
+    async exists(identity){return same(identity,await stat(identity.pid))}
+  };
+}
+// END NATIVE PROCESS OBSERVER.
+
 async function runNativeIdbDiagnostics(){
   const {mkdtemp,rm}=fs,{tmpdir}=await import('node:os'),path=await import('node:path'),{createHash}=await import('node:crypto');
   const out='artifacts/11520-player-life-idb-qa',base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173',origin=new URL(base).origin;
@@ -371,7 +408,9 @@ async function runNativeIdbDiagnostics(){
   const required=['NATIVE_IDB','CROSS_TAB_STALE_CAS','SIMULTANEOUS_CAS','REFRESH_EXPLICIT_RETRY','SELECTION_EPOCH_ISOLATION','MULTI_RECORD_ABORT','ATOMIC_COURIER_CREDIT','CORRUPT_RECORD_PRESERVATION','FULL_RECORD_ABSENCE_AND_CORRUPTION','REVIEW_CAPTURE_SOURCE_PRESERVATION','PINNED_OLD_WRITES_ISOLATED','CLEAN_BROWSER_RESTART'];
   const digest=value=>createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');
   const report={schema:'K11520_NATIVE_IDB_DIAGNOSTICS_V1',scope:'NATIVE_ADAPTER_DIAGNOSTICS',fixtureSeeding:'SYNTHETIC_DIRECT_IDB_NOT_MIGRATION',head:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),tree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),ciHead:process.env.GITHUB_SHA||null,trackedDirty:Boolean(execFileSync('git',['status','--porcelain','--untracked-files=no'],{encoding:'utf8'}).trim()),functionalQA:'RUNNING',visualQA:'ADAPTER_DIAGNOSTIC_ONLY_NOT_PRODUCT_VISUAL_QA',releaseStatus:'HOLD',wholePlayerLifeP0:'INCOMPLETE',origin,pinnedHead:pinned,startedAt:new Date().toISOString(),cases:required.map(id=>({id,required:true,status:'NOT_RUN'})),diagnostics:[{id:'OLD_PRE_SET_INTERLEAVE',required:false,status:'NOT_EXERCISED'},{id:'BFCACHE',required:false,status:'NOT_EXERCISED'},{id:'REAL_DISK_QUOTA_OR_POWER_LOSS',required:false,status:'NOT_EXERCISED'}],servedSources:[],screenshots:[],blockedRequests:[],pageErrors:[],providerActivity:[],failures:[],limitations:['No production caller, full cutover or migration is exercised.','Clean browser restart is not crash or power-loss proof.','Injected native transaction abort is not physical disk/quota failure.','Diagnostic fixture screenshots do not establish product visual QA.']};
-  await fs.mkdir(out,{recursive:true});let context=null,profileDir=null,pageA=null,pageB=null,launches=0;
+  await fs.mkdir(out,{recursive:true});let context=null,profileDir=null,pageA=null,pageB=null,launches=0,browserProcess=null,pendingLaunch=null,launchGeneration=0,shuttingDown=false;
+  const ownedContexts=new Map();
+  const processObserver=createNativeProcessObserver({readFile:fs.readFile,parentPid:process.pid});report.processLaunches=[];
   const checkpoint=()=>fs.writeFile(out+'/report.json',JSON.stringify(report,null,2)+'\n');await checkpoint();
   const bounded=async(promise,label,ms=10000)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('NATIVE_CASE_TIMEOUT:'+label)),ms)})])}finally{clearTimeout(timer)}};
   const run=async(id,fn)=>{const entry=report.cases.find(c=>c.id===id);entry.status='RUNNING';entry.startedAt=Date.now();await checkpoint();try{entry.evidence=await bounded(fn(),id,25000);entry.status='PASS'}catch(error){entry.status='FAIL';entry.error=String(error.stack||error);throw error}finally{entry.elapsedMs=Date.now()-entry.startedAt;await checkpoint()}};
@@ -394,7 +433,32 @@ async function runNativeIdbDiagnostics(){
     });
     await ctx.addInitScript(()=>{globalThis.__nativeProviderCalls=[];Object.defineProperty(globalThis,'ethereum',{configurable:false,get(){__nativeProviderCalls.push('ethereum');throw Error('PROVIDER_FORBIDDEN_IN_NATIVE_IDB_QA')}});globalThis.__signPlayerLifeFixture=()=>{__nativeProviderCalls.push('signing');throw Error('SIGNER_FORBIDDEN_IN_NATIVE_IDB_QA')}});
   }
-  async function launch(){const ctx=await chromium.launchPersistentContext(profileDir,{headless:true,viewport:{width:390,height:844},serviceWorkers:'block',timeout:20000});launches++;await routeContext(ctx);report.browserVersion=ctx.browser().version();report.playwrightVersion=JSON.parse(await fs.readFile('node_modules/playwright/package.json','utf8')).version;return ctx}
+  function launch(){
+    if(shuttingDown)return Promise.reject(Error('NATIVE_LAUNCH_REVOKED'));
+    const generation=launchGeneration;
+    const work=(async()=>{
+      const ctx=await chromium.launchPersistentContext(profileDir,{headless:true,viewport:{width:390,height:844},serviceWorkers:'block',timeout:20000});
+      context=ctx;launches++; // Own cleanup before fallible setup, including a late launch.
+      const owned={identity:null,closed:false};owned.closeEvent=new Promise(resolve=>ctx.once('close',()=>{owned.closed=true;resolve()}));ownedContexts.set(ctx,owned);
+      if(shuttingDown||generation!==launchGeneration){await closeOwnedContext(ctx);throw Error('NATIVE_LAUNCH_REVOKED')}
+      owned.identity=browserProcess=await processObserver.find(profileDir);await routeContext(ctx);
+      const probe=await ctx.newPage(),session=await ctx.newCDPSession(probe);let version;
+      try{version=await session.send('Browser.getVersion');for(const field of ['product','revision','protocolVersion'])assert.ok(typeof version[field]==='string'&&version[field].length>0,'native browser '+field)}finally{await session.detach();await probe.close()}
+      if(shuttingDown||generation!==launchGeneration)throw Error('NATIVE_LAUNCH_REVOKED');
+      report.browserVersion=version.product;report.playwrightVersion=JSON.parse(await fs.readFile('node_modules/playwright/package.json','utf8')).version;
+      report.processLaunches.push({launch:launches,identity:browserProcess,version:{product:version.product,revision:version.revision,protocolVersion:version.protocolVersion}});return ctx;
+    })();
+    pendingLaunch=work;work.then(()=>{if(pendingLaunch===work)pendingLaunch=null},()=>{if(pendingLaunch===work)pendingLaunch=null});return work;
+  }
+  async function closeOwnedContext(ctx,{verifyBefore=false}={}){
+    const owned=ownedContexts.get(ctx);assert.ok(owned,'acquired native context required');const identity=owned.identity;
+    if(verifyBefore){assert.ok(identity,'acquired native process identity required');assert.equal(await processObserver.exists(identity),true,'browser process must exist before requested close')}
+    await bounded(Promise.all([owned.closed?Promise.resolve():ctx.close(),owned.closeEvent]),'persistent-context-close',10000);
+    const present=()=>identity?processObserver.exists(identity):processObserver.find(profileDir,{allowAbsent:true}).then(value=>value!==null);
+    const deadline=Date.now()+5000;while(await present()){if(Date.now()>=deadline)throw Error('NATIVE_BROWSER_PROCESS_DID_NOT_EXIT');await new Promise(resolve=>setTimeout(resolve,25))}
+    assert.equal(owned.closed,true);ownedContexts.delete(ctx);if(context===ctx){context=null;browserProcess=null}return {contextCloseObserved:true,oldProcessAbsent:true,identity};
+  }
+  async function closeObservedContext(){return closeOwnedContext(context,{verifyBefore:true})}
   async function page(ctx,label){const p=await ctx.newPage();p.setDefaultTimeout(10000);p.on('pageerror',error=>report.pageErrors.push({page:label,error:String(error)}));await p.goto(fixtureUrl+'#'+label,{waitUntil:'domcontentloaded'});return p}
   async function openCurrent(p,name=dbName){return p.evaluate(async({lifeUrl,name})=>{const life=await import(lifeUrl);const store=life.createLocalGameAuthority({indexedDB:globalThis.indexedDB,crypto:globalThis.crypto,databaseName:name});await store.openGame();globalThis.__nativeCurrent={life,store,name};return {factory:Object.prototype.toString.call(indexedDB),secureContext:isSecureContext}}, {lifeUrl:moduleUrl('runtime/player-life-runtime.mjs'),name})}
   const read=p=>p.evaluate(()=>__nativeCurrent.store.readGame());
@@ -461,8 +525,28 @@ async function runNativeIdbDiagnostics(){
     report.diagnostics[0].reason='NOT_EXERCISED: exact pre-set CDP interleave is not substituted by the required post-cutover old-writer case';
     for(const [label,p] of [['A',pageA],['B',pageB]]){const calls=await p.evaluate(()=>__nativeProviderCalls);report.providerActivity.push({page:label,calls});assert.deepEqual(calls,[],'provider/signing activity is forbidden')}
     const beforeRestart=await read(pageA);await screenshot(pageA,'native-idb-before-restart-390x844.png',beforeRestart);
-    await run('CLEAN_BROWSER_RESTART',async()=>{const oldBrowser=context.browser();let disconnected=false,closed=false;const disconnectedEvent=new Promise(resolve=>oldBrowser.once('disconnected',()=>{disconnected=true;resolve()}));context.once('close',()=>{closed=true});await context.close();await bounded(disconnectedEvent,'old-browser-disconnect',5000);assert.equal(closed,true);assert.equal(disconnected,true);assert.equal(oldBrowser.isConnected(),false);context=null;pageA=null;pageB=null;context=await launch();pageA=await page(context,'REOPENED');await openCurrent(pageA);const reopened=await read(pageA);assert.deepEqual(reopened,beforeRestart,'no reseed, storageState import or repair is permitted after browser relaunch');await screenshot(pageA,'native-idb-after-restart-390x844.png',reopened);return {kind:'CLEAN_BROWSER_RESTART',sameProfileDirectory:true,sameOrigin:origin,oldContextClosed:closed,oldBrowserDisconnected:disconnected,newBrowserConnected:context.browser().isConnected(),launches,reseeded:false,storageStateImported:false,before:evidence(beforeRestart),after:evidence(reopened)}});
-    assert.deepEqual(report.blockedRequests,[],'unexpected network activity fails even when blocked');assert.deepEqual(report.pageErrors,[],'uncaught page errors must fail native diagnostics');const reopenedCalls=await pageA.evaluate(()=>__nativeProviderCalls);report.providerActivity.push({page:'REOPENED',calls:reopenedCalls});assert.deepEqual(reopenedCalls,[]);assert.ok(report.cases.every(c=>c.status==='PASS'));report.functionalQA='PASS';console.log('PASS native IndexedDB adapter diagnostics; production cutover remains HOLD');
+    await run('CLEAN_BROWSER_RESTART',async()=>{
+      const oldProcess=browserProcess,firstVersion=report.processLaunches[0].version,closed=await closeObservedContext();pageA=null;pageB=null;
+      context=await launch();const newProcess=browserProcess;assert.ok(oldProcess.pid!==newProcess.pid||oldProcess.startTicks!==newProcess.startTicks,'relaunch must replace the browser process');assert.equal(await processObserver.exists(newProcess),true);
+      assert.deepEqual(report.processLaunches[1].version,firstVersion,'both launches use the same installed browser build');
+      pageA=await page(context,'REOPENED');await openCurrent(pageA);const reopened=await read(pageA);assert.deepEqual(reopened,beforeRestart,'no reseed, storageState import or repair is permitted after browser relaunch');await screenshot(pageA,'native-idb-after-restart-390x844.png',reopened);
+      return {kind:'CLEAN_BROWSER_RESTART',processObservation:'LINUX_OWN_CHILD_PID_STARTTIME',sameProfileDirectory:true,sameOrigin:origin,contextCloseObserved:closed.contextCloseObserved,oldProcessAbsent:closed.oldProcessAbsent,newProcessObserved:true,oldProcess,newProcess,firstVersion,secondVersion:report.processLaunches[1].version,launches,reseeded:false,storageStateImported:false,before:evidence(beforeRestart),after:evidence(reopened)};
+    });
+    assert.deepEqual(report.blockedRequests,[],'unexpected network activity fails even when blocked');assert.deepEqual(report.pageErrors,[],'uncaught page errors must fail native diagnostics');const reopenedCalls=await pageA.evaluate(()=>__nativeProviderCalls);report.providerActivity.push({page:'REOPENED',calls:reopenedCalls});assert.deepEqual(reopenedCalls,[]);assert.ok(report.cases.every(c=>c.status==='PASS'));report.functionalQA='PASS';
   }catch(error){report.functionalQA='FAIL';report.failures.push(String(error.stack||error));if(pageA)await pageA.screenshot({path:out+'/native-idb-failure.png'}).catch(()=>{});throw error}
-  finally{report.launches=launches;report.finishedAt=new Date().toISOString();await checkpoint();if(context)await context.close().catch(()=>{});if(profileDir)await rm(profileDir,{recursive:true,force:true})}
+  finally{
+    shuttingDown=true;launchGeneration++;const activeLaunch=pendingLaunch;let cleanupError=null;
+    const cleanupAttempt=async work=>{try{await work()}catch(error){cleanupError??=error;report.failures.push('CLEANUP_FAILED:'+String(error))}};
+    await cleanupAttempt(async()=>{for(const ctx of [...ownedContexts.keys()])await closeOwnedContext(ctx)});
+    // A timed-out case may still be acquiring a context. Its generation is revoked;
+    // wait for its late-close path before inspecting/deleting the disposable profile.
+    if(activeLaunch)await cleanupAttempt(()=>bounded(activeLaunch.then(()=>{},()=>{}),'settle-owned-launch',30000));
+    await cleanupAttempt(async()=>{for(const ctx of [...ownedContexts.keys()])await closeOwnedContext(ctx)});
+    if(!cleanupError)await cleanupAttempt(async()=>{if(profileDir){assert.equal(await processObserver.find(profileDir,{allowAbsent:true}),null,'no profile process may remain before directory cleanup');await rm(profileDir,{recursive:true,force:true})}});
+    report.cleanup=cleanupError?{status:'FAIL',error:String(cleanupError.stack||cleanupError),profilePreserved:true}:{status:'PASS',profileRemoved:Boolean(profileDir)};
+    const passedBeforeCleanup=report.functionalQA==='PASS';if(cleanupError)report.functionalQA='FAIL';
+    report.launches=launches;report.finishedAt=new Date().toISOString();await checkpoint();
+    if(cleanupError&&passedBeforeCleanup)throw cleanupError; // Preserve the original scenario error when there is one.
+  }
+  console.log('PASS native IndexedDB adapter diagnostics; production cutover remains HOLD');
 }
