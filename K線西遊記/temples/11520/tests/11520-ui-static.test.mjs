@@ -113,10 +113,10 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.1 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.1 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.1'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.1'"),'Portal registry must advertise the same K11520 release');
+test('V2.9.3 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.3 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.3'"));
+  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.3'"),'Portal registry must advertise the same K11520 release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
@@ -269,4 +269,12 @@ test('landscape More positions chat only when its existing open state is set',()
   const entry=read('../game-5d.html');
   assert.ok(entry.includes('html.k11520UtilitiesOpen #gameChat.open,'));
   assert.ok(!entry.includes('html.k11520UtilitiesOpen #gameChat,'));
+});
+
+
+test('Courier CLOCK_REVIEW explanation is presentation-only and exposes no unsafe recovery action',()=>{
+  for(const text of ["badge:'暫停'",'暫停／時間待核對','尚未完成或發獎','目前沒有安全的恢復操作','重新整理不會解除此暫停','勿清除本機儲存或重複接單','仍可繼續移動、戰鬥與探索'])assert.ok(mobileShell.includes(text),`missing truthful review guidance: ${text}`);
+  for(const token of ['courierRecoveryConfirm','resumeClockReview','previewClockRecovery','DELIVERY_PENDING_CREDIT'])assert.ok(!mobileShell.includes(token),`explanation-only successor must not enable ${token}`);
+  const release=read('../runtime/game-5d-bootstrap.mjs').match(/const PRODUCT_VERSION='([^']+)'/)[1],escaped=release.replaceAll('.',String.raw`\.`);
+  for(const path of ['./11520-browser-responsive.mjs','./11520-browser-smoke.mjs'])assert.ok(read(path).includes(escaped),`${path} must match canonical release ${release}`);
 });

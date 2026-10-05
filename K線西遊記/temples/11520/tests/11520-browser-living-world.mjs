@@ -6,8 +6,11 @@ const OUT='artifacts/11520-visual-qa';
 const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
+const reviewOnly=process.env.K11520_COURIER_REVIEW_ONLY==='1';
+const errors=[];
+if(!reviewOnly){
 let page=await browser.newPage({viewport:{width:1280,height:800},isMobile:false,hasTouch:false});
-const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:30000});
 await page.waitForTimeout(2200);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
@@ -300,5 +303,59 @@ const claimGeometry=await page.waitForFunction(id=>{
 const insuranceClaimBox=await claimGeometry.jsonValue();await claimGeometry.dispose();assert.ok(insuranceClaimBox&&insuranceClaimBox.height>=44&&insuranceClaimBox.x>=0&&insuranceClaimBox.x+insuranceClaimBox.width<=390,'insurance claim must be a full-width 44px mobile touch target');await page.locator('#courierInsuranceClaim').click();await page.waitForFunction(id=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.(id)?.mission?.insurance?.claimStatus==='PAID',insuredMission.missionId);
 const insuranceAfter=await page.evaluate(id=>({mission:globalThis.__K11520_PLAYER_COURIER__.snapshot(id).mission,kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}),insuredMission.missionId);assert.equal(insuranceAfter.kaios,insuredBeforeKaios+insuranceAfter.mission.insurance.payoutKaios,'approved insurance payout credits the original courier local ledger exactly once');const replayResult=await page.evaluate(m=>globalThis.__K11520_PRODUCT__.recordCourierInsurancePayout(m.insurance.payoutReceiptId,m.insurance.payoutKaios),insuranceAfter.mission);assert.equal(replayResult.replayed,true);assert.equal(await page.evaluate(()=>globalThis.__K11520_PRODUCT__.snapshot().kaios),insuranceAfter.kaios,'replaying the insurance receipt never credits twice');assert.equal(await page.locator('#courierInsuranceClaim').count(),0,'paid claim action disappears after one-shot settlement');
 
-await browser.close();
+assert.deepEqual(errors,[]);
 console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);
+}
+
+if(reviewOnly){
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
+  page.on('pageerror',error=>errors.push(String(error)));
+  const boot=async()=>{
+    await page.goto(`${BASE_URL}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`,{waitUntil:'domcontentloaded',timeout:15000});
+    await page.waitForFunction(()=>document.getElementById('enter11520')||globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId,null,{timeout:10000});
+    if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:5000});
+    await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.snapshot?.()&&globalThis.__K11520_PRODUCT__?.snapshot?.()?.playerId&&document.querySelector('.brandMetaV250 span:first-child')?.dataset.k11520ProductVersion==='V2.9.3',null,{timeout:15000});
+    await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
+    await page.waitForFunction(()=>/READY|FALLBACK/.test(document.getElementById('charState')?.textContent||''),null,{timeout:15000});
+  };
+  try{
+    await boot();
+    const before=await page.evaluate(async()=>{
+      const {createPlayerCourierOffer,createPlayerCourierStore}=await import('./runtime/digital-ant-logistics-runtime.mjs'),player=globalThis.__K11520_PRODUCT__.snapshot(),at=Date.now()-120_000,store=createPlayerCourierStore({sessionId:'QA-REVIEW-EXPLANATION',now:()=>at,monotonicNow:()=>100});
+      const m=store.accept(createPlayerCourierOffer({missionId:'QA-EXPLANATION-ONLY',requesterLifeId:player.playerId,cargoId:'QA-EXPLANATION-CARGO',cargoAmount:1000,freightFeeKaios:17,courierSalaryKaios:6,estimatedDurationMs:60_000}),{courierLifeId:player.playerId});
+      store.observe(m.missionId,{wallNow:Date.now(),monoNow:101});localStorage.setItem('11520.playerCourier.lastMission',m.missionId);
+      return {mission:store.snapshot(m.missionId).mission,kaios:player.kaios};
+    });
+    assert.equal(before.mission.status,'CLOCK_REVIEW');await boot();
+    const savedEnvelope=await page.evaluate(()=>localStorage.getItem('K11520_PLAYER_COURIER')),screenshots=[];
+    for(const [width,height] of [[390,844],[844,390],[432,856],[412,772],[480,900],[360,740]]){
+      if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+      await page.setViewportSize({width,height});await page.waitForTimeout(250);
+      await page.waitForFunction(()=>document.getElementById('homeDeliveryButton')?.getAttribute('aria-label')?.includes('時間待核對'),null,{timeout:3000});
+      if(width>height){
+        await page.waitForFunction(()=>document.getElementById('k11520UtilityMaster')?.getAttribute('aria-label')?.includes('時間待核對'),null,{timeout:3000});
+        assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'landscape context remains owned by existing More');
+        await page.screenshot({path:`${OUT}/11520-courier-review-compact-${width}x${height}.png`});await page.locator('#k11520UtilityMaster').click();
+      }else await page.screenshot({path:`${OUT}/11520-courier-review-compact-${width}x${height}.png`});
+      const entry=await page.locator('#homeDeliveryButton').evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height,hit:hit===el||el.contains(hit)}});
+      assert.ok(entry.width>=44&&entry.height>=44&&entry.hit&&entry.x>=0&&entry.y>=0&&entry.right<=width&&entry.bottom<=height,`paused contextual action stays reachable ${width}x${height}: ${JSON.stringify(entry)}`);
+      assert.match(await page.locator('#homeDeliveryButton').textContent(),/暫停/);assert.doesNotMatch(await page.locator('#homeDeliveryButton').textContent(),/00:00/);
+      await page.locator('#homeDeliveryButton').click();
+      const details=await page.locator('#playerCourierDetails').textContent();
+      for(const message of ['暫停／時間待核對','尚未完成或發獎','目前沒有安全的恢復操作','重新整理不會解除此暫停','勿清除本機儲存或重複接單','仍可繼續移動、戰鬥與探索'])assert.ok(details.includes(message),message);
+      assert.equal(await page.locator('#courierRecoveryConfirm,#courierRecoveryPrepare').count(),0,'explanation-only UI must not expose a recovery action');
+      if(width===390&&height===844)assert.equal(await page.evaluate(async()=>{const node=document.querySelector('[data-courier-clock-guidance]');await new Promise(resolve=>setTimeout(resolve,1200));return node?.isConnected&&node===document.querySelector('[data-courier-clock-guidance]')}),true,'paused guidance node remains stable across two countdown render ticks');
+      const panel=await page.locator('#playerCourierDetails').boundingBox();assert.ok(panel&&panel.x>=0&&panel.y>=0&&panel.x+panel.width<=width&&panel.y+panel.height<=height,`details stay inside ${width}x${height}`);
+      await page.locator('[data-courier-clock-guidance]').scrollIntoViewIfNeeded();await page.screenshot({path:`${OUT}/11520-courier-review-details-${width}x${height}.png`});screenshots.push(`${width}x${height}`);
+      await page.locator('#homeDeliveryButton').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),false);
+      if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+      const after=await page.evaluate(()=>({mission:globalThis.__K11520_PLAYER_COURIER__.active(),kaios:globalThis.__K11520_PRODUCT__.snapshot().kaios}));
+      assert.equal(after.mission.status,'CLOCK_REVIEW');assert.equal(after.mission.settlement,null);assert.deepEqual(after.mission.cargo,before.mission.cargo);assert.deepEqual(after.mission.economics,before.mission.economics);assert.deepEqual(after.mission.insurance,before.mission.insurance);assert.equal(after.kaios,before.kaios);assert.equal(await page.evaluate(()=>localStorage.getItem('K11520_PLAYER_COURIER')),savedEnvelope,'opening/closing disclosure does not rewrite the Courier envelope or receipt indexes');
+    }
+    await boot();assert.equal(await page.evaluate(()=>globalThis.__K11520_PLAYER_COURIER__.active().status),'CLOCK_REVIEW','reload never implies an automatic recovery');assert.equal(await page.evaluate(()=>localStorage.getItem('K11520_PLAYER_COURIER')),savedEnvelope,'reload retains the Courier save and receipt indexes');assert.deepEqual(errors,[]);
+    await fs.writeFile(`${OUT}/11520-courier-review-report.json`,JSON.stringify({sourceSha:process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||'LOCAL',version:'V2.9.3',scope:'EXPLANATION_ONLY',screenshots,noRecoveryAction:true,missionAndEconomicsPreserved:true,errors},null,2));
+    console.log('11520 Courier review explanation QA PASS: six viewports, reachable context action, retained state, no recovery/credit action');
+  }catch(error){await page.screenshot({path:`${OUT}/11520-courier-review-failure.png`}).catch(()=>{});await fs.writeFile(`${OUT}/11520-courier-review-failure.json`,JSON.stringify({error:String(error),errors},null,2));throw error}
+  finally{await context.close()}
+}
+await browser.close();
