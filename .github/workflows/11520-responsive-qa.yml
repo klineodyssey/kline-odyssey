@@ -104,3 +104,47 @@ jobs:
           path: artifacts/11520-responsive-qa/
           if-no-files-found: error
           retention-days: 14
+  public-input-diagnostics:
+    # Bounded investigation for #504 only; never an always-on duplicate lane.
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 504
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      K11520_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+      K11520_PUBLIC_ASSET_SHA: 765d0e24e3fbe7353a80329c99bc3b5c3025fd12
+      K11520_BASE_URL: https://klineodyssey.github.io/kline-odyssey
+      K11520_PRODUCTION_QA: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Verify deployed source provenance
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          info=json.load(urllib.request.urlopen(os.environ['K11520_BASE_URL']+'/KGEN-KAIOS/dashboard/build-info.json', timeout=20))
+          evidence={'harness_head':os.environ['K11520_SOURCE_SHA'],'expected_public_head':os.environ['K11520_PUBLIC_ASSET_SHA'],'build_info':info}
+          out=pathlib.Path('artifacts/11520-responsive-qa');out.mkdir(parents=True,exist_ok=True)
+          (out/'public-diagnostic-provenance.json').write_text(json.dumps(evidence,indent=2)+'\n')
+          assert info['main_commit']==os.environ['K11520_PUBLIC_ASSET_SHA'], 'Public deployment moved; reconcile before diagnostics'
+          PY
+      - name: Observe public gameplay in isolated local simulation
+        # No connected wallet, signer, transactions, server writes or deployment.
+        # The existing harness verifies all public runtime asset fingerprints.
+        run: node 'K線西遊記/temples/11520/tests/11520-browser-responsive.mjs'
+      - name: Preserve public diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-public-input-diagnostics-${{ github.event.pull_request.head.sha }}
+          path: artifacts/11520-responsive-qa/
+          if-no-files-found: error
+          retention-days: 14
