@@ -94,12 +94,20 @@ async function verifyWorldFirst(){
         // catches up on the next rendered frame. Wait for that canonical visual
         // state instead of racing a fixed sleep on a busy landscape runner.
         await page.waitForFunction(origin=>{const c=__K11520_CAMERA__.snapshot(),p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;return c.zoom===1&&c.panX===0&&c.panZ===0&&c.manual===false&&Math.abs(p.x-origin.x)<.5&&Math.abs(p.y-origin.y)<.5},result.visibility.player,{timeout:3000});
+        // Actors keep moving between directions. Reusing the first origin may
+        // correctly select a newly arrived actor instead of starting camera pan.
+        const gesturePoint=await page.evaluate(({dx,dy})=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12)if(__K11520_CAMERA__.isWorldGestureArea(x,y,10)&&document.elementFromPoint(x+dx,y+dy)===canvas)return{x,y};return null},{dx,dy});
+        assert.ok(gesturePoint,`drag ${name} requires a fresh unobstructed world origin`);
         const before=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
-        await touch('touchStart',[[1,x,y]]);await touch('touchMove',[[1,x+dx/2,y+dy/2]]);await touch('touchMove',[[1,x+dx,y+dy]]);await touch('touchEnd',[]);await page.waitForTimeout(80);
-        const after=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));
+        const gx=gesturePoint.x,gy=gesturePoint.y;
+        await touch('touchStart',[[1,gx,gy]]);await touch('touchMove',[[1,gx+dx/2,gy+dy/2]]);await touch('touchMove',[[1,gx+dx,gy+dy]]);await touch('touchEnd',[]);
+        const attempt={name,origin:gesturePoint,before,finger:{dx,dy}};(result.cameraAttempts??=[]).push(attempt);
+        try{await page.waitForFunction(({before,screenAxis,sign})=>(__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen[screenAxis]-before[screenAxis])*sign>8,{before:before.player,screenAxis,sign},{timeout:3000})}
+        finally{attempt.after=await page.evaluate(()=>({camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}));attempt.pointerTrace=await page.evaluate(()=>worldFirstPointerTrace)}
+        const after=attempt.after;
         assert.ok((after.player[screenAxis]-before.player[screenAxis])*sign>8,`drag ${name} must move world content ${name}`);
         assert.deepEqual(after.camera.playerXYZ,start.playerXYZ,'camera pan never moves XYZ');
-        directions.push({name,finger:{dx,dy},content:{dx:after.player.x-before.player.x,dy:after.player.y-before.player.y},camera:after.camera});
+        directions.push({name,origin:gesturePoint,finger:{dx,dy},content:{dx:after.player.x-before.player.x,dy:after.player.y-before.player.y},camera:after.camera});
         await page.screenshot({path:`${OUT}/camera-${profile.name}-pan-${name}.png`});
       }
       result.pointerTrace=await page.evaluate(()=>({events:worldFirstPointerTrace,touchAction:getComputedStyle(document.querySelector('#three')).touchAction,scale:visualViewport.scale}));result.panOrigin=point;result.cameraDirections=directions;
@@ -193,7 +201,7 @@ async function verifyWorldFirst(){
       if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
       assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
-    }catch(error){result.error=String(error);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
+    }catch(error){result.error=String(error);result.failurePointerTrace=await page.evaluate(()=>globalThis.worldFirstPointerTrace||[]).catch(()=>[]);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
     finally{await context.close();await fs.writeFile(`${OUT}/world-first-report.json`,JSON.stringify({results,head:process.env.K11520_SOURCE_SHA||null},null,2))}
   }
 }
@@ -537,6 +545,7 @@ function check(label,state,{expanded=false,landscape=false}={}){const b=state.bo
   const compactUtilityTray=expanded&&!landscape&&state.height<=780;
   const target=b['#kspaceTarget'];ok(!target?.visible,'legacy K-space detail card must stay folded into monster HUD');
   if(!expanded)for(const other of ['.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#attack','#orderFire'])ok(!overlap(b['#k11520MonsterGuide'],b[other]),`contextual target overlaps ${other}`);
+  if(landscape&&!expanded)for(const other of ['.tele','.monsterHud'])ok(!overlap(b['#k11520MonsterGuide'],b[other]),`landscape contextual target overlaps ${other}`);
   for(const s of ['.top',...(compactUtilityTray?[]:['.tele','.monsterHud']),'.minimapWrap','#joy','#cControl','#lotsControl','#yControl','#cThumb','#lotsThumb','#yThumb','#k11520UtilityMaster',...(combatHidden?[]:['#orderFire','#attack'])]){const r=b[s];ok(r?.visible,`${s} missing/hidden`);if(r?.visible)ok(r.x>=-1&&r.y>=-1&&r.right<=state.width+1&&r.bottom<=state.height+1,`${s} outside viewport`)}
   if(compactUtilityTray){ok(!b['.tele']?.visible,'short portrait More tray must context-hide world telemetry');ok(!b['.monsterHud']?.visible,'short portrait More tray must context-hide monster status')}
   for(const s of ['#joy','#cControl','#lotsControl','#yControl','#k11520UtilityMaster',...(combatHidden?[]:['#tradeSword','#orderFire','#attack'])])ok(b[s]?.hit,`${s} cannot receive a real click: ${JSON.stringify(b[s]?.blocker)}`);

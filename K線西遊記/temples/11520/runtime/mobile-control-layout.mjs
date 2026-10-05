@@ -116,6 +116,7 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
   html[data-k11520-hud-profile] .axes{height:auto!important;min-height:74px!important}
   html[data-k11520-hud-profile] .axis .marketKValue{white-space:normal!important;overflow-wrap:normal!important;word-break:keep-all!important;line-height:1.25!important}
   html[data-k11520-hud-profile] .tele,html[data-k11520-hud-profile] .monsterHud{top:var(--k11520-landscape-status-top,136px)!important}
+  html[data-k11520-hud-profile] #k11520MonsterGuide{top:auto!important;bottom:8px!important;transform:none!important}
   html[data-k11520-hud-profile="MINIMAL"].k11520MarketOpen #k11520MonsterGuide{top:auto!important}
   html[data-k11520-hud-profile="MINIMAL"] .minimapWrap{top:66px!important;bottom:auto!important;left:6px!important}
   html[data-k11520-hud-profile="MINIMAL"] .top>.pill{display:none!important}
