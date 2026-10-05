@@ -726,7 +726,24 @@ try{
       const authorityAfter=await page.evaluate(()=>({axis:globalThis.__K11520_SIGNED_C_IMMERSIVE__?.activeAxis,order:document.querySelector('#orderFire')?.getAttribute('aria-label')}));
       assert.deepEqual(authorityAfter,authorityBefore,'market detail click must not change plane-selected trading authority or order semantics');
       await page.locator('#sheetClose').click();report.marketCardAuthority='PRESERVED';
-      if(report.states.cold.boxes['#k11520UtilityMaster']?.hit){for(let i=0;i<3;i++){await page.locator('#k11520UtilityMaster').click({timeout:2500});await page.waitForTimeout(250);const opened=await snapshot(page);check(profile.name+' expanded cycle '+i,opened,{expanded:true,landscape:!!profile.landscape});if(i===0){report.states.open=opened;await page.screenshot({path:`${OUT}/${profile.name}-expanded.png`,fullPage:true})}await page.locator('#k11520UtilityMaster').click({timeout:2500});await page.waitForTimeout(250)}report.states.closedAgain=await snapshot(page);check(profile.name+' after cycles',report.states.closedAgain,{landscape:!!profile.landscape});await page.screenshot({path:`${OUT}/${profile.name}-closed-again.png`,fullPage:true})}
+      if(report.states.cold.boxes['#k11520UtilityMaster']?.hit){
+        report.states.utilityCycles=[];
+        for(let i=0;i<3;i++){
+          await page.locator('#k11520UtilityMaster').click({timeout:2500});await page.waitForTimeout(250);
+          const opened=await snapshot(page),priorFailures=failures.length;
+          report.states.utilityCycles.push({cycle:i,opened});
+          check(profile.name+' expanded cycle '+i,opened,{expanded:true,landscape:!!profile.landscape});
+          if(failures.length>priorFailures){
+            const diagnostic=report.states.utilityCycles.at(-1);
+            diagnostic.failures=failures.slice(priorFailures);
+            await page.screenshot({path:`${OUT}/${profile.name}-expanded-cycle-${i}-failure.png`,fullPage:true});
+            diagnostic.frames=await page.evaluate(async()=>{const began=performance.now(),frames=[];const read=()=>{const rect=el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom}};return{at:performance.now(),landscapeStatusTop:document.documentElement.style.getPropertyValue('--k11520-landscape-status-top'),cards:[...document.querySelectorAll('#axes .axis')].map(rect),status:['.tele','.monsterHud'].map(selector=>{const el=document.querySelector(selector),style=getComputedStyle(el);return{selector,...rect(el),top:style.top,transition:style.transition,animations:el.getAnimations().map(a=>({state:a.playState,currentTime:a.currentTime}))}})}};do{frames.push(read());await new Promise(requestAnimationFrame)}while(performance.now()-began<500&&frames.length<60);return frames});
+          }
+          if(i===0){report.states.open=opened;await page.screenshot({path:`${OUT}/${profile.name}-expanded.png`,fullPage:true})}
+          await page.locator('#k11520UtilityMaster').click({timeout:2500});await page.waitForTimeout(250);
+        }
+        report.states.closedAgain=await snapshot(page);check(profile.name+' after cycles',report.states.closedAgain,{landscape:!!profile.landscape});await page.screenshot({path:`${OUT}/${profile.name}-closed-again.png`,fullPage:true});
+      }
       // Open a simulation preview directly; neither order nor combat needs arming.
       const quotePresent=await page.locator('[data-axis="KX"] .q').textContent().then(s=>Number(String(s).replace(/[$,]/g,''))>0);
       if(PRODUCTION)assert.equal(quotePresent,true,'Public Pages market-data-only quote source must be LIVE');
