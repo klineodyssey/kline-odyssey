@@ -287,10 +287,17 @@ async function verifyFullHudControlOwnership(page,report){
   report.expandedMarketGeometry=marketGeometry;
 
   const readCamera=()=>page.evaluate(()=>globalThis.__K11520_CAMERA__.snapshot());
-  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+60;y<r.bottom-60;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,8)&&document.elementFromPoint(x+42,y)===canvas)return{x,y};return null});
+  const start=await readCamera(),point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+60;y<r.bottom-60;y+=10)for(let x=r.left+60;x<r.right-60;x+=10)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,20)&&document.elementFromPoint(x+42,y)===canvas)return{x,y};return null});
   assert.ok(point,'FULL HUD must leave an actual world gesture area for Recenter QA');
-  const pointer=(type,id,x,y,buttons)=>page.dispatchEvent('#three',type,{pointerId:id,pointerType:'touch',clientX:x,clientY:y,button:0,buttons});
-  await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);await page.waitForTimeout(80);
+  // Exercise the native browser touch route, as world-first QA does, instead
+  // of synthetic DOM pointer events. Keep failed preconditions diagnosable.
+  const fullCdp=await page.context().newCDPSession(page),fullTouches=new Map();
+  const pointer=async(type,id,x,y)=>{if(type==='pointerup')fullTouches.delete(id);else fullTouches.set(id,{id,x,y,radiusX:3,radiusY:3,force:1});await fullCdp.send('Input.dispatchTouchEvent',{type:type==='pointerdown'?'touchStart':type==='pointerup'?'touchEnd':'touchMove',touchPoints:[...fullTouches.values()]})};
+  report.fullHudPanPrecondition={origin:point,before:start};
+  await page.evaluate(()=>{globalThis.fullHudPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(fullHudPointerTrace.length<24)fullHudPointerTrace.push({type,x:e.clientX,y:e.clientY,target:e.target.id,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
+  await pointer('pointerdown',10,point.x,point.y,1);await pointer('pointermove',10,point.x+21,point.y,1);await pointer('pointermove',10,point.x+42,point.y,1);await pointer('pointerup',10,point.x+42,point.y,0);
+  try{await page.waitForFunction(()=>__K11520_CAMERA__.snapshot().panX!==0,null,{timeout:3000})}
+  finally{report.fullHudPanPrecondition.after=await readCamera();report.fullHudPanPrecondition.pointerTrace=await page.evaluate(()=>fullHudPointerTrace)}
   assert.notEqual((await readCamera()).panX,0,'FULL HUD pan precondition must move Camera before Recenter');
   await page.locator('#k11520CameraReset').click();await page.waitForTimeout(60);
   const recentered=await readCamera();assert.equal(recentered.panX,0);assert.equal(recentered.panZ,0);assert.equal(recentered.zoom,1);assert.deepEqual(recentered.playerXYZ,start.playerXYZ,'FULL Recenter must not mutate Player XYZ');
@@ -319,6 +326,7 @@ async function verifyFullHudControlOwnership(page,report){
   assert.equal(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')),false,'Missile/ATM evidence sheet must remain closed after QA cleanup');
   const landscapeContext=await page.evaluate(()=>{const read=id=>{const el=document.getElementById(id),style=getComputedStyle(el),r=el.getBoundingClientRect();return{state:el.dataset.contextState,visible:style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0&&r.width>0&&r.height>0,rect:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}};return{landscape:matchMedia('(orientation:landscape) and (max-height:600px)').matches,raid:read('cargoInterceptionButton'),courier:read('homeDeliveryButton')}});
   {if(landscapeContext.raid.state==='cruise')assert.equal(landscapeContext.raid.visible,false,'inactive Raid must not occupy the world');if(landscapeContext.courier.state==='idle')assert.equal(landscapeContext.courier.visible,false,'inactive Courier must not occupy the world')}
+  await fullCdp.detach();
   report.fullHudHitOwnership={ownership,recentered,zoomSafety,missile:'OPENED_OWN_SURFACE',landscapeContext};
 }
 async function verifyKSpaceMap(page,report){
