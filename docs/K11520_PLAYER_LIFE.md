@@ -427,3 +427,22 @@ another queued heavy run; small in-memory checks do not replace it.
 ```json
 {"STAGE":"FULL_RECORD_STORAGE_MECHANICS_PROTOTYPE","INTEGRATION":"UNINTEGRATED_DRAFT","SOURCE_PR":508,"PRODUCTION_CALLERS":0,"FULL_MARKER_PUBLIC_INITIALIZER":false,"PARTIAL_MARKER_AUTO_UPGRADE":false,"FULL_MIGRATION":"NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","PREMIUM_ACTIVATION":"TYPED_ATOMIC_DEBIT_REQUIRED","CROSS_LIFE_CUSTODY":"NOT_IMPLEMENTED","MODEL_TEST_ENGINE":"fake-indexeddb@6.2.5","NATIVE_FULL_MODE_QA":"NOT_RUN","HEAVY_ACCEPTANCE":"BLOCKED_SHARED_QA_BASELINE","PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","SELF_MERGE":false}
 ```
+
+### Versioned lossless migration-source digest
+
+New Life-only candidates record `hashEncoding: JSON_SOURCE_STRING_V1`. The digest
+is SHA-256 over UTF-8 encoding of the deterministic JSON representation
+`JSON.stringify({present:true,raw})`, where `raw` is the exact original
+localStorage string. localStorage exposes UTF-16 strings, not disk bytes. The
+[ECMAScript JSON string quoting algorithm](https://tc39.es/ecma262/multipage/structured-data.html#sec-quotejsonstring)
+escapes lone surrogate code units so distinct source strings remain distinct in
+this hash input. The original string is preserved separately and compared exactly
+on migration confirmation. SHA-256 provides integrity checking, not authenticated
+ownership or authorship.
+
+Candidates without the supported encoding version fail with
+UNSUPPORTED_MIGRATION_HASH_ENCODING_HOLD. Their stored candidate and legacy source
+are left unchanged; an old hash is never silently reinterpreted. Synthetic tests
+show two source strings that direct TextEncoder would conflate now have different
+digests, and historical unsupported candidates cannot commit. This remains an
+inert, Life-only candidate correction with no new production callers or cutover.

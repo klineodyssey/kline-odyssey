@@ -264,6 +264,7 @@ const AUTHORITY_INTEGRATION='UNINTEGRATED_DRAFT';
 const AUTHORITY_DOMAIN='PLAYER_LIFE';
 const AUTHORITY_STORE='records';
 const AUTHORITY_READ_KEYS=['$authority',AUTHORITY_DOMAIN,'$initialized','$keys'];
+const SOURCE_HASH_ENCODING='JSON_SOURCE_STRING_V1';
 const FULL_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_FULL_DRAFT_V1';
 const FULL_AUTHORITY_DOMAINS=['PLAYER_LIFE','BACKPACK','PRODUCT','COURIER'];
 const equalData=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -310,6 +311,9 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
   const secureCrypto=()=>crypto??globalThis.crypto;
   const token=()=>{const c=secureCrypto();if(typeof c?.getRandomValues!=='function')fail('SECURE_RANDOM_UNAVAILABLE');const b=new Uint8Array(16);c.getRandomValues(b);return [...b].map(v=>v.toString(16).padStart(2,'0')).join('')};
   async function hash(raw){const c=secureCrypto();if(typeof c?.subtle?.digest!=='function')fail('HASH_UNAVAILABLE');const b=await c.subtle.digest('SHA-256',new TextEncoder().encode(raw));return [...new Uint8Array(b)].map(v=>v.toString(16).padStart(2,'0')).join('')}
+  // localStorage exposes UTF-16 strings, not raw disk bytes. JSON escaping
+  // preserves lone code units that direct TextEncoder(raw) would replace.
+  const hashSource=raw=>hash(JSON.stringify({present:true,raw}));
   function close(){generation++;opening=null;gameRegistry=null;for(const tx of transactions){try{tx.abort()}catch{}}db?.close();db=null}
   function open(){
     if(db)return Promise.resolve();if(opening)return opening;
@@ -416,7 +420,8 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     });
   }
   function validateCandidate(candidate){
-    if(!keys(candidate,['schema','id','coverage','sourceKey','raw','sha256','ownerIds','activePlayerId'])||candidate.schema!=='LIFE_DRAFT_MIGRATION_CANDIDATE'||typeof candidate.id!=='string'||!/^[a-f0-9]{32}$/.test(candidate.id)||!equalData(candidate.coverage,[AUTHORITY_DOMAIN])||candidate.sourceKey!==PLAYER_LIFE_STORAGE_KEY||typeof candidate.raw!=='string'||candidate.raw.length>4000000||typeof candidate.sha256!=='string'||!/^[a-f0-9]{64}$/.test(candidate.sha256))fail('INVALID_MIGRATION_CANDIDATE');
+    if(candidate?.hashEncoding!==SOURCE_HASH_ENCODING)fail('UNSUPPORTED_MIGRATION_HASH_ENCODING_HOLD');
+    if(!keys(candidate,['schema','id','coverage','sourceKey','raw','sha256','hashEncoding','ownerIds','activePlayerId'])||candidate.schema!=='LIFE_DRAFT_MIGRATION_CANDIDATE'||typeof candidate.id!=='string'||!/^[a-f0-9]{32}$/.test(candidate.id)||!equalData(candidate.coverage,[AUTHORITY_DOMAIN])||candidate.sourceKey!==PLAYER_LIFE_STORAGE_KEY||typeof candidate.raw!=='string'||candidate.raw.length>4000000||typeof candidate.sha256!=='string'||!/^[a-f0-9]{64}$/.test(candidate.sha256))fail('INVALID_MIGRATION_CANDIDATE');
     let parsed;try{parsed=JSON.parse(candidate.raw)}catch{fail('INVALID_MIGRATION_CANDIDATE')}authorityEnvelope(parsed);
     if(candidate.activePlayerId!==parsed.activePlayerId||!equalData(candidate.ownerIds,Object.keys(parsed.players).sort()))fail('INVALID_MIGRATION_OWNER');return parsed;
   }
@@ -424,14 +429,14 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     authorityDomain(input.domain);if(!keys(input,['domain','sourceStorage']))fail('INVALID_MIGRATION_CANDIDATE');requireOpen();const admitted=generation;
     const raw=input.sourceStorage?.getItem(PLAYER_LIFE_STORAGE_KEY);if(typeof raw!=='string')fail('LEGACY_SOURCE_MISSING');if(raw.length>4000000)fail('STORE_CAPACITY');
     let envelope;try{envelope=JSON.parse(raw)}catch{fail('INVALID_MIGRATION_CANDIDATE')}authorityEnvelope(envelope);
-    const candidate={schema:'LIFE_DRAFT_MIGRATION_CANDIDATE',id:token(),coverage:[AUTHORITY_DOMAIN],sourceKey:PLAYER_LIFE_STORAGE_KEY,raw,sha256:await hash(raw),ownerIds:Object.keys(envelope.players).sort(),activePlayerId:envelope.activePlayerId};
+    const candidate={schema:'LIFE_DRAFT_MIGRATION_CANDIDATE',id:token(),coverage:[AUTHORITY_DOMAIN],sourceKey:PLAYER_LIFE_STORAGE_KEY,raw,sha256:await hashSource(raw),hashEncoding:SOURCE_HASH_ENCODING,ownerIds:Object.keys(envelope.players).sort(),activePlayerId:envelope.activePlayerId};
     if(admitted!==generation)fail('AUTHORITY_CLOSED');
     return transaction('readwrite',AUTHORITY_READ_KEYS,(values,store)=>{if(loaded(values).status!=='UNINITIALIZED')fail('AUTHORITY_ALREADY_INITIALIZED');store.add(candidate,'candidate:'+candidate.id);return candidate});
   }
   function readCandidate(id){if(typeof id!=='string'||!/^[a-f0-9]{32}$/.test(id))fail('INVALID_MIGRATION_CANDIDATE');return transaction('readonly',['candidate:'+id],values=>{const value=values['candidate:'+id];validateCandidate(value);if(value.id!==id)fail('MIGRATION_CANDIDATE_ID_MISMATCH');return value})}
   async function commitMigration(input={}){
     authorityDomain(input.domain);if(!keys(input,['domain','candidateId','sha256','sourceStorage','confirmLifeOnlyDraft']))fail('INVALID_MIGRATION_CANDIDATE');if(input.confirmLifeOnlyDraft!==true)fail('EXPLICIT_DRAFT_CONFIRMATION_REQUIRED');requireOpen();const admitted=generation;
-    input={...input};const candidate=await readCandidate(input.candidateId);if(candidate.sha256!==input.sha256||await hash(candidate.raw)!==candidate.sha256)fail('MIGRATION_CONTENT_MISMATCH');
+    input={...input};const candidate=await readCandidate(input.candidateId);if(candidate.sha256!==input.sha256||await hashSource(candidate.raw)!==candidate.sha256)fail('MIGRATION_CONTENT_MISMATCH');
     if(input.sourceStorage?.getItem(PLAYER_LIFE_STORAGE_KEY)!==candidate.raw)fail('LEGACY_SOURCE_DIVERGED_HOLD');if(admitted!==generation)fail('AUTHORITY_CLOSED');
     const {data,meta}=initialRecords(validateCandidate(candidate),token());
     return transaction('readwrite',[...AUTHORITY_READ_KEYS,'candidate:'+input.candidateId],(values,store)=>{
