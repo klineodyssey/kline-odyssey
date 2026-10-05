@@ -70,6 +70,10 @@ async function verifyWorldFirst(){
         await page.locator('#k11520UtilityMaster').click();
         result.checks.contextActions='INACTIVE HIDDEN / EXISTING MORE RAIL ACCESSIBLE PASS';
       }
+      // Ambient actors keep moving while the utility disclosure is exercised.
+      // Reuse the existing startup visual-readiness gate before sampling; a
+      // random instant can put otherwise playable actors behind the minimap.
+      await page.waitForFunction(()=>__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot().filter(m=>m.visible&&m.inView&&m.uncovered).length>=2,null,{timeout:5000});
       result.visibility=await page.evaluate(()=>{
         const p=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;
         return{player:p,playerUncovered:document.elementFromPoint(p.x,p.y)?.id==='three',monsters:globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot()};
@@ -201,7 +205,7 @@ async function verifyWorldFirst(){
       if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
       assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
-    }catch(error){result.error=String(error);result.failurePointerTrace=await page.evaluate(()=>globalThis.worldFirstPointerTrace||[]).catch(()=>[]);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
+    }catch(error){result.error=String(error);result.failureVisibility=await page.evaluate(()=>{const projection=globalThis.__K11520_WORLD_SELECTION_PROJECTION__;if(!projection)return null;return{player:projection.playerHomeSnapshot().playerScreen,monsters:projection.journeyLifeSnapshot().map(m=>{const hit=document.elementFromPoint(m.screen.x,m.screen.y);return{...m,hitOwner:hit?{id:hit.id,classes:String(hit.className),text:(hit.textContent||'').slice(0,100)}:null}})}}).catch(()=>null);result.failurePointerTrace=await page.evaluate(()=>globalThis.worldFirstPointerTrace||[]).catch(()=>[]);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
     finally{await context.close();await fs.writeFile(`${OUT}/world-first-report.json`,JSON.stringify({results,head:process.env.K11520_SOURCE_SHA||null},null,2))}
   }
 }
