@@ -238,3 +238,87 @@ jobs:
           path: artifacts/11520-visual-qa/
           if-no-files-found: error
           retention-days: 14
+
+  native-idb-adapter:
+    name: Native IndexedDB adapter diagnostics (mandatory)
+    runs-on: ubuntu-latest
+    # Independent resource budget; ordinary product/script budgets stay unchanged.
+    # Adds at most 8 runner-minutes per workflow event (push and PR each run it).
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Prepare isolated native browser and exact historical sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/11520-player-life-idb-qa
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.51.1 ethers@6.15.0
+          npx playwright install --with-deps chromium
+          # Read-only source object. No mutable-main fixture and no old runtime execution in Node.
+          git fetch --no-tags --depth=1 origin b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720
+          test "$(git rev-parse 'b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720^{commit}')" = "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-player-life.mjs"
+      - name: Run native two-tab and clean-browser-restart adapter diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/11520-player-life-idb-qa/http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          timeout --signal=TERM --kill-after=10s 240s node "K線西遊記/temples/11520/tests/11520-browser-player-life.mjs" --native-idb-only 2>&1 | tee artifacts/11520-player-life-idb-qa/browser.log
+      - name: Validate mandatory adapter evidence without implying product acceptance
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for FILE in report.json native-idb-before-restart-390x844.png native-idb-after-restart-390x844.png; do
+            test -s "artifacts/11520-player-life-idb-qa/$FILE" || { echo "QA_RED: missing native IDB evidence $FILE"; exit 1; }
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const r=JSON.parse(fs.readFileSync('artifacts/11520-player-life-idb-qa/report.json','utf8'));
+          assert.equal(r.schema,'K11520_NATIVE_IDB_DIAGNOSTICS_V1');
+          assert.equal(r.scope,'NATIVE_ADAPTER_DIAGNOSTICS');
+          assert.equal(r.fixtureSeeding,'SYNTHETIC_DIRECT_IDB_NOT_MIGRATION');
+          assert.equal(r.functionalQA,'PASS');assert.equal(r.releaseStatus,'HOLD');assert.equal(r.wholePlayerLifeP0,'INCOMPLETE');
+          assert.equal(r.visualQA,'ADAPTER_DIAGNOSTIC_ONLY_NOT_PRODUCT_VISUAL_QA');
+          assert.equal(r.head,process.env.GITHUB_SHA);assert.equal(r.ciHead,process.env.GITHUB_SHA);assert.match(r.tree,/^[0-9a-f]{40}$/);assert.equal(r.trackedDirty,false);
+          assert.equal(r.playwrightVersion,'1.51.1');assert.ok(typeof r.browserVersion==='string'&&r.browserVersion.length>0);
+          const snapshot=e=>{assert.match(e.hash,/^[0-9a-f]{64}$/);assert.equal(e.records.length,6);for(const record of e.records){assert.match(record.sha256,/^[0-9a-f]{64}$/);assert.ok(Number.isSafeInteger(record.revision)&&record.revision>=0);}};
+          const required=['NATIVE_IDB','CROSS_TAB_STALE_CAS','SIMULTANEOUS_CAS','REFRESH_EXPLICIT_RETRY','SELECTION_EPOCH_ISOLATION','MULTI_RECORD_ABORT','ATOMIC_COURIER_CREDIT','CORRUPT_RECORD_PRESERVATION','FULL_RECORD_ABSENCE_AND_CORRUPTION','REVIEW_CAPTURE_SOURCE_PRESERVATION','PINNED_OLD_WRITES_ISOLATED','CLEAN_BROWSER_RESTART'];
+          assert.equal(r.cases.length,required.length);assert.equal(new Set(r.cases.map(c=>c.id)).size,required.length);
+          for(const id of required){const c=r.cases.find(c=>c.id===id);assert.equal(c?.required,true);assert.equal(c?.status,'PASS');assert.ok(c.evidence);}
+          const restart=r.cases.find(c=>c.id==='CLEAN_BROWSER_RESTART').evidence;
+          assert.equal(restart.kind,'CLEAN_BROWSER_RESTART');assert.equal(restart.oldContextClosed,true);assert.equal(restart.oldBrowserDisconnected,true);assert.equal(restart.newBrowserConnected,true);assert.equal(restart.launches,2);assert.equal(restart.sameProfileDirectory,true);assert.equal(restart.sameOrigin,r.origin);assert.equal(restart.reseeded,false);assert.equal(restart.storageStateImported,false);assert.equal(restart.before.hash,restart.after.hash);
+          snapshot(restart.before);snapshot(restart.after);
+          const stale=r.cases.find(c=>c.id==='CROSS_TAB_STALE_CAS').evidence,simultaneous=r.cases.find(c=>c.id==='SIMULTANEOUS_CAS').evidence;
+          assert.deepEqual(stale.admittedA,stale.admittedB);assert.equal(stale.staleOutcome,'REVISION_CONFLICT_RELOAD_REQUIRED');snapshot(stale.after);
+          const retry=r.cases.find(c=>c.id==='REFRESH_EXPLICIT_RETRY').evidence;assert.equal(retry.reloadOccurred,true);assert.equal(retry.oldCachesOnBPreserved,true);snapshot(retry.beforeReload);snapshot(retry.afterReload);assert.equal(retry.beforeReload.hash,retry.afterReload.hash);
+          assert.deepEqual(simultaneous.admittedA,simultaneous.admittedB);assert.equal(simultaneous.outcomes.filter(o=>o.status==='fulfilled').length,1);assert.equal(simultaneous.outcomes.filter(o=>o.status==='rejected'&&/REVISION_CONFLICT/.test(o.error)).length,1);snapshot(simultaneous.after);
+          const abort=r.cases.find(c=>c.id==='MULTI_RECORD_ABORT').evidence;assert.equal(abort.injection,'NATIVE_REQUEST_SUCCESS_THEN_TRANSACTION_ABORT');assert.equal(abort.physicalQuotaTest,false);assert.equal(abort.injectionEvidence.productRequestSucceeded,1);assert.equal(abort.injectionEvidence.abortCalls,1);assert.equal(abort.injectionEvidence.requestDone,true);assert.deepEqual(abort.injectionEvidence.errors,[]);assert.match(abort.refusal,/AUTHORITY_TRANSACTION_ABORTED|AbortError/);snapshot(abort.before);snapshot(abort.after);assert.equal(abort.before.hash,abort.after.hash);
+          const corrupt=r.cases.find(c=>c.id==='CORRUPT_RECORD_PRESERVATION').evidence,capture=r.cases.find(c=>c.id==='REVIEW_CAPTURE_SOURCE_PRESERVATION').evidence;
+          assert.equal(corrupt.preserved,true);assert.equal(corrupt.repairAttempted,false);assert.match(corrupt.refusal,/CORRUPT_AUTHORITY/);assert.equal(capture.sourceStringsPreserved,true);assert.equal(capture.authorityInstalled,false);assert.match(capture.manifestSha256,/^[0-9a-f]{64}$/);
+          const old=r.cases.find(c=>c.id==='PINNED_OLD_WRITES_ISOLATED').evidence;
+          const fault=r.cases.find(c=>c.id==='FULL_RECORD_ABSENCE_AND_CORRUPTION').evidence;assert.equal(fault.declaredAbsent.revision,null);assert.equal(fault.declaredAbsent.refusal,'DOMAIN_RECORD_ABSENT');assert.equal(fault.declaredAbsent.preserved,true);assert.equal(fault.sourceUnchanged,true);for(const f of [fault.unexpectedMissing,fault.malformed]){assert.equal(f.preserved,true);assert.equal(f.markerPreserved,true);assert.ok(f.refusal&&f.readRefusal);}
+          assert.equal(old.pinnedHead,'b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720');assert.equal(old.operations.length,6);
+          snapshot(old.canonical);for(const source of r.servedSources)assert.match(source.sha256,/^[0-9a-f]{64}$/);
+          for(const kind of ['LIFE','PRODUCT','COURIER','BACKPACK','SESSION','TUTORIAL']){const o=old.operations.find(o=>o.operation===kind);assert.equal(o?.changed,true);assert.equal(o?.canonicalUnchanged,true);assert.notEqual(o.beforeSha256,o.afterSha256);}
+          for(const path of ['player-life-runtime.mjs','evm-wallet-runtime.mjs','backpack-ui.mjs','digital-ant-logistics-runtime.mjs','world-runtime.mjs'])assert.ok(r.servedSources.some(s=>s.version==='PINNED_OLD'&&s.path.endsWith('/runtime/'+path)&&/^[0-9a-f]{64}$/.test(s.sha256)));
+          assert.ok(r.servedSources.some(s=>s.version==='CURRENT'&&s.path.endsWith('/runtime/player-life-runtime.mjs')));
+          assert.deepEqual(r.blockedRequests,[]);assert.deepEqual(r.pageErrors,[]);assert.equal(r.providerActivity.length,4);for(const p of r.providerActivity)assert.deepEqual(p.calls,[]);
+          assert.equal(r.screenshots.length,2);for(const s of r.screenshots){assert.equal(s.width,390);assert.equal(s.height,844);assert.equal(s.kind,'ADAPTER_DIAGNOSTIC_NOT_PRODUCT_UI');}
+          for(const id of ['OLD_PRE_SET_INTERLEAVE','BFCACHE','REAL_DISK_QUOTA_OR_POWER_LOSS']){const d=r.diagnostics.find(d=>d.id===id);assert.equal(d?.required,false);assert.equal(d?.status,'NOT_EXERCISED');}
+          NODE
+      - name: Upload native adapter evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-player-life-idb-${{ github.sha }}
+          path: artifacts/11520-player-life-idb-qa/
+          if-no-files-found: error
+          retention-days: 14

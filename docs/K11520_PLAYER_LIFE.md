@@ -555,3 +555,69 @@ conflict/recovery feedback remain incomplete. No new heavy CI batch is claimed.
 ```json
 {"STAGE":"FULL_MIGRATION_CAPTURE_REVIEW_ONLY","INTEGRATION":"UNINTEGRATED_DRAFT","POLICY":"STRICT_SCOPED_REVIEW_V1","HASH_ENCODING":"JSON_SOURCE_STRING_V1","PRODUCTION_CALLERS":0,"AUTHORITY_INSTALLATION":false,"SOURCE_WRITES":0,"FULL_MIGRATION":"NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","CAPTURE_ATOMICITY":"NOT_CLAIMED","RAW_ARCHIVE_EXPORT":"LOCAL_ONLY","NATIVE_FULL_MODE_QA":"NOT_RUN","PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","SELF_MERGE":false}
 ```
+
+### Prepared native IndexedDB adapter diagnostic mode
+
+The existing Player Life browser harness now has a mutually exclusive
+`--native-idb-only` mode. Its branch precedes ordinary wallet fixtures, signing
+setup, game boot and ordinary report creation. The ordinary harness body remains
+unchanged. This mode is prepared source; no native execution or PASS is claimed
+until the exact candidate's queued CI evidence is available.
+
+A separate mandatory Product workflow job has an eight-minute maximum and a
+240-second scenario cap. It adds up to eight runner-minutes per workflow event,
+or sixteen for both push and pull-request events. Existing jobs/assertions and
+script budgets are unchanged. The accepted desktop/mobile Courier split must be
+retained during dependency reconciliation before a new heavy run.
+
+The native mode uses Playwright 1.51.1 with a newly created disposable Chromium
+persistent profile and one fixed loopback origin. It uses the browser's native
+IndexedDB, never fake-indexeddb. The all-domain fixture is seeded directly in an
+isolated test database and is explicitly synthetic, not a full migration or a
+production cutover. External requests, service workers and provider/signing
+activity are blocked. Unexpected attempted network/provider activity fails the
+mode even when the request was blocked.
+
+Mandatory cases cover two tabs admitting the same revision vector, stale-write
+refusal, simultaneous CAS (exactly one commit/conflict), reload and explicit retry,
+shared selection epoch/Life isolation, a real native request followed by injected
+transaction abort, atomic Courier credit/acknowledgement, corrupt-record
+preservation and review-capture source preservation. The abort injection is not
+actual disk or quota failure.
+
+Actual old modules and their static transitive dependencies are pinned to
+b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720 and routed under the same test origin. The
+old tab's caches are created before newer canonical writes. Each old Life,
+product, Courier, backpack, session and tutorial mutation must successfully change
+its native localStorage string; an independent IndexedDB read must then retain
+all canonical records/revisions/consumed receipts unchanged. Refusal, activation
+alone or a no-op cannot satisfy that proof. This demonstrates the tested adapter
+keyspace boundary, not that the production game has adopted it.
+
+The required old-writer case avoids debugger scheduling dependence. Exact
+pause-after-read/before-set interleaving is explicitly NOT_EXERCISED in this mode;
+no shared-renderer pause or scheduling hook is represented as a passing atomicity
+case. BFCache and genuine disk/quota/power-loss tests also remain NOT_EXERCISED.
+
+For CLEAN_BROWSER_RESTART, all transaction acknowledgements complete first. The
+harness records canonical evidence, observes both persistent-context close and
+browser disconnection, verifies the old browser is disconnected, and relaunches
+with exactly the same profile directory and origin. No storageState import,
+reseeding, clearing or repair occurs after reopening. All canonical records,
+revision vectors and replay evidence must reopen unchanged. This is clean restart
+proof only. The pinned Playwright version uses close/disconnected events and
+browser.isConnected rather than APIs introduced in later versions. See the
+[Playwright persistent-context contract](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context).
+
+The independent report is checkpointed after each case and on failure, with
+HEAD/tree/dirty status, served source hashes, pinned source identity, browser and
+driver versions, mandatory outcomes and explicit remaining gaps. Available
+artifacts upload even when a case fails. Missing cases, JSON or required screenshots
+fail nonzero. The before/after-restart screenshots show the diagnostic fixture,
+not the production game, and cannot produce VISUAL_QA PASS. Raw capture archives
+are not exported as browser artifacts.
+
+Result scope is NATIVE_ADAPTER_DIAGNOSTICS. Full migration, restore, live trusted
+command integration, conflict/recovery UI and world/custody behavior remain
+INCOMPLETE. The ordinary product functional/visual gates and the user's
+whole-Player-Life P0 requirements remain separate release blockers.
