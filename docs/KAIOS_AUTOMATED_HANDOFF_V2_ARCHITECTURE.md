@@ -1,6 +1,6 @@
 ---
 VERSION: "0.2.0-design"
-REVISION: "2026-10-05.1"
+REVISION: "2026-10-05.2"
 STATUS: "RESEARCH_DESIGN_DRAFT_NOT_OPERATIONAL"
 LAST_UPDATED: "2026-10-05"
 UPDATED_BY: "dot (temporary external maintainer)"
@@ -27,7 +27,7 @@ A durable relational authority stores work revisions, inbox/outbox, leases, dedu
 ## Records and atomic boundaries
 
 - **Work:** Work ID, project/repository, source decision/grant reference, scope, expected base HEAD, revision, lifecycle, owner binding, lease/fence, reviewer policy, result references, budgets and expiry.
-- **Message:** immutable signed envelope and payload digest with Message ID, correlation/causation IDs, idempotency key, sender/recipient bindings and expiry. See state-machine contract.
+- **Message:** immutable signed logical envelope and payload digest with Message ID, correlation/causation IDs, idempotency key, claimed sender/recipient binding references and expiry. Attempt IDs, transport receipts, verification snapshots and acceptance times belong to separate append-only delivery/processing records. See the state-machine digest/ACK contract.
 - **Outbox:** unique message intent, transaction/revision, next-attempt time, attempt count, transport receipt, ACK deadline and terminal reason. Do not delete accepted-but-unacknowledged records.
 - **Inbox:** unique recipient-principal + Message ID, scoped idempotency key, payload digest, authenticated binding snapshot, disposition and stored ACK/result reference.
 - **Event:** monotonically increasing per-work sequence, prior revision/event digest, actor verification reference, before/after state, server time and effect evidence. Append-only permissions plus independently retained checkpoints provide tamper evidence; a hash chain alone cannot stop an administrator replacing everything.
@@ -40,7 +40,7 @@ An external effect cannot generally share this database transaction. Use a recip
 
 ## Leases, heartbeat and fencing
 
-Claim acquisition is one compare-and-swap transaction against current work revision, eligible state, approved claimant binding and absence/expiry of the existing lease. Increment a monotonic fence on every ownership change. Heartbeats renew only a still-current, unexpired lease with the exact owner/fence; they provide liveness hints, never work-completion proof.
+Claim acquisition is one compare-and-swap transaction against current work revision, eligible state, approved claimant binding and absence/expiry of the existing lease. Use a fence tuple `(recovery_epoch, lease_counter)` and increment the counter on every ownership change within the active epoch. Every sink requires the exact active epoch plus current counter. Heartbeats renew only a still-current, unexpired lease with the exact owner/fence; they provide liveness hints, never work-completion proof.
 
 Every effect sink and result acceptance checks the current fence. A process paused beyond lease expiry cannot resume writes after another owner claims the work. Database row locks are short transaction tools, not long-lived network-work locks. Work stealing is an authorized reassignment after expiry/revocation, not a worker editing ownership fields. If any downstream effect cannot enforce fencing, do not enable concurrent takeover for that effect; quarantine/reconcile instead.
 
@@ -52,7 +52,13 @@ Persist attempts before scheduling. For retryable transport failures use full ji
 
 Exhausted work enters a durable DLQ with original IDs, sanitized reason, timestamps, last receipt and next responsible party. Human-authorized redrive uses the same immutable logical message and a new attempt ID after the cause is fixed; revoked/stale work requires a new authorized revision rather than replaying it. Never endlessly loop DLQ to source queue.
 
-Backups must include work, outbox, inbox, effect ledger, leases, events and schema/policy checkpoints at a consistent revision. Object blobs are immutable and digest-addressed. Recovery revalidates current revocations/grants, fences all restored in-flight ownership and reconciles possibly delivered messages before replay. Do not restore stale credentials or resurrect expired grants. A restore drill must prove no accepted effect is duplicated or silently lost.
+Backups must include work, outbox, inbox, effect ledger, leases, events and schema/policy checkpoints at a consistent revision. Object blobs are immutable and digest-addressed. Recovery revalidates current revocations/grants, changes the recovery epoch, fences all restored in-flight ownership and reconciles possibly delivered messages before replay. Do not restore stale credentials or resurrect expired grants. A restore drill must prove no accepted effect is duplicated or silently lost.
+
+### Rollback-safe recovery epoch and missing-tail reconciliation
+
+A restored database must not reissue an old fence counter. Allocate a new recovery epoch from an approved non-rollback authority/high-water checkpoint outside the restored snapshot's failure domain; bind it to the restore event and install it at every effect sink before admitting work. Each sink rejects all prior epochs regardless of their numeric lease counter. Do not merely increment a counter recovered from an old backup. No such authority is configured by this proposal.
+
+Before resume, compare snapshot sequence/dedupe/effect watermarks with an independently retained current journal, recipient inbox receipts and external operation records. Reconstruct events and accepted effects newer than the snapshot, preserving original IDs and duplicate outcomes. Queue retention alone is not a complete effect journal. If the tail, current revocation state or non-rollback epoch cannot be established, remain `RECOVERY_UNCERTAIN_BLOCKED`; do not claim a zero-loss restore or retry ambiguous work. Never erase a newer accepted effect because it is absent from the backup. Recovery drills must include successful work after snapshot creation, then restoration of that older snapshot and attempted stale-owner writes.
 
 ## Safe #489 seams
 

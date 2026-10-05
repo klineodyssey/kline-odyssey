@@ -1,6 +1,6 @@
 ---
 VERSION: "0.2.0-design"
-REVISION: "2026-10-05.1"
+REVISION: "2026-10-05.2"
 STATUS: "RESEARCH_DESIGN_DRAFT_NOT_OPERATIONAL"
 LAST_UPDATED: "2026-10-05"
 UPDATED_BY: "dot (temporary external maintainer)"
@@ -22,7 +22,7 @@ Dual writes and an early dedupe marker can respectively lose notifications or su
 
 ## Decision
 
-Commit work mutation, audit event and outbound intent together; commit inbox dedupe with its local effect and ACK outbox. Use fenced leases for ownership.
+Commit work mutation, audit event and outbound intent together; commit inbox dedupe with its local effect and ACK outbox. Use fenced leases with non-rollback recovery epochs for ownership. Keep the immutable signed logical message separate from append-only attempt/processing records.
 
 ## Alternatives rejected
 
@@ -34,7 +34,7 @@ Requires durable transactions, recovery discipline and downstream fence enforcem
 
 ## Verification before adoption
 
-Crash at every boundary; race two claimants; resume an expired owner; restore backup; confirm no duplicated committed local effect.
+Crash at every boundary; race two claimants; resume an expired owner; restore an older backup after later accepted effects; reconstruct the missing tail or block; confirm no duplicated committed local effect.
 
 ## Evidence and related design
 
