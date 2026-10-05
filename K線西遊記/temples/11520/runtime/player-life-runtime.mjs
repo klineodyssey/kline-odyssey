@@ -266,8 +266,28 @@ const AUTHORITY_STORE='records';
 const AUTHORITY_READ_KEYS=['$authority',AUTHORITY_DOMAIN,'$initialized','$keys'];
 const equalData=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function authorityDomain(domain){if(domain!==AUTHORITY_DOMAIN)fail('DOMAIN_NOT_IMPLEMENTED')}
+function exactAuthorityJson(value){
+  const ancestors=new Set();let characters=0;
+  const invalid=()=>fail('INVALID_AUTHORITY_JSON');
+  const add=text=>{characters+=text.length;if(characters>4000000)invalid()};
+  function visit(v,depth=0){
+    if(depth>128)invalid();
+    if(v===null||typeof v==='string'||typeof v==='boolean'){add(JSON.stringify(v));return}
+    if(typeof v==='number'){if(!Number.isFinite(v))invalid();add(JSON.stringify(v));return}
+    if(typeof v!=='object'||ancestors.has(v)||(!Array.isArray(v)&&![Object.prototype,null].includes(Object.getPrototypeOf(v))))invalid();
+    ancestors.add(v);const descriptors=Object.getOwnPropertyDescriptors(v),names=Reflect.ownKeys(descriptors);
+    if(Array.isArray(v)){
+      if(names.length!==v.length+1)invalid();add('[]');
+      for(let n=0;n<v.length;n++){const d=descriptors[n];if(!d||!d.enumerable||!Object.hasOwn(d,'value'))invalid();if(n)add(',');visit(d.value,depth+1)}
+    }else{
+      add('{}');for(let n=0;n<names.length;n++){const key=names[n],d=descriptors[key];if(typeof key!=='string'||!d.enumerable||!Object.hasOwn(d,'value'))invalid();if(n)add(',');add(JSON.stringify(key));add(':');visit(d.value,depth+1)}
+    }
+    ancestors.delete(v);
+  }
+  visit(value);
+}
 function authorityEnvelope(value){
-  try{validateEnvelope(value);if(JSON.stringify(value).length>4000000)fail('STORE_CAPACITY')}
+  try{exactAuthorityJson(value);validateEnvelope(value);if(JSON.stringify(value).length>4000000)fail('STORE_CAPACITY')}
   catch{fail('CORRUPT_AUTHORITY')}
   return value;
 }
@@ -332,12 +352,12 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
   };
   function read({domain=AUTHORITY_DOMAIN}={}){authorityDomain(domain);return transaction('readonly',AUTHORITY_READ_KEYS,loaded)}
   function initialRecords(envelope,epoch){
-    const data=clone(envelope);authorityEnvelope(data);
+    authorityEnvelope(envelope);const data=clone(envelope);
     const meta={schema:AUTHORITY_SCHEMA,integration:AUTHORITY_INTEGRATION,coverage:[AUTHORITY_DOMAIN],authorityEpoch:epoch,selectionEpoch:0,activePlayerId:data.activePlayerId};
     return {data,meta};
   }
   function initialize(input={}){
-    authorityDomain(input.domain);if(!keys(input,['domain','envelope','confirmLifeOnlyDraft']))fail('INVALID_INITIALIZATION');if(input.confirmLifeOnlyDraft!==true)fail('EXPLICIT_DRAFT_CONFIRMATION_REQUIRED');
+    exactAuthorityJson(input);authorityDomain(input.domain);if(!keys(input,['domain','envelope','confirmLifeOnlyDraft']))fail('INVALID_INITIALIZATION');if(input.confirmLifeOnlyDraft!==true)fail('EXPLICIT_DRAFT_CONFIRMATION_REQUIRED');
     const {data,meta}=initialRecords(input.envelope,token());
     return transaction('readwrite',AUTHORITY_READ_KEYS,(values,store)=>{
       if(loaded(values).status!=='UNINITIALIZED')fail('AUTHORITY_ALREADY_INITIALIZED');
@@ -348,8 +368,9 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
   // Reducers are trusted existing domain-transition code, not arbitrary user
   // patches. Structural validation does not replace import/wallet-proof policy.
   function command(input={},reducer){
-    if(reducing)fail('REENTRANT_COMMAND');authorityDomain(input.domain);
+    if(reducing)fail('REENTRANT_COMMAND');exactAuthorityJson(input);authorityDomain(input.domain);
     if(!keys(input,['domain','kind','playerId','expected'])||!['UPDATE','CREATE','IMPORT','SWITCH'].includes(input.kind))fail('INVALID_AUTHORITY_COMMAND');
+    if(!keys(input.expected,['authorityEpoch','selectionEpoch','revision'])||Object.keys(input.expected).length!==3)fail('INVALID_AUTHORITY_EXPECTATIONS');
     input=clone(input);const expectations=input.expected;
     return transaction('readwrite',AUTHORITY_READ_KEYS,(values,store)=>{
       const before=loaded(values);if(before.status!=='READY')fail('AUTHORITY_UNINITIALIZED');
@@ -365,6 +386,7 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
         reducing=true;let result;
         try{result=reducer(next)}finally{reducing=false}
         if(result&&typeof result.then==='function'){Promise.resolve(result).catch(()=>{});fail('ASYNC_TRANSACTION_REDUCER')}
+        exactAuthorityJson(next);
         if(next.revision!==previous.revision)fail('REVISION_MUTATION_FORBIDDEN');
         const nextIds=Object.keys(next.players);
         if(input.kind==='UPDATE'){

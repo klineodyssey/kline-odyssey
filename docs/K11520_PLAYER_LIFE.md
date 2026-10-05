@@ -313,3 +313,17 @@ commands, immutable binding transitions, complete migration/cutover, asynchronou
 production integration, native old-client and browser-restart acceptance remain
 INCOMPLETE. The session/tutorial and pending-insurance-payment legacy keys must
 not become automatic post-cutover state inputs.
+
+### Follow-up strict Life input admission
+
+The inert primitive now checks original JSON data before cloning initialization
+or command inputs, and checks reducer drafts before equality/serialization.
+Descriptor-based admission rejects values JSON would drop or transform, including
+undefined/function/symbol/hidden fields, accessors, sparse arrays and non-finite
+numbers. It does not invoke getters. The existing envelope/schema validation then
+runs against the original validated data before making a detached draft.
+
+Regressions confirm rejected initialization creates no authority/archive and
+rejected commands do not advance revision or change bytes. This is strict
+admission hardening in an unintegrated API, not a production incident, a new CAS
+claim or completion of the multi-domain P0 gate.

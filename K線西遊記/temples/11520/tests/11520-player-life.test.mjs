@@ -262,7 +262,8 @@ test('atomic Life Stage1 reducer throw/thenable/corruption abort without partial
 });
 test('atomic Life Stage1 complete expectation and player isolation are mandatory',async()=>{
  const f=lifeFixture(),legacy=make({storage:f.storage});const first=legacy.activePlayer().playerId,second=legacy.createPlayer().playerId;const envelope=JSON.parse(f.storage.getItem(PLAYER_LIFE_STORAGE_KEY));const a=newAuthority();await a.open();await a.initialize({domain:'PLAYER_LIFE',envelope,confirmLifeOnlyDraft:true});const s=await a.read();
- for(const c of [change(s,{playerId:first}),change(s,{expected:{revision:s.revision}}),change(s,{expected:{...expected(s),authorityEpoch:'wrong'}})])await assert.rejects(a.command(c,()=>{}));
+ assert.throws(()=>a.command(change(s,{expected:{revision:s.revision}}),()=>{}),/INVALID_AUTHORITY_EXPECTATIONS/);
+ for(const c of [change(s,{playerId:first}),change(s,{expected:{...expected(s),authorityEpoch:'wrong'}})])await assert.rejects(a.command(c,()=>{}));
  await assert.rejects(a.command(change(s),d=>{d.players[first].displayName='wrong Life'}),/NON_TARGET_PLAYER/);await assert.rejects(a.command(change(s),d=>{d.activePlayerId=first}),/SELECTION_MUTATION/);
  const switched=await a.command({domain:'PLAYER_LIFE',kind:'SWITCH',playerId:first,expected:expected(s)});assert.equal(switched.activePlayerId,first);assert.equal(switched.selectionEpoch,s.selectionEpoch+1);assert.equal(switched.envelope.players[second].playerId,second);await assert.rejects(a.command(change(s),()=>{}),/REVISION_CONFLICT/);a.close();
 });
@@ -335,4 +336,16 @@ test('atomic Life Stage1 missing canonical pair with protected history cannot in
 
 test('atomic Life Stage1 oversized raw legacy source is never archived or initialized',async()=>{
  const {storage}=lifeFixture();storage.setItem(PLAYER_LIFE_STORAGE_KEY,storage.getItem(PLAYER_LIFE_STORAGE_KEY)+' '.repeat(4000000));const a=newAuthority();await a.open();await assert.rejects(a.prepareMigration({domain:'PLAYER_LIFE',sourceStorage:storage}),/STORE_CAPACITY/);assert.equal((await a.read()).status,'UNINITIALIZED');assert.ok(storage.getItem(PLAYER_LIFE_STORAGE_KEY).length>4000000);a.close();
+});
+
+test('atomic Life Stage1 validates original non-JSON initialization before cloning',async()=>{
+ let getters=0;
+ for(const alter of [e=>e.extra=undefined,e=>e.extra=()=>{},e=>e[Symbol('hidden')]=1,e=>e.players[e.activePlayerId].ageRange=NaN,e=>Object.defineProperty(e,'extra',{value:1}),e=>Object.defineProperty(e,'extra',{enumerable:true,get(){getters++;return 1}})]){const a=newAuthority(),envelope=lifeFixture().envelope;await a.open();alter(envelope);assert.throws(()=>a.initialize({domain:'PLAYER_LIFE',envelope,confirmLifeOnlyDraft:true}),/CORRUPT_AUTHORITY|INVALID_AUTHORITY_JSON/);assert.equal((await a.read()).status,'UNINITIALIZED');a.close()}assert.equal(getters,0);
+});
+test('atomic Life Stage1 refuses non-JSON command tokens before clone can drop fields',async()=>{
+ const a=await initialized(),s=await a.read(),input=change(s);input.expected.extra=undefined;assert.throws(()=>a.command(input,()=>{}),/INVALID_AUTHORITY_JSON/);assert.deepEqual(await a.read(),s);a.close();
+});
+
+test('atomic Life Stage1 validates reducer draft before equality checks can invoke getters',async()=>{
+ const a=await initialized(),s=await a.read();let getters=0;await assert.rejects(a.command(change(s),d=>{Object.defineProperty(d.players[s.activePlayerId],'displayName',{enumerable:true,get(){getters++;return 'must not run'}})}),/INVALID_AUTHORITY_JSON/);assert.equal(getters,0);assert.deepEqual(await a.read(),s);a.close();
 });
