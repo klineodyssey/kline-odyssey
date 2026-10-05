@@ -21,6 +21,8 @@ const verifyDesktopContext=async(label)=>{
   assert.ok(boxes[0].bottom<=boxes[1].y||boxes[1].bottom<=boxes[0].y,`${label}: desktop Courier/Raid cannot overlap`);
   await page.screenshot({path:`${OUT}/desktop-context-${label}-1280x800.png`});
 };
+const desktopMoreStyle=await page.locator('#k11520UtilityMaster').evaluate(el=>{const s=getComputedStyle(el);return{label:el.textContent,color:s.color,background:s.backgroundColor}});
+assert.equal(desktopMoreStyle.label,'☰');assert.equal(desktopMoreStyle.color,'rgb(223, 250, 255)');assert.match(desktopMoreStyle.background,/^rgba?\(16, 25, 35/,'native desktop More keeps the existing readable dark control style');
 assert.equal(await page.locator('#cargoInterceptionButton').isVisible(),false,'fresh desktop idle Raid hidden');
 assert.equal(await page.locator('#homeDeliveryButton').isVisible(),false,'fresh desktop idle Courier hidden');
 await page.screenshot({path:`${OUT}/desktop-context-idle-1280x800.png`});

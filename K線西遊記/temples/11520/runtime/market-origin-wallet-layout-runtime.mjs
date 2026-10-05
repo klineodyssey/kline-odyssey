@@ -61,6 +61,7 @@ function pinMobileUtilityStack(){
       const idle=(selector==='#cargoInterceptionButton'&&el.dataset.contextState==='cruise')||(selector==='#homeDeliveryButton'&&el.dataset.contextState==='idle');
       const values={position:'fixed',top:`${top}px`,bottom:'auto',left:'auto',right:'64px',transform:'none',width:'44px',height:'44px',minWidth:'44px',minHeight:'44px',maxWidth:'44px',maxHeight:'44px',boxSizing:'border-box',margin:'0',padding:'0',zIndex:'9991',display:collapsed||(!open&&idle)?'none':'grid',placeItems:'center',visibility:'visible',opacity:'1',pointerEvents:'auto'};
       for(const [key,value]of Object.entries(values))put(el,key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value);
+      if(selector==='#k11520UtilityMaster')for(const [key,value]of Object.entries({border:'1px solid #68e4ff66',borderRadius:'13px',background:'#101923ef',color:'#dffaff',font:'900 18px system-ui',touchAction:'manipulation'}))put(el,key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase()),value);
     }
     return;
   }
