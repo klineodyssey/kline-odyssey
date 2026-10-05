@@ -7,15 +7,17 @@ const BASE_URL=process.env.K11520_TEST_BASE_URL||'http://127.0.0.1:4173';
 const processStarted=performance.now();
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH}:{})});
-const reviewOnly=process.env.K11520_COURIER_REVIEW_ONLY==='1';
+const reviewOnly=process.env.K11520_COURIER_REVIEW_ONLY==='1',desktopOnly=process.env.K11520_COURIER_DESKTOP_ONLY==='1';
+assert.ok(!(reviewOnly&&desktopOnly),'select only one isolated browser mode');
 const errors=[];
 if(!reviewOnly){
 let page,diagnosticMissionId=null,expectedCourierLifeId=null,diagnosticRunning=false;
+const diagnosticPrefix=desktopOnly?'11520-living-world-desktop':'11520-living-world';
 const stageTimes=[],elapsed=()=>Math.round(performance.now()-processStarted);
 const stage=async name=>{
   const entry={name,elapsedMs:elapsed(),remainingBudgetMs:Math.max(0,90000-elapsed())};
   stageTimes.push(entry);console.log('[11520 LIVING STAGE]',JSON.stringify(entry));
-  await fs.writeFile(`${OUT}/11520-living-world-timings.json`,JSON.stringify({sourceSha:process.env.GITHUB_SHA||'LOCAL',budgetMs:90000,stages:stageTimes},null,2));
+  await fs.writeFile(`${OUT}/${diagnosticPrefix}-timings.json`,JSON.stringify({sourceSha:process.env.GITHUB_SHA||'LOCAL',budgetMs:90000,stages:stageTimes},null,2));
 };
 // Read-only evidence before the unchanged outer 90s cap. This timer does not
 // retry, advance game time, suppress failures, or extend any assertion timeout.
@@ -32,12 +34,13 @@ const captureDiagnostic=async (reason,{screenshot=true}={})=>{
     },{missionId:diagnosticMissionId,expectedLifeId:expectedCourierLifeId}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('DIAGNOSTIC_STATE_TIMEOUT')),1500)})]);
   }catch(error){report.stateError=String(error)}finally{clearTimeout(timer)}
   // No local profile names, wallet addresses, full storage dumps or credentials.
-  await fs.writeFile(`${OUT}/11520-living-world-${reason}.json`,JSON.stringify(report,null,2));
-  if(screenshot)await page?.screenshot({path:`${OUT}/11520-living-world-${reason}.png`,timeout:1500}).catch(()=>{});
+  await fs.writeFile(`${OUT}/${diagnosticPrefix}-${reason}.json`,JSON.stringify(report,null,2));
+  if(screenshot)await page?.screenshot({path:`${OUT}/${diagnosticPrefix}-${reason}.png`,timeout:1500}).catch(()=>{});
   diagnosticRunning=false;
 };
 const watchdog=setTimeout(()=>{void captureDiagnostic('pre-timeout').catch(error=>console.error('Diagnostic capture failed',String(error)))},Math.max(0,80000-elapsed()));
 try{
+if(desktopOnly){
 await stage('desktop-boot');
 page=await browser.newPage({viewport:{width:1280,height:800},isMobile:false,hasTouch:false});
 page.on('pageerror',e=>errors.push(String(e)));
@@ -73,6 +76,9 @@ await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.active?.()?
 await page.locator('#k11520UtilityMaster').click();assert.equal(await page.locator('#homeDeliveryButton').isVisible(),true,'native desktop active Courier visible with More closed');
 await page.locator('#homeDeliveryButton').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),true);await page.screenshot({path:`${OUT}/desktop-native-active-courier-1280x800.png`});
 await page.close();
+await stage('desktop-complete');assert.deepEqual(errors,[]);
+console.log('11520 native desktop contextual Courier/Raid QA PASS');
+}else{
 await stage('mobile-boot');
 // Preserve the original mobile touch context and fresh state for all mobile QA.
 page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});page.on('pageerror',e=>errors.push(String(e)));
@@ -349,6 +355,7 @@ const insuranceAfter=await page.evaluate(id=>({mission:globalThis.__K11520_PLAYE
 await stage('ordinary-complete');
 assert.deepEqual(errors,[]);
 console.log(`11520 Digital Ant living-world + routed canonical 3D selected-Life HP/XYZ browser visual QA PASS (${picked.lifeId})`);
+}
 }catch(error){await captureDiagnostic('failure').catch(()=>{});throw error}
 finally{clearTimeout(watchdog)}
 }

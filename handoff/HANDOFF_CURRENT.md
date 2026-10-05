@@ -82,3 +82,10 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 - Separate test-only diagnostic commit adds stage elapsed/remaining budget, bounded read-only local-game state before timeout/restoration, failure screenshot. Original90s cap and APPROVED/PAID/replay assertions unchanged.
 - Narrow paused-details-only landscape scroll bound now clears the lower parameter rails; active Courier/Raid layout unchanged. Browser assertions require non-overlap, native trial clicks on Y/C/Lots thumbs and scroll-accessible44px Logistics action.
 - Revised local169/169 tests, syntax and diff PASS; revised exact-head browser/visual QA PENDING. Parent owns release serialization. PR503 remains blocked; no recovery enabling.
+
+### 2026-10-05T10:56Z measured smoke budget repair
+- Current main765d freshly fetched and Boot/local AGENTS/AI Company safety reread before edits.
+- Head456f5ec4: both Product runs37298520114(push)/37298525188(PR) hit90s. Desktop consumed19.5–20.0s; insured restoration started86.6–87.4s. Both persisted and live mission already ROBBED/APPROVED, premium27, payout720, original player active, durable store READY. Push restored APPROVED at88.96s and began claim click89.63s; these observations establish budget pressure, not an insurance-economic defect.
+- Both revised explanation-only runs PASS. Direct initial/scrolled landscape inspection confirms camera/market/parameter rail clearance; full13-image review tracked in PR.
+- Existing independent desktop block moves intact to its own mandatory90s invocation; default mobile remains90s with all original assertions. This adds up to90s aggregate CI budget. Both modes fail nonzero independently; desktop screenshots and timing report required. No product code changes in this follow-up.
+- Shared harness owner506 notified before edits and must preserve/reconcile this exact delta in its explicit stack. New exact-head CI pending; no release claim.
