@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {inspectRealTradingUiPreflight,inspectMainnetUnsignedPackage} from '../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs';
 
@@ -69,4 +71,22 @@ test('UI preflight can become ready only for exact fixed market and all protecte
   assert.equal(r.ready,true);
   assert.deepEqual(r.blockers,[]);
   assert.throws(()=>inspectRealTradingUiPreflight({axis:'KZ',market:'SOLUSDT',chainId:56,walletIdentity:WALLET,feedProvenanceVerified:true,brainAddress:BRAIN,positionEngineAddress:ENGINE,humanMainnetAuthorization:true}),/REAL_TRADING_AXIS_MARKET_MISMATCH/);
+});
+
+
+test('every preflight identity follows the existing wallet session through A B reload and disconnect events',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs',import.meta.url),'utf8');
+ const render=source.slice(source.indexOf('function renderPreflight(){'),source.indexOf('function notifyOrderRoute(){'));
+ const install=source.slice(source.indexOf('export function install11520RealTradingPreflightUi(){')).replace('export ','');
+ const A='0x'+'11'.repeat(20),B='0x'+'22'.repeat(20);let current={account:A,chainId:97};
+ const state={textContent:'',title:''},host={dataset:{},querySelector:()=>state},binding={axis:'KY',display:'ETHUSDT'},handlers=new Map();
+ const context=vm.createContext({$:selector=>selector==='#k11520RealTradePreflight'?host:null,ensureStyle(){},document:{querySelectorAll:()=>[]},addEventListener:(name,fn)=>handlers.set(name,fn),activeAxisMarket:()=>({axis:'KY',market:'ETHUSDT'}),getRealTradingBinding:()=>binding,getWalletSession11520:()=>({snapshot:()=>current}),inspectRealTradingUiPreflight:()=>({ready:false,blockers:[],binding}),blockerLabel:String});
+ vm.runInContext(render+install,context);vm.runInContext('install11520RealTradingPreflightUi()',context);
+ const event=handlers.get('k11520:wallet');assert.equal(typeof event,'function');assert.equal(handlers.has('storage'),false,'cached storage is not current identity authority');
+ const assertAddress=address=>{assert.equal(host.dataset.walletAddress,address);assert.equal(context.__K11520_REAL_TRADING_PREFLIGHT__.walletAddress,address||null);assert.equal(host.dataset.walletIdentityScope,address?'ACTIVE_SESSION':'DISCONNECTED')};
+ assertAddress(A);assert.match(state.textContent,/0x1111/);
+ current={account:null,chainId:null,status:'READING'};event();assertAddress('');assert.match(state.textContent,/錢包未連接/);assert.doesNotMatch(state.textContent,/0x/);
+ current={account:B,chainId:97};event({detail:{account:A}});assertAddress(B);assert.match(state.textContent,/0x2222/);assert.doesNotMatch(state.textContent,/0x1111/,'event payload cannot replace canonical session');
+ vm.runInContext('install11520RealTradingPreflightUi()',context);assertAddress(B);
+ current={account:null,chainId:null,status:'DISCONNECTED'};event();assertAddress('');assert.doesNotMatch(state.textContent,/0x/);
 });

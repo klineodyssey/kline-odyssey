@@ -187,3 +187,39 @@ jobs:
           name: capital-wallet-local-evm-${{ github.sha }}
           path: artifacts/11520-candidate-wallet-qa/
           if-no-files-found: error
+
+  m1-readonly-wallet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install pinned M1 read-only browser dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0 ethers@6.15.0
+          npx playwright install --with-deps chromium
+      - name: M1 real BSC97 reads through synthetic EIP-1193 without any signer
+        env:
+          K11520_BASE_URL: http://127.0.0.1:4173
+          BSC_TESTNET_RPC_URL: https://bsc-testnet-dataseed.bnbchain.org
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-m1-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          node "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs" --m1-read-only \
+            --read-only-accounts=0x3a909988E4d5c9C2326A7a0596714482AB25eE0A,0x6BE8fb4320d46475e2C5e9ba55DFB9F3573FFE11
+          git diff --exit-code
+      - name: Preserve M1 read-only evidence and failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1-readonly-wallet-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/11520-m1-readonly-qa/
+          if-no-files-found: error
