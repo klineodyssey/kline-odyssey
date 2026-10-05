@@ -3,7 +3,7 @@ import {formatGameDistanceK} from './spatial-coordinate-runtime.mjs';
 /* KGEN_META
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: Mobile Control Layout
-VERSION: 1.3.15
+VERSION: 1.3.16
 REVISION: 2026-10-05.BOUNDED-EXPANDED-LANDSCAPE-CONTEXT
 PURPOSE: Preserve approved HUD anchors across mobile widths; center the normal-axis energy rail in the mobile viewport, keep its approved Wukong artwork upright and recognisable at 34px, own its track/thumb horizontal geometry, place signed-C and positive lot rails to its right without overlap, preserve Market/Wallet utility-layout ownership, and keep expanded KX/KY/KZ market cards equally wide and readable. Raid/courier action geometry is owned by the existing Market/Wallet utility rail. Thumb travel is presentation-only; no wallet identity, chain, payment, treasury or governance mutation.
 */
@@ -12,6 +12,7 @@ const MOBILE_MAX=600;
 let booted=false,flowObserver=null,guard=null,timers=[],energyTimer=null,energyLabelGuard=null,collapseBound=false;
 const thumbObservers=new WeakMap();
 const hudCollapsed=()=>document.documentElement.classList.contains('k11520HudCollapsed');
+const paramsHidden=()=>!!$('.sliderDock')?.classList.contains('k11520HiddenBySettings');
 function installStyle(){
   let s=$('#k11520MobileControlLayout');
   if(!s){s=document.createElement('style');s.id='k11520MobileControlLayout';document.head.appendChild(s)}
@@ -88,10 +89,10 @@ function installStyle(){
   html[data-k11520-layout-owner] #k11520PlaneLabel{width:calc(100vw - 252px)!important}
 }
 /* WORLD_FIRST_HUD_POLICY: disclosure never changes coordinates or control owners. */
-#k11520MarketRow{position:fixed;top:68px;left:6px;right:6px;min-height:44px;z-index:310;border:1px solid #68e4ff66;border-radius:12px;background:#071018e8;color:#dffaff;font:700 12px system-ui;touch-action:manipulation}
+#k11520MarketRow{position:fixed;top:68px;left:auto;right:6px;width:44px;height:44px;min-height:44px;z-index:310;border:1px solid #68e4ff66;border-radius:12px;background:#071018e8;color:#dffaff;font:700 12px system-ui;touch-action:manipulation}
 #k11520HudProfile{min-height:44px;background:#102332;color:#dffaff;border:1px solid #68e4ff66;border-radius:8px}
 #k11520PlaneLabel{overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%}
-html[data-k11520-hud-profile]:not([data-k11520-hud-profile="FULL"]):not(.k11520MarketOpen) .axes{display:none!important}
+html[data-k11520-hud-profile]:not(.k11520MarketOpen) .axes{display:none!important}
 html[data-k11520-hud-profile="MINIMAL"] .tele,html[data-k11520-hud-profile="MINIMAL"] .monsterHud{display:none!important}
 /* Expanded Market owns the full available row. Camera controls live in their
    own compact context cluster instead of consuming a fourth market column. */
@@ -107,9 +108,9 @@ html[data-k11520-hud-profile] #logisticsMissionHud{display:none!important}
 #k11520CameraZoomStatus{position:fixed;z-index:589;left:54px;right:auto;top:auto;bottom:max(170px,calc(env(safe-area-inset-bottom) + 170px));width:116px;transform:translateY(6px);padding:6px 8px;border:1px solid #68e4ff66;border-radius:999px;background:#071018e8;color:#dffaff;font:800 11px system-ui;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
 #k11520CameraZoomStatus.show{opacity:1;transform:translateY(0)}
 #k11520FollowMonster{position:fixed;left:54px;right:auto;top:116px;width:calc(100vw - 224px);height:44px;z-index:620;border:1px solid #68e4ff88;border-radius:10px;background:#071018dd;color:#dffaff;font:700 10px system-ui;overflow:hidden;text-overflow:ellipsis}
-#k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
+#k11520CameraReset[hidden],#k11520FollowMonster[hidden],#k11520MarketRow[hidden]{display:none!important}
 @media(orientation:landscape) and (max-height:600px){
-  #k11520MarketRow{top:6px;left:360px;right:58px;min-height:44px}
+  #k11520MarketRow{top:6px;left:auto;right:6px;width:44px;min-height:44px}
   html[data-k11520-hud-profile] .axes{top:54px!important;left:360px!important;right:58px!important;width:auto!important;max-width:none!important;transform:none!important}
   /* Realistic quotes may wrap k/alpha/theta onto two lines. Size to content,
      then flow diagnostic HUD below it instead of leaking past a 74px card. */
@@ -136,7 +137,7 @@ function applyRail(){
   if(innerWidth>MOBILE_MAX&&!landscape)return;
   globalThis.__K11520_AXIS_RAIL_GUARD__?.disconnect?.();
   const specs=landscape?[['#yControl','max(182px, calc(env(safe-area-inset-left) + 168px))'],['#cControl','max(232px, calc(env(safe-area-inset-left) + 218px))'],['#lotsControl','max(282px, calc(env(safe-area-inset-left) + 268px))']]:[['#yControl','calc(50% - 21px)'],['#cControl','calc(50% + 29px)'],['#lotsControl','calc(50% + 79px)']];
-  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
+  for(const [sel,left] of specs){const el=$(sel);if(!el)continue;if(landscape&&el.parentElement!==document.body)document.body.appendChild(el);if(hudCollapsed()||paramsHidden()||document.documentElement.classList.contains('k11520SettingsOpen')){setImportant(el,'display','none');continue}for(const [k,v] of [['position','fixed'],['left',left],['right','auto'],['top','auto'],['bottom','max(28px, env(safe-area-inset-bottom))'],['width','42px'],['height','132px'],['display','block'],['transform','none'],['margin','0'],['z-index','456'],['opacity','1'],['visibility','visible'],['pointer-events','auto']])setImportant(el,k,v);el.dataset.k11520MobileLayout='center-normal-rail'}
   if(landscape)for(const [sel] of specs){const el=$(sel);setImportant(el,'bottom','max(58px, calc(env(safe-area-inset-bottom) + 50px))');setImportant(el,'height','108px');setImportant(el,'width','44px')}
 }
 function installThumbBounds(){
@@ -205,8 +206,8 @@ function measure(){
   report.statusBelowMarket=innerWidth>MOBILE_MAX||!statusVisible||!marketVisible||Boolean(report.marketHud&&report.worldHud&&report.lifeHud&&report.worldHud.top>=report.marketHud.bottom+8&&report.lifeHud.top>=report.marketHud.bottom+8);
   report.mapBelowStatus=innerWidth>MOBILE_MAX||!statusVisible||Boolean(report.worldHud&&report.lifeHud&&report.minimap&&report.minimap.top>=Math.max(report.worldHud.bottom,report.lifeHud.bottom)+8);
   report.overlaps={joyRail:overlap(report.joy,report.axisRail),warpLots:overlap(report.warp,report.lots),lotsRail:overlap(report.lots,report.axisRail),warpRail:overlap(report.warp,report.axisRail),railDock:overlap(report.axisRail,report.dock),attackWarp:overlap(report.attack,report.warp),orderLots:overlap(report.order,report.lots),worldLife:overlap(report.worldHud,report.lifeHud),marketWorld:overlap(report.marketHud,report.worldHud),marketLife:overlap(report.marketHud,report.lifeHud),worldMap:overlap(report.worldHud,report.minimap),lifeMap:overlap(report.lifeHud,report.minimap),chatMaster:overlap(report.chat,report.masterCollapse)};
-  report.collapsed=hudCollapsed();
-  report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v));
+  report.collapsed=hudCollapsed();report.paramsHidden=paramsHidden();report.settingsOpen=document.documentElement.classList.contains('k11520SettingsOpen');
+  report.ok=innerWidth>MOBILE_MAX||(report.collapsed||report.settingsOpen||(report.paramsHidden||report.axisRailCentered&&report.axisEnergyGeometryAligned&&report.threeRailAligned)&&report.equalWorldLifeWidth&&report.statusBelowMarket&&report.mapBelowStatus&&Object.values(report.overlaps).every(v=>!v));
   document.documentElement.dataset.k11520MobileControlLayout=report.ok?'PASS':'RED';
   return report;
 }
@@ -242,4 +243,7 @@ export function install11520MobileControlLayout(){
   }
   return globalThis.__K11520_MOBILE_CONTROL_LAYOUT__;
 }
+// Restore current values through the same rail owner; never replay old geometry
+// or reset the canonical C/lots/XYZ values after a Settings close.
+if(typeof document!=='undefined')document.addEventListener('k11520:settings-context',()=>{applyRail();globalThis.__K11520_MOBILE_CONTROL_LAYOUT__=measure()});
 export function get11520MobileControlLayout(){return measure()}

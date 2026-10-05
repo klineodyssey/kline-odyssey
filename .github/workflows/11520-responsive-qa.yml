@@ -27,6 +27,66 @@ concurrency:
   group: responsive-11520-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.production || false }}
   cancel-in-progress: true
 jobs:
+  contextual-hud:
+    # One additional bounded runner per candidate/public batch. Reuse this
+    # existing harness and artifact route; no separate dispatch or poll loop.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Verify six-size contextual HUD at the exact head
+        env:
+          PUBLIC_QA: ${{ inputs.production || github.event_name == 'workflow_run' }}
+          K11520_CONTEXTUAL_QA: '1'
+          K11520_SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-contextual-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          if [ "$PUBLIC_QA" = true ]; then
+            export K11520_BASE_URL='https://klineodyssey.github.io/kline-odyssey'
+            export K11520_PRODUCTION_QA=1
+          fi
+          node 'K線西遊記/temples/11520/tests/11520-browser-responsive.mjs'
+          python3 - <<'PYQA'
+          import json, pathlib, os
+          out=pathlib.Path('artifacts/11520-responsive-qa')
+          report=json.loads((out/'contextual-report.json').read_text())
+          assert report['head']==os.environ['K11520_SOURCE_SHA'], 'Evidence head mismatch'
+          assert report['failures']==[], report['failures']
+          assert {(r['profile']['width'],r['profile']['height']) for r in report['reports']}=={(360,740),(390,844),(412,772),(432,856),(480,900),(844,390)}
+          for result in report['reports']:
+              name=result['profile']['name']
+              for state in ['contextual-world','settings-owned','settings-preferences-retained','wallet-restored','contextual-recenter','contextual-market-expanded','contextual-market-hidden','contextual-courier-active','active-courier-settings-owned','contextual-full-idle-hidden']:
+                  image=out/f'{name}-{state}.png'
+                  assert image.is_file() and image.stat().st_size>1000, f'Missing screenshot: {image}'
+              if result['profile']['width']==390 or result['profile'].get('landscape'):
+                  assert result.get('interruptedRails'), 'Missing native interruption result'
+                  image=out/f'{name}-settings-interrupted-rails.png'
+                  assert image.is_file() and image.stat().st_size>1000, f'Missing interruption screenshot: {image}'
+          if report['production']:
+              assert report['sourceChecks'] and all(x['match'] for x in report['sourceChecks']), 'Public source provenance missing'
+          PYQA
+      - name: Preserve contextual HUD screenshots and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-contextual-hud-${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}-${{ github.event_name }}
+          path: artifacts/11520-responsive-qa/
+          if-no-files-found: error
+          retention-days: 14
   world-first:
     if: github.event_name != 'workflow_run' && inputs.production != true
     runs-on: ubuntu-latest
@@ -105,13 +165,13 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   public-input-diagnostics:
-    # Bounded investigation for #504 only; never an always-on duplicate lane.
-    if: github.event_name == 'pull_request' && github.event.pull_request.number == 504
+    # Bounded facing follow-up only; never an always-on duplicate lane.
+    if: github.event_name == 'pull_request' && github.head_ref == 'dot/11520-facing-standoff-20261005'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
       K11520_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
-      K11520_PUBLIC_ASSET_SHA: 765d0e24e3fbe7353a80329c99bc3b5c3025fd12
+      K11520_PUBLIC_ASSET_SHA: b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720
       K11520_BASE_URL: https://klineodyssey.github.io/kline-odyssey
       K11520_PRODUCTION_QA: '1'
     steps:

@@ -38,6 +38,10 @@ await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready==
 await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',null,{timeout:5000});
 await page.waitForTimeout(500);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
+// Human 12:43 Market collapse applies to FULL too; explicitly disclose it
+// before measuring the full-information HUD, rather than defeating idle hide.
+if(!await page.locator('#axes').isVisible())await page.locator('#k11520MarketRow').click();
+await page.locator('#axes').waitFor({state:'visible'});
 const normalHud=await page.evaluate(()=>{const visible=sel=>{const el=document.querySelector(sel);if(!el)return false;const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&b.width>0&&b.height>0};return{axes:visible('.axes'),world:visible('.tele'),life:visible('.monsterHud'),map:visible('.minimapWrap'),visual:Math.round(globalThis.visualViewport?.height||innerHeight),css:getComputedStyle(document.documentElement).getPropertyValue('--k11520-visible-vh').trim()}});assert.deepEqual({axes:normalHud.axes,world:normalHud.world,life:normalHud.life,map:normalHud.map},{axes:true,world:true,life:true,map:true},'ordinary HUD must stay visible');assert.equal(normalHud.css,`${normalHud.visual}px`,'ordinary mode must track VisualViewport so browser chrome recovery becomes game space');
 
 const tradeAxis=async()=>page.evaluate(()=>globalThis.__K11520_TRADE_AXIS_API__?.current());

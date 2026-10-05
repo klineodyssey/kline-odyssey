@@ -113,10 +113,10 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.1 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.1 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.1'"));
-  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.1'"),'Portal registry must advertise the same K11520 release');
+test('V2.9.5 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.5 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.5'"));
+  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.5'"),'Portal registry must advertise the same K11520 release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
@@ -269,4 +269,101 @@ test('landscape More positions chat only when its existing open state is set',()
   const entry=read('../game-5d.html');
   assert.ok(entry.includes('html.k11520UtilitiesOpen #gameChat.open,'));
   assert.ok(!entry.includes('html.k11520UtilitiesOpen #gameChat,'));
+});
+
+test('Settings context preserves organ states and restores only its temporary inert ownership',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const ui=read('../runtime/mobile-ui-settings.mjs');
+  const element=(id,inert=false)=>({id,inert,attributes:{},classList:{values:new Set(),contains(v){return this.values.has(v)},toggle(v,on){if(on)this.values.add(v);else this.values.delete(v)}},hasAttribute(name){return name==='inert'&&this.inert},setAttribute(name,value){this.attributes[name]=value},focus(){focused=this.id}});
+  let focused=null;const root=element('root'),panel=element('k11520UiSettings'),launcher=element('gameModeToggle'),close=element('k11520UiSettingsClose'),courier=element('homeDeliveryButton'),rail=element('yControl'),preexisting=element('bgmButton',true);
+  courier.dataset={contextState:'active'};const nodes=[launcher,courier,rail,preexisting],byId=Object.fromEntries([panel,launcher,close,...nodes].map(el=>['#'+el.id,el]));
+  const context={document:{documentElement:root,querySelector:s=>byId[s]||null,querySelectorAll:()=>nodes,dispatchEvent(){}},CustomEvent:class{constructor(type,{detail}){this.type=type;this.detail=detail}}};
+  runInNewContext("const $=s=>document.querySelector(s);"+ui.slice(ui.indexOf('const SETTINGS_BACKGROUND='),ui.indexOf('// Visibility stays'))+'globalThis.openSettings=setSettingsOpen;globalThis.syncSettings=syncSettingsContext;',context);
+  context.openSettings(true);assert.equal(focused,'k11520UiSettingsClose');assert.ok(nodes.every(el=>el.inert));assert.equal(root.classList.contains('k11520SettingsOpen'),true);
+  // The mission can finish while the dialog is open. Closing must never restore
+  // a stale state, toggle More, or make an already-inert organ interactive.
+  courier.dataset.contextState='arrived';context.syncSettings();context.openSettings(false);
+  assert.equal(courier.dataset.contextState,'arrived');assert.equal(courier.inert,false);assert.equal(rail.inert,false);assert.equal(preexisting.inert,true);assert.equal(launcher.inert,false);assert.equal(focused,'gameModeToggle');assert.equal(root.classList.contains('k11520SettingsOpen'),false);
+  context.openSettings(true);context.openSettings(false);assert.equal(preexisting.inert,true);
+  assert.ok(ui.includes("e.key==='Escape'"));assert.ok(ui.includes("e.key==='Tab'"));
+});
+
+test('the existing Market owner collapses every HUD profile after a real 15-second idle interval',async()=>{
+  const {runInNewContext}=await import('node:vm');const ui=read('../runtime/mobile-ui-settings.mjs');let timer=null;
+  const row={hidden:false,attributes:{},setAttribute(k,v){this.attributes[k]=v}},root={dataset:{},classList:{toggle(k,v){this[k]=v}}};
+  const context={document:{documentElement:root},row,setTimeout:(fn,ms)=>{timer={fn,ms};return 1},clearTimeout:()=>{timer=null}};
+  runInNewContext("const $=()=>row;const MARKET_IDLE_MS=15000;let profile='FULL',marketOpen=false,marketTimer=0,marketPointers=new Set(),allOn=true,state={markets:true};"+ui.slice(ui.indexOf('function syncWorldFirst()'),ui.indexOf('function installWorldFirst()'))+"globalThis.openMarket=showMarketCards;globalThis.holdMarket=()=>{marketPointers.add(1);scheduleMarketHide()};globalThis.releaseMarket=()=>{marketPointers.clear();scheduleMarketHide()};",context);
+  context.openMarket();assert.equal(row.attributes['aria-expanded'],'true');assert.equal(timer.ms,15000);assert.equal(row.textContent,'⌃');context.holdMarket();assert.equal(timer,null);context.releaseMarket();assert.equal(timer.ms,15000);timer.fn();assert.equal(root.classList.k11520MarketOpen,false);assert.equal(row.attributes['aria-expanded'],'false');assert.equal(row.textContent,'📈');
+  const layout=read('../runtime/mobile-control-layout.mjs');assert.ok(layout.includes('html[data-k11520-hud-profile]:not(.k11520MarketOpen) .axes{display:none!important}'));assert.equal(main.includes('KX BTC · KY ETH · KZ BNB ·'),false,'quotes must not recreate the persistent ticker');
+});
+
+test('Camera Recenter is context-only and never gains movement or settlement authority',async()=>{
+  const {runInNewContext}=await import('node:vm');const context={cameraView:{manual:false,zoom:1,panX:0,panZ:0},cameraReset:{dataset:{}}};
+  runInNewContext(main.slice(main.indexOf('function syncCameraResetContext()'),main.indexOf("const cameraStatus=document.createElement"))+'globalThis.sync=syncCameraResetContext;',context);
+  context.sync();assert.equal(context.cameraReset.hidden,true);assert.equal(context.cameraReset.inert,true);context.cameraView.manual=true;context.sync();assert.equal(context.cameraReset.hidden,false);assert.equal(context.cameraReset.inert,false);context.cameraView.manual=false;context.sync();assert.equal(context.cameraReset.hidden,true);
+  assert.ok(main.includes('cameraView.manual=true;cameraGesture=true;syncCameraResetContext();return;'),'existing pinch owner must reveal Recenter');assert.ok(main.includes('showCameraStatus();syncCameraResetContext()};'),'existing Recenter handler must hide its own control again');
+});
+
+test('World context uses existing mission eligibility, not idle or settled history',async()=>{
+  const {runInNewContext}=await import('node:vm');const context={};runInNewContext(mobileShell.slice(mobileShell.indexOf('function contextActionWorldVisibility('),mobileShell.indexOf('function style(){'))+'globalThis.visibility=contextActionWorldVisibility;',context);
+  const input={target:null,courier:null,digital:null,playerLifeId:'PLAYER-A',playerPosition:{x:0,y:0,z:0},raidDistance:5,now:2000};const visible=patch=>context.visibility({...input,...patch});
+  assert.equal(visible({}).raid,false);assert.equal(visible({}).courier,false);
+  for(const status of ['ACTIVE','CLOCK_REVIEW'])assert.equal(visible({courier:{status}}).courier,true);
+  for(const status of ['DELIVERED','ROBBED','FAILED'])assert.equal(visible({courier:{status}}).courier,false);
+  assert.equal(visible({courier:{status:'ROBBED',insurance:{claimStatus:'APPROVED'}}}).courier,true);
+  assert.equal(visible({courier:{status:'DELIVERED'},digital:{status:'IN_TRANSIT'}}).courier,false,'keep existing courier-before-digital selection precedence');
+  const target={status:'ACTIVE',courierLifeId:'PLAYER-B',dueAt:5000,bandit:{attackWindowStartsAt:1000,lastRaidAt:0,cooldownMs:1000}};
+  assert.equal(visible({target}).raid,true);for(const raidDistance of [-1,8.01,NaN,Infinity])assert.equal(visible({target,raidDistance}).raid,false);
+  assert.equal(visible({target,playerPosition:{x:0,y:0}}).raid,false);assert.equal(visible({target,now:900}).raid,false);assert.equal(visible({target,now:5000}).raid,false);assert.equal(visible({target:{...target,courierLifeId:'PLAYER-A'}}).raid,false);
+  assert.equal(visible({target:{...target,bandit:{...target.bandit,lastRaidAt:1500}}}).raid,false);
+  assert.equal(visible({target,digitalInterceptionEligible:true,raidDistance:20}).raid,false,'target-before-digital selection stays canonical');
+  assert.equal(visible({digital:{status:'IN_TRANSIT'}}).raid,false,'a flight alone does not pass canonical missile eligibility');assert.equal(visible({digitalInterceptionEligible:true}).raid,true);
+  assert.equal(visible({target:{status:'ROBBED',cargo:{ownerState:'LOOT_CRATE',ownerLifeId:'PLAYER-A'}}}).raid,true);
+});
+
+test('existing rail owners cancel capture on Settings and require a fresh pointer after close',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  for(const owner of ['lots','C','Y']){
+    let settings=false,commits=[],clears=0;
+    const listeners=new Map(),documentListeners=new Map(),captured=new Set();
+    const el={dataset:{},classList:{contains:()=>false},closest:()=>el,getBoundingClientRect:()=>({top:0,height:100}),addEventListener(type,fn){const a=listeners.get(type)||[];a.push(fn);listeners.set(type,a)},setPointerCapture:id=>captured.add(id),hasPointerCapture:id=>captured.has(id),releasePointerCapture:id=>captured.delete(id)};
+    const root={classList:{contains:()=>settings}},doc={documentElement:root,addEventListener(type,fn){const a=documentListeners.get(type)||[];a.push(fn);documentListeners.set(type,a)}};
+    const ctx={$:()=>el,ROOT:root,document:doc,el,record:value=>commits.push(value),clear:()=>clears++,signedFromPointer:y=>y,paintSignedC:()=>{},applySignedValue:value=>commits.push(value)};
+    if(owner==='lots')runInNewContext(main.slice(main.indexOf('function bindVertical('),main.indexOf("bindVertical('#lotsControl'"))+"bindVertical('#lotsControl',record);",ctx);
+    if(owner==='C')runInNewContext('let cPointer=null,internalNative=false;'+signedC.slice(signedC.indexOf('function cancelCInput()'),signedC.indexOf('function onDocumentClick('))+signedC.slice(signedC.indexOf('function bindC()'),signedC.indexOf('function publish()'))+'bindC();',ctx);
+    if(owner==='Y')runInNewContext('let railPid=null,rail={active:false,value:0};function railFrom(e){rail={active:true,value:e.clientY};record(e.clientY)}function clearRail(){rail={active:false,value:0};clear()}'+xyzControl.slice(xyzControl.indexOf('function bindRail()'),xyzControl.indexOf('function install(){'))+'bindRail();',ctx);
+    const emit=(type,pointerId,clientY=25)=>{const e={type,pointerId,clientY,target:el,preventDefault(){},stopImmediatePropagation(){}};for(const fn of listeners.get(type)||[])fn(e)};
+    const context=open=>{settings=open;for(const fn of documentListeners.get('k11520:settings-context')||[])fn({detail:{open}})};
+    emit('pointerdown',1);assert.equal(commits.length,1,owner+' fresh down');assert.ok(captured.has(1));
+    emit('pointerdown',2);assert.equal(commits.length,1,owner+' second contact must not steal current ownership');assert.equal(captured.has(2),false);
+    context(true);assert.equal(captured.size,0,owner+' releases capture on Settings open');const previous=commits.at(-1);
+    emit('pointermove',1,80);emit('pointerdown',3,80);assert.equal(commits.length,1,owner+' hidden gestures cannot edit values');
+    context(false);emit('pointermove',1,80);emit('pointerup',1,80);assert.equal(commits.length,1,owner+' old input cannot resume after close');assert.equal(commits.at(-1),previous);
+    emit('pointerdown',4,40);assert.equal(commits.length,2,owner+' fresh input works after close');emit('lostpointercapture',4);assert.equal(captured.size,0);emit('pointermove',4,90);assert.equal(commits.length,2,owner+' lost capture ends ownership');
+    if(owner==='Y')assert.ok(clears>=2,'remaining-axis transient movement is cleared without writing XYZ');
+  }
+});
+
+test('numeric editors preserve ordinary blur but cannot commit after Settings suppresses geometry',async()=>{
+  const {runInNewContext}=await import('node:vm');let settings=false,commits=[],syncs=0;const listeners={};
+  const input={dataset:{},value:'12',addEventListener:(type,fn)=>listeners[type]=fn,blur:()=>listeners.blur()};
+  const ctx={input,commit:v=>commits.push(v),ROOT:{classList:{contains:()=>settings}},syncNumericEditors:()=>syncs++};
+  runInNewContext(signedC.slice(signedC.indexOf('function bindNumericEditor('),signedC.indexOf('function ensureNumericEditors('))+'bindNumericEditor(input,commit);',ctx);
+  listeners.blur();assert.deepEqual(commits,['12'],'normal blur-before-open still commits');settings=true;input.value='99';listeners.change();listeners.blur();listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12'],'Settings-active change/blur/Enter cannot dispatch into hidden rails');assert.ok(syncs>=2);
+  settings=false;input.value='7';listeners.keydown({key:'Enter',stopPropagation(){},preventDefault(){}});assert.deepEqual(commits,['12','7'],'a fresh Enter after close commits normally');
+});
+
+test('shared Wallet foreground guard composes with Settings and current hidden preferences',async()=>{
+  const {runInNewContext}=await import('node:vm');const layout=read('../runtime/market-origin-wallet-layout-runtime.mjs');
+  const flags=new Set(['k11520UtilitiesOpen']),node=id=>({id,textContent:'',title:'',dataset:{},attrs:{},classes:new Set(),classList:{contains(name){return this.owner.classes.has(name)}},style:{values:{},setProperty(k,v){this.values[k]=v},removeProperty(k){delete this.values[k]},getPropertyValue(k){return this.values[k]||''},getPropertyPriority(k){return k in this.values?'important':''}},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]}});
+  const ids=['k11520UtilityMaster','cargoInterceptionButton','homeDeliveryButton','dock','gameModeToggle','walletToggle','walletPanel','chatHandle','bgmButton','aiChatButton','backpackButton','k11520HudCollapseAll','kaiosPortalButton'];const nodes=Object.fromEntries(ids.map(id=>{const el=node(id);el.classList.owner=el;return['#'+id,el]}));nodes['#walletPanel'].classes.add('collapsed');nodes['#chatHandle'].classes.add('k11520HiddenBySettings');
+  const ctx={$:s=>nodes[s]||null,document:{documentElement:{classList:{contains:k=>flags.has(k)}},querySelectorAll:s=>nodes[s]?[nodes[s]]:[]},settingsOpen:()=>flags.has('k11520SettingsOpen'),installUtilityMaster:()=>nodes['#k11520UtilityMaster'],matchMedia:q=>({matches:q.includes('(max-width:600px)')&&!q.includes('landscape')})};
+  runInNewContext('let walletWasOpen=false;'+layout.slice(layout.indexOf('function put('),layout.indexOf('function installStyle()'))+layout.slice(layout.indexOf('function pinMobileUtilityStack()'),layout.indexOf('function closeUtilitySurfaces()'))+layout.slice(layout.indexOf('function syncUtilityMaster()'),layout.indexOf('function walletAnchor()'))+'globalThis.sync=()=>{pinMobileUtilityStack();syncUtilityMaster();pinMobileUtilityStack();syncUtilityMaster()};',ctx);
+  ctx.sync();assert.equal(nodes['#chatHandle'].style.values.display,'none');assert.notEqual(nodes['#gameModeToggle'].style.values.display,'none');
+  nodes['#cargoInterceptionButton'].dataset.worldContext='true';nodes['#homeDeliveryButton'].dataset.worldContext='true';nodes['#walletPanel'].classes.delete('collapsed');ctx.sync();assert.equal(nodes['#gameModeToggle'].style.values.display,'none');assert.equal(nodes['#dock'].style.values.display,'none');assert.notEqual(nodes['#walletToggle'].style.values.display,'none');for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(nodes[id].style.values.display,'none','active context peer stays hidden across owner ticks');
+  flags.add('k11520HudCollapsed');ctx.sync();assert.notEqual(nodes['#k11520HudCollapseAll'].style.values.display,'none','whole-HUD restore remains available');flags.delete('k11520HudCollapsed');
+  flags.add('k11520SettingsOpen');ctx.sync();assert.equal(nodes['#walletToggle'].style.values.display,'none');assert.equal(nodes['#walletPanel'].style.values.display,'none');assert.equal(nodes['#walletPanel'].classes.has('collapsed'),false,'Settings never rewrites Wallet state');
+  flags.delete('k11520SettingsOpen');ctx.sync();assert.notEqual(nodes['#walletPanel'].style.values.display,'none');assert.equal(nodes['#gameModeToggle'].style.values.display,'none','Wallet remains the foreground owner after Settings closes');
+  nodes['#walletPanel'].classes.add('collapsed');ctx.sync();assert.notEqual(nodes['#gameModeToggle'].style.values.display,'none');assert.equal(nodes['#chatHandle'].style.values.display,'none','Wallet close does not override a hidden chat preference');
+  flags.delete('k11520UtilitiesOpen');for(const eligible of [true,false,true]){for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])nodes[id].dataset.worldContext=String(eligible);ctx.sync();for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(nodes[id].style.values.display,eligible?'grid':'none','closed tray uses current eligibility after Wallet close')}
 });
