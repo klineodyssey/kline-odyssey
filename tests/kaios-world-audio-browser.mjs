@@ -55,7 +55,7 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
  await page.evaluate(()=>{
   window.__heartTx=[];window.__txFailure=null;window.__holdTx=false;window.__walletReads=[];
   window.__heartInputEvents=[];
-  for(const type of ['touchstart','touchend','click'])document.addEventListener(type,e=>{
+  for(const type of ['touchstart','touchend','click','focusin','input','keydown'])document.addEventListener(type,e=>{
    __heartInputEvents.push({type,target:e.target.closest('button')?.id||e.target.id,value:document.getElementById('kh-vow-amount')?.value,tx:__heartTx.length,time:performance.now()});
   },true);
   window.ethereum={isMetaMask:true,request:async({method,params})=>{
@@ -84,7 +84,20 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   await page.waitForFunction(({id,before})=>__heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id)&&document.getElementById(id).dataset.heartPending!=='1',{id,before});
  };
  const count=()=>page.evaluate(()=>__heartTx.length);
- const open=async id=>{if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false')await page.locator('#kgen-heart-toggle').tap();await page.locator(id).tap();};
+ const open=async id=>{
+  if(await page.locator('#kgen-heart-live-panel').getAttribute('aria-hidden')==='false'){
+   await page.locator('#kgen-heart-toggle').tap();
+   await page.waitForFunction(()=>document.getElementById('kgen-heart-live-panel').getAttribute('aria-hidden')==='true');
+  }
+  const before=await page.evaluate(()=>__heartInputEvents.length);
+  await page.locator(id).tap();
+  // openHeartCard focuses its first field in requestAnimationFrame. Wait for
+  // this tap's click and that focus before fill('') sends Delete to the input.
+  await page.waitForFunction(({id,before})=>
+   __heartInputEvents.slice(before).some(e=>e.type==='click'&&e.target===id.slice(1))&&
+   document.getElementById('kgen-heart-live-panel').getAttribute('aria-hidden')==='false'&&
+   document.activeElement===document.getElementById(id.includes('vow')?'kh-vow-option':'kh-wish-text'),{id,before});
+ };
  try{
   await open('#kgen-v30-wish-btn');await page.locator('#kh-wish-text').fill('世界平安');
   assert.equal(await count(),0,'shortcut only opens the canonical form');
@@ -103,7 +116,9 @@ if(!preservation)for(const [width,height] of [[390,844],[844,390]]){
   const invalidInputs=[];
   for(const [id,value,pattern]of [['kh-vow-amount','',/請輸入/],['kh-vow-amount','   ',/請輸入/],['kh-vow-amount','0',/範圍/],['kh-vow-amount','1.5',/正整數/],['kh-vow-amount','-1',/正整數/],['kh-vow-amount','abc',/正整數/],['kh-lamp-days','',/請輸入/],['kh-lamp-days','1.5',/正整數/],['kh-lamp-days','3651',/範圍/]]){
    const before=await count(),prompts=confirmations;
-   await page.locator('#'+id).fill(value);const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);
+   await page.locator('#'+id).fill(value);
+   assert.equal(await page.locator('#'+id).inputValue(),value,`invalid-input fixture ${id} must be entered before submission`);
+   const action=id.includes('vow')?'kh-vow':'kh-lamp';await click(action);
    const message=await feedback(action).innerText();assert.match(message,pattern,JSON.stringify(await page.evaluate(()=>({events:__heartInputEvents.slice(-15),tx:__heartTx,value:document.getElementById('kh-vow-amount').value}))));
    assert.equal(await count(),before,`invalid ${id} ${JSON.stringify(value)} cannot reach signer`);
    assert.equal(confirmations,prompts,'invalid amount cannot request confirmation');
