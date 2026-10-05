@@ -372,3 +372,54 @@ export function validateLocalSimulationProductRecord(value,{playerId,owner}={}){
   }
   return value;
 }
+
+/**
+ * Pure BEFORE/AFTER credit check for the existing LOCAL Courier reducer rules.
+ * A matching receipt alone is not payment evidence: its exact progress delta
+ * must be present in the same candidate. This neither issues a credit nor
+ * proves the Courier mission; the caller still validates that canonical link.
+ * By default revision is unchanged. A guarded adapter may explicitly supply
+ * its exact next revision; this never supplies a monotonic-write guard itself.
+ */
+export function validateLocalCourierCreditTransition(before,after,{binding,expectedRevision}={}){
+  const invalid=()=>{throw new Error('INVALID_LOCAL_COURIER_CREDIT_TRANSITION')};
+  const bindingFields=['receiptId','missionId','playerId','owner','rewardKaios','purpose'];
+  if(binding===null||typeof binding!=='object'||Array.isArray(binding)||(Object.getPrototypeOf(binding)!==Object.prototype&&Object.getPrototypeOf(binding)!==null))invalid();
+  const descriptors=Object.getOwnPropertyDescriptors(binding),names=Reflect.ownKeys(descriptors);
+  if(names.length!==bindingFields.length||!bindingFields.every(k=>Object.hasOwn(descriptors,k)&&descriptors[k].enumerable&&Object.hasOwn(descriptors[k],'value')))invalid();
+  // Read only data descriptors so untrusted binding getters are never invoked.
+  const b=Object.fromEntries(bindingFields.map(k=>[k,descriptors[k].value]));
+  const insurance=b.purpose==='PLAYER_COURIER_INSURANCE_PAYOUT';
+  if(!insurance&&b.purpose!=='PLAYER_COURIER_REWARD')invalid();
+  const namespace={playerId:b.playerId,owner:b.owner};
+  validateLocalSimulationProductRecord(before,namespace);
+  validateLocalSimulationProductRecord(after,namespace);
+  const revision=expectedRevision===undefined?before.revision:expectedRevision;
+  if(!Number.isSafeInteger(revision)||(revision!==before.revision&&revision!==before.revision+1)||after.revision!==revision)invalid();
+  const same=(a,z)=>{
+    if(Object.is(a,z))return true;
+    if(a===null||z===null||typeof a!=='object'||typeof z!=='object'||Array.isArray(a)!==Array.isArray(z))return false;
+    const aKeys=Object.keys(a),zKeys=Object.keys(z);
+    return aKeys.length===zKeys.length&&aKeys.every(k=>Object.hasOwn(z,k)&&same(a[k],z[k]));
+  };
+  const p=before.progress,field=insurance?'courierInsuranceBindings':'courierReceiptBindings',index=insurance?'courierInsuranceReceipts':'courierReceipts',id=b.receiptId;
+  if(typeof id!=='string'||!(insurance?/^COURIER-INSURANCE-[0-9a-f]{8}$/:/^COURIER-RECEIPT-[0-9a-f]{8}$/).test(id)||typeof b.missionId!=='string'||!b.missionId||b.missionId.length>160||b.missionId!==b.missionId.trim()||/[<>\x00-\x1f]/.test(b.missionId)||!Number.isSafeInteger(b.rewardKaios)||b.rewardKaios<0||b.rewardKaios>(insurance?1080000:1000))invalid();
+  if(Object.hasOwn(p[field],id)){
+    // Exact already-bound credits are confirm-only. Preserve all existing
+    // binding extensions and reject every other delta, including double pay.
+    if(!bindingFields.every(k=>p[field][id][k]===b[k])||!same(after,{...before,revision}))invalid();
+    return after;
+  }
+  if(insurance?Object.hasOwn(p[index],id):p[index].includes(id))invalid();
+  const event=insurance?'COURIER_INSURANCE_PAYOUT':'COURIER_SETTLEMENT';
+  const expected={...before,revision,progress:{...p,
+    kaios:p.kaios+b.rewardKaios,
+    claimableKaios:b.owner==='guest'?p.claimableKaios:p.claimableKaios+b.rewardKaios,
+    xp:insurance?p.xp:p.xp+12,
+    events:{...p.events,[event]:(Object.hasOwn(p.events,event)?p.events[event]:0)+1},
+    [index]:insurance?{...p[index],[id]:b.rewardKaios}:[...p[index],id],
+    [field]:{...p[field],[id]:b}
+  }};
+  if(!same(after,expected))invalid();
+  return after;
+}

@@ -327,3 +327,103 @@ Regressions confirm rejected initialization creates no authority/archive and
 rejected commands do not advance revision or change bytes. This is strict
 admission hardening in an unintegrated API, not a production incident, a new CAS
 claim or completion of the multi-domain P0 gate.
+
+### Stage2A2: unintegrated full-record transaction mechanics
+
+This checkpoint adds `openGame`, `readGame` and `commandGame` to the same inert
+`createLocalGameAuthority` adapter. It is a storage-mechanics prototype, not a
+complete game-command authority or a production cutover. There are still zero
+production callers. No public method initializes, migrates, restores or promotes
+full-mode records. Tests seed only isolated fake-IndexedDB fixtures directly.
+Importing or constructing the adapter opens no database, reads no legacy storage,
+and changes no live writer.
+
+`openGame` explicitly loads a fixed lazy registry of the three existing pure
+domain validators before starting transactions. This preserves the current
+Recovery Center's Life-only loading path; its two-file asset allowlist is not
+expanded here. `openGame` alone creates no authority marker. Life-only and full
+APIs reject the other mode's marker, and no partial marker is silently upgraded.
+
+Full mode requires `KAIOS_LOCAL_GAME_FULL_DRAFT_V1`, `UNINTEGRATED_DRAFT`, and exact
+coverage of PLAYER_LIFE, BACKPACK, PRODUCT and COURIER. One object store remains the
+transaction boundary. A typed fixed catalog identifies the existing Life
+envelope, per-Life backpack, per-Life/owner local product envelope and shared
+Courier envelope. Product means local simulation persistence, not chain balances,
+margin authority or a second ledger. Every Life must have declared backpack and
+guest-product entries. A declaration of ABSENT has revision null and no physical
+row; this differs from a missing PRESENT row, an omitted caller expectation or an
+undeclared physical row, all of which fail closed. This prototype cannot create
+or mutate ABSENT rows, add players, add namespaces, or change the catalog.
+
+Every read validates the complete catalog, physical-key census, original JSON,
+existing domain schemas, exact owner namespaces and cross-domain receipt links.
+It rejects data that JSON would coerce or omit without calling accessors. Catalog
+size is bounded to 128 entries and the aggregate metadata/domain JSON to 8,000,000
+characters; the stricter existing per-domain limits also apply. Valid unknown
+extension fields survive. Corrupt or oversized data is not repaired or overwritten.
+
+Every command supplies the authority epoch, shared selection epoch, catalog
+revision and all catalog references/revisions, including explicit null entries.
+The complete vector is checked inside the same native readwrite transaction that
+reloads, validates, creates detached drafts, validates the result and persists all
+changed records. The adapter owns revision increments; each changed record moves
+forward once, unchanged records are not rewritten. A no-op writes nothing.
+Selection uses a dedicated SWITCH command and increments its shared epoch only
+when the active Life changes. Stale contexts must reload and explicitly retry;
+there is no automatic stale replay. Any request failure or abort rejects the whole
+operation. An acknowledgement is returned only from transaction completion, and
+closing/versionchange invalidates pending operations. Fake-IndexedDB proves only
+the modeled mechanics; native browser lifecycle and durability remain unverified.
+
+The synchronous internal reducer receives only detached domain payloads. It
+cannot change catalog metadata, revisions, other Lives/owners or undeclared
+mission participants. Async/thenable and reentrant reducers fail. The admitted
+prototype kinds are PLAYER_UPDATE, INVENTORY_UPDATE, PRODUCT_UPDATE,
+OWN_COURIER_TRANSACTION and SWITCH. These are not public gameplay intents: most
+gameplay semantics still need their existing trusted reducer wrappers and typed
+commands before integration. Arbitrary external callers must not receive this
+mechanical mutation API. No network waits or external effects belong inside it.
+
+Consumed Life events/nonces, backpack reward IDs, product receipt indexes/bindings
+and simulation order/position/receipt identities are retained. Simulation history
+cannot be reset, terminal records cannot be rewritten and observations cannot
+roll back. Product cumulative counters cannot decrease. Existing bound receipts
+cannot lose or alter their binding. Legacy unbound receipt/terminal-mission
+classifications must match immutable `legacyUnbound` metadata; missing bindings
+do not create new legacy provenance and never authorize inferred backpayment.
+
+OWN_COURIER_TRANSACTION is limited to a named mission belonging to the selected
+Life and selected product owner. It cannot create missions, activate quoted
+insurance, raid, claim cross-Life loot, change custody of terminal missions or
+recover CLOCK_REVIEW. DELIVERED/FAILED missions are immutable; ROBBED permits only
+its already-approved insurance progression. Premium activation remains explicitly
+held until a typed atomic debit command is reviewed.
+
+New confirmed credits require both the canonical mission link and the exact
+existing local product delta in the same commit. The pure
+`validateLocalCourierCreditTransition` API in `kgen-margin-runtime.mjs` verifies
+receipt, namespace, purpose and amount, delivery XP/event updates, insurance event
+updates and wallet-owner claimable changes under the existing rules. It rejects
+metadata-only acknowledgements, unrelated balance/history changes, legacy
+backpayment and duplicate credit. Its revision argument is supplied only by the
+adapter from the actual changed-record set; the validator alone is not a write
+guard. An already-bound credit permits confirmation with unchanged product bytes
+and revision. This checkpoint does not import the frozen clock-recovery candidate.
+
+Targeted regression coverage includes complete-vector N/N conflict, non-target
+staleness, explicit reload, absence/census corruption, scope isolation, shared
+selection, abort after one product request, exact delivery/insurance credit plus
+acknowledgement, confirm-only, immutable history/provenance, premium HOLD and
+coerced-ID rejection. These use fake-indexeddb 6.2.5 and synthetic data only.
+Native multi-tab, persistent-browser restart, quota/disk failure, BFCache, exact
+old-client interference, full raw-preserving migration/backup/restore, typed
+custody/world-effect replay and production conflict/recovery UI are still gates.
+No current browser result establishes the user's whole-Player-Life P0 acceptance.
+
+The published Stage1 head's shared Product QA baseline has failures in unchanged
+browser harnesses. Preserve that evidence and resolve the shared baseline before
+another queued heavy run; small in-memory checks do not replace it.
+
+```json
+{"STAGE":"FULL_RECORD_STORAGE_MECHANICS_PROTOTYPE","INTEGRATION":"UNINTEGRATED_DRAFT","SOURCE_PR":508,"PRODUCTION_CALLERS":0,"FULL_MARKER_PUBLIC_INITIALIZER":false,"PARTIAL_MARKER_AUTO_UPGRADE":false,"FULL_MIGRATION":"NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","PREMIUM_ACTIVATION":"TYPED_ATOMIC_DEBIT_REQUIRED","CROSS_LIFE_CUSTODY":"NOT_IMPLEMENTED","MODEL_TEST_ENGINE":"fake-indexeddb@6.2.5","NATIVE_FULL_MODE_QA":"NOT_RUN","HEAVY_ACCEPTANCE":"BLOCKED_SHARED_QA_BASELINE","PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","SELF_MERGE":false}
+```

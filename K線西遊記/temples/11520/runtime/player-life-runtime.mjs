@@ -264,12 +264,14 @@ const AUTHORITY_INTEGRATION='UNINTEGRATED_DRAFT';
 const AUTHORITY_DOMAIN='PLAYER_LIFE';
 const AUTHORITY_STORE='records';
 const AUTHORITY_READ_KEYS=['$authority',AUTHORITY_DOMAIN,'$initialized','$keys'];
+const FULL_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_FULL_DRAFT_V1';
+const FULL_AUTHORITY_DOMAINS=['PLAYER_LIFE','BACKPACK','PRODUCT','COURIER'];
 const equalData=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function authorityDomain(domain){if(domain!==AUTHORITY_DOMAIN)fail('DOMAIN_NOT_IMPLEMENTED')}
-function exactAuthorityJson(value){
+function exactAuthorityJson(value,limit=4000000){
   const ancestors=new Set();let characters=0;
   const invalid=()=>fail('INVALID_AUTHORITY_JSON');
-  const add=text=>{characters+=text.length;if(characters>4000000)invalid()};
+  const add=text=>{characters+=text.length;if(characters>limit)invalid()};
   function visit(v,depth=0){
     if(depth>128)invalid();
     if(v===null||typeof v==='string'||typeof v==='boolean'){add(JSON.stringify(v));return}
@@ -287,13 +289,13 @@ function exactAuthorityJson(value){
   visit(value);
 }
 function authorityEnvelope(value){
-  try{exactAuthorityJson(value);validateEnvelope(value);if(JSON.stringify(value).length>4000000)fail('STORE_CAPACITY')}
+  try{exactAuthorityJson(value);if(!object(value)||(value.activePlayerId!==null&&(typeof value.activePlayerId!=='string'||!ID.test(value.activePlayerId))))fail('INVALID_ACTIVE_PLAYER_ID');validateEnvelope(value);if(JSON.stringify(value).length>4000000)fail('STORE_CAPACITY')}
   catch{fail('CORRUPT_AUTHORITY')}
   return value;
 }
 function authoritySnapshot(meta,envelope){
   if(meta===undefined&&envelope===undefined)return {status:'UNINITIALIZED',coverage:[AUTHORITY_DOMAIN],integration:AUTHORITY_INTEGRATION};
-  if(!keys(meta,['schema','integration','coverage','authorityEpoch','selectionEpoch','activePlayerId'])||meta.schema!==AUTHORITY_SCHEMA||meta.integration!==AUTHORITY_INTEGRATION||!equalData(meta.coverage,[AUTHORITY_DOMAIN])||!/^[a-f0-9]{32}$/.test(meta.authorityEpoch)||!integer(meta.selectionEpoch,Number.MAX_SAFE_INTEGER))fail('CORRUPT_AUTHORITY');
+  if(!keys(meta,['schema','integration','coverage','authorityEpoch','selectionEpoch','activePlayerId'])||meta.schema!==AUTHORITY_SCHEMA||meta.integration!==AUTHORITY_INTEGRATION||!equalData(meta.coverage,[AUTHORITY_DOMAIN])||typeof meta.authorityEpoch!=='string'||!/^[a-f0-9]{32}$/.test(meta.authorityEpoch)||!integer(meta.selectionEpoch,Number.MAX_SAFE_INTEGER))fail('CORRUPT_AUTHORITY');
   authorityEnvelope(envelope);
   if(meta.activePlayerId!==envelope.activePlayerId)fail('CORRUPT_AUTHORITY');
   return clone({status:'READY',coverage:meta.coverage,integration:meta.integration,authorityEpoch:meta.authorityEpoch,selectionEpoch:meta.selectionEpoch,revision:envelope.revision,activePlayerId:envelope.activePlayerId,envelope});
@@ -301,14 +303,14 @@ function authoritySnapshot(meta,envelope){
 export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GAME_AUTHORITY_DATABASE}={}){
   // No global storage getter, DB request, event listener, or random generation
   // occurs here. Explicit open is the first interaction with browser storage.
-  if(databaseName!==LOCAL_GAME_AUTHORITY_DATABASE&&!/^KAIOS_LOCAL_GAME_TEST:[a-zA-Z0-9_-]{1,100}$/.test(databaseName))fail('INVALID_AUTHORITY_DATABASE');
-  let db=null,opening=null,generation=0,reducing=false;
+  if(typeof databaseName!=='string'||(databaseName!==LOCAL_GAME_AUTHORITY_DATABASE&&!/^KAIOS_LOCAL_GAME_TEST:[a-zA-Z0-9_-]{1,100}$/.test(databaseName)))fail('INVALID_AUTHORITY_DATABASE');
+  let db=null,opening=null,generation=0,reducing=false,gameRegistry=null;
   const transactions=new Set();
   const requireOpen=()=>{if(!db)fail('AUTHORITY_OPEN_REQUIRED');return db};
   const secureCrypto=()=>crypto??globalThis.crypto;
   const token=()=>{const c=secureCrypto();if(typeof c?.getRandomValues!=='function')fail('SECURE_RANDOM_UNAVAILABLE');const b=new Uint8Array(16);c.getRandomValues(b);return [...b].map(v=>v.toString(16).padStart(2,'0')).join('')};
   async function hash(raw){const c=secureCrypto();if(typeof c?.subtle?.digest!=='function')fail('HASH_UNAVAILABLE');const b=await c.subtle.digest('SHA-256',new TextEncoder().encode(raw));return [...new Uint8Array(b)].map(v=>v.toString(16).padStart(2,'0')).join('')}
-  function close(){generation++;opening=null;for(const tx of transactions){try{tx.abort()}catch{}}db?.close();db=null}
+  function close(){generation++;opening=null;gameRegistry=null;for(const tx of transactions){try{tx.abort()}catch{}}db?.close();db=null}
   function open(){
     if(db)return Promise.resolve();if(opening)return opening;
     const admitted=generation;
@@ -328,7 +330,7 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     }).finally(()=>{if(admitted===generation)opening=null});
     return opening;
   }
-  function transaction(mode,recordKeys,work){
+  function transaction(mode,recordKeys,work,expandKeys=null){
     const connection=requireOpen(),admitted=generation;
     return new Promise((resolve,reject)=>{
       let tx,result,workError=null;
@@ -339,12 +341,18 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
       tx.oncomplete=()=>{transactions.delete(tx);if(admitted!==generation||connection!==db){reject(new Error('AUTHORITY_CLOSED'));return}resolve(clone(result))};
       tx.onabort=()=>{transactions.delete(tx);reject(workError||tx.error||new Error('AUTHORITY_TRANSACTION_ABORTED'))};
       tx.onerror=()=>{workError??=tx.error||new Error('AUTHORITY_TRANSACTION_FAILED')};
-      const store=tx.objectStore(AUTHORITY_STORE),values={};let remaining=recordKeys.length;
-      try{for(const key of recordKeys){const request=key==='$keys'?store.getAllKeys():store.get(key);request.onsuccess=()=>{values[key]=request.result;if(--remaining===0){try{if(admitted!==generation||connection!==db)fail('AUTHORITY_CLOSED');result=work(values,store);if(result&&typeof result.then==='function')fail('ASYNC_TRANSACTION_REDUCER')}catch(error){abort(error)}}}}}catch(error){abort(error)}
+      const store=tx.objectStore(AUTHORITY_STORE),values={};
+      const apply=()=>{try{if(admitted!==generation||connection!==db)fail('AUTHORITY_CLOSED');result=work(values,store);if(result&&typeof result.then==='function')fail('ASYNC_TRANSACTION_REDUCER')}catch(error){abort(error)}};
+      function readKeys(keys,done){
+        let remaining=keys.length;if(!remaining){done();return}
+        try{for(const key of keys){const request=key==='$keys'?store.getAllKeys():store.get(key);request.onerror=()=>{workError??=request.error};request.onsuccess=()=>{values[key]=request.result;if(--remaining===0)done()}}}catch(error){abort(error)}
+      }
+      readKeys(recordKeys,()=>{try{if(admitted!==generation||connection!==db)fail('AUTHORITY_CLOSED');const extra=expandKeys?expandKeys(values):[];readKeys(extra,apply)}catch(error){abort(error)}});
     });
   }
   const loaded=values=>{
     const meta=values.$authority,envelope=values[AUTHORITY_DOMAIN],marker=values.$initialized;
+    if(meta?.schema===FULL_AUTHORITY_SCHEMA)fail('FULL_AUTHORITY_REQUIRES_GAME_API');
     const history=values.$keys?.some(key=>typeof key==='string'&&key.startsWith('archive:'));
     if(meta===undefined&&envelope===undefined){if(marker!==undefined||history)fail('CORRUPT_AUTHORITY')}
     else if(!keys(marker,['authorityEpoch','coverage'])||marker.authorityEpoch!==meta?.authorityEpoch||!equalData(marker.coverage,[AUTHORITY_DOMAIN])||!values.$keys?.includes('archive:'+meta.authorityEpoch))fail('CORRUPT_AUTHORITY');
@@ -376,7 +384,7 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
       const before=loaded(values);if(before.status!=='READY')fail('AUTHORITY_UNINITIALIZED');
       if(!keys(expectations,['authorityEpoch','selectionEpoch','revision'])||expectations.authorityEpoch!==before.authorityEpoch||expectations.selectionEpoch!==before.selectionEpoch||expectations.revision!==before.revision)fail('REVISION_CONFLICT_RELOAD_REQUIRED');
       const previous=before.envelope,next=clone(previous),meta=clone(values.$authority),oldIds=Object.keys(previous.players);
-      if(!ID.test(input.playerId||''))fail('INVALID_PLAYER_ID');
+      if(typeof input.playerId!=='string'||!ID.test(input.playerId))fail('INVALID_PLAYER_ID');
       if(input.kind==='SWITCH'){
         if(reducer!==undefined)fail('SWITCH_REDUCER_FORBIDDEN');if(!Object.hasOwn(next.players,input.playerId))fail('PLAYER_NOT_FOUND');next.activePlayerId=input.playerId;
       }else{
@@ -408,7 +416,7 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     });
   }
   function validateCandidate(candidate){
-    if(!keys(candidate,['schema','id','coverage','sourceKey','raw','sha256','ownerIds','activePlayerId'])||candidate.schema!=='LIFE_DRAFT_MIGRATION_CANDIDATE'||!/^[a-f0-9]{32}$/.test(candidate.id)||!equalData(candidate.coverage,[AUTHORITY_DOMAIN])||candidate.sourceKey!==PLAYER_LIFE_STORAGE_KEY||typeof candidate.raw!=='string'||candidate.raw.length>4000000||!/^[a-f0-9]{64}$/.test(candidate.sha256))fail('INVALID_MIGRATION_CANDIDATE');
+    if(!keys(candidate,['schema','id','coverage','sourceKey','raw','sha256','ownerIds','activePlayerId'])||candidate.schema!=='LIFE_DRAFT_MIGRATION_CANDIDATE'||typeof candidate.id!=='string'||!/^[a-f0-9]{32}$/.test(candidate.id)||!equalData(candidate.coverage,[AUTHORITY_DOMAIN])||candidate.sourceKey!==PLAYER_LIFE_STORAGE_KEY||typeof candidate.raw!=='string'||candidate.raw.length>4000000||typeof candidate.sha256!=='string'||!/^[a-f0-9]{64}$/.test(candidate.sha256))fail('INVALID_MIGRATION_CANDIDATE');
     let parsed;try{parsed=JSON.parse(candidate.raw)}catch{fail('INVALID_MIGRATION_CANDIDATE')}authorityEnvelope(parsed);
     if(candidate.activePlayerId!==parsed.activePlayerId||!equalData(candidate.ownerIds,Object.keys(parsed.players).sort()))fail('INVALID_MIGRATION_OWNER');return parsed;
   }
@@ -420,7 +428,7 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     if(admitted!==generation)fail('AUTHORITY_CLOSED');
     return transaction('readwrite',AUTHORITY_READ_KEYS,(values,store)=>{if(loaded(values).status!=='UNINITIALIZED')fail('AUTHORITY_ALREADY_INITIALIZED');store.add(candidate,'candidate:'+candidate.id);return candidate});
   }
-  function readCandidate(id){if(!/^[a-f0-9]{32}$/.test(id||''))fail('INVALID_MIGRATION_CANDIDATE');return transaction('readonly',['candidate:'+id],values=>{const value=values['candidate:'+id];validateCandidate(value);if(value.id!==id)fail('MIGRATION_CANDIDATE_ID_MISMATCH');return value})}
+  function readCandidate(id){if(typeof id!=='string'||!/^[a-f0-9]{32}$/.test(id))fail('INVALID_MIGRATION_CANDIDATE');return transaction('readonly',['candidate:'+id],values=>{const value=values['candidate:'+id];validateCandidate(value);if(value.id!==id)fail('MIGRATION_CANDIDATE_ID_MISMATCH');return value})}
   async function commitMigration(input={}){
     authorityDomain(input.domain);if(!keys(input,['domain','candidateId','sha256','sourceStorage','confirmLifeOnlyDraft']))fail('INVALID_MIGRATION_CANDIDATE');if(input.confirmLifeOnlyDraft!==true)fail('EXPLICIT_DRAFT_CONFIRMATION_REQUIRED');requireOpen();const admitted=generation;
     input={...input};const candidate=await readCandidate(input.candidateId);if(candidate.sha256!==input.sha256||await hash(candidate.raw)!==candidate.sha256)fail('MIGRATION_CONTENT_MISMATCH');
@@ -434,5 +442,179 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
       store.add({kind:'MIGRATED_LIFE_DRAFT',candidate},'archive:'+meta.authorityEpoch);store.add({authorityEpoch:meta.authorityEpoch,coverage:[AUTHORITY_DOMAIN]},'$initialized');store.add(meta,'$authority');store.add(data,AUTHORITY_DOMAIN);return authoritySnapshot(meta,data);
     });
   }
-  return Object.freeze({open,close,read,initialize,command,prepareMigration,readCandidate,commitMigration,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
+
+  // Full mode is a separate inert storage-mechanics prototype. No public API
+  // initializes/promotes its marker; isolated tests seed reviewed fixtures.
+  async function openGame(){
+    const admitted=generation;
+    const [bag,product,courier]=await Promise.all([import('./backpack-runtime.mjs'),import('./kgen-margin-runtime.mjs'),import('./digital-ant-logistics-runtime.mjs')]);
+    if(admitted!==generation)fail('AUTHORITY_CLOSED');
+    if(typeof bag.validateCanonicalBackpack!=='function'||typeof product.validateLocalSimulationProductRecord!=='function'||typeof product.validateLocalCourierCreditTransition!=='function'||typeof courier.validateCanonicalCourierEnvelope!=='function')fail('DOMAIN_VALIDATORS_UNAVAILABLE');
+    await open();if(admitted!==generation)fail('AUTHORITY_CLOSED');
+    gameRegistry=Object.freeze({bag:bag.validateCanonicalBackpack,product:product.validateLocalSimulationProductRecord,credit:product.validateLocalCourierCreditTransition,courier:courier.validateCanonicalCourierEnvelope});
+  }
+  const gameFailure=()=>fail('CORRUPT_FULL_AUTHORITY');
+  function referenceKey(ref){
+    if(!keys(ref,['domain','playerId','owner']))gameFailure();
+    if(['PLAYER_LIFE','COURIER'].includes(ref.domain)){if(Object.keys(ref).length!==1)gameFailure();return ref.domain}
+    if(typeof ref.playerId!=='string'||!/^KAIOS-P-[a-zA-Z0-9-]{16,80}$/.test(ref.playerId))gameFailure();
+    if(ref.domain==='BACKPACK'&&Object.keys(ref).length===2)return 'BACKPACK:'+ref.playerId;
+    if(ref.domain==='PRODUCT'&&Object.keys(ref).length===3&&typeof ref.owner==='string'&&(ref.owner==='guest'||/^0x[0-9a-f]{40}$/.test(ref.owner)))return 'PRODUCT:'+ref.playerId+':'+ref.owner;
+    gameFailure();
+  }
+  function fullCatalog(values){
+    const meta=values.$authority,marker=values.$initialized,census=values.$keys;
+    if(meta?.schema===AUTHORITY_SCHEMA)fail('PARTIAL_AUTHORITY_REQUIRES_REVIEW');
+    if(meta===undefined)fail('FULL_AUTHORITY_NOT_INITIALIZED');
+    exactAuthorityJson(meta);exactAuthorityJson(marker);
+    if((meta.activePlayerId!==null&&(typeof meta.activePlayerId!=='string'||!ID.test(meta.activePlayerId)))||!keys(meta,['schema','integration','coverage','authorityEpoch','selectionEpoch','activePlayerId','catalogRevision','catalog','legacyUnbound'])||meta.schema!==FULL_AUTHORITY_SCHEMA||meta.integration!==AUTHORITY_INTEGRATION||!equalData(meta.coverage,FULL_AUTHORITY_DOMAINS)||typeof meta.authorityEpoch!=='string'||!/^[a-f0-9]{32}$/.test(meta.authorityEpoch)||!integer(meta.selectionEpoch,Number.MAX_SAFE_INTEGER)||!integer(meta.catalogRevision,Number.MAX_SAFE_INTEGER)||!Array.isArray(meta.catalog)||meta.catalog.length<2||meta.catalog.length>128||!Array.isArray(meta.legacyUnbound)||meta.legacyUnbound.some(v=>typeof v!=='string')||new Set(meta.legacyUnbound).size!==meta.legacyUnbound.length)gameFailure();
+    if(!keys(marker,['authorityEpoch','coverage','catalogRevision'])||marker.authorityEpoch!==meta.authorityEpoch||marker.catalogRevision!==meta.catalogRevision||!equalData(marker.coverage,FULL_AUTHORITY_DOMAINS)||!Array.isArray(census)||!census.includes('archive:'+meta.authorityEpoch))gameFailure();
+    const catalog=new Map();
+    for(const entry of meta.catalog){if(!keys(entry,['ref','presence'])||Object.keys(entry).length!==2||!['PRESENT','ABSENT'].includes(entry.presence))gameFailure();const key=referenceKey(entry.ref);if(catalog.has(key))gameFailure();catalog.set(key,entry);if(census.includes(key)!==(entry.presence==='PRESENT'))gameFailure()}
+    if(catalog.get('PLAYER_LIFE')?.presence!=='PRESENT'||!catalog.has('COURIER'))gameFailure();
+    for(const key of census)if(!catalog.has(key)&&!['$authority','$initialized'].includes(key)&&!(typeof key==='string'&&/^(archive|candidate):[a-f0-9]{32}$/.test(key)))gameFailure();
+    return catalog;
+  }
+  const legacyToken=(ref,purpose,receiptId,missionId=null)=>JSON.stringify([referenceKey(ref),purpose,receiptId,missionId]);
+  function fullState(values){
+    const catalog=fullCatalog(values),meta=values.$authority,life=values.PLAYER_LIFE,records=[];authorityEnvelope(life);
+    if(meta.activePlayerId!==life.activePlayerId)gameFailure();const playerIds=Object.keys(life.players);let aggregate=JSON.stringify(meta).length;
+    for(const playerId of playerIds)if(!catalog.has('BACKPACK:'+playerId)||!catalog.has('PRODUCT:'+playerId+':guest'))gameFailure();
+    for(const [key,entry] of catalog){
+      const raw=values[key],ref=entry.ref;
+      if(ref.playerId&&!playerIds.includes(ref.playerId))gameFailure();
+      if(entry.presence==='ABSENT'){if(raw!==undefined)gameFailure();records.push({ref:clone(ref),revision:null,value:null});continue}
+      if(raw===undefined)gameFailure();exactAuthorityJson(raw);aggregate+=JSON.stringify(raw).length;if(aggregate>8_000_000)fail('FULL_AUTHORITY_CAPACITY');
+      let revision,value;
+      if(ref.domain==='BACKPACK'){if(!keys(raw,['revision','data'])||Object.keys(raw).length!==2||!integer(raw.revision,Number.MAX_SAFE_INTEGER))gameFailure();gameRegistry.bag(raw.data,{ownerId:ref.playerId});revision=raw.revision;value=raw.data}
+      else{value=raw;revision=raw.revision;if(ref.domain==='PRODUCT')gameRegistry.product(raw,{playerId:ref.playerId,owner:ref.owner});else if(ref.domain==='COURIER')gameRegistry.courier(raw,{playerIds});else authorityEnvelope(raw)}
+      if(!integer(revision,Number.MAX_SAFE_INTEGER))gameFailure();records.push({ref:clone(ref),revision,value:clone(value)});
+    }
+    const byKey=new Map(records.map(e=>[referenceKey(e.ref),e])),courier=byKey.get('COURIER')?.value,unbound=[];
+    const bindingEqual=(binding,credit)=>binding&&credit&&['receiptId','missionId','playerId','owner','rewardKaios','purpose'].every(k=>binding[k]===credit[k]);
+    for(const record of records)if(record.ref.domain==='PRODUCT'&&record.value){
+      const p=record.value.progress;
+      for(const insurance of [false,true]){const bindings=p[insurance?'courierInsuranceBindings':'courierReceiptBindings'],ids=insurance?Object.keys(p.courierInsuranceReceipts):p.courierReceipts,purpose=insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD';
+        for(const id of ids){const binding=bindings[id];if(!binding){unbound.push(legacyToken(record.ref,purpose,id));continue}const mission=courier?.missions[binding.missionId],credit=insurance?mission?.insurance?.credit:mission?.settlement?.credit;if(!bindingEqual(binding,credit)||mission.courierLifeId!==record.ref.playerId)fail('INVALID_FULL_CREDIT_REFERENCE')}
+      }
+    }
+    for(const mission of Object.values(courier?.missions||{})){
+      for(const insurance of [false,true]){const credit=insurance?mission.insurance?.credit:mission.settlement?.credit,purpose=insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD',receiptId=insurance?mission.insurance?.payoutReceiptId:mission.settlement?.receiptId;
+        const completed=insurance?mission.insurance?.claimStatus==='PAID':mission.status==='DELIVERED';
+        if(credit){const product=byKey.get(referenceKey({domain:'PRODUCT',playerId:credit.playerId,owner:credit.owner}))?.value,binding=product?.progress[insurance?'courierInsuranceBindings':'courierReceiptBindings']?.[credit.receiptId];if(!product||(binding&&!bindingEqual(binding,credit))||(credit.status==='CONFIRMED'&&!binding))fail('INVALID_FULL_CREDIT_REFERENCE')}
+        else if(completed)unbound.push(legacyToken({domain:'COURIER'},purpose,receiptId,mission.missionId));
+      }
+      if(mission.cargo.ownerState==='CLAIMED_BY_BANDIT'){const bag=byKey.get(referenceKey({domain:'BACKPACK',playerId:mission.cargo.ownerLifeId}))?.value;if(!bag?.rewardReceipts.includes(mission.bandit.lootReceiptId))fail('INVALID_FULL_LOOT_REFERENCE')}
+    }
+    if(!equalData([...unbound].sort(),[...meta.legacyUnbound].sort()))fail('LEGACY_PROVENANCE_MISMATCH');
+    return {status:'READY',integration:AUTHORITY_INTEGRATION,coverage:clone(FULL_AUTHORITY_DOMAINS),authorityEpoch:meta.authorityEpoch,selectionEpoch:meta.selectionEpoch,activePlayerId:meta.activePlayerId,catalogRevision:meta.catalogRevision,records};
+  }
+  function gameTransaction(mode,work){
+    requireOpen();if(!gameRegistry)fail('GAME_VALIDATORS_NOT_READY');
+    return transaction(mode,['$authority','$initialized','$keys'],work,values=>[...fullCatalog(values).keys()]);
+  }
+  function readGame(){return gameTransaction('readonly',fullState)}
+  function retainedArray(before,after){if(!Array.isArray(after)||!equalData(before,after.slice(0,before.length)))fail('IMMUTABLE_HISTORY_CHANGED')}
+  function retainedMap(before,after){for(const [key,value] of Object.entries(before))if(!Object.hasOwn(after,key)||!equalData(value,after[key]))fail('IMMUTABLE_BINDING_CHANGED')}
+  function retainedCredit(before,after){if(!before)return;if(!after||!equalData({...before,status:undefined},{...after,status:undefined})||!['PENDING','CONFIRMED'].includes(after.status)||(before.status==='CONFIRMED'&&after.status!=='CONFIRMED'))fail('IMMUTABLE_BINDING_CHANGED')}
+  function retainedSimulation(before,after){
+    if(!before)return;if(!after||after.sequence<before.sequence)fail('SIMULATION_HISTORY_CHANGED');
+    retainedArray(before.receipts,after.receipts);
+    for(const kind of ['orders','positions']){
+      if(after[kind].length<before[kind].length)fail('SIMULATION_HISTORY_CHANGED');
+      for(let n=0;n<before[kind].length;n++){
+        const a=before[kind][n],b=after[kind][n],id=kind==='orders'?'orderId':'positionId';if(a[id]!==b[id])fail('SIMULATION_HISTORY_CHANGED');
+        const mutable=kind==='orders'?['status','triggeredAt','observedPrice','fillPrice','positionId','reason']:['status','margin','mark','observedAt','observationSequence','deltaIndex','equity','settledAt'];
+        const omit=v=>Object.fromEntries(Object.entries(v).filter(([k])=>!mutable.includes(k)));if(!equalData(omit(a),omit(b)))fail('SIMULATION_IDENTITY_CHANGED');
+        if((kind==='orders'?a.status!=='PENDING':a.status!=='OPEN')&&!equalData(a,b))fail('SIMULATION_HISTORY_CHANGED');
+        if(kind==='positions'&&b.observedAt<a.observedAt)fail('SIMULATION_HISTORY_CHANGED');
+      }
+    }
+    for(const [market,a] of Object.entries(before.observations)){const b=after.observations[market];if(!b||(!equalData(a,b)&&b.at<=a.at))fail('SIMULATION_HISTORY_CHANGED')}
+  }
+  function commandGame(input={},reducer){
+    if(reducing)fail('REENTRANT_COMMAND');exactAuthorityJson(input);
+    if(!keys(input,['kind','playerId','owner','missionId','expected'])||!['PLAYER_UPDATE','INVENTORY_UPDATE','PRODUCT_UPDATE','OWN_COURIER_TRANSACTION','SWITCH'].includes(input.kind))fail('INVALID_GAME_COMMAND');input=clone(input);
+    return gameTransaction('readwrite',(values,store)=>{
+      const before=fullState(values),meta=clone(values.$authority),catalog=fullCatalog(values),expect=input.expected;
+      if(!keys(expect,['authorityEpoch','selectionEpoch','catalogRevision','records'])||Object.keys(expect).length!==4||expect.authorityEpoch!==before.authorityEpoch||expect.selectionEpoch!==before.selectionEpoch||expect.catalogRevision!==before.catalogRevision||!Array.isArray(expect.records)||expect.records.length!==before.records.length)fail('REVISION_CONFLICT_RELOAD_REQUIRED');
+      const expected=new Map();for(const entry of expect.records){if(!keys(entry,['ref','revision'])||Object.keys(entry).length!==2)fail('INVALID_GAME_EXPECTATIONS');const key=referenceKey(entry.ref);if(expected.has(key)||!catalog.has(key))fail('INVALID_GAME_EXPECTATIONS');expected.set(key,entry.revision)}
+      for(const record of before.records)if(!expected.has(referenceKey(record.ref))||expected.get(referenceKey(record.ref))!==record.revision)fail('REVISION_CONFLICT_RELOAD_REQUIRED');
+      const life=before.records.find(e=>e.ref.domain==='PLAYER_LIFE').value;
+      if(typeof input.playerId!=='string'||!ID.test(input.playerId)||!Object.hasOwn(life.players,input.playerId)||typeof input.owner!=='string'||!(input.owner==='guest'||/^0x[0-9a-f]{40}$/.test(input.owner)))fail('INVALID_GAME_NAMESPACE');
+      if(input.kind!=='SWITCH'&&input.playerId!==before.activePlayerId)fail('PLAYER_NOT_ACTIVE');
+      const bagKey=referenceKey({domain:'BACKPACK',playerId:input.playerId}),productKey=referenceKey({domain:'PRODUCT',playerId:input.playerId,owner:input.owner});
+      const allowed=new Set(input.kind==='PLAYER_UPDATE'||input.kind==='SWITCH'?['PLAYER_LIFE']:input.kind==='INVENTORY_UPDATE'?[bagKey]:input.kind==='PRODUCT_UPDATE'?[productKey]:['COURIER',productKey]);
+      for(const key of allowed)if(catalog.get(key)?.presence!=='PRESENT')fail('DOMAIN_RECORD_ABSENT');
+      const oldCourier=before.records.find(e=>e.ref.domain==='COURIER')?.value;
+      if(input.kind==='OWN_COURIER_TRANSACTION'){if(typeof input.missionId!=='string'||oldCourier?.missions[input.missionId]?.courierLifeId!==input.playerId)fail('UNDECLARED_COURIER_PARTICIPANT')}
+      else if(input.missionId!==undefined)fail('UNDECLARED_COURIER_PARTICIPANT');
+      const drafts=before.records.map(({ref,value})=>({ref:clone(ref),value:clone(value)}));
+      if(input.kind==='SWITCH'){if(reducer!==undefined)fail('SWITCH_REDUCER_FORBIDDEN');drafts.find(e=>e.ref.domain==='PLAYER_LIFE').value.activePlayerId=input.playerId}
+      else{if(typeof reducer!=='function'||reducer.constructor?.name==='AsyncFunction')fail('SYNCHRONOUS_REDUCER_REQUIRED');reducing=true;let result;try{result=reducer(drafts)}finally{reducing=false}if(result&&typeof result.then==='function'){Promise.resolve(result).catch(()=>{});fail('ASYNC_TRANSACTION_REDUCER')}}
+      exactAuthorityJson(drafts,8000000);if(drafts.length!==before.records.length)fail('CATALOG_MUTATION_FORBIDDEN');
+      const nextValues={...values},changed=[];
+      for(let n=0;n<drafts.length;n++){
+        const entry=drafts[n],previous=before.records[n],key=referenceKey(previous.ref);
+        if(!keys(entry,['ref','value'])||Object.keys(entry).length!==2||referenceKey(entry.ref)!==key)fail('CATALOG_MUTATION_FORBIDDEN');
+        if(equalData(entry.value,previous.value))continue;
+        if(!allowed.has(key))fail('NON_TARGET_RECORD_MUTATION');if(previous.revision===null)fail('DOMAIN_RECORD_ABSENT');
+        const value=entry.value,old=previous.value;
+        if(previous.ref.domain!=='BACKPACK'&&value?.revision!==old.revision)fail('REVISION_MUTATION_FORBIDDEN');
+        if(previous.ref.domain==='PLAYER_LIFE'){
+          if(!equalData(Object.keys(value.players),Object.keys(old.players)))fail('PLAYER_REGISTRY_MUTATION_FORBIDDEN');
+          for(const id of Object.keys(old.players))if((input.kind==='SWITCH'||id!==input.playerId)&&!equalData(value.players[id],old.players[id]))fail('NON_TARGET_PLAYER_MUTATION');
+          if(input.kind!=='SWITCH'&&value.activePlayerId!==old.activePlayerId)fail('SELECTION_MUTATION_FORBIDDEN');
+          if(['schema','scope','legacyMigrated'].some(k=>value[k]!==old[k]))fail('GLOBAL_AUTHORITY_MUTATION_FORBIDDEN');retainedArray(old.usedNonces,value.usedNonces);for(const id of Object.keys(old.players))retainedArray(old.players[id].events,value.players[id].events);
+        }else if(previous.ref.domain==='BACKPACK'){
+          retainedArray(old.rewardReceipts,value.rewardReceipts);if(value.rewardReceipts.slice(old.rewardReceipts.length).some(id=>/^LOOT-[0-9a-f]{8}$/.test(id)))fail('CROSS_PARTY_LOOT_NOT_IMPLEMENTED');
+        }else if(previous.ref.domain==='PRODUCT'){
+          retainedSimulation(old.ledger.simulation,value.ledger.simulation);
+          for(const field of ['spentKaios','loot','xp','engineXp','playedMs'])if(value.progress[field]<old.progress[field])fail('PRODUCT_HISTORY_CHANGED');
+          for(const [event,count] of Object.entries(old.progress.events))if(!Object.hasOwn(value.progress.events,event)||value.progress.events[event]<count)fail('PRODUCT_HISTORY_CHANGED');
+          retainedArray(old.progress.courierReceipts,value.progress.courierReceipts);for(const field of ['courierInsuranceReceipts','courierReceiptBindings','courierInsuranceBindings'])retainedMap(old.progress[field],value.progress[field]);
+          for(const field of ['courierReceipts','courierInsuranceReceipts','courierReceiptBindings','courierInsuranceBindings'])if(input.kind!=='OWN_COURIER_TRANSACTION'&&!equalData(old.progress[field],value.progress[field]))fail('COURIER_TRANSACTION_REQUIRED');
+          if(input.kind==='OWN_COURIER_TRANSACTION')for(const field of ['courierReceiptBindings','courierInsuranceBindings'])for(const [id,b] of Object.entries(value.progress[field]))if(!Object.hasOwn(old.progress[field],id)&&b.missionId!==input.missionId)fail('UNDECLARED_COURIER_PARTICIPANT');
+        }else{
+          if(!equalData(Object.keys(old.missions),Object.keys(value.missions)))fail('MISSION_CREATION_NOT_IMPLEMENTED');
+          for(const [id,mission] of Object.entries(old.missions))if(id!==input.missionId&&!equalData(mission,value.missions[id]))fail('NON_TARGET_MISSION_MUTATION');
+          const a=old.missions[input.missionId],b=value.missions[input.missionId];
+          if(['DELIVERED','FAILED'].includes(a.status)&&!equalData(a,b))fail('TERMINAL_MISSION_CHANGED');
+          if(a.status==='ROBBED'&&!equalData({...a,insurance:null},{...b,insurance:null}))fail('TERMINAL_MISSION_CHANGED');
+          for(const field of ['schema','missionId','courierLifeId','requesterLifeId','mode','createdAt','estimatedDurationMs','startedAt','dueAt','origin','destination','economics'])if(!equalData(a[field],b[field]))fail('IMMUTABLE_MISSION_CHANGED');
+          for(const field of ['cargoId','kind','amount','unit'])if(a.cargo[field]!==b.cargo[field])fail('IMMUTABLE_MISSION_CHANGED');
+          const transitions={ACTIVE:['ACTIVE','CLOCK_REVIEW','DELIVERY_PENDING_CREDIT','FAILED'],CLOCK_REVIEW:['CLOCK_REVIEW'],DELIVERY_PENDING_CREDIT:['DELIVERY_PENDING_CREDIT','DELIVERED'],DELIVERED:['DELIVERED'],ROBBED:['ROBBED'],FAILED:['FAILED']};if(!transitions[a.status]?.includes(b.status))fail('UNSUPPORTED_COURIER_TRANSITION');
+          retainedArray(old.settledReceipts,value.settledReceipts);retainedArray(old.lootReceipts,value.lootReceipts);
+          if(!equalData(a.bandit,b.bandit))fail('CROSS_PARTY_RAID_NOT_IMPLEMENTED');
+          if(['DELIVERED','ROBBED','FAILED'].includes(a.status)&&!equalData(a.cargo,b.cargo))fail('IMMUTABLE_CUSTODY_CHANGED');
+          if(a.settlement){const omitCredit=s=>Object.fromEntries(Object.entries(s).filter(([k])=>!['credit','outcome'].includes(k)));if(!b.settlement||!equalData(omitCredit(a.settlement),omitCredit(b.settlement)))fail('IMMUTABLE_SETTLEMENT_CHANGED')}
+          for(const field of ['status','claimStatus']){const allowed=field==='status'?{UNINSURED:['UNINSURED'],QUOTE_ONLY:['QUOTE_ONLY'],ACTIVE:['ACTIVE']}:{NOT_APPLICABLE:['NOT_APPLICABLE'],NOT_CLAIMED:['NOT_CLAIMED'],APPROVED:['APPROVED','PAID'],PAID:['PAID']};if(!allowed[a.insurance[field]]?.includes(b.insurance[field]))fail('UNSUPPORTED_INSURANCE_TRANSITION')}
+          for(const field of ['policyId','coverageBps','deductibleKaios','maxClaimKaios','premiumKaios'])if(!equalData(a.insurance[field],b.insurance[field]))fail('IMMUTABLE_INSURANCE_CHANGED');
+          for(const field of ['activatedAt','paymentEvidence','payoutKaios','payoutReceiptId','paidAt','payoutEvidence'])if(Object.hasOwn(a.insurance,field)&&!equalData(a.insurance[field],b.insurance[field]))fail('IMMUTABLE_INSURANCE_CHANGED');
+          retainedCredit(a.settlement?.credit,b.settlement?.credit);retainedCredit(a.insurance?.credit,b.insurance?.credit);
+          if(value.settledReceipts.slice(old.settledReceipts.length).some(id=>id!==b.settlement?.receiptId)||value.lootReceipts.length!==old.lootReceipts.length)fail('UNDECLARED_COURIER_PARTICIPANT');
+        }
+        if(previous.revision>=Number.MAX_SAFE_INTEGER)fail('REVISION_CAPACITY');
+        const raw=previous.ref.domain==='BACKPACK'?{revision:previous.revision+1,data:value}:{...value,revision:previous.revision+1};nextValues[key]=raw;changed.push(key);
+      }
+      if(input.kind==='SWITCH'&&life.activePlayerId!==input.playerId){if(meta.selectionEpoch>=Number.MAX_SAFE_INTEGER)fail('SELECTION_EPOCH_CAPACITY');meta.selectionEpoch++;meta.activePlayerId=input.playerId;nextValues.$authority=meta}
+      const after=fullState(nextValues);
+      if(input.kind==='OWN_COURIER_TRANSACTION'){
+        const oldProduct=before.records.find(e=>referenceKey(e.ref)===productKey).value,newProduct=after.records.find(e=>referenceKey(e.ref)===productKey).value,mission=after.records.find(e=>e.ref.domain==='COURIER').value.missions[input.missionId];
+        let confirmed=false;
+        for(const insurance of [false,true]){
+          const field=insurance?'courierInsuranceBindings':'courierReceiptBindings';for(const id of Object.keys(newProduct.progress[field]))if(!Object.hasOwn(oldProduct.progress[field],id)&&(insurance?mission.insurance.claimStatus!=='PAID':mission.status!=='DELIVERED'))fail('INCOMPLETE_NEW_CREDIT_ACK');
+          const credit=insurance?mission.insurance.credit:mission.settlement?.credit;if(credit&&credit.owner!==input.owner)fail('BOUND_OWNER_CONTEXT_REQUIRED');
+          if(credit?.status==='CONFIRMED'){
+            const binding=Object.fromEntries(['receiptId','missionId','playerId','owner','rewardKaios','purpose'].map(key=>[key,credit[key]]));
+            gameRegistry.credit(oldProduct,newProduct,{binding,expectedRevision:oldProduct.revision+(changed.includes(productKey)?1:0)});confirmed=true;
+          }
+        }
+        if(!confirmed&&!equalData(oldProduct,newProduct))fail('COURIER_CREDIT_REQUIRED');
+      }
+      for(const key of changed)store.put(nextValues[key],key);if(nextValues.$authority!==values.$authority)store.put(nextValues.$authority,'$authority');return after;
+    });
+  }
+
+  return Object.freeze({open,openGame,close,read,readGame,initialize,command,commandGame,prepareMigration,readCandidate,commitMigration,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
 }

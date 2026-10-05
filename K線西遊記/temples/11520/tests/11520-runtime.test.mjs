@@ -840,3 +840,27 @@ test('strict local product keeps frozen legacy tombstones and opaque extensions 
  const freeze=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value)}return value},bytes=JSON.stringify(v);freeze(v);assert.equal(assertStrictProduct(v),v);assert.equal(JSON.stringify(v),bytes);assert.equal(v.progress.courierReceiptBindings[old],undefined);
  let invoked=0;const getter=strictProductFixture();Object.defineProperty(getter,'extension',{enumerable:true,get(){invoked++;return 1}});assert.throws(()=>assertStrictProduct(getter));assert.equal(invoked,0);
 });
+
+function strictCreditFixture({insurance=false,owner='guest',rewardKaios=7}={}){
+ const before=strictProductFixture();before.owner=owner;before.ledger.owner=owner;before.progress.kaios=2.5;before.progress.claimableKaios=1.5;before.extension={keep:['opaque']};
+ const binding={receiptId:insurance?'COURIER-INSURANCE-abcdef01':'COURIER-RECEIPT-abcdef01',missionId:'COURIER-QA',playerId:strictProductPlayer,owner,rewardKaios,purpose:insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD'};
+ const after=structuredClone(before),p=after.progress,event=insurance?'COURIER_INSURANCE_PAYOUT':'COURIER_SETTLEMENT',field=insurance?'courierInsuranceBindings':'courierReceiptBindings',index=insurance?'courierInsuranceReceipts':'courierReceipts';
+ p[field][binding.receiptId]=structuredClone(binding);if(insurance)p[index][binding.receiptId]=rewardKaios;else{p[index].push(binding.receiptId);p.xp+=12}p.events[event]=(p.events[event]||0)+1;p.kaios+=rewardKaios;if(owner!=='guest')p.claimableKaios+=rewardKaios;
+ return {before,after,binding,event,field,index};
+}
+test('pure Courier credit transition verifies exact guest/wallet delivery and insurance deltas',()=>{
+ for(const insurance of [false,true])for(const owner of ['guest','0x'+'a'.repeat(40)])for(const rewardKaios of [0,7,insurance?1080000:1000]){const {before,after,binding}=strictCreditFixture({insurance,owner,rewardKaios});const raw=[before,after,binding].map(JSON.stringify);assert.equal(strictProductDomain.validateLocalCourierCreditTransition(before,after,{binding}),after);assert.equal(strictProductDomain.validateLocalCourierCreditTransition(after,after,{binding}),after);assert.deepEqual([before,after,binding].map(JSON.stringify),raw);const revised=structuredClone(after);revised.revision++;assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(before,revised,{binding}));assert.equal(strictProductDomain.validateLocalCourierCreditTransition(before,revised,{binding,expectedRevision:1}),revised)}
+});
+test('pure Courier credit transition rejects phantom payment and every unrelated delta',()=>{
+ for(const insurance of [false,true]){const f=strictCreditFixture({insurance});for(const alter of [v=>v.progress.kaios=f.before.progress.kaios,v=>v.progress.xp++,v=>v.progress.events[f.event]=0,v=>v.progress.claimableKaios++,v=>v.ledger.free++,v=>v.extension.keep.push('changed'),v=>v.progress.engineXp++,v=>v.progress.spentKaios++,v=>v.progress[f.field][f.binding.receiptId].rewardKaios++,v=>delete v.progress[f.field][f.binding.receiptId],v=>v.progress[f.index]=insurance?{}:[]]){const bad=structuredClone(f.after);alter(bad);const raw=JSON.stringify(bad);assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(f.before,bad,{binding:f.binding}));assert.equal(JSON.stringify(bad),raw)}
+ const phantom=structuredClone(f.after);phantom.progress.kaios=f.before.progress.kaios;phantom.progress.xp=f.before.progress.xp;phantom.progress.events=structuredClone(f.before.progress.events);assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(f.before,phantom,{binding:f.binding}));
+ const tombstone=structuredClone(f.before);if(insurance)tombstone.progress[f.index][f.binding.receiptId]=f.binding.rewardKaios;else tombstone.progress[f.index].push(f.binding.receiptId);assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(tombstone,f.after,{binding:f.binding}));
+ const double=structuredClone(f.after);double.progress.kaios+=f.binding.rewardKaios;assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(f.after,double,{binding:f.binding}));
+ }
+});
+test('pure Courier credit transition preserves frozen data and rejects binding getters and namespace drift',()=>{
+ const {before,after,binding}=strictCreditFixture(),freeze=v=>{if(v&&typeof v==='object'){Object.values(v).forEach(freeze);Object.freeze(v)}return v};const raw=[before,after,binding].map(JSON.stringify);freeze(before);freeze(after);freeze(binding);assert.equal(strictProductDomain.validateLocalCourierCreditTransition(before,after,{binding}),after);assert.deepEqual([before,after,binding].map(JSON.stringify),raw);
+ for(const patch of [{owner:'0x'+'b'.repeat(40)},{playerId:'KAIOS-P-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'},{missionId:'OTHER'},{rewardKaios:8},{extra:true}])assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(before,after,{binding:{...binding,...patch}}));
+ for(const expectedRevision of [-1,.5,'0',2,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(before,after,{binding,expectedRevision}));
+ let invoked=0;const getter={...binding};Object.defineProperty(getter,'rewardKaios',{enumerable:true,get(){invoked++;return 7}});assert.throws(()=>strictProductDomain.validateLocalCourierCreditTransition(before,after,{binding:getter}));assert.equal(invoked,0);
+});

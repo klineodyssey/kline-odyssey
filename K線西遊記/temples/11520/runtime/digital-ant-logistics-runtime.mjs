@@ -784,7 +784,7 @@ export function validateCanonicalCourierEnvelope(value,{playerIds}={}){
       if(credit===undefined){if(!insurance&&pending)invalid();continue}
       const amount=insurance?i.payoutKaios:s?.rewardKaios,receiptId=insurance?i.payoutReceiptId:s?.receiptId;
       const status=insurance?(i.claimStatus==='PAID'?'CONFIRMED':i.claimStatus==='APPROVED'?'PENDING':null):(m.status==='DELIVERED'?'CONFIRMED':pending?'PENDING':null);
-      if(!object(credit)||!status||credit.status!==status||credit.playerId!==m.courierLifeId||credit.missionId!==id||credit.receiptId!==receiptId||credit.rewardKaios!==amount||!integer(amount)||amount>(insurance?1080000:1000)||!(credit.owner==='guest'||/^0x[0-9a-f]{40}$/.test(credit.owner||''))||credit.purpose!==(insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD')||(insurance&&(m.status!=='ROBBED'||i.status!=='ACTIVE'))||(!insurance&&!delivery))invalid();
+      if(!object(credit)||!status||credit.status!==status||credit.playerId!==m.courierLifeId||credit.missionId!==id||credit.receiptId!==receiptId||credit.rewardKaios!==amount||!integer(amount)||amount>(insurance?1080000:1000)||typeof credit.owner!=='string'||!(credit.owner==='guest'||/^0x[0-9a-f]{40}$/.test(credit.owner))||credit.purpose!==(insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD')||(insurance&&(m.status!=='ROBBED'||i.status!=='ACTIVE'))||(!insurance&&!delivery))invalid();
     }
   }
   if(Object.keys(active).length!==Object.keys(value.activeByCourier).length||Object.entries(value.activeByCourier).some(([owner,id])=>active[owner]!==id))invalid();

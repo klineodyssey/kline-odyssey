@@ -243,6 +243,11 @@ test('atomic Life Stage1 import/constructor inert; explicit open creates no auth
  assert.equal(typeof lifeAuthorityModule.createLocalGameAuthority,'function');let opens=0;const a=newAuthority({open(){opens++;throw Error('unexpected open')}});assert.equal(opens,0);a.close();assert.equal(opens,0);
  const b=newAuthority();await b.open();assert.equal((await b.read()).status,'UNINITIALIZED');b.close();assert.throws(()=>b.read(),/AUTHORITY_OPEN_REQUIRED/);
 });
+test('atomic authority database names reject coercion without invoking a factory or conversion',()=>{
+ let opens=0,conversions=0;const indexedDB={open(){opens++;throw Error('unexpected open')}};
+ for(const databaseName of [[authorityName],{toString(){conversions++;return authorityName}}])assert.throws(()=>lifeAuthorityModule.createLocalGameAuthority({indexedDB,databaseName}),/INVALID_AUTHORITY_DATABASE/);
+ assert.equal(opens,0);assert.equal(conversions,0);
+});
 test('atomic Life Stage1 N/N conflict, refresh and explicit retry',async()=>{
  const idb=new IDBFactory(),a=await initialized(idb),b=newAuthority(idb);await b.open();const n=await a.read();assert.deepEqual(await b.read(),n);
  const saved=await a.command(change(n),d=>{d.players[n.activePlayerId].displayName='A latest'});assert.equal(saved.revision,n.revision+1);
@@ -348,4 +353,108 @@ test('atomic Life Stage1 refuses non-JSON command tokens before clone can drop f
 
 test('atomic Life Stage1 validates reducer draft before equality checks can invoke getters',async()=>{
  const a=await initialized(),s=await a.read();let getters=0;await assert.rejects(a.command(change(s),d=>{Object.defineProperty(d.players[s.activePlayerId],'displayName',{enumerable:true,get(){getters++;return 'must not run'}})}),/INVALID_AUTHORITY_JSON/);assert.equal(getters,0);assert.deepEqual(await a.read(),s);a.close();
+});
+
+// Full-mode fixtures are seeded ONLY in isolated fake-IDB. No public migration
+// or promotion API exists; this does not establish production cutover.
+import {createBackpack} from '../runtime/backpack-runtime.mjs';
+import {createPlayerCourierOffer,createPlayerCourierStore,quoteCargoInsurance} from '../runtime/digital-ant-logistics-runtime.mjs';
+const fullSchema='KAIOS_LOCAL_GAME_FULL_DRAFT_V1';
+const fullDomains=['PLAYER_LIFE','BACKPACK','PRODUCT','COURIER'];
+const fullKey=ref=>ref.domain==='PLAYER_LIFE'?'PLAYER_LIFE':ref.domain==='COURIER'?'COURIER':ref.domain+':'+ref.playerId+(ref.domain==='PRODUCT'?':'+ref.owner:'');
+const fullProduct=playerId=>({schema:'K11520_LOCAL_SIMULATION_V2',playerId,owner:'guest',revision:0,ledger:{...createKgenLedger(100),owner:'guest'},progress:{kaios:0,claimableKaios:0,spentKaios:0,loot:0,xp:0,engineXp:0,playedMs:0,events:{},courierReceipts:[],courierInsuranceReceipts:{},courierReceiptBindings:{},courierInsuranceBindings:{}}});
+async function fullFixture({absentBag=false,pending=false,insuranceMode=null}={}){
+ const idb=new IDBFactory(),a=newAuthority(idb);await a.open();const f=lifeFixture(),legacy=make({storage:f.storage});const other=legacy.activePlayer().playerId,selected=legacy.createPlayer().playerId,life=JSON.parse(f.storage.getItem(PLAYER_LIFE_STORAGE_KEY));
+ let courier={schema:'K11520_PLAYER_COURIER',revision:0,missions:{},activeByCourier:{},settledReceipts:[],lootReceipts:[]};
+ if(pending||insuranceMode){
+  const cs=memory(),store=createPlayerCourierStore({storage:cs,now:()=>10000,monotonicNow:()=>100,sessionId:'FULL-A'}),quote=insuranceMode?quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000}):null,offer=createPlayerCourierOffer({missionId:'FULL-MISSION',requesterLifeId:'REQUESTER-QA',cargoId:'FULL-CARGO',cargoAmount:1000,freightFeeKaios:8,courierSalaryKaios:3,estimatedDurationMs:300000,createdAt:1000,insuranceQuote:quote}),mission=store.accept(offer,{courierLifeId:selected});
+  if(pending){const later=createPlayerCourierStore({storage:cs,now:()=>mission.dueAt,monotonicNow:()=>0,sessionId:'FULL-B'});later.settleDue(mission.missionId,{courierLifeId:selected})}
+  if(insuranceMode==='PENDING'){store.activateInsurance(mission.missionId,{courierLifeId:selected,paymentEvidence:{ok:true,amount:quote.premiumKaios,purpose:'PLAYER_COURIER_INSURANCE_PREMIUM',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}});store.raid(mission.missionId,{attackerLifeId:other,banditMode:true,action:'CARGO_RAID_ACTION',attackPower:100,defensePower:0,distanceMeters:1,replayKey:'FULL-RAID',wallNow:mission.bandit.attackWindowStartsAt})}
+  courier=JSON.parse(cs.getItem('K11520_PLAYER_COURIER'));const m=courier.missions['FULL-MISSION'];
+  // Explicit isolated shapes for the pending protocol; this branch has no live pending caller.
+  if(pending){m.status='DELIVERY_PENDING_CREDIT';m.settlement.outcome=m.status;m.cargo.ownerState='OWNED_BY_COURIER';m.cargo.ownerLifeId=selected;courier.activeByCourier[selected]=m.missionId;m.settlement.credit={status:'PENDING',receiptId:m.settlement.receiptId,missionId:m.missionId,playerId:selected,owner:'guest',rewardKaios:m.settlement.rewardKaios,purpose:'PLAYER_COURIER_REWARD'}}
+  if(insuranceMode==='PENDING')m.insurance.credit={status:'PENDING',receiptId:m.insurance.payoutReceiptId,missionId:m.missionId,playerId:selected,owner:'guest',rewardKaios:m.insurance.payoutKaios,purpose:'PLAYER_COURIER_INSURANCE_PAYOUT'};
+ }
+ const entries=[{ref:{domain:'PLAYER_LIFE'},value:life},{ref:{domain:'COURIER'},value:courier}];
+ for(const playerId of [other,selected]){entries.push({ref:{domain:'BACKPACK',playerId},value:absentBag&&playerId===selected?undefined:{revision:0,data:createBackpack({ownerId:playerId})}});entries.push({ref:{domain:'PRODUCT',playerId,owner:'guest'},value:fullProduct(playerId)})}
+ const meta={schema:fullSchema,integration:'UNINTEGRATED_DRAFT',coverage:fullDomains,authorityEpoch:'b'.repeat(32),selectionEpoch:0,activePlayerId:selected,catalogRevision:0,catalog:entries.map(e=>({ref:e.ref,presence:e.value===undefined?'ABSENT':'PRESENT'})),legacyUnbound:[]};
+ const db=await rawDb(idb);await new Promise((resolve,reject)=>{const tx=db.transaction('records','readwrite'),os=tx.objectStore('records');tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error);os.put(meta,'$authority');os.put({authorityEpoch:meta.authorityEpoch,coverage:fullDomains,catalogRevision:0},'$initialized');os.put({kind:'ISOLATED_FULL_DRAFT_FIXTURE'},'archive:'+meta.authorityEpoch);for(const e of entries)if(e.value!==undefined)os.put(e.value,fullKey(e.ref))});db.close();await a.openGame();return {a,idb,selected,other,meta};
+}
+const gameExpected=s=>({authorityEpoch:s.authorityEpoch,selectionEpoch:s.selectionEpoch,catalogRevision:s.catalogRevision,records:s.records.map(({ref,revision})=>({ref,revision}))});
+const gameCommand=(s,kind='PLAYER_UPDATE',extra={})=>({kind,playerId:s.activePlayerId,owner:'guest',expected:gameExpected(s),...extra});
+const domainValue=(drafts,domain,playerId,owner='guest')=>drafts.find(e=>e.ref.domain===domain&&(playerId===undefined||e.ref.playerId===playerId)&&(domain!=='PRODUCT'||e.ref.owner===owner)).value;
+
+test('full atomic draft modes cannot bypass partial/full coverage and expose no migration API',async()=>{
+ const partial=await initialized();await partial.openGame();await assert.rejects(partial.readGame(),/PARTIAL_AUTHORITY/);partial.close();const {a}=await fullFixture();await assert.rejects(a.read(),/FULL_AUTHORITY_REQUIRES_GAME_API/);await assert.rejects(a.command({domain:'PLAYER_LIFE',kind:'UPDATE',playerId:'KAIOS-P-'+'a'.repeat(32),expected:{authorityEpoch:'b'.repeat(32),selectionEpoch:0,revision:1}},()=>{}),/FULL_AUTHORITY_REQUIRES_GAME_API/);assert.equal(a.initializeGame,undefined);assert.equal(a.promote,undefined);a.close();
+});
+test('full atomic draft complete revision vector detects stale non-target records',async()=>{
+ const {a,idb,other}=await fullFixture(),s=await a.readGame(),db=await rawDb(idb),record=s.records.find(e=>e.ref.domain==='PRODUCT'&&e.ref.playerId===other);await rawWrite(db,fullKey(record.ref),{...record.value,revision:record.revision+1});await assert.rejects(a.commandGame(gameCommand(s),ds=>{domainValue(ds,'PLAYER_LIFE').players[s.activePlayerId].displayName='stale'}),/REVISION_CONFLICT/);assert.notEqual((await a.readGame()).records.find(e=>e.ref.domain==='PLAYER_LIFE').value.players[s.activePlayerId].displayName,'stale');db.close();a.close();
+});
+test('full atomic draft rejects omitted/extra revision entries and non-target mutation',async()=>{
+ const {a,other}=await fullFixture(),s=await a.readGame();for(const edit of [e=>e.records.pop(),e=>e.records.push(e.records[0]),e=>delete e.catalogRevision]){const input=gameCommand(s);edit(input.expected);await assert.rejects(a.commandGame(input,()=>{}))}
+ await assert.rejects(a.commandGame(gameCommand(s),ds=>{domainValue(ds,'PLAYER_LIFE').players[other].displayName='wrong'}),/NON_TARGET/);await assert.rejects(a.commandGame(gameCommand(s,'INVENTORY_UPDATE'),ds=>{domainValue(ds,'BACKPACK',other).updatedAt++}),/NON_TARGET/);assert.deepEqual(await a.readGame(),s);a.close();
+});
+test('full atomic draft distinguishes declared absence from missing canonical records',async()=>{
+ const {a,idb,selected}=await fullFixture({absentBag:true}),s=await a.readGame();assert.equal(s.records.find(e=>e.ref.domain==='BACKPACK'&&e.ref.playerId===selected).revision,null);await assert.rejects(a.commandGame(gameCommand(s,'INVENTORY_UPDATE'),()=>{}),/DOMAIN_RECORD_ABSENT/);const db=await rawDb(idb);await rawWrite(db,'PRODUCT:'+selected+':guest',undefined);await assert.rejects(a.readGame(),/CORRUPT_FULL_AUTHORITY/);db.close();a.close();
+});
+test('full atomic draft validates catalog census and refuses undeclared rows',async()=>{
+ const {a,idb}=await fullFixture(),db=await rawDb(idb);await rawWrite(db,'PRODUCT:unknown:guest',{});await assert.rejects(a.readGame(),/CORRUPT_FULL_AUTHORITY/);db.close();a.close();
+});
+test('full atomic draft two connections N/N produce one commit and one conflict',async()=>{
+ const {a,idb}=await fullFixture(),b=newAuthority(idb);await b.openGame();const s=await a.readGame(),run=(store,name)=>store.commandGame(gameCommand(s),ds=>{domainValue(ds,'PLAYER_LIFE').players[s.activePlayerId].displayName=name});const results=await Promise.allSettled([run(a,'A'),run(b,'B')]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.match(results.find(r=>r.status==='rejected').reason.message,/REVISION_CONFLICT/);a.close();b.close();
+});
+function creditAndAcknowledge(drafts,playerId){const product=domainValue(drafts,'PRODUCT',playerId),courier=domainValue(drafts,'COURIER'),mission=courier.missions['FULL-MISSION'],credit=mission.settlement.credit,{status,...binding}=credit;product.progress.courierReceipts.push(credit.receiptId);product.progress.courierReceiptBindings[credit.receiptId]=binding;product.progress.kaios+=credit.rewardKaios;product.progress.xp+=12;product.progress.events.COURIER_SETTLEMENT=1;credit.status='CONFIRMED';mission.status='DELIVERED';mission.settlement.outcome='DELIVERED';mission.cargo.ownerState='DELIVERED_TO_DESTINATION';mission.cargo.ownerLifeId=null;delete courier.activeByCourier[playerId]}
+test('full atomic draft own Courier credit and acknowledgement commit together',async()=>{
+ const {a}=await fullFixture({pending:true}),s=await a.readGame(),after=await a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>creditAndAcknowledge(ds,s.activePlayerId));assert.equal(domainValue(after.records,'COURIER').missions['FULL-MISSION'].status,'DELIVERED');assert.equal(domainValue(after.records,'PRODUCT',s.activePlayerId).progress.courierReceipts.length,1);a.close();
+});
+test('full atomic draft rejects matching credit metadata without the complete reward delta',async()=>{
+ const {a}=await fullFixture({pending:true}),s=await a.readGame();
+ for(const missing of ['kaios','xp','events']){await assert.rejects(a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>{creditAndAcknowledge(ds,s.activePlayerId);const p=domainValue(ds,'PRODUCT',s.activePlayerId);p.progress[missing]=structuredClone(domainValue(s.records,'PRODUCT',s.activePlayerId).progress[missing])}));assert.deepEqual(await a.readGame(),s)}a.close();
+});
+test('full atomic draft confirm-only acknowledgement never rewrites a credited product',async()=>{
+ const {a,idb,selected}=await fullFixture({pending:true}),s=await a.readGame(),ds=s.records.map(({ref,value})=>({ref,value:structuredClone(value)}));creditAndAcknowledge(ds,selected);const db=await rawDb(idb);await rawWrite(db,'PRODUCT:'+selected+':guest',domainValue(ds,'PRODUCT',selected));const before=await a.readGame(),product=domainValue(before.records,'PRODUCT',selected);
+ const after=await a.commandGame(gameCommand(before,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),drafts=>{const target=domainValue(drafts,'COURIER'),paid=domainValue(ds,'COURIER');target.missions=structuredClone(paid.missions);target.activeByCourier=structuredClone(paid.activeByCourier)});assert.deepEqual(domainValue(after.records,'PRODUCT',selected),product);assert.equal(domainValue(after.records,'COURIER').missions['FULL-MISSION'].status,'DELIVERED');db.close();a.close();
+});
+function insuranceCreditAndAcknowledge(drafts,playerId){const p=domainValue(drafts,'PRODUCT',playerId).progress,m=domainValue(drafts,'COURIER').missions['FULL-MISSION'],i=m.insurance,{status,...binding}=i.credit;p.courierInsuranceReceipts[binding.receiptId]=binding.rewardKaios;p.courierInsuranceBindings[binding.receiptId]=binding;p.kaios+=binding.rewardKaios;p.events.COURIER_INSURANCE_PAYOUT=1;i.credit.status='CONFIRMED';i.claimStatus='PAID';i.paidAt=m.settlement.settledAt+1;i.payoutEvidence={receiptId:binding.receiptId,rewardKaios:binding.rewardKaios,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER',replayed:false}}
+test('full atomic draft insured payout requires its exact delta and commits with acknowledgement',async()=>{
+ const {a}=await fullFixture({insuranceMode:'PENDING'}),s=await a.readGame();
+ for(const missing of ['kaios','events']){await assert.rejects(a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>{insuranceCreditAndAcknowledge(ds,s.activePlayerId);domainValue(ds,'PRODUCT',s.activePlayerId).progress[missing]=structuredClone(domainValue(s.records,'PRODUCT',s.activePlayerId).progress[missing])}));assert.deepEqual(await a.readGame(),s)}
+ const after=await a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>insuranceCreditAndAcknowledge(ds,s.activePlayerId)),product=domainValue(after.records,'PRODUCT',s.activePlayerId);assert.equal(product.progress.kaios,720);assert.equal(product.progress.xp,0);assert.equal(domainValue(after.records,'COURIER').missions['FULL-MISSION'].insurance.claimStatus,'PAID');const replay=await a.commandGame(gameCommand(after,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),()=>{});assert.deepEqual(replay,after);a.close();
+});
+test('full atomic draft premium activation remains held without a typed atomic debit',async()=>{
+ const {a}=await fullFixture({insuranceMode:'QUOTE'}),s=await a.readGame();await assert.rejects(a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>{const i=domainValue(ds,'COURIER').missions['FULL-MISSION'].insurance;i.status='ACTIVE';i.premiumPaidKaios=i.premiumKaios;i.activatedAt=10000;i.paymentEvidence={amount:i.premiumKaios,purpose:'PLAYER_COURIER_INSURANCE_PREMIUM',scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'}}),/UNSUPPORTED_INSURANCE_TRANSITION/);assert.deepEqual(await a.readGame(),s);a.close();
+});
+test('full atomic draft terminal missions cannot rewrite clock or custody history',async()=>{
+ const {a}=await fullFixture({pending:true}),s=await a.readGame(),paid=await a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>creditAndAcknowledge(ds,s.activePlayerId));await assert.rejects(a.commandGame(gameCommand(paid,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>{domainValue(ds,'COURIER').missions['FULL-MISSION'].lastWallAt++}),/TERMINAL_MISSION_CHANGED/);assert.deepEqual(await a.readGame(),paid);a.close();
+});
+test('full atomic draft abort after product put preserves product and Courier',async()=>{
+ const {a,idb}=await fullFixture({pending:true}),s=await a.readGame(),db=await rawDb(idb),prototype=Object.getPrototypeOf(db.transaction('records','readonly').objectStore('records')),original=prototype.put;prototype.put=function(v,k){const r=original.call(this,v,k);if(k==='PRODUCT:'+s.activePlayerId+':guest'){const tx=this.transaction;r.addEventListener('success',()=>tx.abort())}return r};try{await assert.rejects(a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>creditAndAcknowledge(ds,s.activePlayerId)))}finally{prototype.put=original}assert.deepEqual(await a.readGame(),s);db.close();a.close();
+});
+test('full atomic draft prevents unproved acknowledgement and binding downgrade',async()=>{
+ const {a}=await fullFixture({pending:true}),s=await a.readGame();await assert.rejects(a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>{creditAndAcknowledge(ds,s.activePlayerId);domainValue(ds,'PRODUCT',s.activePlayerId).progress.courierReceiptBindings={}}));assert.deepEqual(await a.readGame(),s);const after=await a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>creditAndAcknowledge(ds,s.activePlayerId));await assert.rejects(a.commandGame(gameCommand(after,'PRODUCT_UPDATE'),ds=>{domainValue(ds,'PRODUCT',s.activePlayerId).progress.courierReceiptBindings={}}));assert.deepEqual(await a.readGame(),after);a.close();
+});
+
+test('full atomic draft dedicated switch changes only shared selection and its epoch',async()=>{
+ const {a,other}=await fullFixture(),before=await a.readGame(),after=await a.commandGame(gameCommand(before,'SWITCH',{playerId:other}));assert.equal(after.activePlayerId,other);assert.equal(after.selectionEpoch,before.selectionEpoch+1);for(const r of before.records)if(r.ref.domain!=='PLAYER_LIFE')assert.deepEqual(after.records.find(v=>fullKey(v.ref)===fullKey(r.ref)),r);await assert.rejects(a.commandGame(gameCommand(before),()=>{}),/REVISION_CONFLICT/);a.close();
+});
+test('full atomic draft credit namespace is immutable and generic product writes cannot bypass acknowledgement',async()=>{
+ const {a}=await fullFixture({pending:true}),s=await a.readGame();await assert.rejects(a.commandGame(gameCommand(s,'PRODUCT_UPDATE'),ds=>{const p=domainValue(ds,'PRODUCT',s.activePlayerId),m=domainValue(ds,'COURIER').missions['FULL-MISSION'],{status,...binding}=m.settlement.credit;p.progress.courierReceipts.push(binding.receiptId);p.progress.courierReceiptBindings[binding.receiptId]=binding}),/COURIER_TRANSACTION_REQUIRED/);
+ await assert.rejects(a.commandGame(gameCommand(s,'OWN_COURIER_TRANSACTION',{missionId:'FULL-MISSION'}),ds=>{creditAndAcknowledge(ds,s.activePlayerId);domainValue(ds,'COURIER').missions['FULL-MISSION'].settlement.credit.owner='0x'+'a'.repeat(40)}));assert.deepEqual(await a.readGame(),s);a.close();
+});
+test('full atomic draft legacy classification remains immutable and cannot authorize backpay',async()=>{
+ const {a,idb,selected}=await fullFixture(),db=await rawDb(idb),key='PRODUCT:'+selected+':guest',before=await a.readGame(),product=structuredClone(domainValue(before.records,'PRODUCT',selected)),id='COURIER-RECEIPT-12345678';product.progress.courierReceipts.push(id);await rawWrite(db,key,product);await assert.rejects(a.readGame(),/LEGACY_PROVENANCE_MISMATCH/);
+ const meta=await new Promise((resolve,reject)=>{const tx=db.transaction('records','readonly'),r=tx.objectStore('records').get('$authority');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});meta.legacyUnbound=[JSON.stringify([key,'PLAYER_COURIER_REWARD',id,null])];await rawWrite(db,'$authority',meta);const legacy=await a.readGame();assert.equal(domainValue(legacy.records,'PRODUCT',selected).progress.courierReceiptBindings[id],undefined);await assert.rejects(a.commandGame(gameCommand(legacy,'PRODUCT_UPDATE'),ds=>{domainValue(ds,'PRODUCT',selected).progress.courierReceipts=[]}),/IMMUTABLE_HISTORY/);assert.deepEqual(await a.readGame(),legacy);db.close();a.close();
+});
+
+import {observeSimulationPrice,placeSimulationOrder,closeSimulationPosition} from '../runtime/kgen-margin-runtime.mjs';
+test('full atomic draft retains consumed simulation identities instead of resetting the book',async()=>{
+ const {a,idb,selected}=await fullFixture(),db=await rawDb(idb),state=await a.readGame(),product=structuredClone(domainValue(state.records,'PRODUCT',selected));observeSimulationPrice(product.ledger,{market:'BTCUSDT',price:99,observedAt:1000,now:1000});placeSimulationOrder(product.ledger,{axis:'KX',market:'BTCUSDT',c:1,lots:1,triggerPrice:100,now:1001});observeSimulationPrice(product.ledger,{market:'BTCUSDT',price:100,observedAt:1002,now:1002});closeSimulationPosition(product.ledger,product.ledger.simulation.positions[0].positionId,{now:1003});await rawWrite(db,'PRODUCT:'+selected+':guest',product);const before=await a.readGame();
+ await assert.rejects(a.commandGame(gameCommand(before,'PRODUCT_UPDATE'),ds=>{delete domainValue(ds,'PRODUCT',selected).ledger.simulation}),/SIMULATION_HISTORY_CHANGED/);await assert.rejects(a.commandGame(gameCommand(before,'PRODUCT_UPDATE'),ds=>{domainValue(ds,'PRODUCT',selected).ledger.simulation={sequence:0,orders:[],positions:[],receipts:[],observations:{}}}),/SIMULATION_HISTORY_CHANGED/);assert.deepEqual(await a.readGame(),before);db.close();a.close();
+});
+
+test('atomic Life Stage1 rejects array-coerced selected IDs without self-corrupting state',async()=>{
+ const a=await initialized(),s=await a.read();await assert.rejects(a.command({domain:'PLAYER_LIFE',kind:'SWITCH',playerId:[s.activePlayerId],expected:expected(s)}),/INVALID_PLAYER_ID/);assert.deepEqual(await a.read(),s);const e=lifeFixture().envelope;e.activePlayerId=[e.activePlayerId];assert.throws(()=>a.initialize({domain:'PLAYER_LIFE',envelope:e,confirmLifeOnlyDraft:true}),/CORRUPT_AUTHORITY/);a.close();
+});
+test('full atomic draft rejects array-coerced selection, owner and catalog references',async()=>{
+ const {a,idb,meta}=await fullFixture(),s=await a.readGame();for(const changes of [{playerId:[s.activePlayerId]},{owner:['0x'+'a'.repeat(40)]}])await assert.rejects(a.commandGame(gameCommand(s,'SWITCH',changes)),/INVALID_GAME_NAMESPACE/);assert.deepEqual(await a.readGame(),s);const db=await rawDb(idb),bad=structuredClone(meta),ref=bad.catalog.find(e=>e.ref.domain==='PRODUCT').ref;ref.playerId=[ref.playerId];await rawWrite(db,'$authority',bad);await assert.rejects(a.readGame(),/CORRUPT_FULL_AUTHORITY/);db.close();a.close();
 });
