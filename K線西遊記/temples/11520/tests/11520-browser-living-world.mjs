@@ -214,7 +214,29 @@ await page.screenshot({path:`${OUT}/11520-selected-life-hud.png`,fullPage:true})
 assert.deepEqual(errors,[],'page errors after selected-Life click: '+errors.join('\n'));
 
 if(await page.locator('#sheet').evaluate(sheet=>sheet.classList.contains('open')))await page.locator('#sheetClose').click();
-await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);assert.equal(await page.locator('#playerCourierChip').isVisible(),false,'legacy courier chip stays retired in 844x390');assert.equal(await page.locator('#homeDeliveryButton').isVisible(),true,'courier rail action remains visible in 844x390');await page.locator('#homeDeliveryButton').click();const landscapeDetails=await page.locator('#playerCourierDetails').boundingBox();assert.ok(landscapeDetails&&landscapeDetails.x>=0&&landscapeDetails.y>=0&&landscapeDetails.x+landscapeDetails.width<=844&&landscapeDetails.y+landscapeDetails.height<=390,'expanded Player Courier details must remain inside 844x390');await page.screenshot({path:`${OUT}/11520-player-courier-844x390.png`});
+async function verifyActiveLandscapeContext(kind){
+  await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);
+  if(await page.locator('#k11520UtilityMaster').getAttribute('aria-expanded')==='true')await page.locator('#k11520UtilityMaster').click();
+  for(const id of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(id).isVisible(),false,'landscape context actions stay in More even when active');
+  await page.waitForFunction(()=>document.querySelector('#k11520UtilityMaster')?.dataset.contextActive==='true');
+  assert.match(await page.locator('#k11520UtilityMaster').getAttribute('aria-label'),/Courier|攔截|搶鈔|運鈔/,'More announces the existing active context');
+  assert.match(await page.locator('#k11520UtilityMaster').evaluate(el=>getComputedStyle(el,'::after').content),/•/,'More visibly signals active work');
+  const hits=await page.evaluate(()=>['#tradeSword','#attack','#orderFire','#dodge','#flat','#skill','#k11520MonsterGuide','#k11520UtilityMaster'].map(selector=>{const el=document.querySelector(selector),r=el.getBoundingClientRect(),inset=8,points=[[r.x+r.width/2,r.y+r.height/2],[r.x+inset,r.y+r.height/2],[r.right-inset,r.y+r.height/2],[r.x+r.width/2,r.y+inset],[r.x+r.width/2,r.bottom-inset]];return{selector,owned:points.every(([x,y])=>{const h=document.elementFromPoint(x,y);return h===el||el.contains(h)})}}));
+  assert.ok(hits.every(h=>h.owned),`active landscape context must not steal combat hits: ${JSON.stringify(hits)}`);
+  await page.screenshot({path:`${OUT}/11520-${kind}-context-closed-844x390.png`});
+  await page.locator('#k11520UtilityMaster').click();
+  const open=await page.evaluate(()=>['#cargoInterceptionButton','#homeDeliveryButton'].map(selector=>{const el=document.querySelector(selector),r=el.getBoundingClientRect(),h=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return{selector,left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,hit:h===el||el.contains(h)}}));
+  assert.ok(open.every(x=>x.width>=44&&x.height>=44&&x.hit),'both context actions remain usable inside existing More');
+  const guide=await page.locator('#k11520MonsterGuide').boundingBox();assert.ok(open.every(x=>!guide||x.right<=guide.x||x.left>=guide.x+guide.width||x.bottom<=guide.y||x.top>=guide.y+guide.height),'open context actions remain clear of the world target');
+  assert.equal(await page.locator('#tradeSword').isVisible(),false,'existing landscape More disclosure hides combat until closed');
+  assert.ok(open[0].right<=open[1].left||open[1].right<=open[0].left||open[0].bottom<=open[1].top||open[1].bottom<=open[0].top,'context actions do not overlap each other');
+  await page.screenshot({path:`${OUT}/11520-${kind}-context-menu-844x390.png`});
+}
+await verifyActiveLandscapeContext('courier');
+assert.equal(await page.locator('#playerCourierChip').isVisible(),false,'legacy courier chip stays retired in 844x390');
+await page.locator('#homeDeliveryButton').click();const landscapeDetails=await page.locator('#playerCourierDetails').boundingBox();assert.ok(landscapeDetails&&landscapeDetails.x>=0&&landscapeDetails.y>=0&&landscapeDetails.x+landscapeDetails.width<=844&&landscapeDetails.y+landscapeDetails.height<=390,'expanded Player Courier details must remain inside 844x390');await page.screenshot({path:`${OUT}/11520-player-courier-844x390.png`});
+await page.locator('#k11520UtilityMaster').click();assert.equal(await page.locator('#playerCourierDetails').isVisible(),false,'closing More closes Courier presentation instead of stranding it');
+assert.equal(await page.evaluate(()=>__K11520_PLAYER_COURIER__.active().missionId),courierMission.missionId,'closing More never cancels the mission');
 
 // Public Player Courier bandit flow is intentionally same-browser LOCAL
 // GAMEPLAY. A second local Life can raid the first Life's persisted cargo;
@@ -230,8 +252,11 @@ await page.reload({waitUntil:'domcontentloaded'});await page.waitForTimeout(1800
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click().catch(()=>{});
 await page.waitForFunction(()=>globalThis.__K11520_PLAYER_COURIER__?.banditTarget?.()?.status==='ACTIVE',null,{timeout:5000});
 assert.equal(await page.locator('#playerBanditTarget').isVisible(),false,'legacy top bandit target chip must not occupy the world area');
+await verifyActiveLandscapeContext('raid');
 assert.match(await page.locator('#cargoInterceptionButton').getAttribute('aria-label'),/合法運鈔目標/);await page.locator('#cargoInterceptionButton').click();assert.match(await page.locator('#playerBanditPanel').textContent(),/LOCAL GAMEPLAY/);assert.match(await page.locator('#playerBanditPanel').textContent(),/未實作跨裝置 realtime multiplayer/);assert.equal(await page.locator('#banditRaidButton').isDisabled(),true,'ordinary combat cannot raid cargo before explicit Bandit mode');
 await page.locator('#banditModeButton').click();assert.equal(await page.locator('#banditRaidButton').isDisabled(),false);await page.locator('#banditRaidButton').click();assert.match(await page.locator('#playerBanditPanel').textContent(),/搶鈔未成立：搶鈔窗口尚未開放/,'closed attack window must return a visible reason');
+await page.locator('#k11520UtilityMaster').click();assert.equal(await page.locator('#playerBanditPanel').isVisible(),false,'closing More closes Raid presentation');
+assert.equal(await page.evaluate(()=>__K11520_PLAYER_COURIER__.banditTarget().status),'ACTIVE','closing More preserves the active target');await page.setViewportSize({width:390,height:844});
 
 // Open a deterministic QA attack window without waiting minutes. The action
 // and settlement still go through the public buttons and canonical raid().
