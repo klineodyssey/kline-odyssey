@@ -59,9 +59,9 @@ Twenty meaningful work packages are listed below, including substreams of the sa
 
 3. **P1 / QUEUED — Public main responsive 390 timeout**. Dependencies: Q01. Next: After #498 latest-main integration releases the shared responsive harness, add trajectory, relative-target and control diagnostics; reproduce before choosing a grounded fix. Evidence: Read-only diagnosis COMPLETE: run37279131404 failed a15-second distance<2 approach with fixed-forward joystick against a moving target. Leading causal hypothesis remains unproven. #499 retains Portal/Pages/HTTP success but explicitly marks public Responsive FAIL. Instrumentation/fix is waiting on upstream, not canceled or actively coding. Source: [1](https://github.com/klineodyssey/kline-odyssey/actions/runs/37279131404)
 
-4. **P1 / QUEUED — BSC97 stale-quote dispatch race**. Dependencies: Q01. Next: Reproduce quote-age change across awaited dispatch on latest main; prepare fail-closed engineering fix with no signer or transaction. Evidence: Draft89d6af11 is based on older main; parent audit identified quote-before-dispatch race. Existing PR PASS claims do not clear this gap. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
+4. **P2 / QUEUED — BSC97 stale-quote dispatch race**. Dependencies: Q01. Next: Reproduce quote-age change across awaited dispatch on latest main; prepare fail-closed engineering fix with no signer or transaction. Evidence: Draft89d6af11 is based on older main; parent audit identified quote-before-dispatch race. Existing PR PASS claims do not clear this gap. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
 
-5. **P1 / BLOCKED — Real financial release readiness gate**. Dependencies: Q04. Next: Keep release on Human hold; assemble current exact-head safety evidence and concrete protected-action scope before requesting any execution. Evidence: Engineering readiness is not financial authority. No real funds, signer, deployment, Treasury or chain execution authorized by this queue. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
+5. **P2 / BLOCKED — Real financial release readiness gate**. Dependencies: Q04. Next: Keep release on Human hold; assemble current exact-head safety evidence and concrete protected-action scope before requesting any execution. Evidence: Engineering readiness is not financial authority. No real funds, signer, deployment, Treasury or chain execution authorized by this queue. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/488)
 
 6. **P2 / READY_FOR_REVIEW — Automated Handoff V2 research review**. Dependencies: none. Next: Review six research documents/eight ADRs and resolve protected Boot inventory proposal separately; no Boot edit here. Evidence: acb4276e research-only Draft,16 Markdown files; no CI result returned is not CI pass. Real endpoint and identity proofs absent. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/500)
 
@@ -95,9 +95,11 @@ Twenty meaningful work packages are listed below, including substreams of the sa
 
 ### Clarified product vision
 
-KAIOS is a next-generation operating-system design goal: a customer/player wish becomes a KGEN AI Company project and proceeds to verified delivery. This describes intended product behavior, not an implemented autonomous service or a grant of authority.
+KAIOS is a next-generation operating-system design goal that makes customer dreams real: customer/player wish → KGEN AI Company project → verified customer outcome. K11520 is currently game-first, with exchange/trading secondary and contextual. These are priorities and intended behavior, not implemented autonomous-service or execution-authority claims.
 
 ### Scheduling and release boundaries
+
+Game-first selection: active HUD, Courier and game QA lead. After game P1 and as dependencies permit, multiplayer, graphics/performance and original audio can precede secondary financial-release work. Trading stays in the queue with its existing safety holds. Reprioritization does not start extra tasks or interrupt active work.
 
 Independent read/test/review work may run in parallel up to actual capacity. Shared-file changes have one write owner; all main merges serialize. This documentation Draft stays behind#498 and must be refreshed against changed main before integration. Failed or pending gates remain visible; no blind retries, skipped tests, invented P0, discarded projects, formal employee reassignment or credential creation. Once a package closes, choose an existing ready priority; if all close, research a concrete roadmap gap before proposing more work. No money, chain, production identity or external AI authority is granted.
 
@@ -124,8 +126,9 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     "parallel": "Independent read, review, test and isolated-branch work may proceed concurrently. Do not stop or reassign existing workers.",
     "serialization": "One write owner per overlapping file; serialize shared-file integration and all main merges. Rebase/revalidate later candidates against newly merged main.",
     "merge_hold": "This queue Draft must not merge ahead of#498 or invalidate its current QA base. No merge/deploy performed by this work.",
-    "selection": "P1 HUD exact-head QA and Courier recovery continue. Public390 read-only diagnosis is complete; instrumentation/fix is ready next after #498 integration. Independent V2 reviews continue.",
-    "refill": "When a package completes, choose the highest-priority authorized ready item. If all close, inspect roadmap and evidence for useful gaps; never invent tasks solely to consume capacity."
+    "selection": "Game-first: active HUD, Courier and game QA retain priority. Public390 instrumentation waits for #498 integration. As dependencies and real capacity permit after game P1, recovery/multiplayer, graphics/performance and original audio may precede secondary financial-release work. Trading remains tracked with its safety holds; independent authorized V2 review continues.",
+    "refill": "When a package completes, choose the highest-priority authorized ready item. If all close, inspect roadmap and evidence for useful gaps; never invent tasks solely to consume capacity.",
+    "reprioritization": "No new task, canceled project, interrupted active work or dependency removal. Q04 and Q05 remain tracked as secondary P2 engineering/release work; blocked financial execution stays blocked."
   },
   "items": [
     {
@@ -178,7 +181,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     {
       "id": "Q04",
       "title": "BSC97 stale-quote dispatch race",
-      "priority": "P1",
+      "priority": "P2",
       "status": "QUEUED",
       "dependencies": [
         "Q01"
@@ -193,7 +196,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     {
       "id": "Q05",
       "title": "Real financial release readiness gate",
-      "priority": "P1",
+      "priority": "P2",
       "status": "BLOCKED",
       "dependencies": [
         "Q04"
@@ -441,7 +444,8 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     }
   ],
   "clarification_at": "2026-10-05T08:40:33Z",
-  "product_vision": "KAIOS is a next-generation operating-system design goal: a customer/player wish becomes a KGEN AI Company project and proceeds to verified delivery. This describes intended product behavior, not an implemented autonomous service or a grant of authority.",
-  "checkpoint_at": "2026-10-05T08:42:38Z"
+  "product_vision": "KAIOS is a next-generation operating-system design goal that makes customer dreams real: customer/player wish → KGEN AI Company project → verified customer outcome. K11520 is currently game-first, with exchange/trading secondary and contextual. These are priorities and intended behavior, not implemented autonomous-service or execution-authority claims.",
+  "checkpoint_at": "2026-10-05T08:42:38Z",
+  "priority_clarification_at": "2026-10-05T08:43:35Z"
 }
 ```
