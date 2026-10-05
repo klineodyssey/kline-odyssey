@@ -113,9 +113,10 @@ test('mobile combat uses contextual disclosure instead of a second persistent K-
   assert.ok(main.includes("monsterHud.addEventListener('click'"));
 });
 
-test('V2.9.0 release stamp preserves restored-player encounter boot',()=>{
-  assert.ok(fixes.includes('V2.9.0 · 5D K線西遊記'));
-  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.0'"));
+test('V2.9.1 release stamp preserves restored-player encounter boot',()=>{
+  assert.ok(fixes.includes('V2.9.1 · 5D K線西遊記'));
+  assert.ok(read('../runtime/game-5d-bootstrap.mjs').includes("const PRODUCT_VERSION='V2.9.1'"));
+  assert.ok(read('../../../../assets/kaios-world-registry.mjs').includes("version:'V2.9.1'"),'Portal registry must advertise the same K11520 release');
   assert.ok(main.includes('createKSpaceEncounter(world,undefined,S.xyz)'));
 });
 
