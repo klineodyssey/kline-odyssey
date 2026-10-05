@@ -89,3 +89,9 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 - Both revised explanation-only runs PASS. Direct initial/scrolled landscape inspection confirms camera/market/parameter rail clearance; full13-image review tracked in PR.
 - Existing independent desktop block moves intact to its own mandatory90s invocation; default mobile remains90s with all original assertions. This adds up to90s aggregate CI budget. Both modes fail nonzero independently; desktop screenshots and timing report required. No product code changes in this follow-up.
 - Shared harness owner506 notified before edits and must preserve/reconcile this exact delta in its explicit stack. New exact-head CI pending; no release claim.
+
+### 2026-10-05T11:24Z latest-main integration
+- Prior headc14801ae9eb0b78f08da1e32a914251060fbeb75 passed Product push37300068685 and PR37300071188, Responsive/Portal/Universal. Measured ordinary mobile69.8–70.3s; independent desktop20.0–20.4s. Full assertions and caps retained.
+- Explanation13-image visual review PASS. Desktop artifacts separately showed baseline-looking white/overlapping utility controls and a transient acceptance toast; provenance/reachability investigation remains separate, no whole-product visual-clear claim.
+- Refreshed mainb513d4e7ca87ebfb5adf5c03b8d2c26ff834b720 and reread Boot/safety before merging into isolated candidate. No conflicts; preserved complete504 Responsive harness/workflow, changing only its existing expected public version to505's V2.9.3. Main not modified.
+- Integrated candidate local169/169 tests, syntax/diff/YAML PASS. Exact integrated-head CI and screenshot evidence pending; parent serializes release. Prior-head passes are retained, not substituted for integrated checks.
