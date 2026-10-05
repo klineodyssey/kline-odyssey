@@ -3,7 +3,7 @@ VERSION: 1.1.0
 STATUS: ACTIVE_SAFE_PREFLIGHT
 PURPOSE: Player-visible 11520 real-trading readiness preflight and order-route classification. Never signs or broadcasts.
 */
-import {readPublicWalletIdentity} from './evm-wallet-runtime.mjs';
+import {getWalletSession11520} from './wallet-game-bridge.mjs';
 import {getRealTradingBinding,assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
 
 const $=s=>document.querySelector(s);
@@ -122,20 +122,24 @@ function renderPreflight(){
   const host=$('#k11520RealTradePreflight');if(!host)return null;
   let axis,market,binding;
   try{({axis,market}=activeAxisMarket());binding=getRealTradingBinding(axis)}catch{return null}
-  const identity=readPublicWalletIdentity();
+  const session=getWalletSession11520().snapshot();
+  const identity=session.account?{address:session.account,chainId:session.chainId}:null;
   let result;
   try{result=inspectRealTradingUiPreflight({axis,market,chainId:identity?.chainId??56,walletIdentity:identity})}
   catch(error){result={ready:false,blockers:[String(error?.message||error)],binding,signerRequested:false,transactionPayload:null,broadcast:false}}
   host.dataset.ready=result.ready?'1':'0';
   const state=host.querySelector('.state');
   if(state){
-    const wallet=identity?.address?`${identity.address.slice(0,6)}…${identity.address.slice(-4)}`:'未連錢包';
+    // Identity comes only from the existing live session; no ownership/signature claim.
+    const wallet=identity?.address?`錢包帳戶 ${identity.address.slice(0,6)}…${identity.address.slice(-4)}`:'錢包未連接';
     const expected=`${binding.axis}=${binding.display}`;
     state.textContent=result.ready?`BSC97 TESTNET READY · ${expected} · ${wallet}`:`SIMULATION · ${expected} · ${wallet}`;
     state.title=result.blockers.map(blockerLabel).join('；');
   }
+  host.dataset.walletIdentityScope=identity?'ACTIVE_SESSION':'DISCONNECTED';
+  host.dataset.walletAddress=identity?.address||'';
   host.dataset.blockers=result.blockers.join(',');
-  globalThis.__K11520_REAL_TRADING_PREFLIGHT__={...result,walletAddress:identity?.address||null,checkedAt:new Date().toISOString()};
+  globalThis.__K11520_REAL_TRADING_PREFLIGHT__={...result,walletAddress:identity?.address||null,walletIdentityScope:identity?'ACTIVE_SESSION':'DISCONNECTED',checkedAt:new Date().toISOString()};
   return result
 }
 
@@ -163,7 +167,7 @@ export function install11520RealTradingPreflightUi(){
   const order=$('#orderFire');if(order&&!order.dataset.realTradeRouteBound){order.dataset.realTradeRouteBound='1';order.addEventListener('click',()=>setTimeout(notifyOrderRoute,0))}
   for(const el of document.querySelectorAll('[data-market]'))el.addEventListener('change',renderPreflight);
   for(const el of document.querySelectorAll('[data-axis]'))el.addEventListener('click',()=>setTimeout(renderPreflight,0));
-  addEventListener('storage',event=>{if(event.key==='klineodyssey.public-wallet-identity.v1')renderPreflight()});
+  addEventListener('k11520:wallet',renderPreflight);
   renderPreflight();
   return host
 }

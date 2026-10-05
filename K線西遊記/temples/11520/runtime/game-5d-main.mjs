@@ -467,7 +467,7 @@ async function selectReadOnlyWalletView(){
 }
 async function refreshTestnet(){if(!isTestnet()||executionBusy||chainRefreshBusy)return;chainRefreshBusy=true;try{await execution.refresh();syncSimulationPositions();renderWallet();if(pending)void paintOrderPreview({background:true})}finally{chainRefreshBusy=false}}
 const retained=readPublicWalletIdentity();
-if(retained){const el=document.createElement('p');el.id='walletRetained';el.textContent='上次公開地址（未驗證連線）：'+retained.address;$('#walletMsg').after(el)}
+if(retained){const el=document.createElement('p');el.id='walletRetained';el.textContent='已保留公開錢包紀錄；目前未連接錢包。';$('#walletMsg').after(el)}
 function walletExecutionView(value){
   const chain=execution.snapshot();
   if(!isTestnet())return chain;
