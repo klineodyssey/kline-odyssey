@@ -1,5 +1,18 @@
 # KGEN MASTER_INDEX
 
+## KAIOS Backend / Recovery V1 candidate (2026-10-04)
+
+- `KAIOS/backend/README.md`: complete new service/file inventory.
+- `KAIOS/backend/KAIOS_BACKEND_ARCHITECTURE.md`: canon owners, three authorities, ports/API.
+- `KAIOS/backend/KAIOS_BACKUP_RECOVERY_SPEC.md`: atomic backups, safe recovery, tests.
+- `KAIOS/backend/KAIOS_BACKEND_SECURITY_BOUNDARY.md`: auth/privacy/financial isolation.
+- `KAIOS/backend/LOCAL_DEVELOPMENT.md`: free local dev, undeployed provider candidate/rollback.
+- `K線西遊記/temples/11520/runtime/player-cloud-sync.mjs`: optional existing-owner outbox.
+- `.github/workflows/kaios-backend-recovery-qa.yml`: dedicated local tests/browser artifacts, no deploy.
+
+Boot CURRENT remains protected and unchanged; candidate registration does not activate a production authority.
+
+
 ## KAIOS canonical World Portal / Audio (2026-10-01)
 
 | Path | Purpose |
@@ -979,3 +992,14 @@ Runtime V1 implementation:
 | `core/data/canonical.json` | Player-first, membership, no-new-Life, Zhang Cuiyun, remote Gatekeeper and evidence-based 8888 audit projections. |
 | `K線西遊記/temples/11520/app.mjs` | First-screen concierge, working Voice/Speech/Text fallback, Join, first mission and return flow. |
 | `K線西遊記/temples/11520/styles.css` | Animated CSS 3D character and visible 2D/reduced-motion fallback. |
+
+
+### PR489 Identity/Auth and XYZ remediation candidate
+
+`KAIOS/backend/KAIOS_IDENTITY_AUTH_RESEARCH.md` documents official-source research
+and decisions; `KAIOS/backend/src/identity.mjs` implements private Account enrollment,
+email/recovery adapters and sessions; `KAIOS/backend/deploy/0002_identity.sql` is its
+additive migration; `KAIOS/backend/test/identity.test.mjs` holds adversarial tests.
+The existing backend model adds explicit unresolved universe/local coordinate frames.
+This candidate does not activate production identity, KYC, financial transactions or
+Universal Market. Boot CURRENT is intentionally unchanged (no Boot-update authority).

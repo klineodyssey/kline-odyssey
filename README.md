@@ -6,6 +6,15 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### KAIOS Backend / Recovery V1 review candidate
+
+Portable authenticated Player Life sync, immutable backups and a Traditional Chinese
+Recovery Center: [local development](KAIOS/backend/LOCAL_DEVELOPMENT.md),
+[architecture](KAIOS/backend/KAIOS_BACKEND_ARCHITECTURE.md).
+SQLite/file adapters run without a paid cloud account; Cloudflare configuration is
+an undeployed candidate. Blockchain remains the financial authority; no settlement
+or token changes. Full file inventory: [backend index](KAIOS/backend/README.md).
+
 ### K11520 V2.9 gameplay candidate
 
 Player/GA600 game progression, Boss encounters, rarity loot and Daily Journey

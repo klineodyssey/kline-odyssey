@@ -1,0 +1,31 @@
+# Deployment candidate ONLY. Copy and supply authorized resource IDs; never run automatically.
+name = "kaios-backend-recovery-candidate"
+main = "../.candidate/worker.mjs"
+compatibility_date = "2026-09-01"
+[assets]
+directory = "../.candidate/public"
+binding = "ASSETS"
+run_worker_first = ["/api/v1/*"]
+[vars]
+KAIOS_DOMAIN = "https://YOUR_AUTHORIZED_DOMAIN.example"
+KAIOS_ALLOWED_ORIGINS = '["https://YOUR_AUTHORIZED_DOMAIN.example"]'
+KAIOS_CHAIN_IDS = '[97]'
+[[d1_databases]]
+binding = "DB"
+database_name = "kaios-player-game-candidate"
+database_id = "REPLACE_WITH_AUTHORIZED_ID"
+migrations_dir = "."
+[[r2_buckets]]
+binding = "BACKUPS"
+bucket_name = "kaios-player-backups-candidate"
+[[durable_objects.bindings]]
+name = "WORLD_ROOMS"
+class_name = "KAIOSWorldRoom"
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["KAIOSWorldRoom"]
+[[queues.producers]]
+binding = "JOBS"
+queue = "kaios-game-jobs-candidate"
+[[queues.consumers]]
+queue = "kaios-game-jobs-candidate"
