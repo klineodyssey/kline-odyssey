@@ -49,13 +49,13 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 
 ## KAIOS multi-project engineering coordination snapshot
 
-Current checkpoint: 2026-10-05T11:26:48Z; observed main `b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720`. Documentation branch original base remains `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
+Current checkpoint: 2026-10-05T11:33:25Z; observed main `b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720`. Documentation branch original base remains `27a21b031afad333468d9d3847d1933bc053487e`. This is an additive coordination report under the Human temporary-external-maintainer exception, not a formal dispatcher, Worker claim, identity registry or production authority. The prior salary-fixture report above is preserved verbatim as historical evidence; its old pending status is superseded by merged PR#497, not rewritten here.
 
 Twenty meaningful work packages are listed below, including substreams of the same project. The Human clarified the target as 20; obvious typographical mistakes are normalized in current coordination text. The target is 20 work packages, not a claim that 20 workers execute simultaneously. IN_PROGRESS identifies active coordination/QA/recovery as described, not a pending CI job running code. Existing projects remain tracked when new tasks arrive.
 
 1. **P1 / IN_PROGRESS — 11520 HUD V2.9.1 exact-head release QA**. Dependencies: none. Next: Track required postrelease gameplay acceptance through #507, plus integrated #505 explanation-only checks. Preserve proven public version facts and separate inherited P2 observations. Evidence: #498 V2.9.1 remains publicly live. #504 test-only successor merged at b513d4e7 at11:08 UTC, without a product-version change. Pages is live, but postmerge public pointblank-facing failure is unresolved in successor #507; no blanket behavioral QA pass. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/498) · [2](https://github.com/klineodyssey/kline-odyssey/actions/runs/37282998693) Child checkpoints: Q01.release=COMPLETE; Q01.behavioral_gates=IN_PROGRESS.
 
-2. **P1 / BLOCKED / RELEASE_BLOCKED — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Keep #503 recovery and #506 medium-risk integrity stack on HOLD. Validate explanation-only #505 at integrated cc235810 separately; reconcile refreshed dependency/main before final #506 QA, then resolve its remaining release gates. Evidence: Fresh #5034916c833 remains RELEASE_BLOCKED for additional local-game integrity validation. No actual player data or real assets changed. #505cc235810 integrates main b513; explanation-only V2.9.3 remains candidate. Prior c148 had all CI and13 explanation screenshots PASS; current exact CI pending. #506afb3f9e0 remains a Draft stack with medium-risk lifecycle, compatibility, migration and follower-UX holds despite14 native cases PASS reported by parent. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/503) · [2](https://github.com/klineodyssey/kline-odyssey/pull/505) · [3](https://github.com/klineodyssey/kline-odyssey/pull/506) Child checkpoints: Q02.recovery_candidate=BLOCKED; Q02.explanation_only_ux=IN_PROGRESS; Q02.canonical_writer_design=BLOCKED.
+2. **P0 / BLOCKED / RELEASE_BLOCKED — Courier CLOCK_REVIEW recovery**. Dependencies: none. Next: Prioritize #506 whole-Player-Life stale-writer safety and required restart/legacy/schema/corruption/backup/Player-and-Life-isolation coverage. Keep release blocked until complete evidence; continue #505 explanation-only independently while reconciling the actual stack dependency. #503 remains held. Evidence: Human priority update11:31 UTC: #506 has an observed legacy-client safety failure in controlled testing and a P0 release blocker for local-game integrity. Prior14 native cases do not establish full Player Life acceptance. Current afb3f9e0 remains stacked on #505 c148 while #505 latest is cc235810; dependency truth must be reconciled without blocking #506 engineering. No production-data impact or real-asset loss is claimed. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/503) · [2](https://github.com/klineodyssey/kline-odyssey/pull/505) · [3](https://github.com/klineodyssey/kline-odyssey/pull/506) Child checkpoints: Q02.recovery_candidate=BLOCKED; Q02.explanation_only_ux=IN_PROGRESS independently; Q02.canonical_writer_design=IN_PROGRESS / P0 RELEASE_BLOCKED.
 
 3. **P1 / IN_PROGRESS — Public main responsive 390 timeout**. Dependencies: none. Next: Inspect exact #507195aa504 local/public CI and native facing evidence; retain required gameplay assertions and bounded deadlines before any parent-coordinated merge. Evidence: #504 merged b513d4e7 from5c3aa2af. Public postmerge pointblank-facing precondition failed before an attack. Draft #507195aa504df2c3f6c4044dd753afc03b310b4b55d is a clean test-only successor using native standoff/facing feedback; runtime and original gameplay assertions unchanged. 227 local tests PASS; exact CI pending. Source: [1](https://github.com/klineodyssey/kline-odyssey/pull/504) · [2](https://github.com/klineodyssey/kline-odyssey/pull/507) Child checkpoints: Q03.pursuit=COMPLETE; Q03.pan=COMPLETE; Q03.facing=IN_PROGRESS.
 
@@ -101,7 +101,7 @@ KAIOS is a next-generation operating-system design goal that makes customer drea
 
 Before each work cycle, refresh main and read current Boot, Company Boot, applicable instructions and ownership. This checkpoint preserves the Human long-term KAIOS wish-to-verified-customer-outcome vision; no formal identity or authority follows from that vision.
 
-Game-first selection: active HUD, Courier and game QA lead. After game P1 and as dependencies permit, multiplayer, graphics/performance and original audio can precede secondary financial-release work. Trading stays in the queue with its existing safety holds. Reprioritization does not start extra tasks or interrupt active work.
+Game-first selection: #506 whole-Player-Life integrity and its P0 release blocker now lead. #505 explanation-only work continues independently; #504 engineering is closed and #507 owns remaining public gameplay QA. After required integrity/gameplay gates and as dependencies permit, multiplayer, graphics/performance and original audio can precede secondary financial-release work. Trading stays in the queue with its existing safety holds. Reprioritization does not start extra tasks or interrupt active work.
 
 Independent read/test/review work may run in parallel up to actual capacity. Shared-file changes have one write owner; all main merges serialize. PR #498 is merged; this documentation Draft remains unmerged and requires current-main/shared-handoff reconciliation before separately authorized integration. Failed or pending gates remain visible; no blind retries, skipped tests, invented P0, discarded projects, formal employee reassignment or credential creation. Once a package closes, choose an existing ready priority; if all close, research a concrete roadmap gap before proposing more work. No money, chain, production identity or external AI authority is granted.
 
@@ -128,7 +128,7 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     "parallel": "Independent read, review, test and isolated-branch work may proceed concurrently. Do not stop or reassign existing workers.",
     "serialization": "One write owner per overlapping file; serialize shared-file integration and all main merges. Rebase/revalidate later candidates against newly merged main.",
     "merge_hold": "This queue remains Draft. Parent serializes later integration around active #507 gameplay QA and #505 explanation-only release, reconciling shared handoff edits. This worker does not merge main.",
-    "selection": "Game-first: required gameplay QA in #507 and exact integrated-head #505 checks lead. #503 recovery and medium-risk #506 store-integrity stack stay held. Inherited P2 visual observations are bounded follow-up children, not confirmed P1 or #505 regressions. Preserve active work and existing dependencies; no blind retries or competing runtime.",
+    "selection": "Highest priority: #506 whole-Player-Life local-game data integrity and its P0 release blocker. Existing14 native cases are partial evidence, not full acceptance. #505 explanation-only work proceeds independently and must not block this engineering effort, although actual stack dependencies require reconciliation. #504 engineering is closed/merged; #507 owns the remaining public gameplay issue. #503 remains on HOLD.",
     "refill": "When a package completes, choose the highest-priority authorized ready item. If all close, inspect roadmap and evidence for useful gaps; never invent tasks solely to consume capacity.",
     "reprioritization": "No new task, canceled project, interrupted active work or dependency removal. Q04 and Q05 remain tracked as secondary P2 engineering/release work; blocked financial execution stays blocked.",
     "boot_before_each_cycle": "Refresh latest main and read current Boot/Company Boot, applicable AGENTS and ownership before each work cycle; never infer employee identity or authority from reading."
@@ -163,17 +163,17 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
     {
       "id": "Q02",
       "title": "Courier CLOCK_REVIEW recovery",
-      "priority": "P1",
+      "priority": "P0",
       "status": "BLOCKED",
       "dependencies": [],
-      "next_action": "Keep #503 recovery and #506 medium-risk integrity stack on HOLD. Validate explanation-only #505 at integrated cc235810 separately; reconcile refreshed dependency/main before final #506 QA, then resolve its remaining release gates.",
+      "next_action": "Prioritize #506 whole-Player-Life stale-writer safety and required restart/legacy/schema/corruption/backup/Player-and-Life-isolation coverage. Keep release blocked until complete evidence; continue #505 explanation-only independently while reconciling the actual stack dependency. #503 remains held.",
       "sources": [
         "https://github.com/klineodyssey/kline-odyssey/pull/503",
         "https://github.com/klineodyssey/kline-odyssey/pull/505",
         "https://github.com/klineodyssey/kline-odyssey/pull/506"
       ],
-      "evidence": "Fresh #5034916c833 remains RELEASE_BLOCKED for additional local-game integrity validation. No actual player data or real assets changed. #505cc235810 integrates main b513; explanation-only V2.9.3 remains candidate. Prior c148 had all CI and13 explanation screenshots PASS; current exact CI pending. #506afb3f9e0 remains a Draft stack with medium-risk lifecycle, compatibility, migration and follower-UX holds despite14 native cases PASS reported by parent.",
-      "activity": "RELEASE_HOLDS_WITH_SEPARATE_EXPLANATION_QA",
+      "evidence": "Human priority update11:31 UTC: #506 has an observed legacy-client safety failure in controlled testing and a P0 release blocker for local-game integrity. Prior14 native cases do not establish full Player Life acceptance. Current afb3f9e0 remains stacked on #505 c148 while #505 latest is cc235810; dependency truth must be reconciled without blocking #506 engineering. No production-data impact or real-asset loss is claimed.",
+      "activity": "HIGHEST_PRIORITY_LOCAL_GAME_INTEGRITY_RELEASE_BLOCKED",
       "readiness": "RELEASE_BLOCKED",
       "risk": "MEDIUM",
       "children": [
@@ -191,17 +191,33 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
           "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
           "pr": 505,
           "version": "V2.9.3_CANDIDATE_NOT_LIVE",
-          "scope": "Explanation only; no recovery action. Integrated main b513; fresh exact-head CI pending. Prior c148 all CI and13 explanation images PASS, not current-head approval."
+          "scope": "Explanation only; no recovery action. Integrated main b513; fresh exact-head CI pending. Prior c148 all CI and13 explanation images PASS, not current-head approval.",
+          "scheduling": "Independent explanation-only task; does not gate starting or continuing #506 integrity engineering."
         },
         {
           "id": "Q02.canonical_writer_design",
-          "status": "BLOCKED",
-          "readiness": "DRAFT_STACK_HOLD",
+          "status": "IN_PROGRESS",
+          "readiness": "RELEASE_BLOCKED",
           "risk": "MEDIUM",
           "pr": 506,
           "head": "afb3f9e0e59c6ebd7310c68de80766cda78ae6f9",
           "depends_on_pr": 505,
-          "evidence": "Parent-reported14 real-native cases PASS. BFCache not exercised; old-client fencing not established. Follower UX, migration and mixed-version compatibility remain held. Refreshed505/main reconciliation pending; no release approval."
+          "evidence": "Observed legacy-client safety failure in controlled validation is a P0 release blocker. Existing14 native cases are partial proof only; full Player Life acceptance is not established. No production-data impact claimed.",
+          "priority": "P0",
+          "acceptance_scope": [
+            "Whole Player Life: stale revision N from an old tab must never overwrite accepted N+1",
+            "Browser restart and restored-tab lifecycle",
+            "Legacy-client compatibility and safe migration",
+            "Schema validation and corrupt-state fail-closed handling",
+            "Backup and recovery preservation",
+            "Player isolation and Life isolation"
+          ],
+          "dependency_truth": {
+            "actual_base_pr": 505,
+            "actual_dependency_head": "c14801ae9eb0b78f08da1e32a914251060fbeb75",
+            "latest505_head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+            "engineering_scheduling": "#505 explanation-only work is independent and must not block #506 engineering; stack/latest-main reconciliation still required before release."
+          }
         }
       ]
     },
@@ -600,8 +616,8 @@ The JSON is a snapshot, not an executable queue. Exact commit/PR identity for th
   ],
   "clarification_at": "2026-10-05T08:40:33Z",
   "product_vision": "KAIOS is a next-generation operating-system design goal that makes customer dreams real: customer/player wish → KGEN AI Company project → verified customer outcome. K11520 is currently game-first, with exchange/trading secondary and contextual. These are priorities and intended behavior, not implemented autonomous-service or execution-authority claims.",
-  "checkpoint_at": "2026-10-05T11:26:48Z",
-  "priority_clarification_at": "2026-10-05T08:43:35Z",
+  "checkpoint_at": "2026-10-05T11:33:25Z",
+  "priority_clarification_at": "2026-10-05T11:31:00Z",
   "audit_checkpoint_at": "2026-10-05T08:51:09Z",
   "observed_main_sha": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
   "branch_base_note": "Documentation branch retains original base27a21b03; current main b513d4e7 and Boot/Company Boot were read before this checkpoint. No main merge or rebase performed.",
