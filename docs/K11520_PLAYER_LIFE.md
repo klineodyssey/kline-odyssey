@@ -276,7 +276,8 @@ malformed, conflicting, oversized or wrong-namespace records remain untouched.
 - Node coverage includes ownership/lifecycle, concurrent consumers, durability,
   pending-credit retries, namespace binding, migration and capacity boundaries.
   Local Chromium cannot start because socket() is not permitted; no bypass was
-  attempted. FUNCTIONAL_QA is store/Node only; VISUAL_QA is NOT_RUN.
+  attempted. Local checks do not substitute for exact-head CI browser execution
+  or direct image review; capture alone is not VISUAL_QA PASS.
 - The isolated native-browser mode has its own mandatory job in the existing
   Product workflow: a 240-second scenario cap inside an 8-minute job. This adds
   up to 8 runner-minutes per workflow invocation under existing push/PR triggers,
@@ -284,6 +285,14 @@ malformed, conflicting, oversized or wrong-namespace records remain untouched.
   are attempted on failure; missing JSON/screenshots fail the job. Native BFCache
   not exercised by Chromium remains explicitly unverified. Pinned old-client
   observations are unsupported-compatibility diagnostics, not safety acceptance.
+- Native production-entry evidence covers both the existing Knight asset and
+  blocked-asset fallback. Only the exact existing public Knight GET is allowed;
+  redirects are refused and URL/content hash are recorded. Twelve labeled frames
+  cover both modes at 390x844 and 844x390: initial feedback, natural toast
+  clearance, and dismissed Courier details. Required action/toggle and dismissed
+  world controls are checked; open-panel overlap remains a separate diagnostic.
+  No toast is hidden or timer shortened. Unexercised BFCache sets top-level
+  acceptance to INCOMPLETE; the report retains release HOLD.
 - Real multi-tab, close/crash/takeover, BFCache, mixed-version, account switches,
   interrupted credit/ack, existing browser suites and inspected mobile/landscape
   screenshots remain required at the final integrated head.
