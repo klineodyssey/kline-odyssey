@@ -57,10 +57,19 @@ async function verifyWorldFirst(){
       await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),null,{timeout:45000});
       assert.equal(await page.evaluate(()=>globalThis.__K11520_UI_SETTINGS__.profile),'MINIMAL');
       assert.equal(await page.locator('#axes').isVisible(),false);
-      for(const selector of ['#cargoInterceptionButton','#homeDeliveryButton','#k11520MarketRow','#k11520CameraReset']){
+      for(const selector of ['#k11520MarketRow','#k11520CameraReset']){
         const box=await page.locator(selector).boundingBox();assert.ok(box&&box.height>=44&&box.width>=44,selector+' accessible compact target');
         assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=profile.width&&box.y+box.height<=profile.height);
       }
+      const contextActions=['#cargoInterceptionButton','#homeDeliveryButton'];
+      if(profile.landscape){
+        const inactive=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{const el=document.querySelector(selector);return[selector,{state:el?.dataset.contextState||'',visible:!!el&&getComputedStyle(el).display!=='none'}]})),contextActions);
+        assert.deepEqual(inactive,{'#cargoInterceptionButton':{state:'cruise',visible:false},'#homeDeliveryButton':{state:'idle',visible:false}},'inactive landscape context actions must not occupy the world');
+        await page.locator('#k11520UtilityMaster').click();
+        for(const selector of contextActions){const box=await page.locator(selector).boundingBox();assert.ok(box&&box.height>=44&&box.width>=44,selector+' must remain accessible in the existing utility rail');assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=profile.width&&box.y+box.height<=profile.height)}
+        await page.locator('#k11520UtilityMaster').click();
+        result.checks.landscapeContextActions='INACTIVE HIDDEN / EXISTING MORE RAIL ACCESSIBLE PASS';
+      }else for(const selector of contextActions){const box=await page.locator(selector).boundingBox();assert.ok(box&&box.height>=44&&box.width>=44,selector+' accessible compact target');assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=profile.width&&box.y+box.height<=profile.height)}
       result.visibility=await page.evaluate(()=>{
         const p=globalThis.__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen;
         return{player:p,playerUncovered:document.elementFromPoint(p.x,p.y)?.id==='three',monsters:globalThis.__K11520_WORLD_SELECTION_PROJECTION__.journeyLifeSnapshot()};
