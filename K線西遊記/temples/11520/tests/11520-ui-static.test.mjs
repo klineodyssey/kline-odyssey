@@ -465,3 +465,25 @@ test('signed-C WAIT evidence survives the separate deferred route toast and clea
     assert.equal(disconnected,true);assert.equal('__SIGNED_C_WAIT_EVIDENCE__' in context,false);
   }
 });
+
+test('responsive event routing retains standalone mobile-HUD coverage and references only its required exact-tree Game owner',async()=>{
+  const {mkdtempSync,mkdirSync,rmSync}=await import('node:fs'),{tmpdir}=await import('node:os'),{spawnSync}=await import('node:child_process');
+  const responsive=read('../../../../.github/workflows/11520-responsive-qa.yml'),game=read('../../../../.github/workflows/11520-game-product-qa.yml');
+  const paths=(source,event)=>source.split('  '+event+':\n')[1].split(/\n  [a-z_]+:/)[0].split('\n').map(line=>line.match(/^      - ['"](.+)['"]$/)?.[1]).filter(Boolean);
+  for(const event of ['pull_request','push'])for(const path of paths(responsive,event))assert.ok(paths(game,event).includes(path),event+' Game owner must trigger for '+path);
+  assert.ok(game.includes('timeout --signal=TERM --kill-after=10s 90s node "K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs"'));
+  assert.ok(game.includes('RC=${PIPESTATUS[0]}'));assert.ok(game.includes('mobile HUD three-rail/collapse screenshots missing'));
+  const start=responsive.indexOf('          if [ "$PUBLIC_QA" != true ]; then'),end=responsive.indexOf('      - name: Preserve screenshots and focused failure logs',start);
+  const script=responsive.slice(start,end).replace(/^          /gm,'');
+  for(const [event,production,reference,mobile] of [['pull_request','false',true,false],['push','false',true,false],['workflow_dispatch','false',false,true],['workflow_dispatch','true',false,false],['workflow_run','true',false,false]]){
+    const directory=mkdtempSync(resolve(tmpdir(),'k11520-hud-routing-'));try{
+      mkdirSync(resolve(directory,'artifacts/11520-responsive-qa'),{recursive:true});const trace=resolve(directory,'trace');
+      const mocked='set -euo pipefail\ntimeout(){ printf "%s\\n" "$*" >> "$TRACE"; }\npython3(){ printf "REFERENCE\\n" >> "$TRACE"; cat >/dev/null; }\n';
+      const result=spawnSync('bash',['-c',mocked+script],{cwd:directory,env:{PATH:process.env.PATH,TRACE:trace,GITHUB_EVENT_NAME:event,PUBLIC_QA:production},encoding:'utf8'});
+      assert.equal(result.status,0,result.stderr);const observed=existsSync(trace)?readFileSync(trace,'utf8'):'';
+      assert.equal(observed.includes('REFERENCE'),reference,event+'/'+production+' ownership reference');assert.equal(observed.includes('11520-browser-mobile-hud.mjs'),mobile,event+'/'+production+' local mobile-HUD execution');assert.equal(observed.includes('11520-browser-character-status.mjs'),production==='false','character coverage remains unchanged');
+    }finally{rmSync(directory,{recursive:true,force:true})}
+  }
+  for(const field of ["'head':head","'tree':subprocess.check_output", "'scriptSha256':hashlib.sha256", "'requiredWorkflow':'11520 Game Product QA'", "'requiredJob':'product-qa'", "'requiredConclusion':'success'", "'evidenceIsReferenceOnly':True",'11520-mobile-hud-3rail.png','11520-mobile-hud-collapsed.png'])assert.ok(script.includes(field),field);
+  assert.ok(script.includes("assert head==os.environ['K11520_SOURCE_SHA']"));
+});

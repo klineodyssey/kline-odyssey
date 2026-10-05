@@ -154,7 +154,27 @@ jobs:
           node 'K線西遊記/temples/11520/tests/11520-browser-responsive.mjs'
           if [ "$PUBLIC_QA" != true ]; then
             timeout 100s node 'K線西遊記/temples/11520/tests/11520-browser-character-status.mjs' 2>&1 | tee artifacts/11520-responsive-qa/character-status-test.log
-            timeout 180s node 'K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs' 2>&1 | tee artifacts/11520-responsive-qa/mobile-hud-test.log
+            if [ "$GITHUB_EVENT_NAME" = pull_request ] || [ "$GITHUB_EVENT_NAME" = push ]; then
+              # Identical local script is mandatory in Game/product-qa, including
+              # its RC and screenshot gates. This reference is NOT a PASS;
+              # release still requires that exact-tree Game job to succeed.
+              python3 - <<'PYHUD'
+          import hashlib, json, os, pathlib, subprocess
+          head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          assert head==os.environ['K11520_SOURCE_SHA'], 'Coverage reference head mismatch'
+          script=pathlib.Path('K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs')
+          evidence={'head':head,'tree':subprocess.check_output(['git','rev-parse','HEAD^{tree}'],text=True).strip(),
+              'script':str(script),'scriptSha256':hashlib.sha256(script.read_bytes()).hexdigest(),
+              'requiredWorkflow':'11520 Game Product QA','requiredJob':'product-qa','requiredConclusion':'success',
+              'evidenceIsReferenceOnly':True,'localUrl':'http://127.0.0.1:4173',
+              'requiredScreenshots':['11520-mobile-hud-3rail.png','11520-mobile-hud-collapsed.png'],
+              'artifact':'11520-runtime-visual-qa-<Game checkout SHA>','matchingRule':'same head or merge commit with identical tree'}
+          pathlib.Path('artifacts/11520-responsive-qa/mobile-hud-required-evidence.json').write_text(json.dumps(evidence,indent=2)+'\n')
+          PYHUD
+            else
+              # Standalone local dispatch has no companion Game trigger.
+              timeout 180s node 'K線西遊記/temples/11520/tests/11520-browser-mobile-hud.mjs' 2>&1 | tee artifacts/11520-responsive-qa/mobile-hud-test.log
+            fi
           fi
       - name: Preserve screenshots and focused failure logs
         if: always()
