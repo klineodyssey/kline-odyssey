@@ -564,6 +564,40 @@ async function publicTestnetBrowserQA(){
 }
 
 
+// Bind actual browser response bytes, including each real query/cache variant,
+// to the deployment checkout. This never replaces a public application response.
+async function bootM1ReadOnlyPage(page,url){
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});
+  if(await page.locator('#enter11520').isVisible()){
+    try{await page.locator('#enter11520').click({timeout:1500})}
+    catch(error){if(await page.locator('#intro11520').isVisible())throw error}
+  }
+  await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
+  await page.waitForFunction(()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),null,{timeout:45000});
+}
+
+function attachM1PageSourceProof(page,{base,sourceSha,assets,createHash}){
+  const prefix=new URL(base).pathname.replace(/\/$/,'')+'/',origin=new URL(base).origin;
+  const expected=new Map(assets.map(x=>[x.path,x.sha256])),seen=new Map(),pending=new Set(),errors=[];
+  page.on('response',response=>{
+    const url=new URL(response.url()),path=decodeURIComponent(url.pathname).slice(prefix.length);
+    if(url.origin!==origin||!decodeURIComponent(url.pathname).startsWith(prefix)||!expected.has(path))return;
+    const job=(async()=>{try{
+      assert.equal(response.status(),200,'PUBLIC_BROWSER_ASSET_HTTP_ERROR '+path);
+      const sha256=createHash('sha256').update(await response.body()).digest('hex');
+      assert.equal(sha256,expected.get(path),'PUBLIC_BROWSER_ASSET_SOURCE_MISMATCH '+path);
+      seen.set(path,{path,sha256,query:url.search,fromServiceWorker:response.fromServiceWorker()});
+    }catch(error){errors.push(String(error.message))}})();
+    pending.add(job);void job.finally(()=>pending.delete(job));
+  });
+  return async()=>{
+    while(pending.size)await Promise.all([...pending]);assert.deepEqual(errors,[],'actual public browser assets must match checkout');
+    for(const path of expected.keys())assert.ok(seen.has(path),'PUBLIC_BROWSER_ASSET_NOT_OBSERVED '+path);
+    return {sourceSha,status:'PASS',actualBrowserResponses:[...seen.values()]};
+  };
+}
+
 // M1 uses real public chain97 reads through a synthetic injected EIP-1193
 // transport. No Wallet/signer is constructed; this is not Human MetaMask QA.
 async function m1ReadOnlyBrowserQA(){
@@ -576,14 +610,19 @@ async function m1ReadOnlyBrowserQA(){
   const provider=new JsonRpcProvider(process.env.BSC_TESTNET_RPC_URL||'https://bsc-testnet-dataseed.bnbchain.org',undefined,{batchMaxCount:1});
   assert.equal(BigInt(await provider.send('eth_chainId',[])),97n);
   const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173',origin=new URL(base).origin,out='artifacts/11520-m1-readonly-qa';await fs.mkdir(out,{recursive:true});
+  const publicSource=new URL(base).hostname==='klineodyssey.github.io'?JSON.parse(await fs.readFile(out+'/public-source-before.json','utf8')):null;
+  if(publicSource){assert.equal(publicSource.status,'PASS');assert.equal(publicSource.sourceSha,process.env.K11520_SOURCE_SHA)}
+  const {createHash}=await import('node:crypto');
   const {TESTNET_EXECUTION_ABI}=await import('../runtime/real-trading-order-intent.mjs'),tokenAbi=new Interface(TESTNET_EXECUTION_ABI.testToken),orderAbi=new Interface(TESTNET_EXECUTION_ABI.orderTriggerEngine);
   const allowedAddresses=new Set([...Object.values(manifest.addresses),...Object.values(candidate.addresses)].map(a=>a.toLowerCase()));
   const browser=await chromium.launch({headless:true});const results=[];
   const routeThree=page=>page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async route=>{const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';let body=await fs.readFile(`node_modules/three/${route.request().url().slice(prefix.length)}`,'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);await route.fulfill({contentType:'text/javascript',body})});
   const url=`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`;
-  const boot=async page=>{await page.goto(url,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();await page.locator('#intro11520').waitFor({state:'hidden'});};
+  const boot=page=>bootM1ReadOnlyPage(page,url);
   try{
     const absent=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+    // The no-provider screen never requests the lazily loaded wallet codec.
+    const finishAbsentPublicSource=publicSource?attachM1PageSourceProof(absent,{base,...publicSource,assets:publicSource.assets.filter(x=>x.path!=='K線西遊記/assets/ethers-5.7.2.umd.min.js'),createHash}):null;
     try{
       await routeThree(absent);await boot(absent);
       await absent.waitForFunction(()=>document.querySelector('#walletProviderHelp')?.hidden===false);
@@ -591,13 +630,19 @@ async function m1ReadOnlyBrowserQA(){
       if(await absent.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await absent.locator('#walletToggle').click();
       assert.equal(await absent.locator('#walletProviderHelp').isVisible(),true);
       assert.equal(await absent.locator('#wAddr').textContent(),'DISCONNECTED');
+      await absent.waitForFunction(()=>document.querySelector('#walletM1ReadOnly')?.disabled===false&&document.querySelector('#k11520RealTradePreflight'));
+      // Settings is a late bootstrap import and owns wallet visibility. Wait
+      // for that real owner before capturing its source-bound public state.
+      if(publicSource)await absent.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__,null,{timeout:15000});
       await absent.screenshot({path:`${out}/390x844-no-injected-wallet.png`});
+      if(finishAbsentPublicSource)await fs.writeFile(out+'/no-provider-source.json',JSON.stringify(await finishAbsentPublicSource(),null,2));
     }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message)},null,2));throw error}finally{await absent.close()}
     for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
       const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[],phaseCounts={M1:{},LEGACY:{},INITIAL:{}};let logFallbacks=0,phase='INITIAL';
       const consoleErrors=[],requestFailures=[];let stage='BOOT';
       const safeText=value=>String(value).replace(/https?:\/\/[^\s"']+/g,url=>{try{return new URL(url).origin}catch{return '[URL]'}});
       const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
+      const finishPublicSource=publicSource?attachM1PageSourceProof(page,{base,...publicSource,createHash}):null;
       page.on('pageerror',e=>errors.push(safeText(e.stack||e)));
       page.on('console',m=>{if(m.type()==='error')consoleErrors.push(safeText(m.text()))});
       page.on('requestfailed',r=>requestFailures.push({url:safeText(r.url()),resourceType:r.resourceType(),error:safeText(r.failure()?.errorText||'REQUEST_FAILED')}));await routeThree(page);
@@ -666,7 +711,8 @@ async function m1ReadOnlyBrowserQA(){
         const closeHit=await page.locator('#walletToggle').evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))});assert.equal(closeHit,true,'wallet close is reachable');
         await page.locator('#walletToggle').click();await page.waitForFunction(()=>document.querySelector('#walletPanel').classList.contains('collapsed')&&getComputedStyle(document.querySelector('#dock')).display!=='none');
         for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton'])assert.equal(await page.locator(selector).isVisible(),true,'wallet close restores peer '+selector);await shot('wallet-close-restores-tray');
-        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
+        const publicBrowserSource=finishPublicSource?await finishPublicSource():null;
+        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({publicBrowserSource,viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
         await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify(results.at(-1),null,2));
       }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,forbidden,errors,consoleErrors,requestFailures,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
     }
