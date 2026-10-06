@@ -1,15 +1,15 @@
 /* KGEN_META
 VERSION: 2.4.0
-REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+REVISION: 2026-10-06.TOAST-DISMISSAL-PLACEMENT
 PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
 LAST_UPDATED: 2026-10-06
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
 REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
+SOURCE_COMMIT: de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9
 TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Place the single existing toast in active trading-panel header flow, preserving feedback while preventing data overlap.
-ANCESTOR: K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+CHANGE_REASON: Preserve visible toast placement at dismissal while retaining next-message and trading-panel context updates.
+ANCESTOR: K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs @ de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Playable 11520 product behavior: mobile clearance, center-Y, fixed Y/C/Lots controls, canonical floors, compass, local AI help, BGM and intro.
 */
@@ -69,7 +69,12 @@ function install11520ToastContext(){
   const toast=document.getElementById('toast');if(!toast)return;
   toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');
   if(!toastContextObserver){
-    toastContextObserver=new MutationObserver(()=>place11520Toast(toast));
+    toastContextObserver=new MutationObserver(records=>{
+      // Dismissal starts an opacity fade; keep its placement until the next
+      // message. Actual panel-context changes must still move the same node.
+      if(records.every(record=>record.target===toast)&&!toast.classList.contains('show'))return;
+      place11520Toast(toast);
+    });
     for(const id of ['confirm','sheet','toast']){const node=document.getElementById(id);if(node)toastContextObserver.observe(node,{attributes:true,attributeFilter:['class']})}
     const body=document.getElementById('sheetBody');if(body)toastContextObserver.observe(body,{attributes:true,attributeFilter:['data-sim-organ']});
     const title=document.getElementById('sheetTitle');if(title)toastContextObserver.observe(title,{childList:true,characterData:true,subtree:true});

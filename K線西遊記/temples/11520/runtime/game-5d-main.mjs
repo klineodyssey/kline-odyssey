@@ -1,15 +1,15 @@
 /* KGEN_META
 VERSION: 2.9.0
-REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+REVISION: 2026-10-06.MARKET-CARD-NODE-RETENTION
 PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
 LAST_UPDATED: 2026-10-06
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
 REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
+SOURCE_COMMIT: cf2ffb47c3e71e444935ef6151adc7f9d6208ca4
 TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Restore explicit simulation quote access and bounded recovery feedback through the existing lifecycle without relaxing real-trading gates.
-ANCESTOR: K線西遊記/temples/11520/runtime/game-5d-main.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+CHANGE_REASON: Retain canonical market-card nodes and their existing presentation decorations during quote and simulation refreshes.
+ANCESTOR: K線西遊記/temples/11520/runtime/game-5d-main.mjs @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: 11520 5D game main runtime using unbounded XYZ control intent, collision-constrained physical body, plane-aware maps, canonical XYZ world/entity navigation and 3D Life visuals. Signed-C rendering is delegated to its canonical runtime; game state exposes one direct canonical trade-side setter.
 */
@@ -148,8 +148,24 @@ function setTradeSide(axisId,value){const id=String(axisId||'').toUpperCase(),ta
 globalThis.__K11520_TRADE_DIRECTION_API__=Object.freeze({version:'1.0.0',authority:'GAME_STATE_SIDE',setSide:(axisId,side)=>setTradeSide(axisId,side),getSide:axisId=>S.axes[String(axisId||'').toUpperCase()]?.side||null,snapshot:()=>Object.fromEntries(Object.entries(S.axes).map(([k,v])=>[k,v.side]))});
 
 function renderAxes(){
-  $('#axes').innerHTML=['KX','KY','KZ'].map(a=>{const x=S.axes[a],q=S.quotes[x.market],active=a===S.axis;return `<button type="button" class="axis panel ${active?'active':''}" data-axis="${a}" data-market-card="${a}" aria-current="${active?'true':'false'}" aria-label="查看 ${a} ${x.market.replace('USDT','/USDT')} 市場詳情"><div class="axisHead"><span>${a} 球膜軸</span><b>${q?'LIVE':'WAIT'}</b></div><span class="marketName">${x.market.replace('USDT','/USDT')}</span><span class="q">${q?'$'+fmt(q,q<10?5:2):'--'}</span><span class="pos">${execution.readOnly?'NOT_REQUESTED':x.pos?`${x.pos.side} ${x.pos.lots}口 · ${x.pos.c}C`:'空倉'}</span></button>`}).join('');
-  $$('[data-market-card]').forEach(card=>card.onclick=()=>openMarketCard(card.dataset.marketCard));
+  const axes=$('#axes');
+  for(const a of ['KX','KY','KZ']){
+    const x=S.axes[a],q=S.quotes[x.market],active=a===S.axis;
+    let card=axes.querySelector(`[data-market-card="${a}"]`);
+    if(!card){
+      card=document.createElement('button');card.type='button';card.className='axis panel';card.setAttribute('data-axis',a);card.setAttribute('data-market-card',a);
+      card.innerHTML=`<div class="axisHead"><span>${a} 球膜軸</span><b></b></div><span class="marketName"></span><span class="q"></span><span class="pos"></span>`;
+      axes.appendChild(card);
+    }
+    // The normal-market owner decorates these same nodes. Replacing them on
+    // every quote/simulation tick creates a visible gap before its next paint.
+    card.classList.toggle('active',active);
+    const attrs={'aria-current':String(active),'aria-label':`查看 ${a} ${x.market.replace('USDT','/USDT')} 市場詳情`};
+    for(const [name,value] of Object.entries(attrs))if(card.getAttribute(name)!==value)card.setAttribute(name,value);
+    const fields={'.axisHead b':q?'LIVE':'WAIT','.marketName':x.market.replace('USDT','/USDT'),'.q':q?'$'+fmt(q,q<10?5:2):'--','.pos':execution.readOnly?'NOT_REQUESTED':x.pos?`${x.pos.side} ${x.pos.lots}口 · ${x.pos.c}C`:'空倉'};
+    for(const [selector,text] of Object.entries(fields)){const node=card.querySelector(selector);if(node.textContent!==text)node.textContent=text}
+    card.onclick=()=>openMarketCard(card.dataset.marketCard);
+  }
   syncMarketKLabels();
 }
 function openMarketCard(axisId){const id=String(axisId||'').toUpperCase(),x=S.axes[id];if(!x)return;const q=S.quotes[x.market],p=x.pos;$('#sheetTitle').textContent=`${id} 市場｜${x.market.replace('USDT','/USDT')}`;$('#sheetBody').innerHTML=`<div class="card"><h3>${x.market.replace('USDT','/USDT')}</h3><p id="marketReferenceDetail" data-market-info-axis="${id}">參考價（非結算 Oracle）：${q?'$'+fmt(q,q<10?5:2):'WAIT'}</p><p>交易軸：${id===S.axis?'目前由三軸控制選中':'未選中；點市場卡不會改變交易軸'}</p><p>方向：${x.side}｜C ${x.c}｜${x.lots}口</p><p>持倉：${execution.readOnly?'NOT_REQUESTED':p?`${p.side} ${p.lots}口 @ ${fmt(p.entry,4)}`:'空倉'}</p><p class="muted">V1: |C| 0.001–1，0 fee，SIMULATION。免費 REST USDT 參考價不是 USD 結算 Oracle，不假設 USD=USDT。交易 authority 仍只由 XZ / XY / YZ 圖切換。</p></div>`;$('#sheet').classList.add('open')}

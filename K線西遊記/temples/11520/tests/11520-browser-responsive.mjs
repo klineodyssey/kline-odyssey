@@ -541,11 +541,16 @@ async function snapshot(page){return page.evaluate(async sels=>{
   // ResizeObserver status flow follows card-height changes after render. Sample
   // geometry stability, never a desired gap: a stable2px gap still fails check().
   const started=performance.now(),frames=[],requiredConsecutive=3,maxWaitMs=500;
+  const nodeIds=new WeakMap();let nextNodeId=0;const nodeId=node=>{if(!node)return null;if(!nodeIds.has(node))nodeIds.set(node,++nextNodeId);return nodeIds.get(node)};
   let consecutive=0,previous=null;
   do{
     const geometry={viewport:{width:innerWidth,height:innerHeight},rects:[...document.querySelectorAll('#axes .axis,.tele,.monsterHud')].map(el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el);return{identity:el.dataset.axis||el.className,x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,display:style.display,visibility:style.visibility}})};
     const signature=JSON.stringify(geometry);consecutive=signature===previous?consecutive+1:1;previous=signature;
-    frames.push({at:performance.now(),geometry});
+    const axisNodes=[...document.querySelectorAll('#axes .axis')].map(card=>{
+      const head=card.querySelector('.axisHead'),badge=card.querySelector('.k11520NormalBadge'),rect=node=>{if(!node)return null;const r=node.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}};
+      return{axis:card.dataset.axis,nodeId:nodeId(card),normal:card.classList.contains('k11520NormalActive'),header:rect(head),badge:badge?{nodeId:nodeId(badge),display:getComputedStyle(badge).display,rect:rect(badge),text:badge.textContent}:null};
+    });
+    frames.push({at:performance.now(),geometry,axisNodes});
     if(consecutive>=requiredConsecutive||performance.now()-started>=maxWaitMs)break;
     await new Promise(requestAnimationFrame);
   }while(performance.now()-started<maxWaitMs);
