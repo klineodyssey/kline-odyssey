@@ -97,13 +97,31 @@ test('every preflight identity follows the existing wallet session through A B r
 {
 const source=await readFile(new URL('../K線西遊記/temples/11520/tests/11520-browser-settlement.mjs',import.meta.url),'utf8');
 const functionSource=source.slice(source.indexOf('function attachM1PageSourceProof('),source.indexOf('// M1 uses real public chain97 reads'));
-const base='https://klineodyssey.github.io/kline-odyssey',path='K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs',bytes=Buffer.from('reviewed module');
-const fixture=()=>{const page=new EventEmitter(),context=vm.createContext({assert,URL});vm.runInContext(functionSource,context);return{page,finish:context.attachM1PageSourceProof(page,{base,sourceSha:'a'.repeat(40),assets:[{path,sha256:createHash('sha256').update(bytes).digest('hex')}],createHash})}};
+const base='https://klineodyssey.github.io/kline-odyssey',path='K線西遊記/temples/11520/game-5d.html',bytes=Buffer.from('reviewed module');
+const fixture=(sourceBytes=bytes)=>{const page=new EventEmitter(),context=vm.createContext({assert,URL}),hasBom=sourceBytes.subarray(0,3).equals(Buffer.from([239,187,191]));vm.runInContext(functionSource,context);return{page,finish:context.attachM1PageSourceProof(page,{base,sourceSha:'a'.repeat(40),assets:[{path,sha256:createHash('sha256').update(sourceBytes).digest('hex'),sourceByteLength:sourceBytes.length,hasLeadingUtf8Bom:hasBom,bomStrippedSha256:hasBom?createHash('sha256').update(sourceBytes.subarray(3)).digest('hex'):null,bomStrippedByteLength:hasBom?sourceBytes.length-3:null}],createHash})}};
 const response=(body=bytes,query='?v=271')=>({url:()=>base+'/'+encodeURI(path)+query,status:()=>200,body:async()=>body,fromServiceWorker:()=>false});
 test('public proof binds observed browser response bytes including cache variants',async()=>{const f=fixture();f.page.emit('response',response());const proof=await f.finish();assert.equal(proof.status,'PASS');assert.equal(proof.actualBrowserResponses[0].query,'?v=271')});
 test('public proof rejects a stale browser variant even if a separate request matched',async()=>{const f=fixture();f.page.emit('response',response(Buffer.from('stale variant')));await assert.rejects(f.finish(),/actual public browser assets must match checkout/)});
 test('public proof rejects missing critical responses',async()=>{const f=fixture();await assert.rejects(f.finish(),/PUBLIC_BROWSER_ASSET_NOT_OBSERVED/)});
-test('public proof retains a mismatch across later matching reload responses',async()=>{const f=fixture();f.page.emit('response',response(Buffer.from('old')));f.page.emit('response',response());await assert.rejects(f.finish(),/actual public browser assets must match checkout/)});
+test('public proof retains a mismatch across later matching reload responses',async()=>{const f=fixture();f.page.emit('response',response(Buffer.from('old'),'?v=old'));f.page.emit('response',response());await assert.rejects(f.finish(),/actual public browser assets must match checkout/);const records=f.finish.snapshot().observedBrowserResponses;assert.equal(records[0].query,'?v=old');assert.equal(records[0].matchKind,'NOT_VERIFIED');assert.equal(records[0].httpStatus,200);assert.equal(records[1].matchKind,'EXACT_SOURCE_BYTES')});
+
+test('public proof accepts only source-derived leading UTF-8 BOM representation and records provenance',async()=>{
+ const raw=Buffer.concat([Buffer.from([239,187,191]),bytes]);
+ for(const body of [raw,bytes]){
+  const f=fixture(raw);f.page.emit('response',{...response(body,'?v=bom-proof'),fromServiceWorker:()=>true});const proof=await f.finish(),record=proof.actualBrowserResponses[0];
+  assert.equal(record.matchKind,body===raw?'EXACT_SOURCE_BYTES':'SOURCE_MINUS_LEADING_UTF8_BOM');
+  assert.equal(record.rawExpectedHash,createHash('sha256').update(raw).digest('hex'));assert.equal(record.expectedBrowserRepresentationHash,createHash('sha256').update(bytes).digest('hex'));
+  assert.equal(record.actualObservedHash,createHash('sha256').update(body).digest('hex'));assert.equal(record.actualObservedLength,body.length);assert.equal(record.rawExpectedLength,raw.length);
+  assert.equal(record.fromServiceWorker,true);assert.equal(record.url,base+'/'+encodeURI(path)+'?v=bom-proof');assert.equal(proof.wholeModuleGraphVerified,false);
+ }
+});
+test('public proof never normalizes altered content, unexpected BOM, line endings or another encoding',async()=>{
+ const bom=Buffer.from([239,187,191]),raw=Buffer.concat([bom,bytes]);
+ for(const [sourceBytes,body] of [[bytes,raw],[raw,Buffer.from('altered module')],[raw,Buffer.concat([bom,Buffer.from('altered module')])],[raw,Buffer.concat([bom,raw])],[raw,Buffer.concat([Buffer.from([255,254]),bytes])],[raw,Buffer.from('reviewed module','utf16le')],[raw,Buffer.concat([Buffer.from([239,187]),bytes])],[raw,Buffer.from('reviewed module\r\n')],[raw,Buffer.from(' reviewed module')],[Buffer.concat([bom,raw]),bytes],[Buffer.concat([bom,bytes,bom]),bytes]]){
+  const f=fixture(sourceBytes);f.page.emit('response',response(body,'?v=bad'));await assert.rejects(f.finish(),/actual public browser assets must match checkout/);
+  const record=f.finish.snapshot().observedBrowserResponses[0];assert.equal(record.matchKind,'NOT_VERIFIED');assert.equal(record.actualObservedLength,body.length);assert.equal(record.fromServiceWorker,false);assert.equal(record.query,'?v=bad');
+ }
+});
 
 test('public proof drains response bodies that arrive while an earlier body is pending',async()=>{
  const f=fixture();let first,second;const a=new Promise(r=>{first=r}),b=new Promise(r=>{second=r});
@@ -201,19 +219,19 @@ def public(url,timeout):
  if path=='KGEN-KAIOS/dashboard/build-info.json':
   reads+=1;bad=input['mode']=='stale' or input['mode']=='mixed' and reads>1
   body=json.dumps({'main_commit':'b'*40 if bad else sha}).encode()
- else:body=(path+('@altered' if input['mode']=='bytes' else '@reviewed')).encode()
+ else:body=(bytes.fromhex('efbbbf') if input['mode']=='bom' else b'')+(path+('@altered' if input['mode']=='bytes' else '@reviewed')).encode()
  return Response(body,url)
 with tempfile.TemporaryDirectory() as folder:
  os.chdir(folder);os.environ.update(K11520_SOURCE_SHA=sha,K11520_BASE_URL='https://klineodyssey.github.io/kline-odyssey',GITHUB_WORKFLOW_SHA='c'*40,GITHUB_EVENT_NAME='workflow_run');sys.argv=['verifier','--phase','before']
- with patch('urllib.request.urlopen',side_effect=public),patch('subprocess.check_output',return_value=sha+'\\n'),patch.object(Path,'read_bytes',lambda p:(str(p)+'@reviewed').encode()):
+ with patch('urllib.request.urlopen',side_effect=public),patch('subprocess.check_output',return_value=sha+'\\n'),patch.object(Path,'read_bytes',lambda p:(bytes.fromhex('efbbbf') if input['mode']=='bom' else b'')+(str(p)+'@reviewed').encode()):
   try:exec(compile(input['source'],'<public-verifier>','exec'));ok=True
   except Exception:ok=False
  report=json.loads(Path('artifacts/11520-m1-readonly-qa/public-source-before.json').read_text())
  print(json.dumps({'ok':ok,'report':report}))`;
- for(const mode of ['match','stale','mixed','bytes']){
+ for(const mode of ['match','bom','stale','mixed','bytes']){
   const r=spawnSync('python3',['-c',wrapper],{input:JSON.stringify({source,mode}),encoding:'utf8',timeout:3000});assert.equal(r.status,0,r.stderr);const {ok,report}=JSON.parse(r.stdout);
-  assert.equal(ok,mode==='match');assert.equal(report.status,mode==='match'?'PASS':'FAIL');assert.equal(report.sourceSha,'a'.repeat(40));assert.equal(report.workflowDefinitionSha,'c'.repeat(40));assert.equal(report.sourceEvent,'workflow_run');
-  if(mode==='match'){assert.equal(report.assets.length,15);assert.equal(report.wholeModuleGraphVerified,false)}
+  const matches=['match','bom'].includes(mode);assert.equal(ok,matches);assert.equal(report.status,matches?'PASS':'FAIL');assert.equal(report.sourceSha,'a'.repeat(40));assert.equal(report.workflowDefinitionSha,'c'.repeat(40));assert.equal(report.sourceEvent,'workflow_run');
+  if(matches){assert.equal(report.assets.length,15);assert.equal(report.wholeModuleGraphVerified,false);for(const asset of report.assets){const bomExpected=mode==='bom'&&asset.path==='K線西遊記/temples/11520/game-5d.html';assert.equal(asset.hasLeadingUtf8Bom,mode==='bom');assert.ok(asset.sourceByteLength>0);if(bomExpected){assert.equal(asset.bomStrippedByteLength,asset.sourceByteLength-3);assert.notEqual(asset.bomStrippedSha256,asset.sha256)}else assert.equal(asset.bomStrippedSha256,null)}}
  }
 });
 
@@ -257,4 +275,15 @@ test('M1 actual viewport failure catch preserves the original boot error and wri
  const context=vm.createContext({assert,URL,accounts:['0x'+'11'.repeat(20),'0x'+'22'.repeat(20)],browser:{newPage:async()=>page},publicSource:null,origin:'https://example.test',out:'evidence',routeThree:async()=>{},boot:async()=>{throw original},fs:{writeFile:async(path,body)=>writes.push({path,body:JSON.parse(body)})}});
  vm.runInContext(helper,context);await assert.rejects(vm.runInContext('(async()=>{'+source.slice(start,end)+'})()',context),caught=>caught===original);
  assert.equal(closed,1);assert.equal(writes.length,1);assert.match(writes[0].path,/360x740-FAILURE.json$/);assert.equal(writes[0].body.message,'original boot failure');assert.deepEqual(writes[0].body.evidence,[]);assert.equal(writes[0].body.rpcDiagnostics.failureCount,0);assert.ok(writes[0].body.phaseCounts);
+});
+
+test('M1 diagnostics retain first and recent non-fallback errors despite a log fallback flood',async()=>{
+ const {trace}=await m1DiagnosticsFixture(2),meta={method:'eth_call',phase:'LEGACY',stage:'RETURN_LEGACY'};
+ const fail=async(meta,options)=>{const error=Object.assign(new Error('private raw content'),{code:'NETWORK_ERROR'});await assert.rejects(trace.run(meta,()=>Promise.reject(error),options),caught=>caught===error)};
+ await fail(meta);const first=trace.snapshot().firstNonFallbackFailure;
+ for(let i=0;i<8;i++)await fail({...meta,method:'eth_getLogs'},{existingLogFallback:true});
+ let report=trace.snapshot();assert.equal(report.nonFallbackFailureCount,1);assert.equal(report.firstNonFallbackFailure,first);assert.equal(report.nonFallbackFailures.length,1);assert.equal(report.failures.length,2);
+ await fail({...meta,method:'eth_getBalance'});await fail({...meta,method:'eth_getCode'});
+ report=trace.snapshot();assert.equal(report.nonFallbackFailureCount,3);assert.equal(report.droppedNonFallbackFailures,1);assert.equal(report.nonFallbackFailures.length,2);assert.equal(report.firstNonFallbackFailure,first);
+ assert.equal(JSON.stringify(report).includes('private raw content'),false);assert.equal(report.nonFallbackFailures[0].method,'eth_getBalance');
 });

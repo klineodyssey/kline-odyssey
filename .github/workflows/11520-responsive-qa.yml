@@ -291,7 +291,12 @@ jobs:
               for path in paths:
                   actual, local = read_public(path), Path(path).read_bytes()
                   same = actual == local
-                  report['assets'].append({'path': path, 'sha256': hashlib.sha256(actual).hexdigest(), 'matchesCheckout': same})
+                  has_bom = local.startswith(bytes.fromhex('efbbbf'))
+                  allow_bom_representation = has_bom and path == 'K線西遊記/temples/11520/game-5d.html'
+                  report['assets'].append({'path': path, 'sha256': hashlib.sha256(actual).hexdigest(), 'matchesCheckout': same,
+                      'sourceByteLength': len(local), 'hasLeadingUtf8Bom': has_bom,
+                      'bomStrippedSha256': hashlib.sha256(local[3:]).hexdigest() if allow_bom_representation else None,
+                      'bomStrippedByteLength': len(local) - 3 if allow_bom_representation else None})
                   assert same, 'PUBLIC_ASSET_SOURCE_MISMATCH: ' + path
               # A deployment changing during the asset reads must not certify a mixed page.
               assert json.loads(read_public('KGEN-KAIOS/dashboard/build-info.json')).get('main_commit') == expected, 'PUBLIC_DEPLOYMENT_CHANGED'

@@ -568,8 +568,8 @@ async function publicTestnetBrowserQA(){
 // to the deployment checkout. This never replaces a public application response.
 // Diagnostics only: no raw RPC parameters, response bodies or extra requests.
 function createM1RpcDiagnostics({limit=32,now=()=>Date.now()}={}){
-  const cap=Math.min(32,Math.max(1,Number.isSafeInteger(limit)?limit:32)),recent=[],failures=[];
-  let sequence=0,failureCount=0,droppedFailures=0,lastStarted=null,lastCompleted=null;
+  const cap=Math.min(32,Math.max(1,Number.isSafeInteger(limit)?limit:32)),recent=[],failures=[],nonFallbackFailures=[];
+  let sequence=0,failureCount=0,droppedFailures=0,nonFallbackFailureCount=0,droppedNonFallbackFailures=0,firstNonFallbackFailure=null,lastStarted=null,lastCompleted=null;
   const read=(value,key)=>{try{return value?.[key]}catch{return undefined}};
   const code=value=>typeof value==='number'&&Number.isSafeInteger(value)?value:['UNKNOWN_ERROR','SERVER_ERROR','TIMEOUT','NETWORK_ERROR','BAD_DATA','CALL_EXCEPTION','INVALID_ARGUMENT','UNSUPPORTED_OPERATION','ACTION_REJECTED'].includes(value)?value:null;
   const errorFields=error=>{
@@ -589,10 +589,11 @@ function createM1RpcDiagnostics({limit=32,now=()=>Date.now()}={}){
     }catch(error){
       finish({ok:false,...errorFields(error),existingLogFallback});
       failureCount++;failures.push(lastCompleted);if(failures.length>cap){failures.shift();droppedFailures++}
+      if(!existingLogFallback){nonFallbackFailureCount++;firstNonFallbackFailure??=lastCompleted;nonFallbackFailures.push(lastCompleted);if(nonFallbackFailures.length>cap){nonFallbackFailures.shift();droppedNonFallbackFailures++}}
       throw error; // Preserve original rejection; the caller owns log fallback.
     }
   };
-  return Object.freeze({run,snapshot:()=>({failureCount,droppedFailures,lastStarted,lastCompleted,recent:[...recent],failures:[...failures]})});
+  return Object.freeze({run,snapshot:()=>({failureCount,droppedFailures,nonFallbackFailureCount,droppedNonFallbackFailures,firstNonFallbackFailure,nonFallbackFailures:[...nonFallbackFailures],lastStarted,lastCompleted,recent:[...recent],failures:[...failures]})});
 }
 
 async function bootM1ReadOnlyPage(page,url){
@@ -608,23 +609,37 @@ async function bootM1ReadOnlyPage(page,url){
 
 function attachM1PageSourceProof(page,{base,sourceSha,assets,createHash}){
   const prefix=new URL(base).pathname.replace(/\/$/,'')+'/',origin=new URL(base).origin;
-  const expected=new Map(assets.map(x=>[x.path,x.sha256])),seen=new Map(),pending=new Set(),errors=[];
+  const expected=new Map(assets.map(x=>[x.path,x])),seen=new Map(),pending=new Set(),errors=[],observed=[];
+  const snapshot=()=>({sourceSha,status:'NOT_VERIFIED',coverageScope:'EXPLICIT_M1_WALLET_AND_HUD_ASSETS_ONLY',wholeModuleGraphVerified:false,observedBrowserResponses:[...observed],errors:[...errors]});
   page.on('response',response=>{
     const url=new URL(response.url()),path=decodeURIComponent(url.pathname).slice(prefix.length);
     if(url.origin!==origin||!decodeURIComponent(url.pathname).startsWith(prefix)||!expected.has(path))return;
+    const source=expected.get(path),record={path,url:url.href,query:url.search,fromServiceWorker:null,
+      rawExpectedHash:source.sha256,rawExpectedLength:source.sourceByteLength,
+      expectedBrowserRepresentationHash:source.bomStrippedSha256??source.sha256,
+      httpStatus:null,actualObservedHash:null,actualObservedLength:null,matchKind:'NOT_VERIFIED'};
+    observed.push(record);
     const job=(async()=>{try{
-      assert.equal(response.status(),200,'PUBLIC_BROWSER_ASSET_HTTP_ERROR '+path);
-      const sha256=createHash('sha256').update(await response.body()).digest('hex');
-      assert.equal(sha256,expected.get(path),'PUBLIC_BROWSER_ASSET_SOURCE_MISMATCH '+path);
-      seen.set(path,{path,sha256,query:url.search,fromServiceWorker:response.fromServiceWorker()});
+      record.fromServiceWorker=response.fromServiceWorker();
+      record.httpStatus=response.status();assert.equal(record.httpStatus,200,'PUBLIC_BROWSER_ASSET_HTTP_ERROR '+path);
+      const bytes=await response.body(),sha256=createHash('sha256').update(bytes).digest('hex');
+      record.actualObservedHash=sha256;record.actualObservedLength=bytes.length;
+      // Raw HTTP equality remains a separate mandatory gate. DevTools may
+      // expose text without its one leading UTF-8 BOM; accept only that exact
+      // source-derived representation, never whitespace or Unicode changes.
+      if(sha256===source.sha256&&bytes.length===source.sourceByteLength)record.matchKind='EXACT_SOURCE_BYTES';
+      else if(path==='K線西遊記/temples/11520/game-5d.html'&&source.hasLeadingUtf8Bom===true&&source.bomStrippedByteLength===source.sourceByteLength-3&&sha256===source.bomStrippedSha256&&bytes.length===source.bomStrippedByteLength)record.matchKind='SOURCE_MINUS_LEADING_UTF8_BOM';
+      assert.notEqual(record.matchKind,'NOT_VERIFIED','PUBLIC_BROWSER_ASSET_SOURCE_MISMATCH '+path);
+      seen.set(path,{...record,sha256});
     }catch(error){errors.push(String(error.message))}})();
     pending.add(job);void job.finally(()=>pending.delete(job));
   });
-  return async()=>{
+  const finish=async()=>{
     while(pending.size)await Promise.all([...pending]);assert.deepEqual(errors,[],'actual public browser assets must match checkout');
     for(const path of expected.keys())assert.ok(seen.has(path),'PUBLIC_BROWSER_ASSET_NOT_OBSERVED '+path);
-    return {sourceSha,status:'PASS',actualBrowserResponses:[...seen.values()]};
+    return {...snapshot(),status:'PASS',actualBrowserResponses:[...seen.values()]};
   };
+  finish.snapshot=snapshot;return finish;
 }
 
 // M1 uses real public chain97 reads through a synthetic injected EIP-1193
@@ -665,7 +680,7 @@ async function m1ReadOnlyBrowserQA(){
       if(publicSource)await absent.waitForFunction(()=>globalThis.__K11520_UI_SETTINGS__,null,{timeout:15000});
       await absent.screenshot({path:`${out}/390x844-no-injected-wallet.png`});
       if(finishAbsentPublicSource)await fs.writeFile(out+'/no-provider-source.json',JSON.stringify(await finishAbsentPublicSource(),null,2));
-    }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message)},null,2));throw error}finally{await absent.close()}
+    }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message),publicBrowserSource:finishAbsentPublicSource?.snapshot()??null},null,2));throw error}finally{await absent.close()}
     for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
       const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[],phaseCounts={M1:{},LEGACY:{},INITIAL:{}};let logFallbacks=0,phase='INITIAL';
       const consoleErrors=[],requestFailures=[],evidence=[],rpcDiagnostics=createM1RpcDiagnostics();let stage='BOOT';
@@ -745,7 +760,7 @@ async function m1ReadOnlyBrowserQA(){
         const publicBrowserSource=finishPublicSource?await finishPublicSource():null;
         assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({rpcDiagnostics:rpcDiagnostics.snapshot(),publicBrowserSource,viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
         await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify(results.at(-1),null,2));
-      }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,forbidden,errors,consoleErrors,requestFailures,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,rpcDiagnostics:rpcDiagnostics.snapshot(),evidence,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
+      }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,publicBrowserSource:finishPublicSource?.snapshot()??null,forbidden,errors,consoleErrors,requestFailures,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,rpcDiagnostics:rpcDiagnostics.snapshot(),evidence,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
     }
     console.log('M1 signer-free public BSC97 read-only browser PASS; Human MetaMask NOT_VERIFIED');
   }finally{await browser.close();provider.destroy()}
