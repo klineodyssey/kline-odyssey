@@ -111,6 +111,7 @@ import {
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { createCustomerProjectPrototype, createFrozenV1CustomerProjectTestAdapter, SMALL_HOUSE_REQUIRED_STAGES } from "../core/company/index.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -3254,4 +3255,271 @@ test("V4.1 production shell exposes animated concierge and resilient storage cac
   for (const state of ["IDLE", "LISTENING", "THINKING", "SPEAKING", "SUCCESS", "ERROR"]) assert.match(appSource + cssSource, new RegExp(state));
   assert.match(cssSource, /2D FALLBACK/);
   assert.deepEqual(seed.next_stage.player_first_v4_0.entry_actions, ["VOICE", "TEXT", "EXPLORE", "JOIN", "WORK", "MY_AI"]);
+});
+
+// These cases are local model fixtures, not a customer, tariff or service launch.
+function customerProjectFixture({ planningAdapter = null } = {}) {
+  let time = 1000;
+  let principal = { accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' };
+  let planner = {
+    policyId: 'TEST-ONLY-SYNTHETIC-COSTS', policyRevision: 1,
+    stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64),
+    costs: [{ name: 'fixture-materials', amount: '60000' }, { name: 'fixture-labor', amount: '5000' }],
+    conditions: ['Execution remains held'], assumptions: ['All resources are synthetic test fixtures'],
+    validForMs: 10000, durationHours: 100
+  };
+  const model = createCustomerProjectPrototype({ identityAdapter: { resolve: () => structuredClone(principal) },
+    quotePlanner: { plan: async () => structuredClone(planner) }, planningAdapter, now: () => time });
+  const request = { objective: 'SMALL_HOUSE', locationRef: 'TEST-HOME-PLOT', rightsRef: 'TEST-SIMULATED-USAGE', quality: 'STANDARD_SIMULATION', quantity: 1,
+    budget: { amount: '220000', unit: 'SIMULATED_CREDIT', scale: 0 }, deadlineHours: 1000, intendedUse: 'TEST_ONLY' };
+  const command = (type, key, revision, data) => ({ type, idempotencyKey: key, expectedRevision: revision, data });
+  const submit = () => model.command(command('SUBMIT_REQUEST', 'submit-0001', 0, request));
+  const issue = async (key = 'issue-00001') => { const s = await model.read(); return model.command(command('ISSUE_SIMULATED_QUOTE', key, s.revision, { requestRevision: s.request.revision })); };
+  const acceptance = (quote, key, revision) => command('ACCEPT_QUOTE', key, revision, { quoteId: quote.quoteId, quoteRevision: quote.revision, quoteHash: quote.contentHash, acknowledgementHash: quote.acknowledgementHash, accept: true });
+  return { model, request, command, submit, issue, acceptance,
+    setTime(v) { time = v; }, setPrincipal(v) { principal = { ...principal, ...v }; }, setPlan(v) { planner = { ...planner, ...v }; } };
+}
+const customerProjectRejects = (promise, code) => assert.rejects(promise, (error) => error.code === code);
+
+test('Customer project V2 requires trusted context and rejects payload authority', async () => {
+  assert.throws(() => createCustomerProjectPrototype({}), (e) => e.code === 'CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED');
+  const f = customerProjectFixture();
+  await customerProjectRejects(f.model.command(f.command('SUBMIT_REQUEST', 'forged-0001', 0, { ...f.request, customerId: 'OTHER' })), 'CUSTOMER_PROJECT_FIELDS');
+  await customerProjectRejects(f.model.command({ ...f.command('SUBMIT_REQUEST', 'forged-0002', 0, f.request), authority: true }), 'CUSTOMER_PROJECT_FIELDS');
+  await customerProjectRejects(f.model.command(f.command('START_TASK', 'execute-001', 0, {})), 'CUSTOMER_PROJECT_COMMAND_DISABLED');
+  assert.equal((await f.model.read()).revision, 0);
+  f.setPrincipal({ active: false });
+  await customerProjectRejects(f.submit(), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+});
+
+test('Customer project V2 preserves incomplete requests and requires complete plans', async () => {
+  const f = customerProjectFixture();
+  const r = await f.model.command(f.command('SUBMIT_REQUEST', 'submit-null', 0, { ...f.request, locationRef: null }));
+  assert.equal(r.status, 'NEEDS_CLARIFICATION'); assert.deepEqual(r.missing, ['locationRef']);
+  await customerProjectRejects(f.issue(), 'CUSTOMER_PROJECT_COMPLETE_REQUEST_REQUIRED');
+  await f.model.command(f.command('CLARIFY_REQUEST', 'clarify-001', 1, f.request));
+  f.setPlan({ stages: ['SURVEY', 'COMPLETE'] });
+  await customerProjectRejects(f.issue(), 'HOUSE_STAGE_PLAN_INCOMPLETE');
+  f.setPlan({ stages: [...SMALL_HOUSE_REQUIRED_STAGES], costs: [{ name: 'free', amount: '0' }] });
+  await customerProjectRejects(f.issue(), 'CUSTOMER_PROJECT_COST_BASIS_REQUIRED');
+  f.setPlan({ costs: [{ name: 'too-much', amount: '220001' }] });
+  await customerProjectRejects(f.issue(), 'CUSTOMER_PROJECT_PLAN_EXCEEDS_REQUEST');
+  assert.equal((await f.model.read()).quotes.length, 0);
+});
+
+test('Customer project V2 freezes quote revisions and rejects stale or changed acceptance', async () => {
+  const f = customerProjectFixture(); await f.submit(); const a = (await f.issue()).quote;
+  f.setPlan({ policyRevision: 2, costs: [{ name: 'updated-fixture', amount: '66000' }] });
+  const b = (await f.issue('issue-00002')).quote;
+  assert.equal(b.revision, 2); assert.notEqual(a.contentHash, b.contentHash);
+  const before = await f.model.read();
+  await customerProjectRejects(f.model.command(f.acceptance(a, 'accept-old1', before.revision)), 'QUOTE_SUPERSEDED');
+  await customerProjectRejects(f.model.command({ ...f.acceptance(b, 'accept-bad1', before.revision), data: { ...f.acceptance(b, 'x', 0).data, quoteHash: 'b'.repeat(64) } }), 'QUOTE_HASH_MISMATCH');
+  await customerProjectRejects(f.model.command({ ...f.acceptance(b, 'accept-bad2', before.revision), data: { ...f.acceptance(b, 'x', 0).data, acknowledgementHash: 'b'.repeat(64) } }), 'ACCEPTANCE_INTENT_MISMATCH');
+  b.content.total = '1'; // Returned copies cannot mutate the stored quote.
+  assert.deepEqual(await f.model.read(), before);
+});
+
+test('Customer project V2 acceptance is explicit and expiry uses the host clock', async () => {
+  const f = customerProjectFixture(); await f.submit(); const q = (await f.issue()).quote;
+  const c = f.acceptance(q, 'accept-time', 2);
+  await customerProjectRejects(f.model.command({ ...c, data: { ...c.data, accept: false } }), 'CUSTOMER_PROJECT_EXPLICIT_ACCEPTANCE_REQUIRED');
+  f.setTime(q.content.expiresAt);
+  await customerProjectRejects(f.model.command(c), 'QUOTE_EXPIRED');
+  const s = await f.model.read(); assert.equal(s.project, null); assert.equal(s.revision, 2);
+});
+
+test('Customer project V2 exact retries and new-key accepted no-ops keep one project', async () => {
+  const f = customerProjectFixture(); await f.submit(); const q = (await f.issue()).quote;
+  const c = f.acceptance(q, 'accept-once', 2); const accepted = await f.model.command(c);
+  assert.equal(accepted.status, 'ACCEPTED_SIMULATION_PLAN'); assert.equal(accepted.durable, false);
+  assert.deepEqual(await f.model.command(c), accepted);
+  const baseline = await f.model.read(); f.setTime(q.content.expiresAt + 1);
+  const otherKey = { ...c, idempotencyKey: 'accept-again' };
+  const repeated = await f.model.command(otherKey);
+  assert.equal(repeated.status, 'ALREADY_ACCEPTED'); assert.equal(repeated.projectId, accepted.projectId);
+  assert.deepEqual(await f.model.command(otherKey), repeated);
+  await customerProjectRejects(f.model.command({ ...otherKey, expectedRevision: 3 }), 'IDEMPOTENCY_CONTENT_MISMATCH');
+  await customerProjectRejects(f.model.command({ ...c, idempotencyKey: 'accept-ack2', data: { ...c.data, acknowledgementHash: 'b'.repeat(64) } }), 'ACCEPTANCE_INTENT_MISMATCH');
+  const after = await f.model.read();
+  assert.equal(after.revision, baseline.revision); assert.deepEqual(after.events, baseline.events);
+  assert.deepEqual(after.project, baseline.project); assert.equal(after.commandJournal.length, baseline.commandJournal.length + 1);
+  assert.equal(after.project.status, 'PLANNED_EXECUTION_HELD'); assert.equal(after.project.houseComplete, false);
+  for (const key of ['asset', 'delivery', 'receipt']) assert.equal(after.project[key], null);
+  for (const [k, v] of Object.entries(after.boundaries)) assert.equal(v, k === 'simulationOnly');
+});
+
+test('Customer project V2 changed request supersedes quotes and accepted baseline cannot change', async () => {
+  const f = customerProjectFixture(); await f.submit(); const old = (await f.issue()).quote;
+  await f.model.command(f.command('CLARIFY_REQUEST', 'clarify-new', 2, { ...f.request, quality: 'UPDATED_TEST_QUALITY' }));
+  await customerProjectRejects(f.model.command(f.acceptance(old, 'accept-null', 3)), 'QUOTE_SUPERSEDED');
+  const q = (await f.issue('issue-new01')).quote; await f.model.command(f.acceptance(q, 'accept-new1', 4));
+  await customerProjectRejects(f.model.command(f.command('CLARIFY_REQUEST', 'clarify-end', 5, f.request)), 'CHANGE_ORDER_REQUIRED');
+  await customerProjectRejects(f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'issue-after', 5, { requestRevision: 2 })), 'CHANGE_ORDER_REQUIRED');
+  assert.equal((await f.model.read()).requestRevisions.length, 2);
+});
+
+test('Customer project V2 serializes concurrent creation and acceptance in one prototype instance', async () => {
+  const f = customerProjectFixture();
+  const first = f.command('SUBMIT_REQUEST', 'submit-race', 0, f.request);
+  const results = await Promise.allSettled([f.model.command(first), f.model.command({ ...first, idempotencyKey: 'submit-other' })]);
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(results.find((r) => r.status === 'rejected').reason.code, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  assert.deepEqual(await f.model.command(first), results[0].value);
+  const q = (await f.issue()).quote; const c = f.acceptance(q, 'accept-race', 2);
+  const [a, b] = await Promise.all([f.model.command(c), f.model.command({ ...c, idempotencyKey: 'accept-rac2' })]);
+  assert.equal(a.projectId, b.projectId); assert.equal(b.status, 'ALREADY_ACCEPTED');
+  const state = await f.model.read(); assert.equal(state.revision, 3); assert.equal(state.events.length, 3);
+});
+
+test('Customer project V2 quote replacement and acceptance race on the same revision', async () => {
+  const f = customerProjectFixture(); await f.submit(); const q = (await f.issue()).quote;
+  const results = await Promise.allSettled([
+    f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'issue-race2', 2, { requestRevision: 1 })),
+    f.model.command(f.acceptance(q, 'accept-rac3', 2))
+  ]);
+  assert.equal(results[0].status, 'fulfilled'); assert.equal(results[1].status, 'rejected');
+  assert.equal(results[1].reason.code, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const s = await f.model.read(); assert.equal(s.project, null); assert.equal(s.quoteHeadRevision, 2);
+});
+
+test('Customer project V2 checks the host customer before read and idempotent replay', async () => {
+  const f = customerProjectFixture(); const submitted = await f.submit();
+  f.setPrincipal({ playerId: 'TEST-PLAYER-B' });
+  await customerProjectRejects(f.submit(), 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  await customerProjectRejects(f.model.read(), 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  f.setPrincipal({ playerId: 'TEST-PLAYER-A', active: false });
+  await customerProjectRejects(f.submit(), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+  f.setPrincipal({ active: true }); assert.deepEqual(await f.submit(), submitted);
+});
+
+test('Customer project V2 adapter failures and invalid inputs never partially accept', async () => {
+  const adapter = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const f = customerProjectFixture({ planningAdapter: adapter });
+  // V1 needs its existing 65,000-credit rough budget; no bypass is added.
+  await f.model.command(f.command('SUBMIT_REQUEST', 'submit-low1', 0, { ...f.request, budget: { ...f.request.budget, amount: '100' } }));
+  f.setPlan({ costs: [{ name: 'synthetic-small', amount: '50' }] });
+  const q = (await f.issue()).quote; const before = await f.model.read();
+  await customerProjectRejects(f.model.command(f.acceptance(q, 'accept-low1', 2)), 'CUSTOMER_PROJECT_V1_PLANNING_BLOCKED');
+  assert.deepEqual(await f.model.read(), before);
+  await customerProjectRejects(f.model.command({ ...f.command('SUBMIT_REQUEST', 'invalid-num', 2, f.request), expectedRevision: NaN }), 'CUSTOMER_PROJECT_INVALID_NUMBER');
+  assert.throws(() => createCustomerProjectPrototype({ identityAdapter: { resolve() {} }, quotePlanner: { plan() {} }, planningAdapter: { prepare() {} } }), (e) => e.code === 'CUSTOMER_PROJECT_TEST_ADAPTER_REQUIRED');
+});
+
+test('Customer project V2 frozen V1 test adapter only prepares an unassigned plan', async () => {
+  const paths = ['../KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js', '../KGEN-KAIOS/world-viewer/tests/ai-company-runtime-v1.test.mjs', '../world-viewer/ai-company-v1/app.js', '../core/data/canonical.json'];
+  const before = await Promise.all(paths.map((p) => fs.readFile(new URL(p, import.meta.url))));
+  const adapter = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const f = customerProjectFixture({ planningAdapter: adapter }); await f.submit(); const q = (await f.issue()).quote;
+  await f.model.command(f.acceptance(q, 'accept-plan', 2)); const s = await f.model.read(); const v1 = s.project.planning.snapshot.state;
+  assert.equal(s.project.planning.scope, 'FROZEN_V1_TEST_PLANNING_ONLY');
+  assert.equal(v1.projects.length, 1); assert.equal(v1.projects[0].tasks.length, 7);
+  assert.equal(s.project.desiredStages.length, 12); assert.equal(s.project.status, 'PLANNED_EXECUTION_HELD');
+  assert.equal(v1.finance.opening_cash, 0);
+  for (const key of ['contracts', 'procurement_orders', 'ledger', 'worker_reservations', 'equipment_reservations', 'deliveries']) assert.equal(v1[key].length, 0);
+  assert.ok(v1.projects[0].tasks.every((t) => t.workers.length === 0 && t.progress_percent === 0));
+  const actions = v1.action_log.map((a) => a.command);
+  assert.deepEqual(actions, ['SUBMIT_REQUEST', 'ANALYZE_REQUIREMENTS', 'EVALUATE_FEASIBILITY', 'CREATE_PROPOSAL', 'APPROVE_PROPOSAL', 'CREATE_PROJECT', 'DECOMPOSE_PROJECT']);
+  const after = await Promise.all(paths.map((p) => fs.readFile(new URL(p, import.meta.url))));
+  after.forEach((bytes, i) => assert.deepEqual(bytes, before[i]));
+});
+
+test('Customer project V2 hash binds revision even for identical plans at the same time', async () => {
+  const f = customerProjectFixture(); await f.submit();
+  const a = (await f.issue()).quote, b = (await f.issue('issue-same2')).quote;
+  assert.deepEqual(a.content, b.content); assert.notEqual(a.contentHash, b.contentHash);
+  await customerProjectRejects(f.model.command({ ...f.acceptance(b, 'accept-mix1', 3), data: { ...f.acceptance(b, 'x', 0).data, quoteHash: a.contentHash } }), 'QUOTE_HASH_MISMATCH');
+});
+
+test('Customer project V2 captures command copies and enforces revision and capacity bounds', async () => {
+  const f = customerProjectFixture(); const c = f.command('SUBMIT_REQUEST', 'submit-copy', 0, structuredClone(f.request));
+  const pending = f.model.command(c); c.data.locationRef = 'MUTATED-AFTER-SEND'; await pending;
+  assert.equal((await f.model.read()).request.content.locationRef, 'TEST-HOME-PLOT');
+  await customerProjectRejects(f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'issue-wrong', 0, { requestRevision: 1 })), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  for (let i = 0; i < 20; i += 1) await f.issue(`issue-bound-${i}`);
+  const before = await f.model.read();
+  await customerProjectRejects(f.issue('issue-bound-last'), 'CUSTOMER_PROJECT_CAPACITY');
+  assert.deepEqual(await f.model.read(), before);
+});
+
+test('Customer project V2 captures invocation identity before queue execution', async () => {
+  const f = customerProjectFixture();
+  const pending = f.submit(); // A is captured synchronously, before the queue runs.
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' });
+  await customerProjectRejects(pending, 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  assert.equal((await f.model.read()).revision, 0);
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A' }); await f.submit();
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' });
+  const forged = f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'queue-other', 1, { requestRevision: 1 }));
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A' });
+  await customerProjectRejects(forged, 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  assert.equal((await f.model.read()).quotes.length, 0);
+});
+
+test('Customer project V2 rejects revocation while a planner is pending', async () => {
+  let active = true, release, entered;
+  const started = new Promise((r) => { entered = r; });
+  const gate = new Promise((r) => { release = r; });
+  const f = customerProjectFixture();
+  const prototype = createCustomerProjectPrototype({
+    identityAdapter: { resolve: () => ({ accountId: 'TEST-A', playerId: 'TEST-P', active, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+    quotePlanner: { plan: async () => { entered(); await gate; return { policyId: 'TEST', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: [], assumptions: [], validForMs: 1000, durationHours: 100 }; } }, now: () => 1000
+  });
+  await prototype.command(f.command('SUBMIT_REQUEST', 'revoke-sub1', 0, f.request));
+  const pending = prototype.command(f.command('ISSUE_SIMULATED_QUOTE', 'revoke-quo1', 1, { requestRevision: 1 }));
+  await started; active = false; release();
+  await customerProjectRejects(pending, 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+  active = true; const s = await prototype.read(); assert.equal(s.revision, 1); assert.equal(s.quotes.length, 0);
+});
+
+test('Customer project V2 starts quote validity after asynchronous planning', async () => {
+  const f = customerProjectFixture(); let time = 1000, release, entered;
+  const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const model = createCustomerProjectPrototype({
+    identityAdapter: { resolve: () => ({ accountId: 'CLOCK-A', playerId: 'CLOCK-P', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+    quotePlanner: { plan: async () => { entered(); await gate; return { policyId: 'TEST-CLOCK', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: [], assumptions: [], validForMs: 100, durationHours: 100 }; } }, now: () => time
+  });
+  await model.command(f.command('SUBMIT_REQUEST', 'clock-sub01', 0, f.request));
+  const pending = model.command(f.command('ISSUE_SIMULATED_QUOTE', 'clock-quote', 1, { requestRevision: 1 }));
+  await started; time = 20000; release(); const q = (await pending).quote;
+  assert.equal(q.content.issuedAt, 20000); assert.equal(q.content.expiresAt, 20100);
+  await model.command(f.acceptance(q, 'clock-acc01', 2));
+});
+
+test('Customer project V2 hashes acknowledgement from the same immutable plan snapshot', async (t) => {
+  const f = customerProjectFixture();
+  const borrowed = { policyId: 'MUTABLE-PLANNER-TEST', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: ['ORIGINAL'], assumptions: [], validForMs: 1000, durationHours: 100 };
+  const digest = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+  let mutationTriggered = false;
+  t.mock.method(globalThis.crypto.subtle, 'digest', async (algorithm, bytes) => {
+    if (new TextDecoder().decode(bytes).includes('MUTABLE-PLANNER-TEST')) { borrowed.conditions[0] = 'CHANGED_AFTER_SNAPSHOT'; mutationTriggered = true; }
+    return digest(algorithm, bytes);
+  });
+  const model = createCustomerProjectPrototype({
+    identityAdapter: { resolve: () => ({ accountId: 'PLAN-A', playerId: 'PLAN-P', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+    quotePlanner: { plan: async () => borrowed }, now: () => 1000
+  });
+  await model.command(f.command('SUBMIT_REQUEST', 'plan-sub001', 0, f.request));
+  const q = (await model.command(f.command('ISSUE_SIMULATED_QUOTE', 'plan-quote1', 1, { requestRevision: 1 }))).quote;
+  assert.equal(mutationTriggered, true); assert.deepEqual(q.content.plan.conditions, ['ORIGINAL']);
+  const { sha256 } = await import('../core/shared/utils.mjs');
+  assert.equal(q.acknowledgementHash, await sha256({ conditions: q.content.plan.conditions, assumptions: q.content.plan.assumptions, executionHolds: q.content.executionHolds }));
+});
+
+test('Customer project V2 rechecks quote expiry before replacing accepted state', async () => {
+  // Expire separately at the post-planning check and the final pre-commit check.
+  for (const validAcceptanceClockReads of [1, 2]) {
+    const f = customerProjectFixture(); let accepting = false, acceptanceClockReads = 0;
+    const model = createCustomerProjectPrototype({
+      identityAdapter: { resolve: () => ({ accountId: 'EXPIRY-A', playerId: 'EXPIRY-P', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' }) },
+      quotePlanner: { plan: async () => ({ policyId: 'EXPIRY-TEST', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test', amount: '65000' }], conditions: [], assumptions: [], validForMs: 1000, durationHours: 100 }) },
+      now: () => accepting && acceptanceClockReads++ >= validAcceptanceClockReads ? 3000 : 1000
+    });
+    await model.command(f.command('SUBMIT_REQUEST', 'expiry-sub1', 0, f.request));
+    const q = (await model.command(f.command('ISSUE_SIMULATED_QUOTE', 'expiry-quo1', 1, { requestRevision: 1 }))).quote;
+    const before = await model.read(); accepting = true;
+    await customerProjectRejects(model.command(f.acceptance(q, 'expiry-acc1', 2)), 'QUOTE_EXPIRED');
+    assert.deepEqual(await model.read(), before);
+    assert.equal(acceptanceClockReads, validAcceptanceClockReads + 1);
+  }
 });

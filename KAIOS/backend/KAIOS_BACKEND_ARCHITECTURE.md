@@ -139,3 +139,68 @@ UNRESOLVED, explicit address anchor and no transform) and `coordinates.local`
 No API promotes client-supplied universe triples. Human address examples are decimal
 anchor metadata, not 3-axis position or currency exchange rates. A future authoritative
 position adapter must supply provenance/frame/transform before coordinates can resolve.
+
+## Customer project research prototype and future integration boundary
+
+Task `KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2`, source baseline
+`b2a349c36d3670327aa419802f6a80a4ed339a4e`. The existing Company owner now has a
+pure local test prototype for request -> immutable simulated quote -> explicit
+acceptance -> planned project. It is `LOCAL_TEST_ONLY_NOT_DURABLE`. No Backend
+service, route, data model, SQL migration, provider binding or deployment was
+changed to enable it. Player schema 2 still rejects arbitrary project fields.
+
+The cumulative owner map and acceptance rules are in
+`KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md`, section 8. The unchanged #97
+library is used only by an explicit test planning adapter. No house completion,
+asset registration, real customer/revenue, procurement or payment follows from
+the prototype. #182/#410 remain HOLD with no stale code transplant.
+
+If a later implementation is authorized, reuse this Backend's Account -> enrolled
+Player session, DatabaseAdapter, idempotency journal, hashing and conflict policy.
+The prototype's synchronous simulation identity context must be supplied only
+after server authentication; it is not a new authenticator. Do not create a new
+account, claim a legacy Life, configure persistent access or mutate a registry as
+a shortcut to testing the project flow.
+
+Proposed next changes, not implemented:
+
+- `src/model.mjs`: separate strict customer-project aggregate, leaving Player
+  `SCHEMA_VERSION=2` and game-only receipts unchanged.
+- `src/service.mjs`: default-off owned workspace read/command routes; resolve
+  session identity before reads, command execution and idempotency lookup.
+- Additive `deploy/0003_customer_projects.sql`: current aggregate, append-only
+  event and project-specific revision-guard tables in the existing database.
+  Reuse the existing idempotency table; do not edit applied 0001/0002 migrations.
+- `src/local-server.mjs`: load the additive migration only in the separately
+  approved local prototype configuration. Do not enable production worker flags.
+- Existing backend tests: add restart, statement-by-statement rollback,
+  concurrent first submission, wrong-tenant and conflict preservation coverage.
+
+The first database slice may have one workspace per enrolled Player as a bounded
+technical scope, not a permanent product entitlement. Enforce workspace ID as the
+primary key and `owner_player_id` independently UNIQUE; a composite uniqueness
+constraint alone does not enforce the one-workspace bound. Use a stable
+Account/Player/company/primary-slot command scope before a workspace ID exists.
+Initial creation uses expected revision zero and a guarded absent row.
+
+For state-changing commands, atomically check workspace revision and prior event
+hash, replace the aggregate, append its event, and store the exact key/hash/response.
+Accepted quote, simulated contract and planned project must become visible together.
+For a new-key duplicate of the exact accepted intent, guard the immutable accepted
+hash and cache only the ALREADY_ACCEPTED response; do not advance state/event
+revision. Changed payload under an existing key fails with a content mismatch.
+Retries never receive a silent new key. Cross-process guarantees must be tested
+against the database; the pure prototype's in-memory queue does not prove them.
+
+Project backup/export/import/restore must use a separately versioned project
+envelope and preserve accepted-baseline history. The existing Player snapshot
+loader is deliberately incompatible and must not be weakened. R2 snapshots,
+Recovery Center integration, multi-device UI, full-house construction coverage,
+Asset/Player projections and final simulated receipts are deferred. No automatic
+cross-store Company IndexedDB writes or public REAL business events are planned.
+
+Any future new file needs its full path/purpose registered in Backend README,
+repository README and KGEN indexes. Boot CURRENT remains protected and requires
+explicit scoped authorization. This existing-document appendix does not authorize
+that update, production activation, heavy CI, funding, legal commitments or real
+external effects.
