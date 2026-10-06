@@ -515,3 +515,21 @@ test('contextual entry tolerates only a completed intro transition and still req
     assert.equal(clicks,Number(scenario.button),scenario.name+' keeps the ordinary native-click path');
   }
 });
+
+test('world-first minimap waits for dismissal and requires native owned pointer delivery',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const source=read('./11520-browser-responsive.mjs');
+  const context={assert};
+  runInNewContext(source.slice(source.indexOf('async function clickWorldFirstMinimap('),source.indexOf('async function verifyWorldFirst('))+'globalThis.clickMap=clickWorldFirstMinimap;',context);
+  async function run({blocked=false,wrongTarget=false,untrusted=false,missingUp=false,wrongPlane=false,diagnosticsFail=false}={}){
+    const order=[],result={};let evaluations=0;
+    const clickError=new Error('native actionability blocked');
+    const page={locator(selector){return selector==='#sheet'?{async waitFor(options){assert.equal(options.state,'hidden');order.push('hidden')}}:{async getAttribute(){return 'XYZ'},async boundingBox(){return {x:1,y:2,width:200,height:100}},async click(options){order.push('click');assert.equal(options.force,undefined);assert.equal(options.position.x,170);assert.equal(options.position.y,80);if(blocked)throw clickError}}},async evaluate(){evaluations++;if(evaluations===1)return wrongPlane?'XY':'XZ';if(evaluations===2){order.push('reset');return}if(diagnosticsFail)throw Error('diagnostic unavailable');return {plane:'XZ',coordinateSpace:'XYZ',events:[{type:'pointerdown',id:7,target:wrongTarget?'sheet':'minimap',isTrusted:!untrusted},...(missingUp?[]:[{type:'pointerup',id:7,target:'minimap',isTrusted:true}])]}}};
+    try{await context.clickMap(page,result)}catch(error){return {error,clickError,order,result}}
+    return {order,result};
+  }
+  const good=await run();assert.equal(good.error,undefined);assert.deepEqual(good.order,['hidden','reset','click']);
+  for(const option of ['wrongTarget','untrusted','missingUp','wrongPlane'])assert.ok((await run({[option]:true})).error,option+' must fail closed');
+  const blocked=await run({blocked:true,diagnosticsFail:true});assert.equal(blocked.error,blocked.clickError,'diagnostics cannot mask native input failure');
+  assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#waypointAction'\).waitFor\(\{state:'visible'\}\)/);
+});
