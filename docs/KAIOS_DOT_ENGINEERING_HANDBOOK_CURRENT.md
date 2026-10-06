@@ -541,3 +541,24 @@ AGENTS同時要求new-file Boot登錄與禁止未明確授權修改protected Boo
   ]
 }
 ```
+
+## Boot source acknowledgement checkpoint
+
+Human06:20:21要求的工程讀取紀錄，記錄本次實際read-only refresh，不能回填舊週期或證明認知閱讀／authenticated authorship。正式main Boot仍是`b85c9a34`；同一PR516的未合併candidate `9c852793`只有路徑／用途入口append，Boot blob為`0796d36c`。兩者不得混寫為同一個CURRENT已部署狀態。
+
+格式只參考[Draft514](https://github.com/klineodyssey/kline-odyssey/pull/514)的path/blob與COMPANY_SYNC receipt概念；本段是有限projection，不宣稱符合其完整schema、執行validator或validator已在main。COMPANY_SYNC列出實際讀取範圍，未完成的全公司／身份／claim驗證不標PASS。既有二十工作包與Canon矩陣保持原樣。
+
+```json
+{
+  "BOOT_ACK": {"status":"SELF_REPORTED_RELEVANT_SOURCE_READ","read_started_at":"2026-10-06T06:21:25Z","read_completed_at":"2026-10-06T06:22:13Z","recorded_at":"2026-10-06T06:23:15Z","authenticated_authorship":false},
+  "BOOT_FILE": "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+  "BOOT_BLOB": "4286d1aede181f45eb274196a6799ac18ced42ec",
+  "MAIN_SHA": "e26f3a76ef0be7f43058225f46def3fbe123371e",
+  "BOOT_CURRENT": {"path":"PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md","main_blob":"b85c9a34a81810e0063480092025a9ef02d456cc","candidate_head":"9c852793d359d878d89ed9b336776c797dc43aac","candidate_blob":"0796d36c38ddeff48235f9739e832432a4ea6a01","candidate_status":"DRAFT_UNMERGED_PATH_PURPOSE_APPEND_ONLY"},
+  "COMPANY_SYNC": {"observed_at":"2026-10-06T06:22:13Z","scope":"BOUNDED_READ_ONLY_SOURCE_REFRESH_NOT_FORMAL_COMPANY_ADMISSION","checks":[{"path":"KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md","blob":"c58eddb13da0a3ee520202f253290f560f368f04","read_scope":"Metadata and layer/authority sections"},{"path":"KGEN-KAIOS/worker_registry.json","blob":"d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c","read_scope":"Metadata header only; no Worker identity validated or changed"},{"path":"KGEN-Organization/WorkOrders/WORK_QUEUE.md","blob":"1bc7a3bbed2f83bf6e28066dbfc5c0b92071fb4c","read_scope":"Opening work-item context only; no claim or complete queue audit"}],"prs":["514 Draft08204119 not merged","516 Draft9c852793 not merged"]},
+  "DOMAIN_CANON": [{"path":"docs/physics/KGEN_Universe_Physics_Runtime_CURRENT.md","blob":"6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc","sections":"235,236,245,246: mass/direction/energy/motion"},{"path":"docs/maps/README.md","blob":"8d534fc6132d0e1f2127cd74571f3cd2e56e8e29","sections":"Current Shared Map selector"},{"path":"K線西遊記/temples/11520/LOGISTICS_UNIVERSE_SPEC.md","blob":"c660c692ff1a1a04e9f6c1c721c146f868471868","sections":"4.1 route/C calibration"}],
+  "CANON_CONFLICT": [{"source":"Main Bootb85 versus candidate Boot0796","disposition":"DISTINCT_REFS_NOT_AUTHORITY_CONFLICT","reason":"Candidate adds only handbook path/purpose; not merged into main. Earlier handbook inventory-pending language is historical main/adoption status."},{"source":"Legacy C0 walking / map profit-axis prose versus scoped current engineering direction","disposition":"RECORDED_OUTSIDE_THIS_DOCUMENTATION_CHANGE","reason":"Existing handbook domain distinctions remain; no Physics, map, runtime or financial rule is amended."}],
+  "FORMAT_REFERENCE": {"pr":514,"head":"08204119d78f3cf9ac0620dfab12e60cbd641011","schema_path":"KGEN-KAIOS/governance/agents/runtime-v0.1/KAIOS_COMPANY_BOOT_RUNTIME_V0_1_SCHEMA.json","reference":"Self-reported path/blob and bounded COMPANY_SYNC receipt fields","conformance_claim":false,"validator_executed":false,"validator_on_main_claim":false},
+  "AUTHORITY": "Documentation receipt only; no authenticated identity, cognitive-reading proof, action grant, dispatch, financial authority or cutover."
+}
+```
