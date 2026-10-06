@@ -1,6 +1,16 @@
 /* KGEN_META
 VERSION: 2.4.0
+REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+PRODUCT_CONTEXT: V2.9.5
 STATUS: ACTIVE
+LAST_UPDATED: 2026-10-06
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
+SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
+TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
+CHANGE_REASON: Place the single existing toast in active trading-panel header flow, preserving feedback while preventing data overlap.
+ANCESTOR: K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+SOURCE_OF_TRUTH: TRUE
 PURPOSE: Playable 11520 product behavior: mobile clearance, center-Y, fixed Y/C/Lots controls, canonical floors, compass, local AI help, BGM and intro.
 */
 import {C_DETENTS,signedTravelFromC} from '../controls/nonlinear-controls.mjs';
