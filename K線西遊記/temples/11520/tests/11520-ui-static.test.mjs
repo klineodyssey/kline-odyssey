@@ -577,7 +577,7 @@ test('offline acceptance closes each open surface once and awaits its completed 
  const start=source.indexOf('    const game=async()=>{'),fn=source.slice(start,source.indexOf('    const organ=async name=>{',start));
  for(const open of [false,true]){
   const clicks=[],waits=[],page={locator:selector=>({evaluate:async predicate=>predicate({classList:{contains:cls=>selector==='#walletPanel'?cls==='collapsed':['#confirm','#sheet'].includes(selector)&&cls==='open'&&open}}),click:async()=>clicks.push(selector),waitFor:async options=>{assert.deepEqual({...options},{state:'hidden',timeout:12000});waits.push(selector)},isVisible(){throw new Error('transitional visibility is not close authority')}})};
-  const context={page};runInNewContext(fn+';globalThis.game=game;',context);await context.game();
+  const context={page,usable:async selector=>assert.equal(selector,'#cancelOrder')};runInNewContext(fn+';globalThis.game=game;',context);await context.game();
   assert.deepEqual(clicks,open?['#cancelOrder','#sheetClose']:[]);assert.deepEqual(waits,['#confirm','#sheet']);
  }
 });
@@ -597,4 +597,26 @@ test('camera QA reacquires only rejected native origins with a fixed budget and 
  const movement=source.slice(source.indexOf('const attempt={name,origin:gesturePoint'),source.indexOf('result.pointerTrace=await page.evaluate'));
  assert.match(movement,/sign>8/);assert.match(movement,/timeout:3000/);assert.match(movement,/after\.camera\.playerXYZ,start\.playerXYZ/);
  assert.doesNotMatch(movement,/acquireAdmittedCameraPan|continue|catch\s*\(/,'a failed admitted movement is never retried or ignored');
+});
+
+
+test('offline confirmation readiness observes rendered animation and geometry with a bounded fail-closed wait',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('async function waitForOfflineConfirmationGeometry('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start));
+ async function scenario(kind){
+  let frame=0;const record={selector:'#confirmOrder'},qa={};
+  const surface={id:'confirm',tagName:'DIV',classList:{contains:()=>kind!=='hidden'},parentElement:null,getAnimations:()=>kind==='forever'||(kind==='animation'&&frame<3)?[{playState:'running',pending:frame===1,currentTime:frame*16,effect:{getComputedTiming:()=>({progress:.25})}}]:[]};
+  const element={id:'confirmOrder',tagName:'BUTTON',parentElement:surface,getAnimations:()=>[],getBoundingClientRect:()=>({x:20,y:kind==='clipped'?900:(kind==='moving'&&frame<3?frame*20:100),width:150,height:44,right:170,bottom:kind==='clipped'?944:(kind==='moving'&&frame<3?frame*20+44:144)})};
+  const context={__offlineSimulationQA:qa,Date:{now:()=>frame*16},performance:{now:()=>frame*16},document:{querySelector:selector=>selector==='#confirm'?surface:element},getComputedStyle:node=>({display:'block',visibility:'visible',opacity:'1',transform:node===surface&&frame<3?'matrix(1,0,0,1,-180,100)':'matrix(1,0,0,1,-180,0)'})};
+  const page={evaluate:async(callback,arg)=>{context.arg=arg;return runInNewContext('('+callback.toString()+')(arg)',context)},waitForFunction:async(predicate,arg,options)=>{assert.deepEqual({...options},{polling:'raf',timeout:1200});for(frame=1;frame<=8;frame++){if(await runInNewContext('('+predicate.toString()+')()',context))return}throw new Error('fixture timeout')}};
+  context.page=page;context.record=record;runInNewContext(fn+'globalThis.wait=waitForOfflineConfirmationGeometry;',context);
+  let error;try{await context.wait(page,record)}catch(caught){error=caught}return{record,error,frame};
+ }
+ for(const kind of ['still','animation','moving','clipped']){const result=await scenario(kind);assert.equal(result.error,undefined,kind);assert.equal(result.record.status,'STABLE_RENDERED_GEOMETRY');assert.equal(result.frame,kind==='animation'||kind==='moving'?5:3);assert.equal(result.record.observation.frames.length,result.frame);assert.equal(result.record.observation.frames.at(-1).stableFrames,3)}
+ for(const kind of ['forever','hidden']){const result=await scenario(kind);assert.match(String(result.error),/CONFIRM_GEOMETRY_NOT_STABLE.*fixture timeout/);assert.equal(result.record.status,'NOT_STABLE');assert.equal(result.record.observation.frames.length,8)}
+ const offline=source.slice(source.indexOf('async function offlineSimulationBrowserQA('),source.indexOf('async function localCandidateBrowserQA('));
+ assert.match(offline,/box\.right<=profile\.width\+1&&box\.bottom<=profile\.height\+1/,'stable clipped geometry still fails the unchanged viewport assertion');
+ assert.match(offline,/assert\.ok\(box\.hit/,'own-hit remains mandatory');
+ assert.match(offline,/evidence\.submitActionHit=await usable\('#confirmOrder'\);await page\.locator\('#confirmOrder'\)\.click\(\)/,'own-hit is rechecked immediately after the screenshot and before native Submit');
+ assert.doesNotMatch(fn,/waitForTimeout|scroll|style\.|\.finish\(|\.cancel\(|\.click\(/,'readiness cannot alter rendering or dispatch/retry actions');
 });

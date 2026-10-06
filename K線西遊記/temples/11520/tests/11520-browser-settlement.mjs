@@ -234,6 +234,30 @@ try {
 // submit/observe API, replaces runtime code, connects a wallet, or signs a TX.
 // Baseline mode records the same native attempt against an explicitly pinned
 // pre-repair server; BASELINE_REPRODUCED is not a product/browser PASS.
+// Read-only readiness before native input: observe real rendered frames, never
+// finish animations, mutate styles, scroll controls, or retry submitted actions.
+async function waitForOfflineConfirmationGeometry(page,record){
+  await page.evaluate(selector=>{globalThis.__offlineSimulationQA.confirmGeometry={selector,frames:[],stableFrames:0}},record.selector);
+  try{
+    await page.waitForFunction(()=>{
+      const evidence=globalThis.__offlineSimulationQA.confirmGeometry,element=document.querySelector(evidence.selector),surface=document.querySelector('#confirm');
+      const rect=element?.getBoundingClientRect(),box=rect?{x:rect.x,y:rect.y,width:rect.width,height:rect.height,right:rect.right,bottom:rect.bottom}:null;
+      const ancestors=[];for(let node=element;node;node=node.parentElement){
+        const css=getComputedStyle(node);ancestors.push({id:node.id||node.tagName,display:css.display,visibility:css.visibility,opacity:css.opacity,transform:css.transform,
+          animations:node.getAnimations().map(animation=>({playState:animation.playState,pending:animation.pending,currentTime:animation.currentTime,progress:animation.effect?.getComputedTiming().progress??null}))});
+      }
+      const visible=!!surface?.classList.contains('open')&&!!box&&box.width>0&&box.height>0&&ancestors.every(node=>node.display!=='none'&&node.visibility==='visible'&&Number(node.opacity)>0);
+      const moving=ancestors.some(node=>node.animations.some(animation=>animation.pending||!['finished','idle'].includes(animation.playState)));
+      const previous=evidence.frames.at(-1),same=!!previous?.box&&!!box&&Object.keys(box).every(key=>box[key]===previous.box[key]);
+      evidence.stableFrames=visible&&!moving?(same?evidence.stableFrames+1:1):0;
+      evidence.frames.push({at:Date.now(),monotonicAt:performance.now(),box,visible,moving,stableFrames:evidence.stableFrames,ancestors});
+      return evidence.stableFrames>=3;
+    },null,{polling:'raf',timeout:1200});
+    record.status='STABLE_RENDERED_GEOMETRY';
+  }catch(error){record.status='NOT_STABLE';throw new Error('CONFIRM_GEOMETRY_NOT_STABLE '+String(error.message))}
+  finally{record.observation=await page.evaluate(()=>globalThis.__offlineSimulationQA.confirmGeometry).catch(()=>null)}
+}
+
 async function offlineSimulationBrowserQA({baseline=false}={}){
   const {createHash}=await import('node:crypto');
   const {execFileSync}=await import('node:child_process');
@@ -337,6 +361,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     });
     const shot=async label=>{const file=`${name}-${label}.png`;await page.screenshot({path:`${out}/${file}`,fullPage:true});result.screenshots.push(file)};
     const usable=async selector=>{
+      if(['#confirmOrder','#cancelOrder'].includes(selector)){const record={stage,selector};(result.controlReadiness??=[]).push(record);await waitForOfflineConfirmationGeometry(page,record)}
       const box=await page.locator(selector).evaluate(element=>{const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,hit:hit===element||element.contains(hit),blocker:hit?.id||hit?.tagName}});
       assert.ok(box.width>0&&box.height>0&&box.x>=0&&box.y>=0&&box.right<=profile.width+1&&box.bottom<=profile.height+1,`${selector} clipped: ${JSON.stringify(box)}`);
       assert.ok(box.hit,`${selector} pointer blocked: ${JSON.stringify(box)}`);return box;
@@ -348,7 +373,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
     const game=async()=>{
       // A native close may already be finishing its CSS transition. Never
       // click a second time merely because isVisible saw that earlier frame.
-      if(await page.locator('#confirm').evaluate(e=>e.classList.contains('open')))await page.locator('#cancelOrder').click();
+      if(await page.locator('#confirm').evaluate(e=>e.classList.contains('open'))){await usable('#cancelOrder');await page.locator('#cancelOrder').click();}
       await page.locator('#confirm').waitFor({state:'hidden',timeout:12000});
       if(await page.locator('#sheet').evaluate(e=>e.classList.contains('open')))await page.locator('#sheetClose').click();
       await page.locator('#sheet').waitFor({state:'hidden',timeout:12000});
@@ -433,7 +458,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         evidence.preview=await state();assert.match(evidence.preview.preview,new RegExp(source));assertNoAuthority(evidence.preview);
         evidence.submitHit=await usable('#confirmOrder');await shot(stage+'-preview');
         const clickCount=evidence.preview.native.filter(event=>event.id==='confirmOrder'&&event.type==='click').length;
-        await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
+        evidence.submitActionHit=await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
         await page.waitForFunction(count=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length===count+1,count);
         evidence.submitted=await state();const order=evidence.submitted.simulation.orders.at(-1);
         assert.equal(order.market,testCase.market);assert.equal(order.axis,testCase.axis);assert.equal(order.c,testCase.c);assert.equal(order.lots,1);
@@ -467,13 +492,13 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       if(!baseline&&profile.width===390){
         stage='pending-cancel';await select(cases[0]);await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
         const anchor=(await snap()).observations.BTCUSDT.simulationAnchorPrice;await page.locator('#simulationTriggerPrice').fill(String(anchor+10));
-        await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
+        await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
         const pending=(await snap()).orders.at(-1);await page.clock.fastForward(4000);assert.equal((await snap()).orders.at(-1).status,'PENDING');
         await page.locator(`[data-sim-cancel="${pending.orderId}"]`).click();await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.find(o=>o.orderId===id)?.status==='CANCELLED',pending.orderId);
         result.cancel=await state();assert.equal(result.cancel.simulation.receipts.filter(r=>r.orderId===pending.orderId).length,0);await shot('pending-cancelled');
         stage='liquidation';await select(cases.find(c=>c.market==='ETHUSDT'&&c.c===1));await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
         const ethAnchor=(await snap()).observations.ETHUSDT.simulationAnchorPrice;await page.locator('#simulationTriggerPrice').fill(String(ethAnchor+.125));
-        await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
+        await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await usable('#confirmOrder');await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
         const liquidationOrder=(await snap()).orders.at(-1);
         for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===liquidationOrder.orderId).status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
         const liquidationPosition=(await snap()).positions.find(p=>p.orderId===liquidationOrder.orderId);assert.equal(liquidationPosition.status,'OPEN');result.beforeLiquidation=await state();
