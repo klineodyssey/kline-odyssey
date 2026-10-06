@@ -32,6 +32,42 @@ export function createWorldFeedbackObserver(emit){
   };
 }
 const feedbackHistory=[];
+let toastContextObserver=null;
+// Reuse the one toast inside the active trading panel's existing header. Direct
+// route/joystick writers still address #toast; context changes do not reset time.
+function place11520Toast(toast){
+  const confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),body=document.getElementById('sheetBody');
+  const organ=body?.dataset.simOrgan,title=['orders','positions','history'].includes(organ)?document.querySelector('#rail [data-organ="'+organ+'"]')?.getAttribute('title'):null;
+  const panel=confirm?.classList.contains('open')?confirm:sheet?.classList.contains('open')&&title&&document.getElementById('sheetTitle')?.textContent===title?sheet:null;
+  const header=panel?.querySelector('.sheetHead');
+  if(header){
+    if(toast.parentElement!==header)header.appendChild(toast);
+    toast.dataset.panelContext=panel.id;
+    for(const key of ['top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key);
+    return;
+  }
+  if(toast.parentElement!==document.body)document.body.appendChild(toast);
+  delete toast.dataset.panelContext;
+  const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
+  if(guide?.width>0){
+    for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
+    const height=toast.getBoundingClientRect().height;
+    if(guide.bottom+6+height>innerHeight-6)toast.style.setProperty('top',Math.max(6,guide.top-6-height)+'px','important');
+  }
+}
+function install11520ToastContext(){
+  const toast=document.getElementById('toast');if(!toast)return;
+  toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');
+  if(!toastContextObserver){
+    toastContextObserver=new MutationObserver(()=>place11520Toast(toast));
+    for(const id of ['confirm','sheet','toast']){const node=document.getElementById(id);if(node)toastContextObserver.observe(node,{attributes:true,attributeFilter:['class']})}
+    const body=document.getElementById('sheetBody');if(body)toastContextObserver.observe(body,{attributes:true,attributeFilter:['data-sim-organ']});
+    const title=document.getElementById('sheetTitle');if(title)toastContextObserver.observe(title,{childList:true,characterData:true,subtree:true});
+  }
+  place11520Toast(toast);
+}
+function dispose11520ToastContext(){toastContextObserver?.disconnect();toastContextObserver=null}
+if(isGame)addEventListener('pageshow',install11520ToastContext);
 // One placement/timer owner for ordinary gameplay and world-event messages.
 export function show11520Toast(text,{combat=false,event='',duration=1700}={}){
   if(typeof document==='undefined')return;
@@ -39,14 +75,7 @@ export function show11520Toast(text,{combat=false,event='',duration=1700}={}){
   clearTimeout(show11520Toast.timer);toast.textContent=text;toast.dataset.kspaceFeedback=String(combat);
   if(event)toast.dataset.worldEvent=event;else delete toast.dataset.worldEvent;
   toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.style.transition='opacity .2s';toast.classList.add('show');toast.style.pointerEvents='none';toast.style.zIndex='2147482000';
-  const guide=document.getElementById('k11520MonsterGuide')?.getBoundingClientRect();
-  if(guide?.width>0){
-    for(const [key,value] of Object.entries({top:(guide.bottom+6)+'px',bottom:'auto',left:guide.left+'px',transform:'none','max-width':guide.width+'px','box-sizing':'border-box','font-size':'10px'}))toast.style.setProperty(key,value,'important');
-    // MINIMAL landscape places the guide at the bottom. Measure the actual
-    // wrapped message and use the free space above it, never below the screen.
-    const height=toast.getBoundingClientRect().height;
-    if(guide.bottom+6+height>innerHeight-6)toast.style.setProperty('top',Math.max(6,guide.top-6-height)+'px','important');
-  }
+  install11520ToastContext();
   // Keep placement while opacity fades. Clearing it at dismissal moves still-
   // visible loot text back into the HUD. The next message replaces placement;
   // pagehide remains the cleanup owner. No extra timer or DOM node is needed.
@@ -69,7 +98,7 @@ export function emit11520WorldFeedback(event){
   return true;
 }
 globalThis.__K11520_WORLD_AUDIO__=Object.freeze({snapshot:()=>({events:feedbackHistory.map(row=>({...row})),authority:'PRESENTATION_ONLY'})});
-if(typeof document!=='undefined')addEventListener('pagehide',()=>{clearTimeout(show11520Toast.timer);clearTimeout(emit11520WorldFeedback.fxTimer);emit11520WorldFeedback.animation?.cancel();document.getElementById('journeyEventFx')?.remove();const toast=document.getElementById('toast');if(toast){toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)}});
+if(typeof document!=='undefined')addEventListener('pagehide',()=>{dispose11520ToastContext();clearTimeout(show11520Toast.timer);clearTimeout(emit11520WorldFeedback.fxTimer);emit11520WorldFeedback.animation?.cancel();document.getElementById('journeyEventFx')?.remove();const toast=document.getElementById('toast');if(toast){toast.classList.remove('show');delete toast.dataset.worldEvent;for(const key of ['z-index','top','bottom','left','transform','max-width','box-sizing','font-size'])toast.style.removeProperty(key)}});
 
 function installCss(){
   if(document.getElementById('k11520ProductFixesStyleV23'))return;
@@ -127,4 +156,4 @@ function installBgm(){if(document.getElementById('bgmButton'))return true;const 
 // A late optional skin must never reopen an intro over the running game.
 function intro(){if(document.getElementById('k11520Bootstrap')||sessionStorage.getItem('11520.intro.seen.v2')||document.getElementById('intro11520'))return true;const o=document.createElement('div');o.id='intro11520';o.innerHTML='<div class="introCore"><div class="introLogo"></div><div class="introTitle">11520 花果山 5D</div><div class="introSub">先取經，再交易。你的市場冒險從 0C 開始。</div><div class="introPath"><span><b>①</b>走路取經<br>探索 XYZ</span><span><b>②</b>斬妖掉寶<br>累積戰利品</span><span><b>③</b>0.001C<br>解鎖 K 場交易</span></div><div class="introHint">不用連錢包也能先玩 · 0 手續費模擬交易 · >1C 高速模式暫鎖</div><button class="introSkip" type="button">開始取經</button></div>';document.body.appendChild(o);const close=(withAudio=false)=>{sessionStorage.setItem('11520.intro.seen.v2','1');if(withAudio){startBgm();speakAi('歡迎來到花果山。先用左下搖桿取經，找到附近妖怪，靠近後按打怪。')}o.classList.add('hide');setTimeout(()=>o.remove(),480)};o.querySelector('button').onclick=()=>close(true);setTimeout(()=>close(false),6000);return true}
 
-export function install11520ProductFixes(){if(!isGame)return{ok:false,reason:'NOT_11520_GAME'};const root=document.documentElement;if(root.dataset.k11520ProductFixesInstalled==='1')return{ok:true,alreadyInstalled:true};root.dataset.k11520ProductFixesInstalled='1';installCss();installPortalNav();installAi();installBgm();intro();const ready=()=>installEnergyTaps()&&installCenterY()&&watchFloors()&&compass()&&clearance();if(!ready()){const mo=new MutationObserver(()=>{if(ready())mo.disconnect()});mo.observe(document.documentElement,{childList:true,subtree:true})}addEventListener('resize',()=>requestAnimationFrame(clearance));return{ok:true,features:['mobile-layout-single-owner','joystick-clearance','left-center-y','fixed-energy-icons','canonical-floors','north-up-compass','kaios-portal-nav','ai-send-reply','original-synthetic-bgm','bgm','intro']}}
+export function install11520ProductFixes(){if(!isGame)return{ok:false,reason:'NOT_11520_GAME'};const root=document.documentElement;if(root.dataset.k11520ProductFixesInstalled==='1')return{ok:true,alreadyInstalled:true};root.dataset.k11520ProductFixesInstalled='1';install11520ToastContext();installCss();installPortalNav();installAi();installBgm();intro();const ready=()=>installEnergyTaps()&&installCenterY()&&watchFloors()&&compass()&&clearance();if(!ready()){const mo=new MutationObserver(()=>{if(ready())mo.disconnect()});mo.observe(document.documentElement,{childList:true,subtree:true})}addEventListener('resize',()=>requestAnimationFrame(clearance));return{ok:true,features:['mobile-layout-single-owner','joystick-clearance','left-center-y','fixed-energy-icons','canonical-floors','north-up-compass','kaios-portal-nav','ai-send-reply','original-synthetic-bgm','bgm','intro']}}

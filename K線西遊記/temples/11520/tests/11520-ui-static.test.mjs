@@ -620,3 +620,52 @@ test('offline confirmation readiness observes rendered animation and geometry wi
  assert.match(offline,/evidence\.submitActionHit=await usable\('#confirmOrder'\);await page\.locator\('#confirmOrder'\)\.click\(\)/,'own-hit is rechecked immediately after the screenshot and before native Submit');
  assert.doesNotMatch(fn,/waitForTimeout|scroll|style\.|\.finish\(|\.cancel\(|\.click\(/,'readiness cannot alter rendering or dispatch/retry actions');
 });
+
+
+test('one existing toast follows trading-panel context without replacing text, timers or accessibility',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('../runtime/game-ui-product-fixes-v23.mjs');
+ const start=source.indexOf('let toastContextObserver=null;'),fn=source.slice(start,source.indexOf('export function emit11520WorldFeedback(',start)).replace('export function show11520Toast','function show11520Toast');
+ const nodes={},timers=[],cleared=[],observers=[],listeners={};let moves=0;
+ const element=id=>{const classes=new Set(),styleValues={};return nodes[id]={id,dataset:{},attrs:{},parentElement:null,children:[],style:{setProperty:(k,v)=>styleValues[k]=v,removeProperty:k=>delete styleValues[k]},styleValues,classList:{contains:k=>classes.has(k),add:k=>classes.add(k),remove:k=>classes.delete(k)},setAttribute(k,v){this.attrs[k]=v},appendChild(node){if(node.parentElement)node.parentElement.children=node.parentElement.children.filter(x=>x!==node);this.children.push(node);node.parentElement=this;moves++},querySelector:()=>null,getBoundingClientRect:()=>({left:6,top:160,bottom:200,width:360,height:24})}};
+ const body=element('body'),toast=element('toast'),confirm=element('confirm'),sheet=element('sheet'),sheetBody=element('sheetBody'),sheetTitle=element('sheetTitle'),confirmHeader=element('confirmHeader'),sheetHeader=element('sheetHeader');element('k11520MonsterGuide');body.appendChild(toast);confirm.querySelector=()=>confirmHeader;sheet.querySelector=()=>sheetHeader;
+ const context={isGame:true,innerHeight:844,document:{body,getElementById:id=>nodes[id],querySelector:selector=>({getAttribute:()=>({orders:'委託',positions:'持倉',history:'歷史'})[selector.match(/data-organ="(.*?)"/)[1]]})},MutationObserver:class{constructor(callback){this.callback=callback;this.observed=[];observers.push(this)}observe(node,options){this.observed.push({node,options})}disconnect(){this.disconnected=true}},setTimeout:(callback,ms)=>{timers.push({callback,ms});return timers.length},clearTimeout:id=>cleared.push(id),addEventListener:(name,callback)=>listeners[name]=callback};
+ runInNewContext(fn+'globalThis.api={install:install11520ToastContext,show:show11520Toast,dispose:dispose11520ToastContext};',context);
+ context.api.install();assert.equal(observers.length,1);assert.equal(toast.parentElement,body);assert.equal(toast.attrs.role,'status');assert.equal(toast.attrs['aria-live'],'polite');
+ assert.deepEqual(observers[0].observed.map(x=>x.node.id),['confirm','sheet','toast','sheetBody','sheetTitle']);for(const {node,options} of observers[0].observed){if(node===sheetTitle){assert.equal(options.childList,true);assert.equal(options.characterData,true);assert.equal(options.subtree,true)}else{assert.equal(options.attributes,true);assert.equal(options.childList,undefined);assert.equal(options.subtree,undefined)}}
+ context.api.show('ORDER_REJECTED · KEEP_ERROR',{duration:1700});assert.equal(toast.textContent,'ORDER_REJECTED · KEEP_ERROR');assert.equal(timers.length,1);assert.equal(toast.styleValues.top,'206px');
+ confirm.classList.add('open');observers[0].callback();assert.equal(toast.parentElement,confirmHeader);assert.equal(toast.dataset.panelContext,'confirm');assert.equal(toast.styleValues.top,undefined);assert.equal(toast.textContent,'ORDER_REJECTED · KEEP_ERROR');assert.equal(timers.length,1,'context does not reset the feedback lifetime');
+ const moved=moves;observers[0].callback();assert.equal(moves,moved,'idempotent placement cannot create a child-list feedback loop');
+ toast.textContent='DIRECT_PREFLIGHT_ROUTE';toast.classList.add('show');observers[0].callback();assert.equal(toast.textContent,'DIRECT_PREFLIGHT_ROUTE');assert.equal(toast.parentElement,confirmHeader);
+ sheet.classList.add('open');sheetBody.dataset.simOrgan='history';sheetTitle.textContent='歷史';observers[0].callback();assert.equal(toast.parentElement,confirmHeader,'confirmation takes priority');
+ confirm.classList.remove('open');observers[0].callback();assert.equal(toast.parentElement,sheetHeader);assert.equal(toast.dataset.panelContext,'sheet');
+ context.api.show('SIM-R-4 · CLOSED',{event:'GA600_LEVEL_UP',duration:2000});assert.equal(observers.length,1);assert.equal(timers.at(-1).ms,2000);assert.equal(toast.textContent,'SIM-R-4 · CLOSED');assert.equal(toast.dataset.worldEvent,'GA600_LEVEL_UP');
+ timers.at(-1).callback();assert.equal(toast.classList.contains('show'),false);assert.equal(toast.dataset.worldEvent,undefined);
+ sheetTitle.textContent='市場卡';observers[0].callback();assert.equal(toast.parentElement,body,'a stale history marker cannot claim an unrelated sheet');sheetTitle.textContent='歷史';observers[0].callback();assert.equal(toast.parentElement,sheetHeader);sheetBody.dataset.simOrgan='help';observers[0].callback();assert.equal(toast.parentElement,body,'unrelated sheets keep existing world behavior');assert.equal(toast.dataset.panelContext,undefined);assert.equal(toast.styleValues.top,'206px');
+ context.api.dispose();assert.equal(observers[0].disconnected,true);listeners.pageshow();assert.equal(observers.length,2,'bfcache return reinstalls a single observer');listeners.pageshow();assert.equal(observers.length,2);
+ assert.match(source,/pagehide',\(\)=>\{dispose11520ToastContext\(\);clearTimeout\(show11520Toast.timer\)/);
+ assert.match(html,/:is\(#confirm,#sheet\)>\.sheetHead:has\(>#toast\)\{flex-wrap:wrap;position:sticky/);
+ assert.match(html,/:is\(#confirm,#sheet\)>\.sheetHead>#toast\{[^}]*position:static!important[^}]*flex:0 0 100%[^}]*max-height:min\(96px,25dvh\)[^}]*overflow:auto/);
+ assert.match(html,/#confirm>\.sheetHead,#confirm>\.grid2\{flex:0 0 auto/,'feedback must not shrink the existing footer');
+});
+
+
+test('toast visual assertions cannot prevent the existing failure screenshot capture',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('    const shot=async label=>{'),fn=source.slice(start,source.indexOf('    const usable=async selector=>{',start));
+ for(const evaluationThrows of [false,true])for(const captureThrows of [false,true]){
+  const originalError=new Error('fixture DOM unavailable'),result={screenshots:[]},captured=[],context={assert,baseline:false,name:'390x844',out:'artifacts',profile:{width:390,height:844},result,page:{evaluate:async()=>{if(evaluationThrows)throw originalError;return{panel:'confirm',context:'wrong',inHeader:false}},screenshot:async options=>{captured.push(options.path);if(captureThrows)throw new Error('fixture capture unavailable')}}};
+  runInNewContext(fn+'globalThis.shot=shot;',context);await assert.rejects(context.shot('failure'),error=>{if(evaluationThrows)assert.equal(error,originalError);else assert.equal(error.code,'ERR_ASSERTION');return true});assert.deepEqual(captured,['artifacts/390x844-failure.png']);assert.deepEqual(result.screenshots,captureThrows?[]:['390x844-failure.png']);if(captureThrows)assert.match(result.screenshotErrors[0].error,/capture unavailable/);
+ }
+});
+
+
+test('offline toast visual gate cannot pass without actual preview and history observations',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('function assertOfflineToastCoverage('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start)),context={assert};
+ runInNewContext(fn+'globalThis.check=assertOfflineToastCoverage;',context);
+ assert.throws(()=>context.check({}, {width:390}),/order-preview feedback coverage/);
+ const preview={panel:'confirm',stage:'BTCUSDT-LONG-preview'},history={panel:'sheet',stage:'BTCUSDT-LONG-close-receipt'};
+ assert.throws(()=>context.check({toastLayout:[preview]}, {width:390}),/history feedback coverage/);
+ assert.doesNotThrow(()=>context.check({toastLayout:[preview,history]}, {width:390}));assert.doesNotThrow(()=>context.check({toastLayout:[preview]}, {width:360}));
+ assert.match(source,/if\(!baseline\)assertOfflineToastCoverage\(result,profile\);/,'immutable baseline stays a reproduction lane');
+});

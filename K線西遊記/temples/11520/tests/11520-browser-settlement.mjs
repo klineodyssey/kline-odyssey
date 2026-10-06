@@ -258,6 +258,11 @@ async function waitForOfflineConfirmationGeometry(page,record){
   finally{record.observation=await page.evaluate(()=>globalThis.__offlineSimulationQA.confirmGeometry).catch(()=>null)}
 }
 
+function assertOfflineToastCoverage(result,profile){
+  assert.ok(result.toastLayout?.some(sample=>sample.panel==='confirm'&&sample.stage.endsWith('-preview')),'Actual visible native order-preview feedback coverage is required');
+  if(profile.width===390)assert.ok(result.toastLayout?.some(sample=>sample.panel==='sheet'&&(sample.stage.endsWith('-close-receipt')||sample.stage==='liquidation')),'Actual visible settlement/history feedback coverage is required');
+}
+
 async function offlineSimulationBrowserQA({baseline=false}={}){
   const {createHash}=await import('node:crypto');
   const {execFileSync}=await import('node:child_process');
@@ -268,7 +273,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
   const root='K線西遊記/temples/11520/',route=root+'game-5d.html';
   const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
   const sourceBytes=new Map();
-  const files=['game-5d.html','runtime/game-5d-main.mjs','runtime/real-trading-order-intent.mjs','runtime/kgen-margin-runtime.mjs','runtime/public-market-quotes.mjs','runtime/mobile-signed-c-immersive-runtime.mjs'];
+  const files=['game-5d.html','runtime/game-5d-main.mjs','runtime/real-trading-order-intent.mjs','runtime/kgen-margin-runtime.mjs','runtime/public-market-quotes.mjs','runtime/mobile-signed-c-immersive-runtime.mjs','runtime/game-ui-product-fixes-v23.mjs'];
   const assets=files.map(relative=>{
     const path=root+relative,bytes=execFileSync('git',['show',head+':'+path]);sourceBytes.set(path,bytes);
     const hasLeadingUtf8Bom=bytes.length>=3&&bytes[0]===0xef&&bytes[1]===0xbb&&bytes[2]===0xbf;
@@ -359,7 +364,27 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         execution:globalThis.__K11520_EXECUTION__?.snapshot(),simulation:globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot(),
         providerCalls:globalThis.__offlineSimulationQA.calls,native:globalThis.__offlineSimulationQA.native,feedback:globalThis.__offlineSimulationQA.feedback};
     });
-    const shot=async label=>{const file=`${name}-${label}.png`;await page.screenshot({path:`${out}/${file}`,fullPage:true});result.screenshots.push(file)};
+    const shot=async label=>{
+      let validationError=null;
+      try{if(!baseline){
+        const feedback=await page.evaluate(()=>{
+          const toast=document.getElementById('toast'),confirm=document.getElementById('confirm'),sheet=document.getElementById('sheet'),body=document.getElementById('sheetBody');
+          const panel=confirm.classList.contains('open')?confirm:sheet.classList.contains('open')&&['orders','positions','history'].includes(body.dataset.simOrgan)?sheet:null;
+          if(!panel||!toast.classList.contains('show'))return null;
+          const header=panel.querySelector('.sheetHead'),rect=element=>{const r=element.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
+          return {panel:panel.id,text:toast.textContent,context:toast.dataset.panelContext,inHeader:toast.parentElement===header,role:toast.getAttribute('role'),live:toast.getAttribute('aria-live'),position:getComputedStyle(toast).position,toast:rect(toast),header:rect(header),title:rect(header.querySelector('h2')),close:rect(header.querySelector('.close'))};
+        });
+        if(feedback){
+          (result.toastLayout??=[]).push({stage:label,...feedback});assert.equal(feedback.context,feedback.panel);assert.equal(feedback.inHeader,true);assert.equal(feedback.position,'static');assert.equal(feedback.role,'status');assert.equal(feedback.live,'polite');
+          assert.ok(feedback.toast.width>0&&feedback.toast.height>0&&feedback.toast.x>=0&&feedback.toast.right<=profile.width+1&&feedback.toast.y>=0&&feedback.toast.bottom<=profile.height+1,'Visible panel feedback must remain inside the viewport');
+          assert.ok(feedback.toast.y>=Math.max(feedback.title.bottom,feedback.close.bottom)-1&&feedback.toast.bottom<=feedback.header.bottom+1,'Feedback must have its own header row, never overlay title or body');
+        }
+      }}catch(error){validationError=error}
+      const file=`${name}-${label}.png`;
+      try{await page.screenshot({path:`${out}/${file}`,fullPage:true});result.screenshots.push(file)}
+      catch(error){(result.screenshotErrors??=[]).push({file,error:String(error)});if(!validationError)throw error}
+      if(validationError)throw validationError;
+    };
     const usable=async selector=>{
       if(['#confirmOrder','#cancelOrder'].includes(selector)){const record={stage,selector};(result.controlReadiness??=[]).push(record);await waitForOfflineConfirmationGeometry(page,record)}
       const box=await page.locator(selector).evaluate(element=>{const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,hit:hit===element||element.contains(hit),blocker:hit?.id||hit?.tagName}});
@@ -519,6 +544,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
         await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
         result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');
       }
+      if(!baseline)assertOfflineToastCoverage(result,profile);
       await sourceProof();
       await verifyRawSource('AFTER_BROWSER');
       assert.deepEqual(result.pageErrors,[]);result.status=baseline?'BASELINE_REPRODUCED':'FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';

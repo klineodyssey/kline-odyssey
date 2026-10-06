@@ -69,6 +69,10 @@
 #confirm .btn,#confirm .close{min-height:44px}
 #confirm .close{min-width:44px}
 .confirm input{background:#101923;color:#eef7ff;border:1px solid #7893a3;border-radius:6px;padding:8px;font:inherit}.confirm input:focus{outline:2px solid #ffd25c;outline-offset:1px}
+/* Trading-panel feedback stays in the existing header flow, above its body. */
+:is(#confirm,#sheet)>.sheetHead:has(>#toast){flex-wrap:wrap;position:sticky;top:0;z-index:3;background:#101923}
+:is(#confirm,#sheet)>.sheetHead>#toast{display:none;position:static!important;inset:auto!important;transform:none!important;z-index:auto!important;flex:0 0 100%;width:100%;max-width:100%!important;max-height:min(96px,25dvh);box-sizing:border-box!important;margin:6px 0 0;overflow:auto;overflow-wrap:anywhere;overscroll-behavior:contain;pointer-events:auto!important;font-size:11px!important}
+:is(#confirm,#sheet)>.sheetHead>#toast.show{display:block}
 #kspaceTarget{position:fixed;left:50%;top:414px;transform:translateX(-50%);width:min(156px,40vw);min-height:68px;max-height:92px;overflow:hidden;padding:7px;z-index:221;color:#dfefff;font:10px/1.35 system-ui;text-align:left;white-space:pre-line;border-radius:10px;background:#091119f5;touch-action:manipulation}
 @media(max-width:420px){#kspaceTarget{left:50%;top:414px;transform:translateX(-50%);width:min(142px,38vw);max-height:86px;font-size:9px}}
 @media(max-width:380px){#kspaceTarget{left:126px;right:auto;top:284px;transform:none;width:108px;min-height:58px;max-height:72px;font-size:8px;z-index:690}}
