@@ -255,3 +255,61 @@ jobs:
           path: artifacts/11520-visual-qa/
           if-no-files-found: error
           retention-days: 14
+
+  simulation-regression:
+    needs: product-qa
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source head
+        id: source
+        env:
+          EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_HEAD=$(git rev-parse HEAD)
+          test "$ACTUAL_HEAD" = "$EXPECTED_HEAD"
+          echo "sha=$ACTUAL_HEAD" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Install existing Chromium simulation QA dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0
+          npx playwright install --with-deps chromium
+      - name: Capture immutable pre-repair native Submit failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASELINE=e26f3a76ef0be7f43058225f46def3fbe123371e
+          git fetch --no-tags --depth=1 origin "$BASELINE"
+          BASELINE_DIR=$(mktemp -d)
+          git archive "$BASELINE" | tar -x -C "$BASELINE_DIR"
+          python3 -m http.server 4174 --bind 127.0.0.1 --directory "$BASELINE_DIR" > /tmp/k11520-simulation-baseline-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          # Baseline success means BASELINE_REPRODUCED, never product PASS.
+          K11520_BASE_URL=http://127.0.0.1:4174 K11520_SOURCE_SHA="$BASELINE" timeout --signal=TERM --kill-after=10s 300s node "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs" --simulation-offline-baseline
+      - name: Verify exact candidate offline simulation through native Submit
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-simulation-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          K11520_BASE_URL=http://127.0.0.1:4173 K11520_SOURCE_SHA="$(git rev-parse HEAD)" timeout --signal=TERM --kill-after=10s 600s node "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs" --simulation-offline
+      - name: Retain source-bound baseline and candidate browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 11520-simulation-regression-${{ steps.source.outputs.sha }}
+          path: artifacts/11520-settlement-qa/
+          if-no-files-found: error
+          retention-days: 14

@@ -434,7 +434,7 @@ test('wrapped Wallet help links require ownership of every rendered fragment wit
   await inspect();await inspect(0);await inspect(1);await inspect(0,'paragraph');await inspect(1,'paragraph');
 });
 
-test('signed-C quote fixture is loopback-only and retains missing-quote rejection and 100C no-chain guards',async()=>{
+test('signed-C quote fixture is loopback-only and separates SIMULATION WAIT preview from public LIVE and 100C no-chain guards',async()=>{
   const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-signed-c-immersive.mjs');
   const config=source.slice(source.indexOf('const BASE='),source.indexOf('await fs.mkdir'));
   const payload=source.slice(source.indexOf('function freeQuotePayload('),source.indexOf("import fs from 'node:fs/promises'"));
@@ -446,24 +446,18 @@ test('signed-C quote fixture is loopback-only and retains missing-quote rejectio
     assert.equal(context.payload(route,[]).length,0);const row=context.payload(route,context.result.rows)[0];assert.equal(row.p,'3500');assert.equal(row.T,40000);assert.equal(row.a,40000);
   }
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*'"));
-  assert.ok(source.includes("status==='WAIT'"));assert.ok(source.includes("/ORACLE_STALE/"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
+  assert.ok(source.includes("status==='WAIT'"));assert.ok(source.includes("K11520_DETERMINISTIC_SIMULATION"));assert.ok(source.includes("simulationMode,'SIMULATION_WALLET'"));assert.ok(source.includes("status==='LIVE'"));
   assert.ok(source.includes("if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000})"),'final fixture readiness is local-only');
   for(const guard of ['V1_HIGH_SPEED_PRODUCTION_LOCKED',"'#confirmOrder').isDisabled(),true",'PENDING 模擬委託；下一筆有效價格觸及／穿越才成交，不送鏈'])assert.ok(source.includes(guard),guard);
   assert.ok(source.includes("page.locator('#confirm').waitFor({state:'visible',timeout:2500})"),'confirmation timeout remains unchanged');
 });
 
-test('signed-C WAIT evidence survives the separate deferred route toast and cleans up its observer',async()=>{
-  const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-signed-c-immersive.mjs');
+test('signed-C WAIT preview checks source, public status, no debit and native cancellation',()=>{
+  const source=read('./11520-browser-signed-c-immersive.mjs');
   const block=source.slice(source.indexOf('if(LOCAL_SIMULATION_QA){'),source.indexOf('// Human 12:43'));
-  for(const clickFails of [false,true]){
-    let observer=null,saved=null,text='',disconnected=false;const market={status:'WAIT'};
-    const toast={get textContent(){return text},set textContent(value){text=value;if(observer)queueMicrotask(()=>observer?.())}};
-    const context={assert,LOCAL_SIMULATION_QA:true,BASE:'http://127.0.0.1:4173',OUT:'evidence',quoteFixtureRows:[],document:{getElementById:()=>toast},__K11520_MARKET_K__:market,__K11520_EXECUTION__:{snapshot:()=>({mode:'SIMULATION_WALLET'})},MutationObserver:class{constructor(fn){this.fn=fn}observe(){observer=this.fn}disconnect(){observer=null;disconnected=true}},fs:{writeFile:async(path,value)=>{saved=JSON.parse(value)}},page:{evaluate:async fn=>fn(),waitForFunction:async fn=>assert.ok(fn()),locator:selector=>selector==='#confirm'?{isVisible:async()=>false}:{click:async()=>{if(clickFails)throw new Error('native click failed');toast.textContent='ORACLE_STALE · 行情未就緒';await Promise.resolve();toast.textContent='目前下單走本機模擬；真實交易仍封鎖';await Promise.resolve()}}}};
-    Object.defineProperty(context,'quoteFixtureReady',{set(value){market.status=value?'LIVE':'WAIT'}});
-    const run=runInNewContext('(async()=>{'+block+'})()',context);
-    if(clickFails)await assert.rejects(run,/native click failed/);else{await run;assert.equal(saved.waitRejected,true);assert.ok(saved.waitMessages.some(message=>message.includes('ORACLE_STALE')));assert.ok(saved.waitMessages.some(message=>message.includes('本機模擬')));assert.equal(saved.realMarketValidation,false)}
-    assert.equal(disconnected,true);assert.equal('__SIGNED_C_WAIT_EVIDENCE__' in context,false);
-  }
+  for(const guard of ["'#cNumericInput').fill('1')", "'#orderFire').click", "'#confirmOrder').isDisabled(),false", 'K11520_DETERMINISTIC_SIMULATION', "snapshot().wallet),before", "'#cancelOrder').click()", "waitPreviewAllowed:true"])assert.ok(block.includes(guard),guard);
+  assert.ok(block.indexOf("'#cancelOrder').click()")<block.indexOf('quoteFixtureReady=true'));
+  assert.doesNotMatch(block,/waitRejected:true|__SIGNED_C_WAIT_EVIDENCE__/);
 });
 
 test('responsive event routing retains standalone mobile-HUD coverage and references only its required exact-tree Game owner',async()=>{
@@ -550,4 +544,170 @@ test('FULL HUD readiness diagnostics observe existing queries without extra hit 
   if(kind==='DOM'){assert.equal(x.canPanReads,0);assert.equal(d.firstDomBlock.owner,'fixture-HUD');assert.ok(d.domRejects>0)}else{assert.equal(d.firstDomBlock,null);assert.ok(d.firstCanPanBlock);assert.ok(d.canPanRejects>0)}
  }
  assert.match(body,/performance\.now\(\)-since>=150&&performance\.now\(\)-began<2000/);
+});
+
+test('shared order confirmation keeps actions outside its scrolling body in portrait, landscape and reduced visual viewport',()=>{
+  const shared=html.split('/* Shared order-confirmation viewport:')[1]?.split('.confirm input{')[0]||'';
+  assert.ok(shared,'the existing confirmation needs one orientation-independent layout owner');
+  assert.doesNotMatch(shared,/@media|position:\s*(?:absolute|sticky)/,'no orientation-only or overlaid replacement action row');
+  assert.match(shared,/#confirm\.open\{[^}]*display:flex;flex-direction:column;overflow:hidden/);
+  assert.match(shared,/var\(--k11520-visible-vh,100dvh\)/,'use existing VisualViewport height owner for keyboard resize');
+  assert.match(shared,/top:max\(8px,env\(safe-area-inset-top\)\)!important;bottom:auto!important/);
+  assert.match(shared,/#confirm #confirmBody\{min-height:0;overflow:auto;flex:1 1 auto;overscroll-behavior:contain/);
+  assert.match(shared,/#confirm>\.sheetHead,#confirm>\.grid2\{flex:0 0 auto/,'header and both actions must not shrink with overflowing content');
+  assert.match(shared,/#confirm \.btn,#confirm \.close\{min-height:44px/);
+  assert.match(html,/<div id="confirmBody"><\/div><div class="grid2"><button class="btn" id="cancelOrder">取消<\/button><button class="btn" id="confirmOrder">/,'retain the original reachable Cancel and Submit controls');
+});
+
+test('offline acceptance waits for the actual adapter before reload assertions and emits bounded missing-boot evidence',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const fn=source.slice(source.indexOf('    const waitForSimulationBoot=async()=>{'),source.indexOf('    const game=async()=>{'));
+ let checked=0,fail=false;
+ const context={page:{waitForFunction:async(predicate,arg,options)=>{checked++;assert.equal(options.timeout,12000);assert.doesNotThrow(()=>predicate());if(fail)throw new Error('fixture timeout');}},state:async()=>({simulation:null,execution:null,axis:null,url:'http://127.0.0.1/fixture'})};
+ runInNewContext(fn+';globalThis.waitForSimulationBoot=waitForSimulationBoot;',context);
+ await context.waitForSimulationBoot();assert.equal(checked,1,'absent global is an ordinary not-ready observation');
+ fail=true;await assert.rejects(context.waitForSimulationBoot(),/SIMULATION_BOOT_NOT_READY.*adapterPresent.*false.*fixture timeout/);
+ const reload=source.slice(source.indexOf("stage='reload-recovery'"),source.indexOf('result.reload=await state()'));
+ assert.ok(reload.indexOf('await waitForSimulationBoot()')<reload.indexOf('globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot()'));
+ assert.match(reload,/receipts\.length===length/,'receipt equality remains mandatory');
+});
+
+test('offline acceptance closes each open surface once and awaits its completed hidden transition',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('    const game=async()=>{'),fn=source.slice(start,source.indexOf('    const organ=async name=>{',start));
+ for(const open of [false,true]){
+  const clicks=[],waits=[],page={locator:selector=>({evaluate:async predicate=>predicate({classList:{contains:cls=>selector==='#walletPanel'?cls==='collapsed':['#confirm','#sheet'].includes(selector)&&cls==='open'&&open}}),click:async()=>clicks.push(selector),waitFor:async options=>{assert.deepEqual({...options},{state:'hidden',timeout:12000});waits.push(selector)},isVisible(){throw new Error('transitional visibility is not close authority')}})};
+  const context={page,usable:async selector=>assert.equal(selector,'#cancelOrder')};runInNewContext(fn+';globalThis.game=game;',context);await context.game();
+  assert.deepEqual(clicks,open?['#cancelOrder','#sheetClose']:[]);assert.deepEqual(waits,['#confirm','#sheet']);
+ }
+});
+
+test('camera QA reacquires only rejected native origins with a fixed budget and complete evidence',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs');
+ const start=source.indexOf('async function acquireAdmittedCameraPan('),fn=source.slice(start,source.indexOf('// Real entry only:',start));
+ const context={};runInNewContext(fn+';globalThis.acquire=acquireAdmittedCameraPan;',context);
+ const fixture=(outcomes,{pickCost=10,beginCost=10,downOverride=null}={})=>{let time=0,begins=0,cancels=0;const records=[];return{records,get counts(){return{begins,cancels}},options:{records,now:()=>time,pick:async()=>{time+=pickCost;return{origin:{x:212,y:116},before:{camera:{manual:false},player:{x:422,y:216}}}},begin:async()=>{begins++;time+=beginCost},cancel:async()=>{cancels++},inspect:async()=>({down:downOverride??{type:'pointerdown',target:'three',isTrusted:true,canPan:outcomes[begins-1]},camera:{manual:false}})}}};
+ const first=fixture([true]);const admitted=await context.acquire(first.options);assert.equal(admitted.admission.admitted,true);assert.deepEqual(first.counts,{begins:1,cancels:0});
+ const moved=fixture([false,true]);await context.acquire(moved.options);assert.deepEqual(moved.counts,{begins:2,cancels:1});assert.equal(moved.records[0].reason,'ORIGIN_REJECTED_AT_NATIVE_DOWN');assert.ok(moved.records[0].afterCancel);assert.equal(moved.records[1].admitted,true);
+ const rejected=fixture([false,false,false,true]);await assert.rejects(context.acquire(rejected.options),/3_ATTEMPTS_1000MS/);assert.deepEqual(rejected.counts,{begins:3,cancels:3});assert.equal(rejected.records.length,3);
+ const slow=fixture([true],{pickCost:1000});await assert.rejects(context.acquire(slow.options),/3_ATTEMPTS_1000MS/);assert.equal(slow.counts.begins,0,'no late native attempt after acquisition deadline');
+ const delayed=fixture([true],{beginCost:1000});await assert.rejects(context.acquire(delayed.options),/ACQUISITION_BUDGET_EXPIRED/);assert.deepEqual(delayed.counts,{begins:1,cancels:1});
+ for(const downOverride of [{type:'pointerdown',target:'three',isTrusted:false,canPan:true},{type:'pointerdown',target:'button',isTrusted:true,canPan:true}]){const wrong=fixture([true],{downOverride});await assert.rejects(context.acquire(wrong.options),/TRUSTED_CANVAS_DOWN_REQUIRED/);assert.deepEqual(wrong.counts,{begins:1,cancels:1})}
+ for(const canPan of [undefined,null,'false',1]){const malformed=fixture([false,true],{downOverride:{type:'pointerdown',target:'three',isTrusted:true,canPan}});await assert.rejects(context.acquire(malformed.options),/BOOLEAN_PAN_ELIGIBILITY_REQUIRED/);assert.deepEqual(malformed.counts,{begins:1,cancels:1})}
+ const movement=source.slice(source.indexOf('const attempt={name,origin:gesturePoint'),source.indexOf('result.pointerTrace=await page.evaluate'));
+ assert.match(movement,/sign>8/);assert.match(movement,/timeout:3000/);assert.match(movement,/after\.camera\.playerXYZ,start\.playerXYZ/);
+ assert.doesNotMatch(movement,/acquireAdmittedCameraPan|continue|catch\s*\(/,'a failed admitted movement is never retried or ignored');
+});
+
+
+test('offline confirmation readiness observes rendered animation and geometry with a bounded fail-closed wait',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('async function waitForOfflineConfirmationGeometry('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start));
+ async function scenario(kind){
+  let frame=0;const record={selector:'#confirmOrder'},qa={};
+  const surface={id:'confirm',tagName:'DIV',classList:{contains:()=>kind!=='hidden'},parentElement:null,getAnimations:()=>kind==='forever'||(kind==='animation'&&frame<3)?[{playState:'running',pending:frame===1,currentTime:frame*16,effect:{getComputedTiming:()=>({progress:.25})}}]:[]};
+  const element={id:'confirmOrder',tagName:'BUTTON',parentElement:surface,getAnimations:()=>[],getBoundingClientRect:()=>({x:20,y:kind==='clipped'?900:(kind==='moving'&&frame<3?frame*20:100),width:150,height:44,right:170,bottom:kind==='clipped'?944:(kind==='moving'&&frame<3?frame*20+44:144)})};
+  const context={__offlineSimulationQA:qa,Date:{now:()=>frame*16},performance:{now:()=>frame*16},document:{querySelector:selector=>selector==='#confirm'?surface:element},getComputedStyle:node=>({display:'block',visibility:'visible',opacity:'1',transform:node===surface&&frame<3?'matrix(1,0,0,1,-180,100)':'matrix(1,0,0,1,-180,0)'})};
+  const page={evaluate:async(callback,arg)=>{context.arg=arg;return runInNewContext('('+callback.toString()+')(arg)',context)},waitForFunction:async(predicate,arg,options)=>{assert.deepEqual({...options},{polling:'raf',timeout:1200});for(frame=1;frame<=8;frame++){if(await runInNewContext('('+predicate.toString()+')()',context))return}throw new Error('fixture timeout')}};
+  context.page=page;context.record=record;runInNewContext(fn+'globalThis.wait=waitForOfflineConfirmationGeometry;',context);
+  let error;try{await context.wait(page,record)}catch(caught){error=caught}return{record,error,frame};
+ }
+ for(const kind of ['still','animation','moving','clipped']){const result=await scenario(kind);assert.equal(result.error,undefined,kind);assert.equal(result.record.status,'STABLE_RENDERED_GEOMETRY');assert.equal(result.frame,kind==='animation'||kind==='moving'?5:3);assert.equal(result.record.observation.frames.length,result.frame);assert.equal(result.record.observation.frames.at(-1).stableFrames,3)}
+ for(const kind of ['forever','hidden']){const result=await scenario(kind);assert.match(String(result.error),/CONFIRM_GEOMETRY_NOT_STABLE.*fixture timeout/);assert.equal(result.record.status,'NOT_STABLE');assert.equal(result.record.observation.frames.length,8)}
+ const offline=source.slice(source.indexOf('async function offlineSimulationBrowserQA('),source.indexOf('async function localCandidateBrowserQA('));
+ assert.match(offline,/box\.right<=profile\.width\+1&&box\.bottom<=profile\.height\+1/,'stable clipped geometry still fails the unchanged viewport assertion');
+ assert.match(offline,/assert\.ok\(box\.hit/,'own-hit remains mandatory');
+ assert.match(offline,/evidence\.submitActionHit=await usable\('#confirmOrder'\);await page\.locator\('#confirmOrder'\)\.click\(\)/,'own-hit is rechecked immediately after the screenshot and before native Submit');
+ assert.doesNotMatch(fn,/waitForTimeout|scroll|style\.|\.finish\(|\.cancel\(|\.click\(/,'readiness cannot alter rendering or dispatch/retry actions');
+});
+
+
+test('one existing toast follows trading-panel context without replacing text, timers or accessibility',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('../runtime/game-ui-product-fixes-v23.mjs');
+ const start=source.indexOf('let toastContextObserver=null;'),fn=source.slice(start,source.indexOf('export function emit11520WorldFeedback(',start)).replace('export function show11520Toast','function show11520Toast');
+ const nodes={},timers=[],cleared=[],observers=[],listeners={};let moves=0;
+ const element=id=>{const classes=new Set(),styleValues={};return nodes[id]={id,dataset:{},attrs:{},parentElement:null,children:[],style:{setProperty:(k,v)=>styleValues[k]=v,removeProperty:k=>delete styleValues[k]},styleValues,classList:{contains:k=>classes.has(k),add:k=>classes.add(k),remove:k=>classes.delete(k)},setAttribute(k,v){this.attrs[k]=v},appendChild(node){if(node.parentElement)node.parentElement.children=node.parentElement.children.filter(x=>x!==node);this.children.push(node);node.parentElement=this;moves++},querySelector:()=>null,getBoundingClientRect:()=>({left:6,top:160,bottom:200,width:360,height:24})}};
+ const body=element('body'),toast=element('toast'),confirm=element('confirm'),sheet=element('sheet'),sheetBody=element('sheetBody'),sheetTitle=element('sheetTitle'),confirmHeader=element('confirmHeader'),sheetHeader=element('sheetHeader');element('k11520MonsterGuide');body.appendChild(toast);confirm.querySelector=()=>confirmHeader;sheet.querySelector=()=>sheetHeader;
+ const context={isGame:true,innerHeight:844,document:{body,getElementById:id=>nodes[id],querySelector:selector=>({getAttribute:()=>({orders:'委託',positions:'持倉',history:'歷史'})[selector.match(/data-organ="(.*?)"/)[1]]})},MutationObserver:class{constructor(callback){this.callback=callback;this.observed=[];observers.push(this)}observe(node,options){this.observed.push({node,options})}disconnect(){this.disconnected=true}},setTimeout:(callback,ms)=>{timers.push({callback,ms});return timers.length},clearTimeout:id=>cleared.push(id),addEventListener:(name,callback)=>listeners[name]=callback};
+ runInNewContext(fn+'globalThis.api={install:install11520ToastContext,show:show11520Toast,dispose:dispose11520ToastContext};',context);
+ context.api.install();assert.equal(observers.length,1);assert.equal(toast.parentElement,body);assert.equal(toast.attrs.role,'status');assert.equal(toast.attrs['aria-live'],'polite');
+ assert.deepEqual(observers[0].observed.map(x=>x.node.id),['confirm','sheet','toast','sheetBody','sheetTitle']);for(const {node,options} of observers[0].observed){if(node===sheetTitle){assert.equal(options.childList,true);assert.equal(options.characterData,true);assert.equal(options.subtree,true)}else{assert.equal(options.attributes,true);assert.equal(options.childList,undefined);assert.equal(options.subtree,undefined)}}
+ context.api.show('ORDER_REJECTED · KEEP_ERROR',{duration:1700});assert.equal(toast.textContent,'ORDER_REJECTED · KEEP_ERROR');assert.equal(timers.length,1);assert.equal(toast.styleValues.top,'206px');
+ confirm.classList.add('open');observers[0].callback();assert.equal(toast.parentElement,confirmHeader);assert.equal(toast.dataset.panelContext,'confirm');assert.equal(toast.styleValues.top,undefined);assert.equal(toast.textContent,'ORDER_REJECTED · KEEP_ERROR');assert.equal(timers.length,1,'context does not reset the feedback lifetime');
+ const moved=moves;observers[0].callback();assert.equal(moves,moved,'idempotent placement cannot create a child-list feedback loop');
+ toast.textContent='DIRECT_PREFLIGHT_ROUTE';toast.classList.add('show');observers[0].callback();assert.equal(toast.textContent,'DIRECT_PREFLIGHT_ROUTE');assert.equal(toast.parentElement,confirmHeader);
+ sheet.classList.add('open');sheetBody.dataset.simOrgan='history';sheetTitle.textContent='歷史';observers[0].callback();assert.equal(toast.parentElement,confirmHeader,'confirmation takes priority');
+ confirm.classList.remove('open');observers[0].callback();assert.equal(toast.parentElement,sheetHeader);assert.equal(toast.dataset.panelContext,'sheet');
+ context.api.show('SIM-R-4 · CLOSED',{event:'GA600_LEVEL_UP',duration:2000});assert.equal(observers.length,1);assert.equal(timers.at(-1).ms,2000);assert.equal(toast.textContent,'SIM-R-4 · CLOSED');assert.equal(toast.dataset.worldEvent,'GA600_LEVEL_UP');
+ timers.at(-1).callback();assert.equal(toast.classList.contains('show'),false);assert.equal(toast.dataset.worldEvent,undefined);
+ sheetTitle.textContent='市場卡';observers[0].callback();assert.equal(toast.parentElement,body,'a stale history marker cannot claim an unrelated sheet');sheetTitle.textContent='歷史';observers[0].callback();assert.equal(toast.parentElement,sheetHeader);sheetBody.dataset.simOrgan='help';observers[0].callback();assert.equal(toast.parentElement,body,'unrelated sheets keep existing world behavior');assert.equal(toast.dataset.panelContext,undefined);assert.equal(toast.styleValues.top,'206px');
+ context.api.dispose();assert.equal(observers[0].disconnected,true);listeners.pageshow();assert.equal(observers.length,2,'bfcache return reinstalls a single observer');listeners.pageshow();assert.equal(observers.length,2);
+ assert.match(source,/pagehide',\(\)=>\{dispose11520ToastContext\(\);clearTimeout\(show11520Toast.timer\)/);
+ assert.match(html,/:is\(#confirm,#sheet\)>\.sheetHead:has\(>#toast\)\{flex-wrap:wrap;position:sticky/);
+ assert.match(html,/:is\(#confirm,#sheet\)>\.sheetHead>#toast\{[^}]*position:static!important[^}]*flex:0 0 100%[^}]*max-height:min\(96px,25dvh\)[^}]*overflow:auto/);
+ assert.match(html,/#confirm>\.sheetHead,#confirm>\.grid2\{flex:0 0 auto/,'feedback must not shrink the existing footer');
+});
+
+
+test('toast visual assertions cannot prevent the existing failure screenshot capture',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('    const shot=async label=>{'),fn=source.slice(start,source.indexOf('    const usable=async selector=>{',start));
+ for(const evaluationThrows of [false,true])for(const captureThrows of [false,true]){
+  const originalError=new Error('fixture DOM unavailable'),result={screenshots:[]},captured=[],context={assert,baseline:false,name:'390x844',out:'artifacts',profile:{width:390,height:844},result,page:{evaluate:async()=>{if(evaluationThrows)throw originalError;return{panel:'confirm',context:'wrong',inHeader:false}},screenshot:async options=>{captured.push(options.path);if(captureThrows)throw new Error('fixture capture unavailable')}}};
+  runInNewContext(fn+'globalThis.shot=shot;',context);await assert.rejects(context.shot('failure'),error=>{if(evaluationThrows)assert.equal(error,originalError);else assert.equal(error.code,'ERR_ASSERTION');return true});assert.deepEqual(captured,['artifacts/390x844-failure.png']);assert.deepEqual(result.screenshots,captureThrows?[]:['390x844-failure.png']);if(captureThrows)assert.match(result.screenshotErrors[0].error,/capture unavailable/);
+ }
+});
+
+
+test('offline toast visual gate cannot pass without actual preview and history observations',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('function assertOfflineToastCoverage('),fn=source.slice(start,source.indexOf('async function offlineSimulationBrowserQA(',start)),context={assert};
+ runInNewContext(fn+'globalThis.check=assertOfflineToastCoverage;',context);
+ assert.throws(()=>context.check({}, {width:390}),/order-preview feedback coverage/);
+ const preview={panel:'confirm',stage:'BTCUSDT-LONG-preview'},history={panel:'sheet',stage:'BTCUSDT-LONG-close-receipt'};
+ assert.throws(()=>context.check({toastLayout:[preview]}, {width:390}),/history feedback coverage/);
+ assert.doesNotThrow(()=>context.check({toastLayout:[preview,history]}, {width:390}));assert.doesNotThrow(()=>context.check({toastLayout:[preview]}, {width:360}));
+ assert.match(source,/if\(!baseline\)assertOfflineToastCoverage\(result,profile\);/,'immutable baseline stays a reproduction lane');
+});
+
+
+test('simulation component revision exposes complete provenance and preserves exact executable bytes',async()=>{
+ const {createHash}=await import('node:crypto'),hash=text=>createHash('sha256').update(text).digest('hex');
+ const revision='2026-10-06.SIMULATION-ORDER-PLAYABILITY',sourceCommit='0ad0cffe33d23d1104baa963fedef25ad149a0ac';
+ const assets=[{"path": "runtime/game-5d-main.mjs", "version": "2.9.0", "status": "ACTIVE", "nonMetadataSha256": "a92855a3fb13a8e230c332103d04254a95be4226d137a212e94a0411c07126a2", "priorFullSha256": "d38f0a6c21b73553eddfba6fb1742891bef800f4d1ca33e81e2f46123935afda"}, {"path": "runtime/public-market-quotes.mjs", "version": "1.0.0", "status": "ACTIVE", "nonMetadataSha256": "850908b15e29dfeba665b2d1b28535e7bb7812fa5c8cad271a9154ee0603eeaf", "priorFullSha256": "07d2553b0a918a0d33236202eed35dd93dc6b44f7c4f24b1243b199587f99071"}, {"path": "runtime/real-trading-order-intent.mjs", "version": "1.0.0", "status": "CANDIDATE", "nonMetadataSha256": "59c72325eda86da744153e4f64035f032025a6d5a2529fdf30ad417c373113b0", "priorFullSha256": "f412d5e054e2df611c74efc2ee2a66d7467f28ee8adeef6ed22ed22a20c36ece"}, {"path": "runtime/kgen-margin-runtime.mjs", "version": "CURRENT", "status": "ACTIVE", "nonMetadataSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed", "priorFullSha256": "4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed"}, {"path": "runtime/game-ui-product-fixes-v23.mjs", "version": "2.4.0", "status": "ACTIVE", "nonMetadataSha256": "7caadef4856739bfa768f8902eb0bbb096ace1bc830222516a6e50f33aba3a47", "priorFullSha256": "a944b9fbe886e0348ad1ef0d39a5af0d64f5acf261be9338cef74d621b13b2f2"}, {"path": "game-5d.html", "version": "2.9.5", "status": "ACTIVE", "nonMetadataSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f", "priorFullSha256": "dc961da9c95ebe0278f3e36f212af1a71911078e161b8a56280e0d5a7f42045f"}];
+ const mandatory=['VERSION','REVISION','STATUS','LAST_UPDATED','UPDATED_BY','REVIEWED_BY','SOURCE_COMMIT','TASK_ID','CHANGE_REASON','ANCESTOR','SOURCE_OF_TRUTH'];
+ for(const asset of assets){
+  const source=read('../'+asset.path),match=asset.path.endsWith('.mjs')?source.match(/^\/\* KGEN_META\n([\s\S]*?)\*\/\n/):source.match(/^\ufeff<!doctype html>\n<!-- KGEN_META\n([\s\S]*?)-->\n/);
+  assert.ok(match,asset.path+' has one leading metadata comment');const fields=Object.fromEntries(match[1].trim().split('\n').map(line=>[line.slice(0,line.indexOf(':')),line.slice(line.indexOf(':')+1).trim()]));
+  for(const field of mandatory)assert.ok(fields[field],asset.path+' '+field);assert.equal(fields.VERSION,asset.version);assert.equal(fields.STATUS,asset.status);assert.equal(fields.REVISION,revision);assert.equal(fields.PRODUCT_CONTEXT,'V2.9.5');assert.equal(fields.SOURCE_COMMIT,sourceCommit);assert.equal(fields.LAST_UPDATED,'2026-10-06');assert.match(fields.UPDATED_BY,/^dot \/ TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER/);assert.equal(fields.SOURCE_OF_TRUTH,'TRUE');assert.equal(fields.REVIEWED_BY,'dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval','accepted metadata review required');
+  assert.equal(fields.ANCESTOR,'K線西遊記/temples/11520/'+asset.path+' @ e26f3a76ef0be7f43058225f46def3fbe123371e');
+  const body=asset.path.endsWith('.mjs')?source.slice(match[0].length):'\ufeff<!doctype html>\n'+source.slice(match[0].length);assert.equal(hash(body),asset.nonMetadataSha256,asset.path+' changed non-metadata bytes');
+ }
+ const changelog=read('../CHANGELOG.md');assert.ok(changelog.includes('| REVISION | '+revision+' |'));assert.ok(changelog.includes('| SOURCE_COMMIT | '+sourceCommit+' |'));assert.ok(changelog.includes('V2.9.5 simulation-playability component revision'));assert.ok(changelog.includes('full VISUAL_QA/release gate remained FAIL'));assert.ok(changelog.includes('needs its own exact-head Chromium'));
+ const logMetadata=changelog.split('## Metadata\n')[1]?.split('## 2026-10-06')[0]||'';for(const field of mandatory)assert.ok(logMetadata.includes('| '+field+' | '),'CHANGELOG '+field);
+ const entryFields=['Date','Version / Revision','Task ID','Actor','Reviewer','Files','Reason','Compatibility','Rollback'];assert.ok(changelog.includes('| '+entryFields.join(' | ')+' |'));
+ for(const path of [".github/workflows/11520-game-product-qa.yml", "K線西遊記/temples/11520/CHANGELOG.md", "K線西遊記/temples/11520/HANDOFF_CURRENT.md", "K線西遊記/temples/11520/game-5d.html", "K線西遊記/temples/11520/runtime/game-5d-main.mjs", "K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs", "K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs", "K線西遊記/temples/11520/runtime/public-market-quotes.mjs", "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs", "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs", "K線西遊記/temples/11520/tests/11520-browser-settlement.mjs", "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs", "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs", "tests/11520-order-route.test.mjs", "tests/11520-real-trading-order-intent.test.mjs"])assert.ok(changelog.includes('`'+path+'`'),'CHANGELOG aggregate file '+path);
+ assert.ok(changelog.includes('metadata-only commit can be reverted'));assert.ok(changelog.includes('do not load the old runtime against active synthetic-source books'));
+ assert.ok(!changelog.includes('PENDING_METADATA_REVIEW'),'CHANGELOG reviewer must be accepted before handoff');
+ const history='# 11520 Changelog\n\n'+changelog.slice(changelog.indexOf('## 2026-10-04 — Canonical signed market address candidate'));assert.equal(hash(history),'214f25ea9de3aff65ee08cfabb871e78a7c39e1a33b055150e3c936ad3149881','prior changelog history remains byte-exact');
+});
+
+
+test('camera origin endpoint prefilter preserves the exact ordered result while reducing scene checks',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs');
+ const start=source.indexOf('function selectWorldFirstPanOrigin('),fn=source.slice(start,source.indexOf('// Qualify the actual trusted down',start));
+ for(const [width,height] of [[390,844],[844,390]])for(const [dx,dy] of [[60,0],[-60,0],[0,60],[0,-60]])for(const kind of ['clear','top-hud','alternating','late-origin','no-endpoint','no-origin']){
+  const r={top:0,left:0,right:width,bottom:height},canvas={getBoundingClientRect:()=>r};let calls=0,time=0;
+  const endpoint=(x,y)=>kind==='no-endpoint'?false:kind==='top-hud'?y>=70:kind==='alternating'?(x+y)%24===4:true;
+  const origin=(x,y)=>kind==='no-origin'?false:kind==='late-origin'?x>=164&&y>=116:true;
+  const camera={isWorldGestureArea:(x,y,radius)=>{assert.equal(radius,10);calls++;time+=5;return origin(x,y)},snapshot:()=>({panX:0,panZ:0,manual:false})};
+  const context={document:{querySelector:()=>canvas,elementFromPoint:(x,y)=>endpoint(x,y)?canvas:null},__K11520_CAMERA__:camera,__K11520_WORLD_SELECTION_PROJECTION__:{playerHomeSnapshot:()=>({playerScreen:{x:width/2,y:height/2}})},performance:{now:()=>time}};
+  let expected=null;outer:for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12)if(camera.isWorldGestureArea(x,y,10)&&context.document.elementFromPoint(x+dx,y+dy)===canvas){expected={x,y};break outer}
+  const beforeCalls=calls;calls=0;time=0;runInNewContext(fn+'globalThis.pick=selectWorldFirstPanOrigin;',context);const actual=context.pick({dx,dy}),stats=context.worldFirstPanPickDiagnostics;
+  assert.deepEqual(actual?.origin?{...actual.origin}:null,expected,width+'/'+height+'/'+dx+'/'+dy+'/'+kind);assert.ok(calls<=beforeCalls);assert.equal(stats.originPredicateCalls,calls);assert.equal(stats.candidates,stats.endpointDomChecks);assert.equal(stats.candidates,stats.endpointRejects+stats.originPredicateCalls);assert.equal(stats.elapsedMs,calls*5);
+  if(kind==='no-endpoint'||kind==='top-hud'&&dy===-60)assert.ok(calls<beforeCalls,'covered endpoints do not pay for the scene predicate');
+  if(actual){assert.equal(actual.before.camera.manual,false);assert.equal(actual.selectedAt,stats.finishedAt);assert.deepEqual({...actual.pickDiagnostics},{...stats})}else assert.equal(actual,null,'no clear origin still fails closed');
+ }
+ const acquisition=source.slice(source.indexOf('async function acquireAdmittedCameraPan('),source.indexOf('// Real entry only:'));assert.match(acquisition,/budgetMs=1000,maxAttempts=3/);assert.match(acquisition,/elapsedAfterDown>=budgetMs/);assert.match(acquisition,/down\.canPan!==true&&down\.canPan!==false/);
+ const movement=source.slice(source.indexOf('const attempt={name,origin:gesturePoint'),source.indexOf('result.pointerTrace=await page.evaluate'));assert.match(movement,/sign>8/);assert.match(movement,/timeout:3000/);assert.match(movement,/after\.camera\.playerXYZ,start\.playerXYZ/);
 });
