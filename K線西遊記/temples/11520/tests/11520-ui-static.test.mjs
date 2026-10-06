@@ -533,3 +533,21 @@ test('world-first minimap waits for dismissal and requires native owned pointer 
   const blocked=await run({blocked:true,diagnosticsFail:true});assert.equal(blocked.error,blocked.clickError,'diagnostics cannot mask native input failure');
   assert.match(source,/await clickWorldFirstMinimap\(page,result\);\s*await page.locator\('#waypointAction'\).waitFor\(\{state:'visible'\}\)/);
 });
+
+test('FULL HUD readiness diagnostics observe existing queries without extra hit tests or relaxed thresholds',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs');
+ const begin=source.indexOf("const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),began=performance.now(),history=[];"),end=source.indexOf('  });\n  report.fullHudPanPrecondition',begin);
+ assert.ok(begin>0&&end>begin);const body=source.slice(begin,end);
+ async function inspect(kind){
+  let now=0,domReads=0,canPanReads=0,afterDeadlineReads=0;const canvas={getBoundingClientRect:()=>({left:0,top:0,right:140,bottom:240})},hud={id:'fixture-HUD'};
+  const context={performance:{now:()=>now},innerWidth:140,innerHeight:240,requestAnimationFrame:fn=>{now+=50;fn(now)},document:{querySelector:()=>canvas,elementFromPoint:()=>{domReads++;if(now>=2000)afterDeadlineReads++;return kind==='DOM'?hud:canvas}},__K11520_CAMERA__:{canPanAt:()=>{canPanReads++;if(now>=2000)afterDeadlineReads++;return kind!=='SCENE'}},__K11520_WORLD_SELECTION_PROJECTION__:{journeyLifeSnapshot:()=>[],playerHomeSnapshot:()=>({})}};
+  const result=await runInNewContext('(async()=>{'+body+'})()',context);return {result,domReads,canPanReads,afterDeadlineReads};
+ }
+ const pass=await inspect('CLEAR');assert.ok(pass.result.point);assert.equal(pass.result.radius,30);assert.equal(pass.result.stableMs,150);assert.equal(pass.canPanReads,49*4,'all49 scene predicates remain checked each stability sample');
+ for(const kind of ['DOM','SCENE']){
+  const x=await inspect(kind),d=x.result.diagnostics;assert.equal(x.result.point,null);assert.equal(x.result.elapsedMs,2000);assert.equal(x.afterDeadlineReads,0,'diagnostics never probe after deadline');
+  assert.equal(d.domReads,x.domReads);assert.equal(d.canPanReads,x.canPanReads);assert.equal(d.frames.length,16);assert.ok(d.droppedFrames>0);assert.ok(d.centers>0&&d.rows>0);
+  if(kind==='DOM'){assert.equal(x.canPanReads,0);assert.equal(d.firstDomBlock.owner,'fixture-HUD');assert.ok(d.domRejects>0)}else{assert.equal(d.firstDomBlock,null);assert.ok(d.firstCanPanBlock);assert.ok(d.canPanRejects>0)}
+ }
+ assert.match(body,/performance\.now\(\)-since>=150&&performance\.now\(\)-began<2000/);
+});

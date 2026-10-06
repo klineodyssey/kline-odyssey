@@ -568,8 +568,8 @@ async function publicTestnetBrowserQA(){
 // to the deployment checkout. This never replaces a public application response.
 // Diagnostics only: no raw RPC parameters, response bodies or extra requests.
 function createM1RpcDiagnostics({limit=32,now=()=>Date.now()}={}){
-  const cap=Math.min(32,Math.max(1,Number.isSafeInteger(limit)?limit:32)),recent=[],failures=[];
-  let sequence=0,failureCount=0,droppedFailures=0,lastStarted=null,lastCompleted=null;
+  const cap=Math.min(32,Math.max(1,Number.isSafeInteger(limit)?limit:32)),recent=[],failures=[],nonFallbackFailures=[];
+  let sequence=0,failureCount=0,droppedFailures=0,nonFallbackFailureCount=0,droppedNonFallbackFailures=0,firstNonFallbackFailure=null,lastStarted=null,lastCompleted=null;
   const read=(value,key)=>{try{return value?.[key]}catch{return undefined}};
   const code=value=>typeof value==='number'&&Number.isSafeInteger(value)?value:['UNKNOWN_ERROR','SERVER_ERROR','TIMEOUT','NETWORK_ERROR','BAD_DATA','CALL_EXCEPTION','INVALID_ARGUMENT','UNSUPPORTED_OPERATION','ACTION_REJECTED'].includes(value)?value:null;
   const errorFields=error=>{
@@ -589,10 +589,11 @@ function createM1RpcDiagnostics({limit=32,now=()=>Date.now()}={}){
     }catch(error){
       finish({ok:false,...errorFields(error),existingLogFallback});
       failureCount++;failures.push(lastCompleted);if(failures.length>cap){failures.shift();droppedFailures++}
+      if(!existingLogFallback){nonFallbackFailureCount++;firstNonFallbackFailure??=lastCompleted;nonFallbackFailures.push(lastCompleted);if(nonFallbackFailures.length>cap){nonFallbackFailures.shift();droppedNonFallbackFailures++}}
       throw error; // Preserve original rejection; the caller owns log fallback.
     }
   };
-  return Object.freeze({run,snapshot:()=>({failureCount,droppedFailures,lastStarted,lastCompleted,recent:[...recent],failures:[...failures]})});
+  return Object.freeze({run,snapshot:()=>({failureCount,droppedFailures,nonFallbackFailureCount,droppedNonFallbackFailures,firstNonFallbackFailure,nonFallbackFailures:[...nonFallbackFailures],lastStarted,lastCompleted,recent:[...recent],failures:[...failures]})});
 }
 
 async function bootM1ReadOnlyPage(page,url){

@@ -276,3 +276,14 @@ test('M1 actual viewport failure catch preserves the original boot error and wri
  vm.runInContext(helper,context);await assert.rejects(vm.runInContext('(async()=>{'+source.slice(start,end)+'})()',context),caught=>caught===original);
  assert.equal(closed,1);assert.equal(writes.length,1);assert.match(writes[0].path,/360x740-FAILURE.json$/);assert.equal(writes[0].body.message,'original boot failure');assert.deepEqual(writes[0].body.evidence,[]);assert.equal(writes[0].body.rpcDiagnostics.failureCount,0);assert.ok(writes[0].body.phaseCounts);
 });
+
+test('M1 diagnostics retain first and recent non-fallback errors despite a log fallback flood',async()=>{
+ const {trace}=await m1DiagnosticsFixture(2),meta={method:'eth_call',phase:'LEGACY',stage:'RETURN_LEGACY'};
+ const fail=async(meta,options)=>{const error=Object.assign(new Error('private raw content'),{code:'NETWORK_ERROR'});await assert.rejects(trace.run(meta,()=>Promise.reject(error),options),caught=>caught===error)};
+ await fail(meta);const first=trace.snapshot().firstNonFallbackFailure;
+ for(let i=0;i<8;i++)await fail({...meta,method:'eth_getLogs'},{existingLogFallback:true});
+ let report=trace.snapshot();assert.equal(report.nonFallbackFailureCount,1);assert.equal(report.firstNonFallbackFailure,first);assert.equal(report.nonFallbackFailures.length,1);assert.equal(report.failures.length,2);
+ await fail({...meta,method:'eth_getBalance'});await fail({...meta,method:'eth_getCode'});
+ report=trace.snapshot();assert.equal(report.nonFallbackFailureCount,3);assert.equal(report.droppedNonFallbackFailures,1);assert.equal(report.nonFallbackFailures.length,2);assert.equal(report.firstNonFallbackFailure,first);
+ assert.equal(JSON.stringify(report).includes('private raw content'),false);assert.equal(report.nonFallbackFailures[0].method,'eth_getBalance');
+});
