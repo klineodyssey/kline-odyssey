@@ -5,17 +5,48 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-06.TOAST-DISMISSAL-PLACEMENT |
+| REVISION | 2026-10-06.MARKET-CARD-NODE-RETENTION |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
 | LAST_UPDATED | 2026-10-06 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
 | REVIEWED_BY | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval |
-| SOURCE_COMMIT | de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9 |
+| SOURCE_COMMIT | cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
 | TASK_ID | K11520-SIMULATION-TRADING-P0-20261006 |
-| CHANGE_REASON | Record the post-merge toast-dismissal correction and its independent validation boundary. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9 |
+| CHANGE_REASON | Record retained market-card presentation and preserve the measured HUD-stability gate. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-06 — V2.9.5 retained market-card presentation revision
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | V2.9.5 / 2026-10-06.MARKET-CARD-NODE-RETENTION | K11520-SIMULATION-TRADING-P0-20261006 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval | `K線西遊記/temples/11520/runtime/game-5d-main.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/tests/11520-browser-responsive.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Preserve the three canonical card nodes and existing normal-axis decorations across quote and simulation refreshes. | Same market selectors, leaf values, labels, aria state and click routing; financial/source algorithms and simulation storage are unchanged. | Revert this four-file increment to cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 if required. It preserves the earlier toast-dismissal repair and simulation ledger support, but restores the measured missing-decoration interval. |
+
+- Candidate `cf2ffb47c3e71e444935ef6151adc7f9d6208ca4` passed all six
+  recorded toast-fade trajectories (zero visible rectangle drift, final opacity
+  zero), but Responsive job `112381925094` failed landscape expanded cycle 1.
+  Artifact `11428985611`, SHA-256
+  `dd277860ec776e42fb055f13baca643eecc6f0a3421da343dafa5b2da7bae358`,
+  records ten frames over 535.6 ms with card heights 81.890625 / 75.6875 and
+  status top 144 / 138. Later settled screenshots do not erase that failure.
+- Executing the actual render, simulation-tick and normal-presentation owners
+  in a deterministic DOM fixture proved that an unchanged-data tick replaced
+  all cards and detached their badges until the existing 120 ms decorator
+  callback. Under the tested timer phase, the gap was 117 ms. No CSS or pixel
+  heights were assigned in that model; exact browser attribution remains
+  pending card/badge diagnostics on the next candidate.
+- The existing renderAxes owner now creates missing canonical cards, then
+  updates their leaves, active state, accessibility and handlers in place.
+  It does not rebuild the header span or duplicate the normal-axis decorator.
+- The actual-owner regression checks identity and badge retention, current
+  price/position/read-only output, labels, aria state, click routing and
+  unchanged game/trade state. Browser stability frames now additionally record
+  card/badge identity, presence and header geometry; the existing geometry
+  signature, three consecutive frames, 500 ms limit and hit tests remain.
+- Fresh exact-head CI, runtime screenshots and direct inspection remain
+  required. No CI timeout, Courier presentation, financial function, source
+  authority, signing, token transfer or general product version is changed.
 
 ## 2026-10-06 — V2.9.5 toast-dismissal placement revision
 
