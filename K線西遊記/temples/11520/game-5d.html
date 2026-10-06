@@ -60,6 +60,14 @@
  html.k11520UtilitiesOpen #backpackPanel,html.k11520UtilitiesOpen #aiChatPanel,html.k11520UtilitiesOpen #gameChat.open,html.k11520UtilitiesOpen #k11520UiSettings,html.k11520UtilitiesOpen #walletPanel:not(.collapsed){left:max(10px,env(safe-area-inset-left))!important;right:calc(245px + max(5px,env(safe-area-inset-right)))!important;top:58px!important;bottom:max(12px,env(safe-area-inset-bottom))!important;width:auto!important;max-height:calc(100dvh - 70px)!important;overflow:auto!important;transform:none!important}
  .dock{right:4px!important;bottom:4px!important}.assetTag{display:none!important}
 }
+/* Shared order-confirmation viewport: keep Cancel/Submit visible while only
+   the preview/form scrolls, including portrait and the keyboard-sized viewport. */
+#confirm.open{display:flex;flex-direction:column;overflow:hidden;top:max(8px,env(safe-area-inset-top))!important;bottom:auto!important;max-height:calc(var(--k11520-visible-vh,100dvh) - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)))!important}
+#confirm #confirmBody{min-height:0;overflow:auto;flex:1 1 auto;overscroll-behavior:contain}
+#confirm>.sheetHead,#confirm>.grid2{flex:0 0 auto;background:#101923}
+#confirm>.grid2{padding-top:8px}
+#confirm .btn,#confirm .close{min-height:44px}
+#confirm .close{min-width:44px}
 .confirm input{background:#101923;color:#eef7ff;border:1px solid #7893a3;border-radius:6px;padding:8px;font:inherit}.confirm input:focus{outline:2px solid #ffd25c;outline-offset:1px}
 #kspaceTarget{position:fixed;left:50%;top:414px;transform:translateX(-50%);width:min(156px,40vw);min-height:68px;max-height:92px;overflow:hidden;padding:7px;z-index:221;color:#dfefff;font:10px/1.35 system-ui;text-align:left;white-space:pre-line;border-radius:10px;background:#091119f5;touch-action:manipulation}
 @media(max-width:420px){#kspaceTarget{left:50%;top:414px;transform:translateX(-50%);width:min(142px,38vw);max-height:86px;font-size:9px}}

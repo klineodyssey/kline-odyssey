@@ -545,3 +545,16 @@ test('FULL HUD readiness diagnostics observe existing queries without extra hit 
  }
  assert.match(body,/performance\.now\(\)-since>=150&&performance\.now\(\)-began<2000/);
 });
+
+test('shared order confirmation keeps actions outside its scrolling body in portrait, landscape and reduced visual viewport',()=>{
+  const shared=html.split('/* Shared order-confirmation viewport:')[1]?.split('.confirm input{')[0]||'';
+  assert.ok(shared,'the existing confirmation needs one orientation-independent layout owner');
+  assert.doesNotMatch(shared,/@media|position:\s*(?:absolute|sticky)/,'no orientation-only or overlaid replacement action row');
+  assert.match(shared,/#confirm\.open\{[^}]*display:flex;flex-direction:column;overflow:hidden/);
+  assert.match(shared,/var\(--k11520-visible-vh,100dvh\)/,'use existing VisualViewport height owner for keyboard resize');
+  assert.match(shared,/top:max\(8px,env\(safe-area-inset-top\)\)!important;bottom:auto!important/);
+  assert.match(shared,/#confirm #confirmBody\{min-height:0;overflow:auto;flex:1 1 auto;overscroll-behavior:contain/);
+  assert.match(shared,/#confirm>\.sheetHead,#confirm>\.grid2\{flex:0 0 auto/,'header and both actions must not shrink with overflowing content');
+  assert.match(shared,/#confirm \.btn,#confirm \.close\{min-height:44px/);
+  assert.match(html,/<div id="confirmBody"><\/div><div class="grid2"><button class="btn" id="cancelOrder">取消<\/button><button class="btn" id="confirmOrder">/,'retain the original reachable Cancel and Submit controls');
+});
