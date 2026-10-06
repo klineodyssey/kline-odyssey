@@ -184,6 +184,103 @@ jobs:
           path: artifacts/11520-responsive-qa/
           if-no-files-found: error
           retention-days: 14
+  m1-public-readonly:
+    # Explicit release verification only: no automatic deployment fan-out.
+    # The existing production dispatch runs general public QA first, then M1.
+    needs: responsive
+    if: github.event_name == 'workflow_dispatch' && inputs.production == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - name: Install pinned read-only browser dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0 ethers@6.15.0
+          npx playwright install --with-deps chromium
+      - name: Verify public source and six-size current wallet identities
+        env:
+          K11520_BASE_URL: https://klineodyssey.github.io/kline-odyssey
+          K11520_SOURCE_SHA: ${{ github.sha }}
+          BSC_TESTNET_RPC_URL: https://bsc-testnet-dataseed.bnbchain.org
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/verify-m1-public-assets.py" <<'PY'
+          """Fail closed unless public M1 assets equal the checked-out deployment commit."""
+          import argparse
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          from urllib.parse import quote, urlparse
+          from urllib.request import urlopen
+
+          parser = argparse.ArgumentParser()
+          parser.add_argument('--phase', choices=['before', 'after'], required=True)
+          args = parser.parse_args()
+          expected = os.environ['K11520_SOURCE_SHA']
+          base = os.environ['K11520_BASE_URL'].rstrip('/')
+          assert re.fullmatch(r'[0-9a-f]{40}', expected), 'INVALID_SOURCE_SHA'
+          assert base == 'https://klineodyssey.github.io/kline-odyssey', 'UNEXPECTED_PUBLIC_ORIGIN'
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == expected, 'CHECKOUT_SOURCE_MISMATCH'
+          root = Path('artifacts/11520-m1-readonly-qa')
+          root.mkdir(parents=True, exist_ok=True)
+          report = {'sourceSha': expected, 'phase': args.phase, 'base': base, 'assets': [], 'status': 'PENDING'}
+
+          def read_public(path):
+              with urlopen(base + '/' + quote(path, safe='/'), timeout=30) as response:
+                  assert response.status == 200, 'PUBLIC_ASSET_HTTP_ERROR'
+                  assert urlparse(response.url).netloc == 'klineodyssey.github.io', 'PUBLIC_ASSET_REDIRECT'
+                  return response.read()
+
+          try:
+              info = json.loads(read_public('KGEN-KAIOS/dashboard/build-info.json'))
+              report['deployedCommit'] = info.get('main_commit')
+              assert info.get('main_commit') == expected, 'PUBLIC_DEPLOYMENT_SHA_MISMATCH'
+              paths = ['K線西遊記/temples/11520/game-5d.html', 'docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json', 'K線西遊記/assets/ethers-5.7.2.umd.min.js']
+              paths += ['K線西遊記/temples/11520/runtime/' + name for name in [
+                  'game-5d-main.mjs', 'game-5d-bootstrap.mjs', 'game-ui-product-fixes.mjs',
+                  'real-trading-order-intent.mjs', 'real-trading-preflight-ui.mjs',
+                  'wallet-game-bridge.mjs', 'evm-wallet-runtime.mjs',
+                  'market-origin-wallet-layout-runtime.mjs', 'public-market-quotes.mjs',
+                  'mobile-control-layout.mjs', 'mobile-ui-settings.mjs', 'game-mobile-shell.mjs']]
+              report['coverageScope'] = 'EXPLICIT_M1_WALLET_AND_HUD_ASSETS_ONLY'
+              report['wholeModuleGraphVerified'] = False
+              for path in paths:
+                  actual, local = read_public(path), Path(path).read_bytes()
+                  same = actual == local
+                  report['assets'].append({'path': path, 'sha256': hashlib.sha256(actual).hexdigest(), 'matchesCheckout': same})
+                  assert same, 'PUBLIC_ASSET_SOURCE_MISMATCH: ' + path
+              # A deployment changing during the asset reads must not certify a mixed page.
+              assert json.loads(read_public('KGEN-KAIOS/dashboard/build-info.json')).get('main_commit') == expected, 'PUBLIC_DEPLOYMENT_CHANGED'
+              report['status'] = 'PASS'
+          except Exception as error:
+              report['status'] = 'FAIL'
+              report['error'] = str(error)
+              raise
+          finally:
+              (root / ('public-source-' + args.phase + '.json')).write_text(json.dumps(report, indent=2) + '\n')
+          PY
+          python3 "$RUNNER_TEMP/verify-m1-public-assets.py" --phase before
+          node 'K線西遊記/temples/11520/tests/11520-browser-settlement.mjs' --m1-read-only \
+            --read-only-accounts=0x3a909988E4d5c9C2326A7a0596714482AB25eE0A,0x6BE8fb4320d46475e2C5e9ba55DFB9F3573FFE11
+          python3 "$RUNNER_TEMP/verify-m1-public-assets.py" --phase after
+          git diff --exit-code
+      - name: Preserve deployed M1 source, method counts and screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-public-m1-${{ github.sha }}-${{ github.event_name }}
+          path: artifacts/11520-m1-readonly-qa/
+          if-no-files-found: error
+          retention-days: 14
   public-input-diagnostics:
     # Bounded facing follow-up only; never an always-on duplicate lane.
     if: github.event_name == 'pull_request' && github.head_ref == 'dot/11520-facing-standoff-20261005'
