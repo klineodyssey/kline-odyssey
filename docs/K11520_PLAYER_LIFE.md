@@ -918,3 +918,76 @@ Evidence for this slice is regression-first local fake-IDB/unit integration only
 Native daily evidence remains queued at the preceding checkpoint; no retained
 browser/restart or production visual acceptance is claimed. Whole-Life P0, actual
 recovery, migration UX, all-writer integration and release remain HOLD.
+
+### Existing daily UI async-command seam (public authority routing disabled)
+
+The next bounded integration prerequisite modifies only the existing injected
+`claimDaily` callback in `installPlayerLifeUI`. Public main still supplies its
+unchanged synchronous legacy callback; it does not construct or call the inert
+IndexedDB authority. No feature flag, bootstrap manager, parallel store, migration
+or new storage writer is added.
+
+The daily button now awaits a returned promise, prevents overlapping calls, and
+renders/notifies only after completion. Rejection uses the existing error surface
+without a success render. Busy state survives rerender and clears in `finally`.
+The existing synchronous main callback keeps its immediate render followed by
+microtask-deferred `onChange`. Detached buttons cannot start work. Closing or
+replacing the panel, rerendering, or changing the selected Life suppresses stale
+completion/error presentation. UI-originated import/new/switch attempts invalidate
+pending work before mutation; a failed replacement still leaves a later deliberate
+daily click usable.
+
+The callback receives frozen `{playerId, isCurrent}`. This is a UI-freshness token,
+not authority or selection authorization. An eventual async adapter must capture
+its original authority/selection/retention generations, full revision vector and
+opId before awaiting; keep the original Player ID; and check UI freshness before
+starting a later fulfillment phase. Authority CAS must independently reject stale
+or ABA contexts. A completed durable claim cannot be cancelled or reassigned by
+closing/switching the UI: its pending claimRef must be recovered by a later admitted
+read. No automatic retry, opId regeneration or rebase occurs in the UI seam.
+Arbitrary external player A→B→A or hide→show without the UI hooks is not detected;
+a live adapter still needs a trusted session/selection token or subscription.
+
+Focused tests invoke the actual installed handler with a small DOM model and
+actual fake-IDB retained commands. They cover waiting, duplicate clicks, rejection,
+closed/replaced/rerendered panels, owner rebinding, detached handlers, failed switch,
+unchanged synchronous main-source behavior, atomic abort and explicit retry. The
+owner-rebinding fixture changes only its synthetic UI projection; retained authority
+remains frozen on the original Life. It proves no other Life is credited, not a
+supported live authority switch. This is unit/integration evidence, not native
+browser or Visual QA. There is no public authority cutover or whole-Life P0 claim.
+
+#### Concrete production caller and admission audit
+
+Reference snapshot: local `20e0c6e11d7b7afedc63822603b4d040f5375d1f`, incorporating
+main `c99feb74f08cdc135fceca897c4460d563f4efc0`, before the UI-only seam above.
+Runtime paths below are under `K線西遊記/temples/11520/runtime/`.
+
+| Existing owner / location | Current responsibility and remaining admission gap |
+|---|---|
+| `K線西遊記/temples/11520/game-5d.html:12,91–94`; `game-5d-bootstrap.mjs:6–9,39–44` | Import map, early layout, 1.4s fail-open entry, avatar/drop bridge, then main import. No authority hydration gate precedes all side effects. |
+| `evm-wallet-runtime.mjs:284–290` | Static dependency evaluation launches independent dynamic imports for shell, backpack and living-world UI. Their completion order relative to main is not guaranteed; main-only gating is too late. |
+| `game-mobile-shell.mjs:95,211,214–216` | Independent installation creates the Courier store and timer. |
+| `backpack-ui.mjs:8–21,40,63–64,80` | Install/render resolves legacy owner, creates scoped storage, restores and later persists a bag. |
+| `game-5d-main.mjs:44–55` | Legacy session/Life creation, scoped session preference, training memory, guest product SESSION, tutorial construction and optional legacy progress migration. |
+| `evm-wallet-runtime.mjs:20,24,64`; `world-runtime.mjs:29–30` | Apparently read/constructor paths can claim legacy ownership, copy source values, save SESSION or write tutorial state. |
+| `game-5d-main.mjs:48,103,748,753–756` | Session/XYZ/tutorial persistence, pagehide/visibility flush and exploration events remain live legacy writers. |
+| `game-5d-main.mjs:73,241,244–246,348,399` | Cargo, practice, combat/loot, simulation and quest events write Life XP and/or bag/product separately. |
+| `game-5d-main.mjs:105–114,564`; `player-life-ui.mjs:23,82` | Existing injected daily seam: Life claim precedes separate global bag insertion. This checkpoint changes only the UI awaiting contract. |
+| `player-life-ui.mjs:62–94` | Profile/home/consent, import/new/switch, direct imported bag/tutorial writes and wallet-link/nonces remain outside atomic admission. |
+| `backpack-ui.mjs:50–58,75–78`; `living-world-browser-bridge.mjs:36–45` | Add/remove/capture/release and compensation lack one durable custody/effect command. |
+| `world-item-drop-bootstrap.mjs:61–66,81–86`; `game-mobile-shell.mjs:105` | World pickup/drop and robbed-Courier crate effects surround independent bag/mission writes. |
+| `game-5d-main.mjs:52,59,62,71,81,86,119–120,246,348,402,531–532` | Product activation/events/playtime, spending, Courier credit, simulation execution and namespace changes remain separate writers. M1 readonly wallet behavior stays unchanged. |
+| `market-life-runtime.mjs:61–78` | Scoped training memory is an unsupported migration companion and remains explicit HOLD. |
+| `KAIOS/backend/web/app.mjs:8,170,351–374` | Recovery Center independently constructs, imports, selects and restores legacy Life outside game bootstrap. |
+| `K線西遊記/temples/11520/sw.js:1–6` | Individual URL caching does not establish a coherent admitted writer generation. |
+
+A live cutover cannot route only daily credit into IndexedDB while its eligibility
+sources, projections and other mutations remain on localStorage. Retained daily
+explicitly rejects live movement, event ingestion, profile, selection, bag removal,
+product and other anchor changes. Generic `commandGame` is storage mechanics, not
+approved live semantic authority. The next real activation boundary still requires
+one pre-import hydration/admission gate, all-writer typed command coverage, coherent
+module generation, reviewed explicit migration, conflict/read-only UX and custody
+reconciliation. Recovery Center needs the same admission rule. These blockers are
+not solved by the async UI prerequisite.
