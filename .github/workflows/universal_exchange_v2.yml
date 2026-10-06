@@ -8,6 +8,12 @@ on:
   push:
     paths:
       - "core/**"
+      - "KAIOS/software-life/**"
+      - "assets/kaios-audio.mjs"
+      - "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json"
+      - "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json"
+      - "KGEN-KAIOS/organism/taxonomy_registry.json"
+      - "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md"
       - "tests/universal-exchange.test.mjs"
       - "tests/autonomous-company-engineering-cycle.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
@@ -19,6 +25,12 @@ on:
   pull_request:
     paths:
       - "core/**"
+      - "KAIOS/software-life/**"
+      - "assets/kaios-audio.mjs"
+      - "KAIOS_CANONICAL_LIFE_SCHEMA_V1.json"
+      - "KGEN-KAIOS/provenance/ORGANISM_MANIFEST_SCHEMA.json"
+      - "KGEN-KAIOS/organism/taxonomy_registry.json"
+      - "KGEN-KAIOS/civilization/BIOLOGY_TAXONOMY_STANDARD.md"
       - "tests/universal-exchange.test.mjs"
       - "tests/autonomous-company-engineering-cycle.test.mjs"
       - "tests/universal-exchange-workflow-security.test.mjs"
@@ -70,6 +82,65 @@ jobs:
       - name: Validate ES modules
         shell: bash
         run: find core tests -name '*.mjs' -print0 | xargs -0 -n1 node --check
+      - name: Require complete Software Life Git history
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(git rev-parse --is-shallow-repository)" != "false" ]; then
+            echo "SOFTWARE_LIFE_FULL_HISTORY_REQUIRED" >&2
+            exit 1
+          fi
+          # Checkout omits .git; preserve the formal validator's exact URL check.
+          # Check stored AND effective URLs so aliases cannot hide a foreign origin.
+          mapfile -d '' -t origins < <(git config --null --get-all remote.origin.url)
+          if [ "${#origins[@]}" -ne 1 ]; then
+            echo "SOFTWARE_LIFE_CANONICAL_ORIGIN_REQUIRED" >&2
+            exit 1
+          fi
+          origin="${origins[0]}"
+          case "$origin" in
+            https://github.com/klineodyssey/kline-odyssey|https://github.com/klineodyssey/kline-odyssey.git) ;;
+            *) echo "SOFTWARE_LIFE_CANONICAL_ORIGIN_REQUIRED" >&2; exit 1 ;;
+          esac
+          # The sentinel retains trailing URL newlines, which $() alone removes.
+          effective_origin="$(git remote get-url origin && printf '\001')"
+          if [ "$effective_origin" != "$origin"$'\n\001' ]; then
+            echo "SOFTWARE_LIFE_ORIGIN_REWRITE_FORBIDDEN" >&2
+            exit 1
+          fi
+          if [ "$origin" = "https://github.com/klineodyssey/kline-odyssey" ]; then
+            git remote set-url origin https://github.com/klineodyssey/kline-odyssey.git
+          fi
+          mapfile -d '' -t origins < <(git config --null --get-all remote.origin.url)
+          test "${#origins[@]}" -eq 1
+          test "${origins[0]}" = "https://github.com/klineodyssey/kline-odyssey.git"
+          test "$(git remote get-url origin && printf '\001')" = $'https://github.com/klineodyssey/kline-odyssey.git\n\001'
+          # Existing immutable authority and candidate source epochs, not new pins.
+          for anchor in cc80135f2c6e6a74aad11f34e793c65ac0ee1938 e26f3a76ef0be7f43058225f46def3fbe123371e; do
+            git cat-file -e "$anchor^{commit}"
+            git merge-base --is-ancestor "$anchor" HEAD
+          done
+          # The existing transplant suite locates these historical fixtures by subject.
+          for subject in \
+            "test(kaios): bind semantic transplant evidence fixture" \
+            "fix(kaios): allow completed transplant projections" \
+            "test(kaios): add completion provenance fixture projection"; do
+            fixture="$(git log -1 --format=%H --fixed-strings --grep="$subject")"
+            if [ -z "$fixture" ]; then
+              echo "SOFTWARE_LIFE_FIXTURE_HISTORY_MISSING: $subject" >&2
+              exit 1
+            fi
+            git cat-file -e "$fixture^{commit}"
+            git merge-base --is-ancestor "$fixture" HEAD
+          done
+          printf 'Software Life full history verified at %s\n' "$(git rev-parse HEAD)"
+      - name: Run complete Software Life suites
+        shell: bash
+        run: |
+          node --test \
+            KAIOS/software-life/tests/software-organ-standards.test.mjs \
+            KAIOS/software-life/tests/software-life-registry.test.mjs \
+            KAIOS/software-life/tests/software-life-naming-audit.test.mjs
       - name: Run Continuity Anchor targeted tests
         run: node --test tests/starforge-spirit-life-genesis.test.mjs
       - name: Run full existing Node tests
