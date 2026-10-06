@@ -216,3 +216,45 @@ with tempfile.TemporaryDirectory() as folder:
   if(mode==='match'){assert.equal(report.assets.length,15);assert.equal(report.wholeModuleGraphVerified,false)}
  }
 });
+
+async function m1DiagnosticsFixture(limit=2){
+ const source=await readFile(new URL('../K線西遊記/temples/11520/tests/11520-browser-settlement.mjs',import.meta.url),'utf8');
+ const helper=source.slice(source.indexOf('function createM1RpcDiagnostics('),source.indexOf('async function bootM1ReadOnlyPage('));
+ const context=vm.createContext({});vm.runInContext(helper,context);let time=0;
+ return {trace:context.createM1RpcDiagnostics({limit,now:()=>time}),tick:value=>{time=value}};
+}
+test('M1 Node broker diagnostics preserve the original failure while exposing its safe class',async()=>{
+ const {normalizeExecutionError}=await import('../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs');
+ const {trace}=await m1DiagnosticsFixture(),error=Object.assign(new Error('network request https://user:password@rpc.example/path?apiKey=hidden failed'),{code:'SERVER_ERROR',error:{code:-32005,message:'rate limit exceeded for 0x'+'aa'.repeat(20)}});
+ assert.equal(normalizeExecutionError(error),'ORDER_REJECTED','legacy normalization alone loses the provider-specific failure');
+ await assert.rejects(trace.run({method:'eth_call',phase:'LEGACY',stage:'RETURN_LEGACY',selector:'0x12345678',contract:'LEGACY.brainProxy'},async()=>{throw error}),caught=>caught===error);
+ const record=trace.snapshot().failures[0];assert.equal(record.method,'eth_call');assert.equal(record.code,'SERVER_ERROR');assert.equal(record.rpcCode,-32005);assert.equal(record.category,'RATE_LIMIT');assert.equal(record.contract,'LEGACY.brainProxy');
+ const serialized=JSON.stringify(trace.snapshot());for(const secret of ['rpc.example','password','hidden','0x'+'aa'.repeat(20),'network request','rate limit exceeded'])assert.equal(serialized.includes(secret),false);
+});
+test('M1 Node broker diagnostics retain the existing empty-log fallback and bounded failure history',async()=>{
+ const {trace}=await m1DiagnosticsFixture();let fallbacks=0;
+ for(let i=0;i<4;i++){
+  const result=await trace.run({method:'eth_getLogs',phase:'LEGACY',stage:'RETURN_LEGACY'},async()=>{throw new Error('unavailable')},{existingLogFallback:true}).catch(()=>{fallbacks++;return []});assert.deepEqual(result,[]);
+ }
+ const report=trace.snapshot();assert.equal(fallbacks,4);assert.equal(report.failureCount,4);assert.equal(report.droppedFailures,2);assert.equal(report.failures.length,2);assert.equal(report.recent.length,2);assert.equal(report.failures[1].sequence,4);assert.equal(report.failures[1].existingLogFallback,true);
+});
+test('M1 broker phase and stage are captured before async completion; successful response content stays private',async()=>{
+ const {trace,tick}=await m1DiagnosticsFixture();let release;const meta={method:'eth_call',phase:'M1',stage:'CONNECT',selector:'0x12345678'};
+ const pending=trace.run(meta,()=>new Promise(resolve=>{release=resolve}));meta.phase='LEGACY';meta.stage='RETURN_LEGACY';tick(9);release('0x');assert.equal(await pending,'0x');
+ const done=trace.snapshot().lastCompleted;assert.equal(done.phase,'M1');assert.equal(done.stage,'CONNECT');assert.equal(done.elapsedMs,9);assert.equal(done.responseKind,'string');assert.equal(done.responseLength,2);assert.equal('response' in done,false);
+});
+test('M1 malformed error metadata cannot mask the original broker rejection',async()=>{
+ const {trace}=await m1DiagnosticsFixture(),error={};for(const key of ['code','message','shortMessage','error','name'])Object.defineProperty(error,key,{get(){throw new Error('metadata getter failure')}});
+ await assert.rejects(trace.run({method:'eth_getCode',phase:'LEGACY',stage:'RETURN_LEGACY'},async()=>{throw error}),caught=>caught===error);
+ const failure=trace.snapshot().failures[0];assert.equal(failure.errorClass,'OTHER');assert.equal(failure.code,null);assert.equal(failure.category,'UNCLASSIFIED');
+});
+test('M1 actual viewport failure catch preserves the original boot error and writes bounded diagnostics',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/tests/11520-browser-settlement.mjs',import.meta.url),'utf8');
+ const helper=source.slice(source.indexOf('function createM1RpcDiagnostics('),source.indexOf('async function bootM1ReadOnlyPage('));
+ const start=source.indexOf('    for(const [width,height]of[[360,740]'),end=source.indexOf("    console.log('M1 signer-free",start);assert.ok(start>0&&end>start);
+ const original=new Error('original boot failure'),writes=[];let closed=0;
+ const page={setDefaultTimeout(){},on(){},exposeBinding:async()=>{},addInitScript:async()=>{},screenshot:async()=>{},evaluate:async()=>null,close:async()=>{closed++}};
+ const context=vm.createContext({assert,URL,accounts:['0x'+'11'.repeat(20),'0x'+'22'.repeat(20)],browser:{newPage:async()=>page},publicSource:null,origin:'https://example.test',out:'evidence',routeThree:async()=>{},boot:async()=>{throw original},fs:{writeFile:async(path,body)=>writes.push({path,body:JSON.parse(body)})}});
+ vm.runInContext(helper,context);await assert.rejects(vm.runInContext('(async()=>{'+source.slice(start,end)+'})()',context),caught=>caught===original);
+ assert.equal(closed,1);assert.equal(writes.length,1);assert.match(writes[0].path,/360x740-FAILURE.json$/);assert.equal(writes[0].body.message,'original boot failure');assert.deepEqual(writes[0].body.evidence,[]);assert.equal(writes[0].body.rpcDiagnostics.failureCount,0);assert.ok(writes[0].body.phaseCounts);
+});
