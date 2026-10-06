@@ -691,3 +691,23 @@ test('simulation component revision exposes complete provenance and preserves ex
  assert.ok(!changelog.includes('PENDING_METADATA_REVIEW'),'CHANGELOG reviewer must be accepted before handoff');
  const history='# 11520 Changelog\n\n'+changelog.slice(changelog.indexOf('## 2026-10-04 — Canonical signed market address candidate'));assert.equal(hash(history),'214f25ea9de3aff65ee08cfabb871e78a7c39e1a33b055150e3c936ad3149881','prior changelog history remains byte-exact');
 });
+
+
+test('camera origin endpoint prefilter preserves the exact ordered result while reducing scene checks',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs');
+ const start=source.indexOf('function selectWorldFirstPanOrigin('),fn=source.slice(start,source.indexOf('// Qualify the actual trusted down',start));
+ for(const [width,height] of [[390,844],[844,390]])for(const [dx,dy] of [[60,0],[-60,0],[0,60],[0,-60]])for(const kind of ['clear','top-hud','alternating','late-origin','no-endpoint','no-origin']){
+  const r={top:0,left:0,right:width,bottom:height},canvas={getBoundingClientRect:()=>r};let calls=0,time=0;
+  const endpoint=(x,y)=>kind==='no-endpoint'?false:kind==='top-hud'?y>=70:kind==='alternating'?(x+y)%24===4:true;
+  const origin=(x,y)=>kind==='no-origin'?false:kind==='late-origin'?x>=164&&y>=116:true;
+  const camera={isWorldGestureArea:(x,y,radius)=>{assert.equal(radius,10);calls++;time+=5;return origin(x,y)},snapshot:()=>({panX:0,panZ:0,manual:false})};
+  const context={document:{querySelector:()=>canvas,elementFromPoint:(x,y)=>endpoint(x,y)?canvas:null},__K11520_CAMERA__:camera,__K11520_WORLD_SELECTION_PROJECTION__:{playerHomeSnapshot:()=>({playerScreen:{x:width/2,y:height/2}})},performance:{now:()=>time}};
+  let expected=null;outer:for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12)if(camera.isWorldGestureArea(x,y,10)&&context.document.elementFromPoint(x+dx,y+dy)===canvas){expected={x,y};break outer}
+  const beforeCalls=calls;calls=0;time=0;runInNewContext(fn+'globalThis.pick=selectWorldFirstPanOrigin;',context);const actual=context.pick({dx,dy}),stats=context.worldFirstPanPickDiagnostics;
+  assert.deepEqual(actual?.origin?{...actual.origin}:null,expected,width+'/'+height+'/'+dx+'/'+dy+'/'+kind);assert.ok(calls<=beforeCalls);assert.equal(stats.originPredicateCalls,calls);assert.equal(stats.candidates,stats.endpointDomChecks);assert.equal(stats.candidates,stats.endpointRejects+stats.originPredicateCalls);assert.equal(stats.elapsedMs,calls*5);
+  if(kind==='no-endpoint'||kind==='top-hud'&&dy===-60)assert.ok(calls<beforeCalls,'covered endpoints do not pay for the scene predicate');
+  if(actual){assert.equal(actual.before.camera.manual,false);assert.equal(actual.selectedAt,stats.finishedAt);assert.deepEqual({...actual.pickDiagnostics},{...stats})}else assert.equal(actual,null,'no clear origin still fails closed');
+ }
+ const acquisition=source.slice(source.indexOf('async function acquireAdmittedCameraPan('),source.indexOf('// Real entry only:'));assert.match(acquisition,/budgetMs=1000,maxAttempts=3/);assert.match(acquisition,/elapsedAfterDown>=budgetMs/);assert.match(acquisition,/down\.canPan!==true&&down\.canPan!==false/);
+ const movement=source.slice(source.indexOf('const attempt={name,origin:gesturePoint'),source.indexOf('result.pointerTrace=await page.evaluate'));assert.match(movement,/sign>8/);assert.match(movement,/timeout:3000/);assert.match(movement,/after\.camera\.playerXYZ,start\.playerXYZ/);
+});

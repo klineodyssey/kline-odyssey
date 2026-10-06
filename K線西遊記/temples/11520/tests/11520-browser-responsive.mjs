@@ -11,6 +11,24 @@ import fs from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 
+// Same ordered candidate grid and predicates; reject a covered endpoint before
+// paying for the unchanged nine-point scene-origin check. No budget is extended.
+function selectWorldFirstPanOrigin({dx,dy}){
+  globalThis.worldFirstPointerTrace=[];
+  const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect(),startedAt=performance.now();
+  const stats={startedAt,candidates:0,endpointDomChecks:0,endpointRejects:0,originPredicateCalls:0,originRejects:0};globalThis.worldFirstPanPickDiagnostics=stats;
+  const finish=()=>{stats.finishedAt=performance.now();stats.elapsedMs=stats.finishedAt-startedAt};
+  for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12){
+    stats.candidates++;stats.endpointDomChecks++;
+    if(document.elementFromPoint(x+dx,y+dy)!==canvas){stats.endpointRejects++;continue}
+    stats.originPredicateCalls++;
+    if(!__K11520_CAMERA__.isWorldGestureArea(x,y,10)){stats.originRejects++;continue}
+    const before={camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen};finish();
+    return{origin:{x,y},before,selectedAt:stats.finishedAt,pickDiagnostics:{...stats}};
+  }
+  finish();return null;
+}
+
 // Qualify the actual trusted down, not an earlier moving-world sample. Only a
 // rejected origin can be reacquired; an admitted gesture is asserted once below.
 async function acquireAdmittedCameraPan({pick,begin,inspect,cancel,records,now=Date.now}){
@@ -156,7 +174,7 @@ async function verifyWorldFirst(){
         // correctly select a newly arrived actor instead of starting camera pan.
         const acquisition={name,attempts:[]};(result.cameraInputAcquisitions??=[]).push(acquisition);
         const admitted=await acquireAdmittedCameraPan({records:acquisition.attempts,
-          pick:()=>page.evaluate(({dx,dy})=>{globalThis.worldFirstPointerTrace=[];const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12)if(__K11520_CAMERA__.isWorldGestureArea(x,y,10)&&document.elementFromPoint(x+dx,y+dy)===canvas)return{origin:{x,y},before:{camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen},selectedAt:performance.now()};return null},{dx,dy}),
+          pick:()=>page.evaluate(selectWorldFirstPanOrigin,{dx,dy}),
           begin:point=>touch('touchStart',[[1,point.x,point.y]]),cancel:()=>touch('touchCancel',[]),
           inspect:()=>page.evaluate(()=>({down:worldFirstPointerTrace.find(e=>e.type==='pointerdown'&&e.isTrusted)||null,trace:[...worldFirstPointerTrace],camera:__K11520_CAMERA__.snapshot(),player:__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot().playerScreen}))});
         const gesturePoint=admitted.origin,before=admitted.before,gx=gesturePoint.x,gy=gesturePoint.y;
@@ -262,7 +280,7 @@ async function verifyWorldFirst(){
       if(completedGrowth){await page.waitForFunction(id=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().actors.some(a=>a.id===id),followed);assert.deepEqual(await page.evaluate(id=>globalThis.__K11520_MONSTER_FOLLOW__.snapshot().actors.find(a=>a.id===id).growth,followed),completedGrowth,'reload keeps completed growth without fabricating a new result');result.checks.performanceReload='EXACT GROWTH RETAINED PASS'}
       assert.equal(await page.evaluate(()=>globalThis.__K11520_MONSTER_FOLLOW__?.snapshot().automatesTrading),false);
       assert.deepEqual(errors,[]);result.checks.reload='PREFERENCE RETAINED / NO AUTO TRADE PASS';
-    }catch(error){result.error=String(error);result.failureVisibility=await page.evaluate(()=>{const projection=globalThis.__K11520_WORLD_SELECTION_PROJECTION__;if(!projection)return null;return{player:projection.playerHomeSnapshot().playerScreen,monsters:projection.journeyLifeSnapshot().map(m=>{const hit=document.elementFromPoint(m.screen.x,m.screen.y);return{...m,hitOwner:hit?{id:hit.id,classes:String(hit.className),text:(hit.textContent||'').slice(0,100)}:null}})}}).catch(()=>null);result.failurePointerTrace=await page.evaluate(()=>globalThis.worldFirstPointerTrace||[]).catch(()=>[]);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
+    }catch(error){result.error=String(error);result.failureVisibility=await page.evaluate(()=>{const projection=globalThis.__K11520_WORLD_SELECTION_PROJECTION__;if(!projection)return null;return{player:projection.playerHomeSnapshot().playerScreen,monsters:projection.journeyLifeSnapshot().map(m=>{const hit=document.elementFromPoint(m.screen.x,m.screen.y);return{...m,hitOwner:hit?{id:hit.id,classes:String(hit.className),text:(hit.textContent||'').slice(0,100)}:null}})}}).catch(()=>null);result.failurePointerTrace=await page.evaluate(()=>globalThis.worldFirstPointerTrace||[]).catch(()=>[]);result.failurePanPick=await page.evaluate(()=>globalThis.worldFirstPanPickDiagnostics||null).catch(()=>null);await page.screenshot({path:`${OUT}/world-first-${profile.width}-FAIL.png`}).catch(()=>{});throw error}
     finally{await context.close();await fs.writeFile(`${OUT}/world-first-report.json`,JSON.stringify({results,head:process.env.K11520_SOURCE_SHA||null},null,2))}
   }
 }
