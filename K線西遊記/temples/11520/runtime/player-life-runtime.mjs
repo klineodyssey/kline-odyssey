@@ -272,6 +272,8 @@ const AUTHORITY_READ_KEYS=['$authority',AUTHORITY_DOMAIN,'$initialized','$keys']
 const SOURCE_HASH_ENCODING='JSON_SOURCE_STRING_V1';
 const FULL_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_FULL_DRAFT_V1';
 const DAILY_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_DAILY_DRAFT_V1';
+const RETAINED_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_RETAINED_DAILY_DRAFT_V1';
+const RETAINED_LIMITS=Object.freeze({censusKeys:256,operationSlots:32,checkpointBytes:16777216,entryBytes:12582912,totalBytes:33554432,fulfillmentBytes:2097152,headsBytes:65536,captureBytes:67108864});
 const DAILY_PROTOCOL_LIMITS=Object.freeze({operationSlots:256,entryBytes:32768,totalBytes:1048576,protocolBytes:65536,legacyEntries:256});
 const DAILY_OP=/^[a-f0-9]{32}$/;
 const FULL_AUTHORITY_DOMAINS=['PLAYER_LIFE','BACKPACK','PRODUCT','COURIER'];
@@ -367,6 +369,7 @@ export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,database
   }
   const loaded=values=>{
     const meta=values.$authority,envelope=values[AUTHORITY_DOMAIN],marker=values.$initialized;
+    if(meta?.schema===RETAINED_AUTHORITY_SCHEMA)fail('RETAINED_AUTHORITY_REQUIRES_RETAINED_API');
     if(meta?.schema===DAILY_AUTHORITY_SCHEMA)fail('DAILY_AUTHORITY_REQUIRES_DAILY_API');
     if(meta?.schema===FULL_AUTHORITY_SCHEMA)fail('FULL_AUTHORITY_REQUIRES_GAME_API');
     const history=values.$keys?.some(key=>typeof key==='string'&&key.startsWith('archive:'));
@@ -482,6 +485,7 @@ export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,database
   function fullCatalog(values,protocol='full'){
     const daily=protocol==='daily';
     const meta=values.$authority,marker=values.$initialized,census=values.$keys;
+    if(meta?.schema===RETAINED_AUTHORITY_SCHEMA)fail('RETAINED_AUTHORITY_REQUIRES_RETAINED_API');
     if(meta?.schema===AUTHORITY_SCHEMA)fail('PARTIAL_AUTHORITY_REQUIRES_REVIEW');
     if(!daily&&meta?.schema===DAILY_AUTHORITY_SCHEMA)fail('DAILY_AUTHORITY_REQUIRES_DAILY_API');
     if(daily&&meta?.schema!==DAILY_AUTHORITY_SCHEMA)fail('DAILY_PROTOCOL_REQUIRED');
@@ -645,22 +649,22 @@ export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,database
   const dailyBytes=(key,value)=>new TextEncoder().encode(JSON.stringify({key,value})).byteLength;
   const dailyKey=id=>'daily-operation:'+id;
   const dailyToken=(playerId,rewardId)=>JSON.stringify([playerId,rewardId]);
-  function dailyRequest(input,kind,base){
+  function dailyRequest(input,kind,base,retainedGeneration=null){
     exactAuthorityJson(input,32768);
     if(!dailyShape(input,['opId','playerId','expected',...(kind==='FULFILL_DAILY'?['claimRef']:[])])||!DAILY_OP.test(input.opId)||typeof input.opId!=='string'||typeof input.playerId!=='string'||!ID.test(input.playerId)||(kind==='FULFILL_DAILY'&&(typeof input.claimRef!=='string'||!DAILY_OP.test(input.claimRef))))fail('INVALID_DAILY_COMMAND');
     const e=input.expected;
-    if(!dailyShape(e,['authorityEpoch','dailyGeneration','selectionEpoch','catalogRevision','dailySequence','records'])||typeof e.authorityEpoch!=='string'||!DAILY_OP.test(e.authorityEpoch)||typeof e.dailyGeneration!=='string'||!DAILY_OP.test(e.dailyGeneration)||!integer(e.selectionEpoch,Number.MAX_SAFE_INTEGER)||!integer(e.catalogRevision,Number.MAX_SAFE_INTEGER)||!integer(e.dailySequence,Number.MAX_SAFE_INTEGER)||!Array.isArray(e.records)||e.records.length!==base.records.length)fail('INVALID_DAILY_EXPECTATIONS');
+    if(!dailyShape(e,['authorityEpoch','dailyGeneration','selectionEpoch','catalogRevision','dailySequence','records',...(retainedGeneration===null?[]:['retainedGeneration'])])||(retainedGeneration!==null&&e.retainedGeneration!==retainedGeneration)||typeof e.authorityEpoch!=='string'||!DAILY_OP.test(e.authorityEpoch)||typeof e.dailyGeneration!=='string'||!DAILY_OP.test(e.dailyGeneration)||!integer(e.selectionEpoch,Number.MAX_SAFE_INTEGER)||!integer(e.catalogRevision,Number.MAX_SAFE_INTEGER)||!integer(e.dailySequence,Number.MAX_SAFE_INTEGER)||!Array.isArray(e.records)||e.records.length!==base.records.length)fail('INVALID_DAILY_EXPECTATIONS');
     const refs=new Map(base.records.map(r=>[referenceKey(r.ref),r.ref])),seen=new Set(),records=[];
     for(const r of e.records){if(!dailyShape(r,['ref','revision']))fail('INVALID_DAILY_EXPECTATIONS');const key=referenceKey(r.ref);if(!refs.has(key)||seen.has(key)||(r.revision!==null&&!integer(r.revision,Number.MAX_SAFE_INTEGER)))fail('INVALID_DAILY_EXPECTATIONS');seen.add(key);records.push({ref:clone(refs.get(key)),revision:r.revision})}
     records.sort((a,b)=>referenceKey(a.ref)<referenceKey(b.ref)?-1:referenceKey(a.ref)>referenceKey(b.ref)?1:0);
-    return {opId:input.opId,playerId:input.playerId,expected:{authorityEpoch:e.authorityEpoch,dailyGeneration:e.dailyGeneration,selectionEpoch:e.selectionEpoch,catalogRevision:e.catalogRevision,dailySequence:e.dailySequence,records},...(kind==='FULFILL_DAILY'?{claimRef:input.claimRef}:{})};
+    return {opId:input.opId,playerId:input.playerId,expected:{authorityEpoch:e.authorityEpoch,dailyGeneration:e.dailyGeneration,selectionEpoch:e.selectionEpoch,catalogRevision:e.catalogRevision,dailySequence:e.dailySequence,records,...(retainedGeneration===null?{}:{retainedGeneration:e.retainedGeneration})},...(kind==='FULFILL_DAILY'?{claimRef:input.claimRef}:{})};
   }
   function dailyAccounting(receipts,pending,generation){
     const acceptedBytes=receipts.reduce((total,r)=>total+dailyBytes(dailyKey(r.request.opId),r),0),acceptedCount=receipts.length;
     const head={schema:'DAILY_HEAD_V1',generation,sequence:acceptedCount,acceptedCount,acceptedBytes,pendingCount:pending,reservedSlots:pending,reservedBytes:pending*DAILY_PROTOCOL_LIMITS.entryBytes};
     if(acceptedCount+pending>DAILY_PROTOCOL_LIMITS.operationSlots||acceptedBytes+head.reservedBytes>DAILY_PROTOCOL_LIMITS.totalBytes)fail('DAILY_RECEIPT_CAPACITY');return head;
   }
-  function dailyState(values){
+  function dailyState(values,retainedGeneration=null){
     const base=fullState(values,'daily'),p=values.$authority.dailyProtocol;
     exactAuthorityJson(p,DAILY_PROTOCOL_LIMITS.protocolBytes);
     if(!dailyShape(p,['generation','limits','legacyClaims','legacyDeliveries'])||typeof p.generation!=='string'||!DAILY_OP.test(p.generation)||!dailyShape(p.limits,Object.keys(DAILY_PROTOCOL_LIMITS))||Object.keys(DAILY_PROTOCOL_LIMITS).some(k=>p.limits[k]!==DAILY_PROTOCOL_LIMITS[k])||dailyBytes('$dailyProtocol',p)>DAILY_PROTOCOL_LIMITS.protocolBytes)dailyFailure();
@@ -675,7 +679,7 @@ export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,database
     const receipts=receiptKeys.map(key=>{const r=values[key];exactAuthorityJson(r,DAILY_PROTOCOL_LIMITS.entryBytes);if(dailyBytes(key,r)>DAILY_PROTOCOL_LIMITS.entryBytes||!dailyShape(r,['schema','kind','sequence','request','reducerVersion','at',r?.kind==='CLAIM_DAILY'?'claim':'delivery'])||r.schema!=='DAILY_OPERATION_V1'||!['CLAIM_DAILY','FULFILL_DAILY'].includes(r.kind)||r.reducerVersion!=='DAILY_RULES_V1'||!integer(r.sequence,DAILY_PROTOCOL_LIMITS.operationSlots)||r.sequence<1||key!==dailyKey(r.request?.opId))dailyFailure();dayAt(r.at);return r}).sort((a,b)=>a.sequence-b.sequence);
     const byId=new Map(),claims=new Map(),claimTokens=new Set(),fulfilled=new Map();
     for(let n=0;n<receipts.length;n++){
-      const r=receipts[n],request=dailyRequest(r.request,r.kind,base),e=request.expected;
+      const r=receipts[n],request=dailyRequest(r.request,r.kind,base,retainedGeneration),e=request.expected;
       if(r.sequence!==n+1||!equalData(request,r.request)||e.authorityEpoch!==base.authorityEpoch||e.dailyGeneration!==p.generation||e.catalogRevision!==base.catalogRevision||e.selectionEpoch>base.selectionEpoch||e.dailySequence!==n||!Object.hasOwn(life.players,request.playerId))dailyFailure();byId.set(request.opId,r);
       if(r.kind==='CLAIM_DAILY'){
         const c=r.claim,day=dayAt(r.at),rewardId='DAILY_JOURNEY:'+day,token=dailyToken(request.playerId,rewardId),event=allClaims.get(token),prior=e.records.find(v=>v.ref.domain==='PLAYER_LIFE').revision;
@@ -705,16 +709,15 @@ export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,database
     });
   }
   function readDaily(){return dailyTransaction('readonly',values=>dailyState(values).snapshot)}
-  function dailyCommand(kind,input){
-    if(reducing)fail('REENTRANT_COMMAND');exactAuthorityJson(input,32768);input=clone(input);
-    return dailyTransaction('readwrite',(values,store)=>{
-      const state=dailyState(values),request=dailyRequest(input,kind,state.base),e=request.expected,b=state.base;
+  // One closed planner is shared by execution and retained-history replay.
+  function planDaily(kind,input,values,clock,retainedGeneration=null){
+      const state=dailyState(values,retainedGeneration),request=dailyRequest(input,kind,state.base,retainedGeneration),e=request.expected,b=state.base;
       if(request.playerId!==b.activePlayerId)fail('PLAYER_NOT_ACTIVE');
       if(e.authorityEpoch!==b.authorityEpoch||e.dailyGeneration!==state.protocol.generation||e.selectionEpoch!==b.selectionEpoch||e.catalogRevision!==b.catalogRevision)fail('REVISION_CONFLICT_RELOAD_REQUIRED');
-      const prior=state.byId.get(request.opId);if(prior){if(prior.kind!==kind||!equalData(prior.request,request))fail('OPERATION_ID_CONFLICT');return {ok:true,replayed:true,receipt:prior}}
+      const prior=state.byId.get(request.opId);if(prior){if(prior.kind!==kind||!equalData(prior.request,request))fail('OPERATION_ID_CONFLICT');return {result:{ok:true,replayed:true,receipt:prior}}}
       if(e.dailySequence!==state.head.sequence||e.records.some(r=>b.records.find(v=>referenceKey(v.ref)===referenceKey(r.ref)).revision!==r.revision))fail('REVISION_CONFLICT_RELOAD_REQUIRED');
       const next={...values},life=values.PLAYER_LIFE,player=life.players[request.playerId],bagKey='BACKPACK:'+request.playerId;let affected,key;
-      if(typeof now!=='function')fail('CLOCK_UNAVAILABLE');const at=now();dayAt(at);
+      if(typeof clock!=='function')fail('CLOCK_UNAVAILABLE');const at=clock();dayAt(at);
       const receipt={schema:'DAILY_OPERATION_V1',kind,sequence:state.head.sequence+1,request,reducerVersion:'DAILY_RULES_V1',at};
       if(kind==='CLAIM_DAILY'){
         const d=dailyFor(player.events,at),token=dailyToken(request.playerId,d.rewardId);
@@ -726,18 +729,169 @@ export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,database
         const claim=state.claims.get(request.claimRef);if(!claim||claim.request.playerId!==request.playerId)fail('DAILY_CLAIM_NOT_OWNED');if(state.fulfilled.has(request.claimRef))fail('DAILY_ALREADY_FULFILLED');
         const row=values[bagKey];if(!row)fail('DOMAIN_RECORD_ABSENT');if(row.revision>=Number.MAX_SAFE_INTEGER)fail('REVISION_CAPACITY');
         const draft=clone(row.data),result=gameRegistry.storeItem(draft,claim.claim.item,{at});
-        if(!result.ok)return {ok:false,reason:result.reason,pending:true};
+        if(!result.ok)return {result:{ok:false,reason:result.reason,pending:true}};
         const before=row.data.items.find(item=>item.itemId===result.item.itemId)?.qty||0;if(result.item.qty!==before+1)fail('DAILY_QUANTITY_MISMATCH');
         receipt.delivery={rewardId:claim.claim.rewardId,bagBefore:row.revision,bagAfter:row.revision+1,destinationItemId:result.item.itemId,quantityBefore:before,quantityAfter:result.item.qty};affected={revision:row.revision+1,data:draft};key=bagKey;
       }
       const entryKey=dailyKey(request.opId);exactAuthorityJson(receipt,DAILY_PROTOCOL_LIMITS.entryBytes);if(dailyBytes(entryKey,receipt)>DAILY_PROTOCOL_LIMITS.entryBytes)fail('DAILY_RECEIPT_CAPACITY');
       const pending=state.head.pendingCount+(kind==='CLAIM_DAILY'?1:-1),head=dailyAccounting([...state.receipts,receipt],pending,state.protocol.generation);
-      next[key]=affected;next[entryKey]=receipt;next.$daily=head;next.$keys=[...values.$keys,entryKey];dailyState(next);
-      store.put(affected,key);store.add(receipt,entryKey);store.put(head,'$daily');return {ok:true,replayed:false,receipt};
+      next[key]=affected;next[entryKey]=receipt;next.$daily=head;next.$keys=[...values.$keys,entryKey];dailyState(next,retainedGeneration);
+      return {next,key,receipt,result:{ok:true,replayed:false,receipt}};
+  }
+  function dailyCommand(kind,input){
+    if(reducing)fail('REENTRANT_COMMAND');exactAuthorityJson(input,32768);input=clone(input);
+    return dailyTransaction('readwrite',(values,store)=>{
+      const plan=planDaily(kind,input,values,now);
+      if(plan.next){store.put(plan.next[plan.key],plan.key);store.add(plan.receipt,dailyKey(plan.receipt.request.opId));store.put(plan.next.$daily,'$daily')}
+      return plan.result;
     });
   }
   function claimDaily(input){return dailyCommand('CLAIM_DAILY',input)}
   function fulfillDaily(input){return dailyCommand('FULFILL_DAILY',input)}
+
+  // Inert retained-daily experiment. Explicit APIs, no initializer or repair.
+  // All proof records stay in this authority's existing object store. A frozen
+  // checkpoint plus a complete semantic tail is required; no last-good rollback.
+  const retainedFailure=()=>fail('RETAINED_HISTORY_HOLD');
+  const retainedKey=id=>'retained-postimage:'+id;
+  const retainedDigest=/^[a-f0-9]{64}$/;
+  const retainedMetadata=values=>['$authority','$initialized','archive:'+values.$authority.authorityEpoch];
+  function retainedDailyValues(values){
+    const {retainedProtocol,...meta}=values.$authority,{retainedGeneration,...marker}=values.$initialized;
+    return {...values,$authority:{...meta,schema:DAILY_AUTHORITY_SCHEMA},$initialized:marker,$keys:values.$keys.filter(k=>!['$retained','$retained-checkpoint'].includes(k)&&!k.startsWith('retained-postimage:'))};
+  }
+  function retainedLayout(values){
+    const meta=values.$authority,p=meta?.retainedProtocol,marker=values.$initialized;
+    if(meta?.schema!==RETAINED_AUTHORITY_SCHEMA)fail('RETAINED_PROTOCOL_REQUIRED');
+    if(!dailyShape(p,['generation','targetPlayerId','limits'])||typeof p.generation!=='string'||!DAILY_OP.test(p.generation)||p.targetPlayerId!==meta.activePlayerId||typeof p.targetPlayerId!=='string'||!ID.test(p.targetPlayerId)||!equalData(p.limits,RETAINED_LIMITS)||marker?.retainedGeneration!==p.generation)retainedFailure();
+    const bagKey='BACKPACK:'+p.targetPlayerId,adapted=retainedDailyValues(values);
+    // Only covered projection absence is tolerated. Presence of undefined is
+    // rejected by capture before cloning; it is never interpreted as absence.
+    adapted.$keys=[...new Set([...adapted.$keys,'PLAYER_LIFE',bagKey])];
+    const catalog=fullCatalog(adapted,'daily');if(catalog.get(bagKey)?.presence!=='PRESENT')retainedFailure();
+    const fixed=[...retainedMetadata(values),'$daily','$retained-checkpoint','$retained'];
+    if(fixed.some(k=>!values.$keys.includes(k)))retainedFailure();
+    const receipts=values.$keys.filter(k=>k.startsWith('daily-operation:')),images=values.$keys.filter(k=>k.startsWith('retained-postimage:'));
+    if(receipts.length>RETAINED_LIMITS.operationSlots||receipts.length!==images.length||receipts.some(k=>!images.includes(retainedKey(k.slice('daily-operation:'.length)))))retainedFailure();
+    for(const key of values.$keys)if(!fixed.includes(key)&&!catalog.has(key)&&!receipts.includes(key)&&!images.includes(key))retainedFailure();
+    return {protocol:p,bagKey,catalog,receipts,images};
+  }
+  function retainedRaw(value,key){
+    const limit=key==='$retained-checkpoint'?RETAINED_LIMITS.checkpointBytes:key.startsWith('retained-postimage:')?RETAINED_LIMITS.entryBytes:key.startsWith('daily-operation:')?DAILY_PROTOCOL_LIMITS.entryBytes:key==='$daily'||key==='$initialized'?2048:key==='$retained'?RETAINED_LIMITS.headsBytes:key.startsWith('BACKPACK:')||key.startsWith('PRODUCT:')||key==='COURIER'?2_001_024:12_001_024;
+    try{
+      exactAuthorityJson(value,Math.min(limit,key==='PLAYER_LIFE'||key==='$authority'||key.startsWith('archive:')?4_000_000:16_777_216));
+      const rejectLoss=v=>{if(typeof v==='number'&&Object.is(v,-0))fail('NEGATIVE_ZERO');if(v&&typeof v==='object')for(const child of Object.values(v))rejectLoss(child)};rejectLoss(value);
+    }catch{fail('RETAINED_UNSUPPORTED_DATA_HOLD')}
+    const raw=JSON.stringify(value),bytes=dailyBytes(key,value);if(bytes>limit)fail('RETAINED_CAPACITY_HOLD');return {raw,bytes};
+  }
+  function retainedTransaction(mode,work){
+    const connection=requireOpen(),admitted=generation;if(!gameRegistry)fail('GAME_VALIDATORS_NOT_READY');
+    return new Promise((resolve,reject)=>{
+      let tx,result,workError=null,total=0;const values={},identities=[];
+      const abort=error=>{workError??=error;try{tx.abort()}catch{reject(workError)}};
+      const current=()=>{if(admitted!==generation||connection!==db)fail('AUTHORITY_CLOSED')};
+      try{tx=connection.transaction(AUTHORITY_STORE,mode,{durability:'strict'});transactions.add(tx)}catch(error){reject(error);return}
+      tx.oncomplete=()=>{transactions.delete(tx);try{current();resolve(clone(result))}catch(error){reject(error)}};
+      tx.onabort=()=>{transactions.delete(tx);reject(workError||tx.error||new Error('AUTHORITY_TRANSACTION_ABORTED'))};
+      tx.onerror=()=>{workError??=tx.error||new Error('AUTHORITY_TRANSACTION_FAILED')};
+      const store=tx.objectStore(AUTHORITY_STORE);
+      const readNext=(list,index,done)=>{
+        if(index===list.length){try{current();done()}catch(error){abort(error)}return}
+        const key=list[index];let r;try{r=store.get(key)}catch(error){abort(error);return}
+        r.onerror=()=>{workError??=r.error};r.onsuccess=()=>{try{current();const {raw,bytes}=retainedRaw(r.result,key);total+=bytes;if(total>RETAINED_LIMITS.captureBytes)fail('RETAINED_CAPACITY_HOLD');values[key]=r.result;identities.push({key,raw});readNext(list,index+1,done)}catch(error){abort(error)}};
+      };
+      let census;try{census=store.getAllKeys(undefined,RETAINED_LIMITS.censusKeys+1)}catch(error){abort(error);return}
+      census.onerror=()=>{workError??=census.error};census.onsuccess=()=>{try{
+        current();const ks=census.result;
+        if(ks.length>RETAINED_LIMITS.censusKeys)fail('RETAINED_CAPACITY_HOLD');
+        if(ks.some(k=>typeof k!=='string'||!(/^\$(authority|initialized|daily|retained|retained-checkpoint)$/.test(k)||/^(daily-operation|retained-postimage|archive):[a-f0-9]{32}$/.test(k)||k==='PLAYER_LIFE'||k==='COURIER'||/^BACKPACK:KAIOS-P-[a-zA-Z0-9-]{16,80}$/.test(k)||/^PRODUCT:KAIOS-P-[a-zA-Z0-9-]{16,80}:(guest|0x[0-9a-f]{40})$/.test(k))))retainedFailure();
+        if(!ks.includes('$authority')||!ks.includes('$initialized'))retainedFailure();values.$keys=ks;
+        readNext(['$authority','$initialized'],0,()=>{retainedLayout(values);readNext(ks.filter(k=>!['$authority','$initialized'].includes(k)),0,()=>{
+          const captured={values,identities:identities.sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:0)};
+          result=work(captured,store);if(result&&typeof result.then==='function')fail('ASYNC_TRANSACTION_REDUCER');
+        })});
+      }catch(error){abort(error)}};
+    });
+  }
+  const retainedCapture=()=>retainedTransaction('readonly',capture=>capture);
+  const retainedSame=(a,b)=>equalData(a.values.$keys,b.values.$keys)&&equalData(a.identities,b.identities);
+  async function retainedHash(value){
+    const admitted=generation,connection=requireOpen();const digest=await hash(JSON.stringify(value));
+    if(admitted!==generation||connection!==db)fail('AUTHORITY_CLOSED');return digest;
+  }
+  const digestObject=async value=>({...value,digest:await retainedHash(value)});
+  async function verifyObjectDigest(value){
+    if(!retainedDigest.test(value?.digest))retainedFailure();const {digest,...payload}=value;if(await retainedHash(payload)!==digest)retainedFailure();
+  }
+  async function retainedHead(values,checkpoint,entries,receipts,state){
+    const pending=state.head.pendingCount,acceptedBytes=dailyBytes('$retained-checkpoint',checkpoint)+retainedMetadata(values).reduce((n,k)=>n+dailyBytes(k,values[k]),0)+entries.reduce((n,e)=>n+dailyBytes(retainedKey(e.opId),e),0)+receipts.reduce((n,r)=>n+dailyBytes(dailyKey(r.request.opId),r),0)+RETAINED_LIMITS.headsBytes;
+    if(entries.length+pending>RETAINED_LIMITS.operationSlots||acceptedBytes+pending*RETAINED_LIMITS.fulfillmentBytes>RETAINED_LIMITS.totalBytes)fail('RETAINED_CAPACITY_HOLD');
+    const head=await digestObject({schema:'RETAINED_DAILY_HEAD_V1',generation:values.$authority.retainedProtocol.generation,sequence:entries.length,checkpointDigest:checkpoint.digest,tipDigest:entries.at(-1)?.digest||checkpoint.digest,records:state.base.records.map(({ref,revision})=>({ref,revision})),acceptedBytes,reservedBytes:pending*RETAINED_LIMITS.fulfillmentBytes,reservedSlots:pending});
+    if(dailyBytes('$retained',head)+dailyBytes('$daily',state.head)>RETAINED_LIMITS.headsBytes)fail('RETAINED_CAPACITY_HOLD');return head;
+  }
+  async function verifyRetained(capture){
+    const values=capture.values,{protocol:p,bagKey,catalog,receipts:receiptKeys,images}=retainedLayout(values),checkpoint=values['$retained-checkpoint'];
+    if(!dailyShape(checkpoint,['schema','generation','targetPlayerId','life','bag','daily','anchors','digest'])||checkpoint.schema!=='RETAINED_DAILY_CHECKPOINT_V1'||checkpoint.generation!==p.generation||checkpoint.targetPlayerId!==p.targetPlayerId||!Array.isArray(checkpoint.anchors))retainedFailure();
+    await verifyObjectDigest(checkpoint);
+    const anchorKeys=[...retainedMetadata(values),...[...catalog.keys()].filter(k=>!['PLAYER_LIFE',bagKey].includes(k))].sort();
+    if(checkpoint.anchors.length!==anchorKeys.length)retainedFailure();
+    for(let n=0;n<anchorKeys.length;n++){
+      const key=anchorKeys[n],a=checkpoint.anchors[n],present=values.$keys.includes(key);
+      if(!dailyShape(a,['key','present','digest'])||a.key!==key||a.present!==present||!retainedDigest.test(a.digest)||a.digest!==await retainedHash(present?{present:true,value:values[key]}:{present:false}))retainedFailure();
+    }
+    let reconstructed=retainedDailyValues(values);reconstructed.PLAYER_LIFE=checkpoint.life;reconstructed[bagKey]=checkpoint.bag;reconstructed.$daily=checkpoint.daily;
+    reconstructed.$keys=[...new Set([...reconstructed.$keys.filter(k=>!k.startsWith('daily-operation:')),'PLAYER_LIFE',bagKey])];
+    for(const key of receiptKeys)delete reconstructed[key];
+    let state=dailyState(reconstructed,p.generation);if(state.head.sequence!==0||state.head.pendingCount!==0)retainedFailure();
+    const entries=images.map(k=>{if(k!==retainedKey(values[k]?.opId))retainedFailure();return values[k]}).sort((a,b)=>a.sequence-b.sequence),receipts=[];let previousDigest=checkpoint.digest;
+    for(let n=0;n<entries.length;n++){
+      const entry=entries[n],receipt=values[dailyKey(entry?.opId)];
+      if(!dailyShape(entry,['schema','generation','sequence','opId','previousDigest','receiptDigest','key','value','digest'])||entry.schema!=='RETAINED_DAILY_POSTIMAGE_V1'||entry.generation!==p.generation||entry.sequence!==n+1||typeof entry.opId!=='string'||!DAILY_OP.test(entry.opId)||!images.includes(retainedKey(entry.opId))||entry.previousDigest!==previousDigest||!receipt||receipt.request?.opId!==entry.opId||receipt.sequence!==n+1||receipt.request?.playerId!==p.targetPlayerId||!['CLAIM_DAILY','FULFILL_DAILY'].includes(receipt.kind))retainedFailure();
+      await verifyObjectDigest(entry);if(entry.receiptDigest!==await retainedHash(receipt))retainedFailure();
+      const plan=planDaily(receipt.kind,receipt.request,reconstructed,()=>receipt.at,p.generation);
+      if(!plan.next||!equalData(plan.receipt,receipt)||plan.key!==entry.key||!equalData(plan.next[plan.key],entry.value))fail('RETAINED_SEMANTIC_HOLD');
+      if(receipt.kind==='FULFILL_DAILY'&&dailyBytes(retainedKey(entry.opId),entry)+dailyBytes(dailyKey(entry.opId),receipt)>RETAINED_LIMITS.fulfillmentBytes)fail('RETAINED_CAPACITY_HOLD');
+      reconstructed=plan.next;receipts.push(receipt);previousDigest=entry.digest;
+    }
+    state=dailyState(reconstructed,p.generation);const head=await retainedHead(values,checkpoint,entries,receipts,state);
+    if(!equalData(values.$daily,state.head)||!equalData(values.$retained,head))retainedFailure();
+    const damage=[];
+    for(const key of ['PLAYER_LIFE',bagKey]){
+      const actual=values[key],expected=reconstructed[key];
+      if(values.$keys.includes(key)&&typeof actual?.revision==='number'&&actual.revision>expected.revision)fail('RETAINED_NEWER_PROJECTION_HOLD');
+      if(!values.$keys.includes(key)||!equalData(actual,expected))damage.push(key);
+    }
+    const snapshot={...state.snapshot,retained:{generation:p.generation,sequence:head.sequence,checkpointDigest:head.checkpointDigest,tipDigest:head.tipDigest,headDigest:head.digest,acceptedBytes:head.acceptedBytes,reservedBytes:head.reservedBytes,reservedSlots:head.reservedSlots}};
+    return {checkpoint,entries,receipts,state,reconstructed,head,damage,snapshot};
+  }
+  async function retainedPrepared(){
+    const admitted=generation,connection=requireOpen(),capture=await retainedCapture(),verified=await verifyRetained(capture);
+    if(admitted!==generation||connection!==db)fail('AUTHORITY_CLOSED');return {admitted,connection,capture,verified};
+  }
+  function retainedFinish(prepared,mode,work){
+    if(prepared.admitted!==generation||prepared.connection!==db)fail('AUTHORITY_CLOSED');
+    return retainedTransaction(mode,(current,store)=>{if(!retainedSame(current,prepared.capture))fail('REVISION_CONFLICT_RELOAD_REQUIRED');return work(store)});
+  }
+  async function inspectDailyReconstruction(input){
+    if(input!==undefined)fail('RETAINED_INSPECTION_INPUT_FORBIDDEN');const prepared=await retainedPrepared(),v=prepared.verified;
+    return retainedFinish(prepared,'readonly',()=>({status:v.damage.length?'RECONSTRUCTION_CANDIDATE':'VERIFIED_CURRENT',integration:AUTHORITY_INTEGRATION,coverage:['PLAYER_LIFE','BACKPACK:'+prepared.capture.values.$authority.retainedProtocol.targetPlayerId],generation:prepared.capture.values.$authority.retainedProtocol.generation,sequence:v.head.sequence,headDigest:v.head.digest,projectionDamage:v.damage,candidate:v.snapshot}));
+  }
+  async function readRetainedDaily(){const result=await inspectDailyReconstruction();if(result.status!=='VERIFIED_CURRENT')fail('RETAINED_PROJECTION_HOLD');return result.candidate}
+  async function retainedCommand(kind,input){
+    if(reducing)fail('REENTRANT_COMMAND');exactAuthorityJson(input,32768);retainedRaw(input,'$request');input=clone(input);
+    const prepared=await retainedPrepared(),v=prepared.verified,p=prepared.capture.values.$authority.retainedProtocol;
+    if(v.damage.length)fail('RETAINED_PROJECTION_HOLD');
+    const plan=planDaily(kind,input,v.reconstructed,now,p.generation);
+    if(!plan.next)return retainedFinish(prepared,'readonly',()=>plan.result);
+    const receipt=plan.receipt;for(const [key,value] of [[plan.key,plan.next[plan.key]],[dailyKey(receipt.request.opId),receipt],['$daily',plan.next.$daily]])retainedRaw(value,key);
+    const entry=await digestObject({schema:'RETAINED_DAILY_POSTIMAGE_V1',generation:p.generation,sequence:receipt.sequence,opId:receipt.request.opId,previousDigest:v.head.tipDigest,receiptDigest:await retainedHash(receipt),key:plan.key,value:plan.next[plan.key]});
+    if(dailyBytes(retainedKey(entry.opId),entry)>RETAINED_LIMITS.entryBytes||(kind==='FULFILL_DAILY'&&dailyBytes(retainedKey(entry.opId),entry)+dailyBytes(dailyKey(entry.opId),receipt)>RETAINED_LIMITS.fulfillmentBytes))fail('RETAINED_CAPACITY_HOLD');
+    const head=await retainedHead(prepared.capture.values,v.checkpoint,[...v.entries,entry],[...v.receipts,receipt],dailyState(plan.next,p.generation));
+    retainedRaw(entry,retainedKey(entry.opId));retainedRaw(head,'$retained');
+    return retainedFinish(prepared,'readwrite',store=>{store.put(plan.next[plan.key],plan.key);store.add(receipt,dailyKey(entry.opId));store.put(plan.next.$daily,'$daily');store.add(entry,retainedKey(entry.opId));store.put(head,'$retained');return plan.result});
+  }
+  const claimRetainedDaily=input=>retainedCommand('CLAIM_DAILY',input);
+  const fulfillRetainedDaily=input=>retainedCommand('FULFILL_DAILY',input);
 
   const captureFixed=[PLAYER_LIFE_STORAGE_KEY,'K11520_PLAYER_COURIER','k11520.player-life.legacy-owner','11520.backpack.v1','k11520.local-product.v1:guest','k11520.player-session.v1','k11520.journey.tutorial','11520.playerCourier.pendingInsurancePayment','11520.playerCourier.lastMission'];
   const captureSuffixes=['11520.backpack.v1','k11520.local-product.v1:guest','k11520.player-session.v1','k11520.journey.tutorial'];
@@ -856,5 +1010,5 @@ export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,database
     if(admitted!==generation||!db||!gameRegistry)fail('AUTHORITY_CLOSED');return clone(candidate);
   }
 
-  return Object.freeze({open,openGame,close,read,readGame,readDaily,claimDaily,fulfillDaily,initialize,command,commandGame,prepareMigration,readCandidate,commitMigration,prepareGameMigration,readGameCandidate,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
+  return Object.freeze({open,openGame,close,read,readGame,readDaily,claimDaily,fulfillDaily,readRetainedDaily,claimRetainedDaily,fulfillRetainedDaily,inspectDailyReconstruction,initialize,command,commandGame,prepareMigration,readCandidate,commitMigration,prepareGameMigration,readGameCandidate,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
 }

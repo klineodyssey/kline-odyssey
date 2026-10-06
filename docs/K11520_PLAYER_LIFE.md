@@ -815,3 +815,106 @@ added: 8-minute native job, 240-second scenario, original Product budgets intact
 Estimated normal native scenario overhead is under 2 seconds beyond the prior
 roughly 2-second adapter fixture; this is an estimate awaiting the queued run.
 No native daily PASS, production caller or migration/cutover claim is made here.
+
+### Inert retained-daily reconstruction prototype (local checkpoint)
+
+This next experiment uses the same IndexedDB database and `records` object store.
+Its distinct `KAIOS_LOCAL_GAME_RETAINED_DAILY_DRAFT_V1` marker is admitted only by
+isolated test fixtures. There is no initializer, automatic migration, promotion,
+repair/apply method, UI caller or production cutover. The earlier Daily Draft
+protocol and its native evidence checkpoint remain separate. All older Stage1,
+Full and Daily mutation paths reject the retained marker. `restore()` remains
+`RESTORE_NOT_IMPLEMENTED`.
+
+The frozen scope is one selected Player Life and its existing bag. The complete
+Life envelope is covered, with every other player preserved unchanged by the
+closed planner. The selected player, selection epoch, catalog revision, complete
+catalog, authority/daily/retention generations, legacy provenance and every other
+canonical row (including declared absence) are immutable anchors. There is no
+post-admission switch, event ingestion, bag removal or other generic reducer.
+Synthetic eligibility for multiple days is prepared before fixture admission;
+freeing bag space or adding events afterward is an unprotected change and HOLD.
+This is deliberately insufficient for live gameplay.
+
+Explicit `readRetainedDaily`, `claimRetainedDaily` and `fulfillRetainedDaily` require
+an opened validator-ready authority. Commands use the existing daily request plus
+`expected.retainedGeneration`; it is validated before exact replay. No caller can
+supply a reward, item recipe, timestamp, eligibility assertion or prepared plan.
+One private closed daily planner serves ordinary execution and retained semantic
+replay. Reward policy, XP-first delivery and the existing bag insertion/merge
+rules are unchanged.
+
+The same authority retains:
+
+- One immutable `$retained-checkpoint`: valid initial Life/bag projections, empty
+  daily head, explicit legacy provenance bindings and hashes of every immutable
+  anchor. Sequence 0 cannot admit absent or invalid covered projections.
+- The existing immutable `daily-operation:<opId>` receipts.
+- One immutable `retained-postimage:<opId>` per accepted operation, bound to its
+  actual storage key, receipt, preceding digest and entire affected postimage.
+- `$retained`: checkpoint/tail digest, contiguous sequence, complete resulting
+  revision vector and capacity accounting. `$daily` retains ordinary accounting.
+
+A new command captures a bounded coherent snapshot, validates the complete proof,
+reads the controlled local clock once, derives its transition and hashes outside
+IndexedDB. A short readwrite transaction repeats the bounded capture and compares
+exact census and JSON representations, not just numeric revisions. It atomically
+writes the affected projection, receipt, daily head, postimage and retained head.
+Only transaction completion acknowledges success. Any request-stage abort keeps
+all original rows. There is no automatic rebase. Close/versionchange invalidates
+preparation, and all proposed writes pass the same lossless JSON admission guard
+as stored values. In particular, negative zero cannot be acknowledged and then
+become unreadable. Exact replay performs no write, but still requires a fully
+verified current projection and final unchanged-evidence check.
+
+`inspectDailyReconstruction()` is read-only and accepts no backup or target revision.
+It starts from the checkpoint and replays every receipt at its stored timestamp
+through that same planner. Full derived receipts and postimages, including
+unchanged fields, must match. Valid checksums alone cannot authorize XP or item
+changes. One-to-one receipt/postimage membership, physical keys and a complete,
+contiguous tail are mandatory. The current heads must equal the derived heads.
+Pending claim obligations, delivered tombstones, destination stack identity,
+quantity and pre-existing opaque metadata survive reconstruction.
+
+With intact proof, a missing, malformed JSON or older covered projection may yield
+`RECONSTRUCTION_CANDIDATE`, containing the latest verified projection plus its head
+digest, coverage and generation. Nothing is installed or acknowledged as recovered.
+The inspector performs another exact readonly capture after asynchronous work;
+changed evidence invalidates its result. A newer unprotected projection revision,
+missing/corrupt checkpoint or tail, changed non-target anchor, unsupported raw
+value, or undeclared census entry preserves the data and HOLD. It never chooses an
+older last-good tail. Product/Courier balances are immutable anchors and cannot be
+rolled back or reconstructed by this experiment.
+
+Fixed limits (UTF-8 JSON key/value wrappers included):
+
+- 256 census keys, requested with a 257-key overflow probe; no extra candidates,
+  archives or unrelated keys. Unknown key values are not read.
+- 32 accepted-plus-reserved operations; checkpoint ≤16 MiB; postimage ≤12 MiB.
+- 32 MiB for exact checkpoint/postimage/receipt/immutable-metadata bytes plus
+  reservations. A fixed 65,536-byte allowance is charged from admission for both
+  mutable heads together, and their actual combined size must fit.
+- Each pending claim reserves one operation and 2 MiB for its future combined bag
+  postimage, receipt and wrappers, before XP commits. Fulfillment exchanges that
+  reservation for actual bytes. The independent ordinary receipt limits remain.
+- Sequential capture stops at 64 MiB aggregate. Daily/initialized heads are capped
+  at 2 KiB; the retained head at 64 KiB; bag/product/Courier rows at 2,001,024 bytes
+  including wrappers; Life/authority/archive at 4 million JSON code units with a
+  conservative 12,001,024-byte wrapper cap. Protected records retain their own caps.
+
+No compaction, eviction or truncation exists. Capacity failure occurs before
+acknowledgement and leaves existing claims fulfillable within their reservation.
+IndexedDB necessarily materializes one stored value before application validation;
+these checks are not a hard memory bound against an arbitrarily large corrupt value.
+Presence comes from the key census: a present `undefined`, cyclic/non-JSON object
+or negative zero is unsupported, not silently normalized or treated as missing.
+Hash inputs use JSON escaping then UTF-8, preserving accepted string code units.
+SHA-256 provides consistency checks, not authenticated ownership or tamper resistance
+against coherent replacement of the entire authority history. Whole-authority
+rollback, origin/device clearing, power loss and physical storage quota need
+separate guarantees; an in-memory abort test proves none of those.
+
+Evidence for this slice is regression-first local fake-IDB/unit integration only.
+Native daily evidence remains queued at the preceding checkpoint; no retained
+browser/restart or production visual acceptance is claimed. Whole-Life P0, actual
+recovery, migration UX, all-writer integration and release remain HOLD.

@@ -236,7 +236,7 @@ function newAuthority(indexedDB=new IDBFactory(),extra={}){return lifeAuthorityM
 const expected=s=>({authorityEpoch:s.authorityEpoch,selectionEpoch:s.selectionEpoch,revision:s.revision});
 const change=(s,extra={})=>({domain:'PLAYER_LIFE',kind:'UPDATE',playerId:s.activePlayerId,expected:expected(s),...extra});
 async function initialized(indexedDB=new IDBFactory()){const a=newAuthority(indexedDB);await a.open();await a.initialize({domain:'PLAYER_LIFE',envelope:lifeFixture().envelope,confirmLifeOnlyDraft:true});return a}
-async function rawDb(indexedDB){return new Promise((resolve,reject)=>{const r=indexedDB.open(authorityName,1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function rawDb(indexedDB,version=1){return new Promise((resolve,reject)=>{const r=indexedDB.open(authorityName,version);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 async function rawWrite(db,key,value){return new Promise((resolve,reject)=>{const tx=db.transaction('records','readwrite');tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error);value===undefined?tx.objectStore('records').delete(key):tx.objectStore('records').put(value,key)})}
 
 test('atomic Life Stage1 import/constructor inert; explicit open creates no authority',async()=>{
@@ -731,8 +731,8 @@ test('typed daily new operations reject unsupported clocks while exact committed
  const {a,clock}=await dailyFixture(),before=await a.readDaily(),input=dailyInput(before),at=clock.now;for(const bad of [NaN,Infinity,-1,'1']){clock.now=bad;await assert.rejects(a.claimDaily(input),/INVALID_CLOCK/);assert.deepEqual(await a.readDaily(),before)}clock.now=at;const claim=await a.claimDaily(input);clock.now=NaN;assert.deepEqual((await a.claimDaily(input)).receipt,claim.receipt);a.close();
 });
 test('typed daily bounded scalar receipts fit one maximal vector but a second vector is not budgeted (size model)',()=>{
- const expected={authorityEpoch:'a'.repeat(32),dailyGeneration:'b'.repeat(32),selectionEpoch:Number.MAX_SAFE_INTEGER,catalogRevision:Number.MAX_SAFE_INTEGER,dailySequence:Number.MAX_SAFE_INTEGER,records:Array.from({length:128},(_,i)=>({ref:{domain:'PRODUCT',playerId:'KAIOS-P-'+'a'.repeat(32),owner:'0x'+i.toString(16).padStart(40,'0')},revision:Number.MAX_SAFE_INTEGER}))};
- const value={schema:'DAILY_OPERATION_V1',kind:'FULFILL_DAILY',sequence:256,request:{opId:'a'.repeat(32),playerId:'KAIOS-P-'+'a'.repeat(32),claimRef:'b'.repeat(32),expected},reducerVersion:'DAILY_RULES_V1',at:8640000000000000,delivery:{rewardId:'DAILY_JOURNEY:9999-12-31',bagBefore:Number.MAX_SAFE_INTEGER-1,bagAfter:Number.MAX_SAFE_INTEGER,destinationItemId:'\ud800'.repeat(256),quantityBefore:999999,quantityAfter:1000000}};
+ const expected={authorityEpoch:'a'.repeat(32),dailyGeneration:'b'.repeat(32),retainedGeneration:'c'.repeat(32),selectionEpoch:Number.MAX_SAFE_INTEGER,catalogRevision:Number.MAX_SAFE_INTEGER,dailySequence:Number.MAX_SAFE_INTEGER,records:Array.from({length:128},(_,i)=>({ref:{domain:'PRODUCT',playerId:'KAIOS-P-'+'a'.repeat(80),owner:'0x'+i.toString(16).padStart(40,'0')},revision:Number.MAX_SAFE_INTEGER}))};
+ const value={schema:'DAILY_OPERATION_V1',kind:'FULFILL_DAILY',sequence:256,request:{opId:'a'.repeat(32),playerId:'KAIOS-P-'+'a'.repeat(80),claimRef:'b'.repeat(32),expected},reducerVersion:'DAILY_RULES_V1',at:8640000000000000,delivery:{rewardId:'DAILY_JOURNEY:9999-12-31',bagBefore:Number.MAX_SAFE_INTEGER-1,bagAfter:Number.MAX_SAFE_INTEGER,destinationItemId:'\ud800'.repeat(256),quantityBefore:999999,quantityAfter:1000000}};
  const bytes=v=>new TextEncoder().encode(JSON.stringify({key:'daily-operation:'+'a'.repeat(32),value:v})).byteLength;assert.ok(bytes(value)<dailyLimits.entryBytes);assert.ok(bytes({...value,forbiddenResultVector:expected.records})>dailyLimits.entryBytes);
 });
 
@@ -759,4 +759,142 @@ test('typed daily current fulfillment projection must corroborate receipt destin
 });
 test('typed daily merge preserves existing weight and opaque metadata under the original matching rule',async()=>{
  const {a,idb,selected}=await dailyFixture(),before=await a.readDaily(),bag=structuredClone(domainValue(before.records,'BACKPACK',selected)),db=await rawDb(idb);storeItem(bag,{itemId:'OLD-STACK',kind:'MATERIAL',name:'每日星塵',qty:2,weightEach:1,meta:{opaque:'preserved'}});await rawWrite(db,'BACKPACK:'+selected,{revision:1,data:bag});db.close();const claim=await a.claimDaily(dailyInput(await a.readDaily()));await a.fulfillDaily(dailyInput(await a.readDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));const item=domainValue((await a.readDaily()).records,'BACKPACK',selected).items[0];assert.equal(item.weightEach,1);assert.equal(item.qty,3);assert.deepEqual(item.meta,{opaque:'preserved'});a.close();
+});
+
+// Retained protocol admission is synthetic direct fake-IDB seeding only. No
+// runtime initializer, promotion, installed repair or live event writer exists.
+const retainedSchema='KAIOS_LOCAL_GAME_RETAINED_DAILY_DRAFT_V1';
+const retainedLimits={censusKeys:256,operationSlots:32,checkpointBytes:16777216,entryBytes:12582912,totalBytes:33554432,fulfillmentBytes:2097152,headsBytes:65536,captureBytes:67108864};
+const entryBytes=(key,value)=>new TextEncoder().encode(JSON.stringify({key,value})).length;
+const retainedHash=async value=>Buffer.from(await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value)))).toString('hex');
+async function rawRows(idb,version=1){const db=await rawDb(idb,version);try{return await new Promise((resolve,reject)=>{const tx=db.transaction('records','readonly'),store=tx.objectStore('records'),result={};tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(tx.error);const r=store.openCursor();r.onsuccess=()=>{const c=r.result;if(c){result[c.key]=c.value;c.continue()}}})}finally{db.close()}}
+async function retainedFixture(options={}){
+ const f=await dailyFixture(options);
+ if(options.futureDays){const original=f.clock.now,storage=memory();storage.setItem(PLAYER_LIFE_STORAGE_KEY,JSON.stringify(domainValue((await f.a.readDaily()).records,'PLAYER_LIFE')));const life=make({storage,now:()=>f.clock.now});for(let n=1;n<=options.futureDays;n++){f.clock.now=original+n*86400000;finishDaily(life)}f.clock.now=original;const db=await rawDb(f.idb);await rawWrite(db,'PLAYER_LIFE',JSON.parse(storage.getItem(PLAYER_LIFE_STORAGE_KEY)));db.close()}
+ if(options.stack){const s=await f.a.readDaily(),bag=structuredClone(domainValue(s.records,'BACKPACK',f.selected));storeItem(bag,{itemId:'ADMITTED-STACK',kind:'MATERIAL',name:'每日星塵',qty:3,weightEach:.5,meta:{opaque:'admitted'}},{at:f.clock.now});const db=await rawDb(f.idb);await rawWrite(db,'BACKPACK:'+f.selected,{revision:0,data:bag});db.close()}
+ const before=await f.a.readDaily(),rows=await rawRows(f.idb),bagKey='BACKPACK:'+f.selected,generation='d'.repeat(32);
+ rows.$authority={...rows.$authority,schema:retainedSchema,retainedProtocol:{generation,targetPlayerId:f.selected,limits:retainedLimits}};
+ rows.$initialized={...rows.$initialized,retainedGeneration:generation};
+ const anchors=[];for(const key of ['$authority','$initialized','archive:'+rows.$authority.authorityEpoch,...rows.$authority.catalog.map(e=>fullKey(e.ref)).filter(k=>!['PLAYER_LIFE',bagKey].includes(k))].sort())anchors.push({key,present:Object.hasOwn(rows,key),digest:await retainedHash(Object.hasOwn(rows,key)?{present:true,value:rows[key]}:{present:false})});
+ const checkpoint={schema:'RETAINED_DAILY_CHECKPOINT_V1',generation,targetPlayerId:f.selected,life:rows.PLAYER_LIFE,bag:rows[bagKey],daily:rows.$daily,anchors};checkpoint.digest=await retainedHash(checkpoint);rows['$retained-checkpoint']=checkpoint;
+ const acceptedBytes=entryBytes('$retained-checkpoint',checkpoint)+['$authority','$initialized','archive:'+rows.$authority.authorityEpoch].reduce((n,k)=>n+entryBytes(k,rows[k]),0)+retainedLimits.headsBytes;
+ const head={schema:'RETAINED_DAILY_HEAD_V1',generation,sequence:0,checkpointDigest:checkpoint.digest,tipDigest:checkpoint.digest,records:before.records.map(({ref,revision})=>({ref,revision})),acceptedBytes,reservedBytes:0,reservedSlots:0};head.digest=await retainedHash(head);rows.$retained=head;
+ const db=await rawDb(f.idb);for(const [key,value] of Object.entries(rows))await rawWrite(db,key,value);db.close();return {...f,rows};
+}
+const retainedInput=(s,opId='1'.repeat(32),extra={})=>({...dailyInput(s,opId,extra),expected:{...dailyExpected(s),retainedGeneration:s.retained.generation}});
+test('retained daily first claim retains an immutable obligation and inspection writes nothing (fake-IDB)',async()=>{
+ const {a,idb,selected}=await retainedFixture(),before=await a.readRetainedDaily(),input=retainedInput(before),claim=await a.claimRetainedDaily(input),after=await a.readRetainedDaily(),rows=await rawRows(idb);
+ assert.equal(after.daily.pending.length,1);assert.equal(domainValue(after.records,'PLAYER_LIFE').players[selected].xp-domainValue(before.records,'PLAYER_LIFE').players[selected].xp,25);
+ const inspection=await a.inspectDailyReconstruction();assert.equal(inspection.status,'VERIFIED_CURRENT');assert.equal(inspection.sequence,1);assert.deepEqual(inspection.candidate,after);assert.deepEqual(await rawRows(idb),rows);
+ assert.deepEqual((await a.claimRetainedDaily(input)).receipt,claim.receipt);assert.deepEqual(await rawRows(idb),rows);a.close();
+});
+test('retained daily missing covered projections reconstruct only the latest pending or consumed state',async()=>{
+ for(const fulfilled of [false,true]){const {a,idb,selected}=await retainedFixture(),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily()));if(fulfilled)await a.fulfillRetainedDaily(retainedInput(await a.readRetainedDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));const latest=await a.readRetainedDaily(),db=await rawDb(idb);await rawWrite(db,'PLAYER_LIFE',undefined);await rawWrite(db,'BACKPACK:'+selected,{corrupt:true});db.close();const damaged=await rawRows(idb),inspection=await a.inspectDailyReconstruction();assert.equal(inspection.status,'RECONSTRUCTION_CANDIDATE');assert.deepEqual(inspection.candidate,latest);assert.equal(inspection.candidate.daily.pending.length,fulfilled?0:1);await assert.rejects(a.claimRetainedDaily(retainedInput(latest,'3'.repeat(32))),/PROJECTION/);assert.deepEqual(await rawRows(idb),damaged);a.close()}
+});
+test('retained daily rejects all older mutation protocols without changing retained bytes',async()=>{
+ const {a,idb}=await retainedFixture(),s=await a.readRetainedDaily(),before=await rawRows(idb);for(const call of [()=>a.readDaily(),()=>a.claimDaily(retainedInput(s)),()=>a.fulfillDaily(retainedInput(s,'2'.repeat(32),{claimRef:'1'.repeat(32)})),()=>a.readGame(),()=>a.commandGame(gameCommand(s),()=>{}),()=>a.read(),()=>a.command({domain:'PLAYER_LIFE',kind:'UPDATE',playerId:s.activePlayerId,expected:{authorityEpoch:s.authorityEpoch,selectionEpoch:s.selectionEpoch,revision:0}},()=>{})])await assert.rejects(async()=>call(),/RETAINED/);assert.deepEqual(await rawRows(idb),before);assert.throws(()=>a.restore(),/NOT_IMPLEMENTED/);a.close();
+});
+test('retained daily missing tail preserves all bytes and never chooses an older good state',async()=>{
+ const {a,idb}=await retainedFixture(),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily())),db=await rawDb(idb);await rawWrite(db,'retained-postimage:'+claim.receipt.request.opId,undefined);db.close();const damaged=await rawRows(idb);await assert.rejects(a.inspectDailyReconstruction(),/RETAINED/);assert.deepEqual(await rawRows(idb),damaged);a.close();
+});
+async function retainedWriteRows(idb,rows){const db=await rawDb(idb);try{for(const [k,v] of Object.entries(rows))await rawWrite(db,k,v)}finally{db.close()}}
+async function resealRetainedFixture(rows){
+ const cp=rows['$retained-checkpoint'];delete cp.digest;cp.digest=await retainedHash(cp);let previous=cp.digest;
+ const entries=Object.entries(rows).filter(([k])=>k.startsWith('retained-postimage:')).map(([,v])=>v).sort((a,b)=>a.sequence-b.sequence);
+ for(const e of entries){e.previousDigest=previous;e.receiptDigest=await retainedHash(rows['daily-operation:'+e.opId]);delete e.digest;e.digest=await retainedHash(e);previous=e.digest}
+ const h=rows.$retained;h.checkpointDigest=cp.digest;h.tipDigest=previous;h.acceptedBytes=entryBytes('$retained-checkpoint',cp)+['$authority','$initialized','archive:'+rows.$authority.authorityEpoch].reduce((n,k)=>n+entryBytes(k,rows[k]),0)+entries.reduce((n,e)=>n+entryBytes('retained-postimage:'+e.opId,e)+entryBytes('daily-operation:'+e.opId,rows['daily-operation:'+e.opId]),0)+retainedLimits.headsBytes;delete h.digest;h.digest=await retainedHash(h);
+}
+test('retained daily valid-checksum semantic edits to XP entitlement fields or custody still HOLD',async()=>{
+ for(const kind of ['UNCHANGED_PROFILE','QUANTITY']){
+  const {a,idb,selected}=await retainedFixture(),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily()));let op=claim.receipt.request.opId;
+  if(kind==='QUANTITY')op=(await a.fulfillRetainedDaily(retainedInput(await a.readRetainedDaily(),'2'.repeat(32),{claimRef:op}))).receipt.request.opId;
+  const rows=await rawRows(idb),image=rows['retained-postimage:'+op];
+  if(kind==='UNCHANGED_PROFILE')image.value.players[selected].displayName='Structurally valid unsolicited profile edit';else{image.value.data.items[0].qty++;rows['daily-operation:'+op].delivery.quantityAfter++}
+  rows[image.key]=structuredClone(image.value);await resealRetainedFixture(rows);await retainedWriteRows(idb,rows);
+  await assert.rejects(a.inspectDailyReconstruction(),/RETAINED_SEMANTIC/);assert.deepEqual(await rawRows(idb),rows);a.close();
+ }
+});
+test('retained daily rejects swapped physical receipt or postimage keys and orphaned entries',async()=>{
+ for(const kind of ['daily-operation:','retained-postimage:','orphan']){
+  const {a,idb}=await retainedFixture(),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily()));await a.fulfillRetainedDaily(retainedInput(await a.readRetainedDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));const rows=await rawRows(idb);
+  if(kind==='orphan')rows['retained-postimage:'+'3'.repeat(32)]=structuredClone(rows['retained-postimage:'+'1'.repeat(32)]);else [rows[kind+'1'.repeat(32)],rows[kind+'2'.repeat(32)]]=[rows[kind+'2'.repeat(32)],rows[kind+'1'.repeat(32)]];
+  await retainedWriteRows(idb,rows);await assert.rejects(a.inspectDailyReconstruction(),/RETAINED/);assert.deepEqual(await rawRows(idb),rows);a.close();
+ }
+});
+test('retained daily wrong incarnation forged request and post-claim expected edits cannot replay',async()=>{
+ const {a,idb}=await retainedFixture(),s=await a.readRetainedDaily(),input=retainedInput(s);await a.claimRetainedDaily(input);const saved=await rawRows(idb);
+ for(const bad of [{...input,expected:{...input.expected,retainedGeneration:'e'.repeat(32)}},{...input,expected:dailyExpected(s)},{...input,expected:{...input.expected,dailySequence:1}},{...input,amount:25},{...input,eligible:true}])await assert.rejects(a.claimRetainedDaily(bad));
+ await assert.rejects(a.inspectDailyReconstruction({targetRevision:0}),/INPUT_FORBIDDEN/);assert.deepEqual(await rawRows(idb),saved);a.close();
+});
+test('retained daily anchors selection catalog provenance and higher projection revisions are immutable',async()=>{
+ for(const change of ['ANCHOR','SELECTION','CATALOG','LEGACY','HIGHER','CHECKPOINT','HEAD','TAIL_SEQUENCE']){
+  const {a,idb,other,selected}=await retainedFixture(),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily())),rows=await rawRows(idb);
+  if(change==='ANCHOR')rows['BACKPACK:'+other].revision++;if(change==='SELECTION'){rows.$authority.selectionEpoch++;rows.$authority.activePlayerId=other}if(change==='CATALOG')rows.$authority.catalogRevision++;if(change==='LEGACY')rows['archive:'+rows.$authority.authorityEpoch].dailyProtocol.legacyClaims.push(JSON.stringify([selected,claim.receipt.claim.rewardId]));if(change==='HIGHER')rows.PLAYER_LIFE.revision++;if(change==='CHECKPOINT')rows['$retained-checkpoint'].life.players[selected].displayName='altered';if(change==='HEAD')rows.$retained.sequence++;if(change==='TAIL_SEQUENCE')rows['retained-postimage:'+claim.receipt.request.opId].sequence++;
+  await retainedWriteRows(idb,rows);await assert.rejects(a.inspectDailyReconstruction());assert.deepEqual(await rawRows(idb),rows);a.close();
+ }
+});
+test('retained daily unsupported raw values including present undefined are held before JSON cloning',async()=>{
+ const cycle={};cycle.self=cycle;
+ for(const value of [undefined,new Date(0),new Map([['x',1]]),{revision:-0},cycle]){
+  const {a,idb}=await retainedFixture(),db=await rawDb(idb);await new Promise((resolve,reject)=>{const tx=db.transaction('records','readwrite');tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error);tx.objectStore('records').put(value,'PLAYER_LIFE')});db.close();const damaged=await rawRows(idb);assert.ok(Object.hasOwn(damaged,'PLAYER_LIFE'));await assert.rejects(a.inspectDailyReconstruction(),/UNSUPPORTED_DATA/);assert.deepEqual(await rawRows(idb),damaged);a.close();
+ }
+});
+test('retained daily older valid projections are candidates without resurrecting consumed delivery',async()=>{
+ const {a,idb,selected,rows:initial}=await retainedFixture(),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily()));await a.fulfillRetainedDaily(retainedInput(await a.readRetainedDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));const latest=await a.readRetainedDaily(),db=await rawDb(idb);await rawWrite(db,'PLAYER_LIFE',initial.PLAYER_LIFE);await rawWrite(db,'BACKPACK:'+selected,initial['BACKPACK:'+selected]);db.close();const damaged=await rawRows(idb),candidate=await a.inspectDailyReconstruction();assert.equal(candidate.status,'RECONSTRUCTION_CANDIDATE');assert.deepEqual(candidate.candidate,latest);assert.equal(candidate.candidate.daily.pending.length,0);assert.equal(domainValue(candidate.candidate.records,'BACKPACK',selected).items[0].qty,1);assert.deepEqual(await rawRows(idb),damaged);a.close();
+});
+async function abortRetainedRequest(idb,key,work){
+ const db=await rawDb(idb),prototype=Object.getPrototypeOf(db.transaction('records','readonly').objectStore('records')),old={put:prototype.put,add:prototype.add};let successes=0;
+ for(const method of ['put','add'])prototype[method]=function(value,target){const r=old[method].call(this,value,target);if(target===key){const tx=this.transaction;r.addEventListener('success',()=>{successes++;tx.abort()})}return r};
+ try{await assert.rejects(work(),/AUTHORITY_TRANSACTION_ABORTED|AUTHORITY_TRANSACTION_FAILED|AbortError/)}finally{Object.assign(prototype,old);db.close()}assert.equal(successes,1);
+}
+test('retained daily each write-stage abort leaves projection receipt head and postimage wholly unchanged',async()=>{
+ for(const kind of ['CLAIM','FULFILL'])for(const stage of ['projection','receipt','daily','postimage','head']){
+  const {a,idb,selected}=await retainedFixture();let claim;if(kind==='FULFILL')claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily()));const before=await rawRows(idb),s=await a.readRetainedDaily(),input=retainedInput(s,kind==='CLAIM'?'1'.repeat(32):'2'.repeat(32),kind==='FULFILL'?{claimRef:claim.receipt.request.opId}:{}),work=()=>kind==='CLAIM'?a.claimRetainedDaily(input):a.fulfillRetainedDaily(input);
+  const key={projection:kind==='CLAIM'?'PLAYER_LIFE':'BACKPACK:'+selected,receipt:'daily-operation:'+input.opId,daily:'$daily',postimage:'retained-postimage:'+input.opId,head:'$retained'}[stage];await abortRetainedRequest(idb,key,work);assert.deepEqual(await rawRows(idb),before);assert.equal((await work()).ok,true);assert.equal((await work()).replayed,true);a.close();
+ }
+});
+test('retained daily competing asynchronous preparations require full CAS with one winning claim',async()=>{
+ const {a,idb,clock}=await retainedFixture(),b=newAuthority(idb,{now:()=>clock.now});await b.openGame();const s=await a.readRetainedDaily(),results=await Promise.allSettled([a.claimRetainedDaily(retainedInput(s)),b.claimRetainedDaily(retainedInput(s,'3'.repeat(32)))]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.match(results.find(r=>r.status==='rejected').reason.message,/REVISION_CONFLICT/);assert.equal((await a.readRetainedDaily()).daily.pending.length,1);a.close();b.close();
+});
+test('retained daily hash-time byte change at the same revision invalidates both command and inspection',async()=>{
+ for(const inspection of [false,true]){
+  const f=await retainedFixture(),s=await f.a.readRetainedDaily();f.a.close();let armed=true;
+  const a=newAuthority(f.idb,{now:()=>f.clock.now,crypto:{subtle:{async digest(...args){if(armed){armed=false;const db=await rawDb(f.idb),row=structuredClone(f.rows.PLAYER_LIFE);row.players[f.selected].displayName='Changed during hashing';await rawWrite(db,'PLAYER_LIFE',row);db.close()}return globalThis.crypto.subtle.digest(...args)}}}});await a.openGame();await assert.rejects(inspection?a.inspectDailyReconstruction():a.claimRetainedDaily(retainedInput(s)),/REVISION_CONFLICT/);const after=await rawRows(f.idb);assert.equal(after.$daily.sequence,0);assert.equal(after.$retained.sequence,0);assert.equal(after.PLAYER_LIFE.players[f.selected].displayName,'Changed during hashing');a.close();
+ }
+});
+test('retained daily crypto failure and close during preparation preserve all rows without acknowledgement',async()=>{
+ for(const mode of ['FAIL','CLOSE','VERSIONCHANGE']){
+  const f=await retainedFixture(),s=await f.a.readRetainedDaily(),before=await rawRows(f.idb);f.a.close();let armed=true,a;
+  a=newAuthority(f.idb,{now:()=>f.clock.now,crypto:{subtle:{async digest(...args){if(armed){armed=false;if(mode==='FAIL')throw Error('SYNTHETIC_HASH_FAILURE');if(mode==='CLOSE')a.close();if(mode==='VERSIONCHANGE')await new Promise((resolve,reject)=>{const r=f.idb.open(authorityName,2);r.onerror=()=>reject(r.error);r.onsuccess=()=>{r.result.close();resolve()}})}return globalThis.crypto.subtle.digest(...args)}}}});await a.openGame();await assert.rejects(a.claimRetainedDaily(retainedInput(s)),mode==='FAIL'?/SYNTHETIC_HASH_FAILURE/:/AUTHORITY_CLOSED/);
+  assert.deepEqual(await rawRows(f.idb,mode==='VERSIONCHANGE'?2:1),before);a.close();
+ }
+});
+test('retained daily rejects a negative-zero fulfillment clock before any durable write',async()=>{
+ const {a,idb,clock}=await retainedFixture(),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily())),s=await a.readRetainedDaily(),saved=await rawRows(idb);clock.now=-0;await assert.rejects(a.fulfillRetainedDaily(retainedInput(s,'2'.repeat(32),{claimRef:claim.receipt.request.opId})),/UNSUPPORTED_DATA/);assert.deepEqual(await rawRows(idb),saved);assert.deepEqual(await a.readRetainedDaily(),s);a.close();
+});
+test('retained daily capacity is reserved before XP and fulfillment uses reserved room (fake-IDB)',async()=>{
+ // All eligible day events are admitted BEFORE the frozen checkpoint. There is
+ // no post-admission synthetic event or capacity mutation in this protocol.
+ const {a,idb,clock,selected}=await retainedFixture({futureDays:20}),start=clock.now;let accepted=0,last=null;
+ for(let n=0;n<=20;n++){clock.now=start+n*86400000;const before=await a.readRetainedDaily(),raw=await rawRows(idb);try{last=await a.claimRetainedDaily(retainedInput(before,(n+1).toString(16).padStart(32,'0')));accepted++}catch(error){assert.match(error.message,/RETAINED_CAPACITY_HOLD/);assert.deepEqual(await rawRows(idb),raw);assert.deepEqual(await a.readRetainedDaily(),before);break}}
+ assert.ok(accepted>0&&accepted<=16);const full=await a.readRetainedDaily();assert.equal(full.retained.reservedBytes,accepted*retainedLimits.fulfillmentBytes);const xp=domainValue(full.records,'PLAYER_LIFE').players[selected].xp;
+ const paid=await a.fulfillRetainedDaily(retainedInput(full,'f'.repeat(32),{claimRef:last.receipt.request.opId}));assert.equal(paid.ok,true);const after=await a.readRetainedDaily();assert.equal(domainValue(after.records,'PLAYER_LIFE').players[selected].xp,xp);assert.equal(domainValue(after.records,'BACKPACK',selected).items[0].qty,1);assert.equal(after.daily.pending.length,accepted-1);assert.ok(after.retained.acceptedBytes+after.retained.reservedBytes<=retainedLimits.totalBytes);a.close();
+});
+test('retained daily bag-full keeps the obligation and unprotected space changes force HOLD',async()=>{
+ const {a,idb,selected}=await retainedFixture({fullBag:true}),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily())),pending=await a.readRetainedDaily(),input=retainedInput(pending,'2'.repeat(32),{claimRef:claim.receipt.request.opId}),saved=await rawRows(idb);assert.equal((await a.fulfillRetainedDaily(input)).reason,'BACKPACK_SLOT_FULL');assert.deepEqual(await rawRows(idb),saved);
+ const db=await rawDb(idb),bag=structuredClone(saved['BACKPACK:'+selected]);bag.data.items=[];await rawWrite(db,'BACKPACK:'+selected,bag);db.close();const changed=await rawRows(idb);await assert.rejects(a.fulfillRetainedDaily(input),/PROJECTION_HOLD/);assert.deepEqual(await rawRows(idb),changed);a.close();
+});
+test('retained daily reconstruction conserves admitted stack identity quantity and opaque metadata',async()=>{
+ const {a,idb,selected}=await retainedFixture({stack:true}),claim=await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily()));await a.fulfillRetainedDaily(retainedInput(await a.readRetainedDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));const s=await a.readRetainedDaily(),bag=domainValue(s.records,'BACKPACK',selected),db=await rawDb(idb);assert.equal(bag.items.length,1);assert.equal(bag.items[0].itemId,'ADMITTED-STACK');assert.equal(bag.items[0].qty,4);assert.equal(bag.items[0].weightEach,.5);assert.deepEqual(bag.items[0].meta,{opaque:'admitted'});await rawWrite(db,'BACKPACK:'+selected,undefined);db.close();assert.deepEqual((await a.inspectDailyReconstruction()).candidate,s);a.close();
+});
+test('retained daily exact replay and repeated inspection never attempt a write',async()=>{
+ const {a,idb}=await retainedFixture(),input=retainedInput(await a.readRetainedDaily()),claim=await a.claimRetainedDaily(input),db=await rawDb(idb),prototype=Object.getPrototypeOf(db.transaction('records').objectStore('records')),old=Object.fromEntries(['put','add','delete','clear'].map(k=>[k,prototype[k]]));let attempts=0;for(const k of Object.keys(old))prototype[k]=function(){attempts++;throw Error('UNEXPECTED_WRITE')};
+ try{assert.deepEqual((await a.claimRetainedDaily(input)).receipt,claim.receipt);for(let n=0;n<3;n++)assert.equal((await a.inspectDailyReconstruction()).status,'VERIFIED_CURRENT')}finally{Object.assign(prototype,old);db.close();a.close()}assert.equal(attempts,0);
+});
+test('retained daily unknown census names are not read and census overflow is bounded',async()=>{
+ for(const overflow of [false,true]){const {a,idb}=await retainedFixture(),db=await rawDb(idb);for(let n=0;n<(overflow?257:1);n++)await rawWrite(db,'unrelated-private-value-'+n,{synthetic:true});const prototype=Object.getPrototypeOf(db.transaction('records').objectStore('records')),get=prototype.get,all=prototype.getAllKeys;let unrelatedReads=0,requestedLimit=null;prototype.get=function(k){if(k.startsWith('unrelated-'))unrelatedReads++;return get.call(this,k)};prototype.getAllKeys=function(query,count){requestedLimit=count;return all.call(this,query,count)};try{await assert.rejects(a.inspectDailyReconstruction(),/RETAINED/)}finally{prototype.get=get;prototype.getAllKeys=all;db.close();a.close()}assert.equal(unrelatedReads,0);assert.equal(requestedLimit,257)}
+});
+test('retained daily missing checkpoint or head and malformed compact heads never fall back',async()=>{
+ for(const key of ['$retained-checkpoint','$retained','$daily']){const {a,idb}=await retainedFixture(),db=await rawDb(idb);await rawWrite(db,key,undefined);db.close();const damaged=await rawRows(idb);await assert.rejects(a.inspectDailyReconstruction(),/RETAINED/);assert.deepEqual(await rawRows(idb),damaged);a.close()}
+ const {a,idb}=await retainedFixture(),db=await rawDb(idb);await rawWrite(db,'$daily',{extra:'x'.repeat(2100)});db.close();const damaged=await rawRows(idb);await assert.rejects(a.inspectDailyReconstruction(),/RETAINED_UNSUPPORTED_DATA_HOLD/);assert.deepEqual(await rawRows(idb),damaged);a.close();
 });
