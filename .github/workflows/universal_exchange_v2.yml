@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
       - name: Confirm exact pull request head and clean patch
         if: github.event_name == 'pull_request'
         shell: bash
