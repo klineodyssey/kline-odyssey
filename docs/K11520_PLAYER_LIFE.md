@@ -663,3 +663,129 @@ the same browser task, retains all existing8px clearance assertions, and passes
 the intended5-second timeout in the correct Playwright argument. It adds bounded
 failure evidence without changing runtime/controller behavior or retrying a
 failed assertion. No Responsive harness/public-controller changes are imported.
+
+### Integration dependency map (reviewed design, not live cutover)
+
+The native adapter checkpoint at PR508 head
+`b8909f4a71c7be5b5150234c45f186f9c1bfaf05`, tree
+`f8ff9c9ca35531d517a0b638899c1c877885544d`, passed all 12 mandatory native cases
+in both push and PR lanes. The eight triggered workflows passed. Actual pinned
+legacy writes, request-success abort and clean process replacement/reopen were
+verified against the uploaded records and source hashes. These are synthetic
+adapter fixtures, not production migration. The failed earlier native startup
+checkpoint remains preserved. Exact pre-set interleaving, BFCache and physical
+quota/power-loss tests are still unexercised.
+
+The remaining writer boundaries, using existing owners, are:
+
+- Life runtime/UI: creation, profile/consent, home, events, exploration, daily,
+  wallet proof/nonces, selection, import and restore need separate closed commands.
+- Main/scoped-storage startup: ownership claims, copy-on-read, SESSION activation
+  and default tutorial writes must move behind explicit admitted hydration.
+- Main/world/market-Life: XYZ/session/tutorial precedence and training observation
+  persistence need explicit contracts. Training is not silently included in the
+  present four-domain authority or promoted to reward authority.
+- Combat, daily, Cargo and simulation progression: declare every Life/product/bag
+  participant and derive rewards from the existing rules. UI-supplied amounts or
+  success flags do not authorize a grant.
+- Product/simulation: namespace changes, playtime/counters, spending, orders,
+  observations, close/cancel and receipt rewards need their own typed transitions.
+- Courier: debit+premium activation, delivery+credit acknowledgement,
+  insurance+credit acknowledgement, raid and loot need participant-bound commits.
+  Legacy payment hints never authorize replay or debit.
+- Bag/living/world-item owners: capture/release/drop/pickup commit conserved
+  custody and consumption before idempotent rendered-world reconciliation.
+- Player UI and the existing Recovery Center both write Life/import/selection.
+  A game-only boot gate is insufficient. The cloud outbox remains transport state.
+
+Order: closed semantic commands and consumption evidence; complete writer and
+custody contracts; existing bootstrap/entry hydration plus coherent module
+admission; reviewed full migration promotion; then native/UI integration QA.
+Current `commandGame` is trusted mechanics, not a public semantic reducer API.
+No new loader, world authority, balance ledger, server or live migration is added.
+
+Later review decisions include XYZ/tutorial precedence, training coverage,
+local product namespace generation (distinct from live M1 query identity), full
+custody participants, retention/compaction, legacy backup ambiguity and supported
+browser failure UX. M1 read-only identity queries must not rebind local product
+ownership. Existing sanitized exports remain unchanged; raw archives stay local.
+Latest-state reconstruction requires a complete verified checkpoint/tail and new
+revisions. Missing evidence means HOLD; same-device copies do not recover a
+cleared origin/device or authenticate a coherently rolled-back whole history.
+
+Waiting for IDB alone is not module admission: the old EVM module auto-imports
+writer UIs and the current service worker caches individual URLs. A possible
+future design uses the existing HTML import map's integrity metadata and an
+entry integrity/enforcement check before writer imports. A wrong-hash/offline
+mixed-generation browser test and explicit unsupported-browser policy are required.
+This is design only; see the [HTML module integrity model](https://html.spec.whatwg.org/multipage/webappapis.html#import-map-processing-model)
+and [Chrome 127 release notes](https://developer.chrome.com/release-notes/127?hl=en).
+
+### Inert daily claim/fulfillment semantic checkpoint
+
+`KAIOS_LOCAL_GAME_DAILY_DRAFT_V1` uses the same authority database and record store.
+It is explicitly `UNINTEGRATED_DRAFT`, has no public initializer or migration
+promotion, and has zero production typed-command callers. Isolated fake-IDB
+fixtures admit its marker, fixed catalog, protocol generation and immutable legacy
+provenance. Stage1 and generic `commandGame` reject this protocol; the prior full
+mechanical protocol remains unchanged. This is not general retained history,
+reconstruction, restoration or live game authority.
+
+The only new commands are `claimDaily({opId,playerId,expected})` and
+`fulfillDaily({opId,playerId,claimRef,expected})`; `readDaily()` reads their validated
+state. They concern Life and its bag, not wallet identity or a product namespace.
+No command accepts a day, amount, item, timestamp, eligibility assertion or reducer.
+The expected context contains the authority/protocol incarnations, shared selection
+epoch, catalog revision, daily sequence and complete canonical record vector.
+
+For a new claim, the controlled local UTC clock and canonical validated Life events
+feed the existing `dailyFor`/event projection rules: three kills, one six-phase
+practice and ten 5m exploration events, not already claimed that day. The unchanged
+reward is 25 player XP and 20 engine XP. The fixed item factory matches the existing
+main-runtime recipe exactly: one MATERIAL 每日星塵, weight 0.02, UNCOMMON, with the
+same PlayerID/reward identity. A source-behavior regression guards that compatibility;
+main/UI callsites are not refactored in this checkpoint.
+
+CLAIM atomically appends the Life event, derived XP and immutable claim/obligation
+receipt. FULFILL atomically uses the existing bag insertion/merge rule, records the
+bag reward tombstone and appends a separate immutable fulfillment receipt. Pending
+means a claim with no fulfillment; the claim is never rewritten. Quantity evidence
+binds the incoming one-unit entitlement to the actual destination stack. Missing an
+item later does not revive consumed delivery. Full bag/weight/receipt-cap denial
+keeps XP and the obligation, without an accepted fulfillment or reservation loss.
+Transaction failure acknowledges nothing and leaves the original records intact. When the
+current bag revision equals a fulfillment's resulting revision, its destination,
+quantity, insertion timestamp and matching stack attributes must agree. A new
+stack must equal the full normalized fixed recipe. Later bag revisions retain
+consumption without assuming the item remains present; full historical postimage
+verification is outside this checkpoint.
+
+Input/state/current owner and selection context are checked before idempotency.
+An exact opId replay compares its normalized original request, including its
+original expected vector, and returns immutable historical evidence without writes.
+It does not claim that its old projection is current. Changed request/claimRef or
+selection context rejects. A new operation requires full current CAS. Exact claim
+replay after midnight retains the original day; fulfillment always uses claimRef.
+New claims derive the current day. Clock values are checked without coercion.
+
+Legacy claim and delivery provenance is declared, bounded, and matched to the
+admitted baseline archive. It cannot be inferred from a missing receipt. An old
+claimed event or delivery tombstone cannot create a new entitlement or authorize
+backpay. Contradictions preserve the original state and HOLD.
+
+Fixed prototype limits, measured as UTF-8 JSON containing each entry's key/value:
+256 accepted-plus-reserved operation slots; 1,048,576 accepted-plus-reserved receipt
+bytes; 32,768 bytes per receipt entry. Each pending claim reserves one slot and 32,768
+bytes for fulfillment before XP commits. Fulfillment exchanges its reservation for
+its actual bounded receipt. No eviction occurs. Protocol/provenance metadata is
+separately capped at 65,536 bytes and 256 entries per legacy category; canonical
+record limits are unchanged. These application budgets do not guarantee physical
+IDB quota. One complete expected vector is stored, never a second result vector,
+full records or arbitrary stack metadata. A separate capacity model covers the
+maximum 128-reference receipt shape and an integration fixture reaches the logical
+byte boundary, refuses the next claim before XP, then fulfills from reserved space.
+
+All daily tests are in-memory model evidence, separate from the earlier native
+adapter run. Full-bag, selected-player and next-day setup changes are explicitly
+synthetic fixture readmissions; they do not establish missing live switch, removal
+or event commands. Native daily integration, whole-Life P0 and release remain HOLD.

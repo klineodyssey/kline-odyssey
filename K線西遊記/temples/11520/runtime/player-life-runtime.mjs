@@ -41,6 +41,11 @@ export const GAMEPLAY_UNLOCKS=Object.freeze([
   {id:'ENGINE_MASTERY',label:'GA600 核心成就',playerLevel:6,engineLevel:4}
 ].map(Object.freeze));
 export const DAILY_JOURNEY_RULES=Object.freeze({kills:3,sixPhase:1,distanceMeters:50,stepMeters:5,playerXp:25,engineXp:20,clock:'UTC_LOCAL_CANDIDATE'});
+// Fixed existing daily item recipe. Additive/inert until a reviewed caller uses it.
+export function dailyJourneyRewardItem(playerId,rewardId){
+  if(typeof playerId!=='string'||!ID.test(playerId)||typeof rewardId!=='string'||!rewardId.startsWith('DAILY_JOURNEY:')||!text(rewardId,128))fail('INVALID_DAILY_REWARD_ID');
+  return {itemId:rewardId,rewardId,kind:'MATERIAL',name:'每日星塵',qty:1,weightEach:.02,meta:{scope:'LOCAL_GAME_ONLY',playerId,rarity:'UNCOMMON'}};
+}
 const QUEST_IDS=Object.freeze(['FIRST_JOURNEY','SIX_PHASE_INTRO','HISTORICAL_TRAINING']);
 const clone=value=>JSON.parse(JSON.stringify(value));
 const fail=code=>{throw Object.assign(new Error(code),{code})};
@@ -266,6 +271,9 @@ const AUTHORITY_STORE='records';
 const AUTHORITY_READ_KEYS=['$authority',AUTHORITY_DOMAIN,'$initialized','$keys'];
 const SOURCE_HASH_ENCODING='JSON_SOURCE_STRING_V1';
 const FULL_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_FULL_DRAFT_V1';
+const DAILY_AUTHORITY_SCHEMA='KAIOS_LOCAL_GAME_DAILY_DRAFT_V1';
+const DAILY_PROTOCOL_LIMITS=Object.freeze({operationSlots:256,entryBytes:32768,totalBytes:1048576,protocolBytes:65536,legacyEntries:256});
+const DAILY_OP=/^[a-f0-9]{32}$/;
 const FULL_AUTHORITY_DOMAINS=['PLAYER_LIFE','BACKPACK','PRODUCT','COURIER'];
 const GAME_CAPTURE_SCHEMA='LOCAL_GAME_MIGRATION_CAPTURE_V1';
 const GAME_CAPTURE_POLICY='STRICT_SCOPED_REVIEW_V1';
@@ -304,7 +312,7 @@ function authoritySnapshot(meta,envelope){
   if(meta.activePlayerId!==envelope.activePlayerId)fail('CORRUPT_AUTHORITY');
   return clone({status:'READY',coverage:meta.coverage,integration:meta.integration,authorityEpoch:meta.authorityEpoch,selectionEpoch:meta.selectionEpoch,revision:envelope.revision,activePlayerId:envelope.activePlayerId,envelope});
 }
-export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GAME_AUTHORITY_DATABASE}={}){
+export function createLocalGameAuthority({indexedDB,crypto,now=Date.now,databaseName=LOCAL_GAME_AUTHORITY_DATABASE}={}){
   // No global storage getter, DB request, event listener, or random generation
   // occurs here. Explicit open is the first interaction with browser storage.
   if(typeof databaseName!=='string'||(databaseName!==LOCAL_GAME_AUTHORITY_DATABASE&&!/^KAIOS_LOCAL_GAME_TEST:[a-zA-Z0-9_-]{1,100}$/.test(databaseName)))fail('INVALID_AUTHORITY_DATABASE');
@@ -359,6 +367,7 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
   }
   const loaded=values=>{
     const meta=values.$authority,envelope=values[AUTHORITY_DOMAIN],marker=values.$initialized;
+    if(meta?.schema===DAILY_AUTHORITY_SCHEMA)fail('DAILY_AUTHORITY_REQUIRES_DAILY_API');
     if(meta?.schema===FULL_AUTHORITY_SCHEMA)fail('FULL_AUTHORITY_REQUIRES_GAME_API');
     const history=values.$keys?.some(key=>typeof key==='string'&&key.startsWith('archive:'));
     if(meta===undefined&&envelope===undefined){if(marker!==undefined||history)fail('CORRUPT_AUTHORITY')}
@@ -459,7 +468,7 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     if(admitted!==generation)fail('AUTHORITY_CLOSED');
     if(typeof bag.validateCanonicalBackpack!=='function'||typeof product.validateLocalSimulationProductRecord!=='function'||typeof product.validateLocalCourierCreditTransition!=='function'||typeof courier.validateCanonicalCourierEnvelope!=='function')fail('DOMAIN_VALIDATORS_UNAVAILABLE');
     await open();if(admitted!==generation)fail('AUTHORITY_CLOSED');
-    gameRegistry=Object.freeze({bag:bag.validateCanonicalBackpack,product:product.validateLocalSimulationProductRecord,credit:product.validateLocalCourierCreditTransition,courier:courier.validateCanonicalCourierEnvelope});
+    gameRegistry=Object.freeze({bag:bag.validateCanonicalBackpack,product:product.validateLocalSimulationProductRecord,credit:product.validateLocalCourierCreditTransition,courier:courier.validateCanonicalCourierEnvelope,storeItem:bag.storeItem,normalizeItem:bag.normalizeItem});
   }
   const gameFailure=()=>fail('CORRUPT_FULL_AUTHORITY');
   function referenceKey(ref){
@@ -470,22 +479,26 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     if(ref.domain==='PRODUCT'&&Object.keys(ref).length===3&&typeof ref.owner==='string'&&(ref.owner==='guest'||/^0x[0-9a-f]{40}$/.test(ref.owner)))return 'PRODUCT:'+ref.playerId+':'+ref.owner;
     gameFailure();
   }
-  function fullCatalog(values){
+  function fullCatalog(values,protocol='full'){
+    const daily=protocol==='daily';
     const meta=values.$authority,marker=values.$initialized,census=values.$keys;
     if(meta?.schema===AUTHORITY_SCHEMA)fail('PARTIAL_AUTHORITY_REQUIRES_REVIEW');
+    if(!daily&&meta?.schema===DAILY_AUTHORITY_SCHEMA)fail('DAILY_AUTHORITY_REQUIRES_DAILY_API');
+    if(daily&&meta?.schema!==DAILY_AUTHORITY_SCHEMA)fail('DAILY_PROTOCOL_REQUIRED');
     if(meta===undefined)fail('FULL_AUTHORITY_NOT_INITIALIZED');
     exactAuthorityJson(meta);exactAuthorityJson(marker);
-    if((meta.activePlayerId!==null&&(typeof meta.activePlayerId!=='string'||!ID.test(meta.activePlayerId)))||!keys(meta,['schema','integration','coverage','authorityEpoch','selectionEpoch','activePlayerId','catalogRevision','catalog','legacyUnbound'])||meta.schema!==FULL_AUTHORITY_SCHEMA||meta.integration!==AUTHORITY_INTEGRATION||!equalData(meta.coverage,FULL_AUTHORITY_DOMAINS)||typeof meta.authorityEpoch!=='string'||!/^[a-f0-9]{32}$/.test(meta.authorityEpoch)||!integer(meta.selectionEpoch,Number.MAX_SAFE_INTEGER)||!integer(meta.catalogRevision,Number.MAX_SAFE_INTEGER)||!Array.isArray(meta.catalog)||meta.catalog.length<2||meta.catalog.length>128||!Array.isArray(meta.legacyUnbound)||meta.legacyUnbound.some(v=>typeof v!=='string')||new Set(meta.legacyUnbound).size!==meta.legacyUnbound.length)gameFailure();
-    if(!keys(marker,['authorityEpoch','coverage','catalogRevision'])||marker.authorityEpoch!==meta.authorityEpoch||marker.catalogRevision!==meta.catalogRevision||!equalData(marker.coverage,FULL_AUTHORITY_DOMAINS)||!Array.isArray(census)||!census.includes('archive:'+meta.authorityEpoch))gameFailure();
+    if((meta.activePlayerId!==null&&(typeof meta.activePlayerId!=='string'||!ID.test(meta.activePlayerId)))||!keys(meta,['schema','integration','coverage','authorityEpoch','selectionEpoch','activePlayerId','catalogRevision','catalog','legacyUnbound',...(daily?['dailyProtocol']:[])])||meta.schema!==(daily?DAILY_AUTHORITY_SCHEMA:FULL_AUTHORITY_SCHEMA)||meta.integration!==AUTHORITY_INTEGRATION||!equalData(meta.coverage,FULL_AUTHORITY_DOMAINS)||typeof meta.authorityEpoch!=='string'||!/^[a-f0-9]{32}$/.test(meta.authorityEpoch)||!integer(meta.selectionEpoch,Number.MAX_SAFE_INTEGER)||!integer(meta.catalogRevision,Number.MAX_SAFE_INTEGER)||!Array.isArray(meta.catalog)||meta.catalog.length<2||meta.catalog.length>128||!Array.isArray(meta.legacyUnbound)||meta.legacyUnbound.some(v=>typeof v!=='string')||new Set(meta.legacyUnbound).size!==meta.legacyUnbound.length)gameFailure();
+    if(daily&&marker?.dailyGeneration!==meta.dailyProtocol?.generation)gameFailure();
+    if(!keys(marker,['authorityEpoch','coverage','catalogRevision',...(daily?['dailyGeneration']:[])])||marker.authorityEpoch!==meta.authorityEpoch||marker.catalogRevision!==meta.catalogRevision||!equalData(marker.coverage,FULL_AUTHORITY_DOMAINS)||!Array.isArray(census)||!census.includes('archive:'+meta.authorityEpoch))gameFailure();
     const catalog=new Map();
     for(const entry of meta.catalog){if(!keys(entry,['ref','presence'])||Object.keys(entry).length!==2||!['PRESENT','ABSENT'].includes(entry.presence))gameFailure();const key=referenceKey(entry.ref);if(catalog.has(key))gameFailure();catalog.set(key,entry);if(census.includes(key)!==(entry.presence==='PRESENT'))gameFailure()}
     if(catalog.get('PLAYER_LIFE')?.presence!=='PRESENT'||!catalog.has('COURIER'))gameFailure();
-    for(const key of census)if(!catalog.has(key)&&!['$authority','$initialized'].includes(key)&&!(typeof key==='string'&&/^(archive|candidate):[a-f0-9]{32}$/.test(key)))gameFailure();
+    for(const key of census)if(!catalog.has(key)&&!['$authority','$initialized'].includes(key)&&!(daily&&(key==='$daily'||(typeof key==='string'&&/^daily-operation:[a-f0-9]{32}$/.test(key))))&&!(typeof key==='string'&&/^(archive|candidate):[a-f0-9]{32}$/.test(key)))gameFailure();
     return catalog;
   }
   const legacyToken=(ref,purpose,receiptId,missionId=null)=>JSON.stringify([referenceKey(ref),purpose,receiptId,missionId]);
-  function fullState(values){
-    const catalog=fullCatalog(values),meta=values.$authority,life=values.PLAYER_LIFE,records=[];authorityEnvelope(life);
+  function fullState(values,protocol='full'){
+    const catalog=fullCatalog(values,protocol),meta=values.$authority,life=values.PLAYER_LIFE,records=[];authorityEnvelope(life);
     if(meta.activePlayerId!==life.activePlayerId)gameFailure();const playerIds=Object.keys(life.players);let aggregate=JSON.stringify(meta).length;
     for(const playerId of playerIds)if(!catalog.has('BACKPACK:'+playerId)||!catalog.has('PRODUCT:'+playerId+':guest'))gameFailure();
     for(const [key,entry] of catalog){
@@ -625,6 +638,107 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
   }
 
   // Capture/review only: no full initializer, promotion, source write or restore.
+  // Closed daily-only semantic prototype. Same database/store; no initializer,
+  // promotion or generic reducer exposure. These receipts are not full recovery.
+  const dailyFailure=()=>fail('CORRUPT_DAILY_AUTHORITY');
+  const dailyShape=(v,names)=>keys(v,names)&&Object.keys(v).length===names.length;
+  const dailyBytes=(key,value)=>new TextEncoder().encode(JSON.stringify({key,value})).byteLength;
+  const dailyKey=id=>'daily-operation:'+id;
+  const dailyToken=(playerId,rewardId)=>JSON.stringify([playerId,rewardId]);
+  function dailyRequest(input,kind,base){
+    exactAuthorityJson(input,32768);
+    if(!dailyShape(input,['opId','playerId','expected',...(kind==='FULFILL_DAILY'?['claimRef']:[])])||!DAILY_OP.test(input.opId)||typeof input.opId!=='string'||typeof input.playerId!=='string'||!ID.test(input.playerId)||(kind==='FULFILL_DAILY'&&(typeof input.claimRef!=='string'||!DAILY_OP.test(input.claimRef))))fail('INVALID_DAILY_COMMAND');
+    const e=input.expected;
+    if(!dailyShape(e,['authorityEpoch','dailyGeneration','selectionEpoch','catalogRevision','dailySequence','records'])||typeof e.authorityEpoch!=='string'||!DAILY_OP.test(e.authorityEpoch)||typeof e.dailyGeneration!=='string'||!DAILY_OP.test(e.dailyGeneration)||!integer(e.selectionEpoch,Number.MAX_SAFE_INTEGER)||!integer(e.catalogRevision,Number.MAX_SAFE_INTEGER)||!integer(e.dailySequence,Number.MAX_SAFE_INTEGER)||!Array.isArray(e.records)||e.records.length!==base.records.length)fail('INVALID_DAILY_EXPECTATIONS');
+    const refs=new Map(base.records.map(r=>[referenceKey(r.ref),r.ref])),seen=new Set(),records=[];
+    for(const r of e.records){if(!dailyShape(r,['ref','revision']))fail('INVALID_DAILY_EXPECTATIONS');const key=referenceKey(r.ref);if(!refs.has(key)||seen.has(key)||(r.revision!==null&&!integer(r.revision,Number.MAX_SAFE_INTEGER)))fail('INVALID_DAILY_EXPECTATIONS');seen.add(key);records.push({ref:clone(refs.get(key)),revision:r.revision})}
+    records.sort((a,b)=>referenceKey(a.ref)<referenceKey(b.ref)?-1:referenceKey(a.ref)>referenceKey(b.ref)?1:0);
+    return {opId:input.opId,playerId:input.playerId,expected:{authorityEpoch:e.authorityEpoch,dailyGeneration:e.dailyGeneration,selectionEpoch:e.selectionEpoch,catalogRevision:e.catalogRevision,dailySequence:e.dailySequence,records},...(kind==='FULFILL_DAILY'?{claimRef:input.claimRef}:{})};
+  }
+  function dailyAccounting(receipts,pending,generation){
+    const acceptedBytes=receipts.reduce((total,r)=>total+dailyBytes(dailyKey(r.request.opId),r),0),acceptedCount=receipts.length;
+    const head={schema:'DAILY_HEAD_V1',generation,sequence:acceptedCount,acceptedCount,acceptedBytes,pendingCount:pending,reservedSlots:pending,reservedBytes:pending*DAILY_PROTOCOL_LIMITS.entryBytes};
+    if(acceptedCount+pending>DAILY_PROTOCOL_LIMITS.operationSlots||acceptedBytes+head.reservedBytes>DAILY_PROTOCOL_LIMITS.totalBytes)fail('DAILY_RECEIPT_CAPACITY');return head;
+  }
+  function dailyState(values){
+    const base=fullState(values,'daily'),p=values.$authority.dailyProtocol;
+    exactAuthorityJson(p,DAILY_PROTOCOL_LIMITS.protocolBytes);
+    if(!dailyShape(p,['generation','limits','legacyClaims','legacyDeliveries'])||typeof p.generation!=='string'||!DAILY_OP.test(p.generation)||!dailyShape(p.limits,Object.keys(DAILY_PROTOCOL_LIMITS))||Object.keys(DAILY_PROTOCOL_LIMITS).some(k=>p.limits[k]!==DAILY_PROTOCOL_LIMITS[k])||dailyBytes('$dailyProtocol',p)>DAILY_PROTOCOL_LIMITS.protocolBytes)dailyFailure();
+    if(!equalData(values['archive:'+base.authorityEpoch]?.dailyProtocol,p))fail('DAILY_PROVENANCE_MISMATCH');
+    const life=base.records.find(r=>r.ref.domain==='PLAYER_LIFE').value,bagFor=id=>base.records.find(r=>r.ref.domain==='BACKPACK'&&r.ref.playerId===id),allClaims=new Map(),allDeliveries=new Set();
+    for(const [id,player] of Object.entries(life.players)){
+      for(const event of player.events)if(event.type==='DAILY_JOURNEY')allClaims.set(dailyToken(id,event.id),event);
+      for(const rewardId of bagFor(id)?.value?.rewardReceipts||[])if(rewardId.startsWith('DAILY_JOURNEY:'))allDeliveries.add(dailyToken(id,rewardId));
+    }
+    for(const [field,source] of [['legacyClaims',allClaims],['legacyDeliveries',allDeliveries]])if(!Array.isArray(p[field])||p[field].length>DAILY_PROTOCOL_LIMITS.legacyEntries||p[field].some(v=>typeof v!=='string'||!source.has(v))||new Set(p[field]).size!==p[field].length)fail('DAILY_PROVENANCE_MISMATCH');
+    const receiptKeys=values.$keys.filter(k=>typeof k==='string'&&k.startsWith('daily-operation:'));if(receiptKeys.length>DAILY_PROTOCOL_LIMITS.operationSlots)fail('DAILY_RECEIPT_CAPACITY');
+    const receipts=receiptKeys.map(key=>{const r=values[key];exactAuthorityJson(r,DAILY_PROTOCOL_LIMITS.entryBytes);if(dailyBytes(key,r)>DAILY_PROTOCOL_LIMITS.entryBytes||!dailyShape(r,['schema','kind','sequence','request','reducerVersion','at',r?.kind==='CLAIM_DAILY'?'claim':'delivery'])||r.schema!=='DAILY_OPERATION_V1'||!['CLAIM_DAILY','FULFILL_DAILY'].includes(r.kind)||r.reducerVersion!=='DAILY_RULES_V1'||!integer(r.sequence,DAILY_PROTOCOL_LIMITS.operationSlots)||r.sequence<1||key!==dailyKey(r.request?.opId))dailyFailure();dayAt(r.at);return r}).sort((a,b)=>a.sequence-b.sequence);
+    const byId=new Map(),claims=new Map(),claimTokens=new Set(),fulfilled=new Map();
+    for(let n=0;n<receipts.length;n++){
+      const r=receipts[n],request=dailyRequest(r.request,r.kind,base),e=request.expected;
+      if(r.sequence!==n+1||!equalData(request,r.request)||e.authorityEpoch!==base.authorityEpoch||e.dailyGeneration!==p.generation||e.catalogRevision!==base.catalogRevision||e.selectionEpoch>base.selectionEpoch||e.dailySequence!==n||!Object.hasOwn(life.players,request.playerId))dailyFailure();byId.set(request.opId,r);
+      if(r.kind==='CLAIM_DAILY'){
+        const c=r.claim,day=dayAt(r.at),rewardId='DAILY_JOURNEY:'+day,token=dailyToken(request.playerId,rewardId),event=allClaims.get(token),prior=e.records.find(v=>v.ref.domain==='PLAYER_LIFE').revision;
+        if(!dailyShape(c,['day','rewardId','lifeBefore','lifeAfter','item'])||c.day!==day||c.rewardId!==rewardId||!integer(prior,Number.MAX_SAFE_INTEGER-1)||c.lifeBefore!==prior||c.lifeAfter!==prior+1||life.revision<c.lifeAfter||!equalData(c.item,dailyJourneyRewardItem(request.playerId,rewardId))||!event||event.at!==r.at||claimTokens.has(token)||p.legacyClaims.includes(token)||p.legacyDeliveries.includes(token))dailyFailure();
+        claimTokens.add(token);claims.set(request.opId,r);
+      }else{
+        const claim=claims.get(request.claimRef),d=r.delivery,bag=bagFor(request.playerId),prior=e.records.find(v=>v.ref.domain==='BACKPACK'&&v.ref.playerId===request.playerId)?.revision;
+        if(!claim||claim.request.playerId!==request.playerId||fulfilled.has(request.claimRef)||!dailyShape(d,['rewardId','bagBefore','bagAfter','destinationItemId','quantityBefore','quantityAfter'])||d.rewardId!==claim.claim.rewardId||!integer(prior,Number.MAX_SAFE_INTEGER-1)||d.bagBefore!==prior||d.bagAfter!==prior+1||!bag?.value||bag.revision<d.bagAfter||!text(d.destinationItemId,256)||!d.destinationItemId||!integer(d.quantityBefore,999999)||d.quantityAfter!==d.quantityBefore+1||!bag.value.rewardReceipts.includes(d.rewardId)||p.legacyDeliveries.includes(dailyToken(request.playerId,d.rewardId)))dailyFailure();
+        if(bag.revision===d.bagAfter){
+          const target=bag.value.items.find(item=>item.itemId===d.destinationItemId),recipe=gameRegistry.normalizeItem(claim.claim.item);
+          if(!target||target.qty!==d.quantityAfter||bag.value.updatedAt!==r.at||['kind','name','species','stackable'].some(field=>target[field]!==recipe[field])||(d.quantityBefore===0&&!equalData(target,recipe)))fail('DAILY_CURRENT_PROJECTION_MISMATCH');
+        }
+        fulfilled.set(request.claimRef,r);
+      }
+    }
+    const expectedClaims=new Set([...p.legacyClaims,...claimTokens]),expectedDeliveries=new Set([...p.legacyDeliveries,...[...fulfilled.values()].map(r=>dailyToken(r.request.playerId,r.delivery.rewardId))]);
+    if(allClaims.size!==expectedClaims.size||[...allClaims.keys()].some(k=>!expectedClaims.has(k))||allDeliveries.size!==expectedDeliveries.size||[...allDeliveries].some(k=>!expectedDeliveries.has(k)))fail('DAILY_PROVENANCE_MISMATCH');
+    const pending=[...claims.values()].filter(r=>!fulfilled.has(r.request.opId)),head=dailyAccounting(receipts,pending.length,p.generation);
+    exactAuthorityJson(values.$daily,2048);if(!dailyShape(values.$daily,Object.keys(head))||Object.keys(head).some(k=>values.$daily[k]!==head[k]))dailyFailure();
+    return {base,protocol:p,receipts,byId,claims,fulfilled,head,snapshot:{...base,daily:{generation:p.generation,sequence:head.sequence,acceptedCount:head.acceptedCount,acceptedBytes:head.acceptedBytes,reservedSlots:head.reservedSlots,reservedBytes:head.reservedBytes,pending:pending.map(r=>({claimRef:r.request.opId,playerId:r.request.playerId,rewardId:r.claim.rewardId,item:clone(r.claim.item)})),receipts:clone(receipts)}}};
+  }
+  function dailyTransaction(mode,work){
+    requireOpen();if(!gameRegistry)fail('GAME_VALIDATORS_NOT_READY');
+    return transaction(mode,['$authority','$initialized','$keys'],work,values=>{
+      const refs=[...fullCatalog(values,'daily').keys()],ops=values.$keys.filter(k=>typeof k==='string'&&k.startsWith('daily-operation:'));
+      if(ops.length>DAILY_PROTOCOL_LIMITS.operationSlots)fail('DAILY_RECEIPT_CAPACITY');return [...refs,'$daily','archive:'+values.$authority.authorityEpoch,...ops];
+    });
+  }
+  function readDaily(){return dailyTransaction('readonly',values=>dailyState(values).snapshot)}
+  function dailyCommand(kind,input){
+    if(reducing)fail('REENTRANT_COMMAND');exactAuthorityJson(input,32768);input=clone(input);
+    return dailyTransaction('readwrite',(values,store)=>{
+      const state=dailyState(values),request=dailyRequest(input,kind,state.base),e=request.expected,b=state.base;
+      if(request.playerId!==b.activePlayerId)fail('PLAYER_NOT_ACTIVE');
+      if(e.authorityEpoch!==b.authorityEpoch||e.dailyGeneration!==state.protocol.generation||e.selectionEpoch!==b.selectionEpoch||e.catalogRevision!==b.catalogRevision)fail('REVISION_CONFLICT_RELOAD_REQUIRED');
+      const prior=state.byId.get(request.opId);if(prior){if(prior.kind!==kind||!equalData(prior.request,request))fail('OPERATION_ID_CONFLICT');return {ok:true,replayed:true,receipt:prior}}
+      if(e.dailySequence!==state.head.sequence||e.records.some(r=>b.records.find(v=>referenceKey(v.ref)===referenceKey(r.ref)).revision!==r.revision))fail('REVISION_CONFLICT_RELOAD_REQUIRED');
+      const next={...values},life=values.PLAYER_LIFE,player=life.players[request.playerId],bagKey='BACKPACK:'+request.playerId;let affected,key;
+      if(typeof now!=='function')fail('CLOCK_UNAVAILABLE');const at=now();dayAt(at);
+      const receipt={schema:'DAILY_OPERATION_V1',kind,sequence:state.head.sequence+1,request,reducerVersion:'DAILY_RULES_V1',at};
+      if(kind==='CLAIM_DAILY'){
+        const d=dailyFor(player.events,at),token=dailyToken(request.playerId,d.rewardId);
+        if(state.protocol.legacyClaims.includes(token)||state.protocol.legacyDeliveries.includes(token))fail('LEGACY_DAILY_REVIEW_REQUIRED');
+        if(d.claimed)fail('DAILY_ALREADY_CLAIMED');if(!d.ready)fail('DAILY_NOT_COMPLETE');if(life.revision>=Number.MAX_SAFE_INTEGER)fail('REVISION_CAPACITY');
+        const envelope=clone(life),p=envelope.players[request.playerId];p.events.push({id:d.rewardId,type:'DAILY_JOURNEY',at});Object.assign(p,projectEvents(p.events,p.legacyProgress));p.achievements=p.events.some(isKill)?['FIRST_MONSTER']:[];p.lastSeenAt=Math.max(p.lastSeenAt,at);envelope.revision++;
+        receipt.claim={day:d.day,rewardId:d.rewardId,lifeBefore:life.revision,lifeAfter:envelope.revision,item:dailyJourneyRewardItem(request.playerId,d.rewardId)};affected=envelope;key='PLAYER_LIFE';
+      }else{
+        const claim=state.claims.get(request.claimRef);if(!claim||claim.request.playerId!==request.playerId)fail('DAILY_CLAIM_NOT_OWNED');if(state.fulfilled.has(request.claimRef))fail('DAILY_ALREADY_FULFILLED');
+        const row=values[bagKey];if(!row)fail('DOMAIN_RECORD_ABSENT');if(row.revision>=Number.MAX_SAFE_INTEGER)fail('REVISION_CAPACITY');
+        const draft=clone(row.data),result=gameRegistry.storeItem(draft,claim.claim.item,{at});
+        if(!result.ok)return {ok:false,reason:result.reason,pending:true};
+        const before=row.data.items.find(item=>item.itemId===result.item.itemId)?.qty||0;if(result.item.qty!==before+1)fail('DAILY_QUANTITY_MISMATCH');
+        receipt.delivery={rewardId:claim.claim.rewardId,bagBefore:row.revision,bagAfter:row.revision+1,destinationItemId:result.item.itemId,quantityBefore:before,quantityAfter:result.item.qty};affected={revision:row.revision+1,data:draft};key=bagKey;
+      }
+      const entryKey=dailyKey(request.opId);exactAuthorityJson(receipt,DAILY_PROTOCOL_LIMITS.entryBytes);if(dailyBytes(entryKey,receipt)>DAILY_PROTOCOL_LIMITS.entryBytes)fail('DAILY_RECEIPT_CAPACITY');
+      const pending=state.head.pendingCount+(kind==='CLAIM_DAILY'?1:-1),head=dailyAccounting([...state.receipts,receipt],pending,state.protocol.generation);
+      next[key]=affected;next[entryKey]=receipt;next.$daily=head;next.$keys=[...values.$keys,entryKey];dailyState(next);
+      store.put(affected,key);store.add(receipt,entryKey);store.put(head,'$daily');return {ok:true,replayed:false,receipt};
+    });
+  }
+  function claimDaily(input){return dailyCommand('CLAIM_DAILY',input)}
+  function fulfillDaily(input){return dailyCommand('FULFILL_DAILY',input)}
+
   const captureFixed=[PLAYER_LIFE_STORAGE_KEY,'K11520_PLAYER_COURIER','k11520.player-life.legacy-owner','11520.backpack.v1','k11520.local-product.v1:guest','k11520.player-session.v1','k11520.journey.tutorial','11520.playerCourier.pendingInsurancePayment','11520.playerCourier.lastMission'];
   const captureSuffixes=['11520.backpack.v1','k11520.local-product.v1:guest','k11520.player-session.v1','k11520.journey.tutorial'];
   function captureRule(key){
@@ -742,5 +856,5 @@ export function createLocalGameAuthority({indexedDB,crypto,databaseName=LOCAL_GA
     if(admitted!==generation||!db||!gameRegistry)fail('AUTHORITY_CLOSED');return clone(candidate);
   }
 
-  return Object.freeze({open,openGame,close,read,readGame,initialize,command,commandGame,prepareMigration,readCandidate,commitMigration,prepareGameMigration,readGameCandidate,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
+  return Object.freeze({open,openGame,close,read,readGame,readDaily,claimDaily,fulfillDaily,initialize,command,commandGame,prepareMigration,readCandidate,commitMigration,prepareGameMigration,readGameCandidate,restore(){fail('RESTORE_NOT_IMPLEMENTED')}});
 }

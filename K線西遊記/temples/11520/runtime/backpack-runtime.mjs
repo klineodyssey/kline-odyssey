@@ -57,11 +57,13 @@ export function canStore(backpack,itemInput){
   return{ok:true,item,existing};
 }
 
-export function storeItem(backpack,itemInput){
+// Optional captured clock for an internal deterministic draft; existing callers use Date.now.
+export function storeItem(backpack,itemInput,{at}={}){
   const check=canStore(backpack,itemInput);if(!check.ok)return check;
+  const timestamp=at===undefined?Date.now():at;if(!Number.isSafeInteger(timestamp)||timestamp<0)throw new Error('INVALID_BACKPACK_CLOCK');
   if(check.existing)check.existing.qty+=check.item.qty;else backpack.items.push(check.item);
   if(check.item.rewardId)(backpack.rewardReceipts??=[]).push(check.item.rewardId);
-  backpack.updatedAt=Date.now();return{ok:true,item:check.existing||check.item,snapshot:backpackSnapshot(backpack)};
+  backpack.updatedAt=timestamp;return{ok:true,item:check.existing||check.item,snapshot:backpackSnapshot(backpack)};
 }
 
 export function removeItem(backpack,itemId,qty=1){

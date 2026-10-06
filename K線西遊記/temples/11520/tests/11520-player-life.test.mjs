@@ -626,3 +626,137 @@ test('native persistent cleanup reuses the acquisition close event after process
  const runner=factory({assert,report:{processLaunches:[]},chromium:{launchPersistentContext:async()=>ctx},processObserver:{find:async()=>identity,exists:async()=>{if(!alive&&deny)throw Error('EACCES');return alive}},routeContext:async()=>{},fs:{readFile:async()=>'{"version":"1.51.1"}'}});
  await runner.launch();await assert.rejects(runner.close(),/EACCES/);assert.equal(closes,1);deny=false;const closed=await runner.close();assert.equal(closes,1);assert.equal(closed.contextCloseObserved,true);assert.equal(closed.oldProcessAbsent,true);assert.equal(runner.state().context,null);
 });
+
+// DAILY_DRAFT_V1 fixtures are direct, isolated fake-IDB admission only. There is
+// no production initializer, migration, restore or live command caller.
+const dailySchema='KAIOS_LOCAL_GAME_DAILY_DRAFT_V1';
+const dailyLimits={operationSlots:256,entryBytes:32768,totalBytes:1048576,protocolBytes:65536,legacyEntries:256};
+async function dailyFixture({ready=true,claimed=false,legacyDelivery=false,fullBag=false}={}){
+ const f=await fullFixture(),clock={now:Date.now()},base=await f.a.readGame(),storage=memory();storage.setItem(PLAYER_LIFE_STORAGE_KEY,JSON.stringify(domainValue(base.records,'PLAYER_LIFE')));const life=make({storage,now:()=>clock.now});
+ if(ready)finishDaily(life);if(claimed)life.claimDailyJourney();const rewardId=life.gameplayProfile().daily.rewardId,legacyKey=JSON.stringify([f.selected,rewardId]);
+ const protocol={generation:'c'.repeat(32),limits:dailyLimits,legacyClaims:claimed?[legacyKey]:[],legacyDeliveries:legacyDelivery?[legacyKey]:[]},meta={...f.meta,schema:dailySchema,dailyProtocol:protocol},db=await rawDb(f.idb);
+ await rawWrite(db,'PLAYER_LIFE',JSON.parse(storage.getItem(PLAYER_LIFE_STORAGE_KEY)));
+ const bag=structuredClone(domainValue(base.records,'BACKPACK',f.selected));if(fullBag){bag.capacitySlots=1;storeItem(bag,{itemId:'SYNTHETIC-FULL',kind:'FOOD',name:'Synthetic full bag',qty:1,weightEach:1})}if(legacyDelivery)bag.rewardReceipts.push(rewardId);
+ await rawWrite(db,'BACKPACK:'+f.selected,{revision:0,data:bag});await rawWrite(db,'$authority',meta);await rawWrite(db,'$initialized',{authorityEpoch:meta.authorityEpoch,coverage:fullDomains,catalogRevision:0,dailyGeneration:protocol.generation});await rawWrite(db,'archive:'+meta.authorityEpoch,{kind:'ISOLATED_DAILY_DRAFT_FIXTURE',dailyProtocol:protocol});await rawWrite(db,'$daily',{schema:'DAILY_HEAD_V1',generation:protocol.generation,sequence:0,acceptedCount:0,acceptedBytes:0,pendingCount:0,reservedSlots:0,reservedBytes:0});db.close();f.a.close();const a=newAuthority(f.idb,{now:()=>clock.now});await a.openGame();return {...f,a,clock,rewardId};
+}
+const dailyExpected=s=>({authorityEpoch:s.authorityEpoch,dailyGeneration:s.daily.generation,selectionEpoch:s.selectionEpoch,catalogRevision:s.catalogRevision,dailySequence:s.daily.sequence,records:s.records.map(({ref,revision})=>({ref,revision}))});
+const dailyInput=(s,opId='1'.repeat(32),extra={})=>({opId,playerId:s.activePlayerId,expected:dailyExpected(s),...extra});
+
+test('typed daily claim derives eligibility and fixed XP then fulfills exactly once without a live caller',async()=>{
+ const {a,selected,rewardId}=await dailyFixture(),before=await a.readDaily(),p=domainValue(before.records,'PLAYER_LIFE').players[selected],input=dailyInput(before);
+ const claim=await a.claimDaily(input);assert.equal(claim.ok,true);assert.equal(claim.receipt.kind,'CLAIM_DAILY');assert.equal(claim.receipt.claim.rewardId,rewardId);
+ const pending=await a.readDaily();assert.equal(domainValue(pending.records,'PLAYER_LIFE').players[selected].xp,p.xp+25);assert.equal(domainValue(pending.records,'PLAYER_LIFE').players[selected].engineXp,p.engineXp+20);assert.equal(pending.daily.pending.length,1);assert.equal(domainValue(pending.records,'BACKPACK',selected).items.length,0);
+ const fulfillment=await a.fulfillDaily(dailyInput(pending,'2'.repeat(32),{claimRef:input.opId}));assert.equal(fulfillment.receipt.delivery.quantityAfter-fulfillment.receipt.delivery.quantityBefore,1);
+ const after=await a.readDaily();assert.equal(after.daily.pending.length,0);assert.deepEqual(domainValue(after.records,'BACKPACK',selected).rewardReceipts,[rewardId]);assert.equal(domainValue(after.records,'BACKPACK',selected).items[0].qty,1);assert.equal(a.initializeDaily,undefined);a.close();
+});
+test('typed daily exact claim replay ignores only its committed revision changes including after midnight',async()=>{
+ const {a,clock}=await dailyFixture(),before=await a.readDaily(),input=dailyInput(before),first=await a.claimDaily(input),saved=await a.readDaily();clock.now+=86400000;const replay=await a.claimDaily(input);assert.equal(replay.replayed,true);assert.deepEqual(replay.receipt,first.receipt);assert.deepEqual(await a.readDaily(),saved);
+ const changed=structuredClone(input);changed.expected.records[0].revision++;await assert.rejects(a.claimDaily(changed),/OPERATION_ID_CONFLICT/);a.close();
+});
+test('typed daily rejects caller reward assertions and canonical incomplete eligibility without writes',async()=>{
+ const {a}=await dailyFixture({ready:false}),s=await a.readDaily();for(const extra of [{amount:25},{day:'2026-10-05'},{item:{qty:1}},{eligible:true},{owner:'guest'},{reducer:()=>{}}])await assert.rejects(async()=>a.claimDaily({...dailyInput(s),...extra}));await assert.rejects(a.claimDaily(dailyInput(s)),/DAILY_NOT_COMPLETE/);assert.deepEqual(await a.readDaily(),s);a.close();
+});
+test('typed daily full bag leaves XP and obligation saved and explicit synthetic capacity change enables item-only retry',async()=>{
+ const {a,idb,selected}=await dailyFixture({fullBag:true});const claim=await a.claimDaily(dailyInput(await a.readDaily())),pending=await a.readDaily(),failed=await a.fulfillDaily(dailyInput(pending,'2'.repeat(32),{claimRef:claim.receipt.request.opId}));assert.equal(failed.reason,'BACKPACK_SLOT_FULL');assert.deepEqual(await a.readDaily(),pending);
+ // Test-only readmission of space: a typed remove command is outside this checkpoint.
+ const db=await rawDb(idb),row=pending.records.find(r=>r.ref.domain==='BACKPACK'&&r.ref.playerId===selected),bag=structuredClone(row.value);bag.items=[];await rawWrite(db,fullKey(row.ref),{revision:row.revision+1,data:bag});db.close();const refreshed=await a.readDaily();await a.fulfillDaily(dailyInput(refreshed,'2'.repeat(32),{claimRef:claim.receipt.request.opId}));assert.equal(domainValue((await a.readDaily()).records,'PLAYER_LIFE').players[selected].xp,domainValue(pending.records,'PLAYER_LIFE').players[selected].xp);a.close();
+});
+test('typed daily protocol rejects generic reducers and legacy claimed rewards never become pending backpay',async()=>{
+ const {a}=await dailyFixture({claimed:true}),s=await a.readDaily();await assert.rejects(a.commandGame(gameCommand(s),()=>{}),/DAILY_AUTHORITY/);await assert.rejects(a.command({domain:'PLAYER_LIFE',kind:'UPDATE',playerId:s.activePlayerId,expected:{authorityEpoch:s.authorityEpoch,selectionEpoch:s.selectionEpoch,revision:domainValue(s.records,'PLAYER_LIFE').revision}},()=>{}),/DAILY_AUTHORITY/);await assert.rejects(a.claimDaily(dailyInput(s)),/LEGACY_DAILY_REVIEW_REQUIRED/);assert.deepEqual(await a.readDaily(),s);a.close();
+});
+
+test('typed daily two connections serialize competing claims and identical fulfillment retries',async()=>{
+ const {a,idb,clock}=await dailyFixture(),b=newAuthority(idb,{now:()=>clock.now});await b.openGame();const before=await a.readDaily(),results=await Promise.allSettled([a.claimDaily(dailyInput(before)),b.claimDaily(dailyInput(before,'3'.repeat(32)))]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.match(results.find(r=>r.status==='rejected').reason.message,/REVISION_CONFLICT/);
+ const claim=results.find(r=>r.status==='fulfilled').value.receipt,pending=await a.readDaily();await assert.rejects(a.claimDaily(dailyInput(pending,'4'.repeat(32))),/DAILY_ALREADY_CLAIMED/);const input=dailyInput(pending,'2'.repeat(32),{claimRef:claim.request.opId}),fulfilled=await Promise.all([a.fulfillDaily(input),b.fulfillDaily(input)]);assert.equal(fulfilled.filter(r=>r.replayed).length,1);const after=await a.readDaily();assert.equal(after.daily.receipts.length,2);assert.equal(domainValue(after.records,'BACKPACK',after.activePlayerId).items[0].qty,1);assert.deepEqual(await a.fulfillDaily(input),fulfilled.find(r=>r.replayed));assert.deepEqual(await a.readDaily(),after);await assert.rejects(a.fulfillDaily({...input,claimRef:'f'.repeat(32)}),/OPERATION_ID_CONFLICT/);a.close();b.close();
+});
+test('typed daily owner epoch complete-vector and post-selection replay fences precede mutation',async()=>{
+ const {a,idb,other}=await dailyFixture(),s=await a.readDaily(),input=dailyInput(s);await assert.rejects(a.claimDaily({...input,playerId:other}),/PLAYER_NOT_ACTIVE/);
+ for(const field of ['authorityEpoch','dailyGeneration','selectionEpoch','catalogRevision']){const x=structuredClone(input);x.expected[field]=typeof x.expected[field]==='string'?'f'.repeat(32):x.expected[field]+1;await assert.rejects(a.claimDaily(x),/REVISION_CONFLICT/)}
+ for(const edit of [e=>e.records.pop(),e=>e.records.push(e.records[0]),e=>e.records[0].revision++,e=>delete e.dailySequence]){const x=structuredClone(input);edit(x.expected);await assert.rejects(a.claimDaily(x))}assert.deepEqual(await a.readDaily(),s);
+ await a.claimDaily(input);const db=await rawDb(idb),meta=await new Promise(resolve=>{const r=db.transaction('records').objectStore('records').get('$authority');r.onsuccess=()=>resolve(r.result)});meta.selectionEpoch+=2;await rawWrite(db,'$authority',meta);const changed=await a.readDaily();await assert.rejects(a.claimDaily(input),/REVISION_CONFLICT/);assert.deepEqual(await a.readDaily(),changed);db.close();a.close();
+});
+async function failDailyPut(a,idb,key,work){
+ const db=await rawDb(idb),prototype=Object.getPrototypeOf(db.transaction('records','readonly').objectStore('records')),original=prototype.put;let succeeded=0;
+ prototype.put=function(value,target){const r=original.call(this,value,target);if(target===key){const tx=this.transaction;r.addEventListener('success',()=>{succeeded++;tx.abort()})}return r};
+ try{await assert.rejects(work(),/AUTHORITY_TRANSACTION_ABORTED|AUTHORITY_TRANSACTION_FAILED|AbortError/)}finally{prototype.put=original;db.close()}assert.equal(succeeded,1,'fake-IDB injected successful request before abort');
+}
+test('typed daily claim and fulfillment aborts retain every original record and allow exact retry',async()=>{
+ const {a,idb,selected}=await dailyFixture(),before=await a.readDaily(),input=dailyInput(before);await failDailyPut(a,idb,'PLAYER_LIFE',()=>a.claimDaily(input));assert.deepEqual(await a.readDaily(),before);const claim=await a.claimDaily(input),pending=await a.readDaily(),fulfill=dailyInput(pending,'2'.repeat(32),{claimRef:claim.receipt.request.opId});await failDailyPut(a,idb,'BACKPACK:'+selected,()=>a.fulfillDaily(fulfill));assert.deepEqual(await a.readDaily(),pending);await a.fulfillDaily(fulfill);assert.equal((await a.readDaily()).daily.pending.length,0);a.close();
+});
+test('typed daily fulfillment binds a one-unit incoming entitlement to the existing destination stack',async()=>{
+ const {a,idb,selected}=await dailyFixture(),db=await rawDb(idb),before=await a.readDaily(),bag=structuredClone(domainValue(before.records,'BACKPACK',selected));storeItem(bag,{itemId:'EXISTING-STARDUST',kind:'MATERIAL',name:'每日星塵',qty:3,weightEach:.02,meta:{existing:true}});await rawWrite(db,'BACKPACK:'+selected,{revision:1,data:bag});db.close();const claim=await a.claimDaily(dailyInput(await a.readDaily())),result=await a.fulfillDaily(dailyInput(await a.readDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));assert.equal(result.receipt.delivery.destinationItemId,'EXISTING-STARDUST');assert.equal(result.receipt.delivery.quantityBefore,3);assert.equal(result.receipt.delivery.quantityAfter,4);const after=domainValue((await a.readDaily()).records,'BACKPACK',selected);assert.equal(after.items.length,1);assert.deepEqual(after.items[0].meta,{existing:true});a.close();
+});
+test('typed daily fulfilled consumption survives later synthetic item absence and never redelivers',async()=>{
+ const {a,idb,selected}=await dailyFixture(),claim=await a.claimDaily(dailyInput(await a.readDaily())),input=dailyInput(await a.readDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId});await a.fulfillDaily(input);const s=await a.readDaily(),db=await rawDb(idb),row=s.records.find(r=>r.ref.domain==='BACKPACK'&&r.ref.playerId===selected),bag=structuredClone(row.value);bag.items=[];await rawWrite(db,fullKey(row.ref),{revision:row.revision+1,data:bag});db.close();const empty=await a.readDaily();assert.equal((await a.fulfillDaily(input)).replayed,true);await assert.rejects(a.fulfillDaily(dailyInput(empty,'3'.repeat(32),{claimRef:claim.receipt.request.opId})),/DAILY_ALREADY_FULFILLED/);assert.deepEqual(await a.readDaily(),empty);a.close();
+});
+test('typed daily pending fulfillment follows its original claim day after midnight',async()=>{
+ const {a,clock,rewardId,selected}=await dailyFixture(),claim=await a.claimDaily(dailyInput(await a.readDaily()));clock.now+=86400000;await a.fulfillDaily(dailyInput(await a.readDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));const s=await a.readDaily();assert.deepEqual(domainValue(s.records,'BACKPACK',selected).rewardReceipts,[rewardId]);await assert.rejects(a.claimDaily(dailyInput(s,'3'.repeat(32))),/DAILY_NOT_COMPLETE/);a.close();
+});
+test('typed daily bag receipt-cap denial keeps existing XP-first policy and the reservation',async()=>{
+ const {a,idb,selected}=await dailyFixture(),s=await a.readDaily(),bag=structuredClone(domainValue(s.records,'BACKPACK',selected)),db=await rawDb(idb);bag.rewardReceipts=Array.from({length:10000},(_,i)=>'OTHER-REWARD-'+i);await rawWrite(db,'BACKPACK:'+selected,{revision:1,data:bag});db.close();const claim=await a.claimDaily(dailyInput(await a.readDaily())),pending=await a.readDaily(),r=await a.fulfillDaily(dailyInput(pending,'2'.repeat(32),{claimRef:claim.receipt.request.opId}));assert.equal(r.reason,'REWARD_RECEIPT_LIMIT');assert.equal(pending.daily.reservedSlots,1);assert.deepEqual(await a.readDaily(),pending);a.close();
+});
+test('typed daily undeclared or contradictory receipt and provenance corruption holds without repair',async()=>{
+ for(const mode of ['claim-item','claim-request','missing-op','head-null','legacy-copy','extra-key','bag-unproved']){
+  const {a,idb,selected,rewardId}=await dailyFixture(),claim=await a.claimDaily(dailyInput(await a.readDaily())),db=await rawDb(idb),key='daily-operation:'+claim.receipt.request.opId;
+  if(mode==='claim-item'){const r=structuredClone(claim.receipt);r.claim.item.qty=2;await rawWrite(db,key,r)}
+  if(mode==='claim-request'){const r=structuredClone(claim.receipt);r.request.playerId='KAIOS-P-'+'f'.repeat(32);await rawWrite(db,key,r)}
+  if(mode==='missing-op')await rawWrite(db,key,undefined);
+  if(mode==='head-null')await rawWrite(db,'$daily',null);
+  if(mode==='legacy-copy')await rawWrite(db,'archive:'+'b'.repeat(32),{dailyProtocol:{}});
+  if(mode==='extra-key')await rawWrite(db,'daily-operation:unknown',{});
+  if(mode==='bag-unproved'){const before=await a.readDaily(),bag=structuredClone(domainValue(before.records,'BACKPACK',selected));bag.rewardReceipts.push(rewardId);await rawWrite(db,'BACKPACK:'+selected,{revision:1,data:bag})}
+  const raw=await new Promise(resolve=>{const tx=db.transaction('records'),r=tx.objectStore('records').getAll();r.onsuccess=()=>resolve(r.result)});await assert.rejects(a.readDaily());await assert.rejects(a.fulfillDaily({opId:'2'.repeat(32),playerId:selected,claimRef:claim.receipt.request.opId,expected:claim.receipt.request.expected}));const preserved=await new Promise(resolve=>{const r=db.transaction('records').objectStore('records').getAll();r.onsuccess=()=>resolve(r.result)});assert.deepEqual(preserved,raw,mode+' original records preserved');db.close();a.close();
+ }
+});
+test('typed daily legacy bag consumption without Life proof cannot create a new obligation',async()=>{const {a}=await dailyFixture({legacyDelivery:true}),s=await a.readDaily();await assert.rejects(a.claimDaily(dailyInput(s)),/LEGACY_DAILY_REVIEW_REQUIRED/);assert.deepEqual(await a.readDaily(),s);a.close()});
+
+test('typed daily fixed recipe exactly matches the frozen legacy main item behavior',async()=>{
+ const {dailyJourneyRewardItem}=await import('../runtime/player-life-runtime.mjs'),source=await (await import('node:fs/promises')).readFile(new URL('../runtime/game-5d-main.mjs',import.meta.url),'utf8'),start=source.indexOf('function claimDailyJourney(){'),end=source.indexOf('\nsyncWorldFeedback();',start);assert.ok(start>=0&&end>start);const playerId='KAIOS-P-'+'a'.repeat(32),rewardId='DAILY_JOURNEY:2026-10-05';let captured;
+ const fn=new Function('playerLife','globalThis','playerId','toast','syncWorldFeedback','emit11520WorldFeedback',source.slice(start,end)+';return claimDailyJourney;')({gameplayProfile:()=>({daily:{claimed:true,rewardId}}),snapshot:()=>({persistent:true})},{K11520Backpack:{addItem:item=>{captured=item;return {ok:true,persistent:true}}}},playerId,()=>{},()=>{},()=>{});fn();assert.deepEqual(dailyJourneyRewardItem(playerId,rewardId),captured);
+ const bag=createBackpack({ownerId:playerId}),before=structuredClone(bag);assert.throws(()=>storeItem(bag,captured,{at:NaN}),/INVALID_BACKPACK_CLOCK/);assert.deepEqual(bag,before);storeItem(bag,captured,{at:1234});assert.equal(bag.updatedAt,1234);
+});
+
+test('typed daily accounting reserves fulfillment capacity without evicting receipt history (pure model)',async()=>{
+ const source=await (await import('node:fs/promises')).readFile(new URL('../runtime/player-life-runtime.mjs',import.meta.url),'utf8'),start=source.indexOf('  function dailyAccounting('),end=source.indexOf('  function dailyState(',start);assert.ok(start>=0&&end>start);
+ const accounting=new Function('DAILY_PROTOCOL_LIMITS','dailyBytes','dailyKey','fail',source.slice(start,end)+';return dailyAccounting;')(dailyLimits,(key,value)=>new TextEncoder().encode(JSON.stringify({key,value})).byteLength,id=>'daily-operation:'+id,code=>{throw Error(code)}),receipt=i=>({request:{opId:i.toString(16).padStart(32,'0')}}),one=[receipt(1)],head=accounting(one,1,'c'.repeat(32));assert.equal(head.reservedSlots,1);assert.equal(head.reservedBytes,32768);const fulfilled=accounting([...one,receipt(2)],0,'c'.repeat(32));assert.ok(fulfilled.acceptedBytes<head.acceptedBytes+head.reservedBytes);
+ assert.throws(()=>accounting(Array.from({length:256},(_,i)=>receipt(i)),1,'c'.repeat(32)),/CAPACITY/);assert.throws(()=>accounting(one,32,'c'.repeat(32)),/CAPACITY/);assert.equal(accounting(Array.from({length:256},(_,i)=>receipt(i)),0,'c'.repeat(32)).acceptedCount,256);
+});
+
+test('typed daily the same UTC reward ID remains separately consumed in two Player Lives',async()=>{
+ const {a,idb,selected,other,clock,rewardId}=await dailyFixture(),first=await a.claimDaily(dailyInput(await a.readDaily()));await a.fulfillDaily(dailyInput(await a.readDaily(),'2'.repeat(32),{claimRef:first.receipt.request.opId}));
+ // Synthetic activity/selection readmission, not a production switch or event port.
+ const saved=await a.readDaily(),storage=memory();storage.setItem(PLAYER_LIFE_STORAGE_KEY,JSON.stringify(domainValue(saved.records,'PLAYER_LIFE')));const legacy=make({storage,now:()=>clock.now});legacy.activatePlayer(other);finishDaily(legacy);const db=await rawDb(idb),meta=await new Promise(resolve=>{const r=db.transaction('records').objectStore('records').get('$authority');r.onsuccess=()=>resolve(r.result)});meta.activePlayerId=other;meta.selectionEpoch++;await rawWrite(db,'PLAYER_LIFE',JSON.parse(storage.getItem(PLAYER_LIFE_STORAGE_KEY)));await rawWrite(db,'$authority',meta);db.close();const current=await a.readDaily();await assert.rejects(a.fulfillDaily(dailyInput(current,'3'.repeat(32),{claimRef:first.receipt.request.opId})),/DAILY_CLAIM_NOT_OWNED/);const second=await a.claimDaily(dailyInput(current,'3'.repeat(32)));await a.fulfillDaily(dailyInput(await a.readDaily(),'4'.repeat(32),{claimRef:second.receipt.request.opId}));const after=await a.readDaily();for(const id of [selected,other]){const bag=domainValue(after.records,'BACKPACK',id);assert.deepEqual(bag.rewardReceipts,[rewardId]);assert.equal(bag.items[0].qty,1);assert.equal(bag.ownerId,id)}a.close();
+});
+test('typed daily new operations reject unsupported clocks while exact committed replay reads no clock',async()=>{
+ const {a,clock}=await dailyFixture(),before=await a.readDaily(),input=dailyInput(before),at=clock.now;for(const bad of [NaN,Infinity,-1,'1']){clock.now=bad;await assert.rejects(a.claimDaily(input),/INVALID_CLOCK/);assert.deepEqual(await a.readDaily(),before)}clock.now=at;const claim=await a.claimDaily(input);clock.now=NaN;assert.deepEqual((await a.claimDaily(input)).receipt,claim.receipt);a.close();
+});
+test('typed daily bounded scalar receipts fit one maximal vector but a second vector is not budgeted (size model)',()=>{
+ const expected={authorityEpoch:'a'.repeat(32),dailyGeneration:'b'.repeat(32),selectionEpoch:Number.MAX_SAFE_INTEGER,catalogRevision:Number.MAX_SAFE_INTEGER,dailySequence:Number.MAX_SAFE_INTEGER,records:Array.from({length:128},(_,i)=>({ref:{domain:'PRODUCT',playerId:'KAIOS-P-'+'a'.repeat(32),owner:'0x'+i.toString(16).padStart(40,'0')},revision:Number.MAX_SAFE_INTEGER}))};
+ const value={schema:'DAILY_OPERATION_V1',kind:'FULFILL_DAILY',sequence:256,request:{opId:'a'.repeat(32),playerId:'KAIOS-P-'+'a'.repeat(32),claimRef:'b'.repeat(32),expected},reducerVersion:'DAILY_RULES_V1',at:8640000000000000,delivery:{rewardId:'DAILY_JOURNEY:9999-12-31',bagBefore:Number.MAX_SAFE_INTEGER-1,bagAfter:Number.MAX_SAFE_INTEGER,destinationItemId:'\ud800'.repeat(256),quantityBefore:999999,quantityAfter:1000000}};
+ const bytes=v=>new TextEncoder().encode(JSON.stringify({key:'daily-operation:'+'a'.repeat(32),value:v})).byteLength;assert.ok(bytes(value)<dailyLimits.entryBytes);assert.ok(bytes({...value,forbiddenResultVector:expected.records})>dailyLimits.entryBytes);
+});
+
+test('typed daily logical capacity stops claim before XP and preserves reserved fulfillment room (fake-IDB)',async()=>{
+ const {a,idb,clock}=await dailyFixture();let refused=null,prior=null,accepted=0;
+ for(let i=0;i<40;i++){
+  if(i){clock.now+=86400000;const s=await a.readDaily(),storage=memory();storage.setItem(PLAYER_LIFE_STORAGE_KEY,JSON.stringify(domainValue(s.records,'PLAYER_LIFE')));const legacy=make({storage,now:()=>clock.now}),day=legacy.gameplayProfile().daily.day,events=[...Array.from({length:3},(_,n)=>({type:'JOURNEY_MONSTER_KILL',id:`capacity:${day}:kill:${n}`})),{type:'SIX_PHASE_PRACTICE',id:`capacity:${day}:phase`},...Array.from({length:10},(_,n)=>({type:'EXPLORATION_STEP',id:`explore:${day}:${n+1}`}))];legacy.recordEvents(events.slice(0,8));legacy.recordEvents(events.slice(8));const db=await rawDb(idb);await rawWrite(db,'PLAYER_LIFE',JSON.parse(storage.getItem(PLAYER_LIFE_STORAGE_KEY)));db.close()} // Synthetic eligible-day readmission only, using the existing bounded event reducer.
+  prior=await a.readDaily();const input=dailyInput(prior,(i+1).toString(16).padStart(32,'0'));
+  try{await a.claimDaily(input);accepted++}catch(error){assert.equal(error.message,'DAILY_RECEIPT_CAPACITY');refused=input;assert.deepEqual(await a.readDaily(),prior);break}
+ }
+ assert.ok(refused&&accepted>0&&accepted<32);assert.equal(prior.daily.pending.length,accepted);assert.ok(prior.daily.acceptedBytes+prior.daily.reservedBytes<=dailyLimits.totalBytes);
+ const first=prior.daily.pending[0];await a.fulfillDaily(dailyInput(prior,'f'.repeat(32),{claimRef:first.claimRef}));const afterFulfill=await a.readDaily();assert.equal(afterFulfill.daily.pending.length,accepted-1);await a.claimDaily(dailyInput(afterFulfill,refused.opId));assert.equal((await a.readDaily()).daily.pending.length,accepted);a.close();
+});
+
+test('typed daily current fulfillment projection must corroborate receipt destination quantity and timestamp',async()=>{
+ for(const mode of ['destination','quantity','timestamp','new-recipe','receipt-destination','receipt-quantity']){
+  const {a,idb,selected}=await dailyFixture(),claim=await a.claimDaily(dailyInput(await a.readDaily())),paid=await a.fulfillDaily(dailyInput(await a.readDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId})),s=await a.readDaily(),db=await rawDb(idb),bag=structuredClone(domainValue(s.records,'BACKPACK',selected));
+  if(mode==='destination')bag.items[0].itemId='X'+bag.items[0].itemId.slice(1);
+  if(mode==='quantity')bag.items[0].qty++;
+  if(mode==='timestamp')bag.updatedAt++;
+  if(mode==='new-recipe')bag.items[0].meta.rarity='COMMON';
+  if(mode.startsWith('receipt-')){const r=structuredClone(paid.receipt);if(mode==='receipt-destination')r.delivery.destinationItemId='X'+r.delivery.destinationItemId.slice(1);else{r.delivery.quantityBefore++;r.delivery.quantityAfter++}await rawWrite(db,'daily-operation:'+r.request.opId,r)}else await rawWrite(db,'BACKPACK:'+selected,{revision:paid.receipt.delivery.bagAfter,data:bag});await assert.rejects(a.readDaily(),/DAILY_CURRENT_PROJECTION_MISMATCH/);const preserved=await new Promise(resolve=>{const r=db.transaction('records').objectStore('records').get('BACKPACK:'+selected);r.onsuccess=()=>resolve(r.result)});assert.deepEqual(preserved.data,bag);db.close();a.close();
+ }
+});
+test('typed daily merge preserves existing weight and opaque metadata under the original matching rule',async()=>{
+ const {a,idb,selected}=await dailyFixture(),before=await a.readDaily(),bag=structuredClone(domainValue(before.records,'BACKPACK',selected)),db=await rawDb(idb);storeItem(bag,{itemId:'OLD-STACK',kind:'MATERIAL',name:'每日星塵',qty:2,weightEach:1,meta:{opaque:'preserved'}});await rawWrite(db,'BACKPACK:'+selected,{revision:1,data:bag});db.close();const claim=await a.claimDaily(dailyInput(await a.readDaily()));await a.fulfillDaily(dailyInput(await a.readDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));const item=domainValue((await a.readDaily()).records,'BACKPACK',selected).items[0];assert.equal(item.weightEach,1);assert.equal(item.qty,3);assert.deepEqual(item.meta,{opaque:'preserved'});a.close();
+});
