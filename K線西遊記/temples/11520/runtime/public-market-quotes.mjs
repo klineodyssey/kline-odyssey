@@ -74,3 +74,28 @@ export async function fetchPublicMarketQuotes({symbols,fetchImpl=globalThis.fetc
     return parsePublicMarketQuotes(await response.json(),{symbols});
   }finally{clearTimeout(timer)}
 }
+
+// Local gameplay fixtures, not market prices, Universe constants or a settlement
+// Oracle. The existing simulation ledger alone consumes these observations.
+export const SIMULATION_PRICE_SOURCE='K11520_DETERMINISTIC_SIMULATION';
+const SIMULATION_SEEDS=Object.freeze({BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600});
+export function deterministicSimulationObservation({market,previous=null,now=Date.now()}={}){
+  if(!Object.hasOwn(SIMULATION_SEEDS,market))throw new RangeError('MARKET_NOT_SUPPORTED');
+  if(!Number.isSafeInteger(now)||now<0)throw new RangeError('INVALID_TIMESTAMP');
+  if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new RangeError('INVALID_SIMULATION_SOURCE');
+  const pinned=previous?.source===SIMULATION_PRICE_SOURCE;
+  const anchorPrice=pinned?previous.simulationAnchorPrice:Number.isFinite(previous?.price)&&previous.price>0?previous.price:SIMULATION_SEEDS[market];
+  const anchorAt=pinned?previous.simulationAnchorAt:now;
+  if(!Number.isFinite(anchorPrice)||anchorPrice<=0||!Number.isSafeInteger(anchorAt)||anchorAt<0||now<anchorAt||now<(previous?.at??0))throw new RangeError('INVALID_SIMULATION_SOURCE');
+  // A clock-bound 128-second triangular path, two seconds per 0.125 index
+  // step and +/-2 index maximum. No random/feed values or order-aware fills.
+  const priceAt=at=>{const phase=Math.floor((at-anchorAt)/2000)%64;
+    const offset=(phase<=16?phase:phase<=48?32-phase:phase-64)/8;
+    return Math.max(anchorPrice/2,anchorPrice+offset)};
+  // Consistency validation, not authentication: a lone corrupted finite anchor
+  // must not manufacture a price jump or liquidate an existing local position.
+  if(pinned&&(previous.at<anchorAt||previous.price!==priceAt(previous.at)))throw new RangeError('INVALID_SIMULATION_SOURCE');
+  return Object.freeze({market,price:priceAt(now),at:now,
+    source:SIMULATION_PRICE_SOURCE,sourceStatus:'SIMULATION_DETERMINISTIC',simulationOnly:true,
+    simulationAnchorPrice:anchorPrice,simulationAnchorAt:anchorAt,settlementAuthority:false});
+}

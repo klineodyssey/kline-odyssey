@@ -4,6 +4,7 @@ STATUS: CANDIDATE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
 */
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
+import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot} from './kgen-margin-runtime.mjs';
@@ -75,36 +76,79 @@ export function createExecutionAdapter({ledger,deployment=null,wallet=null,ether
   }
   if(!ledger||typeof ledger!=='object')throw new Error('EXISTING_LEDGER_REQUIRED');
   const run=(fn,mutating=false)=>{try{if(mutating)options.beforeMutation?.();const result=fn();if(result.ok&&mutating)options.afterMutation?.();return result.ok?{...result,executionMode:'SIMULATION'}:executionFailure(result)}catch(error){return executionFailure(error)}};
+  const fallback=options.simulationFallback===true;
+  const quote=(market,{now=Date.now(),book=simulationSnapshot(ledger)}={})=>{
+    const previous=book.observations[market],pending=book.orders.filter(o=>o.market===market&&o.status==='PENDING'),open=book.positions.filter(p=>p.market===market&&p.status==='OPEN'),active=pending.length>0||open.length>0;
+    const pinned=pending.some(o=>(o.executionPriceSource||o.priceSource)===SIMULATION_PRICE_SOURCE)||open.some(p=>p.priceSource===SIMULATION_PRICE_SOURCE);
+    if((!previous&&active)||(pinned&&previous?.source!==SIMULATION_PRICE_SOURCE))throw new Error('SIMULATION_RECOVERY_REQUIRED');
+    if(previous&&(!Number.isFinite(previous.price)||previous.price<=0||!Number.isSafeInteger(previous.at)||previous.at<0))throw new Error(active?'SIMULATION_RECOVERY_REQUIRED':'INVALID_SIMULATION_SOURCE');
+    if(fallback&&(previous?.source===SIMULATION_PRICE_SOURCE||!previous||now-previous.at>15000)){
+      try{return deterministicSimulationObservation({market,previous,now})}catch(error){if(active)throw new Error('SIMULATION_RECOVERY_REQUIRED');throw error}
+    }
+    return previous;
+  };
+  const applyQuote=(target,market,now)=>{
+    const book=simulationSnapshot(target),selected=quote(market,{now,book});
+    if(!selected||selected.source!==SIMULATION_PRICE_SOURCE||selected.at===book.observations[market]?.at)return {ok:true,events:[]};
+    return observeSimulationPrice(target,{...selected,observedAt:selected.at,now,productV1:options.productV1===true});
+  };
   const preview=(input,{now=Date.now()}={})=>run(()=>{
     if(options.productV1)requireV1TradingC(input.c);
-    const intent=buildExecutionOrderIntent({...input,now}),book=simulationSnapshot(ledger);
-    const quote=book.observations[intent.market];
-    if(!quote||now<quote.at||now-quote.at>15000)throw new Error('STALE_PRICE');
+    const selected=quote(input.market,{now}),intent=buildExecutionOrderIntent({...input,...(fallback?{currentPrice:selected?.price}:{}),now}),book=simulationSnapshot(ledger);
+    if(!selected||now<selected.at||now-selected.at>15000)throw new Error('STALE_PRICE');
     if(book.orders.some(o=>o.axis===intent.axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===intent.axis&&p.status==='OPEN'))throw new Error('AXIS_ALREADY_ACTIVE');
     const margin=requiredMargin(intent),available=book.wallet.free;
     if(!Number.isFinite(available)||available<margin)throw new Error('INSUFFICIENT_FREE_KGEN');
     return {ok:true,...intent,intent,requiredMargin:margin,available,
       estimatedLiquidationPrice:Math.max(0,liquidationMark({entry:intent.triggerPrice,c:intent.c,side:intent.side})),
       pnlModel:'INDEX_DELTA_C_LOTS_V1',liquidationModel:'SIMULATION_ISOLATED_ZERO_MAINTENANCE_NO_FEES',
-      currentPrice:quote.price,priceObservedAt:quote.at,executionMode:'SIMULATION'};
+      currentPrice:selected.price,priceObservedAt:selected.at,priceSource:selected.source||'SIMULATION_OBSERVATION',simulationOnly:true,executionMode:'SIMULATION'};
   });
-  return Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,
+  return Object.freeze({name:'SIMULATION_ADAPTER',mode:'SIMULATION',enabled:true,preview,quote,
     submit:(input,{now=Date.now()}={})=>run(()=>{
       const checked=preview(input,{now});if(!checked.ok)return checked;
-      const result=placeSimulationOrder(ledger,checked.intent);
+      const draft=structuredClone(ledger),observation=applyQuote(draft,checked.market,now);if(!observation.ok)return observation;
+      const result=placeSimulationOrder(draft,checked.intent);
+      if(result.ok)Object.assign(ledger,draft);
       return result.ok?{...result,status:'PENDING_TRIGGER'}:result;
     },true),
-    observe:(observation)=>run(()=>observeSimulationPrice(ledger,{...observation,productV1:options.productV1===true}),true),
-    close:(positionId,options)=>run(()=>closeSimulationPosition(ledger,positionId,options),true),
+    observe:(observation)=>run(()=>{
+      // Once local fallback is selected, public recovery cannot jump a pending
+      // order/open position to another source, including after wallet reload.
+      if(fallback){
+        const book=simulationSnapshot(ledger);quote(observation.market,{now:observation.now??Date.now(),book});
+        if(book.observations[observation.market]?.source===SIMULATION_PRICE_SOURCE)return {ok:true,ignored:true,events:[]};
+      }
+      if(observation.source===SIMULATION_PRICE_SOURCE)return {ok:false,reason:'SIMULATION_SOURCE_REQUIRES_LOCAL_CLOCK'};
+      return observeSimulationPrice(ledger,{...observation,productV1:options.productV1===true});
+    },true),
+    tick:({now=Date.now()}={})=>run(()=>{
+      if(!fallback)return {ok:true,events:[]};
+      const draft=structuredClone(ledger),events=[];
+      for(const market of ['BTCUSDT','ETHUSDT','BNBUSDT']){const r=applyQuote(draft,market,now);if(!r.ok)return r;events.push(...r.events)}
+      Object.assign(ledger,draft);return {ok:true,events};
+    },true),
+    close:(positionId,{now=Date.now()}={})=>run(()=>{
+      const draft=structuredClone(ledger),position=simulationSnapshot(draft).positions.find(p=>p.positionId===positionId);
+      if(position?.status==='OPEN'){const advanced=applyQuote(draft,position.market,now);if(!advanced.ok)return advanced;
+        const settled=advanced.events.find(r=>r.positionId===positionId&&r.kind==='SETTLEMENT');if(settled){Object.assign(ledger,draft);return {ok:true,receipt:settled};}}
+      const result=closeSimulationPosition(draft,positionId,{now});if(result.ok)Object.assign(ledger,draft);return result;
+    },true),
     cancel:(orderId)=>run(()=>cancelSimulationOrder(ledger,orderId),true),
     snapshot:()=>simulationSnapshot(ledger)});
+}
+
+export function assertRealExecutionPriceSource({priceSource,source,simulationOnly,quoteState}={}){
+  if(simulationOnly===true||[priceSource,source].some(value=>typeof value==='string'&&/SIMULATION/.test(value)))throw new Error('SIMULATION_PRICE_NOT_REAL');
+  if(quoteState!==undefined&&quoteState!=='LIVE')throw new Error('REAL_QUOTE_NOT_LIVE');
 }
 
 export function buildRealTradingOrderIntent({
   axis,market,chainId=56,side,lots,c,price,
   walletAddress,brainAddress,positionEngineAddress,
-  feedProvenanceVerified=false,humanMainnetAuthorization=false
+  feedProvenanceVerified=false,humanMainnetAuthorization=false,priceSource,source,simulationOnly,quoteState
 }={}){
+  assertRealExecutionPriceSource({priceSource,source,simulationOnly,quoteState});
   const binding=assertRealTradingAxisMarket({axis,market,chainId});
   const trader=normalizeAddress(walletAddress,'WALLET_ADDRESS');
   const eligibility=realTradingEligibility({axis,market,chainId,feedProvenanceVerified,brainAddress,positionEngineAddress,humanMainnetAuthorization});
@@ -444,6 +488,7 @@ export function createTestnetExecutionAdapter({deployment,ethereum,ethers,receip
     publish({...lost||readOnly?blank():{},status:failure.code,error:failure.reason,
       transaction:state.transaction?{...state.transaction,status:failure.code}:null});return failure}};
   const previewInternal=async(input,{forceRefresh=false}={})=>{
+    assertRealExecutionPriceSource(input);
     const intent=buildExecutionOrderIntent(input),ticket=generation,account=await identity(),recent=lastReadyRefresh;
     // Display-only history reuse avoids repeating a just-completed RPC recovery.
     // Identity and oracle are always live; a write always forces full recovery.

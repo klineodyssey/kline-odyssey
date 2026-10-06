@@ -182,3 +182,47 @@ test('execution owner initializes before startup world feedback can synchronousl
  vm.runInContext(declaration+render,context);vm.runInContext('renderAxes()',context);assert.match(nodes.axes.innerHTML,/空倉/);
  vm.runInContext('execution={readOnly:true};renderAxes()',context);assert.match(nodes.axes.innerHTML,/NOT_REQUESTED/);assert.doesNotMatch(nodes.axes.innerHTML,/空倉/);
 });
+
+for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])for(const c of [1,-1])test(`actual openOrder owner opens ${market} ${c>0?'LONG':'SHORT'} while public quote is WAIT`,async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const {createExecutionAdapter}=await import('../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs');
+ const {createKgenLedger,normalizeSignedC,signedCFromLegacyMagnitude}=await import('../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs');
+ const ledger=createKgenLedger(100),execution=createExecutionAdapter({ledger,productV1:true,simulationFallback:true}),before=structuredClone(ledger);
+ const nodes={'#confirmOrder':{},'#confirmBody':{},'#confirm':{classList:{add:v=>{nodes.open=v}}}},toasts=[];
+ const state={axis,quotes:{},axes:{[axis]:{market,c,lots:1}}};let previews=0;
+ const context=vm.createContext({S:state,execution,pending:null,axis:()=>state.axes[axis],syncTradeAxisFromPlane(){},isTestnet:()=>false,price:()=>0,toast:x=>toasts.push(x),normalizeSignedC,signedCFromLegacyMagnitude,$:id=>nodes[id],$$:()=>[],paintOrderPreview:()=>previews++,journey:{event:()=>false},__K11520_SIGNED_C_IMMERSIVE__:{signedByAxis:{[axis]:c}}});
+ vm.runInContext(source.slice(source.indexOf('function executionQuote('),source.indexOf('function orderInput(')),context);
+ vm.runInContext(source.slice(source.indexOf('function openOrder(){'),source.indexOf("$('#cancelOrder').onclick")),context);context.openOrder();
+ assert.equal(nodes.open,'open');assert.equal(previews,1);assert.equal(context.pending.market,market);assert.equal(context.pending.c,c);assert.deepEqual(toasts,[]);assert.deepEqual(ledger,before,'opening preview must not debit or mutate simulation');assert.deepEqual(state.quotes,{},'never relabel fallback as LIVE public data');
+});
+
+test('actual order UI catches corrupt-source and rollback quote failures and clears stale confirmation',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ for(const message of ['INVALID_SIMULATION_SOURCE','provider payload with private content']){
+  const nodes={'#confirmOrder':{disabled:false},'#confirm':{classList:{remove:value=>{nodes.removed=value}}}},toasts=[];
+  const context=vm.createContext({execution:{mode:'SIMULATION',quote(){throw new Error(message)}},pending:{axis:'KY'},axis:()=>({market:'ETHUSDT'}),syncTradeAxisFromPlane(){},$:id=>nodes[id],toast:value=>toasts.push(value)});
+  vm.runInContext(source.slice(source.indexOf('function executionQuote('),source.indexOf('function orderInput(')),context);
+  vm.runInContext(source.slice(source.indexOf('function openOrder(){'),source.indexOf("$('#cancelOrder').onclick")),context);
+  assert.doesNotThrow(()=>context.openOrder());assert.equal(context.pending,null);assert.equal(nodes['#confirmOrder'].disabled,true);assert.equal(nodes.removed,'open');
+  assert.equal(toasts[0],message==='INVALID_SIMULATION_SOURCE'?'ORDER_REJECTED · INVALID_SIMULATION_SOURCE':'ORDER_REJECTED · INVALID_EXECUTION_QUOTE');
+ }
+});
+
+test('order presentation distinguishes creation provenance from current pending/fill source and SIM time',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/game-5d-main.mjs',import.meta.url),'utf8');
+ const {createExecutionAdapter}=await import('../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs');
+ const {createKgenLedger}=await import('../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs');
+ const adapter=createExecutionAdapter({ledger:createKgenLedger(100),simulationFallback:true});
+ adapter.observe({market:'ETHUSDT',price:4000,observedAt:1000,now:1000,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'});
+ adapter.submit({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4001},{now:1001});
+ adapter.tick({now:17000});
+ const context=vm.createContext({execution:{readOnly:false},walletExecutionView:()=>adapter.snapshot(),isTestnet:()=>false,receiptRows:rows=>JSON.stringify(rows),receiptTime:x=>x,executionLabel:()=>'SIMULATION'});
+ vm.runInContext(source.slice(source.indexOf('function simulationOrganHTML(id){'),source.indexOf('function bindSimulationSheet(')),context);
+ for(const time of [17000,33000]){
+  if(time===33000)adapter.tick({now:time});
+  const html=vm.runInContext("simulationOrganHTML('orders')",context);
+  assert.ok(html.includes('["SOURCE AT CREATION","BINANCE_PUBLIC_MARKET_DATA_ONLY"]'));
+  assert.ok(html.includes('["EXECUTION SOURCE","K11520_DETERMINISTIC_SIMULATION"]'));
+ }
+ assert.match(source,/isTestnet\(\)\?'ORACLE TIME':'OBSERVED AT \(SIMULATION\)'/);
+});

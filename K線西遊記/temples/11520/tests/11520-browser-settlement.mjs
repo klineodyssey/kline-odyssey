@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 
+if(process.argv.includes('--simulation-offline')||process.argv.includes('--simulation-offline-baseline')){
+  await offlineSimulationBrowserQA({baseline:process.argv.includes('--simulation-offline-baseline')});process.exit(0);
+}
+
 if(process.argv.includes('--m1-read-only')){
   await m1ReadOnlyBrowserQA();process.exit(0);
 }
@@ -225,6 +229,276 @@ try {
   }
   console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
 } finally {await browser.close()}
+
+// Opt-in P0 acceptance at the actual game entry. This lane never calls a model
+// submit/observe API, replaces runtime code, connects a wallet, or signs a TX.
+// Baseline mode records the same native attempt against an explicitly pinned
+// pre-repair server; BASELINE_REPRODUCED is not a product/browser PASS.
+async function offlineSimulationBrowserQA({baseline=false}={}){
+  const {createHash}=await import('node:crypto');
+  const {execFileSync}=await import('node:child_process');
+  const base=(process.env.K11520_BASE_URL||'http://127.0.0.1:4173').replace(/\/+$/,'');
+  const baseURL=new URL(base);assert.ok(['http:','https:'].includes(baseURL.protocol));assert.equal(baseURL.search,'');assert.equal(baseURL.hash,'');
+  const head=process.env.K11520_SOURCE_SHA||process.env.GITHUB_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  assert.match(head,/^[0-9a-f]{40}$/i,'An exact source commit is required');
+  const root='K線西遊記/temples/11520/',route=root+'game-5d.html';
+  const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+  const sourceBytes=new Map();
+  const files=['game-5d.html','runtime/game-5d-main.mjs','runtime/real-trading-order-intent.mjs','runtime/kgen-margin-runtime.mjs','runtime/public-market-quotes.mjs','runtime/mobile-signed-c-immersive-runtime.mjs'];
+  const assets=files.map(relative=>{
+    const path=root+relative,bytes=execFileSync('git',['show',head+':'+path]);sourceBytes.set(path,bytes);
+    const hasLeadingUtf8Bom=bytes.length>=3&&bytes[0]===0xef&&bytes[1]===0xbb&&bytes[2]===0xbf;
+    return {path,sha256:hash(bytes),sourceByteLength:bytes.length,hasLeadingUtf8Bom,
+      ...(path===route&&hasLeadingUtf8Bom?{bomStrippedSha256:hash(bytes.subarray(3)),bomStrippedByteLength:bytes.length-3}:{})};
+  });
+  const expected=Object.fromEntries(assets.map(asset=>[asset.path,asset.sha256]));
+  const out=`artifacts/11520-settlement-qa/${baseline?'offline-baseline':'offline-simulation'}`;
+  await fs.mkdir(out,{recursive:true});
+  const source='K11520_DETERMINISTIC_SIMULATION',results=[],failures=[];
+  const profiles=[
+    {width:360,height:740,quote:'WAIT',account:null,chain:'0x38'},
+    {width:390,height:844,quote:'STALE',account:'0x1111111111111111111111111111111111111111',chain:'0x38'},
+    {width:412,height:772,quote:'INVALID',account:'0x1111111111111111111111111111111111111111',chain:'0x1'},
+    {width:432,height:856,quote:'WAIT',account:null,chain:'0x38'},
+    {width:480,height:900,quote:'STALE',account:null,chain:'0x38'},
+    {width:844,height:390,quote:'INVALID',account:null,chain:'0x38'},
+  ];
+  const cases=[['YZ','KX','BTCUSDT'],['XZ','KY','ETHUSDT'],['XY','KZ','BNBUSDT']].flatMap(([plane,axis,market])=>[1,-1].map(c=>({plane,axis,market,c,side:c>0?'LONG':'SHORT'})));
+  const browser=await chromium.launch({headless:true});
+  try{for(const profile of profiles){
+    const name=`${profile.width}x${profile.height}-${profile.quote.toLowerCase()}`;
+    const result={profile,head,baseline,simulatedBrowserClock:true,rawSourceChecks:[],sourceChecks:[],cases:[],screenshots:[],pageErrors:[],requestFailures:[],referenceResponses:[],networkAuthorityAttempts:[]};results.push(result);
+    const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
+    page.setDefaultTimeout(12000);let stage='raw-source-proof',networkSequence=0;
+    page.on('pageerror',error=>result.pageErrors.push(String(error)));
+    page.on('requestfailed',request=>result.requestFailures.push({url:request.url(),error:request.failure()?.errorText}));
+    const finishBrowserSource=attachM1PageSourceProof(page,{base,sourceSha:head,assets,createHash});
+    const sourceProof=async()=>{
+      const proof=await finishBrowserSource();result.sourceChecks=proof.observedBrowserResponses;
+      result.browserSourceProof={...proof,coverageScope:'EXPLICIT_OFFLINE_SIMULATION_ENTRY_AND_EXECUTION_ASSETS_ONLY'};return proof;
+    };
+    await page.addInitScript(({account,chain})=>{
+      const listeners=new Map(),fixture={account,chain,calls:[],native:[],feedback:[],emit(name,value){for(const fn of listeners.get(name)||[])fn(value)}};
+      window.__offlineSimulationQA=fixture;
+      document.addEventListener('DOMContentLoaded',()=>{
+        const toast=document.querySelector('#toast');if(!toast)return;
+        const capture=()=>{const text=toast.textContent||'';if(text&&fixture.feedback.at(-1)?.text!==text)fixture.feedback.push({text,at:Date.now()})};
+        fixture.feedbackObserver=new MutationObserver(capture);fixture.feedbackObserver.observe(toast,{childList:true,subtree:true,characterData:true});capture();
+      },{once:true});
+      window.ethereum={on(name,fn){if(!listeners.has(name))listeners.set(name,new Set());listeners.get(name).add(fn)},removeListener:(name,fn)=>listeners.get(name)?.delete(fn),request:async({method})=>{
+        fixture.calls.push({method,at:Date.now()});
+        if(method==='eth_accounts')return fixture.account?[fixture.account]:[];
+        if(method==='eth_chainId')return fixture.chain;
+        if(method==='eth_getBalance')return '0x0';
+        if(method==='eth_call')return '0x'+'0'.repeat(64);
+        throw new Error('FORBIDDEN_OFFLINE_QA_PROVIDER_METHOD:'+method);
+      }};
+      for(const type of ['pointerdown','pointerup','click'])document.addEventListener(type,event=>{
+        const target=event.target?.closest?.('#joy,#orderFire,#confirmOrder,#flat,#cancelOrder,#sheetClose,[data-sim-close],[data-sim-cancel]');
+        if(target)fixture.native.push({type,id:target.id||target.dataset.simClose||target.dataset.simCancel,isTrusted:event.isTrusted,at:Date.now()});
+      },true);
+    },profile);
+    // Deliberately unavailable REAL/public references. Runtime source remains
+    // untouched; only external read-only responses are deterministic fixtures.
+    await page.route('https://data-api.binance.vision/**',request=>{
+      const url=new URL(request.request().url()),prices={BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600};
+      const payload=profile.quote==='INVALID'?[{p:'not-a-price',T:Date.now(),a:++networkSequence}]:[{p:String(prices[url.searchParams.get('symbol')]),T:Date.now()-60000,a:++networkSequence}];
+      result.referenceResponses.push({market:url.searchParams.get('symbol'),state:profile.quote,status:profile.quote==='WAIT'?503:200,payload});
+      return request.fulfill({status:profile.quote==='WAIT'?503:200,contentType:'application/json',body:JSON.stringify(profile.quote==='WAIT'?{code:'OFFLINE_QA_REFERENCE_UNAVAILABLE'}:payload)});
+    });
+    await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
+    await page.route('https://cdn.jsdelivr.net/npm/three@0.180.0/**',async r=>{
+      const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';
+      let body=await fs.readFile('node_modules/three/'+r.request().url().slice(prefix.length),'utf8');
+      body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);
+      await r.fulfill({contentType:'text/javascript',body});
+    });
+    // Synthetic ethereum reads above must not conceal a second real RPC route.
+    // Reject and retain every external write/RPC attempt rather than relying on
+    // a zero eth_sendTransaction counter as proof of no Mainnet activity.
+    await page.route('**/*',async r=>{
+      const request=r.request(),url=new URL(request.url()),external=url.origin!==new URL(base).origin;
+      const rpc=external&&/dataseed|llamarpc|ankr\.com|infura|alchemy|quicknode|(?:^|[./-])rpc(?:[./-]|$)/i.test(url.hostname+url.pathname);
+      if(!['GET','HEAD','OPTIONS'].includes(request.method())||rpc){result.networkAuthorityAttempts.push({method:request.method(),origin:url.origin,path:url.pathname,rpc});await r.abort('blockedbyclient');return}
+      await r.fallback();
+    });
+    page.on('websocket',socket=>result.networkAuthorityAttempts.push({method:'WEBSOCKET',url:socket.url()}));
+    const snap=()=>page.evaluate(()=>__K11520_SIMULATION_EXCHANGE__.snapshot());
+    const state=()=>page.evaluate(()=>{
+      const text=selector=>document.querySelector(selector)?.textContent||'',s=globalThis.__K11520_SIGNED_C_IMMERSIVE__,button=document.querySelector('#confirmOrder');
+      return {at:Date.now(),url:location.href,plane:globalThis.__K11520_3D_CONTROL__?.mode,axis:s?.activeAxis,c:s?.signedC,lots:s?.lots,canonicalSide:s?.canonicalSide,
+        cInput:document.querySelector('#cNumericInput')?.value,lotsInput:document.querySelector('#lotsNumericInput')?.value,
+        confirmOpen:document.querySelector('#confirm')?.classList.contains('open'),submitDisabled:button?.disabled,submitLabel:button?.textContent,
+        preview:text('#simulationOrderPreview'),trigger:document.querySelector('#simulationTriggerPrice')?.value,toast:text('#toast'),feed:text('#feed'),
+        wallet:{address:text('#wAddr'),chain:text('#wChain'),message:text('#walletMsg'),mode:text('#executionMode'),modeDisabled:document.querySelector('#executionMode')?.disabled},
+        publicReference:globalThis.__K11520_FREE_ORACLE__||{},marketReference:globalThis.__K11520_MARKET_K__||null,
+        execution:globalThis.__K11520_EXECUTION__?.snapshot(),simulation:globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot(),
+        providerCalls:globalThis.__offlineSimulationQA.calls,native:globalThis.__offlineSimulationQA.native,feedback:globalThis.__offlineSimulationQA.feedback};
+    });
+    const shot=async label=>{const file=`${name}-${label}.png`;await page.screenshot({path:`${out}/${file}`,fullPage:true});result.screenshots.push(file)};
+    const usable=async selector=>{
+      const box=await page.locator(selector).evaluate(element=>{const r=element.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,hit:hit===element||element.contains(hit),blocker:hit?.id||hit?.tagName}});
+      assert.ok(box.width>0&&box.height>0&&box.x>=0&&box.y>=0&&box.right<=profile.width+1&&box.bottom<=profile.height+1,`${selector} clipped: ${JSON.stringify(box)}`);
+      assert.ok(box.hit,`${selector} pointer blocked: ${JSON.stringify(box)}`);return box;
+    };
+    const game=async()=>{
+      if(await page.locator('#confirm').isVisible())await page.locator('#cancelOrder').click();
+      if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();
+      if(!await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click();
+      if(await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+    };
+    const organ=async name=>{
+      await game();await page.locator('#k11520UtilityMaster').click();
+      if(!await page.locator(`#dock [data-organ="${name}"]`).isVisible())await page.locator('#dockToggle').click();
+      await page.locator(`#dock [data-organ="${name}"]`).click();await page.locator('#sheet.open').waitFor();
+    };
+    const select=async ({plane,axis,c})=>{
+      await game();for(let i=0;i<3&&await page.evaluate(()=>__K11520_3D_CONTROL__.mode)!==plane;i++){
+        const previous=await page.evaluate(()=>__K11520_3D_CONTROL__.mode);await page.locator('#joy').tap();
+        await page.waitForFunction(previous=>__K11520_3D_CONTROL__.mode!==previous,previous);
+      }
+      await page.waitForFunction(axis=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis,axis);
+      await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
+      await page.locator('#lotsNumericInput').fill('1');await page.locator('#lotsNumericInput').press('Enter');
+      await page.waitForFunction(({axis,c})=>__K11520_SIGNED_C_IMMERSIVE__.activeAxis===axis&&__K11520_SIGNED_C_IMMERSIVE__.signedC===c&&__K11520_SIGNED_C_IMMERSIVE__.lots===1,{axis,c});
+    };
+    const assertNoAuthority=s=>{
+      assert.equal(s.execution.mode,'SIMULATION_WALLET','Offline simulation must not switch execution authority');
+      assert.equal(s.wallet.modeDisabled,true,'Unverified REAL/Testnet selection stays disabled');
+      assert.ok(s.providerCalls.every(call=>['eth_accounts','eth_chainId','eth_getBalance','eth_call'].includes(call.method)),'No connect, signer, chain switch or TX request is permitted');
+      assert.deepEqual(result.networkAuthorityAttempts,[],'No public RPC, network write or wallet websocket may be attempted');
+      for(const observation of Object.values(s.publicReference))assert.notEqual(observation.source,source,'Simulation must never become public/REAL provenance');
+    };
+    const verifyRawSource=async phase=>{
+      // APIRequestContext returns raw HTTP bytes. This mandatory exact gate
+      // precedes navigation; it cannot use the browser's BOM representation
+      // exception and accepts no redirect, changed origin, path or length.
+      for(const asset of assets){
+        const url=new URL(base+'/'+encodeURI(asset.path)).href,response=await context.request.get(url,{maxRedirects:0});
+        const bytes=await response.body(),actual=hash(bytes),record={phase,path:asset.path,url:response.url(),status:response.status(),expectedHash:asset.sha256,expectedLength:asset.sourceByteLength,actualHash:actual,actualLength:bytes.length,bytesEqual:bytes.equals(sourceBytes.get(asset.path))};
+        result.rawSourceChecks.push(record);assert.equal(response.url(),url,'Raw source URL/origin/basepath changed');assert.equal(response.status(),200,'Raw source HTTP status');
+        assert.equal(record.bytesEqual,true,'Raw source bytes mismatch: '+asset.path);assert.equal(bytes.length,asset.sourceByteLength,'Raw source byte length mismatch: '+asset.path);assert.equal(actual,asset.sha256,'Raw source hash mismatch: '+asset.path);record.match='EXACT_SOURCE_BYTES';
+      }
+    };
+    try{
+      await verifyRawSource('BEFORE_BROWSER');
+      stage='boot';
+      await page.clock.install({time:new Date()});
+      await page.goto(base+'/'+encodeURI(route),{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_3D_CONTROL__);
+      if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();
+      await page.locator('#intro11520').waitFor({state:'hidden'});
+      await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
+      if(!baseline)await page.waitForFunction(source=>['BTCUSDT','ETHUSDT','BNBUSDT'].every(market=>__K11520_SIMULATION_EXCHANGE__.snapshot().observations[market]?.source===source),source);
+      await sourceProof();
+      await shot('boot');result.boot=await state();assertNoAuthority(result.boot);
+      if(!baseline&&profile.width===390){
+        stage='input-validation';await select({...cases[0],c:0});const count=(await snap()).orders.length;await page.locator('#orderFire').click();
+        await page.waitForTimeout(150);const neutral=await state();assert.ok(!neutral.confirmOpen||neutral.submitDisabled,'0C must remain blocked');assert.equal(neutral.simulation.orders.length,count);
+        await select({...cases[0],c:5});await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
+        await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview').textContent.includes('V1_HIGH_SPEED_PRODUCTION_LOCKED'));
+        const highC=await state();assert.equal(highC.submitDisabled,true);await shot('high-c-blocked');
+        await select(cases[0]);await page.locator('#lotsNumericInput').fill('-5');await page.locator('#lotsNumericInput').press('Enter');
+        await page.waitForFunction(()=>__K11520_SIGNED_C_IMMERSIVE__.lots===1&&document.querySelector('#lotsNumericInput').value==='1');
+        await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();await page.locator('#simulationTriggerPrice').fill('0');
+        await page.waitForFunction(()=>document.querySelector('#confirmOrder').disabled&&/TRIGGER_PRICE_MUST_BE_POSITIVE/.test(document.querySelector('#simulationOrderPreview').textContent));
+        result.validation={neutral,highC,invalidTrigger:await state()};await shot('invalid-trigger');await game();
+      }
+      for(const testCase of cases){
+        stage=`${testCase.market}-${testCase.side}`;const evidence={...testCase};result.cases.push(evidence);
+        await select(testCase);evidence.before=await state();evidence.orderHit=await usable('#orderFire');
+        const count=evidence.before.simulation.orders.length;
+        await page.locator('#orderFire').click();
+        if(baseline){
+          await page.waitForTimeout(350);evidence.after=await state();await shot(stage+'-blocked');
+          assert.equal(evidence.after.simulation.orders.length,count,'Baseline probe must not create a position/order');
+          assert.ok(!evidence.after.confirmOpen||evidence.after.submitDisabled,'Pinned baseline unexpectedly accepts the offline preview');
+          evidence.clickFeedback=evidence.after.feedback.slice(evidence.before.feedback.length);
+          assert.match(evidence.clickFeedback.map(event=>event.text).join(' ')+' '+evidence.after.preview,/ORACLE_STALE|STALE_PRICE|行情未就緒|PRICE_MUST_BE_POSITIVE/,'Capture the actual old validation blocker before deferred route feedback replaces it');
+          evidence.result='BASELINE_REPRODUCED';assertNoAuthority(evidence.after);continue;
+        }
+        await page.locator('#confirm.open').waitFor();
+        const anchor=(await snap()).observations[testCase.market]?.simulationAnchorPrice;
+        assert.ok(Number.isFinite(anchor)&&anchor>0,'The observed simulation source must expose its deterministic anchor');
+        await page.locator('#simulationTriggerPrice').fill(String(anchor+.125));
+        await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);
+        evidence.preview=await state();assert.match(evidence.preview.preview,new RegExp(source));assertNoAuthority(evidence.preview);
+        evidence.submitHit=await usable('#confirmOrder');await shot(stage+'-preview');
+        const clickCount=evidence.preview.native.filter(event=>event.id==='confirmOrder'&&event.type==='click').length;
+        await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
+        await page.waitForFunction(count=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.length===count+1,count);
+        evidence.submitted=await state();const order=evidence.submitted.simulation.orders.at(-1);
+        assert.equal(order.market,testCase.market);assert.equal(order.axis,testCase.axis);assert.equal(order.c,testCase.c);assert.equal(order.lots,1);
+        assert.equal(order.side,testCase.side);assert.equal(order.priceSource,source);
+        assert.equal(evidence.submitted.native.filter(event=>event.id==='confirmOrder'&&event.type==='click'&&event.isTrusted).length,clickCount+1,'One trusted native Submit must reach the application');
+        assert.ok(['PENDING','FILLED'].includes(order.status),'Submission must create an actual lifecycle record');
+        // One full 128-second source cycle is the domain bound, rather than an
+        // arbitrary retry count. Advance only the browser clock; the app's own
+        // timer, observe guard, trigger crossing and settlement remain in use.
+        for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===order.orderId)?.status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
+        let book=await snap(),filled=book.orders.find(o=>o.orderId===order.orderId);
+        assert.equal(filled.status,'FILLED','The actual deterministic source tick must fill the submitted trigger');
+        const position=book.positions.find(p=>p.positionId===filled.positionId);assert.equal(position.status,'OPEN');
+        assert.equal(book.receipts.filter(r=>r.orderId===order.orderId&&r.kind==='FILL').length,1,'Fill is exactly once');
+        assert.equal(book.wallet.lockedMargin,1);evidence.filled=await state();await shot(stage+'-filled');
+        await page.clock.fastForward(4000);book=await snap();const marked=book.positions.find(p=>p.positionId===position.positionId);
+        assert.equal(marked.status,'OPEN');const expectedPnl=(marked.mark-marked.entry)*marked.c*marked.lots;
+        assert.ok(Math.abs(book.wallet.unrealizedPnl-expectedPnl)<1e-7,'PnL must follow signed C and real simulation mark');
+        evidence.marked=await state();
+        if(testCase===cases[0]){await organ('positions');assert.match(await page.locator('#sheetBody').innerText(),/UNREALIZED PNL/);await shot(stage+'-position-pnl')}
+        await game();await usable('#flat');await page.locator('#flat').click();
+        await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().positions.find(p=>p.positionId===id)?.status==='CLOSED',position.positionId);
+        evidence.closed=await state();book=evidence.closed.simulation;assert.equal(book.wallet.lockedMargin,0);
+        const receipt=book.receipts.find(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT');
+        assert.equal(receipt.status,'CLOSED');assert.equal(receipt.priceSource,source);assert.ok(Number.isFinite(receipt.realizedPnl));
+        assert.ok(Math.abs(receipt.rawPnl-(receipt.settlementPrice-receipt.entryPrice)*testCase.c)<1e-7,'Settlement receipt must preserve the signed index-delta PnL');
+        assert.equal(book.receipts.filter(r=>r.positionId===position.positionId&&r.kind==='SETTLEMENT').length,1);
+        if(testCase===cases[0]){await organ('history');await page.locator(`[data-receipt="${receipt.receiptId}"] > summary`).click();assert.match(await page.locator('#sheetBody').innerText(),new RegExp(source));await shot(stage+'-close-receipt')}
+        assertNoAuthority(evidence.closed);evidence.result='FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
+      }
+      if(!baseline&&profile.width===390){
+        stage='pending-cancel';await select(cases[0]);await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
+        const anchor=(await snap()).observations.BTCUSDT.simulationAnchorPrice;await page.locator('#simulationTriggerPrice').fill(String(anchor+10));
+        await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
+        const pending=(await snap()).orders.at(-1);await page.clock.fastForward(4000);assert.equal((await snap()).orders.at(-1).status,'PENDING');
+        await page.locator(`[data-sim-cancel="${pending.orderId}"]`).click();await page.waitForFunction(id=>__K11520_SIMULATION_EXCHANGE__.snapshot().orders.find(o=>o.orderId===id)?.status==='CANCELLED',pending.orderId);
+        result.cancel=await state();assert.equal(result.cancel.simulation.receipts.filter(r=>r.orderId===pending.orderId).length,0);await shot('pending-cancelled');
+        stage='liquidation';await select(cases.find(c=>c.market==='ETHUSDT'&&c.c===1));await page.locator('#orderFire').click();await page.locator('#confirm.open').waitFor();
+        const ethAnchor=(await snap()).observations.ETHUSDT.simulationAnchorPrice;await page.locator('#simulationTriggerPrice').fill(String(ethAnchor+.125));
+        await page.waitForFunction(()=>!document.querySelector('#confirmOrder').disabled);await page.locator('#confirmOrder').click();await page.locator('#confirm').waitFor({state:'hidden'});
+        const liquidationOrder=(await snap()).orders.at(-1);
+        for(let elapsed=0;elapsed<=128000&&(await snap()).orders.find(o=>o.orderId===liquidationOrder.orderId).status==='PENDING';elapsed+=4000)await page.clock.fastForward(4000);
+        const liquidationPosition=(await snap()).positions.find(p=>p.orderId===liquidationOrder.orderId);assert.equal(liquidationPosition.status,'OPEN');result.beforeLiquidation=await state();
+        for(let elapsed=0;elapsed<=128000&&(await snap()).positions.find(p=>p.positionId===liquidationPosition.positionId).status==='OPEN';elapsed+=4000)await page.clock.fastForward(4000);
+        result.liquidation=await state();const liquidationReceipt=result.liquidation.simulation.receipts.find(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT');
+        assert.equal(liquidationReceipt?.status,'LIQUIDATED');assert.equal(liquidationReceipt.priceSource,source);assert.equal(liquidationReceipt.realizedPnl,-1);assert.equal(liquidationReceipt.marginAfter,0);assert.equal(result.liquidation.simulation.wallet.lockedMargin,0);
+        await organ('history');await page.locator(`[data-receipt="${liquidationReceipt.receiptId}"] > summary`).click();await shot('liquidation');await page.clock.fastForward(8000);assert.equal((await snap()).receipts.filter(r=>r.positionId===liquidationPosition.positionId&&r.kind==='SETTLEMENT').length,1,'Liquidation must not replay');
+        stage='account-isolation';const owned=await snap();
+        await page.evaluate(()=>{__offlineSimulationQA.account='0x2222222222222222222222222222222222222222';__offlineSimulationQA.emit('accountsChanged',[__offlineSimulationQA.account])});
+        await page.waitForFunction(()=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===0);result.otherAccount=await state();assert.equal(result.otherAccount.simulation.orders.length,0);assertNoAuthority(result.otherAccount);
+        await page.evaluate(()=>{__offlineSimulationQA.account='0x1111111111111111111111111111111111111111';__offlineSimulationQA.emit('accountsChanged',[__offlineSimulationQA.account])});
+        await page.waitForFunction(length=>__K11520_SIMULATION_EXCHANGE__.snapshot().receipts.length===length,owned.receipts.length);result.ownerRestored=await state();assert.deepEqual(result.ownerRestored.simulation.receipts,owned.receipts);await shot('owner-restored');
+      }
+      if(!baseline){
+        stage='reload-recovery';const before=await snap();await page.reload({waitUntil:'domcontentloaded'});
+        await page.waitForFunction(length=>__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===length,before.receipts.length);
+        await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
+        result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');
+      }
+      await sourceProof();
+      await verifyRawSource('AFTER_BROWSER');
+      assert.deepEqual(result.pageErrors,[]);result.status=baseline?'BASELINE_REPRODUCED':'FUNCTIONAL_PASS_VISUAL_REVIEW_REQUIRED';
+    }catch(error){result.status='FAIL';result.stage=stage;result.error=String(error);result.stack=error.stack;failures.push(`${name}/${stage}: ${error.message}`);result.failureState=await state().catch(()=>null);await shot('failure').catch(()=>{})}
+    finally{result.browserSourceObservedAtExit={...finishBrowserSource.snapshot(),coverageScope:'EXPLICIT_OFFLINE_SIMULATION_ENTRY_AND_EXECUTION_ASSETS_ONLY'};result.lastState=await state().catch(()=>null);await page.evaluate(()=>globalThis.__offlineSimulationQA?.feedbackObserver?.disconnect()).catch(()=>{});await fs.writeFile(`${out}/${name}-result.json`,JSON.stringify(result,null,2));await context.close()}
+  }}finally{
+    await browser.close();await fs.writeFile(`${out}/report.json`,JSON.stringify({head,base,baseline,harnessSha256:hash(await fs.readFile(new URL(import.meta.url))),capturedAt:new Date().toISOString(),expectedSourceHashes:expected,expectedSourceAssets:assets,
+      simulatedBrowserClock:true,clockEvidence:'PLAYWRIGHT_VIRTUAL_BROWSER_TIME_ADVANCES_REAL_APPLICATION_TIMERS; NOT_REAL_ELAPSED_MOVEMENT_OR_MARKET_TIME',
+      fixtureScope:'EXTERNAL_READ_ONLY_REFERENCE_AND_SYNTHETIC_EIP1193_ONLY',callChain:'native #orderFire → openOrder → orderInput → simulation adapter preview → native #confirmOrder → executionAction → adapter.submit → placeSimulationOrder → real app tick → observeSimulationPrice',
+      functional:failures.length?'FAIL':baseline?'BASELINE_REPRODUCED':'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',results,failures},null,2));
+  }
+  assert.deepEqual(failures,[],'Offline simulation real-entry failures; inspect source-bound JSON and screenshots');
+  console.log(baseline?'BASELINE_REPRODUCED: offline native Submit blocked; this is not browser product PASS':'FUNCTIONAL_PASS: offline six-market/direction Submit at six sizes; VISUAL_QA requires direct screenshot inspection');
+}
 
 // Actual candidate contracts in a disposable local EVM. No configured keys,
 // public RPC or public transactions; the manifest is intercepted only in QA.
