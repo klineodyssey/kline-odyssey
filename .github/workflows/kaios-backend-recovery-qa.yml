@@ -36,6 +36,8 @@ jobs:
         run: npm ci --prefix KAIOS/backend --ignore-scripts
       - name: Syntax, unit, database, API and recovery integration
         run: |
+          # Shared mandatory Life tests use an in-memory IDB model, not a browser.
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org fake-indexeddb@6.2.5
           npm run --prefix KAIOS/backend check
           npm run --prefix KAIOS/backend test
           node --test 'K線西遊記/temples/11520/tests/11520-player-life.test.mjs'

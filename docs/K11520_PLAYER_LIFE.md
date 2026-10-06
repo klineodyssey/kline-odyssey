@@ -181,3 +181,934 @@ storage/two players/home/XP/wallet proofs/account switch/export-import.
 GM provides PR/head/evidence to Human for ChatGPT second-layer review; it must
 not claim that second review already occurred. No automatic cross-thread
 message, cloud purchase, Mainnet write or KAIOS payout is part of this release.
+
+## Atomic local authority successor: inert Stage1 (2026-10-05)
+
+STATUS: MEDIUM_RISK_DRAFT / UNINTEGRATED_LIFE_ONLY / P0_ACCEPTANCE_INCOMPLETE
+BASE_MAIN: b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720
+SOURCE_PR: #506
+SOURCE_HEAD: 8db98fb9d50828e9024daa2d811498c4e05201dd
+REASON: Broaden reviewed local-store protection to the requested canonical Player
+Life boundary; preserve the cooperative-lock prototype and its evidence unchanged.
+
+This clean-main successor is not stacked on explanation-only #505 and does not
+copy its UI/version changes. Stage1 adds an inert primitive inside the existing
+player-life-runtime.mjs and tests inside the existing Player Life suite. No
+production caller uses it. Existing game persistence remains unchanged. It does
+not authorize real-user migration, release, backend provisioning, or chain action.
+
+### Canonical replacement design and current limits
+
+The intended reviewed endpoint is one IndexedDB write authority for existing Life,
+backpack, local simulation product and Courier records, including session/tutorial
+inputs that can flow back into Life. Their domain owners remain canonical. There
+will be no parallel authoritative ledger, dual-writing, or post-cutover fallback
+to legacy localStorage. The current Stage1 supports only PLAYER_LIFE; other domains
+fail DOMAIN_NOT_IMPLEMENTED. Its marker explicitly records coverage PLAYER_LIFE
+and integration UNINTEGRATED_DRAFT. A full-system integrator must reject this
+partial marker as incomplete, never infer completed migration from its existence.
+
+The constructor/import are inert. Explicit open creates structural schema only.
+Explicit initialize or confirmed migration is separate. Commands carry complete
+authority epoch, shared-selection epoch and expected Life revision; stale commands
+conflict rather than silently rebase. Existing Life validation applies to every
+loaded/drafted envelope. The adapter owns monotonic revisions and selection epoch;
+ordinary commands cannot modify another player, registry, selection or consumed
+event/nonce history. Snapshot clones do not expose stored state.
+
+One readwrite transaction coordinates the records. Success is acknowledged only
+on transaction completion, never on an individual put. Exceptions/validation and
+request failures abort the transaction. Reducers are trusted existing domain-transition
+code, not user patches; structural validation does not replace import/profile/wallet-proof
+policy. Stage2 must retain those original exclusions. Reducers are synchronous and
+cannot receive IDB handles or replace validation. Closure/versionchange fences pending admission.
+A retained initialization sentinel and archive identity distinguish missing canonical
+records from a genuinely empty database. Whole-origin deletion cannot be detected
+from erased local evidence. Missing/corrupt canonical data stays blocked. Unsupported/open failures never
+delete the database or initialize a fallback identity.
+
+Prepared migration candidates preserve exact raw Life source, SHA-256, source key
+and validated owner/selection summary. Immutable candidate and protection identities
+use add, not overwrite. Observed legacy source divergence holds the commit; originals
+remain untouched. This source recheck cannot prove an atomic multi-key legacy
+snapshot. The eventual full migration requires an explicit preserved candidate and
+cross-domain validation. Restore currently fails RESTORE_NOT_IMPLEMENTED: replay
+retention and atomic cross-domain restore must be reviewed before it is enabled.
+Sanitized user/cloud exports have not changed.
+
+### Evidence and remaining gates
+
+Regression-first tests use fake-indexeddb 6.2.5, Apache-2.0, from its
+[official repository](https://github.com/dumbmatter/fakeIndexedDB) and the npm registry.
+Recorded npm integrity is
+`sha512-CGnyrvbhPlWYMngksqrSSUT1BAVP49dZocrHuK0SvtR0D5TMs5wP0o3j7jexDJW01KSadjBp1M/71o/KR3nD1w==`.
+Both existing Product and Backend Node steps install this exact test-only version
+with scripts disabled. No jobs, triggers, permission scope or timeout budgets are
+added. This adds one small package install per affected existing invocation.
+Missing dependencies fail; tests are not silently skipped. In-memory results are
+not native concurrency, disk durability, browser restart, or old-client proof.
+
+The browser platform explicitly provides no localStorage locking assumption;
+Web Locks coordinate participating scripts. IndexedDB supplies atomic transactions
+with overlapping readwrite serialization. Strict durability remains a browser hint,
+not a guarantee against device loss. Sources: [Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html),
+[Web Locks](https://www.w3.org/TR/web-locks/),
+[IndexedDB transaction model](https://www.w3.org/TR/IndexedDB/#transaction-concept).
+
+Stage2 must route every writer/read projection through the replacement authority,
+retain receipt tombstones, implement safe restore, and preserve real-wallet behavior.
+Required native proof includes N/N conflict/reload/retry, exact pinned-old Life,
+backpack/product/Courier/session/tutorial interference after cutover, migration and
+restore interruption, real persistent-profile restart, schema/corruption/quota,
+selection/Life isolation, and actual production conflict/recovery feedback. Missing
+BFCache evidence remains explicit. Separate direct visual QA is required.
+
+FINAL: Life-only authority primitive; production persistence unchanged;
+Player Life/backpack/product/Courier cutover and P0 acceptance incomplete.
+
+```json
+{"WORK_ID":"DOT-PLAYER-LIFE-ATOMIC-20261005","TRACK":"A_LOCAL_SAVE_INTEGRITY","RISK":"MEDIUM","BASE_MAIN":"b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720","SOURCE_PR":506,"SOURCE_HEAD":"8db98fb9d50828e9024daa2d811498c4e05201dd","STAGE":"LIFE_ONLY_AUTHORITY_PRIMITIVE","INTEGRATION":"UNINTEGRATED_DRAFT","SUPPORTED_DOMAINS":["PLAYER_LIFE"],"OTHER_DOMAINS":"DOMAIN_NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","PRODUCTION_CALLERS":0,"PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","NATIVE_QA":"NOT_RUN","SELF_MERGE":false}
+```
+
+### Stage2A1: inert strict domain validators
+
+Additive validation APIs now reside in the existing pure owners:
+
+- `backpack-runtime.mjs`: `validateCanonicalBackpack` checks exact Player owner,
+  capacities, items/living identities and retained reward receipts. It does not
+  call the separate legacy `restoreBackpack` normalizer.
+- `kgen-margin-runtime.mjs`: `validateLocalSimulationProductRecord` checks only
+  LOCAL_SIMULATION_PRODUCT persistence, including existing simulation engine
+  records, namespace and receipt relationships. Existing formulas, settlement,
+  real-wallet behavior and evm product-transition ownership are unchanged.
+- `digital-ant-logistics-runtime.mjs`: `validateCanonicalCourierEnvelope` checks
+  stored mission/index/owner/clock/insurance/receipt consistency and the existing
+  economics/cooldown/terminal-raid derivations, without altering those reducers.
+
+These functions return the original valid object or throw. They neither coerce nor
+insert defaults, change timestamps, generate identifiers, discard extensions,
+read storage, or write data. Non-JSON values, accessors, hidden/symbol fields and
+sparse arrays are rejected without calling property getters. Canonical receipt
+spelling is exact; historical noncanonical spelling needs explicit, raw-preserving
+migration review rather than silent normalization.
+
+Historical terminal missions and receipt IDs without binding metadata are not
+proof of credit. The future authority wrapper must record migration-derived
+LEGACY_UNBOUND identifiers immutably and forbid downgrading an existing bound
+receipt by deleting metadata. It must compare product/Courier records in the same
+transaction. Neither validator success, DELIVERED nor PAID alone authorizes credit.
+No historical reward, missing binding or backpay is inferred here.
+
+Stage2A1 does not import these modules into the authority and adds no production
+callers. Therefore the Stage1 coverage marker still supports only PLAYER_LIFE;
+other domains remain DOMAIN_NOT_IMPLEMENTED and restore remains unavailable.
+Future loading must be explicit and use a fixed registry. Static new imports from
+Player Life would break Recovery Center's current two-file asset allowlist; its
+exact pure dependency graph must be tested and added separately before integration.
+
+Focused tests validate genuine existing reducer output, malformed records and
+frozen byte-preservation. Pending-credit fixtures are explicitly labeled shapes,
+not evidence that pending integration exists on this successor. Atomic multi-domain
+commands, immutable binding transitions, complete migration/cutover, asynchronous
+production integration, native old-client and browser-restart acceptance remain
+INCOMPLETE. The session/tutorial and pending-insurance-payment legacy keys must
+not become automatic post-cutover state inputs.
+
+### Follow-up strict Life input admission
+
+The inert primitive now checks original JSON data before cloning initialization
+or command inputs, and checks reducer drafts before equality/serialization.
+Descriptor-based admission rejects values JSON would drop or transform, including
+undefined/function/symbol/hidden fields, accessors, sparse arrays and non-finite
+numbers. It does not invoke getters. The existing envelope/schema validation then
+runs against the original validated data before making a detached draft.
+
+Regressions confirm rejected initialization creates no authority/archive and
+rejected commands do not advance revision or change bytes. This is strict
+admission hardening in an unintegrated API, not a production incident, a new CAS
+claim or completion of the multi-domain P0 gate.
+
+### Stage2A2: unintegrated full-record transaction mechanics
+
+This checkpoint adds `openGame`, `readGame` and `commandGame` to the same inert
+`createLocalGameAuthority` adapter. It is a storage-mechanics prototype, not a
+complete game-command authority or a production cutover. There are still zero
+production callers. No public method initializes, migrates, restores or promotes
+full-mode records. Tests seed only isolated fake-IndexedDB fixtures directly.
+Importing or constructing the adapter opens no database, reads no legacy storage,
+and changes no live writer.
+
+`openGame` explicitly loads a fixed lazy registry of the three existing pure
+domain validators before starting transactions. This preserves the current
+Recovery Center's Life-only loading path; its two-file asset allowlist is not
+expanded here. `openGame` alone creates no authority marker. Life-only and full
+APIs reject the other mode's marker, and no partial marker is silently upgraded.
+
+Full mode requires `KAIOS_LOCAL_GAME_FULL_DRAFT_V1`, `UNINTEGRATED_DRAFT`, and exact
+coverage of PLAYER_LIFE, BACKPACK, PRODUCT and COURIER. One object store remains the
+transaction boundary. A typed fixed catalog identifies the existing Life
+envelope, per-Life backpack, per-Life/owner local product envelope and shared
+Courier envelope. Product means local simulation persistence, not chain balances,
+margin authority or a second ledger. Every Life must have declared backpack and
+guest-product entries. A declaration of ABSENT has revision null and no physical
+row; this differs from a missing PRESENT row, an omitted caller expectation or an
+undeclared physical row, all of which fail closed. This prototype cannot create
+or mutate ABSENT rows, add players, add namespaces, or change the catalog.
+
+Every read validates the complete catalog, physical-key census, original JSON,
+existing domain schemas, exact owner namespaces and cross-domain receipt links.
+It rejects data that JSON would coerce or omit without calling accessors. Catalog
+size is bounded to 128 entries and the aggregate metadata/domain JSON to 8,000,000
+characters; the stricter existing per-domain limits also apply. Valid unknown
+extension fields survive. Corrupt or oversized data is not repaired or overwritten.
+
+Every command supplies the authority epoch, shared selection epoch, catalog
+revision and all catalog references/revisions, including explicit null entries.
+The complete vector is checked inside the same native readwrite transaction that
+reloads, validates, creates detached drafts, validates the result and persists all
+changed records. The adapter owns revision increments; each changed record moves
+forward once, unchanged records are not rewritten. A no-op writes nothing.
+Selection uses a dedicated SWITCH command and increments its shared epoch only
+when the active Life changes. Stale contexts must reload and explicitly retry;
+there is no automatic stale replay. Any request failure or abort rejects the whole
+operation. An acknowledgement is returned only from transaction completion, and
+closing/versionchange invalidates pending operations. Fake-IndexedDB proves only
+the modeled mechanics; native browser lifecycle and durability remain unverified.
+
+The synchronous internal reducer receives only detached domain payloads. It
+cannot change catalog metadata, revisions, other Lives/owners or undeclared
+mission participants. Async/thenable and reentrant reducers fail. The admitted
+prototype kinds are PLAYER_UPDATE, INVENTORY_UPDATE, PRODUCT_UPDATE,
+OWN_COURIER_TRANSACTION and SWITCH. These are not public gameplay intents: most
+gameplay semantics still need their existing trusted reducer wrappers and typed
+commands before integration. Arbitrary external callers must not receive this
+mechanical mutation API. No network waits or external effects belong inside it.
+
+Consumed Life events/nonces, backpack reward IDs, product receipt indexes/bindings
+and simulation order/position/receipt identities are retained. Simulation history
+cannot be reset, terminal records cannot be rewritten and observations cannot
+roll back. Product cumulative counters cannot decrease. Existing bound receipts
+cannot lose or alter their binding. Legacy unbound receipt/terminal-mission
+classifications must match immutable `legacyUnbound` metadata; missing bindings
+do not create new legacy provenance and never authorize inferred backpayment.
+
+OWN_COURIER_TRANSACTION is limited to a named mission belonging to the selected
+Life and selected product owner. It cannot create missions, activate quoted
+insurance, raid, claim cross-Life loot, change custody of terminal missions or
+recover CLOCK_REVIEW. DELIVERED/FAILED missions are immutable; ROBBED permits only
+its already-approved insurance progression. Premium activation remains explicitly
+held until a typed atomic debit command is reviewed.
+
+New confirmed credits require both the canonical mission link and the exact
+existing local product delta in the same commit. The pure
+`validateLocalCourierCreditTransition` API in `kgen-margin-runtime.mjs` verifies
+receipt, namespace, purpose and amount, delivery XP/event updates, insurance event
+updates and wallet-owner claimable changes under the existing rules. It rejects
+metadata-only acknowledgements, unrelated balance/history changes, legacy
+backpayment and duplicate credit. Its revision argument is supplied only by the
+adapter from the actual changed-record set; the validator alone is not a write
+guard. An already-bound credit permits confirmation with unchanged product bytes
+and revision. This checkpoint does not import the frozen clock-recovery candidate.
+
+Targeted regression coverage includes complete-vector N/N conflict, non-target
+staleness, explicit reload, absence/census corruption, scope isolation, shared
+selection, abort after one product request, exact delivery/insurance credit plus
+acknowledgement, confirm-only, immutable history/provenance, premium HOLD and
+coerced-ID rejection. These use fake-indexeddb 6.2.5 and synthetic data only.
+Native multi-tab, persistent-browser restart, quota/disk failure, BFCache, exact
+old-client interference, full raw-preserving migration/backup/restore, typed
+custody/world-effect replay and production conflict/recovery UI are still gates.
+No current browser result establishes the user's whole-Player-Life P0 acceptance.
+
+The published Stage1 head's shared Product QA baseline has failures in unchanged
+browser harnesses. Preserve that evidence and resolve the shared baseline before
+another queued heavy run; small in-memory checks do not replace it.
+
+```json
+{"STAGE":"FULL_RECORD_STORAGE_MECHANICS_PROTOTYPE","INTEGRATION":"UNINTEGRATED_DRAFT","SOURCE_PR":508,"PRODUCTION_CALLERS":0,"FULL_MARKER_PUBLIC_INITIALIZER":false,"PARTIAL_MARKER_AUTO_UPGRADE":false,"FULL_MIGRATION":"NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","PREMIUM_ACTIVATION":"TYPED_ATOMIC_DEBIT_REQUIRED","CROSS_LIFE_CUSTODY":"NOT_IMPLEMENTED","MODEL_TEST_ENGINE":"fake-indexeddb@6.2.5","NATIVE_FULL_MODE_QA":"NOT_RUN","HEAVY_ACCEPTANCE":"BLOCKED_SHARED_QA_BASELINE","PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","SELF_MERGE":false}
+```
+
+### Versioned lossless migration-source digest
+
+New Life-only candidates record `hashEncoding: JSON_SOURCE_STRING_V1`. The digest
+is SHA-256 over UTF-8 encoding of the deterministic JSON representation
+`JSON.stringify({present:true,raw})`, where `raw` is the exact original
+localStorage string. localStorage exposes UTF-16 strings, not disk bytes. The
+[ECMAScript JSON string quoting algorithm](https://tc39.es/ecma262/multipage/structured-data.html#sec-quotejsonstring)
+escapes lone surrogate code units so distinct source strings remain distinct in
+this hash input. The original string is preserved separately and compared exactly
+on migration confirmation. SHA-256 provides integrity checking, not authenticated
+ownership or authorship.
+
+Candidates without the supported encoding version fail with
+UNSUPPORTED_MIGRATION_HASH_ENCODING_HOLD. Their stored candidate and legacy source
+are left unchanged; an old hash is never silently reinterpreted. Synthetic tests
+show two source strings that direct TextEncoder would conflate now have different
+digests, and historical unsupported candidates cannot commit. This remains an
+inert, Life-only candidate correction with no new production callers or cutover.
+
+### Stage2B: inert full migration capture for review
+
+`prepareGameMigration({sourceStorage})` and `readGameCandidate(id)` require an
+explicit completed `openGame()`. They neither default to global localStorage nor
+install/promote a full authority. They do not restore, delete, copy back, normalize
+source strings, or change any production caller. Preparation rejects existing
+partial/full authority and unexpected initialization evidence before source reads,
+then rechecks inside the same transaction as add-only candidate insertion.
+
+The allowlist is restricted to existing local-game data: Life and shared Courier;
+exact scoped backpack, local-product, player-session and tutorial names; their
+recognized unscoped legacy equivalents; the legacy-owner claim; pending insurance
+payment; and lastMission. Scoped values are read only when their exact canonical
+Life ID exists in the valid captured Life registry. Owner suffixes are exactly
+guest or lowercase canonical wallet addresses. Wallet identity, providers,
+authentication and other unrelated keys are excluded. Unknown/orphan scoped key
+names remain unexamined HOLD evidence: their values are never read. The existing
+scoped/unscoped `k11520.market-life.training` companion is explicitly recognized
+but remains unread with UNSUPPORTED_TRAINING_COMPANION. This checkpoint does not
+expand that domain's authority.
+
+Preparation makes two bounded captures separated by first-pass hashing. It stores
+both sorted relevant-key censuses, the first exact allowed source strings and
+presence flags, second-pass presence/digests, and the direct string-comparison
+result. Observed changes yield an immutable SOURCE_DIVERGED_HOLD candidate. Native
+getItem null is absence; the present string `null` is invalid source data. Proposal
+catalog entries distinguish PRESENT, ABSENT and INVALID; INVALID is review-only
+and can never pass the full-authority catalog validator. Duplicate/disappearing
+enumeration entries, unreadable sources or unstable lengths reject preparation
+with a typed HOLD error and create no candidate. Corrupt strings successfully
+captured within budget remain preserved inside a HOLD candidate.
+
+The [HTML storage standard](https://html.spec.whatwg.org/multipage/webstorage.html#storage)
+does not provide a cross-tab locking assumption, and enumeration order can change
+with mutations. Two equal passes are only observed stability. REVIEWABLE_CAPTURE
+never means atomic snapshot, latest state, migration-ready or production-ready.
+No retry-until-quiet loop conceals this boundary. Source writes occurring after
+these observations are not fenced by this preparation API. A later cutover needs
+its separately reviewed explicit snapshot boundary and divergence handling.
+
+Candidate records bind `STRICT_SCOPED_REVIEW_V1`, exact source strings, lossless
+per-source encoding/digests, censuses, owner/coverage summaries, limits, HOLD
+reasons, legacy classifications and review proposals into one manifest digest.
+Per-source hashing uses JSON_SOURCE_STRING_V1 with the actual presence boolean and
+raw string (or null for absence). The manifest hashes the deterministic JSON body
+excluding its own digest. Reads verify source hashes, ID/schema/encoding, the
+manifest and deterministic interpretation before returning detached data.
+Unsupported policy/encoding versions HOLD; nothing is silently reinterpreted.
+Hashes prove integrity relative to the digest, not authenticated owner identity.
+Raw captures stay local and are never added to sanitized exports or public QA.
+
+V1 product conversion exists only as a review proposal. The original string stays
+unchanged. Existing schema, owner, revision, ledger, progress, events and every
+counter must be valid. A pre-existing playerId cannot conflict with the scoped
+key. Only these absent fields receive explicit defaults:
+
+- courierReceipts: []
+- courierInsuranceReceipts: {}
+- courierReceiptBindings: {}
+- courierInsuranceBindings: {}
+
+Explicit null or malformed recognized fields HOLD. No missing ledger/progress
+container or counter is manufactured. The proposed V2 adds playerId from the
+verified scoped-key/Life-registry relationship and preserves opaque JSON extension
+fields without treating them as authority. Receipt spelling is never normalized;
+IDs/amounts are not deduplicated or truncated. Valid unique histories above 1000
+entries now pass the pure read validator only within its existing 2MB UTF-8 record
+bound. This changes no production append policy, reward rule or backpay permission.
+Unbound histories remain immutable LEGACY_UNBOUND classifications. Canonical
+cross-domain references and unresolved duplicate living identities are checked.
+Generic item IDs, including per-Life daily rewards, remain scoped to their owner.
+
+Unscoped monetary/inventory/session data, generic legacy backpack ownership,
+conflicting owners, orphan namespaces, missing required records, session/tutorial
+mismatches, pending insurance-payment evidence, unsupported companions and
+invalid cross-domain records HOLD. The legacy-owner claim cannot assign monetary
+ownership. lastMission is only a hint and never proves custody or payment.
+Many existing users may therefore require explicit migration review; no release
+or migration UX approval is implied.
+
+Safeguards are intentionally explicit and reviewable:
+
+- 4096 names enumerated per pass; 512 relevant/source entries; relevant name length
+  at most 256 code units
+- 4,000,000 UTF-16 code units per source; 8,000,000 captured code units across both
+  passes combined, counting each observed string even when unchanged
+- 16,000,000 bytes for the UTF-8 encoded candidate JSON
+- At most 8 candidate records and 32,000,000 total encoded candidate bytes; count
+  and aggregate admission are checked atomically with insertion
+
+Capacity failures preserve all source data and existing candidates. There is no
+truncation, eviction or partial replacement; a rejected attempt has no new archive.
+Hashing occurs before the insertion transaction and close-generation fencing
+prevents abandoned work from writing. Transaction completion remains the only
+acknowledgement. Budget/count races, duplicate IDs and insertion aborts retain
+prior evidence.
+
+Synthetic fake-IndexedDB tests cover V1/V2 proposals,1001 histories, explicit null,
+corrupt/ambiguous/orphan sources, unread value boundaries, source/census races,
+authority appearing during capture, generation fencing, policy/manifest tampering,
+lossless surrogates, count/byte budgets and zero source writes. These are model
+checks only. Full migration/promotion/restore, trusted live command wrappers,
+custody/world replay, Chromium old-client tests, persistent restart and production
+conflict/recovery feedback remain incomplete. No new heavy CI batch is claimed.
+
+```json
+{"STAGE":"FULL_MIGRATION_CAPTURE_REVIEW_ONLY","INTEGRATION":"UNINTEGRATED_DRAFT","POLICY":"STRICT_SCOPED_REVIEW_V1","HASH_ENCODING":"JSON_SOURCE_STRING_V1","PRODUCTION_CALLERS":0,"AUTHORITY_INSTALLATION":false,"SOURCE_WRITES":0,"FULL_MIGRATION":"NOT_IMPLEMENTED","RESTORE":"NOT_IMPLEMENTED","CAPTURE_ATOMICITY":"NOT_CLAIMED","RAW_ARCHIVE_EXPORT":"LOCAL_ONLY","NATIVE_FULL_MODE_QA":"NOT_RUN","PLAYER_LIFE_P0_ACCEPTANCE":"INCOMPLETE","SELF_MERGE":false}
+```
+
+### Prepared native IndexedDB adapter diagnostic mode
+
+The existing Player Life browser harness now has a mutually exclusive
+`--native-idb-only` mode. Its branch precedes ordinary wallet fixtures, signing
+setup, game boot and ordinary report creation. The ordinary harness body remains
+unchanged. This mode is prepared source; no native execution or PASS is claimed
+until the exact candidate's queued CI evidence is available.
+
+A separate mandatory Product workflow job has an eight-minute maximum and a
+240-second scenario cap. It adds up to eight runner-minutes per workflow event,
+or sixteen for both push and pull-request events. Existing jobs/assertions and
+script budgets are unchanged. The accepted desktop/mobile Courier split must be
+retained during dependency reconciliation before a new heavy run.
+
+The native mode uses Playwright 1.51.1 with a newly created disposable Chromium
+persistent profile and one fixed loopback origin. It uses the browser's native
+IndexedDB, never fake-indexeddb. The all-domain fixture is seeded directly in an
+isolated test database and is explicitly synthetic, not a full migration or a
+production cutover. External requests, service workers and provider/signing
+activity are blocked. Unexpected attempted network/provider activity fails the
+mode even when the request was blocked.
+
+Mandatory cases cover two tabs admitting the same revision vector, stale-write
+refusal, simultaneous CAS (exactly one commit/conflict), reload and explicit retry,
+shared selection epoch/Life isolation, a real native request followed by injected
+transaction abort, atomic Courier credit/acknowledgement, corrupt-record
+preservation and review-capture source preservation. The abort injection is not
+actual disk or quota failure.
+
+Actual old modules and their static transitive dependencies are pinned to
+b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720 and routed under the same test origin. The
+old tab's caches are created before newer canonical writes. Each old Life,
+product, Courier, backpack, session and tutorial mutation must successfully change
+its native localStorage string; an independent IndexedDB read must then retain
+all canonical records/revisions/consumed receipts unchanged. Refusal, activation
+alone or a no-op cannot satisfy that proof. This demonstrates the tested adapter
+keyspace boundary, not that the production game has adopted it.
+
+The required old-writer case avoids debugger scheduling dependence. Exact
+pause-after-read/before-set interleaving is explicitly NOT_EXERCISED in this mode;
+no shared-renderer pause or scheduling hook is represented as a passing atomicity
+case. BFCache and genuine disk/quota/power-loss tests also remain NOT_EXERCISED.
+
+For CLEAN_BROWSER_RESTART, all transaction acknowledgements complete first. The
+harness records canonical evidence, registers persistent-context close observation,
+awaits close, and independently verifies the exact Linux browser PID/starttime
+identity disappears before relaunching with the same profile directory and origin.
+Discovery reads only this harness's own child process list and exact NUL-delimited
+profile argument, excluding Chromium subprocesses. Ambiguity, permission errors,
+malformed evidence and an unreaped same-identity zombie fail closed. A new process
+identity and public CDP Browser.getVersion evidence are required for the second
+launch. No storageState import, reseeding, clearing or repair occurs after reopening.
+All canonical records, revision vectors and replay evidence must reopen unchanged.
+This proves requested shutdown and process replacement, not exit-code observation,
+crash or power-loss durability. It is explicitly Linux/Ubuntu CI diagnostics.
+
+The first native batch (head95181f4e, tree585e3abe) failed before all12 cases because
+Playwright1.51.1 persistent contexts do not expose the assumed Browser handle.
+Both failure artifacts are retained; zero source modules/cases/screenshots ran.
+The corrected harness avoids context.browser(), immediately owns acquired context
+cleanup, generation-fences late acquisitions after a case timeout, reuses each
+context close observation, and settles in-flight launch ownership before deleting
+the disposable profile. Cleanup or process-disappearance failure refuses PASS.
+Pure mocked-process regression tests do not substitute for the next native run.
+See the [persistent-context contract](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context),
+[public CDP sessions](https://playwright.dev/docs/api/class-browsercontext#browser-context-new-cdp-session)
+and [Linux process fields](https://docs.kernel.org/filesystems/proc.html).
+
+The independent report is checkpointed after each case and on failure, with
+HEAD/tree/dirty status, served source hashes, pinned source identity, browser and
+driver versions, mandatory outcomes and explicit remaining gaps. Available
+artifacts upload even when a case fails. Missing cases, JSON or required screenshots
+fail nonzero. The before/after-restart screenshots show the diagnostic fixture,
+not the production game, and cannot produce VISUAL_QA PASS. Raw capture archives
+are not exported as browser artifacts.
+
+Result scope is NATIVE_ADAPTER_DIAGNOSTICS. Full migration, restore, live trusted
+command integration, conflict/recovery UI and world/custody behavior remain
+INCOMPLETE. The ordinary product functional/visual gates and the user's
+whole-Player-Life P0 requirements remain separate release blockers.
+
+### Narrow shared-QA prerequisites for the queued native batch
+
+The clean-main candidate reuses only the reviewed Courier desktop/mobile split
+and bounded read-only timing/restoration diagnostics. Provenance is #507 local
+91572879e324f670cb1826d8baa95f88eaca019e (published20ede27b), subsequently reused
+unchanged by Track C in fe6ee6f6fcbb94b7664e7267afe980965a64e128
+(published #509 head7e0b1d1d537c55fde58e625e9f21d8a2f2308383). This is a selective
+test-only prerequisite, not a merge of #507 or any wallet/HUD runtime branch.
+
+The original desktop block gets its own mandatory90-second invocation. The
+ordinary mobile block retains its90-second cap, original gameplay assertions and
+wait predicates. This adds up to90 seconds of aggregate Product QA time. Required
+desktop screenshots and both timing reports are checked. Diagnostics preserve
+failed restoration state without altering timers, authority or receipt behavior.
+The native-IDB job and all authority code remain unchanged by this prerequisite.
+Exact-candidate browser evidence is still required; prior passes do not validate
+this candidate, and production cutover remains HOLD.
+
+The separate mobile-HUD prerequisite copies only #507
+e4b33676c251ba291a7faafce144ed762cc176a3's atomic KZ geometry test hunk. A's prior
+Product PR lane failed between a visibility wait and a second DOM lookup while
+market refresh replaced the node. The correction returns plain geometry from
+the same browser task, retains all existing8px clearance assertions, and passes
+the intended5-second timeout in the correct Playwright argument. It adds bounded
+failure evidence without changing runtime/controller behavior or retrying a
+failed assertion. No Responsive harness/public-controller changes are imported.
+
+### Integration dependency map (reviewed design, not live cutover)
+
+The native adapter checkpoint at PR508 head
+`b8909f4a71c7be5b5150234c45f186f9c1bfaf05`, tree
+`f8ff9c9ca35531d517a0b638899c1c877885544d`, passed all 12 mandatory native cases
+in both push and PR lanes. The eight triggered workflows passed. Actual pinned
+legacy writes, request-success abort and clean process replacement/reopen were
+verified against the uploaded records and source hashes. These are synthetic
+adapter fixtures, not production migration. The failed earlier native startup
+checkpoint remains preserved. Exact pre-set interleaving, BFCache and physical
+quota/power-loss tests are still unexercised.
+
+The remaining writer boundaries, using existing owners, are:
+
+- Life runtime/UI: creation, profile/consent, home, events, exploration, daily,
+  wallet proof/nonces, selection, import and restore need separate closed commands.
+- Main/scoped-storage startup: ownership claims, copy-on-read, SESSION activation
+  and default tutorial writes must move behind explicit admitted hydration.
+- Main/world/market-Life: XYZ/session/tutorial precedence and training observation
+  persistence need explicit contracts. Training is not silently included in the
+  present four-domain authority or promoted to reward authority.
+- Combat, daily, Cargo and simulation progression: declare every Life/product/bag
+  participant and derive rewards from the existing rules. UI-supplied amounts or
+  success flags do not authorize a grant.
+- Product/simulation: namespace changes, playtime/counters, spending, orders,
+  observations, close/cancel and receipt rewards need their own typed transitions.
+- Courier: debit+premium activation, delivery+credit acknowledgement,
+  insurance+credit acknowledgement, raid and loot need participant-bound commits.
+  Legacy payment hints never authorize replay or debit.
+- Bag/living/world-item owners: capture/release/drop/pickup commit conserved
+  custody and consumption before idempotent rendered-world reconciliation.
+- Player UI and the existing Recovery Center both write Life/import/selection.
+  A game-only boot gate is insufficient. The cloud outbox remains transport state.
+
+Order: closed semantic commands and consumption evidence; complete writer and
+custody contracts; existing bootstrap/entry hydration plus coherent module
+admission; reviewed full migration promotion; then native/UI integration QA.
+Current `commandGame` is trusted mechanics, not a public semantic reducer API.
+No new loader, world authority, balance ledger, server or live migration is added.
+
+Later review decisions include XYZ/tutorial precedence, training coverage,
+local product namespace generation (distinct from live M1 query identity), full
+custody participants, retention/compaction, legacy backup ambiguity and supported
+browser failure UX. M1 read-only identity queries must not rebind local product
+ownership. Existing sanitized exports remain unchanged; raw archives stay local.
+Latest-state reconstruction requires a complete verified checkpoint/tail and new
+revisions. Missing evidence means HOLD; same-device copies do not recover a
+cleared origin/device or authenticate a coherently rolled-back whole history.
+
+Waiting for IDB alone is not module admission: the old EVM module auto-imports
+writer UIs and the current service worker caches individual URLs. A possible
+future design uses the existing HTML import map's integrity metadata and an
+entry integrity/enforcement check before writer imports. A wrong-hash/offline
+mixed-generation browser test and explicit unsupported-browser policy are required.
+This is design only; see the [HTML module integrity model](https://html.spec.whatwg.org/multipage/webappapis.html#import-map-processing-model)
+and [Chrome 127 release notes](https://developer.chrome.com/release-notes/127?hl=en).
+
+### Inert daily claim/fulfillment semantic checkpoint
+
+`KAIOS_LOCAL_GAME_DAILY_DRAFT_V1` uses the same authority database and record store.
+It is explicitly `UNINTEGRATED_DRAFT`, has no public initializer or migration
+promotion, and has zero production typed-command callers. Isolated fake-IDB
+fixtures admit its marker, fixed catalog, protocol generation and immutable legacy
+provenance. Stage1 and generic `commandGame` reject this protocol; the prior full
+mechanical protocol remains unchanged. This is not general retained history,
+reconstruction, restoration or live game authority.
+
+The only new commands are `claimDaily({opId,playerId,expected})` and
+`fulfillDaily({opId,playerId,claimRef,expected})`; `readDaily()` reads their validated
+state. They concern Life and its bag, not wallet identity or a product namespace.
+No command accepts a day, amount, item, timestamp, eligibility assertion or reducer.
+The expected context contains the authority/protocol incarnations, shared selection
+epoch, catalog revision, daily sequence and complete canonical record vector.
+
+For a new claim, the controlled local UTC clock and canonical validated Life events
+feed the existing `dailyFor`/event projection rules: three kills, one six-phase
+practice and ten 5m exploration events, not already claimed that day. The unchanged
+reward is 25 player XP and 20 engine XP. The fixed item factory matches the existing
+main-runtime recipe exactly: one MATERIAL 每日星塵, weight 0.02, UNCOMMON, with the
+same PlayerID/reward identity. A source-behavior regression guards that compatibility;
+main/UI callsites are not refactored in this checkpoint.
+
+CLAIM atomically appends the Life event, derived XP and immutable claim/obligation
+receipt. FULFILL atomically uses the existing bag insertion/merge rule, records the
+bag reward tombstone and appends a separate immutable fulfillment receipt. Pending
+means a claim with no fulfillment; the claim is never rewritten. Quantity evidence
+binds the incoming one-unit entitlement to the actual destination stack. Missing an
+item later does not revive consumed delivery. Full bag/weight/receipt-cap denial
+keeps XP and the obligation, without an accepted fulfillment or reservation loss.
+Transaction failure acknowledges nothing and leaves the original records intact. When the
+current bag revision equals a fulfillment's resulting revision, its destination,
+quantity, insertion timestamp and matching stack attributes must agree. A new
+stack must equal the full normalized fixed recipe. Later bag revisions retain
+consumption without assuming the item remains present; full historical postimage
+verification is outside this checkpoint.
+
+Input/state/current owner and selection context are checked before idempotency.
+An exact opId replay compares its normalized original request, including its
+original expected vector, and returns immutable historical evidence without writes.
+It does not claim that its old projection is current. Changed request/claimRef or
+selection context rejects. A new operation requires full current CAS. Exact claim
+replay after midnight retains the original day; fulfillment always uses claimRef.
+New claims derive the current day. Clock values are checked without coercion.
+
+Legacy claim and delivery provenance is declared, bounded, and matched to the
+admitted baseline archive. It cannot be inferred from a missing receipt. An old
+claimed event or delivery tombstone cannot create a new entitlement or authorize
+backpay. Contradictions preserve the original state and HOLD.
+
+Fixed prototype limits, measured as UTF-8 JSON containing each entry's key/value:
+256 accepted-plus-reserved operation slots; 1,048,576 accepted-plus-reserved receipt
+bytes; 32,768 bytes per receipt entry. Each pending claim reserves one slot and 32,768
+bytes for fulfillment before XP commits. Fulfillment exchanges its reservation for
+its actual bounded receipt. No eviction occurs. Protocol/provenance metadata is
+separately capped at 65,536 bytes and 256 entries per legacy category; canonical
+record limits are unchanged. These application budgets do not guarantee physical
+IDB quota. One complete expected vector is stored, never a second result vector,
+full records or arbitrary stack metadata. A separate capacity model covers the
+maximum 128-reference receipt shape and an integration fixture reaches the logical
+byte boundary, refuses the next claim before XP, then fulfills from reserved space.
+
+All daily tests are in-memory model evidence, separate from the earlier native
+adapter run. Full-bag, selected-player and next-day setup changes are explicitly
+synthetic fixture readmissions; they do not establish missing live switch, removal
+or event commands. Native daily integration, whole-Life P0 and release remain HOLD.
+
+### Prepared native daily evidence extension (not yet executed)
+
+The existing isolated native-IDB mode now prepares report schema
+`K11520_NATIVE_IDB_DIAGNOSTICS_V2` with the original 12 cases plus two mandatory
+synthetic daily cases: `DAILY_TYPED_CLAIM_RACE` and
+`DAILY_TYPED_FULFILL_ABORT_RETRY`. This is a separate daily test database in the
+same disposable origin/profile; fixture clock, protocol marker and initial
+eligibility are explicitly synthetic. Both tabs and restart reuse one captured
+clock without changing global time or the original current/legacy store handles.
+
+Required evidence is one winning claim/one stale conflict, exactly 25/20 XP,
+one pending item obligation, a native bag-request success followed by a witnessed
+transaction abort, unchanged records, successful retry delivering one item,
+and exact replay with zero add/put/delete/clear attempts. Original canonical state
+and every synthetic legacy source string must remain unchanged. The existing
+process-restart case must reopen both databases, their complete records and
+consumption receipts without reseeding. Diagnostic screenshots show a compact
+daily summary; they still provide no production UI acceptance.
+
+The mandatory artifact validator requires all 14 cases and those exact observations;
+missing evidence fails. No job, permission, trigger, timeout or retry budget is
+added: 8-minute native job, 240-second scenario, original Product budgets intact.
+Estimated normal native scenario overhead is under 2 seconds beyond the prior
+roughly 2-second adapter fixture; this is an estimate awaiting the queued run.
+No native daily PASS, production caller or migration/cutover claim is made here.
+
+### Inert retained-daily reconstruction prototype (local checkpoint)
+
+This next experiment uses the same IndexedDB database and `records` object store.
+Its distinct `KAIOS_LOCAL_GAME_RETAINED_DAILY_DRAFT_V1` marker is admitted only by
+isolated test fixtures. There is no initializer, automatic migration, promotion,
+repair/apply method, UI caller or production cutover. The earlier Daily Draft
+protocol and its native evidence checkpoint remain separate. All older Stage1,
+Full and Daily mutation paths reject the retained marker. `restore()` remains
+`RESTORE_NOT_IMPLEMENTED`.
+
+The frozen scope is one selected Player Life and its existing bag. The complete
+Life envelope is covered, with every other player preserved unchanged by the
+closed planner. The selected player, selection epoch, catalog revision, complete
+catalog, authority/daily/retention generations, legacy provenance and every other
+canonical row (including declared absence) are immutable anchors. There is no
+post-admission switch, event ingestion, bag removal or other generic reducer.
+Synthetic eligibility for multiple days is prepared before fixture admission;
+freeing bag space or adding events afterward is an unprotected change and HOLD.
+This is deliberately insufficient for live gameplay.
+
+Explicit `readRetainedDaily`, `claimRetainedDaily` and `fulfillRetainedDaily` require
+an opened validator-ready authority. Commands use the existing daily request plus
+`expected.retainedGeneration`; it is validated before exact replay. No caller can
+supply a reward, item recipe, timestamp, eligibility assertion or prepared plan.
+One private closed daily planner serves ordinary execution and retained semantic
+replay. Reward policy, XP-first delivery and the existing bag insertion/merge
+rules are unchanged.
+
+The same authority retains:
+
+- One immutable `$retained-checkpoint`: valid initial Life/bag projections, empty
+  daily head, explicit legacy provenance bindings and hashes of every immutable
+  anchor. Sequence 0 cannot admit absent or invalid covered projections.
+- The existing immutable `daily-operation:<opId>` receipts.
+- One immutable `retained-postimage:<opId>` per accepted operation, bound to its
+  actual storage key, receipt, preceding digest and entire affected postimage.
+- `$retained`: checkpoint/tail digest, contiguous sequence, complete resulting
+  revision vector and capacity accounting. `$daily` retains ordinary accounting.
+
+A new command captures a bounded coherent snapshot, validates the complete proof,
+reads the controlled local clock once, derives its transition and hashes outside
+IndexedDB. A short readwrite transaction repeats the bounded capture and compares
+exact census and JSON representations, not just numeric revisions. It atomically
+writes the affected projection, receipt, daily head, postimage and retained head.
+Only transaction completion acknowledges success. Any request-stage abort keeps
+all original rows. There is no automatic rebase. Close/versionchange invalidates
+preparation, and all proposed writes pass the same lossless JSON admission guard
+as stored values. In particular, negative zero cannot be acknowledged and then
+become unreadable. Exact replay performs no write, but still requires a fully
+verified current projection and final unchanged-evidence check.
+
+`inspectDailyReconstruction()` is read-only and accepts no backup or target revision.
+It starts from the checkpoint and replays every receipt at its stored timestamp
+through that same planner. Full derived receipts and postimages, including
+unchanged fields, must match. Valid checksums alone cannot authorize XP or item
+changes. One-to-one receipt/postimage membership, physical keys and a complete,
+contiguous tail are mandatory. The current heads must equal the derived heads.
+Pending claim obligations, delivered tombstones, destination stack identity,
+quantity and pre-existing opaque metadata survive reconstruction.
+
+With intact proof, a missing, malformed JSON or older covered projection may yield
+`RECONSTRUCTION_CANDIDATE`, containing the latest verified projection plus its head
+digest, coverage and generation. Nothing is installed or acknowledged as recovered.
+The inspector performs another exact readonly capture after asynchronous work;
+changed evidence invalidates its result. A newer unprotected projection revision,
+missing/corrupt checkpoint or tail, changed non-target anchor, unsupported raw
+value, or undeclared census entry preserves the data and HOLD. It never chooses an
+older last-good tail. Product/Courier balances are immutable anchors and cannot be
+rolled back or reconstructed by this experiment.
+
+Fixed limits (UTF-8 JSON key/value wrappers included):
+
+- 256 census keys, requested with a 257-key overflow probe; no extra candidates,
+  archives or unrelated keys. Unknown key values are not read.
+- 32 accepted-plus-reserved operations; checkpoint ≤16 MiB; postimage ≤12 MiB.
+- 32 MiB for exact checkpoint/postimage/receipt/immutable-metadata bytes plus
+  reservations. A fixed 65,536-byte allowance is charged from admission for both
+  mutable heads together, and their actual combined size must fit.
+- Each pending claim reserves one operation and 2 MiB for its future combined bag
+  postimage, receipt and wrappers, before XP commits. Fulfillment exchanges that
+  reservation for actual bytes. The independent ordinary receipt limits remain.
+- Sequential capture stops at 64 MiB aggregate. Daily/initialized heads are capped
+  at 2 KiB; the retained head at 64 KiB; bag/product/Courier rows at 2,001,024 bytes
+  including wrappers; Life/authority/archive at 4 million JSON code units with a
+  conservative 12,001,024-byte wrapper cap. Protected records retain their own caps.
+
+No compaction, eviction or truncation exists. Capacity failure occurs before
+acknowledgement and leaves existing claims fulfillable within their reservation.
+IndexedDB necessarily materializes one stored value before application validation;
+these checks are not a hard memory bound against an arbitrarily large corrupt value.
+Presence comes from the key census: a present `undefined`, cyclic/non-JSON object
+or negative zero is unsupported, not silently normalized or treated as missing.
+Hash inputs use JSON escaping then UTF-8, preserving accepted string code units.
+SHA-256 provides consistency checks, not authenticated ownership or tamper resistance
+against coherent replacement of the entire authority history. Whole-authority
+rollback, origin/device clearing, power loss and physical storage quota need
+separate guarantees; an in-memory abort test proves none of those.
+
+Evidence for this slice is regression-first local fake-IDB/unit integration only.
+Native daily evidence remains queued at the preceding checkpoint; no retained
+browser/restart or production visual acceptance is claimed. Whole-Life P0, actual
+recovery, migration UX, all-writer integration and release remain HOLD.
+
+### Existing daily UI async-command seam (public authority routing disabled)
+
+The next bounded integration prerequisite modifies only the existing injected
+`claimDaily` callback in `installPlayerLifeUI`. Public main still supplies its
+unchanged synchronous legacy callback; it does not construct or call the inert
+IndexedDB authority. No feature flag, bootstrap manager, parallel store, migration
+or new storage writer is added.
+
+The daily button now awaits a returned promise, prevents overlapping calls, and
+renders/notifies only after completion. Rejection uses the existing error surface
+without a success render. Busy state survives rerender and clears in `finally`.
+The existing synchronous main callback keeps its immediate render followed by
+microtask-deferred `onChange`. Detached buttons cannot start work. Closing or
+replacing the panel, rerendering, or changing the selected Life suppresses stale
+completion/error presentation. UI-originated import/new/switch attempts invalidate
+pending work before mutation; a failed replacement still leaves a later deliberate
+daily click usable.
+
+The callback receives frozen `{playerId, isCurrent}`. This is a UI-freshness token,
+not authority or selection authorization. An eventual async adapter must capture
+its original authority/selection/retention generations, full revision vector and
+opId before awaiting; keep the original Player ID; and check UI freshness before
+starting a later fulfillment phase. Authority CAS must independently reject stale
+or ABA contexts. A completed durable claim cannot be cancelled or reassigned by
+closing/switching the UI: its pending claimRef must be recovered by a later admitted
+read. No automatic retry, opId regeneration or rebase occurs in the UI seam.
+Arbitrary external player A→B→A or hide→show without the UI hooks is not detected;
+a live adapter still needs a trusted session/selection token or subscription.
+
+Focused tests invoke the actual installed handler with a small DOM model and
+actual fake-IDB retained commands. They cover waiting, duplicate clicks, rejection,
+closed/replaced/rerendered panels, owner rebinding, detached handlers, failed switch,
+unchanged synchronous main-source behavior, atomic abort and explicit retry. The
+owner-rebinding fixture changes only its synthetic UI projection; retained authority
+remains frozen on the original Life. It proves no other Life is credited, not a
+supported live authority switch. This is unit/integration evidence, not native
+browser or Visual QA. There is no public authority cutover or whole-Life P0 claim.
+
+#### Concrete production caller and admission audit
+
+Reference snapshot: local `20e0c6e11d7b7afedc63822603b4d040f5375d1f`, incorporating
+main `c99feb74f08cdc135fceca897c4460d563f4efc0`, before the UI-only seam above.
+Runtime paths below are under `K線西遊記/temples/11520/runtime/`.
+
+| Existing owner / location | Current responsibility and remaining admission gap |
+|---|---|
+| `K線西遊記/temples/11520/game-5d.html:12,91–94`; `game-5d-bootstrap.mjs:6–9,39–44` | Import map, early layout, 1.4s fail-open entry, avatar/drop bridge, then main import. No authority hydration gate precedes all side effects. |
+| `evm-wallet-runtime.mjs:284–290` | Static dependency evaluation launches independent dynamic imports for shell, backpack and living-world UI. Their completion order relative to main is not guaranteed; main-only gating is too late. |
+| `game-mobile-shell.mjs:95,211,214–216` | Independent installation creates the Courier store and timer. |
+| `backpack-ui.mjs:8–21,40,63–64,80` | Install/render resolves legacy owner, creates scoped storage, restores and later persists a bag. |
+| `game-5d-main.mjs:44–55` | Legacy session/Life creation, scoped session preference, training memory, guest product SESSION, tutorial construction and optional legacy progress migration. |
+| `evm-wallet-runtime.mjs:20,24,64`; `world-runtime.mjs:29–30` | Apparently read/constructor paths can claim legacy ownership, copy source values, save SESSION or write tutorial state. |
+| `game-5d-main.mjs:48,103,748,753–756` | Session/XYZ/tutorial persistence, pagehide/visibility flush and exploration events remain live legacy writers. |
+| `game-5d-main.mjs:73,241,244–246,348,399` | Cargo, practice, combat/loot, simulation and quest events write Life XP and/or bag/product separately. |
+| `game-5d-main.mjs:105–114,564`; `player-life-ui.mjs:23,82` | Existing injected daily seam: Life claim precedes separate global bag insertion. This checkpoint changes only the UI awaiting contract. |
+| `player-life-ui.mjs:62–94` | Profile/home/consent, import/new/switch, direct imported bag/tutorial writes and wallet-link/nonces remain outside atomic admission. |
+| `backpack-ui.mjs:50–58,75–78`; `living-world-browser-bridge.mjs:36–45` | Add/remove/capture/release and compensation lack one durable custody/effect command. |
+| `world-item-drop-bootstrap.mjs:61–66,81–86`; `game-mobile-shell.mjs:105` | World pickup/drop and robbed-Courier crate effects surround independent bag/mission writes. |
+| `game-5d-main.mjs:52,59,62,71,81,86,119–120,246,348,402,531–532` | Product activation/events/playtime, spending, Courier credit, simulation execution and namespace changes remain separate writers. M1 readonly wallet behavior stays unchanged. |
+| `market-life-runtime.mjs:61–78` | Scoped training memory is an unsupported migration companion and remains explicit HOLD. |
+| `KAIOS/backend/web/app.mjs:8,170,351–374` | Recovery Center independently constructs, imports, selects and restores legacy Life outside game bootstrap. |
+| `K線西遊記/temples/11520/sw.js:1–6` | Individual URL caching does not establish a coherent admitted writer generation. |
+
+A live cutover cannot route only daily credit into IndexedDB while its eligibility
+sources, projections and other mutations remain on localStorage. Retained daily
+explicitly rejects live movement, event ingestion, profile, selection, bag removal,
+product and other anchor changes. Generic `commandGame` is storage mechanics, not
+approved live semantic authority. The next real activation boundary still requires
+one pre-import hydration/admission gate, all-writer typed command coverage, coherent
+module generation, reviewed explicit migration, conflict/read-only UX and custody
+reconciliation. Recovery Center needs the same admission rule. These blockers are
+not solved by the async UI prerequisite.
+
+### Retained-history and async-UI native evidence extension (test-only, queued)
+
+SOURCE_PR: #508
+SOURCE_HEAD: `2fc9b4ddd9bc42e6de0cb83e25f8d867dafe52b5`
+SOURCE_TREE: `7ec9970b4f59af28e473ee4f42cdaa93f3f8accc`
+BASE_MAIN: `11f18db83ba08e61fa9da34d1a4c95a14442b45d`
+STATUS: LOCAL_TEST_EXTENSION / NATIVE_NOT_RUN / RELEASE_HOLD
+
+The source checkpoint completed all eight exact-head workflows and its 14 required
+native cases. That result belongs to that source tree. It did not exercise retained
+history or the asynchronous UI callback in Chromium. This successor changes only
+the existing Life browser harness, Life tests, mandatory native evidence validator
+and this document. Domain/runtime bytes and public entry routing stay unchanged.
+
+Fresh work-cycle reads actually occurred on **2026-10-06 01:02:34–01:02:49 UTC**:
+`PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` (blob
+`4286d1aede181f45eb274196a6799ac18ced42ec`), root/domain AGENTS, formal boot,
+Company OS boot, protected policy, scoped CURRENT rules and relevant manifests.
+The Master Index resolves the whitepaper lineage to the existing capitalized
+`docs/Whitepaper/` directory. CURRENT V3.8 supersedes older neural references.
+Main/PR ownership was refreshed at 01:02–01:06 UTC; no unmerged governance PR is
+adopted as current authority. These are present-time reads, not a claim about an
+earlier checkpoint's boot procedure.
+
+The existing isolated mode now declares 18 mandatory cases in report schema
+`K11520_NATIVE_IDB_DIAGNOSTICS_V3`. All original 14 remain required. Four additions:
+
+1. `RETAINED_LATEST_RECONSTRUCTION`: commit one claim and fulfillment, then inspect
+   separate missing/older/malformed covered-projection forks. Every candidate must
+   equal the complete latest healthy snapshot, with the same sequence/head. Reads
+   cannot install a repair or call `add`, `put`, `delete` or `clear`.
+2. `RETAINED_HISTORY_HOLD`: separate absent-tail, corrupt-tail, foreign-checkpoint
+   and truncated-valid-prefix/newer-projection forks preserve every stored row and
+   return HOLD. A checkpoint from another admitted generation is stale/unbound to
+   this history; the protocol has no checkpoint compaction or user-selected target
+   revision. A valid older tail cannot roll back the newer bag projection.
+3. `ASYNC_DAILY_UI_ACK_RETRY`: the real `installPlayerLifeUI` and button run against
+   a synthetic read-only projection and retained commands on the isolated fixture
+   URL. An independent native page corroborates the committed claim before its
+   callback result is withheld. Explicit retry replays the original claim and
+   commits fulfillment; cross-page readback corroborates that fulfillment before
+   a second result loss. A final explicit click confirms both original operations
+   without writing again. There must be one XP award, one item, two immutable
+   receipts and one completion render. This is loss of a callback result after a
+   completed command, not an IndexedDB abort or physical durability experiment.
+4. `ASYNC_DAILY_UI_OWNER_FENCE`: changing only the synthetic visible Life while the
+   callback awaits prevents stale completion and fulfillment. The durable claim
+   stays pending for its original Life; the other Life, all bags and authority
+   selection remain unchanged. This does not demonstrate a live authority switch.
+
+Direct fixture seeding is add-only, rejects production/ambiguous database names,
+uses only synthetic records and the existing strict domain loader, and never
+replaces an admitted history. Healthy data and corrupt forks occupy distinct
+`KAIOS_LOCAL_GAME_TEST:native-retained...` databases. The actual UI module graph is
+served at `/__native_idb_fixture__.html`, which does not activate the public game's
+independent imports. Source hashes and provider/network observations remain
+mandatory. No user save, signer, remote storage or new authority is involved.
+
+The existing clean persistent-browser restart now must reopen three healthy
+retained authorities and four held forks without reseeding, repair or storageState
+import. Complete proof rows, heads, receipts, latest projections and preserved HOLD
+errors must match before/after the actual browser process replacement. Six required
+390×844 screenshots cover original adapter before/after, retained HOLD, async busy,
+confirmed and owner-fenced views. Their fixture styling is diagnostic; even passing
+these cases would not establish public-product Visual QA, migration or cutover.
+
+Local prerequisites execute the exact seed/fork/inspector helpers with fake-IDB,
+model the post-commit retry through the actual UI handler, and exercise the exact
+CI validator with in-memory report-contract objects. The validator rejects missing
+cases, contradictory proof, writes during inspection/replay, duplicate awards,
+replacement operations/revisions, stale-owner success, altered restart evidence,
+missing UI source/screenshots/provider observations and product-visual overclaims.
+Contract objects are never emitted as native reports. Native execution remains
+NOT_RUN until a separately scheduled exact-head batch produces actual evidence.
+
+Resource limits remain the existing 8-minute job, 240-second scenario process and
+25-second case cap. No new job, trigger, permission, dependency, production step or
+ordinary test budget is introduced. Four new cases add two pages, four screenshots
+and bounded synthetic proof scans; estimate less than 30 additional scenario
+seconds, to be measured rather than treated as acceptance. Original 14-case push
+case timings totaled under one second, excluding setup/launch/artifact work. A slow
+or absent case fails; it is not skipped or replaced with a model result.
+
+#### Next activation dependency, still design-only
+
+The highest-risk gap is admission **before side-effect imports**, not the daily
+button's promise support. Source readback on this checkpoint reconfirms bootstrap
+lines 39–44, independent EVM module imports 284–290, Recovery Center construction at
+`KAIOS/backend/web/app.mjs:8` and restore paths 351–374, plus per-URL service-worker
+caching. A gate added only to main leaves these writers outside its decision.
+The source-only no-production-caller test is a review tripwire, not a runtime
+security boundary or proof of a coherent import graph.
+
+The smallest coherent future activation increment therefore needs these reviewed
+dependencies together, rather than a partial daily flag:
+
+- Reuse the existing bootstrap as the sole game admission point before world-drop
+  and any module capable of legacy writes. Derive one hydrated context from the
+  existing authority owner, with explicit domain/semantic coverage, selected-Life
+  epoch and module compatibility. Recovery Center must obtain the same admission
+  decision before constructing any legacy writer.
+- Route every already-mapped writer through supported typed commands and remove
+  implicit installation races. Preserve existing M1 read-only wallet semantics.
+  Product/Courier, event eligibility, bag custody/effects and selection cannot be
+  delegated to the retained daily protocol, which deliberately rejects them.
+- Review explicit migration promotion and divergence HOLD before installing any
+  canonical marker. Missing, blocked, corrupt or unsupported canonical reads must
+  not create a fresh persisted guest or fall back to legacy writes. Raw legacy
+  source strings stay preserved; old clients' localStorage actions cannot become
+  accepted canonical updates after cutover.
+- Prove delayed/failed admission causes zero constructor/session/tutorial writes;
+  test independent import order, Recovery Center entry, stale callbacks, offline
+  mixed-generation caches and old-client writes before release. A real atomic
+  owner/selection switch and bounded custody reconciliation remain separate
+  semantic acceptance requirements.
+
+No production gate, global opt-in, automatic migration, repair installation or
+retained-history compaction is implemented here. Public daily eligibility and
+other live writers still use their existing legacy stores. Whole-PlayerLife stale
+write protection and backup/recovery acceptance remain incomplete.

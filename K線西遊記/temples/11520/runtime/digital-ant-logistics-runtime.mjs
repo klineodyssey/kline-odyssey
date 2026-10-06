@@ -692,3 +692,101 @@ export function deliverySnapshot(ant){
     simulation:true,realAssetTransfer:false,mainnetWrite:false,
   };
 }
+
+/**
+ * Additive Stage2A strict local-game persistence checker. No existing writer
+ * calls this API yet. No storage access, migration, normalization or backpay.
+ * Legacy terminal receipts without credit metadata remain tombstones only;
+ * their validity here is never evidence that a product credit was confirmed.
+ */
+export function validateCanonicalCourierEnvelope(value,{playerIds}={}){
+  const invalid=()=>{throw new Error('INVALID_CANONICAL_COURIER')};
+  const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+  const integer=(v,min=0)=>Number.isSafeInteger(v)&&v>=min;
+  const finite=(v,min=0)=>typeof v==='number'&&Number.isFinite(v)&&v>=min;
+  const text=v=>typeof v==='string'&&v.length>0&&v.length<=160&&!/[<>\x00-\x1f]/.test(v)&&v.trim()===v;
+  const player=v=>typeof v==='string'&&/^KAIOS-P-[a-zA-Z0-9-]{16,80}$/.test(v);
+  const receipt=/^COURIER-(RECEIPT|FAILED|ROBBED)-[0-9a-f]{8}$/;
+  const loot=/^LOOT-[0-9a-f]{8}$/;
+  const seen=new Set();let bytes=0;
+  const add=text=>{for(const character of text){const cp=character.codePointAt(0);bytes+=cp<128?1:cp<2048?2:cp<65536?3:4}if(bytes>2_000_000)invalid()};
+  function jsonData(v,depth=0){
+    if(depth>128)invalid();
+    if(v===null||typeof v==='string'||typeof v==='boolean'){add(JSON.stringify(v));return}
+    if(typeof v==='number'){if(!Number.isFinite(v))invalid();add(JSON.stringify(v));return}
+    if(typeof v!=='object'||seen.has(v)||(!Array.isArray(v)&&![Object.prototype,null].includes(Object.getPrototypeOf(v))))invalid();
+    seen.add(v);const descriptors=Object.getOwnPropertyDescriptors(v),names=Reflect.ownKeys(descriptors);
+    if(Array.isArray(v)){
+      if(names.length!==v.length+1)invalid();add('[]');
+      for(let index=0;index<v.length;index++){const d=descriptors[index];if(!d||!d.enumerable||!Object.hasOwn(d,'value'))invalid();if(index)add(',');jsonData(d.value,depth+1)}
+    }else{
+      add('{}');for(let index=0;index<names.length;index++){const name=names[index],d=descriptors[name];if(typeof name!=='string'||!d.enumerable||!Object.hasOwn(d,'value'))invalid();if(index)add(',');add(JSON.stringify(name));add(':');jsonData(d.value,depth+1)}
+    }
+    seen.delete(v);
+  }
+  jsonData(value);
+  if(!Array.isArray(playerIds)||playerIds.some(id=>!player(id))||new Set(playerIds).size!==playerIds.length||!object(value)||value.schema!==PLAYER_COURIER_SCHEMA||!integer(value.revision)||!object(value.missions)||!object(value.activeByCourier)||!Array.isArray(value.settledReceipts)||!Array.isArray(value.lootReceipts)||value.settledReceipts.some(id=>!receipt.test(id))||value.lootReceipts.some(id=>!loot.test(id))||new Set(value.settledReceipts).size!==value.settledReceipts.length||new Set(value.lootReceipts).size!==value.lootReceipts.length)invalid();
+  const active={},missionReceipts=new Set(),missionLoot=new Set();
+  for(const [id,m] of Object.entries(value.missions)){
+    if(!object(m)||m.schema!==PLAYER_COURIER_SCHEMA||m.missionId!==id||!text(id)||!text(m.requesterLifeId)||!playerIds.includes(m.courierLifeId)||m.mode!=='PLAYER_COURIER'||!['ACTIVE','CLOCK_REVIEW','DELIVERY_PENDING_CREDIT',...PLAYER_COURIER_TERMINAL_STATES].includes(m.status)||m.scope!=='LOCAL_GAME_CARGO_ONLY'||m.realKaiosTransfer!==false||m.realKgenTransfer!==false||m.mainnetWrite!==false||m.backgroundMission!==true||['blocksMovement','blocksCombat','blocksExploration','blocksHome'].some(k=>m[k]!==false))invalid();
+    if(!integer(m.createdAt)||!integer(m.estimatedDurationMs,PLAYER_COURIER_MIN_DURATION_MS)||m.estimatedDurationMs>PLAYER_COURIER_MAX_DURATION_MS||!integer(m.startedAt)||!integer(m.dueAt)||m.dueAt-m.startedAt!==m.estimatedDurationMs||!integer(m.lastWallAt)||m.lastWallAt<m.startedAt||!finite(m.lastMonotonicAt)||!text(m.clockSessionId)||!finite(m.distanceMeters)||!finite(m.risk)||m.risk>1||!['OK','CLOCK_ROLLBACK_DETECTED','CLOCK_DRIFT_DETECTED'].includes(m.clockState))invalid();
+    for(const point of [m.origin,m.destination])if(!object(point)||!['x','y','z'].every(k=>typeof point[k]==='number'&&Number.isFinite(point[k])))invalid();
+    if((m.status==='CLOCK_REVIEW')!==(m.clockState!=='OK'))invalid();
+    const c=m.cargo,e=m.economics,b=m.bandit,i=m.insurance,s=m.settlement;
+    if(!object(c)||!text(c.cargoId)||!['CASH','GOODS','KUFO','KSHIP'].includes(c.kind)||!['KAIOS','KGEN','KUFO','KSHIP','GOODS'].includes(c.unit)||!integer(c.amount,1)||!finite(c.durability)||c.durability>100)invalid();
+    if(!object(e)||e.currency!=='KAIOS'||e.cargoPrincipal!==c.amount||e.cargoPrincipalRecognizedAsRevenue!==false||e.chainTransfer!==false||!['freightRevenue','courierSalary','courierFreightShare','courierPayout'].every(k=>integer(e[k]))||!['operatingCost','companyNet'].every(k=>finite(e[k]))||e.courierSalary>e.freightRevenue||e.courierPayout!==e.courierSalary+e.courierFreightShare)invalid();
+    const share=Math.max(0,Math.floor((e.freightRevenue-e.courierSalary)*.25)),cost=Math.max(0,Number(((e.freightRevenue-e.courierSalary-share)*.25).toFixed(3))),net=Number((e.freightRevenue-e.courierSalary-share-cost).toFixed(3));
+    if(e.courierFreightShare!==share||e.operatingCost!==cost||e.companyNet!==net)invalid();
+    if(!object(b)||b.modeRequired!=='BANDIT_MODE'||b.actionRequired!=='CARGO_RAID_ACTION'||!integer(b.attackWindowStartsAt)||b.attackWindowStartsAt!==m.startedAt+Math.floor(m.estimatedDurationMs*.2)||!integer(b.lastRaidAt)||b.cooldownMs!==PLAYER_COURIER_RAID_COOLDOWN_MS||!Array.isArray(b.attempts))invalid();
+    const raidIds=new Set();let successful=null,lastAttemptAt=0;
+    for(const a of b.attempts){if(!object(a)||!text(a.replayKey)||raidIds.has(a.replayKey)||!text(a.attackerLifeId)||a.attackerLifeId===m.courierLifeId||!integer(a.at)||a.at<b.attackWindowStartsAt||a.at>=m.dueAt||a.at-lastAttemptAt<b.cooldownMs||!integer(a.attack)||!integer(a.defense)||!Number.isSafeInteger(a.variance)||a.variance!==(raidHash(a.replayKey)%21)-10||typeof a.success!=='boolean'||!finite(a.distanceMeters))invalid();lastAttemptAt=a.at;raidIds.add(a.replayKey);if(a.success){if(successful)invalid();successful=a}}
+    if(b.attempts.length?b.lastRaidAt!==b.attempts.at(-1).at:b.lastRaidAt!==0)invalid();
+    if(!object(i)||!['UNINSURED','QUOTE_ONLY','ACTIVE'].includes(i.status)||!integer(i.coverageBps)||i.coverageBps>10000||!['deductibleKaios','maxClaimKaios','premiumKaios'].every(k=>integer(i[k])))invalid();
+    if(i.status==='UNINSURED'){
+      if(i.policyId!==null||i.coverageBps!==0||i.deductibleKaios!==0||i.maxClaimKaios!==0||i.premiumKaios!==0||i.claimStatus!=='NOT_APPLICABLE'||(i.premiumPaidKaios!==undefined&&i.premiumPaidKaios!==0)||i.credit!==undefined)invalid();
+    }else{
+      if(typeof i.policyId!=='string'||!/^COURIER-POLICY-[0-9a-f]{8}$/.test(i.policyId)||!integer(i.premiumPaidKaios)||!['NOT_CLAIMED','APPROVED','PAID'].includes(i.claimStatus))invalid();
+      if(i.status==='QUOTE_ONLY'&&(i.premiumPaidKaios!==0||i.claimStatus!=='NOT_CLAIMED'||i.credit!==undefined))invalid();
+      if(i.status==='ACTIVE'&&(!integer(i.activatedAt)||i.premiumPaidKaios!==i.premiumKaios||!object(i.paymentEvidence)||i.paymentEvidence.amount!==i.premiumKaios||i.paymentEvidence.purpose!=='PLAYER_COURIER_INSURANCE_PREMIUM'||i.paymentEvidence.scope!=='LOCAL_SIMULATION_NO_CHAIN_TRANSFER'))invalid();
+    }
+    if(i.status!=='ACTIVE'&&(i.activatedAt!==undefined||i.paymentEvidence!==undefined))invalid();
+    if(!['APPROVED','PAID'].includes(i.claimStatus)&&(i.payoutKaios!==undefined||i.payoutReceiptId!==undefined||i.credit!==undefined))invalid();
+    if(i.claimStatus!=='PAID'&&(i.paidAt!==undefined||i.payoutEvidence!==undefined))invalid();
+    const pending=m.status==='DELIVERY_PENDING_CREDIT',ongoing=['ACTIVE','CLOCK_REVIEW'].includes(m.status),delivery=pending||m.status==='DELIVERED';
+    if(ongoing){
+      if(s!==null||c.ownerState!=='OWNED_BY_COURIER'||c.ownerLifeId!==m.courierLifeId||c.durability<=0||c.dropId!==null||c.lootClaimedAt!==null||successful)invalid();
+    }else{
+      if(!object(s)||s.outcome!==m.status||!receipt.test(s.receiptId)||!value.settledReceipts.includes(s.receiptId)||missionReceipts.has(s.receiptId)||!integer(s.settledAt)||!integer(s.rewardKaios)||s.scope!=='LOCAL_SIMULATION_ONLY'||s.chainTransfer!==false)invalid();missionReceipts.add(s.receiptId);
+      if(delivery){
+        const expectedId=`COURIER-RECEIPT-${raidHash(`${id}:${m.courierLifeId}:${m.dueAt}`).toString(16).padStart(8,'0')}`;
+        if(s.receiptId!==expectedId||s.courierLifeId!==m.courierLifeId||s.rewardKaios!==e.courierPayout||s.salaryKaios!==e.courierSalary||s.freightShareKaios!==e.courierFreightShare||s.insurancePayoutKaios!==0||s.settledAt<m.dueAt||c.durability<=0||c.dropId!==null||c.lootClaimedAt!==null||successful)invalid();
+        if(pending?(c.ownerState!=='OWNED_BY_COURIER'||c.ownerLifeId!==m.courierLifeId):(c.ownerState!=='DELIVERED_TO_DESTINATION'||c.ownerLifeId!==null))invalid();
+      }else if(m.status==='FAILED'){
+        const expectedId=`COURIER-FAILED-${raidHash(`${id}:${s.settledAt}`).toString(16).padStart(8,'0')}`;
+        if(s.receiptId!==expectedId||s.rewardKaios!==0||c.ownerState!=='DESTROYED'||c.ownerLifeId!==null||c.durability!==0||c.dropId!==null||c.lootClaimedAt!==null||successful)invalid();
+      }else{
+        if(c.durability<=0||!successful||successful.attack+successful.variance<=successful.defense+Math.round(c.durability*.2)||successful!==b.attempts.at(-1)||s.settledAt!==successful.at||s.attackerLifeId!==successful.attackerLifeId||s.rewardKaios!==0||c.ownerLifeId!==s.attackerLifeId||!['LOOT_CRATE','CLAIMED_BY_BANDIT'].includes(c.ownerState))invalid();
+        const dropId=`CARGO-DROP-${raidHash(`${id}:${successful.replayKey}`).toString(16).padStart(8,'0')}`,lootId=`LOOT-${raidHash(`${dropId}:${s.attackerLifeId}`).toString(16).padStart(8,'0')}`,settlementId=`COURIER-ROBBED-${raidHash(`${id}:${successful.replayKey}`).toString(16).padStart(8,'0')}`;
+        if(c.dropId!==dropId||s.dropId!==dropId||b.lootReceiptId!==lootId||s.lootReceiptId!==lootId||s.receiptId!==settlementId||missionLoot.has(lootId))invalid();missionLoot.add(lootId);
+        if(c.ownerState==='CLAIMED_BY_BANDIT'?(!integer(c.lootClaimedAt)||!value.lootReceipts.includes(lootId)):(c.lootClaimedAt!==null||value.lootReceipts.includes(lootId)))invalid();
+        const payout=i.status==='ACTIVE'?Math.min(i.maxClaimKaios,Math.max(0,c.amount-i.deductibleKaios)):0;
+        if(s.insurancePayoutKaios!==payout)invalid();
+        if(i.status==='ACTIVE'){
+          const payoutId=`COURIER-INSURANCE-${raidHash(`${id}:${i.policyId}:${successful.replayKey}`).toString(16).padStart(8,'0')}`;
+          if(!['APPROVED','PAID'].includes(i.claimStatus)||i.payoutKaios!==payout||i.payoutReceiptId!==payoutId)invalid();
+          if(i.claimStatus==='PAID'&&(!integer(i.paidAt)||!object(i.payoutEvidence)||i.payoutEvidence.receiptId!==payoutId||i.payoutEvidence.rewardKaios!==payout||i.payoutEvidence.scope!=='LOCAL_SIMULATION_NO_CHAIN_TRANSFER'||typeof i.payoutEvidence.replayed!=='boolean'))invalid();
+        }
+      }
+    }
+    if(ongoing||pending){if(active[m.courierLifeId])invalid();active[m.courierLifeId]=id}
+    if(m.status!=='ROBBED'&&(b.lootReceiptId!==null||['APPROVED','PAID'].includes(i.claimStatus)))invalid();
+    for(const [credit,insurance] of [[s?.credit,false],[i.credit,true]]){
+      if(credit===undefined){if(!insurance&&pending)invalid();continue}
+      const amount=insurance?i.payoutKaios:s?.rewardKaios,receiptId=insurance?i.payoutReceiptId:s?.receiptId;
+      const status=insurance?(i.claimStatus==='PAID'?'CONFIRMED':i.claimStatus==='APPROVED'?'PENDING':null):(m.status==='DELIVERED'?'CONFIRMED':pending?'PENDING':null);
+      if(!object(credit)||!status||credit.status!==status||credit.playerId!==m.courierLifeId||credit.missionId!==id||credit.receiptId!==receiptId||credit.rewardKaios!==amount||!integer(amount)||amount>(insurance?1080000:1000)||typeof credit.owner!=='string'||!(credit.owner==='guest'||/^0x[0-9a-f]{40}$/.test(credit.owner))||credit.purpose!==(insurance?'PLAYER_COURIER_INSURANCE_PAYOUT':'PLAYER_COURIER_REWARD')||(insurance&&(m.status!=='ROBBED'||i.status!=='ACTIVE'))||(!insurance&&!delivery))invalid();
+    }
+  }
+  if(Object.keys(active).length!==Object.keys(value.activeByCourier).length||Object.entries(value.activeByCourier).some(([owner,id])=>active[owner]!==id))invalid();
+  return value;
+}

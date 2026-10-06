@@ -21,10 +21,43 @@ export function createPlayerLife({lastXYZ}={}){
   return store;
 }
 export function installPlayerLifeUI({store,getXYZ,saveSession,onChange=()=>{},beforePlayerChange=()=>{},navigate,toast=()=>{},wallet,startEncounter=()=>{},claimDaily=()=>{}}){
-  let binding=false;
+  let binding=false,dailyPending=null,viewGeneration=0;
   const act=fn=>async()=>{try{await fn();onChange()}catch(e){toast(String(e?.message||'PLAYER_SAVE_FAILED'));const el=$('#playerLifeMessage');if(el)el.textContent=String(e?.message||'PLAYER_SAVE_FAILED')}};
-  function close(){ $('#sheet').classList.remove('open') }
+  function close(){viewGeneration++;$('#sheet').classList.remove('open')}
+  function dailyAction(panel,button,playerId){
+    // UI freshness only, never storage/selection authorization. An injected async
+    // callback must retain its own original authority epochs/vector and opId.
+    const matches=(p,b)=>{try{return p.isConnected&&b.isConnected&&$('#playerLifePanel')===p&&$('#dailyJourneyClaim')===b&&$('#sheet').classList.contains('open')&&store.snapshot().player?.playerId===playerId}catch{return false}};
+    return async()=>{
+      if(dailyPending||button.disabled||!matches(panel,button))return;
+      // Capture at invocation: a failed player-replacement attempt invalidates
+      // pending work without permanently disabling a still-mounted handler.
+      const view=viewGeneration,isCurrent=()=>viewGeneration===view&&matches(panel,button);
+      const pending={};dailyPending=pending;button.disabled=true;button.setAttribute('aria-busy','true');
+      const context=Object.freeze({playerId,isCurrent});
+      let reportCurrent=isCurrent;
+      try{
+        const result=claimDaily(context);
+        // Keep the existing synchronous main callback's rendering order.
+        if(result&&typeof result.then==='function')await result;
+        if(isCurrent()){
+          render();const completedView=viewGeneration,completedPanel=$('#playerLifePanel'),completedButton=$('#dailyJourneyClaim');
+          reportCurrent=()=>viewGeneration===completedView&&matches(completedPanel,completedButton);
+          // The prior synchronous act rendered first, then deferred onChange.
+          await Promise.resolve();if(reportCurrent())onChange();
+        }
+      }catch(error){
+        if(reportCurrent()){const message=String(error?.message||'PLAYER_SAVE_FAILED');toast(message);const el=$('#playerLifeMessage');if(el)el.textContent=message}
+      }finally{
+        if(dailyPending===pending){
+          dailyPending=null;const current=$('#dailyJourneyClaim');
+          if(current?.isConnected&&$('#playerLifePanel')?.contains(current)){current.removeAttribute('aria-busy');try{current.disabled=!store.gameplayProfile().daily.ready}catch{current.disabled=true}}
+        }
+      }
+    };
+  }
   function render(){
+    viewGeneration++;
     const state=store.snapshot(),p=state.player;if(!p)return;
     const home=state.home||{},appearance=p.characterAppearance||'WUKONG',game=store.gameplayProfile(),daily=game.daily;
     $('#k11520UiSettings')?.classList.remove('open');$('#dock')?.classList.remove('open');
@@ -71,15 +104,16 @@ export function installPlayerLifeUI({store,getXYZ,saveSession,onChange=()=>{},be
       if(bundle?.schema!=='KAIOS_PLAYER_BACKUP_V1'||Object.keys(bundle).some(k=>!['schema','player','backpack'].includes(k)))throw new Error('INVALID_BACKUP');
       const id=bundle.player?.player?.playerId;if(bundle.backpack?.ownerId!==id)throw new Error('INVALID_BACKPACK_OWNER');
       const backpack=restoreBackpack(bundle.backpack,id); // Validate every item before changing either store.
-      saveSession();store.importPlayer(JSON.stringify(bundle.player),{confirmLocalCandidate:true});beforePlayerChange();
+      viewGeneration++;saveSession();store.importPlayer(JSON.stringify(bundle.player),{confirmLocalCandidate:true});beforePlayerChange();
       try{const target=createPlayerScopedStorage(store.snapshot().persistent?undefined:null,id);target.setItem('11520.backpack.v1',JSON.stringify(backpack));const stage=store.activePlayer().journeyProgress?.tutorialStage;if(stage)target.setItem('k11520.journey.tutorial',JSON.stringify({stage}))}
       catch{render();$('#playerLifeMessage').textContent='IMPORT_INCOMPLETE_STORAGE_FAILURE：角色候選已保存，但背包未成功保存。原備份未變，請保留備份並重新載入；不得視為完整恢復。';return}
       location.reload();
     });
-    $('#playerLifeNew').onclick=act(()=>{if(!confirm('建立新本機玩家並重新載入？原玩家存檔保留；本機切換不是安全登入。'))return;saveSession();store.createPlayer({lastXYZ:{x:0,y:0,z:0}});beforePlayerChange();location.reload()});
-    $('#playerLifeSwitch').onclick=act(()=>{if(!confirm('切換本機玩家並重新載入？此操作不是安全登入。'))return;saveSession();store.activatePlayer($('#playerLifePlayers').value);beforePlayerChange();location.reload()});
+    $('#playerLifeNew').onclick=act(()=>{if(!confirm('建立新本機玩家並重新載入？原玩家存檔保留；本機切換不是安全登入。'))return;viewGeneration++;saveSession();store.createPlayer({lastXYZ:{x:0,y:0,z:0}});beforePlayerChange();location.reload()});
+    $('#playerLifeSwitch').onclick=act(()=>{if(!confirm('切換本機玩家並重新載入？此操作不是安全登入。'))return;viewGeneration++;saveSession();store.activatePlayer($('#playerLifePlayers').value);beforePlayerChange();location.reload()});
     $('#playerLifeContinue').onclick=close;
-    $('#dailyJourneyClaim').onclick=act(()=>{claimDaily();render()});
+    const dailyButton=$('#dailyJourneyClaim');dailyButton.disabled=!daily.ready||!!dailyPending;if(dailyPending)dailyButton.setAttribute('aria-busy','true');
+    dailyButton.onclick=dailyAction($('#playerLifePanel'),dailyButton,p.playerId);
     for(const b of document.querySelectorAll('[data-journey-encounter]'))b.onclick=act(()=>{startEncounter(b.dataset.journeyEncounter);close()});
     $('#playerLifeBag').onclick=()=>{close();if(!document.documentElement.classList.contains('k11520UtilitiesOpen'))$('#k11520UtilityMaster')?.click();if(!$('#backpackPanel')?.classList.contains('open'))$('#backpackButton')?.click()};
     for(const button of document.querySelectorAll('[data-player-wallet-unlink]'))button.onclick=act(()=>{if(!confirm('只移除此本機角色連結，不撤銷 token allowance、不轉移資產。確定？'))return;store.unlinkWallet(button.dataset.playerWalletUnlink,{confirmLocalOnly:true});render();toast('本機錢包連結已移除；鏈上資產與授權未變')});

@@ -77,6 +77,8 @@ jobs:
           node --check "K線西遊記/temples/11520/tests/11520-browser-storage-fallback.mjs"
       - name: Run 11520 runtime and product invariant tests
         run: |
+          # In-memory IDB model only; native browser evidence is a separate gate.
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org fake-indexeddb@6.2.5
           node --test "K線西遊記/temples/11520/tests/11520-player-life.test.mjs"
           node --test "K線西遊記/temples/11520/tests/11520-runtime.test.mjs" "K線西遊記/temples/11520/tests/11520-ui-static.test.mjs" "K線西遊記/temples/11520/tests/11520-backpack-living-world.test.mjs" "K線西遊記/temples/11520/tests/11520-plane-map.test.mjs" "K線西遊記/temples/11520/tests/11520-xyz-map-navigation.test.mjs" "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-item-visual.test.mjs" "K線西遊記/temples/11520/tests/11520-kaios-atm-receiving.test.mjs" "K線西遊記/temples/11520/tests/11520-public-market-quotes.test.mjs" "K線西遊記/temples/11520/tests/11520-pwa-bgm.test.mjs"
           node "K線西遊記/temples/11520/tests/combat-mass-scale-runtime.mjs"
@@ -253,5 +255,138 @@ jobs:
         with:
           name: 11520-runtime-visual-qa-${{ github.sha }}
           path: artifacts/11520-visual-qa/
+          if-no-files-found: error
+          retention-days: 14
+
+  native-idb-adapter:
+    name: Native IndexedDB adapter diagnostics (mandatory)
+    runs-on: ubuntu-latest
+    # Independent resource budget; ordinary product/script budgets stay unchanged.
+    # Adds at most 8 runner-minutes per workflow event (push and PR each run it).
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Prepare isolated native browser and exact historical sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/11520-player-life-idb-qa
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.51.1 ethers@6.15.0
+          npx playwright install --with-deps chromium
+          # Read-only source object. No mutable-main fixture and no old runtime execution in Node.
+          git fetch --no-tags --depth=1 origin b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720
+          test "$(git rev-parse 'b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720^{commit}')" = "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720"
+          node --check "K線西遊記/temples/11520/tests/11520-browser-player-life.mjs"
+      - name: Run native two-tab and clean-browser-restart adapter diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > artifacts/11520-player-life-idb-qa/http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          timeout --signal=TERM --kill-after=10s 240s node "K線西遊記/temples/11520/tests/11520-browser-player-life.mjs" --native-idb-only 2>&1 | tee artifacts/11520-player-life-idb-qa/browser.log
+      - name: Validate mandatory adapter evidence without implying product acceptance
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          for FILE in report.json native-idb-before-restart-390x844.png native-idb-after-restart-390x844.png native-retained-hold-390x844.png native-async-ui-pending-390x844.png native-async-ui-confirmed-390x844.png native-async-ui-owner-fenced-390x844.png; do
+            test -s "artifacts/11520-player-life-idb-qa/$FILE" || { echo "QA_RED: missing native IDB evidence $FILE"; exit 1; }
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const r=JSON.parse(fs.readFileSync('artifacts/11520-player-life-idb-qa/report.json','utf8'));
+          assert.equal(r.schema,'K11520_NATIVE_IDB_DIAGNOSTICS_V3');assert.equal(r.dailyFixtureScope,'DAILY_DRAFT_V1_SYNTHETIC_DIRECT_IDB_NOT_MIGRATION');
+          assert.equal(r.scope,'NATIVE_ADAPTER_DIAGNOSTICS');
+          assert.equal(r.fixtureSeeding,'SYNTHETIC_DIRECT_IDB_NOT_MIGRATION');
+          assert.equal(r.functionalQA,'PASS');assert.equal(r.releaseStatus,'HOLD');assert.equal(r.wholePlayerLifeP0,'INCOMPLETE');
+          assert.equal(r.visualQA,'ADAPTER_DIAGNOSTIC_ONLY_NOT_PRODUCT_VISUAL_QA');
+          assert.equal(r.head,process.env.GITHUB_SHA);assert.equal(r.ciHead,process.env.GITHUB_SHA);assert.match(r.tree,/^[0-9a-f]{40}$/);assert.equal(r.trackedDirty,false);
+          assert.equal(r.playwrightVersion,'1.51.1');assert.ok(typeof r.browserVersion==='string'&&r.browserVersion.length>0);
+          const snapshot=e=>{assert.match(e.hash,/^[0-9a-f]{64}$/);assert.equal(e.records.length,6);for(const record of e.records){assert.match(record.sha256,/^[0-9a-f]{64}$/);assert.ok(Number.isSafeInteger(record.revision)&&record.revision>=0);}};
+          const required=['NATIVE_IDB','CROSS_TAB_STALE_CAS','SIMULTANEOUS_CAS','REFRESH_EXPLICIT_RETRY','SELECTION_EPOCH_ISOLATION','MULTI_RECORD_ABORT','ATOMIC_COURIER_CREDIT','CORRUPT_RECORD_PRESERVATION','FULL_RECORD_ABSENCE_AND_CORRUPTION','REVIEW_CAPTURE_SOURCE_PRESERVATION','PINNED_OLD_WRITES_ISOLATED','DAILY_TYPED_CLAIM_RACE','DAILY_TYPED_FULFILL_ABORT_RETRY','RETAINED_LATEST_RECONSTRUCTION','RETAINED_HISTORY_HOLD','ASYNC_DAILY_UI_ACK_RETRY','ASYNC_DAILY_UI_OWNER_FENCE','CLEAN_BROWSER_RESTART'];
+          assert.equal(r.cases.length,required.length);assert.equal(new Set(r.cases.map(c=>c.id)).size,required.length);
+          for(const id of required){const c=r.cases.find(c=>c.id===id);assert.equal(c?.required,true);assert.equal(c?.status,'PASS');assert.ok(c.evidence);}
+          const restart=r.cases.find(c=>c.id==='CLEAN_BROWSER_RESTART').evidence;
+          assert.equal(restart.kind,'CLEAN_BROWSER_RESTART');assert.equal(restart.processObservation,'LINUX_OWN_CHILD_PID_STARTTIME');assert.equal(restart.contextCloseObserved,true);assert.equal(restart.oldProcessAbsent,true);assert.equal(restart.newProcessObserved,true);assert.equal(restart.launches,2);assert.equal(restart.sameProfileDirectory,true);assert.equal(restart.sameOrigin,r.origin);assert.equal(restart.reseeded,false);assert.equal(restart.storageStateImported,false);assert.equal(restart.before.hash,restart.after.hash);
+          snapshot(restart.before);snapshot(restart.after);
+          const processIdentity=p=>{assert.ok(Number.isSafeInteger(p.pid)&&p.pid>0);assert.ok(Number.isSafeInteger(p.parentPid)&&p.parentPid>0);assert.match(p.startTicks,/^\d+$/);};
+          processIdentity(restart.oldProcess);processIdentity(restart.newProcess);assert.ok(restart.oldProcess.pid!==restart.newProcess.pid||restart.oldProcess.startTicks!==restart.newProcess.startTicks);
+          assert.equal(r.processLaunches.length,2);assert.deepEqual(r.processLaunches.map(p=>p.launch),[1,2]);assert.deepEqual(r.processLaunches[0].identity,restart.oldProcess);assert.deepEqual(r.processLaunches[1].identity,restart.newProcess);
+          for(const p of r.processLaunches){processIdentity(p.identity);for(const field of ['product','revision','protocolVersion'])assert.ok(typeof p.version[field]==='string'&&p.version[field].length>0);}
+          assert.deepEqual(restart.firstVersion,restart.secondVersion);assert.deepEqual(r.processLaunches[0].version,restart.firstVersion);assert.deepEqual(r.processLaunches[1].version,restart.secondVersion);assert.equal(r.browserVersion,restart.secondVersion.product);assert.equal(r.cleanup.status,'PASS');assert.equal(r.cleanup.profileRemoved,true);
+          const claim=r.cases.find(c=>c.id==='DAILY_TYPED_CLAIM_RACE').evidence,fulfill=r.cases.find(c=>c.id==='DAILY_TYPED_FULFILL_ABORT_RETRY').evidence;
+          for(const d of [claim,fulfill]){assert.equal(d.scope,r.dailyFixtureScope);assert.ok(Number.isSafeInteger(d.fixtureAt)&&d.fixtureAt>0);assert.equal(d.originalCanonicalUnchanged,true);assert.equal(d.legacySourceStringsUnchanged,true);assert.match(d.originalCanonicalHash,/^[0-9a-f]{64}$/);assert.match(d.legacySourceHash,/^[0-9a-f]{64}$/);snapshot(d.before);snapshot(d.after);}
+          assert.equal(claim.originalCanonicalHash,restart.before.hash);assert.equal(claim.originalCanonicalHash,r.cases.find(c=>c.id==='PINNED_OLD_WRITES_ISOLATED').evidence.canonical.hash);
+          const dailyPlayer=claim.before.activePlayerId;assert.match(dailyPlayer,/^KAIOS-P-[0-9a-f]{32}$/);for(const playerId of [claim.after.activePlayerId,fulfill.before.activePlayerId,fulfill.after.activePlayerId,claim.beforeFacts.playerId,claim.afterFacts.playerId,fulfill.beforeFacts.playerId,fulfill.afterFacts.playerId,claim.claimReceipt.request.playerId,fulfill.fulfillmentReceipt.request.playerId,restart.dailyFacts.playerId])assert.equal(playerId,dailyPlayer);
+          assert.equal(claim.claimReceipt.at,claim.fixtureAt);assert.equal(fulfill.fulfillmentReceipt.at,claim.fixtureAt);assert.equal(claim.claimReceipt.claim.day,new Date(claim.fixtureAt).toISOString().slice(0,10));assert.equal(claim.claimReceipt.claim.rewardId,'DAILY_JOURNEY:'+claim.claimReceipt.claim.day);assert.equal(fulfill.fulfillmentReceipt.delivery.rewardId,claim.claimReceipt.claim.rewardId);
+          assert.equal(claim.fixtureAt,fulfill.fixtureAt);assert.deepEqual(claim.tabClocks,[claim.fixtureAt,claim.fixtureAt]);assert.equal(claim.originalCanonicalHash,fulfill.originalCanonicalHash);assert.equal(claim.legacySourceHash,fulfill.legacySourceHash);assert.deepEqual(claim.admittedA,claim.admittedB);
+          assert.equal(claim.outcomes.filter(o=>o.status==='fulfilled').length,1);assert.equal(claim.outcomes.filter(o=>o.status==='rejected'&&/REVISION_CONFLICT/.test(o.error)).length,1);assert.equal(claim.afterFacts.xp,claim.beforeFacts.xp+25);assert.equal(claim.afterFacts.engineXp,claim.beforeFacts.engineXp+20);assert.equal(claim.afterFacts.claimEvents,claim.beforeFacts.claimEvents+1);assert.equal(claim.beforeFacts.receiptCount,0);assert.equal(claim.afterFacts.receiptCount,1);assert.equal(claim.afterFacts.pendingCount,1);assert.equal(claim.beforeFacts.stardustQuantity,0);assert.equal(claim.afterFacts.stardustQuantity,0);assert.equal(claim.replayedWithoutWrite,true);assert.deepEqual(claim.replayMutationMethodsCovered,['add','put','delete','clear']);assert.deepEqual(claim.replayMutationAttempts,[]);assert.equal(claim.claimReceipt.kind,'CLAIM_DAILY');
+          assert.equal(fulfill.injection,'NATIVE_BAG_REQUEST_SUCCESS_THEN_TRANSACTION_ABORT');assert.equal(fulfill.physicalQuotaTest,false);assert.equal(fulfill.injectionEvidence.requestSucceeded,1);assert.equal(fulfill.injectionEvidence.abortCalls,1);assert.equal(fulfill.injectionEvidence.abortEvents,1);assert.equal(fulfill.injectionEvidence.requestDone,true);assert.equal(fulfill.injectionEvidence.writtenKey,'BACKPACK:'+fulfill.beforeFacts.playerId);assert.deepEqual(fulfill.injectionEvidence.errors,[]);assert.match(fulfill.refusal,/AUTHORITY_TRANSACTION_ABORTED|AUTHORITY_TRANSACTION_FAILED|AbortError/);snapshot(fulfill.afterAbort);assert.equal(fulfill.before.hash,fulfill.afterAbort.hash);assert.equal(fulfill.before.hash,claim.after.hash);
+          assert.equal(fulfill.afterFacts.xp,fulfill.beforeFacts.xp);assert.equal(fulfill.afterFacts.engineXp,fulfill.beforeFacts.engineXp);assert.equal(fulfill.afterFacts.claimEvents,fulfill.beforeFacts.claimEvents);assert.equal(fulfill.afterFacts.stardustQuantity,1);assert.equal(fulfill.afterFacts.receiptCount,2);assert.equal(fulfill.afterFacts.pendingCount,0);assert.equal(fulfill.fulfillmentReceipt.kind,'FULFILL_DAILY');assert.equal(fulfill.fulfillmentReceipt.request.claimRef,claim.claimReceipt.request.opId);assert.equal(fulfill.afterFacts.bagRewardReceipts.filter(id=>id===fulfill.fulfillmentReceipt.delivery.rewardId).length,1);assert.equal(fulfill.replayReceiptEqual,true);assert.deepEqual(fulfill.replayMutationMethodsCovered,['add','put','delete','clear']);assert.deepEqual(fulfill.replayMutationAttempts,[]);
+          assert.equal(restart.dailyProtocolScope,r.dailyFixtureScope);assert.equal(restart.dailyFixtureAt,claim.fixtureAt);assert.equal(restart.dailyAuthorityReopened,true);snapshot(restart.dailyBefore);snapshot(restart.dailyAfter);assert.equal(restart.dailyBefore.hash,restart.dailyAfter.hash);assert.equal(restart.dailyBefore.hash,fulfill.after.hash);assert.deepEqual(restart.dailyFacts,fulfill.afterFacts);
+          const stale=r.cases.find(c=>c.id==='CROSS_TAB_STALE_CAS').evidence,simultaneous=r.cases.find(c=>c.id==='SIMULTANEOUS_CAS').evidence;
+          assert.deepEqual(stale.admittedA,stale.admittedB);assert.equal(stale.staleOutcome,'REVISION_CONFLICT_RELOAD_REQUIRED');snapshot(stale.after);
+          const retry=r.cases.find(c=>c.id==='REFRESH_EXPLICIT_RETRY').evidence;assert.equal(retry.reloadOccurred,true);assert.equal(retry.oldCachesOnBPreserved,true);snapshot(retry.beforeReload);snapshot(retry.afterReload);assert.equal(retry.beforeReload.hash,retry.afterReload.hash);
+          assert.deepEqual(simultaneous.admittedA,simultaneous.admittedB);assert.equal(simultaneous.outcomes.filter(o=>o.status==='fulfilled').length,1);assert.equal(simultaneous.outcomes.filter(o=>o.status==='rejected'&&/REVISION_CONFLICT/.test(o.error)).length,1);snapshot(simultaneous.after);
+          const abort=r.cases.find(c=>c.id==='MULTI_RECORD_ABORT').evidence;assert.equal(abort.injection,'NATIVE_REQUEST_SUCCESS_THEN_TRANSACTION_ABORT');assert.equal(abort.physicalQuotaTest,false);assert.equal(abort.injectionEvidence.productRequestSucceeded,1);assert.equal(abort.injectionEvidence.abortCalls,1);assert.equal(abort.injectionEvidence.requestDone,true);assert.deepEqual(abort.injectionEvidence.errors,[]);assert.match(abort.refusal,/AUTHORITY_TRANSACTION_ABORTED|AbortError/);snapshot(abort.before);snapshot(abort.after);assert.equal(abort.before.hash,abort.after.hash);
+          const corrupt=r.cases.find(c=>c.id==='CORRUPT_RECORD_PRESERVATION').evidence,capture=r.cases.find(c=>c.id==='REVIEW_CAPTURE_SOURCE_PRESERVATION').evidence;
+          assert.equal(corrupt.preserved,true);assert.equal(corrupt.repairAttempted,false);assert.match(corrupt.refusal,/CORRUPT_AUTHORITY/);assert.equal(capture.sourceStringsPreserved,true);assert.equal(capture.authorityInstalled,false);assert.match(capture.manifestSha256,/^[0-9a-f]{64}$/);
+          const old=r.cases.find(c=>c.id==='PINNED_OLD_WRITES_ISOLATED').evidence;
+          const fault=r.cases.find(c=>c.id==='FULL_RECORD_ABSENCE_AND_CORRUPTION').evidence;assert.equal(fault.declaredAbsent.revision,null);assert.equal(fault.declaredAbsent.refusal,'DOMAIN_RECORD_ABSENT');assert.equal(fault.declaredAbsent.preserved,true);assert.equal(fault.sourceUnchanged,true);for(const f of [fault.unexpectedMissing,fault.malformed]){assert.equal(f.preserved,true);assert.equal(f.markerPreserved,true);assert.ok(f.refusal&&f.readRefusal);}
+          assert.equal(old.pinnedHead,'b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720');assert.equal(old.operations.length,6);
+          snapshot(old.canonical);for(const source of r.servedSources)assert.match(source.sha256,/^[0-9a-f]{64}$/);
+          for(const kind of ['LIFE','PRODUCT','COURIER','BACKPACK','SESSION','TUTORIAL']){const o=old.operations.find(o=>o.operation===kind);assert.equal(o?.changed,true);assert.equal(o?.canonicalUnchanged,true);assert.notEqual(o.beforeSha256,o.afterSha256);}
+          for(const path of ['player-life-runtime.mjs','evm-wallet-runtime.mjs','backpack-ui.mjs','digital-ant-logistics-runtime.mjs','world-runtime.mjs'])assert.ok(r.servedSources.some(s=>s.version==='PINNED_OLD'&&s.path.endsWith('/runtime/'+path)&&/^[0-9a-f]{64}$/.test(s.sha256)));
+          assert.ok(r.servedSources.some(s=>s.version==='CURRENT'&&s.path.endsWith('/runtime/player-life-runtime.mjs')));
+          // BEGIN RETAINED NATIVE VALIDATION.
+          function validateRetainedNativeEvidence(r,snapshot){
+            const scope='RETAINED_DAILY_DRAFT_V1_SYNTHETIC_DIRECT_IDB_NOT_MIGRATION',uiScope='ACTUAL_PLAYER_LIFE_INSTALLER_SYNTHETIC_READONLY_PROJECTION_NOT_PUBLIC_BOOT',by=id=>{const c=r.cases.find(c=>c.id===id);assert.equal(c?.required,true);assert.equal(c?.status,'PASS');assert.ok(c.evidence);return c.evidence},sha=v=>assert.match(v,/^[0-9a-f]{64}$/),methods=['add','put','delete','clear'];
+            const noWrites=e=>{assert.deepEqual(e.mutationMethods,methods);assert.deepEqual(e.mutationAttempts,[])};
+            assert.equal(r.retainedFixtureScope,scope);assert.equal(r.asyncUiFixtureScope,uiScope);
+            const daily=by('DAILY_TYPED_FULFILL_ABORT_RETRY'),reconstruct=by('RETAINED_LATEST_RECONSTRUCTION'),held=by('RETAINED_HISTORY_HOLD'),ack=by('ASYNC_DAILY_UI_ACK_RETRY'),owner=by('ASYNC_DAILY_UI_OWNER_FENCE'),restart=by('CLEAN_BROWSER_RESTART');
+            for(const e of [reconstruct,held,ack,owner]){assert.equal(e.fixtureAt,daily.fixtureAt);assert.equal(e.originalCanonicalUnchanged,true);assert.equal(e.ordinaryDailyUnchanged,true);assert.equal(e.legacySourceStringsUnchanged,true);assert.equal(e.originalCanonicalHash,daily.originalCanonicalHash);assert.equal(e.ordinaryDailyHash,daily.after.hash);assert.equal(e.legacySourceHash,daily.legacySourceHash)}
+            for(const e of [reconstruct,held])assert.equal(e.scope,scope);
+            for(const e of [ack,owner]){assert.equal(e.scope,uiScope);assert.equal(e.retainedScope,scope);assert.equal(e.actualInstaller,true);assert.equal(e.fixturePath,'/__native_idb_fixture__.html');snapshot(e.before);snapshot(e.after);sha(e.proofRowsHash);sha(e.headDigest);assert.match(e.retainedGeneration,/^[a-f0-9]{32}$/);assert.equal(e.beforeFacts.playerId,e.before.activePlayerId);assert.equal(e.afterFacts.playerId,e.before.activePlayerId);assert.equal(e.after.activePlayerId,e.before.activePlayerId);assert.equal(e.ui.claimInput.playerId,e.before.activePlayerId);assert.equal(e.ui.claimInput.expected.retainedGeneration,e.retainedGeneration);assert.deepEqual(e.ui.legacyWriteAttempts,[])}
+            assert.equal(new Set([reconstruct.retainedGeneration,ack.retainedGeneration,owner.retainedGeneration]).size,3);
+            snapshot(reconstruct.before);snapshot(reconstruct.latest);sha(reconstruct.proofRowsHash);sha(reconstruct.headDigest);assert.equal(reconstruct.sequence,2);assert.match(reconstruct.retainedGeneration,/^[a-f0-9]{32}$/);assert.equal(reconstruct.afterFacts.xp,reconstruct.beforeFacts.xp+25);assert.equal(reconstruct.afterFacts.engineXp,reconstruct.beforeFacts.engineXp+20);assert.equal(reconstruct.afterFacts.stardustQuantity,1);assert.equal(reconstruct.afterFacts.receiptCount,2);assert.equal(reconstruct.afterFacts.pendingCount,0);
+            assert.deepEqual(reconstruct.variants.map(v=>v.kind),['MISSING','OLDER','MALFORMED']);for(const v of reconstruct.variants){assert.equal(v.status,'RECONSTRUCTION_CANDIDATE');sha(v.beforeRawHash);assert.equal(v.beforeRawHash,v.afterRawHash);assert.equal(v.candidateHash,reconstruct.latest.hash);assert.equal(v.headDigest,reconstruct.headDigest);assert.equal(v.sequence,2);assert.equal(v.installed,false);noWrites(v)}
+            const holdKinds=['ABSENT_TAIL','CORRUPT_TAIL','FOREIGN_CHECKPOINT','TRUNCATED_PREFIX_WITH_NEWER_PROJECTION'];assert.deepEqual(held.variants.map(v=>v.kind),holdKinds);assert.equal(held.healthyHash,reconstruct.latest.hash);assert.equal(held.healthyProofRowsHash,reconstruct.proofRowsHash);assert.equal(held.expectedGeneration,reconstruct.retainedGeneration);assert.notEqual(held.foreignCheckpointGeneration,held.expectedGeneration);
+            for(const v of held.variants){assert.match(v.error,/RETAINED_.*HOLD/);sha(v.beforeRawHash);assert.equal(v.beforeRawHash,v.afterRawHash);assert.equal(v.repairAttempted,false);noWrites(v)}assert.match(held.variants.at(-1).error,/RETAINED_NEWER_PROJECTION_HOLD/);
+            const sortRefs=records=>[...records].sort((a,b)=>JSON.stringify(a.ref).localeCompare(JSON.stringify(b.ref))),vector=s=>sortRefs(s.records.map(({ref,revision})=>({ref,revision}))),refs=s=>sortRefs(s.records).map(r=>r.ref),playerId=daily.after.activePlayerId;
+            assert.match(playerId,/^KAIOS-P-[0-9a-f]{32}$/);assert.equal(new Set(daily.after.records.map(r=>JSON.stringify(r.ref))).size,6);
+            const retainedSnapshot=(s,generation,sequence)=>{snapshot(s);assert.equal(s.activePlayerId,playerId);assert.equal(s.authorityEpoch,generation);assert.equal(s.retainedGeneration,generation);assert.equal(s.dailyGeneration,'d'.repeat(32));assert.equal(s.dailySequence,sequence);assert.equal(s.catalogRevision,0);assert.equal(s.selectionEpoch,daily.after.selectionEpoch);assert.deepEqual(refs(s),refs(daily.after))};
+            const originalRequest=(q,s,claimRef)=>{assert.equal(q.playerId,s.activePlayerId);assert.match(q.opId,/^[a-f0-9]{32}$/);assert.deepEqual(Object.keys(q).sort(),(claimRef?['opId','playerId','expected','claimRef']:['opId','playerId','expected']).sort());if(claimRef)assert.equal(q.claimRef,claimRef);assert.deepEqual({...q.expected,records:sortRefs(q.expected.records)},{authorityEpoch:s.authorityEpoch,dailyGeneration:s.dailyGeneration,retainedGeneration:s.retainedGeneration,selectionEpoch:s.selectionEpoch,catalogRevision:s.catalogRevision,dailySequence:s.dailySequence,records:vector(s)})};
+            retainedSnapshot(reconstruct.before,reconstruct.retainedGeneration,0);retainedSnapshot(reconstruct.claimCommitted,reconstruct.retainedGeneration,1);retainedSnapshot(reconstruct.latest,reconstruct.retainedGeneration,2);for(const f of [reconstruct.beforeFacts,reconstruct.afterFacts])assert.equal(f.playerId,playerId);originalRequest(reconstruct.claimReceipt.request,reconstruct.before);assert.equal(reconstruct.claimReceipt.kind,'CLAIM_DAILY');assert.equal(reconstruct.claimReceipt.at,reconstruct.fixtureAt);assert.equal(reconstruct.fulfillmentReceipt.kind,'FULFILL_DAILY');assert.equal(reconstruct.fulfillmentReceipt.at,reconstruct.fixtureAt);assert.equal(reconstruct.fulfillmentReceipt.request.claimRef,reconstruct.claimReceipt.request.opId);assert.equal(reconstruct.fulfillmentReceipt.request.playerId,playerId);originalRequest(reconstruct.fulfillmentReceipt.request,reconstruct.claimCommitted,reconstruct.claimReceipt.request.opId);
+            for(const [s,sequence] of [[ack.before,0],[ack.claimCommitted,1],[ack.fulfillCommitted,2],[ack.after,2]])retainedSnapshot(s,ack.retainedGeneration,sequence);for(const f of [ack.beforeFacts,ack.claimCommittedFacts,ack.fulfillCommittedFacts,ack.afterFacts])assert.equal(f.playerId,playerId);originalRequest(ack.ui.claimInput,ack.before);originalRequest(ack.ui.fulfillInput,ack.claimCommitted,ack.ui.claimInput.opId);
+            retainedSnapshot(owner.before,owner.retainedGeneration,0);retainedSnapshot(owner.after,owner.retainedGeneration,1);originalRequest(owner.ui.claimInput,owner.before);assert.equal(owner.otherPlayerId,refs(daily.after).find(r=>r.domain==='BACKPACK'&&r.playerId!==playerId).playerId);
+            const normalRequest=q=>({...q,expected:{...q.expected,records:[...q.expected.records].sort((a,b)=>JSON.stringify(a.ref).localeCompare(JSON.stringify(b.ref)))}});
+            assert.equal(ack.injection,'POST_COMMIT_CALLBACK_RESULT_LOSS_NOT_IDB_ABORT');assert.equal(ack.claimCrossPageReadback,true);assert.equal(ack.fulfillCrossPageReadback,true);assert.equal(ack.ignoredBusyNativeClick,true);assert.equal(ack.explicitRetryClicks,2);assert.equal(ack.sequence,2);snapshot(ack.claimCommitted);snapshot(ack.fulfillCommitted);assert.deepEqual(ack.fulfillCommitted,ack.after);
+            const c=ack.claimCommittedFacts,f=ack.fulfillCommittedFacts;assert.equal(c.xp,ack.beforeFacts.xp+25);assert.equal(c.engineXp,ack.beforeFacts.engineXp+20);assert.equal(c.claimEvents,ack.beforeFacts.claimEvents+1);assert.equal(c.receiptCount,1);assert.equal(c.pendingCount,1);assert.equal(c.stardustQuantity,0);assert.deepEqual(f,ack.afterFacts);assert.equal(f.xp,c.xp);assert.equal(f.engineXp,c.engineXp);assert.equal(f.claimEvents,c.claimEvents);assert.equal(f.receiptCount,2);assert.equal(f.pendingCount,0);assert.equal(f.stardustQuantity,1);
+            const ui=ack.ui;assert.equal(ui.calls,3);assert.equal(ui.completions,1);assert.deepEqual(ui.messages,['SYNTHETIC_POST_COMMIT_CLAIM_ACK_LOST','SYNTHETIC_POST_COMMIT_FULFILL_ACK_LOST']);assert.deepEqual(normalRequest(ui.claimReceipt.request),normalRequest(ui.claimInput));assert.deepEqual(normalRequest(ui.fulfillmentReceipt.request),normalRequest(ui.fulfillInput));assert.equal(ui.claimReceipt.kind,'CLAIM_DAILY');assert.equal(ui.fulfillmentReceipt.kind,'FULFILL_DAILY');assert.equal(ui.fulfillInput.claimRef,ui.claimInput.opId);assert.equal(ui.fulfillInput.playerId,ui.claimInput.playerId);assert.equal(ui.fulfillInput.expected.retainedGeneration,ack.retainedGeneration);assert.equal(ui.claimReceipt.at,ack.fixtureAt);assert.equal(ui.fulfillmentReceipt.at,ack.fixtureAt);assert.equal(f.bagRewardReceipts.filter(id=>id===ui.fulfillmentReceipt.delivery.rewardId).length,1);
+            assert.deepEqual(ui.replays.map(x=>x.method),['claimRetainedDaily','claimRetainedDaily','fulfillRetainedDaily']);for(const x of ui.replays){assert.deepEqual(x.methods,methods);assert.deepEqual(x.attempts,[]);const receipt=x.method==='claimRetainedDaily'?ui.claimReceipt:ui.fulfillmentReceipt;assert.equal(x.opId,receipt.request.opId);assert.deepEqual(x.receipt,receipt)}
+            assert.equal(owner.selectionKind,'SYNTHETIC_UI_REBIND_NOT_AUTHORITY_SWITCH');assert.equal(owner.sequence,1);assert.notEqual(owner.otherPlayerId,owner.before.activePlayerId);assert.equal(owner.ui.originalOwner,owner.before.activePlayerId);assert.equal(owner.ui.visibleOwner,owner.otherPlayerId);assert.equal(owner.ui.panelOwnerVisible,true);assert.equal(owner.ui.fulfillInput,null);assert.equal(owner.ui.calls,1);assert.equal(owner.ui.completions,0);assert.deepEqual(owner.ui.messages,[]);assert.equal(owner.authoritySelectionUnchanged,true);assert.equal(owner.after.selectionEpoch,owner.before.selectionEpoch);assert.equal(owner.allBagsUnchanged,true);sha(owner.otherLifeHashBefore);assert.equal(owner.otherLifeHashBefore,owner.otherLifeHashAfter);assert.equal(owner.afterFacts.xp,owner.beforeFacts.xp+25);assert.equal(owner.afterFacts.engineXp,owner.beforeFacts.engineXp+20);assert.equal(owner.afterFacts.receiptCount,1);assert.equal(owner.afterFacts.pendingCount,1);assert.equal(owner.afterFacts.stardustQuantity,0);
+            assert.equal(restart.retainedProtocolScope,scope);assert.equal(restart.retainedFixtureAt,reconstruct.fixtureAt);assert.equal(restart.retainedReopened.length,3);const expected=[['KAIOS_LOCAL_GAME_TEST:native-retained',reconstruct.latest,reconstruct],['KAIOS_LOCAL_GAME_TEST:native-retained-ui-ack',ack.after,ack],['KAIOS_LOCAL_GAME_TEST:native-retained-ui-owner',owner.after,owner]];assert.deepEqual(restart.retainedReopened.map(e=>e.name),expected.map(e=>e[0]));
+            for(let n=0;n<expected.length;n++){const [name,s,e]=expected[n],x=restart.retainedReopened[n];snapshot(x.before);snapshot(x.after);assert.deepEqual(x.before,s);assert.deepEqual(x.after,s);assert.equal(x.beforeProofRowsHash,e.proofRowsHash);assert.equal(x.afterProofRowsHash,e.proofRowsHash);assert.equal(x.headDigest,e.headDigest);assert.equal(x.sequence,e.sequence);assert.deepEqual(x.dailyFacts,e.afterFacts);assert.equal(x.reseeded,false);assert.equal(x.repairAttempted,false);noWrites(x)}
+            assert.deepEqual(restart.retainedHoldReopened.map(e=>e.kind),holdKinds);for(let n=0;n<holdKinds.length;n++){const x=restart.retainedHoldReopened[n],before=held.variants[n];assert.equal(x.beforeRawHash,before.beforeRawHash);assert.equal(x.afterRawHash,before.afterRawHash);assert.equal(x.error,before.error);assert.equal(x.repairAttempted,false);noWrites(x)}
+            assert.ok(r.servedSources.some(s=>s.version==='CURRENT'&&s.path.endsWith('/runtime/player-life-ui.mjs')&&/^[0-9a-f]{64}$/.test(s.sha256)));
+            assert.deepEqual(r.blockedRequests,[]);assert.deepEqual(r.pageErrors,[]);assert.deepEqual(r.providerActivity.map(p=>p.page),['A_BEFORE_RELOAD','A','B','UI_ACK','UI_OWNER','REOPENED']);for(const p of r.providerActivity)assert.deepEqual(p.calls,[]);
+            const screenshots={'native-retained-hold-390x844.png':'RETAINED_HOLD_DIAGNOSTIC_NOT_REPAIR','native-async-ui-pending-390x844.png':'ISOLATED_ASYNC_UI_NOT_PUBLIC_GAME','native-async-ui-confirmed-390x844.png':'ISOLATED_ASYNC_UI_NOT_PUBLIC_GAME','native-async-ui-owner-fenced-390x844.png':'ISOLATED_ASYNC_UI_NOT_PUBLIC_GAME','native-idb-before-restart-390x844.png':'ADAPTER_DIAGNOSTIC_NOT_PRODUCT_UI','native-idb-after-restart-390x844.png':'ADAPTER_DIAGNOSTIC_NOT_PRODUCT_UI'};assert.equal(r.screenshots.length,6);assert.equal(new Set(r.screenshots.map(s=>s.file)).size,6);for(const s of r.screenshots){assert.equal(s.width,390);assert.equal(s.height,844);assert.equal(s.kind,screenshots[s.file]);assert.ok(screenshots[s.file]);}
+          }
+          // END RETAINED NATIVE VALIDATION.
+          validateRetainedNativeEvidence(r,snapshot);
+          for(const id of ['OLD_PRE_SET_INTERLEAVE','BFCACHE','REAL_DISK_QUOTA_OR_POWER_LOSS']){const d=r.diagnostics.find(d=>d.id===id);assert.equal(d?.required,false);assert.equal(d?.status,'NOT_EXERCISED');}
+          NODE
+      - name: Upload native adapter evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: 11520-player-life-idb-${{ github.sha }}
+          path: artifacts/11520-player-life-idb-qa/
           if-no-files-found: error
           retention-days: 14
