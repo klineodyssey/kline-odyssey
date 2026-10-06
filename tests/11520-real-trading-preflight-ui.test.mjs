@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {EventEmitter} from 'node:events';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 import {inspectRealTradingUiPreflight,inspectMainnetUnsignedPackage} from '../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs';
 
 const WALLET={address:'0x3333333333333333333333333333333333333333',chainId:56};
@@ -139,5 +140,79 @@ test('M1 public boot tolerates only completed entry races and requires execution
   const context=vm.createContext({__K11520_EXECUTION__:scenario.execution!==false,document:{querySelector:()=>({textContent:scenario.character===false?'LOADING':'READY'})}});
   vm.runInContext(helper,context);const pending=context.bootM1ReadOnlyPage(page,'https://example.test');
   if(scenario.error)await assert.rejects(pending,new RegExp(scenario.error),scenario.name);else{await pending;assert.equal(checks,2);assert.equal(clicks,Number(scenario.button))}
+ }
+});
+
+test('automatic public M1 guard binds the triggering deployment and rejects nondeployments without a fallback SHA',async()=>{
+ const workflow=await readFile(new URL('../.github/workflows/11520-responsive-qa.yml',import.meta.url),'utf8');
+ const block=workflow.split("python3 - <<'PYSOURCE'\n")[1]?.split('          PYSOURCE')[0];assert.ok(block);
+ const source=block.split('\n').map(line=>line.startsWith('          ')?line.slice(10):line).join('\n');
+ const repo='klineodyssey/kline-odyssey',deployed='a'.repeat(40),defaultHead='b'.repeat(40),definition='c'.repeat(40);
+ const event={repository:{full_name:repo},workflow:{id:307599529,name:'Deploy Pages Static',path:'.github/workflows/deploy-pages-static.yml'},workflow_run:{workflow_id:307599529,status:'completed',conclusion:'success',event:'push',name:'Deploy Pages Static',path:'.github/workflows/deploy-pages-static.yml',head_branch:'main',head_repository:{full_name:repo},repository:{full_name:repo},head_sha:deployed}};
+ const env={GITHUB_REPOSITORY:repo,GITHUB_EVENT_NAME:'workflow_run',GITHUB_SHA:defaultHead,GITHUB_REF:'refs/heads/main',GITHUB_WORKFLOW_SHA:definition};
+ const wrapper=`import json, os, sys, tempfile
+from pathlib import Path
+data=json.load(sys.stdin)
+with tempfile.TemporaryDirectory() as folder:
+ p=Path(folder); event=p/'event.json'; output=p/'output';event.write_text(json.dumps(data['event']))
+ os.environ.update(data['env']);os.environ['GITHUB_EVENT_PATH']=str(event);os.environ['GITHUB_OUTPUT']=str(output)
+ try:
+  exec(compile(data['source'], '<workflow-source-guard>', 'exec'))
+  result={'ok':True}
+ except Exception as error:
+  result={'ok':False,'reason':str(error)}
+ result['output']=output.read_text() if output.exists() else ''
+ print(json.dumps(result))`;
+ const run=(e=event,v=env)=>{const r=spawnSync('python3',['-c',wrapper],{input:JSON.stringify({source,event:e,env:v}),encoding:'utf8',timeout:3000});assert.equal(r.status,0,r.stderr);return JSON.parse(r.stdout)};
+ assert.deepEqual(run(),{ok:true,output:`sha=${deployed}\nworkflow_sha=${definition}\n`},'default branch head must not replace triggering deployment head');
+ const qualified=structuredClone(event);qualified.workflow_run.path+='@refs/heads/main';assert.equal(run(qualified).ok,true,'canonical workflow identity does not depend on run.path serialization');
+ for(const change of [e=>e.workflow_run.conclusion='failure',e=>e.workflow_run.status='in_progress',e=>e.workflow_run.event='pull_request',e=>e.workflow_run.event='pull_request_target',e=>e.workflow.name='Other',e=>e.workflow.path='.github/workflows/other.yml',e=>delete e.workflow,e=>delete e.workflow.id,e=>e.workflow.id=true,e=>e.workflow_run.workflow_id=123,e=>e.workflow_run.head_branch='feature',e=>e.workflow_run.head_repository.full_name='foreign/repo',e=>e.workflow_run.repository.full_name='foreign/repo',e=>e.repository.full_name='foreign/repo',e=>delete e.workflow_run.head_sha,e=>e.workflow_run.head_sha='main',e=>e.workflow_run.head_sha='A'.repeat(40)]){
+  const altered=structuredClone(event);change(altered);const result=run(altered);assert.equal(result.ok,false);assert.equal(result.output,'','invalid source cannot emit a fallback checkout ref');
+ }
+ const manual={repository:{full_name:repo},inputs:{production:true}},manualEnv={...env,GITHUB_EVENT_NAME:'workflow_dispatch'};
+ assert.equal(run(manual,manualEnv).output,`sha=${defaultHead}\nworkflow_sha=${definition}\n`);
+ assert.equal(run({...manual,inputs:{production:'true'}},manualEnv).ok,true);
+ for(const production of [false,'false',1,null])assert.equal(run({...manual,inputs:{production}},manualEnv).ok,false);
+ assert.equal(run(manual,{...manualEnv,GITHUB_REF:'refs/heads/feature'}).ok,false);
+ assert.equal(run(event,{...env,GITHUB_EVENT_NAME:'pull_request'}).ok,false);
+ assert.equal(run(event,{...env,GITHUB_WORKFLOW_SHA:'invalid'}).ok,false);
+});
+test('automatic M1 retains read-only bounds and Pages cannot deploy a selected non-main branch',async()=>{
+ const responsive=await readFile(new URL('../.github/workflows/11520-responsive-qa.yml',import.meta.url),'utf8'),pages=await readFile(new URL('../.github/workflows/deploy-pages-static.yml',import.meta.url),'utf8');
+ const job=responsive.split('  m1-public-readonly:')[1].split('  public-input-diagnostics:')[0];
+ assert.match(job,/needs: responsive/);assert.match(job,/timeout-minutes: 18/);assert.match(job,/ref: \$\{\{ steps\.source\.outputs\.sha \}\}/);assert.match(job,/K11520_SOURCE_SHA: \$\{\{ steps\.source\.outputs\.sha \}\}/);assert.match(job,/name: 11520-public-m1-\$\{\{ steps\.source\.outputs\.sha/);
+ assert.match(job,/--m1-read-only/);assert.doesNotMatch(job,/--public-testnet|secrets\.|actions: write|contents: write/);assert.match(responsive,/permissions:\n  contents: read/);
+ const deploy=pages.split('  deploy:')[1];assert.match(deploy,/github\.ref == 'refs\/heads\/main'/);assert.match(deploy,/ref: \$\{\{ github\.sha \}\}/);assert.match(deploy,/test "\$\(git rev-parse HEAD\)" = "\$GITHUB_SHA"/);
+});
+test('public source verifier fails closed on stale, mixed or changed deployment bytes',async()=>{
+ const workflow=await readFile(new URL('../.github/workflows/11520-responsive-qa.yml',import.meta.url),'utf8');
+ const body=workflow.split("cat > \"$RUNNER_TEMP/verify-m1-public-assets.py\" <<'PY'\n")[1]?.split('          PY\n')[0];assert.ok(body);
+ const source=body.split('\n').map(line=>line.startsWith('          ')?line.slice(10):line).join('\n');
+ const wrapper=`import io,json,os,sys,tempfile
+from pathlib import Path
+from unittest.mock import patch
+from urllib.parse import unquote,urlparse
+input=json.load(sys.stdin);sha='a'*40;reads=0
+class Response(io.BytesIO):
+ def __init__(self,body,url):super().__init__(body);self.status=200;self.url=url
+def public(url,timeout):
+ global reads
+ path=unquote(urlparse(url).path).removeprefix('/kline-odyssey/')
+ if path=='KGEN-KAIOS/dashboard/build-info.json':
+  reads+=1;bad=input['mode']=='stale' or input['mode']=='mixed' and reads>1
+  body=json.dumps({'main_commit':'b'*40 if bad else sha}).encode()
+ else:body=(path+('@altered' if input['mode']=='bytes' else '@reviewed')).encode()
+ return Response(body,url)
+with tempfile.TemporaryDirectory() as folder:
+ os.chdir(folder);os.environ.update(K11520_SOURCE_SHA=sha,K11520_BASE_URL='https://klineodyssey.github.io/kline-odyssey',GITHUB_WORKFLOW_SHA='c'*40,GITHUB_EVENT_NAME='workflow_run');sys.argv=['verifier','--phase','before']
+ with patch('urllib.request.urlopen',side_effect=public),patch('subprocess.check_output',return_value=sha+'\\n'),patch.object(Path,'read_bytes',lambda p:(str(p)+'@reviewed').encode()):
+  try:exec(compile(input['source'],'<public-verifier>','exec'));ok=True
+  except Exception:ok=False
+ report=json.loads(Path('artifacts/11520-m1-readonly-qa/public-source-before.json').read_text())
+ print(json.dumps({'ok':ok,'report':report}))`;
+ for(const mode of ['match','stale','mixed','bytes']){
+  const r=spawnSync('python3',['-c',wrapper],{input:JSON.stringify({source,mode}),encoding:'utf8',timeout:3000});assert.equal(r.status,0,r.stderr);const {ok,report}=JSON.parse(r.stdout);
+  assert.equal(ok,mode==='match');assert.equal(report.status,mode==='match'?'PASS':'FAIL');assert.equal(report.sourceSha,'a'.repeat(40));assert.equal(report.workflowDefinitionSha,'c'.repeat(40));assert.equal(report.sourceEvent,'workflow_run');
+  if(mode==='match'){assert.equal(report.assets.length,15);assert.equal(report.wholeModuleGraphVerified,false)}
  }
 });
