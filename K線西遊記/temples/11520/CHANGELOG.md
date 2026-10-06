@@ -5,17 +5,42 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-06.SIMULATION-ORDER-PLAYABILITY |
+| REVISION | 2026-10-06.TOAST-DISMISSAL-PLACEMENT |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
 | LAST_UPDATED | 2026-10-06 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
 | REVIEWED_BY | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval |
-| SOURCE_COMMIT | 0ad0cffe33d23d1104baa963fedef25ad149a0ac |
+| SOURCE_COMMIT | de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9 |
 | TASK_ID | K11520-SIMULATION-TRADING-P0-20261006 |
-| CHANGE_REASON | Record the V2.9.5 simulation-playability component revision, provenance, scoped evidence and outstanding release gates. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ e26f3a76ef0be7f43058225f46def3fbe123371e |
+| CHANGE_REASON | Record the post-merge toast-dismissal correction and its independent validation boundary. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9 |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-06 — V2.9.5 toast-dismissal placement revision
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | V2.9.5 / 2026-10-06.TOAST-DISMISSAL-PLACEMENT | K11520-SIMULATION-TRADING-P0-20261006 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval | `K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Keep the same toast stationary during dismissal without weakening its visible-fade assertion. | Presentation-only observer admission; same DOM node, timer, accessibility, local simulation storage and financial behavior. | Revert this three-file successor to de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9 if required; that restores the observed dismissal-shift defect but does not remove the simulation source/ledger support introduced by #519. |
+
+- Post-merge main `de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9`
+  failed the local responsive fade assertion in job `112369037365`, run
+  `37492641953`. Artifact `11427520499`, SHA-256
+  `2d80e07ad4084b26c92a8ba9c3ed1e06c0a75faad426938a60a5a015a32ec914`,
+  records a cold-360 toast at y=440.75, then y=432.75 after dismissal while
+  opacity remained 1. The later failure screenshot does not capture that instant.
+- The existing observer re-ran world placement on the toast's class removal.
+  An executed regression using the actual owner callback and a changed guide
+  rectangle reproduced the exact 8 px shift. The original browser record did
+  not record the guide rectangle, so that specific movement remains inferred.
+- Ignore toast-only dismissal notifications; a new direct message still reads
+  current geometry, and actual panel-context mutations still move the same node.
+  Preserve the existing browser fade/geometry assertions and all time budgets.
+- Exact-head source review, fresh browser evidence and successor release remain
+  separate gates. #519's public preview/M1 results do not validate this change.
+  Public contextual job `112369454296` is separately CANCELLED after its
+  functional test and artifact upload succeeded; this source change does not
+  relabel or repair that job result. No workflow or timeout is changed here.
 
 ## 2026-10-06 — V2.9.5 simulation-playability component revision
 
