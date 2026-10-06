@@ -375,3 +375,1816 @@ The following array is a compact projection of the bounded audit, with all origi
   {"name": "Recovery original bounded caller slice", "commit": "b6523a048101f5eeee7f3472c468ea3dc44c49a8", "tree": "72aa733a01090b089784e964e628d2d9032997f3", "classification": "GITHUB_PRESERVED", "pr": 521, "branch": "dot/recovery-async-caller-20261006", "equivalent_remote_commit": "e1c84739a887cdcff78867c01b7c4c8393f402a8", "scope": "Source-equivalent bounded Recovery subset only; does not preserve whole Player explicit candidate."}
 ]
 ```
+
+## Durable work ledger: bounded 28-deliverable audit — 2026-10-06
+
+This cumulative ledger supersedes the earlier partial-scope denominator only, while preserving all earlier evidence and failed observations. Its observation window is 2026-10-05 02:26:03 UTC through 2026-10-06 13:47 UTC, approximately 35.35 elapsed hours, not continuous compute. It inventories 28 meaningful bounded deliverables, not 28 workers, revisions, or the existing twenty formal parent work packages. Pre-existing work is excluded from dot authorship; unnamed/unreported increments remain explicit coverage gaps.
+
+Snapshot:21 GitHub-preserved deliverables,1 artifact-recoverable engineering report,6 whole-source-not-verified deliverables. Code engineering is separated:18/24 source-preserved (75% by item count),6/24 source-unverified (25% by count). These are not value, effort, completion or loss percentages. ENGINEERING_VALUE_PERCENT remains NOT_ESTIMABLE. No reconstruction was performed, and no recovered single file substitutes for an unverified full candidate.
+
+The source audit JSON was77,072 bytes, SHA-256 `dd101ecd04ef820203bda6d1f90fba70ffb19f01cbdbeb976648529756060bb5`. The machine-readable projection below preserves all row data, normalizes equivalent names to the Human-requested field names, and binds publication through the containing handoff commit and PR516 readback. It contains engineering evidence only, not a raw conversation export. The complete early report remains ARTIFACT_RECOVERABLE in this observation snapshot; any later GitHub preservation must be logged separately rather than silently changing these metrics.
+
+```json
+{
+  "schema": "DURABLE_WORK_LEDGER_V2",
+  "status": "BOUNDED_WORK_ITEM_INVENTORY_COMPLETE_AWAITING_GITHUB_CHECKPOINT",
+  "observed_at": "2026-10-06T13:47:00Z",
+  "requested_window": {
+    "start": "2026-10-05T02:26:03.819631+00:00",
+    "start_evidence": "Sentinel_2964271721988191b3adfc74ad0d98f3",
+    "engineering_acknowledged_at": "2026-10-05T03:00:55.137597+00:00",
+    "end": "2026-10-06T13:47:00Z",
+    "elapsed_hours_approx": 35.35,
+    "meaning": "Elapsed conversation/work window, not continuous compute hours."
+  },
+  "categories": [
+    "GITHUB_PRESERVED",
+    "ARTIFACT_RECOVERABLE",
+    "OTHER_WORKSPACE_RECOVERABLE",
+    "RECONSTRUCTABLE",
+    "LOST_OR_NOT_VERIFIED"
+  ],
+  "definition": "Categories apply to a meaningful bounded deliverable's recoverable source, not product completion, release readiness, or every historical commit. Provenance revisions remain nested. Partial preserved files do not promote incomplete whole deliverables.",
+  "work_items": [
+    {
+      "WORK_ID": "C-M2-LOCAL-PREREQUISITES",
+      "TRACK": "C / Q04",
+      "WORK_DESCRIPTION": "Inert M2 prerequisites and journal/reservation-port candidate.",
+      "local_history": [
+        "e5934dc09602d6afe762aa7378dbd85a150f06a7",
+        "e90e34d620eb0df235741da026b293408f4a81a2",
+        "c4fb0bfe58b82c5547325135f8836631007deeca",
+        "ad3c93209c54a01954e8192e11b84b102f849152",
+        "a5aab593fe18862dc77119e724b04ff454338b7f"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": null,
+      "CI": {
+        "status": "NOT_VERIFIED_FOR_UNPUBLISHED_SOURCE",
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_VERIFIED"
+      },
+      "evidence": {
+        "claimed_local_tree": "c009c81a8e13fb7904333e1253f4ef1c2677564c",
+        "remote_ref_verified": false,
+        "limitations": "Local M2 prerequisites; candidate only, no financial activation."
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": null,
+      "REMOTE_HEAD": null,
+      "PR": null,
+      "LAST_KNOWN_LOCAL_SHA": "acdd1817d7f191e53a3cd079dc2d8b944c9db0dc",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NEEDS_RESEARCH",
+      "NEXT_ACTION": "Locate original complete source objects, patch or bundle; preserve any verified subset inertly. No reconstruction yet.",
+      "STATUS": "LOST_OR_NOT_VERIFIED"
+    },
+    {
+      "WORK_ID": "F-SCENERY-ORIGINAL-GEOMETRY",
+      "TRACK": "F / Q15",
+      "WORK_DESCRIPTION": "Five-file original scenery geometry, tests and documentation candidate.",
+      "local_history": [],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": null,
+      "CI": {
+        "status": "NOT_VERIFIED_FOR_UNPUBLISHED_SOURCE",
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_VERIFIED"
+      },
+      "evidence": {
+        "claimed_local_tree": "89863fc579ca85bdc059a96f77e91de8e9e85977",
+        "remote_ref_verified": false,
+        "limitations": "Five-file original-geometry/test/document candidate; original bytes unavailable in checked sources."
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": null,
+      "REMOTE_HEAD": null,
+      "PR": null,
+      "LAST_KNOWN_LOCAL_SHA": "d27364e138577c6c7c32547de4c5140469f591dc",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NEEDS_RESEARCH",
+      "NEXT_ACTION": "Locate original complete source objects, patch or bundle; preserve any verified subset inertly. No reconstruction yet.",
+      "STATUS": "LOST_OR_NOT_VERIFIED"
+    },
+    {
+      "WORK_ID": "A-PLAYER-STRUCTURAL-STARTUP",
+      "TRACK": "A / Q02",
+      "WORK_DESCRIPTION": "Unpublished Player structural startup, explicit legacy entry and inactive generation preview.",
+      "local_history": [
+        "218a4a35d07045c75b90ef4a3d663f536183adf9",
+        "57afd528c29a928176fc43c6302c11a64acd97fd"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": null,
+      "CI": {
+        "status": "NOT_VERIFIED_FOR_UNPUBLISHED_SOURCE",
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_VERIFIED"
+      },
+      "evidence": {
+        "claimed_local_tree": "171762a4b87256ae0dd4b316b1a7a4846718aeab",
+        "remote_ref_verified": false,
+        "limitations": "Structural explicit legacy entry; only its bounded Recovery caller seam is separately preserved in PR521."
+      },
+      "partial_preservation": {
+        "pr": 521,
+        "scope": "Only Recovery caller seam, not whole structural source"
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": null,
+      "REMOTE_HEAD": null,
+      "PR": null,
+      "LAST_KNOWN_LOCAL_SHA": "2cdf30d5fc7b026d95169e6ef52d689c7e7c852c",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NEEDS_RESEARCH",
+      "NEXT_ACTION": "Locate original complete source objects, patch or bundle; preserve any verified subset inertly. No reconstruction yet.",
+      "STATUS": "LOST_OR_NOT_VERIFIED"
+    },
+    {
+      "WORK_ID": "F-NAVIGATOR-MOTION",
+      "TRACK": "F / Q15",
+      "WORK_DESCRIPTION": "Unpublished Navigator, elapsed-C movement, radar/countdown and measurement candidates.",
+      "local_history": [
+        "2642c430882c18795f63fc99c3b3fb05346f3c37",
+        "97b31815361ec3eacd772239b820dfe329ccfb2c",
+        "d57f914c50861be0ded8b1f99271ec282800e225",
+        "9e0ad86f93ab87f20422172757048bad12b04d96",
+        "b65cf1fcfc91783c310ff94b3c26d8c461df3019",
+        "e30028669f328f6c30b2d7cb2e1432b535c40558"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": null,
+      "CI": {
+        "status": "NOT_VERIFIED_FOR_UNPUBLISHED_SOURCE",
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_VERIFIED"
+      },
+      "evidence": {
+        "claimed_local_tree": "ae216d9489221b7f65d29b6c8fe626427fd4834a",
+        "remote_ref_verified": false,
+        "limitations": "Unpublished navigation/movement candidate; full source tree unavailable."
+      },
+      "partial_preservation": {
+        "branch": "dot/recovery-navigator-blob-20261006",
+        "head": "066e92390d4429a92b33016bfc1c58b3166dc168",
+        "tree": "bfa4a0bdc9dbb09099ea021f9ea5dd08f9190772",
+        "whole_candidate_preserved": false,
+        "source_blob": "65350fe6569059212f7ccc5b911605a123c3dc5e",
+        "bytes": 117042,
+        "sha256": "9ace7bc824bc84a1386d18d05aefc13d9224864d60f337392743806aa6187d1f",
+        "archive_blob": "65350fe6569059212f7ccc5b911605a123c3dc5e",
+        "exact_bytes_equal_original": true
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": null,
+      "REMOTE_HEAD": null,
+      "PR": null,
+      "LAST_KNOWN_LOCAL_SHA": "a021e5e556a18df13d124e99fb9a75d751998bbd",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NEEDS_RESEARCH",
+      "NEXT_ACTION": "Locate original complete source objects, patch or bundle; preserve any verified subset inertly. No reconstruction yet.",
+      "STATUS": "LOST_OR_NOT_VERIFIED"
+    },
+    {
+      "WORK_ID": "D-CUSTOMER-PROJECT-V2",
+      "TRACK": "D / Q08",
+      "WORK_DESCRIPTION": "Customer Project local simulation, immutable execution evidence, SQLite persistence and metadata successor.",
+      "local_history": [
+        "c67242533fa1f2721d61af8b620b53654c771ca2",
+        "0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e",
+        "021edd48a689948ec54e666da754c4a25b398fe9"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": {
+        "branch": "dot/customer-project-v2-evidence-20261006",
+        "head": "e95ae3a0e4c772af50644bf628e15801de65b97e",
+        "pr": 520,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/520",
+        "state": "open",
+        "draft": true
+      },
+      "CI": {
+        "status": "Three ordinary workflows SUCCESS at e95ae3a0, attempt1; historical exact-head packet read back.",
+        "runs": [
+          {
+            "id": 37458049530,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37458049530"
+          },
+          {
+            "id": 37458052621,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37458052621"
+          },
+          {
+            "id": 37458052551,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37458052551"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11410801426,
+          "sha256": "bfe65a775d8c22410c416f9c5ddea225c7e4586336f5a7bed2f6b283e4bdced9",
+          "expired": false,
+          "run": 37458052551,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37458052551/artifacts/11410801426"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Ten exact-head Recovery Center PNGs previously reviewed; no Customer UI/full-house acceptance.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "claimed_local_tree": "a578aa785df9ff3175e5ba3d4a71da0c3e5a912a",
+        "remote_ref_verified": true,
+        "limitations": "d2d6c892 preserves c672 exact tree; e95 is reviewed metadata successor. Older Customer snapshots are lineage, not proven identical snapshots.",
+        "historical_source_equivalence": {
+          "local": "c67242533fa1f2721d61af8b620b53654c771ca2",
+          "remote": "d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f",
+          "tree": "492e9041fc2d658ac835ec33fe0fe6b15c771339",
+          "relation": "Immediate parent of e95 metadata successor"
+        }
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": "dot/customer-project-v2-evidence-20261006",
+      "REMOTE_HEAD": "e95ae3a0e4c772af50644bf628e15801de65b97e",
+      "PR": 520,
+      "LAST_KNOWN_LOCAL_SHA": "bf698adb244dba60de6574db9191677ab9cfc8b2",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified GitHub source and bound historical QA to its exact head.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "A-RECOVERY-CALLER-CONTRACT",
+      "TRACK": "A / Q02",
+      "WORK_DESCRIPTION": "Bounded legacy Recovery async caller contracts, context guards, one-use verification and localization.",
+      "local_history": [
+        "b6523a048101f5eeee7f3472c468ea3dc44c49a8"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": {
+        "branch": "dot/recovery-async-caller-20261006",
+        "head": "eacb58a4004495f0675e09e260ccd9f09e66fb6d",
+        "pr": 521,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/521",
+        "state": "open",
+        "draft": true
+      },
+      "CI": {
+        "status": "Backend Recovery workflow SUCCESS, attempt1; historical exact-head report read back.",
+        "runs": [
+          {
+            "id": 37456497597,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37456497597"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11409633816,
+          "sha256": "84ae35272007c0f4b174ff8a5b226953d367e1f5e98f32879cdd30c61abf7efa",
+          "expired": false,
+          "run": 37456497597,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37456497597/artifacts/11409633816"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Ten exact-head Recovery screenshots previously reviewed; legacy bounded scope.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "claimed_local_tree": "ef282c7620b11b10221707232aa01181c4c84dac",
+        "remote_ref_verified": true,
+        "limitations": "Legacy Recovery caller/await/context fencing plus localization; no canonical IDB admission."
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": "dot/recovery-async-caller-20261006",
+      "REMOTE_HEAD": "eacb58a4004495f0675e09e260ccd9f09e66fb6d",
+      "PR": 521,
+      "LAST_KNOWN_LOCAL_SHA": "8a15d946b84a9b1a322bed3db11c7db4d3d8590d",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified GitHub source and bound historical QA to its exact head.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "C-SIMULATION-ORDER-P0",
+      "TRACK": "C / Q04",
+      "WORK_DESCRIPTION": "Offline simulation native Submit, full order lifecycle, toast/receipt and bounded camera-test repair.",
+      "local_history": [
+        "9823118a74dff55bc6e49f4df8186e1f1f192489",
+        "90ea2aa083303bc27ec485a8f4ec5ecebe537b14",
+        "0164e58a4d809aa6a131795feb03a6a24899859a",
+        "c95479c318232b28630ad4ba834b9bf935af8874"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": {
+        "branch": "dot/k11520-simulation-order-20261006",
+        "head": "6c654ce367772420ae11fd30759c613dad7aa2ea",
+        "pr": 519,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/519",
+        "state": "open",
+        "draft": true
+      },
+      "CI": {
+        "status": "Seven expected workflows SUCCESS;13successful checks/four designed skips; historical exact-head packet read back.",
+        "runs": [
+          {
+            "id": 37462888495,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462888495"
+          },
+          {
+            "id": 37462887434,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887434"
+          },
+          {
+            "id": 37462887410,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887410"
+          },
+          {
+            "id": 37462887398,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887398"
+          },
+          {
+            "id": 37462887390,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887390"
+          },
+          {
+            "id": 37462880868,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462880868"
+          },
+          {
+            "id": 37462880853,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462880853"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11414519767,
+          "sha256": "39de90a67fdc67c8260e7383c1a5717bb2c5adffdf7f0d34fbbb87eb33b3a7a6",
+          "expired": false,
+          "run": 37462880853,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462880853/artifacts/11414519767"
+        },
+        {
+          "id": 11414147510,
+          "sha256": "05068ec7e43c33eba5bd19b0a7242092b2f265e420f55fda09e29cee2f5fa930",
+          "expired": false,
+          "run": 37462880853,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462880853/artifacts/11414147510"
+        },
+        {
+          "id": 11413524229,
+          "sha256": "8e4ffa1cfbfa7355dfc5e48b88aaf215a21ea9d9f042bb0144fd7cbff72794a0",
+          "expired": false,
+          "run": 37462880853,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462880853/artifacts/11413524229"
+        },
+        {
+          "id": 11413264533,
+          "sha256": "7b395afeed1c9588a4b74fb097daecf488b55a91e857c3224ca6bdd51885ff6a",
+          "expired": false,
+          "run": 37462880853,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462880853/artifacts/11413264533"
+        },
+        {
+          "id": 11414915273,
+          "sha256": "a61fe490eafd3e82067ab7ceb1daccbb9ae76edb3aef25c82a0252211503e3b4",
+          "expired": false,
+          "run": 37462887390,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887390/artifacts/11414915273"
+        },
+        {
+          "id": 11414043988,
+          "sha256": "8764e652ef902d1a2aefd611ef2911acf4b3dd61a2474ceaf8542ffbfd71375d",
+          "expired": false,
+          "run": 37462887390,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887390/artifacts/11414043988"
+        },
+        {
+          "id": 11413864043,
+          "sha256": "54ddeffa760bec486558841e1cba1121c6abbc7543fc6c6368c707fbce9ae4c2",
+          "expired": false,
+          "run": 37462887390,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887390/artifacts/11413864043"
+        },
+        {
+          "id": 11413438067,
+          "sha256": "49934977ea8e73e41b2ca03f297a29b3d2a6179fdfb0aae7650c554e964e6d2d",
+          "expired": false,
+          "run": 37462887390,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37462887390/artifacts/11413438067"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "94 original images previously directly reviewed for simulation order/receipt scope; new review not performed.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "claimed_local_tree": "bf15caa6ad93b836a8b8d95baa8a37db94f3034f",
+        "remote_ref_verified": true,
+        "limitations": "Bounded simulation order lifecycle repair; no Navigator/Player structural/M2 candidate imported."
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": "dot/k11520-simulation-order-20261006",
+      "REMOTE_HEAD": "6c654ce367772420ae11fd30759c613dad7aa2ea",
+      "PR": 519,
+      "LAST_KNOWN_LOCAL_SHA": "4ef861a38997866f7de1076b2919122fae78e524",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified GitHub source and bound historical QA to its exact head.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "F-MARKET-LIFE-LOGIC",
+      "TRACK": "F / Q15",
+      "WORK_DESCRIPTION": "Three-file local Market Life observer, prediction audit and permitted NPC interaction logic; distinct from Navigator.",
+      "local_history": [],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": {
+        "branch": "codex/living-market-zone-prototype-20261006",
+        "head": "594835ffa03620abb1ed60d7fb357250d6957324",
+        "pr": 518,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/518",
+        "state": "open",
+        "draft": true
+      },
+      "CI": {
+        "status": "Six ordinary workflows SUCCESS, prior source-bound checkouts/tree proof.",
+        "runs": [
+          {
+            "id": 37437297465,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37437297465"
+          },
+          {
+            "id": 37437387943,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37437387943"
+          },
+          {
+            "id": 37437297536,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37437297536"
+          },
+          {
+            "id": 37437387913,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37437387913"
+          },
+          {
+            "id": 37437387975,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37437387975"
+          },
+          {
+            "id": 37437387952,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37437387952"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Three sampled existing-consumer screenshots reviewed, not complete LivingMarketZone visual acceptance.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "claimed_local_tree": "a5afcd30499ed035f73e847e3570ac665764c661",
+        "remote_ref_verified": true,
+        "limitations": "Three-file local Market Life logic prototype; scene/physical Follow not complete."
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": "codex/living-market-zone-prototype-20261006",
+      "REMOTE_HEAD": "594835ffa03620abb1ed60d7fb357250d6957324",
+      "PR": 518,
+      "LAST_KNOWN_LOCAL_SHA": "2b5dff59686089f701689e6cb8fbfe93c89deea9",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified GitHub source and bound historical QA to its exact head.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "A-ATOMIC-PLAYER-BASELINE",
+      "TRACK": "A / Q02",
+      "WORK_DESCRIPTION": "Published inert atomic Player storage, retained-history inspection and isolated native acceptance; no production cutover.",
+      "local_history": [
+        "ca3ccdecd7493af635faef6039fd805c35044cbc"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": {
+        "branch": "dot/player-life-atomic-store-20261005",
+        "head": "4d511f6d0c814123ef612890d0f38cb3f1316468",
+        "pr": 508,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/508",
+        "state": "open",
+        "draft": true
+      },
+      "CI": {
+        "status": "Seven ordinary workflows SUCCESS and both native18/18, historical report.",
+        "runs": [
+          {
+            "id": 37408345246,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408345246"
+          },
+          {
+            "id": 37408349045,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408349045"
+          },
+          {
+            "id": 37408349038,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408349038"
+          },
+          {
+            "id": 37408349026,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408349026"
+          },
+          {
+            "id": 37408349041,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408349041"
+          },
+          {
+            "id": 37408349034,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408349034"
+          },
+          {
+            "id": 37408345255,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408345255"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11388956211,
+          "sha256": "a45e1246e2fc32c162f6846b3119a5b21a6f099cfefa0b77e31c86ea09363a13",
+          "expired": false,
+          "run": 37408345246,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408345246/artifacts/11388956211"
+        },
+        {
+          "id": 11388830899,
+          "sha256": "9751c22360bd9b207992883470e4a6dee384148e3a7f34940e1ce11b72db11e6",
+          "expired": false,
+          "run": 37408345246,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408345246/artifacts/11388830899"
+        },
+        {
+          "id": 11388766461,
+          "sha256": "3789469f46361829547ff8d6241713da679794191d24dfa5d48b83d9f2e22ec9",
+          "expired": false,
+          "run": 37408345246,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408345246/artifacts/11388766461"
+        },
+        {
+          "id": 11388041534,
+          "sha256": "18ec25a98ce21c3961601f2437f8a5e96630b8be40b6b64e56d95ed152939fb2",
+          "expired": false,
+          "run": 37408345246,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37408345246/artifacts/11388041534"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Twelve isolated native diagnostics previously reviewed; public product visual acceptance remains unproved.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "claimed_local_tree": "5db43b70d159008e0d90e3b53371df9171113468",
+        "remote_ref_verified": true,
+        "limitations": "Published inert atomic baseline/native tests; explicitly excludes later structural startup candidates."
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": "dot/player-life-atomic-store-20261005",
+      "REMOTE_HEAD": "4d511f6d0c814123ef612890d0f38cb3f1316468",
+      "PR": 508,
+      "LAST_KNOWN_LOCAL_SHA": "394d52faee8b3f756872b02943feab531382e100",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified GitHub source and bound historical QA to its exact head.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "E-SOFTWARE-LIFE-STAGE-A",
+      "TRACK": "E / Q11",
+      "WORK_DESCRIPTION": "Source-bound Stage A Software Life composition and full candidate-suite CI coverage; no formal donor admission.",
+      "local_history": [
+        "f4ccca9a14eb0a95922f2073b2be9b29b4adba1d",
+        "1ab35b8453857890e62910a77dff6a564a3ecf38"
+      ],
+      "local_history_note": "Provenance revisions are not counted as separate work items; original older snapshots may remain unavailable despite a preserved reviewed successor.",
+      "remote": {
+        "branch": "dot/life-composition-candidate-20261006",
+        "head": "99aa82c83e2c54860d44f8ba53a80b87e6432339",
+        "pr": 517,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/517",
+        "state": "open",
+        "draft": true
+      },
+      "CI": {
+        "status": "Two Universal workflows SUCCESS, candidate21/21 and fullSoftwareLife81/81; prior exact-head evidence.",
+        "runs": [
+          {
+            "id": 37429259571,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37429259571"
+          },
+          {
+            "id": 37429265493,
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37429265493"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_RUN; pure/inert composition work has no live page change.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "claimed_local_tree": "c9cae7cc4c9e23f45b54fa625bb67f822035ecd6",
+        "remote_ref_verified": true,
+        "limitations": "PR517 reports local source tree c9cae7cc4c9e23f45b54fa625bb67f822035ecd6; Git commit confirms tree"
+      },
+      "deliverable_kind": "CODE_ENGINEERING",
+      "REMOTE_BRANCH": "dot/life-composition-candidate-20261006",
+      "REMOTE_HEAD": "99aa82c83e2c54860d44f8ba53a80b87e6432339",
+      "PR": 517,
+      "LAST_KNOWN_LOCAL_SHA": "98a22c2d02c32ade1f1ed8913f7b80040f1c08d4",
+      "LAST_VERIFIED_AT": "2026-10-06T13:41:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified GitHub source and bound historical QA to its exact head.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "C-SALARY-DATE-FIXTURE",
+      "TRACK": "C / Q04",
+      "WORK_DESCRIPTION": "Deterministic salary-advance test fixture; production salary validation unchanged.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 497,
+        "branch": "dot/universal-salary-date-fixture-20261005",
+        "head": "22f69a477f443b51e198ed0cbfb52efddc44562f",
+        "tree": "fbf5699f6a1401efc6226bb4ecdfd5e7ac026376",
+        "ref_verified": true,
+        "state": "closed",
+        "draft": false,
+        "merged_at": "2026-10-05T03:29:27Z",
+        "merge_sha": "96f57de17ce31b5715df2e4a8a520dfe04ca99d2",
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/497"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Merged; exact-main Universal421/421 and Pages/public QA historically passed.",
+        "runs": [
+          {
+            "id": 37259642272,
+            "conclusion": "success",
+            "head": "96f57de17ce31b5715df2e4a8a520dfe04ca99d2",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37259642272",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11324158222,
+          "head": "96f57de17ce31b5715df2e4a8a520dfe04ca99d2",
+          "run": 37259672064,
+          "sha256": "d2e0dc3273f53d84ff69e70b18d0d2c6f979d73bcb1d4cc91b0904ef24992eb3",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37259672064/artifacts/11324158222"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_APPLICABLE: no UI change.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/universal-salary-date-fixture-20261005",
+      "REMOTE_HEAD": "22f69a477f443b51e198ed0cbfb52efddc44562f",
+      "PR": 497,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "F-HUD-RESPONSIVE-V291",
+      "TRACK": "F / Q01",
+      "WORK_DESCRIPTION": "Responsive HUD V2.9.1 successor to existing #496; contextual Courier/Raid/More, Chat input and genuine pinch QA.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 498,
+        "branch": "dot/k11520-496-visual-p1-20261005",
+        "head": "4f226036e10a700723611351205137c36b020ba3",
+        "tree": "158c2b7fc4d66825770592366fb9433bd3020401",
+        "ref_verified": true,
+        "state": "closed",
+        "draft": false,
+        "merged_at": "2026-10-05T08:57:43Z",
+        "merge_sha": "765d0e24e3fbe7353a80329c99bc3b5c3025fd12",
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/498"
+      },
+      "related_preserved_sources": [
+        {
+          "pr": 496,
+          "branch": "codex/k11520-context-action-rail",
+          "head": "431c51069e4ee0ab2c6816771d967f2d0dc38803",
+          "tree": "428f351ba467009f6d5872c69678f802058e7a45",
+          "ref_verified": true,
+          "state": "open",
+          "draft": true,
+          "merged_at": null,
+          "merge_sha": null,
+          "url": "https://github.com/klineodyssey/kline-odyssey/pull/496"
+        }
+      ],
+      "CI": {
+        "status": "Candidate six workflows passed; merged/deployed; downstream main/public failures retained and addressed by later work.",
+        "runs": [
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37286984937",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37284734669",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37284734671",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37284728115",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37284734704",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37284734695",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Six-size Chromium, native desktop and direct images reviewed historically; this audit did not re-review pixels.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/k11520-496-visual-p1-20261005",
+      "REMOTE_HEAD": "4f226036e10a700723611351205137c36b020ba3",
+      "PR": 498,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "F-PORTAL-FOCUS-TEST",
+      "TRACK": "F / Q03",
+      "WORK_DESCRIPTION": "Portal canonical form-focus race correction in existing browser test.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 499,
+        "branch": "dot/fix-portal-input-focus-20261005",
+        "head": "2a877060dc7bbca76120344a9271145fd320cdd7",
+        "tree": "187d402c4af898c2f835c05c15445fb468ca0a1e",
+        "ref_verified": true,
+        "state": "closed",
+        "draft": false,
+        "merged_at": "2026-10-05T07:40:04Z",
+        "merge_sha": "27a21b031afad333468d9d3847d1933bc053487e",
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/499"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Exact-head Portal SUCCESS; merged Pages/public verification historically complete.",
+        "runs": [
+          {
+            "id": 37278357279,
+            "conclusion": "success",
+            "head": "2a877060dc7bbca76120344a9271145fd320cdd7",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37278357279",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11331725871,
+          "head": "2a877060dc7bbca76120344a9271145fd320cdd7",
+          "run": 37278357279,
+          "sha256": "49ecf52ace415982158d7e448d223e9c901a91c28b187370801d96bf9e4516f1",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37278357279/artifacts/11331725871"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Portal artifact retained; no production UI/Heart change.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/fix-portal-input-focus-20261005",
+      "REMOTE_HEAD": "2a877060dc7bbca76120344a9271145fd320cdd7",
+      "PR": 499,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "D-HANDOFF-V2-RESEARCH",
+      "TRACK": "D / Q06",
+      "WORK_DESCRIPTION": "Handoff V2 research: independent #177 audit, six design documents and eight ADRs.",
+      "deliverable_kind": "TEXT_RESEARCH",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 500,
+        "branch": "dot/kaios-automated-handoff-v2",
+        "head": "acb4276e8dcb498f14ec653304249971fa151755",
+        "tree": "138e951fff16d0742b03816070d182ca929b55a1",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/500"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Docs/design validation only; no runtime closed-loop or authenticated ACK completion.",
+        "runs": [],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_APPLICABLE: research documents.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/kaios-automated-handoff-v2",
+      "REMOTE_HEAD": "acb4276e8dcb498f14ec653304249971fa151755",
+      "PR": 500,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "D-HANDOFF-V2-OFFLINE",
+      "TRACK": "D / Q07",
+      "WORK_DESCRIPTION": "Bounded Handoff V2 offline SQLite/lease/idempotency/recovery prototype using test identities.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 501,
+        "branch": "dot/kaios-handoff-v2-offline-prototype",
+        "head": "012acd95a64e14e78911686eca342e906c4f1254",
+        "tree": "945298976a51ba93bb018876d36ad6743b766151",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/501"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Latest Universal SUCCESS; 440 historical local cases including19 fault cases. Does not prove real employee delivery.",
+        "runs": [
+          {
+            "id": 37283625776,
+            "conclusion": "success",
+            "head": "012acd95a64e14e78911686eca342e906c4f1254",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37283625776",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_APPLICABLE: offline prototype.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/kaios-handoff-v2-offline-prototype",
+      "REMOTE_HEAD": "012acd95a64e14e78911686eca342e906c4f1254",
+      "PR": 501,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "SUPPORT-PERSISTENT-WORK-QUEUE",
+      "TRACK": "SUPPORT / Q20",
+      "WORK_DESCRIPTION": "Twenty-package/six-track engineering queue and evidence-backed ownership coordination, including existing Market assignment audit.",
+      "deliverable_kind": "TEXT_RESEARCH",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 502,
+        "branch": "dot/engineering-work-queue-20261005",
+        "head": "2bccb636a29cf26feddc5787b3b7d3d2d5618db6",
+        "tree": "455b80ec6b3a95d1629002c86ff705350bf929c5",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/502"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Document checks only; status metadata is not source or test acceptance.",
+        "runs": [
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37415708746",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_APPLICABLE: queue/research notes.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "gaps": [
+        "Market ownership audit preserves verified prior assignment and missing ACK; it does not claim Market implementation by dot or active work by the other owner.",
+        "Twenty queued packages are not twenty delivered products."
+      ],
+      "REMOTE_BRANCH": "dot/engineering-work-queue-20261005",
+      "REMOTE_HEAD": "2bccb636a29cf26feddc5787b3b7d3d2d5618db6",
+      "PR": 502,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "B-COURIER-CLOCK-RECOVERY",
+      "TRACK": "B / Q02",
+      "WORK_DESCRIPTION": "Preserved Courier CLOCK_REVIEW recovery candidate, currently Draft HOLD.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 503,
+        "branch": "dot/courier-clock-recovery-20261005",
+        "head": "4916c833ad0fe148d53e24385b54d4819956dc51",
+        "tree": "0ecf9f6f1b0ba08854c509424eb04df5b3b25d3c",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/503"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Latest Product recovery FAILURE verified; ordinary/other scoped gates pass historically. Release remains blocked.",
+        "runs": [
+          {
+            "id": 37290280429,
+            "conclusion": "failure",
+            "head": "4916c833ad0fe148d53e24385b54d4819956dc51",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37290280429",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11336845713,
+          "head": "4916c833ad0fe148d53e24385b54d4819956dc51",
+          "run": 37290280429,
+          "sha256": "dc3321e2a89002d07177fa2d16a1ccdf9b2a13944787b35e9dd86ab44bf3ca84",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37290280429/artifacts/11336845713"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "PARTIAL_NOT_ACCEPTED; historical screenshots do not close recovery/data-integrity gates.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "gaps": [
+        "Body mentions prepared local test-only ordinary/recovery90s split without SHA/file list. No separate completed increment proved; not counted as an extra work item or reconstruction-ready source."
+      ],
+      "REMOTE_BRANCH": "dot/courier-clock-recovery-20261005",
+      "REMOTE_HEAD": "4916c833ad0fe148d53e24385b54d4819956dc51",
+      "PR": 503,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "F-LIVE-INPUT-QA",
+      "TRACK": "F / Q03",
+      "WORK_DESCRIPTION": "Test-only live pursuit, pan-readiness and native-input diagnostics following merged HUD.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 504,
+        "branch": "dot/11520-responsive-input-followup-20261005",
+        "head": "5c3aa2afcaaedc24623609f99eef95671ef1d950",
+        "tree": "8f0e89869c289963c67e29d987b75de1602997e3",
+        "ref_verified": true,
+        "state": "closed",
+        "draft": false,
+        "merged_at": "2026-10-05T11:08:03Z",
+        "merge_sha": "b513d4e7ca87ebfb5adf5c03b8d2c26ff834b720",
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/504"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Merged to b513; bounded input corrections retained. Later public Axe separation issue tracked separately.",
+        "runs": [],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Historical local/public diagnostic evidence; no fresh visual acceptance in audit.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/11520-responsive-input-followup-20261005",
+      "REMOTE_HEAD": "5c3aa2afcaaedc24623609f99eef95671ef1d950",
+      "PR": 504,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "B-COURIER-REVIEW-EXPLANATION",
+      "TRACK": "B / Q02",
+      "WORK_DESCRIPTION": "Explanation-only paused Courier review UI; no recovery action or state/ledger mutation.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [
+        "88ed27d8aa5f42cba08056f81e61e5c31901d439"
+      ],
+      "remote": {
+        "pr": 505,
+        "branch": "dot/courier-review-explanation-20261005",
+        "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+        "tree": "5c8cfea8f8858d047d864207073c4207a63cd79e",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/505"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Exact-head Product push/PR, Responsive, Portal, Universal historically PASS; Draft unmerged.",
+        "runs": [
+          {
+            "id": 37302794269,
+            "conclusion": "success",
+            "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11343341380,
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "run": 37302794269,
+          "sha256": "742ca4b0f48f7792edd855d18e8490910e05b3d5c73e1847340ddb7d88caa66e",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269/artifacts/11343341380"
+        },
+        {
+          "id": 11342343939,
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "run": 37302794269,
+          "sha256": "278551c38852ccd3b5a3d63765d12d56f5ac64233903417b3fa43953d252cf56",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269/artifacts/11342343939"
+        },
+        {
+          "id": 11342209159,
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "run": 37302794269,
+          "sha256": "485df3b20702447681c9b41cd294a0cf375eb4e19cc8ff484c26867c8307cd56",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269/artifacts/11342209159"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Thirteen explanation-only images historically reviewed PASS.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "gaps": [
+        "Later compatible copy lineage has no exact source-tree recovery proof; original complete explanation candidate is preserved."
+      ],
+      "REMOTE_BRANCH": "dot/courier-review-explanation-20261005",
+      "REMOTE_HEAD": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+      "PR": 505,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "A-LOCAL-STORE-GUARDS",
+      "TRACK": "A / Q02",
+      "WORK_DESCRIPTION": "Cooperative product/Courier persistence guards and immutable receipt bindings, stacked on #505.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 506,
+        "branch": "dot/local-store-integrity-20261005",
+        "head": "8db98fb9d50828e9024daa2d811498c4e05201dd",
+        "tree": "772be8ed0b25a0c7443da2aceeb5cf64b5ea43fe",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/506"
+      },
+      "related_preserved_sources": [
+        {
+          "pr": 505,
+          "branch": "dot/courier-review-explanation-20261005",
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "tree": "5c8cfea8f8858d047d864207073c4207a63cd79e",
+          "ref_verified": true,
+          "state": "open",
+          "draft": true,
+          "merged_at": null,
+          "merge_sha": null,
+          "url": "https://github.com/klineodyssey/kline-odyssey/pull/505"
+        }
+      ],
+      "CI": {
+        "status": "284 prior/261 refreshed scoped Node passes; current full-Life/BFCache and fresh exact-frame acceptance incomplete.",
+        "runs": [
+          {
+            "id": 37302794269,
+            "conclusion": "success",
+            "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11343341380,
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "run": 37302794269,
+          "sha256": "742ca4b0f48f7792edd855d18e8490910e05b3d5c73e1847340ddb7d88caa66e",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269/artifacts/11343341380"
+        },
+        {
+          "id": 11342343939,
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "run": 37302794269,
+          "sha256": "278551c38852ccd3b5a3d63765d12d56f5ac64233903417b3fa43953d252cf56",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269/artifacts/11342343939"
+        },
+        {
+          "id": 11342209159,
+          "head": "cc2358101a99d11c369fb22c47d203c2e17c8e4e",
+          "run": 37302794269,
+          "sha256": "485df3b20702447681c9b41cd294a0cf375eb4e19cc8ff484c26867c8307cd56",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37302794269/artifacts/11342209159"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Historical native14; current native15/12-frame acceptance not established by this audit; release HOLD.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/local-store-integrity-20261005",
+      "REMOTE_HEAD": "8db98fb9d50828e9024daa2d811498c4e05201dd",
+      "PR": 506,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "F-FACING-STANDOFF-QA",
+      "TRACK": "F / Q03",
+      "WORK_DESCRIPTION": "Published moving-target standoff and settled geometry/KZ browser-test corrections.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [],
+      "remote": {
+        "pr": 507,
+        "branch": "dot/11520-facing-standoff-20261005",
+        "head": "e4b33676c251ba291a7faafce144ed762cc176a3",
+        "tree": "73a041cf412412093a4e1e0cd9a2e50bfee90eac",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/507"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Latest Responsive FAILURE verified at e4b33676; Product/Portal/Universal pass historically; public390 separation remains unclosed.",
+        "runs": [
+          {
+            "id": 37310981281,
+            "conclusion": "failure",
+            "head": "e4b33676c251ba291a7faafce144ed762cc176a3",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37310981281",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Older195aa screenshot artifacts are historical, not current-head acceptance.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/11520-facing-standoff-20261005",
+      "REMOTE_HEAD": "e4b33676c251ba291a7faafce144ed762cc176a3",
+      "PR": 507,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "C-M1-READONLY-PUBLIC",
+      "TRACK": "C / Q04 / Q18",
+      "WORK_DESCRIPTION": "M1 read-only wallet and exact deployed-public QA, including Pages trigger and BOM/source-proof corrections.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Reviewed local provenance; related remote source/head is recorded separately.",
+      "local_history": [],
+      "remote": {
+        "pr": 509,
+        "branch": "codex/k11520-m1-readonly-20261005",
+        "head": "1b432d348783f6778ce795578d50347bff0dc35f",
+        "tree": "3da7a9e2838a4ec47434d4716d587065aa7c3285",
+        "ref_verified": true,
+        "state": "closed",
+        "draft": false,
+        "merged_at": "2026-10-05T17:51:40Z",
+        "merge_sha": "b2a349c36d3670327aa419802f6a80a4ed339a4e",
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/509"
+      },
+      "related_preserved_sources": [
+        {
+          "pr": 512,
+          "branch": "codex/k11520-m1-public-qa-20261005",
+          "head": "4712ca2c5df176db255ac0717396635598a90b0b",
+          "tree": "b05fbb17228c5d0c1320ca14048deeea9adda605",
+          "ref_verified": true,
+          "state": "closed",
+          "draft": false,
+          "merged_at": "2026-10-05T23:56:48Z",
+          "merge_sha": "11f18db83ba08e61fa9da34d1a4c95a14442b45d",
+          "url": "https://github.com/klineodyssey/kline-odyssey/pull/512"
+        },
+        {
+          "pr": 513,
+          "branch": "codex/k11520-m1-auto-public-20261006",
+          "head": "25c6c63fbea76b003dc396a4ca17c6d59ecaabbe",
+          "tree": "4d194e33254e30f17d39113a6ff04da74afeee6e",
+          "ref_verified": true,
+          "state": "closed",
+          "draft": false,
+          "merged_at": "2026-10-06T03:37:59Z",
+          "merge_sha": "1e2bed7eb5429d788c9d547fc7e079a1dbc75dcf",
+          "url": "https://github.com/klineodyssey/kline-odyssey/pull/513"
+        },
+        {
+          "pr": 515,
+          "branch": "codex/k11520-public-m1-encoding-20261006",
+          "head": "91ad249d866f069bb75bda154e9454da54ce34fa",
+          "tree": "dc03439370aba2b9b768a31e52b475ad07895969",
+          "ref_verified": true,
+          "state": "closed",
+          "draft": false,
+          "merged_at": "2026-10-06T04:51:14Z",
+          "merge_sha": "e26f3a76ef0be7f43058225f46def3fbe123371e",
+          "url": "https://github.com/klineodyssey/kline-odyssey/pull/515"
+        }
+      ],
+      "CI": {
+        "status": "Final deployed-public run37415708746 SUCCESS at e26; M1 scope closed. M2–M5/signing and physical MetaMask remain unverified/held.",
+        "runs": [
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37348229880",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37348223068",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37348230080",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37348229931",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37348230096",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37348229873",
+            "verification": "HISTORICAL_PR_REFERENCE"
+          },
+          {
+            "id": 37415708746,
+            "status": "completed",
+            "conclusion": "success",
+            "head_sha": "e26f3a76ef0be7f43058225f46def3fbe123371e",
+            "event": "workflow_run",
+            "run_attempt": 1,
+            "html_url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37415708746",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11391107155,
+          "head": "e26f3a76ef0be7f43058225f46def3fbe123371e",
+          "run": 37415708746,
+          "sha256": "97fe86ad30aa7f88b844c7a0b7a956250c6878ad69d467a22a9cf1c1bc87c810",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37415708746/artifacts/11391107155"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Six sizes/49 M1 candidate images plus final deployed-public artifact historically reviewed; no physical-phone claim.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "codex/k11520-m1-readonly-20261005",
+      "REMOTE_HEAD": "1b432d348783f6778ce795578d50347bff0dc35f",
+      "PR": 509,
+      "LAST_KNOWN_LOCAL_SHA": "bb698aabb802225ad955f33be2e7cd64f8d4e86e",
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "F-CONTEXTUAL-HUD-V295",
+      "TRACK": "F / Q01 / Q15",
+      "WORK_DESCRIPTION": "V2.9.5 contextual HUD/Settings ownership, true Market hide and completed-intro public QA successor.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Reviewed local provenance; related remote source/head is recorded separately.",
+      "local_history": [],
+      "remote": {
+        "pr": 510,
+        "branch": "dot/11520-contextual-hud-20261005",
+        "head": "39cdb2857c11290aa0c0d204c3535b89e9e11ece",
+        "tree": "da60cf3685da78b1daecb5ffa2ed63da16f5f8d5",
+        "ref_verified": true,
+        "state": "closed",
+        "draft": false,
+        "merged_at": "2026-10-05T22:26:02Z",
+        "merge_sha": "eba2b5758960c978ef54e9000b133322cc44d99b",
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/510"
+      },
+      "related_preserved_sources": [
+        {
+          "pr": 511,
+          "branch": "dot/11520-contextual-entry-20261005",
+          "head": "3bc8e52a75b1c6f32059df2a6370c45d46c36f73",
+          "tree": "8ae5b299df92c7ee4b9f1bcb4ef4761627281bce",
+          "ref_verified": true,
+          "state": "closed",
+          "draft": false,
+          "merged_at": "2026-10-05T23:09:31Z",
+          "merge_sha": "c99feb74f08cdc135fceca897c4460d563f4efc0",
+          "url": "https://github.com/klineodyssey/kline-odyssey/pull/511"
+        }
+      ],
+      "CI": {
+        "status": "Merged510/511; public c99 run37386906367 SUCCESS. One bounded failed-job recovery followed Actions incident; old failures preserved.",
+        "runs": [
+          {
+            "id": 37386906367,
+            "conclusion": "success",
+            "head": "c99feb74f08cdc135fceca897c4460d563f4efc0",
+            "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37386906367",
+            "verification": "LIVE_METADATA_READ"
+          }
+        ],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "id": 11379662985,
+          "head": "c99feb74f08cdc135fceca897c4460d563f4efc0",
+          "run": 37386906367,
+          "sha256": "19fc5eaadb511e29d6471d1b7f98ad2c294bc8cfdfb1ec4e3bceceae681e30fc",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37386906367/artifacts/11379662985"
+        },
+        {
+          "id": 11379507919,
+          "head": "c99feb74f08cdc135fceca897c4460d563f4efc0",
+          "run": 37386906367,
+          "sha256": "fcf1196c46094aff901da70babddb41fc7ab091ffe9745bcc0cca5ce70a81cf0",
+          "expired": false,
+          "url": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37386906367/artifacts/11379507919"
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "Historical closeout reviewed74 contextual,16 ordinary and2 Game images; accepted c99 scope.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/11520-contextual-hud-20261005",
+      "REMOTE_HEAD": "39cdb2857c11290aa0c0d204c3535b89e9e11ece",
+      "PR": 510,
+      "LAST_KNOWN_LOCAL_SHA": "3240ad4b5da27d121f166312a6000206f1201247",
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "SUPPORT-BOOT-FIRST-WORKFLOW",
+      "TRACK": "SUPPORT / Q20",
+      "WORK_DESCRIPTION": "Nine-file Boot-first workflow evidence/schema/CLI validator with immutable rework records.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "local_sha_note": "Reviewed local provenance; related remote source/head is recorded separately.",
+      "local_history": [],
+      "remote": {
+        "pr": 514,
+        "branch": "dot/boot-first-workflow-20261006",
+        "head": "08204119d78f3cf9ac0620dfab12e60cbd641011",
+        "tree": "09d1ff4e05b49658fc62d0e6a0b688d72e29b421",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/514"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "126 historical local tests PASS; CI_NOT_CONFIGURED. Draft only; no automatic identity/permission enforcement.",
+        "runs": [],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_APPLICABLE: governance validator/docs.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/boot-first-workflow-20261006",
+      "REMOTE_HEAD": "08204119d78f3cf9ac0620dfab12e60cbd641011",
+      "PR": 514,
+      "LAST_KNOWN_LOCAL_SHA": "8023af97b75fe4658b541b5ffa209e87ad9f463c",
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "SUPPORT-ENGINEERING-HANDBOOK",
+      "TRACK": "SUPPORT / Q20",
+      "WORK_DESCRIPTION": "Fixed engineering handbook, approved minimal Boot index, bounded read receipts and durable-checkpoint policy.",
+      "deliverable_kind": "TEXT_RESEARCH",
+      "local_sha_note": "Exact latest local commit not independently recorded in checked evidence; verified remote source remains recoverable.",
+      "local_history": [
+        "2668c4ded56e1705295435737115c4a2512699c8",
+        "56e65c0b7268ab9919a2d25f2025ef1b7ff66c14"
+      ],
+      "remote": {
+        "pr": 516,
+        "branch": "dot/engineering-handbook-20261006",
+        "head": "bf49ab4437335b2a9e0c6499cc35a70b4238a046",
+        "tree": "a215ea19b5a66559e2a3ee782718896f6dc96b23",
+        "ref_verified": true,
+        "state": "open",
+        "draft": true,
+        "merged_at": null,
+        "merge_sha": null,
+        "url": "https://github.com/klineodyssey/kline-odyssey/pull/516"
+      },
+      "related_preserved_sources": [],
+      "CI": {
+        "status": "Documentation/source readback checks; CI_NOT_CONFIGURED; current preservation checkpointbf49 verified.",
+        "runs": [],
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_APPLICABLE: documentation.",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "remote_ref_verified": true,
+        "scope": "Branch ref and Git commit/tree verified; PR/history provides original scope and QA attribution."
+      },
+      "REMOTE_BRANCH": "dot/engineering-handbook-20261006",
+      "REMOTE_HEAD": "bf49ab4437335b2a9e0c6499cc35a70b4238a046",
+      "PR": 516,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NONE",
+      "NEXT_ACTION": "Retain verified source and historical acceptance limits; preservation is not release approval.",
+      "STATUS": "GITHUB_PRESERVED"
+    },
+    {
+      "WORK_ID": "F-AXE-FEEDBACK-INCREMENT",
+      "TRACK": "F / Q03",
+      "WORK_DESCRIPTION": "Unpublished compact-Axe native feedback correction following preserved #507.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "remote": null,
+      "preserved_parent_pr": 507,
+      "CI": {
+        "status": "NO_VERIFIED_REMOTE_SOURCE_OR_NEW_QA_FOR_THIS_INCREMENT",
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_VERIFIED_FOR_THIS_INCREMENT",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "commit_endpoint": "422_NOT_FOUND",
+        "limits": "Endpoint absence is not global loss. Parent PR source remains preserved; missing increment is counted separately."
+      },
+      "local_history": [],
+      "REMOTE_BRANCH": null,
+      "REMOTE_HEAD": null,
+      "PR": null,
+      "LAST_KNOWN_LOCAL_SHA": "dcf7b69fbc499f998c4223816a8356a2ff8fd71f",
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NEEDS_RESEARCH",
+      "NEXT_ACTION": "Find original full patch, source objects or exact reviewed successor equivalence; no reconstruction from partial prose.",
+      "STATUS": "LOST_OR_NOT_VERIFIED"
+    },
+    {
+      "WORK_ID": "C-LEGACY-488-HARDENING",
+      "TRACK": "C / Q05",
+      "WORK_DESCRIPTION": "Unpublished broader #488 legacy financial-execution safety successor; metadata audit only, separate from M1 and M2 milestones.",
+      "deliverable_kind": "CODE_ENGINEERING",
+      "remote": null,
+      "preserved_parent_pr": 488,
+      "CI": {
+        "status": "NO_VERIFIED_REMOTE_SOURCE_OR_NEW_QA_FOR_THIS_INCREMENT",
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_VERIFIED_FOR_THIS_INCREMENT",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "commit_endpoint": "404_GIT_COMMIT_NOT_FOUND",
+        "limits": "Endpoint absence is not global loss. Parent PR source remains preserved; missing increment is counted separately."
+      },
+      "local_history": [],
+      "REMOTE_BRANCH": null,
+      "REMOTE_HEAD": null,
+      "PR": null,
+      "LAST_KNOWN_LOCAL_SHA": "e7b9bf82aba5373ba4173efe6a3af563fc582f8f",
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "NEEDS_RESEARCH",
+      "NEXT_ACTION": "Find original full patch, source objects or exact reviewed successor equivalence; no reconstruction from partial prose.",
+      "STATUS": "LOST_OR_NOT_VERIFIED"
+    },
+    {
+      "WORK_ID": "SUPPORT-CAPABILITY-CENSUS",
+      "TRACK": "SUPPORT",
+      "WORK_DESCRIPTION": "Complete KAIOS dot capability census report delivered in chat; read-only tested capabilities and explicit verification limits.",
+      "deliverable_kind": "TEXT_RESEARCH",
+      "remote": null,
+      "CI": {
+        "status": "NOT_APPLICABLE_REPORT_ONLY",
+        "rerun_in_audit": false
+      },
+      "ARTIFACT": [
+        {
+          "kind": "VERIFIED_CHAT_TEXT_ONLY_NOT_RUNTIME",
+          "message_id": "Sentinel_63f4e16cce208191859aa0c283f3dc41",
+          "sent_at": "2026-10-05T02:45:06.547856+00:00",
+          "bytes": 17401,
+          "sha256": "8eb6b920005d98bfb4bcd358da37a6e251fbf2e689511b4507bc287f927ce847",
+          "complete_text_available": true
+        }
+      ],
+      "SCREENSHOT_EVIDENCE": {
+        "status": "NOT_APPLICABLE_TEXT_REPORT",
+        "new_visual_review": false
+      },
+      "evidence": {
+        "source": "Verified original chat message, full11010-character text retained.",
+        "scope": "Report only; it does not establish uninterrupted35-hour compute or present-day capability state."
+      },
+      "local_history": [],
+      "REMOTE_BRANCH": null,
+      "REMOTE_HEAD": null,
+      "PR": null,
+      "LAST_KNOWN_LOCAL_SHA": null,
+      "LAST_VERIFIED_AT": "2026-10-06T13:47:00Z",
+      "RECOVERY_ACTION": "RESTORE_ARTIFACT",
+      "NEXT_ACTION": "Preserve the exact already-delivered text as an inert report if desired; do not treat it as recoverable runtime source.",
+      "STATUS": "ARTIFACT_RECOVERABLE"
+    }
+  ],
+  "coverage": {
+    "bounded_complete": true,
+    "exhaustive": false,
+    "checked": [
+      "Original first-KAIOS message and deduplicated available Oct5 reports",
+      "GitHub PR metadata485–521; dot contribution attribution begins497, pre-existing496 retained as context",
+      "Exact current refs and Git commit/tree for preserved bounded deliverables",
+      "Named unpublished candidate commits/trees; supplied Navigator immutable blob and newly verified inert archive",
+      "Eighteen surviving ZIPs and69 report/log texts; no complete source patch/bundle found"
+    ],
+    "excluded": [
+      "Pre-existing PR485–496 implementations are not credited to dot",
+      "Twenty queued parent packages are not counted as delivered work",
+      "Historical SHA revisions, failed CI attempts and snapshots are nested evidence, not extra work items",
+      "Navigator archive file is partial recovery within Navigator, not another delivered runtime",
+      "Unnamed #503 local test follow-up is a gap, not an inflated extra deliverable",
+      "Other machines/filesystems and deleted disk blocks were not searched"
+    ],
+    "limits": [
+      "No claim that every unreported local file or every prior chat message was exhaustively inspected.",
+      "No exact-source reconstruction classification without complete bytes or diff.",
+      "LOST_OR_NOT_VERIFIED means source unverified in checked evidence, not proof of permanent loss.",
+      "Source preservation does not establish product completion, safe cutover, merge or release."
+    ]
+  },
+  "metrics": {
+    "TOTAL_TRACKS": 28,
+    "TOTAL_TRACKS_DEFINITION": "Bounded meaningful deliverable/work-item rows, not commits or the six A–F coordination lanes.",
+    "COORDINATION_LANES": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "SUPPORT"
+    ],
+    "all_work_items": {
+      "denominator": 28,
+      "counts": {
+        "GITHUB_PRESERVED": 21,
+        "ARTIFACT_RECOVERABLE": 1,
+        "OTHER_WORKSPACE_RECOVERABLE": 0,
+        "RECONSTRUCTABLE": 0,
+        "LOST_OR_NOT_VERIFIED": 6
+      }
+    },
+    "code_engineering": {
+      "denominator": 24,
+      "counts": {
+        "GITHUB_PRESERVED": 18,
+        "ARTIFACT_RECOVERABLE": 0,
+        "OTHER_WORKSPACE_RECOVERABLE": 0,
+        "RECONSTRUCTABLE": 0,
+        "LOST_OR_NOT_VERIFIED": 6
+      },
+      "github_preserved_count_percent": 75,
+      "lost_or_not_verified_count_percent": 25,
+      "meaning": "Count share of24 bounded engineering deliverables, not effort/value/completion percentage."
+    },
+    "text_research": {
+      "denominator": 4,
+      "counts": {
+        "GITHUB_PRESERVED": 3,
+        "ARTIFACT_RECOVERABLE": 1,
+        "OTHER_WORKSPACE_RECOVERABLE": 0,
+        "RECONSTRUCTABLE": 0,
+        "LOST_OR_NOT_VERIFIED": 0
+      }
+    },
+    "ENGINEERING_VALUE_PERCENT": "NOT_ESTIMABLE",
+    "reason": "No agreed effort/value weights; text research is separated to avoid inflating code-preservation share."
+  },
+  "actions": {
+    "reconstruction": false,
+    "new_tests": false,
+    "heavy_ci": false,
+    "financial_action": false,
+    "other_workspace_search": false
+  },
+  "publication": {
+    "this_ledger": "CONTAINING_HANDOFF_COMMIT_REQUIRES_EXTERNAL_REMOTE_READBACK",
+    "existing_revision_checkpoint": {
+      "pr": 516,
+      "head": "bf49ab4437335b2a9e0c6499cc35a70b4238a046",
+      "scope": "Earlier bounded revision observations; not this complete deduplicated ledger"
+    },
+    "navigator_subset_archive": {
+      "head": "066e92390d4429a92b33016bfc1c58b3166dc168",
+      "tree": "bfa4a0bdc9dbb09099ea021f9ea5dd08f9190772",
+      "status": "EXACT_BYTES_VERIFIED_INERT_SUBSET_ONLY"
+    },
+    "head_binding": "Exact ledger commit and full remote readback are recorded in existing PR516 body after publication; no self-hash"
+  }
+}
+```
