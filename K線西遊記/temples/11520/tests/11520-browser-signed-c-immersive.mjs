@@ -10,9 +10,16 @@ import {chromium} from 'playwright';
 import {C_ABS_DETENTS,signedTravelFromC,formatSignedC} from '../controls/nonlinear-controls.mjs';
 
 const OUT='artifacts/11520-visual-qa';
+const BASE=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
+// This local simulation UI harness must not depend on Binance availability.
+// Public/live market validation keeps its existing independent browser suite.
+const LOCAL_SIMULATION_QA=['127.0.0.1','localhost'].includes(new URL(BASE).hostname);
+const quoteFixtureRows=[{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price:'3500'},{symbol:'BNBUSDT',price:'600'}];
+let quoteFixtureReady=false;
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+if(LOCAL_SIMULATION_QA)await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,quoteFixtureReady?quoteFixtureRows:[]))}));
 // This suite checks FULL HUD/immersive transitions. MINIMAL's default hiding
 // is independently covered by the world-first six-viewport browser suite.
 await page.addInitScript(()=>localStorage.setItem('k11520.ui.settings',JSON.stringify({profile:'FULL'})));
@@ -25,11 +32,10 @@ if(process.env.K11520_LOCAL_QA_ASSETS==='1'){
       await route.fulfill({status:200,contentType:'text/javascript; charset=utf-8',body});
     }catch{await route.abort()}
   });
-  await page.route('https://data-api.binance.vision/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(freeQuotePayload(route,[{symbol:'BTCUSDT',price:'65000'},{symbol:'ETHUSDT',price:'3500'},{symbol:'BNBUSDT',price:'600'}]))}));
   await page.route('https://raw.githubusercontent.com/**',route=>route.abort());
 }
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-await page.goto((process.env.K11520_BASE_URL||'http://127.0.0.1:4173')+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
+await page.goto(BASE+'/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:30000});
 if(process.env.K11520_LOCAL_QA_ASSETS==='1')await page.addStyleTag({content:`@font-face{font-family:K11520LocalCJK;src:url('/node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}html,body,button,input,select{font-family:K11520LocalCJK,sans-serif!important}`});
 await page.waitForTimeout(1900);
 if(await page.locator('#intro11520').isVisible().catch(()=>false))await page.locator('#enter11520').click({timeout:1500}).catch(()=>{});
@@ -38,6 +44,24 @@ await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready==
 await page.waitForFunction(()=>document.documentElement.dataset.k11520MobileControlLayout==='PASS',null,{timeout:5000});
 await page.waitForTimeout(500);
 assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
+if(LOCAL_SIMULATION_QA){
+  await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='WAIT',null,{timeout:5000});
+  const simulationMode=await page.evaluate(()=>globalThis.__K11520_EXECUTION__.snapshot().mode);assert.equal(simulationMode,'SIMULATION_WALLET');
+  // The existing preflight owner posts a separate route toast on its next
+  // timer. Record the real missing-quote message during the native click,
+  // rather than racing that later legitimate notification.
+  await page.evaluate(()=>{const toast=document.getElementById('toast'),messages=[],observer=new MutationObserver(()=>messages.push(toast.textContent));observer.observe(toast,{childList:true,subtree:true,characterData:true});globalThis.__SIGNED_C_WAIT_EVIDENCE__={messages,observer}});
+  let waitMessages;try{await page.locator('#orderFire').click({timeout:2500})}finally{waitMessages=await page.evaluate(()=>{const evidence=globalThis.__SIGNED_C_WAIT_EVIDENCE__;evidence.observer.disconnect();delete globalThis.__SIGNED_C_WAIT_EVIDENCE__;return evidence.messages})}
+  assert.equal(await page.locator('#confirm').isVisible(),false,'missing quote must not open an order preview');
+  assert.ok(waitMessages.some(message=>/ORACLE_STALE/.test(message)),'WAIT keeps the production missing-quote rejection: '+JSON.stringify(waitMessages));
+  quoteFixtureReady=true;
+  await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
+  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,waitRejected:true,waitMessages,firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
+}
+// Human 12:43 Market collapse applies to FULL too; explicitly disclose it
+// before measuring the full-information HUD, rather than defeating idle hide.
+if(!await page.locator('#axes').isVisible())await page.locator('#k11520MarketRow').click();
+await page.locator('#axes').waitFor({state:'visible'});
 const normalHud=await page.evaluate(()=>{const visible=sel=>{const el=document.querySelector(sel);if(!el)return false;const s=getComputedStyle(el),b=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&b.width>0&&b.height>0};return{axes:visible('.axes'),world:visible('.tele'),life:visible('.monsterHud'),map:visible('.minimapWrap'),visual:Math.round(globalThis.visualViewport?.height||innerHeight),css:getComputedStyle(document.documentElement).getPropertyValue('--k11520-visible-vh').trim()}});assert.deepEqual({axes:normalHud.axes,world:normalHud.world,life:normalHud.life,map:normalHud.map},{axes:true,world:true,life:true,map:true},'ordinary HUD must stay visible');assert.equal(normalHud.css,`${normalHud.visual}px`,'ordinary mode must track VisualViewport so browser chrome recovery becomes game space');
 
 const tradeAxis=async()=>page.evaluate(()=>globalThis.__K11520_TRADE_AXIS_API__?.current());
@@ -238,6 +262,7 @@ await page.waitForTimeout(100);
 assert.equal((await page.locator('#cRead').textContent()).trim(),'+100C','1000C must not displace the last valid 100C state');
 await page.evaluate(()=>document.querySelector('[data-organ="trade"]')?.click());
 await page.waitForTimeout(120);
+if(LOCAL_SIMULATION_QA)await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:5000});
 await page.locator('#orderFire').evaluate(el=>el.click());
 await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
 await page.waitForTimeout(240);
