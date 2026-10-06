@@ -789,3 +789,29 @@ All daily tests are in-memory model evidence, separate from the earlier native
 adapter run. Full-bag, selected-player and next-day setup changes are explicitly
 synthetic fixture readmissions; they do not establish missing live switch, removal
 or event commands. Native daily integration, whole-Life P0 and release remain HOLD.
+
+### Prepared native daily evidence extension (not yet executed)
+
+The existing isolated native-IDB mode now prepares report schema
+`K11520_NATIVE_IDB_DIAGNOSTICS_V2` with the original 12 cases plus two mandatory
+synthetic daily cases: `DAILY_TYPED_CLAIM_RACE` and
+`DAILY_TYPED_FULFILL_ABORT_RETRY`. This is a separate daily test database in the
+same disposable origin/profile; fixture clock, protocol marker and initial
+eligibility are explicitly synthetic. Both tabs and restart reuse one captured
+clock without changing global time or the original current/legacy store handles.
+
+Required evidence is one winning claim/one stale conflict, exactly 25/20 XP,
+one pending item obligation, a native bag-request success followed by a witnessed
+transaction abort, unchanged records, successful retry delivering one item,
+and exact replay with zero add/put/delete/clear attempts. Original canonical state
+and every synthetic legacy source string must remain unchanged. The existing
+process-restart case must reopen both databases, their complete records and
+consumption receipts without reseeding. Diagnostic screenshots show a compact
+daily summary; they still provide no production UI acceptance.
+
+The mandatory artifact validator requires all 14 cases and those exact observations;
+missing evidence fails. No job, permission, trigger, timeout or retry budget is
+added: 8-minute native job, 240-second scenario, original Product budgets intact.
+Estimated normal native scenario overhead is under 2 seconds beyond the prior
+roughly 2-second adapter fixture; this is an estimate awaiting the queued run.
+No native daily PASS, production caller or migration/cutover claim is made here.
