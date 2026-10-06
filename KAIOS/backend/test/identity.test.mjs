@@ -568,6 +568,7 @@ async function recoveryEntryFixture({
   factoryError,
   realStorage,
   serverPlayer,
+  accountAuthRequired = false,
 } = {}) {
   const source = await readFile(
     new URL("../web/app.mjs", import.meta.url),
@@ -758,6 +759,10 @@ async function recoveryEntryFixture({
     };
     assert.ok(path in responses, `Unexpected Recovery API request: ${path}`);
     let status = 200;
+    if (accountAuthRequired && path === "/player/me") {
+      status = 401;
+      responses[path] = { code: "ACCOUNT_AUTH_REQUIRED" };
+    }
     if (path === "/account/email/verify" && verificationCalls++ > 0) {
       status = 400;
       responses[path] = { code: "IDENTITY_TOKEN_INVALID" };
@@ -1635,4 +1640,28 @@ test("Recovery entry download cannot publish a retained record replaced by anoth
   await f.nodes.get("saveCodes").onclick();
   assert.equal(f.downloads.length, 1);
   assert.equal(await f.downloads[0].blob.text(), "other-test-only-code");
+});
+
+test("Recovery entry localizes ACCOUNT_AUTH_REQUIRED without changing login or creating fallback state", async () => {
+  const f = await recoveryEntryFixture({ accountAuthRequired: true });
+  await f.start({ storeFactory: f.storeFactory });
+  assert.equal(f.nodes.get("message").textContent, "請先登入 Account。");
+  assert.equal(f.nodes.get("dashboard")?.hidden, undefined);
+  assert.equal(typeof f.nodes.get("verifyEmail").onclick, "function");
+  assert.equal(f.factoryCalls(), 2);
+  assert.deepEqual(
+    f.calls.map((call) => call.path),
+    ["/health", "/player/me"],
+  );
+  assert.equal(f.mutations.length, 0);
+  assert.equal(f.clouds.length, 0);
+  await f.nodes.get("refresh").onclick();
+  assert.equal(f.nodes.get("message").textContent, "請先登入 Account。");
+  assert.equal(f.factoryCalls(), 3);
+  assert.deepEqual(
+    f.calls.map((call) => call.path),
+    ["/health", "/player/me", "/player/me"],
+  );
+  assert.equal(f.mutations.length, 0);
+  assert.equal(f.clouds.length, 0);
 });

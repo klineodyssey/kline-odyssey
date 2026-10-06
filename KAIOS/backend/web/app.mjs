@@ -1,3 +1,18 @@
+/*
+KGEN_META
+VERSION: V1
+REVISION: 2026-10-06.RECOVERY_ASYNC_CALLER.1
+STATUS: DRAFT
+LAST_UPDATED: 2026-10-06
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot (independent source and localization review; final candidate evidence in PR #521)
+SOURCE_COMMIT: e1c84739a887cdcff78867c01b7c4c8393f402a8
+TASK_ID: RECOVERY-ASYNC-CALLER-20261006
+CHANGE_REASON: Await prepared legacy stores and commit acknowledgements; preserve Account-bound verification results and localize required-login feedback.
+ANCESTOR: Existing Recovery V1 at e26f3a76; explicit Recovery seam at 2cdf30d5.
+SOURCE_OF_TRUTH: FALSE
+Changelog: KAIOS/backend/README.md. Legacy-only review candidate; no canonical authority promotion.
+*/
 import {
   createLocalPlayerStore,
   PLAYER_LIFE_SCHEMA,
@@ -124,6 +139,7 @@ async function run(fn) {
         STALE_RESTORE: "版本已更新，請重新預覽。",
         CORRUPTED: "備份損壞，已拒絕恢復。",
         AUTH_REQUIRED: "請先登入。",
+        ACCOUNT_AUTH_REQUIRED: "請先登入 Account。",
         SESSION_EXPIRED: "登入已過期，請重新簽章。",
         BACKEND_NOT_CONFIGURED: "雲端服務尚未配置，本機旅程仍可使用。",
       }[e.message] ?? e.message,
