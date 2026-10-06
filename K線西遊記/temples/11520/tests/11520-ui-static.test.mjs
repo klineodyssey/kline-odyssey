@@ -558,3 +558,26 @@ test('shared order confirmation keeps actions outside its scrolling body in port
   assert.match(shared,/#confirm \.btn,#confirm \.close\{min-height:44px/);
   assert.match(html,/<div id="confirmBody"><\/div><div class="grid2"><button class="btn" id="cancelOrder">取消<\/button><button class="btn" id="confirmOrder">/,'retain the original reachable Cancel and Submit controls');
 });
+
+test('offline acceptance waits for the actual adapter before reload assertions and emits bounded missing-boot evidence',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const fn=source.slice(source.indexOf('    const waitForSimulationBoot=async()=>{'),source.indexOf('    const game=async()=>{'));
+ let checked=0,fail=false;
+ const context={page:{waitForFunction:async(predicate,arg,options)=>{checked++;assert.equal(options.timeout,12000);assert.doesNotThrow(()=>predicate());if(fail)throw new Error('fixture timeout');}},state:async()=>({simulation:null,execution:null,axis:null,url:'http://127.0.0.1/fixture'})};
+ runInNewContext(fn+';globalThis.waitForSimulationBoot=waitForSimulationBoot;',context);
+ await context.waitForSimulationBoot();assert.equal(checked,1,'absent global is an ordinary not-ready observation');
+ fail=true;await assert.rejects(context.waitForSimulationBoot(),/SIMULATION_BOOT_NOT_READY.*adapterPresent.*false.*fixture timeout/);
+ const reload=source.slice(source.indexOf("stage='reload-recovery'"),source.indexOf('result.reload=await state()'));
+ assert.ok(reload.indexOf('await waitForSimulationBoot()')<reload.indexOf('globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot()'));
+ assert.match(reload,/receipts\.length===length/,'receipt equality remains mandatory');
+});
+
+test('offline acceptance closes each open surface once and awaits its completed hidden transition',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-settlement.mjs');
+ const start=source.indexOf('    const game=async()=>{'),fn=source.slice(start,source.indexOf('    const organ=async name=>{',start));
+ for(const open of [false,true]){
+  const clicks=[],waits=[],page={locator:selector=>({evaluate:async predicate=>predicate({classList:{contains:cls=>selector==='#walletPanel'?cls==='collapsed':['#confirm','#sheet'].includes(selector)&&cls==='open'&&open}}),click:async()=>clicks.push(selector),waitFor:async options=>{assert.deepEqual({...options},{state:'hidden',timeout:12000});waits.push(selector)},isVisible(){throw new Error('transitional visibility is not close authority')}})};
+  const context={page};runInNewContext(fn+';globalThis.game=game;',context);await context.game();
+  assert.deepEqual(clicks,open?['#cancelOrder','#sheetClose']:[]);assert.deepEqual(waits,['#confirm','#sheet']);
+ }
+});

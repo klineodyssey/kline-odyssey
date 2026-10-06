@@ -341,9 +341,17 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       assert.ok(box.width>0&&box.height>0&&box.x>=0&&box.y>=0&&box.right<=profile.width+1&&box.bottom<=profile.height+1,`${selector} clipped: ${JSON.stringify(box)}`);
       assert.ok(box.hit,`${selector} pointer blocked: ${JSON.stringify(box)}`);return box;
     };
+    const waitForSimulationBoot=async()=>{
+      try{await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_3D_CONTROL__,null,{timeout:12000})}
+      catch(error){const observed=await state().catch(()=>null);throw new Error('SIMULATION_BOOT_NOT_READY '+JSON.stringify({adapterPresent:!!observed?.simulation,executionMode:observed?.execution?.mode,axis:observed?.axis,url:observed?.url,cause:String(error.message)}))}
+    };
     const game=async()=>{
-      if(await page.locator('#confirm').isVisible())await page.locator('#cancelOrder').click();
-      if(await page.locator('#sheet').isVisible())await page.locator('#sheetClose').click();
+      // A native close may already be finishing its CSS transition. Never
+      // click a second time merely because isVisible saw that earlier frame.
+      if(await page.locator('#confirm').evaluate(e=>e.classList.contains('open')))await page.locator('#cancelOrder').click();
+      await page.locator('#confirm').waitFor({state:'hidden',timeout:12000});
+      if(await page.locator('#sheet').evaluate(e=>e.classList.contains('open')))await page.locator('#sheetClose').click();
+      await page.locator('#sheet').waitFor({state:'hidden',timeout:12000});
       if(!await page.locator('#walletPanel').evaluate(e=>e.classList.contains('collapsed')))await page.locator('#walletToggle').click();
       if(await page.locator('html').evaluate(e=>e.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
     };
@@ -385,7 +393,7 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       stage='boot';
       await page.clock.install({time:new Date()});
       await page.goto(base+'/'+encodeURI(route),{waitUntil:'domcontentloaded'});
-      await page.waitForFunction(()=>globalThis.__K11520_SIMULATION_EXCHANGE__&&globalThis.__K11520_SIGNED_C_IMMERSIVE__?.ready&&globalThis.__K11520_3D_CONTROL__);
+      await waitForSimulationBoot();
       if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click();
       await page.locator('#intro11520').waitFor({state:'hidden'});
       await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
@@ -481,7 +489,8 @@ async function offlineSimulationBrowserQA({baseline=false}={}){
       }
       if(!baseline){
         stage='reload-recovery';const before=await snap();await page.reload({waitUntil:'domcontentloaded'});
-        await page.waitForFunction(length=>__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===length,before.receipts.length);
+        await waitForSimulationBoot();
+        await page.waitForFunction(length=>globalThis.__K11520_SIMULATION_EXCHANGE__?.snapshot().receipts.length===length,before.receipts.length,{timeout:12000});
         await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#charState').filter({hasText:/READY|FALLBACK/}).waitFor({state:'attached',timeout:45000});
         result.reload=await state();assert.deepEqual(result.reload.simulation.orders,before.orders);assert.deepEqual(result.reload.simulation.receipts,before.receipts);assertNoAuthority(result.reload);await shot('reload-recovery');
       }
