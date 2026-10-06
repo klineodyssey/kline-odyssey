@@ -562,3 +562,60 @@ Human06:20:21要求的工程讀取紀錄，記錄本次實際read-only refresh�
   "AUTHORITY": "Documentation receipt only; no authenticated identity, cognitive-reading proof, action grant, dispatch, financial authority or cutover."
 }
 ```
+
+## 13 Durable engineering checkpoint rule — 2026-10-06
+
+Human 2026-10-06 13:28:54 UTC 的新指示：**WORKSPACE IS TEMPORARY / GIT HISTORY IS DURABLE**。本節累積補充既有 §8–10 的保存與交接流程，適用於已獲准施工的 dot、Codex、Codex Cloud、Cursor 及其他 engineering agents；不建立新 policy owner、正式 claim、Worker 身份或執行權限。
+
+### 及早保存，不以完成度阻擋
+
+- 已形成可編譯／可執行程式、有意義 diff、部分 tests、重要 bug repro、待 QA 修補或可供接手的半成品時，即建立 durable checkpoint；不等整項工作 100% 完成才第一次 push。
+- 優先沿用該任務合法的 dedicated branch：檢查來源與安全內容 → commit → push GitHub → 讀回 branch HEAD、tree／必要 blob。Cursor 保留 `cursor-handoff/<Task-ID>`，其他 workers 遵循既有 allowed branch pattern；不另派 owner、不複製 claim。**不得把 main 當備份分支**，不得 force push、清理／覆盖他人的未提交工作。
+- 本地 commit、上傳的孤立 blob、chat summary、未驗證 push 回覆都不等於可恢復來源。只有遠端 ref 可達且 exact HEAD/tree/必要 source bytes 已讀回，才標 `REMOTE_VERIFIED`；缺 ref／bytes 就如實標 `LOCAL_ONLY`、`BLOCKED` 或 `RECOVERY_REQUIRED`。
+- 長測試／昂貴 QA 前先保存可用工作；測試結束或失敗後，再保存已知結果、精簡 redacted log、失敗位置及下一步。不要為等待全部綠燈而延後第一次保存，也不要因保存而啟動未獲准 heavy batch。
+- WIP / candidate 先保存 branch；適用時使用既有 Draft PR 交接。完成且符合既有 merge policy 才進入相應 PR／CI／QA／main release 流程；checkpoint 不等於 merge、部署、發布或財務權限。
+
+### 狀態、證據與安全內容
+
+明示可並存的工程標記：`WIP`、`DRAFT`、`NOT_RELEASEABLE`；實際失敗加 `TEST_FAILURE`，阻塞加 `BLOCKED`，來源未能恢復加 `RECOVERY_REQUIRED`。這些是 checkpoint 資料欄位，不自行建立 GitHub labels 或改寫正式 WorkQueue 狀態。失敗的 WIP 可以保存，但不得寫成 production-ready。
+
+每次 checkpoint 在既有 handoff／報告／PR 中保留 machine-readable 欄位：
+`WORK_ID`、`OWNER`、`TIMESTAMP`、`BASE`、`BRANCH`、`HEAD`、`TREE`、`PR`、`STATUS`、`LABELS`、`COMPLETED`、`TESTS_PASSED`、`TESTS_FAILED`、`TESTS_NOT_RUN`、`CI`、`EVIDENCE_LINKS`、`BLOCKERS`、`NEXT_ACTION`、`SECRET_SCAN`。每項 test/CI/log 證據綁定實際 tested HEAD、時間與 scope。未知欄位用 null 或明確未知，不能從舊 PASS 補值。
+
+提交內的報告不能自我寫入其尚未產生的 commit hash：保留 `SOURCE_HEAD`／`HEAD_BINDING`，在 push 後以既有 PR body 或外部 handoff envelope 補上讀回的 exact `HEAD`、`TREE`、commit link 及驗證時間。歷史錯誤保留，後續 append superseding evidence，不追改成當時已成功。
+
+- Git 只保留適量可審閱 source、diff、repro、machine-readable evidence、log 摘要與 artifact manifest。大型截圖／影片／build output／資料集使用已批准的有界 artifact 儲存；記錄 run/artifact link、SHA-256、大小及保留／到期資訊，未查到就標未知。CI artifact 會到期，不能單獨取代 source checkpoint；不得無限制提交 binaries、cache、node_modules 或整個 workspace。
+- commit/push 前檢查 exact diff 與待發布內容，排除 private keys、seed phrases、API/access tokens、cookies、密碼、環境 secret、認證檔及非必要個資。先 redaction 再保存；secret scan 的 scope、結果／限制必須列明，不能把未掃描當 PASS。
+- 網路、權限或來源失敗時立即記錄 exact action／target／error，保留安全的本地 diff／repro 並回報；不換身份、工具或分支繞過拒絕。缺失資料不能從記憶重造為原版；partial artifact 或 422/404 只證明本次查詢結果，不證明全域永久遺失。
+- 本規則不授權 financial execution、signer/secret 使用、Mainnet/Testnet 交易、真實資產移動、protected Boot／Physics／registry／permissions 修改、重寫歷史或自動 merge。既有 approval、安全與資源限制保持適用。
+
+### 本次 documentation checkpoint envelope
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "OWNER": "dot",
+  "ROLE": "TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER",
+  "TIMESTAMP": "2026-10-06T13:32:20Z",
+  "BASE": "e26f3a76ef0be7f43058225f46def3fbe123371e",
+  "SOURCE_HEAD": "f44a4a8b06e095096ddf6c151c7eec2c5d5a020a",
+  "BRANCH": "dot/engineering-handbook-20261006",
+  "HEAD": null,
+  "TREE": null,
+  "HEAD_BINDING": "Containing commit; exact published HEAD/tree/readback added to PR516 body after non-force compare-and-swap push",
+  "PR": 516,
+  "STATUS": "DOCUMENTATION_REVIEW_CANDIDATE",
+  "LABELS": ["WIP", "DRAFT", "NOT_RELEASEABLE"],
+  "COMPLETED": ["Read formal Boot CURRENT, Company Boot, AGENTS and existing handbook/worker workflow", "Reuse existing Q20 handbook and handoff owners", "Define early durable checkpoint, long-test boundaries and secret exclusion"],
+  "TESTS_PASSED": [],
+  "TESTS_FAILED": [],
+  "TESTS_NOT_RUN": ["Runtime tests", "Browser QA", "Heavy tests"],
+  "CI": "Candidate paths match none of 19 active push/PR workflow definitions at base; CI_NOT_CONFIGURED, not PASS",
+  "EVIDENCE_LINKS": ["https://github.com/klineodyssey/kline-odyssey/pull/516", "https://github.com/klineodyssey/kline-odyssey/pull/502"],
+  "BLOCKERS": ["Documentation validation and remote readback must be recorded outside the containing commit", "Recovery audit is partial; existing product release holds remain"],
+  "NEXT_ACTION": "Validate exact two-file append, publish checkpoint on existing branch, verify remote bytes and append audit results when available",
+  "SECRET_SCAN": "Required before publication; exact result belongs to verified external envelope",
+  "AUTHORITY": "Documentation-only checkpoint; no registration, formal claim, runtime, protected-path, workflow, merge, deploy or financial grant"
+}
+```

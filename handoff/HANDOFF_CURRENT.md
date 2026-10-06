@@ -189,3 +189,63 @@ This bounded technical report grants no Life, Worker, employment, payroll, Treas
 ## dot engineering handbook review handoff — 2026-10-06
 
 Human requested one indexed engineering handbook. The docs-only successor from main `e26f3a76ef0be7f43058225f46def3fbe123371e` is [`docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md`](../docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md), containing the existing twenty stable parent IDs, six-track evidence, canonical owner map and local-vs-published boundaries. This pointer preserves all earlier handoff records. This is an engineering review candidate; containing commit/PR readback determines publication. No merge, repository adoption, runtime/Physics or identity grant follows from this pointer; protected Boot inventory registration remains pending.
+
+## Durable checkpoint policy and partial recovery audit — 2026-10-06
+
+Human's 13:28:54 UTC order is recorded cumulatively in the [existing engineering handbook §13](../docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md#13-durable-engineering-checkpoint-rule--2026-10-06). This is the existing Q20/#516 documentation owner, not a new WorkQueue or product implementation. Earlier records remain historical and unchanged. This partial audit preserves uncertainty now rather than waiting for the whole investigation; later results must append a superseding checkpoint.
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "TIMESTAMP": "2026-10-06T13:32:20Z",
+  "STATUS": "PARTIAL_RECOVERY_AUDIT",
+  "LABELS": [
+    "WIP",
+    "DRAFT",
+    "NOT_RELEASEABLE",
+    "RECOVERY_REQUIRED"
+  ],
+  "SOURCE_HEAD": "f44a4a8b06e095096ddf6c151c7eec2c5d5a020a",
+  "BRANCH": "dot/engineering-handbook-20261006",
+  "PR": 516,
+  "HEAD": null,
+  "HEAD_BINDING": "Resolve containing commit and PR516 readback envelope",
+  "OBSERVED_MAIN": "e26f3a76ef0be7f43058225f46def3fbe123371e",
+  "SOURCE_AUDIT": {
+    "at": "2026-10-06T13:30:28Z",
+    "sha256": "dd3d23ec3e37d31d8b46d49e8fdfd5787a53d66cd4e5db148f488866e3f7116a",
+    "bytes": 4470,
+    "kind": "Auditor local JSON snapshot; private filesystem locations omitted from public projection",
+    "coverage": "INCOMPLETE"
+  },
+  "OBSERVATIONS": [
+    "The two authorized top-level workspace .git directories were empty",
+    "18 surviving ZIP artifacts contain screenshot/report evidence so far; exact candidate source recovery not established",
+    "Ten prior local candidate commit queries returned 422 through the GitHub commits endpoint; this is not proof of global irretrievability"
+  ],
+  "REMOTE_COMMIT_LOOKUPS": [
+    {
+      "pr": 518,
+      "head": "594835ffa03620abb1ed60d7fb357250d6957324"
+    },
+    {
+      "pr": 519,
+      "head": "6c654ce367772420ae11fd30759c613dad7aa2ea"
+    },
+    {
+      "pr": 520,
+      "head": "e95ae3a0e4c772af50644bf628e15801de65b97e"
+    },
+    {
+      "pr": 521,
+      "head": "eacb58a4004495f0675e09e260ccd9f09e66fb6d"
+    }
+  ],
+  "REMOTE_LOOKUP_LIMIT": "Commit objects resolve; branch reachability, full trees/blobs and equivalence checks remain pending in this partial checkpoint",
+  "TESTS": "NOT_RUN_THIS_AUDIT",
+  "SOURCE_RECONSTRUCTION": false,
+  "PRODUCT_RELEASE_READY": false,
+  "NEXT_ACTION": "Append superseding inventory after exact remote refs/tree/blob and surviving artifact checks; preserve original identifiers and evidence limits"
+}
+```
