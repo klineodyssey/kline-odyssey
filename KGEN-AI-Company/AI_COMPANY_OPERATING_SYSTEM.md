@@ -149,3 +149,40 @@ Design references: [ERPNext Quotation](https://docs.frappe.io/erpnext/quotation)
 [Workflows](https://docs.frappe.io/erpnext/workflows), and
 [AWS idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/).
 These are process references, not Company pricing, contract or execution authority.
+
+### Local database checkpoint milestone
+
+The next bounded prototype adds `createCustomerProjectPersistencePrototype` in
+the existing `KAIOS/backend/src/service.mjs`, explicitly gated by
+`mode: "LOCAL_TEST_ONLY"`. It is never connected to `createBackend`, HTTP routes,
+signup, local-server startup, production configuration or deployment. The pure
+Company model remains `LOCAL_TEST_ONLY_NOT_DURABLE`; its hashed responses remain
+unchanged. A separate `LOCAL_DATABASE_SIMULATION_PROTOTYPE` envelope reports a
+committed local database checkpoint and its storageVersion.
+
+The schema exists only inside the existing universal-exchange test file. No
+applied SQL migration, new migration path, Account/Life onboarding, formal registry
+or financial state is changed. SQLite temporary-file tests use preseeded fictional
+Account/Player bindings and the existing `DatabaseAdapter.atomic` implementation.
+
+Each checkpoint stores exact command, trusted planner snapshot, clock observations,
+response and resulting state hash. Restart reconstructs the pure model by replay;
+historical operations never call the live planner/clock. Replay consumption,
+operation-to-commandJournal correspondence, table events and idempotency responses
+must agree exactly. Inconsistent records fail closed instead of being repaired
+with invented fixture state.
+
+The initial local schema enforces one workspace per Player as a technical bound,
+explicit `account_lives` ownership, and unique event sequence within each workspace.
+Trigger-based storageVersion/payloadHash guards fail the whole transaction on a
+race. State, new domain events and response journal commit together. A new-key
+ALREADY_ACCEPTED checkpoint advances storageVersion only; its domain revision and
+event sequence remain unchanged. Exact retries change neither counter.
+
+Evidence is limited to the local SQLite prototype. Acceptance uses the recorded
+trusted service decision time; a subsequent lock wait is not proof of a database
+commit before quote expiry. Concurrent duplicate issuance may call the side-effect-free
+trusted planner twice, while only one outcome commits. Hash/replay checks detect
+inconsistent corruption, not an adversary rewriting the entire database coherently
+or restoring an older valid file. D1, production authentication, cross-device UI,
+backup/restore and full-house execution remain unverified or unimplemented.

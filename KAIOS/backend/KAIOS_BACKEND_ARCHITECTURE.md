@@ -204,3 +204,74 @@ repository README and KGEN indexes. Boot CURRENT remains protected and requires
 explicit scoped authorization. This existing-document appendix does not authorize
 that update, production activation, heavy CI, funding, legal commitments or real
 external effects.
+
+### Local SQLite persistence prototype after the pure model checkpoint
+
+Local ancestor `7dff3fa49646093dd4fce6b0a405c18106a61877` is the reviewed pure-model
+checkpoint described above. A separate, explicitly opt-in exported helper in
+`src/service.mjs` now exercises local persistence without connecting a service
+route or modifying `createBackend`. The only Company-domain change factors the
+existing synchronous trusted-context validator for reuse; the V1 planning/runtime
+source remains unchanged. This helper does not load a planningAdapter.
+
+The fixture schema is confined to `tests/universal-exchange.test.mjs`:
+
+- `customer_project_workspaces`: stable workspace primary key, independently
+  unique owner Player, Account binding, domain revision, storageVersion, payload/hash.
+- `customer_project_events`: foreign key to the workspace,
+  PRIMARY KEY(workspace_id, sequence), globally unique event ID, immutable payload/hash.
+- `customer_project_guards`: expected storageVersion/payloadHash and current
+  Account/Player binding, enforced by a RAISE(ABORT) trigger within atomic().
+- Existing `idempotency` table: prototype-specific hashed owner/company/primary-slot
+  namespace plus command type and client key. It cannot collide with existing routes.
+
+The fixture applies existing 0001/0002 to disposable databases and seeds fictional
+existing Account/Player bindings directly. It never calls signup, enrollment,
+email, wallet or formal registry routines. No new or applied migration is edited,
+and no production database is provisioned by the helper.
+
+Each stored operation retains exact command, copied planner output, every consumed
+clock observation, model-result hash, resulting-state hash and cached persistence
+envelope. Replay must consume those observations exactly once and reconstruct the
+unchanged pure-model response, including durable:false. The persistence envelope
+is separate; committed:true is returned only after the local DB transaction succeeds
+or a coherent reload verifies a previously committed matching response.
+
+One SQL SELECT captures Account/Player binding, workspace, ordered event rows and
+the entire namespaced idempotency journal in a single read snapshot. A concurrent
+writer cannot make cache/event rows appear newer than the selected workspace.
+Stored events exactly match replayed events; journal operations exactly match the
+pure model's commandJournal. Missing, extra or inconsistent records block reads
+and retries. No unchecked snapshot import, silent reconstruction or automatic reset
+is provided.
+
+Live commands compute a candidate off to the side. One DatabaseAdapter.atomic
+transaction performs the trigger-based compare-and-set, aggregate replacement,
+new domain-event inserts, idempotency response insert and guard cleanup. The port
+returns no affected-row counts, so a zero-row UPDATE is never accepted as CAS proof.
+On a race, lost acknowledgement or speculative planner/expiry failure, one coherent
+snapshot/replay reload verifies any matching committed result without rerunning the
+planner or mutation. Different-key losers receive a conflict and never
+overwrite the winner. Response-only ALREADY_ACCEPTED checkpoints still advance
+storageVersion to prevent lost response journals, while domain revision stays fixed.
+
+The focused integration evidence covers SQLite file reopen, historical replay
+without live clock/planner calls, independent connection races, Account/Player
+isolation, two workspaces both using event sequence 1, every-statement rollback for
+creation and acceptance, lost-response recovery, coherent reads during another
+commit, revocation during asynchronous work and inconsistent cache/event/replay
+records. These tests do not establish D1 behavior, cloud execution, production
+authentication or end-user recovery/UI readiness.
+
+Acceptance time remains the trusted service decision timestamp saved by the model.
+The helper checks freshness before requesting the transaction; a lock wait may
+commit later. This is not a database-commit-before-expiry guarantee. Replay keeps
+the original decision and cannot reaccept an expired quote. Concurrent duplicate
+issuance can evaluate the trusted side-effect-free planner twice, with one committed
+outcome. Hashes/replay are corruption checks, not signatures or an external
+anti-rollback anchor against coherent whole-database replacement.
+
+Before a deployment migration is proposed, retain the registration and scoped
+review gates above. No CURRENT/Boot update, registry write, new Life, worker dispatch,
+supplier order, actual payment, house asset release or production activation is
+authorized by this local checkpoint.

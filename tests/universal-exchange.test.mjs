@@ -3523,3 +3523,296 @@ test('Customer project V2 rechecks quote expiry before replacing accepted state'
     assert.equal(acceptanceClockReads, validAcceptanceClockReads + 1);
   }
 });
+
+// Intentionally test-file-only schema. Not an applied or deployable migration.
+const CUSTOMER_PROJECT_SQLITE_FIXTURE_SCHEMA = `
+CREATE TABLE customer_project_workspaces(workspace_id TEXT PRIMARY KEY,owner_account_id TEXT NOT NULL REFERENCES accounts(account_id),owner_player_id TEXT NOT NULL UNIQUE REFERENCES players(player_id),revision INTEGER NOT NULL CHECK(revision>0),storage_version INTEGER NOT NULL CHECK(storage_version>0),payload_hash TEXT NOT NULL,payload TEXT NOT NULL);
+CREATE TABLE customer_project_events(workspace_id TEXT NOT NULL REFERENCES customer_project_workspaces(workspace_id),sequence INTEGER NOT NULL CHECK(sequence>0),event_id TEXT NOT NULL UNIQUE,payload TEXT NOT NULL,payload_hash TEXT NOT NULL,PRIMARY KEY(workspace_id,sequence));
+CREATE TABLE customer_project_guards(guard_id TEXT PRIMARY KEY,owner_account_id TEXT NOT NULL,owner_player_id TEXT NOT NULL,expected_storage_version INTEGER NOT NULL,expected_payload_hash TEXT);
+CREATE TRIGGER customer_project_cas BEFORE INSERT ON customer_project_guards BEGIN
+ SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM account_lives WHERE account_id=NEW.owner_account_id AND player_id=NEW.owner_player_id) THEN RAISE(ABORT,'CUSTOMER_PROJECT_BINDING_REQUIRED') END;
+ SELECT CASE WHEN (NEW.expected_storage_version=0 AND EXISTS(SELECT 1 FROM customer_project_workspaces WHERE owner_player_id=NEW.owner_player_id)) OR (NEW.expected_storage_version>0 AND NOT EXISTS(SELECT 1 FROM customer_project_workspaces WHERE owner_player_id=NEW.owner_player_id AND owner_account_id=NEW.owner_account_id AND storage_version=NEW.expected_storage_version AND payload_hash=NEW.expected_payload_hash)) THEN RAISE(ABORT,'CUSTOMER_PROJECT_CAS_CONFLICT') END;
+END;
+CREATE TRIGGER customer_project_binding_insert BEFORE INSERT ON customer_project_workspaces BEGIN SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM account_lives WHERE account_id=NEW.owner_account_id AND player_id=NEW.owner_player_id) THEN RAISE(ABORT,'CUSTOMER_PROJECT_BINDING_REQUIRED') END; END;
+CREATE TRIGGER customer_project_binding_update BEFORE UPDATE ON customer_project_workspaces BEGIN SELECT CASE WHEN NEW.workspace_id!=OLD.workspace_id OR NEW.owner_account_id!=OLD.owner_account_id OR NEW.owner_player_id!=OLD.owner_player_id THEN RAISE(ABORT,'CUSTOMER_PROJECT_IMMUTABLE_OWNER') END; END;
+CREATE TRIGGER customer_project_event_no_update BEFORE UPDATE ON customer_project_events BEGIN SELECT RAISE(ABORT,'CUSTOMER_PROJECT_IMMUTABLE_EVENT'); END;
+CREATE TRIGGER customer_project_event_no_delete BEFORE DELETE ON customer_project_events BEGIN SELECT RAISE(ABORT,'CUSTOMER_PROJECT_IMMUTABLE_EVENT'); END;
+`;
+async function durableCustomerProjectFixture(t) {
+  const { tmpdir } = await import('node:os');
+  const { SQLiteDatabaseAdapter } = await import('../KAIOS/backend/src/adapters/local.mjs');
+  const { createCustomerProjectPersistencePrototype } = await import('../KAIOS/backend/src/service.mjs');
+  const { canonical, hash, stmt } = await import('../KAIOS/backend/src/primitives.mjs');
+  const directory = await fs.mkdtemp(tmpdir() + '/customer-project-local-');
+  const file = directory + '/fixture.sqlite', connections = new Set();
+  const open = () => { const db = new SQLiteDatabaseAdapter(file); connections.add(db); return db; };
+  let db = open(), time = 1000;
+  db.migrate(await fs.readFile(new URL('../KAIOS/backend/deploy/0001.sql', import.meta.url), 'utf8'));
+  db.migrate(await fs.readFile(new URL('../KAIOS/backend/deploy/0002_identity.sql', import.meta.url), 'utf8'));
+  db.migrate(CUSTOMER_PROJECT_SQLITE_FIXTURE_SCHEMA);
+  // Existing-identity fixtures only. No signup, enrollment or formal registry call.
+  for (const suffix of ['A', 'B']) await db.atomic([
+    stmt('INSERT INTO accounts VALUES(?,?,?,?,?,?)', 'TEST-ACCOUNT-' + suffix, 'TEST-LOOKUP-' + suffix, 'TEST-CIPHER-' + suffix, 1, 0, 0),
+    stmt('INSERT INTO players VALUES(?,?,?,?,?)', 'TEST-PLAYER-' + suffix, 'TEST-LIFE-REFERENCE-' + suffix, 0, 0, 2),
+    stmt('INSERT INTO account_lives VALUES(?,?,?)', 'TEST-ACCOUNT-' + suffix, 'TEST-PLAYER-' + suffix, 0)
+  ]);
+  let principal = { accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' };
+  const plan = { policyId: 'TEST-ONLY-SQLITE-PLAN', policyRevision: 1, stages: [...SMALL_HOUSE_REQUIRED_STAGES], bomHash: 'a'.repeat(64), costs: [{ name: 'test-model', amount: '65000' }], conditions: ['EXECUTION_HELD'], assumptions: ['SYNTHETIC_TEST_INPUTS'], validForMs: 10000, durationHours: 100 };
+  const f = customerProjectFixture();
+  const make = (options = {}) => createCustomerProjectPersistencePrototype({ mode: 'LOCAL_TEST_ONLY', database: options.database ?? db,
+    identityAdapter: options.identityAdapter ?? { resolve: () => structuredClone(principal) },
+    quotePlanner: options.quotePlanner ?? { plan: async () => structuredClone(plan) }, now: options.now ?? (() => time) });
+  t.after(async () => { for (const c of connections) c.close(); await fs.rm(directory, { recursive: true, force: true }); });
+  return { ...f, db, open, make, plan, canonical, hash, stmt, file,
+    setPrincipal(values) { principal = { ...principal, ...values }; }, setTime(v) { time = v; },
+    closeAll() { for (const connection of connections) connection.close(); connections.clear(); },
+    reopen() { db.close(); connections.delete(db); db = open(); this.db = db; return db; },
+    async prepare(api = make()) {
+      const submitted = await api.command(f.command('SUBMIT_REQUEST', 'durable-sub1', 0, f.request));
+      const issued = await api.command(f.command('ISSUE_SIMULATED_QUOTE', 'durable-quo1', 1, { requestRevision: 1 }));
+      return { api, submitted, quote: issued.result.quote, acceptance: f.acceptance(issued.result.quote, 'durable-acc1', 2) };
+    },
+    async rows() {
+      const result = {};
+      for (const table of ['customer_project_workspaces', 'customer_project_events', 'customer_project_guards', 'idempotency']) result[table] = await db.all('SELECT * FROM ' + table + ' ORDER BY rowid');
+      return result;
+    }
+  };
+}
+const durableCustomerRejects = (promise, code) => assert.rejects(promise, (error) => (error.code ?? error.message) === code);
+
+test('Customer project durable SQLite restarts with exact acceptance and frozen historical observations', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance } = await f.prepare();
+  const result = await api.command(acceptance); const before = await api.read();
+  assert.equal(result.persistence.committed, true); assert.equal(result.result.durable, false);
+  assert.equal(result.result.scope, 'LOCAL_TEST_ONLY_NOT_DURABLE');
+  assert.equal(before.state.project.status, 'PLANNED_EXECUTION_HELD'); assert.equal(before.state.project.houseComplete, false);
+  f.reopen();
+  const restarted = f.make({ quotePlanner: { plan() { throw new Error('LIVE_PLANNER_DURING_REPLAY'); } }, now() { throw new Error('LIVE_CLOCK_DURING_REPLAY'); } });
+  assert.deepEqual(await restarted.read(), before); assert.deepEqual(await restarted.command(acceptance), result);
+  assert.equal((await f.rows()).customer_project_workspaces.length, 1);
+  assert.equal((await f.rows()).customer_project_events.length, 3);
+});
+
+test('Customer project durable SQLite separates storage revision from accepted domain revision', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance, quote } = await f.prepare();
+  await api.command(acceptance); const before = await api.read(); f.setTime(quote.content.expiresAt + 1);
+  const second = { ...acceptance, idempotencyKey: 'durable-acc2' };
+  const result = await api.command(second); const after = await api.read();
+  assert.equal(result.result.status, 'ALREADY_ACCEPTED'); assert.equal(after.storageVersion, before.storageVersion + 1);
+  assert.equal(after.state.revision, before.state.revision); assert.deepEqual(after.state.events, before.state.events);
+  assert.deepEqual(await api.command(second), result); assert.deepEqual(await api.read(), after);
+  await durableCustomerRejects(api.command({ ...second, expectedRevision: 3 }), 'IDEMPOTENCY_CONTENT_MISMATCH');
+});
+
+test('Customer project durable SQLite resolves same-key concurrent submissions across connections', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const a = f.make(), b = f.make({ database: f.open() });
+  const command = f.command('SUBMIT_REQUEST', 'same-submit', 0, f.request);
+  const results = await Promise.all([a.command(command), b.command(command)]);
+  assert.deepEqual(results[0], results[1]);
+  const rows = await f.rows(); assert.equal(rows.customer_project_workspaces.length, 1); assert.equal(rows.customer_project_events.length, 1); assert.equal(rows.idempotency.length, 1);
+  assert.equal(rows.customer_project_guards.length, 0);
+});
+
+test('Customer project durable SQLite guards different-key first submits and quote acceptance races', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const a = f.make(), b = f.make({ database: f.open() });
+  const command = f.command('SUBMIT_REQUEST', 'race-subm01', 0, f.request);
+  const first = await Promise.allSettled([a.command(command), b.command({ ...command, idempotencyKey: 'race-subm02' })]);
+  assert.equal(first.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(first.find((r) => r.status === 'rejected').reason.message, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const quote = (await a.command(f.command('ISSUE_SIMULATED_QUOTE', 'race-quote1', 1, { requestRevision: 1 }))).result.quote;
+  const accept = f.acceptance(quote, 'race-accept', 2);
+  const accepted = await Promise.all([a.command(accept), b.command(accept)]); assert.deepEqual(accepted[0], accepted[1]);
+  const rows = await f.rows(); assert.equal(rows.customer_project_workspaces.length, 1); assert.equal(rows.customer_project_events.length, 3); assert.equal(rows.idempotency.length, 3);
+});
+
+test('Customer project durable SQLite rolls back every failed transaction position', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const before = await f.rows();
+  for (let position = 0; position <= 5; position += 1) {
+    const database = { get: (...args) => f.db.get(...args), atomic: (statements) => f.db.atomic([...statements.slice(0, position), { sql: 'INSERT INTO deliberately_missing_test_table VALUES(1)' }, ...statements.slice(position)]) };
+    const api = f.make({ database });
+    await assert.rejects(api.command(f.command('SUBMIT_REQUEST', `failed-sub-${position}`, 0, f.request)));
+    assert.deepEqual(await f.rows(), before);
+  }
+  const api = f.make(); await api.command(f.command('SUBMIT_REQUEST', 'after-failed', 0, f.request));
+  assert.equal((await api.read()).storageVersion, 1);
+});
+
+test('Customer project durable SQLite recovers a committed response after transport loss', async (t) => {
+  const f = await durableCustomerProjectFixture(t); let committed = 0;
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) { await f.db.atomic(statements); committed += 1; throw new Error('SIMULATED_LOST_RESPONSE_AFTER_COMMIT'); } };
+  const api = f.make({ database }); const command = f.command('SUBMIT_REQUEST', 'lost-submit', 0, f.request);
+  const result = await api.command(command); assert.equal(committed, 1);
+  f.reopen(); assert.deepEqual(await f.make().command(command), result); assert.equal((await f.rows()).idempotency.length, 1);
+});
+
+test('Customer project durable SQLite uses trusted Account Player binding and isolated event sequences', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const api = f.make();
+  const a = await api.command(f.command('SUBMIT_REQUEST', 'tenant-sub1', 0, f.request));
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B' });
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_BINDING_REQUIRED');
+  await durableCustomerRejects(api.command(f.command('SUBMIT_REQUEST', 'tenant-sub1', 0, f.request)), 'CUSTOMER_PROJECT_BINDING_REQUIRED');
+  f.setPrincipal({ playerId: 'TEST-PLAYER-B' });
+  const b = await api.command(f.command('SUBMIT_REQUEST', 'tenant-sub1', 0, f.request));
+  assert.notEqual(a.result.requestId, b.result.requestId);
+  const events = (await f.rows()).customer_project_events; assert.equal(events.length, 2); assert.deepEqual(events.map((e) => e.sequence), [1, 1]);
+  f.setPrincipal({ active: false }); await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+});
+
+test('Customer project durable SQLite rejects missing cache and unused replay observations', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare();
+  const saved = await f.rows();
+  await f.db.atomic([f.stmt('DELETE FROM idempotency WHERE key=?', 'durable-sub1')]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+  const old = saved.idempotency.find((r) => r.key === 'durable-sub1');
+  await f.db.atomic([f.stmt('INSERT INTO idempotency VALUES(?,?,?,?,?,?)', old.scope, old.key, old.request_hash, old.response, old.status, old.created_at)]);
+  const row = saved.customer_project_workspaces[0], envelope = JSON.parse(row.payload);
+  envelope.operations[0].clocks.push(1000);
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=? WHERE workspace_id=?', f.canonical(envelope), await f.hash(envelope), row.workspace_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_REPLAY_OBSERVATION');
+});
+
+test('Customer project durable SQLite keeps snapshot reads coherent during another commit', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const writer = f.make({ database: f.open() });
+  const submitted = await writer.command(f.command('SUBMIT_REQUEST', 'coherent-sub', 0, f.request));
+  let interleaved = false;
+  const database = { async get(...args) {
+    const captured = await f.db.get(...args);
+    if (!interleaved) { interleaved = true; await writer.command(f.command('ISSUE_SIMULATED_QUOTE', 'coherent-quo', 1, { requestRevision: 1 })); }
+    return captured;
+  }, atomic: (...args) => f.db.atomic(...args) };
+  const reader = f.make({ database });
+  assert.deepEqual(await reader.command(f.command('SUBMIT_REQUEST', 'coherent-sub', 0, f.request)), submitted);
+  assert.equal(interleaved, true); assert.equal((await reader.read()).storageVersion, 2);
+});
+
+test('Customer project durable SQLite rolls back partial acceptance at every statement', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { acceptance } = await f.prepare(); const before = await f.rows();
+  for (let position = 0; position <= 5; position += 1) {
+    const database = { get: (...args) => f.db.get(...args), atomic: (statements) => f.db.atomic([...statements.slice(0, position), { sql: 'INSERT INTO deliberately_missing_acceptance_table VALUES(1)' }, ...statements.slice(position)]) };
+    await assert.rejects(f.make({ database }).command(acceptance));
+    assert.deepEqual(await f.rows(), before);
+  }
+  const committed = await f.make().command(acceptance); assert.equal(committed.result.status, 'ACCEPTED_SIMULATION_PLAN');
+  assert.equal((await f.make().read()).state.revision, 3);
+});
+
+test('Customer project durable SQLite blocks revoked or switched identities during asynchronous work', async (t) => {
+  const f = await durableCustomerProjectFixture(t); let releasePlan, enteredPlan;
+  const started = new Promise((r) => { enteredPlan = r; }), gate = new Promise((r) => { releasePlan = r; });
+  const api = f.make({ quotePlanner: { async plan() { enteredPlan(); await gate; return structuredClone(f.plan); } } });
+  await api.command(f.command('SUBMIT_REQUEST', 'identity-sub', 0, f.request)); const before = await f.rows();
+  const pending = api.command(f.command('ISSUE_SIMULATED_QUOTE', 'identity-quo', 1, { requestRevision: 1 }));
+  await started; f.setPrincipal({ active: false }); releasePlan();
+  await durableCustomerRejects(pending, 'CUSTOMER_PROJECT_IDENTITY_REQUIRED'); assert.deepEqual(await f.rows(), before);
+  f.setPrincipal({ active: true }); let releaseRead, enteredRead;
+  const readStarted = new Promise((r) => { enteredRead = r; }), readGate = new Promise((r) => { releaseRead = r; });
+  const database = { async get(...args) { const result = await f.db.get(...args); enteredRead(); await readGate; return result; }, atomic: (...args) => f.db.atomic(...args) };
+  const read = f.make({ database }).read(); await readStarted;
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' }); releaseRead();
+  await durableCustomerRejects(read, 'CUSTOMER_PROJECT_WRONG_CUSTOMER'); assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer project durable SQLite rejects extra cache rows and mismatched response payloads', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare(); const original = await f.rows();
+  const record = original.idempotency[0];
+  await f.db.atomic([f.stmt('INSERT INTO idempotency VALUES(?,?,?,?,?,?)', record.scope, 'extra-cache-row', record.request_hash, record.response, 200, record.created_at)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+  await f.db.atomic([f.stmt('DELETE FROM idempotency WHERE key=?', 'extra-cache-row'), f.stmt('UPDATE idempotency SET response=? WHERE scope=? AND key=?', '{}', record.scope, record.key)]);
+  await durableCustomerRejects(api.command(f.command('SUBMIT_REQUEST', 'durable-sub1', 0, f.request)), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+});
+
+test('Customer project durable SQLite rejects missing or extra events and protects event immutability', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare();
+  const original = await f.rows(); const first = original.customer_project_events[0];
+  await assert.rejects(f.db.atomic([f.stmt('UPDATE customer_project_events SET payload=? WHERE event_id=?', '{}', first.event_id)]), /CUSTOMER_PROJECT_IMMUTABLE_EVENT/);
+  await assert.rejects(f.db.atomic([f.stmt('DELETE FROM customer_project_events WHERE event_id=?', first.event_id)]), /CUSTOMER_PROJECT_IMMUTABLE_EVENT/);
+  await f.db.atomic([f.stmt('INSERT INTO customer_project_events VALUES(?,?,?,?,?)', first.workspace_id, 99, 'TEST-EXTRA-EVENT', '{}', 'a'.repeat(64))]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+  // Fault injection only in this disposable fixture, never an applied migration.
+  f.db.db.exec('DROP TRIGGER customer_project_event_no_delete');
+  await f.db.atomic([f.stmt('DELETE FROM customer_project_events WHERE sequence=99'), f.stmt('DELETE FROM customer_project_events WHERE event_id=?', first.event_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+});
+
+test('Customer project durable SQLite rejects unused planner records and changed replay commands', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api } = await f.prepare();
+  const row = (await f.rows()).customer_project_workspaces[0]; const envelope = JSON.parse(row.payload);
+  envelope.operations[0].plan = structuredClone(f.plan);
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=? WHERE workspace_id=?', f.canonical(envelope), await f.hash(envelope), row.workspace_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_REPLAY_OBSERVATION');
+  const changed = JSON.parse(row.payload); changed.operations[0].command.data.quality = 'TAMPERED';
+  changed.operations[0].commandHash = await f.hash(changed.operations[0].command);
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=? WHERE workspace_id=?', f.canonical(changed), await f.hash(changed), row.workspace_id)]);
+  await durableCustomerRejects(api.read(), 'CUSTOMER_PROJECT_PERSISTENCE_CORRUPT');
+});
+
+test('Customer project durable SQLite preserves decision time without claiming commit-before-expiry', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const prepared = await f.prepare();
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) {
+    // A simulated wait after service validation: durability is later than intent.
+    f.setTime(prepared.quote.content.expiresAt + 1); return f.db.atomic(statements);
+  } };
+  const result = await f.make({ database }).command(prepared.acceptance);
+  assert.equal(result.result.status, 'ACCEPTED_SIMULATION_PLAN');
+  const state = (await f.make().read()).state;
+  assert.ok(state.acceptance.acceptedAt < prepared.quote.content.expiresAt);
+  assert.deepEqual(await f.make().command(prepared.acceptance), result);
+});
+
+test('Customer project durable SQLite returns a same-key winner after speculative planner failure', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const a = f.make();
+  await a.command(f.command('SUBMIT_REQUEST', 'planner-sub1', 0, f.request));
+  let entered, release; const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const b = f.make({ database: f.open(), quotePlanner: { async plan() { entered(); await gate; throw new Error('SPECULATIVE_PLANNER_FAILURE'); } } });
+  const command = f.command('ISSUE_SIMULATED_QUOTE', 'planner-race', 1, { requestRevision: 1 });
+  const loser = b.command(command); await started; const winner = await a.command(command); release();
+  assert.deepEqual(await loser, winner); assert.equal((await f.rows()).idempotency.length, 2);
+});
+
+test('Customer project durable SQLite returns a same-key winner when the losing acceptance expires', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api: a, acceptance, quote } = await f.prepare();
+  let entered, release, first = true; const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const connection = f.open();
+  const database = { async get(...args) { const captured = await connection.get(...args); if (first) { first = false; entered(); await gate; } return captured; }, atomic: (...args) => connection.atomic(...args) };
+  const loser = f.make({ database }).command(acceptance); await started;
+  const winner = await a.command(acceptance); f.setTime(quote.content.expiresAt + 1); release();
+  assert.deepEqual(await loser, winner); assert.equal((await a.read()).state.events.length, 3);
+});
+
+test('Customer project durable SQLite CAS prevents lost response-only acceptance journals', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance } = await f.prepare(); await api.command(acceptance);
+  const before = await api.read(); let arrivals = 0, release;
+  const gate = new Promise((r) => { release = r; });
+  const connectionOwner = () => {
+    const db = f.open(); let first = true;
+    return { async get(...args) { const captured = await db.get(...args); if (first) { first = false; if (++arrivals === 2) release(); await gate; } return captured; }, atomic: (...args) => db.atomic(...args) };
+  };
+  const commands = ['journal-noop-a', 'journal-noop-b'].map((idempotencyKey) => ({ ...acceptance, idempotencyKey }));
+  const results = await Promise.allSettled(commands.map((c) => f.make({ database: connectionOwner() }).command(c)));
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+  const loser = results.findIndex((r) => r.status === 'rejected'); assert.equal(results[loser].reason.message, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const middle = await api.read(); assert.equal(middle.storageVersion, before.storageVersion + 1); assert.deepEqual(middle.state.events, before.state.events);
+  await api.command(commands[loser]); const after = await api.read();
+  assert.equal(after.storageVersion, before.storageVersion + 2); assert.equal(after.state.revision, before.state.revision); assert.deepEqual(after.state.events, before.state.events);
+  assert.equal((await f.rows()).idempotency.length, 5);
+});
+
+test('Customer project durable SQLite survives a fresh operating-system process', async (t) => {
+  const f = await durableCustomerProjectFixture(t); const { api, acceptance } = await f.prepare();
+  await api.command(acceptance); const before = await api.read(); f.closeAll();
+  const { execFile } = await import('node:child_process'); const { promisify } = await import('node:util');
+  const script = `
+    import { SQLiteDatabaseAdapter } from ${JSON.stringify(new URL('../KAIOS/backend/src/adapters/local.mjs', import.meta.url).href)};
+    import { createCustomerProjectPersistencePrototype } from ${JSON.stringify(new URL('../KAIOS/backend/src/service.mjs', import.meta.url).href)};
+    const db = new SQLiteDatabaseAdapter(process.argv[1]);
+    try {
+      const api = createCustomerProjectPersistencePrototype({mode:'LOCAL_TEST_ONLY',database:db,
+        identityAdapter:{resolve:()=>({accountId:'TEST-ACCOUNT-A',playerId:'TEST-PLAYER-A',active:true,scope:'SIMULATION_CUSTOMER_CONTEXT'})},
+        quotePlanner:{plan(){throw new Error('NO_LIVE_PLANNER_ON_RESTART')}},now(){throw new Error('NO_LIVE_CLOCK_ON_RESTART')}});
+      process.stdout.write(JSON.stringify(await api.read()));
+    } finally { db.close(); }
+  `;
+  const { stdout } = await promisify(execFile)(process.execPath, ['--input-type=module', '-e', script, f.file], { timeout: 5000, maxBuffer: 1000000 });
+  assert.deepEqual(JSON.parse(stdout), before);
+});

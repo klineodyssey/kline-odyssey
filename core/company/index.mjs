@@ -2969,6 +2969,15 @@ function cpPlan(plan) {
   return total.toString();
 }
 
+// Shared host boundary for local model/persistence prototypes, not authentication.
+export function captureCustomerProjectContext(identityAdapter) {
+  cpFail(typeof identityAdapter?.resolve === "function", "CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED");
+  const result = identityAdapter.resolve(); cpJson(result);
+  cpFields(result, ["accountId", "playerId", "active", "scope"]);
+  cpFail(cpText(result.accountId, 128) && cpText(result.playerId, 128) && result.active === true && result.scope === "SIMULATION_CUSTOMER_CONTEXT", "CUSTOMER_PROJECT_IDENTITY_REQUIRED");
+  return { accountId: result.accountId, playerId: result.playerId };
+}
+
 /** Trusted composition ports are code supplied by the host, never command data.
  * identityAdapter.resolve() synchronously snapshots an active SIMULATION_CUSTOMER_CONTEXT. That
  * context is not an authentication proof; a future backend must authenticate it.
@@ -2983,10 +2992,7 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
     acceptance: null, contract: null, project: null, events: [], commandJournal: [], lastEventHash: null, lastAt: 0 };
   let queue = Promise.resolve();
   function customer() {
-    const result = identityAdapter.resolve(); cpJson(result);
-    cpFields(result, ["accountId", "playerId", "active", "scope"]);
-    cpFail(cpText(result.accountId, 128) && cpText(result.playerId, 128) && result.active === true && result.scope === "SIMULATION_CUSTOMER_CONTEXT", "CUSTOMER_PROJECT_IDENTITY_REQUIRED");
-    const owner = { accountId: result.accountId, playerId: result.playerId };
+    const owner = captureCustomerProjectContext(identityAdapter);
     cpFail(!state.owner || serializeCustomerProject(owner) === serializeCustomerProject(state.owner), "CUSTOMER_PROJECT_WRONG_CUSTOMER");
     return owner;
   }
