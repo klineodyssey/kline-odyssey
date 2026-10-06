@@ -566,6 +566,35 @@ async function publicTestnetBrowserQA(){
 
 // Bind actual browser response bytes, including each real query/cache variant,
 // to the deployment checkout. This never replaces a public application response.
+// Diagnostics only: no raw RPC parameters, response bodies or extra requests.
+function createM1RpcDiagnostics({limit=32,now=()=>Date.now()}={}){
+  const cap=Math.min(32,Math.max(1,Number.isSafeInteger(limit)?limit:32)),recent=[],failures=[];
+  let sequence=0,failureCount=0,droppedFailures=0,lastStarted=null,lastCompleted=null;
+  const read=(value,key)=>{try{return value?.[key]}catch{return undefined}};
+  const code=value=>typeof value==='number'&&Number.isSafeInteger(value)?value:['UNKNOWN_ERROR','SERVER_ERROR','TIMEOUT','NETWORK_ERROR','BAD_DATA','CALL_EXCEPTION','INVALID_ARGUMENT','UNSUPPORTED_OPERATION','ACTION_REJECTED'].includes(value)?value:null;
+  const errorFields=error=>{
+    const rpc=read(error,'error'),message=[read(error,'shortMessage'),read(error,'message'),read(rpc,'message')].filter(x=>typeof x==='string').map(x=>x.slice(0,1024)).join(' ');
+    const category=/rate.?limit|too many requests|429|limit exceeded/i.test(message)?'RATE_LIMIT':/timeout|timed out|ETIMEDOUT/i.test(message)?'TIMEOUT':/decode|invalid json|bad data/i.test(message)?'DATA_SHAPE':/network|socket|connection|ECONN|fetch failed/i.test(message)?'TRANSPORT':'UNCLASSIFIED';
+    const name=read(error,'name');
+    return {errorClass:['Error','TypeError','TimeoutError','AssertionError','RangeError','SyntaxError'].includes(name)?name:'OTHER',code:code(read(error,'code')),rpcCode:code(read(rpc,'code')),category};
+  };
+  const run=async(meta,request,{existingLogFallback=false}={})=>{
+    const started=Object.freeze({sequence:++sequence,method:meta.method,phase:meta.phase,stage:meta.stage,contract:meta.contract||null,
+      selector:/^0x[0-9a-fA-F]{8}$/.test(meta.selector||'')?meta.selector:null,startedAt:now()});lastStarted=started;
+    const finish=outcome=>{lastCompleted=Object.freeze({...started,elapsedMs:Math.max(0,now()-started.startedAt),...outcome});recent.push(lastCompleted);if(recent.length>cap)recent.shift()};
+    try{
+      const result=await request();const kind=result===null?'null':Array.isArray(result)?'array':typeof result;
+      const length=typeof result==='string'||Array.isArray(result)?read(result,'length'):null;
+      finish({ok:true,responseKind:kind,responseLength:Number.isSafeInteger(length)?length:null});return result;
+    }catch(error){
+      finish({ok:false,...errorFields(error),existingLogFallback});
+      failureCount++;failures.push(lastCompleted);if(failures.length>cap){failures.shift();droppedFailures++}
+      throw error; // Preserve original rejection; the caller owns log fallback.
+    }
+  };
+  return Object.freeze({run,snapshot:()=>({failureCount,droppedFailures,lastStarted,lastCompleted,recent:[...recent],failures:[...failures]})});
+}
+
 async function bootM1ReadOnlyPage(page,url){
   await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>globalThis.__K11520_EXECUTION__,null,{timeout:45000});
@@ -639,7 +668,7 @@ async function m1ReadOnlyBrowserQA(){
     }catch(error){await absent.screenshot({path:`${out}/390x844-no-provider-FAILURE.png`});await fs.writeFile(`${out}/no-provider-FAILURE.json`,JSON.stringify({message:String(error.message)},null,2));throw error}finally{await absent.close()}
     for(const [width,height]of[[360,740],[390,844],[412,772],[432,856],[480,900],[844,390]]){
       const state={account:accounts[width===390?0:1],chain:'0x1',connected:true},methods=[],forbidden=[],errors=[],phaseCounts={M1:{},LEGACY:{},INITIAL:{}};let logFallbacks=0,phase='INITIAL';
-      const consoleErrors=[],requestFailures=[];let stage='BOOT';
+      const consoleErrors=[],requestFailures=[],evidence=[],rpcDiagnostics=createM1RpcDiagnostics();let stage='BOOT';
       const safeText=value=>String(value).replace(/https?:\/\/[^\s"']+/g,url=>{try{return new URL(url).origin}catch{return '[URL]'}});
       const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});page.setDefaultTimeout(20000);
       const finishPublicSource=publicSource?attachM1PageSourceProof(page,{base,...publicSource,createHash}):null;
@@ -655,8 +684,10 @@ async function m1ReadOnlyBrowserQA(){
         if(method==='wallet_switchEthereumChain'){assert.equal(params[0]?.chainId,'0x61');state.chain='0x61';return null}
         assert.ok(['eth_getBalance','eth_call','eth_getCode','eth_getStorageAt','eth_blockNumber','eth_getLogs','eth_getTransactionReceipt','eth_getBlockByNumber'].includes(method),'read-only RPC allowlist');
         if(method==='eth_call')assert.ok(allowedAddresses.has(params[0].to.toLowerCase()));
-        if(method==='eth_getLogs'){assert.ok(allowedAddresses.has(params[0].address.toLowerCase()));try{return await provider.send(method,params)}catch{logFallbacks++;return []}}
-        return provider.send(method,params);
+        const target=['eth_getCode','eth_getStorageAt'].includes(method)?params[0]:params[0]?.to||params[0]?.address,contract=target?['LEGACY','M1'].flatMap(label=>Object.entries(label==='LEGACY'?manifest.addresses:candidate.addresses).filter(([,address])=>address.toLowerCase()===target.toLowerCase()).map(([name])=>label+'.'+name)).join('|'):null;
+        const meta={method,phase,stage,contract,selector:method==='eth_call'?params[0]?.data?.slice(0,10):null};
+        if(method==='eth_getLogs'){assert.ok(allowedAddresses.has(params[0].address.toLowerCase()));try{return await rpcDiagnostics.run(meta,()=>provider.send(method,params),{existingLogFallback:true})}catch{logFallbacks++;return []}}
+        return rpcDiagnostics.run(meta,()=>provider.send(method,params));
       });
       await page.addInitScript(()=>{const listeners=new Map();window.__m1WalletEvents={emit:(name,value)=>{for(const fn of listeners.get(name)||[])fn(value)}};window.ethereum={request:async args=>{const result=await window.__m1ReadBroker(args);if(args.method==='wallet_switchEthereumChain')window.__m1WalletEvents.emit('chainChanged','0x61');return result},on:(n,f)=>{if(!listeners.has(n))listeners.set(n,new Set());listeners.get(n).add(f)},removeListener:(n,f)=>listeners.get(n)?.delete(f)};if(!sessionStorage.getItem('k11520.execution-mode'))sessionStorage.setItem('k11520.execution-mode','SIMULATION')});
       const snap=()=>page.evaluate(()=>globalThis.__K11520_EXECUTION__?.snapshot()??null),shot=name=>page.screenshot({path:`${out}/${width}x${height}-${name}.png`});
@@ -692,7 +723,7 @@ async function m1ReadOnlyBrowserQA(){
         await boot(page);await wallet();await page.locator('#walletConnect').click();await page.waitForFunction(()=>!document.querySelector('#walletM1ReadOnly').disabled);
         const legacyPreference=await page.evaluate(()=>sessionStorage.getItem('k11520.execution-mode'));
         phase='M1';await page.locator('#walletM1ReadOnly').click();await page.waitForFunction(()=>__K11520_EXECUTION__.snapshot().readOnly&&__K11520_EXECUTION__.snapshot().status==='WRONG_CHAIN');assert.equal((await snap()).wallet,null);await shot('wrong-chain');
-        await page.locator('#testnetSwitch').click();const evidence=[await verify(state.account)];await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('connected');stage='ACCOUNT_SWITCH';
+        await page.locator('#testnetSwitch').click();evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('connected');stage='ACCOUNT_SWITCH';
         state.account=state.account.toLowerCase()===accounts[0].toLowerCase()?accounts[1]:accounts[0];await page.evaluate(a=>__m1WalletEvents.emit('accountsChanged',[a]),state.account);
         evidence.push(await verify(state.account));await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('account-switched');stage='RELOAD';
         await page.reload({waitUntil:'domcontentloaded'});evidence.push(await verify(state.account));await page.locator('#intro11520').waitFor({state:'hidden'});await wallet();await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});await shot('reloaded');stage='DISCONNECT';
@@ -712,9 +743,9 @@ async function m1ReadOnlyBrowserQA(){
         await page.locator('#walletToggle').click();await page.waitForFunction(()=>document.querySelector('#walletPanel').classList.contains('collapsed')&&getComputedStyle(document.querySelector('#dock')).display!=='none');
         for(const selector of ['#dock','#aiChatButton','#chatHandle','#bgmButton','#backpackButton'])assert.equal(await page.locator(selector).isVisible(),true,'wallet close restores peer '+selector);await shot('wallet-close-restores-tray');
         const publicBrowserSource=finishPublicSource?await finishPublicSource():null;
-        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({publicBrowserSource,viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
+        assert.deepEqual(forbidden,[]);assert.deepEqual(errors,[]);results.push({rpcDiagnostics:rpcDiagnostics.snapshot(),publicBrowserSource,viewport:[width,height],functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',mode:'ACTUAL_BSC97_READS_SYNTHETIC_EIP1193',humanMetaMask:'NOT_VERIFIED',signedTransactions:0,legacyPreferencePreserved:true,legacyExitEvidence,walletCloseRestoresPeers:true,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,m1HistoryRequests:0,evidence,methods:[...new Set(methods)]});
         await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify(results.at(-1),null,2));
-      }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,forbidden,errors,consoleErrors,requestFailures,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
+      }catch(e){await shot('FAILURE').catch(()=>{});const snapshot=await snap().catch(()=>null);await fs.writeFile(`${out}/${width}x${height}-FAILURE.json`,JSON.stringify({stage,message:safeText(e.message),stack:safeText(e.stack||e),snapshot,forbidden,errors,consoleErrors,requestFailures,phaseCounts,legacyHistoryLogFallbacks:logFallbacks,rpcDiagnostics:rpcDiagnostics.snapshot(),evidence,methods:[...new Set(methods)]},null,2));throw e}finally{await page.close()}
     }
     console.log('M1 signer-free public BSC97 read-only browser PASS; Human MetaMask NOT_VERIFIED');
   }finally{await browser.close();provider.destroy()}

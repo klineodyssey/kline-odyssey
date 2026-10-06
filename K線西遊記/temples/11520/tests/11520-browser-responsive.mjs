@@ -40,6 +40,32 @@ const skillFixture={key:PLAYER_LIFE_STORAGE_KEY,encoded:skillStorage.get(PLAYER_
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourceSha=bytes=>sha(Buffer.from(Buffer.from(bytes).toString('utf8').replace(/\r\n?/g,'\n'),'utf8'));
 // Default-policy coverage is separate from the existing FULL HUD geometry suite.
+async function clickWorldFirstMinimap(page,result){
+  // Follow closes the sheet synchronously, but its exit transition still owns
+  // hit testing. Await dismissal, then let native locator actionability apply.
+  await page.locator('#sheet').waitFor({state:'hidden'});
+  const minimap=page.locator('#minimap');
+  assert.equal(await minimap.getAttribute('data-coordinate-space'),'XYZ');
+  assert.equal(await page.evaluate(()=>globalThis.__K11520_PLANE_MAP__?.mode),'XZ');
+  const box=await minimap.boundingBox();
+  assert.ok(box&&box.width>0&&box.height>0,'minimap must have rendered dimensions');
+  result.mapInput={box,position:{x:box.width*.85,y:box.height*.8}};
+  await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[]});
+  try{
+    await minimap.click({position:result.mapInput.position});
+  }finally{
+    result.mapInput.delivery=await page.evaluate(()=>({events:globalThis.worldFirstPointerTrace||[],plane:globalThis.__K11520_PLANE_MAP__?.mode,coordinateSpace:document.querySelector('#minimap')?.dataset.coordinateSpace,sheetOpen:document.querySelector('#sheet')?.classList.contains('open'),waypoint:!!document.querySelector('#waypointAction'),alternateWaypoint:!!document.querySelector('#xyzWaypointAction')})).catch(()=>null);
+  }
+  assert.ok(result.mapInput.delivery,'minimap delivery evidence must be readable');
+  const events=result.mapInput.delivery.events.filter(e=>e.type==='pointerdown'||e.type==='pointerup');
+  assert.equal(events.length,2,'one native minimap down/up pair must be delivered');
+  assert.equal(events[0].type,'pointerdown');
+  assert.equal(events[1].type,'pointerup');
+  assert.ok(events.every(e=>e.target==='minimap'&&e.isTrusted),'native pointer delivery must belong to minimap');
+  assert.equal(events[0].id,events[1].id,'minimap pointer identity must remain paired');
+  assert.equal(result.mapInput.delivery.plane,'XZ');
+  assert.equal(result.mapInput.delivery.coordinateSpace,'XYZ');
+}
 async function verifyWorldFirst(){
   const results=[];
   for(const profile of selectedProfiles){
@@ -94,7 +120,7 @@ async function verifyWorldFirst(){
       const point=await page.evaluate(()=>{const canvas=document.querySelector('#three'),r=canvas.getBoundingClientRect();for(let y=r.top+80;y<r.bottom-80;y+=12)for(let x=r.left+80;x<r.right-80;x+=12)if(globalThis.__K11520_CAMERA__.isWorldGestureArea(x,y,10)&&[[60,0],[-60,0],[0,60],[0,-60]].every(([dx,dy])=>document.elementFromPoint(x+dx,y+dy)===canvas))return{x,y};return null});
       assert.ok(point,'an unobstructed world gesture surface must exist');
       const start=await read(),{x,y}=point;
-      await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
+      await page.evaluate(()=>{globalThis.worldFirstPointerTrace=[];for(const type of ['pointerdown','pointermove','pointerup','pointercancel'])document.addEventListener(type,e=>{if(worldFirstPointerTrace.length<30)worldFirstPointerTrace.push({type,id:e.pointerId,target:e.target.id,isTrusted:e.isTrusted,x:e.clientX,y:e.clientY,button:e.button,canPan:__K11520_CAMERA__.canPanAt(e.clientX,e.clientY)})},true)});
       const directions=[];
       for(const [name,dx,dy,screenAxis,sign] of [['right',60,0,'x',1],['left',-60,0,'x',-1],['down',0,60,'y',1],['up',0,-60,'y',-1]]){
         if(await page.locator('#k11520CameraReset').isVisible())await page.locator('#k11520CameraReset').click();
@@ -187,8 +213,7 @@ async function verifyWorldFirst(){
         await page.locator('#k11520FollowMonster').click();await page.locator('#k11520MonsterGuide').click();await page.locator('#monsterFollowAction').click();
         result.checks.followSwitch='ACTUAL WORLD TAP / SWITCH / CANCEL PASS';
       }
-      assert.equal(await page.locator('#minimap').getAttribute('data-coordinate-space'),'XYZ');
-      const map=await page.locator('#minimap').boundingBox();await page.mouse.click(map.x+map.width*.85,map.y+map.height*.8);
+      await clickWorldFirstMinimap(page,result);
       await page.locator('#waypointAction').waitFor({state:'visible'});await page.locator('#waypointAction').click();
       await page.waitForFunction(old=>Math.hypot(globalThis.__K11520_CAMERA__.snapshot().playerXYZ.x-old.x,globalThis.__K11520_CAMERA__.snapshot().playerXYZ.z-old.z)>.5,start.playerXYZ);
       // Canonical joystick remains the movement owner and cancels waypoint navigation.

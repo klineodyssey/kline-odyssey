@@ -124,7 +124,7 @@ jobs:
   responsive:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v7
         with:
@@ -185,16 +185,51 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   m1-public-readonly:
-    # Explicit release verification only: no automatic deployment fan-out.
-    # The existing production dispatch runs general public QA first, then M1.
+    # One bounded read-only check after each successful Pages deployment.
+    # Includes docs-only deployments; no cached PASS or once-per-SHA claim.
     needs: responsive
-    if: github.event_name == 'workflow_dispatch' && inputs.production == true
+    if: (github.event_name == 'workflow_dispatch' && inputs.production == true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
+      - name: Resolve trusted public M1 source
+        id: source
+        shell: bash
+        run: |
+          python3 - <<'PYSOURCE'
+          import json, os, re
+          from pathlib import Path
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          repo = 'klineodyssey/kline-odyssey'
+          assert os.environ['GITHUB_REPOSITORY'] == repo, 'UNTRUSTED_REPOSITORY'
+          assert event.get('repository', {}).get('full_name') == repo, 'UNTRUSTED_EVENT_REPOSITORY'
+          kind = os.environ['GITHUB_EVENT_NAME']
+          if kind == 'workflow_run':
+              run = event.get('workflow_run', {})
+              assert run.get('status') == 'completed' and run.get('conclusion') == 'success', 'PAGES_NOT_SUCCESSFUL'
+              assert run.get('event') in ('push', 'workflow_dispatch'), 'PAGES_VALIDATION_IS_NOT_DEPLOYMENT'
+              workflow = event.get('workflow') or {}
+              assert workflow.get('name') == 'Deploy Pages Static' and workflow.get('path') == '.github/workflows/deploy-pages-static.yml', 'UNTRUSTED_PAGES_WORKFLOW'
+              assert type(workflow.get('id')) is int and workflow['id'] > 0 and type(run.get('workflow_id')) is int and workflow['id'] == run['workflow_id'], 'PAGES_WORKFLOW_ID_MISMATCH'
+              assert run.get('head_branch') == 'main', 'PAGES_NOT_MAIN'
+              assert run.get('head_repository', {}).get('full_name') == repo and run.get('repository', {}).get('full_name') == repo, 'UNTRUSTED_PAGES_REPOSITORY'
+              sha = run.get('head_sha')
+          elif kind == 'workflow_dispatch':
+              production = event.get('inputs', {}).get('production')
+              assert production is True or production == 'true', 'PUBLIC_QA_NOT_REQUESTED'
+              assert os.environ['GITHUB_REF'] == 'refs/heads/main', 'PUBLIC_QA_NOT_MAIN'
+              sha = os.environ['GITHUB_SHA']
+          else:
+              raise AssertionError('UNSUPPORTED_PUBLIC_QA_EVENT')
+          assert isinstance(sha, str) and re.fullmatch(r'[0-9a-f]{40}', sha), 'INVALID_SOURCE_SHA'
+          workflow_sha = os.environ['GITHUB_WORKFLOW_SHA']
+          assert re.fullmatch(r'[0-9a-f]{40}', workflow_sha), 'INVALID_WORKFLOW_DEFINITION_SHA'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write(f'sha={sha}\nworkflow_sha={workflow_sha}\n')
+          PYSOURCE
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ steps.source.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -206,7 +241,7 @@ jobs:
       - name: Verify public source and six-size current wallet identities
         env:
           K11520_BASE_URL: https://klineodyssey.github.io/kline-odyssey
-          K11520_SOURCE_SHA: ${{ github.sha }}
+          K11520_SOURCE_SHA: ${{ steps.source.outputs.sha }}
           BSC_TESTNET_RPC_URL: https://bsc-testnet-dataseed.bnbchain.org
         run: |
           set -euo pipefail
@@ -232,7 +267,7 @@ jobs:
           assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == expected, 'CHECKOUT_SOURCE_MISMATCH'
           root = Path('artifacts/11520-m1-readonly-qa')
           root.mkdir(parents=True, exist_ok=True)
-          report = {'sourceSha': expected, 'phase': args.phase, 'base': base, 'assets': [], 'status': 'PENDING'}
+          report = {'sourceSha': expected, 'workflowDefinitionSha': os.environ.get('GITHUB_WORKFLOW_SHA'), 'sourceEvent': os.environ.get('GITHUB_EVENT_NAME'), 'phase': args.phase, 'base': base, 'assets': [], 'status': 'PENDING'}
 
           def read_public(path):
               with urlopen(base + '/' + quote(path, safe='/'), timeout=30) as response:
@@ -277,7 +312,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: 11520-public-m1-${{ github.sha }}-${{ github.event_name }}
+          name: 11520-public-m1-${{ steps.source.outputs.sha || 'unverified-source' }}-${{ github.event_name }}
           path: artifacts/11520-m1-readonly-qa/
           if-no-files-found: error
           retention-days: 14
