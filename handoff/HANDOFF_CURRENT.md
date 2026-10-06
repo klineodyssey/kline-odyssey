@@ -2473,3 +2473,198 @@ The 117,042-byte Navigator archive remains PARTIAL_RECOVERY only. Support invest
   "NORMAL_ENGINEERING_BLOCKED_BY_FREEZE": false
 }
 ```
+
+## Final recovery check and conditional reconstruction deadline — 2026-10-06
+
+Human's 20:25:05 UTC decision is FINAL_RECOVERY_CHECK_THEN_RECONSTRUCT. The final bounded 20:26 check established ORIGINAL_DELTA_NOT_RECOVERED for all six named original deltas; it did not establish permanent loss or a complete original restoration. Known surviving base directories are not verified original worktrees, whose paths remain UNKNOWN. The 117,042-byte Navigator archive is still readable and remains PARTIAL_RECOVERY only.
+
+The deadline is 2026-10-07 02:19 UTC / 10:19 UTC+8. If OpenAI has not supplied actually usable original workspace/files by then, the Human instruction ends RECOVERY_FREEZE and authorizes missing-delta reconstruction without waiting indefinitely for support. No reconstruction starts in this checkpoint or automatically before that deadline. Normal READY work continues. The required four-function inventory, source comparison, priority order, bounded concurrency and early commit/push requirements are recorded below; reconstructed code must not be represented as restored original code.
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "EVENT": "FINAL_RECOVERY_CHECK_THEN_CONDITIONAL_RECONSTRUCTION",
+  "SOURCE_MESSAGE_ID": "Sentinel_15a4762dea9081918894cbcfd0329545",
+  "SOURCE_TIME": "2026-10-06T20:25:05Z",
+  "RECORDED_AT": "2026-10-06T20:29:11Z",
+  "SOURCE_HEAD": "b4511bd60a58bbe6445b3bd1a0d08852bd9d3173",
+  "OBSERVED_MAIN": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+  "BRANCH": "dot/engineering-handbook-20261006",
+  "PR": 516,
+  "BOOT_SYNC": {
+    "scope": "Bounded read refresh, not formal admission or full Company layer execution",
+    "boot_current_blob": "b85c9a34a81810e0063480092025a9ef02d456cc",
+    "company_boot_blob": "c58eddb13da0a3ee520202f253290f560f368f04",
+    "company_manifest_blob": "18a1b5fc3fd9d8bdcc9a3c8a3725a13221a49d65",
+    "agents_blob": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d",
+    "physics_current_blob": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc",
+    "physics_scope": "Sections235-236 read only; no new Physics or Boot rule"
+  },
+  "FINAL_CHECK": {
+    "commit_diff_at": "2026-10-06T20:26:07Z/2026-10-06T20:26:08Z",
+    "git_commit_and_tree_at": "2026-10-06T20:26:15Z",
+    "scope": "Named original commit/diff, Git commit and known tree endpoints only; results supplied by the completed bounded read-only check, not rerun by this writer",
+    "originals": [
+      {
+        "WORK_ID": "C-M2-LOCAL-PREREQUISITES",
+        "candidate": "M2",
+        "sha": "acdd1817d7f191e53a3cd079dc2d8b944c9db0dc",
+        "tree": "c009c81a8e13fb7904333e1253f4ef1c2677564c",
+        "STATUS": "ORIGINAL_DELTA_NOT_RECOVERED",
+        "commit_diff_http": 422,
+        "git_commit_http": 404,
+        "git_tree_http": 404,
+        "related_results": "NOT_APPLICABLE",
+        "original_worktree": "UNKNOWN"
+      },
+      {
+        "WORK_ID": "F-SCENERY-ORIGINAL-GEOMETRY",
+        "candidate": "Original 3D scenery",
+        "sha": "d27364e138577c6c7c32547de4c5140469f591dc",
+        "tree": "89863fc579ca85bdc059a96f77e91de8e9e85977",
+        "STATUS": "ORIGINAL_DELTA_NOT_RECOVERED",
+        "commit_diff_http": 422,
+        "git_commit_http": 404,
+        "git_tree_http": 404,
+        "related_results": "NOT_APPLICABLE",
+        "original_worktree": "UNKNOWN"
+      },
+      {
+        "WORK_ID": "A-PLAYER-STRUCTURAL-STARTUP",
+        "candidate": "Player Life follow-up",
+        "sha": "2cdf30d5fc7b026d95169e6ef52d689c7e7c852c",
+        "tree": "171762a4b87256ae0dd4b316b1a7a4846718aeab",
+        "related_originals": [
+          {
+            "sha": "218a4a35d07045c75b90ef4a3d663f536183adf9",
+            "tree": "84d0804d800a9df249479b2f74493a68ea6152ca"
+          },
+          {
+            "sha": "57afd528c29a928176fc43c6302c11a64acd97fd",
+            "tree": "7d84434ad8c5f959c181b9d3d0c6e23ce4b895b9"
+          }
+        ],
+        "STATUS": "ORIGINAL_DELTA_NOT_RECOVERED",
+        "commit_diff_http": 422,
+        "git_commit_http": 404,
+        "git_tree_http": 404,
+        "related_results": "Same commit/diff422, Git commit404 and known tree404",
+        "original_worktree": "UNKNOWN"
+      },
+      {
+        "WORK_ID": "F-NAVIGATOR-MOTION",
+        "candidate": "Full Navigator",
+        "sha": "a021e5e556a18df13d124e99fb9a75d751998bbd",
+        "tree": "ae216d9489221b7f65d29b6c8fe626427fd4834a",
+        "related_originals": [
+          {
+            "sha": "2642c430882c18795f63fc99c3b3fb05346f3c37",
+            "tree": "97fabd701245d184ced9648bfa19f9408a7bc512"
+          }
+        ],
+        "STATUS": "ORIGINAL_DELTA_NOT_RECOVERED",
+        "commit_diff_http": 422,
+        "git_commit_http": 404,
+        "git_tree_http": 404,
+        "related_results": "Same commit/diff422, Git commit404 and known tree404",
+        "original_worktree": "UNKNOWN"
+      },
+      {
+        "WORK_ID": "F-AXE-FEEDBACK-INCREMENT",
+        "candidate": "Compact-Axe increment",
+        "sha": "dcf7b69fbc499f998c4223816a8356a2ff8fd71f",
+        "tree": null,
+        "STATUS": "ORIGINAL_DELTA_NOT_RECOVERED",
+        "commit_diff_http": 422,
+        "git_commit_http": 404,
+        "git_tree_http": "NOT_CHECKED_ORIGINAL_TREE_ID_UNKNOWN",
+        "related_results": "NOT_APPLICABLE",
+        "original_worktree": "UNKNOWN"
+      },
+      {
+        "WORK_ID": "C-LEGACY-488-HARDENING",
+        "candidate": "Legacy finance hardening",
+        "sha": "e7b9bf82aba5373ba4173efe6a3af563fc582f8f",
+        "tree": null,
+        "STATUS": "ORIGINAL_DELTA_NOT_RECOVERED",
+        "commit_diff_http": 422,
+        "git_commit_http": 404,
+        "git_tree_http": "NOT_CHECKED_ORIGINAL_TREE_ID_UNKNOWN",
+        "related_results": "NOT_APPLICABLE",
+        "original_worktree": "UNKNOWN"
+      }
+    ],
+    "workspace_checks": {
+      "known_surviving_bases": 2,
+      "checked_at": "2026-10-06T20:26:33Z/2026-10-06T20:26:54Z",
+      "results": "Both known bases reported not a Git repository; exact Git HEAD/objects and root Boot markers absent",
+      "original_candidate_worktree_paths": "UNKNOWN",
+      "meaning": "Known bases are not verified original worktrees; these results do not prove absence elsewhere or a cause for environment lifecycle changes"
+    },
+    "complete_original_restore_established": false,
+    "permanent_loss_claim": false,
+    "tests_run": false,
+    "windows_access": false,
+    "broad_scan": false
+  },
+  "NAVIGATOR_PARTIAL": {
+    "STATUS": "PARTIAL_RECOVERY",
+    "verified_at": "2026-10-06T20:26:24Z",
+    "branch": "dot/recovery-navigator-blob-20261006",
+    "head": "066e92390d4429a92b33016bfc1c58b3166dc168",
+    "blob": "65350fe6569059212f7ccc5b911605a123c3dc5e",
+    "bytes": 117042,
+    "readable": true,
+    "whole_original_candidate_restored": false
+  },
+  "DEADLINE": {
+    "utc": "2026-10-07T02:19:00Z",
+    "human_time": "2026-10-07 10:19 UTC+8",
+    "condition": "If OpenAI has not provided actually usable original workspace/files by the deadline, RECOVERY_FREEZE ends and missing-delta RECONSTRUCTION is authorized",
+    "before_deadline": "No automatic reconstruction before the deadline; keep normal READY engineering work moving",
+    "current_reconstruction_started": false,
+    "human_decision_required_for_this_authorized_reconstruction": "NO",
+    "scope_boundary": "This conditional engineering authorization does not permit Mainnet transactions or expand protected execution authority"
+  },
+  "RECONSTRUCTION_PLAN": {
+    "required_sources": [
+      "Latest CURRENT main at the time work starts",
+      "Preserved GitHub parent lineage",
+      "Boot and CURRENT Canon",
+      "Existing tests",
+      "Old engineering reports",
+      "Screenshots and artifacts",
+      "Partial recovered source"
+    ],
+    "required_precheck_fields": [
+      "PRESERVED_FUNCTIONS",
+      "MISSING_FUNCTIONS",
+      "PARTIAL_FUNCTIONS",
+      "TESTED_FUNCTIONS"
+    ],
+    "implementation_scope": "Only missing delta; label reconstruction distinctly from original-source restoration",
+    "navigator_precheck": "Compare partial recovered source against current main and UniverseMap CURRENT before defining missing delta",
+    "priority": [
+      "P1 Full Navigator",
+      "P2 M2",
+      "P3 Player Life follow-up",
+      "P4 3D scene",
+      "P5 Finance e7b9bf82",
+      "P6 Compact-Axe dcf7b69f"
+    ],
+    "resource_rule": "Dependency/worker availability may adjust parallel order; do not run six heavy reconstructions at once",
+    "checkpoint_rule": "Every meaningful bounded checkpoint: COMMIT -> PUSH dedicated branch -> RECORD SHA; no important LOCAL-ONLY candidate",
+    "MAINNET_TX": "NO"
+  },
+  "SUPPORT_CONTEXT": "Human states OpenAI Support recovery investigation continues; source availability remains uncertain rather than permanently lost",
+  "HISTORICAL_LEDGER": "Existing 28-item snapshot, earlier decisions and all previous bytes retained; this is a later conditional decision/check receipt",
+  "EVIDENCE_LINKS": [
+    "https://github.com/klineodyssey/kline-odyssey/blob/b4511bd60a58bbe6445b3bd1a0d08852bd9d3173/handoff/HANDOFF_CURRENT.md",
+    "https://github.com/klineodyssey/kline-odyssey/commit/066e92390d4429a92b33016bfc1c58b3166dc168"
+  ],
+  "PUBLICATION": "Containing commit; PUSHED only after exact remote ref/tree/content readback, recorded in PR516 body",
+  "DATA_LOSS_RISK": "Original deltas remain unavailable in the checked sources; original worktrees are unknown. No permanent-loss or completed-restoration claim. This decision/evidence checkpoint becomes durable only after verified push.",
+  "THIS_ACTION": "Documentation-only append; no source restoration, reconstruction, runtime tests, heavy scan, Windows access, main write, merge, deployment or financial action"
+}
+```
