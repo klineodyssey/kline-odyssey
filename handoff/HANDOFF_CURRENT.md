@@ -249,3 +249,129 @@ Human's 13:28:54 UTC order is recorded cumulatively in the [existing engineering
   "NEXT_ACTION": "Append superseding inventory after exact remote refs/tree/blob and surviving artifact checks; preserve original identifiers and evidence limits"
 }
 ```
+
+## Partial expanded-ledger checkpoint: bounded source inventory — 2026-10-06
+
+This updates the earlier source-recovery observations only. The Human-requested expanded 30-hour work-item ledger remains incomplete and is not replaced by this revision inventory. The underlying historical checkpoint text is retained. Source-tree equivalence preserves source bytes, not original local commit metadata, whole-product completion or historical test acceptance. `LOST_OR_NOT_VERIFIED` means not recovered from the checked sources; it does not prove global or permanent loss. No new parent work IDs or implementation owners are created.
+
+[Verified inert Navigator archive and provenance](https://github.com/klineodyssey/kline-odyssey/blob/066e92390d4429a92b33016bfc1c58b3166dc168/archive/README.md) preserves one source blob only. The full Navigator candidate, dependencies and exact candidate-tree membership remain unverified.
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "SOURCE_AUDIT_AT": "2026-10-06T13:41:00Z",
+  "STATUS": "PARTIAL_30H_LEDGER_REVISION_INVENTORY",
+  "TOTAL_TRACKS": null,
+  "TOTAL_TRACKS_REASON": "Expanded 30-hour deduplicated ledger remains in progress; this record array counts revisions and aliases only",
+  "LABELS": [
+    "DRAFT",
+    "NOT_RELEASEABLE",
+    "RECOVERY_REQUIRED"
+  ],
+  "SOURCE_AUDIT": {
+    "bytes": 25495,
+    "sha256": "d9bfe0e61693b519a6af88345059fcd8842c0d511dd82e84e5b327d62808ac1b"
+  },
+  "RECORD_COUNT": 29,
+  "COUNT_SEMANTICS": "Checkpoint records include historical revisions and aliases; not independent projects or new WorkQueue parents",
+  "COUNTS": {
+    "GITHUB_PRESERVED": 8,
+    "ARTIFACT_RECOVERABLE": 0,
+    "LOCAL_RECOVERABLE": 0,
+    "LOST_OR_NOT_VERIFIED": 21
+  },
+  "COVERAGE": {
+    "exhaustive": false,
+    "reason": "Limited to named candidates, additional local checkpoints in recent PR502/508/517/518/520/521 evidence, authorized surviving workspace artifacts, named branch searches and exact object endpoints.",
+    "local_git": "Both top-level authorized .git directories empty; ordinary nested source/bundle inventory negative.",
+    "local_artifacts": {
+      "zip_archives": 18,
+      "png_members": 1370,
+      "json_members": 45,
+      "log_members": 8,
+      "report_files_read": 69,
+      "verified_candidate_source_archives": 0
+    },
+    "remote_artifact_metadata": "Five known workflow runs checked; archive metadata and SHA256 retained, not a repository-wide artifact scan.",
+    "branch_search_terms": [
+      "player",
+      "navigator",
+      "m2",
+      "scenery",
+      "customer",
+      "recovery",
+      "living-market",
+      "dot/",
+      "navigation",
+      "journal",
+      "M1"
+    ],
+    "branch_pages": "Each returned cursor followed to empty.",
+    "limitations": [
+      "422/404 establish only not found through the checked endpoint, not global irretrievability.",
+      "No deleted-block recovery, other environments, credential stores, finance source or denied-path access.",
+      "Historical remote test reports are not new acceptance; no tests or CI were run.",
+      "Source-tree equivalence preserves source bytes, not original local commit metadata.",
+      "One Navigator blob does not preserve its dependencies or full candidate; no reachable candidate branch/tree has been verified."
+    ]
+  },
+  "TESTS": "NOT_RUN_THIS_AUDIT; previous local/CI reports remain historical and do not establish current acceptance",
+  "RECOVERED_SUBSET": {
+    "branch": "dot/recovery-navigator-blob-20261006",
+    "head": "066e92390d4429a92b33016bfc1c58b3166dc168",
+    "tree": "bfa4a0bdc9dbb09099ea021f9ea5dd08f9190772",
+    "archive_path": "archive/recovery/2026-10-06/65350fe6569059212f7ccc5b911605a123c3dc5e.txt",
+    "original_path": "K線西遊記/temples/11520/runtime/game-5d-main.mjs",
+    "git_blob_sha1": "65350fe6569059212f7ccc5b911605a123c3dc5e",
+    "sha256": "9ace7bc824bc84a1386d18d05aefc13d9224864d60f337392743806aa6187d1f",
+    "bytes": 117042,
+    "remote_verification": "Exact ref, manifest and full source bytes read back; source blob independently rehashed",
+    "whole_candidate": "NOT_VERIFIED",
+    "tests": "NOT_RUN",
+    "secret_scan": "PASS bounded credential patterns and credential/URL-context review, not universal detection",
+    "ci": "No configured candidate trigger; observed exact-head runs zero, not CI PASS",
+    "activation": "NONE; inert .txt archive only, no PR, main merge, runtime install or Boot adoption"
+  },
+  "NEXT_ACTION": "Continue only from exact preserved sources; unresolved candidates require retained original objects/patch/bundle or another specifically authorized source. Do not reconstruct missing originals from descriptions.",
+  "AUTHORITY": "No owner reassignment, formal queue modification, protected-path or financial authority; no tests, reconstruction, merge or deployment"
+}
+```
+
+### Exact checkpoint record projection
+
+The following array is a compact projection of the bounded audit, with all original candidate identifiers and observed classification. A GitHub-preserved descendant or bounded caller slice must not silently stand in for an unpublished whole Player/Navigator/M2 candidate.
+
+```json
+[
+  {"name": "M2", "commit": "acdd1817d7f191e53a3cd079dc2d8b944c9db0dc", "tree": "c009c81a8e13fb7904333e1253f4ef1c2677564c", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Local M2 prerequisites; candidate only, no financial activation."},
+  {"name": "M2 inert journal", "commit": "e5934dc09602d6afe762aa7378dbd85a150f06a7", "tree": "b41e02b28339d6403f536598aeaf7a650042ab46", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Inert journal/reservation-port candidate; production authority not established."},
+  {"name": "M2 legacy", "commit": "e90e34d620eb0df235741da026b293408f4a81a2", "tree": "e5192c7ee35f616ab4f3d311f5f5f0744d9feeae", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Historical local M2 checkpoint; full SHA/tree supplied by existing #516 handbook."},
+  {"name": "Scenery", "commit": "d27364e138577c6c7c32547de4c5140469f591dc", "tree": "89863fc579ca85bdc059a96f77e91de8e9e85977", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Five-file original-geometry/test/document candidate; original bytes unavailable in checked sources."},
+  {"name": "Player explicit", "commit": "2cdf30d5fc7b026d95169e6ef52d689c7e7c852c", "tree": "171762a4b87256ae0dd4b316b1a7a4846718aeab", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Structural explicit legacy entry; only its bounded Recovery caller seam is separately preserved in PR521."},
+  {"name": "Player generation preview", "commit": "218a4a35d07045c75b90ef4a3d663f536183adf9", "tree": "84d0804d800a9df249479b2f74493a68ea6152ca", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Inactive generation/inventory preview; public cutover not established."},
+  {"name": "Player older", "commit": "57afd528c29a928176fc43c6302c11a64acd97fd", "tree": "7d84434ad8c5f959c181b9d3d0c6e23ce4b895b9", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Earlier structural startup candidate, distinct from published PR508."},
+  {"name": "Navigator latest", "commit": "a021e5e556a18df13d124e99fb9a75d751998bbd", "tree": "ae216d9489221b7f65d29b6c8fe626427fd4834a", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Unpublished navigation/movement candidate; full source tree unavailable."},
+  {"name": "Navigator approved", "commit": "2642c430882c18795f63fc99c3b3fb05346f3c37", "tree": "97fabd701245d184ced9648bfa19f9408a7bc512", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "Unpublished approved navigation candidate; one immutable source blob recoverable, incomplete tree."},
+  {"name": "Customer original", "commit": "c67242533fa1f2721d61af8b620b53654c771ca2", "tree": "492e9041fc2d658ac835ec33fe0fe6b15c771339", "classification": "GITHUB_PRESERVED", "branch": "dot/customer-project-v2-evidence-20261006", "equivalent_remote_commit": "d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "FOUND", "scope": "Local Customer Project evidence/SQLite checkpoint; source-equivalent tree preserved under different GitHub commit metadata."},
+  {"name": "Customer preserved PR520", "commit": "e95ae3a0e4c772af50644bf628e15801de65b97e", "tree": "a578aa785df9ff3175e5ba3d4a71da0c3e5a912a", "classification": "GITHUB_PRESERVED", "pr": 520, "branch": "dot/customer-project-v2-evidence-20261006", "commit_endpoint": "FOUND", "tree_endpoint": "COMMIT_TREE_VERIFIED", "scope": "Metadata successor for existing Company and Backend candidate owners."},
+  {"name": "Recovery PR521", "commit": "eacb58a4004495f0675e09e260ccd9f09e66fb6d", "tree": "ef282c7620b11b10221707232aa01181c4c84dac", "classification": "GITHUB_PRESERVED", "pr": 521, "branch": "dot/recovery-async-caller-20261006", "commit_endpoint": "FOUND", "tree_endpoint": "COMMIT_TREE_VERIFIED", "scope": "Legacy Recovery caller/await/context fencing plus localization; no canonical IDB admission."},
+  {"name": "P0 PR519", "commit": "6c654ce367772420ae11fd30759c613dad7aa2ea", "tree": "bf15caa6ad93b836a8b8d95baa8a37db94f3034f", "classification": "GITHUB_PRESERVED", "pr": 519, "branch": "dot/k11520-simulation-order-20261006", "commit_endpoint": "FOUND", "tree_endpoint": "COMMIT_TREE_VERIFIED", "scope": "Bounded simulation order lifecycle repair; no Navigator/Player structural/M2 candidate imported."},
+  {"name": "Worldlogic PR518", "commit": "594835ffa03620abb1ed60d7fb357250d6957324", "tree": "a5afcd30499ed035f73e847e3570ac665764c661", "classification": "GITHUB_PRESERVED", "pr": 518, "branch": "codex/living-market-zone-prototype-20261006", "commit_endpoint": "FOUND", "tree_endpoint": "COMMIT_TREE_VERIFIED", "scope": "Three-file local Market Life logic prototype; scene/physical Follow not complete."},
+  {"name": "M2 historical inert", "commit": "c4fb0bfe58b82c5547325135f8836631007deeca", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical metadata; exact preservation not established"},
+  {"name": "M2 historical prerequisite", "commit": "ad3c93209c54a01954e8192e11b84b102f849152", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical metadata; exact preservation not established"},
+  {"name": "Navigator countdown", "commit": "97b31815361ec3eacd772239b820dfe329ccfb2c", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical metadata; exact preservation not established"},
+  {"name": "Customer earlier background", "commit": "021edd48a689948ec54e666da754c4a25b398fe9", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical metadata; exact preservation not established"},
+  {"name": "Historical movement correction", "commit": "dcf7b69fbc499f998c4223816a8356a2ff8fd71f", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical metadata; exact preservation not established"},
+  {"name": "Historical courier copy", "commit": "88ed27d8aa5f42cba08056f81e61e5c31901d439", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical metadata; exact preservation not established"},
+  {"name": "Historical HUD", "commit": "87f7e41859e075646c74f0a2366c8060e6150420", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical metadata; exact preservation not established"},
+  {"name": "Radar working checkpoint", "commit": "9e0ad86f93ab87f20422172757048bad12b04d96", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical checkpoint"},
+  {"name": "Radar initial checkpoint", "commit": "b65cf1fcfc91783c310ff94b3c26d8c461df3019", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_CHECKED_NO_TREE_ID", "scope": "PR502 historical checkpoint"},
+  {"name": "Navigator historical", "commit": "d57f914c50861be0ded8b1f99271ec282800e225", "tree": "a916e12d63c727f942ec6a272ef74c189a2fa854", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "PR502 historical checkpoint"},
+  {"name": "M2 historical tested", "commit": "a5aab593fe18862dc77119e724b04ff454338b7f", "tree": "0c8e9ed2406f0647032a561f2fe277069fd53083", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "PR502 historical checkpoint"},
+  {"name": "Customer earlier research", "commit": "0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e", "tree": "1995b5ea2a3c09235852af6ad8f06eb2b3820e6b", "classification": "LOST_OR_NOT_VERIFIED", "commit_endpoint": "NOT_FOUND_422", "tree_endpoint": "NOT_FOUND_404", "scope": "PR502 historical checkpoint"},
+  {"name": "Player published atomic baseline", "commit": "4d511f6d0c814123ef612890d0f38cb3f1316468", "tree": "5db43b70d159008e0d90e3b53371df9171113468", "classification": "GITHUB_PRESERVED", "pr": 508, "branch": "dot/player-life-atomic-store-20261005", "scope": "Published inert atomic baseline/native tests; explicitly excludes later structural startup candidates."},
+  {"name": "Software Life Stage A", "head": "99aa82c83e2c54860d44f8ba53a80b87e6432339", "local_head": "98a22c2d02c32ade1f1ed8913f7b80040f1c08d4", "tree": "c9cae7cc4c9e23f45b54fa625bb67f822035ecd6", "classification": "GITHUB_PRESERVED", "pr": 517, "ref": "dot/life-composition-candidate-20261006"},
+  {"name": "Recovery original bounded caller slice", "commit": "b6523a048101f5eeee7f3472c468ea3dc44c49a8", "tree": "72aa733a01090b089784e964e628d2d9032997f3", "classification": "GITHUB_PRESERVED", "pr": 521, "branch": "dot/recovery-async-caller-20261006", "equivalent_remote_commit": "e1c84739a887cdcff78867c01b7c4c8393f402a8", "scope": "Source-equivalent bounded Recovery subset only; does not preserve whole Player explicit candidate."}
+]
+```
