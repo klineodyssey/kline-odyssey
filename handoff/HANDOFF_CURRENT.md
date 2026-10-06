@@ -2188,3 +2188,152 @@ The source audit JSON was77,072 bytes, SHA-256 `dd101ecd04ef820203bda6d1f90fba70
   }
 }
 ```
+
+## Post-snapshot census report preservation — 2026-10-06
+
+The following is an engineering-only redacted projection of the original 2026-10-05 capability census, not the complete original report. Unrelated or private details are omitted entirely. It preserves historical engineering status and concrete repository/CI evidence; none of its historical capability statements is a current capability claim. The earlier 28-item ledger snapshot and its metrics remain unchanged.
+
+```json
+{
+  "WORK_ID": "SUPPORT-CAPABILITY-CENSUS",
+  "EVENT": "ENGINEERING_ONLY_REDACTED_PROJECTION_PRESERVATION",
+  "RECORDED_AT": "2026-10-06T13:58:05Z",
+  "SOURCE_MESSAGE_ID": "Sentinel_63f4e16cce208191859aa0c283f3dc41",
+  "SOURCE_TIMESTAMP": "2026-10-05T02:45:06.547856+00:00",
+  "PROJECTION_BYTES": 5269,
+  "PROJECTION_SHA256": "1e620d92e92d8303ad8c7b88ea6a940cc7bc5d8ae9c510f20fa933445d5d74de",
+  "KEPT_SECTIONS": [
+    5,
+    6,
+    7,
+    12,
+    14
+  ],
+  "REDACTIONS": "All other sections, personal account identity/permissions/connections, unrelated memory/internal/infrastructure/connector content and installation versions omitted",
+  "EXACT_FULL_ORIGINAL": false,
+  "PUBLICATION": "Containing handoff commit; exact GitHub HEAD/readback bound in existing PR516 body",
+  "CLASSIFICATION_DELTA": "Only this redacted engineering projection becomes GitHub-preserved after readback; full original remains available in the private source conversation, not copied to GitHub",
+  "SNAPSHOT_COUNTS": "Historical 28-item snapshot remains 21 GITHUB_PRESERVED / 1 ARTIFACT_RECOVERABLE / 6 LOST_OR_NOT_VERIFIED; 24 engineering denominator unchanged",
+  "TESTS": "NO_NEW_TESTS; all report observations are historical",
+  "AUTHORITY": "No runtime, identity, permissions, queue, workflow, merge, deployment or financial action"
+}
+```
+
+```text
+KAIOS DOT CAPABILITY CENSUS V1 — ENGINEERING-ONLY REDACTED PROJECTION
+
+Original report timestamp: 2026-10-05T02:45:06.547856+00:00.
+Historical observations only; not current capabilities, new test execution or new authority.
+Sections 5, 6, 7, 12 and 14 retained for engineering provenance. Other sections, personal account/connection details and environment installation versions omitted. This is not the exact full original report.
+
+5. GITHUB
+
+CAN_ACCESS_GITHUB = VERIFIED。
+CAN_ACCESS_klineodyssey/kline-odyssey = VERIFIED。
+CAN_READ_REPO = VERIFIED。
+CAN_READ_MAIN = VERIFIED。
+CAN_READ_BRANCH = VERIFIED。
+CAN_READ_COMMIT = VERIFIED。
+CAN_READ_PR = VERIFIED。
+CAN_READ_DIFF = VERIFIED。
+CAN_READ_CI = VERIFIED。
+CAN_READ_JOB_LOG = VERIFIED。
+CAN_READ_ARTIFACT = AVAILABLE_BUT_NOT_TESTED；清單、大小、到期狀態已驗證，ZIP 內容未下載。
+
+CAN_EDIT_FILES = AVAILABLE_BUT_NOT_TESTED。
+CAN_CREATE_BRANCH = AVAILABLE_BUT_NOT_TESTED。
+CAN_COMMIT = AVAILABLE_BUT_NOT_TESTED。
+CAN_PUSH = AVAILABLE_BUT_NOT_TESTED；有更新 Git ref 的工具，真正 git push 端到端 NOT_VERIFIED。
+CAN_OPEN_DRAFT_PR = AVAILABLE_BUT_NOT_TESTED。
+CAN_COMMENT_PR = AVAILABLE_BUT_NOT_TESTED。
+CAN_UPDATE_PR = AVAILABLE_BUT_NOT_TESTED。
+CAN_MERGE_PR = AVAILABLE_BUT_NOT_TESTED。
+
+[已移除帳號身份、repo 權限與連線細節。]
+
+6. SOFTWARE ENGINEERING
+
+CAN_RESEARCH = VERIFIED；已查核 repository、diff、CI 與日誌。
+CAN_WRITE_CODE = VERIFIED，限微型記憶體內 Node／Python 範例；完整產品交付未驗證。
+CAN_REVIEW_CODE = PARTIAL；已讀 diff 與失敗測試，完整專案審查未完成。
+CAN_DEBUG = PARTIAL；已讀取並定位 CI 錯誤，未修改或驗證修復。
+CAN_RUN_TESTS = VERIFIED，限本次 Node／Python assertion；未在本地執行 KAIOS 全套測試。
+CAN_BUILD_WEB_APP = AVAILABLE_BUT_NOT_TESTED。
+CAN_BUILD_BACKEND = AVAILABLE_BUT_NOT_TESTED。
+CAN_BUILD_DATABASE = PARTIAL；SQLite 記憶體內 SQL 已通過，正式資料庫建置未驗證。
+CAN_REVIEW_SOLIDITY = AVAILABLE_BUT_NOT_TESTED；不能當成已完成安全稽核。
+CAN_COMPILE_SOLIDITY = NOT_VERIFIED；未找到現成 solc／forge／hardhat。
+CAN_RUN_LOCAL_EVM = NOT_VERIFIED；未找到 anvil／ganache／geth。
+CAN_USE_PLAYWRIGHT = AVAILABLE_BUT_NOT_TESTED；[已移除環境安裝版本細節]，未跑完整腳本。
+CAN_USE_CHROMIUM = VERIFIED；[已移除環境版本細節]。
+
+本次實測：Node assertion PASS；Python assertion PASS；SQLite SELECT 2+3＝5 PASS。未安裝套件，未部署服務。
+
+7. MOBILE / GAME QA
+
+360×740 = NOT_VERIFIED。
+390×844 = NOT_VERIFIED。
+412×772 = NOT_VERIFIED。
+432×856 = NOT_VERIFIED。
+480×900 = NOT_VERIFIED。
+844×390 = NOT_VERIFIED。
+
+CAN_TEST_TOUCH = NOT_VERIFIED；滑鼠點擊不能冒充觸控。
+CAN_TEST_DRAG = AVAILABLE_BUT_NOT_TESTED。
+CAN_TEST_MULTI_TOUCH_PINCH = NO，以本次可用瀏覽器介面而言，未提供多點觸控操作。
+CAN_TEST_GAME_CANVAS = AVAILABLE_BUT_NOT_TESTED。
+CAN_COMPARE_BEFORE_AFTER_SCREENSHOTS = AVAILABLE_BUT_NOT_TESTED；截圖與看圖已通，尚未做同場景前後比對。
+
+目前瀏覽器控制介面沒有已驗證的 viewport resize／手機模擬操作。本次沒有真機 QA，也沒有把既有 CI 報告算成我自己跑過六尺寸。
+
+12. SECURITY / AUTHORITY
+
+least privilege = YES
+fail closed = YES
+no secret exposure = YES
+no self-issued identity = YES
+no self-issued permissions = YES
+no self-issued payroll = YES
+no unauthorized merge = YES
+no unauthorized deploy = YES
+no unauthorized Mainnet = YES
+no unauthorized Treasury = YES
+
+這代表能理解並遵守，不是經過形式化驗證的零風險保證。本次沒有自建 Life、Worker、薪資或公司權限。
+
+14. PRACTICAL DEMONSTRATION
+
+CURRENT_MAIN = 53692530f9e161a0d56592ba69a6a81ff74236c4
+ONE_OPEN_PR = #496
+PR_STATUS = OPEN／DRAFT／NOT_MERGED
+PR_HEAD = 431c51069e4ee0ab2c6816771d967f2d0dc38803
+PR_BRANCH = codex/k11520-context-action-rail
+
+LATEST_CI_STATUS = MIXED，不能概括宣告全綠。
+
+main：
+- 最新一筆排程工作 Update Latest Video：SUCCESS。
+- Universal Exchange V2：FAILURE。
+- 部署後 Responsive QA：FAILURE。
+- 另一筆 push Responsive QA：SUCCESS。
+- Game、Portal、Backend Recovery QA、Pages deploy：SUCCESS。
+
+PR #496 exact head：
+- Universal Exchange V2 的 push 與 pull_request：FAILURE。
+- Game、Trading Readiness、Responsive、Portal：SUCCESS。
+
+已讀失敗日誌：420 passed、1 failed。
+測試：tests/universal-exchange.test.mjs:355。
+錯誤：SALARY_ADVANCE_DUE_DATE_INVALID。
+訊息：Salary advance requires a future payroll due date。
+這次沒有修復、重跑或改動測試。
+
+證據：
+Main：https://github.com/klineodyssey/kline-odyssey/commit/53692530f9e161a0d56592ba69a6a81ff74236c4
+PR：https://github.com/klineodyssey/kline-odyssey/pull/496
+Main Universal：https://github.com/klineodyssey/kline-odyssey/actions/runs/37249598708
+部署後 Responsive：https://github.com/klineodyssey/kline-odyssey/actions/runs/37248067887
+已讀 Job：https://github.com/klineodyssey/kline-odyssey/actions/runs/37246419607/job/111565114125
+
+另已讀 PR diff：8 個檔案、149 additions、66 deletions。已取得 artifact 清單，但未下載或執行。
+```
