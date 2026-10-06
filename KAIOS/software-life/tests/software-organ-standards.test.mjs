@@ -787,16 +787,31 @@ test("review, gate and approval actors resolve through canonical Worker Registry
 });
 
 test("current Worker Registry revocation overrides historical maximum authority", () => {
-  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, currentWorkerRegistry), true);
+  // Current Human suspension is authoritative, regardless of the older epoch.
+  const currentCursor = currentWorkerRegistry.workers.find(({ worker_id }) => worker_id === "cursor-01");
+  assert.equal(currentCursor.status, "OFFLINE");
+  assert.equal(currentCursor.suspension, "CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_BY_HUMAN_COST_DECISION");
+  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, currentWorkerRegistry), false);
+  // Explicit synthetic positive control, never written into the real Registry.
+  const activeCursorFixture = structuredClone(trustedWorkerRegistry);
+  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, activeCursorFixture), true);
   assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "CODEX_CANONICAL_REVIEW", true, currentWorkerRegistry), true);
 
-  const revokedCursorRegistry = structuredClone(currentWorkerRegistry);
+  const revokedCursorRegistry = structuredClone(activeCursorFixture);
   revokedCursorRegistry.workers.find(({ worker_id }) => worker_id === "cursor-01").status = "OFFLINE";
   assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, revokedCursorRegistry), false);
 
-  const blockedCursorRegistry = structuredClone(currentWorkerRegistry);
+  const blockedCursorRegistry = structuredClone(activeCursorFixture);
   blockedCursorRegistry.workers.find(({ worker_id }) => worker_id === "cursor-01").status = "BLOCKED";
   assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, blockedCursorRegistry), false);
+
+  const suspendedCursorFixture = structuredClone(activeCursorFixture);
+  suspendedCursorFixture.workers.find(({ worker_id }) => worker_id === "cursor-01").suspension = {
+    status: "SUSPENDED", reason: "Deterministic current-state denial fixture"
+  };
+  assert.equal(isAuthorizedWorker(trustedWorkerRegistry, "cursor-01", false, suspendedCursorFixture), false);
+  assert.equal(currentWorkerRegistry.workers.find(({ worker_id }) => worker_id === "cursor-01").suspension,
+    "CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_BY_HUMAN_COST_DECISION");
 
   const suspendedReviewerRegistry = structuredClone(currentWorkerRegistry);
   suspendedReviewerRegistry.workers.find(({ worker_id }) => worker_id === "codex-gm-01").suspension = {
