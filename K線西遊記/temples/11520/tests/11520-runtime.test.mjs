@@ -754,3 +754,410 @@ test('order execution rejects forged C, lots, side, margin and duplicate positio
  const once=structuredClone(state);assert.equal(executeOrder(state,base).reason,'POSITION_EXISTS');assert.deepEqual(state,once);
  assert.equal(previewOrder({axis:'KX',fire:-1,leverage:1,price:100,kgen:1000}).reason,'BAD_LOTS');
 });
+
+// LivingMarketZone local prototype. Append-only: existing Player Life/Courier
+// regression sections above remain byte-for-byte identical to source main.
+import {LIVING_MARKET_TRAINING_RULES,livingMarketDecisionSnapshot,configureLivingMarketLife,interactLivingMarketLives} from '../runtime/market-life-runtime.mjs';
+
+const livingQuote=(at,price,extra={})=>({status:'LIVE',source:'DETERMINISTIC_GAME_FIXTURE',receivedAt:at,markets:[{axis:'KX',symbol:'BTCUSDT',price}],...extra});
+const livingFeed=(life,at,price,extra={})=>observeTrainingMarket(life,livingQuote(at,price,extra),{now:at});
+const livingTestEntities=new WeakMap();
+function livingActor(id,profile='MOMENTUM',options={}){
+  const life=createMarketLife({lifeId:id,species:profile==='ADAPTIVE_BOSS'?'BULL_DEMON':profile==='COUNTERTREND'?'FIRE_WISP':'STONE_APE',markets:['BTCUSDT'],capital:25});
+  const sourceEntity={lifeId:id,marketLife:life,sourceManaged:false,simulationOnly:true,
+    sourceMeta:{scope:'LOCAL_GAME_NPC_ONLY',sourceType:'WORLD_EVENT',sourceEventId:`fixture:${id}`}};
+  livingTestEntities.set(life,sourceEntity);
+  assert.equal(configureLivingMarketLife(life,{sourceEntity,sourceEventId:`fixture:${id}`,profile,energyUnits:10,massUnits:4,...options}).ok,true);
+  return life;
+}
+function livingResolve(life,exit){
+  const p=life.training.pending;assert.ok(p);
+  const hold=life.training.quotes[p.market];
+  for(let at=life.training.lastAt+5000;at<p.deadline;at+=5000)livingFeed(life,at,hold);
+  livingFeed(life,p.deadline,exit);return p;
+}
+function livingCapability(actor,target,actions=['FOLLOW','ALLY','COMPETE','FLEE','ABSORB']){
+  return {scope:'LOCAL_GAME_NPC_INTERACTION',actorLifeId:actor.lifeId,targetLifeId:target.lifeId,
+    actorSourceEventId:actor.livingMarket.sourceEventId,targetSourceEventId:target.livingMarket.sourceEventId,
+    actorRevision:actor.livingMarket.revision,targetRevision:target.livingMarket.revision,sequence:actor.livingMarket.lastInteractionSequence+1,
+    actions,issuedAt:0,expiresAt:1000000,maxEnergyUnits:10,maxMassUnits:4};
+}
+
+test('LivingMarket three market lives and one Boss derive distinct choices without any movement authority',()=>{
+  const profiles=['MOMENTUM','COUNTERTREND','CAUTIOUS','ADAPTIVE_BOSS'];
+  const actors=profiles.map((p,i)=>livingActor(`ZONE-${i}`,p));
+  const originals=actors.map(l=>({capital:l.capital,positions:structuredClone(l.positions),world:structuredClone(l.world)}));
+  for(const l of actors){livingFeed(l,1000,100);livingFeed(l,6000,100.01)}
+  assert.deepEqual(actors.map(l=>livingMarketDecisionSnapshot(l,{now:6000}).decision),['LONG','SHORT','WAIT','LONG']);
+  for(const [i,l] of actors.entries()){
+    const v=livingMarketDecisionSnapshot(l,{now:6000});
+    assert.equal(v.motion.status,'NAVIGATION_DEPENDENCY_REQUIRED');assert.equal(v.motion.controlsPlayer,false);assert.equal(v.motion.movesCoordinates,false);
+    assert.equal(v.fullGA600,'NOT_INTEGRATED');assert.equal(v.automatesTrading,false);assert.equal(v.profitPromise,false);
+    assert.deepEqual({capital:l.capital,positions:l.positions,world:l.world},originals[i]);
+    assert.ok(v.motion.requestedSpeedFactor>=0&&v.motion.requestedSpeedFactor<=1);
+  }
+  assert.equal(livingMarketDecisionSnapshot(actors[2],{now:6000}).motion.requestedSpeedFactor,0);
+  assert.equal(livingMarketDecisionSnapshot(actors[3],{now:6000}).boss.affectsRealMarket,false);
+});
+
+test('LivingMarket freezes issuance provenance, resolves after its horizon and excludes hindsight edits',()=>{
+  const life=livingActor('CAUSAL');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  const p=life.training.pending;assert.equal(p.deadline,66000);assert.equal(p.issuedAt,6000);assert.equal(p.confidence,null);
+  assert.throws(()=>{p.sign=-1},TypeError);assert.throws(()=>{p.price=90},TypeError);
+  for(let at=11000;at<66000;at+=5000)livingFeed(life,at,102);
+  assert.equal(life.growth.predictionCount,0);assert.equal(life.training.session.resolved,0);
+  livingFeed(life,66000,103);
+  const settled=life.training.audit.find(e=>e.type==='PREDICTION_SETTLED');
+  assert.equal(settled.predictionId,p.id);assert.equal(settled.entry,101);assert.equal(settled.exit,103);
+  assert.equal(settled.deadline,66000);assert.equal(settled.exitAt,66000);assert.equal(settled.settlementDelayMs,0);
+  assert.equal(settled.source,'DETERMINISTIC_GAME_FIXTURE');assert.equal(settled.confidenceAtIssue,null);
+  assert.equal(life.training.audit[0].timeBasis,'HOST_RECEIVED_AT');
+  const snapshot=livingMarketDecisionSnapshot(life,{now:66000});snapshot.audit.events[0].price=1;
+  assert.equal(life.training.audit[0].price,101,'snapshot is detached from owner state');
+});
+
+test('LivingMarket identical replay cannot score twice; conflicting replay invalidates and preserves last-good evidence',()=>{
+  const life=livingActor('REPLAY');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  const p=life.training.pending,events=life.training.audit.length;
+  livingFeed(life,6000,101);assert.equal(life.training.pending,p);assert.equal(life.training.audit.length,events);
+  assert.equal(livingFeed(life,6000,1000),null);
+  assert.equal(life.training.pending,null);assert.equal(life.training.quotes.BTCUSDT,101);
+  assert.equal(livingMarketDecisionSnapshot(life,{now:6000}).status,'INVALID');
+  assert.equal(life.training.session.invalidated,1);assert.equal(life.growth.predictionCount,0);
+  assert.equal(livingFeed(life,11000,102).decision,'WAIT','recovery must warm up, not reuse quarantined signal');
+  assert.equal(livingFeed(life,16000,103).decision,'LONG');
+});
+
+test('LivingMarket WAIT, STALE, INVALID and future/clock failures never become actionable LIVE',()=>{
+  const cases=[
+    {name:'WAIT',batch:livingQuote(11000,101,{status:'WAIT'}),now:11000,status:'WAIT'},
+    {name:'STALE',batch:livingQuote(11000,101,{status:'STALE'}),now:11000,status:'STALE'},
+    {name:'unknown status',batch:livingQuote(11000,101,{status:'PENDING'}),now:11000,status:'INVALID'},
+    {name:'expired',batch:livingQuote(11000,101),now:26001,status:'STALE'},
+    {name:'future',batch:livingQuote(11000,101),now:10000,status:'INVALID'},
+    {name:'clock reversal',batch:livingQuote(7000,101),now:5000,status:'INVALID'},
+    {name:'NaN clock',batch:livingQuote(11000,101),now:NaN,status:'STALE'},
+    {name:'negative timestamp',batch:livingQuote(-1,101),now:11000,status:'INVALID'},
+    {name:'missing batch',batch:livingQuote(11000,101,{markets:null}),now:11000,status:'INVALID'},
+    {name:'zero price',batch:livingQuote(11000,0),now:11000,status:'INVALID'},
+    {name:'infinite price',batch:livingQuote(11000,Infinity),now:11000,status:'INVALID'},
+    {name:'numeric string',batch:livingQuote(11000,'102'),now:11000,status:'INVALID'},
+    {name:'invalid axis',batch:livingQuote(11000,102,{markets:[{axis:'W',symbol:'BTCUSDT',price:102}]}),now:11000,status:'INVALID'},
+    {name:'duplicate market',batch:livingQuote(11000,102,{markets:[{axis:'KX',symbol:'BTCUSDT',price:102},{axis:'KY',symbol:'BTCUSDT',price:103}]}),now:11000,status:'INVALID'},
+  ];
+  for(const c of cases){
+    const life=livingActor(c.name);livingFeed(life,1000,100);livingFeed(life,6000,101);
+    assert.equal(observeTrainingMarket(life,c.batch,{now:c.now}),null,c.name);
+    const view=livingMarketDecisionSnapshot(life,{now:c.now});
+    assert.equal(view.decision,'WAIT',c.name);assert.notEqual(view.status,'LIVE',c.name);
+    assert.equal(view.motion.requestedSpeedFactor,0,c.name);assert.equal(life.training.pending,null,c.name);
+    assert.equal(view.sessionMetrics.predictions,0,c.name);assert.equal(life.training.session.invalidated,1,c.name);
+  }
+});
+
+test('LivingMarket source changes and missing markets invalidate whole predictions rather than cherry-pick outcomes',()=>{
+  const life=livingActor('SOURCE');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  const r=livingFeed(life,11000,999,{source:'OTHER_SOURCE'});
+  assert.equal(r.decision,'WAIT');assert.equal(r.status,'WAIT');assert.equal(life.training.pending,null);
+  assert.ok(life.training.audit.some(e=>e.reason==='SOURCE_CHANGED'));
+  const multi=createMarketLife({lifeId:'MULTI',markets:['BTCUSDT','ETHUSDT']});
+  const batch=at=>({receivedAt:at,status:'LIVE',source:'FIXTURE',markets:[{axis:'KX',symbol:'BTCUSDT',price:at},{axis:'KY',symbol:'ETHUSDT',price:100}]});
+  observeTrainingMarket(multi,batch(1000),{now:1000});observeTrainingMarket(multi,batch(6000),{now:6000});
+  const partial=batch(11000);partial.markets.pop();
+  assert.equal(observeTrainingMarket(multi,partial,{now:11000}),null);
+  assert.equal(multi.training.pending,null);assert.equal(multi.training.session.invalidated,1);
+});
+
+test('LivingMarket gap invalidation is one-shot; a fresh recovery cannot score the discarded horizon',()=>{
+  const life=livingActor('GAP');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  assert.equal(livingFeed(life,66000,200).decision,'WAIT');assert.equal(life.training.session.invalidated,1);
+  assert.equal(life.training.session.resolved,0);assert.equal(life.growth.wins,0);
+  for(let i=0;i<500;i++)observeTrainingMarket(life,livingQuote(66000,200,{status:'STALE'}),{now:66000+i});
+  assert.equal(life.training.session.invalidated,1);assert.equal(life.training.audit.length,2,'stale render ticks do not flood history');
+  assert.equal(livingFeed(life,71000,201).decision,'WAIT');assert.equal(livingFeed(life,76000,202).decision,'LONG');
+});
+
+test('LivingMarket correct/wrong/flat, streak, drawdown and calibration are auditable game points',()=>{
+  const life=livingActor('METRICS');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  livingResolve(life,103);livingResolve(life,102);livingResolve(life,102);
+  const m=livingMarketDecisionSnapshot(life,{now:186000}).sessionMetrics;
+  assert.deepEqual([m.predictions,m.correct,m.wrong,m.flat,m.streak],[3,1,1,1,0]);
+  assert.deepEqual([m.scorePoints,m.peakScorePoints,m.maxDrawdownPoints],[0,1,1]);
+  assert.equal(m.calibration.samples,1);assert.equal(m.calibration.brier,1,'second prediction captured 100% prior empirical accuracy, then failed');
+  assert.equal(m.calibration.bins.reduce((n,b)=>n+b.samples,0),1);
+  assert.match(m.scoreDefinition,/NOT PNL OR MONEY/);assert.equal(life.capital,25);assert.deepEqual(life.positions,{});
+});
+
+test('LivingMarket session metrics do not borrow restored growth or fabricate calibration after reload',()=>{
+  const data=new Map(),storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};
+  const life=livingActor('RELOAD');livingFeed(life,1000,100);livingFeed(life,6000,101);livingResolve(life,103);
+  assert.equal(createTrainingMemory(storage).save(life),true);
+  const restored=createMarketLife({lifeId:'RELOAD',species:'STONE_APE'});assert.equal(createTrainingMemory(storage).restore(restored),true);
+  assert.equal(livingMarketDecisionSnapshot(restored,{now:1000}).sessionMetrics,null);
+  livingFeed(restored,1000,100);const intent=livingFeed(restored,6000,101);
+  assert.equal(intent.confidence,null);assert.equal(intent.confidenceSamples,0);
+  const m=livingMarketDecisionSnapshot(restored,{now:6000});
+  assert.equal(m.sessionMetrics.predictions,0);assert.equal(m.sessionMetrics.calibration.brier,null);
+  assert.equal(m.persistedGrowth.wins,1);assert.equal(m.audit.persisted,false);
+});
+
+test('LivingMarket Boss adapts only from settled errors, with causal policy lineage and no market field authority',()=>{
+  const life=livingActor('BOSS','ADAPTIVE_BOSS');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  livingResolve(life,100);assert.equal(life.training.policyGeneration,0);
+  livingResolve(life,101);
+  const state=livingMarketDecisionSnapshot(life,{now:126000});
+  assert.equal(state.boss.policyGeneration,1);assert.equal(state.boss.strategyBias,-1);assert.equal(state.decision,'SHORT');
+  const adaptation=state.audit.events.find(e=>e.type==='BOSS_POLICY_ADAPTED');
+  assert.ok(adaptation.evidencePredictionId);assert.equal(adaptation.at,126000);assert.equal(adaptation.simulationOnly,true);
+  assert.equal(life.training.pending.policyGeneration,1);assert.equal(state.boss.affectsRealMarket,false);
+  assert.equal(life.capital,25);assert.deepEqual(life.positions,{});
+});
+
+test('LivingMarket bounded audit reports truncation honestly while monotonically retaining summary counts',()=>{
+  const life=livingActor('BOUNDED');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  for(let i=0;i<80;i++)livingResolve(life,102+i);
+  const view=livingMarketDecisionSnapshot(life,{now:life.training.lastAt});
+  assert.equal(view.sessionMetrics.predictions,80);assert.equal(view.audit.events.length,LIVING_MARKET_TRAINING_RULES.auditLimit);
+  assert.ok(view.audit.droppedEvents>0);assert.equal(view.audit.completeSessionWindow,false);
+  assert.ok(view.audit.events.every((e,i,a)=>i===0||e.sequence>a[i-1].sequence));
+  assert.equal(view.audit.events.at(-1).sequence,life.training.sequence);
+});
+
+test('LivingMarket only configures unowned existing monster fixtures; ecology, cargo and ownership are protected',()=>{
+  for(const props of [{species:'FISH'},{species:'DIGITAL_ANT'},{species:'STONE_APE',ownerPlayerId:'PLAYER'},{species:'STONE_APE',ownerLandId:'LAND'},
+    {species:'STONE_APE',sourceManaged:true},{species:'STONE_APE',cargo:{principal:100}},{species:'STONE_APE',sourceClass:'PLAYER_OWNED'}]){
+    const life=Object.assign(createMarketLife({lifeId:'DENIED',species:props.species}),props),before=structuredClone(life);
+    assert.equal(configureLivingMarketLife(life,{sourceEventId:'fixture'}).ok,false);assert.deepEqual(life,before);
+  }
+  const life=livingActor('ONLY_ONCE');assert.equal(configureLivingMarketLife(life,{sourceEventId:'again',energyUnits:999}).reason,'ALREADY_CONFIGURED');
+  for(const input of [{energyUnits:-1},{energyUnits:0.1},{massUnits:Infinity},{sourceClass:'PLAYER_OWNED'},{profile:'FULL_GA600'}]){
+    const candidate=createMarketLife({lifeId:'INVALID',species:'STONE_APE'});
+    assert.equal(configureLivingMarketLife(candidate,{sourceEventId:'fixture',...input}).ok,false);assert.equal(candidate.livingMarket,undefined);
+  }
+});
+
+test('LivingMarket FOLLOW, ALLY, COMPETE and FLEE change only game relation evidence, never movement or capital',()=>{
+  const a=livingActor('A'),b=livingActor('B');
+  const original=[a,b].map(l=>({world:structuredClone(l.world),capital:l.capital,positions:structuredClone(l.positions),state:l.state}));
+  for(const [i,action] of ['FOLLOW','ALLY','COMPETE','FLEE'].entries()){
+    const r=interactLivingMarketLives(a,b,{action,sequence:i+1,actorRevision:a.livingMarket.revision,targetRevision:b.livingMarket.revision,capability:livingCapability(a,b),now:100+i});
+    assert.equal(r.ok,true);assert.equal(r.event.movesCoordinates,false);assert.equal(r.event.changesOwnership,false);
+  }
+  assert.deepEqual([a,b].map(l=>({world:l.world,capital:l.capital,positions:l.positions,state:l.state})),original);
+  assert.equal(a.livingMarket.energyUnits,10);assert.equal(b.livingMarket.massUnits,4);
+});
+
+test('LivingMarket ABSORB conserves bounded game mass/energy and rejects replay and stale concurrent revisions',()=>{
+  const a=livingActor('ABSORBER'),b=livingActor('YIELDING','COUNTERTREND',{allowAbsorption:true}),capability=livingCapability(a,b);
+  const request={action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,energyUnits:7,massUnits:3,capability,now:100};
+  assert.equal(interactLivingMarketLives(a,b,request).ok,true);
+  assert.deepEqual([a.livingMarket.energyUnits,b.livingMarket.energyUnits,a.livingMarket.massUnits,b.livingMarket.massUnits],[17,3,7,1]);
+  assert.equal(a.livingMarket.energyUnits+b.livingMarket.energyUnits,20);assert.equal(a.livingMarket.massUnits+b.livingMarket.massUnits,8);
+  const before=structuredClone([a,b]);assert.equal(interactLivingMarketLives(a,b,request).reason,'REPLAY_OR_STALE_REVISION');
+  assert.deepEqual([a,b],before);
+  assert.equal(interactLivingMarketLives(a,b,{...request,sequence:2,actorRevision:1}).reason,'REPLAY_OR_STALE_REVISION');
+  assert.equal(a.capital,25);assert.equal(b.capital,25);assert.deepEqual(a.positions,{});assert.deepEqual(b.positions,{});
+});
+
+test('LivingMarket interactions reject missing, expired, mismatched, excess, fractional and non-transfer capabilities atomically',()=>{
+  for(const mutation of [
+    r=>({...r,capability:null}),r=>({...r,capability:{...r.capability,scope:'WALLET'}}),
+    r=>({...r,capability:{...r.capability,targetLifeId:'OTHER'}}),r=>({...r,capability:{...r.capability,targetSourceEventId:'OTHER'}}),
+    r=>({...r,capability:{...r.capability,expiresAt:100}}),r=>({...r,capability:{...r.capability,issuedAt:101}}),
+    r=>({...r,capability:{...r.capability,actions:['FOLLOW']}}),r=>({...r,energyUnits:11}),r=>({...r,massUnits:-1}),
+    r=>({...r,massUnits:.5}),r=>({...r,action:'FOLLOW',energyUnits:1}),r=>({...r,sequence:2}),
+  ]){
+    const a=livingActor('DENY-A'),b=livingActor('DENY-B','MOMENTUM',{allowAbsorption:true});
+    const request=mutation({action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,energyUnits:1,massUnits:1,capability:livingCapability(a,b),now:100});
+    const before=structuredClone([a,b]);assert.equal(interactLivingMarketLives(a,b,request).ok,false);assert.deepEqual([a,b],before);
+  }
+  const a=livingActor('NO-A'),b=livingActor('NO-B');
+  assert.equal(interactLivingMarketLives(a,b,{action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,energyUnits:1,capability:livingCapability(a,b),now:100}).ok,false);
+});
+
+test('LivingMarket late accepted observation records actual horizon delay without retroactive settlement',()=>{
+  const life=livingActor('DELAY');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  for(let at=11000;at<=61000;at+=5000)livingFeed(life,at,102);
+  assert.equal(life.training.session.resolved,0);
+  livingFeed(life,71000,103);
+  const e=life.training.audit.find(e=>e.type==='PREDICTION_SETTLED');
+  assert.equal(e.deadline,66000);assert.equal(e.exitAt,71000);assert.equal(e.settlementDelayMs,5000);
+  assert.equal(e.exit,103,'no interpolated or invented price at the missed deadline');
+});
+
+test('LivingMarket market-axis rebinding cannot settle a prediction under a changed coordinate binding',()=>{
+  const life=livingActor('REBIND');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  const r=livingFeed(life,11000,999,{markets:[{axis:'KY',symbol:'BTCUSDT',price:999}]});
+  assert.equal(r,null);assert.equal(life.training.dataStatus,'INVALID');assert.equal(life.training.pending,null);
+  assert.ok(life.training.audit.some(e=>e.reason==='AXIS_MARKET_BINDING_MISMATCH'));
+  assert.equal(life.training.session.resolved,0);
+});
+
+test('LivingMarket rejects unsafe clocks, invalid source provenance and overflowing signal arithmetic',()=>{
+  for(const [batch,now] of [
+    [livingQuote(Number.MAX_SAFE_INTEGER,100),Number.MAX_SAFE_INTEGER],
+    [livingQuote(11000.5,100),11000.5],
+    [livingQuote(11000,100,{source:{name:'pretend'}}),11000],
+    [livingQuote(11000,100,{source:''}),11000],
+  ]){
+    const life=livingActor('BAD-CLOCK');livingFeed(life,1000,100);livingFeed(life,6000,101);
+    assert.equal(observeTrainingMarket(life,batch,{now}),null);assert.equal(life.training.pending,null);
+    assert.equal(life.training.session.resolved,0);
+  }
+  const life=livingActor('OVERFLOW');livingFeed(life,1000,1e-300);
+  assert.equal(livingFeed(life,6000,1e300),null);assert.equal(life.training.reason,'INVALID_SIGNAL_ARITHMETIC');
+  assert.equal(life.training.pending,null);assert.equal(life.training.session.issued,0);
+});
+
+test('LivingMarket lifecycle lock prevents dead/recovery lives from issuing predictions or presenting motion',()=>{
+  for(const state of ['DEAD','NAIHE','MENGPO_RECOVERY','REBIRTH']){
+    const life=livingActor(state);livingFeed(life,1000,100);livingFeed(life,6000,101);life.state=state;
+    assert.equal(livingMarketDecisionSnapshot(life,{now:6000}).decision,'WAIT');
+    assert.equal(livingFeed(life,11000,102),null);assert.equal(life.training.pending,null);
+    assert.equal(life.training.reason,'LIFECYCLE_LOCK');assert.equal(life.training.session.resolved,0);
+  }
+});
+
+test('LivingMarket profile cannot be configured retrospectively after observing a result',()=>{
+  const life=createMarketLife({lifeId:'OLD',species:'STONE_APE'});livingFeed(life,1000,100);
+  const before=structuredClone(life);
+  assert.equal(configureLivingMarketLife(life,{sourceEventId:'hindsight',profile:'ADAPTIVE_BOSS'}).reason,'FRESH_FIXTURE_REQUIRED');
+  assert.deepEqual(life,before);
+});
+
+test('LivingMarket transfer rejects corrupted pools, integer overflow, changed ownership and time reversal atomically',()=>{
+  for(const corrupt of [l=>{l.livingMarket.energyUnits=-1},l=>{l.livingMarket.massUnits=.5},l=>{l.livingMarket.revision=Number.MAX_SAFE_INTEGER},
+    l=>{l.ownerPlayerId='OWNER'},l=>{l.state='NAIHE'},l=>{l.livingMarket.lastInteractionAt=200}]){
+    const a=livingActor('CORRUPT-A'),b=livingActor('CORRUPT-B','MOMENTUM',{allowAbsorption:true});corrupt(b);
+    const before=structuredClone([a,b]);
+    assert.equal(interactLivingMarketLives(a,b,{action:'ABSORB',sequence:1,actorRevision:a.livingMarket.revision,targetRevision:b.livingMarket.revision,
+      energyUnits:1,massUnits:1,capability:livingCapability(a,b),now:100}).ok,false);
+    assert.deepEqual([a,b],before);
+  }
+  const a=livingActor('FULL','MOMENTUM',{energyUnits:Number.MAX_SAFE_INTEGER}),b=livingActor('OFFER','MOMENTUM',{allowAbsorption:true});
+  const before=structuredClone([a,b]);
+  assert.equal(interactLivingMarketLives(a,b,{action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,energyUnits:1,capability:livingCapability(a,b),now:100}).ok,false);
+  assert.deepEqual([a,b],before);
+});
+
+test('LivingMarket interaction history is bounded without reopening old sequence replay',()=>{
+  const a=livingActor('LONG-A'),b=livingActor('LONG-B');
+  for(let sequence=1;sequence<=40;sequence++)assert.equal(interactLivingMarketLives(a,b,{action:'ALLY',sequence,actorRevision:a.livingMarket.revision,
+    targetRevision:b.livingMarket.revision,capability:livingCapability(a,b),now:sequence}).ok,true);
+  assert.equal(a.livingMarket.events.length,32);assert.equal(b.livingMarket.events.length,32);
+  const before=structuredClone([a,b]);
+  assert.equal(interactLivingMarketLives(a,b,{action:'ALLY',sequence:1,actorRevision:40,targetRevision:40,capability:livingCapability(a,b),now:41}).reason,'REPLAY_OR_STALE_REVISION');
+  assert.deepEqual([a,b],before);
+});
+
+test('LivingMarket snapshot never projects a signal before its issuance or the last observed host clock',()=>{
+  const life=livingActor('SNAPSHOT-CLOCK');livingFeed(life,1000,100);
+  observeTrainingMarket(life,livingQuote(6000,101),{now:12000});
+  assert.equal(life.training.pending.issuedAt,12000);assert.equal(life.training.intent.issuedAt,12000);
+  const before=structuredClone(life);
+  for(const now of [6500,11999,NaN,-1,12000.5]){
+    const view=livingMarketDecisionSnapshot(life,{now});
+    assert.equal(view.status,'INVALID');assert.equal(view.decision,'WAIT');assert.equal(view.motion.requestedSpeedFactor,0);
+  }
+  assert.equal(livingMarketDecisionSnapshot(life,{now:12000}).decision,'LONG');assert.deepEqual(life,before,'projection remains read-only');
+});
+
+test('LivingMarket removed pending market invalidates instead of throwing or scoring a different market',()=>{
+  const life=livingActor('REMOVED-MARKET');livingFeed(life,1000,100);livingFeed(life,6000,101);
+  for(let at=11000;at<=61000;at+=5000)livingFeed(life,at,102);
+  life.marketDimensions=['ETHUSDT'];
+  const changed=livingQuote(66000,999,{markets:[{axis:'KY',symbol:'ETHUSDT',price:999}]});
+  const view=observeTrainingMarket(life,changed,{now:66000});
+  assert.equal(view.decision,'WAIT');assert.equal(life.training.pending,null);assert.equal(life.training.session.resolved,0);
+  assert.ok(life.training.audit.some(e=>e.reason==='MARKET_CAPABILITY_CHANGED'));
+});
+
+test('LivingMarket setup requires host wrapper provenance and rejects sourceType and wrapper-only logistics ownership',()=>{
+  const bare=createMarketLife({lifeId:'BARE',species:'STONE_APE'});
+  assert.equal(configureLivingMarketLife(bare,{sourceEventId:'fixture'}).reason,'HOST_LOCAL_FIXTURE_CONTEXT_REQUIRED');
+  for(const edit of [
+    (l,e)=>{l.sourceType='PLAYER_OWNED'},(l,e)=>{l.mission={type:'LOGISTICS',cargo:'BTC'}},
+    (l,e)=>{e.sourceManaged=true},(l,e)=>{e.cargo={principal:100}},(l,e)=>{e.mission={type:'LOGISTICS'}},
+    (l,e)=>{e.ownerPlayerId='OWNER'},(l,e)=>{e.sourceMeta.sourceType='PLAYER_OWNED'},
+    (l,e)=>{e.sourceMeta.sourceClass='BRAIN_LOGISTICS'},(l,e)=>{e.lifeId='OTHER'},
+    (l,e)=>{e.sourceMeta.sourceEventId='OTHER'},
+  ]){
+    const life=createMarketLife({lifeId:'WRAPPED',species:'STONE_APE'});
+    const entity={lifeId:life.lifeId,marketLife:life,sourceManaged:false,simulationOnly:true,
+      sourceMeta:{scope:'LOCAL_GAME_NPC_ONLY',sourceType:'WORLD_EVENT',sourceEventId:'fixture'}};
+    edit(life,entity);const before=structuredClone(life);
+    assert.equal(configureLivingMarketLife(life,{sourceEntity:entity,sourceEventId:'fixture'}).ok,false);assert.deepEqual(life,before);
+  }
+});
+
+test('LivingMarket interactions revalidate external host ownership and source context on every transition',()=>{
+  for(const edit of [e=>{e.ownerLandId='PLOT'},e=>{e.sourceMeta.sourceType='PLAYER_OWNED'},e=>{e.mission={type:'LOGISTICS'}},
+    e=>{e.sourceManaged=true},e=>{e.cargo={principal:1}},e=>{e.sourceMeta.sourceEventId='REPLACED'}]){
+    const a=livingActor('CONTEXT-A'),b=livingActor('CONTEXT-B','MOMENTUM',{allowAbsorption:true});
+    edit(livingTestEntities.get(b));const before=structuredClone([a,b]);
+    assert.equal(interactLivingMarketLives(a,b,{action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,
+      energyUnits:1,capability:livingCapability(a,b),now:100}).reason,'OWNED_OR_SOURCE_MANAGED_LIFE_DENIED');
+    assert.deepEqual([a,b],before);
+  }
+});
+
+test('LivingMarket serialized clones cannot restore provenance or gain interaction authority',()=>{
+  const a=livingActor('CLONE-A'),b=livingActor('CLONE-B','MOMENTUM',{allowAbsorption:true});
+  assert.doesNotThrow(()=>JSON.stringify([a,b]),'host world-entity references cannot introduce serializable cycles');
+  const [aa,bb]=structuredClone([a,b]),before=structuredClone([aa,bb]);
+  assert.equal(interactLivingMarketLives(aa,bb,{action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,
+    energyUnits:1,capability:livingCapability(aa,bb),now:100}).reason,'OWNED_OR_SOURCE_MANAGED_LIFE_DENIED');
+  assert.deepEqual([aa,bb],before);
+});
+
+test('LivingMarket one-transition unit cap cannot be reused by advancing sequence and revisions',()=>{
+  const a=livingActor('SINGLE-A'),b=livingActor('SINGLE-B','MOMENTUM',{allowAbsorption:true});
+  const capability={...livingCapability(a,b),maxEnergyUnits:1,maxMassUnits:0};
+  const request={action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,energyUnits:1,capability,now:100};
+  assert.equal(interactLivingMarketLives(a,b,request).ok,true);
+  const before=structuredClone([a,b]);
+  assert.equal(interactLivingMarketLives(a,b,{...request,sequence:2,actorRevision:1,targetRevision:1,now:101}).reason,'CAPABILITY_ALREADY_USED_OR_STALE');
+  assert.deepEqual([a,b],before);assert.equal(a.livingMarket.energyUnits,11);assert.equal(b.livingMarket.energyUnits,9);
+});
+
+test('LivingMarket generated transfer cases preserve exact integer energy and mass without touching financial records',()=>{
+  for(let n=0;n<60;n++){
+    const a=livingActor(`CONSERVE-A-${n}`,'MOMENTUM',{energyUnits:n,massUnits:2*n}),b=livingActor(`CONSERVE-B-${n}`,'MOMENTUM',{energyUnits:100,massUnits:100,allowAbsorption:true});
+    const energy=n%11,mass=n%5,capability={...livingCapability(a,b),maxEnergyUnits:10,maxMassUnits:4};
+    assert.equal(interactLivingMarketLives(a,b,{action:'ABSORB',sequence:1,actorRevision:0,targetRevision:0,energyUnits:energy,massUnits:mass,capability,now:n}).ok,true);
+    assert.equal(BigInt(a.livingMarket.energyUnits)+BigInt(b.livingMarket.energyUnits),BigInt(n+100));
+    assert.equal(BigInt(a.livingMarket.massUnits)+BigInt(b.livingMarket.massUnits),BigInt(2*n+100));
+    assert.equal(a.capital+b.capital,50);assert.deepEqual([a.positions,b.positions],[{},{}]);
+  }
+});
+
+import {getRealTradingBinding as livingCanonicalBinding} from '../runtime/real-trading-market-binding.mjs';
+test('LivingMarket canonical symbol-axis owner rejects every wrong pair before warmup or actionable intent',()=>{
+  const bindings=['KX','KY','KZ'].map(livingCanonicalBinding);
+  for(const symbolBinding of bindings)for(const axisBinding of bindings){
+    if(symbolBinding.axis===axisBinding.axis)continue;
+    const life=createMarketLife({lifeId:`WRONG-${symbolBinding.axis}-${axisBinding.axis}`,markets:[symbolBinding.market]});
+    for(const [at,price] of [[1000,100],[6000,101],[11000,102]]){
+      const quote=livingQuote(at,price,{markets:[{axis:axisBinding.axis,symbol:symbolBinding.market,price}]});
+      assert.equal(observeTrainingMarket(life,quote,{now:at}),null);
+      assert.equal(life.training.reason,'AXIS_MARKET_BINDING_MISMATCH');assert.equal(life.training.dataStatus,'INVALID');
+      const view=livingMarketDecisionSnapshot(life,{now:at});assert.equal(view.decision,'WAIT');assert.equal(view.motion.requestedSpeedFactor,0);
+      assert.equal(life.training.session.issued,0);assert.equal(life.training.session.resolved,0);assert.equal(life.training.pending,null);
+    }
+  }
+});
+
+test('LivingMarket trusted world producer conforms to the existing binding owner and remains accepted',()=>{
+  const world=createWorldState(1000);
+  const bindings=['KX','KY','KZ'].map(livingCanonicalBinding);
+  const quotes=Object.fromEntries(bindings.map((binding,i)=>[binding.market,100+i]));
+  updateKMarketReference(world,quotes,1000);
+  const life=createMarketLife({lifeId:'PRODUCER-CONTRACT',markets:bindings.map(binding=>binding.market)});
+  let market=kMarketSnapshot(world,1000);
+  for(const row of market.markets)assert.equal(row.symbol,livingCanonicalBinding(row.axis).market);
+  assert.equal(observeTrainingMarket(life,market,{now:1000}).decision,'WAIT');
+  quotes[bindings[1].market]+=5;updateKMarketReference(world,quotes,6000);market=kMarketSnapshot(world,6000);
+  const intent=observeTrainingMarket(life,market,{now:6000});
+  assert.equal(intent.decision,'LONG');assert.equal(intent.market,bindings[1].market);assert.equal(intent.axis,bindings[1].axis);
+  assert.equal(life.training.pending.source,market.source);assert.equal(life.training.session.issued,1);
+});
