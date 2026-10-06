@@ -2337,3 +2337,139 @@ Main Universal：https://github.com/klineodyssey/kline-odyssey/actions/runs/3724
 
 另已讀 PR diff：8 個檔案、149 additions、66 deletions。已取得 artifact 清單，但未下載或執行。
 ```
+
+## Recovery freeze and normal engineering queue — 2026-10-06 15:24 UTC
+
+Human's later instruction resumes normal engineering while placing the six source-unverified scopes below in RECOVERY_FREEZE. This append-only decision receipt uses the existing Q20/#516 handoff owner. The historical 28-deliverable snapshot is retained exactly; none of its rows is retrospectively relabeled as permanently lost or fully recovered.
+
+The 117,042-byte Navigator archive remains PARTIAL_RECOVERY only. Support investigation belongs to 悟界/OpenAI Support and Constitution work belongs to 悟界; this receipt does not claim a message was sent, an ACK received, or authority granted. Do not repeat the frozen recovery investigation or Constitution reading. Platform-provided new recovery evidence may support a bounded ledger update. The six isolated scopes do not block normal engineering.
+
+#519 is the first release target under its existing applicable gates. At the later parent checkpoint below, platform authorization for mark-ready remained pending; no mutation was confirmed and this is not recorded as a technical failure. #520 and #521 return to the normal review/engineering queue. Priority does not establish completed release, merge or runtime acceptance.
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "EVENT": "HUMAN_RECOVERY_FREEZE_AND_ENGINEERING_QUEUE_RESUME",
+  "SOURCE_MESSAGE_ID": "Sentinel_a52af613c25c8191acd8919eaa4b9515",
+  "OBSERVED_AT": "2026-10-06T15:28:10Z",
+  "OBSERVED_MAIN": "e26f3a76ef0be7f43058225f46def3fbe123371e",
+  "SOURCE_HEAD": "444194b40e3cad76009c94377fe304ca35a017eb",
+  "BRANCH": "dot/engineering-handbook-20261006",
+  "PR": 516,
+  "PUBLICATION": "Containing commit; report PUSHED only after exact remote ref, tree and content readback",
+  "BOOT_SYNC": {
+    "scope": "Bounded source refresh; no formal admission, identity or complete Company layer execution claim",
+    "formal_boot_blob": "b85c9a34a81810e0063480092025a9ef02d456cc",
+    "company_boot_blob": "c58eddb13da0a3ee520202f253290f560f368f04",
+    "company_manifest_blob": "18a1b5fc3fd9d8bdcc9a3c8a3725a13221a49d65",
+    "agents_blob": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d",
+    "workspace_policy_blob": "88b39aa27261a5ade3c482d9576770d2fa4b03e3",
+    "physics_current_blob": "6eaa6d14d19f4f6d06d9172f1bd1a5cd55b35fcc",
+    "physics_read_scope": "Sections 235-236 source refresh only; no Physics change"
+  },
+  "FROZEN_ITEMS": [
+    {
+      "WORK_ID": "C-M2-LOCAL-PREREQUISITES",
+      "TRACK": "C / Q04",
+      "LAST_KNOWN_LOCAL_SHA": "acdd1817d7f191e53a3cd079dc2d8b944c9db0dc",
+      "DECISION_STATE": "RECOVERY_FREEZE",
+      "RECOVERY_ACTION": "NO_REPEATED_INVESTIGATION_OR_RECONSTRUCTION"
+    },
+    {
+      "WORK_ID": "F-SCENERY-ORIGINAL-GEOMETRY",
+      "TRACK": "F / Q15",
+      "LAST_KNOWN_LOCAL_SHA": "d27364e138577c6c7c32547de4c5140469f591dc",
+      "DECISION_STATE": "RECOVERY_FREEZE",
+      "RECOVERY_ACTION": "NO_REPEATED_INVESTIGATION_OR_RECONSTRUCTION"
+    },
+    {
+      "WORK_ID": "A-PLAYER-STRUCTURAL-STARTUP",
+      "TRACK": "A / Q02",
+      "LAST_KNOWN_LOCAL_SHA": "2cdf30d5fc7b026d95169e6ef52d689c7e7c852c",
+      "DECISION_STATE": "RECOVERY_FREEZE",
+      "RECOVERY_ACTION": "NO_REPEATED_INVESTIGATION_OR_RECONSTRUCTION"
+    },
+    {
+      "WORK_ID": "F-NAVIGATOR-MOTION",
+      "TRACK": "F / Q15",
+      "LAST_KNOWN_LOCAL_SHA": "a021e5e556a18df13d124e99fb9a75d751998bbd",
+      "DECISION_STATE": "RECOVERY_FREEZE",
+      "RECOVERY_ACTION": "NO_REPEATED_INVESTIGATION_OR_RECONSTRUCTION"
+    },
+    {
+      "WORK_ID": "F-AXE-FEEDBACK-INCREMENT",
+      "TRACK": "F / Q03",
+      "LAST_KNOWN_LOCAL_SHA": "dcf7b69fbc499f998c4223816a8356a2ff8fd71f",
+      "DECISION_STATE": "RECOVERY_FREEZE",
+      "RECOVERY_ACTION": "NO_REPEATED_INVESTIGATION_OR_RECONSTRUCTION"
+    },
+    {
+      "WORK_ID": "C-LEGACY-488-HARDENING",
+      "TRACK": "C / Q05",
+      "LAST_KNOWN_LOCAL_SHA": "e7b9bf82aba5373ba4173efe6a3af563fc582f8f",
+      "DECISION_STATE": "RECOVERY_FREEZE",
+      "RECOVERY_ACTION": "NO_REPEATED_INVESTIGATION_OR_RECONSTRUCTION"
+    }
+  ],
+  "FREEZE_MEANING": "Six source-unverified scopes stay frozen. Do not claim permanently LOST or fully RECOVERED; no renewed repeated investigation or implicit reconstruction.",
+  "NAVIGATOR_SUBSET": {
+    "head": "066e92390d4429a92b33016bfc1c58b3166dc168",
+    "blob": "65350fe6569059212f7ccc5b911605a123c3dc5e",
+    "bytes": 117042,
+    "scope": "Previously verified inert archive subset only; whole Navigator remains unverified",
+    "STATUS": "PARTIAL_RECOVERY"
+  },
+  "ROUTING": {
+    "vm_support": [
+      "悟界",
+      "OpenAI Support"
+    ],
+    "constitution": "悟界",
+    "scope": "Human routing decision only; no new contact, handoff delivery, recipient ACK, Constitution edit or authority grant",
+    "constitution_scope": "KAIOS Genesis Constitution V2.0; dot does not repeat the Constitution-source reading"
+  },
+  "QUEUE": [
+    {
+      "PR": 519,
+      "REMOTE_HEAD": "6c654ce367772420ae11fd30759c613dad7aa2ea",
+      "REMOTE_BRANCH": "dot/k11520-simulation-order-20261006",
+      "OBSERVED_STATE": "OPEN_DRAFT_NOT_MERGED",
+      "DECISION": "FIRST_RELEASE_TARGET_UNDER_APPLICABLE_REVIEW_CI_QA_GATES",
+      "EVIDENCE_URL": "https://github.com/klineodyssey/kline-odyssey/pull/519",
+      "RELEASE_STATUS": "PENDING_PLATFORM_AUTHORIZATION",
+      "BLOCKER": "Parent reports mark-ready authorization still blocked; no mutation confirmed, no alternate-route retry, not classified as a technical failure",
+      "BLOCKER_REPORTED_AT": "2026-10-06T15:29:39Z"
+    },
+    {
+      "PR": 520,
+      "REMOTE_HEAD": "e95ae3a0e4c772af50644bf628e15801de65b97e",
+      "REMOTE_BRANCH": "dot/customer-project-v2-evidence-20261006",
+      "OBSERVED_STATE": "OPEN_DRAFT_NOT_MERGED",
+      "DECISION": "NORMAL_REVIEW_QUEUE",
+      "EVIDENCE_URL": "https://github.com/klineodyssey/kline-odyssey/pull/520"
+    },
+    {
+      "PR": 521,
+      "REMOTE_HEAD": "eacb58a4004495f0675e09e260ccd9f09e66fb6d",
+      "REMOTE_BRANCH": "dot/recovery-async-caller-20261006",
+      "OBSERVED_STATE": "OPEN_DRAFT_NOT_MERGED",
+      "DECISION": "NORMAL_REVIEW_QUEUE",
+      "EVIDENCE_URL": "https://github.com/klineodyssey/kline-odyssey/pull/521"
+    }
+  ],
+  "HISTORICAL_LEDGER": "All prior 28-item snapshot bytes, classifications, evidence and counts remain unchanged; this event records a later operating decision",
+  "DATA_LOSS_RISK": {
+    "new_checkpoint": "Not considered durable until remote readback; publication status belongs to the external PR checkpoint envelope",
+    "frozen_original_sources": "Unavailability remains unresolved and frozen; no claim of permanent loss, zero risk or whole-source recovery"
+  },
+  "TESTS": "NO_RUNTIME_TESTS_RUN; documentation JSON, prefix, diff, scope and secret checks only",
+  "CI": "Existing handoff path matches none of 19 unchanged workflow definitions at observed main; absence is not CI PASS",
+  "NEXT_ACTION": "Continue #519 release work in its existing lane, retain #520/#521 normal review queue, and checkpoint future meaningful authorized work early",
+  "AUTHORITY": "Documentation-only decision receipt; no formal queue mutation, new physics/identity/permissions, protected Boot/Constitution edit, merge, deployment or financial execution",
+  "SOURCE_TIME": "2026-10-06T15:24:53Z",
+  "RECORDED_AT": "2026-10-06T15:29:39Z",
+  "NEW_RECOVERY_EVIDENCE_TRIGGER": "If the platform supplies new recovery evidence, append a bounded ledger update; do not repeat VM lifecycle investigation",
+  "NORMAL_ENGINEERING_BLOCKED_BY_FREEZE": false
+}
+```
