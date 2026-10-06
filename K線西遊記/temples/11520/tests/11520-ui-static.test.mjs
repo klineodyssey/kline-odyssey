@@ -581,3 +581,20 @@ test('offline acceptance closes each open surface once and awaits its completed 
   assert.deepEqual(clicks,open?['#cancelOrder','#sheetClose']:[]);assert.deepEqual(waits,['#confirm','#sheet']);
  }
 });
+
+test('camera QA reacquires only rejected native origins with a fixed budget and complete evidence',async()=>{
+ const {runInNewContext}=await import('node:vm'),source=read('./11520-browser-responsive.mjs');
+ const start=source.indexOf('async function acquireAdmittedCameraPan('),fn=source.slice(start,source.indexOf('// Real entry only:',start));
+ const context={};runInNewContext(fn+';globalThis.acquire=acquireAdmittedCameraPan;',context);
+ const fixture=(outcomes,{pickCost=10,beginCost=10,downOverride=null}={})=>{let time=0,begins=0,cancels=0;const records=[];return{records,get counts(){return{begins,cancels}},options:{records,now:()=>time,pick:async()=>{time+=pickCost;return{origin:{x:212,y:116},before:{camera:{manual:false},player:{x:422,y:216}}}},begin:async()=>{begins++;time+=beginCost},cancel:async()=>{cancels++},inspect:async()=>({down:downOverride??{type:'pointerdown',target:'three',isTrusted:true,canPan:outcomes[begins-1]},camera:{manual:false}})}}};
+ const first=fixture([true]);const admitted=await context.acquire(first.options);assert.equal(admitted.admission.admitted,true);assert.deepEqual(first.counts,{begins:1,cancels:0});
+ const moved=fixture([false,true]);await context.acquire(moved.options);assert.deepEqual(moved.counts,{begins:2,cancels:1});assert.equal(moved.records[0].reason,'ORIGIN_REJECTED_AT_NATIVE_DOWN');assert.ok(moved.records[0].afterCancel);assert.equal(moved.records[1].admitted,true);
+ const rejected=fixture([false,false,false,true]);await assert.rejects(context.acquire(rejected.options),/3_ATTEMPTS_1000MS/);assert.deepEqual(rejected.counts,{begins:3,cancels:3});assert.equal(rejected.records.length,3);
+ const slow=fixture([true],{pickCost:1000});await assert.rejects(context.acquire(slow.options),/3_ATTEMPTS_1000MS/);assert.equal(slow.counts.begins,0,'no late native attempt after acquisition deadline');
+ const delayed=fixture([true],{beginCost:1000});await assert.rejects(context.acquire(delayed.options),/ACQUISITION_BUDGET_EXPIRED/);assert.deepEqual(delayed.counts,{begins:1,cancels:1});
+ for(const downOverride of [{type:'pointerdown',target:'three',isTrusted:false,canPan:true},{type:'pointerdown',target:'button',isTrusted:true,canPan:true}]){const wrong=fixture([true],{downOverride});await assert.rejects(context.acquire(wrong.options),/TRUSTED_CANVAS_DOWN_REQUIRED/);assert.deepEqual(wrong.counts,{begins:1,cancels:1})}
+ for(const canPan of [undefined,null,'false',1]){const malformed=fixture([false,true],{downOverride:{type:'pointerdown',target:'three',isTrusted:true,canPan}});await assert.rejects(context.acquire(malformed.options),/BOOLEAN_PAN_ELIGIBILITY_REQUIRED/);assert.deepEqual(malformed.counts,{begins:1,cancels:1})}
+ const movement=source.slice(source.indexOf('const attempt={name,origin:gesturePoint'),source.indexOf('result.pointerTrace=await page.evaluate'));
+ assert.match(movement,/sign>8/);assert.match(movement,/timeout:3000/);assert.match(movement,/after\.camera\.playerXYZ,start\.playerXYZ/);
+ assert.doesNotMatch(movement,/acquireAdmittedCameraPan|continue|catch\s*\(/,'a failed admitted movement is never retried or ignored');
+});
