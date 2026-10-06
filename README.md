@@ -6,6 +6,10 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+## dot engineering reference
+
+[docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md](docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md): Human-requested cross-project Boot-first engineering reference, canonical source map and twenty-package checkpoint. Review candidate; not Physics, identity, dispatch or financial authority.
+
 ### KAIOS Backend / Recovery V1 review candidate
 
 Portable authenticated Player Life sync, immutable backups and a Traditional Chinese

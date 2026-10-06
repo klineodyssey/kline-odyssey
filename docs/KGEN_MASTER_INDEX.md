@@ -1,5 +1,9 @@
 # KGEN MASTER_INDEX
 
+## dot engineering handbook review candidate — 2026-10-06
+
+- [`docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md`](KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md): cross-project engineering reference, Canon/source boundaries, exact-evidence handoff and twenty stable work packages. No Runtime/identity/financial authority. Protected Boot inventory is proposed but not modified.
+
 ## KAIOS Backend / Recovery V1 candidate (2026-10-04)
 
 - `KAIOS/backend/README.md`: complete new service/file inventory.
