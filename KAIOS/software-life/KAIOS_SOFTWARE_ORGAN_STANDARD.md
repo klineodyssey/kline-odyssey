@@ -246,3 +246,80 @@ nonstandard JSON Schema annotations.
 
 This standard defines a simulation review contract. It does not perform a
 transplant or activate any organ.
+
+## 12. Source-Bound App Composition Research Candidate (2026-10-06)
+
+Status: `LOCAL_CANDIDATE / STAGE_A / PENDING_REVIEW`. This additive section does
+not change sections 1–11, the formal compatibility JSON schema, its fourteen
+gates, or the immutable `cc80135f2c6e6a74aad11f34e793c65ac0ee1938` authority
+epoch. It does not grant transplant approval, certification, listing or Rights.
+
+The current Navigation, world-game and Audio implementations are not admitted
+Software Life donor organs in that epoch. Their candidate identifiers therefore
+use `CANDIDATE-*` artifact IDs. No Life, Species, Genome, Worker or Employee ID is
+created. Taxonomy descriptions use the existing exact 12/19 crosswalk and are
+prefixed `CANDIDATE:`; they are not Species registration records.
+
+The existing `tools/validate-software-organ-transplant.mjs` now has a separate
+`validateSoftwareCompositionCandidate(contract, host)` research entry point.
+It composes the existing schema's repository path, commit, SHA-256, quantity,
+interface, organ-type and denied-security subcontracts and the existing Software
+Life taxonomy binding. It does not accept caller-supplied schemas or Registries.
+The formal `validateSoftwareOrganTransplant` function is unchanged.
+
+A candidate binds all of the following:
+
+- Candidate artifact ID, schema version, contract version and source commit.
+- Existing taxonomy owners and exact rank names, explicitly candidate-valued.
+- Structural DNA and command RNA hashes from the existing App owner.
+- Every donor's current permanent source path, Git blob and byte SHA-256.
+- The audited local ESM dependency closure, at the same immutable commit, with
+  current regular-file bytes matching every recorded source hash.
+- Existing organ type, input/output interface, explicit dependency order,
+  compatibility digest and non-escalating host permissions.
+- A bounded event count and local-meter step size. These are logical work
+  budgets, not measured CPU, memory or physical energy attestations.
+
+The compatibility digest reuses the existing organ signature helper with null
+Life/Genome identity slots. It is a content digest, not a cryptographic signature
+or authenticated approval. `contract_hash` binds the entire candidate including
+source commit, dependency bytes and budgets. The host must freshly validate that
+contract before using its digest to create or reconstruct a candidate session.
+A digest copied from an imported snapshot is not trusted contract evidence.
+
+Outcomes are `COMPATIBLE_CANDIDATE`, `REJECTED`, or `ADAPTER_REQUIRED`.
+DNA/RNA/source/dependency/permission failures reject. API version or coordinate
+frame mismatch requires a separately reviewed source-bound adapter; this slice
+executes no adapters and never coerces K-index into local meters. A compatible
+candidate still returns `formal_admission: NOT_ADMITTED`, `certified: false`,
+`listed: false`, and `registered_life_created: false`.
+
+The existing `core/apps/index.mjs` owns the small pure candidate state/event
+helper. The host injects the current `vectorToward3D` and `resolvePlayerMove`
+functions; the helper never chooses an import or evaluates executable JSON.
+Navigation proposes a vector, the world owner resolves collision, and the
+candidate records a movement result. A blocked movement may emit the existing
+Audio `BLOCKED` intent. The host alone dispatches an accepted new event to the
+existing Audio owner; gesture, mute and resource bounds remain that owner's
+responsibility. Reconstructing or rolling back state never dispatches Audio.
+
+Arrival uses the existing Navigation semantics at the accepted post-collision
+position, never the pre-move position or an unaccepted proposed destination.
+Collision denial remains `MOVEMENT_BLOCKED`; non-arrived partial, clamped or
+detoured movement remains `MOVED`. This basis is included in the RNA digest,
+without adding a new arrival tolerance or changing the live Navigation owner.
+
+Snapshots contain only the candidate contract reference, finite XYZ state,
+injected logical clock, budgets and deterministic command/event chain. They
+contain no AudioContext, private identity, wallet, account, localStorage, market
+inventory or backend projection. JSON export/reconstruction verifies SHA-256,
+exact contract/version/budgets, sequence, event hashes and deterministic replay.
+This demonstrates a local reconstruction, not durable backup or a signed
+attestation. Rollback restores the exact baseline position, retains append-only
+history and closes the candidate session. Replayed event sequences are rejected.
+
+The test fixture's source epoch is main
+`e26f3a76ef0be7f43058225f46def3fbe123371e`. Future donor byte changes require
+explicit source-bound candidate review, not automatically updating hashes until
+tests pass. The live `game-5d-main.mjs` already composes these donors and remains
+the sole live game owner; this research adds no bootstrap or public route.

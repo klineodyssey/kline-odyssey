@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { renameSync, rmSync, symlinkSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import {
@@ -15,10 +15,17 @@ import {
   computeReviewerProvenanceSubjectHash,
   computeReplayStateHash,
   computeTransplantEventHash,
+  computeCandidateOrganSignature,
+  validateSoftwareCompositionCandidate,
   isAuthorizedWorker,
   validateJsonSchema202012,
   validateSoftwareOrganTransplant
 } from "../tools/validate-software-organ-transplant.mjs";
+import { CANDIDATE_APP_STATE_SCHEMA, CANDIDATE_APP_RNA_CONTRACT, createCandidateAppComposition,
+  advanceCandidateAppComposition, exportCandidateAppComposition, reconstructCandidateAppComposition } from "../../../core/apps/index.mjs";
+import { planePointToWorld, vectorToward3D } from "../../../K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs";
+import { resolvePlayerMove, createWorldState, serializeWorld, selectJourneyLoot } from "../../../K線西遊記/temples/11520/runtime/world-runtime.mjs";
+import { createKaiosAudio } from "../../../assets/kaios-audio.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "../../..");
@@ -1078,4 +1085,344 @@ test("rollback execution must bind the reviewed rollback plan action", () => {
   const codes = new Set(validate(record).errors.map(({ code }) => code));
   assert.ok(codes.has("ROLLBACK_PLAN_STEPS_INVALID"));
   assert.ok(codes.has("EVENT_NOT_IN_ROLLBACK_PLAN"));
+});
+
+// Human-authorized 2026-10-06 Stage A. These are test artifacts, never Registry
+// entries, Species births, App releases, durable backups or market listings.
+const candidateSourceCommit = 'e26f3a76ef0be7f43058225f46def3fbe123371e';
+const candidateDonorSources = [
+  ['NAVIGATION', 'LOCATION_ORGAN', 'K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs', '7833a4f19249c45dc9ad14a2e369d8223db8f840', 'e1365b101dc942e02975b4df17760caa632f4ebcf111191e7b64f9bb59741c5e'],
+  ['GAME', 'PROCESSING_ORGAN', 'K線西遊記/temples/11520/runtime/world-runtime.mjs', '4fbd285c400044afeb82db95b6a17b9697ddf606', 'f46e11484688c1612da3770405be86a0effb74dcc21b0628edab01b6708fc2d5'],
+  ['AUDIO', 'OUTPUT_ORGAN', 'assets/kaios-audio.mjs', '711fee90637b2e7983dc430a6dbd79dadd2a418d', 'a285dada9cc571b62fc76d8cb93b76c35a7c496d70589acceafcdfa2cb3629e8']
+];
+const candidateSources = new Map();
+function bindCandidateSource(path) {
+  if (candidateSources.has(path)) return;
+  const bytes = gitBlob(candidateSourceCommit, path);
+  const git_blob = execFileSync('git', ['rev-parse', `${candidateSourceCommit}:${path}`], { cwd: root, encoding: 'utf8' }).trim();
+  candidateSources.set(path, { path, git_blob, sha256: computeContentHash(bytes) });
+  for (const match of bytes.toString('utf8').matchAll(/\b(?:import|export)\s+(?:[^;]*?\s+from\s*)?["']([^"']+)["']/g)) {
+    assert.ok(match[1].startsWith('.'), `source closure is local: ${path}`);
+    bindCandidateSource(relative(root, resolve(root, dirname(path), match[1])).replaceAll('\\', '/'));
+  }
+}
+candidateDonorSources.forEach(([, , path]) => bindCandidateSource(path));
+const candidateCrosswalk = await readJson('KAIOS/software-life/KAIOS_SOFTWARE_LIFE_TAXONOMY_CROSSWALK.json');
+const candidateHost = () => ({ api_version: '1.0.0', coordinate_space: 'LOCAL_METERS',
+  permissions: ['LOCAL_SIMULATION', 'HOST_GESTURE_AUDIO'], available_dependencies: ['NAVIGATION', 'GAME', 'AUDIO'],
+  max_steps: 16, max_step_meters: 1 });
+const resignCandidate = (contract) => {
+  for (const donor of contract.donors) donor.compatibility_signature = computeCandidateOrganSignature(donor, contract);
+  return contract;
+};
+function candidateContract() {
+  const rna = computeReplayStateHash(CANDIDATE_APP_RNA_CONTRACT);
+  const layers = Object.fromEntries(candidateCrosswalk.extension_19.map(({ layer, software_binding }) => [layer, `CANDIDATE:${software_binding}`]));
+  const contract = {
+    candidate_id: 'CANDIDATE-11520-COMPOSITION', schema_version: '1.0.0', version: '0.1.0', status: 'CANDIDATE_ONLY',
+    source_commit: candidateSourceCommit, dna_hash: computeReplayStateHash(CANDIDATE_APP_STATE_SCHEMA), rna_hash: rna,
+    api_version: '1.0.0', coordinate_space: 'LOCAL_METERS', permissions: ['LOCAL_SIMULATION', 'HOST_GESTURE_AUDIO'],
+    resource_budget: { steps: quantity(16, 'event'), step_distance: quantity(1, 'meter') },
+    security_boundary: Object.fromEntries(Object.keys(schema.$defs.securityBoundary.properties).map((key) => [key, key === 'simulation_only'])),
+    taxonomy: {
+      owner_12: candidateCrosswalk.owners.canonical_twelve_level_registry, owner_19: candidateCrosswalk.owners.canonical_nineteen_layer_extension,
+      levels_12: { domain: layers.Domain, kingdom: layers.Kingdom, phylum: layers.Phylum,
+        class: `CANDIDATE:${candidateCrosswalk.application_bindings.find(({ life_type }) => life_type === 'APPLICATION').twelve_level_class}`,
+        order: layers.Order, family: layers.Family, genus: layers.Genus, species: layers.Species,
+        cell: layers.Cell, organ: layers.Organ, runtime: layers.Expression, civilization: 'CANDIDATE:KAIOS_SIMULATION' },
+      levels_19: layers
+    },
+    sources: structuredClone([...candidateSources.values()].sort((a, b) => a.path.localeCompare(b.path))),
+    donors: candidateDonorSources.map(([role, organ_type, source_path]) => {
+      const entry = (direction) => ({ interface_id: `CANDIDATE-${role}-${direction}`, direction, protocol: 'IN_PROCESS_CALL',
+        contract_hash: computeReplayStateHash(CANDIDATE_APP_RNA_CONTRACT.ports[role][direction.toLowerCase()]),
+        data_classification: 'CANDIDATE_ONLY', cardinality: 'ONE', required: true, mutation_allowed: false, adapter_organ_id: null });
+      return { candidate_artifact_id: `CANDIDATE-${role}`, role, organ_type, source_path, contract_version: '1.0.0',
+        input_interface: [entry('INPUT')], output_interface: [entry('OUTPUT')],
+        dependencies: role === 'NAVIGATION' ? [] : role === 'GAME' ? ['NAVIGATION'] : ['GAME'], compatibility_signature: hash('0') };
+    })
+  };
+  return resignCandidate(contract);
+}
+const candidateCodes = (contract, host = candidateHost()) => new Set(validateSoftwareCompositionCandidate(contract, host).errors.map(({ code }) => code));
+const candidatePorts = { vectorToward: vectorToward3D, resolveMove: resolvePlayerMove };
+function candidateExpected(contract = candidateContract()) {
+  const report = validateSoftwareCompositionCandidate(contract, candidateHost());
+  assert.equal(report.ok, true, JSON.stringify(report.errors));
+  return { candidateId: contract.candidate_id, contractHash: report.contract_hash, version: contract.version,
+    maxSteps: contract.resource_budget.steps.value, maxStepMeters: contract.resource_budget.step_distance.value };
+}
+const candidateMove = (sequence, target = { x: 8, y: 0, z: 5 }) => ({ sequence, clock_ms: 1000 + sequence * 100,
+  action: 'MOVE', target, step_meters: 1 });
+const startCandidate = (expected = candidateExpected()) => createCandidateAppComposition({ ...expected, position: { x: 8, y: 0, z: 2 }, clockMs: 1000 });
+
+// An injected, silent test host. It exercises the REAL Audio owner without
+// constructing a browser AudioContext, opening a channel or touching storage.
+function candidateAudioHost() {
+  const contexts = [], timeouts = new Map(); let timer = 0;
+  class Param { value = 0; cancelScheduledValues() {} setValueAtTime(value) { this.value = value; }
+    linearRampToValueAtTime(value) { this.value = value; } exponentialRampToValueAtTime(value) { this.value = value; } }
+  class AudioNode { gain = new Param(); frequency = new Param(); connect() {} disconnect() {} start() {} stop() {} }
+  class AudioContext { state = 'suspended'; currentTime = 1; destination = {}; nodes = [];
+    constructor() { contexts.push(this); } createGain() { return new AudioNode(); }
+    createOscillator() { const node = new AudioNode(); this.nodes.push(node); return node; }
+    async resume() { this.state = 'running'; } async close() { this.state = 'closed'; } }
+  const audio = createKaiosAudio({ env: {}, document: null, storage: null, AudioContext,
+    setTimeout: (fn) => { timeouts.set(++timer, fn); return timer; }, clearTimeout: (id) => timeouts.delete(id) });
+  return { audio, contexts, timeouts };
+}
+
+test('candidate: source-bound 12/19 taxonomy and existing organ subcontracts validate without admission', () => {
+  const contract = candidateContract(); const report = validateSoftwareCompositionCandidate(contract, candidateHost());
+  assert.equal(report.ok, true, JSON.stringify(report.errors));
+  assert.equal(report.decision, 'COMPATIBLE_CANDIDATE'); assert.equal(report.formal_admission, 'NOT_ADMITTED');
+  assert.equal(report.formal_authority_epoch, 'cc80135f2c6e6a74aad11f34e793c65ac0ee1938');
+  assert.equal(report.registered_life_created, false); assert.equal(report.certified, false); assert.equal(report.listed, false);
+  assert.equal(report.contract_hash, computeReplayStateHash(contract));
+  for (const [, , path, blob, sha] of candidateDonorSources) {
+    assert.deepEqual(candidateSources.get(path), { path, git_blob: blob, sha256: sha });
+  }
+  assert.ok(candidateSources.size > 3, 'dependency source closure is also bound');
+});
+
+test('candidate: missing/extra ranks and formal taxonomy identity claims are rejected', () => {
+  for (const mutate of [c => delete c.taxonomy.levels_12.cell, c => { c.taxonomy.levels_19.NewRank = 'CANDIDATE:new'; },
+    c => { c.taxonomy.levels_12.species = 'SPECIES-FORMAL-UNREGISTERED'; }, c => { c.taxonomy.owner_12 = 'new-taxonomy.json'; },
+    c => { c.taxonomy.levels_12.class = 'CANDIDATE:UNRELATED_ANIMAL_CLASS'; }]) {
+    const c = candidateContract(); mutate(c); assert.equal(validateSoftwareCompositionCandidate(c, candidateHost()).ok, false);
+  }
+});
+
+test('candidate: wrong DNA, RNA and future schema/version fail closed even after rehashing', () => {
+  for (const [field, value, code] of [['dna_hash', hash('0'), 'CANDIDATE_DNA_MISMATCH'], ['rna_hash', hash('0'), 'CANDIDATE_RNA_MISMATCH'],
+    ['schema_version', '2.0.0', 'CANDIDATE_SCHEMA_INVALID'], ['version', '1.0.0', 'CANDIDATE_SCHEMA_INVALID']]) {
+    const c = candidateContract(); c[field] = value; resignCandidate(c); assert.ok(candidateCodes(c).has(code), field);
+  }
+});
+
+test('candidate: API version/frame mismatch requires an adapter and never silently coerces', () => {
+  for (const [key, value] of [['api_version', '2.0.0'], ['coordinate_space', 'K_INDEX']]) {
+    const host = candidateHost(); host[key] = value;
+    const report = validateSoftwareCompositionCandidate(candidateContract(), host);
+    assert.equal(report.ok, false); assert.equal(report.decision, 'ADAPTER_REQUIRED'); assert.equal(report.contract_hash, null);
+  }
+});
+
+test('candidate: missing donor, imported module, host dependency and cycles are rejected', () => {
+  let c = candidateContract(); c.donors.pop(); assert.ok(candidateCodes(c).has('CANDIDATE_SCHEMA_INVALID'));
+  c = candidateContract(); c.sources = c.sources.filter(({ path }) => !path.endsWith('/spatial-coordinate-runtime.mjs')); resignCandidate(c);
+  assert.ok(candidateCodes(c).has('CANDIDATE_DEPENDENCY_MISSING'));
+  c = candidateContract(); c.donors[0].dependencies = ['AUDIO']; resignCandidate(c); assert.ok(candidateCodes(c).has('CANDIDATE_DEPENDENCY_INVALID'));
+  const host = candidateHost(); host.available_dependencies.pop(); assert.ok(candidateCodes(candidateContract(), host).has('CANDIDATE_HOST_DEPENDENCY_MISSING'));
+});
+
+test('candidate: permission escalation, missing host permission, budget and ownership claims are denied', () => {
+  for (const mutate of [c => c.permissions.push('SIGN_TRANSACTION'), c => { c.security_boundary.real_ownership_transfer = true; },
+    c => { c.status = 'COMPLETE'; }, c => { c.certified = true; }, c => { c.resource_budget.steps.value = 1000; },
+    c => { c.resource_budget.step_distance.unit = 'K_INDEX'; }]) {
+    const c = candidateContract(); mutate(c); resignCandidate(c); assert.equal(validateSoftwareCompositionCandidate(c, candidateHost()).ok, false);
+  }
+  const host = candidateHost(); host.permissions.pop(); assert.ok(candidateCodes(candidateContract(), host).has('CANDIDATE_HOST_PERMISSION_MISSING'));
+  host.permissions.push('HOST_GESTURE_AUDIO'); host.max_steps = 1; assert.ok(candidateCodes(candidateContract(), host).has('CANDIDATE_HOST_CAPACITY_MISSING'));
+});
+
+test('candidate: donor content hash, Git blob, source commit and compatibility digest tampering are denied', () => {
+  for (const field of ['git_blob', 'sha256']) {
+    const c = candidateContract(); c.sources[0][field] = field === 'git_blob' ? '0'.repeat(40) : hash('0'); resignCandidate(c);
+    assert.ok(candidateCodes(c).has('CANDIDATE_SOURCE_HASH_MISMATCH'), field);
+  }
+  let c = candidateContract(); c.source_commit = '0'.repeat(40); assert.ok(candidateCodes(c).has('CANDIDATE_SOURCE_COMMIT_INVALID'));
+  c = candidateContract(); c.donors[0].compatibility_signature = hash('0'); assert.ok(candidateCodes(c).has('CANDIDATE_SIGNATURE_INVALID'));
+  c = candidateContract(); c.donors[0].input_interface[0].adapter_organ_id = 'CANDIDATE-UNREVIEWED-ADAPTER'; resignCandidate(c);
+  assert.ok(candidateCodes(c).has('CANDIDATE_INTERFACE_INVALID'));
+});
+
+test('candidate: deterministic Navigation → world collision → event → injected Audio flow', async () => {
+  const expected = candidateExpected(); const initial = await startCandidate(expected);
+  const target = planePointToWorld({ px: 50, py: 35, width: 100, height: 100, center: initial.state.position, mode: 'XZ', range: 10 });
+  assert.deepEqual(target, { x: 8, y: 0, z: 5 });
+  const first = await advanceCandidateAppComposition(initial, candidateMove(1, target), candidatePorts);
+  assert.equal(first.events[0].outcome, 'MOVED'); assert.deepEqual(first.state.position, { x: 8, y: 0, z: 3 });
+  const blocked = await advanceCandidateAppComposition(first, candidateMove(2, target), candidatePorts);
+  assert.equal(blocked.events[1].outcome, 'MOVEMENT_BLOCKED'); assert.deepEqual(blocked.state.position, first.state.position);
+  assert.equal(blocked.events[1].audio_intent, 'BLOCKED'); assert.equal(initial.events.length, 0);
+  const host = candidateAudioHost();
+  assert.equal(host.audio.play(blocked.events[1].audio_intent), false); assert.equal(host.contexts.length, 0, 'no autoplay');
+  await host.audio.unlock(); assert.equal(host.audio.play(blocked.events[1].audio_intent), true);
+  assert.equal(host.contexts.length, 1); assert.ok(host.audio.snapshot().activeNodes <= 7);
+  host.audio.setMuted(true); assert.equal(host.audio.play(blocked.events[1].audio_intent), false);
+  assert.equal(host.audio.snapshot().activeNodes, 0); await host.audio.dispose();
+  let repeated = await startCandidate(expected);
+  for (const command of [candidateMove(1, target), candidateMove(2, target)]) repeated = await advanceCandidateAppComposition(repeated, command, candidatePorts);
+  assert.deepEqual(repeated, blocked);
+  const world = createWorldState(1000); assert.deepEqual(serializeWorld(world), serializeWorld(createWorldState(1000)));
+  assert.deepEqual(selectJourneyLoot('candidate-seed'), selectJourneyLoot('candidate-seed'));
+});
+
+test('candidate: repeated commands, clock regression, missing ports and unbounded motion fail without state mutation', async () => {
+  const initial = await startCandidate(); const one = await advanceCandidateAppComposition(initial, candidateMove(1), candidatePorts);
+  await assert.rejects(() => advanceCandidateAppComposition(one, candidateMove(1), candidatePorts), { code: 'CANDIDATE_REPLAY_REJECTED' });
+  await assert.rejects(() => advanceCandidateAppComposition(one, { ...candidateMove(2), clock_ms: 999 }, candidatePorts), { code: 'CANDIDATE_CLOCK_INVALID' });
+  await assert.rejects(() => advanceCandidateAppComposition(one, candidateMove(2), {}), { code: 'CANDIDATE_PORT_MISSING' });
+  await assert.rejects(() => advanceCandidateAppComposition(one, { ...candidateMove(2), step_meters: 2 }, candidatePorts), { code: 'CANDIDATE_COMMAND_INVALID' });
+  await assert.rejects(() => advanceCandidateAppComposition(one, candidateMove(2), { ...candidatePorts, resolveMove: () => ({ x: 999, y: 0, z: 0, blocked: false }) }), { code: 'CANDIDATE_PORT_INVALID' });
+  assert.equal(one.events.length, 1); assert.deepEqual(initial.state.position, { x: 8, y: 0, z: 2 });
+});
+
+test('candidate: baseline rollback is hash-chained, exact, terminal and silent', async () => {
+  const initial = await startCandidate(); const one = await advanceCandidateAppComposition(initial, candidateMove(1), candidatePorts);
+  const rollback = { sequence: 2, clock_ms: 1200, action: 'ROLLBACK', target: null, step_meters: 0 };
+  const restored = await advanceCandidateAppComposition(one, rollback, candidatePorts);
+  assert.deepEqual(restored.state.position, initial.state.position); assert.equal(restored.state.rolled_back, true);
+  assert.equal(restored.events[1].audio_intent, null); assert.equal(restored.events[1].previous_hash, one.head_hash);
+  await assert.rejects(() => advanceCandidateAppComposition(restored, candidateMove(3), candidatePorts), { code: 'CANDIDATE_STOPPED' });
+  assert.deepEqual(await reconstructCandidateAppComposition(await exportCandidateAppComposition(restored), candidateExpected(), candidatePorts), restored);
+});
+
+test('candidate: JSON reload reconstructs exactly with no restored AudioContext or replay effects', async () => {
+  const expected = candidateExpected(); let state = await startCandidate(expected);
+  state = await advanceCandidateAppComposition(state, candidateMove(1), candidatePorts);
+  state = await advanceCandidateAppComposition(state, candidateMove(2), candidatePorts);
+  const envelope = JSON.parse(JSON.stringify(await exportCandidateAppComposition(state)));
+  const audio = candidateAudioHost();
+  assert.deepEqual(await reconstructCandidateAppComposition(envelope, expected, candidatePorts), state);
+  assert.equal(audio.contexts.length, 0); assert.equal(audio.audio.snapshot().contextState, 'NOT_CREATED');
+  await audio.audio.dispose();
+});
+
+test('candidate: snapshot tamper, wrong source contract/version, duplicate replay and arbitrary JSON fields fail closed', async () => {
+  const expected = candidateExpected(); const state = await advanceCandidateAppComposition(await startCandidate(expected), candidateMove(1), candidatePorts);
+  const original = await exportCandidateAppComposition(state);
+  let value = structuredClone(original); value.payload.state.position.x = 42;
+  await assert.rejects(() => reconstructCandidateAppComposition(value, expected, candidatePorts), { code: 'CANDIDATE_SNAPSHOT_HASH_INVALID' });
+  for (const mutate of [v => { v.payload.state.position.x = 42; }, v => { v.payload.events.push(v.payload.events[0]); },
+    v => { v.payload.AudioContext = { state: 'running' }; }, v => { v.payload.events[0].command.script = 'throw new Error("executed")'; }]) {
+    value = structuredClone(original); mutate(value); value.snapshot_hash = computeReplayStateHash(value.payload);
+    await assert.rejects(() => reconstructCandidateAppComposition(value, expected, candidatePorts));
+  }
+  for (const change of [{ contractHash: hash('0') }, { version: '2.0.0' }, { maxSteps: 1000 }]) {
+    await assert.rejects(() => reconstructCandidateAppComposition(original, { ...expected, ...change }, candidatePorts), { code: 'CANDIDATE_CONTRACT_MISMATCH' });
+  }
+  value = structuredClone(original); value.payload.schema_version = '2.0.0'; value.snapshot_hash = computeReplayStateHash(value.payload);
+  await assert.rejects(() => reconstructCandidateAppComposition(value, expected, candidatePorts), { code: 'CANDIDATE_CONTRACT_MISMATCH' });
+});
+
+test('candidate: the unchanged formal validator rejects every unregistered donor in the 33-Life epoch', () => {
+  assert.equal(registry.software_lives.length, 33); assert.equal(gates.length, 14);
+  for (const role of ['NAVIGATION', 'GAME', 'AUDIO']) {
+    const record = createValidRecord(); const id = `CANDIDATE-${role}`;
+    record.organ.owner_life_id = id; record.compatibility_review.donor_life_id = id; record.transplant.donor_life_id = id;
+    record.organ.compatibility_signature = computeOrganCompatibilitySignature(record.organ, record.security_boundary);
+    const report = validate(record); assert.equal(report.ok, false);
+    assert.ok(report.errors.some(({ code }) => code === 'LIFE_ID_NOT_REGISTERED'), role);
+    assert.ok(report.errors.some(({ code }) => code === 'SOFTWARE_LIFE_AUTHORITY_DRIFT'), role);
+    assert.equal(registry.software_lives.some(({ life_id }) => life_id === id), false);
+  }
+});
+
+test('candidate: advancing imported edited state replays the baseline instead of trusting current-state fields', async () => {
+  const one = await advanceCandidateAppComposition(await startCandidate(), candidateMove(1), candidatePorts);
+  const edited = structuredClone(one); edited.state.position.z = 30;
+  await assert.rejects(() => advanceCandidateAppComposition(edited, candidateMove(2), candidatePorts), { code: 'CANDIDATE_REPLAY_HASH_INVALID' });
+  assert.equal(one.state.position.z, 3);
+});
+
+test('candidate: finite coordinates, event cap, malformed rollback and schema mutation are rejected', async () => {
+  const expected = { ...candidateExpected(), maxSteps: 1 };
+  const initial = await startCandidate(expected);
+  for (const target of [{ x: Infinity, y: 0, z: 1 }, { x: '8', y: 0, z: 5 }, { x: 8, y: 0, z: 5, script: 'execute' }]) {
+    await assert.rejects(() => advanceCandidateAppComposition(initial, candidateMove(1, target), candidatePorts), { code: 'CANDIDATE_COMMAND_INVALID' });
+  }
+  const one = await advanceCandidateAppComposition(initial, candidateMove(1), candidatePorts);
+  await assert.rejects(() => advanceCandidateAppComposition(one, candidateMove(2), candidatePorts), { code: 'CANDIDATE_STOPPED' });
+  await assert.rejects(() => advanceCandidateAppComposition(initial, { ...candidateMove(1), action: 'ROLLBACK' }, candidatePorts), { code: 'CANDIDATE_COMMAND_INVALID' });
+  assert.throws(() => { CANDIDATE_APP_STATE_SCHEMA.properties.position.properties.x.type = 'string'; }, TypeError);
+  assert.equal(validateJsonSchema202012({ position: { x: 0, y: 0, z: 0 }, clock_ms: 0, rolled_back: false }, CANDIDATE_APP_STATE_SCHEMA).ok, true);
+  assert.equal(validateJsonSchema202012({ position: { x: '0', y: 0, z: 0 }, clock_ms: 0, rolled_back: false }, CANDIDATE_APP_STATE_SCHEMA).ok, false);
+});
+
+test('candidate: async transitions capture caller input and never share mutable state', async () => {
+  const initial = await startCandidate(); const command = candidateMove(1);
+  const operation = advanceCandidateAppComposition(initial, command, candidatePorts);
+  command.target.z = 999; command.sequence = 20;
+  const next = await operation;
+  assert.deepEqual(next.events[0].command, candidateMove(1));
+  assert.throws(() => { next.state.position.z = 999; }, TypeError);
+  assert.deepEqual(initial.state.position, { x: 8, y: 0, z: 2 });
+});
+
+test('candidate: exact object keys and string identity fields cannot be bypassed by delimiters or coercion', async () => {
+  const expected = candidateExpected();
+  const collision = { 'x|y': 0, z: 0 };
+  await assert.rejects(() => createCandidateAppComposition({ ...expected, position: collision, clockMs: 0 }), { code: 'CANDIDATE_STATE_INVALID' });
+  for (const [key, code] of [['candidateId', 'CANDIDATE_ID_REQUIRED'], ['contractHash', 'CANDIDATE_CONTRACT_HASH_REQUIRED'], ['version', 'CANDIDATE_VERSION_INVALID']]) {
+    await assert.rejects(() => startCandidate({ ...expected, [key]: [expected[key]] }), { code });
+  }
+  const envelope = structuredClone(await exportCandidateAppComposition(await startCandidate(expected)));
+  envelope.payload.initial_state.position = collision; envelope.payload.state.position = collision;
+  envelope.snapshot_hash = computeReplayStateHash(envelope.payload);
+  await assert.rejects(() => reconstructCandidateAppComposition(envelope, expected, candidatePorts), { code: 'CANDIDATE_STATE_INVALID' });
+});
+
+test('candidate: each donor interface binds its real port shape rather than a generic command hash', () => {
+  const contract = candidateContract();
+  const audio = contract.donors.find(({ role }) => role === 'AUDIO');
+  assert.equal(audio.input_interface[0].contract_hash, computeReplayStateHash({ const: 'BLOCKED' }));
+  assert.equal(validateJsonSchema202012('BLOCKED', CANDIDATE_APP_RNA_CONTRACT.ports.AUDIO.input).ok, true);
+  assert.equal(validateJsonSchema202012(candidateMove(1), CANDIDATE_APP_RNA_CONTRACT.ports.AUDIO.input).ok, false);
+  audio.input_interface[0].contract_hash = contract.rna_hash; resignCandidate(contract);
+  assert.ok(candidateCodes(contract).has('CANDIDATE_INTERFACE_INVALID'));
+});
+
+test('candidate: parsed JSON prototype keys cannot bypass additionalProperties or claim authority', () => {
+  const base = candidateContract();
+  for (const key of ['__proto__', 'constructor', 'prototype']) {
+    const poison = JSON.parse(`{"${key}": {"production_authority": true}}`);
+    const rootPoison = Object.assign(structuredClone(base), poison);
+    // Object.assign's __proto__ setter is separately rejected as a non-plain
+    // prototype; use spread for the exact own-key parsed JSON regression.
+    assert.equal(validateSoftwareCompositionCandidate(rootPoison, candidateHost()).ok, false);
+    const c = { ...structuredClone(base), ...poison };
+    assert.ok(candidateCodes(c).has('CANDIDATE_JSON_INVALID'));
+    const nested = candidateContract(); nested.donors[0].input_interface[0] = { ...nested.donors[0].input_interface[0], ...poison };
+    assert.ok(candidateCodes(nested).has('CANDIDATE_JSON_INVALID'));
+  }
+  const cyclic = candidateContract(); cyclic.cycle = cyclic;
+  assert.ok(candidateCodes(cyclic).has('CANDIDATE_JSON_INVALID'));
+});
+
+test('candidate: arrival is evaluated at the accepted post-collision position on the same command', async () => {
+  const expected = candidateExpected();
+  const initial = await createCandidateAppComposition({ ...expected, position: { x: 0, y: 0, z: 0 }, clockMs: 1000 });
+  const target = { x: 0, y: 0, z: 1 };
+  const arrived = await advanceCandidateAppComposition(initial, candidateMove(1, target), candidatePorts);
+  assert.deepEqual(arrived.state.position, target); assert.equal(arrived.events[0].outcome, 'ARRIVED');
+  assert.equal(arrived.events[0].audio_intent, null);
+  assert.deepEqual(await reconstructCandidateAppComposition(await exportCandidateAppComposition(arrived), expected, candidatePorts), arrived);
+  // Existing Navigation owns the tolerance; this test introduces no threshold.
+  const nearTarget = { x: 0, y: 0, z: 1.2 };
+  const near = await advanceCandidateAppComposition(initial, candidateMove(1, nearTarget), candidatePorts);
+  assert.equal(vectorToward3D(near.state.position, nearTarget).arrived, true);
+  assert.equal(near.events[0].outcome, 'ARRIVED');
+  const oldRna = structuredClone(CANDIDATE_APP_RNA_CONTRACT); delete oldRna.arrival_authority;
+  const staleContract = candidateContract(); staleContract.rna_hash = computeReplayStateHash(oldRna); resignCandidate(staleContract);
+  assert.ok(candidateCodes(staleContract).has('CANDIDATE_RNA_MISMATCH'), 'old semantics cannot reuse the new source-verified contract');
+});
+
+test('candidate: partial, world-clamped, blocked and detoured steps cannot claim false arrival', async () => {
+  const expected = candidateExpected();
+  const start = (position) => createCandidateAppComposition({ ...expected, position, clockMs: 1000 });
+  const partial = await advanceCandidateAppComposition(await start({ x: 0, y: 0, z: 0 }), candidateMove(1, { x: 0, y: 0, z: 3 }), candidatePorts);
+  assert.deepEqual(partial.state.position, { x: 0, y: 0, z: 1 }); assert.equal(partial.events[0].outcome, 'MOVED');
+  const clamped = await advanceCandidateAppComposition(await start({ x: 59.5, y: 0, z: 0 }), candidateMove(1, { x: 61, y: 0, z: 0 }), candidatePorts);
+  assert.deepEqual(clamped.state.position, { x: 60, y: 0, z: 0 }); assert.equal(clamped.events[0].outcome, 'MOVED');
+  const blocked = await advanceCandidateAppComposition(await start({ x: 8, y: 0, z: 3 }), candidateMove(1, { x: 8, y: 0, z: 4 }), candidatePorts);
+  assert.deepEqual(blocked.state.position, { x: 8, y: 0, z: 3 }); assert.equal(blocked.events[0].outcome, 'MOVEMENT_BLOCKED');
+  // A trusted host may return a bounded accepted detour. The proposal reaches
+  // the target, but the accepted position does not: never label it ARRIVED.
+  const detourPorts = { ...candidatePorts, resolveMove: () => ({ x: 0, y: 0, z: .5, blocked: false }) };
+  const detoured = await advanceCandidateAppComposition(await start({ x: 0, y: 0, z: 0 }), candidateMove(1, { x: .8, y: 0, z: 0 }), detourPorts);
+  assert.deepEqual(detoured.state.position, { x: 0, y: 0, z: .5 }); assert.equal(detoured.events[0].outcome, 'MOVED');
+  for (const state of [partial, clamped, detoured]) assert.equal(state.events[0].audio_intent, null);
+  assert.equal(blocked.events[0].audio_intent, 'BLOCKED');
 });
