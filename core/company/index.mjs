@@ -2984,9 +2984,10 @@ export function captureCustomerProjectContext(identityAdapter) {
  * The one-workspace bound is per prototype instance, not a permanent product law
  * or a cross-process uniqueness guarantee. No persistence/recovery is claimed.
  */
-export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, planningAdapter = null, now = Date.now } = {}) {
+export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, planningAdapter = null, executionEvidenceSource = null, now = Date.now } = {}) {
   cpFail(typeof identityAdapter?.resolve === "function" && typeof quotePlanner?.plan === "function" && typeof now === "function", "CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED");
   cpFail(planningAdapter === null || customerProjectTestAdapters.has(planningAdapter), "CUSTOMER_PROJECT_TEST_ADAPTER_REQUIRED");
+  cpFail(executionEvidenceSource === null || typeof executionEvidenceSource.read === "function", "CUSTOMER_PROJECT_EVIDENCE_SOURCE_REQUIRED");
   let state = { scope: CUSTOMER_PROJECT_PROTOTYPE_SCOPE, boundaries: { ...CUSTOMER_PROJECT_BOUNDARIES }, revision: 0, owner: null,
     workspaceId: null, request: null, requestRevisions: [], quotes: [], quoteHeadRevision: null,
     acceptance: null, contract: null, project: null, events: [], commandJournal: [], lastEventHash: null, lastAt: 0 };
@@ -3006,7 +3007,7 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
   async function execute(command, owner) {
     assertCurrentCustomer(owner);
     cpFields(command, ["type", "idempotencyKey", "expectedRevision", "data"]);
-    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
+    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
     cpFail(typeof command.idempotencyKey === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(command.idempotencyKey) && cpInt(command.expectedRevision), "CUSTOMER_PROJECT_INVALID_COMMAND");
     const key = `${command.type}:${command.idempotencyKey}`;
     const commandHash = await hashCustomerProject(command);
@@ -3067,6 +3068,41 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
         contentHash: await hashCustomerProject({ quoteId, revision, content }), acknowledgementHash: await hashCustomerProject({ conditions: content.plan.conditions, assumptions: content.plan.assumptions, executionHolds: content.executionHolds }) };
       draft.quotes.push(quote); draft.quoteHeadRevision = quote.revision;
       response = { ...responseBase, status: "SIMULATED_QUOTE_ISSUED", quote: cloneCustomerProject(quote) };
+    } else if (command.type === "CHECKPOINT_SUBPLAN_EVIDENCE") {
+      cpFields(command.data, ["projectId", "acceptanceId", "quoteHash", "snapshotHash", "fixtureHash"]);
+      for (const field of ["projectId", "acceptanceId"]) cpFail(cpText(command.data[field]), "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
+      for (const field of ["quoteHash", "snapshotHash", "fixtureHash"]) cpFail(cpDigest(command.data[field]), "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
+      cpFail(state.acceptance && state.project && state.contract && command.data.projectId === state.project.projectId
+        && command.data.acceptanceId === state.acceptance.acceptanceId && command.data.quoteHash === state.acceptance.quoteHash
+        && command.data.quoteHash === state.project.quoteHash, "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
+      const intentHash = await hashCustomerProject({ owner, ...command.data });
+      if (state.executionEvidence) {
+        cpFail(state.executionEvidence.intentHash === intentHash, "CUSTOMER_PROJECT_CHECKPOINT_IMMUTABLE");
+        const response = { ...responseBase, status: "ALREADY_CHECKPOINTED", evidenceId: state.executionEvidence.evidenceId,
+          evidenceHash: await hashCustomerProject(state.executionEvidence), revision: state.revision };
+        draft.commandJournal.push({ key, commandHash, response }); bounded(draft); assertCurrentCustomer(owner); state = draft;
+        return cloneCustomerProject(response);
+      }
+      cpFail(executionEvidenceSource, "CUSTOMER_PROJECT_EVIDENCE_SOURCE_REQUIRED");
+      // Only this code-level source provides bytes. Command data cannot supply
+      // inspection PASS, reviewer identity, audit results or authority flags.
+      const supplied = await executionEvidenceSource.read(cloneCustomerProject(command.data)); cpJson(supplied);
+      const inputs = cloneCustomerProject(supplied); cpFields(inputs, ["resourceFixture", "snapshot"]);
+      cpFail(await hashCustomerProject(inputs.snapshot) === command.data.snapshotHash
+        && await hashCustomerProject(inputs.resourceFixture) === command.data.fixtureHash, "CUSTOMER_PROJECT_EVIDENCE_HASH_MISMATCH");
+      const auditor = await createFrozenV1CustomerProjectTestAdapter({ mode: "LOCAL_TEST_ONLY" });
+      const audit = await auditor.auditSubplan({ projectSource: { read: async () => cloneCustomerProject(state) }, ...inputs });
+      assertCurrentCustomer(owner);
+      draft.executionEvidence = { format: "KAIOS_CUSTOMER_PROJECT_SUBPLAN_CHECKPOINT", version: 1,
+        scope: "LOCAL_TEST_ONLY_V1_SUBPLAN_CHECKPOINT", evidenceId: `${state.workspaceId}-SUBPLAN-${state.revision + 1}`,
+        workspaceId: state.workspaceId, owner: cloneCustomerProject(owner), projectId: state.project.projectId,
+        sourceRevision: state.revision, acceptanceId: state.acceptance.acceptanceId, acceptedAt: state.acceptance.acceptedAt,
+        quoteId: state.acceptance.quoteId, quoteRevision: state.acceptance.quoteRevision, quoteHash: state.acceptance.quoteHash,
+        snapshotHash: command.data.snapshotHash, fixtureHash: command.data.fixtureHash, intentHash,
+        audit, auditHash: await hashCustomerProject(audit), recordedAt: at,
+        authenticatedWorkerReview: false, productionVerified: false };
+      response = { ...responseBase, status: "SUBPLAN_EVIDENCE_CHECKPOINTED", evidenceId: draft.executionEvidence.evidenceId,
+        evidenceHash: await hashCustomerProject(draft.executionEvidence) };
     } else {
       quote = state.quotes.find((q) => q.quoteId === command.data.quoteId && q.revision === command.data.quoteRevision);
       cpFail(quote && quote.revision === state.quoteHeadRevision, "QUOTE_SUPERSEDED");

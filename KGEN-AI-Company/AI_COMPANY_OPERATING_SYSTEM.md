@@ -223,3 +223,73 @@ retains `HOUSE_STAGE_ADAPTER_REQUIRED`, `houseComplete:false`, and null asset,
 delivery and receipt. Legacy delivery flags about rights/documentation/accounting
 remain unverified subplan assertions. New Asset ownership and transport receipts
 require their existing owners' separately reviewed evidence contracts.
+
+### Immutable local execution-evidence checkpoint (2026-10-06)
+
+This successor preserves the three original local milestones from `0bbfa5cc`
+without replacing Company, Backend, construction, Market or Logistics owners.
+It adds only `CHECKPOINT_SUBPLAN_EVIDENCE` to the local prototype. This command
+requires an already accepted simulated quote/project, the current aggregate
+revision, exact project/acceptance IDs and exact SHA-256 digests for the quoted
+resource fixture and V1 export. It does not approve a proposal, accept a new quote,
+create an order, advance construction or authorize delivery.
+
+A code-level trusted evidence source supplies the bytes. The command cannot
+supply an audit result, PASS, reviewer identity or authority flags. The frozen
+existing V1 auditor replays those bytes, checks the accepted quote/customer and
+resource/inspection bindings, and produces the evidence. A separate immutable
+`executionEvidence` projection binds workspace/customer, project, source revision,
+acceptance ID/time, quote ID/revision/hash, input hashes and audit result/hash.
+The parent project remains byte-identical: `PLANNED_EXECUTION_HELD`,
+`HOUSE_STAGE_ADAPTER_REQUIRED`, `houseComplete:false`, and null asset/delivery/
+receipt. V1 `ACCEPTANCE_PENDING` is retained as a coordinator observation only.
+`authenticatedWorkerReview:false` explicitly disclaims real reviewer authority.
+
+This slice admits one immutable evidence checkpoint per workspace. Same-key
+retries return the exact saved result; changed content under that key fails.
+A new key with the current revision and the identical binding returns
+`ALREADY_CHECKPOINTED`, recording only the response journal. Stale new-key
+revisions and replacement evidence fail closed. That one-checkpoint bound is a
+local experiment limit, not a permanent product or customer entitlement.
+
+The Backend helper records complete inputs once and re-audits them on recovery.
+Its version-2 journal retains the unchanged version-1 operations and hashes;
+version-1-only workspaces remain readable without a schema/table migration.
+No live planner, clock or evidence-source call is needed during replay. Missing,
+changed or inconsistent inputs/results/cache/event rows block both reads and
+retries. The existing 512 KB workspace, 128 event and 256 operation bounds remain
+unchanged; an oversized experiment is rejected rather than split into another
+store. No runtime-facing route or production caller is added.
+
+This is local SQLite evidence persistence, separate from the unchanged pure
+model's `durable:false`. It is not authenticated production storage, cloud/D1
+verification, power-loss durability, backup restore, Recovery Center support or
+full-house completion. Full-house stages, source-authorized final inspection,
+Asset/Player projections, transport and customer delivery acceptance remain held.
+The file/process recovery proof applies to the tested installed auditor/runtime
+revision only. Result/state hashes reject changed replay outcomes but do not
+authenticate code provenance or detect source changes with identical outcomes.
+Cross-version auditor retention/admission and migration remain future work.
+
+### Remaining house-to-receipt boundary
+
+The next release cannot promote this V1 subplan merely because replay succeeds.
+A reviewed implementation in the existing construction ownership boundary must
+supply all twelve stages at the accepted location, including material/energy/
+water conservation, actual simulated work time, worker/equipment non-overlap,
+route arrival and rest constraints. The separate fixed-location foundation
+fixture must not be unioned into coverage. Inspection must bind the current build
+revision and actual measured observations; a caller-supplied PASS or reviewer name
+is not evidence. An explicit no-rework decision or completed rework/reinspection
+must resolve every blocking defect without skipping the REWORK gate.
+
+Only that complete owner evidence may enable an immutable simulation-only
+BUILDING projection referencing the existing Asset/Player owners. No Registry
+insertion, home eligibility, XP, legal title or Universe-coordinate authority is
+implied. A delivery record must bind the precise build/asset/inspection revision
+and existing Logistics evidence where transport is required. Delivery changes
+only to customer-acceptance pending. The same customer must explicitly accept
+that exact delivery revision; rejection preserves the delivery and opens rework.
+The final acceptance and one nonredeemable simulation receipt belong in one
+Backend aggregate/event/idempotency transaction. No V1 `acceptProject` call is
+used as a shortcut: its revenue-recognition side effect is outside this slice.

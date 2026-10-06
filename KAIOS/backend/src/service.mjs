@@ -1006,7 +1006,7 @@ export function createBackend({
  * Core model responses remain unchanged, including durable:false. Only the
  * separate persistence envelope attests that a local DB transaction committed.
  */
-export function createCustomerProjectPersistencePrototype({ mode, database: db, identityAdapter, quotePlanner, now = Date.now } = {}) {
+export function createCustomerProjectPersistencePrototype({ mode, database: db, identityAdapter, quotePlanner, executionEvidenceSource = null, now = Date.now } = {}) {
   requireThat(mode === "LOCAL_TEST_ONLY" && db && ["get", "atomic"].every((k) => typeof db[k] === "function") && typeof quotePlanner?.plan === "function" && typeof now === "function", "CUSTOMER_PROJECT_LOCAL_PERSISTENCE_REQUIRED");
   const scope = "LOCAL_DATABASE_SIMULATION_PROTOTYPE";
   const exact = (v, keys) => requireThat(v && Object.getPrototypeOf(v) === Object.prototype && Object.keys(v).length === keys.length && keys.every((k) => Object.hasOwn(v, k)), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
@@ -1026,7 +1026,7 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
     return { resolve() { current(owner); return { ...owner, active: true, scope: "SIMULATION_CUSTOMER_CONTEXT" }; } };
   }
   function makeReplay(owner) {
-    let observation, historical, clockIndex, planUses;
+    let observation, historical, clockIndex, planUses, evidenceUses;
     const model = createCustomerProjectPrototype({ identityAdapter: replayOwner(owner), quotePlanner: {
       async plan(request) {
         planUses += 1;
@@ -1037,7 +1037,17 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
         observation.plan = structuredClone(await quotePlanner.plan(request));
         return structuredClone(observation.plan);
       }
-    }, now() {
+    }, executionEvidenceSource: { async read(binding) {
+      evidenceUses += 1;
+      if (historical) {
+        requireThat(evidenceUses === 1 && observation.evidence !== null, "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+        return structuredClone(observation.evidence);
+      }
+      requireThat(typeof executionEvidenceSource?.read === "function", "CUSTOMER_PROJECT_EVIDENCE_SOURCE_REQUIRED");
+      observation.evidence = structuredClone(await executionEvidenceSource.read(binding));
+      boundedJson(observation.evidence);
+      return structuredClone(observation.evidence);
+    } }, now() {
       if (historical) {
         requireThat(clockIndex < observation.clocks.length, "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
         return observation.clocks[clockIndex++];
@@ -1045,9 +1055,10 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
       const value = now(); observation.clocks.push(value); return value;
     } });
     return { model, async run(record, isHistorical) {
-      observation = record; historical = isHistorical; clockIndex = 0; planUses = 0;
+      observation = record; historical = isHistorical; clockIndex = 0; planUses = 0; evidenceUses = 0;
       const result = await model.command(record.command);
-      requireThat(planUses === (record.plan === null ? 0 : 1) && (!historical || clockIndex === record.clocks.length), "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+      requireThat(planUses === (record.plan === null ? 0 : 1) && evidenceUses === (record.evidence == null ? 0 : 1)
+        && (!historical || clockIndex === record.clocks.length), "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
       return result;
     } };
   }
@@ -1074,11 +1085,13 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
     requireThat(row.owner_account_id === owner.accountId && row.owner_player_id === owner.playerId, "CUSTOMER_PROJECT_WRONG_CUSTOMER", 403);
     const envelope = parse(row.payload);
     exact(envelope, ["format", "version", "owner", "operations", "state", "stateHash"]);
-    requireThat(envelope.format === "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL" && envelope.version === 1 && canonical(envelope.owner) === canonical(owner) && Array.isArray(envelope.operations) && envelope.operations.length > 0 && envelope.operations.length <= 256, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    requireThat(envelope.format === "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL" && [1, 2].includes(envelope.version) && canonical(envelope.owner) === canonical(owner) && Array.isArray(envelope.operations) && envelope.operations.length > 0 && envelope.operations.length <= 256, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
     requireThat(row.payload_hash === await hash(envelope) && row.storage_version === envelope.operations.length && cached.length === envelope.operations.length, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
     const replay = makeReplay(owner);
     for (const operation of envelope.operations) {
-      exact(operation, ["command", "commandHash", "clocks", "plan", "modelResultHash", "stateHash", "response", "recordedAt"]);
+      const checkpoint = operation.command?.type === "CHECKPOINT_SUBPLAN_EVIDENCE";
+      requireThat(!checkpoint || envelope.version === 2, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      exact(operation, ["command", "commandHash", "clocks", "plan", "modelResultHash", "stateHash", "response", "recordedAt", ...(checkpoint ? ["evidence"] : [])]);
       requireThat(Array.isArray(operation.clocks) && operation.clocks.length <= 8 && operation.clocks.every((v) => integer(v, Number.MAX_SAFE_INTEGER)) && integer(operation.recordedAt, Number.MAX_SAFE_INTEGER) && operation.commandHash === await hash(operation.command), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
       const result = await replay.run(operation, true);
       const state = await replay.model.read();
@@ -1108,12 +1121,13 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
     if (prior) { current(owner); return prior; }
     try {
     const operation = { command, commandHash, clocks: [], plan: null, modelResultHash: null, stateHash: null, response: null, recordedAt: null };
+    if (command.type === "CHECKPOINT_SUBPLAN_EVIDENCE") operation.evidence = null;
     const result = await loaded.replay.run(operation, false), state = await loaded.replay.model.read();
     const storageVersion = (loaded.row?.storage_version ?? 0) + 1;
     operation.modelResultHash = await hash(result); operation.stateHash = await hash(state);
     operation.response = { scope, persistence: { committed: true, storageVersion, productionVerified: false }, result };
     operation.recordedAt = now(); requireThat(integer(operation.recordedAt, Number.MAX_SAFE_INTEGER), "CUSTOMER_PROJECT_INVALID_CLOCK");
-    const envelope = { format: "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL", version: 1, owner,
+    const envelope = { format: "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL", version: command.type === "CHECKPOINT_SUBPLAN_EVIDENCE" ? 2 : (loaded.envelope?.version ?? 1), owner,
       operations: [...(loaded.envelope?.operations ?? []), operation], state, stateHash: operation.stateHash };
     requireThat(envelope.operations.length <= 256 && state.commandJournal.length === envelope.operations.length, "CUSTOMER_PROJECT_PERSISTENCE_CAPACITY", 413);
     const payload = boundedJson(envelope), payloadHash = await hash(envelope), guardId = id();

@@ -292,3 +292,70 @@ downstream task state after the failed assignment. Full-house stage/location
 coverage, canonical scheduler replanning, authoritative inspection, owner-provided
 Asset/logistics projections and durable execution commands remain separate work.
 See the cumulative Company operating-system section for exact coverage limits.
+
+### Version-2 local subplan evidence journal (2026-10-06)
+
+`createCustomerProjectPersistencePrototype` now accepts an optional code-level
+`executionEvidenceSource.read` port for `CHECKPOINT_SUBPLAN_EVIDENCE`. The caller
+command contains only exact project/acceptance/quote/input-digest bindings and
+expected aggregate revision. It cannot provide the audit decision. The Company
+owner invokes the existing frozen V1 auditor and creates a separate immutable
+summary projection, leaving the held project and all asset/delivery/receipt
+fields untouched. No authenticated Worker/Reviewer or real acceptance is claimed.
+Object digests use the existing canonical JSON SHA-256 functions. They establish
+content consistency, not an authenticated publisher, human review or byte-layout
+identity for differently formatted but equivalent JSON text.
+
+The same existing workspace row stores a version-2 replay envelope. Only checkpoint
+operations gain an `evidence` observation containing complete resource-fixture and
+V1 export bytes; a response-only identical checkpoint has `evidence:null`. Earlier
+operations keep exactly their original shapes/results/state hashes. Version-1
+journals are still accepted, but cannot contain the new command. There is no new
+table, migration, route, schema-2 Player field, object-storage dual write, provider
+binding or production startup change.
+
+Replay consumes retained input observations exactly once, recomputes their
+command-bound digests, replays the frozen auditor, and verifies model response,
+projection/state hashes, append-only events and exact idempotency rows. A read
+cannot substitute a fresh evidence source or fabricate missing inputs. Live
+first-checkpoint storage uses the existing binding/storageVersion/payloadHash CAS
+trigger and one `DatabaseAdapter.atomic` transaction for workspace replacement,
+new event, exact response and guard cleanup. A concurrent loser reloads the
+coherent winner only for an identical committed key/hash; otherwise it conflicts.
+Lost acknowledgement uses the same verified recovery path. New-key identical
+checkpoints increment storageVersion alone and remain revision-guarded.
+
+The 512 KB workspace/read bound, 128-event bound, 256-operation bound and 16 KB
+command bound are unchanged. Complete V1 input bytes are stored once, while the
+state and response retain bounded audit summaries. If these bounds cannot hold a
+future artifact, that dependency needs separate review; no implicit unbounded
+blob store or cap increase is provided.
+
+The scoped verification uses real disposable SQLite files with the existing
+Node SQLite adapter, including a fresh OS process reopening the same file and
+reconstructing evidence with all live sources disabled. This demonstrates the
+local file/restart path only. It does not establish cloud/D1 behavior, power-loss
+or hostile whole-file rollback resistance, recovery UI, multi-device readiness,
+formal owner source authorization or a completed house. The pure model response
+still says `durable:false`; the separate persistence envelope identifies only a
+committed local database checkpoint.
+
+Recovery is tested only against the recorded code revision. The frozen adapter
+imports the installed V1 module path; it is not a Git-pinned runtime loader, and
+the journal does not authenticate an auditor source commit. A later implementation
+that rejects the retained V1 export or computes a different audit/model response
+or state will fail the replay/result/state-hash checks. A source change that
+computes identical results is not detected by those content hashes. Arbitrary-
+version recovery is therefore NOT_VERIFIED. Source-version admission, retained
+auditor availability and explicit journal migration are future dependencies, not
+features silently added by this checkpoint.
+
+A later house delivery/acceptance/receipt implementation must extend this same
+aggregate boundary with current owner evidence, not create a second Company or
+ledger. Source revision drift invalidates inspection and pending delivery; final
+customer acceptance and a unique simulation receipt must commit together.
+Restore/import must preserve consumed accepted baselines and receipts, rather
+than reaccepting an older quote or deleting later acceptance history. Existing
+Player backup/schema-2 recovery remains incompatible and unchanged. Production
+migration/authentication, reviewed construction coverage, Asset/Logistics
+projection contracts and explicit customer-delivery intent remain dependencies.

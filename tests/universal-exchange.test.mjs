@@ -3258,7 +3258,7 @@ test("V4.1 production shell exposes animated concierge and resilient storage cac
 });
 
 // These cases are local model fixtures, not a customer, tariff or service launch.
-function customerProjectFixture({ planningAdapter = null } = {}) {
+function customerProjectFixture({ planningAdapter = null, executionEvidenceSource = null } = {}) {
   let time = 1000;
   let principal = { accountId: 'TEST-ACCOUNT-A', playerId: 'TEST-PLAYER-A', active: true, scope: 'SIMULATION_CUSTOMER_CONTEXT' };
   let planner = {
@@ -3269,7 +3269,7 @@ function customerProjectFixture({ planningAdapter = null } = {}) {
     validForMs: 10000, durationHours: 100
   };
   const model = createCustomerProjectPrototype({ identityAdapter: { resolve: () => structuredClone(principal) },
-    quotePlanner: { plan: async () => structuredClone(planner) }, planningAdapter, now: () => time });
+    quotePlanner: { plan: async () => structuredClone(planner) }, planningAdapter, executionEvidenceSource, now: () => time });
   const request = { objective: 'SMALL_HOUSE', locationRef: 'TEST-HOME-PLOT', rightsRef: 'TEST-SIMULATED-USAGE', quality: 'STANDARD_SIMULATION', quantity: 1,
     budget: { amount: '220000', unit: 'SIMULATED_CREDIT', scale: 0 }, deadlineHours: 1000, intendedUse: 'TEST_ONLY' };
   const command = (type, key, revision, data) => ({ type, idempotencyKey: key, expectedRevision: revision, data });
@@ -3718,7 +3718,8 @@ async function durableCustomerProjectFixture(t) {
   const f = customerProjectFixture();
   const make = (options = {}) => createCustomerProjectPersistencePrototype({ mode: 'LOCAL_TEST_ONLY', database: options.database ?? db,
     identityAdapter: options.identityAdapter ?? { resolve: () => structuredClone(principal) },
-    quotePlanner: options.quotePlanner ?? { plan: async () => structuredClone(plan) }, now: options.now ?? (() => time) });
+    quotePlanner: options.quotePlanner ?? { plan: async () => structuredClone(plan) }, executionEvidenceSource: options.executionEvidenceSource ?? null,
+    now: options.now ?? (() => time) });
   t.after(async () => { for (const c of connections) c.close(); await fs.rm(directory, { recursive: true, force: true }); });
   return { ...f, db, open, make, plan, canonical, hash, stmt, file,
     setPrincipal(values) { principal = { ...principal, ...values }; }, setTime(v) { time = v; },
@@ -3972,4 +3973,218 @@ test('Customer project durable SQLite survives a fresh operating-system process'
   `;
   const { stdout } = await promisify(execFile)(process.execPath, ['--input-type=module', '-e', script, f.file], { timeout: 5000, maxBuffer: 1000000 });
   assert.deepEqual(JSON.parse(stdout), before);
+});
+
+// One immutable evidence checkpoint only. These tests reopen real temporary
+// SQLite files; no production migration, credentials, worker or reviewer exists.
+async function customerCheckpointFixture(t, source = null) {
+  const subplan = source ?? await subplanBaseline();
+  const f = await durableCustomerProjectFixture(t);
+  Object.assign(f.plan, structuredClone(subplan.accepted.contract.acceptedQuote.content.plan));
+  const inputs = { resourceFixture: subplan.resourceFixture, snapshot: subplan.snapshot };
+  const evidenceSource = { read: async () => structuredClone(inputs) };
+  const api = f.make({ executionEvidenceSource: evidenceSource });
+  const { acceptance, quote } = await f.prepare(api); await api.command(acceptance);
+  assert.equal(quote.contentHash, subplan.accepted.acceptance.quoteHash);
+  const accepted = (await api.read()).state;
+  const checkpoint = f.command('CHECKPOINT_SUBPLAN_EVIDENCE', 'checkpoint-local-001', accepted.revision, {
+    projectId: accepted.project.projectId, acceptanceId: accepted.acceptance.acceptanceId, quoteHash: quote.contentHash,
+    snapshotHash: await f.hash(inputs.snapshot), fixtureHash: await f.hash(inputs.resourceFixture)
+  });
+  return { ...f, api, accepted, checkpoint, inputs, evidenceSource };
+}
+
+test('Customer checkpoint retains exact evidence and held parent after real SQLite process reopen', async (t) => {
+  const f = await customerCheckpointFixture(t);
+  const result = await f.api.command(f.checkpoint), before = await f.api.read();
+  assert.equal(result.result.status, 'SUBPLAN_EVIDENCE_CHECKPOINTED');
+  assert.equal(result.persistence.committed, true); assert.equal(result.result.durable, false);
+  assert.deepEqual(before.state.project, f.accepted.project);
+  const evidence = before.state.executionEvidence;
+  assert.deepEqual(evidence.owner, f.accepted.owner); assert.equal(evidence.sourceRevision, 3);
+  assert.equal(evidence.quoteRevision, f.accepted.acceptance.quoteRevision);
+  assert.equal(evidence.authenticatedWorkerReview, false);
+  assert.equal(evidence.audit.coordinatorStatus, 'ACCEPTANCE_PENDING');
+  assert.equal(evidence.audit.houseComplete, false); assert.equal(evidence.audit.fullHouseStatus, 'HOUSE_STAGE_ADAPTER_REQUIRED');
+  for (const key of ['asset', 'delivery', 'receipt']) assert.equal(evidence.audit[key], null);
+  const rows = await f.rows(), envelope = JSON.parse(rows.customer_project_workspaces[0].payload);
+  assert.equal(envelope.version, 2); assert.deepEqual(envelope.operations[3].evidence, f.inputs);
+  assert.ok(Buffer.byteLength(rows.customer_project_workspaces[0].payload) < 512000);
+  assert.equal(rows.customer_project_events.length, 4); assert.equal(rows.idempotency.length, 4);
+  f.closeAll();
+  const { execFile } = await import('node:child_process'); const { promisify } = await import('node:util');
+  const script = `
+    import { SQLiteDatabaseAdapter } from ${JSON.stringify(new URL('../KAIOS/backend/src/adapters/local.mjs', import.meta.url).href)};
+    import { createCustomerProjectPersistencePrototype } from ${JSON.stringify(new URL('../KAIOS/backend/src/service.mjs', import.meta.url).href)};
+    const db = new SQLiteDatabaseAdapter(process.argv[1]);
+    try {
+      const forbidden = () => { throw new Error('LIVE_SOURCE_USED_DURING_RECOVERY'); };
+      const api = createCustomerProjectPersistencePrototype({mode:'LOCAL_TEST_ONLY',database:db,
+        identityAdapter:{resolve:()=>({accountId:'TEST-ACCOUNT-A',playerId:'TEST-PLAYER-A',active:true,scope:'SIMULATION_CUSTOMER_CONTEXT'})},
+        quotePlanner:{plan:forbidden},executionEvidenceSource:{read:forbidden},now:forbidden});
+      process.stdout.write(JSON.stringify({state:await api.read(),result:await api.command(JSON.parse(process.argv[2]))}));
+    } finally { db.close(); }
+  `;
+  const { stdout } = await promisify(execFile)(process.execPath, ['--input-type=module', '-e', script, f.file, JSON.stringify(f.checkpoint)], { timeout: 15000, maxBuffer: 1000000 });
+  assert.deepEqual(JSON.parse(stdout), { state: before, result });
+});
+
+test('Customer checkpoint rejects missing acceptance, stale version and caller authority before evidence reads', async (t) => {
+  const f = await durableCustomerProjectFixture(t); let reads = 0;
+  const api = f.make({ executionEvidenceSource: { read() { reads++; throw new Error('UNEXPECTED_SOURCE_READ'); } } });
+  const { acceptance } = await f.prepare(api);
+  const draft = f.command('CHECKPOINT_SUBPLAN_EVIDENCE', 'checkpoint-missing', 2, { projectId: 'WRONG', acceptanceId: 'WRONG', quoteHash: 'a'.repeat(64), snapshotHash: 'b'.repeat(64), fixtureHash: 'c'.repeat(64) });
+  await durableCustomerRejects(api.command(draft), 'CUSTOMER_PROJECT_CHECKPOINT_BINDING');
+  await api.command(acceptance); const before = await f.rows();
+  await durableCustomerRejects(api.command(draft), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  await durableCustomerRejects(api.command({ ...draft, expectedRevision: 3 }), 'CUSTOMER_PROJECT_CHECKPOINT_BINDING');
+  await durableCustomerRejects(api.command({ ...draft, expectedRevision: 3, data: { ...draft.data, review: 'PASS' } }), 'CUSTOMER_PROJECT_FIELDS');
+  assert.equal(reads, 0); assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer checkpoint exact retry and new-key duplicate preserve one immutable projection', async (t) => {
+  const f = await customerCheckpointFixture(t), first = await f.api.command(f.checkpoint);
+  const before = await f.rows(); assert.deepEqual(await f.api.command(f.checkpoint), first); assert.deepEqual(await f.rows(), before);
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, data: { ...f.checkpoint.data, snapshotHash: 'a'.repeat(64) } }), 'IDEMPOTENCY_CONTENT_MISMATCH');
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, idempotencyKey: 'checkpoint-stale' }), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, idempotencyKey: 'checkpoint-change', expectedRevision: 4, data: { ...f.checkpoint.data, snapshotHash: 'a'.repeat(64) } }), 'CUSTOMER_PROJECT_CHECKPOINT_IMMUTABLE');
+  const result = await f.api.command({ ...f.checkpoint, idempotencyKey: 'checkpoint-repeat', expectedRevision: 4 });
+  assert.equal(result.result.status, 'ALREADY_CHECKPOINTED'); assert.equal(result.persistence.storageVersion, 5);
+  const rows = await f.rows(); assert.equal(rows.customer_project_events.length, 4); assert.equal(rows.idempotency.length, 5);
+  const state = (await f.api.read()).state; assert.equal(state.revision, 4); assert.deepEqual(state.project, f.accepted.project);
+  assert.equal(JSON.parse(rows.customer_project_workspaces[0].payload).operations[4].evidence, null);
+});
+
+test('Customer checkpoint fails changed input bytes, forged inspection and cross-customer evidence', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows();
+  const altered = structuredClone(f.inputs); altered.resourceFixture.openingSimulationCredit = '65001';
+  const api = f.make({ executionEvidenceSource: { read: async () => altered } });
+  await durableCustomerRejects(api.command(f.checkpoint), 'CUSTOMER_PROJECT_EVIDENCE_HASH_MISMATCH');
+  const forged = await customerProjectSubplanFixture({ defaultInspections: true });
+  await durableCustomerRejects(f.make({ executionEvidenceSource: { read: async () => ({ resourceFixture: forged.resourceFixture, snapshot: forged.snapshot }) } }).command({
+    ...f.checkpoint, data: { ...f.checkpoint.data, snapshotHash: await f.hash(forged.snapshot) }
+  }), 'CUSTOMER_PROJECT_SUBPLAN_INSPECTION_MISMATCH');
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' });
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, expectedRevision: 0 }), 'CUSTOMER_PROJECT_CHECKPOINT_BINDING');
+  assert.deepEqual(await f.rows(), before);
+  const b = await f.prepare(f.api); await f.api.command(b.acceptance);
+  const stateB = (await f.api.read()).state, rowsB = await f.rows();
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, data: { ...f.checkpoint.data,
+    projectId: stateB.project.projectId, acceptanceId: stateB.acceptance.acceptanceId, quoteHash: stateB.acceptance.quoteHash
+  } }), 'CUSTOMER_PROJECT_SUBPLAN_SCOPE_MISMATCH');
+  assert.deepEqual(await f.rows(), rowsB);
+});
+
+test('Customer checkpoint source revocation and capacity failure preserve SQLite', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows();
+  const revoked = f.make({ executionEvidenceSource: { async read() { f.setPrincipal({ active: false }); return f.inputs; } } });
+  await durableCustomerRejects(revoked.command(f.checkpoint), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+  f.setPrincipal({ active: true }); assert.deepEqual(await f.rows(), before);
+  const tooLarge = { ...f.inputs, excess: 'x'.repeat(512000) };
+  await durableCustomerRejects(f.make({ executionEvidenceSource: { read: async () => tooLarge } }).command(f.checkpoint), 'CUSTOMER_PROJECT_PERSISTENCE_CAPACITY');
+  assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer checkpoint atomic rollback and lost acknowledgement retain exact local disk evidence', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows(); let statementCount = 0;
+  for (let failAt = 0; failAt < 5; failAt++) {
+    const database = { get: (...args) => f.db.get(...args), async atomic(statements) {
+      statementCount = statements.length;
+      const interrupted = [...statements]; interrupted.splice(failAt, 0, { sql: 'SELECT * FROM deliberate_missing_checkpoint_table' });
+      return f.db.atomic(interrupted);
+    } };
+    await assert.rejects(f.make({ database, executionEvidenceSource: f.evidenceSource }).command(f.checkpoint), /deliberate_missing_checkpoint_table/);
+    assert.deepEqual(await f.rows(), before);
+  }
+  assert.equal(statementCount, 5);
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) { await f.db.atomic(statements); throw new Error('ACK_LOST_AFTER_SQLITE_COMMIT'); } };
+  const result = await f.make({ database, executionEvidenceSource: f.evidenceSource }).command(f.checkpoint);
+  assert.equal(result.persistence.committed, true); assert.equal((await f.rows()).customer_project_events.length, 4);
+});
+
+test('Customer checkpoint independent SQLite connections fence racing keys', async (t) => {
+  const f = await customerCheckpointFixture(t); let arrivals = 0, release;
+  const gate = new Promise((r) => { release = r; });
+  const source = { async read() { if (++arrivals === 2) release(); await gate; return structuredClone(f.inputs); } };
+  const commands = ['checkpoint-race-a', 'checkpoint-race-b'].map((idempotencyKey) => ({ ...f.checkpoint, idempotencyKey }));
+  const results = await Promise.allSettled(commands.map((c) => f.make({ database: f.open(), executionEvidenceSource: source }).command(c)));
+  assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(results.find((r) => r.status === 'rejected').reason.message, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  const rows = await f.rows(); assert.equal(rows.customer_project_events.length, 4); assert.equal(rows.idempotency.length, 4);
+});
+
+test('Customer checkpoint replay rejects changed retained inputs, summaries and journal format', async (t) => {
+  const f = await customerCheckpointFixture(t); await f.api.command(f.checkpoint);
+  const row = (await f.rows()).customer_project_workspaces[0], pristine = JSON.parse(row.payload);
+  for (const mutate of [
+    (p) => { p.operations[3].evidence.snapshot.state.seed = 'changed'; },
+    (p) => { p.state.executionEvidence.audit.houseComplete = true; },
+    (p) => { p.operations[3].evidence.resourceFixture.openingSimulationCredit = '65001'; },
+    (p) => { p.version = 1; },
+    (p) => { delete p.operations[3].evidence; }
+  ]) {
+    const payload = structuredClone(pristine); mutate(payload);
+    await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=?', f.canonical(payload), await f.hash(payload))]);
+    await assert.rejects(f.api.read());
+    await assert.rejects(f.api.command(f.checkpoint));
+  }
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=?', row.payload, row.payload_hash)]);
+  assert.equal((await f.api.read()).state.executionEvidence.audit.houseComplete, false);
+});
+
+test('Customer checkpoint pending evidence read fences switched ownership and preserves SQL rows', async (t) => {
+  const f = await customerCheckpointFixture(t), before = await f.rows();
+  let entered, release; const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const api = f.make({ executionEvidenceSource: { async read() { entered(); await gate; return structuredClone(f.inputs); } } });
+  const pending = api.command(f.checkpoint); await started;
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' }); release();
+  await durableCustomerRejects(pending, 'CUSTOMER_PROJECT_WRONG_CUSTOMER');
+  assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer checkpoint copies source bytes before asynchronous audit and durable replay', async (t) => {
+  const f = await customerCheckpointFixture(t), supplied = structuredClone(f.inputs); let mutated = false;
+  const api = f.make({ executionEvidenceSource: { async read() {
+    setImmediate(() => { supplied.snapshot.state.seed = 'MUTATED_AFTER_RETURN'; supplied.resourceFixture.openingSimulationCredit = '1'; mutated = true; });
+    return supplied;
+  } } });
+  const result = await api.command(f.checkpoint); assert.equal(mutated, true);
+  const payload = JSON.parse((await f.rows()).customer_project_workspaces[0].payload);
+  assert.deepEqual(payload.operations[3].evidence, f.inputs);
+  f.reopen(); assert.deepEqual(await f.make().command(f.checkpoint), result);
+});
+
+test('Customer checkpoint Company queue prevents revision drift underneath awaited evidence audit', async () => {
+  const base = await subplanBaseline(); let entered, release, reads = 0;
+  const started = new Promise((r) => { entered = r; }), gate = new Promise((r) => { release = r; });
+  const f = customerProjectFixture({ executionEvidenceSource: { async read() {
+    reads++; entered(); await gate; return { resourceFixture: base.resourceFixture, snapshot: base.snapshot };
+  } } });
+  f.setPlan(base.accepted.contract.acceptedQuote.content.plan);
+  await f.submit(); const quote = (await f.issue()).quote; await f.model.command(f.acceptance(quote, 'queue-acceptance', 2));
+  const before = await f.model.read(), hash = (await import('../core/shared/utils.mjs')).sha256;
+  const command = f.command('CHECKPOINT_SUBPLAN_EVIDENCE', 'queue-checkpoint-a', 3, {
+    projectId: before.project.projectId, acceptanceId: before.acceptance.acceptanceId, quoteHash: quote.contentHash,
+    snapshotHash: await hash(base.snapshot), fixtureHash: await hash(base.resourceFixture)
+  });
+  const first = f.model.command(command); await started;
+  const second = f.model.command({ ...command, idempotencyKey: 'queue-checkpoint-b' });
+  // Attach the rejection handler before releasing the source. The queued second
+  // command cannot enter the source or mutate revision during the first audit.
+  const rejected = customerProjectRejects(second, 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  assert.equal(reads, 1); release();
+  assert.equal((await first).status, 'SUBPLAN_EVIDENCE_CHECKPOINTED'); await rejected;
+  const after = await f.model.read(); assert.equal(after.revision, 4); assert.equal(reads, 1);
+  assert.deepEqual(after.project, before.project); assert.equal(after.executionEvidence.sourceRevision, 3);
+});
+
+test('Customer checkpoint retains a valid replan blocker without asserting construction completion', async (t) => {
+  const subplan = await customerProjectSubplanFixture({ earlyRework: true });
+  const f = await customerCheckpointFixture(t, subplan);
+  await f.api.command(f.checkpoint); f.reopen();
+  const state = (await f.make().read()).state;
+  assert.equal(state.executionEvidence.audit.executionStatus, 'REPLAN_REQUIRED');
+  assert.equal(state.executionEvidence.audit.executionBlocker, 'REST_REQUIREMENT_CONFLICT');
+  assert.equal(state.executionEvidence.audit.houseComplete, false);
+  assert.deepEqual(state.project, f.accepted.project);
 });
