@@ -1,5 +1,25 @@
 # KGEN AI Company Operating System
 
+## Metadata
+
+| Field | Value |
+|---|---|
+| VERSION | V3.0 |
+| REVISION | 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1 |
+| STATUS | DRAFT |
+| LAST_UPDATED | 2026-10-06 |
+| UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
+| REVIEWED_BY | dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant |
+| SOURCE_COMMIT | d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f |
+| TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
+| CHANGE_REASON | Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction. |
+| ANCESTOR | KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
+| SOURCE_OF_TRUTH | FALSE |
+
+This metadata describes the Customer Project candidate revision only. Existing
+owner/document version identities and inherited governance content are preserved.
+It does not promote this branch or its local prototype to a production authority.
+
 **Version:** V3.0  
 **Status:** Active / Draft for Review  
 **Source:** KGEN Organization V2.0, Agent Office, Machine-Readable Canon
@@ -293,3 +313,26 @@ that exact delivery revision; rejection preserves the delivery and opens rework.
 The final acceptance and one nonredeemable simulation receipt belong in one
 Backend aggregate/event/idempotency transaction. No V1 `acceptProject` call is
 used as a shortcut: its revenue-recognition side effect is outside this slice.
+
+
+## Local revision history / release record
+
+This cumulative record covers all seven paths in [Draft #520](https://github.com/klineodyssey/kline-odyssey/pull/520),
+including the earlier request/quote acceptance, SQLite persistence, frozen V1
+subplan audit, immutable evidence checkpoint and ordinary-CI Node 24 milestones.
+It does not declare a new semantic release. Company uses its stable CURRENT
+rolling source entry; this document remains V3.0 and Backend remains V1.
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | Company CURRENT / document V3.0 / Backend V1; 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1 | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 | dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant | `core/company/index.mjs`; `KAIOS/backend/src/service.mjs`; `KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md`; `KAIOS/backend/KAIOS_BACKEND_ARCHITECTURE.md`; `tests/universal-exchange.test.mjs`; `tests/universal-exchange-workflow-security.test.mjs`; `.github/workflows/universal_exchange_v2.yml` | Record all reviewed local Customer milestones and their revision/provenance; this successor adds only headers and release documentation. | No executable, production migration, route, trigger, permission, or journal-schema change in this metadata successor. Existing v2 helper reads v1 and v2 local journals. | Revert only this metadata successor to recover the reviewed d2d6c892 source bytes. Functional rollback needs separate review: a v1-only helper cannot read a v2 evidence journal; preserve the DB and evidence, do not reset or delete data. |
+
+The source-review record is scoped engineering review, not admission of dot as a
+registered Worker or Reviewer. Metadata-scope approval does not manufacture a
+new exact-head validation result. The existing CI, local SQLite/process-reopen
+proof and ten Recovery Center screenshots remain bound to source
+`d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f`, tree
+`492e9041fc2d658ac835ec33fe0fe6b15c771339`; they are not relabeled for this successor.
+The comment-stripped executable-byte comparison and any subsequent review must
+identify their own source tree. No new CI, publication, merge or deployment is
+implied by this release record.

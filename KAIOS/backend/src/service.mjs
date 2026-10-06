@@ -1,3 +1,21 @@
+/*
+KGEN_META
+VERSION: V1
+REVISION: 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1
+STATUS: DRAFT
+LAST_UPDATED: 2026-10-06
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant
+SOURCE_COMMIT: d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f
+TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
+CHANGE_REASON: Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction.
+ANCESTOR: KAIOS/backend/src/service.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
+SOURCE_OF_TRUTH: FALSE
+METADATA_SCOPE: Customer Project candidate revision within the existing owner.
+Existing owner identity and execution boundaries are unchanged. This record is
+not a new Runtime/version authority or approval of production/financial activity.
+*/
+
 import { createIdentity } from "./identity.mjs";
 import { createCustomerProjectPrototype, captureCustomerProjectContext } from "../../../core/company/index.mjs";
 import {

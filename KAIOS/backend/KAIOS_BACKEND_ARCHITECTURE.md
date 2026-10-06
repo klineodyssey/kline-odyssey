@@ -1,5 +1,25 @@
 # KAIOS Backend V1 — review candidate
 
+## Metadata
+
+| Field | Value |
+|---|---|
+| VERSION | V1 |
+| REVISION | 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1 |
+| STATUS | DRAFT |
+| LAST_UPDATED | 2026-10-06 |
+| UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
+| REVIEWED_BY | dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant |
+| SOURCE_COMMIT | d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f |
+| TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
+| CHANGE_REASON | Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction. |
+| ANCESTOR | KAIOS/backend/KAIOS_BACKEND_ARCHITECTURE.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
+| SOURCE_OF_TRUTH | FALSE |
+
+This metadata describes the Customer Project candidate revision only. Existing
+owner/document version identities and inherited governance content are preserved.
+It does not promote this branch or its local prototype to a production authority.
+
 This adds a service layer, not a second gameplay or financial engine. No production
 service, paid resource or public multiplayer world is created by this PR.
 
@@ -359,3 +379,25 @@ than reaccepting an older quote or deleting later acceptance history. Existing
 Player backup/schema-2 recovery remains incompatible and unchanged. Production
 migration/authentication, reviewed construction coverage, Asset/Logistics
 projection contracts and explicit customer-delivery intent remain dependencies.
+
+
+## Local revision history / release record
+
+The aggregate seven-file record is in
+[`AI_COMPANY_OPERATING_SYSTEM.md`](../../KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md#local-revision-history--release-record).
+It includes both root test files and the existing Universal workflow's ordinary
+Node 24 lane; the scheduled worker stays on Node 20. This local Backend entry
+records the same cumulative source and its recovery-specific compatibility limit.
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | Backend V1; 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1 | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 | dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant | `KAIOS/backend/src/service.mjs`; `KAIOS/backend/KAIOS_BACKEND_ARCHITECTURE.md`; full seven-file scope in the linked aggregate record. | Record the inherited local persistence helper and reviewed immutable execution-evidence checkpoint; this successor changes comments/docs only. | No production migration or new route/table. The existing v2 journal reader retains v1 compatibility; metadata does not change payloads or executable code. | Reverting metadata alone restores the d2d6c892 behavior. A pre-checkpoint v1-only helper cannot read v2 evidence journals. Preserve the database, accepted history and artifacts; fail closed and require an explicit migration/admission plan, never an automatic reset or deletion. |
+
+Backend V1 and the Company owner are unchanged identities; this record does not
+introduce a replacement Runtime, public version authority, schema-2 Player
+extension or production activation. Source/metadata-scope review is not a formal
+Reviewer-role grant. The three passing CI runs and screenshot artifact on
+`d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f` remain historical exact-head evidence.
+A later metadata successor must bind its own source and review instead of reusing
+those results as if they ran on a new commit. The installed-auditor-only recovery,
+local SQLite, no-cloud and held-house boundaries above continue to apply.
