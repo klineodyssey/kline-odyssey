@@ -275,3 +275,20 @@ Before a deployment migration is proposed, retain the registration and scoped
 review gates above. No CURRENT/Boot update, registry write, new Life, worker dispatch,
 supplier order, actual payment, house asset release or production activation is
 authorized by this local checkpoint.
+
+### Subsequent local execution-evidence experiment
+
+The existing Company test adapter's `auditSubplan` is a read-only consumer of a
+trusted accepted-project source and a quote-bound disposable V1 simulation. It
+checks replay, request/quote/resource scope, explicit inspection measurements and
+the quoted rework rest policy. It does not enter this Backend's model, route or
+persistence command set; the SQLite helper still persists only the four original
+request/quote/acceptance commands. No execution snapshot is durably stored here.
+
+The bounded late-QA fixture reaches legacy coordinator `ACCEPTANCE_PENDING` without
+customer acceptance or revenue recognition. An early physical rework fixture is
+retained as `REPLAN_REQUIRED` on `REST_REQUIREMENT_CONFLICT`, with unchanged
+downstream task state after the failed assignment. Full-house stage/location
+coverage, canonical scheduler replanning, authoritative inspection, owner-provided
+Asset/logistics projections and durable execution commands remain separate work.
+See the cumulative Company operating-system section for exact coverage limits.

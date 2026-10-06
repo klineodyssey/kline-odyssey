@@ -186,3 +186,40 @@ trusted planner twice, while only one outcome commits. Hash/replay checks detect
 inconsistent corruption, not an adversary rewriting the entire database coherently
 or restoring an older valid file. D1, production authentication, cross-device UI,
 backup/restore and full-house execution remain unverified or unimplemented.
+
+### Quote-bound legacy execution evidence, with house coverage held
+
+The existing `LOCAL_TEST_ONLY` V1 adapter now offers a read-only `auditSubplan`.
+Its trusted host `projectSource.read()` must expose the explicitly accepted quote;
+this remains a local simulation contract, not authentication. A synthetic resource
+fixture is committed in that quote's acknowledged assumptions by SHA-256, while
+its material quantities bind the BOM hash. Its opening simulated credit equals
+the quoted total, deposit is zero, and all work uses V1's existing fixture workers,
+equipment, materials, route timing and accounting. No funding or state is written
+to the parent Company model, Backend, Asset, Player, registry or logistics owner.
+
+Small fixtures execute the frozen V1 task DAG with material arrival, reservations,
+elapsed work, explicit inspection, defect/rework and reinspection. The audit uses
+V1's strict replay, then binds the request (including intended use), quote version,
+hash, synthetic resources and inspection measurements. The internal QA inspector
+comes from V1's existing synthetic workforce. Default V1 PASS is rejected as
+insufficient evidence. The successful late-QA case waits for the next V1 shift
+after minimum rest, with the rule both quoted and checked against actual repair
+timing. It ends at coordinator `ACCEPTANCE_PENDING`; no customer-delivery acceptance,
+revenue recognition, closeout or receipt is performed.
+
+The negative early-SURVEY case remains explicit: after a two-hour repair, V1's
+shifted downstream schedule produces `REST_REQUIREMENT_CONFLICT`. The rejected
+assignment preserves all task state; the audit reports `REPLAN_REQUIRED`. This is
+an unresolved canonical scheduler/replan dependency, not permission to weaken rest
+rules. The late-QA case proves only its bounded fixture path.
+
+Neither result completes a twelve-stage house. The seven coordinator tasks omit
+mandatory stage evidence. V1's separate eight-stage `BASIC_HOUSE_FOUNDATION` binding
+uses its own fixed location and does not consume the quote's house location; those
+records cannot be combined into coverage for one accepted house. `FINAL_ACCEPTANCE`
+is internal V1 QA, not the customer's delivery acceptance. Audit output therefore
+retains `HOUSE_STAGE_ADAPTER_REQUIRED`, `houseComplete:false`, and null asset,
+delivery and receipt. Legacy delivery flags about rights/documentation/accounting
+remain unverified subplan assertions. New Asset ownership and transport receipts
+require their existing owners' separately reviewed evidence contracts.

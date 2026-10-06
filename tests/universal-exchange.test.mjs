@@ -3524,6 +3524,163 @@ test('Customer project V2 rechecks quote expiry before replacing accepted state'
   }
 });
 
+// Disposable execution fixtures use the existing frozen V1, never the real queue.
+async function customerProjectSubplanFixture({ defaultInspections = false, earlyRework = false, intendedUse = null, alignRework = true } = {}) {
+  const { sha256: hash } = await import('../core/shared/utils.mjs');
+  const { createKaiosAiCompanyRuntimeV1, PROJECT_TEMPLATES } = await import('../KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js');
+  const materials = {};
+  for (const task of PROJECT_TEMPLATES.BASIC_HOUSE_PROJECT.tasks) for (const [name, amount] of Object.entries(task.materials)) materials[name] = (materials[name] ?? 0) + amount;
+  const resourceFixture = { scope: 'LOCAL_TEST_ONLY_V1_SUBPLAN', openingSimulationCredit: '65000', depositRate: 0, materials,
+    inspectionPolicy: earlyRework ? 'SURVEY_REWORK_ONCE_FROM_WORK_SEGMENTS' : 'FINAL_QA_REWORK_ONCE_FROM_WORK_SEGMENTS', reworkRestPolicy: earlyRework ? 'NONE' : 'NEXT_V1_SHIFT_AFTER_MINIMUM_REST' };
+  const defectTaskCode = earlyRework ? 'SURVEY' : 'FINAL_ACCEPTANCE';
+  const fixtureHash = await hash(resourceFixture);
+  const adapter = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const f = customerProjectFixture({ planningAdapter: adapter });
+  f.setPlan({ bomHash: await hash(materials), durationHours: 1000,
+    assumptions: ['Synthetic subplan resources only; no real balance, worker or title authority', `LOCAL_SUBPLAN_FIXTURE_SHA256:${fixtureHash}`] });
+  await f.submit(); const quote = (await f.issue()).quote;
+  await f.model.command(f.acceptance(quote, 'accept-subplan-fixture', 2));
+  const accepted = await f.model.read();
+  assert.equal(accepted.events.at(-1).command, 'ACCEPT_QUOTE');
+  assert.equal(accepted.acceptance.quoteHash, quote.contentHash);
+  const runtime = createKaiosAiCompanyRuntimeV1({ seed: quote.contentHash, initialCash: Number(resourceFixture.openingSimulationCredit) });
+  const done = (result) => { assert.ok(typeof result.status === 'string' && !['BLOCKED', 'REJECTED', 'NEEDS_CLARIFICATION', 'REWORK_REQUIRED', 'FAILED'].includes(result.status), `${result.status}:${result.reason}`); return result; };
+  try {
+    const request = done(runtime.submitRequest({ customer_life_id: accepted.owner.playerId, customer_type: 'PLAYER', request_text: 'Explicitly accepted local subplan fixture',
+      requested_object: 'HOUSE', requested_location: f.request.locationRef, requested_quantity: f.request.quantity, requested_quality: f.request.quality,
+      requested_deadline: f.request.deadlineHours, requested_budget: Number(f.request.budget.amount), intended_use: intendedUse ?? f.request.intendedUse,
+      civilization_context: 'INDUSTRIAL', rights_context: [f.request.rightsRef], risk_level: 'MEDIUM', priority: 'NORMAL' })).outputs.request;
+    done(runtime.analyzeRequirements(request.request_id)); done(runtime.evaluateFeasibility(request.request_id));
+    const proposal = done(runtime.createProposal(request.request_id)).outputs.proposal; done(runtime.approveProposal(proposal.proposal_id));
+    const projectId = done(runtime.createProject(proposal.proposal_id)).outputs.project.project_id;
+    for (const method of ['decomposeProject', 'calculateDependencies', 'createBOM', 'createWorkforcePlan', 'createEquipmentPlan', 'createSupplyChainPlan']) done(runtime[method](projectId));
+    done(runtime.calculateBudget(projectId, { approved_budget: Number(quote.content.total), funding_source: 'EXPLICIT_QUOTE_BOUND_SYNTHETIC_FIXTURE' }));
+    done(runtime.calculateSchedule(projectId)); done(runtime.createSimulatedContract(projectId, { deposit_rate: resourceFixture.depositRate }));
+    done(runtime.startProcurement(projectId)); done(runtime.start());
+    const orders = runtime.getState().procurement_orders;
+    assert.equal(runtime.receiveMaterial(projectId, orders[0].material_id).reason, 'TRANSPORT_TIME_REQUIRED');
+    done(runtime.advanceTime(Math.max(...orders.map((order) => order.arrival_time)) - runtime.getState().simulation_time));
+    for (const order of orders) done(runtime.receiveMaterial(projectId, order.material_id));
+    done(runtime.calculateSchedule(projectId));
+    const originals = runtime.getState().projects[0].tasks;
+    assert.equal(runtime.startTask(projectId, originals[1].task_id).reason, 'DEPENDENCY_NOT_COMPLETE');
+    function inspect(taskId, result) {
+      if (defaultInspections) return runtime.inspectTask(projectId, taskId);
+      const state = runtime.getState(), task = state.projects[0].tasks.find((t) => t.task_id === taskId);
+      const inspector = state.resource_plans[0].workforce.find((w) => w.skill === 'QA_INSPECTOR');
+      assert.equal(task.remaining_hours, 0);
+      const effectiveHours = task.work_segments.reduce((sum, segment) => sum + segment.effective_hours, 0);
+      assert.ok(Math.abs(effectiveHours - task.duration_hours) < 0.001);
+      return runtime.inspectTask(projectId, taskId, result, { inspector: inspector.worker_id,
+        criteria: ['V1_WORK_SEGMENTS_COMPLETE', resourceFixture.inspectionPolicy], measurements: { remainingHours: task.remaining_hours, effectiveHours },
+        evidence: [`QUOTE_SHA256:${quote.contentHash}`, `FIXTURE_SHA256:${fixtureHash}`],
+        defects: result === 'PASS' ? [] : ['EXPLICIT_SYNTHETIC_FIXTURE_DEFECT'], rework: result === 'PASS' ? [] : ['TWO_HOURS_CORRECTION'] });
+    }
+    function perform(taskId) {
+      let state = runtime.getState(); const task = state.projects[0].tasks.find((t) => t.task_id === taskId), plan = state.resource_plans[0];
+      for (const skill of task.skills) {
+        const before = runtime.getState().projects[0].tasks;
+        const assigned = runtime.assignWorker(projectId, taskId, plan.workforce.find((w) => w.skill === skill).worker_id);
+        if (earlyRework && assigned.reason === 'REST_REQUIREMENT_CONFLICT') {
+          assert.deepEqual(runtime.getState().projects[0].tasks, before);
+          return { status: 'REPLAN_REQUIRED', taskId };
+        }
+        done(assigned);
+      }
+      for (const type of task.equipment) done(runtime.reserveEquipment(projectId, taskId, plan.equipment.find((e) => e.type === type).equipment_id));
+      state = runtime.getState(); const window = state.task_windows[taskId];
+      if (window.start > state.simulation_time) done(runtime.advanceTime(window.start - state.simulation_time));
+      done(runtime.startTask(projectId, taskId));
+      assert.equal(runtime.completeTask(projectId, taskId).reason, 'INSPECTION_APPROVAL_REQUIRED');
+      done(runtime.advanceTime(task.remaining_hours));
+    }
+    for (const task of originals) {
+      const progress = perform(task.task_id);
+      if (progress?.status === 'REPLAN_REQUIRED') return { f, adapter, resourceFixture, snapshot: runtime.exportState(), accepted, blockedTaskId: progress.taskId };
+      if (task.task_code === defectTaskCode && !defaultInspections) {
+        assert.equal(inspect(task.task_id, 'REWORK_REQUIRED').status, 'REWORK_REQUIRED');
+        assert.equal(runtime.deliverProject(projectId).reason, 'MANDATORY_TASKS_INCOMPLETE');
+        if (earlyRework) assert.equal(runtime.startTask(projectId, originals[1].task_id).reason, 'DEPENDENCY_NOT_COMPLETE');
+        if (resourceFixture.reworkRestPolicy !== 'NONE') {
+          const state = runtime.getState(), shift = state.resource_plans[0].workforce.find((w) => w.skill === 'QA_INSPECTOR').shift;
+          const nextShift = alignRework ? Math.ceil((state.simulation_time + shift.minimum_rest_hours) / shift.cycle_hours) * shift.cycle_hours + shift.start
+            : state.simulation_time + shift.minimum_rest_hours;
+          done(runtime.advanceTime(nextShift - state.simulation_time));
+        }
+        const repair = done(runtime.requestRework(projectId, task.task_id, { duration_hours: 2 })).outputs.rework_task;
+        perform(repair.task_id); done(inspect(repair.task_id, 'PASS')); done(runtime.completeTask(projectId, repair.task_id));
+      }
+      done(inspect(task.task_id, 'PASS')); done(runtime.completeTask(projectId, task.task_id));
+    }
+    assert.equal(runtime.deliverProject(projectId).reason, 'MAINTENANCE_PLAN_REQUIRED');
+    done(runtime.scheduleMaintenance(projectId)); done(runtime.deliverProject(projectId));
+    assert.equal(runtime.integrityReport().ok, true);
+    return { f, adapter, resourceFixture, snapshot: runtime.exportState(), accepted };
+  } finally { runtime.destroy(); }
+}
+let customerProjectSubplanBaseline;
+const subplanBaseline = () => customerProjectSubplanBaseline ??= customerProjectSubplanFixture();
+
+test('Customer project subplan binds quote acceptance, rework and pending coordinator delivery without completing the house', async () => {
+  const { f, adapter, resourceFixture, snapshot, accepted } = await subplanBaseline();
+  const result = await adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot });
+  assert.equal(result.coordinatorStatus, 'ACCEPTANCE_PENDING'); assert.equal(result.reworkCompleted, 1);
+  assert.deepEqual(result.missingStages, ['EXCAVATION', 'ROOF', 'INTERIOR', 'INSPECTION', 'REWORK', 'COMPLETE']);
+  assert.equal(result.quoteHash, accepted.acceptance.quoteHash); assert.equal(result.fullHouseStatus, 'HOUSE_STAGE_ADAPTER_REQUIRED');
+  assert.equal(result.houseComplete, false); assert.equal(result.deliveryAcceptance, 'NOT_REQUESTED');
+  assert.equal(result.asset, null); assert.equal(result.delivery, null); assert.equal(result.receipt, null);
+  assert.equal(snapshot.state.finance.project_revenue, 0); assert.equal(snapshot.state.finance.customer_deposits, 0);
+  assert.equal(snapshot.state.deliveries[0].customer_outcome, null); assert.equal(snapshot.state.projects[0].closed_at, null);
+  assert.ok(snapshot.state.projects[0].tasks.every((task) => task.consumed.labor_hours > 0));
+  assert.deepEqual(await f.model.read(), accepted);
+  const restarted = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  assert.deepEqual(await restarted.auditSubplan({ projectSource: f.model, resourceFixture, snapshot: structuredClone(snapshot) }), result);
+});
+
+test('Customer project subplan rejects unaccepted source and unquoted synthetic funding', async () => {
+  const { adapter, resourceFixture, snapshot } = await subplanBaseline(); const f = customerProjectFixture();
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_ACCEPTED_QUOTE_REQUIRED');
+  await f.submit(); const q = (await f.issue()).quote; await f.model.command(f.acceptance(q, 'accept-no-fixture', 2));
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_FIXTURE_UNBOUND');
+  const bound = await subplanBaseline();
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: bound.f.model, resourceFixture: { ...resourceFixture, openingSimulationCredit: '65001' }, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_FIXTURE_UNBOUND');
+});
+
+test('Customer project subplan rejects legacy default PASS even when V1 replay accepts it', async () => {
+  const { f, adapter, resourceFixture, snapshot } = await customerProjectSubplanFixture({ defaultInspections: true });
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_INSPECTION_MISMATCH');
+});
+
+test('Customer project subplan reports early rework scheduler conflict without changing downstream tasks', async () => {
+  const { f, adapter, resourceFixture, snapshot, accepted, blockedTaskId } = await customerProjectSubplanFixture({ earlyRework: true });
+  const result = await adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot });
+  assert.equal(result.executionStatus, 'REPLAN_REQUIRED'); assert.equal(result.executionBlocker, 'REST_REQUIREMENT_CONFLICT');
+  const blocked = snapshot.state.projects[0].tasks.find((task) => task.task_id === blockedTaskId);
+  assert.notEqual(blocked.status, 'COMPLETE'); assert.equal(blocked.progress_percent, 0);
+  assert.equal(snapshot.state.deliveries.length, 0); assert.equal(result.houseComplete, false);
+  assert.equal(result.delivery, null); assert.equal(result.receipt, null); assert.deepEqual(await f.model.read(), accepted);
+});
+
+test('Customer project subplan rejects a replay-valid project for a different intended use', async () => {
+  const { f, adapter, resourceFixture, snapshot } = await customerProjectSubplanFixture({ intendedUse: 'ANOTHER_USE' });
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_REQUEST_MISMATCH');
+});
+
+test('Customer project subplan rejects valid V1 rest that does not meet the quoted next-shift policy', async () => {
+  const { f, adapter, resourceFixture, snapshot } = await customerProjectSubplanFixture({ alignRework: false });
+  await customerProjectRejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_REST_MISMATCH');
+});
+
+test('Customer project subplan rejects altered replay evidence and rechecks trusted source identity', async () => {
+  const { f, adapter, resourceFixture, snapshot, accepted } = await subplanBaseline();
+  const corrupt = structuredClone(snapshot); corrupt.state.projects[0].tasks[0].consumed.labor_hours = 0;
+  await assert.rejects(adapter.auditSubplan({ projectSource: f.model, resourceFixture, snapshot: corrupt }));
+  let reads = 0;
+  const projectSource = { async read() { reads += 1; return reads === 1 ? structuredClone(accepted) : { ...structuredClone(accepted), owner: { ...accepted.owner, playerId: 'OTHER-PLAYER' } }; } };
+  await customerProjectRejects(adapter.auditSubplan({ projectSource, resourceFixture, snapshot }), 'CUSTOMER_PROJECT_SUBPLAN_SOURCE_CHANGED');
+  assert.deepEqual(await f.model.read(), accepted);
+});
+
 // Intentionally test-file-only schema. Not an applied or deployable migration.
 const CUSTOMER_PROJECT_SQLITE_FIXTURE_SCHEMA = `
 CREATE TABLE customer_project_workspaces(workspace_id TEXT PRIMARY KEY,owner_account_id TEXT NOT NULL REFERENCES accounts(account_id),owner_player_id TEXT NOT NULL UNIQUE REFERENCES players(player_id),revision INTEGER NOT NULL CHECK(revision>0),storage_version INTEGER NOT NULL CHECK(storage_version>0),payload_hash TEXT NOT NULL,payload TEXT NOT NULL);

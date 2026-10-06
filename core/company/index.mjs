@@ -3143,6 +3143,91 @@ export async function createFrozenV1CustomerProjectTestAdapter({ mode } = {}) {
         snapshotHash: await hashCustomerProject(exported), snapshot: exported,
         coverage: "SEVEN_TASK_DEMO_NOT_TWELVE_STAGE_COMPLETE_HOUSE", execution: "HELD", registryWrites: false };
     } finally { runtime.destroy(); replay.destroy(); }
+  }, async auditSubplan({ projectSource, resourceFixture, snapshot } = {}) {
+    // projectSource is a trusted host read port, never a caller-supplied identity.
+    // This audits a disposable legacy subplan; it never advances the parent project.
+    cpFail(typeof projectSource?.read === "function", "CUSTOMER_PROJECT_SOURCE_REQUIRED");
+    const fixture = cloneCustomerProject(resourceFixture); cpJson(fixture);
+    cpFields(fixture, ["scope", "openingSimulationCredit", "depositRate", "materials", "inspectionPolicy", "reworkRestPolicy"]);
+    cpFail(fixture.scope === "LOCAL_TEST_ONLY_V1_SUBPLAN" && cpAmount(fixture.openingSimulationCredit) && BigInt(fixture.openingSimulationCredit) <= BigInt(Number.MAX_SAFE_INTEGER)
+      && fixture.depositRate === 0 && ["SURVEY_REWORK_ONCE_FROM_WORK_SEGMENTS", "FINAL_QA_REWORK_ONCE_FROM_WORK_SEGMENTS"].includes(fixture.inspectionPolicy)
+      && fixture.reworkRestPolicy === (fixture.inspectionPolicy.startsWith("SURVEY_") ? "NONE" : "NEXT_V1_SHIFT_AFTER_MINIMUM_REST"), "CUSTOMER_PROJECT_SUBPLAN_FIXTURE_REQUIRED");
+    const accepted = await projectSource.read();
+    const quote = accepted?.contract?.acceptedQuote;
+    cpFail(accepted?.scope === CUSTOMER_PROJECT_PROTOTYPE_SCOPE && accepted.acceptance && quote && accepted.project?.quoteHash === quote.contentHash
+      && accepted.acceptance.quoteHash === quote.contentHash && accepted.acceptance.quoteId === quote.quoteId && accepted.acceptance.quoteRevision === quote.revision,
+    "CUSTOMER_PROJECT_ACCEPTED_QUOTE_REQUIRED");
+    cpFail(quote.contentHash === await hashCustomerProject({ quoteId: quote.quoteId, revision: quote.revision, content: quote.content })
+      && accepted.acceptance.acknowledgementHash === quote.acknowledgementHash, "QUOTE_HASH_MISMATCH");
+    const fixtureHash = await hashCustomerProject(fixture);
+    cpFail(quote.content.plan.assumptions.includes(`LOCAL_SUBPLAN_FIXTURE_SHA256:${fixtureHash}`)
+      && quote.content.plan.bomHash === await hashCustomerProject(fixture.materials)
+      && quote.content.total === fixture.openingSimulationCredit, "CUSTOMER_PROJECT_SUBPLAN_FIXTURE_UNBOUND");
+    const exported = cloneCustomerProject(snapshot);
+    cpFail(exported?.export_status === "NON_AUTHORITATIVE_SIMULATION" && new TextEncoder().encode(serializeCustomerProject(exported)).length <= 2_000_000,
+      "CUSTOMER_PROJECT_SUBPLAN_SNAPSHOT_REQUIRED");
+    const verifier = createKaiosAiCompanyRuntimeV1({ seed: quote.contentHash, initialCash: 0 });
+    try {
+      verifier.importState(exported);
+      const state = verifier.getState(), project = state.projects[0], request = state.requests[0], plan = state.resource_plans[0];
+      cpFail(state.seed === quote.contentHash && state.projects.length === 1 && state.requests.length === 1 && state.resource_plans.length === 1
+        && project.template_id === "BASIC_HOUSE_PROJECT" && state.finance.opening_cash === Number(fixture.openingSimulationCredit)
+        && project.budget?.approved_budget === Number(quote.content.total)
+        && state.simulation_time - project.schedule.planned_start <= quote.content.plan.durationHours, "CUSTOMER_PROJECT_SUBPLAN_SCOPE_MISMATCH");
+      cpFail(request.customer_life_id === accepted.owner.playerId && request.requested_location === quote.content.request.locationRef
+        && request.intended_use === quote.content.request.intendedUse
+        && request.requested_quality === quote.content.request.quality && request.requested_quantity === quote.content.request.quantity
+        && request.requested_deadline === quote.content.request.deadlineHours && request.requested_budget === Number(quote.content.request.budget.amount)
+        && serializeCustomerProject(request.rights_context) === serializeCustomerProject([quote.content.request.rightsRef]), "CUSTOMER_PROJECT_SUBPLAN_REQUEST_MISMATCH");
+      cpFail(serializeCustomerProject(Object.fromEntries(plan.bill_of_materials.map((v) => [v.material_id, v.quantity]))) === serializeCustomerProject(fixture.materials),
+        "CUSTOMER_PROJECT_SUBPLAN_MATERIAL_MISMATCH");
+      cpFail(state.contracts.length === 1 && state.contracts[0].deposit_amount === 0 && state.finance.customer_deposits === 0 && state.finance.project_revenue === 0
+        && !state.action_log.some((a) => ["ACCEPT_PROJECT", "CLOSE_PROJECT", "SUBMIT_CHANGE_ORDER", "APPROVE_CHANGE_ORDER"].includes(a.command))
+        && state.deliveries.every((d) => d.customer_outcome === null), "CUSTOMER_PROJECT_SUBPLAN_ACCEPTANCE_FORBIDDEN");
+      const inspected = new Map(), reworkCompleted = new Set();
+      const defectTaskCode = fixture.inspectionPolicy.startsWith("SURVEY_") ? "SURVEY" : "FINAL_ACCEPTANCE";
+      for (const repair of project.tasks.filter((t) => t.rework_for_task_id && t.actual_start !== null)) {
+        const original = project.tasks.find((t) => t.task_id === repair.rework_for_task_id);
+        cpFail(original?.task_code === defectTaskCode && repair.duration_hours === 2, "CUSTOMER_PROJECT_SUBPLAN_REWORK_MISMATCH");
+        if (fixture.reworkRestPolicy !== "NONE") {
+          const shift = state.workforce_pool.find((w) => w.skill === "QA_INSPECTOR").shift;
+          const nextShift = Math.ceil((original.actual_end + shift.minimum_rest_hours) / shift.cycle_hours) * shift.cycle_hours + shift.start;
+          cpFail(repair.actual_start >= nextShift, "CUSTOMER_PROJECT_SUBPLAN_REST_MISMATCH");
+        }
+      }
+      for (const action of state.action_log) {
+        const task = project.tasks.find((t) => t.task_id === action.args.taskId);
+        if (action.command === "COMPLETE_TASK" && action.result_status === "COMPLETED" && task?.rework_for_task_id) reworkCompleted.add(task.rework_for_task_id);
+        if (action.command !== "INSPECT_TASK") continue;
+        cpFail(task && Object.hasOwn(action.args, "outcome") && action.args.details, "CUSTOMER_PROJECT_SUBPLAN_INSPECTION_REQUIRED");
+        const count = inspected.get(task.task_id) ?? 0;
+        const expected = task.task_code === defectTaskCode && count === 0 ? "REWORK_REQUIRED" : "PASS";
+        const details = action.args.details, hours = task.work_segments.reduce((sum, segment) => sum + segment.effective_hours, 0);
+        cpFail(action.args.outcome === expected && (task.task_code !== defectTaskCode || count === 0 || reworkCompleted.has(task.task_id))
+          && state.workforce_pool.some((w) => w.worker_id === details.inspector && w.skill === "QA_INSPECTOR")
+          && details.measurements?.remainingHours === 0 && details.measurements?.effectiveHours === hours && Math.abs(hours - task.duration_hours) < 0.001
+          && serializeCustomerProject(details.criteria) === serializeCustomerProject(["V1_WORK_SEGMENTS_COMPLETE", fixture.inspectionPolicy])
+          && serializeCustomerProject(details.evidence) === serializeCustomerProject([`QUOTE_SHA256:${quote.contentHash}`, `FIXTURE_SHA256:${fixtureHash}`]),
+        "CUSTOMER_PROJECT_SUBPLAN_INSPECTION_MISMATCH");
+        inspected.set(task.task_id, count + 1);
+      }
+      const completedCodes = [...new Set(project.tasks.filter((t) => t.status === "COMPLETE" && !t.rework_for_task_id).map((t) => t.task_code))];
+      // Do not union the separate fixed-location foundation fixture into this quote.
+      // Legacy FINAL_ACCEPTANCE is internal QA, never the customer's acceptance.
+      const missingStages = SMALL_HOUSE_REQUIRED_STAGES.filter((stage) => !completedCodes.includes(stage));
+      const snapshotHash = await hashCustomerProject(exported);
+      const lastAction = state.action_log.at(-1);
+      const replanRequired = lastAction?.command === "ASSIGN_WORKER" && lastAction.result_status === "BLOCKED" && lastAction.result_reason === "REST_REQUIREMENT_CONFLICT";
+      const current = await projectSource.read();
+      cpFail(serializeCustomerProject({ owner: current.owner, acceptance: current.acceptance, contract: current.contract, project: current.project })
+        === serializeCustomerProject({ owner: accepted.owner, acceptance: accepted.acceptance, contract: accepted.contract, project: accepted.project }),
+      "CUSTOMER_PROJECT_SUBPLAN_SOURCE_CHANGED");
+      return { scope: "LOCAL_TEST_ONLY_V1_SUBPLAN_EVIDENCE", quoteId: quote.quoteId, quoteRevision: quote.revision, quoteHash: quote.contentHash,
+        fixtureHash, snapshotHash, coordinatorStatus: project.status, completedTaskCodes: completedCodes,
+        executionStatus: replanRequired ? "REPLAN_REQUIRED" : project.status, executionBlocker: replanRequired ? "REST_REQUIREMENT_CONFLICT" : null,
+        reworkCompleted: reworkCompleted.size, missingStages, fullHouseStatus: "HOUSE_STAGE_ADAPTER_REQUIRED", houseComplete: false,
+        deliveryAcceptance: "NOT_REQUESTED", asset: null, delivery: null, receipt: null, parentStateChanged: false, productionVerified: false };
+    } finally { verifier.destroy(); }
   } });
   customerProjectTestAdapters.add(adapter); return adapter;
 }
