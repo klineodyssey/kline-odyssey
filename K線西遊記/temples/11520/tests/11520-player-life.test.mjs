@@ -968,3 +968,146 @@ test('daily UI failed player replacement invalidates pending work but keeps a de
 test('daily UI preserves error reporting for the deferred current-panel projection callback',async()=>{
  const {store}=dailyUiStore(),messages=[];const f=await dailyUiFixture({store,claimDaily:()=>{},onChange:()=>{throw Error('PROJECTION_REFRESH_FAILED')},toast:m=>messages.push(m)});try{await f.button().onclick();assert.deepEqual(messages,['PROJECTION_REFRESH_FAILED']);assert.equal(f.nodes.get('playerLifeMessage').textContent,'PROJECTION_REFRESH_FAILED');assert.equal(f.button().disabled,false)}finally{f.cleanup()}
 });
+
+// This is the exact synthetic native fixture builder, executed here against
+// fake-IDB before any queued Chromium run. It is never a production initializer.
+function nativeRetainedFixtureBuilder(idb){
+ const body=nativeHarnessSource.split('// BEGIN SYNTHETIC RETAINED NATIVE FIXTURE.\n')[1]?.split('// END SYNTHETIC RETAINED NATIVE FIXTURE.')[0];assert.ok(body,'actual native retained fixture helper required');
+ return new Function('__nativeCurrent','indexedDB','crypto','return ('+body.trim()+')')({life:lifeAuthorityModule},idb,globalThis.crypto);
+}
+test('native retained fixture uses explicit test namespace and strict existing authority validation',async()=>{
+ const f=await fullFixture(),source=await f.a.readGame(),original=structuredClone(source),name='KAIOS_LOCAL_GAME_TEST:native-retained-unit',at=Date.now(),seed=nativeRetainedFixtureBuilder(f.idb);
+ const initial=await seed({name,source,at,generation:'e'.repeat(32)}),a=newAuthority(f.idb,{databaseName:name,now:()=>at});await a.openGame();const loaded=await a.readRetainedDaily();assert.deepEqual(loaded,initial.snapshot);assert.equal(loaded.daily.sequence,0);assert.equal(loaded.retained.generation,'e'.repeat(32));assert.equal(loaded.activePlayerId,source.activePlayerId);assert.equal(loaded.daily.pending.length,0);assert.equal(gameplayProfile(domainValue(loaded.records,'PLAYER_LIFE').players[loaded.activePlayerId],{now:at}).daily.ready,true);assert.deepEqual(await f.a.readGame(),original);assert.deepEqual(source,original);a.close();f.a.close();
+});
+test('native retained fixture rejects production or ambiguous namespace before touching storage',async()=>{
+ let opens=0;const seed=nativeRetainedFixtureBuilder({open(){opens++;throw Error('UNEXPECTED_STORAGE_OPEN')}});
+ for(const name of ['KAIOS_LOCAL_GAME','KAIOS_LOCAL_GAME_TEST:native-adapter','KAIOS_LOCAL_GAME_TEST:native-daily','unscoped'])await assert.rejects(seed({name,source:null,at:Date.now(),generation:'e'.repeat(32)}),/SYNTHETIC_RETAINED_DATABASE_REQUIRED/);assert.equal(opens,0);
+});
+test('native retained fixture is add-only and cannot silently replace an existing admitted history',async()=>{
+ const f=await fullFixture(),source=await f.a.readGame(),name='KAIOS_LOCAL_GAME_TEST:native-retained-once',at=Date.now(),seed=nativeRetainedFixtureBuilder(f.idb);await seed({name,source,at,generation:'e'.repeat(32)});const a=newAuthority(f.idb,{databaseName:name,now:()=>at});await a.openGame();await a.claimRetainedDaily(retainedInput(await a.readRetainedDaily()));const before=await a.readRetainedDaily();assert.equal(before.daily.receipts.length,1);await assert.rejects(seed({name,source,at,generation:'e'.repeat(32)}));assert.deepEqual(await a.readRetainedDaily(),before);a.close();f.a.close();
+});
+test('daily UI ambiguous acknowledgement after actual commit retries the original operation without duplicate reward',async()=>{
+ const f=await retainedFixture();let viewState=await f.a.readRetainedDaily(),failAck=true,changes=0,claimCalls=0,claimInput=retainedInput(viewState),fulfillInput=null;const messages=[],before=structuredClone(viewState),view=retainedUiView(()=>viewState,undefined,()=>f.clock.now);
+ const ui=await dailyUiFixture({store:view,claimDaily:async context=>{assert.equal(context.playerId,claimInput.playerId);claimCalls++;const claim=await f.a.claimRetainedDaily(claimInput);const committed=await f.a.readRetainedDaily();assert.ok(committed.daily.receipts.some(r=>r.request.opId===claimInput.opId));if(failAck){failAck=false;throw Error('SYNTHETIC_POST_COMMIT_CALLBACK_RESULT_LOST')}assert.equal(claim.replayed,true);viewState=committed;if(!context.isCurrent())return;fulfillInput??=retainedInput(viewState,'2'.repeat(32),{claimRef:claimInput.opId});await f.a.fulfillRetainedDaily(fulfillInput);viewState=await f.a.readRetainedDaily()},onChange:()=>changes++,toast:m=>messages.push(m)});
+ try{const button=ui.button();await button.onclick();assert.equal(changes,0);assert.equal(ui.button(),button);assert.deepEqual(messages,['SYNTHETIC_POST_COMMIT_CALLBACK_RESULT_LOST']);assert.deepEqual(viewState,before,'unknown acknowledgement must not invent a refreshed UI');const durable=await f.a.readRetainedDaily();assert.equal(durable.daily.pending.length,1);assert.equal(durable.daily.receipts.length,1);assert.equal(domainValue(durable.records,'PLAYER_LIFE').players[f.selected].xp-domainValue(before.records,'PLAYER_LIFE').players[f.selected].xp,25);await button.onclick();assert.equal(claimCalls,2);assert.equal(changes,1);assert.equal(viewState.daily.receipts.length,2);assert.equal(viewState.daily.pending.length,0);assert.equal(domainValue(viewState.records,'BACKPACK',f.selected).items[0].qty,1);const settled=await rawRows(f.idb);await ui.button().onclick();assert.deepEqual(await rawRows(f.idb),settled,'both original requests replay without advancing the authority')}finally{ui.cleanup();f.a.close()}
+});
+test('production authority admission remains explicitly unwired before the all-writer gate is reviewed',async()=>{
+ // Source tripwire only, not a runtime security boundary or graph-integrity proof.
+ const {readFile}=await import('node:fs/promises'),owners=['../runtime/game-5d-bootstrap.mjs','../runtime/game-5d-main.mjs','../runtime/player-life-ui.mjs','../runtime/backpack-ui.mjs','../runtime/evm-wallet-runtime.mjs','../runtime/game-mobile-shell.mjs','../runtime/world-item-drop-bootstrap.mjs','../runtime/living-world-browser-bridge.mjs','../../../../KAIOS/backend/web/app.mjs'];
+ for(const owner of owners){const source=await readFile(new URL(owner,import.meta.url),'utf8');assert.doesNotMatch(source,/createLocalGameAuthority|claimRetainedDaily|fulfillRetainedDaily|inspectDailyReconstruction/,'partial public authority activation requires a reviewed pre-import and all-writer admission contract: '+owner)}
+});
+
+// Contract-only report data. These objects are never written as browser evidence;
+// they exercise the exact mandatory CI validator, not Chromium or persistence.
+async function retainedNativeValidator(){
+ const source=await (await import('node:fs/promises')).readFile(new URL('../../../../.github/workflows/11520-game-product-qa.yml',import.meta.url),'utf8'),body=source.split('// BEGIN RETAINED NATIVE VALIDATION.\n')[1]?.split('// END RETAINED NATIVE VALIDATION.')[0];assert.ok(body,'exact CI retained validator required');
+ return {validate:new Function('assert',body+';return validateRetainedNativeEvidence;')(assert),source};
+}
+function retainedNativeReportContract(){
+ const sha=n=>n.toString(16).padStart(64,'0'),playerId='KAIOS-P-'+'1'.repeat(32),otherPlayerId='KAIOS-P-'+'2'.repeat(32),at=Date.UTC(2026,9,6),scope='RETAINED_DAILY_DRAFT_V1_SYNTHETIC_DIRECT_IDB_NOT_MIGRATION',uiScope='ACTUAL_PLAYER_LIFE_INSTALLER_SYNTHETIC_READONLY_PROJECTION_NOT_PUBLIC_BOOT',methods=['add','put','delete','clear'];
+ const refs=[{domain:'PLAYER_LIFE'},{domain:'COURIER'},{domain:'BACKPACK',playerId},{domain:'PRODUCT',playerId,owner:'guest'},{domain:'BACKPACK',playerId:otherPlayerId},{domain:'PRODUCT',playerId:otherPlayerId,owner:'guest'}];
+ const snapshot=(n,generation=null,sequence=0)=>({hash:sha(n),activePlayerId:playerId,authorityEpoch:generation||'b'.repeat(32),selectionEpoch:0,catalogRevision:0,...(generation?{retainedGeneration:generation,dailyGeneration:'d'.repeat(32),dailySequence:sequence}:{}),records:refs.map((ref,i)=>({ref,revision:ref.domain==='PLAYER_LIFE'&&sequence>0?1:ref.domain==='BACKPACK'&&ref.playerId===playerId&&sequence===2?1:0,sha256:sha(i+100)}))});
+ const facts=(stage)=>({playerId,xp:stage?60:35,engineXp:stage?40:20,claimEvents:stage?1:0,receiptCount:stage,pendingCount:stage===1?1:0,stardustQuantity:stage===2?1:0,bagRewardReceipts:stage===2?['DAILY_JOURNEY:2026-10-06']:[]});
+ const noWrites=()=>({mutationMethods:[...methods],mutationAttempts:[]});
+ const common=()=>({fixtureAt:at,originalCanonicalUnchanged:true,ordinaryDailyUnchanged:true,legacySourceStringsUnchanged:true,originalCanonicalHash:sha(1),ordinaryDailyHash:sha(2),legacySourceHash:sha(3)});
+ const input=(generation,opId,claimRef)=>{const s=snapshot(0,generation,claimRef?1:0);return {opId,playerId,...(claimRef?{claimRef}:{}),expected:{authorityEpoch:s.authorityEpoch,selectionEpoch:s.selectionEpoch,catalogRevision:s.catalogRevision,dailyGeneration:s.dailyGeneration,dailySequence:s.dailySequence,retainedGeneration:s.retainedGeneration,records:s.records.map(({ref,revision})=>({ref,revision}))}}};
+ const reconstruct={...common(),scope,before:snapshot(10,'e'.repeat(32)),claimCommitted:snapshot(11,'e'.repeat(32),1),latest:snapshot(12,'e'.repeat(32),2),claimReceipt:{kind:'CLAIM_DAILY',at,request:input('e'.repeat(32),'1'.repeat(32))},fulfillmentReceipt:{kind:'FULFILL_DAILY',at,request:input('e'.repeat(32),'2'.repeat(32),'1'.repeat(32))},beforeFacts:facts(0),afterFacts:facts(2),retainedGeneration:'e'.repeat(32),sequence:2,headDigest:sha(13),proofRowsHash:sha(14),variants:['MISSING','OLDER','MALFORMED'].map((kind,n)=>({kind,status:'RECONSTRUCTION_CANDIDATE',beforeRawHash:sha(20+n),afterRawHash:sha(20+n),candidateHash:sha(12),headDigest:sha(13),sequence:2,installed:false,...noWrites()}))};
+ const holdKinds=['ABSENT_TAIL','CORRUPT_TAIL','FOREIGN_CHECKPOINT','TRUNCATED_PREFIX_WITH_NEWER_PROJECTION'];
+ const held={...common(),scope,healthyHash:sha(12),healthyProofRowsHash:sha(14),expectedGeneration:reconstruct.retainedGeneration,foreignCheckpointGeneration:'f'.repeat(32),variants:holdKinds.map((kind,n)=>({kind,error:n===3?'Error: RETAINED_NEWER_PROJECTION_HOLD':'Error: RETAINED_HISTORY_HOLD',beforeRawHash:sha(30+n),afterRawHash:sha(30+n),repairAttempted:false,...noWrites()}))};
+ const claimInput=input('8'.repeat(32),'a'.repeat(32)),fulfillInput=input('8'.repeat(32),'b'.repeat(32),claimInput.opId);
+ const claimReceipt={kind:'CLAIM_DAILY',at,request:structuredClone(claimInput)},fulfillmentReceipt={kind:'FULFILL_DAILY',at,request:structuredClone(fulfillInput),delivery:{rewardId:'DAILY_JOURNEY:2026-10-06'}};
+ const ack={...common(),scope:uiScope,retainedScope:scope,actualInstaller:true,fixturePath:'/__native_idb_fixture__.html',retainedGeneration:'8'.repeat(32),before:snapshot(40,'8'.repeat(32)),claimCommitted:snapshot(41,'8'.repeat(32),1),fulfillCommitted:snapshot(42,'8'.repeat(32),2),after:snapshot(42,'8'.repeat(32),2),beforeFacts:facts(0),claimCommittedFacts:facts(1),fulfillCommittedFacts:facts(2),afterFacts:facts(2),proofRowsHash:sha(43),headDigest:sha(44),sequence:2,injection:'POST_COMMIT_CALLBACK_RESULT_LOSS_NOT_IDB_ABORT',claimCrossPageReadback:true,fulfillCrossPageReadback:true,ignoredBusyNativeClick:true,explicitRetryClicks:2,ui:{calls:3,completions:1,messages:['SYNTHETIC_POST_COMMIT_CLAIM_ACK_LOST','SYNTHETIC_POST_COMMIT_FULFILL_ACK_LOST'],claimInput,fulfillInput,claimReceipt,fulfillmentReceipt,legacyWriteAttempts:[],replays:['claimRetainedDaily','claimRetainedDaily','fulfillRetainedDaily'].map(method=>{const receipt=method==='claimRetainedDaily'?claimReceipt:fulfillmentReceipt;return {method,opId:receipt.request.opId,methods:[...methods],attempts:[],receipt:structuredClone(receipt)}})}};
+ const owner={...common(),scope:uiScope,retainedScope:scope,actualInstaller:true,fixturePath:'/__native_idb_fixture__.html',retainedGeneration:'9'.repeat(32),before:snapshot(50,'9'.repeat(32)),after:snapshot(51,'9'.repeat(32),1),beforeFacts:facts(0),afterFacts:facts(1),proofRowsHash:sha(52),headDigest:sha(53),sequence:1,selectionKind:'SYNTHETIC_UI_REBIND_NOT_AUTHORITY_SWITCH',otherPlayerId,otherLifeHashBefore:sha(54),otherLifeHashAfter:sha(54),authoritySelectionUnchanged:true,allBagsUnchanged:true,ui:{claimInput:input('9'.repeat(32),'a'.repeat(32)),fulfillInput:null,originalOwner:playerId,visibleOwner:otherPlayerId,panelOwnerVisible:true,calls:1,completions:0,messages:[],legacyWriteAttempts:[]}};
+ const restart={retainedProtocolScope:scope,retainedFixtureAt:at,retainedReopened:[['KAIOS_LOCAL_GAME_TEST:native-retained',reconstruct.latest,reconstruct],['KAIOS_LOCAL_GAME_TEST:native-retained-ui-ack',ack.after,ack],['KAIOS_LOCAL_GAME_TEST:native-retained-ui-owner',owner.after,owner]].map(([name,s,e])=>({name,before:s,after:s,beforeProofRowsHash:e.proofRowsHash,afterProofRowsHash:e.proofRowsHash,headDigest:e.headDigest,sequence:e.sequence,dailyFacts:e.afterFacts,reseeded:false,repairAttempted:false,...noWrites()})),retainedHoldReopened:held.variants.map(e=>({...e}))};
+ const screenshots={'native-retained-hold-390x844.png':'RETAINED_HOLD_DIAGNOSTIC_NOT_REPAIR','native-async-ui-pending-390x844.png':'ISOLATED_ASYNC_UI_NOT_PUBLIC_GAME','native-async-ui-confirmed-390x844.png':'ISOLATED_ASYNC_UI_NOT_PUBLIC_GAME','native-async-ui-owner-fenced-390x844.png':'ISOLATED_ASYNC_UI_NOT_PUBLIC_GAME','native-idb-before-restart-390x844.png':'ADAPTER_DIAGNOSTIC_NOT_PRODUCT_UI','native-idb-after-restart-390x844.png':'ADAPTER_DIAGNOSTIC_NOT_PRODUCT_UI'};
+ return JSON.parse(JSON.stringify({retainedFixtureScope:scope,asyncUiFixtureScope:uiScope,cases:Object.entries({DAILY_TYPED_FULFILL_ABORT_RETRY:{fixtureAt:at,originalCanonicalHash:sha(1),legacySourceHash:sha(3),after:snapshot(2)},RETAINED_LATEST_RECONSTRUCTION:reconstruct,RETAINED_HISTORY_HOLD:held,ASYNC_DAILY_UI_ACK_RETRY:ack,ASYNC_DAILY_UI_OWNER_FENCE:owner,CLEAN_BROWSER_RESTART:restart}).map(([id,evidence])=>({id,required:true,status:'PASS',evidence})),servedSources:[{version:'CURRENT',path:'/runtime/player-life-ui.mjs',sha256:sha(60)}],blockedRequests:[],pageErrors:[],providerActivity:['A_BEFORE_RELOAD','A','B','UI_ACK','UI_OWNER','REOPENED'].map(page=>({page,calls:[]})),screenshots:Object.entries(screenshots).map(([file,kind])=>({file,kind,width:390,height:844}))}));
+}
+const nativeContractSnapshot=e=>{assert.match(e.hash,/^[0-9a-f]{64}$/);assert.equal(e.records.length,6);for(const record of e.records){assert.match(record.sha256,/^[0-9a-f]{64}$/);assert.ok(Number.isSafeInteger(record.revision)&&record.revision>=0)}};
+test('native retained CI validator accepts its contract fixture without producing browser evidence',async()=>{
+ const {validate}=await retainedNativeValidator(),r=retainedNativeReportContract();validate(r,nativeContractSnapshot);const input=r.cases.find(c=>c.id==='ASYNC_DAILY_UI_ACK_RETRY').evidence.ui.claimInput;input.expected.records.reverse();validate(r,nativeContractSnapshot);
+});
+test('native retained CI validator rejects missing contradictory or overclaimed evidence',async()=>{
+ const {validate}=await retainedNativeValidator(),by=(r,id)=>r.cases.find(c=>c.id===id).evidence;
+ const mutations=[
+  ['wrong intermediate owner',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').claimCommitted.activePlayerId='KAIOS-P-'+'2'.repeat(32)],
+  ['wrong intermediate facts owner',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').claimCommittedFacts.playerId='KAIOS-P-'+'2'.repeat(32)],
+  ['missing reconstructed owner',r=>delete by(r,'RETAINED_LATEST_RECONSTRUCTION').latest.activePlayerId],
+  ['empty expected vectors',r=>{const u=by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui;u.claimInput.expected.records=[];u.claimReceipt.request.expected.records=[];for(const x of u.replays.filter(x=>x.method==='claimRetainedDaily'))x.receipt.request.expected.records=[]}],
+  ['missing original authority epoch',r=>{const u=by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui;delete u.claimInput.expected.authorityEpoch;delete u.claimReceipt.request.expected.authorityEpoch;for(const x of u.replays.filter(x=>x.method==='claimRetainedDaily'))delete x.receipt.request.expected.authorityEpoch}],
+  ['foreign daily generation',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.fulfillInput.expected.dailyGeneration='c'.repeat(32)],
+  ['wrong intermediate sequence',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').claimCommitted.dailySequence=0],
+  ['wrong catalog revision',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.claimInput.expected.catalogRevision=1],
+  ['wrong original selection epoch',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.claimInput.expected.selectionEpoch=1],
+  ['contradictory fulfilled revision',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').fulfillCommitted.records[0].revision=99],
+  ['contradictory restart revision',r=>by(r,'CLEAN_BROWSER_RESTART').retainedReopened[0].after.records[0].revision++],
+  ['contradictory restart owner',r=>delete by(r,'CLEAN_BROWSER_RESTART').retainedReopened[1].before.activePlayerId],
+  ['case absent',r=>r.cases=r.cases.filter(c=>c.id!=='RETAINED_HISTORY_HOLD')],
+  ['case optional',r=>r.cases.find(c=>c.id==='ASYNC_DAILY_UI_ACK_RETRY').required=false],
+  ['case skipped',r=>r.cases.find(c=>c.id==='ASYNC_DAILY_UI_OWNER_FENCE').status='NOT_EXERCISED'],
+  ['wrong protocol scope',r=>r.retainedFixtureScope='PRODUCTION'],
+  ['ordinary state changed',r=>by(r,'RETAINED_LATEST_RECONSTRUCTION').ordinaryDailyHash='0'.repeat(64)],
+  ['historical candidate',r=>by(r,'RETAINED_LATEST_RECONSTRUCTION').variants[0].candidateHash='0'.repeat(64)],
+  ['repair performed',r=>by(r,'RETAINED_LATEST_RECONSTRUCTION').variants[1].installed=true],
+  ['inspector write',r=>by(r,'RETAINED_HISTORY_HOLD').variants[0].mutationAttempts=['put']],
+  ['missing write guard',r=>by(r,'RETAINED_HISTORY_HOLD').variants[0].mutationMethods.pop()],
+  ['tail silently restored',r=>by(r,'RETAINED_HISTORY_HOLD').variants[0].afterRawHash='0'.repeat(64)],
+  ['checkpoint not foreign',r=>{const h=by(r,'RETAINED_HISTORY_HOLD');h.foreignCheckpointGeneration=h.expectedGeneration}],
+  ['newer projection accepted',r=>by(r,'RETAINED_HISTORY_HOLD').variants.at(-1).error='RETAINED_GENERIC_HOLD'],
+  ['public entry used',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').fixturePath='/game-5d.html'],
+  ['callback mocked',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').actualInstaller=false],
+  ['claim readback absent',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').claimCrossPageReadback=false],
+  ['fulfill readback absent',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').fulfillCrossPageReadback=false],
+  ['duplicate busy click',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.calls=4],
+  ['false success',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.completions=3],
+  ['duplicate XP',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').fulfillCommittedFacts.xp++],
+  ['duplicate item',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').afterFacts.stardustQuantity++],
+  ['replacement operation',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.claimInput.opId='c'.repeat(32)],
+  ['replacement revision',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.fulfillInput.expected.records[0].revision++],
+  ['replay wrote',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.replays[0].attempts=['add']],
+  ['legacy writer used',r=>by(r,'ASYNC_DAILY_UI_ACK_RETRY').ui.legacyWriteAttempts=['save']],
+  ['other Life changed',r=>by(r,'ASYNC_DAILY_UI_OWNER_FENCE').otherLifeHashAfter='0'.repeat(64)],
+  ['wrong owner shown',r=>by(r,'ASYNC_DAILY_UI_OWNER_FENCE').ui.panelOwnerVisible=false],
+  ['late owner success',r=>by(r,'ASYNC_DAILY_UI_OWNER_FENCE').ui.completions=1],
+  ['authority switch overclaimed',r=>by(r,'ASYNC_DAILY_UI_OWNER_FENCE').selectionKind='REAL_SWITCH'],
+  ['pending receipt lost',r=>by(r,'ASYNC_DAILY_UI_OWNER_FENCE').afterFacts.pendingCount=0],
+  ['restart reseeded',r=>by(r,'CLEAN_BROWSER_RESTART').retainedReopened[0].reseeded=true],
+  ['restart lost proof',r=>by(r,'CLEAN_BROWSER_RESTART').retainedReopened[1].afterProofRowsHash='0'.repeat(64)],
+  ['restart missing held fork',r=>by(r,'CLEAN_BROWSER_RESTART').retainedHoldReopened.pop()],
+  ['restart altered held bytes',r=>by(r,'CLEAN_BROWSER_RESTART').retainedHoldReopened[2].afterRawHash='0'.repeat(64)],
+  ['missing UI source',r=>r.servedSources=[]],
+  ['provider calls',r=>r.providerActivity[3].calls.push('eth_requestAccounts')],
+  ['missing UI page observation',r=>r.providerActivity.splice(3,1)],
+  ['network calls',r=>r.blockedRequests.push('https://example.invalid')],
+  ['page error',r=>r.pageErrors.push('error')],
+  ['missing screenshot',r=>r.screenshots.pop()],
+  ['duplicate screenshot',r=>r.screenshots[1]=r.screenshots[0]],
+  ['product visual overclaim',r=>r.screenshots[1].kind='PRODUCT_VISUAL_PASS']
+ ];
+ for(const [label,mutate] of mutations){const r=retainedNativeReportContract();mutate(r);assert.throws(()=>validate(r,nativeContractSnapshot),undefined,label)}
+});
+test('native retained mode keeps its original budget and every published case mandatory',async()=>{
+ const {source}=await retainedNativeValidator(),ids=s=>JSON.parse(s.match(/const required=(\[[^;]+\]);/)[1].replaceAll("'",'"')),harnessIds=ids(nativeHarnessSource),workflowIds=ids(source);
+ assert.deepEqual(workflowIds,harnessIds);assert.equal(harnessIds.length,18);assert.equal(new Set(harnessIds).size,18);assert.match(source,/timeout --signal=TERM --kill-after=10s 240s node .* --native-idb-only/);assert.match(source,/native-idb-adapter:[\s\S]*?timeout-minutes: 8/);assert.match(source,/if-no-files-found: error/);
+});
+
+async function nativeRetainedModel(){
+ const f=await fullFixture(),source=await f.a.readGame(),at=Date.now(),name='KAIOS_LOCAL_GAME_TEST:native-retained',seed=nativeRetainedFixtureBuilder(f.idb);await seed({name,source,at,generation:'e'.repeat(32)});
+ const a=newAuthority(f.idb,{databaseName:name,now:()=>at});await a.openGame();const initial=await a.readRetainedDaily();
+ const db=await new Promise((resolve,reject)=>{const r=f.idb.open(name,1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}),IDBObjectStore=db.transaction('records').objectStore('records').constructor;db.close();
+ const sourceHelpers=nativeHarnessSource.slice(nativeHarnessSource.indexOf('  async function retainedRows('),nativeHarnessSource.indexOf('  async function mountRetainedUi('));assert.ok(sourceHelpers.length>0);
+ const helpers=new Function('__nativeCurrent','indexedDB','crypto','IDBObjectStore',sourceHelpers+';return {retainedRows,forkRetained,inspectRetainedWithoutWrites};')({life:lifeAuthorityModule},f.idb,globalThis.crypto,IDBObjectStore),page={evaluate:(fn,arg)=>fn(arg)};
+ const claim=await a.claimRetainedDaily(retainedInput(initial)),pendingRows=await helpers.retainedRows(page,name);await a.fulfillRetainedDaily(retainedInput(await a.readRetainedDaily(),'2'.repeat(32),{claimRef:claim.receipt.request.opId}));
+ return {f,source,at,name,seed,a,initial,latest:await a.readRetainedDaily(),rows:await helpers.retainedRows(page,name),pendingRows,helpers,page,close(){a.close();f.a.close()}};
+}
+test('native retained scenario helpers reconstruct latest missing older and malformed projections in fake-IDB',async()=>{
+ const f=await nativeRetainedModel();try{const checkpoint=new Map(f.rows).get('$retained-checkpoint'),bagKey='BACKPACK:'+f.initial.activePlayerId;
+  for(const kind of ['MISSING','OLDER','MALFORMED']){const name=f.name+'-projection-'+kind.toLowerCase(),map=new Map(structuredClone(f.rows));if(kind==='MISSING'){map.delete('PLAYER_LIFE');map.delete(bagKey)}if(kind==='OLDER'){map.set('PLAYER_LIFE',checkpoint.life);map.set(bagKey,checkpoint.bag)}if(kind==='MALFORMED'){map.set('PLAYER_LIFE',{corrupt:true});map.set(bagKey,{revision:0,data:{corrupt:true}})}await f.helpers.forkRetained(f.page,name,[...map]);const before=await f.helpers.retainedRows(f.page,name),inspection=await f.helpers.inspectRetainedWithoutWrites(f.page,name,f.at);assert.equal(inspection.error,null);assert.equal(inspection.result.status,'RECONSTRUCTION_CANDIDATE');assert.deepEqual(inspection.result.candidate,f.latest);assert.deepEqual(inspection.methods,['add','put','delete','clear']);assert.deepEqual(inspection.attempts,[]);assert.deepEqual(await f.helpers.retainedRows(f.page,name),before)}
+  assert.deepEqual(await f.a.readRetainedDaily(),f.latest);assert.deepEqual(await f.f.a.readGame(),f.source);
+ }finally{f.close()}
+});
+test('native retained scenario helpers preserve absent corrupt foreign and truncated history HOLD in fake-IDB',async()=>{
+ const f=await nativeRetainedModel();try{const foreign=f.name+'-foreign';await f.seed({name:foreign,source:f.source,at:f.at,generation:'f'.repeat(32)});const foreignRows=new Map(await f.helpers.retainedRows(f.page,foreign)),prefix=new Map(f.pendingRows);
+  for(const kind of ['ABSENT_TAIL','CORRUPT_TAIL','FOREIGN_CHECKPOINT','TRUNCATED_PREFIX_WITH_NEWER_PROJECTION']){const name=f.name+'-hold-'+kind.toLowerCase().split('_')[0],map=new Map(structuredClone(f.rows));if(kind==='ABSENT_TAIL')map.delete('retained-postimage:'+'2'.repeat(32));if(kind==='CORRUPT_TAIL')map.get('retained-postimage:'+'2'.repeat(32)).digest='0'.repeat(64);if(kind==='FOREIGN_CHECKPOINT')map.set('$retained-checkpoint',foreignRows.get('$retained-checkpoint'));if(kind==='TRUNCATED_PREFIX_WITH_NEWER_PROJECTION'){map.delete('daily-operation:'+'2'.repeat(32));map.delete('retained-postimage:'+'2'.repeat(32));map.set('$daily',prefix.get('$daily'));map.set('$retained',prefix.get('$retained'))}await f.helpers.forkRetained(f.page,name,[...map]);const before=await f.helpers.retainedRows(f.page,name),inspection=await f.helpers.inspectRetainedWithoutWrites(f.page,name,f.at);assert.equal(inspection.result,null);assert.match(inspection.error,kind.startsWith('TRUNCATED')?/RETAINED_NEWER_PROJECTION_HOLD/:/RETAINED_.*HOLD/);assert.deepEqual(inspection.methods,['add','put','delete','clear']);assert.deepEqual(inspection.attempts,[]);assert.deepEqual(await f.helpers.retainedRows(f.page,name),before)}
+  assert.deepEqual(await f.a.readRetainedDaily(),f.latest);assert.deepEqual(await f.helpers.retainedRows(f.page,f.name),f.rows);assert.deepEqual(await f.f.a.readGame(),f.source);
+ }finally{f.close()}
+});

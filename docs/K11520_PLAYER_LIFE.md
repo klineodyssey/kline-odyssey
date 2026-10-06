@@ -991,3 +991,124 @@ one pre-import hydration/admission gate, all-writer typed command coverage, cohe
 module generation, reviewed explicit migration, conflict/read-only UX and custody
 reconciliation. Recovery Center needs the same admission rule. These blockers are
 not solved by the async UI prerequisite.
+
+### Retained-history and async-UI native evidence extension (test-only, queued)
+
+SOURCE_PR: #508
+SOURCE_HEAD: `2fc9b4ddd9bc42e6de0cb83e25f8d867dafe52b5`
+SOURCE_TREE: `7ec9970b4f59af28e473ee4f42cdaa93f3f8accc`
+BASE_MAIN: `11f18db83ba08e61fa9da34d1a4c95a14442b45d`
+STATUS: LOCAL_TEST_EXTENSION / NATIVE_NOT_RUN / RELEASE_HOLD
+
+The source checkpoint completed all eight exact-head workflows and its 14 required
+native cases. That result belongs to that source tree. It did not exercise retained
+history or the asynchronous UI callback in Chromium. This successor changes only
+the existing Life browser harness, Life tests, mandatory native evidence validator
+and this document. Domain/runtime bytes and public entry routing stay unchanged.
+
+Fresh work-cycle reads actually occurred on **2026-10-06 01:02:34–01:02:49 UTC**:
+`PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` (blob
+`4286d1aede181f45eb274196a6799ac18ced42ec`), root/domain AGENTS, formal boot,
+Company OS boot, protected policy, scoped CURRENT rules and relevant manifests.
+The Master Index resolves the whitepaper lineage to the existing capitalized
+`docs/Whitepaper/` directory. CURRENT V3.8 supersedes older neural references.
+Main/PR ownership was refreshed at 01:02–01:06 UTC; no unmerged governance PR is
+adopted as current authority. These are present-time reads, not a claim about an
+earlier checkpoint's boot procedure.
+
+The existing isolated mode now declares 18 mandatory cases in report schema
+`K11520_NATIVE_IDB_DIAGNOSTICS_V3`. All original 14 remain required. Four additions:
+
+1. `RETAINED_LATEST_RECONSTRUCTION`: commit one claim and fulfillment, then inspect
+   separate missing/older/malformed covered-projection forks. Every candidate must
+   equal the complete latest healthy snapshot, with the same sequence/head. Reads
+   cannot install a repair or call `add`, `put`, `delete` or `clear`.
+2. `RETAINED_HISTORY_HOLD`: separate absent-tail, corrupt-tail, foreign-checkpoint
+   and truncated-valid-prefix/newer-projection forks preserve every stored row and
+   return HOLD. A checkpoint from another admitted generation is stale/unbound to
+   this history; the protocol has no checkpoint compaction or user-selected target
+   revision. A valid older tail cannot roll back the newer bag projection.
+3. `ASYNC_DAILY_UI_ACK_RETRY`: the real `installPlayerLifeUI` and button run against
+   a synthetic read-only projection and retained commands on the isolated fixture
+   URL. An independent native page corroborates the committed claim before its
+   callback result is withheld. Explicit retry replays the original claim and
+   commits fulfillment; cross-page readback corroborates that fulfillment before
+   a second result loss. A final explicit click confirms both original operations
+   without writing again. There must be one XP award, one item, two immutable
+   receipts and one completion render. This is loss of a callback result after a
+   completed command, not an IndexedDB abort or physical durability experiment.
+4. `ASYNC_DAILY_UI_OWNER_FENCE`: changing only the synthetic visible Life while the
+   callback awaits prevents stale completion and fulfillment. The durable claim
+   stays pending for its original Life; the other Life, all bags and authority
+   selection remain unchanged. This does not demonstrate a live authority switch.
+
+Direct fixture seeding is add-only, rejects production/ambiguous database names,
+uses only synthetic records and the existing strict domain loader, and never
+replaces an admitted history. Healthy data and corrupt forks occupy distinct
+`KAIOS_LOCAL_GAME_TEST:native-retained...` databases. The actual UI module graph is
+served at `/__native_idb_fixture__.html`, which does not activate the public game's
+independent imports. Source hashes and provider/network observations remain
+mandatory. No user save, signer, remote storage or new authority is involved.
+
+The existing clean persistent-browser restart now must reopen three healthy
+retained authorities and four held forks without reseeding, repair or storageState
+import. Complete proof rows, heads, receipts, latest projections and preserved HOLD
+errors must match before/after the actual browser process replacement. Six required
+390×844 screenshots cover original adapter before/after, retained HOLD, async busy,
+confirmed and owner-fenced views. Their fixture styling is diagnostic; even passing
+these cases would not establish public-product Visual QA, migration or cutover.
+
+Local prerequisites execute the exact seed/fork/inspector helpers with fake-IDB,
+model the post-commit retry through the actual UI handler, and exercise the exact
+CI validator with in-memory report-contract objects. The validator rejects missing
+cases, contradictory proof, writes during inspection/replay, duplicate awards,
+replacement operations/revisions, stale-owner success, altered restart evidence,
+missing UI source/screenshots/provider observations and product-visual overclaims.
+Contract objects are never emitted as native reports. Native execution remains
+NOT_RUN until a separately scheduled exact-head batch produces actual evidence.
+
+Resource limits remain the existing 8-minute job, 240-second scenario process and
+25-second case cap. No new job, trigger, permission, dependency, production step or
+ordinary test budget is introduced. Four new cases add two pages, four screenshots
+and bounded synthetic proof scans; estimate less than 30 additional scenario
+seconds, to be measured rather than treated as acceptance. Original 14-case push
+case timings totaled under one second, excluding setup/launch/artifact work. A slow
+or absent case fails; it is not skipped or replaced with a model result.
+
+#### Next activation dependency, still design-only
+
+The highest-risk gap is admission **before side-effect imports**, not the daily
+button's promise support. Source readback on this checkpoint reconfirms bootstrap
+lines 39–44, independent EVM module imports 284–290, Recovery Center construction at
+`KAIOS/backend/web/app.mjs:8` and restore paths 351–374, plus per-URL service-worker
+caching. A gate added only to main leaves these writers outside its decision.
+The source-only no-production-caller test is a review tripwire, not a runtime
+security boundary or proof of a coherent import graph.
+
+The smallest coherent future activation increment therefore needs these reviewed
+dependencies together, rather than a partial daily flag:
+
+- Reuse the existing bootstrap as the sole game admission point before world-drop
+  and any module capable of legacy writes. Derive one hydrated context from the
+  existing authority owner, with explicit domain/semantic coverage, selected-Life
+  epoch and module compatibility. Recovery Center must obtain the same admission
+  decision before constructing any legacy writer.
+- Route every already-mapped writer through supported typed commands and remove
+  implicit installation races. Preserve existing M1 read-only wallet semantics.
+  Product/Courier, event eligibility, bag custody/effects and selection cannot be
+  delegated to the retained daily protocol, which deliberately rejects them.
+- Review explicit migration promotion and divergence HOLD before installing any
+  canonical marker. Missing, blocked, corrupt or unsupported canonical reads must
+  not create a fresh persisted guest or fall back to legacy writes. Raw legacy
+  source strings stay preserved; old clients' localStorage actions cannot become
+  accepted canonical updates after cutover.
+- Prove delayed/failed admission causes zero constructor/session/tutorial writes;
+  test independent import order, Recovery Center entry, stale callbacks, offline
+  mixed-generation caches and old-client writes before release. A real atomic
+  owner/selection switch and bounded custody reconciliation remain separate
+  semantic acceptance requirements.
+
+No production gate, global opt-in, automatic migration, repair installation or
+retained-history compaction is implemented here. Public daily eligibility and
+other live writers still use their existing legacy stores. Whole-PlayerLife stale
+write protection and backup/recovery acceptance remain incomplete.
