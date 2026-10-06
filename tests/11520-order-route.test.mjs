@@ -176,11 +176,19 @@ test('execution owner initializes before startup world feedback can synchronousl
  const declaration=source.split('\n').find(line=>line.startsWith('let execution=simulationExecution,'));
  assert.ok(source.indexOf(declaration)>source.indexOf('const simulationExecution='));assert.ok(source.indexOf(declaration)<source.indexOf('\nsyncWorldFeedback();'),'existing owner must be initialized before earliest synchronous HUD callback');
  const render=source.slice(source.indexOf('function renderAxes(){'),source.indexOf('function openMarketCard('));
- const nodes={axes:{innerHTML:''}},axis={market:'BTCUSDT',pos:null};
- const context=vm.createContext({simulationExecution:{mode:'SIMULATION'},syncMarketKLabels:()=>{},S:{axis:'KX',axes:{KX:axis,KY:axis,KZ:axis},quotes:{}},$:selector=>nodes[selector.slice(1)],$$:()=>[],fmt:String});
- const preInit=vm.createContext({S:context.S,$:context.$,$$:context.$$,syncMarketKLabels:()=>{}});assert.throws(()=>vm.runInContext(render+'renderAxes();'+declaration,preInit),/Cannot access 'execution' before initialization/,'reproduce the exact CI startup failure ordering');
- vm.runInContext(declaration+render,context);vm.runInContext('renderAxes()',context);assert.match(nodes.axes.innerHTML,/空倉/);
- vm.runInContext('execution={readOnly:true};renderAxes()',context);assert.match(nodes.axes.innerHTML,/NOT_REQUESTED/);assert.doesNotMatch(nodes.axes.innerHTML,/空倉/);
+ function fixture(){
+  const cards=new Map(),axis={market:'BTCUSDT',pos:null};
+  const axes={querySelector:selector=>cards.get(selector.match(/data-market-card="([^"]+)"/)[1])||null,appendChild:card=>cards.set(card.dataset.marketCard,card)};
+  const document={createElement(){
+   const attributes={},fields=Object.fromEntries(['.axisHead b','.marketName','.q','.pos'].map(selector=>[selector,{textContent:''}]));
+   return {dataset:{},classList:{toggle(){}},querySelector:selector=>fields[selector],getAttribute:name=>attributes[name]??null,setAttribute(name,value){attributes[name]=String(value);if(name==='data-axis')this.dataset.axis=String(value);if(name==='data-market-card')this.dataset.marketCard=String(value)}};
+  }};
+  const context=vm.createContext({document,simulationExecution:{mode:'SIMULATION'},syncMarketKLabels:()=>{},S:{axis:'KX',axes:{KX:axis,KY:axis,KZ:axis},quotes:{}},$:selector=>selector==='#axes'?axes:null,$$:()=>[],fmt:String});
+  return {cards,context};
+ }
+ const {context:preInit}=fixture();assert.throws(()=>vm.runInContext(render+'renderAxes();'+declaration,preInit),/Cannot access 'execution' before initialization/,'reproduce the exact CI startup failure ordering');
+ const {cards,context}=fixture();vm.runInContext(declaration+render,context);vm.runInContext('renderAxes()',context);assert.equal(cards.size,3);for(const card of cards.values())assert.match(card.querySelector('.pos').textContent,/空倉/);
+ vm.runInContext('execution={readOnly:true};renderAxes()',context);for(const card of cards.values()){assert.match(card.querySelector('.pos').textContent,/NOT_REQUESTED/);assert.doesNotMatch(card.querySelector('.pos').textContent,/空倉/)}
 });
 
 for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])for(const c of [1,-1])test(`actual openOrder owner opens ${market} ${c>0?'LONG':'SHORT'} while public quote is WAIT`,async()=>{
