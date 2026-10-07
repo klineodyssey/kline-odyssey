@@ -478,6 +478,9 @@ export function chooseBestDelivery(ant,missions=[],atmRegistry=[],options={}){
 }
 
 export function assignDelivery(ant,mission,atmRegistry=[],options={}){
+  if(n(ant.cargo?.amount)>0||['IN_TRANSIT','ARRIVED_AWAITING_RECEIPT','CRASHING'].includes(ant.mission?.status))return {ok:false,reason:'DELIVERY_MISSION_UNRESOLVED'};
+  if(!mission||mission.status!=='CREATED')return {ok:false,reason:'NEW_DELIVERY_MISSION_REQUIRED'};
+  if(ant.mission?.missionId===mission.missionId&&ant.mission.status!=='ASSIGNED')return {ok:false,reason:'DELIVERY_MISSION_REPLAY_BLOCKED'};
   const atm=atmRegistry.find(x=>x.atmId===mission.destinationAtmId);
   const legacy=logisticsDecision({destination:mission.price,demand:mission.demand,capital:ant.capital,vitality:ant.vitality,cargoCapacity:ant.cargoCapacity,currentCargo:0});
   const cfo=cfoEvaluateDelivery(ant,mission,atm,options);
@@ -492,6 +495,8 @@ export function assignDelivery(ant,mission,atmRegistry=[],options={}){
 export function loadCargo(ant){
   if(!ant.mission)return {ok:false,reason:'NO_MISSION'};
   const m=ant.mission;
+  if(m.status!=='ASSIGNED')return {ok:false,reason:'ASSIGNED_DELIVERY_MISSION_REQUIRED'};
+  if(n(ant.cargo?.amount)>0)return {ok:false,reason:'EXISTING_CARGO_REQUIRES_RESOLUTION'};
   ant.cargo={kind:m.cargoKind,amount:m.amount,unit:m.unit};
   m.status='IN_TRANSIT';m.pickedUpAt=Date.now();ant.state=m.route?.route||'IN_TRANSIT';
   return {ok:true,cargo:{...ant.cargo},route:m.route,quote:m.quote};

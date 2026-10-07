@@ -566,6 +566,74 @@ test('Digital Ant travels full XYZ and requires verified receipt before delivery
   assert.ok(ant.retirementReserve>=0);
 });
 
+test('Digital Ant pickup requires an assigned mission and preserves every rejected state',()=>{
+  const ant=createDigitalAnt({capital:20,cargoCapacity:100});
+  const atms=buildAtmRegistry([{id:'ATM-PICKUP',type:'ATM',x:1,y:1,z:1}]);
+  const mission=createDeliveryMission({missionId:'PICKUP-GUARD',amount:10,destinationAtmId:'ATM-PICKUP',freightOffer:10});
+  assert.equal(loadCargo(ant).reason,'NO_MISSION');
+  assert.equal(assignDelivery(ant,mission,atms).ok,true);
+  for(const status of ['CREATED','IN_TRANSIT','ARRIVED_AWAITING_RECEIPT','DELIVERED','CRASHING','CRASHED','FAILED']){
+    ant.mission.status=status;
+    const before=structuredClone(ant);
+    assert.equal(loadCargo(ant).reason,'ASSIGNED_DELIVERY_MISSION_REQUIRED',status);
+    assert.deepEqual(ant,before,`rejected ${status} pickup must not mutate cargo, mission or accounting`);
+  }
+  ant.mission.status='ASSIGNED';
+  assert.equal(loadCargo(ant).ok,true);
+  const loaded=structuredClone(ant);
+  assert.equal(loadCargo(ant).reason,'ASSIGNED_DELIVERY_MISSION_REQUIRED');
+  assert.deepEqual(ant,loaded);
+});
+
+test('Digital Ant assignment cannot overwrite in-flight, waiting or crashed cargo',()=>{
+  const atms=buildAtmRegistry([{id:'ATM-ASSIGN',type:'ATM',x:1,y:1,z:1}]);
+  const next=createDeliveryMission({missionId:'NEXT-CARGO',cargoKind:'CASH',amount:20,destinationAtmId:'ATM-ASSIGN',freightOffer:10});
+  for(const status of ['IN_TRANSIT','ARRIVED_AWAITING_RECEIPT','CRASHING','CRASHED']){
+    const ant=createDigitalAnt({capital:20,cargoCapacity:100});
+    const first=createDeliveryMission({missionId:'FIRST-CARGO',cargoKind:'GOODS',amount:10,destinationAtmId:'ATM-ASSIGN',freightOffer:10});
+    assert.equal(assignDelivery(ant,first,atms).ok,true);assert.equal(loadCargo(ant).ok,true);
+    ant.mission.status=status;
+    const before=structuredClone(ant);
+    assert.equal(assignDelivery(ant,next,atms).reason,'DELIVERY_MISSION_UNRESOLVED',status);
+    assert.deepEqual(ant,before,`rejected ${status} assignment must retain original cargo and destination`);
+  }
+});
+
+test('Digital Ant terminal pickup and reassignment cannot repay the same home receipt',()=>{
+  const requester='KAIOS-P-PICKUP-REPLAY',home={x:1,y:0,z:1};
+  const ant=createDigitalAnt({capital:20,cargoCapacity:2000});
+  const request=createPlayerHomeDeliveryRequest({requestId:'HOME-PICKUP-REPLAY',requesterLifeId:requester,homePlotId:'HOME-PICKUP',homePosition:home,origin:ant,cargoKind:'GOODS',amount:1000,freightFee:8,workerSalary:3});
+  assert.equal(assignDelivery(ant,request.mission,[request.destination]).ok,true);assert.equal(loadCargo(ant).ok,true);
+  let tick;for(let i=0;i<80;i++){tick=tickDigitalAntDelivery(ant,{deltaMs:100,speed:.2});if(tick.arrived)break}
+  assert.equal(tick.arrived,true);
+  const acceptance={requesterLifeId:requester,playerPosition:home,paymentEvidence:{ok:true,amount:8,scope:'LOCAL_SIMULATION_NO_CHAIN_TRANSFER'},now:5000};
+  assert.equal(acceptPlayerHomeDelivery(ant,acceptance).ok,true);
+  const delivered=structuredClone(ant);
+  assert.equal(loadCargo(ant).reason,'ASSIGNED_DELIVERY_MISSION_REQUIRED');
+  assert.equal(tickDigitalAntDelivery(ant,{deltaMs:100,speed:.2}).reason,'NOT_IN_TRANSIT');
+  assert.equal(acceptPlayerHomeDelivery(ant,acceptance).reason,'NOT_AWAITING_RECEIPT');
+  assert.equal(assignDelivery(ant,request.mission,[request.destination]).reason,'DELIVERY_MISSION_REPLAY_BLOCKED');
+  assert.equal(assignDelivery(ant,structuredClone(ant.mission),[request.destination]).reason,'NEW_DELIVERY_MISSION_REQUIRED');
+  assert.deepEqual(ant,delivered);assert.equal(ant.finance.earned,8);assert.equal(ant.payroll.paid,3);
+  const next=createDeliveryMission({missionId:'FRESH-AFTER-DELIVERY',amount:10,destinationAtmId:request.destination.atmId,freightOffer:10});
+  assert.equal(assignDelivery(ant,next,[request.destination]).ok,true);assert.equal(loadCargo(ant).ok,true);
+  assert.equal(ant.finance.earned,8);assert.equal(ant.payroll.paid,3,'a new pickup pays nothing');
+});
+
+test('Digital Ant unladen quote changes remain available but pickup never replaces retained cargo',()=>{
+  const ant=createDigitalAnt({capital:20,cargoCapacity:100});
+  const atms=buildAtmRegistry([{id:'ATM-QUOTE',type:'ATM',x:1,y:1,z:1}]);
+  const quote=amount=>createDeliveryMission({missionId:`QUOTE-${amount}`,amount,destinationAtmId:'ATM-QUOTE',freightOffer:10});
+  assert.equal(assignDelivery(ant,quote(10),atms).ok,true);
+  assert.equal(assignDelivery(ant,quote(20),atms).ok,true);
+  assert.equal(ant.mission.amount,20);assert.equal(ant.cargo.amount,0);
+  ant.cargo={kind:'GOODS',amount:5,unit:'KAIOS'};
+  const before=structuredClone(ant);
+  assert.equal(loadCargo(ant).reason,'EXISTING_CARGO_REQUIRES_RESOLUTION');
+  assert.equal(assignDelivery(ant,quote(30),atms).reason,'DELIVERY_MISSION_UNRESOLVED');
+  assert.deepEqual(ant,before);
+});
+
 test('player action creates one home-delivery demand at the canonical player-home XYZ',()=>{
   const destination=createPlayerHomeDestination({requestId:'HOME-QA-1',requesterLifeId:'KAIOS-P-HOME-1234567890',homePlotId:'KAIOS-H-HOME-1234567890',position:{x:4,y:0,z:-3}});
   assert.equal(destination.ok,true);assert.equal(destination.destination.kind,'PLAYER_HOME');assert.deepEqual({x:destination.destination.x,y:destination.destination.y,z:destination.destination.z},{x:4,y:0,z:-3});
