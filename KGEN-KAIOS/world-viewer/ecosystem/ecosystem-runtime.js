@@ -1,3 +1,17 @@
+/*
+KGEN_META
+VERSION: 1.0.0
+REVISION: 2026-10-07.LOCAL_PAIRED_BIOMASS_CANDIDATE.3
+STATUS: DRAFT
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / Human continuous engineering authorization 2026-10-07
+REVIEWED_BY: PENDING; no registered Reviewer authority
+SOURCE_COMMIT: a6906b91508691cd0c62ba34fe36d8125ba19d0d
+TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
+CHANGE_REASON: Add explicitly opted-in, recorded dead-biomass ingress for disposable paired candidates; preserve default ecology and all existing biological rates.
+SOURCE_OF_TRUTH: FALSE
+*/
+
 import {
   boundedPush,
   clamp,
@@ -326,7 +340,9 @@ function defaultEcologyState(seed) {
   };
 }
 
-export function createReproductionEcologyRuntimeV1({ seed = "KAIOS-ECOLOGY-V1-001", initialState: suppliedState, initializeDefaults = true } = {}) {
+export function createReproductionEcologyRuntimeV1({ seed = "KAIOS-ECOLOGY-V1-001", initialState: suppliedState, initializeDefaults = true, localExchangeMode = null } = {}) {
+  if (localExchangeMode !== null && localExchangeMode !== "LOCAL_PAIRED_EXCHANGE_TEST") throw new Error("INVALID_LOCAL_EXCHANGE_MODE");
+  const localExchangeEnabled = localExchangeMode === "LOCAL_PAIRED_EXCHANGE_TEST";
   let state = suppliedState ? ecologyClone(suppliedState) : defaultEcologyState(seed);
   if (!suppliedState && !initializeDefaults) { state.habitats = []; state.populations = []; state.entities = state.entities.slice(0, 1); state.resources.restoration_water_reserve_l += state.resources.water_l; state.resources.water_l = 0; }
   const genesis = ecologyClone(state);
@@ -341,7 +357,7 @@ export function createReproductionEcologyRuntimeV1({ seed = "KAIOS-ECOLOGY-V1-00
   const publicState = () => Object.freeze(ecologyClone({ ...state, integrity: integrityReport() }));
   const emit = () => { const view = publicState(); subscribers.forEach((listener) => listener(view)); };
   const stateCore = () => ({ schema_version: state.schema_version, runtime: state.runtime, mode: state.mode, seed: state.seed, simulation_time: state.simulation_time, entities: state.entities, habitats: state.habitats, populations: state.populations, resources: state.resources, exported_population_count: state.exported_population_count, conditions: state.conditions, candidate_lineages: state.candidate_lineages, boundaries: state.boundaries });
-  const track = (command, args = {}) => { if (!isAdvancing && !isReplaying) state.action_log.push({ command, args: ecologyClone(args) }); };
+  const track = (command, args = {}) => { if (!isAdvancing && (!isReplaying || (localExchangeEnabled && command === "receiveLocalDeadBiomass"))) state.action_log.push({ command, args: ecologyClone(args) }); };
   const finitePositive = (value) => Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : 0;
   const individualMass = (population) => population.species_id.includes("TREE") ? 8 : population.species_id.includes("GRASS") ? 0.08 : population.species_id.includes("FISH") ? 1 : 0.05;
   const biomassPool = (population) => population.species_id.includes("GRASS") || population.species_id.includes("TREE") ? "biomass_kg" : "consumer_biomass_kg";
@@ -549,6 +565,44 @@ export function createReproductionEcologyRuntimeV1({ seed = "KAIOS-ECOLOGY-V1-00
     track("processDecomposition");
     return { decomposed, returned };
   }
+  function receiveLocalDeadBiomass(manifest) {
+    requireUsable(); requireActionCapacity();
+    if (!localExchangeEnabled) throw new Error("LOCAL_EXCHANGE_NOT_ENABLED");
+    if (state.status !== "PAUSED") throw new Error("LOCAL_EXCHANGE_REQUIRES_PAUSED");
+    // This local candidate receipt binds owner snapshots; FNV hashes are not authentication.
+    const copyRecord = (value, fields) => {
+      if (!value || typeof value !== "object" || Array.isArray(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) || Reflect.ownKeys(value).length !== fields.length) throw new Error("INVALID_LOCAL_EXCHANGE_MANIFEST");
+      return Object.fromEntries(fields.map((field) => {
+        const descriptor = Object.getOwnPropertyDescriptor(value, field);
+        if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value")) throw new Error("INVALID_LOCAL_EXCHANGE_MANIFEST");
+        return [field, descriptor.value];
+      }));
+    };
+    const received = copyRecord(manifest, ["scope", "exchangeId", "fixtureHash", "resource", "unit", "quantityGrams", "source", "destination"]);
+    const endpointFields = ["runtime", "ownerId", "revision", "stateHash"];
+    received.source = copyRecord(received.source, endpointFields);
+    received.destination = copyRecord(received.destination, endpointFields);
+    const validEndpoint = (endpoint) => typeof endpoint.ownerId === "string" && endpoint.ownerId.trim().length > 0 && endpoint.ownerId.length <= 128 && Number.isSafeInteger(endpoint.revision) && endpoint.revision >= 0 && typeof endpoint.stateHash === "string" && endpoint.stateHash.length === 14 && /^fnv1a-[0-9a-f]{8}$/.test(endpoint.stateHash);
+    if (received.scope !== "LOCAL_PAIRED_EXCHANGE_TEST" || typeof received.exchangeId !== "string" || received.exchangeId.trim() !== received.exchangeId || !/^[A-Za-z0-9_-]{8,128}$/.test(received.exchangeId) || typeof received.fixtureHash !== "string" || received.fixtureHash.length !== 64 || !/^[0-9a-f]{64}$/.test(received.fixtureHash) || received.resource !== "DEAD_BIOMASS" || received.unit !== "GRAM" || !Number.isSafeInteger(received.quantityGrams) || received.quantityGrams <= 0 || !validEndpoint(received.source) || !validEndpoint(received.destination) || received.source.runtime !== "KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1" || received.destination.runtime !== ECOLOGY_V1) throw new Error("INVALID_LOCAL_EXCHANGE_MANIFEST");
+    if (state.action_log.some((action) => action.command === "receiveLocalDeadBiomass" && action.args?.exchangeId === received.exchangeId)) throw new Error("DUPLICATE_LOCAL_EXCHANGE_ID");
+    if (!state.entities.some((entity) => entity.type === "ECOSYSTEM" && entity.id === received.destination.ownerId) || received.destination.revision !== state.revision || received.destination.stateHash !== integrityReport().state_hash) throw new Error("LOCAL_EXCHANGE_DESTINATION_MISMATCH");
+    if (state.habitats.some(({ type }) => type === "FISHPOND") || state.populations.some(({ species_id }) => ["SPECIES-KAIOS-FOUNDATIONAL-FISH", "SPECIES-KAIOS-FOUNDATIONAL-SHRIMP"].includes(species_id))) throw new Error("LOCAL_EXCHANGE_DESTINATION_NOT_DISJOINT");
+    if (!Number.isSafeInteger(state.revision + 1)) throw new Error("LOCAL_EXCHANGE_REVISION_LIMIT");
+    // Existing resource precision is six decimal kg: account in integer milligrams.
+    const previousKg = state.resources.dead_biomass_kg;
+    const previousMg = Math.round(previousKg * 1e6);
+    const quantityMg = received.quantityGrams * 1000;
+    const quantityKg = received.quantityGrams / 1000;
+    const nextMg = previousMg + quantityMg;
+    const nextKg = nextMg / 1e6;
+    if (!Number.isSafeInteger(previousMg) || previousMg < 0 || previousMg / 1e6 !== previousKg || !Number.isSafeInteger(quantityMg) || quantityMg / 1e6 !== quantityKg || !Number.isSafeInteger(nextMg) || nextMg - previousMg !== quantityMg || Math.round(nextKg * 1e6) !== nextMg || nextKg <= previousKg) throw new Error("LOCAL_EXCHANGE_PRECISION_LOSS");
+    const previous = ecologyClone(state);
+    state.resources.dead_biomass_kg = nextKg;
+    record("DECOMPOSITION_EVENT", { location: received.destination.ownerId, inputs: { quantity_grams: received.quantityGrams }, outputs: { phase: "INGRESS", decomposed_kg: 0, nutrient_return_kg: 0, manifest: received }, resource_delta: { dead_biomass_kg: quantityKg }, reason: "LOCAL_PAIRED_EXCHANGE_TEST_INGRESS" });
+    track("receiveLocalDeadBiomass", received);
+    commitOrRollback(previous, "INVALID_LOCAL_EXCHANGE_RECEIPT");
+    emit(); return publicState();
+  }
   function processPollution(amount = 0) {
     requireActionCapacity();
     const delta = Number.isFinite(Number(amount)) ? clamp(Number(amount), -1, 1) : 0;
@@ -629,11 +683,14 @@ export function createReproductionEcologyRuntimeV1({ seed = "KAIOS-ECOLOGY-V1-00
   function replayEvents() {
     requireUsable(); const actions = ecologyClone(state.action_log); state = ecologyClone(genesis); isReplaying = true;
     const commands = { createEcosystem, createHabitat, addPopulation, evaluateResources, evaluateCarryingCapacity, processGrowth, processReproduction, processCompetition, processFoodConsumption, processDeath, processDecomposition, processWaterCycle, processSoilCycle, processPollution, processDrought, processMigration, processRestoration, processNaturalSelection };
+    if (localExchangeEnabled) commands.receiveLocalDeadBiomass = receiveLocalDeadBiomass;
     try {
       for (const action of actions) {
         if (action.command === "advanceTime") { state.status = "RUNNING"; advanceTime(action.args?.ticks); continue; }
         const command = commands[action.command]; if (!command) throw new Error("UNKNOWN_REPLAY_COMMAND");
-        if (["createEcosystem", "createHabitat", "addPopulation", "processDrought", "processRestoration"].includes(action.command)) command(action.args); else if (action.command === "processPollution") command(action.args?.amount); else command();
+        // Receipt commands require PAUSED; lifecycle toggles are not action-logged.
+        if (action.command === "receiveLocalDeadBiomass") { state.status = "PAUSED"; command(action.args); }
+        else if (["createEcosystem", "createHabitat", "addPopulation", "processDrought", "processRestoration"].includes(action.command)) command(action.args); else if (action.command === "processPollution") command(action.args?.amount); else command();
       }
     } finally { isReplaying = false; }
     state.action_log = actions; state.status = "PAUSED"; emit(); return publicState();
@@ -672,5 +729,5 @@ export function createReproductionEcologyRuntimeV1({ seed = "KAIOS-ECOLOGY-V1-00
     return { ok: issues.length === 0, issues, state_hash: ecologyHash(stateCore()), total_biological_population: biological, maximum_total_population: ECOLOGY_MAX_POPULATION, event_count: state.events.length };
   }
   if (!integrityReport().ok) throw new Error("INVALID_ECOLOGY_INITIAL_STATE");
-  return Object.freeze({ createEcosystem, createHabitat, addPopulation, advanceTime, evaluateResources, evaluateCarryingCapacity, processGrowth, processReproduction, processCompetition, processFoodConsumption, processDeath, processDecomposition, processWaterCycle, processSoilCycle, processPollution, processDrought, processMigration, processRestoration, processNaturalSelection, start, pause, resume, stop, exportState, importState, resetState, replayEvents, getState: publicState, integrityReport, subscribe(listener) { subscribers.add(listener); return () => subscribers.delete(listener); }, destroy() { subscribers.clear(); destroyed = true; } });
+  return Object.freeze({ createEcosystem, createHabitat, addPopulation, advanceTime, evaluateResources, evaluateCarryingCapacity, processGrowth, processReproduction, processCompetition, processFoodConsumption, processDeath, processDecomposition, processWaterCycle, processSoilCycle, processPollution, processDrought, processMigration, processRestoration, processNaturalSelection, start, pause, resume, stop, exportState, importState, resetState, replayEvents, getState: publicState, integrityReport, ...(localExchangeEnabled ? { receiveLocalDeadBiomass } : {}), subscribe(listener) { subscribers.add(listener); return () => subscribers.delete(listener); }, destroy() { subscribers.clear(); destroyed = true; } });
 }

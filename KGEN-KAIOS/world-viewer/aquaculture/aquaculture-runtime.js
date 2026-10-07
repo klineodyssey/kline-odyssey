@@ -1,12 +1,12 @@
 /*
 KGEN_META
 VERSION: 1.0.0
-REVISION: 2026-10-07.CUSTOMER_CLOSED_WORLD_PROOF_REVIEW.2
+REVISION: 2026-10-07.LOCAL_PAIRED_BIOMASS_CANDIDATE.3
 STATUS: DRAFT
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / Human continuous engineering authorization 2026-10-07
 REVIEWED_BY: PENDING; local tests are not registered Reviewer authority
-SOURCE_COMMIT: 6e4763c496425ecaa91640110ecb302306f83110
+SOURCE_COMMIT: a6906b91508691cd0c62ba34fe36d8125ba19d0d
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
 CHANGE_REASON: Add opt-in finite fixture configuration and measured construction evidence without changing standalone defaults or delivery acceptance.
 SOURCE_OF_TRUTH: FALSE
@@ -211,7 +211,8 @@ function updateWaterState(state) {
   if (quality.state === "LOW_OXYGEN") state.pond.aeration_state = "EMERGENCY_AERATION_REQUIRED";
 }
 
-export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V1-001" } = {}) {
+export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V1-001", localExchangeMode = null } = {}) {
+  if (localExchangeMode !== null && localExchangeMode !== "LOCAL_PAIRED_EXCHANGE_TEST") throw new Error("LOCAL_EXCHANGE_MODE_REQUIRED");
   let state = defaultState(String(seed));
   let destroyed = false;
   const listeners = new Set();
@@ -698,6 +699,49 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     });
   }
 
+  function debitLocalDeadBiomass(input) {
+    usable();
+    const fail = (ok, code) => { if (!ok) throw new Error(code); };
+    const exact = (value, keys) => value && Object.getPrototypeOf(value) === Object.prototype
+      && Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
+    fail(localExchangeMode === "LOCAL_PAIRED_EXCHANGE_TEST", "LOCAL_EXCHANGE_MODE_REQUIRED");
+    validateLocalExchangeJson(input);
+    fail(exact(input, ["scope", "exchangeId", "fixtureHash", "resource", "unit", "quantityGrams", "source", "destination"]), "LOCAL_EXCHANGE_FIELDS");
+    const manifest = clone(input);
+    fail(manifest.scope === localExchangeMode && manifest.resource === "DEAD_BIOMASS" && manifest.unit === "GRAM"
+      && typeof manifest.exchangeId === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(manifest.exchangeId)
+      && typeof manifest.fixtureHash === "string" && /^[a-f0-9]{64}$/.test(manifest.fixtureHash)
+      && Number.isSafeInteger(manifest.quantityGrams) && manifest.quantityGrams > 0, "LOCAL_EXCHANGE_MANIFEST");
+    for (const endpoint of [manifest.source, manifest.destination]) {
+      fail(exact(endpoint, ["runtime", "ownerId", "revision", "stateHash"])
+        && typeof endpoint.ownerId === "string" && endpoint.ownerId.length > 0 && endpoint.ownerId.length <= 200
+        && Number.isSafeInteger(endpoint.revision) && endpoint.revision >= 0
+        && typeof endpoint.stateHash === "string" && /^fnv1a-[a-f0-9]{8}$/.test(endpoint.stateHash), "LOCAL_EXCHANGE_ENDPOINT");
+    }
+    fail(state.status === "PAUSED" && state.action_log.some((action) => action.command === "CONFIGURE_LOCAL_FIXTURE"), "LOCAL_EXCHANGE_PAUSED_FIXTURE_REQUIRED");
+    fail(manifest.source.runtime === RUNTIME && manifest.source.ownerId === state.pond.pond_id
+      && manifest.source.revision === state.revision && manifest.source.stateHash === hash(stateProjection(state)), "LOCAL_EXCHANGE_SOURCE_CONFLICT");
+    fail(manifest.destination.runtime === "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1", "LOCAL_EXCHANGE_DESTINATION");
+    fail(!state.action_log.some((action) => action.command === "DEBIT_LOCAL_DEAD_BIOMASS" && action.args.exchangeId === manifest.exchangeId), "LOCAL_EXCHANGE_DUPLICATE");
+    fail(Number.isSafeInteger(state.revision + 1), "LOCAL_EXCHANGE_REVISION_LIMIT");
+    const grams = Math.round(state.pond.dead_biomass_kg * 1000);
+    fail(Number.isSafeInteger(grams) && Number.isSafeInteger(grams * 1000) && Number.isSafeInteger(manifest.quantityGrams * 1000)
+      && grams / 1000 === state.pond.dead_biomass_kg
+      && Math.round(state.pond.dead_biomass_kg * 1e6) === grams * 1000
+      && (grams * 1000) / 1e6 === state.pond.dead_biomass_kg, "LOCAL_EXCHANGE_PRECISION");
+    fail(grams >= manifest.quantityGrams, "LOCAL_EXCHANGE_SOURCE_SHORTAGE");
+    const nextGrams = grams - manifest.quantityGrams, nextKg = nextGrams / 1000;
+    fail(Number.isSafeInteger(nextGrams * 1000) && Math.round(nextKg * 1000) === nextGrams
+      && Math.round(nextKg * 1e6) === nextGrams * 1000 && grams * 1000 - nextGrams * 1000 === manifest.quantityGrams * 1000
+      && nextKg < state.pond.dead_biomass_kg, "LOCAL_EXCHANGE_PRECISION");
+    return execute("DEBIT_LOCAL_DEAD_BIOMASS", manifest, "LOCAL_PAIRED_EXCHANGE_TEST", () => {
+      state.pond.dead_biomass_kg = nextKg;
+      return { status: "LOCAL_DEBIT_CANDIDATE", biomass_delta: -manifest.quantityGrams / 1000,
+        outputs: { phase: "EGRESS", manifest, transferred_kg: manifest.quantityGrams / 1000,
+          decomposed_kg: 0, paired_commit: false, production_authority: false } };
+    });
+  }
+
   function processDecomposition(kilograms = state.pond.dead_biomass_kg) {
     return execute("PROCESS_DECOMPOSITION", { kilograms }, "MICROBIAL_DECOMPOSITION_PROXY", () => {
       const amount = Math.min(Math.max(0, Number(kilograms) || 0), state.pond.dead_biomass_kg);
@@ -872,7 +916,7 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     const ledgerPayables = round(candidate.enterprise.ledger.reduce((sum, entry) => sum + entry.payable_delta, 0), 2);
     const inventoryBookValue = round(candidate.inventory.reduce((sum, item) => sum + item.book_value, 0), 2);
     if (Math.abs(ledgerExpenses - accounts.expenses) > EPSILON || Math.abs(ledgerRevenue - accounts.revenue) > EPSILON || Math.abs(INITIAL_CASH + ledgerCash - accounts.cash) > EPSILON || Math.abs(ledgerPayables - accounts.payables) > EPSILON || Math.abs(accounts.payables + accounts.debt - candidate.enterprise.liabilities) > EPSILON || Math.abs(accounts.revenue - accounts.expenses - candidate.enterprise.profit_or_loss) > EPSILON || Math.abs(inventoryBookValue - accounts.inventory_value) > EPSILON) issues.push("ACCOUNT_RECONCILIATION");
-    const knownCommands = new Set(["CONFIGURE_LOCAL_FIXTURE", "START_RUNTIME", "PAUSE_RUNTIME", "RESUME_RUNTIME", "STOP_RUNTIME", "SELECT_LAND", "DESIGN_POND", "SET_SIMULATION_RESOURCE", "SET_WORKER_AVAILABILITY", "SET_WATER_SOURCE_AVAILABILITY", "REPLENISH_FEED", "APPLY_OPERATING_COST", "ADVANCE_POND_CONSTRUCTION", "FILL_WATER", "TEST_WATER", "STOCK_FISH", "STOCK_SHRIMP", "FEED_POPULATION", "START_AERATION", "WATER_EXCHANGE", "ADVANCE_TIME", "PROCESS_REPRODUCTION", "PROCESS_DECOMPOSITION", "HEALTH_CHECK_SIMULATION", "HARVEST", "MOVE_TO_COLD_STORAGE", "CREATE_MARKET_ORDER", "CREATE_DELIVERY_ORDER", "ADVANCE_DELIVERY", "POLLUTION_INFLOW", "RESTORATION", "FLOOD_SCENARIO", "POWER_OUTAGE_SCENARIO", "LOW_OXYGEN_SCENARIO", "EVALUATE_BUSINESS_STATE", "RESTRUCTURE_SIMULATION", "LIQUIDATE_SIMULATION"]);
+    const knownCommands = new Set(["DEBIT_LOCAL_DEAD_BIOMASS", "CONFIGURE_LOCAL_FIXTURE", "START_RUNTIME", "PAUSE_RUNTIME", "RESUME_RUNTIME", "STOP_RUNTIME", "SELECT_LAND", "DESIGN_POND", "SET_SIMULATION_RESOURCE", "SET_WORKER_AVAILABILITY", "SET_WATER_SOURCE_AVAILABILITY", "REPLENISH_FEED", "APPLY_OPERATING_COST", "ADVANCE_POND_CONSTRUCTION", "FILL_WATER", "TEST_WATER", "STOCK_FISH", "STOCK_SHRIMP", "FEED_POPULATION", "START_AERATION", "WATER_EXCHANGE", "ADVANCE_TIME", "PROCESS_REPRODUCTION", "PROCESS_DECOMPOSITION", "HEALTH_CHECK_SIMULATION", "HARVEST", "MOVE_TO_COLD_STORAGE", "CREATE_MARKET_ORDER", "CREATE_DELIVERY_ORDER", "ADVANCE_DELIVERY", "POLLUTION_INFLOW", "RESTORATION", "FLOOD_SCENARIO", "POWER_OUTAGE_SCENARIO", "LOW_OXYGEN_SCENARIO", "EVALUATE_BUSINESS_STATE", "RESTRUCTURE_SIMULATION", "LIQUIDATE_SIMULATION"]);
     if (candidate.action_log.some((action) => !knownCommands.has(action.command))) issues.push("UNKNOWN_ACTION_COMMAND");
     for (let index = 1; index < (candidate.events?.length ?? 0); index += 1) if (candidate.events[index].previous_state_hash !== candidate.events[index - 1].next_state_hash) issues.push("EVENT_CHAIN_BROKEN");
     if (candidate.events?.length && candidate.events.at(-1).next_state_hash !== hash(stateProjection(candidate))) issues.push("STATE_HASH_MISMATCH");
@@ -893,10 +937,11 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
   function replayEvents() {
     usable();
     const actions = clone(state.action_log);
-    const replay = createFishpondAquacultureRuntimeV1({ seed: state.seed });
+    const replay = createFishpondAquacultureRuntimeV1({ seed: state.seed, localExchangeMode });
     for (const action of actions) {
       const handler = {
         START_RUNTIME: () => replay.start(), PAUSE_RUNTIME: () => replay.pause(), RESUME_RUNTIME: () => replay.resume(), STOP_RUNTIME: () => replay.stop(),
+        DEBIT_LOCAL_DEAD_BIOMASS: () => replay.debitLocalDeadBiomass(action.args),
         CONFIGURE_LOCAL_FIXTURE: () => replay.configureLocalFixture(action.args),
         SELECT_LAND: () => replay.selectLand(action.args), DESIGN_POND: () => replay.designPond(action.args),
         SET_SIMULATION_RESOURCE: () => replay.setResource(action.args.category, action.args.key, action.args.value), SET_WORKER_AVAILABILITY: () => replay.setWorkerAvailability(action.args.role, action.args.available),
@@ -1004,6 +1049,7 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
   }
 
   return Object.freeze({
+    ...(localExchangeMode === "LOCAL_PAIRED_EXCHANGE_TEST" ? { debitLocalDeadBiomass } : {}),
     getState, start, pause, resume, stop, selectLand, designPond, configureLocalFixture, inspectLocalConstruction, setResource, setWorkerAvailability, setWaterSourceAvailability, replenishFeed, applyOperatingCost, advanceConstruction,
     fillWater, testWater, stockFish, stockShrimp, feed, startAeration, performWaterExchange, advanceTime,
     processReproduction, processDecomposition, scheduleHealthCheck, harvest, moveToColdStorage, createMarketOrder,
@@ -1012,4 +1058,128 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     resetState, replayEvents, integrityReport, subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
     destroy() { listeners.clear(); destroyed = true; }
   });
+}
+
+function validateLocalExchangeJson(input) {
+  let remaining = 512000, nodes = 100000;
+  const fail = (ok, code) => { if (!ok) throw new Error(code); };
+  const consume = (text) => {
+    fail(text.length <= remaining, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+    remaining -= new TextEncoder().encode(text).length;
+    fail(remaining >= 0, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+  };
+  const visit = (value, depth = 0) => {
+    fail(depth <= 30 && --nodes >= 0, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+    if (value === null || typeof value === 'boolean') { consume(JSON.stringify(value)); return; }
+    if (typeof value === 'string') { fail(value.length <= remaining, 'LOCAL_EXCHANGE_INPUT_LIMIT'); consume(JSON.stringify(value)); return; }
+    if (typeof value === 'number') { fail(Number.isFinite(value), 'LOCAL_EXCHANGE_INVALID_NUMBER'); consume(JSON.stringify(value)); return; }
+    fail(value && typeof value === 'object', 'LOCAL_EXCHANGE_JSON');
+    const array = Array.isArray(value);
+    fail(Object.getPrototypeOf(value) === (array ? Array.prototype : Object.prototype), 'LOCAL_EXCHANGE_JSON');
+    if (array) fail(value.length <= 20000, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+    const keys = Reflect.ownKeys(value);
+    fail(array ? keys.length === value.length + 1 : keys.length <= 2048, 'LOCAL_EXCHANGE_JSON');
+    consume(array ? '[' : '{');
+    const fields = array ? Array.from({ length: value.length }, (_, index) => String(index)) : keys;
+    for (let index = 0; index < fields.length; index += 1) {
+      const key = fields[index], descriptor = Object.getOwnPropertyDescriptor(value, key);
+      fail(typeof key === 'string' && descriptor?.enumerable && Object.hasOwn(descriptor, 'value')
+        && !['__proto__', 'constructor', 'prototype'].includes(key), 'LOCAL_EXCHANGE_JSON');
+      if (index) consume(',');
+      if (!array) { consume(JSON.stringify(key)); consume(':'); }
+      visit(descriptor.value, depth + 1);
+    }
+    consume(array ? ']' : '}');
+  };
+  visit(input);
+}
+
+/** Prepares two disposable candidates, never two live writes. The caller must
+ * later commit the whole pair in one authority-owned transaction. Source stock
+ * is admitted accounting input; this does not prove finite juvenile procurement. */
+export async function prepareLocalDeadBiomassExchange(input) {
+  const fail = (ok, code) => { if (!ok) throw new Error(code); };
+  const exact = (value, keys) => value && Object.getPrototypeOf(value) === Object.prototype
+    && Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
+  const sha256 = async (value) => [...new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(stableStringify(value))))]
+    .map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  validateLocalExchangeJson(input);
+  const request = clone(input);
+  fail(new TextEncoder().encode(stableStringify(request)).length <= 512000, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+  fail(exact(request, ['scope', 'exchangeId', 'fixtureHash', 'quantityGrams', 'expectedSourceRevision', 'expectedDestinationRevision',
+    'constructionExport', 'constructionHash', 'pondExport', 'pondHash', 'ecologyGenesis', 'ecologyGenesisHash', 'ecologyExport', 'ecologyHash']), 'LOCAL_EXCHANGE_FIELDS');
+  fail(request.scope === 'LOCAL_PAIRED_EXCHANGE_TEST' && typeof request.exchangeId === 'string'
+    && /^[A-Za-z0-9_-]{8,128}$/.test(request.exchangeId) && Number.isSafeInteger(request.quantityGrams)
+    && request.quantityGrams > 0 && Number.isSafeInteger(request.quantityGrams * 1000), 'LOCAL_EXCHANGE_MANIFEST');
+  for (const key of ['fixtureHash', 'constructionHash', 'pondHash', 'ecologyGenesisHash', 'ecologyHash'])
+    fail(typeof request[key] === 'string' && /^[a-f0-9]{64}$/.test(request[key]), 'LOCAL_EXCHANGE_HASH_REQUIRED');
+  for (const [value, digest] of [['constructionExport', 'constructionHash'], ['pondExport', 'pondHash'], ['ecologyGenesis', 'ecologyGenesisHash'], ['ecologyExport', 'ecologyHash']])
+    fail(await sha256(request[value]) === request[digest], 'LOCAL_EXCHANGE_HASH_MISMATCH');
+  for (const value of [request.constructionExport, request.pondExport]) fail(exact(value, ['export_status', 'schema_version', 'state'])
+    && value.export_status === 'NON_AUTHORITATIVE_SIMULATION' && value.schema_version === SCHEMA_VERSION, 'LOCAL_EXCHANGE_EXPORT');
+  fail(exact(request.ecologyExport, ['envelope', 'state']) && request.ecologyExport.envelope === 'NON_AUTHORITATIVE_SIMULATION', 'LOCAL_EXCHANGE_EXPORT');
+  const originalPond = request.pondExport.state, originalEcology = request.ecologyExport.state;
+  fail(originalPond.status === 'PAUSED' && originalEcology.status === 'PAUSED'
+    && request.expectedSourceRevision === originalPond.revision && Number.isSafeInteger(request.expectedSourceRevision)
+    && request.expectedDestinationRevision === originalEcology.revision && Number.isSafeInteger(request.expectedDestinationRevision), 'LOCAL_EXCHANGE_REVISION_CONFLICT');
+  const baselineEcology = createReproductionEcologyRuntimeV1({ seed: request.ecologyGenesis.seed });
+  const baseline = baselineEcology.exportState().state; baselineEcology.destroy();
+  const wetland = baseline.habitats.find((habitat) => habitat.type === 'WETLAND');
+  const expectedGenesis = clone(baseline);
+  expectedGenesis.habitats = [{ ...wetland, water_l: 0 }]; expectedGenesis.populations = [];
+  expectedGenesis.entities = baseline.entities.filter((entity) => entity.type === 'ECOSYSTEM' || entity.id === wetland.id);
+  for (const key of Object.keys(expectedGenesis.resources)) expectedGenesis.resources[key] = 0;
+  fail(stableStringify(request.ecologyGenesis) === stableStringify(expectedGenesis), 'LOCAL_EXCHANGE_DISJOINT_GENESIS_REQUIRED');
+  const build = createFishpondAquacultureRuntimeV1({ seed: request.constructionExport.state.seed });
+  const donor = createFishpondAquacultureRuntimeV1({ seed: originalPond.seed, localExchangeMode: request.scope });
+  const receiver = createReproductionEcologyRuntimeV1({ initialState: request.ecologyGenesis, localExchangeMode: request.scope });
+  try {
+    build.importState(request.constructionExport);
+    const constructionEvidence = build.inspectLocalConstruction();
+    fail(constructionEvidence.status === 'CONSTRUCTION_EVIDENCE_READY', 'LOCAL_EXCHANGE_CONSTRUCTION_EVIDENCE_REQUIRED');
+    const configuration = request.constructionExport.state.action_log.find((action) => action.command === 'CONFIGURE_LOCAL_FIXTURE');
+    fail(await sha256(configuration.args) === request.fixtureHash, 'LOCAL_EXCHANGE_FIXTURE_MISMATCH');
+    fail(originalPond.seed === request.constructionExport.state.seed
+      && stableStringify(originalPond.action_log.slice(0, request.constructionExport.state.action_log.length)) === stableStringify(request.constructionExport.state.action_log)
+      && stableStringify(originalPond.events.slice(0, request.constructionExport.state.events.length)) === stableStringify(request.constructionExport.state.events), 'LOCAL_EXCHANGE_CONSTRUCTION_PREFIX_MISMATCH');
+    donor.importState(request.pondExport);
+    fail(stableStringify(donor.replayEvents()) === stableStringify(donor.getState()), 'LOCAL_EXCHANGE_SOURCE_REPLAY_MISMATCH');
+    receiver.importState(request.ecologyExport); receiver.replayEvents();
+    fail(stableStringify(receiver.exportState()) === stableStringify(request.ecologyExport), 'LOCAL_EXCHANGE_DESTINATION_REPLAY_MISMATCH');
+    fail(originalPond.orders.length === 0 && originalPond.cold_chain.length === 0 && originalPond.enterprise.accounts.revenue === 0, 'LOCAL_EXCHANGE_COMMERCIAL_STATE_FORBIDDEN');
+    const sourceTransfers = originalPond.action_log.filter((action) => action.command === 'DEBIT_LOCAL_DEAD_BIOMASS').map((action) => action.args);
+    const destinationTransfers = originalEcology.action_log.filter((action) => action.command === 'receiveLocalDeadBiomass').map((action) => action.args);
+    fail(stableStringify(sourceTransfers) === stableStringify(destinationTransfers), 'LOCAL_EXCHANGE_HISTORY_PAIR_MISMATCH');
+    fail(sourceTransfers.every((manifest) => manifest.fixtureHash === request.fixtureHash
+      && manifest.source.ownerId === originalPond.pond.pond_id
+      && manifest.destination.ownerId === originalEcology.entities.find((entity) => entity.type === 'ECOSYSTEM').id), 'LOCAL_EXCHANGE_HISTORY_FIXTURE_MISMATCH');
+    const manifest = { scope: request.scope, exchangeId: request.exchangeId, fixtureHash: request.fixtureHash,
+      resource: 'DEAD_BIOMASS', unit: 'GRAM', quantityGrams: request.quantityGrams,
+      source: { runtime: originalPond.runtime, ownerId: originalPond.pond.pond_id, revision: originalPond.revision, stateHash: hash(stateProjection(originalPond)) },
+      destination: { runtime: originalEcology.runtime, ownerId: originalEcology.entities.find((entity) => entity.type === 'ECOSYSTEM').id,
+        revision: originalEcology.revision, stateHash: receiver.integrityReport().state_hash } };
+    donor.debitLocalDeadBiomass(manifest); receiver.receiveLocalDeadBiomass(manifest);
+    const sourceCandidate = donor.exportState(), destinationCandidate = receiver.exportState();
+    const expectedSource = stateProjection(originalPond), actualSource = stateProjection(sourceCandidate.state);
+    expectedSource.pond.dead_biomass_kg = (Math.round(originalPond.pond.dead_biomass_kg * 1000) - request.quantityGrams) / 1000;
+    fail(stableStringify(expectedSource) === stableStringify(actualSource), 'LOCAL_EXCHANGE_UNRELATED_SOURCE_MUTATION');
+    const expectedDestination = clone(originalEcology), actualDestination = clone(destinationCandidate.state);
+    expectedDestination.resources.dead_biomass_kg = (Math.round(originalEcology.resources.dead_biomass_kg * 1e6) + request.quantityGrams * 1000) / 1e6;
+    for (const value of [expectedDestination, actualDestination]) { delete value.events; delete value.action_log; delete value.revision; }
+    fail(stableStringify(expectedDestination) === stableStringify(actualDestination), 'LOCAL_EXCHANGE_UNRELATED_DESTINATION_MUTATION');
+    fail(stableStringify(donor.replayEvents()) === stableStringify(sourceCandidate.state), 'LOCAL_EXCHANGE_SOURCE_REPLAY_MISMATCH');
+    receiver.replayEvents(); fail(stableStringify(receiver.exportState()) === stableStringify(destinationCandidate), 'LOCAL_EXCHANGE_DESTINATION_REPLAY_MISMATCH');
+    const beforeMilligrams = Math.round(originalPond.pond.dead_biomass_kg * 1e6) + Math.round(originalEcology.resources.dead_biomass_kg * 1e6);
+    const afterMilligrams = Math.round(sourceCandidate.state.pond.dead_biomass_kg * 1e6) + Math.round(destinationCandidate.state.resources.dead_biomass_kg * 1e6);
+    fail(Number.isSafeInteger(beforeMilligrams) && Number.isSafeInteger(afterMilligrams) && beforeMilligrams === afterMilligrams, 'LOCAL_EXCHANGE_MASS_CONSERVATION');
+    const result = { scope: request.scope, status: 'PAIRED_TRANSFER_CANDIDATE_NOT_COMMITTED', manifest,
+      sourceInputHash: request.pondHash, destinationInputHash: request.ecologyHash, ecologyGenesisHash: request.ecologyGenesisHash,
+      constructionEvidence, ecologyGenesis: request.ecologyGenesis, sourceCandidate, destinationCandidate,
+      conservation: { unit: 'MILLIGRAM', before: beforeMilligrams, after: afterMilligrams, residual: 0 },
+      limitations: ['ADMITTED_STOCK_WINDOW_NOT_FINITE_JUVENILE_PROCUREMENT', 'ABSTRACT_RESOURCE_POOL', 'NOT_FULL_LIFE_RUNTIME',
+        'NO_SHARED_CLOCK_CONVERSION', 'NO_BIOLOGICAL_EFFICACY_OR_TRANSPORT_PROOF'],
+      durable: false, productionAuthority: false, assetCreated: false, customerAcceptance: null, delivery: null, receipt: null, revenueCreated: false };
+    fail(new TextEncoder().encode(stableStringify(result)).length <= 512000, 'LOCAL_EXCHANGE_OUTPUT_LIMIT');
+    return { ...result, contentHash: await sha256(result) };
+  } finally { build.destroy(); donor.destroy(); receiver.destroy(); }
 }

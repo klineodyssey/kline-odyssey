@@ -1,8 +1,8 @@
 # KAIOS Fishpond Aquaculture Runtime V1 Report
 
-Current candidate revision: `2026-10-07.CUSTOMER_CLOSED_WORLD_PROOF_REVIEW.2`.
+Current candidate revision: `2026-10-07.LOCAL_PAIRED_BIOMASS_CANDIDATE.3`.
 Status: `DRAFT`, review pending, source parent
-`6e4763c496425ecaa91640110ecb302306f83110`. The historical deployed report below
+`a6906b91508691cd0c62ba34fe36d8125ba19d0d`. The historical deployed report below
 is preserved; it does not claim this additive candidate is deployed.
 
 Task: `KAIOS-FISHPOND-AQUACULTURE-RUNTIME-V1-001`
@@ -196,3 +196,109 @@ findings. Nine focused cases and twelve independent boundary-window cases
 passed with exact replay equality. This is scoped source validation, not a
 registered Reviewer role or production/merge authority. Successor CI/browser
 results still require their own source binding.
+
+## Paired dead-biomass candidate, admitted-stock window only
+
+This successor adds explicit `LOCAL_PAIRED_EXCHANGE_TEST` owner options and a
+pure candidate preparer within the existing Aquaculture owner. The unchanged
+default APIs expose neither the new Aquaculture debit nor the new Ecology
+receipt. No biological coefficient, default resource/population, alpha interface
+or standalone acceptance/revenue behavior is changed. The existing Ecology
+owner receives an optional entry point; this is not another ecology engine.
+
+The proof window begins after **5 kg of explicitly admitted stock**. Existing
+Aquaculture stocking checks an availability Boolean but does not debit a finite
+juvenile inventory. Therefore this checkpoint is not end-to-end finite stocking
+or procurement proof. Existing low-oxygen mortality over 24 explicit Aquaculture
+hours, with every environmental water flow set to zero, leaves 4.7 kg living
+and 0.3 kg dead biomass. The initial valid construction export is retained
+separately; later stocking/ecology operations must not weaken its inspection.
+
+The receiver uses the existing canonical wetland and ecosystem identities,
+no populations and zero resource pools. Its exact frozen genesis is retained;
+it does not adopt Ecology's default pond inventory or fish/shrimp populations.
+This prevents double-counting Aquaculture's pond against the separate default
+Ecology FISHPOND. Both incoming exports and the construction/genesis/fixture
+are SHA-256-bound and reconstructed through their owners before preparation.
+Full exported events, actions, revisions and state must match replay.
+
+One manifest binds the same exchange ID, fixture hash, endpoint identities,
+revisions/FNV consistency hashes, resource and exact integer-gram quantity.
+Aquaculture debits in exact integer grams; Ecology credits in safe integer
+milligrams at its existing six-decimal kg precision. Unsafe magnitude, loss
+of an increment, fractional grams, source shortage, duplicate IDs, wrong
+unit/resource/endpoint, stale hashes/revisions and unmatched historical halves
+are rejected. FNV and SHA-256 provide consistency, not authentication.
+
+The candidate fixture transfers **0.200 kg**: Aquaculture dead biomass becomes
+0.100 kg and the disjoint receiver holds 0.200 kg. Ingress is explicitly not
+decomposition: the receiver event records zero decomposed mass and zero nutrient
+return. One subsequent existing Ecology tick yields 0.150 kg dead biomass,
+0.030 kg decomposition and 0.020 kg nutrients. Together with 4.7 kg living and
+0.1 kg remaining Aquaculture dead biomass, the admitted window still totals
+5 kg. Existing abstract proxy labels remain `ABSTRACT_RESOURCE_POOL` and
+`NOT_FULL_LIFE_RUNTIME`; no scientific fish-farming efficacy is implied.
+
+`prepareLocalDeadBiomassExchange` accepts bounded data snapshots, never live
+owner objects or arbitrary callbacks. It clones inputs, validates a successful
+construction prefix and the exact disjoint genesis, checks full replay and
+paired prior manifest histories, prepares the donor then receiver in disposable
+instances, verifies equal mass and unchanged unrelated state, then returns both
+exports together as `PAIRED_TRANSFER_CANDIDATE_NOT_COMMITTED`. A receiver failure
+after donor preparation discards both candidates and leaves caller/live data
+unchanged. Source and destination clocks remain separate; there is no invented
+hour-to-tick conversion. Constructor-captured Ecology genesis must be preserved
+for future restart; importing into a fresh default receiver is not equivalent.
+
+The result remains non-durable and contains no asset, customer acceptance,
+delivery, receipt, production authority or revenue. Backend integration is a
+separate future checkpoint: both exports, exact genesis and manifest belong in
+one existing aggregate/event/idempotency transaction, not independent owner
+writes. This preparer enforces the existing 512,000-byte payload boundary.
+The older House checkpoint must not be relaxed to accept arbitrary Pond pairs.
+
+Local regression: 62 Aquaculture node:test cases pass, plus all 32 checks in the
+preserved Ecology test script; the combined Node runner reports 63 subtests
+because that script is one wrapper subtest. Zero failures/skips. New cases
+cover exact 0.200 kg transfer, existing decomposition and 5 kg balance, caller
+immutability, unsafe amounts, source shortage, stale bindings, wrong genesis,
+forged histories, receiver rejection after donor preparation, duplicate IDs,
+unmatched halves and no default API expansion. The standalone Ecology three-
+tick export equals the preserved SHA-256
+`d450e861554a3d589ef32a238bfdbac892ce18d44ed0ea1e36b29af60ff242fa`; standalone
+Aquaculture's 27-event compatibility state remains byte-identical. Source
+review and normal CI/browser results must bind this successor separately.
+
+Changed paths are the existing Aquaculture runtime, existing Ecology runtime,
+existing fishpond runtime test and this report. No new file, schema, rate,
+workflow, Backend mutation, real settlement or automatic customer acceptance.
+Rollback requires retaining readers for saved transfer actions/genesis, or
+failing closed while preserving their snapshots; no automatic data reset.
+
+Paired source review identified and repaired four hardening gaps before
+publication: non-index array properties could escape canonical hash/size
+measurement; cloning could invoke accessors before validation; matching prior
+receipts were not also checked against the current fixture; and the direct
+donor port needed safe resulting-mass/next-revision bounds. Original inputs
+now undergo descriptor-based dense-JSON validation with a UTF-8 byte and
+traversal budget before cloning. Accessors, sparse/custom-property arrays,
+symbols and non-enumerable fields are rejected. Prior paired manifests must
+match the actual construction fixture hash and current owner identities. Both
+ports reject unsafe integer-milligram values, lost increments and unsafe
+revisions before mutation. The full coordinator already rejected forged
+unsafe owner histories; this also hardens direct local ports.
+
+Four further regression cases cover those findings and a second 50 g transfer
+after an independent Ecology tick. Both receipts remain replayable with saved
+genesis and separate clocks; admitted-window conservation and caller-owned
+data remain unchanged. No persistent pair commit or customer delivery is
+claimed.
+
+Final scoped re-review verified Aquaculture blob
+`be1a5e2aee57706aa9ad2b7230139045e61c794a` and Ecology blob
+`a631bdced9b317e67af2d14d30fb40e94c3c9870`, closing all reported findings.
+A residual initial-milligram round-trip case was included in the repair and
+negative tests before publication. The final source-only re-review does not
+relabel earlier independent probes as a fresh full suite; final 11-case paired
+and combined 62-plus-Ecology verification are the implementation test results.
+No formal Reviewer authority, merge, deployment or customer acceptance follows.

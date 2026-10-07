@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createFishpondAquacultureRuntimeV1, CONSTRUCTION_STAGES } from "../aquaculture/aquaculture-runtime.js";
+import { createFishpondAquacultureRuntimeV1, CONSTRUCTION_STAGES, prepareLocalDeadBiomassExchange } from "../aquaculture/aquaculture-runtime.js";
+import { createReproductionEcologyRuntimeV1 } from "../ecosystem/ecosystem-runtime.js";
+import { createHash } from "node:crypto";
 
 function completeConstruction(runtime) {
   if (runtime.getState().status !== "RUNNING") runtime.start();
@@ -548,4 +550,191 @@ test('closed-world daily capacity is correctly recorded across a calendar bounda
   assert.equal(log.effective_work_hours, 9); assert.equal(log.shift_capacity_hours, 9);
   completeConstruction(runtime);
   assert.equal(runtime.inspectLocalConstruction().status, 'CONSTRUCTION_EVIDENCE_READY');
+});
+
+const exchangeCanonical = (value) => Array.isArray(value) ? `[${value.map(exchangeCanonical).join(',')}]`
+  : value && typeof value === 'object' ? `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${exchangeCanonical(value[key])}`).join(',')}}` : JSON.stringify(value);
+const exchangeHash = (value) => createHash('sha256').update(exchangeCanonical(value)).digest('hex');
+function pairedBiomassFixture() {
+  const mode = 'LOCAL_PAIRED_EXCHANGE_TEST';
+  const donor = createFishpondAquacultureRuntimeV1({ seed: 'PAIRED-DONOR-FIXTURE', localExchangeMode: mode });
+  const fixture = closedWorldFixture(donor); donor.configureLocalFixture(fixture); completeConstruction(donor);
+  const constructionExport = donor.exportState();
+  donor.stockFish(100, { stock_available: true, transport_available: true, health_check_passed: true, quarantine_complete: true });
+  // The five-kg stocking boundary is admitted input, not finite procurement proof.
+  assert.equal(donor.getState().populations[0].total_biomass_kg, 5);
+  donor.runLowOxygenScenario(); donor.advanceTime(24, { rainfall_l: 0, evaporation_l: 0, seepage_l: 0, outflow_l: 0 }); donor.pause();
+  assert.equal(donor.getState().populations[0].total_biomass_kg, 4.7); assert.equal(donor.getState().pond.dead_biomass_kg, 0.3);
+  const canonical = createReproductionEcologyRuntimeV1({ seed: 'PAIRED-RECEIVER-FIXTURE' }).exportState().state;
+  const wetland = canonical.habitats.find((habitat) => habitat.type === 'WETLAND'), genesis = structuredClone(canonical);
+  genesis.habitats = [{ ...wetland, water_l: 0 }]; genesis.populations = [];
+  genesis.entities = canonical.entities.filter((entity) => entity.type === 'ECOSYSTEM' || entity.id === wetland.id);
+  for (const key of Object.keys(genesis.resources)) genesis.resources[key] = 0;
+  const receiver = createReproductionEcologyRuntimeV1({ initialState: genesis, localExchangeMode: mode });
+  const pondExport = donor.exportState(), ecologyExport = receiver.exportState();
+  const request = { scope: mode, exchangeId: 'PAIR-DEAD-BIOMASS-001', fixtureHash: exchangeHash(fixture), quantityGrams: 200,
+    expectedSourceRevision: pondExport.state.revision, expectedDestinationRevision: ecologyExport.state.revision,
+    constructionExport, constructionHash: exchangeHash(constructionExport), pondExport, pondHash: exchangeHash(pondExport),
+    ecologyGenesis: genesis, ecologyGenesisHash: exchangeHash(genesis), ecologyExport, ecologyHash: exchangeHash(ecologyExport) };
+  return { donor, receiver, canonical, genesis, request, mode };
+}
+
+test('paired dead biomass candidate conserves an admitted five-kg window without live writes', async () => {
+  const f = pairedBiomassFixture(), before = structuredClone(f.request), liveDonor = f.donor.exportState(), liveReceiver = f.receiver.exportState();
+  const pair = await prepareLocalDeadBiomassExchange(f.request);
+  assert.deepEqual(f.request, before); assert.deepEqual(f.donor.exportState(), liveDonor); assert.deepEqual(f.receiver.exportState(), liveReceiver);
+  assert.equal(pair.status, 'PAIRED_TRANSFER_CANDIDATE_NOT_COMMITTED'); assert.equal(pair.durable, false);
+  assert.equal(pair.sourceCandidate.state.pond.dead_biomass_kg, 0.1); assert.equal(pair.destinationCandidate.state.resources.dead_biomass_kg, 0.2);
+  assert.deepEqual(pair.conservation, { unit: 'MILLIGRAM', before: 300000, after: 300000, residual: 0 });
+  const { contentHash, ...content } = pair; assert.equal(contentHash, exchangeHash(content));
+  assert.equal(pair.sourceCandidate.state.enterprise.accounts.revenue, 0); assert.equal(pair.customerAcceptance, null); assert.equal(pair.delivery, null); assert.equal(pair.receipt, null);
+  const receiving = createReproductionEcologyRuntimeV1({ initialState: pair.ecologyGenesis, localExchangeMode: f.mode });
+  receiving.importState(pair.destinationCandidate); receiving.start(); receiving.advanceTime(1); receiving.pause();
+  const pools = receiving.getState().resources;
+  assert.equal(pools.dead_biomass_kg, 0.15); assert.equal(pools.decomposition_kg, 0.03); assert.equal(pools.nutrients_kg, 0.02);
+  assert.equal(Math.round((4.7 + 0.1 + pools.dead_biomass_kg + pools.decomposition_kg + pools.nutrients_kg) * 1e6), 5000000);
+  const afterTick = receiving.exportState(); receiving.replayEvents(); assert.deepEqual(receiving.exportState(), afterTick);
+});
+
+test('paired dead biomass rejects unsafe quantities, shortages and stale bindings without mutations', async () => {
+  const f = pairedBiomassFixture(), original = structuredClone(f.request);
+  for (const quantityGrams of [0, -1, 0.5, '200', NaN, Infinity, Number.MAX_SAFE_INTEGER, 301]) {
+    await assert.rejects(prepareLocalDeadBiomassExchange({ ...f.request, quantityGrams }));
+    assert.deepEqual(f.request, original);
+  }
+  for (const key of ['expectedSourceRevision', 'expectedDestinationRevision'])
+    await assert.rejects(prepareLocalDeadBiomassExchange({ ...f.request, [key]: f.request[key] + 1 }), /REVISION_CONFLICT/);
+  await assert.rejects(prepareLocalDeadBiomassExchange({ ...f.request, fixtureHash: 'f'.repeat(64) }), /FIXTURE_MISMATCH/);
+  await assert.rejects(prepareLocalDeadBiomassExchange({ ...f.request, pondHash: 'f'.repeat(64) }), /HASH_MISMATCH/);
+  await assert.rejects(prepareLocalDeadBiomassExchange({ ...f.request, resource: 'WATER' }), /FIELDS/);
+  assert.equal(f.donor.getState().pond.dead_biomass_kg, 0.3); assert.equal(f.receiver.getState().resources.dead_biomass_kg, 0);
+});
+
+test('paired dead biomass requires exact receiver genesis and complete owner replay evidence', async () => {
+  const f = pairedBiomassFixture();
+  const wrongGenesis = structuredClone(f.request); wrongGenesis.ecologyGenesis.resources.nutrients_kg = 1;
+  wrongGenesis.ecologyGenesisHash = exchangeHash(wrongGenesis.ecologyGenesis);
+  await assert.rejects(prepareLocalDeadBiomassExchange(wrongGenesis), /DISJOINT_GENESIS_REQUIRED/);
+  const badSource = structuredClone(f.request); badSource.pondExport.state.events.at(-1).outputs.forged = true; badSource.pondHash = exchangeHash(badSource.pondExport);
+  await assert.rejects(prepareLocalDeadBiomassExchange(badSource), /SOURCE_REPLAY_MISMATCH/);
+  const badDestination = structuredClone(f.request); badDestination.ecologyExport.state.resources.nutrients_kg = 1; badDestination.ecologyHash = exchangeHash(badDestination.ecologyExport);
+  await assert.rejects(prepareLocalDeadBiomassExchange(badDestination), /DESTINATION_REPLAY_MISMATCH/);
+});
+
+test('paired dead biomass receiver failure after candidate debit cannot half-write live owners', async () => {
+  const f = pairedBiomassFixture();
+  const fishpond = f.canonical.habitats.find((habitat) => habitat.type === 'FISHPOND');
+  f.receiver.createHabitat({ ...fishpond, water_l: 0 });
+  const request = { ...f.request, ecologyExport: f.receiver.exportState() };
+  request.expectedDestinationRevision = request.ecologyExport.state.revision; request.ecologyHash = exchangeHash(request.ecologyExport);
+  const donorBefore = f.donor.exportState(), receiverBefore = f.receiver.exportState();
+  await assert.rejects(prepareLocalDeadBiomassExchange(request), /DESTINATION_NOT_DISJOINT/);
+  assert.deepEqual(f.donor.exportState(), donorBefore); assert.deepEqual(f.receiver.exportState(), receiverBefore);
+});
+
+test('paired dead biomass rejects duplicate exchange IDs and unmatched prior halves', async () => {
+  const f = pairedBiomassFixture(), pair = await prepareLocalDeadBiomassExchange(f.request);
+  const advanced = { ...f.request, pondExport: pair.sourceCandidate, ecologyExport: pair.destinationCandidate,
+    pondHash: exchangeHash(pair.sourceCandidate), ecologyHash: exchangeHash(pair.destinationCandidate),
+    expectedSourceRevision: pair.sourceCandidate.state.revision, expectedDestinationRevision: pair.destinationCandidate.state.revision };
+  await assert.rejects(prepareLocalDeadBiomassExchange(advanced), /DUPLICATE/);
+  const unmatched = { ...advanced, exchangeId: 'PAIR-DEAD-BIOMASS-002', ecologyExport: f.request.ecologyExport,
+    ecologyHash: f.request.ecologyHash, expectedDestinationRevision: f.request.expectedDestinationRevision };
+  await assert.rejects(prepareLocalDeadBiomassExchange(unmatched), /HISTORY_PAIR_MISMATCH/);
+  assert.equal(f.donor.getState().pond.dead_biomass_kg, 0.3);
+});
+
+test('local exchange owner ports are absent from default APIs and never decompose on receipt', async () => {
+  assert.equal(createFishpondAquacultureRuntimeV1().debitLocalDeadBiomass, undefined);
+  assert.equal(createReproductionEcologyRuntimeV1().receiveLocalDeadBiomass, undefined);
+  const f = pairedBiomassFixture(), pair = await prepareLocalDeadBiomassExchange(f.request);
+  const event = pair.destinationCandidate.state.events.at(-1);
+  assert.equal(event.outputs.phase, 'INGRESS'); assert.equal(event.outputs.decomposed_kg, 0); assert.equal(event.outputs.nutrient_return_kg, 0);
+  assert.deepEqual(event.outputs.manifest, pair.manifest); assert.equal(event.resource_delta.dead_biomass_kg, 0.2);
+  assert.equal(pair.sourceCandidate.state.events.at(-1).outputs.phase, 'EGRESS');
+  const changed = structuredClone(pair.manifest); changed.destination.stateHash = 'fnv1a-ffffffff';
+  assert.throws(() => f.receiver.receiveLocalDeadBiomass(changed), /DESTINATION_MISMATCH/);
+  assert.equal(f.receiver.getState().resources.dead_biomass_kg, 0);
+});
+
+test('paired exchange extension preserves the exact standalone Ecology baseline', () => {
+  const runtime = createReproductionEcologyRuntimeV1({ seed: 'CLOSED-WORLD-ECOLOGY-COMPATIBILITY' });
+  runtime.start(); runtime.advanceTime(3); runtime.pause();
+  // SHA-256 of the same scenario on the preserved, unmodified owner source.
+  assert.equal(exchangeHash(runtime.exportState()), 'd450e861554a3d589ef32a238bfdbac892ce18d44ed0ea1e36b29af60ff242fa');
+  assert.equal(runtime.receiveLocalDeadBiomass, undefined);
+});
+
+function exchangePondStateHash(state) {
+  const projection = structuredClone(state); delete projection.events; delete projection.action_log; delete projection.revision;
+  let result = 2166136261;
+  for (const char of exchangeCanonical(projection)) { result ^= char.charCodeAt(0); result = Math.imul(result, 16777619); }
+  return `fnv1a-${(result >>> 0).toString(16).padStart(8, '0')}`;
+}
+
+test('paired exchange rejects hidden array data, sparse arrays and getters before cloning', async () => {
+  const f = pairedBiomassFixture(), before = f.donor.exportState();
+  for (const mutate of [
+    (request) => { request.pondExport.state.events.unbound = 'x'.repeat(600000); },
+    (request) => { delete request.pondExport.state.events[0]; },
+    (request) => { Object.defineProperty(request, 'hidden', { value: 'not JSON', enumerable: false }); },
+    (request) => { request[Symbol('hidden')] = 'not JSON'; }
+  ]) {
+    const request = structuredClone(f.request); mutate(request);
+    await assert.rejects(prepareLocalDeadBiomassExchange(request), /LOCAL_EXCHANGE_JSON|INPUT_LIMIT/);
+  }
+  let invoked = 0; const request = { ...f.request };
+  Object.defineProperty(request, 'quantityGrams', { enumerable: true, get() { invoked++; f.donor.pause(); return 0; } });
+  await assert.rejects(prepareLocalDeadBiomassExchange(request), /LOCAL_EXCHANGE_JSON/);
+  assert.equal(invoked, 0); assert.deepEqual(f.donor.exportState(), before);
+  const large = structuredClone(f.request); large.exchangeId = 'x'.repeat(600000);
+  await assert.rejects(prepareLocalDeadBiomassExchange(large), /INPUT_LIMIT/);
+});
+
+test('paired exchange rejects matching prior halves tied to a different fixture', async () => {
+  const f = pairedBiomassFixture(), pair = await prepareLocalDeadBiomassExchange(f.request);
+  const wrong = { ...pair.manifest, fixtureHash: 'f'.repeat(64) };
+  f.donor.debitLocalDeadBiomass(wrong); f.receiver.receiveLocalDeadBiomass(wrong);
+  const request = { ...f.request, exchangeId: 'PAIR-WRONG-FIXTURE-002', quantityGrams: 50,
+    pondExport: f.donor.exportState(), ecologyExport: f.receiver.exportState() };
+  request.pondHash = exchangeHash(request.pondExport); request.ecologyHash = exchangeHash(request.ecologyExport);
+  request.expectedSourceRevision = request.pondExport.state.revision; request.expectedDestinationRevision = request.ecologyExport.state.revision;
+  await assert.rejects(prepareLocalDeadBiomassExchange(request), /HISTORY_FIXTURE_MISMATCH/);
+});
+
+test('local donor rejects unsafe resulting mass or revision and never invokes input getters', async () => {
+  const f = pairedBiomassFixture(), pair = await prepareLocalDeadBiomassExchange(f.request);
+  for (const change of [
+    (state) => { state.pond.dead_biomass_kg = 9007199254740; },
+    (state) => { state.pond.dead_biomass_kg = 9007199254.738; },
+    (state) => { state.pond.dead_biomass_kg = 9007199254.734; },
+    (state) => { state.revision = Number.MAX_SAFE_INTEGER; }
+  ]) {
+    const payload = f.donor.exportState(); payload.state.events = []; change(payload.state);
+    const donor = createFishpondAquacultureRuntimeV1({ seed: payload.state.seed, localExchangeMode: f.mode }); donor.importState(payload);
+    const manifest = { ...pair.manifest, quantityGrams: 1, source: { ...pair.manifest.source, revision: payload.state.revision, stateHash: exchangePondStateHash(payload.state) } };
+    const before = donor.exportState();
+    assert.throws(() => donor.debitLocalDeadBiomass(manifest), /PRECISION|REVISION_LIMIT/);
+    assert.deepEqual(donor.exportState(), before);
+  }
+  const manifest = structuredClone(pair.manifest); let invoked = 0;
+  Object.defineProperty(manifest, 'quantityGrams', { enumerable: true, get() { invoked++; return 1; } });
+  assert.throws(() => f.donor.debitLocalDeadBiomass(manifest), /LOCAL_EXCHANGE_JSON/); assert.equal(invoked, 0);
+});
+
+test('paired exchange replays a second measured transfer after an independent Ecology tick', async () => {
+  const f = pairedBiomassFixture(), first = await prepareLocalDeadBiomassExchange(f.request);
+  const receiver = createReproductionEcologyRuntimeV1({ initialState: first.ecologyGenesis, localExchangeMode: f.mode });
+  receiver.importState(first.destinationCandidate); receiver.start(); receiver.advanceTime(1); receiver.pause();
+  const ecologyExport = receiver.exportState();
+  const request = { ...f.request, exchangeId: 'PAIR-DEAD-BIOMASS-002', quantityGrams: 50,
+    pondExport: first.sourceCandidate, pondHash: exchangeHash(first.sourceCandidate), expectedSourceRevision: first.sourceCandidate.state.revision,
+    ecologyExport, ecologyHash: exchangeHash(ecologyExport), expectedDestinationRevision: ecologyExport.state.revision };
+  const second = await prepareLocalDeadBiomassExchange(request);
+  assert.equal(second.sourceCandidate.state.pond.dead_biomass_kg, 0.05);
+  assert.equal(second.destinationCandidate.state.resources.dead_biomass_kg, 0.2);
+  assert.equal(second.sourceCandidate.state.simulation_time, f.request.pondExport.state.simulation_time);
+  assert.equal(second.destinationCandidate.state.simulation_time, 1);
+  assert.equal(second.sourceCandidate.state.action_log.filter((a) => a.command === 'DEBIT_LOCAL_DEAD_BIOMASS').length, 2);
+  assert.equal(second.destinationCandidate.state.action_log.filter((a) => a.command === 'receiveLocalDeadBiomass').length, 2);
 });
