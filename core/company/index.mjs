@@ -2219,8 +2219,11 @@ export const BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS = Object.freeze({});
 const BRANCH_WRITER_MAX_LEASE_MS = 4 * 60 * 60 * 1000;
 const BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS = 15 * 60 * 1000;
 const BRANCH_WRITER_CHALLENGE_TTL_MS = 2 * 60 * 1000;
+const BRANCH_WRITER_DATE = Date;
+const BRANCH_WRITER_DATE_PARSE = Date.parse.bind(Date);
 const BRANCH_WRITER_WALL_NOW = Date.now.bind(Date);
 const BRANCH_WRITER_MONOTONIC_NOW = globalThis.performance?.now.bind(globalThis.performance) ?? BRANCH_WRITER_WALL_NOW;
+const branchWriterIsoTime = (milliseconds) => new BRANCH_WRITER_DATE(milliseconds).toISOString();
 
 function branchWriterSignatureBytes(value) {
   invariant(typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value), "BRANCH_WRITER_SIGNATURE_INVALID", "Writer attestation requires a base64url signature");
@@ -2290,7 +2293,7 @@ export async function verifyBranchWriterRuntimeAttestation({
   const claim = claims.find((entry) => entry?.claim_id === claim_id);
   invariant(claim, "BRANCH_WRITER_CLAIM_NOT_FOUND", "Writer claim is absent from exact-PR evidence");
   invariant(repository.snapshot.active_task_pr?.head_ref === claim.branch, "BRANCH_WRITER_PR_BRANCH_MISMATCH", "Writer claim branch must match the exact PR head branch");
-  const verifiedAt = new Date(verifiedAtMs).toISOString();
+  const verifiedAt = branchWriterIsoTime(verifiedAtMs);
   const inspected = inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: verifiedAt, claims });
   invariant(inspected.status === "STRUCTURALLY_VALID", "BRANCH_WRITER_CLAIM_NOT_CURRENT", `Writer claim is not current: ${inspected.reasons.join(",")}`);
 
@@ -2323,7 +2326,7 @@ export async function verifyBranchWriterRuntimeAttestation({
   "BRANCH_WRITER_CHALLENGE_MISMATCH", "Signed payload must bind the fresh current-process challenge");
   invariant(signed_payload.pr_head === file.ref && signed_payload.source_git_object === file.git_object,
     "BRANCH_WRITER_SIGNED_SOURCE_MISMATCH", "Signed payload must bind exact PR head and WorkOrder blob");
-  const signedAtMs = Date.parse(signed_payload.attested_at ?? "");
+  const signedAtMs = BRANCH_WRITER_DATE_PARSE(signed_payload.attested_at ?? "");
   invariant(Number.isFinite(signedAtMs) && Math.abs(verifiedAtMs - signedAtMs) <= BRANCH_WRITER_CHALLENGE_TTL_MS,
     "BRANCH_WRITER_SIGNED_TIME_INVALID", "Signed writer time must be close to module-owned verification time");
   const key = await globalThis.crypto.subtle.importKey("jwk", public_key_jwk, { name: "Ed25519" }, false, ["verify"]);
@@ -2348,7 +2351,7 @@ export async function verifyBranchWriterRuntimeAttestation({
 /** Structural inspection only; never grants writer authority. */
 export function inspectBranchConcurrencyClaimSet({ branch, observed_at, claims = [] }) {
   const result = (status, reasons = []) => Object.freeze({ status, reasons: Object.freeze(reasons), authority_granted: false });
-  const observedMs = Date.parse(observed_at ?? "");
+  const observedMs = BRANCH_WRITER_DATE_PARSE(observed_at ?? "");
   if (typeof branch !== "string" || !branch.startsWith("codex/") || branch === "main") return result("INVALID", ["BRANCH_INVALID"]);
   if (Number.isNaN(observedMs) || !Array.isArray(claims)) return result("INVALID", ["CLAIM_OR_TIME_INVALID"]);
   const branchClaims = claims.filter((claim) => claim?.branch === branch);
@@ -2356,9 +2359,9 @@ export function inspectBranchConcurrencyClaimSet({ branch, observed_at, claims =
   if (new Set(branchClaims.map((claim) => claim.fencing_token)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_FENCING_TOKEN"]);
   if (new Set(branchClaims.map((claim) => claim.fencing_epoch)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_FENCING_EPOCH"]);
   const malformed = branchClaims.find((claim) => {
-    const claimed = Date.parse(claim?.claimed_at ?? "");
-    const heartbeat = Date.parse(claim?.last_heartbeat ?? "");
-    const expires = Date.parse(claim?.lease_expires_at ?? "");
+    const claimed = BRANCH_WRITER_DATE_PARSE(claim?.claimed_at ?? "");
+    const heartbeat = BRANCH_WRITER_DATE_PARSE(claim?.last_heartbeat ?? "");
+    const expires = BRANCH_WRITER_DATE_PARSE(claim?.lease_expires_at ?? "");
     return !Number.isFinite(claimed) || !Number.isFinite(heartbeat) || !Number.isFinite(expires)
       || claimed > heartbeat || heartbeat > observedMs || expires <= observedMs
       || expires - claimed > BRANCH_WRITER_MAX_LEASE_MS || observedMs - heartbeat > BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS
@@ -2386,22 +2389,23 @@ export function evaluateBranchConcurrencyGate({
     lease_status: "HOLD",
     reasons: Object.freeze(reasons)
   });
+  if (VERIFIED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) {
+    if (CONSUMED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("WRITER_ATTESTATION_REPLAYED");
+    // A real capability is consumed at the start of its first gate evaluation,
+    // even when the caller supplied an invalid branch, work ID or handoff head.
+    CONSUMED_BRANCH_WRITER_ATTESTATIONS.add(verified_attestation);
+  }
   if (typeof branch !== "string" || !branch.startsWith("codex/") || branch === "main") return hold("BRANCH_INVALID");
   if (typeof work_id !== "string" || !work_id.trim()) return hold("WORK_ID_INVALID");
   if (!/^[0-9a-f]{40}$/.test(handoff_head ?? "")) return hold("HANDOFF_HEAD_INVALID");
   if (!VERIFIED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("VERIFIED_RUNTIME_ATTESTATION_REQUIRED");
-  if (CONSUMED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("WRITER_ATTESTATION_REPLAYED");
-  // The first gate evaluation consumes the capability, including any later
-  // validation failure. A corrected or changed claim needs a new challenge,
-  // signature and exact-head attestation.
-  CONSUMED_BRANCH_WRITER_ATTESTATIONS.add(verified_attestation);
   const claims = verified_attestation.claims;
   const signed = verified_attestation.signed_payload;
   const observedAtMs = BRANCH_WRITER_WALL_NOW();
-  const verifiedAtMs = Date.parse(verified_attestation.verified_at ?? "");
+  const verifiedAtMs = BRANCH_WRITER_DATE_PARSE(verified_attestation.verified_at ?? "");
   if (!Number.isFinite(verifiedAtMs) || observedAtMs < verifiedAtMs
     || observedAtMs - verifiedAtMs > BRANCH_WRITER_CHALLENGE_TTL_MS) return hold("WRITER_ATTESTATION_EXPIRED");
-  const inspected = inspectBranchConcurrencyClaimSet({ branch, observed_at: new Date(observedAtMs).toISOString(), claims });
+  const inspected = inspectBranchConcurrencyClaimSet({ branch, observed_at: branchWriterIsoTime(observedAtMs), claims });
   if (inspected.status !== "STRUCTURALLY_VALID") return hold(...inspected.reasons);
   const claim = inspected.active_claim;
   const worker = verified_attestation.worker;
@@ -2416,7 +2420,7 @@ export function evaluateBranchConcurrencyGate({
   if (!/^FENCE-[A-Za-z0-9._-]+$/.test(claim.fencing_token ?? "")) return hold("FENCING_TOKEN_INVALID");
   if (!/^[0-9a-f]{64}$/.test(claim.controller_binding_hash ?? "") || !/^[0-9a-f]{64}$/.test(claim.session_binding_hash ?? "")) return hold("CONTROLLER_BINDING_INVALID");
   if (claim.branch_authority !== "HUMAN_EXPLICIT_EXISTING_PR_BRANCH") return hold("BRANCH_AUTHORITY_REQUIRED");
-  const attestedMs = Date.parse(signed.attested_at ?? "");
+  const attestedMs = BRANCH_WRITER_DATE_PARSE(signed.attested_at ?? "");
   if (!Number.isFinite(attestedMs) || Math.abs(attestedMs - verifiedAtMs) > BRANCH_WRITER_CHALLENGE_TTL_MS
     || signed.session_binding_hash !== claim.session_binding_hash) return hold("RUNTIME_ATTESTATION_FRESHNESS_INVALID");
 
