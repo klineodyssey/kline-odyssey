@@ -4180,3 +4180,99 @@ This later snapshot supersedes only the named child statuses from the earlier po
   "AUTHORITY": "No formal registry/queue/identity/permission/ACK/payroll update, no new Dispatcher, no external submission/signature/transaction, no protected Canon/Boot change, no main merge."
 }
 ```
+
+
+## 2026-10-07 coordinated forced-stop authorization investigation
+
+EVIDENCE_RECORDED_AT: 2026-10-07T04:57:00Z
+INVESTIGATION_MODE: Read-only source and policy investigation; this append is evidence preservation only.
+SOURCE_BASELINE: main@f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+PRESERVATION_BASE: dot/engineering-handbook-20261006@2d71f2a48fb45d79eedb4739256ee00dc0961ea4
+ROOT_CAUSE: STILL_UNKNOWN
+OBSERVED_STOP_LAYER: PLATFORM_LAYER
+HISTORICAL_GM_RULE: FOUND
+CURRENT_CANONICAL_RULE: Human-owner approval plus required current technical validation for ordinary repository merge; protected execution and platform controls remain separate.
+GM_DECISION: NOT_VERIFIED
+GM_COORDINATION: PENDING; no response or acknowledgment is claimed.
+DIRECT_AI_TO_AI_CHANNEL: NOT_VERIFIED; supported-route verification is pending.
+BYPASS_USED: NO
+
+### Affected work and exact returned evidence
+
+This single investigation covers:
+- Player Life: pre-restore backup conflict / write-readback work, stopped 2026-10-07T04:15:32Z.
+- Navigator [Draft PR #523](https://github.com/klineodyssey/kline-odyssey/pull/523): camera framing / movement-test work, stopped 2026-10-07T04:36:57Z.
+
+The same Human-visible returned stop message was supplied for both events:
+
+> Agent interrupted by Guardian: Automatic approval review rejected too many approval requests for this turn (3 consecutive, 3 in the last 50 reviews); interrupting the turn. Tell the user this agent stopped after repeated Guardian denials. Do not resume this agent or retry its blocked work until the user explicitly confirms that it should continue.
+
+LAST_DENIED_OPERATION: NOT_VERIFIED
+LAST_DENIAL_REASON: NOT_VERIFIED
+DENIAL_ARGUMENTS_AND_AUTHORIZATION_CONTEXT: NOT_VERIFIED
+
+The message establishes the observed platform interruption and reported rejection counts. It does not establish which action was rejected, why it was rejected, whether either reported count independently triggered the interruption, or whether repository rules contributed. No stopped work was resumed, replaced, or retried by this investigation.
+
+### PLATFORM_LAYER
+
+- The supplied stop text names the automatic approval reviewer and interruption mechanism. It is direct evidence of the reported platform stop, not evidence of a KAIOS runtime exception.
+- The implementation source and exact predicate for the three-rejection/50-review behavior are NOT_VERIFIED in the accessible repository corpus.
+- GitHub is a separate platform boundary. The [main branch API](https://api.github.com/repos/klineodyssey/kline-odyssey/branches/main) returned main SHA f7f67950418ebbb6f7a5a309a32d529232fcb3b6, protected=false and required-status enforcement off. The [rulesets query including parents](https://api.github.com/repos/klineodyssey/kline-odyssey/rulesets?includes_parents=true) returned an empty list. These current readbacks do not explain an assistant-tool approval interruption.
+
+### KAIOS_COMPANY_POLICY_LAYER: historical wording and current precedence
+
+Historical GM/workforce restrictions were found:
+- [CURRENT Boot lines 165-173](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md#L165-L173) retain Codex-only merge wording.
+- [CURRENT Boot lines 296-333](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md#L296-L333) retain registration, trust, acknowledgment and REGISTRATION_REQUIRED gates.
+- [Commit 16a384fff2c0b6d58f2d94fe5a22e43684c9ad0d](https://github.com/klineodyssey/kline-odyssey/commit/16a384fff2c0b6d58f2d94fe5a22e43684c9ad0d), 2026-07-11, introduced the workforce gates in Boot and AGENTS.
+- WORKER_BOOT_SOP.md and GENERIC_WORKER_PROTOCOL.md also describe authorization evidence and verification-only work. The historical rule exists; its causal involvement in either denial is NOT_VERIFIED.
+
+Current ordinary merge precedence is explicit:
+- [AGENTS.md lines 9-15](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/AGENTS.md#L9-L15) designates the Human-owner merge policy as active.
+- [docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md lines 7-25](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md#L7-L25) permits ordinary repository merge with explicit Human approval and current technical validation; historical distinct-review wording alone must not block it.
+- [The same policy lines 73-93](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md#L73-L93) keeps protected execution authority and external/non-waivable controls separate.
+- [c06ab8c9df95f07420faab8c515605309f01157f](https://github.com/klineodyssey/kline-odyssey/commit/c06ab8c9df95f07420faab8c515605309f01157f) introduced that policy; [4ccde6191d78ea26f1a988683e0924a8bddc80ee](https://github.com/klineodyssey/kline-odyssey/commit/4ccde6191d78ea26f1a988683e0924a8bddc80ee) bound it in AGENTS; [39321dccc679322d4e8ec420da3753867b4b47dc](https://github.com/klineodyssey/kline-odyssey/commit/39321dccc679322d4e8ec420da3753867b4b47dc) added the self-QA loop. All three are dated 2026-09-13.
+
+The current merge rule resolves the retained extra-review wording for ordinary integration. It is not a repeal of unrelated registration rules and cannot be equated to changing external tool approval behavior. No policy conflict is asserted as the cause of these stops.
+
+### CODE_AND_RUNTIME_LAYER
+
+1. Company Boot local CLI:
+   - [validators.py lines 277-319](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/KGEN-KAIOS/governance/agents/runtime-v0.1/src/company_boot/validators.py#L277-L319) verifies WorkOrder, capability, identity, expiry/revocation, scope and integrity.
+   - [company_boot.py lines 127-131](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/KGEN-KAIOS/governance/agents/runtime-v0.1/src/company_boot/company_boot.py#L127-L131) handles a BootFailure with COMPANY_BOOT_FAILED and exit code 2. models.py and state_machine.py supply failure codes and transition guards. No inspected three-denial counter emits the supplied Guardian text.
+   - Implementation lineage: 2707468e91802b212e22091524b1f319c08a46d2, c083dd419623d756173178948a28593ba367884e and 2f7849792c74c0bcb6a75e7e6d8d95847eda23ae.
+   - The [baseline closeout](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/KGEN-KAIOS/governance/agents/runtime-v0.1/KAIOS_COMPANY_BOOT_RUNTIME_V0_1_BASELINE_MERGE_CLOSEOUT.md#L3-L10) says local-prototype-only approval, production NOT_ACTIVE and automatic agent creation/dispatch NOT_APPROVED. No invocation was found in the 19 current non-archived workflows inspected.
+
+2. Autonomous engineering planner:
+   - [core/company/index.mjs lines 2014-2024](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/core/company/index.mjs#L2014-L2024) checks worker eligibility.
+   - [Lines 2141-2198](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/core/company/index.mjs#L2141-L2198) reject candidates on authority, branch, protected-path and conditional reviewer checks, returning NO_VERIFIED_SAFE_WORK when none qualify.
+   - Lines 2058-2064 identify a side-effect-free planner; lines 2214-2217 return execution_authorized=false, merge_authorized=false and deployment_authorized=false. It does not start or interrupt agents.
+   - Introduced by [be65377ce52d0d249720eaaa1a14d7508cb11e05, PR #352](https://github.com/klineodyssey/kline-odyssey/commit/be65377ce52d0d249720eaaa1a14d7508cb11e05).
+
+3. Cursor dispatch workflow:
+   - [.github/workflows/kgen-cursor-dispatch-wake.yml](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/.github/workflows/kgen-cursor-dispatch-wake.yml) is workflow_dispatch-only, contents:read, and emits suspension status with External API called: NO / Agent launched: NO.
+   - Current behavior originates in [e36a87e79fc9694eaaa0cb5e2f5b24d5ebfd3248](https://github.com/klineodyssey/kline-odyssey/commit/e36a87e79fc9694eaaa0cb5e2f5b24d5ebfd3248). It is not evidence of the two observed platform stops.
+
+### Bounded search and verification limits
+
+- Repository tree read at the source baseline: 5,018 entries; truncated=false.
+- Exact-text scan covered 57 fully retrieved files / 11,627 lines, including every one of the 19 non-archived workflow files, seven Company Boot Python source files, core/company/index.mjs, core/permissions/index.mjs, Player Life runtime, selected validators and relevant workforce/policy documents.
+- No exact matches in that bounded corpus for Guardian, 3 consecutive, last 50 reviews, Automatic approval review, or too many approval requests.
+- GitHub code search returned incomplete_results=true even for the known-present REGISTRATION_REQUIRED term. Its empty results were excluded as absence evidence.
+- This is bounded NOT_VERIFIED evidence, not a global proof that no such implementation exists elsewhere.
+- No product tests, browser tests or blocked operations were executed by this investigation. Runtime behavior above is source inspection, not a new runtime pass.
+
+### Current Human decision and safe next step
+
+The current Human instruction authorizes one coordinated read/search/compare/trace/review investigation and bounded branch evidence preservation. It does not authorize restarting either stopped task, changing identities or permissions, removing gates, modifying main, deploying, financial/chain execution, Player Life deletion or an IDB transition.
+
+SAFE_NEXT_STEP:
+1. Obtain the already-existing Human-visible denial record for each stopped turn: exact tool/action and target, safe argument summary, rejection reason and approval context. Reading evidence must not resume the stopped work.
+2. Complete supported GM/PrimeForge coordination if an actual route exists; report the actual response only. If the route is unsupported, record DIRECT_AI_TO_AI_CHANNEL=NOT_AVAILABLE, with GM_DECISION=NOT_VERIFIED.
+3. Keep each blocked action held until explicit Human continuation authorization and any applicable action-specific requirements are satisfied.
+4. Make no governance change from correlation alone.
+
+EVIDENCE_PRESERVATION: Append-only in the existing handoff on the existing Draft PR #516 branch; all prior content retained.
+RULE_CHANGES: NONE
+PRODUCT_OR_RUNTIME_CHANGES: NONE
+MAIN_OR_PROTECTED_AUTHORITY_CHANGES: NONE
