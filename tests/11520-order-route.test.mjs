@@ -123,6 +123,7 @@ test('existing utility owner gives expanded wallet an unobstructed view and rest
  // The existing owner now composes with Settings; evaluate its real dependency
  // rather than bypassing that guard in this Wallet-only fixture.
  vm.runInContext(source.slice(source.indexOf('const settingsOpen='),source.indexOf('function put(')),context);
+ vm.runInContext(source.slice(source.indexOf('function backpackForeground(){'),source.indexOf('function installStyle(){')),context);
  vm.runInContext(source.slice(source.indexOf('function pinMobileUtilityStack(){'),source.indexOf('function installUtilityMaster(){')),context);vm.runInContext(fn,context);vm.runInContext('syncUtilityMaster()',context);
  for(const id of ['dock','aiChatButton','chatHandle','bgmButton','backpackButton'])assert.equal(nodes[id].style.values.display,'none');
  assert.notEqual(nodes.walletPanel.style.values.display,'none');assert.notEqual(nodes.walletToggle.style.values.display,'none');
