@@ -86,3 +86,14 @@ test('production metadata checks never create execution readiness even with ever
  const blocked=productionTradingMetadataEligibility({axis:input.axis,market:input.market});
  assert.equal(blocked.metadataEligible,false);assert.equal(blocked.blockers.length,4);assert.equal(blocked.executionReady,false);
 });
+
+
+test('production metadata eligibility ignores unrelated getters and reads each named field once',()=>{
+ const values={axis:'KX',market:'BTC/USD INDEX',chainId:56,feedProvenanceVerified:true,brainAddress:BRAIN,positionEngineAddress:ENGINE,humanMainnetAuthorization:true};
+ const reads={},input={};
+ for(const [key,value] of Object.entries(values))Object.defineProperty(input,key,{enumerable:true,get(){reads[key]=(reads[key]||0)+1;return value}});
+ for(const key of ['provider','request','signer','settlementAuthority','transactionPayload'])Object.defineProperty(input,key,{enumerable:true,get(){throw new Error('UNRELATED_GETTER_EXECUTED')}});
+ const result=productionTradingMetadataEligibility(input);
+ assert.equal(result.metadataEligible,true);assert.equal(result.executionReady,false);assert.equal(result.oracleVerification,'NOT_PERFORMED');
+ assert.deepEqual(reads,Object.fromEntries(Object.keys(values).map(key=>[key,1])));
+});
