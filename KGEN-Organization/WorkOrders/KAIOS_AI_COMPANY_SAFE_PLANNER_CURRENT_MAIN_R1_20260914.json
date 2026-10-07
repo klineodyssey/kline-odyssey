@@ -70,7 +70,11 @@
     "identity_bound_writer_ack_required": true,
     "fencing_token_required": true,
     "fresh_signed_challenge_required": true,
+    "module_owned_challenge_clock_required": true,
+    "challenge_ttl_ms": 120000,
+    "challenge_first_verification_attempt_consumes": true,
     "writer_attestation_one_shot": true,
+    "writer_attestation_first_gate_attempt_consumes": true,
     "writer_transfer_requires_release_and_ack": true,
     "suspended_worker_forbidden": true,
     "all_authority_effect_flags_false": true,
@@ -203,7 +207,8 @@
       "CANONICAL_CONTROLLER_SIGNING_KEY_HASH_REQUIRED",
       "INDEPENDENT_SHIPPED_CONTROLLER_TRUST_ANCHOR_REQUIRED",
       "FRESH_PLATFORM_SIGNED_CHALLENGE_REQUIRED",
-      "PLATFORM_SIGNED_RUNTIME_ATTESTATION_REQUIRED"
+      "PLATFORM_SIGNED_RUNTIME_ATTESTATION_REQUIRED",
+      "TRUSTED_RUNTIME_CLOCK_SOURCE_REQUIRED_FOR_ACTIVATION"
     ],
     "other_workers": "READ_REVIEW_WATCH_ONLY",
     "authority_expanded": false
@@ -403,7 +408,7 @@
     "seal": "INVALID",
     "transport_provenance": "CUSTOM_TRANSPORT_DIAGNOSTIC_ONLY; NEVER_PRODUCTION_CI_PASS",
     "ci_pr_repository_identity": "FOCUSED_TEST_PASS",
-    "branch_single_writer_gate": "FAIL_CLOSED_IMPLEMENTED_LIVE_ACTIVATION_HOLD_FOR_SIGNED_ATTESTATION",
+    "branch_single_writer_gate": "FAIL_CLOSED_MODULE_TIMED_ONE_SHOT_IMPLEMENTED_LIVE_ACTIVATION_HOLD_FOR_TRUST_ANCHOR_AND_SIGNED_ATTESTATION",
     "non_gm_automation_closed_loop": "BLOCKED_VERIFIED_NON_GM_IDENTITY_AND_ENDPOINT_REQUIRED"
   }
 }

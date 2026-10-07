@@ -1347,6 +1347,12 @@ test("branch concurrency gate rejects diagnostic provenance and structurally blo
     source_ref: WORK_ORDER_REF, claim_id: claim.claim_id,
     signed_payload: {}, challenge, public_key_jwk: {}, signature_base64url: "AA"
   }), error => error.code === "BRANCH_WRITER_PUBLIC_EVIDENCE_REQUIRED");
+  await assert.rejects(() => verifyBranchWriterRuntimeAttestation({
+    repository_evidence: repositoryEvidence, current_main_sha: MAIN_SHA,
+    source_ref: WORK_ORDER_REF, claim_id: claim.claim_id,
+    signed_payload: {}, challenge, public_key_jwk: {}, signature_base64url: "AA"
+  }), error => error.code === "BRANCH_WRITER_FRESH_CHALLENGE_REQUIRED");
+  assert.deepEqual(Object.keys(challenge).sort(), ["branch", "handoff_head", "nonce", "work_id"]);
   assert.deepEqual(BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS, {});
 
   const inspected = inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [claim] });
