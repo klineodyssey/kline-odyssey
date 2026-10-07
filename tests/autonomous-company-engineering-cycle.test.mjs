@@ -768,6 +768,108 @@ class V2OfflineStore {
     return this.commit(before, after, "LOCAL_RESULT_ONLY", now, false,
       () => this.verifier.actor(actor.principal, actor.instance, now));
   }
+  reviewReceipt(bytes, observation, now) { return this.reviewEvidence("RECEIPT", bytes, observation, now); }
+  reviewDisposition(bytes, observation, now) { return this.reviewEvidence("DISPOSITION", bytes, observation, now); }
+  async reviewEvidence(phase, bytes, observation, now) {
+    // New boundaries accept primitive serialized fixture inputs only. Existing
+    // actor/fence APIs keep their inherited cloning behavior; no general object
+    // safety or actual authenticated worker/reviewer authority is asserted.
+    // Result receipts keep their earlier immutable V1 marker fields. Current
+    // review status lives only in these separate records and the work projection.
+    v2Require(["RECEIPT", "DISPOSITION"].includes(phase), "REVIEW_PHASE");
+    v2Require(typeof bytes === "string" && Buffer.byteLength(bytes) <= V2_BUDGET.bytes &&
+      typeof observation === "string" && observation.length > 0 && observation.length <= 128, "REVIEW_BYTES_BUDGET");
+    v2Require(Number.isSafeInteger(now) && now >= 0 && now <= V2_BUDGET.reconciliationAge, "REVIEW_TIME_BUDGET");
+    const isReceipt = phase === "RECEIPT";
+    const field = isReceipt ? "reviewReceiptRecord" : "reviewDispositionRecord";
+    const schema = isReceipt ? "KAIOS_OFFLINE_REVIEW_RECEIPT_V1" : "KAIOS_OFFLINE_REVIEW_DISPOSITION_V1";
+    const type = isReceipt ? "REVIEW_RECEIPT" : "REVIEW_DISPOSITION";
+    const fields = ["schema", "type", "id", "key", "sender", "instance", "work", "resultId",
+      "resultDigest", "resultHead", "resultRevision", "expectedRevision", "epoch",
+      ...(isReceipt ? [] : ["receiptId", "receiptDigest", "receiptRevision", "disposition", "reason"])];
+    const verify = (historical) => {
+      let message;
+      try { message = JSON.parse(bytes); } catch { throw new Error("REVIEW_DESCRIPTOR_INVALID"); }
+      v2Require(message && Object.getPrototypeOf(message) === Object.prototype &&
+        Object.keys(message).length === fields.length && fields.every((key) => Object.hasOwn(message, key)), "REVIEW_FIELDS");
+      v2Require(message.schema === schema && message.type === type &&
+        ["id", "key", "sender", "instance", "work", "resultId", ...(isReceipt ? [] : ["receiptId"])].every((key) =>
+          typeof message[key] === "string" && message[key].length > 0 && message[key].length <= 128) &&
+        typeof message.resultHead === "string" && /^[a-f0-9]{40}$/.test(message.resultHead) &&
+        ["resultDigest", ...(isReceipt ? [] : ["receiptDigest"])].every((key) =>
+          typeof message[key] === "string" && /^[a-f0-9]{64}$/.test(message[key])) &&
+        Number.isSafeInteger(message.expectedRevision) && message.expectedRevision >= 0 &&
+        ["resultRevision", "epoch", ...(isReceipt ? [] : ["receiptRevision"])].every((key) =>
+          Number.isSafeInteger(message[key]) && message[key] > 0) &&
+        (isReceipt || (["ACCEPT", "REJECT"].includes(message.disposition) &&
+          typeof message.reason === "string" && message.reason.length > 0 && message.reason.length <= 2048)), "REVIEW_DESCRIPTOR_INVALID");
+      v2Require(JSON.stringify(message) === bytes, "REVIEW_FIXTURE_ENCODING");
+      return this.verifier.verify({ bytes, observation }, now, historical);
+    };
+    const historical = verify(true);
+    const retainedRecord = (record) => {
+      v2Require(record.id === historical.message.id || record.key === historical.message.key, "REVIEW_TERMINAL");
+      v2Require(record.bytes === bytes && record.digest === historical.digest, "REVIEW_CONFLICT");
+      return v2Copy(record); // historical receipt only, no permission or state renewal
+    };
+    const before = await this.checked();
+    verify(true); // current read access must survive the awaited durable read
+    if (before[field]) return retainedRecord(before[field]);
+    const authorize = () => {
+      const { actor, message } = verify(false), result = before.resultRecord;
+      v2Require(result && result.scope === "OFFLINE_FAKE_FIXTURE_EVIDENCE" &&
+        typeof result.bytes === "string" && Buffer.byteLength(result.bytes) <= V2_BUDGET.bytes &&
+        result.digest === v2Hash(result.bytes), "REVIEW_RESULT_REQUIRED");
+      const original = JSON.parse(result.bytes), task = JSON.parse(before.message.bytes);
+      v2Require(original.worker === result.worker && original.instance === result.instance &&
+        original.work === result.work && original.head === result.head && original.id === result.id &&
+        original.expectedRevision === result.expectedRevision, "REVIEW_RESULT_INTEGRITY");
+      v2Require(actor.principal === V2_REVIEWER.principal && task.recipient === actor.principal, "REVIEWER_NOT_ASSIGNED");
+      v2Require(v2Independent(this.verifier,
+        { principal: result.worker, instance: result.instance }, actor, now), "REVIEWER_NOT_INDEPENDENT");
+      v2Require(before.work === (isReceipt ? "RESULT_RECORDED" : "OFFLINE_REVIEW_ACKED"), "REVIEW_STAGE");
+      v2Require(now >= before.clock && now < V2_BUDGET.age && message.work === result.work &&
+        message.resultId === result.id && message.resultDigest === result.digest &&
+        message.resultHead === result.head && before.head === result.head &&
+        message.resultRevision === result.acceptedRevision &&
+        message.expectedRevision === before.revision && message.epoch === before.epoch, "REVIEW_TARGET_BINDING");
+      v2Require(message.id !== result.id && message.id !== task.id &&
+        (isReceipt || message.id !== before.reviewReceiptRecord?.id), "REVIEW_MESSAGE_ID_REUSE");
+      if (!isReceipt) {
+        const receipt = before.reviewReceiptRecord;
+        v2Require(receipt && receipt.scope === "OFFLINE_FAKE_FIXTURE_EVIDENCE" &&
+          receipt.digest === v2Hash(receipt.bytes) && receipt.resultDigest === result.digest &&
+          receipt.reviewer === actor.principal && receipt.instance === actor.instance &&
+          message.receiptId === receipt.id && message.receiptDigest === receipt.digest &&
+          message.receiptRevision === receipt.recordedRevision, "REVIEW_RECEIPT_BINDING");
+      }
+      return { actor, message };
+    };
+    const { actor, message } = authorize(), after = v2Copy(before);
+    after.work = isReceipt ? "OFFLINE_REVIEW_ACKED" :
+      message.disposition === "ACCEPT" ? "OFFLINE_REVIEW_ACCEPTED" : "OFFLINE_REPAIR_REQUIRED";
+    after.revision++;
+    after[field] = { scope: "OFFLINE_FAKE_FIXTURE_EVIDENCE", type, id: message.id, key: message.key,
+      bytes, digest: historical.digest, reviewer: actor.principal, instance: actor.instance,
+      work: message.work, resultId: message.resultId, resultDigest: message.resultDigest,
+      resultHead: message.resultHead, resultRevision: message.resultRevision,
+      epoch: before.epoch, recordedRevision: after.revision, recordedAt: now,
+      commitRef: "OFFLINE-REVIEW-COMMIT-" + (before.seq + 1),
+      disposition: isReceipt ? "NOT_REVIEWED" : message.disposition,
+      ...(isReceipt ? {} : { receiptDigest: message.receiptDigest, reason: message.reason }),
+      authenticatedWorkerAck: false, integrationAuthorized: false };
+    try {
+      await this.commit(before, after, isReceipt ? "OFFLINE_REVIEW_RECEIPT_RECORDED" : "OFFLINE_REVIEW_DISPOSITION_RECORDED",
+        now, false, authorize);
+    } catch (error) {
+      if (!/CHECK constraint/.test(error.message)) throw error;
+      const winner = (await this.checked())[field];
+      verify(true);
+      if (!winner) throw error;
+      return retainedRecord(winner); // one bounded read; never retry a new effect
+    }
+    return v2Copy(after[field]);
+  }
   async cancel(now) {
     const before = await this.checked(), after = v2Copy(before);
     after.work = "CANCELLED"; after.delivery = "CANCELLED"; after.lease = null; after.fence++;
@@ -1374,4 +1476,214 @@ v2Test("result descriptor classifies an exact winner between observation and own
   const retained = await delayed.checked();
   assert.equal(retained.seq, f.before.seq + 1);
   assert.equal(retained.events.filter((event) => event.event === "OFFLINE_RESULT_DESCRIPTOR_RECORDED").length, 1);
+});
+
+// Receipt and disposition are separate immutable offline evidence. Neither
+// represents an authenticated real reviewer nor authorizes integration.
+async function v2ReviewFixture(t) {
+  const f = await v2ResultFixture(t);
+  f.result = await f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor);
+  return f;
+}
+function v2ReviewWire(f, state, phase = "RECEIPT", changes = {}, actor = V2_REVIEWER) {
+  const result = state.resultRecord || f.result, receipt = state.reviewReceiptRecord;
+  return f.verifier.observe(JSON.stringify({
+    schema: phase === "RECEIPT" ? "KAIOS_OFFLINE_REVIEW_RECEIPT_V1" : "KAIOS_OFFLINE_REVIEW_DISPOSITION_V1",
+    type: phase === "RECEIPT" ? "REVIEW_RECEIPT" : "REVIEW_DISPOSITION",
+    id: "FAKE-REVIEW-" + phase, key: "FAKE-REVIEW-KEY-" + phase,
+    sender: actor.principal, instance: actor.instance, work: result.work,
+    resultId: result.id, resultDigest: result.digest, resultHead: result.head,
+    resultRevision: result.acceptedRevision, expectedRevision: state.revision, epoch: state.epoch,
+    ...(phase === "RECEIPT" ? {} : { receiptId: receipt?.id || "MISSING-RECEIPT",
+      receiptDigest: receipt?.digest || "a".repeat(64), receiptRevision: receipt?.recordedRevision || 1,
+      disposition: "ACCEPT", reason: "Offline fixture checks only" }), ...changes
+  }), actor);
+}
+const v2SubmitReview = (model, phase, wire, now) => phase === "RECEIPT"
+  ? model.reviewReceipt(wire.bytes, wire.observation, now)
+  : model.reviewDisposition(wire.bytes, wire.observation, now);
+
+v2Test("review receipt is not acceptance and disposition creates no integration authority", async (t) => {
+  const f = await v2ReviewFixture(t), before = await f.model.checked();
+  const ack = v2ReviewWire(f, before), receipt = await v2SubmitReview(f.model, "RECEIPT", ack, 3);
+  const acknowledged = await f.model.checked();
+  assert.equal(acknowledged.work, "OFFLINE_REVIEW_ACKED");
+  assert.equal(receipt.disposition, "NOT_REVIEWED"); assert.equal(acknowledged.reviewDispositionRecord, undefined);
+  assert.equal(receipt.authenticatedWorkerAck, false); assert.equal(receipt.integrationAuthorized, false);
+  const decision = v2ReviewWire(f, acknowledged, "DISPOSITION");
+  const review = await v2SubmitReview(f.model, "DISPOSITION", decision, 4);
+  const accepted = await f.model.checked();
+  assert.equal(accepted.work, "OFFLINE_REVIEW_ACCEPTED"); assert.equal(review.disposition, "ACCEPT");
+  assert.equal(review.authenticatedWorkerAck, false); assert.equal(review.integrationAuthorized, false);
+  assert.deepEqual(accepted.resultRecord, before.resultRecord); assert.deepEqual(accepted.reviewReceiptRecord, receipt);
+  assert.equal(accepted.effects, before.effects); assert.deepEqual(accepted.grantedTools, []);
+  assert.equal(typeof f.model.integrationEvidence, "undefined"); assert.equal(typeof f.model.integrate, "undefined");
+});
+
+v2Test("review receipt binds exact result task head revision and current epoch", async (t) => {
+  const f = await v2ReviewFixture(t), before = await f.model.checked();
+  for (const changes of [{ resultId: "OTHER" }, { resultDigest: "a".repeat(64) }, { resultHead: "c".repeat(40) },
+    { resultRevision: 99 }, { expectedRevision: 99 }, { epoch: 99 }, { work: "OTHER-WORK" },
+    { disposition: "ACCEPT" }, { id: before.resultRecord.id }]) {
+    await assert.rejects(v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, before, "RECEIPT", changes), 3), /REVIEW_/);
+    assert.deepEqual(await (await f.reopen()).checked(), before);
+  }
+  const changed = v2Copy(before); changed.head = "c".repeat(40);
+  await f.model.commit(before, changed, "FIXTURE_MOVED_HEAD", 3);
+  const current = await f.model.checked();
+  await assert.rejects(v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, current), 4), /REVIEW_TARGET_BINDING/);
+  assert.deepEqual(await f.model.checked(), current);
+  const g = await v2ReviewFixture(t), original = await g.model.checked(), corrupt = v2Copy(original);
+  corrupt.resultRecord.bytes = corrupt.resultRecord.bytes.replace("Harmless", "Modified");
+  await g.model.commit(original, corrupt, "FIXTURE_RESULT_BYTES_CORRUPTED", 3);
+  const corrupted = await g.model.checked();
+  await assert.rejects(v2SubmitReview(g.model, "RECEIPT", v2ReviewWire(g, corrupted), 4), /REVIEW_RESULT_REQUIRED/);
+  assert.deepEqual(await g.model.checked(), corrupted);
+});
+
+v2Test("review receipt requires the assigned fake reviewer independent of the actual result author", async (t) => {
+  for (const actor of [V2_BUILDER, V2_STEALER]) {
+    const f = await v2ReviewFixture(t), before = await f.model.checked();
+    await assert.rejects(v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, before, "RECEIPT", {}, actor), 3), /REVIEWER_NOT_ASSIGNED/);
+    assert.deepEqual(await f.model.checked(), before);
+  }
+  for (const field of ["life", "worker", "controller", "credentialPrincipal"]) {
+    const f = await v2ReviewFixture(t), before = await f.model.checked();
+    f.verifier.actors.get(V2_REVIEWER.principal)[field] = V2_BUILDER[field];
+    await assert.rejects(v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, before), 3), /REVIEWER_NOT_INDEPENDENT/);
+    assert.deepEqual(await f.model.checked(), before);
+  }
+  const f = await v2ResultFixture(t), takeover = await f.model.claim(V2_STEALER, f.fence.until);
+  const state = await f.model.checked(), bytes = v2ResultDescriptor(state, V2_STEALER, takeover);
+  f.result = await f.model.result(V2_STEALER, takeover, V2_HEAD, f.fence.until + 1, bytes);
+  const before = await f.model.checked();
+  f.verifier.actors.get(V2_REVIEWER.principal).controller = V2_STEALER.controller;
+  await assert.rejects(v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, before), f.fence.until + 2), /REVIEWER_NOT_INDEPENDENT/);
+  assert.deepEqual(await f.model.checked(), before);
+});
+
+v2Test("review serialized boundaries reject getters oversize unknown fields and legacy unbound results", async (t) => {
+  const f = await v2ReviewFixture(t), before = await f.model.checked();
+  let getters = 0;
+  const hostile = { get bytes() { getters++; throw new Error("GETTER_CALLED"); }, valueOf() { getters++; return 3; } };
+  for (const args of [[hostile, "x", 3], ["{}", hostile, 3], ["{}", "x", hostile], ["😀".repeat(V2_BUDGET.bytes), "x", 3]]) {
+    await assert.rejects(f.model.reviewReceipt(...args), /REVIEW_/);
+  }
+  assert.equal(getters, 0);
+  for (const value of ["{invalid", "[]", "null", JSON.stringify({ ...JSON.parse(v2ReviewWire(f, before).bytes), unexpected: true })]) {
+    const wire = f.verifier.observe(value, V2_REVIEWER);
+    await assert.rejects(v2SubmitReview(f.model, "RECEIPT", wire, 3), /REVIEW_|SENDER_MISMATCH/);
+  }
+  const valid = v2ReviewWire(f, before), duplicateKey = '{"id":"ignored",' + valid.bytes.slice(1);
+  await assert.rejects(v2SubmitReview(f.model, "RECEIPT", f.verifier.observe(duplicateKey, V2_REVIEWER), 3), /REVIEW_FIXTURE_ENCODING/);
+  assert.deepEqual(await f.model.checked(), before);
+  const legacy = await v2ResultFixture(t);
+  await legacy.model.result(V2_BUILDER, legacy.fence, V2_HEAD, 2);
+  const old = await legacy.model.checked(), forged = legacy.verifier.observe(valid.bytes, V2_REVIEWER);
+  await assert.rejects(v2SubmitReview(legacy.model, "RECEIPT", forged, 3), /REVIEW_RESULT_REQUIRED/);
+  assert.deepEqual(await legacy.model.checked(), old);
+});
+
+v2Test("review receipt and disposition dedupe across SQLite reopen and reject conflicting bytes", async (t) => {
+  const f = await v2ReviewFixture(t);
+  for (const phase of ["RECEIPT", "DISPOSITION"]) {
+    const before = await f.model.checked(), wire = v2ReviewWire(f, before, phase);
+    const receipt = await v2SubmitReview(f.model, phase, wire, phase === "RECEIPT" ? 3 : 4);
+    const after = await f.model.checked(), reopened = await f.reopen();
+    assert.deepEqual(await v2SubmitReview(reopened, phase, wire, 300), receipt);
+    assert.deepEqual(await reopened.checked(), after);
+    for (const patch of [{ id: "CHANGED-ID" }, { key: "CHANGED-KEY" }]) {
+      const changed = f.verifier.observe(JSON.stringify({ ...JSON.parse(wire.bytes), ...patch }), V2_REVIEWER);
+      await assert.rejects(v2SubmitReview(reopened, phase, changed, 300), /REVIEW_CONFLICT/);
+      assert.deepEqual(await reopened.checked(), after);
+    }
+  }
+  const state = await f.model.checked(), wire = { bytes: state.reviewReceiptRecord.bytes, observation: "unknown" };
+  await assert.rejects(v2SubmitReview(f.model, "RECEIPT", wire, 300), /FAKE_AUTH_DENIED/);
+  f.verifier.actors.get(V2_REVIEWER.principal).read = false;
+  const known = f.verifier.observe(wire.bytes, V2_REVIEWER);
+  await assert.rejects(v2SubmitReview(f.model, "RECEIPT", known, 300), /READ_DENIED/);
+  assert.deepEqual(await f.model.checked(), state);
+});
+
+v2Test("review rejection stays held and wrong receipt binding cannot accept or reopen", async (t) => {
+  const f = await v2ReviewFixture(t), first = await f.model.checked();
+  await assert.rejects(v2SubmitReview(f.model, "DISPOSITION", v2ReviewWire(f, first, "DISPOSITION"), 3), /REVIEW_STAGE/);
+  await v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, first), 3);
+  const before = await f.model.checked();
+  for (const patch of [{ receiptId: "OTHER" }, { receiptDigest: "a".repeat(64) }, { receiptRevision: 99 },
+    { resultDigest: "a".repeat(64) }, { resultHead: "c".repeat(40) }, { resultRevision: 99 },
+    { epoch: 99 }, { expectedRevision: 99 }]) {
+    await assert.rejects(v2SubmitReview(f.model, "DISPOSITION", v2ReviewWire(f, before, "DISPOSITION", patch), 4), /REVIEW_RECEIPT_BINDING|REVIEW_TARGET_BINDING/);
+    assert.deepEqual(await f.model.checked(), before);
+  }
+  const wire = v2ReviewWire(f, before, "DISPOSITION", { disposition: "REJECT", reason: "Bounded fixture defect" });
+  await v2SubmitReview(f.model, "DISPOSITION", wire, 4);
+  const rejected = await f.model.checked(); assert.equal(rejected.work, "OFFLINE_REPAIR_REQUIRED");
+  const changed = f.verifier.observe(JSON.stringify({ ...JSON.parse(wire.bytes), disposition: "ACCEPT" }), V2_REVIEWER);
+  await assert.rejects(v2SubmitReview(f.model, "DISPOSITION", changed, 5), /REVIEW_CONFLICT/);
+  const newMessage = v2ReviewWire(f, rejected, "DISPOSITION", { id: "NEW-REVIEW", key: "NEW-KEY" });
+  await assert.rejects(v2SubmitReview(f.model, "DISPOSITION", newMessage, 5), /REVIEW_TERMINAL/);
+  await assert.rejects(f.model.claim(V2_BUILDER, 5), /LEASE_BUSY/);
+  await assert.rejects(f.model.reviewEvidence("INTEGRATION", wire.bytes, wire.observation, 5), /REVIEW_PHASE/);
+  assert.equal(typeof f.model.integrationEvidence, "undefined"); assert.deepEqual(await f.model.checked(), rejected);
+});
+
+v2Test("review disposition requires the current recovery epoch while old receipt replay stays historical", async (t) => {
+  const f = await v2ReviewFixture(t), snapshot = join(f.dir, "pre-review-snapshot.json");
+  await f.model.snapshot(snapshot);
+  const before = await f.model.checked(), ack = v2ReviewWire(f, before);
+  const receipt = await v2SubmitReview(f.model, "RECEIPT", ack, 3);
+  const acknowledged = await f.model.checked(), stale = v2ReviewWire(f, acknowledged, "DISPOSITION");
+  await f.model.restore(snapshot, 4);
+  const recovered = await f.model.checked();
+  assert.deepEqual(recovered.resultRecord, before.resultRecord);
+  assert.deepEqual(await v2SubmitReview(f.model, "RECEIPT", ack, 5), receipt);
+  assert.deepEqual(await f.model.checked(), recovered);
+  await assert.rejects(v2SubmitReview(f.model, "DISPOSITION", stale, 5), /REVIEW_TARGET_BINDING/);
+  assert.deepEqual(await f.model.checked(), recovered);
+  await v2SubmitReview(f.model, "DISPOSITION", v2ReviewWire(f, recovered, "DISPOSITION"), 5);
+  assert.equal((await f.model.checked()).work, "OFFLINE_REVIEW_ACCEPTED");
+});
+
+v2Test("review phases preserve atomic rollback lost acknowledgements and one concurrent SQLite outcome", async (t) => {
+  for (const phase of ["RECEIPT", "DISPOSITION"]) {
+    const f = await v2ReviewFixture(t);
+    if (phase === "DISPOSITION") await v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, await f.model.checked()), 3);
+    const before = await f.model.checked(), wire = v2ReviewWire(f, before, phase), commit = f.model.commit.bind(f.model);
+    f.model.commit = (b, a, e, n, _f, auth) => commit(b, a, e, n, true, auth);
+    await assert.rejects(v2SubmitReview(f.model, phase, wire, 4), /CHECK constraint/);
+    assert.deepEqual(await (await f.reopen()).checked(), before);
+    f.model.commit = async (...args) => { await commit(...args); throw new Error("FAKE_REVIEW_RESPONSE_LOST"); };
+    await assert.rejects(v2SubmitReview(f.model, phase, wire, 4), /FAKE_REVIEW_RESPONSE_LOST/);
+    const reopened = await f.reopen(), recorded = await reopened.checked();
+    const field = phase === "RECEIPT" ? "reviewReceiptRecord" : "reviewDispositionRecord";
+    assert.deepEqual(await v2SubmitReview(reopened, phase, wire, 5), recorded[field]);
+    assert.deepEqual(await reopened.checked(), recorded);
+
+    const g = await v2ReviewFixture(t);
+    if (phase === "DISPOSITION") await v2SubmitReview(g.model, "RECEIPT", v2ReviewWire(g, await g.model.checked()), 3);
+    const start = await g.model.checked(), same = v2ReviewWire(g, start, phase), other = await g.reopen();
+    const values = await Promise.all([v2SubmitReview(g.model, phase, same, 4), v2SubmitReview(other, phase, same, 4)]);
+    assert.deepEqual(values[0], values[1]); assert.equal((await g.model.checked()).seq, start.seq + 1);
+  }
+});
+
+v2Test("review phases recheck fixture revocation after awaits and cancellation cannot be revived", async (t) => {
+  for (const phase of ["RECEIPT", "DISPOSITION"]) {
+    for (const principal of [V2_REVIEWER.principal, V2_BUILDER.principal]) {
+      const f = await v2ReviewFixture(t);
+      if (phase === "DISPOSITION") await v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, await f.model.checked()), 3);
+      const before = await f.model.checked(), wire = v2ReviewWire(f, before, phase), checked = f.model.checked.bind(f.model);
+      f.model.checked = async () => { const state = await checked(); f.verifier.actors.get(principal).revoked = true; return state; };
+      await assert.rejects(v2SubmitReview(f.model, phase, wire, 4), /EXPIRED_OR_REVOKED_FIXTURE/);
+      assert.deepEqual(await (await f.reopen()).checked(), before);
+    }
+    const f = await v2ReviewFixture(t);
+    if (phase === "DISPOSITION") await v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, await f.model.checked()), 3);
+    await f.model.cancel(4);
+    const cancelled = await f.model.checked();
+    await assert.rejects(v2SubmitReview(f.model, phase, v2ReviewWire(f, cancelled, phase), 5), /REVIEW_STAGE/);
+    assert.deepEqual(await f.model.checked(), cancelled);
+  }
 });
