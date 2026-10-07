@@ -2115,6 +2115,253 @@ export function serializeKaiosAutomatedHandoffV1(record, options) {
   return `${JSON.stringify(handoff, null, 2)}\n`;
 }
 
+export const KAIOS_OFFICIAL_MESSAGE_V1_FIELDS = Object.freeze([
+  "MESSAGE_ID", "WORK_ID", "FROM", "TO", "CREATED_AT", "REVISION", "SUBJECT", "SCOPE", "AUTHORITY",
+  "ACK_STATUS", "EXECUTION_STATUS", "REVIEW_STATUS", "FINAL_STATUS", "BASE_MAIN_SHA", "TARGET_HEAD_SHA",
+  "WORK_ORDER_REF", "WORK_ORDER_BLOB_SHA", "ENDPOINT_ID", "EXPIRES_AT", "SUPERSEDES_MESSAGE_ID"
+]);
+
+export const KAIOS_OFFICIAL_MESSAGE_EVENT_TYPES = Object.freeze([
+  "DELIVERED", "DELIVERY_FAILED", "RETRY_SCHEDULED", "ACKNOWLEDGED", "WORK_STARTED",
+  "RESULT_RECORDED", "REVIEWED", "GM_CLOSED", "STALE", "SUPERSEDED"
+]);
+
+const KAIOS_OFFICIAL_MESSAGE_TERMINAL_STATES = Object.freeze(["CLOSED", "FAILED", "STALE", "SUPERSEDED"]);
+const PRODUCED_KAIOS_OFFICIAL_MESSAGES = new WeakSet();
+const PRODUCED_KAIOS_OFFICIAL_MESSAGE_EVENTS = new WeakSet();
+
+function officialMessageImmutablePayload(record) {
+  return Object.fromEntries([
+    "MESSAGE_ID", "WORK_ID", "FROM", "TO", "CREATED_AT", "REVISION", "SUBJECT", "SCOPE", "AUTHORITY",
+    "BASE_MAIN_SHA", "TARGET_HEAD_SHA", "WORK_ORDER_REF", "WORK_ORDER_BLOB_SHA", "ENDPOINT_ID", "EXPIRES_AT",
+    "SUPERSEDES_MESSAGE_ID"
+  ].map((field) => [field, record[field]]));
+}
+
+export function validateKaiosOfficialMessageV1(record) {
+  requireFields(record, KAIOS_OFFICIAL_MESSAGE_V1_FIELDS, "KaiosOfficialMessageV1");
+  for (const field of ["MESSAGE_ID", "WORK_ID"]) requireId(record[field], field);
+  for (const field of ["FROM", "TO", "SUBJECT", "WORK_ORDER_REF", "ENDPOINT_ID"]) {
+    invariant(typeof record[field] === "string" && record[field].trim(), "OFFICIAL_MESSAGE_TEXT_REQUIRED", `${field} must be a non-empty string`);
+  }
+  invariant(Number.isSafeInteger(record.REVISION) && record.REVISION > 0, "OFFICIAL_MESSAGE_REVISION_INVALID", "REVISION must be a positive integer");
+  requireArray(record.SCOPE, "official_message.SCOPE");
+  invariant(record.SCOPE.length > 0 && record.SCOPE.every((item) => typeof item === "string" && item.trim()), "OFFICIAL_MESSAGE_SCOPE_INVALID", "SCOPE must contain bounded non-empty entries");
+  invariant(record.AUTHORITY && typeof record.AUTHORITY === "object" && !Array.isArray(record.AUTHORITY), "OFFICIAL_MESSAGE_AUTHORITY_REQUIRED", "AUTHORITY must be a bounded object");
+  invariant(["R0", "R1"].includes(record.AUTHORITY.risk_level), "OFFICIAL_MESSAGE_RISK_NOT_ORDINARY", "Official-message V1 accepts ordinary R0/R1 work only");
+  invariant(record.AUTHORITY.ordinary_safe_work === true && record.AUTHORITY.protected_action === false && record.AUTHORITY.gm_policy_allowed === true, "OFFICIAL_MESSAGE_AUTHORITY_NOT_ALLOWED", "Ordinary safe GM policy authority is required and protected actions are forbidden");
+  for (const field of ["BASE_MAIN_SHA", "TARGET_HEAD_SHA", "WORK_ORDER_BLOB_SHA"]) {
+    invariant(/^[0-9a-f]{40}$/.test(record[field] ?? ""), "OFFICIAL_MESSAGE_GIT_SHA_INVALID", `${field} must be a lowercase 40-character Git SHA`);
+  }
+  for (const field of ["CREATED_AT", "EXPIRES_AT"]) invariant(typeof record[field] === "string" && !Number.isNaN(Date.parse(record[field])), "OFFICIAL_MESSAGE_TIME_INVALID", `${field} must be an ISO timestamp`);
+  invariant(Date.parse(record.EXPIRES_AT) > Date.parse(record.CREATED_AT), "OFFICIAL_MESSAGE_EXPIRY_INVALID", "EXPIRES_AT must follow CREATED_AT");
+  invariant(record.SUPERSEDES_MESSAGE_ID === null || (typeof record.SUPERSEDES_MESSAGE_ID === "string" && record.SUPERSEDES_MESSAGE_ID.trim() && record.SUPERSEDES_MESSAGE_ID !== record.MESSAGE_ID), "OFFICIAL_MESSAGE_SUPERSESSION_INVALID", "SUPERSEDES_MESSAGE_ID must be null or a different message");
+  requireEnum(record.ACK_STATUS, ["NOT_DELIVERED", "DELIVERY_VERIFIED", "ACKNOWLEDGED", "FAILED", "STALE", "SUPERSEDED"], "official_message.ACK_STATUS");
+  requireEnum(record.EXECUTION_STATUS, ["NOT_STARTED", "WORK_STARTED", "RESULT_RECORDED", "BLOCKED", "FAILED", "STALE", "SUPERSEDED"], "official_message.EXECUTION_STATUS");
+  requireEnum(record.REVIEW_STATUS, ["NOT_REQUESTED", "PENDING", "PASS", "FAIL", "BLOCKED", "STALE", "SUPERSEDED"], "official_message.REVIEW_STATUS");
+  requireEnum(record.FINAL_STATUS, ["CREATED", "DELIVERED", "ACKNOWLEDGED", "WORKING", "REVIEW", "RETRY_PENDING", "CLOSED", "FAILED", "STALE", "SUPERSEDED"], "official_message.FINAL_STATUS");
+  return record;
+}
+
+export async function createKaiosOfficialMessageV1(input) {
+  const record = {
+    ...Object.fromEntries(KAIOS_OFFICIAL_MESSAGE_V1_FIELDS.map((field) => [field, input?.[field]])),
+    ACK_STATUS: "NOT_DELIVERED", EXECUTION_STATUS: "NOT_STARTED", REVIEW_STATUS: "NOT_REQUESTED", FINAL_STATUS: "CREATED"
+  };
+  validateKaiosOfficialMessageV1(record);
+  const result = Object.freeze({
+    SCHEMA: "KAIOS_OFFICIAL_MESSAGE_V1",
+    ...record,
+    SCOPE: Object.freeze([...record.SCOPE]),
+    AUTHORITY: Object.freeze({ ...record.AUTHORITY }),
+    MESSAGE_DIGEST: await sha256(stableStringify(officialMessageImmutablePayload(record))),
+    EXTERNAL_EFFECT_AUTHORIZED: false,
+    PROTECTED_ACTION_AUTHORIZED: false
+  });
+  PRODUCED_KAIOS_OFFICIAL_MESSAGES.add(result);
+  return result;
+}
+
+function requireOfficialMessageEvidence(event, message) {
+  const evidence = event.EVIDENCE;
+  invariant(evidence && typeof evidence === "object" && !Array.isArray(evidence), "OFFICIAL_MESSAGE_EVIDENCE_REQUIRED", "Lifecycle events require machine-readable evidence");
+  invariant(evidence.status === "VERIFIED" && typeof evidence.ref === "string" && evidence.ref.trim(), "OFFICIAL_MESSAGE_EVIDENCE_UNVERIFIED", "Lifecycle evidence must be VERIFIED and durable");
+  invariant(/^[0-9a-f]{64}$/.test(evidence.sha256 ?? ""), "OFFICIAL_MESSAGE_EVIDENCE_HASH_INVALID", "Lifecycle evidence requires a SHA-256 digest");
+  invariant(evidence.message_digest === message.MESSAGE_DIGEST && evidence.work_id === message.WORK_ID, "OFFICIAL_MESSAGE_EVIDENCE_BINDING_MISMATCH", "Lifecycle evidence must bind message digest and WORK_ID");
+  return evidence;
+}
+
+export function createKaiosOfficialMessageEvent(message, input) {
+  invariant(PRODUCED_KAIOS_OFFICIAL_MESSAGES.has(message), "OFFICIAL_MESSAGE_CAPABILITY_REQUIRED", "Events require a message created by the canonical generator in this process");
+  requireEnum(input?.EVENT_TYPE, KAIOS_OFFICIAL_MESSAGE_EVENT_TYPES, "official_message.EVENT_TYPE");
+  for (const field of ["EVENT_ID", "ACTOR_ID", "ACTOR_ROLE", "ACTOR_CONTROLLER_ID", "ENDPOINT_ID"]) invariant(typeof input?.[field] === "string" && input[field].trim(), "OFFICIAL_MESSAGE_EVENT_FIELD_REQUIRED", `${field} is required`);
+  invariant(Number.isSafeInteger(input?.SEQUENCE) && input.SEQUENCE > 0, "OFFICIAL_MESSAGE_EVENT_SEQUENCE_INVALID", "SEQUENCE must be a positive integer");
+  invariant(typeof input?.OCCURRED_AT === "string" && !Number.isNaN(Date.parse(input.OCCURRED_AT)), "OFFICIAL_MESSAGE_EVENT_TIME_INVALID", "OCCURRED_AT must be an ISO timestamp");
+  invariant(input.MESSAGE_ID === message.MESSAGE_ID && input.WORK_ID === message.WORK_ID && input.MESSAGE_DIGEST === message.MESSAGE_DIGEST, "OFFICIAL_MESSAGE_EVENT_BINDING_MISMATCH", "Event identity must bind the generated message");
+  const evidence = requireOfficialMessageEvidence(input, message);
+  const event = Object.freeze({
+    ...input,
+    EVIDENCE: Object.freeze({ ...evidence }),
+    DETAILS: Object.freeze({ ...(input.DETAILS ?? {}) })
+  });
+  PRODUCED_KAIOS_OFFICIAL_MESSAGE_EVENTS.add(event);
+  return event;
+}
+
+function assertOfficialMessageEventSemantics(message, event) {
+  const evidence = requireOfficialMessageEvidence(event, message);
+  const details = event.DETAILS;
+  if (["DELIVERED", "ACKNOWLEDGED", "WORK_STARTED"].includes(event.EVENT_TYPE)) invariant(event.ENDPOINT_ID === message.ENDPOINT_ID, "OFFICIAL_MESSAGE_ENDPOINT_MISMATCH", "Delivery, ACK and work start must use the addressed endpoint");
+  if (event.EVENT_TYPE === "DELIVERED") {
+    invariant(evidence.transport_receipt === "VERIFIED" && details.recipient_id === message.TO, "OFFICIAL_MESSAGE_DELIVERY_UNVERIFIED", "Delivery requires a verified transport receipt for the addressed worker");
+  } else if (event.EVENT_TYPE === "DELIVERY_FAILED") {
+    invariant(typeof details.reason === "string" && details.reason.trim(), "OFFICIAL_MESSAGE_DELIVERY_FAILURE_REASON_REQUIRED", "Delivery failure requires an exact reason");
+  } else if (event.EVENT_TYPE === "RETRY_SCHEDULED") {
+    invariant(Number.isSafeInteger(details.attempt) && details.attempt >= 1 && details.attempt <= 3, "OFFICIAL_MESSAGE_RETRY_BUDGET_INVALID", "Retries are bounded to three attempts");
+    invariant(typeof details.next_retry_at === "string" && Date.parse(details.next_retry_at) > Date.parse(event.OCCURRED_AT), "OFFICIAL_MESSAGE_RETRY_TIME_INVALID", "Retry must be scheduled in the future");
+  } else if (event.EVENT_TYPE === "ACKNOWLEDGED") {
+    invariant(event.ACTOR_ID === message.TO && evidence.identity_binding_status === "VERIFIED" && details.challenge_status === "CONSUMED" && details.ack_message_digest === message.MESSAGE_DIGEST, "OFFICIAL_MESSAGE_ACK_UNVERIFIED", "ACK requires identity binding and a consumed one-time challenge");
+  } else if (event.EVENT_TYPE === "WORK_STARTED") {
+    invariant(event.ACTOR_ID === message.TO && details.ack_event_id && details.writer_lease_status === "ACTIVE", "OFFICIAL_MESSAGE_WORK_START_UNVERIFIED", "Work start requires the addressed worker's durable ACK and active writer lease");
+  } else if (event.EVENT_TYPE === "RESULT_RECORDED") {
+    invariant(event.ACTOR_ID === message.TO && details.result_status === "COMPLETED" && details.head_sha === message.TARGET_HEAD_SHA && details.tests === "PASS" && details.ci === "PASS", "OFFICIAL_MESSAGE_RESULT_UNVERIFIED", "Result must bind the addressed worker, target head, tests and exact-head CI");
+  } else if (event.EVENT_TYPE === "REVIEWED") {
+    invariant(details.review_status === "PASS" && details.qualification === "VERIFIED" && details.distinct_worker === true && details.distinct_life === true && details.distinct_controller === true, "OFFICIAL_MESSAGE_REVIEW_UNVERIFIED", "Review requires a qualified reviewer distinct by worker, Life and controller");
+    invariant(event.ACTOR_ID !== message.TO, "OFFICIAL_MESSAGE_SELF_REVIEW_FORBIDDEN", "The implementer cannot review its own result");
+  } else if (event.EVENT_TYPE === "GM_CLOSED") {
+    invariant(event.ACTOR_ROLE === "GENERAL_MANAGER" && details.decision === "CLOSE" && typeof details.record_ref === "string" && details.record_ref.trim(), "OFFICIAL_MESSAGE_GM_CLOSEOUT_UNVERIFIED", "GM closeout requires an explicit durable CLOSE record");
+  } else if (event.EVENT_TYPE === "STALE") {
+    invariant(typeof details.reason === "string" && details.reason.trim(), "OFFICIAL_MESSAGE_STALE_REASON_REQUIRED", "STALE requires an exact reason");
+  } else if (event.EVENT_TYPE === "SUPERSEDED") {
+    invariant(typeof details.superseded_by_message_id === "string" && details.superseded_by_message_id.trim() && details.superseded_by_message_id !== message.MESSAGE_ID, "OFFICIAL_MESSAGE_SUPERSESSION_EVIDENCE_REQUIRED", "SUPERSEDED requires a different successor message");
+  }
+}
+
+export function projectKaiosOfficialMessageLifecycle({ message, events = [], observed_at }) {
+  invariant(PRODUCED_KAIOS_OFFICIAL_MESSAGES.has(message), "OFFICIAL_MESSAGE_CAPABILITY_REQUIRED", "Projection requires the canonical generated message");
+  requireArray(events, "official_message.events");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "OFFICIAL_MESSAGE_OBSERVED_TIME_INVALID", "observed_at must be an ISO timestamp");
+  let lifecycle = "CREATED";
+  let ack = "NOT_DELIVERED";
+  let execution = "NOT_STARTED";
+  let review = "NOT_REQUESTED";
+  let deliveryFailures = 0;
+  let lastAt = Date.parse(message.CREATED_AT);
+  const seenIds = new Set();
+  for (let index = 0; index < events.length; index += 1) {
+    const event = events[index];
+    invariant(PRODUCED_KAIOS_OFFICIAL_MESSAGE_EVENTS.has(event), "OFFICIAL_MESSAGE_EVENT_CAPABILITY_REQUIRED", "Projection accepts only canonical lifecycle events");
+    invariant(event.SEQUENCE === index + 1 && !seenIds.has(event.EVENT_ID), "OFFICIAL_MESSAGE_EVENT_ORDER_INVALID", "Events require contiguous sequence and unique IDs");
+    invariant(Date.parse(event.OCCURRED_AT) >= lastAt && Date.parse(event.OCCURRED_AT) <= Date.parse(observed_at), "OFFICIAL_MESSAGE_EVENT_TIME_REGRESSION", "Events must be ordered and not from the future");
+    invariant(!KAIOS_OFFICIAL_MESSAGE_TERMINAL_STATES.includes(lifecycle), "OFFICIAL_MESSAGE_TERMINAL_REOPEN_FORBIDDEN", "Terminal messages cannot be reopened by late events");
+    assertOfficialMessageEventSemantics(message, event);
+    const allowed = {
+      CREATED: ["DELIVERED", "DELIVERY_FAILED", "STALE", "SUPERSEDED"],
+      DELIVERY_FAILED: ["RETRY_SCHEDULED", "STALE", "SUPERSEDED"],
+      RETRY_SCHEDULED: ["DELIVERED", "DELIVERY_FAILED", "STALE", "SUPERSEDED"],
+      DELIVERED: ["ACKNOWLEDGED", "STALE", "SUPERSEDED"],
+      ACKNOWLEDGED: ["WORK_STARTED", "STALE", "SUPERSEDED"],
+      WORKING: ["RESULT_RECORDED", "STALE", "SUPERSEDED"],
+      REVIEW: ["REVIEWED", "STALE", "SUPERSEDED"],
+      REVIEWED: ["GM_CLOSED", "STALE", "SUPERSEDED"]
+    };
+    invariant(allowed[lifecycle]?.includes(event.EVENT_TYPE), "OFFICIAL_MESSAGE_TRANSITION_INVALID", `${lifecycle} cannot accept ${event.EVENT_TYPE}`);
+    if (event.EVENT_TYPE === "DELIVERY_FAILED") {
+      deliveryFailures += 1;
+      lifecycle = deliveryFailures >= 3 ? "FAILED" : "DELIVERY_FAILED";
+      if (lifecycle === "FAILED") { ack = "FAILED"; execution = "FAILED"; review = "BLOCKED"; }
+    } else if (event.EVENT_TYPE === "RETRY_SCHEDULED") lifecycle = "RETRY_SCHEDULED";
+    else if (event.EVENT_TYPE === "DELIVERED") { lifecycle = "DELIVERED"; ack = "DELIVERY_VERIFIED"; }
+    else if (event.EVENT_TYPE === "ACKNOWLEDGED") { lifecycle = "ACKNOWLEDGED"; ack = "ACKNOWLEDGED"; }
+    else if (event.EVENT_TYPE === "WORK_STARTED") { lifecycle = "WORKING"; execution = "WORK_STARTED"; }
+    else if (event.EVENT_TYPE === "RESULT_RECORDED") { lifecycle = "REVIEW"; execution = "RESULT_RECORDED"; review = "PENDING"; }
+    else if (event.EVENT_TYPE === "REVIEWED") { lifecycle = "REVIEWED"; review = "PASS"; }
+    else if (event.EVENT_TYPE === "GM_CLOSED") lifecycle = "CLOSED";
+    else if (event.EVENT_TYPE === "STALE") { lifecycle = "STALE"; ack = "STALE"; execution = "STALE"; review = "STALE"; }
+    else if (event.EVENT_TYPE === "SUPERSEDED") { lifecycle = "SUPERSEDED"; ack = "SUPERSEDED"; execution = "SUPERSEDED"; review = "SUPERSEDED"; }
+    seenIds.add(event.EVENT_ID);
+    lastAt = Date.parse(event.OCCURRED_AT);
+  }
+  const finalStatus = ["DELIVERY_FAILED", "RETRY_SCHEDULED"].includes(lifecycle)
+    ? "RETRY_PENDING"
+    : lifecycle === "REVIEWED" ? "REVIEW" : lifecycle;
+  return Object.freeze({
+    MESSAGE_ID: message.MESSAGE_ID, WORK_ID: message.WORK_ID, MESSAGE_DIGEST: message.MESSAGE_DIGEST,
+    ACK_STATUS: ack, EXECUTION_STATUS: execution, REVIEW_STATUS: review, FINAL_STATUS: finalStatus,
+    DELIVERY_FAILURES: deliveryFailures, EVENT_COUNT: events.length,
+    AUTOMATION_CLOSED_LOOP: lifecycle === "CLOSED" ? "PASS" : "NOT_VERIFIED",
+    PROGRESS_STATUS: lifecycle === "CLOSED" ? "AVAILABLE" : ["FAILED", "STALE", "SUPERSEDED"].includes(lifecycle) ? "BLOCKED" : "IN_PROGRESS"
+  });
+}
+
+export async function persistKaiosOfficialMessageLifecycle({ store, company, message, events = [], observed_at }) {
+  invariant(store && typeof store.history === "function" && typeof store.commitBatch === "function", "COMPANY_EVENT_STORE_REQUIRED", "Official-message persistence requires the existing UniverseStore interface");
+  validateCompany(company);
+  const projection = projectKaiosOfficialMessageLifecycle({ message, events, observed_at });
+  const history = await store.history(company.company_id, "COMPANY");
+  const prior = history.filter((entry) => entry.event_type === "OFFICIAL_MESSAGE_LIFECYCLE_EVENT" && entry.payload?.message_id === message.MESSAGE_ID);
+  const priorIds = new Set(prior.map((entry) => entry.payload?.official_event?.EVENT_ID));
+  const operations = events.filter((event) => !priorIds.has(event.EVENT_ID)).map((event) => ({
+    domain: "COMPANY", stream: "COMPANY", id: company.company_id, entity: company,
+    event_type: "OFFICIAL_MESSAGE_LIFECYCLE_EVENT", actor_id: event.ACTOR_ID, timestamp: event.OCCURRED_AT,
+    payload: {
+      message_id: message.MESSAGE_ID,
+      work_id: message.WORK_ID,
+      message_digest: message.MESSAGE_DIGEST,
+      official_message: message,
+      official_event: event
+    }
+  }));
+  const persisted = operations.length ? await store.commitBatch(operations) : [];
+  return Object.freeze({ projection, persisted: Object.freeze(persisted), idempotent_noop: operations.length === 0 });
+}
+
+export async function restoreKaiosOfficialMessageLifecycle({ store, company, message, observed_at }) {
+  invariant(store && typeof store.history === "function", "COMPANY_EVENT_STORE_REQUIRED", "Official-message restore requires the existing UniverseStore interface");
+  validateCompany(company);
+  invariant(PRODUCED_KAIOS_OFFICIAL_MESSAGES.has(message), "OFFICIAL_MESSAGE_CAPABILITY_REQUIRED", "Restore requires a message recreated by the canonical generator");
+  const history = await store.history(company.company_id, "COMPANY");
+  const records = history.filter((entry) => entry.event_type === "OFFICIAL_MESSAGE_LIFECYCLE_EVENT" && entry.payload?.message_id === message.MESSAGE_ID);
+  invariant(records.length > 0, "OFFICIAL_MESSAGE_DURABLE_HISTORY_MISSING", "No durable lifecycle history exists for this message");
+  const expectedPayload = stableStringify(officialMessageImmutablePayload(message));
+  const restoredEvents = records.map((entry) => {
+    const snapshot = entry.payload?.official_message;
+    invariant(snapshot?.SCHEMA === "KAIOS_OFFICIAL_MESSAGE_V1", "OFFICIAL_MESSAGE_SNAPSHOT_MISSING", "Durable events must include the canonical message snapshot");
+    validateKaiosOfficialMessageV1(snapshot);
+    invariant(snapshot.MESSAGE_DIGEST === message.MESSAGE_DIGEST && entry.payload?.message_digest === message.MESSAGE_DIGEST, "OFFICIAL_MESSAGE_DURABLE_DIGEST_MISMATCH", "Durable message and event digests must match the recreated message");
+    invariant(stableStringify(officialMessageImmutablePayload(snapshot)) === expectedPayload, "OFFICIAL_MESSAGE_DURABLE_SNAPSHOT_MISMATCH", "Durable message immutable fields changed across process boundaries");
+    const storedEvent = entry.payload?.official_event;
+    invariant(storedEvent && typeof storedEvent === "object", "OFFICIAL_MESSAGE_DURABLE_EVENT_MISSING", "Durable lifecycle event payload is required");
+    return createKaiosOfficialMessageEvent(message, {
+      ...storedEvent,
+      EVIDENCE: { ...(storedEvent.EVIDENCE ?? {}) },
+      DETAILS: { ...(storedEvent.DETAILS ?? {}) }
+    });
+  }).sort((left, right) => left.SEQUENCE - right.SEQUENCE);
+  return Object.freeze({
+    projection: projectKaiosOfficialMessageLifecycle({ message, events: restoredEvents, observed_at }),
+    restored_events: Object.freeze(restoredEvents),
+    source: "COMPANY_UNIVERSE_STORE"
+  });
+}
+
+export function projectKaiosOfficialMessageProgressBoard(lifecycles = []) {
+  requireArray(lifecycles, "official_message_lifecycles");
+  const records = lifecycles.map((record) => Object.freeze({
+    work_id: record.WORK_ID,
+    status: record.PROGRESS_STATUS,
+    final_status: record.FINAL_STATUS,
+    automation_closed_loop: record.AUTOMATION_CLOSED_LOOP
+  }));
+  return Object.freeze({
+    source: "KAIOS_OFFICIAL_MESSAGE_V1_VERIFIED_LIFECYCLE_ONLY",
+    available: records.filter((record) => record.status === "AVAILABLE").length,
+    in_progress: records.filter((record) => record.status === "IN_PROGRESS").length,
+    blocked: records.filter((record) => record.status === "BLOCKED").length,
+    records: Object.freeze(records)
+  });
+}
+
 export const AUTONOMOUS_ENGINEERING_SAFE_ACTIONS = Object.freeze([
   "READ", "RESEARCH", "ANALYZE", "DOCUMENT", "TEST", "SIMULATE",
   "CODE", "DEBUG", "REFACTOR", "LOCAL_QA", "BROWSER_QA", "ASSIGN_WORK",

@@ -17,6 +17,14 @@ import {
   KAIOS_AUTOMATED_HANDOFF_V1_FIELDS,
   KAIOS_AUTOMATED_HANDOFF_V1_STATUSES,
   KAIOS_AUTOMATED_HANDOFF_V1_HUMAN_ESCALATIONS,
+  createKaiosOfficialMessageV1,
+  createKaiosOfficialMessageEvent,
+  projectKaiosOfficialMessageLifecycle,
+  persistKaiosOfficialMessageLifecycle,
+  restoreKaiosOfficialMessageLifecycle,
+  projectKaiosOfficialMessageProgressBoard,
+  KAIOS_OFFICIAL_MESSAGE_V1_FIELDS,
+  KAIOS_OFFICIAL_MESSAGE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_SAFE_ACTIONS,
   AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS,
@@ -429,6 +437,163 @@ test("enforces ASSIGN/WORKING/REVIEW/BLOCKED/DONE transitions", () => {
   assert.throws(
     () => createKaiosAutomatedHandoffV1({ ...handoff, CI: [{ name: "Universal", status: "PASS", head: MAIN_SHA }] }),
     (error) => error.code === "AUTOMATED_HANDOFF_CI_HEAD_MISMATCH"
+  );
+});
+
+const officialMessageInput = Object.freeze({
+  MESSAGE_ID: "KAIOS-OFFICIAL-TEST-001",
+  WORK_ID: "KAIOS-WORK-TEST-001",
+  FROM: "DOT",
+  TO: "worker-01",
+  CREATED_AT: "2026-10-08T00:00:00Z",
+  REVISION: 1,
+  SUBJECT: "Bounded official-message lifecycle test",
+  SCOPE: ["core/company/index.mjs"],
+  AUTHORITY: { risk_level: "R1", ordinary_safe_work: true, protected_action: false, gm_policy_allowed: true },
+  BASE_MAIN_SHA: MAIN_SHA,
+  TARGET_HEAD_SHA: HEAD_SHA,
+  WORK_ORDER_REF: "KGEN-Organization/WorkOrders/SAFE_ENGINEERING_001.json",
+  WORK_ORDER_BLOB_SHA: HISTORY_SHA,
+  ENDPOINT_ID: "automation-worker-01",
+  EXPIRES_AT: "2026-10-08T01:00:00Z",
+  SUPERSEDES_MESSAGE_ID: null
+});
+
+function officialEvent(message, sequence, eventType, patch = {}) {
+  const actorByType = {
+    DELIVERED: ["DOT", "DOT"], DELIVERY_FAILED: ["DOT", "DOT"], RETRY_SCHEDULED: ["DOT", "DOT"],
+    ACKNOWLEDGED: [message.TO, "WORKER"], WORK_STARTED: [message.TO, "WORKER"], RESULT_RECORDED: [message.TO, "WORKER"],
+    REVIEWED: ["reviewer-01", "INDEPENDENT_REVIEWER"], GM_CLOSED: ["codex-gm-01", "GENERAL_MANAGER"],
+    STALE: ["DOT", "DOT"], SUPERSEDED: ["DOT", "DOT"]
+  };
+  const detailsByType = {
+    DELIVERED: { recipient_id: message.TO },
+    DELIVERY_FAILED: { reason: "ENDPOINT_TIMEOUT" },
+    RETRY_SCHEDULED: { attempt: 1, next_retry_at: "2026-10-08T00:10:00Z" },
+    ACKNOWLEDGED: { challenge_status: "CONSUMED", ack_message_digest: message.MESSAGE_DIGEST },
+    WORK_STARTED: { ack_event_id: "EVENT-002", writer_lease_status: "ACTIVE" },
+    RESULT_RECORDED: { result_status: "COMPLETED", head_sha: message.TARGET_HEAD_SHA, tests: "PASS", ci: "PASS" },
+    REVIEWED: { review_status: "PASS", qualification: "VERIFIED", distinct_worker: true, distinct_life: true, distinct_controller: true },
+    GM_CLOSED: { decision: "CLOSE", record_ref: "github://issues/1#closeout" },
+    STALE: { reason: "MAIN_CHANGED" },
+    SUPERSEDED: { superseded_by_message_id: "KAIOS-OFFICIAL-TEST-002" }
+  };
+  const [actorId, actorRole] = actorByType[eventType];
+  return createKaiosOfficialMessageEvent(message, {
+    EVENT_ID: `EVENT-${String(sequence).padStart(3, "0")}`,
+    MESSAGE_ID: message.MESSAGE_ID,
+    WORK_ID: message.WORK_ID,
+    MESSAGE_DIGEST: message.MESSAGE_DIGEST,
+    SEQUENCE: sequence,
+    EVENT_TYPE: eventType,
+    OCCURRED_AT: `2026-10-08T00:${String(sequence).padStart(2, "0")}:00Z`,
+    ACTOR_ID: actorId,
+    ACTOR_ROLE: actorRole,
+    ACTOR_CONTROLLER_ID: `${actorId}-controller`,
+    ENDPOINT_ID: ["DELIVERED", "ACKNOWLEDGED", "WORK_STARTED"].includes(eventType) ? message.ENDPOINT_ID : "company-ledger",
+    EVIDENCE: {
+      status: "VERIFIED", ref: `github://evidence/${sequence}`, sha256: "b".repeat(64),
+      message_digest: message.MESSAGE_DIGEST, work_id: message.WORK_ID,
+      ...(eventType === "DELIVERED" ? { transport_receipt: "VERIFIED" } : {}),
+      ...(eventType === "ACKNOWLEDGED" ? { identity_binding_status: "VERIFIED" } : {})
+    },
+    DETAILS: detailsByType[eventType],
+    ...patch
+  });
+}
+
+test("official message closes only after delivery, identity-bound ACK, result, distinct review, and GM record", async () => {
+  const message = await createKaiosOfficialMessageV1(officialMessageInput);
+  assert.equal(message.SCHEMA, "KAIOS_OFFICIAL_MESSAGE_V1");
+  assert.deepEqual(KAIOS_OFFICIAL_MESSAGE_V1_FIELDS.slice(0, 13), [
+    "MESSAGE_ID", "WORK_ID", "FROM", "TO", "CREATED_AT", "REVISION", "SUBJECT", "SCOPE", "AUTHORITY",
+    "ACK_STATUS", "EXECUTION_STATUS", "REVIEW_STATUS", "FINAL_STATUS"
+  ]);
+  assert.deepEqual(KAIOS_OFFICIAL_MESSAGE_EVENT_TYPES, [
+    "DELIVERED", "DELIVERY_FAILED", "RETRY_SCHEDULED", "ACKNOWLEDGED", "WORK_STARTED",
+    "RESULT_RECORDED", "REVIEWED", "GM_CLOSED", "STALE", "SUPERSEDED"
+  ]);
+  const events = ["DELIVERED", "ACKNOWLEDGED", "WORK_STARTED", "RESULT_RECORDED", "REVIEWED", "GM_CLOSED"]
+    .map((type, index) => officialEvent(message, index + 1, type));
+  const projection = projectKaiosOfficialMessageLifecycle({ message, events, observed_at: "2026-10-08T00:07:00Z" });
+  assert.deepEqual({ ack: projection.ACK_STATUS, execution: projection.EXECUTION_STATUS, review: projection.REVIEW_STATUS, final: projection.FINAL_STATUS }, {
+    ack: "ACKNOWLEDGED", execution: "RESULT_RECORDED", review: "PASS", final: "CLOSED"
+  });
+  assert.equal(projection.AUTOMATION_CLOSED_LOOP, "PASS");
+  assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).available, 1);
+
+  const company = {
+    company_id: "KAIOS_AI_COMPANY", founder_life_id: "HUMAN_AUTHORITY", name: "KAIOS AI Company",
+    wallet_address: null, treasury_address: null, employees: [], equity: [], products: [], services: [], assets: [],
+    revenue: "0", expenses: "0", mission: "TEST_ONLY", status: "FORMING", location_id: null, civilization_id: "KGEN"
+  };
+  const store = new MemoryUniverseStore();
+  const persisted = await persistKaiosOfficialMessageLifecycle({ store, company, message, events, observed_at: "2026-10-08T00:07:00Z" });
+  assert.equal(persisted.persisted.length, 6);
+  assert.equal(assertAppendOnlyChain(await store.history(company.company_id, "COMPANY")), true);
+  const replay = await persistKaiosOfficialMessageLifecycle({ store, company, message, events, observed_at: "2026-10-08T00:07:00Z" });
+  assert.equal(replay.idempotent_noop, true);
+  assert.equal((await store.history(company.company_id, "COMPANY")).length, 6);
+
+  const restartedMessage = await createKaiosOfficialMessageV1(officialMessageInput);
+  const restored = await restoreKaiosOfficialMessageLifecycle({
+    store, company, message: restartedMessage, observed_at: "2026-10-08T00:08:00Z"
+  });
+  assert.equal(restored.source, "COMPANY_UNIVERSE_STORE");
+  assert.equal(restored.restored_events.length, 6);
+  assert.equal(restored.projection.FINAL_STATUS, "CLOSED");
+  assert.equal(restored.projection.AUTOMATION_CLOSED_LOOP, "PASS");
+
+  const changedMessage = await createKaiosOfficialMessageV1({ ...officialMessageInput, REVISION: 2 });
+  await assert.rejects(
+    () => restoreKaiosOfficialMessageLifecycle({ store, company, message: changedMessage, observed_at: "2026-10-08T00:08:00Z" }),
+    (error) => error.code === "OFFICIAL_MESSAGE_DURABLE_DIGEST_MISMATCH"
+  );
+});
+
+test("official message fails closed on forged objects, invalid order, self-review, retry exhaustion, and terminal replay", async () => {
+  const message = await createKaiosOfficialMessageV1(officialMessageInput);
+  assert.throws(
+    () => createKaiosOfficialMessageEvent(structuredClone(message), {}),
+    (error) => error.code === "OFFICIAL_MESSAGE_CAPABILITY_REQUIRED"
+  );
+  const ackFirst = officialEvent(message, 1, "ACKNOWLEDGED");
+  assert.throws(
+    () => projectKaiosOfficialMessageLifecycle({ message, events: [ackFirst], observed_at: "2026-10-08T00:02:00Z" }),
+    (error) => error.code === "OFFICIAL_MESSAGE_TRANSITION_INVALID"
+  );
+  const delivered = officialEvent(message, 1, "DELIVERED");
+  const acknowledged = officialEvent(message, 2, "ACKNOWLEDGED");
+  const started = officialEvent(message, 3, "WORK_STARTED");
+  const result = officialEvent(message, 4, "RESULT_RECORDED");
+  const selfReview = officialEvent(message, 5, "REVIEWED", { ACTOR_ID: message.TO });
+  assert.throws(
+    () => projectKaiosOfficialMessageLifecycle({ message, events: [delivered, acknowledged, started, result, selfReview], observed_at: "2026-10-08T00:06:00Z" }),
+    (error) => error.code === "OFFICIAL_MESSAGE_SELF_REVIEW_FORBIDDEN"
+  );
+
+  const failures = [
+    officialEvent(message, 1, "DELIVERY_FAILED"),
+    officialEvent(message, 2, "RETRY_SCHEDULED", { DETAILS: { attempt: 1, next_retry_at: "2026-10-08T00:10:00Z" } }),
+    officialEvent(message, 3, "DELIVERY_FAILED"),
+    officialEvent(message, 4, "RETRY_SCHEDULED", { DETAILS: { attempt: 2, next_retry_at: "2026-10-08T00:11:00Z" } }),
+    officialEvent(message, 5, "DELIVERY_FAILED")
+  ];
+  const failed = projectKaiosOfficialMessageLifecycle({ message, events: failures, observed_at: "2026-10-08T00:06:00Z" });
+  assert.equal(failed.FINAL_STATUS, "FAILED");
+  assert.equal(failed.AUTOMATION_CLOSED_LOOP, "NOT_VERIFIED");
+  assert.equal(projectKaiosOfficialMessageProgressBoard([failed]).blocked, 1);
+
+  const retryPending = projectKaiosOfficialMessageLifecycle({ message, events: failures.slice(0, 2), observed_at: "2026-10-08T00:03:00Z" });
+  assert.equal(retryPending.FINAL_STATUS, "RETRY_PENDING");
+  assert.equal(retryPending.PROGRESS_STATUS, "IN_PROGRESS");
+
+  const closedEvents = ["DELIVERED", "ACKNOWLEDGED", "WORK_STARTED", "RESULT_RECORDED", "REVIEWED", "GM_CLOSED"]
+    .map((type, index) => officialEvent(message, index + 1, type));
+  const late = officialEvent(message, 7, "STALE");
+  assert.throws(
+    () => projectKaiosOfficialMessageLifecycle({ message, events: [...closedEvents, late], observed_at: "2026-10-08T00:08:00Z" }),
+    (error) => error.code === "OFFICIAL_MESSAGE_TERMINAL_REOPEN_FORBIDDEN"
   );
 });
 
