@@ -27,6 +27,30 @@ const cancelPlaneNav=async(id)=>{const b=await page.locator('#joy').boundingBox(
 let m=await plane();assert.equal(m.mode,'XZ');assert.equal(m.hAxis,'X');assert.equal(m.vAxis,'Z');assert.equal(m.depthAxis,'Y');assert.equal(m.normalAxis,'KY');
 await page.screenshot({path:`${OUT}/11520-plane-map-xz.png`,fullPage:true});
 
+// Native1C obstacle acceptance uses the existing full-map organ for precise
+// waypoint clicks. Pure coordinate projection reads the current view; it never
+// writes player state, fixes a monster, or calls the navigation action API.
+async function clickNativeXzTarget(target){
+  if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+  await page.locator('#dockToggle').click();await page.locator('[data-organ="worldmap"]').click();await page.locator('#fullMap').waitFor({state:'visible'});
+  const point=await page.evaluate(async target=>{const {worldToNorthUpMap}=await import('./runtime/spatial-coordinate-runtime.mjs'),c=document.querySelector('#fullMap'),r=c.getBoundingClientRect(),p=__K11520_WORLD_COORDS__.physical,q=worldToNorthUpMap(target,{centerX:p.x,centerZ:p.z,range:34/1.3,width:c.width,height:c.height});return{x:q.px*r.width/c.width,y:q.py*r.height/c.height}},target);
+  await page.locator('#fullMap').click({position:point});await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.source==='PLANE_MAP'&&globalThis.__K11520_XYZ_MAP_NAVIGATION__?.mode==='XZ');
+  const selected=await page.evaluate(()=>({...__K11520_XYZ_MAP_NAVIGATION__.target}));assert.ok(Math.hypot(selected.x-target.x,selected.z-target.z)<.12,'native map projection must select the intended coordinate');
+  await page.locator('#sheetClose').click();await page.locator('#sheet').waitFor({state:'hidden'});await page.locator('#xyzWaypointAction').click();return selected;
+}
+await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>__K11520_SIGNED_C_IMMERSIVE__?.signedC===1);
+await clickNativeXzTarget({x:4,y:0,z:5});await page.waitForFunction(()=>__K11520_XYZ_MAP_NAVIGATION__?.etaStatus==='ARRIVED',null,{timeout:10000});
+const obstacleOrigin=await coords();
+await page.evaluate(()=>{globalThis.__qaObstacleSamples=[];globalThis.__qaObstacleSampling=true;const sample=()=>{if(!globalThis.__qaObstacleSampling)return;const m=__K11520_PLAYER_MOTION__,p=__K11520_WORLD_SELECTION_PROJECTION__.playerHomeSnapshot();__qaObstacleSamples.push({now:m.clock.now,dt:m.clock.elapsedSeconds,c:m.sharedC,throttle:m.inputThrottle,distanceK:m.distanceMovedK,detour:m.detour,status:m.status,position:{...m.physical},rendered:{...p.renderedPlayer},visible:p.playerVisible});requestAnimationFrame(sample)};requestAnimationFrame(sample)});
+const obstacleTarget=await clickNativeXzTarget({x:12,y:0,z:5});await page.waitForFunction(()=>__K11520_XYZ_MAP_NAVIGATION__?.etaStatus==='ARRIVED',null,{timeout:10000});
+const obstacleEvidence=await page.evaluate(()=>{globalThis.__qaObstacleSampling=false;return{samples:__qaObstacleSamples,end:{...__K11520_WORLD_COORDS__.physical},build:__K11520_BUILD_INFO__}});
+const obstacleSamples=[...new Map(obstacleEvidence.samples.map(row=>[row.now,row])).values()];assert.ok(obstacleSamples.some(row=>row.detour),'native1C path must actually exercise the ATM obstacle detour');
+for(const row of obstacleSamples){assert.equal(row.c,1);assert.equal(row.visible,true);assert.ok(!['BLOCKED','SPEED_UNAVAILABLE'].includes(row.status));assert.ok(Math.hypot(row.position.x-8,row.position.z-5)>=1.85-1e-8,'actor must not tunnel through ATM');for(const axis of ['x','y','z'])assert.ok(Math.abs(row.position[axis]-row.rendered[axis])<1e-8,'actual model must track committed '+axis);const budget=.001*row.dt*row.throttle;assert.ok(row.distanceK<=budget+1e-9,'sidestep cannot exceed the1C elapsed budget');if(['MOVING','DETOUR'].includes(row.status))assert.ok(Math.abs(row.distanceK-budget)<1e-9,'unclipped movement must match1C elapsed travel')}
+assert.ok(Math.hypot(obstacleEvidence.end.x-obstacleTarget.x,obstacleEvidence.end.z-obstacleTarget.z)<1e-6,'native obstacle route must arrive');
+await fs.writeFile(`${OUT}/11520-native-obstacle-1c.json`,JSON.stringify({origin:obstacleOrigin,target:obstacleTarget,...obstacleEvidence,samples:obstacleSamples,toleranceK:1e-9,renderTolerance:1e-8},null,2));await page.screenshot({path:`${OUT}/11520-native-obstacle-1c.png`,fullPage:true});
+await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+
+
 await tapCenter(701);await page.waitForFunction(()=>globalThis.__K11520_PLANE_MAP__?.mode==='XY',null,{timeout:2000});m=await plane();assert.equal(m.hAxis,'X');assert.equal(m.vAxis,'Y');assert.equal(m.depthAxis,'Z');assert.equal(m.normalAxis,'KZ');
 const xy0=await coords();await mapTap(.72,.34,711);await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.target&&globalThis.__K11520_XYZ_MAP_NAVIGATION__.mode==='XY',null,{timeout:2000});
 const xyt=await page.evaluate(()=>structuredClone(globalThis.__K11520_XYZ_MAP_NAVIGATION__.target));assert.ok(xyt.x>xy0.x);assert.ok(xyt.y>=xy0.y);assert.equal(Number(xyt.z.toFixed(3)),Number(xy0.z.toFixed(3)));

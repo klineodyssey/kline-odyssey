@@ -1,3 +1,11 @@
+### f3 exact-head browser evidence and test-only acceptance successor
+
+- Durable motion/sidestep checkpoint: f3b0dcbdacdf59a570f50da4c76e5541ac189263. No production source changes in this successor.
+- Game run37567405103/job112618165867 passed native XYZ, signed-C, general smoke, character, mobile HUD, action-rail, actual0/+1/-1C elapsed/render evidence and plane navigation; it then failed the home-delivery test at living-world:175. The test reloads player C0, sets the separate Ant delivery C, then expects the player's home route to move. The successor explicitly verifies PAUSED player navigation before native player .1C input; delivery/accounting assertions and deadlines remain.
+- Responsive run37567404927/job112618165652 separately failed cold390 slash-negative OUT_OF_RANGE and landscape zero native Axe strikes. These are retained failures, distinct from the earlier XZ/ATM fixture failure. R2 artifact11458213471 directly measured roughly170ms of held-input travel after readiness at1C; actor traveled2.4–2.7m while target moved only about.05m. The test controller now reads actual speed, joystick geometry and round-trip time, tapers near the original gate, keeps combat C at±1, and executes one native strike within the original5000ms. No range, production speed, retries or timeouts are relaxed.
+- Added separate native1C full-map obstacle traversal with actual rendered-position and per-frame elapsed-budget checks; no actor/target teleport and no navigation API action call in that acceptance path. Runtime browser rerun and screenshot inspection remain required.
+- f3 contextual-HUD, world-first, simulation-regression, Universal Exchange and Portal jobs passed; aggregate Game/Responsive remained FAIL. No Mainnet/Testnet product development, financial runtime, reward/storage or deployment change is included.
+
 ## 2026-10-07 — V2.9.6 / 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
 
 - New missing-delta reconstruction lineage from f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial Navigator blob remains PARTIAL_RECOVERY, not restored original.

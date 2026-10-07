@@ -758,3 +758,21 @@ ctx.execution.readOnly=true;delete ctx.S.quotes.ETHUSDT;vm.runInContext('renderA
 ctx.__K11520_3D_CONTROL__.mode='YZ';advance(1237);assert.deepEqual(current.filter(card=>card.classList.contains('k11520NormalActive')).map(card=>card.dataset.axis),['KX'],'existing normal owner still follows the current control plane');assert.equal(doc.querySelectorAll('[data-market-card]').length,3);assert(originalBadges.every((badge,i)=>badge===current[i].querySelector('.k11520NormalBadge')));
 
 });
+
+test('native pursuit keeps canonical1C and bounds near-gate travel by current speed and latency',async()=>{
+ const vm=await import('node:vm'),{kToGameUnits}=await import('../runtime/spatial-coordinate-runtime.mjs');
+ const source=read('./11520-browser-responsive.mjs'),start=source.indexOf('function planPursuitTravel('),fn=source.slice(start,source.indexOf('async function verifyKSpaceGameplay(',start));
+ const context=vm.createContext({assert,kToGameUnits});vm.runInContext(fn+'globalThis.plan=planPursuitTravel;',context);
+ for(const sharedC of [-1,1]){
+  const current={relative:{x:0,y:0,z:.52},speedKPerSecond:.001,sharedC,joyRadius:49.64};
+  const before=JSON.stringify(current),plan=context.plan(current,{limit:.8,magnitude:35,roundTripMs:170});
+  assert.equal(JSON.stringify(current),before,'test controller must not mutate C or actor state');
+  assert.ok(Math.abs(plan.travel)<3,'near-gate displacement must not retain the old12px floor');
+  assert.ok(Math.abs(plan.travel)/current.joyRadius*plan.speed*.17<.15,'measured170ms release latency must remain within the approach margin');
+  const far=context.plan({...current,relative:{x:0,y:0,z:7}},{limit:.8,magnitude:35,roundTripMs:170});assert.ok(far.travel>8&&far.travel<=35,'far native approach latches the existing drag without exceeding the prior cap');
+ }
+ assert.match(source,/await page.waitForTimeout\(430\)/,'small fresh contacts cannot accidentally become a short center tap');
+ assert.match(source,/await pursue\(variant,\.8,5000,35,strike\)/,'every actual strike stays within the original native approach budget');
+ assert.match(source,/beforeStrike.distance<\.8/,'one-shot attack retains a fresh distance precondition');
+ assert.ok(!source.includes("else{await pursue(variant,.8,5000,35);await strike(await state())}"),'do not release then strike using stale readiness');
+});
