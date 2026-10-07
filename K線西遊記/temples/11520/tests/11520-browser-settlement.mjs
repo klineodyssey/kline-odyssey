@@ -1158,6 +1158,17 @@ async function m1ReadOnlyBrowserQA(){
   }finally{await browser.close();provider.destroy()}
 }
 
+// Poll in the Node harness: waitForFunction evaluates predicate strings inside
+// the page, which strict CSP correctly forbids. No CSP bypass or page eval loop.
+async function waitForPreparationFromHost(page,predicate,label,timeoutMs=45000){
+  const deadline=Date.now()+timeoutMs;
+  do{
+    if(await page.evaluate(predicate))return;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }while(Date.now()<deadline);
+  throw new Error('PREPARATION_BROWSER_STATE_TIMEOUT '+label);
+}
+
 // Test-only integration of the existing page singleton and its private browser
 // codec loader. Every wallet response is local synthetic data; no signing seam.
 async function bsc56TransferPreparationBrowserQA(browser,base,out){
@@ -1240,8 +1251,18 @@ async function bsc56TransferPreparationBrowserQA(browser,base,out){
       }};
     },{code,token,sender,selectors});
     try{
-      await bootM1ReadOnlyPage(page,`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`);
-      await page.waitForFunction(()=>document.documentElement.dataset.wallet11520==='CONNECTED');
+      const entry=`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`;
+      if(scenario==='csp-denied'){
+        await page.goto(entry,{waitUntil:'domcontentloaded'});
+        await waitForPreparationFromHost(page,()=>!!globalThis.__K11520_EXECUTION__,'execution-owner');
+        if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click({timeout:1500});
+        await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
+        await waitForPreparationFromHost(page,()=>/READY|FALLBACK/.test(document.querySelector('#charState')?.textContent||''),'character-ready');
+        await waitForPreparationFromHost(page,()=>document.documentElement.dataset.wallet11520==='CONNECTED','wallet-connected');
+      }else{
+        await bootM1ReadOnlyPage(page,entry);
+        await page.waitForFunction(()=>document.documentElement.dataset.wallet11520==='CONNECTED');
+      }
       const before=await page.evaluate(async()=>{const m=await import('./runtime/wallet-game-bridge.mjs');const session=m.getWalletSession11520();return {wallet:session.snapshot(),mode:__K11520_EXECUTION__.snapshot().mode,singleton:session===m.getWalletSession11520()}});
       assert.equal(before.singleton,true);
       const result=await page.evaluate(async input=>{
