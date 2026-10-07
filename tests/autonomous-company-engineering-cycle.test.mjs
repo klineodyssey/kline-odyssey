@@ -471,6 +471,8 @@ const v2Actor = (name) => Object.freeze({ principal: `PUBLIC-FAKE-${name}`, inst
   life: `FICTITIOUS-${name}-LIFE`, worker: `FICTITIOUS-${name}-WORKER`,
   controller: `FICTITIOUS-${name}-CONTROL`, credentialPrincipal: `PUBLIC-FAKE-${name}-NO-KEY` });
 const V2_BUILDER = v2Actor("BUILDER"), V2_REVIEWER = v2Actor("REVIEWER"), V2_STEALER = v2Actor("REPLACEMENT");
+// Enrolled only by the integration tests below, never in the default catalog.
+const V2_CLOSER = v2Actor("CLOSER");
 
 // This deliberately fake verifier recognizes test-catalog observations, not signatures.
 // Rehashing caller bytes, setting verified:true or naming a real Worker cannot enroll a principal.
@@ -869,6 +871,117 @@ class V2OfflineStore {
       return retainedRecord(winner); // one bounded read; never retry a new effect
     }
     return v2Copy(after[field]);
+  }
+  async recordIntegrationEvidence(bytes, observation, now) {
+    // Offline evidence closure only. This API cannot merge, deploy, dispatch,
+    // enroll an actor or grant tools. Old receipt marker fields stay immutable.
+    v2Require(typeof bytes === "string" && Buffer.byteLength(bytes) <= V2_BUDGET.bytes &&
+      typeof observation === "string" && observation.length > 0 && observation.length <= 128, "INTEGRATION_BYTES_BUDGET");
+    v2Require(Number.isSafeInteger(now) && now >= 0 && now <= V2_BUDGET.reconciliationAge, "INTEGRATION_TIME_BUDGET");
+    const fields = ["schema", "type", "id", "key", "sender", "instance", "work", "resultId", "resultDigest",
+      "resultHead", "resultRevision", "receiptId", "receiptDigest", "receiptRevision", "reviewId", "reviewDigest",
+      "reviewRevision", "reviewEpoch", "expectedRevision", "epoch", "evidence", "evidenceDigest"];
+    const verify = (historical) => {
+      let message;
+      try { message = JSON.parse(bytes); } catch { throw new Error("INTEGRATION_DESCRIPTOR_INVALID"); }
+      v2Require(message && Object.getPrototypeOf(message) === Object.prototype &&
+        Object.keys(message).length === fields.length && fields.every((key) => Object.hasOwn(message, key)), "INTEGRATION_FIELDS");
+      v2Require(message.schema === "KAIOS_OFFLINE_INTEGRATION_EVIDENCE_V1" && message.type === "INTEGRATION_EVIDENCE" &&
+        ["id", "key", "sender", "instance", "work", "resultId", "receiptId", "reviewId"].every((key) =>
+          typeof message[key] === "string" && message[key].length > 0 && message[key].length <= 128) &&
+        typeof message.resultHead === "string" && /^[a-f0-9]{40}$/.test(message.resultHead) &&
+        ["resultDigest", "receiptDigest", "reviewDigest", "evidenceDigest"].every((key) =>
+          typeof message[key] === "string" && /^[a-f0-9]{64}$/.test(message[key])) &&
+        ["resultRevision", "receiptRevision", "reviewRevision", "reviewEpoch", "expectedRevision", "epoch"].every((key) =>
+          Number.isSafeInteger(message[key]) && message[key] > 0) &&
+        typeof message.evidence === "string" && message.evidence.length > 0, "INTEGRATION_DESCRIPTOR_INVALID");
+      v2Require(JSON.stringify(message) === bytes, "INTEGRATION_FIXTURE_ENCODING");
+      v2Require(v2Hash(message.evidence) === message.evidenceDigest, "INTEGRATION_EVIDENCE_DIGEST");
+      return this.verifier.verify({ bytes, observation }, now, historical);
+    };
+    const historical = verify(true);
+    const retainedRecord = (record) => {
+      v2Require(record.id === historical.message.id || record.key === historical.message.key, "INTEGRATION_TERMINAL");
+      v2Require(record.bytes === bytes && record.digest === historical.digest, "INTEGRATION_CONFLICT");
+      return v2Copy(record); // historical evidence, no new action or authority
+    };
+    const before = await this.checked();
+    verify(true);
+    if (before.integrationRecord) return retainedRecord(before.integrationRecord);
+    const authorize = () => {
+      const { actor, message } = verify(false);
+      v2Require(actor.principal === V2_CLOSER.principal && actor.closeEvidence === true, "INTEGRATION_CLOSER_NOT_ASSIGNED");
+      v2Require(before.work === "OFFLINE_REVIEW_ACCEPTED" && !before.lease, "INTEGRATION_STAGE");
+      const result = before.resultRecord, receipt = before.reviewReceiptRecord, review = before.reviewDispositionRecord;
+      const readRecord = (record) => {
+        v2Require(record && record.scope === "OFFLINE_FAKE_FIXTURE_EVIDENCE" &&
+          typeof record.bytes === "string" && Buffer.byteLength(record.bytes) <= V2_BUDGET.bytes &&
+          record.digest === v2Hash(record.bytes), "INTEGRATION_RECORD_INTEGRITY");
+        let value;
+        try { value = JSON.parse(record.bytes); } catch { throw new Error("INTEGRATION_RECORD_INTEGRITY"); }
+        v2Require(value && Object.getPrototypeOf(value) === Object.prototype &&
+          JSON.stringify(value) === record.bytes && value.id === record.id && value.key === record.key &&
+          value.work === record.work, "INTEGRATION_RECORD_INTEGRITY");
+        return value;
+      };
+      const resultBytes = readRecord(result), receiptBytes = readRecord(receipt), reviewBytes = readRecord(review);
+      const task = JSON.parse(before.message.bytes);
+      v2Require(resultBytes.schema === "KAIOS_OFFLINE_RESULT_DESCRIPTOR_V1" && resultBytes.worker === result.worker &&
+        resultBytes.instance === result.instance && resultBytes.head === result.head && resultBytes.bodyDigest === v2Hash(resultBytes.body) &&
+        resultBytes.expectedRevision === result.expectedRevision && result.acceptedRevision === result.expectedRevision + 1 &&
+        resultBytes.taskMessageId === task.id && resultBytes.taskDigest === v2Hash(before.message.bytes) &&
+        task.work === result.work && task.head === result.head, "INTEGRATION_RESULT_BINDING");
+      for (const [record, value, type, schema] of [[receipt, receiptBytes, "REVIEW_RECEIPT", "KAIOS_OFFLINE_REVIEW_RECEIPT_V1"],
+        [review, reviewBytes, "REVIEW_DISPOSITION", "KAIOS_OFFLINE_REVIEW_DISPOSITION_V1"]]) {
+        v2Require(value.schema === schema && value.type === type && record.type === type &&
+          value.sender === record.reviewer && value.instance === record.instance && record.reviewer === task.recipient &&
+          record.reviewer === V2_REVIEWER.principal && value.epoch === record.epoch &&
+          value.expectedRevision + 1 === record.recordedRevision &&
+          value.resultId === result.id && record.resultId === result.id &&
+          value.resultDigest === result.digest && record.resultDigest === result.digest &&
+          value.resultHead === result.head && record.resultHead === result.head &&
+          value.resultRevision === result.acceptedRevision && record.resultRevision === result.acceptedRevision &&
+          record.work === result.work, "INTEGRATION_REVIEW_BINDING");
+      }
+      v2Require(receipt.disposition === "NOT_REVIEWED" && review.disposition === "ACCEPT" && reviewBytes.disposition === "ACCEPT" &&
+        reviewBytes.receiptId === receipt.id && reviewBytes.receiptDigest === receipt.digest && review.receiptDigest === receipt.digest &&
+        reviewBytes.receiptRevision === receipt.recordedRevision && reviewBytes.reason === review.reason &&
+        review.reviewer === receipt.reviewer && review.instance === receipt.instance, "INTEGRATION_ACCEPTANCE_REQUIRED");
+      const author = { principal: result.worker, instance: result.instance };
+      const reviewer = { principal: review.reviewer, instance: review.instance };
+      v2Require(v2Independent(this.verifier, author, reviewer, now) && v2Independent(this.verifier, author, actor, now) &&
+        v2Independent(this.verifier, reviewer, actor, now), "INTEGRATION_CLOSER_NOT_INDEPENDENT");
+      // Recovery cannot silently renew an accepted review into a newer epoch.
+      // A retained prior-epoch acceptance remains history pending reconciliation.
+      v2Require(now >= before.clock && now < V2_BUDGET.age && before.head === result.head &&
+        message.work === result.work && message.resultId === result.id && message.resultDigest === result.digest &&
+        message.resultHead === result.head && message.resultRevision === result.acceptedRevision &&
+        message.receiptId === receipt.id && message.receiptDigest === receipt.digest && message.receiptRevision === receipt.recordedRevision &&
+        message.reviewId === review.id && message.reviewDigest === review.digest && message.reviewRevision === review.recordedRevision &&
+        message.reviewEpoch === review.epoch && review.epoch === before.epoch && message.epoch === before.epoch &&
+        message.expectedRevision === before.revision && review.recordedRevision === before.revision, "INTEGRATION_TARGET_BINDING");
+      v2Require(![task.id, result.id, receipt.id, review.id].includes(message.id), "INTEGRATION_MESSAGE_ID_REUSE");
+      return { actor, message };
+    };
+    const { actor, message } = authorize(), after = v2Copy(before);
+    after.work = "OFFLINE_INTEGRATION_EVIDENCE_RECORDED"; after.revision++;
+    after.integrationRecord = { scope: "OFFLINE_FAKE_FIXTURE_EVIDENCE", type: message.type, id: message.id, key: message.key,
+      bytes, digest: historical.digest, closer: actor.principal, instance: actor.instance, work: message.work,
+      resultId: message.resultId, resultDigest: message.resultDigest, resultHead: message.resultHead, resultRevision: message.resultRevision,
+      receiptDigest: message.receiptDigest, reviewId: message.reviewId, reviewDigest: message.reviewDigest, reviewRevision: message.reviewRevision,
+      reviewEpoch: message.reviewEpoch, epoch: before.epoch, recordedRevision: after.revision, recordedAt: now,
+      evidenceDigest: message.evidenceDigest, commitRef: "OFFLINE-INTEGRATION-EVIDENCE-COMMIT-" + (before.seq + 1),
+      authenticatedWorkerAck: false, integrationAuthorized: false, gitMergePerformed: false, deploymentPerformed: false };
+    try {
+      await this.commit(before, after, "OFFLINE_INTEGRATION_EVIDENCE_RECORDED", now, false, authorize);
+    } catch (error) {
+      if (!/CHECK constraint/.test(error.message)) throw error;
+      const winner = (await this.checked()).integrationRecord;
+      verify(true);
+      if (!winner) throw error;
+      return retainedRecord(winner); // one bounded read only; no effect retry
+    }
+    return v2Copy(after.integrationRecord);
   }
   async cancel(now) {
     const before = await this.checked(), after = v2Copy(before);
@@ -1686,4 +1799,246 @@ v2Test("review phases recheck fixture revocation after awaits and cancellation c
     await assert.rejects(v2SubmitReview(f.model, phase, v2ReviewWire(f, cancelled, phase), 5), /REVIEW_STAGE/);
     assert.deepEqual(await f.model.checked(), cancelled);
   }
+});
+
+// The closer exists only in these fake test catalogs. No real worker enrollment,
+// integration permission, Git operation, network or deployment is modeled.
+async function v2IntegrationFixture(t, stage = "ACCEPTED") {
+  const f = await v2ReviewFixture(t);
+  f.verifier.actors.set(V2_CLOSER.principal, { ...V2_CLOSER, expires: 2000, revoked: false, read: true, closeEvidence: true });
+  if (stage !== "RESULT") {
+    await v2SubmitReview(f.model, "RECEIPT", v2ReviewWire(f, await f.model.checked()), 3);
+    if (stage !== "RECEIPT") await v2SubmitReview(f.model, "DISPOSITION",
+      v2ReviewWire(f, await f.model.checked(), "DISPOSITION", { disposition: stage === "REJECTED" ? "REJECT" : "ACCEPT" }), 4);
+  }
+  return f;
+}
+function v2IntegrationWire(f, state, changes = {}, actor = V2_CLOSER) {
+  const result = state.resultRecord, receipt = state.reviewReceiptRecord, review = state.reviewDispositionRecord;
+  const evidence = "Harmless offline integration evidence; no Git operation";
+  return f.verifier.observe(JSON.stringify({ schema: "KAIOS_OFFLINE_INTEGRATION_EVIDENCE_V1", type: "INTEGRATION_EVIDENCE",
+    id: "FAKE-INTEGRATION-1", key: "FAKE-INTEGRATION-KEY-1", sender: actor.principal, instance: actor.instance, work: result.work,
+    resultId: result.id, resultDigest: result.digest, resultHead: result.head, resultRevision: result.acceptedRevision,
+    receiptId: receipt?.id || "MISSING-RECEIPT", receiptDigest: receipt?.digest || "a".repeat(64), receiptRevision: receipt?.recordedRevision || 1,
+    reviewId: review?.id || "MISSING-REVIEW", reviewDigest: review?.digest || "a".repeat(64), reviewRevision: review?.recordedRevision || 1,
+    reviewEpoch: review?.epoch || 1, expectedRevision: state.revision, epoch: state.epoch,
+    evidence, evidenceDigest: v2Hash(evidence), ...changes }), actor);
+}
+const v2SubmitIntegration = (model, wire, now = 5) => model.recordIntegrationEvidence(wire.bytes, wire.observation, now);
+
+v2Test("integration closure records immutable offline evidence without granting operational authority", async (t) => {
+  const f = await v2IntegrationFixture(t), before = await f.model.checked(), wire = v2IntegrationWire(f, before);
+  const receipt = await v2SubmitIntegration(f.model, wire), after = await f.model.checked();
+  assert.equal(after.work, "OFFLINE_INTEGRATION_EVIDENCE_RECORDED");
+  assert.equal(after.revision, before.revision + 1); assert.equal(after.seq, before.seq + 1);
+  assert.equal(receipt.scope, "OFFLINE_FAKE_FIXTURE_EVIDENCE"); assert.equal(receipt.bytes, wire.bytes);
+  assert.equal(receipt.digest, v2Hash(wire.bytes)); assert.equal(receipt.closer, V2_CLOSER.principal);
+  for (const key of ["authenticatedWorkerAck", "integrationAuthorized", "gitMergePerformed", "deploymentPerformed"]) assert.equal(receipt[key], false);
+  for (const key of ["resultRecord", "reviewReceiptRecord", "reviewDispositionRecord", "grantedTools", "effects", "head", "delivery"]) {
+    assert.deepEqual(after[key], before[key]);
+  }
+  assert.equal(after.lease, null); assert.equal(typeof f.model.integrate, "undefined");
+  assert.equal(new V2FakeVerifier().actors.has(V2_CLOSER.principal), false, "closer is not enrolled by ordinary model construction");
+  receipt.bytes = "caller mutation"; assert.equal((await f.model.checked()).integrationRecord.bytes, wire.bytes);
+});
+
+v2Test("integration closure rejects receipt-only rejected cancelled and legacy result states", async (t) => {
+  for (const stage of ["RESULT", "RECEIPT", "REJECTED", "CANCELLED", "LEGACY"]) {
+    const f = await v2IntegrationFixture(t, ["CANCELLED", "LEGACY"].includes(stage) ? "ACCEPTED" : stage);
+    const original = await f.model.checked(), wire = v2IntegrationWire(f, original);
+    if (stage === "CANCELLED") await f.model.cancel(5);
+    if (stage === "LEGACY") {
+      const changed = v2Copy(original); delete changed.resultRecord;
+      await f.model.commit(original, changed, "FIXTURE_UNBOUND_LEGACY_RESULT", 5);
+    }
+    const before = await f.model.checked();
+    await assert.rejects(v2SubmitIntegration(f.model, wire, 6), /INTEGRATION_STAGE|INTEGRATION_RECORD_INTEGRITY/);
+    assert.deepEqual(await (await f.reopen()).checked(), before);
+  }
+});
+
+v2Test("integration closure binds exact result review receipt head revision and current epoch", async (t) => {
+  const f = await v2IntegrationFixture(t), before = await f.model.checked();
+  for (const patch of [{ resultId: "OTHER" }, { resultDigest: "a".repeat(64) }, { resultHead: "c".repeat(40) }, { resultRevision: 99 },
+    { receiptId: "OTHER" }, { receiptDigest: "a".repeat(64) }, { receiptRevision: 99 }, { reviewId: "OTHER" },
+    { reviewDigest: "a".repeat(64) }, { reviewRevision: 99 }, { reviewEpoch: 99 }, { expectedRevision: 99 }, { epoch: 99 },
+    { work: "OTHER-WORK" }, { id: before.resultRecord.id }, { id: before.reviewReceiptRecord.id }, { id: before.reviewDispositionRecord.id },
+    { id: JSON.parse(before.message.bytes).id }]) {
+    await assert.rejects(v2SubmitIntegration(f.model, v2IntegrationWire(f, before, patch)), /INTEGRATION_TARGET_BINDING|INTEGRATION_MESSAGE_ID_REUSE/);
+    assert.deepEqual(await f.model.checked(), before);
+  }
+  for (const patch of [{ head: "c".repeat(40) }, { revision: before.revision + 1 }, { lease: { principal: V2_CLOSER.principal } }]) {
+    const g = await v2IntegrationFixture(t), base = await g.model.checked(), changed = { ...v2Copy(base), ...patch };
+    await g.model.commit(base, changed, "FIXTURE_CHANGED_TARGET", 5);
+    const current = await g.model.checked();
+    await assert.rejects(v2SubmitIntegration(g.model, v2IntegrationWire(g, current), 6), /INTEGRATION_STAGE|INTEGRATION_TARGET_BINDING/);
+    assert.deepEqual(await g.model.checked(), current);
+  }
+});
+
+v2Test("integration closure validates retained record bytes and acceptance metadata", async (t) => {
+  const patches = [
+    ["resultRecord", "bytes", "corrupt"], ["resultRecord", "worker", V2_STEALER.principal],
+    ["reviewReceiptRecord", "bytes", "corrupt"], ["reviewReceiptRecord", "reviewer", V2_BUILDER.principal],
+    ["reviewDispositionRecord", "bytes", "corrupt"], ["reviewDispositionRecord", "disposition", "REJECT"],
+    ["reviewDispositionRecord", "receiptDigest", "a".repeat(64)], ["reviewDispositionRecord", "epoch", 99],
+    ["reviewDispositionRecord", "recordedRevision", 99], ["reviewDispositionRecord", "resultHead", "c".repeat(40)]
+  ];
+  for (const [field, key, value] of patches) {
+    const f = await v2IntegrationFixture(t), before = await f.model.checked(), changed = v2Copy(before);
+    changed[field][key] = value;
+    await f.model.commit(before, changed, "FIXTURE_CHANGED_RETAINED_RECORD", 5);
+    const current = await f.model.checked();
+    await assert.rejects(v2SubmitIntegration(f.model, v2IntegrationWire(f, current), 6), /INTEGRATION_/);
+    assert.deepEqual(await f.model.checked(), current);
+  }
+});
+
+v2Test("integration closure requires current independent fake closer author and reviewer", async (t) => {
+  for (const actor of [V2_BUILDER, V2_REVIEWER, V2_STEALER]) {
+    const f = await v2IntegrationFixture(t), before = await f.model.checked();
+    await assert.rejects(v2SubmitIntegration(f.model, v2IntegrationWire(f, before, {}, actor)), /INTEGRATION_CLOSER_NOT_ASSIGNED/);
+    assert.deepEqual(await f.model.checked(), before);
+  }
+  for (const source of [V2_BUILDER, V2_REVIEWER]) for (const key of ["life", "worker", "controller", "credentialPrincipal"]) {
+    const f = await v2IntegrationFixture(t), before = await f.model.checked();
+    f.verifier.actors.get(V2_CLOSER.principal)[key] = source[key];
+    await assert.rejects(v2SubmitIntegration(f.model, v2IntegrationWire(f, before)), /INTEGRATION_CLOSER_NOT_INDEPENDENT/);
+    assert.deepEqual(await f.model.checked(), before);
+  }
+  for (const actor of [V2_BUILDER, V2_REVIEWER, V2_CLOSER]) {
+    const f = await v2IntegrationFixture(t), before = await f.model.checked();
+    f.verifier.actors.get(actor.principal).revoked = true;
+    await assert.rejects(v2SubmitIntegration(f.model, v2IntegrationWire(f, before)), /EXPIRED_OR_REVOKED_FIXTURE/);
+    assert.deepEqual(await f.model.checked(), before);
+  }
+  const f = await v2IntegrationFixture(t), before = await f.model.checked();
+  f.verifier.actors.get(V2_CLOSER.principal).closeEvidence = false;
+  await assert.rejects(v2SubmitIntegration(f.model, v2IntegrationWire(f, before)), /INTEGRATION_CLOSER_NOT_ASSIGNED/);
+  assert.deepEqual(await f.model.checked(), before);
+});
+
+v2Test("integration closure rejects unsafe serialized boundaries and enforces byte time and event bounds", async (t) => {
+  const f = await v2IntegrationFixture(t), before = await f.model.checked();
+  let getters = 0;
+  const hostile = { get bytes() { getters++; throw new Error("GETTER_CALLED"); }, valueOf() { getters++; return 5; } };
+  for (const args of [[hostile, "x", 5], ["{}", hostile, 5], ["{}", "x", hostile], ["😀".repeat(V2_BUDGET.bytes), "x", 5]]) {
+    await assert.rejects(f.model.recordIntegrationEvidence(...args), /INTEGRATION_/);
+  }
+  assert.equal(getters, 0);
+  const valid = v2IntegrationWire(f, before);
+  await assert.rejects(f.model.recordIntegrationEvidence(valid.bytes, "SELF-CLAIMED-VERIFIED", 5), /FAKE_AUTH_DENIED/);
+  const observedOtherBytes = v2IntegrationWire(f, before, { id: "OTHER-OBSERVATION" });
+  await assert.rejects(f.model.recordIntegrationEvidence(valid.bytes, observedOtherBytes.observation, 5), /FAKE_AUTH_DENIED/);
+  const spoofed = f.verifier.observe(JSON.stringify({ ...JSON.parse(valid.bytes), sender: V2_BUILDER.principal }), V2_CLOSER);
+  await assert.rejects(v2SubmitIntegration(f.model, spoofed), /SENDER_MISMATCH/);
+  for (const value of ["{invalid", "null", "[]", '{"id":"duplicate",' + valid.bytes.slice(1)]) {
+    await assert.rejects(v2SubmitIntegration(f.model, f.verifier.observe(value, V2_CLOSER)), /INTEGRATION_/);
+  }
+  for (const patch of [{ evidence: {} }, { evidence: "" }, { evidenceDigest: "a".repeat(64) }, { expectedRevision: 1.5 },
+    { id: "x".repeat(129) }, { extraAuthority: true }, { type: "MERGE" }]) {
+    await assert.rejects(v2SubmitIntegration(f.model, v2IntegrationWire(f, before, patch)), /INTEGRATION_/);
+  }
+  for (const now of [3, V2_BUDGET.age, V2_BUDGET.reconciliationAge + 1, NaN]) {
+    await assert.rejects(v2SubmitIntegration(f.model, valid, now), /INTEGRATION_/);
+  }
+  assert.deepEqual(await f.model.checked(), before);
+  const descriptor = { ...JSON.parse(valid.bytes), evidence: "", evidenceDigest: v2Hash("") };
+  descriptor.evidence = "x".repeat(V2_BUDGET.bytes - Buffer.byteLength(JSON.stringify(descriptor)));
+  descriptor.evidenceDigest = v2Hash(descriptor.evidence);
+  const exact = f.verifier.observe(JSON.stringify(descriptor), V2_CLOSER);
+  assert.equal(Buffer.byteLength(exact.bytes), V2_BUDGET.bytes);
+  assert.equal((await v2SubmitIntegration(f.model, exact)).bytes, exact.bytes);
+  const g = await v2IntegrationFixture(t), original = await g.model.checked(), capped = v2Copy(original);
+  capped.events = Array.from({ length: V2_BUDGET.events - 1 }, (_, seq) => ({ seq, event: "FIXTURE_BUDGET_FILL" }));
+  await g.model.commit(original, capped, "FIXTURE_EVENT_CAP", 5);
+  const state = await g.model.checked();
+  await assert.rejects(v2SubmitIntegration(g.model, v2IntegrationWire(g, state), 6), /EVENT_BUDGET/);
+  assert.deepEqual(await g.model.checked(), state);
+});
+
+v2Test("integration historical replay survives reopen and revocation but conflicts never renew evidence", async (t) => {
+  const f = await v2IntegrationFixture(t), before = await f.model.checked(), wire = v2IntegrationWire(f, before);
+  const receipt = await v2SubmitIntegration(f.model, wire), after = await f.model.checked(), reopened = await f.reopen();
+  f.verifier.actors.get(V2_CLOSER.principal).revoked = true;
+  assert.deepEqual(await v2SubmitIntegration(reopened, wire, 2500), receipt);
+  assert.deepEqual(await reopened.checked(), after);
+  for (const patch of [{ id: "OTHER" }, { key: "OTHER" }, { evidence: "changed", evidenceDigest: v2Hash("changed") }]) {
+    await assert.rejects(v2SubmitIntegration(reopened, v2IntegrationWire(f, before, patch), 2500), /INTEGRATION_CONFLICT/);
+    assert.deepEqual(await reopened.checked(), after);
+  }
+  await assert.rejects(v2SubmitIntegration(reopened, v2IntegrationWire(f, before, { id: "OTHER", key: "OTHER" }), 2500), /INTEGRATION_TERMINAL/);
+  f.verifier.actors.get(V2_CLOSER.principal).read = false;
+  await assert.rejects(v2SubmitIntegration(reopened, wire, 2500), /READ_DENIED/);
+  assert.deepEqual(await reopened.checked(), after);
+});
+
+v2Test("integration recovery keeps historical closure while stale accepted review cannot authorize new closure", async (t) => {
+  const f = await v2IntegrationFixture(t), before = await f.model.checked(), wire = v2IntegrationWire(f, before);
+  const snapshot = join(f.dir, "accepted-review.json"); await f.model.snapshot(snapshot);
+  await f.model.restore(snapshot, 5);
+  const recovered = await f.model.checked();
+  for (const input of [wire, v2IntegrationWire(f, recovered)]) {
+    await assert.rejects(v2SubmitIntegration(f.model, input, 6), /INTEGRATION_TARGET_BINDING/);
+    assert.deepEqual(await f.model.checked(), recovered);
+  }
+  const g = await v2IntegrationFixture(t), preClosure = join(g.dir, "pre-closure.json"); await g.model.snapshot(preClosure);
+  const start = await g.model.checked(), same = v2IntegrationWire(g, start), receipt = await v2SubmitIntegration(g.model, same);
+  await g.model.restore(preClosure, 6);
+  const retained = await g.model.checked();
+  assert.equal(retained.epoch, start.epoch + 1); assert.deepEqual(retained.integrationRecord, receipt);
+  assert.deepEqual(await v2SubmitIntegration(await g.reopen(), same, 7), receipt);
+  assert.deepEqual(await g.model.checked(), retained);
+});
+
+v2Test("integration rollback lost response and concurrent duplicate or conflict produce one atomic outcome", async (t) => {
+  const f = await v2IntegrationFixture(t), before = await f.model.checked(), wire = v2IntegrationWire(f, before);
+  const commit = f.model.commit.bind(f.model);
+  f.model.commit = (b, a, e, n, _f, auth) => commit(b, a, e, n, true, auth);
+  await assert.rejects(v2SubmitIntegration(f.model, wire), /CHECK constraint/);
+  assert.deepEqual(await (await f.reopen()).checked(), before);
+  f.model.commit = async (...args) => { await commit(...args); throw new Error("FAKE_INTEGRATION_RESPONSE_LOST"); };
+  await assert.rejects(v2SubmitIntegration(f.model, wire), /FAKE_INTEGRATION_RESPONSE_LOST/);
+  const reopened = await f.reopen(), committed = await reopened.checked();
+  assert.deepEqual(await v2SubmitIntegration(reopened, wire, 6), committed.integrationRecord);
+  assert.deepEqual(await reopened.checked(), committed);
+  for (const conflicting of [false, true]) {
+    const g = await v2IntegrationFixture(t), start = await g.model.checked(), other = await g.reopen();
+    const left = v2IntegrationWire(g, start), right = conflicting
+      ? v2IntegrationWire(g, start, { evidence: "conflict", evidenceDigest: v2Hash("conflict") }) : left;
+    const outcomes = await Promise.allSettled([v2SubmitIntegration(g.model, left), v2SubmitIntegration(other, right)]);
+    assert.equal(outcomes.filter((value) => value.status === "fulfilled").length, conflicting ? 1 : 2);
+    if (conflicting) assert.match(outcomes.find((value) => value.status === "rejected").reason.message, /INTEGRATION_CONFLICT/);
+    else assert.deepEqual(outcomes[0].value, outcomes[1].value);
+    const final = await (await g.reopen()).checked();
+    assert.equal(final.seq, start.seq + 1); assert.equal(final.revision, start.revision + 1);
+    assert.equal(final.events.filter((event) => event.event === "OFFLINE_INTEGRATION_EVIDENCE_RECORDED").length, 1);
+  }
+});
+
+v2Test("integration rechecks authority after await and at commit and cannot race past cancellation", async (t) => {
+  for (const actor of [V2_BUILDER, V2_REVIEWER, V2_CLOSER]) for (const timing of ["read", "commit"]) {
+    const f = await v2IntegrationFixture(t), before = await f.model.checked(), wire = v2IntegrationWire(f, before);
+    if (timing === "read") {
+      const checked = f.model.checked.bind(f.model);
+      f.model.checked = async () => { const state = await checked(); f.verifier.actors.get(actor.principal).revoked = true; return state; };
+    } else {
+      const commit = f.model.commit.bind(f.model);
+      f.model.commit = (...args) => { f.verifier.actors.get(actor.principal).revoked = true; return commit(...args); };
+    }
+    await assert.rejects(v2SubmitIntegration(f.model, wire), /EXPIRED_OR_REVOKED_FIXTURE/);
+    assert.deepEqual(await (await f.reopen()).checked(), before);
+  }
+  const f = await v2IntegrationFixture(t), before = await f.model.checked(), wire = v2IntegrationWire(f, before), other = await f.reopen();
+  const checked = f.model.checked.bind(f.model);
+  let cancelled = false;
+  f.model.checked = async () => {
+    const state = await checked();
+    if (!cancelled) { cancelled = true; await other.cancel(5); }
+    return state;
+  };
+  await assert.rejects(v2SubmitIntegration(f.model, wire), /CHECK constraint/);
+  const final = await other.checked();
+  assert.equal(final.work, "CANCELLED"); assert.equal(final.integrationRecord, undefined);
+  assert.equal(final.seq, before.seq + 1);
 });
