@@ -114,6 +114,9 @@ jobs:
 
           test -s /tmp/brain-v4-build/KGEN_contracts_KGEN_OrderTriggerEngine_sol_KGEN_OrderTriggerEngine.bin
 
+      - name: Validate BSC56 runtime ABI against exact compiled canonical contracts
+        run: node KGEN/contracts/tests/brain-v4-static-invariants.mjs --runtime-execution-abi
+
       - name: Run fixed axis/market binding invariants
         run: node --test tests/11520-real-trading-market-binding.test.mjs
 
@@ -163,7 +166,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: settlement-local-evm-${{ github.sha }}
-          path: artifacts/settlement-local-evm.json
+          path: |
+            artifacts/settlement-local-evm.json
+            artifacts/runtime-execution-abi.json
           if-no-files-found: error
 
   candidate-wallet-browser:
