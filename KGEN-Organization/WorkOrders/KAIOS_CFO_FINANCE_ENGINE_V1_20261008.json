@@ -26,14 +26,14 @@
   "formal_runtime": "core/accounting/runtime-finance.js",
   "version": "V1",
   "mode": "SIMULATION_ONLY",
-  "status": "SESSION_TECHNICAL_PASS_WITH_FOLLOWUP_INSTALL_HOLD",
+  "status": "EXACT_HEAD_CI_PASS_SESSION_TECHNICAL_PASS_WITH_FOLLOWUP_INSTALL_HOLD",
   "designed_by": "沈英明 / Human Authority",
   "system_architecture": "Human order plus current repository canon",
   "company_policy_owner": "衡曜 / General Manager",
   "implemented_by": "CURRENT_CODEX_ENGINEERING_SESSION",
   "implemented_by_registry_status": "SESSION_WORKTREE_BOUND_NOT_CANONICAL_WORKER_REGISTRY_BOUND",
   "maintainer": "NOT_ASSIGNED",
-  "reviewed_by": "cfo_finance_independent_review / PASS_WITH_FOLLOWUP_AT_ab554f0868f5d95dc3b1cad87ad4e0f4d4aca1f0 / SESSION_TECHNICAL_REVIEW_NOT_CANONICAL_COMPANY_AUTHORITY",
+  "reviewed_by": "cfo_finance_independent_review / PASS_WITH_FOLLOWUP_AT_2a2423d63dbddf973e399f1c749dc8b346db7433 / SESSION_TECHNICAL_REVIEW_NOT_CANONICAL_COMPANY_AUTHORITY",
   "base_main_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
   "source_commit": "1659565fe193cccba30294dcdc10396a9811e0bd",
   "head_sha": null,
@@ -144,12 +144,19 @@
       "decision": "PASS_WITH_FOLLOWUP",
       "findings": "P0 none; P1 none; P2 manufacturing-record wording precision only",
       "disposition": "SESSION_TECHNICAL_PASS; CANDIDATE_REMAINS_UNINSTALLED_UNSEALED_PENDING_CANONICAL_COMPANY_ACCEPTANCE_AND_BOOT_AUTHORITY"
+    },
+    {
+      "head": "2a2423d63dbddf973e399f1c749dc8b346db7433",
+      "reviewer": "cfo_finance_independent_review",
+      "decision": "PASS_WITH_FOLLOWUP",
+      "findings": "P0 none; P1 none; P2 none in metadata-only delta",
+      "disposition": "SESSION_TECHNICAL_PASS; EXACT_HEAD_CI_TEST_PASS; GOVERNANCE_INSTALL_AND_SEAL_HOLDS_RETAINED"
     }
   ],
   "tests": {
     "targeted": "16/16 PASS",
     "full_regression": "475/475 PASS outside the unchanged 11520 real-trading preflight file; that Windows checkout file is 22/25 PASS with three baseline CRLF-sensitive workflow-source assertions",
-    "ci": "PENDING"
+    "ci": "PASS_AT_2a2423d63dbddf973e399f1c749dc8b346db7433 / PR_549 / 11520 Universal Exchange V2 test / https://github.com/klineodyssey/kline-odyssey/actions/runs/37691171961/job/113031427841"
   },
   "demo_financial_report": {
     "currency": "KAIOS",
