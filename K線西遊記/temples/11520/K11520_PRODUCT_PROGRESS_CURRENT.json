@@ -17,6 +17,8 @@
     "latestMain": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
     "publicPagesRun": "https://github.com/klineodyssey/kline-odyssey/actions/runs/37517256473",
     "publicPagesState": "waiting",
+    "blockedFeatures": [],
+    "failedFeatures": [],
     "activePullRequests": [541, 542, 543, 544]
   },
   "features": {

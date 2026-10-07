@@ -2,7 +2,10 @@
   "status": "PASS",
   "sourceTruthCases": {
     "stale": "PASS",
-    "future": "PASS"
+    "future": "PASS",
+    "exactTtl": "PASS",
+    "responseGeneration": "PASS",
+    "failedReadNoResurrection": "PASS"
   },
   "reports": [
     {

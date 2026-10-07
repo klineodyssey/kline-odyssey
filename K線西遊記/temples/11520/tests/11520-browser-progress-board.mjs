@@ -8,6 +8,7 @@ const ROUTE='/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html';
 const profiles=[{name:'portrait',width:390,height:844},{name:'landscape',width:844,height:390}];
 const overlap=(a,b)=>!!a&&!!b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
 const settlePaint=page=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+const ensureProgressRuntime=page=>page.evaluate(async()=>{await import(new URL('./runtime/market-origin-wallet-layout-runtime.mjs',location.href).href);const {install11520ProductProgressBoard}=await import(new URL('./runtime/product-progress-board.mjs',location.href).href);if(!globalThis.__K11520_PROGRESS_BOARD__)install11520ProductProgressBoard()});
 async function assertDialogChrome(page){
   await page.waitForFunction(()=>{const title=document.querySelector('#sheetTitle'),close=document.querySelector('#sheetClose'),visible=el=>{const r=el?.getBoundingClientRect(),s=el&&getComputedStyle(el);return !!(r&&r.width&&r.height&&s.visibility!=='hidden'&&s.display!=='none'&&Number(s.opacity)>0)};return title?.textContent?.includes('遊戲進度')&&visible(title)&&visible(close)});
   await settlePaint(page);
@@ -32,6 +33,7 @@ try{
     const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
     await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:'[]'}));
     await page.goto(`${BASE}${ROUTE}?progress-board-v1=1`,{waitUntil:'domcontentloaded'});
+    await ensureProgressRuntime(page);
     await page.waitForFunction(()=>globalThis.__K11520_PROGRESS_BOARD__?.status==='AVAILABLE'&&document.querySelector('#k11520ProgressButton'));
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click().catch(()=>{});
     await page.locator('#intro11520').waitFor({state:'hidden'});
@@ -70,6 +72,10 @@ try{
     const engineeringChrome=await assertDialogChrome(page);
     const engineeringOverlay=await assertNoProgressOverlay(page,`${profile.width}x${profile.height} Engineering`);
     await page.screenshot({path:`${OUT}/${profile.width}x${profile.height}-engineering.png`});
+    await page.locator('[data-progress-mode="engineering"]').focus();
+    await page.keyboard.press('Home');
+    assert.equal(await page.locator('[data-progress-mode="player"]').getAttribute('aria-selected'),'true','Home must select the first Progress tab');
+    assert.equal(await page.evaluate(()=>document.activeElement?.dataset?.progressMode),'player','keyboard tab navigation must move focus with selection');
     await page.keyboard.press('Escape');await page.locator('#sheet').waitFor({state:'hidden'});
     await progress.waitFor({state:'visible'});
     assert.equal(await page.evaluate(()=>document.activeElement?.id),'k11520ProgressButton','Escape must restore focus to Progress in the reopened utility rail');
@@ -93,6 +99,7 @@ try{
     await page.route('**/K11520_PRODUCT_PROGRESS_CURRENT.json',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(injected)}));
     await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:'[]'}));
     await page.goto(`${BASE}${ROUTE}?progress-board-${sourceCase}=1`,{waitUntil:'domcontentloaded'});
+    await ensureProgressRuntime(page);
     await page.waitForFunction(()=>globalThis.__K11520_PROGRESS_BOARD__?.open&&document.querySelector('#k11520ProgressButton'));
     if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click().catch(()=>{});
     await page.locator('#intro11520').waitFor({state:'hidden'});
@@ -114,6 +121,57 @@ try{
     }
     await context.close();
   }
+
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'}),page=await context.newPage();
+    const expiring=structuredClone(canonical);expiring.lastUpdatedAt=new Date().toISOString();expiring.staleAfterHours=0.003;
+    await page.route('**/K11520_PRODUCT_PROGRESS_CURRENT.json',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(expiring)}));
+    await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:'[]'}));
+    await page.goto(`${BASE}${ROUTE}?progress-board-expiry=1`,{waitUntil:'domcontentloaded'});
+    await ensureProgressRuntime(page);
+    await page.waitForFunction(()=>globalThis.__K11520_PROGRESS_BOARD__?.open&&document.querySelector('#k11520ProgressButton'));
+    if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click().catch(()=>{});
+    await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#k11520UtilityMaster').click();await page.locator('#dockToggle').click();await page.locator('#k11520ProgressButton').click();
+    await page.locator('[data-progress-key="WORLD_MOVEMENT"][data-progress-status="AVAILABLE"]').waitFor();
+    await page.waitForFunction(()=>document.querySelectorAll('[data-progress-status="AVAILABLE"]').length===0,{timeout:15000});
+    assert.equal(await page.locator('[data-progress-status="STALE"]').count(),25,'an open board must age to STALE at the exact TTL without reopen or tab switch');
+    await context.close();
+  }
+
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'}),page=await context.newPage();
+    let requestCount=0;
+    await page.route('**/K11520_PRODUCT_PROGRESS_CURRENT.json',async route=>{requestCount+=1;const response=structuredClone(canonical);if(requestCount===1){await new Promise(resolve=>setTimeout(resolve,400))}else response.evidence.blockedFeatures=['ORDER'];await route.fulfill({contentType:'application/json',body:JSON.stringify(response)})});
+    await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:'[]'}));
+    await page.goto(`${BASE}${ROUTE}?progress-board-race=1`,{waitUntil:'domcontentloaded'});
+    await ensureProgressRuntime(page);
+    await page.waitForFunction(()=>globalThis.__K11520_PROGRESS_BOARD__?.open&&document.querySelector('#k11520ProgressButton'));
+    if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click().catch(()=>{});
+    await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#k11520UtilityMaster').click();await page.locator('#dockToggle').click();
+    await page.evaluate(()=>{const trigger=document.querySelector('#k11520ProgressButton');document.dispatchEvent(new CustomEvent('k11520:open-progress-board',{detail:{trigger}}));document.dispatchEvent(new CustomEvent('k11520:open-progress-board',{detail:{trigger}}))});
+    await page.locator('[data-progress-key="ORDER"][data-progress-status="BLOCKED"]').waitFor();
+    await page.waitForTimeout(500);
+    assert.equal(await page.locator('[data-progress-key="ORDER"]').getAttribute('data-progress-status'),'BLOCKED','an older response must not overwrite a newer generation');
+    await context.close();
+  }
+
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'}),page=await context.newPage();
+    let requestCount=0;
+    await page.route('**/K11520_PRODUCT_PROGRESS_CURRENT.json',route=>{requestCount+=1;return requestCount===1?route.fulfill({contentType:'application/json',body:JSON.stringify(canonical)}):route.fulfill({status:503,contentType:'text/plain',body:'unavailable'})});
+    await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:'[]'}));
+    await page.goto(`${BASE}${ROUTE}?progress-board-failure=1`,{waitUntil:'domcontentloaded'});
+    await ensureProgressRuntime(page);
+    await page.waitForFunction(()=>globalThis.__K11520_PROGRESS_BOARD__?.open&&document.querySelector('#k11520ProgressButton'));
+    if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click().catch(()=>{});
+    await page.locator('#intro11520').waitFor({state:'hidden'});await page.locator('#k11520UtilityMaster').click();await page.locator('#dockToggle').click();await page.locator('#k11520ProgressButton').click();
+    await page.locator('[data-progress-key="WORLD_MOVEMENT"][data-progress-status="AVAILABLE"]').waitFor();await page.keyboard.press('Escape');await page.locator('#sheet').waitFor({state:'hidden'});
+    await page.locator('#k11520ProgressButton').click();await page.locator('#k11520ProgressContent').filter({hasText:'HTTP_503'}).waitFor();
+    await page.locator('[data-progress-mode="engineering"]').click();
+    assert.match(await page.locator('#k11520ProgressContent').textContent(),/HTTP_503/,'tab switch after a failed read must preserve UNKNOWN error state');
+    assert.equal(await page.locator('[data-progress-status="AVAILABLE"]').count(),0,'failed read must not resurrect cached AVAILABLE status');
+    await context.close();
+  }
 }finally{await browser.close()}
-await fs.writeFile(`${OUT}/report.json`,JSON.stringify({status:'PASS',sourceTruthCases:{stale:'PASS',future:'PASS'},reports},null,2));
+await fs.writeFile(`${OUT}/report.json`,JSON.stringify({status:'PASS',sourceTruthCases:{stale:'PASS',future:'PASS',exactTtl:'PASS',responseGeneration:'PASS',failedReadNoResurrection:'PASS'},reports},null,2));
 console.log(JSON.stringify({status:'PASS',profiles:reports.map(r=>`${r.profile.width}x${r.profile.height}`),artifacts:OUT}));
