@@ -366,7 +366,7 @@ export function resolvePlayerMove(player,next,{allowBoundsRecovery=false}={}){
   // farther out. The same object collision owner still checks every step.
   const bounded=recovery&&after>0?{...next}:{x:Math.max(bounds.minX,Math.min(bounds.maxX,Number(next.x)||0)),y:Math.max(bounds.minY,Math.min(bounds.maxY,Number(next.y)||0)),z:Math.max(bounds.minZ,Math.min(bounds.maxZ,Number(next.z)||0))};
   const blocker=WORLD_OBJECTS.find(o=>distance2D(bounded,o)<o.radius+WORLD_RULES.playerRadius)||null;
-  return blocker?{x:player.x,y:player.y,z:player.z,blocked:true,blocker}:{...bounded,blocked:false,blocker:null,recoveringBounds:recovery};
+  return blocker?{x:player.x,y:player.y,z:player.z,blocked:true,blocker}:{...bounded,blocked:false,blocker:null};
 }
 
 function sideFromText(v){const s=String(v||'');if(/多|LONG|BUY|\+/.test(s))return 1;if(/空|SHORT|SELL|−|-/.test(s))return-1;return 0}

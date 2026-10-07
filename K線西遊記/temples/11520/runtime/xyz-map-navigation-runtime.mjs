@@ -73,13 +73,25 @@ function cancelOnManual(e){if(!nav.active)return;const t=e.target;if(t?.closest?
 // The existing actor loop is the only movement clock. Navigation supplies a
 // target and observes the committed collision result; it no longer races a
 // second animation loop or the C presentation bridge by writing joystick state.
-export function prepareLocalNavigationFrame(){return nav.active&&nav.target?{target:{...nav.target},startedAt:nav.startedAt}:null}
+export function resolveLocalNavigationStep(from,next,{mode,source,resolveMove}={}){
+  const direct=resolveMove(from,next);
+  if(!direct.blocked||!direct.blocker?.id||mode!=='XZ'||source!=='PLANE_MAP'||Math.abs(next.y-from.y)>1e-10)return direct;
+  const dx=next.x-from.x,dz=next.z-from.z,length=Math.hypot(dx,dz);if(length===0)return direct;
+  // Preserve the old XZ route's perpendicular candidates without another
+  // position writer or extra distance budget. The world resolver checks both.
+  for(const direction of [{x:-dz/length,z:dx/length},{x:dz/length,z:-dx/length}]){
+    const candidate={x:from.x+direction.x*length,y:from.y,z:from.z+direction.z*length},result=resolveMove(from,candidate);
+    if(!result.blocked&&['x','y','z'].every(a=>Number.isFinite(result[a])&&Math.abs(result[a]-candidate[a])<1e-10))return{...result,detour:true};
+  }
+  return direct;
+}
+export function prepareLocalNavigationFrame(){return nav.active&&nav.target?{target:{...nav.target},startedAt:nav.startedAt,mode:nav.mode,source:nav.source}:null}
 export function commitLocalNavigationFrame(result,{speedKPerSecond=null}={}){
   if(!nav.active||!nav.target)return;
   nav.lastDistance=Math.hypot(...['x','y','z'].map(a=>nav.target[a]-result.position[a]));
   nav.motionStatus=result.status;
-  nav.etaStatus=result.status==='PAUSED'?'PAUSED':speedKPerSecond>0?'ESTIMATE':'WAIT';
-  nav.etaSeconds=speedKPerSecond>0?gameUnitsToK(nav.lastDistance)/speedKPerSecond:null;
+  nav.etaStatus=result.status==='PAUSED'?'PAUSED':result.detour?'DETOUR':speedKPerSecond>0?'ESTIMATE':'WAIT';
+  nav.etaSeconds=!result.detour&&speedKPerSecond>0?gameUnitsToK(nav.lastDistance)/speedKPerSecond:null;
   if(result.status==='ARRIVED'){nav.etaStatus='ARRIVED';nav.etaSeconds=0;stop('已到達 XYZ 目的地','ARRIVED')}
   else if(result.blocked){nav.etaStatus='BLOCKED';nav.etaSeconds=null;stop(`導航受阻：${result.blocker?.name||'WORLD'}`,'BLOCKED')}
   else publish();

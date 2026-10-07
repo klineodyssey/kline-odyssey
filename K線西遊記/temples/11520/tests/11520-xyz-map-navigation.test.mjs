@@ -122,3 +122,21 @@ test('actual waypoint owner publishes pause, cancellation, arrival and player-cl
   assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaStatus,'ARRIVED');assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaSeconds,0);
   vm.runInContext("stopWorldNavigation3D(null,{clearTarget:true})",context);assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.target,null);
 });
+
+import {resolveLocalNavigationStep} from '../runtime/xyz-map-navigation-runtime.mjs';
+test('preserved XZ obstacle detour reaches the ATM-crossing target with one clock and budget',()=>{
+  let position={x:4,y:0,z:5},detours=0,total=0;const target={x:12,y:0,z:5};
+  const resolver=(from,next)=>resolvePlayerMove(from,next,{allowBoundsRecovery:true});
+  for(let i=0;i<900;i++){
+    const motion=integrateLocalMotion({position,target,elapsedSeconds:1/60,speedKPerSecond:.0001,resolveMove:(from,next)=>resolveLocalNavigationStep(from,next,{mode:'XZ',source:'PLANE_MAP',resolveMove:resolver})});
+    assert.equal(motion.blocked,false);assert.ok(motion.distanceMovedK<=.0001/60+1e-12,'detour may not spend extra movement budget');
+    position=motion.position;total+=motion.distanceMoved;detours+=Number(motion.detour);if(motion.status==='ARRIVED')break;
+  }
+  assert.ok(detours>0,'actual ATM collision must exercise the preserved sidestep');near(position.x,target.x);near(position.z,target.z);assert.ok(total>8);
+  const outside=resolveLocalNavigationStep({x:210,y:0,z:186},{x:210.2,y:0,z:186},{mode:'XZ',source:'PLANE_MAP',resolveMove:resolver});assert.equal(outside.blocked,true,'detour cannot bypass recovery direction policy');
+});
+
+test('world collision default callers retain their original result shape and bounds behavior',()=>{
+  assert.deepEqual(resolvePlayerMove({x:0,y:0,z:0},{x:1,y:0,z:0}),{x:1,y:0,z:0,blocked:false,blocker:null});
+  assert.deepEqual(resolvePlayerMove({x:210,y:0,z:186},{x:209,y:0,z:186}),{x:60,y:0,z:60,blocked:false,blocker:null});
+});

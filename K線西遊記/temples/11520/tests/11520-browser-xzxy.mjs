@@ -56,13 +56,15 @@ const assertNormal=async(mode,axis)=>{await page.waitForFunction(([m,a])=>{const
 
 await visible('#joy');await visible('#knob');await visible('#knob img');await visible('#yControl');
 let c=await control();assert.equal(c.mode,'XZ');assert.deepEqual(c.discAxes,['X','Z']);assert.equal(c.railAxis,'Y');assert.equal(c.unboundedCoordinateIntent,true);await assertKgenArt();await assertNormal('XZ','KY');assert.match(await page.locator('#yControl label').textContent(),/Y 縱搖桿/);
-const setMotionC=async()=>{await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===1)};
-const defaultPosition=await xyz();await drag(.90,.50,100,180);assert.deepEqual(await xyz(),defaultPosition,'default C0 must pause the actual actor');await setMotionC();
-await assertThumbFollows();
-let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+');assertFixed('XZ right',p0,p1,'y');
+const setMotionC=async(value=.1)=>{await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(c=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===c,value)};
+const defaultPosition=await xyz();await drag(.90,.50,100,180);assert.deepEqual(await xyz(),defaultPosition,'default C0 must pause the actual actor');
+// Capture the held-thumb visual at C0 so screenshot latency cannot drive the
+// actor into an obstacle before the independent direction assertions begin.
+await assertThumbFollows();await setMotionC();
+let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+ '+JSON.stringify({before:p0,after:p1,state:await page.evaluate(()=>({motion:__K11520_PLAYER_MOTION__,collision:document.querySelector('#collision')?.textContent,control:__K11520_3D_CONTROL__}))}));assertFixed('XZ right',p0,p1,'y');
 await drag(.50,.10,102);let p2=await xyz();assert.ok(p2.z>p1.z,'XZ up must Z+');assertFixed('XZ up',p1,p2,'y');
 let w0=await world();await dragRail(.90,103,420);let w1=await world();assert.ok(w1.intent.y<w0.intent.y,'XZ rail down must advance Y- intent');assert.ok(near(w1.physical.y,w0.physical.y,.08),'ground must block physical body while Y intent keeps changing');
-let w2=w1;for(let i=0;i<15&&w2.intent.y<=40;i++){await dragRail(.10,104+i,2000);w2=await world()}assert.ok(w2.intent.y>40,`Y intent must cross legacy 40 independent of frame rate: ${JSON.stringify(w2)}`);assert.ok(w2.physical.y>40,`physical Y must be able to leave legacy 0..40 world band: ${JSON.stringify(w2)}`);
+await setMotionC(1);let w2=w1;for(let i=0;i<15&&w2.intent.y<=40;i++){await dragRail(.10,104+i,2000);w2=await world()}assert.ok(w2.intent.y>40,`Y intent must cross legacy 40 independent of frame rate: ${JSON.stringify(w2)}`);assert.ok(w2.physical.y>40,`physical Y must be able to leave legacy 0..40 world band: ${JSON.stringify(w2)}`);
 await page.screenshot({path:`${OUT}/11520-mobile-xz-ground.png`,fullPage:true});
 
 await tapCenter(201);c=await control();assert.equal(c.mode,'XY');assert.deepEqual(c.discAxes,['X','Y']);assert.equal(c.railAxis,'Z');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_XY',{timeout:2500});assert.match(await page.locator('#knob img').getAttribute('src'),/goddess-ui\.webp$/);assert.match(await page.locator('#yControl label').textContent(),/Z 縱搖桿/);await assertNormal('XY','KZ');await assertNoDrift('XZ→XY');await setMotionC();

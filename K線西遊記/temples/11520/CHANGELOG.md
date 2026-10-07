@@ -7,6 +7,15 @@
 - Local evidence: 28 Navigator/elapsed/actual-owner tests and three drive suites pass. Real Chromium, exact-head aggregate CI and screenshot review remain pending. C-rate correction is not yet verified as the full visual root cause.
 - Canonical scalar-to-local XYZ mapping remains NOT_CONFIGURED, canonical POI search/favorites and remaining HUD requests are unfinished. No fake LIVE boundary, new registry/runtime, financial settlement, signer, real transaction, storage architecture, Physics or deployment change.
 
+### Preserved XZ detour review successor
+
+- Successor 300196dcd2d117aa118e1965a5594ffd934fec56 passed exact-head Universal Exchange CI, then real Chromium failed the XZ-right assertion after a held1C thumb screenshot. The screenshot places the actor near the ATM; collision during capture is a hypothesis, not yet a verified browser diagnosis. Thumb-visual capture now remains at explicitly checked C0, and independent direction gestures use native .1C with added position/control/motion/collision diagnostics. Existing directional assertions remain unchanged.
+
+
+- Independent reproduction found that baseline XZ routes could sidestep the existing ATM obstacle, while the first unified implementation stopped short. The existing navigation owner now selects the same bounded perpendicular candidates only for legacy XZ plane-map routes. It spends the same elapsed distance budget and calls the same world collision owner; no second clock or broader pathfinder is introduced.
+- Deterministic fixture {4,0,5} to {12,0,5} now reaches the target at .1C,1C,5C and100C. Detours publish ETA DETOUR without a false straight-path arrival estimate. Default world-collision callers retain their original result shape and behavior.
+- Known exploration-credit dependency and separate dodge/recovery exceptions remain unchanged. Exact-head Chromium and full Navigator acceptance remain pending.
+
 ### First-checkpoint review and harness successor
 
 - Durable pre-code matrix: 71b39ec25e1011a0592a84739f50c307c430385a. First code: 1aecc6a3d378b216d40faa953e6934e6aef3be96 on dot/k11520-navigator-reconstruction-20261007, Draft PR #523.

@@ -144,7 +144,7 @@ export function advanceLocalMotionClock(previous,now,{visible=true,ownerKey=null
 export function integrateLocalMotion({position,vector={x:0,y:0,z:0},target=null,elapsedSeconds=0,speedKPerSecond=null,resolveMove}={}){
   const axes=['x','y','z'],valid=p=>p&&axes.every(a=>typeof p[a]==='number'&&Number.isFinite(p[a]));
   if(!valid(position))throw new RangeError('INVALID_LOCAL_POSITION');
-  let current={...position},distanceMoved=0,blocked=false,blocker=null,substeps=0;
+  let current={...position},distanceMoved=0,blocked=false,blocker=null,substeps=0,detour=false;
   const base={position:current,intentDelta:{x:0,y:0,z:0},distanceMoved:0,distanceMovedK:0,observedSpeedKPerSecond:0,inputThrottle:0,blocked:false,blocker:null,substeps:0};
   if(typeof speedKPerSecond!=='number'||!Number.isFinite(speedKPerSecond)||speedKPerSecond<0||speedKPerSecond>.1)return{...base,status:'SPEED_UNAVAILABLE'};
   if(speedKPerSecond===0)return{...base,status:'PAUSED'};
@@ -165,9 +165,9 @@ export function integrateLocalMotion({position,vector={x:0,y:0,z:0},target=null,
     if(result.blocked){blocked=true;blocker=result.blocker||{name:'WORLD'};break}
     const moved=Math.hypot(...axes.map(a=>result[a]-current[a]));
     if(moved>amount+1e-8){blocked=true;blocker={name:'INVALID_COLLISION_DISPLACEMENT'};break}
-    current=Object.fromEntries(axes.map(a=>[a,result[a]]));distanceMoved+=moved;
-    if(axes.some(a=>Math.abs(current[a]-next[a])>1e-8)){blocked=true;blocker={name:'WORLD_BOUNDARY'};break}
+    current=Object.fromEntries(axes.map(a=>[a,result[a]]));distanceMoved+=moved;detour=detour||result.detour===true;
+    if(!result.detour&&axes.some(a=>Math.abs(current[a]-next[a])>1e-8)){blocked=true;blocker={name:'WORLD_BOUNDARY'};break}
   }
   const distanceMovedK=gameUnitsToK(distanceMoved),arrived=target&&Math.hypot(...axes.map(a=>target[a]-current[a]))<1e-8;
-  return{position:current,intentDelta,distanceMoved,distanceMovedK,inputThrottle:throttle,observedSpeedKPerSecond:elapsedSeconds>0?distanceMovedK/elapsedSeconds:0,blocked,blocker,substeps,status:blocked?'BLOCKED':arrived?'ARRIVED':distanceMoved>0?'MOVING':'IDLE'};
+  return{position:current,intentDelta,distanceMoved,distanceMovedK,inputThrottle:throttle,observedSpeedKPerSecond:elapsedSeconds>0?distanceMovedK/elapsedSeconds:0,blocked,blocker,substeps,detour,status:blocked?'BLOCKED':arrived?'ARRIVED':detour?'DETOUR':distanceMoved>0?'MOVING':'IDLE'};
 }

@@ -27,7 +27,7 @@ import {collectInspectableEntities,inspectMapPoint} from './map-object-navigatio
 import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
 import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
 import {create11520CombatFx} from './combat-fx-runtime.mjs';
-import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D,prepareLocalNavigationFrame,commitLocalNavigationFrame} from './xyz-map-navigation-runtime.mjs';
+import {setWorldTarget3D,startWorldNavigation3D,stopWorldNavigation3D,prepareLocalNavigationFrame,commitLocalNavigationFrame,resolveLocalNavigationStep} from './xyz-map-navigation-runtime.mjs';
 import {readCanonicalDriveState} from './combat-drive-adapter.mjs';
 import {rawVectorFromControl} from './combat-drive-live-runtime.mjs';
 import {warpC,resolveCMode} from '../controls/nonlinear-controls.mjs';
@@ -247,14 +247,14 @@ function resolveLocalPlayerStep(from,next){
 function moveManual(elapsedSeconds){
   syncTradeAxisFromPlane();
   const drive=readCanonicalDriveState({activeAxis:S.axis}),route=prepareLocalNavigationFrame();
-  const motion=integrateLocalMotion({position:S.xyz,vector:controlVector(),target:route?.target||null,elapsedSeconds,speedKPerSecond:drive.speedKPerSecond,resolveMove:resolveLocalPlayerStep});
+  const motion=integrateLocalMotion({position:S.xyz,vector:controlVector(),target:route?.target||null,elapsedSeconds,speedKPerSecond:drive.speedKPerSecond,resolveMove:(from,next)=>route?resolveLocalNavigationStep(from,next,{...route,resolveMove:resolveLocalPlayerStep}):resolveLocalPlayerStep(from,next)});
   const prior={...S.xyz};S.xyz={...motion.position};
   const delta=route?Object.fromEntries(['x','y','z'].map(a=>[a,S.xyz[a]-prior[a]])):motion.intentDelta;
   S.intentXYZ=Object.fromEntries(['x','y','z'].map(a=>[a,S.intentXYZ[a]+delta[a]]));
   if(motion.distanceMoved>0){if(!route)playerHomeFraming=false;const x=S.xyz.x-prior.x,z=S.xyz.z-prior.z;if(Math.hypot(x,z)>0)S.heading=worldHeading({x,z})}
   globalThis.__K11520_PLAYER_MOTION__=Object.freeze({...motion,clock:playerMotionClock,sharedC:drive.c,activeAxis:S.axis,speedAuthority:drive.source,requestedSpeedKPerSecond:drive.speedKPerSecond,ownerPlayerId:playerLife.activePlayer().playerId,physical:{...S.xyz},coordinateSpace:'LOCAL_METERS',canonicalPlacement:'NOT_CONFIGURED'});
   commitLocalNavigationFrame(motion,{speedKPerSecond:drive.speedKPerSecond});
-  $('#collision').textContent=motion.blocked?`BLOCKED · ${motion.blocker?.name||'WORLD'}`:motion.status==='PAUSED'?'C0 PAUSED · 請設定 UFO C 曲速':motion.status==='SPEED_UNAVAILABLE'?'曲速尚未就緒':'CLEAR';
+  $('#collision').textContent=motion.blocked?`BLOCKED · ${motion.blocker?.name||'WORLD'}`:motion.status==='PAUSED'?'C0 PAUSED · 請設定 UFO C 曲速':motion.status==='SPEED_UNAVAILABLE'?'曲速尚未就緒':motion.detour?'NAV DETOUR · ETA 待路徑確認':'CLEAR';
   return motion;
 }
 function setWaypoint(x,z){cancelNavigation('切換地圖目標');setWorldTarget3D({x,y:S.xyz.y,z},{mode:'XZ',source:'PLANE_MAP'});hud()}
