@@ -103,9 +103,11 @@ export function realTradingEligibility({
 
 // Metadata consistency only: caller booleans and labels cannot verify an Oracle,
 // deployment or Human approval. No execution-ready route is created here.
-export function productionTradingMetadataEligibility(input={}) {
-  const binding=assertProductionAxisMarket(input);
-  const legacy=realTradingEligibility({...input,market:binding.market});
+export function productionTradingMetadataEligibility({axis,market,chainId=56,
+  feedProvenanceVerified=false,brainAddress=null,positionEngineAddress=null,humanMainnetAuthorization=false}={}) {
+  const binding=assertProductionAxisMarket({axis,market,chainId});
+  const legacy=realTradingEligibility({axis,market:binding.market,chainId,
+    feedProvenanceVerified,brainAddress,positionEngineAddress,humanMainnetAuthorization});
   return Object.freeze({binding,metadataEligible:legacy.eligible,blockers:legacy.blockers,
     executionReady:false,oracleVerification:'NOT_PERFORMED',
     orderSubmissionEnabled:false,signerRequestEnabled:false});
