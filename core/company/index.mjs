@@ -1996,6 +1996,10 @@ export const KAIOS_OFFICIAL_MESSAGE_EVENT_TYPES = Object.freeze([
 const KAIOS_OFFICIAL_MESSAGE_TERMINAL_STATES = Object.freeze(["CLOSED", "FAILED", "STALE", "SUPERSEDED"]);
 const PRODUCED_KAIOS_OFFICIAL_MESSAGES = new WeakSet();
 const PRODUCED_KAIOS_OFFICIAL_MESSAGE_EVENTS = new WeakSet();
+const PRODUCED_KAIOS_OFFICIAL_MESSAGE_PROJECTIONS = new WeakSet();
+const KAIOS_OFFICIAL_MESSAGE_AUTHORITY_FIELDS = Object.freeze([
+  "risk_level", "ordinary_safe_work", "protected_action", "gm_policy_allowed"
+]);
 
 function officialMessageImmutablePayload(record) {
   return Object.fromEntries([
@@ -2015,6 +2019,9 @@ export function validateKaiosOfficialMessageV1(record) {
   requireArray(record.SCOPE, "official_message.SCOPE");
   invariant(record.SCOPE.length > 0 && record.SCOPE.every((item) => typeof item === "string" && item.trim()), "OFFICIAL_MESSAGE_SCOPE_INVALID", "SCOPE must contain bounded non-empty entries");
   invariant(record.AUTHORITY && typeof record.AUTHORITY === "object" && !Array.isArray(record.AUTHORITY), "OFFICIAL_MESSAGE_AUTHORITY_REQUIRED", "AUTHORITY must be a bounded object");
+  invariant(Object.keys(record.AUTHORITY).length === KAIOS_OFFICIAL_MESSAGE_AUTHORITY_FIELDS.length
+    && KAIOS_OFFICIAL_MESSAGE_AUTHORITY_FIELDS.every((field) => Object.hasOwn(record.AUTHORITY, field)),
+  "OFFICIAL_MESSAGE_AUTHORITY_FIELDS_INVALID", "AUTHORITY may contain only the four canonical ordinary-work fields");
   invariant(["R0", "R1"].includes(record.AUTHORITY.risk_level), "OFFICIAL_MESSAGE_RISK_NOT_ORDINARY", "Official-message V1 accepts ordinary R0/R1 work only");
   invariant(record.AUTHORITY.ordinary_safe_work === true && record.AUTHORITY.protected_action === false && record.AUTHORITY.gm_policy_allowed === true, "OFFICIAL_MESSAGE_AUTHORITY_NOT_ALLOWED", "Ordinary safe GM policy authority is required and protected actions are forbidden");
   for (const field of ["BASE_MAIN_SHA", "TARGET_HEAD_SHA", "WORK_ORDER_BLOB_SHA"]) {
@@ -2113,6 +2120,8 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
   let execution = "NOT_STARTED";
   let review = "NOT_REQUESTED";
   let deliveryFailures = 0;
+  let retryAttempt = 0;
+  let retryNotBefore = null;
   let lastAt = Date.parse(message.CREATED_AT);
   const seenIds = new Set();
   for (let index = 0; index < events.length; index += 1) {
@@ -2120,6 +2129,7 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
     invariant(PRODUCED_KAIOS_OFFICIAL_MESSAGE_EVENTS.has(event), "OFFICIAL_MESSAGE_EVENT_CAPABILITY_REQUIRED", "Projection accepts only canonical lifecycle events");
     invariant(event.SEQUENCE === index + 1 && !seenIds.has(event.EVENT_ID), "OFFICIAL_MESSAGE_EVENT_ORDER_INVALID", "Events require contiguous sequence and unique IDs");
     invariant(Date.parse(event.OCCURRED_AT) >= lastAt && Date.parse(event.OCCURRED_AT) <= Date.parse(observed_at), "OFFICIAL_MESSAGE_EVENT_TIME_REGRESSION", "Events must be ordered and not from the future");
+    invariant(Date.parse(event.OCCURRED_AT) <= Date.parse(message.EXPIRES_AT), "OFFICIAL_MESSAGE_EVENT_AFTER_EXPIRY", "Lifecycle events cannot advance an expired official message");
     invariant(!KAIOS_OFFICIAL_MESSAGE_TERMINAL_STATES.includes(lifecycle), "OFFICIAL_MESSAGE_TERMINAL_REOPEN_FORBIDDEN", "Terminal messages cannot be reopened by late events");
     assertOfficialMessageEventSemantics(message, event);
     const allowed = {
@@ -2134,11 +2144,24 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
     };
     invariant(allowed[lifecycle]?.includes(event.EVENT_TYPE), "OFFICIAL_MESSAGE_TRANSITION_INVALID", `${lifecycle} cannot accept ${event.EVENT_TYPE}`);
     if (event.EVENT_TYPE === "DELIVERY_FAILED") {
+      invariant(retryNotBefore === null || Date.parse(event.OCCURRED_AT) >= retryNotBefore,
+        "OFFICIAL_MESSAGE_RETRY_TOO_EARLY", "A retry failure cannot occur before its scheduled time");
+      retryNotBefore = null;
       deliveryFailures += 1;
       lifecycle = deliveryFailures >= 3 ? "FAILED" : "DELIVERY_FAILED";
       if (lifecycle === "FAILED") { ack = "FAILED"; execution = "FAILED"; review = "BLOCKED"; }
-    } else if (event.EVENT_TYPE === "RETRY_SCHEDULED") lifecycle = "RETRY_SCHEDULED";
-    else if (event.EVENT_TYPE === "DELIVERED") { lifecycle = "DELIVERED"; ack = "DELIVERY_VERIFIED"; }
+    } else if (event.EVENT_TYPE === "RETRY_SCHEDULED") {
+      invariant(event.DETAILS.attempt === deliveryFailures && event.DETAILS.attempt === retryAttempt + 1,
+        "OFFICIAL_MESSAGE_RETRY_ATTEMPT_INVALID", "Retry attempt must increase exactly once for each delivery failure");
+      retryAttempt = event.DETAILS.attempt;
+      retryNotBefore = Date.parse(event.DETAILS.next_retry_at);
+      lifecycle = "RETRY_SCHEDULED";
+    } else if (event.EVENT_TYPE === "DELIVERED") {
+      invariant(retryNotBefore === null || Date.parse(event.OCCURRED_AT) >= retryNotBefore,
+        "OFFICIAL_MESSAGE_RETRY_TOO_EARLY", "A retry delivery cannot occur before its scheduled time");
+      retryNotBefore = null;
+      lifecycle = "DELIVERED"; ack = "DELIVERY_VERIFIED";
+    }
     else if (event.EVENT_TYPE === "ACKNOWLEDGED") { lifecycle = "ACKNOWLEDGED"; ack = "ACKNOWLEDGED"; }
     else if (event.EVENT_TYPE === "WORK_STARTED") { lifecycle = "WORKING"; execution = "WORK_STARTED"; }
     else if (event.EVENT_TYPE === "RESULT_RECORDED") { lifecycle = "REVIEW"; execution = "RESULT_RECORDED"; review = "PENDING"; }
@@ -2149,26 +2172,36 @@ export function projectKaiosOfficialMessageLifecycle({ message, events = [], obs
     seenIds.add(event.EVENT_ID);
     lastAt = Date.parse(event.OCCURRED_AT);
   }
+  if (!KAIOS_OFFICIAL_MESSAGE_TERMINAL_STATES.includes(lifecycle) && Date.parse(observed_at) > Date.parse(message.EXPIRES_AT)) {
+    lifecycle = "STALE"; ack = "STALE"; execution = "STALE"; review = "STALE";
+  }
   const finalStatus = ["DELIVERY_FAILED", "RETRY_SCHEDULED"].includes(lifecycle)
     ? "RETRY_PENDING"
-    : lifecycle === "REVIEWED" ? "REVIEW" : lifecycle;
-  return Object.freeze({
+    : lifecycle === "REVIEWED" ? "REVIEW" : lifecycle === "CLOSED" ? "CLOSED_CANDIDATE" : lifecycle;
+  const projection = Object.freeze({
     MESSAGE_ID: message.MESSAGE_ID, WORK_ID: message.WORK_ID, MESSAGE_DIGEST: message.MESSAGE_DIGEST,
     ACK_STATUS: ack, EXECUTION_STATUS: execution, REVIEW_STATUS: review, FINAL_STATUS: finalStatus,
     DELIVERY_FAILURES: deliveryFailures, EVENT_COUNT: events.length,
-    AUTOMATION_CLOSED_LOOP: lifecycle === "CLOSED" ? "PASS" : "NOT_VERIFIED",
-    PROGRESS_STATUS: lifecycle === "CLOSED" ? "AVAILABLE" : ["FAILED", "STALE", "SUPERSEDED"].includes(lifecycle) ? "BLOCKED" : "IN_PROGRESS"
+    RUNTIME_EVIDENCE_TRUST: "NOT_VERIFIED",
+    AUTOMATION_CLOSED_LOOP: "NOT_VERIFIED",
+    PROGRESS_STATUS: lifecycle === "CLOSED" ? "TESTING" : ["FAILED", "STALE", "SUPERSEDED"].includes(lifecycle) ? "BLOCKED" : "IN_PROGRESS"
   });
+  PRODUCED_KAIOS_OFFICIAL_MESSAGE_PROJECTIONS.add(projection);
+  return projection;
 }
 
 export async function persistKaiosOfficialMessageLifecycle({ store, company, message, events = [], observed_at }) {
   invariant(store && typeof store.history === "function" && typeof store.commitBatch === "function", "COMPANY_EVENT_STORE_REQUIRED", "Official-message persistence requires the existing UniverseStore interface");
   validateCompany(company);
-  const projection = projectKaiosOfficialMessageLifecycle({ message, events, observed_at });
   const history = await store.history(company.company_id, "COMPANY");
   const prior = history.filter((entry) => entry.event_type === "OFFICIAL_MESSAGE_LIFECYCLE_EVENT" && entry.payload?.message_id === message.MESSAGE_ID);
-  const priorIds = new Set(prior.map((entry) => entry.payload?.official_event?.EVENT_ID));
-  const operations = events.filter((event) => !priorIds.has(event.EVENT_ID)).map((event) => ({
+  invariant(prior.length <= events.length, "OFFICIAL_MESSAGE_DURABLE_PREFIX_MISSING", "Persistence requires the full durable event prefix");
+  for (let index = 0; index < prior.length; index += 1) {
+    invariant(stableStringify(prior[index].payload?.official_event) === stableStringify(events[index]),
+      "OFFICIAL_MESSAGE_DURABLE_PREFIX_MISMATCH", "New lifecycle events must exactly extend durable history");
+  }
+  const projection = projectKaiosOfficialMessageLifecycle({ message, events, observed_at });
+  const operations = events.slice(prior.length).map((event) => ({
     domain: "COMPANY", stream: "COMPANY", id: company.company_id, entity: company,
     event_type: "OFFICIAL_MESSAGE_LIFECYCLE_EVENT", actor_id: event.ACTOR_ID, timestamp: event.OCCURRED_AT,
     payload: {
@@ -2214,6 +2247,8 @@ export async function restoreKaiosOfficialMessageLifecycle({ store, company, mes
 
 export function projectKaiosOfficialMessageProgressBoard(lifecycles = []) {
   requireArray(lifecycles, "official_message_lifecycles");
+  invariant(lifecycles.every((record) => PRODUCED_KAIOS_OFFICIAL_MESSAGE_PROJECTIONS.has(record)),
+    "OFFICIAL_MESSAGE_PROJECTION_CAPABILITY_REQUIRED", "Progress Board accepts only canonical lifecycle projections");
   const records = lifecycles.map((record) => Object.freeze({
     work_id: record.WORK_ID,
     status: record.PROGRESS_STATUS,
@@ -2223,6 +2258,7 @@ export function projectKaiosOfficialMessageProgressBoard(lifecycles = []) {
   return Object.freeze({
     source: "KAIOS_OFFICIAL_MESSAGE_V1_VERIFIED_LIFECYCLE_ONLY",
     available: records.filter((record) => record.status === "AVAILABLE").length,
+    testing: records.filter((record) => record.status === "TESTING").length,
     in_progress: records.filter((record) => record.status === "IN_PROGRESS").length,
     blocked: records.filter((record) => record.status === "BLOCKED").length,
     records: Object.freeze(records)

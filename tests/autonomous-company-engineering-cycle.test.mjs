@@ -409,10 +409,12 @@ test("official message closes only after delivery, identity-bound ACK, result, d
     .map((type, index) => officialEvent(message, index + 1, type));
   const projection = projectKaiosOfficialMessageLifecycle({ message, events, observed_at: "2026-10-08T00:07:00Z" });
   assert.deepEqual({ ack: projection.ACK_STATUS, execution: projection.EXECUTION_STATUS, review: projection.REVIEW_STATUS, final: projection.FINAL_STATUS }, {
-    ack: "ACKNOWLEDGED", execution: "RESULT_RECORDED", review: "PASS", final: "CLOSED"
+    ack: "ACKNOWLEDGED", execution: "RESULT_RECORDED", review: "PASS", final: "CLOSED_CANDIDATE"
   });
-  assert.equal(projection.AUTOMATION_CLOSED_LOOP, "PASS");
-  assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).available, 1);
+  assert.equal(projection.AUTOMATION_CLOSED_LOOP, "NOT_VERIFIED");
+  assert.equal(projection.RUNTIME_EVIDENCE_TRUST, "NOT_VERIFIED");
+  assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).available, 0);
+  assert.equal(projectKaiosOfficialMessageProgressBoard([projection]).testing, 1);
 
   const company = {
     company_id: "KAIOS_AI_COMPANY", founder_life_id: "HUMAN_AUTHORITY", name: "KAIOS AI Company",
@@ -433,13 +435,22 @@ test("official message closes only after delivery, identity-bound ACK, result, d
   });
   assert.equal(restored.source, "COMPANY_UNIVERSE_STORE");
   assert.equal(restored.restored_events.length, 6);
-  assert.equal(restored.projection.FINAL_STATUS, "CLOSED");
-  assert.equal(restored.projection.AUTOMATION_CLOSED_LOOP, "PASS");
+  assert.equal(restored.projection.FINAL_STATUS, "CLOSED_CANDIDATE");
+  assert.equal(restored.projection.AUTOMATION_CLOSED_LOOP, "NOT_VERIFIED");
 
   const changedMessage = await createKaiosOfficialMessageV1({ ...officialMessageInput, REVISION: 2 });
   await assert.rejects(
     () => restoreKaiosOfficialMessageLifecycle({ store, company, message: changedMessage, observed_at: "2026-10-08T00:08:00Z" }),
     (error) => error.code === "OFFICIAL_MESSAGE_DURABLE_DIGEST_MISMATCH"
+  );
+
+  const divergentMessage = await createKaiosOfficialMessageV1({ ...officialMessageInput, MESSAGE_ID: "KAIOS-OFFICIAL-TEST-DIVERGENT" });
+  const divergentFirst = officialEvent(divergentMessage, 1, "DELIVERED");
+  await persistKaiosOfficialMessageLifecycle({ store, company, message: divergentMessage, events: [divergentFirst], observed_at: "2026-10-08T00:02:00Z" });
+  const alternateFirst = officialEvent(divergentMessage, 1, "DELIVERED", { EVENT_ID: "EVENT-ALT-001" });
+  await assert.rejects(
+    () => persistKaiosOfficialMessageLifecycle({ store, company, message: divergentMessage, events: [alternateFirst], observed_at: "2026-10-08T00:02:00Z" }),
+    (error) => error.code === "OFFICIAL_MESSAGE_DURABLE_PREFIX_MISMATCH"
   );
 });
 
@@ -466,9 +477,9 @@ test("official message fails closed on forged objects, invalid order, self-revie
 
   const failures = [
     officialEvent(message, 1, "DELIVERY_FAILED"),
-    officialEvent(message, 2, "RETRY_SCHEDULED", { DETAILS: { attempt: 1, next_retry_at: "2026-10-08T00:10:00Z" } }),
+    officialEvent(message, 2, "RETRY_SCHEDULED", { DETAILS: { attempt: 1, next_retry_at: "2026-10-08T00:03:00Z" } }),
     officialEvent(message, 3, "DELIVERY_FAILED"),
-    officialEvent(message, 4, "RETRY_SCHEDULED", { DETAILS: { attempt: 2, next_retry_at: "2026-10-08T00:11:00Z" } }),
+    officialEvent(message, 4, "RETRY_SCHEDULED", { DETAILS: { attempt: 2, next_retry_at: "2026-10-08T00:05:00Z" } }),
     officialEvent(message, 5, "DELIVERY_FAILED")
   ];
   const failed = projectKaiosOfficialMessageLifecycle({ message, events: failures, observed_at: "2026-10-08T00:06:00Z" });
@@ -479,6 +490,20 @@ test("official message fails closed on forged objects, invalid order, self-revie
   const retryPending = projectKaiosOfficialMessageLifecycle({ message, events: failures.slice(0, 2), observed_at: "2026-10-08T00:03:00Z" });
   assert.equal(retryPending.FINAL_STATUS, "RETRY_PENDING");
   assert.equal(retryPending.PROGRESS_STATUS, "IN_PROGRESS");
+
+  assert.throws(
+    () => projectKaiosOfficialMessageProgressBoard([{ WORK_ID: message.WORK_ID, PROGRESS_STATUS: "AVAILABLE", FINAL_STATUS: "CLOSED", AUTOMATION_CLOSED_LOOP: "PASS" }]),
+    (error) => error.code === "OFFICIAL_MESSAGE_PROJECTION_CAPABILITY_REQUIRED"
+  );
+
+  const expired = projectKaiosOfficialMessageLifecycle({ message, events: [], observed_at: "2026-10-08T02:00:00Z" });
+  assert.equal(expired.FINAL_STATUS, "STALE");
+  assert.equal(expired.PROGRESS_STATUS, "BLOCKED");
+
+  await assert.rejects(
+    () => createKaiosOfficialMessageV1({ ...officialMessageInput, AUTHORITY: { ...officialMessageInput.AUTHORITY, mainnet_authorized: true } }),
+    (error) => error.code === "OFFICIAL_MESSAGE_AUTHORITY_FIELDS_INVALID"
+  );
 
   const closedEvents = ["DELIVERED", "ACKNOWLEDGED", "WORK_STARTED", "RESULT_RECORDED", "REVIEWED", "GM_CLOSED"]
     .map((type, index) => officialEvent(message, index + 1, type));
