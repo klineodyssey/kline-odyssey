@@ -2668,3 +2668,755 @@ The deadline is 2026-10-07 02:19 UTC / 10:19 UTC+8. If OpenAI has not supplied a
   "THIS_ACTION": "Documentation-only append; no source restoration, reconstruction, runtime tests, heavy scan, Windows access, main write, merge, deployment or financial action"
 }
 ```
+
+
+## Continuous portfolio and bounded READY backlog — 2026-10-07
+
+This early checkpoint records the Human's continuous-engineering instruction and the bounded owner evidence available at the stated observation time. The target is at least 20 executable READY items, 5–7 active projects, 2–4 heavy batches, and one production merge lane. This snapshot does not yet meet the 20-READY target. Unresolved dependencies, unknown source/identity evidence and protected live actions are not counted as READY. Owner session labels below describe existing engineering assignments, never formal employees or authenticated ACKs.
+
+Q01–Q20 remain the existing parent work packages. The rows below are bounded children, not replacement formal WorkQueue entries. Earlier history, including the 28-deliverable recovery ledger, remains unchanged. Customer's digital-world requirement/Fish Pond work preserves the existing house slice; the scene track does not become a second active project by sharing Navigator work.
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "EVENT": "CONTINUOUS_PORTFOLIO_EARLY_BACKLOG",
+  "RECORDED_AT": "2026-10-07T04:19:00Z",
+  "SOURCE_MESSAGE_ID": "Sentinel_75d1fd2116188191adc3cb71fa99f287",
+  "SOURCE_TIME": "2026-10-07T03:47:23Z",
+  "SOURCE_HEAD": "09195d64a5441f75928194991704af8931c45bf6",
+  "OBSERVED_MAIN": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+  "BRANCH": "dot/engineering-handbook-20261006",
+  "PR": 516,
+  "AUTHOR_ROLE": "dot temporary external engineering maintainer; session owner labels are not Worker identities",
+  "OPERATING_TARGET": {
+    "backlog_ready_min": 20,
+    "active_projects_min": 5,
+    "active_projects_max": 7,
+    "heavy_parallel_min": 2,
+    "heavy_parallel_max": 4,
+    "production_merge_lanes": 1
+  },
+  "COUNTS": {
+    "bounded_rows": 31,
+    "ready": 11,
+    "ready_target_met": false,
+    "active_project_owners_reported": 5,
+    "heavy_batches_verified": null
+  },
+  "STATUS_MEANING": {
+    "READY": "Known inputs/outputs/test/owner; can start within ordinary owner-serialized work. Not running, formal OPEN/claimable, complete or merged.",
+    "ACTIVE": "Owner currently reports actual work; active work excluded from READY count.",
+    "ACTIVE_REPORTED": "Coordinator reports resumption, direct renewed envelope pending.",
+    "DEPENDENCY_QUEUED": "Unresolved predecessor or owner overlap; excluded from READY count.",
+    "HOLD": "Exact protected action or missing evidence only; independent safe work continues.",
+    "BLOCKED_GUARDIAN": "No retry/reassignment/alternate-route bypass. Resolve exact denied action and applicable Human confirmation."
+  },
+  "PORTFOLIO": {
+    "BSC56": "ACTIVE unsigned construction/manifest semantic validation. Owner-reported durable#5248886aa1f; cancelled README publication was resolved by parent-approved identical retry.",
+    "Navigator": "ACTIVE exact f3b0dcbd browser failure diagnosis; shared motion/3D ownership",
+    "PlayerLife": "BLOCKED_GUARDIAN; do not resume or reassign denied patch until exact blocker and explicit Human continuation resolved.",
+    "Customer": "ACTIVE generalized digital-world requirement/Fish Pond draft; house preserved",
+    "Company": "ACTIVE two-path durable queue; capability inventory READY for a distinct lightweight lane.",
+    "ExternalIdentity": "ACTIVE current owner envelope04:19, existing assets README/BscScan token-info only; public platform readiness and no external submission.",
+    "World3D": "DEPENDENCY_QUEUED; shares Navigator owner, not counted as independent active project",
+    "PublicRelease": "WAITING_READ_ONLY; owner resumption required",
+    "ACTIVE_COUNT_NOTE": "Coordinator at04:18 reports five existing project owners BSC56/Navigator/Customer/ExternalIdentity/Company running. Player Life blocked;3D shares Navigator and is queued. This is owner activity, not a claim of five simultaneous heavy processes."
+  },
+  "OWNERSHIP_RULES": [
+    "No second Dispatcher, queue service, Worker identity, authenticated ACK or payroll claim.",
+    "Root serializes production merge/release; workers do not merge main.",
+    "Navigator owns shared game-5d/world/coordinate/drive/bootstrap/UI files; 3D overlapping writes wait.",
+    "Player Life bounded writer scope is runtime/player-life-runtime.mjs, its unit tests and docs/K11520_PLAYER_LIFE.md; backend caller audit read-only.",
+    "Customer owns core/company/index.mjs and its existing tests/spec; other Company work stays read-only or handoff-only until file coordination.",
+    "#516 writer assigned only existing handoff and handbook; prior #502/history/28-item ledger preserved."
+  ],
+  "BOOT_READ": {
+    "scope": "Bounded source reads 03:49–03:50 UTC then current main/#516 refresh 04:13–04:14; not fourteen-layer admission or authenticated authorship",
+    "v1_4_blob": "4286d1aede181f45eb274196a6799ac18ced42ec",
+    "current_main_boot_blob": "b85c9a34a81810e0063480092025a9ef02d456cc",
+    "current_516_boot_blob": "0796d36c38ddeff48235f9739e832432a4ea6a01",
+    "company_boot_blob": "c58eddb13da0a3ee520202f253290f560f368f04",
+    "company_manifest_blob": "18a1b5fc3fd9d8bdcc9a3c8a3725a13221a49d65",
+    "agents_blob": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d",
+    "formal_workqueue_blob": "1bc7a3bbed2f83bf6e28066dbfc5c0b92071fb4c",
+    "registry_blob": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c",
+    "authenticated_ack": false,
+    "formal_claim": false
+  },
+  "SOURCE_REFS": {
+    "main": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    "handbook_head": "09195d64a5441f75928194991704af8931c45bf6",
+    "navigator": "f3b0dcbdacdf59a570f50da4c76e5541ac189263",
+    "customer": "e95ae3a0e4c772af50644bf628e15801de65b97e",
+    "player_caller": "eacb58a4004495f0675e09e260ccd9f09e66fb6d",
+    "player_atomic": "4d511f6d0c814123ef612890d0f38cb3f1316468",
+    "handoff_design": "acb4276e8dcb498f14ec653304249971fa151755",
+    "handoff_offline": "012acd95a64e14e78911686eca342e906c4f1254",
+    "bsc56_owner_reported": "8886aa1fb9956e6abd5d7477b6357a68d573c3ba"
+  },
+  "ITEMS": [
+    {
+      "id": "Q04-BSC-MATRIX",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "COMPLETE_OWNER_REPORTED",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Complete real-product blocker matrix",
+      "current_paths": [
+        "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json",
+        "KGEN/contracts/KGEN_OracleSourceAdapter.sol"
+      ],
+      "input": "Owner report04:18: verified Draft#524 head8886aa1fb9956e6abd5d7477b6357a68d573c3ba, branch dot/k11520-bsc56-production-20261007; 23-row matrix/design and cumulative manifest metadata persisted.",
+      "output": "Owner-reported durable23-row matrix:3 READY,14 PARTIAL,3 NOT_DEPLOYED,2 MISSING,1 CANON_CONFLICT. Matrix component counts are not executable-backlog counts.",
+      "acceptance_test": "Every readiness assertion has source/head/evidence; simulation and local fork never imply real trading.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q04-BSC-SOURCE",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "ACTIVE",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Bind unsigned package to exact candidate sources",
+      "current_paths": [
+        "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json",
+        "KGEN/scripts/rehearse_bsc_testnet.mjs"
+      ],
+      "input": "Owner current ACTIVE next: validate preserved manifest semantics and existing-organ pure unsigned construction plan following#524.",
+      "output": "A source-hash and unsigned-envelope consistency regression in the existing owner surface.",
+      "acceptance_test": "Mismatched contract/compiler/chain/source rejected before any provider or signer creation.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q04-BSC-ORACLE",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "QUEUED_OWNER_ENVELOPE",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Specify missing production oracle evidence",
+      "current_paths": [
+        "KGEN/contracts/KGEN_OracleSourceAdapter.sol",
+        "tests/11520-real-trading-feed-provenance.test.mjs",
+        "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json"
+      ],
+      "input": "CURRENT manifest identifies free-reference USDT vs authenticated USD settlement boundary.",
+      "output": "Concrete allowed negative cases and missing read-only provenance evidence.",
+      "acceptance_test": "Wrong unit, stale timestamp and unverified feed stay fail closed; no live activation.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "Q04-BSC-MATRIX"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q05-BSC-LIVE",
+      "parent": "Q05",
+      "track": "BSC56",
+      "status": "HOLD_ACTION_AUTHORITY",
+      "owner": "dot coordinator",
+      "title": "Present exact live execution action when technically ready",
+      "current_paths": [
+        "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json"
+      ],
+      "input": "Completed source/feed/role/capital packet and wallet-owner action confirmation, both still missing.",
+      "output": "Human-readable action-specific packet, never a signature or transaction from this queue.",
+      "acceptance_test": "Chain, target, amount at risk, signer, effects and pause/rollback fully specified.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "Q04-BSC-MATRIX",
+        "Q04-BSC-SOURCE",
+        "Q04-BSC-ORACLE",
+        "WALLET_OWNER_ACTION_CONFIRMATION"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-NAV-FAILURES",
+      "parent": "Q15",
+      "track": "Navigator",
+      "status": "ACTIVE",
+      "owner": "dot Navigator engineering owner",
+      "title": "Diagnose exact-head elapsed-C browser failures",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/game-5d-main.mjs",
+        "K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/combat-drive-adapter.mjs",
+        "K線西遊記/temples/11520/runtime/combat-mass-scale-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/world-runtime.mjs"
+      ],
+      "input": "#523 f3b0dcbd exact browser failures; owner report 04:14 UTC.",
+      "output": "Failure causes with source-bound smallest repair, preserving elapsed motion/collision/Player ownership.",
+      "acceptance_test": "Keep C0 stop, ±1C, configured range and existing time deadlines; no global mapping invention.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-NAV-PURSUIT",
+      "parent": "Q15",
+      "track": "Navigator",
+      "status": "READY",
+      "owner": "dot Navigator engineering owner",
+      "title": "Repair native pursuit throttle fixture",
+      "current_paths": [
+        "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs"
+      ],
+      "input": "Owner identified test-only pursuit throttle repair for Responsive OUT_OF_RANGE/Axe at #523 f3b0dcbd.",
+      "output": "Minimal owner-local test correction with unchanged assertions.",
+      "acceptance_test": "Same ±1C/range/deadlines; actual actor reaches valid range and Axe action succeeds without teleport.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-NAV-HOME",
+      "parent": "Q15",
+      "track": "Navigator",
+      "status": "READY",
+      "owner": "dot Navigator engineering owner",
+      "title": "Reproduce living-world delivery timeout",
+      "current_paths": [
+        "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs",
+        "K線西遊記/temples/11520/runtime/world-runtime.mjs"
+      ],
+      "input": "Exact f3b0dcbd failure at living-world line175; motion precondition suspected, not proven.",
+      "output": "One source-bound repro and diagnosis; product patch only after cause is established.",
+      "acceptance_test": "Record actor/home distance and action state; distinguish test precondition from runtime defect; retain deadline.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-NAV-ROUTE",
+      "parent": "Q15",
+      "track": "Navigator",
+      "status": "QUEUED_EXACT_PATH",
+      "owner": "dot Navigator engineering owner",
+      "title": "Run native obstacle route evidence",
+      "current_paths": [
+        "K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs",
+        "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs",
+        "K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs"
+      ],
+      "input": "Owner reports prepared local native 1C obstacle-route test; exact target existing harness must be confirmed before staging.",
+      "output": "Source-bound native route evidence and test-only checkpoint.",
+      "acceptance_test": "Use genuine local actor motion around obstacle; no position seeding shortcut; inspect actual movement screenshot.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "OWNER_CONFIRM_EXACT_PREPARED_TEST_PATH"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-NAV-ACCEPT",
+      "parent": "Q15",
+      "track": "Navigator",
+      "status": "DEPENDENCY_QUEUED",
+      "owner": "dot Navigator engineering owner",
+      "title": "Verify final Navigator head and screenshots",
+      "current_paths": [
+        "K線西遊記/temples/11520/tests/11520-browser-responsive.mjs",
+        "K線西遊記/temples/11520/tests/11520-browser-living-world.mjs",
+        "K線西遊記/temples/11520/HANDOFF_CURRENT.md"
+      ],
+      "input": "Final repaired exact head and root heavy-lane allocation.",
+      "output": "CI conclusions, actual motion evidence and six-size screenshot review bound to the final SHA.",
+      "acceptance_test": "Functional and visual pass required separately; old f3 failure remains history.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "Q15-NAV-FAILURES",
+        "Q15-NAV-PURSUIT",
+        "Q15-NAV-HOME",
+        "Q15-NAV-ROUTE",
+        "HEAVY_LANE_ALLOCATION"
+      ],
+      "heavy": true,
+      "formal_claim": false
+    },
+    {
+      "id": "Q02-PLAYER-GUARD",
+      "parent": "Q02",
+      "track": "PlayerLife",
+      "status": "BLOCKED_GUARDIAN",
+      "owner": "dot Player Life engineering owner",
+      "title": "Protect local restore backup before applying import",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/player-life-runtime.mjs",
+        "K線西遊記/temples/11520/tests/11520-player-life.test.mjs",
+        "docs/K11520_PLAYER_LIFE.md"
+      ],
+      "input": "Owner bounded envelope; main f7 existing restore path; coordinator reports resumed after ordinary tool abort. Coordinator report04:17: Guardian forced stop after three denials; exact last action not returned. Do not retry/reassign or bypass.",
+      "output": "Minimal guard refusing different protection-copy overwrite and unverified protection readback.",
+      "acceptance_test": "Collision/no-op write/read failure/source conflict negatives plus unchanged successful restore; no IDB cutover.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "EXACT_DENIED_ACTION_SCOPE_AND_EXPLICIT_HUMAN_CONTINUE"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q02-PLAYER-COMPAT",
+      "parent": "Q02",
+      "track": "PlayerLife",
+      "status": "HOLD_SCOPE_REVIEW",
+      "owner": "dot Player Life engineering owner",
+      "title": "Reconcile restore guard with preserved adapter and callers",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/player-life-runtime.mjs",
+        "KAIOS/backend/web/app.mjs",
+        "docs/K11520_PLAYER_LIFE.md"
+      ],
+      "input": "Read #508 4d511f6d and #521 eacb58a4 against main f7; their changes remain separate Drafts. Read-only compatibility audit itself is not asserted denied, but this owner is stopped; clarify exact action before resuming its lane.",
+      "output": "Compatibility audit naming affected contracts and remaining whole-Life gaps.",
+      "acceptance_test": "No hidden import of lost structural startup, no atomicity or cloud-auth claim; no backend write ownership.",
+      "rollback": "No runtime mutation; supersede or revert only the scoped report append.",
+      "dependencies": [
+        "EXACT_DENIED_ACTION_SCOPE"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q02-PLAYER-BROWSER",
+      "parent": "Q02",
+      "track": "PlayerLife",
+      "status": "DEPENDENCY_QUEUED",
+      "owner": "dot Player Life engineering owner",
+      "title": "Verify guarded recovery in real browser",
+      "current_paths": [
+        "K線西遊記/temples/11520/tests/11520-browser-player-life.mjs",
+        "K線西遊記/temples/11520/tests/11520-player-life.test.mjs"
+      ],
+      "input": "Remote guard checkpoint, final source and assigned heavy lane.",
+      "output": "Collision preservation and successful restore browser evidence on exact head.",
+      "acceptance_test": "Existing copy survives collision; failed readback never applies incoming state; current successful restore still works.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "Q02-PLAYER-GUARD",
+        "HEAVY_LANE_ALLOCATION"
+      ],
+      "heavy": true,
+      "formal_claim": false
+    },
+    {
+      "id": "Q08-CUSTOMER-DRAFT",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "ACTIVE",
+      "owner": "dot Customer engineering owner",
+      "title": "Generalize digital-world requirement draft",
+      "current_paths": [
+        "core/company/index.mjs",
+        "tests/universal-exchange.test.mjs",
+        "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md"
+      ],
+      "input": "#520 e95ae3a0 plus current Human digital-world Fish Pond direction relayed by coordinator; preserve house path.",
+      "output": "Shared requirement fields and Fish Pond policy references in the existing Company owner.",
+      "acceptance_test": "Completeness and owner-feasibility holds; house workflow unchanged; no quote/order/asset authority.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q08-CUSTOMER-AMBIGUITY",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Test ambiguous natural-language requirement drafts",
+      "current_paths": [
+        "tests/universal-exchange.test.mjs",
+        "core/company/index.mjs"
+      ],
+      "input": "Existing owner drafting strict requirements; unknown/ambiguous fields require explicit classification.",
+      "output": "Owner-local negative fixtures for missing, contradictory and unrecognized requirements.",
+      "acceptance_test": "No guessed location, identity, budget, dimensions or authority; unrecognized input cannot promote request.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q08-CUSTOMER-NOAUTH",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Test complete pond draft remains non-executing",
+      "current_paths": [
+        "tests/universal-exchange.test.mjs",
+        "core/company/index.mjs"
+      ],
+      "input": "Owner’s complete digital-world Fish Pond fixture with explicit simulation scope.",
+      "output": "Negative regression proving completeness does not grant execution.",
+      "acceptance_test": "Complete draft creates no quote/order/asset/acceptance, transfer or real-world delivery.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q08-CUSTOMER-ADAPTER",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Map requirements to existing Aquaculture owner",
+      "current_paths": [
+        "KAIOS/life/aquaculture/KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1_SPEC.md",
+        "KAIOS/life/aquaculture/KAIOS_FISHPOND_AQUACULTURE_SOURCE_CROSSWALK.md",
+        "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js",
+        "core/company/index.mjs"
+      ],
+      "input": "Existing 17-stage Aquaculture V1 owner, not a new pond runtime.",
+      "output": "Read-only adapter audit listing each requirement/evidence field and missing seam.",
+      "acceptance_test": "No duplicate pond lifecycle; distinguish simulated location/resources/time/inspection from verified completion.",
+      "rollback": "No runtime mutation; supersede or revert only the scoped report append.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q08-CUSTOMER-PERSIST",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "DEPENDENCY_QUEUED",
+      "owner": "dot Customer engineering owner",
+      "title": "Persist guarded quote mapping",
+      "current_paths": [
+        "core/company/index.mjs",
+        "KAIOS/backend/src/service.mjs",
+        "tests/universal-exchange.test.mjs"
+      ],
+      "input": "Reviewed generalized requirement contract and existing #520 journal/persistence seam.",
+      "output": "Minimal non-authoritative quote mapping/journal candidate on owner branch.",
+      "acceptance_test": "Idempotent replay, immutable inputs and no acceptance/revenue upgrade; database retained on rollback.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "Q08-CUSTOMER-DRAFT",
+        "Q08-CUSTOMER-ADAPTER"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q08-CUSTOMER-DELIVERY",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "HOLD_REQUIRED_EVIDENCE",
+      "owner": "dot Customer engineering owner",
+      "title": "Advance complete-house or pond delivery after acceptance",
+      "current_paths": [
+        "core/company/index.mjs",
+        "KAIOS/backend/src/service.mjs"
+      ],
+      "input": "Accepted location/resource/time/inspection evidence and explicit customer acceptance remain absent.",
+      "output": "Bounded digital-world vertical slice using existing project/delivery owners.",
+      "acceptance_test": "Arrival is not receipt; plan is not execution; no completed house, real revenue or legal commitment inferred.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "ACCEPTED_LOCATION_RESOURCE_TIME_INSPECTION",
+        "EXPLICIT_CUSTOMER_ACCEPTANCE"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q20-COMPANY-QUEUE",
+      "parent": "Q20",
+      "track": "Company",
+      "status": "ACTIVE",
+      "owner": "dot backlog engineering owner",
+      "title": "Persist evidence-backed portfolio checkpoint",
+      "current_paths": [
+        "handoff/HANDOFF_CURRENT.md",
+        "docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md"
+      ],
+      "input": "Current main f7, #516 09195d64, owner envelopes and 03:47 Human instruction.",
+      "output": "Append-only two-file checkpoint and verified branch/tree/bytes.",
+      "acceptance_test": "Prior prefixes/JSON/Q01–Q20 and 28-item ledger unchanged; no formal WorkQueue/registry/Dispatcher edits.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q20-COMPANY-CAPABILITY",
+      "parent": "Q20",
+      "track": "Company",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Audit existing workforce capability and workload",
+      "current_paths": [
+        "KGEN-KAIOS/worker_registry.json",
+        "KGEN-KAIOS/governance/autopilot/company_boot_manifest.json",
+        "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+        "handoff/HANDOFF_CURRENT.md"
+      ],
+      "input": "Existing formal registry plus actual reachable tasks/endpoints; latest coordinator instruction requests evidence inventory.",
+      "output": "Read-only capability audit for existing named roles, current assignment, reachable route, allowed action and evidence gaps.",
+      "acceptance_test": "No invented LifeID/T5/ACK/payroll; a role label or historical registry row is not authenticated live capability.",
+      "rollback": "No runtime mutation; supersede or revert only the scoped report append.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q07-COMPANY-OFFLINE",
+      "parent": "Q07",
+      "track": "Company",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Audit offline handoff guarantees against delivery target",
+      "current_paths": [
+        "tests/autonomous-company-engineering-cycle.test.mjs",
+        "KAIOS/backend/src/adapters/local.mjs",
+        "core/company/index.mjs",
+        "handoff/HANDOFF_CURRENT.md"
+      ],
+      "input": "#501 012acd95 test-only fake-catalog SQLite model and #500 acb4276e research design.",
+      "output": "Gap audit mapping authenticated ACK, durable result, reviewer ACK and integration to actual owner seams.",
+      "acceptance_test": "Atomic inbox/outbox/fencing/duplicate outcomes distinguished from live identity and genuine recipient delivery; no copied parallel runtime.",
+      "rollback": "No runtime mutation; supersede or revert only the scoped report append.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q09-COMPANY-LIVE",
+      "parent": "Q09",
+      "track": "Company",
+      "status": "HOLD_IDENTITY_CAPABILITY",
+      "owner": "dot coordinator",
+      "title": "Perform authenticated end-to-end handoff only when proven",
+      "current_paths": [
+        "core/company/index.mjs",
+        "KAIOS/backend/src/identity.mjs",
+        "handoff/HANDOFF_CURRENT.md"
+      ],
+      "input": "Verified endpoint/controller identity and bounded contact/communication authority missing.",
+      "output": "Future exact-scope request→authenticated ACK→durable result→reviewer ACK→integration evidence.",
+      "acceptance_test": "Posting/sending does not equal ACK; fake fixtures do not equal real employees; no unverified agent contact.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "VERIFIED_RECIPIENT_ENDPOINTS",
+        "AUTHENTICATED_CONTROLLER_BINDING",
+        "BOUNDED_COMMUNICATION_AUTHORITY"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-3D-DEPENDENCY",
+      "parent": "Q15",
+      "track": "3DWorld",
+      "status": "DEPENDENCY_QUEUED",
+      "owner": "dot coordinator",
+      "title": "Map scene and performance dependencies after motion owner stabilizes",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/world-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/game-5d-main.mjs",
+        "K線西遊記/temples/11520/runtime/spatial-coordinate-runtime.mjs"
+      ],
+      "input": "Navigator exact motion/collision owner boundary and current map/CURRENT definitions.",
+      "output": "Read-only scene/performance dependency design naming measurable next delta.",
+      "acceptance_test": "No second motion owner, guessed global POI transform, guessed vehicle ownership/maxC or energy economics.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "Q15-NAV-FAILURES"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-3D-IMPLEMENT",
+      "parent": "Q15",
+      "track": "3DWorld",
+      "status": "DEPENDENCY_QUEUED",
+      "owner": "dot Navigator engineering owner",
+      "title": "Implement next non-overlapping scene delta",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/world-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/game-5d-main.mjs"
+      ],
+      "input": "Accepted bounded dependency design and explicit file-owner release from Navigator.",
+      "output": "Single current-owner scene delta with frame/performance/movement evidence.",
+      "acceptance_test": "Canonical movement and collisions preserved; geometry reconstruction labeled new lineage, not recovered original.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "Q15-3D-DEPENDENCY",
+        "NAVIGATOR_FILE_OWNER_RELEASE"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q19-IDENTITY-ASSETS",
+      "parent": "Q19",
+      "track": "ExternalIdentity",
+      "status": "ACTIVE",
+      "owner": "dot external identity readiness engineering owner",
+      "title": "Validate public brand assets and provenance",
+      "current_paths": [
+        "assets/kaios/brand-manifest.json",
+        "tools/validate-kaios-brand-assets.py",
+        "assets/kgen/kgen-logo.svg",
+        "assets/kgen/kgen-logo-200.png",
+        "assets/kaios/README.md",
+        "KGEN/registry/BscScan/KGEN_BSCSCAN_TOKEN_INFO_SUBMISSION_V1.md"
+      ],
+      "input": "Owner envelope04:19: branch chatgpt-handoff/KGEN-KAIOS-EXTERNAL-IDENTITY-READINESS-20261007 at mainf7; existing asset manifest, mainnet address manifest and listing records. Official BscScan token-page read failed; no current verification claim.",
+      "output": "Cumulative known/missing requirements, hashes/geometry and owner checklist in existing assets/kaios/README.md and existing BscScan token-info file; Draft PR in progress.",
+      "acceptance_test": "Match actual bytes/dimensions/hash to manifest; label declared licence vs independently evidenced scope; no external submit or website replacement.",
+      "rollback": "No runtime mutation; supersede or revert only the scoped report append.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q19-IDENTITY-PACKAGE",
+      "parent": "Q19",
+      "track": "ExternalIdentity",
+      "status": "READY",
+      "owner": "dot external identity readiness engineering owner",
+      "title": "Reconcile public listing package evidence",
+      "current_paths": [
+        "KGEN/registry/BscScan/KGEN_BSCSCAN_TOKEN_INFO_SUBMISSION_V1.md",
+        "KGEN/registry/CoinMarketCap/KGEN_CMC_NEW_LISTING_SUBMISSION_V1.md",
+        "KGEN/registry/CoinMarketCap/test_kgen_cmc_listing_package.py"
+      ],
+      "input": "Existing public listing records and current read-only official requirements; submission status unknown.",
+      "output": "Read-only package audit for contract/name/symbol/decimals/public assets and source-time labels.",
+      "acceptance_test": "Historical supply/block snapshots are not live values; separate KGEN/KAIOS identities; no application, account ownership proof or wallet signature.",
+      "rollback": "No runtime mutation; supersede or revert only the scoped report append.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q19-IDENTITY-TICKET",
+      "parent": "Q19",
+      "track": "ExternalIdentity",
+      "status": "BLOCKED_SOURCE_ACCESS",
+      "owner": "dot coordinator",
+      "title": "Verify existing external listing ticket outcome",
+      "current_paths": [
+        "handoff/HANDOFF_CURRENT.md"
+      ],
+      "input": "Brand-mailbox ticket evidence not accessible; public BscScan read attempt failed.",
+      "output": "Only a source-bound accepted/pending/rejected status when actual relevant evidence arrives.",
+      "acceptance_test": "Missing search result is not rejection; do not reapply or publish private mailbox/account details.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "RELEVANT_EXISTING_TICKET_EVIDENCE"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q18-RELEASE-PAGES",
+      "parent": "Q18",
+      "track": "PublicRelease",
+      "status": "WAITING_READ_ONLY",
+      "owner": "dot release engineering owner",
+      "title": "Observe existing Pages publication outcome",
+      "current_paths": [
+        ".github/workflows/11520-game-product-qa.yml",
+        "handoff/HANDOFF_CURRENT.md"
+      ],
+      "input": "Previously reported run37517256473; release owner interrupted at roster read, no current outcome claim.",
+      "output": "Exact current run/deployment result and scoped next public-source QA decision.",
+      "acceptance_test": "Read-only observation; no rerun/dispatch/merge and no old public evidence promoted to new head.",
+      "rollback": "Revert only the isolated candidate change; retain user data, prior evidence and unrelated branches.",
+      "dependencies": [
+        "RELEASE_OWNER_RESUMPTION"
+      ],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q04-BSC-PREVIEW",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Prepare unsigned-only chain56 transaction preview",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
+        "tests/11520-real-trading-order-intent.test.mjs"
+      ],
+      "input": "Owner supplied independent READY scope04:17; existing intent owner and pinned main.",
+      "output": "Unsigned preview with exact chain56/token/target/exposure fields, without send/sign dispatch.",
+      "acceptance_test": "Reject unknown target/token/chain/mode; exposure preview cannot create provider, signature or broadcast.",
+      "rollback": "Revert only isolated unsigned/UI candidate diff; no on-chain state or persisted user balances changed.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q04-BSC-DOMAIN",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Separate production settlement identity from simulation reference labels",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/real-trading-market-binding.mjs",
+        "tests/11520-real-trading-market-binding.test.mjs"
+      ],
+      "input": "Owner supplied independent READY scope04:17; existing USD INDEX vs USDT reference distinction.",
+      "output": "Explicit evidence/status fields in the existing binding owner; unresolved production value remains unavailable.",
+      "acceptance_test": "USDT simulation reference never accepted as authenticated USD INDEX settlement provenance; no invented KAIOS token semantics.",
+      "rollback": "Revert only isolated unsigned/UI candidate diff; no on-chain state or persisted user balances changed.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    },
+    {
+      "id": "Q04-BSC-CONFIRMATION",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Model wallet-owner confirmation boundary in preflight",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs",
+        "tests/11520-real-trading-preflight-ui.test.mjs"
+      ],
+      "input": "Owner supplied independent READY scope04:17; engineering authorization differs from wallet-owner action confirmation.",
+      "output": "Fail-closed UI/contract state model distinguishing built/unsigned from specifically confirmed execution.",
+      "acceptance_test": "Engineering READY alone never enables signing; missing confirmation shown clearly; no external transaction.",
+      "rollback": "Revert only isolated unsigned/UI candidate diff; no on-chain state or persisted user balances changed.",
+      "dependencies": [],
+      "heavy": false,
+      "formal_claim": false
+    }
+  ],
+  "TESTS": "Documentation validation only; no runtime/browser/heavy tests for this checkpoint.",
+  "CI": "NOT_REVALIDATED_FOR_THIS_CHECKPOINT; no absence labeled PASS",
+  "PUBLICATION": "Containing commit; exact remote HEAD/tree/bytes readback recorded externally after CAS push",
+  "DATA_LOSS_RISK": "Early checkpoint preserves queue evidence; not source preservation or completion of owner-local candidates. Historical recovery uncertainty remains.",
+  "NEXT_ACTION": "Verify and preserve early two-path checkpoint now; await precise Player denied-action resolution and external owner envelope. Continue actual safe READY work;20-ready target remains unmet, not padded.",
+  "AUTHORITY": "Engineering reference only; no formal WorkQueue/registry/protected Boot/Physics/Constitution mutation, external submission, signer, finance, main merge or deployment.",
+  "PUBLICATION_BLOCKERS": {
+    "BSC56": "Resolved per owner report04:18; original cancellation retained as history, no retry by this writer.",
+    "PlayerLife": "Coordinator-reported three-denial Guardian stop; exact action unavailable. Human continuation request pending."
+  }
+}
+```

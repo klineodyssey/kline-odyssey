@@ -619,3 +619,12 @@ Human 2026-10-06 13:28:54 UTC 的新指示：**WORKSPACE IS TEMPORARY / GIT HIST
   "AUTHORITY": "Documentation-only checkpoint; no registration, formal claim, runtime, protected-path, workflow, merge, deploy or financial grant"
 }
 ```
+
+
+## 14 Continuous portfolio superseding checkpoint — 2026-10-07
+
+Human instruction at 2026-10-07 03:47:23 UTC (`Sentinel_75d1fd2116188191adc3cb71fa99f287`) sets continuous authorized engineering, at least 20 executable backlog items, 5–7 active projects, 2–4 heavy parallel batches and one production merge lane. This later direction supersedes only the older §8 statement limiting new heavy work to one batch. It does not change Canon, identity, financial or protected-action boundaries. An hourly status report is not a stop-work event or new authorization gate.
+
+The append-only [portfolio checkpoint in the existing handoff](../handoff/HANDOFF_CURRENT.md#continuous-portfolio-and-bounded-ready-backlog--2026-10-07) records current evidence, bounded work items, dependencies, owner overlap and actual counts. Its READY count is below target at the early snapshot; pending/blocked/active tasks are not padded into READY. Session owner labels do not establish formal Worker identity, authenticated ACK, employee capability or payroll. Actual 3D work shares Navigator ownership until a non-overlapping lane is established. No second Dispatcher or formal queue is created.
+
+Preserve early COMMIT → PUSH → RECORD SHA, exact remote readback, prior Q01–Q20, #502 history and the #516 recovery ledger. Continue safe independent work while only the precise unsupported or protected action is held. This entry remains a documentation review candidate; no main merge or deployment is performed by this checkpoint.
