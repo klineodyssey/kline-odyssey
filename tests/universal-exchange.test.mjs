@@ -1348,6 +1348,10 @@ test("monitoring incident history rejects empty, malformed, unordered, and contr
   const secondFailure = createTempleMonitoringFailure({ condition: "HEART_UNAVAILABLE", occurredAt: "2026-10-08T02:00:00.000Z", source: "TEMPLE_HEART_12345:CHAIN_READ_UNAVAILABLE" });
   const first = advanceTempleMonitoringIncident({ failures: [firstFailure], observedAt: "2026-10-08T01:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100801" });
   const incident = advanceTempleMonitoringIncident({ previousIncident: first, failures: [secondFailure], observedAt: "2026-10-08T02:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100802" });
+  assert.equal(validateTempleMonitoringIncident(incident), incident);
+  assert.equal(incident.first_failure_cycle_id, "DIGITAL_ANT_0001_HOURLY_2026100801");
+  assert.equal(incident.last_observed_cycle_id, "DIGITAL_ANT_0001_HOURLY_2026100802");
+  assert.equal(incident.consecutive_failure_count, 2);
 
   const empty = structuredClone(incident);
   empty.failure_records = [];
@@ -1377,22 +1381,44 @@ test("monitoring incident history rejects empty, malformed, unordered, and contr
   impossibleCount.consecutive_failure_count = 3;
   assert.throws(() => validateTempleMonitoringIncident(impossibleCount), (error) => error.code === "INVALID_TEMPLE_MONITORING_FAILURE_COUNT");
 
+  const forgedSameHourP1 = structuredClone(incident);
+  forgedSameHourP1.failure_records[1].occurred_at = "2026-10-08T01:30:00.000Z";
+  forgedSameHourP1.last_failure_at = "2026-10-08T01:30:00.000Z";
+  forgedSameHourP1.last_observed_cycle_id = "DIGITAL_ANT_0001_HOURLY_2026100801";
+  assert.throws(() => validateTempleMonitoringIncident(forgedSameHourP1), (error) => error.code === "INVALID_TEMPLE_MONITORING_FAILURE_COUNT");
+
+  const mismatchedFirstCycle = structuredClone(incident);
+  mismatchedFirstCycle.first_failure_cycle_id = "DIGITAL_ANT_0001_HOURLY_2026100800";
+  assert.throws(() => validateTempleMonitoringIncident(mismatchedFirstCycle), (error) => error.code === "TEMPLE_MONITORING_FIRST_CYCLE_MISMATCH");
+
+  const mismatchedLastCycle = structuredClone(incident);
+  mismatchedLastCycle.last_observed_cycle_id = "DIGITAL_ANT_0001_HOURLY_2026100801";
+  assert.throws(() => validateTempleMonitoringIncident(mismatchedLastCycle), (error) => error.code === "TEMPLE_MONITORING_LAST_CYCLE_MISMATCH");
+
   const recovered = advanceTempleMonitoringIncident({ previousIncident: incident, failures: [], observedAt: "2026-10-08T03:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100803", recoveryEvidence: verifiedMonitoringRecovery() });
+  assert.equal(validateTempleMonitoringIncident(recovered), recovered);
+  assert.equal(recovered.recovery_cycle_id, "DIGITAL_ANT_0001_HOURLY_2026100803");
+  assert.equal(recovered.last_observed_cycle_id, recovered.recovery_cycle_id);
   const recoveredBeforeLastFailure = structuredClone(recovered);
   recoveredBeforeLastFailure.closed_at = "2026-10-08T01:30:00.000Z";
   assert.throws(() => validateTempleMonitoringIncident(recoveredBeforeLastFailure), (error) => error.code === "TEMPLE_MONITORING_RECOVERY_EVIDENCE_REQUIRED");
+  const mismatchedRecoveryCycle = structuredClone(recovered);
+  mismatchedRecoveryCycle.recovery_cycle_id = "DIGITAL_ANT_0001_HOURLY_2026100804";
+  assert.throws(() => validateTempleMonitoringIncident(mismatchedRecoveryCycle), (error) => error.code === "TEMPLE_MONITORING_RECOVERY_EVIDENCE_REQUIRED");
+  const mismatchedRecoveryObservation = structuredClone(recovered);
+  mismatchedRecoveryObservation.last_observed_cycle_id = "DIGITAL_ANT_0001_HOURLY_2026100804";
+  assert.throws(() => validateTempleMonitoringIncident(mismatchedRecoveryObservation), (error) => error.code === "TEMPLE_MONITORING_RECOVERY_EVIDENCE_REQUIRED");
 });
 
 test("repeat monitoring failure creates deduplicated P1 local repair proposals without queue promotion", () => {
-  const observedAt = "2026-10-08T02:00:00.000Z";
-  const failures = [
+  const failuresAt = (occurredAt) => [
     ["BSC_RPC_UNREACHABLE", "BSC_RPC:RPC_UNAVAILABLE"],
     ["HEART_UNAVAILABLE", "TEMPLE_HEART_12345:CHAIN_READ_UNAVAILABLE"],
     ["TEMPLE_RUNTIME_UNAVAILABLE", "TEMPLE_RUNTIME:PATROL_UNAVAILABLE"]
-  ].map(([condition, source]) => createTempleMonitoringFailure({ condition, occurredAt: observedAt, source, fallback: { attempted: true, strategy: "READ_ONLY", result: "FAILED", evidence: [condition] } }));
-  const first = advanceTempleMonitoringIncident({ failures, observedAt });
-  const second = advanceTempleMonitoringIncident({ previousIncident: first, failures, observedAt: "2026-10-08T03:00:00.000Z" });
-  const third = advanceTempleMonitoringIncident({ previousIncident: second, failures, observedAt: "2026-10-08T04:00:00.000Z" });
+  ].map(([condition, source]) => createTempleMonitoringFailure({ condition, occurredAt, source, fallback: { attempted: true, strategy: "READ_ONLY", result: "FAILED", evidence: [condition] } }));
+  const first = advanceTempleMonitoringIncident({ failures: failuresAt("2026-10-08T02:00:00.000Z"), observedAt: "2026-10-08T02:00:00.000Z" });
+  const second = advanceTempleMonitoringIncident({ previousIncident: first, failures: failuresAt("2026-10-08T03:00:00.000Z"), observedAt: "2026-10-08T03:00:00.000Z" });
+  const third = advanceTempleMonitoringIncident({ previousIncident: second, failures: failuresAt("2026-10-08T04:00:00.000Z"), observedAt: "2026-10-08T04:00:00.000Z" });
   assert.equal(second.priority, "P1");
   assert.equal(second.status, "MONITORING_FAILED");
   assert.deepEqual(second.repair_work_orders.map((order) => order.action).sort(), ["RESTORE_READ_ONLY_BSC_RPC", "VERIFY_GATEKEEPER_RUNTIME", "VERIFY_HEART_READ_PATH"]);
@@ -1414,7 +1440,8 @@ test("same UTC work-cycle replay cannot fabricate a second consecutive failure o
   assert.equal(replay.priority, "P2");
   assert.deepEqual(replay.repair_work_orders, []);
   assert.equal(replay.last_failure_at, first.last_failure_at);
-  const nextCycle = advanceTempleMonitoringIncident({ previousIncident: replay, failures: [failure], observedAt: "2026-10-08T03:01:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100803" });
+  const nextFailure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T03:01:00.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
+  const nextCycle = advanceTempleMonitoringIncident({ previousIncident: replay, failures: [nextFailure], observedAt: "2026-10-08T03:01:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100803" });
   assert.equal(nextCycle.consecutive_failure_count, 2);
   assert.equal(nextCycle.priority, "P1");
 });
@@ -1520,7 +1547,8 @@ test("restored monitoring projections are explicit, canonical, and protected aft
 
   const failure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T05:00:00.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
   const first = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T05:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100805" });
-  const second = advanceTempleMonitoringIncident({ previousIncident: first, failures: [failure], observedAt: "2026-10-08T06:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100806" });
+  const secondFailure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T06:00:00.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
+  const second = advanceTempleMonitoringIncident({ previousIncident: first, failures: [secondFailure], observedAt: "2026-10-08T06:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100806" });
   const recovered = advanceTempleMonitoringIncident({ previousIncident: second, failures: [], observedAt: "2026-10-08T07:00:05.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100807", recoveryEvidence: verifiedMonitoringRecovery() });
   assert.equal(validateTempleMonitoringIncident(recovered), recovered);
   assert.equal(recovered.repair_work_orders.length, 1);
@@ -1582,6 +1610,7 @@ test("recovered incident event survives status persistence and the next distinct
   const reopenedInCompletedEvent = structuredClone(recoveredEvent);
   reopenedInCompletedEvent.temple_monitoring_incident.status = "DEGRADED";
   reopenedInCompletedEvent.temple_monitoring_incident.open = true;
+  reopenedInCompletedEvent.temple_monitoring_incident.last_observed_cycle_id = "DIGITAL_ANT_0001_HOURLY_2026100805";
   reopenedInCompletedEvent.temple_monitoring_incident.recovery_evidence = null;
   assert.throws(() => validateRestoredWorkEvent(reopenedInCompletedEvent, { expectedCycleId: recoveredEvent.work_cycle_id, eventPath: join(tmpdir(), `${recoveredEvent.work_cycle_id}.json`), observedAt: recoveryFinishedAt }), (error) => error.code === "RESTORED_EVENT_RECOVERY_STATUS_INVALID");
   const degradedWithClosedRecovery = { ...structuredClone(recoveredEvent), result: "WORK_CYCLE_DEGRADED", monitoring_status: "DEGRADED" };
@@ -3198,17 +3227,34 @@ test("corrupted exact-filename restored event cannot suppress patrol and becomes
   assert.equal(futureHistory.event, null);
   assert.match(futureHistory.failures[0].source, /TEMPLE_MONITORING_INCIDENT_TIME_BOUNDARY_INVALID/);
 
+  const priorFailure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T09:00:01.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
+  const priorIncident = advanceTempleMonitoringIncident({ failures: [priorFailure], observedAt: "2026-10-08T09:00:05.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100809" });
+  const currentFailure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T10:00:01.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
+  const repeatedIncident = advanceTempleMonitoringIncident({ previousIncident: priorIncident, failures: [currentFailure], observedAt: "2026-10-08T10:00:05.000Z", currentCycleId: cycleId });
+  const forgedSameHourEvent = {
+    ...structuredClone(degradedEvent), monitoring_status: "MONITORING_FAILED", temple_monitoring_incident: structuredClone(repeatedIncident)
+  };
+  forgedSameHourEvent.temple_monitoring_incident.failure_records[0].occurred_at = "2026-10-08T10:00:00.000Z";
+  forgedSameHourEvent.temple_monitoring_incident.first_failure_at = "2026-10-08T10:00:00.000Z";
+  forgedSameHourEvent.temple_monitoring_incident.first_failure_cycle_id = cycleId;
+  forgedSameHourEvent.temple_monitoring_incident.notification_projections[0].created_at = "2026-10-08T10:00:00.000Z";
+  forgedSameHourEvent.dot_gm_notification_projections = structuredClone(forgedSameHourEvent.temple_monitoring_incident.notification_projections);
+  forgedSameHourEvent.repair_work_orders = structuredClone(forgedSameHourEvent.temple_monitoring_incident.repair_work_orders);
+  const forgedSameHour = prepareRestoredWorkEvent({ candidate: forgedSameHourEvent, expectedCycleId: cycleId, eventPath, observedAt });
+  assert.equal(forgedSameHour.event, null);
+  assert.match(forgedSameHour.failures[0].source, /INVALID_TEMPLE_MONITORING_FAILURE_COUNT/);
+
   const state = await runtime();
   const life = await state.registries.life.get("DIGITAL_ANT_0001");
   const app = await state.registries.app.get("DIGITAL_ANT_APP_0001");
   const result = await runDigitalAntHourlyCycle({
-    store: state.store, life, app, scheduledAt, startedAt: observedAt, finishedAt: "2026-10-08T10:30:01.000Z", preflightFailures: emptyHistory.failures,
+    store: state.store, life, app, scheduledAt, startedAt: observedAt, finishedAt: "2026-10-08T10:30:01.000Z", preflightFailures: forgedSameHour.failures,
     readCycle: async () => ({ monitoring_recovery_evidence: verifiedMonitoringRecovery() })
   });
   assert.notEqual(result.status, "IDEMPOTENT_NOOP");
   assert.equal(result.status, "WORK_CYCLE_DEGRADED");
   assert.equal(result.event.payload.temple_monitoring_incident.consecutive_failure_count, 1);
-  assert.match(result.event.payload.temple_monitoring_incident.failure_records[0].source, /TEMPLE_MONITORING_FAILURE_RECORDS_REQUIRED/);
+  assert.match(result.event.payload.temple_monitoring_incident.failure_records[0].source, /INVALID_TEMPLE_MONITORING_FAILURE_COUNT/);
   assert.equal(result.event.payload.secret_access, false);
   assert.equal(result.event.payload.chain_write, false);
 
