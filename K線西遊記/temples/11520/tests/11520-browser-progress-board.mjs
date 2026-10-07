@@ -7,6 +7,15 @@ const BASE=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
 const ROUTE='/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html';
 const profiles=[{name:'portrait',width:390,height:844},{name:'landscape',width:844,height:390}];
 const overlap=(a,b)=>!!a&&!!b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
+const settlePaint=page=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+async function assertDialogChrome(page){
+  await page.waitForFunction(()=>{const title=document.querySelector('#sheetTitle'),close=document.querySelector('#sheetClose'),visible=el=>{const r=el?.getBoundingClientRect(),s=el&&getComputedStyle(el);return !!(r&&r.width&&r.height&&s.visibility!=='hidden'&&s.display!=='none'&&Number(s.opacity)>0)};return title?.textContent?.includes('遊戲進度')&&visible(title)&&visible(close)});
+  await settlePaint(page);
+  const chrome=await page.evaluate(()=>Object.fromEntries(['#sheetTitle','#sheetClose'].map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return[selector,{x:r.x,y:r.y,width:r.width,height:r.height}]})));
+  assert.ok(chrome['#sheetTitle'].width>0&&chrome['#sheetTitle'].height>0,'Progress title must be painted and visible');
+  assert.ok(chrome['#sheetClose'].width>=44&&chrome['#sheetClose'].height>=44,'Progress close control must be painted and visible');
+  return chrome;
+}
 
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
@@ -43,10 +52,13 @@ try{
     assert.equal(await page.locator('[data-progress-key="WALLET"]').getAttribute('data-progress-status'),'NOT_READY');
     assert.equal(await page.locator('[data-progress-key="PUBLIC_RUNTIME"]').getAttribute('data-progress-status'),'STALE');
     const scroll=await page.locator('#sheetBody').evaluate(el=>({height:el.clientHeight,scrollHeight:el.scrollHeight,overflow:getComputedStyle(el).overflowY}));assert.ok(scroll.scrollHeight>scroll.height,'Progress content must scroll');assert.equal(scroll.overflow,'auto');
+    const playerChrome=await assertDialogChrome(page);
     await page.screenshot({path:`${OUT}/${profile.width}x${profile.height}-player.png`});
     await page.locator('[data-progress-mode="engineering"]').click();
+    await page.waitForFunction(()=>document.querySelector('[data-progress-mode="engineering"]')?.getAttribute('aria-selected')==='true');
     const engineeringText=await page.locator('#k11520ProgressContent').textContent();
     for(const field of ['LATEST_MAIN','PUBLIC_BUILD','ACTIVE_PROJECTS','REAL_WALLET','REAL_ORDER','REAL_SETTLEMENT','BLOCKERS','LAST_UPDATED_AT'])assert.ok(engineeringText.includes(field));
+    const engineeringChrome=await assertDialogChrome(page);
     await page.screenshot({path:`${OUT}/${profile.width}x${profile.height}-engineering.png`});
     await page.keyboard.press('Escape');await page.locator('#sheet').waitFor({state:'hidden'});
     await progress.waitFor({state:'visible'});
@@ -59,9 +71,38 @@ try{
     assert.equal(world.playerUncovered,true,'closed board must restore uncovered Player');
     assert.equal(world.monsterUncovered,true,'closed board must restore an uncovered Monster');
     assert.deepEqual(errors,[],'real runtime must not emit page errors');
-    reports.push({profile,buttonBox,controls:beforeOpen.controls,layout:{railOverlaps:beforeOpen.layout?.railOverlaps,cleanUtilityStack:beforeOpen.layout?.cleanUtilityStack},scroll,world,playerMode:'PASS',engineeringMode:'PASS',escape:'PASS',close:'PASS',focusReturn:'PASS'});
+    reports.push({profile,buttonBox,controls:beforeOpen.controls,layout:{railOverlaps:beforeOpen.layout?.railOverlaps,cleanUtilityStack:beforeOpen.layout?.cleanUtilityStack},scroll,world,playerChrome,engineeringChrome,playerMode:'PASS',engineeringMode:'PASS',escape:'PASS',close:'PASS',focusReturn:'PASS'});
+    await context.close();
+  }
+
+  const canonical=JSON.parse(await fs.readFile('K線西遊記/temples/11520/K11520_PRODUCT_PROGRESS_CURRENT.json','utf8'));
+  for(const sourceCase of ['stale','future']){
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'}),page=await context.newPage();
+    const injected=structuredClone(canonical);injected.lastUpdatedAt=sourceCase==='stale'?'2026-09-01T00:00:00Z':'2999-01-01T00:00:00Z';
+    await page.route('**/K11520_PRODUCT_PROGRESS_CURRENT.json',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(injected)}));
+    await page.route('https://data-api.binance.vision/api/v3/aggTrades*',route=>route.fulfill({contentType:'application/json',body:'[]'}));
+    await page.goto(`${BASE}${ROUTE}?progress-board-${sourceCase}=1`,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>globalThis.__K11520_PROGRESS_BOARD__?.open&&document.querySelector('#k11520ProgressButton'));
+    if(await page.locator('#enter11520').isVisible())await page.locator('#enter11520').click().catch(()=>{});
+    await page.locator('#intro11520').waitFor({state:'hidden'});
+    await page.locator('#k11520UtilityMaster').click();await page.locator('#dockToggle').click();await page.locator('#k11520ProgressButton').click();
+    await page.locator('#k11520ProgressBoard').waitFor({state:'visible'});await settlePaint(page);
+    if(sourceCase==='stale'){
+      assert.equal(await page.locator('[data-progress-status="AVAILABLE"]').count(),0,'stale Player view must expose no AVAILABLE claim');
+      assert.equal(await page.locator('#k11520ProgressContent b').filter({hasText:/^可玩$/}).count(),0,'stale Player view must expose no playable label');
+      assert.equal(await page.locator('[data-progress-status="STALE"]').count(),25,'stale Player view must downgrade every core feature');
+      await page.locator('[data-progress-mode="engineering"]').click();await settlePaint(page);
+      assert.equal(await page.locator('[data-progress-status="AVAILABLE"]').count(),0,'stale Engineering view must expose no AVAILABLE claim');
+      assert.ok(await page.locator('[data-progress-status="STALE"]').count()>0,'stale Engineering view must downgrade claims');
+      assert.match(await page.locator('#k11520ProgressContent').textContent(),/STALE_SOURCE_VALUE_WITHHELD/);
+    }else{
+      const error=await page.locator('#k11520ProgressContent').textContent();
+      assert.match(error,/SOURCE_TIMESTAMP_FUTURE/);
+      assert.match(error,/UNKNOWN/);
+      assert.equal(await page.locator('[data-progress-status="AVAILABLE"]').count(),0,'future source must expose no AVAILABLE claim');
+    }
     await context.close();
   }
 }finally{await browser.close()}
-await fs.writeFile(`${OUT}/report.json`,JSON.stringify({status:'PASS',reports},null,2));
+await fs.writeFile(`${OUT}/report.json`,JSON.stringify({status:'PASS',sourceTruthCases:{stale:'PASS',future:'PASS'},reports},null,2));
 console.log(JSON.stringify({status:'PASS',profiles:reports.map(r=>`${r.profile.width}x${r.profile.height}`),artifacts:OUT}));

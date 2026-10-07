@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {ALLOWED_PROGRESS_STATUSES,classifyPlayerSections,validateProgressSource} from '../runtime/product-progress-board.mjs';
+import {ALLOWED_PROGRESS_STATUSES,classifyPlayerSections,renderEngineeringProgress,renderPlayerProgress,renderProgressMode,validateProgressSource} from '../runtime/product-progress-board.mjs';
 
 const here=dirname(fileURLToPath(import.meta.url));
 const source=JSON.parse(readFileSync(resolve(here,'../K11520_PRODUCT_PROGRESS_CURRENT.json'),'utf8'));
@@ -33,9 +33,35 @@ test('truth boundary never promotes Draft or CI evidence to real funds or public
 });
 
 test('source expiry fails visibly and invalid feature status fails validation',()=>{
-  assert.equal(validateProgressSource(source,{now:Date.parse('2026-10-12T00:00:00Z')}).sourceStale,true);
+  const stale=validateProgressSource(source,{now:Date.parse('2026-10-12T00:00:00Z')});
+  assert.equal(stale.sourceStale,true);
+  const player=renderPlayerProgress(source,stale);
+  const engineering=renderEngineeringProgress(source,stale);
+  assert.doesNotMatch(player,/data-progress-status="AVAILABLE"/);
+  assert.doesNotMatch(player,/<b>可玩<\/b>/);
+  assert.equal((player.match(/data-progress-status="STALE"/g)||[]).length,required.length);
+  assert.match(player,/尚無可驗證項目/);
+  assert.doesNotMatch(engineering,/data-progress-status="AVAILABLE"/);
+  assert.equal((engineering.match(/data-progress-status="STALE"/g)||[]).length,Object.keys(source.engineering).length);
+  assert.match(engineering,/STALE_SOURCE_VALUE_WITHHELD/);
   const invalid=structuredClone(source);invalid.features.ORDER.status='PASS';
   assert.deepEqual(validateProgressSource(invalid).errors,['STATUS_INVALID:ORDER']);
+});
+
+test('future-dated source is rejected and rendered as UNKNOWN rather than current claims',()=>{
+  const future=structuredClone(source);future.lastUpdatedAt='2026-10-08T00:00:01Z';
+  const validation=validateProgressSource(future,{now:Date.parse('2026-10-08T00:00:00Z')});
+  assert.equal(validation.ok,false);
+  assert.equal(validation.sourceFuture,true);
+  assert.equal(validation.sourceStale,true);
+  assert.ok(validation.errors.includes('SOURCE_TIMESTAMP_FUTURE'));
+  for(const mode of ['player','engineering']){
+    const rendered=renderProgressMode(future,validation,mode);
+    assert.match(rendered,/SOURCE_TIMESTAMP_FUTURE/);
+    assert.match(rendered,/所有狀態以 UNKNOWN 處理/);
+    assert.doesNotMatch(rendered,/data-progress-status="AVAILABLE"/);
+    assert.doesNotMatch(rendered,/<b>可玩<\/b>/);
+  }
 });
 
 test('player view derives available, building and blocked groups without a parallel owner',()=>{

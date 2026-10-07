@@ -1,5 +1,9 @@
 {
   "status": "PASS",
+  "sourceTruthCases": {
+    "stale": "PASS",
+    "future": "PASS"
+  },
   "reports": [
     {
       "profile": {
@@ -63,6 +67,34 @@
         "playerUncovered": true,
         "monsterUncovered": true
       },
+      "playerChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 96.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 325,
+          "y": 85,
+          "width": 44,
+          "height": 44
+        }
+      },
+      "engineeringChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 96.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 325,
+          "y": 85,
+          "width": 44,
+          "height": 44
+        }
+      },
       "playerMode": "PASS",
       "engineeringMode": "PASS",
       "escape": "PASS",
@@ -120,6 +152,34 @@
         },
         "playerUncovered": true,
         "monsterUncovered": true
+      },
+      "playerChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 32.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 779,
+          "y": 21,
+          "width": 44,
+          "height": 44
+        }
+      },
+      "engineeringChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 32.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 779,
+          "y": 21,
+          "width": 44,
+          "height": 44
+        }
       },
       "playerMode": "PASS",
       "engineeringMode": "PASS",
