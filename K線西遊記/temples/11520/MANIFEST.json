@@ -57,6 +57,7 @@
   "worker_health": "EVIDENCE_DERIVED_HEALTHY_DEGRADED_MISSED_FAILED_OFFLINE",
   "worker_shared_status": "runtime/worker-status.json",
   "worker_status_role": "RELEASE_SNAPSHOT_SCHEDULED_CONTINUITY_USES_READ_ONLY_ACTION_ARTIFACT",
+  "worker_continuity_validation": "EXACT_NEWEST_MAIN_RUN_ATTEMPT_ARTIFACT_STATUS_SCHEMA_IDENTITY_AND_WORK_EVENTS_RESTORED_SAME_HOUR_IDEMPOTENT",
   "temple_monitoring_incident": "TEMPLE_MONITORING_INCIDENT_FAIL_CLOSED",
   "temple_monitoring_failure_conditions": [
     "BSC_RPC_MISSING",

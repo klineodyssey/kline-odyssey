@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createUniverseRuntime } from "../registry/universe-runtime.mjs";
-import { advanceTempleMonitoringIncident, assertCompanyWorkAllowedAfterGatekeeper, classifyTempleMonitoringError, createTempleMonitoringFailure, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
+import { advanceTempleMonitoringIncident, assertCompanyWorkAllowedAfterGatekeeper, classifyTempleMonitoringError, createTempleMonitoringFailure, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, validateTempleMonitoringIncident, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
 import { readTempleHeart12345 } from "../integrations/temple-heart-12345.mjs";
 import { createHeartActionCandidate } from "../security/life-security.mjs";
 import { assertThoughtOrganReadyForPlanning, createAiLifeCertification, verifyThoughtOrganHealth } from "../life/index.mjs";
@@ -395,13 +395,59 @@ export function buildSharedWorkerStatus({ event, previous = null, requestPatrol,
   }));
 }
 
+function validIso(value) { return typeof value === "string" && Number.isFinite(Date.parse(value)); }
+
+function expectedHourlyCycleId(scheduledAt) {
+  const instant = new Date(scheduledAt);
+  if (!Number.isFinite(instant.getTime())) return null;
+  instant.setUTCMinutes(0, 0, 0);
+  return `DIGITAL_ANT_0001_HOURLY_${instant.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
+}
+
+export function validateRestoredWorkerStatus(status) {
+  validateSharedWorkerStatus(status);
+  if (!validIso(status.generated_at)) throw statusError("RESTORED_STATUS_TIME_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  const cycle = status.last_work_cycle;
+  if (!cycle || cycle.life_id !== "DIGITAL_ANT_0001" || cycle.app_id !== "DIGITAL_ANT_APP_0001") throw statusError("RESTORED_STATUS_CYCLE_IDENTITY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  if (!validIso(cycle.scheduled_at) || !validIso(cycle.started_at) || !validIso(cycle.finished_at) || Date.parse(cycle.finished_at) < Date.parse(cycle.started_at)) throw statusError("RESTORED_STATUS_CYCLE_TIME_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  if (Date.parse(status.generated_at) < Date.parse(cycle.finished_at)) throw statusError("RESTORED_STATUS_GENERATED_BEFORE_CYCLE_FINISH", "PUBLIC_WORKER_SHARED_STATUS");
+  if (cycle.work_cycle_id !== expectedHourlyCycleId(cycle.scheduled_at)) throw statusError("RESTORED_STATUS_CYCLE_KEY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  if (!["WORK_CYCLE_COMPLETED", "WORK_CYCLE_DEGRADED", "WORK_CYCLE_FAILED"].includes(cycle.result)) throw statusError("RESTORED_STATUS_RESULT_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  if (cycle.chain_write !== false || cycle.signer_action !== false || cycle.tx_hash !== null) throw statusError("RESTORED_STATUS_AUTHORITY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  if (status.temple_monitoring_incident) {
+    validateTempleMonitoringIncident(status.temple_monitoring_incident);
+    if (status.temple_monitoring_incident.last_observed_cycle_id !== cycle.work_cycle_id) throw statusError("RESTORED_INCIDENT_CYCLE_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
+  }
+  if (status.last_known_good) {
+    const good = status.last_known_good;
+    const goodCycleId = expectedHourlyCycleId(good.observed_at);
+    const validBlocks = [good.bsc_block, good.heart_block].every((block) => block === null || (Number.isInteger(block) && block >= 0));
+    if (good.status !== "VERIFIED_LAST_KNOWN_GOOD" || !validIso(good.observed_at) || good.work_cycle_id !== goodCycleId || good.work_cycle_id > cycle.work_cycle_id || Date.parse(good.observed_at) > Date.parse(status.generated_at) || !validBlocks) throw statusError("RESTORED_LAST_KNOWN_GOOD_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  }
+  return status;
+}
+
+export function prepareRestoredWorkerStatus({ candidate, observedAt }) {
+  if (!validIso(observedAt)) throw statusError("RESTORED_STATUS_OBSERVED_TIME_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  if (!candidate) return Object.freeze({ status: null, failures: Object.freeze([createTempleMonitoringFailure({ condition: "PUBLIC_RUNTIME_STALE", occurredAt: observedAt, source: "PUBLIC_WORKER_SHARED_STATUS:RESTORE_MISSING", lastKnownGood: null, fallback: { attempted: true, strategy: "RUN_CURRENT_READ_ONLY_WORKER_CYCLE", result: "CURRENT_CYCLE_STARTED", evidence: ["NO_PREVIOUS_STATUS_ARTIFACT_RESTORED"] } })]) });
+  let status;
+  try { status = validateRestoredWorkerStatus(candidate); } catch (error) {
+    return Object.freeze({ status: null, failures: Object.freeze([createTempleMonitoringFailure({ condition: "CRITICAL_STATUS_UNKNOWN", occurredAt: observedAt, source: `PUBLIC_WORKER_SHARED_STATUS:RESTORE_REJECTED:${error?.code ?? "INVALID_STATUS"}`, lastKnownGood: null, fallback: { attempted: true, strategy: "IGNORE_UNTRUSTED_STATUS_AND_RUN_CURRENT_READ_ONLY_CYCLE", result: "RESTORED_STATUS_REJECTED", evidence: [error?.code ?? "INVALID_STATUS"] } })]) });
+  }
+  const finishedAt = Date.parse(status.last_work_cycle.finished_at);
+  const age = Date.parse(observedAt) - finishedAt;
+  if (age < 0) return Object.freeze({ status: null, failures: Object.freeze([createTempleMonitoringFailure({ condition: "CRITICAL_STATUS_UNKNOWN", occurredAt: observedAt, source: "PUBLIC_WORKER_SHARED_STATUS:RESTORE_FROM_FUTURE", lastKnownGood: null, fallback: { attempted: true, strategy: "IGNORE_UNTRUSTED_STATUS_AND_RUN_CURRENT_READ_ONLY_CYCLE", result: "RESTORED_STATUS_REJECTED", evidence: ["RESTORED_STATUS_FROM_FUTURE"] } })]) });
+  if (age > 4_500_000) return Object.freeze({ status, failures: Object.freeze([createTempleMonitoringFailure({ condition: "PUBLIC_RUNTIME_STALE", occurredAt: observedAt, source: "PUBLIC_WORKER_SHARED_STATUS:FRESHNESS", lastKnownGood: status.last_known_good ?? null, fallback: { attempted: true, strategy: "RUN_CURRENT_READ_ONLY_WORKER_CYCLE", result: "CURRENT_CYCLE_STARTED", evidence: [status.last_work_cycle.work_cycle_id] } })]) });
+  return Object.freeze({ status, failures: Object.freeze([]) });
+}
+
 export async function persistFatalMonitoringEvidence({ error, statusPath, eventsDir = null, output = null, observedAt = new Date().toISOString() }) {
   let previous = null;
-  try { previous = await readJsonIfPresent(statusPath); } catch { previous = null; }
+  try { previous = validateRestoredWorkerStatus(await readJsonIfPresent(statusPath)); } catch { previous = null; }
   const failure = classifyTempleMonitoringError(error, { occurredAt: observedAt, lastKnownGood: previous?.last_known_good ?? null });
-  const incident = advanceTempleMonitoringIncident({ previousIncident: previous?.temple_monitoring_incident ?? null, failures: [failure], observedAt });
   const hour = new Date(observedAt); hour.setUTCMinutes(0, 0, 0);
   const workCycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
+  const incident = advanceTempleMonitoringIncident({ previousIncident: previous?.temple_monitoring_incident ?? null, failures: [failure], observedAt, currentCycleId: workCycleId });
   const gatekeeperDuty = Object.freeze(validateGatekeeperDutyStatus({
     status: "DEGRADED", gatekeeper_started_at: observedAt, gatekeeper_finished_at: observedAt, heart_block: null,
     heart_status: "UNKNOWN", fortune_status: "UNKNOWN", heartbeat_status: "UNKNOWN", ignition_status: "UNKNOWN",
@@ -410,7 +456,7 @@ export async function persistFatalMonitoringEvidence({ error, statusPath, events
     evidence: Object.freeze([failure.condition, failure.source])
   }));
   const event = Object.freeze({
-    work_cycle_id: workCycleId, scheduled_at: observedAt, started_at: observedAt, finished_at: observedAt,
+    life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", work_cycle_id: workCycleId, scheduled_at: hour.toISOString(), started_at: observedAt, finished_at: observedAt,
     bsc_block: null, rpc_status: "UNKNOWN", heart_status: "UNKNOWN", kgen_status: "UNKNOWN", kaios_status: "UNKNOWN",
     indexer_status: "UNKNOWN", wallet_state: "UNKNOWN", heart_state: "UNKNOWN", finance_state: "UNKNOWN",
     work_queue_state: "UNVERIFIED", observations: Object.freeze(["FATAL_RUNTIME_MONITORING_EVIDENCE"]), risk_level: "UNKNOWN",
@@ -440,7 +486,7 @@ async function main() {
   const output = argument(argv, "--output");
   const seed = JSON.parse(await readFile(new URL("../data/canonical.json", import.meta.url), "utf8"));
   const universe = await createUniverseRuntime({ seed });
-  const [life, app, previousStatus, firstEventEvidence] = await Promise.all([
+  const [life, app, previousStatusCandidate, firstEventEvidence] = await Promise.all([
     universe.registries.life.get("DIGITAL_ANT_0001"), universe.registries.app.get("DIGITAL_ANT_APP_0001"), readJsonIfPresent(statusPath), readJsonIfPresent(FIRST_HEARTBEAT_KGEN_EVIDENCE)
   ]);
   const canonicalReceiptEvents = Object.fromEntries((seed.next_stage?.heart_life_events_v3_7?.events ?? [])
@@ -461,12 +507,9 @@ async function main() {
     if (output) await writeJson(output, report); else process.stdout.write(`${JSON.stringify(report)}\n`);
     return;
   }
-  const stalePreflight = (() => {
-    if (!previousStatus) return [createTempleMonitoringFailure({ condition: "PUBLIC_RUNTIME_STALE", occurredAt: now, source: "PUBLIC_WORKER_SHARED_STATUS:RESTORE_MISSING", lastKnownGood: null, fallback: { attempted: true, strategy: "RUN_CURRENT_READ_ONLY_WORKER_CYCLE", result: "CURRENT_CYCLE_STARTED", evidence: ["NO_PREVIOUS_STATUS_ARTIFACT_RESTORED"] } })];
-    const finishedAt = Date.parse(previousStatus?.last_work_cycle?.finished_at ?? "");
-    if (!Number.isFinite(finishedAt) || Date.parse(now) - finishedAt <= 4_500_000) return [];
-    return [createTempleMonitoringFailure({ condition: "PUBLIC_RUNTIME_STALE", occurredAt: now, source: "PUBLIC_WORKER_SHARED_STATUS:FRESHNESS", lastKnownGood: previousStatus?.last_known_good ?? null, fallback: { attempted: true, strategy: "RUN_CURRENT_READ_ONLY_WORKER_CYCLE", result: "CURRENT_CYCLE_STARTED", evidence: [previousStatus.last_work_cycle.work_cycle_id] } })];
-  })();
+  const restoredStatus = prepareRestoredWorkerStatus({ candidate: previousStatusCandidate, observedAt: now });
+  const previousStatus = restoredStatus.status;
+  const stalePreflight = restoredStatus.failures;
   const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, previousStatus, preflightFailures: stalePreflight, readCycle: (context) => publicReadCycle({ ...context, seed, verifiedFirstEvents }) });
   const event = publicWorkEvent(result);
   const requestPatrol = event.request_patrol;

@@ -16,6 +16,10 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.equal((workflow.match(/continue-on-error:\s*true/g) || []).length, 2);
   assert.match(workflow, /actions:\s*read/);
   assert.match(workflow, /Restore previous read-only status for consecutive-cycle detection/);
+  assert.match(workflow, /previous_events="\$previous_runtime\/work-events"/);
+  assert.match(workflow, /cp "\$previous_events"\/DIGITAL_ANT_0001_HOURLY_\*\.json "\$RUNNER_TEMP\/digital-ant-runtime\/work-events\/"/);
+  assert.match(workflow, /item\.name === expectedName/);
+  assert.doesNotMatch(workflow, /item\.name\.startsWith\("digital-ant-hourly-"\)/);
   assert.doesNotMatch(workflow, /uses: actions\/upload-artifact@v4/);
   assert.equal((workflow.match(/uses: actions\/checkout@v7/g) || []).length, 2);
   assert.equal((workflow.match(/uses: actions\/setup-node@v7/g) || []).length, 2);
@@ -33,6 +37,35 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
   assert.doesNotMatch(workflow, /git\s+push\b/);
   assert.doesNotMatch(workflow, /gh\s+workflow\s+run\s+deploy-pages-static\.yml/);
   assert.doesNotMatch(workflow, /DIGITAL_ANT_0001_PRIVATE_KEY|SIGN_TRANSACTION|PRIVATE_KEY/);
+});
+
+test("Digital Ant artifact selection is deterministic and accepts only the exact newest valid run-attempt name", async () => {
+  const workflow = await fs.readFile(new URL("../.github/workflows/universal_exchange_v2.yml", import.meta.url), "utf8");
+  const match = workflow.match(/id: previous-runtime[\s\S]*?script: \|\r?\n([\s\S]*?)\r?\n      - name: Download previous Digital Ant runtime evidence/);
+  assert.ok(match);
+  const script = match[1].split(/\r?\n/).map((line) => line.replace(/^ {12}/, "")).join("\n");
+  const runs = [
+    { id: 41, run_number: 41, run_attempt: 1, status: "completed", head_branch: "main", event: "schedule" },
+    { id: 43, run_number: 43, run_attempt: 2, status: "completed", head_branch: "main", event: "schedule" },
+    { id: 42, run_number: 42, run_attempt: 3, status: "completed", head_branch: "main", event: "workflow_dispatch" },
+    { id: 44, run_number: 44, run_attempt: 1, status: "completed", head_branch: "feature", event: "schedule" },
+    { id: 99, run_number: 99, run_attempt: 1, status: "completed", head_branch: "main", event: "schedule" }
+  ];
+  const artifacts = new Map([
+    [43, [{ name: "digital-ant-hourly-43-2-prefix-spoof", expired: false }]],
+    [42, [{ name: "digital-ant-hourly-42-2", expired: false }, { name: "digital-ant-hourly-42-3", expired: false }]],
+    [41, [{ name: "digital-ant-hourly-41-1", expired: false }]]
+  ]);
+  const listWorkflowRuns = Symbol("listWorkflowRuns");
+  const listWorkflowRunArtifacts = Symbol("listWorkflowRunArtifacts");
+  const github = {
+    rest: { actions: { listWorkflowRuns, listWorkflowRunArtifacts } },
+    async paginate(method, args) { return method === listWorkflowRuns ? runs : artifacts.get(args.run_id) ?? []; }
+  };
+  const outputs = {};
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+  await new AsyncFunction("github", "context", "core", script)(github, { repo: { owner: "klineodyssey", repo: "kline-odyssey" }, runId: 99 }, { setOutput(key, value) { outputs[key] = value; } });
+  assert.deepEqual(outputs, { "run-id": "42", "artifact-name": "digital-ant-hourly-42-3" });
 });
 
 test("Cursor Cloud is manual-only and suspended by Human cost decision", async () => {

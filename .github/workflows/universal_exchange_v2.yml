@@ -115,14 +115,17 @@ jobs:
               status: "completed",
               per_page: 50
             });
-            for (const run of runs) {
-              if (run.id >= Number(context.runId)) continue;
+            const candidates = runs
+              .filter((run) => String(run.id) !== String(context.runId) && run.status === "completed" && run.head_branch === "main" && ["schedule", "workflow_dispatch"].includes(run.event))
+              .sort((a, b) => Number(b.run_number) - Number(a.run_number) || Number(b.run_attempt) - Number(a.run_attempt) || Number(b.id) - Number(a.id));
+            for (const run of candidates) {
               const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
                 ...context.repo,
                 run_id: run.id,
                 per_page: 100
               });
-              const artifact = artifacts.find((item) => item.expired !== true && item.name.startsWith("digital-ant-hourly-"));
+              const expectedName = `digital-ant-hourly-${run.id}-${run.run_attempt}`;
+              const artifact = artifacts.find((item) => item.expired !== true && item.name === expectedName);
               if (!artifact) continue;
               core.setOutput("run-id", String(run.id));
               core.setOutput("artifact-name", artifact.name);
@@ -142,9 +145,14 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/digital-ant-runtime/work-events"
-          previous="$RUNNER_TEMP/digital-ant-previous/digital-ant-runtime/worker-status.json"
-          if test -f "$previous"; then
-            cp "$previous" "$RUNNER_TEMP/digital-ant-runtime/worker-status.json"
+          previous_runtime="$RUNNER_TEMP/digital-ant-previous/digital-ant-runtime"
+          previous_status="$previous_runtime/worker-status.json"
+          previous_events="$previous_runtime/work-events"
+          if test -f "$previous_status"; then
+            cp "$previous_status" "$RUNNER_TEMP/digital-ant-runtime/worker-status.json"
+          fi
+          if test -d "$previous_events" && compgen -G "$previous_events/DIGITAL_ANT_0001_HOURLY_*.json" > /dev/null; then
+            cp "$previous_events"/DIGITAL_ANT_0001_HOURLY_*.json "$RUNNER_TEMP/digital-ant-runtime/work-events/"
           fi
       - name: Run one independent read-only hourly or ignition-window cycle
         env:

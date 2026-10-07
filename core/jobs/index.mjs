@@ -373,11 +373,12 @@ function monitoringRepairWorkOrder({ incidentId, action, createdAt }) {
 }
 
 export function validateTempleMonitoringIncident(incident) {
-  requireFields(incident, ["incident_id", "incident_type", "status", "open", "first_failure_at", "last_failure_at", "consecutive_failure_count", "failure_conditions", "failure_records", "notification_projections", "repair_work_orders", "recovery_evidence", "safety"], "TempleMonitoringIncident");
+  requireFields(incident, ["incident_id", "incident_type", "status", "open", "first_failure_at", "last_failure_at", "first_failure_cycle_id", "last_observed_cycle_id", "consecutive_failure_count", "failure_conditions", "failure_records", "notification_projections", "repair_work_orders", "recovery_evidence", "safety"], "TempleMonitoringIncident");
   invariant(incident.incident_type === "TEMPLE_MONITORING_INCIDENT", "INVALID_TEMPLE_MONITORING_INCIDENT_TYPE", "Temple monitoring incidents require their canonical type");
   invariant(["DEGRADED", "MONITORING_FAILED", "RECOVERED"].includes(incident.status), "INVALID_TEMPLE_MONITORING_INCIDENT_STATUS", "Temple monitoring incident status is invalid");
   invariant(!["NORMAL", "NO_ISSUE"].includes(incident.status), "TEMPLE_MONITORING_FALSE_NORMAL_FORBIDDEN", "A monitoring incident cannot be normal");
   invariant(Number.isInteger(incident.consecutive_failure_count) && incident.consecutive_failure_count >= 1, "INVALID_TEMPLE_MONITORING_FAILURE_COUNT", "Temple monitoring incident failure count is invalid");
+  invariant(/^(?:DIGITAL_ANT_0001_HOURLY|TEMPLE_MONITORING_UTC)_\d{10}$/.test(incident.first_failure_cycle_id) && /^(?:DIGITAL_ANT_0001_HOURLY|TEMPLE_MONITORING_UTC)_\d{10}$/.test(incident.last_observed_cycle_id), "INVALID_TEMPLE_MONITORING_CYCLE_ID", "Temple monitoring incidents require UTC work-cycle identity");
   invariant(incident.failure_conditions.every((condition) => TEMPLE_MONITORING_FAILURE_CONDITIONS.includes(condition)), "INVALID_TEMPLE_MONITORING_FAILURE", "Temple monitoring incident contains an unknown failure");
   invariant(incident.safety?.read_only === true && incident.safety?.secret_access === false && incident.safety?.signer === false && incident.safety?.chain_write === false && incident.safety?.transaction_sent === false && incident.safety?.asset_movement === false && incident.safety?.temple_mutation === false && incident.safety?.token_mutation === false && incident.safety?.governance_action === false, "TEMPLE_MONITORING_SAFETY_BOUNDARY", "Temple monitoring incidents must remain read-only and mutation-free");
   if (incident.status === "RECOVERED") invariant(incident.open === false && recoveryEvidenceVerified(incident.recovery_evidence), "TEMPLE_MONITORING_RECOVERY_EVIDENCE_REQUIRED", "Recovery requires verified RPC, Heart, wallet, cooldown, and patrol evidence");
@@ -389,17 +390,22 @@ export function validateTempleMonitoringIncident(incident) {
   return incident;
 }
 
-export function advanceTempleMonitoringIncident({ previousIncident = null, failures = [], observedAt, recoveryEvidence = null }) {
+export function advanceTempleMonitoringIncident({ previousIncident = null, failures = [], observedAt, recoveryEvidence = null, currentCycleId = null }) {
   invariant(validIso(observedAt), "INVALID_TEMPLE_MONITORING_INCIDENT_TIME", "Temple monitoring incident transitions require an ISO timestamp");
   invariant(Array.isArray(failures), "TEMPLE_MONITORING_FAILURES_REQUIRED", "Temple monitoring failures must be an array");
+  const cycleId = currentCycleId ?? `TEMPLE_MONITORING_UTC_${observedAt.slice(0, 13).replace(/[-T:]/g, "")}`;
+  invariant(/^(?:DIGITAL_ANT_0001_HOURLY|TEMPLE_MONITORING_UTC)_\d{10}$/.test(cycleId), "INVALID_TEMPLE_MONITORING_CYCLE_ID", "Temple monitoring transitions require a UTC work-cycle identity");
   const previousOpen = previousIncident?.incident_type === "TEMPLE_MONITORING_INCIDENT" && previousIncident.open === true;
   if (failures.length === 0 && !previousOpen) return null;
+  if (previousOpen && previousIncident.last_observed_cycle_id === cycleId) return Object.freeze(validateTempleMonitoringIncident(immutableClone(previousIncident)));
   if (failures.length === 0 && previousOpen && recoveryEvidenceVerified(recoveryEvidence)) {
     return Object.freeze(validateTempleMonitoringIncident({
       ...immutableClone(previousIncident),
       status: "RECOVERED",
       open: false,
       closed_at: observedAt,
+      recovery_cycle_id: cycleId,
+      last_observed_cycle_id: cycleId,
       recovery_evidence: immutableClone(recoveryEvidence)
     }));
   }
@@ -436,6 +442,8 @@ export function advanceTempleMonitoringIncident({ previousIncident = null, failu
     priority: consecutive >= 2 ? "P1" : "P2",
     first_failure_at: firstFailureAt,
     last_failure_at: observedAt,
+    first_failure_cycle_id: previousOpen ? previousIncident.first_failure_cycle_id : cycleId,
+    last_observed_cycle_id: cycleId,
     consecutive_failure_count: consecutive,
     failure_conditions: [...new Set(allRecords.map((failure) => failure.condition))],
     failure_records: allRecords,
@@ -763,7 +771,8 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
     previousIncident: previousStatus?.temple_monitoring_incident ?? null,
     failures: normalizedMonitoringFailures,
     observedAt: finish,
-    recoveryEvidence: observation.monitoring_recovery_evidence ?? null
+    recoveryEvidence: observation.monitoring_recovery_evidence ?? null,
+    currentCycleId: cycleIdValue
   });
   if (monitoringIncident?.open === true) result = "WORK_CYCLE_DEGRADED";
   if (monitoringIncident?.open === true && !observation.gatekeeper_duty) observation.gatekeeper_duty = synthesizeMonitoringFailureDuty({ startedAt: start, finishedAt: finish, failure: normalizedMonitoringFailures[0] });

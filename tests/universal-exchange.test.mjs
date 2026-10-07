@@ -2,8 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
+import { execFile } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import {
   MemoryUniverseStore, IndexedDbUniverseStore, createResilientBrowserUniverseStore,
   createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
@@ -114,9 +117,10 @@ import {
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
-import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, persistFatalMonitoringEvidence, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, persistFatalMonitoringEvidence, prepareRestoredWorkerStatus, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol, validateRestoredWorkerStatus } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
+const execFileAsync = promisify(execFile);
 
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
@@ -131,6 +135,18 @@ function verifiedMonitoringRecovery(overrides = {}) {
     patrol_data: { status: "VERIFIED", fresh: true, evidence: ["CORE_HEART_INDEXER_HEALTHY", "PATROL_BLOCK_116040000"] },
     ...overrides
   };
+}
+
+function restoredStatusFixture({ scheduledAt = "2026-10-08T10:00:00.000Z", finishedAt = "2026-10-08T10:00:05.000Z" } = {}) {
+  const cycleId = `DIGITAL_ANT_0001_HOURLY_${scheduledAt.slice(0, 13).replace(/[-T:]/g, "")}`;
+  const event = {
+    event_id: cycleId, life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", work_cycle_id: cycleId,
+    scheduled_at: scheduledAt, started_at: scheduledAt, finished_at: finishedAt, result: "WORK_CYCLE_COMPLETED",
+    action_taken: "NO_ACTION", work_duration_seconds: 5, monitoring_status: "VERIFIED", temple_monitoring_incident: null,
+    chain_write: false, signer_action: false, tx_hash: null, bsc_block: 116040000,
+    gatekeeper_duty: { heart_block: 116040000 }, heart_state: { status: "12345_PATROL_COMPLETED" }, work_time: { gatekeeper_work_seconds: 1, cfo_work_seconds: 1, company_work_seconds: 1 }
+  };
+  return buildSharedWorkerStatus({ event, requestPatrol: { status: "SHARED_REQUEST_SOURCE_VERIFIED", real_requests: 0, open_requests: 0, evidence: [] }, companyPatrol: { status: "COMPANY_PATROL_COMPLETED", work_queue: 0 }, generatedAt: finishedAt });
 }
 
 async function withIndexedDb(fakeIndexedDb, callback) {
@@ -1341,6 +1357,51 @@ test("repeat monitoring failure creates deduplicated P1 local repair proposals w
     assert.equal(order.execution_authorized, false);
     assert.equal(order.chain_write, false);
   }
+});
+
+test("same UTC work-cycle replay cannot fabricate a second consecutive failure or P1 proposal", () => {
+  const failure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T02:01:00.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
+  const first = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T02:01:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100802" });
+  const replay = advanceTempleMonitoringIncident({ previousIncident: first, failures: [failure], observedAt: "2026-10-08T02:40:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100802" });
+  assert.equal(replay.consecutive_failure_count, 1);
+  assert.equal(replay.priority, "P2");
+  assert.deepEqual(replay.repair_work_orders, []);
+  assert.equal(replay.last_failure_at, first.last_failure_at);
+  const nextCycle = advanceTempleMonitoringIncident({ previousIncident: replay, failures: [failure], observedAt: "2026-10-08T03:01:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100803" });
+  assert.equal(nextCycle.consecutive_failure_count, 2);
+  assert.equal(nextCycle.priority, "P1");
+});
+
+test("restored status is identity/schema validated and malformed evidence cannot influence streak or last-known-good", () => {
+  const valid = restoredStatusFixture();
+  assert.equal(validateRestoredWorkerStatus(valid), valid);
+  const fresh = prepareRestoredWorkerStatus({ candidate: valid, observedAt: "2026-10-08T10:30:00.000Z" });
+  assert.equal(fresh.status, valid);
+  assert.deepEqual(fresh.failures, []);
+
+  const malicious = structuredClone(valid);
+  malicious.life_id = "ATTACKER_LIFE";
+  malicious.last_known_good = { status: "VERIFIED_LAST_KNOWN_GOOD", work_cycle_id: "DIGITAL_ANT_0001_HOURLY_2099010101", observed_at: "2099-01-01T01:00:00.000Z", bsc_block: 999999999 };
+  const rejected = prepareRestoredWorkerStatus({ candidate: malicious, observedAt: "2026-10-08T10:30:00.000Z" });
+  assert.equal(rejected.status, null);
+  assert.equal(rejected.failures[0].condition, "CRITICAL_STATUS_UNKNOWN");
+  assert.equal(rejected.failures[0].last_known_good.status, "NO_VERIFIED_LAST_KNOWN_GOOD");
+  assert.match(rejected.failures[0].source, /RESTORE_REJECTED/);
+  const failClosedIncident = advanceTempleMonitoringIncident({ previousIncident: rejected.status?.temple_monitoring_incident ?? null, failures: rejected.failures, observedAt: "2026-10-08T10:30:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100810" });
+  assert.equal(failClosedIncident.consecutive_failure_count, 1);
+  assert.equal(failClosedIncident.priority, "P2");
+
+  const forgedLastKnownGood = structuredClone(valid);
+  forgedLastKnownGood.last_known_good.observed_at = "2099-01-01T01:00:00.000Z";
+  forgedLastKnownGood.last_known_good.work_cycle_id = "DIGITAL_ANT_0001_HOURLY_2099010101";
+  const rejectedLastKnownGood = prepareRestoredWorkerStatus({ candidate: forgedLastKnownGood, observedAt: "2026-10-08T10:30:00.000Z" });
+  assert.equal(rejectedLastKnownGood.status, null);
+  assert.match(rejectedLastKnownGood.failures[0].source, /RESTORED_LAST_KNOWN_GOOD_INVALID/);
+
+  const stale = prepareRestoredWorkerStatus({ candidate: valid, observedAt: "2026-10-08T12:00:06.000Z" });
+  assert.equal(stale.status, valid);
+  assert.equal(stale.failures[0].condition, "PUBLIC_RUNTIME_STALE");
+  assert.equal(stale.failures[0].last_known_good.work_cycle_id, valid.last_known_good.work_cycle_id);
 });
 
 test("incident recovery requires RPC, Heart bytecode, canonical wallet read, cooldown, and fresh patrol evidence", () => {
@@ -2865,6 +2926,31 @@ test("fatal public worker catch persists fail-closed status and actual event evi
     assert.equal(JSON.parse(await fs.readFile(statusPath, "utf8")).temple_monitoring_incident.open, true);
     assert.equal(JSON.parse(await fs.readFile(output, "utf8")).fatal_runtime_failure, true);
     assert.equal((await fs.readdir(eventsDir)).length, 1);
+  } finally {
+    await fs.rm(temporary, { recursive: true, force: true });
+  }
+});
+
+test("restored same-hour Work Event makes a new worker process idempotently no-op", async () => {
+  const temporary = await fs.mkdtemp(join(tmpdir(), "kgen-monitoring-replay-"));
+  const runtimeDir = join(temporary, "digital-ant-runtime");
+  const eventsDir = join(runtimeDir, "work-events");
+  const statusPath = join(runtimeDir, "worker-status.json");
+  const output = join(temporary, "worker-result.json");
+  const hour = new Date(); hour.setUTCMinutes(0, 0, 0);
+  const cycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
+  const eventPath = join(eventsDir, `${cycleId}.json`);
+  const restoredEvent = { work_cycle_id: cycleId, marker: "RESTORED_FROM_PREVIOUS_ACTION_ARTIFACT" };
+  try {
+    await fs.mkdir(eventsDir, { recursive: true });
+    await fs.writeFile(eventPath, `${JSON.stringify(restoredEvent)}\n`, "utf8");
+    const workerPath = fileURLToPath(new URL("../core/jobs/public-read-only-worker.mjs", import.meta.url));
+    await execFileAsync(process.execPath, [workerPath, "--status", statusPath, "--events-dir", eventsDir, "--output", output], { cwd: fileURLToPath(new URL("..", import.meta.url)), timeout: 20_000 });
+    const report = JSON.parse(await fs.readFile(output, "utf8"));
+    assert.equal(report.result, "IDEMPOTENT_NOOP");
+    assert.equal(report.work_cycle_id, cycleId);
+    assert.deepEqual(JSON.parse(await fs.readFile(eventPath, "utf8")), restoredEvent);
+    await assert.rejects(fs.readFile(statusPath, "utf8"), (error) => error.code === "ENOENT");
   } finally {
     await fs.rm(temporary, { recursive: true, force: true });
   }
