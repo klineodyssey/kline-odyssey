@@ -1,7 +1,7 @@
 {
   "schema": "KAIOS_MACHINE_VERIFIABLE_WORK_ORDER_V1",
   "work_order_id": "KAIOS-AI-COMPANY-SAFE-PLANNER-CURRENT-MAIN-R1-20260914",
-  "status": "ACTIVE_MODE_INDEPENDENT_REVIEW_PASS_PENDING_EXACT_HEAD_CI",
+  "status": "ACTIVE_MODE_DRAFT_PR_OPEN_INDEPENDENT_REVIEW_PASS_EXACT_HEAD_CI_PENDING",
   "priority": "P1",
   "risk": "R1",
   "repository": "klineodyssey/kline-odyssey",
@@ -9,7 +9,7 @@
   "base_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
   "head_sha_source": "GIT_COMMIT_CONTAINING_THIS_MANIFEST",
   "active_mode_work_id": "KAIOS-AI-COMPANY-ACTIVE-MODE-20261007",
-  "source_pr": null,
+  "source_pr": 536,
   "previous_source_pr": 170,
   "source_pr_disposition": "PARTIAL_CURRENT_MAIN_TRANSPLANT_ONLY",
   "branch": "codex/kaios-ai-company-active-mode-20261007",
