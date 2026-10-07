@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   product-qa:
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only) }}
+    if: ${{ !((github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only) || (github.event_name == 'push' && github.ref == 'refs/heads/dot/k11520-bsc56-review-qa-20261007')) }}
     runs-on: ubuntu-latest
     # Full mobile + settlement + Player Life passed on 0610eef3, but the
     # aggregate reached 20 minutes during artifact/post-job cleanup. Keep
@@ -265,7 +265,7 @@ jobs:
 
   simulation-regression:
     needs: product-qa
-    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only) }}
+    if: ${{ !cancelled() && !((github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only) || (github.event_name == 'push' && github.ref == 'refs/heads/dot/k11520-bsc56-review-qa-20261007')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -322,7 +322,7 @@ jobs:
           retention-days: 14
 
   bsc56-review-only:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only) || (github.event_name == 'push' && github.ref == 'refs/heads/dot/k11520-bsc56-review-qa-20261007') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -341,10 +341,12 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse "$RUNTIME_REFERENCE^{tree}")" = "75b90872a3ce5ea84345c1423d1b678a6edde786"
+          echo "QA_ONLY / NOT_RELEASE: four-width review evidence against unchanged a678 application"
           git diff --check "$RUNTIME_REFERENCE" HEAD
           python3 - <<'PYQA'
           import os, subprocess
-          changed=set(subprocess.check_output(['git','diff','--name-only',os.environ['RUNTIME_REFERENCE'],'HEAD'],text=True).splitlines())
+          changed=set(filter(None,subprocess.check_output(['git','diff','--name-only','-z',os.environ['RUNTIME_REFERENCE'],'HEAD'],text=True).split('\0')))
           allowed={'.github/workflows/11520-game-product-qa.yml','K線西遊記/temples/11520/tests/11520-browser-settlement.mjs'}
           assert changed <= allowed, 'Application/source drift: '+repr(sorted(changed-allowed))
           print('Runtime/entry/all other tracked files byte-identical to '+os.environ['RUNTIME_REFERENCE'])
