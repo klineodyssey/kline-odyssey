@@ -95,6 +95,48 @@
           "height": 44
         }
       },
+      "playerOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 6,
+            "y": 218,
+            "width": 97.3125,
+            "height": 27
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 21,
+            "y": 195,
+            "width": 348,
+            "height": 1701
+          }
+        },
+        "intersection": false
+      },
+      "engineeringOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 6,
+            "y": 218,
+            "width": 97.3125,
+            "height": 27
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 21,
+            "y": 195,
+            "width": 348,
+            "height": 1263
+          }
+        },
+        "intersection": false
+      },
       "playerMode": "PASS",
       "engineeringMode": "PASS",
       "escape": "PASS",
@@ -180,6 +222,48 @@
           "width": 44,
           "height": 44
         }
+      },
+      "playerOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 346,
+            "y": 301,
+            "width": 103.3125,
+            "height": 31
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 42,
+            "y": 131,
+            "width": 760,
+            "height": 1815.203125
+          }
+        },
+        "intersection": false
+      },
+      "engineeringOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 346,
+            "y": 301,
+            "width": 103.3125,
+            "height": 31
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 42,
+            "y": 131,
+            "width": 760,
+            "height": 1367
+          }
+        },
+        "intersection": false
       },
       "playerMode": "PASS",
       "engineeringMode": "PASS",

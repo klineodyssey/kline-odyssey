@@ -76,5 +76,7 @@ test('player view derives available, building and blocked groups without a paral
   assert.match(utilityOwner,/utilitySelectors=.*'#k11520ProgressButton'/);
   assert.match(runtime,/setAttribute\('role','dialog'\)/);
   assert.match(runtime,/event\.key!=='Escape'/);
+  assert.match(runtime,/data-k11520-progress-board-open="true".*#toast\{visibility:hidden!important\}/s);
+  assert.match(runtime,/delete document\.documentElement\.dataset\.k11520ProgressBoardOpen/);
   assert.match(bootstrap,/install11520ProductProgressBoard/);
 });

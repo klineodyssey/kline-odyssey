@@ -16,6 +16,12 @@ async function assertDialogChrome(page){
   assert.ok(chrome['#sheetClose'].width>=44&&chrome['#sheetClose'].height>=44,'Progress close control must be painted and visible');
   return chrome;
 }
+async function assertNoProgressOverlay(page,label){
+  const result=await page.evaluate(()=>{const rect=selector=>{const el=document.querySelector(selector),r=el?.getBoundingClientRect(),s=el&&getComputedStyle(el),visible=!!(r&&r.width&&r.height&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>0);return{visible,rect:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null}},toast=rect('#toast'),content=rect('#k11520ProgressContent'),intersects=(a,b)=>!!a&&!!b&&a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;return{toast,content,intersection:toast.visible&&content.visible&&intersects(toast.rect,content.rect)}});
+  assert.equal(result.intersection,false,`${label}: gameplay feedback must not cover Progress content`);
+  assert.equal(result.toast.visible,false,`${label}: existing toast must be temporarily hidden while Progress owns the modal surface`);
+  return result;
+}
 
 await fs.mkdir(OUT,{recursive:true});
 const browser=await chromium.launch({headless:true,...(process.env.K11520_CHROMIUM_PATH?{executablePath:process.env.K11520_CHROMIUM_PATH}:{})});
@@ -40,6 +46,8 @@ try{
     assert.equal(beforeOpen.layout?.railOverlaps?.some(item=>item.button==='#k11520ProgressButton'),false,'Progress must not overlap C/Lots/remaining-axis rails');
     assert.equal(beforeOpen.playerUncovered,true,'Progress rail must not cover Player');
     assert.equal(beforeOpen.monsterUncovered,true,'Progress rail must not cover every visible Monster');
+    await page.evaluate(async()=>{const module=await import(new URL('./runtime/game-ui-product-fixes-v23.mjs',location.href).href);module.show11520Toast('花果山 · 旅程開始',{event:'WORLD_ENTER',duration:60000})});
+    await page.locator('#toast').waitFor({state:'visible'});
     await progress.click();await page.locator('#k11520ProgressBoard').waitFor({state:'visible'});
     await page.waitForFunction(()=>document.activeElement?.id==='sheetClose');
     assert.equal(await page.locator('#sheet').getAttribute('role'),'dialog');
@@ -53,16 +61,19 @@ try{
     assert.equal(await page.locator('[data-progress-key="PUBLIC_RUNTIME"]').getAttribute('data-progress-status'),'STALE');
     const scroll=await page.locator('#sheetBody').evaluate(el=>({height:el.clientHeight,scrollHeight:el.scrollHeight,overflow:getComputedStyle(el).overflowY}));assert.ok(scroll.scrollHeight>scroll.height,'Progress content must scroll');assert.equal(scroll.overflow,'auto');
     const playerChrome=await assertDialogChrome(page);
+    const playerOverlay=await assertNoProgressOverlay(page,`${profile.width}x${profile.height} Player`);
     await page.screenshot({path:`${OUT}/${profile.width}x${profile.height}-player.png`});
     await page.locator('[data-progress-mode="engineering"]').click();
     await page.waitForFunction(()=>document.querySelector('[data-progress-mode="engineering"]')?.getAttribute('aria-selected')==='true');
     const engineeringText=await page.locator('#k11520ProgressContent').textContent();
     for(const field of ['LATEST_MAIN','PUBLIC_BUILD','ACTIVE_PROJECTS','REAL_WALLET','REAL_ORDER','REAL_SETTLEMENT','BLOCKERS','LAST_UPDATED_AT'])assert.ok(engineeringText.includes(field));
     const engineeringChrome=await assertDialogChrome(page);
+    const engineeringOverlay=await assertNoProgressOverlay(page,`${profile.width}x${profile.height} Engineering`);
     await page.screenshot({path:`${OUT}/${profile.width}x${profile.height}-engineering.png`});
     await page.keyboard.press('Escape');await page.locator('#sheet').waitFor({state:'hidden'});
     await progress.waitFor({state:'visible'});
     assert.equal(await page.evaluate(()=>document.activeElement?.id),'k11520ProgressButton','Escape must restore focus to Progress in the reopened utility rail');
+    await page.locator('#toast').waitFor({state:'visible'});
     await progress.click();await page.locator('#k11520ProgressBoard').waitFor({state:'visible'});
     await page.locator('#sheetClose').click();await page.locator('#sheet').waitFor({state:'hidden'});
     await progress.waitFor({state:'visible'});
@@ -71,7 +82,7 @@ try{
     assert.equal(world.playerUncovered,true,'closed board must restore uncovered Player');
     assert.equal(world.monsterUncovered,true,'closed board must restore an uncovered Monster');
     assert.deepEqual(errors,[],'real runtime must not emit page errors');
-    reports.push({profile,buttonBox,controls:beforeOpen.controls,layout:{railOverlaps:beforeOpen.layout?.railOverlaps,cleanUtilityStack:beforeOpen.layout?.cleanUtilityStack},scroll,world,playerChrome,engineeringChrome,playerMode:'PASS',engineeringMode:'PASS',escape:'PASS',close:'PASS',focusReturn:'PASS'});
+    reports.push({profile,buttonBox,controls:beforeOpen.controls,layout:{railOverlaps:beforeOpen.layout?.railOverlaps,cleanUtilityStack:beforeOpen.layout?.cleanUtilityStack},scroll,world,playerChrome,engineeringChrome,playerOverlay,engineeringOverlay,playerMode:'PASS',engineeringMode:'PASS',escape:'PASS',close:'PASS',focusReturn:'PASS'});
     await context.close();
   }
 
