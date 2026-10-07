@@ -115,7 +115,10 @@ export function positionRisk({entry,mark,side,lots,c}){
   const rawPnl=pnlForMove({entry,mark,side,lots,c});
   const pnl=clampPositionPnl({principal,pnl:rawPnl});
   const remaining=Math.max(0,principal+pnl);
-  return {principal,pnl,rawPnl,remaining,liquidated:rawPnl<=-principal,pnlModel:C_PNL_MODEL,maxAdverseFraction:maxAdverseFraction(c,entry),maxAdversePoints:maxAdversePoints(c,entry),liquidationMark:liquidationMark({entry,side,c})};
+  const boundary=liquidationMark({entry,side,c});
+  // Match the lifecycle's exact price threshold; raw PnL can round above -principal.
+  const liquidated=Number(c)>0?Number(mark)<=boundary:Number(mark)>=boundary;
+  return {principal,pnl,rawPnl,remaining,liquidated,pnlModel:C_PNL_MODEL,maxAdverseFraction:maxAdverseFraction(c,entry),maxAdversePoints:maxAdversePoints(c,entry),liquidationMark:boundary};
 }
 
 export function reserveOrder(ledger,amount){
