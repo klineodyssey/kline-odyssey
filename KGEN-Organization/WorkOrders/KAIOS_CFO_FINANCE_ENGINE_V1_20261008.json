@@ -6,7 +6,7 @@
   "formal_runtime": "core/accounting/runtime-finance.js",
   "version": "V1",
   "mode": "SIMULATION_ONLY",
-  "status": "REVIEW_CANDIDATE",
+  "status": "INDEPENDENT_REVIEW_PENDING",
   "designed_by": "沈英明 / Human Authority",
   "system_architecture": "Human order plus current repository canon",
   "company_policy_owner": "衡曜 / General Manager",
@@ -15,7 +15,7 @@
   "maintainer": "NOT_ASSIGNED",
   "reviewed_by": "PENDING_DISTINCT_REVIEW",
   "base_main_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
-  "source_commit": "PENDING_COMMIT",
+  "source_commit": "ad0a94fb8ed0341d20237811fed81d218e8fb802",
   "branch": "codex/cfo-finance-organ-v1",
   "pull_request": null,
   "created_at": "2026-10-08T00:00:00+08:00",
@@ -94,7 +94,7 @@
   ],
   "tests": {
     "targeted": "12/12 PASS",
-    "full_regression": "PENDING",
+    "full_regression": "471/471 PASS outside the unchanged 11520 real-trading preflight file; that Windows checkout file is 22/25 PASS with three baseline CRLF-sensitive workflow-source assertions",
     "ci": "PENDING"
   },
   "demo_financial_report": {
