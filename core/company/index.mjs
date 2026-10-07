@@ -2010,6 +2010,8 @@ export const AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES = Object.freeze([
 
 export const ACTIVE_COMPANY_BOOT_READS = Object.freeze([
   "company_boot",
+  "boot_manifest",
+  "boot_current",
   "latest_main",
   "handoff_current",
   "human_owner_policy",
@@ -2020,7 +2022,9 @@ export const ACTIVE_COMPANY_BOOT_READS = Object.freeze([
 ]);
 
 export const ACTIVE_COMPANY_BOOT_SOURCE_PATHS = Object.freeze({
-  company_boot: "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+  company_boot: "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md",
+  boot_manifest: "KGEN-KAIOS/governance/autopilot/company_boot_manifest.json",
+  boot_current: "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md",
   latest_main: "git://origin/main",
   handoff_current: "handoff/HANDOFF_CURRENT.md",
   human_owner_policy: "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md",
@@ -2031,6 +2035,7 @@ export const ACTIVE_COMPANY_BOOT_SOURCE_PATHS = Object.freeze({
 });
 
 const ACTIVE_COMPANY_REPOSITORY_EVIDENCE = new WeakSet();
+const CANONICAL_COMPANY_PUBLIC_FETCH = globalThis.fetch;
 const ACTIVE_COMPANY_REPOSITORY_PATHS = Object.freeze([
   ...new Set(Object.values(ACTIVE_COMPANY_BOOT_SOURCE_PATHS).filter((path) => !path.startsWith("git://")))
 ]);
@@ -2059,16 +2064,17 @@ async function gitBlobObjectId(content) {
  */
 export async function resolveActiveCompanyRepositoryEvidence({
   current_main_sha,
+  observed_at,
   guardian_evidence_refs = [],
   work_order_refs = [],
-  fetch_impl = globalThis.fetch
+  fetch_impl = CANONICAL_COMPANY_PUBLIC_FETCH
 }) {
   invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
   requireArray(guardian_evidence_refs, "guardian_evidence_refs");
   requireArray(work_order_refs, "work_order_refs");
   invariant(typeof fetch_impl === "function", "PUBLIC_GITHUB_FETCH_REQUIRED", "Public GitHub evidence resolution requires fetch");
   const nodeTestContext = globalThis.process?.env?.NODE_TEST_CONTEXT;
-  invariant(fetch_impl === globalThis.fetch || nodeTestContext === "child-v8", "PUBLIC_GITHUB_CUSTOM_FETCH_FORBIDDEN", "Custom evidence transports are allowed only inside the Node test runner");
+  invariant(fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH || nodeTestContext === "child-v8", "PUBLIC_GITHUB_CUSTOM_FETCH_FORBIDDEN", "Custom evidence transports are allowed only inside the Node test runner");
   const normalizedGuardianRefs = guardian_evidence_refs.map((path) => {
     invariant(typeof path === "string" && path.trim() && !path.startsWith("/") && !path.includes("..") && !path.includes("\\"), "GUARDIAN_EVIDENCE_PATH_INVALID", "Guardian evidence must be a repository-relative path");
     return path;
@@ -2078,29 +2084,18 @@ export async function resolveActiveCompanyRepositoryEvidence({
     return path;
   });
   const paths = [...new Set([...ACTIVE_COMPANY_REPOSITORY_PATHS, ...normalizedGuardianRefs, ...normalizedWorkOrderRefs])];
-  const apiBase = "https://api.github.com/repos/klineodyssey/kline-odyssey";
-  const request = async (url) => {
-    const response = await fetch_impl(url, { headers: { Accept: "application/vnd.github+json" } });
-    invariant(response?.ok === true, "PUBLIC_GITHUB_EVIDENCE_UNAVAILABLE", `Public GitHub evidence read failed: ${response?.status ?? "UNKNOWN"}`);
-    return response.json();
-  };
-  const commit = await request(`${apiBase}/commits/${current_main_sha}`);
-  invariant(commit?.sha === current_main_sha, "PUBLIC_GITHUB_MAIN_MISMATCH", "Public GitHub commit evidence does not match current_main_sha");
-  const files = {};
-  for (const path of paths) {
-    const encodedPath = path.split("/").map(encodeURIComponent).join("/");
-    const file = await request(`${apiBase}/contents/${encodedPath}?ref=${current_main_sha}`);
-    invariant(file?.type === "file" && file?.encoding === "base64" && /^[0-9a-f]{40}$/.test(file?.sha ?? ""), "PUBLIC_GITHUB_FILE_EVIDENCE_INVALID", `Invalid public GitHub file evidence: ${path}`);
-    const content = decodePublicGitHubBase64(file.content);
-    invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_BLOB_HASH_MISMATCH", `Public GitHub blob hash mismatch: ${path}`);
-    files[path] = Object.freeze({ path, git_object: file.sha, content });
-  }
+  // Compatibility entry only: canonical reader owns ALL repository HTTP reads.
+  const snapshot = await readLatestRepositorySnapshot({
+    repository: "klineodyssey/kline-odyssey", observed_at,
+    required_check_names: ["company-safe-cycle"], expected_main_sha: current_main_sha,
+    evidence_paths: paths, fetch_impl
+  });
   const evidence = Object.freeze({
-    status: "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED",
-    repository: "klineodyssey/kline-odyssey",
-    main_sha: current_main_sha,
-    files: Object.freeze(files),
-    external_effect: false
+    status: snapshot.transport_provenance === "DEFAULT_PUBLIC_GITHUB" ? "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED" : "DIAGNOSTIC_REPOSITORY_EVIDENCE_NOT_VERIFIED",
+    evidence_class: snapshot.transport_provenance,
+    repository: snapshot.repository, main_sha: snapshot.main_sha,
+    observed_at: snapshot.observed_at, files: snapshot.files,
+    snapshot, external_effect: false
   });
   ACTIVE_COMPANY_REPOSITORY_EVIDENCE.add(evidence);
   return evidence;
@@ -2147,10 +2142,12 @@ const AUTONOMOUS_ENGINEERING_ACKS = Object.freeze([
 
 function autonomousEngineeringWorkerEligible(worker, task = null) {
   if (!worker || worker.status !== "ACTIVE" || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return false;
-  if ((AUTONOMOUS_ENGINEERING_TRUST[worker.trust_level] ?? -1) < 2 || worker.suspension) return false;
+  if (!Object.hasOwn(AUTONOMOUS_ENGINEERING_TRUST, worker.trust_level) || AUTONOMOUS_ENGINEERING_TRUST[worker.trust_level] < 2 || worker.suspension) return false;
   if (!AUTONOMOUS_ENGINEERING_ACKS.every((field) => worker[field] === true)) return false;
   if (typeof worker.worker_id !== "string" || !worker.worker_id.trim()) return false;
   if (typeof worker.life_identity_ref !== "string" || !worker.life_identity_ref.trim()) return false;
+  if (typeof worker.controller_id !== "string" || !worker.controller_id.trim()) return false;
+  if (worker.revoked === true || worker.credential_status === "REVOKED") return false;
   if (Number(worker.active_claim_count ?? 0) > 1) return false;
   if (task && Number(worker.active_claim_count ?? 0) > 0 && worker.current_task !== task.task_id) return false;
   if (task && worker.current_task && worker.current_task !== task.task_id) return false;
@@ -2161,9 +2158,11 @@ function autonomousEngineeringActorsDistinct(left, right) {
   if (!left || !right) return false;
   const normalize = (value) => typeof value === "string" ? value.trim().toLowerCase() : "";
   return Boolean(normalize(left.worker_id) && normalize(right.worker_id)
-    && normalize(left.life_identity_ref) && normalize(right.life_identity_ref))
+    && normalize(left.life_identity_ref) && normalize(right.life_identity_ref)
+    && normalize(left.controller_id) && normalize(right.controller_id))
     && normalize(left.worker_id) !== normalize(right.worker_id)
-    && normalize(left.life_identity_ref) !== normalize(right.life_identity_ref);
+    && normalize(left.life_identity_ref) !== normalize(right.life_identity_ref)
+    && normalize(left.controller_id) !== normalize(right.controller_id);
 }
 
 function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
@@ -2216,7 +2215,7 @@ export function validateActiveCompanyRegistryEvidence({ repository_evidence, cur
   requireArray(registry.workers, "registry.workers");
   requireArray(actors, "actors");
   const comparedFields = Object.freeze([
-    "worker_id", "life_identity_ref", "role", "allowed_branch_pattern", "status",
+    "worker_id", "life_identity_ref", "controller_id", "revoked", "credential_status", "role", "allowed_branch_pattern", "status",
     "employee_status", "trust_level", "boot_acknowledged", "canon_acknowledged",
     "workspace_policy_acknowledged", "do_not_touch_acknowledged", "suspension",
     "active_claim_count", "current_task"
@@ -2304,7 +2303,7 @@ function planAutonomousCompanyEngineeringCycleCore({
     return result("IDEMPOTENT_NOOP", { next_safe_action: "WAIT_FOR_NEW_CYCLE_ID" });
   }
 
-  invariant(autonomousEngineeringWorkerEligible(manager), "GM_REGISTRATION_REQUIRED", "General Manager must be active, T2+ and fully acknowledged");
+  if (!autonomousEngineeringWorkerEligible(manager)) return result("WATCHING", { blocker: "WAITING_FOR_QUALIFIED_WORKER", next_safe_action: "WAIT_FOR_VERIFIED_REGISTRY_CHANGE" });
   invariant(String(manager.role ?? "").includes("General Manager"), "GM_ROLE_REQUIRED", "Manager role must include General Manager");
 
   const events = [];
@@ -2340,7 +2339,7 @@ function planAutonomousCompanyEngineeringCycleCore({
     const reasons = [];
     const forbidden = requestedActions.filter((action) => AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS.includes(action));
     const unknown = requestedActions.filter((action) => !AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes(action));
-    if (!(candidate.priority in AUTONOMOUS_ENGINEERING_PRIORITY)) reasons.push("PRIORITY_NOT_P0_P1_P2");
+    if (!(Object.hasOwn(AUTONOMOUS_ENGINEERING_PRIORITY, candidate.priority))) reasons.push("PRIORITY_NOT_P0_P1_P2");
     if (!AUTONOMOUS_ENGINEERING_SAFE_RISKS.includes(candidate.risk_level)) reasons.push("RISK_NOT_R0_R1");
     if (candidate.task_envelope_status !== "AUTHORIZED" || candidate.authority_status !== "MACHINE_VERIFIED") reasons.push("AUTHORITY_NOT_MACHINE_VERIFIED");
     if (candidate.dependencies_complete !== true) reasons.push("DEPENDENCIES_INCOMPLETE");
@@ -2369,6 +2368,7 @@ function planAutonomousCompanyEngineeringCycleCore({
       if (!autonomousEngineeringWorkerEligible(reviewer) || !autonomousEngineeringActorsDistinct(worker, reviewer)) reasons.push("DISTINCT_REVIEWER_REQUIRED");
     }
     if (candidate.active_company_mode === true) {
+      reasons.push(...(candidate.opportunity_blockers ?? []));
       if (candidate.work_order_evidence_verified !== true) reasons.push("WORK_ORDER_EVIDENCE_MISMATCH");
       if (typeof candidate.project_owner_id !== "string" || !candidate.project_owner_id.trim()) reasons.push("PROJECT_OWNER_REQUIRED");
       if (candidate.implementer_id !== candidate.assigned_worker_id) reasons.push("PROJECT_IMPLEMENTER_MISMATCH");
@@ -2406,10 +2406,11 @@ function planAutonomousCompanyEngineeringCycleCore({
       guardian_denials: rejected.filter((entry) => entry.guardian_denial?.status === "UNRESOLVED").map((entry) => entry.guardian_denial)
     });
     append("CLOCK_OUT", { result: "NO_VERIFIED_SAFE_WORK" });
-    return result("NO_VERIFIED_SAFE_WORK", {
+    return result("WATCHING", {
+      blocker: "NO_VERIFIED_SAFE_WORK",
       rejected_candidates: Object.freeze(rejected),
       events: Object.freeze(events),
-      next_safe_action: "REPAIR_CANDIDATE_EVIDENCE_OR_WAIT"
+      next_safe_action: "WATCH_MAIN_QUEUE_REGISTRY_CI_AND_DEPENDENCIES"
     });
   }
 
@@ -2464,7 +2465,147 @@ function planAutonomousCompanyEngineeringCycleCore({
  * Oracle chasing silent until a material trigger exists. It plans only; it does
  * not claim, launch, write, merge, deploy, pay, sign, or mutate chain state.
  */
-export function planActiveCompanyOperatingCycle({
+// V1.0.0 candidate projection inside the existing Company owner. No dispatcher,
+// transport, runtime activation, receipt, or new identity authority is introduced.
+export const DYNAMIC_COMPANY_WORK_TYPES = Object.freeze([
+  "CODE", "DEBUG", "TEST", "QA", "REVIEW", "RESEARCH", "DESIGN", "WRITE",
+  "CREATE", "BUILD_WORLD", "CONTENT", "CUSTOMER", "PLAYER", "COMPANY",
+  "ATM_REPLENISH", "KGEN_CARGO", "KAIOS_CARGO", "SECURITY", "DOCS"
+]);
+
+const PRODUCED_COMPANY_OPPORTUNITY_RECORDS = new WeakSet();
+
+function projectDynamicCompanyOpportunities({ work_queue, projects, repository, observed_at, previous_work_orders, previous_work_orders_verified }) {
+  invariant(Array.isArray(previous_work_orders) && previous_work_orders.length <= 256, "PREVIOUS_WORK_BOUND", "At most 256 previous candidate records may be compared");
+  invariant(work_queue.length <= 256, "OPPORTUNITY_BOUND", "At most 256 demands per bounded cycle");
+  const prior = new Map();
+  for (const record of previous_work_orders) {
+    requireId(record?.WORK_ID, "previous.WORK_ID");
+    invariant(!prior.has(record.WORK_ID), "PREVIOUS_WORK_CONFLICT", "Previous candidate IDs must be unique");
+    prior.set(record.WORK_ID, record);
+  }
+  const records = [];
+  for (const task of work_queue) {
+    const file = repository.files[task.work_order_ref];
+    let envelope;
+    try { envelope = file ? JSON.parse(file.content) : null; } catch { envelope = null; }
+    const project = projects.find((entry) => entry.task_id === task.task_id);
+    const bound = Boolean(envelope && stableStringify(envelope.planner_task) === stableStringify(task)
+      && stableStringify(envelope.active_project) === stableStringify(project));
+    // Unverified caller data is never normalized into a canonical WorkOrder.
+    if (!bound) continue;
+    const type = task.work_type;
+    const blockers = [];
+    if (!DYNAMIC_COMPANY_WORK_TYPES.includes(type)) blockers.push("UNSUPPORTED_WORK_TYPE");
+    if (!(Object.hasOwn(AUTONOMOUS_ENGINEERING_PRIORITY, task.priority))) blockers.push("PRIORITY_POLICY_REQUIRED");
+    if (task.expected_base_sha !== repository.main_sha) blockers.push("STALE_MAIN");
+    if (task.dependencies_complete !== true) blockers.push("DEPENDENCIES_INCOMPLETE");
+    if (task.target_pr != null && repository.snapshot.active_task_pr?.number !== task.target_pr) blockers.push("ACTIVE_PR_EVIDENCE_REQUIRED");
+    const cargo = ["ATM_REPLENISH", "KGEN_CARGO", "KAIOS_CARGO"].includes(type);
+    if (cargo) blockers.push("CARGO_POLICY_CAPACITY_RIGHTS_UNVERIFIED");
+    const binding = Object.freeze({ main_sha: repository.main_sha, work_order_blob: file.git_object,
+      project: stableStringify(project), task: stableStringify(task), pr: repository.snapshot.active_task_pr ?? null });
+    const previous = prior.get(task.task_id);
+    const previousVerified = previous && previous_work_orders_verified.includes(previous.WORK_ID);
+    if (previous && !previousVerified) blockers.push("PREDECESSOR_PROVENANCE_REQUIRED");
+    const changed = previousVerified && stableStringify(previous.EVIDENCE_BINDING) !== stableStringify(binding);
+    const expired = task.expires_at != null && (!Number.isFinite(Date.parse(task.expires_at)) || Date.parse(task.expires_at) <= Date.parse(observed_at));
+    if (expired) blockers.push("EXPIRED");
+    records.push(Object.freeze({
+      WORK_ID: task.task_id, GENERATED_AT: observed_at, WORK_TYPE: type ?? "UNKNOWN",
+      SOURCE: Object.freeze({ path: task.work_order_ref, git_object: file.git_object, main_sha: repository.main_sha }),
+      WHY_NOW: task.why_now ?? "CANONICAL_DEMAND_REQUIRES_REVIEW", PRIORITY: task.priority ?? "UNKNOWN",
+      BASE_MAIN_SHA: repository.main_sha, PROJECT: task.project_id ?? task.task_id,
+      TARGET_PR: task.target_pr ?? null, TARGET_BRANCH: task.branch ?? null,
+      PROJECT_OWNER: project.project_owner_id ?? null, IMPLEMENTER: project.implementer_id ?? null,
+      REVIEWER: project.reviewer_id ?? null, SCOPE: Object.freeze([...(task.scope ?? [])]),
+      DEPENDENCIES: Object.freeze([...(project.dependencies ?? [])]), EXPECTED_OUTPUT: project.expected_output ?? null,
+      ACCEPTANCE_TESTS: Object.freeze([...(task.acceptance_tests ?? [])]),
+      PROTECTED_ACTIONS: Object.freeze({ permitted: false, requested: [...(task.authorized_actions ?? [])].filter((action) => !AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes(action)) }),
+      CARGO_REQUIRED: cargo ? "YES" : "NO", CARGO_ASSET: cargo ? (task.cargo_asset ?? null) : null,
+      CARGO_AMOUNT: cargo ? (task.cargo_amount ?? null) : null, ORIGIN: null, DESTINATION: null,
+      EXPIRES_WHEN: Object.freeze({ at: task.expires_at ?? null, conditions: ["MAIN_CHANGED", "PR_OR_CI_CHANGED", "DEPENDENCY_CHANGED", "REGISTRY_CHANGED", "HUMAN_CANCELLED"] }),
+      SUPERSEDES: changed ? Object.freeze({ WORK_ID: previous.WORK_ID, EVIDENCE_BINDING: previous.EVIDENCE_BINDING }) : null,
+      STATUS: blockers.includes("STALE_MAIN") || expired ? "STALE" : blockers.length ? "BLOCKED" : "PROPOSED_UNADMITTED",
+      BLOCKERS: Object.freeze(blockers), EVIDENCE_BINDING: binding,
+      PREDECESSOR_VERIFICATION: previous ? (previousVerified ? "SAME_PROCESS_PRODUCED_RECORD" : "NOT_VERIFIED") : "NOT_APPLICABLE",
+      IDEMPOTENT: Boolean(previousVerified && !changed), DISPATCHED: false, ACK: "ACK_NOT_VERIFIED"
+    }));
+  }
+  for (const record of records) PRODUCED_COMPANY_OPPORTUNITY_RECORDS.add(record);
+  return Object.freeze(records.sort((a, b) => (AUTONOMOUS_ENGINEERING_PRIORITY[a.PRIORITY] ?? 99) - (AUTONOMOUS_ENGINEERING_PRIORITY[b.PRIORITY] ?? 99)
+    || a.WORK_ID.localeCompare(b.WORK_ID)));
+}
+
+function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at }) {
+  return Object.freeze({
+    organ_version: "1.0.0", evidence_class: repository.evidence_class, owner: "core/company/index.mjs", opportunity_records: opportunities,
+    generated_proposals: opportunities.length, dispatched_count: 0, acknowledged_count: 0,
+    direct_channel: "NOT_VERIFIED", delivery_status: "HANDOFF_REQUIRED", ack_status: "ACK_NOT_VERIFIED",
+    heartbeat: Object.freeze({ observed_at, evidence_at: repository.observed_at, status: "OBSERVATION_ONLY", actual_receipt: null }),
+    day_breath: Object.freeze({ status: "BLOCKED_CANONICAL_K12345_DAY_BOUNDARY_AND_CLOCK_REQUIRED", day_key: null, actual_receipt: null }),
+    manufacture: Object.freeze({ version: "1.0.0", design_author: "沈英明", company_owner: "衡曜", implementer: "DOT", runtime_host: "PrimeForge", status: "CANDIDATE_NOT_INSTALLED", signature: "NOT_SIGNED", verification: "NOT_VERIFIED" }),
+    inspection: Object.freeze({ status: "PENDING_INDEPENDENT_REVIEW", tests: "NOT_ESTABLISHED_BY_PLANNER", signature: "NOT_SIGNED" }),
+    maintenance: Object.freeze({ status: "WATCHING", next_check_condition: "MAIN_PR_CI_QUEUE_REGISTRY_OR_DEPENDENCY_CHANGE", background_service: false }),
+    rollback: Object.freeze({ status: "PLAN_ONLY", action: "REVERT_REVIEWED_CANDIDATE_DIFF_WITH_OWNER_APPROVAL", previous_head: "b00aee498cfd14bb0b4435326edabed2129bf9f2" }),
+    seal: Object.freeze({ status: "INVALID", reason: "INSTALLATION_INSPECTION_SIGNATURE_AND_AUTHENTICATED_ACK_NOT_VERIFIED" })
+  });
+}
+
+// Copy data through descriptors before any policy read. Accessors never run;
+// later mutations to the caller's graph cannot change verified actor/task facts.
+function captureCompanyData(value, budget = { nodes: 0 }, depth = 0) {
+  invariant(++budget.nodes <= 20000 && depth <= 24, "COMPANY_INPUT_BOUND", "Company input exceeds bounded data size");
+  if (value === null || value === undefined || ["string", "boolean"].includes(typeof value)) return value;
+  if (typeof value === "number") {
+    invariant(Number.isFinite(value), "COMPANY_INPUT_NUMBER_INVALID", "Company numbers must be finite");
+    return value;
+  }
+  invariant(typeof value === "object", "COMPANY_INPUT_DATA_ONLY", "Company input accepts data only");
+  const array = Array.isArray(value);
+  const prototype = Object.getPrototypeOf(value);
+  invariant(prototype === (array ? Array.prototype : Object.prototype) || (!array && prototype === null), "COMPANY_INPUT_PROTOTYPE_INVALID", "Company input requires plain data");
+  invariant(Object.getOwnPropertySymbols(value).length === 0, "COMPANY_INPUT_SYMBOL_FORBIDDEN", "Symbol properties are not Company data");
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const copy = array ? [] : {};
+  for (const [key, descriptor] of Object.entries(descriptors)) {
+    invariant(Object.hasOwn(descriptor, "value"), "COMPANY_INPUT_ACCESSOR_FORBIDDEN", "Company input must not contain accessors");
+    if (array && key === "length") continue;
+    invariant(descriptor.enumerable && (!array || /^(0|[1-9][0-9]*)$/.test(key)), "COMPANY_INPUT_PROPERTY_INVALID", "Only enumerable data properties are accepted");
+    Object.defineProperty(copy, key, { value: captureCompanyData(descriptor.value, budget, depth + 1), enumerable: true });
+  }
+  return Object.freeze(copy);
+}
+
+function captureCompanyCycleInput(input) {
+  invariant(input && typeof input === "object" && !Array.isArray(input), "COMPANY_INPUT_REQUIRED", "Company input is required");
+  invariant([Object.prototype, null].includes(Object.getPrototypeOf(input)) && Object.getOwnPropertySymbols(input).length === 0, "COMPANY_INPUT_PROTOTYPE_INVALID", "Cycle input requires plain data");
+  const descriptors = Object.getOwnPropertyDescriptors(input);
+  const evidence = descriptors.repository_evidence;
+  invariant(evidence && Object.hasOwn(evidence, "value"), "COMPANY_INPUT_ACCESSOR_FORBIDDEN", "Repository evidence must be an own data property");
+  invariant(ACTIVE_COMPANY_REPOSITORY_EVIDENCE.has(evidence.value), "TRUSTED_REPOSITORY_EVIDENCE_REQUIRED", "Repository evidence must originate from the canonical reader");
+  const other = Object.create(null);
+  for (const [key, descriptor] of Object.entries(descriptors)) {
+    invariant(Object.hasOwn(descriptor, "value"), "COMPANY_INPUT_ACCESSOR_FORBIDDEN", "Cycle properties must not be accessors");
+    if (key !== "repository_evidence") Object.defineProperty(other, key, descriptor);
+  }
+  const data = captureCompanyData(other);
+  const previousDescriptor = descriptors.previous_work_orders;
+  const previous = previousDescriptor?.value;
+  const verifiedPrevious = [];
+  if (Array.isArray(previous)) {
+    const recordDescriptors = Object.getOwnPropertyDescriptors(previous);
+    for (const [key, descriptor] of Object.entries(recordDescriptors)) {
+      if (key !== "length" && Object.hasOwn(descriptor, "value") && PRODUCED_COMPANY_OPPORTUNITY_RECORDS.has(descriptor.value)) {
+        verifiedPrevious.push(descriptor.value.WORK_ID);
+      }
+    }
+  }
+  return Object.freeze({ ...data, repository_evidence: evidence.value, previous_work_orders_verified: Object.freeze(verifiedPrevious) });
+}
+
+export function planActiveCompanyOperatingCycle(input) {
+  let {
   cycle_id,
   observed_at,
   current_main_sha,
@@ -2478,28 +2619,40 @@ export function planActiveCompanyOperatingCycle({
   previous_cycle_ids = [],
   boot,
   direct_channel = "NOT_AVAILABLE",
-  durable_handoff_ref = null
-}) {
+  durable_handoff_ref = null,
+  previous_work_orders = [],
+  previous_work_orders_verified = []
+} = captureCompanyCycleInput(input);
   const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
   const bootStatus = validateActiveCompanyBoot({ boot, current_main_sha, manager, observed_at, repository_evidence: trustedRepository });
   requireArray(work_queue, "work_queue");
   requireArray(projects, "projects");
   requireArray(guardian_denials, "guardian_denials");
   requireArray(workers, "workers");
+  invariant(new Set(workers.map((worker) => worker?.worker_id)).size === workers.length, "DUPLICATE_WORKER_ID", "Worker IDs must be unique within a cycle");
   const registryStatus = validateActiveCompanyRegistryEvidence({
     repository_evidence: trustedRepository,
     current_main_sha,
-    actors: [manager, ...workers.filter((worker) => worker?.worker_id !== manager?.worker_id)]
+    actors: [manager, ...workers]
   });
-  invariant(["AVAILABLE", "NOT_AVAILABLE"].includes(direct_channel), "DIRECT_CHANNEL_STATUS_INVALID", "direct_channel must be AVAILABLE or NOT_AVAILABLE");
-  if (direct_channel === "NOT_AVAILABLE") {
-    invariant(typeof durable_handoff_ref === "string" && durable_handoff_ref.trim(), "DURABLE_HANDOFF_REQUIRED", "A durable handoff is required when no direct AI channel exists");
+  invariant(["AVAILABLE", "NOT_AVAILABLE", "NOT_VERIFIED"].includes(direct_channel), "DIRECT_CHANNEL_STATUS_INVALID", "Unsupported direct channel status");
+  // Caller availability cannot prove delivery. The bounded organ has no authenticated
+  // transport verifier: even AVAILABLE retains the canonical handoff and no ACK.
+  direct_channel = "NOT_VERIFIED";
+  durable_handoff_ref = durable_handoff_ref ?? "handoff/HANDOFF_CURRENT.md";
+  invariant(repository_evidence.files[durable_handoff_ref], "DURABLE_HANDOFF_REQUIRED", "Handoff must be a verified current-main repository file");
+  invariant(Date.parse(observed_at) >= Date.parse(trustedRepository.observed_at), "SNAPSHOT_FROM_FUTURE", "Cycle cannot predate repository observation");
+  invariant(projects.every((project) => typeof project?.task_id === "string" && project.task_id.trim()), "ACTIVE_PROJECT_TASK_ID_REQUIRED", "Every project requires a task ID");
+  invariant(new Set(projects.map((project) => project.task_id)).size === projects.length, "DUPLICATE_ACTIVE_PROJECT", "Projects must be unique");
+  const unique = new Map();
+  for (const candidate of work_queue) {
+    requireId(candidate?.task_id, "task_id");
+    invariant(!unique.has(candidate.task_id) || stableStringify(unique.get(candidate.task_id)) === stableStringify(candidate), "DUPLICATE_WORK_QUEUE_TASK", "Same demand ID with different bytes conflicts");
+    unique.set(candidate.task_id, candidate);
   }
-
-  invariant(projects.every((project) => typeof project?.task_id === "string" && project.task_id.trim()), "ACTIVE_PROJECT_TASK_ID_REQUIRED", "Every active project requires a task_id");
-  invariant(new Set(projects.map((project) => project.task_id)).size === projects.length, "DUPLICATE_ACTIVE_PROJECT", "Each task may have only one active project ownership record");
-  invariant(work_queue.every((candidate) => typeof candidate?.task_id === "string" && candidate.task_id.trim()), "WORK_QUEUE_TASK_ID_REQUIRED", "Every work-queue candidate requires a task_id");
-  invariant(new Set(work_queue.map((candidate) => candidate.task_id)).size === work_queue.length, "DUPLICATE_WORK_QUEUE_TASK", "Each task may appear only once in the work queue");
+  work_queue = [...unique.values()];
+  const opportunities = projectDynamicCompanyOpportunities({ work_queue, projects, repository: trustedRepository, observed_at, previous_work_orders, previous_work_orders_verified });
+  const dynamicEvidence = dynamicCompanyCycleEvidence({ opportunities, repository: trustedRepository, observed_at });
   const projectsByTask = new Map(projects.map((project) => [project?.task_id, project]));
   const commonPreflight = planAutonomousCompanyEngineeringCycleCore({
     cycle_id,
@@ -2514,11 +2667,12 @@ export function planActiveCompanyOperatingCycle({
   if (["IDEMPOTENT_NOOP", "HOLD_STALE_MAIN"].includes(commonPreflight.status)) {
     return Object.freeze({
       ...commonPreflight,
+      ...dynamicEvidence,
       mode: "ACTIVE_COMPANY_MODE",
       boot_status: bootStatus.status,
       registry_status: registryStatus.status,
       direct_channel,
-      durable_handoff_ref: direct_channel === "NOT_AVAILABLE" ? durable_handoff_ref : null,
+      durable_handoff_ref: durable_handoff_ref,
       oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
       silent_task_ids: Object.freeze([]),
       guardian_denials: Object.freeze([]),
@@ -2590,6 +2744,7 @@ export function planActiveCompanyOperatingCycle({
   const actionableQueue = work_queue.filter((candidate) => !silentOracleTaskIds.includes(candidate?.task_id));
   if (work_queue.length > 0 && actionableQueue.length === 0) {
     return Object.freeze({
+      ...dynamicEvidence,
       cycle_id,
       status: "IDEMPOTENT_NOOP",
       mode: "ACTIVE_COMPANY_MODE",
@@ -2614,7 +2769,7 @@ export function planActiveCompanyOperatingCycle({
       boot_status: bootStatus.status,
       registry_status: registryStatus.status,
       direct_channel,
-      durable_handoff_ref: direct_channel === "NOT_AVAILABLE" ? durable_handoff_ref : null,
+      durable_handoff_ref: durable_handoff_ref,
       oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
       silent_task_ids: Object.freeze(silentOracleTaskIds),
       guardian_denials: Object.freeze(normalizedDenials),
@@ -2632,6 +2787,7 @@ export function planActiveCompanyOperatingCycle({
     return {
       ...candidate,
       active_company_mode: true,
+      opportunity_blockers: opportunities.find((record) => record.WORK_ID === candidate.task_id)?.BLOCKERS ?? ["WORK_ORDER_EVIDENCE_MISMATCH"],
       work_order_evidence_verified: workOrderEvidenceVerified(candidate),
       project_owner_id: project?.project_owner_id ?? null,
       implementer_id: project?.implementer_id ?? null,
@@ -2655,11 +2811,12 @@ export function planActiveCompanyOperatingCycle({
   });
   return Object.freeze({
     ...planned,
+    ...dynamicEvidence,
     mode: "ACTIVE_COMPANY_MODE",
     boot_status: bootStatus.status,
     registry_status: registryStatus.status,
     direct_channel,
-    durable_handoff_ref: direct_channel === "NOT_AVAILABLE" ? durable_handoff_ref : null,
+    durable_handoff_ref: durable_handoff_ref,
     oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
     silent_task_ids: Object.freeze(silentOracleTaskIds),
     guardian_denials: Object.freeze(normalizedDenials),
@@ -2803,6 +2960,9 @@ function aggregateAutonomousEngineeringCheckRuns(checkRuns, totalCount, required
  * omits Authorization and cookies, rejects redirects, and exposes no write,
  * dispatch, merge, deployment, worker, signer, payment, or chain capability.
  */
+const VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS = new WeakSet();
+const DIAGNOSTIC_COMPANY_REPOSITORY_SNAPSHOTS = new WeakSet();
+
 export async function readLatestRepositorySnapshot(options) {
   invariant(options && typeof options === "object" && !Array.isArray(options), "GITHUB_READ_OPTIONS_REQUIRED", "GitHub read options are required");
   for (const forbiddenField of ["token", "authorization", "headers", "api_base", "api_origin", "credentials"]) {
@@ -2813,7 +2973,9 @@ export async function readLatestRepositorySnapshot(options) {
     active_task_pr = null,
     observed_at,
     required_check_names = [],
-    fetch_impl = globalThis.fetch
+    evidence_paths = [],
+    expected_main_sha = null,
+    fetch_impl = CANONICAL_COMPANY_PUBLIC_FETCH
   } = options;
   invariant(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? ""), "INVALID_GITHUB_REPOSITORY", "Repository must use owner/name form");
   invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_REPOSITORY_OBSERVATION_TIME", "observed_at must be an ISO timestamp");
@@ -2822,6 +2984,9 @@ export async function readLatestRepositorySnapshot(options) {
   invariant(Array.isArray(required_check_names) && required_check_names.length > 0 && required_check_names.every((name) => typeof name === "string" && name.trim()), "GITHUB_REQUIRED_CHECKS_INVALID", "required_check_names must contain one or more exact check names");
   invariant(new Set(required_check_names).size === required_check_names.length, "GITHUB_REQUIRED_CHECKS_DUPLICATE", "required_check_names must not contain duplicates");
 
+  invariant(Array.isArray(evidence_paths) && evidence_paths.length <= 32, "GITHUB_EVIDENCE_PATH_BOUND", "Evidence read accepts at most 32 files");
+  invariant(evidence_paths.every((path) => typeof path === "string" && path.length <= 300 && /^[A-Za-z0-9_./-]+$/.test(path) && !path.startsWith("/") && !path.split("/").some((part) => !part || part === "." || part === "..")), "GITHUB_EVIDENCE_PATH_INVALID", "Evidence paths must be safe repository-relative paths");
+  invariant(expected_main_sha === null || /^[0-9a-f]{40}$/.test(expected_main_sha), "INVALID_EXPECTED_MAIN_SHA", "Expected main must be an exact SHA");
   const headers = Object.freeze({
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28"
@@ -2853,6 +3018,15 @@ export async function readLatestRepositorySnapshot(options) {
   const mainCommitTime = mainCommit.commit?.committer?.date ?? mainCommit.commit?.author?.date;
   invariant(typeof mainCommitTime === "string" && !Number.isNaN(Date.parse(mainCommitTime)), "GITHUB_MAIN_TIME_INVALID", "GitHub main commit time is invalid");
 
+  invariant(expected_main_sha === null || mainCommit.sha === expected_main_sha, "PUBLIC_GITHUB_MAIN_MISMATCH", "Requested evidence is not the current default-branch HEAD");
+  const files = {};
+  for (const path of [...new Set(evidence_paths)]) {
+    const file = await read(`/contents/${path.split("/").map(encodeURIComponent).join("/")}?ref=${mainCommit.sha}`);
+    invariant(file.type === "file" && file.encoding === "base64" && typeof file.content === "string" && file.content.length <= 1400000, "PUBLIC_GITHUB_FILE_EVIDENCE_INVALID", `Invalid or oversized file evidence: ${path}`);
+    const content = decodePublicGitHubBase64(file.content);
+    invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_BLOB_HASH_MISMATCH", `Blob hash mismatch: ${path}`);
+    files[path] = Object.freeze({ path, git_object: file.sha, content });
+  }
   let pullRequest = null;
   if (active_task_pr !== null) {
     const pr = await read(`/pulls/${active_task_pr}`);
@@ -2870,6 +3044,7 @@ export async function readLatestRepositorySnapshot(options) {
       head_ref: pr.head.ref,
       head_repository: pr.head.repo?.full_name ?? null,
       base_ref: pr.base.ref,
+      base_repository: pr.base.repo?.full_name ?? null,
       state: String(pr.state ?? "").toUpperCase(),
       draft: pr.draft === true,
       mergeable: pr.mergeable === true ? true : pr.mergeable === false ? false : null,
@@ -2891,8 +3066,14 @@ export async function readLatestRepositorySnapshot(options) {
     });
   }
 
-  return Object.freeze({
+  if (evidence_paths.length) {
+    const refreshed = await read(`/commits/${encodeURIComponent(defaultBranch)}`);
+    invariant(refreshed.sha === mainCommit.sha, "GITHUB_MAIN_MOVED_DURING_SNAPSHOT", "Default branch changed during evidence collection");
+  }
+  const snapshot = Object.freeze({
     snapshot_type: "LATEST_REPOSITORY_READ_ONLY",
+    transport_provenance: fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH ? "DEFAULT_PUBLIC_GITHUB" : "DIAGNOSTIC_CUSTOM_TRANSPORT",
+    files: Object.freeze(files),
     observed_at,
     repository,
     default_branch: defaultBranch,
@@ -2912,12 +3093,14 @@ export async function readLatestRepositorySnapshot(options) {
       chain_write: false
     })
   });
+  (fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH ? VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS : DIAGNOSTIC_COMPANY_REPOSITORY_SNAPSHOTS).add(snapshot);
+  return snapshot;
 }
 
 /**
  * Evaluate a snapshot only. A passing result is evidence, never merge power.
  */
-export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha, expected_head_sha }) {
+export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha, expected_head_sha, work_order_ref = null }) {
   invariant(repository_snapshot?.snapshot_type === "LATEST_REPOSITORY_READ_ONLY", "LATEST_REPOSITORY_SNAPSHOT_REQUIRED", "Exact-head CI gate requires a fresh read-only repository snapshot");
   invariant(/^[0-9a-f]{40}$/.test(expected_main_sha ?? ""), "EXPECTED_MAIN_SHA_INVALID", "Expected main must be a lowercase Git SHA");
   invariant(/^[0-9a-f]{40}$/.test(expected_head_sha ?? ""), "EXPECTED_HEAD_SHA_INVALID", "Expected PR head must be a lowercase Git SHA");
@@ -2942,13 +3125,28 @@ export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha
   if (pr.state !== "OPEN") return hold("HOLD_PR_NOT_OPEN");
   if (pr.draft) return hold("HOLD_PR_DRAFT");
   if (pr.base_ref !== repository_snapshot.default_branch) return hold("HOLD_PR_BASE_BRANCH_MISMATCH", { expected_base: repository_snapshot.default_branch, observed_base: pr.base_ref });
-  if (pr.head_ref === repository_snapshot.default_branch || pr.head_ref.startsWith("codex/")) return hold("HOLD_FORBIDDEN_BRANCH_PATH", { observed_head_ref: pr.head_ref });
+  if (pr.head_ref === repository_snapshot.default_branch) return hold("HOLD_FORBIDDEN_BRANCH_PATH", { observed_head_ref: pr.head_ref });
   if (pr.behind_main !== 0) return hold("HOLD_PR_BEHIND_MAIN");
   if (pr.ahead_main < 1) return hold("HOLD_PR_HAS_NO_BRANCH_DIFF");
   if (pr.mergeable === false) return hold("HOLD_PR_NOT_MERGEABLE");
   if (pr.mergeable === null) return hold("HOLD_PR_MERGEABILITY_UNKNOWN");
   if (pr.ci_status !== "PASS") return hold(pr.ci_status === "FAIL" ? "HOLD_EXACT_HEAD_CI_FAILED" : "HOLD_EXACT_HEAD_CI_INCOMPLETE");
-  return hold("EXACT_MAIN_HEAD_CI_PASS", { exact_main: true, exact_head: true, ci_status: "PASS", behind_main: 0 });
+  if ((!VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot) && !DIAGNOSTIC_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot)) || typeof work_order_ref !== "string") return hold("HOLD_BRANCH_EVIDENCE_REQUIRED");
+  let envelope, registry;
+  try {
+    envelope = JSON.parse(repository_snapshot.files[work_order_ref]?.content);
+    registry = JSON.parse(repository_snapshot.files[ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority]?.content);
+  } catch { return hold("HOLD_BRANCH_EVIDENCE_REQUIRED"); }
+  const task = envelope?.planner_task;
+  if (task?.target_pr !== pr.number || pr.head_repository !== repository_snapshot.repository || pr.base_repository !== repository_snapshot.repository) return hold("HOLD_PR_IDENTITY_OR_REPOSITORY_MISMATCH");
+  const registered = registry?.workers?.find((worker) => worker.worker_id === task?.assigned_worker_id);
+  if (!task || task.work_order_ref !== work_order_ref || task.expected_base_sha !== expected_main_sha
+      || task.branch !== pr.head_ref || !autonomousEngineeringWorkerEligible(registered, task)
+      || !autonomousEngineeringBranchMatches(registered.allowed_branch_pattern, pr.head_ref, task.task_id)) {
+    return hold("HOLD_BRANCH_REGISTRY_TASK_MISMATCH");
+  }
+  return hold(VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot) ? "EXACT_MAIN_HEAD_CI_PASS" : "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED", { evidence_class: repository_snapshot.transport_provenance, exact_main: true, exact_head: true, ci_status: "PASS", behind_main: 0,
+    branch_policy_status: "REGISTRY_TASK_BOUND", branch_policy_work_order: work_order_ref });
 }
 
 export function createAutonomousBusinessWorkOrder({ cycle_id, primary_job_status, candidates }) {

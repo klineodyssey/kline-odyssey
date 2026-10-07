@@ -1,14 +1,14 @@
 {
   "schema": "KAIOS_MACHINE_VERIFIABLE_WORK_ORDER_V1",
   "work_order_id": "KAIOS-AI-COMPANY-SAFE-PLANNER-CURRENT-MAIN-R1-20260914",
-  "status": "ACTIVE_MODE_DRAFT_PR_OPEN_INDEPENDENT_REVIEW_PASS_EXACT_HEAD_CI_PENDING",
+  "status": "DYNAMIC_ORGAN_CANDIDATE_INDEPENDENT_REVIEW_PENDING",
   "priority": "P1",
   "risk": "R1",
   "repository": "klineodyssey/kline-odyssey",
   "base_branch": "main",
   "base_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
   "head_sha_source": "GIT_COMMIT_CONTAINING_THIS_MANIFEST",
-  "active_mode_work_id": "KAIOS-AI-COMPANY-ACTIVE-MODE-20261007",
+  "active_mode_work_id": "KAIOS-DOT-ORGAN-V1-20261007",
   "source_pr": 536,
   "previous_source_pr": 170,
   "source_pr_disposition": "PARTIAL_CURRENT_MAIN_TRANSPLANT_ONLY",
@@ -35,10 +35,18 @@
   ],
   "acceptance": {
     "selects_at_most_one_task": true,
-    "priority_order": ["P0", "P1", "P2"],
+    "priority_order": [
+      "P0",
+      "P1",
+      "P2"
+    ],
     "unsafe_p0_does_not_stall_safe_lower_priority_work": true,
     "exact_main_required": true,
-    "risk_allowed": ["R0", "R1", "LOW"],
+    "risk_allowed": [
+      "R0",
+      "R1",
+      "LOW"
+    ],
     "active_company_boot_required": true,
     "active_company_boot_git_object_evidence_required": true,
     "public_github_trusted_resolver_required": true,
@@ -75,5 +83,165 @@
   "ui_or_game_change": false,
   "browser_qa": "NOT_APPLICABLE",
   "screenshot_visual_qa": "NOT_APPLICABLE",
-  "protected_actions_executed": false
+  "protected_actions_executed": false,
+  "superseded_status_assertions": [
+    {
+      "head": "b00aee498cfd14bb0b4435326edabed2129bf9f2",
+      "asserted_status": "ACTIVE_MODE_DRAFT_PR_OPEN_INDEPENDENT_REVIEW_PASS_EXACT_HEAD_CI_PENDING",
+      "actual_review": "FAIL",
+      "review_url": "https://github.com/klineodyssey/kline-odyssey/pull/536#pullrequestreview-5440566159",
+      "disposition": "SUPERSEDED_NOT_DELETED; original branch history preserved"
+    }
+  ],
+  "organ_version": "1.0.0",
+  "planner_task": {
+    "task_id": "KAIOS-DOT-ORGAN-V1-20261007",
+    "work_type": "CODE",
+    "work_order_ref": "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json",
+    "project_id": "DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE",
+    "status": "PROPOSED",
+    "priority": "P1",
+    "risk_level": "R1",
+    "assigned_worker_id": "DOT",
+    "reviewer_id": null,
+    "review_requirement": "REQUIRED",
+    "branch": "codex/kaios-ai-company-active-mode-20261007",
+    "target_pr": 536,
+    "expected_base_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    "why_now": "Human 2026-10-07 authorizes bounded repair of existing failing Company organ",
+    "authorized_actions": [
+      "READ",
+      "SAFE_BRANCH_WORK",
+      "TEST",
+      "OPEN_PR",
+      "CI"
+    ],
+    "scope": [
+      "core/company/index.mjs",
+      "tests/autonomous-company-engineering-cycle.test.mjs",
+      "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md",
+      "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+      "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"
+    ],
+    "acceptance_tests": [
+      "node --test tests/autonomous-company-engineering-cycle.test.mjs"
+    ],
+    "task_envelope_status": "PROPOSED_UNADMITTED",
+    "authority_status": "HUMAN_ENGINEERING_ORDER_NOT_MACHINE_WORKER_ADMISSION",
+    "dependencies_complete": false,
+    "protected_paths_changed": false,
+    "ready": false,
+    "unresolved_threads": 0,
+    "blocking_comments": 1,
+    "blocking_defects": 8,
+    "human_decision_required": false,
+    "external_effects": false,
+    "secrets_required": false,
+    "chain_state_mutation": false,
+    "worker_activation": false,
+    "paid_external_api": false,
+    "created_at": "2026-10-07T12:00:42Z"
+  },
+  "active_project": {
+    "task_id": "KAIOS-DOT-ORGAN-V1-20261007",
+    "project_owner_id": "codex-gm-01",
+    "project_owner_name": "衡曜",
+    "implementer_id": "DOT",
+    "reviewer_id": null,
+    "dependencies": [
+      "CURRENT_MAIN",
+      "QUALIFIED_WORKER_IDENTITY",
+      "INDEPENDENT_REVIEW",
+      "EXACT_HEAD_CI"
+    ],
+    "expected_output": "BOUNDED_OFFCHAIN_CANDIDATE_AND_REVIEW_EVIDENCE"
+  },
+  "manufacturing_record": {
+    "version": "1.0.0",
+    "design_author": "沈英明",
+    "company_owner": "衡曜",
+    "runtime_host": "PrimeForge",
+    "primary_implementer": "DOT",
+    "worker_class": "TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER",
+    "status": "INCOMPLETE_WIP_SOURCE_CANDIDATE_NOT_INSTALLED",
+    "signature": "NOT_SIGNED",
+    "verification": "NOT_VERIFIED",
+    "seal": "INVALID",
+    "source_head": "b00aee498cfd14bb0b4435326edabed2129bf9f2",
+    "human_order_message": "Sentinel_2276674abe5c8191b44148d832d65088",
+    "installation": false,
+    "deployment": false,
+    "real_asset_movement": false,
+    "target_version": "1.0.0"
+  },
+  "inspection_record": {
+    "version": "1.0.0",
+    "status": "PENDING",
+    "independent_review": "PENDING",
+    "exact_head_ci": "NOT_RUN",
+    "real_dispatches": 0,
+    "verified_acks": 0,
+    "local_focused_suite": "44 PASS / 0 FAIL / 0 SKIP; Node 24.19.0; focused-checkpoint3.log; includes separate non-test-process and spoofed-env transport probes",
+    "security_review": "CHECKPOINT1_FAIL: accessor, inherited-policy, manager-alias; CHECKPOINT2_FAIL: custom transport provenance and PR/fork binding. Both preserved; repairs pending independent rereview."
+  },
+  "maintenance_record": {
+    "version": "1.0.0",
+    "state": "WATCHING",
+    "next_check_condition": "MAIN_PR_CI_QUEUE_REGISTRY_OR_DEPENDENCY_CHANGE",
+    "heartbeat": "OBSERVATION_ONLY_NO_RECEIPT",
+    "day_breath": "BLOCKED_CANONICAL_K12345_DAY_BOUNDARY_AND_CLOCK_REQUIRED",
+    "daemon_installed": false
+  },
+  "rollback_record": {
+    "version": "1.0.0",
+    "status": "PLAN_ONLY",
+    "scope": [
+      "core/company/index.mjs",
+      "tests/autonomous-company-engineering-cycle.test.mjs",
+      "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md",
+      "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+      "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"
+    ],
+    "anchor": "b00aee498cfd14bb0b4435326edabed2129bf9f2",
+    "method": "Owner-reviewed revert of bounded candidate commit; no history rewrite or canonical state migration"
+  },
+  "known_limits": [
+    "No qualified DOT/controller/reviewer registry identity has been created",
+    "Cargo proposal requires registered canonical origin/destination, explicit capacity/weight/rights policy; no movement",
+    "Human minimum 1 KGEN is a constraint, not funding/entitlement or capacity authority",
+    "Prior PR #536 claims do not resolve actual FAIL review",
+    "Unmerged #520/#501 remain independent overlap/dependency work; no source transplant",
+    "Controller binding restored from main because #536 removed it",
+    "PR-head/CI-driven supersession is incomplete: compatibility resolver has no active PR argument in this checkpoint",
+    "Priority uses canonical P0/P1/P2 with stable WORK_ID tie-break; broader dynamic factors are not complete",
+    "Next bounded slice: active PR/evidence invalidation through existing reader, freshness policy, priority policy; no second resolver",
+    "Predecessor provenance is same-process-only: serialized/copied records remain held; durable restart supersession is NOT_VERIFIED",
+    "Actual branch WorkOrder test proves parse/projection compatibility, not admission on current main",
+    "Demands with a target PR stay ACTIVE_PR_EVIDENCE_REQUIRED until that PR is observed"
+  ],
+  "requirement_matrix": {
+    "single_existing_owner": "IMPLEMENTED_CANDIDATE",
+    "default_branch_and_file_hash_snapshot": "FOCUSED_TEST_PASS",
+    "nineteen_work_types_and_required_fields": "FOCUSED_TEST_PASS",
+    "canonical_p0_p1_p2_priority": "FOCUSED_TEST_PASS",
+    "broader_dynamic_priority": "INCOMPLETE",
+    "detached_registry_identity_and_controller_checks": "REPAIRED_PENDING_INDEPENDENT_REREVIEW",
+    "ci_branch_registry_task_binding": "FOCUSED_TEST_PASS_EVIDENCE_ONLY",
+    "duplicate_demand_conflict": "FOCUSED_TEST_PASS",
+    "supersede_same_process": "FOCUSED_TEST_PASS",
+    "supersede_durable_or_pr_ci_change": "INCOMPLETE_HOLD",
+    "real_workorder_main_admission": "NOT_ADMITTED",
+    "watching_no_global_idle": "CANDIDATE_OBSERVATION_ONLY",
+    "direct_delivery_and_gm_ack": "NOT_VERIFIED",
+    "runtime_installation": "NOT_PERFORMED",
+    "heartbeat_receipt": "NOT_VERIFIED",
+    "day_breath": "BLOCKED_CANONICAL_CLOCK_BOUNDARY_REQUIRED",
+    "cargo_registered_locations_capacity_rights": "BLOCKED",
+    "manufacture": "INCOMPLETE_WIP",
+    "inspection": "PENDING_INDEPENDENT_REREVIEW",
+    "signatures": "NOT_SIGNED",
+    "seal": "INVALID",
+    "transport_provenance": "CUSTOM_TRANSPORT_DIAGNOSTIC_ONLY; NEVER_PRODUCTION_CI_PASS",
+    "ci_pr_repository_identity": "FOCUSED_TEST_PASS"
+  }
 }

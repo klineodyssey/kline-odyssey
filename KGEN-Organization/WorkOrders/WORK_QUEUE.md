@@ -1,5 +1,26 @@
 # KGEN Organization V2.0 WorkQueue
 
+## DOT Dynamic Opportunity & Task Engine V1.0.0 candidate — 2026-10-07
+
+WORK_ID: KAIOS-DOT-ORGAN-V1-20261007. Human design 沈英明; Company owner 衡曜 / codex-gm-01; implementer DOT (temporary external engineering maintainer); eventual Runtime Host PrimeForge. Existing PR #536 / codex/kaios-ai-company-active-mode-20261007 is the sole lineage. Base main f7f67950418ebbb6f7a5a309a32d529232fcb3b6; predecessor b00aee498cfd14bb0b4435326edabed2129bf9f2.
+
+Current status: MANUFACTURING_INCOMPLETE / WIP_CANDIDATE / INDEPENDENT_REVIEW_PENDING / NOT_INSTALLED / NOT_DEPLOYED. Target version 1.0.0 is not complete. Actual review [5440566159](https://github.com/klineodyssey/kline-odyssey/pull/536#pullrequestreview-5440566159) is FAIL. All predecessor PASS, AVAILABLE and second_review claims below are historical unsupported author assertions, explicitly superseded by this record and the actual review; branch history is retained. They are not current acceptance evidence.
+
+One owner remains core/company/index.mjs. Its existing planner produces canonical evidence-bound proposals across all nineteen work types, deterministic P0/P1/P2 ordering, duplicate/conflict handling, stale/supersede evidence and WATCHING. The existing readLatestRepositorySnapshot exclusively owns hardened GET/file/hash/default-branch verification; the old resolver name is only a compatibility delegator. Controller separation is restored from main, where #536 had removed it. Unknown identity, reviewer, capacity, cargo rights or work types stay blocked; proposal detection is possible without granting a worker identity.
+
+The existing safe-planner WorkOrder JSON contains the real held envelope and versioned manufacturing/inspection/maintenance/rollback records. It is a branch candidate, not a dispatched main queue item. DOT has no invented registry employee, Life, controller or trust grant. Fake second_review is not an assigned reviewer. At most one safe proposal is selected; actual dispatch/ACK counts remain zero. Direct AVAILABLE is not evidence: the canonical repository handoff is retained and ACK_NOT_VERIFIED persists.
+
+No cargo is required for ordinary code/research. Cargo types cannot acquire invented coordinates, weight coefficients, rights, max capacity, receipts or a funding grant; minimum 1 KGEN is only Human input. Day breath is blocked until verified clock and canonical K12345 boundary exist, without using Cloud host timezone. Heartbeat is observation-only, not a reward or receipt.
+
+Checkpoint limits: canonical P0/P1/P2 plus stable WORK_ID is implemented; broader dynamic priority factors are incomplete. Compatibility evidence resolution has no active PR argument yet, so PR-head/CI-driven supersession is incomplete. The next bounded slice must extend existing-reader integration and evidence invalidation, without another resolver. A target PR without observed evidence remains held. Serialized/copied predecessors lack source provenance and remain held; same-process produced-record comparison is the only implemented supersession boundary. The actual branch WorkOrder test establishes parse/projection compatibility, not main admission. Local focused source suite passed 44/44 on Node 24.19.0; this is not final-head CI or production evidence.
+
+Security checkpoint history: first review reproduced accessor/policy-prototype/manager-alias bypasses; second reproduced custom-transport provenance and PR/fork binding gaps. Repairs retain these FAIL findings and require independent rereview. Injected transports now produce DIAGNOSTIC_CI_MATCH_NOT_VERIFIED, including outside the test runner and under spoofed test environment; they never mint production CI evidence. Positive CI evidence also requires exact canonical WorkOrder target PR, head/base repository and registered task branch.
+
+Manufacture signature NOT_SIGNED; verification NOT_VERIFIED; inspection PENDING; seal INVALID. Runtime installation, daemon scheduling, deployment, payments, chain state and real assets are not performed. Rollback is an owner-reviewed revert of this bounded diff, not history rewriting. #520 overlaps core/OS and #501 overlaps tests; their unmerged changes are not imported or falsely claimed preserved here. Existing unrelated base content remains intact.
+
+## Superseded predecessor narrative (historical, not current status)
+
+
 ## KAIOS AI Company Active Mode — 2026-10-07
 
 - `WORK_ID`: `KAIOS-AI-COMPANY-ACTIVE-MODE-20261007`.

@@ -16,7 +16,8 @@ import {
   AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS,
   ACTIVE_COMPANY_BOOT_READS,
   ACTIVE_COMPANY_BOOT_SOURCE_PATHS,
-  ACTIVE_COMPANY_ORACLE_POLICY
+  ACTIVE_COMPANY_ORACLE_POLICY,
+  DYNAMIC_COMPANY_WORK_TYPES
 } from "../core/company/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
 import { assertAppendOnlyChain } from "../core/history/index.mjs";
@@ -41,6 +42,7 @@ const manager = Object.freeze({
   ...acknowledgedWorker,
   worker_id: "codex-gm-01",
   life_identity_ref: "LIFE-CODEX-GM-0001",
+  controller_id: "TEST-CONTROLLER-CODEX-GM",
   role: "General Manager / Dispatcher / Reviewer",
   allowed_branch_pattern: "codex/<Task-ID>"
 });
@@ -48,6 +50,7 @@ const worker = Object.freeze({
   ...acknowledgedWorker,
   worker_id: "chatgpt-01",
   life_identity_ref: "LIFE-CHATGPT-0001",
+  controller_id: "TEST-CONTROLLER-CHATGPT",
   role: "System Maintainer",
   allowed_branch_pattern: "chatgpt-handoff/<Task-ID>"
 });
@@ -55,11 +58,13 @@ const reviewer = Object.freeze({
   ...acknowledgedWorker,
   worker_id: "reviewer-01",
   life_identity_ref: "LIFE-REVIEWER-0001",
+  controller_id: "TEST-CONTROLLER-REVIEWER",
   role: "Independent Reviewer",
   allowed_branch_pattern: "review/<Task-ID>"
 });
 const task = Object.freeze({
   task_id: "SAFE-ENGINEERING-001",
+  work_type: "CODE",
   status: "READY",
   priority: "P1",
   risk_level: "R1",
@@ -113,8 +118,9 @@ function gitBlobSha(content) {
 function activeCompanyEvidenceFetch(files, { corruptPath = null } = {}) {
   return async (url) => {
     const parsed = new URL(url);
-    if (parsed.pathname.endsWith(`/commits/${MAIN_SHA}`)) {
-      return { ok: true, status: 200, json: async () => ({ sha: MAIN_SHA }) };
+    if (parsed.pathname === "/repos/klineodyssey/kline-odyssey") return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
+    if (parsed.pathname.endsWith("/commits/main")) {
+      return { ok: true, status: 200, json: async () => ({ sha: MAIN_SHA, commit: { committer: { date: "2026-10-07T07:00:00Z" } } }) };
     }
     const marker = "/contents/";
     const markerIndex = parsed.pathname.indexOf(marker);
@@ -139,7 +145,9 @@ function activeCompanyEvidenceFetch(files, { corruptPath = null } = {}) {
 const GUARDIAN_RESOLUTION_REF = "KGEN-Organization/WorkOrders/GUARDIAN_RESOLUTION_TEST.json";
 const fixtureRegistry = JSON.stringify({ workers: [manager, worker, reviewer] });
 const fixtureFiles = Object.freeze({
-  "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md": "boot fixture",
+  "KGEN-KAIOS/governance/autopilot/COMPANY_OS_BOOT.md": "company boot fixture",
+  "KGEN-KAIOS/governance/autopilot/company_boot_manifest.json": "boot manifest fixture",
+  "PRIMEFORGE_GENESIS_BOOT_SEQUENCE.md": "current boot fixture",
   "handoff/HANDOFF_CURRENT.md": "handoff fixture",
   "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md": "owner policy fixture",
   "KGEN-Organization/WorkOrders/WORK_QUEUE.md": "queue fixture",
@@ -157,6 +165,7 @@ const fixtureFiles = Object.freeze({
   })
 });
 const activeCompanyRepositoryEvidence = await resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-07T07:00:00Z",
   current_main_sha: MAIN_SHA,
   guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF],
   work_order_refs: [WORK_ORDER_REF],
@@ -168,6 +177,7 @@ async function repositoryEvidenceForActors(actors) {
     "KGEN-KAIOS/worker_registry.json": JSON.stringify({ workers: actors })
   };
   return resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-07T07:00:00Z",
     current_main_sha: MAIN_SHA,
     guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF],
     work_order_refs: [WORK_ORDER_REF],
@@ -181,6 +191,7 @@ async function repositoryEvidenceForEnvelope(plannerTask, activeProject, actors 
     [WORK_ORDER_REF]: JSON.stringify({ planner_task: plannerTask, active_project: activeProject })
   };
   return resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-07T07:00:00Z",
     current_main_sha: MAIN_SHA,
     guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF],
     work_order_refs: [WORK_ORDER_REF],
@@ -247,7 +258,7 @@ function publicGitHubFixtureFetch(overrides = {}) {
       mergeable: true,
       mergeable_state: "clean",
       head: { sha: HEAD_SHA, ref: "chatgpt-handoff/SAFE-ENGINEERING-001", repo: { full_name: "klineodyssey/kline-odyssey" } },
-      base: { ref: "main" }
+      base: { ref: "main", repo: { full_name: "klineodyssey/kline-odyssey" } }
     },
     [`/repos/klineodyssey/kline-odyssey/compare/main...${HEAD_SHA}`]: { ahead_by: 2, behind_by: 0 },
     [`/repos/klineodyssey/kline-odyssey/commits/${HEAD_SHA}/check-runs?per_page=100`]: {
@@ -257,6 +268,7 @@ function publicGitHubFixtureFetch(overrides = {}) {
         { id: 11, name: "workflow-security", status: "completed", conclusion: "success", head_sha: HEAD_SHA, html_url: "https://github.com/example/check/11" }
       ]
     },
+    ...Object.fromEntries(Object.entries({ ...fixtureFiles, [WORK_ORDER_REF]: JSON.stringify({ planner_task: { ...task, target_pr: 353 }, active_project: activeCompanyProject }) }).map(([path, content]) => [`/repos/klineodyssey/kline-odyssey/contents/${path}?ref=${MAIN_SHA}`, { type: "file", encoding: "base64", sha: gitBlobSha(content), content: Buffer.from(content).toString("base64") }])),
     ...overrides
   };
   const fetch = async (url, options) => {
@@ -322,7 +334,7 @@ test("enforces exact-main readiness, completed dependencies, and zero blockers",
     { protected_paths_changed: true }, { unresolved_threads: 1 }, { blocking_comments: 1 }, { blocking_defects: 1 }
   ]) {
     const result = cycle({ work_queue: [{ ...task, ...patch }] });
-    assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+    assert.equal(result.status, "WATCHING");
     assert.equal(result.selected_task_id, null);
   }
 });
@@ -333,7 +345,7 @@ test("rejects forbidden, unknown, high-risk, or side-effectful authority", () =>
     { risk_level: "R2" }, { priority: "P3" }, { task_envelope_status: "DRAFT" },
     { authority_status: "CHAT_ONLY" }, { human_decision_required: true }, { secrets_required: true },
     { external_effects: true }, { chain_state_mutation: true }, { worker_activation: true }, { paid_external_api: true }
-  ]) assert.equal(cycle({ work_queue: [{ ...task, ...patch }] }).status, "NO_VERIFIED_SAFE_WORK");
+  ]) assert.equal(cycle({ work_queue: [{ ...task, ...patch }] }).status, "WATCHING");
   assert.ok(AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes("VERIFY_STATIC_PAGES"));
   assert.ok(!AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes("MERGE_MAIN"));
   assert.ok(AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS.includes("EXTERNAL_AGENT_LAUNCH"));
@@ -353,7 +365,7 @@ test("accepts the canonical READY_FOR_ATOMIC_CLAIM queue state", async () => {
 test("blocks main and branch namespaces that do not match the registered worker", () => {
   for (const branch of ["main", "codex/SAFE-ENGINEERING-001", "chatgpt-handoff/WRONG-TASK"]) {
     const result = cycle({ work_queue: [{ ...task, branch }] });
-    assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+    assert.equal(result.status, "WATCHING");
     assert.ok(result.rejected_candidates[0].reasons.includes("BRANCH_POLICY_MISMATCH"));
   }
 });
@@ -432,7 +444,7 @@ test("Active Company Mode rejects caller-invented tasks and projects absent from
     work_queue: [inventedTask],
     projects: [{ ...activeCompanyProject, task_id: inventedTask.task_id }]
   });
-  assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+  assert.equal(result.status, "WATCHING");
   assert.ok(result.rejected_candidates[0].reasons.includes("WORK_ORDER_EVIDENCE_MISMATCH"));
 });
 
@@ -447,6 +459,7 @@ test("Active Company Mode rejects duplicate queue task IDs before evidence selec
 test("public GitHub evidence resolver rejects a blob whose content does not match its Git object", async () => {
   await assert.rejects(
     () => resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-07T07:00:00Z",
       current_main_sha: MAIN_SHA,
       fetch_impl: activeCompanyEvidenceFetch(fixtureFiles, { corruptPath: "AGENTS.md" })
     }),
@@ -478,14 +491,14 @@ test("Active Company Mode rejects missing ownership, implementer mismatch, and s
     { ...activeCompanyProject, project_owner_id: reviewer.worker_id }
   ]) {
     const result = activeCycle({ projects: [project] });
-    assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+    assert.equal(result.status, "WATCHING");
   }
   const wrongRoleReviewer = { ...reviewer, role: "System Maintainer" };
   const wrongRole = activeCycle({
     workers: [manager, worker, wrongRoleReviewer],
     repository_evidence: await repositoryEvidenceForActors([manager, worker, wrongRoleReviewer])
   });
-  assert.equal(wrongRole.status, "NO_VERIFIED_SAFE_WORK");
+  assert.equal(wrongRole.status, "WATCHING");
   assert.ok(wrongRole.rejected_candidates[0].reasons.includes("REVIEWER_ROLE_REQUIRED"));
   assert.throws(
     () => activeCycle({ projects: [activeCompanyProject, { ...activeCompanyProject }] }),
@@ -504,16 +517,16 @@ test("Active Company Mode stops an unresolved Guardian denial instead of retryin
     timestamp: "2026-10-07T07:00:30Z"
   });
   const result = activeCycle({ guardian_denials: [denial] });
-  assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+  assert.equal(result.status, "WATCHING");
   assert.ok(result.rejected_candidates[0].reasons.includes("GUARDIAN_STOP_REPEAT"));
   assert.equal(result.events[1].payload.guardian_denials[0].review_id, denial.review_id);
   assert.equal(result.guardian_denials[0].action, denial.action);
   const unknownFields = activeCycle({ guardian_denials: [{ target_item_id: task.task_id, action: "UNKNOWN" }] });
-  assert.equal(unknownFields.status, "NO_VERIFIED_SAFE_WORK");
+  assert.equal(unknownFields.status, "WATCHING");
   assert.equal(unknownFields.guardian_denials[0].turn_id, "UNKNOWN");
   assert.equal(unknownFields.guardian_denials[0].reason, "UNKNOWN");
   const malformedInline = activeCycle({ work_queue: [{ ...task, guardian_denial: { target_item_id: task.task_id } }] });
-  assert.equal(malformedInline.status, "NO_VERIFIED_SAFE_WORK");
+  assert.equal(malformedInline.status, "WATCHING");
   assert.ok(malformedInline.rejected_candidates[0].reasons.includes("GUARDIAN_STOP_REPEAT"));
   assert.throws(
     () => activeCycle({ guardian_denials: [{ ...denial, status: "RESOLVED" }] }),
@@ -604,6 +617,7 @@ test("Active Company Mode keeps paid Oracle chasing silent until a material trig
     [SECOND_WORK_ORDER_REF]: JSON.stringify({ planner_task: otherTask, active_project: otherProject })
   };
   const mixedEvidence = await resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-07T07:00:00Z",
     current_main_sha: MAIN_SHA,
     guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF],
     work_order_refs: [WORK_ORDER_REF, SECOND_WORK_ORDER_REF],
@@ -618,14 +632,15 @@ test("Active Company Mode keeps paid Oracle chasing silent until a material trig
   assert.deepEqual(mixed.silent_task_ids, [oracleTask.task_id]);
 });
 
-test("Active Company Mode requires a durable handoff when direct AI communication is unavailable", () => {
-  assert.throws(
-    () => activeCycle({ direct_channel: "NOT_AVAILABLE", durable_handoff_ref: null }),
-    (error) => error.code === "DURABLE_HANDOFF_REQUIRED"
-  );
-  const result = activeCycle({ direct_channel: "NOT_AVAILABLE", durable_handoff_ref: "handoff/HANDOFF_CURRENT.md" });
-  assert.equal(result.status, "WORK_ORDER_CANDIDATE_READY");
-  assert.equal(result.durable_handoff_ref, "handoff/HANDOFF_CURRENT.md");
+test("caller direct availability never bypasses verified canonical handoff or grants ACK", () => {
+  for (const direct_channel of ["AVAILABLE", "NOT_AVAILABLE"]) {
+    const result = activeCycle({ direct_channel, durable_handoff_ref: null });
+    assert.equal(result.direct_channel, "NOT_VERIFIED");
+    assert.equal(result.durable_handoff_ref, "handoff/HANDOFF_CURRENT.md");
+    assert.equal(result.ack_status, "ACK_NOT_VERIFIED");
+    assert.equal(result.dispatched_count, 0);
+  }
+  assert.throws(() => activeCycle({ durable_handoff_ref: "caller-invented.md" }), error => error.code === "DURABLE_HANDOFF_REQUIRED");
 });
 
 test("never activates a suspended, occupied, or under-trusted worker", async () => {
@@ -638,7 +653,7 @@ test("never activates a suspended, occupied, or under-trusted worker", async () 
       workers: [manager, candidateWorker, reviewer],
       repository_evidence: await repositoryEvidenceForActors([manager, candidateWorker, reviewer])
     });
-    assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+    assert.equal(result.status, "WATCHING");
     assert.equal(result.authority.worker_activated, false);
   }
 });
@@ -646,7 +661,7 @@ test("never activates a suspended, occupied, or under-trusted worker", async () 
 test("Active Company Mode always requires an eligible distinct reviewer", () => {
   assert.equal(cycle().selected_reviewer_id, reviewer.worker_id);
   const selfReviewed = cycle({ projects: [{ ...activeCompanyProject, reviewer_id: worker.worker_id }] });
-  assert.equal(selfReviewed.status, "NO_VERIFIED_SAFE_WORK");
+  assert.equal(selfReviewed.status, "WATCHING");
   assert.ok(selfReviewed.rejected_candidates[0].reasons.includes("DISTINCT_REVIEWER_REQUIRED"));
 });
 
@@ -776,12 +791,13 @@ test("exact-main and exact-head gate passes evidence without granting merge auth
   const snapshot = await readLatestRepositorySnapshot({
     repository: "klineodyssey/kline-odyssey",
     active_task_pr: 353,
+    evidence_paths: [WORK_ORDER_REF, ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority],
     observed_at: "2026-09-14T01:05:00Z",
     required_check_names: ["company-safe-cycle", "workflow-security"],
     fetch_impl: fixture.fetch
   });
-  const gate = evaluateExactHeadCiGate({ repository_snapshot: snapshot, expected_main_sha: MAIN_SHA, expected_head_sha: HEAD_SHA });
-  assert.equal(gate.status, "EXACT_MAIN_HEAD_CI_PASS");
+  const gate = evaluateExactHeadCiGate({ repository_snapshot: snapshot, expected_main_sha: MAIN_SHA, expected_head_sha: HEAD_SHA, work_order_ref: WORK_ORDER_REF });
+  assert.equal(gate.status, "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED");
   assert.equal(gate.exact_main, true);
   assert.equal(gate.exact_head, true);
   assert.equal(gate.merge_authorized, false);
@@ -814,7 +830,8 @@ test("exact-head gate fails closed for moving main/head, draft, branch, divergen
   assert.equal(status(snapshot({ ...basePr, state: "CLOSED" })), "HOLD_PR_NOT_OPEN");
   assert.equal(status(snapshot({ ...basePr, draft: true })), "HOLD_PR_DRAFT");
   assert.equal(status(snapshot({ ...basePr, base_ref: "release" })), "HOLD_PR_BASE_BRANCH_MISMATCH");
-  assert.equal(status(snapshot({ ...basePr, head_ref: "codex/unsafe-trigger" })), "HOLD_FORBIDDEN_BRANCH_PATH");
+  assert.equal(status(snapshot({ ...basePr, head_ref: "main" })), "HOLD_FORBIDDEN_BRANCH_PATH");
+  assert.equal(status(snapshot({ ...basePr, head_ref: "codex/SAFE-ENGINEERING-001" })), "HOLD_BRANCH_EVIDENCE_REQUIRED");
   assert.equal(status(snapshot({ ...basePr, behind_main: 1 })), "HOLD_PR_BEHIND_MAIN");
   assert.equal(status(snapshot({ ...basePr, ahead_main: 0 })), "HOLD_PR_HAS_NO_BRANCH_DIFF");
   assert.equal(status(snapshot({ ...basePr, mergeable: false })), "HOLD_PR_NOT_MERGEABLE");
@@ -863,4 +880,200 @@ test("public repository reader fails closed on missing, failed, pending, or trun
     () => readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", observed_at: "2026-09-14T01:05:00Z", required_check_names: ["company-safe-cycle"], fetch_impl: failedRead.fetch }),
     (error) => error.code === "GITHUB_READ_FAILED"
   );
+});
+
+
+test("canonical snapshot rejects a valid historical commit and detects main moving during file reads", async () => {
+  const fixture = activeCompanyEvidenceFetch(fixtureFiles);
+  await assert.rejects(() => resolveActiveCompanyRepositoryEvidence({ current_main_sha: "8".repeat(40), observed_at: "2026-10-07T07:00:00Z", fetch_impl: fixture }), error => error.code === "PUBLIC_GITHUB_MAIN_MISMATCH");
+  let heads = 0;
+  await assert.rejects(() => resolveActiveCompanyRepositoryEvidence({ current_main_sha: MAIN_SHA, observed_at: "2026-10-07T07:00:00Z", fetch_impl: async (url, options) => {
+    assert.equal(options.method, "GET"); assert.equal(options.credentials, "omit"); assert.equal(options.redirect, "error");
+    assert.equal(options.headers.Authorization, undefined);
+    if (url.endsWith("/commits/main") && ++heads === 2) return { ok: true, json: async () => ({ sha: "8".repeat(40) }) };
+    return fixture(url, options);
+  } }), error => error.code === "GITHUB_MAIN_MOVED_DURING_SNAPSHOT");
+});
+
+test("dynamic projection deduplicates identical demand and retains changed evidence predecessor", async () => {
+  const first = cycle({ work_queue: [task, task] });
+  assert.equal(first.generated_proposals, 1);
+  const record = first.opportunity_records[0];
+  const replay = cycle({ previous_work_orders: [record] });
+  assert.equal(replay.opportunity_records[0].IDEMPOTENT, true);
+  const changedTask = { ...task, dependencies_complete: false };
+  const changed = cycle({ work_queue: [changedTask], previous_work_orders: [record], repository_evidence: await repositoryEvidenceForEnvelope(changedTask, activeCompanyProject) });
+  assert.equal(changed.status, "WATCHING");
+  assert.equal(changed.opportunity_records[0].STATUS, "BLOCKED");
+  assert.deepEqual(changed.opportunity_records[0].SUPERSEDES.EVIDENCE_BINDING, record.EVIDENCE_BINDING);
+  assert.equal(record.STATUS, "PROPOSED_UNADMITTED");
+});
+
+test("all workorder fields and all nineteen work types remain evidence-only without fake seal or receipt", async () => {
+  const required = "WORK_ID GENERATED_AT WORK_TYPE SOURCE WHY_NOW PRIORITY BASE_MAIN_SHA PROJECT TARGET_PR TARGET_BRANCH PROJECT_OWNER IMPLEMENTER REVIEWER SCOPE DEPENDENCIES EXPECTED_OUTPUT ACCEPTANCE_TESTS PROTECTED_ACTIONS CARGO_REQUIRED CARGO_ASSET CARGO_AMOUNT ORIGIN DESTINATION EXPIRES_WHEN SUPERSEDES STATUS".split(" ");
+  assert.equal(DYNAMIC_COMPANY_WORK_TYPES.length, 19);
+  for (const type of DYNAMIC_COMPANY_WORK_TYPES) {
+    const next = { ...task, work_type: type, signature: "SIGNED", seal: "VALID", review_status: "PASS" };
+    const result = cycle({ work_queue: [next], repository_evidence: await repositoryEvidenceForEnvelope(next, activeCompanyProject) });
+    const record = result.opportunity_records[0];
+    for (const key of required) assert.ok(Object.hasOwn(record, key), key);
+    assert.equal(result.seal.status, "INVALID"); assert.equal(result.manufacture.signature, "NOT_SIGNED");
+    assert.equal(result.dispatched_count, 0); assert.equal(result.acknowledged_count, 0);
+    assert.equal(result.day_breath.day_key, null); assert.equal(result.heartbeat.actual_receipt, null);
+    assert.equal(record.CARGO_REQUIRED, ["ATM_REPLENISH", "KGEN_CARGO", "KAIOS_CARGO"].includes(type) ? "YES" : "NO");
+    assert.equal(record.DESTINATION, null); assert.equal(record.ORIGIN, null);
+    if (record.CARGO_REQUIRED === "YES") assert.equal(record.STATUS, "BLOCKED");
+  }
+});
+
+test("missing controller identity blocks assignment while canonical demand detection survives", async () => {
+  const unavailableManager = { ...manager, controller_id: undefined };
+  const result = cycle({ manager: unavailableManager, workers: [unavailableManager, worker, reviewer], repository_evidence: await repositoryEvidenceForActors([unavailableManager, worker, reviewer]) });
+  assert.equal(result.status, "WATCHING");
+  assert.equal(result.blocker, "WAITING_FOR_QUALIFIED_WORKER");
+  assert.equal(result.generated_proposals, 1);
+  assert.equal(result.selected_worker_id, null);
+  assert.equal(result.dispatched_count, 0);
+});
+
+test("forged controller or same-controller reviewer cannot pass registry-bound identity", async () => {
+  assert.throws(() => cycle({ workers: [manager, { ...worker, controller_id: "FORGED" }, reviewer] }), error => error.code === "WORKER_REGISTRY_EVIDENCE_MISMATCH");
+  const sameController = { ...reviewer, controller_id: worker.controller_id };
+  const result = cycle({ workers: [manager, worker, sameController], repository_evidence: await repositoryEvidenceForActors([manager, worker, sameController]) });
+  assert.equal(result.status, "WATCHING");
+  assert.ok(result.rejected_candidates[0].reasons.includes("DISTINCT_REVIEWER_REQUIRED"));
+});
+
+test("unknown type and expired or stale demand never become selected work", async () => {
+  for (const patch of [{ work_type: "SECRET_ACTION" }, { expires_at: "2026-10-07T07:00:00Z" }, { expected_base_sha: "8".repeat(40) }]) {
+    const demand = { ...task, ...patch };
+    const result = cycle({ work_queue: [demand], repository_evidence: await repositoryEvidenceForEnvelope(demand, activeCompanyProject) });
+    assert.equal(result.status, "WATCHING");
+    assert.notEqual(result.opportunity_records[0].STATUS, "PROPOSED_UNADMITTED");
+    assert.equal(result.selected_task_id, null);
+  }
+});
+
+test("repository-owned real WorkOrder envelope is detected but never pretends to be dispatched", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const path = "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json";
+  const content = await readFile(new URL(`../${path}`, import.meta.url), "utf8");
+  const actual = JSON.parse(content);
+  const files = { ...fixtureFiles, [path]: content };
+  const evidence = await resolveActiveCompanyRepositoryEvidence({ current_main_sha: MAIN_SHA, observed_at: "2026-10-07T07:00:00Z", work_order_refs: [path], fetch_impl: activeCompanyEvidenceFetch(files) });
+  const result = cycle({ repository_evidence: evidence, work_queue: [actual.planner_task], projects: [actual.active_project] });
+  assert.equal(result.generated_proposals, 1);
+  assert.equal(result.opportunity_records[0].WORK_ID, "KAIOS-DOT-ORGAN-V1-20261007");
+  assert.equal(result.status, "WATCHING"); assert.equal(result.dispatched_count, 0);
+  assert.equal(actual.manufacturing_record.seal, "INVALID"); assert.equal(actual.active_project.reviewer_id, null);
+  assert.equal(actual.superseded_status_assertions[0].actual_review, "FAIL");
+  // This test exercises actual branch bytes through a fake read adapter, not a main admission.
+});
+
+test("authorization captures inert data and rejects getter actors with zero getter execution", async () => {
+  let reads = 0;
+  const mutableActor = { ...worker };
+  Object.defineProperty(mutableActor, "allowed_branch_pattern", { enumerable: true, get() { reads += 1; return reads === 1 ? worker.allowed_branch_pattern : "unregistered/attack"; } });
+  const demand = { ...task, branch: "unregistered/attack" };
+  const evidence = await repositoryEvidenceForEnvelope(demand, activeCompanyProject);
+  assert.throws(() => cycle({ work_queue: [demand], workers: [manager, mutableActor, reviewer], repository_evidence: evidence }), error => error.code === "COMPANY_INPUT_ACCESSOR_FORBIDDEN");
+  assert.equal(reads, 0);
+  const top = companyCycleInput();
+  Object.defineProperty(top, "manager", { enumerable: true, get() { reads += 1; return manager; } });
+  assert.throws(() => planActiveCompanyOperatingCycle(top), error => error.code === "COMPANY_INPUT_ACCESSOR_FORBIDDEN");
+  assert.equal(reads, 0);
+  const inherited = Object.create({ allowed_branch_pattern: "unregistered/attack" });
+  Object.assign(inherited, worker);
+  assert.throws(() => cycle({ workers: [manager, inherited, reviewer] }), error => error.code === "COMPANY_INPUT_PROTOTYPE_INVALID");
+});
+
+test("prototype property names never count as priority or trust policy entries", async () => {
+  for (const key of ["toString", "constructor", "__proto__", "hasOwnProperty"]) {
+    const demand = { ...task, priority: key };
+    const result = cycle({ work_queue: [demand], repository_evidence: await repositoryEvidenceForEnvelope(demand, activeCompanyProject) });
+    assert.equal(result.status, "WATCHING");
+    assert.ok(result.opportunity_records[0].BLOCKERS.includes("PRIORITY_POLICY_REQUIRED"));
+    const badTrust = { ...worker, trust_level: key };
+    const denied = cycle({ workers: [manager, badTrust, reviewer], repository_evidence: await repositoryEvidenceForActors([manager, badTrust, reviewer]) });
+    assert.equal(denied.status, "WATCHING");
+    assert.equal(denied.selected_worker_id, null);
+  }
+});
+
+test("manager aliases in worker list receive full canonical validation and duplicate IDs fail", async () => {
+  const demand = { ...task, assigned_worker_id: manager.worker_id, branch: "unregistered/attack" };
+  const project = { ...activeCompanyProject, implementer_id: manager.worker_id };
+  const evidence = await repositoryEvidenceForEnvelope(demand, project);
+  assert.throws(() => cycle({ work_queue: [demand], projects: [project], workers: [{ ...manager, allowed_branch_pattern: "unregistered/attack" }, reviewer], repository_evidence: evidence }), error => error.code === "WORKER_REGISTRY_EVIDENCE_MISMATCH");
+  assert.throws(() => cycle({ workers: [manager, worker, worker, reviewer] }), error => error.code === "DUPLICATE_WORKER_ID");
+});
+
+test("exact-head CI accepts registered codex task branch only with canonical reader evidence", async () => {
+  const demand = { ...task, assigned_worker_id: manager.worker_id, target_pr: 353, branch: `codex/${task.task_id}` };
+  const project = { ...activeCompanyProject, implementer_id: manager.worker_id };
+  const content = JSON.stringify({ planner_task: demand, active_project: project });
+  const fixture = publicGitHubFixtureFetch({
+    [`/repos/klineodyssey/kline-odyssey/contents/${WORK_ORDER_REF}?ref=${MAIN_SHA}`]: { type: "file", encoding: "base64", sha: gitBlobSha(content), content: Buffer.from(content).toString("base64") },
+    "/repos/klineodyssey/kline-odyssey/pulls/353": { state: "open", draft: false, mergeable: true, head: { sha: HEAD_SHA, ref: demand.branch, repo: { full_name: "klineodyssey/kline-odyssey" } }, base: { ref: "main", repo: { full_name: "klineodyssey/kline-odyssey" } } }
+  });
+  const snapshot = await readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", active_task_pr: 353, observed_at: "2026-10-07T07:00:00Z", required_check_names: ["company-safe-cycle"], evidence_paths: [WORK_ORDER_REF, ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority], fetch_impl: fixture.fetch });
+  const options = { repository_snapshot: snapshot, expected_main_sha: MAIN_SHA, expected_head_sha: HEAD_SHA, work_order_ref: WORK_ORDER_REF };
+  assert.equal(evaluateExactHeadCiGate(options).status, "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED");
+  assert.equal(evaluateExactHeadCiGate(options).merge_authorized, false);
+  assert.equal(evaluateExactHeadCiGate({ ...options, repository_snapshot: { ...snapshot } }).status, "HOLD_BRANCH_EVIDENCE_REQUIRED");
+  assert.equal(evaluateExactHeadCiGate({ ...options, work_order_ref: "forged.json" }).status, "HOLD_BRANCH_EVIDENCE_REQUIRED");
+});
+
+test("copied predecessor bytes cannot establish source provenance or supersession authority", () => {
+  const first = cycle().opportunity_records[0];
+  const copied = structuredClone(first);
+  const result = cycle({ previous_work_orders: [copied], previous_work_orders_verified: [copied.WORK_ID] });
+  const record = result.opportunity_records[0];
+  assert.equal(record.PREDECESSOR_VERIFICATION, "NOT_VERIFIED");
+  assert.equal(record.SUPERSEDES, null); assert.equal(record.IDEMPOTENT, false);
+  assert.ok(record.BLOCKERS.includes("PREDECESSOR_PROVENANCE_REQUIRED"));
+  assert.equal(result.status, "WATCHING");
+});
+
+test("a demand bound to an unobserved PR remains held rather than claiming CI freshness", async () => {
+  const demand = { ...task, target_pr: 536 };
+  const result = cycle({ work_queue: [demand], repository_evidence: await repositoryEvidenceForEnvelope(demand, activeCompanyProject) });
+  assert.equal(result.status, "WATCHING");
+  assert.ok(result.opportunity_records[0].BLOCKERS.includes("ACTIVE_PR_EVIDENCE_REQUIRED"));
+});
+
+test("CI gate rejects other PR numbers and fork or unknown repository origins", async () => {
+  for (const patch of [{ target: 536 }, { head: "untrusted/fork" }, { base: "untrusted/fork" }, { head: null }]) {
+    const content = JSON.stringify({ planner_task: { ...task, target_pr: patch.target ?? 353 }, active_project: activeCompanyProject });
+    const fixture = publicGitHubFixtureFetch({
+      [`/repos/klineodyssey/kline-odyssey/contents/${WORK_ORDER_REF}?ref=${MAIN_SHA}`]: { type: "file", encoding: "base64", sha: gitBlobSha(content), content: Buffer.from(content).toString("base64") },
+      "/repos/klineodyssey/kline-odyssey/pulls/353": { state: "open", draft: false, mergeable: true,
+        head: { sha: HEAD_SHA, ref: task.branch, repo: { full_name: Object.hasOwn(patch, "head") ? patch.head : "klineodyssey/kline-odyssey" } },
+        base: { ref: "main", repo: { full_name: patch.base ?? "klineodyssey/kline-odyssey" } } }
+    });
+    const snapshot = await readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", active_task_pr: 353, observed_at: "2026-10-07T07:00:00Z", required_check_names: ["company-safe-cycle"], evidence_paths: [WORK_ORDER_REF, ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority], fetch_impl: fixture.fetch });
+    assert.equal(evaluateExactHeadCiGate({ repository_snapshot: snapshot, expected_main_sha: MAIN_SHA, expected_head_sha: HEAD_SHA, work_order_ref: WORK_ORDER_REF }).status, "HOLD_PR_IDENTITY_OR_REPOSITORY_MISMATCH");
+  }
+});
+
+test("injected transport outside tests or with spoofed test env cannot mint verified CI evidence", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const fixture = publicGitHubFixtureFetch();
+  const options = { repository: "klineodyssey/kline-odyssey", active_task_pr: 353, observed_at: "2026-10-07T07:00:00Z", required_check_names: ["company-safe-cycle"], evidence_paths: [WORK_ORDER_REF, ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority] };
+  await readLatestRepositorySnapshot({ ...options, fetch_impl: fixture.fetch });
+  const bodies = {};
+  for (const call of [...fixture.calls]) bodies[call.url] = await (await fixture.fetch(call.url, call.options)).json();
+  const moduleUrl = new URL("../core/company/index.mjs", import.meta.url).href;
+  const source = `import { readLatestRepositorySnapshot, evaluateExactHeadCiGate } from ${JSON.stringify(moduleUrl)};
+    const bodies = ${JSON.stringify(bodies)};
+    const snapshot = await readLatestRepositorySnapshot({ ...${JSON.stringify(options)}, fetch_impl: async url => ({ ok: true, json: async () => bodies[url] }) });
+    const result = evaluateExactHeadCiGate({ repository_snapshot: snapshot, expected_main_sha: ${JSON.stringify(MAIN_SHA)}, expected_head_sha: ${JSON.stringify(HEAD_SHA)}, work_order_ref: ${JSON.stringify(WORK_ORDER_REF)} });
+    process.stdout.write(JSON.stringify({ status: result.status, provenance: snapshot.transport_provenance }));`;
+  for (const spoof of [null, "child-v8"]) {
+    const env = { ...process.env }; delete env.NODE_TEST_CONTEXT;
+    if (spoof) env.NODE_TEST_CONTEXT = spoof;
+    const child = spawnSync(process.execPath, ["--input-type=module", "-e", source], { env, encoding: "utf8", timeout: 5000 });
+    assert.equal(child.status, 0, child.stderr);
+    assert.deepEqual(JSON.parse(child.stdout), { status: "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED", provenance: "DIAGNOSTIC_CUSTOM_TRANSPORT" });
+  }
 });
