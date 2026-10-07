@@ -1,5 +1,32 @@
 # 11520 Universal Exchange V3.9
 
+## P1 inventory preview lifetime candidate — 2026-10-07
+
+Task `K11520-INVENTORY-PREVIEW-LIFETIME-20261007` is a Human-authorized temporary
+engineering subtask, not a formal employee/registry claim. BOOT/MUST READ:
+Boot CURRENT and V1.4, Physics CURRENT, root/local AGENTS, Company OS Boot,
+worker/lease/workspace/protected-path policy and this product's CURRENT handoff
+were re-read from main `f7f6795`. The separate cargo-cleanup PR is not its base.
+PROTECTED PATH CHECK: only the existing item-preview owner, backpack preview
+caller, existing tests and this README are changed. Camera, navigation, Player,
+inventory ledger/custody, financial and protected governance owners are untouched.
+
+TASK PLAN/EXECUTION: `runtime/item-visual-runtime.mjs` owns one private offscreen
+WebGL preview renderer and copies completed frames to the visible 2D canvases.
+Temporary scene geometry/materials and render lists are released after success
+or render/copy failure. Same-canvas requests and `runtime/backpack-ui.mjs` batch
+generations prevent superseded asynchronous paints; hidden bags do not render
+previews. The only production caller ignored the old returned resource handles.
+The public canvas ready/shape/label and descriptor contract remains; returned
+`renderer`/`root` are explicitly null because resources are now owner-managed.
+
+EARLY CHECKPOINT: 10 focused item tests PASS, including 100 preview canvases with
+one renderer, one-time cleanup, stale requests and failure cleanup. All four new
+regressions failed on base; its repeated-preview test created 100 renderers.
+Runtime syntax checks PASS. `FUNCTIONAL_QA=FOCUSED_PASS`, `VISUAL_QA=NOT_RUN`;
+fresh source-bound Chromium, mobile screenshots and independent review remain.
+No full GPU/FPS improvement, merge, deployment or playtest readiness is claimed.
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads

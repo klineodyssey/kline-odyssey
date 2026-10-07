@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.0
+VERSION: 1.0.1
 STATUS: ACTIVE
 PURPOSE: Canonical procedural 3D item identity for 11520 world/backpack objects. Items must be visually distinguishable by geometry, not emoji/text alone.
 */
@@ -62,11 +62,40 @@ export function createItemPreviewScene(THREE,item={}){
   return{scene,camera,root,descriptor:itemVisualDescriptor(item)};
 }
 
-export async function renderItemPreview(canvas,item,{size=96}={}){
+// This existing preview owner keeps one private WebGL context. Visible item
+// canvases are bitmap projections, never additional WebGL renderer owners.
+let previewRenderer=null;
+const previewRequests=new WeakMap();
+function releasePreviewScene(scene){
+  const resources=new Set();
+  scene.traverse(node=>{if(node.geometry)resources.add(node.geometry);for(const material of [node.material].flat())if(material)resources.add(material)});
+  for(const resource of resources)resource.dispose?.();
+  scene.clear();
+}
+
+export async function renderItemPreview(canvas,item,{size=96,shouldRender=()=>true}={}){
   if(!canvas)return{ok:false,reason:'CANVAS_REQUIRED'};
+  const request={};previewRequests.set(canvas,request);
+  const current=()=>previewRequests.get(canvas)===request&&shouldRender();
+  if(!current())return{ok:false,reason:'PREVIEW_STALE'};
   const THREE=await import('three');
-  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,preserveDrawingBuffer:true});
+  if(!current())return{ok:false,reason:'PREVIEW_STALE'};
+  const context=canvas.getContext('2d');if(!context)throw new Error('PREVIEW_BITMAP_CONTEXT_REQUIRED');
+  if(!previewRenderer){
+    const surface=canvas.ownerDocument.createElement('canvas');
+    previewRenderer=new THREE.WebGLRenderer({canvas:surface,alpha:true,antialias:true,preserveDrawingBuffer:true});
+  }
+  const renderer=previewRenderer;
+  if(renderer.getContext().isContextLost())throw new Error('PREVIEW_CONTEXT_LOST');
   const px=Math.max(48,Math.min(160,Number(size)||96));renderer.setPixelRatio(Math.min(2,globalThis.devicePixelRatio||1));renderer.setSize(px,px,false);renderer.setClearColor(0x000000,0);
-  const {scene,camera,root,descriptor}=createItemPreviewScene(THREE,item);root.rotation.y=.62;root.rotation.x=-.08;renderer.render(scene,camera);canvas.dataset.item3d='ready';canvas.dataset.itemShape=descriptor.shape;canvas.setAttribute('aria-label',`${descriptor.name} 3D ${descriptor.label}`);
-  return{ok:true,descriptor,renderer,root};
+  const {scene,camera,root,descriptor}=createItemPreviewScene(THREE,item);
+  try{
+    root.rotation.y=.62;root.rotation.x=-.08;renderer.render(scene,camera);
+    canvas.width=renderer.domElement.width;canvas.height=renderer.domElement.height;
+    context.clearRect(0,0,canvas.width,canvas.height);context.drawImage(renderer.domElement,0,0);
+    canvas.dataset.item3d='ready';canvas.dataset.itemShape=descriptor.shape;canvas.setAttribute('aria-label',`${descriptor.name} 3D ${descriptor.label}`);
+    // The only production caller consumes the canvas/descriptor. Do not leak
+    // the shared renderer or already-released scene as caller-owned handles.
+    return{ok:true,descriptor,renderer:null,root:null};
+  }finally{releasePreviewScene(scene);renderer.renderLists.dispose()}
 }
