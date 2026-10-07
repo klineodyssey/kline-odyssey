@@ -684,8 +684,83 @@ class V2OfflineStore {
     return this.commit(before, after, "HEARTBEAT", now, false,
       () => this.verifier.actor(actor.principal, actor.instance, now));
   }
-  async result(actor, fence, head, now) {
+  async result(actor, fence, head, now, descriptorBytes = null) {
     actor = v2Copy(actor); fence = v2Copy(fence);
+    if (descriptorBytes !== null) {
+      // Optional exact JSON.stringify fixture bytes only. This is not JCS,
+      // origin authentication, artifact verification or a real worker ACK.
+      v2Require(typeof descriptorBytes === "string" && Buffer.byteLength(descriptorBytes) <= V2_BUDGET.bytes, "RESULT_BYTES_BUDGET");
+      let descriptor;
+      try { descriptor = JSON.parse(descriptorBytes); } catch { throw new Error("RESULT_DESCRIPTOR_INVALID"); }
+      const fields = ["schema", "id", "key", "taskMessageId", "taskDigest", "work", "head", "expectedRevision",
+        "worker", "instance", "leaseEpoch", "leaseCounter", "body", "bodyDigest"];
+      v2Require(descriptor && Object.getPrototypeOf(descriptor) === Object.prototype &&
+        Object.keys(descriptor).length === fields.length && fields.every((field) => Object.hasOwn(descriptor, field)), "RESULT_DESCRIPTOR_FIELDS");
+      v2Require(descriptor.schema === "KAIOS_OFFLINE_RESULT_DESCRIPTOR_V1" &&
+        ["id", "key", "taskMessageId", "work", "worker", "instance"].every((field) =>
+          typeof descriptor[field] === "string" && descriptor[field].length > 0 && descriptor[field].length <= 128) &&
+        typeof descriptor.body === "string" && typeof descriptor.head === "string" && /^[a-f0-9]{40}$/.test(descriptor.head) &&
+        ["taskDigest", "bodyDigest"].every((field) => typeof descriptor[field] === "string" && /^[a-f0-9]{64}$/.test(descriptor[field])) &&
+        Number.isSafeInteger(descriptor.expectedRevision) && descriptor.expectedRevision >= 0 &&
+        ["leaseEpoch", "leaseCounter"].every((field) => Number.isSafeInteger(descriptor[field]) && descriptor[field] > 0), "RESULT_DESCRIPTOR_INVALID");
+      // Validate scalar fields before stringify, so nested/cyclic structures are
+      // never traversed here. Round-trip equality rejects duplicate JSON keys.
+      v2Require(JSON.stringify(descriptor) === descriptorBytes, "RESULT_FIXTURE_ENCODING");
+      v2Require(descriptor.bodyDigest === v2Hash(descriptor.body), "RESULT_BODY_DIGEST");
+      v2Require(descriptor.worker === actor.principal && descriptor.instance === actor.instance &&
+        descriptor.head === head && descriptor.leaseEpoch === fence.epoch && descriptor.leaseCounter === fence.counter, "RESULT_CALLER_BINDING");
+      v2Require(Number.isSafeInteger(now) && now >= 0 && now <= V2_BUDGET.reconciliationAge, "RESULT_TIME_BUDGET");
+      const retainedResult = (retained) => {
+        v2Require(retained.id === descriptor.id || retained.key === descriptor.key, "RESULT_TERMINAL");
+        v2Require(retained.bytes === descriptorBytes && retained.digest === v2Hash(descriptorBytes), "RESULT_CONFLICT");
+        return v2Copy(retained);
+      };
+      this.verifier.actor(actor.principal, actor.instance, now, true);
+      const observed = await this.checked();
+      this.verifier.actor(actor.principal, actor.instance, now, true);
+      if (observed.resultRecord) {
+        // Historical read only: no lease renewal, event or work-state change.
+        return retainedResult(observed.resultRecord);
+      }
+      let before;
+      try { before = await this.owner(actor, fence, now); } catch (error) {
+        // A concurrent exact result may have cleared the lease after observed.
+        // Classify that retained receipt once; never reacquire or retry work.
+        if (error.message !== "STALE_FENCE") throw error;
+        const winner = (await this.checked()).resultRecord;
+        this.verifier.actor(actor.principal, actor.instance, now, true);
+        if (!winner) throw error;
+        return retainedResult(winner);
+      }
+      v2Require(before.work === "READY" && !before.resultRecord, "RESULT_TERMINAL");
+      v2Require(before.message, "RESULT_TASK_REQUIRED");
+      const task = JSON.parse(before.message.bytes);
+      v2Require(head === before.head, "STALE_HEAD");
+      v2Require(descriptor.taskMessageId === task.id && descriptor.taskDigest === v2Hash(before.message.bytes) &&
+        descriptor.work === task.work && descriptor.expectedRevision === before.revision, "RESULT_TASK_BINDING");
+      const after = v2Copy(before);
+      after.work = "RESULT_RECORDED"; after.lease = null; after.revision++;
+      after.resultRecord = { scope: "OFFLINE_FAKE_FIXTURE_EVIDENCE", id: descriptor.id, key: descriptor.key,
+        bytes: descriptorBytes, digest: v2Hash(descriptorBytes), work: descriptor.work, head,
+        worker: actor.principal, instance: actor.instance, leaseEpoch: fence.epoch, leaseCounter: fence.counter,
+        expectedRevision: before.revision, acceptedRevision: after.revision,
+        commitRef: `OFFLINE-RESULT-COMMIT-${before.seq + 1}`, recordedAt: now,
+        reviewState: "NOT_IMPLEMENTED", integrationState: "NOT_IMPLEMENTED", authenticatedWorkerAck: false };
+      try {
+        await this.commit(before, after, "OFFLINE_RESULT_DESCRIPTOR_RECORDED", now, false,
+          () => this.verifier.actor(actor.principal, actor.instance, now));
+      } catch (error) {
+        // One bounded reread classifies a CAS winner; never retry an effect.
+        if (!/CHECK constraint/.test(error.message)) throw error;
+        const winner = (await this.checked()).resultRecord;
+        this.verifier.actor(actor.principal, actor.instance, now, true);
+        if (!winner) throw error;
+        return retainedResult(winner);
+      }
+      return v2Copy(after.resultRecord);
+    }
+    // Preserve legacy local counters; without a descriptor they cannot supply
+    // result evidence to any later review/integration fixture checkpoint.
     const before = await this.owner(actor, fence, now);
     v2Require(before.work === "READY", "RESULT_TERMINAL");
     v2Require(head === before.head, "STALE_HEAD");
@@ -1129,4 +1204,174 @@ v2Test("revocation during awaited state reads denies every new privileged mutati
     await assert.rejects(call(), /EXPIRED_OR_REVOKED_FIXTURE/);
     assert.deepEqual(await (await f.reopen()).checked(), before);
   }
+});
+
+
+// First result-evidence checkpoint only: exact local fixture bytes, never a
+// real worker ACK, verified artifact, reviewer decision or integration authority.
+function v2ResultDescriptor(state, actor, fence, changes = {}) {
+  const task = JSON.parse(state.message.bytes), body = "Harmless offline fixture test evidence";
+  return JSON.stringify({ schema: "KAIOS_OFFLINE_RESULT_DESCRIPTOR_V1", id: "FAKE-RESULT-1",
+    key: "FAKE-RESULT-KEY-1", taskMessageId: task.id, taskDigest: v2Hash(state.message.bytes),
+    work: task.work, head: state.head, expectedRevision: state.revision,
+    worker: actor.principal, instance: actor.instance, leaseEpoch: fence.epoch,
+    leaseCounter: fence.counter, body, bodyDigest: v2Hash(body), ...changes });
+}
+async function v2ResultFixture(t) {
+  const f = await v2Fixture(t);
+  await f.model.queue(v2Task(f.verifier), 0);
+  const fence = await f.model.claim(V2_BUILDER, 1), before = await f.model.checked();
+  return { ...f, fence, before, descriptor: v2ResultDescriptor(before, V2_BUILDER, fence) };
+}
+
+v2Test("result descriptor records exact hash-bound bytes without review or operational authority", async (t) => {
+  const f = await v2ResultFixture(t);
+  const receipt = await f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor);
+  const state = await f.model.checked();
+  assert.equal(state.work, "RESULT_RECORDED"); assert.equal(state.lease, null);
+  assert.equal(state.resultRecord.bytes, f.descriptor); assert.equal(state.resultRecord.digest, v2Hash(f.descriptor));
+  assert.equal(state.resultRecord.scope, "OFFLINE_FAKE_FIXTURE_EVIDENCE");
+  assert.equal(state.resultRecord.worker, V2_BUILDER.principal);
+  assert.equal(state.resultRecord.expectedRevision, f.before.revision);
+  assert.equal(state.resultRecord.acceptedRevision, f.before.revision + 1);
+  assert.deepEqual(receipt, state.resultRecord); assert.equal(receipt.reviewState, "NOT_IMPLEMENTED");
+  assert.equal(receipt.integrationState, "NOT_IMPLEMENTED"); assert.equal(receipt.authenticatedWorkerAck, false);
+  assert.deepEqual(state.grantedTools, []); assert.equal(state.effects, f.before.effects);
+  receipt.bytes = "caller mutation"; assert.equal((await f.model.checked()).resultRecord.bytes, f.descriptor);
+
+  const legacy = await v2Fixture(t), lease = await legacy.model.claim(V2_BUILDER, 1);
+  await legacy.model.result(V2_BUILDER, lease, V2_HEAD, 2);
+  assert.equal((await legacy.model.checked()).resultRecord, undefined, "legacy marker has no reviewable result descriptor");
+  assert.equal(typeof legacy.model.review, "undefined"); assert.equal(typeof legacy.model.integrate, "undefined");
+});
+
+v2Test("result descriptor rejects mismatched task work revision head author lease and payload hash", async (t) => {
+  for (const change of [
+    { taskMessageId: "OTHER-TASK" }, { taskDigest: "b".repeat(64) }, { work: "OTHER-WORK" },
+    { head: "c".repeat(40) }, { expectedRevision: 99 }, { worker: V2_REVIEWER.principal },
+    { instance: V2_REVIEWER.instance }, { leaseEpoch: 99 }, { leaseCounter: 99 },
+    { bodyDigest: "b".repeat(64) }, { schema: "PRODUCTION_RESULT" }, { unexpectedAuthority: true }
+  ]) {
+    const f = await v2ResultFixture(t), bytes = v2ResultDescriptor(f.before, V2_BUILDER, f.fence, change);
+    await assert.rejects(f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, bytes), /RESULT_/);
+    assert.deepEqual(await (await f.reopen()).checked(), f.before);
+  }
+});
+
+v2Test("result descriptor validates worker ownership and current lease independently of claimed bytes", async (t) => {
+  for (const kind of ["wrong-worker", "stale-counter", "stale-epoch", "expired", "takeover", "wrong-head"]) {
+    const f = await v2ResultFixture(t);
+    let actor = V2_BUILDER, fence = f.fence, now = 2, head = V2_HEAD;
+    if (kind === "wrong-worker") actor = V2_REVIEWER;
+    if (kind === "stale-counter") fence = { ...fence, counter: fence.counter + 1 };
+    if (kind === "stale-epoch") fence = { ...fence, epoch: fence.epoch + 1 };
+    if (kind === "expired") now = fence.until;
+    if (kind === "takeover") { now = fence.until; await f.model.claim(V2_STEALER, now); }
+    if (kind === "wrong-head") head = "c".repeat(40);
+    const before = await f.model.checked();
+    const bytes = v2ResultDescriptor(before, actor, fence);
+    await assert.rejects(f.model.result(actor, fence, head, now, bytes), /STALE_FENCE|STALE_HEAD|RESULT_/);
+    assert.deepEqual(await (await f.reopen()).checked(), before);
+  }
+});
+
+v2Test("result descriptor exact duplicates survive reopen and conflicts never create another effect", async (t) => {
+  const f = await v2ResultFixture(t), receipt = await f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor);
+  const committed = await f.model.checked(), reopened = await f.reopen();
+  assert.deepEqual(await reopened.result(V2_BUILDER, f.fence, V2_HEAD, 200, f.descriptor), receipt, "expired execution lease does not rerun a retained historical receipt");
+  assert.deepEqual(await reopened.checked(), committed);
+  for (const change of [{ body: "changed", bodyDigest: v2Hash("changed") }, { id: "OTHER-ID" }, { key: "OTHER-KEY" }]) {
+    const bytes = JSON.stringify({ ...JSON.parse(f.descriptor), ...change });
+    await assert.rejects(reopened.result(V2_BUILDER, f.fence, V2_HEAD, 200, bytes), /RESULT_CONFLICT/);
+    assert.deepEqual(await reopened.checked(), committed);
+  }
+  const other = JSON.stringify({ ...JSON.parse(f.descriptor), id: "OTHER-ID", key: "OTHER-KEY" });
+  await assert.rejects(reopened.result(V2_BUILDER, f.fence, V2_HEAD, 200, other), /RESULT_TERMINAL/);
+  f.verifier.actors.get(V2_BUILDER.principal).read = false;
+  await assert.rejects(reopened.result(V2_BUILDER, f.fence, V2_HEAD, 200, f.descriptor), /READ_DENIED/);
+  assert.deepEqual(await reopened.checked(), committed);
+});
+
+v2Test("result descriptor enforces byte bounds and strict inert fixture encoding before any write", async (t) => {
+  for (const input of [
+    "x".repeat(V2_BUDGET.bytes + 1), "😀".repeat(V2_BUDGET.bytes / 2),
+    "{invalid", "null", "[]", { get bytes() { throw new Error("must not inspect an object"); } }
+  ]) {
+    const f = await v2ResultFixture(t);
+    await assert.rejects(f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, input), /RESULT_/);
+    assert.deepEqual(await (await f.reopen()).checked(), f.before);
+  }
+  const f = await v2ResultFixture(t), descriptor = JSON.parse(f.descriptor);
+  for (const change of [{ id: "" }, { key: "x".repeat(129) }, { expectedRevision: 1.5 }, { body: {} }]) {
+    await assert.rejects(f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, JSON.stringify({ ...descriptor, ...change })), /RESULT_/);
+  }
+  const duplicateKey = '{"id":"ignored",' + f.descriptor.slice(1);
+  await assert.rejects(f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, duplicateKey), /RESULT_FIXTURE_ENCODING/);
+  assert.deepEqual(await f.model.checked(), f.before);
+  const empty = { ...descriptor, body: "", bodyDigest: v2Hash("") };
+  const fill = V2_BUDGET.bytes - Buffer.byteLength(JSON.stringify(empty));
+  empty.body = "x".repeat(fill); empty.bodyDigest = v2Hash(empty.body);
+  const exact = JSON.stringify(empty); assert.equal(Buffer.byteLength(exact), V2_BUDGET.bytes);
+  assert.equal((await f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, exact)).bytes, exact);
+});
+
+v2Test("result descriptor rolls back failed commit and recovers lost acknowledgement after reopen", async (t) => {
+  const f = await v2ResultFixture(t), commit = f.model.commit.bind(f.model);
+  f.model.commit = (before, after, event, now, _fault, authorize) => commit(before, after, event, now, true, authorize);
+  await assert.rejects(f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor), /CHECK constraint/);
+  assert.deepEqual(await (await f.reopen()).checked(), f.before);
+  f.model.commit = async (...args) => { await commit(...args); throw new Error("FAKE_LOST_RESULT_ACK"); };
+  await assert.rejects(f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor), /FAKE_LOST_RESULT_ACK/);
+  const reopened = await f.reopen(), committed = await reopened.checked();
+  assert.deepEqual(await reopened.result(V2_BUILDER, f.fence, V2_HEAD, 3, f.descriptor), committed.resultRecord);
+  assert.deepEqual(await reopened.checked(), committed);
+});
+
+v2Test("result descriptor remains immutable across awaited reads and rechecks revoked fixture before commit", async (t) => {
+  const f = await v2ResultFixture(t), actor = { ...V2_BUILDER }, fence = { ...f.fence };
+  const checked = f.model.checked.bind(f.model);
+  f.model.checked = async () => { const state = await checked(); actor.principal = "CALLER-MUTATED"; fence.counter = 999; return state; };
+  const receipt = await f.model.result(actor, fence, V2_HEAD, 2, f.descriptor);
+  assert.equal(receipt.worker, V2_BUILDER.principal); assert.equal(receipt.leaseCounter, f.fence.counter);
+  const g = await v2ResultFixture(t), gChecked = g.model.checked.bind(g.model);
+  g.model.checked = async () => { const state = await gChecked(); g.verifier.actors.get(V2_BUILDER.principal).revoked = true; return state; };
+  await assert.rejects(g.model.result(V2_BUILDER, g.fence, V2_HEAD, 2, g.descriptor), /EXPIRED_OR_REVOKED_FIXTURE/);
+  assert.deepEqual(await (await g.reopen()).checked(), g.before);
+});
+
+v2Test("result descriptor concurrent SQLite duplicates commit one retained record and conflict stays inert", async (t) => {
+  const f = await v2ResultFixture(t), other = await f.reopen();
+  const [left, right] = await Promise.all([
+    f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor),
+    other.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor)
+  ]);
+  assert.deepEqual(left, right);
+  const state = await f.model.checked();
+  assert.equal(state.revision, f.before.revision + 1);
+  assert.equal(state.seq, f.before.seq + 1);
+  assert.equal(state.events.filter((event) => event.event === "OFFLINE_RESULT_DESCRIPTOR_RECORDED").length, 1);
+  assert.equal(state.effects, f.before.effects);
+  const g = await v2ResultFixture(t), second = await g.reopen();
+  const conflict = JSON.stringify({ ...JSON.parse(g.descriptor), body: "conflict", bodyDigest: v2Hash("conflict") });
+  const results = await Promise.allSettled([
+    g.model.result(V2_BUILDER, g.fence, V2_HEAD, 2, g.descriptor),
+    second.result(V2_BUILDER, g.fence, V2_HEAD, 2, conflict)
+  ]);
+  assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+  assert.match(results.find((result) => result.status === "rejected").reason.message, /RESULT_CONFLICT/);
+  const retained = await (await g.reopen()).checked();
+  assert.equal(retained.seq, g.before.seq + 1); assert.equal(retained.effects, g.before.effects);
+});
+
+v2Test("result descriptor classifies an exact winner between observation and owner read", async (t) => {
+  const f = await v2ResultFixture(t), delayed = await f.reopen(), owner = delayed.owner.bind(delayed);
+  let winner;
+  delayed.owner = async (...args) => {
+    winner = await f.model.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor);
+    return owner(...args);
+  };
+  assert.deepEqual(await delayed.result(V2_BUILDER, f.fence, V2_HEAD, 2, f.descriptor), winner);
+  const retained = await delayed.checked();
+  assert.equal(retained.seq, f.before.seq + 1);
+  assert.equal(retained.events.filter((event) => event.event === "OFFLINE_RESULT_DESCRIPTOR_RECORDED").length, 1);
 });
