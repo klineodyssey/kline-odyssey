@@ -1,15 +1,15 @@
 /* KGEN_META
 VERSION: 1.2.0
-REVISION: 2026-10-07.BSC56-INLINE-UNSIGNED-REVIEW
+REVISION: 2026-10-07.BSC56-REVIEW-CONTROL-CONTRAST
 PRODUCT_CONTEXT: V2.9.5
 STATUS: CANDIDATE
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
 REVIEWED_BY: dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval
-SOURCE_COMMIT: 5351051b2cd8f9e4cf4920841cae2253e99b73cd
+SOURCE_COMMIT: 0589c16553e781c282b868a374e6fa60e4841f0f
 TASK_ID: K11520-BSC56-PRODUCTION-20261007
-CHANGE_REASON: Add bounded inline eight-field unsigned review and stale-context invalidation in the existing preflight owner.
-ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs @ 5351051b2cd8f9e4cf4920841cae2253e99b73cd
+CHANGE_REASON: Fix measured pale-on-white control contrast with scoped explicit colors and focus/disabled states.
+ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs @ 0589c16553e781c282b868a374e6fa60e4841f0f
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Player-visible preflight and blocked unsigned custody review. Never signs or broadcasts.
 */
@@ -233,7 +233,11 @@ function blockerLabel(code){if(code==='WALLET_PUBLIC_IDENTITY_REQUIRED')return'�
 function ensureStyle(){
   if($('#k11520RealTradePreflightStyle'))return;
   const style=document.createElement('style');style.id='k11520RealTradePreflightStyle';style.textContent=`
-#k11520Bsc56UnsignedReview{min-width:0;max-width:100%;overflow-wrap:anywhere}\n#k11520Bsc56UnsignedReview summary{cursor:pointer}\n#k11520Bsc56UnsignedReview input,#k11520Bsc56UnsignedReview select{display:block;width:100%;margin:8px 0}\n#k11520Bsc56UnsignedReview[hidden],#k11520Bsc56UnsignedReview [hidden]{display:none}
+#k11520Bsc56UnsignedReview{min-width:0;max-width:100%;overflow-wrap:anywhere}\n#k11520Bsc56UnsignedReview summary{cursor:pointer}\n#k11520Bsc56UnsignedReview input,#k11520Bsc56UnsignedReview select{display:block;width:100%;margin:8px 0;background:#08131e;color:#e6f4ff;border:1px solid #456477;border-radius:4px;padding:8px;font:inherit}
+#k11520Bsc56UnsignedReview option{background:#08131e;color:#e6f4ff}
+#k11520Bsc56UnsignedReview input::placeholder{color:#abbcc8;opacity:1}
+#k11520Bsc56UnsignedReview input:focus-visible,#k11520Bsc56UnsignedReview select:focus-visible,#k11520Bsc56UnsignedReview button:focus-visible{outline:2px solid #8ceaff;outline-offset:2px}
+#k11520Bsc56UnsignedReview input:disabled,#k11520Bsc56UnsignedReview select:disabled,#k11520Bsc56UnsignedReview button:disabled{background:#142332;color:#abbcc8;opacity:1;border-color:#456477;cursor:not-allowed}\n#k11520Bsc56UnsignedReview[hidden],#k11520Bsc56UnsignedReview [hidden]{display:none}
 #k11520Bsc56UnsignedReview .exchangeRows dt,#k11520Bsc56UnsignedReview .exchangeRows dd{min-width:0;overflow-wrap:anywhere;word-break:break-word}\n#k11520RealTradePreflight{position:fixed;z-index:475;right:58px;bottom:366px;display:grid;gap:4px;justify-items:end;pointer-events:none}
 #k11520RealTradePreflight button{pointer-events:auto;border:1px solid #f1ca7377;background:#111923ee;color:#f5de9c;border-radius:10px;padding:7px 9px;font-size:8px;font-weight:900;touch-action:manipulation;box-shadow:0 6px 20px #0008}
 #k11520RealTradePreflight .state{max-width:190px;padding:5px 7px;border-radius:8px;background:#071018e8;border:1px solid #ffffff16;color:#aebdca;font-size:7px;text-align:right;line-height:1.2}

@@ -115,6 +115,21 @@ try {
     assert.equal(await page.evaluate(()=>__walletFixture.calls.length),reviewBaseline.calls,'review cannot invoke any wallet method');
     assert.match(await review.locator('[data-bsc56-review-field="CONTRACT"]').innerText(),/NOT_DEPLOYED \/ UNKNOWN/);
     async function inspectReviewWidth(label){
+      // Actual computed colors, including native option and disabled/focus styles.
+      const contrasts=await review.evaluate(root=>{
+        const luminance=color=>{const c=color.match(/[\d.]+/g).slice(0,3).map(Number).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4});return .2126*c[0]+.7152*c[1]+.0722*c[2]};
+        const ratio=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+        return [...root.querySelectorAll('input:not([hidden]),select,select option')].map(el=>{
+          const normal=getComputedStyle(el),enabled=ratio(normal.color,normal.backgroundColor),old=el.disabled;el.disabled=true;
+          const disabled=getComputedStyle(el),disabledRatio=ratio(disabled.color,disabled.backgroundColor),visible=disabled.visibility!=='hidden'&&disabled.opacity==='1';el.disabled=old;
+          return {tag:el.tagName,enabled,disabledRatio,visible};
+        });
+      });
+      for(const c of contrasts){assert.ok(c.enabled>=4.5,label+' enabled '+c.tag+' contrast');assert.ok(c.disabledRatio>=4.5,label+' disabled '+c.tag+' contrast');assert.equal(c.visible,true)}
+      await review.locator('input[inputmode="numeric"]').focus();
+      assert.equal(await review.locator('input[inputmode="numeric"]').evaluate(el=>{const c=getComputedStyle(el);return c.outlineStyle!=='none'&&parseFloat(c.outlineWidth)>=2}),true,'keyboard focus remains visible');
+      assert.equal(await review.locator('input[inputmode="numeric"]').inputValue(),'1000000000000000001','styling preserves exact amount');
+      await review.locator('summary').scrollIntoViewIfNeeded();await shot('bsc56-review-'+label+'-controls');
       const fields=review.locator('[data-bsc56-review-field]');assert.equal(await fields.count(),8);
       for(let i=0;i<8;i++){
         await fields.nth(i).scrollIntoViewIfNeeded();

@@ -5,17 +5,25 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-07.BSC56-INLINE-UNSIGNED-REVIEW |
+| REVISION | 2026-10-07.BSC56-REVIEW-CONTROL-CONTRAST |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
 | REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval |
-| SOURCE_COMMIT | 5351051b2cd8f9e4cf4920841cae2253e99b73cd |
+| SOURCE_COMMIT | 0589c16553e781c282b868a374e6fa60e4841f0f |
 | TASK_ID | K11520-BSC56-PRODUCTION-20261007 |
-| CHANGE_REASON | Register the inline unsigned review candidate and context invalidation; no signing or trading enablement. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 5351051b2cd8f9e4cf4920841cae2253e99b73cd |
+| CHANGE_REASON | Fix screenshot-confirmed pale-on-white unsigned review controls without changing financial or wallet behavior. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 0589c16553e781c282b868a374e6fa60e4841f0f |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-07 — BSC56 review control contrast correction
+
+- Source `0589c16553e781c282b868a374e6fa60e4841f0f` passed settlement Chromium assertions, but inspected screenshots revealed pale select/input text on native white backgrounds. FUNCTIONAL_PASS / VISUAL_FAIL is retained; it is not a releasable UI result.
+- Evidence: Game run `37579408292`, artifact `11464531756`, ZIP SHA256 `c9a710c64bded2820ece99956d4c743b293b6925e680e6fb3c34cebc812b53ce`. Tested merge `918d4758fcd82114a778884a1a0bb59fd6274100` and candidate `0589c165` have identical tree `c2bbfa9ce39a98cf52a7e0d391bb865a0d5468bb`.
+- Scoped explicit select/option/input foreground, background and border colors repair contrast; focus-visible outline, readable placeholders and disabled states are defined without hiding controls. Existing [hidden] guard remains stronger than display styles.
+- Existing settlement browser owner now checks computed enabled/disabled contrast >= 4.5, visible keyboard focus and byte-exact amount preservation; adds controls screenshots in both mobile orientations and desktop resize.
+- Current correction status: LOCAL_CHECKS_PASS / NEW_HEAD_CHROMIUM_PENDING / NEW_HEAD_VISUAL_QA_PENDING / NOT_RELEASEABLE. No functional or visual result is carried forward from the prior candidate. Rollback is the six-file review checkpoint `0589c165` (with its known visual defect).
 
 ## 2026-10-07 — BSC56 inline unsigned review candidate
 
