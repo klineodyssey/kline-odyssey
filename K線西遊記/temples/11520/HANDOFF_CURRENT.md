@@ -79,6 +79,28 @@ main containment (`Y`, `N`, or `P` for partial/superseded/reimplemented). File
 scope is assigned by the canonical area column; exact PR file lists remain in
 the immutable GitHub PR record. Dates are UTC `created/last-updated`.
 
+Every table row is a complete `D1` provenance record with these explicit
+per-item fields in addition to the row values:
+
+- `PROJECT` and `PURPOSE` = the row's canonical area/purpose; `PR`, `BRANCH`,
+  `HEAD_SHA`, `BASE_REF`, `CREATED_AT`, `LAST_UPDATED_AT`, `MERGED`, and
+  `CURRENT_MAIN_CONTAINS_CODE` = the corresponding row values.
+- `FILES` = the exact immutable GitHub files record at
+  `https://api.github.com/repos/klineodyssey/kline-odyssey/pulls/<PR>/files`,
+  constrained by the row's canonical area and the domain map below.
+- `BASE_SHA` and creation-time `COMMIT_RANGE` = `NOT_VERIFIED`; a current
+  `baseRefOid` is not retroactively represented as the historical base SHA.
+- `AUTHOR_GIT_IDENTITY = klineodyssey`; `CLAIMED_AI_AUTHOR = NOT_VERIFIED`;
+  `WORKER_ID = NOT_VERIFIED`; `LIFE_ID = NOT_VERIFIED`. Branch prefixes remain
+  workflow evidence only.
+- `HUMAN_AUTHORITY = NOT_VERIFIED` and `WORK_ORDER = NOT_VERIFIED` unless the
+  referenced PR files contain an explicit binding. No absent binding is filled
+  from later chat history.
+- `PROVENANCE_CONFIDENCE = VERIFIED` for PR mechanics (state/ref/head/date),
+  and `PARTIAL` for individual authorship/IP ownership. `IP_CLASS =
+  MIXED_PROVENANCE` until an item-specific contribution record proves a narrower
+  class.
+
 | PR | State | Branch | Head | Base ref | Created / updated | Canonical area and purpose | main |
 |---:|:---:|---|---|---|---|---|:---:|
 | 137 | M | `agent/digital-ant-v3-3-public-gateway` | `4a0b7bd1` | main | 08-16 / 08-16 | public request gateway | Y |
@@ -98,16 +120,16 @@ the immutable GitHub PR record. Dates are UTC `created/last-updated`.
 | 221 | M | `chatgpt-handoff/KAIOS-11520-XZXY-MOTION-SPLIT-20260908` | `2d14500d` | main | 09-07 / 09-08 | three-plane control/living logistics | Y |
 | 225 | M | `chatgpt/11520-living-world-logistics-visuals-20260908` | `19634975` | main | 09-08 / 09-08 | logistics/world visuals | Y |
 | 229 | C | `chatgpt/11520-kaios-atm-receiving-20260908` | `7b0221de` | main | 09-08 / 09-13 | ATM receiving adapter | P |
-| 235 | C | `chatgpt-handoff/KAIOS-11520-ATM-INTEGER-ACCOUNTING-20260909` | `d899fb86` | #229 | 09-09 / 09-13 | exact integer accounting | P |
-| 236 | C | `chatgpt-handoff/KAIOS-11520-ATM-RECEIPT-IDENTITY-20260909` | `6e3017be` | #235 | 09-09 / 09-13 | receipt chain/log identity | P |
-| 240 | C | `chatgpt-handoff/KAIOS-11520-ATM-MANIFEST-WINDOW-20260909` | `eb54fab4` | #236 | 09-09 / 09-10 | manifest validity window | P |
+| 235 | C | `chatgpt-handoff/KAIOS-11520-ATM-INTEGER-ACCOUNTING-20260909` | `d899fb86` | `chatgpt/11520-kaios-atm-receiving-20260908` | 09-09 / 09-13 | exact integer accounting | P |
+| 236 | C | `chatgpt-handoff/KAIOS-11520-ATM-RECEIPT-IDENTITY-20260909` | `6e3017be` | `chatgpt-handoff/KAIOS-11520-ATM-INTEGER-ACCOUNTING-20260909` | 09-09 / 09-13 | receipt chain/log identity | P |
+| 240 | C | `chatgpt-handoff/KAIOS-11520-ATM-MANIFEST-WINDOW-20260909` | `eb54fab4` | `chatgpt-handoff/KAIOS-11520-ATM-RECEIPT-IDENTITY-20260909` | 09-09 / 09-10 | manifest validity window | P |
 | 243 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-20260909` | `9f9c5325` | main | 09-09 / 09-10 | read-only scheduler guard R1 | P |
 | 246 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R2-20260910` | `f1338738` | main | 09-09 / 09-10 | scheduler guard R2 | P |
 | 250 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R3-20260910` | `8a432bdc` | main | 09-09 / 09-10 | scheduler guard R3 | P |
 | 251 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R4-20260910` | `5dee50a5` | main | 09-09 / 09-11 | scheduler guard R4 | P |
-| 262 | M | `codex/KAIOS-DIGITAL-ANT-SECURITY-TEST-INTEGRITY-V1-001` | `edd49512` | #251 | 09-10 / 09-10 | test-integrity repair; non-main merge | P |
+| 262 | M | `codex/KAIOS-DIGITAL-ANT-SECURITY-TEST-INTEGRITY-V1-001` | `edd49512` | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R4-20260910` | 09-10 / 09-10 | test-integrity repair; non-main merge | P |
 | 264 | C | `codex/KAIOS-11520-ATM-DURABLE-REPLAY-INTEGRATION-V1-001` | `f77ea44c` | main | 09-10 / 09-12 | durable ATM replay gate | Y |
-| 265 | C | `chatgpt-handoff/KAIOS-11520-ATM-FREIGHT-REVENUE-FAILCLOSED-20260911` | `2f562520` | #264 | 09-10 / 09-12 | freight revenue fail-closed | Y |
+| 265 | C | `chatgpt-handoff/KAIOS-11520-ATM-FREIGHT-REVENUE-FAILCLOSED-20260911` | `2f562520` | `codex/KAIOS-11520-ATM-DURABLE-REPLAY-INTEGRATION-V1-001` | 09-10 / 09-12 | freight revenue fail-closed | Y |
 | 266 | M | `codex/KAIOS-11520-ATM-CANON-RECONCILE-V1-001` | `aab57933` | main | 09-10 / 09-10 | ATM/K-market accounting reconcile | Y |
 | 269 | C | `chatgpt-handoff/KAIOS-11520-ATM-K-DIRECTION-FAILCLOSED-20260911` | `7e44c693` | main | 09-11 / 09-11 | K-direction guard R1 | P |
 | 278 | C | `codex/KAIOS-11520-ATM-CONFIGURED-STATE-BRIDGE-V1-001` | `04772cbf` | main | 09-11 / 09-13 | configured-state bridge R1 | P |
@@ -118,7 +140,7 @@ the immutable GitHub PR record. Dates are UTC `created/last-updated`.
 | 292 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R8-20260912` | `f685b8fc` | main | 09-12 / 09-12 | scheduler guard R8 | Y |
 | 293 | C | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R9-20260912` | `ac044a13` | main | 09-12 / 09-12 | scheduler guard R9 | Y |
 | 295 | M | `chatgpt-handoff/KAIOS-DIGITAL-ANT-NO-DIRECT-MAIN-DEPLOY-R10-20260912` | `b68badc5` | main | 09-12 / 09-12 | final read-only scheduler guard | Y |
-| 302 | C | `codex/11520-atm-direction-reject-visible-20260912` | `214f66e3` | #287 | 09-12 / 09-12 | visible rejected ATM route | P |
+| 302 | C | `codex/11520-atm-direction-reject-visible-20260912` | `214f66e3` | `chatgpt-handoff/KAIOS-11520-ATM-K-DIRECTION-FAILCLOSED-R2-20260912` | 09-12 / 09-12 | visible rejected ATM route | P |
 | 303 | M | `chatgpt-handoff/KAIOS-11520-ATM-K-DIRECTION-REJECT-VISIBILITY-R3-20260912` | `ff83fede` | main | 09-12 / 09-13 | direction/visibility convergence | Y |
 | 320 | M | `chatgpt-handoff/KAIOS-11520-ATM-CONFIGURED-STATE-R2-20260913` | `f7154cde` | main | 09-13 / 09-13 | configured-state current-main | Y |
 | 347 | M | `codex/digital-ant-atm-finance-runtime-v1` | `22cbab93` | main | 09-13 / 09-13 | autonomous bank operating desk | Y |
@@ -138,10 +160,10 @@ the immutable GitHub PR record. Dates are UTC `created/last-updated`.
 | 496 | O | `codex/k11520-context-action-rail` | `431c5106` | main | 10-04 / 10-05 | courier/raid context action rail | N |
 | 503 | O | `dot/courier-clock-recovery-20261005` | `4916c833` | main | 10-05 / 10-05 | HOLD courier clock recovery | N |
 | 505 | O | `dot/courier-review-explanation-20261005` | `cc235810` | main | 10-05 / 10-05 | paused-courier explanation | N |
-| 506 | O | `dot/local-store-integrity-20261005` | `8db98fb9` | #505 | 10-05 / 10-05 | local persistence integrity | N |
+| 506 | O | `dot/local-store-integrity-20261005` | `8db98fb9` | `dot/courier-review-explanation-20261005` | 10-05 / 10-05 | local persistence integrity | N |
 | 518 | O | `codex/living-market-zone-prototype-20261006` | `594835ff` | main | 10-06 / 10-06 | local Market Life prototype | N |
 | 520 | O | `dot/customer-project-v2-evidence-20261006` | `8989bf19` | main | 10-06 / 10-07 | local customer-project evidence | N |
-| 525 | O | `dot/customer-project-digital-world-20261007` | `1b320872` | #520 | 10-07 / 10-07 | digital-world requirements | N |
+| 525 | O | `dot/customer-project-digital-world-20261007` | `1b320872` | `dot/customer-project-v2-evidence-20261006` | 10-07 / 10-07 | digital-world requirements | N |
 | 527 | O | `chatgpt-handoff/K11520-CARGO-VISUAL-LIFETIME-20261007` | `772e7adb` | main | 10-07 / 10-07 | cargo visual lifetime | N |
 | 536 | O | `codex/kaios-ai-company-active-mode-20261007` | `ccbb1469` | main | 10-07 / 10-07 | evidence-bound company loop | N |
 
