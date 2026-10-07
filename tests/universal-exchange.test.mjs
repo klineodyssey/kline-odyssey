@@ -4388,3 +4388,122 @@ test('Fishpond requirement adapter rejects malformed fixture numbers and excess 
       (e) => ['CUSTOMER_REQUIREMENT_SITE_VALUE', 'CUSTOMER_REQUIREMENT_DESIGN_VALUE', 'CUSTOMER_REQUIREMENT_DESIGN_VOLUME', 'CUSTOMER_PROJECT_FIELDS'].includes(e.code));
   }
 });
+
+function saveRequirementCommand(f, input, { key = 'save-draft-0001', revision = 0, previousDraftHash = null } = {}) {
+  return f.command('SAVE_REQUIREMENT_DRAFT', key, revision, { draft: input, previousDraftHash });
+}
+
+test('Digital requirement save versions drafts without submitting a request or accepting a quote', async () => {
+  const f = customerProjectFixture(), input = digitalWorldRequirementFixture();
+  input.requirements.locationRef = null;
+  const first = await f.model.command(saveRequirementCommand(f, input));
+  assert.equal(first.status, 'REQUIREMENT_DRAFT_SAVED'); assert.equal(first.readiness, 'NEEDS_CLARIFICATION');
+  assert.equal(first.submitted, false); assert.equal(first.durable, false);
+  const initial = await f.model.read();
+  const second = await f.model.command(saveRequirementCommand(f, digitalWorldRequirementFixture(), { key: 'save-draft-0002', revision: 1, previousDraftHash: first.draftHash }));
+  assert.equal(second.draftRevision, 2); assert.notEqual(second.draftHash, first.draftHash);
+  const state = await f.model.read();
+  assert.deepEqual(state.requirementDrafts[0], initial.requirementDrafts[0]); assert.equal(state.requirementDrafts.length, 2);
+  for (const key of ['request', 'acceptance', 'contract', 'project']) assert.equal(state[key], null);
+  assert.deepEqual(state.quotes, []);
+  await customerProjectRejects(f.model.command(f.command('ISSUE_SIMULATED_QUOTE', 'no-quote-0001', 2, { requestRevision: 1 })), 'CUSTOMER_PROJECT_COMPLETE_REQUEST_REQUIRED');
+  await customerProjectRejects(f.model.command(f.command('SUBMIT_REQUEST', 'no-submit-001', 2, f.request)), 'DIGITAL_REQUIREMENT_SUBMISSION_MAPPING_REQUIRED');
+  await customerProjectRejects(f.model.command(saveRequirementCommand(f, input, { key: 'save-stale-001', revision: 2, previousDraftHash: first.draftHash })), 'CUSTOMER_REQUIREMENT_REVISION_CONFLICT');
+  assert.deepEqual(await f.model.read(), state);
+});
+
+test('Digital requirement save keeps exact retries and new-key unchanged drafts idempotent', async () => {
+  const f = customerProjectFixture(), input = digitalWorldRequirementFixture();
+  const command = saveRequirementCommand(f, input), first = await f.model.command(command);
+  assert.deepEqual(await f.model.command(command), first);
+  const duplicate = await f.model.command(saveRequirementCommand(f, input, { key: 'draft-same-newkey', revision: 1, previousDraftHash: first.draftHash }));
+  assert.equal(duplicate.status, 'REQUIREMENT_DRAFT_UNCHANGED'); assert.equal(duplicate.draftRevision, 1); assert.equal(duplicate.revision, 1);
+  const before = await f.model.read(); assert.equal(before.events.length, 1); assert.equal(before.commandJournal.length, 2);
+  assert.equal(before.requirementDrafts.length, 1);
+  const changed = structuredClone(command); changed.data.draft.text = 'changed text';
+  await customerProjectRejects(f.model.command(changed), 'IDEMPOTENCY_CONTENT_MISMATCH');
+  assert.deepEqual(await f.model.read(), before);
+});
+
+test('Digital requirement save cannot replace a submitted house or exceed its revision capacity', async () => {
+  const existing = customerProjectFixture(); await existing.submit(); const before = await existing.model.read();
+  await customerProjectRejects(existing.model.command(saveRequirementCommand(existing, digitalWorldRequirementFixture(), { revision: 1 })), 'CUSTOMER_REQUIREMENT_WORKSPACE_ALREADY_SUBMITTED');
+  assert.deepEqual(await existing.model.read(), before);
+  const f = customerProjectFixture(); let previousDraftHash = null;
+  for (let i = 0; i < 20; i += 1) {
+    const input = digitalWorldRequirementFixture(); input.text += ` revision ${i}`;
+    const saved = await f.model.command(saveRequirementCommand(f, input, { key: `draft-capacity-${i}`, revision: i, previousDraftHash }));
+    previousDraftHash = saved.draftHash;
+  }
+  const full = await f.model.read(), input = digitalWorldRequirementFixture(); input.text += ' overflow';
+  await customerProjectRejects(f.model.command(saveRequirementCommand(f, input, { key: 'draft-overflow', revision: 20, previousDraftHash })), 'CUSTOMER_PROJECT_CAPACITY');
+  assert.deepEqual(await f.model.read(), full);
+});
+
+test('Digital requirement SQLite save survives a new process without live planner or clock', async (t) => {
+  const f = await durableCustomerProjectFixture(t), api = f.make(), input = digitalWorldRequirementFixture();
+  const command = saveRequirementCommand(f, input), saved = await api.command(command);
+  assert.equal(saved.persistence.committed, true); assert.equal(saved.result.durable, false);
+  assert.deepEqual(await api.command(command), saved);
+  const update = saveRequirementCommand(f, { ...input, text: 'Revised digital pond requirement' }, { key: 'draft-saved-next', revision: 1, previousDraftHash: saved.result.draftHash });
+  await api.command(update);
+  const before = await api.read(), rows = await f.rows(); f.closeAll();
+  const { execFile } = await import('node:child_process'); const { promisify } = await import('node:util');
+  const script = `
+    import { SQLiteDatabaseAdapter } from ${JSON.stringify(new URL('../KAIOS/backend/src/adapters/local.mjs', import.meta.url).href)};
+    import { createCustomerProjectPersistencePrototype } from ${JSON.stringify(new URL('../KAIOS/backend/src/service.mjs', import.meta.url).href)};
+    const db = new SQLiteDatabaseAdapter(process.argv[1]);
+    try {
+      const api = createCustomerProjectPersistencePrototype({ mode:'LOCAL_TEST_ONLY', database:db,
+        identityAdapter:{ resolve:()=>({ accountId:'TEST-ACCOUNT-A', playerId:'TEST-PLAYER-A', active:true, scope:'SIMULATION_CUSTOMER_CONTEXT' }) },
+        quotePlanner:{ plan(){ throw new Error('LIVE_PLANNER_FORBIDDEN'); } }, now(){ throw new Error('LIVE_CLOCK_FORBIDDEN'); } });
+      const command = JSON.parse(process.argv[2]);
+      process.stdout.write(JSON.stringify({ read:await api.read(), retry:await api.command(command) }));
+    } finally { db.close(); }
+  `;
+  const { stdout } = await promisify(execFile)(process.execPath, ['--input-type=module', '-e', script, f.file, JSON.stringify(command)], { timeout:5000, maxBuffer:1000000 });
+  const recovered = JSON.parse(stdout); assert.deepEqual(recovered.read, before); assert.deepEqual(recovered.retry, saved);
+  assert.equal(recovered.read.state.requirementDrafts.length, 2); assert.equal(recovered.read.state.request, null); assert.equal(recovered.read.state.project, null);
+  const reopened = f.open(), afterRows = {};
+  for (const table of Object.keys(rows)) afterRows[table] = await reopened.all('SELECT * FROM ' + table + ' ORDER BY rowid');
+  assert.deepEqual(afterRows, rows);
+});
+
+test('Digital requirement SQLite save fences concurrent revisions and preserves response-only retries', async (t) => {
+  const f = await durableCustomerProjectFixture(t), api = f.make(), input = digitalWorldRequirementFixture();
+  const first = await api.command(saveRequirementCommand(f, input));
+  const options = { revision: 1, previousDraftHash: first.result.draftHash };
+  const a = saveRequirementCommand(f, { ...input, text: 'Candidate A' }, { ...options, key: 'draft-racing-A' });
+  const b = saveRequirementCommand(f, { ...input, text: 'Candidate B' }, { ...options, key: 'draft-racing-B' });
+  const results = await Promise.allSettled([api.command(a), f.make({ database: f.open() }).command(b)]);
+  assert.equal(results.filter((v) => v.status === 'fulfilled').length, 1);
+  const error = results.find((v) => v.status === 'rejected').reason;
+  assert.ok(['CUSTOMER_PROJECT_REVISION_CONFLICT', 'CUSTOMER_REQUIREMENT_REVISION_CONFLICT'].includes(error.code ?? error.message));
+  const before = await api.read(), head = before.state.requirementDrafts.at(-1);
+  const same = { text: head.content.text, objective: head.content.objective, requirements: head.content.requirements };
+  const noop = await api.command(saveRequirementCommand(f, same, { key: 'draft-same-durable', revision: before.state.revision, previousDraftHash: head.content.contentHash }));
+  assert.equal(noop.result.status, 'REQUIREMENT_DRAFT_UNCHANGED');
+  f.reopen(); const after = await f.make().read();
+  assert.equal(after.storageVersion, before.storageVersion + 1); assert.equal(after.state.revision, before.state.revision);
+  assert.deepEqual(after.state.events, before.state.events); assert.deepEqual(after.state.requirementDrafts, before.state.requirementDrafts);
+});
+
+test('Digital requirement SQLite rollback and lost acknowledgement preserve one saved draft', async (t) => {
+  const f = await durableCustomerProjectFixture(t), input = digitalWorldRequirementFixture(), before = await f.rows();
+  const command = saveRequirementCommand(f, input);
+  for (let position = 0; position <= 5; position += 1) {
+    const database = { get: (...args) => f.db.get(...args), atomic: (statements) => f.db.atomic([
+      ...statements.slice(0, position), { sql: 'INSERT INTO deliberately_missing_draft_table VALUES(1)' }, ...statements.slice(position)
+    ]) };
+    await assert.rejects(f.make({ database }).command(command)); assert.deepEqual(await f.rows(), before);
+  }
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) {
+    await f.db.atomic(statements); throw new Error('DRAFT_ACK_LOST_AFTER_COMMIT');
+  } };
+  const saved = await f.make({ database }).command(command);
+  assert.equal(saved.persistence.committed, true);
+  f.reopen(); assert.deepEqual(await f.make().command(command), saved);
+  assert.equal((await f.rows()).customer_project_events.length, 1); assert.equal((await f.rows()).idempotency.length, 1);
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B' });
+  await durableCustomerRejects(f.make().command(command), 'CUSTOMER_PROJECT_BINDING_REQUIRED');
+});

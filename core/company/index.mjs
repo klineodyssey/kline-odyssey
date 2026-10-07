@@ -1,12 +1,12 @@
 /*
 KGEN_META
 VERSION: CURRENT
-REVISION: 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_ADAPTER.2
+REVISION: 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_SAVE.3
 STATUS: DRAFT
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
 REVIEWED_BY: PENDING; local focused tests are not registered Reviewer authority
-SOURCE_COMMIT: 58aa7a9428b31b12ddb8d3c557248d94f5c4f5bb
+SOURCE_COMMIT: faca4e0dd378b3cd8ab15f28fb41b4a4430a008b
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
 CHANGE_REASON: Add bounded digital-world requirement drafts without changing the preserved house command or persistence owners.
 ANCESTOR: core/company/index.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
@@ -3158,12 +3158,13 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
   }
   function bounded(candidate) {
     cpFail(candidate.commandJournal.length <= 256 && candidate.events.length <= 128 && candidate.requestRevisions.length <= 20 && candidate.quotes.length <= 20, "CUSTOMER_PROJECT_CAPACITY");
+    cpFail((candidate.requirementDrafts?.length ?? 0) <= 20, "CUSTOMER_PROJECT_CAPACITY");
     cpFail(new TextEncoder().encode(serializeCustomerProject(candidate)).length <= 512000, "CUSTOMER_PROJECT_CAPACITY");
   }
   async function execute(command, owner) {
     assertCurrentCustomer(owner);
     cpFields(command, ["type", "idempotencyKey", "expectedRevision", "data"]);
-    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
+    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE", "SAVE_REQUIREMENT_DRAFT"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
     cpFail(typeof command.idempotencyKey === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(command.idempotencyKey) && cpInt(command.expectedRevision), "CUSTOMER_PROJECT_INVALID_COMMAND");
     const key = `${command.type}:${command.idempotencyKey}`;
     const commandHash = await hashCustomerProject(command);
@@ -3192,7 +3193,29 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
     cpFail(command.expectedRevision === state.revision, "CUSTOMER_PROJECT_REVISION_CONFLICT");
     let at = now(); cpFail(cpInt(at) && at >= state.lastAt, "CUSTOMER_PROJECT_INVALID_CLOCK");
     let response;
-    if (command.type === "SUBMIT_REQUEST" || command.type === "CLARIFY_REQUEST") {
+    if (command.type === "SAVE_REQUIREMENT_DRAFT") {
+      cpFields(command.data, ["draft", "previousDraftHash"]);
+      cpFail(!state.request && !state.acceptance, "CUSTOMER_REQUIREMENT_WORKSPACE_ALREADY_SUBMITTED");
+      const previousDraft = state.requirementDrafts?.at(-1);
+      cpFail(command.data.previousDraftHash === (previousDraft?.content.contentHash ?? null), "CUSTOMER_REQUIREMENT_REVISION_CONFLICT");
+      const content = await createDigitalWorldCustomerRequirementDraft(command.data.draft);
+      const draftId = `${state.workspaceId}-REQUIREMENT-DRAFT`;
+      if (previousDraft?.content.contentHash === content.contentHash) {
+        const response = { ...responseBase, status: "REQUIREMENT_DRAFT_UNCHANGED", draftId, draftRevision: previousDraft.revision,
+          draftHash: content.contentHash, readiness: content.status, submitted: false, revision: state.revision };
+        draft.commandJournal.push({ key, commandHash, response }); bounded(draft); assertCurrentCustomer(owner); state = draft;
+        return cloneCustomerProject(response);
+      }
+      if (!draft.owner) {
+        draft.owner = owner;
+        draft.workspaceId = `CPW-${(await hashCustomerProject({ owner, companyId: "AI_ANT_COMPANY_0001", slot: "CUSTOMER_PROJECT_PRIMARY" })).slice(0, 32)}`;
+      }
+      const saved = { draftId: `${draft.workspaceId}-REQUIREMENT-DRAFT`, revision: (previousDraft?.revision ?? 0) + 1, content };
+      draft.requirementDrafts = [...(draft.requirementDrafts ?? []), saved];
+      response = { ...responseBase, status: "REQUIREMENT_DRAFT_SAVED", draftId: saved.draftId, draftRevision: saved.revision,
+        draftHash: content.contentHash, readiness: content.status, submitted: false };
+    } else if (command.type === "SUBMIT_REQUEST" || command.type === "CLARIFY_REQUEST") {
+      cpFail(!state.requirementDrafts, "DIGITAL_REQUIREMENT_SUBMISSION_MAPPING_REQUIRED");
       cpFail(!state.acceptance, "CHANGE_ORDER_REQUIRED");
       cpFail(command.type !== "SUBMIT_REQUEST" || state.request === null, "WORKSPACE_ALREADY_EXISTS");
       cpFail(command.type !== "CLARIFY_REQUEST" || state.request !== null, "CUSTOMER_PROJECT_REQUEST_REQUIRED");

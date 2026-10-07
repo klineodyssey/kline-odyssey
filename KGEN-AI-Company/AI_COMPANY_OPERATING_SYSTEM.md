@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | VERSION | V3.0 |
-| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_ADAPTER.2 |
+| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_SAVE.3 |
 | STATUS | DRAFT |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
 | REVIEWED_BY | PENDING; local focused tests are not registered Reviewer authority |
-| SOURCE_COMMIT | 58aa7a9428b31b12ddb8d3c557248d94f5c4f5bb |
+| SOURCE_COMMIT | faca4e0dd378b3cd8ab15f28fb41b4a4430a008b |
 | TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
 | CHANGE_REASON | Add bounded digital-world requirement drafts while preserving the house and Backend owners. |
 | ANCESTOR | KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
@@ -457,3 +457,55 @@ browser-storage capability use, the adapter's inspect-only surface, malformed
 numbers, overflowed geometric capacity and excess authority/policy fields. The
 final selected command/requirements/adapter run is 30/30 with zero failures or
 skips; this supersedes only the narrower 28-case run, not historical CI.
+
+### Versioned requirement saving through the existing local journal
+
+The additive Company command `SAVE_REQUIREMENT_DRAFT` accepts only
+`{draft, previousDraftHash}` inside the existing strict command envelope. It
+reuses the same code-level customer context, workspace identity, event hash
+chain, expected revision, idempotency response journal and local Backend
+aggregate/event/cache transaction. The draft is re-derived from raw text, an
+explicit objective and proposed requirements; caller readiness, acceptance,
+inspection or authority fields are not accepted. No Backend source, route,
+migration, schema, package or cloud configuration is changed.
+
+A saved draft is still unsubmitted. It does not populate `request`, `quotes`,
+`acceptance`, `contract` or `project`. Quote issuance stays blocked. Legacy house
+submission cannot silently consume an unrelated digital draft; it returns
+`DIGITAL_REQUIREMENT_SUBMISSION_MAPPING_REQUIRED`. Conversely, an existing
+submitted House workspace cannot be overwritten by a new draft. A later
+explicitly specified submission adapter must bind the current draft rather
+than inferring intent from text or from a saved configuration report.
+
+Each changed draft appends one immutable revision, capped at twenty, with its
+full content hash. The expected prior draft hash and aggregate revision must
+both match. Exact command retries return the original response. A different
+key for unchanged current content appends only a response entry, with unchanged
+domain revision/event history; stale new-key requests still fail the revision
+guard. Failed validation/capacity/transaction operations preserve stored state.
+
+The pure response remains `durable:false`. Only the existing separate local
+SQLite envelope can report a committed transaction. A fresh OS process can
+replay saved drafts, prior revisions and exact retries with live clock/planner
+disabled. This is local file recovery under the tested installed code, not
+cloud, hostile-database rollback, arbitrary-version or multi-device evidence.
+The journal envelope format is unchanged; this adds a command vocabulary entry.
+Older code that does not know the command must fail closed and preserve the DB.
+No old client may reset an unsupported draft journal.
+
+Six new tests cover draft history/completeness, no request/quote side effects,
+previous-hash conflicts, exact and response-only retries, existing-workspace
+separation, capacity rollback, true new-process SQLite recovery, independent
+writer fencing, failure at every transaction position, lost acknowledgement
+and Account/Player mismatch. A narrow final run passes 36/36 with zero failures
+or skips (18 legacy House command cases plus 18 cumulative new cases). The
+first new-process test initially attempted to close an already-closed fixture
+connection; the test reopened a fresh connection before its final row equality
+check, then passed. No production defect or data loss occurred.
+
+Revision `2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_SAVE.3`, predecessor
+`faca4e0dd378b3cd8ab15f28fb41b4a4430a008b`, is confined to the same three files.
+Source review is pending. For rollback, retain this reader for databases with
+SAVE_REQUIREMENT_DRAFT operations or stop safely with their files preserved;
+there is no automatic downgrade/migration or permission to delete saved data.
+No generated draft is submitted or accepted on a customer's behalf.
