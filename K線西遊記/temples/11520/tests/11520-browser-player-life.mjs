@@ -106,13 +106,14 @@ async function closePanels(page){
   if(await page.locator('#sheet').evaluate(el=>el.classList.contains('open')))await page.locator('#sheetClose').click();
   if(await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
 }
+async function nativeMovementC(page,value){await page.locator('#cNumericInput').fill(String(value));await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(c=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===c,value)}
 async function killFirstMonster(page){
   await closePanels(page);
-  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await nativeMovementC(page,.1);
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40,{steps:5});
   try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__?.distance<2,null,{timeout:15000})}finally{await page.mouse.up()}
-  const before=(await snap(page)).player.xp;
+  await nativeMovementC(page,0);const before=(await snap(page)).player.xp;
   for(let i=0;i<30&&(await snap(page)).player.xp===before;i++){await pursueMovingEncounter(page);await page.locator('#attack').click();await page.waitForTimeout(400)}
   const after=await snap(page);assert.ok(after.player.xp>before,'real monster interaction must grant canonical XP');assert.equal(after.player.inventory.ownerPlayerId,after.player.playerId);assert.ok(await page.evaluate(()=>K11520Backpack.get().items.length>0),'loot appears in the single scoped backpack');
   return after;
@@ -129,13 +130,13 @@ async function audioProbe(context){await context.addInitScript(()=>{
 async function audioState(page){return page.evaluate(async()=>{const {getKaiosAudio}=await import('../../../assets/kaios-audio.mjs');return getKaiosAudio().snapshot()})}
 async function signal(page){return page.evaluate(async()=>{let peak=0,rms=0;for(let i=0;i<16;i++){for(const probe of __v29Probes){const values=new Float32Array(probe.fftSize);probe.getFloatTimeDomainData(values);let sum=0;for(const v of values){peak=Math.max(peak,Math.abs(v));sum+=v*v}rms=Math.max(rms,Math.sqrt(sum/values.length))}await new Promise(r=>setTimeout(r,90))}return {peak,rms}})}
 async function approachEncounter(page){
-  await closePanels(page);await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
+  await closePanels(page);await nativeMovementC(page,.1);
   const before=await page.evaluate(()=>({distance:__K11520_KSPACE_COMBAT__.distance,xyz:{...__K11520_WORLD_COORDS__.physical}}));
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-40,{steps:6});
   try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__.distance<1.9,null,{timeout:15000})}finally{await page.mouse.up()}
   const after=await page.evaluate(()=>({distance:__K11520_KSPACE_COMBAT__.distance,xyz:{...__K11520_WORLD_COORDS__.physical}}));
-  assert(after.distance<2);assert(after.xyz.z>before.xyz.z,'real joystick must move forward, not teleport target');return {before,after};
+  assert(after.distance<2);assert(after.xyz.z>before.xyz.z,'real joystick must move forward, not teleport target');await nativeMovementC(page,0);return {before,after};
 }
 async function selectEncounterUI(page,id){
   await openLife(page);const button=page.locator(`[data-journey-encounter="${id}"]`);await expandDetails(page,`[data-journey-encounter="${id}"]`);assert.equal(await button.isEnabled(),true,id+' unlocked');await button.scrollIntoViewIfNeeded();await button.click();
@@ -144,12 +145,13 @@ async function selectEncounterUI(page,id){
 async function pursueMovingEncounter(page){
   const state=await page.evaluate(()=>__K11520_KSPACE_COMBAT__);
   if(state.target.state==='DEAD'||state.distance<=1.2||await page.locator('#journeyRecover').isVisible())return;
+  const priorC=await page.evaluate(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__.signedC);await nativeMovementC(page,.1);
   // Roaming lives are no longer stationary. Use the existing physical joystick,
   // not a teleport/frozen target or wider attack radius. Keep all strike limits.
   const joy=await page.locator('#joy').boundingBox(),x=joy.x+joy.width/2,y=joy.y+joy.height/2;
   const d=Math.hypot(state.relative.x,state.relative.z)||1;
   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+state.relative.x/d*35,y-state.relative.z/d*35,{steps:4});
-  try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__.distance<.8||document.querySelector('#journeyRecover')?.getBoundingClientRect().width>0,null,{timeout:5000})}finally{await page.mouse.up()}
+  try{await page.waitForFunction(()=>__K11520_KSPACE_COMBAT__.distance<.8||document.querySelector('#journeyRecover')?.getBoundingClientRect().width>0,null,{timeout:5000})}finally{await page.mouse.up();await nativeMovementC(page,priorC)}
 }
 async function defeatUsingSlash(page,{tag,onAttack,recoveryEvidence=[],attackTrace=[]}={}){
   for(let i=0;i<55;i++){
@@ -328,7 +330,7 @@ try{
       await shot(page,`${width}x${height}-offline-save`);await context.setOffline(false);profile.checks.push('OFFLINE_IN_SESSION_LOCAL_SAVE');
       await expandDetails(page,'#playerLifeConsent');await page.locator('#playerLifeConsent').click();assert.deepEqual((await snap(page)).player.privacyConsent,{location:false,motion:false,analytics:false});profile.checks.push('CONSENT_REVOCATION_NO_SENSOR_REQUEST');
       await openLife(page);await reachable(page,'#playerLifeHomeNav');await page.locator('#playerLifeHomeNav').click();
-      await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active);
+      await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.active);await page.locator('#sheet').waitFor({state:'hidden'});await nativeMovementC(page,.1);
       await page.waitForFunction(()=>{const h=__K11520_PLAYER_LIFE__.snapshot().home.xyz,p=__K11520_WORLD_COORDS__.physical;return Math.hypot(h.x-p.x,h.y-p.y,h.z-2.2-p.z)<.8&&!__K11520_XYZ_MAP_NAVIGATION__.active},null,{timeout:20000});
       // MINIMAL hides telemetry, not the loaded character. Assert readiness
       // text in the attached node without requiring a diagnostic HUD to show.

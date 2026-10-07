@@ -22,7 +22,7 @@ import {normalizeSignedC,signedPositionSide,signedCFromLegacyMagnitude} from './
 import {createExecutionAdapter} from './real-trading-order-intent.mjs';
 import {getWalletSession11520} from './wallet-game-bridge.mjs';
 import {readPublicWalletIdentity,readPlayerSession,savePlayerSession,createSimulationPlayerStore,createPlayerScopedStorage} from './evm-wallet-runtime.mjs';
-import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,advanceLocalMotionClock,integrateLocalMotion,clampWorldPosition} from './spatial-coordinate-runtime.mjs';
+import {joystickToWorld,worldToNorthUpMap,northUpMapToWorld,worldHeading,formatGameDistanceK,localPositionToK,formatUniverseAddress,advanceLocalMotionClock,integrateLocalMotion} from './spatial-coordinate-runtime.mjs';
 import {collectInspectableEntities,inspectMapPoint} from './map-object-navigation-runtime.mjs';
 import {createLifeVisual,syncLifeVisual} from './life-visual-runtime.mjs';
 import {install11520ProductFixes} from './game-ui-product-fixes.mjs';
@@ -242,7 +242,7 @@ let playerMotionClock=null;
 for(const event of ['visibilitychange','pagehide'])addEventListener(event,()=>{playerMotionClock=null});
 function resolveLocalPlayerStep(from,next){
   if(next.y<0)return{...from,blocked:true,blocker:{name:'GROUND'}};
-  return from.y<4||next.y<4?resolvePlayerMove(from,next):{...clampWorldPosition(next),blocked:false};
+  return from.y<4||next.y<4?resolvePlayerMove(from,next,{allowBoundsRecovery:true}):{...next,blocked:false};
 }
 function moveManual(elapsedSeconds){
   syncTradeAxisFromPlane();
@@ -617,7 +617,7 @@ function syncPlayerHome(){const p=playerLife.activePlayer(),h=playerLife.loadHom
   if(h.houseLevel>0){const wall=new THREE.Mesh(new THREE.BoxGeometry(2,1.6,1.7),new THREE.MeshStandardMaterial({color:h.houseLevel>1?0xd7c79c:0x9b6d38}));wall.position.y=.8;const roof=new THREE.Mesh(new THREE.ConeGeometry(1.65,.9,4),new THREE.MeshStandardMaterial({color:0xb79b46}));roof.rotation.y=Math.PI/4;roof.position.y=2.05;const door=new THREE.Mesh(new THREE.PlaneGeometry(.6,1.05),new THREE.MeshStandardMaterial({color:0x392614,side:THREE.DoubleSide}));door.position.set(0,.525,-.856);playerHome.add(wall,roof,door)}
   playerHome.traverse(n=>{n.userData.playerHome=true});
 }
-const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching){syncPlayerHome();syncWorldFeedback()}},beforePlayerChange:()=>{playerLifeSwitching=true;explorationMeters=0;playerMotionClock=null;stopWorldNavigation3D('切換玩家：導航停止')},startEncounter:startJourneyEncounter,claimDaily:claimDailyJourney,toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
+const playerLifeUI=installPlayerLifeUI({store:playerLife,getXYZ:()=>({...S.xyz}),saveSession:()=>persistPlayerSession(true),onChange:()=>{if(!playerLifeSwitching){syncPlayerHome();syncWorldFeedback()}},beforePlayerChange:()=>{playerLifeSwitching=true;explorationMeters=0;playerMotionClock=null;stopWorldNavigation3D('切換玩家：導航停止',{clearTarget:true})},startEncounter:startJourneyEncounter,claimDaily:claimDailyJourney,toast,wallet:walletSession,navigate:xyz=>{if(!xyz)return;cancelNavigation('前往起家地');playerHomeFraming=true;setWorldTarget3D({x:xyz.x,y:xyz.y,z:xyz.z-2.2},{mode:'WORLD',source:'PLAYER_HOME'});startWorldNavigation3D()}});
 syncPlayerHome();
 const lifeVisuals=new Map(),lifeVisualPending=new Set();async function ensureLifeVisual(m){if(m.state==='DEAD'||!(m.name||m.baseName))return null;const key=`${m.lifeId||m.id}|${m.species}`;const current=lifeVisuals.get(m.id);if(current?.key===key)return current.root;if(current){scene.remove(current.root);lifeVisuals.delete(m.id)}if(lifeVisualPending.has(m.id))return null;lifeVisualPending.add(m.id);try{const v=await createLifeVisual(THREE,{species:m.species,name:m.baseName||m.name,scale:.75});v.root.userData.worldMonsterId=m.id;v.root.userData.lifeId=m.lifeId||null;v.root.traverse?.(n=>{n.userData.worldMonsterId=m.id;n.userData.lifeId=m.lifeId||null});scene.add(v.root);lifeVisuals.set(m.id,{key,root:v.root,mode:v.mode});return v.root}finally{lifeVisualPending.delete(m.id)}}
 function syncLifeVisuals(){restoreOcclusionMaterials();renderCombatTarget();for(const m of [...world.monsters,...(world.ambientLife||[])]){const rec=lifeVisuals.get(m.id);if(m.state==='DEAD'||!(m.name||m.baseName)){if(rec)rec.root.visible=false;continue}if(!rec){void ensureLifeVisual(m);continue}const key=`${m.lifeId||m.id}|${m.species}`;if(rec.key!==key){void ensureLifeVisual(m);continue}syncLifeVisual(rec.root,m);if(m.simulationCombat)syncPhaseBody(rec.root,m)}}
@@ -693,7 +693,7 @@ function journeyLifeSnapshot(){
     return {id:m.id,position:{x:m.x,y:m.y,z:m.z},sourceManaged:m.sourceManaged,visible:!!root?.visible,screen:{x,y},inView:p.z>=-1&&p.z<=1&&Math.abs(p.x)<=1&&Math.abs(p.y)<=1,uncovered:document.elementFromPoint(x,y)===renderer.domElement};
   });
 }
-function playerHomeSnapshot(){const rect=renderer.domElement.getBoundingClientRect(),project=v=>{const p=new THREE.Vector3(v.x,v.y,v.z).project(camera);return {x:rect.left+(renderer.domElement.dataset.xVisualMirror==='1'?1-p.x:1+p.x)*rect.width/2,y:rect.top+(1-p.y)*rect.height/2,inView:p.z>=-1&&p.z<=1&&Math.abs(p.x)<=1&&Math.abs(p.y)<=1}};return {home:{...playerLife.loadHomePlot()},renderedHome:{x:playerHome.position.x,y:playerHome.position.y,z:playerHome.position.z},player:{...S.xyz},cameraYaw:S.camYaw,homeScreen:project({...playerHome.position,y:playerHome.position.y+1}),playerScreen:project({...S.xyz,y:S.xyz.y+.8}),canvas:{left:rect.left,top:rect.top,width:rect.width,height:rect.height},houseVisible:playerHome.visible}}
+function playerHomeSnapshot(){const rect=renderer.domElement.getBoundingClientRect(),project=v=>{const p=new THREE.Vector3(v.x,v.y,v.z).project(camera);return {x:rect.left+(renderer.domElement.dataset.xVisualMirror==='1'?1-p.x:1+p.x)*rect.width/2,y:rect.top+(1-p.y)*rect.height/2,inView:p.z>=-1&&p.z<=1&&Math.abs(p.x)<=1&&Math.abs(p.y)<=1}};return {home:{...playerLife.loadHomePlot()},renderedHome:{x:playerHome.position.x,y:playerHome.position.y,z:playerHome.position.z},renderedPlayer:{x:avatar.position.x,y:avatar.position.y,z:avatar.position.z},playerVisible:avatar.visible,player:{...S.xyz},cameraYaw:S.camYaw,homeScreen:project({...playerHome.position,y:playerHome.position.y+1}),playerScreen:project({...S.xyz,y:S.xyz.y+.8}),canvas:{left:rect.left,top:rect.top,width:rect.width,height:rect.height},houseVisible:playerHome.visible}}
 globalThis.__K11520_WORLD_SELECTION_PROJECTION__=Object.freeze({lifeCanvasHitPoints,visibleLifeCanvasHitPoints,journeyLifeSnapshot,playerHomeSnapshot});
 
 const raycaster=new THREE.Raycaster(),tapPointer=new THREE.Vector2(),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);let worldTapStart=null;

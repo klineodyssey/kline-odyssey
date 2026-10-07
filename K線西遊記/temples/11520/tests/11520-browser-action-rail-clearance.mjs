@@ -50,6 +50,7 @@ assert.equal(initial.runtime.visibleAuthority,'CANONICAL_XYZ_RUNTIME');
 assert.equal(initial.pseudo,null,'market-derived pseudo text must not override canonical XYZ display');
 assert.ok(initial.market.some(x=>x.quote.includes('65000')||x.quote.includes('65,000')),'stubbed K market quote should be present independently');
 assert.ok(!initial.visible.includes('65,000.25')&&!initial.visible.includes('65000.25'),'player XYZ display must not equal KX market quote');
+await page.locator('#cNumericInput').fill('0.1');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===.1);
 const joy=await page.locator('#joy').boundingBox();assert.ok(joy,'joystick missing');
 await page.mouse.move(joy.x+joy.width*.24,joy.y+joy.height*.5);await page.mouse.down();await page.mouse.move(joy.x+joy.width*.82,joy.y+joy.height*.5,{steps:5});await page.waitForTimeout(450);await page.mouse.up();await page.waitForTimeout(220);
 const moved=await page.evaluate(()=>({

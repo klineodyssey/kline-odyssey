@@ -257,7 +257,9 @@ async function verifyWorldFirst(){
         result.checks.followSwitch='ACTUAL WORLD TAP / SWITCH / CANCEL PASS';
       }
       await clickWorldFirstMinimap(page,result);
-      await page.locator('#waypointAction').waitFor({state:'visible'});await page.locator('#waypointAction').click();
+      await page.locator('#xyzWaypointAction').waitFor({state:'visible'});await page.locator('#xyzWaypointAction').click();
+      const paused=await page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical}));await page.waitForFunction(()=>globalThis.__K11520_XYZ_MAP_NAVIGATION__?.etaStatus==='PAUSED');await page.waitForTimeout(150);assert.deepEqual(await page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical})),paused,'0C waypoint must retain position with PAUSED ETA');
+      await page.locator('#cNumericInput').fill('0.1');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===.1);
       await page.waitForFunction(old=>Math.hypot(globalThis.__K11520_CAMERA__.snapshot().playerXYZ.x-old.x,globalThis.__K11520_CAMERA__.snapshot().playerXYZ.z-old.z)>.5,start.playerXYZ);
       // Canonical joystick remains the movement owner and cancels waypoint navigation.
       const joy=await page.locator('#joy').boundingBox();await page.mouse.move(joy.x+joy.width*.5,joy.y+joy.height*.5);await page.mouse.down();await page.mouse.move(joy.x+joy.width*.7,joy.y+joy.height*.5);await page.mouse.up();

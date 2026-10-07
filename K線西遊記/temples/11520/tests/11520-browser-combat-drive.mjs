@@ -77,6 +77,27 @@ await setSignedC(-1);
 d=await drive();
 assert.equal(d.c,-1);assert.equal(d.cMode,'REVERSE_LIGHT_SPEED');assert.equal(d.xyzStep,-.1);
 
+// Source-bound real actor evidence: native C editor + native pointer gesture.
+// Samples are read-only; neither coordinates nor drive state are injected.
+const motionEvidence=[];
+async function measureActualMotion(c){
+  await page.locator('#cNumericInput').fill(String(c));await page.locator('#cNumericInput').press('Enter');
+  await page.waitForFunction(v=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===v,c);
+  const origin=await page.evaluate(()=>({...globalThis.__K11520_WORLD_COORDS__.physical}));
+  await page.evaluate(()=>{globalThis.__qaMotionSamples=[];globalThis.__qaMotionSampling=true;const sample=()=>{if(!globalThis.__qaMotionSampling)return;const m=globalThis.__K11520_PLAYER_MOTION__,p=globalThis.__K11520_WORLD_SELECTION_PROJECTION__?.playerHomeSnapshot?.();if(m&&p)globalThis.__qaMotionSamples.push({now:m.clock.now,dt:m.clock.elapsedSeconds,c:m.sharedC,throttle:m.inputThrottle,distanceK:m.distanceMovedK,status:m.status,position:{...m.physical},rendered:{...p.renderedPlayer},visible:p.playerVisible});requestAnimationFrame(sample)};requestAnimationFrame(sample)});
+  const box=await page.locator('#joy').boundingBox();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width*.95,box.y+box.height/2,{steps:6});await page.waitForTimeout(250);await page.mouse.up();await page.waitForTimeout(80);
+  const result=await page.evaluate(()=>{globalThis.__qaMotionSampling=false;return{samples:globalThis.__qaMotionSamples,end:{...globalThis.__K11520_WORLD_COORDS__.physical},build:globalThis.__K11520_BUILD_INFO__}});
+  const samples=[...new Map(result.samples.map(r=>[r.now,r])).values()];assert.ok(samples.length>=3,'need actual rendered frames');
+  for(const row of samples){assert.equal(row.visible,true,'real avatar must remain visible');for(const axis of ['x','y','z'])assert.ok(Math.abs(row.position[axis]-row.rendered[axis])<1e-8,'rendered actor must follow committed '+axis);assert.ok(!['BLOCKED','SPEED_UNAVAILABLE','INPUT_UNAVAILABLE'].includes(row.status),'measurement route must be clear: '+row.status)}
+  const expectedK=samples.reduce((n,r)=>n+Math.abs(r.c)*.001*r.dt*r.throttle,0),actualK=samples.reduce((n,r)=>n+r.distanceK,0);
+  assert.ok(Math.abs(actualK-expectedK)<1e-9,`elapsed travel mismatch ${JSON.stringify({c,actualK,expectedK})}`);
+  if(c===0){assert.deepEqual(result.end,origin,'0C must not move the actual actor');assert.equal(actualK,0)}else{assert.ok(actualK>0,'nonzero C must move the actor');assert.ok(result.end.x>origin.x,'negative C must retain joystick X+ direction')}
+  motionEvidence.push({c,origin,...result,samples,expectedK,actualK,toleranceK:1e-9,renderTolerance:1e-8});
+  await page.screenshot({path:`${OUT}/11520-actual-motion-c${c}.png`,fullPage:true});
+}
+for(const c of [0,1,-1])await measureActualMotion(c);
+await fs.writeFile(`${OUT}/11520-actual-motion.json`,JSON.stringify(motionEvidence,null,2));
+
 // +10C: superluminal layer scales XYZ intent by 10, without changing the source disc/rail state.
 await setSignedC(10);
 d=await drive();

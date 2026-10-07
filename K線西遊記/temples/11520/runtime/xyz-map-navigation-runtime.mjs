@@ -52,13 +52,13 @@ export function vectorToward3D(from={},target={}){
 function setVector(v){const c=control();if(!c)return false;c.vector={x:finite(v.x),y:finite(v.y),z:finite(v.z)};globalThis.__K11520_XYZ_NAV_VECTOR__={...c.vector};return true}
 function clearVector(){setVector({x:0,y:0,z:0})}
 function publish(){globalThis.__K11520_XYZ_MAP_NAVIGATION__={organ:'XYZ Plane Waypoint Navigation',active:nav.active,target:nav.target?{...nav.target}:null,mode:nav.mode,source:nav.source,startedAt:nav.startedAt,lastDistance:nav.lastDistance,lastDistanceK:nav.lastDistance===null?null:gameUnitsToK(nav.lastDistance),distanceSpace:'LOCAL_METERS',worldTargetAuthority:true,collisionAuthority:'game-5d-main.moveManual',motionStatus:nav.motionStatus||'IDLE',etaSeconds:nav.etaSeconds??null,etaStatus:nav.etaStatus||'WAIT',legacyXZPreserved:false,setWorldTarget:setWorldTarget3D,start:startWorldNavigation3D,stop:stopWorldNavigation3D}}
-function stop(reason=null){nav.active=false;clearVector();actionButton?.remove();actionButton=null;if(reason)toast(reason);publish()}
-function start(){if(!nav.target)return false;nav.active=true;nav.startedAt=Date.now();actionButton?.remove();actionButton=null;toast(`XYZ 導航 ${nav.mode} 開始`);publish();return true}
+function stop(reason=null,status='CANCELLED',clearTarget=false){nav.active=false;nav.motionStatus=status;nav.etaStatus=status;nav.etaSeconds=status==='ARRIVED'?0:null;if(clearTarget)nav.target=null;clearVector();actionButton?.remove();actionButton=null;if(reason)toast(reason);publish()}
+function start(){if(!nav.target)return false;nav.active=true;nav.startedAt=Date.now();nav.motionStatus='WAIT';nav.etaStatus='WAIT';nav.etaSeconds=null;actionButton?.remove();actionButton=null;toast(`XYZ 導航 ${nav.mode} 開始`);publish();return true}
 function showAction(){actionButton?.remove();actionButton=document.createElement('button');actionButton.id='xyzWaypointAction';actionButton.className='waypointAction';const p=nav.target,d=vectorToward3D(physical(),p).distance;actionButton.textContent=`前往 ${nav.mode} · ${formatGameDistanceK(d)}`;actionButton.title=['LOCAL XYZ',...['x','y','z'].map(a=>`${a.toUpperCase()} ${formatGameDistanceK(p[a],{detail:true})}`)].join(' · ');actionButton.setAttribute('aria-label',`${actionButton.textContent}；${actionButton.title}`);actionButton.onclick=start;document.body.appendChild(actionButton)}
 function setTarget(target,plane,source='PLANE_MAP'){nav={active:false,target:normalizeWorldTarget3D(target),mode:plane||mode(),source,startedAt:0,lastDistance:null};clearVector();showAction();toast(`${nav.mode} waypoint 已設定`);publish();return{...nav.target}}
 export function setWorldTarget3D(target,{mode:targetMode='WORLD',source='WORLD'}={}){return setTarget(target,targetMode,source)}
 export function startWorldNavigation3D(){return start()}
-export function stopWorldNavigation3D(reason=null){stop(reason);return true}
+export function stopWorldNavigation3D(reason=null,{clearTarget=false}={}){stop(reason,'CANCELLED',clearTarget);return true}
 function mapCanvasFromEventTarget(target){if(!(target instanceof Element))return null;if(target.matches?.('#minimap,#fullMap'))return target;return target.closest?.('#minimap,#fullMap')||null}
 function intercept(e){const plane=mode();if(plane==='XZ')return;const canvas=mapCanvasFromEventTarget(e.target);if(!canvas||canvas.dataset.coordinateSpace==='K')return;
   if(e.type==='pointerdown'){e.preventDefault();e.stopImmediatePropagation();return}
@@ -80,8 +80,8 @@ export function commitLocalNavigationFrame(result,{speedKPerSecond=null}={}){
   nav.motionStatus=result.status;
   nav.etaStatus=result.status==='PAUSED'?'PAUSED':speedKPerSecond>0?'ESTIMATE':'WAIT';
   nav.etaSeconds=speedKPerSecond>0?gameUnitsToK(nav.lastDistance)/speedKPerSecond:null;
-  if(result.status==='ARRIVED'){nav.etaStatus='ARRIVED';nav.etaSeconds=0;stop('已到達 XYZ 目的地')}
-  else if(result.blocked){nav.etaStatus='BLOCKED';nav.etaSeconds=null;stop(`導航受阻：${result.blocker?.name||'WORLD'}`)}
+  if(result.status==='ARRIVED'){nav.etaStatus='ARRIVED';nav.etaSeconds=0;stop('已到達 XYZ 目的地','ARRIVED')}
+  else if(result.blocked){nav.etaStatus='BLOCKED';nav.etaSeconds=null;stop(`導航受阻：${result.blocker?.name||'WORLD'}`,'BLOCKED')}
   else publish();
 }
 

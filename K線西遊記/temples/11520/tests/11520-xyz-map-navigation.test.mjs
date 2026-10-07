@@ -89,3 +89,36 @@ test('actual main movement owner commits shared-C displacement and camera state 
   assert.ok(main.includes('avatar.position.set(S.xyz.x,S.xyz.y,S.xyz.z)'),'existing actual actor render must follow committed coordinates');
   assert.ok(!main.includes('const speed=.10'));assert.ok(!main.includes('S.navActive'));
 });
+
+test('existing airborne local movement remains unbounded above the ground collision zone',()=>{
+  const main=fs.readFileSync(new URL('../runtime/game-5d-main.mjs',import.meta.url),'utf8'),fn=main.slice(main.indexOf('function resolveLocalPlayerStep('),main.indexOf('function moveManual('));
+  const context=vm.createContext({resolvePlayerMove:()=>{throw Error('airborne movement must not acquire the ground-only bounds')}});vm.runInContext(fn,context);
+  const result=vm.runInContext('resolveLocalPlayerStep({x:80,y:42,z:0},{x:81,y:43,z:0})',context);
+  assert.deepEqual({...result},{x:81,y:43,z:0,blocked:false});
+});
+
+import {resolvePlayerMove} from '../runtime/world-runtime.mjs';
+test('restored exterior player recovers inward or upward without clamping teleport',()=>{
+  const origin={x:210,y:.013172,z:186};
+  const resolver=(from,next)=>from.y<4||next.y<4?resolvePlayerMove(from,next,{allowBoundsRecovery:true}):freeMove(from,next);
+  const move=(position,vector)=>integrateLocalMotion({position,vector,elapsedSeconds:1/60,speedKPerSecond:.001,resolveMove:resolver});
+  const inward=move(origin,{x:-1,y:0,z:0});assert.ok(inward.position.x<210&&inward.position.x>209);assert.equal(inward.blocked,false);
+  const outward=move(origin,{x:1,y:0,z:0});assert.deepEqual(outward.position,origin);assert.equal(outward.blocked,true);
+  let p=origin;for(let i=0;i<15;i++){const result=move(p,{x:0,y:1,z:0});assert.equal(result.blocked,false);p=result.position}
+  assert.ok(p.y>4);near(p.x,210);near(p.z,186);
+  const inbound=move({x:60.1,y:0,z:0},{x:-1,y:0,z:0});assert.ok(inbound.position.x<60);assert.equal(inbound.blocked,false);
+  const collision=resolvePlayerMove({x:8,y:0,z:2.9},{x:8,y:0,z:3.4},{allowBoundsRecovery:true});assert.equal(collision.blocked,true,'opt-in recovery cannot bypass existing object collision');
+});
+
+test('actual waypoint owner publishes pause, cancellation, arrival and player-clear states without stale ETA',()=>{
+  const source=fs.readFileSync(new URL('../runtime/xyz-map-navigation-runtime.mjs',import.meta.url),'utf8').replace(/^import .*;$/m,'').replaceAll('export function ','function ');
+  const document={querySelector:()=>null,createElement:()=>({remove(){},setAttribute(){}}),body:{appendChild(){}}};
+  const context=vm.createContext({document,gameUnitsToK,formatGameDistanceK:String});vm.runInContext(source,context);
+  vm.runInContext("setWorldTarget3D({x:10,y:0,z:0});startWorldNavigation3D();commitLocalNavigationFrame({position:{x:0,y:0,z:0},status:'PAUSED',blocked:false},{speedKPerSecond:0})",context);
+  assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaStatus,'PAUSED');assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaSeconds,null);
+  vm.runInContext("commitLocalNavigationFrame({position:{x:1,y:0,z:0},status:'MOVING',blocked:false},{speedKPerSecond:.001});stopWorldNavigation3D()",context);
+  assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaStatus,'CANCELLED');assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaSeconds,null);assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.active,false);
+  vm.runInContext("startWorldNavigation3D();commitLocalNavigationFrame({position:{x:10,y:0,z:0},status:'ARRIVED',blocked:false},{speedKPerSecond:.001})",context);
+  assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaStatus,'ARRIVED');assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.etaSeconds,0);
+  vm.runInContext("stopWorldNavigation3D(null,{clearTarget:true})",context);assert.equal(context.__K11520_XYZ_MAP_NAVIGATION__.target,null);
+});

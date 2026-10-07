@@ -145,7 +145,7 @@ export function integrateLocalMotion({position,vector={x:0,y:0,z:0},target=null,
   const axes=['x','y','z'],valid=p=>p&&axes.every(a=>typeof p[a]==='number'&&Number.isFinite(p[a]));
   if(!valid(position))throw new RangeError('INVALID_LOCAL_POSITION');
   let current={...position},distanceMoved=0,blocked=false,blocker=null,substeps=0;
-  const base={position:current,intentDelta:{x:0,y:0,z:0},distanceMoved:0,distanceMovedK:0,observedSpeedKPerSecond:0,blocked:false,blocker:null,substeps:0};
+  const base={position:current,intentDelta:{x:0,y:0,z:0},distanceMoved:0,distanceMovedK:0,observedSpeedKPerSecond:0,inputThrottle:0,blocked:false,blocker:null,substeps:0};
   if(typeof speedKPerSecond!=='number'||!Number.isFinite(speedKPerSecond)||speedKPerSecond<0||speedKPerSecond>.1)return{...base,status:'SPEED_UNAVAILABLE'};
   if(speedKPerSecond===0)return{...base,status:'PAUSED'};
   if(!Number.isFinite(elapsedSeconds)||elapsedSeconds<0||elapsedSeconds>.25||typeof resolveMove!=='function')return{...base,status:'FRAME_UNAVAILABLE'};
@@ -169,5 +169,5 @@ export function integrateLocalMotion({position,vector={x:0,y:0,z:0},target=null,
     if(axes.some(a=>Math.abs(current[a]-next[a])>1e-8)){blocked=true;blocker={name:'WORLD_BOUNDARY'};break}
   }
   const distanceMovedK=gameUnitsToK(distanceMoved),arrived=target&&Math.hypot(...axes.map(a=>target[a]-current[a]))<1e-8;
-  return{position:current,intentDelta,distanceMoved,distanceMovedK,observedSpeedKPerSecond:elapsedSeconds>0?distanceMovedK/elapsedSeconds:0,blocked,blocker,substeps,status:blocked?'BLOCKED':arrived?'ARRIVED':distanceMoved>0?'MOVING':'IDLE'};
+  return{position:current,intentDelta,distanceMoved,distanceMovedK,inputThrottle:throttle,observedSpeedKPerSecond:elapsedSeconds>0?distanceMovedK/elapsedSeconds:0,blocked,blocker,substeps,status:blocked?'BLOCKED':arrived?'ARRIVED':distanceMoved>0?'MOVING':'IDLE'};
 }

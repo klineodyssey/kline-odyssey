@@ -68,6 +68,10 @@ const rect=async selector=>page.locator(selector).evaluate(el=>{const r=el.getBo
 
 for(const id of ['joy','attack','skill','dodge','k11520UtilityMaster'])await assertVisible('#'+id);assert.equal(await page.locator('#k11520HudCollapseAll').isVisible(),false,'whole-HUD collapse must boot behind the single utility master');await assertVisible('#knob img');
 for(const id of ['dockToggle','gameModeToggle','walletToggle','chatHandle','aiChatButton','bgmButton','backpackButton'])assert.equal(await page.locator('#'+id).isVisible(),false,`${id} must boot behind the utility master`);
+// Default 0C is an intentional pause. Exercise it before selecting motion C
+// through the native numeric editor; do not bypass the canonical C owner.
+const pausedOrigin=await xyz();await dragReal('#joy',.9,.5,180);assert.deepEqual(await xyz(),pausedOrigin,'default C0 must pause actual body movement');
+await page.locator('#cNumericInput').fill('0.1');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===.1);
 let a=await xyz();await dragReal('#joy',.9,.5);let b=await xyz();assert.ok(b.x>a.x,'right must X+');await assertVisible('#knob img');await page.screenshot({path:`${ARTIFACT_DIR}/11520-mobile-x-right.png`,fullPage:true});
 assert.ok(a.x>=3.9&&a.y>=1.9&&a.z<=-2.9,`11520 must restore last valid XYZ: ${JSON.stringify(a)}`);assert.match(await page.locator('#walletRetained').textContent(),/已保留公開錢包紀錄.*目前未連接錢包/,'retained record must not impersonate a connected wallet');
 assert.doesNotMatch(await page.locator('#walletRetained').textContent(),/0x[0-9a-fA-F]{40}/,'disconnected hint must not display a stale current address');

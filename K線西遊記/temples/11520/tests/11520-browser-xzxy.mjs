@@ -56,6 +56,8 @@ const assertNormal=async(mode,axis)=>{await page.waitForFunction(([m,a])=>{const
 
 await visible('#joy');await visible('#knob');await visible('#knob img');await visible('#yControl');
 let c=await control();assert.equal(c.mode,'XZ');assert.deepEqual(c.discAxes,['X','Z']);assert.equal(c.railAxis,'Y');assert.equal(c.unboundedCoordinateIntent,true);await assertKgenArt();await assertNormal('XZ','KY');assert.match(await page.locator('#yControl label').textContent(),/Y 縱搖桿/);
+const setMotionC=async()=>{await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');await page.waitForFunction(()=>globalThis.__K11520_SIGNED_C_IMMERSIVE__?.signedC===1)};
+const defaultPosition=await xyz();await drag(.90,.50,100,180);assert.deepEqual(await xyz(),defaultPosition,'default C0 must pause the actual actor');await setMotionC();
 await assertThumbFollows();
 let p0=await xyz();await drag(.90,.50,101);let p1=await xyz();assert.ok(p1.x>p0.x,'XZ right must X+');assertFixed('XZ right',p0,p1,'y');
 await drag(.50,.10,102);let p2=await xyz();assert.ok(p2.z>p1.z,'XZ up must Z+');assertFixed('XZ up',p1,p2,'y');
@@ -63,13 +65,13 @@ let w0=await world();await dragRail(.90,103,420);let w1=await world();assert.ok(
 let w2=w1;for(let i=0;i<15&&w2.intent.y<=40;i++){await dragRail(.10,104+i,2000);w2=await world()}assert.ok(w2.intent.y>40,`Y intent must cross legacy 40 independent of frame rate: ${JSON.stringify(w2)}`);assert.ok(w2.physical.y>40,`physical Y must be able to leave legacy 0..40 world band: ${JSON.stringify(w2)}`);
 await page.screenshot({path:`${OUT}/11520-mobile-xz-ground.png`,fullPage:true});
 
-await tapCenter(201);c=await control();assert.equal(c.mode,'XY');assert.deepEqual(c.discAxes,['X','Y']);assert.equal(c.railAxis,'Z');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_XY',{timeout:2500});assert.match(await page.locator('#knob img').getAttribute('src'),/goddess-ui\.webp$/);assert.match(await page.locator('#yControl label').textContent(),/Z 縱搖桿/);await assertNormal('XY','KZ');await assertNoDrift('XZ→XY');
+await tapCenter(201);c=await control();assert.equal(c.mode,'XY');assert.deepEqual(c.discAxes,['X','Y']);assert.equal(c.railAxis,'Z');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_XY',{timeout:2500});assert.match(await page.locator('#knob img').getAttribute('src'),/goddess-ui\.webp$/);assert.match(await page.locator('#yControl label').textContent(),/Z 縱搖桿/);await assertNormal('XY','KZ');await assertNoDrift('XZ→XY');await setMotionC();
 let q0=await xyz();await drag(.50,.10,202);let q1=await xyz();assert.ok(q1.y>q0.y,'XY up must Y+');assertFixed('XY up',q0,q1,'z');
 await drag(.90,.50,203);let q2=await xyz();assert.ok(q2.x>q1.x,'XY right must X+');assertFixed('XY right',q1,q2,'z');
 await dragRail(.10,204,420);let q3=await xyz();assert.ok(q3.z>q2.z,'XY rail up must Z+');assertFixed('XY rail',q2,q3,'y');
 await page.screenshot({path:`${OUT}/11520-mobile-xy-flight.png`,fullPage:true});
 
-await tapCenter(301);c=await control();assert.equal(c.mode,'YZ');assert.deepEqual(c.discAxes,['Y','Z']);assert.equal(c.railAxis,'X');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_YZ',{timeout:2500});const heartSrc=await page.locator('#knob img').getAttribute('src');assert.ok(String(heartSrc).startsWith('data:image/webp;base64,'),'YZ must use human-approved heart image');assert.match(await page.locator('#yControl label').textContent(),/X 縱搖桿/);await assertNormal('YZ','KX');await assertNoDrift('XY→YZ');
+await tapCenter(301);c=await control();assert.equal(c.mode,'YZ');assert.deepEqual(c.discAxes,['Y','Z']);assert.equal(c.railAxis,'X');await page.waitForFunction(()=>document.documentElement.dataset.k11520AvatarMotion==='FLIGHT_YZ',{timeout:2500});const heartSrc=await page.locator('#knob img').getAttribute('src');assert.ok(String(heartSrc).startsWith('data:image/webp;base64,'),'YZ must use human-approved heart image');assert.match(await page.locator('#yControl label').textContent(),/X 縱搖桿/);await assertNormal('YZ','KX');await assertNoDrift('XY→YZ');await setMotionC();
 let r0=await xyz();await drag(.90,.50,302);let r1=await xyz();assert.ok(r1.y>r0.y,'YZ right must Y+');assertFixed('YZ right',r0,r1,'x');
 await drag(.50,.10,303);let r2=await xyz();assert.ok(r2.z>r1.z,'YZ up must Z+');assertFixed('YZ up',r1,r2,'x');
 await dragRail(.10,304,420);let r3=await xyz();assert.ok(r3.x>r2.x,'YZ rail up must X+');
