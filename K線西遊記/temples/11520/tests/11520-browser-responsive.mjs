@@ -419,6 +419,44 @@ async function verifySettingsContext(page,report){
   await page.locator('#gameModeToggle').waitFor({state:'visible'});for(const selector of ['#cargoInterceptionButton','#homeDeliveryButton'])assert.equal(await page.locator(selector).isVisible(),true,selector+' returns to manual More access after Wallet closes');assert.equal(await page.locator('#walletPanel').isVisible(),false,'Wallet close restores the existing tray');
   await page.locator('#k11520UtilityMaster').click();report.settingsContext='THREE_CYCLES / BUTTON_ESCAPE_FOCUS / ORIGINAL_STATES / WALLET_OWNERSHIP PASS';report.settingsContextMs=Date.now()-started;
 }
+async function verifyBackpackForeground(page,report){
+  // A native, presentation-only flow. Do not seed inventory, exercise preview
+  // stress, force clicks, mutate layout or change the current Player store.
+  if(await page.locator('#k11520UtilityMaster').getAttribute('aria-expanded')!=='true')await page.locator('#k11520UtilityMaster').click();
+  await page.locator('#gameModeToggle').click();await page.locator('#k11520UiSettings').waitFor({state:'visible'});
+  const chatWasOn=await page.locator('[data-ui-key="chat"]').getAttribute('aria-checked')==='true';
+  if(chatWasOn)await page.locator('[data-ui-key="chat"]').click();await page.locator('#k11520UiSettingsClose').click();
+  const original=await page.evaluate(()=>({preferences:{...__K11520_UI_SETTINGS__.state},allOn:__K11520_UI_SETTINGS__.allOn,bag:JSON.stringify(K11520Backpack.get()),walletCollapsed:document.querySelector('#walletPanel').classList.contains('collapsed')}));
+  const peers=['#cargoInterceptionButton','#homeDeliveryButton','#dock','#gameModeToggle','#walletToggle','#chatHandle','#bgmButton','#aiChatButton','#k11520HudCollapseAll','#kaiosPortalButton'];
+  for(let cycle=0;cycle<2;cycle++){
+    await page.locator('#backpackButton').click();await page.locator('#backpackPanel').waitFor({state:'visible'});
+    await page.waitForFunction(()=>__K11520_MARKET_ORIGIN_LAYOUT__?.backpackOpen===true);
+    // Cross normal owner ticks, including layoutReport's Wallet anchor path.
+    await page.waitForTimeout(150);
+    for(const selector of peers)assert.equal(await page.locator(selector).isVisible(),false,selector+' must not cover Backpack');
+    await verifyScrolledControlCenters(page,'#backpackButton,#k11520UtilityMaster,#backpackPanel button:visible','Backpack');
+    const state=await page.evaluate(()=>({layout:__K11520_MARKET_ORIGIN_LAYOUT__,preferences:{...__K11520_UI_SETTINGS__.state},allOn:__K11520_UI_SETTINGS__.allOn,bag:JSON.stringify(K11520Backpack.get()),walletCollapsed:document.querySelector('#walletPanel').classList.contains('collapsed')}));
+    assert.equal(state.layout.cleanBackpackForeground,true);assert.deepEqual(state.layout.backpackOverlaps,[]);assert.equal(state.layout.utilitiesOpen,true,'Backpack preserves More disclosure');
+    for(const key of ['preferences','allOn','bag','walletCollapsed'])assert.deepEqual(state[key],original[key],'Backpack does not mutate '+key);
+    if(cycle===0)await page.screenshot({path:`${OUT}/${report.profile.name}-backpack-foreground.png`});
+    await page.locator('#backpackButton').click();await page.locator('#backpackPanel').waitFor({state:'hidden'});await page.locator('#gameModeToggle').waitFor({state:'visible'});
+    assert.equal(await page.locator('#k11520UtilityMaster').getAttribute('aria-expanded'),'true','same-toggle close restores the existing open tray');
+    assert.equal(await page.locator('#chatHandle').isVisible(),false,'Backpack close preserves the current off preference');
+    assert.equal(await page.locator('#walletToggle').isVisible(),true);
+  }
+  // Preserve the established Wallet and dock owners after Backpack closes.
+  await page.locator('#walletToggle').click();await page.waitForFunction(()=>!document.querySelector('#walletPanel').classList.contains('collapsed'));await page.locator('#backpackButton').waitFor({state:'hidden'});
+  await page.locator('#walletToggle').click();await page.locator('#backpackButton').waitFor({state:'visible'});
+  await page.locator('#dockToggle').click();await page.waitForFunction(()=>document.querySelector('#dock').classList.contains('open'));await page.locator('#backpackButton').waitFor({state:'hidden'});
+  await page.locator('#dockToggle').click();await page.locator('#backpackButton').waitFor({state:'visible'});
+  await page.locator('#backpackButton').click();await page.locator('#backpackPanel').waitFor({state:'visible'});await page.locator('#k11520UtilityMaster').click();await page.locator('#backpackPanel').waitFor({state:'hidden'});
+  assert.equal(await page.locator('#k11520UtilityMaster').getAttribute('aria-expanded'),'false','native More close still dismisses Backpack');
+  await page.locator('#k11520UtilityMaster').click();await page.locator('#gameModeToggle').click();await page.locator('#k11520UiSettings').waitFor({state:'visible'});
+  assert.equal(await page.locator('[data-ui-key="chat"]').getAttribute('aria-checked'),'false','Settings retains the preference through repeated Backpack use');
+  if(chatWasOn)await page.locator('[data-ui-key="chat"]').click();await page.locator('#k11520UiSettingsClose').click();await page.locator('#k11520UtilityMaster').click();
+  report.backpackForeground='NATIVE_OPEN_CLOSE / TWO_CYCLES / HIT_OWNERSHIP / PREFERENCES / WALLET_DOCK_PRECEDENCE PASS';
+}
+
 async function verifyContextualHud(){
   const contextualProfiles=PRODUCTION&&!process.env.K11520_RESPONSIVE_PROFILE?[{name:'pages-360',width:360,height:740},{name:'pages-390',width:390,height:844},{name:'pages-412',width:412,height:772},{name:'pages-432',width:432,height:856},{name:'pages-480',width:480,height:900},{name:'pages-landscape-844',width:844,height:390,landscape:true}]:selectedProfiles;
   for(const profile of contextualProfiles){
@@ -437,6 +475,7 @@ async function verifyContextualHud(){
       const edge=await page.locator('#k11520MarketRow').boundingBox();assert.ok(edge.width===44&&edge.height===44,'Market disclosure is one tiny edge control, never a ticker row');assert.doesNotMatch(await page.locator('#k11520MarketRow').textContent(),/BTC|ETH|BNB|LIVE/);
       await page.screenshot({path:`${OUT}/${profile.name}-contextual-world.png`});
       await verifySettingsContext(page,report);
+      if(profile.width===390||profile.landscape)await verifyBackpackForeground(page,report);
       if(profile.width===390||profile.landscape)await verifySettingsInterruptedRails(page,report);
       // Actual native drag proves the initially hidden left circle has one
       // Camera-only handler and becomes available only after manual input.
