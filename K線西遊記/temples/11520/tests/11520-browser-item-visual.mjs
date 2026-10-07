@@ -1,13 +1,38 @@
 import {chromium} from 'playwright';
 import fs from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 
 const out='artifacts/11520-visual-qa/11520-backpack-item-3d.png';
 const dropOut='artifacts/11520-visual-qa/11520-live-world-ground-drop.png';
 const worldOut='artifacts/11520-visual-qa/11520-world-item-identity-390x844.png';
+const previewReport='artifacts/11520-visual-qa/11520-inventory-preview-lifetime.json';
+const sourceHead=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 await fs.mkdir('artifacts/11520-visual-qa',{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
 const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
+const consoleProblems=[];page.on('console',message=>{if(/context lost|too many active WebGL/i.test(message.text()))consoleProblems.push(message.text())});
+await page.addInitScript(()=>{
+  // Observer-only test instrumentation: every original context/resource call is
+  // forwarded unchanged. No context is created, lost or restored by this probe.
+  const original=HTMLCanvasElement.prototype.getContext,seen=new WeakMap(),records=[],events=[];
+  HTMLCanvasElement.prototype.getContext=function(...args){
+    const context=original.apply(this,args);
+    if(context&&/^(webgl2?|experimental-webgl)$/.test(args[0])&&!seen.has(context)){
+      const record={canvas:this,context,counts:{},created:{},peaks:{}};seen.set(context,record);records.push(record);
+      for(const [create,remove,key] of [['createBuffer','deleteBuffer','buffers'],['createTexture','deleteTexture','textures'],['createProgram','deleteProgram','programs'],['createVertexArray','deleteVertexArray','vertexArrays']]){
+        if(!context[create])continue;
+        const live=new Set(),make=context[create],drop=context[remove];record.counts[key]=live;record.created[key]=0;record.peaks[key]=0;
+        context[create]=function(...values){const resource=make.apply(this,values);if(resource){live.add(resource);record.created[key]++;record.peaks[key]=Math.max(record.peaks[key],live.size)}return resource};
+        context[remove]=function(resource,...values){const result=drop.call(this,resource,...values);live.delete(resource);return result};
+      }
+      for(const type of ['webglcontextlost','webglcontextrestored'])this.addEventListener(type,()=>events.push({type,canvasId:this.id,at:performance.now()}));
+    }
+    return context;
+  };
+  globalThis.__K11520_PREVIEW_QA__={snapshot:()=>({events:[...events],contexts:records.map(r=>({canvasId:r.canvas.id,inDOM:r.canvas.isConnected,lost:r.context.isContextLost(),live:Object.fromEntries(Object.entries(r.counts).map(([k,v])=>[k,v.size])),created:{...r.created},peaks:{...r.peaks}}))})};
+});
 await page.addInitScript(()=>{
   // Seed the actual pre-Player-Life guest owner; arbitrary foreign owners must
   // remain rejected by V2.8's backpack ownership validation.
@@ -20,7 +45,42 @@ await page.addInitScript(()=>{
   ]}));
 });
 await page.goto('http://127.0.0.1:4173/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html',{waitUntil:'domcontentloaded',timeout:60000});
+const sourceFiles=[];
+for(const name of ['item-visual-runtime.mjs','backpack-ui.mjs']){
+  const path=`K線西遊記/temples/11520/runtime/${name}`,local=await fs.readFile(path);
+  const response=await page.request.get(`http://127.0.0.1:4173/${encodeURI(path)}`),served=await response.body();
+  if(!response.ok()||!local.equals(served))throw new Error(`PREVIEW_SOURCE_MISMATCH:${name}`);
+  sourceFiles.push({path,sha256:createHash('sha256').update(served).digest('hex')});
+}
+const previewSamples=[];let previewLiveBaseline=null;
+async function previewSample(stage){
+  const sample=await page.evaluate(()=>{
+    const state=globalThis.__K11520_PREVIEW_QA__.snapshot(),canvases=[...document.querySelectorAll('canvas.bp3d[data-item3d="ready"]')];
+    return{...state,readyCanvases:canvases.length,allReadyAreBitmaps:canvases.every(c=>Boolean(c.getContext('2d')))};
+  });
+  previewSamples.push({stage,...sample});
+  if(sample.events.some(event=>event.canvasId==='three'&&event.type==='webglcontextlost')||consoleProblems.length)throw new Error('WORLD_CONTEXT_LOSS_DURING_INVENTORY_PREVIEW');
+  const previews=sample.contexts.filter(context=>context.canvasId!=='three');
+  if(sample.contexts.length!==2||previews.length!==1||previews[0].inDOM||previews[0].lost)throw new Error(`PREVIEW_CONTEXT_BOUND_FAILED:${JSON.stringify(sample.contexts)}`);
+  if(!sample.allReadyAreBitmaps)throw new Error('VISIBLE_PREVIEW_STILL_OWNS_WEBGL_CONTEXT');
+  const live=previews[0].live;
+  if(live.buffers!==0||live.programs!==0||live.vertexArrays!==0)throw new Error(`PREVIEW_RESOURCE_NOT_RELEASED:${JSON.stringify(live)}`);
+  if(previewLiveBaseline&&JSON.stringify(live)!==previewLiveBaseline)throw new Error('PREVIEW_LIVE_RESOURCE_COUNT_GREW');
+  previewLiveBaseline=JSON.stringify(live);return sample;
+}
+async function assertWorldFrame(stage){
+  const result=await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>{
+    const canvas=document.getElementById('three'),gl=canvas.getContext('webgl2');
+    if(!gl||gl.isContextLost())return resolve({ready:false,reason:'CONTEXT_LOST'});
+    const width=gl.drawingBufferWidth,height=gl.drawingBufferHeight,pixels=new Uint8Array(width*height*4);gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+    const colors=new Set();let visible=0;
+    for(let y=1;y<12;y++)for(let x=1;x<12;x++){const i=(Math.floor(height*y/12)*width+Math.floor(width*x/12))*4;if(pixels[i+3]){colors.add(`${pixels[i]>>3},${pixels[i+1]>>3},${pixels[i+2]>>3}`);if(Math.max(pixels[i],pixels[i+1],pixels[i+2])>20)visible++}}
+    resolve({ready:visible>=3&&colors.size>=2,width,height,visibleSamples:visible,colors:colors.size});
+  })));
+  previewSamples.push({stage,worldFrame:result});if(!result.ready)throw new Error(`WORLD_FRAME_EMPTY:${stage}`);
+}
 // Live market polling is intentionally ongoing: await the actual scene, not network silence.
+try{
 await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__?.sceneReady===true,null,{timeout:45000});
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
 await page.waitForSelector('#k11520UtilityMaster',{timeout:30000});
@@ -31,6 +91,7 @@ await page.waitForSelector('#backpackPanel.open');
 const migrated=await page.evaluate(()=>({bag:K11520Backpack.get(),playerId:__K11520_PLAYER_LIFE__.snapshot().player.playerId}));
 if(migrated.bag.ownerId!==migrated.playerId||migrated.bag.items.length!==5)throw new Error('LEGACY_GUEST_BACKPACK_MIGRATION_FAILED');
 await page.waitForFunction(()=>document.querySelectorAll('canvas.bp3d[data-item3d="ready"]').length>=5,null,{timeout:30000});
+await previewSample('initial-open');
 const shapes=await page.$$eval('canvas.bp3d[data-item3d="ready"]',els=>els.map(e=>e.dataset.itemShape));
 for(const expected of ['CRYSTAL','KGEN_CYLINDER','CASH_BUNDLE','FOOD','LIFE_CRATE'])if(!shapes.includes(expected))throw new Error(`MISSING_3D_ITEM_SHAPE:${expected}`);
 if(pageErrors.length)throw new Error(`PAGEERROR:${pageErrors.join('|')}`);
@@ -46,11 +107,42 @@ if(liveDrop.backpackHasCash)throw new Error('DISCARDED_CASH_STILL_IN_BACKPACK');
 await page.click('#backpackButton');
 await page.waitForFunction(()=>!document.querySelector('#backpackPanel')?.classList.contains('open'),null,{timeout:3000});
 await page.waitForSelector('#worldItemPickup.show',{timeout:3000});
+await previewSample('initial-discard-and-close');await assertWorldFrame('initial-ground-drop');
 await page.screenshot({path:dropOut,fullPage:false});
 const pickup=await page.evaluate(()=>globalThis.__K11520_WORLD_ITEM_DROP__.collectNearest());
 if(!pickup?.ok)throw new Error(`LIVE_WORLD_PICKUP_FAILED:${pickup?.reason}`);
 const afterPickup=await page.evaluate(()=>({dropCount:globalThis.__K11520_WORLD_ITEM_DROP__.drops.size,backpackHasCash:globalThis.K11520Backpack.get().items.some(i=>i.itemId==='QA-CASH')}));
 if(afterPickup.dropCount!==0||!afterPickup.backpackHasCash)throw new Error('LIVE_WORLD_PICKUP_DID_NOT_RESTORE_BACKPACK');
+
+// Exercise the actual product controls/store before creating any synthetic
+// gallery contexts. One private preview context must survive every viewport.
+const profiles=[{name:'360',width:360,height:740},{name:'390',width:390,height:844},{name:'412',width:412,height:772},{name:'432',width:432,height:856},{name:'480',width:480,height:900},{name:'landscape',width:844,height:390}];
+try{
+  for(const profile of profiles){
+    await page.setViewportSize({width:profile.width,height:profile.height});
+    for(let cycle=0;cycle<4;cycle++){
+      await page.locator('#backpackButton').click();
+      await page.waitForFunction(()=>document.querySelector('#backpackPanel')?.classList.contains('open')&&document.querySelectorAll('canvas.bp3d[data-item3d="ready"]').length===5,null,{timeout:3000});
+      await previewSample(`${profile.name}-${cycle}-open`);
+      if(cycle===0)await page.screenshot({path:`artifacts/11520-visual-qa/11520-preview-${profile.name}-open.png`,fullPage:false});
+      await page.locator('[data-item="QA-CASH"] [data-action="discard"]').click();
+      await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__.drops.size===1&&document.querySelectorAll('canvas.bp3d[data-item3d="ready"]').length===4,null,{timeout:3000});
+      await previewSample(`${profile.name}-${cycle}-mutated`);
+      await page.locator('#backpackButton').click();
+      await page.waitForFunction(()=>!document.querySelector('#backpackPanel')?.classList.contains('open'));
+      await previewSample(`${profile.name}-${cycle}-closed`);await assertWorldFrame(`${profile.name}-${cycle}-world`);
+      if(cycle===0)await page.screenshot({path:`artifacts/11520-visual-qa/11520-preview-${profile.name}-world.png`,fullPage:false});
+      await page.locator('#worldItemPickup.show').click();
+      await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__.drops.size===0&&globalThis.K11520Backpack.get().items.some(item=>item.itemId==='QA-CASH'&&item.qty===1),null,{timeout:3000});
+    }
+  }
+  if(pageErrors.length)throw new Error(`PAGEERROR_AFTER_PREVIEW_STRESS:${pageErrors.join('|')}`);
+  await fs.writeFile(previewReport,JSON.stringify({head:sourceHead,sourceFiles,status:'PASS',scope:'ACTUAL_INVENTORY_PREVIEW_BEFORE_SYNTHETIC_GALLERY',profiles,cycles:24,samples:previewSamples,pageErrors,consoleProblems,gpuMemoryOrFpsClaim:false},null,2)+'\n');
+}catch(error){
+  await page.screenshot({path:'artifacts/11520-visual-qa/11520-preview-failure.png',fullPage:false});
+  await fs.writeFile(previewReport,JSON.stringify({head:sourceHead,sourceFiles,status:'FAIL',error:String(error),profiles,samples:previewSamples,pageErrors,consoleProblems},null,2)+'\n');throw error;
+}
+await page.setViewportSize({width:390,height:844});
 
 const identity=await page.evaluate(async()=>{
   const THREE=await import('three');
@@ -96,7 +188,12 @@ if(identity.transitContext!=='ANT_CARGO'||identity.unloadContext!=='ATM_UNLOAD')
 if(identity.transitCustody!=='ARMORED_CASH_CASE'||identity.unloadCustody!=='ATM_CASSETTE')throw new Error(`LIVE_CASH_CUSTODY_WRONG:${identity.transitCustody}/${identity.unloadCustody}`);
 await page.waitForTimeout(250);
 await page.screenshot({path:worldOut,fullPage:false});
+if(pageErrors.length)throw new Error(`PAGEERROR_AFTER_ITEM_GALLERY:${pageErrors.join('|')}`);
 console.log(`[11520 ITEM 3D QA] PASS shapes=${shapes.join(',')} screenshot=${out}`);
 console.log(`[11520 LIVE WORLD DROP QA] PASS identity=${liveDrop.identityKey} custody=${liveDrop.custodyType} pickup=PASS screenshot=${dropOut}`);
 console.log(`[11520 CASH CUSTODY QA] PASS ${identity.custodyTypes.join('->')} live=${identity.transitCustody}->${identity.unloadCustody} screenshot=${worldOut}`);
-await browser.close();
+console.log(`[11520 PREVIEW LIFETIME QA] PASS head=${sourceHead} cycles=24 profiles=6 contexts=2 report=${previewReport}`);
+}catch(error){
+  await page.screenshot({path:'artifacts/11520-visual-qa/11520-preview-failure.png',fullPage:false});
+  await fs.writeFile(previewReport,JSON.stringify({head:sourceHead,sourceFiles,status:'FAIL',error:String(error),samples:previewSamples,pageErrors,consoleProblems},null,2)+'\n');throw error;
+}finally{await browser.close()}

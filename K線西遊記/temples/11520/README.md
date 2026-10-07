@@ -27,6 +27,19 @@ Runtime syntax checks PASS. `FUNCTIONAL_QA=FOCUSED_PASS`, `VISUAL_QA=NOT_RUN`;
 fresh source-bound Chromium, mobile screenshots and independent review remain.
 No full GPU/FPS improvement, merge, deployment or playtest readiness is claimed.
 
+Independent review identified a retained-Three-render-stack failure case. The
+same preview owner now retires/disposes its private renderer and loses only that
+private context after render/setup/context failure; the next request may create
+a fresh one. Constructor failure also releases its already-created private
+context. Ordinary bitmap-copy errors retain the healthy renderer. Twelve focused
+tests pass, including constructor/lost-context recovery and actual backpack-batch
+close/reopen fencing. The existing browser item harness now binds served owner
+hashes, counts real WebGL contexts/buffers/programs/VAOs through observer-only
+forwarding, and requires 24 native inventory cycles across 360/390/412/432/480
+portrait plus 844x390 with no world-context loss. Preview resources must be
+released and per-context retained texture counts stable before any synthetic
+gallery starts. Screenshots and fresh CI remain pending at this checkpoint.
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads

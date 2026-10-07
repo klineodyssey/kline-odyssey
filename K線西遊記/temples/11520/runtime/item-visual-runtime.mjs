@@ -66,6 +66,12 @@ export function createItemPreviewScene(THREE,item={}){
 // canvases are bitmap projections, never additional WebGL renderer owners.
 let previewRenderer=null;
 const previewRequests=new WeakMap();
+function retirePreviewRenderer(renderer){
+  if(previewRenderer===renderer)previewRenderer=null;
+  // Only this owner's private context is retired. A failed Three render can
+  // retain internal stacks; it must never become the next preview's renderer.
+  try{renderer.dispose()}finally{renderer.forceContextLoss()}
+}
 function releasePreviewScene(scene){
   const resources=new Set();
   scene.traverse(node=>{if(node.geometry)resources.add(node.geometry);for(const material of [node.material].flat())if(material)resources.add(material)});
@@ -83,19 +89,28 @@ export async function renderItemPreview(canvas,item,{size=96,shouldRender=()=>tr
   const context=canvas.getContext('2d');if(!context)throw new Error('PREVIEW_BITMAP_CONTEXT_REQUIRED');
   if(!previewRenderer){
     const surface=canvas.ownerDocument.createElement('canvas');
-    previewRenderer=new THREE.WebGLRenderer({canvas:surface,alpha:true,antialias:true,preserveDrawingBuffer:true});
+    const options={alpha:true,antialias:true,preserveDrawingBuffer:true};
+    const gl=surface.getContext('webgl2',options);if(!gl)throw new Error('PREVIEW_CONTEXT_UNAVAILABLE');
+    try{previewRenderer=new THREE.WebGLRenderer({canvas:surface,context:gl,...options})}
+    catch(error){gl.getExtension('WEBGL_lose_context')?.loseContext();throw error}
   }
   const renderer=previewRenderer;
-  if(renderer.getContext().isContextLost())throw new Error('PREVIEW_CONTEXT_LOST');
-  const px=Math.max(48,Math.min(160,Number(size)||96));renderer.setPixelRatio(Math.min(2,globalThis.devicePixelRatio||1));renderer.setSize(px,px,false);renderer.setClearColor(0x000000,0);
+  if(renderer.getContext().isContextLost()){retirePreviewRenderer(renderer);throw new Error('PREVIEW_CONTEXT_LOST')}
+  const px=Math.max(48,Math.min(160,Number(size)||96));
+  try{renderer.setPixelRatio(Math.min(2,globalThis.devicePixelRatio||1));renderer.setSize(px,px,false);renderer.setClearColor(0x000000,0)}
+  catch(error){retirePreviewRenderer(renderer);throw error}
   const {scene,camera,root,descriptor}=createItemPreviewScene(THREE,item);
+  let renderFailed=false;
   try{
-    root.rotation.y=.62;root.rotation.x=-.08;renderer.render(scene,camera);
+    root.rotation.y=.62;root.rotation.x=-.08;
+    try{renderer.render(scene,camera)}catch(error){renderFailed=true;throw error}
     canvas.width=renderer.domElement.width;canvas.height=renderer.domElement.height;
     context.clearRect(0,0,canvas.width,canvas.height);context.drawImage(renderer.domElement,0,0);
     canvas.dataset.item3d='ready';canvas.dataset.itemShape=descriptor.shape;canvas.setAttribute('aria-label',`${descriptor.name} 3D ${descriptor.label}`);
     // The only production caller consumes the canvas/descriptor. Do not leak
     // the shared renderer or already-released scene as caller-owned handles.
     return{ok:true,descriptor,renderer:null,root:null};
-  }finally{releasePreviewScene(scene);renderer.renderLists.dispose()}
+  }finally{
+    try{releasePreviewScene(scene)}finally{if(renderFailed)retirePreviewRenderer(renderer);else renderer.renderLists.dispose()}
+  }
 }
