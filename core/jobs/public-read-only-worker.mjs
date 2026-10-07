@@ -382,13 +382,14 @@ export function buildSharedWorkerStatus({ event, previous = null, requestPatrol,
   };
   const health = deriveWorkerHealth({ lastCycle: event, now: generatedAt });
   const lastKnownGood = event.monitoring_status === "VERIFIED" && event.result === "WORK_CYCLE_COMPLETED" ? Object.freeze({ status: "VERIFIED_LAST_KNOWN_GOOD", work_cycle_id: event.work_cycle_id, observed_at: event.finished_at, bsc_block: event.bsc_block ?? null, heart_block: event.gatekeeper_duty?.heart_block ?? null }) : previous?.last_known_good ?? null;
+  const monitoringIncident = Object.prototype.hasOwnProperty.call(event, "temple_monitoring_incident") ? event.temple_monitoring_incident : previous?.temple_monitoring_incident ?? null;
   return validateSharedWorkerStatus(Object.freeze({
     schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.6.0",
     scheduler: "GITHUB_ACTIONS_HOURLY_PLUS_IGNITION_WINDOW_PROBES", scheduler_status: "PRODUCTION_ACTIVE", cadence: "EVERY_HOUR_AND_UTC_00_02_00_07", public_read_only: true, signer: false, chain_write: false,
     worker_health: health.status, work_stop_reason: health.stop_reason, generated_at: generatedAt, last_work_cycle: event,
     next_expected_at: new Date(Date.parse(event.scheduled_at) + 3_600_000).toISOString(), metrics,
     primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, heart_action_candidates: event.heart_action_candidates, ignition_window: event.ignition_window, life_event_status: event.life_event_status, thought_organ_health: event.thought_organ_health, life_certification: event.life_certification,
-    monitoring_status: event.monitoring_status ?? "UNKNOWN", temple_monitoring_incident: event.temple_monitoring_incident ?? previous?.temple_monitoring_incident ?? null, dot_gm_notification_projections: event.dot_gm_notification_projections ?? [], repair_work_orders: event.repair_work_orders ?? [], last_known_good: lastKnownGood,
+    monitoring_status: event.monitoring_status ?? "UNKNOWN", temple_monitoring_incident: monitoringIncident, dot_gm_notification_projections: event.dot_gm_notification_projections ?? [], repair_work_orders: event.repair_work_orders ?? [], last_known_good: lastKnownGood,
     patrols: { temple_12345: event.heart_state, field_service: event.field_service_patrol, request: requestPatrol, mother_engine: event.mother_engine_patrol, company: companyPatrol },
     request_patrol: { ...requestPatrol, new_real_request_detected: currentRequests > previousRequests, first_real_customer_detected: previousRequests === 0 && currentRequests > 0 },
     global_truth_source: "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT", browser_indexeddb_role: "LOCAL_DRAFT_CACHE_ONLY"
@@ -420,10 +421,14 @@ export function validateRestoredWorkEvent(event, { expectedCycleId, eventPath, o
   if (![event.rpc_status, event.heart_status].every((status) => typeof status === "string" && status.length > 0) || ![event.observations, event.actions_considered, event.error_evidence].every(Array.isArray)) throw statusError("RESTORED_EVENT_EVIDENCE_SHAPE_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   validateGatekeeperDutyStatus(event.gatekeeper_duty);
   if (event.result === "WORK_CYCLE_COMPLETED") {
-    if (event.monitoring_status !== "VERIFIED" || event.temple_monitoring_incident !== null) throw statusError("RESTORED_EVENT_COMPLETION_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+    if (event.monitoring_status !== "VERIFIED") throw statusError("RESTORED_EVENT_COMPLETION_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+    if (event.temple_monitoring_incident !== null) {
+      const recovered = validateTempleMonitoringIncident(event.temple_monitoring_incident);
+      if (recovered.status !== "RECOVERED" || recovered.open !== false || !validIso(recovered.closed_at) || recovered.closed_at !== event.finished_at || recovered.recovery_cycle_id !== expectedCycleId || recovered.last_observed_cycle_id !== expectedCycleId) throw statusError("RESTORED_EVENT_RECOVERY_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+    }
   } else {
     validateTempleMonitoringIncident(event.temple_monitoring_incident);
-    if (event.temple_monitoring_incident.open !== true || event.temple_monitoring_incident.last_observed_cycle_id !== expectedCycleId || !["DEGRADED", "MONITORING_FAILED"].includes(event.monitoring_status)) throw statusError("RESTORED_EVENT_INCIDENT_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+    if (event.temple_monitoring_incident.open !== true || event.temple_monitoring_incident.last_observed_cycle_id !== expectedCycleId || event.monitoring_status !== event.temple_monitoring_incident.status || !["DEGRADED", "MONITORING_FAILED"].includes(event.monitoring_status)) throw statusError("RESTORED_EVENT_INCIDENT_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   }
   if (event.secret_access !== false || event.signer_action !== false || event.chain_write !== false || event.tx_hash !== null || event.gas_spent !== "0" || event.asset_movement !== false || event.temple_mutation !== false || event.token_mutation !== false || event.governance_action !== false) throw statusError("RESTORED_EVENT_SAFETY_BOUNDARY_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   return event;

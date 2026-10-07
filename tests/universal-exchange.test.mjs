@@ -1433,6 +1433,75 @@ test("incident recovery requires RPC, Heart bytecode, canonical wallet read, coo
   assert.equal(recovered.recovery_evidence.wallet_read_path.canonical_binding_verified, true);
 });
 
+test("recovered incident event survives status persistence and the next distinct verified read without false critical status", async () => {
+  const state = await runtime();
+  const life = await state.registries.life.get("DIGITAL_ANT_0001");
+  const app = await state.registries.app.get("DIGITAL_ANT_APP_0001");
+  const requestPatrol = { status: "SHARED_REQUEST_SOURCE_VERIFIED", real_requests: 0, open_requests: 0, evidence: [] };
+  const companyPatrol = { status: "COMPANY_PATROL_COMPLETED", work_queue: 0 };
+  const failed = await runDigitalAntHourlyCycle({
+    store: state.store, life, app, scheduledAt: "2026-10-08T05:00:00.000Z", startedAt: "2026-10-08T05:00:01.000Z", finishedAt: "2026-10-08T05:00:02.000Z",
+    readCycle: async () => { throw Object.assign(new Error("heart unavailable"), { code: "HEART_UNAVAILABLE", component: "HEART" }); }
+  });
+  const failedEvent = failed.event.payload;
+  const failedStatus = buildSharedWorkerStatus({ event: failedEvent, requestPatrol, companyPatrol, generatedAt: failedEvent.finished_at });
+  const recoveryStartedAt = "2026-10-08T06:00:01.000Z";
+  const recoveryFinishedAt = "2026-10-08T06:00:05.000Z";
+  const recovered = await runDigitalAntHourlyCycle({
+    store: state.store, life, app, scheduledAt: "2026-10-08T06:00:00.000Z", startedAt: recoveryStartedAt, finishedAt: recoveryFinishedAt, previousStatus: failedStatus,
+    readCycle: async () => ({
+      bsc_block: 116040001, rpc_status: "AVAILABLE", heart_status: "AVAILABLE", gatekeeper_duty: gatekeeperDuty({ gatekeeper_started_at: recoveryStartedAt, gatekeeper_finished_at: recoveryFinishedAt, heart_block: 116040001 }),
+      monitoring_recovery_evidence: verifiedMonitoringRecovery()
+    })
+  });
+  const recoveredEvent = recovered.event.payload;
+  assert.equal(recoveredEvent.result, "WORK_CYCLE_COMPLETED");
+  assert.equal(recoveredEvent.monitoring_status, "VERIFIED");
+  assert.equal(recoveredEvent.temple_monitoring_incident.status, "RECOVERED");
+  assert.equal(recoveredEvent.temple_monitoring_incident.open, false);
+  assert.equal(validateRestoredWorkEvent(recoveredEvent, { expectedCycleId: recoveredEvent.work_cycle_id, eventPath: join(tmpdir(), `${recoveredEvent.work_cycle_id}.json`), observedAt: recoveryFinishedAt }), recoveredEvent);
+  const reopenedInCompletedEvent = structuredClone(recoveredEvent);
+  reopenedInCompletedEvent.temple_monitoring_incident.status = "DEGRADED";
+  reopenedInCompletedEvent.temple_monitoring_incident.open = true;
+  reopenedInCompletedEvent.temple_monitoring_incident.recovery_evidence = null;
+  assert.throws(() => validateRestoredWorkEvent(reopenedInCompletedEvent, { expectedCycleId: recoveredEvent.work_cycle_id, eventPath: join(tmpdir(), `${recoveredEvent.work_cycle_id}.json`), observedAt: recoveryFinishedAt }), (error) => error.code === "RESTORED_EVENT_RECOVERY_STATUS_INVALID");
+  const degradedWithClosedRecovery = { ...structuredClone(recoveredEvent), result: "WORK_CYCLE_DEGRADED", monitoring_status: "DEGRADED" };
+  assert.throws(() => validateRestoredWorkEvent(degradedWithClosedRecovery, { expectedCycleId: recoveredEvent.work_cycle_id, eventPath: join(tmpdir(), `${recoveredEvent.work_cycle_id}.json`), observedAt: recoveryFinishedAt }), (error) => error.code === "RESTORED_EVENT_INCIDENT_STATUS_INVALID");
+
+  const temporary = await fs.mkdtemp(join(tmpdir(), "kgen-recovered-status-roundtrip-"));
+  try {
+    const statusPath = join(temporary, "worker-status.json");
+    const recoveredStatus = buildSharedWorkerStatus({ event: recoveredEvent, previous: failedStatus, requestPatrol, companyPatrol, generatedAt: recoveryFinishedAt });
+    await fs.writeFile(statusPath, `${JSON.stringify(recoveredStatus)}\n`, "utf8");
+    const restoredCandidate = JSON.parse(await fs.readFile(statusPath, "utf8"));
+    const restored = prepareRestoredWorkerStatus({ candidate: restoredCandidate, observedAt: "2026-10-08T06:30:00.000Z" });
+    assert.deepEqual(restored.failures, []);
+    assert.equal(restored.status.temple_monitoring_incident.open, false);
+    assert.equal(restored.status.last_known_good.work_cycle_id, recoveredEvent.work_cycle_id);
+
+    const nextStartedAt = "2026-10-08T07:00:01.000Z";
+    const nextFinishedAt = "2026-10-08T07:00:04.000Z";
+    const next = await runDigitalAntHourlyCycle({
+      store: state.store, life, app, scheduledAt: "2026-10-08T07:00:00.000Z", startedAt: nextStartedAt, finishedAt: nextFinishedAt, previousStatus: restored.status, preflightFailures: restored.failures,
+      readCycle: async () => ({
+        bsc_block: 116040002, rpc_status: "AVAILABLE", heart_status: "AVAILABLE", gatekeeper_duty: gatekeeperDuty({ gatekeeper_started_at: nextStartedAt, gatekeeper_finished_at: nextFinishedAt, heart_block: 116040002 }),
+        monitoring_recovery_evidence: verifiedMonitoringRecovery()
+      })
+    });
+    assert.equal(next.status, "WORK_CYCLE_COMPLETED");
+    assert.equal(next.event.payload.temple_monitoring_incident, null);
+    assert.equal(next.event.payload.monitoring_status, "VERIFIED");
+    const nextStatus = buildSharedWorkerStatus({ event: next.event.payload, previous: restored.status, requestPatrol, companyPatrol, generatedAt: nextFinishedAt });
+    assert.equal(nextStatus.last_known_good.work_cycle_id, next.event.payload.work_cycle_id);
+    assert.equal(nextStatus.temple_monitoring_incident, null);
+    const nextRestored = prepareRestoredWorkerStatus({ candidate: JSON.parse(JSON.stringify(nextStatus)), observedAt: "2026-10-08T07:30:00.000Z" });
+    assert.deepEqual(nextRestored.failures, []);
+    assert.equal(nextRestored.status.last_known_good.work_cycle_id, next.event.payload.work_cycle_id);
+  } finally {
+    await fs.rm(temporary, { recursive: true, force: true });
+  }
+});
+
 test("monitoring incident safety boundary forbids secrets, signing, transactions, assets, mutations, and governance", () => {
   const failure = classifyTempleMonitoringError(Object.assign(new Error("offline"), { code: "RPC_UNAVAILABLE", component: "BSC_RPC", read_only_attempt_telemetry: [{ target: "APPROVED_READ_ONLY_BSC_RPC_FALLBACK_1", result: "FAILED" }] }), { occurredAt: "2026-10-08T08:00:00.000Z" });
   const incident = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T08:00:00.000Z" });
