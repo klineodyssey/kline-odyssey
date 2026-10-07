@@ -2,7 +2,7 @@
 
 **Version:** V4.0
 
-**Status:** ACTIVE / CANDIDATE PENDING INDEPENDENT REVIEW
+**Status:** ACTIVE / INDEPENDENT REVIEW PASS / PENDING DRAFT PR EXACT-HEAD CI
 
 **Human Authority:** 沈英明
 
@@ -29,6 +29,8 @@ Every new task, thread, cloud instance, work session or interruption recovery mu
 
 Work begins only after the boot evidence is complete and bound to the current `main` SHA. Canonical conflicts are escalated to DOT and General Manager; workers do not invent a replacement Canon.
 
+The Active Company planner accepts repository evidence only from its public-GitHub read-only resolver. The resolver pins the exact main commit, reads an allowlisted canonical path for every Boot item, recomputes each Git blob object ID and returns a module-private verified snapshot. Caller-authored source labels, worker lists, branch patterns or hexadecimal strings are not evidence. Worker eligibility and branch policy are read from the hash-verified canonical registry blob in that snapshot.
+
 ## 3. Operating Roles
 
 - **General Manager — 衡曜:** reads company state, prioritizes, assigns, resolves cross-project blockers, routes review and maintains delivery status. GM manages the company rather than monopolizing implementation.
@@ -45,6 +47,8 @@ Work begins only after the boot evidence is complete and bound to the current `m
 
 Every active project has a `PROJECT_OWNER`, `IMPLEMENTER` and independent `REVIEWER`. The implementer cannot approve its own result. UI and game changes require functional QA, real-browser QA and screenshot visual QA.
 
+This is an operational assignment and evidence model, not a new GitHub branch-protection or merge-authority rule. `docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md` remains authoritative: explicit Human Owner approval plus technical validation is sufficient for ordinary repository merge when the platform does not require a second reviewer. Protected actions still require their own action-specific Human approval.
+
 Every claim records:
 
 - `WORK_ID`
@@ -54,6 +58,8 @@ Every claim records:
 - `BRANCH`
 - `DEPENDENCIES`
 - `EXPECTED_OUTPUT`
+
+The caller cannot manufacture these fields at runtime. Every selectable task carries a repository-relative machine-readable `work_order_ref`; its complete planner task and project triad must byte-semantically match the JSON envelope fetched and hash-verified at the same `main` commit. A Markdown queue entry alone is informative, not machine authority.
 
 Completion records `RESULT`, `HEAD`, `TESTS`, `CI`, `REVIEW_STATUS` and `DATA_LOSS_RISK`. One worker claims one bounded task at a time; one cycle selects at most one safe task.
 
@@ -78,6 +84,8 @@ GitHub remains the durable handoff center. The live queue is `KGEN-Organization/
 On the first Guardian denial, the worker must `STOP_REPEAT`, save the event, read the reason and escalate. It must not retry the same action, change task or change worker to bypass the denial.
 
 The durable event records `turn_id`, `review_id`, `target_item_id`, `action`, `reason` and `timestamp`; missing facts are recorded as `UNKNOWN`, never guessed.
+
+A `RESOLVED` denial is effective only when the registry-verified General Manager authorized it, the resolution time follows the original denial and is not in the future, and a hash-verified JSON resolution file at the same `main` commit exactly matches the denied target, action, review and decision. An unverified resolution remains blocked.
 
 ## 8. Authority Boundary
 
@@ -115,6 +123,8 @@ Paid-provider work becomes reportable only for: `NEW_PROVIDER_REPLY`, `TRIAL_ACC
 
 With no material trigger: `SILENT`. Do not repeat old prompts, mailbox checks or vendor chasing.
 
+Oracle silence occurs only after the common cycle, replay, GM, registry and exact-main preflight. A stale or replayed Oracle-only cycle still returns the corresponding fail-closed status; silence cannot hide a stale-main blocker.
+
 ## 11. Payroll and Reward
 
 The company may record contribution, task completion, review pass, bug bounty, project bounty and engineering score as `ELIGIBLE`, `PROPOSED` or `PENDING`. Real payment is Human-protected and cannot be inferred from work completion.
@@ -136,3 +146,7 @@ Existing owners and PRs are checked before any claim. The company does not start
 `BOOT → READ COMPANY STATE → IDENTIFY PRIORITIES → CHECK OWNERS/BLOCKERS → CLAIM ONE SAFE TASK → IMPLEMENT → TEST → INDEPENDENT REVIEW → SAVE → REPORT MATERIAL CHANGE → FIND NEXT LEGAL TASK`
 
 Success means active, evidence-bound collaboration without unauthorized high-risk action, fake completion, fake acknowledgement, fake deployment, fake payment, bypass or duplicate work.
+
+## 14. Planner API Migration
+
+`planAutonomousCompanyEngineeringCycle` remains as the compatibility export name, but since V4 it intentionally enforces the same strict input contract as `planActiveCompanyOperatingCycle`. Callers must first obtain `repository_evidence` with `resolveActiveCompanyRepositoryEvidence`, provide exact-main Boot evidence, canonical worker objects, project triads and repository-backed work-order envelopes. Legacy caller-only task payloads now fail closed; there is no weaker legacy execution path.

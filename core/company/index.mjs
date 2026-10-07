@@ -1,5 +1,6 @@
 import { requireArray, requireFields, requireId, requireEnum } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
+import { stableStringify } from "../shared/utils.mjs";
 
 export const COMPANY_FIELDS = Object.freeze([
   "company_id", "founder_life_id", "name", "wallet_address", "treasury_address", "employees", "equity",
@@ -2018,6 +2019,99 @@ export const ACTIVE_COMPANY_BOOT_READS = Object.freeze([
   "task_safety_runtime_product_docs"
 ]);
 
+export const ACTIVE_COMPANY_BOOT_SOURCE_PATHS = Object.freeze({
+  company_boot: "PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md",
+  latest_main: "git://origin/main",
+  handoff_current: "handoff/HANDOFF_CURRENT.md",
+  human_owner_policy: "docs/KAIOS_HUMAN_OWNER_MERGE_POLICY.md",
+  company_queue: "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  worker_identity_authority: "KGEN-KAIOS/worker_registry.json",
+  active_pr_branch_ci_blockers: "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
+  task_safety_runtime_product_docs: "AGENTS.md"
+});
+
+const ACTIVE_COMPANY_REPOSITORY_EVIDENCE = new WeakSet();
+const ACTIVE_COMPANY_REPOSITORY_PATHS = Object.freeze([
+  ...new Set(Object.values(ACTIVE_COMPANY_BOOT_SOURCE_PATHS).filter((path) => !path.startsWith("git://")))
+]);
+
+function decodePublicGitHubBase64(value) {
+  invariant(typeof value === "string", "PUBLIC_GITHUB_FILE_CONTENT_REQUIRED", "Public GitHub file evidence requires base64 content");
+  const compact = value.replace(/\s+/g, "");
+  const binary = globalThis.atob(compact);
+  return new TextDecoder().decode(Uint8Array.from(binary, (character) => character.charCodeAt(0)));
+}
+
+async function gitBlobObjectId(content) {
+  const body = new TextEncoder().encode(content);
+  const header = new TextEncoder().encode(`blob ${body.byteLength}\0`);
+  const bytes = new Uint8Array(header.byteLength + body.byteLength);
+  bytes.set(header);
+  bytes.set(body, header.byteLength);
+  const digest = await globalThis.crypto.subtle.digest("SHA-1", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Resolve a read-only, hash-checked repository snapshot from public GitHub.
+ * The returned object carries a module-private capability and is the only
+ * repository evidence accepted by Active Company planning.
+ */
+export async function resolveActiveCompanyRepositoryEvidence({
+  current_main_sha,
+  guardian_evidence_refs = [],
+  work_order_refs = [],
+  fetch_impl = globalThis.fetch
+}) {
+  invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
+  requireArray(guardian_evidence_refs, "guardian_evidence_refs");
+  requireArray(work_order_refs, "work_order_refs");
+  invariant(typeof fetch_impl === "function", "PUBLIC_GITHUB_FETCH_REQUIRED", "Public GitHub evidence resolution requires fetch");
+  const nodeTestContext = globalThis.process?.env?.NODE_TEST_CONTEXT;
+  invariant(fetch_impl === globalThis.fetch || nodeTestContext === "child-v8", "PUBLIC_GITHUB_CUSTOM_FETCH_FORBIDDEN", "Custom evidence transports are allowed only inside the Node test runner");
+  const normalizedGuardianRefs = guardian_evidence_refs.map((path) => {
+    invariant(typeof path === "string" && path.trim() && !path.startsWith("/") && !path.includes("..") && !path.includes("\\"), "GUARDIAN_EVIDENCE_PATH_INVALID", "Guardian evidence must be a repository-relative path");
+    return path;
+  });
+  const normalizedWorkOrderRefs = work_order_refs.map((path) => {
+    invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "WORK_ORDER_EVIDENCE_PATH_INVALID", "Work-order evidence must be a JSON file in KGEN-Organization/WorkOrders");
+    return path;
+  });
+  const paths = [...new Set([...ACTIVE_COMPANY_REPOSITORY_PATHS, ...normalizedGuardianRefs, ...normalizedWorkOrderRefs])];
+  const apiBase = "https://api.github.com/repos/klineodyssey/kline-odyssey";
+  const request = async (url) => {
+    const response = await fetch_impl(url, { headers: { Accept: "application/vnd.github+json" } });
+    invariant(response?.ok === true, "PUBLIC_GITHUB_EVIDENCE_UNAVAILABLE", `Public GitHub evidence read failed: ${response?.status ?? "UNKNOWN"}`);
+    return response.json();
+  };
+  const commit = await request(`${apiBase}/commits/${current_main_sha}`);
+  invariant(commit?.sha === current_main_sha, "PUBLIC_GITHUB_MAIN_MISMATCH", "Public GitHub commit evidence does not match current_main_sha");
+  const files = {};
+  for (const path of paths) {
+    const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+    const file = await request(`${apiBase}/contents/${encodedPath}?ref=${current_main_sha}`);
+    invariant(file?.type === "file" && file?.encoding === "base64" && /^[0-9a-f]{40}$/.test(file?.sha ?? ""), "PUBLIC_GITHUB_FILE_EVIDENCE_INVALID", `Invalid public GitHub file evidence: ${path}`);
+    const content = decodePublicGitHubBase64(file.content);
+    invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_BLOB_HASH_MISMATCH", `Public GitHub blob hash mismatch: ${path}`);
+    files[path] = Object.freeze({ path, git_object: file.sha, content });
+  }
+  const evidence = Object.freeze({
+    status: "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED",
+    repository: "klineodyssey/kline-odyssey",
+    main_sha: current_main_sha,
+    files: Object.freeze(files),
+    external_effect: false
+  });
+  ACTIVE_COMPANY_REPOSITORY_EVIDENCE.add(evidence);
+  return evidence;
+}
+
+function requireTrustedActiveCompanyRepositoryEvidence(repositoryEvidence, currentMainSha) {
+  invariant(ACTIVE_COMPANY_REPOSITORY_EVIDENCE.has(repositoryEvidence), "TRUSTED_REPOSITORY_EVIDENCE_REQUIRED", "Active Company Mode requires evidence returned by the public GitHub resolver");
+  invariant(repositoryEvidence.main_sha === currentMainSha, "REPOSITORY_EVIDENCE_MAIN_MISMATCH", "Repository evidence must bind current_main_sha");
+  return repositoryEvidence;
+}
+
 export const ACTIVE_COMPANY_ROLES = Object.freeze({
   GENERAL_MANAGER: "GENERAL_MANAGER",
   PRIMEFORGE: "PRIMEFORGE",
@@ -2057,7 +2151,6 @@ function autonomousEngineeringWorkerEligible(worker, task = null) {
   if (!AUTONOMOUS_ENGINEERING_ACKS.every((field) => worker[field] === true)) return false;
   if (typeof worker.worker_id !== "string" || !worker.worker_id.trim()) return false;
   if (typeof worker.life_identity_ref !== "string" || !worker.life_identity_ref.trim()) return false;
-  if (typeof worker.controller_id !== "string" || !worker.controller_id.trim()) return false;
   if (Number(worker.active_claim_count ?? 0) > 1) return false;
   if (task && Number(worker.active_claim_count ?? 0) > 0 && worker.current_task !== task.task_id) return false;
   if (task && worker.current_task && worker.current_task !== task.task_id) return false;
@@ -2068,11 +2161,9 @@ function autonomousEngineeringActorsDistinct(left, right) {
   if (!left || !right) return false;
   const normalize = (value) => typeof value === "string" ? value.trim().toLowerCase() : "";
   return Boolean(normalize(left.worker_id) && normalize(right.worker_id)
-    && normalize(left.life_identity_ref) && normalize(right.life_identity_ref)
-    && normalize(left.controller_id) && normalize(right.controller_id))
+    && normalize(left.life_identity_ref) && normalize(right.life_identity_ref))
     && normalize(left.worker_id) !== normalize(right.worker_id)
-    && normalize(left.life_identity_ref) !== normalize(right.life_identity_ref)
-    && normalize(left.controller_id) !== normalize(right.controller_id);
+    && normalize(left.life_identity_ref) !== normalize(right.life_identity_ref);
 }
 
 function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
@@ -2081,16 +2172,26 @@ function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
   return pattern.replace("<Task-ID>", taskId) === branch;
 }
 
-export function validateActiveCompanyBoot({ boot, current_main_sha, manager }) {
+export function validateActiveCompanyBoot({ boot, current_main_sha, manager, observed_at, repository_evidence }) {
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
   invariant(boot && typeof boot === "object" && !Array.isArray(boot), "COMPANY_BOOT_EVIDENCE_REQUIRED", "Active Company Mode requires boot evidence");
   invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
   invariant(manager && typeof manager.worker_id === "string" && manager.worker_id.trim(), "COMPANY_BOOT_MANAGER_REQUIRED", "Active Company Mode requires a registered manager");
   invariant(boot.worker_id === manager.worker_id, "COMPANY_BOOT_WORKER_MISMATCH", "Boot evidence must belong to the active manager");
   invariant(boot.latest_main_sha === current_main_sha, "COMPANY_BOOT_STALE_MAIN", "Boot evidence must bind the latest main SHA");
   invariant(typeof boot.completed_at === "string" && !Number.isNaN(Date.parse(boot.completed_at)), "COMPANY_BOOT_TIME_REQUIRED", "Boot evidence requires an ISO completion time");
+  invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "INVALID_ENGINEERING_CYCLE_TIME", "observed_at must be an ISO timestamp");
+  invariant(Date.parse(boot.completed_at) <= Date.parse(observed_at), "COMPANY_BOOT_FROM_FUTURE", "Boot evidence cannot be newer than the observed cycle time");
   invariant(boot.reads && typeof boot.reads === "object" && !Array.isArray(boot.reads), "COMPANY_BOOT_READS_REQUIRED", "Boot evidence requires canonical read references");
-  const missingReads = ACTIVE_COMPANY_BOOT_READS.filter((field) => typeof boot.reads[field] !== "string" || !boot.reads[field].trim());
+  const missingReads = ACTIVE_COMPANY_BOOT_READS.filter((field) => {
+    const evidence = boot.reads[field];
+    const expectedSource = ACTIVE_COMPANY_BOOT_SOURCE_PATHS[field];
+    if (!evidence || typeof evidence !== "object" || Array.isArray(evidence) || evidence.source_ref !== expectedSource) return true;
+    if (field === "latest_main") return evidence.git_object !== current_main_sha;
+    return trustedRepository.files[expectedSource]?.git_object !== evidence.git_object;
+  });
   invariant(missingReads.length === 0, "COMPANY_BOOT_INCOMPLETE", `Missing Company Boot reads: ${missingReads.join(", ")}`);
+  invariant(boot.reads.latest_main.git_object === current_main_sha, "COMPANY_BOOT_MAIN_EVIDENCE_MISMATCH", "latest_main evidence must bind current_main_sha");
   return Object.freeze({
     status: "COMPANY_BOOT_COMPLETE",
     worker_id: manager.worker_id,
@@ -2098,6 +2199,39 @@ export function validateActiveCompanyBoot({ boot, current_main_sha, manager }) {
     completed_at: boot.completed_at,
     reads: Object.freeze({ ...boot.reads }),
     repository_written: false,
+    external_effect: false
+  });
+}
+
+export function validateActiveCompanyRegistryEvidence({ repository_evidence, current_main_sha, actors }) {
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  const registryFile = trustedRepository.files[ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority];
+  invariant(registryFile, "WORKER_REGISTRY_EVIDENCE_REQUIRED", "Active Company Mode requires the canonical registry blob");
+  let registry;
+  try {
+    registry = JSON.parse(registryFile.content);
+  } catch {
+    invariant(false, "WORKER_REGISTRY_JSON_INVALID", "Canonical worker registry evidence must be valid JSON");
+  }
+  requireArray(registry.workers, "registry.workers");
+  requireArray(actors, "actors");
+  const comparedFields = Object.freeze([
+    "worker_id", "life_identity_ref", "role", "allowed_branch_pattern", "status",
+    "employee_status", "trust_level", "boot_acknowledged", "canon_acknowledged",
+    "workspace_policy_acknowledged", "do_not_touch_acknowledged", "suspension",
+    "active_claim_count", "current_task"
+  ]);
+  for (const actor of actors) {
+    const registered = registry.workers.find((entry) => entry?.worker_id === actor?.worker_id);
+    invariant(registered, "WORKER_NOT_IN_REGISTRY_EVIDENCE", `Worker is absent from registry evidence: ${actor?.worker_id ?? "UNKNOWN"}`);
+    invariant(comparedFields.every((field) => (registered[field] ?? null) === (actor[field] ?? null)), "WORKER_REGISTRY_EVIDENCE_MISMATCH", `Worker differs from registry evidence: ${actor.worker_id}`);
+  }
+  return Object.freeze({
+    status: "WORKER_REGISTRY_VERIFIED",
+    source_ref: ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority,
+    git_object: registryFile.git_object,
+    main_sha: trustedRepository.main_sha,
+    verified_worker_ids: Object.freeze(actors.map((actor) => actor.worker_id)),
     external_effect: false
   });
 }
@@ -2123,7 +2257,7 @@ function createAutonomousEngineeringEvent(cycleId, sequence, eventType, actorId,
  * one bounded work-order candidate. It never claims work, writes GitHub, starts
  * a worker, merges, deploys, pays, accesses a signer, or mutates chain state.
  */
-export function planAutonomousCompanyEngineeringCycle({
+function planAutonomousCompanyEngineeringCycleCore({
   cycle_id,
   observed_at,
   current_main_sha,
@@ -2235,10 +2369,14 @@ export function planAutonomousCompanyEngineeringCycle({
       if (!autonomousEngineeringWorkerEligible(reviewer) || !autonomousEngineeringActorsDistinct(worker, reviewer)) reasons.push("DISTINCT_REVIEWER_REQUIRED");
     }
     if (candidate.active_company_mode === true) {
+      if (candidate.work_order_evidence_verified !== true) reasons.push("WORK_ORDER_EVIDENCE_MISMATCH");
       if (typeof candidate.project_owner_id !== "string" || !candidate.project_owner_id.trim()) reasons.push("PROJECT_OWNER_REQUIRED");
       if (candidate.implementer_id !== candidate.assigned_worker_id) reasons.push("PROJECT_IMPLEMENTER_MISMATCH");
       if (reviewRequirement !== "REQUIRED") reasons.push("ACTIVE_COMPANY_REVIEW_REQUIRED");
       if (!String(reviewer?.role ?? "").includes("Reviewer")) reasons.push("REVIEWER_ROLE_REQUIRED");
+      const projectActors = [candidate.project_owner_id, candidate.implementer_id, candidate.reviewer_id]
+        .map((value) => typeof value === "string" ? value.trim().toLowerCase() : "");
+      if (projectActors.some((value) => !value) || new Set(projectActors).size !== 3) reasons.push("PROJECT_ACTORS_MUST_BE_DISTINCT");
       if (candidate.guardian_denial?.status === "UNRESOLVED") reasons.push("GUARDIAN_STOP_REPEAT");
       if (candidate.work_category === "PAID_ORACLE_PROCUREMENT"
         && !ACTIVE_COMPANY_ORACLE_POLICY.material_triggers.includes(candidate.oracle_material_trigger)) {
@@ -2336,14 +2474,23 @@ export function planActiveCompanyOperatingCycle({
   work_queue = [],
   projects = [],
   guardian_denials = [],
+  repository_evidence,
   previous_cycle_ids = [],
   boot,
   direct_channel = "NOT_AVAILABLE",
   durable_handoff_ref = null
 }) {
-  const bootStatus = validateActiveCompanyBoot({ boot, current_main_sha, manager });
+  const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  const bootStatus = validateActiveCompanyBoot({ boot, current_main_sha, manager, observed_at, repository_evidence: trustedRepository });
+  requireArray(work_queue, "work_queue");
   requireArray(projects, "projects");
   requireArray(guardian_denials, "guardian_denials");
+  requireArray(workers, "workers");
+  const registryStatus = validateActiveCompanyRegistryEvidence({
+    repository_evidence: trustedRepository,
+    current_main_sha,
+    actors: [manager, ...workers.filter((worker) => worker?.worker_id !== manager?.worker_id)]
+  });
   invariant(["AVAILABLE", "NOT_AVAILABLE"].includes(direct_channel), "DIRECT_CHANNEL_STATUS_INVALID", "direct_channel must be AVAILABLE or NOT_AVAILABLE");
   if (direct_channel === "NOT_AVAILABLE") {
     invariant(typeof durable_handoff_ref === "string" && durable_handoff_ref.trim(), "DURABLE_HANDOFF_REQUIRED", "A durable handoff is required when no direct AI channel exists");
@@ -2351,25 +2498,141 @@ export function planActiveCompanyOperatingCycle({
 
   invariant(projects.every((project) => typeof project?.task_id === "string" && project.task_id.trim()), "ACTIVE_PROJECT_TASK_ID_REQUIRED", "Every active project requires a task_id");
   invariant(new Set(projects.map((project) => project.task_id)).size === projects.length, "DUPLICATE_ACTIVE_PROJECT", "Each task may have only one active project ownership record");
+  invariant(work_queue.every((candidate) => typeof candidate?.task_id === "string" && candidate.task_id.trim()), "WORK_QUEUE_TASK_ID_REQUIRED", "Every work-queue candidate requires a task_id");
+  invariant(new Set(work_queue.map((candidate) => candidate.task_id)).size === work_queue.length, "DUPLICATE_WORK_QUEUE_TASK", "Each task may appear only once in the work queue");
   const projectsByTask = new Map(projects.map((project) => [project?.task_id, project]));
-  const normalizedDenials = guardian_denials.map((denial) => {
+  const commonPreflight = planAutonomousCompanyEngineeringCycleCore({
+    cycle_id,
+    observed_at,
+    current_main_sha,
+    expected_main_sha,
+    manager,
+    workers,
+    work_queue: [],
+    previous_cycle_ids
+  });
+  if (["IDEMPOTENT_NOOP", "HOLD_STALE_MAIN"].includes(commonPreflight.status)) {
+    return Object.freeze({
+      ...commonPreflight,
+      mode: "ACTIVE_COMPANY_MODE",
+      boot_status: bootStatus.status,
+      registry_status: registryStatus.status,
+      direct_channel,
+      durable_handoff_ref: direct_channel === "NOT_AVAILABLE" ? durable_handoff_ref : null,
+      oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
+      silent_task_ids: Object.freeze([]),
+      guardian_denials: Object.freeze([]),
+      protected_action_authority_granted: false
+    });
+  }
+  const workOrderEvidenceVerified = (candidate) => {
+    const project = projectsByTask.get(candidate?.task_id);
+    const evidenceFile = typeof candidate?.work_order_ref === "string"
+      ? trustedRepository.files[candidate.work_order_ref]
+      : null;
+    if (!evidenceFile) return false;
+    try {
+      const envelope = JSON.parse(evidenceFile.content);
+      return stableStringify(envelope?.planner_task) === stableStringify(candidate)
+        && stableStringify(envelope?.active_project) === stableStringify(project);
+    } catch {
+      return false;
+    }
+  };
+  const normalizeGuardianDenial = (denial) => {
     const normalized = Object.fromEntries(
       ["turn_id", "review_id", "target_item_id", "action", "reason", "timestamp"].map((field) => [
         field,
         typeof denial?.[field] === "string" && denial[field].trim() ? denial[field] : "UNKNOWN"
       ])
     );
-    return Object.freeze({ ...normalized, status: denial?.status ?? "UNRESOLVED" });
-  });
-  const activeQueue = work_queue.map((candidate) => {
+    const status = denial?.status === "RESOLVED" ? "RESOLVED" : "UNRESOLVED";
+    if (status === "RESOLVED") {
+      invariant(denial?.resolution_actor_id === manager.worker_id, "GUARDIAN_RESOLUTION_ACTOR_REQUIRED", "Resolved Guardian denial must be authorized by the registry-verified General Manager");
+      invariant(typeof denial?.resolution_evidence_ref === "string" && denial.resolution_evidence_ref.trim(), "GUARDIAN_RESOLUTION_EVIDENCE_REQUIRED", "Resolved Guardian denial requires durable evidence");
+      invariant(typeof denial?.resolved_at === "string" && !Number.isNaN(Date.parse(denial.resolved_at)), "GUARDIAN_RESOLUTION_TIME_REQUIRED", "Resolved Guardian denial requires an ISO timestamp");
+      invariant(typeof denial?.timestamp === "string" && !Number.isNaN(Date.parse(denial.timestamp)), "GUARDIAN_DENIAL_TIME_REQUIRED", "Resolved Guardian denial requires the original denial timestamp");
+      invariant(Date.parse(denial.resolved_at) >= Date.parse(denial.timestamp) && Date.parse(denial.resolved_at) <= Date.parse(observed_at), "GUARDIAN_RESOLUTION_TIME_INVALID", "Guardian resolution must follow the denial and not be from the future");
+      const resolutionFile = trustedRepository.files[denial.resolution_evidence_ref];
+      invariant(resolutionFile, "GUARDIAN_RESOLUTION_EVIDENCE_UNVERIFIED", "Guardian resolution evidence must be a hash-verified file at current_main_sha");
+      let resolution;
+      try {
+        resolution = JSON.parse(resolutionFile.content);
+      } catch {
+        invariant(false, "GUARDIAN_RESOLUTION_EVIDENCE_INVALID", "Guardian resolution evidence must be valid JSON");
+      }
+      invariant(
+        resolution?.status === "RESOLVED"
+        && resolution?.decision === "APPROVED_TO_RETRY"
+        && resolution?.resolution_actor_id === denial.resolution_actor_id
+        && resolution?.target_item_id === normalized.target_item_id
+        && resolution?.action === normalized.action
+        && resolution?.review_id === normalized.review_id
+        && resolution?.resolved_at === denial.resolved_at,
+        "GUARDIAN_RESOLUTION_EVIDENCE_MISMATCH",
+        "Guardian resolution payload must match the denied action and authorized resolution"
+      );
+    }
+    return Object.freeze({
+      ...normalized,
+      status,
+      resolution_actor_id: status === "RESOLVED" ? denial.resolution_actor_id : null,
+      resolution_evidence_ref: status === "RESOLVED" ? denial.resolution_evidence_ref : null,
+      resolved_at: status === "RESOLVED" ? denial.resolved_at : null
+    });
+  };
+  const normalizedDenials = guardian_denials.map(normalizeGuardianDenial);
+  const silentOracleTaskIds = work_queue.filter((candidate) => (
+    candidate?.work_category === "PAID_ORACLE_PROCUREMENT"
+    && !ACTIVE_COMPANY_ORACLE_POLICY.material_triggers.includes(candidate?.oracle_material_trigger)
+    && workOrderEvidenceVerified(candidate)
+  )).map((candidate) => candidate.task_id);
+  const actionableQueue = work_queue.filter((candidate) => !silentOracleTaskIds.includes(candidate?.task_id));
+  if (work_queue.length > 0 && actionableQueue.length === 0) {
+    return Object.freeze({
+      cycle_id,
+      status: "IDEMPOTENT_NOOP",
+      mode: "ACTIVE_COMPANY_MODE",
+      selected_task_id: null,
+      selected_worker_id: null,
+      selected_reviewer_id: null,
+      work_order_candidate: null,
+      rejected_candidates: Object.freeze([]),
+      events: Object.freeze([]),
+      authority: Object.freeze({
+        repository_written: false,
+        main_modified: false,
+        merge_executed: false,
+        deployment_executed: false,
+        mainnet_tx_sent: false,
+        payment_sent: false,
+        private_key_accessed: false,
+        external_agent_started: false,
+        worker_activated: false,
+        workqueue_modified: false
+      }),
+      boot_status: bootStatus.status,
+      registry_status: registryStatus.status,
+      direct_channel,
+      durable_handoff_ref: direct_channel === "NOT_AVAILABLE" ? durable_handoff_ref : null,
+      oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
+      silent_task_ids: Object.freeze(silentOracleTaskIds),
+      guardian_denials: Object.freeze(normalizedDenials),
+      protected_action_authority_granted: false,
+      next_safe_action: "SILENT_UNTIL_MATERIAL_ORACLE_CHANGE"
+    });
+  }
+  const activeQueue = actionableQueue.map((candidate) => {
     const project = projectsByTask.get(candidate?.task_id);
+    const inlineDenial = candidate?.guardian_denial ? normalizeGuardianDenial(candidate.guardian_denial) : null;
     const guardianDenial = normalizedDenials.find((denial) => (
       denial.status === "UNRESOLVED"
-      && denial.target_item_id === candidate?.task_id
-    )) ?? candidate?.guardian_denial ?? null;
+      && [candidate?.task_id, "UNKNOWN"].includes(denial.target_item_id)
+    )) ?? inlineDenial;
     return {
       ...candidate,
       active_company_mode: true,
+      work_order_evidence_verified: workOrderEvidenceVerified(candidate),
       project_owner_id: project?.project_owner_id ?? null,
       implementer_id: project?.implementer_id ?? null,
       reviewer_id: project?.reviewer_id ?? null,
@@ -2380,7 +2643,7 @@ export function planActiveCompanyOperatingCycle({
     };
   });
 
-  const planned = planAutonomousCompanyEngineeringCycle({
+  const planned = planAutonomousCompanyEngineeringCycleCore({
     cycle_id,
     observed_at,
     current_main_sha,
@@ -2394,12 +2657,20 @@ export function planActiveCompanyOperatingCycle({
     ...planned,
     mode: "ACTIVE_COMPANY_MODE",
     boot_status: bootStatus.status,
+    registry_status: registryStatus.status,
     direct_channel,
     durable_handoff_ref: direct_channel === "NOT_AVAILABLE" ? durable_handoff_ref : null,
     oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
+    silent_task_ids: Object.freeze(silentOracleTaskIds),
     guardian_denials: Object.freeze(normalizedDenials),
     protected_action_authority_granted: false
   });
+}
+
+// Compatibility name retained for existing importers. There is one strict
+// Active Company planner, not a weaker parallel entry point.
+export function planAutonomousCompanyEngineeringCycle(input) {
+  return planActiveCompanyOperatingCycle(input);
 }
 
 /**

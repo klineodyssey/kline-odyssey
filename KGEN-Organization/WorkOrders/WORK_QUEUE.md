@@ -3,7 +3,7 @@
 ## KAIOS AI Company Active Mode — 2026-10-07
 
 - `WORK_ID`: `KAIOS-AI-COMPANY-ACTIVE-MODE-20261007`.
-- `STATUS`: `REVIEW`; `PRIORITY`: `P1`; `RISK`: `R1`.
+- `STATUS`: `REVIEW_PASS_PENDING_EXACT_HEAD_CI`; `PRIORITY`: `P1`; `RISK`: `R1`.
 - `PROJECT_OWNER`: Human / 沈英明; `OWNER` and `IMPLEMENTER`: `codex-gm-01`;
   `REVIEWER`: independent `second_review` session, not a new canonical employee.
 - `BASE_SHA`: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`.
@@ -16,11 +16,42 @@
   Human Owner policy, worker registry, open PR ownership and exact current main.
 - `EXPECTED_OUTPUT`: bounded implementation, existing test-suite coverage,
   task-branch commit/push, Draft PR, exact-head CI and independent review.
-- `RESULT`: `LOCAL_QA_PASS / INDEPENDENT_REVIEW_IN_PROGRESS`;
+- `RESULT`: `LOCAL_QA_PASS / INDEPENDENT_REVIEW_PASS / PENDING_EXACT_HEAD_CI`;
   `HEAD`: Git commit containing this record; `CI`: `PENDING_EXACT_HEAD`.
-- `TESTS`: Active Company 25/25, Universal 258/258, workflow security 3/3 and
+- `TESTS`: Active Company 29/29, Universal 258/258, workflow security 3/3 and
   11520 native market 24/24 PASS. Full `tests/*.test.mjs` retains three unrelated
   11520 Windows-CRLF baseline failures reproduced at the exact base SHA.
+- `REVIEW_STATUS`: first independent review returned `FAIL` for a weak compatibility
+  entry point, caller-trusted boot/registry data, incomplete actor separation,
+  malformed Guardian handling, noisy Oracle no-change handling and merge-policy
+  wording. The candidate now routes both public planner names through the same
+  strict Active Company preflight, binds Git-object boot and registry evidence,
+  requires pairwise-distinct project actors, fails closed on malformed denials,
+  emits zero Oracle events without a material trigger and preserves the Human
+  Owner merge policy. Independent rereview is required before push or Draft PR.
+- `SECOND_REVIEW_STATUS`: `FAIL` found that hexadecimal Boot/registry values and
+  Guardian resolution strings were still caller-asserted. The candidate now
+  accepts only a module-private snapshot produced by the read-only public GitHub
+  resolver, pins the exact commit, recomputes every allowlisted Git blob ID,
+  parses worker and branch authority from the verified registry blob, and accepts
+  Guardian resolution only from the registry-verified GM with a time-valid,
+  matching JSON resolution file in that same main snapshot. A third independent
+  review is required before push or Draft PR.
+- `THIRD_REVIEW_STATUS`: `FAIL` found that task/project envelopes were still
+  caller-supplied despite the verified queue blob, and the all-silent Oracle path
+  returned before common stale-main/replay/GM checks. Every selectable candidate
+  now requires a semantic match to a hash-verified machine work-order JSON at the
+  same main commit; caller-invented tasks fail closed. Oracle silence now follows
+  common preflight, with explicit stale-main and replay tests. The intentionally
+  stricter compatibility-export contract is documented. Independent rereview is
+  still required before push or Draft PR.
+- `FOURTH_REVIEW_STATUS`: `FAIL` found duplicate queue task IDs could share a
+  task-ID-keyed envelope result. The planner now rejects duplicate task IDs before
+  selection and verifies each candidate against its own envelope instead of a
+  shared task-ID lookup. A dedicated duplicate-ID regression test passes.
+- `FINAL_REVIEW_STATUS`: `PASS`; independent review confirmed all prior findings
+  corrected, focused tests 29/29, syntax and diff checks pass, and the changed-file
+  scope remains exactly the five approved files. No merge or deployment approved.
 - `DATA_LOSS_RISK`: no protected or existing dirty worktree was modified; this
   candidate is isolated and becomes durable only after task-branch push.
 - `DIRECT_CHANNEL`: available to the independent reviewer in this task; other
