@@ -76,10 +76,20 @@
       "walletOwnerConfirmationRequired": true,
       "executionReady": false,
       "broadcast": false,
-      "localTests": "69/69 order-intent tests; nine new BSC56 cases; no full security/browser QA claim",
+      "localTests": "76/76 focused tests: 72 order-intent plus4 unchanged market-binding; pre-fix exact blob fails3 new security regressions",
       "transactionFormat": "ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC",
       "bindingVerification": "INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED",
-      "allowanceSafety": "Digest-bound old allowance; confirmed zero reset before nonzero replacement; disclose pending revoke exposure"
+      "allowanceSafety": "Digest-bound old allowance; confirmed zero reset before nonzero replacement; disclose pending revoke exposure",
+      "inputSnapshot": "One bounded own-data-descriptor snapshot for input fields and deployment; reject accessors/cycles/nonplain input, never re-read original properties during hashing/construction",
+      "resourceBounds": {
+        "depth": 8,
+        "nodes": 256,
+        "accountedUtf8Bytes": 16384,
+        "stringCharacters": 1024,
+        "objectFields": 32,
+        "arrayEntries": 64
+      },
+      "reviewScope": "Independent local pure-helper review; full production/deployed-contract security and browser signing UX remain pending"
     }
   },
   "productV1Decision20260930": {

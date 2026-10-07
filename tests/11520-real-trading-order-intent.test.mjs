@@ -738,7 +738,7 @@ test('BSC56 rejects wrong chain/token/capability/target/spender and zero/collidi
 
 test('BSC56 rejects floats, numbers, exponent/hex/negative/leading-zero strings, overflow and unbounded allowance',()=>{
  const {input,options}=custodyFixture();
- for(const amountWei of [1,1.1,'1.1','1e18','0x10','-1','01','',String(1n<<256n),'9'.repeat(100000),'0'])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,amountWei},options),/AMOUNT_/);
+ for(const amountWei of [1,1.1,'1.1','1e18','0x10','-1','01','',String(1n<<256n),'9'.repeat(100000),'0'])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,amountWei},options),/AMOUNT_|REVIEW_JSON_STRING_BUDGET_EXCEEDED/);
  assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei:String((1n<<256n)-1n)},options),/UNLIMITED/);
  for(const [key,value] of [['nonce',7],['nonce',String(1n<<64n)],['gasLimit','0'],['gasPriceWei','0'],['maximumGasFeeWei','4999999999999']])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,[key]:value},options),/NONCE_|GAS_/);
 });
@@ -775,4 +775,38 @@ test('BSC56 approval review binds existing allowance, blocks replacement races a
  assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',deployment:missing},{...options,expectedBindingDigest:reviewDigest(missing)}),/BOUND_ALLOWANCE_EXACT_UINT_STRING_REQUIRED/);
  const newApproval=buildBsc56UnsignedCustodyReview({...input,action:'approve'},options);
  assert.equal(newApproval.review.MAXIMUM_EXPOSURE.allowanceTransitionUpperBoundWei,input.amountWei);
+});
+
+test('BSC56 rejects changing-target and action/amount/gas accessors before invoking them',()=>{
+ const {input,options}=custodyFixture();let reads=0;
+ Object.defineProperty(input.deployment,'brainAddress',{enumerable:true,get(){return ++reads===1?BRAIN:'0x4444444444444444444444444444444444444444'}});
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(input,options),/REVIEW_JSON_ACCESSOR_FORBIDDEN/);assert.equal(reads,0);
+ for(const key of ['action','amountWei','gasLimit','gasPriceWei','walletAddress','deployment']){
+  const f=custodyFixture();let invoked=0;Object.defineProperty(f.input,key,{enumerable:true,get(){invoked++;return 'unsafe'}});
+  assert.throws(()=>buildBsc56UnsignedCustodyReview(f.input,f.options),/REVIEW_JSON_ACCESSOR_FORBIDDEN/);assert.equal(invoked,0);
+ }
+});
+
+test('BSC56 hash and construction use one snapshot even when original input changes during hashing',()=>{
+ const {input,options}=custodyFixture(),originalAmount=input.amountWei;
+ const hooked={...codec,keccak256(bytes){input.deployment.brainAddress='0x4444444444444444444444444444444444444444';input.amountWei='9';input.action='withdrawMargin';input.gasLimit='1';return codec.keccak256(bytes)}};
+ const r=buildBsc56UnsignedCustodyReview(input,{...options,ethers:hooked}),d=new codec.Interface(custodyFragments).parseTransaction(r.transaction);
+ assert.equal(r.bindingDigest,options.expectedBindingDigest);assert.equal(r.transaction.to,BRAIN);assert.equal(d.name,'depositMargin');assert.equal(d.args[0].toString(),originalAmount);
+ assert.equal(r.review.FUNCTION,'depositMargin');assert.equal(r.review.AMOUNT.baseUnits,originalAmount);assert.equal(r.transaction.gasLimit,'100000');assert.equal(r.executionReady,false);
+});
+
+test('BSC56 untrusted binding snapshot has cycle, depth, node, UTF-8-byte and shape budgets',()=>{
+ const f=()=>custodyFixture();let x=f();x.input.deployment.cycle=x.input.deployment;
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/REVIEW_JSON_CYCLE/);
+ x=f();let deep={};x.input.deployment.extra=deep;for(let i=0;i<10;i++){deep.child={};deep=deep.child}
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/STRUCTURE_BUDGET/);
+ x=f();x.input.deployment.extra=Array.from({length:5},()=>Array(60).fill(1));
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/STRUCTURE_BUDGET/);
+ x=f();x.input.deployment.extra=Object.fromEntries(Array.from({length:6},(_,i)=>['unicode'+i,'漢'.repeat(1000)]));
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/BYTE_BUDGET/);
+ for(const extra of [Array(100).fill(1),new Array(5),new Date(),Object.create(null),{[Symbol('hidden')]:'x'}]){
+  x=f();x.input.deployment.extra=extra;assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/REVIEW_JSON_/);
+ }
+ x=f();let calls=0;x.input.deployment.extra={get toJSON(){calls++;return ()=>({})}};
+ assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/ACCESSOR_FORBIDDEN/);assert.equal(calls,0);
 });

@@ -229,6 +229,42 @@ export const CAPITAL_EXECUTION_ABI=Object.freeze({
 // The expected digest must come from the reviewed deployment registry, never
 // from the same untrusted page-storage object as the proposed binding.
 export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindingDigest}={}){
+  // Read only data descriptors once. Hashing and construction share this bounded
+  // snapshot, so a getter/mutation cannot swap the reviewed target or amount.
+  // Browser JS cannot reliably detect every Proxy; no original property is read
+  // after snapshotting. No getter or toJSON hook is intentionally evaluated.
+  let nodes=0,bytes=0;const active=new WeakSet(),encoder=new TextEncoder();
+  const accountBytes=text=>{bytes+=encoder.encode(text).length;if(bytes>16384)throw new Error('REVIEW_JSON_BYTE_BUDGET_EXCEEDED')};
+  const snapshot=(value,depth=0)=>{
+    if(++nodes>256||depth>8)throw new Error('REVIEW_JSON_STRUCTURE_BUDGET_EXCEEDED');
+    if(value===null||typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)){accountBytes(String(value));return value}
+    if(typeof value==='string'){if(value.length>1024)throw new Error('REVIEW_JSON_STRING_BUDGET_EXCEEDED');accountBytes(JSON.stringify(value));return value}
+    if(!value||typeof value!=='object'||(!Array.isArray(value)&&Object.getPrototypeOf(value)!==Object.prototype))throw new Error('REVIEW_JSON_PLAIN_DATA_REQUIRED');
+    if(active.has(value))throw new Error('REVIEW_JSON_CYCLE');active.add(value);
+    const descriptors=Object.getOwnPropertyDescriptors(value),keys=Reflect.ownKeys(descriptors);
+    if(keys.some(k=>typeof k!=='string'))throw new Error('REVIEW_JSON_PLAIN_DATA_REQUIRED');
+    for(const key of keys)if(!Object.hasOwn(descriptors[key],'value'))throw new Error('REVIEW_JSON_ACCESSOR_FORBIDDEN');
+    let result;
+    if(Array.isArray(value)){
+      const length=descriptors.length.value;
+      if(length>64||keys.length!==length+1)throw new Error('REVIEW_JSON_ARRAY_BUDGET_OR_SHAPE');
+      result=[];for(let i=0;i<length;i++){if(!Object.hasOwn(descriptors,String(i)))throw new Error('REVIEW_JSON_ARRAY_BUDGET_OR_SHAPE');result.push(snapshot(descriptors[i].value,depth+1))}
+    }else{
+      if(keys.length>32)throw new Error('REVIEW_JSON_STRUCTURE_BUDGET_EXCEEDED');result={};
+      for(const key of keys){if(key.length>128)throw new Error('REVIEW_JSON_STRING_BUDGET_EXCEEDED');accountBytes(JSON.stringify(key));Object.defineProperty(result,key,{value:snapshot(descriptors[key].value,depth+1),enumerable:true,writable:true,configurable:true})}
+    }
+    accountBytes('[]'+',:'.repeat(keys.length));active.delete(value);return result;
+  };
+  if(!input||Object.getPrototypeOf(input)!==Object.prototype)throw new Error('REVIEW_INPUT_PLAIN_DATA_REQUIRED');
+  const descriptors=Object.getOwnPropertyDescriptors(input);
+  if(Reflect.ownKeys(descriptors).length>32)throw new Error('REVIEW_JSON_STRUCTURE_BUDGET_EXCEEDED');
+  const selected={};
+  for(const key of ['chainId','action','walletAddress','amountWei','positionKey','nonce','gasLimit','gasPriceWei','maximumGasFeeWei','deployment','spenderAddress','contractAddress']){
+    if(!Object.hasOwn(descriptors,key))continue;
+    if(!Object.hasOwn(descriptors[key],'value'))throw new Error('REVIEW_JSON_ACCESSOR_FORBIDDEN');
+    selected[key]=snapshot(descriptors[key].value);
+  }
+  input=selected;
   if(input.chainId!==KGEN_CHAIN_ID)throw new Error('BSC56_CHAIN_REQUIRED');
   const actions=['approve','depositMargin','withdrawMargin','claimSettlement'];
   if(!actions.includes(input.action))throw new Error('BSC56_CUSTODY_ACTION_NOT_SUPPORTED');

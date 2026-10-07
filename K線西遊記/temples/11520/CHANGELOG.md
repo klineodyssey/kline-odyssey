@@ -22,8 +22,9 @@
 - Human BSC56-only direction: no new BSC97 product/rehearsal milestone; historical evidence is preserved.
 - Existing `runtime/real-trading-order-intent.mjs::buildBsc56UnsignedCustodyReview` pure-builds KGEN approve/revoke, margin deposit/withdraw and claim review using existing ABI fragments. No provider, wallet, signature, broadcast or ledger mutation.
 - Missing deployed binding returns a null transaction. Calldata requires pinned binding/ABI hashes, explicit token/target/account/nonce/code/source readback metadata and exact uint amounts/gas caps. Input metadata is not a live verification claim.
+- Independent review found and corrected accessor/hash-to-target drift: use one bounded data-descriptor snapshot for all used input/metadata, reject accessors/cycles/nonplain structures and enforce depth/node/UTF-8 budgets. Exact pre-fix runtime blob fails the three new regressions; corrected source passes.
 - Nonzero allowance replacement requires confirmed zero reset; revoke review discloses outstanding allowance exposure. Output is ethers-style unsigned review data, not EIP-1193 request payload.
-- `tests/11520-real-trading-order-intent.test.mjs`: 69/69 focused local tests (nine new BSC56 cases); with unchanged market-binding tests, 73/73. Full CI/security/browser release gates remain separately pending.
+- `tests/11520-real-trading-order-intent.test.mjs`: 72/72 focused local tests (twelve new BSC56 cases); with unchanged market-binding tests, 76/76. Full CI/security/browser release gates remain separately pending.
 - `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md` and existing Mainnet manifest record remaining Canon/Oracle/deployment/UX gaps. No invented KAIOS derivative semantics, guessed deployment, USD/USDT conversion or second financial organ.
 - Rollback: remove only this builder/import and appended tests, retaining #519/#522 simulation behavior and independent #523 Navigator. Initial matrix checkpoint: `8886aa1fb9956e6abd5d7477b6357a68d573c3ba`; initial builder checkpoint: `7741674612a4707ff579c1dbd35d12bae4efa5fe`.
 

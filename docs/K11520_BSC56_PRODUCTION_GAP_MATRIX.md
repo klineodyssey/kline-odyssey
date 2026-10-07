@@ -32,7 +32,7 @@ The audit began with the preserved `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`, t
 | KAIOS BSC56 identity | READY | `0xD4E67B3a69e41524c424150E6b6e921b01D036db`; live code, KAIOS symbol, 18 decimals, immutable KGEN linkage below | Token existence does not establish K11520 margin, market or settlement semantics. |
 | KAIOS standard / deployed-source match | PARTIAL | `KGEN-KAIOS/contracts/KAIOS.sol` and exact preserved Genesis source inherit `ERC20, ERC20Capped`; read-only metadata is compatible | Full fresh compiler-to-deployed-bytecode verification remains unperformed; explorer full source access returned 403 and Sourcify full-match metadata 404. Do not call metadata reads a full audit. |
 | KAIOS authority | PARTIAL | Source: no `Ownable`/discretionary owner mint; live `KGEN()`, `LINGXIAO_TREASURY_18888()`, `ORGAN_REGISTRY()` match canonical links. `owner()` reverts | `owner()` reverting is unsupported getter evidence, not proof of renounced ownership. Verify current registry-authorized organ membership and exact deployed implementation before dependent actions. No Treasury authority is granted. |
-| KAIOS allowed use / K11520 trading semantics | MISSING | KAIOS source supports holder transfer/allowance and specifically holder-authorized furnace burn; Life CURRENT section 7 permits lawful goods/services/markets when available. Trading Canon section 2 excludes sub-0.001C KAIOS game behavior from KGEN margin/position/PnL | `KAIOS_TRADING_SEMANTICS_CANON_GAP`: no approved KAIOS collateral, derivative lot/PnL/liquidation/oracle/settlement model was found. Do not invent KAIOS markets, equate local game credits with chain tokens, or block independent KGEN work on this gap. |
+| KAIOS allowed use / K11520 trading semantics | MISSING | KAIOS source supports holder transfer/allowance and specifically holder-authorized furnace burn; Life CURRENT section 8 permits lawful goods/services/markets when available. Trading Canon section 2 excludes sub-0.001C KAIOS game behavior from KGEN margin/position/PnL | `KAIOS_TRADING_SEMANTICS_CANON_GAP`: no approved KAIOS collateral, derivative lot/PnL/liquidation/oracle/settlement model was found. Do not invent KAIOS markets, equate local game credits with chain tokens, or block independent KGEN work on this gap. |
 | Margin contract, exact production candidate | NOT_DEPLOYED | Existing `KGEN/contracts/KGEN_BrainExchange.sol`: `depositMargin`, `withdrawMargin`, `principalOf`, `lockedPrincipalOf`, actual-received accounting. Mainnet candidate `BRAIN_PROXY/BRAIN_IMPLEMENTATION=null`; conditional predictions explicitly `deployed=false` | Reuse Brain. Existing BSC56 Brain `0xd0605F4EF10e5C1438F11AF9edc36926769239d6` is legacy, not evidence that current capital/claimable methods are deployed. Review fresh deployment or explicit compatible migration; do not silently rebind. |
 | Settlement / Position candidate | NOT_DEPLOYED | `KGEN_PositionEngine.sol`, `KGEN_MarketRiskKernel.sol`, Brain `SETTLEMENT_ROLE`; candidate `POSITION_ENGINE=null` | Position owns settlement, RiskKernel is inlined, Brain owns custody. Require Position-only settlement role and Trigger-only executor. No second settlement ledger. |
 | Historical KAIOS Settlement on BSC56 | PARTIAL | `0x17587F49dFDE4e400D03Ae81364AC2af8E1629Df`; pinned EIP-1967 implementation `0xA08A9CEcfa18b2FDb9ca8De0063A5029B9Ffc363` | Code/proxy existence is confirmed, but present ABI/authority compatibility with the KGEN derivative candidate is unverified. It must not fill the null candidate Position/Brain fields. |
@@ -124,3 +124,25 @@ chain facts, and transactions as ethers-style unsigned review fields, not raw
 EIP-1193 JSON-RPC requests. Future wallet integration must validate and convert
 quantity encoding at its separate boundary; no direct-send path exists here.
 Runtime metadata and the existing 11520 CHANGELOG register this scoped addition.
+
+### Checkpoint 4 — binding snapshot integrity
+
+Independent scoped review of `83cc73268fcf7ee1d514a0e736a37985515c44a2`
+found an accessor-bearing input could change its Brain address between hashing
+and construction. Execution remained disabled, but the unsigned target was not
+bound to the reported digest. The helper now takes one bounded plain-data
+snapshot of all used input fields and deployment metadata before hashing or
+construction. Accessors and serialization hooks are rejected without invocation;
+cycles, nonplain data, symbols and sparse arrays are rejected. Limits are depth8,
+256 visited nodes, 16384 accounted UTF-8 bytes, 1024 characters per string,
+32 object fields and 64 array entries. Browser JavaScript cannot reliably detect
+every transparent Proxy, so all construction uses the captured descriptors and
+never re-reads original input after snapshotting.
+
+Red/green proof: the exact published pre-fix runtime blob
+`d7fdd01f46d37686f725b9f182ccb78e6b7cae19` passes 73 and fails the three new
+accessor/mutation/resource-budget regressions. Corrected source passes 76/76
+(72 order-intent plus four unchanged binding tests); an independent focused
+review reran the same suites successfully. This is scoped helper review, not
+full deployed-contract, Oracle or production security certification. No signer,
+provider, transaction broadcast or UI activation was added.
