@@ -2,10 +2,10 @@
 
 ## Q15 3D frame-budget source audit — 2026-10-07
 
-TASK_ID: Q15-3D-FRAME-BUDGET  
-STATUS: SOURCE_AUDIT / IMPLEMENTATION_PROPOSED / NOT_MEASURED  
-SOURCE_HEAD: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`  
-UPDATED_BY: dot / scoped external engineering documentation  
+TASK_ID: Q15-3D-FRAME-BUDGET
+STATUS: SOURCE_AUDIT / IMPLEMENTATION_PROPOSED / NOT_MEASURED
+SOURCE_HEAD: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`
+UPDATED_BY: dot / scoped external engineering documentation
 SCOPE: existing 11520 world renderer; documentation only, no release approval.
 
 ### Preserved / partial / missing / tested
