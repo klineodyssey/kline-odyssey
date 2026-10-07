@@ -4941,3 +4941,52 @@ The prior coordinated forced-stop investigation atce1da4fa is preserved unchange
   }
 }
 ```
+
+## Portfolio evidence reconciliation — 2026-10-07 06:21 UTC
+
+This bounded status receipt supersedes only the named queue statuses below. All prior content is preserved, including the earlier investigation ledger. Source baseline: main `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`; prior #516 head `ce42be563c587a7262fcfafb4e167cf6fb994eed`. Issue #502 remains stale historical evidence and is not represented as synchronized.
+
+### Durable results and current work
+
+- **Q07-COMPANY-OFFLINE — COMPLETE_WITHIN_OFFLINE_SCOPE.** [#501](https://github.com/klineodyssey/kline-odyssey/pull/501), branch `dot/kaios-handoff-v2-offline-prototype`, head `1b3fe60bda879343f951447fc8fce0ce0af4f74f`. The existing `tests/autonomous-company-engineering-cycle.test.mjs` now covers exact result bytes, separate review receipt/disposition, and one-time integration-evidence recording. Combined tests: **69/69** (66 owner tests plus 3 workflow-policy tests); mandatory offline subset: **49/49**, no failures or skips. Exact-head [PR CI 37579744989](https://github.com/klineodyssey/kline-odyssey/actions/runs/37579744989) and [push CI 37579739222](https://github.com/klineodyssey/kline-odyssey/actions/runs/37579739222) succeeded; checkout logs contain the exact head. Independent review found no blocking issue in this bounded fixture scope. Default fake verifier/catalog and existing tests were preserved. These are offline fixture receipts: no real Worker authentication, operational ACK, Git integration, deployment or permission grant is established.
+- **Q04-BSC-REVIEW-UI — ACTIVE / VISUAL_REPAIR.** [#524](https://github.com/klineodyssey/kline-odyssey/pull/524), branch `dot/k11520-bsc56-production-20261007`, head `0589c16553e781c282b868a374e6fa60e4841f0f`. Existing `real-trading-preflight-ui.mjs` has an eight-field inline blocked review and bounded context invalidation; 178/178 focused tests passed. Actual-page visual review found a contrast defect being repaired. This remains an unsigned blocked preview: trusted deployed binding/readback and owner confirmation are not supplied by UI labels. Visual acceptance is not complete.
+- **Q04-BSC-ABI-DRIFT — IMPLEMENTED / REVIEW_CLEAR / CI_PENDING.** [#530](https://github.com/klineodyssey/kline-odyssey/pull/530), branch `dot/wip-bsc56-runtime-abi-20261007`, head `2dc722df985204ffdce2ded6dff78f9506e59162`. Existing `KGEN/contracts/tests/brain-v4-static-invariants.mjs` and `.github/workflows/11520-trading-readiness.yml` validate 43 compiled ABI fragments and 21 negative cases; independent review is clear. Exact-head CI [37580412193](https://github.com/klineodyssey/kline-odyssey/actions/runs/37580412193) and [37580407401](https://github.com/klineodyssey/kline-odyssey/actions/runs/37580407401) were running at this observation. The stacked ABI branch and UI branch remain separate file ownership scopes within one BSC project.
+- **Q15-3D-FRAME-BUDGET — SOURCE_AUDIT_COMPLETE / NEW_CI_PENDING.** [#531](https://github.com/klineodyssey/kline-odyssey/pull/531), branch `dot/q15-frame-budget-audit-20261007`, current head `a2042f00577a50c903c4c6737536265886d02060`, changes only `K線西遊記/temples/11520/README.md`. Source inspection is complete; no measured FPS, GPU profile or runtime performance acceptance is claimed. Navigator owns overlapping runtime files, so instrumentation remains held for ownership reconciliation. Historical head `09310de560eab3383ee274dd906fe741802bfd6b` had a passing Universal push run, while [PR run 37580310365](https://github.com/klineodyssey/kline-odyssey/actions/runs/37580310365) failed `git diff --check` on introduced README lines 5–8 trailing whitespace. The current head fixes that introduced whitespace. New exact-head Universal PR/push runs 37580858979/37580855191 passed; browser/Portal workflows remain pending at this observation. The historical documentation failure remains recorded separately from the completed source audit.
+- **Q10-MARKET-LINEAGE — READ_ONLY_AUDIT_COMPLETE.** At main `f7f6795`, canonical owner `core/market/index.mjs` is blob `14e3d18368e962e24b0bd81fddb9bb06b9d73ad1`. `createListing` and `replayCanonical11520Listing` have different validation paths; the replay path and listing/asset/seller linkage require a bounded successor proposal. No validator change was made. `tests/universal-exchange.test.mjs` overlaps current Company/Customer ownership, and the existing backend assignment has no verified acceptance in the examined evidence. The successor remains PROPOSED_WITH_DEPENDENCIES, not an added READY item or a new backend owner.
+- **Customer — DURABLE_OWNER_CANDIDATE / PUBLICATION_HOLD.** [#529](https://github.com/klineodyssey/kline-odyssey/pull/529), branch `dot/customer-pond-owner-20261007`, remains at `e5c9234953dbe44f2b73ddd587509e50cccad352`. The paired-owner checkpoint is preserved. Later journal publication is stopped pending explicit Human continuation. No unpublished candidate content is included here; this receipt does not resume or reassign that action.
+
+### Queue delta and dependency boundaries
+
+The prior `ce42be56` receipt contained 14 unstarted READY items. Remove these six from that buffer:
+
+1. `Q19-IDENTITY-MASK-QA`: bounded visual audit completed and evidence preserved in #526.
+2. `Q07-COMPANY-OFFLINE`: bounded offline lifecycle completed and reviewed in #501.
+3. `Q04-BSC-REVIEW-UI`: active implementation/visual repair in #524.
+4. `Q04-BSC-ABI-DRIFT`: implemented and reviewed in #530; CI pending.
+5. `Q15-3D-FRAME-BUDGET`: source audit completed in #531; introduced whitespace repaired and new CI pending.
+6. `Q10-MARKET-LINEAGE`: source audit completed; successor has unresolved dependencies.
+
+**BACKLOG_READY_COUNT = 6, all bounded read-only research/design scopes; target = 20; gap = 14.** The remaining eight original IDs were rechecked individually:
+
+- `Q04-BSC-DOMAIN` — **READY_READ_ONLY**, existing BSC owner: source reconciliation/design for production USD INDEX versus USDT reference/simulation callers in the existing market-binding owner and test source. The semantic code/test change is **DEPENDENCY_HELD** until the identity evidence is reconciled; no conversion or formula change is inferred.
+- `Q04-BSC-PACKAGE-PROVENANCE` — **READY_READ_ONLY**, existing BSC owner: pinned source/hash/lineage/capability inventory of `KGEN/scripts/rehearse_bsc_testnet.mjs`, the current Mainnet manifest and existing order-intent/package tests. Excludes runtime/test edits, active #530 compiled-ABI work and already completed custody-fragment checks.
+- `Q12-MARKET-MATCHING` — **READY_READ_ONLY**, coordinator: preserved #200 spot-matcher reservation, cancellation, self-match and replay source/coverage matrix. No order execution, source edits or settlement.
+- `Q12-MARKET-SETTLEMENT-INGRESS` — **READY_READ_ONLY**, coordinator: existing settlement/market/backend-model caller-trust map and repro design. No shared test edits or real financial action.
+- `Q11-LIFE-RIGHTS-PORTABILITY` — **READY_READ_ONLY**, coordinator: source-linked rights/permission compatibility matrix for existing permission/asset/market/settlement owners. No identity transfer, new entitlement or Canon change.
+- `Q13-LOGISTICS-RECEIPT` — **READY_READ_ONLY**, coordinator: route-arrival versus delivery-evidence crosswalk across existing logistics owners. No movement edits, delivery acceptance, inventory or ledger mutation.
+- `Q08-CUSTOMER-COVERAGE` — **DEPENDENCY_HELD**, excluded from READY: the latest required deliverable includes an executable supplied/applied/held map and tests in shared `core/company/index.mjs` / `tests/universal-exchange.test.mjs`. The stopped Customer publication and source ownership must be reconciled before this write package can begin.
+- `Q20-GIT-RECOVERY-PROOF` — **CANDIDATE_UNVERIFIED**, excluded from READY: its older recovery-validator design may duplicate the completed PrimeForge restore-chain proof. No distinct missing increment was established by this refresh; first reconcile that evidence before counting or scheduling new work.
+
+The six READY scopes retain their original input/output/acceptance/rollback records but are explicitly limited to read-only source research and design. Their implementation successors require separate source-owner and dependency resolution. No held write, successor proposal, completed audit, CI wait or unacknowledged assignment is counted as READY.
+
+Current confirmed engineering activity is BSC UI repair and Company coordination/evidence reconciliation. ABI CI observation is within the same BSC project; completed Q15, Q10 and external identity audits are not additional executing projects. Recovery UI remains review-ready. Navigator/Player stopped actions and Cargo preview remediation retain their exact holds. No claim of five simultaneously executing projects is made; total heavy workload is not established by this receipt. The production integration lane remains one, with no merge performed here.
+
+### Operational Handoff dependencies
+
+- Preserved [#492](https://github.com/klineodyssey/kline-odyssey/pull/492) remains Draft at `b601715c97320aa0a881da8fdc52888d9abb8934`; its V1 serializer/routing metadata is absent from main. Its caller-supplied Worker/Life/source labels do not authenticate a sender.
+- Current Backend `service.mjs`/`identity.mjs` authenticate Account/Life sessions, with bounded requests and idempotent atomic storage. They do not establish a Worker/Instance/WorkOrder binding, a handoff inbox or an authenticated reviewer ACK.
+- Existing Company Boot V0.1 is a local CLI prototype with scoped attestation/grant checks; it is not an operational dispatch service. Reuse of public hashes cannot establish new worker authority.
+- A source-bound, read-only V1 repository-evidence adapter is a proposal only. It requires #492/#501 ownership reconciliation and resolution of shared `core/company/index.mjs` dependencies. It is unimplemented and does not incorporate the stopped Customer journal.
+- Existing Company/Backend owners, authority boundaries and formal registries remain unchanged. No new runtime, dispatcher, Worker identity, authenticated ACK, external communication or credential is created by this documentation receipt.
+
+Publication evidence is the containing commit on the existing #516 branch; exact parent/tree/ref and unchanged-prefix verification are required before claiming this append durable. No optional PR comment or #502 update is part of this checkpoint.
