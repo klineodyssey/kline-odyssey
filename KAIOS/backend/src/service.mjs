@@ -1,14 +1,14 @@
 /*
 KGEN_META
 VERSION: V1
-REVISION: 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1
+REVISION: 2026-10-07.CUSTOMER_POND_PAIR_LOCAL_JOURNAL.1
 STATUS: DRAFT
-LAST_UPDATED: 2026-10-06
+LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant
-SOURCE_COMMIT: d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f
+REVIEWED_BY: PENDING; local focused tests are not registered Reviewer authority
+SOURCE_COMMIT: e5c9234953dbe44f2b73ddd587509e50cccad352
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
-CHANGE_REASON: Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction.
+CHANGE_REASON: Preserve journal v1/v2 readers and add v3 paired-pond observations inside the existing local SQLite transaction.
 ANCESTOR: KAIOS/backend/src/service.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
 SOURCE_OF_TRUTH: FALSE
 METADATA_SCOPE: Customer Project candidate revision within the existing owner.
@@ -17,7 +17,7 @@ not a new Runtime/version authority or approval of production/financial activity
 */
 
 import { createIdentity } from "./identity.mjs";
-import { createCustomerProjectPrototype, captureCustomerProjectContext } from "../../../core/company/index.mjs";
+import { createCustomerProjectPrototype, captureCustomerProjectContext, cloneCustomerPondExchangeObservation } from "../../../core/company/index.mjs";
 import {
   Problem,
   requireThat,
@@ -1024,7 +1024,7 @@ export function createBackend({
  * Core model responses remain unchanged, including durable:false. Only the
  * separate persistence envelope attests that a local DB transaction committed.
  */
-export function createCustomerProjectPersistencePrototype({ mode, database: db, identityAdapter, quotePlanner, executionEvidenceSource = null, now = Date.now } = {}) {
+export function createCustomerProjectPersistencePrototype({ mode, database: db, identityAdapter, quotePlanner, executionEvidenceSource = null, pondExchangeSource = null, now = Date.now } = {}) {
   requireThat(mode === "LOCAL_TEST_ONLY" && db && ["get", "atomic"].every((k) => typeof db[k] === "function") && typeof quotePlanner?.plan === "function" && typeof now === "function", "CUSTOMER_PROJECT_LOCAL_PERSISTENCE_REQUIRED");
   const scope = "LOCAL_DATABASE_SIMULATION_PROTOTYPE";
   const exact = (v, keys) => requireThat(v && Object.getPrototypeOf(v) === Object.prototype && Object.keys(v).length === keys.length && keys.every((k) => Object.hasOwn(v, k)), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
@@ -1044,7 +1044,7 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
     return { resolve() { current(owner); return { ...owner, active: true, scope: "SIMULATION_CUSTOMER_CONTEXT" }; } };
   }
   function makeReplay(owner) {
-    let observation, historical, clockIndex, planUses, evidenceUses;
+    let observation, historical, clockIndex, planUses, evidenceUses, pondUses;
     const model = createCustomerProjectPrototype({ identityAdapter: replayOwner(owner), quotePlanner: {
       async plan(request) {
         planUses += 1;
@@ -1065,6 +1065,16 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
       observation.evidence = structuredClone(await executionEvidenceSource.read(binding));
       boundedJson(observation.evidence);
       return structuredClone(observation.evidence);
+    } }, pondExchangeSource: { async read(binding) {
+      pondUses += 1;
+      if (historical) {
+        requireThat(pondUses === 1 && observation.pondExchange != null, "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+        return cloneCustomerPondExchangeObservation(observation.pondExchange);
+      }
+      requireThat(typeof pondExchangeSource?.read === "function", "CUSTOMER_POND_SOURCE_REQUIRED");
+      observation.pondExchange = cloneCustomerPondExchangeObservation(await pondExchangeSource.read(binding));
+      boundedJson(observation.pondExchange);
+      return cloneCustomerPondExchangeObservation(observation.pondExchange);
     } }, now() {
       if (historical) {
         requireThat(clockIndex < observation.clocks.length, "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
@@ -1073,10 +1083,10 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
       const value = now(); observation.clocks.push(value); return value;
     } });
     return { model, async run(record, isHistorical) {
-      observation = record; historical = isHistorical; clockIndex = 0; planUses = 0; evidenceUses = 0;
+      observation = record; historical = isHistorical; clockIndex = 0; planUses = 0; evidenceUses = 0; pondUses = 0;
       const result = await model.command(record.command);
       requireThat(planUses === (record.plan === null ? 0 : 1) && evidenceUses === (record.evidence == null ? 0 : 1)
-        && (!historical || clockIndex === record.clocks.length), "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
+        && pondUses === (record.pondExchange == null ? 0 : 1) && (!historical || clockIndex === record.clocks.length), "CUSTOMER_PROJECT_REPLAY_OBSERVATION", 422);
       return result;
     } };
   }
@@ -1103,13 +1113,15 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
     requireThat(row.owner_account_id === owner.accountId && row.owner_player_id === owner.playerId, "CUSTOMER_PROJECT_WRONG_CUSTOMER", 403);
     const envelope = parse(row.payload);
     exact(envelope, ["format", "version", "owner", "operations", "state", "stateHash"]);
-    requireThat(envelope.format === "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL" && [1, 2].includes(envelope.version) && canonical(envelope.owner) === canonical(owner) && Array.isArray(envelope.operations) && envelope.operations.length > 0 && envelope.operations.length <= 256, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+    requireThat(envelope.format === "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL" && [1, 2, 3].includes(envelope.version) && canonical(envelope.owner) === canonical(owner) && Array.isArray(envelope.operations) && envelope.operations.length > 0 && envelope.operations.length <= 256, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
     requireThat(row.payload_hash === await hash(envelope) && row.storage_version === envelope.operations.length && cached.length === envelope.operations.length, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
     const replay = makeReplay(owner);
     for (const operation of envelope.operations) {
       const checkpoint = operation.command?.type === "CHECKPOINT_SUBPLAN_EVIDENCE";
-      requireThat(!checkpoint || envelope.version === 2, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
-      exact(operation, ["command", "commandHash", "clocks", "plan", "modelResultHash", "stateHash", "response", "recordedAt", ...(checkpoint ? ["evidence"] : [])]);
+      const pondCheckpoint = operation.command?.type === "CHECKPOINT_POND_EXCHANGE";
+      requireThat(!pondCheckpoint || envelope.version === 3, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      requireThat(!checkpoint || envelope.version >= 2, "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
+      exact(operation, ["command", "commandHash", "clocks", "plan", "modelResultHash", "stateHash", "response", "recordedAt", ...(checkpoint ? ["evidence"] : []), ...(pondCheckpoint ? ["pondExchange"] : [])]);
       requireThat(Array.isArray(operation.clocks) && operation.clocks.length <= 8 && operation.clocks.every((v) => integer(v, Number.MAX_SAFE_INTEGER)) && integer(operation.recordedAt, Number.MAX_SAFE_INTEGER) && operation.commandHash === await hash(operation.command), "CUSTOMER_PROJECT_PERSISTENCE_CORRUPT", 422);
       const result = await replay.run(operation, true);
       const state = await replay.model.read();
@@ -1140,12 +1152,13 @@ export function createCustomerProjectPersistencePrototype({ mode, database: db, 
     try {
     const operation = { command, commandHash, clocks: [], plan: null, modelResultHash: null, stateHash: null, response: null, recordedAt: null };
     if (command.type === "CHECKPOINT_SUBPLAN_EVIDENCE") operation.evidence = null;
+    if (command.type === "CHECKPOINT_POND_EXCHANGE") operation.pondExchange = null;
     const result = await loaded.replay.run(operation, false), state = await loaded.replay.model.read();
     const storageVersion = (loaded.row?.storage_version ?? 0) + 1;
     operation.modelResultHash = await hash(result); operation.stateHash = await hash(state);
     operation.response = { scope, persistence: { committed: true, storageVersion, productionVerified: false }, result };
     operation.recordedAt = now(); requireThat(integer(operation.recordedAt, Number.MAX_SAFE_INTEGER), "CUSTOMER_PROJECT_INVALID_CLOCK");
-    const envelope = { format: "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL", version: command.type === "CHECKPOINT_SUBPLAN_EVIDENCE" ? 2 : (loaded.envelope?.version ?? 1), owner,
+    const envelope = { format: "KAIOS_CUSTOMER_PROJECT_LOCAL_JOURNAL", version: Math.max(loaded.envelope?.version ?? 1, command.type === "CHECKPOINT_POND_EXCHANGE" ? 3 : command.type === "CHECKPOINT_SUBPLAN_EVIDENCE" ? 2 : 1), owner,
       operations: [...(loaded.envelope?.operations ?? []), operation], state, stateHash: operation.stateHash };
     requireThat(envelope.operations.length <= 256 && state.commandJournal.length === envelope.operations.length, "CUSTOMER_PROJECT_PERSISTENCE_CAPACITY", 413);
     const payload = boundedJson(envelope), payloadHash = await hash(envelope), guardId = id();

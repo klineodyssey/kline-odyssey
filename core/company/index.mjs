@@ -1,14 +1,14 @@
 /*
 KGEN_META
 VERSION: CURRENT
-REVISION: 2026-10-07.CUSTOMER_DIGITAL_WORLD_CONDITIONAL_PROPOSAL.4
+REVISION: 2026-10-07.CUSTOMER_POND_PAIR_LOCAL_JOURNAL.1
 STATUS: DRAFT
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
 REVIEWED_BY: PENDING; local focused tests are not registered Reviewer authority
-SOURCE_COMMIT: 62e668a62707f957c8c3ca3448e76e47ed157ba0
+SOURCE_COMMIT: e5c9234953dbe44f2b73ddd587509e50cccad352
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
-CHANGE_REASON: Add bounded digital-world requirement drafts without changing the preserved house command or persistence owners.
+CHANGE_REASON: Add a distinct accepted-conditional-pond evidence checkpoint with exact paired owner snapshots; preserve House guards and held delivery.
 ANCESTOR: core/company/index.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
 SOURCE_OF_TRUTH: FALSE
 METADATA_SCOPE: Customer Project candidate revision within the existing owner.
@@ -3125,6 +3125,34 @@ function cpPlan(plan, requiredStages = SMALL_HOUSE_REQUIRED_STAGES) {
   return total.toString();
 }
 
+/** Strict local pond observation boundary. Inspect descriptors before cloning;
+ * neither a host port nor its historical journal may run caller-owned getters. */
+export function cloneCustomerPondExchangeObservation(input) {
+  let nodes = 0, bytes = 0;
+  const add = (value) => { bytes += new TextEncoder().encode(value).length; cpFail(bytes <= 512000, "CUSTOMER_POND_OBSERVATION_CAPACITY"); };
+  function visit(value, depth = 0) {
+    cpFail(++nodes <= 100000 && depth <= 30, "CUSTOMER_POND_OBSERVATION_CAPACITY");
+    if (value === null || typeof value === "boolean" || typeof value === "string") { add(JSON.stringify(value)); return value; }
+    if (typeof value === "number") { cpFail(Number.isFinite(value), "CUSTOMER_POND_OBSERVATION_JSON"); add(JSON.stringify(value)); return value; }
+    cpFail(value && typeof value === "object", "CUSTOMER_POND_OBSERVATION_JSON");
+    const array = Array.isArray(value), keys = Reflect.ownKeys(value);
+    cpFail(Object.getPrototypeOf(value) === (array ? Array.prototype : Object.prototype), "CUSTOMER_POND_OBSERVATION_JSON");
+    const length = array ? Object.getOwnPropertyDescriptor(value, "length")?.value : null;
+    cpFail(array ? cpInt(length, 20000) && keys.length === length + 1 : keys.length <= 2048, "CUSTOMER_POND_OBSERVATION_JSON");
+    const copy = array ? [] : {};
+    add(array ? "[]" : "{}");
+    for (const [index, key] of (array ? Array.from({ length }, (_, i) => String(i)) : keys).entries()) {
+      cpFail(typeof key === "string" && !["__proto__", "constructor", "prototype"].includes(key), "CUSTOMER_POND_OBSERVATION_JSON");
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      cpFail(descriptor && descriptor.enumerable && Object.hasOwn(descriptor, "value"), "CUSTOMER_POND_OBSERVATION_JSON");
+      if (index) add(","); if (!array) add(JSON.stringify(key) + ":");
+      copy[key] = visit(descriptor.value, depth + 1);
+    }
+    return copy;
+  }
+  return visit(input);
+}
+
 // Shared host boundary for local model/persistence prototypes, not authentication.
 export function captureCustomerProjectContext(identityAdapter) {
   cpFail(typeof identityAdapter?.resolve === "function", "CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED");
@@ -3140,10 +3168,11 @@ export function captureCustomerProjectContext(identityAdapter) {
  * The one-workspace bound is per prototype instance, not a permanent product law
  * or a cross-process uniqueness guarantee. No persistence/recovery is claimed.
  */
-export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, planningAdapter = null, executionEvidenceSource = null, now = Date.now } = {}) {
+export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, planningAdapter = null, executionEvidenceSource = null, pondExchangeSource = null, now = Date.now } = {}) {
   cpFail(typeof identityAdapter?.resolve === "function" && typeof quotePlanner?.plan === "function" && typeof now === "function", "CUSTOMER_PROJECT_TRUSTED_ADAPTER_REQUIRED");
   cpFail(planningAdapter === null || customerProjectTestAdapters.has(planningAdapter), "CUSTOMER_PROJECT_TEST_ADAPTER_REQUIRED");
   cpFail(executionEvidenceSource === null || typeof executionEvidenceSource.read === "function", "CUSTOMER_PROJECT_EVIDENCE_SOURCE_REQUIRED");
+  cpFail(pondExchangeSource === null || typeof pondExchangeSource.read === "function", "CUSTOMER_POND_SOURCE_REQUIRED");
   let state = { scope: CUSTOMER_PROJECT_PROTOTYPE_SCOPE, boundaries: { ...CUSTOMER_PROJECT_BOUNDARIES }, revision: 0, owner: null,
     workspaceId: null, request: null, requestRevisions: [], quotes: [], quoteHeadRevision: null,
     acceptance: null, contract: null, project: null, events: [], commandJournal: [], lastEventHash: null, lastAt: 0 };
@@ -3164,7 +3193,7 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
   async function execute(command, owner) {
     assertCurrentCustomer(owner);
     cpFields(command, ["type", "idempotencyKey", "expectedRevision", "data"]);
-    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE", "SAVE_REQUIREMENT_DRAFT", "SUBMIT_REQUIREMENT_DRAFT"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
+    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE", "CHECKPOINT_POND_EXCHANGE", "SAVE_REQUIREMENT_DRAFT", "SUBMIT_REQUIREMENT_DRAFT"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
     cpFail(typeof command.idempotencyKey === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(command.idempotencyKey) && cpInt(command.expectedRevision), "CUSTOMER_PROJECT_INVALID_COMMAND");
     const key = `${command.type}:${command.idempotencyKey}`;
     const commandHash = await hashCustomerProject(command);
@@ -3271,6 +3300,68 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
         contentHash: await hashCustomerProject({ quoteId, revision, content }), acknowledgementHash: await hashCustomerProject({ conditions: content.plan.conditions, assumptions: content.plan.assumptions, executionHolds: content.executionHolds }) };
       draft.quotes.push(quote); draft.quoteHeadRevision = quote.revision;
       response = { ...responseBase, status: fishpond ? "CONDITIONAL_SIMULATION_PROPOSAL_ISSUED" : "SIMULATED_QUOTE_ISSUED", quote: cloneCustomerProject(quote) };
+    } else if (command.type === "CHECKPOINT_POND_EXCHANGE") {
+      cpFields(command.data, ["projectId", "acceptanceId", "quoteHash", "inputHash"]);
+      cpFail(state.request?.content.objective === "FISH_POND_ECOSYSTEM" && state.acceptance && state.project && state.contract,
+        "CUSTOMER_POND_ACCEPTED_CONDITIONAL_PROJECT_REQUIRED");
+      cpFail(command.data.projectId === state.project.projectId && command.data.acceptanceId === state.acceptance.acceptanceId
+        && command.data.quoteHash === state.acceptance.quoteHash && cpDigest(command.data.inputHash), "CUSTOMER_POND_CHECKPOINT_BINDING");
+      const intentHash = await hashCustomerProject({ owner, ...command.data });
+      if (state.pondExchangeEvidence) {
+        cpFail(state.pondExchangeEvidence.intentHash === intentHash, "CUSTOMER_POND_CHECKPOINT_IMMUTABLE");
+        const response = { ...responseBase, status: "POND_PAIR_ALREADY_CHECKPOINTED", evidenceId: state.pondExchangeEvidence.evidenceId,
+          evidenceHash: await hashCustomerProject(state.pondExchangeEvidence), revision: state.revision };
+        draft.commandJournal.push({ key, commandHash, response }); bounded(draft); assertCurrentCustomer(owner); state = draft;
+        return cloneCustomerProject(response);
+      }
+      const acceptedQuote = state.contract.acceptedQuote, plan = acceptedQuote.content.plan;
+      cpFail(state.project.status === "PLANNED_EXECUTION_HELD" && acceptedQuote.content.proposalClass === "CONDITIONAL_SIMULATION_PROPOSAL"
+        && acceptedQuote.content.deliveryCommitment === false, "CUSTOMER_POND_ACCEPTED_CONDITIONAL_PROJECT_REQUIRED");
+      cpFail(plan.assumptions.includes(`LOCAL_POND_INPUT_SHA256:${command.data.inputHash}`), "CUSTOMER_POND_QUOTED_INPUT_REQUIRED");
+      cpFail(pondExchangeSource, "CUSTOMER_POND_SOURCE_REQUIRED");
+      const binding = { owner: cloneCustomerProject(owner), workspaceId: state.workspaceId, projectId: state.project.projectId,
+        acceptanceId: state.acceptance.acceptanceId, quoteHash: state.acceptance.quoteHash };
+      const observation = cloneCustomerPondExchangeObservation(await pondExchangeSource.read(cloneCustomerProject(binding)));
+      cpFields(observation, ["binding", "input"]);
+      cpFail(serializeCustomerProject(observation.binding) === serializeCustomerProject(binding), "CUSTOMER_POND_SOURCE_BINDING_MISMATCH");
+      const input = observation.input;
+      cpFail(await hashCustomerProject(input) === command.data.inputHash, "CUSTOMER_POND_INPUT_HASH_MISMATCH");
+      const { prepareLocalDeadBiomassExchange } = await import("../../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js");
+      const pair = await prepareLocalDeadBiomassExchange(input);
+      const requiredAssumptions = [`LOCAL_POND_FIXTURE_SHA256:${input.fixtureHash}`, `LOCAL_POND_GENESIS_SHA256:${input.ecologyGenesisHash}`,
+        `LOCAL_POND_EXCHANGE_GRAMS:${input.quantityGrams}`, "ADMITTED_FIVE_KG_NOT_FINITE_JUVENILE_PROCUREMENT",
+        "ABSTRACT_RESOURCE_POOL_NOT_FULL_LIFE_RUNTIME", "PLANTS_AND_POLICY_REFERENCES_NOT_APPLIED", "NO_SHARED_CLOCK_CONVERSION",
+        "NO_BIOLOGICAL_EFFICACY_OR_TRANSPORT_PROOF", "OWNER_SIMULATED_EXPENSES_CEILING_NOT_PRICE_PROOF"];
+      cpFail(requiredAssumptions.every((value) => plan.assumptions.includes(value)) && plan.bomHash === input.fixtureHash,
+        "CUSTOMER_POND_QUOTED_LIMITATIONS_REQUIRED");
+      const pond = input.pondExport.state, sourceRequest = acceptedQuote.content.request;
+      cpFail(pond.land.land_parcel_id === sourceRequest.locationRef && pond.land.usage_right === sourceRequest.rightsRef,
+        "CUSTOMER_POND_SITE_RIGHTS_MISMATCH");
+      cpFail(pond.simulation_time <= plan.durationHours && Number.isFinite(pond.enterprise.accounts.expenses)
+        && pond.enterprise.accounts.expenses >= 0 && Number.isSafeInteger(Math.ceil(pond.enterprise.accounts.expenses))
+        && BigInt(Math.ceil(pond.enterprise.accounts.expenses)) <= BigInt(acceptedQuote.content.total), "CUSTOMER_POND_QUOTE_BOUNDS_MISMATCH");
+      // This first journal adapter deliberately admits only the measured five-kg
+      // window. Legacy stocking booleans are not finite juvenile procurement.
+      const suffix = pond.action_log.slice(input.constructionExport.state.action_log.length);
+      cpFail(serializeCustomerProject(suffix.map((action) => action.command)) === serializeCustomerProject([
+        "STOCK_FISH", "LOW_OXYGEN_SCENARIO", "ADVANCE_TIME", "PAUSE_RUNTIME"])
+        && suffix[0].args.count === 100 && suffix[2].args.hours === 24
+        && serializeCustomerProject(suffix[2].args.environment) === serializeCustomerProject({ rainfall_l: 0, evaporation_l: 0, seepage_l: 0, outflow_l: 0 })
+        && pond.populations.length === 1 && pond.populations[0].total_biomass_kg === 4.7 && pond.pond.dead_biomass_kg === 0.3
+        && input.ecologyExport.state.action_log.length === 0 && input.ecologyExport.state.revision === 0,
+        "CUSTOMER_POND_ADMITTED_WINDOW_REQUIRED");
+      assertCurrentCustomer(owner);
+      draft.pondExchangeEvidence = { format: "KAIOS_CUSTOMER_POND_PAIR_CHECKPOINT", version: 1,
+        scope: "LOCAL_TEST_ONLY_PAIRED_OWNER_SNAPSHOT", evidenceId: `${state.workspaceId}-POND-PAIR-${state.revision + 1}`,
+        ...binding, sourceRevision: state.revision, inputHash: command.data.inputHash,
+        observationHash: await hashCustomerProject(observation), intentHash,
+        constructionHash: input.constructionHash, fixtureHash: input.fixtureHash, ecologyGenesisHash: input.ecologyGenesisHash,
+        sourceInputHash: input.pondHash, destinationInputHash: input.ecologyHash,
+        sourceCandidateHash: await hashCustomerProject(pair.sourceCandidate), destinationCandidateHash: await hashCustomerProject(pair.destinationCandidate),
+        pair, recordedAt: at, admittedStockGrams: 5000, liveOwnerMutation: false,
+        authenticatedWorkerReview: false, productionVerified: false };
+      response = { ...responseBase, status: "POND_PAIR_EVIDENCE_CHECKPOINTED", evidenceId: draft.pondExchangeEvidence.evidenceId,
+        evidenceHash: await hashCustomerProject(draft.pondExchangeEvidence) };
     } else if (command.type === "CHECKPOINT_SUBPLAN_EVIDENCE") {
       cpFail(state.request?.content.objective !== "FISH_POND_ECOSYSTEM", "CUSTOMER_PROJECT_HOUSE_SUBPLAN_REQUIRED");
       cpFields(command.data, ["projectId", "acceptanceId", "quoteHash", "snapshotHash", "fixtureHash"]);
