@@ -764,6 +764,9 @@ test("land-god demo keeps real-world data and the 50-km model evidence-bounded",
   const result = runUniversalCustomerOrderDryRunV1({ raw_request: "我要土地公生命 App" });
   assert.equal(result.data_availability.length, 12);
   assert.equal(result.data_availability.every(({ source, license, status }) => source === null && license === "NOT_VERIFIED" && status === "RESEARCH_REQUIRED"), true);
+  assert.equal(result.data_availability.every(({ truth_class }) => truth_class === "UNKNOWN"), true);
+  assert.equal(result.data_availability.find(({ domain }) => domain === "GROUNDWATER").required_truth_class, "MEASURED");
+  assert.equal(result.data_availability.find(({ domain }) => domain === "LAND_HISTORY").required_truth_class, "DOCUMENTED");
   assert.deepEqual(result.depth_model.map(({ depth_m }) => depth_m), [0, 100, 1000, 10000, 50000]);
   assert.equal(result.depth_model.every(({ temperature, pressure, rock_model }) => temperature === null && pressure === null && rock_model === null), true);
   assert.equal(result.depth_model.every(({ truth_class }) => ["MODEL_ESTIMATE", "UNKNOWN"].includes(truth_class)), true);
@@ -827,18 +830,37 @@ test("unsupported universal requests are retained and fail closed instead of map
   assert.equal(result.product_requirement, null);
   assert.equal(result.project_proposal, null);
   assert.deepEqual(result.work_orders, []);
+  for (const raw_request of [
+    "不要土地公生命 App，我要火星晶圓廠",
+    "LAND GODZILLA game",
+    "討論土地公文化，不是要 App"
+  ]) {
+    const negative = runUniversalCustomerOrderDryRunV1({ raw_request });
+    assert.equal(negative.feasibility.status, "RESEARCH_REQUIRED", raw_request);
+    assert.equal(negative.project_proposal, null, raw_request);
+    assert.deepEqual(negative.work_orders, [], raw_request);
+  }
+  const english = runUniversalCustomerOrderDryRunV1({ raw_request: "I want a Land God life application" });
+  assert.equal(english.feasibility.status, "PARTIALLY_FEASIBLE");
 });
 
 test("manufacturing record cannot sign or seal incomplete evidence", () => {
   const incomplete = createUniversalCustomerOrderManufacturingRecordV1({ base_sha: "abc" });
   assert.equal(incomplete.manufacturing_status, "INCOMPLETE");
   assert.equal(incomplete.signature, "NOT_SIGNED");
-  assert.equal(incomplete.seal_status, "INVALID_INCOMPLETE_EVIDENCE");
+  assert.equal(incomplete.seal_status, "INVALID_NOT_AUTHORIZED_OR_EXTERNALLY_VERIFIED");
   const complete = createUniversalCustomerOrderManufacturingRecordV1({
-    base_sha: "base", head_sha: "head", branch: "codex/example", pr: "1",
+    base_sha: "a".repeat(40), head_sha: "b".repeat(40), branch: "codex/example", pr: "https://github.com/klineodyssey/kline-odyssey/pull/539",
     tests: "PASS", ci: "PASS", reviewed_by: "DISTINCT-REVIEWER", review_result: "PASS"
   });
-  assert.equal(complete.manufacturing_status, "COMPLETE_PENDING_AUTHORIZED_SIGNATURE");
-  assert.equal(complete.signature, "READY_FOR_AUTHORIZED_SIGNATURE");
-  assert.equal(complete.seal_status, "READY_FOR_AUTHORIZED_SEAL");
+  assert.equal(complete.manufacturing_status, "EVIDENCE_PENDING_EXTERNAL_VERIFICATION");
+  assert.equal(complete.evidence_shape_status, "FORMAT_VALID_NOT_EXTERNALLY_VERIFIED");
+  assert.equal(complete.signature, "NOT_SIGNED");
+  assert.equal(complete.seal_status, "INVALID_NOT_AUTHORIZED_OR_EXTERNALLY_VERIFIED");
+  const forged = createUniversalCustomerOrderManufacturingRecordV1({
+    base_sha: "x", head_sha: "y", branch: "main", pr: "not-a-pr",
+    tests: "PASS", ci: "PASS", reviewed_by: true, review_result: "PASS"
+  });
+  assert.equal(forged.manufacturing_status, "INCOMPLETE");
+  assert.equal(forged.signature, "NOT_SIGNED");
 });

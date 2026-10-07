@@ -2845,18 +2845,18 @@ export const CUSTOMER_TRUTH_CLASSES = deepFreeze([
 ]);
 
 const LAND_GOD_DATA_REQUIREMENTS = deepFreeze([
-  { domain: "LAND_IDENTITY", source_class: "CUSTOMER_LAND_RECORD_OR_GOVERNMENT_CADASTRE", truth_class: "DOCUMENTED" },
-  { domain: "LAND_HISTORY", source_class: "GOVERNMENT_ARCHIVE_AND_HISTORICAL_MAP", truth_class: "DOCUMENTED" },
-  { domain: "ARCHAEOLOGY", source_class: "CULTURAL_HERITAGE_AND_ARCHAEOLOGY_RECORD", truth_class: "DOCUMENTED" },
-  { domain: "GEOLOGY", source_class: "GEOLOGICAL_SURVEY_AND_BOREHOLE_DATA", truth_class: "DOCUMENTED" },
-  { domain: "GROUNDWATER", source_class: "HYDROGEOLOGY_AND_MONITORING_DATA", truth_class: "MEASURED" },
-  { domain: "MINERAL_RESOURCES", source_class: "LICENSED_MINERAL_SURVEY", truth_class: "MODEL_ESTIMATE" },
-  { domain: "GEOTHERMAL", source_class: "GEOTHERMAL_SURVEY_AND_TEMPERATURE_MODEL", truth_class: "MODEL_ESTIMATE" },
-  { domain: "SEISMIC", source_class: "SEISMIC_NETWORK_AND_HAZARD_MODEL", truth_class: "MEASURED" },
-  { domain: "DEEP_EARTH_MODEL", source_class: "REGIONAL_GEOPHYSICS_AND_EARTH_MODEL", truth_class: "MODEL_ESTIMATE" },
-  { domain: "CULTURAL_MEMORY", source_class: "CONSENTED_COMMUNITY_ARCHIVE", truth_class: "DOCUMENTED" },
-  { domain: "LAND_USE_HISTORY", source_class: "LAND_USE_AND_REMOTE_SENSING_ARCHIVE", truth_class: "DOCUMENTED" },
-  { domain: "FUTURE_MONITORING", source_class: "AUTHORIZED_SENSOR_OR_REFRESH_PIPELINE", truth_class: "OBSERVED" }
+  { domain: "LAND_IDENTITY", source_class: "CUSTOMER_LAND_RECORD_OR_GOVERNMENT_CADASTRE", required_truth_class: "DOCUMENTED" },
+  { domain: "LAND_HISTORY", source_class: "GOVERNMENT_ARCHIVE_AND_HISTORICAL_MAP", required_truth_class: "DOCUMENTED" },
+  { domain: "ARCHAEOLOGY", source_class: "CULTURAL_HERITAGE_AND_ARCHAEOLOGY_RECORD", required_truth_class: "DOCUMENTED" },
+  { domain: "GEOLOGY", source_class: "GEOLOGICAL_SURVEY_AND_BOREHOLE_DATA", required_truth_class: "DOCUMENTED" },
+  { domain: "GROUNDWATER", source_class: "HYDROGEOLOGY_AND_MONITORING_DATA", required_truth_class: "MEASURED" },
+  { domain: "MINERAL_RESOURCES", source_class: "LICENSED_MINERAL_SURVEY", required_truth_class: "MODEL_ESTIMATE" },
+  { domain: "GEOTHERMAL", source_class: "GEOTHERMAL_SURVEY_AND_TEMPERATURE_MODEL", required_truth_class: "MODEL_ESTIMATE" },
+  { domain: "SEISMIC", source_class: "SEISMIC_NETWORK_AND_HAZARD_MODEL", required_truth_class: "MEASURED" },
+  { domain: "DEEP_EARTH_MODEL", source_class: "REGIONAL_GEOPHYSICS_AND_EARTH_MODEL", required_truth_class: "MODEL_ESTIMATE" },
+  { domain: "CULTURAL_MEMORY", source_class: "CONSENTED_COMMUNITY_ARCHIVE", required_truth_class: "DOCUMENTED" },
+  { domain: "LAND_USE_HISTORY", source_class: "LAND_USE_AND_REMOTE_SENSING_ARCHIVE", required_truth_class: "DOCUMENTED" },
+  { domain: "FUTURE_MONITORING", source_class: "AUTHORIZED_SENSOR_OR_REFRESH_PIPELINE", required_truth_class: "OBSERVED" }
 ]);
 
 function simulatedUniversalWorkerCatalog() {
@@ -2926,6 +2926,15 @@ function landGodWorkOrderBlueprints(projectId) {
   ].map((blueprint, index) => ({ ...blueprint, work_id: `${projectId}-WORK-${String(index + 1).padStart(3, "0")}` }));
 }
 
+function isSupportedLandGodCandidateIntent(rawRequest) {
+  const text = String(rawRequest).trim();
+  const negativeIntent = /(?:不要|不需要|不是要|並非要|不想要|排除|只是討論|文化討論)|\b(?:do\s+not|don't|not|without|exclude|instead\s+of)\b/i;
+  if (negativeIntent.test(text)) return false;
+  const chineseIntent = /(?:我要|我需要|請建立|請製作|請開發|建立|製作|開發).{0,80}土地公.{0,80}(?:生命|App|APP|應用)/;
+  const englishIntent = /\b(?:want|need|build|create|develop)\b.{0,100}\bland\s+god\b.{0,100}\b(?:life|app|application)\b/i;
+  return chineseIntent.test(text) || englishIntent.test(text);
+}
+
 export function createUniversalCustomerOrderManufacturingRecordV1({
   base_sha = null,
   head_sha = null,
@@ -2936,8 +2945,12 @@ export function createUniversalCustomerOrderManufacturingRecordV1({
   reviewed_by = null,
   review_result = "NOT_VERIFIED"
 } = {}) {
-  const completeEvidence = [base_sha, head_sha, branch, pr].every((value) => typeof value === "string" && value.length > 0)
-    && tests === "PASS" && ci === "PASS" && reviewed_by && review_result === "PASS";
+  const evidenceShapeValid = /^[a-f0-9]{40}$/.test(base_sha ?? "")
+    && /^[a-f0-9]{40}$/.test(head_sha ?? "")
+    && /^codex\/[A-Za-z0-9._/-]+$/.test(branch ?? "")
+    && /^https:\/\/github\.com\/klineodyssey\/kline-odyssey\/pull\/\d+$/.test(pr ?? "")
+    && tests === "PASS" && ci === "PASS" && typeof reviewed_by === "string" && reviewed_by.length > 0
+    && review_result === "PASS";
   return deepFreeze({
     organ_id: UNIVERSAL_CUSTOMER_ORDER_ENGINE.organ_id,
     organ_name: UNIVERSAL_CUSTOMER_ORDER_ENGINE.organ_name,
@@ -2960,10 +2973,11 @@ export function createUniversalCustomerOrderManufacturingRecordV1({
       "NO_DEPLOYMENT_OR_LIFE_ACTIVATION"
     ],
     rollback: "REVERT_THE_DEDICATED_COMMIT_WITHOUT_RESETTING_THE_CANONICAL_AI_COMPANY_RUNTIME",
-    signature: completeEvidence ? "READY_FOR_AUTHORIZED_SIGNATURE" : "NOT_SIGNED",
-    seal_status: completeEvidence ? "READY_FOR_AUTHORIZED_SEAL" : "INVALID_INCOMPLETE_EVIDENCE",
+    evidence_shape_status: evidenceShapeValid ? "FORMAT_VALID_NOT_EXTERNALLY_VERIFIED" : "INCOMPLETE_OR_INVALID",
+    signature: "NOT_SIGNED",
+    seal_status: "INVALID_NOT_AUTHORIZED_OR_EXTERNALLY_VERIFIED",
     review_result,
-    manufacturing_status: completeEvidence ? "COMPLETE_PENDING_AUTHORIZED_SIGNATURE" : "INCOMPLETE"
+    manufacturing_status: evidenceShapeValid ? "EVIDENCE_PENDING_EXTERNAL_VERIFICATION" : "INCOMPLETE"
   });
 }
 
@@ -2983,7 +2997,7 @@ export function runUniversalCustomerOrderDryRunV1({
 } = {}, { worker_catalog } = {}) {
   const rawRequest = String(raw_request ?? "").trim();
   if (!rawRequest) throw new Error("RAW_CUSTOMER_REQUEST_REQUIRED");
-  if (!/土地公|LAND\s*GOD/i.test(rawRequest)) {
+  if (!isSupportedLandGodCandidateIntent(rawRequest)) {
     return deepFreeze({
       engine: UNIVERSAL_CUSTOMER_ORDER_ENGINE,
       customer_order: {
@@ -3083,6 +3097,7 @@ export function runUniversalCustomerOrderDryRunV1({
     ];
     const dataAvailability = LAND_GOD_DATA_REQUIREMENTS.map((requirement) => ({
       ...requirement,
+      truth_class: "UNKNOWN",
       source: null,
       source_date: null,
       license: "NOT_VERIFIED",

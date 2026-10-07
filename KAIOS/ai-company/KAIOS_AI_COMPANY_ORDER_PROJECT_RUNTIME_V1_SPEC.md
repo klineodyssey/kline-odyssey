@@ -420,7 +420,9 @@ local dry-run authority. Missing implementers or reviewers fail closed as
 Truth classifications are `MEASURED`, `OBSERVED`, `DOCUMENTED`, `CALCULATED`,
 `MODEL_ESTIMATE`, `INFERRED` and `UNKNOWN`. Source, date, license, quality,
 coverage, freshness and uncertainty remain visibly unverified until discovery
-evidence exists. A model estimate never becomes an observation or measurement.
+evidence exists. Each unresolved source records `truth_class=UNKNOWN` and keeps
+the intended evidence level separately as `required_truth_class`. A model
+estimate never becomes an observation or measurement.
 
 The first deterministic example is the natural-language request `我要土地公生命
 App`. It remains `PARTIALLY_FEASIBLE`: discovery, research, architecture and a
@@ -440,5 +442,7 @@ V1 has one executable universal-intake profile: the Land God candidate-app
 dry-run. Any other raw request is retained but returns `RESEARCH_REQUIRED` with
 `NO_BOUNDED_V1_PRODUCT_PROFILE`; it is never silently mapped to Land God or an
 unrelated template. The manufacturing-record builder remains unsigned and
-unsealed until exact base/head, branch, PR, tests, CI and independent review are
-all supplied as evidence.
+unsealed even when exact base/head, branch, PR, tests, CI and independent review
+are supplied by a caller. Those values can only advance to
+`EVIDENCE_PENDING_EXTERNAL_VERIFICATION`; an authorized external verifier must
+validate them before any signature or seal workflow.
