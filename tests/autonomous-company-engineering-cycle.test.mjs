@@ -26,6 +26,7 @@ import {
   evaluateDotOrganSeal,
   evaluateDotDispatchSafety,
   evaluateBranchConcurrencyGate,
+  inspectBranchConcurrencyClaimSet,
   verifyBranchWriterRuntimeAttestation,
   PRIMEFORGE_IDENTITY_BOUNDARY
 } from "../core/company/index.mjs";
@@ -1303,19 +1304,16 @@ test("DONE counts completed only with hash-bound result exact head CI tests and 
   }
 });
 
-test("branch concurrency gate permits one signed repository-bound writer and rejects competing stale or forged claims", async () => {
+test("branch concurrency gate rejects diagnostic provenance and structurally blocks competing stale or forged claims", async () => {
   const handoffHead = "8".repeat(40);
   const sessionBinding = "d".repeat(64);
-  const keys = await globalThis.crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-  const publicKey = await globalThis.crypto.subtle.exportKey("jwk", keys.publicKey);
-  const controllerBinding = createHash("sha256").update(stableStringify(publicKey)).digest("hex");
   const claim = {
     claim_id: "CLAIM-KAIOS-DOT-ORGAN-V1-20261007-codex-gm-01-R1",
     work_id: "KAIOS-DOT-ORGAN-V1-20261007",
     branch: "codex/kaios-ai-company-active-mode-20261007",
     active_writer: manager.worker_id,
     life_id: manager.life_identity_ref,
-    controller_binding_hash: controllerBinding,
+    controller_binding_hash: "c".repeat(64),
     controller_registry_id: manager.controller_id,
     session_binding_hash: sessionBinding,
     handoff_head: handoffHead,
@@ -1341,63 +1339,30 @@ test("branch concurrency gate permits one signed repository-bound writer and rej
     work_order_refs: [WORK_ORDER_REF], pr_work_order_refs: [WORK_ORDER_REF],
     fetch_impl: activeCompanyEvidenceFetch(files, { prHeadRef: claim.branch })
   });
-  const signedPayload = {
-    claim_id: claim.claim_id,
-    claim_hash: createHash("sha256").update(stableStringify(claim)).digest("hex"),
-    branch: claim.branch,
-    work_id: claim.work_id,
-    handoff_head: claim.handoff_head,
-    fencing_token: claim.fencing_token,
-    fencing_epoch: claim.fencing_epoch,
-    session_binding_hash: claim.session_binding_hash,
-    attested_at: "2026-10-07T13:59:00Z"
-  };
-  const signature = await globalThis.crypto.subtle.sign({ name: "Ed25519" }, keys.privateKey, new TextEncoder().encode(stableStringify(signedPayload)));
-  const signatureBase64url = Buffer.from(signature).toString("base64url");
-  const verifiedAttestation = await verifyBranchWriterRuntimeAttestation({
-    repository_evidence: repositoryEvidence,
-    current_main_sha: MAIN_SHA,
-    source_ref: WORK_ORDER_REF,
-    claim_id: claim.claim_id,
-    signed_payload: signedPayload,
-    public_key_jwk: publicKey,
-    signature_base64url: signatureBase64url
-  });
-  const input = {
+  await assert.rejects(() => verifyBranchWriterRuntimeAttestation({
+    repository_evidence: repositoryEvidence, current_main_sha: MAIN_SHA,
+    source_ref: WORK_ORDER_REF, claim_id: claim.claim_id,
+    signed_payload: {}, public_key_jwk: {}, signature_base64url: "AA"
+  }), error => error.code === "BRANCH_WRITER_PUBLIC_EVIDENCE_REQUIRED");
+
+  const inspected = inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [claim] });
+  assert.equal(inspected.status, "STRUCTURALLY_VALID");
+  assert.equal(inspected.authority_granted, false);
+  const forgedInput = {
     branch: claim.branch,
     work_id: claim.work_id,
     handoff_head: handoffHead,
     observed_at: "2026-10-07T14:00:00Z",
-    verified_attestation: verifiedAttestation
+    verified_attestation: { claim, claims: [claim], worker: manager, signed_payload: {} }
   };
-  const passed = evaluateBranchConcurrencyGate(input);
-  assert.equal(passed.status, "SINGLE_WRITER_PASS");
-  assert.equal(passed.active_writer, manager.worker_id);
-  assert.equal(passed.other_workers, "READ_REVIEW_WATCH_ONLY");
-  assert.equal(passed.authority_expanded, false);
-
-  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, verified_attestation: { ...verifiedAttestation } }).reasons, ["VERIFIED_RUNTIME_ATTESTATION_REQUIRED"]);
-
-  const reverify = async (claims, payload = signedPayload, signingKey = keys.privateKey) => {
-    const content = JSON.stringify({ branch_concurrency_gate: { claims } });
-    const nextFiles = { ...files, [WORK_ORDER_REF]: content };
-    const evidence = await resolveActiveCompanyRepositoryEvidence({
-      observed_at: "2026-10-07T14:00:00Z", current_main_sha: MAIN_SHA, active_task_pr: 353,
-      work_order_refs: [WORK_ORDER_REF], pr_work_order_refs: [WORK_ORDER_REF],
-      fetch_impl: activeCompanyEvidenceFetch(nextFiles, { prHeadRef: claim.branch })
-    });
-    const nextSignature = await globalThis.crypto.subtle.sign({ name: "Ed25519" }, signingKey, new TextEncoder().encode(stableStringify(payload)));
-    return verifyBranchWriterRuntimeAttestation({ repository_evidence: evidence, current_main_sha: MAIN_SHA, source_ref: WORK_ORDER_REF,
-      claim_id: claim.claim_id, signed_payload: payload, public_key_jwk: publicKey, signature_base64url: Buffer.from(nextSignature).toString("base64url") });
-  };
+  assert.deepEqual(evaluateBranchConcurrencyGate(forgedInput).reasons, ["VERIFIED_RUNTIME_ATTESTATION_REQUIRED"]);
   const competing = { ...claim, claim_id: `${claim.claim_id}-COMPETING`, work_id: "OTHER-WORK", active_writer: worker.worker_id,
     life_id: worker.life_identity_ref, controller_registry_id: worker.controller_id, fencing_token: "FENCE-OTHER-WORK-R2", fencing_epoch: 2 };
-  const competingAttestation = await reverify([claim, competing]);
-  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, verified_attestation: competingAttestation }).reasons, ["MULTIPLE_ACTIVE_WRITERS"]);
+  assert.deepEqual(inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [claim, competing] }).reasons, ["MULTIPLE_ACTIVE_WRITERS"]);
   const future = { ...claim, claimed_at: "2026-10-07T14:01:00Z", last_heartbeat: "2026-10-07T14:01:00Z" };
-  const futurePayload = { ...signedPayload, claim_hash: createHash("sha256").update(stableStringify(future)).digest("hex") };
-  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, verified_attestation: await reverify([future], futurePayload) }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
-  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, observed_at: "2026-10-07T14:20:00Z" }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
+  assert.deepEqual(inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [future] }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
+  assert.deepEqual(inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:20:00Z", claims: [claim] }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
+  assert.deepEqual(inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [claim, { ...competing, fencing_token: claim.fencing_token }] }).reasons, ["DUPLICATE_FENCING_TOKEN"]);
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.distinct_from, "human-primeforge");
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.active_writer_authority, false);
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.runtime_maintainer_authority, false);

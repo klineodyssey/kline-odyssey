@@ -2208,6 +2208,7 @@ export const PRIMEFORGE_IDENTITY_BOUNDARY = Object.freeze({
 });
 
 const VERIFIED_BRANCH_WRITER_ATTESTATIONS = new WeakSet();
+const BRANCH_WRITER_WORK_ORDER_REF = "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json";
 const BRANCH_WRITER_MAX_LEASE_MS = 4 * 60 * 60 * 1000;
 const BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS = 15 * 60 * 1000;
 const BRANCH_WRITER_MAX_ATTESTATION_AGE_MS = 5 * 60 * 1000;
@@ -2233,7 +2234,11 @@ export async function verifyBranchWriterRuntimeAttestation({
   signature_base64url
 }) {
   const repository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
-  invariant(typeof source_ref === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(source_ref), "BRANCH_WRITER_SOURCE_REF_INVALID", "Writer claim must come from a WorkOrders JSON file");
+  invariant(repository.status === "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED"
+    && repository.evidence_class === "DEFAULT_PUBLIC_GITHUB"
+    && VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository.snapshot),
+  "BRANCH_WRITER_PUBLIC_EVIDENCE_REQUIRED", "Writer authority requires the canonical public GitHub transport; diagnostic/custom evidence cannot mint authority");
+  invariant(source_ref === BRANCH_WRITER_WORK_ORDER_REF, "BRANCH_WRITER_SOURCE_REF_INVALID", "Writer claim must come from the one canonical active Company WorkOrder path");
   const file = repository.snapshot.pr_files[source_ref];
   invariant(file && file.ref === repository.snapshot.active_task_pr?.head_sha, "BRANCH_WRITER_PR_EVIDENCE_REQUIRED", "Writer claim must be hash-checked at the exact PR head");
   let manifest;
@@ -2252,6 +2257,9 @@ export async function verifyBranchWriterRuntimeAttestation({
   invariant(worker, "REGISTERED_WORKER_REQUIRED", "Claimed writer is absent from canonical registry evidence");
   invariant(typeof worker.controller_id === "string" && worker.controller_id.trim(), "REGISTERED_CONTROLLER_REQUIRED", "Claimed writer requires a canonical controller binding");
   invariant(claim.controller_registry_id === worker.controller_id, "CONTROLLER_REGISTRY_BINDING_MISMATCH", "Claim controller must match the canonical worker controller");
+  invariant(/^[0-9a-f]{64}$/.test(worker.controller_public_key_sha256 ?? "")
+    && worker.controller_public_key_sha256 === claim.controller_binding_hash,
+  "CONTROLLER_PUBLIC_KEY_BINDING_REQUIRED", "Canonical worker registry must bind the controller to the signing public key hash");
   invariant(public_key_jwk && typeof public_key_jwk === "object" && !Array.isArray(public_key_jwk), "BRANCH_WRITER_PUBLIC_KEY_REQUIRED", "Writer attestation requires a public verification key");
   invariant(await sha256(public_key_jwk) === claim.controller_binding_hash, "BRANCH_WRITER_PUBLIC_KEY_MISMATCH", "Public verification key must match the claim binding");
   invariant(signed_payload && typeof signed_payload === "object" && !Array.isArray(signed_payload), "BRANCH_WRITER_SIGNED_PAYLOAD_REQUIRED", "Writer attestation requires a signed payload");
@@ -2275,6 +2283,31 @@ export async function verifyBranchWriterRuntimeAttestation({
   });
   VERIFIED_BRANCH_WRITER_ATTESTATIONS.add(attestation);
   return attestation;
+}
+
+/** Structural inspection only; never grants writer authority. */
+export function inspectBranchConcurrencyClaimSet({ branch, observed_at, claims = [] }) {
+  const result = (status, reasons = []) => Object.freeze({ status, reasons: Object.freeze(reasons), authority_granted: false });
+  const observedMs = Date.parse(observed_at ?? "");
+  if (typeof branch !== "string" || !branch.startsWith("codex/") || branch === "main") return result("INVALID", ["BRANCH_INVALID"]);
+  if (Number.isNaN(observedMs) || !Array.isArray(claims)) return result("INVALID", ["CLAIM_OR_TIME_INVALID"]);
+  const branchClaims = claims.filter((claim) => claim?.branch === branch);
+  if (new Set(branchClaims.map((claim) => claim.claim_id)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_CLAIM_ID"]);
+  if (new Set(branchClaims.map((claim) => claim.fencing_token)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_FENCING_TOKEN"]);
+  if (new Set(branchClaims.map((claim) => claim.fencing_epoch)).size !== branchClaims.length) return result("INVALID", ["DUPLICATE_FENCING_EPOCH"]);
+  const malformed = branchClaims.find((claim) => {
+    const claimed = Date.parse(claim?.claimed_at ?? "");
+    const heartbeat = Date.parse(claim?.last_heartbeat ?? "");
+    const expires = Date.parse(claim?.lease_expires_at ?? "");
+    return !Number.isFinite(claimed) || !Number.isFinite(heartbeat) || !Number.isFinite(expires)
+      || claimed > heartbeat || heartbeat > observedMs || expires <= observedMs
+      || expires - claimed > BRANCH_WRITER_MAX_LEASE_MS || observedMs - heartbeat > BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS
+      || !Number.isSafeInteger(claim?.fencing_epoch) || claim.fencing_epoch < 1;
+  });
+  if (malformed) return result("INVALID", ["CLAIM_FRESHNESS_INVALID"]);
+  const activeClaims = branchClaims.filter((claim) => claim?.lease_status === "ACTIVE");
+  if (activeClaims.length !== 1) return result("INVALID", [activeClaims.length === 0 ? "ACTIVE_WRITER_REQUIRED" : "MULTIPLE_ACTIVE_WRITERS"]);
+  return Object.freeze({ status: "STRUCTURALLY_VALID", reasons: Object.freeze([]), active_claim: activeClaims[0], authority_granted: false });
 }
 
 /**
@@ -2301,24 +2334,9 @@ export function evaluateBranchConcurrencyGate({
   if (Number.isNaN(observedMs)) return hold("OBSERVED_AT_INVALID");
   if (!VERIFIED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("VERIFIED_RUNTIME_ATTESTATION_REQUIRED");
   const claims = verified_attestation.claims;
-  const branchClaims = claims.filter((claim) => claim?.branch === branch);
-  if (new Set(branchClaims.map((claim) => claim.claim_id)).size !== branchClaims.length) return hold("DUPLICATE_CLAIM_ID");
-  if (new Set(branchClaims.map((claim) => claim.fencing_token)).size !== branchClaims.length) return hold("DUPLICATE_FENCING_TOKEN");
-  if (new Set(branchClaims.map((claim) => claim.fencing_epoch)).size !== branchClaims.length) return hold("DUPLICATE_FENCING_EPOCH");
-  const malformed = branchClaims.find((claim) => {
-    const claimed = Date.parse(claim?.claimed_at ?? "");
-    const heartbeat = Date.parse(claim?.last_heartbeat ?? "");
-    const expires = Date.parse(claim?.lease_expires_at ?? "");
-    return !Number.isFinite(claimed) || !Number.isFinite(heartbeat) || !Number.isFinite(expires)
-      || claimed > heartbeat || heartbeat > observedMs || expires <= observedMs
-      || expires - claimed > BRANCH_WRITER_MAX_LEASE_MS || observedMs - heartbeat > BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS
-      || !Number.isSafeInteger(claim?.fencing_epoch) || claim.fencing_epoch < 1;
-  });
-  if (malformed) return hold("CLAIM_FRESHNESS_INVALID");
-  const activeClaims = branchClaims.filter((claim) => claim?.lease_status === "ACTIVE");
-  if (activeClaims.length !== 1) return hold(activeClaims.length === 0 ? "ACTIVE_WRITER_REQUIRED" : "MULTIPLE_ACTIVE_WRITERS");
-
-  const claim = activeClaims[0];
+  const inspected = inspectBranchConcurrencyClaimSet({ branch, observed_at, claims });
+  if (inspected.status !== "STRUCTURALLY_VALID") return hold(...inspected.reasons);
+  const claim = inspected.active_claim;
   const worker = verified_attestation.worker;
   if (claim.work_id !== work_id || verified_attestation.claim.claim_id !== claim.claim_id) return hold("WORK_CLAIM_MISMATCH");
   if (worker.status !== "ACTIVE" || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return hold("ACTIVE_EMPLOYEE_REQUIRED");
