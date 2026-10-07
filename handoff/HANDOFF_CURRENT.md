@@ -4276,3 +4276,668 @@ EVIDENCE_PRESERVATION: Append-only in the existing handoff on the existing Draft
 RULE_CHANGES: NONE
 PRODUCT_OR_RUNTIME_CHANGES: NONE
 MAIN_OR_PROTECTED_AUTHORITY_CHANGES: NONE
+
+
+## Portfolio completion and capacity reconciliation — 2026-10-07 05:11 UTC
+
+This append reconciles completed work against the earlier20-READY snapshot; completed tests remain historical evidence instead of being counted as unstarted work. The current buffer is14 READY items after removing six completed scopes and two now-active scopes, then adding two genuinely independent READY tasks. A third new public-byte audit briefly ran and completed a bounded access attempt; its remaining public verification is WAITING_EXTERNAL, not READY or still running. The20-item target has a six-item gap. Portfolio coverage is five projects, but only four are currently executing: RecoveryUI has completed validation and is awaiting review, not running a new fix.
+
+The prior coordinated forced-stop investigation atce1da4fa is preserved unchanged. Navigator/camera and Player prebackup work remain stopped; ordinary work on other tracks continues without impersonation, permission changes or reassignment of the denied actions. READY source/design/test packages below retain existing owners and their overlap boundaries. A temporarily started fifth project is not silently carried forward after its bounded attempt ends.
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "EVENT": "PORTFOLIO_COMPLETION_AND_CAPACITY_RECONCILIATION",
+  "OBSERVED_AT": "2026-10-07T05:11:20Z",
+  "SOURCE_HEAD": "ce1da4fad5046a1e0cf0bfde9f6c4270cf8604c3",
+  "OBSERVED_MAIN": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+  "PR": 516,
+  "STATE_APPLICATION": "Apply these STATUS_UPDATES after the04:30refresh, then add NEW_ITEMS. Earlier snapshots/history remain unchanged.",
+  "COUNTS": {
+    "prior_ready": 20,
+    "removed_completed": 6,
+    "removed_active": 2,
+    "new_ready": 2,
+    "current_ready": 14,
+    "ready_target": 20,
+    "ready_target_gap": 6,
+    "total_historical_and_current_rows": 54,
+    "portfolio_coverage": 5,
+    "actual_executing_projects": 4,
+    "active_target_min": 5,
+    "active_target_gap": 1
+  },
+  "PORTFOLIO": [
+    {
+      "project": "BSC56",
+      "status": "ACTIVE",
+      "scope": "Pinned-block readback/CI boundary; source/helper security scope complete; local successor review in progress"
+    },
+    {
+      "project": "Customer",
+      "status": "ACTIVE",
+      "scope": "Closed-world construction P1/P2 review repairs and bounded owner/ecology work; complete ecosystem/acceptance not claimed"
+    },
+    {
+      "project": "RecoveryUI",
+      "status": "READY_FOR_REVIEW",
+      "scope": "#528 exact validation complete, no new fix running; integration lane unassigned here"
+    },
+    {
+      "project": "3D cargo",
+      "status": "ACTIVE",
+      "scope": "Test-only cargo gallery/ATM-transition evidence repair; no stopped camera production changes"
+    },
+    {
+      "project": "Company",
+      "status": "ACTIVE",
+      "scope": "Backlog reconciliation and existing investigation/GM coordination; formal registry untouched"
+    }
+  ],
+  "EXCLUDED_FROM_ACTIVE": [
+    {
+      "project": "Navigator",
+      "status": "BLOCKED_GUARDIAN",
+      "reason": "Camera/framing/movement-test stopped; no Human continuation supplied to this refresh"
+    },
+    {
+      "project": "Player prebackup",
+      "status": "BLOCKED_GUARDIAN",
+      "reason": "Exact pre-restore backup/write-readback scope stopped; not replaced by RecoveryUI"
+    },
+    {
+      "project": "External identity readiness",
+      "status": "COMPLETE_SCOPED",
+      "reason": "#526 ready package completed; new public-byte/mask tasks READY but not started"
+    },
+    {
+      "project": "External public-byte audit",
+      "status": "BOUNDED_ATTEMPT_COMPLETE_WAITING_EXTERNAL",
+      "reason": "Source verified; no origin response. No repeated audit claimed running."
+    }
+  ],
+  "CAPACITY": "A separate public verifier could not initially be allocated, then started05:10 and completed its bounded attempt before05:11:20. Actual active count briefly reached5, then returned4. No ongoing verifier or unresolved task-slot blocker is asserted at this final snapshot.",
+  "HEADS": [
+    {
+      "pr": 516,
+      "head": "ce1da4fad5046a1e0cf0bfde9f6c4270cf8604c3",
+      "branch": "dot/engineering-handbook-20261006",
+      "state": "open",
+      "draft": true
+    },
+    {
+      "pr": 523,
+      "head": "c8e930c1cf49432f21dd3420ae8fb479e884d814",
+      "branch": "dot/k11520-navigator-reconstruction-20261007",
+      "state": "open",
+      "draft": true
+    },
+    {
+      "pr": 524,
+      "head": "3ae14f034947bc1b519bcba97d4126ba7618034f",
+      "branch": "dot/k11520-bsc56-production-20261007",
+      "state": "open",
+      "draft": true
+    },
+    {
+      "pr": 525,
+      "head": "1b32087243ee9489c855b56db786a165184367ab",
+      "branch": "dot/customer-project-digital-world-20261007",
+      "state": "open",
+      "draft": true
+    },
+    {
+      "pr": 526,
+      "head": "c9ac7cf155ae7324a950c262175b930e9a2367b6",
+      "branch": "chatgpt-handoff/KGEN-KAIOS-EXTERNAL-IDENTITY-READINESS-20261007",
+      "state": "open",
+      "draft": true
+    },
+    {
+      "pr": 527,
+      "head": "ba7cd3d635afd69335f02ae291edb26701544b74",
+      "branch": "chatgpt-handoff/K11520-CARGO-VISUAL-LIFETIME-20261007",
+      "state": "open",
+      "draft": true
+    },
+    {
+      "pr": 528,
+      "head": "c65fd248b800159e9f7004b66559452350afd024",
+      "branch": "dot/recovery-verify-feedback-20261007",
+      "state": "open",
+      "draft": true
+    },
+    {
+      "pr": 529,
+      "head": "6e4763c496425ecaa91640110ecb302306f83110",
+      "branch": "dot/customer-pond-owner-20261007",
+      "state": "open",
+      "draft": true
+    }
+  ],
+  "CI_OBSERVATIONS": [
+    {
+      "pr": 524,
+      "head": "3ae14f034947bc1b519bcba97d4126ba7618034f",
+      "observed_at": "2026-10-07T05:03:16Z",
+      "runs": [
+        {
+          "id": 37573470906,
+          "name": "11520 Responsive Product QA",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37573470857,
+          "name": "11520 Game Product QA",
+          "event": "pull_request",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 37573470804,
+          "name": "11520 Universal Exchange V2",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37573470801,
+          "name": "KAIOS Portal Product QA",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37573470758,
+          "name": "11520 Trading Readiness",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37573467794,
+          "name": "11520 Game Product QA",
+          "event": "push",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 37573467834,
+          "name": "11520 Universal Exchange V2",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "pr": 525,
+      "head": "1b32087243ee9489c855b56db786a165184367ab",
+      "observed_at": "2026-10-07T05:03:16Z",
+      "runs": [
+        {
+          "id": 37573383887,
+          "name": "11520 Universal Exchange V2",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37573381408,
+          "name": "11520 Universal Exchange V2",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "pr": 526,
+      "head": "c9ac7cf155ae7324a950c262175b930e9a2367b6",
+      "observed_at": "2026-10-07T05:03:16Z",
+      "runs": [
+        {
+          "id": 37571235655,
+          "name": "KAIOS brand review",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "pr": 527,
+      "head": "d024920e2d1becb8bbacf8a4b90a420d0416a1a4",
+      "observed_at": "2026-10-07T05:03:16Z",
+      "runs": [
+        {
+          "id": 37572849210,
+          "name": "11520 Universal Exchange V2",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37572849154,
+          "name": "KAIOS Portal Product QA",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37572849449,
+          "name": "11520 Responsive Product QA",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37572849203,
+          "name": "11520 Game Product QA",
+          "event": "pull_request",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 37572836505,
+          "name": "11520 Universal Exchange V2",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37572836497,
+          "name": "11520 Game Product QA",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "pr": 528,
+      "head": "c65fd248b800159e9f7004b66559452350afd024",
+      "observed_at": "2026-10-07T05:03:16Z",
+      "runs": [
+        {
+          "id": 37573907815,
+          "name": "KAIOS Backend Recovery QA",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "pr": 529,
+      "head": "6e4763c496425ecaa91640110ecb302306f83110",
+      "observed_at": "2026-10-07T05:03:16Z",
+      "runs": [
+        {
+          "id": 37574119617,
+          "name": "World Viewer Product QA",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 37574066124,
+          "name": "World Viewer Product QA",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "CI_SCOPE": "#527 advanced tod024→ba7 after the listed CI observation; old d024 results do not validate ba7. #529 initial green CI does not override later P1/P2 review findings. Local BSC144pass successor is not the currently published3ae source.",
+  "RECOVERY_UI_ACCEPTANCE": {
+    "head": "c65fd248b800159e9f7004b66559452350afd024",
+    "run_id": 37573907815,
+    "ci": "SUCCESS_DIRECT_READBACK",
+    "backend_cases": 62,
+    "player_cases": 39,
+    "native_flow": "Verify→RequestEmail",
+    "screenshots": 11,
+    "artifact_id": 11461674193,
+    "artifact_sha256": "6a260b89e18c04d7bce6231e64b522e6813e9fcd02447eec069067d20c921687",
+    "artifact_and_visual_validation": "COMPLETE_COORDINATOR_REPORTED; not re-downloaded by this documentation writer",
+    "state": "READY_FOR_REVIEW_NOT_RUNNING"
+  },
+  "HEAVY_WORK_OBSERVATION": {
+    "observed_at": "2026-10-07T05:04:41Z",
+    "verified_browser_ci_batches": 2,
+    "heads": [
+      "3ae14f034947bc1b519bcba97d4126ba7618034f",
+      "d024920e2d1becb8bbacf8a4b90a420d0416a1a4"
+    ],
+    "active_browser_jobs": 3,
+    "run_ids": [
+      37573470857,
+      37573467794,
+      37572849203
+    ],
+    "steps": [
+      "BSC Game push/PR deterministic settlement Chromium",
+      "Cargo simulation-regression native Submit"
+    ],
+    "local_heavy_processes": "UNKNOWN",
+    "boundary": "Timestamped observed batches, not five simultaneously computing products or a current claim about ba7."
+  },
+  "STATUS_UPDATES": [
+    {
+      "id": "Q08-CUSTOMER-STRICT-INPUT",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "#5251b320872 retains completed strict site/design numeric, extra-field and forged-authority tests; no longer READY."
+    },
+    {
+      "id": "Q08-CUSTOMER-IMMUTABILITY",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "#5251b320872 retains owner-byte/no-network/no-storage guard tests; no longer READY."
+    },
+    {
+      "id": "Q08-CUSTOMER-JOURNAL-COMPAT",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "#5251b320872 retains saved draft revisions and existing Company/SQLite replay/CAS/rollback/lost-ACK coverage; no longer READY."
+    },
+    {
+      "id": "Q08-CUSTOMER-CONSTRUCTION-PROVENANCE",
+      "status": "ACTIVE_REVIEW_REPAIR",
+      "evidence": "#5296e4763c4 implements opt-in closed-world construction/inspection. Initial World Viewer CI passed, but independent review found P1 forged/missing reservation evidence and P2 per-call shift-quota reset. Repairs are ACTIVE; not complete or READY_FOR_MERGE."
+    },
+    {
+      "id": "Q08-CUSTOMER-COVERAGE",
+      "status": "READY",
+      "evidence": "Owner05:07 confirms executable per-field supplied/applied/held map and tests still missing. Generic documented holds do not complete this task."
+    },
+    {
+      "id": "Q08-CUSTOMER-PERSIST",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "#5251b320872 adds explicit current-draft submission and hash-bound conditional simulation proposal/acknowledgement through existing local journals. Execution remains held; no asset/delivery/receipt."
+    },
+    {
+      "id": "Q08-CUSTOMER-ADAPTER",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "#525 current generalized draft and read-only adapter checkpoint is complete within its declared scope. Remaining owner coverage map and #529 repairs are tracked separately."
+    },
+    {
+      "id": "Q04-BSC-ALLOWANCE-RACE",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Owner confirms allowance exposure/reset safety complete in reviewed7bcdd0d6 helper retained by#5243ae14f03;76focused+89adversarial assertions are scoped evidence, not live wallet proof."
+    },
+    {
+      "id": "Q04-BSC-BINDING-BUDGET",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Bounded cloned binding snapshot now rejects accessor/serialization hooks, deep/oversized/cyclic/nonplain/sparse input; reviewed helper retained by#5243ae14f03. No longer READY."
+    },
+    {
+      "id": "Q04-BSC-CONFIRMATION",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Eight-field unsigned confirmation data model complete in#5243ae14f03. Actual contextual signing-review UI is a new bounded task; wallet execution remains separately held."
+    },
+    {
+      "id": "Q04-BSC-READBACK-DESIGN",
+      "status": "ACTIVE",
+      "evidence": "Owner05:04 reports pinned-block BSC56 readback/CI-boundary candidate prepared locally with144passes and under coordinator review. Last remote remains3ae14f03; local work is not described as remotely preserved."
+    },
+    {
+      "id": "Q04-BSC-SOURCE",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Existing-organ unsigned construction/helper source checkpoint complete on#5243ae14f03; full ABI/package provenance remain distinct READY tasks."
+    },
+    {
+      "id": "Q04-BSC-DOMAIN",
+      "status": "READY",
+      "evidence": "Owner reconfirms production USD INDEX versus USDT reference reconciliation is independent pending work; unresolved KAIOS trading semantics remain held."
+    },
+    {
+      "id": "Q04-BSC-ABI-DRIFT",
+      "status": "READY",
+      "evidence": "Owner reconfirms full compiled Brain/Position/Trigger ABI drift validator; current helper covers only four custody-method ABI bindings."
+    },
+    {
+      "id": "Q04-BSC-PACKAGE-PROVENANCE",
+      "status": "READY",
+      "evidence": "Owner reconfirms broader unsigned deployment-package provenance validator remains unimplemented; do not repeat completed helper-only guards."
+    },
+    {
+      "id": "Q15-NAV-FAILURES",
+      "status": "BLOCKED_GUARDIAN",
+      "evidence": "Camera framing/movement-test work was forced-stopped. The exact coordinated investigation atce1da4fa is preserved; no resumption/reassignment/retry without explicit Human continuation and applicable action requirements."
+    },
+    {
+      "id": "Q15-NAV-ACCEPT",
+      "status": "HOLD_STOPPED_SCOPE",
+      "evidence": "No active completion or release work is assigned through this refresh. Existing#523c8e930c1 source stays preserved; blocked camera work is not replaced."
+    },
+    {
+      "id": "Q02-PLAYER-GUARD",
+      "status": "BLOCKED_GUARDIAN",
+      "evidence": "Pre-restore backup conflict/write-readback action remains precisely stopped; no resumed patch, replacement worker or continuation is inferred from RecoveryUI#528."
+    },
+    {
+      "id": "Q02-PLAYER-COMPAT",
+      "status": "HOLD_SCOPE_REVIEW",
+      "evidence": "Retain exact stopped-action boundary; this refresh does not restart Player guard or its paused lane."
+    },
+    {
+      "id": "Q02-PLAYER-BROWSER",
+      "status": "DEPENDENCY_QUEUED",
+      "evidence": "Blocked Player guard is not resumed; backend RecoveryUI#528 evidence does not establish this task's completion."
+    },
+    {
+      "id": "Q15-3D-DEPENDENCY",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Read-only resource-lifetime call-site audit progressed into bounded#527cargo cleanup. No measured GPU-memory/FPS claim; unrelated Navigator/Player production files remain excluded."
+    },
+    {
+      "id": "Q19-IDENTITY-ASSETS",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "#526c9ac7cf1 repository readiness complete; exact-head brandCI37571235655SUCCESS. New public-byte and destination-mask checks below are not counted as already done."
+    },
+    {
+      "id": "Q19-IDENTITY-PACKAGE",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "#526 public requirements/package preparation complete within source-access limits. No new application, account ownership proof or acceptance claim."
+    },
+    {
+      "id": "Q20-COMPANY-QUEUE",
+      "status": "ACTIVE",
+      "evidence": "Preserve this bounded reconciliation alongside completed three-layer investigation atce1da4fa; coordinator GM/capability routing continues without a verified GM response or authority change."
+    }
+  ],
+  "NEW_ITEMS": [
+    {
+      "id": "Q04-BSC-REVIEW-UI",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Build contextual unsigned signing-review presentation",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs",
+        "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
+        "tests/11520-real-trading-preflight-ui.test.mjs"
+      ],
+      "input": "Completed#5243ae14f03 pure review output and eight Human review fields; deployed binding and real execution are not required to render a blocked review.",
+      "output": "Existing-context UI for chain/wallet/contract/function/token/amount/effect/exposure, clearly distinguishing proposal and execution holds.",
+      "acceptance_test": "Missing binding/owner confirmation stays visibly blocked; account/head changes invalidate displayed review. No provider signing/broadcast; browser/screenshots needed for eventual UI acceptance.",
+      "rollback": "Revert only isolated UI/tests; preserve simulation ledger and user state.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_UI_AND_TEST_PACKAGE",
+      "source_ref": "PR524@3ae14f034947bc1b519bcba97d4126ba7618034f",
+      "formal_claim": false
+    },
+    {
+      "id": "Q04-BSC-REGISTRY-BINDING",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "DEPENDENCY_QUEUED",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Bind readback to separately reviewed registry",
+      "current_paths": [
+        "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json",
+        "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs"
+      ],
+      "input": "Exact readback/source schema after current review; current user-supplied digest is not independent authority.",
+      "output": "Bounded readback-to-reviewed-registry binding generator using existing owners.",
+      "acceptance_test": "Expected digest comes from reviewed registry rather than same untrusted request; stale/mismatched head/code/account/nonce fail closed.",
+      "rollback": "Revert candidate generator/UI binding without changing live contract or funds.",
+      "dependencies": [
+        "Q04-BSC-READBACK-DESIGN",
+        "CURRENT_READBACK_SCHEMA_REVIEW"
+      ],
+      "work_kind": "BOUNDED_DEPENDENT_IMPLEMENTATION",
+      "source_ref": "Owner05:04 envelope",
+      "formal_claim": false
+    },
+    {
+      "id": "Q19-IDENTITY-PUBLIC-BYTES",
+      "parent": "Q19",
+      "track": "ExternalIdentity",
+      "status": "WAITING_EXTERNAL",
+      "owner": "dot coordinator / existing external identity readiness lane",
+      "title": "Verify publicly served logo bytes",
+      "current_paths": [
+        "assets/kgen/kgen-logo-64.png",
+        "assets/kgen/kgen-logo.svg",
+        "assets/kgen/kgen-logo-256.png",
+        "KGEN/registry/BscScan/KGEN_BSCSCAN_TOKEN_INFO_SUBMISSION_V1.md",
+        "assets/kaios/README.md"
+      ],
+      "input": "#526c9ac7cf baseline confirmed by the completed bounded public verifier; exact three URLs attempted.",
+      "public_urls": [
+        "https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-64.png",
+        "https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo.svg",
+        "https://klineodyssey.github.io/kline-odyssey/assets/kgen/kgen-logo-256.png"
+      ],
+      "output": "Committed source digests verified; public tool returned inaccessible without an origin HTTP response. Served status/MIME/bytes equality remain NOT_VERIFIED, not404.",
+      "acceptance_test": "Actual response bytes match committed expected assets; redirect/error/block is recorded without bypass or claimed platform acceptance.",
+      "rollback": "Read-only; supersede only the scoped evidence record.",
+      "dependencies": [
+        "PERMITTED_PUBLIC_RESPONSE_ACCESS"
+      ],
+      "resource_state": "BOUNDED_AUDIT_COMPLETED_NOT_RUNNING",
+      "work_kind": "READ_ONLY_PUBLIC_ARTIFACT_VALIDATION",
+      "source_ref": "PR526@c9ac7cf155ae7324a950c262175b930e9a2367b6",
+      "formal_claim": false
+    },
+    {
+      "id": "Q19-IDENTITY-MASK-QA",
+      "parent": "Q19",
+      "track": "ExternalIdentity",
+      "status": "READY",
+      "owner": "dot coordinator / existing external identity readiness lane",
+      "title": "Check shared mark in destination visual masks",
+      "current_paths": [
+        "assets/kgen/kgen-logo-256.png",
+        "assets/kaios/kaios-logo-256.png",
+        "assets/kaios/README.md",
+        "KGEN/registry/BscScan/KGEN_BSCSCAN_TOKEN_INFO_SUBMISSION_V1.md"
+      ],
+      "input": "#526 leaves circular-mask and light/dark rendering unchecked; existing shared256px28,387-byte mark is the format candidate.",
+      "output": "Bounded local visual evidence of circular-mask/light/dark readability using unchanged existing assets.",
+      "acceptance_test": "No cropped identifying geometry or unreadable contrast at intended display sizes; report format test only, not submission acceptance.",
+      "rollback": "Read-only asset QA; no artwork replacement or external upload.",
+      "dependencies": [],
+      "resource_state": "NOT_RUNNING",
+      "work_kind": "READ_ONLY_ASSET_VISUAL_QA",
+      "source_ref": "PR526@c9ac7cf155ae7324a950c262175b930e9a2367b6",
+      "formal_claim": false
+    },
+    {
+      "id": "Q15-3D-CARGO-EVIDENCE",
+      "parent": "Q15",
+      "track": "3DWorld",
+      "status": "ACTIVE",
+      "owner": "dot cargo visual cleanup engineering owner",
+      "title": "Finish cargo cleanup visual evidence",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs",
+        "K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs",
+        "K線西遊記/temples/11520/tests/11520-browser-item-visual.mjs",
+        "K線西遊記/temples/11520/README.md"
+      ],
+      "input": "#527 cleanup source preserved; test review found gallery framing and missing rerender after ATM transition.",
+      "output": "Test-only harness correction plus exact-head browser/screenshot evidence for owned cargo disposal.",
+      "acceptance_test": "Owned geometry/material disposal once; unchanged/borrowed resources retained; corrected gallery actually renders transition. No GPU leak/FPS claim from disposal spies.",
+      "rollback": "Revert only scoped cargo/test candidate, retaining domain state and unrelated visual owners.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_BROWSER_EVIDENCE_REPAIR",
+      "source_ref": "PR527@ba7cd3d635afd69335f02ae291edb26701544b74",
+      "formal_claim": false
+    },
+    {
+      "id": "Q02-RECOVERY-VERIFY-REVIEW",
+      "parent": "Q02",
+      "track": "RecoveryUI",
+      "status": "READY_FOR_REVIEW",
+      "owner": "dot coordinator / existing RecoveryUI lane",
+      "title": "Review accepted Verify-feedback candidate for integration",
+      "current_paths": [
+        "KAIOS/backend/web/app.mjs",
+        "KAIOS/backend/test/identity.test.mjs",
+        "KAIOS/backend/test/browser.mjs",
+        "KAIOS/backend/README.md"
+      ],
+      "input": "#528c65 exact-head CI success and coordinator-verified fresh artifact/screenshots.",
+      "output": "Bounded integration decision under the single merge lane; no active new fix or merge performed here.",
+      "acceptance_test": "Retain exact-head/source/62backend/39Player/native Verify→RequestEmail and11 reviewed screenshots; no old-head pass substitution.",
+      "rollback": "No mutation in this queue; any later authorized integration retains current legacy recovery boundaries.",
+      "dependencies": [
+        "COORDINATOR_INTEGRATION_LANE"
+      ],
+      "work_kind": "COMPLETED_VALIDATION_REVIEW_QUEUE",
+      "source_ref": "PR528@c65fd248b800159e9f7004b66559452350afd024",
+      "formal_claim": false
+    }
+  ],
+  "READY_IDS": [
+    "Q07-COMPANY-OFFLINE",
+    "Q04-BSC-DOMAIN",
+    "Q08-CUSTOMER-COVERAGE",
+    "Q04-BSC-ABI-DRIFT",
+    "Q04-BSC-PACKAGE-PROVENANCE",
+    "Q15-3D-FRAME-BUDGET",
+    "Q10-MARKET-LINEAGE",
+    "Q12-MARKET-MATCHING",
+    "Q12-MARKET-SETTLEMENT-INGRESS",
+    "Q11-LIFE-RIGHTS-PORTABILITY",
+    "Q13-LOGISTICS-RECEIPT",
+    "Q20-GIT-RECOVERY-PROOF",
+    "Q04-BSC-REVIEW-UI",
+    "Q19-IDENTITY-MASK-QA"
+  ],
+  "SOURCE_REFRESH": {
+    "boot_v1_4_blob": "4286d1aede181f45eb274196a6799ac18ced42ec",
+    "main_boot_blob": "b85c9a34a81810e0063480092025a9ef02d456cc",
+    "company_boot_blob": "c58eddb13da0a3ee520202f253290f560f368f04",
+    "agents_blob": "2e5e7090a184a5a8e4390db3d8e6104936dfaf7d",
+    "formal_workqueue_blob": "1bc7a3bbed2f83bf6e28066dbfc5c0b92071fb4c",
+    "worker_registry_blob": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c",
+    "meaning": "Main/paths unchanged; current handoff plus complete investigation read. No fresh formal admission/identity/ACK claim."
+  },
+  "BACKUP": "Coordinator reports PrimeForge full and incremental Git backup complete. This refresh does not independently verify the latest backup ref coverage or recover old cloud/uncommitted files; no private desktop path included.",
+  "PRESERVATION": "Existing#516ce1da4fa investigation,96 appended lines, all prior bytes and Q01–Q20 preserved. Earlier optional PR-body cancellation is not retried.",
+  "AUTHORITY": "Documentation-only current-status append; no formal registry/dispatcher/identity/permission mutation, no resumed stopped action, no private correspondence, no main merge/deployment/external submission/financial action.",
+  "PUBLICATION": "Containing commit; exact ref/tree/full-text verification required before durability claim.",
+  "PUBLIC_ASSET_AUDIT": {
+    "source_head": "c9ac7cf155ae7324a950c262175b930e9a2367b6",
+    "scope": "Exactly three literal public URLs from#526; no heavy test or external submission",
+    "status": "BOUNDED_AUDIT_COMPLETE_PUBLIC_VERIFICATION_WAITING_EXTERNAL",
+    "source_digest_evidence": "COORDINATOR_REPORTED",
+    "source_sha256": {
+      "assets/kgen/kgen-logo-64.png": "36a57aa629115c78ca98a98f16e8f473c20e4e4414a5dd40e354c7ad6c5b4886",
+      "assets/kgen/kgen-logo.svg": "f762aa7d69c715632932eb3e388e4442e12ea9a0b932332e6fed6c4c54ac23ee",
+      "assets/kgen/kgen-logo-256.png": "955afb35b65e7e5c106d774fe6b624d3aee75c6048b311604d35563e97c39e68"
+    },
+    "public_result": "Tool inaccessible; no origin HTTP response, no confirmed404",
+    "served_mime_and_bytes": "NOT_VERIFIED",
+    "active_now": false
+  }
+}
+```
