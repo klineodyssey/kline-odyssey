@@ -2579,14 +2579,23 @@ function selectDynamicCompanyWorker(task, workers) {
       || left.worker_id.localeCompare(right.worker_id))[0] ?? null;
 }
 
+function dynamicCompanyReviewerEligible(task, project, implementer, reviewer, projectOwner = null) {
+  return autonomousEngineeringWorkerEligible(reviewer)
+    && String(reviewer.role ?? "").includes("Reviewer")
+    && autonomousEngineeringActorsDistinct(reviewer, implementer)
+    && ![project?.project_owner_id, implementer?.worker_id].includes(reviewer.worker_id)
+    && (reviewer.review_qualification === true || (Array.isArray(reviewer.review_qualification) && reviewer.review_qualification.includes(task.work_type)))
+    && (projectOwner === null || autonomousEngineeringActorsDistinct(reviewer, projectOwner));
+}
+
 function selectDynamicCompanyReviewer(task, project, implementer, workers) {
   const explicit = project?.reviewer_id ?? task.reviewer_id;
-  if (typeof explicit === "string" && explicit !== "AUTO" && explicit.trim()) return workers.find((worker) => worker.worker_id === explicit) ?? null;
-  return workers.filter((worker) => autonomousEngineeringWorkerEligible(worker)
-      && String(worker.role ?? "").includes("Reviewer")
-      && autonomousEngineeringActorsDistinct(worker, implementer)
-      && ![project?.project_owner_id, implementer?.worker_id].includes(worker.worker_id)
-      && (worker.review_qualification === true || (Array.isArray(worker.review_qualification) && worker.review_qualification.includes(task.work_type))))
+  const projectOwner = workers.find((worker) => worker.worker_id === project?.project_owner_id) ?? null;
+  if (typeof explicit === "string" && explicit !== "AUTO" && explicit.trim()) {
+    const reviewer = workers.find((worker) => worker.worker_id === explicit) ?? null;
+    return dynamicCompanyReviewerEligible(task, project, implementer, reviewer, projectOwner) ? reviewer : null;
+  }
+  return workers.filter((worker) => dynamicCompanyReviewerEligible(task, project, implementer, worker, projectOwner))
     .sort((left, right) => Number(left.current_load ?? 0) - Number(right.current_load ?? 0)
       || Number(right.past_performance ?? 0) - Number(left.past_performance ?? 0)
       || left.worker_id.localeCompare(right.worker_id))[0] ?? null;
@@ -2608,6 +2617,13 @@ function dynamicCompanyCompletionVerified(task, project, repository, observedAt)
   const pr = repository.snapshot.active_task_pr;
   const implementer = registry?.workers?.find((actor) => actor.worker_id === project?.implementer_id);
   const reviewer = registry?.workers?.find((actor) => actor.worker_id === project?.reviewer_id);
+  const projectOwner = registry?.workers?.find((actor) => actor.worker_id === project?.project_owner_id);
+  const dispatchAt = task.dispatch_evidence?.occurred_at;
+  const testsAt = result?.tests?.completed_at;
+  const ciAt = result?.ci?.completed_at;
+  const reviewAt = result?.independent_review?.reviewed_at;
+  const completedAt = result?.completed_at;
+  const validTime = (value) => typeof value === "string" && Number.isFinite(Date.parse(value));
   return claim.status === "VERIFIED"
     && claim.work_id === task.task_id
     && result?.schema === "KAIOS_WORK_COMPLETION_EVIDENCE_V1"
@@ -2616,18 +2632,25 @@ function dynamicCompanyCompletionVerified(task, project, repository, observedAt)
     && result?.head_sha === claim.head_sha
     && result?.tests?.status === "PASS"
     && Number.isInteger(result?.tests?.total) && result.tests.total > 0
+    && validTime(testsAt)
     && result?.ci?.status === "PASS"
     && result?.ci?.head_sha === claim.head_sha
+    && validTime(ciAt)
     && result?.independent_review?.status === "PASS"
     && result?.independent_review?.reviewer_id === project?.reviewer_id
-    && typeof result?.completed_at === "string" && Number.isFinite(Date.parse(result.completed_at))
-    && Date.parse(result.completed_at) <= Date.parse(observedAt)
+    && validTime(reviewAt) && validTime(completedAt) && validTime(dispatchAt)
+    && Date.parse(dispatchAt) <= Date.parse(testsAt)
+    && Date.parse(dispatchAt) <= Date.parse(ciAt)
+    && Date.parse(testsAt) <= Date.parse(reviewAt)
+    && Date.parse(ciAt) <= Date.parse(reviewAt)
+    && Date.parse(reviewAt) <= Date.parse(completedAt)
+    && Date.parse(completedAt) <= Date.parse(observedAt)
     && pr?.number === task.target_pr
     && pr?.head_sha === claim.head_sha
     && pr?.ci_status === "PASS"
     && autonomousEngineeringWorkerEligible(implementer, task)
-    && autonomousEngineeringWorkerEligible(reviewer)
-    && autonomousEngineeringActorsDistinct(implementer, reviewer);
+    && projectOwner
+    && dynamicCompanyReviewerEligible(task, project, implementer, reviewer, projectOwner);
 }
 
 function projectDynamicCompanyOpportunities({ work_queue, projects, repository, observed_at, previous_work_orders, previous_work_orders_verified }) {

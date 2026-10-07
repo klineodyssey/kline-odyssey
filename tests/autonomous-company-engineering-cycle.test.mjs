@@ -69,6 +69,7 @@ const reviewer = Object.freeze({
   life_identity_ref: "LIFE-REVIEWER-0001",
   controller_id: "TEST-CONTROLLER-REVIEWER",
   role: "Independent Reviewer",
+  review_qualification: true,
   allowed_branch_pattern: "review/<Task-ID>"
 });
 const task = Object.freeze({
@@ -1257,28 +1258,44 @@ test("heartbeat result derives lifecycle and duplicate counts from bound queue e
 
 test("DONE counts completed only with hash-bound result exact head CI tests and distinct review", async () => {
   const completionRef = "KGEN-Organization/WorkOrders/DONE_001_RESULT.json";
-  const completionResult = {
-    schema: "KAIOS_WORK_COMPLETION_EVIDENCE_V1", work_id: "DONE-001", result_status: "COMPLETED", head_sha: HEAD_SHA,
-    tests: { status: "PASS", total: 52 }, ci: { status: "PASS", head_sha: HEAD_SHA },
-    independent_review: { status: "PASS", reviewer_id: reviewer.worker_id }, completed_at: "2026-10-07T07:00:30Z"
+  const owner = { ...manager, worker_id: "human-owner-01", life_identity_ref: "LIFE-HUMAN-OWNER-0001", controller_id: "TEST-CONTROLLER-HUMAN-OWNER", role: "Project Owner" };
+  const qualifiedReviewer = { ...reviewer, review_qualification: ["CODE"] };
+  const evaluate = async ({ reviewActor = qualifiedReviewer, projectOwner = owner, dispatchAt = "2026-10-07T07:00:10Z", completedAt = "2026-10-07T07:00:50Z", resultMutation = {}, workerActors = null } = {}) => {
+    const completionResult = {
+      schema: "KAIOS_WORK_COMPLETION_EVIDENCE_V1", work_id: "DONE-001", result_status: "COMPLETED", head_sha: HEAD_SHA,
+      tests: { status: "PASS", total: 54, completed_at: "2026-10-07T07:00:20Z" },
+      ci: { status: "PASS", head_sha: HEAD_SHA, completed_at: "2026-10-07T07:00:30Z" },
+      independent_review: { status: "PASS", reviewer_id: reviewActor.worker_id, reviewed_at: "2026-10-07T07:00:40Z" },
+      completed_at: completedAt, ...resultMutation
+    };
+    const resultContent = JSON.stringify(completionResult);
+    const doneTask = { ...task, task_id: "DONE-001", status: "DONE", target_pr: 353, reviewer_id: reviewActor.worker_id,
+      work_order_ref: "KGEN-Organization/WorkOrders/DONE_001.json", branch: "chatgpt-handoff/DONE-001",
+      dispatch_evidence: { status: "VERIFIED", work_id: "DONE-001", worker_id: worker.worker_id, occurred_at: dispatchAt },
+      completion_evidence: { status: "VERIFIED", work_id: "DONE-001", result_ref: completionRef, result_blob: gitBlobSha(resultContent), head_sha: HEAD_SHA } };
+    const doneProject = { ...activeCompanyProject, task_id: doneTask.task_id, project_owner_id: projectOwner.worker_id, reviewer_id: reviewActor.worker_id };
+    const actors = workerActors ?? [manager, worker, reviewActor, projectOwner];
+    const evidence = await repositoryEvidenceForEnvelopes([{ task: doneTask, project: doneProject }], actors, {
+      extraFiles: { [completionRef]: resultContent }, extraWorkOrderRefs: [completionRef], activeTaskPr: 353
+    });
+    return cycle({ work_queue: [doneTask], projects: [doneProject], workers: actors, repository_evidence: evidence });
   };
-  const resultContent = JSON.stringify(completionResult);
-  const doneTask = { ...task, task_id: "DONE-001", status: "DONE", target_pr: 353,
-    work_order_ref: "KGEN-Organization/WorkOrders/DONE_001.json", branch: "chatgpt-handoff/DONE-001",
-    dispatch_evidence: { status: "VERIFIED", work_id: "DONE-001", worker_id: worker.worker_id, occurred_at: "2026-10-07T07:00:10Z" },
-    completion_evidence: { status: "VERIFIED", work_id: "DONE-001", result_ref: completionRef, result_blob: gitBlobSha(resultContent), head_sha: HEAD_SHA } };
-  const doneProject = { ...activeCompanyProject, task_id: doneTask.task_id };
-  const evidence = await repositoryEvidenceForEnvelopes([{ task: doneTask, project: doneProject }], [manager, worker, reviewer], {
-    extraFiles: { [completionRef]: resultContent }, extraWorkOrderRefs: [completionRef], activeTaskPr: 353
-  });
-  const result = cycle({ work_queue: [doneTask], projects: [doneProject], repository_evidence: evidence });
+  const result = await evaluate();
   assert.equal(result.heartbeat_result.COMPLETED, 1);
   assert.equal(result.opportunity_records[0].STATUS, "COMPLETED");
-  const forged = { ...doneTask, completion_evidence: { ...doneTask.completion_evidence, result_blob: "f".repeat(40) } };
-  const forgedEvidence = await repositoryEvidenceForEnvelopes([{ task: forged, project: doneProject }], [manager, worker, reviewer], {
-    extraFiles: { [completionRef]: resultContent }, extraWorkOrderRefs: [completionRef], activeTaskPr: 353
-  });
-  const held = cycle({ work_queue: [forged], projects: [doneProject], repository_evidence: forgedEvidence });
-  assert.equal(held.heartbeat_result.COMPLETED, 0);
-  assert.ok(held.opportunity_records[0].BLOCKERS.includes("COMPLETION_EVIDENCE_REQUIRED"));
+  const nonReviewer = { ...qualifiedReviewer, role: "Software Engineer" };
+  const unqualifiedReviewer = { ...qualifiedReviewer, review_qualification: false };
+  const sameController = { ...qualifiedReviewer, controller_id: worker.controller_id };
+  const sameLife = { ...qualifiedReviewer, life_identity_ref: worker.life_identity_ref };
+  for (const held of [
+    await evaluate({ reviewActor: nonReviewer }),
+    await evaluate({ reviewActor: unqualifiedReviewer }),
+    await evaluate({ projectOwner: qualifiedReviewer, workerActors: [manager, worker, qualifiedReviewer] }),
+    await evaluate({ reviewActor: sameController }),
+    await evaluate({ reviewActor: sameLife }),
+    await evaluate({ completedAt: "2026-10-07T07:00:05Z" })
+  ]) {
+    assert.equal(held.heartbeat_result.COMPLETED, 0);
+    assert.ok(held.opportunity_records[0].BLOCKERS.includes("COMPLETION_EVIDENCE_REQUIRED"));
+  }
 });
