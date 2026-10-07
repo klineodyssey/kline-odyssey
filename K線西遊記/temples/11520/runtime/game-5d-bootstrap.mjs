@@ -42,6 +42,7 @@ setTimeout(()=>releaseIntro(),BOOT_FAIL_OPEN_MS+900);
   try{const {install11520AvatarFacingCorrection}=await import('./avatar-facing-runtime.mjs');install11520AvatarFacingCorrection()}catch(facingErr){console.warn('[11520 bootstrap] avatar-facing correction degraded',facingErr)}
   try{const {install11520WorldItemDropBridge}=await import('./world-item-drop-bootstrap.mjs');install11520WorldItemDropBridge()}catch(dropErr){console.warn('[11520 bootstrap] world-item drop bridge degraded',dropErr)}
   await import('./game-5d-main.mjs');
+  try{const {install11520ProductProgressBoard}=await import('./product-progress-board.mjs');install11520ProductProgressBoard()}catch(progressErr){console.warn('[11520 bootstrap] product progress board degraded',progressErr)}
   try{const {install11520ControlsV251}=await import('./game-controls-v251.mjs');install11520ControlsV251();guardProductVersion()}catch(controlErr){console.warn('[11520 bootstrap] control skin degraded',controlErr)}
   try{const {install11520JoystickXZXY}=await import('./joystick-xzxy.mjs');install11520JoystickXZXY();guardAxisRail()}catch(planeErr){console.warn('[11520 bootstrap] XYZ plane joystick degraded',planeErr)}
   try{const {install11520XyzInputAuthority}=await import('./xyz-input-authority-runtime.mjs');install11520XyzInputAuthority()}catch(inputErr){console.warn('[11520 bootstrap] XYZ input authority degraded',inputErr)}

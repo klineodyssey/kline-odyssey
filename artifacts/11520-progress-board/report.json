@@ -1,0 +1,278 @@
+{
+  "status": "PASS",
+  "sourceTruthCases": {
+    "stale": "PASS",
+    "future": "PASS",
+    "exactTtl": "PASS",
+    "responseGeneration": "PASS",
+    "failedReadNoResurrection": "PASS"
+  },
+  "reports": [
+    {
+      "profile": {
+        "name": "portrait",
+        "width": 390,
+        "height": 844
+      },
+      "buttonBox": {
+        "x": 290,
+        "y": 70,
+        "width": 44,
+        "height": 44
+      },
+      "controls": {
+        "#joy": {
+          "x": 14,
+          "y": 682,
+          "width": 146,
+          "height": 146
+        },
+        "#cControl": {
+          "x": 224,
+          "y": 684,
+          "width": 42,
+          "height": 132
+        },
+        "#lotsControl": {
+          "x": 274,
+          "y": 684,
+          "width": 42,
+          "height": 132
+        },
+        "#orderFire": {
+          "x": 200,
+          "y": 592,
+          "width": 58,
+          "height": 40
+        },
+        "#attack": {
+          "x": 136,
+          "y": 592,
+          "width": 58,
+          "height": 40
+        }
+      },
+      "layout": {
+        "railOverlaps": [],
+        "cleanUtilityStack": true
+      },
+      "scroll": {
+        "height": 626,
+        "scrollHeight": 1795,
+        "overflow": "auto"
+      },
+      "world": {
+        "player": {
+          "x": 195,
+          "y": 467.13433253616876,
+          "inView": true
+        },
+        "playerUncovered": true,
+        "monsterUncovered": true
+      },
+      "playerChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 96.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 325,
+          "y": 85,
+          "width": 44,
+          "height": 44
+        }
+      },
+      "engineeringChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 96.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 325,
+          "y": 85,
+          "width": 44,
+          "height": 44
+        }
+      },
+      "playerOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 6,
+            "y": 218,
+            "width": 97.3125,
+            "height": 27
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 21,
+            "y": 195,
+            "width": 348,
+            "height": 1701
+          }
+        },
+        "intersection": false
+      },
+      "engineeringOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 6,
+            "y": 218,
+            "width": 97.3125,
+            "height": 27
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 21,
+            "y": 195,
+            "width": 348,
+            "height": 1263
+          }
+        },
+        "intersection": false
+      },
+      "playerMode": "PASS",
+      "engineeringMode": "PASS",
+      "escape": "PASS",
+      "close": "PASS",
+      "focusReturn": "PASS"
+    },
+    {
+      "profile": {
+        "name": "landscape",
+        "width": 844,
+        "height": 390
+      },
+      "buttonBox": {
+        "x": 653,
+        "y": 10,
+        "width": 44,
+        "height": 44
+      },
+      "controls": {
+        "#joy": {
+          "x": 14,
+          "y": 226,
+          "width": 146,
+          "height": 146
+        },
+        "#cControl": {
+          "x": 232,
+          "y": 224,
+          "width": 44,
+          "height": 108
+        },
+        "#lotsControl": {
+          "x": 282,
+          "y": 224,
+          "width": 44,
+          "height": 108
+        },
+        "#orderFire": null,
+        "#attack": null
+      },
+      "layout": {
+        "railOverlaps": [],
+        "cleanUtilityStack": true
+      },
+      "scroll": {
+        "height": 304,
+        "scrollHeight": 1909,
+        "overflow": "auto"
+      },
+      "world": {
+        "player": {
+          "x": 422,
+          "y": 215.85591195391686,
+          "inView": true
+        },
+        "playerUncovered": true,
+        "monsterUncovered": true
+      },
+      "playerChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 32.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 779,
+          "y": 21,
+          "width": 44,
+          "height": 44
+        }
+      },
+      "engineeringChrome": {
+        "#sheetTitle": {
+          "x": 21,
+          "y": 32.5,
+          "width": 133.984375,
+          "height": 21
+        },
+        "#sheetClose": {
+          "x": 779,
+          "y": 21,
+          "width": 44,
+          "height": 44
+        }
+      },
+      "playerOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 346,
+            "y": 301,
+            "width": 103.3125,
+            "height": 31
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 42,
+            "y": 131,
+            "width": 760,
+            "height": 1815.203125
+          }
+        },
+        "intersection": false
+      },
+      "engineeringOverlay": {
+        "toast": {
+          "visible": false,
+          "rect": {
+            "x": 346,
+            "y": 301,
+            "width": 103.3125,
+            "height": 31
+          }
+        },
+        "content": {
+          "visible": true,
+          "rect": {
+            "x": 42,
+            "y": 131,
+            "width": 760,
+            "height": 1367
+          }
+        },
+        "intersection": false
+      },
+      "playerMode": "PASS",
+      "engineeringMode": "PASS",
+      "escape": "PASS",
+      "close": "PASS",
+      "focusReturn": "PASS"
+    }
+  ]
+}

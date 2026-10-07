@@ -18,6 +18,15 @@ Site root: C:\Desktop\kline-odyssey\K線西遊記
 
 ## Frontend File Inventory
 
+### K11520 in-game product progress board (2026-10-08)
+
+| Full path | Purpose | Authority |
+|---|---|---|
+| `K線西遊記/temples/11520/K11520_PRODUCT_PROGRESS_CURRENT.json` | Single controlled current product-status source. | Read-only evidence projection; no completion inference from Draft/CI alone. |
+| `K線西遊記/temples/11520/runtime/product-progress-board.mjs` | PLAYER/ENGINEERING presentation in the existing utility rail and shared sheet. | No second HUD, wallet, settlement, deployment or chain-write authority. |
+| `K線西遊記/temples/11520/tests/11520-progress-board.test.mjs` | Status vocabulary, completeness and truth-boundary regression. | Deterministic local validation. |
+| `K線西遊記/temples/11520/tests/11520-browser-progress-board.mjs` | 390×844 and 844×390 real-browser interaction/visual QA. | Screenshot evidence only; not public release evidence. |
+
 2026-10-01 Portal organs: `assets/kaios-world-registry.mjs`,
 `assets/kaios-portal.mjs`, `assets/kaios-portal.css`, `assets/kaios-audio.mjs`,
 `assets/kaios-audio-ui.mjs`, `assets/kaios-audio.css`,

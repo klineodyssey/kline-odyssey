@@ -194,5 +194,7 @@
   "field_service_next_best_job": "NO_VERIFIED_FIELD_JOB_AVAILABLE",
   "field_service_route_authority": "EXISTING_K280_LAND_AND_UNIVERSE_MAP_ONLY",
   "field_service_revenue": "0",
+  "product_progress_source": "K11520_PRODUCT_PROGRESS_CURRENT.json",
+  "product_progress_board": "MARKET_ORIGIN_UTILITY_OWNER_AND_SHARED_SHEET_READ_ONLY_V1",
   "private_key_storage": "FORBIDDEN"
 }
