@@ -10,7 +10,7 @@
 - Inventory base: `origin/main` at
   `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`.
 - Audit branch:
-  `codex/digital-ant-gatekeeper-provenance-audit-20261007`.
+  `codex/digital-ant-ip-audit-20261007`.
 - This is an evidence inventory and IP-review handoff. It does not decide legal
   ownership, compensation, licensing, employment, or whether theft occurred.
   `THEFT_CONFIRMED = NO` and `IP_INCIDENT_REVIEW_REQUIRED = NOT_YET`.
