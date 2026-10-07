@@ -1,6 +1,6 @@
 import { requireArray, requireFields, requireId, requireEnum } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
-import { stableStringify } from "../shared/utils.mjs";
+import { sha256, stableStringify } from "../shared/utils.mjs";
 
 export const COMPANY_FIELDS = Object.freeze([
   "company_id", "founder_life_id", "name", "wallet_address", "treasury_address", "employees", "equity",
@@ -2069,6 +2069,7 @@ export async function resolveActiveCompanyRepositoryEvidence({
   guardian_evidence_refs = [],
   work_order_refs = [],
   pr_work_order_refs = [],
+  work_order_history_refs = [],
   direct_channel_evidence_refs = [],
   active_task_pr = null,
   fetch_impl = CANONICAL_COMPANY_PUBLIC_FETCH
@@ -2077,6 +2078,7 @@ export async function resolveActiveCompanyRepositoryEvidence({
   requireArray(guardian_evidence_refs, "guardian_evidence_refs");
   requireArray(work_order_refs, "work_order_refs");
   requireArray(pr_work_order_refs, "pr_work_order_refs");
+  requireArray(work_order_history_refs, "work_order_history_refs");
   requireArray(direct_channel_evidence_refs, "direct_channel_evidence_refs");
   invariant(typeof fetch_impl === "function", "PUBLIC_GITHUB_FETCH_REQUIRED", "Public GitHub evidence resolution requires fetch");
   const nodeTestContext = globalThis.process?.env?.NODE_TEST_CONTEXT;
@@ -2093,6 +2095,12 @@ export async function resolveActiveCompanyRepositoryEvidence({
     invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "PR_WORK_ORDER_EVIDENCE_PATH_INVALID", "PR work-order evidence must be a JSON file in KGEN-Organization/WorkOrders");
     return path;
   });
+  const normalizedHistoryRefs = work_order_history_refs.map((entry) => {
+    invariant(entry && typeof entry === "object" && !Array.isArray(entry), "WORK_ORDER_HISTORY_REF_INVALID", "History evidence requires path and commit");
+    invariant(typeof entry.path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(entry.path), "WORK_ORDER_HISTORY_PATH_INVALID", "History evidence must be a WorkOrders JSON path");
+    invariant(/^[0-9a-f]{40}$/.test(entry.commit ?? ""), "WORK_ORDER_HISTORY_COMMIT_INVALID", "History evidence requires an exact commit SHA");
+    return Object.freeze({ path: entry.path, commit: entry.commit });
+  });
   const normalizedChannelRefs = direct_channel_evidence_refs.map((path) => {
     invariant(typeof path === "string" && /^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(path), "DIRECT_CHANNEL_EVIDENCE_PATH_INVALID", "Direct-channel evidence must be a JSON file in KGEN-Organization/WorkOrders");
     return path;
@@ -2102,7 +2110,7 @@ export async function resolveActiveCompanyRepositoryEvidence({
   const snapshot = await readLatestRepositorySnapshot({
     repository: "klineodyssey/kline-odyssey", observed_at, active_task_pr,
     required_check_names: ["company-safe-cycle"], expected_main_sha: current_main_sha,
-    evidence_paths: paths, pr_evidence_paths: normalizedPrWorkOrderRefs, fetch_impl
+    evidence_paths: paths, pr_evidence_paths: normalizedPrWorkOrderRefs, historical_evidence_refs: normalizedHistoryRefs, fetch_impl
   });
   const evidence = Object.freeze({
     status: snapshot.transport_provenance === "DEFAULT_PUBLIC_GITHUB" ? "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED" : "DIAGNOSTIC_REPOSITORY_EVIDENCE_NOT_VERIFIED",
@@ -2586,6 +2594,42 @@ function selectDynamicCompanyReviewer(task, project, implementer, workers) {
 
 const PRODUCED_COMPANY_OPPORTUNITY_RECORDS = new WeakSet();
 
+function dynamicCompanyCompletionVerified(task, project, repository, observedAt) {
+  const claim = task.completion_evidence;
+  if (!claim || typeof claim !== "object" || Array.isArray(claim)) return false;
+  if (typeof claim.result_ref !== "string" || !/^KGEN-Organization\/WorkOrders\/[^/]+\.json$/.test(claim.result_ref)) return false;
+  const file = repository.files[claim.result_ref];
+  if (!file || claim.result_blob !== file.git_object) return false;
+  let result, registry;
+  try {
+    result = JSON.parse(file.content);
+    registry = JSON.parse(repository.files[ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority]?.content);
+  } catch { return false; }
+  const pr = repository.snapshot.active_task_pr;
+  const implementer = registry?.workers?.find((actor) => actor.worker_id === project?.implementer_id);
+  const reviewer = registry?.workers?.find((actor) => actor.worker_id === project?.reviewer_id);
+  return claim.status === "VERIFIED"
+    && claim.work_id === task.task_id
+    && result?.schema === "KAIOS_WORK_COMPLETION_EVIDENCE_V1"
+    && result?.work_id === task.task_id
+    && result?.result_status === "COMPLETED"
+    && result?.head_sha === claim.head_sha
+    && result?.tests?.status === "PASS"
+    && Number.isInteger(result?.tests?.total) && result.tests.total > 0
+    && result?.ci?.status === "PASS"
+    && result?.ci?.head_sha === claim.head_sha
+    && result?.independent_review?.status === "PASS"
+    && result?.independent_review?.reviewer_id === project?.reviewer_id
+    && typeof result?.completed_at === "string" && Number.isFinite(Date.parse(result.completed_at))
+    && Date.parse(result.completed_at) <= Date.parse(observedAt)
+    && pr?.number === task.target_pr
+    && pr?.head_sha === claim.head_sha
+    && pr?.ci_status === "PASS"
+    && autonomousEngineeringWorkerEligible(implementer, task)
+    && autonomousEngineeringWorkerEligible(reviewer)
+    && autonomousEngineeringActorsDistinct(implementer, reviewer);
+}
+
 function projectDynamicCompanyOpportunities({ work_queue, projects, repository, observed_at, previous_work_orders, previous_work_orders_verified }) {
   invariant(Array.isArray(previous_work_orders) && previous_work_orders.length <= 256, "PREVIOUS_WORK_BOUND", "At most 256 previous candidate records may be compared");
   invariant(work_queue.length <= 256, "OPPORTUNITY_BOUND", "At most 256 demands per bounded cycle");
@@ -2622,12 +2666,19 @@ function projectDynamicCompanyOpportunities({ work_queue, projects, repository, 
       project: stableStringify(project), task: stableStringify(task), pr: repository.snapshot.active_task_pr ?? null });
     const canonicalHistoryCandidate = Array.isArray(envelope.previous_work_orders)
       ? envelope.previous_work_orders.find((record) => record?.WORK_ID === task.task_id) : null;
-    // Envelope bytes can describe history, but cannot prove their own Git ancestry.
-    // Until the canonical reader returns a hash-recomputed historical commit/blob
-    // capability, durable predecessor claims fail closed and cannot drive SUPERSEDES.
-    const canonicalHistory = null;
-    const previous = prior.get(task.task_id);
-    const previousVerified = Boolean(previous && previous_work_orders_verified.includes(previous.WORK_ID));
+    const historyKey = canonicalHistoryCandidate
+      ? `${canonicalHistoryCandidate.SOURCE_COMMIT}:${canonicalHistoryCandidate.CANONICAL_HISTORY_REF}` : null;
+    const verifiedHistory = historyKey ? repository.snapshot.history_records?.[historyKey] : null;
+    let canonicalHistory = null;
+    if (verifiedHistory
+        && canonicalHistoryCandidate.SOURCE_BLOB === verifiedHistory.git_object
+        && canonicalHistoryCandidate.RECORD_HASH === verifiedHistory.record_hash) {
+      const claimedRecord = { ...canonicalHistoryCandidate };
+      for (const field of ["CANONICAL_HISTORY_REF", "SOURCE_COMMIT", "SOURCE_BLOB", "RECORD_HASH"]) delete claimedRecord[field];
+      if (stableStringify(claimedRecord) === stableStringify(verifiedHistory.opportunity_record)) canonicalHistory = verifiedHistory.opportunity_record;
+    }
+    const previous = canonicalHistory ?? prior.get(task.task_id);
+    const previousVerified = Boolean(canonicalHistory) || Boolean(previous && previous_work_orders_verified.includes(previous.WORK_ID));
     if ((previous || canonicalHistoryCandidate) && !previousVerified) blockers.push("PREDECESSOR_PROVENANCE_REQUIRED");
     const changed = previousVerified && stableStringify(previous.EVIDENCE_BINDING) !== stableStringify(binding);
     const expired = task.expires_at != null && (!Number.isFinite(Date.parse(task.expires_at)) || Date.parse(task.expires_at) <= Date.parse(observed_at));
@@ -2643,12 +2694,15 @@ function projectDynamicCompanyOpportunities({ work_queue, projects, repository, 
       && Number.isFinite(Date.parse(dispatchEvidence.occurred_at))
       && Date.parse(dispatchEvidence.occurred_at) <= Date.parse(observed_at);
     if (lifecycleNeedsDispatch && !dispatched) blockers.push("DISPATCH_EVIDENCE_REQUIRED");
+    const completionVerified = ["DONE", "COMPLETED"].includes(lifecycle)
+      ? dynamicCompanyCompletionVerified(task, project, repository, observed_at) : false;
+    if (["DONE", "COMPLETED"].includes(lifecycle) && !completionVerified) blockers.push("COMPLETION_EVIDENCE_REQUIRED");
     const projectedStatus = blockers.includes("STALE_MAIN") || expired ? "STALE"
       : waiting ? "WATCHING"
       : blockers.length ? "BLOCKED"
       : ["WORKING", "ACTIVE", "ASSIGN"].includes(lifecycle) ? "ACTIVE"
       : ["REVIEW", "REVIEWING"].includes(lifecycle) ? "REVIEWING"
-      : ["DONE", "COMPLETED"].includes(lifecycle) ? "COMPLETED"
+      : ["DONE", "COMPLETED"].includes(lifecycle) && completionVerified ? "COMPLETED"
       : lifecycle === "BLOCKED" ? "BLOCKED"
       : "PROPOSED_UNADMITTED";
     records.push(Object.freeze({
@@ -2672,7 +2726,7 @@ function projectDynamicCompanyOpportunities({ work_queue, projects, repository, 
       BLOCKERS: Object.freeze(blockers), EVIDENCE_BINDING: binding,
       WATCHER: waiting ? task.watcher_id ?? null : null,
       NEXT_CHECK_CONDITION: waiting ? task.next_check_condition ?? null : null,
-      PREDECESSOR_VERIFICATION: canonicalHistoryCandidate ? "HISTORICAL_GIT_PROVENANCE_NOT_VERIFIED" : previous ? (previousVerified ? "SAME_PROCESS_PRODUCED_RECORD" : "NOT_VERIFIED") : "NOT_APPLICABLE",
+      PREDECESSOR_VERIFICATION: canonicalHistory ? "CANONICAL_GIT_ANCESTOR_RECORD" : canonicalHistoryCandidate ? "HISTORICAL_GIT_PROVENANCE_NOT_VERIFIED" : previous ? (previousVerified ? "SAME_PROCESS_PRODUCED_RECORD" : "NOT_VERIFIED") : "NOT_APPLICABLE",
       IDEMPOTENT: Boolean(previousVerified && !changed), DISPATCHED: dispatched, ACK: "ACK_NOT_VERIFIED"
     }));
   }
@@ -3287,6 +3341,7 @@ export async function readLatestRepositorySnapshot(options) {
     required_check_names = [],
     evidence_paths = [],
     pr_evidence_paths = [],
+    historical_evidence_refs = [],
     expected_main_sha = null,
     fetch_impl = CANONICAL_COMPANY_PUBLIC_FETCH
   } = options;
@@ -3302,6 +3357,12 @@ export async function readLatestRepositorySnapshot(options) {
   invariant(Array.isArray(pr_evidence_paths) && pr_evidence_paths.length <= 16, "GITHUB_PR_EVIDENCE_PATH_BOUND", "PR evidence read accepts at most 16 files");
   invariant(pr_evidence_paths.every((path) => typeof path === "string" && path.length <= 300 && /^[A-Za-z0-9_./-]+$/.test(path) && !path.startsWith("/") && !path.split("/").some((part) => !part || part === "." || part === "..")), "GITHUB_PR_EVIDENCE_PATH_INVALID", "PR evidence paths must be safe repository-relative paths");
   invariant(active_task_pr !== null || pr_evidence_paths.length === 0, "GITHUB_PR_REQUIRED_FOR_PR_EVIDENCE", "PR evidence paths require an active pull request");
+  invariant(Array.isArray(historical_evidence_refs) && historical_evidence_refs.length <= 16, "GITHUB_HISTORY_EVIDENCE_BOUND", "Historical evidence accepts at most 16 files");
+  invariant(historical_evidence_refs.every((entry) => entry && typeof entry === "object" && !Array.isArray(entry)
+    && /^[0-9a-f]{40}$/.test(entry.commit ?? "")
+    && typeof entry.path === "string" && entry.path.length <= 300 && /^[A-Za-z0-9_./-]+$/.test(entry.path)
+    && !entry.path.startsWith("/") && !entry.path.split("/").some((part) => !part || part === "." || part === "..")),
+  "GITHUB_HISTORY_EVIDENCE_INVALID", "Historical evidence requires safe paths and exact commits");
   invariant(expected_main_sha === null || /^[0-9a-f]{40}$/.test(expected_main_sha), "INVALID_EXPECTED_MAIN_SHA", "Expected main must be an exact SHA");
   const headers = Object.freeze({
     Accept: "application/vnd.github+json",
@@ -3342,6 +3403,29 @@ export async function readLatestRepositorySnapshot(options) {
     const content = decodePublicGitHubBase64(file.content);
     invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_BLOB_HASH_MISMATCH", `Blob hash mismatch: ${path}`);
     files[path] = Object.freeze({ path, git_object: file.sha, content });
+  }
+  const historyFiles = {};
+  const historyRecords = {};
+  for (const entry of historical_evidence_refs) {
+    const commit = await read(`/commits/${entry.commit}`);
+    invariant(commit.sha === entry.commit, "GITHUB_HISTORY_COMMIT_MISMATCH", "Historical evidence commit did not resolve exactly");
+    const ancestry = await read(`/compare/${entry.commit}...${mainCommit.sha}`);
+    invariant(ancestry.merge_base_commit?.sha === entry.commit && ancestry.behind_by === 0 && Number.isInteger(ancestry.ahead_by) && ancestry.ahead_by >= 0,
+      "GITHUB_HISTORY_NOT_MAIN_ANCESTOR", "Historical evidence must be an ancestor of current main");
+    const file = await read(`/contents/${entry.path.split("/").map(encodeURIComponent).join("/")}?ref=${entry.commit}`);
+    invariant(file.type === "file" && file.encoding === "base64" && typeof file.content === "string" && file.content.length <= 1400000, "PUBLIC_GITHUB_HISTORY_FILE_INVALID", `Invalid or oversized historical evidence: ${entry.path}`);
+    const content = decodePublicGitHubBase64(file.content);
+    invariant(await gitBlobObjectId(content) === file.sha, "PUBLIC_GITHUB_HISTORY_BLOB_HASH_MISMATCH", `Historical blob hash mismatch: ${entry.path}`);
+    let payload;
+    try { payload = JSON.parse(content); } catch { invariant(false, "GITHUB_HISTORY_JSON_INVALID", "Historical work-order evidence must be valid JSON"); }
+    invariant(payload?.schema === "KAIOS_DOT_WORK_ORDER_HISTORY_V1" && payload?.opportunity_record && typeof payload.opportunity_record === "object" && !Array.isArray(payload.opportunity_record)
+      && /^[0-9a-f]{64}$/.test(payload.record_hash ?? "")
+      && await sha256(payload.opportunity_record) === payload.record_hash,
+    "GITHUB_HISTORY_RECORD_HASH_MISMATCH", "Historical record hash must recompute from canonical record bytes");
+    const key = `${entry.commit}:${entry.path}`;
+    invariant(!Object.hasOwn(historyFiles, key), "GITHUB_HISTORY_EVIDENCE_DUPLICATE", "Historical evidence refs must be unique");
+    historyFiles[key] = Object.freeze({ path: entry.path, commit: entry.commit, git_object: file.sha, content });
+    historyRecords[key] = Object.freeze({ path: entry.path, commit: entry.commit, git_object: file.sha, record_hash: payload.record_hash, opportunity_record: Object.freeze(payload.opportunity_record) });
   }
   let pullRequest = null;
   const prFiles = {};
@@ -3390,7 +3474,7 @@ export async function readLatestRepositorySnapshot(options) {
     }
   }
 
-  if (evidence_paths.length || pr_evidence_paths.length) {
+  if (evidence_paths.length || pr_evidence_paths.length || historical_evidence_refs.length) {
     const refreshed = await read(`/commits/${encodeURIComponent(defaultBranch)}`);
     invariant(refreshed.sha === mainCommit.sha, "GITHUB_MAIN_MOVED_DURING_SNAPSHOT", "Default branch changed during evidence collection");
   }
@@ -3399,6 +3483,8 @@ export async function readLatestRepositorySnapshot(options) {
     transport_provenance: fetch_impl === CANONICAL_COMPANY_PUBLIC_FETCH ? "DEFAULT_PUBLIC_GITHUB" : "DIAGNOSTIC_CUSTOM_TRANSPORT",
     files: Object.freeze(files),
     pr_files: Object.freeze(prFiles),
+    history_files: Object.freeze(historyFiles),
+    history_records: Object.freeze(historyRecords),
     observed_at,
     repository,
     default_branch: defaultBranch,

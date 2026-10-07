@@ -28,9 +28,11 @@ import {
 } from "../core/company/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
 import { assertAppendOnlyChain } from "../core/history/index.mjs";
+import { stableStringify } from "../core/shared/utils.mjs";
 
 const MAIN_SHA = "9".repeat(40);
 const HEAD_SHA = "a".repeat(40);
+const HISTORY_SHA = "7".repeat(40);
 const WORK_ORDER_REF = "KGEN-Organization/WorkOrders/SAFE_ENGINEERING_001.json";
 const SECOND_WORK_ORDER_REF = "KGEN-Organization/WorkOrders/SAFE_ENGINEERING_002.json";
 const acknowledgedWorker = Object.freeze({
@@ -122,19 +124,25 @@ function gitBlobSha(content) {
   return createHash("sha1").update(Buffer.from(`blob ${body.length}\0`, "utf8")).update(body).digest("hex");
 }
 
-function activeCompanyEvidenceFetch(files, { corruptPath = null } = {}) {
+function activeCompanyEvidenceFetch(files, { corruptPath = null, historicalFiles = {} } = {}) {
   return async (url) => {
     const parsed = new URL(url);
     if (parsed.pathname === "/repos/klineodyssey/kline-odyssey") return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
     if (parsed.pathname.endsWith("/commits/main")) {
       return { ok: true, status: 200, json: async () => ({ sha: MAIN_SHA, commit: { committer: { date: "2026-10-07T07:00:00Z" } } }) };
     }
+    if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/commits/${HISTORY_SHA}`) return { ok: true, status: 200, json: async () => ({ sha: HISTORY_SHA, commit: { committer: { date: "2026-10-06T07:00:00Z" } } }) };
+    if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/compare/${HISTORY_SHA}...${MAIN_SHA}`) return { ok: true, status: 200, json: async () => ({ merge_base_commit: { sha: HISTORY_SHA }, ahead_by: 2, behind_by: 0 }) };
+    if (parsed.pathname === "/repos/klineodyssey/kline-odyssey/pulls/353") return { ok: true, status: 200, json: async () => ({ state: "open", draft: false, mergeable: true, mergeable_state: "clean", head: { sha: HEAD_SHA, ref: "chatgpt-handoff/DONE-001", repo: { full_name: "klineodyssey/kline-odyssey" } }, base: { ref: "main", repo: { full_name: "klineodyssey/kline-odyssey" } } }) };
+    if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/compare/main...${HEAD_SHA}`) return { ok: true, status: 200, json: async () => ({ ahead_by: 2, behind_by: 0 }) };
+    if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/commits/${HEAD_SHA}/check-runs`) return { ok: true, status: 200, json: async () => ({ total_count: 1, check_runs: [{ id: 1, name: "company-safe-cycle", status: "completed", conclusion: "success", head_sha: HEAD_SHA }] }) };
     const marker = "/contents/";
     const markerIndex = parsed.pathname.indexOf(marker);
     const path = markerIndex >= 0
       ? parsed.pathname.slice(markerIndex + marker.length).split("/").map(decodeURIComponent).join("/")
       : null;
-    const content = path ? files[path] : undefined;
+    const ref = parsed.searchParams.get("ref");
+    const content = path ? (historicalFiles[`${ref}:${path}`] ?? files[path]) : undefined;
     if (content === undefined) return { ok: false, status: 404, json: async () => ({ message: "not found" }) };
     return {
       ok: true,
@@ -210,13 +218,15 @@ async function repositoryEvidenceForEnvelope(plannerTask, activeProject, actors 
   });
 }
 
-async function repositoryEvidenceForEnvelopes(entries, actors = [manager, worker, reviewer]) {
+async function repositoryEvidenceForEnvelopes(entries, actors = [manager, worker, reviewer], { historyRefs = [], historicalFiles = {}, extraFiles = {}, extraWorkOrderRefs = [], activeTaskPr = null, fetchImpl = null } = {}) {
   const files = { ...fixtureFiles, "KGEN-KAIOS/worker_registry.json": JSON.stringify({ workers: actors }) };
   for (const entry of entries) files[entry.task.work_order_ref] = JSON.stringify({ planner_task: entry.task, active_project: entry.project, previous_work_orders: entry.previous_work_orders ?? [] });
+  Object.assign(files, extraFiles);
   return resolveActiveCompanyRepositoryEvidence({
     observed_at: "2026-10-07T07:00:00Z", current_main_sha: MAIN_SHA,
-    guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF], work_order_refs: entries.map((entry) => entry.task.work_order_ref),
-    fetch_impl: activeCompanyEvidenceFetch(files)
+    guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF], work_order_refs: [...entries.map((entry) => entry.task.work_order_ref), ...extraWorkOrderRefs],
+    work_order_history_refs: historyRefs, active_task_pr: activeTaskPr,
+    fetch_impl: fetchImpl ?? activeCompanyEvidenceFetch(files, { historicalFiles })
   });
 }
 function bootForEvidence(repositoryEvidence) {
@@ -1141,6 +1151,26 @@ test("self-described durable predecessor cannot mint Git provenance or supersess
   assert.ok(record.BLOCKERS.includes("PREDECESSOR_PROVENANCE_REQUIRED"));
 });
 
+test("reader-verified ancestor record survives restart and permits material supersession", async () => {
+  const first = cycle().opportunity_records[0];
+  const recordHash = createHash("sha256").update(stableStringify(first)).digest("hex");
+  const historyContent = JSON.stringify({ schema: "KAIOS_DOT_WORK_ORDER_HISTORY_V1", opportunity_record: first, record_hash: recordHash });
+  const durable = { ...structuredClone(first), CANONICAL_HISTORY_REF: WORK_ORDER_REF, SOURCE_COMMIT: HISTORY_SHA, SOURCE_BLOB: gitBlobSha(historyContent), RECORD_HASH: recordHash };
+  const changed = { ...task, dependencies_complete: false };
+  const evidence = await repositoryEvidenceForEnvelopes([{ task: changed, project: activeCompanyProject, previous_work_orders: [durable] }], [manager, worker, reviewer], {
+    historyRefs: [{ path: WORK_ORDER_REF, commit: HISTORY_SHA }], historicalFiles: { [`${HISTORY_SHA}:${WORK_ORDER_REF}`]: historyContent }
+  });
+  const result = cycle({ work_queue: [changed], repository_evidence: evidence });
+  const record = result.opportunity_records[0];
+  assert.equal(record.PREDECESSOR_VERIFICATION, "CANONICAL_GIT_ANCESTOR_RECORD");
+  assert.equal(record.SUPERSEDES.WORK_ID, task.task_id);
+  assert.equal(record.STATUS, "BLOCKED");
+  const forgedHistory = JSON.stringify({ schema: "KAIOS_DOT_WORK_ORDER_HISTORY_V1", opportunity_record: first, record_hash: "f".repeat(64) });
+  await assert.rejects(() => repositoryEvidenceForEnvelopes([{ task: changed, project: activeCompanyProject, previous_work_orders: [durable] }], [manager, worker, reviewer], {
+    historyRefs: [{ path: WORK_ORDER_REF, commit: HISTORY_SHA }], historicalFiles: { [`${HISTORY_SHA}:${WORK_ORDER_REF}`]: forgedHistory }
+  }), error => error.code === "GITHUB_HISTORY_RECORD_HASH_MISMATCH");
+});
+
 test("exact-head gate can bind a hash-checked PR-head envelope without pretending main admission", async () => {
   const plannerTask = { ...task, target_pr: 353 };
   const content = JSON.stringify({ planner_task: plannerTask, active_project: activeCompanyProject });
@@ -1216,10 +1246,39 @@ test("heartbeat result derives lifecycle and duplicate counts from bound queue e
   const result = cycle({ work_queue: definitions.map((entry) => entry.task), projects: definitions.map((entry) => entry.project), repository_evidence: evidence });
   assert.equal(result.heartbeat_result.ACTIVE, 1);
   assert.equal(result.heartbeat_result.REVIEWING, 1);
-  assert.equal(result.heartbeat_result.COMPLETED, 1);
-  assert.equal(result.heartbeat_result.BLOCKED, 1);
+  assert.equal(result.heartbeat_result.COMPLETED, 0);
+  assert.equal(result.heartbeat_result.BLOCKED, 2);
   assert.equal(result.heartbeat_result.DISPATCHED, 3);
+  assert.ok(result.opportunity_records.find((record) => record.WORK_ID === "DONE-001").BLOCKERS.includes("COMPLETION_EVIDENCE_REQUIRED"));
   const duplicate = cycle({ work_queue: [task, task] });
   assert.equal(duplicate.heartbeat_result.DUPLICATE_REMOVED, 1);
   assert.equal(duplicate.heartbeat_result.DISPATCHED, 0);
+});
+
+test("DONE counts completed only with hash-bound result exact head CI tests and distinct review", async () => {
+  const completionRef = "KGEN-Organization/WorkOrders/DONE_001_RESULT.json";
+  const completionResult = {
+    schema: "KAIOS_WORK_COMPLETION_EVIDENCE_V1", work_id: "DONE-001", result_status: "COMPLETED", head_sha: HEAD_SHA,
+    tests: { status: "PASS", total: 52 }, ci: { status: "PASS", head_sha: HEAD_SHA },
+    independent_review: { status: "PASS", reviewer_id: reviewer.worker_id }, completed_at: "2026-10-07T07:00:30Z"
+  };
+  const resultContent = JSON.stringify(completionResult);
+  const doneTask = { ...task, task_id: "DONE-001", status: "DONE", target_pr: 353,
+    work_order_ref: "KGEN-Organization/WorkOrders/DONE_001.json", branch: "chatgpt-handoff/DONE-001",
+    dispatch_evidence: { status: "VERIFIED", work_id: "DONE-001", worker_id: worker.worker_id, occurred_at: "2026-10-07T07:00:10Z" },
+    completion_evidence: { status: "VERIFIED", work_id: "DONE-001", result_ref: completionRef, result_blob: gitBlobSha(resultContent), head_sha: HEAD_SHA } };
+  const doneProject = { ...activeCompanyProject, task_id: doneTask.task_id };
+  const evidence = await repositoryEvidenceForEnvelopes([{ task: doneTask, project: doneProject }], [manager, worker, reviewer], {
+    extraFiles: { [completionRef]: resultContent }, extraWorkOrderRefs: [completionRef], activeTaskPr: 353
+  });
+  const result = cycle({ work_queue: [doneTask], projects: [doneProject], repository_evidence: evidence });
+  assert.equal(result.heartbeat_result.COMPLETED, 1);
+  assert.equal(result.opportunity_records[0].STATUS, "COMPLETED");
+  const forged = { ...doneTask, completion_evidence: { ...doneTask.completion_evidence, result_blob: "f".repeat(40) } };
+  const forgedEvidence = await repositoryEvidenceForEnvelopes([{ task: forged, project: doneProject }], [manager, worker, reviewer], {
+    extraFiles: { [completionRef]: resultContent }, extraWorkOrderRefs: [completionRef], activeTaskPr: 353
+  });
+  const held = cycle({ work_queue: [forged], projects: [doneProject], repository_evidence: forgedEvidence });
+  assert.equal(held.heartbeat_result.COMPLETED, 0);
+  assert.ok(held.opportunity_records[0].BLOCKERS.includes("COMPLETION_EVIDENCE_REQUIRED"));
 });
