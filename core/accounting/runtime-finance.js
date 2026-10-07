@@ -30,6 +30,14 @@ export const CFO_ORGAN_METADATA = Object.freeze({
   version: VERSION,
   mode: MODE,
   source_of_truth: "core/accounting",
+  task_id: "KAIOS-CFO-FINANCE-ENGINE-V1-20261008",
+  revision: "1",
+  ancestor: "core/accounting/index.mjs",
+  source_commit: "PENDING_REPAIR_COMMIT",
+  author: "CURRENT_CODEX_REPOSITORY_WORKER / SESSION_ONLY",
+  reviewer: "PENDING_DISTINCT_REVIEW",
+  runtime_dna: "COMPANY_CORE_ORGAN / ACCOUNTING / REPORTING / OFFCHAIN",
+  taxonomy: "KAIOS_AI_COMPANY.CFO_FINANCE_ORGAN",
   policy_owner: "Hengyao / General Manager",
   cfo_digital_life: "NOT_ASSIGNED",
   protected_actions: Object.freeze([
@@ -89,11 +97,22 @@ function distribute(total, policy) {
   ];
   let allocated = 0n;
   const result = {};
+  const remainders = [];
   targets.forEach(([name, bps], index) => {
-    const share = index === targets.length - 1 ? base - allocated : base * BigInt(policy[bps]) / 10_000n;
-    result[name] = share.toString();
+    const weighted = base * BigInt(policy[bps]);
+    const share = weighted / 10_000n;
+    result[name] = share;
     allocated += share;
+    if (policy[bps] > 0) remainders.push({ name, remainder: weighted % 10_000n, index });
   });
+  remainders.sort((left, right) => left.remainder === right.remainder ? left.index - right.index : left.remainder > right.remainder ? -1 : 1);
+  let residue = base - allocated;
+  for (let index = 0; residue > 0n; index += 1) {
+    const target = remainders[index % remainders.length];
+    result[target.name] += 1n;
+    residue -= 1n;
+  }
+  for (const key of Object.keys(result)) result[key] = result[key].toString();
   return Object.freeze(result);
 }
 
@@ -123,7 +142,7 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     return record;
   }
 
-  function postJournalEntry({ entry_id, occurred_at, description, source, authority, evidence, project_id = null, cash_flow_type = "NON_CASH", lines }) {
+  function postJournalEntry({ entry_id, occurred_at, description, source, authority, evidence, project_id = null, cash_flow_type = "NON_CASH", revenue_type = null, source_type = null, lines }) {
     const id = text(entry_id, "entry_id");
     if (journal.some((entry) => entry.entry_id === id)) fail("DUPLICATE_ENTRY", `Journal entry ${id} already exists`);
     if (!Array.isArray(lines) || lines.length < 2) fail("INVALID_JOURNAL_ENTRY", "Journal entry requires at least two lines");
@@ -139,6 +158,14 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
       add(totals, `${currency}:${line.side}`, lineAmount);
       return Object.freeze({ account_id: account.account_id, side: line.side, amount: lineAmount.toString(), currency });
     });
+    const revenueLines = normalizedLines.filter((line) => accounts.get(line.account_id).account_type === "REVENUE");
+    if (revenueLines.length) {
+      if (!REVENUE_TYPES.includes(revenue_type)) fail("REVENUE_CLASSIFICATION_REQUIRED", "Every revenue journal requires an approved revenue_type");
+      const normalizedSourceType = text(source_type, "source_type");
+      if (FORBIDDEN_REVENUE_SOURCES.includes(normalizedSourceType)) fail("REVENUE_MISCLASSIFICATION", `${normalizedSourceType} cannot be company revenue`);
+      if (revenueLines.some((line) => line.side !== "CREDIT")) fail("REVENUE_REVERSAL_UNSUPPORTED", "V1 revenue lines must be credits; use a future governed reversal interface");
+      source_type = normalizedSourceType;
+    }
     for (const currency of new Set(normalizedLines.map((line) => line.currency))) {
       if ((totals.get(`${currency}:DEBIT`) ?? 0n) !== (totals.get(`${currency}:CREDIT`) ?? 0n)) {
         fail("UNBALANCED_ENTRY", `Journal entry ${id} is not balanced for ${currency}`);
@@ -155,6 +182,8 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
       evidence: Object.freeze({ ...evidence, mode: MODE }),
       project_id,
       cash_flow_type,
+      revenue_type,
+      source_type,
       lines: Object.freeze(normalizedLines)
     });
     journal.push(record);
@@ -163,11 +192,18 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
 
   function recordRevenue({ revenue_type, source_type, amount: value, cash_account_id, revenue_account_id, ...entry }) {
     if (!REVENUE_TYPES.includes(revenue_type)) fail("INVALID_REVENUE_TYPE", `Unsupported revenue type ${revenue_type}`);
-    if (FORBIDDEN_REVENUE_SOURCES.includes(source_type)) fail("REVENUE_MISCLASSIFICATION", `${source_type} cannot be company revenue`);
+    const normalizedSourceType = text(source_type, "source_type");
+    if (FORBIDDEN_REVENUE_SOURCES.includes(normalizedSourceType)) fail("REVENUE_MISCLASSIFICATION", `${normalizedSourceType} cannot be company revenue`);
+    const cashAccount = accounts.get(cash_account_id);
+    const revenueAccount = accounts.get(revenue_account_id);
+    if (cashAccount?.account_type !== "ASSET" || cashAccount.classification !== "CASH") fail("INVALID_REVENUE_CASH_ACCOUNT", "recordRevenue requires an ASSET/CASH debit account");
+    if (revenueAccount?.account_type !== "REVENUE") fail("INVALID_REVENUE_ACCOUNT", "recordRevenue requires a REVENUE credit account");
     return postJournalEntry({
       ...entry,
       description: entry.description ?? revenue_type,
       cash_flow_type: "OPERATING",
+      revenue_type,
+      source_type: normalizedSourceType,
       lines: [
         { account_id: cash_account_id, side: "DEBIT", amount: value },
         { account_id: revenue_account_id, side: "CREDIT", amount: value }
@@ -179,6 +215,19 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     const start = amount(start_usage, "start_usage", true);
     const end = amount(end_usage, "end_usage", true);
     if (end < start) fail("INVALID_USAGE_RANGE", "end_usage must not be below start_usage");
+    const normalized = {
+      work_id: text(work_id, "work_id"),
+      worker: text(worker, "worker"),
+      runtime: text(runtime, "runtime"),
+      task_type: text(task_type, "task_type"),
+      deliverable: text(deliverable, "deliverable"),
+      duration_seconds: Number(duration_seconds),
+      blocked_seconds: Number(blocked_seconds),
+      amount: amount(value).toString()
+    };
+    if (!Number.isFinite(normalized.duration_seconds) || normalized.duration_seconds < 0 || !Number.isFinite(normalized.blocked_seconds) || normalized.blocked_seconds < 0) {
+      fail("INVALID_COMPUTE_DURATION", "Compute duration and blocked time must be finite non-negative numbers");
+    }
     const posted = postJournalEntry({
       ...entry,
       description: entry.description ?? `Compute cost for ${work_id}`,
@@ -188,10 +237,11 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
       ]
     });
     const record = Object.freeze({
-      work_id: text(work_id, "work_id"), worker: text(worker, "worker"), runtime: text(runtime, "runtime"),
+      work_id: normalized.work_id, worker: normalized.worker, runtime: normalized.runtime,
       start_usage: start.toString(), end_usage: end.toString(), usage_delta: (end - start).toString(),
-      duration_seconds: Number(duration_seconds), task_type: text(task_type, "task_type"), deliverable: text(deliverable, "deliverable"),
-      rework: rework === true, blocked_seconds: Number(blocked_seconds), amount: amount(value).toString(), journal_entry_id: posted.entry_id
+      duration_seconds: normalized.duration_seconds, task_type: normalized.task_type, deliverable: normalized.deliverable,
+      rework: rework === true, blocked_seconds: normalized.blocked_seconds, amount: normalized.amount,
+      occurred_at: posted.occurred_at, journal_entry_id: posted.entry_id
     });
     compute.push(record);
     return record;
@@ -199,9 +249,14 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
 
   function recordWorkerIncome({ worker_id, income_type, amount: value, currency, source, journal_entry_id = null }) {
     if (!WORKER_INCOME_TYPES.includes(income_type)) fail("INVALID_WORKER_INCOME_TYPE", `Unsupported worker income type ${income_type}`);
+    if (income_type !== "HEARTBEAT_REWARD" && (!journal_entry_id || !journal.some((entry) => entry.entry_id === journal_entry_id))) {
+      fail("WORKER_INCOME_EVIDENCE_REQUIRED", "Company compensation requires an existing journal entry");
+    }
+    if (journal_entry_id && !journal.some((entry) => entry.entry_id === journal_entry_id)) fail("UNKNOWN_JOURNAL_REFERENCE", `Unknown journal entry ${journal_entry_id}`);
     const record = Object.freeze({
       worker_id: text(worker_id, "worker_id"), income_type, amount: amount(value).toString(), currency: text(currency, "currency"),
       source: text(source, "source"), journal_entry_id,
+      occurred_at: journal_entry_id ? journal.find((entry) => entry.entry_id === journal_entry_id).occurred_at : timestamp(clock()),
       company_accounting: income_type === "HEARTBEAT_REWARD" ? "EXTERNAL_LIFE_REWARD" : "COMPENSATION_OR_SERVICE"
     });
     workers.push(record);
@@ -222,9 +277,12 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
   }
 
   function recordProjectEvent({ project_id, event_type, amount: value, currency, journal_entry_id = null }) {
+    if (!journal_entry_id || !journal.some((entry) => entry.entry_id === journal_entry_id)) fail("PROJECT_EVENT_EVIDENCE_REQUIRED", "Project events require an existing journal entry");
+    const journalEntry = journal.find((entry) => entry.entry_id === journal_entry_id);
     const record = Object.freeze({
       project_id: text(project_id, "project_id"), event_type: text(event_type, "event_type"),
-      amount: amount(value, "amount", true).toString(), currency: text(currency, "currency"), journal_entry_id
+      amount: amount(value, "amount", true).toString(), currency: text(currency, "currency"), journal_entry_id,
+      occurred_at: journalEntry.occurred_at
     });
     projects.push(record);
     return record;
@@ -250,11 +308,18 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     const profile = profiles.get(species_id);
     if (!profile) fail("UNKNOWN_CONSUMPTION_PROFILE", `No consumption profile for ${species_id}`);
     if (!profile.consumption_types.includes(consumption_type)) fail("CONSUMPTION_TYPE_MISMATCH", `${species_id} cannot consume ${consumption_type}`);
-    if (!inventory_debit_entry_id || !sink_entry_id) fail("CONSUMPTION_EVIDENCE_REQUIRED", "Consumption requires inventory debit and sink evidence");
+    const inventoryEntry = journal.find((entry) => entry.entry_id === inventory_debit_entry_id);
+    const sinkEntry = journal.find((entry) => entry.entry_id === sink_entry_id);
+    const hasInventoryCredit = inventoryEntry?.lines.some((line) => {
+      const account = accounts.get(line.account_id);
+      return line.side === "CREDIT" && account.account_type === "ASSET" && account.classification.includes("INVENTORY");
+    });
+    const hasExpenseSink = sinkEntry?.lines.some((line) => line.side === "DEBIT" && accounts.get(line.account_id).account_type === "EXPENSE");
+    if (!hasInventoryCredit || !hasExpenseSink) fail("CONSUMPTION_EVIDENCE_REQUIRED", "Consumption requires existing inventory-credit and expense-sink journal evidence");
     const record = Object.freeze({
       event_id: text(event_id, "event_id"), entity_id: text(entity_id, "entity_id"), species_id, consumption_type,
       amount: amount(value).toString(), unit: text(unit, "unit"), inventory_debit_entry_id, sink_entry_id,
-      mode: MODE
+      occurred_at: sinkEntry.occurred_at, mode: MODE
     });
     consumption.push(record);
     return record;
@@ -276,16 +341,16 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     });
   }
 
-  function balances() {
+  function balances(entries = journal) {
     const result = new Map();
-    for (const entry of journal) {
+    for (const entry of entries) {
       for (const line of entry.lines) add(result, `${line.currency}:${line.account_id}`, line.side === "DEBIT" ? BigInt(line.amount) : -BigInt(line.amount));
     }
     return result;
   }
 
-  function reportCurrency(currency) {
-    const raw = balances();
+  function reportCurrency(currency, entries) {
+    const raw = balances(entries);
     const sections = { assets: new Map(), liabilities: new Map(), posted_equity: new Map(), revenue: new Map(), expense: new Map() };
     const sectionByType = { ASSET: "assets", LIABILITY: "liabilities", EQUITY: "posted_equity", REVENUE: "revenue", EXPENSE: "expense" };
     for (const account of accounts.values()) {
@@ -310,19 +375,22 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
   }
 
   function createDailyReport({ report_date, currencies }) {
+    const normalizedDate = text(report_date, "report_date");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) fail("INVALID_REPORT_DATE", "report_date must use YYYY-MM-DD");
+    const dailyJournal = journal.filter((entry) => entry.occurred_at.slice(0, 10) === normalizedDate);
     const selected = currencies ?? [...new Set([...accounts.values()].map((account) => account.currency))].sort();
-    const accounting = Object.fromEntries(selected.map((currency) => [currency, reportCurrency(currency)]));
+    const accounting = Object.fromEntries(selected.map((currency) => [currency, reportCurrency(currency, dailyJournal)]));
     const cashFlow = new Map();
-    for (const entry of journal) {
+    for (const entry of dailyJournal) {
       if (entry.cash_flow_type === "NON_CASH") continue;
       for (const line of entry.lines) {
         if (accounts.get(line.account_id)?.classification === "CASH") add(cashFlow, `${line.currency}:${entry.cash_flow_type}`, line.side === "DEBIT" ? BigInt(line.amount) : -BigInt(line.amount));
       }
     }
     const workerIncome = new Map();
-    for (const record of workers) add(workerIncome, `${record.worker_id}:${record.currency}:${record.income_type}`, BigInt(record.amount));
+    for (const record of workers.filter((item) => item.occurred_at.slice(0, 10) === normalizedDate)) add(workerIncome, `${record.worker_id}:${record.currency}:${record.income_type}`, BigInt(record.amount));
     const projectTotals = new Map();
-    for (const entry of journal) {
+    for (const entry of dailyJournal) {
       if (!entry.project_id) continue;
       for (const line of entry.lines) {
         const account = accounts.get(line.account_id);
@@ -346,12 +414,13 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
       })];
     }));
     return Object.freeze({
-      organ_id: ORGAN_ID, version: VERSION, mode: MODE, report_type: "DAILY_REPORT", report_date: text(report_date, "report_date"),
+      organ_id: ORGAN_ID, version: VERSION, mode: MODE, report_type: "DAILY_REPORT", report_date: normalizedDate,
       accounting: Object.freeze(accounting), cash_flow: Object.freeze(objectFromBigInts(cashFlow)),
-      worker_income: Object.freeze(objectFromBigInts(workerIncome)), project_ledger: Object.freeze([...projects]),
+      worker_income: Object.freeze(objectFromBigInts(workerIncome)), project_ledger: Object.freeze(projects.filter((item) => item.occurred_at.slice(0, 10) === normalizedDate)),
       project_profitability: Object.freeze(projectProfitability),
-      compute_cost: Object.freeze([...compute]), consumption: Object.freeze([...consumption]),
-      payables_execution: "NOT_LIVE", real_financial_execution: false, journal_entries: journal.length,
+      compute_cost: Object.freeze(compute.filter((item) => item.occurred_at.slice(0, 10) === normalizedDate)),
+      consumption: Object.freeze(consumption.filter((item) => item.occurred_at.slice(0, 10) === normalizedDate)),
+      payables_execution: "NOT_LIVE", real_financial_execution: false, journal_entries: dailyJournal.length,
       accounting_balanced: Object.values(accounting).every((report) => report.balance_sheet.balanced)
     });
   }

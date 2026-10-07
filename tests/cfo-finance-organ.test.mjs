@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   CFO_ORGAN_METADATA,
+  WORKER_INCOME_TYPES,
   createCfoFinanceRuntime,
   createCfoV1SimulationDemo
 } from "../core/accounting/index.mjs";
@@ -88,6 +89,16 @@ test("cargo principal, restricted inventory and heartbeat reward cannot be poste
   }
 });
 
+test("direct journal posting cannot bypass revenue classification", () => {
+  const engine = runtime();
+  engine.registerAccount({ account_id: "CASH", account_type: "ASSET", currency: "KAIOS", classification: "CASH" });
+  engine.registerAccount({ account_id: "REV", account_type: "REVENUE", currency: "KAIOS", classification: "GAME_REVENUE" });
+  const base = { entry_id: "BYPASS", description: "attempt", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, lines: [{ account_id: "CASH", side: "DEBIT", amount: "1" }, { account_id: "REV", side: "CREDIT", amount: "1" }] };
+  assert.throws(() => engine.postJournalEntry(base), errorCode("REVENUE_CLASSIFICATION_REQUIRED"));
+  assert.throws(() => engine.postJournalEntry({ ...base, revenue_type: "GAME_REVENUE", source_type: "CARGO_PRINCIPAL" }), errorCode("REVENUE_MISCLASSIFICATION"));
+  assert.equal(engine.snapshot().journal.length, 0);
+});
+
 test("journal rejects imbalance, decimals, cross-currency lines and non-simulation evidence", () => {
   const engine = runtime();
   engine.registerAccount({ account_id: "A", account_type: "ASSET", currency: "KAIOS", classification: "CASH" });
@@ -106,17 +117,20 @@ test("game distribution is configurable, exact and rejects overspending", () => 
   assert.deepEqual(result.distribution, { company_share: "40000", creator_share: "20000", team_share: "8000", reviewer_share: "4000", maintenance_reserve: "8000" });
   assert.throws(() => engine.calculateGameDistribution({ gross_revenue: "1", platform_cost: "2", compute_cost: "0", operating_cost: "0", refunds: "0" }), errorCode("NEGATIVE_GAME_NET"));
   assert.throws(() => createCfoFinanceRuntime({ royalty_policy: { ...royaltyPolicy, company_share_bps: 4999 } }), errorCode("INVALID_ROYALTY_POLICY"));
+  const noMaintenance = createCfoFinanceRuntime({ royalty_policy: { company_share_bps: 5000, creator_share_bps: 5000, team_share_bps: 0, reviewer_share_bps: 0, maintenance_reserve_bps: 0 } });
+  assert.deepEqual(noMaintenance.calculateGameDistribution({ gross_revenue: "1", platform_cost: "0", compute_cost: "0", operating_cost: "0", refunds: "0" }).distribution, {
+    company_share: "1", creator_share: "0", team_share: "0", reviewer_share: "0", maintenance_reserve: "0"
+  });
 });
 
 test("salary, task, creator, freight and heartbeat remain distinct worker income classes", () => {
   const engine = runtime();
-  for (const income_type of ["SALARY_INCOME", "TASK_COMPENSATION", "CREATOR_ROYALTY", "FREIGHT_REVENUE", "HEARTBEAT_REWARD"]) {
-    engine.recordWorkerIncome({ worker_id: "W1", income_type, amount: "1", currency: income_type === "HEARTBEAT_REWARD" ? "KGEN" : "KAIOS", source: "TEST" });
-  }
+  assert.deepEqual(WORKER_INCOME_TYPES, ["SALARY_INCOME", "TASK_COMPENSATION", "CREATOR_ROYALTY", "FREIGHT_REVENUE", "HEARTBEAT_REWARD"]);
+  engine.recordWorkerIncome({ worker_id: "W1", income_type: "HEARTBEAT_REWARD", amount: "1", currency: "KGEN", source: "TEST" });
   const records = engine.snapshot().worker_ledger;
-  assert.equal(new Set(records.map((record) => record.income_type)).size, 5);
   assert.equal(records.find((record) => record.income_type === "HEARTBEAT_REWARD").company_accounting, "EXTERNAL_LIFE_REWARD");
   assert.notEqual(records.find((record) => record.income_type === "HEARTBEAT_REWARD").income_type, "SALARY_INCOME");
+  assert.throws(() => engine.recordWorkerIncome({ worker_id: "W1", income_type: "SALARY_INCOME", amount: "1", currency: "KAIOS", source: "TEST" }), errorCode("WORKER_INCOME_EVIDENCE_REQUIRED"));
 });
 
 test("compute cost records usage delta and creates a payable rather than fake payment", () => {
@@ -128,14 +142,45 @@ test("compute cost records usage delta and creates a payable rather than fake pa
   assert.equal(demo.daily_report.payables_execution, "NOT_LIVE");
 });
 
+test("invalid compute evidence fails before any journal mutation", () => {
+  const engine = runtime();
+  engine.registerAccount({ account_id: "EXP", account_type: "EXPENSE", currency: "KAIOS", classification: "COMPUTE_EXPENSE" });
+  engine.registerAccount({ account_id: "PAY", account_type: "LIABILITY", currency: "KAIOS", classification: "COMPUTE_PAYABLE" });
+  assert.throws(() => engine.recordComputeCost({
+    entry_id: "BAD-COMPUTE", description: "bad", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" },
+    work_id: "W1", worker: "", runtime: "R", start_usage: "0", end_usage: "1", duration_seconds: 1,
+    task_type: "CODE", deliverable: "D", amount: "1", expense_account_id: "EXP", payable_account_id: "PAY"
+  }), errorCode("INVALID_FIELD"));
+  assert.equal(engine.snapshot().revision, 0);
+  assert.equal(engine.snapshot().journal.length, 0);
+});
+
 test("species consumption is allow-listed, evidence-linked and replay protected", () => {
   const engine = runtime();
+  engine.registerAccount({ account_id: "FOOD", account_type: "ASSET", currency: "KAIOS", classification: "FOOD_INVENTORY" });
+  engine.registerAccount({ account_id: "EXP", account_type: "EXPENSE", currency: "KAIOS", classification: "FOOD_EXPENSE" });
+  engine.registerAccount({ account_id: "CASH", account_type: "ASSET", currency: "KAIOS", classification: "CASH" });
+  engine.postJournalEntry({ entry_id: "BUY", description: "buy", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, lines: [{ account_id: "FOOD", side: "DEBIT", amount: "10" }, { account_id: "CASH", side: "CREDIT", amount: "10" }] });
+  engine.postJournalEntry({ entry_id: "USE", description: "use", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, lines: [{ account_id: "EXP", side: "DEBIT", amount: "1" }, { account_id: "FOOD", side: "CREDIT", amount: "1" }] });
   engine.registerConsumptionProfile({ species_id: "PLANT", consumption_types: ["WATER", "LIGHT"], daily_consumption: "10" });
-  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "BEEF", amount: "1", unit: "GRAM", inventory_debit_entry_id: "J1", sink_entry_id: "J1" }), errorCode("CONSUMPTION_TYPE_MISMATCH"));
+  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "BEEF", amount: "1", unit: "GRAM", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_TYPE_MISMATCH"));
   assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML" }), errorCode("CONSUMPTION_EVIDENCE_REQUIRED"));
-  const accepted = engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "J1", sink_entry_id: "J1" });
+  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "MISSING", sink_entry_id: "MISSING" }), errorCode("CONSUMPTION_EVIDENCE_REQUIRED"));
+  const accepted = engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "USE", sink_entry_id: "USE" });
   assert.equal(accepted.mode, "SIMULATION_ONLY");
-  assert.throws(() => engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "J1", sink_entry_id: "J1" }), errorCode("CONSUMPTION_REPLAY"));
+  assert.throws(() => engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_REPLAY"));
+});
+
+test("daily reports include only the requested UTC date", () => {
+  const engine = runtime();
+  engine.registerAccount({ account_id: "CASH", account_type: "ASSET", currency: "KAIOS", classification: "CASH" });
+  engine.registerAccount({ account_id: "REV", account_type: "REVENUE", currency: "KAIOS", classification: "GAME_REVENUE" });
+  for (const [entry_id, occurred_at] of [["R7", "2026-10-07T12:00:00Z"], ["R8", "2026-10-08T12:00:00Z"]]) {
+    engine.recordRevenue({ entry_id, occurred_at, description: "daily", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, revenue_type: "GAME_REVENUE", source_type: "SIMULATED_ACCEPTED_ORDER", amount: "100", cash_account_id: "CASH", revenue_account_id: "REV" });
+  }
+  const report = engine.createDailyReport({ report_date: "2026-10-08", currencies: ["KAIOS"] });
+  assert.equal(report.accounting.KAIOS.profit_and_loss.revenue, "100");
+  assert.equal(report.journal_entries, 1);
 });
 
 test("KUFO projection reuses current canonical engine and keeps 12.5 percent after year three", () => {
