@@ -26,14 +26,14 @@
   "formal_runtime": "core/accounting/runtime-finance.js",
   "version": "V1",
   "mode": "SIMULATION_ONLY",
-  "status": "FIX_COMPLETE_REVIEW_PENDING",
+  "status": "SESSION_TECHNICAL_PASS_WITH_FOLLOWUP_INSTALL_HOLD",
   "designed_by": "沈英明 / Human Authority",
   "system_architecture": "Human order plus current repository canon",
   "company_policy_owner": "衡曜 / General Manager",
   "implemented_by": "CURRENT_CODEX_ENGINEERING_SESSION",
   "implemented_by_registry_status": "SESSION_WORKTREE_BOUND_NOT_CANONICAL_WORKER_REGISTRY_BOUND",
   "maintainer": "NOT_ASSIGNED",
-  "reviewed_by": "FIRST_REVIEW_FAIL_REPAIRED_RE_REVIEW_PENDING",
+  "reviewed_by": "cfo_finance_independent_review / PASS_WITH_FOLLOWUP_AT_ab554f0868f5d95dc3b1cad87ad4e0f4d4aca1f0 / SESSION_TECHNICAL_REVIEW_NOT_CANONICAL_COMPANY_AUTHORITY",
   "base_main_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
   "source_commit": "1659565fe193cccba30294dcdc10396a9811e0bd",
   "head_sha": null,
@@ -57,7 +57,7 @@
     { "role": "FINANCE_AND_ACCOUNTING_AUDIT", "assignee": "cfo_canonical_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
     { "role": "KUFO_AND_CONSUMPTION_AUDIT", "assignee": "cfo_kufo_consumption_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
     { "role": "CODING_IMPLEMENTER", "assignee": "CURRENT_CODEX_ENGINEERING_SESSION", "registry_status": "SESSION_WORKTREE_BOUND_NOT_CANONICAL_WORKER_REGISTRY_BOUND", "result": "IMPLEMENTATION_COMPLETE_GOVERNANCE_HOLD" },
-    { "role": "INDEPENDENT_REVIEWER", "assignee": "cfo_finance_independent_review", "registry_status": "SESSION_TECHNICAL_REVIEWER_NOT_CANONICAL_COMPANY_AUTHORITY", "result": "SECOND_REVIEW_FAIL_REPAIRED_RE_REVIEW_PENDING" }
+    { "role": "INDEPENDENT_REVIEWER", "assignee": "cfo_finance_independent_review", "registry_status": "SESSION_TECHNICAL_REVIEWER_NOT_CANONICAL_COMPANY_AUTHORITY", "result": "PASS_WITH_FOLLOWUP_AT_ab554f0868f5d95dc3b1cad87ad4e0f4d4aca1f0" }
   ],
   "work_orders": [
     {
@@ -103,7 +103,7 @@
       "reviewer": "PENDING_GM_ACCEPTANCE",
       "scope": "Independent diff, accounting, security, canon and regression review",
       "acceptance_tests": ["NO_P0_P1", "CANONICAL_BOUND", "SECURITY_BOUNDARY", "EXACT_HEAD_TESTS"],
-      "status": "PENDING"
+      "status": "SESSION_TECHNICAL_PASS_WITH_FOLLOWUP_CANONICAL_ACCEPTANCE_PENDING"
     }
   ],
   "changed_files": [
@@ -136,7 +136,14 @@
       "reviewer": "cfo_finance_independent_review",
       "decision": "FAIL",
       "findings": "P1 journal-line evidence replay, typed helper semantic classification and unproven implementer registry binding; P2 stale queue evidence",
-      "disposition": "REPAIR_IN_PROGRESS_NO_PASS_TRANSFER"
+      "disposition": "REPAIRED_ON_1659565fe193cccba30294dcdc10396a9811e0bd_NO_PASS_TRANSFER"
+    },
+    {
+      "head": "ab554f0868f5d95dc3b1cad87ad4e0f4d4aca1f0",
+      "reviewer": "cfo_finance_independent_review",
+      "decision": "PASS_WITH_FOLLOWUP",
+      "findings": "P0 none; P1 none; P2 manufacturing-record wording precision only",
+      "disposition": "SESSION_TECHNICAL_PASS; CANDIDATE_REMAINS_UNINSTALLED_UNSEALED_PENDING_CANONICAL_COMPANY_ACCEPTANCE_AND_BOOT_AUTHORITY"
     }
   ],
   "tests": {
