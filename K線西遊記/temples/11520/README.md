@@ -40,6 +40,16 @@ portrait plus 844x390 with no world-context loss. Preview resources must be
 released and per-context retained texture counts stable before any synthetic
 gallery starts. Screenshots and fresh CI remain pending at this checkpoint.
 
+The first extended run (`37585640016`, tree-identical checkout `dcab0e44`)
+reached all six viewport screenshot pairs but timed out at the existing 90-second
+cap during landscape pickup. Its open utility tray covers the pickup control;
+this known layout issue is outside the preview-resource repair. The harness now
+preserves that screenshot and uses the normal native utility toggle before
+landscape pickup, reopening it normally for the next inventory cycle. It does
+not force clicks, hide UI or change production layout. Short action timeouts and
+per-cycle JSON checkpoints preserve partial evidence on failure. No earlier run
+is treated as a completed 24-cycle or full visual PASS.
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads

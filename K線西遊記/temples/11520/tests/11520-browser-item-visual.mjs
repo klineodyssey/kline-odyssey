@@ -8,9 +8,11 @@ const dropOut='artifacts/11520-visual-qa/11520-live-world-ground-drop.png';
 const worldOut='artifacts/11520-visual-qa/11520-world-item-identity-390x844.png';
 const previewReport='artifacts/11520-visual-qa/11520-inventory-preview-lifetime.json';
 const sourceHead=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const previewStarted=Date.now();
 await fs.mkdir('artifacts/11520-visual-qa',{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+page.setDefaultTimeout(5000);
 const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
 const consoleProblems=[];page.on('console',message=>{if(/context lost|too many active WebGL/i.test(message.text()))consoleProblems.push(message.text())});
 await page.addInitScript(()=>{
@@ -53,6 +55,9 @@ for(const name of ['item-visual-runtime.mjs','backpack-ui.mjs']){
   sourceFiles.push({path,sha256:createHash('sha256').update(served).digest('hex')});
 }
 const previewSamples=[];let previewLiveBaseline=null;
+async function previewCheckpoint(status,extra={}){
+  await fs.writeFile(previewReport,JSON.stringify({head:sourceHead,sourceFiles,status,scope:'ACTUAL_INVENTORY_PREVIEW_BEFORE_SYNTHETIC_GALLERY',elapsedMs:Date.now()-previewStarted,samples:previewSamples,pageErrors,consoleProblems,...extra},null,2)+'\n');
+}
 async function previewSample(stage){
   const sample=await page.evaluate(()=>{
     const state=globalThis.__K11520_PREVIEW_QA__.snapshot(),canvases=[...document.querySelectorAll('canvas.bp3d[data-item3d="ready"]')];
@@ -117,10 +122,11 @@ if(afterPickup.dropCount!==0||!afterPickup.backpackHasCash)throw new Error('LIVE
 // Exercise the actual product controls/store before creating any synthetic
 // gallery contexts. One private preview context must survive every viewport.
 const profiles=[{name:'360',width:360,height:740},{name:'390',width:390,height:844},{name:'412',width:412,height:772},{name:'432',width:432,height:856},{name:'480',width:480,height:900},{name:'landscape',width:844,height:390}];
-try{
   for(const profile of profiles){
     await page.setViewportSize({width:profile.width,height:profile.height});
     for(let cycle=0;cycle<4;cycle++){
+      console.log(`[11520 PREVIEW STAGE] ${profile.name}-${cycle} elapsedMs=${Date.now()-previewStarted}`);
+      if(!await page.locator('#backpackButton').isVisible())await page.locator('#k11520UtilityMaster').click();
       await page.locator('#backpackButton').click();
       await page.waitForFunction(()=>document.querySelector('#backpackPanel')?.classList.contains('open')&&document.querySelectorAll('canvas.bp3d[data-item3d="ready"]').length===5,null,{timeout:3000});
       await previewSample(`${profile.name}-${cycle}-open`);
@@ -132,16 +138,18 @@ try{
       await page.waitForFunction(()=>!document.querySelector('#backpackPanel')?.classList.contains('open'));
       await previewSample(`${profile.name}-${cycle}-closed`);await assertWorldFrame(`${profile.name}-${cycle}-world`);
       if(cycle===0)await page.screenshot({path:`artifacts/11520-visual-qa/11520-preview-${profile.name}-world.png`,fullPage:false});
+      await previewCheckpoint('IN_PROGRESS',{profile,cycle,stage:'before-native-pickup'});
+      // The existing landscape utility tray overlaps pickup. Preserve the
+      // open-tray screenshot above, then use its real toggle, never a forced
+      // click, hidden DOM, layout patch or direct pickup API to bypass it.
+      if(profile.name==='landscape')await page.locator('#k11520UtilityMaster').click();
       await page.locator('#worldItemPickup.show').click();
       await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__.drops.size===0&&globalThis.K11520Backpack.get().items.some(item=>item.itemId==='QA-CASH'&&item.qty===1),null,{timeout:3000});
+      await previewCheckpoint('IN_PROGRESS',{profile,cycle,stage:'native-pickup-complete'});
     }
   }
   if(pageErrors.length)throw new Error(`PAGEERROR_AFTER_PREVIEW_STRESS:${pageErrors.join('|')}`);
-  await fs.writeFile(previewReport,JSON.stringify({head:sourceHead,sourceFiles,status:'PASS',scope:'ACTUAL_INVENTORY_PREVIEW_BEFORE_SYNTHETIC_GALLERY',profiles,cycles:24,samples:previewSamples,pageErrors,consoleProblems,gpuMemoryOrFpsClaim:false},null,2)+'\n');
-}catch(error){
-  await page.screenshot({path:'artifacts/11520-visual-qa/11520-preview-failure.png',fullPage:false});
-  await fs.writeFile(previewReport,JSON.stringify({head:sourceHead,sourceFiles,status:'FAIL',error:String(error),profiles,samples:previewSamples,pageErrors,consoleProblems},null,2)+'\n');throw error;
-}
+  await previewCheckpoint('PASS',{profiles,cycles:24,landscapePickupUsesNativeTrayToggle:true,gpuMemoryOrFpsClaim:false});
 await page.setViewportSize({width:390,height:844});
 
 const identity=await page.evaluate(async()=>{
@@ -194,6 +202,7 @@ console.log(`[11520 LIVE WORLD DROP QA] PASS identity=${liveDrop.identityKey} cu
 console.log(`[11520 CASH CUSTODY QA] PASS ${identity.custodyTypes.join('->')} live=${identity.transitCustody}->${identity.unloadCustody} screenshot=${worldOut}`);
 console.log(`[11520 PREVIEW LIFETIME QA] PASS head=${sourceHead} cycles=24 profiles=6 contexts=2 report=${previewReport}`);
 }catch(error){
-  await page.screenshot({path:'artifacts/11520-visual-qa/11520-preview-failure.png',fullPage:false});
-  await fs.writeFile(previewReport,JSON.stringify({head:sourceHead,sourceFiles,status:'FAIL',error:String(error),samples:previewSamples,pageErrors,consoleProblems},null,2)+'\n');throw error;
+  await previewCheckpoint('FAIL',{error:String(error),viewport:page.viewportSize()});
+  try{await page.screenshot({path:'artifacts/11520-visual-qa/11520-preview-failure.png',fullPage:false})}catch(captureError){await previewCheckpoint('FAIL',{error:String(error),captureError:String(captureError)})}
+  throw error;
 }finally{await browser.close()}
