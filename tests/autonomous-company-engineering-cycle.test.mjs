@@ -26,6 +26,7 @@ import {
   evaluateDotOrganSeal,
   evaluateDotDispatchSafety,
   evaluateBranchConcurrencyGate,
+  verifyBranchWriterRuntimeAttestation,
   PRIMEFORGE_IDENTITY_BOUNDARY
 } from "../core/company/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
@@ -127,7 +128,7 @@ function gitBlobSha(content) {
   return createHash("sha1").update(Buffer.from(`blob ${body.length}\0`, "utf8")).update(body).digest("hex");
 }
 
-function activeCompanyEvidenceFetch(files, { corruptPath = null, historicalFiles = {} } = {}) {
+function activeCompanyEvidenceFetch(files, { corruptPath = null, historicalFiles = {}, prHeadRef = "chatgpt-handoff/DONE-001" } = {}) {
   return async (url) => {
     const parsed = new URL(url);
     if (parsed.pathname === "/repos/klineodyssey/kline-odyssey") return { ok: true, status: 200, json: async () => ({ default_branch: "main" }) };
@@ -136,7 +137,7 @@ function activeCompanyEvidenceFetch(files, { corruptPath = null, historicalFiles
     }
     if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/commits/${HISTORY_SHA}`) return { ok: true, status: 200, json: async () => ({ sha: HISTORY_SHA, commit: { committer: { date: "2026-10-06T07:00:00Z" } } }) };
     if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/compare/${HISTORY_SHA}...${MAIN_SHA}`) return { ok: true, status: 200, json: async () => ({ merge_base_commit: { sha: HISTORY_SHA }, ahead_by: 2, behind_by: 0 }) };
-    if (parsed.pathname === "/repos/klineodyssey/kline-odyssey/pulls/353") return { ok: true, status: 200, json: async () => ({ state: "open", draft: false, mergeable: true, mergeable_state: "clean", head: { sha: HEAD_SHA, ref: "chatgpt-handoff/DONE-001", repo: { full_name: "klineodyssey/kline-odyssey" } }, base: { ref: "main", repo: { full_name: "klineodyssey/kline-odyssey" } } }) };
+    if (parsed.pathname === "/repos/klineodyssey/kline-odyssey/pulls/353") return { ok: true, status: 200, json: async () => ({ state: "open", draft: false, mergeable: true, mergeable_state: "clean", head: { sha: HEAD_SHA, ref: prHeadRef, repo: { full_name: "klineodyssey/kline-odyssey" } }, base: { ref: "main", repo: { full_name: "klineodyssey/kline-odyssey" } } }) };
     if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/compare/main...${HEAD_SHA}`) return { ok: true, status: 200, json: async () => ({ ahead_by: 2, behind_by: 0 }) };
     if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/commits/${HEAD_SHA}/check-runs`) return { ok: true, status: 200, json: async () => ({ total_count: 1, check_runs: [{ id: 1, name: "company-safe-cycle", status: "completed", conclusion: "success", head_sha: HEAD_SHA }] }) };
     const marker = "/contents/";
@@ -1302,10 +1303,12 @@ test("DONE counts completed only with hash-bound result exact head CI tests and 
   }
 });
 
-test("branch concurrency gate permits one identity-bound writer and rejects competing or stale claims", () => {
+test("branch concurrency gate permits one signed repository-bound writer and rejects competing stale or forged claims", async () => {
   const handoffHead = "8".repeat(40);
-  const controllerBinding = "c".repeat(64);
   const sessionBinding = "d".repeat(64);
+  const keys = await globalThis.crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+  const publicKey = await globalThis.crypto.subtle.exportKey("jwk", keys.publicKey);
+  const controllerBinding = createHash("sha256").update(stableStringify(publicKey)).digest("hex");
   const claim = {
     claim_id: "CLAIM-KAIOS-DOT-ORGAN-V1-20261007-codex-gm-01-R1",
     work_id: "KAIOS-DOT-ORGAN-V1-20261007",
@@ -1313,31 +1316,59 @@ test("branch concurrency gate permits one identity-bound writer and rejects comp
     active_writer: manager.worker_id,
     life_id: manager.life_identity_ref,
     controller_binding_hash: controllerBinding,
+    controller_registry_id: manager.controller_id,
     session_binding_hash: sessionBinding,
     handoff_head: handoffHead,
     handoff_scope: ["install branch concurrency gate", "add bounded regression test"],
     current_writer_release: true,
     next_writer_ack: true,
     fencing_token: "FENCE-KAIOS-DOT-ORGAN-V1-20261007-R1",
+    fencing_epoch: 1,
     branch_authority: "HUMAN_EXPLICIT_EXISTING_PR_BRANCH",
     lease_status: "ACTIVE",
-    lease_expires_at: "2026-10-07T18:00:00Z"
+    claimed_at: "2026-10-07T13:50:00Z",
+    last_heartbeat: "2026-10-07T13:58:00Z",
+    lease_expires_at: "2026-10-07T17:50:00Z"
   };
+  const sourceManifest = JSON.stringify({ branch_concurrency_gate: { claims: [claim] } });
+  const files = {
+    ...fixtureFiles,
+    "KGEN-KAIOS/worker_registry.json": JSON.stringify({ workers: [manager, worker] }),
+    [WORK_ORDER_REF]: sourceManifest
+  };
+  const repositoryEvidence = await resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-07T14:00:00Z", current_main_sha: MAIN_SHA, active_task_pr: 353,
+    work_order_refs: [WORK_ORDER_REF], pr_work_order_refs: [WORK_ORDER_REF],
+    fetch_impl: activeCompanyEvidenceFetch(files, { prHeadRef: claim.branch })
+  });
+  const signedPayload = {
+    claim_id: claim.claim_id,
+    claim_hash: createHash("sha256").update(stableStringify(claim)).digest("hex"),
+    branch: claim.branch,
+    work_id: claim.work_id,
+    handoff_head: claim.handoff_head,
+    fencing_token: claim.fencing_token,
+    fencing_epoch: claim.fencing_epoch,
+    session_binding_hash: claim.session_binding_hash,
+    attested_at: "2026-10-07T13:59:00Z"
+  };
+  const signature = await globalThis.crypto.subtle.sign({ name: "Ed25519" }, keys.privateKey, new TextEncoder().encode(stableStringify(signedPayload)));
+  const signatureBase64url = Buffer.from(signature).toString("base64url");
+  const verifiedAttestation = await verifyBranchWriterRuntimeAttestation({
+    repository_evidence: repositoryEvidence,
+    current_main_sha: MAIN_SHA,
+    source_ref: WORK_ORDER_REF,
+    claim_id: claim.claim_id,
+    signed_payload: signedPayload,
+    public_key_jwk: publicKey,
+    signature_base64url: signatureBase64url
+  });
   const input = {
     branch: claim.branch,
     work_id: claim.work_id,
     handoff_head: handoffHead,
     observed_at: "2026-10-07T14:00:00Z",
-    claims: [claim],
-    registered_workers: [manager],
-    runtime_attestation: {
-      branch: claim.branch,
-      work_id: claim.work_id,
-      handoff_head: handoffHead,
-      fencing_token: claim.fencing_token,
-      controller_binding_hash: controllerBinding,
-      session_binding_hash: sessionBinding
-    }
+    verified_attestation: verifiedAttestation
   };
   const passed = evaluateBranchConcurrencyGate(input);
   assert.equal(passed.status, "SINGLE_WRITER_PASS");
@@ -1345,10 +1376,28 @@ test("branch concurrency gate permits one identity-bound writer and rejects comp
   assert.equal(passed.other_workers, "READ_REVIEW_WATCH_ONLY");
   assert.equal(passed.authority_expanded, false);
 
-  const competing = { ...claim, claim_id: `${claim.claim_id}-COMPETING`, active_writer: worker.worker_id, life_id: worker.life_identity_ref };
-  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, claims: [claim, competing] }).reasons, ["MULTIPLE_ACTIVE_WRITERS"]);
-  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, observed_at: "2026-10-07T18:00:00Z" }).reasons, ["ACTIVE_WRITER_REQUIRED"]);
-  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, runtime_attestation: { ...input.runtime_attestation, fencing_token: "FENCE-STALE" } }).reasons, ["RUNTIME_ATTESTATION_MISMATCH"]);
+  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, verified_attestation: { ...verifiedAttestation } }).reasons, ["VERIFIED_RUNTIME_ATTESTATION_REQUIRED"]);
+
+  const reverify = async (claims, payload = signedPayload, signingKey = keys.privateKey) => {
+    const content = JSON.stringify({ branch_concurrency_gate: { claims } });
+    const nextFiles = { ...files, [WORK_ORDER_REF]: content };
+    const evidence = await resolveActiveCompanyRepositoryEvidence({
+      observed_at: "2026-10-07T14:00:00Z", current_main_sha: MAIN_SHA, active_task_pr: 353,
+      work_order_refs: [WORK_ORDER_REF], pr_work_order_refs: [WORK_ORDER_REF],
+      fetch_impl: activeCompanyEvidenceFetch(nextFiles, { prHeadRef: claim.branch })
+    });
+    const nextSignature = await globalThis.crypto.subtle.sign({ name: "Ed25519" }, signingKey, new TextEncoder().encode(stableStringify(payload)));
+    return verifyBranchWriterRuntimeAttestation({ repository_evidence: evidence, current_main_sha: MAIN_SHA, source_ref: WORK_ORDER_REF,
+      claim_id: claim.claim_id, signed_payload: payload, public_key_jwk: publicKey, signature_base64url: Buffer.from(nextSignature).toString("base64url") });
+  };
+  const competing = { ...claim, claim_id: `${claim.claim_id}-COMPETING`, work_id: "OTHER-WORK", active_writer: worker.worker_id,
+    life_id: worker.life_identity_ref, controller_registry_id: worker.controller_id, fencing_token: "FENCE-OTHER-WORK-R2", fencing_epoch: 2 };
+  const competingAttestation = await reverify([claim, competing]);
+  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, verified_attestation: competingAttestation }).reasons, ["MULTIPLE_ACTIVE_WRITERS"]);
+  const future = { ...claim, claimed_at: "2026-10-07T14:01:00Z", last_heartbeat: "2026-10-07T14:01:00Z" };
+  const futurePayload = { ...signedPayload, claim_hash: createHash("sha256").update(stableStringify(future)).digest("hex") };
+  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, verified_attestation: await reverify([future], futurePayload) }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
+  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, observed_at: "2026-10-07T14:20:00Z" }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.distinct_from, "human-primeforge");
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.active_writer_authority, false);
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.runtime_maintainer_authority, false);

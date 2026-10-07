@@ -1,7 +1,7 @@
 {
   "schema": "KAIOS_MACHINE_VERIFIABLE_WORK_ORDER_V1",
   "work_order_id": "KAIOS-AI-COMPANY-SAFE-PLANNER-CURRENT-MAIN-R1-20260914",
-  "status": "DYNAMIC_ORGAN_CANDIDATE_SINGLE_WRITER_ACTIVE",
+  "status": "DYNAMIC_ORGAN_CANDIDATE_WRITER_CONTROLLER_PROOF_HOLD",
   "priority": "P1",
   "risk": "R1",
   "repository": "klineodyssey/kline-odyssey",
@@ -103,7 +103,7 @@
     "work_type": "CODE",
     "work_order_ref": "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json",
     "project_id": "DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE",
-    "status": "WORKING",
+    "status": "BLOCKED",
     "priority": "P1",
     "priority_factors": {
       "severity": 4,
@@ -143,8 +143,8 @@
     "acceptance_tests": [
       "node --test tests/autonomous-company-engineering-cycle.test.mjs"
     ],
-    "task_envelope_status": "SINGLE_WRITER_CLAIM_RECORDED",
-    "authority_status": "HUMAN_AUTHORIZED_BOUNDED_ENGINEERING_WITH_IDENTITY_BOUND_CLAIM",
+    "task_envelope_status": "WRITER_SELECTED_CONTROLLER_PROOF_HOLD",
+    "authority_status": "HUMAN_AUTHORIZED_BOUNDED_ENGINEERING_CONTROLLER_PROOF_NOT_VERIFIED",
     "dependencies_complete": false,
     "protected_paths_changed": false,
     "ready": false,
@@ -161,33 +161,45 @@
   },
   "branch_concurrency_gate": {
     "schema": "KAIOS_BRANCH_CONCURRENCY_CLAIM_V1",
-    "status": "SINGLE_WRITER_PASS",
-    "branch": "codex/kaios-ai-company-active-mode-20261007",
-    "work_id": "KAIOS-DOT-ORGAN-V1-20261007",
-    "active_writer": "codex-gm-01",
-    "life_id": "LIFE-CODEX-GM-0001",
-    "claim_id": "CLAIM-KAIOS-DOT-ORGAN-V1-20261007-codex-gm-01-R1",
-    "claimed_at": "2026-10-07T13:56:00Z",
-    "last_heartbeat": "2026-10-07T13:56:00Z",
-    "lease_expires_at": "2026-10-07T18:00:00Z",
-    "lease_status": "ACTIVE",
-    "handoff_head": "86061cbcc7913641fa06062566b954e834cc20a8",
-    "handoff_scope": [
-      "install branch concurrency gate",
-      "add the fifty-fifth bounded concurrency test",
-      "rerun exact-head tests and CI",
-      "route independent review",
-      "prepare non-GM automation closed-loop evidence"
+    "status": "HOLD_PLATFORM_SIGNED_ATTESTATION_AND_REGISTERED_CONTROLLER_REQUIRED",
+    "selected_writer_candidate": "codex-gm-01",
+    "active_writer": null,
+    "claims": [
+      {
+        "branch": "codex/kaios-ai-company-active-mode-20261007",
+        "work_id": "KAIOS-DOT-ORGAN-V1-20261007",
+        "active_writer": "codex-gm-01",
+        "life_id": "LIFE-CODEX-GM-0001",
+        "claim_id": "CLAIM-KAIOS-DOT-ORGAN-V1-20261007-codex-gm-01-R1",
+        "claimed_at": "2026-10-07T13:56:00Z",
+        "last_heartbeat": "2026-10-07T13:56:00Z",
+        "lease_expires_at": "2026-10-07T17:56:00Z",
+        "lease_status": "PROVISIONAL",
+        "handoff_head": "86061cbcc7913641fa06062566b954e834cc20a8",
+        "handoff_scope": [
+          "install branch concurrency gate",
+          "add the fifty-fifth bounded concurrency test",
+          "rerun exact-head tests and CI",
+          "route independent review",
+          "prepare non-GM automation closed-loop evidence"
+        ],
+        "current_writer_release": true,
+        "next_writer_ack": true,
+        "fencing_token": "FENCE-KAIOS-DOT-ORGAN-V1-20261007-R1",
+        "fencing_epoch": 1,
+        "controller_proof_type": "HOST_VERIFYING_IDENTITY_HASH_ONLY_NOT_SIGNED",
+        "controller_registry_id": "NOT_VERIFIED",
+        "controller_binding_hash": "7881d1241671639c118d17f6489f05ed341d7cd3993ca4224261528fecd91306",
+        "session_binding_hash": "26c6d61586f2e767764bc0191f59e99ae20a6f05ac9d4db8651c851ace5b0f4e",
+        "canonical_life_wallet_public_address_match": true,
+        "branch_authority": "HUMAN_EXPLICIT_EXISTING_PR_BRANCH",
+        "source": "https://github.com/klineodyssey/kline-odyssey/pull/536#issuecomment-6039481332"
+      }
     ],
-    "current_writer_release": true,
-    "next_writer_ack": true,
-    "fencing_token": "FENCE-KAIOS-DOT-ORGAN-V1-20261007-R1",
-    "controller_proof_type": "CODEX_HOST_VERIFYING_IDENTITY_SHA256_PLUS_CANONICAL_PUBLIC_LIFE_WALLET_MATCH",
-    "controller_binding_hash": "7881d1241671639c118d17f6489f05ed341d7cd3993ca4224261528fecd91306",
-    "session_binding_hash": "26c6d61586f2e767764bc0191f59e99ae20a6f05ac9d4db8651c851ace5b0f4e",
-    "canonical_life_wallet_public_address_match": true,
-    "branch_authority": "HUMAN_EXPLICIT_EXISTING_PR_BRANCH",
-    "source": "https://github.com/klineodyssey/kline-odyssey/pull/536#issuecomment-6039481332",
+    "activation_blockers": [
+      "CANONICAL_WORKER_CONTROLLER_ID_REQUIRED",
+      "PLATFORM_SIGNED_RUNTIME_ATTESTATION_REQUIRED"
+    ],
     "other_workers": "READ_REVIEW_WATCH_ONLY",
     "authority_expanded": false
   },
@@ -222,7 +234,7 @@
     "ORGAN_NAME": "KAIOS DOT Dynamic Opportunity & Task Engine",
     "VERSION": "1.0.0",
     "DESIGNED_BY": "沈英明",
-    "IMPLEMENTED_BY": "codex-gm-01_AS_AUTHORIZED_SINGLE_WRITER",
+    "IMPLEMENTED_BY": "codex-gm-01_PROVISIONAL_SESSION_CONTROLLER_NOT_CANONICAL",
     "REVIEWED_BY": "NOT_VERIFIED",
     "MAINTAINED_BY": "NOT_ASSIGNED_PRIMEFORGE_IDENTITY_PENDING",
     "POLICY_OWNER": "衡曜_UNDER_HUMAN_AUTHORITY",
@@ -246,6 +258,7 @@
     "KNOWN_LIMITS": [
       "NO_SEPARATE_REGISTERED_DOT_IDENTITY; BOUNDED_IMPLEMENTATION_WRITER_IS_codex-gm-01",
       "PRIMEFORGE_AI_LIFE_WORKER_AND_CONTROLLER_NOT_VERIFIED",
+      "codex-gm-01_CANONICAL_CONTROLLER_ID_AND_PLATFORM_SIGNED_ATTESTATION_NOT_VERIFIED",
       "NO_ELIGIBLE_DISTINCT_REVIEWER_CONFIRMED",
       "NO_AUTHENTICATED_DIRECT_CHANNEL",
       "NO_CANONICAL_DAY_BREATH_CLOCK_EVIDENCE"
@@ -384,7 +397,7 @@
     "seal": "INVALID",
     "transport_provenance": "CUSTOM_TRANSPORT_DIAGNOSTIC_ONLY; NEVER_PRODUCTION_CI_PASS",
     "ci_pr_repository_identity": "FOCUSED_TEST_PASS",
-    "branch_single_writer_gate": "55TH_BOUNDED_TEST_PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+    "branch_single_writer_gate": "FAIL_CLOSED_IMPLEMENTED_LIVE_ACTIVATION_HOLD_FOR_SIGNED_ATTESTATION",
     "non_gm_automation_closed_loop": "BLOCKED_VERIFIED_NON_GM_IDENTITY_AND_ENDPOINT_REQUIRED"
   }
 }
