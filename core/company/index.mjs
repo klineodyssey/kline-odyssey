@@ -2109,7 +2109,7 @@ export async function resolveActiveCompanyRepositoryEvidence({
   // Compatibility entry only: canonical reader owns ALL repository HTTP reads.
   const snapshot = await readLatestRepositorySnapshot({
     repository: "klineodyssey/kline-odyssey", observed_at, active_task_pr,
-    required_check_names: ["company-safe-cycle"], expected_main_sha: current_main_sha,
+    required_check_names: ["test"], expected_main_sha: current_main_sha,
     evidence_paths: paths, pr_evidence_paths: normalizedPrWorkOrderRefs, historical_evidence_refs: normalizedHistoryRefs, fetch_impl
   });
   const evidence = Object.freeze({
@@ -2208,6 +2208,8 @@ export const PRIMEFORGE_IDENTITY_BOUNDARY = Object.freeze({
 });
 
 const VERIFIED_BRANCH_WRITER_ATTESTATIONS = new WeakSet();
+const CONSUMED_BRANCH_WRITER_ATTESTATIONS = new WeakSet();
+const BRANCH_WRITER_CHALLENGES = new WeakSet();
 const BRANCH_WRITER_WORK_ORDER_REF = "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json";
 // Deliberately empty until an action-specific identity/security decision installs
 // a controller key fingerprint in shipped code. Repository/network responses
@@ -2215,12 +2217,25 @@ const BRANCH_WRITER_WORK_ORDER_REF = "KGEN-Organization/WorkOrders/KAIOS_AI_COMP
 export const BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS = Object.freeze({});
 const BRANCH_WRITER_MAX_LEASE_MS = 4 * 60 * 60 * 1000;
 const BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS = 15 * 60 * 1000;
-const BRANCH_WRITER_MAX_ATTESTATION_AGE_MS = 5 * 60 * 1000;
 
 function branchWriterSignatureBytes(value) {
   invariant(typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value), "BRANCH_WRITER_SIGNATURE_INVALID", "Writer attestation requires a base64url signature");
   const padded = `${value.replaceAll("-", "+").replaceAll("_", "/")}${"=".repeat((4 - value.length % 4) % 4)}`;
   return Uint8Array.from(globalThis.atob(padded), (character) => character.charCodeAt(0));
+}
+
+export function createBranchWriterChallenge({ branch, work_id, handoff_head }) {
+  invariant(typeof branch === "string" && branch.startsWith("codex/") && branch !== "main", "BRANCH_WRITER_CHALLENGE_BRANCH_INVALID", "Writer challenge requires a task branch");
+  invariant(typeof work_id === "string" && work_id.trim(), "BRANCH_WRITER_CHALLENGE_WORK_INVALID", "Writer challenge requires a work ID");
+  invariant(/^[0-9a-f]{40}$/.test(handoff_head ?? ""), "BRANCH_WRITER_CHALLENGE_HEAD_INVALID", "Writer challenge requires an exact handoff head");
+  const challenge = Object.freeze({
+    nonce: globalThis.crypto.randomUUID(),
+    branch,
+    work_id,
+    handoff_head
+  });
+  BRANCH_WRITER_CHALLENGES.add(challenge);
+  return challenge;
 }
 
 /**
@@ -2234,10 +2249,12 @@ export async function verifyBranchWriterRuntimeAttestation({
   source_ref,
   claim_id,
   signed_payload,
+  challenge,
   public_key_jwk,
   signature_base64url
 }) {
   const repository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
+  invariant(BRANCH_WRITER_CHALLENGES.has(challenge), "BRANCH_WRITER_FRESH_CHALLENGE_REQUIRED", "Writer proof requires a fresh current-process challenge");
   invariant(repository.status === "PUBLIC_GITHUB_REPOSITORY_EVIDENCE_VERIFIED"
     && repository.evidence_class === "DEFAULT_PUBLIC_GITHUB"
     && VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository.snapshot),
@@ -2277,11 +2294,17 @@ export async function verifyBranchWriterRuntimeAttestation({
   invariant(signed_payload.branch === claim.branch && signed_payload.work_id === claim.work_id && signed_payload.handoff_head === claim.handoff_head
     && signed_payload.fencing_token === claim.fencing_token && signed_payload.fencing_epoch === claim.fencing_epoch,
   "BRANCH_WRITER_SIGNED_SCOPE_MISMATCH", "Signed payload must bind branch, work, head and fencing epoch");
+  invariant(signed_payload.challenge_nonce === challenge.nonce && challenge.branch === claim.branch
+    && challenge.work_id === claim.work_id && challenge.handoff_head === claim.handoff_head,
+  "BRANCH_WRITER_CHALLENGE_MISMATCH", "Signed payload must bind the fresh current-process challenge");
+  invariant(signed_payload.pr_head === file.ref && signed_payload.source_git_object === file.git_object,
+    "BRANCH_WRITER_SIGNED_SOURCE_MISMATCH", "Signed payload must bind exact PR head and WorkOrder blob");
   const key = await globalThis.crypto.subtle.importKey("jwk", public_key_jwk, { name: "Ed25519" }, false, ["verify"]);
   const verified = await globalThis.crypto.subtle.verify(
     { name: "Ed25519" }, key, branchWriterSignatureBytes(signature_base64url), new TextEncoder().encode(stableStringify(signed_payload))
   );
   invariant(verified, "BRANCH_WRITER_SIGNATURE_VERIFICATION_FAILED", "Writer runtime attestation signature is invalid");
+  BRANCH_WRITER_CHALLENGES.delete(challenge);
   const attestation = Object.freeze({
     claim: Object.freeze({ ...claim }),
     claims: Object.freeze(claims.map((entry) => Object.freeze({ ...entry }))),
@@ -2328,7 +2351,6 @@ export function evaluateBranchConcurrencyGate({
   branch,
   work_id,
   handoff_head,
-  observed_at,
   verified_attestation = null
 }) {
   const hold = (...reasons) => Object.freeze({
@@ -2340,11 +2362,11 @@ export function evaluateBranchConcurrencyGate({
   if (typeof branch !== "string" || !branch.startsWith("codex/") || branch === "main") return hold("BRANCH_INVALID");
   if (typeof work_id !== "string" || !work_id.trim()) return hold("WORK_ID_INVALID");
   if (!/^[0-9a-f]{40}$/.test(handoff_head ?? "")) return hold("HANDOFF_HEAD_INVALID");
-  const observedMs = Date.parse(observed_at ?? "");
-  if (Number.isNaN(observedMs)) return hold("OBSERVED_AT_INVALID");
   if (!VERIFIED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("VERIFIED_RUNTIME_ATTESTATION_REQUIRED");
+  if (CONSUMED_BRANCH_WRITER_ATTESTATIONS.has(verified_attestation)) return hold("WRITER_ATTESTATION_REPLAYED");
   const claims = verified_attestation.claims;
-  const inspected = inspectBranchConcurrencyClaimSet({ branch, observed_at, claims });
+  const signed = verified_attestation.signed_payload;
+  const inspected = inspectBranchConcurrencyClaimSet({ branch, observed_at: signed.attested_at, claims });
   if (inspected.status !== "STRUCTURALLY_VALID") return hold(...inspected.reasons);
   const claim = inspected.active_claim;
   const worker = verified_attestation.worker;
@@ -2359,11 +2381,11 @@ export function evaluateBranchConcurrencyGate({
   if (!/^FENCE-[A-Za-z0-9._-]+$/.test(claim.fencing_token ?? "")) return hold("FENCING_TOKEN_INVALID");
   if (!/^[0-9a-f]{64}$/.test(claim.controller_binding_hash ?? "") || !/^[0-9a-f]{64}$/.test(claim.session_binding_hash ?? "")) return hold("CONTROLLER_BINDING_INVALID");
   if (claim.branch_authority !== "HUMAN_EXPLICIT_EXISTING_PR_BRANCH") return hold("BRANCH_AUTHORITY_REQUIRED");
-  const signed = verified_attestation.signed_payload;
   const attestedMs = Date.parse(signed.attested_at ?? "");
-  if (!Number.isFinite(attestedMs) || attestedMs < Date.parse(claim.last_heartbeat) || attestedMs > observedMs
-    || observedMs - attestedMs > BRANCH_WRITER_MAX_ATTESTATION_AGE_MS
+  if (!Number.isFinite(attestedMs) || attestedMs < Date.parse(claim.last_heartbeat)
     || signed.session_binding_hash !== claim.session_binding_hash) return hold("RUNTIME_ATTESTATION_FRESHNESS_INVALID");
+
+  CONSUMED_BRANCH_WRITER_ATTESTATIONS.add(verified_attestation);
 
   return Object.freeze({
     status: "SINGLE_WRITER_PASS",

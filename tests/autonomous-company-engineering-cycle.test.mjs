@@ -27,6 +27,7 @@ import {
   evaluateDotDispatchSafety,
   evaluateBranchConcurrencyGate,
   inspectBranchConcurrencyClaimSet,
+  createBranchWriterChallenge,
   verifyBranchWriterRuntimeAttestation,
   BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS,
   PRIMEFORGE_IDENTITY_BOUNDARY
@@ -141,7 +142,7 @@ function activeCompanyEvidenceFetch(files, { corruptPath = null, historicalFiles
     if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/compare/${HISTORY_SHA}...${MAIN_SHA}`) return { ok: true, status: 200, json: async () => ({ merge_base_commit: { sha: HISTORY_SHA }, ahead_by: 2, behind_by: 0 }) };
     if (parsed.pathname === "/repos/klineodyssey/kline-odyssey/pulls/353") return { ok: true, status: 200, json: async () => ({ state: "open", draft: false, mergeable: true, mergeable_state: "clean", head: { sha: HEAD_SHA, ref: prHeadRef, repo: { full_name: "klineodyssey/kline-odyssey" } }, base: { ref: "main", repo: { full_name: "klineodyssey/kline-odyssey" } } }) };
     if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/compare/main...${HEAD_SHA}`) return { ok: true, status: 200, json: async () => ({ ahead_by: 2, behind_by: 0 }) };
-    if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/commits/${HEAD_SHA}/check-runs`) return { ok: true, status: 200, json: async () => ({ total_count: 1, check_runs: [{ id: 1, name: "company-safe-cycle", status: "completed", conclusion: "success", head_sha: HEAD_SHA }] }) };
+    if (parsed.pathname === `/repos/klineodyssey/kline-odyssey/commits/${HEAD_SHA}/check-runs`) return { ok: true, status: 200, json: async () => ({ total_count: 1, check_runs: [{ id: 1, name: "test", status: "completed", conclusion: "success", head_sha: HEAD_SHA }] }) };
     const marker = "/contents/";
     const markerIndex = parsed.pathname.indexOf(marker);
     const path = markerIndex >= 0
@@ -1340,10 +1341,11 @@ test("branch concurrency gate rejects diagnostic provenance and structurally blo
     work_order_refs: [WORK_ORDER_REF], pr_work_order_refs: [WORK_ORDER_REF],
     fetch_impl: activeCompanyEvidenceFetch(files, { prHeadRef: claim.branch })
   });
+  const challenge = createBranchWriterChallenge({ branch: claim.branch, work_id: claim.work_id, handoff_head: claim.handoff_head });
   await assert.rejects(() => verifyBranchWriterRuntimeAttestation({
     repository_evidence: repositoryEvidence, current_main_sha: MAIN_SHA,
     source_ref: WORK_ORDER_REF, claim_id: claim.claim_id,
-    signed_payload: {}, public_key_jwk: {}, signature_base64url: "AA"
+    signed_payload: {}, challenge, public_key_jwk: {}, signature_base64url: "AA"
   }), error => error.code === "BRANCH_WRITER_PUBLIC_EVIDENCE_REQUIRED");
   assert.deepEqual(BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS, {});
 

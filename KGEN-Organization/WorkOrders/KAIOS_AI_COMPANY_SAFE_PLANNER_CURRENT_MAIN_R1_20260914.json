@@ -69,6 +69,8 @@
     "single_active_writer_required": true,
     "identity_bound_writer_ack_required": true,
     "fencing_token_required": true,
+    "fresh_signed_challenge_required": true,
+    "writer_attestation_one_shot": true,
     "writer_transfer_requires_release_and_ack": true,
     "suspended_worker_forbidden": true,
     "all_authority_effect_flags_false": true,
@@ -200,6 +202,7 @@
       "CANONICAL_WORKER_CONTROLLER_ID_REQUIRED",
       "CANONICAL_CONTROLLER_SIGNING_KEY_HASH_REQUIRED",
       "INDEPENDENT_SHIPPED_CONTROLLER_TRUST_ANCHOR_REQUIRED",
+      "FRESH_PLATFORM_SIGNED_CHALLENGE_REQUIRED",
       "PLATFORM_SIGNED_RUNTIME_ATTESTATION_REQUIRED"
     ],
     "other_workers": "READ_REVIEW_WATCH_ONLY",
