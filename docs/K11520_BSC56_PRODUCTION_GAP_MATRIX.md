@@ -194,3 +194,114 @@ have been added, but browser execution and screenshot inspection are pending at
 this source checkpoint: NOT_RELEASEABLE. The preceding `5351051b` checkpoint's
 five PR workflows passed, including identity-only chain56 evidence and preserved
 simulation regression; that result does not certify this newer UI increment.
+
+## Bounded KGEN holder-transfer engineering design
+
+Source checkpoint: `a678437d435e2b7f58704e81782b1db542716692`. Task: `K11520-BSC56-KGEN-TRANSFER-20261007`. This appended design uses the already registered gap-matrix owner; it creates no new document or Boot authority. Existing readiness classifications remain unchanged.
+
+### Authority and source boundaries
+
+Human BSC56-only direction of 2026-10-07 authorizes product code, wallet integration,
+transaction construction, tests and Draft checkpoints. Actual irreversible actions
+require the wallet owner to confirm the exact action in their wallet. Engineering
+and QA do not perform real transfers, signatures, approvals, deployments or
+Treasury actions. Existing historical97 tests and receipts stay preserved; no new
+historical97 feature or completion gate is introduced.
+
+- Existing `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json::productDecision20261007`
+  records engineering authority and the eight required confirmation fields.
+- `KGEN-KAIOS/KAIOS_MAINNET_GENESIS_ADDRESS_MANIFEST_CURRENT.md` identifies KGEN on
+  chain56 as `0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be` and forbids redeployment.
+- `KGEN/contracts/KGEN_Token_V7_5_2.sol` inherits OpenZeppelin ERC20, has initial
+  supply 72,000,000 × 10^18 and a fixed 30 bps conditional tax. Its `_update`
+  applies tax only when a pair flag is set and neither endpoint is exempt.
+- `docs/KGEN_TAX_IMMUTABILITY.md` distinguishes immutable rates from mutable pair,
+  exemption and tax-wallet state. Ordinary holder transfer does not depend on
+  trading USD INDEX, Brain/Position/Trigger deployment or KAIOS margin semantics.
+- Canonical expected code hash comes from the existing manifest field
+  `nonOraclePreparation20260930.publicReadback.tokenCodeHash`. Pin equality is
+  identity evidence, not source-to-bytecode recompilation or live authorization.
+- V10 wallet documents describe their own prototype. They are not the current
+  11520 wallet implementation or a prohibition on the newly authorized engineering.
+
+Standards: [ERC-20 transfer and Transfer event](https://eips.ethereum.org/EIPS/eip-20),
+[EIP-1193 provider/account/chain events](https://eips.ethereum.org/EIPS/eip-1193),
+[EIP-1474 RPC quantities](https://eips.ethereum.org/EIPS/eip-1474),
+[EIP-1898 hash-bound state](https://eips.ethereum.org/EIPS/eip-1898), and
+[EIP-2681 transaction nonce ceiling](https://eips.ethereum.org/EIPS/eip-2681).
+
+### Initial bounded checkpoint
+
+Only `runtime/evm-wallet-runtime.mjs::buildBsc56KgenTransferReview` is added as a
+pure constructor, with deterministic cases in the existing
+`tests/11520-kgen-margin-wallet-foundation.test.mjs`. All previous connection,
+read-only balance, singleton/session, player storage and simulation behavior stays
+byte-preserved after removing the new helper/constants/header.
+
+Inputs are a bounded descriptor snapshot: explicit chain, sender, recipient, exact
+KGEN decimal string, nonce, gas bounds and flat source/readback metadata. No floats,
+scientific notation, implicit rounding, zero/self/token recipient, accessor hooks,
+nonplain/cyclic structure, extra action or arbitrary calldata are accepted.
+
+Output contains full RECIPIENT in addition to CHAIN, WALLET, CONTRACT, FUNCTION,
+TOKEN, AMOUNT, EXPECTED_EFFECT and MAXIMUM_EXPOSURE. `transfer(address,uint256)`
+uses the canonical token, exact wei, native value zero and RPC hex quantities.
+No approval, allowance, swap, margin deposit or settlement action is constructed.
+
+The supplied codec is trusted by this pure helper. Checking its methods does not
+prove its provenance. A future private session must load the exact approved
+vendored module, not accept caller callbacks or a page global as signing authority.
+
+Every output stays `executionReady=false`, `walletHandoffReady=false`,
+`signerRequested=false`, `broadcast=false`, and explicitly input-metadata-only.
+There is no provider callback or request-to-wallet function in this checkpoint.
+A digest binds displayed metadata; it never grants execution authority.
+
+Tax observations describe the primary recipient Transfer amount at readback,
+not guaranteed final recipient balance credit. Tax recipients may receive other
+logs, flags can change before mining, balance can change or the transaction can
+revert. The fixed 30 bps bound is separate from the zero-fee V1 trading policy.
+Contract recipient presence is displayed, not treated as proof that it can recover
+the received token. Full receipt reconciliation is required before success.
+
+Local coverage: 13 Node test cases (nine new pure-transfer suites plus four prior
+pinned-identity suites), with all prior top-level wallet/simulation/connection
+assertions retained. Fixtures never call a real provider. Coverage includes all
+16 tax-flag combinations, exact 18-decimal encoding, bounds, provenance mismatch,
+accessor/codec input mutation, distinct metadata digests and no-wallet side effects.
+This does not certify a deployed contract, live readback, UI or wallet handoff.
+
+### Separately reviewable next increments
+
+1. **Session-owned readback.** Extend the existing wallet owner, retaining its
+   private provider and bridge singleton. Gather canonical chain/token/code,
+   raw balances, sender/recipient flags and recipient code at one pinned block
+   hash; record source head and read timestamp. Unsupported EIP-1898 or missing
+   reads remain UNKNOWN; do not substitute latest. Pending nonce and gas estimate
+   are separate observations, not falsely labeled hash-pinned state. Recheck them
+   and the active account/chain immediately before handoff. Bound RPC counts,
+   timeouts and response sizes. The caller cannot inject a trusted readback.
+2. **Explicit wallet-owner handoff.** Add a narrowly scoped method to that same
+   session only after review. Require fresh player action and the precise request
+   summary including full recipient. Bind an internal, short-lived review identity
+   to one account/chain/recipient/amount/source/block/nonce/gas context. Changes,
+   errors, close/reopen or late/ABA responses invalidate it. Read/connect/refresh
+   never sign/send, switch chain or submit automatically. Never accept a pure
+   constructor result or caller digest as an execution credential.
+3. **Pending request and receipt recovery.** Keep one request lease through wallet
+   timeout until rejection or reconciliation. Do not retry a send automatically.
+   Distinguish rejection, submitted hash, pending, matching confirmed transaction
+   and receipt, reverted/replaced/reorged/unknown, and reload recovery. Check chain,
+   transaction from/to/value/calldata, token log address/from/to/value and block
+   canonicality. A returned hash or receipt status alone is not transfer success.
+   Never credit a local simulation ledger as a chain effect.
+4. **Current wallet-panel UI.** Use existing preflight presentation and wallet
+   layout/inert owners, without another wallet/modal/connection. Explicit user
+   recipient and amount are required; nothing is guessed or prefilled as a real
+   transfer target. Preserve market selection, simulation controls and historical
+   evidence. Actual Chromium at 390×844, landscape and desktop plus direct
+   screenshot review must pass before product acceptance. Engineering tests use
+   synthetic providers/local contracts, never a real wallet send.
+
+Each increment needs an early Draft checkpoint and its own exact-source validation.
+No merge, deployment or live transfer is authorized by this design document.

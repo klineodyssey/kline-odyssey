@@ -5,17 +5,29 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-07.BSC56-REVIEW-CONTROL-CONTRAST |
+| REVISION | 2026-10-07.BSC56-KGEN-TRANSFER-REVIEW |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval |
-| SOURCE_COMMIT | 0589c16553e781c282b868a374e6fa60e4841f0f |
+| REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; no live transfer or release approval |
+| SOURCE_COMMIT | a678437d435e2b7f58704e81782b1db542716692 |
 | TASK_ID | K11520-BSC56-PRODUCTION-20261007 |
-| CHANGE_REASON | Fix screenshot-confirmed pale-on-white unsigned review controls without changing financial or wallet behavior. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 0589c16553e781c282b868a374e6fa60e4841f0f |
+| CHANGE_REASON | Register pure canonical KGEN transfer input review; session, wallet handoff and receipt integration remain separate. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ a678437d435e2b7f58704e81782b1db542716692 |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-07 — BSC56 KGEN transfer pure review checkpoint
+
+- Separate stacked engineering lane from `a678437d435e2b7f58704e81782b1db542716692`; current contrast UI acceptance continues separately in #524.
+- Existing `runtime/evm-wallet-runtime.mjs::buildBsc56KgenTransferReview` constructs only input-metadata review. Explicit recipient plus eight Human review fields, exact decimal-string units, canonical token/code identity, pinned source/block metadata, bounded gas/native exposure and mutable tax observations are retained together.
+- ERC20 `transfer(address,uint256)` has native value zero and proper EIP-1474 quantity fields. It is neither approve nor margin/order/settlement; no Brain deployment, Oracle or KAIOS trading semantics are required to build this holder-transfer path.
+- Codec method-shape validation is not module provenance. The pure helper trusts the supplied codec; future session handoff must bind the actual approved vendored module and never accept caller callbacks as execution authority.
+- All executionReady, walletHandoffReady, signerRequested and broadcast flags remain false. No provider callback, connection, session mutation, storage write, request-to-wallet or receipt claim is introduced. Existing wallet/session implementation remains byte-identical after removing the helper/constants/header.
+- Mutable pair/exemption state can change; primary Transfer credit at readback and fixed-tax bounds are observations, not a promised mined net amount. Full receipt accounting and session-owned fresh readback are later increments.
+- Existing `tests/11520-kgen-margin-wallet-foundation.test.mjs`: nine new deterministic suites cover encoding, exact units, 16 tax-flag combinations, bounds, malformed/provenance/account inputs, accessor/codec mutation and unchanged no-write behavior; four prior pinned-identity suites and top-level wallet/simulation regressions are retained.
+- The existing `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md` now records the bounded next session/readback/handoff/receipt work and security gates. No production readiness, merge or deployment claim.
+- Rollback: revert this pure-helper/tests/existing-design/metadata increment to `a678437d`; existing singleton/session behavior and independent trading/ABI lanes remain intact.
 
 ## 2026-10-07 — BSC56 review control contrast correction
 
