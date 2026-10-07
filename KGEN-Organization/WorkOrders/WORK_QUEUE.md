@@ -7,20 +7,20 @@
   task_source_actor: 沈英明; task_source_file: current conversation;
   task_source_commit: f7f67950418ebbb6f7a5a309a32d529232fcb3b6.
 - task_source_reason: manufacture one executable, testable and maintainable company CFO organ while keeping DOT, GM and CFO authority separate.
-- created_by / owner: codex-gm-01 acting on the direct Human request; project orchestration: DOT / 衡曜 policy;
-  implementer: codex-gm-01 (registered ACTIVE T5 system maintainer); session technical reviewer:
+- created_by / implementer: current Codex engineering session in the isolated managed worktree; this session is not
+  claimed as registry-bound `codex-gm-01`; project orchestration / policy owner: DOT / 衡曜; session technical reviewer:
   `cfo_finance_independent_review` (canonical Company reviewer authority remains unassigned).
-- Role-separation exception: no other registered active runtime implementer with a matching branch was available.
-  This keeps the organ an uninstalled candidate and does not assign the GM as CFO Digital Life or runtime operator.
+- Identity limitation: no registered active runtime implementer was bound to this exact worktree, task and branch.
+  This keeps the organ an uninstalled candidate and does not assign the GM as implementer, CFO Digital Life or runtime operator.
 - risk_level: R1_OFFCHAIN_SIMULATION; dependencies: existing `core/accounting` owner, Physics CURRENT KUFO law,
   exact-head tests, independent review and separately authorized Boot CURRENT registration before installation/seal.
 - Branch: `codex/cfo-finance-organ-v1`; base: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`;
-  implementation source commit: `cc7a4fffe854eed8f899bb33bc4d8158e2c38a84`.
+  implementation source commit: `50dfe685d51a21f4b5b6388f1b3958d41929802c` (later repair commit pending binding).
 - Scope: exact-integer double-entry, P&L/cash-flow/balance-sheet, separated compensation, royalties,
   compute cost, species consumption and read-only KUFO/KSHIP projection. No payment, signer, Treasury,
   Mainnet, real KGEN/KAIOS movement or CFO Digital Life assignment.
 - Output: `KGEN-Organization/WorkOrders/KAIOS_CFO_FINANCE_ENGINE_V1_20261008.json`.
-- Acceptance: 15 targeted tests, unaffected regressions, exact-head independent review, truthful candidate status;
+- Acceptance: 16 targeted tests, unaffected regressions, exact-head independent review, truthful candidate status;
   Boot registration remains a governance hold and is not bypassed.
 
 ## KAIOS World Portal / shared audio — 2026-10-01

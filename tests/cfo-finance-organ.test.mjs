@@ -87,6 +87,13 @@ test("cargo principal, restricted inventory and heartbeat reward cannot be poste
       revenue_account_id: "REV"
     }), errorCode("REVENUE_MISCLASSIFICATION"));
   }
+  const engine = runtime();
+  engine.registerAccount({ account_id: "CASH", account_type: "ASSET", currency: "KAIOS", classification: "CASH" });
+  engine.registerAccount({ account_id: "SERVICE", account_type: "REVENUE", currency: "KAIOS", classification: "SERVICE_REVENUE" });
+  assert.throws(() => engine.recordRevenue({
+    entry_id: "WRONG-REVENUE-CLASS", description: "wrong class", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" },
+    revenue_type: "GAME_REVENUE", source_type: "SIMULATED_ACCEPTED_ORDER", amount: "1", cash_account_id: "CASH", revenue_account_id: "SERVICE"
+  }), errorCode("INVALID_REVENUE_ACCOUNT"));
 });
 
 test("direct journal posting cannot bypass revenue classification", () => {
@@ -146,6 +153,15 @@ test("invalid compute evidence fails before any journal mutation", () => {
   const engine = runtime();
   engine.registerAccount({ account_id: "EXP", account_type: "EXPENSE", currency: "KAIOS", classification: "COMPUTE_EXPENSE" });
   engine.registerAccount({ account_id: "PAY", account_type: "LIABILITY", currency: "KAIOS", classification: "COMPUTE_PAYABLE" });
+  engine.registerAccount({ account_id: "WRONG_EXP", account_type: "ASSET", currency: "KAIOS", classification: "CASH" });
+  engine.registerAccount({ account_id: "WRONG_PAY", account_type: "EQUITY", currency: "KAIOS", classification: "OWNER_EQUITY" });
+  const validCompute = {
+    entry_id: "WRONG-COMPUTE-CLASS", description: "bad class", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" },
+    work_id: "W1", worker: "W", runtime: "R", start_usage: "0", end_usage: "1", duration_seconds: 1,
+    task_type: "CODE", deliverable: "D", amount: "1"
+  };
+  assert.throws(() => engine.recordComputeCost({ ...validCompute, expense_account_id: "WRONG_EXP", payable_account_id: "PAY" }), errorCode("INVALID_COMPUTE_EXPENSE_ACCOUNT"));
+  assert.throws(() => engine.recordComputeCost({ ...validCompute, expense_account_id: "EXP", payable_account_id: "WRONG_PAY" }), errorCode("INVALID_COMPUTE_PAYABLE_ACCOUNT"));
   assert.throws(() => engine.recordComputeCost({
     entry_id: "BAD-COMPUTE", description: "bad", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" },
     work_id: "W1", worker: "", runtime: "R", start_usage: "0", end_usage: "1", duration_seconds: 1,
@@ -168,10 +184,13 @@ test("worker and project subledgers reconcile journal project, amount, currency 
   engine.registerAccount({ account_id: "PAY", account_type: "LIABILITY", currency: "KAIOS", classification: "TASK_COMPENSATION_PAYABLE" });
   engine.postJournalEntry({ entry_id: "TASK", occurred_at: "2026-10-08T00:00:00Z", description: "task", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, project_id: "P1", lines: [{ account_id: "EXP", side: "DEBIT", amount: "1" }, { account_id: "PAY", side: "CREDIT", amount: "1" }] });
   assert.throws(() => engine.recordWorkerIncome({ worker_id: "W1", income_type: "TASK_COMPENSATION", amount: "999999", currency: "USD", source: "TEST", journal_entry_id: "TASK" }), errorCode("WORKER_INCOME_MISMATCH"));
-  assert.throws(() => engine.recordProjectEvent({ project_id: "P2", event_type: "PROJECT_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_PROJECT_MISMATCH"));
-  assert.throws(() => engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_COST", amount: "999999", currency: "USD", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_JOURNAL_MISMATCH"));
+  assert.throws(() => engine.recordProjectEvent({ project_id: "P2", event_type: "PROJECT_LABOR_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_PROJECT_MISMATCH"));
+  assert.throws(() => engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_LABOR_COST", amount: "999999", currency: "USD", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_JOURNAL_MISMATCH"));
+  assert.throws(() => engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_COMPUTE_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_JOURNAL_MISMATCH"));
   assert.equal(engine.recordWorkerIncome({ worker_id: "W1", income_type: "TASK_COMPENSATION", amount: "1", currency: "KAIOS", source: "TEST", journal_entry_id: "TASK" }).amount, "1");
-  assert.equal(engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }).amount, "1");
+  assert.equal(engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_LABOR_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }).amount, "1");
+  assert.throws(() => engine.recordWorkerIncome({ worker_id: "W2", income_type: "TASK_COMPENSATION", amount: "1", currency: "KAIOS", source: "TEST", journal_entry_id: "TASK" }), errorCode("WORKER_INCOME_EVIDENCE_REPLAY"));
+  assert.throws(() => engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_LABOR_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_EVIDENCE_REPLAY"));
 });
 
 test("species consumption is allow-listed, evidence-linked and replay protected", () => {
@@ -189,6 +208,7 @@ test("species consumption is allow-listed, evidence-linked and replay protected"
   const accepted = engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", accounting_amount: "1", accounting_currency: "KAIOS", inventory_debit_entry_id: "USE", sink_entry_id: "USE" });
   assert.equal(accepted.mode, "SIMULATION_ONLY");
   assert.throws(() => engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", accounting_amount: "1", accounting_currency: "KAIOS", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_REPLAY"));
+  assert.throws(() => engine.recordConsumption({ event_id: "C2", entity_id: "P2", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", accounting_amount: "1", accounting_currency: "KAIOS", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_EVIDENCE_REPLAY"));
 });
 
 test("daily reports include only the requested UTC date", () => {

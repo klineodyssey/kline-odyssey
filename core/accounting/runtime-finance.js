@@ -23,6 +23,14 @@ export const FORBIDDEN_REVENUE_SOURCES = Object.freeze([
   "UNACCEPTED_ORDER", "SIMULATION_RECEIPT"
 ]);
 
+const PROJECT_EVENT_RULES = Object.freeze({
+  GAME_GROSS_REVENUE: Object.freeze({ account_type: "REVENUE", classifications: Object.freeze(["GAME_REVENUE"]), side: "CREDIT" }),
+  PROJECT_COMPUTE_COST: Object.freeze({ account_type: "EXPENSE", classifications: Object.freeze(["COMPUTE_EXPENSE"]), side: "DEBIT" }),
+  PROJECT_LABOR_COST: Object.freeze({ account_type: "EXPENSE", classifications: Object.freeze(["PAYROLL_EXPENSE", "TASK_COMPENSATION_EXPENSE"]), side: "DEBIT" }),
+  PROJECT_DELIVERY_COST: Object.freeze({ account_type: "EXPENSE", classifications: Object.freeze(["CUSTOMER_DELIVERY_COST"]), side: "DEBIT" }),
+  PROJECT_ROYALTY: Object.freeze({ account_type: "EXPENSE", classifications: Object.freeze(["CREATOR_ROYALTY_EXPENSE"]), side: "DEBIT" })
+});
+
 export const CFO_ORGAN_METADATA = Object.freeze({
   organ_id: ORGAN_ID,
   organ_name: "KAIOS CFO Finance Engine",
@@ -34,7 +42,7 @@ export const CFO_ORGAN_METADATA = Object.freeze({
   revision: "1",
   ancestor: "core/accounting/index.mjs",
   source_commit: "50dfe685d51a21f4b5b6388f1b3958d41929802c",
-  author: "codex-gm-01 / REGISTERED_ACTIVE_T5_SYSTEM_MAINTAINER",
+  author: "CURRENT_CODEX_ENGINEERING_SESSION / WORKTREE_BOUND_NOT_REGISTRY_BOUND",
   reviewer: "cfo_finance_independent_review / SESSION_TECHNICAL_REVIEW_PENDING",
   runtime_dna: "COMPANY_CORE_ORGAN / ACCOUNTING / REPORTING / OFFCHAIN",
   taxonomy: "KAIOS_AI_COMPANY.CFO_FINANCE_ORGAN",
@@ -129,6 +137,9 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
   const consumption = [];
   const compute = [];
   const profiles = new Map();
+  const workerEvidenceClaims = new Set();
+  const projectEvidenceClaims = new Set();
+  const consumptionEvidenceClaims = new Set();
   let revision = 0;
 
   function registerAccount({ account_id, account_type, currency, classification, restricted = false }) {
@@ -169,6 +180,9 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     const revenueLines = normalizedLines.filter((line) => accounts.get(line.account_id).account_type === "REVENUE");
     if (revenueLines.length) {
       if (!REVENUE_TYPES.includes(revenue_type)) fail("REVENUE_CLASSIFICATION_REQUIRED", "Every revenue journal requires an approved revenue_type");
+      if (revenueLines.some((line) => accounts.get(line.account_id).classification !== revenue_type)) {
+        fail("REVENUE_ACCOUNT_CLASSIFICATION_MISMATCH", "Revenue journal account classification must equal revenue_type");
+      }
       const normalizedSourceType = text(source_type, "source_type");
       if (FORBIDDEN_REVENUE_SOURCES.includes(normalizedSourceType)) fail("REVENUE_MISCLASSIFICATION", `${normalizedSourceType} cannot be company revenue`);
       if (revenueLines.some((line) => line.side !== "CREDIT")) fail("REVENUE_REVERSAL_UNSUPPORTED", "V1 revenue lines must be credits; use a future governed reversal interface");
@@ -206,7 +220,7 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     const cashAccount = accounts.get(cash_account_id);
     const revenueAccount = accounts.get(revenue_account_id);
     if (cashAccount?.account_type !== "ASSET" || cashAccount.classification !== "CASH") fail("INVALID_REVENUE_CASH_ACCOUNT", "recordRevenue requires an ASSET/CASH debit account");
-    if (revenueAccount?.account_type !== "REVENUE") fail("INVALID_REVENUE_ACCOUNT", "recordRevenue requires a REVENUE credit account");
+    if (revenueAccount?.account_type !== "REVENUE" || revenueAccount.classification !== revenue_type) fail("INVALID_REVENUE_ACCOUNT", "recordRevenue requires a REVENUE account whose classification equals revenue_type");
     return postJournalEntry({
       ...entry,
       description: entry.description ?? revenue_type,
@@ -236,6 +250,14 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     };
     if (!Number.isFinite(normalized.duration_seconds) || normalized.duration_seconds < 0 || !Number.isFinite(normalized.blocked_seconds) || normalized.blocked_seconds < 0) {
       fail("INVALID_COMPUTE_DURATION", "Compute duration and blocked time must be finite non-negative numbers");
+    }
+    const expenseAccount = accounts.get(expense_account_id);
+    const payableAccount = accounts.get(payable_account_id);
+    if (expenseAccount?.account_type !== "EXPENSE" || expenseAccount.classification !== "COMPUTE_EXPENSE") {
+      fail("INVALID_COMPUTE_EXPENSE_ACCOUNT", "Compute cost requires an EXPENSE/COMPUTE_EXPENSE debit account");
+    }
+    if (payableAccount?.account_type !== "LIABILITY" || payableAccount.classification !== "COMPUTE_PAYABLE") {
+      fail("INVALID_COMPUTE_PAYABLE_ACCOUNT", "Compute cost requires a LIABILITY/COMPUTE_PAYABLE credit account");
     }
     const posted = postJournalEntry({
       ...entry,
@@ -271,22 +293,28 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
       CREATOR_ROYALTY: ["ROYALTY_PAYABLE"],
       FREIGHT_REVENUE: ["FREIGHT_PAYABLE"]
     };
+    let evidenceClaim = null;
     if (journalEntry) {
-      const reconciled = journalEntry.lines.some((line) => {
+      const reconciledLineIndex = journalEntry.lines.findIndex((line) => {
         const account = accounts.get(line.account_id);
         return line.side === "CREDIT" && account.account_type === "LIABILITY" &&
           payableClassifications[income_type]?.includes(account.classification) &&
           line.currency === normalizedCurrency && BigInt(line.amount) === normalizedAmount;
       });
-      if (!reconciled) fail("WORKER_INCOME_MISMATCH", "Worker income must match the journal payable classification, amount and currency");
+      if (reconciledLineIndex < 0) fail("WORKER_INCOME_MISMATCH", "Worker income must match the journal payable classification, amount and currency");
+      evidenceClaim = `${journal_entry_id}:${reconciledLineIndex}`;
+      if (workerEvidenceClaims.has(evidenceClaim)) fail("WORKER_INCOME_EVIDENCE_REPLAY", "Worker income journal line has already been consumed");
     }
+    const normalizedWorkerId = text(worker_id, "worker_id");
+    const normalizedSource = text(source, "source");
     const record = Object.freeze({
-      worker_id: text(worker_id, "worker_id"), income_type, amount: normalizedAmount.toString(), currency: normalizedCurrency,
-      source: text(source, "source"), journal_entry_id,
+      worker_id: normalizedWorkerId, income_type, amount: normalizedAmount.toString(), currency: normalizedCurrency,
+      source: normalizedSource, journal_entry_id,
       occurred_at: journalEntry ? journalEntry.occurred_at : timestamp(clock()),
       company_accounting: income_type === "HEARTBEAT_REWARD" ? "EXTERNAL_LIFE_REWARD" : "COMPENSATION_OR_SERVICE"
     });
     workers.push(record);
+    if (evidenceClaim) workerEvidenceClaims.add(evidenceClaim);
     return record;
   }
 
@@ -311,17 +339,23 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     const normalizedAmount = amount(value, "amount", true);
     const normalizedCurrency = text(currency, "currency");
     if (journalEntry.project_id !== normalizedProjectId) fail("PROJECT_EVENT_PROJECT_MISMATCH", "Project event and journal project_id must match");
-    const accountType = normalizedEventType.includes("REVENUE") ? "REVENUE" : normalizedEventType.includes("COST") || normalizedEventType.includes("EXPENSE") || normalizedEventType.includes("ROYALTY") ? "EXPENSE" : null;
-    if (!accountType) fail("UNSUPPORTED_PROJECT_EVENT", "Project event type has no V1 accounting reconciliation rule");
-    const side = accountType === "REVENUE" ? "CREDIT" : "DEBIT";
-    const reconciled = journalEntry.lines.some((line) => accounts.get(line.account_id).account_type === accountType && line.side === side && line.currency === normalizedCurrency && BigInt(line.amount) === normalizedAmount);
-    if (!reconciled) fail("PROJECT_EVENT_JOURNAL_MISMATCH", "Project event must match journal project, amount, currency and account class");
+    const rule = PROJECT_EVENT_RULES[normalizedEventType];
+    if (!rule) fail("UNSUPPORTED_PROJECT_EVENT", "Project event type has no V1 accounting reconciliation rule");
+    const reconciledLineIndex = journalEntry.lines.findIndex((line) => {
+      const account = accounts.get(line.account_id);
+      return account.account_type === rule.account_type && rule.classifications.includes(account.classification) &&
+        line.side === rule.side && line.currency === normalizedCurrency && BigInt(line.amount) === normalizedAmount;
+    });
+    if (reconciledLineIndex < 0) fail("PROJECT_EVENT_JOURNAL_MISMATCH", "Project event must match journal project, amount, currency and semantic account classification");
+    const evidenceClaim = `${journal_entry_id}:${reconciledLineIndex}`;
+    if (projectEvidenceClaims.has(evidenceClaim)) fail("PROJECT_EVENT_EVIDENCE_REPLAY", "Project journal line has already been consumed");
     const record = Object.freeze({
       project_id: normalizedProjectId, event_type: normalizedEventType,
       amount: normalizedAmount.toString(), currency: normalizedCurrency, journal_entry_id,
       occurred_at: journalEntry.occurred_at
     });
     projects.push(record);
+    projectEvidenceClaims.add(evidenceClaim);
     return record;
   }
 
@@ -349,20 +383,27 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     const sinkEntry = journal.find((entry) => entry.entry_id === sink_entry_id);
     const normalizedAccountingAmount = amount(accounting_amount, "accounting_amount");
     const normalizedAccountingCurrency = text(accounting_currency, "accounting_currency");
-    const hasInventoryCredit = inventoryEntry?.lines.some((line) => {
+    const inventoryLineIndex = inventoryEntry?.lines.findIndex((line) => {
       const account = accounts.get(line.account_id);
       return line.side === "CREDIT" && account.account_type === "ASSET" && account.classification.includes("INVENTORY") &&
         line.currency === normalizedAccountingCurrency && BigInt(line.amount) === normalizedAccountingAmount;
     });
-    const hasExpenseSink = sinkEntry?.lines.some((line) => line.side === "DEBIT" && accounts.get(line.account_id).account_type === "EXPENSE" && line.currency === normalizedAccountingCurrency && BigInt(line.amount) === normalizedAccountingAmount);
-    if (!hasInventoryCredit || !hasExpenseSink) fail("CONSUMPTION_EVIDENCE_REQUIRED", "Consumption requires amount- and currency-matched inventory-credit and expense-sink journal evidence");
+    const sinkLineIndex = sinkEntry?.lines.findIndex((line) => line.side === "DEBIT" && accounts.get(line.account_id).account_type === "EXPENSE" && line.currency === normalizedAccountingCurrency && BigInt(line.amount) === normalizedAccountingAmount);
+    if (inventoryLineIndex === undefined || inventoryLineIndex < 0 || sinkLineIndex === undefined || sinkLineIndex < 0) fail("CONSUMPTION_EVIDENCE_REQUIRED", "Consumption requires amount- and currency-matched inventory-credit and expense-sink journal evidence");
+    const evidenceClaims = [`${inventory_debit_entry_id}:${inventoryLineIndex}`, `${sink_entry_id}:${sinkLineIndex}`];
+    if (evidenceClaims.some((claim) => consumptionEvidenceClaims.has(claim))) fail("CONSUMPTION_EVIDENCE_REPLAY", "Consumption journal line has already been consumed");
+    const normalizedEventId = text(event_id, "event_id");
+    const normalizedEntityId = text(entity_id, "entity_id");
+    const normalizedQuantity = amount(value);
+    const normalizedUnit = text(unit, "unit");
     const record = Object.freeze({
-      event_id: text(event_id, "event_id"), entity_id: text(entity_id, "entity_id"), species_id, consumption_type,
-      amount: amount(value).toString(), unit: text(unit, "unit"), inventory_debit_entry_id, sink_entry_id,
+      event_id: normalizedEventId, entity_id: normalizedEntityId, species_id, consumption_type,
+      amount: normalizedQuantity.toString(), unit: normalizedUnit, inventory_debit_entry_id, sink_entry_id,
       accounting_amount: normalizedAccountingAmount.toString(), accounting_currency: normalizedAccountingCurrency,
       occurred_at: sinkEntry.occurred_at, mode: MODE
     });
     consumption.push(record);
+    evidenceClaims.forEach((claim) => consumptionEvidenceClaims.add(claim));
     return record;
   }
 

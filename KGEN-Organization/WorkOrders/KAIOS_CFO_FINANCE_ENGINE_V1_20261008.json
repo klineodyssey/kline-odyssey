@@ -8,8 +8,8 @@
   "task_source_file": "current conversation",
   "task_source_commit": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
   "task_source_reason": "Manufacture one bounded company CFO organ without assigning CFO Digital Life authority or enabling real finance.",
-  "created_by": "codex-gm-01",
-  "owner": "codex-gm-01",
+  "created_by": "CURRENT_CODEX_ENGINEERING_SESSION",
+  "owner": "DOT_ORCHESTRATION_WITH_HENGYAO_POLICY",
   "project_owner": "DOT_ORCHESTRATION_AND_HENGYAO_POLICY",
   "reviewer": "cfo_finance_independent_review",
   "priority": "P1",
@@ -30,8 +30,8 @@
   "designed_by": "沈英明 / Human Authority",
   "system_architecture": "Human order plus current repository canon",
   "company_policy_owner": "衡曜 / General Manager",
-  "implemented_by": "codex-gm-01",
-  "implemented_by_registry_status": "REGISTERED_ACTIVE_T5_SYSTEM_MAINTAINER_NOT_CFO_DIGITAL_LIFE",
+  "implemented_by": "CURRENT_CODEX_ENGINEERING_SESSION",
+  "implemented_by_registry_status": "SESSION_WORKTREE_BOUND_NOT_CANONICAL_WORKER_REGISTRY_BOUND",
   "maintainer": "NOT_ASSIGNED",
   "reviewed_by": "FIRST_REVIEW_FAIL_REPAIRED_RE_REVIEW_PENDING",
   "base_main_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
@@ -44,8 +44,8 @@
   "source_of_truth": "core/accounting",
   "authority_boundaries": {
     "dot_is_cfo": false,
-    "gm_is_implementer_or_auditor": true,
-    "gm_role_separation_exception": "No separate registered active runtime implementer with a matching branch was available; candidate cannot be installed or sealed on this evidence alone.",
+    "gm_is_implementer_or_auditor": false,
+    "implementer_identity_limit": "The engineering session is not proven to be codex-gm-01 because the registry workspace/task/branch do not bind this worktree; candidate cannot be installed or sealed on this evidence alone.",
     "cfo_digital_life": "NOT_ASSIGNED",
     "real_financial_execution": false,
     "payroll_execution": "NOT_LIVE",
@@ -56,7 +56,7 @@
     { "role": "COMPANY_POLICY_OWNER", "assignee": "衡曜", "registry_status": "POLICY_ROLE" },
     { "role": "FINANCE_AND_ACCOUNTING_AUDIT", "assignee": "cfo_canonical_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
     { "role": "KUFO_AND_CONSUMPTION_AUDIT", "assignee": "cfo_kufo_consumption_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
-    { "role": "CODING_IMPLEMENTER", "assignee": "codex-gm-01", "registry_status": "REGISTERED_ACTIVE_T5_SYSTEM_MAINTAINER", "result": "COMPLETE_WITH_ROLE_SEPARATION_EXCEPTION" },
+    { "role": "CODING_IMPLEMENTER", "assignee": "CURRENT_CODEX_ENGINEERING_SESSION", "registry_status": "SESSION_WORKTREE_BOUND_NOT_CANONICAL_WORKER_REGISTRY_BOUND", "result": "IMPLEMENTATION_COMPLETE_GOVERNANCE_HOLD" },
     { "role": "INDEPENDENT_REVIEWER", "assignee": "cfo_finance_independent_review", "registry_status": "SESSION_TECHNICAL_REVIEWER_NOT_CANONICAL_COMPANY_AUTHORITY", "result": "SECOND_REVIEW_FAIL_REPAIRED_RE_REVIEW_PENDING" }
   ],
   "work_orders": [
@@ -64,7 +64,7 @@
       "work_id": "CFO-V1-WO-001-CANON-AUDIT",
       "owner": "DOT",
       "implementer": "cfo_canonical_audit",
-      "reviewer": "codex-gm-01",
+      "reviewer": "CURRENT_CODEX_ENGINEERING_SESSION",
       "scope": "Read-only accounting, payroll, royalty, compute, logistics and owner-boundary audit",
       "acceptance_tests": ["LATEST_MAIN_CONFIRMED", "EXISTING_OWNER_IDENTIFIED", "NO_PARALLEL_FINANCE_ENGINE"],
       "status": "COMPLETE"
@@ -73,7 +73,7 @@
       "work_id": "CFO-V1-WO-002-KUFO-CONSUMPTION-AUDIT",
       "owner": "DOT",
       "implementer": "cfo_kufo_consumption_audit",
-      "reviewer": "codex-gm-01",
+      "reviewer": "CURRENT_CODEX_ENGINEERING_SESSION",
       "scope": "Read-only Physics CURRENT, KUFO/KSHIP and species consumption audit",
       "acceptance_tests": ["HALF_LIFE_CURRENT", "YEAR_3_CUTOFF_NOT_INVENTED", "SPECIES_RULES_NOT_INVENTED"],
       "status": "COMPLETE"
@@ -81,7 +81,7 @@
     {
       "work_id": "CFO-V1-WO-003-RUNTIME",
       "owner": "DOT",
-      "implementer": "codex-gm-01",
+      "implementer": "CURRENT_CODEX_ENGINEERING_SESSION",
       "reviewer": "cfo_finance_independent_review",
       "scope": "Fixed-name CFO V1 runtime inside core/accounting with no execution authority",
       "acceptance_tests": ["DOUBLE_ENTRY", "ASSETS_EQUAL_LIABILITIES_PLUS_EQUITY", "CLASSIFICATION_SEPARATION", "NO_PAYMENT_API"],
@@ -90,7 +90,7 @@
     {
       "work_id": "CFO-V1-WO-004-DEMO-AND-TEST",
       "owner": "DOT",
-      "implementer": "codex-gm-01",
+      "implementer": "CURRENT_CODEX_ENGINEERING_SESSION",
       "reviewer": "cfo_finance_independent_review",
       "scope": "Deterministic game-app, compute, royalty, food, consumption and KUFO simulation",
       "acceptance_tests": ["TARGETED_NODE_TESTS", "FULL_NODE_REGRESSION", "DEMO_REPORT_BALANCED"],
@@ -130,6 +130,13 @@
       "decision": "FAIL",
       "findings": "P1 failed-entry revision atomicity and worker/project/consumption subledger reconciliation; P1 governance identity/claim evidence; P2 stale embedded head",
       "disposition": "REPAIRED_ON_SAME_BRANCH_NO_PASS_TRANSFER"
+    },
+    {
+      "head": "60bbc00d4f392107e581b706bc41945682716639",
+      "reviewer": "cfo_finance_independent_review",
+      "decision": "FAIL",
+      "findings": "P1 journal-line evidence replay, typed helper semantic classification and unproven implementer registry binding; P2 stale queue evidence",
+      "disposition": "REPAIR_IN_PROGRESS_NO_PASS_TRANSFER"
     }
   ],
   "tests": {
