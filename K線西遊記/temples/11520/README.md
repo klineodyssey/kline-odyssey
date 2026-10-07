@@ -141,6 +141,55 @@ backpack-preview WebGL remediation, Player Life backup guard and Customer
 journal are excluded; no hooks or changes there. This README-only proposal
 does not authorize any runtime/test implementation or reopening stopped work.
 
+## P1 inventory preview lifetime candidate — 2026-10-07
+
+Task `K11520-INVENTORY-PREVIEW-LIFETIME-20261007` is a Human-authorized temporary
+engineering subtask, not a formal employee/registry claim. BOOT/MUST READ:
+Boot CURRENT and V1.4, Physics CURRENT, root/local AGENTS, Company OS Boot,
+worker/lease/workspace/protected-path policy and this product's CURRENT handoff
+were re-read from main `f7f6795`. The separate cargo-cleanup PR is not its base.
+PROTECTED PATH CHECK: only the existing item-preview owner, backpack preview
+caller, existing tests and this README are changed. Camera, navigation, Player,
+inventory ledger/custody, financial and protected governance owners are untouched.
+
+TASK PLAN/EXECUTION: `runtime/item-visual-runtime.mjs` owns one private offscreen
+WebGL preview renderer and copies completed frames to the visible 2D canvases.
+Temporary scene geometry/materials and render lists are released after success
+or render/copy failure. Same-canvas requests and `runtime/backpack-ui.mjs` batch
+generations prevent superseded asynchronous paints; hidden bags do not render
+previews. The only production caller ignored the old returned resource handles.
+The public canvas ready/shape/label and descriptor contract remains; returned
+`renderer`/`root` are explicitly null because resources are now owner-managed.
+
+EARLY CHECKPOINT: 10 focused item tests PASS, including 100 preview canvases with
+one renderer, one-time cleanup, stale requests and failure cleanup. All four new
+regressions failed on base; its repeated-preview test created 100 renderers.
+Runtime syntax checks PASS. `FUNCTIONAL_QA=FOCUSED_PASS`, `VISUAL_QA=NOT_RUN`;
+fresh source-bound Chromium, mobile screenshots and independent review remain.
+No full GPU/FPS improvement, merge, deployment or playtest readiness is claimed.
+
+Independent review identified a retained-Three-render-stack failure case. The
+same preview owner now retires/disposes its private renderer and loses only that
+private context after render/setup/context failure; the next request may create
+a fresh one. Constructor failure also releases its already-created private
+context. Ordinary bitmap-copy errors retain the healthy renderer. Twelve focused
+tests pass, including constructor/lost-context recovery and actual backpack-batch
+close/reopen fencing. The existing browser item harness now binds served owner
+hashes, counts real WebGL contexts/buffers/programs/VAOs through observer-only
+forwarding, and requires 24 native inventory cycles across 360/390/412/432/480
+portrait plus 844x390 with no world-context loss. Preview resources must be
+released and per-context retained texture counts stable before any synthetic
+gallery starts. Screenshots and fresh CI remain pending at this checkpoint.
+
+The first extended run (`37585640016`, tree-identical checkout `dcab0e44`)
+reached all six viewport screenshot pairs but timed out at the existing 90-second
+cap during landscape pickup. Its open utility tray covers the pickup control;
+this known layout issue is outside the preview-resource repair. The harness now
+preserves that screenshot and uses the normal native utility toggle before
+landscape pickup, reopening it normally for the next inventory cycle. It does
+not force clicks, hide UI or change production layout. Short action timeouts and
+per-cycle JSON checkpoints preserve partial evidence on failure. No earlier run
+is treated as a completed 24-cycle or full visual PASS.
 
 ## V2.9.4 M1 read-only wallet candidate
 
