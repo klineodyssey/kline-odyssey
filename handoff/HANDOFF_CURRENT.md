@@ -3420,3 +3420,763 @@ Q01–Q20 remain the existing parent work packages. The rows below are bounded c
   }
 }
 ```
+
+
+## Workforce capability and executable buffer refresh — 2026-10-07
+
+This later snapshot supersedes only the named child statuses from the earlier portfolio receipt. It keeps every prior byte and parent Q01–Q20. The READY buffer is a mix of bounded engineering tests and explicitly read-only source/design audits, not a claim that twenty product features are complete or running. Formal registry rows are historical evidence, not live sessions or permission grants. Current source owners retain all writes; prepared work stays serialized around exact-head reviews.
+
+```json
+{
+  "WORK_ID": "DOT-ENGINEERING-HANDBOOK-20261006",
+  "PARENT_ID": "Q20",
+  "EVENT": "WORKFORCE_CAPABILITY_AND_EXECUTABLE_BUFFER_REFRESH",
+  "OBSERVED_AT": "2026-10-07T04:30:00Z",
+  "SOURCE_HEAD": "4648f434d8f48327280f1cf5a65223ce7b220998",
+  "OBSERVED_MAIN": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+  "PR": 516,
+  "AUTHORITY_SOURCE": "Human03:47 continuous bounded engineering; Human04:10 GitHub durable evidence/workforce direction as supplied by coordinator",
+  "STATUS": "DOCUMENTATION_REVIEW_CANDIDATE",
+  "COUNTS": {
+    "existing_rows": 31,
+    "new_rows": 17,
+    "total_rows": 48,
+    "ready": 20,
+    "target": 20,
+    "ready_target_met": true,
+    "active_product_projects": 5,
+    "active_projects": [
+      "BSC56",
+      "Navigator",
+      "Customer",
+      "3D resource-lifetime research",
+      "Company durable coordination"
+    ],
+    "not_active": [
+      "Player Life precise action blocked",
+      "External identity readiness completed",
+      "Public release read-only observation"
+    ]
+  },
+  "READY_COUNT_RULE": "Only exact READY rows after applying STATUS_UPDATES to the04:19snapshot, then adding NEW_ITEMS. Test plans/source audits are executable but not claimed implemented product features. Owner-serialized work is not permission to modify a reviewed head concurrently.",
+  "WORKFORCE": {
+    "source_main": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    "sources": [
+      {
+        "path": "KGEN-KAIOS/worker_registry.json",
+        "blob": "d016a1d0a9dec94aa756de8b3ccfee9e7a88f62c",
+        "updated": "2026-09-13"
+      },
+      {
+        "path": "KGEN-KAIOS/workforce/agent_registry.json",
+        "blob": "6f9e96d02d96b67768f4d7bc7116e31f399fccf5",
+        "updated": "2026-08-01"
+      },
+      {
+        "path": "KGEN-KAIOS/workforce/desk_registry.json",
+        "blob": "ddc758e4e33c6f22378f5cf2e22d7722940fa80a",
+        "updated": "2026-07-13"
+      }
+    ],
+    "registry_rows": [
+      {
+        "worker_id": "codex-gm-01",
+        "status": "ACTIVE",
+        "employee_status": "ACTIVE",
+        "trust_level": "T5",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": "2026-09-13T14:21:31Z",
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "cursor-01",
+        "status": "OFFLINE",
+        "employee_status": "ACTIVE",
+        "trust_level": "T2",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": "2026-09-13T14:21:31Z",
+        "suspension": "CURSOR_CLOUD_DEFERRED_UNTIL_HIGH_WORKLOAD_BY_HUMAN_COST_DECISION",
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "claude-01",
+        "status": "OFFLINE",
+        "employee_status": "PENDING_REGISTRATION",
+        "trust_level": "T0",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": null,
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "gemini-01",
+        "status": "OFFLINE",
+        "employee_status": "PENDING_REGISTRATION",
+        "trust_level": "T0",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": null,
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "openhands-01",
+        "status": "OFFLINE",
+        "employee_status": "PENDING_REGISTRATION",
+        "trust_level": "T0",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": null,
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "copilot-01",
+        "status": "OFFLINE",
+        "employee_status": "PENDING_REGISTRATION",
+        "trust_level": "T0",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": null,
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "chatgpt-01",
+        "status": "ACTIVE",
+        "employee_status": "ACTIVE",
+        "trust_level": "T5",
+        "current_task": "KAIOS-11520-UI-HUMAN-REWORK-20260907",
+        "current_branch": "chatgpt-handoff/KAIOS-11520-UI-HUMAN-REWORK-20260907",
+        "last_heartbeat": "2026-09-07T03:22:00Z",
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "deep-research-01",
+        "status": "OFFLINE",
+        "employee_status": "PENDING_REGISTRATION",
+        "trust_level": "T0",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": null,
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      },
+      {
+        "worker_id": "human-engineer-01",
+        "status": "OFFLINE",
+        "employee_status": "PENDING_REGISTRATION",
+        "trust_level": "T0",
+        "current_task": null,
+        "current_branch": null,
+        "last_heartbeat": null,
+        "suspension": null,
+        "live_endpoint": "NOT_VERIFIED_IN_THIS_READ_SCOPE"
+      }
+    ],
+    "conflicts": [
+      "Older agent registry says Cursor ACTIVE_ON_DUTY, while newer worker registry says OFFLINE and deferred-capacity suspension.",
+      "Older agent/desk registry says ChatGPT OFFLINE/not activated, while newer worker registry says ACTIVE/T5 with aSep7 task.",
+      "Old status, provider label, GitHub author or branch prefix cannot prove current live capacity, controller identity or authenticated ACK."
+    ],
+    "named_roles": [
+      {
+        "name": "衡曜 / Codex GM",
+        "public_registry_mapping": "codex-gm-01 is recorded GM; no fresh runtime binding proved by this inventory",
+        "current_task_in_registry": null,
+        "current_live_ack": "NOT_VERIFIED",
+        "accessible_route": "Coordinator reports historical task read rejected unsupported placement format; no message or new ACK"
+      },
+      {
+        "name": "澄序 / Cloud Backend Engineer",
+        "public_decision": "Issue491 comment5980081931 records HIRED; explicitly Life/Worker registration NOT_STARTED, IDs NOT_ISSUED, permissions NOT_GRANTED",
+        "assignment": "Issue491 comment5986249329 assigns Universal Market Backend V1",
+        "fresh_assignment_ack_or_delivery": "NOT_FOUND_IN_FETCHED_491_THREAD; not a global absence claim",
+        "registry_mapping": "No matching named worker in examined worker/agent rows; do not create duplicate identity"
+      },
+      {
+        "name": "悟界 / architecture",
+        "role_source": "Current Human role direction relayed by coordinator",
+        "registry_endpoint_binding": "NOT_ESTABLISHED_IN_EXAMINED_RECORDS",
+        "live_ack": "NOT_VERIFIED"
+      }
+    ],
+    "route_scope": "This delegated inventory's direct-child listing returned empty; it does not describe all coordinator/account tasks. Recent PRs share GitHub author klineodyssey, which does not distinguish AI controllers.",
+    "formal_mutations": false,
+    "external_agent_contact": false,
+    "payroll_claim": false
+  },
+  "CI_WORKLOAD": {
+    "observed_at": "2026-10-07T04:24:46Z",
+    "scope": "GitHub in_progress/queued workflow lists and all jobs of the6 in-progress runs; local processes not observed",
+    "workflow_runs_in_progress": 6,
+    "unique_exact_head_batches": 2,
+    "browser_heavy_batches": 1,
+    "cpu_batches": 1,
+    "active_browser_jobs": 6,
+    "active_cpu_test_jobs": 2,
+    "browser_head": "c8e930c1cf49432f21dd3420ae8fb479e884d814",
+    "cpu_head": "58aa7a9428b31b12ddb8d3c557248d94f5c4f5bb",
+    "run_ids": [
+      37571072585,
+      37571065312,
+      37571065140,
+      37571065173,
+      37571061972,
+      37571020207
+    ],
+    "old_unrelated_queued_run": {
+      "id": 34749322334,
+      "date": "2026-09-13",
+      "counted_current": false
+    },
+    "total_heavy_including_local": "UNKNOWN",
+    "not_claimed": "Six workflows are not six projects or six independently scheduled heavy batches."
+  },
+  "DURABLE_HEADS": [
+    {
+      "pr": 516,
+      "head": "4648f434d8f48327280f1cf5a65223ce7b220998",
+      "branch": "dot/engineering-handbook-20261006",
+      "draft": true
+    },
+    {
+      "pr": 523,
+      "head": "c8e930c1cf49432f21dd3420ae8fb479e884d814",
+      "branch": "dot/k11520-navigator-reconstruction-20261007",
+      "draft": true
+    },
+    {
+      "pr": 524,
+      "head": "83cc73268fcf7ee1d514a0e736a37985515c44a2",
+      "branch": "dot/k11520-bsc56-production-20261007",
+      "draft": true
+    },
+    {
+      "pr": 525,
+      "head": "faca4e0dd378b3cd8ab15f28fb41b4a4430a008b",
+      "branch": "dot/customer-project-digital-world-20261007",
+      "draft": true
+    },
+    {
+      "pr": 526,
+      "head": "c9ac7cf155ae7324a950c262175b930e9a2367b6",
+      "branch": "chatgpt-handoff/KGEN-KAIOS-EXTERNAL-IDENTITY-READINESS-20261007",
+      "draft": true
+    }
+  ],
+  "BACKUP_OWNER_REPORT": {
+    "observed_at": "2026-10-07T04:24:11Z",
+    "scope": "Coordinator reports verified Git mirror/bundle backup; desktop path and private file names omitted",
+    "refs": 1104,
+    "branches": 518,
+    "tags": 1,
+    "pull_refs": 585,
+    "fsck_strict": "PASS_REPORTED",
+    "bundles": 2,
+    "bundle_verification": "PASS_REPORTED",
+    "remote_comparison_differences": 0,
+    "main": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    "dirty_working_files": "12 modified and27 untracked untouched and not backed up",
+    "boundary": "Git backup does not recover old cloud workspace or uncommitted files; no zero-loss claim."
+  },
+  "STATUS_UPDATES": [
+    {
+      "id": "Q15-NAV-PURSUIT",
+      "status": "IMPLEMENTED_CI_PENDING",
+      "evidence": "Owner confirms c8e930c1 implements test-only pursuit throttle/fresh one-shot strike."
+    },
+    {
+      "id": "Q15-NAV-HOME",
+      "status": "IMPLEMENTED_CI_PENDING",
+      "evidence": "Owner confirms living-world175 native player-C setup follows explicit PAUSED verification atc8e930c1."
+    },
+    {
+      "id": "Q15-NAV-ROUTE",
+      "status": "IMPLEMENTED_CI_PENDING",
+      "evidence": "Exact existing path tests/11520-browser-plane-map.mjs; expected native-obstacle1c JSON/PNG committed, actual artifact not yet verified."
+    },
+    {
+      "id": "Q15-NAV-FAILURES",
+      "status": "ACTIVE",
+      "evidence": "New root-approved automatic camera framing/clipped-avatar follow-up after±1C; existing game-mobile-shell/game-5d-main presentation and avatar-facing read-only evidence. Manual pan/pinch/Recenter/Home preserved."
+    },
+    {
+      "id": "Q08-CUSTOMER-DRAFT",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Published#52558aa7a94; generalized requirement draft only, no execution."
+    },
+    {
+      "id": "Q08-CUSTOMER-AMBIGUITY",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Included in five new requirement cases at58aa7a94; remove fromREADY."
+    },
+    {
+      "id": "Q08-CUSTOMER-NOAUTH",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Included in five new requirement cases at58aa7a94; remove fromREADY."
+    },
+    {
+      "id": "Q08-CUSTOMER-ADAPTER",
+      "status": "ACTIVE",
+      "evidence": "Owner reports five more local adapter cases/28 selected total and new#525faca4e0d observed remotely. CI/source details remain owner-scoped."
+    },
+    {
+      "id": "Q19-IDENTITY-ASSETS",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Draft#526c9ac7cf1 exact remote docs verified by owner; brandCI37571235655 success. No explorer/listing approval claim."
+    },
+    {
+      "id": "Q19-IDENTITY-PACKAGE",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Current official-platform/document readiness supplied by#526; public external byte/chain reads need their own bounded assignment."
+    },
+    {
+      "id": "Q20-COMPANY-CAPABILITY",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "This read-only capability inventory is recorded below. No formal claim/permission/identity change."
+    },
+    {
+      "id": "Q04-BSC-PREVIEW",
+      "status": "COMPLETE_SCOPED",
+      "evidence": "Pure unsigned builder now on#52483cc7326, current9 BSC56 cases owner-reported; no deployed binding/live authority."
+    },
+    {
+      "id": "Q04-BSC-SOURCE",
+      "status": "ACTIVE",
+      "evidence": "Current head83cc7326 under exact-head review; next bounded source/security work owner-serialized."
+    },
+    {
+      "id": "Q15-3D-DEPENDENCY",
+      "status": "ACTIVE",
+      "evidence": "Coordinator began actual read-only resource-lifetime audit of life-visual-runtime/world-item-visual-runtime/game-5d-main. Call-site cleanup gaps, not measured GPU leak; verify shared ownership before any patch."
+    },
+    {
+      "id": "Q18-RELEASE-PAGES",
+      "status": "WAITING_READ_ONLY",
+      "evidence": "Coordinator now owns read-only existing Pages checks; not an extra active product or new dispatch."
+    }
+  ],
+  "NEW_ITEMS": [
+    {
+      "id": "Q08-CUSTOMER-STRICT-INPUT",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Fuzz strict site/design requirement fields",
+      "current_paths": [
+        "core/company/index.mjs",
+        "tests/universal-exchange.test.mjs"
+      ],
+      "input": "Owner supplied existing adapter fixtures and published requirement draft; no execution inputs required.",
+      "output": "Deterministic negative matrix for allowlists, bounds, prototypes, extra fields, NaN and forged status.",
+      "acceptance_test": "Each malformed case rejects before owner side effects; valid fixture and input bytes remain unchanged.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_TEST_PACKAGE",
+      "source_ref": "PR525@faca4e0dd378b3cd8ab15f28fb41b4a4430a008b",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q08-CUSTOMER-IMMUTABILITY",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Prove read-only owner inspection has no side effects",
+      "current_paths": [
+        "core/company/index.mjs",
+        "tests/universal-exchange.test.mjs",
+        "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js",
+        "KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js"
+      ],
+      "input": "Installed V1 exports and current local inspection adapter from owner report.",
+      "output": "Source-immutability and storage/network trap regression package.",
+      "acceptance_test": "Before/after owner bytes/state match; inspection invokes no storage or network write.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_TEST_PACKAGE",
+      "source_ref": "PR525@faca4e0dd378b3cd8ab15f28fb41b4a4430a008b",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q08-CUSTOMER-COVERAGE",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Map supplied versus applied ecosystem policies",
+      "current_paths": [
+        "core/company/index.mjs",
+        "tests/universal-exchange.test.mjs",
+        "KAIOS/life/aquaculture/KAIOS_FISHPOND_AQUACULTURE_RUNTIME_V1_SPEC.md",
+        "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js"
+      ],
+      "input": "Existing read-only V1 exports and generalized requirements.",
+      "output": "Field-by-field applied/unsupported/held map for plants, microbes, resources, labor and policies.",
+      "acceptance_test": "A supplied field never claims owner application without a source function/effect; missing coverage stays held.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "PR525@faca4e0dd378b3cd8ab15f28fb41b4a4430a008b",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q08-CUSTOMER-CONSTRUCTION-PROVENANCE",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Audit existing pond construction evidence chain",
+      "current_paths": [
+        "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js",
+        "KGEN-KAIOS/world-viewer/tests/fishpond-aquaculture-runtime-v1.test.mjs",
+        "KAIOS/life/aquaculture/KAIOS_AQUACULTURE_CONSTRUCTION_SCHEMA_V1.json"
+      ],
+      "input": "Current 17-stage action/event logs and construction schema.",
+      "output": "Exact resource/time/worker provenance blockers and smallest owner-compatible fix proposal.",
+      "acceptance_test": "Trace each claimed construction stage to resource consumption, elapsed work and inspection; no quote or acceptance invented.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "main@f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q08-CUSTOMER-JOURNAL-COMPAT",
+      "parent": "Q08",
+      "track": "Customer",
+      "status": "READY",
+      "owner": "dot Customer engineering owner",
+      "title": "Recheck retained journals after Company imports",
+      "current_paths": [
+        "tests/universal-exchange.test.mjs",
+        "core/company/index.mjs",
+        "KAIOS/backend/src/adapters/local.mjs",
+        "KAIOS/backend/src/service.mjs"
+      ],
+      "input": "Preserved v1/v2 fixture journals and existing local SQLite adapter; Node24 path already used by owner.",
+      "output": "Fresh-process journal compatibility evidence after added Company imports.",
+      "acceptance_test": "No source/identity mutation or replay effects; old v1/v2 records restore or fail closed without resetting DB.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_TEST_PACKAGE",
+      "source_ref": "PR525@faca4e0dd378b3cd8ab15f28fb41b4a4430a008b",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q04-BSC-ABI-DRIFT",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Inventory ABI and contract-source drift",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
+        "tests/11520-real-trading-order-intent.test.mjs",
+        "KGEN/contracts/KGEN_BrainExchange.sol",
+        "KGEN/contracts/KGEN_PositionEngine.sol",
+        "KGEN/contracts/KGEN_OrderTriggerEngine.sol"
+      ],
+      "input": "Current TESTNET_EXECUTION_ABI/CAPITAL_EXECUTION_ABI and canonical contract sources; compiled comparison only after existing local compiler is verified.",
+      "output": "Exact signature/selector coverage matrix and bounded regression plan, identifying already covered checks.",
+      "acceptance_test": "Wrong function/argument/return/event fragments cannot be silently labeled current; do not claim compilation if unavailable.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "PR524@83cc73268fcf7ee1d514a0e736a37985515c44a2",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q04-BSC-ALLOWANCE-RACE",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Test stale allowance transition previews",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
+        "tests/11520-real-trading-order-intent.test.mjs"
+      ],
+      "input": "Current pure unsigned helper; owner confirms exact/revoke cases exist while old-allowance race is not covered by those cases.",
+      "output": "Deterministic old-allowance/reset-zero/exact-amount exposure fixtures and proposed revalidation boundary.",
+      "acceptance_test": "Changed allowance invalidates any dependent plan; no infinite approval, automatic token transfer, signer or broadcast.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_TEST_PACKAGE",
+      "source_ref": "PR524@83cc73268fcf7ee1d514a0e736a37985515c44a2",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q04-BSC-PACKAGE-PROVENANCE",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Audit unsigned deployment-package provenance coverage",
+      "current_paths": [
+        "KGEN/scripts/rehearse_bsc_testnet.mjs",
+        "docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json",
+        "tests/11520-real-trading-order-intent.test.mjs"
+      ],
+      "input": "Existing --test-mainnet-package path and source/ABI/storage digest checks; many basic tests already exist.",
+      "output": "Coverage inventory and only genuinely missing stale-digest negative vectors.",
+      "acceptance_test": "Demonstrate which source/ABI/layout mismatch is caught; no duplicate generic tests, BSC97 milestone, deployment or signer.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "PR524@83cc73268fcf7ee1d514a0e736a37985515c44a2",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q04-BSC-READBACK-DESIGN",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Specify pinned BSC56 readback invalidation",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
+        "K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs",
+        "tests/11520-real-trading-order-intent.test.mjs"
+      ],
+      "input": "Existing97 fixture behavior and current56 unsigned binding; production adapter absent.",
+      "output": "Local-fixture contract for mixed block, missing code, proxy change, wallet change and nonce invalidation.",
+      "acceptance_test": "No fixture claims live56 validation; distinguish existing97 coverage and new56 binding gaps before implementation.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_DESIGN_PACKAGE",
+      "source_ref": "PR524@83cc73268fcf7ee1d514a0e736a37985515c44a2",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q04-BSC-BINDING-BUDGET",
+      "parent": "Q04",
+      "track": "BSC56",
+      "status": "READY",
+      "owner": "dot BSC56 engineering owner",
+      "title": "Bound canonical binding traversal",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs",
+        "tests/11520-real-trading-order-intent.test.mjs"
+      ],
+      "input": "Owner confirms83cc7326 limits uint length but recursive plain-object/array canonicalization has no depth/node/byte/cycle budget; current9 BSC56 tests do not cover it.",
+      "output": "Minimal fail-fast input-budget hardening and deterministic oversized/deep/cyclic binding tests.",
+      "acceptance_test": "Bounded error codes instead of incidental stack exhaustion; no changes to transaction semantics, live route or authority. Prepare test design while exact-head review runs; serialize edits afterward.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_SECURITY_TEST_AND_FIX",
+      "source_ref": "PR524@83cc73268fcf7ee1d514a0e736a37985515c44a2",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q15-3D-FRAME-BUDGET",
+      "parent": "Q15",
+      "track": "3DWorld",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Audit per-frame CPU and allocation fan-out",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/game-5d-main.mjs",
+        "K線西遊記/temples/11520/runtime/world-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/life-visual-runtime.mjs"
+      ],
+      "input": "#523 c8 frame calls persistPlayerSession/tickWorld/syncLifeVisuals/hud/drawAllMaps/render each frame.",
+      "output": "Read-only operation/allocation budget and bounded instrumentation plan in existing handoff.",
+      "acceptance_test": "Separate source-estimated costs from measured FPS; do not run heavy browser or edit Navigator/Player paths.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "PR523@c8e930c1cf49432f21dd3420ae8fb479e884d814",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q10-MARKET-LINEAGE",
+      "parent": "Q10",
+      "track": "Market",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Reconcile assigned backend scope with preserved market sources",
+      "current_paths": [
+        "KAIOS/backend/src/model.mjs",
+        "KAIOS/backend/src/service.mjs",
+        "core/market/index.mjs",
+        "core/assets/index.mjs"
+      ],
+      "input": "Public#491 assignment and pinned#181/#188/#200; current backend reads show no generic BID/ASK/MATCH/CANCEL endpoint.",
+      "output": "Read-only preserved/missing/current-owner matrix; no duplicate backend implementation or employee reassignment.",
+      "acceptance_test": "Pin every claim to existing source/PR; assigned does not mean active/ACK or delivered.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "mainf7;PR1818a8e8eda;PR188eb627f43;PR200e33982ac;issue491comment5986249329",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q12-MARKET-MATCHING",
+      "parent": "Q12",
+      "track": "Market",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Audit preserved spot matcher reservation and replay semantics",
+      "current_paths": [
+        "K線西遊記/temples/11520/modules/kgen-kaios-spot-market.mjs",
+        "tests/11520-kgen-kaios-spot-market.test.mjs"
+      ],
+      "input": "Both paths verified as changed files on unmerged#200 e33982ac; not asserted present on main.",
+      "output": "Price-time/self-match/cancel/reservation/replay behavior matrix for future current-owner reconciliation.",
+      "acceptance_test": "Use exact preserved source; no fresh order, settlement, funds or activation; distinguish existing tests from missing cases.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "PR200@e33982ac3d3ce276935de95cf96b4a7b65d42287",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q12-MARKET-SETTLEMENT-INGRESS",
+      "parent": "Q12",
+      "track": "Market",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Audit settlement evidence ingress and caller trust",
+      "current_paths": [
+        "core/settlement/index.mjs",
+        "core/market/index.mjs",
+        "KAIOS/backend/src/model.mjs",
+        "tests/universal-exchange.test.mjs"
+      ],
+      "input": "main settleOrder checks tx-hash shape and caller evidence; backend chainReceiptProjection has a separate verifier boundary.",
+      "output": "All-caller trust map and isolated fixture repro plan before deciding whether a defect exists.",
+      "acceptance_test": "Never treat hash syntax as verified chain evidence; prove actual exposure before proposing financial code changes.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "main@f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q11-LIFE-RIGHTS-PORTABILITY",
+      "parent": "Q11",
+      "track": "Market",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Map transferable organ rights without Life identity transfer",
+      "current_paths": [
+        "core/permissions/index.mjs",
+        "core/assets/index.mjs",
+        "core/market/index.mjs",
+        "core/settlement/index.mjs"
+      ],
+      "input": "Existing LIFE/core-right rejection, generic asset rights and parentQ11 install/composition design goal.",
+      "output": "Read-only rights/permission/dependency compatibility matrix and existing-test coverage references.",
+      "acceptance_test": "No stock/equity/dividend entitlement, identity sale, copied rights authority or new Canon.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "main@f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q13-LOGISTICS-RECEIPT",
+      "parent": "Q13",
+      "track": "Logistics",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Audit route arrival versus delivery receipt boundary",
+      "current_paths": [
+        "K線西遊記/temples/11520/runtime/logistics-universe-runtime.mjs",
+        "K線西遊記/temples/11520/runtime/digital-ant-logistics-runtime.mjs",
+        "K線西遊記/temples/11520/LOGISTICS_UNIVERSE_SPEC.md",
+        "KGEN-KAIOS/world-viewer/settlement/logistics-runtime.js"
+      ],
+      "input": "Existing route/mission owners expose movement and receiptVerified separately; parentQ13 requires typed route integration.",
+      "output": "Typed physical route and delivery-evidence crosswalk with exact gaps; no new route, inventory or ledger.",
+      "acceptance_test": "Arrival alone never establishes customer acceptance, receipt, balance or revenue; unknown global mapping stays unknown.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "READ_ONLY_SOURCE_AUDIT",
+      "source_ref": "main@f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+      "formal_claim": false,
+      "owner_serialized": true
+    },
+    {
+      "id": "Q20-GIT-RECOVERY-PROOF",
+      "parent": "Q20",
+      "track": "Company",
+      "status": "READY",
+      "owner": "dot coordinator",
+      "title": "Design bounded Git checkpoint recovery validator",
+      "current_paths": [
+        "core/company/index.mjs",
+        "tests/autonomous-company-engineering-cycle.test.mjs",
+        "handoff/HANDOFF_CURRENT.md",
+        "docs/KAIOS_DOT_ENGINEERING_HANDBOOK_CURRENT.md"
+      ],
+      "input": "Existing public repository reader/exact-head gate and verified checkpoint/desktop Git backup results.",
+      "output": "Read-only validator design and fixture inventory for reachable branch→commit→tree→required blobs; no second queue service.",
+      "acceptance_test": "Reject local-only SHA, isolated blob, moved branch and mismatched source; distinguish Git preservation from artifact expiry and dirty working files.",
+      "rollback": "No runtime state change; supersede or revert only this scoped evidence/design append.",
+      "dependencies": [],
+      "work_kind": "BOUNDED_DESIGN_PACKAGE",
+      "source_ref": "main@f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+      "formal_claim": false,
+      "owner_serialized": true
+    }
+  ],
+  "READY_IDS": [
+    "Q07-COMPANY-OFFLINE",
+    "Q04-BSC-DOMAIN",
+    "Q04-BSC-CONFIRMATION",
+    "Q08-CUSTOMER-STRICT-INPUT",
+    "Q08-CUSTOMER-IMMUTABILITY",
+    "Q08-CUSTOMER-COVERAGE",
+    "Q08-CUSTOMER-CONSTRUCTION-PROVENANCE",
+    "Q08-CUSTOMER-JOURNAL-COMPAT",
+    "Q04-BSC-ABI-DRIFT",
+    "Q04-BSC-ALLOWANCE-RACE",
+    "Q04-BSC-PACKAGE-PROVENANCE",
+    "Q04-BSC-READBACK-DESIGN",
+    "Q04-BSC-BINDING-BUDGET",
+    "Q15-3D-FRAME-BUDGET",
+    "Q10-MARKET-LINEAGE",
+    "Q12-MARKET-MATCHING",
+    "Q12-MARKET-SETTLEMENT-INGRESS",
+    "Q11-LIFE-RIGHTS-PORTABILITY",
+    "Q13-LOGISTICS-RECEIPT",
+    "Q20-GIT-RECOVERY-PROOF"
+  ],
+  "SCHEDULING": [
+    "Existing source owners retain write ownership; source/design audits may read concurrently.",
+    "BSC exact83cc review target does not move during review; new tests/design prepared separately and edits serialized.",
+    "Customer owns Company runtime/tests; Company infrastructure audits do not mutate those files.",
+    "3D resource audit is real active research; no measured leak or cleanup patch is asserted; Navigator overlap still coordinated.",
+    "Only exact stopped Player action remains held. No reassignment/retry is authorized by this inventory."
+  ],
+  "VALIDATION": "JSON/unique IDs/READY recomputation/source-path and append-prefix checks required; no runtime or heavy tests by this writer",
+  "PUBLICATION": "Containing commit; verify remote ref/tree/full-text; no self-hash claim",
+  "PR_METADATA": "Earlier optional#516body update cancelled and readback unchanged; no retry. Durable source files remain authoritative checkpoint evidence.",
+  "AUTHORITY": "No formal registry/queue/identity/permission/ACK/payroll update, no new Dispatcher, no external submission/signature/transaction, no protected Canon/Boot change, no main merge."
+}
+```
