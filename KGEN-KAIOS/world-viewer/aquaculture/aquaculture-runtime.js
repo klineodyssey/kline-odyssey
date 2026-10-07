@@ -1,3 +1,17 @@
+/*
+KGEN_META
+VERSION: 1.0.0
+REVISION: 2026-10-07.LOCAL_PAIRED_BIOMASS_CANDIDATE.3
+STATUS: DRAFT
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / Human continuous engineering authorization 2026-10-07
+REVIEWED_BY: PENDING; local tests are not registered Reviewer authority
+SOURCE_COMMIT: a6906b91508691cd0c62ba34fe36d8125ba19d0d
+TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
+CHANGE_REASON: Add opt-in finite fixture configuration and measured construction evidence without changing standalone defaults or delivery acceptance.
+SOURCE_OF_TRUTH: FALSE
+*/
+
 import { createCausalWorldRuntime } from "../causal-runtime/causal-world-runtime.js";
 import { createReproductionEcologyRuntimeV1 } from "../ecosystem/ecosystem-runtime.js";
 import {
@@ -197,7 +211,8 @@ function updateWaterState(state) {
   if (quality.state === "LOW_OXYGEN") state.pond.aeration_state = "EMERGENCY_AERATION_REQUIRED";
 }
 
-export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V1-001" } = {}) {
+export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V1-001", localExchangeMode = null } = {}) {
+  if (localExchangeMode !== null && localExchangeMode !== "LOCAL_PAIRED_EXCHANGE_TEST") throw new Error("LOCAL_EXCHANGE_MODE_REQUIRED");
   let state = defaultState(String(seed));
   let destroyed = false;
   const listeners = new Set();
@@ -297,6 +312,70 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     });
   }
 
+  // Opt-in closed-world fixture configuration. It cannot increase the owner's
+  // canonical starting pools, create identities, move parcels or mark work done.
+  // The legacy default factory and its standalone commands remain unchanged.
+  function configureLocalFixture(input) {
+    usable();
+    const exact = (value, keys) => value && Object.getPrototypeOf(value) === Object.prototype
+      && Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
+    const fail = (ok, code) => { if (!ok) throw new Error(code); };
+    fail(exact(input, ["scope", "fixtureId", "expectedRevision", "landParcelId", "resources", "workers"]), "LOCAL_FIXTURE_FIELDS");
+    input = clone(input);
+    fail(input.scope === "LOCAL_CLOSED_WORLD_TEST" && typeof input.fixtureId === "string"
+      && /^[A-Za-z0-9_-]{8,128}$/.test(input.fixtureId) && input.expectedRevision === 0, "LOCAL_FIXTURE_SCOPE");
+    const prior = state.action_log.find((action) => action.command === "CONFIGURE_LOCAL_FIXTURE");
+    if (prior) {
+      fail(stableStringify(prior.args) === stableStringify(input), "LOCAL_FIXTURE_IMMUTABLE");
+      const event = state.events.find((item) => item.event_type === "CONFIGURE_LOCAL_FIXTURE");
+      fail(Boolean(event), "LOCAL_FIXTURE_HISTORY_REQUIRED");
+      return clone({ status: "CONFIGURED", outputs: event.outputs, event });
+    }
+    fail(state.revision === 0 && state.action_log.length === 0 && state.events.length === 0
+      && state.simulation_time === 0 && state.status === "PAUSED", "LOCAL_FIXTURE_INITIAL_STATE_REQUIRED");
+    fail(input.landParcelId === state.land.land_parcel_id, "LOCAL_FIXTURE_CANONICAL_PARCEL_REQUIRED");
+    fail(exact(input.resources, ["equipment", "materials", "energy", "waterSources", "feed"]), "LOCAL_FIXTURE_RESOURCE_FIELDS");
+    for (const category of ["equipment", "materials", "energy"]) {
+      fail(exact(input.resources[category], Object.keys(state[category])), "LOCAL_FIXTURE_RESOURCE_FIELDS");
+      for (const [key, amount] of Object.entries(input.resources[category])) {
+        fail(typeof amount === "number" && Number.isFinite(amount) && amount >= 0 && amount <= state[category][key]
+          && (category !== "equipment" || Number.isInteger(amount)), "LOCAL_FIXTURE_RESOURCE_CEILING");
+      }
+    }
+    fail(exact(input.resources.feed, ["inventory_kg", "quality"]), "LOCAL_FIXTURE_RESOURCE_FIELDS");
+    for (const field of ["inventory_kg", "quality"]) {
+      const value = input.resources.feed[field];
+      fail(typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= state.feed[field], "LOCAL_FIXTURE_RESOURCE_CEILING");
+    }
+    fail(Array.isArray(input.resources.waterSources) && input.resources.waterSources.length === state.water_sources.length
+      && new Set(input.resources.waterSources.map((source) => source?.id)).size === state.water_sources.length, "LOCAL_FIXTURE_WATER_SOURCES");
+    for (const source of input.resources.waterSources) {
+      const original = state.water_sources.find((item) => item.id === source?.id);
+      fail(exact(source, ["id", "volume_l", "available"]) && original && typeof source.available === "boolean"
+        && typeof source.volume_l === "number" && Number.isFinite(source.volume_l) && source.volume_l >= 0
+        && source.volume_l <= original.volume_l, "LOCAL_FIXTURE_WATER_SOURCES");
+    }
+    fail(Array.isArray(input.workers) && input.workers.length === state.workers.length
+      && new Set(input.workers.map((worker) => worker?.life_id)).size === state.workers.length, "LOCAL_FIXTURE_WORKERS");
+    for (const worker of input.workers) {
+      fail(exact(worker, ["life_id", "current_location", "travel_time_hours", "availability"])
+        && state.workers.some((item) => item.life_id === worker.life_id)
+        && typeof worker.current_location === "string" && worker.current_location.length > 0 && worker.current_location.length <= 200
+        && typeof worker.travel_time_hours === "number" && Number.isFinite(worker.travel_time_hours) && worker.travel_time_hours >= 0
+        && (worker.current_location === state.land.land_parcel_id || worker.travel_time_hours > 0)
+        && typeof worker.availability === "boolean", "LOCAL_FIXTURE_WORKER_TRAVEL");
+    }
+    const fixture = clone(input);
+    return execute("CONFIGURE_LOCAL_FIXTURE", fixture, "LOCAL_TEST_FIXTURE", () => {
+      for (const category of ["equipment", "materials", "energy"]) state[category] = clone(fixture.resources[category]);
+      Object.assign(state.feed, fixture.resources.feed, { delivered_kg: fixture.resources.feed.inventory_kg });
+      for (const source of fixture.resources.waterSources) Object.assign(state.water_sources.find((item) => item.id === source.id), source);
+      for (const worker of fixture.workers) Object.assign(state.workers.find((item) => item.life_id === worker.life_id), worker);
+      return { status: "CONFIGURED", outputs: { fixture_id: fixture.fixtureId, land_parcel_id: fixture.landParcelId,
+        scope: "LOCAL_CLOSED_WORLD_TEST", new_identities: false, resources_increased: false, production_authority: false } };
+    });
+  }
+
   function setWorkerAvailability(role, available) {
     return execute("SET_WORKER_AVAILABILITY", { role, available }, "SIMULATION_OPERATOR", () => {
       const worker = state.workers.find((candidate) => candidate.role === role);
@@ -340,6 +419,31 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     });
   }
 
+  // Aggregate fixture logs may span several days. Allocate their effective
+  // hours within each observed window using the existing daily shift limit,
+  // so repeated short commands cannot obtain a fresh shift allowance.
+  function fixtureShiftCapacity(worker, window = null) {
+    const used = new Map();
+    if (!(worker.shift_hours > 0 && worker.shift_hours <= 24)) return { valid: false, available: 0 };
+    const allocate = (log, requested) => {
+      const begin = log.activity_start + log.travel_hours, end = log.activity_end;
+      if (![begin, end, log.activity_start, log.travel_hours, requested].every(Number.isFinite)
+        || begin < 0 || end <= begin || end - log.activity_start > 168 + EPSILON
+        || log.travel_hours < 0 || requested < 0 || !Number.isSafeInteger(Math.floor(end / 24))) return 0;
+      let assigned = 0;
+      for (let day = Math.floor(begin / 24); day * 24 < end && assigned < requested; day += 1) {
+        const span = Math.max(0, Math.min(end, (day + 1) * 24) - Math.max(begin, day * 24));
+        const amount = Math.min(requested - assigned, span, Math.max(0, worker.shift_hours - (used.get(day) ?? 0)));
+        assigned += amount; used.set(day, (used.get(day) ?? 0) + amount);
+      }
+      return assigned;
+    };
+    for (const log of worker.time_log) {
+      if (allocate(log, log.effective_work_hours) + EPSILON < log.effective_work_hours) return { valid: false, available: 0 };
+    }
+    return { valid: true, available: window ? allocate(window, 168) : 0 };
+  }
+
   function advanceConstruction(hours = 72) {
     return execute("ADVANCE_POND_CONSTRUCTION", { hours }, "AQUACULTURE_CONSTRUCTION_TEAM", () => {
       if (state.status !== "RUNNING") return { status: "BLOCKED", reason: "RUNTIME_PAUSED" };
@@ -349,10 +453,19 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
       const step = clamp(Number(hours) || 0, 0, 168);
       if (!(step > 0)) return { status: "BLOCKED", reason: "TIME_REQUIRED" };
       const assignedWorkers = requirement.roles.map((role) => state.workers.find((worker) => worker.role === role));
+      const fixture = state.action_log.find((action) => action.command === "CONFIGURE_LOCAL_FIXTURE");
+      const reservation = fixture ? {
+        reservation_id: `${fixture.args.fixtureId}:${state.construction.stage}`, scope: "LOCAL_CLOSED_WORLD_TEST",
+        stage: state.construction.stage, location: state.land.land_parcel_id, started_at: state.simulation_time,
+        worker_life_ids: assignedWorkers.map((worker) => worker.life_id), equipment: [...requirement.equipment],
+        materials: clone(requirement.materials), electricity_kwh: requirement.energy
+      } : null;
       const travelHours = assignedWorkers.map((worker) => worker.current_location === state.land.land_parcel_id ? 0 : worker.travel_time_hours);
       if (travelHours.some((travel) => travel >= step)) return { status: "BLOCKED", reason: "TRAVEL_TIME_CONFLICT" };
       const calendarDays = Math.max(1, Math.ceil(step / 24));
-      const workerCapacities = assignedWorkers.map((worker, index) => Math.min(Math.max(0, step - travelHours[index]), worker.shift_hours * calendarDays));
+      const workerCapacities = assignedWorkers.map((worker, index) => fixture
+        ? fixtureShiftCapacity(worker, { activity_start: state.simulation_time, activity_end: state.simulation_time + step, travel_hours: travelHours[index] }).available
+        : Math.min(Math.max(0, step - travelHours[index]), worker.shift_hours * calendarDays));
       const workHours = Math.min(Math.max(0, requirement.hours - state.construction.progress_hours), ...workerCapacities);
       if (!(workHours > 0)) return { status: "BLOCKED", reason: "REST_REQUIREMENT_CONFLICT" };
       const activityStart = state.simulation_time;
@@ -366,14 +479,15 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
         for (const [index, worker] of assignedWorkers.entries()) {
           const restHours = round(Math.max(0, step - travelHours[index] - workHours));
           worker.stamina = clamp(round(worker.stamina - workHours * 0.9 + restHours * 0.4), 0, 100);
-          worker.time_log.push({ stage: state.construction.stage, location: state.land.land_parcel_id, activity_start: activityStart, activity_end: state.simulation_time, scheduled_hours: step, travel_hours: travelHours[index], effective_work_hours: workHours, rest_hours: restHours, shift_capacity_hours: worker.shift_hours * calendarDays });
+          worker.time_log.push({ stage: state.construction.stage, location: state.land.land_parcel_id, activity_start: activityStart, activity_end: state.simulation_time, scheduled_hours: step, travel_hours: travelHours[index], effective_work_hours: workHours, rest_hours: restHours, shift_capacity_hours: fixture ? workerCapacities[index] : worker.shift_hours * calendarDays });
           worker.event_log.push({ event: "CONSTRUCTION_SHIFT", stage: state.construction.stage, start: activityStart, end: state.simulation_time, status: "CLOCKED_OUT" });
           worker.current_activity = "OFF_DUTY"; worker.activity_end = state.simulation_time; worker.last_work_end = state.simulation_time; worker.availability = true; worker.rest_state = worker.stamina < 10 ? "REST_REQUIRED" : "RESTED";
         }
       };
       finishWorkerAssignments();
       const laborCost = assignedWorkers.reduce((sum, worker) => sum + workHours * worker.wage, 0);
-      if (state.construction.progress_hours + EPSILON < requirement.hours) return { status: "IN_PROGRESS", cash_delta: charge(`CONSTRUCTION_LABOR_${state.construction.stage}`, laborCost), outputs: { stage: state.construction.stage, progress_hours: state.construction.progress_hours, worker_life_ids: assignedWorkers.map((worker) => worker.life_id), effective_work_hours: workHours } };
+      if (state.construction.progress_hours + EPSILON < requirement.hours) return { status: "IN_PROGRESS", cash_delta: charge(`CONSTRUCTION_LABOR_${state.construction.stage}`, laborCost), outputs: { stage: state.construction.stage, progress_hours: state.construction.progress_hours, worker_life_ids: assignedWorkers.map((worker) => worker.life_id), effective_work_hours: workHours,
+        ...(reservation ? { resource_reservation: { ...reservation, ended_at: state.simulation_time, status: "HELD_BY_STAGE" } } : {}) } };
       for (const [item, amount] of Object.entries(requirement.materials)) state.materials[item] = round(state.materials[item] - amount);
       state.energy.electricity_kwh = round(state.energy.electricity_kwh - requirement.energy);
       const completed = state.construction.stage;
@@ -402,7 +516,8 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
         state.enterprise.status = "PRE_STOCKING";
       } else state.construction.stage = CONSTRUCTION_STAGES[state.construction.stage_index];
       const cashDelta = charge(`CONSTRUCTION_${completed}`, laborCost + requirement.energy * 1.4);
-      return { status: state.pond.status === "READY_FOR_STOCKING" ? "READY_FOR_STOCKING" : "COMPLETED", water_delta: waterDelta, energy_delta: -requirement.energy, cash_delta: cashDelta, outputs: { completed_stage: completed, next_stage: state.construction.stage, worker_life_ids: assignedWorkers.map((worker) => worker.life_id), labor_cost: round(laborCost, 2) } };
+      return { status: state.pond.status === "READY_FOR_STOCKING" ? "READY_FOR_STOCKING" : "COMPLETED", water_delta: waterDelta, energy_delta: -requirement.energy, cash_delta: cashDelta, outputs: { completed_stage: completed, next_stage: state.construction.stage, worker_life_ids: assignedWorkers.map((worker) => worker.life_id), labor_cost: round(laborCost, 2),
+        ...(reservation ? { resource_reservation: { ...reservation, ended_at: state.simulation_time, status: "RELEASED_AFTER_COMPLETION" } } : {}) } };
     });
   }
 
@@ -584,6 +699,49 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     });
   }
 
+  function debitLocalDeadBiomass(input) {
+    usable();
+    const fail = (ok, code) => { if (!ok) throw new Error(code); };
+    const exact = (value, keys) => value && Object.getPrototypeOf(value) === Object.prototype
+      && Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
+    fail(localExchangeMode === "LOCAL_PAIRED_EXCHANGE_TEST", "LOCAL_EXCHANGE_MODE_REQUIRED");
+    validateLocalExchangeJson(input);
+    fail(exact(input, ["scope", "exchangeId", "fixtureHash", "resource", "unit", "quantityGrams", "source", "destination"]), "LOCAL_EXCHANGE_FIELDS");
+    const manifest = clone(input);
+    fail(manifest.scope === localExchangeMode && manifest.resource === "DEAD_BIOMASS" && manifest.unit === "GRAM"
+      && typeof manifest.exchangeId === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(manifest.exchangeId)
+      && typeof manifest.fixtureHash === "string" && /^[a-f0-9]{64}$/.test(manifest.fixtureHash)
+      && Number.isSafeInteger(manifest.quantityGrams) && manifest.quantityGrams > 0, "LOCAL_EXCHANGE_MANIFEST");
+    for (const endpoint of [manifest.source, manifest.destination]) {
+      fail(exact(endpoint, ["runtime", "ownerId", "revision", "stateHash"])
+        && typeof endpoint.ownerId === "string" && endpoint.ownerId.length > 0 && endpoint.ownerId.length <= 200
+        && Number.isSafeInteger(endpoint.revision) && endpoint.revision >= 0
+        && typeof endpoint.stateHash === "string" && /^fnv1a-[a-f0-9]{8}$/.test(endpoint.stateHash), "LOCAL_EXCHANGE_ENDPOINT");
+    }
+    fail(state.status === "PAUSED" && state.action_log.some((action) => action.command === "CONFIGURE_LOCAL_FIXTURE"), "LOCAL_EXCHANGE_PAUSED_FIXTURE_REQUIRED");
+    fail(manifest.source.runtime === RUNTIME && manifest.source.ownerId === state.pond.pond_id
+      && manifest.source.revision === state.revision && manifest.source.stateHash === hash(stateProjection(state)), "LOCAL_EXCHANGE_SOURCE_CONFLICT");
+    fail(manifest.destination.runtime === "KAIOS_REPRODUCTION_ECOLOGY_RUNTIME_V1", "LOCAL_EXCHANGE_DESTINATION");
+    fail(!state.action_log.some((action) => action.command === "DEBIT_LOCAL_DEAD_BIOMASS" && action.args.exchangeId === manifest.exchangeId), "LOCAL_EXCHANGE_DUPLICATE");
+    fail(Number.isSafeInteger(state.revision + 1), "LOCAL_EXCHANGE_REVISION_LIMIT");
+    const grams = Math.round(state.pond.dead_biomass_kg * 1000);
+    fail(Number.isSafeInteger(grams) && Number.isSafeInteger(grams * 1000) && Number.isSafeInteger(manifest.quantityGrams * 1000)
+      && grams / 1000 === state.pond.dead_biomass_kg
+      && Math.round(state.pond.dead_biomass_kg * 1e6) === grams * 1000
+      && (grams * 1000) / 1e6 === state.pond.dead_biomass_kg, "LOCAL_EXCHANGE_PRECISION");
+    fail(grams >= manifest.quantityGrams, "LOCAL_EXCHANGE_SOURCE_SHORTAGE");
+    const nextGrams = grams - manifest.quantityGrams, nextKg = nextGrams / 1000;
+    fail(Number.isSafeInteger(nextGrams * 1000) && Math.round(nextKg * 1000) === nextGrams
+      && Math.round(nextKg * 1e6) === nextGrams * 1000 && grams * 1000 - nextGrams * 1000 === manifest.quantityGrams * 1000
+      && nextKg < state.pond.dead_biomass_kg, "LOCAL_EXCHANGE_PRECISION");
+    return execute("DEBIT_LOCAL_DEAD_BIOMASS", manifest, "LOCAL_PAIRED_EXCHANGE_TEST", () => {
+      state.pond.dead_biomass_kg = nextKg;
+      return { status: "LOCAL_DEBIT_CANDIDATE", biomass_delta: -manifest.quantityGrams / 1000,
+        outputs: { phase: "EGRESS", manifest, transferred_kg: manifest.quantityGrams / 1000,
+          decomposed_kg: 0, paired_commit: false, production_authority: false } };
+    });
+  }
+
   function processDecomposition(kilograms = state.pond.dead_biomass_kg) {
     return execute("PROCESS_DECOMPOSITION", { kilograms }, "MICROBIAL_DECOMPOSITION_PROXY", () => {
       const amount = Math.min(Math.max(0, Number(kilograms) || 0), state.pond.dead_biomass_kg);
@@ -758,7 +916,7 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     const ledgerPayables = round(candidate.enterprise.ledger.reduce((sum, entry) => sum + entry.payable_delta, 0), 2);
     const inventoryBookValue = round(candidate.inventory.reduce((sum, item) => sum + item.book_value, 0), 2);
     if (Math.abs(ledgerExpenses - accounts.expenses) > EPSILON || Math.abs(ledgerRevenue - accounts.revenue) > EPSILON || Math.abs(INITIAL_CASH + ledgerCash - accounts.cash) > EPSILON || Math.abs(ledgerPayables - accounts.payables) > EPSILON || Math.abs(accounts.payables + accounts.debt - candidate.enterprise.liabilities) > EPSILON || Math.abs(accounts.revenue - accounts.expenses - candidate.enterprise.profit_or_loss) > EPSILON || Math.abs(inventoryBookValue - accounts.inventory_value) > EPSILON) issues.push("ACCOUNT_RECONCILIATION");
-    const knownCommands = new Set(["START_RUNTIME", "PAUSE_RUNTIME", "RESUME_RUNTIME", "STOP_RUNTIME", "SELECT_LAND", "DESIGN_POND", "SET_SIMULATION_RESOURCE", "SET_WORKER_AVAILABILITY", "SET_WATER_SOURCE_AVAILABILITY", "REPLENISH_FEED", "APPLY_OPERATING_COST", "ADVANCE_POND_CONSTRUCTION", "FILL_WATER", "TEST_WATER", "STOCK_FISH", "STOCK_SHRIMP", "FEED_POPULATION", "START_AERATION", "WATER_EXCHANGE", "ADVANCE_TIME", "PROCESS_REPRODUCTION", "PROCESS_DECOMPOSITION", "HEALTH_CHECK_SIMULATION", "HARVEST", "MOVE_TO_COLD_STORAGE", "CREATE_MARKET_ORDER", "CREATE_DELIVERY_ORDER", "ADVANCE_DELIVERY", "POLLUTION_INFLOW", "RESTORATION", "FLOOD_SCENARIO", "POWER_OUTAGE_SCENARIO", "LOW_OXYGEN_SCENARIO", "EVALUATE_BUSINESS_STATE", "RESTRUCTURE_SIMULATION", "LIQUIDATE_SIMULATION"]);
+    const knownCommands = new Set(["DEBIT_LOCAL_DEAD_BIOMASS", "CONFIGURE_LOCAL_FIXTURE", "START_RUNTIME", "PAUSE_RUNTIME", "RESUME_RUNTIME", "STOP_RUNTIME", "SELECT_LAND", "DESIGN_POND", "SET_SIMULATION_RESOURCE", "SET_WORKER_AVAILABILITY", "SET_WATER_SOURCE_AVAILABILITY", "REPLENISH_FEED", "APPLY_OPERATING_COST", "ADVANCE_POND_CONSTRUCTION", "FILL_WATER", "TEST_WATER", "STOCK_FISH", "STOCK_SHRIMP", "FEED_POPULATION", "START_AERATION", "WATER_EXCHANGE", "ADVANCE_TIME", "PROCESS_REPRODUCTION", "PROCESS_DECOMPOSITION", "HEALTH_CHECK_SIMULATION", "HARVEST", "MOVE_TO_COLD_STORAGE", "CREATE_MARKET_ORDER", "CREATE_DELIVERY_ORDER", "ADVANCE_DELIVERY", "POLLUTION_INFLOW", "RESTORATION", "FLOOD_SCENARIO", "POWER_OUTAGE_SCENARIO", "LOW_OXYGEN_SCENARIO", "EVALUATE_BUSINESS_STATE", "RESTRUCTURE_SIMULATION", "LIQUIDATE_SIMULATION"]);
     if (candidate.action_log.some((action) => !knownCommands.has(action.command))) issues.push("UNKNOWN_ACTION_COMMAND");
     for (let index = 1; index < (candidate.events?.length ?? 0); index += 1) if (candidate.events[index].previous_state_hash !== candidate.events[index - 1].next_state_hash) issues.push("EVENT_CHAIN_BROKEN");
     if (candidate.events?.length && candidate.events.at(-1).next_state_hash !== hash(stateProjection(candidate))) issues.push("STATE_HASH_MISMATCH");
@@ -779,10 +937,12 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
   function replayEvents() {
     usable();
     const actions = clone(state.action_log);
-    const replay = createFishpondAquacultureRuntimeV1({ seed: state.seed });
+    const replay = createFishpondAquacultureRuntimeV1({ seed: state.seed, localExchangeMode });
     for (const action of actions) {
       const handler = {
         START_RUNTIME: () => replay.start(), PAUSE_RUNTIME: () => replay.pause(), RESUME_RUNTIME: () => replay.resume(), STOP_RUNTIME: () => replay.stop(),
+        DEBIT_LOCAL_DEAD_BIOMASS: () => replay.debitLocalDeadBiomass(action.args),
+        CONFIGURE_LOCAL_FIXTURE: () => replay.configureLocalFixture(action.args),
         SELECT_LAND: () => replay.selectLand(action.args), DESIGN_POND: () => replay.designPond(action.args),
         SET_SIMULATION_RESOURCE: () => replay.setResource(action.args.category, action.args.key, action.args.value), SET_WORKER_AVAILABILITY: () => replay.setWorkerAvailability(action.args.role, action.args.available),
         SET_WATER_SOURCE_AVAILABILITY: () => replay.setWaterSourceAvailability(action.args.sourceId, action.args.available, action.args.volumeL), REPLENISH_FEED: () => replay.replenishFeed(action.args.kilograms, action.args.quality), APPLY_OPERATING_COST: () => replay.applyOperatingCost(action.args.costType, action.args.amount),
@@ -802,6 +962,71 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     const replayState = replay.getState();
     if (hash(stateProjection(replayState)) !== hash(stateProjection(state))) throw new Error("REPLAY_STATE_MISMATCH");
     return replayState;
+  }
+
+  function inspectLocalConstruction() {
+    usable();
+    const fixture = state.action_log.find((action) => action.command === "CONFIGURE_LOCAL_FIXTURE");
+    if (!fixture) throw new Error("LOCAL_FIXTURE_REQUIRED");
+    const issues = [], initial = fixture.args.resources, complete = state.construction.completed_stages;
+    if (state.action_log.some((action) => !["CONFIGURE_LOCAL_FIXTURE", "START_RUNTIME", "PAUSE_RUNTIME", "RESUME_RUNTIME", "ADVANCE_POND_CONSTRUCTION"].includes(action.command))) issues.push("UNSCOPED_OWNER_ACTION");
+    if (stableStringify(complete) !== stableStringify(CONSTRUCTION_STAGES.slice(0, complete.length))) issues.push("CONSTRUCTION_STAGE_ORDER");
+    const materialBalance = {};
+    for (const [key, amount] of Object.entries(initial.materials)) {
+      const required = complete.reduce((sum, stage) => sum + (STAGE_REQUIREMENTS[stage]?.materials[key] ?? 0), 0);
+      materialBalance[key] = { initial: amount, installed: required, remaining: state.materials[key], residual: round(amount - required - state.materials[key]) };
+      if (Math.abs(materialBalance[key].residual) > EPSILON) issues.push(`MATERIAL_CONSERVATION:${key}`);
+    }
+    const consumedEnergy = complete.reduce((sum, stage) => sum + (STAGE_REQUIREMENTS[stage]?.energy ?? 0), 0);
+    const electricityBalance = { initial_kwh: initial.energy.electricity_kwh, consumed_kwh: consumedEnergy,
+      remaining_kwh: state.energy.electricity_kwh, residual_kwh: round(initial.energy.electricity_kwh - consumedEnergy - state.energy.electricity_kwh) };
+    if (Math.abs(electricityBalance.residual_kwh) > EPSILON) issues.push("ENERGY_CONSERVATION");
+    const initialWater = initial.waterSources.reduce((sum, source) => sum + source.volume_l, 0);
+    const remainingWater = state.water_sources.reduce((sum, source) => sum + source.volume_l, 0);
+    const waterBalance = { initial_source_l: initialWater, remaining_source_l: remainingWater, pond_l: state.pond.water_volume_l,
+      residual_l: round(initialWater - remainingWater - state.pond.water_volume_l) };
+    if (Math.abs(waterBalance.residual_l) > EPSILON) issues.push("WATER_CONSERVATION");
+    const reservations = state.events.filter((event) => event.event_type === "ADVANCE_POND_CONSTRUCTION" && event.status !== "BLOCKED").map((event) => event.outputs.resource_reservation);
+    if (reservations.some((reservation) => !reservation || reservation.scope !== "LOCAL_CLOSED_WORLD_TEST"
+      || reservation.location !== fixture.args.landParcelId || !(reservation.ended_at > reservation.started_at))) issues.push("RESOURCE_RESERVATION_REQUIRED");
+    if (!state.events.some((event) => event.event_type === "CONFIGURE_LOCAL_FIXTURE"
+      && event.outputs?.fixture_id === fixture.args.fixtureId)) issues.push("FIXTURE_EVENT_HISTORY_REQUIRED");
+    for (const stage of complete) {
+      const requirement = STAGE_REQUIREMENTS[stage];
+      if (!requirement) continue;
+      if (reservations.filter((reservation) => reservation?.stage === stage && reservation.status === "RELEASED_AFTER_COMPLETION"
+        && reservation.reservation_id === `${fixture.args.fixtureId}:${stage}`).length !== 1) issues.push(`COMPLETION_RESERVATION_REQUIRED:${stage}`);
+      for (const role of requirement.roles) {
+        const worker = state.workers.find((item) => item.role === role);
+        const hours = worker?.time_log.filter((log) => log.stage === stage).reduce((sum, log) => sum + log.effective_work_hours, 0);
+        if (!Number.isFinite(hours) || Math.abs(hours - requirement.hours) > EPSILON) issues.push(`LABOR_HOURS:${stage}:${role}`);
+      }
+    }
+    for (const worker of state.workers) {
+      if (!fixtureShiftCapacity(worker).valid) issues.push(`CUMULATIVE_SHIFT_CAPACITY:${worker.life_id}`);
+      let lastEnd = 0;
+      for (const log of worker.time_log) {
+        if (log.activity_start < lastEnd || log.activity_end <= log.activity_start || log.location !== fixture.args.landParcelId
+          || log.effective_work_hours > log.shift_capacity_hours + EPSILON
+          || Math.abs(log.scheduled_hours - log.effective_work_hours - log.travel_hours - log.rest_hours) > EPSILON) issues.push(`WORKER_TIMELINE:${worker.life_id}`);
+        lastEnd = log.activity_end;
+      }
+      const declared = fixture.args.workers.find((item) => item.life_id === worker.life_id);
+      if (worker.time_log.length && declared.current_location !== fixture.args.landParcelId
+        && worker.time_log[0].travel_hours !== declared.travel_time_hours) issues.push(`WORKER_TRAVEL:${worker.life_id}`);
+    }
+    if (state.enterprise.accounts.payables > 0) issues.push("UNFUNDED_EXPENSES");
+    const integrity = integrityReport(); if (!integrity.ok) issues.push(...integrity.issues);
+    try {
+      const replayed = replayEvents();
+      if (stableStringify(replayed) !== stableStringify(state)) issues.push("OWNER_EVIDENCE_REPLAY_MISMATCH");
+    } catch { issues.push("OWNER_REPLAY_MISMATCH"); }
+    if (complete.length !== CONSTRUCTION_STAGES.length) issues.push("CONSTRUCTION_INCOMPLETE");
+    return clone({ scope: "LOCAL_CLOSED_WORLD_TEST", fixtureId: fixture.args.fixtureId, revision: state.revision,
+      sourceStateHash: hash(stateProjection(state)), status: issues.length ? "CONSTRUCTION_EVIDENCE_HELD" : "CONSTRUCTION_EVIDENCE_READY",
+      simulationHours: state.simulation_time, completedStages: complete, materialBalance, electricityBalance, waterBalance,
+      reservations, issues: [...new Set(issues)], inspection: "MEASURED_OWNER_EVIDENCE_NOT_CUSTOMER_ACCEPTANCE",
+      biology: "NOT_STOCKED_OR_ECOSYSTEM_COMPLETE", assetCreated: false, delivery: null, receipt: null, productionAuthority: false });
   }
 
   function integrityReport() {
@@ -824,7 +1049,8 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
   }
 
   return Object.freeze({
-    getState, start, pause, resume, stop, selectLand, designPond, setResource, setWorkerAvailability, setWaterSourceAvailability, replenishFeed, applyOperatingCost, advanceConstruction,
+    ...(localExchangeMode === "LOCAL_PAIRED_EXCHANGE_TEST" ? { debitLocalDeadBiomass } : {}),
+    getState, start, pause, resume, stop, selectLand, designPond, configureLocalFixture, inspectLocalConstruction, setResource, setWorkerAvailability, setWaterSourceAvailability, replenishFeed, applyOperatingCost, advanceConstruction,
     fillWater, testWater, stockFish, stockShrimp, feed, startAeration, performWaterExchange, advanceTime,
     processReproduction, processDecomposition, scheduleHealthCheck, harvest, moveToColdStorage, createMarketOrder,
     createDeliveryOrder, advanceDelivery, processPollution, processRestoration, runDroughtScenario, runFloodScenario,
@@ -832,4 +1058,128 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     resetState, replayEvents, integrityReport, subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
     destroy() { listeners.clear(); destroyed = true; }
   });
+}
+
+function validateLocalExchangeJson(input) {
+  let remaining = 512000, nodes = 100000;
+  const fail = (ok, code) => { if (!ok) throw new Error(code); };
+  const consume = (text) => {
+    fail(text.length <= remaining, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+    remaining -= new TextEncoder().encode(text).length;
+    fail(remaining >= 0, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+  };
+  const visit = (value, depth = 0) => {
+    fail(depth <= 30 && --nodes >= 0, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+    if (value === null || typeof value === 'boolean') { consume(JSON.stringify(value)); return; }
+    if (typeof value === 'string') { fail(value.length <= remaining, 'LOCAL_EXCHANGE_INPUT_LIMIT'); consume(JSON.stringify(value)); return; }
+    if (typeof value === 'number') { fail(Number.isFinite(value), 'LOCAL_EXCHANGE_INVALID_NUMBER'); consume(JSON.stringify(value)); return; }
+    fail(value && typeof value === 'object', 'LOCAL_EXCHANGE_JSON');
+    const array = Array.isArray(value);
+    fail(Object.getPrototypeOf(value) === (array ? Array.prototype : Object.prototype), 'LOCAL_EXCHANGE_JSON');
+    if (array) fail(value.length <= 20000, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+    const keys = Reflect.ownKeys(value);
+    fail(array ? keys.length === value.length + 1 : keys.length <= 2048, 'LOCAL_EXCHANGE_JSON');
+    consume(array ? '[' : '{');
+    const fields = array ? Array.from({ length: value.length }, (_, index) => String(index)) : keys;
+    for (let index = 0; index < fields.length; index += 1) {
+      const key = fields[index], descriptor = Object.getOwnPropertyDescriptor(value, key);
+      fail(typeof key === 'string' && descriptor?.enumerable && Object.hasOwn(descriptor, 'value')
+        && !['__proto__', 'constructor', 'prototype'].includes(key), 'LOCAL_EXCHANGE_JSON');
+      if (index) consume(',');
+      if (!array) { consume(JSON.stringify(key)); consume(':'); }
+      visit(descriptor.value, depth + 1);
+    }
+    consume(array ? ']' : '}');
+  };
+  visit(input);
+}
+
+/** Prepares two disposable candidates, never two live writes. The caller must
+ * later commit the whole pair in one authority-owned transaction. Source stock
+ * is admitted accounting input; this does not prove finite juvenile procurement. */
+export async function prepareLocalDeadBiomassExchange(input) {
+  const fail = (ok, code) => { if (!ok) throw new Error(code); };
+  const exact = (value, keys) => value && Object.getPrototypeOf(value) === Object.prototype
+    && Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
+  const sha256 = async (value) => [...new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(stableStringify(value))))]
+    .map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  validateLocalExchangeJson(input);
+  const request = clone(input);
+  fail(new TextEncoder().encode(stableStringify(request)).length <= 512000, 'LOCAL_EXCHANGE_INPUT_LIMIT');
+  fail(exact(request, ['scope', 'exchangeId', 'fixtureHash', 'quantityGrams', 'expectedSourceRevision', 'expectedDestinationRevision',
+    'constructionExport', 'constructionHash', 'pondExport', 'pondHash', 'ecologyGenesis', 'ecologyGenesisHash', 'ecologyExport', 'ecologyHash']), 'LOCAL_EXCHANGE_FIELDS');
+  fail(request.scope === 'LOCAL_PAIRED_EXCHANGE_TEST' && typeof request.exchangeId === 'string'
+    && /^[A-Za-z0-9_-]{8,128}$/.test(request.exchangeId) && Number.isSafeInteger(request.quantityGrams)
+    && request.quantityGrams > 0 && Number.isSafeInteger(request.quantityGrams * 1000), 'LOCAL_EXCHANGE_MANIFEST');
+  for (const key of ['fixtureHash', 'constructionHash', 'pondHash', 'ecologyGenesisHash', 'ecologyHash'])
+    fail(typeof request[key] === 'string' && /^[a-f0-9]{64}$/.test(request[key]), 'LOCAL_EXCHANGE_HASH_REQUIRED');
+  for (const [value, digest] of [['constructionExport', 'constructionHash'], ['pondExport', 'pondHash'], ['ecologyGenesis', 'ecologyGenesisHash'], ['ecologyExport', 'ecologyHash']])
+    fail(await sha256(request[value]) === request[digest], 'LOCAL_EXCHANGE_HASH_MISMATCH');
+  for (const value of [request.constructionExport, request.pondExport]) fail(exact(value, ['export_status', 'schema_version', 'state'])
+    && value.export_status === 'NON_AUTHORITATIVE_SIMULATION' && value.schema_version === SCHEMA_VERSION, 'LOCAL_EXCHANGE_EXPORT');
+  fail(exact(request.ecologyExport, ['envelope', 'state']) && request.ecologyExport.envelope === 'NON_AUTHORITATIVE_SIMULATION', 'LOCAL_EXCHANGE_EXPORT');
+  const originalPond = request.pondExport.state, originalEcology = request.ecologyExport.state;
+  fail(originalPond.status === 'PAUSED' && originalEcology.status === 'PAUSED'
+    && request.expectedSourceRevision === originalPond.revision && Number.isSafeInteger(request.expectedSourceRevision)
+    && request.expectedDestinationRevision === originalEcology.revision && Number.isSafeInteger(request.expectedDestinationRevision), 'LOCAL_EXCHANGE_REVISION_CONFLICT');
+  const baselineEcology = createReproductionEcologyRuntimeV1({ seed: request.ecologyGenesis.seed });
+  const baseline = baselineEcology.exportState().state; baselineEcology.destroy();
+  const wetland = baseline.habitats.find((habitat) => habitat.type === 'WETLAND');
+  const expectedGenesis = clone(baseline);
+  expectedGenesis.habitats = [{ ...wetland, water_l: 0 }]; expectedGenesis.populations = [];
+  expectedGenesis.entities = baseline.entities.filter((entity) => entity.type === 'ECOSYSTEM' || entity.id === wetland.id);
+  for (const key of Object.keys(expectedGenesis.resources)) expectedGenesis.resources[key] = 0;
+  fail(stableStringify(request.ecologyGenesis) === stableStringify(expectedGenesis), 'LOCAL_EXCHANGE_DISJOINT_GENESIS_REQUIRED');
+  const build = createFishpondAquacultureRuntimeV1({ seed: request.constructionExport.state.seed });
+  const donor = createFishpondAquacultureRuntimeV1({ seed: originalPond.seed, localExchangeMode: request.scope });
+  const receiver = createReproductionEcologyRuntimeV1({ initialState: request.ecologyGenesis, localExchangeMode: request.scope });
+  try {
+    build.importState(request.constructionExport);
+    const constructionEvidence = build.inspectLocalConstruction();
+    fail(constructionEvidence.status === 'CONSTRUCTION_EVIDENCE_READY', 'LOCAL_EXCHANGE_CONSTRUCTION_EVIDENCE_REQUIRED');
+    const configuration = request.constructionExport.state.action_log.find((action) => action.command === 'CONFIGURE_LOCAL_FIXTURE');
+    fail(await sha256(configuration.args) === request.fixtureHash, 'LOCAL_EXCHANGE_FIXTURE_MISMATCH');
+    fail(originalPond.seed === request.constructionExport.state.seed
+      && stableStringify(originalPond.action_log.slice(0, request.constructionExport.state.action_log.length)) === stableStringify(request.constructionExport.state.action_log)
+      && stableStringify(originalPond.events.slice(0, request.constructionExport.state.events.length)) === stableStringify(request.constructionExport.state.events), 'LOCAL_EXCHANGE_CONSTRUCTION_PREFIX_MISMATCH');
+    donor.importState(request.pondExport);
+    fail(stableStringify(donor.replayEvents()) === stableStringify(donor.getState()), 'LOCAL_EXCHANGE_SOURCE_REPLAY_MISMATCH');
+    receiver.importState(request.ecologyExport); receiver.replayEvents();
+    fail(stableStringify(receiver.exportState()) === stableStringify(request.ecologyExport), 'LOCAL_EXCHANGE_DESTINATION_REPLAY_MISMATCH');
+    fail(originalPond.orders.length === 0 && originalPond.cold_chain.length === 0 && originalPond.enterprise.accounts.revenue === 0, 'LOCAL_EXCHANGE_COMMERCIAL_STATE_FORBIDDEN');
+    const sourceTransfers = originalPond.action_log.filter((action) => action.command === 'DEBIT_LOCAL_DEAD_BIOMASS').map((action) => action.args);
+    const destinationTransfers = originalEcology.action_log.filter((action) => action.command === 'receiveLocalDeadBiomass').map((action) => action.args);
+    fail(stableStringify(sourceTransfers) === stableStringify(destinationTransfers), 'LOCAL_EXCHANGE_HISTORY_PAIR_MISMATCH');
+    fail(sourceTransfers.every((manifest) => manifest.fixtureHash === request.fixtureHash
+      && manifest.source.ownerId === originalPond.pond.pond_id
+      && manifest.destination.ownerId === originalEcology.entities.find((entity) => entity.type === 'ECOSYSTEM').id), 'LOCAL_EXCHANGE_HISTORY_FIXTURE_MISMATCH');
+    const manifest = { scope: request.scope, exchangeId: request.exchangeId, fixtureHash: request.fixtureHash,
+      resource: 'DEAD_BIOMASS', unit: 'GRAM', quantityGrams: request.quantityGrams,
+      source: { runtime: originalPond.runtime, ownerId: originalPond.pond.pond_id, revision: originalPond.revision, stateHash: hash(stateProjection(originalPond)) },
+      destination: { runtime: originalEcology.runtime, ownerId: originalEcology.entities.find((entity) => entity.type === 'ECOSYSTEM').id,
+        revision: originalEcology.revision, stateHash: receiver.integrityReport().state_hash } };
+    donor.debitLocalDeadBiomass(manifest); receiver.receiveLocalDeadBiomass(manifest);
+    const sourceCandidate = donor.exportState(), destinationCandidate = receiver.exportState();
+    const expectedSource = stateProjection(originalPond), actualSource = stateProjection(sourceCandidate.state);
+    expectedSource.pond.dead_biomass_kg = (Math.round(originalPond.pond.dead_biomass_kg * 1000) - request.quantityGrams) / 1000;
+    fail(stableStringify(expectedSource) === stableStringify(actualSource), 'LOCAL_EXCHANGE_UNRELATED_SOURCE_MUTATION');
+    const expectedDestination = clone(originalEcology), actualDestination = clone(destinationCandidate.state);
+    expectedDestination.resources.dead_biomass_kg = (Math.round(originalEcology.resources.dead_biomass_kg * 1e6) + request.quantityGrams * 1000) / 1e6;
+    for (const value of [expectedDestination, actualDestination]) { delete value.events; delete value.action_log; delete value.revision; }
+    fail(stableStringify(expectedDestination) === stableStringify(actualDestination), 'LOCAL_EXCHANGE_UNRELATED_DESTINATION_MUTATION');
+    fail(stableStringify(donor.replayEvents()) === stableStringify(sourceCandidate.state), 'LOCAL_EXCHANGE_SOURCE_REPLAY_MISMATCH');
+    receiver.replayEvents(); fail(stableStringify(receiver.exportState()) === stableStringify(destinationCandidate), 'LOCAL_EXCHANGE_DESTINATION_REPLAY_MISMATCH');
+    const beforeMilligrams = Math.round(originalPond.pond.dead_biomass_kg * 1e6) + Math.round(originalEcology.resources.dead_biomass_kg * 1e6);
+    const afterMilligrams = Math.round(sourceCandidate.state.pond.dead_biomass_kg * 1e6) + Math.round(destinationCandidate.state.resources.dead_biomass_kg * 1e6);
+    fail(Number.isSafeInteger(beforeMilligrams) && Number.isSafeInteger(afterMilligrams) && beforeMilligrams === afterMilligrams, 'LOCAL_EXCHANGE_MASS_CONSERVATION');
+    const result = { scope: request.scope, status: 'PAIRED_TRANSFER_CANDIDATE_NOT_COMMITTED', manifest,
+      sourceInputHash: request.pondHash, destinationInputHash: request.ecologyHash, ecologyGenesisHash: request.ecologyGenesisHash,
+      constructionEvidence, ecologyGenesis: request.ecologyGenesis, sourceCandidate, destinationCandidate,
+      conservation: { unit: 'MILLIGRAM', before: beforeMilligrams, after: afterMilligrams, residual: 0 },
+      limitations: ['ADMITTED_STOCK_WINDOW_NOT_FINITE_JUVENILE_PROCUREMENT', 'ABSTRACT_RESOURCE_POOL', 'NOT_FULL_LIFE_RUNTIME',
+        'NO_SHARED_CLOCK_CONVERSION', 'NO_BIOLOGICAL_EFFICACY_OR_TRANSPORT_PROOF'],
+      durable: false, productionAuthority: false, assetCreated: false, customerAcceptance: null, delivery: null, receipt: null, revenueCreated: false };
+    fail(new TextEncoder().encode(stableStringify(result)).length <= 512000, 'LOCAL_EXCHANGE_OUTPUT_LIMIT');
+    return { ...result, contentHash: await sha256(result) };
+  } finally { build.destroy(); donor.destroy(); receiver.destroy(); }
 }
