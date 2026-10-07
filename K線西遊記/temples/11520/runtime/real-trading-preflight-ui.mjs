@@ -1,15 +1,15 @@
 /* KGEN_META
-VERSION: 1.2.0
-REVISION: 2026-10-07.BSC56-REVIEW-CONTROL-CONTRAST
+VERSION: 1.3.0
+REVISION: 2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI
 PRODUCT_CONTEXT: V2.9.5
 STATUS: CANDIDATE
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval
-SOURCE_COMMIT: 0589c16553e781c282b868a374e6fa60e4841f0f
+REVIEWED_BY: dot / independent scoped view/controller review / 2026-10-07; browser UI QA pending, no release approval
+SOURCE_COMMIT: 7160d3a34cd4a61149e56239131cd6642f7d2371
 TASK_ID: K11520-BSC56-PRODUCTION-20261007
-CHANGE_REASON: Fix measured pale-on-white control contrast with scoped explicit colors and focus/disabled states.
-ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs @ 0589c16553e781c282b868a374e6fa60e4841f0f
+CHANGE_REASON: Wire timestamped read-only KGEN transfer preview into existing wallet panel and singleton; no wallet handoff.
+ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs @ 7160d3a34cd4a61149e56239131cd6642f7d2371
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Player-visible preflight and blocked unsigned custody review. Never signs or broadcasts.
 */
@@ -106,6 +106,103 @@ export function createBsc56UnsignedReviewController({getWalletSnapshot,getReview
     },
     dispose(){disposed=true;opened=false;return invalidate('REVIEW_CLOSED','CLOSED')}
   });
+}
+
+
+const KGEN_PREVIEW_INPUTS=Object.freeze(['recipient','amountKgen','gasLimit','gasPriceWei','maximumGasFeeWei']);
+export const KGEN_TRANSFER_PREVIEW_FIELDS=Object.freeze(['CHAIN','WALLET','RECIPIENT','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE']);
+// Bounded view-data copy only: rendering never calls getters/toJSON or grants
+// authority to a caller-supplied review, codec, provider, digest or transaction.
+function transferPreviewData(value){
+  let nodes=0,bytes=0;const parents=new Set();
+  const copy=(v,depth)=>{
+    if(++nodes>512||depth>10)throw Error('TRANSFER_PREVIEW_DATA_BUDGET');
+    if(v===null||typeof v==='boolean'||(typeof v==='number'&&Number.isSafeInteger(v)))return v;
+    if(typeof v==='string'){bytes+=new TextEncoder().encode(v).length;if(v.length>4096||bytes>32768)throw Error('TRANSFER_PREVIEW_DATA_BUDGET');return v}
+    if(!v||typeof v!=='object'||parents.has(v)||(Array.isArray(v)?Object.getPrototypeOf(v)!==Array.prototype:![Object.prototype,null].includes(Object.getPrototypeOf(v))))throw Error('TRANSFER_PREVIEW_PLAIN_DATA_REQUIRED');
+    const keys=Reflect.ownKeys(v),array=Array.isArray(v);if(keys.length>65||keys.some(k=>typeof k!=='string')||(array&&(v.length>64||keys.length!==v.length+1)))throw Error('TRANSFER_PREVIEW_PLAIN_DATA_REQUIRED');
+    parents.add(v);const out=array?[]:Object.create(null);
+    for(const key of keys){if(array&&key==='length')continue;bytes+=new TextEncoder().encode(key).length;if(bytes>32768)throw Error('TRANSFER_PREVIEW_DATA_BUDGET');const d=Object.getOwnPropertyDescriptor(v,key);if(!d||!Object.hasOwn(d,'value')||!d.enumerable||(array&&!/^(0|[1-9][0-9]*)$/.test(key)))throw Error('TRANSFER_PREVIEW_ACCESSOR_FORBIDDEN');Object.defineProperty(out,key,{value:copy(d.value,depth+1),enumerable:true})}
+    parents.delete(v);return Object.freeze(out);
+  };return copy(value,0);
+}
+
+export function createKgenTransferPreviewController({session,onChange=()=>{}}={}){
+  if(!session||!['snapshot','transferSnapshot','prepareKgenTransfer','invalidateTransferReview'].every(k=>typeof session[k]==='function'))throw Error('EXISTING_WALLET_SESSION_REQUIRED');
+  let opened=false,disposed=false,generation=0,status='CLOSED',reason='PREVIEW_CLOSED',wallet=null,walletKey=null,accepted=null,acceptedIdentity=null;
+  let draft=Object.freeze(Object.fromEntries(KGEN_PREVIEW_INPUTS.map(k=>[k,''])));
+  const invalidate=(why,next='STALE')=>{++generation;accepted=null;acceptedIdentity=null;status=next;reason=why;session.invalidateTransferReview(why)};
+  function reconcile(){
+    if(disposed)return;
+    try{
+      const w=transferPreviewData(session.snapshot()),key=JSON.stringify([w.account,w.chainId,w.status,w.kgen,w.bnb]);wallet=w;
+      if(walletKey!==key){const initial=walletKey===null;walletKey=key;invalidate(initial?'TRANSFER_INPUTS_REQUIRED':'TRANSFER_WALLET_CONTEXT_CHANGED',opened?(initial?'BLOCKED':'STALE'):'CLOSED')}
+      if(acceptedIdentity&&session.transferSnapshot()!==acceptedIdentity)invalidate('TRANSFER_OBSERVATION_INVALIDATED',opened?'STALE':'CLOSED');
+    }catch{wallet=null;walletKey=null;invalidate('TRANSFER_WALLET_CONTEXT_UNKNOWN',opened?'BLOCKED':'CLOSED')}
+  }
+  function snapshot(){
+    reconcile();const r=accepted?.review?.review;
+    const fields=r?{CHAIN:`${r.CHAIN.name} · ${r.CHAIN.chainId}`,WALLET:r.WALLET,RECIPIENT:r.RECIPIENT,CONTRACT:r.CONTRACT,FUNCTION:r.FUNCTION,TOKEN:`${r.TOKEN.symbol} · ${r.TOKEN.address} · ${r.TOKEN.decimals} decimals`,AMOUNT:`${r.AMOUNT.inputKgen} KGEN\n${r.AMOUNT.baseUnits} wei`,EXPECTED_EFFECT:r.EXPECTED_EFFECT,MAXIMUM_EXPOSURE:JSON.stringify(r.MAXIMUM_EXPOSURE,null,2)}:{CHAIN:`BNB Smart Chain · 56 / wallet ${wallet?.chainId??'UNKNOWN'}`,WALLET:wallet?.account||'DISCONNECTED / UNKNOWN',RECIPIENT:draft.recipient||'NOT_PROVIDED',CONTRACT:KGEN_TOKEN_ADDRESS,FUNCTION:'transfer(address,uint256) · preview only',TOKEN:'KGEN · 18 decimals',AMOUNT:draft.amountKgen?draft.amountKgen+' KGEN · UNVERIFIED':'NOT_PROVIDED',EXPECTED_EFFECT:'尚未讀取綁定區塊的轉帳觀察資料',MAXIMUM_EXPOSURE:'UNKNOWN · 必須填寫 gas 與費用上限'};
+    const facts=accepted?{observedAt:accepted.observedAt||'UNKNOWN',blockNumber:accepted.review.readback.blockNumber,blockHash:accepted.review.readback.blockHash,tokenBalanceWei:accepted.review.readback.tokenBalanceWei,nativeBalanceWei:accepted.review.readback.nativeBalanceWei,pendingNonce:accepted.review.readback.pendingNonce,pendingNonceScope:accepted.pendingNonceScope||'UNKNOWN',readbackScope:accepted.readbackScope||'UNKNOWN',builderSourceScope:accepted.builderSourceScope||'UNKNOWN',builderSourceCommit:accepted.review.readback.sourceCommit||'UNKNOWN',gasScope:accepted.gasScope||'UNKNOWN',recipientCodePresentAtReadback:typeof r.recipientCodePresentAtReadback==='boolean'?r.recipientCodePresentAtReadback:'UNKNOWN',recipientCodeWarning:'Contract code at the observed block is not permanent identity, trust or recovery proof. No code observed does not guarantee an EOA or safe recipient. Verify the full recipient independently.',tax:r.taxObservation}:null;
+    return Object.freeze({status,reason,opened,generation,draft,fields:Object.freeze(fields),facts:facts?Object.freeze(facts):null,executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false,scope:'TIMESTAMPED_READ_ONLY_OBSERVATION_NOT_EXECUTION_CAPABILITY'});
+  }
+  const publish=()=>{const model=snapshot();try{onChange(model)}catch{}return model};
+  return Object.freeze({snapshot,sync:publish,
+    open(){if(disposed)return snapshot();opened=true;invalidate('TRANSFER_INPUTS_REQUIRED','BLOCKED');return publish()},
+    close(){opened=false;invalidate('PREVIEW_CLOSED','CLOSED');return publish()},
+    setDraft(patch){
+      try{const p=transferPreviewData(patch);if(!p||Array.isArray(p)||Object.keys(p).some(k=>!KGEN_PREVIEW_INPUTS.includes(k))||Object.values(p).some(v=>typeof v!=='string'||v.length>98))throw Error('TRANSFER_PREVIEW_DRAFT_INVALID');const next=Object.freeze({...draft,...p});if(JSON.stringify(next)!==JSON.stringify(draft)){draft=next;invalidate('TRANSFER_INPUT_CHANGED',opened?'STALE':'CLOSED')}}
+      catch{invalidate('TRANSFER_PREVIEW_DRAFT_INVALID',opened?'BLOCKED':'CLOSED')}return publish();
+    },
+    async prepare(){
+      reconcile();if(disposed||!opened||status==='READING')return snapshot();
+      if(wallet?.status!=='CONNECTED'||wallet.chainId!==56||!/^0x[0-9a-fA-F]{40}$/.test(wallet.account||'')){invalidate('TRANSFER_ACTIVE_CHAIN56_SESSION_REQUIRED','BLOCKED');return publish()}
+      if(KGEN_PREVIEW_INPUTS.some(k=>!draft[k])){invalidate('TRANSFER_EXPLICIT_INPUTS_REQUIRED','BLOCKED');return publish()}
+      invalidate('PINNED_READ_ONLY_PREPARATION','READING');const ticket=generation,key=walletKey,request=draft;publish();if(disposed||!opened||ticket!==generation)return snapshot();
+      try{
+        const raw=await session.prepareKgenTransfer(request);reconcile();if(disposed||!opened||ticket!==generation||walletKey!==key)return snapshot();
+        const value=transferPreviewData(raw);
+        if(!['executionReady','walletHandoffReady','signerRequested','broadcast'].every(k=>value[k]===false))throw Error('TRANSFER_PREVIEW_BOUNDARY_INVALID');
+        if(value.status!=='READ_ONLY_REVIEW'){invalidate(/^[A-Z][A-Z0-9_]{0,100}$/.test(value.reason||'')?value.reason:'TRANSFER_READBACK_UNKNOWN','BLOCKED');return publish()}
+        const r=value.review?.review;
+        if(raw!==session.transferSnapshot()||value.review?.schema!=='K11520_BSC56_KGEN_TRANSFER_REVIEW_V1'||!['executionReady','walletHandoffReady','signerRequested','broadcast'].every(k=>value.review[k]===false)||r?.CHAIN?.chainId!==56||r?.WALLET?.toLowerCase()!==wallet.account.toLowerCase()||r?.RECIPIENT?.toLowerCase()!==request.recipient.toLowerCase()||r?.AMOUNT?.inputKgen!==request.amountKgen||r?.CONTRACT!==KGEN_TOKEN_ADDRESS||r?.TOKEN?.address!==KGEN_TOKEN_ADDRESS)throw Error('TRANSFER_PREVIEW_CONTEXT_MISMATCH');
+        accepted=value;acceptedIdentity=raw;status='READ_ONLY_REVIEW';reason='WALLET_HANDOFF_NOT_IMPLEMENTED';return publish();
+      }catch{if(ticket===generation&&!disposed&&opened){invalidate('TRANSFER_PREVIEW_UNAVAILABLE','BLOCKED');return publish()}return snapshot()}
+    },
+    dispose(){disposed=true;opened=false;invalidate('PREVIEW_CLOSED','CLOSED');return publish()}
+  });
+}
+
+const kgenTransferPreviewMounts=new WeakMap();
+export function installKgenTransferPreviewUi(){
+  const panel=$('#walletPanel');if(!panel)return null;if(kgenTransferPreviewMounts.has(panel))return kgenTransferPreviewMounts.get(panel);
+  const root=document.createElement('details');root.id='k11520KgenTransferPreview';root.dataset.executionReady='false';root.dataset.componentRevision='2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI';
+  const text=(tag,value,parent=root)=>{const element=document.createElement(tag);element.textContent=value;parent.appendChild(element);return element};
+  text('summary','KGEN 轉帳資料預覽 · BSC56');
+  const provenance=text('p','WIP / NOT_RELEASE · component 1.3.0 · revision 2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI · source PARENT 7160d3a34cd4a61149e56239131cd6642f7d2371 (not current component HEAD) · PRODUCT_VERSION_BUILD_INFO_SYNC_PENDING');provenance.dataset.kgenTransferProvenance='';
+  text('p','只讀取資料與建立未簽署預覽；不會送出、簽署或 Approve。所有地址與金額必須自行輸入。Gas 欄位是自訂上限，並非網路估算。');
+  const inputs={};for(const [key,label,mode] of [['recipient','收款地址（完整0x地址）','text'],['amountKgen','KGEN 數量（最多18位小數）','decimal'],['gasLimit','Gas limit（整數）','numeric'],['gasPriceWei','Gas price（wei／gas，整數）','numeric'],['maximumGasFeeWei','最高 gas 費用（BNB wei，整數）','numeric']]){
+    const wrapper=document.createElement('label');wrapper.htmlFor='kgenTransferPreview-'+key;wrapper.textContent=label;root.appendChild(wrapper);
+    const input=document.createElement('input');input.id=wrapper.htmlFor;input.type='text';input.inputMode=mode;input.maxLength=98;input.autocomplete='off';input.spellcheck=false;input.dataset.kgenTransferInput=key;root.appendChild(input);inputs[key]=input;
+  }
+  const button=text('button','讀取轉帳預覽（不送出）');button.type='button';button.className='btn';
+  const status=text('p','');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  const rows=document.createElement('dl');rows.className='exchangeRows';root.appendChild(rows);const values={};
+  for(const field of KGEN_TRANSFER_PREVIEW_FIELDS){const row=document.createElement('div');rows.appendChild(row);text('dt',field,row);const value=text('dd','',row);value.dataset.kgenTransferField=field;values[field]=value}
+  const facts=text('pre','');facts.dataset.kgenTransferFacts='';
+  text('p','資料只代表顯示區塊／時間的觀察；目前有效性未持續驗證。Tax pair／免稅狀態可變動，不保證收款人上鏈淨額。需重新讀取；錢包送出與收據確認尚未開放。');
+  const session=getWalletSession11520(),controller=createKgenTransferPreviewController({session,onChange:model=>{
+    root.dataset.previewState=model.status;root.dataset.executionReady='false';root.dataset.walletHandoffReady='false';status.textContent=`${model.status} · ${model.reason} · READ ONLY / NOT EXECUTABLE`;
+    for(const field of KGEN_TRANSFER_PREVIEW_FIELDS)values[field].textContent=model.fields[field];
+    facts.textContent=JSON.stringify({observation:model.facts||'Pinned balance / block / observation time: UNKNOWN',executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false},null,2);button.disabled=model.status==='READING';
+  }});
+  const update=()=>controller.setDraft(Object.fromEntries(KGEN_PREVIEW_INPUTS.map(k=>[k,inputs[k].value])));
+  for(const input of Object.values(inputs))input.addEventListener('input',update);
+  button.addEventListener('click',()=>{update();void controller.prepare()});root.addEventListener('toggle',()=>root.open?controller.open():controller.close());
+  const unsubscribe=session.subscribe(()=>controller.sync()),visibility=()=>{root.hidden=panel.classList.contains('collapsed');if(root.hidden){root.open=false;controller.close()}};
+  const observer=new MutationObserver(visibility);observer.observe(panel,{attributes:true,attributeFilter:['class']});
+  const mounted=Object.freeze({controller,root,dispose(){unsubscribe();observer.disconnect();controller.dispose();root.remove();kgenTransferPreviewMounts.delete(panel)}});kgenTransferPreviewMounts.set(panel,mounted);
+  const anchor=$('#k11520Bsc56UnsignedReview')||$('#walletSimulation');if(anchor?.parentElement===panel)anchor.after(root);else panel.appendChild(root);controller.close();visibility();return mounted;
 }
 
 const bsc56ReviewMounts=new WeakMap();
@@ -238,7 +335,15 @@ function ensureStyle(){
 #k11520Bsc56UnsignedReview input::placeholder{color:#abbcc8;opacity:1}
 #k11520Bsc56UnsignedReview input:focus-visible,#k11520Bsc56UnsignedReview select:focus-visible,#k11520Bsc56UnsignedReview button:focus-visible{outline:2px solid #8ceaff;outline-offset:2px}
 #k11520Bsc56UnsignedReview input:disabled,#k11520Bsc56UnsignedReview select:disabled,#k11520Bsc56UnsignedReview button:disabled{background:#142332;color:#abbcc8;opacity:1;border-color:#456477;cursor:not-allowed}\n#k11520Bsc56UnsignedReview[hidden],#k11520Bsc56UnsignedReview [hidden]{display:none}
-#k11520Bsc56UnsignedReview .exchangeRows dt,#k11520Bsc56UnsignedReview .exchangeRows dd{min-width:0;overflow-wrap:anywhere;word-break:break-word}\n#k11520RealTradePreflight{position:fixed;z-index:475;right:58px;bottom:366px;display:grid;gap:4px;justify-items:end;pointer-events:none}
+#k11520Bsc56UnsignedReview .exchangeRows dt,#k11520Bsc56UnsignedReview .exchangeRows dd{min-width:0;overflow-wrap:anywhere;word-break:break-word}\n#k11520KgenTransferPreview{margin-top:12px;padding:10px;border:1px solid #4c708c;border-radius:10px;background:#0b1722;color:#e6edf5;font-size:12px;line-height:1.5;min-width:0;overflow-wrap:anywhere}
+#k11520KgenTransferPreview summary,#k11520KgenTransferPreview button{min-height:44px;cursor:pointer}
+#k11520KgenTransferPreview label{display:block;margin-top:8px}
+#k11520KgenTransferPreview input,#k11520KgenTransferPreview button{display:block;box-sizing:border-box;width:100%;min-height:44px;background:#0d1d2c;color:#e6edf5;border:1px solid #6f91ad;border-radius:7px;padding:8px;font:inherit}
+#k11520KgenTransferPreview input:focus-visible,#k11520KgenTransferPreview button:focus-visible{outline:2px solid #7fe7ff;outline-offset:2px}
+#k11520KgenTransferPreview button:disabled{background:#142332;color:#abbcc8;opacity:1;cursor:not-allowed}
+#k11520KgenTransferPreview [hidden],#k11520KgenTransferPreview[hidden]{display:none}
+#k11520KgenTransferPreview dt,#k11520KgenTransferPreview dd,#k11520KgenTransferPreview pre{min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+#k11520RealTradePreflight{position:fixed;z-index:475;right:58px;bottom:366px;display:grid;gap:4px;justify-items:end;pointer-events:none}
 #k11520RealTradePreflight button{pointer-events:auto;border:1px solid #f1ca7377;background:#111923ee;color:#f5de9c;border-radius:10px;padding:7px 9px;font-size:8px;font-weight:900;touch-action:manipulation;box-shadow:0 6px 20px #0008}
 #k11520RealTradePreflight .state{max-width:190px;padding:5px 7px;border-radius:8px;background:#071018e8;border:1px solid #ffffff16;color:#aebdca;font-size:7px;text-align:right;line-height:1.2}
 #k11520RealTradePreflight[data-ready="1"] .state{color:#73e7a7;border-color:#73e7a744}
@@ -289,7 +394,7 @@ function notifyOrderRoute(){
 
 export function install11520RealTradingPreflightUi(){
   ensureStyle();
-  if($('#walletPanel'))installBsc56UnsignedReviewUi();
+  if($('#walletPanel')){installBsc56UnsignedReviewUi();installKgenTransferPreviewUi()}
   let host=$('#k11520RealTradePreflight');
   if(!host){host=document.createElement('div');host.id='k11520RealTradePreflight';host.innerHTML='<button type="button" id="k11520RealTradePreflightBtn">⚡ 交易模式</button><div class="state">SIMULATION</div>';document.body.appendChild(host)}
   const btn=$('#k11520RealTradePreflightBtn');if(btn&&!btn.dataset.bound){btn.dataset.bound='1';btn.addEventListener('click',()=>{const result=renderPreflight();const message=result?.ready?'真實交易條件已齊；仍需由錢包明確確認交易':'真實交易仍封鎖：'+(result?.blockers||[]).map(blockerLabel).join('、');const toast=$('#toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2600)}})}

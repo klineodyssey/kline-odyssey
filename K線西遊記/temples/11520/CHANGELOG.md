@@ -5,17 +5,34 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-07.BSC56-KGEN-TRANSFER-REVIEW |
+| REVISION | 2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; no live transfer or release approval |
-| SOURCE_COMMIT | a678437d435e2b7f58704e81782b1db542716692 |
+| REVIEWED_BY | dot / independent scoped view/controller review / 2026-10-07; browser UI QA pending, no release approval |
+| SOURCE_COMMIT | 7160d3a34cd4a61149e56239131cd6642f7d2371 |
 | TASK_ID | K11520-BSC56-PRODUCTION-20261007 |
-| CHANGE_REASON | Register pure canonical KGEN transfer input review; session, wallet handoff and receipt integration remain separate. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ a678437d435e2b7f58704e81782b1db542716692 |
+| CHANGE_REASON | Wire timestamped read-only transfer preview into the existing wallet panel; no wallet handoff. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 7160d3a34cd4a61149e56239131cd6642f7d2371 |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-07 — Existing-wallet KGEN read-only transfer preview candidate
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-07 | Component 1.3.0 / 2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI | K11520-BSC56-PRODUCTION-20261007 | dot / temporary external maintainer | dot / independent scoped technical review only; no canonical employee or Reviewer grant | `K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs`; `tests/11520-real-trading-preflight-ui.test.mjs`; `K線西遊記/temples/11520/CHANGELOG.md`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md` | Add explicit timestamped read-only transfer view to existing wallet owner. | Additive view only; no wallet/financial/runtime schema or storage migration. | Revert this five-path increment to source parent 7160; no data deletion. |
+
+- `WIP / NOT_RELEASE`; `PRODUCT_VERSION_BUILD_INFO_SYNC_PENDING`. The panel visibly names component 1.3.0, its revision and source PARENT 7160 (not current component HEAD). Global V2.9.5 labels and build/deploy owners are unchanged. No tracked 11520 build-info owner exists in the source parent; do not invent one or claim product promotion. Release reconciliation remains with the existing product/release owner.
+- Authority: active `KGEN-KAIOS/VERSIONING_STANDARD.md` permits formal runtime/public behavior changes to update VERSION or REVISION plus the local changelog. Existing `HANDOFF_CURRENT.md` separates component lineage from global game release labels. This satisfies scoped candidate provenance only; it does not waive Human-required product/build-info/UI synchronization before release.
+
+- Existing `runtime/real-trading-preflight-ui.mjs` component advances to 1.3.0 / `2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI`, within the unchanged V2.9.5 product context. Global entry/build publication, wallet/runtime, bridge, game/simulation and contract bytes are unchanged.
+- One inline section in the existing wallet panel captures `getWalletSession11520()`. The caller supplies only explicit recipient, exact decimal KGEN amount, gas limit, gas price and maximum gas-fee cap. Values stay strings; no recipient/amount default, invented network estimate, second connection, signing, approval or send action exists.
+- The view controller calls only existing session `prepareKgenTransfer`. It displays nine review fields, pinned balances/block/time, gas/exposure and mutable-tax caveats. Pending nonce, provider observation and builder-ancestor scopes remain explicit; recipient code is true/false/UNKNOWN at readback and never permanent identity, trust or recovery proof. All execution/handoff/sign/broadcast flags remain false. This is a timestamped observation, never a continuously fresh execution capability.
+- Input, account, chain, balance, session refresh, close/reopen, disposal and late/ABA responses clear the view. Duplicate reads coalesce while pending. Bounded descriptor snapshots avoid getters/toJSON; external values render with textContent only.
+- Existing `tests/11520-real-trading-preflight-ui.test.mjs`: 44 cases pass locally, including 34 retained cases and 10 new preview suites. Actual native-input browser UI and six-size screenshot acceptance remain NOT_RUN at this WIP checkpoint; scoped independent controller/view review passed.
+- Parent runtime preparation at `93033c5` had 196 focused local cases plus independent provenance/freshness review. Separate source-bound browser tooling `7160d3a` exercised actual approved vendor bytes, SRI tamper rejection and unchanged strict-CSP Blob denial on the existing page singleton. These scoped tests do not establish this newly wired UI's visual acceptance.
+- Existing `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md` carries this design. Rollback: remove this component/view-tests/metadata increment to 7160; retain the reviewed read-only session and all historical tests. No main merge, deployment or financial action is implied.
 
 ## 2026-10-07 — BSC56 KGEN transfer pure review checkpoint
 

@@ -305,3 +305,43 @@ This does not certify a deployed contract, live readback, UI or wallet handoff.
 
 Each increment needs an early Draft checkpoint and its own exact-source validation.
 No merge, deployment or live transfer is authorized by this design document.
+
+
+### Existing-wallet transfer preview UI candidate
+
+Source parent: `7160d3a34cd4a61149e56239131cd6642f7d2371`; existing
+preflight presentation owner and `wallet-game-bridge` singleton are retained.
+This candidate adds an inline read-only form and review, with explicit recipient,
+KGEN decimal amount and gas/fee-cap strings. It consumes the existing session's
+bounded private-codec preparation. It does not add another wallet, ledger,
+market, custody path, signer, approval or transaction broadcast.
+
+The display is a timestamped observation with nine review fields, balances,
+block/time provenance, explicit gas-cap and mutable-tax caveats. Input/wallet/
+chain/refresh/close changes invalidate it; late completion cannot restore an old
+view. Text is rendered safely, without HTML interpolation. Current or future
+execution authority is never inferred from the displayed result.
+
+The reviewed session at 93033 and separate browser tests at 7160 establish scoped
+read-only preparation evidence, including approved bytes, SRI tamper and strict
+CSP-denial behavior. New view unit tests pass 44/44. Scoped independent controller/view review passed. The newly wired UI still
+needs its own exact-source Chromium/native-input/six-size
+screenshot verification. Wallet-owner handoff, receipt/reload lifecycle and all
+undeployed trading-contract gaps remain unchanged. No readiness-row promotion
+or global product version/publication is made by this candidate.
+
+Pending nonce is explicitly separate from hash-pinned state. Provider readback
+is not finality; builder source identifies a reviewed ancestor rather than a
+deployed application. Missing scope fields stay UNKNOWN. Recipient code is a
+true/false/UNKNOWN observation at the block, not permanent identity, trust or
+recovery proof; no code observed does not guarantee an EOA or safe recipient.
+
+
+Candidate version status: **WIP / NOT_RELEASE** and
+**PRODUCT_VERSION_BUILD_INFO_SYNC_PENDING**. The visible inline caption records
+component 1.3.0 / revision 2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI and source
+PARENT 7160, explicitly not the current component HEAD. The existing visible game
+V2.9.5 owners remain unchanged. No tracked 11520 build-info owner was found in the
+complete source-parent tree; the Pages workflow's generated build-info surfaces
+belong to KAIOS dashboard/version owners. No new build-info authority or product
+version is invented. Release synchronization is still a separate required gate.

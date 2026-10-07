@@ -367,3 +367,74 @@ test('BSC56 review draft bounds forbid unsupported semantics and retain exact ui
  for(const amountWei of [1,1.5,1n,'1'.repeat(79)])assert.throws(()=>f.controller.setDraft({amountWei}),/REVIEW_DRAFT_INVALID/);
  let invoked=0;assert.throws(()=>f.controller.setDraft(Object.defineProperty({},'amountWei',{get(){invoked++;return '1'}})),/ACCESSOR_FORBIDDEN/);assert.equal(invoked,0);
 });
+
+// Read-only presentation fixtures. No provider, signer or executable transaction.
+function transferPreviewFixture(options={}){
+ const token='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
+ const f={wallet:{account:'0x1111111111111111111111111111111111111111',chainId:56,status:'CONNECTED',kgen:'12345',bnb:'1'},input:{recipient:'0x2222222222222222222222222222222222222222',amountKgen:'1.000000000000000001',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000'},calls:[],current:null,change:null};
+ f.result=input=>({status:'READ_ONLY_REVIEW',reason:'WALLET_HANDOFF_NOT_IMPLEMENTED',observedAt:'2026-10-07T09:00:00.000Z',gasScope:'EXPLICIT_INPUT_CAPS_NOT_NETWORK_ESTIMATE',executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false,review:{schema:'K11520_BSC56_KGEN_TRANSFER_REVIEW_V1',executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false,readback:{blockNumber:'123',blockHash:'0x'+'ab'.repeat(32),tokenBalanceWei:'12345000000000000000000',nativeBalanceWei:'1000000000000000000',pendingNonce:'7'},review:{CHAIN:{name:'BNB Smart Chain Mainnet',chainId:56},WALLET:f.wallet.account,RECIPIENT:input.recipient,CONTRACT:token,FUNCTION:'transfer(address,uint256)',TOKEN:{symbol:'KGEN',address:token,decimals:18},AMOUNT:{inputKgen:input.amountKgen,baseUnits:'1000000000000000001'},EXPECTED_EFFECT:'Timestamped observation only',MAXIMUM_EXPOSURE:{walletTokenDebitWei:'1000000000000000001',nativeGasFeeWei:'5000000000000',nativeTransferValueWei:'0'},taxObservation:{miningTimeNetGuaranteed:false}}}});
+ f.session={snapshot:()=>({...f.wallet}),transferSnapshot:()=>f.current,invalidateTransferReview:reason=>{f.current={status:'EMPTY',reason,review:null}},async prepareKgenTransfer(input){f.calls.push(input);const result=options.prepare?await options.prepare(input,f):f.result(input);f.current=result;return result}};
+ f.controller=reviewUi.createKgenTransferPreviewController({session:f.session,onChange:value=>f.change?.(value)});f.controller.open();f.controller.setDraft(f.input);return f;
+}
+function assertTransferPreviewClosed(value){assert.notEqual(value.status,'READ_ONLY_REVIEW');assert.equal(value.facts,null);for(const flag of ['executionReady','walletHandoffReady','signerRequested','broadcast'])assert.equal(value[flag],false)}
+
+test('KGEN preview uses existing session with exact input strings and timestamped pinned facts',async()=>{
+ const f=transferPreviewFixture(),s=await f.controller.prepare();assert.equal(s.status,'READ_ONLY_REVIEW');assert.equal(f.calls.length,1);assert.deepEqual(f.calls[0],f.input);assert.equal(typeof f.calls[0].amountKgen,'string');assert.equal(Object.keys(s.fields).length,9);assert.equal(s.fields.RECIPIENT,f.input.recipient);assert.match(s.fields.AMOUNT,/1\.000000000000000001 KGEN/);assert.equal(s.facts.observedAt,'2026-10-07T09:00:00.000Z');assert.equal(s.facts.tokenBalanceWei,'12345000000000000000000');assert.equal(s.facts.tax.miningTimeNetGuaranteed,false);for(const flag of ['executionReady','walletHandoffReady','signerRequested','broadcast'])assert.equal(s[flag],false);assert.match(s.scope,/NOT_EXECUTION_CAPABILITY/);assert.ok(Object.isFrozen(s.facts.tax));
+});
+
+test('KGEN preview refuses implicit fields and disconnected or wrong-chain preparation',async()=>{
+ for(const mutate of [f=>f.wallet.account=null,f=>f.wallet.chainId=97,f=>f.wallet.status='READING',...['recipient','amountKgen','gasLimit','gasPriceWei','maximumGasFeeWei'].map(key=>f=>f.controller.setDraft({[key]:''}))]){const f=transferPreviewFixture();mutate(f);assertTransferPreviewClosed(await f.controller.prepare());assert.equal(f.calls.length,0)}
+ const f=transferPreviewFixture();f.controller.close();await f.controller.prepare();assert.equal(f.calls.length,0);
+});
+
+test('KGEN preview clears observations for every input and wallet/balance/session invalidation',async()=>{
+ for(const mutate of [f=>f.wallet.account='0x3333333333333333333333333333333333333333',f=>f.wallet.chainId=1,f=>f.wallet.status='DISCONNECTED',f=>f.wallet.kgen='0',f=>f.wallet.bnb='0',f=>f.session.invalidateTransferReview('REFRESH'),...['recipient','amountKgen','gasLimit','gasPriceWei','maximumGasFeeWei'].map(key=>f=>f.controller.setDraft({[key]:f.input[key]+'0'}))]){const f=transferPreviewFixture();await f.controller.prepare();mutate(f);assertTransferPreviewClosed(f.controller.sync())}
+});
+
+test('KGEN preview close/reopen, dispose and account ABA discard late preparation',async()=>{
+ for(const kind of ['input','close-reopen','dispose','account-aba']){
+  let release;const f=transferPreviewFixture({prepare:async(input,state)=>{await new Promise(resolve=>{release=resolve});return state.result(input)}}),pending=f.controller.prepare();
+  if(kind==='input')f.controller.setDraft({amountKgen:'2'});if(kind==='close-reopen'){f.controller.close();f.controller.open()}if(kind==='dispose')f.controller.dispose();if(kind==='account-aba'){f.wallet.account='0x3333333333333333333333333333333333333333';f.controller.sync();f.wallet.account='0x1111111111111111111111111111111111111111';f.controller.sync()}
+  release();await pending;assertTransferPreviewClosed(f.controller.snapshot());
+ }
+});
+
+test('KGEN preview double click coalesces while reading and reentrant close prevents reads',async()=>{
+ let release;const f=transferPreviewFixture({prepare:async(input,state)=>{await new Promise(resolve=>{release=resolve});return state.result(input)}}),one=f.controller.prepare();await f.controller.prepare();assert.equal(f.calls.length,1);release();await one;assert.equal(f.controller.snapshot().status,'READ_ONLY_REVIEW');
+ const g=transferPreviewFixture();g.change=s=>{if(s.status==='READING')g.controller.close()};await g.controller.prepare();assert.equal(g.calls.length,0);assertTransferPreviewClosed(g.controller.snapshot());
+});
+
+test('KGEN preview rejects result authority/context drift and sanitizes arbitrary error reasons',async()=>{
+ for(const mutate of [v=>v.executionReady=true,v=>v.walletHandoffReady=true,v=>v.signerRequested=true,v=>v.broadcast=true,v=>v.review.broadcast=true,v=>v.review.review.WALLET='0x3333333333333333333333333333333333333333',v=>v.review.review.RECIPIENT='0x3333333333333333333333333333333333333333',v=>v.review.review.AMOUNT.inputKgen='2',v=>v.review.review.CHAIN.chainId=97,v=>v.review.review.CONTRACT='0x3333333333333333333333333333333333333333']){const f=transferPreviewFixture({prepare:(i,s)=>{const r=s.result(i);mutate(r);return r}});assertTransferPreviewClosed(await f.controller.prepare())}
+ const f=transferPreviewFixture({prepare:()=>({status:'BLOCKED',reason:'<img src=x onerror=alert(1)>',review:null,executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false})});const r=await f.controller.prepare();assert.equal(r.reason,'TRANSFER_READBACK_UNKNOWN');assertTransferPreviewClosed(r);
+});
+
+test('KGEN preview rejects accessor, cyclic, oversized, symbolic and non-string view inputs',async()=>{
+ let getters=0;
+ for(const patch of [Object.defineProperty({},'recipient',{enumerable:true,get(){getters++;return 'x'}}),{amountKgen:1},{amountKgen:'1'.repeat(99)},{sourceCommit:'a'.repeat(40)},Object.create({recipient:'x'}),{[Symbol('x')]:'x'},null]){const f=transferPreviewFixture();await f.controller.prepare();assertTransferPreviewClosed(f.controller.setDraft(patch))}
+ assert.equal(getters,0);
+ const cyclic={};cyclic.loop=cyclic;const cycle=transferPreviewFixture();assertTransferPreviewClosed(cycle.controller.setDraft(cyclic));
+ const f=transferPreviewFixture({prepare:(i,s)=>{const r=s.result(i);Object.defineProperty(r,'reason',{enumerable:true,get(){getters++;return 'x'}});return r}});assertTransferPreviewClosed(await f.controller.prepare());assert.equal(getters,0);
+});
+
+test('KGEN preview UI stays in existing owner with safe text rendering and explicit empty fields',async()=>{
+ const source=await readFile(new URL('../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs',import.meta.url),'utf8');
+ const start=source.indexOf('export function installKgenTransferPreviewUi()'),end=source.indexOf('const bsc56ReviewMounts=',start),body=source.slice(start,end);
+ assert.ok(start>0&&end>start);assert.ok(body.includes('getWalletSession11520()'));assert.ok(body.includes('anchor.after(root)'));assert.ok(body.includes('textContent'));assert.ok(!/innerHTML|insertAdjacentHTML|eth_send|personal_sign|requestAccounts|createWalletSession/.test(body));assert.ok(body.includes('input.type=\'text\''));assert.ok(!body.includes('input.value='));assert.ok(body.includes("root.dataset.walletHandoffReady='false'"));assert.match(source,/#k11520KgenTransferPreview\[hidden\]\{display:none\}/);
+});
+
+
+test('KGEN preview exposes separate nonce/source scopes and true false unknown recipient-code observations',async()=>{
+ for(const code of [true,false,undefined]){
+  const f=transferPreviewFixture({prepare:(input,state)=>{const r=state.result(input);r.pendingNonceScope='PENDING_SEPARATE_FROM_HASH_PINNED_STATE';r.readbackScope='PROVIDER_OBSERVATION_NOT_FINALITY_PROOF';r.builderSourceScope='REVIEWED_PURE_BUILDER_ANCESTOR_NOT_CURRENT_DEPLOYMENT';r.review.readback.sourceCommit='a1eaed4f332486d1301f8b38c5dab2df53470731';if(code!==undefined)r.review.review.recipientCodePresentAtReadback=code;return r}});
+  const s=await f.controller.prepare();assert.equal(s.status,'READ_ONLY_REVIEW');assert.equal(s.facts.pendingNonce,'7');assert.match(s.facts.pendingNonceScope,/SEPARATE_FROM_HASH_PINNED/);assert.match(s.facts.readbackScope,/NOT_FINALITY_PROOF/);assert.match(s.facts.builderSourceScope,/NOT_CURRENT_DEPLOYMENT/);assert.equal(s.facts.builderSourceCommit,'a1eaed4f332486d1301f8b38c5dab2df53470731');assert.equal(s.facts.recipientCodePresentAtReadback,code===undefined?'UNKNOWN':code);assert.match(s.facts.recipientCodeWarning,/not permanent identity, trust or recovery proof/);assert.match(s.facts.recipientCodeWarning,/does not guarantee an EOA/);
+ }
+ const f=transferPreviewFixture(),s=await f.controller.prepare();for(const key of ['pendingNonceScope','readbackScope','builderSourceScope','builderSourceCommit','recipientCodePresentAtReadback'])assert.equal(s.facts[key],'UNKNOWN',key);
+});
+
+
+test('KGEN preview visible WIP provenance distinguishes component and source parent from product promotion',async()=>{
+ const s=await readFile(new URL('../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs',import.meta.url),'utf8');
+ const line=s.split('\n').find(line=>line.includes("const provenance=text('p',"));assert.ok(line);for(const value of ['WIP / NOT_RELEASE','component 1.3.0','revision 2026-10-07.BSC56-KGEN-TRANSFER-PREVIEW-UI','source PARENT 7160d3a34cd4a61149e56239131cd6642f7d2371','not current component HEAD','PRODUCT_VERSION_BUILD_INFO_SYNC_PENDING'])assert.ok(line.includes(value),value);
+ assert.ok(line.includes("provenance.dataset.kgenTransferProvenance=''")&&!line.includes('hidden'));
+});
