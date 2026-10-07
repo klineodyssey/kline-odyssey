@@ -6,6 +6,17 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### KAIOS CFO Finance Engine V1 candidate
+
+The company accounting organ at `core/accounting/runtime-finance.js` extends the
+existing `core/accounting` authority with exact-integer, per-currency double-entry
+journals, derived daily statements, project and worker projections, configurable
+creator royalties, compute-cost evidence, species-specific consumption records and
+a read-only KUFO/KSHIP decay adapter. V1 is `SIMULATION_ONLY`: it has no signer,
+payment, Treasury, transfer or private-key capability. Manufacturing evidence and
+the deterministic demo are recorded in
+`KGEN-Organization/WorkOrders/KAIOS_CFO_FINANCE_ENGINE_V1_20261008.json`.
+
 ### KAIOS Backend / Recovery V1 review candidate
 
 Portable authenticated Player Life sync, immutable backups and a Traditional Chinese

@@ -1,6 +1,17 @@
 import { requireFields, requireId, requireEnum } from "../shared/schema.mjs";
 import { invariant } from "../shared/errors.mjs";
 
+export {
+  ACCOUNT_TYPES,
+  CFO_ORGAN_METADATA,
+  EXPENSE_TYPES,
+  FORBIDDEN_REVENUE_SOURCES,
+  REVENUE_TYPES,
+  WORKER_INCOME_TYPES,
+  createCfoFinanceRuntime,
+  createCfoV1SimulationDemo
+} from "./runtime-finance.js";
+
 export const LEDGER_TYPES = Object.freeze(["LIFE", "COMPANY"]);
 
 export function validateLedger(ledger) {

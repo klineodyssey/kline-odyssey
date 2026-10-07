@@ -1,0 +1,143 @@
+{
+  "message_protocol": "KAIOS_CFO_FINANCE_ORGAN_MANUFACTURING_RECORD_V1",
+  "project_id": "KAIOS-CFO-FINANCE-ENGINE-V1-20261008",
+  "organ_id": "KAIOS_CFO_FINANCE_ENGINE",
+  "organ_name": "KAIOS CFO Finance Engine",
+  "formal_runtime": "core/accounting/runtime-finance.js",
+  "version": "V1",
+  "mode": "SIMULATION_ONLY",
+  "status": "REVIEW_CANDIDATE",
+  "designed_by": "沈英明 / Human Authority",
+  "system_architecture": "Human order plus current repository canon",
+  "company_policy_owner": "衡曜 / General Manager",
+  "implemented_by": "CURRENT_CODEX_REPOSITORY_WORKER",
+  "implemented_by_registry_status": "NOT_VERIFIED_AS_CFO_DIGITAL_LIFE",
+  "maintainer": "NOT_ASSIGNED",
+  "reviewed_by": "PENDING_DISTINCT_REVIEW",
+  "base_main_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+  "source_commit": "PENDING_COMMIT",
+  "branch": "codex/cfo-finance-organ-v1",
+  "pull_request": null,
+  "created_at": "2026-10-08T00:00:00+08:00",
+  "source_of_truth": "core/accounting",
+  "authority_boundaries": {
+    "dot_is_cfo": false,
+    "gm_is_implementer_or_auditor": false,
+    "cfo_digital_life": "NOT_ASSIGNED",
+    "real_financial_execution": false,
+    "payroll_execution": "NOT_LIVE",
+    "treasury_or_signer_connected": false
+  },
+  "team": [
+    { "role": "PROJECT_ORCHESTRATOR", "assignee": "DOT", "registry_status": "POLICY_ROLE" },
+    { "role": "COMPANY_POLICY_OWNER", "assignee": "衡曜", "registry_status": "POLICY_ROLE" },
+    { "role": "FINANCE_AND_ACCOUNTING_AUDIT", "assignee": "cfo_canonical_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
+    { "role": "KUFO_AND_CONSUMPTION_AUDIT", "assignee": "cfo_kufo_consumption_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
+    { "role": "CODING_IMPLEMENTER", "assignee": "CURRENT_CODEX_REPOSITORY_WORKER", "registry_status": "SESSION_IDENTITY_ONLY", "result": "COMPLETE" },
+    { "role": "INDEPENDENT_REVIEWER", "assignee": null, "registry_status": "PENDING" }
+  ],
+  "work_orders": [
+    {
+      "work_id": "CFO-V1-WO-001-CANON-AUDIT",
+      "owner": "DOT",
+      "implementer": "cfo_canonical_audit",
+      "reviewer": "CURRENT_CODEX_REPOSITORY_WORKER",
+      "scope": "Read-only accounting, payroll, royalty, compute, logistics and owner-boundary audit",
+      "acceptance_tests": ["LATEST_MAIN_CONFIRMED", "EXISTING_OWNER_IDENTIFIED", "NO_PARALLEL_FINANCE_ENGINE"],
+      "status": "COMPLETE"
+    },
+    {
+      "work_id": "CFO-V1-WO-002-KUFO-CONSUMPTION-AUDIT",
+      "owner": "DOT",
+      "implementer": "cfo_kufo_consumption_audit",
+      "reviewer": "CURRENT_CODEX_REPOSITORY_WORKER",
+      "scope": "Read-only Physics CURRENT, KUFO/KSHIP and species consumption audit",
+      "acceptance_tests": ["HALF_LIFE_CURRENT", "YEAR_3_CUTOFF_NOT_INVENTED", "SPECIES_RULES_NOT_INVENTED"],
+      "status": "COMPLETE"
+    },
+    {
+      "work_id": "CFO-V1-WO-003-RUNTIME",
+      "owner": "DOT",
+      "implementer": "CURRENT_CODEX_REPOSITORY_WORKER",
+      "reviewer": "PENDING_DISTINCT_REVIEW",
+      "scope": "Fixed-name CFO V1 runtime inside core/accounting with no execution authority",
+      "acceptance_tests": ["DOUBLE_ENTRY", "ASSETS_EQUAL_LIABILITIES_PLUS_EQUITY", "CLASSIFICATION_SEPARATION", "NO_PAYMENT_API"],
+      "status": "IMPLEMENTED"
+    },
+    {
+      "work_id": "CFO-V1-WO-004-DEMO-AND-TEST",
+      "owner": "DOT",
+      "implementer": "CURRENT_CODEX_REPOSITORY_WORKER",
+      "reviewer": "PENDING_DISTINCT_REVIEW",
+      "scope": "Deterministic game-app, compute, royalty, food, consumption and KUFO simulation",
+      "acceptance_tests": ["TARGETED_NODE_TESTS", "FULL_NODE_REGRESSION", "DEMO_REPORT_BALANCED"],
+      "status": "TARGETED_TESTS_PASS"
+    },
+    {
+      "work_id": "CFO-V1-WO-005-INDEPENDENT-REVIEW",
+      "owner": "DOT",
+      "implementer": "PENDING_DISTINCT_REVIEWER",
+      "reviewer": "PENDING_GM_ACCEPTANCE",
+      "scope": "Independent diff, accounting, security, canon and regression review",
+      "acceptance_tests": ["NO_P0_P1", "CANONICAL_BOUND", "SECURITY_BOUNDARY", "EXACT_HEAD_TESTS"],
+      "status": "PENDING"
+    }
+  ],
+  "changed_files": [
+    "core/accounting/runtime-finance.js",
+    "core/accounting/index.mjs",
+    "tests/cfo-finance-organ.test.mjs",
+    "README.md",
+    "docs/KGEN_MASTER_INDEX.md",
+    "docs/KGEN_RUNTIME_INDEX.md",
+    "KGEN-Organization/WorkOrders/KAIOS_CFO_FINANCE_ENGINE_V1_20261008.json"
+  ],
+  "tests": {
+    "targeted": "12/12 PASS",
+    "full_regression": "PENDING",
+    "ci": "PENDING"
+  },
+  "demo_financial_report": {
+    "currency": "KAIOS",
+    "mode": "SIMULATION_ONLY",
+    "revenue": "100000",
+    "expense": "60200",
+    "profit": "39800",
+    "cash_flow_financing": "300000",
+    "cash_flow_operating": "84000",
+    "assets": "1464800",
+    "liabilities": "1125000",
+    "equity": "339800",
+    "accounting_balanced": true,
+    "project_revenue": "100000",
+    "project_cost": "60000",
+    "project_profit": "40000",
+    "project_margin_bps": "4000",
+    "creator_royalty_payable": "20000",
+    "restricted_kaios_inventory": "1080000",
+    "matching_restricted_liability": "1080000",
+    "heartbeat_company_accounting": "EXTERNAL_LIFE_REWARD",
+    "kufo_after_three_years": "12.5_PERCENT_REMAINS",
+    "year_3_settlement_cutoff": "NOT_DEFINED_BY_CURRENT_CANON"
+  },
+  "known_limits": [
+    "Simulation only; no real balances, valuation, payment, payroll, royalty, Treasury, signer or token transfer.",
+    "KUFO/KSHIP quantities are read-only projections from the existing canonical calculation; valuation and year-3 cutoff are unresolved.",
+    "Species rates and health/lifespan effects remain UNKNOWN unless separately canonicalized.",
+    "Existing project, payroll and logistics runtimes are evidence sources and are not yet wired as adapters.",
+    "Boot V1.4 registration is intentionally not changed without explicit Boot-update authority.",
+    "CFO Digital Life and long-term maintainer are not assigned."
+  ],
+  "rollback": {
+    "method": "Revert the candidate commit on its non-main branch; no state migration or real asset rollback is required.",
+    "data_loss_risk": "NONE_FOR_REAL_FINANCE",
+    "last_known_good_main": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6"
+  },
+  "signatures": {
+    "implementer": "NOT_SIGNED",
+    "independent_reviewer": "NOT_SIGNED",
+    "gm_acceptance": "NOT_SIGNED",
+    "human_authority": "ORDER_RECORDED_NOT_CRYPTOGRAPHIC_SIGNATURE"
+  },
+  "seal_status": "NOT_SEALED"
+}

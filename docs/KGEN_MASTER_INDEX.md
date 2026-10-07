@@ -993,6 +993,22 @@ Runtime V1 implementation:
 | `K線西遊記/temples/11520/app.mjs` | First-screen concierge, working Voice/Speech/Text fallback, Join, first mission and return flow. |
 | `K線西遊記/temples/11520/styles.css` | Animated CSS 3D character and visible 2D/reduced-motion fallback. |
 
+## KAIOS CFO Finance Engine V1 Candidate Registration — 2026-10-08
+
+This is a subordinate, simulation-only company accounting organ under the existing
+`core/accounting` owner. It does not replace nation public finance, payroll, project,
+logistics, token, Treasury or settlement authorities.
+
+| Repository path | Purpose |
+|---|---|
+| `core/accounting/runtime-finance.js` | Fixed-name CFO V1 double-entry, reporting, royalty, compute-cost, consumption and read-only KUFO/KSHIP adapter runtime. |
+| `core/accounting/index.mjs` | Existing accounting owner and public re-export surface. |
+| `tests/cfo-finance-organ.test.mjs` | Exact-integer accounting, classification, consumption, KUFO and protected-action regression tests. |
+| `KGEN-Organization/WorkOrders/KAIOS_CFO_FINANCE_ENGINE_V1_20261008.json` | Project, work-order, demo, manufacturing, limits and rollback evidence. |
+
+Safety boundary: `SIMULATION_ONLY`; no real revenue, payment, payroll, royalty,
+Treasury movement, token transfer, signer, secret or private-key authority.
+
 
 ### PR489 Identity/Auth and XYZ remediation candidate
 
