@@ -409,3 +409,70 @@ test("subscribers receive the corrected previous-state hash", () => {
   assert.equal(observed.previous_state_hash, result.event.previous_state_hash);
   assert.notEqual(observed.previous_state_hash, observed.next_state_hash);
 });
+
+function closedWorldFixture(runtime) {
+  const state = runtime.getState();
+  return { scope: 'LOCAL_CLOSED_WORLD_TEST', fixtureId: 'CUSTOMER-POND-FIXTURE-001', expectedRevision: 0,
+    landParcelId: state.land.land_parcel_id,
+    resources: { equipment: structuredClone(state.equipment), materials: structuredClone(state.materials), energy: structuredClone(state.energy),
+      waterSources: state.water_sources.map(({ id, volume_l, available }) => ({ id, volume_l, available })),
+      feed: { inventory_kg: state.feed.inventory_kg, quality: state.feed.quality } },
+    workers: state.workers.map(({ life_id, current_location, travel_time_hours, availability }) => ({ life_id, current_location, travel_time_hours, availability })) };
+}
+
+test('closed-world configuration preserves finite owner pools, canonical parcel and exact retries', () => {
+  const runtime = createFishpondAquacultureRuntimeV1(), fixture = closedWorldFixture(runtime);
+  const result = runtime.configureLocalFixture(fixture), before = runtime.getState();
+  assert.equal(result.status, 'CONFIGURED'); assert.equal(result.outputs.resources_increased, false);
+  assert.deepEqual(runtime.configureLocalFixture(fixture), result); assert.deepEqual(runtime.getState(), before);
+  assert.equal(before.simulation_time, 0); assert.equal(before.construction.completed_stages.length, 0); assert.equal(before.populations.length, 0);
+  const changed = structuredClone(fixture); changed.resources.materials.SOIL -= 1;
+  assert.throws(() => runtime.configureLocalFixture(changed), /LOCAL_FIXTURE_IMMUTABLE/);
+  assert.deepEqual(runtime.getState(), before);
+  assert.deepEqual(runtime.replayEvents(), before);
+});
+
+test('closed-world configuration rejects added resources, foreign identities, instant travel and forged status', () => {
+  for (const change of [
+    (v) => { v.resources.materials.SOIL += 1; }, (v) => { v.resources.energy.electricity_kwh = -1; },
+    (v) => { v.resources.waterSources[0].volume_l += 1; }, (v) => { v.resources.equipment.EXCAVATOR = 1.5; },
+    (v) => { v.workers[0].life_id = 'NEW-UNREGISTERED-WORKER'; }, (v) => { v.workers[0].current_location = 'REMOTE-YARD'; },
+    (v) => { v.landParcelId = 'OTHER-PARCEL'; }, (v) => { v.status = 'COMPLETE'; },
+    (v) => { v.resources.feed.inventory_kg = Infinity; }
+  ]) {
+    const runtime = createFishpondAquacultureRuntimeV1(), before = runtime.getState(), fixture = closedWorldFixture(runtime); change(fixture);
+    assert.throws(() => runtime.configureLocalFixture(fixture)); assert.deepEqual(runtime.getState(), before);
+  }
+});
+
+test('closed-world construction records nonzero declared travel, reservations and measured conservation', () => {
+  const runtime = createFishpondAquacultureRuntimeV1(), fixture = closedWorldFixture(runtime);
+  fixture.workers[0].current_location = 'SYNTHETIC-NEARBY-YARD'; fixture.workers[0].travel_time_hours = 2;
+  runtime.configureLocalFixture(fixture); runtime.start();
+  const partial = runtime.advanceConstruction(8);
+  assert.equal(partial.status, 'IN_PROGRESS'); assert.equal(partial.outputs.effective_work_hours, 6);
+  assert.equal(partial.outputs.resource_reservation.status, 'HELD_BY_STAGE');
+  const worker = runtime.getState().workers[0]; assert.equal(worker.time_log[0].travel_hours, 2); assert.equal(worker.time_log[0].effective_work_hours, 6);
+  assert.equal(runtime.inspectLocalConstruction().status, 'CONSTRUCTION_EVIDENCE_HELD');
+  completeConstruction(runtime);
+  const report = runtime.inspectLocalConstruction();
+  assert.equal(report.status, 'CONSTRUCTION_EVIDENCE_READY'); assert.deepEqual(report.issues, []);
+  assert.deepEqual(report.completedStages, CONSTRUCTION_STAGES); assert.ok(report.simulationHours > 0);
+  for (const balance of Object.values(report.materialBalance)) assert.equal(balance.residual, 0);
+  assert.equal(report.electricityBalance.residual_kwh, 0); assert.equal(report.waterBalance.residual_l, 0);
+  assert.equal(report.waterBalance.pond_l, runtime.getState().pond.capacity_l);
+  assert.equal(report.reservations.filter((r) => r.status === 'RELEASED_AFTER_COMPLETION').length, CONSTRUCTION_STAGES.length);
+  assert.equal(report.assetCreated, false); assert.equal(report.delivery, null); assert.equal(report.receipt, null);
+  assert.equal(report.inspection, 'MEASURED_OWNER_EVIDENCE_NOT_CUSTOMER_ACCEPTANCE');
+});
+
+test('closed-world empty pools block execution and later unscoped mutations cannot pass inspection', () => {
+  const runtime = createFishpondAquacultureRuntimeV1(), fixture = closedWorldFixture(runtime);
+  fixture.resources.energy.electricity_kwh = 0; runtime.configureLocalFixture(fixture); runtime.start();
+  assert.equal(runtime.advanceConstruction(8).reason, 'BLOCKED_ENERGY');
+  assert.equal(runtime.getState().simulation_time, 0); assert.equal(runtime.inspectLocalConstruction().status, 'CONSTRUCTION_EVIDENCE_HELD');
+  runtime.setResource('energy', 'electricity_kwh', 1500);
+  assert.ok(runtime.inspectLocalConstruction().issues.includes('UNSCOPED_OWNER_ACTION'));
+  const standalone = createFishpondAquacultureRuntimeV1(); standalone.start();
+  assert.throws(() => standalone.configureLocalFixture(closedWorldFixture(standalone)), /LOCAL_FIXTURE_INITIAL_STATE_REQUIRED/);
+});
