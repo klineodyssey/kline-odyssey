@@ -47,7 +47,7 @@ The audit began with the preserved `PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md`, t
 | Positions / PnL / Liquidation | PARTIAL | Active `INDEX_DELTA_C_LOTS_V1`; Position `openCPosition`, `markPosition`, `settlementReceipt`; RiskKernel math and existing deterministic/EVM suites | Source implementation exists, but no exact BSC56 candidate deployment/Oracle/capital activation. Maintain lots KGEN principal, V1 ≤1C launch, actual accepted-price exits outside admission bounds, isolated loss and positive-profit debt. |
 | Claim / Withdraw frontend | PARTIAL | Existing adapter `claim`, `withdraw`, contract-state reconciliation; Capital ABI | BSC56 wallet-owner review and verified execution/recovery path absent. A claim is debt repayment into principal, not guaranteed immediately withdrawable cash. Recheck custody and original trader. |
 | Receipt / recovery | PARTIAL | Existing adapter verifies transaction identity/status/events, bounded log recovery, scoped account/chain/deployment context; simulation recovery preserved by #519 | Extend that same owner for chain56: pending/rejected/replaced/dropped/reverted/reorg/timeout, wallet switch/reload and double-click handling. Hash alone is not success; state-recovered evidence must not masquerade as confirmed transaction receipt. |
-| First irreversible action / signing UX | MISSING | Human 2026-10-07 explicit wallet-owner confirmation requirement; no current chain56 live adapter | Display CHAIN, WALLET, CONTRACT, FUNCTION, TOKEN, AMOUNT, EXPECTED_EFFECT, MAXIMUM_EXPOSURE; include nonce/gas/caps and calldata/manifest identity. User confirms in their wallet. Assistant does not sign/send. Construction and review may continue offline. |
+| First irreversible action / signing UX | PARTIAL | Human 2026-10-07 requirement; existing order organ now builds all eight unsigned review fields. No current chain56 live adapter or connected signing UI | Display CHAIN, WALLET, CONTRACT, FUNCTION, TOKEN, AMOUNT, EXPECTED_EFFECT, MAXIMUM_EXPOSURE; include nonce/gas/caps and calldata/manifest identity. User confirms in their wallet. Assistant does not sign/send. Construction and review may continue offline. |
 | Deployment package / production QA | PARTIAL | Existing `rehearse_bsc_testnet.mjs --build-mainnet-unsigned` and `--test-mainnet-package`; `inspectMainnetUnsignedPackage`; historical source/storage/local-fork evidence | Reuse current builder, populate verified inputs only, preserve exact-head hashes and disabled new-risk state. Complete focused deterministic tests, security/invariant review and browser QA before deployment gate. BSC97 milestones are not prerequisites. |
 
 ## Pinned read-only BSC56 observations
@@ -84,3 +84,30 @@ Public evidence locations: [KGEN](https://bscscan.com/address/0xBA3d3810e58735cb
 - Fresh functional/browser/security suite: not run for this documentation-only checkpoint; historical test reports are not relabelled as fresh PASS.
 - Boot CURRENT registration is deferred under its protected-edit rule; existing README and both KGEN indexes expose this candidate. No Boot or Physics Canon rewrite is needed to analyze/build the authorized BSC56 product.
 - Source lineage is the pinned main plus its preserved ancestors. No missing M2 delta was reconstructed or claimed recovered.
+
+## Checkpoint 2 — pure unsigned custody review
+
+First durable audit SHA: `8886aa1fb9956e6abd5d7477b6357a68d573c3ba`, Draft PR #524.
+
+`real-trading-order-intent.mjs::buildBsc56UnsignedCustodyReview` now constructs
+unsigned KGEN approve/revoke, depositMargin, withdrawMargin and claimSettlement
+review envelopes in the existing owner. It has no provider/signing/broadcast path
+and never makes an execution adapter ready. Missing or proposed deployment
+bindings return a review proposal with null contract/transaction; no address is
+guessed. A digest-pinned deployed-binding input, exact ABI digest, account/nonce,
+source/code/readback hashes, chain56, canonical KGEN and explicit gas cap are
+required for calldata construction. Binding inputs remain assertions requiring
+fresh independent chain verification before any wallet action. A digest alone is
+not proof of deployment, source identity, custody or permission.
+
+Amounts are decimal uint strings only. No float amount conversion or unlimited
+approval is supported. Exact target/spender and the eight required Human review
+fields are present; claim amounts remain contract state and repayment is not
+mislabelled a wallet withdrawal. The pure builder is deterministic, not a nonce
+ledger: live replay protection still requires a fresh wallet nonce and confirmation.
+
+Focused local validation: 68/68 existing order-intent tests passed, including
+eight new chain56 unsigned-review tests and the 60 unchanged prior tests.
+No new BSC97 features or milestones were added; retained tests are regressions.
+This does not establish live execution, browser signing UX, fresh full EVM/security
+review, Oracle/capital readiness or product completion. No DOM/UI wiring changed.

@@ -59,7 +59,25 @@
       "#522 feedback and market-card refresh",
       "#523 Navigator"
     ],
-    "checkpoint": "First matrix and bounded design; no runtime change or fresh product QA claim"
+    "checkpoint": "First matrix and bounded design; no runtime change or fresh product QA claim",
+    "unsignedCustodyReview": {
+      "builder": "K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs::buildBsc56UnsignedCustodyReview",
+      "actions": [
+        "approve",
+        "depositMargin",
+        "withdrawMargin",
+        "claimSettlement"
+      ],
+      "mode": "UNSIGNED_REVIEW_ONLY",
+      "bindingSchema": "K11520_BSC56_DEPLOYMENT_BINDING_V1",
+      "missingDeployedBinding": "PROPOSAL_WITH_NULL_TRANSACTION",
+      "expectedBindingDigestSource": "Reviewed independent deployment registry; never same untrusted input",
+      "liveReadbackRequired": true,
+      "walletOwnerConfirmationRequired": true,
+      "executionReady": false,
+      "broadcast": false,
+      "localTests": "68/68 order-intent tests; eight new BSC56 cases; no full security/browser QA claim"
+    }
   },
   "productV1Decision20260930": {
     "status": "PRODUCT_CANDIDATE_NOT_MAINNET_AUTHORIZATION",

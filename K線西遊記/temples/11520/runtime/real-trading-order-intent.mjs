@@ -16,6 +16,7 @@ PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fix
 import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
 import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
+import {KGEN_TOKEN_ADDRESS,KGEN_CHAIN_ID} from './evm-wallet-runtime.mjs';
 import {normalizeSignedC,signedPositionSide,requiredMargin,liquidationMark,placeSimulationOrder,
   observeSimulationPrice,closeSimulationPosition,cancelSimulationOrder,simulationSnapshot} from './kgen-margin-runtime.mjs';
 
@@ -222,6 +223,71 @@ export const CAPITAL_EXECUTION_ABI=Object.freeze({
     'event SettlementClaimPaid(bytes32 indexed positionKey,address indexed user,uint256 paidWei,uint256 remainingWei)'],
   positionEngine:['function previewLiquidationBoundary(uint8,int256,uint256,uint256) view returns(uint256)','function positionKey(uint256) view returns(bytes32)']
 });
+
+// Pure build/review seam for the existing custody organ. This never creates a
+// provider, asks a wallet, signs, submits, mutates a ledger, or claims readiness.
+// The expected digest must come from the reviewed deployment registry, never
+// from the same untrusted page-storage object as the proposed binding.
+export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindingDigest}={}){
+  if(input.chainId!==KGEN_CHAIN_ID)throw new Error('BSC56_CHAIN_REQUIRED');
+  const actions=['approve','depositMargin','withdrawMargin','claimSettlement'];
+  if(!actions.includes(input.action))throw new Error('BSC56_CUSTODY_ACTION_NOT_SUPPORTED');
+  if(typeof ethers?.Interface!=='function'||typeof ethers?.getAddress!=='function'||typeof ethers?.keccak256!=='function'||typeof ethers?.toUtf8Bytes!=='function')throw new Error('REVIEWED_ABI_CODEC_REQUIRED');
+  const uint=(value,label,{zero=false,max=(1n<<256n)-1n}={})=>{
+    if(typeof value!=='string'||!/^(0|[1-9][0-9]*)$/.test(value))throw new Error(label+'_EXACT_UINT_STRING_REQUIRED');
+    const n=BigInt(value);if((!zero&&n===0n)||n>max)throw new Error(label+'_OUT_OF_RANGE');return n;
+  };
+  const address=(value,label)=>{
+    try{const result=ethers.getAddress(value);if(/^0x0{40}$/i.test(result))throw new Error();return result}
+    catch{throw new Error(label+'_INVALID')}
+  };
+  const hash=(value,label)=>{if(typeof value!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(value)||/^0x0{64}$/i.test(value))throw new Error(label+'_INVALID');return value.toLowerCase()};
+  const canonical=value=>{
+    if(value===null||typeof value==='string'||typeof value==='boolean')return JSON.stringify(value);
+    if(typeof value==='number'&&Number.isSafeInteger(value))return JSON.stringify(value);
+    if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';
+    if(value&&Object.getPrototypeOf(value)===Object.prototype)return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}';
+    throw new Error('BINDING_JSON_REQUIRED');
+  };
+  const freeze=value=>{if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value)}return value};
+  const wallet=address(input.walletAddress,'WALLET'),token=KGEN_TOKEN_ADDRESS;
+  const amount=input.action==='claimSettlement'?null:uint(input.amountWei,'AMOUNT',{zero:input.action==='approve'});
+  if(amount===(1n<<256n)-1n)throw new Error('UNLIMITED_APPROVAL_OR_AMOUNT_FORBIDDEN');
+  const positionKey=input.action==='claimSettlement'?hash(input.positionKey,'POSITION_KEY'):null;
+  if(input.action==='claimSettlement'&&input.amountWei!==undefined)throw new Error('CLAIM_AMOUNT_IS_CONTRACT_STATE');
+  const nonce=uint(input.nonce,'NONCE',{zero:true,max:(1n<<64n)-1n});
+  const gasLimit=uint(input.gasLimit,'GAS_LIMIT',{max:(1n<<64n)-1n}),gasPrice=uint(input.gasPriceWei,'GAS_PRICE');
+  const gasCap=uint(input.maximumGasFeeWei,'GAS_FEE_CAP');
+  const gasExposure=gasLimit*gasPrice;if(gasExposure>gasCap)throw new Error('GAS_FEE_CAP_EXCEEDED');
+  const effects={approve:'Set exact KGEN allowance for the bound Brain; zero revokes. No token transfer occurs in this call.',depositMargin:'Request KGEN transfer into Brain; credit only the actual received token delta.',withdrawMargin:'Request withdrawal of available Brain principal to this wallet; receipt determines actual token delivery.',claimSettlement:'Request repayment of this position claim to its recorded trader principal, limited by funded capital. This is not a wallet withdrawal.'};
+  const proposal={CHAIN:{name:'BNB Smart Chain Mainnet',chainId:KGEN_CHAIN_ID},WALLET:wallet,CONTRACT:null,FUNCTION:input.action,TOKEN:{symbol:'KGEN',address:token,decimals:18},AMOUNT:amount===null?{kind:'CONTRACT_RECORDED_CLAIM',positionKey}:{baseUnits:amount.toString(),decimals:18},EXPECTED_EFFECT:effects[input.action],MAXIMUM_EXPOSURE:{nativeGasFeeWei:gasExposure.toString(),approvedGasFeeCapWei:gasCap.toString(),walletTokenDebitWei:input.action==='depositMargin'?amount.toString():'0',allowanceAfterWei:input.action==='approve'?amount.toString():null,principalDebitWei:input.action==='withdrawMargin'?amount.toString():'0'}};
+  const blocked=['FRESH_CHAIN_CODE_ACCOUNT_NONCE_AND_STATE_READBACK_REQUIRED','HUMAN_WALLET_OWNER_CONFIRMATION_REQUIRED'];
+  const deployment=input.deployment;
+  if(!deployment||deployment.status!=='DEPLOYED_CONFIG_VERIFIED')return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',status:'PROPOSAL_MISSING_DEPLOYED_BINDING',review:proposal,transaction:null,bindingDigest:null,intentDigest:null,blockers:['BSC56_DEPLOYED_BINDING_REQUIRED',...blocked],executionReady:false,signerRequested:false,broadcast:false});
+  const digest=ethers.keccak256(ethers.toUtf8Bytes(canonical(deployment)));
+  if(digest!==hash(expectedBindingDigest,'EXPECTED_BINDING_DIGEST'))throw new Error('DEPLOYMENT_BINDING_DIGEST_MISMATCH');
+  if(deployment.schema!=='K11520_BSC56_DEPLOYMENT_BINDING_V1'||deployment.chainId!==KGEN_CHAIN_ID||deployment.testOnly!==false)throw new Error('BSC56_PRODUCTION_BINDING_REQUIRED');
+  if(address(deployment.tokenAddress,'TOKEN')!==token)throw new Error('CANONICAL_KGEN_TOKEN_REQUIRED');
+  const brain=address(deployment.brainAddress,'BRAIN'),implementation=address(deployment.brainImplementation,'BRAIN_IMPLEMENTATION');
+  if(new Set([wallet,token,brain,implementation].map(a=>a.toLowerCase())).size!==4)throw new Error('CUSTODY_ROLE_ADDRESS_COLLISION');
+  if(address(deployment.walletAddress,'BOUND_WALLET')!==wallet||uint(deployment.pendingNonce,'BOUND_NONCE',{zero:true,max:(1n<<64n)-1n})!==nonce)throw new Error('WALLET_NONCE_BINDING_MISMATCH');
+  for(const key of ['tokenCodeHash','brainCodeHash','implementationCodeHash','brainSourceHash','abiHash','blockHash'])hash(deployment[key],key.toUpperCase());
+  if(typeof deployment.reviewedCommit!=='string'||! /^[0-9a-f]{40}$/.test(deployment.reviewedCommit))throw new Error('REVIEWED_COMMIT_REQUIRED');
+  uint(deployment.blockNumber,'READBACK_BLOCK');
+  if(deployment.accountingModel!=='ISOLATED_SETTLEMENT_CAPITAL_V1')throw new Error('CAPITAL_ABI_CAPABILITY_REQUIRED');
+  const fragments=[TESTNET_EXECUTION_ABI.testToken.find(f=>f.startsWith('function approve(')),...TESTNET_EXECUTION_ABI.brainProxy.filter(f=>/^function (depositMargin|withdrawMargin)\(/.test(f)),CAPITAL_EXECUTION_ABI.brainProxy.find(f=>f.startsWith('function claimSettlement('))];
+  const abiHash=ethers.keccak256(ethers.toUtf8Bytes(canonical(fragments)));
+  if(deployment.abiHash.toLowerCase()!==abiHash)throw new Error('CUSTODY_ABI_HASH_MISMATCH');
+  const args=input.action==='approve'?[brain,amount.toString()]:input.action==='claimSettlement'?[positionKey]:[amount.toString()];
+  const data=new ethers.Interface(fragments).encodeFunctionData(input.action,args);
+  const target=input.action==='approve'?token:brain;
+  if(input.spenderAddress!==undefined&&address(input.spenderAddress,'SPENDER')!==brain)throw new Error('BRAIN_SPENDER_MISMATCH');
+  if(input.contractAddress!==undefined&&address(input.contractAddress,'CONTRACT')!==target)throw new Error('CUSTODY_TARGET_MISMATCH');
+  proposal.CONTRACT=target;if(input.action==='approve')proposal.SPENDER=brain;
+  const transaction={chainId:KGEN_CHAIN_ID,type:0,from:wallet,to:target,nonce:nonce.toString(),data,value:'0',gasLimit:gasLimit.toString(),gasPrice:gasPrice.toString()};
+  const intentDigest=ethers.keccak256(ethers.toUtf8Bytes(canonical({bindingDigest:digest,transaction})));
+  return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',status:'UNSIGNED_REVIEW_ONLY',review:proposal,transaction,bindingDigest:digest,intentDigest,blockers:blocked,replayProtection:'FRESH_WALLET_NONCE_REQUIRED_AT_CONFIRMATION',executionReady:false,signerRequested:false,broadcast:false});
+}
 
 // A timed-out wallet prompt cannot be cancelled by JavaScript. Keep its write
 // lease across adapter recreation until rejection or mined-receipt reconciliation.
