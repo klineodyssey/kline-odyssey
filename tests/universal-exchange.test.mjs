@@ -7,7 +7,7 @@ import {
   createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
   createListing, settleOrder, MissionEngine, completeAssetDream, assertLedgerSeparation,
   assertAppendOnlyChain, validateSpacecraft, ASSET_TYPES, buildLifeDraft, assignLifeJob,
-  validateKgenMarketSnapshot, validateSwapIntent, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
+  validateKgenMarketSnapshot, validateSwapIntent, createK18921KgenWbnbObservation, KGEN_SWAP_CONFIG, DigitalLifeBirthResolver,
   createBirthCertificate, createPendingBirthCertificate, createDigitalLifeBirthCertificateView, appendResolvedLifeBirth, calculateLifeAge,
   deriveHeartEligibility, createDigitalAntFinanceSnapshot, createSurvivalReserveProposal,
   createFirstKgenAcquisitionPlan, createDigitalAntWishProposal, runWukongGatekeeperHourlyJob,
@@ -39,7 +39,10 @@ import {
   replayCanonicalCompanyGenesis, validateCompanyRole, validateCompanyQueues,
   validateCompanyMissionGraph, validateCompanyHealth, validateCivilizationNeed,
   validateCivilizationDemandEngine, calculateProductPriority, rankProductPriorities,
-  validateBusinessProposal, validateAutoLpProduct, validateTreasuryOsProduct,
+  validateBusinessProposal, validateAutoLpProduct, validateAutoLpMarketQuote,
+  calculateK18921CrossRates, calculateK18921InitialLiquidity,
+  simulateK18921ConstantProductSwap, calculateK18921ImpermanentLossScenarios,
+  simulateK18921AutoLp, createK18921LiquidityStatusProjection, buildUniverse123PointRndMap, validateTreasuryOsProduct,
   validateCompanyTreasuryPlan, validateKaiosQuoteSupport, validateCelestialSeatCandidacy,
   validateCelestialCompensationPolicy, validatePublicServiceContract,
   validateInvestorRelationsEngine, replayCanonicalCivilizationDemandCycle,
@@ -2004,6 +2007,153 @@ test("V3.0 Auto LP is a non-executable liquidity service and forbids fake market
   assert.equal(product.pricing_policy, "POLICY_REQUIRED");
   assert.match(product.accounting_profile, /SEPARATE_FROM_COMPANY_INVESTMENT/);
   for (const activity of ["WASH_TRADE", "SELF_MATCH", "FAKE_VOLUME", "SAME_CONTROLLER_FAKE_ACTIVITY"]) assert.ok(product.forbidden_activity.includes(activity));
+});
+
+test("K18921 cross rates preserve KAIOS reference-target truth and reject stale market inputs", () => {
+  const observedAt = "2026-10-08T00:01:00.000Z";
+  const quote = (symbol, price) => ({ source: "BOUNDED_TEST_FIXTURE", symbol, price, source_timestamp: "2026-10-08T00:00:30.000Z", received_timestamp: "2026-10-08T00:00:40.000Z", freshness: "FRESH", status: "AVAILABLE" });
+  const cross = calculateK18921CrossRates({
+    kgenWbnbQuote: quote("KGEN/WBNB", 0.0002579),
+    bnbUsdtQuote: quote("BNB/USDT", 600),
+    kaiosUsdtReference: { price: 1, source: "HUMAN_PRODUCT_DIRECTION", classification: "REFERENCE_TARGET_NOT_PEG" },
+    observedAt
+  });
+  assert.equal(cross.rates["KGEN/WBNB"], 0.0002579);
+  assert.equal(cross.rates["KGEN/USDT"], 0.15474);
+  assert.ok(Math.abs(cross.rates["KAIOS/WBNB"] - 1 / 600) < 1e-12);
+  assert.ok(Math.abs(cross.rates["KAIOS/KGEN"] - 1 / 0.15474) < 1e-12);
+  assert.equal(cross.kaios_reference_classification, "REFERENCE_TARGET_NOT_PEG");
+  assert.equal(cross.status, "SIMULATION_INPUTS_STRUCTURALLY_VALIDATED");
+  assert.equal(cross.chain_write, false);
+  assert.throws(() => validateAutoLpMarketQuote({ ...quote("BNB/USDT", 600), freshness: "STALE" }, { observedAt }), (error) => error.code === "AUTO_LP_QUOTE_NOT_FRESH");
+  assert.throws(() => validateAutoLpMarketQuote({ ...quote("BNB/USDT", 600), source_timestamp: "10/8/2026 00:00:30" }, { observedAt }), (error) => error.code === "AUTO_LP_QUOTE_TIME_INVALID");
+  assert.throws(() => validateAutoLpMarketQuote({ ...quote("BNB/USDT", 600), source_timestamp: "2026-02-30T00:00:30.000Z" }, { observedAt }), (error) => error.code === "AUTO_LP_QUOTE_TIME_INVALID");
+  assert.throws(() => calculateK18921CrossRates({ kgenWbnbQuote: quote("KGEN/WBNB", 0.0002579), bnbUsdtQuote: quote("BNB/USDT", 600), kaiosUsdtReference: { price: 1, source: "TEST", classification: "GUARANTEED_PEG" }, observedAt }), (error) => error.code === "KAIOS_REFERENCE_NOT_GUARANTEE");
+  assert.throws(() => calculateK18921CrossRates({ kgenWbnbQuote: quote("BNB/USDT", 600), bnbUsdtQuote: quote("KGEN/WBNB", 0.0002579), kaiosUsdtReference: { price: 1, source: "TEST", classification: "REFERENCE_TARGET_NOT_PEG" }, observedAt }), (error) => error.code === "AUTO_LP_QUOTE_ROLE_MISMATCH");
+  assert.throws(() => calculateK18921CrossRates({ kgenWbnbQuote: quote("KGEN/WBNB", 0.0002579), bnbUsdtQuote: { ...quote("BNB/USDT", 600), source_timestamp: "2026-10-07T23:59:30.000Z" }, kaiosUsdtReference: { price: 1, source: "TEST", classification: "REFERENCE_TARGET_NOT_PEG" }, observedAt, maxAgeMs: 120_000 }), (error) => error.code === "AUTO_LP_QUOTE_TIME_SKEW");
+});
+
+test("K18921 converts the canonical read-only pair reserves into a provenance-rich KGEN/WBNB observation", () => {
+  const observation = createK18921KgenWbnbObservation({
+    status: "CHAIN_READ_VERIFIED",
+    mode: "DRY_RUN_ONLY",
+    broadcast_capability: "ABSENT",
+    chain_id: 56,
+    pair_address: KGEN_SWAP_CONFIG.pair_address,
+    block_number: 123,
+    observed_at: "2026-10-08T00:00:30.000Z",
+    reserves: { kgen_wei: "1000000000000000000000", wbnb_wei: "257900000000000000" }
+  }, "2026-10-08T00:00:40.000Z");
+  assert.equal(observation.symbol, "KGEN/WBNB");
+  assert.equal(observation.price, 0.0002579);
+  assert.equal(observation.block_number, 123);
+  assert.equal(observation.mode, "READ_ONLY_NO_BROADCAST");
+  assert.equal(observation.status, "AVAILABLE");
+  assert.throws(() => createK18921KgenWbnbObservation({ status: "CHAIN_READ_VERIFIED", mode: "LIVE", broadcast_capability: "PRESENT" }, "2026-10-08T00:00:40.000Z"), (error) => error.code === "K18921_READ_ONLY_SNAPSHOT_REQUIRED");
+  assert.throws(() => createK18921KgenWbnbObservation({ ...observation, status: "CHAIN_READ_VERIFIED", mode: "DRY_RUN_ONLY", broadcast_capability: "ABSENT", observed_at: "2026-10-08T00:00:30.000Z", reserves: { kgen_wei: "1000000000000000000000", wbnb_wei: "257900000000000000" } }, "2026-10-08T00:03:00.000Z"), (error) => error.code === "K18921_OBSERVATION_STALE");
+  assert.throws(() => createK18921KgenWbnbObservation({ ...observation, status: "CHAIN_READ_VERIFIED", mode: "DRY_RUN_ONLY", broadcast_capability: "ABSENT", observed_at: "2026-02-30T00:00:00.000Z", reserves: { kgen_wei: "1000000000000000000000", wbnb_wei: "257900000000000000" } }, "2026-03-02T00:00:01.000Z"), (error) => error.code === "K18921_OBSERVATION_TIME_INVALID");
+});
+
+test("K18921 plans equal-value initial liquidity for all four registered pairs", () => {
+  const rates = { "KGEN/USDT": 0.15474, "BNB/USDT": 600, "KAIOS/USDT": 1 };
+  for (const pair of ["KAIOS/USDT", "KAIOS/WBNB", "KAIOS/KGEN", "KGEN/WBNB"]) {
+    const plan = calculateK18921InitialLiquidity({ pair, totalValueUsd: 200, rates });
+    assert.ok(Math.abs(plan.usd_value_a - 100) < 1e-9);
+    assert.ok(Math.abs(plan.usd_value_b - 100) < 1e-9);
+    assert.equal(plan.expected_tvl_usd, 200);
+    assert.equal(plan.mode, "SIMULATION_ONLY");
+    assert.equal(plan.chain_write, false);
+  }
+  const kaiosUsdt = calculateK18921InitialLiquidity({ pair: "KAIOS/USDT", totalValueUsd: 200, rates });
+  assert.equal(kaiosUsdt.token_a_amount, 100);
+  assert.equal(kaiosUsdt.token_b_amount, 100);
+});
+
+test("K18921 constant-product simulation reports size slippage, price impact, transfer tax and reserve conservation", () => {
+  const small = simulateK18921ConstantProductSwap({ reserveIn: 1000, reserveOut: 1000, amountIn: 10, feeBps: 30, transferTaxInBps: 0, transferTaxOutBps: 0 });
+  const large = simulateK18921ConstantProductSwap({ reserveIn: 1000, reserveOut: 1000, amountIn: 200, feeBps: 30, transferTaxInBps: 0, transferTaxOutBps: 0 });
+  assert.ok(small.amount_out > 0 && small.amount_out < 10);
+  assert.ok(large.slippage_at_size_bps > small.slippage_at_size_bps);
+  assert.ok(large.reserve_price_change_bps > small.reserve_price_change_bps);
+  assert.ok(large.constant_product_after >= large.constant_product_before);
+  assert.equal(large.chain_write, false);
+  const taxed = simulateK18921ConstantProductSwap({ reserveIn: 1000, reserveOut: 1000, amountIn: 10, feeBps: 30, transferTaxInBps: 30, transferTaxOutBps: 30 });
+  assert.ok(taxed.amount_received_by_pool < taxed.amount_in);
+  assert.ok(taxed.amount_out < taxed.amount_out_before_transfer_tax);
+  assert.ok(taxed.total_execution_deviation_bps > taxed.price_impact_bps);
+  assert.throws(() => simulateK18921ConstantProductSwap({ reserveIn: 1000, reserveOut: 1000, amountIn: 10, feeBps: 30 }), (error) => error.code === "AUTO_LP_TRANSFER_TAX_INVALID");
+});
+
+test("K18921 IL scenarios use the constant-product hold comparison", () => {
+  const scenarios = calculateK18921ImpermanentLossScenarios([0.5, 1, 2, 4]);
+  assert.equal(scenarios[1].impermanent_loss_percent, 0);
+  assert.ok(Math.abs(scenarios[0].impermanent_loss_percent - scenarios[2].impermanent_loss_percent) < 1e-12);
+  assert.ok(Math.abs(scenarios[0].impermanent_loss_percent - 5.719095841793674) < 1e-12);
+  assert.ok(scenarios[3].impermanent_loss_percent > scenarios[2].impermanent_loss_percent);
+});
+
+test("K18921 Auto LP produces a simulation-only 11520 liquidity projection", () => {
+  const observedAt = "2026-10-08T00:01:00.000Z";
+  const quote = (symbol, price) => ({ source: "BOUNDED_TEST_FIXTURE", symbol, price, source_timestamp: "2026-10-08T00:00:30.000Z", received_timestamp: "2026-10-08T00:00:40.000Z", freshness: "FRESH", status: "AVAILABLE" });
+  const cross = calculateK18921CrossRates({ kgenWbnbQuote: quote("KGEN/WBNB", 0.0002579), bnbUsdtQuote: quote("BNB/USDT", 600), kaiosUsdtReference: { price: 1, source: "HUMAN_PRODUCT_DIRECTION", classification: "REFERENCE_TARGET_NOT_PEG" }, observedAt });
+  const transferTaxContext = { source: "BOUNDED_TEST_FIXTURE", classification: "SIMULATION_ASSUMPTION_NOT_LIVE_TAX_QUOTE", direction: "TOKEN_A_TO_TOKEN_B", sender_context: "UNVERIFIED", recipient_context: "UNVERIFIED", exemption_state: "UNVERIFIED" };
+  const simulations = ["KAIOS/USDT", "KAIOS/WBNB", "KAIOS/KGEN", "KGEN/WBNB"].map((pair) => simulateK18921AutoLp({ pair, totalValueUsd: 200, rates: cross.rates, feeBps: 30, transferTaxBps: { KAIOS: 0, USDT: 0, WBNB: 0, KGEN: 30 }, transferTaxContext, swapSizesUsd: [1, 10, 50], priceMultipliers: [0.5, 1, 2] }));
+  const projection = createK18921LiquidityStatusProjection({ crossRates: cross, simulations, observedAt });
+  assert.equal(projection.consumer, "K11520_READ_ONLY");
+  assert.equal(projection.pairs.length, 4);
+  assert.equal(projection.truth_classification, "SIMULATION");
+  assert.equal(projection.live_reserves, false);
+  assert.equal(projection.deployed_pairs_verified, false);
+  assert.equal(projection.chain_write, false);
+  assert.ok(projection.pairs.every((pair) => pair.liquidity_health === "SIMULATED_NOT_DEPLOYED"));
+  assert.throws(() => createK18921LiquidityStatusProjection({ crossRates: cross, simulations: [simulations[0], simulations[0]], observedAt }), (error) => error.code === "AUTO_LP_PROJECTION_PAIR_INVALID");
+  assert.throws(() => createK18921LiquidityStatusProjection({ crossRates: cross, simulations: simulations.map((simulation, index) => index ? simulation : { ...simulation, plan: { ...simulation.plan, token_a_amount: -1 } }), observedAt }), (error) => error.code === "AUTO_LP_PROJECTION_VALUE_INVALID");
+  assert.throws(() => createK18921LiquidityStatusProjection({ crossRates: { ...cross, rates: { ...cross.rates, "KAIOS/KGEN": 99 } }, simulations, observedAt }), (error) => error.code === "AUTO_LP_PROJECTION_RATE_MISMATCH");
+  assert.throws(() => createK18921LiquidityStatusProjection({ crossRates: cross, simulations: simulations.map((simulation, index) => index ? simulation : { ...simulation, impacts: simulation.impacts.map((impact) => ({ ...impact, slippage_at_size_bps: 0 })) }), observedAt }), (error) => error.code === "AUTO_LP_PROJECTION_IMPACT_INVALID");
+  assert.throws(() => createK18921LiquidityStatusProjection({ crossRates: cross, simulations: simulations.map((simulation, index) => index ? simulation : { ...simulation, impacts: simulation.impacts.map((impact) => ({ ...impact, slippage_at_size_bps: Infinity })) }), observedAt }), (error) => error.code === "AUTO_LP_PROJECTION_IMPACT_INVALID");
+  assert.throws(() => createK18921LiquidityStatusProjection({ crossRates: cross, simulations: simulations.map((simulation, index) => index ? simulation : { ...simulation, transfer_tax_context: null }), observedAt }), (error) => error.code === "INVALID_ENTITY");
+});
+
+test("Universe 123 R&D map preserves canonical point identity without copying geometry or stale physics", async () => {
+  const canonical = JSON.parse(await fs.readFile(new URL("../docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json", import.meta.url), "utf8"));
+  const points = canonical.point_index_sorted;
+  const k18921 = points.find((point) => point.id === "P_18921p0_斬妖台_R68");
+  assert.ok(k18921);
+  const map = await buildUniverse123PointRndMap({
+    canonicalMap: canonical,
+    generatedAt: "2026-10-08T00:00:00.000Z",
+    evidenceByPoint: {
+      [k18921.id]: {
+        current_product: "K18921_AUTO_LP_GAME_AND_LIQUIDITY_RND",
+        product_status: "ACTIVE_BRANCH",
+        next_feature: "LIQUIDITY_FORGE_GAMEPLAY",
+        next_rnd: "TWAP_ORACLE_AND_MEV_RISK_REVIEW",
+        rnd_status: "ACTIVE_RND",
+        blocker: "REAL_KAIOS_PAIR_RESERVES_NOT_VERIFIED",
+        dependencies: ["AI_ANT_AUTO_LP", "KGEN_PANCAKESWAP_V2_READ_ONLY"],
+        deployment_status: "NOT_DEPLOYED",
+        evidence: "BOUNDED_SIMULATION_BRANCH"
+      }
+    }
+  });
+  assert.equal(map.point_count, 123);
+  assert.equal(map.unique_coordinate_count, 108);
+  assert.equal(map.duplicate_coordinate_group_count, 13);
+  assert.equal(map.entries.length, 123);
+  assert.equal(new Set(map.entries.map((entry) => entry.point_id)).size, 123);
+  assert.equal(map.entries.find((entry) => entry.point_id === k18921.id).product_status, "ACTIVE_BRANCH");
+  assert.equal(map.entries.filter((entry) => entry.rnd_status === "RESEARCH_REQUIRED").length, 122);
+  assert.equal(map.geometry_authority, "EXTERNAL_CANONICAL_MAP_NOT_DUPLICATED");
+  assert.equal(map.physics_authority, "KGEN_UNIVERSE_PHYSICS_RUNTIME_CURRENT_NOT_OVERRIDDEN");
+  assert.equal(JSON.stringify(map).includes("Z-KZ"), false);
+  assert.equal(map.chain_write, false);
+  assert.equal(map.evidence_classification, "CALLER_REFERENCES_RECORDED_NOT_EXTERNAL_AUTHORITY");
+  assert.equal(map.source_identity_sha256, "d4b085c5c55e18a0dff584862f3f3499565cbb0b22de913c8a833a000a8b78c7");
+  await assert.rejects(() => buildUniverse123PointRndMap({ canonicalMap: { ...canonical, layers: { ...canonical.layers, main_universe: { ...canonical.layers.main_universe, points: points.slice(0, 122) } } }, generatedAt: "2026-10-08T00:00:00.000Z" }), (error) => error.code === "UNIVERSE_123_POINT_COUNT_INVALID");
+  const fakePoints = points.map((point, index) => ({ ...point, id: `FAKE_${index}` }));
+  const fakeIndex = canonical.point_index_sorted.map((point, index) => ({ ...point, id: `FAKE_${index}` }));
+  await assert.rejects(() => buildUniverse123PointRndMap({ canonicalMap: { ...canonical, layers: { ...canonical.layers, main_universe: { ...canonical.layers.main_universe, points: fakePoints } }, point_index_sorted: fakeIndex }, generatedAt: "2026-10-08T00:00:00.000Z" }), (error) => error.code === "UNIVERSE_123_CANONICAL_FINGERPRINT_MISMATCH");
+  await assert.rejects(() => buildUniverse123PointRndMap({ canonicalMap: canonical, generatedAt: "2026-10-08T00:00:00.000Z", evidenceByPoint: { [k18921.id]: { product_status: "CURRENT_MAIN", rnd_status: "READY", deployment_status: "DEPLOYED_VERIFIED", dependencies: [], evidence: "FORGED" } } }), (error) => error.code === "UNIVERSE_123_PRODUCT_STATUS_INVALID");
 });
 
 test("V3.0 Treasury OS and Company Treasury can read and propose but cannot control assets", () => {

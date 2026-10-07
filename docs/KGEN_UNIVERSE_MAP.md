@@ -6,10 +6,16 @@ Formal file: `C:\Desktop\kline-odyssey\docs\maps\UniverseMap_V10_2_DISTANCE_COMP
 | --- | --- |
 | JSON valid | True |
 | Version | KLINE_UNIVERSE_MAP_V10_2_DISTANCE_COMPLETE_ALL_POINTS |
-| Detected point records | 246 |
+| Canonical point records | 123 |
+| Derived sorted index records | 123 |
+| Unique coordinates | 108 |
 | 12345 hits | 19 |
 | 16888 hits | 399 |
 | 11520 hits | 5 |
+
+The formal map contains 123 canonical records in `main_universe.points`. `point_index_sorted` is a derived index over those same records and must not be counted as another 123 points. Point identity is the canonical `id`, not the coordinate: 13 coordinate groups intentionally contain multiple semantic points and must not be deduplicated. Operational R&D status must be an overlay keyed by that ID; it must not rewrite the protected geometry source or copy the retired `Z-KZ` profit-axis mapping into new work.
+
+The bounded `buildUniverse123PointRndMap` function in `core/company/index.mjs` creates that controlled R&D overlay from all 123 canonical IDs. It verifies the main point list against the derived index, the 108/13 geometry invariants, and the repository-pinned SHA-256 identity fingerprint before accepting input. Each point receives explicit current-product, next-feature, next-R&D, blocker, dependency and deployment fields; absent evidence stays `NOT_IMPLEMENTED` / `RESEARCH_REQUIRED` / `UNKNOWN`, while caller evidence references are explicitly non-authoritative. The overlay does not duplicate geometry, change coordinates, or create a second Physics authority.
 
 ```mermaid
 flowchart TD
