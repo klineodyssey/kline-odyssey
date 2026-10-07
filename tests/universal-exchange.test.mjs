@@ -111,7 +111,9 @@ import {
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
-import { createCustomerProjectPrototype, createFrozenV1CustomerProjectTestAdapter, SMALL_HOUSE_REQUIRED_STAGES } from "../core/company/index.mjs";
+import { createCustomerProjectPrototype, createFrozenV1CustomerProjectTestAdapter, SMALL_HOUSE_REQUIRED_STAGES,
+  createDigitalWorldCustomerRequirementDraft, DIGITAL_WORLD_CUSTOMER_REQUIREMENT_FIELDS,
+  FISHPOND_CUSTOMER_REQUIREMENT_FIELDS } from "../core/company/index.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -4187,4 +4189,84 @@ test('Customer checkpoint retains a valid replan blocker without asserting const
   assert.equal(state.executionEvidence.audit.executionBlocker, 'REST_REQUIREMENT_CONFLICT');
   assert.equal(state.executionEvidence.audit.houseComplete, false);
   assert.deepEqual(state.project, f.accepted.project);
+});
+
+// Explicit synthetic inputs. References are requested policies, not owner evidence.
+function digitalWorldRequirementFixture(objective = 'FISH_POND_ECOSYSTEM') {
+  const requirements = Object.fromEntries([
+    ...DIGITAL_WORLD_CUSTOMER_REQUIREMENT_FIELDS,
+    ...(objective === 'FISH_POND_ECOSYSTEM' ? FISHPOND_CUSTOMER_REQUIREMENT_FIELDS : [])
+  ].map((field) => [field, `SYNTHETIC-${field}`]));
+  Object.assign(requirements, { quantity: 1, deadlineHours: 1000,
+    budget: { amount: '220000', unit: 'SIMULATED_CREDIT', scale: 0 },
+    acceptanceCriteria: ['Owner-reviewed conservation and inspection evidence'] });
+  return { text: objective === 'SMALL_HOUSE' ? 'Build a small digital house' : '建造有魚、水草與微生物的數位魚池', objective, requirements };
+}
+
+test('Digital world requirements keep natural language as an unsubmitted draft', async () => {
+  const draft = await createDigitalWorldCustomerRequirementDraft({ text: 'Compare a house and fish pond', objective: null, requirements: {} });
+  assert.equal(draft.world, 'KAIOS_DIGITAL_WORLD');
+  assert.deepEqual(draft.suggestedObjectives, ['SMALL_HOUSE', 'FISH_POND_ECOSYSTEM']);
+  assert.equal(draft.objective, null); assert.ok(draft.missing.includes('objective'));
+  assert.equal(draft.status, 'NEEDS_CLARIFICATION'); assert.deepEqual(draft.inferredDefaults, []);
+  assert.equal(draft.requestSubmitted, false); assert.equal(draft.projectCreated, false);
+  assert.equal(draft.customerAcceptance, null); assert.equal(draft.quoteCreated, false);
+});
+
+test('Digital world fishpond requirements cover ecosystem policies without claiming feasibility', async () => {
+  const input = digitalWorldRequirementFixture();
+  const before = structuredClone(input), draft = await createDigitalWorldCustomerRequirementDraft(input);
+  assert.deepEqual(input, before); assert.deepEqual(draft.missing, []);
+  assert.equal(draft.status, 'READY_FOR_OWNER_FEASIBILITY_REVIEW');
+  assert.equal(draft.feasibility, 'NOT_EVALUATED'); assert.equal(draft.execution, 'HELD');
+  assert.equal(draft.ownerReferences.domain, 'KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js');
+  assert.equal(draft.assetCreated, false); assert.equal(draft.lifeCreated, false);
+  assert.equal(draft.revenueCreated, false); assert.equal(draft.delivery, null); assert.equal(draft.receipt, null);
+  assert.equal(draft.durable, false); assert.equal(draft.boundaries.simulationOnly, true);
+  for (const key of ['realLegalEffect', 'payment', 'dispatch', 'procurement', 'registryWrite', 'lifeCreation', 'production']) assert.equal(draft.boundaries[key], false);
+  const { contentHash, ...content } = draft;
+  const { sha256 } = await import('../core/shared/utils.mjs');
+  assert.equal(contentHash, await sha256(content));
+  assert.deepEqual(await createDigitalWorldCustomerRequirementDraft(input), draft);
+  input.requirements.budget.amount = '1'; assert.equal(draft.requirements.budget.amount, '220000');
+});
+
+test('Digital world fishpond missing policies remain individually visible', async () => {
+  for (const field of FISHPOND_CUSTOMER_REQUIREMENT_FIELDS) {
+    const input = digitalWorldRequirementFixture(); delete input.requirements[field];
+    const draft = await createDigitalWorldCustomerRequirementDraft(input);
+    assert.deepEqual(draft.missing, [field]); assert.equal(draft.requirements[field], null);
+    assert.equal(draft.status, 'NEEDS_CLARIFICATION'); assert.equal(draft.execution, 'HELD');
+  }
+});
+
+test('Digital world requirements reject authority, fabricated evidence and invalid units', async () => {
+  const rejects = (input, code) => customerProjectRejects(createDigitalWorldCustomerRequirementDraft(input), code);
+  await rejects({ ...digitalWorldRequirementFixture(), accept: true }, 'CUSTOMER_PROJECT_FIELDS');
+  for (const [key, value] of [['customerId', 'OTHER'], ['inspectionPass', true], ['revenue', '100'], ['world', 'REAL_WORLD']]) {
+    const input = digitalWorldRequirementFixture(); input.requirements[key] = value;
+    await rejects(input, 'CUSTOMER_REQUIREMENT_FIELDS');
+  }
+  for (const [key, value, code] of [
+    ['quantity', 0, 'CUSTOMER_REQUIREMENT_QUANTITY'], ['quantity', 1.5, 'CUSTOMER_REQUIREMENT_QUANTITY'],
+    ['deadlineHours', -1, 'CUSTOMER_REQUIREMENT_DEADLINE'], ['acceptanceCriteria', [], 'CUSTOMER_PROJECT_INVALID_LIST'],
+    ['budget', { amount: '100', unit: 'KAIOS', scale: 0 }, 'CUSTOMER_REQUIREMENT_BUDGET'],
+    ['budget', { amount: '0', unit: 'SIMULATED_CREDIT', scale: 0 }, 'CUSTOMER_REQUIREMENT_BUDGET'],
+    ['speciesRef', { pass: true }, 'CUSTOMER_REQUIREMENT_REFERENCE']
+  ]) {
+    const input = digitalWorldRequirementFixture(); input.requirements[key] = value; await rejects(input, code);
+  }
+  await rejects({ ...digitalWorldRequirementFixture(), objective: 'REAL_FARM' }, 'CUSTOMER_REQUIREMENT_OBJECTIVE_UNSUPPORTED');
+});
+
+test('Digital world house draft reuses owner and preserves the existing held quote workflow', async () => {
+  const draft = await createDigitalWorldCustomerRequirementDraft(digitalWorldRequirementFixture('SMALL_HOUSE'));
+  assert.deepEqual(draft.missing, []); assert.equal(draft.ownerReferences.domain, 'KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js');
+  assert.equal(draft.projectCreated, false); assert.equal(draft.customerAcceptance, null);
+  const f = customerProjectFixture(); await f.submit(); const quote = (await f.issue()).quote;
+  assert.equal((await f.model.read()).project, null);
+  await f.model.command(f.acceptance(quote, 'house-unchanged', 2));
+  const state = await f.model.read();
+  assert.equal(state.project.status, 'PLANNED_EXECUTION_HELD'); assert.equal(state.project.houseComplete, false);
+  assert.deepEqual(state.project.desiredStages, SMALL_HOUSE_REQUIRED_STAGES);
 });

@@ -5,14 +5,14 @@
 | Field | Value |
 |---|---|
 | VERSION | V3.0 |
-| REVISION | 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1 |
+| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_DRAFT.1 |
 | STATUS | DRAFT |
-| LAST_UPDATED | 2026-10-06 |
+| LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant |
-| SOURCE_COMMIT | d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f |
+| REVIEWED_BY | PENDING; local focused tests are not registered Reviewer authority |
+| SOURCE_COMMIT | e95ae3a0e4c772af50644bf628e15801de65b97e |
 | TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
-| CHANGE_REASON | Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction. |
+| CHANGE_REASON | Add bounded digital-world requirement drafts while preserving the house and Backend owners. |
 | ANCESTOR | KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
 | SOURCE_OF_TRUTH | FALSE |
 
@@ -336,3 +336,67 @@ proof and ten Recovery Center screenshots remain bound to source
 The comment-stripped executable-byte comparison and any subsequent review must
 identify their own source tree. No new CI, publication, merge or deployment is
 implied by this release record.
+
+## Digital-world requirement draft checkpoint (2026-10-07)
+
+The next bounded Customer V2 increment reuses `core/company/index.mjs` and the
+existing `tests/universal-exchange.test.mjs`. It adds no file, route, database,
+Company, Registry, Life, logistics engine or resource simulator. The preserved
+#520 source is `e95ae3a0e4c772af50644bf628e15801de65b97e`; current-main inspection
+found `f7f67950418ebbb6f7a5a309a32d529232fcb3b6` with no overlap in these owners.
+The new continuation must retain #520 as its parent, not replace its checkpoint.
+
+`createDigitalWorldCustomerRequirementDraft({text, objective, requirements})` is
+a pure draft schema and completeness check. Its output always names
+`KAIOS_DIGITAL_WORLD`, is non-durable, and has no real-world construction effect.
+The explicitly selected objective is initially `SMALL_HOUSE`,
+`FISH_POND_ECOSYSTEM`, or null while clarification is pending. House/fishpond
+keyword matches are suggestions only, including ambiguous or negated sentences;
+they never select an objective, invent critical parameters, submit a request,
+accept a quote, create an order, or authorize work. Other objectives remain
+unsupported instead of being silently mapped to either template. This is the
+first schema/fixture checkpoint, not a completed general-language parser.
+
+Shared requirements cover location, rights, quality, quantity, simulated budget,
+deadline, intended use, acceptance criteria and maintenance. The Fish Pond
+extension requires explicit references for pond design, species, water source,
+oxygen, temperature, pH, feed, plants, microorganisms, waste, risk, density,
+growth, harvest, logistics and DigitalLife policy. Missing references remain
+individually visible. Supplied references are proposed requirements, not proof
+that resources, rights, entities, compatible ecology or adapters exist. No pH,
+oxygen, stocking-density, growth or health threshold is invented here.
+
+A structurally complete draft becomes `READY_FOR_OWNER_FEASIBILITY_REVIEW`,
+while feasibility remains `NOT_EVALUATED` and execution remains `HELD`. Its
+SHA-256 binds the full draft. The existing AI Company V1 remains project/DAG/
+inspection/delivery owner; existing Aquaculture V1 remains the 17-stage pond,
+water, feed, oxygen, growth, harvest and conservation owner. Asset/Life and
+Logistics references are not registrations or dispatch. Plant/microorganism
+coverage must be audited in the ecology owner before any integrated execution
+claim. The existing HOUSE command model, accepted snapshots and Backend local
+v1/v2 journals remain unchanged. No draft is automatically fed into them.
+
+Local validation: 23/23 selected tests passed under Node 24.19.0, comprising
+18 preserved `Customer project V2` cases and five `Digital world` cases. The
+latter cover ambiguity, all sixteen missing ecosystem fields, deterministic
+hashing, copied input, explicit bounds/units, payload-authority rejection,
+no fabricated feasibility/assets/acceptance/revenue, and unchanged house quote
+acceptance behavior. Syntax checks passed. Earlier incomplete-materialization
+module-load failures were resolved before this final selected run. Full CI,
+Backend regression, UI/browser QA and generalized persistence are not claimed.
+
+Next bounded work is a read-only owner-mapping/feasibility adapter, then a
+revision-bound simulated quote mapping, explicit same-customer acceptance,
+resource/time-conserving task execution, inspection/rework, delivery acceptance
+and one nonredeemable simulated receipt. Existing local Backend atomic journal
+is reused only after deterministic replay compatibility is tested. Neither
+#520's seven-task V1 house audit nor this requirement draft completes a house
+or pond. No merge, deployment, real procurement, payment or payroll occurs.
+
+Release record: Company CURRENT / document V3.0, revision
+`2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_DRAFT.1`; task
+`KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2`; actor dot under Human continuous
+engineering authorization 2026-10-07; review pending. Files are the existing
+Company runtime, Company operating-system document and Universal test file.
+Rollback removes only this additive draft function/constants/tests and restores
+the prior metadata. No saved project or database is reset or migrated.

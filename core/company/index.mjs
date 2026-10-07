@@ -1,14 +1,14 @@
 /*
 KGEN_META
 VERSION: CURRENT
-REVISION: 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1
+REVISION: 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_DRAFT.1
 STATUS: DRAFT
-LAST_UPDATED: 2026-10-06
+LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant
-SOURCE_COMMIT: d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f
+REVIEWED_BY: PENDING; local focused tests are not registered Reviewer authority
+SOURCE_COMMIT: e95ae3a0e4c772af50644bf628e15801de65b97e
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
-CHANGE_REASON: Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction.
+CHANGE_REASON: Add bounded digital-world requirement drafts without changing the preserved house command or persistence owners.
 ANCESTOR: core/company/index.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
 SOURCE_OF_TRUTH: FALSE
 METADATA_SCOPE: Customer Project candidate revision within the existing owner.
@@ -2939,6 +2939,68 @@ const CUSTOMER_PROJECT_BOUNDARIES = Object.freeze({
   procurement: false, registryWrite: false, lifeCreation: false, production: false
 });
 const customerProjectTestAdapters = new WeakSet();
+// Requirements are proposed inputs, never owner evidence, an accepted quote or
+// an instruction to the domain runtimes. Fishpond physics stays with its owner.
+export const DIGITAL_WORLD_CUSTOMER_REQUIREMENT_FIELDS = Object.freeze([
+  "locationRef", "rightsRef", "quality", "quantity", "budget", "deadlineHours",
+  "intendedUse", "acceptanceCriteria", "maintenancePlanRef"
+]);
+export const FISHPOND_CUSTOMER_REQUIREMENT_FIELDS = Object.freeze([
+  "pondDesignRef", "speciesRef", "waterSourceRef", "oxygenPolicyRef",
+  "temperaturePolicyRef", "phPolicyRef", "feedPlanRef", "plantPlanRef",
+  "microorganismPlanRef", "wastePlanRef", "riskPlanRef", "densityPolicyRef",
+  "growthPolicyRef", "harvestPlanRef", "logisticsPlanRef", "digitalLifePolicyRef"
+]);
+
+/** Pure draft intake only. The caller explicitly selects the objective after
+ * reviewing the text; keyword mentions are suggestions, never authorization.
+ * References describe requested policies. They do not prove the referenced
+ * resources, rights, biological compatibility or domain adapters exist. */
+export async function createDigitalWorldCustomerRequirementDraft(input) {
+  cpJson(input);
+  cpFields(input, ["text", "objective", "requirements"]);
+  cpFail(typeof input.text === "string" && input.text.trim().length > 0
+    && input.text.length <= 4000, "CUSTOMER_REQUIREMENT_TEXT_REQUIRED");
+  cpFail(input.objective === null || ["SMALL_HOUSE", "FISH_POND_ECOSYSTEM"].includes(input.objective), "CUSTOMER_REQUIREMENT_OBJECTIVE_UNSUPPORTED");
+  const fields = [...DIGITAL_WORLD_CUSTOMER_REQUIREMENT_FIELDS,
+    ...(input.objective === "FISH_POND_ECOSYSTEM" ? FISHPOND_CUSTOMER_REQUIREMENT_FIELDS : [])];
+  const supplied = input.requirements;
+  cpFail(supplied && Object.getPrototypeOf(supplied) === Object.prototype
+    && Object.keys(supplied).every((key) => fields.includes(key)), "CUSTOMER_REQUIREMENT_FIELDS");
+  const requirements = {}, missing = input.objective === null ? ["objective"] : [];
+  for (const field of fields) {
+    const value = supplied[field] ?? null;
+    if (value === null) { requirements[field] = null; missing.push(field); continue; }
+    if (field === "quantity") cpFail(cpInt(value, 1000) && value > 0, "CUSTOMER_REQUIREMENT_QUANTITY");
+    else if (field === "deadlineHours") cpFail(cpInt(value, 1_000_000) && value > 0, "CUSTOMER_REQUIREMENT_DEADLINE");
+    else if (field === "budget") {
+      cpFields(value, ["amount", "unit", "scale"]);
+      cpFail(cpAmount(value.amount) && BigInt(value.amount) > 0n && value.unit === "SIMULATED_CREDIT" && value.scale === 0, "CUSTOMER_REQUIREMENT_BUDGET");
+    } else if (field === "acceptanceCriteria") cpStrings(value, 1);
+    else cpFail(cpText(value), "CUSTOMER_REQUIREMENT_REFERENCE");
+    requirements[field] = cloneCustomerProject(value);
+  }
+  const suggestedObjectives = [];
+  if (/\bhouse\b|房屋|房子|住宅/iu.test(input.text)) suggestedObjectives.push("SMALL_HOUSE");
+  if (/\bfish\s*pond\b|魚池|鱼池|養魚|养鱼/iu.test(input.text)) suggestedObjectives.push("FISH_POND_ECOSYSTEM");
+  const content = { format: "KAIOS_CUSTOMER_REQUIREMENT_DRAFT", schemaVersion: 1,
+    world: "KAIOS_DIGITAL_WORLD", text: input.text.trim(), objective: input.objective,
+    requirements, missing, suggestedObjectives, inferredDefaults: [],
+    status: missing.length ? "NEEDS_CLARIFICATION" : "READY_FOR_OWNER_FEASIBILITY_REVIEW",
+    feasibility: "NOT_EVALUATED", execution: "HELD", durable: false,
+    boundaries: { ...CUSTOMER_PROJECT_BOUNDARIES },
+    ownerReferences: { coordinator: "core/company/index.mjs",
+      project: "KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js",
+      domain: input.objective === "FISH_POND_ECOSYSTEM"
+        ? "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js"
+        : input.objective === "SMALL_HOUSE" ? "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js" : null,
+      assetLife: "KGEN-KAIOS/life/World_Asset_Life_Specification_V1_0.md" },
+    requestSubmitted: false, quoteCreated: false, customerAcceptance: null,
+    projectCreated: false, assetCreated: false, lifeCreated: false,
+    delivery: null, receipt: null, revenueCreated: false };
+  return { ...content, contentHash: await hashCustomerProject(content) };
+}
+
 const cpFail = (ok, code) => invariant(ok, code, code);
 const cpText = (v, max = 200) => typeof v === "string" && v.length > 0 && v.length <= max && !/[<>\x00-\x1f]/.test(v);
 const cpInt = (v, max = Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(v) && v >= 0 && v <= max;
