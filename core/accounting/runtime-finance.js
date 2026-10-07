@@ -33,11 +33,15 @@ export const CFO_ORGAN_METADATA = Object.freeze({
   task_id: "KAIOS-CFO-FINANCE-ENGINE-V1-20261008",
   revision: "1",
   ancestor: "core/accounting/index.mjs",
-  source_commit: "PENDING_REPAIR_COMMIT",
+  source_commit: "cc7a4fffe854eed8f899bb33bc4d8158e2c38a84",
   author: "CURRENT_CODEX_REPOSITORY_WORKER / SESSION_ONLY",
   reviewer: "PENDING_DISTINCT_REVIEW",
   runtime_dna: "COMPANY_CORE_ORGAN / ACCOUNTING / REPORTING / OFFCHAIN",
   taxonomy: "KAIOS_AI_COMPANY.CFO_FINANCE_ORGAN",
+  changelog: Object.freeze([
+    "V1: simulation-only exact-integer double-entry, financial reports and bounded subledgers",
+    "V1 repair: daily period isolation, revenue classification enforcement, atomic compute validation, evidence-linked consumption and largest-remainder royalty allocation"
+  ]),
   policy_owner: "Hengyao / General Manager",
   cfo_digital_life: "NOT_ASSIGNED",
   protected_actions: Object.freeze([

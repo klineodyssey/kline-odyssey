@@ -357,10 +357,10 @@ No Runtime CURRENT file was modified by this registration pass.
 | `C:\Desktop\kline-odyssey\tests\cfo-finance-organ.test.mjs` | Universal Exchange Node test workflow | Double-entry, classification, royalty, compute, consumption, KUFO and no-payment regressions. |
 | `C:\Desktop\kline-odyssey\KGEN-Organization\WorkOrders\KAIOS_CFO_FINANCE_ENGINE_V1_20261008.json` | DOT/GM/reviewer | Manufacturing record, work orders, deterministic demo and governance state. |
 
-`PRIMEFORGE_GENESIS_BOOT_SEQUENCE_V1_4.md` is intentionally unchanged because
-repository policy requires separate explicit Boot-update authority. This candidate
-must not be called installed or sealed until that registration and independent review
-are complete.
+The protected Boot sequence files are intentionally unchanged because repository
+policy requires separate explicit Boot-update authority. This candidate must not be
+called installed or sealed until cumulative Boot CURRENT registration and independent
+review are complete.
 
 ## 11520 V3.4 Subordinate Runtime Registration
 
