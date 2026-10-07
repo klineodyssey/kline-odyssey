@@ -482,6 +482,73 @@ test('responsive event routing retains standalone mobile-HUD coverage and refere
   assert.ok(script.includes("assert head==os.environ['K11520_SOURCE_SHA']"));
 });
 
+// Read the actual job gates so routing tests fail when workflow expressions drift.
+const responsiveWorkflow=read('../../../../.github/workflows/11520-responsive-qa.yml');
+const responsiveJobs=Object.fromEntries([...responsiveWorkflow.matchAll(/^  ([\w-]+):\n([\s\S]*?)(?=^  [\w-]+:|$(?![\s\S]))/gm)]
+  .filter(match=>match.index>responsiveWorkflow.indexOf('\njobs:\n'))
+  .map(([,name,body])=>[name,{
+    needs:(body.match(/^    needs: (.+)$/m)?.[1]||'').replace(/[\[\]]/g,'').split(',').map(value=>value.trim()).filter(Boolean),
+    condition:body.match(/^    if: (.+)$/m)?.[1].replace(/^\$\{\{\s*|\s*\}\}$/g,'')
+  }]));
+
+test('responsive QA serializes heavy jobs without cancelling or hiding failed coverage',()=>{
+  assert.deepEqual(responsiveJobs['contextual-hud'].needs,[]);
+  assert.deepEqual(responsiveJobs['world-first'].needs,['contextual-hud']);
+  assert.deepEqual(responsiveJobs.responsive.needs,['contextual-hud','world-first']);
+  assert.deepEqual(responsiveJobs['m1-public-readonly'].needs,['responsive']);
+  for(const name of ['world-first','responsive','m1-public-readonly'])assert.match(responsiveJobs[name].condition,/!cancelled\(\)/,name+' overrides implicit ancestor success but respects cancellation');
+  assert.match(responsiveJobs['m1-public-readonly'].condition,/needs\.responsive\.result == 'success'/);
+  assert.doesNotMatch(responsiveWorkflow,/continue-on-error:/);
+});
+
+test('responsive DAG preserves event, failed ancestor, intentional skip and cancellation routing',async()=>{
+  const {runInNewContext}=await import('node:vm');
+  const order=['contextual-hud','world-first','responsive','m1-public-readonly'];
+  const routes=[
+    ['pull_request',false,'success',[true,true,true,false]],
+    ['push',false,'success',[true,true,true,false]],
+    ['workflow_dispatch',false,'success',[true,true,true,false]],
+    ['workflow_dispatch',true,'success',[true,false,true,true]],
+    ['workflow_run',false,'success',[true,false,true,true]],
+    ['workflow_run',false,'failure',[false,false,false,false]],
+    ['workflow_run',false,'cancelled',[false,false,false,false]],
+    ['workflow_run',false,'skipped',[false,false,false,false]]
+  ];
+  for(const [event,production,conclusion,expected] of routes){
+    for(const contextualResult of ['success','failure'])for(const worldResult of ['success','failure'])for(const responsiveResult of ['success','failure']){
+      const needs={},observed=[];
+      const github={event_name:event,event:{workflow_run:{conclusion}},head_ref:''};
+      for(const [index,name] of order.entries()){
+        const job=responsiveJobs[name];
+        const enabled=runInNewContext(job.condition,{github,inputs:{production},needs,cancelled:()=>false});
+        // A gate without a status function also has GitHub's implicit success().
+        const implicitSuccess=/\b(?:always|cancelled|success|failure)\(/.test(job.condition)||job.needs.every(parent=>needs[parent].result==='success');
+        observed.push(Boolean(enabled&&implicitSuccess));
+        needs[name]={result:observed[index]?([contextualResult,worldResult,responsiveResult,'success'][index]):'skipped'};
+      }
+      const wanted=[...expected];wanted[3]&&=responsiveResult==='success';
+      assert.deepEqual(observed,wanted,JSON.stringify({event,production,conclusion,contextualResult,worldResult,responsiveResult}));
+      // A cancelled workflow must never start any dependent browser runner.
+      for(const name of order.slice(1))assert.equal(runInNewContext(responsiveJobs[name].condition,{github,inputs:{production},needs,cancelled:()=>true}),false,name+' cancelled');
+    }
+  }
+});
+
+test('one open-PR push stays within four heavy runners including bounded diagnostics',()=>{
+  // Enumerate all antichains: jobs in one chain cannot be simultaneously running,
+  // regardless of duration, failed predecessors or intentionally skipped jobs.
+  const names=Object.keys(responsiveJobs);
+  const depends=(name,parent)=>responsiveJobs[name].needs.some(dependency=>dependency===parent||depends(dependency,parent));
+  let width=0;
+  for(let mask=0;mask<(1<<names.length);mask++){
+    const parallel=names.filter((_,index)=>mask&(1<<index));
+    if(parallel.every(a=>parallel.every(b=>a===b||!depends(a,b))))width=Math.max(width,parallel.length);
+  }
+  assert.equal(width,2,'serialized QA plus optional public-input-diagnostics');
+  assert.equal(width+2,4,'push Game + PR Game + Responsive antichain');
+  assert.equal(names.filter(name=>name!=='public-input-diagnostics').length,4,'all existing primary jobs retained');
+});
+
 test('contextual entry tolerates only a completed intro transition and still requires character readiness',async()=>{
   const {runInNewContext}=await import('node:vm'),browserSource=read('./11520-browser-responsive.mjs');
   const contextual=browserSource.slice(browserSource.indexOf('async function verifyContextualHud(){'));

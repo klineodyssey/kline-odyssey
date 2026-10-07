@@ -28,8 +28,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   contextual-hud:
-    # One additional bounded runner per candidate/public batch. Reuse this
-    # existing harness and artifact route; no separate dispatch or poll loop.
+    # Serialize existing QA runners; failures remain failures and do not
+    # suppress later coverage. Reuse each existing harness and artifact route.
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -88,7 +88,8 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   world-first:
-    if: github.event_name != 'workflow_run' && inputs.production != true
+    needs: contextual-hud
+    if: ${{ !cancelled() && github.event_name != 'workflow_run' && inputs.production != true }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -122,7 +123,9 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   responsive:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # Keep the direct HUD dependency when public QA intentionally skips world-first.
+    needs: [contextual-hud, world-first]
+    if: ${{ !cancelled() && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 14
     steps:
@@ -188,7 +191,8 @@ jobs:
     # One bounded read-only check after each successful Pages deployment.
     # Includes docs-only deployments; no cached PASS or once-per-SHA claim.
     needs: responsive
-    if: (github.event_name == 'workflow_dispatch' && inputs.production == true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    # Preserve the original responsive-success gate, not newly added ancestors.
+    if: ${{ !cancelled() && needs.responsive.result == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.production == true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
