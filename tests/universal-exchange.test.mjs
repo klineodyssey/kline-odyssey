@@ -113,7 +113,7 @@ import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_
 import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 import { createCustomerProjectPrototype, createFrozenV1CustomerProjectTestAdapter, SMALL_HOUSE_REQUIRED_STAGES,
   createDigitalWorldCustomerRequirementDraft, DIGITAL_WORLD_CUSTOMER_REQUIREMENT_FIELDS,
-  FISHPOND_CUSTOMER_REQUIREMENT_FIELDS } from "../core/company/index.mjs";
+  FISHPOND_CUSTOMER_REQUIREMENT_FIELDS, createFrozenFishpondRequirementTestAdapter } from "../core/company/index.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
@@ -4269,4 +4269,122 @@ test('Digital world house draft reuses owner and preserves the existing held quo
   const state = await f.model.read();
   assert.equal(state.project.status, 'PLANNED_EXECUTION_HELD'); assert.equal(state.project.houseComplete, false);
   assert.deepEqual(state.project.desiredStages, SMALL_HOUSE_REQUIRED_STAGES);
+});
+
+async function fishpondRequirementInspectionFixture({ siteChanges = {}, pondChanges = {} } = {}) {
+  const { sha256 } = await import('../core/shared/utils.mjs');
+  const input = digitalWorldRequirementFixture();
+  input.requirements.locationRef = 'CUSTOMER-POND-SITE'; input.requirements.rightsRef = 'SIMULATED_LAND_USAGE_RIGHT';
+  const draft = await createDigitalWorldCustomerRequirementDraft(input);
+  const fixture = { scope: 'LOCAL_TEST_ONLY_FISHPOND_CONFIGURATION', draftHash: draft.contentHash,
+    site: { land_parcel_id: input.requirements.locationRef, usage_right: input.requirements.rightsRef,
+      area_m2: 2500, elevation_m: 20, slope_percent: 1, soil_type: 'CLAY', soil_permeability: 0.2,
+      groundwater_risk: 0.2, flood_risk: 0.2, water_source_distance_m: 100, road_access: true,
+      electricity_access: true, environmental_capacity: 0.8, pollution_risk: 0.1, ...siteChanges },
+    pond: { pond_id: 'CUSTOMER-POND-DESIGN', area_m2: 1000, depth_m: 1, capacity_l: 500000, water_source: 'RIVER', ...pondChanges },
+    policyRefs: Object.fromEntries(FISHPOND_CUSTOMER_REQUIREMENT_FIELDS.map((field) => [field, draft.requirements[field]])) };
+  const adapter = await createFrozenFishpondRequirementTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const args = { requirementSource: { read: async () => structuredClone(draft) },
+    fixtureSource: { read: async () => structuredClone(fixture) }, draftHash: draft.contentHash, fixtureHash: await sha256(fixture) };
+  return { adapter, args, draft, fixture, sha256 };
+}
+
+test('Fishpond requirement adapter binds actual requested site/design without advancing execution', async () => {
+  const f = await fishpondRequirementInspectionFixture();
+  const result = await f.adapter.inspect(f.args);
+  assert.deepEqual(result.configuration, { site: f.fixture.site, pond: f.fixture.pond });
+  assert.equal(result.ownerSiteResult.status, 'COMPLETED'); assert.equal(result.status, 'OWNER_CONFIGURATION_INSPECTED_EXECUTION_HELD');
+  assert.equal(result.configurationHash, await f.sha256(result.configuration));
+  assert.equal(result.draftHash, f.draft.contentHash); assert.equal(result.fixtureHash, f.args.fixtureHash);
+  assert.ok(result.holds.includes('RESOURCE_PROVENANCE_REQUIRED'));
+  assert.ok(result.holds.includes('PLANT_POPULATION_INTEGRATION_REQUIRED'));
+  assert.ok(result.holds.includes('MICROORGANISM_PROXY_ONLY'));
+  assert.ok(result.limitations.includes('LEGACY_ADVANCE_DELIVERY_AUTO_ACCEPTANCE_AND_REVENUE_PATH_NOT_USED'));
+  for (const key of ['durable', 'quoteCreated', 'projectCreated', 'assetCreated', 'lifeCreated', 'revenueCreated']) assert.equal(result[key], false);
+  for (const key of ['customerAcceptance', 'delivery', 'receipt']) assert.equal(result[key], null);
+  const { contentHash, ...content } = result; assert.equal(contentHash, await f.sha256(content));
+  assert.deepEqual(await f.adapter.inspect(f.args), result);
+});
+
+test('Fishpond requirement adapter exposes site blockers and electricity gap without seeded success', async () => {
+  for (const [siteChanges, reason] of [
+    [{ slope_percent: 7 }, 'SLOPE_TOO_HIGH'], [{ road_access: false }, 'NO_ACCESS_ROUTE'],
+    [{ area_m2: 500 }, 'INSUFFICIENT_AREA'], [{ electricity_access: false }, 'CUSTOMER_SITE_ELECTRICITY_UNAVAILABLE']
+  ]) {
+    const f = await fishpondRequirementInspectionFixture({ siteChanges });
+    const result = await f.adapter.inspect(f.args);
+    assert.ok(result.holds.includes(reason)); assert.equal(result.delivery, null); assert.equal(result.revenueCreated, false);
+  }
+});
+
+test('Fishpond requirement adapter rejects stale draft, fixture, location and policy binding', async () => {
+  const f = await fishpondRequirementInspectionFixture();
+  await customerProjectRejects(f.adapter.inspect({ ...f.args, draftHash: 'f'.repeat(64) }), 'CUSTOMER_REQUIREMENT_DRAFT_HASH_MISMATCH');
+  await customerProjectRejects(f.adapter.inspect({ ...f.args, fixtureHash: 'f'.repeat(64) }), 'CUSTOMER_REQUIREMENT_FIXTURE_HASH_MISMATCH');
+  for (const change of [
+    (v) => { v.site.land_parcel_id = 'OTHER-SITE'; },
+    (v) => { v.policyRefs.oxygenPolicyRef = 'OTHER-POLICY'; }
+  ]) {
+    const bad = structuredClone(f.fixture); change(bad);
+    await assert.rejects(f.adapter.inspect({ ...f.args, fixtureHash: await f.sha256(bad), fixtureSource: { read: async () => bad } }),
+      (e) => ['CUSTOMER_REQUIREMENT_SITE_MISMATCH', 'CUSTOMER_REQUIREMENT_POLICY_MISMATCH'].includes(e.code));
+  }
+  const forged = structuredClone(f.draft); forged.feasibility = 'PASS';
+  await customerProjectRejects(f.adapter.inspect({ ...f.args, requirementSource: { read: async () => forged } }), 'CUSTOMER_REQUIREMENT_DRAFT_HASH_MISMATCH');
+});
+
+test('Fishpond requirement adapter rejects completion and resource injection at the override boundary', async () => {
+  const f = await fishpondRequirementInspectionFixture();
+  for (const [field, value] of [['status', 'READY_FOR_STOCKING'], ['water_volume_l', 500000], ['inlet_installed', true], ['populations', []]]) {
+    const bad = structuredClone(f.fixture); bad.pond[field] = value;
+    await customerProjectRejects(f.adapter.inspect({ ...f.args, fixtureHash: await f.sha256(bad), fixtureSource: { read: async () => bad } }), 'CUSTOMER_PROJECT_FIELDS');
+  }
+  const bad = { ...f.fixture, resources: { cash: 9999999 } };
+  await customerProjectRejects(f.adapter.inspect({ ...f.args, fixtureHash: await f.sha256(bad), fixtureSource: { read: async () => bad } }), 'CUSTOMER_PROJECT_FIELDS');
+});
+
+test('Fishpond requirement adapter rejects impossible geometry and changed source', async () => {
+  const f = await fishpondRequirementInspectionFixture({ pondChanges: { capacity_l: 1000001 } });
+  await customerProjectRejects(f.adapter.inspect(f.args), 'CUSTOMER_REQUIREMENT_DESIGN_VOLUME');
+  const valid = await fishpondRequirementInspectionFixture(); let reads = 0;
+  await customerProjectRejects(valid.adapter.inspect({ ...valid.args, requirementSource: { read: async () => {
+    reads += 1; return reads === 1 ? structuredClone(valid.draft) : { ...structuredClone(valid.draft), text: 'changed requirement' };
+  } } }), 'CUSTOMER_REQUIREMENT_SOURCE_CHANGED');
+  await customerProjectRejects(createFrozenFishpondRequirementTestAdapter({ mode: 'PRODUCTION' }), 'CUSTOMER_PROJECT_TEST_MODE_REQUIRED');
+});
+
+test('Fishpond requirement adapter preserves owner source and has no storage or network capability', async () => {
+  const paths = ['../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js', '../KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js', '../KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js'];
+  const before = await Promise.all(paths.map((p) => fs.readFile(new URL(p, import.meta.url))));
+  const descriptors = Object.fromEntries(['fetch', 'localStorage', 'sessionStorage'].map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
+  let accesses = 0;
+  const forbidden = () => { accesses += 1; throw new Error('EXTERNAL_CAPABILITY_FORBIDDEN'); };
+  try {
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: forbidden });
+    for (const key of ['localStorage', 'sessionStorage']) Object.defineProperty(globalThis, key, { configurable: true, get: forbidden });
+    const f = await fishpondRequirementInspectionFixture();
+    assert.deepEqual(Object.keys(f.adapter), ['inspect']);
+    const result = await f.adapter.inspect(f.args);
+    assert.equal(result.delivery, null); assert.equal(accesses, 0);
+  } finally {
+    for (const [key, descriptor] of Object.entries(descriptors)) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key];
+    }
+  }
+  const after = await Promise.all(paths.map((p) => fs.readFile(new URL(p, import.meta.url))));
+  assert.ok(before.every((bytes, index) => bytes.equals(after[index])));
+});
+
+test('Fishpond requirement adapter rejects malformed fixture numbers and excess fields', async () => {
+  const f = await fishpondRequirementInspectionFixture();
+  for (const change of [
+    (v) => { v.site.flood_risk = 1.01; }, (v) => { v.site.road_access = 'true'; },
+    (v) => { v.site.slope_percent = -1; }, (v) => { v.pond.depth_m = 0; },
+    (v) => { v.pond.capacity_l = '500000'; }, (v) => { v.pond.area_m2 = 1e308; v.pond.depth_m = 1e308; },
+    (v) => { v.site.authority = 'APPROVED'; }, (v) => { v.policyRefs.inspection = 'PASS'; }
+  ]) {
+    const bad = structuredClone(f.fixture); change(bad);
+    await assert.rejects(f.adapter.inspect({ ...f.args, fixtureHash: await f.sha256(bad), fixtureSource: { read: async () => bad } }),
+      (e) => ['CUSTOMER_REQUIREMENT_SITE_VALUE', 'CUSTOMER_REQUIREMENT_DESIGN_VALUE', 'CUSTOMER_REQUIREMENT_DESIGN_VOLUME', 'CUSTOMER_PROJECT_FIELDS'].includes(e.code));
+  }
 });

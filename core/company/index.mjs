@@ -1,12 +1,12 @@
 /*
 KGEN_META
 VERSION: CURRENT
-REVISION: 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_DRAFT.1
+REVISION: 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_ADAPTER.2
 STATUS: DRAFT
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
 REVIEWED_BY: PENDING; local focused tests are not registered Reviewer authority
-SOURCE_COMMIT: e95ae3a0e4c772af50644bf628e15801de65b97e
+SOURCE_COMMIT: 58aa7a9428b31b12ddb8d3c557248d94f5c4f5bb
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
 CHANGE_REASON: Add bounded digital-world requirement drafts without changing the preserved house command or persistence owners.
 ANCESTOR: core/company/index.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
@@ -2999,6 +2999,82 @@ export async function createDigitalWorldCustomerRequirementDraft(input) {
     projectCreated: false, assetCreated: false, lifeCreated: false,
     delivery: null, receipt: null, revenueCreated: false };
   return { ...content, contentHash: await hashCustomerProject(content) };
+}
+
+/** Bounded local configuration inspection. Resolves proposed site/design bytes
+ * through host read ports, then exercises only the installed domain's existing
+ * configuration methods. Seeded resources never become customer evidence. */
+export async function createFrozenFishpondRequirementTestAdapter({ mode } = {}) {
+  cpFail(mode === "LOCAL_TEST_ONLY", "CUSTOMER_PROJECT_TEST_MODE_REQUIRED");
+  const { createFishpondAquacultureRuntimeV1 } = await import("../../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js");
+  return Object.freeze({ async inspect({ requirementSource, fixtureSource, draftHash, fixtureHash } = {}) {
+    cpFail(typeof requirementSource?.read === "function" && typeof fixtureSource?.read === "function"
+      && cpDigest(draftHash) && cpDigest(fixtureHash), "CUSTOMER_REQUIREMENT_SOURCE_REQUIRED");
+    const draft = cloneCustomerProject(await requirementSource.read()); cpJson(draft);
+    const expected = await createDigitalWorldCustomerRequirementDraft({ text: draft.text, objective: draft.objective, requirements: draft.requirements });
+    cpFail(serializeCustomerProject(draft) === serializeCustomerProject(expected) && draft.contentHash === draftHash,
+      "CUSTOMER_REQUIREMENT_DRAFT_HASH_MISMATCH");
+    cpFail(draft.objective === "FISH_POND_ECOSYSTEM" && draft.missing.length === 0 && draft.requirements.quantity === 1,
+      "CUSTOMER_REQUIREMENT_COMPLETE_POND_REQUIRED");
+    const fixture = cloneCustomerProject(await fixtureSource.read({ draftHash, fixtureHash })); cpJson(fixture);
+    cpFields(fixture, ["scope", "draftHash", "site", "pond", "policyRefs"]);
+    cpFail(fixture.scope === "LOCAL_TEST_ONLY_FISHPOND_CONFIGURATION" && fixture.draftHash === draftHash
+      && await hashCustomerProject(fixture) === fixtureHash, "CUSTOMER_REQUIREMENT_FIXTURE_HASH_MISMATCH");
+    cpFields(fixture.policyRefs, [...FISHPOND_CUSTOMER_REQUIREMENT_FIELDS]);
+    cpFail(FISHPOND_CUSTOMER_REQUIREMENT_FIELDS.every((field) => fixture.policyRefs[field] === draft.requirements[field]),
+      "CUSTOMER_REQUIREMENT_POLICY_MISMATCH");
+    const siteFields = ["land_parcel_id", "usage_right", "area_m2", "elevation_m", "slope_percent", "soil_type", "soil_permeability",
+      "groundwater_risk", "flood_risk", "water_source_distance_m", "road_access", "electricity_access", "environmental_capacity", "pollution_risk"];
+    cpFields(fixture.site, siteFields);
+    cpFields(fixture.pond, ["pond_id", "area_m2", "depth_m", "capacity_l", "water_source"]);
+    const site = fixture.site, pond = fixture.pond;
+    cpFail(site.land_parcel_id === draft.requirements.locationRef && site.usage_right === draft.requirements.rightsRef,
+      "CUSTOMER_REQUIREMENT_SITE_MISMATCH");
+    for (const field of ["land_parcel_id", "usage_right", "soil_type"]) cpFail(cpText(site[field]), "CUSTOMER_REQUIREMENT_REFERENCE");
+    for (const field of ["pond_id", "water_source"]) cpFail(cpText(pond[field]), "CUSTOMER_REQUIREMENT_REFERENCE");
+    for (const field of ["road_access", "electricity_access"]) cpFail(typeof site[field] === "boolean", "CUSTOMER_REQUIREMENT_SITE_VALUE");
+    for (const field of ["soil_permeability", "groundwater_risk", "flood_risk", "environmental_capacity", "pollution_risk"])
+      cpFail(typeof site[field] === "number" && site[field] >= 0 && site[field] <= 1, "CUSTOMER_REQUIREMENT_SITE_VALUE");
+    for (const field of ["area_m2", "elevation_m", "slope_percent", "water_source_distance_m"])
+      cpFail(typeof site[field] === "number" && Number.isFinite(site[field]) && (field === "elevation_m" || site[field] >= 0), "CUSTOMER_REQUIREMENT_SITE_VALUE");
+    for (const field of ["area_m2", "depth_m", "capacity_l"])
+      cpFail(typeof pond[field] === "number" && Number.isFinite(pond[field]) && pond[field] > 0, "CUSTOMER_REQUIREMENT_DESIGN_VALUE");
+    const geometricCapacity = pond.area_m2 * pond.depth_m * 1000;
+    cpFail(site.area_m2 > 0 && Number.isFinite(geometricCapacity) && pond.capacity_l <= geometricCapacity,
+      "CUSTOMER_REQUIREMENT_DESIGN_VOLUME");
+    const runtime = createFishpondAquacultureRuntimeV1({ seed: draftHash });
+    try {
+      // These methods accept broad overrides in V1; the exact field lists above
+      // prevent callers from inserting completion, infrastructure or authority.
+      runtime.selectLand(cloneCustomerProject(site));
+      const configured = runtime.designPond(cloneCustomerProject(pond));
+      const state = runtime.getState();
+      cpFail(siteFields.every((field) => state.land[field] === site[field])
+        && Object.keys(pond).every((field) => state.pond[field] === pond[field]), "CUSTOMER_REQUIREMENT_OWNER_INPUT_MISMATCH");
+      cpFail(state.simulation_time === 0 && state.status === "PAUSED" && state.construction.completed_stages.length === 0
+        && state.populations.length === 0 && state.orders.length === 0 && state.cold_chain.length === 0
+        && state.enterprise.ledger.length === 0 && state.enterprise.accounts.revenue === 0
+        && state.action_log.length === 2 && state.action_log.every((action) => ["SELECT_LAND", "DESIGN_POND"].includes(action.command)),
+        "CUSTOMER_REQUIREMENT_OWNER_SIDE_EFFECT");
+      const holds = ["RESOURCE_PROVENANCE_REQUIRED", "LABOR_LOCATION_TRAVEL_AND_REST_EVIDENCE_REQUIRED",
+        "WATER_AND_POLICY_BINDING_REQUIRED", "PLANT_POPULATION_INTEGRATION_REQUIRED", "MICROORGANISM_PROXY_ONLY",
+        "BUILD_INSPECTION_AND_REWORK_EVIDENCE_REQUIRED", "EXPLICIT_CUSTOMER_DELIVERY_ACCEPTANCE_REQUIRED"];
+      if (configured.status === "BLOCKED") holds.unshift(configured.reason);
+      if (!site.electricity_access) holds.unshift("CUSTOMER_SITE_ELECTRICITY_UNAVAILABLE");
+      const current = await requirementSource.read(); cpJson(current);
+      cpFail(serializeCustomerProject(current) === serializeCustomerProject(draft), "CUSTOMER_REQUIREMENT_SOURCE_CHANGED");
+      const report = { scope: "LOCAL_TEST_ONLY_FISHPOND_CONFIGURATION", draftHash, fixtureHash,
+        runtime: state.runtime, runtimeSchema: state.schema_version, configuration: { site, pond },
+        configurationHash: await hashCustomerProject({ site, pond }),
+        status: "OWNER_CONFIGURATION_INSPECTED_EXECUTION_HELD", ownerSiteResult: { status: configured.status, reason: configured.reason ?? null },
+        holds, limitations: ["SEEDED_RESOURCES_ARE_NOT_CUSTOMER_EVIDENCE", "POLICY_REFERENCES_ARE_NOT_APPLIED",
+          "PLANTS_ARE_NOT_INTEGRATED_POND_POPULATIONS", "MICROBIAL_DECOMPOSITION_IS_A_SIMULATION_PROXY",
+          "LEGACY_ADVANCE_DELIVERY_AUTO_ACCEPTANCE_AND_REVENUE_PATH_NOT_USED"],
+        simulationOnly: true, durable: false, quoteCreated: false, customerAcceptance: null,
+        projectCreated: false, assetCreated: false, lifeCreated: false, delivery: null, receipt: null, revenueCreated: false };
+      return { ...report, contentHash: await hashCustomerProject(report) };
+    } finally { runtime.destroy(); }
+  } });
 }
 
 const cpFail = (ok, code) => invariant(ok, code, code);

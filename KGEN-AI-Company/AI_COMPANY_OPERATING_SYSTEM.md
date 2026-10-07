@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | VERSION | V3.0 |
-| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_DRAFT.1 |
+| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_ADAPTER.2 |
 | STATUS | DRAFT |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
 | REVIEWED_BY | PENDING; local focused tests are not registered Reviewer authority |
-| SOURCE_COMMIT | e95ae3a0e4c772af50644bf628e15801de65b97e |
+| SOURCE_COMMIT | 58aa7a9428b31b12ddb8d3c557248d94f5c4f5bb |
 | TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
 | CHANGE_REASON | Add bounded digital-world requirement drafts while preserving the house and Backend owners. |
 | ANCESTOR | KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
@@ -400,3 +400,60 @@ engineering authorization 2026-10-07; review pending. Files are the existing
 Company runtime, Company operating-system document and Universal test file.
 Rollback removes only this additive draft function/constants/tests and restores
 the prior metadata. No saved project or database is reset or migrated.
+
+### Bound Fish Pond configuration adapter checkpoint
+
+`createFrozenFishpondRequirementTestAdapter({mode: "LOCAL_TEST_ONLY"})` now
+resolves a complete digital Pond draft and its configuration fixture through
+code-level read ports. Both exact SHA-256 bindings are supplied, the draft is
+re-derived, all policy references must match, and the site must match the draft's
+location and simulated usage-right reference. The adapter rejects extra fields
+and privileged pond overrides, including completion/status, installed facilities
+or prefilled water. Finite dimensions must have physically consistent capacity
+(`capacity_l <= area_m2 * depth_m * 1000`); all numbers remain digital fixtures.
+
+Only the installed Aquaculture V1 `selectLand` and `designPond` methods run in a
+disposable paused instance. A temporary SELECT_LAND failure against the old
+default pond size is not final evidence; the result is read after both requested
+site and pond design are installed. The adapter reads all whitelisted values
+back, asserts zero time, stages, populations, orders, delivery, ledger and
+revenue changes, rechecks the draft source, and destroys the instance. It never
+starts construction, stocks fish, applies a policy, calls `advanceDelivery`, or
+invokes the legacy buyer auto-acceptance/revenue pathway. Frozen owners remain
+byte-identical. No general callback/runtime factory or replacement physics is
+accepted.
+
+Even a successful configuration returns
+`OWNER_CONFIGURATION_INSPECTED_EXECUTION_HELD`. It exposes site blockers from
+the existing owner plus an explicit missing-electricity hold. Seeded cash,
+materials, water, workers and equipment are not customer-provided evidence.
+Resource provenance, labor location/travel/rest, water/policy binding, plant
+population integration, microorganism proxy limits, build inspection/rework
+and explicit delivery acceptance remain holds. Opaque requested references are
+not silently treated as applied numerical settings or verified resources.
+A policy-rich request therefore cannot become an accepted feasibility result.
+
+Five new focused cases cover exact configuration/hash readback, site and power
+blockers, stale draft/fixture/policy/location rejection, completion/resource
+injection, impossible geometry, and source changes. The selected combined run
+passed 28/28 with zero failures/skips on Node 24.19.0, including all 18 preserved
+house-command cases and the five earlier draft cases. Syntax/whitespace checks
+passed. The original HOUSE command/audit implementation after its shared helper
+boundary is byte-identical to #520. No browser/UI claim is made.
+
+Revision `2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_ADAPTER.2` is a successor
+to `58aa7a9428b31b12ddb8d3c557248d94f5c4f5bb`, within the same three existing
+Company code/test/document paths. Review is pending. Rollback removes this
+additive inspection adapter and tests only; stored #520 journals are unaffected.
+
+An expanded 54/54 bounded run also passed in 26.0 seconds: preserved Customer
+V2 commands, frozen V1 subplan audits, 19 local SQLite recovery/concurrency/
+transaction cases, and the ten new draft/adapter cases. This includes fresh-OS-
+process recovery of the existing accepted-house journal; it does not persist the
+new draft or configuration report. Groups overlap and are not additive.
+
+Two additional focused cases verify unchanged owner file bytes, no fetch or
+browser-storage capability use, the adapter's inspect-only surface, malformed
+numbers, overflowed geometric capacity and excess authority/policy fields. The
+final selected command/requirements/adapter run is 30/30 with zero failures or
+skips; this supersedes only the narrower 28-case run, not historical CI.
