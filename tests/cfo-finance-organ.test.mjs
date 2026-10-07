@@ -153,6 +153,25 @@ test("invalid compute evidence fails before any journal mutation", () => {
   }), errorCode("INVALID_FIELD"));
   assert.equal(engine.snapshot().revision, 0);
   assert.equal(engine.snapshot().journal.length, 0);
+  assert.throws(() => engine.recordComputeCost({
+    entry_id: "BAD-TIME", occurred_at: "not-a-date", description: "bad", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" },
+    work_id: "W1", worker: "W", runtime: "R", start_usage: "0", end_usage: "1", duration_seconds: 1,
+    task_type: "CODE", deliverable: "D", amount: "1", expense_account_id: "EXP", payable_account_id: "PAY"
+  }), errorCode("INVALID_TIMESTAMP"));
+  assert.equal(engine.snapshot().revision, 0);
+  assert.equal(engine.snapshot().journal.length, 0);
+});
+
+test("worker and project subledgers reconcile journal project, amount, currency and class", () => {
+  const engine = runtime();
+  engine.registerAccount({ account_id: "EXP", account_type: "EXPENSE", currency: "KAIOS", classification: "TASK_COMPENSATION_EXPENSE" });
+  engine.registerAccount({ account_id: "PAY", account_type: "LIABILITY", currency: "KAIOS", classification: "TASK_COMPENSATION_PAYABLE" });
+  engine.postJournalEntry({ entry_id: "TASK", occurred_at: "2026-10-08T00:00:00Z", description: "task", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, project_id: "P1", lines: [{ account_id: "EXP", side: "DEBIT", amount: "1" }, { account_id: "PAY", side: "CREDIT", amount: "1" }] });
+  assert.throws(() => engine.recordWorkerIncome({ worker_id: "W1", income_type: "TASK_COMPENSATION", amount: "999999", currency: "USD", source: "TEST", journal_entry_id: "TASK" }), errorCode("WORKER_INCOME_MISMATCH"));
+  assert.throws(() => engine.recordProjectEvent({ project_id: "P2", event_type: "PROJECT_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_PROJECT_MISMATCH"));
+  assert.throws(() => engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_COST", amount: "999999", currency: "USD", journal_entry_id: "TASK" }), errorCode("PROJECT_EVENT_JOURNAL_MISMATCH"));
+  assert.equal(engine.recordWorkerIncome({ worker_id: "W1", income_type: "TASK_COMPENSATION", amount: "1", currency: "KAIOS", source: "TEST", journal_entry_id: "TASK" }).amount, "1");
+  assert.equal(engine.recordProjectEvent({ project_id: "P1", event_type: "PROJECT_COST", amount: "1", currency: "KAIOS", journal_entry_id: "TASK" }).amount, "1");
 });
 
 test("species consumption is allow-listed, evidence-linked and replay protected", () => {
@@ -163,12 +182,13 @@ test("species consumption is allow-listed, evidence-linked and replay protected"
   engine.postJournalEntry({ entry_id: "BUY", description: "buy", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, lines: [{ account_id: "FOOD", side: "DEBIT", amount: "10" }, { account_id: "CASH", side: "CREDIT", amount: "10" }] });
   engine.postJournalEntry({ entry_id: "USE", description: "use", source: "TEST", authority: "TEST", evidence: { mode: "SIMULATION_ONLY" }, lines: [{ account_id: "EXP", side: "DEBIT", amount: "1" }, { account_id: "FOOD", side: "CREDIT", amount: "1" }] });
   engine.registerConsumptionProfile({ species_id: "PLANT", consumption_types: ["WATER", "LIGHT"], daily_consumption: "10" });
-  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "BEEF", amount: "1", unit: "GRAM", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_TYPE_MISMATCH"));
-  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML" }), errorCode("CONSUMPTION_EVIDENCE_REQUIRED"));
-  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "MISSING", sink_entry_id: "MISSING" }), errorCode("CONSUMPTION_EVIDENCE_REQUIRED"));
-  const accepted = engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "USE", sink_entry_id: "USE" });
+  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "BEEF", amount: "1", unit: "GRAM", accounting_amount: "1", accounting_currency: "KAIOS", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_TYPE_MISMATCH"));
+  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", accounting_amount: "1", accounting_currency: "KAIOS" }), errorCode("CONSUMPTION_EVIDENCE_REQUIRED"));
+  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", accounting_amount: "1", accounting_currency: "KAIOS", inventory_debit_entry_id: "MISSING", sink_entry_id: "MISSING" }), errorCode("CONSUMPTION_EVIDENCE_REQUIRED"));
+  assert.throws(() => engine.recordConsumption({ event_id: "C0", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "999999", unit: "ML", accounting_amount: "999999", accounting_currency: "USD", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_EVIDENCE_REQUIRED"));
+  const accepted = engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", accounting_amount: "1", accounting_currency: "KAIOS", inventory_debit_entry_id: "USE", sink_entry_id: "USE" });
   assert.equal(accepted.mode, "SIMULATION_ONLY");
-  assert.throws(() => engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_REPLAY"));
+  assert.throws(() => engine.recordConsumption({ event_id: "C1", entity_id: "P1", species_id: "PLANT", consumption_type: "WATER", amount: "1", unit: "ML", accounting_amount: "1", accounting_currency: "KAIOS", inventory_debit_entry_id: "USE", sink_entry_id: "USE" }), errorCode("CONSUMPTION_REPLAY"));
 });
 
 test("daily reports include only the requested UTC date", () => {

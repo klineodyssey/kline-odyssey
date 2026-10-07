@@ -2,15 +2,16 @@
   "message_protocol": "KAIOS_CFO_FINANCE_ORGAN_MANUFACTURING_RECORD_V1",
   "project_id": "KAIOS-CFO-FINANCE-ENGINE-V1-20261008",
   "task_id": "KAIOS-CFO-FINANCE-ENGINE-V1-20261008",
-  "task_source_type": "HUMAN_WORK_ORDER",
+  "task_source_type": "HUMAN_REQUEST",
   "task_source_id": "KAIOS_CFO_FINANCE_ORGAN_MANUFACTURING_ORDER_V1",
   "task_source_actor": "沈英明",
   "task_source_file": "current conversation",
   "task_source_commit": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
   "task_source_reason": "Manufacture one bounded company CFO organ without assigning CFO Digital Life authority or enabling real finance.",
-  "created_by": "CURRENT_CODEX_SESSION_ACTING_ON_DIRECT_HUMAN_ORDER",
+  "created_by": "codex-gm-01",
+  "owner": "codex-gm-01",
   "project_owner": "DOT_ORCHESTRATION_AND_HENGYAO_POLICY",
-  "reviewer": "DISTINCT_SESSION_REVIEWER_REQUIRED",
+  "reviewer": "cfo_finance_independent_review",
   "priority": "P1",
   "risk_level": "R1_OFFCHAIN_SIMULATION",
   "dependencies": [
@@ -29,20 +30,22 @@
   "designed_by": "沈英明 / Human Authority",
   "system_architecture": "Human order plus current repository canon",
   "company_policy_owner": "衡曜 / General Manager",
-  "implemented_by": "CURRENT_CODEX_SESSION",
-  "implemented_by_registry_status": "NOT_VERIFIED_AS_CFO_DIGITAL_LIFE",
+  "implemented_by": "codex-gm-01",
+  "implemented_by_registry_status": "REGISTERED_ACTIVE_T5_SYSTEM_MAINTAINER_NOT_CFO_DIGITAL_LIFE",
   "maintainer": "NOT_ASSIGNED",
   "reviewed_by": "FIRST_REVIEW_FAIL_REPAIRED_RE_REVIEW_PENDING",
   "base_main_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
   "source_commit": "cc7a4fffe854eed8f899bb33bc4d8158e2c38a84",
-  "head_sha": "cc7a4fffe854eed8f899bb33bc4d8158e2c38a84",
+  "head_sha": null,
+  "head_binding": "RESOLVE_EXACT_GIT_BRANCH_HEAD_AT_REVIEW; source_commit identifies the implementation logic commit",
   "branch": "codex/cfo-finance-organ-v1",
   "pull_request": null,
   "created_at": "2026-10-08T00:00:00+08:00",
   "source_of_truth": "core/accounting",
   "authority_boundaries": {
     "dot_is_cfo": false,
-    "gm_is_implementer_or_auditor": false,
+    "gm_is_implementer_or_auditor": true,
+    "gm_role_separation_exception": "No separate registered active runtime implementer with a matching branch was available; candidate cannot be installed or sealed on this evidence alone.",
     "cfo_digital_life": "NOT_ASSIGNED",
     "real_financial_execution": false,
     "payroll_execution": "NOT_LIVE",
@@ -53,15 +56,15 @@
     { "role": "COMPANY_POLICY_OWNER", "assignee": "衡曜", "registry_status": "POLICY_ROLE" },
     { "role": "FINANCE_AND_ACCOUNTING_AUDIT", "assignee": "cfo_canonical_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
     { "role": "KUFO_AND_CONSUMPTION_AUDIT", "assignee": "cfo_kufo_consumption_audit", "registry_status": "SESSION_SUBAGENT", "result": "COMPLETE" },
-    { "role": "CODING_IMPLEMENTER", "assignee": "CURRENT_CODEX_SESSION", "registry_status": "UNREGISTERED_SESSION_IDENTITY_DISCLOSED", "result": "COMPLETE" },
-    { "role": "INDEPENDENT_REVIEWER", "assignee": null, "registry_status": "PENDING" }
+    { "role": "CODING_IMPLEMENTER", "assignee": "codex-gm-01", "registry_status": "REGISTERED_ACTIVE_T5_SYSTEM_MAINTAINER", "result": "COMPLETE_WITH_ROLE_SEPARATION_EXCEPTION" },
+    { "role": "INDEPENDENT_REVIEWER", "assignee": "cfo_finance_independent_review", "registry_status": "SESSION_TECHNICAL_REVIEWER_NOT_CANONICAL_COMPANY_AUTHORITY", "result": "SECOND_REVIEW_FAIL_REPAIRED_RE_REVIEW_PENDING" }
   ],
   "work_orders": [
     {
       "work_id": "CFO-V1-WO-001-CANON-AUDIT",
       "owner": "DOT",
       "implementer": "cfo_canonical_audit",
-      "reviewer": "CURRENT_CODEX_REPOSITORY_WORKER",
+      "reviewer": "codex-gm-01",
       "scope": "Read-only accounting, payroll, royalty, compute, logistics and owner-boundary audit",
       "acceptance_tests": ["LATEST_MAIN_CONFIRMED", "EXISTING_OWNER_IDENTIFIED", "NO_PARALLEL_FINANCE_ENGINE"],
       "status": "COMPLETE"
@@ -70,7 +73,7 @@
       "work_id": "CFO-V1-WO-002-KUFO-CONSUMPTION-AUDIT",
       "owner": "DOT",
       "implementer": "cfo_kufo_consumption_audit",
-      "reviewer": "CURRENT_CODEX_REPOSITORY_WORKER",
+      "reviewer": "codex-gm-01",
       "scope": "Read-only Physics CURRENT, KUFO/KSHIP and species consumption audit",
       "acceptance_tests": ["HALF_LIFE_CURRENT", "YEAR_3_CUTOFF_NOT_INVENTED", "SPECIES_RULES_NOT_INVENTED"],
       "status": "COMPLETE"
@@ -78,8 +81,8 @@
     {
       "work_id": "CFO-V1-WO-003-RUNTIME",
       "owner": "DOT",
-      "implementer": "CURRENT_CODEX_SESSION",
-      "reviewer": "PENDING_DISTINCT_REVIEW",
+      "implementer": "codex-gm-01",
+      "reviewer": "cfo_finance_independent_review",
       "scope": "Fixed-name CFO V1 runtime inside core/accounting with no execution authority",
       "acceptance_tests": ["DOUBLE_ENTRY", "ASSETS_EQUAL_LIABILITIES_PLUS_EQUITY", "CLASSIFICATION_SEPARATION", "NO_PAYMENT_API"],
       "status": "IMPLEMENTED"
@@ -87,8 +90,8 @@
     {
       "work_id": "CFO-V1-WO-004-DEMO-AND-TEST",
       "owner": "DOT",
-      "implementer": "CURRENT_CODEX_SESSION",
-      "reviewer": "PENDING_DISTINCT_REVIEW",
+      "implementer": "codex-gm-01",
+      "reviewer": "cfo_finance_independent_review",
       "scope": "Deterministic game-app, compute, royalty, food, consumption and KUFO simulation",
       "acceptance_tests": ["TARGETED_NODE_TESTS", "FULL_NODE_REGRESSION", "DEMO_REPORT_BALANCED"],
       "status": "TARGETED_TESTS_PASS"
@@ -96,7 +99,7 @@
     {
       "work_id": "CFO-V1-WO-005-INDEPENDENT-REVIEW",
       "owner": "DOT",
-      "implementer": "PENDING_DISTINCT_REVIEWER",
+      "implementer": "cfo_finance_independent_review",
       "reviewer": "PENDING_GM_ACCEPTANCE",
       "scope": "Independent diff, accounting, security, canon and regression review",
       "acceptance_tests": ["NO_P0_P1", "CANONICAL_BOUND", "SECURITY_BOUNDARY", "EXACT_HEAD_TESTS"],
@@ -120,11 +123,18 @@
       "decision": "FAIL",
       "findings": "P1 daily period, revenue bypass, compute atomicity, consumption evidence and WorkOrder governance; P2 royalty rounding",
       "disposition": "REPAIRED_ON_SAME_BRANCH_NO_PASS_TRANSFER"
+    },
+    {
+      "head": "f2aabec163ee13ce733978d1777a839702ea2ea8",
+      "reviewer": "cfo_finance_independent_review",
+      "decision": "FAIL",
+      "findings": "P1 failed-entry revision atomicity and worker/project/consumption subledger reconciliation; P1 governance identity/claim evidence; P2 stale embedded head",
+      "disposition": "REPAIRED_ON_SAME_BRANCH_NO_PASS_TRANSFER"
     }
   ],
   "tests": {
-    "targeted": "15/15 PASS",
-    "full_regression": "474/474 PASS outside the unchanged 11520 real-trading preflight file; that Windows checkout file is 22/25 PASS with three baseline CRLF-sensitive workflow-source assertions",
+    "targeted": "16/16 PASS",
+    "full_regression": "475/475 PASS outside the unchanged 11520 real-trading preflight file; that Windows checkout file is 22/25 PASS with three baseline CRLF-sensitive workflow-source assertions",
     "ci": "PENDING"
   },
   "demo_financial_report": {

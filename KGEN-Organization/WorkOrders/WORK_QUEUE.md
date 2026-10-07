@@ -3,12 +3,15 @@
 ## KAIOS CFO Finance Engine V1 — 2026-10-08
 
 - task_id: KAIOS-CFO-FINANCE-ENGINE-V1-20261008; status: FIX_COMPLETE_REVIEW_PENDING; priority: P1.
-- task_source_type: HUMAN_WORK_ORDER; task_source_id: KAIOS_CFO_FINANCE_ORGAN_MANUFACTURING_ORDER_V1;
+- task_source_type: HUMAN_REQUEST; task_source_id: KAIOS_CFO_FINANCE_ORGAN_MANUFACTURING_ORDER_V1;
   task_source_actor: 沈英明; task_source_file: current conversation;
   task_source_commit: f7f67950418ebbb6f7a5a309a32d529232fcb3b6.
 - task_source_reason: manufacture one executable, testable and maintainable company CFO organ while keeping DOT, GM and CFO authority separate.
-- created_by: current Codex session acting on the direct Human order; project_owner: DOT orchestration / 衡曜 policy;
-  implementer identity: session-only, not a registered CFO Digital Life; distinct reviewer: required.
+- created_by / owner: codex-gm-01 acting on the direct Human request; project orchestration: DOT / 衡曜 policy;
+  implementer: codex-gm-01 (registered ACTIVE T5 system maintainer); session technical reviewer:
+  `cfo_finance_independent_review` (canonical Company reviewer authority remains unassigned).
+- Role-separation exception: no other registered active runtime implementer with a matching branch was available.
+  This keeps the organ an uninstalled candidate and does not assign the GM as CFO Digital Life or runtime operator.
 - risk_level: R1_OFFCHAIN_SIMULATION; dependencies: existing `core/accounting` owner, Physics CURRENT KUFO law,
   exact-head tests, independent review and separately authorized Boot CURRENT registration before installation/seal.
 - Branch: `codex/cfo-finance-organ-v1`; base: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`;

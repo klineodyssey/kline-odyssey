@@ -34,8 +34,8 @@ export const CFO_ORGAN_METADATA = Object.freeze({
   revision: "1",
   ancestor: "core/accounting/index.mjs",
   source_commit: "cc7a4fffe854eed8f899bb33bc4d8158e2c38a84",
-  author: "CURRENT_CODEX_REPOSITORY_WORKER / SESSION_ONLY",
-  reviewer: "PENDING_DISTINCT_REVIEW",
+  author: "codex-gm-01 / REGISTERED_ACTIVE_T5_SYSTEM_MAINTAINER",
+  reviewer: "cfo_finance_independent_review / SESSION_TECHNICAL_REVIEW_PENDING",
   runtime_dna: "COMPANY_CORE_ORGAN / ACCOUNTING / REPORTING / OFFCHAIN",
   taxonomy: "KAIOS_AI_COMPANY.CFO_FINANCE_ORGAN",
   changelog: Object.freeze([
@@ -151,6 +151,10 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     if (journal.some((entry) => entry.entry_id === id)) fail("DUPLICATE_ENTRY", `Journal entry ${id} already exists`);
     if (!Array.isArray(lines) || lines.length < 2) fail("INVALID_JOURNAL_ENTRY", "Journal entry requires at least two lines");
     if (evidence?.mode !== MODE) fail("REAL_FINANCE_BLOCKED", "V1 accepts SIMULATION_ONLY evidence only");
+    const normalizedOccurredAt = timestamp(occurred_at ?? clock());
+    const normalizedDescription = text(description, "description");
+    const normalizedSource = text(source, "source");
+    const normalizedAuthority = text(authority, "authority");
     const totals = new Map();
     const normalizedLines = lines.map((line, index) => {
       const account = accounts.get(text(line.account_id, `lines[${index}].account_id`));
@@ -175,14 +179,14 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
         fail("UNBALANCED_ENTRY", `Journal entry ${id} is not balanced for ${currency}`);
       }
     }
-    revision += 1;
+    const nextRevision = revision + 1;
     const record = Object.freeze({
       entry_id: id,
-      revision,
-      occurred_at: timestamp(occurred_at ?? clock()),
-      description: text(description, "description"),
-      source: text(source, "source"),
-      authority: text(authority, "authority"),
+      revision: nextRevision,
+      occurred_at: normalizedOccurredAt,
+      description: normalizedDescription,
+      source: normalizedSource,
+      authority: normalizedAuthority,
       evidence: Object.freeze({ ...evidence, mode: MODE }),
       project_id,
       cash_flow_type,
@@ -191,6 +195,7 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
       lines: Object.freeze(normalizedLines)
     });
     journal.push(record);
+    revision = nextRevision;
     return record;
   }
 
@@ -253,14 +258,32 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
 
   function recordWorkerIncome({ worker_id, income_type, amount: value, currency, source, journal_entry_id = null }) {
     if (!WORKER_INCOME_TYPES.includes(income_type)) fail("INVALID_WORKER_INCOME_TYPE", `Unsupported worker income type ${income_type}`);
-    if (income_type !== "HEARTBEAT_REWARD" && (!journal_entry_id || !journal.some((entry) => entry.entry_id === journal_entry_id))) {
+    const normalizedAmount = amount(value);
+    const normalizedCurrency = text(currency, "currency");
+    const journalEntry = journal_entry_id ? journal.find((entry) => entry.entry_id === journal_entry_id) : null;
+    if (income_type !== "HEARTBEAT_REWARD" && !journalEntry) {
       fail("WORKER_INCOME_EVIDENCE_REQUIRED", "Company compensation requires an existing journal entry");
     }
-    if (journal_entry_id && !journal.some((entry) => entry.entry_id === journal_entry_id)) fail("UNKNOWN_JOURNAL_REFERENCE", `Unknown journal entry ${journal_entry_id}`);
+    if (journal_entry_id && !journalEntry) fail("UNKNOWN_JOURNAL_REFERENCE", `Unknown journal entry ${journal_entry_id}`);
+    const payableClassifications = {
+      SALARY_INCOME: ["SALARY_PAYABLE"],
+      TASK_COMPENSATION: ["TASK_COMPENSATION_PAYABLE"],
+      CREATOR_ROYALTY: ["ROYALTY_PAYABLE"],
+      FREIGHT_REVENUE: ["FREIGHT_PAYABLE"]
+    };
+    if (journalEntry) {
+      const reconciled = journalEntry.lines.some((line) => {
+        const account = accounts.get(line.account_id);
+        return line.side === "CREDIT" && account.account_type === "LIABILITY" &&
+          payableClassifications[income_type]?.includes(account.classification) &&
+          line.currency === normalizedCurrency && BigInt(line.amount) === normalizedAmount;
+      });
+      if (!reconciled) fail("WORKER_INCOME_MISMATCH", "Worker income must match the journal payable classification, amount and currency");
+    }
     const record = Object.freeze({
-      worker_id: text(worker_id, "worker_id"), income_type, amount: amount(value).toString(), currency: text(currency, "currency"),
+      worker_id: text(worker_id, "worker_id"), income_type, amount: normalizedAmount.toString(), currency: normalizedCurrency,
       source: text(source, "source"), journal_entry_id,
-      occurred_at: journal_entry_id ? journal.find((entry) => entry.entry_id === journal_entry_id).occurred_at : timestamp(clock()),
+      occurred_at: journalEntry ? journalEntry.occurred_at : timestamp(clock()),
       company_accounting: income_type === "HEARTBEAT_REWARD" ? "EXTERNAL_LIFE_REWARD" : "COMPENSATION_OR_SERVICE"
     });
     workers.push(record);
@@ -283,9 +306,19 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
   function recordProjectEvent({ project_id, event_type, amount: value, currency, journal_entry_id = null }) {
     if (!journal_entry_id || !journal.some((entry) => entry.entry_id === journal_entry_id)) fail("PROJECT_EVENT_EVIDENCE_REQUIRED", "Project events require an existing journal entry");
     const journalEntry = journal.find((entry) => entry.entry_id === journal_entry_id);
+    const normalizedProjectId = text(project_id, "project_id");
+    const normalizedEventType = text(event_type, "event_type");
+    const normalizedAmount = amount(value, "amount", true);
+    const normalizedCurrency = text(currency, "currency");
+    if (journalEntry.project_id !== normalizedProjectId) fail("PROJECT_EVENT_PROJECT_MISMATCH", "Project event and journal project_id must match");
+    const accountType = normalizedEventType.includes("REVENUE") ? "REVENUE" : normalizedEventType.includes("COST") || normalizedEventType.includes("EXPENSE") || normalizedEventType.includes("ROYALTY") ? "EXPENSE" : null;
+    if (!accountType) fail("UNSUPPORTED_PROJECT_EVENT", "Project event type has no V1 accounting reconciliation rule");
+    const side = accountType === "REVENUE" ? "CREDIT" : "DEBIT";
+    const reconciled = journalEntry.lines.some((line) => accounts.get(line.account_id).account_type === accountType && line.side === side && line.currency === normalizedCurrency && BigInt(line.amount) === normalizedAmount);
+    if (!reconciled) fail("PROJECT_EVENT_JOURNAL_MISMATCH", "Project event must match journal project, amount, currency and account class");
     const record = Object.freeze({
-      project_id: text(project_id, "project_id"), event_type: text(event_type, "event_type"),
-      amount: amount(value, "amount", true).toString(), currency: text(currency, "currency"), journal_entry_id,
+      project_id: normalizedProjectId, event_type: normalizedEventType,
+      amount: normalizedAmount.toString(), currency: normalizedCurrency, journal_entry_id,
       occurred_at: journalEntry.occurred_at
     });
     projects.push(record);
@@ -307,22 +340,26 @@ export function createCfoFinanceRuntime({ royalty_policy, clock = () => new Date
     return record;
   }
 
-  function recordConsumption({ event_id, entity_id, species_id, consumption_type, amount: value, unit, inventory_debit_entry_id, sink_entry_id }) {
+  function recordConsumption({ event_id, entity_id, species_id, consumption_type, amount: value, unit, accounting_amount, accounting_currency, inventory_debit_entry_id, sink_entry_id }) {
     if (consumption.some((item) => item.event_id === event_id)) fail("CONSUMPTION_REPLAY", `Duplicate consumption event ${event_id}`);
     const profile = profiles.get(species_id);
     if (!profile) fail("UNKNOWN_CONSUMPTION_PROFILE", `No consumption profile for ${species_id}`);
     if (!profile.consumption_types.includes(consumption_type)) fail("CONSUMPTION_TYPE_MISMATCH", `${species_id} cannot consume ${consumption_type}`);
     const inventoryEntry = journal.find((entry) => entry.entry_id === inventory_debit_entry_id);
     const sinkEntry = journal.find((entry) => entry.entry_id === sink_entry_id);
+    const normalizedAccountingAmount = amount(accounting_amount, "accounting_amount");
+    const normalizedAccountingCurrency = text(accounting_currency, "accounting_currency");
     const hasInventoryCredit = inventoryEntry?.lines.some((line) => {
       const account = accounts.get(line.account_id);
-      return line.side === "CREDIT" && account.account_type === "ASSET" && account.classification.includes("INVENTORY");
+      return line.side === "CREDIT" && account.account_type === "ASSET" && account.classification.includes("INVENTORY") &&
+        line.currency === normalizedAccountingCurrency && BigInt(line.amount) === normalizedAccountingAmount;
     });
-    const hasExpenseSink = sinkEntry?.lines.some((line) => line.side === "DEBIT" && accounts.get(line.account_id).account_type === "EXPENSE");
-    if (!hasInventoryCredit || !hasExpenseSink) fail("CONSUMPTION_EVIDENCE_REQUIRED", "Consumption requires existing inventory-credit and expense-sink journal evidence");
+    const hasExpenseSink = sinkEntry?.lines.some((line) => line.side === "DEBIT" && accounts.get(line.account_id).account_type === "EXPENSE" && line.currency === normalizedAccountingCurrency && BigInt(line.amount) === normalizedAccountingAmount);
+    if (!hasInventoryCredit || !hasExpenseSink) fail("CONSUMPTION_EVIDENCE_REQUIRED", "Consumption requires amount- and currency-matched inventory-credit and expense-sink journal evidence");
     const record = Object.freeze({
       event_id: text(event_id, "event_id"), entity_id: text(entity_id, "entity_id"), species_id, consumption_type,
       amount: amount(value).toString(), unit: text(unit, "unit"), inventory_debit_entry_id, sink_entry_id,
+      accounting_amount: normalizedAccountingAmount.toString(), accounting_currency: normalizedAccountingCurrency,
       occurred_at: sinkEntry.occurred_at, mode: MODE
     });
     consumption.push(record);
@@ -472,7 +509,7 @@ export function createCfoV1SimulationDemo() {
   runtime.postJournalEntry({ ...common, entry_id: "DEMO-FOOD-PURCHASE", description: "Simulated rice inventory purchase", cash_flow_type: "OPERATING", lines: [{ account_id: "FOOD_INVENTORY", side: "DEBIT", amount: "1000" }, { account_id: "SIM_CASH", side: "CREDIT", amount: "1000" }] });
   runtime.postJournalEntry({ ...common, entry_id: "DEMO-FOOD-CONSUMPTION", description: "Simulated life food consumption", lines: [{ account_id: "FOOD_EXPENSE", side: "DEBIT", amount: "200" }, { account_id: "FOOD_INVENTORY", side: "CREDIT", amount: "200" }] });
   runtime.registerConsumptionProfile({ species_id: "HUMAN_DEMO", consumption_types: ["RICE", "PORK", "FISH", "VEGETABLE"], daily_consumption: "200", maintenance: ["WATER"] });
-  runtime.recordConsumption({ event_id: "DEMO-CONSUMPTION-1", entity_id: "PLAYER-DEMO", species_id: "HUMAN_DEMO", consumption_type: "RICE", amount: "200", unit: "SIMULATED_GRAM", inventory_debit_entry_id: "DEMO-FOOD-CONSUMPTION", sink_entry_id: "DEMO-FOOD-CONSUMPTION" });
+  runtime.recordConsumption({ event_id: "DEMO-CONSUMPTION-1", entity_id: "PLAYER-DEMO", species_id: "HUMAN_DEMO", consumption_type: "RICE", amount: "200", unit: "SIMULATED_GRAM", accounting_amount: "200", accounting_currency: "KAIOS", inventory_debit_entry_id: "DEMO-FOOD-CONSUMPTION", sink_entry_id: "DEMO-FOOD-CONSUMPTION" });
   runtime.recordProjectEvent({ project_id: "PROJECT-GAME-APP-DEMO", event_type: "GAME_GROSS_REVENUE", amount: "100000", currency: "KAIOS", journal_entry_id: "DEMO-GAME-REVENUE" });
   runtime.recordProjectEvent({ project_id: "PROJECT-GAME-APP-DEMO", event_type: "PROJECT_COMPUTE_COST", amount: "5000", currency: "KAIOS", journal_entry_id: "DEMO-COMPUTE-COST" });
   const yearMs = HEAVEN_TIME_LAW.heaven_day_k280_days * 86_400_000;
