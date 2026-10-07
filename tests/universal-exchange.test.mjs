@@ -1418,6 +1418,48 @@ test("restored status is identity/schema validated and malformed evidence cannot
   assert.equal(stale.failures[0].last_known_good.work_cycle_id, valid.last_known_good.work_cycle_id);
 });
 
+test("restored status rejects bidirectional monitoring projection, health, and metrics contradictions as fresh P2 evidence", () => {
+  const healthy = restoredStatusFixture();
+  const failure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T10:00:01.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
+  const incident = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T10:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100810" });
+
+  const injectedTopLevel = structuredClone(healthy);
+  injectedTopLevel.monitoring_status = "DEGRADED";
+  injectedTopLevel.worker_health = "DEGRADED";
+  injectedTopLevel.work_stop_reason = "INDEXER_FAILURE";
+  injectedTopLevel.temple_monitoring_incident = incident;
+  injectedTopLevel.dot_gm_notification_projections = incident.notification_projections;
+  const rejectedInjected = prepareRestoredWorkerStatus({ candidate: injectedTopLevel, observedAt: "2026-10-08T10:30:00.000Z" });
+  assert.equal(rejectedInjected.status, null);
+  assert.match(rejectedInjected.failures[0].source, /RESTORED_STATUS_MONITORING_PROJECTION_MISMATCH/);
+  const injectedFreshIncident = advanceTempleMonitoringIncident({ failures: rejectedInjected.failures, observedAt: "2026-10-08T10:30:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100810" });
+  assert.equal(injectedFreshIncident.priority, "P2");
+  assert.equal(injectedFreshIncident.consecutive_failure_count, 1);
+
+  const degradedEvent = {
+    ...restoredEventFixture(), result: "WORK_CYCLE_DEGRADED", monitoring_status: "DEGRADED", temple_monitoring_incident: incident,
+    dot_gm_notification_projections: incident.notification_projections, repair_work_orders: incident.repair_work_orders,
+    gatekeeper_duty: gatekeeperDuty({ status: "DEGRADED", gatekeeper_started_at: "2026-10-08T10:00:00.000Z", gatekeeper_finished_at: "2026-10-08T10:00:05.000Z", monitoring_status: "MONITORING_FAILED", risk_status: "UNKNOWN", degradation_affects_safety: false })
+  };
+  const degraded = buildSharedWorkerStatus({ event: degradedEvent, requestPatrol: { status: "SHARED_REQUEST_SOURCE_VERIFIED", real_requests: 0, open_requests: 0, evidence: [] }, companyPatrol: { status: "COMPANY_PATROL_COMPLETED", work_queue: 0 }, generatedAt: degradedEvent.finished_at });
+  const droppedTopLevel = structuredClone(degraded);
+  droppedTopLevel.temple_monitoring_incident = null;
+  const rejectedDropped = prepareRestoredWorkerStatus({ candidate: droppedTopLevel, observedAt: "2026-10-08T10:30:00.000Z" });
+  assert.equal(rejectedDropped.status, null);
+  assert.match(rejectedDropped.failures[0].source, /RESTORED_STATUS_MONITORING_PROJECTION_MISMATCH/);
+  const droppedFreshIncident = advanceTempleMonitoringIncident({ failures: rejectedDropped.failures, observedAt: "2026-10-08T10:30:00.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100810" });
+  assert.equal(droppedFreshIncident.priority, "P2");
+  assert.equal(droppedFreshIncident.consecutive_failure_count, 1);
+
+  const contradictoryHealth = structuredClone(healthy);
+  contradictoryHealth.worker_health = "FAILED";
+  contradictoryHealth.work_stop_reason = "RPC_FAILURE";
+  assert.match(prepareRestoredWorkerStatus({ candidate: contradictoryHealth, observedAt: "2026-10-08T10:30:00.000Z" }).failures[0].source, /RESTORED_STATUS_WORKER_HEALTH_MISMATCH/);
+  const contradictoryMetrics = structuredClone(healthy);
+  contradictoryMetrics.metrics.completed_cycles = 0;
+  assert.match(prepareRestoredWorkerStatus({ candidate: contradictoryMetrics, observedAt: "2026-10-08T10:30:00.000Z" }).failures[0].source, /RESTORED_STATUS_METRICS_CONTRADICT_CYCLE/);
+});
+
 test("incident recovery requires RPC, Heart bytecode, canonical wallet read, cooldown, and fresh patrol evidence", () => {
   const failure = createTempleMonitoringFailure({ condition: "HEART_UNAVAILABLE", occurredAt: "2026-10-08T05:00:00.000Z", source: "HEART:UNAVAILABLE" });
   const first = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T05:00:00.000Z" });
@@ -1472,6 +1514,8 @@ test("recovered incident event survives status persistence and the next distinct
   try {
     const statusPath = join(temporary, "worker-status.json");
     const recoveredStatus = buildSharedWorkerStatus({ event: recoveredEvent, previous: failedStatus, requestPatrol, companyPatrol, generatedAt: recoveryFinishedAt });
+    assert.deepEqual(recoveredStatus.temple_monitoring_incident, recoveredEvent.temple_monitoring_incident);
+    assert.equal(recoveredStatus.monitoring_status, recoveredEvent.monitoring_status);
     await fs.writeFile(statusPath, `${JSON.stringify(recoveredStatus)}\n`, "utf8");
     const restoredCandidate = JSON.parse(await fs.readFile(statusPath, "utf8"));
     const restored = prepareRestoredWorkerStatus({ candidate: restoredCandidate, observedAt: "2026-10-08T06:30:00.000Z" });
@@ -1494,6 +1538,7 @@ test("recovered incident event survives status persistence and the next distinct
     const nextStatus = buildSharedWorkerStatus({ event: next.event.payload, previous: restored.status, requestPatrol, companyPatrol, generatedAt: nextFinishedAt });
     assert.equal(nextStatus.last_known_good.work_cycle_id, next.event.payload.work_cycle_id);
     assert.equal(nextStatus.temple_monitoring_incident, null);
+    assert.equal(next.event.payload.temple_monitoring_incident, null);
     const nextRestored = prepareRestoredWorkerStatus({ candidate: JSON.parse(JSON.stringify(nextStatus)), observedAt: "2026-10-08T07:30:00.000Z" });
     assert.deepEqual(nextRestored.failures, []);
     assert.equal(nextRestored.status.last_known_good.work_cycle_id, next.event.payload.work_cycle_id);

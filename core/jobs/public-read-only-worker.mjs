@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 import { createUniverseRuntime } from "../registry/universe-runtime.mjs";
 import { advanceTempleMonitoringIncident, assertCompanyWorkAllowedAfterGatekeeper, classifyTempleMonitoringError, createTempleMonitoringFailure, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, validateTempleMonitoringIncident, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
 import { readTempleHeart12345 } from "../integrations/temple-heart-12345.mjs";
@@ -451,9 +452,19 @@ export function validateRestoredWorkerStatus(status) {
   if (Date.parse(status.generated_at) < Date.parse(cycle.finished_at)) throw statusError("RESTORED_STATUS_GENERATED_BEFORE_CYCLE_FINISH", "PUBLIC_WORKER_SHARED_STATUS");
   if (cycle.work_cycle_id !== expectedHourlyCycleId(cycle.scheduled_at)) throw statusError("RESTORED_STATUS_CYCLE_KEY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
   validateRestoredWorkEvent(cycle, { expectedCycleId: cycle.work_cycle_id, eventPath: `${cycle.work_cycle_id}.json`, observedAt: status.generated_at });
+  if (status.monitoring_status !== cycle.monitoring_status || !isDeepStrictEqual(status.temple_monitoring_incident ?? null, cycle.temple_monitoring_incident ?? null)) throw statusError("RESTORED_STATUS_MONITORING_PROJECTION_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
+  if (!isDeepStrictEqual(status.dot_gm_notification_projections ?? [], cycle.dot_gm_notification_projections ?? []) || !isDeepStrictEqual(status.repair_work_orders ?? [], cycle.repair_work_orders ?? [])) throw statusError("RESTORED_STATUS_INCIDENT_PROJECTION_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
+  const derivedHealth = deriveWorkerHealth({ lastCycle: cycle, now: status.generated_at });
+  if (status.worker_health !== derivedHealth.status || status.work_stop_reason !== derivedHealth.stop_reason) throw statusError("RESTORED_STATUS_WORKER_HEALTH_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
+  const metrics = status.metrics;
+  const countFields = ["completed_cycles", "failed_cycles", "degraded_cycles", "no_action_cycles", "action_cycles", "missed_cycles"];
+  const durationFields = ["work_duration_seconds", "gatekeeper_work_seconds", "cfo_work_seconds", "company_work_seconds"];
+  if (!metrics || countFields.some((key) => !Number.isInteger(metrics[key]) || metrics[key] < 0) || durationFields.some((key) => !Number.isFinite(metrics[key]) || metrics[key] < 0)) throw statusError("RESTORED_STATUS_METRICS_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  const resultMetric = cycle.result === "WORK_CYCLE_COMPLETED" ? "completed_cycles" : cycle.result === "WORK_CYCLE_FAILED" ? "failed_cycles" : "degraded_cycles";
+  if (metrics.completed_cycles + metrics.failed_cycles + metrics.degraded_cycles !== metrics.no_action_cycles + metrics.action_cycles || metrics[resultMetric] < 1 || metrics.no_action_cycles < 1 || metrics.work_duration_seconds < cycle.work_duration_seconds || metrics.gatekeeper_work_seconds < Number(cycle.work_time?.gatekeeper_work_seconds ?? 0) || metrics.cfo_work_seconds < Number(cycle.work_time?.cfo_work_seconds ?? 0) || metrics.company_work_seconds < Number(cycle.work_time?.company_work_seconds ?? 0)) throw statusError("RESTORED_STATUS_METRICS_CONTRADICT_CYCLE", "PUBLIC_WORKER_SHARED_STATUS");
   if (status.temple_monitoring_incident) {
-    validateTempleMonitoringIncident(status.temple_monitoring_incident);
-    if (status.temple_monitoring_incident.last_observed_cycle_id !== cycle.work_cycle_id) throw statusError("RESTORED_INCIDENT_CYCLE_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
+    const incident = validateTempleMonitoringIncident(status.temple_monitoring_incident);
+    if (incident.last_observed_cycle_id !== cycle.work_cycle_id || !/^DIGITAL_ANT_0001_HOURLY_\d{10}$/.test(incident.first_failure_cycle_id) || incident.consecutive_failure_count > incident.failure_records.length || incident.consecutive_failure_count > metrics.degraded_cycles + metrics.failed_cycles) throw statusError("RESTORED_INCIDENT_CYCLE_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
   }
   if (status.last_known_good) {
     const good = status.last_known_good;
