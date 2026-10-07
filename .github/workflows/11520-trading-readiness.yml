@@ -66,9 +66,13 @@ jobs:
   canonical-real-funds-candidate:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      K11520_REVIEWED_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
           # The UUPS regression compiles the pinned pre-capital implementation.
           fetch-depth: 0
       - uses: actions/setup-node@v4
@@ -153,6 +157,9 @@ jobs:
       - name: Verify unsigned Mainnet package construction (synthetic inputs; no provider or signer)
         run: node KGEN/scripts/rehearse_bsc_testnet.mjs --test-mainnet-package
 
+      - name: Reproduce saved unsigned package offline (Paris; synthetic only)
+        run: node KGEN/contracts/tests/brain-v4-static-invariants.mjs --unsigned-package-reproducibility
+
       - name: Reject tracked drift and parallel contract aliases
         shell: bash
         run: |
@@ -165,10 +172,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: settlement-local-evm-${{ github.sha }}
+          name: settlement-local-evm-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             artifacts/settlement-local-evm.json
             artifacts/runtime-execution-abi.json
+            artifacts/mainnet-unsigned/build.json
+            artifacts/mainnet-unsigned/synthetic-test-package.json
+            artifacts/mainnet-unsigned/reproducibility.json
           if-no-files-found: error
 
   candidate-wallet-browser:

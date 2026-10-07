@@ -288,3 +288,212 @@ if (process.argv.includes('--runtime-execution-abi')) {
   fs.writeFileSync('artifacts/runtime-execution-abi.json', JSON.stringify(evidence, null, 2) + '\n');
   console.log(`[runtime-execution-abi] PASS: ${checked.length} fragments; ${negativeFixtures} negative fixtures; source ${sourceDigest}`);
 }
+
+// Separate from the frontend ABI gate: replay the saved unsigned-package input
+// with its Paris settings, without an import callback, provider or signer.
+if (process.argv.includes('--unsigned-package-reproducibility')) {
+  const reportPath = 'artifacts/mainnet-unsigned/reproducibility.json';
+  fs.rmSync(reportPath, {force: true});
+  const {createHash} = await import('node:crypto');
+  const {createRequire} = await import('node:module');
+  const {execFileSync} = await import('node:child_process');
+  const {default: solc} = await import('solc');
+  const {ContractFactory, Interface, getCreateAddress, keccak256} = await import('ethers');
+  const require = createRequire(import.meta.url);
+  const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+  const stable = value => JSON.stringify(value, (_, item) => item && !Array.isArray(item) && typeof item === 'object'
+    ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
+  const digest = value => {const {packageDigest, ...body} = value; return 'sha256:' + sha256(stable(body));};
+  const canonical = text => text.replace(/\r\n/g, '\n');
+  const runnerPath = 'KGEN/scripts/rehearse_bsc_testnet.mjs';
+  const runner = canonical(fs.readFileSync(runnerPath, 'utf8'));
+  const harness = runner.match(/const harness = `([\s\S]*?)`;/)?.[1];
+  assert.ok(harness && !harness.includes('${'), 'literal runner harness required');
+  const entries = ['BrainExchange', 'PositionEngine', 'MarketRiskKernel', 'OrderTriggerEngine', 'OracleSourceAdapter']
+    .map(name => `KGEN/contracts/KGEN_${name}.sol`);
+  const sourceFiles = [...entries, 'K11520TestnetAssets.sol'];
+  const settings = {optimizer: {enabled: true, runs: 200}, evmVersion: 'paris',
+    outputSelection: {'*': {'*': ['abi', 'evm.bytecode', 'evm.deployedBytecode']}}};
+  const buildPath = 'artifacts/mainnet-unsigned/build.json';
+  const packagePath = 'artifacts/mainnet-unsigned/synthetic-test-package.json';
+  const read = file => {assert.ok(fs.existsSync(file), `missing saved artifact: ${file}`); return JSON.parse(fs.readFileSync(file, 'utf8'));};
+  const build = read(buildPath), pkg = read(packagePath);
+  function validateInput(value) {
+    assert.match(solc.version(), /^0\.8\.24\+commit\.e11b9ed9\./, 'pinned solc required');
+    assert.equal(value.compiler, solc.version(), 'saved compiler mismatch');
+    assert.equal(value.sourceEncoding, 'UTF-8_LF', 'source encoding');
+    assert.deepEqual(value.settings, settings, 'saved compiler settings');
+    assert.deepEqual(value.standardJsonInput?.settings, settings, 'standard JSON settings');
+    assert.equal(value.standardJsonInput.language, 'Solidity', 'compiler language');
+    assert.deepEqual(Object.keys(value.standardJsonInput).sort(), ['language', 'settings', 'sources'], 'standard JSON shape');
+    assert.deepEqual(Object.keys(value.dependencies).sort(), ['@openzeppelin/contracts', '@openzeppelin/contracts-upgradeable'], 'dependency set');
+    for (const [name, version] of Object.entries(value.dependencies)) {
+      assert.equal(version, '5.0.2', 'pinned OpenZeppelin required');
+      assert.equal(JSON.parse(fs.readFileSync(`node_modules/${name}/package.json`, 'utf8')).version, version, 'installed dependency version');
+    }
+    const hashes = {};
+    for (const [file, source] of Object.entries(value.standardJsonInput.sources)) {
+      assert.deepEqual(Object.keys(source), ['content'], 'fully resolved inline source required');
+      assert.equal(typeof source.content, 'string', 'source bytes required');
+      assert.ok(sourceFiles.includes(file) || /^@openzeppelin\/(contracts|contracts-upgradeable)\/[A-Za-z0-9_/-]+\.sol$/.test(file), 'unexpected source path');
+      const expected = file === 'K11520TestnetAssets.sol' ? harness
+        : canonical(fs.readFileSync(file.startsWith('@openzeppelin/') ? `node_modules/${file}` : file, 'utf8'));
+      assert.equal(source.content, expected, `checkout/import bytes: ${file}`);
+      hashes[file] = sha256(source.content);
+    }
+    assert.ok(sourceFiles.every(file => Object.hasOwn(hashes, file)), 'missing entry source');
+    assert.deepEqual(value.sourceHashes, Object.fromEntries(sourceFiles.map(file => [file, hashes[file]])), 'saved entry hashes');
+    return hashes;
+  }
+  const sourceHashes = validateInput(build);
+  // The deliberately absent callback makes incomplete saved imports fail closed.
+  const output = JSON.parse(solc.compile(JSON.stringify(build.standardJsonInput)));
+  assert.deepEqual((output.errors || []).filter(e => e.severity === 'error'), [], 'offline replay compilation');
+  assert.deepEqual(Object.keys(output.sources).sort(), Object.keys(sourceHashes).sort(), 'resolved compiler source set');
+  const definitions = {
+    testToken: ['K11520TestnetAssets.sol', 'K11520TestToken'],
+    brainImplementation: [entries[0], 'KGEN_BrainExchange_V4_0_0'],
+    brainProxy: ['K11520TestnetAssets.sol', 'K11520TestProxy'],
+    positionEngine: [entries[1], 'KGEN_PositionEngine_V1_0_0'],
+    orderTriggerEngine: [entries[3], 'KGEN_OrderTriggerEngine'],
+    oracle: ['K11520TestnetAssets.sol', 'K11520TestOracle'],
+    productionProxyTemplate: ['@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol', 'ERC1967Proxy'],
+    candidateOracleAdapter: [entries[4], 'KGEN_OracleSourceAdapter'],
+  };
+  const rebuilt = Object.fromEntries(Object.entries(definitions).map(([key, [file, name]]) => {
+    const artifact = output.contracts[file][name];
+    assert.deepEqual(artifact.evm.bytecode.linkReferences, {}, 'unlinked creation artifact');
+    assert.ok(artifact.evm.deployedBytecode.object.length / 2 <= 24576, 'EIP170');
+    return [key, {abi: artifact.abi, bytecode: '0x' + artifact.evm.bytecode.object}];
+  }));
+  function validateArtifacts(value) {
+    assert.deepEqual(Object.keys(value.artifacts).sort(), Object.keys(definitions).filter(k => !['productionProxyTemplate', 'candidateOracleAdapter'].includes(k)).sort(), 'artifact set');
+    assert.equal(value.productionProxyTemplate.policy, 'BUILD_ONLY_NOT_AUTHORIZED', 'production proxy policy');
+    assert.equal(value.productionProxyTemplate.source, definitions.productionProxyTemplate[0], 'production proxy source');
+    assert.equal(value.candidateOracleAdapter.policy, 'BUILD_ONLY_NOT_DEPLOYED_NOT_PRODUCTION_READY', 'adapter policy');
+    assert.equal(value.candidateOracleAdapter.source, entries[4], 'adapter source');
+    for (const [key, expected] of Object.entries(rebuilt)) {
+      const actual = value.artifacts[key] || value[key];
+      assert.deepEqual(actual.abi, expected.abi, `recompiled ABI: ${key}`);
+      assert.equal(actual.bytecode, expected.bytecode, `recompiled creation bytecode: ${key}`);
+    }
+  }
+  validateArtifacts(build);
+  const keys = ['brainImplementation', 'brainProxy', 'positionEngine', 'orderTriggerEngine'];
+  const production = {...rebuilt, brainProxy: rebuilt.productionProxyTemplate};
+  async function validatePackage(value) {
+    assert.equal(value.documentType, 'K11520_MAINNET_UNSIGNED_EXECUTION_PACKAGE', 'package type');
+    assert.equal(value.schemaVersion, 1, 'package schema');
+    assert.equal(value.syntheticFixture, true, 'synthetic fixture only');
+    assert.equal(value.mode, 'BUILD_ONLY', 'build only');
+    assert.equal(value.broadcast, false, 'no broadcast');
+    assert.equal(value.executionAuthorized, false, 'no execution authority');
+    assert.equal(value.deploymentReadbacks, 'NOT_PERFORMED', 'no deployment claim');
+    assert.equal(value.status, 'UNSIGNED_REQUIRES_HUMAN_APPROVAL', 'unsigned status');
+    assert.deepEqual(value.blockers, [], 'valid synthetic package');
+    assert.equal(value.chainId, 56, 'package chain');
+    assert.equal(value.input.chainId, 56, 'input chain');
+    assert.equal(value.input.transactionRoute, 'DIRECT_EOA_UNSIGNED', 'unsigned route');
+    assert.equal(value.compiler, build.compiler, 'package compiler');
+    assert.deepEqual(value.sourceHashes, build.sourceHashes, 'package source hashes');
+    assert.deepEqual(value.input.sourceHashes, build.sourceHashes, 'input source hashes');
+    assert.equal(value.packageDigest, digest(value), 'canonical package digest');
+    assert.deepEqual(Object.keys(value.artifactDigests).sort(), keys.slice().sort(), 'creation digest set');
+    assert.deepEqual(Object.keys(value.predictedAddresses).sort(), keys.slice().sort(), 'prediction set');
+    const input = value.input, roles = input.roles, predicted = {}, start = input.startingNonces[input.deployer.toLowerCase()];
+    assert.ok(Number.isSafeInteger(start) && start >= 0, 'deployer starting nonce');
+    assert.equal(roles.triggerAdmin.toLowerCase(), input.deployer.toLowerCase(), 'immutable trigger admin is deployer');
+    keys.forEach((key, i) => {
+      predicted[key] = getCreateAddress({from: input.deployer, nonce: start + i});
+      assert.equal(value.predictedAddresses[key], predicted[key], `CREATE prediction: ${key}`);
+      assert.equal(value.artifactDigests[key], keccak256(production[key].bytecode), `creation digest: ${key}`);
+    });
+    const init = new Interface(rebuilt.brainImplementation.abi).encodeFunctionData('initialize',
+      [input.token.address, roles.brainAdmin, roles.brainKeeper, roles.pauser, roles.upgradeAuthority, roles.treasury, input.nextPayrollAt]);
+    const args = [[], [predicted.brainImplementation, init],
+      [roles.positionAdmin, predicted.orderTriggerEngine, predicted.brainProxy], [predicted.positionEngine, roles.triggerKeeper]];
+    assert.equal(value.transactions.filter(tx => tx.to === null).length, 4, 'four creation transactions');
+    assert.equal(value.transactions.length, 23, 'synthetic transaction count');
+    const nonces = {...input.startingNonces};
+    for (const tx of value.transactions) {
+      assert.equal(tx.chainId, 56, 'transaction chain');
+      assert.equal(tx.type, 0, 'unsigned transaction type');
+      assert.equal(tx.value, '0', 'zero native value');
+      assert.ok(Object.hasOwn(nonces, tx.from.toLowerCase()), 'known transaction sender');
+      assert.equal(tx.nonce, nonces[tx.from.toLowerCase()]++, 'transaction nonce binding');
+      assert.equal(tx.calldataKeccak256, keccak256(tx.data), 'calldata digest');
+    }
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i], tx = value.transactions[i];
+      const expected = await new ContractFactory(production[key].abi, production[key].bytecode).getDeployTransaction(...args[i]);
+      assert.equal(tx.id, 'DEPLOY_' + key, 'creation order');
+      assert.equal(tx.method, 'constructor', 'creation method');
+      assert.equal(tx.from.toLowerCase(), input.deployer.toLowerCase(), 'creation sender');
+      assert.equal(tx.to, null, 'creation destination');
+      assert.equal(tx.data, expected.data, `recompiled init payload: ${key}`);
+      assert.equal(tx.expectedState.createdAddress, predicted[key], 'predicted only address binding');
+      assert.equal(tx.expectedState.initCodeKeccak256, keccak256(expected.data), 'init code digest');
+    }
+    return {initializerKeccak256: keccak256(init), creationTransactions: keys.map((key, i) => ({organ: key,
+      creationBytecodeKeccak256: value.artifactDigests[key], initCodeKeccak256: value.transactions[i].expectedState.initCodeKeccak256,
+      predictedAddress: predicted[key]}))};
+  }
+  const bindings = await validatePackage(pkg);
+  const negatives = [];
+  const rejectBuild = (label, mutate, validate) => {
+    const changed = structuredClone(build); mutate(changed);
+    assert.throws(() => validate(changed), {code: 'ERR_ASSERTION'}, label); negatives.push(label);
+  };
+  rejectBuild('compiler mismatch', b => b.compiler = '0.8.25', validateInput);
+  rejectBuild('optimizer mismatch', b => b.standardJsonInput.settings.optimizer.runs++, validateInput);
+  rejectBuild('EVM mismatch', b => b.settings.evmVersion = 'shanghai', validateInput);
+  rejectBuild('missing source', b => delete b.standardJsonInput.sources[entries[0]], validateInput);
+  rejectBuild('changed checkout source', b => b.standardJsonInput.sources[entries[0]].content += '\n', validateInput);
+  const imported = Object.keys(sourceHashes).find(file => file.startsWith('@openzeppelin/'));
+  rejectBuild('changed import bytes', b => b.standardJsonInput.sources[imported].content += '\n', validateInput);
+  rejectBuild('unresolved URL source', b => b.standardJsonInput.sources[imported] = {urls: ['https://example.invalid/source']}, validateInput);
+  rejectBuild('entry hash mismatch', b => b.sourceHashes[entries[0]] = '0'.repeat(64), validateInput);
+  rejectBuild('creation bytecode mismatch', b => b.artifacts.brainImplementation.bytecode += '00', validateArtifacts);
+  rejectBuild('stale ABI artifact', b => b.artifacts.positionEngine.abi = [], validateArtifacts);
+  rejectBuild('test proxy substitution', b => b.productionProxyTemplate.bytecode = b.artifacts.brainProxy.bytecode, validateArtifacts);
+  for (const [label, mutate, rehash] of [
+    ['package digest mismatch', p => p.packageDigest = 'sha256:' + '0'.repeat(64), false],
+    ['package source mismatch', p => p.sourceHashes[entries[0]] = '0'.repeat(64), true],
+    ['artifact digest mismatch', p => p.artifactDigests.brainImplementation = '0x' + '0'.repeat(64), true],
+    ['CREATE prediction mismatch', p => p.predictedAddresses.brainProxy = p.predictedAddresses.brainImplementation, true],
+    ['nonce mismatch', p => p.transactions[0].nonce++, true],
+    ['wrong chain', p => p.transactions[0].chainId = 97, true],
+    ['immutable trigger admin mismatch', p => p.input.roles.triggerAdmin = p.input.roles.treasury, true],
+    ['initializer role mismatch', p => p.input.roles.treasury = p.input.roles.brainAdmin, true],
+    ['rehashed init payload tamper', p => {p.transactions[1].data += '00'; p.transactions[1].calldataKeccak256 = keccak256(p.transactions[1].data); p.transactions[1].expectedState.initCodeKeccak256 = keccak256(p.transactions[1].data);}, true],
+    ['creation order mismatch', p => [p.transactions[0], p.transactions[1]] = [p.transactions[1], p.transactions[0]], true],
+    ['extra creation transaction', p => p.transactions.push(p.transactions[0]), true],
+    ['false execution authorization', p => p.executionAuthorized = true, true],
+  ]) {
+    const changed = structuredClone(pkg); mutate(changed); if (rehash) changed.packageDigest = digest(changed);
+    await assert.rejects(() => validatePackage(changed), {code: 'ERR_ASSERTION'}, label); negatives.push(label);
+  }
+  let testedCommit = null;
+  try {testedCommit = execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']}).trim();} catch {}
+  if (process.env.CI) {
+    assert.match(testedCommit || '', /^[a-f0-9]{40}$/, 'CI requires exact checkout commit');
+    assert.equal(testedCommit, process.env.K11520_REVIEWED_COMMIT, 'CI requires reviewed head checkout');
+  }
+  const evidence = {schema: 'K11520_UNSIGNED_PACKAGE_REPRODUCIBILITY_V1', status: 'PASS', productChainId: 56,
+    scope: 'OFFLINE_SYNTHETIC_CREATION_REPRODUCIBILITY_NOT_DEPLOYMENT_READINESS', testedCommit,
+    syntheticReviewedCommit: pkg.input.reviewedCommit, syntheticReviewedCommitIsCheckoutIdentity: false,
+    compiler: solc.version(), compilerModuleSha256: sha256(fs.readFileSync(require.resolve('solc/soljson.js'))),
+    settings, dependencies: build.dependencies, sourceHashes, standardJsonInputSha256: sha256(stable(build.standardJsonInput)),
+    sourceDigest: sha256(stable({compiler: solc.version(), settings, sourceHashes})),
+    runnerSha256: sha256(fs.readFileSync(runnerPath)), buildFileSha256: sha256(fs.readFileSync(buildPath)),
+    packageFileSha256: sha256(fs.readFileSync(packagePath)), packageDigest: pkg.packageDigest,
+    validatorSha256: sha256(fs.readFileSync('KGEN/contracts/tests/brain-v4-static-invariants.mjs')),
+    workflowSha256: sha256(fs.readFileSync('.github/workflows/11520-trading-readiness.yml')),
+    artifacts: Object.fromEntries(Object.entries(rebuilt).map(([key, a]) => [key, {abiSha256: sha256(stable(a.abi)), creationBytecodeKeccak256: keccak256(a.bytecode)}])),
+    bindings, negativeFixtures: negatives, providerRequests: 0, signerRequests: 0, broadcast: false,
+    limits: ['Synthetic fixture only; predictions are not deployed addresses.',
+      'No deployed runtime, live roles, oracle provenance, funding, gas or activation verified.',
+      'Configuration/funding calldata digest integrity checked; semantic execution is not replayed.']};
+  fs.writeFileSync(reportPath, JSON.stringify(evidence, null, 2) + '\n');
+  console.log(`[unsigned-package-reproducibility] PASS: ${Object.keys(rebuilt).length} artifacts; 4 creation payloads; ${negatives.length} negative fixtures`);
+}
