@@ -284,6 +284,7 @@ try {
     assert.deepEqual(errors,[]);await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s},null,2));
     await page.close();
   }
+  await bsc56TransferPreparationBrowserQA(browser,base,out);
   console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
 } finally {await browser.close()}
 
@@ -1155,4 +1156,137 @@ async function m1ReadOnlyBrowserQA(){
     }
     console.log('M1 signer-free public BSC97 read-only browser PASS; Human MetaMask NOT_VERIFIED');
   }finally{await browser.close();provider.destroy()}
+}
+
+// Test-only integration of the existing page singleton and its private browser
+// codec loader. Every wallet response is local synthetic data; no signing seam.
+async function bsc56TransferPreparationBrowserQA(browser,base,out){
+  const {createHash}=await import('node:crypto');
+  const {execFileSync}=await import('node:child_process');
+  const {id,keccak256,Interface}=await import('ethers');
+  const origin=new URL(base).origin;
+  assert.ok(['localhost','127.0.0.1','[::1]'].includes(new URL(base).hostname),'preparation QA requires localhost');
+  const head=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  assert.match(head,/^[0-9a-f]{40}$/);
+  if(process.env.GITHUB_SHA)assert.equal(head,process.env.GITHUB_SHA,'exact CI checkout');
+  const runtimePath='K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs',vendorPath='K線西遊記/assets/ethers-5.7.2.umd.min.js';
+  const runtime=await fs.readFile(runtimePath),vendor=await fs.readFile(vendorPath),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+  assert.equal(hash(runtime),'9a235f0732b2de2a600f7bfb64959fdbaf2d4e048473562395beb6743d932a82','exact independently reviewed93033 wallet runtime');
+  assert.equal(createHash('sha384').update(vendor).digest('base64'),'Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J','real approved vendor bytes');
+  const fixtureSource=await fs.readFile('tests/11520-kgen-margin-wallet-foundation.test.mjs','utf8');
+  const code=fixtureSource.match(/^const transferPinnedRuntime='(0x[0-9a-f]+)';$/m)?.[1];
+  assert.ok(code,'reuse the existing public runtime-byte fixture, never execute it');
+  assert.equal(keccak256(code),'0x251cff271c2c754743f9eb3bc11982163fd7ca756e0b0378cb0358418ffeecc1');
+  const token='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',sender='0x1111111111111111111111111111111111111111',recipient='0x2222222222222222222222222222222222222222';
+  const input={recipient,amountKgen:'1.000000000000000001',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000'};
+  const selectors={balance:id('balanceOf(address)').slice(0,10),exempt:id('isTaxExempt(address)').slice(0,10),pair:id('isMarketMakerPair(address)').slice(0,10)};
+  const paths=['K線西遊記/temples/11520/game-5d.html','K線西遊記/temples/11520/runtime/game-5d-main.mjs','K線西遊記/temples/11520/runtime/wallet-game-bridge.mjs',runtimePath,vendorPath];
+  const assets=await Promise.all(paths.map(async path=>{const bytes=await fs.readFile(path),bom=bytes.subarray(0,3).equals(Buffer.from([239,187,191]));return {path,sha256:hash(bytes),sourceByteLength:bytes.length,hasLeadingUtf8Bom:bom,...(bom?{bomStrippedSha256:hash(bytes.subarray(3)),bomStrippedByteLength:bytes.length-3}:{})}}));
+  for(const scenario of ['approved-bytes','tampered-vendor','csp-denied']){
+    const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage();
+    const report={head,runtimeReference:'93033c57521af8cb13c0e7c932ef1718f2051a7c',scenario,functional:'NOT_RUN',visual:'REQUIRES_DIRECT_INSPECTION',walletAuthority:'EXISTING_PAGE_SINGLETON',provider:'LOCAL_DETERMINISTIC_FIXTURE',signatures:0,transactionsSent:0,executionReady:false,networkDenied:[],pageErrors:[],consoleErrors:[],vendorFulfillments:[],cspPolicySource:'UNCHANGED_PRODUCTION_RESPONSE'};
+    page.setDefaultTimeout(12000);page.on('pageerror',error=>report.pageErrors.push(String(error)));page.on('console',message=>{if(message.type()==='error')report.consoleErrors.push(message.text())});
+    const finishSource=attachM1PageSourceProof(page,{base,sourceSha:head,createHash,assets:scenario==='tampered-vendor'?assets.filter(x=>x.path!==vendorPath):assets});
+    let vendorResponses=0;
+    await page.route('**/*',async route=>{
+      const url=new URL(route.request().url()),path=decodeURIComponent(url.pathname);
+      if(url.origin===origin){
+        if(path.endsWith('/'+vendorPath)){
+          vendorResponses++;
+          if(scenario==='tampered-vendor'){
+            const body=Buffer.concat([vendor,Buffer.from('\n/* intentional QA integrity failure */')]);
+            await route.fulfill({status:200,contentType:'text/javascript',body});
+            report.vendorFulfillments.push({status:200,bytes:body.length,sha256:hash(body),sha384:createHash('sha384').update(body).digest('base64')});return;
+          }
+        }
+        if(scenario==='csp-denied'&&path.endsWith('/game-5d.html')){
+          const response=await route.fetch(),headers=response.headers();
+          // Additional restrictive test policy, never remove/relax an existing one.
+          const extra="script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net";
+          headers['content-security-policy']=headers['content-security-policy']?headers['content-security-policy']+', '+extra:extra;
+          report.cspPolicySource='ADDITIONAL_TEST_ONLY_POLICY_FORBIDS_BLOB_MODULES';
+          return route.fulfill({response,headers});
+        }
+        return route.continue();
+      }
+      const prefix='https://cdn.jsdelivr.net/npm/three@0.180.0/';
+      if(url.href.startsWith(prefix)){
+        const relative=url.pathname.slice('/npm/three@0.180.0/'.length);assert.ok(!relative.split('/').includes('..'));
+        let body=await fs.readFile('node_modules/three/'+relative,'utf8');body=body.replaceAll("from 'three'",`from '${prefix}build/three.module.js'`).replaceAll('from "three"',`from "${prefix}build/three.module.js"`);
+        return route.fulfill({status:200,contentType:'text/javascript',body});
+      }
+      if(url.origin==='https://data-api.binance.vision'){
+        const prices={BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600};
+        return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(url.pathname.endsWith('/aggTrades')?[{p:String(prices[url.searchParams.get('symbol')]),T:Date.now(),a:1}]:Object.entries(prices).map(([symbol,price])=>({symbol,price:String(price)})))});
+      }
+      report.networkDenied.push(url.origin+url.pathname);return route.abort();
+    });
+    await page.addInitScript(({code,token,sender,selectors})=>{
+      const listeners=new Map(),f={account:sender,chain:'0x38',calls:[],totalCalls:[],globalCodecReads:0,violations:[],head:{number:'0x7b',hash:'0x'+'ab'.repeat(32),timestamp:'0x'+Math.floor(Date.now()/1000).toString(16)}};
+      f.emit=(event,value)=>{for(const fn of listeners.get(event)||[])fn(value)};globalThis.__bsc56PreparationFixture=f;
+      document.addEventListener('securitypolicyviolation',event=>f.violations.push({directive:event.effectiveDirective,blockedURI:event.blockedURI}));
+      window.ethereum={on(event,fn){if(!listeners.has(event))listeners.set(event,new Set());listeners.get(event).add(fn)},removeListener:(event,fn)=>listeners.get(event)?.delete(fn),async request({method,params=[]}){
+        f.calls.push({method,params:structuredClone(params)});f.totalCalls.push(method);
+        if(method==='eth_accounts')return [f.account];if(method==='eth_chainId')return f.chain;
+        if(method==='eth_getBlockByNumber')return {...f.head};if(method==='eth_getTransactionCount')return '0x7';if(method==='eth_getBalance')return '0xde0b6b3a7640000';
+        if(method==='eth_getCode')return params[0].toLowerCase()===token.toLowerCase()?code:'0x';
+        if(method==='eth_call'){
+          if(params[0].to.toLowerCase()!==token.toLowerCase())throw Error('FIXTURE_WRONG_TOKEN');
+          const selector=params[0].data.slice(0,10);
+          if(selector===selectors.balance)return '0x'+(12345n*10n**18n).toString(16).padStart(64,'0');
+          if([selectors.exempt,selectors.pair].includes(selector))return '0x'+'0'.repeat(64);
+        }
+        throw Error('FORBIDDEN_PREPARATION_FIXTURE_METHOD:'+method);
+      }};
+    },{code,token,sender,selectors});
+    try{
+      await bootM1ReadOnlyPage(page,`${base}/K%E7%B7%9A%E8%A5%BF%E9%81%8A%E8%A8%98/temples/11520/game-5d.html`);
+      await page.waitForFunction(()=>document.documentElement.dataset.wallet11520==='CONNECTED');
+      const before=await page.evaluate(async()=>{const m=await import('./runtime/wallet-game-bridge.mjs');const session=m.getWalletSession11520();return {wallet:session.snapshot(),mode:__K11520_EXECUTION__.snapshot().mode,singleton:session===m.getWalletSession11520()}});
+      assert.equal(before.singleton,true);
+      const result=await page.evaluate(async input=>{
+        const {getWalletSession11520}=await import('./runtime/wallet-game-bridge.mjs'),f=__bsc56PreparationFixture;f.calls=[];
+        Object.defineProperty(globalThis,'ethers',{configurable:true,get(){f.globalCodecReads++;return {version:'POISONED_GLOBAL_CODEC'}}});
+        const result=await getWalletSession11520().prepareKgenTransfer(input);
+        return {result,calls:f.calls,globalCodecReads:f.globalCodecReads,violations:f.violations,wallet:getWalletSession11520().snapshot(),mode:__K11520_EXECUTION__.snapshot().mode};
+      },input);
+      report.result=result.result;report.rpcCalls=result.calls;report.cspViolations=result.violations;report.vendorResponses=vendorResponses;
+      assert.deepEqual(result.wallet,before.wallet);assert.equal(result.mode,before.mode);assert.equal(result.globalCodecReads,0,'mutable global codec must never be selected');
+      for(const key of ['executionReady','walletHandoffReady','signerRequested','broadcast'])assert.equal(result.result[key],false);
+      assert.ok(result.calls.every(c=>['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_getBalance','eth_getTransactionCount'].includes(c.method)),'all observed methods are read-only');
+      assert.ok(vendorResponses>=1,'real browser fetched approved asset path');
+      if(scenario==='approved-bytes'){
+        assert.equal(result.result.status,'READ_ONLY_REVIEW');assert.equal(result.result.rpcReadCount,15);assert.equal(result.calls.length,15);
+        const review=result.result.review;assert.equal(review.review.RECIPIENT,recipient);assert.equal(review.review.AMOUNT.baseUnits,'1000000000000000001');assert.equal(review.transaction.value,'0x0');
+        assert.equal(review.transaction.to,token);assert.equal(review.transaction.from,sender);assert.equal(review.transaction.chainId,'0x38');
+        assert.equal(review.transaction.data,new Interface(['function transfer(address,uint256)']).encodeFunctionData('transfer',[recipient,1000000000000000001n]));
+        const pinned=result.calls.filter(c=>['eth_getCode','eth_call','eth_getBalance'].includes(c.method));assert.equal(pinned.length,8);for(const c of pinned)assert.deepEqual(c.params[1],{blockHash:'0x'+'ab'.repeat(32),requireCanonical:true});
+        assert.deepEqual(result.calls.find(c=>c.method==='eth_getTransactionCount').params,[sender,'pending']);
+        const invalidation=await page.evaluate(async()=>{const {getWalletSession11520}=await import('./runtime/wallet-game-bridge.mjs'),s=getWalletSession11520();s.invalidateTransferReview();return s.transferSnapshot()});
+        assert.equal(invalidation.status,'EMPTY');assert.equal(invalidation.review,null);
+        assert.equal(await page.evaluate(async input=>(await (await import('./runtime/wallet-game-bridge.mjs')).getWalletSession11520().prepareKgenTransfer(input)).status,input),'READ_ONLY_REVIEW');
+        await page.evaluate(()=>{__bsc56PreparationFixture.account='0x3333333333333333333333333333333333333333';__bsc56PreparationFixture.emit('accountsChanged',[__bsc56PreparationFixture.account])});
+        await page.waitForFunction(()=>document.querySelector('#wAddr')?.textContent==='0x3333333333333333333333333333333333333333');
+        assert.equal(await page.evaluate(async()=>(await import('./runtime/wallet-game-bridge.mjs')).getWalletSession11520().transferSnapshot().review),null);
+      }else{
+        assert.equal(result.result.status,'BLOCKED');assert.equal(result.result.review,null);assert.equal(result.calls.length,0,'codec failure happens before any preparation RPC');
+        if(scenario==='csp-denied'){assert.equal(result.result.reason,'TRANSFER_PRIVATE_CODEC_MODULE_BLOCKED');assert.ok(result.violations.some(v=>v.blockedURI==='blob'||v.blockedURI.startsWith('blob:')),'browser must report actual Blob CSP denial')}
+        else {
+          assert.ok(['TRANSFER_READBACK_UNKNOWN','TRANSFER_CODEC_INTEGRITY_MISMATCH'].includes(result.result.reason),'SRI or explicit byte-integrity rejection');
+          assert.ok(report.vendorFulfillments.some(v=>v.status===200&&v.bytes>vendor.length&&v.sha256!==hash(vendor)&&v.sha384!==createHash('sha384').update(vendor).digest('base64')),'intentional mismatching bytes were fulfilled successfully');
+          if(result.result.reason==='TRANSFER_READBACK_UNKNOWN')assert.ok(report.consoleErrors.some(message=>/ethers-5\.7\.2\.umd\.min\.js/.test(message)&&/integrity|digest/i.test(message)),'generic failure needs the actual asset-specific browser SRI diagnostic');
+        }
+      }
+      const proof=await finishSource();report.sourceProof={...proof,coverageScope:'EXACT_ENTRY_SINGLETON_WALLET_AND_APPROVED_VENDOR_BYTES',tamperedVendorExcluded:scenario==='tampered-vendor'};
+      if(!await page.locator('html').evaluate(el=>el.classList.contains('k11520UtilitiesOpen')))await page.locator('#k11520UtilityMaster').click();
+      if(await page.locator('#walletPanel').evaluate(el=>el.classList.contains('collapsed')))await page.locator('#walletToggle').click();
+      await page.screenshot({path:`${out}/390x844-transfer-preparation-${scenario}.png`});
+      report.allFixtureMethods=await page.evaluate(()=>__bsc56PreparationFixture.totalCalls);
+      assert.ok(report.allFixtureMethods.every(method=>['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_getBalance','eth_getTransactionCount'].includes(method)),'entire scenario remains read-only');
+      if(scenario==='approved-bytes')assert.deepEqual(report.pageErrors,[],'positive page must not contain uncaught runtime errors');
+      report.expectedNegativeDiagnostics=scenario==='approved-bytes'?[]:scenario==='tampered-vendor'?['ASSET_SPECIFIC_SRI_DIGEST_MISMATCH']:['BLOB_SCRIPT_CSP_VIOLATION'];
+      report.functional='PASS';
+    }catch(error){report.functional='FAIL';report.error=String(error.stack||error);report.sourceProof=finishSource.snapshot();await page.screenshot({path:`${out}/390x844-transfer-preparation-${scenario}-FAILURE.png`}).catch(()=>{});throw error}
+    finally{await fs.writeFile(`${out}/transfer-preparation-${scenario}.json`,JSON.stringify(report,null,2));await context.close()}
+  }
 }
