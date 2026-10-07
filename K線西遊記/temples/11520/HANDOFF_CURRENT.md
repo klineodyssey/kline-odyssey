@@ -232,7 +232,10 @@ independent canonical work-order or signed contribution record resolves it.
 
 - `GM_DIRECT_CHANNEL = VERIFIED` for the existing Codex chat titled
   `KAIOS整體創作（衡曜）`; `GM_DELIVERY = SENT` with local exact HEAD and
-  the remote-write blocker. `GM_ACK = NOT_VERIFIED`.
+  the remote-write blocker. `GM_ACK = ACKNOWLEDGED_WITH_LIMITS`: GM independently
+  verified the clean managed branch, 63-row/state split, six seed commits, and
+  316 `digital-ant-worker` commits; the 581 aggregate is accepted as recorded
+  evidence because the exact query/path manifest was not saved separately.
 - `DOT_STATUS = AVAILABLE_FOR_ASSIGNMENT` after this report. A future task must
   supply `WORK_ID`, source, owner, implementer, reviewer, bounded scope, and
   acceptance tests. No new work authority is inferred here.
