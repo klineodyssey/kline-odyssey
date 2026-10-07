@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.3.0
+VERSION: 1.3.1
 STATUS: ACTIVE
 PURPOSE: Procedural 3D life bodies plus visible living-world work/logistics/lifestyle state for 11520 Market Life, Digital Ant, wild creatures and monsters, with canonical item geometry and explicit cash custody containers.
 */
@@ -142,7 +142,23 @@ function buildFlower(THREE,root,main,dark){
 }
 
 function installCargoVisualFactory(THREE,root,cargo){
-  cargo.userData.cargoVisualFactory=(life,context)=>createWorldItemVisual(THREE,cargoItemFromLife(life),{context,scale:.55,yOffset:0});
+  // The procedural item factory creates exclusive resources for this cargo.
+  // Record ownership now: later scene attachments may borrow another owner's
+  // resources, and repeated mesh parts share materials within this subtree.
+  const ownedResources=new Set();
+  cargo.userData.disposeCargoVisual=()=>{
+    for(const resource of ownedResources)resource.dispose?.();
+    ownedResources.clear();
+  };
+  cargo.userData.cargoVisualFactory=(life,context)=>{
+    const visual=createWorldItemVisual(THREE,cargoItemFromLife(life),{context,scale:.55,yOffset:0});
+    visual.root.traverse(node=>{
+      if(node.geometry)ownedResources.add(node.geometry);
+      const materials=Array.isArray(node.material)?node.material:[node.material];
+      for(const material of materials)if(material)ownedResources.add(material);
+    });
+    return visual;
+  };
   cargo.userData.cargoIdentityKey=null;
   cargo.userData.cargoContext=null;
   cargo.userData.custodyType=null;
@@ -156,6 +172,7 @@ function syncCanonicalCargoVisual(cargo,life,p){
   const state=canonicalWorldItem(item,context);
   const needsRebuild=cargo.userData.cargoIdentityKey!==state.identityKey||cargo.userData.cargoContext!==context||cargo.userData.custodyType!==state.custody?.custodyType;
   if(needsRebuild){
+    cargo.userData.disposeCargoVisual?.();
     cargo.clear();
     const v=cargo.userData.cargoVisualFactory?.(life,context);
     if(v?.root){v.root.position.set(0,0,0);v.root.rotation.set(0,.35,0);cargo.add(v.root)}
