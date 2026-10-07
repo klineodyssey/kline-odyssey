@@ -480,6 +480,7 @@ export function chooseBestDelivery(ant,missions=[],atmRegistry=[],options={}){
 export function assignDelivery(ant,mission,atmRegistry=[],options={}){
   if(n(ant.cargo?.amount)>0||['IN_TRANSIT','ARRIVED_AWAITING_RECEIPT','CRASHING'].includes(ant.mission?.status))return {ok:false,reason:'DELIVERY_MISSION_UNRESOLVED'};
   if(!mission||mission.status!=='CREATED')return {ok:false,reason:'NEW_DELIVERY_MISSION_REQUIRED'};
+  if(ant.mission?.status==='ASSIGNED'&&(ant.cargoRisk?.policy||n(ant.cargoRisk?.reserveKaios)>0||n(ant.cargoRisk?.policy?.premiumPaidKaios)>0))return {ok:false,reason:'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION'};
   if(ant.mission?.missionId===mission.missionId&&ant.mission.status!=='ASSIGNED')return {ok:false,reason:'DELIVERY_MISSION_REPLAY_BLOCKED'};
   const atm=atmRegistry.find(x=>x.atmId===mission.destinationAtmId);
   const legacy=logisticsDecision({destination:mission.price,demand:mission.demand,capital:ant.capital,vitality:ant.vitality,cargoCapacity:ant.cargoCapacity,currentCargo:0});

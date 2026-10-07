@@ -634,6 +634,26 @@ test('Digital Ant unladen quote changes remain available but pickup never replac
   assert.deepEqual(ant,before);
 });
 
+test('Digital Ant active cargo policy and reserve cannot follow a replacement quote',()=>{
+  const ant=createDigitalAnt({capital:20,cargoCapacity:6000});
+  const atms=buildAtmRegistry([{id:'ATM-POLICY-BINDING',type:'ATM',x:1,y:1,z:1}]);
+  const first=createDeliveryMission({missionId:'POLICY-BOUND-FIRST',amount:1000,destinationAtmId:'ATM-POLICY-BINDING',freightOffer:10});
+  assert.equal(assignDelivery(ant,first,atms).ok,true);
+  const policyQuote=quoteCargoInsurance({cargoAmount:1000,reserveKaios:1000});
+  assert.equal(activateCargoInsurance(ant,policyQuote,{policyId:'POLICY-BOUND-FIRST',premiumPaidKaios:policyQuote.premiumKaios,reserveSource:'LOCAL_GAME_INSURANCE_RESERVE'}).ok,true);
+  const insured=structuredClone(ant);
+  const replacement=createDeliveryMission({missionId:'POLICY-BOUND-REPLACEMENT',amount:5000,destinationAtmId:'ATM-POLICY-BINDING',freightOffer:10});
+  assert.equal(assignDelivery(ant,replacement,atms).reason,'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION');
+  assert.deepEqual(ant,insured,'rejected replacement must preserve the original mission, policy, reserve and payment evidence');
+  const sameIdReplacement=createDeliveryMission({missionId:'POLICY-BOUND-FIRST',amount:5000,destinationAtmId:'ATM-POLICY-BINDING',freightOffer:10});
+  assert.equal(assignDelivery(ant,sameIdReplacement,atms).reason,'ACTIVE_CARGO_POLICY_REQUIRES_RESOLUTION');
+  assert.deepEqual(ant,insured,'a reused mission id must not move old policy evidence onto changed cargo');
+  assert.equal(loadCargo(ant).ok,true);
+  assert.equal(ant.cargo.amount,1000);
+  assert.equal(ant.cargoRisk.policy.cargoAmount,1000);
+  assert.equal(ant.cargoRisk.reserveKaios,1000);
+});
+
 test('player action creates one home-delivery demand at the canonical player-home XYZ',()=>{
   const destination=createPlayerHomeDestination({requestId:'HOME-QA-1',requesterLifeId:'KAIOS-P-HOME-1234567890',homePlotId:'KAIOS-H-HOME-1234567890',position:{x:4,y:0,z:-3}});
   assert.equal(destination.ok,true);assert.equal(destination.destination.kind,'PLAYER_HOME');assert.deepEqual({x:destination.destination.x,y:destination.destination.y,z:destination.destination.z},{x:4,y:0,z:-3});
