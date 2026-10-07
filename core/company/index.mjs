@@ -1,14 +1,14 @@
 /*
 KGEN_META
 VERSION: CURRENT
-REVISION: 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1
+REVISION: 2026-10-07.CUSTOMER_DIGITAL_WORLD_CONDITIONAL_PROPOSAL.4
 STATUS: DRAFT
-LAST_UPDATED: 2026-10-06
+LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant
-SOURCE_COMMIT: d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f
+REVIEWED_BY: PENDING; local focused tests are not registered Reviewer authority
+SOURCE_COMMIT: 62e668a62707f957c8c3ca3448e76e47ed157ba0
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
-CHANGE_REASON: Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction.
+CHANGE_REASON: Add bounded digital-world requirement drafts without changing the preserved house command or persistence owners.
 ANCESTOR: core/company/index.mjs at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e
 SOURCE_OF_TRUTH: FALSE
 METADATA_SCOPE: Customer Project candidate revision within the existing owner.
@@ -2939,6 +2939,144 @@ const CUSTOMER_PROJECT_BOUNDARIES = Object.freeze({
   procurement: false, registryWrite: false, lifeCreation: false, production: false
 });
 const customerProjectTestAdapters = new WeakSet();
+// Requirements are proposed inputs, never owner evidence, an accepted quote or
+// an instruction to the domain runtimes. Fishpond physics stays with its owner.
+export const DIGITAL_WORLD_CUSTOMER_REQUIREMENT_FIELDS = Object.freeze([
+  "locationRef", "rightsRef", "quality", "quantity", "budget", "deadlineHours",
+  "intendedUse", "acceptanceCriteria", "maintenancePlanRef"
+]);
+export const FISHPOND_CUSTOMER_REQUIREMENT_FIELDS = Object.freeze([
+  "pondDesignRef", "speciesRef", "waterSourceRef", "oxygenPolicyRef",
+  "temperaturePolicyRef", "phPolicyRef", "feedPlanRef", "plantPlanRef",
+  "microorganismPlanRef", "wastePlanRef", "riskPlanRef", "densityPolicyRef",
+  "growthPolicyRef", "harvestPlanRef", "logisticsPlanRef", "digitalLifePolicyRef"
+]);
+
+/** Pure draft intake only. The caller explicitly selects the objective after
+ * reviewing the text; keyword mentions are suggestions, never authorization.
+ * References describe requested policies. They do not prove the referenced
+ * resources, rights, biological compatibility or domain adapters exist. */
+export async function createDigitalWorldCustomerRequirementDraft(input) {
+  cpJson(input);
+  cpFields(input, ["text", "objective", "requirements"]);
+  cpFail(typeof input.text === "string" && input.text.trim().length > 0
+    && input.text.length <= 4000, "CUSTOMER_REQUIREMENT_TEXT_REQUIRED");
+  cpFail(input.objective === null || ["SMALL_HOUSE", "FISH_POND_ECOSYSTEM"].includes(input.objective), "CUSTOMER_REQUIREMENT_OBJECTIVE_UNSUPPORTED");
+  const fields = [...DIGITAL_WORLD_CUSTOMER_REQUIREMENT_FIELDS,
+    ...(input.objective === "FISH_POND_ECOSYSTEM" ? FISHPOND_CUSTOMER_REQUIREMENT_FIELDS : [])];
+  const supplied = input.requirements;
+  cpFail(supplied && Object.getPrototypeOf(supplied) === Object.prototype
+    && Object.keys(supplied).every((key) => fields.includes(key)), "CUSTOMER_REQUIREMENT_FIELDS");
+  const requirements = {}, missing = input.objective === null ? ["objective"] : [];
+  for (const field of fields) {
+    const value = supplied[field] ?? null;
+    if (value === null) { requirements[field] = null; missing.push(field); continue; }
+    if (field === "quantity") cpFail(cpInt(value, 1000) && value > 0, "CUSTOMER_REQUIREMENT_QUANTITY");
+    else if (field === "deadlineHours") cpFail(cpInt(value, 1_000_000) && value > 0, "CUSTOMER_REQUIREMENT_DEADLINE");
+    else if (field === "budget") {
+      cpFields(value, ["amount", "unit", "scale"]);
+      cpFail(cpAmount(value.amount) && BigInt(value.amount) > 0n && value.unit === "SIMULATED_CREDIT" && value.scale === 0, "CUSTOMER_REQUIREMENT_BUDGET");
+    } else if (field === "acceptanceCriteria") cpStrings(value, 1);
+    else cpFail(cpText(value), "CUSTOMER_REQUIREMENT_REFERENCE");
+    requirements[field] = cloneCustomerProject(value);
+  }
+  const suggestedObjectives = [];
+  if (/\bhouse\b|房屋|房子|住宅/iu.test(input.text)) suggestedObjectives.push("SMALL_HOUSE");
+  if (/\bfish\s*pond\b|魚池|鱼池|養魚|养鱼/iu.test(input.text)) suggestedObjectives.push("FISH_POND_ECOSYSTEM");
+  const content = { format: "KAIOS_CUSTOMER_REQUIREMENT_DRAFT", schemaVersion: 1,
+    world: "KAIOS_DIGITAL_WORLD", text: input.text.trim(), objective: input.objective,
+    requirements, missing, suggestedObjectives, inferredDefaults: [],
+    status: missing.length ? "NEEDS_CLARIFICATION" : "READY_FOR_OWNER_FEASIBILITY_REVIEW",
+    feasibility: "NOT_EVALUATED", execution: "HELD", durable: false,
+    boundaries: { ...CUSTOMER_PROJECT_BOUNDARIES },
+    ownerReferences: { coordinator: "core/company/index.mjs",
+      project: "KGEN-KAIOS/world-viewer/ai-company/ai-company-project-runtime.js",
+      domain: input.objective === "FISH_POND_ECOSYSTEM"
+        ? "KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js"
+        : input.objective === "SMALL_HOUSE" ? "KGEN-KAIOS/world-viewer/causal-runtime/causal-world-runtime.js" : null,
+      assetLife: "KGEN-KAIOS/life/World_Asset_Life_Specification_V1_0.md" },
+    requestSubmitted: false, quoteCreated: false, customerAcceptance: null,
+    projectCreated: false, assetCreated: false, lifeCreated: false,
+    delivery: null, receipt: null, revenueCreated: false };
+  return { ...content, contentHash: await hashCustomerProject(content) };
+}
+
+/** Bounded local configuration inspection. Resolves proposed site/design bytes
+ * through host read ports, then exercises only the installed domain's existing
+ * configuration methods. Seeded resources never become customer evidence. */
+export async function createFrozenFishpondRequirementTestAdapter({ mode } = {}) {
+  cpFail(mode === "LOCAL_TEST_ONLY", "CUSTOMER_PROJECT_TEST_MODE_REQUIRED");
+  const { createFishpondAquacultureRuntimeV1 } = await import("../../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js");
+  return Object.freeze({ async inspect({ requirementSource, fixtureSource, draftHash, fixtureHash } = {}) {
+    cpFail(typeof requirementSource?.read === "function" && typeof fixtureSource?.read === "function"
+      && cpDigest(draftHash) && cpDigest(fixtureHash), "CUSTOMER_REQUIREMENT_SOURCE_REQUIRED");
+    const draft = cloneCustomerProject(await requirementSource.read()); cpJson(draft);
+    const expected = await createDigitalWorldCustomerRequirementDraft({ text: draft.text, objective: draft.objective, requirements: draft.requirements });
+    cpFail(serializeCustomerProject(draft) === serializeCustomerProject(expected) && draft.contentHash === draftHash,
+      "CUSTOMER_REQUIREMENT_DRAFT_HASH_MISMATCH");
+    cpFail(draft.objective === "FISH_POND_ECOSYSTEM" && draft.missing.length === 0 && draft.requirements.quantity === 1,
+      "CUSTOMER_REQUIREMENT_COMPLETE_POND_REQUIRED");
+    const fixture = cloneCustomerProject(await fixtureSource.read({ draftHash, fixtureHash })); cpJson(fixture);
+    cpFields(fixture, ["scope", "draftHash", "site", "pond", "policyRefs"]);
+    cpFail(fixture.scope === "LOCAL_TEST_ONLY_FISHPOND_CONFIGURATION" && fixture.draftHash === draftHash
+      && await hashCustomerProject(fixture) === fixtureHash, "CUSTOMER_REQUIREMENT_FIXTURE_HASH_MISMATCH");
+    cpFields(fixture.policyRefs, [...FISHPOND_CUSTOMER_REQUIREMENT_FIELDS]);
+    cpFail(FISHPOND_CUSTOMER_REQUIREMENT_FIELDS.every((field) => fixture.policyRefs[field] === draft.requirements[field]),
+      "CUSTOMER_REQUIREMENT_POLICY_MISMATCH");
+    const siteFields = ["land_parcel_id", "usage_right", "area_m2", "elevation_m", "slope_percent", "soil_type", "soil_permeability",
+      "groundwater_risk", "flood_risk", "water_source_distance_m", "road_access", "electricity_access", "environmental_capacity", "pollution_risk"];
+    cpFields(fixture.site, siteFields);
+    cpFields(fixture.pond, ["pond_id", "area_m2", "depth_m", "capacity_l", "water_source"]);
+    const site = fixture.site, pond = fixture.pond;
+    cpFail(site.land_parcel_id === draft.requirements.locationRef && site.usage_right === draft.requirements.rightsRef,
+      "CUSTOMER_REQUIREMENT_SITE_MISMATCH");
+    for (const field of ["land_parcel_id", "usage_right", "soil_type"]) cpFail(cpText(site[field]), "CUSTOMER_REQUIREMENT_REFERENCE");
+    for (const field of ["pond_id", "water_source"]) cpFail(cpText(pond[field]), "CUSTOMER_REQUIREMENT_REFERENCE");
+    for (const field of ["road_access", "electricity_access"]) cpFail(typeof site[field] === "boolean", "CUSTOMER_REQUIREMENT_SITE_VALUE");
+    for (const field of ["soil_permeability", "groundwater_risk", "flood_risk", "environmental_capacity", "pollution_risk"])
+      cpFail(typeof site[field] === "number" && site[field] >= 0 && site[field] <= 1, "CUSTOMER_REQUIREMENT_SITE_VALUE");
+    for (const field of ["area_m2", "elevation_m", "slope_percent", "water_source_distance_m"])
+      cpFail(typeof site[field] === "number" && Number.isFinite(site[field]) && (field === "elevation_m" || site[field] >= 0), "CUSTOMER_REQUIREMENT_SITE_VALUE");
+    for (const field of ["area_m2", "depth_m", "capacity_l"])
+      cpFail(typeof pond[field] === "number" && Number.isFinite(pond[field]) && pond[field] > 0, "CUSTOMER_REQUIREMENT_DESIGN_VALUE");
+    const geometricCapacity = pond.area_m2 * pond.depth_m * 1000;
+    cpFail(site.area_m2 > 0 && Number.isFinite(geometricCapacity) && pond.capacity_l <= geometricCapacity,
+      "CUSTOMER_REQUIREMENT_DESIGN_VOLUME");
+    const runtime = createFishpondAquacultureRuntimeV1({ seed: draftHash });
+    try {
+      // These methods accept broad overrides in V1; the exact field lists above
+      // prevent callers from inserting completion, infrastructure or authority.
+      runtime.selectLand(cloneCustomerProject(site));
+      const configured = runtime.designPond(cloneCustomerProject(pond));
+      const state = runtime.getState();
+      cpFail(siteFields.every((field) => state.land[field] === site[field])
+        && Object.keys(pond).every((field) => state.pond[field] === pond[field]), "CUSTOMER_REQUIREMENT_OWNER_INPUT_MISMATCH");
+      cpFail(state.simulation_time === 0 && state.status === "PAUSED" && state.construction.completed_stages.length === 0
+        && state.populations.length === 0 && state.orders.length === 0 && state.cold_chain.length === 0
+        && state.enterprise.ledger.length === 0 && state.enterprise.accounts.revenue === 0
+        && state.action_log.length === 2 && state.action_log.every((action) => ["SELECT_LAND", "DESIGN_POND"].includes(action.command)),
+        "CUSTOMER_REQUIREMENT_OWNER_SIDE_EFFECT");
+      const holds = ["RESOURCE_PROVENANCE_REQUIRED", "LABOR_LOCATION_TRAVEL_AND_REST_EVIDENCE_REQUIRED",
+        "WATER_AND_POLICY_BINDING_REQUIRED", "PLANT_POPULATION_INTEGRATION_REQUIRED", "MICROORGANISM_PROXY_ONLY",
+        "BUILD_INSPECTION_AND_REWORK_EVIDENCE_REQUIRED", "EXPLICIT_CUSTOMER_DELIVERY_ACCEPTANCE_REQUIRED"];
+      if (configured.status === "BLOCKED") holds.unshift(configured.reason);
+      if (!site.electricity_access) holds.unshift("CUSTOMER_SITE_ELECTRICITY_UNAVAILABLE");
+      const current = await requirementSource.read(); cpJson(current);
+      cpFail(serializeCustomerProject(current) === serializeCustomerProject(draft), "CUSTOMER_REQUIREMENT_SOURCE_CHANGED");
+      const report = { scope: "LOCAL_TEST_ONLY_FISHPOND_CONFIGURATION", draftHash, fixtureHash,
+        runtime: state.runtime, runtimeSchema: state.schema_version, configuration: { site, pond },
+        configurationHash: await hashCustomerProject({ site, pond }),
+        status: "OWNER_CONFIGURATION_INSPECTED_EXECUTION_HELD", ownerSiteResult: { status: configured.status, reason: configured.reason ?? null },
+        holds, limitations: ["SEEDED_RESOURCES_ARE_NOT_CUSTOMER_EVIDENCE", "POLICY_REFERENCES_ARE_NOT_APPLIED",
+          "PLANTS_ARE_NOT_INTEGRATED_POND_POPULATIONS", "MICROBIAL_DECOMPOSITION_IS_A_SIMULATION_PROXY",
+          "LEGACY_ADVANCE_DELIVERY_AUTO_ACCEPTANCE_AND_REVENUE_PATH_NOT_USED"],
+        simulationOnly: true, durable: false, quoteCreated: false, customerAcceptance: null,
+        projectCreated: false, assetCreated: false, lifeCreated: false, delivery: null, receipt: null, revenueCreated: false };
+      return { ...report, contentHash: await hashCustomerProject(report) };
+    } finally { runtime.destroy(); }
+  } });
+}
+
 const cpFail = (ok, code) => invariant(ok, code, code);
 const cpText = (v, max = 200) => typeof v === "string" && v.length > 0 && v.length <= max && !/[<>\x00-\x1f]/.test(v);
 const cpInt = (v, max = Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(v) && v >= 0 && v <= max;
@@ -2970,10 +3108,10 @@ function cpRequest(input) {
   return ["locationRef", "rightsRef", "quality", "intendedUse"].filter((k) => input[k] === null)
     .concat(BigInt(input.budget.amount) === 0n ? ["budget"] : [], input.deadlineHours === 0 ? ["deadlineHours"] : []);
 }
-function cpPlan(plan) {
+function cpPlan(plan, requiredStages = SMALL_HOUSE_REQUIRED_STAGES) {
   cpFields(plan, ["policyId", "policyRevision", "stages", "bomHash", "costs", "conditions", "assumptions", "validForMs", "durationHours"]);
   cpFail(cpText(plan.policyId) && cpInt(plan.policyRevision) && plan.policyRevision > 0 && cpDigest(plan.bomHash), "CUSTOMER_PROJECT_INVALID_PLAN");
-  cpFail(serializeCustomerProject(plan.stages) === serializeCustomerProject(SMALL_HOUSE_REQUIRED_STAGES), "HOUSE_STAGE_PLAN_INCOMPLETE");
+  cpFail(serializeCustomerProject(plan.stages) === serializeCustomerProject(requiredStages), requiredStages === SMALL_HOUSE_REQUIRED_STAGES ? "HOUSE_STAGE_PLAN_INCOMPLETE" : "FISHPOND_STAGE_PLAN_INCOMPLETE");
   cpStrings(plan.conditions); cpStrings(plan.assumptions);
   cpFail(cpInt(plan.validForMs, 86_400_000) && plan.validForMs > 0 && cpInt(plan.durationHours, 1_000_000) && plan.durationHours > 0, "CUSTOMER_PROJECT_INVALID_PLAN");
   cpFail(Array.isArray(plan.costs) && plan.costs.length > 0 && plan.costs.length <= 32, "CUSTOMER_PROJECT_COST_BASIS_REQUIRED");
@@ -3020,12 +3158,13 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
   }
   function bounded(candidate) {
     cpFail(candidate.commandJournal.length <= 256 && candidate.events.length <= 128 && candidate.requestRevisions.length <= 20 && candidate.quotes.length <= 20, "CUSTOMER_PROJECT_CAPACITY");
+    cpFail((candidate.requirementDrafts?.length ?? 0) <= 20, "CUSTOMER_PROJECT_CAPACITY");
     cpFail(new TextEncoder().encode(serializeCustomerProject(candidate)).length <= 512000, "CUSTOMER_PROJECT_CAPACITY");
   }
   async function execute(command, owner) {
     assertCurrentCustomer(owner);
     cpFields(command, ["type", "idempotencyKey", "expectedRevision", "data"]);
-    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
+    cpFail(["SUBMIT_REQUEST", "CLARIFY_REQUEST", "ISSUE_SIMULATED_QUOTE", "ACCEPT_QUOTE", "CHECKPOINT_SUBPLAN_EVIDENCE", "SAVE_REQUIREMENT_DRAFT", "SUBMIT_REQUIREMENT_DRAFT"].includes(command.type), "CUSTOMER_PROJECT_COMMAND_DISABLED");
     cpFail(typeof command.idempotencyKey === "string" && /^[A-Za-z0-9_-]{8,128}$/.test(command.idempotencyKey) && cpInt(command.expectedRevision), "CUSTOMER_PROJECT_INVALID_COMMAND");
     const key = `${command.type}:${command.idempotencyKey}`;
     const commandHash = await hashCustomerProject(command);
@@ -3054,7 +3193,45 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
     cpFail(command.expectedRevision === state.revision, "CUSTOMER_PROJECT_REVISION_CONFLICT");
     let at = now(); cpFail(cpInt(at) && at >= state.lastAt, "CUSTOMER_PROJECT_INVALID_CLOCK");
     let response;
-    if (command.type === "SUBMIT_REQUEST" || command.type === "CLARIFY_REQUEST") {
+    if (command.type === "SAVE_REQUIREMENT_DRAFT") {
+      cpFields(command.data, ["draft", "previousDraftHash"]);
+      cpFail(!state.request && !state.acceptance, "CUSTOMER_REQUIREMENT_WORKSPACE_ALREADY_SUBMITTED");
+      const previousDraft = state.requirementDrafts?.at(-1);
+      cpFail(command.data.previousDraftHash === (previousDraft?.content.contentHash ?? null), "CUSTOMER_REQUIREMENT_REVISION_CONFLICT");
+      const content = await createDigitalWorldCustomerRequirementDraft(command.data.draft);
+      const draftId = `${state.workspaceId}-REQUIREMENT-DRAFT`;
+      if (previousDraft?.content.contentHash === content.contentHash) {
+        const response = { ...responseBase, status: "REQUIREMENT_DRAFT_UNCHANGED", draftId, draftRevision: previousDraft.revision,
+          draftHash: content.contentHash, readiness: content.status, submitted: false, revision: state.revision };
+        draft.commandJournal.push({ key, commandHash, response }); bounded(draft); assertCurrentCustomer(owner); state = draft;
+        return cloneCustomerProject(response);
+      }
+      if (!draft.owner) {
+        draft.owner = owner;
+        draft.workspaceId = `CPW-${(await hashCustomerProject({ owner, companyId: "AI_ANT_COMPANY_0001", slot: "CUSTOMER_PROJECT_PRIMARY" })).slice(0, 32)}`;
+      }
+      const saved = { draftId: `${draft.workspaceId}-REQUIREMENT-DRAFT`, revision: (previousDraft?.revision ?? 0) + 1, content };
+      draft.requirementDrafts = [...(draft.requirementDrafts ?? []), saved];
+      response = { ...responseBase, status: "REQUIREMENT_DRAFT_SAVED", draftId: saved.draftId, draftRevision: saved.revision,
+        draftHash: content.contentHash, readiness: content.status, submitted: false };
+    } else if (command.type === "SUBMIT_REQUIREMENT_DRAFT") {
+      cpFields(command.data, ["draftId", "draftRevision", "draftHash", "submit"]);
+      cpFail(command.data.submit === true, "CUSTOMER_REQUIREMENT_EXPLICIT_SUBMISSION_REQUIRED");
+      cpFail(!state.request && !state.acceptance, "CUSTOMER_REQUIREMENT_WORKSPACE_ALREADY_SUBMITTED");
+      const saved = state.requirementDrafts?.at(-1);
+      cpFail(saved && saved.draftId === command.data.draftId && saved.revision === command.data.draftRevision
+        && saved.content.contentHash === command.data.draftHash, "CUSTOMER_REQUIREMENT_REVISION_CONFLICT");
+      cpFail(saved.content.missing.length === 0 && saved.content.requirements.quantity === 1,
+        "CUSTOMER_REQUIREMENT_COMPLETE_SINGLE_PROJECT_REQUIRED");
+      const content = { objective: saved.content.objective, ...cloneCustomerProject(saved.content.requirements),
+        requirementDraft: { draftId: saved.draftId, revision: saved.revision, contentHash: saved.content.contentHash }, world: "KAIOS_DIGITAL_WORLD" };
+      const request = { requestId: `${state.workspaceId}-REQUEST`, revision: 1, content,
+        status: "SUBMITTED", missing: [], contentHash: await hashCustomerProject(content) };
+      draft.request = request; draft.requestRevisions.push(cloneCustomerProject(request)); draft.quoteHeadRevision = null;
+      response = { ...responseBase, status: "SUBMITTED", requestId: request.requestId, requestRevision: request.revision,
+        missing: [], draftHash: saved.content.contentHash };
+    } else if (command.type === "SUBMIT_REQUEST" || command.type === "CLARIFY_REQUEST") {
+      cpFail(!state.requirementDrafts, "DIGITAL_REQUIREMENT_SUBMISSION_MAPPING_REQUIRED");
       cpFail(!state.acceptance, "CHANGE_ORDER_REQUIRED");
       cpFail(command.type !== "SUBMIT_REQUEST" || state.request === null, "WORKSPACE_ALREADY_EXISTS");
       cpFail(command.type !== "CLARIFY_REQUEST" || state.request !== null, "CUSTOMER_PROJECT_REQUEST_REQUIRED");
@@ -3074,19 +3251,28 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
       cpFail(state.request && command.data.requestRevision === state.request.revision && state.request.missing.length === 0, "CUSTOMER_PROJECT_COMPLETE_REQUEST_REQUIRED");
       const suppliedPlan = await quotePlanner.plan(cloneCustomerProject(state.request)); cpJson(suppliedPlan);
       const plan = cloneCustomerProject(suppliedPlan);
-      const total = cpPlan(plan);
+      const fishpond = state.request.content.objective === "FISH_POND_ECOSYSTEM";
+      const requiredStages = fishpond
+        ? (await import("../../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js")).CONSTRUCTION_STAGES : SMALL_HOUSE_REQUIRED_STAGES;
+      const total = cpPlan(plan, requiredStages);
       cpFail(BigInt(total) <= BigInt(state.request.content.budget.amount) && plan.durationHours <= state.request.content.deadlineHours, "CUSTOMER_PROJECT_PLAN_EXCEEDS_REQUEST");
       const issuedAt = now(); cpFail(cpInt(issuedAt) && issuedAt >= at, "CUSTOMER_PROJECT_INVALID_CLOCK"); at = issuedAt;
       cpFail(cpInt(at + plan.validForMs), "CUSTOMER_PROJECT_INVALID_CLOCK");
       const content = { requestId: state.request.requestId, requestRevision: state.request.revision, requestHash: state.request.contentHash,
         request: cloneCustomerProject(state.request.content), plan: cloneCustomerProject(plan), total, unit: "SIMULATED_CREDIT", scale: 0,
-        issuedAt: at, expiresAt: at + plan.validForMs, executionReadiness: "PLANNABLE_EXECUTION_HELD", executionHolds: ["HOUSE_STAGE_ADAPTER_REQUIRED"], simulationOnly: true };
+        issuedAt: at, expiresAt: at + plan.validForMs, executionReadiness: fishpond ? "WAIT_FOR_OWNER_EVIDENCE" : "PLANNABLE_EXECUTION_HELD",
+        ...(fishpond ? { proposalClass: "CONDITIONAL_SIMULATION_PROPOSAL", deliveryCommitment: false } : {}),
+        executionHolds: fishpond ? ["FISHPOND_STAGE_ADAPTER_REQUIRED", "RESOURCE_PROVENANCE_REQUIRED",
+          "LABOR_LOCATION_TRAVEL_AND_REST_EVIDENCE_REQUIRED", "WATER_AND_POLICY_BINDING_REQUIRED",
+          "PLANT_POPULATION_INTEGRATION_REQUIRED", "MICROORGANISM_PROXY_ONLY", "BUILD_INSPECTION_AND_REWORK_EVIDENCE_REQUIRED",
+          "EXPLICIT_CUSTOMER_DELIVERY_ACCEPTANCE_REQUIRED"] : ["HOUSE_STAGE_ADAPTER_REQUIRED"], simulationOnly: true };
       const quoteId = `${state.workspaceId}-QUOTE`, revision = state.quotes.length + 1;
       quote = { quoteId, revision, content,
         contentHash: await hashCustomerProject({ quoteId, revision, content }), acknowledgementHash: await hashCustomerProject({ conditions: content.plan.conditions, assumptions: content.plan.assumptions, executionHolds: content.executionHolds }) };
       draft.quotes.push(quote); draft.quoteHeadRevision = quote.revision;
-      response = { ...responseBase, status: "SIMULATED_QUOTE_ISSUED", quote: cloneCustomerProject(quote) };
+      response = { ...responseBase, status: fishpond ? "CONDITIONAL_SIMULATION_PROPOSAL_ISSUED" : "SIMULATED_QUOTE_ISSUED", quote: cloneCustomerProject(quote) };
     } else if (command.type === "CHECKPOINT_SUBPLAN_EVIDENCE") {
+      cpFail(state.request?.content.objective !== "FISH_POND_ECOSYSTEM", "CUSTOMER_PROJECT_HOUSE_SUBPLAN_REQUIRED");
       cpFields(command.data, ["projectId", "acceptanceId", "quoteHash", "snapshotHash", "fixtureHash"]);
       for (const field of ["projectId", "acceptanceId"]) cpFail(cpText(command.data[field]), "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
       for (const field of ["quoteHash", "snapshotHash", "fixtureHash"]) cpFail(cpDigest(command.data[field]), "CUSTOMER_PROJECT_CHECKPOINT_BINDING");
@@ -3132,12 +3318,15 @@ export function createCustomerProjectPrototype({ identityAdapter, quotePlanner, 
         acknowledgementHash: quote.acknowledgementHash, customer: owner, acceptedAt: at, intentHash: acceptanceIntentHash };
       draft.contract = { contractId: `${state.workspaceId}-CONTRACT`, companyRef: "AI_ANT_COMPANY_0001", customer: owner,
         acceptedQuote: cloneCustomerProject(quote), status: "SIMULATED_SCOPE_SNAPSHOT", realLegalEffect: false, payment: false };
+      const fishpond = state.request.content.objective === "FISH_POND_ECOSYSTEM";
+      cpFail(!fishpond || planningAdapter === null, "CUSTOMER_PROJECT_POND_PLANNING_ADAPTER_REQUIRED");
       const planning = planningAdapter ? await planningAdapter.prepare({ request: cloneCustomerProject(state.request), quote: cloneCustomerProject(quote), owner }) : null;
       const acceptedAt = now(); cpFail(cpInt(acceptedAt) && acceptedAt >= at, "CUSTOMER_PROJECT_INVALID_CLOCK");
       cpFail(acceptedAt < quote.content.expiresAt, "QUOTE_EXPIRED"); at = acceptedAt; draft.acceptance.acceptedAt = at;
       draft.project = { projectId: `${state.workspaceId}-PROJECT`, contractId: draft.contract.contractId, quoteHash: quote.contentHash,
-        status: "PLANNED_EXECUTION_HELD", executionHolds: ["HOUSE_STAGE_ADAPTER_REQUIRED"], desiredStages: [...SMALL_HOUSE_REQUIRED_STAGES],
-        planning, houseComplete: false, asset: null, delivery: null, receipt: null };
+        status: "PLANNED_EXECUTION_HELD", executionHolds: [...quote.content.executionHolds], desiredStages: [...quote.content.plan.stages],
+        planning, ...(fishpond ? { objective: "FISH_POND_ECOSYSTEM", proposalClass: "CONDITIONAL_SIMULATION_PROPOSAL", deliveryCommitment: false, ecosystemComplete: false } : { houseComplete: false }),
+        asset: null, delivery: null, receipt: null };
       response = { ...responseBase, status: "ACCEPTED_SIMULATION_PLAN", acceptanceId: draft.acceptance.acceptanceId, contractId: draft.contract.contractId, projectId: draft.project.projectId };
     }
     draft.revision += 1; draft.lastAt = at; response.revision = draft.revision;

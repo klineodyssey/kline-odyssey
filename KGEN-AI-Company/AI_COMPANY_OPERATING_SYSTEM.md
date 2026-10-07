@@ -5,14 +5,14 @@
 | Field | Value |
 |---|---|
 | VERSION | V3.0 |
-| REVISION | 2026-10-06.CUSTOMER_PROJECT_LOCAL_EVIDENCE_METADATA.1 |
+| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_CONDITIONAL_PROPOSAL.4 |
 | STATUS | DRAFT |
-| LAST_UPDATED | 2026-10-06 |
+| LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot, scoped source review and metadata-scope approval only; no registered Reviewer role or authority grant |
-| SOURCE_COMMIT | d2d6c892a9e2c1870638107f9193b3ff0a9c0e7f |
+| REVIEWED_BY | PENDING; local focused tests are not registered Reviewer authority |
+| SOURCE_COMMIT | 62e668a62707f957c8c3ca3448e76e47ed157ba0 |
 | TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
-| CHANGE_REASON | Record cumulative Customer Project local-simulation provenance and revision history; comment/docs-only correction. |
+| CHANGE_REASON | Add bounded digital-world requirement drafts while preserving the house and Backend owners. |
 | ANCESTOR | KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
 | SOURCE_OF_TRUTH | FALSE |
 
@@ -336,3 +336,231 @@ proof and ten Recovery Center screenshots remain bound to source
 The comment-stripped executable-byte comparison and any subsequent review must
 identify their own source tree. No new CI, publication, merge or deployment is
 implied by this release record.
+
+## Digital-world requirement draft checkpoint (2026-10-07)
+
+The next bounded Customer V2 increment reuses `core/company/index.mjs` and the
+existing `tests/universal-exchange.test.mjs`. It adds no file, route, database,
+Company, Registry, Life, logistics engine or resource simulator. The preserved
+#520 source is `e95ae3a0e4c772af50644bf628e15801de65b97e`; current-main inspection
+found `f7f67950418ebbb6f7a5a309a32d529232fcb3b6` with no overlap in these owners.
+The new continuation must retain #520 as its parent, not replace its checkpoint.
+
+`createDigitalWorldCustomerRequirementDraft({text, objective, requirements})` is
+a pure draft schema and completeness check. Its output always names
+`KAIOS_DIGITAL_WORLD`, is non-durable, and has no real-world construction effect.
+The explicitly selected objective is initially `SMALL_HOUSE`,
+`FISH_POND_ECOSYSTEM`, or null while clarification is pending. House/fishpond
+keyword matches are suggestions only, including ambiguous or negated sentences;
+they never select an objective, invent critical parameters, submit a request,
+accept a quote, create an order, or authorize work. Other objectives remain
+unsupported instead of being silently mapped to either template. This is the
+first schema/fixture checkpoint, not a completed general-language parser.
+
+Shared requirements cover location, rights, quality, quantity, simulated budget,
+deadline, intended use, acceptance criteria and maintenance. The Fish Pond
+extension requires explicit references for pond design, species, water source,
+oxygen, temperature, pH, feed, plants, microorganisms, waste, risk, density,
+growth, harvest, logistics and DigitalLife policy. Missing references remain
+individually visible. Supplied references are proposed requirements, not proof
+that resources, rights, entities, compatible ecology or adapters exist. No pH,
+oxygen, stocking-density, growth or health threshold is invented here.
+
+A structurally complete draft becomes `READY_FOR_OWNER_FEASIBILITY_REVIEW`,
+while feasibility remains `NOT_EVALUATED` and execution remains `HELD`. Its
+SHA-256 binds the full draft. The existing AI Company V1 remains project/DAG/
+inspection/delivery owner; existing Aquaculture V1 remains the 17-stage pond,
+water, feed, oxygen, growth, harvest and conservation owner. Asset/Life and
+Logistics references are not registrations or dispatch. Plant/microorganism
+coverage must be audited in the ecology owner before any integrated execution
+claim. The existing HOUSE command model, accepted snapshots and Backend local
+v1/v2 journals remain unchanged. No draft is automatically fed into them.
+
+Local validation: 23/23 selected tests passed under Node 24.19.0, comprising
+18 preserved `Customer project V2` cases and five `Digital world` cases. The
+latter cover ambiguity, all sixteen missing ecosystem fields, deterministic
+hashing, copied input, explicit bounds/units, payload-authority rejection,
+no fabricated feasibility/assets/acceptance/revenue, and unchanged house quote
+acceptance behavior. Syntax checks passed. Earlier incomplete-materialization
+module-load failures were resolved before this final selected run. Full CI,
+Backend regression, UI/browser QA and generalized persistence are not claimed.
+
+Next bounded work is a read-only owner-mapping/feasibility adapter, then a
+revision-bound simulated quote mapping, explicit same-customer acceptance,
+resource/time-conserving task execution, inspection/rework, delivery acceptance
+and one nonredeemable simulated receipt. Existing local Backend atomic journal
+is reused only after deterministic replay compatibility is tested. Neither
+#520's seven-task V1 house audit nor this requirement draft completes a house
+or pond. No merge, deployment, real procurement, payment or payroll occurs.
+
+Release record: Company CURRENT / document V3.0, revision
+`2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_DRAFT.1`; task
+`KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2`; actor dot under Human continuous
+engineering authorization 2026-10-07; review pending. Files are the existing
+Company runtime, Company operating-system document and Universal test file.
+Rollback removes only this additive draft function/constants/tests and restores
+the prior metadata. No saved project or database is reset or migrated.
+
+### Bound Fish Pond configuration adapter checkpoint
+
+`createFrozenFishpondRequirementTestAdapter({mode: "LOCAL_TEST_ONLY"})` now
+resolves a complete digital Pond draft and its configuration fixture through
+code-level read ports. Both exact SHA-256 bindings are supplied, the draft is
+re-derived, all policy references must match, and the site must match the draft's
+location and simulated usage-right reference. The adapter rejects extra fields
+and privileged pond overrides, including completion/status, installed facilities
+or prefilled water. Finite dimensions must have physically consistent capacity
+(`capacity_l <= area_m2 * depth_m * 1000`); all numbers remain digital fixtures.
+
+Only the installed Aquaculture V1 `selectLand` and `designPond` methods run in a
+disposable paused instance. A temporary SELECT_LAND failure against the old
+default pond size is not final evidence; the result is read after both requested
+site and pond design are installed. The adapter reads all whitelisted values
+back, asserts zero time, stages, populations, orders, delivery, ledger and
+revenue changes, rechecks the draft source, and destroys the instance. It never
+starts construction, stocks fish, applies a policy, calls `advanceDelivery`, or
+invokes the legacy buyer auto-acceptance/revenue pathway. Frozen owners remain
+byte-identical. No general callback/runtime factory or replacement physics is
+accepted.
+
+Even a successful configuration returns
+`OWNER_CONFIGURATION_INSPECTED_EXECUTION_HELD`. It exposes site blockers from
+the existing owner plus an explicit missing-electricity hold. Seeded cash,
+materials, water, workers and equipment are not customer-provided evidence.
+Resource provenance, labor location/travel/rest, water/policy binding, plant
+population integration, microorganism proxy limits, build inspection/rework
+and explicit delivery acceptance remain holds. Opaque requested references are
+not silently treated as applied numerical settings or verified resources.
+A policy-rich request therefore cannot become an accepted feasibility result.
+
+Five new focused cases cover exact configuration/hash readback, site and power
+blockers, stale draft/fixture/policy/location rejection, completion/resource
+injection, impossible geometry, and source changes. The selected combined run
+passed 28/28 with zero failures/skips on Node 24.19.0, including all 18 preserved
+house-command cases and the five earlier draft cases. Syntax/whitespace checks
+passed. The original HOUSE command/audit implementation after its shared helper
+boundary is byte-identical to #520. No browser/UI claim is made.
+
+Revision `2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_ADAPTER.2` is a successor
+to `58aa7a9428b31b12ddb8d3c557248d94f5c4f5bb`, within the same three existing
+Company code/test/document paths. Review is pending. Rollback removes this
+additive inspection adapter and tests only; stored #520 journals are unaffected.
+
+An expanded 54/54 bounded run also passed in 26.0 seconds: preserved Customer
+V2 commands, frozen V1 subplan audits, 19 local SQLite recovery/concurrency/
+transaction cases, and the ten new draft/adapter cases. This includes fresh-OS-
+process recovery of the existing accepted-house journal; it does not persist the
+new draft or configuration report. Groups overlap and are not additive.
+
+Two additional focused cases verify unchanged owner file bytes, no fetch or
+browser-storage capability use, the adapter's inspect-only surface, malformed
+numbers, overflowed geometric capacity and excess authority/policy fields. The
+final selected command/requirements/adapter run is 30/30 with zero failures or
+skips; this supersedes only the narrower 28-case run, not historical CI.
+
+### Versioned requirement saving through the existing local journal
+
+The additive Company command `SAVE_REQUIREMENT_DRAFT` accepts only
+`{draft, previousDraftHash}` inside the existing strict command envelope. It
+reuses the same code-level customer context, workspace identity, event hash
+chain, expected revision, idempotency response journal and local Backend
+aggregate/event/cache transaction. The draft is re-derived from raw text, an
+explicit objective and proposed requirements; caller readiness, acceptance,
+inspection or authority fields are not accepted. No Backend source, route,
+migration, schema, package or cloud configuration is changed.
+
+A saved draft is still unsubmitted. It does not populate `request`, `quotes`,
+`acceptance`, `contract` or `project`. Quote issuance stays blocked. Legacy house
+submission cannot silently consume an unrelated digital draft; it returns
+`DIGITAL_REQUIREMENT_SUBMISSION_MAPPING_REQUIRED`. Conversely, an existing
+submitted House workspace cannot be overwritten by a new draft. A later
+explicitly specified submission adapter must bind the current draft rather
+than inferring intent from text or from a saved configuration report.
+
+Each changed draft appends one immutable revision, capped at twenty, with its
+full content hash. The expected prior draft hash and aggregate revision must
+both match. Exact command retries return the original response. A different
+key for unchanged current content appends only a response entry, with unchanged
+domain revision/event history; stale new-key requests still fail the revision
+guard. Failed validation/capacity/transaction operations preserve stored state.
+
+The pure response remains `durable:false`. Only the existing separate local
+SQLite envelope can report a committed transaction. A fresh OS process can
+replay saved drafts, prior revisions and exact retries with live clock/planner
+disabled. This is local file recovery under the tested installed code, not
+cloud, hostile-database rollback, arbitrary-version or multi-device evidence.
+The journal envelope format is unchanged; this adds a command vocabulary entry.
+Older code that does not know the command must fail closed and preserve the DB.
+No old client may reset an unsupported draft journal.
+
+Six new tests cover draft history/completeness, no request/quote side effects,
+previous-hash conflicts, exact and response-only retries, existing-workspace
+separation, capacity rollback, true new-process SQLite recovery, independent
+writer fencing, failure at every transaction position, lost acknowledgement
+and Account/Player mismatch. A narrow final run passes 36/36 with zero failures
+or skips (18 legacy House command cases plus 18 cumulative new cases). The
+first new-process test initially attempted to close an already-closed fixture
+connection; the test reopened a fresh connection before its final row equality
+check, then passed. No production defect or data loss occurred.
+
+Revision `2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_SAVE.3`, predecessor
+`faca4e0dd378b3cd8ab15f28fb41b4a4430a008b`, is confined to the same three files.
+Source review is pending. For rollback, retain this reader for databases with
+SAVE_REQUIREMENT_DRAFT operations or stop safely with their files preserved;
+there is no automatic downgrade/migration or permission to delete saved data.
+No generated draft is submitted or accepted on a customer's behalf.
+
+### Explicit submission and conditional Pond proposals
+
+`SUBMIT_REQUIREMENT_DRAFT` is the bounded submission mapping previously held
+above. It requires exact current draft ID/revision/hash, `submit:true`, complete
+requirements and quantity one. Saving text alone remains unsubmitted. All
+criteria, maintenance and ecosystem policy references are copied into the
+request content hash; none are silently dropped. Submission cannot overwrite
+a previous request, and subsequent scope changes require later change-order
+work rather than editing an accepted snapshot.
+
+The existing `ISSUE_SIMULATED_QUOTE` path now obtains Pond's required stage
+sequence directly from the installed Aquaculture owner's exported
+`CONSTRUCTION_STAGES`. It does not copy a new stage engine or use the House
+sequence. The Fish Pond result is explicitly
+`CONDITIONAL_SIMULATION_PROPOSAL_ISSUED`, with
+`executionReadiness: WAIT_FOR_OWNER_EVIDENCE`,
+`proposalClass: CONDITIONAL_SIMULATION_PROPOSAL`, and
+`deliveryCommitment: false`. Unknown resource/worker/policy capacity therefore
+never becomes a firm delivery quote or an executable order.
+
+The full execution-hold list, including resource provenance, labor location/
+travel/rest, water/policy binding, plant-population integration, microbial proxy
+limits, build inspection/rework and explicit delivery acceptance, participates
+in the existing acknowledgement hash. Synthetic test customers can exercise
+`ACCEPT_QUOTE` only for that exact current quote and complete conditions. The
+existing internal accepted-plan response is retained for Backend expiry/replay
+compatibility, but the resulting project remains `PLANNED_EXECUTION_HELD`,
+`ecosystemComplete:false`, `deliveryCommitment:false`, with every hold intact
+and null asset/delivery/receipt. This acknowledges a conditional simulation
+plan; it does not assert feasible resources or customer delivery acceptance.
+
+The House-only frozen planning adapter is rejected for Pond acceptance. The
+House subplan checkpoint command also rejects Pond requests before reading
+evidence, preventing legacy House completion/audit bytes from being relabeled
+as Pond progress. Existing standalone Aquaculture, its auto-acceptance/revenue
+delivery route, and its resource formulas are unchanged and not called.
+
+Four new tests cover explicit/current/complete submission, preservation of
+criteria, owner stage binding, omitted-condition hash rejection, held conditional
+acknowledgement, wrong-domain planning/audit rejection, and SQLite replay with
+clock/planner disabled. All four pass locally. No real customer is submitted
+or accepted: these are existing-identity synthetic test fixtures only.
+Revision `2026-10-07.CUSTOMER_DIGITAL_WORLD_CONDITIONAL_PROPOSAL.4` succeeds
+`62e668a62707f957c8c3ca3448e76e47ed157ba0`, within the same three owner files.
+Rollback must retain compatible journal reading or fail closed without deleting
+local data, because older readers do not know the new submission command.
+
+Next executable-owner boundary: bind the existing canonical closed-world parcel
+and explicit finite initial resources, retain reservations/conservation/time
+and measured inspection, then add a unit-preserving owner-to-owner exchange
+port. Ecology Canon allows GRASS/TREE/FISH/SHRIMP and abstract microbial/
+primary-food/detritus proxies. It does not supply aquatic-plant species or
+species-specific pond photosynthesis/nutrient/oxygen coefficients. No new
+biological rates, scientific efficacy, Species or full microbe Life is inferred.
