@@ -340,3 +340,191 @@ if(process.env.K11520_RUN_BSC56_READONLY==='1')bsc56Test('BSC56 public pinned KG
  result.httpRequests=httpRequests;result.observedAt=new Date().toISOString();mkdirSync('artifacts/bsc56-readonly',{recursive:true});writeFileSync('artifacts/bsc56-readonly/kgen-identity.json',JSON.stringify(result,null,2)+'\n');
  assert.equal(result.status,'READY',`BSC56 identity ${result.status}: ${result.failureCode||'UNAVAILABLE'}`);
 });
+
+// Pure transfer fixtures: synthetic sender/recipient metadata, never a provider.
+const transferModule=await import('../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs');
+const transferSender='0x1111111111111111111111111111111111111111',transferRecipient='0x2222222222222222222222222222222222222222';
+function transferFixture(){return {chainId:56,sender:transferSender,recipient:transferRecipient,amountKgen:'1.000000000000000001',nonce:'7',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000',readback:{chainId:56,tokenAddress:KGEN_TOKEN_ADDRESS,sender:transferSender,recipient:transferRecipient,tokenCodeHash:transferModule.KGEN_BSC56_TOKEN_CODE_HASH,sourceCommit:'a'.repeat(40),blockNumber:'123',blockHash:'0x'+'ab'.repeat(32),pendingNonce:'7',tokenBalanceWei:'2000000000000000000',nativeBalanceWei:'10000000000000000',senderTaxExempt:false,recipientTaxExempt:false,senderMarketMakerPair:false,recipientMarketMakerPair:false,recipientCodePresent:false}}}
+const transferBuild=(input=transferFixture(),ethers=bsc56Codec)=>transferModule.buildBsc56KgenTransferReview(input,{ethers});
+
+bsc56Test('KGEN transfer pure review encodes exact ERC20 recipient/amount and RPC quantities',()=>{
+ const input=transferFixture(),before=structuredClone(input),r=transferBuild(input),tx=r.transaction;
+ assert.deepEqual(input,before);assert.equal(tx.to,KGEN_TOKEN_ADDRESS);assert.equal(tx.from,transferSender);assert.equal(tx.value,'0x0');assert.equal(tx.chainId,'0x38');assert.equal(tx.type,'0x0');assert.equal(tx.nonce,'0x7');assert.equal(tx.gas,'0x186a0');assert.equal(tx.gasPrice,'0x2faf080');assert.equal(tx.gasLimit,undefined);
+ assert.equal(tx.data.slice(0,10),'0xa9059cbb');const decoded=new bsc56Codec.Interface(transferModule.KGEN_BSC56_TRANSFER_ABI).parseTransaction(tx);assert.equal(decoded.name,'transfer');assert.equal(decoded.args[0],transferRecipient);assert.equal(decoded.args[1].toString(),'1000000000000000001');
+ for(const field of ['CHAIN','WALLET','RECIPIENT','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE'])assert.ok(Object.hasOwn(r.review,field));assert.equal(r.review.RECIPIENT,transferRecipient);assert.equal(r.review.AMOUNT.inputKgen,input.amountKgen);assert.equal(r.review.AMOUNT.canonicalKgen,input.amountKgen);assert.equal(r.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,'1000000000000000001');assert.equal(r.review.MAXIMUM_EXPOSURE.nativeGasFeeWei,'5000000000000');assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceChanged,false);
+ assert.equal(r.executionReady,false);assert.equal(r.walletHandoffReady,false);assert.equal(r.signerRequested,false);assert.equal(r.broadcast,false);assert.equal(r.scope,'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED');assert.match(r.transactionFormat,/EIP1474_QUANTITY/);assert.ok(Object.isFrozen(r.transaction));assert.ok(Object.isFrozen(r.readback));assert.throws(()=>r.review.RECIPIENT=transferSender,TypeError);
+});
+
+bsc56Test('KGEN transfer amount parsing preserves exact decimals and rejects exponents/floats',()=>{
+ for(const [amountKgen,expected] of [['0.000000000000000001','1'],['1','1000000000000000000'],['1.000000000000000001','1000000000000000001'],['2.000000000000000000','2000000000000000000']]){const f=transferFixture();f.amountKgen=amountKgen;assert.equal(transferBuild(f).review.AMOUNT.baseUnits,expected)}
+ for(const amountKgen of ['0','0.000000000000000000','-1','+1','01','1.','1e-18',' 1','1 ','1,000','1.0000000000000000001','９','9'.repeat(99),1,1.1,NaN,Infinity]){const f=transferFixture();f.amountKgen=amountKgen;assert.throws(()=>transferBuild(f),/TRANSFER_/)}
+ const f=transferFixture();f.amountKgen='2.000000000000000001';assert.throws(()=>transferBuild(f),/INSUFFICIENT_KGEN/);f.amountKgen=((1n<<256n)-1n).toString();assert.throws(()=>transferBuild(f),/AMOUNT_OUT_OF_RANGE/);
+});
+
+bsc56Test('KGEN transfer observes all tax flag combinations without promising mined net credit',()=>{
+ for(let bits=0;bits<16;bits++){
+  const f=transferFixture();for(const [i,k] of ['senderTaxExempt','recipientTaxExempt','senderMarketMakerPair','recipientMarketMakerPair'].entries())f.readback[k]=!!(bits&(1<<i));
+  const r=transferBuild(f),o=r.review.taxObservation,taxable=!(bits&1)&&!(bits&2)&&!!(bits&12),tax=1000000000000000001n*30n/10000n;
+  assert.equal(o.taxableAtReadback,taxable);assert.equal(o.estimatedTaxWei,taxable?tax.toString():'0');assert.equal(o.primaryRecipientTransferAtReadbackWei,(1000000000000000001n-(taxable?tax:0n)).toString());assert.equal(o.maximumTaxIfFlagsChangeWei,tax.toString());assert.equal(o.minimumNetIfOnlyTaxFlagsChangeWei,(1000000000000000001n-tax).toString());assert.equal(o.miningTimeNetGuaranteed,false);
+ }
+ const f=transferFixture();f.amountKgen='0.000000000000000001';f.readback.recipientMarketMakerPair=true;assert.equal(transferBuild(f).review.taxObservation.estimatedTaxWei,'0','integer rounding follows the exact token source');f.readback.recipientCodePresent=true;assert.equal(transferBuild(f).review.recipientCodePresentAtReadback,true);
+});
+
+bsc56Test('KGEN transfer rejects wrong identity, recipient, chain, source and nonce metadata',()=>{
+ for(const mutate of [f=>f.chainId=97,f=>f.chainId='56',f=>f.readback.chainId=97,f=>f.sender='0x'+'00'.repeat(20),f=>f.recipient='0x'+'00'.repeat(20),f=>f.recipient='0x123',f=>f.recipient=transferSender,f=>f.recipient=KGEN_TOKEN_ADDRESS,f=>f.readback.sender=transferRecipient,f=>f.readback.recipient=transferSender,f=>f.readback.tokenAddress=transferRecipient,f=>f.readback.tokenCodeHash='0x'+'cd'.repeat(32),f=>f.readback.sourceCommit='x',f=>f.readback.blockHash='0x'+'00'.repeat(32),f=>f.readback.blockNumber='0',f=>f.readback.pendingNonce='8',f=>f.readback.recipientTaxExempt='false',f=>f.readback.recipientCodePresent=0]){const f=transferFixture();mutate(f);assert.throws(()=>transferBuild(f),/TRANSFER_/,mutate.toString())}
+ const f=transferFixture();f.recipient='0xBa3d3810e58735cb6813bC1CDc5458C0d71432Be';assert.throws(()=>transferBuild(f),/CHECKSUM_INVALID/);
+});
+
+bsc56Test('KGEN transfer enforces gas/native balance and exact uint bounds',()=>{
+ for(const mutate of [f=>f.gasLimit='0',f=>f.gasLimit='1e5',f=>f.gasLimit=(1n<<64n).toString(),f=>f.gasPriceWei='0',f=>f.gasPriceWei=(1n<<256n).toString(),f=>f.maximumGasFeeWei='4999999999999',f=>f.readback.nativeBalanceWei='4999999999999',f=>f.nonce='00',f=>f.nonce=((1n<<64n)-1n).toString(),f=>f.readback.tokenBalanceWei='72000000000000000000000001',f=>f.readback.tokenBalanceWei=(1n<<256n).toString(),f=>f.gasPriceWei='9'.repeat(79)]){const f=transferFixture();mutate(f);assert.throws(()=>transferBuild(f),/TRANSFER_/,mutate.toString())}
+ const f=transferFixture();f.nonce=f.readback.pendingNonce=((1n<<64n)-2n).toString();assert.equal(transferBuild(f).transaction.nonce,'0xfffffffffffffffe');
+});
+
+bsc56Test('KGEN transfer rejects accessor-bearing or oversized structured inputs without invoking them',()=>{
+ for(const target of ['recipient','readback','tokenCodeHash']){const f=transferFixture();let calls=0;const obj=target==='tokenCodeHash'?f.readback:f;Object.defineProperty(obj,target,{enumerable:true,get(){calls++;return 'malicious'}});assert.throws(()=>transferBuild(f),/ACCESSOR_FORBIDDEN/);assert.equal(calls,0)}
+ for(const mutate of [f=>f.toJSON=()=>({}),f=>f.readback.loop=f,f=>Object.setPrototypeOf(f,{extra:true}),f=>f.recipient='x'.repeat(1025),f=>f[Symbol('hidden')]='x',f=>delete f.readback.nativeBalanceWei,f=>f.function='approve']){const f=transferFixture();mutate(f);assert.throws(()=>transferBuild(f),/TRANSFER_/)}
+ assert.throws(()=>transferBuild(null),/PLAIN_DATA_REQUIRED/);assert.throws(()=>transferBuild(transferFixture(),{}),/CODEC_INTERFACE_REQUIRED/);
+});
+
+bsc56Test('KGEN transfer codec mutation cannot swap snapshot recipient or amount',()=>{
+ const f=transferFixture(),baseline=transferBuild(f);let changed=false;
+ const codec={...bsc56Codec,getAddress(value){if(!changed){changed=true;f.recipient='0x3333333333333333333333333333333333333333';f.amountKgen='2';f.readback.recipient=f.recipient;f.readback.tokenCodeHash='0x'+'00'.repeat(32)}return bsc56Codec.getAddress(value)}};
+ const r=transferBuild(f,codec);assert.equal(r.intentDigest,baseline.intentDigest);assert.deepEqual(r.transaction,baseline.transaction);assert.deepEqual(r.review,baseline.review);assert.equal(r.readback.recipient,transferRecipient);
+});
+
+bsc56Test('KGEN transfer metadata changes bind distinct intents and never invoke global wallet authority',()=>{
+ const base=transferBuild(),ledger=createKgenLedger(100),before=structuredClone(ledger),old=globalThis.ethereum;let requests=0;globalThis.ethereum={request(){requests++;throw Error('forbidden')}};
+ try{for(const mutate of [f=>f.readback.sourceCommit='b'.repeat(40),f=>f.readback.blockHash='0x'+'cd'.repeat(32),f=>f.readback.recipientTaxExempt=true,f=>f.gasPriceWei='1',f=>f.amountKgen='1',f=>f.nonce=f.readback.pendingNonce='8']){const f=transferFixture();mutate(f);assert.notEqual(transferBuild(f).intentDigest,base.intentDigest)}assert.equal(requests,0);assert.deepEqual(ledger,before)}finally{if(old===undefined)delete globalThis.ethereum;else globalThis.ethereum=old}
+});
+
+
+bsc56Test('KGEN transfer identity, immutable supply and tax bounds match pinned canonical source',async()=>{
+ const {readFile}=await import('node:fs/promises'),{createHash}=await import('node:crypto');
+ const manifest=JSON.parse(await readFile(new URL('../docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json',import.meta.url),'utf8'));
+ const source=await readFile(new URL('../KGEN/contracts/KGEN_Token_V7_5_2.sol',import.meta.url),'utf8');
+ assert.equal(transferModule.KGEN_BSC56_TOKEN_CODE_HASH,manifest.nonOraclePreparation20260930.publicReadback.tokenCodeHash);
+ assert.equal(createHash('sha256').update(source).digest('hex'),manifest.productDecision20261007.readOnlyIdentityGate.tokenSourceSha256);
+ assert.match(source,/TOTAL_SUPPLY = 72_000_000 \* 1e18/);assert.match(source,/TAX_BPS_TOTAL\s*= 30/);assert.match(source,/contract KGEN_Token_V7_5_2 is ERC20, Ownable/);
+});
+
+
+// Exact public runtime bytes observed read-only at BSC56 block 126181251.
+// This fixture is hashed only; never deployed/executed. Wallet/head data below is synthetic.
+const transferPinnedRuntime='0x608060405234801561001057600080fd5b506004361061018e5760003560e01c806370a08231116100de5780639fda058111610097578063ba6a817e11610071578063ba6a817e1461033a578063dd62ed3e1461035d578063f2fde38b14610396578063fb75b2c7146103a957600080fd5b80639fda058114610314578063a9059cbb14610327578063acedf5081461023557600080fd5b806370a08231146102a5578063715018a6146102ce5780638da5cb5b146102d6578063902d55a5146102e75780639335bda3146102f957806395d89b411461030c57600080fd5b8063236a9fc61161014b578063391dbe5f11610125578063391dbe5f1461025f578063463d56e91461019357806356d3b98f1461028a5780635e9e75501461029d57600080fd5b8063236a9fc61461023557806323b872dd1461023d578063313ce5671461025057600080fd5b80630529fcf21461019357806306fdde03146101b3578063095ea7b3146101c857806316c2be6b146101eb57806318160ddd1461020e5780631dc6104014610220575b600080fd5b61019b600581565b60405161ffff90911681526020015b60405180910390f35b6101bb6103bc565b6040516101aa9190610c97565b6101db6101d6366004610d02565b61044e565b60405190151581526020016101aa565b6101db6101f9366004610d2c565b60096020526000908152604090205460ff1681565b6002545b6040519081526020016101aa565b61023361022e366004610d4e565b610468565b005b61019b600a81565b6101db61024b366004610d8a565b6104be565b604051601281526020016101aa565b600654610272906001600160a01b031681565b6040516001600160a01b0390911681526020016101aa565b600854610272906001600160a01b031681565b61019b601e81565b6102126102b3366004610d2c565b6001600160a01b031660009081526020819052604090205490565b6102336104e2565b6005546001600160a01b0316610272565b6102126a3b8e97d229a2d54800000081565b610233610307366004610d4e565b6104f6565b6101bb610556565b610233610322366004610dc6565b610565565b6101db610335366004610d02565b6106e8565b6101db610348366004610d2c565b600a6020526000908152604090205460ff1681565b61021261036b366004610e09565b6001600160a01b03918216600090815260016020908152604080832093909416825291909152205490565b6102336103a4366004610d2c565b6106f6565b600754610272906001600160a01b031681565b6060600380546103cb90610e3c565b80601f01602080910402602001604051908101604052809291908181526020018280546103f790610e3c565b80156104445780601f1061041957610100808354040283529160200191610444565b820191906000526020600020905b81548152906001019060200180831161042757829003601f168201915b5050505050905090565b60003361045c818585610739565b60019150505b92915050565b61047061074b565b6001600160a01b038216600081815260096020908152604091829020805460ff19168515159081179091559151918252600080516020610eec83398151915291015b60405180910390a25050565b6000336104cc858285610778565b6104d78585856107f7565b506001949350505050565b6104ea61074b565b6104f46000610856565b565b6104fe61074b565b6001600160a01b0382166000818152600a6020908152604091829020805460ff191685151590811790915591519182527f214a9d98c666a69557687f31765f5b0682dc16cb753ac62cc8f95618c2991c2591016104b2565b6060600480546103cb90610e3c565b61056d61074b565b6001600160a01b038316158061058a57506001600160a01b038216155b8061059c57506001600160a01b038116155b156105ba5760405163d92e233d60e01b815260040160405180910390fd5b600680546001600160a01b03199081166001600160a01b0386811691821790935560078054831686851690811790915560088054909316938516938417909255600081815260096020526040808220805460ff199081166001908117909255858452828420805482168317905586845282842080549091169091179055517fb3e94ef049cb8bc35180cf03131bd3334c8782cb87bf00ea221698b28a0e45799190a4604051600181526001600160a01b03841690600080516020610eec8339815191529060200160405180910390a2604051600181526001600160a01b03831690600080516020610eec8339815191529060200160405180910390a2604051600181526001600160a01b03821690600080516020610eec8339815191529060200160405180910390a2505050565b60003361045c8185856107f7565b6106fe61074b565b6001600160a01b03811661072d57604051631e4fbdf760e01b8152600060048201526024015b60405180910390fd5b61073681610856565b50565b61074683838360016108a8565b505050565b6005546001600160a01b031633146104f45760405163118cdaa760e01b8152336004820152602401610724565b6001600160a01b038381166000908152600160209081526040808320938616835292905220546000198110156107f157818110156107e257604051637dc7a0d960e11b81526001600160a01b03841660048201526024810182905260448101839052606401610724565b6107f1848484840360006108a8565b50505050565b6001600160a01b03831661082157604051634b637e8f60e11b815260006004820152602401610724565b6001600160a01b03821661084b5760405163ec442f0560e01b815260006004820152602401610724565b61074683838361097d565b600580546001600160a01b038381166001600160a01b0319831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b6001600160a01b0384166108d25760405163e602df0560e01b815260006004820152602401610724565b6001600160a01b0383166108fc57604051634a1406b160e11b815260006004820152602401610724565b6001600160a01b03808516600090815260016020908152604080832093871683529290522082905580156107f157826001600160a01b0316846001600160a01b03167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b9258460405161096f91815260200190565b60405180910390a350505050565b6001600160a01b038316158061099a57506001600160a01b038216155b806109a3575080155b156109b357610746838383610b6d565b6001600160a01b03831660009081526009602052604090205460ff16806109f257506001600160a01b03821660009081526009602052604090205460ff165b80610a3957506001600160a01b0383166000908152600a602052604090205460ff1680610a3757506001600160a01b0382166000908152600a602052604090205460ff165b155b15610a4957610746838383610b6d565b6000612710610a59601e84610e8c565b610a639190610ea3565b90506000610a718284610ec5565b90506000612710610a83600a86610e8c565b610a8d9190610ea3565b90506000612710610a9f600a87610e8c565b610aa99190610ea3565b90506000612710610abb600588610e8c565b610ac59190610ea3565b905060008183610ad58689610ec5565b610adf9190610ec5565b610ae99190610ec5565b9050610af6898987610b6d565b8315610b0857610b0889600086610b6d565b8215610b2657600654610b26908a906001600160a01b031685610b6d565b8115610b4457600754610b44908a906001600160a01b031684610b6d565b8015610b6257600854610b62908a906001600160a01b031683610b6d565b505050505050505050565b6001600160a01b038316610b98578060026000828254610b8d9190610ed8565b90915550610c0a9050565b6001600160a01b03831660009081526020819052604090205481811015610beb5760405163391434e360e21b81526001600160a01b03851660048201526024810182905260448101839052606401610724565b6001600160a01b03841660009081526020819052604090209082900390555b6001600160a01b038216610c2657600280548290039055610c45565b6001600160a01b03821660009081526020819052604090208054820190555b816001600160a01b0316836001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef83604051610c8a91815260200190565b60405180910390a3505050565b60006020808352835180602085015260005b81811015610cc557858101830151858201604001528201610ca9565b506000604082860101526040601f19601f8301168501019250505092915050565b80356001600160a01b0381168114610cfd57600080fd5b919050565b60008060408385031215610d1557600080fd5b610d1e83610ce6565b946020939093013593505050565b600060208284031215610d3e57600080fd5b610d4782610ce6565b9392505050565b60008060408385031215610d6157600080fd5b610d6a83610ce6565b915060208301358015158114610d7f57600080fd5b809150509250929050565b600080600060608486031215610d9f57600080fd5b610da884610ce6565b9250610db660208501610ce6565b9150604084013590509250925092565b600080600060608486031215610ddb57600080fd5b610de484610ce6565b9250610df260208501610ce6565b9150610e0060408501610ce6565b90509250925092565b60008060408385031215610e1c57600080fd5b610e2583610ce6565b9150610e3360208401610ce6565b90509250929050565b600181811c90821680610e5057607f821691505b602082108103610e7057634e487b7160e01b600052602260045260246000fd5b50919050565b634e487b7160e01b600052601160045260246000fd5b808202811582820484141761046257610462610e76565b600082610ec057634e487b7160e01b600052601260045260246000fd5b500490565b8181038181111561046257610462610e76565b8082018082111561046257610462610e7656fe5decc8752b7bc9e42d90a7f5567e1f67a02b9dd6be16631d4a0210617b3c7255a2646970667358221220569bbba95c973317b6f6ca630f481574cb3b439a7b714abdea68ad83ee4da03264736f6c63430008180033';
+assert.equal(bsc56Codec.keccak256(transferPinnedRuntime),transferModule.KGEN_BSC56_TOKEN_CODE_HASH);
+function preparationFixture(sessionFactory=createWalletSession){
+ const abi=new bsc56Codec.Interface(['function balanceOf(address) view returns(uint256)','function isTaxExempt(address) view returns(bool)','function isMarketMakerPair(address) view returns(bool)']);
+ const listeners=new Map(),f={account:transferSender,chain:'0x38',calls:[],hook:null,code:transferPinnedRuntime,balance:2n*10n**18n,native:'0x2386f26fc10000',flag:'0x'+'0'.repeat(64),head:{number:'0x7b',hash:'0x'+'ab'.repeat(32),timestamp:'0x'+Math.floor(Date.now()/1000).toString(16)}};
+ f.provider={on:(event,fn)=>listeners.set(event,fn),removeListener:event=>listeners.delete(event),async request(args){
+  f.calls.push(structuredClone(args));if(f.hook){const handled=await f.hook(args);if(handled?.handled)return handled.value}
+  const {method,params=[]}=args;
+  if(method==='eth_requestAccounts'||method==='eth_accounts')return [f.account];if(method==='eth_chainId')return f.chain;
+  if(method==='eth_getBlockByNumber')return {...f.head};if(method==='eth_getTransactionCount')return '0x7';if(method==='eth_getBalance')return f.native;
+  if(method==='eth_getCode')return params[0].toLowerCase()===KGEN_TOKEN_ADDRESS.toLowerCase()?f.code:'0x';
+  if(method==='eth_call'){const decoded=abi.parseTransaction(params[0]);return decoded.name==='balanceOf'?'0x'+f.balance.toString(16).padStart(64,'0'):f.flag}
+  throw new Error('FORBIDDEN_FIXTURE_WALLET_METHOD');
+ }};
+ f.session=sessionFactory({ethereum:f.provider,storage:{getItem:()=>null,setItem(){}}});
+ f.input={recipient:transferRecipient,amountKgen:'1.000000000000000001',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000'};
+ f.emit=(event,value)=>listeners.get(event)?.(value);return f;
+}
+async function awaitPreparation(predicate){for(let n=0;n<1000;n++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,1))}assert.fail('fixture preparation boundary did not occur')}
+
+bsc56Test('session-owned KGEN preparation uses approved codec and exactly 15 read-only calls',async()=>{
+ const f=preparationFixture();await f.session.connect();const before=f.session.snapshot();f.calls=[];
+ const r=await f.session.prepareKgenTransfer(f.input);assert.equal(r.status,'READ_ONLY_REVIEW');assert.equal(r.rpcReadCount,15);assert.equal(f.calls.length,15);assert.equal(r.review.review.RECIPIENT,transferRecipient);assert.equal(r.review.transaction.value,'0x0');assert.equal(r.executionReady,false);assert.equal(r.walletHandoffReady,false);assert.equal(r.signerRequested,false);assert.equal(r.broadcast,false);assert.equal(r.review.readback.sourceCommit,'a1eaed4f332486d1301f8b38c5dab2df53470731');assert.match(r.codecIntegrity,/^sha384-/);assert.match(r.pendingNonceScope,/SEPARATE/);assert.match(r.gasScope,/NOT_NETWORK_ESTIMATE/);assert.deepEqual(f.session.snapshot(),before);
+ const stateReads=f.calls.filter(c=>['eth_call','eth_getCode','eth_getBalance'].includes(c.method));assert.equal(stateReads.length,8);for(const call of stateReads)assert.deepEqual(call.params[1],{blockHash:f.head.hash,requireCanonical:true});
+ assert.equal(f.calls.filter(c=>c.method==='eth_getBlockByNumber'&&c.params[0]==='latest').length,1);assert.ok(f.calls.every(c=>! /sign|send|switch|approve/i.test(c.method)));assert.ok(Object.isFrozen(r.review.readback));assert.equal(f.session.transferSnapshot(),r);f.session.dispose();
+});
+
+bsc56Test('session preparation cannot take caller source/codec/readback authority or invalid input',async()=>{
+ const f=preparationFixture();assert.equal((await f.session.prepareKgenTransfer(f.input)).reason,'TRANSFER_ACTIVE_CHAIN56_SESSION_REQUIRED');assert.equal(f.calls.length,0);await f.session.connect();
+ for(const patch of [{recipient:'0x'+'00'.repeat(20)},{amountKgen:'1e-18'},{amountKgen:'0'},{amountKgen:1},{gasPriceWei:'-1'},{maximumGasFeeWei:'1'},{readback:{}},{ethers:bsc56Codec},{sourceCommit:'b'.repeat(40)}]){f.calls=[];const r=await f.session.prepareKgenTransfer({...f.input,...patch});assert.equal(r.status,'BLOCKED');assert.equal(r.review,null);assert.equal(f.calls.length,0)}
+ let getters=0;const input={...f.input};Object.defineProperty(input,'recipient',{enumerable:true,get(){getters++;return transferRecipient}});await f.session.prepareKgenTransfer(input);assert.equal(getters,0);f.session.dispose();
+});
+
+bsc56Test('session preparation fails unknown/mismatch without fallback, fabricated zeroes or writes',async()=>{
+ for(const kind of ['unsupportedHash','code','flag','balance','native','nonce','staleHead','futureHead','headReorg','wrongChain','wrongAccount','blockGetter','accountGetter','errorGetter','requestMutation']){
+  const f=preparationFixture();await f.session.connect();f.calls=[];let getters=0,headReads=0;
+  if(kind==='code')f.code='0x6000';if(kind==='flag')f.flag='0x'+'0'.repeat(63)+'2';if(kind==='balance')f.balance=0n;if(kind==='native')f.native='0x';if(kind==='staleHead')f.head.timestamp='0x1';if(kind==='futureHead')f.head.timestamp='0x'+Math.floor(Date.now()/1000+120).toString(16);if(kind==='wrongChain')f.chain='0x61';if(kind==='wrongAccount')f.account=transferRecipient;
+  f.hook=async({method,params})=>{
+   if(kind==='unsupportedHash'&&params?.[1]?.blockHash)throw Object.assign(new Error('EIP1898 unsupported'),{code:-32602});
+   if(kind==='nonce'&&method==='eth_getTransactionCount')return {handled:true,value:'0x00'};
+   if(kind==='headReorg'&&method==='eth_getBlockByNumber'&&++headReads===2)return {handled:true,value:{...f.head,hash:'0x'+'cd'.repeat(32)}};
+   if(kind==='blockGetter'&&method==='eth_getBlockByNumber')return {handled:true,value:Object.defineProperty({...f.head},'hash',{get(){getters++;return f.head.hash}})};
+   if(kind==='accountGetter'&&method==='eth_accounts'){const accounts=[transferSender];Object.defineProperty(accounts,'0',{get(){getters++;return transferSender}});return {handled:true,value:accounts}}
+   if(kind==='requestMutation'&&method==='eth_call')params[0].to=transferRecipient;
+   if(kind==='errorGetter'&&method==='eth_getBlockByNumber')throw Object.defineProperty({},'message',{get(){getters++;throw Error('untrusted getter')}});
+  };
+  const r=await f.session.prepareKgenTransfer(f.input);assert.equal(r.status,'BLOCKED',kind);assert.equal(r.review,null,kind);assert.equal(r.executionReady,false);assert.ok(f.calls.length<=15);assert.equal(getters,0,kind);assert.ok(f.calls.every(c=>! /sign|send|switch|approve/i.test(c.method)));
+  for(const call of f.calls.filter(c=>['eth_call','eth_getCode','eth_getBalance'].includes(c.method)))assert.ok(call.params[1]?.blockHash,'no fallback to latest');f.session.dispose();
+ }
+});
+
+bsc56Test('session account/chain/refresh/disconnect/dispose clears a prepared transfer',async()=>{
+ for(const kind of ['refresh','account','chain','disconnect','dispose']){
+  const f=preparationFixture();await f.session.connect();assert.equal((await f.session.prepareKgenTransfer(f.input)).status,'READ_ONLY_REVIEW');
+  if(kind==='refresh')await f.session.refresh();if(kind==='account'){f.account=transferRecipient;f.emit('accountsChanged',[f.account])}if(kind==='chain'){f.chain='0x61';f.emit('chainChanged',f.chain)}if(kind==='disconnect')f.session.disconnect();if(kind==='dispose')f.session.dispose();
+  assert.equal(f.session.transferSnapshot().review,null,kind);assert.equal(f.session.transferSnapshot().executionReady,false);f.session.dispose();
+ }
+});
+
+bsc56Test('session late preparation cannot cross account ABA or a newer input generation',async()=>{
+ for(const kind of ['ABA','newInput','invalidate','disconnect']){
+  const f=preparationFixture();await f.session.connect();let release,held=false;
+  f.hook=async({method,params})=>{if(!held&&method==='eth_getBlockByNumber'&&params[0]==='latest'){held=true;await new Promise(resolve=>release=resolve)}return undefined};
+  const first=f.session.prepareKgenTransfer(f.input);await awaitPreparation(()=>!!release);
+  if(kind==='ABA'){f.account=transferRecipient;f.emit('accountsChanged',[f.account]);f.account=transferSender;f.emit('accountsChanged',[f.account]);await awaitPreparation(()=>f.session.snapshot().status==='CONNECTED')}
+  let newest;if(kind==='newInput')newest=await f.session.prepareKgenTransfer({...f.input,recipient:'0x3333333333333333333333333333333333333333'});
+  if(kind==='invalidate')f.session.invalidateTransferReview();if(kind==='disconnect')f.session.disconnect();release();await first;
+  if(kind==='newInput'){assert.equal(f.session.transferSnapshot(),newest);assert.equal(newest.review.review.RECIPIENT,'0x3333333333333333333333333333333333333333')}else assert.equal(f.session.transferSnapshot().review,null,kind);f.session.dispose();
+ }
+});
+
+bsc56Test('private verified-byte factory isolates cached namespace and reachable codec behavior',async()=>{
+ const {readFile}=await import('node:fs/promises'),{runInNewContext}=await import('node:vm');
+ const runtime=await readFile(new URL('../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs',import.meta.url),'utf8');
+ const fn=runtime.slice(runtime.indexOf('function kgenTransferCodecModuleSource('),runtime.indexOf('function approvedKgenTransferCodec('));
+ const make=runInNewContext(fn+'kgenTransferCodecModuleSource;'),asset=await readFile(new URL('../K線西遊記/assets/ethers-5.7.2.umd.min.js',import.meta.url),'utf8');
+ const namespace=await import('data:text/javascript;base64,'+Buffer.from(make(asset)).toString('base64'));
+ assert.deepEqual(Object.keys(namespace),['default']);assert.ok(Object.isFrozen(namespace.default));assert.throws(()=>namespace.default=()=>({}),TypeError);
+ const a=namespace.default(),b=namespace.default();assert.notEqual(a,b);assert.notEqual(a.Interface,b.Interface);assert.equal(Object.getPrototypeOf(a),null);assert.ok(Object.isFrozen(a));assert.equal(a.Interface.getAbiCoder,undefined,'no mutable ethers static/coder state is exposed');
+ assert.throws(()=>a.getAddress=()=>transferRecipient,TypeError);assert.throws(()=>a.Interface.prototype.encodeFunctionData=()=>'',TypeError);assert.throws(()=>a.Interface.prototype.constructor=()=>{},TypeError);
+ const encoder=new a.Interface(transferModule.KGEN_BSC56_TRANSFER_ABI);assert.equal(Object.getPrototypeOf(encoder),null);assert.ok(Object.isFrozen(encoder));assert.throws(()=>encoder.encodeFunctionData=()=>'',TypeError);
+ assert.equal(new b.Interface(transferModule.KGEN_BSC56_TRANSFER_ABI).encodeFunctionData('transfer',[transferRecipient,'1']),new bsc56Codec.Interface(transferModule.KGEN_BSC56_TRANSFER_ABI).encodeFunctionData('transfer',[transferRecipient,'1']));
+});
+
+bsc56Test('session preparation ignores poisoned require cache and global ethers exports',async()=>{
+ const {createRequire}=await import('node:module'),require=createRequire(import.meta.url),path=require.resolve('../K線西遊記/assets/ethers-5.7.2.umd.min.js'),saved=require.cache[path].exports,oldGlobal=globalThis.ethers;let hits=0;
+ const fake={version:'ethers/5.7.2',utils:{...bsc56Codec,getAddress(){hits++;throw Error('INJECTED_CACHED_CODEC_EXECUTED')},keccak256(){hits++;throw Error('INJECTED_CACHED_HASH_EXECUTED')}}};
+ try{
+  require.cache[path].exports={ethers:fake};globalThis.ethers=fake;
+  const fresh=await import('../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs?private-codec-poison-regression');
+  const f=preparationFixture(fresh.createWalletSession);await f.session.connect();f.calls=[];const r=await f.session.prepareKgenTransfer(f.input);
+  assert.equal(r.status,'READ_ONLY_REVIEW');assert.equal(r.review.review.RECIPIENT,transferRecipient);assert.equal(hits,0,'verified bytes instantiate privately; poisoned exports are never consulted');assert.equal(f.calls.length,15);assert.equal(r.walletHandoffReady,false);f.session.dispose();
+ }finally{require.cache[path].exports=saved;if(oldGlobal===undefined)delete globalThis.ethers;else globalThis.ethers=oldGlobal}
+});
+
+bsc56Test('synthetic browser module denial and byte mismatch fail closed without global codec fallback',async()=>{
+ const {readFile}=await import('node:fs/promises'),asset=await readFile(new URL('../K線西遊記/assets/ethers-5.7.2.umd.min.js',import.meta.url));
+ const previous={document:globalThis.document,fetch:globalThis.fetch,ethers:globalThis.ethers,create:URL.createObjectURL,revoke:URL.revokeObjectURL};
+ try{for(const kind of ['module-denied','byte-mismatch']){
+  let globals=0,imports=0,revocations=0;globalThis.document={};globalThis.ethers={utils:{getAddress(){globals++;throw Error('GLOBAL_CODEC_FORBIDDEN')}}};
+  globalThis.fetch=async(url,options)=>{assert.ok(url.pathname.endsWith('/K線西遊記/assets/ethers-5.7.2.umd.min.js')||decodeURI(url.pathname).endsWith('/K線西遊記/assets/ethers-5.7.2.umd.min.js'));assert.match(options.integrity,/^sha384-/);return new Response(kind==='byte-mismatch'?Buffer.from('unverified'):asset)};
+  URL.createObjectURL=()=>{imports++;return 'data:text/javascript,throw%20new%20Error(%22SYNTHETIC_MODULE_DENIAL%22)'};URL.revokeObjectURL=()=>{revocations++};
+  const fresh=await import('../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs?browser-private-codec-'+kind),f=preparationFixture(fresh.createWalletSession);await f.session.connect();f.calls=[];
+  const result=await f.session.prepareKgenTransfer(f.input);assert.equal(result.status,'BLOCKED');assert.equal(result.reason,kind==='module-denied'?'TRANSFER_PRIVATE_CODEC_MODULE_BLOCKED':'TRANSFER_CODEC_INTEGRITY_MISMATCH');assert.equal(result.review,null);assert.equal(globals,0);assert.equal(f.calls.length,0);assert.equal(imports,kind==='module-denied'?1:0);assert.equal(revocations,imports);f.session.dispose();
+ }}finally{for(const k of ['document','fetch','ethers'])if(previous[k]===undefined)delete globalThis[k];else globalThis[k]=previous[k];URL.createObjectURL=previous.create;URL.revokeObjectURL=previous.revoke}
+});
+
+bsc56Test('session rechecks exact freshness boundaries immediately before publishing readback',async()=>{
+ const RealDate=globalThis.Date,headTime=1791350000000;
+ try{for(const {age,elapsed,pass} of [{age:119000,elapsed:2000,pass:false},{age:119000,elapsed:1000,pass:true},{age:120000,elapsed:0,pass:true},{age:120001,elapsed:0,pass:false},{age:119999,elapsed:0,pass:true},{age:-30000,elapsed:0,pass:true},{age:-30001,elapsed:0,pass:false},{age:-29000,elapsed:-2000,pass:false}]){
+  let clock=headTime+age;globalThis.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[clock]))}static now(){return clock}};
+  const f=preparationFixture();f.head.timestamp='0x'+(BigInt(headTime)/1000n).toString(16);await f.session.connect();f.calls=[];let advanced=false;
+  f.hook=async({method,params})=>{if(!advanced&&method==='eth_call'&&params[1]?.blockHash){clock+=elapsed;advanced=true}};
+  const r=await f.session.prepareKgenTransfer(f.input);assert.equal(r.status,pass?'READ_ONLY_REVIEW':'BLOCKED',JSON.stringify({age,elapsed}));
+  if(pass){assert.equal(r.observedAt,new RealDate(clock).toISOString());assert.equal(r.rpcReadCount,15)}else{assert.equal(r.reason,'TRANSFER_PINNED_HEAD_STALE_OR_FUTURE');assert.equal(r.review,null)}
+  assert.equal(r.executionReady,false);assert.equal(r.walletHandoffReady,false);assert.equal(r.signerRequested,false);assert.equal(r.broadcast,false);f.session.dispose();
+ }}finally{globalThis.Date=RealDate}
+});

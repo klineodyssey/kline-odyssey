@@ -1,3 +1,17 @@
+/* KGEN_META
+VERSION: 1.0.0
+REVISION: 2026-10-07.BSC56-KGEN-TRANSFER-READONLY-PREPARATION
+PRODUCT_CONTEXT: V2.9.5
+STATUS: CANDIDATE
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot / scoped self-review / 2026-10-07; session preparation review pending, no handoff or release approval
+SOURCE_COMMIT: a1eaed4f332486d1301f8b38c5dab2df53470731
+TASK_ID: K11520-BSC56-KGEN-TRANSFER-20261007
+CHANGE_REASON: Add existing-session bounded read-only transfer preparation with approved codec, pinned facts and generation fencing; no wallet handoff.
+ANCESTOR: K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs @ a1eaed4f332486d1301f8b38c5dab2df53470731
+SOURCE_OF_TRUTH: TRUE
+*/
 import {normalizeSignedC,signedPositionSide,requiredMargin,createKgenLedger} from './kgen-margin-runtime.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 const ERC20_BALANCE_OF='0x70a08231';
@@ -6,6 +20,113 @@ export const PLAYER_SESSION_KEY='k11520.player-session.v1';
 export const KGEN_TOKEN_ADDRESS='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 export const KGEN_CHAIN_ID=56;
 const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
+// Source-bound canonical expectation from the existing Mainnet manifest:
+// nonOraclePreparation20260930.publicReadback.tokenCodeHash. This pin is an
+// identity check, not a claim that source-to-bytecode recompilation was done.
+export const KGEN_BSC56_TOKEN_CODE_HASH='0x251cff271c2c754743f9eb3bc11982163fd7ca756e0b0378cb0358418ffeecc1';
+export const KGEN_BSC56_TRANSFER_ABI=Object.freeze(['function transfer(address to,uint256 value) returns(bool)','event Transfer(address indexed from,address indexed to,uint256 value)']);
+
+/** Pure input-metadata review. No provider, session mutation, wallet request,
+ * signature, allowance, storage, receipt or simulation-ledger side effect.
+ * Codec is caller-supplied: method shape is checked, not module authenticity.
+ * Only a future session-owned approved codec and fresh readback can support a wallet handoff. */
+export function buildBsc56KgenTransferReview(input,{ethers}={}){
+  const topKeys=['chainId','sender','recipient','amountKgen','nonce','gasLimit','gasPriceWei','maximumGasFeeWei','readback'];
+  const readKeys=['chainId','tokenAddress','sender','recipient','tokenCodeHash','sourceCommit','blockNumber','blockHash','pendingNonce','tokenBalanceWei','nativeBalanceWei','senderTaxExempt','recipientTaxExempt','senderMarketMakerPair','recipientMarketMakerPair','recipientCodePresent'];
+  let bytes=0;const encoder=new TextEncoder();
+  const copy=(value,keys,nested=false)=>{
+    if(!value||typeof value!=='object'||Array.isArray(value)||![Object.prototype,null].includes(Object.getPrototypeOf(value)))throw new Error('TRANSFER_PLAIN_DATA_REQUIRED');
+    const descriptors=Object.getOwnPropertyDescriptors(value),names=Reflect.ownKeys(descriptors);
+    if(names.length!==keys.length||names.some(k=>typeof k!=='string'||!keys.includes(k)))throw new Error('TRANSFER_EXACT_FIELDS_REQUIRED');
+    const result={};for(const key of keys){
+      const descriptor=descriptors[key];if(!descriptor||!Object.hasOwn(descriptor,'value')||!descriptor.enumerable)throw new Error('TRANSFER_ACCESSOR_FORBIDDEN');
+      const v=descriptor.value;
+      if(key==='readback'&&!nested){result[key]=copy(v,readKeys,true);continue}
+      if(!['string','number','boolean'].includes(typeof v))throw new Error('TRANSFER_PRIMITIVE_REQUIRED');
+      if(typeof v==='string'){bytes+=encoder.encode(v).length;if(v.length>1024||bytes>8192)throw new Error('TRANSFER_INPUT_BUDGET_EXCEEDED')}
+      result[key]=v;
+    }return result;
+  };
+  // Snapshot every used field before any codec callback can mutate its origin.
+  const data=copy(input,topKeys),r=data.readback;
+  if(typeof ethers?.Interface!=='function'||typeof ethers?.getAddress!=='function'||typeof ethers?.keccak256!=='function'||typeof ethers?.toUtf8Bytes!=='function')throw new Error('TRANSFER_CODEC_INTERFACE_REQUIRED');
+  const uint=(value,label,{zero=false,max=(1n<<256n)-1n}={})=>{
+    if(typeof value!=='string'||value.length>78||!/^(0|[1-9][0-9]*)$/.test(value))throw new Error('TRANSFER_'+label+'_UINT_REQUIRED');
+    const n=BigInt(value);if((zero?n<0n:n<=0n)||n>max)throw new Error('TRANSFER_'+label+'_OUT_OF_RANGE');return n;
+  };
+  const address=(value,label)=>{
+    if(typeof value!=='string'||!EVM_ADDRESS.test(value)||/^0x0{40}$/i.test(value))throw new Error('TRANSFER_'+label+'_ADDRESS_INVALID');
+    try{return ethers.getAddress(value)}catch{throw new Error('TRANSFER_'+label+'_CHECKSUM_INVALID')}
+  };
+  if(data.chainId!==KGEN_CHAIN_ID||r.chainId!==KGEN_CHAIN_ID)throw new Error('TRANSFER_CHAIN56_REQUIRED');
+  const sender=address(data.sender,'SENDER'),recipient=address(data.recipient,'RECIPIENT'),token=address(r.tokenAddress,'TOKEN');
+  if(token!==ethers.getAddress(KGEN_TOKEN_ADDRESS)||r.tokenCodeHash!==KGEN_BSC56_TOKEN_CODE_HASH)throw new Error('TRANSFER_CANONICAL_TOKEN_IDENTITY_REQUIRED');
+  if(address(r.sender,'READBACK_SENDER')!==sender||address(r.recipient,'READBACK_RECIPIENT')!==recipient)throw new Error('TRANSFER_READBACK_ACCOUNT_MISMATCH');
+  if(recipient===sender||recipient===token)throw new Error('TRANSFER_SELF_OR_TOKEN_RECIPIENT_FORBIDDEN');
+  if(typeof r.sourceCommit!=='string'||! /^[0-9a-f]{40}$/.test(r.sourceCommit)||typeof r.blockHash!=='string'||! /^0x[0-9a-fA-F]{64}$/.test(r.blockHash)||/^0x0{64}$/i.test(r.blockHash))throw new Error('TRANSFER_SOURCE_BLOCK_BINDING_REQUIRED');
+  uint(r.blockNumber,'BLOCK_NUMBER');
+  const nonce=uint(data.nonce,'NONCE',{zero:true,max:(1n<<64n)-2n});if(r.pendingNonce!==data.nonce)throw new Error('TRANSFER_PENDING_NONCE_MISMATCH');
+  const rawBalance=uint(r.tokenBalanceWei,'TOKEN_BALANCE',{zero:true}),nativeBalance=uint(r.nativeBalanceWei,'NATIVE_BALANCE',{zero:true});
+  if(rawBalance>72000000n*10n**18n)throw new Error('TRANSFER_BALANCE_EXCEEDS_CANONICAL_SUPPLY');
+  if(typeof data.amountKgen!=='string'||data.amountKgen.length>98||!/^(0|[1-9][0-9]*)(?:\.[0-9]{1,18})?$/.test(data.amountKgen))throw new Error('TRANSFER_EXACT_KGEN_DECIMAL_REQUIRED');
+  const [whole,fraction='']=data.amountKgen.split('.'),amount=BigInt(whole)*10n**18n+BigInt(fraction.padEnd(18,'0'));
+  if(amount<=0n||amount>(1n<<256n)-1n)throw new Error('TRANSFER_AMOUNT_OUT_OF_RANGE');
+  if(amount>rawBalance)throw new Error('TRANSFER_INSUFFICIENT_KGEN');
+  const gasLimit=uint(data.gasLimit,'GAS_LIMIT',{max:(1n<<64n)-1n}),gasPrice=uint(data.gasPriceWei,'GAS_PRICE'),gasCap=uint(data.maximumGasFeeWei,'GAS_CAP'),gasMaximum=gasLimit*gasPrice;
+  if(gasMaximum>gasCap)throw new Error('TRANSFER_GAS_CAP_EXCEEDED');if(gasMaximum>nativeBalance)throw new Error('TRANSFER_INSUFFICIENT_BNB_FOR_GAS_CAP');
+  for(const key of ['senderTaxExempt','recipientTaxExempt','senderMarketMakerPair','recipientMarketMakerPair','recipientCodePresent'])if(typeof r[key]!=='boolean')throw new Error('TRANSFER_TAX_AND_RECIPIENT_FLAGS_REQUIRED');
+  const taxableAtReadback=!r.senderTaxExempt&&!r.recipientTaxExempt&&(r.senderMarketMakerPair||r.recipientMarketMakerPair),maximumTax=amount*30n/10000n,estimatedTax=taxableAtReadback?maximumTax:0n;
+  const quantity=n=>'0x'+n.toString(16),calldata=new ethers.Interface(KGEN_BSC56_TRANSFER_ABI).encodeFunctionData('transfer',[recipient,amount.toString()]);
+  const transaction={chainId:quantity(BigInt(KGEN_CHAIN_ID)),type:'0x0',from:sender,to:token,value:'0x0',nonce:quantity(nonce),gas:quantity(gasLimit),gasPrice:quantity(gasPrice),data:calldata};
+  const taxObservation={senderTaxExempt:r.senderTaxExempt,recipientTaxExempt:r.recipientTaxExempt,senderMarketMakerPair:r.senderMarketMakerPair,recipientMarketMakerPair:r.recipientMarketMakerPair,taxableAtReadback,estimatedTaxWei:estimatedTax.toString(),primaryRecipientTransferAtReadbackWei:(amount-estimatedTax).toString(),maximumTaxIfFlagsChangeWei:maximumTax.toString(),minimumNetIfOnlyTaxFlagsChangeWei:(amount-maximumTax).toString(),miningTimeNetGuaranteed:false};
+  const review={CHAIN:{name:'BNB Smart Chain Mainnet',chainId:56},WALLET:sender,RECIPIENT:recipient,CONTRACT:token,FUNCTION:'transfer(address,uint256)',TOKEN:{symbol:'KGEN',address:token,decimals:18},AMOUNT:{inputKgen:data.amountKgen,canonicalKgen:formatUnits(amount,18),baseUnits:amount.toString(),decimals:18},EXPECTED_EFFECT:'Request a KGEN transfer to the exact displayed recipient. This does not swap, approve, deposit margin or settle a trade. Recipient net is an observation, not a mining-time promise.',MAXIMUM_EXPOSURE:{walletTokenDebitWei:amount.toString(),nativeGasFeeWei:gasMaximum.toString(),approvedGasFeeCapWei:gasCap.toString(),nativeTransferValueWei:'0',allowanceChanged:false},taxObservation,recipientCodePresentAtReadback:r.recipientCodePresent};
+  const intentDigest=ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify({transaction,readback:r,review})));
+  const freeze=v=>{if(v&&typeof v==='object'){for(const x of Object.values(v))freeze(x);Object.freeze(v)}return v};
+  return freeze({schema:'K11520_BSC56_KGEN_TRANSFER_REVIEW_V1',status:'UNSIGNED_INPUT_REVIEW_ONLY',scope:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',transactionFormat:'EIP1474_QUANTITY_UNSIGNED_REVIEW_NOT_WALLET_REQUEST',review,transaction,intentDigest,readback:r,blockers:['SESSION_OWNED_FRESH_TOKEN_BALANCE_TAX_NONCE_GAS_READBACK_REQUIRED','EXPLICIT_WALLET_OWNER_CONFIRMATION_REQUIRED','CONFIRMED_MATCHING_TRANSACTION_AND_RECEIPT_REQUIRED'],executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false});
+}
+
+// The host JS intrinsics, module loader and WebCrypto/Node crypto are trusted.
+// Verified bytes execute in fresh private CommonJS state, never require.cache or
+// globalThis.ethers. A cached module exports only an immutable fresh-state factory.
+// Browser CSP is not changed: denied private Blob modules fail preparation closed.
+const KGEN_TRANSFER_CODEC_INTEGRITY='sha384-Htz1SE4Sl5aitpvFgr2j0sfsGUIuSXI6t8hEyrlQ93zflEF3a29bH2AvkUROUw7J';
+const KGEN_TRANSFER_BUILDER_REVIEWED_COMMIT='a1eaed4f332486d1301f8b38c5dab2df53470731';
+let kgenTransferCodecPromise;
+function kgenTransferCodecModuleSource(source){
+  return `const instantiate=()=>{const module={exports:{}};const exports=module.exports;\n${source}\n;
+const library=module.exports.ethers;if(library?.version!=='ethers/5.7.2'||!library.utils)throw new Error('TRANSFER_APPROVED_CODEC_REQUIRED');
+const u=library.utils;const Interface=function(fragments){const inner=new u.Interface(fragments);const encoder=Object.create(null);Object.defineProperty(encoder,'encodeFunctionData',{enumerable:true,value:Object.freeze((name,args)=>inner.encodeFunctionData(name,args))});return Object.freeze(encoder)};
+Object.freeze(Interface.prototype);Object.freeze(Interface);const codec=Object.create(null);
+Object.assign(codec,{Interface,getAddress:Object.freeze(value=>u.getAddress(value)),keccak256:Object.freeze(value=>u.keccak256(value)),toUtf8Bytes:Object.freeze(value=>u.toUtf8Bytes(value))});return Object.freeze(codec)};export default Object.freeze(instantiate);`;
+}
+function approvedKgenTransferCodec(){
+  if(kgenTransferCodecPromise)return kgenTransferCodecPromise;
+  kgenTransferCodecPromise=(async()=>{
+    let namespace;
+    if(typeof document==='undefined'){
+      const [{readFile},{createHash}]=await Promise.all([import('node:fs/promises'),import('node:crypto')]);
+      const bytes=await readFile(new URL('../../../assets/ethers-5.7.2.umd.min.js',import.meta.url));
+      if(bytes.length>1048576||'sha384-'+createHash('sha384').update(bytes).digest('base64')!==KGEN_TRANSFER_CODEC_INTEGRITY)throw new Error('TRANSFER_CODEC_INTEGRITY_MISMATCH');
+      namespace=await import('data:text/javascript;base64,'+Buffer.from(kgenTransferCodecModuleSource(bytes.toString('utf8'))).toString('base64'));
+    }else{
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);let bytes;
+      try{
+        const response=await fetch(new URL('../../../assets/ethers-5.7.2.umd.min.js',import.meta.url),{cache:'no-store',credentials:'same-origin',integrity:KGEN_TRANSFER_CODEC_INTEGRITY,signal:controller.signal});
+        if(!response.ok||!response.body)throw new Error('TRANSFER_CODEC_FETCH_FAILED');
+        const reader=response.body.getReader(),chunks=[];let size=0;
+        while(true){const part=await reader.read();if(part.done)break;size+=part.value.byteLength;if(size>1048576){await reader.cancel();throw new Error('TRANSFER_CODEC_BYTES_EXCEEDED')}chunks.push(part.value)}
+        bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}
+      }finally{clearTimeout(timer)}
+      const digest=new Uint8Array(await crypto.subtle.digest('SHA-384',bytes));
+      if('sha384-'+btoa(String.fromCharCode(...digest))!==KGEN_TRANSFER_CODEC_INTEGRITY)throw new Error('TRANSFER_CODEC_INTEGRITY_MISMATCH');
+      const url=URL.createObjectURL(new Blob([kgenTransferCodecModuleSource(new TextDecoder('utf-8',{fatal:true}).decode(bytes))],{type:'text/javascript'}));
+      try{namespace=await import(url)}catch{throw new Error('TRANSFER_PRIVATE_CODEC_MODULE_BLOCKED')}finally{URL.revokeObjectURL(url)}
+    }
+    return namespace.default();
+  })().catch(error=>{kgenTransferCodecPromise=null;throw error});
+  return kgenTransferCodecPromise;
+}
+
 export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','COURIER_SETTLEMENT','COURIER_INSURANCE_PAYOUT','KAIOS_SPEND','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
 // A namespace is isolation against application mix-ups, NOT authentication of
 // another person sharing this browser. Player IDs never authorize chain assets.
@@ -186,7 +307,7 @@ export function createWalletSession({ethereum,storage,timeoutMs=12000}={}){
   const listeners=new Set();
   let state={account:null,chainId:null,status:'DISCONNECTED',error:null,kgen:null,bnb:null,network:null,balanceReadOnly:true,executionMode:'SIMULATION'};
   const snapshot=()=>Object.freeze({...state});
-  const publish=patch=>{state={...state,...patch};const value=snapshot();for(const listener of listeners){try{listener(value)}catch{}}return value};
+  const publish=patch=>{invalidateTransferReview('TRANSFER_WALLET_CONTEXT_CHANGED');state={...state,...patch};const value=snapshot();for(const listener of listeners){try{listener(value)}catch{}}return value};
   const clear={kgen:null,bnb:null};
   const current=ticket=>!disposed&&active&&ticket===generation;
   const duration=Number.isFinite(timeoutMs)&&timeoutMs>0?Math.min(timeoutMs,60000):12000;
@@ -224,6 +345,76 @@ export function createWalletSession({ethereum,storage,timeoutMs=12000}={}){
       return publish({...clear,...(identityLost?{account:null,chainId:null,network:null}:{}),status:reason==='DISCONNECTED'?'DISCONNECTED':reason==='WRONG_CHAIN'?'WRONG_CHAIN':'ERROR',error:reason});
     }
   }
+  // Read-only preparation is owned by this same provider/session. Pure review
+  // objects and caller-supplied digests cannot become a handoff capability.
+  let transferGeneration=0,transferState=Object.freeze({status:'EMPTY',reason:'TRANSFER_INPUT_REQUIRED',review:null,executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false});
+  const transferSnapshot=()=>transferState;
+  function invalidateTransferReview(reason='TRANSFER_INPUT_CHANGED'){
+    ++transferGeneration;transferState=Object.freeze({status:'EMPTY',reason,review:null,executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false});return transferState;
+  }
+  async function prepareKgenTransfer(input){
+    const ownKeys=['recipient','amountKgen','gasLimit','gasPriceWei','maximumGasFeeWei'];let draft,calls=0;
+    const blocked=reason=>Object.freeze({status:'BLOCKED',reason,review:null,rpcReadCount:calls,executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false});
+    invalidateTransferReview();const ticket=transferGeneration,walletTicket=generation,sender=state.account;
+    const stillCurrent=()=>!disposed&&active&&!!provider&&ticket===transferGeneration&&walletTicket===generation&&state.status==='CONNECTED'&&state.chainId===KGEN_CHAIN_ID&&state.account===sender;
+    const fail=reason=>{if(ticket===transferGeneration)transferState=blocked(reason);return transferState};
+    if(!stillCurrent())return fail('TRANSFER_ACTIVE_CHAIN56_SESSION_REQUIRED');
+    try{
+      if(!input||typeof input!=='object'||![Object.prototype,null].includes(Object.getPrototypeOf(input)))throw new Error('TRANSFER_PREPARATION_FIELDS_REQUIRED');
+      const ds=Object.getOwnPropertyDescriptors(input),keys=Reflect.ownKeys(ds);
+      if(keys.length!==ownKeys.length||keys.some(k=>!ownKeys.includes(k)))throw new Error('TRANSFER_PREPARATION_FIELDS_REQUIRED');
+      draft={};for(const key of ownKeys){const d=ds[key];if(!d||!Object.hasOwn(d,'value')||!d.enumerable||typeof d.value!=='string'||d.value.length>98)throw new Error('TRANSFER_PREPARATION_PLAIN_STRINGS_REQUIRED');draft[key]=d.value}Object.freeze(draft);
+      transferState=Object.freeze({status:'READING',reason:'PINNED_READ_ONLY_PREPARATION',review:null,executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false});
+      const codec=await approvedKgenTransferCodec();if(!stillCurrent())return transferState;
+      if(!/^(0|[1-9][0-9]*)(?:\.[0-9]{1,18})?$/.test(draft.amountKgen))throw new Error('TRANSFER_EXACT_KGEN_DECIMAL_REQUIRED');
+      const [whole,fraction='']=draft.amountKgen.split('.'),amount=BigInt(whole)*10n**18n+BigInt(fraction.padEnd(18,'0'));
+      if(amount<=0n||amount>72000000n*10n**18n)throw new Error('TRANSFER_AMOUNT_OUT_OF_RANGE');
+      for(const key of ['gasLimit','gasPriceWei','maximumGasFeeWei'])if(!/^[1-9][0-9]{0,77}$/.test(draft[key]))throw new Error('TRANSFER_GAS_UINT_REQUIRED');
+      if(BigInt(draft.gasLimit)>=(1n<<64n)||BigInt(draft.gasPriceWei)>=(1n<<256n)||BigInt(draft.maximumGasFeeWei)>=(1n<<256n)||BigInt(draft.gasLimit)*BigInt(draft.gasPriceWei)>BigInt(draft.maximumGasFeeWei))throw new Error('TRANSFER_GAS_CAP_EXCEEDED');
+      const recipient=codec.getAddress(draft.recipient);if(!EVM_ADDRESS.test(recipient)||/^0x0{40}$/i.test(recipient)||recipient.toLowerCase()===sender.toLowerCase()||recipient.toLowerCase()===KGEN_TOKEN_ADDRESS.toLowerCase())throw new Error('TRANSFER_RECIPIENT_ADDRESS_INVALID');
+      const field=(object,key)=>{const d=object&&Object.getOwnPropertyDescriptor(object,key);if(!d||!Object.hasOwn(d,'value'))throw new Error('TRANSFER_RPC_DATA_DESCRIPTOR_REQUIRED');return d.value};
+      const capturedBlock=value=>{if(!value||typeof value!=='object')throw new Error('TRANSFER_PINNED_HEAD_UNKNOWN');return Object.freeze({number:field(value,'number'),hash:field(value,'hash'),timestamp:field(value,'timestamp')})};
+      const immutable=v=>{if(v&&typeof v==='object'){for(const item of Object.values(v))immutable(item);Object.freeze(v)}return v};
+      const methods=new Set(['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_getBalance','eth_getTransactionCount']);
+      const read=async(method,params=[])=>{
+        if(!stillCurrent())throw new Error('TRANSFER_CONTEXT_CHANGED');
+        if(!methods.has(method)||++calls>15)throw new Error('TRANSFER_READ_ONLY_RPC_BUDGET_EXCEEDED');
+        const value=await request(immutable({method,params}));if(!stillCurrent())throw new Error('TRANSFER_CONTEXT_CHANGED');
+        if(method==='eth_getBlockByNumber')return capturedBlock(value);
+        if(method==='eth_accounts'){if(!Array.isArray(value)||field(value,'length')<1||field(value,'length')>64)throw new Error('TRANSFER_ACTIVE_ACCOUNT_UNKNOWN');return Object.freeze([field(value,'0')])}
+        return value;
+      };
+      const quantity=(value,label)=>{if(typeof value!=='string'||value.length>66||!/^0x(?:0|[1-9a-fA-F][0-9a-fA-F]*)$/.test(value))throw new Error('TRANSFER_'+label+'_QUANTITY_INVALID');return BigInt(value)};
+      const identity=(accounts,chain)=>{if(!Array.isArray(accounts)||accounts.length<1||typeof accounts[0]!=='string'||!EVM_ADDRESS.test(accounts[0])||accounts[0].toLowerCase()!==sender.toLowerCase()||quantity(chain,'CHAIN')!==56n)throw new Error('TRANSFER_ACTIVE_ACCOUNT_OR_CHAIN_CHANGED')};
+      const [accounts,chain,head]=await Promise.all([read('eth_accounts'),read('eth_chainId'),read('eth_getBlockByNumber',['latest',false])]);identity(accounts,chain);
+      if(!head||typeof head!=='object'||typeof head.hash!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(head.hash)||/^0x0{64}$/i.test(head.hash))throw new Error('TRANSFER_PINNED_HEAD_UNKNOWN');
+      const number=quantity(head.number,'BLOCK'),timestamp=quantity(head.timestamp,'BLOCK_TIME');
+      if(number===0n||timestamp*1000n>BigInt(Date.now()+30000)||timestamp*1000n<BigInt(Date.now()-120000))throw new Error('TRANSFER_PINNED_HEAD_STALE_OR_FUTURE');
+      const block=Object.freeze({blockHash:head.hash,requireCanonical:true});
+      const abi=new codec.Interface(['function balanceOf(address) view returns(uint256)','function isTaxExempt(address) view returns(bool)','function isMarketMakerPair(address) view returns(bool)']);
+      const call=(name,account)=>read('eth_call',[{to:KGEN_TOKEN_ADDRESS,data:abi.encodeFunctionData(name,[account])},block]);
+      const [code,balance,native,senderExempt,recipientExempt,senderPair,recipientPair,recipientCode,nonce]=await Promise.all([
+        read('eth_getCode',[KGEN_TOKEN_ADDRESS,block]),call('balanceOf',sender),read('eth_getBalance',[sender,block]),call('isTaxExempt',sender),call('isTaxExempt',recipient),call('isMarketMakerPair',sender),call('isMarketMakerPair',recipient),read('eth_getCode',[recipient,block]),read('eth_getTransactionCount',[sender,'pending'])
+      ]);
+      const codeBytes=value=>{if(typeof value!=='string'||value.length>131074||!/^0x(?:[0-9a-fA-F]{2})*$/.test(value))throw new Error('TRANSFER_CODE_RESPONSE_INVALID');return value};
+      if(codeBytes(code)==='0x'||codec.keccak256(code)!==KGEN_BSC56_TOKEN_CODE_HASH)throw new Error('TRANSFER_CANONICAL_TOKEN_CODE_MISMATCH');
+      const word=value=>{if(typeof value!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(value))throw new Error('TRANSFER_ABI_RESPONSE_INVALID');return BigInt(value)};
+      const flag=value=>{const n=word(value);if(n!==0n&&n!==1n)throw new Error('TRANSFER_TAX_FLAG_RESPONSE_INVALID');return n===1n};
+      const readback={chainId:56,tokenAddress:KGEN_TOKEN_ADDRESS,sender,recipient,tokenCodeHash:KGEN_BSC56_TOKEN_CODE_HASH,sourceCommit:KGEN_TRANSFER_BUILDER_REVIEWED_COMMIT,blockNumber:number.toString(),blockHash:head.hash,pendingNonce:quantity(nonce,'NONCE').toString(),tokenBalanceWei:word(balance).toString(),nativeBalanceWei:quantity(native,'NATIVE_BALANCE').toString(),senderTaxExempt:flag(senderExempt),recipientTaxExempt:flag(recipientExempt),senderMarketMakerPair:flag(senderPair),recipientMarketMakerPair:flag(recipientPair),recipientCodePresent:codeBytes(recipientCode)!=='0x'};
+      const [confirmedHead,confirmedAccounts,confirmedChain]=await Promise.all([read('eth_getBlockByNumber',[head.number,false]),read('eth_accounts'),read('eth_chainId')]);identity(confirmedAccounts,confirmedChain);
+      if(!confirmedHead||typeof confirmedHead.hash!=='string'||confirmedHead.hash.toLowerCase()!==head.hash.toLowerCase()||quantity(confirmedHead.number,'CONFIRM_BLOCK')!==number||quantity(confirmedHead.timestamp,'CONFIRM_TIME')!==timestamp)throw new Error('TRANSFER_PINNED_HEAD_REORG_OR_MISMATCH');
+      const review=buildBsc56KgenTransferReview({chainId:56,sender,recipient,amountKgen:draft.amountKgen,nonce:readback.pendingNonce,gasLimit:draft.gasLimit,gasPriceWei:draft.gasPriceWei,maximumGasFeeWei:draft.maximumGasFeeWei,readback},{ethers:codec});
+      if(!stillCurrent())return transferState;
+      const publishedAt=Date.now();
+      if(timestamp*1000n>BigInt(publishedAt+30000)||timestamp*1000n<BigInt(publishedAt-120000))throw new Error('TRANSFER_PINNED_HEAD_STALE_OR_FUTURE');
+      transferState=Object.freeze({status:'READ_ONLY_REVIEW',reason:'WALLET_HANDOFF_NOT_IMPLEMENTED',review,rpcReadCount:calls,observedAt:new Date(publishedAt).toISOString(),readbackScope:'PROVIDER_OBSERVATION_NOT_FINALITY_PROOF',pendingNonceScope:'PENDING_SEPARATE_FROM_HASH_PINNED_STATE',gasScope:'EXPLICIT_INPUT_CAPS_NOT_NETWORK_ESTIMATE',builderSourceScope:'REVIEWED_PURE_BUILDER_ANCESTOR_NOT_CURRENT_DEPLOYMENT',codecIntegrity:KGEN_TRANSFER_CODEC_INTEGRITY,executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false});return transferState;
+    }catch(error){
+      if(ticket!==transferGeneration)return transferState;
+      let message;try{const d=Object.getOwnPropertyDescriptor(error||{},'message');if(d&&Object.hasOwn(d,'value'))message=d.value}catch{}
+      return fail(typeof message==='string'&&/^[A-Z][A-Z0-9_]{0,100}$/.test(message)?message:'TRANSFER_READBACK_UNKNOWN');
+    }
+  }
+
   function attach(){
     if(disposed)return false;
     if(active&&provider)return true;
@@ -242,6 +433,7 @@ export function createWalletSession({ethereum,storage,timeoutMs=12000}={}){
     connect:()=>attach()?sync({prompt:true}):Promise.resolve(snapshot()),
     refresh:()=>attach()?sync():Promise.resolve(snapshot()),
     disconnect:()=>detach(),snapshot,
+    prepareKgenTransfer,transferSnapshot,invalidateTransferReview,
     subscribe(listener){if(typeof listener!=='function'||disposed)return ()=>{};listeners.add(listener);try{listener(snapshot())}catch{}return ()=>listeners.delete(listener)},
     dispose(){detach();disposed=true;listeners.clear()}
   });
