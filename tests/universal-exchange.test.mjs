@@ -144,6 +144,7 @@ function restoredEventFixture({ scheduledAt = "2026-10-08T10:00:00.000Z", finish
     event_id: cycleId, life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", work_cycle_id: cycleId,
     scheduled_at: scheduledAt, started_at: scheduledAt, finished_at: finishedAt, result: "WORK_CYCLE_COMPLETED",
     action_taken: "NO_ACTION", work_duration_seconds: duration, monitoring_status: "VERIFIED", temple_monitoring_incident: null,
+    dot_gm_notification_projections: [], repair_work_orders: [],
     rpc_status: "AVAILABLE", heart_status: "AVAILABLE", observations: [], actions_considered: [], error_evidence: [],
     chain_write: false, signer_action: false, secret_access: false, tx_hash: null, gas_spent: "0", asset_movement: false, temple_mutation: false, token_mutation: false, governance_action: false, bsc_block: 116040000,
     gatekeeper_duty: gatekeeperDuty({ gatekeeper_started_at: scheduledAt, gatekeeper_finished_at: finishedAt, heart_block: 116040000 }), heart_state: { status: "12345_PATROL_COMPLETED" }, work_time: { gatekeeper_work_seconds: 1, cfo_work_seconds: 1, company_work_seconds: 1 }
@@ -1460,6 +1461,40 @@ test("restored status rejects bidirectional monitoring projection, health, and m
   assert.match(prepareRestoredWorkerStatus({ candidate: contradictoryMetrics, observedAt: "2026-10-08T10:30:00.000Z" }).failures[0].source, /RESTORED_STATUS_METRICS_CONTRADICT_CYCLE/);
 });
 
+test("restored monitoring projections are explicit, canonical, and protected after recovery", () => {
+  const healthy = restoredStatusFixture();
+  const injectedProjection = structuredClone(healthy);
+  const evilNotification = { notification_id: "EVIL_DOT_GM", recipients: ["DOT", "衡曜 / General Manager"], status: "NOTIFICATION_REQUIRED", created_at: "2026-10-08T10:00:05.000Z", external_message_sent: false };
+  injectedProjection.last_work_cycle.dot_gm_notification_projections = [evilNotification];
+  injectedProjection.dot_gm_notification_projections = [evilNotification];
+  const rejectedProjection = prepareRestoredWorkerStatus({ candidate: injectedProjection, observedAt: "2026-10-08T10:30:00.000Z" });
+  assert.equal(rejectedProjection.status, null);
+  assert.match(rejectedProjection.failures[0].source, /RESTORED_EVENT_INCIDENT_PROJECTION_MISMATCH/);
+
+  const omittedTopLevel = structuredClone(healthy);
+  delete omittedTopLevel.dot_gm_notification_projections;
+  assert.match(prepareRestoredWorkerStatus({ candidate: omittedTopLevel, observedAt: "2026-10-08T10:30:00.000Z" }).failures[0].source, /RESTORED_STATUS_MONITORING_PROJECTION_MISSING/);
+  const omittedEventField = structuredClone(healthy);
+  delete omittedEventField.last_work_cycle.repair_work_orders;
+  assert.match(prepareRestoredWorkerStatus({ candidate: omittedEventField, observedAt: "2026-10-08T10:30:00.000Z" }).failures[0].source, /RESTORED_EVENT_SCHEMA_INVALID/);
+
+  const failure = createTempleMonitoringFailure({ condition: "BSC_RPC_UNREACHABLE", occurredAt: "2026-10-08T05:00:00.000Z", source: "BSC_RPC:RPC_UNAVAILABLE" });
+  const first = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T05:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100805" });
+  const second = advanceTempleMonitoringIncident({ previousIncident: first, failures: [failure], observedAt: "2026-10-08T06:00:01.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100806" });
+  const recovered = advanceTempleMonitoringIncident({ previousIncident: second, failures: [], observedAt: "2026-10-08T07:00:05.000Z", currentCycleId: "DIGITAL_ANT_0001_HOURLY_2026100807", recoveryEvidence: verifiedMonitoringRecovery() });
+  assert.equal(validateTempleMonitoringIncident(recovered), recovered);
+  assert.equal(recovered.repair_work_orders.length, 1);
+  const unsafeRecovered = structuredClone(recovered);
+  unsafeRecovered.repair_work_orders[0].chain_write = true;
+  assert.throws(() => validateTempleMonitoringIncident(unsafeRecovered), (error) => error.code === "TEMPLE_MONITORING_REPAIR_SAFETY_BOUNDARY");
+  const misroutedNotification = structuredClone(recovered);
+  misroutedNotification.notification_projections[0].recipients = ["NOT_DOT"];
+  assert.throws(() => validateTempleMonitoringIncident(misroutedNotification), (error) => error.code === "TEMPLE_MONITORING_NOTIFICATION_RECIPIENTS_INVALID");
+  const falselySentNotification = structuredClone(recovered);
+  falselySentNotification.notification_projections[0].external_message_sent = true;
+  assert.throws(() => validateTempleMonitoringIncident(falselySentNotification), (error) => error.code === "TEMPLE_MONITORING_NOTIFICATION_STATUS_INVALID");
+});
+
 test("incident recovery requires RPC, Heart bytecode, canonical wallet read, cooldown, and fresh patrol evidence", () => {
   const failure = createTempleMonitoringFailure({ condition: "HEART_UNAVAILABLE", occurredAt: "2026-10-08T05:00:00.000Z", source: "HEART:UNAVAILABLE" });
   const first = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T05:00:00.000Z" });
@@ -1501,6 +1536,8 @@ test("recovered incident event survives status persistence and the next distinct
   assert.equal(recoveredEvent.monitoring_status, "VERIFIED");
   assert.equal(recoveredEvent.temple_monitoring_incident.status, "RECOVERED");
   assert.equal(recoveredEvent.temple_monitoring_incident.open, false);
+  assert.deepEqual(recoveredEvent.dot_gm_notification_projections, recoveredEvent.temple_monitoring_incident.notification_projections);
+  assert.deepEqual(recoveredEvent.repair_work_orders, recoveredEvent.temple_monitoring_incident.repair_work_orders);
   assert.equal(validateRestoredWorkEvent(recoveredEvent, { expectedCycleId: recoveredEvent.work_cycle_id, eventPath: join(tmpdir(), `${recoveredEvent.work_cycle_id}.json`), observedAt: recoveryFinishedAt }), recoveredEvent);
   const reopenedInCompletedEvent = structuredClone(recoveredEvent);
   reopenedInCompletedEvent.temple_monitoring_incident.status = "DEGRADED";
@@ -1516,6 +1553,8 @@ test("recovered incident event survives status persistence and the next distinct
     const recoveredStatus = buildSharedWorkerStatus({ event: recoveredEvent, previous: failedStatus, requestPatrol, companyPatrol, generatedAt: recoveryFinishedAt });
     assert.deepEqual(recoveredStatus.temple_monitoring_incident, recoveredEvent.temple_monitoring_incident);
     assert.equal(recoveredStatus.monitoring_status, recoveredEvent.monitoring_status);
+    assert.deepEqual(recoveredStatus.dot_gm_notification_projections, recoveredEvent.dot_gm_notification_projections);
+    assert.deepEqual(recoveredStatus.repair_work_orders, recoveredEvent.repair_work_orders);
     await fs.writeFile(statusPath, `${JSON.stringify(recoveredStatus)}\n`, "utf8");
     const restoredCandidate = JSON.parse(await fs.readFile(statusPath, "utf8"));
     const restored = prepareRestoredWorkerStatus({ candidate: restoredCandidate, observedAt: "2026-10-08T06:30:00.000Z" });

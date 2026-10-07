@@ -408,7 +408,7 @@ function expectedHourlyCycleId(scheduledAt) {
 
 export function validateRestoredWorkEvent(event, { expectedCycleId, eventPath, observedAt }) {
   if (!event || typeof event !== "object" || Array.isArray(event)) throw statusError("RESTORED_EVENT_SCHEMA_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
-  const required = ["event_id", "life_id", "app_id", "work_cycle_id", "scheduled_at", "started_at", "finished_at", "rpc_status", "heart_status", "monitoring_status", "action_taken", "result", "work_duration_seconds", "observations", "actions_considered", "error_evidence", "gas_spent", "tx_hash", "signer_action", "chain_write", "secret_access", "asset_movement", "temple_mutation", "token_mutation", "governance_action"];
+  const required = ["event_id", "life_id", "app_id", "work_cycle_id", "scheduled_at", "started_at", "finished_at", "rpc_status", "heart_status", "monitoring_status", "temple_monitoring_incident", "dot_gm_notification_projections", "repair_work_orders", "action_taken", "result", "work_duration_seconds", "observations", "actions_considered", "error_evidence", "gas_spent", "tx_hash", "signer_action", "chain_write", "secret_access", "asset_movement", "temple_mutation", "token_mutation", "governance_action"];
   if (required.some((key) => !Object.prototype.hasOwnProperty.call(event, key))) throw statusError("RESTORED_EVENT_SCHEMA_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   if (!/^DIGITAL_ANT_0001_HOURLY_\d{10}$/.test(expectedCycleId ?? "") || basename(eventPath ?? "") !== `${expectedCycleId}.json` || event.event_id !== expectedCycleId || event.work_cycle_id !== expectedCycleId) throw statusError("RESTORED_EVENT_CYCLE_IDENTITY_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   if (event.life_id !== "DIGITAL_ANT_0001" || event.app_id !== "DIGITAL_ANT_APP_0001") throw statusError("RESTORED_EVENT_LIFE_APP_IDENTITY_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
@@ -431,6 +431,9 @@ export function validateRestoredWorkEvent(event, { expectedCycleId, eventPath, o
     validateTempleMonitoringIncident(event.temple_monitoring_incident);
     if (event.temple_monitoring_incident.open !== true || event.temple_monitoring_incident.last_observed_cycle_id !== expectedCycleId || event.monitoring_status !== event.temple_monitoring_incident.status || !["DEGRADED", "MONITORING_FAILED"].includes(event.monitoring_status)) throw statusError("RESTORED_EVENT_INCIDENT_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   }
+  const incidentNotifications = event.temple_monitoring_incident === null ? [] : event.temple_monitoring_incident.notification_projections;
+  const incidentOrders = event.temple_monitoring_incident === null ? [] : event.temple_monitoring_incident.repair_work_orders;
+  if (!isDeepStrictEqual(event.dot_gm_notification_projections, incidentNotifications) || !isDeepStrictEqual(event.repair_work_orders, incidentOrders)) throw statusError("RESTORED_EVENT_INCIDENT_PROJECTION_MISMATCH", "PUBLIC_WORKER_EVENT_RESTORE");
   if (event.secret_access !== false || event.signer_action !== false || event.chain_write !== false || event.tx_hash !== null || event.gas_spent !== "0" || event.asset_movement !== false || event.temple_mutation !== false || event.token_mutation !== false || event.governance_action !== false) throw statusError("RESTORED_EVENT_SAFETY_BOUNDARY_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   return event;
 }
@@ -445,6 +448,7 @@ export function prepareRestoredWorkEvent({ candidate, expectedCycleId, eventPath
 
 export function validateRestoredWorkerStatus(status) {
   validateSharedWorkerStatus(status);
+  if (!["monitoring_status", "temple_monitoring_incident", "dot_gm_notification_projections", "repair_work_orders"].every((key) => Object.prototype.hasOwnProperty.call(status, key))) throw statusError("RESTORED_STATUS_MONITORING_PROJECTION_MISSING", "PUBLIC_WORKER_SHARED_STATUS");
   if (!validIso(status.generated_at)) throw statusError("RESTORED_STATUS_TIME_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
   const cycle = status.last_work_cycle;
   if (!cycle || cycle.life_id !== "DIGITAL_ANT_0001" || cycle.app_id !== "DIGITAL_ANT_APP_0001") throw statusError("RESTORED_STATUS_CYCLE_IDENTITY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
@@ -453,7 +457,7 @@ export function validateRestoredWorkerStatus(status) {
   if (cycle.work_cycle_id !== expectedHourlyCycleId(cycle.scheduled_at)) throw statusError("RESTORED_STATUS_CYCLE_KEY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
   validateRestoredWorkEvent(cycle, { expectedCycleId: cycle.work_cycle_id, eventPath: `${cycle.work_cycle_id}.json`, observedAt: status.generated_at });
   if (status.monitoring_status !== cycle.monitoring_status || !isDeepStrictEqual(status.temple_monitoring_incident ?? null, cycle.temple_monitoring_incident ?? null)) throw statusError("RESTORED_STATUS_MONITORING_PROJECTION_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
-  if (!isDeepStrictEqual(status.dot_gm_notification_projections ?? [], cycle.dot_gm_notification_projections ?? []) || !isDeepStrictEqual(status.repair_work_orders ?? [], cycle.repair_work_orders ?? [])) throw statusError("RESTORED_STATUS_INCIDENT_PROJECTION_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
+  if (!isDeepStrictEqual(status.dot_gm_notification_projections, cycle.dot_gm_notification_projections) || !isDeepStrictEqual(status.repair_work_orders, cycle.repair_work_orders)) throw statusError("RESTORED_STATUS_INCIDENT_PROJECTION_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
   const derivedHealth = deriveWorkerHealth({ lastCycle: cycle, now: status.generated_at });
   if (status.worker_health !== derivedHealth.status || status.work_stop_reason !== derivedHealth.stop_reason) throw statusError("RESTORED_STATUS_WORKER_HEALTH_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
   const metrics = status.metrics;
