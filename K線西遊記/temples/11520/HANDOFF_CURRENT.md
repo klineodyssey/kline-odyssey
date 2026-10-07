@@ -236,17 +236,24 @@ independent canonical work-order or signed contribution record resolves it.
   verified the clean managed branch, 63-row/state split, six seed commits, and
   316 `digital-ant-worker` commits; the 581 aggregate is accepted as recorded
   evidence because the exact query/path manifest was not saved separately.
-- `DOT_STATUS = AVAILABLE_FOR_ASSIGNMENT` after this report. A future task must
-  supply `WORK_ID`, source, owner, implementer, reviewer, bounded scope, and
-  acceptance tests. No new work authority is inferred here.
-- `REMOTE_SAVE = BLOCKED_GITHUB_INTERNAL_SERVER_ERROR`: two authenticated Git
-  pushes were rejected by the remote with Internal Server Error and the
-  authorized Contents API fallback returned an empty write response. Therefore
-  `PR = NONE`, `REMOTE_HEAD = NONE`, and `DATA_LOSS_RISK = MEDIUM`. The report is
-  committed in the managed worktree and its exact status was sent to GM and DOT,
-  but it is not yet a remote repository checkpoint. No merge, deploy, Mainnet
-  transaction, real KGEN/KAIOS transfer, Treasury, payroll, or governance action
-  is authorized by this report.
+- `DOT_STATUS = AVAILABLE_FOR_ASSIGNMENT`. DOT created the first complete bounded
+  WorkOrder as GitHub issue `#538`,
+  `KAIOS-DOT-DIGITAL-ANT-AUTOMATION-CLOSED-LOOP-20261007-R1`, with source, owner,
+  implementer, reviewer, scope, acceptance tests, expiry, and protected-action
+  boundaries. Delivery is `WATCHING`: the existing `digital-ant-cargo-duty`
+  heartbeat now discovers current open WorkOrders dynamically, but its first
+  automation-origin read and identity-scoped ACK remain `NOT_VERIFIED`.
+- `REMOTE_SAVE = RECOVERED_AFTER_VERIFIED_RETRY`: the historical publication
+  attempt was blocked by two GitHub Internal Server Error responses and an empty
+  Contents API fallback. After a separate same-repository write succeeded, GM
+  rechecked that the remote stub still pointed to base
+  `f7f67950418ebbb6f7a5a309a32d529232fcb3b6` and then performed one fast-forward
+  push of the same branch. `REMOTE_HEAD =
+  72d2d3e965035db8eb2b0c2f00991750930df37e`, `PR = #537 DRAFT`, and
+  `DATA_LOSS_RISK = LOW_REMOTE_DRAFT_CHECKPOINT`. Independent exact-head review
+  is in progress. No merge, deploy, Mainnet transaction, real KGEN/KAIOS transfer,
+  Treasury, payroll, governance action, or legal ownership determination is
+  authorized by this report.
 
 ## P0 simulation order availability candidate — 2026-10-06
 
