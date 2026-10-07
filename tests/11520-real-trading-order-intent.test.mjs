@@ -532,3 +532,139 @@ test('M1 balances-only A B reload and A B A fencing retain one canonical account
  let view=f.make({readOnly:true});await view.recover();assert.equal(view.snapshot().wallet.testBnbBalanceWei,'1');f.setAccount(other);await view.recover();assert.equal(view.snapshot().wallet.testBnbBalanceWei,'2');view.dispose();view=f.make({readOnly:true});await view.recover();assert.equal(view.snapshot().account,other);
  delay=true;const old=view.recover();await started;f.setAccount(WALLET);f.setAccount(other);release();assert.equal((await old).superseded,true);assert.equal(view.snapshot().wallet,null);delay=false;await view.recover();assert.equal(view.snapshot().account,other);assert.equal(view.snapshot().wallet.testBnbBalanceWei,'2');
 });
+
+// Human P0: public quote availability must not disable explicit local simulation.
+for(const [axis,market] of [['KX','BTCUSDT'],['KY','ETHUSDT'],['KZ','BNBUSDT']])for(const c of [1,-1])test(`offline SIMULATION ${market} ${c>0?'LONG':'SHORT'} reuses pending/fill/PnL/close history without providers`,()=>{
+ const ledger=createKgenLedger(100),provider=new Proxy({}, {get(){throw new Error('SIMULATION_PROVIDER_ACCESS')}});
+ const adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true,ethereum:provider,ethers:provider,wallet:provider});
+ const now=20000,input={axis,market,c,lots:2,triggerPrice:{BTCUSDT:100000,ETHUSDT:4000,BNBUSDT:600}[market]};
+ const before=structuredClone(ledger),p=adapter.preview(input,{now});assert.equal(p.ok,true);assert.equal(p.priceSource,'K11520_DETERMINISTIC_SIMULATION');assert.deepEqual(ledger,before,'preview stays pure');
+ assert.equal(adapter.submit(input,{now}).ok,true);assert.equal(adapter.snapshot().orders[0].status,'PENDING');assert.equal(ledger.lockedMargin,0);
+ assert.equal(adapter.tick({now:now+1000}).ok,true);let book=adapter.snapshot();assert.equal(book.orders[0].status,'FILLED');assert.equal(book.positions[0].status,'OPEN');assert.equal(ledger.lockedMargin,2);
+ adapter.tick({now:now+(c>0?4000:68000)});book=adapter.snapshot();assert.ok(ledger.unrealizedPnl>0);assert.equal(book.positions[0].status,'OPEN');
+ const closed=adapter.close(book.positions[0].positionId,{now:now+(c>0?5000:69000)});assert.equal(closed.ok,true);assert.equal(closed.receipt.status,'CLOSED');assert.equal(closed.receipt.priceSource,'K11520_DETERMINISTIC_SIMULATION');assert.ok(ledger.realizedPnl>0);assert.equal(ledger.lockedMargin,0);
+ assert.equal(adapter.snapshot().receipts.length,2);assert.ok(adapter.snapshot().receipts.every(r=>r.simulationOnly&&r.priceSource==='K11520_DETERMINISTIC_SIMULATION'));
+});
+
+test('fallback source stays pinned through pending, position, public recovery and adapter reload',()=>{
+ const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+ adapter.observe({market:'ETHUSDT',price:4000,observedAt:1000,now:1000});
+ const input={axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4000};
+ assert.equal(adapter.submit(input,{now:20000}).ok,true);
+ assert.equal(adapter.observe({market:'ETHUSDT',price:1,observedAt:21000,now:21000}).ignored,true,'public recovery cannot reprice pinned pending order');
+ adapter.tick({now:21000});assert.equal(adapter.snapshot().positions[0].status,'OPEN');
+ const reloaded=createExecutionAdapter({ledger:structuredClone(ledger),productV1:true,simulationFallback:true});
+ assert.equal(reloaded.quote('ETHUSDT',{now:22000}).source,'K11520_DETERMINISTIC_SIMULATION');
+ assert.equal(reloaded.observe({market:'ETHUSDT',price:1,observedAt:23000,now:23000}).ignored,true);
+ assert.equal(reloaded.close(reloaded.snapshot().positions[0].positionId,{now:24000}).ok,true);
+});
+
+test('offline fallback liquidates both directions once with isolated collateral and source-bound receipts',()=>{
+ for(const c of [1,-1]){
+  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+  adapter.submit({axis:'KY',market:'ETHUSDT',c,lots:2,triggerPrice:4000},{now:1000});adapter.tick({now:2000});
+  adapter.tick({now:1000+(c>0?96000:32000)});const book=adapter.snapshot();assert.equal(book.positions[0].status,'LIQUIDATED');assert.equal(ledger.free,98);assert.equal(ledger.lockedMargin,0);assert.equal(book.receipts.length,2);
+  adapter.tick({now:130000});assert.equal(adapter.snapshot().receipts.length,2);
+ }
+});
+
+test('simulation fallback preserves canonical validation, margin and V1 ceiling, rejecting REAL source substitution',()=>{
+ const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+ const input={axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4000},before=structuredClone(ledger);
+ for(const invalid of [{c:0},{c:5},{c:-5},{lots:0},{lots:101},{market:'BTCUSDT'},{triggerPrice:NaN}])assert.equal(adapter.submit({...input,...invalid},{now:1000}).ok,false);
+ assert.deepEqual(ledger,before);ledger.free=0;assert.equal(adapter.preview(input,{now:1000}).code,'INSUFFICIENT_MARGIN');
+ for(const quoteState of ['WAIT','STALE','INVALID'])assert.throws(()=>buildRealTradingOrderIntent({...base,quoteState}),/REAL_QUOTE_NOT_LIVE/);
+ assert.throws(()=>buildRealTradingOrderIntent({...base,priceSource:'K11520_DETERMINISTIC_SIMULATION'}),/SIMULATION_PRICE_NOT_REAL/);
+ const real=createExecutionAdapter({ledger,deployment:{mode:'ON_CHAIN'},simulationFallback:true});assert.equal(real.preview(input).ok,false);assert.equal(real.submit(input).ok,false);assert.equal(real.tick,undefined);
+});
+
+test('fallback ticks and close stage all mutations before persistence, including corrupt source and clock rollback',()=>{
+ const ledger=createKgenLedger(100);let saves=0;
+ const adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true,afterMutation:()=>saves++});
+ adapter.tick({now:1000});ledger.simulation.observations.BNBUSDT.simulationAnchorPrice=NaN;
+ const before=structuredClone(ledger),saved=saves;assert.equal(adapter.tick({now:3000}).ok,false);assert.deepEqual(ledger,before,'later-market failure cannot commit earlier market');assert.equal(saves,saved);
+ ledger.simulation.observations.BNBUSDT.simulationAnchorPrice=600;
+ adapter.submit({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4000},{now:1000});adapter.tick({now:2000});
+ const position=adapter.snapshot().positions[0],open=structuredClone(ledger),afterFill=saves;
+ assert.equal(adapter.close(position.positionId,{now:500}).ok,false);assert.deepEqual(ledger,open);assert.equal(saves,afterFill);
+ assert.equal(adapter.tick({now:500}).ok,false);assert.deepEqual(ledger,open);assert.equal(saves,afterFill);
+ assert.equal(adapter.close('SIM-P-MISSING',{now:5000}).ok,false);assert.deepEqual(ledger,open);assert.equal(saves,afterFill);
+});
+
+test('fresh reference is retained until stale; fallback cannot overwrite public input or be injected as an observation',()=>{
+ const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+ const publicQuote={market:'BTCUSDT',price:65000,observedAt:1000,now:1000,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'},original=structuredClone(publicQuote);
+ assert.equal(adapter.observe(publicQuote).ok,true);assert.equal(adapter.quote('BTCUSDT',{now:15000}).source,publicQuote.source);
+ adapter.tick({now:15000});assert.equal(adapter.snapshot().observations.BTCUSDT.source,publicQuote.source);
+ adapter.tick({now:17000});const fallback=adapter.snapshot().observations.BTCUSDT;assert.equal(fallback.source,'K11520_DETERMINISTIC_SIMULATION');assert.equal(fallback.price,65000);assert.deepEqual(publicQuote,original);
+ const fresh=createExecutionAdapter({ledger:createKgenLedger(100),simulationFallback:true});
+ assert.equal(fresh.observe({market:'BTCUSDT',price:99,observedAt:1000,now:1000,source:'K11520_DETERMINISTIC_SIMULATION'}).ok,false);
+});
+
+test('real Testnet rejects simulation provenance and non-live quote state before any provider read or write',async()=>{
+ const f=testnetFixture(),adapter=f.make({simulationFallback:true});
+ for(const extra of [{priceSource:'K11520_DETERMINISTIC_SIMULATION'},{simulationOnly:true},{quoteState:'WAIT'},{quoteState:'STALE'},{quoteState:'INVALID'}]){
+  const before=f.calls.length,input={...simulationInput,c:1,...extra};
+  assert.equal((await adapter.preview(input)).ok,false);assert.equal((await adapter.submit(input)).ok,false);assert.equal(f.calls.length,before);
+ }
+});
+
+test('offline simulation retains every legal V1 signed-C value across all three market bindings',()=>{
+ for(const [axis,market,triggerPrice] of [['KX','BTCUSDT',100000],['KY','ETHUSDT',4000],['KZ','BNBUSDT',600]])for(const c of [-1,-.1,-.01,-.001,.001,.01,.1,1]){
+  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true}),input={axis,market,c,lots:1,triggerPrice};
+  assert.equal(adapter.preview(input,{now:1000}).ok,true);assert.equal(adapter.submit(input,{now:1000}).ok,true);adapter.tick({now:2000});
+  const position=adapter.snapshot().positions[0];assert.equal(position.c,c);assert.equal(position.side,c<0?'SHORT':'LONG');assert.equal(position.principal,1);
+ }
+});
+
+test('malformed saved observations fail closed rather than reanchoring an existing position to synthetic seed',()=>{
+ for(const invalid of [{price:NaN,at:1000},{price:-1,at:1000},{price:4000,at:undefined},{price:4000,at:-1}]){
+  const ledger=createKgenLedger(100);ledger.simulation={sequence:0,orders:[],positions:[],receipts:[],observations:{ETHUSDT:invalid}};
+  const adapter=createExecutionAdapter({ledger,simulationFallback:true}),before=structuredClone(ledger);
+  assert.equal(adapter.preview({axis:'KY',market:'ETHUSDT',c:1,lots:1,triggerPrice:4000},{now:20000}).ok,false);
+  assert.equal(adapter.tick({now:20000}).ok,false);assert.deepEqual(ledger,before);
+ }
+});
+
+test('missing observation on a pending/open saved market cannot mint a new anchor or fabricate liquidation',()=>{
+ for(const c of [1,-1])for(const filled of [false,true]){
+  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+  adapter.observe({market:'ETHUSDT',price:3000,observedAt:1000,now:1000});
+  adapter.submit({axis:'KY',market:'ETHUSDT',c,lots:1,triggerPrice:3000},{now:1001});
+  if(filled)adapter.observe({market:'ETHUSDT',price:3000,observedAt:2000,now:2000});
+  delete ledger.simulation.observations.ETHUSDT;
+  const before=structuredClone(ledger),reloaded=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+  assert.equal(reloaded.tick({now:17000}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before);
+  if(filled){assert.equal(reloaded.close(reloaded.snapshot().positions[0].positionId,{now:17000}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before)}
+  else {assert.equal(reloaded.preview({axis:'KY',market:'ETHUSDT',c,lots:1,triggerPrice:3000},{now:17000}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before)}
+ }
+});
+
+
+test('active LONG/SHORT source metadata corruption and future anchors require recovery without mutation',()=>{
+ for(const c of [1,-1])for(const filled of [false,true])for(const invalid of [{simulationAnchorPrice:null},{simulationAnchorPrice:NaN},{simulationAnchorPrice:400000},{simulationAnchorAt:999999},{simulationAnchorAt:undefined}]){
+  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,productV1:true,simulationFallback:true});
+  adapter.submit({axis:'KY',market:'ETHUSDT',c,lots:1,triggerPrice:4000},{now:1000});if(filled)adapter.tick({now:2000});
+  Object.assign(ledger.simulation.observations.ETHUSDT,invalid);const before=structuredClone(ledger),reloaded=createExecutionAdapter({ledger,simulationFallback:true});
+  assert.equal(reloaded.tick({now:17000}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before);
+  if(filled){assert.equal(reloaded.close(ledger.simulation.positions[0].positionId,{now:17000}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before)}
+ }
+});
+
+test('public observe cannot bypass recovery or reset a pinned pending/open source after saved metadata loss',()=>{
+ for(const c of [1,-1])for(const filled of [false,true])for(const corruption of ['missing','marker','price']){
+  const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,simulationFallback:true});
+  adapter.submit({axis:'KY',market:'ETHUSDT',c,lots:1,triggerPrice:filled?4000:4001},{now:1000});adapter.tick({now:2000});
+  if(corruption==='missing')delete ledger.simulation.observations.ETHUSDT;
+  if(corruption==='marker')ledger.simulation.observations.ETHUSDT.source='BINANCE_PUBLIC_MARKET_DATA_ONLY';
+  if(corruption==='price')ledger.simulation.observations.ETHUSDT.price=5000;
+  const before=structuredClone(ledger),reloaded=createExecutionAdapter({ledger,simulationFallback:true});
+  assert.equal(reloaded.observe({market:'ETHUSDT',price:c<0?5000:3000,observedAt:3000,now:3000,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before);
+ }
+ const ledger=createKgenLedger(100),adapter=createExecutionAdapter({ledger,simulationFallback:true});
+ adapter.observe({market:'ETHUSDT',price:4000,observedAt:1000,now:1000,source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'});
+ adapter.submit({axis:'KY',market:'ETHUSDT',c:-1,lots:1,triggerPrice:4001},{now:1001});adapter.tick({now:17000});
+ assert.equal(ledger.simulation.orders[0].priceSource,'BINANCE_PUBLIC_MARKET_DATA_ONLY');assert.equal(ledger.simulation.orders[0].executionPriceSource,'K11520_DETERMINISTIC_SIMULATION');
+ ledger.simulation.observations.ETHUSDT.source='BINANCE_PUBLIC_MARKET_DATA_ONLY';const before=structuredClone(ledger);
+ assert.equal(adapter.observe({market:'ETHUSDT',price:5000,observedAt:18000,now:18000}).reason,'SIMULATION_RECOVERY_REQUIRED');assert.deepEqual(ledger,before);
+});

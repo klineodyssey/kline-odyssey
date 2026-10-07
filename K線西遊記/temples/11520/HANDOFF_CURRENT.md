@@ -1,3 +1,63 @@
+## P0 simulation order availability candidate — 2026-10-06
+
+- Human source: `KAIOS DOT — K11520 SIMULATION TRADING P0 GAMEPLAY REPAIR`,
+  `Sentinel_7b88e1c7d5108191a6bf141e57635f7c`, 2026-10-06 07:40 UTC.
+  Prepared by dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER /
+  HUMAN_AUTHORIZED_2026_10_05, under the explicit external-contributor exception.
+  No registered Life/Worker identity, company claim, Registry or authority change.
+- Clean source main: `e26f3a76ef0be7f43058225f46def3fbe123371e`.
+  Read Boot V1.4 first, then Boot CURRENT, Company/Workspace/Worker policy,
+  root/local AGENTS, current domain sources and active PR ownership. No Navigator,
+  PlayerLife/storage candidate, M2 or unrelated Draft source was imported.
+- Reproduction before repair: BTC/KX, ETH/KY and BNB/KZ, LONG/SHORT, +/-1C,
+  1 lot, free=100, disconnected wallet and explicit SIMULATION all hit
+  `ORACLE_STALE / STALE_PRICE` with public WAIT. `openOrder -> price()` returned
+  zero before opening confirmation; adapter preview independently rejected the
+  missing observation. This initial evidence was source + executed model, not
+  an actual Chromium reproduction.
+- Existing simulation adapter now explicitly opts into a clock-bound fallback
+  when public data is unavailable/stale. The existing public quote owner supplies
+  labeled synthetic seed values and a bounded 128-second triangular path;
+  `K11520_DETERMINISTIC_SIMULATION` is never a public LIVE quote or Oracle.
+  Public reference state is unchanged. A fallback market stays pinned through
+  pending orders, positions and reload; returning public data cannot jump it.
+- Existing order/position/risk/ledger lifecycle still owns pending, touch/cross,
+  fills, isolated margin, PnL, close, liquidation and append-only receipt history.
+  Preview is pure. Submit, multi-market clock ticks and close stage ledger changes
+  before committing. Source provenance is retained in orders/positions/receipts.
+- SIMULATION uses no provider, signer, Mainnet RPC or transaction. REAL/Testnet
+  rejects simulation provenance and explicit WAIT/STALE/INVALID before provider
+  access. Existing chain, ownership, allowance, margin, receipt, withdraw,
+  Mainnet and >1C gates remain. Public game SIMULATION retains its existing1C
+  cap. Current principal law remains1lot=1KGEN; existing PnL math is unchanged.
+- The C control remains the existing shared signed detent owner. This repair
+  does not verify or repair physical1C=.001K/s motion: main's manual movement
+  is still frame-dependent. It does not infer Player body mass from margin.
+  Current1000kg/KGEN law is recognized; no Physics or mass formula is changed.
+- Existing browser settlement harness adds opt-in baseline/offline native Submit
+  evidence for six markets/directions at six sizes, provider traps, lifecycle,
+  source hashes and screenshots. Existing signed-C WAIT check now expects a
+  labeled simulation preview, preserving no-debit/cancel/high-C/no-chain guards.
+  Existing Game Product QA invokes bounded baseline and candidate lanes.
+- Source review found and repaired active-book recovery defects before delivery:
+  missing/corrupt/future/inconsistent source anchors block ticks, incoming public
+  observations and close with `SIMULATION_RECOVERY_REQUIRED`. Both LONG/SHORT,
+  pending/open and reload cases preserve wallet, margin and receipts. Partial
+  multi-market mutations are rejected atomically. The source consistency check
+  does not authenticate browser storage or replace the separate PlayerLife work.
+  The UI catches quote errors, disables stale confirmation, and distinguishes
+  creation provenance from current execution provenance.
+- Final local source re-review independently repeated the adverse cases and
+  verified public-to-local source continuity for six legacy positions. Exact
+  source hashes and aggregate test results belong to the accompanying packet.
+- Local functional evidence is recorded in the review packet. Actual Chromium,
+  exact-head CI, direct screenshot review and product release remain PENDING.
+  `FUNCTIONAL_QA=LOCAL_PASS`, `VISUAL_QA=NOT_RUN`, `NOT_COMPLETE`.
+- Visible game release owners remain V2.9.5; general VERSION3.9.0 belongs to the
+  broader app. No version-label blob, NavigatorV2.9.6 payload or new runtime file
+  was copied. Candidate identity is exact source SHA. Release-version
+  reconciliation remains a separate review gate, not an implied publication.
+
 # 11520 HANDOFF CURRENT
 
 ## M1 startup-order repair — 2026-10-05

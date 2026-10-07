@@ -1,4 +1,18 @@
 ﻿<!doctype html>
+<!-- KGEN_META
+VERSION: 2.9.5
+REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+PRODUCT_CONTEXT: V2.9.5
+STATUS: ACTIVE
+LAST_UPDATED: 2026-10-06
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
+SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
+TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
+CHANGE_REASON: Keep confirmation actions visible across viewports and reserve an in-flow feedback row in the existing trading-panel header.
+ANCESTOR: K線西遊記/temples/11520/game-5d.html @ e26f3a76ef0be7f43058225f46def3fbe123371e
+SOURCE_OF_TRUTH: TRUE
+-->
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
@@ -60,7 +74,19 @@
  html.k11520UtilitiesOpen #backpackPanel,html.k11520UtilitiesOpen #aiChatPanel,html.k11520UtilitiesOpen #gameChat.open,html.k11520UtilitiesOpen #k11520UiSettings,html.k11520UtilitiesOpen #walletPanel:not(.collapsed){left:max(10px,env(safe-area-inset-left))!important;right:calc(245px + max(5px,env(safe-area-inset-right)))!important;top:58px!important;bottom:max(12px,env(safe-area-inset-bottom))!important;width:auto!important;max-height:calc(100dvh - 70px)!important;overflow:auto!important;transform:none!important}
  .dock{right:4px!important;bottom:4px!important}.assetTag{display:none!important}
 }
+/* Shared order-confirmation viewport: keep Cancel/Submit visible while only
+   the preview/form scrolls, including portrait and the keyboard-sized viewport. */
+#confirm.open{display:flex;flex-direction:column;overflow:hidden;top:max(8px,env(safe-area-inset-top))!important;bottom:auto!important;max-height:calc(var(--k11520-visible-vh,100dvh) - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)))!important}
+#confirm #confirmBody{min-height:0;overflow:auto;flex:1 1 auto;overscroll-behavior:contain}
+#confirm>.sheetHead,#confirm>.grid2{flex:0 0 auto;background:#101923}
+#confirm>.grid2{padding-top:8px}
+#confirm .btn,#confirm .close{min-height:44px}
+#confirm .close{min-width:44px}
 .confirm input{background:#101923;color:#eef7ff;border:1px solid #7893a3;border-radius:6px;padding:8px;font:inherit}.confirm input:focus{outline:2px solid #ffd25c;outline-offset:1px}
+/* Trading-panel feedback stays in the existing header flow, above its body. */
+:is(#confirm,#sheet)>.sheetHead:has(>#toast){flex-wrap:wrap;position:sticky;top:0;z-index:3;background:#101923}
+:is(#confirm,#sheet)>.sheetHead>#toast{display:none;position:static!important;inset:auto!important;transform:none!important;z-index:auto!important;flex:0 0 100%;width:100%;max-width:100%!important;max-height:min(96px,25dvh);box-sizing:border-box!important;margin:6px 0 0;overflow:auto;overflow-wrap:anywhere;overscroll-behavior:contain;pointer-events:auto!important;font-size:11px!important}
+:is(#confirm,#sheet)>.sheetHead>#toast.show{display:block}
 #kspaceTarget{position:fixed;left:50%;top:414px;transform:translateX(-50%);width:min(156px,40vw);min-height:68px;max-height:92px;overflow:hidden;padding:7px;z-index:221;color:#dfefff;font:10px/1.35 system-ui;text-align:left;white-space:pre-line;border-radius:10px;background:#091119f5;touch-action:manipulation}
 @media(max-width:420px){#kspaceTarget{left:50%;top:414px;transform:translateX(-50%);width:min(142px,38vw);max-height:86px;font-size:9px}}
 @media(max-width:380px){#kspaceTarget{left:126px;right:auto;top:284px;transform:none;width:108px;min-height:58px;max-height:72px;font-size:8px;z-index:690}}

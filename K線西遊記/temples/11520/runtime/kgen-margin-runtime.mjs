@@ -1,3 +1,18 @@
+/* KGEN_META
+VERSION: CURRENT
+REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+PRODUCT_CONTEXT: V2.9.5
+STATUS: ACTIVE
+LAST_UPDATED: 2026-10-06
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
+SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
+TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
+CHANGE_REASON: Carry simulation creation, execution and receipt provenance without changing margin, PnL or settlement laws.
+ANCESTOR: K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+SOURCE_OF_TRUTH: TRUE
+PURPOSE: Existing signed-C isolated simulation ledger and settlement owner; historical financial revision notes remain below.
+*/
 import {C_MAX,requireCanonicalC,resolveCMode} from '../controls/nonlinear-controls.mjs';
 // REVISION 2026-09-29: Human-approved absolute index delta, not percentage return.
 export const C_PNL_MODEL='INDEX_DELTA_C_LOTS_V1';
@@ -167,7 +182,7 @@ export function placeSimulationOrder(ledger,{axis,market,c,side,lots,triggerPric
     if(!quote||createdAt<quote.at||createdAt-quote.at>SIM_MAX_AGE)throw new RangeError('STALE_PRICE');
     if(book.orders.some(o=>o.axis===axis&&o.status==='PENDING')||book.positions.some(p=>p.axis===axis&&p.status==='OPEN'))throw new RangeError('AXIS_ALREADY_ACTIVE');
     if(!Number.isFinite(draft.free)||draft.free<margin)throw new RangeError('INSUFFICIENT_FREE_KGEN');
-    const order={orderId:`SIM-O-${++book.sequence}`,trader:ledger.owner||'SIMULATION_LOCAL_PLAYER',axis,market,side:direction,c:signedC,lots:Number(lots),triggerPrice:trigger,stopPrice:stop,takeProfitPrice:takeProfit,createdAt,triggeredAt:null,observedPrice:null,fillPrice:null,positionId:null,status:'PENDING'};
+    const order={orderId:`SIM-O-${++book.sequence}`,trader:ledger.owner||'SIMULATION_LOCAL_PLAYER',axis,market,priceSource:quote.source||'SIMULATION_OBSERVATION',side:direction,c:signedC,lots:Number(lots),triggerPrice:trigger,stopPrice:stop,takeProfitPrice:takeProfit,createdAt,triggeredAt:null,observedPrice:null,fillPrice:null,positionId:null,status:'PENDING'};
     book.orders.push(order);commitSimulation(ledger,draft,book);return {ok:true,order:{...order}};
   }catch(e){return {ok:false,reason:e.message}}
 }
@@ -182,10 +197,10 @@ function settleSimulationPosition(draft,book,position,{previousPrice,observedPri
   const realizedPnl=status==='LIQUIDATED'?-marginBefore:risk.pnl;
   closeMargin(draft,{margin:marginBefore,pnl:realizedPnl});
   position.status=status;position.margin=0;position.mark=observedPrice;position.settledAt=at;
-  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,trader:position.trader,positionId:position.positionId,orderId:position.orderId,market:position.market,axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,liquidationTrigger:liquidationMark(position),previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
+  const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'SETTLEMENT',simulationOnly:true,trader:position.trader,positionId:position.positionId,orderId:position.orderId,market:position.market,priceSource:position.priceSource||'SIMULATION_OBSERVATION',axis:position.axis,side:position.side,c:position.c,lots:position.lots,entryPrice:position.entry,liquidationTrigger:liquidationMark(position),previousPrice,observedPrice,settlementPrice:observedPrice,triggeredAt:at,settledAt:at,marginBefore,marginAfter:0,rawPnl:risk.rawPnl,realizedPnl,badDebt:Math.max(0,-marginBefore-risk.rawPnl),status};
   book.receipts.push(receipt);return receipt;
 }
-export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(),now=Date.now(),sequence=null,productV1=false}={}){
+export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(),now=Date.now(),sequence=null,productV1=false,source='SIMULATION_OBSERVATION',simulationAnchorPrice,simulationAnchorAt}={}){
   try{
     if(!Object.values(SIM_MARKETS).includes(market))throw new RangeError('MARKET_NOT_SUPPORTED');
     const observedPrice=positivePrice(price),at=timestamp(observedAt),receivedAt=timestamp(now);
@@ -194,9 +209,11 @@ export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(
     if(previous&&at<=previous.at)throw new RangeError('OUT_OF_ORDER_PRICE');
     if(sequence!==null&&(!Number.isSafeInteger(sequence)||sequence<0||(previous?.sequence!=null&&sequence<=previous.sequence)))throw new RangeError('OUT_OF_ORDER_PRICE');
     const previousPrice=previous?.price??observedPrice,events=[];
-    book.observations[market]={price:observedPrice,at,...(sequence!==null?{sequence}:{})};
+    book.observations[market]={price:observedPrice,at,source,simulationOnly:true,...(sequence!==null?{sequence}:{}),...(source==='K11520_DETERMINISTIC_SIMULATION'?{simulationAnchorPrice,simulationAnchorAt}: {})};
     for(const order of book.orders){
-      if(order.market!==market||order.status!=='PENDING'||at<order.createdAt||!touchedOrCrossed(previousPrice,order.triggerPrice,observedPrice))continue;
+      if(order.market!==market||order.status!=='PENDING')continue;
+      order.executionPriceSource=source;
+      if(at<order.createdAt||!touchedOrCrossed(previousPrice,order.triggerPrice,observedPrice))continue;
       // Revalidate persisted/injected pending records before any reserve or receipt.
       if(productV1&&!resolveCMode(order.c).canTrade){order.status='REJECTED';order.reason='V1_HIGH_SPEED_PRODUCTION_LOCKED';events.push({kind:'REJECTED',orderId:order.orderId});continue}
       signedPositionSide(order.c,order.side);
@@ -206,14 +223,14 @@ export function observeSimulationPrice(ledger,{market,price,observedAt=Date.now(
       const reserved=reserveOrder(draft,margin),locked=reserved.ok&&activateMargin(draft,margin);
       if(!reserved.ok||!locked?.ok||locked.amount!==margin)throw new RangeError('COLLATERAL_INVARIANT');
       const positionId=`SIM-P-${++book.sequence}`;
-      const position={trader:order.trader,positionId,orderId:order.orderId,axis:order.axis,market,side:order.side,c:order.c,signedC:order.c,lots:order.lots,entry:observedPrice,mark:observedPrice,principal:margin,margin,stopPrice:order.stopPrice,takeProfitPrice:order.takeProfitPrice,status:'OPEN',openedAt:at};
+      const position={trader:order.trader,positionId,orderId:order.orderId,axis:order.axis,market,priceSource:source,side:order.side,c:order.c,signedC:order.c,lots:order.lots,entry:observedPrice,mark:observedPrice,principal:margin,margin,stopPrice:order.stopPrice,takeProfitPrice:order.takeProfitPrice,status:'OPEN',openedAt:at};
       book.positions.push(position);Object.assign(order,{status:'FILLED',triggeredAt:at,observedPrice,fillPrice:observedPrice,positionId});
-      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,trader:order.trader,orderId:order.orderId,positionId,market,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
+      const receipt={receiptId:`SIM-R-${++book.sequence}`,kind:'FILL',simulationOnly:true,trader:order.trader,orderId:order.orderId,positionId,market,priceSource:source,axis:order.axis,side:order.side,c:order.c,lots:order.lots,createdAt:order.createdAt,triggeredAt:at,previousPrice,triggerPrice:order.triggerPrice,observedPrice,fillPrice:observedPrice,walletBefore,marginLocked:margin,walletAfter:draft.free,status:'FILLED'};
       book.receipts.push(receipt);events.push({...receipt});
     }
     for(const position of book.positions){
       if(position.market!==market||position.status!=='OPEN')continue;
-      const risk=positionRisk({...position,mark:observedPrice});position.mark=observedPrice;position.observedAt=at;position.observationSequence=sequence;position.deltaIndex=observedPrice-position.entry;position.equity=position.margin+risk.pnl;
+      const risk=positionRisk({...position,mark:observedPrice});position.priceSource=source;position.mark=observedPrice;position.observedAt=at;position.observationSequence=sequence;position.deltaIndex=observedPrice-position.entry;position.equity=position.margin+risk.pnl;
       const long=position.c>0,liquidated=long?observedPrice<=risk.liquidationMark:observedPrice>=risk.liquidationMark;
       const stopped=position.stopPrice!==null&&(long?observedPrice<=position.stopPrice:observedPrice>=position.stopPrice);
       const takeProfit=position.takeProfitPrice!==null&&(long?observedPrice>=position.takeProfitPrice:observedPrice<=position.takeProfitPrice);

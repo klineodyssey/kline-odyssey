@@ -1,5 +1,119 @@
 # 11520 Changelog
 
+## Metadata
+
+| Field | Value |
+|---|---|
+| VERSION | CURRENT |
+| REVISION | 2026-10-06.MARKET-CARD-NODE-RETENTION |
+| PRODUCT_CONTEXT | V2.9.5 |
+| STATUS | ACTIVE |
+| LAST_UPDATED | 2026-10-06 |
+| UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
+| REVIEWED_BY | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval |
+| SOURCE_COMMIT | cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
+| TASK_ID | K11520-SIMULATION-TRADING-P0-20261006 |
+| CHANGE_REASON | Record retained market-card presentation and preserve the measured HUD-stability gate. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
+| SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-06 — V2.9.5 retained market-card presentation revision
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | V2.9.5 / 2026-10-06.MARKET-CARD-NODE-RETENTION | K11520-SIMULATION-TRADING-P0-20261006 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval | `K線西遊記/temples/11520/runtime/game-5d-main.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/tests/11520-browser-responsive.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Preserve the three canonical card nodes and existing normal-axis decorations across quote and simulation refreshes. | Same market selectors, leaf values, labels, aria state and click routing; financial/source algorithms and simulation storage are unchanged. | Revert this four-file increment to cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 if required. It preserves the earlier toast-dismissal repair and simulation ledger support, but restores the measured missing-decoration interval. |
+
+- Candidate `cf2ffb47c3e71e444935ef6151adc7f9d6208ca4` passed all six
+  recorded toast-fade trajectories (zero visible rectangle drift, final opacity
+  zero), but Responsive job `112381925094` failed landscape expanded cycle 1.
+  Artifact `11428985611`, SHA-256
+  `dd277860ec776e42fb055f13baca643eecc6f0a3421da343dafa5b2da7bae358`,
+  records ten frames over 535.6 ms with card heights 81.890625 / 75.6875 and
+  status top 144 / 138. Later settled screenshots do not erase that failure.
+- Executing the actual render, simulation-tick and normal-presentation owners
+  in a deterministic DOM fixture proved that an unchanged-data tick replaced
+  all cards and detached their badges until the existing 120 ms decorator
+  callback. Under the tested timer phase, the gap was 117 ms. No CSS or pixel
+  heights were assigned in that model; exact browser attribution remains
+  pending card/badge diagnostics on the next candidate.
+- The existing renderAxes owner now creates missing canonical cards, then
+  updates their leaves, active state, accessibility and handlers in place.
+  It does not rebuild the header span or duplicate the normal-axis decorator.
+- The actual-owner regression checks identity and badge retention, current
+  price/position/read-only output, labels, aria state, click routing and
+  unchanged game/trade state. Browser stability frames now additionally record
+  card/badge identity, presence and header geometry; the existing geometry
+  signature, three consecutive frames, 500 ms limit and hit tests remain.
+- Fresh exact-head CI, runtime screenshots and direct inspection remain
+  required. No CI timeout, Courier presentation, financial function, source
+  authority, signing, token transfer or general product version is changed.
+
+## 2026-10-06 — V2.9.5 toast-dismissal placement revision
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | V2.9.5 / 2026-10-06.TOAST-DISMISSAL-PLACEMENT | K11520-SIMULATION-TRADING-P0-20261006 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval | `K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Keep the same toast stationary during dismissal without weakening its visible-fade assertion. | Presentation-only observer admission; same DOM node, timer, accessibility, local simulation storage and financial behavior. | Revert this three-file successor to de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9 if required; that restores the observed dismissal-shift defect but does not remove the simulation source/ledger support introduced by #519. |
+
+- Post-merge main `de5c876bb713b0d4bbd7b6de4c84c11d27b4e9e9`
+  failed the local responsive fade assertion in job `112369037365`, run
+  `37492641953`. Artifact `11427520499`, SHA-256
+  `2d80e07ad4084b26c92a8ba9c3ed1e06c0a75faad426938a60a5a015a32ec914`,
+  records a cold-360 toast at y=440.75, then y=432.75 after dismissal while
+  opacity remained 1. The later failure screenshot does not capture that instant.
+- The existing observer re-ran world placement on the toast's class removal.
+  An executed regression using the actual owner callback and a changed guide
+  rectangle reproduced the exact 8 px shift. The original browser record did
+  not record the guide rectangle, so that specific movement remains inferred.
+- Ignore toast-only dismissal notifications; a new direct message still reads
+  current geometry, and actual panel-context mutations still move the same node.
+  Preserve the existing browser fade/geometry assertions and all time budgets.
+- Exact-head source review, fresh browser evidence and successor release remain
+  separate gates. #519's public preview/M1 results do not validate this change.
+  Public contextual job `112369454296` is separately CANCELLED after its
+  functional test and artifact upload succeeded; this source change does not
+  relabel or repair that job result. No workflow or timeout is changed here.
+
+## 2026-10-06 — V2.9.5 simulation-playability component revision
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | V2.9.5 / 2026-10-06.SIMULATION-ORDER-PLAYABILITY | K11520-SIMULATION-TRADING-P0-20261006 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval | `.github/workflows/11520-game-product-qa.yml`; `K線西遊記/temples/11520/CHANGELOG.md`; `K線西遊記/temples/11520/HANDOFF_CURRENT.md`; `K線西遊記/temples/11520/game-5d.html`; `K線西遊記/temples/11520/runtime/game-5d-main.mjs`; `K線西遊記/temples/11520/runtime/game-ui-product-fixes-v23.mjs`; `K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs`; `K線西遊記/temples/11520/runtime/public-market-quotes.mjs`; `K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs`; `K線西遊記/temples/11520/tests/11520-browser-responsive.mjs`; `K線西遊記/temples/11520/tests/11520-browser-settlement.mjs`; `K線西遊記/temples/11520/tests/11520-browser-signed-c-immersive.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `tests/11520-order-route.test.mjs`; `tests/11520-real-trading-order-intent.test.mjs` | Restore offline simulation lifecycle, retain REAL gates, expose complete component provenance and prevent panel feedback overlap. | Additive source metadata stays in existing local simulation storage; no automatic storage/model migration. Active deterministic-source books retain their source and recovery guard. | The final metadata-only commit can be reverted without changing executable behavior. A functional rollback before this repair removes support for persisted deterministic observations: preserve/export the local simulation data and do not load the old runtime against active synthetic-source books without a separately validated recovery/migration plan; prefer a forward fix. No destructive reset or safe automatic migration is claimed. |
+
+- Component REVISION: `2026-10-06.SIMULATION-ORDER-PLAYABILITY`. This is a
+  revision within the existing V2.9.5 product context, not a new product-number
+  release or a second version authority. Existing component versions remain;
+  the previously unversioned margin owner is marked CURRENT.
+- Prior revisions of these same stable paths at e26 are ANCESTOR; no parallel
+  active file is promoted, renamed or archived.
+- Record the P0 repair in the existing game main, public quote, execution
+  adapter, margin ledger, toast owner and `game-5d.html` metadata. The provenance
+  base is validated candidate `0ad0cffe33d23d1104baa963fedef25ad149a0ac`;
+  pre-repair lineage is main `e26f3a76ef0be7f43058225f46def3fbe123371e`.
+  The separately reviewed local functional toast parent is
+  `e1d7efc4f132259993bc71558cba7ec9c613cc81`, exact tree
+  `2861266d5ad8b38fce9fb127d3cffbe6518c83c1`; its new behavior is not
+  included in the prior 0ad browser acceptance.
+- Explicit SIMULATION can preview, submit, trigger, fill, mark PnL, close,
+  liquidate and retain history during public WAIT/STALE/INVALID states, using
+  clearly labeled deterministic local observations in the existing engine.
+  Active source corruption fails closed and public/REAL observations stay separate.
+- Preserve financial formulas, the current simulation 1C cap, REAL eligibility,
+  wallet/chain/receipt/withdraw gates and all signer/Mainnet boundaries. No
+  second engine, registry identity, transfer or finance activation is introduced.
+- Keep Cancel/Submit outside the scrolling preview. Route the one existing
+  toast into the active trading panel header so provenance and receipt headings
+  are not covered; preserve direct writers, accessible status, timers and errors.
+- The preceding 0ad candidate passed both 36-case six-size offline lifecycle
+  suites and required CI. Direct screenshot review nevertheless found toast
+  overlap: its full VISUAL_QA/release gate remained FAIL despite footer PASS.
+  This toast successor needs its own exact-head Chromium and direct screenshot
+  acceptance; prior green results are not substituted for that evidence.
+- The final provenance-only layer is checked against exact non-metadata byte
+  hashes. HTML retains its UTF-8 BOM. Formal filenames, bootstrap/brand, the
+  separate Navigator payload, general VERSION/MANIFEST and physics are unchanged.
+- Physical C movement, software-keyboard offset behavior and Player body mass
+  are not established by this repair. No merge or deployment is recorded here.
+
 ## 2026-10-04 — Canonical signed market address candidate
 
 - Restore the existing price-floor lineage with shared `(k, alpha, theta)`

@@ -47,16 +47,21 @@ assert.deepEqual(errors,[],'page errors: '+errors.join('\n'));
 if(LOCAL_SIMULATION_QA){
   await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='WAIT',null,{timeout:5000});
   const simulationMode=await page.evaluate(()=>globalThis.__K11520_EXECUTION__.snapshot().mode);assert.equal(simulationMode,'SIMULATION_WALLET');
-  // The existing preflight owner posts a separate route toast on its next
-  // timer. Record the real missing-quote message during the native click,
-  // rather than racing that later legitimate notification.
-  await page.evaluate(()=>{const toast=document.getElementById('toast'),messages=[],observer=new MutationObserver(()=>messages.push(toast.textContent));observer.observe(toast,{childList:true,subtree:true,characterData:true});globalThis.__SIGNED_C_WAIT_EVIDENCE__={messages,observer}});
-  let waitMessages;try{await page.locator('#orderFire').click({timeout:2500})}finally{waitMessages=await page.evaluate(()=>{const evidence=globalThis.__SIGNED_C_WAIT_EVIDENCE__;evidence.observer.disconnect();delete globalThis.__SIGNED_C_WAIT_EVIDENCE__;return evidence.messages})}
-  assert.equal(await page.locator('#confirm').isVisible(),false,'missing quote must not open an order preview');
-  assert.ok(waitMessages.some(message=>/ORACLE_STALE/.test(message)),'WAIT keeps the production missing-quote rejection: '+JSON.stringify(waitMessages));
+  // Public WAIT remains truthful while explicit SIMULATION can preview.
+  await page.locator('#cNumericInput').fill('1');await page.locator('#cNumericInput').press('Enter');
+  const before=await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet);
+  await page.locator('#orderFire').click({timeout:2500});
+  await page.locator('#confirm').waitFor({state:'visible',timeout:2500});
+  await page.waitForFunction(()=>document.querySelector('#simulationOrderPreview')?.textContent.includes('K11520_DETERMINISTIC_SIMULATION'));
+  assert.equal(await page.locator('#confirmOrder').isDisabled(),false,'WAIT must allow explicit simulation preview');
+  assert.equal(await page.evaluate(()=>globalThis.__K11520_MARKET_K__.status),'WAIT','local source never becomes a fake LIVE public quote');
+  assert.deepEqual(await page.evaluate(()=>globalThis.__K11520_SIMULATION_EXCHANGE__.snapshot().wallet),before,'preview does not debit');
+  await page.screenshot({path:`${OUT}/signed-c-WAIT-simulation-preview-390x844.png`});
+  await page.locator('#cancelOrder').click();
+  await page.locator('#cNumericInput').fill('0');await page.locator('#cNumericInput').press('Enter');
   quoteFixtureReady=true;
   await page.waitForFunction(()=>globalThis.__K11520_MARKET_K__?.status==='LIVE',null,{timeout:15000});
-  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,waitRejected:true,waitMessages,firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
+  await fs.writeFile(`${OUT}/signed-c-quote-provenance.json`,JSON.stringify({source:'HARNESS_LOCAL_SIMULATION_QUOTES',base:BASE,realMarketValidation:false,providerCallsIntercepted:'/api/v3/aggTrades',rows:quoteFixtureRows,waitPreviewAllowed:true,simulationSource:'K11520_DETERMINISTIC_SIMULATION',firstValidBatch:'LIVE',simulationMode,boundary:'SIMULATION_UI_PREVIEW_ONLY'},null,2));
 }
 // Human 12:43 Market collapse applies to FULL too; explicitly disclose it
 // before measuring the full-information HUD, rather than defeating idle hide.
