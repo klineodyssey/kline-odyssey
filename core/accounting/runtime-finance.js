@@ -33,7 +33,7 @@ export const CFO_ORGAN_METADATA = Object.freeze({
   task_id: "KAIOS-CFO-FINANCE-ENGINE-V1-20261008",
   revision: "1",
   ancestor: "core/accounting/index.mjs",
-  source_commit: "cc7a4fffe854eed8f899bb33bc4d8158e2c38a84",
+  source_commit: "50dfe685d51a21f4b5b6388f1b3958d41929802c",
   author: "codex-gm-01 / REGISTERED_ACTIVE_T5_SYSTEM_MAINTAINER",
   reviewer: "cfo_finance_independent_review / SESSION_TECHNICAL_REVIEW_PENDING",
   runtime_dna: "COMPANY_CORE_ORGAN / ACCOUNTING / REPORTING / OFFCHAIN",
