@@ -5,6 +5,65 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
+| REVISION | 2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY |
+| PRODUCT_CONTEXT | V2.9.5 |
+| STATUS | ACTIVE |
+| LAST_UPDATED | 2026-10-07 |
+| UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
+| REVIEWED_BY | dot / independent scoped technical source review / 2026-10-07; no registered Reviewer role or release approval |
+| SOURCE_COMMIT | 35e2a331b05140a33e1b86e6918304e3e36ff039 |
+| TASK_ID | K11520-BNB-LIQUIDATION-STATUS-20261007 |
+| CHANGE_REASON | Record the reviewed liquidation-status source and its strict executable-byte provenance checkpoint. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 35e2a331b05140a33e1b86e6918304e3e36ff039 |
+| SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-07 — V2.9.5 liquidation-status provenance checkpoint
+
+| Date | Version / Revision | Task ID | Actor | Reviewer | Files | Reason | Compatibility | Rollback |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-07 | V2.9.5 / 2026-10-07.BNB-LIQUIDATION-STATUS-CONSISTENCY | K11520-BNB-LIQUIDATION-STATUS-20261007 | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER | dot / independent scoped technical source review / 2026-10-07; no registered Reviewer role or release approval | `K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs`; `tests/11520-kgen-margin-wallet-foundation.test.mjs`; `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs`; `K線西遊記/temples/11520/CHANGELOG.md` | Align the exported risk flag with the existing exact lifecycle liquidation boundary and accurately record the intentional source change. | No accounting, margin, capital, fees, price precision, oracle, units, speed caps, storage or receipt behavior changes. | Reverting only this provenance checkpoint returns to 35e2a331b05140a33e1b86e6918304e3e36ff039 and restores its recorded failing hash check. Reverting the complete liquidation-status increment to f7f67950418ebbb6f7a5a309a32d529232fcb3b6 restores the prior inconsistent boolean; no data reset or migration is required by this boolean-only change. |
+
+- Source parent: `35e2a331b05140a33e1b86e6918304e3e36ff039`; clean pre-fix main: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`.
+- Reproduction: BNB/KZ SHORT, -0.001C, entry 600.0004, 1 lot and
+  mark 1600.0004 returned `risk.liquidated=false` although the existing
+  lifecycle correctly emitted LIQUIDATED with realized PnL -1. The reviewed
+  change uses the lifecycle's existing exact price comparison, without an
+  epsilon or any change to numeric PnL, remaining principal or receipts.
+- Independent scoped technical source review passed for runtime SHA-256
+  `3bd55973da2dbb920934a06a8c2bf463427b371b00560e5954f29df254a24160`
+  and foundation test SHA-256
+  `a3f74b92ec9f967121c789fc1b07409fd0832cc2cd34f24c23a5522637dbb1fc`.
+  That review grants no canonical Reviewer authority or release approval.
+  This successor provenance checkpoint still requires its own review and CI.
+- Fresh deterministic checks covered the exact boundary and adjacent IEEE-754
+  prices across BTC/ETH/BNB LONG/SHORT; the existing foundation fixture suite
+  passed. Differential checks preserved all numeric fields in 1,152 risk
+  outputs and all ledger/receipt fields in 1,152 lifecycle snapshots. Counts
+  describe overlapping check matrices, not unique product tests.
+- Exact-source [Game Product run 37655022698](https://github.com/klineodyssey/kline-odyssey/actions/runs/37655022698)
+  checked out `35e2a331b05140a33e1b86e6918304e3e36ff039`. Its
+  [product-qa job 112907825715](https://github.com/klineodyssey/kline-odyssey/actions/runs/37655022698/job/112907825715)
+  passed 39 Player Life tests, then failed one of 204 product-group checks:
+  the strict executable-byte provenance check still expected the old body hash.
+  The later missing Playwright/screenshots/uploads followed that early failure.
+  This record preserves that failure and makes no successor CI or visual claim.
+- Old executable-body SHA-256:
+  `4add666842ff5b418ae9be0147cc86b240c4ba48159c08413b64598c4ad892ed`.
+  Current reviewed executable-body SHA-256:
+  `cbbb60fead493a081252f92b222caa6951b8d0cf7dd6e24669f839dd40bc0341`.
+  Pre-fix main full runtime SHA-256:
+  `03063c4c323826fb3a74275884aac060c9267e7dc7b9db9750298f3ef2787631`.
+- This checkpoint changes the existing runtime metadata, its one strict
+  provenance record and this cumulative changelog only. Other assets retain
+  their existing expected hashes and metadata. No workflow change, rerun,
+  held BSC/backpack/persistence hunk, general product version change, live
+  transaction, canonical role change or release approval is included.
+
+### Previous checkpoint metadata (historical, preserved verbatim)
+
+| Field | Value |
+|---|---|
+| VERSION | CURRENT |
 | REVISION | 2026-10-06.MARKET-CARD-NODE-RETENTION |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
