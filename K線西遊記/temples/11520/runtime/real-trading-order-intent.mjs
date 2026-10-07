@@ -1,19 +1,19 @@
 /* KGEN_META
-VERSION: 1.1.0
-REVISION: 2026-10-07.BSC56-UNSIGNED-CUSTODY-REVIEW
+VERSION: 1.2.0
+REVISION: 2026-10-07.BSC56-MARKET-DOMAINS
 PRODUCT_CONTEXT: V2.9.5
 STATUS: CANDIDATE
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
 REVIEWED_BY: dot / scoped self-review and parent targeted review / 2026-10-07; no full independent security audit or release approval
-SOURCE_COMMIT: f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+SOURCE_COMMIT: a678437d435e2b7f58704e81782b1db542716692
 TASK_ID: K11520-BSC56-PRODUCTION-20261007
-CHANGE_REASON: Add pure chain56 custody review construction with exact units and exposure; preserve the existing simulation and historical testnet lifecycle.
-ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+CHANGE_REASON: Separate USD-index production metadata from USDT reference identity without authenticating or enabling execution.
+ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ a678437d435e2b7f58704e81782b1db542716692
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
 */
-import {assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
+import {assertRealTradingAxisMarket,assertProductionAxisMarket,productionTradingMetadataEligibility} from './real-trading-market-binding.mjs';
 import {deterministicSimulationObservation,SIMULATION_PRICE_SOURCE} from './public-market-quotes.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 import {KGEN_TOKEN_ADDRESS,KGEN_CHAIN_ID} from './evm-wallet-runtime.mjs';
@@ -154,29 +154,40 @@ export function assertRealExecutionPriceSource({priceSource,source,simulationOnl
   if(quoteState!==undefined&&quoteState!=='LIVE')throw new Error('REAL_QUOTE_NOT_LIVE');
 }
 
+// Denomination validation is necessary metadata, never Oracle authentication.
+// Keep the historical Testnet source guard above unchanged.
+export function assertProductionObservationMetadata(input={}){
+  assertRealExecutionPriceSource(input);
+  if([input.priceSource,input.source,input.sourceStatus].some(value=>typeof value==='string'&&/PUBLIC|REFERENCE|SIMULATION/.test(value.toUpperCase()))||input.settlementAuthority===false)throw new Error('REFERENCE_PRICE_NOT_SETTLEMENT');
+  if(input.quoteCurrency!=='USD')throw new Error('EXPLICIT_USD_SETTLEMENT_DENOMINATION_REQUIRED');
+  if(input.quoteState!=='LIVE')throw new Error('REAL_QUOTE_NOT_LIVE');
+}
+
 export function buildRealTradingOrderIntent({
   axis,market,chainId=56,side,lots,c,price,
   walletAddress,brainAddress,positionEngineAddress,
-  feedProvenanceVerified=false,humanMainnetAuthorization=false,priceSource,source,simulationOnly,quoteState
+  feedProvenanceVerified=false,humanMainnetAuthorization=false,priceSource,source,simulationOnly,quoteState,
+  quoteCurrency,settlementAuthority,sourceStatus
 }={}){
-  assertRealExecutionPriceSource({priceSource,source,simulationOnly,quoteState});
-  const binding=assertRealTradingAxisMarket({axis,market,chainId});
+  assertProductionObservationMetadata({priceSource,source,simulationOnly,quoteState,quoteCurrency,settlementAuthority,sourceStatus});
+  const binding=assertProductionAxisMarket({axis,market,chainId});
   const trader=normalizeAddress(walletAddress,'WALLET_ADDRESS');
-  const eligibility=realTradingEligibility({axis,market,chainId,feedProvenanceVerified,brainAddress,positionEngineAddress,humanMainnetAuthorization});
-  if(!eligibility.eligible)throw new Error(`REAL_TRADING_BLOCKED:${eligibility.blockers.join(',')}`);
+  const eligibility=productionTradingMetadataEligibility({axis,market,chainId,feedProvenanceVerified,brainAddress,positionEngineAddress,humanMainnetAuthorization});
+  if(!eligibility.metadataEligible)throw new Error(`REAL_TRADING_BLOCKED:${eligibility.blockers.join(',')}`);
   const normalizedLots=integerRange(lots,'LOTS',1,100);
   const signedC=requireV1TradingC(normalizeSignedC(c)),leverage=Math.abs(signedC);
   const observedPrice=finitePositive(price,'PRICE');
   const direction=signedPositionSide(signedC,side);
   return Object.freeze({
     schema:'KAIOS_11520_REAL_TRADING_ORDER_INTENT_V1',
-    axis:binding.axis,market:binding.market,contractMarket:binding.contractMarket,chainId:binding.chainId,
+    axis:binding.axis,market:binding.production.market,contractMarket:binding.contractMarket,chainId:binding.chainId,
+    quoteCurrency:binding.production.quoteCurrency,settlementAsset:binding.production.settlementAsset,
     trader,side:direction,lots:normalizedLots,c:signedC,leverage,
     observedPrice,
     brainAddress:normalizeAddress(brainAddress,'BRAIN_ADDRESS'),
     positionEngineAddress:normalizeAddress(positionEngineAddress,'POSITION_ENGINE_ADDRESS'),
     transactionPayload:null,calldata:null,signerRequested:false,broadcast:false,
-    status:'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED'
+    status:'METADATA_ONLY_NOT_EXECUTABLE',executionReady:false,oracleVerification:'NOT_PERFORMED'
   });
 }
 
