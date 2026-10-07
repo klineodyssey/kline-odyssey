@@ -10,19 +10,21 @@ const WALLET='0x3333333333333333333333333333333333333333';
 const BRAIN='0x1111111111111111111111111111111111111111';
 const ENGINE='0x2222222222222222222222222222222222222222';
 const base={
- axis:'KX',market:'BTCUSDT',chainId:56,side:'多',lots:2,c:1,price:65000,
+ axis:'KX',market:'BTC/USD INDEX',chainId:56,side:'多',lots:2,c:1,price:65000,
+ quoteCurrency:'USD',quoteState:'LIVE',
  walletAddress:WALLET,brainAddress:BRAIN,positionEngineAddress:ENGINE,
  feedProvenanceVerified:true,humanMainnetAuthorization:true
 };
 
 test('V1 unsigned intent has 1C ceiling after all protected gates; 100C simulation is not production authority',()=>{
  const intent=buildRealTradingOrderIntent(base);
- assert.equal(intent.axis,'KX');assert.equal(intent.market,'BTCUSDT');assert.equal(intent.contractMarket,0);
+ assert.equal(intent.axis,'KX');assert.equal(intent.market,'BTC/USD INDEX');assert.equal(intent.contractMarket,0);
  assert.equal(intent.c,1);assert.equal(intent.leverage,1);assert.equal(intent.side,'LONG');
  for(const c of [5,-5,100,-100])assert.throws(()=>buildRealTradingOrderIntent({...base,c}),/V1_HIGH_SPEED_PRODUCTION_LOCKED/);
  assert.equal(intent.lots,2);assert.equal(intent.transactionPayload,null);assert.equal(intent.calldata,null);
  assert.equal(intent.signerRequested,false);assert.equal(intent.broadcast,false);
- assert.equal(intent.status,'READY_FOR_EXPLICIT_WALLET_ACTION_NOT_SUBMITTED');
+ assert.equal(intent.status,'METADATA_ONLY_NOT_EXECUTABLE');
+ assert.equal(intent.executionReady,false);assert.equal(intent.oracleVerification,'NOT_PERFORMED');
 });
 test('rejects wrong axis market, chain and missing protected authorization',()=>{
  assert.throws(()=>buildRealTradingOrderIntent({...base,market:'ETHUSDT'}),/REAL_TRADING_AXIS_MARKET_MISMATCH/);
@@ -809,4 +811,32 @@ test('BSC56 untrusted binding snapshot has cycle, depth, node, UTF-8-byte and sh
  }
  x=f();let calls=0;x.input.deployment.extra={get toJSON(){calls++;return ()=>({})}};
  assert.throws(()=>buildBsc56UnsignedCustodyReview(x.input,x.options),/ACCESSOR_FORBIDDEN/);assert.equal(calls,0);
+});
+
+
+test('all production axes retain contract IDs but cannot borrow reference/simulation identity or authority',()=>{
+ for(const [axis,asset,contractMarket] of [['KX','BTC',0],['KY','ETH',1],['KZ','BNB',2]]){
+  const production={...base,axis,market:asset+'/USD INDEX'};
+  const intent=buildRealTradingOrderIntent(production);
+  assert.equal(intent.market,asset+'/USD INDEX');assert.equal(intent.contractMarket,contractMarket);
+  assert.equal(intent.quoteCurrency,'USD');assert.equal(intent.settlementAsset,'KGEN');
+  assert.equal(intent.status,'METADATA_ONLY_NOT_EXECUTABLE');assert.equal(intent.executionReady,false);
+  assert.equal(intent.oracleVerification,'NOT_PERFORMED');assert.equal(intent.signerRequested,false);assert.equal(intent.broadcast,false);
+  const simulation=buildExecutionOrderIntent({...simulationInput,axis,market:asset+'USDT',now:1000});
+  assert.equal(simulation.market,asset+'USDT');assert.equal(simulation.contractMarket,contractMarket);
+  assert.throws(()=>buildRealTradingOrderIntent({...production,market:asset+'USDT'}),/REAL_TRADING_AXIS_MARKET_MISMATCH/);
+  assert.throws(()=>buildExecutionOrderIntent({...simulationInput,axis,market:production.market,now:1000}),/REAL_TRADING_AXIS_MARKET_MISMATCH/);
+  for(const quoteCurrency of [undefined,null,'','USDT','usd','USD_INDEX'])assert.throws(()=>buildRealTradingOrderIntent({...production,quoteCurrency}),/EXPLICIT_USD_SETTLEMENT_DENOMINATION_REQUIRED/);
+  for(const override of [{source:'BINANCE_PUBLIC_MARKET_DATA_ONLY'},{priceSource:'binance_public_market_data_only'},{sourceStatus:'REFERENCE_FRESH'},{settlementAuthority:false},{simulationOnly:true}])assert.throws(()=>buildRealTradingOrderIntent({...production,...override}),/REFERENCE_PRICE_NOT_SETTLEMENT|SIMULATION_PRICE_NOT_REAL/);
+  for(const quoteState of [undefined,'WAIT','STALE','INVALID'])assert.throws(()=>buildRealTradingOrderIntent({...production,quoteState}),/REAL_QUOTE_NOT_LIVE/);
+ }
+});
+
+test('caller USD/authority metadata never verifies an Oracle or bypasses any protected gate',()=>{
+ const metadata={...base,settlementAuthority:true,source:'CALLER_CLAIMS_AUTHENTICATED_USD'};
+ const result=buildRealTradingOrderIntent(metadata);
+ assert.equal(result.executionReady,false);assert.equal(result.oracleVerification,'NOT_PERFORMED');
+ assert.equal(result.status,'METADATA_ONLY_NOT_EXECUTABLE');assert.equal(result.transactionPayload,null);assert.equal(result.calldata,null);
+ assert.equal(result.signerRequested,false);assert.equal(result.broadcast,false);assert.equal(Object.hasOwn(result,'settlementAuthority'),false);
+ for(const [override,reason] of [[{feedProvenanceVerified:false},'PRODUCTION_FEED_PROVENANCE_REQUIRED'],[{brainAddress:null},'BRAIN_DEPLOYED_ADDRESS_REQUIRED'],[{positionEngineAddress:null},'POSITION_ENGINE_DEPLOYED_ADDRESS_REQUIRED'],[{humanMainnetAuthorization:false},'HUMAN_MAINNET_EXECUTION_AUTHORIZATION_REQUIRED']])assert.throws(()=>buildRealTradingOrderIntent({...metadata,...override}),new RegExp(reason));
 });

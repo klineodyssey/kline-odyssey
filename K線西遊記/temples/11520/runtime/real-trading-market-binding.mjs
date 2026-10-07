@@ -1,5 +1,5 @@
 /* KGEN_META
-VERSION: 1.0.1
+VERSION: 1.1.0
 STATUS: CANDIDATE
 PURPOSE: Fail-closed 11520 real-trading axis/market identity binding.
 */
@@ -9,6 +9,8 @@ export const REAL_TRADING_MARKET_BINDINGS = Object.freeze({
     axis: 'KX',
     market: 'BTCUSDT',
     display: 'BTC/USDT',
+    referenceQuoteCurrency: 'USDT',
+    production: Object.freeze({market: 'BTC/USD INDEX', quoteCurrency: 'USD', settlementAsset: 'KGEN'}),
     contractMarket: 0,
     chainId: 56,
     feedSetStatus: 'PRODUCTION_FEED_PROVENANCE_REQUIRED'
@@ -17,6 +19,8 @@ export const REAL_TRADING_MARKET_BINDINGS = Object.freeze({
     axis: 'KY',
     market: 'ETHUSDT',
     display: 'ETH/USDT',
+    referenceQuoteCurrency: 'USDT',
+    production: Object.freeze({market: 'ETH/USD INDEX', quoteCurrency: 'USD', settlementAsset: 'KGEN'}),
     contractMarket: 1,
     chainId: 56,
     feedSetStatus: 'PRODUCTION_FEED_PROVENANCE_REQUIRED'
@@ -25,6 +29,8 @@ export const REAL_TRADING_MARKET_BINDINGS = Object.freeze({
     axis: 'KZ',
     market: 'BNBUSDT',
     display: 'BNB/USDT',
+    referenceQuoteCurrency: 'USDT',
+    production: Object.freeze({market: 'BNB/USD INDEX', quoteCurrency: 'USD', settlementAsset: 'KGEN'}),
     contractMarket: 2,
     chainId: 56,
     feedSetStatus: 'PRODUCTION_FEED_PROVENANCE_REQUIRED'
@@ -61,6 +67,15 @@ export function assertRealTradingAxisMarket({ axis, market, chainId = 56 } = {})
   return binding;
 }
 
+// Legacy reference/simulation callers retain their existing identity contract.
+// Production metadata has a separate validator; neither identity authenticates a feed.
+export function assertProductionAxisMarket({axis,market,chainId=56}={}) {
+  const binding=getRealTradingBinding(axis);
+  if(String(market??'').trim().toUpperCase()!==binding.production.market)throw new Error('REAL_TRADING_AXIS_MARKET_MISMATCH');
+  if(Number(chainId)!==binding.chainId)throw new Error('REAL_TRADING_CHAIN_MISMATCH');
+  return binding;
+}
+
 export function realTradingEligibility({
   axis,
   market,
@@ -84,4 +99,14 @@ export function realTradingEligibility({
     orderSubmissionEnabled: eligible,
     signerRequestEnabled: eligible
   });
+}
+
+// Metadata consistency only: caller booleans and labels cannot verify an Oracle,
+// deployment or Human approval. No execution-ready route is created here.
+export function productionTradingMetadataEligibility(input={}) {
+  const binding=assertProductionAxisMarket(input);
+  const legacy=realTradingEligibility({...input,market:binding.market});
+  return Object.freeze({binding,metadataEligible:legacy.eligible,blockers:legacy.blockers,
+    executionReady:false,oracleVerification:'NOT_PERFORMED',
+    orderSubmissionEnabled:false,signerRequestEnabled:false});
 }
