@@ -27,6 +27,7 @@
 - `K線西遊記/temples/11520/tests/11520-ui-static.test.mjs` now pins the authorized helper 1.1.0 metadata and exact executable-body SHA; the other five component pins and historical changelog guards remain exact. Full local UI-static plus focused builder/binding checks pass 140/140.
 - `tests/11520-real-trading-order-intent.test.mjs`: 72/72 focused local tests (twelve new BSC56 cases); with unchanged market-binding tests, 76/76. Full CI/security/browser release gates remain separately pending.
 - `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md` and existing Mainnet manifest record remaining Canon/Oracle/deployment/UX gaps. No invented KAIOS derivative semantics, guessed deployment, USD/USDT conversion or second financial organ.
+- `.github/workflows/11520-trading-readiness.yml` separates preserved public97 evidence into manual opt-in, adds required pinned-hash chain56 KGEN identity evidence and retains every local financial/security/accounting guard. `tests/11520-kgen-margin-wallet-foundation.test.mjs` adds bounded read-only transport and fail-closed adversarial coverage; source/code identity is not production readiness. Local focused/static total: 144/144.
 - Rollback: remove only this builder/import and appended tests, retaining #519/#522 simulation behavior and independent #523 Navigator. Initial matrix checkpoint: `8886aa1fb9956e6abd5d7477b6357a68d573c3ba`; initial builder checkpoint: `7741674612a4707ff579c1dbd35d12bae4efa5fe`.
 
 ## 2026-10-06 — V2.9.5 retained market-card presentation revision

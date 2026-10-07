@@ -146,3 +146,34 @@ accessor/mutation/resource-budget regressions. Corrected source passes 76/76
 review reran the same suites successfully. This is scoped helper review, not
 full deployed-contract, Oracle or production security certification. No signer,
 provider, transaction broadcast or UI activation was added.
+
+## BSC56 CI boundary candidate
+
+The existing Trading Readiness workflow retains every local contract, custody,
+accounting, Oracle guard, unsigned-package and local-browser regression. The
+public `m1-readonly-wallet` chain97 job becomes manual opt-in only via
+`workflow_dispatch.include_historical_bsc97`; its implementation and historical
+artifacts are preserved, and it cannot gate normal BSC56 pull requests.
+
+The new `bsc56-readonly-binding` job checks the exact PR head and uses the existing
+wallet-foundation test file. One fresh-head batch and one ten-read batch use
+twelve read-only RPC methods total, bounded by two HTTP requests and per-request
+time/response-size limits. State calls use the same canonical block hash under
+[EIP-1898](https://eips.ethereum.org/EIPS/eip-1898); the block number/hash and chain
+are rechecked. No automatic retry or fallback to latest is allowed.
+
+The probe verifies canonical KGEN address, expected runtime code hash, decimals,
+name and symbol, records the owner getter and the EIP-1967 implementation/admin/beacon slots, and binds the evidence to the
+committed manifest and token-source SHA. It does not recompile the token to prove
+source-to-bytecode correspondence, certify the candidate Brain/Position/Trigger,
+or authorize signing. Unknown RPC/ABI/block/source conditions remain UNKNOWN
+and fail the required job; missing code and identity conflicts are distinct.
+
+Endpoint is the fixed public credential-free BNB RPC; no secret discovery, key,
+signer, wallet connection, transaction or Treasury access is used. A PR event
+runs the public probe once; its duplicate branch-push run is skipped. Full local
+144-test validation and YAML boundary checks passed. A bounded local candidate
+probe observed matching KGEN identity at block `0x78589d7`, hash
+`0x04b38ce62988c26a1859974356953182d9369fe91508413ea00240f02c119f00`;
+that pre-publication run is RPC/identity capability evidence only, not an
+exact-head CI result. Final committed source binding must be established by CI.

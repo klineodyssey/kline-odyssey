@@ -90,6 +90,25 @@
         "arrayEntries": 64
       },
       "reviewScope": "Independent local pure-helper review; full production/deployed-contract security and browser signing UX remain pending"
+    },
+    "readOnlyIdentityGate": {
+      "scope": "BSC56_CANONICAL_KGEN_IDENTITY_ONLY_NOT_TRADING_READINESS",
+      "sourceBase": "3ae14f034947bc1b519bcba97d4126ba7618034f",
+      "tokenSourcePath": "KGEN/contracts/KGEN_Token_V7_5_2.sol",
+      "tokenSourceSha256": "9e31be9d480834d1c87912ea5fbfef1309b136de728f75810f97cb4eaa24e19b",
+      "codeHashSource": "nonOraclePreparation20260930.publicReadback.tokenCodeHash",
+      "tokenSourceToDeployedBytecodeRecompilation": "NOT_PERFORMED_BY_THIS_PROBE",
+      "endpoint": "https://bsc-dataseed.bnbchain.org",
+      "rpcBudget": {
+        "httpBatches": 2,
+        "totalMethods": 12,
+        "stateReadBlockReference": "EIP1898_BLOCK_HASH_REQUIRE_CANONICAL",
+        "fallbackToLatest": false,
+        "automaticRetry": false
+      },
+      "failurePolicy": "UNKNOWN or identity conflict fails required job; no readiness, signing or broadcast claim",
+      "historicalBsc97Job": "MANUAL_OPT_IN_PRESERVED_EVIDENCE_ONLY_NOT_PRODUCT_GATE",
+      "proxyInspection": "EIP1967 implementation/admin/beacon slots pinned to the same blockHash; nonzero unexpected slot fails, zero slots do not prove every proxy design absent"
     }
   },
   "productV1Decision20260930": {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createKgenLedger,requiredMargin,reserveOrder,cancelReservedOrder,activateMargin,closeMargin,snapshot,pnlForMove,maxAdversePoints,positionRisk,MAX_C_LEVERAGE,normalizeSignedC,signedCFromLegacyMagnitude} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
-import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY,bindTempleReturnWalletContinuity} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
+import {formatUnits,readNativeBalance,readErc20Balance,assertExecutableOrder,createWalletSession,PUBLIC_WALLET_IDENTITY_KEY,bindTempleReturnWalletContinuity,KGEN_TOKEN_ADDRESS,KGEN_CHAIN_ID} from '../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs';
 import {placeSimulationOrder,cancelSimulationOrder,observeSimulationPrice,closeSimulationPosition,simulationSnapshot,touchedOrCrossed} from '../K線西遊記/temples/11520/runtime/kgen-margin-runtime.mjs';
 import {C_DETENTS} from '../K線西遊記/temples/11520/controls/nonlinear-controls.mjs';
 
@@ -238,3 +238,105 @@ const microtasks=async()=>{for(let i=0;i<30;i++)await Promise.resolve()};
   p.handler=null;assert.equal((await s.connect()).status,'CONNECTED','timeout is recoverable');s.dispose();assert.equal(p.listenerCount(),0);
 }
 console.log('11520 read-only EIP-1193 connect/account/chain/disconnect/race/rejection/timeout PASS');
+
+// BSC56 identity evidence only. This test seam is not a wallet/execution adapter.
+// Public evidence is opt-in for the dedicated required CI job; default runs use
+// deterministic read-only transports and preserve all earlier financial guards.
+const bsc56Test=(await import('node:test')).default;
+const bsc56Codec=(await import('node:module')).createRequire(import.meta.url)('../K線西遊記/assets/ethers-5.7.2.umd.min.js').ethers.utils;
+const bsc56Kgen=KGEN_TOKEN_ADDRESS;
+const bsc56Endpoint='https://bsc-dataseed.bnbchain.org';
+const bsc56ProxySlots={implementation:'0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',admin:'0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103',beacon:'0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50'};
+const bsc56Abi=new bsc56Codec.Interface(['function name() view returns(string)','function symbol() view returns(string)','function decimals() view returns(uint8)','function owner() view returns(address)']);
+
+async function inspectBsc56PinnedKgen({transport,expected,now=Date.now()}={}){
+ const evidence={schema:'K11520_BSC56_PINNED_KGEN_IDENTITY_V1',scope:'KGEN_IDENTITY_ONLY_NOT_TRADING_READINESS',status:'UNKNOWN',failureCode:null,endpoint:bsc56Endpoint,requests:[],block:null,readback:null,sourceBinding:expected?.sourceBinding||null,signatures:0,transactionsSent:0,executionReady:false,candidateContractsVerified:false};
+ const hash=v=>typeof v==='string'&&/^0x[0-9a-fA-F]{64}$/.test(v)&&!/^0x0{64}$/i.test(v);
+ const quantity=v=>typeof v==='string'&&v.length<=66&&/^0x(?:0|[1-9a-f][0-9a-f]*)$/.test(v);
+ const fail=(code,status='UNKNOWN')=>{const error=new Error(code);error.evidenceStatus=status;throw error};
+ const batch=async requests=>{
+  if(requests.length>10||requests.some(r=>!['eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_getStorageAt'].includes(r.method)))fail('READ_ONLY_RPC_ALLOWLIST');
+  evidence.requests.push(...requests.map(r=>({id:r.id,method:r.method,params:structuredClone(r.params)})));
+  let responses;try{responses=await transport(requests)}catch{fail('RPC_TRANSPORT_UNAVAILABLE')}
+  if(!Array.isArray(responses)||responses.length!==requests.length)fail('RPC_BATCH_INCOMPLETE');
+  const ids=new Set(),byId=new Map();for(const r of responses){if(r?.jsonrpc!=='2.0'||!Number.isInteger(r.id)||ids.has(r.id)||!requests.some(q=>q.id===r.id))fail('RPC_BATCH_ID_MISMATCH');ids.add(r.id);byId.set(r.id,r)}
+  return requests.map(q=>{const r=byId.get(q.id);if(!r)fail('RPC_BATCH_INCOMPLETE');if(r.error){evidence.rpcFailure={method:q.method,code:Number.isInteger(r.error.code)?r.error.code:null};fail('RPC_RESULT_UNAVAILABLE')}if(!Object.hasOwn(r,'result')||r.result===null)fail('RPC_RESULT_MISSING');return r.result});
+ };
+ try{
+  if(expected?.address!==bsc56Kgen||expected.chainId!==KGEN_CHAIN_ID||expected.decimals!==18||!hash(expected.codeHash)||! /^[0-9a-f]{64}$/.test(expected.sourceBinding?.manifestSha256||'')||! /^[0-9a-f]{64}$/.test(expected.sourceBinding?.tokenSourceSha256||'')||expected.sourceBinding.tokenSourceSha256!==expected.sourceBinding.expectedTokenSourceSha256)fail('REVIEWED_CANON_SOURCE_BINDING_REQUIRED');
+  const [chain,head]=await batch([{jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]},{jsonrpc:'2.0',id:2,method:'eth_getBlockByNumber',params:['latest',false]}]);
+  if(chain!=='0x38')fail('BSC56_CHAIN_ID_MISMATCH','CANON_CONFLICT');
+  if(!quantity(head?.number)||!hash(head?.hash)||!quantity(head?.timestamp))fail('BLOCK_IDENTITY_MISSING');
+  const stamp=BigInt(head.timestamp),nowSeconds=BigInt(Math.floor(now/1000));
+  if(!Number.isSafeInteger(now)||stamp>nowSeconds+30n||nowSeconds-stamp>180n)fail('LATEST_HEAD_TIME_UNVERIFIED');
+  evidence.block={number:head.number,hash:head.hash.toLowerCase(),timestampSeconds:stamp.toString()};
+  // EIP-1898 hash references prevent cross-fork state mixing. Unsupported/hash-
+  // pruned RPC results stay UNKNOWN; never retry as an unpinned latest read.
+  const blockRef={blockHash:evidence.block.hash,requireCanonical:true};
+  const calls=['decimals','symbol','name','owner'].map((name,index)=>({jsonrpc:'2.0',id:index+4,method:'eth_call',params:[{to:bsc56Kgen,data:bsc56Abi.encodeFunctionData(name,[])},blockRef]}));
+  const values=await batch([{jsonrpc:'2.0',id:3,method:'eth_getCode',params:[bsc56Kgen,blockRef]},...calls,...Object.values(bsc56ProxySlots).map((slot,index)=>({jsonrpc:'2.0',id:index+10,method:'eth_getStorageAt',params:[bsc56Kgen,slot,blockRef]})),{jsonrpc:'2.0',id:8,method:'eth_getBlockByNumber',params:[head.number,false]},{jsonrpc:'2.0',id:9,method:'eth_chainId',params:[]}]);
+  const [code,decimalsRaw,symbolRaw,nameRaw,ownerRaw,implementationSlot,adminSlot,beaconSlot,confirmed,finalChain]=values;
+  if(finalChain!=='0x38')fail('BSC56_CHAIN_CHANGED','CANON_CONFLICT');
+  if(confirmed?.number!==head.number||confirmed?.hash?.toLowerCase()!==evidence.block.hash||confirmed?.timestamp!==head.timestamp)fail('PINNED_BLOCK_CHANGED');
+  if(code==='0x')fail('CANONICAL_KGEN_CODE_ABSENT','NOT_DEPLOYED');
+  if(typeof code!=='string'||!/^0x(?:[0-9a-fA-F]{2})+$/.test(code)||code.length>131074)fail('CONTRACT_CODE_INVALID');
+  const codeHash=bsc56Codec.keccak256(code);let decimals,symbol,name,owner;
+  try{if([decimalsRaw,symbolRaw,nameRaw,ownerRaw].some(raw=>typeof raw!=='string'||raw.length>1024))fail('TOKEN_GETTER_RESPONSE_INVALID');decimals=Number(bsc56Abi.decodeFunctionResult('decimals',decimalsRaw)[0]);symbol=bsc56Abi.decodeFunctionResult('symbol',symbolRaw)[0];name=bsc56Abi.decodeFunctionResult('name',nameRaw)[0];owner=bsc56Abi.decodeFunctionResult('owner',ownerRaw)[0]}catch{fail('TOKEN_GETTER_RESPONSE_INVALID')}
+  evidence.readback={address:bsc56Kgen,codeBytes:(code.length-2)/2,codeHash,decimals,symbol,name,owner};
+  const slots={implementation:implementationSlot,admin:adminSlot,beacon:beaconSlot};
+  if(Object.values(slots).some(value=>typeof value!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(value)))fail('TOKEN_PROXY_SLOT_RESPONSE_INVALID');
+  evidence.readback.proxyInspection={standard:'EIP1967',slots,interpretation:'Zero standard slots alone do not prove absence of every possible proxy design'};
+  if(Object.values(slots).some(value=>!/^0x0{64}$/i.test(value)))fail('UNEXPECTED_TOKEN_PROXY_BINDING','CANON_CONFLICT');
+  if(codeHash!==expected.codeHash.toLowerCase()||decimals!==18||symbol!=='KGEN'||name!=='KLINE GENESIS')fail('CANONICAL_KGEN_IDENTITY_MISMATCH','CANON_CONFLICT');
+  evidence.status='READY';return evidence;
+ }catch(error){evidence.status=error.evidenceStatus||'UNKNOWN';evidence.failureCode=/^[A-Z][A-Z0-9_]+$/.test(error.message||'')?error.message:'READBACK_UNAVAILABLE';return evidence}
+}
+
+function bsc56IdentityFixture(change=()=>{}){
+ const code='0x60006000',hash='0x'+'12'.repeat(32),timestamp=1791344245;
+ const expected={address:bsc56Kgen,chainId:56,decimals:18,codeHash:bsc56Codec.keccak256(code),sourceBinding:{manifestSha256:'a'.repeat(64),tokenSourceSha256:'b'.repeat(64),expectedTokenSourceSha256:'b'.repeat(64),classification:'SYNTHETIC_LOCAL_TEST_NOT_DEPLOYED'}};
+ const requests=[];const transport=async batch=>{requests.push(...structuredClone(batch));const header={number:'0x7855f83',hash,timestamp:'0x'+timestamp.toString(16)};
+  const result={1:'0x38',2:header,3:code,4:bsc56Abi.encodeFunctionResult('decimals',[18]),5:bsc56Abi.encodeFunctionResult('symbol',['KGEN']),6:bsc56Abi.encodeFunctionResult('name',['KLINE GENESIS']),7:bsc56Abi.encodeFunctionResult('owner',['0x'+'34'.repeat(20)]),8:header,9:'0x38',10:'0x'+'00'.repeat(32),11:'0x'+'00'.repeat(32),12:'0x'+'00'.repeat(32)};
+  const responses=batch.map(q=>({jsonrpc:'2.0',id:q.id,result:structuredClone(result[q.id])}));change(responses,batch);return responses.reverse()};
+ return {expected,transport,now:(timestamp+1)*1000,requests,hash};
+}
+
+bsc56Test('BSC56 pinned identity uses exactly two bounded batches and hash-bound read-only state',async()=>{
+ const f=bsc56IdentityFixture(),r=await inspectBsc56PinnedKgen(f);assert.equal(r.status,'READY');assert.equal(f.requests.length,12);assert.equal(r.executionReady,false);assert.equal(r.candidateContractsVerified,false);
+ for(const q of f.requests.filter(q=>['eth_call','eth_getCode','eth_getStorageAt'].includes(q.method)))assert.deepEqual(q.params.at(-1),{blockHash:f.hash,requireCanonical:true});
+ assert.ok(f.requests.every(q=>['eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_getStorageAt'].includes(q.method)));assert.equal(r.signatures,0);assert.equal(r.transactionsSent,0);
+});
+bsc56Test('BSC56 transport, missing/pruned state and malformed batches remain UNKNOWN with no latest fallback',async()=>{
+ const cases=[r=>r.splice(0,1),r=>{r[0].id=r[1].id},r=>{r[0].id=999},r=>{r[0].error={code:-32000,message:'missing trie node'}}];
+ for(const change of cases){const f=bsc56IdentityFixture((r,b)=>{if(b[0].id===3)change(r)}),v=await inspectBsc56PinnedKgen(f);assert.equal(v.status,'UNKNOWN');assert.equal(f.requests.length,12);assert.equal(v.executionReady,false)}
+ const f=bsc56IdentityFixture();f.transport=async()=>{throw new Error('secret/credential-bearing provider text must not be exposed')};const v=await inspectBsc56PinnedKgen(f);assert.equal(v.failureCode,'RPC_TRANSPORT_UNAVAILABLE');assert.ok(!JSON.stringify(v).includes('credential-bearing'));
+});
+bsc56Test('BSC56 chain, canonical code, ABI identity and source binding mismatches never pass',async()=>{
+ for(const [id,value,status] of [[1,'0x61','CANON_CONFLICT'],[9,'0x61','CANON_CONFLICT'],[3,'0x','NOT_DEPLOYED'],[3,'0x6001','CANON_CONFLICT'],[10,'0x'+'00'.repeat(12)+'11'.repeat(20),'CANON_CONFLICT'],[12,'0x','UNKNOWN'],[4,bsc56Abi.encodeFunctionResult('decimals',[6]),'CANON_CONFLICT'],[5,bsc56Abi.encodeFunctionResult('symbol',['tKGEN']),'CANON_CONFLICT']]){
+  const f=bsc56IdentityFixture(r=>{const q=r.find(v=>v.id===id);if(q)q.result=value});assert.equal((await inspectBsc56PinnedKgen(f)).status,status);
+ }
+ const f=bsc56IdentityFixture();f.expected.codeHash=null;const r=await inspectBsc56PinnedKgen(f);assert.equal(r.status,'UNKNOWN');assert.equal(r.failureCode,'REVIEWED_CANON_SOURCE_BINDING_REQUIRED');assert.equal(f.requests.length,0);
+ const changed=bsc56IdentityFixture();changed.expected.sourceBinding.tokenSourceSha256='c'.repeat(64);assert.equal((await inspectBsc56PinnedKgen(changed)).failureCode,'REVIEWED_CANON_SOURCE_BINDING_REQUIRED');assert.equal(changed.requests.length,0);
+});
+bsc56Test('BSC56 hash/time/roundtrip block inconsistency remains UNKNOWN rather than fabricated evidence',async()=>{
+ for(const change of [r=>{const x=r.find(v=>v.id===8);if(x)x.result.hash='0x'+'56'.repeat(32)},r=>{const x=r.find(v=>v.id===4);if(x)x.result='0x'},r=>{const x=r.find(v=>v.id===2);if(x)x.result.timestamp='0x1'}]){
+  const f=bsc56IdentityFixture(change),r=await inspectBsc56PinnedKgen(f);assert.equal(r.status,'UNKNOWN');assert.equal(r.executionReady,false);
+ }
+});
+
+if(process.env.K11520_RUN_BSC56_READONLY==='1')bsc56Test('BSC56 public pinned KGEN identity evidence (no signer or transactions)',async()=>{
+ const {readFileSync,mkdirSync,writeFileSync}=await import('node:fs'),{createHash}=await import('node:crypto');
+ const manifestPath=new URL('../docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json',import.meta.url),tokenSourcePath=new URL('../KGEN/contracts/KGEN_Token_V7_5_2.sol',import.meta.url);
+ const bytes=readFileSync(manifestPath),manifest=JSON.parse(bytes),source=manifest.nonOraclePreparation20260930?.publicReadback;
+ const sourceBinding={manifestPath:'docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json',manifestSha256:createHash('sha256').update(bytes).digest('hex'),codeHashField:'nonOraclePreparation20260930.publicReadback.tokenCodeHash',tokenSourcePath:'KGEN/contracts/KGEN_Token_V7_5_2.sol',tokenSourceSha256:createHash('sha256').update(readFileSync(tokenSourcePath)).digest('hex'),expectedTokenSourceSha256:manifest.productDecision20261007?.readOnlyIdentityGate?.tokenSourceSha256,sourceToBytecodeRecompilation:'NOT_PERFORMED_BY_THIS_IDENTITY_PROBE',sourceRef:process.env.K11520_REVIEWED_COMMIT||null,sourceRefVerification:process.env.CI==='true'?'CI_EXACT_CHECKOUT_GUARD_REQUIRED':'LOCAL_UNCOMMITTED_CANDIDATE',probeSourceSha256:createHash('sha256').update(readFileSync(new URL(import.meta.url))).digest('hex')};
+ let httpRequests=0;
+ const transport=async requests=>{
+  assert.equal(process.env.K11520_BSC56_RPC_URL||bsc56Endpoint,bsc56Endpoint,'Only the public credential-free Canon endpoint is allowed');assert.ok(++httpRequests<=2,'bounded HTTP request budget');
+  const response=await fetch(bsc56Endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(requests),signal:AbortSignal.timeout(15000)});assert.ok(response.ok,'RPC HTTP status unavailable');
+  const reader=response.body.getReader(),chunks=[];let size=0;while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>1048576){await reader.cancel();throw new Error('RPC_RESPONSE_TOO_LARGE')}chunks.push(value)}
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+ };
+ const result=await inspectBsc56PinnedKgen({transport,expected:{address:manifest.KGEN_TOKEN,chainId:manifest.CHAIN_ID,decimals:source?.tokenDecimals,codeHash:source?.tokenCodeHash,sourceBinding}});
+ result.httpRequests=httpRequests;result.observedAt=new Date().toISOString();mkdirSync('artifacts/bsc56-readonly',{recursive:true});writeFileSync('artifacts/bsc56-readonly/kgen-identity.json',JSON.stringify(result,null,2)+'\n');
+ assert.equal(result.status,'READY',`BSC56 identity ${result.status}: ${result.failureCode||'UNAVAILABLE'}`);
+});
