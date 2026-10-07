@@ -2201,8 +2201,12 @@ export async function persistKaiosOfficialMessageLifecycle({ store, company, mes
       "OFFICIAL_MESSAGE_DURABLE_PREFIX_MISMATCH", "New lifecycle events must exactly extend durable history");
   }
   const projection = projectKaiosOfficialMessageLifecycle({ message, events, observed_at });
-  const operations = events.slice(prior.length).map((event) => ({
+  const operations = events.slice(prior.length).map((event, index) => ({
     domain: "COMPANY", stream: "COMPANY", id: company.company_id, entity: company,
+    event_id: `${message.MESSAGE_ID}:${event.EVENT_ID}`,
+    expected_previous_event_id: index === 0
+      ? (history.at(-1)?.event_id ?? null)
+      : `${message.MESSAGE_ID}:${events[prior.length + index - 1].EVENT_ID}`,
     event_type: "OFFICIAL_MESSAGE_LIFECYCLE_EVENT", actor_id: event.ACTOR_ID, timestamp: event.OCCURRED_AT,
     payload: {
       message_id: message.MESSAGE_ID,

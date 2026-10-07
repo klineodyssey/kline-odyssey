@@ -452,6 +452,19 @@ test("official message closes only after delivery, identity-bound ACK, result, d
     () => persistKaiosOfficialMessageLifecycle({ store, company, message: divergentMessage, events: [alternateFirst], observed_at: "2026-10-08T00:02:00Z" }),
     (error) => error.code === "OFFICIAL_MESSAGE_DURABLE_PREFIX_MISMATCH"
   );
+
+  const concurrentMessage = await createKaiosOfficialMessageV1({ ...officialMessageInput, MESSAGE_ID: "KAIOS-OFFICIAL-TEST-CONCURRENT" });
+  const concurrentStore = new MemoryUniverseStore();
+  const concurrentA = officialEvent(concurrentMessage, 1, "DELIVERED", { EVENT_ID: "EVENT-CONCURRENT-A" });
+  const concurrentB = officialEvent(concurrentMessage, 1, "DELIVERED", { EVENT_ID: "EVENT-CONCURRENT-B" });
+  const concurrentResults = await Promise.allSettled([
+    persistKaiosOfficialMessageLifecycle({ store: concurrentStore, company, message: concurrentMessage, events: [concurrentA], observed_at: "2026-10-08T00:02:00Z" }),
+    persistKaiosOfficialMessageLifecycle({ store: concurrentStore, company, message: concurrentMessage, events: [concurrentB], observed_at: "2026-10-08T00:02:00Z" })
+  ]);
+  assert.deepEqual(concurrentResults.map((result) => result.status).sort(), ["fulfilled", "rejected"]);
+  const concurrentFailure = concurrentResults.find((result) => result.status === "rejected");
+  assert.equal(concurrentFailure.reason.code, "HISTORY_EXPECTED_PREVIOUS_EVENT_MISMATCH");
+  assert.equal((await concurrentStore.history(company.company_id, "COMPANY")).length, 1);
 });
 
 test("official message fails closed on forged objects, invalid order, self-review, retry exhaustion, and terminal replay", async () => {

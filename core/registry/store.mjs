@@ -14,6 +14,17 @@ function orderEventChain(events) {
   return ordered.length === events.length ? ordered : events.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 }
 
+function hasExpectedPreviousEvent(operation) {
+  return Object.prototype.hasOwnProperty.call(operation, "expected_previous_event_id");
+}
+
+function assertExpectedPreviousEvent(operation, actualPreviousEventId) {
+  if (!hasExpectedPreviousEvent(operation)) return;
+  invariant(operation.expected_previous_event_id === actualPreviousEventId,
+    "HISTORY_EXPECTED_PREVIOUS_EVENT_MISMATCH",
+    `Expected previous event ${operation.expected_previous_event_id ?? "null"} but found ${actualPreviousEventId ?? "null"}`);
+}
+
 export class MemoryUniverseStore {
   #entities = new Map();
   #events = [];
@@ -44,6 +55,7 @@ export class MemoryUniverseStore {
     const stagedEvents = [];
     for (const operation of operations) {
       const existing = [...this.#events, ...stagedEvents].filter((event) => event.subject_id === operation.id && event.stream === operation.stream);
+      assertExpectedPreviousEvent(operation, existing.at(-1)?.event_id ?? null);
       const event = await createHistoryEvent({
         event_id: operation.event_id,
         stream: operation.stream,
@@ -61,6 +73,17 @@ export class MemoryUniverseStore {
       invariant(!stagedIds.has(event.event_id), "DUPLICATE_EVENT_ID", `Duplicate event id: ${event.event_id}`);
       invariant(!this.#events.some((existing) => existing.event_id === event.event_id), "DUPLICATE_EVENT_ID", `Duplicate event id: ${event.event_id}`);
       stagedIds.add(event.event_id);
+    }
+    const tails = new Map();
+    for (let index = 0; index < operations.length; index += 1) {
+      const operation = operations[index];
+      const key = `${operation.stream}:${operation.id}`;
+      if (!tails.has(key)) {
+        const current = this.#events.filter((event) => event.subject_id === operation.id && event.stream === operation.stream);
+        tails.set(key, current.at(-1)?.event_id ?? null);
+      }
+      assertExpectedPreviousEvent(operation, tails.get(key));
+      tails.set(key, stagedEvents[index].event_id);
     }
     for (let index = 0; index < operations.length; index += 1) {
       const operation = operations[index];
@@ -188,6 +211,7 @@ export class IndexedDbUniverseStore {
     const events = [];
     for (const operation of operations) {
       const prior = [...await this.history(operation.id, operation.stream), ...events.filter((event) => event.subject_id === operation.id && event.stream === operation.stream)];
+      assertExpectedPreviousEvent(operation, prior.at(-1)?.event_id ?? null);
       events.push(await createHistoryEvent({
         event_id: operation.event_id,
         stream: operation.stream,
@@ -202,14 +226,45 @@ export class IndexedDbUniverseStore {
     const db = await this.dbPromise;
     await new Promise((resolve, reject) => {
       const transaction = db.transaction(["entities", "events"], "readwrite");
+      let compareAndSetError = null;
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(compareAndSetError ?? transaction.error);
       const entityStore = transaction.objectStore("entities");
       const eventStore = transaction.objectStore("events");
+      const groups = new Map();
       operations.forEach((operation, index) => {
+        const key = `${operation.stream}:${operation.id}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push({ operation, index });
+      });
+      const pendingGroups = [...groups.values()];
+      let remaining = pendingGroups.length;
+      const writeBatch = () => operations.forEach((operation, index) => {
         entityStore.put({ key: `${operation.domain}:${operation.id}`, domain: operation.domain, entity: clone(operation.entity) });
         eventStore.add(clone(events[index]));
       });
+      if (remaining === 0) return;
+      for (const group of pendingGroups) {
+        const request = eventStore.index("subject_id").getAll(group[0].operation.id);
+        request.onerror = () => { compareAndSetError = request.error; transaction.abort(); };
+        request.onsuccess = () => {
+          try {
+            const stream = group[0].operation.stream;
+            const current = orderEventChain(request.result.filter((event) => event.stream === stream));
+            let tail = current.at(-1)?.event_id ?? null;
+            for (const { operation, index } of group) {
+              assertExpectedPreviousEvent(operation, tail);
+              tail = events[index].event_id;
+            }
+            remaining -= 1;
+            if (remaining === 0) writeBatch();
+          } catch (error) {
+            compareAndSetError = error;
+            transaction.abort();
+          }
+        };
+      }
     });
     return events.map(clone);
   }
