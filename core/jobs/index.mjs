@@ -311,6 +311,7 @@ export function createTempleMonitoringFailure({ condition, occurredAt, source, l
     signer: false,
     chain_write: false,
     transaction_sent: false,
+    asset_movement: false,
     temple_mutation: false,
     token_mutation: false,
     governance_action: false
@@ -379,12 +380,29 @@ function sameStringArray(actual, expected) {
   return Array.isArray(actual) && actual.length === expected.length && actual.every((value, index) => value === expected[index]);
 }
 
+function validateTempleMonitoringFailureRecord(record) {
+  requireFields(record, ["condition", "occurred_at", "source", "last_known_good", "read_only_fallback", "monitoring_status", "secret_access", "signer", "chain_write", "transaction_sent", "asset_movement", "temple_mutation", "token_mutation", "governance_action"], "TempleMonitoringFailureRecord");
+  invariant(TEMPLE_MONITORING_FAILURE_CONDITIONS.includes(record.condition), "INVALID_TEMPLE_MONITORING_FAILURE", "Temple monitoring failure record condition is invalid");
+  invariant(validIso(record.occurred_at), "INVALID_TEMPLE_MONITORING_FAILURE_TIME", "Temple monitoring failure record time is invalid");
+  invariant(typeof record.source === "string" && record.source.length > 0, "TEMPLE_MONITORING_FAILURE_SOURCE_REQUIRED", "Temple monitoring failure record source is required");
+  invariant(record.last_known_good && ["NO_VERIFIED_LAST_KNOWN_GOOD", "VERIFIED_LAST_KNOWN_GOOD"].includes(record.last_known_good.status), "TEMPLE_MONITORING_LAST_KNOWN_GOOD_INVALID", "Temple monitoring failure last-known-good evidence is invalid");
+  if (record.last_known_good.status === "VERIFIED_LAST_KNOWN_GOOD") {
+    const lastKnownGood = record.last_known_good;
+    const validBlocks = [lastKnownGood.bsc_block, lastKnownGood.heart_block].every((block) => block === undefined || block === null || (Number.isInteger(block) && block >= 0));
+    invariant(/^(?:DIGITAL_ANT_0001_HOURLY|TEMPLE_MONITORING_UTC)_\d{10}$/.test(lastKnownGood.work_cycle_id ?? "") && validIso(lastKnownGood.observed_at) && Date.parse(lastKnownGood.observed_at) <= Date.parse(record.occurred_at) && validBlocks, "TEMPLE_MONITORING_LAST_KNOWN_GOOD_INVALID", "Verified last-known-good evidence requires a prior canonical Work Cycle observation");
+  }
+  const fallback = record.read_only_fallback;
+  invariant(fallback && typeof fallback.attempted === "boolean" && typeof fallback.strategy === "string" && fallback.strategy.length > 0 && typeof fallback.result === "string" && fallback.result.length > 0 && Array.isArray(fallback.evidence), "TEMPLE_MONITORING_FALLBACK_INVALID", "Temple monitoring failure fallback evidence is invalid");
+  invariant(record.monitoring_status === "UNKNOWN" && record.secret_access === false && record.signer === false && record.chain_write === false && record.transaction_sent === false && record.asset_movement === false && record.temple_mutation === false && record.token_mutation === false && record.governance_action === false, "TEMPLE_MONITORING_FAILURE_SAFETY_BOUNDARY", "Temple monitoring failure records must remain unknown, read-only, and mutation-free");
+  return record;
+}
+
 function validateTempleMonitoringNotification(notification, incident) {
   requireFields(notification, ["notification_id", "recipients", "status", "created_at", "external_message_sent"], "TempleMonitoringNotification");
   invariant(notification.notification_id === `${incident.incident_id}_DOT_GM`, "TEMPLE_MONITORING_NOTIFICATION_ID_MISMATCH", "Temple monitoring notification identity must match its incident");
   invariant(sameStringArray(notification.recipients, ["DOT", "衡曜 / General Manager"]), "TEMPLE_MONITORING_NOTIFICATION_RECIPIENTS_INVALID", "Temple monitoring notification recipients are fixed");
   invariant(notification.status === "NOTIFICATION_REQUIRED" && notification.external_message_sent === false, "TEMPLE_MONITORING_NOTIFICATION_STATUS_INVALID", "Temple monitoring notification must remain an unsent projection");
-  invariant(validIso(notification.created_at) && Date.parse(notification.created_at) >= Date.parse(incident.first_failure_at) && Date.parse(notification.created_at) <= Date.parse(incident.closed_at ?? incident.last_failure_at), "TEMPLE_MONITORING_NOTIFICATION_TIME_INVALID", "Temple monitoring notification time is invalid");
+  invariant(validIso(notification.created_at) && Date.parse(notification.created_at) >= Date.parse(incident.first_failure_at) && (incident.status !== "RECOVERED" || Date.parse(notification.created_at) <= Date.parse(incident.closed_at)), "TEMPLE_MONITORING_NOTIFICATION_TIME_INVALID", "Temple monitoring notification time is invalid");
   return notification;
 }
 
@@ -394,14 +412,14 @@ function validateTempleMonitoringRepairOrder(order, incident) {
   invariant(allowedActions.includes(order.action), "TEMPLE_MONITORING_REPAIR_ACTION_INVALID", "Repair WorkOrder action must derive from incident failures");
   invariant(order.work_order_id === `WORK_ORDER_${incident.incident_id}_${order.action}` && order.deduplication_key === `${incident.incident_id}:${order.action}` && order.work_order_type === "TEMPLE_MONITORING_REPAIR", "TEMPLE_MONITORING_REPAIR_IDENTITY_INVALID", "Repair WorkOrder identity must match its incident and action");
   invariant(order.priority === "P1" && order.owner === "DOT" && order.manager === "衡曜 / General Manager" && order.status === "PROPOSED_LOCAL_R0_R1", "TEMPLE_MONITORING_REPAIR_ROUTING_INVALID", "Repair WorkOrder routing is invalid");
-  invariant(validIso(order.created_at) && Date.parse(order.created_at) >= Date.parse(incident.first_failure_at) && Date.parse(order.created_at) <= Date.parse(incident.closed_at ?? incident.last_failure_at), "TEMPLE_MONITORING_REPAIR_TIME_INVALID", "Repair WorkOrder time is invalid");
+  invariant(validIso(order.created_at) && Date.parse(order.created_at) >= Date.parse(incident.first_failure_at) && (incident.status !== "RECOVERED" || Date.parse(order.created_at) <= Date.parse(incident.closed_at)), "TEMPLE_MONITORING_REPAIR_TIME_INVALID", "Repair WorkOrder time is invalid");
   invariant(order.canonical_work_queue_promoted === false && order.execution_authorized === false, "TEMPLE_MONITORING_WORK_QUEUE_PROMOTION_FORBIDDEN", "Incident repair proposals cannot auto-promote or authorize execution");
   invariant(sameStringArray(order.allowed_scope, TEMPLE_MONITORING_ALLOWED_REPAIR_SCOPE) && sameStringArray(order.forbidden_scope, TEMPLE_MONITORING_FORBIDDEN_REPAIR_SCOPE), "TEMPLE_MONITORING_REPAIR_SCOPE_INVALID", "Repair WorkOrder scope must remain bounded");
   invariant(order.secret_access === false && order.signer === false && order.chain_write === false && order.transaction_sent === false && order.asset_movement === false && order.temple_mutation === false && order.token_mutation === false && order.governance_action === false, "TEMPLE_MONITORING_REPAIR_SAFETY_BOUNDARY", "Incident repair proposals must remain local, read-only, and mutation-free");
   return order;
 }
 
-export function validateTempleMonitoringIncident(incident) {
+export function validateTempleMonitoringIncident(incident, { notAfter = null } = {}) {
   requireFields(incident, ["incident_id", "incident_type", "status", "open", "first_failure_at", "last_failure_at", "first_failure_cycle_id", "last_observed_cycle_id", "consecutive_failure_count", "failure_conditions", "failure_records", "notification_projections", "repair_work_orders", "recovery_evidence", "safety"], "TempleMonitoringIncident");
   invariant(incident.incident_type === "TEMPLE_MONITORING_INCIDENT", "INVALID_TEMPLE_MONITORING_INCIDENT_TYPE", "Temple monitoring incidents require their canonical type");
   invariant(["DEGRADED", "MONITORING_FAILED", "RECOVERED"].includes(incident.status), "INVALID_TEMPLE_MONITORING_INCIDENT_STATUS", "Temple monitoring incident status is invalid");
@@ -409,12 +427,18 @@ export function validateTempleMonitoringIncident(incident) {
   invariant(Number.isInteger(incident.consecutive_failure_count) && incident.consecutive_failure_count >= 1, "INVALID_TEMPLE_MONITORING_FAILURE_COUNT", "Temple monitoring incident failure count is invalid");
   invariant(validIso(incident.first_failure_at) && validIso(incident.last_failure_at) && Date.parse(incident.last_failure_at) >= Date.parse(incident.first_failure_at), "INVALID_TEMPLE_MONITORING_INCIDENT_TIME", "Temple monitoring incident timestamps are invalid");
   invariant(/^(?:DIGITAL_ANT_0001_HOURLY|TEMPLE_MONITORING_UTC)_\d{10}$/.test(incident.first_failure_cycle_id) && /^(?:DIGITAL_ANT_0001_HOURLY|TEMPLE_MONITORING_UTC)_\d{10}$/.test(incident.last_observed_cycle_id), "INVALID_TEMPLE_MONITORING_CYCLE_ID", "Temple monitoring incidents require UTC work-cycle identity");
+  invariant(Array.isArray(incident.failure_records) && incident.failure_records.length > 0, "TEMPLE_MONITORING_FAILURE_RECORDS_REQUIRED", "Temple monitoring incidents require nonempty failure records");
+  incident.failure_records.forEach(validateTempleMonitoringFailureRecord);
+  invariant(incident.failure_records.every((record, index, records) => index === 0 || Date.parse(record.occurred_at) >= Date.parse(records[index - 1].occurred_at)), "TEMPLE_MONITORING_FAILURE_RECORD_ORDER_INVALID", "Temple monitoring failure records must be chronological");
+  invariant(incident.consecutive_failure_count <= incident.failure_records.length, "INVALID_TEMPLE_MONITORING_FAILURE_COUNT", "Consecutive failures cannot exceed recorded failures");
+  invariant(incident.first_failure_at === incident.failure_records[0].occurred_at && incident.last_failure_at === incident.failure_records.at(-1).occurred_at, "TEMPLE_MONITORING_FAILURE_SUMMARY_TIME_MISMATCH", "Incident failure timestamps must exactly summarize failure records");
+  invariant(sameStringArray(incident.failure_conditions, [...new Set(incident.failure_records.map((record) => record.condition))]), "TEMPLE_MONITORING_FAILURE_CONDITION_MISMATCH", "Incident failure conditions must exactly summarize failure records");
   invariant(Array.isArray(incident.notification_projections) && incident.notification_projections.length === 1, "TEMPLE_MONITORING_NOTIFICATION_REQUIRED", "Temple monitoring incidents require one canonical DOT/GM notification projection");
   incident.notification_projections.forEach((notification) => validateTempleMonitoringNotification(notification, incident));
   invariant(Array.isArray(incident.repair_work_orders), "TEMPLE_MONITORING_REPAIR_WORK_ORDERS_REQUIRED", "Temple monitoring repair WorkOrders must be an array");
   invariant(incident.failure_conditions.every((condition) => TEMPLE_MONITORING_FAILURE_CONDITIONS.includes(condition)), "INVALID_TEMPLE_MONITORING_FAILURE", "Temple monitoring incident contains an unknown failure");
   invariant(incident.safety?.read_only === true && incident.safety?.secret_access === false && incident.safety?.signer === false && incident.safety?.chain_write === false && incident.safety?.transaction_sent === false && incident.safety?.asset_movement === false && incident.safety?.temple_mutation === false && incident.safety?.token_mutation === false && incident.safety?.governance_action === false, "TEMPLE_MONITORING_SAFETY_BOUNDARY", "Temple monitoring incidents must remain read-only and mutation-free");
-  if (incident.status === "RECOVERED") invariant(incident.open === false && validIso(incident.closed_at) && incident.recovery_cycle_id === incident.last_observed_cycle_id && recoveryEvidenceVerified(incident.recovery_evidence), "TEMPLE_MONITORING_RECOVERY_EVIDENCE_REQUIRED", "Recovery requires a closed cycle and verified RPC, Heart, wallet, cooldown, and patrol evidence");
+  if (incident.status === "RECOVERED") invariant(incident.open === false && validIso(incident.closed_at) && Date.parse(incident.last_failure_at) <= Date.parse(incident.closed_at) && incident.recovery_cycle_id === incident.last_observed_cycle_id && recoveryEvidenceVerified(incident.recovery_evidence), "TEMPLE_MONITORING_RECOVERY_EVIDENCE_REQUIRED", "Recovery requires ordered closure and verified RPC, Heart, wallet, cooldown, and patrol evidence");
   else invariant(incident.open === true && incident.recovery_evidence === null, "TEMPLE_MONITORING_OPEN_INCIDENT_REQUIRED", "Unrecovered monitoring incidents must remain open");
   if (incident.consecutive_failure_count >= 2) {
     invariant(incident.priority === "P1" && incident.repair_work_orders.length > 0, "TEMPLE_MONITORING_P1_WORK_ORDER_REQUIRED", "Repeated monitoring failure requires a P1 repair WorkOrder proposal");
@@ -423,6 +447,17 @@ export function validateTempleMonitoringIncident(incident) {
   invariant(new Set(incident.repair_work_orders.map((order) => order.deduplication_key)).size === incident.repair_work_orders.length, "TEMPLE_MONITORING_REPAIR_DUPLICATE", "Repair WorkOrders must be deduplicated");
   const expectedRepairActions = incident.consecutive_failure_count >= 2 ? [...new Set(incident.failure_conditions.map((condition) => TEMPLE_MONITORING_REPAIR_ACTION[condition]))].sort() : [];
   invariant(sameStringArray(incident.repair_work_orders.map((order) => order.action).sort(), expectedRepairActions), "TEMPLE_MONITORING_REPAIR_SET_INCOMPLETE", "Repair WorkOrders must exactly cover the incident failure actions");
+  if (notAfter !== null) {
+    invariant(validIso(notAfter), "INVALID_TEMPLE_MONITORING_INCIDENT_BOUNDARY", "Temple monitoring incident time boundary is invalid");
+    const boundary = Date.parse(notAfter);
+    const lifecycleTimes = [
+      ...incident.failure_records.map((record) => record.occurred_at),
+      ...incident.notification_projections.map((notification) => notification.created_at),
+      ...incident.repair_work_orders.map((order) => order.created_at),
+      ...(incident.status === "RECOVERED" ? [incident.closed_at] : [])
+    ];
+    invariant(lifecycleTimes.every((timestamp) => Date.parse(timestamp) <= boundary), "TEMPLE_MONITORING_INCIDENT_TIME_BOUNDARY_INVALID", "Temple monitoring incident evidence cannot occur after its containing observation");
+  }
   return incident;
 }
 
@@ -433,7 +468,7 @@ export function advanceTempleMonitoringIncident({ previousIncident = null, failu
   invariant(/^(?:DIGITAL_ANT_0001_HOURLY|TEMPLE_MONITORING_UTC)_\d{10}$/.test(cycleId), "INVALID_TEMPLE_MONITORING_CYCLE_ID", "Temple monitoring transitions require a UTC work-cycle identity");
   const previousOpen = previousIncident?.incident_type === "TEMPLE_MONITORING_INCIDENT" && previousIncident.open === true;
   if (failures.length === 0 && !previousOpen) return null;
-  if (previousOpen && previousIncident.last_observed_cycle_id === cycleId) return Object.freeze(validateTempleMonitoringIncident(immutableClone(previousIncident)));
+  if (previousOpen && previousIncident.last_observed_cycle_id === cycleId) return Object.freeze(validateTempleMonitoringIncident(immutableClone(previousIncident), { notAfter: observedAt }));
   if (failures.length === 0 && previousOpen && recoveryEvidenceVerified(recoveryEvidence)) {
     return Object.freeze(validateTempleMonitoringIncident({
       ...immutableClone(previousIncident),
@@ -443,7 +478,7 @@ export function advanceTempleMonitoringIncident({ previousIncident = null, failu
       recovery_cycle_id: cycleId,
       last_observed_cycle_id: cycleId,
       recovery_evidence: immutableClone(recoveryEvidence)
-    }));
+    }, { notAfter: observedAt }));
   }
   const normalizedFailures = failures.length > 0 ? failures.map((failure) => createTempleMonitoringFailure({
     condition: failure.condition,
@@ -451,7 +486,7 @@ export function advanceTempleMonitoringIncident({ previousIncident = null, failu
     source: failure.source,
     lastKnownGood: failure.last_known_good,
     fallback: failure.read_only_fallback ?? failure.fallback
-  })) : [createTempleMonitoringFailure({
+  })).sort((a, b) => Date.parse(a.occurred_at) - Date.parse(b.occurred_at)) : [createTempleMonitoringFailure({
     condition: "CRITICAL_STATUS_UNKNOWN",
     occurredAt: observedAt,
     source: "RECOVERY_GATE:RECOVERY_EVIDENCE_INCOMPLETE",
@@ -463,6 +498,7 @@ export function advanceTempleMonitoringIncident({ previousIncident = null, failu
   const incidentId = previousOpen ? previousIncident.incident_id : `TEMPLE_MONITORING_INCIDENT_${incidentTimestampId(firstFailureAt)}`;
   const existingOrders = previousOpen ? [...(previousIncident.repair_work_orders ?? [])] : [];
   const allRecords = previousOpen ? [...previousIncident.failure_records, ...normalizedFailures] : normalizedFailures;
+  const lastFailureAt = allRecords.at(-1).occurred_at;
   if (consecutive >= 2) {
     const actions = [...new Set(allRecords.map((failure) => TEMPLE_MONITORING_REPAIR_ACTION[failure.condition]))];
     for (const action of actions) {
@@ -477,7 +513,7 @@ export function advanceTempleMonitoringIncident({ previousIncident = null, failu
     open: true,
     priority: consecutive >= 2 ? "P1" : "P2",
     first_failure_at: firstFailureAt,
-    last_failure_at: observedAt,
+    last_failure_at: lastFailureAt,
     first_failure_cycle_id: previousOpen ? previousIncident.first_failure_cycle_id : cycleId,
     last_observed_cycle_id: cycleId,
     consecutive_failure_count: consecutive,
@@ -490,7 +526,7 @@ export function advanceTempleMonitoringIncident({ previousIncident = null, failu
     safety: Object.freeze({ read_only: true, config_verification: true, safe_runtime_repair: true, test: true, evidence: true, work_order_coordination: true, secret_access: false, signer: false, chain_write: false, transaction_sent: false, asset_movement: false, temple_mutation: false, token_mutation: false, governance_action: false })
   };
   assertNoFalseNormal({ status: incident.status, monitoringDataVisible: false });
-  return Object.freeze(validateTempleMonitoringIncident(incident));
+  return Object.freeze(validateTempleMonitoringIncident(incident, { notAfter: observedAt }));
 }
 
 export function assertCompanyWorkAllowedAfterGatekeeper(duty) {

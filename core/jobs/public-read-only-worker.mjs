@@ -424,11 +424,11 @@ export function validateRestoredWorkEvent(event, { expectedCycleId, eventPath, o
   if (event.result === "WORK_CYCLE_COMPLETED") {
     if (event.monitoring_status !== "VERIFIED") throw statusError("RESTORED_EVENT_COMPLETION_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
     if (event.temple_monitoring_incident !== null) {
-      const recovered = validateTempleMonitoringIncident(event.temple_monitoring_incident);
+      const recovered = validateTempleMonitoringIncident(event.temple_monitoring_incident, { notAfter: event.finished_at });
       if (recovered.status !== "RECOVERED" || recovered.open !== false || !validIso(recovered.closed_at) || recovered.closed_at !== event.finished_at || recovered.recovery_cycle_id !== expectedCycleId || recovered.last_observed_cycle_id !== expectedCycleId) throw statusError("RESTORED_EVENT_RECOVERY_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
     }
   } else {
-    validateTempleMonitoringIncident(event.temple_monitoring_incident);
+    validateTempleMonitoringIncident(event.temple_monitoring_incident, { notAfter: event.finished_at });
     if (event.temple_monitoring_incident.open !== true || event.temple_monitoring_incident.last_observed_cycle_id !== expectedCycleId || event.monitoring_status !== event.temple_monitoring_incident.status || !["DEGRADED", "MONITORING_FAILED"].includes(event.monitoring_status)) throw statusError("RESTORED_EVENT_INCIDENT_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
   }
   const incidentNotifications = event.temple_monitoring_incident === null ? [] : event.temple_monitoring_incident.notification_projections;
