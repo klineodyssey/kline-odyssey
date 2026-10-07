@@ -39,7 +39,7 @@
   "head_sha": null,
   "head_binding": "RESOLVE_EXACT_GIT_BRANCH_HEAD_AT_REVIEW; source_commit identifies the implementation logic commit",
   "branch": "codex/cfo-finance-organ-v1",
-  "pull_request": null,
+  "pull_request": "https://github.com/klineodyssey/kline-odyssey/pull/549",
   "created_at": "2026-10-08T00:00:00+08:00",
   "source_of_truth": "core/accounting",
   "authority_boundaries": {
