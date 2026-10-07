@@ -6,6 +6,16 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+### K11520 in-game product progress board V1
+
+K11520's existing right-side utility rail includes a read-only progress action
+with PLAYER and ENGINEERING views. Its sole controlled source is
+`K線西遊記/temples/11520/K11520_PRODUCT_PROGRESS_CURRENT.json`; missing,
+invalid, or expired evidence fails visibly instead of being presented as done.
+Implementation and QA are under the same `temples/11520` runtime/tests tree. The
+board grants no wallet, settlement, deployment, cargo, Player Life or chain-write
+authority.
+
 ### KAIOS Backend / Recovery V1 review candidate
 
 Portable authenticated Player Life sync, immutable backups and a Traditional Chinese

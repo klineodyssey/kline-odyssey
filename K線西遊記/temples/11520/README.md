@@ -1,5 +1,22 @@
 # 11520 Universal Exchange V3.9
 
+## In-game product progress board V1
+
+The existing right-side utility rail now exposes one `📋` progress action. It
+opens the existing shared sheet with PLAYER and ENGINEERING views; no second HUD
+or modal owner is introduced. The board reads only
+`K11520_PRODUCT_PROGRESS_CURRENT.json`, validates its schema/status vocabulary,
+and fails visibly as `UNKNOWN` or `STALE` when the source is invalid, missing, or
+older than its freshness window. Draft/CI evidence is shown as `IN_PROGRESS` or
+`TESTING`; real wallet/order/settlement remain `NOT_READY`, and a waiting Pages
+deployment remains `STALE`. The board is read-only and has no wallet, settlement,
+cargo, Player Life, deployment, Physics, or chain-write authority.
+
+Implementation: `runtime/product-progress-board.mjs`. Deterministic validation:
+`tests/11520-progress-board.test.mjs`. Real Chromium evidence:
+`tests/11520-browser-progress-board.mjs` and
+`artifacts/11520-progress-board/`.
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads

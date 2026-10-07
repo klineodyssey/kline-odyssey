@@ -277,3 +277,11 @@
 
 ## Historical 4.0.0 and earlier
 Earlier entries remain available in Git history. Current behavior is governed by the CURRENT canonical files above; historical code or text that conflicts with them must not be resurrected as active rules.
+# 2026-10-08 — In-game product progress board V1
+
+- Added one read-only Progress action to the existing utility rail and reused the
+  shared sheet for PLAYER/ENGINEERING views.
+- Added one controlled, freshness-bound current progress JSON with strict status
+  vocabulary and conservative real-wallet/public-runtime boundaries.
+- Added deterministic and real Chromium mobile/landscape QA. No product logic,
+  financial authority, deployment, Physics, XYZ, cargo or Player Life owner changed.

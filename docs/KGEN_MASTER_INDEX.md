@@ -1,5 +1,19 @@
 # KGEN MASTER_INDEX
 
+## K11520 in-game product progress board V1 (2026-10-08)
+
+- `K線西遊記/temples/11520/K11520_PRODUCT_PROGRESS_CURRENT.json`: controlled,
+  freshness-bound product status; Draft/CI evidence cannot claim a completed or
+  public release.
+- `K線西遊記/temples/11520/runtime/product-progress-board.mjs`: read-only
+  PLAYER/ENGINEERING board attached to the existing utility rail and shared sheet.
+- `K線西遊記/temples/11520/tests/11520-progress-board.test.mjs` and
+  `11520-browser-progress-board.mjs`: deterministic source validation and real
+  Chromium mobile/landscape screenshot QA.
+
+No Physics, XYZ, wallet, settlement, cargo, Player Life, deployment, secret or
+chain authority is added. Protected Boot files remain unchanged.
+
 ## KAIOS Backend / Recovery V1 candidate (2026-10-04)
 
 - `KAIOS/backend/README.md`: complete new service/file inventory.

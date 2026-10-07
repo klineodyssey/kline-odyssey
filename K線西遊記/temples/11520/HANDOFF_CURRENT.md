@@ -60,6 +60,23 @@
 
 # 11520 HANDOFF CURRENT
 
+## In-game product progress board V1 — 2026-10-08
+
+- `K11520_PRODUCT_PROGRESS_CURRENT.json` is the sole source for the new board.
+  Its status vocabulary is closed and freshness is checked in the browser.
+- `runtime/market-origin-wallet-layout-runtime.mjs` remains the sole utility
+  owner and registers one `📋` action in its existing rail. The presentation
+  module renders through the existing shared sheet; no second HUD owner exists.
+- Missing/invalid/stale data fails visibly; no chat text is read at runtime.
+- Real wallet/order/settlement remain `NOT_READY`; current public Pages remains
+  `STALE`. Draft gameplay/cargo/liquidation work is `IN_PROGRESS`/`TESTING`.
+- Focused static tests are `4/4 PASS`; canonical action/rail Chromium regression
+  is `PASS`. Direct 390×844 and 844×390 Player/Engineering Chromium QA is
+  `FUNCTIONAL_PASS / VISUAL_PASS`, with screenshots and machine-readable overlap
+  evidence under `artifacts/11520-progress-board/`.
+- No merge, deployment, Mainnet transaction, real asset movement, signer or
+  secret use is authorized or performed by this board.
+
 ## M1 startup-order repair — 2026-10-05
 
 - Exact remote `5c9e44f27354bc7f2450dfdfe06f2c25579da5d2` failed shared browser
