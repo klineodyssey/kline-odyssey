@@ -4507,3 +4507,83 @@ test('Digital requirement SQLite rollback and lost acknowledgement preserve one 
   f.setPrincipal({ accountId: 'TEST-ACCOUNT-B' });
   await durableCustomerRejects(f.make().command(command), 'CUSTOMER_PROJECT_BINDING_REQUIRED');
 });
+
+function submitRequirementCommand(f, saved, { key = 'submit-digital-001', revision = saved.revision } = {}) {
+  return f.command('SUBMIT_REQUIREMENT_DRAFT', key, revision, { draftId: saved.draftId, draftRevision: saved.draftRevision, draftHash: saved.draftHash, submit: true });
+}
+
+async function conditionalPondFixture({ planningAdapter = null } = {}) {
+  const f = customerProjectFixture({ planningAdapter });
+  const { CONSTRUCTION_STAGES } = await import('../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js');
+  f.setPlan({ stages: [...CONSTRUCTION_STAGES] });
+  const saved = await f.model.command(saveRequirementCommand(f, digitalWorldRequirementFixture()));
+  const submitted = await f.model.command(submitRequirementCommand(f, saved));
+  return { ...f, saved, submitted, stages: CONSTRUCTION_STAGES };
+}
+
+test('Digital proposal submission requires the current complete draft and explicit intent', async () => {
+  const f = customerProjectFixture();
+  const saved = await f.model.command(saveRequirementCommand(f, digitalWorldRequirementFixture()));
+  const command = submitRequirementCommand(f, saved);
+  await customerProjectRejects(f.model.command({ ...command, data: { ...command.data, submit: false } }), 'CUSTOMER_REQUIREMENT_EXPLICIT_SUBMISSION_REQUIRED');
+  await customerProjectRejects(f.model.command({ ...command, data: { ...command.data, draftHash: 'f'.repeat(64) } }), 'CUSTOMER_REQUIREMENT_REVISION_CONFLICT');
+  const before = await f.model.read(); assert.equal(before.request, null);
+  const result = await f.model.command(command); assert.equal(result.status, 'SUBMITTED');
+  assert.deepEqual(await f.model.command(command), result);
+  const state = await f.model.read();
+  assert.equal(state.request.content.requirementDraft.contentHash, saved.draftHash);
+  assert.deepEqual(state.request.content.acceptanceCriteria, digitalWorldRequirementFixture().requirements.acceptanceCriteria);
+  assert.equal(state.request.content.world, 'KAIOS_DIGITAL_WORLD'); assert.equal(state.acceptance, null); assert.equal(state.project, null);
+  await customerProjectRejects(f.model.command({ ...command, idempotencyKey: 'submit-duplicate', expectedRevision: 2 }), 'CUSTOMER_REQUIREMENT_WORKSPACE_ALREADY_SUBMITTED');
+  const incomplete = customerProjectFixture(), input = digitalWorldRequirementFixture(); input.requirements.oxygenPolicyRef = null;
+  const partial = await incomplete.model.command(saveRequirementCommand(incomplete, input));
+  await customerProjectRejects(incomplete.model.command(submitRequirementCommand(incomplete, partial)), 'CUSTOMER_REQUIREMENT_COMPLETE_SINGLE_PROJECT_REQUIRED');
+});
+
+test('Digital proposal uses owner pond stages and binds all unmet conditions before fixture acknowledgement', async () => {
+  const f = await conditionalPondFixture();
+  f.setPlan({ stages: [...SMALL_HOUSE_REQUIRED_STAGES] });
+  await customerProjectRejects(f.issue(), 'FISHPOND_STAGE_PLAN_INCOMPLETE');
+  f.setPlan({ stages: [...f.stages] });
+  const issued = await f.issue(), quote = issued.quote;
+  assert.equal(issued.status, 'CONDITIONAL_SIMULATION_PROPOSAL_ISSUED');
+  assert.equal(quote.content.proposalClass, 'CONDITIONAL_SIMULATION_PROPOSAL');
+  assert.equal(quote.content.executionReadiness, 'WAIT_FOR_OWNER_EVIDENCE'); assert.equal(quote.content.deliveryCommitment, false);
+  assert.ok(quote.content.executionHolds.includes('MICROORGANISM_PROXY_ONLY'));
+  assert.ok(quote.content.executionHolds.includes('PLANT_POPULATION_INTEGRATION_REQUIRED'));
+  const { sha256 } = await import('../core/shared/utils.mjs');
+  const omitted = await sha256({ conditions: quote.content.plan.conditions, assumptions: quote.content.plan.assumptions, executionHolds: ['FISHPOND_STAGE_ADAPTER_REQUIRED'] });
+  const acceptance = f.acceptance(quote, 'ack-pond-conditions', 3);
+  await customerProjectRejects(f.model.command({ ...acceptance, data: { ...acceptance.data, acknowledgementHash: omitted } }), 'ACCEPTANCE_INTENT_MISMATCH');
+  await f.model.command(acceptance); const state = await f.model.read();
+  assert.equal(state.project.status, 'PLANNED_EXECUTION_HELD'); assert.equal(state.project.deliveryCommitment, false);
+  assert.equal(state.project.ecosystemComplete, false); assert.deepEqual(state.project.executionHolds, quote.content.executionHolds);
+  assert.deepEqual(state.project.desiredStages, f.stages); assert.equal(state.project.asset, null); assert.equal(state.project.delivery, null); assert.equal(state.project.receipt, null);
+  assert.deepEqual(await f.model.command(acceptance), state.commandJournal.at(-1).response);
+});
+
+test('Digital proposal blocks house-only planning and audit shortcuts on pond requests', async () => {
+  const planningAdapter = await createFrozenV1CustomerProjectTestAdapter({ mode: 'LOCAL_TEST_ONLY' });
+  const wrong = await conditionalPondFixture({ planningAdapter }); const q = (await wrong.issue()).quote;
+  const before = await wrong.model.read();
+  await customerProjectRejects(wrong.model.command(wrong.acceptance(q, 'no-house-adapter', 3)), 'CUSTOMER_PROJECT_POND_PLANNING_ADAPTER_REQUIRED');
+  assert.deepEqual(await wrong.model.read(), before);
+  const f = await conditionalPondFixture(); const quote = (await f.issue()).quote;
+  await f.model.command(f.acceptance(quote, 'ack-held-pond', 3));
+  await customerProjectRejects(f.model.command(f.command('CHECKPOINT_SUBPLAN_EVIDENCE', 'no-house-evidence', 4, {})), 'CUSTOMER_PROJECT_HOUSE_SUBPLAN_REQUIRED');
+});
+
+test('Digital proposal SQLite replays submission and conditional acknowledgement without live planning', async (t) => {
+  const f = await durableCustomerProjectFixture(t);
+  const { CONSTRUCTION_STAGES } = await import('../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js');
+  f.plan.stages = [...CONSTRUCTION_STAGES];
+  const api = f.make(); const saved = await api.command(saveRequirementCommand(f, digitalWorldRequirementFixture()));
+  await api.command(submitRequirementCommand(f, saved.result));
+  const quote = (await api.command(f.command('ISSUE_SIMULATED_QUOTE', 'digital-sqlite-quote', 2, { requestRevision: 1 }))).result.quote;
+  const acceptance = f.acceptance(quote, 'digital-sqlite-ack', 3), accepted = await api.command(acceptance);
+  const before = await api.read(), rows = await f.rows(); f.reopen();
+  const offline = f.make({ quotePlanner: { plan() { throw new Error('LIVE_PLANNER_FORBIDDEN'); } }, now() { throw new Error('LIVE_CLOCK_FORBIDDEN'); } });
+  assert.deepEqual(await offline.read(), before); assert.deepEqual(await offline.command(acceptance), accepted); assert.deepEqual(await f.rows(), rows);
+  assert.equal(before.state.project.ecosystemComplete, false); assert.equal(before.state.project.deliveryCommitment, false);
+  assert.ok(before.state.project.executionHolds.length > 1); assert.equal(before.state.project.receipt, null);
+});

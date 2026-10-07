@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | VERSION | V3.0 |
-| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_REQUIREMENT_SAVE.3 |
+| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_CONDITIONAL_PROPOSAL.4 |
 | STATUS | DRAFT |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
 | REVIEWED_BY | PENDING; local focused tests are not registered Reviewer authority |
-| SOURCE_COMMIT | faca4e0dd378b3cd8ab15f28fb41b4a4430a008b |
+| SOURCE_COMMIT | 62e668a62707f957c8c3ca3448e76e47ed157ba0 |
 | TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
 | CHANGE_REASON | Add bounded digital-world requirement drafts while preserving the house and Backend owners. |
 | ANCESTOR | KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
@@ -509,3 +509,58 @@ Source review is pending. For rollback, retain this reader for databases with
 SAVE_REQUIREMENT_DRAFT operations or stop safely with their files preserved;
 there is no automatic downgrade/migration or permission to delete saved data.
 No generated draft is submitted or accepted on a customer's behalf.
+
+### Explicit submission and conditional Pond proposals
+
+`SUBMIT_REQUIREMENT_DRAFT` is the bounded submission mapping previously held
+above. It requires exact current draft ID/revision/hash, `submit:true`, complete
+requirements and quantity one. Saving text alone remains unsubmitted. All
+criteria, maintenance and ecosystem policy references are copied into the
+request content hash; none are silently dropped. Submission cannot overwrite
+a previous request, and subsequent scope changes require later change-order
+work rather than editing an accepted snapshot.
+
+The existing `ISSUE_SIMULATED_QUOTE` path now obtains Pond's required stage
+sequence directly from the installed Aquaculture owner's exported
+`CONSTRUCTION_STAGES`. It does not copy a new stage engine or use the House
+sequence. The Fish Pond result is explicitly
+`CONDITIONAL_SIMULATION_PROPOSAL_ISSUED`, with
+`executionReadiness: WAIT_FOR_OWNER_EVIDENCE`,
+`proposalClass: CONDITIONAL_SIMULATION_PROPOSAL`, and
+`deliveryCommitment: false`. Unknown resource/worker/policy capacity therefore
+never becomes a firm delivery quote or an executable order.
+
+The full execution-hold list, including resource provenance, labor location/
+travel/rest, water/policy binding, plant-population integration, microbial proxy
+limits, build inspection/rework and explicit delivery acceptance, participates
+in the existing acknowledgement hash. Synthetic test customers can exercise
+`ACCEPT_QUOTE` only for that exact current quote and complete conditions. The
+existing internal accepted-plan response is retained for Backend expiry/replay
+compatibility, but the resulting project remains `PLANNED_EXECUTION_HELD`,
+`ecosystemComplete:false`, `deliveryCommitment:false`, with every hold intact
+and null asset/delivery/receipt. This acknowledges a conditional simulation
+plan; it does not assert feasible resources or customer delivery acceptance.
+
+The House-only frozen planning adapter is rejected for Pond acceptance. The
+House subplan checkpoint command also rejects Pond requests before reading
+evidence, preventing legacy House completion/audit bytes from being relabeled
+as Pond progress. Existing standalone Aquaculture, its auto-acceptance/revenue
+delivery route, and its resource formulas are unchanged and not called.
+
+Four new tests cover explicit/current/complete submission, preservation of
+criteria, owner stage binding, omitted-condition hash rejection, held conditional
+acknowledgement, wrong-domain planning/audit rejection, and SQLite replay with
+clock/planner disabled. All four pass locally. No real customer is submitted
+or accepted: these are existing-identity synthetic test fixtures only.
+Revision `2026-10-07.CUSTOMER_DIGITAL_WORLD_CONDITIONAL_PROPOSAL.4` succeeds
+`62e668a62707f957c8c3ca3448e76e47ed157ba0`, within the same three owner files.
+Rollback must retain compatible journal reading or fail closed without deleting
+local data, because older readers do not know the new submission command.
+
+Next executable-owner boundary: bind the existing canonical closed-world parcel
+and explicit finite initial resources, retain reservations/conservation/time
+and measured inspection, then add a unit-preserving owner-to-owner exchange
+port. Ecology Canon allows GRASS/TREE/FISH/SHRIMP and abstract microbial/
+primary-food/detritus proxies. It does not supply aquatic-plant species or
+species-specific pond photosynthesis/nutrient/oxygen coefficients. No new
+biological rates, scientific efficacy, Species or full microbe Life is inferred.
