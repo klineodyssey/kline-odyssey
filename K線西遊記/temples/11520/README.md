@@ -19,6 +19,17 @@ with zero disposal calls. Focused item/life tests pass after the repair.
 These spies prove disposal ownership/calls, not GPU memory or FPS improvement.
 No main merge, deployment, or human-playtest readiness is asserted.
 
+The existing `tests/11520-browser-item-visual.mjs` now records the exact checkout
+and served module hashes, renders 17 alternating cargo custody rebuilds in an
+isolated THREE gallery, and captures both transit and the final ATM cassette.
+The gallery-only cameras fit object bounds; production world/camera/player code
+is unchanged. Its report distinguishes existing actual-world screenshots from
+synthetic-gallery evidence and checks dispose events, stable per-context renderer
+geometry counts, unchanged item/domain state and untouched body resources.
+This follow-up harness is awaiting fresh Chromium CI and screenshot inspection.
+Renderer counts do not establish GPU-memory/FPS acceptance, and camera-created
+material clones remain outside the factory-owned cleanup boundary.
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads
