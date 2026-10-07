@@ -340,3 +340,69 @@ if(process.env.K11520_RUN_BSC56_READONLY==='1')bsc56Test('BSC56 public pinned KG
  result.httpRequests=httpRequests;result.observedAt=new Date().toISOString();mkdirSync('artifacts/bsc56-readonly',{recursive:true});writeFileSync('artifacts/bsc56-readonly/kgen-identity.json',JSON.stringify(result,null,2)+'\n');
  assert.equal(result.status,'READY',`BSC56 identity ${result.status}: ${result.failureCode||'UNAVAILABLE'}`);
 });
+
+// Pure transfer fixtures: synthetic sender/recipient metadata, never a provider.
+const transferModule=await import('../K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs');
+const transferSender='0x1111111111111111111111111111111111111111',transferRecipient='0x2222222222222222222222222222222222222222';
+function transferFixture(){return {chainId:56,sender:transferSender,recipient:transferRecipient,amountKgen:'1.000000000000000001',nonce:'7',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000',readback:{chainId:56,tokenAddress:KGEN_TOKEN_ADDRESS,sender:transferSender,recipient:transferRecipient,tokenCodeHash:transferModule.KGEN_BSC56_TOKEN_CODE_HASH,sourceCommit:'a'.repeat(40),blockNumber:'123',blockHash:'0x'+'ab'.repeat(32),pendingNonce:'7',tokenBalanceWei:'2000000000000000000',nativeBalanceWei:'10000000000000000',senderTaxExempt:false,recipientTaxExempt:false,senderMarketMakerPair:false,recipientMarketMakerPair:false,recipientCodePresent:false}}}
+const transferBuild=(input=transferFixture(),ethers=bsc56Codec)=>transferModule.buildBsc56KgenTransferReview(input,{ethers});
+
+bsc56Test('KGEN transfer pure review encodes exact ERC20 recipient/amount and RPC quantities',()=>{
+ const input=transferFixture(),before=structuredClone(input),r=transferBuild(input),tx=r.transaction;
+ assert.deepEqual(input,before);assert.equal(tx.to,KGEN_TOKEN_ADDRESS);assert.equal(tx.from,transferSender);assert.equal(tx.value,'0x0');assert.equal(tx.chainId,'0x38');assert.equal(tx.type,'0x0');assert.equal(tx.nonce,'0x7');assert.equal(tx.gas,'0x186a0');assert.equal(tx.gasPrice,'0x2faf080');assert.equal(tx.gasLimit,undefined);
+ assert.equal(tx.data.slice(0,10),'0xa9059cbb');const decoded=new bsc56Codec.Interface(transferModule.KGEN_BSC56_TRANSFER_ABI).parseTransaction(tx);assert.equal(decoded.name,'transfer');assert.equal(decoded.args[0],transferRecipient);assert.equal(decoded.args[1].toString(),'1000000000000000001');
+ for(const field of ['CHAIN','WALLET','RECIPIENT','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE'])assert.ok(Object.hasOwn(r.review,field));assert.equal(r.review.RECIPIENT,transferRecipient);assert.equal(r.review.AMOUNT.inputKgen,input.amountKgen);assert.equal(r.review.AMOUNT.canonicalKgen,input.amountKgen);assert.equal(r.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,'1000000000000000001');assert.equal(r.review.MAXIMUM_EXPOSURE.nativeGasFeeWei,'5000000000000');assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceChanged,false);
+ assert.equal(r.executionReady,false);assert.equal(r.walletHandoffReady,false);assert.equal(r.signerRequested,false);assert.equal(r.broadcast,false);assert.equal(r.scope,'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED');assert.match(r.transactionFormat,/EIP1474_QUANTITY/);assert.ok(Object.isFrozen(r.transaction));assert.ok(Object.isFrozen(r.readback));assert.throws(()=>r.review.RECIPIENT=transferSender,TypeError);
+});
+
+bsc56Test('KGEN transfer amount parsing preserves exact decimals and rejects exponents/floats',()=>{
+ for(const [amountKgen,expected] of [['0.000000000000000001','1'],['1','1000000000000000000'],['1.000000000000000001','1000000000000000001'],['2.000000000000000000','2000000000000000000']]){const f=transferFixture();f.amountKgen=amountKgen;assert.equal(transferBuild(f).review.AMOUNT.baseUnits,expected)}
+ for(const amountKgen of ['0','0.000000000000000000','-1','+1','01','1.','1e-18',' 1','1 ','1,000','1.0000000000000000001','９','9'.repeat(99),1,1.1,NaN,Infinity]){const f=transferFixture();f.amountKgen=amountKgen;assert.throws(()=>transferBuild(f),/TRANSFER_/)}
+ const f=transferFixture();f.amountKgen='2.000000000000000001';assert.throws(()=>transferBuild(f),/INSUFFICIENT_KGEN/);f.amountKgen=((1n<<256n)-1n).toString();assert.throws(()=>transferBuild(f),/AMOUNT_OUT_OF_RANGE/);
+});
+
+bsc56Test('KGEN transfer observes all tax flag combinations without promising mined net credit',()=>{
+ for(let bits=0;bits<16;bits++){
+  const f=transferFixture();for(const [i,k] of ['senderTaxExempt','recipientTaxExempt','senderMarketMakerPair','recipientMarketMakerPair'].entries())f.readback[k]=!!(bits&(1<<i));
+  const r=transferBuild(f),o=r.review.taxObservation,taxable=!(bits&1)&&!(bits&2)&&!!(bits&12),tax=1000000000000000001n*30n/10000n;
+  assert.equal(o.taxableAtReadback,taxable);assert.equal(o.estimatedTaxWei,taxable?tax.toString():'0');assert.equal(o.primaryRecipientTransferAtReadbackWei,(1000000000000000001n-(taxable?tax:0n)).toString());assert.equal(o.maximumTaxIfFlagsChangeWei,tax.toString());assert.equal(o.minimumNetIfOnlyTaxFlagsChangeWei,(1000000000000000001n-tax).toString());assert.equal(o.miningTimeNetGuaranteed,false);
+ }
+ const f=transferFixture();f.amountKgen='0.000000000000000001';f.readback.recipientMarketMakerPair=true;assert.equal(transferBuild(f).review.taxObservation.estimatedTaxWei,'0','integer rounding follows the exact token source');f.readback.recipientCodePresent=true;assert.equal(transferBuild(f).review.recipientCodePresentAtReadback,true);
+});
+
+bsc56Test('KGEN transfer rejects wrong identity, recipient, chain, source and nonce metadata',()=>{
+ for(const mutate of [f=>f.chainId=97,f=>f.chainId='56',f=>f.readback.chainId=97,f=>f.sender='0x'+'00'.repeat(20),f=>f.recipient='0x'+'00'.repeat(20),f=>f.recipient='0x123',f=>f.recipient=transferSender,f=>f.recipient=KGEN_TOKEN_ADDRESS,f=>f.readback.sender=transferRecipient,f=>f.readback.recipient=transferSender,f=>f.readback.tokenAddress=transferRecipient,f=>f.readback.tokenCodeHash='0x'+'cd'.repeat(32),f=>f.readback.sourceCommit='x',f=>f.readback.blockHash='0x'+'00'.repeat(32),f=>f.readback.blockNumber='0',f=>f.readback.pendingNonce='8',f=>f.readback.recipientTaxExempt='false',f=>f.readback.recipientCodePresent=0]){const f=transferFixture();mutate(f);assert.throws(()=>transferBuild(f),/TRANSFER_/,mutate.toString())}
+ const f=transferFixture();f.recipient='0xBa3d3810e58735cb6813bC1CDc5458C0d71432Be';assert.throws(()=>transferBuild(f),/CHECKSUM_INVALID/);
+});
+
+bsc56Test('KGEN transfer enforces gas/native balance and exact uint bounds',()=>{
+ for(const mutate of [f=>f.gasLimit='0',f=>f.gasLimit='1e5',f=>f.gasLimit=(1n<<64n).toString(),f=>f.gasPriceWei='0',f=>f.gasPriceWei=(1n<<256n).toString(),f=>f.maximumGasFeeWei='4999999999999',f=>f.readback.nativeBalanceWei='4999999999999',f=>f.nonce='00',f=>f.nonce=((1n<<64n)-1n).toString(),f=>f.readback.tokenBalanceWei='72000000000000000000000001',f=>f.readback.tokenBalanceWei=(1n<<256n).toString(),f=>f.gasPriceWei='9'.repeat(79)]){const f=transferFixture();mutate(f);assert.throws(()=>transferBuild(f),/TRANSFER_/,mutate.toString())}
+ const f=transferFixture();f.nonce=f.readback.pendingNonce=((1n<<64n)-2n).toString();assert.equal(transferBuild(f).transaction.nonce,'0xfffffffffffffffe');
+});
+
+bsc56Test('KGEN transfer rejects accessor-bearing or oversized structured inputs without invoking them',()=>{
+ for(const target of ['recipient','readback','tokenCodeHash']){const f=transferFixture();let calls=0;const obj=target==='tokenCodeHash'?f.readback:f;Object.defineProperty(obj,target,{enumerable:true,get(){calls++;return 'malicious'}});assert.throws(()=>transferBuild(f),/ACCESSOR_FORBIDDEN/);assert.equal(calls,0)}
+ for(const mutate of [f=>f.toJSON=()=>({}),f=>f.readback.loop=f,f=>Object.setPrototypeOf(f,{extra:true}),f=>f.recipient='x'.repeat(1025),f=>f[Symbol('hidden')]='x',f=>delete f.readback.nativeBalanceWei,f=>f.function='approve']){const f=transferFixture();mutate(f);assert.throws(()=>transferBuild(f),/TRANSFER_/)}
+ assert.throws(()=>transferBuild(null),/PLAIN_DATA_REQUIRED/);assert.throws(()=>transferBuild(transferFixture(),{}),/CODEC_INTERFACE_REQUIRED/);
+});
+
+bsc56Test('KGEN transfer codec mutation cannot swap snapshot recipient or amount',()=>{
+ const f=transferFixture(),baseline=transferBuild(f);let changed=false;
+ const codec={...bsc56Codec,getAddress(value){if(!changed){changed=true;f.recipient='0x3333333333333333333333333333333333333333';f.amountKgen='2';f.readback.recipient=f.recipient;f.readback.tokenCodeHash='0x'+'00'.repeat(32)}return bsc56Codec.getAddress(value)}};
+ const r=transferBuild(f,codec);assert.equal(r.intentDigest,baseline.intentDigest);assert.deepEqual(r.transaction,baseline.transaction);assert.deepEqual(r.review,baseline.review);assert.equal(r.readback.recipient,transferRecipient);
+});
+
+bsc56Test('KGEN transfer metadata changes bind distinct intents and never invoke global wallet authority',()=>{
+ const base=transferBuild(),ledger=createKgenLedger(100),before=structuredClone(ledger),old=globalThis.ethereum;let requests=0;globalThis.ethereum={request(){requests++;throw Error('forbidden')}};
+ try{for(const mutate of [f=>f.readback.sourceCommit='b'.repeat(40),f=>f.readback.blockHash='0x'+'cd'.repeat(32),f=>f.readback.recipientTaxExempt=true,f=>f.gasPriceWei='1',f=>f.amountKgen='1',f=>f.nonce=f.readback.pendingNonce='8']){const f=transferFixture();mutate(f);assert.notEqual(transferBuild(f).intentDigest,base.intentDigest)}assert.equal(requests,0);assert.deepEqual(ledger,before)}finally{if(old===undefined)delete globalThis.ethereum;else globalThis.ethereum=old}
+});
+
+
+bsc56Test('KGEN transfer identity, immutable supply and tax bounds match pinned canonical source',async()=>{
+ const {readFile}=await import('node:fs/promises'),{createHash}=await import('node:crypto');
+ const manifest=JSON.parse(await readFile(new URL('../docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json',import.meta.url),'utf8'));
+ const source=await readFile(new URL('../KGEN/contracts/KGEN_Token_V7_5_2.sol',import.meta.url),'utf8');
+ assert.equal(transferModule.KGEN_BSC56_TOKEN_CODE_HASH,manifest.nonOraclePreparation20260930.publicReadback.tokenCodeHash);
+ assert.equal(createHash('sha256').update(source).digest('hex'),manifest.productDecision20261007.readOnlyIdentityGate.tokenSourceSha256);
+ assert.match(source,/TOTAL_SUPPLY = 72_000_000 \* 1e18/);assert.match(source,/TAX_BPS_TOTAL\s*= 30/);assert.match(source,/contract KGEN_Token_V7_5_2 is ERC20, Ownable/);
+});

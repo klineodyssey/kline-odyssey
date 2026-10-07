@@ -1,3 +1,17 @@
+/* KGEN_META
+VERSION: 1.0.0
+REVISION: 2026-10-07.BSC56-KGEN-TRANSFER-REVIEW
+PRODUCT_CONTEXT: V2.9.5
+STATUS: CANDIDATE
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot / scoped self-review and parent targeted review / 2026-10-07; no live transfer or release approval
+SOURCE_COMMIT: a678437d435e2b7f58704e81782b1db542716692
+TASK_ID: K11520-BSC56-KGEN-TRANSFER-20261007
+CHANGE_REASON: Add pure exact-unit KGEN transfer review in the existing wallet owner; preserve all connection/session behavior.
+ANCESTOR: K線西遊記/temples/11520/runtime/evm-wallet-runtime.mjs @ a678437d435e2b7f58704e81782b1db542716692
+SOURCE_OF_TRUTH: TRUE
+*/
 import {normalizeSignedC,signedPositionSide,requiredMargin,createKgenLedger} from './kgen-margin-runtime.mjs';
 import {requireV1TradingC} from '../controls/nonlinear-controls.mjs';
 const ERC20_BALANCE_OF='0x70a08231';
@@ -6,6 +20,71 @@ export const PLAYER_SESSION_KEY='k11520.player-session.v1';
 export const KGEN_TOKEN_ADDRESS='0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be';
 export const KGEN_CHAIN_ID=56;
 const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
+// Source-bound canonical expectation from the existing Mainnet manifest:
+// nonOraclePreparation20260930.publicReadback.tokenCodeHash. This pin is an
+// identity check, not a claim that source-to-bytecode recompilation was done.
+export const KGEN_BSC56_TOKEN_CODE_HASH='0x251cff271c2c754743f9eb3bc11982163fd7ca756e0b0378cb0358418ffeecc1';
+export const KGEN_BSC56_TRANSFER_ABI=Object.freeze(['function transfer(address to,uint256 value) returns(bool)','event Transfer(address indexed from,address indexed to,uint256 value)']);
+
+/** Pure input-metadata review. No provider, session mutation, wallet request,
+ * signature, allowance, storage, receipt or simulation-ledger side effect.
+ * Codec is caller-supplied: method shape is checked, not module authenticity.
+ * Only a future session-owned approved codec and fresh readback can support a wallet handoff. */
+export function buildBsc56KgenTransferReview(input,{ethers}={}){
+  const topKeys=['chainId','sender','recipient','amountKgen','nonce','gasLimit','gasPriceWei','maximumGasFeeWei','readback'];
+  const readKeys=['chainId','tokenAddress','sender','recipient','tokenCodeHash','sourceCommit','blockNumber','blockHash','pendingNonce','tokenBalanceWei','nativeBalanceWei','senderTaxExempt','recipientTaxExempt','senderMarketMakerPair','recipientMarketMakerPair','recipientCodePresent'];
+  let bytes=0;const encoder=new TextEncoder();
+  const copy=(value,keys,nested=false)=>{
+    if(!value||typeof value!=='object'||Array.isArray(value)||![Object.prototype,null].includes(Object.getPrototypeOf(value)))throw new Error('TRANSFER_PLAIN_DATA_REQUIRED');
+    const descriptors=Object.getOwnPropertyDescriptors(value),names=Reflect.ownKeys(descriptors);
+    if(names.length!==keys.length||names.some(k=>typeof k!=='string'||!keys.includes(k)))throw new Error('TRANSFER_EXACT_FIELDS_REQUIRED');
+    const result={};for(const key of keys){
+      const descriptor=descriptors[key];if(!descriptor||!Object.hasOwn(descriptor,'value')||!descriptor.enumerable)throw new Error('TRANSFER_ACCESSOR_FORBIDDEN');
+      const v=descriptor.value;
+      if(key==='readback'&&!nested){result[key]=copy(v,readKeys,true);continue}
+      if(!['string','number','boolean'].includes(typeof v))throw new Error('TRANSFER_PRIMITIVE_REQUIRED');
+      if(typeof v==='string'){bytes+=encoder.encode(v).length;if(v.length>1024||bytes>8192)throw new Error('TRANSFER_INPUT_BUDGET_EXCEEDED')}
+      result[key]=v;
+    }return result;
+  };
+  // Snapshot every used field before any codec callback can mutate its origin.
+  const data=copy(input,topKeys),r=data.readback;
+  if(typeof ethers?.Interface!=='function'||typeof ethers?.getAddress!=='function'||typeof ethers?.keccak256!=='function'||typeof ethers?.toUtf8Bytes!=='function')throw new Error('TRANSFER_CODEC_INTERFACE_REQUIRED');
+  const uint=(value,label,{zero=false,max=(1n<<256n)-1n}={})=>{
+    if(typeof value!=='string'||value.length>78||!/^(0|[1-9][0-9]*)$/.test(value))throw new Error('TRANSFER_'+label+'_UINT_REQUIRED');
+    const n=BigInt(value);if((zero?n<0n:n<=0n)||n>max)throw new Error('TRANSFER_'+label+'_OUT_OF_RANGE');return n;
+  };
+  const address=(value,label)=>{
+    if(typeof value!=='string'||!EVM_ADDRESS.test(value)||/^0x0{40}$/i.test(value))throw new Error('TRANSFER_'+label+'_ADDRESS_INVALID');
+    try{return ethers.getAddress(value)}catch{throw new Error('TRANSFER_'+label+'_CHECKSUM_INVALID')}
+  };
+  if(data.chainId!==KGEN_CHAIN_ID||r.chainId!==KGEN_CHAIN_ID)throw new Error('TRANSFER_CHAIN56_REQUIRED');
+  const sender=address(data.sender,'SENDER'),recipient=address(data.recipient,'RECIPIENT'),token=address(r.tokenAddress,'TOKEN');
+  if(token!==ethers.getAddress(KGEN_TOKEN_ADDRESS)||r.tokenCodeHash!==KGEN_BSC56_TOKEN_CODE_HASH)throw new Error('TRANSFER_CANONICAL_TOKEN_IDENTITY_REQUIRED');
+  if(address(r.sender,'READBACK_SENDER')!==sender||address(r.recipient,'READBACK_RECIPIENT')!==recipient)throw new Error('TRANSFER_READBACK_ACCOUNT_MISMATCH');
+  if(recipient===sender||recipient===token)throw new Error('TRANSFER_SELF_OR_TOKEN_RECIPIENT_FORBIDDEN');
+  if(typeof r.sourceCommit!=='string'||! /^[0-9a-f]{40}$/.test(r.sourceCommit)||typeof r.blockHash!=='string'||! /^0x[0-9a-fA-F]{64}$/.test(r.blockHash)||/^0x0{64}$/i.test(r.blockHash))throw new Error('TRANSFER_SOURCE_BLOCK_BINDING_REQUIRED');
+  uint(r.blockNumber,'BLOCK_NUMBER');
+  const nonce=uint(data.nonce,'NONCE',{zero:true,max:(1n<<64n)-2n});if(r.pendingNonce!==data.nonce)throw new Error('TRANSFER_PENDING_NONCE_MISMATCH');
+  const rawBalance=uint(r.tokenBalanceWei,'TOKEN_BALANCE',{zero:true}),nativeBalance=uint(r.nativeBalanceWei,'NATIVE_BALANCE',{zero:true});
+  if(rawBalance>72000000n*10n**18n)throw new Error('TRANSFER_BALANCE_EXCEEDS_CANONICAL_SUPPLY');
+  if(typeof data.amountKgen!=='string'||data.amountKgen.length>98||!/^(0|[1-9][0-9]*)(?:\.[0-9]{1,18})?$/.test(data.amountKgen))throw new Error('TRANSFER_EXACT_KGEN_DECIMAL_REQUIRED');
+  const [whole,fraction='']=data.amountKgen.split('.'),amount=BigInt(whole)*10n**18n+BigInt(fraction.padEnd(18,'0'));
+  if(amount<=0n||amount>(1n<<256n)-1n)throw new Error('TRANSFER_AMOUNT_OUT_OF_RANGE');
+  if(amount>rawBalance)throw new Error('TRANSFER_INSUFFICIENT_KGEN');
+  const gasLimit=uint(data.gasLimit,'GAS_LIMIT',{max:(1n<<64n)-1n}),gasPrice=uint(data.gasPriceWei,'GAS_PRICE'),gasCap=uint(data.maximumGasFeeWei,'GAS_CAP'),gasMaximum=gasLimit*gasPrice;
+  if(gasMaximum>gasCap)throw new Error('TRANSFER_GAS_CAP_EXCEEDED');if(gasMaximum>nativeBalance)throw new Error('TRANSFER_INSUFFICIENT_BNB_FOR_GAS_CAP');
+  for(const key of ['senderTaxExempt','recipientTaxExempt','senderMarketMakerPair','recipientMarketMakerPair','recipientCodePresent'])if(typeof r[key]!=='boolean')throw new Error('TRANSFER_TAX_AND_RECIPIENT_FLAGS_REQUIRED');
+  const taxableAtReadback=!r.senderTaxExempt&&!r.recipientTaxExempt&&(r.senderMarketMakerPair||r.recipientMarketMakerPair),maximumTax=amount*30n/10000n,estimatedTax=taxableAtReadback?maximumTax:0n;
+  const quantity=n=>'0x'+n.toString(16),calldata=new ethers.Interface(KGEN_BSC56_TRANSFER_ABI).encodeFunctionData('transfer',[recipient,amount.toString()]);
+  const transaction={chainId:quantity(BigInt(KGEN_CHAIN_ID)),type:'0x0',from:sender,to:token,value:'0x0',nonce:quantity(nonce),gas:quantity(gasLimit),gasPrice:quantity(gasPrice),data:calldata};
+  const taxObservation={senderTaxExempt:r.senderTaxExempt,recipientTaxExempt:r.recipientTaxExempt,senderMarketMakerPair:r.senderMarketMakerPair,recipientMarketMakerPair:r.recipientMarketMakerPair,taxableAtReadback,estimatedTaxWei:estimatedTax.toString(),primaryRecipientTransferAtReadbackWei:(amount-estimatedTax).toString(),maximumTaxIfFlagsChangeWei:maximumTax.toString(),minimumNetIfOnlyTaxFlagsChangeWei:(amount-maximumTax).toString(),miningTimeNetGuaranteed:false};
+  const review={CHAIN:{name:'BNB Smart Chain Mainnet',chainId:56},WALLET:sender,RECIPIENT:recipient,CONTRACT:token,FUNCTION:'transfer(address,uint256)',TOKEN:{symbol:'KGEN',address:token,decimals:18},AMOUNT:{inputKgen:data.amountKgen,canonicalKgen:formatUnits(amount,18),baseUnits:amount.toString(),decimals:18},EXPECTED_EFFECT:'Request a KGEN transfer to the exact displayed recipient. This does not swap, approve, deposit margin or settle a trade. Recipient net is an observation, not a mining-time promise.',MAXIMUM_EXPOSURE:{walletTokenDebitWei:amount.toString(),nativeGasFeeWei:gasMaximum.toString(),approvedGasFeeCapWei:gasCap.toString(),nativeTransferValueWei:'0',allowanceChanged:false},taxObservation,recipientCodePresentAtReadback:r.recipientCodePresent};
+  const intentDigest=ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify({transaction,readback:r,review})));
+  const freeze=v=>{if(v&&typeof v==='object'){for(const x of Object.values(v))freeze(x);Object.freeze(v)}return v};
+  return freeze({schema:'K11520_BSC56_KGEN_TRANSFER_REVIEW_V1',status:'UNSIGNED_INPUT_REVIEW_ONLY',scope:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',transactionFormat:'EIP1474_QUANTITY_UNSIGNED_REVIEW_NOT_WALLET_REQUEST',review,transaction,intentDigest,readback:r,blockers:['SESSION_OWNED_FRESH_TOKEN_BALANCE_TAX_NONCE_GAS_READBACK_REQUIRED','EXPLICIT_WALLET_OWNER_CONFIRMATION_REQUIRED','CONFIRMED_MATCHING_TRANSACTION_AND_RECEIPT_REQUIRED'],executionReady:false,walletHandoffReady:false,signerRequested:false,broadcast:false});
+}
+
 export const LOCAL_PRODUCT_EVENTS=Object.freeze(['UNIQUE_PLAYER','SESSION','MONSTER_KILL','LOOT_DROP','COURIER_SETTLEMENT','COURIER_INSURANCE_PAYOUT','KAIOS_SPEND','TRADE_OPEN','TRADE_FILL','TRADE_CLOSE','LIQUIDATION','RETURNING_PLAYER','ERROR']);
 // A namespace is isolation against application mix-ups, NOT authentication of
 // another person sharing this browser. Player IDs never authorize chain assets.
@@ -289,3 +368,4 @@ if(typeof document!=='undefined'&&/\/temples\/11520\/game-5d\.html$/i.test(decod
   import('./game-ui-product-fixes.mjs').catch(()=>{});
   import('./real-trading-preflight-ui.mjs').then(({install11520RealTradingPreflightUi})=>install11520RealTradingPreflightUi()).catch(()=>{});
 }
+
