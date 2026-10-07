@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createUniverseRuntime } from "../registry/universe-runtime.mjs";
 import { advanceTempleMonitoringIncident, assertCompanyWorkAllowedAfterGatekeeper, classifyTempleMonitoringError, createTempleMonitoringFailure, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, validateTempleMonitoringIncident, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
@@ -404,6 +404,39 @@ function expectedHourlyCycleId(scheduledAt) {
   return `DIGITAL_ANT_0001_HOURLY_${instant.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
 }
 
+export function validateRestoredWorkEvent(event, { expectedCycleId, eventPath, observedAt }) {
+  if (!event || typeof event !== "object" || Array.isArray(event)) throw statusError("RESTORED_EVENT_SCHEMA_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  const required = ["event_id", "life_id", "app_id", "work_cycle_id", "scheduled_at", "started_at", "finished_at", "rpc_status", "heart_status", "monitoring_status", "action_taken", "result", "work_duration_seconds", "observations", "actions_considered", "error_evidence", "gas_spent", "tx_hash", "signer_action", "chain_write", "secret_access", "asset_movement", "temple_mutation", "token_mutation", "governance_action"];
+  if (required.some((key) => !Object.prototype.hasOwnProperty.call(event, key))) throw statusError("RESTORED_EVENT_SCHEMA_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  if (!/^DIGITAL_ANT_0001_HOURLY_\d{10}$/.test(expectedCycleId ?? "") || basename(eventPath ?? "") !== `${expectedCycleId}.json` || event.event_id !== expectedCycleId || event.work_cycle_id !== expectedCycleId) throw statusError("RESTORED_EVENT_CYCLE_IDENTITY_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  if (event.life_id !== "DIGITAL_ANT_0001" || event.app_id !== "DIGITAL_ANT_APP_0001") throw statusError("RESTORED_EVENT_LIFE_APP_IDENTITY_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  if (![event.scheduled_at, event.started_at, event.finished_at, observedAt].every(validIso)) throw statusError("RESTORED_EVENT_TIME_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  const scheduled = Date.parse(event.scheduled_at);
+  const started = Date.parse(event.started_at);
+  const finished = Date.parse(event.finished_at);
+  if (expectedHourlyCycleId(event.scheduled_at) !== expectedCycleId || expectedHourlyCycleId(event.started_at) !== expectedCycleId || expectedHourlyCycleId(event.finished_at) !== expectedCycleId || started < scheduled || finished < started || finished > Date.parse(observedAt)) throw statusError("RESTORED_EVENT_TIME_ORDER_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  if (!Number.isInteger(event.work_duration_seconds) || event.work_duration_seconds !== Math.floor((finished - started) / 1000)) throw statusError("RESTORED_EVENT_DURATION_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  if (!["WORK_CYCLE_COMPLETED", "WORK_CYCLE_DEGRADED", "WORK_CYCLE_FAILED"].includes(event.result) || event.action_taken !== "NO_ACTION" || !["VERIFIED", "DEGRADED", "MONITORING_FAILED"].includes(event.monitoring_status)) throw statusError("RESTORED_EVENT_RESULT_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  if (![event.rpc_status, event.heart_status].every((status) => typeof status === "string" && status.length > 0) || ![event.observations, event.actions_considered, event.error_evidence].every(Array.isArray)) throw statusError("RESTORED_EVENT_EVIDENCE_SHAPE_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  validateGatekeeperDutyStatus(event.gatekeeper_duty);
+  if (event.result === "WORK_CYCLE_COMPLETED") {
+    if (event.monitoring_status !== "VERIFIED" || event.temple_monitoring_incident !== null) throw statusError("RESTORED_EVENT_COMPLETION_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  } else {
+    validateTempleMonitoringIncident(event.temple_monitoring_incident);
+    if (event.temple_monitoring_incident.open !== true || event.temple_monitoring_incident.last_observed_cycle_id !== expectedCycleId || !["DEGRADED", "MONITORING_FAILED"].includes(event.monitoring_status)) throw statusError("RESTORED_EVENT_INCIDENT_STATUS_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  }
+  if (event.secret_access !== false || event.signer_action !== false || event.chain_write !== false || event.tx_hash !== null || event.gas_spent !== "0" || event.asset_movement !== false || event.temple_mutation !== false || event.token_mutation !== false || event.governance_action !== false) throw statusError("RESTORED_EVENT_SAFETY_BOUNDARY_INVALID", "PUBLIC_WORKER_EVENT_RESTORE");
+  return event;
+}
+
+export function prepareRestoredWorkEvent({ candidate, expectedCycleId, eventPath, observedAt }) {
+  try {
+    return Object.freeze({ event: validateRestoredWorkEvent(candidate, { expectedCycleId, eventPath, observedAt }), failures: Object.freeze([]) });
+  } catch (error) {
+    return Object.freeze({ event: null, failures: Object.freeze([createTempleMonitoringFailure({ condition: "CRITICAL_STATUS_UNKNOWN", occurredAt: observedAt, source: `PUBLIC_WORKER_EVENT_RESTORE:REJECTED:${error?.code ?? "INVALID_EVENT"}`, lastKnownGood: null, fallback: { attempted: true, strategy: "IGNORE_UNTRUSTED_EVENT_AND_RUN_CURRENT_READ_ONLY_CYCLE", result: "RESTORED_EVENT_REJECTED", evidence: [error?.code ?? "INVALID_EVENT", expectedCycleId] } })]) });
+  }
+}
+
 export function validateRestoredWorkerStatus(status) {
   validateSharedWorkerStatus(status);
   if (!validIso(status.generated_at)) throw statusError("RESTORED_STATUS_TIME_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
@@ -412,8 +445,7 @@ export function validateRestoredWorkerStatus(status) {
   if (!validIso(cycle.scheduled_at) || !validIso(cycle.started_at) || !validIso(cycle.finished_at) || Date.parse(cycle.finished_at) < Date.parse(cycle.started_at)) throw statusError("RESTORED_STATUS_CYCLE_TIME_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
   if (Date.parse(status.generated_at) < Date.parse(cycle.finished_at)) throw statusError("RESTORED_STATUS_GENERATED_BEFORE_CYCLE_FINISH", "PUBLIC_WORKER_SHARED_STATUS");
   if (cycle.work_cycle_id !== expectedHourlyCycleId(cycle.scheduled_at)) throw statusError("RESTORED_STATUS_CYCLE_KEY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
-  if (!["WORK_CYCLE_COMPLETED", "WORK_CYCLE_DEGRADED", "WORK_CYCLE_FAILED"].includes(cycle.result)) throw statusError("RESTORED_STATUS_RESULT_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
-  if (cycle.chain_write !== false || cycle.signer_action !== false || cycle.tx_hash !== null) throw statusError("RESTORED_STATUS_AUTHORITY_INVALID", "PUBLIC_WORKER_SHARED_STATUS");
+  validateRestoredWorkEvent(cycle, { expectedCycleId: cycle.work_cycle_id, eventPath: `${cycle.work_cycle_id}.json`, observedAt: status.generated_at });
   if (status.temple_monitoring_incident) {
     validateTempleMonitoringIncident(status.temple_monitoring_incident);
     if (status.temple_monitoring_incident.last_observed_cycle_id !== cycle.work_cycle_id) throw statusError("RESTORED_INCIDENT_CYCLE_MISMATCH", "PUBLIC_WORKER_SHARED_STATUS");
@@ -456,7 +488,7 @@ export async function persistFatalMonitoringEvidence({ error, statusPath, events
     evidence: Object.freeze([failure.condition, failure.source])
   }));
   const event = Object.freeze({
-    life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", work_cycle_id: workCycleId, scheduled_at: hour.toISOString(), started_at: observedAt, finished_at: observedAt,
+    event_id: workCycleId, life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", work_cycle_id: workCycleId, scheduled_at: hour.toISOString(), started_at: observedAt, finished_at: observedAt,
     bsc_block: null, rpc_status: "UNKNOWN", heart_status: "UNKNOWN", kgen_status: "UNKNOWN", kaios_status: "UNKNOWN",
     indexer_status: "UNKNOWN", wallet_state: "UNKNOWN", heart_state: "UNKNOWN", finance_state: "UNKNOWN",
     work_queue_state: "UNVERIFIED", observations: Object.freeze(["FATAL_RUNTIME_MONITORING_EVIDENCE"]), risk_level: "UNKNOWN",
@@ -465,7 +497,7 @@ export async function persistFatalMonitoringEvidence({ error, statusPath, events
     repair_work_orders: incident.repair_work_orders, work_time: Object.freeze({ gatekeeper_work_seconds: 0, cfo_work_seconds: 0, company_work_seconds: 0 }),
     action_taken: "NO_ACTION", result: "WORK_CYCLE_DEGRADED", stop_reason: failure.condition,
     error_evidence: Object.freeze([{ component: error?.component ?? "PUBLIC_WORKER_RUNTIME", code: error?.code ?? "CRITICAL_STATUS_UNKNOWN", detail: "FATAL_RUNTIME_FAILED_CLOSED_NO_VALUE_FABRICATED" }]),
-    tx_hash: null, gas_spent: "0", signer_action: false, chain_write: false, secret_access: false, temple_mutation: false, token_mutation: false, governance_action: false,
+    tx_hash: null, gas_spent: "0", signer_action: false, chain_write: false, secret_access: false, asset_movement: false, temple_mutation: false, token_mutation: false, governance_action: false,
     work_duration_seconds: 0
   });
   const requestPatrol = previous?.request_patrol ?? Object.freeze({ status: "SHARED_REQUEST_SOURCE_UNAVAILABLE", source: "GITHUB_ISSUES", real_requests: 0, open_requests: 0, evidence: Object.freeze(["FATAL_RUNTIME_READ_UNAVAILABLE"]) });
@@ -502,21 +534,26 @@ async function main() {
   const cycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
   const eventPath = eventsDir ? join(eventsDir, `${cycleId}.json`) : null;
   const existing = await readJsonIfPresent(eventPath);
-  if (existing) {
-    const report = { report_type: "DIGITAL_ANT_PUBLIC_READ_ONLY_HOURLY_WORKER_RESULT", result: "IDEMPOTENT_NOOP", work_cycle_id: cycleId, chain_write: false, signer_action: false };
-    if (output) await writeJson(output, report); else process.stdout.write(`${JSON.stringify(report)}\n`);
-    return;
+  let restoredEventFailures = [];
+  if (existing !== null) {
+    const restoredEvent = prepareRestoredWorkEvent({ candidate: existing, expectedCycleId: cycleId, eventPath, observedAt: now });
+    restoredEventFailures = restoredEvent.failures;
+    if (restoredEvent.event) {
+      const report = { report_type: "DIGITAL_ANT_PUBLIC_READ_ONLY_HOURLY_WORKER_RESULT", result: "IDEMPOTENT_NOOP", work_cycle_id: cycleId, chain_write: false, signer_action: false };
+      if (output) await writeJson(output, report); else process.stdout.write(`${JSON.stringify(report)}\n`);
+      return;
+    }
   }
   const restoredStatus = prepareRestoredWorkerStatus({ candidate: previousStatusCandidate, observedAt: now });
   const previousStatus = restoredStatus.status;
-  const stalePreflight = restoredStatus.failures;
+  const stalePreflight = [...restoredEventFailures, ...restoredStatus.failures];
   const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, previousStatus, preflightFailures: stalePreflight, readCycle: (context) => publicReadCycle({ ...context, seed, verifiedFirstEvents }) });
   const event = publicWorkEvent(result);
   const requestPatrol = event.request_patrol;
   const companyPatrol = event.company_patrol;
   const generatedAt = new Date().toISOString();
   const status = buildSharedWorkerStatus({ event, previous: previousStatus, requestPatrol, companyPatrol, generatedAt });
-  if (eventPath) await writeJson(eventPath, event, { exclusive: true });
+  if (eventPath) await writeJson(eventPath, event, { exclusive: existing === null });
   if (statusPath) await writeJson(statusPath, status);
   const report = { report_type: "DIGITAL_ANT_PUBLIC_READ_ONLY_HOURLY_WORKER_RESULT", scheduler: "GITHUB_ACTIONS_HOURLY", chain_write: false, signer_action: false, result, shared_status: statusPath, event_path: eventPath };
   if (output) await writeJson(output, report); else process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);

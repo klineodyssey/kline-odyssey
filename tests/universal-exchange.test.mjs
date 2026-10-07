@@ -117,7 +117,7 @@ import {
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
-import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, persistFatalMonitoringEvidence, prepareRestoredWorkerStatus, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol, validateRestoredWorkerStatus } from "../core/jobs/public-read-only-worker.mjs";
+import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, persistFatalMonitoringEvidence, prepareRestoredWorkEvent, prepareRestoredWorkerStatus, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol, validateRestoredWorkEvent, validateRestoredWorkerStatus } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 const execFileAsync = promisify(execFile);
@@ -137,15 +137,21 @@ function verifiedMonitoringRecovery(overrides = {}) {
   };
 }
 
-function restoredStatusFixture({ scheduledAt = "2026-10-08T10:00:00.000Z", finishedAt = "2026-10-08T10:00:05.000Z" } = {}) {
+function restoredEventFixture({ scheduledAt = "2026-10-08T10:00:00.000Z", finishedAt = "2026-10-08T10:00:05.000Z" } = {}) {
   const cycleId = `DIGITAL_ANT_0001_HOURLY_${scheduledAt.slice(0, 13).replace(/[-T:]/g, "")}`;
-  const event = {
+  const duration = Math.floor((Date.parse(finishedAt) - Date.parse(scheduledAt)) / 1000);
+  return {
     event_id: cycleId, life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", work_cycle_id: cycleId,
     scheduled_at: scheduledAt, started_at: scheduledAt, finished_at: finishedAt, result: "WORK_CYCLE_COMPLETED",
-    action_taken: "NO_ACTION", work_duration_seconds: 5, monitoring_status: "VERIFIED", temple_monitoring_incident: null,
-    chain_write: false, signer_action: false, tx_hash: null, bsc_block: 116040000,
-    gatekeeper_duty: { heart_block: 116040000 }, heart_state: { status: "12345_PATROL_COMPLETED" }, work_time: { gatekeeper_work_seconds: 1, cfo_work_seconds: 1, company_work_seconds: 1 }
+    action_taken: "NO_ACTION", work_duration_seconds: duration, monitoring_status: "VERIFIED", temple_monitoring_incident: null,
+    rpc_status: "AVAILABLE", heart_status: "AVAILABLE", observations: [], actions_considered: [], error_evidence: [],
+    chain_write: false, signer_action: false, secret_access: false, tx_hash: null, gas_spent: "0", asset_movement: false, temple_mutation: false, token_mutation: false, governance_action: false, bsc_block: 116040000,
+    gatekeeper_duty: gatekeeperDuty({ gatekeeper_started_at: scheduledAt, gatekeeper_finished_at: finishedAt, heart_block: 116040000 }), heart_state: { status: "12345_PATROL_COMPLETED" }, work_time: { gatekeeper_work_seconds: 1, cfo_work_seconds: 1, company_work_seconds: 1 }
   };
+}
+
+function restoredStatusFixture({ scheduledAt = "2026-10-08T10:00:00.000Z", finishedAt = "2026-10-08T10:00:05.000Z" } = {}) {
+  const event = restoredEventFixture({ scheduledAt, finishedAt });
   return buildSharedWorkerStatus({ event, requestPatrol: { status: "SHARED_REQUEST_SOURCE_VERIFIED", real_requests: 0, open_requests: 0, evidence: [] }, companyPatrol: { status: "COMPANY_PATROL_COMPLETED", work_queue: 0 }, generatedAt: finishedAt });
 }
 
@@ -1397,6 +1403,14 @@ test("restored status is identity/schema validated and malformed evidence cannot
   const rejectedLastKnownGood = prepareRestoredWorkerStatus({ candidate: forgedLastKnownGood, observedAt: "2026-10-08T10:30:00.000Z" });
   assert.equal(rejectedLastKnownGood.status, null);
   assert.match(rejectedLastKnownGood.failures[0].source, /RESTORED_LAST_KNOWN_GOOD_INVALID/);
+
+  for (const [field, unsafeValue] of Object.entries({ secret_access: true, signer_action: true, chain_write: true, tx_hash: `0x${"a".repeat(64)}`, gas_spent: "1", asset_movement: true, temple_mutation: true, token_mutation: true, governance_action: true })) {
+    const unsafe = structuredClone(valid);
+    unsafe.last_work_cycle[field] = unsafeValue;
+    const rejectedUnsafe = prepareRestoredWorkerStatus({ candidate: unsafe, observedAt: "2026-10-08T10:30:00.000Z" });
+    assert.equal(rejectedUnsafe.status, null, field);
+    assert.match(rejectedUnsafe.failures[0].source, /RESTORED_EVENT_SAFETY_BOUNDARY_INVALID/, field);
+  }
 
   const stale = prepareRestoredWorkerStatus({ candidate: valid, observedAt: "2026-10-08T12:00:06.000Z" });
   assert.equal(stale.status, valid);
@@ -2923,6 +2937,8 @@ test("fatal public worker catch persists fail-closed status and actual event evi
     assert.equal(evidence.status.monitoring_status, "DEGRADED");
     assert.equal(evidence.event.risk_level, "UNKNOWN");
     assert.equal(evidence.event.gatekeeper_duty.monitoring_status, "MONITORING_FAILED");
+    assert.equal(evidence.event.asset_movement, false);
+    assert.equal(validateRestoredWorkerStatus(evidence.status), evidence.status);
     assert.equal(JSON.parse(await fs.readFile(statusPath, "utf8")).temple_monitoring_incident.open, true);
     assert.equal(JSON.parse(await fs.readFile(output, "utf8")).fatal_runtime_failure, true);
     assert.equal((await fs.readdir(eventsDir)).length, 1);
@@ -2940,7 +2956,7 @@ test("restored same-hour Work Event makes a new worker process idempotently no-o
   const hour = new Date(); hour.setUTCMinutes(0, 0, 0);
   const cycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
   const eventPath = join(eventsDir, `${cycleId}.json`);
-  const restoredEvent = { work_cycle_id: cycleId, marker: "RESTORED_FROM_PREVIOUS_ACTION_ARTIFACT" };
+  const restoredEvent = restoredEventFixture({ scheduledAt: hour.toISOString(), finishedAt: hour.toISOString() });
   try {
     await fs.mkdir(eventsDir, { recursive: true });
     await fs.writeFile(eventPath, `${JSON.stringify(restoredEvent)}\n`, "utf8");
@@ -2954,6 +2970,35 @@ test("restored same-hour Work Event makes a new worker process idempotently no-o
   } finally {
     await fs.rm(temporary, { recursive: true, force: true });
   }
+});
+
+test("corrupted exact-filename restored event cannot suppress patrol and becomes fail-closed incident evidence", async () => {
+  const scheduledAt = "2026-10-08T10:00:00.000Z";
+  const observedAt = "2026-10-08T10:30:00.000Z";
+  const cycleId = "DIGITAL_ANT_0001_HOURLY_2026100810";
+  const eventPath = join(tmpdir(), `${cycleId}.json`);
+  const corrupted = prepareRestoredWorkEvent({ candidate: {}, expectedCycleId: cycleId, eventPath, observedAt });
+  assert.equal(corrupted.event, null);
+  assert.equal(corrupted.failures[0].condition, "CRITICAL_STATUS_UNKNOWN");
+  assert.match(corrupted.failures[0].source, /RESTORED_EVENT_SCHEMA_INVALID/);
+
+  const state = await runtime();
+  const life = await state.registries.life.get("DIGITAL_ANT_0001");
+  const app = await state.registries.app.get("DIGITAL_ANT_APP_0001");
+  const result = await runDigitalAntHourlyCycle({
+    store: state.store, life, app, scheduledAt, startedAt: observedAt, finishedAt: "2026-10-08T10:30:01.000Z", preflightFailures: corrupted.failures,
+    readCycle: async () => ({ monitoring_recovery_evidence: verifiedMonitoringRecovery() })
+  });
+  assert.notEqual(result.status, "IDEMPOTENT_NOOP");
+  assert.equal(result.status, "WORK_CYCLE_DEGRADED");
+  assert.equal(result.event.payload.temple_monitoring_incident.consecutive_failure_count, 1);
+  assert.match(result.event.payload.temple_monitoring_incident.failure_records[0].source, /RESTORED_EVENT_SCHEMA_INVALID/);
+  assert.equal(result.event.payload.secret_access, false);
+  assert.equal(result.event.payload.chain_write, false);
+
+  const valid = restoredEventFixture();
+  assert.equal(validateRestoredWorkEvent(valid, { expectedCycleId: valid.work_cycle_id, eventPath: join(tmpdir(), `${valid.work_cycle_id}.json`), observedAt: "2026-10-08T10:30:00.000Z" }), valid);
+  assert.throws(() => validateRestoredWorkEvent(valid, { expectedCycleId: valid.work_cycle_id, eventPath: join(tmpdir(), "WRONG.json"), observedAt: "2026-10-08T10:30:00.000Z" }), (error) => error.code === "RESTORED_EVENT_CYCLE_IDENTITY_INVALID");
 });
 
 function gatekeeperDuty(overrides = {}) {
