@@ -3721,6 +3721,7 @@ async function durableCustomerProjectFixture(t) {
   const make = (options = {}) => createCustomerProjectPersistencePrototype({ mode: 'LOCAL_TEST_ONLY', database: options.database ?? db,
     identityAdapter: options.identityAdapter ?? { resolve: () => structuredClone(principal) },
     quotePlanner: options.quotePlanner ?? { plan: async () => structuredClone(plan) }, executionEvidenceSource: options.executionEvidenceSource ?? null,
+    pondExchangeSource: options.pondExchangeSource ?? null,
     now: options.now ?? (() => time) });
   t.after(async () => { for (const c of connections) c.close(); await fs.rm(directory, { recursive: true, force: true }); });
   return { ...f, db, open, make, plan, canonical, hash, stmt, file,
@@ -4586,4 +4587,398 @@ test('Digital proposal SQLite replays submission and conditional acknowledgement
   assert.deepEqual(await offline.read(), before); assert.deepEqual(await offline.command(acceptance), accepted); assert.deepEqual(await f.rows(), rows);
   assert.equal(before.state.project.ecosystemComplete, false); assert.equal(before.state.project.deliveryCommitment, false);
   assert.ok(before.state.project.executionHolds.length > 1); assert.equal(before.state.project.receipt, null);
+});
+
+// Bounded, synthetic Company-to-Aqua/Eco journal only. The five-kg stocking
+// input is admitted, not finite procurement or authenticated owner evidence.
+// These helpers mirror the owner's test pattern without importing its tests.
+async function customerPondPairFixture() {
+  const { createFishpondAquacultureRuntimeV1, CONSTRUCTION_STAGES } = await import('../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js');
+  const { createReproductionEcologyRuntimeV1 } = await import('../KGEN-KAIOS/world-viewer/ecosystem/ecosystem-runtime.js');
+  const { hash } = await import('../KAIOS/backend/src/primitives.mjs');
+  function completeConstruction(runtime) {
+    if (runtime.getState().status !== 'RUNNING') runtime.start();
+    while (runtime.getState().construction.completed_stages.length < CONSTRUCTION_STAGES.length) {
+      const result = runtime.advanceConstruction(168);
+      assert.notEqual(result.status, 'BLOCKED', `${result.reason} at ${runtime.getState().construction.stage}`);
+    }
+    assert.equal(runtime.getState().pond.status, 'READY_FOR_STOCKING');
+  }
+  function closedWorldFixture(runtime) {
+    const state = runtime.getState();
+    return { scope: 'LOCAL_CLOSED_WORLD_TEST', fixtureId: 'CUSTOMER-POND-FIXTURE-001', expectedRevision: 0,
+      landParcelId: state.land.land_parcel_id,
+      resources: { equipment: structuredClone(state.equipment), materials: structuredClone(state.materials), energy: structuredClone(state.energy),
+        waterSources: state.water_sources.map(({ id, volume_l, available }) => ({ id, volume_l, available })),
+        feed: { inventory_kg: state.feed.inventory_kg, quality: state.feed.quality } },
+      workers: state.workers.map(({ life_id, current_location, travel_time_hours, availability }) => ({ life_id, current_location, travel_time_hours, availability })) };
+  }
+  const mode = 'LOCAL_PAIRED_EXCHANGE_TEST';
+  const donor = createFishpondAquacultureRuntimeV1({ seed: 'PAIRED-DONOR-FIXTURE', localExchangeMode: mode });
+  const fixture = closedWorldFixture(donor); donor.configureLocalFixture(fixture); completeConstruction(donor);
+  const constructionExport = donor.exportState();
+  donor.stockFish(100, { stock_available: true, transport_available: true, health_check_passed: true, quarantine_complete: true });
+  assert.equal(donor.getState().populations[0].total_biomass_kg, 5);
+  donor.runLowOxygenScenario(); donor.advanceTime(24, { rainfall_l: 0, evaporation_l: 0, seepage_l: 0, outflow_l: 0 }); donor.pause();
+  assert.equal(donor.getState().populations[0].total_biomass_kg, 4.7); assert.equal(donor.getState().pond.dead_biomass_kg, 0.3);
+  const canonical = createReproductionEcologyRuntimeV1({ seed: 'PAIRED-RECEIVER-FIXTURE' }).exportState().state;
+  const wetland = canonical.habitats.find((habitat) => habitat.type === 'WETLAND'), genesis = structuredClone(canonical);
+  genesis.habitats = [{ ...wetland, water_l: 0 }]; genesis.populations = [];
+  genesis.entities = canonical.entities.filter((entity) => entity.type === 'ECOSYSTEM' || entity.id === wetland.id);
+  for (const key of Object.keys(genesis.resources)) genesis.resources[key] = 0;
+  const receiver = createReproductionEcologyRuntimeV1({ initialState: genesis, localExchangeMode: mode });
+  const pondExport = donor.exportState(), ecologyExport = receiver.exportState();
+  const input = { scope: mode, exchangeId: 'PAIR-DEAD-BIOMASS-001', fixtureHash: await hash(fixture), quantityGrams: 200,
+    expectedSourceRevision: pondExport.state.revision, expectedDestinationRevision: ecologyExport.state.revision,
+    constructionExport, constructionHash: await hash(constructionExport), pondExport, pondHash: await hash(pondExport),
+    ecologyGenesis: genesis, ecologyGenesisHash: await hash(genesis), ecologyExport, ecologyHash: await hash(ecologyExport) };
+  return { donor, receiver, input, stages: CONSTRUCTION_STAGES };
+}
+
+async function customerPondCheckpointFixture(t, options = {}) {
+  const pair = await customerPondPairFixture(), f = await durableCustomerProjectFixture(t);
+  const input = structuredClone(pair.input); if (options.changeInput) await options.changeInput(input, f);
+  const inputHash = await f.hash(input), request = digitalWorldRequirementFixture();
+  Object.assign(request.requirements, { locationRef: input.pondExport.state.land.land_parcel_id,
+    rightsRef: input.pondExport.state.land.usage_right, deadlineHours: 3000 });
+  if (options.changeRequest) options.changeRequest(request);
+  Object.assign(f.plan, { stages: [...pair.stages], bomHash: input.fixtureHash, durationHours: 2880,
+    assumptions: [`LOCAL_POND_INPUT_SHA256:${inputHash}`, `LOCAL_POND_FIXTURE_SHA256:${input.fixtureHash}`,
+      `LOCAL_POND_GENESIS_SHA256:${input.ecologyGenesisHash}`, `LOCAL_POND_EXCHANGE_GRAMS:${input.quantityGrams}`,
+      'ADMITTED_FIVE_KG_NOT_FINITE_JUVENILE_PROCUREMENT', 'ABSTRACT_RESOURCE_POOL_NOT_FULL_LIFE_RUNTIME',
+      'PLANTS_AND_POLICY_REFERENCES_NOT_APPLIED', 'NO_SHARED_CLOCK_CONVERSION',
+      'NO_BIOLOGICAL_EFFICACY_OR_TRANSPORT_PROOF', 'OWNER_SIMULATED_EXPENSES_CEILING_NOT_PRICE_PROOF'] });
+  if (options.changePlan) options.changePlan(f.plan);
+  let observation; const sourceReads = [];
+  // This binding is assigned from the accepted state once. The source never
+  // echoes a caller's requested binding, especially for a different customer.
+  const pondExchangeSource = { async read(binding) { sourceReads.push(structuredClone(binding)); return structuredClone(observation); } };
+  const api = f.make({ pondExchangeSource });
+  async function preparePond(target = api) {
+    const saved = (await target.command(saveRequirementCommand(f, request))).result;
+    await target.command(submitRequirementCommand(f, saved));
+    let quote;
+    for (let i = 0; i < (options.quoteCount ?? 1); i++) {
+      const state = (await target.read()).state;
+      quote = (await target.command(f.command('ISSUE_SIMULATED_QUOTE', `pond-local-quote-${i}`, state.revision, { requestRevision: 1 }))).result.quote;
+    }
+    const acceptance = f.acceptance(quote, 'pond-local-acknowledgement', 2 + (options.quoteCount ?? 1));
+    if (options.accept !== false) await target.command(acceptance);
+    return { quote, acceptance, accepted: (await target.read()).state };
+  }
+  const prepared = await preparePond();
+  const accepted = prepared.accepted;
+  const binding = { owner: structuredClone(accepted.owner), workspaceId: accepted.workspaceId,
+    projectId: accepted.project?.projectId ?? `${accepted.workspaceId}-PROJECT`,
+    acceptanceId: accepted.acceptance?.acceptanceId ?? `${accepted.workspaceId}-ACCEPTANCE`, quoteHash: prepared.quote.contentHash };
+  observation = { binding, input };
+  const checkpoint = f.command('CHECKPOINT_POND_EXCHANGE', 'pond-local-checkpoint', accepted.revision, {
+    projectId: binding.projectId, acceptanceId: binding.acceptanceId, quoteHash: binding.quoteHash, inputHash });
+  return { ...f, ...pair, ...prepared, api, input, request, binding, observation, pondExchangeSource, sourceReads, checkpoint, preparePond };
+}
+
+const assertPondOwnersUnchanged = (f) => {
+  assert.deepEqual(f.donor.exportState(), f.input.pondExport);
+  assert.deepEqual(f.receiver.exportState(), f.input.ecologyExport);
+};
+
+test('Customer pond journal persists one complete pair and replays in a fresh process with live ports disabled', async (t) => {
+  const f = await customerPondCheckpointFixture(t);
+  assert.equal(f.quote.content.total, '65000'); assert.equal(f.quote.content.plan.durationHours, 2880);
+  assert.equal(f.quote.acknowledgementHash, f.acceptance.data.acknowledgementHash);
+  const result = await f.api.command(f.checkpoint), before = await f.api.read();
+  assert.equal(result.result.status, 'POND_PAIR_EVIDENCE_CHECKPOINTED'); assert.equal(result.persistence.committed, true);
+  assert.equal(result.persistence.productionVerified, false); assert.equal(result.result.durable, false);
+  assert.equal(before.storageVersion, 5); assert.equal(before.state.revision, 5); assert.equal(f.sourceReads.length, 1);
+  assert.deepEqual(f.sourceReads[0], f.binding); assert.deepEqual(before.state.project, f.accepted.project);
+  assert.deepEqual(before.state.contract, f.accepted.contract); assert.deepEqual(before.state.acceptance, f.accepted.acceptance);
+  const evidence = before.state.pondExchangeEvidence, pair = evidence.pair;
+  assert.equal(evidence.sourceRevision, 4); assert.equal(evidence.admittedStockGrams, 5000);
+  assert.equal(evidence.liveOwnerMutation, false); assert.equal(evidence.authenticatedWorkerReview, false); assert.equal(evidence.productionVerified, false);
+  assert.equal(evidence.inputHash, await f.hash(f.input)); assert.equal(evidence.observationHash, await f.hash(f.observation));
+  assert.equal(evidence.sourceCandidateHash, await f.hash(pair.sourceCandidate));
+  assert.equal(evidence.destinationCandidateHash, await f.hash(pair.destinationCandidate));
+  assert.equal(pair.status, 'PAIRED_TRANSFER_CANDIDATE_NOT_COMMITTED'); assert.equal(pair.durable, false);
+  assert.equal(pair.sourceCandidate.state.pond.dead_biomass_kg, 0.1); assert.equal(pair.destinationCandidate.state.resources.dead_biomass_kg, 0.2);
+  assert.deepEqual(pair.conservation, { unit: 'MILLIGRAM', before: 300000, after: 300000, residual: 0 });
+  const sourceEvent = pair.sourceCandidate.state.events.at(-1), destinationEvent = pair.destinationCandidate.state.events.at(-1);
+  assert.equal(sourceEvent.outputs.phase, 'EGRESS'); assert.equal(destinationEvent.outputs.phase, 'INGRESS');
+  assert.deepEqual(sourceEvent.outputs.manifest, destinationEvent.outputs.manifest);
+  assert.equal(destinationEvent.outputs.decomposed_kg, 0); assert.equal(destinationEvent.outputs.nutrient_return_kg, 0);
+  assert.equal(pair.sourceCandidate.state.enterprise.accounts.revenue, 0);
+  assert.equal(before.state.project.ecosystemComplete, false); assert.equal(before.state.project.deliveryCommitment, false);
+  for (const key of ['asset', 'delivery', 'receipt']) assert.equal(before.state.project[key], null);
+  for (const key of ['customerAcceptance', 'delivery', 'receipt']) assert.equal(pair[key], null);
+  assertPondOwnersUnchanged(f);
+  const rows = await f.rows(), envelope = JSON.parse(rows.customer_project_workspaces[0].payload);
+  assert.equal(envelope.version, 3); assert.deepEqual(envelope.operations[4].pondExchange, f.observation);
+  assert.equal(envelope.operations.filter((op) => op.pondExchange != null).length, 1);
+  assert.equal(Object.hasOwn(evidence, 'input'), false); assert.equal(Object.hasOwn(envelope.operations[4], 'pair'), false);
+  assert.equal(rows.customer_project_workspaces.length, 1); assert.equal(rows.customer_project_events.length, 5);
+  assert.equal(rows.idempotency.length, 5); assert.equal(rows.customer_project_guards.length, 0);
+  const sizes = { input: Buffer.byteLength(f.canonical(f.input)), pair: Buffer.byteLength(f.canonical(pair)),
+    observation: Buffer.byteLength(f.canonical(f.observation)), state: Buffer.byteLength(f.canonical(before.state)), journal: Buffer.byteLength(rows.customer_project_workspaces[0].payload) };
+  assert.ok(sizes.journal < 512000); t.diagnostic(`Synthetic pond byte counts: ${JSON.stringify(sizes)}`);
+  f.closeAll();
+  const { execFile } = await import('node:child_process'), { promisify } = await import('node:util');
+  const script = `
+    import { SQLiteDatabaseAdapter } from ${JSON.stringify(new URL('../KAIOS/backend/src/adapters/local.mjs', import.meta.url).href)};
+    import { createCustomerProjectPersistencePrototype } from ${JSON.stringify(new URL('../KAIOS/backend/src/service.mjs', import.meta.url).href)};
+    const db = new SQLiteDatabaseAdapter(process.argv[1]);
+    try {
+      const forbidden = () => { throw new Error('LIVE_PORT_USED_DURING_POND_REPLAY'); };
+      const api = createCustomerProjectPersistencePrototype({mode:'LOCAL_TEST_ONLY',database:db,
+        identityAdapter:{resolve:()=>({accountId:'TEST-ACCOUNT-A',playerId:'TEST-PLAYER-A',active:true,scope:'SIMULATION_CUSTOMER_CONTEXT'})},
+        quotePlanner:{plan:forbidden},executionEvidenceSource:{read:forbidden},pondExchangeSource:{read:forbidden},now:forbidden});
+      process.stdout.write(JSON.stringify({state:await api.read(),result:await api.command(JSON.parse(process.argv[2]))}));
+    } finally { db.close(); }
+  `;
+  const { stdout } = await promisify(execFile)(process.execPath, ['--input-type=module', '-e', script, f.file, JSON.stringify(f.checkpoint)], { timeout: 15000, maxBuffer: 1000000 });
+  assert.deepEqual(JSON.parse(stdout), { state: before, result });
+});
+
+test('Customer pond journal exact retry and new-key duplicate preserve one immutable pair', async (t) => {
+  const f = await customerPondCheckpointFixture(t), first = await f.api.command(f.checkpoint), before = await f.rows();
+  assert.deepEqual(await f.api.command(f.checkpoint), first); assert.deepEqual(await f.rows(), before);
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, data: { ...f.checkpoint.data, inputHash: 'a'.repeat(64) } }), 'IDEMPOTENCY_CONTENT_MISMATCH');
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, idempotencyKey: 'pond-stale-new-key' }), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, idempotencyKey: 'pond-change-new-key', expectedRevision: 5,
+    data: { ...f.checkpoint.data, inputHash: 'a'.repeat(64) } }), 'CUSTOMER_POND_CHECKPOINT_IMMUTABLE');
+  const offline = f.make({ pondExchangeSource: { read() { throw new Error('DUPLICATE_LIVE_SOURCE'); } } });
+  const duplicate = { ...f.checkpoint, idempotencyKey: 'pond-exact-new-key', expectedRevision: 5 };
+  const result = await offline.command(duplicate), after = await offline.read(), rows = await f.rows();
+  assert.equal(result.result.status, 'POND_PAIR_ALREADY_CHECKPOINTED'); assert.equal(after.storageVersion, 6); assert.equal(after.state.revision, 5);
+  assert.equal(rows.customer_project_events.length, 5); assert.equal(rows.idempotency.length, 6); assert.equal(f.sourceReads.length, 1);
+  assert.equal(JSON.parse(rows.customer_project_workspaces[0].payload).operations[5].pondExchange, null);
+  assert.deepEqual(after.state.pondExchangeEvidence, JSON.parse(before.customer_project_workspaces[0].payload).state.pondExchangeEvidence);
+  f.reopen(); assert.deepEqual(await f.make().command(duplicate), result); assert.deepEqual(await f.rows(), rows); assertPondOwnersUnchanged(f);
+});
+
+test('Customer pond journal rejects absent acceptance, stale revisions and caller authority before source reads', async (t) => {
+  const f = await customerPondCheckpointFixture(t, { accept: false });
+  await durableCustomerRejects(f.api.command(f.checkpoint), 'CUSTOMER_POND_ACCEPTED_CONDITIONAL_PROJECT_REQUIRED');
+  await f.api.command(f.acceptance); const before = await f.rows();
+  await durableCustomerRejects(f.api.command(f.checkpoint), 'CUSTOMER_PROJECT_REVISION_CONFLICT');
+  for (const data of [{ ...f.checkpoint.data, projectId: 'OTHER-PROJECT' }, { ...f.checkpoint.data, acceptanceId: 'OTHER-ACCEPTANCE' },
+    { ...f.checkpoint.data, quoteHash: 'a'.repeat(64) }, { ...f.checkpoint.data, inputHash: 'not-a-digest' }])
+    await durableCustomerRejects(f.api.command({ ...f.checkpoint, expectedRevision: 4, data }), 'CUSTOMER_POND_CHECKPOINT_BINDING');
+  for (const field of ['review', 'pair', 'authenticatedWorkerReview', 'pondExchangeSource'])
+    await durableCustomerRejects(f.api.command({ ...f.checkpoint, expectedRevision: 4, data: { ...f.checkpoint.data, [field]: 'CALLER_AUTHORITY' } }), 'CUSTOMER_PROJECT_FIELDS');
+  assert.equal(f.sourceReads.length, 0); assert.deepEqual(await f.rows(), before);
+});
+
+test('Customer pond journal requires exact input, source binding and accepted customer context', async (t) => {
+  const f = await customerPondCheckpointFixture(t), before = await f.rows();
+  const altered = structuredClone(f.observation); altered.input.quantityGrams = 201;
+  await durableCustomerRejects(f.make({ pondExchangeSource: { read: async () => altered } }).command(f.checkpoint), 'CUSTOMER_POND_INPUT_HASH_MISMATCH');
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, data: { ...f.checkpoint.data, inputHash: 'b'.repeat(64) } }), 'CUSTOMER_POND_QUOTED_INPUT_REQUIRED');
+  await durableCustomerRejects(f.make().command(f.checkpoint), 'CUSTOMER_POND_SOURCE_REQUIRED');
+  for (const key of ['projectId', 'acceptanceId', 'workspaceId', 'quoteHash']) {
+    const observation = structuredClone(f.observation); observation.binding[key] = 'OTHER';
+    await durableCustomerRejects(f.make({ pondExchangeSource: { read: async () => observation } }).command(f.checkpoint), 'CUSTOMER_POND_SOURCE_BINDING_MISMATCH');
+  }
+  assert.deepEqual(await f.rows(), before);
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' });
+  const b = await f.preparePond(), rowsB = await f.rows();
+  await durableCustomerRejects(f.api.command({ ...f.checkpoint, data: { ...f.checkpoint.data,
+    projectId: b.accepted.project.projectId, acceptanceId: b.accepted.acceptance.acceptanceId, quoteHash: b.quote.contentHash } }), 'CUSTOMER_POND_SOURCE_BINDING_MISMATCH');
+  assert.deepEqual(await f.rows(), rowsB); assert.equal(f.binding.owner.playerId, 'TEST-PLAYER-A'); assertPondOwnersUnchanged(f);
+});
+
+test('Customer pond journal rejects unquoted limitations, wrong land rights and duration or expense bounds', async (t) => {
+  const cases = [
+    { name: 'input hash', code: 'CUSTOMER_POND_QUOTED_INPUT_REQUIRED', changePlan: (p) => { p.assumptions.shift(); } },
+    ...Array.from({ length: 9 }, (_, i) => ({ name: `limitation ${i}`, code: 'CUSTOMER_POND_QUOTED_LIMITATIONS_REQUIRED', changePlan: (p) => { p.assumptions.splice(i + 1, 1); } })),
+    { name: 'fixture BOM', code: 'CUSTOMER_POND_QUOTED_LIMITATIONS_REQUIRED', changePlan: (p) => { p.bomHash = 'f'.repeat(64); } },
+    { name: 'parcel', code: 'CUSTOMER_POND_SITE_RIGHTS_MISMATCH', changeRequest: (r) => { r.requirements.locationRef = 'OTHER-PARCEL'; } },
+    { name: 'rights', code: 'CUSTOMER_POND_SITE_RIGHTS_MISMATCH', changeRequest: (r) => { r.requirements.rightsRef = 'OTHER-RIGHTS'; } },
+    { name: 'duration', code: 'CUSTOMER_POND_QUOTE_BOUNDS_MISMATCH', changePlan: (p) => { p.durationHours = 2879; } },
+    { name: 'expense ceiling', code: 'CUSTOMER_POND_QUOTE_BOUNDS_MISMATCH', changePlan: (p) => { p.costs[0].amount = '1'; } }
+  ];
+  for (const scenario of cases) await t.test(scenario.name, async (t) => {
+    const f = await customerPondCheckpointFixture(t, scenario), before = await f.rows();
+    await durableCustomerRejects(f.api.command(f.checkpoint), scenario.code); assert.deepEqual(await f.rows(), before); assertPondOwnersUnchanged(f);
+  });
+});
+
+test('Customer pond journal checks paired owner revisions, hashes and complete replay before committing', async (t) => {
+  for (const scenario of [
+    { name: 'source revision', pattern: /REVISION_CONFLICT/, changeInput: (i) => { i.expectedSourceRevision++; } },
+    { name: 'destination revision', pattern: /REVISION_CONFLICT/, changeInput: (i) => { i.expectedDestinationRevision++; } },
+    { name: 'construction hash', pattern: /HASH_MISMATCH/, changeInput: (i) => { i.constructionHash = 'a'.repeat(64); } },
+    { name: 'pond hash', pattern: /HASH_MISMATCH/, changeInput: (i) => { i.pondHash = 'a'.repeat(64); } },
+    { name: 'ecology hash', pattern: /HASH_MISMATCH/, changeInput: (i) => { i.ecologyHash = 'a'.repeat(64); } },
+    { name: 'forged source replay', pattern: /SOURCE_REPLAY_MISMATCH/, changeInput: async (i, f) => { i.pondExport.state.events.at(-1).outputs.forged = true; i.pondHash = await f.hash(i.pondExport); } },
+    { name: 'forged destination replay', pattern: /DESTINATION_REPLAY_MISMATCH/, changeInput: async (i, f) => { i.ecologyExport.state.resources.nutrients_kg = 1; i.ecologyHash = await f.hash(i.ecologyExport); } }
+  ]) await t.test(scenario.name, async (t) => {
+    const f = await customerPondCheckpointFixture(t, scenario), before = await f.rows(), donor = f.donor.exportState(), receiver = f.receiver.exportState();
+    await assert.rejects(f.api.command(f.checkpoint), scenario.pattern); assert.deepEqual(await f.rows(), before);
+    assert.deepEqual(f.donor.exportState(), donor); assert.deepEqual(f.receiver.exportState(), receiver);
+  });
+});
+
+test('Customer pond journal rolls back every SQLite statement position and recovers lost commit acknowledgement', async (t) => {
+  const f = await customerPondCheckpointFixture(t), before = await f.rows(); let statementCount;
+  for (let position = 0; position <= 5; position++) {
+    const database = { get: (...args) => f.db.get(...args), async atomic(statements) {
+      statementCount = statements.length; const failed = [...statements];
+      failed.splice(position, 0, { sql: 'SELECT * FROM deliberate_missing_pond_checkpoint_table' }); return f.db.atomic(failed);
+    } };
+    await assert.rejects(f.make({ database, pondExchangeSource: f.pondExchangeSource }).command(f.checkpoint), /deliberate_missing_pond_checkpoint_table/);
+    assert.deepEqual(await f.rows(), before); assertPondOwnersUnchanged(f);
+  }
+  assert.equal(statementCount, 5); let commits = 0;
+  const database = { get: (...args) => f.db.get(...args), async atomic(statements) { await f.db.atomic(statements); commits++; throw new Error('POND_ACK_LOST_AFTER_COMMIT'); } };
+  const result = await f.make({ database, pondExchangeSource: f.pondExchangeSource }).command(f.checkpoint);
+  assert.equal(result.persistence.committed, true); assert.equal(commits, 1);
+  const rows = await f.rows(); assert.equal(rows.customer_project_events.length, 5); assert.equal(rows.idempotency.length, 5); assert.equal(rows.customer_project_guards.length, 0);
+  f.reopen(); assert.deepEqual(await f.make().command(f.checkpoint), result); assert.deepEqual(await f.rows(), rows); assertPondOwnersUnchanged(f);
+});
+
+test('Customer pond journal fences same-key and different-key writers across SQLite connections', async (t) => {
+  for (const sameKey of [true, false]) await t.test(sameKey ? 'same key' : 'different keys', async (t) => {
+    const f = await customerPondCheckpointFixture(t); let arrivals = 0, release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const pondExchangeSource = { async read() { if (++arrivals === 2) release(); await gate; return structuredClone(f.observation); } };
+    const commands = [f.checkpoint, { ...f.checkpoint, idempotencyKey: sameKey ? f.checkpoint.idempotencyKey : 'pond-racing-second-key' }];
+    const results = await Promise.allSettled(commands.map((command) => f.make({ database: f.open(), pondExchangeSource }).command(command)));
+    assert.equal(arrivals, 2);
+    if (sameKey) { assert.equal(results.filter((r) => r.status === 'fulfilled').length, 2); assert.deepEqual(results[0].value, results[1].value); }
+    else { assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1); assert.equal(results.find((r) => r.status === 'rejected').reason.message, 'CUSTOMER_PROJECT_REVISION_CONFLICT'); }
+    const rows = await f.rows(); assert.equal(rows.customer_project_events.length, 5); assert.equal(rows.idempotency.length, 5); assert.equal(rows.customer_project_guards.length, 0);
+    assert.equal(JSON.parse(rows.customer_project_workspaces[0].payload).operations.filter((o) => o.pondExchange != null).length, 1); assertPondOwnersUnchanged(f);
+  });
+});
+
+test('Customer pond journal fences revoked or switched identity during an awaited source read', async (t) => {
+  const f = await customerPondCheckpointFixture(t), before = await f.rows();
+  const revoked = f.make({ pondExchangeSource: { async read() { f.setPrincipal({ active: false }); return f.observation; } } });
+  await durableCustomerRejects(revoked.command(f.checkpoint), 'CUSTOMER_PROJECT_IDENTITY_REQUIRED');
+  f.setPrincipal({ active: true }); assert.deepEqual(await f.rows(), before);
+  let entered, release; const started = new Promise((resolve) => { entered = resolve; }), gate = new Promise((resolve) => { release = resolve; });
+  const switched = f.make({ pondExchangeSource: { async read() { entered(); await gate; return f.observation; } } });
+  const pending = switched.command(f.checkpoint); await started;
+  f.setPrincipal({ accountId: 'TEST-ACCOUNT-B', playerId: 'TEST-PLAYER-B' }); release();
+  await durableCustomerRejects(pending, 'CUSTOMER_PROJECT_WRONG_CUSTOMER'); assert.deepEqual(await f.rows(), before); assertPondOwnersUnchanged(f);
+});
+
+test('Customer pond journal rejects source getters, hidden array data and oversized observations without reading accessors', async (t) => {
+  const f = await customerPondCheckpointFixture(t), before = await f.rows(); let getters = 0;
+  const scenarios = [
+    { code: 'CUSTOMER_POND_OBSERVATION_JSON', mutate: (o) => { Object.defineProperty(o, 'input', { enumerable: true, get() { getters++; return f.input; } }); } },
+    { code: 'CUSTOMER_POND_OBSERVATION_JSON', mutate: (o) => { Object.defineProperty(o.input.pondExport.state, 'toJSON', { enumerable: true, get() { getters++; return () => ({}); } }); } },
+    { code: 'CUSTOMER_POND_OBSERVATION_JSON', mutate: (o) => { const prototype = Object.create(Array.prototype); Object.defineProperty(prototype, 'toJSON', { get() { getters++; return () => []; } }); Object.setPrototypeOf(o.input.pondExport.state.events, prototype); } },
+    { code: 'CUSTOMER_POND_OBSERVATION_JSON', mutate: (o) => { o.input.pondExport.state.events.hidden = 'unbound'; } },
+    { code: 'CUSTOMER_POND_OBSERVATION_JSON', mutate: (o) => { delete o.input.pondExport.state.events[0]; } },
+    { code: 'CUSTOMER_POND_OBSERVATION_JSON', mutate: (o) => { Object.defineProperty(o, 'hidden', { value: 'not serialized', enumerable: false }); } },
+    { code: 'CUSTOMER_POND_OBSERVATION_CAPACITY', mutate: (o) => { o.excess = 'x'.repeat(512000); } },
+    { code: 'CUSTOMER_POND_OBSERVATION_CAPACITY', mutate: (o) => { o.excess = '🦐'.repeat(128000); } }
+  ];
+  for (const scenario of scenarios) {
+    const observation = structuredClone(f.observation); scenario.mutate(observation);
+    await durableCustomerRejects(f.make({ pondExchangeSource: { read: async () => observation } }).command(f.checkpoint), scenario.code);
+    assert.equal(getters, 0); assert.deepEqual(await f.rows(), before);
+  }
+  assertPondOwnersUnchanged(f);
+});
+
+test('Customer pond journal descriptor clone never invokes Proxy get or toJSON replacement hooks', async () => {
+  const { cloneCustomerPondExchangeObservation } = await import('../core/company/index.mjs'); let reads = 0;
+  const original = { hello: 'safe', nested: [{ descriptor: 'safe' }] };
+  const observation = new Proxy(original, { get(target, key) { reads++; if (key === 'toJSON') return () => ({ hello: 'REPLACED' }); return Reflect.get(target, key); } });
+  assert.deepEqual(cloneCustomerPondExchangeObservation(observation), original); assert.equal(reads, 0);
+});
+
+test('Customer pond journal detaches source bytes before async replay and retains exact historical input', async (t) => {
+  const f = await customerPondCheckpointFixture(t), supplied = structuredClone(f.observation); let mutated = false;
+  const api = f.make({ pondExchangeSource: { async read() {
+    setImmediate(() => { supplied.input.pondExport.state.seed = 'MUTATED_AFTER_RETURN'; supplied.binding.owner.playerId = 'OTHER'; mutated = true; }); return supplied;
+  } } });
+  const result = await api.command(f.checkpoint); assert.equal(mutated, true);
+  const envelope = JSON.parse((await f.rows()).customer_project_workspaces[0].payload);
+  assert.deepEqual(envelope.operations[4].pondExchange, f.observation);
+  f.reopen(); assert.deepEqual(await f.make().command(f.checkpoint), result); assertPondOwnersUnchanged(f);
+});
+
+test('Customer pond journal replay rejects changed observations, candidates, hashes and format downgrade', async (t) => {
+  const f = await customerPondCheckpointFixture(t); await f.api.command(f.checkpoint);
+  const row = (await f.rows()).customer_project_workspaces[0], pristine = JSON.parse(row.payload); let liveReads = 0;
+  const api = f.make({ pondExchangeSource: { read() { liveReads++; throw new Error('LIVE_SOURCE_ON_CORRUPT_REPLAY'); } } });
+  for (const mutate of [
+    (p) => { p.operations[4].pondExchange.input.quantityGrams = 201; },
+    (p) => { p.operations[4].pondExchange.binding.owner.playerId = 'TEST-PLAYER-B'; },
+    (p) => { p.operations[4].pondExchange = null; },
+    (p) => { delete p.operations[4].pondExchange; },
+    (p) => { p.operations[0].pondExchange = structuredClone(p.operations[4].pondExchange); },
+    (p) => { p.state.pondExchangeEvidence.pair.sourceCandidate.state.pond.dead_biomass_kg = 0; },
+    (p) => { p.state.pondExchangeEvidence.pair.destinationCandidate.state.resources.dead_biomass_kg = 0; },
+    (p) => { p.state.pondExchangeEvidence.inputHash = 'f'.repeat(64); },
+    (p) => { p.state.project.ecosystemComplete = true; },
+    (p) => { p.version = 2; },
+    (p) => { p.operations[4].clocks.push(1000); }
+  ]) {
+    const payload = structuredClone(pristine); mutate(payload);
+    await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=?', f.canonical(payload), await f.hash(payload))]);
+    await assert.rejects(api.read()); await assert.rejects(api.command(f.checkpoint)); assert.equal(liveReads, 0);
+  }
+  await f.db.atomic([f.stmt('UPDATE customer_project_workspaces SET payload=?,payload_hash=?', row.payload, row.payload_hash)]);
+  assert.equal((await api.read()).state.project.ecosystemComplete, false); assert.equal(liveReads, 0); assertPondOwnersUnchanged(f);
+});
+
+test('Customer pond journal aggregate capacity rejects a valid bounded observation atomically', async (t) => {
+  const f = await customerPondCheckpointFixture(t, { quoteCount: 8, changePlan(plan) {
+    plan.conditions = Array.from({ length: 32 }, (_, i) => `Synthetic condition ${i}: ${'c'.repeat(175)}`);
+    while (plan.assumptions.length < 32) plan.assumptions.push(`Synthetic padding ${plan.assumptions.length}: ${'a'.repeat(175)}`);
+  } });
+  const before = await f.rows(), observationBytes = Buffer.byteLength(f.canonical(f.observation));
+  assert.ok(observationBytes < 512000); assert.ok(Buffer.byteLength(before.customer_project_workspaces[0].payload) < 512000);
+  await durableCustomerRejects(f.api.command(f.checkpoint), 'CUSTOMER_PROJECT_PERSISTENCE_CAPACITY');
+  assert.deepEqual(await f.rows(), before); assert.equal((await f.api.read()).state.pondExchangeEvidence, undefined);
+  assert.equal(f.sourceReads.length, 1); assertPondOwnersUnchanged(f);
+  t.diagnostic(`Aggregate capacity: before=${Buffer.byteLength(before.customer_project_workspaces[0].payload)} observation=${observationBytes}`);
+});
+
+// Independently reviewed boundary probes, retained in the same synthetic suite.
+for (const scenario of [
+  { name: 'owner-valid 101-fish input outside the admitted five-kg window', code: 'CUSTOMER_POND_ADMITTED_WINDOW_REQUIRED', ownerValid: true,
+    async changeInput(input, context) {
+      const { createFishpondAquacultureRuntimeV1 } = await import('../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js');
+      const donor = createFishpondAquacultureRuntimeV1({ seed: input.pondExport.state.seed, localExchangeMode: input.scope });
+      try {
+        donor.importState(input.constructionExport);
+        donor.stockFish(101, { stock_available: true, transport_available: true, health_check_passed: true, quarantine_complete: true });
+        donor.runLowOxygenScenario(); donor.advanceTime(24, { rainfall_l: 0, evaporation_l: 0, seepage_l: 0, outflow_l: 0 }); donor.pause();
+        input.pondExport = donor.exportState(); input.pondHash = await context.hash(input.pondExport);
+        input.expectedSourceRevision = input.pondExport.state.revision;
+      } finally { donor.destroy(); }
+    } },
+  { name: 'owner-valid second exchange outside the admitted single-transfer window', code: 'CUSTOMER_POND_ADMITTED_WINDOW_REQUIRED', ownerValid: true,
+    async changeInput(input, context) {
+      const { prepareLocalDeadBiomassExchange } = await import('../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js');
+      const first = await prepareLocalDeadBiomassExchange(input);
+      input.pondExport = first.sourceCandidate; input.ecologyExport = first.destinationCandidate;
+      input.pondHash = await context.hash(input.pondExport); input.ecologyHash = await context.hash(input.ecologyExport);
+      input.expectedSourceRevision = input.pondExport.state.revision; input.expectedDestinationRevision = input.ecologyExport.state.revision;
+      input.exchangeId = 'PAIR-SECOND-REVIEW-001'; input.quantityGrams = 50;
+    } },
+  { name: 'rehashed non-disjoint Ecology genesis', code: 'LOCAL_EXCHANGE_DISJOINT_GENESIS_REQUIRED',
+    async changeInput(input, context) {
+      input.ecologyGenesis.resources.nutrients_kg = 1; input.ecologyGenesisHash = await context.hash(input.ecologyGenesis);
+    } },
+  { name: 'incorrect full Ecology genesis digest', code: 'LOCAL_EXCHANGE_HASH_MISMATCH',
+    async changeInput(input) { input.ecologyGenesisHash = 'a'.repeat(64); } }
+]) test(`Customer pond journal rejects ${scenario.name} without changing SQLite or live owners`, async (t) => {
+  const f = await customerPondCheckpointFixture(t, scenario), before = await f.rows();
+  const donor = f.donor.exportState(), receiver = f.receiver.exportState(), original = structuredClone(f.input);
+  assert.equal(await f.hash(f.input), f.checkpoint.data.inputHash);
+  assert.ok(f.quote.content.plan.assumptions.includes(`LOCAL_POND_INPUT_SHA256:${f.checkpoint.data.inputHash}`));
+  assert.ok(f.quote.content.plan.assumptions.includes(`LOCAL_POND_GENESIS_SHA256:${f.input.ecologyGenesisHash}`));
+  if (scenario.ownerValid) {
+    const { prepareLocalDeadBiomassExchange } = await import('../KGEN-KAIOS/world-viewer/aquaculture/aquaculture-runtime.js');
+    assert.equal((await prepareLocalDeadBiomassExchange(f.input)).status, 'PAIRED_TRANSFER_CANDIDATE_NOT_COMMITTED');
+    assert.deepEqual(f.input, original);
+  }
+  await durableCustomerRejects(f.api.command(f.checkpoint), scenario.code);
+  assert.deepEqual(await f.rows(), before); assert.equal(f.sourceReads.length, 1);
+  assert.deepEqual(f.donor.exportState(), donor); assert.deepEqual(f.receiver.exportState(), receiver);
 });

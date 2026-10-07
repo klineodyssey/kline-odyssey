@@ -5,14 +5,14 @@
 | Field | Value |
 |---|---|
 | VERSION | V3.0 |
-| REVISION | 2026-10-07.CUSTOMER_DIGITAL_WORLD_CONDITIONAL_PROPOSAL.4 |
+| REVISION | 2026-10-07.CUSTOMER_POND_PAIR_LOCAL_JOURNAL.1 |
 | STATUS | DRAFT |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
 | REVIEWED_BY | PENDING; local focused tests are not registered Reviewer authority |
-| SOURCE_COMMIT | 62e668a62707f957c8c3ca3448e76e47ed157ba0 |
+| SOURCE_COMMIT | e5c9234953dbe44f2b73ddd587509e50cccad352 |
 | TASK_ID | KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2 |
-| CHANGE_REASON | Add bounded digital-world requirement drafts while preserving the house and Backend owners. |
+| CHANGE_REASON | Persist the first admitted-stock paired owner snapshots in the existing local journal while preserving House, identity and delivery boundaries. |
 | ANCESTOR | KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md at e26f3a76ef0be7f43058225f46def3fbe123371e; preserved local research lineage 0bbfa5cc5c6f4f391743a50f4b42f208ca397b4e |
 | SOURCE_OF_TRUTH | FALSE |
 
@@ -564,3 +564,97 @@ port. Ecology Canon allows GRASS/TREE/FISH/SHRIMP and abstract microbial/
 primary-food/detritus proxies. It does not supply aquatic-plant species or
 species-specific pond photosynthesis/nutrient/oxygen coefficients. No new
 biological rates, scientific efficacy, Species or full microbe Life is inferred.
+
+
+## Customer pond paired local journal checkpoint — 2026-10-07
+
+This additive checkpoint succeeds preserved Company #525 `1b320872` and paired
+owner #529 `e5c92349`. It changes only the existing Company model, its CPU tests,
+this document and the Customer local-persistence helper in Backend service.
+The owner runtimes, House-only subplan validator, Backend identity/UI/schema,
+HTTP routes and deployment configuration remain unchanged.
+
+`CHECKPOINT_POND_EXCHANGE` is a distinct command. A synthetic test customer must
+first explicitly acknowledge the exact current conditional Pond quote through
+the existing acceptance engine. The quote must bind the complete paired input
+SHA-256, construction fixture SHA-256, exact disjoint Ecology genesis SHA-256,
+exchange grams, and all admitted-stock/proxy/clock/transport/plant limits.
+The source is a code-owned `pondExchangeSource`, not command JSON. It supplies
+an already-associated owner/workspace/project/acceptance/quote binding. Merely
+echoing supplied ownership labels around arbitrary bytes is not an identity or
+ownership proof. The adapter compares all binding fields and rechecks the active
+principal after asynchronous preparation.
+
+Only the published first measured window is admitted: canonical
+`LAND-KAIOS-FISHPOND-001` / `SIMULATED_LAND_USAGE_RIGHT`, fully replayed 17-stage
+construction, legacy stockFish(100), low oxygen, 24 Aquaculture hours with all
+four environmental water flows zero, then pause. Legacy stock availability is
+a Boolean and does not debit a finite juvenile inventory. The **5 kg initial
+stock is explicitly admitted input**, not proof of procurement, finite stocking
+or logistics. Before transfer the fixture has 4.7 kg living and 0.3 kg dead mass.
+The receiver has the exact zero-resource disjoint wetland genesis, no previous
+actions and no independent fish/shrimp inventory. A quoted 200 g transfer yields
+0.1 kg donor dead mass and 0.2 kg receiver dead mass. Checkpointing advances no
+clock, runs no decomposition tick and converts no hours to ticks.
+
+The Company adapter invokes the installed paired preparer, retaining full
+construction/source/receiver replay and conservation checks. It rejects a
+changed site or rights rather than rewriting the owner fixture. Observed
+Aquaculture duration must fit the quote. The ceiling of the owner's simulation
+expense figure must fit the quoted simulation-credit total; that bound is not
+real pricing or funding authority. Policy references and aquatic plants remain
+unapplied; microbial pools are abstract and not full Digital Life. Biological
+efficacy and real-world aquaculture feasibility are not asserted.
+
+The paired input observation is stored once in a journal operation; the full
+two-owner candidate result is stored once in Company evidence state. Responses,
+command-journal entries and idempotency records carry IDs/hashes, not repeated
+snapshots. Exact construction/genesis/input/candidate hashes are retained.
+Journal version 3 preserves the exact historical v1/v2 operation shapes and
+results, permits House observations in versions 2 and 3, and never downgrades.
+Historical recovery reruns the pure owner preparation using saved bytes, not a
+live source, clock or planner, then compares complete state, event and response
+hashes. Dense plain JSON descriptors are checked before cloning the new port's
+input, including accessors, symbols, hidden properties and sparse arrays.
+
+The existing coherent-read/CAS/SQLite transaction commits the workspace payload
+containing **both candidates**, the new event and the idempotent response
+all-or-none. The complete assembled journal retains the 512,000-byte limit;
+repeated response-only operations can reach it and must fail without a partial
+write. Same-key retries use the original verified response. New-key identical
+intent is revision-guarded and adds no second pair or domain event. Different-key
+racing writers do not silently rebase. Lost acknowledgements recover through one
+verified read. No new table, migration or persistence authority is introduced.
+
+This is one immutable local evidence checkpoint, not a distributed transaction
+against live Aquaculture/Ecology owners or globally exclusive inventory across
+customer workspaces. Core/owner candidate fields retain `durable:false`; only
+the outer persistence envelope records the successful local SQLite commit.
+The accepted project remains byte-identical `PLANNED_EXECUTION_HELD`, with all
+execution holds intact, incomplete ecosystem and null asset/delivery/receipt.
+No customer delivery acceptance, title transfer, revenue or real settlement is
+created. The preserved House slice and original #520 are retained.
+
+Rollback must retain a compatible v3 reader or fail closed without deleting the
+local database. Older readers intentionally cannot reinterpret the new command.
+
+Validation for this checkpoint: the 42-case Pond journal suite passes locally
+on Node 24.19, including a fresh OS process with live planner/source/clock
+forbidden, full SQL rollback positions, same/different writer races, lost
+acknowledgement recovery, immutable retries, source revocation, descriptor/
+proxy copy safety and corruption. Four retained negative cases prove that
+otherwise owner-valid 101-fish and second-transfer inputs fail the narrower
+Company admitted-window guard, and that invalid/full-hash-mismatched receiver
+genesis cannot enter the journal. Rejections leave every SQL row unchanged.
+The normal fixture journal is 228,432 UTF-8 bytes. A 481,858-byte accumulated
+journal rejects the additional valid bounded observation atomically.
+
+Independent review also passed 60 focused legacy cases and compared preserved
+Company #525 with the candidate: v1 acceptance and v2 House checkpoint results,
+complete state and SQL payload bytes match exactly; old/new v2 readers reopen
+each other's database without live dependencies. The source clone defects found
+during review were fixed before these checks. Full standalone Backend unit
+invocation could not start in the bounded local source workspace because the
+`ethers` package is absent; it is not reported as a pass. Normal remote CI is
+tracked separately against the actual published commit. These checks establish
+local evidence integrity, not production persistence or completed delivery.
