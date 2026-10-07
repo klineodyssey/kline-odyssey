@@ -1,5 +1,24 @@
 # 11520 Universal Exchange V3.9
 
+## Cargo visual resource lifetime candidate — 2026-10-07
+
+Existing `runtime/life-visual-runtime.mjs` records the geometry/material resources
+owned by each procedural cargo visual at factory creation. A canonical identity
+or custody-context rebuild disposes those resources once before replacing the
+subtree. Shared cargo materials are deduplicated by identity; life-body/status
+resources and borrowed resources attached later are outside that ownership set.
+Unchanged cargo, quantity-only updates and temporarily hidden cargo retain the
+existing cached visual. Item identity, physical-cash custody and domain state
+remain governed by the existing world-item and logistics owners.
+
+`tests/11520-living-world-visual.test.mjs` exercises the real production factories
+and sync owner using THREE-compatible disposal spies, including 64 rebuilds and
+32 unchanged updates. Both cleanup regressions failed against base `f7f6795`
+with zero disposal calls. Focused item/life tests pass after the repair.
+`FUNCTIONAL_QA: FOCUSED_PASS`; `VISUAL_QA: NOT_RUN` at this checkpoint.
+These spies prove disposal ownership/calls, not GPU memory or FPS improvement.
+No main merge, deployment, or human-playtest readiness is asserted.
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads
