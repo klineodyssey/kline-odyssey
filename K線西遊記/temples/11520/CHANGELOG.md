@@ -1,3 +1,12 @@
+## 2026-10-07 — V2.9.6 / 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
+
+- New missing-delta reconstruction lineage from f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial Navigator blob remains PARTIAL_RECOVERY, not restored original.
+- Existing actor, spatial-coordinate and drive owners now use elapsed motion with .001 K/s per 1C; C0 pauses and missing canonical C fails closed. Sign stays financial/body representation, not a joystick reversal.
+- Existing XYZ waypoint owner supplies targets to the same actor clock. Legacy duplicate XZ state is removed; swept collision results govern committed body coordinates. Hidden/resumed/player-switch/suspended time cannot cause catch-up travel.
+- Game product version, runtime revisions, bootstrap build-info, displayed label and Portal release consumer are synchronized. General 11520 app VERSION 3.9.0 is a separate product scope; deployed dashboard build-info remains the deployment owner's responsibility.
+- Local evidence: 28 Navigator/elapsed/actual-owner tests and three drive suites pass. Real Chromium, exact-head aggregate CI and screenshot review remain pending. C-rate correction is not yet verified as the full visual root cause.
+- Canonical scalar-to-local XYZ mapping remains NOT_CONFIGURED, canonical POI search/favorites and remaining HUD requests are unfinished. No fake LIVE boundary, new registry/runtime, financial settlement, signer, real transaction, storage architecture, Physics or deployment change.
+
 # 11520 Changelog
 
 ## Metadata

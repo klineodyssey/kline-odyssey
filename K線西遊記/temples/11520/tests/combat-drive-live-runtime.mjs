@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {driveMultiplier,scaledControlState} from '../runtime/combat-drive-live-runtime.mjs';
 
-assert.equal(driveMultiplier(0),1,'0C keeps ordinary local walk speed');
+assert.equal(driveMultiplier(0),0,'0C pauses local locomotion');
 assert.equal(driveMultiplier(.1),.1);
 assert.equal(driveMultiplier(-.1),.1,'negative market phase must not reverse XYZ movement');
 assert.deepEqual(scaledControlState({mode:'XZ',vector:{x:1,y:0,z:1}},{c:-1}).vector,{x:1,y:0,z:1});
@@ -10,7 +10,7 @@ assert.equal(driveMultiplier(10),10);
 assert.equal(driveMultiplier(100),100);
 
 const source={mode:'XZ',vector:{x:1,y:-.5,z:.25}};
-assert.deepEqual(scaledControlState(source,{c:0,lots:1,kaiosMass:1000}).vector,{x:1,y:-.5,z:.25});
+assert.deepEqual(scaledControlState(source,{c:0,lots:1,kaiosMass:1000}).vector,{x:0,y:-0,z:0});
 assert.deepEqual(scaledControlState(source,{c:10,lots:3,kaiosMass:3000}).vector,{x:10,y:-5,z:2.5});
 assert.deepEqual(source.vector,{x:1,y:-.5,z:.25},'source control state must not be mutated');
 

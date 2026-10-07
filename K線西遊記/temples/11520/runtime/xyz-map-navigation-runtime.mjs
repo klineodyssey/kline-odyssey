@@ -1,4 +1,15 @@
 /* KGEN_META
+VERSION: 1.1.0
+REVISION: 2026-10-07.NAVIGATOR-RECONSTRUCTION-MOTION
+PRODUCT_CONTEXT: V2.9.6
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_07
+REVIEWED_BY: PENDING / Draft reconstruction checkpoint; no release approval
+SOURCE_COMMIT: f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+TASK_ID: K11520-NAVIGATOR-RECONSTRUCTION-20261007
+CHANGE_REASON: Reconstruct only the elapsed shared-C local motion delta using existing actor, coordinate and waypoint owners.
+ANCESTOR: K線西遊記/temples/11520/runtime/xyz-map-navigation-runtime.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6; partial evidence blob 65350fe6569059212f7ccc5b911605a123c3dc5e
+SOURCE_OF_TRUTH: TRUE
 STATUS: ACTIVE
 FORMAL_ORGAN_NAME: XYZ Plane Waypoint Navigation
 PURPOSE: Let XZ / XY / YZ plane-map taps and direct 3D world/entity targets share one canonical XYZ waypoint authority while reusing the physical movement/collision engine. Navigation writes only the public XYZ control vector and never bypasses world collision.
@@ -40,7 +51,7 @@ export function vectorToward3D(from={},target={}){
 }
 function setVector(v){const c=control();if(!c)return false;c.vector={x:finite(v.x),y:finite(v.y),z:finite(v.z)};globalThis.__K11520_XYZ_NAV_VECTOR__={...c.vector};return true}
 function clearVector(){setVector({x:0,y:0,z:0})}
-function publish(){globalThis.__K11520_XYZ_MAP_NAVIGATION__={organ:'XYZ Plane Waypoint Navigation',active:nav.active,target:nav.target?{...nav.target}:null,mode:nav.mode,source:nav.source,startedAt:nav.startedAt,lastDistance:nav.lastDistance,lastDistanceK:nav.lastDistance===null?null:gameUnitsToK(nav.lastDistance),distanceSpace:'LOCAL_METERS',legacyXZPreserved:true,worldTargetAuthority:true,collisionAuthority:'game-5d-main.moveManual',setWorldTarget:setWorldTarget3D,start:startWorldNavigation3D,stop:stopWorldNavigation3D}}
+function publish(){globalThis.__K11520_XYZ_MAP_NAVIGATION__={organ:'XYZ Plane Waypoint Navigation',active:nav.active,target:nav.target?{...nav.target}:null,mode:nav.mode,source:nav.source,startedAt:nav.startedAt,lastDistance:nav.lastDistance,lastDistanceK:nav.lastDistance===null?null:gameUnitsToK(nav.lastDistance),distanceSpace:'LOCAL_METERS',worldTargetAuthority:true,collisionAuthority:'game-5d-main.moveManual',motionStatus:nav.motionStatus||'IDLE',etaSeconds:nav.etaSeconds??null,etaStatus:nav.etaStatus||'WAIT',legacyXZPreserved:false,setWorldTarget:setWorldTarget3D,start:startWorldNavigation3D,stop:stopWorldNavigation3D}}
 function stop(reason=null){nav.active=false;clearVector();actionButton?.remove();actionButton=null;if(reason)toast(reason);publish()}
 function start(){if(!nav.target)return false;nav.active=true;nav.startedAt=Date.now();actionButton?.remove();actionButton=null;toast(`XYZ 導航 ${nav.mode} 開始`);publish();return true}
 function showAction(){actionButton?.remove();actionButton=document.createElement('button');actionButton.id='xyzWaypointAction';actionButton.className='waypointAction';const p=nav.target,d=vectorToward3D(physical(),p).distance;actionButton.textContent=`前往 ${nav.mode} · ${formatGameDistanceK(d)}`;actionButton.title=['LOCAL XYZ',...['x','y','z'].map(a=>`${a.toUpperCase()} ${formatGameDistanceK(p[a],{detail:true})}`)].join(' · ');actionButton.setAttribute('aria-label',`${actionButton.textContent}；${actionButton.title}`);actionButton.onclick=start;document.body.appendChild(actionButton)}
@@ -59,14 +70,25 @@ function intercept(e){const plane=mode();if(plane==='XZ')return;const canvas=map
   }
 }
 function cancelOnManual(e){if(!nav.active)return;const t=e.target;if(t?.closest?.('#joy,#yControl,#yJoyV250'))stop('手動控制：XYZ 導航停止')}
-function tick(){
-  if(nav.active&&nav.target){const step=vectorToward3D(physical(),nav.target);nav.lastDistance=step.distance;if(step.arrived){stop('已到達 XYZ 目的地')}else setVector(step.vector);publish()}
-  requestAnimationFrame(tick)
+// The existing actor loop is the only movement clock. Navigation supplies a
+// target and observes the committed collision result; it no longer races a
+// second animation loop or the C presentation bridge by writing joystick state.
+export function prepareLocalNavigationFrame(){return nav.active&&nav.target?{target:{...nav.target},startedAt:nav.startedAt}:null}
+export function commitLocalNavigationFrame(result,{speedKPerSecond=null}={}){
+  if(!nav.active||!nav.target)return;
+  nav.lastDistance=Math.hypot(...['x','y','z'].map(a=>nav.target[a]-result.position[a]));
+  nav.motionStatus=result.status;
+  nav.etaStatus=result.status==='PAUSED'?'PAUSED':speedKPerSecond>0?'ESTIMATE':'WAIT';
+  nav.etaSeconds=speedKPerSecond>0?gameUnitsToK(nav.lastDistance)/speedKPerSecond:null;
+  if(result.status==='ARRIVED'){nav.etaStatus='ARRIVED';nav.etaSeconds=0;stop('已到達 XYZ 目的地')}
+  else if(result.blocked){nav.etaStatus='BLOCKED';nav.etaSeconds=null;stop(`導航受阻：${result.blocker?.name||'WORLD'}`)}
+  else publish();
 }
+
 export function install11520XyzMapNavigation(){
   if(globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__)return globalThis.__K11520_XYZ_MAP_NAVIGATION__;
   globalThis.__K11520_XYZ_MAP_NAV_INSTALLED__=true;
   for(const type of ['pointerdown','pointermove','pointerup'])document.addEventListener(type,intercept,true);
   document.addEventListener('pointerdown',cancelOnManual,true);
-  publish();requestAnimationFrame(tick);return globalThis.__K11520_XYZ_MAP_NAVIGATION__;
+  publish();return globalThis.__K11520_XYZ_MAP_NAVIGATION__;
 }

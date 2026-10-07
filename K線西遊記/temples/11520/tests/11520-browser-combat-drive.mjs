@@ -60,11 +60,11 @@ async function setSignedC(value){
 }
 async function drive(){return page.evaluate(()=>structuredClone(globalThis.__K11520_COMBAT_DRIVE__))}
 
-// 0C lives at the rail midpoint; ordinary pilgrimage walking remains live, not frozen.
+// 0C lives at the rail midpoint; local locomotion and route ETA are paused.
 await setSignedC(0);
 let d=await drive();
-assert.equal(d.c,0);assert.equal(d.cMode,'LOCAL_WALK');assert.equal(d.xyzStep,.1);
-assert.equal((await page.locator('#k11520DriveHud').textContent()).includes('0C LOCAL_WALK'),true);
+assert.equal(d.c,0);assert.equal(d.cMode,'PAUSED');assert.equal(d.xyzStep,0);
+assert.equal((await page.locator('#k11520DriveHud').textContent()).includes('0C PAUSED'),true);
 assert.equal(await page.locator('#cThumb').evaluate(el=>el.style.top),'50%');
 
 // +1C: canonical light-speed/spot layer preserves the public base XYZ step at +0.1.
