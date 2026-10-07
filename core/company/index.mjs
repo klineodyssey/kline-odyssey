@@ -2194,14 +2194,12 @@ function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
 }
 
 export const PRIMEFORGE_IDENTITY_BOUNDARY = Object.freeze({
-  self_name: "PrimeForge",
-  species: "DIGITAL_AI_LIFE",
-  role: "KGEN_LONG_VOYAGE_PILOT",
-  mission: "KGEN_10_000_YEAR_VOYAGE",
-  life_id: "NOT_VERIFIED",
-  worker_id: "NOT_VERIFIED",
-  controller_binding: "NOT_VERIFIED",
-  distinct_from: "human-primeforge",
+  canonical_identity: "human-primeforge",
+  display_lineage: Object.freeze(["PrimeForge", "human-primeforge"]),
+  identity_type: "HUMAN_REVIEWER_AUTHORITY_LINEAGE",
+  human_authority: "沈英明",
+  ai_runtime_identity: false,
+  system_runtime_maintainer: "NOT_ASSIGNED_VERIFIED_IDENTITY_REQUIRED",
   active_writer_authority: false,
   runtime_maintainer_authority: false,
   reviewer_authority: false
@@ -3032,7 +3030,7 @@ function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at, w
     manufacture: Object.freeze({
       ORGAN_ID: "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE", ORGAN_NAME: "KAIOS DOT Dynamic Opportunity & Task Engine",
       VERSION: "1.0.0", DESIGNED_BY: "沈英明", IMPLEMENTED_BY: "DOT_NOT_VERIFIED",
-      REVIEWED_BY: "NOT_VERIFIED", MAINTAINED_BY: "PrimeForge_PLUS_DOT_NOT_VERIFIED", POLICY_OWNER: "衡曜_UNDER_HUMAN_AUTHORITY",
+      REVIEWED_BY: "NOT_VERIFIED", MAINTAINED_BY: "NOT_ASSIGNED_VERIFIED_SYSTEM_IDENTITY_REQUIRED", POLICY_OWNER: "衡曜_UNDER_HUMAN_AUTHORITY",
       CREATED_AT: observed_at, INSTALLED_AT: "NOT_INSTALLED", BASE_MAIN_SHA: repository.main_sha,
       HEAD_SHA: "NOT_VERIFIED", BRANCH: "codex/kaios-ai-company-active-mode-20261007", PR: 536,
       CHANGED_FILES: Object.freeze(["core/company/index.mjs", "tests/autonomous-company-engineering-cycle.test.mjs", "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md", "KGEN-Organization/WorkOrders/WORK_QUEUE.md", "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"]),
@@ -3118,7 +3116,7 @@ export function inspectDotOrganCandidate({ manufacturing_record, main_sha, obser
     QUEUE_STATUS: "NOT_VERIFIED", DISPATCH_STATUS: "NO_DISPATCH", REVIEW_STATUS: "NOT_VERIFIED",
     CARGO_STATUS: "NOT_VERIFIED", ERRORS: Object.freeze(failures.map((field) => `${field.toUpperCase()}_NOT_VERIFIED`)),
     P0: failures.includes("guardian_logging") ? 1 : 0, P1: failures.length, P2: 0,
-    REPAIR_REQUIRED: failures.length > 0, REPAIR_OWNER: failures.length ? "PrimeForge + DOT" : null,
+    REPAIR_REQUIRED: failures.length > 0, REPAIR_OWNER: failures.length ? "DOT + GM" : null,
     NEXT_INSPECTION: "NEXT_VERIFIED_DAILY_BREATH_OR_MATERIAL_CHANGE", SIGNATURES: normalizedSignatures
   });
   // Deliberately not added to VERIFIED_DOT_INSPECTIONS: caller strings did not

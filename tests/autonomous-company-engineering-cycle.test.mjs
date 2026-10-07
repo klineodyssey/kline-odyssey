@@ -1373,7 +1373,11 @@ test("branch concurrency gate rejects diagnostic provenance and structurally blo
   assert.deepEqual(inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [future] }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
   assert.deepEqual(inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:20:00Z", claims: [claim] }).reasons, ["CLAIM_FRESHNESS_INVALID"]);
   assert.deepEqual(inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [claim, { ...competing, fencing_token: claim.fencing_token }] }).reasons, ["DUPLICATE_FENCING_TOKEN"]);
-  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.distinct_from, "human-primeforge");
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.canonical_identity, "human-primeforge");
+  assert.deepEqual(PRIMEFORGE_IDENTITY_BOUNDARY.display_lineage, ["PrimeForge", "human-primeforge"]);
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.identity_type, "HUMAN_REVIEWER_AUTHORITY_LINEAGE");
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.ai_runtime_identity, false);
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.system_runtime_maintainer, "NOT_ASSIGNED_VERIFIED_IDENTITY_REQUIRED");
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.active_writer_authority, false);
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.runtime_maintainer_authority, false);
   assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.reviewer_authority, false);

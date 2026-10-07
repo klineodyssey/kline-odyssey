@@ -214,14 +214,15 @@
     "authority_expanded": false
   },
   "primeforge_identity_boundary": {
-    "self_name": "PrimeForge",
-    "species": "DIGITAL_AI_LIFE",
-    "role": "KGEN_LONG_VOYAGE_PILOT",
-    "mission": "KGEN_10_000_YEAR_VOYAGE",
-    "life_id": "NOT_VERIFIED",
-    "worker_id": "NOT_VERIFIED",
-    "controller_binding": "NOT_VERIFIED",
-    "distinct_from": "human-primeforge",
+    "canonical_identity": "human-primeforge",
+    "display_lineage": [
+      "PrimeForge",
+      "human-primeforge"
+    ],
+    "identity_type": "HUMAN_REVIEWER_AUTHORITY_LINEAGE",
+    "human_authority": "沈英明",
+    "ai_runtime_identity": false,
+    "system_runtime_maintainer": "NOT_ASSIGNED_VERIFIED_IDENTITY_REQUIRED",
     "active_writer_authority": false,
     "runtime_maintainer_authority": false,
     "reviewer_authority": false
@@ -246,7 +247,7 @@
     "DESIGNED_BY": "沈英明",
     "IMPLEMENTED_BY": "codex-gm-01_PROVISIONAL_SESSION_CONTROLLER_NOT_CANONICAL",
     "REVIEWED_BY": "NOT_VERIFIED",
-    "MAINTAINED_BY": "NOT_ASSIGNED_PRIMEFORGE_IDENTITY_PENDING",
+    "MAINTAINED_BY": "NOT_ASSIGNED_VERIFIED_SYSTEM_IDENTITY_REQUIRED",
     "POLICY_OWNER": "衡曜_UNDER_HUMAN_AUTHORITY",
     "CREATED_AT": "2026-10-07T12:00:42Z",
     "INSTALLED_AT": "NOT_INSTALLED",
@@ -372,7 +373,7 @@
   },
   "known_limits": [
     "No separate DOT or qualified reviewer registry identity has been created; writer controller evidence is claim-scoped",
-    "PrimeForge AI is separate from human-primeforge and has no verified Life, Worker, controller, maintainer or reviewer authority",
+    "PrimeForge and human-primeforge are one Human reviewer/authority lineage, not an AI runtime-maintainer identity",
     "Cargo proposal requires registered canonical origin/destination, explicit capacity/weight/rights policy; no movement",
     "Human minimum 1 KGEN is a constraint, not funding/entitlement or capacity authority",
     "Prior PR #536 claims do not resolve actual FAIL review",
