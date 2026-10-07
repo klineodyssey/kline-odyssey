@@ -30,6 +30,22 @@ This follow-up harness is awaiting fresh Chromium CI and screenshot inspection.
 Renderer counts do not establish GPU-memory/FPS acceptance, and camera-created
 material clones remain outside the factory-owned cleanup boundary.
 
+Follow-up capture diagnosis retains the original immediate ground-drop PNG and
+records console/network/page errors, context events, actual world-canvas sizes
+and framebuffer samples before capture. The additional ready-frame wait is
+bounded to three seconds and fails after preserving the failure PNG/JSON if no
+world renders. It requires varied, visibly nonblack RGB samples from the actual
+WebGL framebuffer, not opaque alpha, HUD presence or a synthetic gallery. The
+observed empty image has no world variation; the normal scene clear color alone
+also cannot satisfy the gate. Existing production context/scene state is read
+only, without context creation, restoration, camera changes or hidden overlays.
+The black live-world image was observed at both initial `d024920e` (Game run
+`37572849203`, checkout `c986c416`) and test-only `ba7cd3d` (Game run
+`37574729237`, checkout `efe983f9`). Those captures alone do not distinguish a
+renderer defect from capture timing/setup. Full product visual acceptance remains
+**NOT_PASS**; cropped backpack previews and utility-tray overlap are not repaired
+or concealed by the isolated gallery.
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads

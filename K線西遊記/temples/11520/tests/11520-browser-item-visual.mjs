@@ -5,6 +5,8 @@ import {execFileSync} from 'node:child_process';
 
 const out='artifacts/11520-visual-qa/11520-backpack-item-3d.png';
 const dropOut='artifacts/11520-visual-qa/11520-live-world-ground-drop.png';
+const dropImmediateOut='artifacts/11520-visual-qa/11520-live-world-ground-drop-immediate.png';
+const dropDiagnostics='artifacts/11520-visual-qa/11520-ground-drop-render-diagnostics.json';
 const worldOut='artifacts/11520-visual-qa/11520-world-item-identity-390x844.png';
 const transitOut='artifacts/11520-visual-qa/11520-cargo-transit-390x844.png';
 const cargoReport='artifacts/11520-visual-qa/11520-cargo-resource-lifetime.json';
@@ -13,6 +15,14 @@ await fs.mkdir('artifacts/11520-visual-qa',{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
 const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e)));
+const consoleMessages=[],networkFailures=[],worldFrames=[];
+page.on('console',message=>{if(consoleMessages.length<500)consoleMessages.push({type:message.type(),text:message.text()})});
+page.on('requestfailed',request=>{if(networkFailures.length<250)networkFailures.push({url:request.url(),failure:request.failure()?.errorText||null})});
+page.on('response',response=>{if(response.status()>=400&&networkFailures.length<250)networkFailures.push({url:response.url(),status:response.status()})});
+await page.addInitScript(()=>{
+  // Observe only. Do not prevent context loss, restore it, or change rendering.
+  for(const type of ['webglcontextlost','webglcontextrestored'])addEventListener(type,event=>console.warn(`[CARGO_QA_${type}]`,event.target?.id||'',event.target?.className||''),true);
+});
 await page.addInitScript(()=>{
   // Seed the actual pre-Player-Life guest owner; arbitrary foreign owners must
   // remain rejected by V2.8's backpack ownership validation.
@@ -32,9 +42,48 @@ for(const name of ['life-visual-runtime.mjs','world-item-visual-runtime.mjs','it
   if(!response.ok()||!local.equals(served))throw new Error(`CARGO_SOURCE_MISMATCH:${name}`);
   sourceFiles.push({path,sha256:createHash('sha256').update(served).digest('hex')});
 }
+async function observeWorldFrame(stage,frameTimeout=300){
+  const frame=await page.evaluate((frameTimeout)=>new Promise(resolve=>{
+    const timer=setTimeout(()=>{cancelAnimationFrame(frameRequest);resolve({ready:false,reason:'ANIMATION_FRAME_TIMEOUT'})},frameTimeout);
+    const frameRequest=requestAnimationFrame(()=>{
+      clearTimeout(timer);
+      const canvas=document.getElementById('three');if(!canvas)return resolve({ready:false,reason:'WORLD_CANVAS_MISSING'});
+      const rect=canvas.getBoundingClientRect(),style=getComputedStyle(canvas);
+      const api=globalThis.__K11520_WORLD_ITEM_DROP__,drop=[...(api?.drops?.values?.()||[])][0],scene=drop?.root?.parent;
+      // Scene-ready is set only after the existing production WebGL2 renderer
+      // has initialized this canvas. Query that same context, with no new
+      // attributes, fallback type, canvas, renderer, or restoration attempt.
+      if(api?.sceneReady!==true)return resolve({ready:false,reason:'EXISTING_WORLD_CONTEXT_NOT_READY'});
+      const gl=canvas.getContext('webgl2');
+      const result={ready:false,reason:null,canvasId:canvas.id,canvasWidth:canvas.width,canvasHeight:canvas.height,css:{x:rect.x,y:rect.y,width:rect.width,height:rect.height,display:style.display,visibility:style.visibility,opacity:style.opacity},contextAvailable:Boolean(gl),contextLost:gl?.isContextLost?.()??null,drawingBufferWidth:gl?.drawingBufferWidth??0,drawingBufferHeight:gl?.drawingBufferHeight??0,domCanvasCount:document.querySelectorAll('canvas').length,sceneReady:api?.sceneReady===true,dropCount:api?.drops?.size??0,dropAttachedToScene:scene?.isScene===true,dropVisible:drop?.root?.visible??null,sceneChildren:scene?.children?.length??null};
+      if(!gl||result.contextLost){result.reason=result.contextLost?'WORLD_CONTEXT_LOST':'WORLD_CONTEXT_UNAVAILABLE';return resolve(result)}
+      const width=gl.drawingBufferWidth,height=gl.drawingBufferHeight;
+      if(!width||!height||rect.width<=0||rect.height<=0){result.reason='WORLD_CANVAS_ZERO_SIZE';return resolve(result)}
+      try{
+        // Read the existing default framebuffer inside a real animation frame;
+        // do not force a render or enable preserveDrawingBuffer in production.
+        const pixels=new Uint8Array(width*height*4);gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+        const colors=new Set();let visibleSamples=0,opaqueSamples=0;
+        for(let y=1;y<12;y++)for(let x=1;x<12;x++){
+          const i=(Math.floor(height*y/12)*width+Math.floor(width*x/12))*4;
+          if(pixels[i+3]){opaqueSamples++;colors.add(`${pixels[i]>>3},${pixels[i+1]>>3},${pixels[i+2]>>3}`);if(Math.max(pixels[i],pixels[i+1],pixels[i+2])>20)visibleSamples++}
+        }
+        Object.assign(result,{opaqueSamples,visibleSamples,distinctSampleColors:colors.size});
+        result.ready=result.sceneReady&&opaqueSamples>0&&visibleSamples>=3&&colors.size>=2;
+        result.reason=result.ready?'RENDERED_WORLD_FRAME':'WORLD_FRAME_EMPTY_OR_BACKGROUND_ONLY';
+      }catch(error){result.reason='WORLD_FRAME_READ_FAILED';result.error=String(error)}
+      resolve(result);
+    });
+  }),frameTimeout);
+  worldFrames.push({stage,at:new Date().toISOString(),...frame});return frame;
+}
+async function saveWorldDiagnostics(status){
+  await fs.writeFile(dropDiagnostics,JSON.stringify({head:sourceHead,sourceFiles,status,scope:'ACTUAL_PRODUCTION_WORLD_CANVAS_READ_ONLY',immediateScreenshot:dropImmediateOut,checkedScreenshot:dropOut,worldFrames,pageErrors,consoleMessages,networkFailures},null,2)+'\n');
+}
 // Live market polling is intentionally ongoing: await the actual scene, not network silence.
 await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__?.sceneReady===true,null,{timeout:45000});
 await page.locator('#intro11520').waitFor({state:'hidden',timeout:5000});
+await observeWorldFrame('before-backpack');
 await page.waitForSelector('#k11520UtilityMaster',{timeout:30000});
 await page.click('#k11520UtilityMaster');
 await page.waitForSelector('#backpackButton',{timeout:30000});
@@ -46,6 +95,7 @@ await page.waitForFunction(()=>document.querySelectorAll('canvas.bp3d[data-item3
 const shapes=await page.$$eval('canvas.bp3d[data-item3d="ready"]',els=>els.map(e=>e.dataset.itemShape));
 for(const expected of ['CRYSTAL','KGEN_CYLINDER','CASH_BUNDLE','FOOD','LIFE_CRATE'])if(!shapes.includes(expected))throw new Error(`MISSING_3D_ITEM_SHAPE:${expected}`);
 if(pageErrors.length)throw new Error(`PAGEERROR:${pageErrors.join('|')}`);
+await observeWorldFrame('backpack-visible');
 await page.screenshot({path:out,fullPage:false});
 
 await page.waitForFunction(()=>globalThis.__K11520_WORLD_ITEM_DROP__?.sceneReady===true,null,{timeout:5000});
@@ -58,7 +108,17 @@ if(liveDrop.backpackHasCash)throw new Error('DISCARDED_CASH_STILL_IN_BACKPACK');
 await page.click('#backpackButton');
 await page.waitForFunction(()=>!document.querySelector('#backpackPanel')?.classList.contains('open'),null,{timeout:3000});
 await page.waitForSelector('#worldItemPickup.show',{timeout:3000});
+// Preserve the original immediate capture before a bounded ready-frame wait.
+await page.screenshot({path:dropImmediateOut,fullPage:false});
+const readyDeadline=Date.now()+3000;let worldFrame;
+do{
+  worldFrame=await observeWorldFrame('ground-drop-before-capture',Math.max(1,Math.min(300,readyDeadline-Date.now())));
+  if(worldFrame.ready)break;
+  const remaining=readyDeadline-Date.now();if(remaining>0)await page.waitForTimeout(Math.min(100,remaining));
+}while(Date.now()<readyDeadline);
 await page.screenshot({path:dropOut,fullPage:false});
+await saveWorldDiagnostics(worldFrame.ready?'RENDERED_WORLD_READY':'FAIL_WORLD_NOT_RENDERED');
+if(!worldFrame.ready)throw new Error(`GROUND_DROP_WORLD_NOT_RENDERED:${worldFrame.reason}: diagnostics=${dropDiagnostics}`);
 const pickup=await page.evaluate(()=>globalThis.__K11520_WORLD_ITEM_DROP__.collectNearest());
 if(!pickup?.ok)throw new Error(`LIVE_WORLD_PICKUP_FAILED:${pickup?.reason}`);
 const afterPickup=await page.evaluate(()=>({dropCount:globalThis.__K11520_WORLD_ITEM_DROP__.drops.size,backpackHasCash:globalThis.K11520Backpack.get().items.some(i=>i.itemId==='QA-CASH')}));
@@ -150,6 +210,7 @@ if(identity.transitCustody!=='ARMORED_CASH_CASE'||identity.unloadCustody!=='ATM_
 await page.waitForTimeout(250);
 await page.screenshot({path:worldOut,fullPage:false});
 if(pageErrors.length)throw new Error(`PAGEERROR:${pageErrors.join('|')}`);
+await saveWorldDiagnostics('RENDERED_WORLD_READY');
 await fs.writeFile(cargoReport,JSON.stringify({head:sourceHead,sourceFiles,viewport:{width:390,height:844},actualWorldScreenshots:[out,dropOut],isolatedGalleryScreenshots:[transitOut,worldOut],...identity},null,2)+'\n');
 console.log(`[11520 ITEM 3D QA] PASS shapes=${shapes.join(',')} screenshot=${out}`);
 console.log(`[11520 LIVE WORLD DROP QA] PASS identity=${liveDrop.identityKey} custody=${liveDrop.custodyType} pickup=PASS screenshot=${dropOut}`);
