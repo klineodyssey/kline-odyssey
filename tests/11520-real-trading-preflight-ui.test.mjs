@@ -287,3 +287,83 @@ test('M1 diagnostics retain first and recent non-fallback errors despite a log f
  report=trace.snapshot();assert.equal(report.nonFallbackFailureCount,3);assert.equal(report.droppedNonFallbackFailures,1);assert.equal(report.nonFallbackFailures.length,2);assert.equal(report.firstNonFallbackFailure,first);
  assert.equal(JSON.stringify(report).includes('private raw content'),false);assert.equal(report.nonFallbackFailures[0].method,'eth_getBalance');
 });
+
+
+// Unsigned review UI fixtures are local metadata only, never live deployments.
+const reviewCodec=(await import('node:module')).createRequire(import.meta.url)('../K線西遊記/assets/ethers-5.7.2.umd.min.js').ethers.utils;
+const reviewModule=await import('../K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs');
+const reviewUi=await import('../K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs');
+const reviewHash=v=>reviewCodec.keccak256(reviewCodec.toUtf8Bytes(sortedJson(v)));
+function reviewUiFixture(overrides={}){
+ const hash='0x'+'ab'.repeat(32),fragments=[reviewModule.TESTNET_EXECUTION_ABI.testToken.find(f=>f.startsWith('function approve(')),...reviewModule.TESTNET_EXECUTION_ABI.brainProxy.filter(f=>/^function (depositMargin|withdrawMargin)\(/.test(f)),reviewModule.CAPITAL_EXECUTION_ABI.brainProxy.find(f=>f.startsWith('function claimSettlement('))];
+ const deployment={schema:'K11520_BSC56_DEPLOYMENT_BINDING_V1',status:'DEPLOYED_CONFIG_VERIFIED',chainId:56,testOnly:false,tokenAddress:'0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',brainAddress:BRAIN,brainImplementation:ENGINE,walletAddress:WALLET.address,pendingNonce:'7',allowanceWei:'0',tokenCodeHash:hash,brainCodeHash:hash,implementationCodeHash:hash,brainSourceHash:hash,abiHash:reviewHash(fragments),blockHash:hash,blockNumber:'123',reviewedCommit:'a'.repeat(40),accountingModel:'ISOLATED_SETTLEMENT_CAPITAL_V1'};
+ const state={wallet:{account:WALLET.address,chainId:56,status:'CONNECTED'},context:{deployment,sourceHead:deployment.reviewedCommit,bindingDigest:reviewHash(deployment),blockHash:hash,blockNumber:'123',pendingNonce:'7',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000'},changes:[]};
+ state.controller=reviewUi.createBsc56UnsignedReviewController({getWalletSnapshot:()=>state.wallet,getReviewContext:()=>state.context,codec:()=>reviewCodec,onChange:s=>state.changes.push(s),...overrides});
+ state.controller.setDraft({action:'depositMargin',amountWei:'1000000000000000001'});state.controller.open();return state;
+}
+const assertReviewBlocked=s=>{assert.equal(s.hasTransaction,false);assert.equal(s.bindingDigest,null);assert.equal(s.executionReady,false);assert.equal(s.signerRequested,false);assert.equal(s.broadcast,false);assert.equal(s.fields.CONTRACT,'NOT_DEPLOYED / UNKNOWN')};
+
+test('BSC56 review exposes all eight exact fields from the pure helper and stays unsigned',async()=>{
+ const f=reviewUiFixture(),s=await f.controller.prepare();assert.equal(s.status,'UNSIGNED_REVIEW');assert.equal(s.hasTransaction,true);
+ assert.deepEqual(Object.keys(s.fields),reviewUi.BSC56_REVIEW_FIELDS);assert.equal(s.fields.WALLET,WALLET.address);assert.equal(s.fields.CONTRACT,BRAIN);assert.equal(s.fields.FUNCTION,'depositMargin');assert.match(s.fields.AMOUNT,/1000000000000000001/);assert.match(s.fields.MAXIMUM_EXPOSURE,/5000000000000/);
+ assert.equal(s.executionReady,false);assert.equal(s.signerRequested,false);assert.equal(s.broadcast,false);assert.match(s.reason,/FRESH_READBACK/);assert.ok(Object.isFrozen(s.fields));
+ for(const action of ['approve','withdrawMargin','claimSettlement']){f.controller.setDraft({action,amountWei:'1',positionKey:'0x'+'cd'.repeat(32)});const x=await f.controller.prepare();assert.equal(x.status,'UNSIGNED_REVIEW',action);assert.equal(x.fields.FUNCTION,action)}
+});
+
+test('BSC56 actual page default has no trusted context and never reaches a codec or builder',async()=>{
+ let calls=0;const c=reviewUi.createBsc56UnsignedReviewController({getWalletSnapshot:()=>({account:WALLET.address,chainId:56,status:'CONNECTED'}),codec(){calls++;throw Error('must not run')},build(){calls++;throw Error('must not run')}});
+ c.open();c.setDraft({action:'depositMargin',amountWei:'1'});const s=await c.prepare();assert.equal(s.reason,'DEPLOYED_BINDING_AND_READBACK_REQUIRED');assertReviewBlocked(s);assert.equal(calls,0);
+});
+
+test('BSC56 review invalidates on account, chain, session, action and amount changes before reading snapshot',async()=>{
+ for(const mutate of [f=>f.wallet.account=ENGINE,f=>f.wallet.chainId=97,f=>f.wallet.status='READING',f=>f.wallet={account:null,chainId:null,status:'DISCONNECTED'},f=>f.controller.setDraft({action:'withdrawMargin'}),f=>f.controller.setDraft({amountWei:'2'})]){
+  const f=reviewUiFixture();await f.controller.prepare();mutate(f);const s=f.controller.snapshot();assertReviewBlocked(s);assert.equal(s.status,'STALE');assert.equal(s.reason,'REVIEW_CONTEXT_CHANGED');
+ }
+});
+
+test('BSC56 review invalidates every source, binding, block, nonce, gas and allowance change',async()=>{
+ for(const mutate of [f=>f.context.sourceHead='b'.repeat(40),f=>f.context.bindingDigest='0x'+'12'.repeat(32),f=>f.context.blockHash='0x'+'34'.repeat(32),f=>f.context.blockNumber='124',f=>f.context.pendingNonce='8',f=>f.context.gasPriceWei='1',f=>f.context.maximumGasFeeWei='1',f=>f.context.deployment.allowanceWei='1',f=>f.context.deployment.brainAddress=ENGINE]){
+  const f=reviewUiFixture();await f.controller.prepare();mutate(f);assertReviewBlocked(f.controller.sync());assert.equal(f.changes.at(-1).status,'STALE');
+ }
+});
+
+test('BSC56 late result cannot cross account ABA, close reopen, input change or disposal',async()=>{
+ for(const event of ['accountABA','closeReopen','input','dispose']){
+  let release;const f=reviewUiFixture({build:(input,opts)=>new Promise(resolve=>{release=()=>resolve(reviewModule.buildBsc56UnsignedCustodyReview(input,opts))})});
+  const pending=f.controller.prepare();assert.equal(f.controller.snapshot().status,'BUILDING');
+  if(event==='accountABA'){f.wallet.account=ENGINE;f.controller.sync();f.wallet.account=WALLET.address;f.controller.sync()}
+  if(event==='closeReopen'){f.controller.close();f.controller.open()}
+  if(event==='input')f.controller.setDraft({amountWei:'2'});
+  if(event==='dispose')f.controller.dispose();
+  release();await pending;assertReviewBlocked(f.controller.snapshot());assert.notEqual(f.controller.snapshot().status,'UNSIGNED_REVIEW');
+ }
+});
+
+test('BSC56 repeated prepare only accepts the most recent result',async()=>{
+ const pending=[];const f=reviewUiFixture({build:(input,opts)=>new Promise(resolve=>pending.push(()=>resolve(reviewModule.buildBsc56UnsignedCustodyReview(input,opts))))});
+ const first=f.controller.prepare(),second=f.controller.prepare();pending[1]();await second;const digest=f.controller.snapshot().intentDigest;pending[0]();await first;assert.equal(f.controller.snapshot().intentDigest,digest);assert.equal(f.controller.snapshot().status,'UNSIGNED_REVIEW');
+});
+
+test('BSC56 context rejects accessors, hooks, cycles and resource excess without invoking them',async()=>{
+ for(const kind of ['getter','nestedGetter','hook','cycle','depth','bytes']){
+  const f=reviewUiFixture();let invoked=0;
+  if(kind==='getter')Object.defineProperty(f.context,'sourceHead',{enumerable:true,get(){invoked++;return 'a'.repeat(40)}});
+  if(kind==='nestedGetter')Object.defineProperty(f.context.deployment,'brainAddress',{enumerable:true,get(){invoked++;return BRAIN}});
+  if(kind==='hook')f.context.toJSON=()=>{invoked++;return {}};
+  if(kind==='cycle')f.context.loop=f.context;
+  if(kind==='depth'){let v=f.context;for(let i=0;i<12;i++)v=v.child={}}
+  if(kind==='bytes')f.context.large='x'.repeat(32769);
+  const s=await f.controller.prepare();assertReviewBlocked(s);assert.equal(s.reason,'REVIEW_CONTEXT_INVALID',kind);assert.equal(invoked,0);
+ }
+});
+
+test('BSC56 source inconsistency and execution-shaped builder output remain blocked',async()=>{
+ const f=reviewUiFixture();f.context.deployment.reviewedCommit='b'.repeat(40);assert.equal((await f.controller.prepare()).reason,'REVIEW_CONTEXT_BINDING_MISMATCH');assertReviewBlocked(f.controller.snapshot());
+ for(const field of ['executionReady','signerRequested','broadcast']){const g=reviewUiFixture({build:(i,o)=>({...reviewModule.buildBsc56UnsignedCustodyReview(i,o),[field]:true})});assert.equal((await g.controller.prepare()).reason,'UNSIGNED_REVIEW_BOUNDARY_REQUIRED');assertReviewBlocked(g.controller.snapshot())}
+});
+
+test('BSC56 review draft bounds forbid unsupported semantics and retain exact uint strings',()=>{
+ const f=reviewUiFixture();for(const action of ['order','sign','send','KAIOS'])assert.throws(()=>f.controller.setDraft({action}),/REVIEW_ACTION_NOT_SUPPORTED/);
+ for(const amountWei of [1,1.5,1n,'1'.repeat(79)])assert.throws(()=>f.controller.setDraft({amountWei}),/REVIEW_DRAFT_INVALID/);
+ let invoked=0;assert.throws(()=>f.controller.setDraft(Object.defineProperty({},'amountWei',{get(){invoked++;return '1'}})),/ACCESSOR_FORBIDDEN/);assert.equal(invoked,0);
+});

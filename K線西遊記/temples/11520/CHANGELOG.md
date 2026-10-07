@@ -5,17 +5,28 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-07.BSC56-UNSIGNED-CUSTODY-REVIEW |
+| REVISION | 2026-10-07.BSC56-INLINE-UNSIGNED-REVIEW |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
 | LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; no full independent security audit or release approval |
-| SOURCE_COMMIT | f7f67950418ebbb6f7a5a309a32d529232fcb3b6 |
+| REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval |
+| SOURCE_COMMIT | 5351051b2cd8f9e4cf4920841cae2253e99b73cd |
 | TASK_ID | K11520-BSC56-PRODUCTION-20261007 |
-| CHANGE_REASON | Register pure BSC56 custody review construction, allowance exposure and fail-closed deployment binding without changing simulation or live execution. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6 |
+| CHANGE_REASON | Register the inline unsigned review candidate and context invalidation; no signing or trading enablement. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ 5351051b2cd8f9e4cf4920841cae2253e99b73cd |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-07 — BSC56 inline unsigned review candidate
+
+- Existing `runtime/real-trading-preflight-ui.mjs` mounts one inline details section after `#walletSimulation`; the wallet singleton, panel geometry/inert owners, market selection and simulation owners are retained.
+- Eight fields show CHAIN, WALLET, CONTRACT, FUNCTION, TOKEN, AMOUNT, EXPECTED_EFFECT and MAXIMUM_EXPOSURE. Actual page has no trusted deployed-binding/readback owner and remains visibly BLOCKED; no guessed address or synthetic production context is installed.
+- Pure controller clears review on account, chain, session, action, input, source head, binding, block, nonce, allowance or gas change. Bounded descriptor snapshots avoid getters/toJSON. Generation checks reject late results, account ABA, close/reopen and disposal races.
+- Scoped authored [hidden] styling preserves amount/claim and collapsed-panel visibility despite the input display rule; the actual-browser assertion checks the inactive field is hidden.
+- All states keep executionReady, signerRequested and broadcast false. No wallet request, mode change, signing callback, localStorage authority, second wallet or transaction send is added.
+- `tests/11520-real-trading-preflight-ui.test.mjs`: 34/34 pass, including nine new deterministic suites. Focused builder/binding/preflight/static/foundation total: 178/178. `K線西遊記/temples/11520/tests/11520-browser-settlement.mjs` adds actual-entry blocked review, mobile wrapping, desktop resize, session changes, repeated mount and preserved simulation checks.
+- Checkpoint status: FUNCTIONAL_UNIT_PASS / CHROMIUM_NOT_RUN / VISUAL_QA_NOT_RUN / NOT_RELEASEABLE. New screenshots must be captured and inspected at the exact published head before UI product-PASS.
+- Rollback: revert this bounded preflight/runtime/tests/metadata increment to `5351051b2cd8f9e4cf4920841cae2253e99b73cd`; independently reviewed unsigned builder and successful chain56 identity gate remain intact.
 
 ## 2026-10-07 — BSC56 unsigned custody review candidate
 

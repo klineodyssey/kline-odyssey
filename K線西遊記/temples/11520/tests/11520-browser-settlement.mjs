@@ -101,6 +101,48 @@ try {
     assert.equal(await page.evaluate(()=>__K11520_EXECUTION__.snapshot().mode),'SIMULATION_WALLET');
     assert.match(await page.locator('#wChain').innerText(),/BNB Smart Chain.*56/);
     await shot('wallet-connected');
+    // New BSC56 UI uses this existing read-only wallet fixture and actual page.
+    // Missing trusted deployment/readback stays blocked; no signing seam exists.
+    const review=page.locator('#k11520Bsc56UnsignedReview');
+    await review.waitFor();
+    const reviewBaseline=await page.evaluate(()=>({mode:__K11520_EXECUTION__.snapshot().mode,markets:[...document.querySelectorAll('[data-market]')].map(e=>e.value),calls:__walletFixture.calls.length}));
+    await review.locator('summary').click();
+    await page.locator('#bsc56ReviewAction').selectOption('depositMargin');
+    await review.locator('input[inputmode="numeric"]').fill('1000000000000000001');
+    await review.getByRole('button',{name:'更新審核資訊'}).click();
+    await page.waitForFunction(()=>document.querySelector('#k11520Bsc56UnsignedReview [role="status"]').textContent.includes('DEPLOYED_BINDING_AND_READBACK_REQUIRED'));
+    assert.equal(await review.getAttribute('data-execution-ready'),'false');
+    assert.equal(await page.evaluate(()=>__walletFixture.calls.length),reviewBaseline.calls,'review cannot invoke any wallet method');
+    assert.match(await review.locator('[data-bsc56-review-field="CONTRACT"]').innerText(),/NOT_DEPLOYED \/ UNKNOWN/);
+    async function inspectReviewWidth(label){
+      const fields=review.locator('[data-bsc56-review-field]');assert.equal(await fields.count(),8);
+      for(let i=0;i<8;i++){
+        await fields.nth(i).scrollIntoViewIfNeeded();
+        assert.equal(await fields.nth(i).evaluate(el=>{const panel=document.querySelector('#walletPanel'),p=panel.getBoundingClientRect(),r=el.getBoundingClientRect(),label=el.previousElementSibling;return !!el.textContent.trim()&&r.width>0&&r.left>=p.left-1&&r.right<=p.right+1&&el.scrollWidth<=el.clientWidth+1&&label.scrollWidth<=label.clientWidth+1}),true,label+' field '+i+' remains fully wrapped');
+        if(i===0||i===7)await shot('bsc56-review-'+label+'-'+(i===0?'top':'bottom'));
+      }
+      assert.equal(await page.locator('#walletPanel').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,label+' has no horizontal overflow');
+    }
+    await inspectReviewWidth('mobile');
+    if(width===390){await page.setViewportSize({width:1280,height:900});await inspectReviewWidth('desktop-1280x900');await page.setViewportSize({width,height})}
+    await page.evaluate(()=>{__walletFixture.account='0x2222222222222222222222222222222222222222';__walletFixture.emit('accountsChanged',[__walletFixture.account])});
+    await page.waitForFunction(()=>document.querySelector('[data-bsc56-review-field="WALLET"]').textContent==='0x2222222222222222222222222222222222222222');
+    assert.equal(await review.getAttribute('data-review-state'),'STALE');
+    await page.evaluate(()=>{__walletFixture.chain='0x61';__walletFixture.emit('chainChanged',__walletFixture.chain)});
+    await page.waitForFunction(()=>document.querySelector('[data-bsc56-review-field="CHAIN"]').textContent.includes('wallet 97'));
+    await review.getByRole('button',{name:'更新審核資訊'}).click();
+    assert.match(await review.getByRole('status').innerText(),/ACTIVE_CHAIN56_SESSION_REQUIRED/);
+    await page.evaluate(()=>{__walletFixture.account='0x1111111111111111111111111111111111111111';__walletFixture.chain='0x38';__walletFixture.emit('chainChanged',__walletFixture.chain)});
+    await page.waitForFunction(()=>document.querySelector('#wKgen').textContent==='12345'&&document.querySelector('[data-bsc56-review-field="WALLET"]').textContent==='0x1111111111111111111111111111111111111111');
+    await page.locator('#bsc56ReviewAction').selectOption('claimSettlement');
+    await review.locator('input[aria-label="Claim position key"]').fill('0x'+'cd'.repeat(32));
+    assert.equal(await review.locator('input[inputmode="numeric"]').isVisible(),false);
+    await review.locator('summary').click();assert.equal(await review.getAttribute('data-review-state'),'CLOSED');
+    await review.locator('summary').click();assert.equal(await review.getAttribute('data-review-state'),'BLOCKED');
+    assert.equal(await page.evaluate(async()=>{const m=await import('./runtime/real-trading-preflight-ui.mjs'),a=m.installBsc56UnsignedReviewUi(),b=m.installBsc56UnsignedReviewUi();return a===b&&document.querySelectorAll('#k11520Bsc56UnsignedReview').length===1}),true,'one inline owner only');
+    await review.locator('summary').click();
+    assert.deepEqual(await page.evaluate(()=>({mode:__K11520_EXECUTION__.snapshot().mode,markets:[...document.querySelectorAll('[data-market]')].map(e=>e.value)})),{mode:reviewBaseline.mode,markets:reviewBaseline.markets});
+    assert.equal(await page.evaluate(()=>__walletFixture.calls.some(m=>/send|sign|switch|addChain|personal_/i.test(m))),false);
     await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});
     await shot('wallet-metrics');
     await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});

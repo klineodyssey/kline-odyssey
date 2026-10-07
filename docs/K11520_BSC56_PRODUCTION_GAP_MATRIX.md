@@ -177,3 +177,20 @@ probe observed matching KGEN identity at block `0x78589d7`, hash
 `0x04b38ce62988c26a1859974356953182d9369fe91508413ea00240f02c119f00`;
 that pre-publication run is RPC/identity capability evidence only, not an
 exact-head CI result. Final committed source binding must be established by CI.
+
+## Inline review UI candidate
+
+The existing preflight owner now hosts a blocked eight-field unsigned review in
+the existing wallet panel. Deployment/readback context is absent on the actual
+page, so construction remains blocked and the contract/exposure rows remain
+UNKNOWN. Deterministic fixtures cover complete input-only review; they are not
+live deployment evidence. All prior matrix classifications stay unchanged.
+
+Account/chain/session/action/input/source/binding/block/nonce/gas/allowance changes
+invalidate old fields; close/reopen, disposal and late results cannot restore
+stale content. No signing, broadcast, wallet mode selection or simulation write
+is introduced. Local focused checks pass 178/178. Actual-entry Chromium checks
+have been added, but browser execution and screenshot inspection are pending at
+this source checkpoint: NOT_RELEASEABLE. The preceding `5351051b` checkpoint's
+five PR workflows passed, including identity-only chain56 evidence and preserved
+simulation regression; that result does not certify this newer UI increment.

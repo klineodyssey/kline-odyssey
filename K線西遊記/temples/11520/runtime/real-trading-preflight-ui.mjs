@@ -1,12 +1,135 @@
 /* KGEN_META
-VERSION: 1.1.0
-STATUS: ACTIVE_SAFE_PREFLIGHT
-PURPOSE: Player-visible 11520 real-trading readiness preflight and order-route classification. Never signs or broadcasts.
+VERSION: 1.2.0
+REVISION: 2026-10-07.BSC56-INLINE-UNSIGNED-REVIEW
+PRODUCT_CONTEXT: V2.9.5
+STATUS: CANDIDATE
+LAST_UPDATED: 2026-10-07
+UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
+REVIEWED_BY: dot / scoped self-review and parent targeted review / 2026-10-07; browser visual QA pending, no release approval
+SOURCE_COMMIT: 5351051b2cd8f9e4cf4920841cae2253e99b73cd
+TASK_ID: K11520-BSC56-PRODUCTION-20261007
+CHANGE_REASON: Add bounded inline eight-field unsigned review and stale-context invalidation in the existing preflight owner.
+ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-preflight-ui.mjs @ 5351051b2cd8f9e4cf4920841cae2253e99b73cd
+SOURCE_OF_TRUTH: TRUE
+PURPOSE: Player-visible preflight and blocked unsigned custody review. Never signs or broadcasts.
 */
 import {getWalletSession11520} from './wallet-game-bridge.mjs';
 import {getRealTradingBinding,assertRealTradingAxisMarket,realTradingEligibility} from './real-trading-market-binding.mjs';
+import {KGEN_TOKEN_ADDRESS,KGEN_CHAIN_ID} from './evm-wallet-runtime.mjs';
+import {buildBsc56UnsignedCustodyReview} from './real-trading-order-intent.mjs';
 
 const $=s=>document.querySelector(s);
+
+export const BSC56_REVIEW_FIELDS=Object.freeze(['CHAIN','WALLET','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE']);
+const BSC56_REVIEW_ACTIONS=Object.freeze(['approve','depositMargin','withdrawMargin','claimSettlement']);
+
+// View state only. The callback is an existing trusted readback/registry owner,
+// not page storage, an event payload, or a request to connect/sign/broadcast.
+// The current page has no deployed binding owner and therefore defaults blocked.
+export function createBsc56UnsignedReviewController({getWalletSnapshot,getReviewContext=()=>null,codec=()=>globalThis.ethers?.utils||globalThis.ethers,build=buildBsc56UnsignedCustodyReview,onChange=()=>{}}={}){
+  if(typeof getWalletSnapshot!=='function')throw new Error('EXISTING_WALLET_SNAPSHOT_REQUIRED');
+  let generation=0,opened=false,disposed=false,currentKey=null,result=null,status='CLOSED',reason='REVIEW_CLOSED';
+  let draft={action:'',amountWei:'',positionKey:''};
+  const own=(object,key)=>{const d=object&&Object.getOwnPropertyDescriptor(object,key);if(d&&!Object.hasOwn(d,'value'))throw new Error('REVIEW_CONTEXT_ACCESSOR_FORBIDDEN');return d?.value};
+  const text=value=>typeof value==='string'&&value.length<=256?value:'';
+  // Bounded data-only context: hashing/rendering never invokes getters/toJSON.
+  // All source fields participate in invalidation, including gas and allowance.
+  function dataSnapshot(value){
+    let nodes=0,bytes=0;const ancestors=new Set(),encoder=new TextEncoder();
+    function copy(v,depth){
+      if(++nodes>512||depth>10)throw new Error('REVIEW_CONTEXT_BUDGET_EXCEEDED');
+      if(v===null||typeof v==='boolean')return v;
+      if(typeof v==='string'){bytes+=encoder.encode(v).length;if(v.length>2048||bytes>32768)throw new Error('REVIEW_CONTEXT_BUDGET_EXCEEDED');return v}
+      if(typeof v==='number'&&Number.isSafeInteger(v))return v;
+      if(!v||typeof v!=='object'||ancestors.has(v)||(!Array.isArray(v)&&Object.getPrototypeOf(v)!==Object.prototype&&Object.getPrototypeOf(v)!==null))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+      const keys=Reflect.ownKeys(v);if(keys.length>65||keys.some(k=>typeof k!=='string'))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+      ancestors.add(v);const result=Array.isArray(v)?[]:{};
+      if(Array.isArray(v)&&(v.length>64||keys.length!==v.length+1))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+      for(const key of keys.sort()){
+        if(Array.isArray(v)&&key==='length')continue;
+        const d=Object.getOwnPropertyDescriptor(v,key);if(!d||!Object.hasOwn(d,'value')||!d.enumerable)throw new Error('REVIEW_CONTEXT_ACCESSOR_FORBIDDEN');
+        bytes+=encoder.encode(key).length;if(bytes>32768)throw new Error('REVIEW_CONTEXT_BUDGET_EXCEEDED');
+        if(Array.isArray(v)&&!/^(0|[1-9][0-9]*)$/.test(key))throw new Error('REVIEW_CONTEXT_DATA_REQUIRED');
+        Object.defineProperty(result,key,{value:copy(d.value,depth+1),enumerable:true,writable:true,configurable:true});
+      }
+      ancestors.delete(v);return result;
+    }return copy(value,0);
+  }
+  function context(){
+    const w=getWalletSnapshot()||{},r=getReviewContext(),wallet={account:text(own(w,'account')),chainId:own(w,'chainId'),status:text(own(w,'status'))};
+    const source=r==null?null:dataSnapshot(r);
+    const values={account:wallet.account.toLowerCase(),chainId:Number.isSafeInteger(wallet.chainId)?wallet.chainId:null,status:wallet.status,
+      sourceHead:text(own(source,'sourceHead')),bindingDigest:text(own(source,'bindingDigest')),blockHash:text(own(source,'blockHash')),blockNumber:text(own(source,'blockNumber')),pendingNonce:text(own(source,'pendingNonce')),
+      action:draft.action,amountWei:draft.amountWei,positionKey:draft.positionKey};
+    return {wallet,values,source,key:JSON.stringify({values,source})};
+  }
+  let latestContext=null;
+  function reconcile(){
+    if(disposed)return;
+    try{
+      const ctx=context();latestContext=ctx;
+      if(currentKey!==ctx.key){const before=currentKey;currentKey=ctx.key;generation++;result=null;
+        if(opened){status=before===null?'BLOCKED':'STALE';reason=before===null?'REVIEW_INPUTS_REQUIRED':'REVIEW_CONTEXT_CHANGED'}}
+    }catch{latestContext=null;currentKey=null;generation++;result=null;if(opened){status='BLOCKED';reason='REVIEW_CONTEXT_INVALID'}}
+  }
+  function fields(ctx){
+    const rows={CHAIN:`BNB Smart Chain · ${KGEN_CHAIN_ID} / wallet ${ctx?.values.chainId??'UNKNOWN'}`,WALLET:ctx?.wallet.account||'未連線 / UNKNOWN',CONTRACT:'NOT_DEPLOYED / UNKNOWN',FUNCTION:draft.action||'NOT_SELECTED',TOKEN:`KGEN · ${KGEN_TOKEN_ADDRESS} · 18 decimals`,AMOUNT:'NOT_PROVIDED / UNKNOWN',EXPECTED_EFFECT:'候選資訊不足，尚未建立未簽署交易',MAXIMUM_EXPOSURE:'UNKNOWN · 缺少可信部署、nonce 或 gas cap'};
+    if(result){const r=result.review;rows.CHAIN=`${r.CHAIN.name} · ${r.CHAIN.chainId}`;rows.WALLET=r.WALLET;rows.CONTRACT=r.CONTRACT||'NOT_DEPLOYED / UNKNOWN';rows.FUNCTION=r.FUNCTION;rows.TOKEN=`${r.TOKEN.symbol} · ${r.TOKEN.address} · ${r.TOKEN.decimals} decimals`;rows.AMOUNT=JSON.stringify(r.AMOUNT);rows.EXPECTED_EFFECT=r.EXPECTED_EFFECT;rows.MAXIMUM_EXPOSURE=JSON.stringify(r.MAXIMUM_EXPOSURE,null,2)}
+    return Object.freeze(rows);
+  }
+  function snapshot(){reconcile();return Object.freeze({status,reason,opened,generation,draft:Object.freeze({...draft}),fields:fields(latestContext),bindingDigest:result?.bindingDigest||null,intentDigest:result?.intentDigest||null,hasTransaction:!!result?.transaction,executionReady:false,signerRequested:false,broadcast:false,scope:'UNSIGNED_INPUT_METADATA_ONLY_NOT_EXECUTABLE'})}
+  const publish=()=>{const state=snapshot();try{onChange(state)}catch{}return state};
+  function invalidate(nextReason,nextStatus='STALE'){generation++;result=null;status=nextStatus;reason=nextReason;return publish()}
+  const sync=()=>publish();
+  return Object.freeze({snapshot,sync,
+    open(){if(disposed)return snapshot();opened=true;currentKey=null;return sync()},
+    close(){opened=false;return invalidate('REVIEW_CLOSED','CLOSED')},
+    setDraft(patch={}){const next={...draft};for(const key of ['action','amountWei','positionKey']){const value=own(patch,key);if(value!==undefined){if(typeof value!=='string'||value.length>(key==='amountWei'?78:key==='positionKey'?66:32))throw new Error('REVIEW_DRAFT_INVALID');next[key]=value}}if(next.action&&!BSC56_REVIEW_ACTIONS.includes(next.action))throw new Error('REVIEW_ACTION_NOT_SUPPORTED');draft=next;return sync()},
+    async prepare(){
+      if(disposed||!opened)return snapshot();reconcile();const ctx=latestContext;if(!ctx)return publish();
+      const ticket=++generation,key=ctx.key;result=null;status='BUILDING';reason='UNSIGNED_REVIEW_ONLY';publish();if(ticket!==generation)return snapshot();
+      const finishBlocked=code=>{if(ticket!==generation||!opened||disposed)return snapshot();status='BLOCKED';reason=code;return publish()};
+      if(ctx.wallet.status!=='CONNECTED'||ctx.wallet.chainId!==KGEN_CHAIN_ID||!/^0x[0-9a-fA-F]{40}$/.test(ctx.wallet.account))return finishBlocked('ACTIVE_CHAIN56_SESSION_REQUIRED');
+      if(!draft.action)return finishBlocked('CUSTODY_ACTION_REQUIRED');
+      if(!ctx.source||! /^[0-9a-f]{40}$/.test(ctx.values.sourceHead)||! /^0x[0-9a-fA-F]{64}$/.test(ctx.values.bindingDigest)||! /^0x[0-9a-fA-F]{64}$/.test(ctx.values.blockHash)||! /^(0|[1-9][0-9]*)$/.test(ctx.values.blockNumber)||! /^(0|[1-9][0-9]*)$/.test(ctx.values.pendingNonce))return finishBlocked('DEPLOYED_BINDING_AND_READBACK_REQUIRED');
+      try{
+        const deployment=own(ctx.source,'deployment');
+        if(own(deployment,'reviewedCommit')!==ctx.values.sourceHead||own(deployment,'blockHash')?.toLowerCase()!==ctx.values.blockHash.toLowerCase()||own(deployment,'blockNumber')!==ctx.values.blockNumber||own(deployment,'pendingNonce')!==ctx.values.pendingNonce)throw new Error('REVIEW_CONTEXT_BINDING_MISMATCH');
+        const input={action:draft.action,chainId:KGEN_CHAIN_ID,walletAddress:ctx.wallet.account,nonce:ctx.values.pendingNonce,gasLimit:own(ctx.source,'gasLimit'),gasPriceWei:own(ctx.source,'gasPriceWei'),maximumGasFeeWei:own(ctx.source,'maximumGasFeeWei'),deployment,...(ctx.values.action==='claimSettlement'?{positionKey:ctx.values.positionKey}:{amountWei:ctx.values.amountWei})};
+        const built=await build(input,{ethers:codec(),expectedBindingDigest:ctx.values.bindingDigest});
+        if(disposed||!opened||ticket!==generation)return snapshot();
+        const latest=context();if(latest.key!==key){currentKey=latest.key;return invalidate('REVIEW_CONTEXT_CHANGED')}
+        if(built?.schema!=='K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1'||built.executionReady!==false||built.signerRequested!==false||built.broadcast!==false||built.bindingVerification!=='INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED'||built.transactionFormat!=='ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC'||built.bindingDigest!==ctx.values.bindingDigest)throw new Error('UNSIGNED_REVIEW_BOUNDARY_REQUIRED');
+        if(built.review?.WALLET?.toLowerCase()!==ctx.wallet.account.toLowerCase()||built.review?.CHAIN?.chainId!==KGEN_CHAIN_ID||built.review?.FUNCTION!==draft.action)throw new Error('UNSIGNED_REVIEW_CONTEXT_MISMATCH');
+        result=built;status='UNSIGNED_REVIEW';reason='FRESH_READBACK_AND_WALLET_OWNER_CONFIRMATION_REQUIRED';return publish();
+      }catch(error){return finishBlocked(/^[A-Z][A-Z0-9_]{0,95}$/.test(error?.message||'')?error.message:'UNSIGNED_REVIEW_UNAVAILABLE')}
+    },
+    dispose(){disposed=true;opened=false;return invalidate('REVIEW_CLOSED','CLOSED')}
+  });
+}
+
+const bsc56ReviewMounts=new WeakMap();
+export function installBsc56UnsignedReviewUi(){
+  const panel=$('#walletPanel');if(!panel)return null;if(bsc56ReviewMounts.has(panel))return bsc56ReviewMounts.get(panel);
+  const root=document.createElement('details');root.id='k11520Bsc56UnsignedReview';root.className='card';
+  const title=document.createElement('summary');title.textContent='BSC56 未簽署審核';title.style.minHeight='44px';root.appendChild(title);
+  const notice=document.createElement('p');notice.textContent='僅檢視候選資訊；不會簽署、送出交易或變更交易模式。部署／readback 尚未齊備時維持封鎖。';root.appendChild(notice);
+  const select=document.createElement('select');select.id='bsc56ReviewAction';select.setAttribute('aria-label','未簽署審核操作');select.style.minHeight='44px';select.style.maxWidth='100%';
+  for(const [value,label] of [['','選擇審核操作'],['approve','Approve / revoke 審核'],['depositMargin','Deposit Margin 審核'],['withdrawMargin','Withdraw Margin 審核'],['claimSettlement','Claim Settlement 審核']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.appendChild(option)}root.appendChild(select);
+  const amount=document.createElement('input');amount.type='text';amount.inputMode='numeric';amount.maxLength=78;amount.placeholder='KGEN 最小單位整數（wei）';amount.setAttribute('aria-label','審核用 KGEN 最小單位整數');amount.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px';root.appendChild(amount);
+  const claim=document.createElement('input');claim.type='text';claim.maxLength=66;claim.placeholder='Claim position key（bytes32）';claim.setAttribute('aria-label','Claim position key');claim.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px';claim.hidden=true;root.appendChild(claim);
+  const refresh=document.createElement('button');refresh.type='button';refresh.className='btn';refresh.textContent='更新審核資訊';refresh.style.minHeight='44px';root.appendChild(refresh);
+  const status=document.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');root.appendChild(status);
+  const rows=document.createElement('dl');rows.className='exchangeRows';const values={};for(const field of BSC56_REVIEW_FIELDS){const row=document.createElement('div'),label=document.createElement('dt'),value=document.createElement('dd');label.textContent=field;value.dataset.bsc56ReviewField=field;value.style.whiteSpace='pre-wrap';row.append(label,value);rows.appendChild(row);values[field]=value}root.appendChild(rows);
+  const session=getWalletSession11520(),controller=createBsc56UnsignedReviewController({getWalletSnapshot:()=>session.snapshot(),onChange:model=>{root.dataset.reviewState=model.status;root.dataset.executionReady='false';status.textContent=`${model.status} · ${model.reason} · NOT EXECUTABLE`;for(const field of BSC56_REVIEW_FIELDS)values[field].textContent=model.fields[field];refresh.disabled=model.status==='BUILDING'}});
+  const draft=()=>controller.setDraft({action:select.value,amountWei:amount.value,positionKey:claim.value});
+  select.addEventListener('change',()=>{claim.hidden=select.value!=='claimSettlement';amount.hidden=!claim.hidden;draft()});amount.addEventListener('input',draft);claim.addEventListener('input',draft);
+  refresh.addEventListener('click',()=>{draft();void controller.prepare()});root.addEventListener('toggle',()=>{if(root.open)controller.open();else controller.close()});
+  const unsubscribe=session.subscribe(()=>controller.sync()),syncVisibility=()=>{root.hidden=panel.classList.contains('collapsed');if(root.hidden){root.open=false;controller.close()}};
+  const observer=new MutationObserver(syncVisibility);observer.observe(panel,{attributes:true,attributeFilter:['class']});
+  const mounted=Object.freeze({controller,root,dispose(){unsubscribe();observer.disconnect();controller.dispose();root.remove();bsc56ReviewMounts.delete(panel)}});bsc56ReviewMounts.set(panel,mounted);
+  const existing=$('#walletSimulation');if(existing?.parentElement===panel)existing.after(root);else panel.appendChild(root);controller.close();syncVisibility();return mounted;
+}
 
 // Offline package inspection only. A digest proves content identity, not Human
 // approval, deployed bytecode, oracle independence, funding or permission to sign.
@@ -110,7 +233,8 @@ function blockerLabel(code){if(code==='WALLET_PUBLIC_IDENTITY_REQUIRED')return'�
 function ensureStyle(){
   if($('#k11520RealTradePreflightStyle'))return;
   const style=document.createElement('style');style.id='k11520RealTradePreflightStyle';style.textContent=`
-#k11520RealTradePreflight{position:fixed;z-index:475;right:58px;bottom:366px;display:grid;gap:4px;justify-items:end;pointer-events:none}
+#k11520Bsc56UnsignedReview{min-width:0;max-width:100%;overflow-wrap:anywhere}\n#k11520Bsc56UnsignedReview summary{cursor:pointer}\n#k11520Bsc56UnsignedReview input,#k11520Bsc56UnsignedReview select{display:block;width:100%;margin:8px 0}\n#k11520Bsc56UnsignedReview[hidden],#k11520Bsc56UnsignedReview [hidden]{display:none}
+#k11520Bsc56UnsignedReview .exchangeRows dt,#k11520Bsc56UnsignedReview .exchangeRows dd{min-width:0;overflow-wrap:anywhere;word-break:break-word}\n#k11520RealTradePreflight{position:fixed;z-index:475;right:58px;bottom:366px;display:grid;gap:4px;justify-items:end;pointer-events:none}
 #k11520RealTradePreflight button{pointer-events:auto;border:1px solid #f1ca7377;background:#111923ee;color:#f5de9c;border-radius:10px;padding:7px 9px;font-size:8px;font-weight:900;touch-action:manipulation;box-shadow:0 6px 20px #0008}
 #k11520RealTradePreflight .state{max-width:190px;padding:5px 7px;border-radius:8px;background:#071018e8;border:1px solid #ffffff16;color:#aebdca;font-size:7px;text-align:right;line-height:1.2}
 #k11520RealTradePreflight[data-ready="1"] .state{color:#73e7a7;border-color:#73e7a744}
@@ -161,6 +285,7 @@ function notifyOrderRoute(){
 
 export function install11520RealTradingPreflightUi(){
   ensureStyle();
+  if($('#walletPanel'))installBsc56UnsignedReviewUi();
   let host=$('#k11520RealTradePreflight');
   if(!host){host=document.createElement('div');host.id='k11520RealTradePreflight';host.innerHTML='<button type="button" id="k11520RealTradePreflightBtn">⚡ 交易模式</button><div class="state">SIMULATION</div>';document.body.appendChild(host)}
   const btn=$('#k11520RealTradePreflightBtn');if(btn&&!btn.dataset.bound){btn.dataset.bound='1';btn.addEventListener('click',()=>{const result=renderPreflight();const message=result?.ready?'真實交易條件已齊；仍需由錢包明確確認交易':'真實交易仍封鎖：'+(result?.blockers||[]).map(blockerLabel).join('、');const toast=$('#toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2600)}})}
