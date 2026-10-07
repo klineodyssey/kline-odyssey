@@ -17,7 +17,14 @@ import {
   ACTIVE_COMPANY_BOOT_READS,
   ACTIVE_COMPANY_BOOT_SOURCE_PATHS,
   ACTIVE_COMPANY_ORACLE_POLICY,
-  DYNAMIC_COMPANY_WORK_TYPES
+  DYNAMIC_COMPANY_WORK_TYPES,
+  DYNAMIC_COMPANY_WAIT_STATES,
+  DYNAMIC_COMPANY_PRIORITY_FACTORS,
+  validateDotOrganManufacturingRecord,
+  inspectDotOrganCandidate,
+  createDotOrganMaintenanceRecord,
+  evaluateDotOrganSeal,
+  evaluateDotDispatchSafety
 } from "../core/company/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
 import { assertAppendOnlyChain } from "../core/history/index.mjs";
@@ -153,6 +160,10 @@ const fixtureFiles = Object.freeze({
   "KGEN-Organization/WorkOrders/WORK_QUEUE.md": "queue fixture",
   "KGEN-KAIOS/worker_registry.json": fixtureRegistry,
   "AGENTS.md": "agent fixture",
+  "docs/maps/UniverseMap_V10_2_DISTANCE_COMPLETE_ALL_POINTS.json": JSON.stringify({ point_index_sorted: [
+    { id: "P_11520p0_花果山_R70", coord: 11520, name: "花果山", type: "mountain" },
+    { id: "P_12345p0_悟空財神殿_R72", coord: 12345, name: "悟空財神殿", type: "palace" }
+  ] }),
   [WORK_ORDER_REF]: JSON.stringify({ planner_task: task, active_project: activeCompanyProject }),
   [GUARDIAN_RESOLUTION_REF]: JSON.stringify({
     status: "RESOLVED",
@@ -195,6 +206,16 @@ async function repositoryEvidenceForEnvelope(plannerTask, activeProject, actors 
     current_main_sha: MAIN_SHA,
     guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF],
     work_order_refs: [WORK_ORDER_REF],
+    fetch_impl: activeCompanyEvidenceFetch(files)
+  });
+}
+
+async function repositoryEvidenceForEnvelopes(entries, actors = [manager, worker, reviewer]) {
+  const files = { ...fixtureFiles, "KGEN-KAIOS/worker_registry.json": JSON.stringify({ workers: actors }) };
+  for (const entry of entries) files[entry.task.work_order_ref] = JSON.stringify({ planner_task: entry.task, active_project: entry.project, previous_work_orders: entry.previous_work_orders ?? [] });
+  return resolveActiveCompanyRepositoryEvidence({
+    observed_at: "2026-10-07T07:00:00Z", current_main_sha: MAIN_SHA,
+    guardian_evidence_refs: [GUARDIAN_RESOLUTION_REF], work_order_refs: entries.map((entry) => entry.task.work_order_ref),
     fetch_impl: activeCompanyEvidenceFetch(files)
   });
 }
@@ -965,7 +986,7 @@ test("repository-owned real WorkOrder envelope is detected but never pretends to
   assert.equal(result.generated_proposals, 1);
   assert.equal(result.opportunity_records[0].WORK_ID, "KAIOS-DOT-ORGAN-V1-20261007");
   assert.equal(result.status, "WATCHING"); assert.equal(result.dispatched_count, 0);
-  assert.equal(actual.manufacturing_record.seal, "INVALID"); assert.equal(actual.active_project.reviewer_id, null);
+  assert.equal(actual.organ_seal.SEAL_STATUS, "INVALID"); assert.equal(actual.manufacturing_record.INSTALLED_AT, "NOT_INSTALLED"); assert.equal(actual.active_project.reviewer_id, null);
   assert.equal(actual.superseded_status_assertions[0].actual_review, "FAIL");
   // This test exercises actual branch bytes through a fake read adapter, not a main admission.
 });
@@ -1076,4 +1097,97 @@ test("injected transport outside tests or with spoofed test env cannot mint veri
     assert.equal(child.status, 0, child.stderr);
     assert.deepEqual(JSON.parse(child.stdout), { status: "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED", provenance: "DIAGNOSTIC_CUSTOM_TRANSPORT" });
   }
+});
+
+test("dynamic priority factors are bounded and deterministically order equal severity", async () => {
+  assert.equal(DYNAMIC_COMPANY_PRIORITY_FACTORS.length, 11);
+  const low = { ...task, task_id: "SAFE-ENGINEERING-LOW", work_order_ref: WORK_ORDER_REF, branch: "chatgpt-handoff/SAFE-ENGINEERING-LOW", priority_factors: { user_impact: 1 } };
+  const high = { ...task, task_id: "SAFE-ENGINEERING-HIGH", work_order_ref: SECOND_WORK_ORDER_REF, branch: "chatgpt-handoff/SAFE-ENGINEERING-HIGH", priority_factors: { security: 5, data_loss_risk: 5 } };
+  const lowProject = { ...activeCompanyProject, task_id: low.task_id };
+  const highProject = { ...activeCompanyProject, task_id: high.task_id };
+  const evidence = await repositoryEvidenceForEnvelopes([{ task: low, project: lowProject }, { task: high, project: highProject }]);
+  const result = cycle({ work_queue: [low, high], projects: [lowProject, highProject], repository_evidence: evidence });
+  assert.equal(result.selected_task_id, high.task_id);
+  assert.ok(result.opportunity_records.find((record) => record.WORK_ID === high.task_id).PRIORITY_SCORE > result.opportunity_records.find((record) => record.WORK_ID === low.task_id).PRIORITY_SCORE);
+  const bad = { ...low, priority_factors: { constructor: 5 } };
+  const badEvidence = await repositoryEvidenceForEnvelope(bad, lowProject);
+  assert.throws(() => cycle({ work_queue: [bad], projects: [lowProject], repository_evidence: badEvidence }), error => error.code === "PRIORITY_FACTOR_UNKNOWN");
+});
+
+test("NO_GLOBAL_IDLE watches one dependency chain and advances independent ready work", async () => {
+  assert.ok(DYNAMIC_COMPANY_WAIT_STATES.includes("CI_RUNNING"));
+  const waiting = { ...task, task_id: "WAITING-P0", work_order_ref: WORK_ORDER_REF, branch: "chatgpt-handoff/WAITING-P0", priority: "P0", status: "CI_RUNNING", watcher_id: "codex-gm-01", next_check_condition: "CHECK_RUN_COMPLETED_OR_HEAD_CHANGED" };
+  const ready = { ...task, task_id: "READY-P1", work_order_ref: SECOND_WORK_ORDER_REF, branch: "chatgpt-handoff/READY-P1", priority: "P1" };
+  const waitingProject = { ...activeCompanyProject, task_id: waiting.task_id, dependencies: ["CI_RUNNING"] };
+  const readyProject = { ...activeCompanyProject, task_id: ready.task_id };
+  const evidence = await repositoryEvidenceForEnvelopes([{ task: waiting, project: waitingProject }, { task: ready, project: readyProject }]);
+  const result = cycle({ work_queue: [waiting, ready], projects: [waitingProject, readyProject], repository_evidence: evidence });
+  assert.equal(result.selected_task_id, ready.task_id);
+  assert.equal(result.no_global_idle, true);
+  assert.deepEqual(result.watching_chains, [{ work_id: waiting.task_id, watcher: "codex-gm-01", next_check_condition: "CHECK_RUN_COMPLETED_OR_HEAD_CHANGED", dependency_chain_only: true }]);
+  assert.equal(result.heartbeat_result.WATCHING, 1);
+});
+
+test("hash-verified canonical predecessor can supersede on dependency or PR evidence change", async () => {
+  const first = cycle().opportunity_records[0];
+  const durable = { ...structuredClone(first), CANONICAL_HISTORY_REF: WORK_ORDER_REF, SOURCE_COMMIT: first.SOURCE.main_sha, SOURCE_BLOB: first.SOURCE.git_object, RECORD_HASH: "b".repeat(64) };
+  const changed = { ...task, dependencies_complete: false };
+  const evidence = await repositoryEvidenceForEnvelopes([{ task: changed, project: activeCompanyProject, previous_work_orders: [durable] }]);
+  const result = cycle({ work_queue: [changed], repository_evidence: evidence });
+  const record = result.opportunity_records[0];
+  assert.equal(record.PREDECESSOR_VERIFICATION, "CANONICAL_ENVELOPE_HISTORY");
+  assert.equal(record.STATUS, "BLOCKED");
+  assert.equal(record.SUPERSEDES.WORK_ID, task.task_id);
+});
+
+test("exact-head gate can bind a hash-checked PR-head envelope without pretending main admission", async () => {
+  const plannerTask = { ...task, target_pr: 353 };
+  const content = JSON.stringify({ planner_task: plannerTask, active_project: activeCompanyProject });
+  const path = `/repos/klineodyssey/kline-odyssey/contents/${WORK_ORDER_REF}?ref=${HEAD_SHA}`;
+  const fixture = publicGitHubFixtureFetch({ [path]: { type: "file", encoding: "base64", sha: gitBlobSha(content), content: Buffer.from(content).toString("base64") } });
+  const snapshot = await readLatestRepositorySnapshot({ repository: "klineodyssey/kline-odyssey", active_task_pr: 353, observed_at: "2026-10-07T07:00:00Z", required_check_names: ["company-safe-cycle", "workflow-security"], evidence_paths: [ACTIVE_COMPANY_BOOT_SOURCE_PATHS.worker_identity_authority], pr_evidence_paths: [WORK_ORDER_REF], fetch_impl: fixture.fetch });
+  const gate = evaluateExactHeadCiGate({ repository_snapshot: snapshot, expected_main_sha: MAIN_SHA, expected_head_sha: HEAD_SHA, work_order_ref: WORK_ORDER_REF });
+  assert.equal(gate.status, "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED");
+  assert.equal(gate.branch_policy_evidence_source, "EXACT_PR_HEAD");
+  assert.equal(snapshot.files[WORK_ORDER_REF], undefined);
+});
+
+test("worker AUTO matching is deterministic and remains fail-closed without a qualified reviewer", async () => {
+  const qualified = { ...worker, capabilities: ["CODE"], authority_scope: task.authorized_actions, current_load: 0, past_performance: 5 };
+  const busy = { ...worker, worker_id: "chatgpt-02", life_identity_ref: "LIFE-CHATGPT-0002", controller_id: "TEST-CONTROLLER-CHATGPT-2", capabilities: ["CODE"], authority_scope: task.authorized_actions, current_load: 1, past_performance: 5 };
+  const qualifiedReviewer = { ...reviewer, review_qualification: true, current_load: 0, past_performance: 5 };
+  const autoTask = { ...task, assigned_worker_id: "AUTO", reviewer_id: "AUTO", branch: "chatgpt-handoff/SAFE-ENGINEERING-001" };
+  const autoProject = { ...activeCompanyProject, implementer_id: "AUTO", reviewer_id: "AUTO" };
+  const evidence = await repositoryEvidenceForEnvelope(autoTask, autoProject, [manager, qualified, busy, qualifiedReviewer]);
+  const result = cycle({ work_queue: [autoTask], projects: [autoProject], workers: [manager, qualified, busy, qualifiedReviewer], repository_evidence: evidence });
+  assert.equal(result.selected_worker_id, qualified.worker_id);
+  assert.equal(result.selected_reviewer_id, qualifiedReviewer.worker_id);
+  const noReviewerEvidence = await repositoryEvidenceForEnvelope(autoTask, autoProject, [manager, qualified]);
+  const held = cycle({ work_queue: [autoTask], projects: [autoProject], workers: [manager, qualified], repository_evidence: noReviewerEvidence });
+  assert.equal(held.status, "WATCHING");
+  assert.ok(held.rejected_candidates[0].reasons.includes("DISTINCT_REVIEWER_REQUIRED"));
+});
+
+test("cargo resolver uses canonical map IDs and computed capacity without moving assets", async () => {
+  const cargoTask = { ...task, work_type: "KGEN_CARGO", cargo_request: { asset: "KGEN", amount: 2, origin_point_id: "P_11520p0_花果山_R70", destination_candidates: [{ point_id: "P_12345p0_悟空財神殿_R72", need_score: 90 }], capacity_metrics: { ability: 5, reliability: 5, performance: 5, completion_history: 5, risk_tier: "LOW" }, rights_verified: true } };
+  const result = cycle({ work_queue: [cargoTask], repository_evidence: await repositoryEvidenceForEnvelope(cargoTask, activeCompanyProject) });
+  const cargo = result.opportunity_records[0];
+  assert.equal(cargo.CARGO_REQUIRED, "YES"); assert.equal(cargo.CARGO_CAPACITY, 5);
+  assert.equal(cargo.DESTINATION.point_id, "P_12345p0_悟空財神殿_R72");
+  assert.equal(result.authority.mainnet_tx_sent, false);
+  const invalid = { ...cargoTask, cargo_request: { ...cargoTask.cargo_request, destination_candidates: [{ point_id: "P_FAKE", need_score: 100 }] } };
+  const held = cycle({ work_queue: [invalid], repository_evidence: await repositoryEvidenceForEnvelope(invalid, activeCompanyProject) });
+  assert.ok(held.opportunity_records[0].BLOCKERS.includes("CARGO_POLICY_CAPACITY_RIGHTS_UNVERIFIED"));
+  assert.equal(cycle().opportunity_records[0].CARGO_REQUIRED, "NO");
+});
+
+test("manufacturing inspection maintenance seal and rollback gates remain truthful", () => {
+  const manufacturing = cycle().manufacture;
+  assert.equal(validateDotOrganManufacturingRecord(manufacturing), manufacturing);
+  const checks = Object.fromEntries(["heartbeat_input", "breath_input", "boot_read", "github_access", "queue_access", "worker_registry", "direct_channels", "priority_engine", "work_order_generator", "dedup_engine", "stale_engine", "dispatch_engine", "review_router", "cargo_resolver", "universe_destination_resolver", "payroll_handoff", "guardian_logging"].map((field) => [field, "PASS"]));
+  const inspection = inspectDotOrganCandidate({ manufacturing_record: manufacturing, main_sha: MAIN_SHA, observed_at: "2026-10-07T08:00:00Z", checks });
+  assert.equal(inspection.REPAIR_REQUIRED, false); assert.equal(inspection.SIGNATURES.independent_inspector, "NOT_VERIFIED");
+  assert.equal(createDotOrganMaintenanceRecord({ issue: "QUEUE_DRIFT", observed_at: "2026-10-07T08:00:00Z" }).ORGAN_STATUS, "DEGRADED");
+  assert.equal(evaluateDotOrganSeal({ manufacturing_record: manufacturing, inspection_record: inspection, exact_head_ci: "PASS", independent_review: "PASS", gm_ack: "SIGNED" }).status, "INVALID");
+  assert.deepEqual(evaluateDotDispatchSafety({ data_loss: true }), { ORGAN_STATUS: "DEGRADED", STOP_NEW_DISPATCH: true, ROLLBACK_REQUIRED: true, ESCALATE_GM: true, TRIGGERS: ["DATA_LOSS"] });
 });
