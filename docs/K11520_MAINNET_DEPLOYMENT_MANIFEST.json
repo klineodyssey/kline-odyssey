@@ -1,6 +1,66 @@
 {
   "documentType": "K11520_MAINNET_DEPLOYMENT_MANIFEST",
   "status": "BLOCKED_NOT_EXECUTABLE",
+  "productDecision20261007": {
+    "authority": "Human BSC56_ONLY_FOR_K11520_REAL_TRADING, 2026-10-07T03:32:30Z",
+    "productNetwork": "BNB Smart Chain Mainnet",
+    "chainId": 56,
+    "precedence": "Current product direction: supersedes all historical requirements for new BSC97 development, trading features, rehearsal milestones or Testnet product-completion gates. Historical tests and receipts remain preserved. Existing productV1Decision20260930 (maximum magnitude 1C, zero trading fee, no required paid Data Streams) and active USD INDEX trading Canon remain in force.",
+    "bsc97NewProductDevelopment": "STOP",
+    "bsc97NewTradingFeatures": "STOP",
+    "bsc97NewRehearsalMilestones": "STOP",
+    "bsc97AsProductCompletionGate": "FORBIDDEN",
+    "preserveBsc97HistoricalEvidence": true,
+    "authorizedEngineering": [
+      "contract implementation",
+      "wallet integration",
+      "contract integration",
+      "unsigned transaction construction",
+      "signing UX construction",
+      "receipt handling",
+      "deterministic local tests",
+      "security review",
+      "accounting invariants",
+      "deployment package",
+      "production QA preparation"
+    ],
+    "buildDoesNotRequireLiveExecutionApproval": true,
+    "productionGapMatrix": "docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md",
+    "auditedMain": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
+    "kaiosTradingSemantics": "KAIOS_TRADING_SEMANTICS_CANON_GAP",
+    "candidateProductionDeployment": "NOT_DEPLOYED",
+    "firstIrreversibleAction": {
+      "confirmation": "Human / wallet owner confirms in wallet interface",
+      "requiredDisplay": [
+        "CHAIN",
+        "WALLET",
+        "CONTRACT",
+        "FUNCTION",
+        "TOKEN",
+        "AMOUNT",
+        "EXPECTED_EFFECT",
+        "MAXIMUM_EXPOSURE"
+      ],
+      "assistantBroadcast": false
+    },
+    "liveActionsPerformed": false,
+    "privateKeysOrSeedsAccessed": false,
+    "treasuryActionsPerformed": false,
+    "nextSequence": [
+      "contract implementation",
+      "deterministic/local tests",
+      "security review",
+      "accounting invariants",
+      "deployment package",
+      "BSC56 deployment gate"
+    ],
+    "protectedWorklines": [
+      "#519 simulation playability",
+      "#522 feedback and market-card refresh",
+      "#523 Navigator"
+    ],
+    "checkpoint": "First matrix and bounded design; no runtime change or fresh product QA claim"
+  },
   "productV1Decision20260930": {
     "status": "PRODUCT_CANDIDATE_NOT_MAINNET_AUTHORIZATION",
     "precedence": "V1 free-reference journey/product scope supersedes paid Data Streams and 100C launch target below. Historical evidence and unsigned envelopes are retained, not executable approval.",
@@ -36,11 +96,33 @@
       "openzeppelinUpgradeable": "5.0.2",
       "compileAndBytecodeMatch": "PASS",
       "storageLayout": "EXPORTED; fresh candidate stack, no upgrade of existing proxy",
-      "eip170RuntimeBytes": {"brain": 21523, "position": 20795, "trigger": 6730},
+      "eip170RuntimeBytes": {
+        "brain": 21523,
+        "position": 20795,
+        "trigger": 6730
+      },
       "unsignedBuilderRegression": "PASS_SYNTHETIC_ONLY",
       "localForkNonOracleGasUsed": "12191298",
-      "tests": ["Four exact candidate contracts deployed on local fork", "Actual deployed Governance code and role readbacks", "Distinct proposer/approver", "Early execute rejected", "Governance replay rejected", "Position executor is Trigger", "Brain SETTLEMENT_ROLE is Position, not EOA", "No Brain payroll keeper", "Brain/Position/Trigger paused", "Allowance reset/exact25M/revoke", "Actual local token deltas20M/5M", "Player principal and claimable remain zero"],
-      "artifactPaths": ["artifacts/mainnet-preflight-20260930/nonoracle-readback.json", "artifacts/mainnet-preflight-20260930/nonoracle-package.json", "artifacts/mainnet-preflight-20260930/storage-layout.json", "artifacts/mainnet-unsigned/build.json"],
+      "tests": [
+        "Four exact candidate contracts deployed on local fork",
+        "Actual deployed Governance code and role readbacks",
+        "Distinct proposer/approver",
+        "Early execute rejected",
+        "Governance replay rejected",
+        "Position executor is Trigger",
+        "Brain SETTLEMENT_ROLE is Position, not EOA",
+        "No Brain payroll keeper",
+        "Brain/Position/Trigger paused",
+        "Allowance reset/exact25M/revoke",
+        "Actual local token deltas20M/5M",
+        "Player principal and claimable remain zero"
+      ],
+      "artifactPaths": [
+        "artifacts/mainnet-preflight-20260930/nonoracle-readback.json",
+        "artifacts/mainnet-preflight-20260930/nonoracle-package.json",
+        "artifacts/mainnet-preflight-20260930/storage-layout.json",
+        "artifacts/mainnet-unsigned/build.json"
+      ],
       "interpretation": "Fork account impersonation is local testing only, not access to real signer secrets, signature approval, public receipts or evidence of authorized real writes. Artifacts are in the local offline backup, not hosted at these GitHub paths."
     },
     "publicReadback": {
@@ -86,7 +168,10 @@
       "insuranceReserveKgen": "5000000",
       "maximumTotalKgen": "25000000",
       "transferApproved": false,
-      "fundingMethods": ["fundSettlementCapital", "fundInsurance"],
+      "fundingMethods": [
+        "fundSettlementCapital",
+        "fundInsurance"
+      ],
       "playerDepositForbidden": true,
       "accounting": "Credit only actual token balance delta; require expected20M/5M readbacks. No automatic tax gross-up beyond25M. No Player Principal/Claimable offset. Capital admission remains mandatory; finite capital does not guarantee unlimited gaps.",
       "allowance": "reset0 -> exact25M -> separate20M/5M funding -> revoke0; not unlimited allowance",
@@ -122,7 +207,12 @@
       "verify": "pwsh -File artifacts/verify-offline.ps1 -ArchivePath <explicit-artifacts-zip>",
       "contents": "Allowlisted tracked source, ABI/compiler standard input, pinned solc WASM/licenses, source hashes, storage layout, read-only/fork evidence, unsigned calldata and governance envelopes. Never env/signers/Gmail/provider secrets.",
       "status": "LOCAL_ARCHIVE_HASHES_AND_OFFLINE_BYTECODE_PASS; final archived commit/digest recorded in PR closeout; regenerate after Oracle integration",
-      "verifiedSnapshot": {"commit":"443b2b16de4b93161cb1b6789db178a6002a7a82","files":526,"archiveSha256":"8c785f8b359b4222858face73f0e19c183a3dba6718778a26eb6977f14605b5d","offlineRecompilation":"PASS_BYTECODE_MATCH"}
+      "verifiedSnapshot": {
+        "commit": "443b2b16de4b93161cb1b6789db178a6002a7a82",
+        "files": 526,
+        "archiveSha256": "8c785f8b359b4222858face73f0e19c183a3dba6718778a26eb6977f14605b5d",
+        "offlineRecompilation": "PASS_BYTECODE_MATCH"
+      }
     },
     "remainingEngineeringDependency": "Production Oracle entitlement/credentials, authenticated observations, signed-report adapter integration, time alignment/independence/100C capability and Oracle-dependent full gas/transaction envelope",
     "notAnEngineeringWaiver": "ORACLE_ONLY_BLOCKED describes the prepared non-Oracle candidate, not signature readiness. Final role/cap approval, safe signer access, fresh nonces/readbacks, full exact-head CI and Human Mainnet execution approval remain mandatory.",
@@ -145,7 +235,11 @@
       "priceSelection": "One authenticated Chainlink execution observation, independently validated by time-aligned source evidence; no arithmetic averaging of asynchronous prices",
       "quorum": "Retain at least 2-of-3 independent providers and mandatory primary; stricter safety veto/third-source availability policy must be tested and pinned before activation. No silent provider failover.",
       "settlementIndex": "USD_INDEX",
-      "symbols": ["BTC/USD INDEX", "ETH/USD INDEX", "BNB/USD INDEX"],
+      "symbols": [
+        "BTC/USD INDEX",
+        "ETH/USD INDEX",
+        "BNB/USD INDEX"
+      ],
       "usdUsdtParityAssumed": false,
       "basisSource": null,
       "basisPolicy": "No conversion in USD-index settlement. USDT browser quotes are display-only and cannot enter settlement. Any later conversion requires a separately validated basis policy.",
@@ -163,7 +257,11 @@
         "BNB": "0x000335fd3f3ffa06cfd9297b97367f77145d7a5f132e84c736cc471dd98621fe"
       },
       "catalogStatus": "All three live/mainnet/V3; public metadata is not subscription entitlement",
-      "catalogPriceDecimals": {"BTC":18,"ETH":18,"BNB":18},
+      "catalogPriceDecimals": {
+        "BTC": 18,
+        "ETH": 18,
+        "BNB": 18
+      },
       "decimalEvidence": "Official crypto-streams page embedded per-feed metadata; must recheck against authenticated report decode",
       "bsc56VerifierProxy": "0xF276a4BC8Da323EA3E8c3c195a4E2E7615a898d1",
       "credentials": "Self-serve app.chain.link account, entitled feed subscription, API key and HMAC secret held server-side only",
@@ -171,7 +269,14 @@
       "billing": "Subscription; legacy pay-per-verification deprecated. No current total dollar quote obtained. BSC gas remains additional.",
       "timing": "Sub-second delivery positioning is not measured latency. V3 validFromTimestamp/observationsTimestamp/expiresAt use seconds; assess this timestamp granularity explicitly at 100C.",
       "precision": "18-decimal representation is not 18-decimal accuracy; liquidity-weighted bid/ask is not a statistical confidence guarantee",
-      "failureModes": ["Authentication/subscription failure", "Expired or replayed report", "Wrong feed/schema", "Invalid signature/verifier", "Timestamp skew", "Source outage or correlated upstream data"],
+      "failureModes": [
+        "Authentication/subscription failure",
+        "Expired or replayed report",
+        "Wrong feed/schema",
+        "Invalid signature/verifier",
+        "Timestamp skew",
+        "Source outage or correlated upstream data"
+      ],
       "sources": [
         "https://docs.chain.link/data-streams/reference/data-streams-api/discovery-endpoint",
         "https://docs.chain.link/data-streams/crypto-streams",
@@ -187,20 +292,63 @@
       "product": "Pyth Pro / Lazer, not Pyth Core",
       "symbology": "https://pyth.dourolabs.app/v1/symbols",
       "feeds": {
-        "BTC": {"id":1,"symbol":"Crypto.BTC/USD","exponent":-8,"minPublishers":3,"minChannel":"real_time","state":"stable"},
-        "ETH": {"id":2,"symbol":"Crypto.ETH/USD","exponent":-8,"minPublishers":3,"minChannel":"real_time","state":"stable"},
-        "BNB": {"id":15,"symbol":"Crypto.BNB/USD","exponent":-8,"minPublishers":3,"minChannel":"real_time","state":"stable"}
+        "BTC": {
+          "id": 1,
+          "symbol": "Crypto.BTC/USD",
+          "exponent": -8,
+          "minPublishers": 3,
+          "minChannel": "real_time",
+          "state": "stable"
+        },
+        "ETH": {
+          "id": 2,
+          "symbol": "Crypto.ETH/USD",
+          "exponent": -8,
+          "minPublishers": 3,
+          "minChannel": "real_time",
+          "state": "stable"
+        },
+        "BNB": {
+          "id": 15,
+          "symbol": "Crypto.BNB/USD",
+          "exponent": -8,
+          "minPublishers": 3,
+          "minChannel": "real_time",
+          "state": "stable"
+        }
       },
-      "channels": ["real_time","fixed_rate@1ms","fixed_rate@50ms","fixed_rate@200ms","fixed_rate@1000ms"],
-      "wsEndpoints": ["wss://pyth-lazer-0.dourolabs.app/v1/stream","wss://pyth-lazer-1.dourolabs.app/v1/stream","wss://pyth-lazer-2.dourolabs.app/v1/stream"],
+      "channels": [
+        "real_time",
+        "fixed_rate@1ms",
+        "fixed_rate@50ms",
+        "fixed_rate@200ms",
+        "fixed_rate@1000ms"
+      ],
+      "wsEndpoints": [
+        "wss://pyth-lazer-0.dourolabs.app/v1/stream",
+        "wss://pyth-lazer-1.dourolabs.app/v1/stream",
+        "wss://pyth-lazer-2.dourolabs.app/v1/stream"
+      ],
       "credentials": "Douro/Pyth API plan and Bearer key; confirm non-display derivatives and onchain signed-payload rights, symbol/channel entitlement and redistribution before purchase",
       "bsc56Verifier": "0xACeA761c27A909d4D3895128EBe6370FDE2dF481",
       "verification": "EVM signed payload via PythLazer verifyUpdate; read verification_fee immediately before constructing capped calldata; unsigned JSON/leUnsigned is not settlement evidence",
       "timing": "Documented real_time delivery interval 1-50ms; fixed channels per subscription. Measure per-feed feedUpdateTimestamp separately from envelope timestampUs; delivery cadence is not guaranteed observation freshness or BSC inclusion latency.",
       "precision": "Exponent -8 from live symbology; not a proof of accuracy. Per-feed timestamp and bid/ask availability must be verified with signed payloads.",
-      "pricingUsdMonthly": {"starter":500,"proStartingAt":2500,"taxIncluded":false},
+      "pricingUsdMonthly": {
+        "starter": 500,
+        "proStartingAt": 2500,
+        "taxIncluded": false
+      },
       "pricingScope": "Starter publicly lists up-to-1-second, display-only/no redistribution. Pro lists up-to-1ms and non-display rights. Starting price is not a binding quote for this integration.",
-      "failureModes": ["Unauthorized channel", "Stale carried-forward feed", "Wrong numeric feed ID", "Invalid signature", "Timestamp replay/skew", "Fee change", "Publisher common-mode outage"],
+      "failureModes": [
+        "Unauthorized channel",
+        "Stale carried-forward feed",
+        "Wrong numeric feed ID",
+        "Invalid signature",
+        "Timestamp replay/skew",
+        "Fee change",
+        "Publisher common-mode outage"
+      ],
       "sources": [
         "https://docs.pyth.network/price-feeds/pro/price-feed-ids",
         "https://docs.pyth.network/price-feeds/pro/subscribe-to-prices",
@@ -212,7 +360,11 @@
     "redstone": {
       "product": "Production Pull; not Push or Live",
       "dataService": "redstone-primary-prod",
-      "requestedDataPackageIds": ["BTC","ETH","BNB"],
+      "requestedDataPackageIds": [
+        "BTC",
+        "ETH",
+        "BNB"
+      ],
       "coverageStatus": "Specific production package coverage, precision, timing and BSC56 license still require provider confirmation and authenticated payloads; public linked catalog redirected to Push, which is not proof of Pull coverage",
       "verification": "Consumer extracts appended signed packages, verifies authorized signer set and unique-signature threshold; not a universal BSC feed contract address",
       "referenceSourceCommit": "5280f657637eaa8e7fcfba6fcf51ae7a0ff15e93",
@@ -222,7 +374,15 @@
       "license": "Reference consumer SPDX BUSL-1.1; confirm applicable production use/license before incorporating source; no source copied in this change",
       "access": "Provider-issued authenticated gateway pairs and x-api-key; server-side proxy/relayer required for public frontend",
       "documentedGatewayLimit": "1 request/second per key; does not establish source update latency. Do not bypass rate limits or assume this supports sub-second three-provider validation.",
-      "pending": ["Production BTC/ETH/BNB IDs and decimals", "Signed timestamp units/update cadence", "Signer rotation policy", "BSC56 consumer integration approval", "Underlying source overlap", "SLA", "Commercial quote and rights"],
+      "pending": [
+        "Production BTC/ETH/BNB IDs and decimals",
+        "Signed timestamp units/update cadence",
+        "Signer rotation policy",
+        "BSC56 consumer integration approval",
+        "Underlying source overlap",
+        "SLA",
+        "Commercial quote and rights"
+      ],
       "sources": [
         "https://docs.redstone.finance/docs/stage1-market-data/price-feeds/pull-model/",
         "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/5280f657637eaa8e7fcfba6fcf51ae7a0ff15e93/packages/evm-connector/contracts/data-services/PrimaryProdDataServiceConsumerBase.sol",
@@ -230,28 +390,38 @@
       ]
     },
     "readOnlyChainEvidence": {
-      "chainId":56,"block":124859099,"timestamp":1790749029,
-      "chainlinkProxyCodeBytes":7009,
-      "chainlinkProxyCodeHash":"0x4bd86e898b2952f6f0d20fee037accf52490dbdd9279345cd4b0a7161b5c022b",
-      "pythVerifierCodeBytes":183,
-      "pythVerifierCodeHash":"0xef41b6fae0a92ef125e99f23cab7dd4bbd4a29d9a16e6de418dd5851bb03b77e",
-      "pythVerificationFeeWei":"1",
-      "limits":"Code existence and fee getter only; no signed-report verification, implementation audit, latency certification or deployment readiness claim",
-      "transactionsSent":0
+      "chainId": 56,
+      "block": 124859099,
+      "timestamp": 1790749029,
+      "chainlinkProxyCodeBytes": 7009,
+      "chainlinkProxyCodeHash": "0x4bd86e898b2952f6f0d20fee037accf52490dbdd9279345cd4b0a7161b5c022b",
+      "pythVerifierCodeBytes": 183,
+      "pythVerifierCodeHash": "0xef41b6fae0a92ef125e99f23cab7dd4bbd4a29d9a16e6de418dd5851bb03b77e",
+      "pythVerificationFeeWei": "1",
+      "limits": "Code existence and fee getter only; no signed-report verification, implementation audit, latency certification or deployment readiness claim",
+      "transactionsSent": 0
     },
     "independence": {
-      "status":"NOT_VERIFIED",
-      "required":"Per-asset underlying exchange/publisher overlap, aggregation weights, operator ownership, delivery infrastructure and outage correlation; three brands or multiple signers do not prove independent observations",
-      "comparison":"Chainlink DON/report providers, Pyth publishers and RedStone signers are different verification models; internal provider quorum is not the K11520 cross-provider quorum"
+      "status": "NOT_VERIFIED",
+      "required": "Per-asset underlying exchange/publisher overlap, aggregation weights, operator ownership, delivery infrastructure and outage correlation; three brands or multiple signers do not prove independent observations",
+      "comparison": "Chainlink DON/report providers, Pyth publishers and RedStone signers are different verification models; internal provider quorum is not the K11520 cross-provider quorum"
     },
     "budgetAndHumanAccess": {
-      "minimumKnownSubscriptionFloorUsdMonthly":2500,
-      "allInMonthlyBudgetUsd":null,
-      "formula":"Confirmed Pyth Pro quote + Chainlink three-stream subscription + RedStone Pull quote + secure relayer/RPC/monitoring + BSC verification gas + tax",
-      "notClaimed":"USD 2500 is a published starting floor, not a sufficient all-in budget or guaranteed 100C service",
-      "proposedApprovalLimits":{"pythFirstMonthBaseUsd":2500,"pythTaxCapUsd":null,"chainlinkUsd":null,"redstoneUsd":null,"infrastructureUsd":null,"automaticOverageUsd":0,"annualCommitmentAllowed":false},
-      "proposalOnly":"Human must approve actual quotes, tax and aggregate ceiling before any purchase. Null caps prohibit spend. No subscription ordered.",
-      "humanActions":[
+      "minimumKnownSubscriptionFloorUsdMonthly": 2500,
+      "allInMonthlyBudgetUsd": null,
+      "formula": "Confirmed Pyth Pro quote + Chainlink three-stream subscription + RedStone Pull quote + secure relayer/RPC/monitoring + BSC verification gas + tax",
+      "notClaimed": "USD 2500 is a published starting floor, not a sufficient all-in budget or guaranteed 100C service",
+      "proposedApprovalLimits": {
+        "pythFirstMonthBaseUsd": 2500,
+        "pythTaxCapUsd": null,
+        "chainlinkUsd": null,
+        "redstoneUsd": null,
+        "infrastructureUsd": null,
+        "automaticOverageUsd": 0,
+        "annualCommitmentAllowed": false
+      },
+      "proposalOnly": "Human must approve actual quotes, tax and aggregate ceiling before any purchase. Null caps prohibit spend. No subscription ordered.",
+      "humanActions": [
         "Chainlink account: obtain BTC/ETH/BNB V3 subscriptions, BSC56 verifier entitlement, allowed report rate and quote; approve exact one-month spend cap",
         "Pyth/Douro account: obtain Pro quote for IDs 1/2/15, real_time and EVM signed payload, non-display derivatives/limited public display rights; approve actual one-month cap",
         "RedStone production access form: request BTC/ETH/BNB Pull packages, gateway pairs, BSC56 verification/precision/SLA/source provenance and quote; approve exact cap",
@@ -260,16 +430,16 @@
       ]
     },
     "liveEvidenceAcceptancePlan": {
-      "status":"NOT_RUN_NO_AUTHENTICATED_PROVIDER_ACCESS_USED",
-      "capture":"After access: collect synchronized signed reports for all assets, provider/feed/config IDs, per-feed observation times, local monotonic receive time, UTC clock error, expiry, verified sequence and payload hashes; preserve licensed payloads privately if redistribution disallowed",
-      "measure":"p50/p95/p99/max source-to-receive and receive-to-BSC-verification age, inter-provider skew, bid/ask/dispersion and missing/stale rates across normal and volatile periods; report sample duration and gaps without treating a finite sample as guarantee",
-      "verify":"Read-only eth_call/fork verification against pinned chain56 contracts, wrong-feed/signature/replay/expired/future/out-of-order cases, scale decoding and provider-specific round completeness",
-      "risk":"Translate observed index error and delay into C*lots PnL exposure using current model; retain zero new-risk capability until justified bounded tolerances and adversarial tests pass. RedStone rate limitations cannot be solved by relaxing freshness.",
-      "finalize":"Implement and test reviewed signed-report adapters, primary selection, cross-source safety and exit paths; bind evidence/config/source hashes to fresh main, then regenerate exact-head manifest. Mainnet approval remains separate."
+      "status": "NOT_RUN_NO_AUTHENTICATED_PROVIDER_ACCESS_USED",
+      "capture": "After access: collect synchronized signed reports for all assets, provider/feed/config IDs, per-feed observation times, local monotonic receive time, UTC clock error, expiry, verified sequence and payload hashes; preserve licensed payloads privately if redistribution disallowed",
+      "measure": "p50/p95/p99/max source-to-receive and receive-to-BSC-verification age, inter-provider skew, bid/ask/dispersion and missing/stale rates across normal and volatile periods; report sample duration and gaps without treating a finite sample as guarantee",
+      "verify": "Read-only eth_call/fork verification against pinned chain56 contracts, wrong-feed/signature/replay/expired/future/out-of-order cases, scale decoding and provider-specific round completeness",
+      "risk": "Translate observed index error and delay into C*lots PnL exposure using current model; retain zero new-risk capability until justified bounded tolerances and adversarial tests pass. RedStone rate limitations cannot be solved by relaxing freshness.",
+      "finalize": "Implement and test reviewed signed-report adapters, primary selection, cross-source safety and exit paths; bind evidence/config/source hashes to fresh main, then regenerate exact-head manifest. Mainnet approval remains separate."
     },
-    "mainnetExecutionReady":false,
-    "mainnetBroadcastApproved":false,
-    "productionOracleReady":false
+    "mainnetExecutionReady": false,
+    "mainnetBroadcastApproved": false,
+    "productionOracleReady": false
   },
   "p0Resolution20260930": {
     "authority": "Human KAIOS_K11520_P0_BLOCKER_RESOLUTION_DECISION_V1",
@@ -285,39 +455,119 @@
     "liabilityPolicy": "Gross reserve remains admission-envelope based, NOT a maximum payout. Additional actual profit remains owed; unpaid amount uses existing PlayerClaimable. Principal and Insurance remain isolated.",
     "oracleCapability": {
       "contractMethod": "configureTradingCapability(uint8,(uint256,uint64,uint32,uint32,uint256,bytes32))",
-      "markets": ["KX", "KY", "KZ"],
+      "markets": [
+        "KX",
+        "KY",
+        "KZ"
+      ],
       "state": "NO_NEW_RISK",
-      "tuple": {"maxCWad":"0","validUntil":"0","maxAge":0,"maxTimeSkew":0,"maxSpreadWad":"0","evidenceHash":"0x0000000000000000000000000000000000000000000000000000000000000000"},
+      "tuple": {
+        "maxCWad": "0",
+        "validUntil": "0",
+        "maxAge": 0,
+        "maxTimeSkew": 0,
+        "maxSpreadWad": "0",
+        "evidenceHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
       "meaning": "Executable fail-closed configuration tuple, not verified live trading capability or authorization to submit it",
       "scope": "Applies to order creation, pending fill, C entry and legacy size entry; not to existing valid exits",
-      "activationRequirements": ["Verified independent source sets", "Latency, precision/confidence and adversarial-selection evidence at proposed C", "Source/config-bound evidence digest and expiry", "Strict admission age/spread/time-skew thresholds", "Exact-head configuration review and Human Mainnet approval"],
+      "activationRequirements": [
+        "Verified independent source sets",
+        "Latency, precision/confidence and adversarial-selection evidence at proposed C",
+        "Source/config-bound evidence digest and expiry",
+        "Strict admission age/spread/time-skew thresholds",
+        "Exact-head configuration review and Human Mainnet approval"
+      ],
       "sourceOrRiskReconfiguration": "Invalidates capability; must re-attest",
       "exitSafety": "Original source authentication, quorum, freshness, complete rounds, timestamp/sequence and deviation remain mandatory"
     },
-    "quotePolicy": {"settlement":"USD_INDEX","symbols":["BTC/USD INDEX","ETH/USD INDEX","BNB/USD INDEX"],"basisSource":null,"implicitUsdUsdtParity":false,"liveUiActivated":false},
-    "capitalCandidateKgen": {"settlementCapital":"20000000","insurance":"5000000","total":"25000000","transferApproved":false},
+    "quotePolicy": {
+      "settlement": "USD_INDEX",
+      "symbols": [
+        "BTC/USD INDEX",
+        "ETH/USD INDEX",
+        "BNB/USD INDEX"
+      ],
+      "basisSource": null,
+      "implicitUsdUsdtParity": false,
+      "liveUiActivated": false
+    },
+    "capitalCandidateKgen": {
+      "settlementCapital": "20000000",
+      "insurance": "5000000",
+      "total": "25000000",
+      "transferApproved": false
+    },
     "sourceResearch": {
-      "observedBlocks": [124819171,124819219,124819267],
-      "observationTimestamps": [1790731054,1790731076,1790731098],
+      "observedBlocks": [
+        124819171,
+        124819219,
+        124819267
+      ],
+      "observationTimestamps": [
+        1790731054,
+        1790731076,
+        1790731098
+      ],
       "localRawEvidence": "artifacts/oracle-quality-observations.json",
       "rawEvidenceSha256": "6bf2cb31a6eed7bcd7d2dcd455dae445b603ec46733cbf2ac4dca3a93c550f33",
-      "chainlinkDecimals":8,"redstoneDecimals":8,
-      "chainlinkAgeRangesSeconds":{"BTC":[12,55],"ETH":[0,44],"BNB":[7,28]},
-      "redstoneAgeRangesSeconds":{"BTC":[15,59],"ETH":[3990,4034],"BNB":[15,59]},
-      "configuredPythBtcAgeRangeSeconds":[391137,391181],
-      "configuredPythBtcConfidenceUsd":"13.73771843",
-      "btcCrossSourceSpreadsUsd":["11.14464833","16.52947365","16.52947365"],
-      "interpretation":"Observed update age and spread, not a certified latency bound or accuracy guarantee. Provider-level identities differ; actual upstream independence not established. Do not infer all Pyth services are stale from this configured core.",
-      "officialSources":["https://docs.chain.link/data-feeds/overview","https://docs.chain.link/data-streams/overview","https://docs.chain.link/data-streams/tutorials/ts-sdk-fetch","https://docs.pyth.network/price-feeds/core/best-practices","https://docs.redstone.finance/"],
-      "researchConclusion":"Push feeds are not streaming guarantees; pull feeds require authenticated update verification and latency/adversarial-selection defenses. Pyth confidence is an uncertainty indicator, not zero error. Short read-only samples and three provider names cannot certify a safe nonzero C.",
-      "productionCapabilityVerified":false
+      "chainlinkDecimals": 8,
+      "redstoneDecimals": 8,
+      "chainlinkAgeRangesSeconds": {
+        "BTC": [
+          12,
+          55
+        ],
+        "ETH": [
+          0,
+          44
+        ],
+        "BNB": [
+          7,
+          28
+        ]
+      },
+      "redstoneAgeRangesSeconds": {
+        "BTC": [
+          15,
+          59
+        ],
+        "ETH": [
+          3990,
+          4034
+        ],
+        "BNB": [
+          15,
+          59
+        ]
+      },
+      "configuredPythBtcAgeRangeSeconds": [
+        391137,
+        391181
+      ],
+      "configuredPythBtcConfidenceUsd": "13.73771843",
+      "btcCrossSourceSpreadsUsd": [
+        "11.14464833",
+        "16.52947365",
+        "16.52947365"
+      ],
+      "interpretation": "Observed update age and spread, not a certified latency bound or accuracy guarantee. Provider-level identities differ; actual upstream independence not established. Do not infer all Pyth services are stale from this configured core.",
+      "officialSources": [
+        "https://docs.chain.link/data-feeds/overview",
+        "https://docs.chain.link/data-streams/overview",
+        "https://docs.chain.link/data-streams/tutorials/ts-sdk-fetch",
+        "https://docs.pyth.network/price-feeds/core/best-practices",
+        "https://docs.redstone.finance/"
+      ],
+      "researchConclusion": "Push feeds are not streaming guarantees; pull feeds require authenticated update verification and latency/adversarial-selection defenses. Pyth confidence is an uncertainty indicator, not zero error. Short read-only samples and three provider names cannot certify a safe nonzero C.",
+      "productionCapabilityVerified": false
     },
-    "knownRemainingBlocker":"PRODUCTION_ORACLE_CAPABILITY_NOT_VERIFIED; executable no-new-risk config is available, real-trading execution manifest is not READY",
-    "deploymentState":"SOURCE_CANDIDATE_ONLY_NOT_PUBLICLY_DEPLOYED",
-    "mainnetBroadcastApproved":false,
-    "mainnetBroadcasts":0,
-    "realKgenTransferred":"0",
-    "olderSections":"Retained cumulative lineage; this range/quote/capability decision supersedes earlier range-exit and USD/USDT unresolved policy wording, not historical receipts"
+    "knownRemainingBlocker": "PRODUCTION_ORACLE_CAPABILITY_NOT_VERIFIED; executable no-new-risk config is available, real-trading execution manifest is not READY",
+    "deploymentState": "SOURCE_CANDIDATE_ONLY_NOT_PUBLICLY_DEPLOYED",
+    "mainnetBroadcastApproved": false,
+    "mainnetBroadcasts": 0,
+    "realKgenTransferred": "0",
+    "olderSections": "Retained cumulative lineage; this range/quote/capability decision supersedes earlier range-exit and USD/USDT unresolved policy wording, not historical receipts"
   },
   "capitalCandidate": {
     "date": "2026-09-29",
@@ -521,7 +771,10 @@
     "candidateOracleAdapter": {
       "source": "KGEN/contracts/KGEN_OracleSourceAdapter.sol",
       "status": "LOCAL_EVM_PASS_NOT_DEPLOYED_NOT_PROVIDER_APPROVAL",
-      "modes": ["TIMESTAMP_AGGREGATOR", "PYTH"],
+      "modes": [
+        "TIMESTAMP_AGGREGATOR",
+        "PYTH"
+      ],
       "policy": "Immutable explicit source/feedId/decimals/maxAge/confidence; exact WAD scaling; raw confidence before scaling; source publishTime identity; existing Position same-time mutation and rollback protection unchanged",
       "quotePolicy": "Preserves source denomination. USD feeds remain USD. No USD/USDT conversion or depeg policy invented.",
       "apiProvenance": "https://api-reference.pyth.network/price-feeds/evm/getPriceNoOlderThan",

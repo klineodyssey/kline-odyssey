@@ -6,6 +6,14 @@ Last optimized: 2026-06-11
 
 # KLINE ODYSSEY
 
+## K11520 BSC56-only production direction (2026-10-07)
+
+- `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md`: source-pinned production gaps, read-only BSC56 evidence and bounded existing-organ implementation design.
+- `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json`: cumulative Human BSC56-only build direction; wallet-owner execution remains a separate gate.
+
+BSC97 new development and rehearsal milestones stop. Historical tests/receipts remain; BSC97 is not a production completion gate. Existing V1 1C launch ceiling and simulation playability remain. Boot CURRENT and Physics are unchanged.
+
+
 ### KAIOS Backend / Recovery V1 review candidate
 
 Portable authenticated Player Life sync, immutable backups and a Traditional Chinese
@@ -1391,3 +1399,4 @@ V3.6 verifies the first `heartbeatClaim()` and first 1 KGEN reward from one succ
 - Shared request entry: `.github/ISSUE_TEMPLATE/civilization-request.yml`
 - Production report: `KGEN-AI-Company/reports/DIGITAL_ANT_V3_5_WUKONG_GATEKEEPER_DUTY_REPORT.md`
 - Settlement and company treasury remain gated; no automatic chain write is introduced by the gateway.
+

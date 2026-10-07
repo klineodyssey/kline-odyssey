@@ -1,5 +1,13 @@
 # KGEN Master Library Index
 
+## K11520 BSC56-only production direction (2026-10-07)
+
+- `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md`: source-pinned production gaps, read-only BSC56 evidence and bounded existing-organ implementation design.
+- `docs/K11520_MAINNET_DEPLOYMENT_MANIFEST.json`: cumulative Human BSC56-only build direction; wallet-owner execution remains a separate gate.
+
+BSC97 new development and rehearsal milestones stop. Historical tests/receipts remain; BSC97 is not a production completion gate. Existing V1 1C launch ceiling and simulation playability remain. Boot CURRENT and Physics are unchanged.
+
+
 > **LIBRARY MASTER INDEX** — Unique cross-library Master Index per ORG-P2-003 D7. Sub-indexes: `docs/KGEN_MASTER_INDEX.md` (repo file inventory), `KGEN-Genesis/KGEN_MASTER_INDEX.md` (Genesis publications GEN-001..GEN-012). Machine-readable indexes live under `KGEN-Canon/`.
 
 **Version:** V1.0
