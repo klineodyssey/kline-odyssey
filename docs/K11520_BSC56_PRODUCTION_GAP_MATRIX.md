@@ -111,3 +111,16 @@ eight new chain56 unsigned-review tests and the 60 unchanged prior tests.
 No new BSC97 features or milestones were added; retained tests are regressions.
 This does not establish live execution, browser signing UX, fresh full EVM/security
 review, Oracle/capital readiness or product completion. No DOM/UI wiring changed.
+
+### Checkpoint 3 hardening
+
+The builder requires a digest-bound current allowance for approve/revoke, refuses
+nonzero-to-nonzero replacement until a confirmed reset/readback and discloses
+that old allowance may be spent before revocation mines. uint inputs have a
+bounded 78-character decimal representation before BigInt parsing. Focused
+order-intent tests now pass 69/69 (nine BSC56 cases, 60 retained regressions).
+The output explicitly labels binding evidence as input metadata, not verified
+chain facts, and transactions as ethers-style unsigned review fields, not raw
+EIP-1193 JSON-RPC requests. Future wallet integration must validate and convert
+quantity encoding at its separate boundary; no direct-send path exists here.
+Runtime metadata and the existing 11520 CHANGELOG register this scoped addition.

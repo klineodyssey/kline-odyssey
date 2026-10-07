@@ -5,17 +5,27 @@
 | Field | Value |
 |---|---|
 | VERSION | CURRENT |
-| REVISION | 2026-10-06.MARKET-CARD-NODE-RETENTION |
+| REVISION | 2026-10-07.BSC56-UNSIGNED-CUSTODY-REVIEW |
 | PRODUCT_CONTEXT | V2.9.5 |
 | STATUS | ACTIVE |
-| LAST_UPDATED | 2026-10-06 |
+| LAST_UPDATED | 2026-10-07 |
 | UPDATED_BY | dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05 |
-| REVIEWED_BY | dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval |
-| SOURCE_COMMIT | cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
-| TASK_ID | K11520-SIMULATION-TRADING-P0-20261006 |
-| CHANGE_REASON | Record retained market-card presentation and preserve the measured HUD-stability gate. |
-| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ cf2ffb47c3e71e444935ef6151adc7f9d6208ca4 |
+| REVIEWED_BY | dot / scoped self-review and parent targeted review / 2026-10-07; no full independent security audit or release approval |
+| SOURCE_COMMIT | f7f67950418ebbb6f7a5a309a32d529232fcb3b6 |
+| TASK_ID | K11520-BSC56-PRODUCTION-20261007 |
+| CHANGE_REASON | Register pure BSC56 custody review construction, allowance exposure and fail-closed deployment binding without changing simulation or live execution. |
+| ANCESTOR | K線西遊記/temples/11520/CHANGELOG.md @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6 |
 | SOURCE_OF_TRUTH | TRUE |
+
+## 2026-10-07 — BSC56 unsigned custody review candidate
+
+- Human BSC56-only direction: no new BSC97 product/rehearsal milestone; historical evidence is preserved.
+- Existing `runtime/real-trading-order-intent.mjs::buildBsc56UnsignedCustodyReview` pure-builds KGEN approve/revoke, margin deposit/withdraw and claim review using existing ABI fragments. No provider, wallet, signature, broadcast or ledger mutation.
+- Missing deployed binding returns a null transaction. Calldata requires pinned binding/ABI hashes, explicit token/target/account/nonce/code/source readback metadata and exact uint amounts/gas caps. Input metadata is not a live verification claim.
+- Nonzero allowance replacement requires confirmed zero reset; revoke review discloses outstanding allowance exposure. Output is ethers-style unsigned review data, not EIP-1193 request payload.
+- `tests/11520-real-trading-order-intent.test.mjs`: 69/69 focused local tests (nine new BSC56 cases); with unchanged market-binding tests, 73/73. Full CI/security/browser release gates remain separately pending.
+- `docs/K11520_BSC56_PRODUCTION_GAP_MATRIX.md` and existing Mainnet manifest record remaining Canon/Oracle/deployment/UX gaps. No invented KAIOS derivative semantics, guessed deployment, USD/USDT conversion or second financial organ.
+- Rollback: remove only this builder/import and appended tests, retaining #519/#522 simulation behavior and independent #523 Navigator. Initial matrix checkpoint: `8886aa1fb9956e6abd5d7477b6357a68d573c3ba`; initial builder checkpoint: `7741674612a4707ff579c1dbd35d12bae4efa5fe`.
 
 ## 2026-10-06 — V2.9.5 retained market-card presentation revision
 

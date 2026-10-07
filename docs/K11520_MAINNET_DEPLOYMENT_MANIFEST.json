@@ -76,7 +76,10 @@
       "walletOwnerConfirmationRequired": true,
       "executionReady": false,
       "broadcast": false,
-      "localTests": "68/68 order-intent tests; eight new BSC56 cases; no full security/browser QA claim"
+      "localTests": "69/69 order-intent tests; nine new BSC56 cases; no full security/browser QA claim",
+      "transactionFormat": "ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC",
+      "bindingVerification": "INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED",
+      "allowanceSafety": "Digest-bound old allowance; confirmed zero reset before nonzero replacement; disclose pending revoke exposure"
     }
   },
   "productV1Decision20260930": {

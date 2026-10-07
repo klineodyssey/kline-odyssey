@@ -1399,4 +1399,3 @@ V3.6 verifies the first `heartbeatClaim()` and first 1 KGEN reward from one succ
 - Shared request entry: `.github/ISSUE_TEMPLATE/civilization-request.yml`
 - Production report: `KGEN-AI-Company/reports/DIGITAL_ANT_V3_5_WUKONG_GATEKEEPER_DUTY_REPORT.md`
 - Settlement and company treasury remain gated; no automatic chain write is introduced by the gateway.
-

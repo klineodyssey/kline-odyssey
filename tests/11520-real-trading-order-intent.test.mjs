@@ -675,7 +675,7 @@ const reviewDigest=value=>codec.keccak256(codec.toUtf8Bytes(canonicalReviewJson(
 const custodyFragments=[TESTNET_EXECUTION_ABI.testToken.find(f=>f.startsWith('function approve(')),...TESTNET_EXECUTION_ABI.brainProxy.filter(f=>/^function (depositMargin|withdrawMargin)\(/.test(f)),CAPITAL_EXECUTION_ABI.brainProxy.find(f=>f.startsWith('function claimSettlement('))];
 function custodyFixture(){
  const hash='0x'+'ab'.repeat(32),deployment={schema:'K11520_BSC56_DEPLOYMENT_BINDING_V1',status:'DEPLOYED_CONFIG_VERIFIED',chainId:56,testOnly:false,
-  tokenAddress:'0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',brainAddress:BRAIN,brainImplementation:ENGINE,walletAddress:WALLET,pendingNonce:'7',
+  tokenAddress:'0xBA3d3810e58735cb6813bC1CDc5458C0d71432Be',brainAddress:BRAIN,brainImplementation:ENGINE,walletAddress:WALLET,pendingNonce:'7',allowanceWei:'0',
   tokenCodeHash:hash,brainCodeHash:hash,implementationCodeHash:hash,brainSourceHash:hash,abiHash:reviewDigest(custodyFragments),blockHash:hash,blockNumber:'123',reviewedCommit:'a'.repeat(40),accountingModel:'ISOLATED_SETTLEMENT_CAPITAL_V1'};
  const input={action:'depositMargin',chainId:56,walletAddress:WALLET,amountWei:'1000000000000000001',nonce:'7',gasLimit:'100000',gasPriceWei:'50000000',maximumGasFeeWei:'5000000000000',deployment};
  return {input,options:{ethers:codec,expectedBindingDigest:reviewDigest(deployment)}};
@@ -685,7 +685,7 @@ test('BSC56 pure builder encodes exact current ABI units and all eight Human rev
  const {input,options}=custodyFixture(),before=JSON.stringify(input),r=buildBsc56UnsignedCustodyReview(input,options);
  const abi=new codec.Interface(custodyFragments),decoded=abi.parseTransaction(r.transaction);
  assert.equal(decoded.name,'depositMargin');assert.equal(decoded.args[0].toString(),'1000000000000000001');
- assert.equal(r.transaction.to,BRAIN);assert.equal(r.transaction.chainId,56);assert.equal(r.transaction.value,'0');assert.equal(r.transaction.nonce,'7');
+ assert.equal(r.transactionFormat,'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC');assert.equal(r.bindingVerification,'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED');assert.equal(r.transaction.to,BRAIN);assert.equal(r.transaction.chainId,56);assert.equal(r.transaction.value,'0');assert.equal(r.transaction.nonce,'7');
  for(const key of ['CHAIN','WALLET','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE'])assert.ok(Object.hasOwn(r.review,key));
  assert.equal(r.review.MAXIMUM_EXPOSURE.walletTokenDebitWei,input.amountWei);assert.equal(r.review.MAXIMUM_EXPOSURE.nativeGasFeeWei,input.maximumGasFeeWei);
  assert.equal(r.executionReady,false);assert.equal(r.signerRequested,false);assert.equal(r.broadcast,false);assert.equal(r.status,'UNSIGNED_REVIEW_ONLY');
@@ -738,7 +738,7 @@ test('BSC56 rejects wrong chain/token/capability/target/spender and zero/collidi
 
 test('BSC56 rejects floats, numbers, exponent/hex/negative/leading-zero strings, overflow and unbounded allowance',()=>{
  const {input,options}=custodyFixture();
- for(const amountWei of [1,1.1,'1.1','1e18','0x10','-1','01','',String(1n<<256n),'0'])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,amountWei},options),/AMOUNT_/);
+ for(const amountWei of [1,1.1,'1.1','1e18','0x10','-1','01','',String(1n<<256n),'9'.repeat(100000),'0'])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,amountWei},options),/AMOUNT_/);
  assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei:String((1n<<256n)-1n)},options),/UNLIMITED/);
  for(const [key,value] of [['nonce',7],['nonce',String(1n<<64n)],['gasLimit','0'],['gasPriceWei','0'],['maximumGasFeeWei','4999999999999']])assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,[key]:value},options),/NONCE_|GAS_/);
 });
@@ -763,4 +763,16 @@ test('BSC56 construction never accesses provider/wallet callbacks or mutates the
  const denied=()=>{throw new Error('PROVIDER_OR_WALLET_ACCESSED')};
  const r=buildBsc56UnsignedCustodyReview({...input,ledger,ethereum:{request:denied},wallet:{request:denied,sendTransaction:denied},humanMainnetAuthorization:false},options);
  assert.equal(r.broadcast,false);assert.equal(JSON.stringify(ledger),before);
+});
+
+test('BSC56 approval review binds existing allowance, blocks replacement races and discloses revoke exposure',()=>{
+ const {input,options}=custodyFixture(),deployment={...input.deployment,allowanceWei:'500'},bound={...options,expectedBindingDigest:reviewDigest(deployment)};
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei:'100',deployment},bound),/ALLOWANCE_RESET_CONFIRMATION_REQUIRED/);
+ const r=buildBsc56UnsignedCustodyReview({...input,action:'approve',amountWei:'0',deployment},bound);
+ assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceAtReadbackWei,'500');assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceAfterWei,'0');assert.equal(r.review.MAXIMUM_EXPOSURE.allowanceTransitionUpperBoundWei,'500');
+ assert.match(r.review.EXPECTED_EFFECT,/may be consumed before revocation/);
+ const {allowanceWei,...missing}=deployment;
+ assert.throws(()=>buildBsc56UnsignedCustodyReview({...input,action:'approve',deployment:missing},{...options,expectedBindingDigest:reviewDigest(missing)}),/BOUND_ALLOWANCE_EXACT_UINT_STRING_REQUIRED/);
+ const newApproval=buildBsc56UnsignedCustodyReview({...input,action:'approve'},options);
+ assert.equal(newApproval.review.MAXIMUM_EXPOSURE.allowanceTransitionUpperBoundWei,input.amountWei);
 });

@@ -1,15 +1,15 @@
 /* KGEN_META
-VERSION: 1.0.0
-REVISION: 2026-10-06.SIMULATION-ORDER-PLAYABILITY
+VERSION: 1.1.0
+REVISION: 2026-10-07.BSC56-UNSIGNED-CUSTODY-REVIEW
 PRODUCT_CONTEXT: V2.9.5
 STATUS: CANDIDATE
-LAST_UPDATED: 2026-10-06
+LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / TEMPORARY_EXTERNAL_ENGINEERING_MAINTAINER / HUMAN_AUTHORIZED_2026_10_05
-REVIEWED_BY: dot / independent scoped metadata and provenance review / 2026-10-06; no registered Reviewer role or release approval
-SOURCE_COMMIT: 0ad0cffe33d23d1104baa963fedef25ad149a0ac
-TASK_ID: K11520-SIMULATION-TRADING-P0-20261006
-CHANGE_REASON: Isolate simulation source and recovery guards across the existing order lifecycle; reject synthetic provenance on REAL paths.
-ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ e26f3a76ef0be7f43058225f46def3fbe123371e
+REVIEWED_BY: dot / scoped self-review and parent targeted review / 2026-10-07; no full independent security audit or release approval
+SOURCE_COMMIT: f7f67950418ebbb6f7a5a309a32d529232fcb3b6
+TASK_ID: K11520-BSC56-PRODUCTION-20261007
+CHANGE_REASON: Add pure chain56 custody review construction with exact units and exposure; preserve the existing simulation and historical testnet lifecycle.
+ANCESTOR: K線西遊記/temples/11520/runtime/real-trading-order-intent.mjs @ f7f67950418ebbb6f7a5a309a32d529232fcb3b6
 SOURCE_OF_TRUTH: TRUE
 PURPOSE: Build unsigned, non-broadcast 11520 real-trading order intents from fixed axis/market bindings.
 */
@@ -234,7 +234,7 @@ export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindin
   if(!actions.includes(input.action))throw new Error('BSC56_CUSTODY_ACTION_NOT_SUPPORTED');
   if(typeof ethers?.Interface!=='function'||typeof ethers?.getAddress!=='function'||typeof ethers?.keccak256!=='function'||typeof ethers?.toUtf8Bytes!=='function')throw new Error('REVIEWED_ABI_CODEC_REQUIRED');
   const uint=(value,label,{zero=false,max=(1n<<256n)-1n}={})=>{
-    if(typeof value!=='string'||!/^(0|[1-9][0-9]*)$/.test(value))throw new Error(label+'_EXACT_UINT_STRING_REQUIRED');
+    if(typeof value!=='string'||value.length>78||!/^(0|[1-9][0-9]*)$/.test(value))throw new Error(label+'_EXACT_UINT_STRING_REQUIRED');
     const n=BigInt(value);if((!zero&&n===0n)||n>max)throw new Error(label+'_OUT_OF_RANGE');return n;
   };
   const address=(value,label)=>{
@@ -263,7 +263,7 @@ export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindin
   const proposal={CHAIN:{name:'BNB Smart Chain Mainnet',chainId:KGEN_CHAIN_ID},WALLET:wallet,CONTRACT:null,FUNCTION:input.action,TOKEN:{symbol:'KGEN',address:token,decimals:18},AMOUNT:amount===null?{kind:'CONTRACT_RECORDED_CLAIM',positionKey}:{baseUnits:amount.toString(),decimals:18},EXPECTED_EFFECT:effects[input.action],MAXIMUM_EXPOSURE:{nativeGasFeeWei:gasExposure.toString(),approvedGasFeeCapWei:gasCap.toString(),walletTokenDebitWei:input.action==='depositMargin'?amount.toString():'0',allowanceAfterWei:input.action==='approve'?amount.toString():null,principalDebitWei:input.action==='withdrawMargin'?amount.toString():'0'}};
   const blocked=['FRESH_CHAIN_CODE_ACCOUNT_NONCE_AND_STATE_READBACK_REQUIRED','HUMAN_WALLET_OWNER_CONFIRMATION_REQUIRED'];
   const deployment=input.deployment;
-  if(!deployment||deployment.status!=='DEPLOYED_CONFIG_VERIFIED')return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',status:'PROPOSAL_MISSING_DEPLOYED_BINDING',review:proposal,transaction:null,bindingDigest:null,intentDigest:null,blockers:['BSC56_DEPLOYED_BINDING_REQUIRED',...blocked],executionReady:false,signerRequested:false,broadcast:false});
+  if(!deployment||deployment.status!=='DEPLOYED_CONFIG_VERIFIED')return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',transactionFormat:'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC',bindingVerification:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',status:'PROPOSAL_MISSING_DEPLOYED_BINDING',review:proposal,transaction:null,bindingDigest:null,intentDigest:null,blockers:['BSC56_DEPLOYED_BINDING_REQUIRED',...blocked],executionReady:false,signerRequested:false,broadcast:false});
   const digest=ethers.keccak256(ethers.toUtf8Bytes(canonical(deployment)));
   if(digest!==hash(expectedBindingDigest,'EXPECTED_BINDING_DIGEST'))throw new Error('DEPLOYMENT_BINDING_DIGEST_MISMATCH');
   if(deployment.schema!=='K11520_BSC56_DEPLOYMENT_BINDING_V1'||deployment.chainId!==KGEN_CHAIN_ID||deployment.testOnly!==false)throw new Error('BSC56_PRODUCTION_BINDING_REQUIRED');
@@ -275,6 +275,13 @@ export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindin
   if(typeof deployment.reviewedCommit!=='string'||! /^[0-9a-f]{40}$/.test(deployment.reviewedCommit))throw new Error('REVIEWED_COMMIT_REQUIRED');
   uint(deployment.blockNumber,'READBACK_BLOCK');
   if(deployment.accountingModel!=='ISOLATED_SETTLEMENT_CAPITAL_V1')throw new Error('CAPITAL_ABI_CAPABILITY_REQUIRED');
+  if(input.action==='approve'){
+    const oldAllowance=uint(deployment.allowanceWei,'BOUND_ALLOWANCE',{zero:true});
+    if(oldAllowance>0n&&amount>0n)throw new Error('ALLOWANCE_RESET_CONFIRMATION_REQUIRED');
+    proposal.MAXIMUM_EXPOSURE.allowanceAtReadbackWei=oldAllowance.toString();
+    proposal.MAXIMUM_EXPOSURE.allowanceTransitionUpperBoundWei=(oldAllowance+amount).toString();
+    if(oldAllowance>0n)proposal.EXPECTED_EFFECT+=' Existing allowance may be consumed before revocation mines; re-read allowance after confirmation.';
+  }
   const fragments=[TESTNET_EXECUTION_ABI.testToken.find(f=>f.startsWith('function approve(')),...TESTNET_EXECUTION_ABI.brainProxy.filter(f=>/^function (depositMargin|withdrawMargin)\(/.test(f)),CAPITAL_EXECUTION_ABI.brainProxy.find(f=>f.startsWith('function claimSettlement('))];
   const abiHash=ethers.keccak256(ethers.toUtf8Bytes(canonical(fragments)));
   if(deployment.abiHash.toLowerCase()!==abiHash)throw new Error('CUSTODY_ABI_HASH_MISMATCH');
@@ -286,7 +293,7 @@ export function buildBsc56UnsignedCustodyReview(input={}, {ethers,expectedBindin
   proposal.CONTRACT=target;if(input.action==='approve')proposal.SPENDER=brain;
   const transaction={chainId:KGEN_CHAIN_ID,type:0,from:wallet,to:target,nonce:nonce.toString(),data,value:'0',gasLimit:gasLimit.toString(),gasPrice:gasPrice.toString()};
   const intentDigest=ethers.keccak256(ethers.toUtf8Bytes(canonical({bindingDigest:digest,transaction})));
-  return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',status:'UNSIGNED_REVIEW_ONLY',review:proposal,transaction,bindingDigest:digest,intentDigest,blockers:blocked,replayProtection:'FRESH_WALLET_NONCE_REQUIRED_AT_CONFIRMATION',executionReady:false,signerRequested:false,broadcast:false});
+  return freeze({schema:'K11520_BSC56_UNSIGNED_CUSTODY_REVIEW_V1',transactionFormat:'ETHERS_STYLE_UNSIGNED_REVIEW_NOT_EIP1193_RPC',bindingVerification:'INPUT_METADATA_ONLY_NOT_CHAIN_VERIFIED',status:'UNSIGNED_REVIEW_ONLY',review:proposal,transaction,bindingDigest:digest,intentDigest,blockers:blocked,replayProtection:'FRESH_WALLET_NONCE_REQUIRED_AT_CONFIRMATION',executionReady:false,signerRequested:false,broadcast:false});
 }
 
 // A timed-out wallet prompt cannot be cancelled by JavaScript. Keep its write
