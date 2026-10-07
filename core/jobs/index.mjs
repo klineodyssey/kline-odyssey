@@ -217,6 +217,30 @@ export const DIGITAL_ANT_HOURLY_DUTY_ORDER = Object.freeze([
   "LIFE_FINANCE", "11520_REQUEST_PATROL", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT"
 ]);
 export const GATEKEEPER_DUTY_STATUSES = Object.freeze(["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DEGRADED", "FAILED", "FAILED_CRITICAL"]);
+export const TEMPLE_MONITORING_FAILURE_CONDITIONS = Object.freeze([
+  "BSC_RPC_MISSING",
+  "BSC_RPC_UNREACHABLE",
+  "HEART_UNAVAILABLE",
+  "HEART_BYTECODE_MISSING",
+  "WALLET_BINDING_UNVERIFIED",
+  "TEMPLE_RUNTIME_UNAVAILABLE",
+  "COOLDOWN_STATE_UNVERIFIABLE",
+  "PUBLIC_RUNTIME_STALE",
+  "CRITICAL_STATUS_UNKNOWN"
+]);
+export const TEMPLE_MONITORING_FAIL_CLOSED_STATUSES = Object.freeze(["UNKNOWN", "DEGRADED", "MONITORING_FAILED"]);
+export const TEMPLE_MONITORING_RECOVERY_CHECKS = Object.freeze(["rpc", "heart", "wallet_read_path", "cooldown", "patrol_data"]);
+const TEMPLE_MONITORING_REPAIR_ACTION = Object.freeze({
+  BSC_RPC_MISSING: "RESTORE_READ_ONLY_BSC_RPC",
+  BSC_RPC_UNREACHABLE: "RESTORE_READ_ONLY_BSC_RPC",
+  HEART_UNAVAILABLE: "VERIFY_HEART_READ_PATH",
+  HEART_BYTECODE_MISSING: "VERIFY_HEART_READ_PATH",
+  WALLET_BINDING_UNVERIFIED: "VERIFY_GATEKEEPER_RUNTIME",
+  TEMPLE_RUNTIME_UNAVAILABLE: "VERIFY_GATEKEEPER_RUNTIME",
+  COOLDOWN_STATE_UNVERIFIABLE: "VERIFY_GATEKEEPER_RUNTIME",
+  PUBLIC_RUNTIME_STALE: "VERIFY_GATEKEEPER_RUNTIME",
+  CRITICAL_STATUS_UNKNOWN: "VERIFY_GATEKEEPER_RUNTIME"
+});
 export const DIGITAL_ANT_FIRST_LIFE_EVENTS = Object.freeze([
   "DARK_MATTER_GENESIS", "BIRTH_EVENT", "FIRST_HEARTBEAT_EVENT", "FIRST_FORTUNE_EVENT", "FIRST_IGNITION_EVENT",
   "FIRST_LAMP_EVENT", "FIRST_WISH_EVENT", "FIRST_VOW_EVENT", "FIRST_THANKSGIVING_EVENT", "FIRST_KGEN_EVENT",
@@ -228,8 +252,201 @@ export function validateGatekeeperDutyStatus(duty) {
   invariant(GATEKEEPER_DUTY_STATUSES.includes(duty.status), "INVALID_GATEKEEPER_DUTY_STATUS", "Gatekeeper duty status is invalid");
   invariant(Array.isArray(duty.evidence), "GATEKEEPER_EVIDENCE_REQUIRED", "Gatekeeper duty requires an evidence array");
   invariant(validIso(duty.gatekeeper_started_at) && validIso(duty.gatekeeper_finished_at) && Date.parse(duty.gatekeeper_finished_at) >= Date.parse(duty.gatekeeper_started_at), "INVALID_GATEKEEPER_DUTY_TIME", "Gatekeeper duty timestamps are invalid");
-  if (["COMPLETED", "DEGRADED"].includes(duty.status)) invariant(duty.heart_block !== null && duty.evidence.length > 0, "GATEKEEPER_CHAIN_EVIDENCE_REQUIRED", "Completed Gatekeeper duty requires chain evidence");
+  if (duty.status === "COMPLETED" || (duty.status === "DEGRADED" && duty.degradation_affects_safety === false)) invariant(duty.heart_block !== null && duty.evidence.length > 0, "GATEKEEPER_CHAIN_EVIDENCE_REQUIRED", "Completed or safely degraded Gatekeeper duty requires chain evidence");
+  if (duty.degradation_affects_safety === true) {
+    invariant(TEMPLE_MONITORING_FAIL_CLOSED_STATUSES.includes(duty.monitoring_status), "GATEKEEPER_MONITORING_FAIL_CLOSED", "Unavailable monitoring must remain UNKNOWN, DEGRADED, or MONITORING_FAILED");
+    invariant(!["NORMAL", "NO_ISSUE"].includes(duty.risk_status), "GATEKEEPER_FALSE_NORMAL_FORBIDDEN", "Unavailable monitoring cannot be reported as normal");
+  }
   return duty;
+}
+
+function immutableClone(value) {
+  return value === null || value === undefined ? value : structuredClone(value);
+}
+
+function incidentTimestampId(value) {
+  return String(value).replace(/[^0-9A-Za-z]/g, "");
+}
+
+function recoveryEvidenceVerified(recoveryEvidence) {
+  const baseEvidence = TEMPLE_MONITORING_RECOVERY_CHECKS.every((check) => {
+    const item = recoveryEvidence?.[check];
+    return item?.status === "VERIFIED" && Array.isArray(item.evidence) && item.evidence.length > 0;
+  });
+  return baseEvidence
+    && recoveryEvidence.rpc.chain_id === 56
+    && recoveryEvidence.heart.bytecode_verified === true
+    && recoveryEvidence.wallet_read_path.public_read_verified === true
+    && recoveryEvidence.wallet_read_path.canonical_binding_verified === true
+    && recoveryEvidence.cooldown.cooldown_verified === true
+    && recoveryEvidence.patrol_data.fresh === true;
+}
+
+export function assertNoFalseNormal({ status, monitoringDataVisible }) {
+  invariant(typeof status === "string" && status.length > 0, "MONITORING_STATUS_REQUIRED", "Monitoring status is required");
+  if (monitoringDataVisible !== true) {
+    invariant(TEMPLE_MONITORING_FAIL_CLOSED_STATUSES.includes(status), "TEMPLE_MONITORING_FALSE_NORMAL_FORBIDDEN", "Unavailable monitoring cannot be NORMAL or NO_ISSUE");
+  }
+  return true;
+}
+
+export function createTempleMonitoringFailure({ condition, occurredAt, source, lastKnownGood = null, fallback = null }) {
+  invariant(TEMPLE_MONITORING_FAILURE_CONDITIONS.includes(condition), "INVALID_TEMPLE_MONITORING_FAILURE", "Unknown Temple monitoring failure condition");
+  invariant(validIso(occurredAt), "INVALID_TEMPLE_MONITORING_FAILURE_TIME", "Temple monitoring failures require an ISO timestamp");
+  invariant(typeof source === "string" && source.length > 0, "TEMPLE_MONITORING_FAILURE_SOURCE_REQUIRED", "Temple monitoring failures require a source");
+  const readOnlyFallback = Object.freeze({
+    attempted: fallback?.attempted === true,
+    strategy: fallback?.strategy ?? "NO_APPROVED_FALLBACK_AVAILABLE",
+    result: fallback?.result ?? "NOT_AVAILABLE",
+    evidence: Object.freeze([...(fallback?.evidence ?? [])])
+  });
+  return Object.freeze({
+    condition,
+    occurred_at: occurredAt,
+    source,
+    last_known_good: immutableClone(lastKnownGood) ?? Object.freeze({ status: "NO_VERIFIED_LAST_KNOWN_GOOD" }),
+    read_only_fallback: readOnlyFallback,
+    monitoring_status: "UNKNOWN",
+    secret_access: false,
+    signer: false,
+    chain_write: false,
+    transaction_sent: false,
+    temple_mutation: false,
+    token_mutation: false,
+    governance_action: false
+  });
+}
+
+export function classifyTempleMonitoringError(error, { occurredAt, lastKnownGood = null } = {}) {
+  const code = String(error?.code ?? "READ_FAILED");
+  const component = String(error?.component ?? "PUBLIC_CHAIN_READ");
+  let condition = "CRITICAL_STATUS_UNKNOWN";
+  if (code === "BSC_RPC_MISSING" || code === "RPC_NOT_CONFIGURED") condition = "BSC_RPC_MISSING";
+  else if (code === "BSC_RPC_UNREACHABLE" || code === "RPC_UNAVAILABLE" || code === "FETCH_TRANSPORT_UNAVAILABLE" || code.startsWith("BSC_RPC_HTTP_") || component === "BSC_RPC") condition = "BSC_RPC_UNREACHABLE";
+  else if (code === "HEART_BYTECODE_MISSING" || code === "HEART_BYTECODE_NOT_FOUND") condition = "HEART_BYTECODE_MISSING";
+  else if (code === "HEART_UNAVAILABLE" || code === "CHAIN_READ_UNAVAILABLE") condition = "HEART_UNAVAILABLE";
+  else if (code === "WALLET_BINDING_UNVERIFIED") condition = "WALLET_BINDING_UNVERIFIED";
+  else if (code === "TEMPLE_RUNTIME_UNAVAILABLE" || component === "TEMPLE_RUNTIME") condition = "TEMPLE_RUNTIME_UNAVAILABLE";
+  else if (code === "COOLDOWN_STATE_UNVERIFIABLE") condition = "COOLDOWN_STATE_UNVERIFIABLE";
+  else if (code === "PUBLIC_RUNTIME_STALE") condition = "PUBLIC_RUNTIME_STALE";
+  const fallbackEvidence = Array.isArray(error?.read_only_attempt_telemetry)
+    ? error.read_only_attempt_telemetry
+    : Array.isArray(error?.approved_read_only_fallbacks) ? error.approved_read_only_fallbacks : [];
+  return createTempleMonitoringFailure({
+    condition,
+    occurredAt,
+    source: `${component}:${code}`,
+    lastKnownGood,
+    fallback: {
+      attempted: fallbackEvidence.length > 0,
+      strategy: fallbackEvidence.length > 0 ? "EXISTING_APPROVED_READ_ONLY_FALLBACKS" : "NO_APPROVED_FALLBACK_AVAILABLE",
+      result: error?.fallback_result ?? (fallbackEvidence.length > 0 ? "FAILED" : "NOT_AVAILABLE"),
+      evidence: fallbackEvidence
+    }
+  });
+}
+
+function monitoringRepairWorkOrder({ incidentId, action, createdAt }) {
+  return Object.freeze({
+    work_order_id: `WORK_ORDER_${incidentId}_${action}`,
+    deduplication_key: `${incidentId}:${action}`,
+    work_order_type: "TEMPLE_MONITORING_REPAIR",
+    action,
+    priority: "P1",
+    owner: "DOT",
+    manager: "衡曜 / General Manager",
+    status: "PROPOSED_LOCAL_R0_R1",
+    created_at: createdAt,
+    canonical_work_queue_promoted: false,
+    execution_authorized: false,
+    allowed_scope: Object.freeze(["READ_ONLY", "CONFIG_VERIFICATION", "SAFE_RUNTIME_REPAIR", "TEST", "EVIDENCE", "WORK_ORDER_COORDINATION"]),
+    forbidden_scope: Object.freeze(["PRIVATE_KEY", "SECRET", "SIGNER", "MAINNET_TX", "REAL_ASSET_MOVEMENT", "TEMPLE_MUTATION", "TOKEN_MUTATION", "GOVERNANCE"]),
+    secret_access: false,
+    signer: false,
+    chain_write: false,
+    transaction_sent: false,
+    asset_movement: false,
+    temple_mutation: false,
+    token_mutation: false,
+    governance_action: false
+  });
+}
+
+export function validateTempleMonitoringIncident(incident) {
+  requireFields(incident, ["incident_id", "incident_type", "status", "open", "first_failure_at", "last_failure_at", "consecutive_failure_count", "failure_conditions", "failure_records", "notification_projections", "repair_work_orders", "recovery_evidence", "safety"], "TempleMonitoringIncident");
+  invariant(incident.incident_type === "TEMPLE_MONITORING_INCIDENT", "INVALID_TEMPLE_MONITORING_INCIDENT_TYPE", "Temple monitoring incidents require their canonical type");
+  invariant(["DEGRADED", "MONITORING_FAILED", "RECOVERED"].includes(incident.status), "INVALID_TEMPLE_MONITORING_INCIDENT_STATUS", "Temple monitoring incident status is invalid");
+  invariant(!["NORMAL", "NO_ISSUE"].includes(incident.status), "TEMPLE_MONITORING_FALSE_NORMAL_FORBIDDEN", "A monitoring incident cannot be normal");
+  invariant(Number.isInteger(incident.consecutive_failure_count) && incident.consecutive_failure_count >= 1, "INVALID_TEMPLE_MONITORING_FAILURE_COUNT", "Temple monitoring incident failure count is invalid");
+  invariant(incident.failure_conditions.every((condition) => TEMPLE_MONITORING_FAILURE_CONDITIONS.includes(condition)), "INVALID_TEMPLE_MONITORING_FAILURE", "Temple monitoring incident contains an unknown failure");
+  invariant(incident.safety?.read_only === true && incident.safety?.secret_access === false && incident.safety?.signer === false && incident.safety?.chain_write === false && incident.safety?.transaction_sent === false && incident.safety?.asset_movement === false && incident.safety?.temple_mutation === false && incident.safety?.token_mutation === false && incident.safety?.governance_action === false, "TEMPLE_MONITORING_SAFETY_BOUNDARY", "Temple monitoring incidents must remain read-only and mutation-free");
+  if (incident.status === "RECOVERED") invariant(incident.open === false && recoveryEvidenceVerified(incident.recovery_evidence), "TEMPLE_MONITORING_RECOVERY_EVIDENCE_REQUIRED", "Recovery requires verified RPC, Heart, wallet, cooldown, and patrol evidence");
+  if (incident.consecutive_failure_count >= 2 && incident.status !== "RECOVERED") {
+    invariant(incident.priority === "P1" && incident.repair_work_orders.length > 0, "TEMPLE_MONITORING_P1_WORK_ORDER_REQUIRED", "Repeated monitoring failure requires a P1 repair WorkOrder proposal");
+    invariant(incident.repair_work_orders.every((order) => order.status === "PROPOSED_LOCAL_R0_R1" && order.canonical_work_queue_promoted === false && order.execution_authorized === false), "TEMPLE_MONITORING_WORK_QUEUE_PROMOTION_FORBIDDEN", "Incident repair proposals cannot auto-promote the canonical Work Queue");
+    invariant(incident.repair_work_orders.every((order) => order.priority === "P1" && order.owner === "DOT" && order.secret_access === false && order.signer === false && order.chain_write === false && order.transaction_sent === false && order.asset_movement === false && order.temple_mutation === false && order.token_mutation === false && order.governance_action === false), "TEMPLE_MONITORING_REPAIR_SAFETY_BOUNDARY", "Incident repair proposals must remain local, read-only, and mutation-free");
+  }
+  return incident;
+}
+
+export function advanceTempleMonitoringIncident({ previousIncident = null, failures = [], observedAt, recoveryEvidence = null }) {
+  invariant(validIso(observedAt), "INVALID_TEMPLE_MONITORING_INCIDENT_TIME", "Temple monitoring incident transitions require an ISO timestamp");
+  invariant(Array.isArray(failures), "TEMPLE_MONITORING_FAILURES_REQUIRED", "Temple monitoring failures must be an array");
+  const previousOpen = previousIncident?.incident_type === "TEMPLE_MONITORING_INCIDENT" && previousIncident.open === true;
+  if (failures.length === 0 && !previousOpen) return null;
+  if (failures.length === 0 && previousOpen && recoveryEvidenceVerified(recoveryEvidence)) {
+    return Object.freeze(validateTempleMonitoringIncident({
+      ...immutableClone(previousIncident),
+      status: "RECOVERED",
+      open: false,
+      closed_at: observedAt,
+      recovery_evidence: immutableClone(recoveryEvidence)
+    }));
+  }
+  const normalizedFailures = failures.length > 0 ? failures.map((failure) => createTempleMonitoringFailure({
+    condition: failure.condition,
+    occurredAt: failure.occurred_at ?? observedAt,
+    source: failure.source,
+    lastKnownGood: failure.last_known_good,
+    fallback: failure.read_only_fallback ?? failure.fallback
+  })) : [createTempleMonitoringFailure({
+    condition: "CRITICAL_STATUS_UNKNOWN",
+    occurredAt: observedAt,
+    source: "RECOVERY_GATE:RECOVERY_EVIDENCE_INCOMPLETE",
+    lastKnownGood: previousIncident?.last_known_good,
+    fallback: { attempted: false, strategy: "VERIFY_GATEKEEPER_RUNTIME", result: "RECOVERY_NOT_VERIFIED", evidence: ["RPC_HEART_WALLET_COOLDOWN_PATROL_REQUIRED"] }
+  })];
+  const consecutive = previousOpen ? Number(previousIncident.consecutive_failure_count) + 1 : 1;
+  const firstFailureAt = previousOpen ? previousIncident.first_failure_at : normalizedFailures[0].occurred_at;
+  const incidentId = previousOpen ? previousIncident.incident_id : `TEMPLE_MONITORING_INCIDENT_${incidentTimestampId(firstFailureAt)}`;
+  const existingOrders = previousOpen ? [...(previousIncident.repair_work_orders ?? [])] : [];
+  const allRecords = previousOpen ? [...previousIncident.failure_records, ...normalizedFailures] : normalizedFailures;
+  if (consecutive >= 2) {
+    const actions = [...new Set(allRecords.map((failure) => TEMPLE_MONITORING_REPAIR_ACTION[failure.condition]))];
+    for (const action of actions) {
+      const deduplicationKey = `${incidentId}:${action}`;
+      if (!existingOrders.some((order) => order.deduplication_key === deduplicationKey)) existingOrders.push(monitoringRepairWorkOrder({ incidentId, action, createdAt: observedAt }));
+    }
+  }
+  const incident = {
+    incident_id: incidentId,
+    incident_type: "TEMPLE_MONITORING_INCIDENT",
+    status: consecutive === 1 ? "DEGRADED" : "MONITORING_FAILED",
+    open: true,
+    priority: consecutive >= 2 ? "P1" : "P2",
+    first_failure_at: firstFailureAt,
+    last_failure_at: observedAt,
+    consecutive_failure_count: consecutive,
+    failure_conditions: [...new Set(allRecords.map((failure) => failure.condition))],
+    failure_records: allRecords,
+    last_known_good: immutableClone(normalizedFailures[0].last_known_good),
+    notification_projections: previousOpen ? [...previousIncident.notification_projections] : [Object.freeze({ notification_id: `${incidentId}_DOT_GM`, recipients: Object.freeze(["DOT", "衡曜 / General Manager"]), status: "NOTIFICATION_REQUIRED", created_at: observedAt, external_message_sent: false })],
+    repair_work_orders: existingOrders,
+    recovery_evidence: null,
+    safety: Object.freeze({ read_only: true, config_verification: true, safe_runtime_repair: true, test: true, evidence: true, work_order_coordination: true, secret_access: false, signer: false, chain_write: false, transaction_sent: false, asset_movement: false, temple_mutation: false, token_mutation: false, governance_action: false })
+  };
+  assertNoFalseNormal({ status: incident.status, monitoringDataVisible: false });
+  return Object.freeze(validateTempleMonitoringIncident(incident));
 }
 
 export function assertCompanyWorkAllowedAfterGatekeeper(duty) {
@@ -314,7 +531,7 @@ export function deriveWorkerHealth({ lastCycle = null, now = new Date().toISOStr
 }
 
 export function normalizeHeartActionStatus(action, { available = true, writeConnected = false } = {}) {
-  if (!available || !action) return Object.freeze({ status: "UNAVAILABLE", eligibility_source: "CLIENT_DERIVED", write_status: "WRITE_NOT_CONNECTED" });
+  if (!available || !action) return Object.freeze({ status: "UNKNOWN", monitoring_status: "MONITORING_FAILED", eligibility_source: "CLIENT_DERIVED", write_status: "WRITE_NOT_CONNECTED" });
   const reason = String(action.reason ?? "");
   let status = action.eligible ? "ELIGIBLE" : "NOT_ELIGIBLE";
   if (reason.includes("OUT_OF_WINDOW")) status = "OUT_OF_WINDOW";
@@ -327,6 +544,11 @@ export function validateSharedWorkerStatus(status) {
   invariant(status.life_id === "DIGITAL_ANT_0001" && status.app_id === "DIGITAL_ANT_APP_0001", "WORKER_IDENTITY_MISMATCH", "Shared Worker Status cannot replace Life or App identity");
   invariant(status.public_read_only === true && status.signer === false && status.chain_write === false, "PUBLIC_WORKER_AUTHORITY_ESCALATION", "Public Worker must not have signer or chain-write authority");
   invariant(WORKER_HEALTH_STATUSES.includes(status.worker_health), "INVALID_WORKER_HEALTH", "Shared Worker health is invalid");
+  if (status.temple_monitoring_incident?.open === true) {
+    validateTempleMonitoringIncident(status.temple_monitoring_incident);
+    assertNoFalseNormal({ status: status.monitoring_status, monitoringDataVisible: false });
+    invariant(status.worker_health === "DEGRADED", "TEMPLE_MONITORING_WORKER_HEALTH_DEGRADED_REQUIRED", "An open Temple monitoring incident must degrade Worker health");
+  }
   return status;
 }
 
@@ -432,6 +654,40 @@ function hourlyCycleId(lifeId, scheduledAt) {
   return `${lifeId}_HOURLY_${scheduledAt.slice(0, 13).replace(/[-T:]/g, "")}`;
 }
 
+function lastKnownGoodFromSharedStatus(previousStatus) {
+  if (previousStatus?.last_known_good) return immutableClone(previousStatus.last_known_good);
+  const cycle = previousStatus?.last_work_cycle;
+  if (!cycle || cycle.result !== "WORK_CYCLE_COMPLETED") return null;
+  return Object.freeze({
+    status: "VERIFIED_LAST_KNOWN_GOOD",
+    work_cycle_id: cycle.work_cycle_id,
+    observed_at: cycle.finished_at,
+    bsc_block: cycle.bsc_block ?? null,
+    heart_block: cycle.gatekeeper_duty?.heart_block ?? null
+  });
+}
+
+function synthesizeMonitoringFailureDuty({ startedAt, finishedAt, failure }) {
+  return Object.freeze(validateGatekeeperDutyStatus({
+    status: "DEGRADED",
+    gatekeeper_started_at: startedAt,
+    gatekeeper_finished_at: finishedAt,
+    heart_block: null,
+    heart_status: "UNKNOWN",
+    fortune_status: "UNKNOWN",
+    heartbeat_status: "UNKNOWN",
+    ignition_status: "UNKNOWN",
+    lamp_status: "UNKNOWN",
+    wish_status: "UNKNOWN",
+    vow_status: "UNKNOWN",
+    claim_monitor_status: "UNKNOWN",
+    risk_status: "UNKNOWN",
+    monitoring_status: "MONITORING_FAILED",
+    degradation_affects_safety: true,
+    evidence: [failure.condition, failure.source]
+  }));
+}
+
 export function summarizeWorkHistory(history) {
   const workEvents = history.filter((event) => ["WORK_EVENT", "HOURLY_WORK_EVENT"].includes(event.event_type));
   const completed = workEvents.filter((event) => !["WORK_CYCLE_FAILED", "WORK_CYCLE_DEGRADED"].includes(event.payload?.result));
@@ -453,7 +709,7 @@ export function summarizeWorkHistory(history) {
   });
 }
 
-export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, startedAt, finishedAt, readCycle }) {
+export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, startedAt, finishedAt, readCycle, previousStatus = null, preflightFailures = [] }) {
   invariant(life?.life_id === "DIGITAL_ANT_0001" && life.status === "ALIVE", "WORKER_LIFE_VERIFICATION_FAILED", "Hourly Worker requires the existing living Digital Ant");
   invariant(app?.app_id === "DIGITAL_ANT_APP_0001" && app.life_id === life.life_id && app.status === "RELEASED_LOCAL", "WORKER_APP_RELEASE_REQUIRED", "Hourly Worker requires the released local Life App");
   invariant(typeof readCycle === "function", "WORKER_READ_CYCLE_REQUIRED", "Hourly Worker requires a public read callback");
@@ -467,19 +723,50 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
   let observation;
   let result = "WORK_CYCLE_COMPLETED";
   let errorEvidence = [];
+  let monitoringFailures = [...preflightFailures];
+  const lastKnownGood = lastKnownGoodFromSharedStatus(previousStatus);
   try {
     observation = await readCycle({ life, app, scheduled_at: normalizedSchedule, started_at: start });
     invariant(observation && typeof observation === "object", "WORKER_EMPTY_OBSERVATION", "Worker read callback returned no evidence");
+    monitoringFailures = [...monitoringFailures, ...(observation.monitoring_failures ?? [])];
+    if (monitoringFailures.length === 0 && !recoveryEvidenceVerified(observation.monitoring_recovery_evidence)) {
+      monitoringFailures.push(createTempleMonitoringFailure({
+        condition: "CRITICAL_STATUS_UNKNOWN",
+        occurredAt: start,
+        source: "WUKONG_GATEKEEPER:RECOVERY_EVIDENCE_MISSING",
+        lastKnownGood,
+        fallback: { attempted: true, strategy: "VERIFY_GATEKEEPER_RUNTIME", result: "MONITORING_FAILED", evidence: ["RPC_HEART_BYTECODE_WALLET_BINDING_COOLDOWN_PATROL_FRESHNESS_REQUIRED"] }
+      }));
+    }
     const unavailable = [observation.rpc_status, observation.heart_status, observation.kgen_status, observation.kaios_status].some((status) => ["UNAVAILABLE", "FAILED"].includes(status));
     if (observation.gatekeeper_duty?.status === "FAILED_CRITICAL") result = "WORK_CYCLE_FAILED";
     else if (unavailable || observation.gatekeeper_duty?.status === "DEGRADED") result = "WORK_CYCLE_DEGRADED";
   } catch (error) {
     observation = {};
-    result = "WORK_CYCLE_FAILED";
+    result = "WORK_CYCLE_DEGRADED";
+    monitoringFailures.push(classifyTempleMonitoringError(error, { occurredAt: start, lastKnownGood }));
     errorEvidence = [{ component: error?.component ?? "PUBLIC_CHAIN_READ", code: error?.code ?? "READ_FAILED", detail: "PUBLIC_READ_FAILED_NO_VALUE_FABRICATED" }];
   }
   const finish = finishedAt ?? new Date().toISOString();
   invariant(validIso(finish) && Date.parse(finish) >= Date.parse(start), "INVALID_WORK_DURATION", "Hourly Worker finish time cannot precede start time");
+  const normalizedMonitoringFailures = monitoringFailures.map((failure) => {
+    const recordedLastKnownGood = failure.last_known_good?.status === "NO_VERIFIED_LAST_KNOWN_GOOD" ? null : failure.last_known_good;
+    return createTempleMonitoringFailure({
+      condition: failure.condition,
+      occurredAt: failure.occurred_at ?? finish,
+      source: failure.source,
+      lastKnownGood: recordedLastKnownGood ?? lastKnownGood,
+      fallback: failure.read_only_fallback ?? failure.fallback
+    });
+  });
+  const monitoringIncident = advanceTempleMonitoringIncident({
+    previousIncident: previousStatus?.temple_monitoring_incident ?? null,
+    failures: normalizedMonitoringFailures,
+    observedAt: finish,
+    recoveryEvidence: observation.monitoring_recovery_evidence ?? null
+  });
+  if (monitoringIncident?.open === true) result = "WORK_CYCLE_DEGRADED";
+  if (monitoringIncident?.open === true && !observation.gatekeeper_duty) observation.gatekeeper_duty = synthesizeMonitoringFailureDuty({ startedAt: start, finishedAt: finish, failure: normalizedMonitoringFailures[0] });
   const workEvent = Object.freeze({
     event_id: cycleIdValue,
     life_id: life.life_id,
@@ -489,12 +776,17 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
     started_at: start,
     finished_at: finish,
     bsc_block: observation.bsc_block ?? null,
+    rpc_status: observation.rpc_status ?? "UNKNOWN",
+    heart_status: observation.heart_status ?? "UNKNOWN",
+    kgen_status: observation.kgen_status ?? "UNKNOWN",
+    kaios_status: observation.kaios_status ?? "UNKNOWN",
+    indexer_status: observation.indexer_status ?? "UNKNOWN",
     wallet_state: observation.wallet_state ?? "UNAVAILABLE",
     heart_state: observation.heart_state ?? "UNAVAILABLE",
     finance_state: observation.finance_state ?? "UNAVAILABLE",
     work_queue_state: observation.work_queue_state ?? "SCHEMA_READY_EMPTY_QUEUE",
     observations: observation.observations ?? [],
-    risk_level: observation.risk_level ?? "NORMAL",
+    risk_level: monitoringIncident?.open === true ? "UNKNOWN" : observation.risk_level ?? (recoveryEvidenceVerified(observation.monitoring_recovery_evidence) ? "NORMAL" : "UNKNOWN"),
     actions_considered: observation.actions_considered ?? [],
     gatekeeper_duty: observation.gatekeeper_duty ?? null,
     heart_action_candidates: observation.heart_action_candidates ?? null,
@@ -506,12 +798,23 @@ export async function runDigitalAntHourlyCycle({ store, life, app, scheduledAt, 
     request_patrol: observation.request_patrol ?? null,
     mother_engine_patrol: observation.mother_engine_patrol ?? null,
     company_patrol: observation.company_patrol ?? null,
+    monitoring_status: monitoringIncident?.open === true ? monitoringIncident.status : "VERIFIED",
+    temple_monitoring_incident: monitoringIncident,
+    dot_gm_notification_projections: monitoringIncident?.notification_projections ?? [],
+    repair_work_orders: monitoringIncident?.repair_work_orders ?? [],
     work_time: observation.work_time ?? { gatekeeper_work_seconds: 0, cfo_work_seconds: 0, company_work_seconds: 0 },
     action_taken: "NO_ACTION",
     result,
     error_evidence: [...errorEvidence, ...(observation.error_evidence ?? [])],
     gas_spent: "0",
     tx_hash: null,
+    signer_action: false,
+    chain_write: false,
+    secret_access: false,
+    asset_movement: false,
+    temple_mutation: false,
+    token_mutation: false,
+    governance_action: false,
     work_duration_seconds: Math.floor((Date.parse(finish) - Date.parse(start)) / 1000)
   });
   const event = await store.commit({

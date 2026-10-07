@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createUniverseRuntime } from "../registry/universe-runtime.mjs";
-import { assertCompanyWorkAllowedAfterGatekeeper, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
+import { advanceTempleMonitoringIncident, assertCompanyWorkAllowedAfterGatekeeper, classifyTempleMonitoringError, createTempleMonitoringFailure, deriveWorkerHealth, evaluateIgnitionWindow, normalizeHeartActionStatus, runDigitalAntHourlyCycle, validateGatekeeperDutyStatus, validateSharedWorkerStatus, DIGITAL_ANT_WISH_TEXT } from "./index.mjs";
 import { readTempleHeart12345 } from "../integrations/temple-heart-12345.mjs";
 import { createHeartActionCandidate } from "../security/life-security.mjs";
 import { assertThoughtOrganReadyForPlanning, createAiLifeCertification, verifyThoughtOrganHealth } from "../life/index.mjs";
@@ -23,24 +23,38 @@ const PHYSICS_CURRENT = new URL("../../docs/physics/KGEN_Universe_Physics_Runtim
 export function createPublicReadProvider({ rpcUrl = process.env.BSC_RPC_URL || PUBLIC_BSC_RPC, fetchImpl = globalThis.fetch } = {}) {
   if (typeof fetchImpl !== "function") throw statusError("FETCH_TRANSPORT_UNAVAILABLE", "BSC_RPC");
   let requestId = 0;
+  const attemptTelemetry = [];
   const transport = {
     async request({ method, params = [] }) {
       const primary = rpcUrl || PUBLIC_BSC_RPC;
       const urls = [...new Set([primary, PUBLIC_BSC_RPC, ...PUBLIC_BSC_RPC_FALLBACKS])];
       let lastError = null;
-      for (const url of urls) {
+      const requestAttempts = [];
+      for (const [index, url] of urls.entries()) {
+        const target = index === 0 ? "PRIMARY_READ_ONLY_BSC_RPC" : `APPROVED_READ_ONLY_BSC_RPC_FALLBACK_${index}`;
         try {
           const response = await fetchImpl(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: ++requestId, method, params }) });
           if (!response.ok) throw statusError(`BSC_RPC_HTTP_${response.status}`, "BSC_RPC");
           const payload = await response.json();
           if (payload.error) throw statusError(`BSC_RPC_${payload.error.code ?? "ERROR"}`, "BSC_RPC");
+          const evidence = Object.freeze({ target, method, result: "VERIFIED" });
+          requestAttempts.push(evidence); attemptTelemetry.push(evidence);
           return payload.result;
-        } catch (error) { lastError = error; }
+        } catch (error) {
+          lastError = error;
+          const evidence = Object.freeze({ target, method, result: "FAILED", code: error?.code ?? "READ_FAILED" });
+          requestAttempts.push(evidence); attemptTelemetry.push(evidence);
+        }
       }
-      throw lastError ?? statusError("BSC_RPC_UNAVAILABLE", "BSC_RPC");
+      const failure = lastError ?? statusError("BSC_RPC_UNREACHABLE", "BSC_RPC");
+      failure.read_only_attempt_telemetry = Object.freeze(requestAttempts);
+      failure.fallback_result = "FAILED";
+      throw failure;
     }
   };
-  return new ethers.providers.Web3Provider(transport, { name: "bnb", chainId: 56 });
+  const provider = new ethers.providers.Web3Provider(transport, { name: "bnb", chainId: 56 });
+  Object.defineProperty(provider, "readOnlyAttemptTelemetry", { value: attemptTelemetry, enumerable: true });
+  return provider;
 }
 
 function argument(argv, name) {
@@ -224,17 +238,19 @@ function heartPatrol(heart) {
   });
 }
 
-function createGatekeeperDuty({ startedAt, finishedAt, heart, patrol }) {
+function createGatekeeperDuty({ startedAt, finishedAt, heart, patrol, monitoringFailed = false }) {
   const coreStatus = patrol.core_heart_indexer;
   const heartAvailable = heart.status === "CHAIN_READ_VERIFIED";
-  const status = !heartAvailable ? "FAILED_CRITICAL" : coreStatus === "CORE_HEART_INDEXER_HEALTHY" ? "COMPLETED" : "DEGRADED";
+  const monitoringVerified = heartAvailable && coreStatus === "CORE_HEART_INDEXER_HEALTHY" && monitoringFailed === false;
+  const status = monitoringVerified ? "COMPLETED" : "DEGRADED";
   return Object.freeze(validateGatekeeperDutyStatus({
     status, gatekeeper_started_at: startedAt, gatekeeper_finished_at: finishedAt,
     heart_block: heart.block_number ?? null, heart_status: heartAvailable ? "AVAILABLE" : "UNAVAILABLE",
     fortune_status: patrol.fortune.status, heartbeat_status: patrol.heartbeat.status, ignition_status: patrol.ignition.status,
     lamp_status: patrol.lamp.status, wish_status: patrol.wish.status, vow_status: patrol.thanksgiving.status,
-    claim_monitor_status: coreStatus, risk_status: heart.risk_assessment?.level ?? "NORMAL",
-    degradation_affects_safety: !heartAvailable, advanced_graph_status: patrol.advanced_graph_indexer,
+    claim_monitor_status: coreStatus, risk_status: monitoringVerified ? heart.risk_assessment?.level ?? "NORMAL" : "UNKNOWN",
+    monitoring_status: monitoringVerified ? "VERIFIED" : "MONITORING_FAILED",
+    degradation_affects_safety: !monitoringVerified, advanced_graph_status: patrol.advanced_graph_indexer,
     evidence: heartAvailable ? [`HEART_BLOCK_${heart.block_number}`, "HEART_BYTECODE_VERIFIED", coreStatus] : [heart.reason ?? "CHAIN_READ_UNAVAILABLE"]
   }));
 }
@@ -272,6 +288,18 @@ export async function publicReadCycle({ life, seed, verifiedFirstEvents = null }
   const gatekeeperStarted = new Date().toISOString();
   const gatekeeperClock = Date.now();
   const heart = await readTempleHeart12345({ ethers, provider, walletAddress: life.wallet_address, wishText: DIGITAL_ANT_WISH_TEXT, recentBlockWindow: 100 });
+  const walletBinding = seed.life_security?.DIGITAL_ANT_0001?.profile?.wallet_binding_history?.find((binding) => binding.status === "ACTIVE" && String(binding.wallet ?? "").toLowerCase() === String(life.wallet_address ?? "").toLowerCase());
+  const monitoringFailures = [];
+  const observedAt = new Date().toISOString();
+  if (!/^0x[0-9a-fA-F]{40}$/.test(life.wallet_address ?? "") || !walletBinding) monitoringFailures.push({ condition: "WALLET_BINDING_UNVERIFIED", occurred_at: observedAt, source: "DIGITAL_ANT_PUBLIC_WALLET_READ_PATH", fallback: { attempted: false, strategy: "VERIFY_GATEKEEPER_RUNTIME", result: "FAILED", evidence: ["PUBLIC_ADDRESS_OR_ACTIVE_BINDING_MISSING"] } });
+  if (heart.status !== "CHAIN_READ_VERIFIED") {
+    const heartCondition = heart.reason === "HEART_BYTECODE_NOT_FOUND" ? "HEART_BYTECODE_MISSING" : ["RPC_NOT_CONFIGURED", "BSC_CHAIN_56_REQUIRED", "RPC_OR_CONTRACT_CALL_FAILED"].includes(heart.reason) ? "HEART_UNAVAILABLE" : "HEART_UNAVAILABLE";
+    monitoringFailures.push({ condition: heartCondition, occurred_at: observedAt, source: `TEMPLE_HEART_12345:${heart.reason ?? "CHAIN_READ_UNAVAILABLE"}`, fallback: { attempted: false, strategy: "VERIFY_HEART_READ_PATH", result: "FAILED", evidence: [heart.reason ?? "CHAIN_READ_UNAVAILABLE"] } });
+  } else {
+    if (heart.contract_code_verified !== true) monitoringFailures.push({ condition: "HEART_BYTECODE_MISSING", occurred_at: observedAt, source: "TEMPLE_HEART_12345:BYTECODE", fallback: { attempted: false, strategy: "VERIFY_HEART_READ_PATH", result: "FAILED", evidence: ["HEART_BYTECODE_NOT_VERIFIED"] } });
+    if (!heart.account || !heart.eligibility || !Number.isFinite(Number(heart.heartbeat?.cooldown_seconds)) || !Number.isFinite(Number(heart.fortune?.cooldown_seconds))) monitoringFailures.push({ condition: "COOLDOWN_STATE_UNVERIFIABLE", occurred_at: observedAt, source: "TEMPLE_HEART_12345:COOLDOWN_READ_PATH", fallback: { attempted: false, strategy: "VERIFY_GATEKEEPER_RUNTIME", result: "FAILED", evidence: ["ACCOUNT_OR_COOLDOWN_EVIDENCE_MISSING"] } });
+    if (heart.recent_events?.status !== "CORE_HEART_INDEXER_HEALTHY") monitoringFailures.push({ condition: "TEMPLE_RUNTIME_UNAVAILABLE", occurred_at: observedAt, source: "TEMPLE_HEART_12345:PATROL_DATA", fallback: { attempted: false, strategy: "VERIFY_GATEKEEPER_RUNTIME", result: "FAILED", evidence: [heart.recent_events?.status ?? "CORE_HEART_INDEXER_UNAVAILABLE"] } });
+  }
   const patrol = heartPatrol(heart);
   const ignitionWindow = evaluateIgnitionWindow(new Date().toISOString());
   const actionCandidates = heart.status === "CHAIN_READ_VERIFIED" ? Object.freeze({
@@ -281,7 +309,7 @@ export async function publicReadCycle({ life, seed, verifiedFirstEvents = null }
     wish: createHeartActionCandidate({ action: "makeWish", eligibility: heart.eligibility?.wish?.eligible === true && seed.next_stage?.gatekeeper_runtime?.life_events?.FIRST_WISH_EVENT !== "VERIFIED", block: heart.block_number, observedAt: heart.observed_at, evidence: [`HEART_BLOCK_${heart.block_number}`, seed.next_stage?.gatekeeper_runtime?.life_events?.FIRST_WISH_EVENT === "VERIFIED" ? "FIRST_WISH_ALREADY_COMPLETED" : heart.eligibility?.wish?.reason ?? "ELIGIBILITY_READ"] })
   }) : Object.freeze({ status: "UNAVAILABLE_NO_CHAIN_EVIDENCE" });
   const gatekeeperFinished = new Date().toISOString();
-  const gatekeeperDuty = createGatekeeperDuty({ startedAt: gatekeeperStarted, finishedAt: gatekeeperFinished, heart, patrol });
+  const gatekeeperDuty = createGatekeeperDuty({ startedAt: gatekeeperStarted, finishedAt: gatekeeperFinished, heart, patrol, monitoringFailed: monitoringFailures.length > 0 });
   const gatekeeperWorkSeconds = Number(((Date.now() - gatekeeperClock) / 1000).toFixed(3));
   const cfoClock = Date.now();
   const finance = { BNB: ethers.utils.formatEther(bnb), KGEN: ethers.utils.formatUnits(kgenRaw, Number(kgenDecimals)), KAIOS: ethers.utils.formatUnits(kaiosRaw, Number(kaiosDecimals)), actual_income: "0", actual_expense: "0", actual_gas: "0" };
@@ -301,7 +329,6 @@ export async function publicReadCycle({ life, seed, verifiedFirstEvents = null }
     companyWorkSeconds = Number(((Date.now() - companyClock) / 1000).toFixed(3));
   }
   const lifeEvents = createLifeEventStatus({ wallet: life.wallet_address, finance, recentEvents: heart.recent_events, verifiedFirstEvents });
-  const walletBinding = seed.life_security?.DIGITAL_ANT_0001?.profile?.wallet_binding_history?.find((binding) => binding.status === "ACTIVE");
   const app = seed.apps?.find((item) => item.app_id === "DIGITAL_ANT_APP_0001");
   const certification = createAiLifeCertification({
     life, birthCertificate: seed.birth_certificates?.find((certificate) => certificate.life_id === life.life_id), walletBinding,
@@ -311,6 +338,13 @@ export async function publicReadCycle({ life, seed, verifiedFirstEvents = null }
     evidence: [thoughtOrgan.binding.sha256, `HEART_BLOCK_${heart.block_number}`, seed.next_stage?.worker?.shared_evidence].filter(Boolean), secretSafe: true
   });
   const coreHealthy = gatekeeperDuty.status === "COMPLETED";
+  const monitoringRecoveryEvidence = monitoringFailures.length === 0 ? Object.freeze({
+    rpc: Object.freeze({ status: "VERIFIED", chain_id: 56, fallback_attempt_telemetry: Object.freeze([...provider.readOnlyAttemptTelemetry]), evidence: Object.freeze([`BSC_CHAIN_56_BLOCK_${block.number}`]) }),
+    heart: Object.freeze({ status: "VERIFIED", bytecode_verified: heart.contract_code_verified === true, evidence: Object.freeze([`HEART_BLOCK_${heart.block_number}`, "HEART_BYTECODE_VERIFIED"]) }),
+    wallet_read_path: Object.freeze({ status: "VERIFIED", public_read_verified: true, canonical_binding_verified: true, evidence: Object.freeze(["PUBLIC_WALLET_BINDING_ACTIVE", "BNB_KGEN_KAIOS_READ_VERIFIED"]) }),
+    cooldown: Object.freeze({ status: "VERIFIED", cooldown_verified: true, evidence: Object.freeze([`HEARTBEAT_COOLDOWN_${heart.heartbeat.cooldown_seconds}`, `FORTUNE_COOLDOWN_${heart.fortune.cooldown_seconds}`]) }),
+    patrol_data: Object.freeze({ status: "VERIFIED", fresh: true, observed_at: observedAt, evidence: Object.freeze([heart.recent_events.status, `PATROL_BLOCK_${heart.block_number}`]) })
+  }) : null;
   return Object.freeze({
     bsc_block: block.number, rpc_status: "AVAILABLE", heart_status: heart.status === "CHAIN_READ_VERIFIED" ? "AVAILABLE" : "UNAVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: coreHealthy ? "CORE_HEART_INDEXER_HEALTHY" : "CORE_HEART_INDEXER_DEGRADED",
     wallet_state: { status: "PUBLIC_ADDRESS_READ", bnb: finance.BNB }, heart_state: patrol, finance_state: finance,
@@ -318,6 +352,8 @@ export async function publicReadCycle({ life, seed, verifiedFirstEvents = null }
     observations: ["LIFE_HEALTH_CHECK", "BNB_DARK_MATTER_CHECK", "12345_GATEKEEPER_PATROL", "HEART_ACTION_ELIGIBILITY", "HEART_ACTION_CANDIDATE", "IGNITION_WINDOW_CHECK", "FORTUNE_MONITOR", "CORE_HEART_EVENT_MONITOR", "WISH_VOW_THANKSGIVING", "LAMP", "IGNITION", "LIFE_FINANCE", "CFO_FIELD_SERVICE_DEMAND_SCAN", "ATM_CASH_SCAN", "ATM_KUFO_SCAN", "WASTE_SCAN", "CARGO_SCAN", "ROUTE_EVIDENCE_SCAN", "FUEL_AND_PROFIT_GATE", "11520_REQUEST_PATROL", "MOTHER_ENGINE_PROBLEM_SOLVING", "MOTHER_ENGINE_NEXT_BEST_ACTION", "AI_ANT_COMPANY_WORK", "MISSION", "REPORT", "ADVANCED_TRANSACTION_GRAPH_INDEXER_REQUIRED_OPTIONAL"],
     risk_level: heart.risk_assessment?.level ?? "NORMAL",
     actions_considered: ["HEARTBEAT_ACTION_CANDIDATE", "IGNITION_ACTION_CANDIDATE", "FORTUNE_ACTION_CANDIDATE", "WISH_ACTION_CANDIDATE", "GATEKEEPER_REPORT", "CFO_CHECK", "REQUEST_PATROL", "COMPANY_PATROL", "WORK_QUEUE_CHECK", "MISSION_CHECK"],
+    monitoring_failures: monitoringFailures.map((failure) => createTempleMonitoringFailure({ condition: failure.condition, occurredAt: failure.occurred_at, source: failure.source, fallback: failure.fallback })),
+    monitoring_recovery_evidence: monitoringRecoveryEvidence,
     gatekeeper_duty: gatekeeperDuty, heart_action_candidates: actionCandidates, ignition_window: ignitionWindow, life_event_status: lifeEvents, thought_organ_health: thoughtOrgan.health, life_certification: certification, field_service_patrol: fieldServicePatrol, request_patrol: requestPatrol, mother_engine_patrol: motherEnginePatrol, company_patrol: companyPatrol,
     work_time: { gatekeeper_work_seconds: gatekeeperWorkSeconds, cfo_work_seconds: cfoWorkSeconds, company_work_seconds: companyWorkSeconds, life_health_seconds: Number(((gatekeeperClock - lifeStarted) / 1000).toFixed(3)) },
     error_evidence: coreHealthy ? [{ component: "ADVANCED_TRANSACTION_GRAPH_INDEXER", code: "INDEXER_REQUIRED_OPTIONAL", detail: "CORE_GATEKEEPER_HEALTH_UNAFFECTED" }] : [{ component: "CORE_HEART_INDEXER", code: heart.recent_events?.status ?? heart.reason ?? "CHAIN_READ_UNAVAILABLE", detail: "NO_EVENT_DATA_FABRICATED" }]
@@ -345,16 +381,56 @@ export function buildSharedWorkerStatus({ event, previous = null, requestPatrol,
     missed_cycles: Number(previous?.metrics?.missed_cycles ?? 0) + newlyMissed
   };
   const health = deriveWorkerHealth({ lastCycle: event, now: generatedAt });
+  const lastKnownGood = event.monitoring_status === "VERIFIED" && event.result === "WORK_CYCLE_COMPLETED" ? Object.freeze({ status: "VERIFIED_LAST_KNOWN_GOOD", work_cycle_id: event.work_cycle_id, observed_at: event.finished_at, bsc_block: event.bsc_block ?? null, heart_block: event.gatekeeper_duty?.heart_block ?? null }) : previous?.last_known_good ?? null;
   return validateSharedWorkerStatus(Object.freeze({
     schema_version: "11520_WORKER_STATUS_V1", life_id: "DIGITAL_ANT_0001", app_id: "DIGITAL_ANT_APP_0001", app_version: "V1.6.0",
     scheduler: "GITHUB_ACTIONS_HOURLY_PLUS_IGNITION_WINDOW_PROBES", scheduler_status: "PRODUCTION_ACTIVE", cadence: "EVERY_HOUR_AND_UTC_00_02_00_07", public_read_only: true, signer: false, chain_write: false,
     worker_health: health.status, work_stop_reason: health.stop_reason, generated_at: generatedAt, last_work_cycle: event,
     next_expected_at: new Date(Date.parse(event.scheduled_at) + 3_600_000).toISOString(), metrics,
     primary_job: "WUKONG_GATEKEEPER", secondary_work: "AI_ANT_COMPANY_FOUNDER", gatekeeper_duty: event.gatekeeper_duty, heart_action_candidates: event.heart_action_candidates, ignition_window: event.ignition_window, life_event_status: event.life_event_status, thought_organ_health: event.thought_organ_health, life_certification: event.life_certification,
+    monitoring_status: event.monitoring_status ?? "UNKNOWN", temple_monitoring_incident: event.temple_monitoring_incident ?? previous?.temple_monitoring_incident ?? null, dot_gm_notification_projections: event.dot_gm_notification_projections ?? [], repair_work_orders: event.repair_work_orders ?? [], last_known_good: lastKnownGood,
     patrols: { temple_12345: event.heart_state, field_service: event.field_service_patrol, request: requestPatrol, mother_engine: event.mother_engine_patrol, company: companyPatrol },
     request_patrol: { ...requestPatrol, new_real_request_detected: currentRequests > previousRequests, first_real_customer_detected: previousRequests === 0 && currentRequests > 0 },
     global_truth_source: "GIT_BACKED_APPEND_ONLY_PUBLIC_SNAPSHOT", browser_indexeddb_role: "LOCAL_DRAFT_CACHE_ONLY"
   }));
+}
+
+export async function persistFatalMonitoringEvidence({ error, statusPath, eventsDir = null, output = null, observedAt = new Date().toISOString() }) {
+  let previous = null;
+  try { previous = await readJsonIfPresent(statusPath); } catch { previous = null; }
+  const failure = classifyTempleMonitoringError(error, { occurredAt: observedAt, lastKnownGood: previous?.last_known_good ?? null });
+  const incident = advanceTempleMonitoringIncident({ previousIncident: previous?.temple_monitoring_incident ?? null, failures: [failure], observedAt });
+  const hour = new Date(observedAt); hour.setUTCMinutes(0, 0, 0);
+  const workCycleId = `DIGITAL_ANT_0001_HOURLY_${hour.toISOString().slice(0, 13).replace(/[-T:]/g, "")}`;
+  const gatekeeperDuty = Object.freeze(validateGatekeeperDutyStatus({
+    status: "DEGRADED", gatekeeper_started_at: observedAt, gatekeeper_finished_at: observedAt, heart_block: null,
+    heart_status: "UNKNOWN", fortune_status: "UNKNOWN", heartbeat_status: "UNKNOWN", ignition_status: "UNKNOWN",
+    lamp_status: "UNKNOWN", wish_status: "UNKNOWN", vow_status: "UNKNOWN", claim_monitor_status: "UNKNOWN",
+    risk_status: "UNKNOWN", monitoring_status: "MONITORING_FAILED", degradation_affects_safety: true,
+    evidence: Object.freeze([failure.condition, failure.source])
+  }));
+  const event = Object.freeze({
+    work_cycle_id: workCycleId, scheduled_at: observedAt, started_at: observedAt, finished_at: observedAt,
+    bsc_block: null, rpc_status: "UNKNOWN", heart_status: "UNKNOWN", kgen_status: "UNKNOWN", kaios_status: "UNKNOWN",
+    indexer_status: "UNKNOWN", wallet_state: "UNKNOWN", heart_state: "UNKNOWN", finance_state: "UNKNOWN",
+    work_queue_state: "UNVERIFIED", observations: Object.freeze(["FATAL_RUNTIME_MONITORING_EVIDENCE"]), risk_level: "UNKNOWN",
+    actions_considered: Object.freeze([]), gatekeeper_duty: gatekeeperDuty, monitoring_status: incident.status,
+    temple_monitoring_incident: incident, dot_gm_notification_projections: incident.notification_projections,
+    repair_work_orders: incident.repair_work_orders, work_time: Object.freeze({ gatekeeper_work_seconds: 0, cfo_work_seconds: 0, company_work_seconds: 0 }),
+    action_taken: "NO_ACTION", result: "WORK_CYCLE_DEGRADED", stop_reason: failure.condition,
+    error_evidence: Object.freeze([{ component: error?.component ?? "PUBLIC_WORKER_RUNTIME", code: error?.code ?? "CRITICAL_STATUS_UNKNOWN", detail: "FATAL_RUNTIME_FAILED_CLOSED_NO_VALUE_FABRICATED" }]),
+    tx_hash: null, gas_spent: "0", signer_action: false, chain_write: false, secret_access: false, temple_mutation: false, token_mutation: false, governance_action: false,
+    work_duration_seconds: 0
+  });
+  const requestPatrol = previous?.request_patrol ?? Object.freeze({ status: "SHARED_REQUEST_SOURCE_UNAVAILABLE", source: "GITHUB_ISSUES", real_requests: 0, open_requests: 0, evidence: Object.freeze(["FATAL_RUNTIME_READ_UNAVAILABLE"]) });
+  const companyPatrol = previous?.patrols?.company ?? Object.freeze({ status: "UNAVAILABLE", evidence: Object.freeze(["FATAL_RUNTIME_READ_UNAVAILABLE"]) });
+  const status = buildSharedWorkerStatus({ event, previous, requestPatrol, companyPatrol, generatedAt: observedAt });
+  const eventPath = eventsDir ? join(eventsDir, `${workCycleId}.json`) : null;
+  if (eventPath) await writeJson(eventPath, event);
+  if (statusPath) await writeJson(statusPath, status);
+  const report = Object.freeze({ report_type: "DIGITAL_ANT_PUBLIC_READ_ONLY_HOURLY_WORKER_RESULT", result: "WORK_CYCLE_DEGRADED", fatal_runtime_failure: true, chain_write: false, signer_action: false, shared_status: statusPath, event_path: eventPath, temple_monitoring_incident: incident });
+  if (output) await writeJson(output, report);
+  return Object.freeze({ report, status, event });
 }
 
 async function main() {
@@ -385,7 +461,13 @@ async function main() {
     if (output) await writeJson(output, report); else process.stdout.write(`${JSON.stringify(report)}\n`);
     return;
   }
-  const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, readCycle: (context) => publicReadCycle({ ...context, seed, verifiedFirstEvents }) });
+  const stalePreflight = (() => {
+    if (!previousStatus) return [createTempleMonitoringFailure({ condition: "PUBLIC_RUNTIME_STALE", occurredAt: now, source: "PUBLIC_WORKER_SHARED_STATUS:RESTORE_MISSING", lastKnownGood: null, fallback: { attempted: true, strategy: "RUN_CURRENT_READ_ONLY_WORKER_CYCLE", result: "CURRENT_CYCLE_STARTED", evidence: ["NO_PREVIOUS_STATUS_ARTIFACT_RESTORED"] } })];
+    const finishedAt = Date.parse(previousStatus?.last_work_cycle?.finished_at ?? "");
+    if (!Number.isFinite(finishedAt) || Date.parse(now) - finishedAt <= 4_500_000) return [];
+    return [createTempleMonitoringFailure({ condition: "PUBLIC_RUNTIME_STALE", occurredAt: now, source: "PUBLIC_WORKER_SHARED_STATUS:FRESHNESS", lastKnownGood: previousStatus?.last_known_good ?? null, fallback: { attempted: true, strategy: "RUN_CURRENT_READ_ONLY_WORKER_CYCLE", result: "CURRENT_CYCLE_STARTED", evidence: [previousStatus.last_work_cycle.work_cycle_id] } })];
+  })();
+  const result = await runDigitalAntHourlyCycle({ store: universe.store, life, app, scheduledAt: now, startedAt: now, previousStatus, preflightFailures: stalePreflight, readCycle: (context) => publicReadCycle({ ...context, seed, verifiedFirstEvents }) });
   const event = publicWorkEvent(result);
   const requestPatrol = event.request_patrol;
   const companyPatrol = event.company_patrol;
@@ -398,5 +480,14 @@ async function main() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  main().catch((error) => { process.stderr.write(`${error?.code ?? "WORKER_RUNTIME_FAILED"}: public read-only worker could not complete.\n`); process.exitCode = 1; });
+  main().catch(async (error) => {
+    const argv = process.argv.slice(2);
+    try {
+      await persistFatalMonitoringEvidence({ error, statusPath: argument(argv, "--status"), eventsDir: argument(argv, "--events-dir"), output: argument(argv, "--output") });
+    } catch (evidenceError) {
+      process.stderr.write(`${evidenceError?.code ?? "MONITORING_EVIDENCE_WRITE_FAILED"}: fatal monitoring evidence could not be persisted.\n`);
+    }
+    process.stderr.write(`${error?.code ?? "WORKER_RUNTIME_FAILED"}: public read-only worker failed closed.\n`);
+    process.exitCode = 1;
+  });
 }

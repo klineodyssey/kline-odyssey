@@ -161,7 +161,7 @@ Existing V2.2 IndexedDB Service projections are upgraded through `CANONICAL_SEED
 
 The four first service profiles expose provider Life ID, description, capabilities, requirements, pricing status, settlement currency, availability, work history, review policy and customer count. All remain `UNPRICED`; Chain Monitoring remains `LIMITED / INDEXER_REQUIRED` for full flow clustering.
 
-`DIGITAL_ANT_WORKER` is a single-cycle worker invoked by a replaceable scheduler adapter. Supported adapters are Local, GitHub Actions, cron, self-hosted agent and external scheduler. The repository does not claim that Codex or the browser stays alive in the background. V2.4 includes an hourly GitHub Actions definition and `core/jobs/public-read-only-worker.mjs`; because neither is committed or pushed, current scheduler truth is `CONFIGURED_LOCAL_NOT_ACTIVE`.
+`DIGITAL_ANT_WORKER` is a single-cycle worker invoked by a replaceable scheduler adapter. Supported adapters are Local, GitHub Actions, cron, self-hosted agent and external scheduler. The repository does not claim that Codex or the browser stays alive in the background. The current hourly GitHub Actions definition invokes `core/jobs/public-read-only-worker.mjs` as a production-active, repository-read-only Worker; mutable continuity and event evidence stay in retained Actions artifacts rather than commits.
 
 ```text
 BOOT → VERIFY LIFE → VERIFY WALLET → READ BSC → 12345 GATEKEEPER
@@ -391,11 +391,19 @@ V3.4 keeps the same Universal Exchange and Life identities. `DIGITAL_ANT_APP_000
 
 The browser Voice Concierge cannot autoplay. A user gesture starts capability/permission checks; Speech Recognition produces a transcript that still requires confirmation before a Draft Intent can advance. Speech Synthesis reads only the public AI understanding. Unsupported browsers retain Text input, and no voice path may speak or store a private key or contact evidence.
 
-`DIGITAL_ANT_CONTINUOUS_WORKER` is a stateless public read-only process scheduled hourly by GitHub Actions. It has no signer, private key, Heart write, transfer, settlement or Treasury authority. One UTC-hour cycle produces at most one append-only `HOURLY_WORK_EVENT`; repeated calls are `IDEMPOTENT_NOOP`. Shared status is committed to `K線西遊記/temples/11520/runtime/worker-status.json`, while hourly evidence is kept under `runtime/work-events/`. Browser IndexedDB is local draft/cache, never global truth.
+`DIGITAL_ANT_CONTINUOUS_WORKER` is a public read-only process scheduled hourly by GitHub Actions. It has no signer, private key, Heart write, transfer, settlement or Treasury authority. One UTC-hour cycle produces at most one append-only `HOURLY_WORK_EVENT`; repeated calls are `IDEMPOTENT_NOOP`. The repository `runtime/worker-status.json` is a release snapshot. Scheduled runs preserve the current status and the actual hourly event in a retained GitHub Actions artifact, and the next run restores the latest prior artifact with `actions: read` so consecutive-failure state can advance without repository mutation. A missing or failed restore is itself `PUBLIC_RUNTIME_STALE`; it does not stop the current read-only patrol from producing fail-closed evidence. Browser IndexedDB is local draft/cache, never global truth.
 
 Worker Health is derived from timestamps and results: `HEALTHY`, `DEGRADED`, `MISSED_CYCLE`, `FAILED` or `OFFLINE`. `NO_ACTION` is a valid completed decision. Heartbeat, Fortune, Ignition, Lamp, Wish and Thanksgiving/Vow statuses remain `CLIENT_DERIVED`; absent secure signer infrastructure is shown as `WRITE_NOT_CONNECTED`. Complete transaction-flow analysis remains `INDEXER_REQUIRED`.
 
 Shared real Requests use authenticated GitHub Issues with an explicit request template. This makes the requester source auditable without exposing private contact evidence. A GitHub Request is still not a Customer, Quote, Order, Contract, Settlement or Revenue. Company Treasury remains unbound and all financial writes remain disabled.
+
+### Temple monitoring incident response
+
+WUKONG_GATEKEEPER treats inability to observe the Temple as an incident, never as normal. `BSC_RPC_MISSING`, `BSC_RPC_UNREACHABLE`, `HEART_UNAVAILABLE`, `HEART_BYTECODE_MISSING`, `WALLET_BINDING_UNVERIFIED`, `TEMPLE_RUNTIME_UNAVAILABLE`, `COOLDOWN_STATE_UNVERIFIABLE`, `PUBLIC_RUNTIME_STALE` and `CRITICAL_STATUS_UNKNOWN` create a `TEMPLE_MONITORING_INCIDENT`. The failure record contains its timestamp and source, last-known-good evidence, each approved read-only fallback attempt and its result. Missing data may only be labelled `UNKNOWN`, `DEGRADED` or `MONITORING_FAILED`; `NORMAL` and `NO_ISSUE` are rejected.
+
+The first unresolved cycle is `DEGRADED` and emits a DOT / 衡曜 General Manager notification projection. A second consecutive unresolved cycle is P1 and creates deduplicated local R0/R1 repair proposals such as `RESTORE_READ_ONLY_BSC_RPC`, `VERIFY_HEART_READ_PATH` and `VERIFY_GATEKEEPER_RUNTIME`. These proposals are evidence records with `canonical_work_queue_promoted=false` and `execution_authorized=false`; they do not create an `OPEN` canonical Work Queue item or bypass V9.1 governance.
+
+Recovery closes the incident only after current evidence verifies BSC chain 56 RPC, Heart bytecode, public Wallet reads and the canonical active binding, cooldown state, and fresh patrol data. The public workflow remains read-only and can perform only configuration verification, safe runtime repair, tests, evidence collection and WorkOrder coordination. Secret access, signing, mainnet transactions, real asset movement, Temple/token mutation and governance actions remain false. A fatal worker exception also persists a fail-closed status and actual event artifact before exiting non-zero.
 
 ## Truth labels
 

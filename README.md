@@ -1383,7 +1383,10 @@ signer-free; the separate Secure Signer specification is `NOT_CONNECTED`.
 - Canonical records: `core/data/canonical.json`
 - Architecture: `docs/KGEN_11520_V2_ARCHITECTURE.md`
 - Validation: `tests/universal-exchange.test.mjs`
-- Shared Worker status: `K線西遊記/temples/11520/runtime/worker-status.json`
+- Release-snapshot Worker status: `K線西遊記/temples/11520/runtime/worker-status.json`
+- Scheduled Worker continuity: the read-only workflow restores the latest retained status artifact with `actions: read`, then uploads the new status plus the actual hourly event; it does not mutate the repository.
+- Temple monitoring: loss of RPC, Heart bytecode/read path, canonical public Wallet binding, cooldown, patrol freshness, runtime freshness, or any critical status creates `TEMPLE_MONITORING_INCIDENT`; missing visibility is `UNKNOWN`/`DEGRADED`/`MONITORING_FAILED`, never `NORMAL`.
+- Repeat/recovery policy: two consecutive unresolved cycles create deduplicated P1 local R0/R1 repair proposals without opening the canonical Work Queue; recovery requires verified RPC, Heart bytecode, Wallet read/binding, cooldown and fresh patrol evidence.
 - Verified first Heartbeat/KGEN evidence: `K線西遊記/temples/11520/runtime/life-events/DIGITAL_ANT_0001_FIRST_HEARTBEAT_AND_KGEN_V3_6.json`
 - Public safety-policy source: `core/security/life-security.mjs`. The credential-capable signer remains outside the Repo, Pages, browser and public workflows.
 

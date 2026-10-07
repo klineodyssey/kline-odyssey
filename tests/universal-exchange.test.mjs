@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   MemoryUniverseStore, IndexedDbUniverseStore, createResilientBrowserUniverseStore,
   createUniverseRuntime, resolveSpeciesCode, upgradeAppVersion,
@@ -80,6 +82,8 @@ import {
   NAIHE_DIGITAL_LIFE_GENESIS_STATION_SPEC,
   DIGITAL_ANT_WORK_PRIORITIES, DIGITAL_ANT_HOURLY_DUTY_ORDER,
   validateGatekeeperDutyStatus, assertCompanyWorkAllowedAfterGatekeeper,
+  TEMPLE_MONITORING_FAILURE_CONDITIONS, assertNoFalseNormal, createTempleMonitoringFailure,
+  classifyTempleMonitoringError, advanceTempleMonitoringIncident, validateTempleMonitoringIncident,
   validateFirstLifeEventEvidence, appendFirstDigitalAntLifeEvent,
   DIGITAL_ANT_LIFE_WORK_CONTRACT, createDailyGatekeeperReport,
   DIGITAL_ANT_SECURE_SIGNER_WORKER, DIGITAL_ANT_LIVE_ACTION_POLICY, prepareSecureHeartAction,
@@ -110,12 +114,23 @@ import {
 } from "../core/index.mjs";
 import { verifyDigitalAntWalletBinding, verifyDigitalLifeWalletBinding, CODEX_GM_ENV } from "../core/security/wallet-binding.mjs";
 import { TEMPLE_HEART_READ_ABI, TEMPLE_HEART_DRY_RUN_ABI, TEMPLE_HEART_VERIFIED_ACTIONS, readCoreHeartEvents } from "../core/integrations/temple-heart-12345.mjs";
-import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
+import { buildSharedWorkerStatus, createPublicReadProvider, inspectPhysicsThoughtOrgan, persistFatalMonitoringEvidence, readCompanyPatrol, readFieldServicePatrol, readMotherEnginePatrol, readPublicRequestPatrol } from "../core/jobs/public-read-only-worker.mjs";
 
 const seed = JSON.parse(await fs.readFile(new URL("../core/data/canonical.json", import.meta.url), "utf8"));
 
 async function runtime() {
   return createUniverseRuntime({ seed: structuredClone(seed), store: new MemoryUniverseStore() });
+}
+
+function verifiedMonitoringRecovery(overrides = {}) {
+  return {
+    rpc: { status: "VERIFIED", chain_id: 56, evidence: ["BSC_CHAIN_56_BLOCK_116040000"] },
+    heart: { status: "VERIFIED", bytecode_verified: true, evidence: ["HEART_BLOCK_116040000", "HEART_BYTECODE_VERIFIED"] },
+    wallet_read_path: { status: "VERIFIED", public_read_verified: true, canonical_binding_verified: true, evidence: ["PUBLIC_WALLET_BINDING_ACTIVE", "BNB_KGEN_KAIOS_READ_VERIFIED"] },
+    cooldown: { status: "VERIFIED", cooldown_verified: true, evidence: ["HEARTBEAT_COOLDOWN_VERIFIED", "FORTUNE_COOLDOWN_VERIFIED"] },
+    patrol_data: { status: "VERIFIED", fresh: true, evidence: ["CORE_HEART_INDEXER_HEALTHY", "PATROL_BLOCK_116040000"] },
+    ...overrides
+  };
 }
 
 async function withIndexedDb(fakeIndexedDb, callback) {
@@ -1249,7 +1264,7 @@ test("V2.4 hourly cycle is once per UTC hour and duration uses actual timestamps
     scheduledAt: "2026-08-15T10:47:00.000Z",
     startedAt: "2026-08-15T10:00:02.000Z",
     finishedAt: "2026-08-15T10:00:07.000Z",
-    readCycle: async () => ({ bsc_block: 116040000, rpc_status: "AVAILABLE", heart_status: "AVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: "INDEXER_REQUIRED", wallet_state: "PUBLIC_READ", heart_state: "READ_ONLY", finance_state: { income: "0", expense: "0" }, work_queue_state: "SCHEMA_READY_EMPTY_QUEUE", observations: ["VERIFIED_PUBLIC_READ"], risk_level: "NORMAL", actions_considered: [] })
+    readCycle: async () => ({ bsc_block: 116040000, rpc_status: "AVAILABLE", heart_status: "AVAILABLE", kgen_status: "AVAILABLE", kaios_status: "AVAILABLE", indexer_status: "INDEXER_REQUIRED", wallet_state: "PUBLIC_READ", heart_state: "READ_ONLY", finance_state: { income: "0", expense: "0" }, work_queue_state: "SCHEMA_READY_EMPTY_QUEUE", observations: ["VERIFIED_PUBLIC_READ"], risk_level: "NORMAL", actions_considered: [], monitoring_recovery_evidence: verifiedMonitoringRecovery() })
   };
   const first = await runDigitalAntHourlyCycle(input);
   const duplicate = await runDigitalAntHourlyCycle({ ...input, scheduledAt: "2026-08-15T10:59:59.000Z" });
@@ -1260,7 +1275,7 @@ test("V2.4 hourly cycle is once per UTC hour and duration uses actual timestamps
   assert.equal(summarizeWorkHistory(await state.store.history(life.life_id, "LIFE")).work_duration_seconds, 5);
 });
 
-test("RPC failure records failed Work evidence and never kills Life", async () => {
+test("RPC failure records a fail-closed Temple monitoring incident and never kills Life", async () => {
   const state = await runtime();
   const life = await state.registries.life.get("DIGITAL_ANT_0001");
   const app = await state.registries.app.get("DIGITAL_ANT_APP_0001");
@@ -1269,11 +1284,85 @@ test("RPC failure records failed Work evidence and never kills Life", async () =
     startedAt: "2026-08-15T11:00:01.000Z", finishedAt: "2026-08-15T11:00:02.000Z",
     readCycle: async () => { const error = new Error("provider unavailable"); error.code = "RPC_UNAVAILABLE"; error.component = "BSC_RPC"; throw error; }
   });
-  assert.equal(result.status, "WORK_CYCLE_FAILED");
+  assert.equal(result.status, "WORK_CYCLE_DEGRADED");
   assert.equal(result.life_status, "ALIVE");
   assert.equal(result.event.payload.tx_hash, null);
   assert.equal(result.event.payload.gas_spent, "0");
   assert.deepEqual(result.event.payload.error_evidence, [{ component: "BSC_RPC", code: "RPC_UNAVAILABLE", detail: "PUBLIC_READ_FAILED_NO_VALUE_FABRICATED" }]);
+  assert.equal(result.event.payload.monitoring_status, "DEGRADED");
+  assert.equal(result.event.payload.risk_level, "UNKNOWN");
+  assert.equal(result.event.payload.gatekeeper_duty.monitoring_status, "MONITORING_FAILED");
+  assert.deepEqual(result.event.payload.temple_monitoring_incident.failure_conditions, ["BSC_RPC_UNREACHABLE"]);
+  assert.deepEqual(result.event.payload.dot_gm_notification_projections[0].recipients, ["DOT", "衡曜 / General Manager"]);
+});
+
+test("every monitoring failure condition creates a recorded first-failure incident without false normal", () => {
+  for (const condition of TEMPLE_MONITORING_FAILURE_CONDITIONS) {
+    const failure = createTempleMonitoringFailure({
+      condition, occurredAt: "2026-10-08T01:00:00.000Z", source: `TEST:${condition}`,
+      lastKnownGood: { status: "VERIFIED_LAST_KNOWN_GOOD", work_cycle_id: "C0" },
+      fallback: { attempted: true, strategy: "APPROVED_READ_ONLY_FALLBACK", result: "FAILED", evidence: ["READ_ONLY_ATTEMPT_1"] }
+    });
+    const incident = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T01:00:01.000Z" });
+    assert.equal(validateTempleMonitoringIncident(incident), incident);
+    assert.equal(incident.incident_type, "TEMPLE_MONITORING_INCIDENT");
+    assert.equal(incident.status, "DEGRADED");
+    assert.equal(incident.priority, "P2");
+    assert.equal(incident.failure_records[0].occurred_at, "2026-10-08T01:00:00.000Z");
+    assert.equal(incident.failure_records[0].source, `TEST:${condition}`);
+    assert.equal(incident.failure_records[0].last_known_good.work_cycle_id, "C0");
+    assert.equal(incident.failure_records[0].read_only_fallback.result, "FAILED");
+    assert.equal(incident.notification_projections[0].external_message_sent, false);
+    assert.notEqual(incident.status, "NORMAL");
+    assert.notEqual(incident.status, "NO_ISSUE");
+  }
+  for (const status of ["UNKNOWN", "DEGRADED", "MONITORING_FAILED"]) assert.equal(assertNoFalseNormal({ status, monitoringDataVisible: false }), true);
+  for (const status of ["NORMAL", "NO_ISSUE"]) assert.throws(() => assertNoFalseNormal({ status, monitoringDataVisible: false }), (error) => error.code === "TEMPLE_MONITORING_FALSE_NORMAL_FORBIDDEN");
+});
+
+test("repeat monitoring failure creates deduplicated P1 local repair proposals without queue promotion", () => {
+  const observedAt = "2026-10-08T02:00:00.000Z";
+  const failures = [
+    ["BSC_RPC_UNREACHABLE", "BSC_RPC:RPC_UNAVAILABLE"],
+    ["HEART_UNAVAILABLE", "TEMPLE_HEART_12345:CHAIN_READ_UNAVAILABLE"],
+    ["TEMPLE_RUNTIME_UNAVAILABLE", "TEMPLE_RUNTIME:PATROL_UNAVAILABLE"]
+  ].map(([condition, source]) => createTempleMonitoringFailure({ condition, occurredAt: observedAt, source, fallback: { attempted: true, strategy: "READ_ONLY", result: "FAILED", evidence: [condition] } }));
+  const first = advanceTempleMonitoringIncident({ failures, observedAt });
+  const second = advanceTempleMonitoringIncident({ previousIncident: first, failures, observedAt: "2026-10-08T03:00:00.000Z" });
+  const third = advanceTempleMonitoringIncident({ previousIncident: second, failures, observedAt: "2026-10-08T04:00:00.000Z" });
+  assert.equal(second.priority, "P1");
+  assert.equal(second.status, "MONITORING_FAILED");
+  assert.deepEqual(second.repair_work_orders.map((order) => order.action).sort(), ["RESTORE_READ_ONLY_BSC_RPC", "VERIFY_GATEKEEPER_RUNTIME", "VERIFY_HEART_READ_PATH"]);
+  assert.equal(third.repair_work_orders.length, 3);
+  assert.equal(new Set(third.repair_work_orders.map((order) => order.deduplication_key)).size, 3);
+  for (const order of third.repair_work_orders) {
+    assert.equal(order.status, "PROPOSED_LOCAL_R0_R1");
+    assert.equal(order.canonical_work_queue_promoted, false);
+    assert.equal(order.execution_authorized, false);
+    assert.equal(order.chain_write, false);
+  }
+});
+
+test("incident recovery requires RPC, Heart bytecode, canonical wallet read, cooldown, and fresh patrol evidence", () => {
+  const failure = createTempleMonitoringFailure({ condition: "HEART_UNAVAILABLE", occurredAt: "2026-10-08T05:00:00.000Z", source: "HEART:UNAVAILABLE" });
+  const first = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T05:00:00.000Z" });
+  const incomplete = verifiedMonitoringRecovery({ patrol_data: { status: "VERIFIED", fresh: false, evidence: ["STALE_PATROL"] } });
+  const stillOpen = advanceTempleMonitoringIncident({ previousIncident: first, failures: [], observedAt: "2026-10-08T06:00:00.000Z", recoveryEvidence: incomplete });
+  assert.equal(stillOpen.open, true);
+  assert.equal(stillOpen.status, "MONITORING_FAILED");
+  assert.ok(stillOpen.failure_conditions.includes("CRITICAL_STATUS_UNKNOWN"));
+  const recovered = advanceTempleMonitoringIncident({ previousIncident: stillOpen, failures: [], observedAt: "2026-10-08T07:00:00.000Z", recoveryEvidence: verifiedMonitoringRecovery() });
+  assert.equal(recovered.open, false);
+  assert.equal(recovered.status, "RECOVERED");
+  assert.equal(recovered.recovery_evidence.heart.bytecode_verified, true);
+  assert.equal(recovered.recovery_evidence.wallet_read_path.canonical_binding_verified, true);
+});
+
+test("monitoring incident safety boundary forbids secrets, signing, transactions, assets, mutations, and governance", () => {
+  const failure = classifyTempleMonitoringError(Object.assign(new Error("offline"), { code: "RPC_UNAVAILABLE", component: "BSC_RPC", read_only_attempt_telemetry: [{ target: "APPROVED_READ_ONLY_BSC_RPC_FALLBACK_1", result: "FAILED" }] }), { occurredAt: "2026-10-08T08:00:00.000Z" });
+  const incident = advanceTempleMonitoringIncident({ failures: [failure], observedAt: "2026-10-08T08:00:00.000Z" });
+  assert.equal(failure.read_only_fallback.attempted, true);
+  for (const key of ["secret_access", "signer", "chain_write", "transaction_sent", "asset_movement", "temple_mutation", "token_mutation", "governance_action"]) assert.equal(incident.safety[key], false);
 });
 
 test("Empty Work Queue is valid and Internal Proposal is not a customer order", () => {
@@ -2676,7 +2765,7 @@ test("V3.4 Heart statuses remain CLIENT_DERIVED and writes stay disconnected", (
   assert.equal(normalizeHeartActionStatus({ eligible: true, reason: "HEARTBEAT_ELIGIBLE", source: "CLIENT_DERIVED" }).status, "ELIGIBLE");
   assert.equal(normalizeHeartActionStatus({ eligible: false, reason: "IGNITE_OUT_OF_WINDOW", source: "CLIENT_DERIVED" }).status, "OUT_OF_WINDOW");
   assert.equal(normalizeHeartActionStatus({ eligible: false, reason: "KGEN_BALANCE_INSUFFICIENT", source: "CLIENT_DERIVED" }).status, "INSUFFICIENT_BALANCE");
-  assert.equal(normalizeHeartActionStatus(null, { available: false }).status, "UNAVAILABLE");
+  assert.deepEqual(normalizeHeartActionStatus(null, { available: false }), { status: "UNKNOWN", monitoring_status: "MONITORING_FAILED", eligibility_source: "CLIENT_DERIVED", write_status: "WRITE_NOT_CONNECTED" });
   assert.equal(normalizeHeartActionStatus({ eligible: true, reason: "WISH_HASH_VALID", source: "CLIENT_DERIVED" }).write_status, "WRITE_NOT_CONNECTED");
 });
 
@@ -2712,7 +2801,11 @@ test("V3.9 App upgrade preserves Life ID and immutable Birth", async () => {
 test("V3.4 scheduled worker is hourly, repository-read-only and cannot access signer secrets", async () => {
   const workflow = await fs.readFile(new URL("../.github/workflows/universal_exchange_v2.yml", import.meta.url), "utf8");
   assert.match(workflow, /cron: "17 \* \* \* \*"/);
-  assert.match(workflow, /--status "K線西遊記\/temples\/11520\/runtime\/worker-status\.json"/);
+  assert.match(workflow, /--status "\$RUNNER_TEMP\/digital-ant-runtime\/worker-status\.json"/);
+  assert.match(workflow, /actions:\s*read/);
+  assert.match(workflow, /actions\/download-artifact@v8/);
+  assert.match(workflow, /Restore previous read-only status for consecutive-cycle detection/);
+  assert.match(workflow, /\$\{\{ runner\.temp \}\}\/digital-ant-runtime\//);
   assert.doesNotMatch(workflow, /contents:\s*write/);
   assert.doesNotMatch(workflow, /actions:\s*write/);
   assert.doesNotMatch(workflow, /git\s+(?:add|commit|push)\b/);
@@ -2735,6 +2828,46 @@ test("V3.4 Node worker uses a signer-free fetch transport and verifies BSC chain
   assert.equal(await provider.getBlockNumber(), 0x1234);
   assert.deepEqual(await provider.listAccounts(), []);
   assert.deepEqual(methods, ["eth_chainId", "eth_blockNumber", "eth_chainId", "eth_accounts"]);
+  assert.ok(provider.readOnlyAttemptTelemetry.every((attempt) => attempt.result === "VERIFIED"));
+});
+
+test("public BSC provider records approved read-only fallback attempts without recording endpoint URLs", async () => {
+  let calls = 0;
+  const provider = createPublicReadProvider({
+    rpcUrl: "https://configured.example.invalid",
+    fetchImpl: async (_url, init) => {
+      calls += 1;
+      if (calls === 1) throw Object.assign(new Error("offline"), { code: "NETWORK_UNAVAILABLE" });
+      const request = JSON.parse(init.body);
+      return { ok: true, json: async () => ({ jsonrpc: "2.0", id: request.id, result: "0x38" }) };
+    }
+  });
+  assert.equal(Number(BigInt(await provider.send("eth_chainId", []))), 56);
+  assert.deepEqual(provider.readOnlyAttemptTelemetry.slice(0, 2).map(({ target, result }) => ({ target, result })), [
+    { target: "PRIMARY_READ_ONLY_BSC_RPC", result: "FAILED" },
+    { target: "APPROVED_READ_ONLY_BSC_RPC_FALLBACK_1", result: "VERIFIED" }
+  ]);
+  assert.doesNotMatch(JSON.stringify(provider.readOnlyAttemptTelemetry), /https?:\/\//);
+});
+
+test("fatal public worker catch persists fail-closed status and actual event evidence", async () => {
+  const temporary = await fs.mkdtemp(join(tmpdir(), "kgen-monitoring-incident-"));
+  const statusPath = join(temporary, "digital-ant-runtime", "worker-status.json");
+  const eventsDir = join(temporary, "digital-ant-runtime", "work-events");
+  const output = join(temporary, "digital-ant-hourly-worker.json");
+  try {
+    const error = Object.assign(new Error("runtime unavailable"), { code: "TEMPLE_RUNTIME_UNAVAILABLE", component: "TEMPLE_RUNTIME" });
+    const evidence = await persistFatalMonitoringEvidence({ error, statusPath, eventsDir, output, observedAt: "2026-10-08T09:00:00.000Z" });
+    assert.equal(evidence.status.worker_health, "DEGRADED");
+    assert.equal(evidence.status.monitoring_status, "DEGRADED");
+    assert.equal(evidence.event.risk_level, "UNKNOWN");
+    assert.equal(evidence.event.gatekeeper_duty.monitoring_status, "MONITORING_FAILED");
+    assert.equal(JSON.parse(await fs.readFile(statusPath, "utf8")).temple_monitoring_incident.open, true);
+    assert.equal(JSON.parse(await fs.readFile(output, "utf8")).fatal_runtime_failure, true);
+    assert.equal((await fs.readdir(eventsDir)).length, 1);
+  } finally {
+    await fs.rm(temporary, { recursive: true, force: true });
+  }
 });
 
 function gatekeeperDuty(overrides = {}) {
@@ -2757,7 +2890,7 @@ test("V3.5 Primary Wukong Gatekeeper job always precedes Company work", () => {
 test("V3.5 Primary job bypass fails while safe degraded duty may continue", () => {
   assert.equal(assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty()), true);
   assert.equal(assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty({ status: "DEGRADED", degradation_affects_safety: false })), true);
-  assert.throws(() => assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true })), (error) => error.code === "PRIMARY_JOB_BYPASS");
+  assert.throws(() => assertCompanyWorkAllowedAfterGatekeeper(gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true, monitoring_status: "MONITORING_FAILED", risk_status: "UNKNOWN" })), (error) => error.code === "PRIMARY_JOB_BYPASS");
   assert.equal(validateGatekeeperDutyStatus(gatekeeperDuty()).status, "COMPLETED");
 });
 
@@ -2896,7 +3029,7 @@ test("Mother Engine patrol runs only after primary duty and creates no customer 
   assert.equal(patrol.chain_write, false);
   assert.equal(patrol.customer_created, false);
   assert.equal(patrol.revenue_created, "0");
-  assert.throws(() => readMotherEnginePatrol(seed, { gatekeeperDuty: gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true }), finance: { BNB: "0", KGEN: "0" }, thoughtOrganHealth: seed.next_stage.thought_organ_health_v3_8 }), (error) => error.code === "PRIMARY_JOB_BYPASS");
+  assert.throws(() => readMotherEnginePatrol(seed, { gatekeeperDuty: gatekeeperDuty({ status: "FAILED_CRITICAL", degradation_affects_safety: true, monitoring_status: "MONITORING_FAILED", risk_status: "UNKNOWN" }), finance: { BNB: "0", KGEN: "0" }, thoughtOrganHealth: seed.next_stage.thought_organ_health_v3_8 }), (error) => error.code === "PRIMARY_JOB_BYPASS");
 });
 
 test("Demand-first product selection does not create factory, inventory, customer, or revenue", () => {

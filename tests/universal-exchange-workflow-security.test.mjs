@@ -7,9 +7,15 @@ test("Digital Ant scheduled worker is repository-read-only and cannot deploy Pag
 
   assert.match(workflow, /cron: "17 \* \* \* \*"/);
   assert.match(workflow, /digital-ant-public-read-only-worker:/);
-  assert.match(workflow, /--status "K線西遊記\/temples\/11520\/runtime\/worker-status\.json"/);
-  assert.match(workflow, /Preserve public Work Event evidence without repository mutation/);
+  assert.match(workflow, /--status "\$RUNNER_TEMP\/digital-ant-runtime\/worker-status\.json"/);
+  assert.match(workflow, /Preserve status and actual incident Work Event evidence without repository mutation/);
+  assert.match(workflow, /Preserve status and actual incident Work Event evidence without repository mutation\r?\n\s+if: always\(\)/);
   assert.match(workflow, /uses: actions\/upload-artifact@v7/);
+  assert.match(workflow, /uses: actions\/download-artifact@v8/);
+  assert.match(workflow, /uses: actions\/github-script@v9/);
+  assert.equal((workflow.match(/continue-on-error:\s*true/g) || []).length, 2);
+  assert.match(workflow, /actions:\s*read/);
+  assert.match(workflow, /Restore previous read-only status for consecutive-cycle detection/);
   assert.doesNotMatch(workflow, /uses: actions\/upload-artifact@v4/);
   assert.equal((workflow.match(/uses: actions\/checkout@v7/g) || []).length, 2);
   assert.equal((workflow.match(/uses: actions\/setup-node@v7/g) || []).length, 2);

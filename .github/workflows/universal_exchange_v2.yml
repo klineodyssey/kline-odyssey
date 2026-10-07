@@ -90,6 +90,7 @@ jobs:
     permissions:
       contents: read
       issues: read
+      actions: read
     concurrency:
       group: digital-ant-public-hourly-worker
       cancel-in-progress: false
@@ -101,21 +102,66 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "20"
+      - name: Locate previous Digital Ant runtime evidence
+        id: previous-runtime
+        continue-on-error: true
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+              ...context.repo,
+              workflow_id: "universal_exchange_v2.yml",
+              branch: "main",
+              status: "completed",
+              per_page: 50
+            });
+            for (const run of runs) {
+              if (run.id >= Number(context.runId)) continue;
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                ...context.repo,
+                run_id: run.id,
+                per_page: 100
+              });
+              const artifact = artifacts.find((item) => item.expired !== true && item.name.startsWith("digital-ant-hourly-"));
+              if (!artifact) continue;
+              core.setOutput("run-id", String(run.id));
+              core.setOutput("artifact-name", artifact.name);
+              break;
+            }
+      - name: Download previous Digital Ant runtime evidence
+        if: steps.previous-runtime.outputs.run-id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ steps.previous-runtime.outputs.artifact-name }}
+          path: ${{ runner.temp }}/digital-ant-previous
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.previous-runtime.outputs.run-id }}
+      - name: Restore previous read-only status for consecutive-cycle detection
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/digital-ant-runtime/work-events"
+          previous="$RUNNER_TEMP/digital-ant-previous/digital-ant-runtime/worker-status.json"
+          if test -f "$previous"; then
+            cp "$previous" "$RUNNER_TEMP/digital-ant-runtime/worker-status.json"
+          fi
       - name: Run one independent read-only hourly or ignition-window cycle
         env:
           BSC_RPC_URL: ${{ vars.BSC_RPC_URL }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           node core/jobs/public-read-only-worker.mjs \
-            --status "K線西遊記/temples/11520/runtime/worker-status.json" \
-            --events-dir "K線西遊記/temples/11520/runtime/work-events" \
+            --status "$RUNNER_TEMP/digital-ant-runtime/worker-status.json" \
+            --events-dir "$RUNNER_TEMP/digital-ant-runtime/work-events" \
             --output "$RUNNER_TEMP/digital-ant-hourly-worker.json"
-      - name: Preserve public Work Event evidence without repository mutation
+      - name: Preserve status and actual incident Work Event evidence without repository mutation
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: digital-ant-hourly-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/digital-ant-hourly-worker.json
-            K線西遊記/temples/11520/runtime/worker-status.json
+            ${{ runner.temp }}/digital-ant-runtime/
           if-no-files-found: error
           retention-days: 30
