@@ -231,14 +231,19 @@ independent canonical work-order or signed contribution record resolves it.
 ### Company handoff
 
 - `GM_DIRECT_CHANNEL = VERIFIED` for the existing Codex chat titled
-  `KAIOS整體創作（衡曜）`; final report delivery is pending the exact report
-  commit/PR URL. `GM_ACK = NOT_VERIFIED`.
+  `KAIOS整體創作（衡曜）`; `GM_DELIVERY = SENT` with local exact HEAD and
+  the remote-write blocker. `GM_ACK = NOT_VERIFIED`.
 - `DOT_STATUS = AVAILABLE_FOR_ASSIGNMENT` after this report. A future task must
   supply `WORK_ID`, source, owner, implementer, reviewer, bounded scope, and
   acceptance tests. No new work authority is inferred here.
-- `DATA_LOSS_RISK = LOW` after commit/push/Draft PR; until then this worktree is
-  the only copy. No merge, deploy, Mainnet transaction, real KGEN/KAIOS transfer,
-  Treasury, payroll, or governance action is authorized by this report.
+- `REMOTE_SAVE = BLOCKED_GITHUB_INTERNAL_SERVER_ERROR`: two authenticated Git
+  pushes were rejected by the remote with Internal Server Error and the
+  authorized Contents API fallback returned an empty write response. Therefore
+  `PR = NONE`, `REMOTE_HEAD = NONE`, and `DATA_LOSS_RISK = MEDIUM`. The report is
+  committed in the managed worktree and its exact status was sent to GM and DOT,
+  but it is not yet a remote repository checkpoint. No merge, deploy, Mainnet
+  transaction, real KGEN/KAIOS transfer, Treasury, payroll, or governance action
+  is authorized by this report.
 
 ## P0 simulation order availability candidate — 2026-10-06
 
