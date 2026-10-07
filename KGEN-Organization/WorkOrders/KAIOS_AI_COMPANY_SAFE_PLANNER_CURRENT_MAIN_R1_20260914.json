@@ -1,7 +1,7 @@
 {
   "schema": "KAIOS_MACHINE_VERIFIABLE_WORK_ORDER_V1",
   "work_order_id": "KAIOS-AI-COMPANY-SAFE-PLANNER-CURRENT-MAIN-R1-20260914",
-  "status": "DYNAMIC_ORGAN_CANDIDATE_INDEPENDENT_REVIEW_PENDING",
+  "status": "DYNAMIC_ORGAN_CANDIDATE_SINGLE_WRITER_ACTIVE",
   "priority": "P1",
   "risk": "R1",
   "repository": "klineodyssey/kline-odyssey",
@@ -66,6 +66,10 @@
     "operational_review_does_not_override_human_merge_policy": true,
     "main_branch_forbidden": true,
     "registered_worker_branch_pattern_required": true,
+    "single_active_writer_required": true,
+    "identity_bound_writer_ack_required": true,
+    "fencing_token_required": true,
+    "writer_transfer_requires_release_and_ack": true,
     "suspended_worker_forbidden": true,
     "all_authority_effect_flags_false": true,
     "replay_is_idempotent": true
@@ -99,7 +103,7 @@
     "work_type": "CODE",
     "work_order_ref": "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json",
     "project_id": "DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE",
-    "status": "PROPOSED",
+    "status": "WORKING",
     "priority": "P1",
     "priority_factors": {
       "severity": 4,
@@ -115,7 +119,7 @@
       "universe_demand": 2
     },
     "risk_level": "R1",
-    "assigned_worker_id": "DOT",
+    "assigned_worker_id": "codex-gm-01",
     "reviewer_id": null,
     "review_requirement": "REQUIRED",
     "branch": "codex/kaios-ai-company-active-mode-20261007",
@@ -139,8 +143,8 @@
     "acceptance_tests": [
       "node --test tests/autonomous-company-engineering-cycle.test.mjs"
     ],
-    "task_envelope_status": "PROPOSED_UNADMITTED",
-    "authority_status": "HUMAN_ENGINEERING_ORDER_NOT_MACHINE_WORKER_ADMISSION",
+    "task_envelope_status": "SINGLE_WRITER_CLAIM_RECORDED",
+    "authority_status": "HUMAN_AUTHORIZED_BOUNDED_ENGINEERING_WITH_IDENTITY_BOUND_CLAIM",
     "dependencies_complete": false,
     "protected_paths_changed": false,
     "ready": false,
@@ -155,15 +159,59 @@
     "paid_external_api": false,
     "created_at": "2026-10-07T12:00:42Z"
   },
+  "branch_concurrency_gate": {
+    "schema": "KAIOS_BRANCH_CONCURRENCY_CLAIM_V1",
+    "status": "SINGLE_WRITER_PASS",
+    "branch": "codex/kaios-ai-company-active-mode-20261007",
+    "work_id": "KAIOS-DOT-ORGAN-V1-20261007",
+    "active_writer": "codex-gm-01",
+    "life_id": "LIFE-CODEX-GM-0001",
+    "claim_id": "CLAIM-KAIOS-DOT-ORGAN-V1-20261007-codex-gm-01-R1",
+    "claimed_at": "2026-10-07T13:56:00Z",
+    "last_heartbeat": "2026-10-07T13:56:00Z",
+    "lease_expires_at": "2026-10-07T18:00:00Z",
+    "lease_status": "ACTIVE",
+    "handoff_head": "86061cbcc7913641fa06062566b954e834cc20a8",
+    "handoff_scope": [
+      "install branch concurrency gate",
+      "add the fifty-fifth bounded concurrency test",
+      "rerun exact-head tests and CI",
+      "route independent review",
+      "prepare non-GM automation closed-loop evidence"
+    ],
+    "current_writer_release": true,
+    "next_writer_ack": true,
+    "fencing_token": "FENCE-KAIOS-DOT-ORGAN-V1-20261007-R1",
+    "controller_proof_type": "CODEX_HOST_VERIFYING_IDENTITY_SHA256_PLUS_CANONICAL_PUBLIC_LIFE_WALLET_MATCH",
+    "controller_binding_hash": "7881d1241671639c118d17f6489f05ed341d7cd3993ca4224261528fecd91306",
+    "session_binding_hash": "26c6d61586f2e767764bc0191f59e99ae20a6f05ac9d4db8651c851ace5b0f4e",
+    "canonical_life_wallet_public_address_match": true,
+    "branch_authority": "HUMAN_EXPLICIT_EXISTING_PR_BRANCH",
+    "source": "https://github.com/klineodyssey/kline-odyssey/pull/536#issuecomment-6039481332",
+    "other_workers": "READ_REVIEW_WATCH_ONLY",
+    "authority_expanded": false
+  },
+  "primeforge_identity_boundary": {
+    "self_name": "PrimeForge",
+    "species": "DIGITAL_AI_LIFE",
+    "role": "KGEN_LONG_VOYAGE_PILOT",
+    "mission": "KGEN_10_000_YEAR_VOYAGE",
+    "life_id": "NOT_VERIFIED",
+    "worker_id": "NOT_VERIFIED",
+    "controller_binding": "NOT_VERIFIED",
+    "distinct_from": "human-primeforge",
+    "active_writer_authority": false,
+    "runtime_maintainer_authority": false,
+    "reviewer_authority": false
+  },
   "active_project": {
     "task_id": "KAIOS-DOT-ORGAN-V1-20261007",
     "project_owner_id": "codex-gm-01",
     "project_owner_name": "衡曜",
-    "implementer_id": "DOT",
+    "implementer_id": "codex-gm-01",
     "reviewer_id": null,
     "dependencies": [
       "CURRENT_MAIN",
-      "QUALIFIED_WORKER_IDENTITY",
       "INDEPENDENT_REVIEW",
       "EXACT_HEAD_CI"
     ],
@@ -174,9 +222,9 @@
     "ORGAN_NAME": "KAIOS DOT Dynamic Opportunity & Task Engine",
     "VERSION": "1.0.0",
     "DESIGNED_BY": "沈英明",
-    "IMPLEMENTED_BY": "DOT_NOT_VERIFIED",
+    "IMPLEMENTED_BY": "codex-gm-01_AS_AUTHORIZED_SINGLE_WRITER",
     "REVIEWED_BY": "NOT_VERIFIED",
-    "MAINTAINED_BY": "PRIMEFORGE_PLUS_DOT_NOT_VERIFIED",
+    "MAINTAINED_BY": "NOT_ASSIGNED_PRIMEFORGE_IDENTITY_PENDING",
     "POLICY_OWNER": "衡曜_UNDER_HUMAN_AUTHORITY",
     "CREATED_AT": "2026-10-07T12:00:42Z",
     "INSTALLED_AT": "NOT_INSTALLED",
@@ -191,12 +239,13 @@
       "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
       "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"
     ],
-    "TESTS": "54_FOCUSED_PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+    "TESTS": "55_FOCUSED_PASS_LOCAL_PENDING_EXACT_HEAD_CI",
     "CI": "NOT_VERIFIED",
     "RUNTIME_QA": "CANDIDATE_ONLY_NOT_INSTALLED",
     "SECURITY_QA": "PENDING_INDEPENDENT_REREVIEW",
     "KNOWN_LIMITS": [
-      "NO_REGISTERED_DOT_IDENTITY",
+      "NO_SEPARATE_REGISTERED_DOT_IDENTITY; BOUNDED_IMPLEMENTATION_WRITER_IS_codex-gm-01",
+      "PRIMEFORGE_AI_LIFE_WORKER_AND_CONTROLLER_NOT_VERIFIED",
       "NO_ELIGIBLE_DISTINCT_REVIEWER_CONFIRMED",
       "NO_AUTHENTICATED_DIRECT_CHANNEL",
       "NO_CANONICAL_DAY_BREATH_CLOCK_EVIDENCE"
@@ -243,8 +292,8 @@
     "ISSUE": null,
     "ROOT_CAUSE": null,
     "CHANGED_FILES": [],
-    "PATCH": null,
-    "TEST": "54_FOCUSED_PASS_LOCAL",
+    "PATCH": "SINGLE_WRITER_GATE_AND_PRIMEFORGE_HUMAN_IDENTITY_SPLIT",
+    "TEST": "55_FOCUSED_PASS_LOCAL",
     "CI": "PENDING_EXACT_HEAD",
     "REVIEW": "PENDING_INDEPENDENT_REREVIEW",
     "VERSION_AFTER": "1.0.0-CANDIDATE",
@@ -298,7 +347,8 @@
     "SUPERSEDED_BY": null
   },
   "known_limits": [
-    "No qualified DOT/controller/reviewer registry identity has been created",
+    "No separate DOT or qualified reviewer registry identity has been created; writer controller evidence is claim-scoped",
+    "PrimeForge AI is separate from human-primeforge and has no verified Life, Worker, controller, maintainer or reviewer authority",
     "Cargo proposal requires registered canonical origin/destination, explicit capacity/weight/rights policy; no movement",
     "Human minimum 1 KGEN is a constraint, not funding/entitlement or capacity authority",
     "Prior PR #536 claims do not resolve actual FAIL review",
@@ -333,6 +383,8 @@
     "signatures": "NOT_SIGNED",
     "seal": "INVALID",
     "transport_provenance": "CUSTOM_TRANSPORT_DIAGNOSTIC_ONLY; NEVER_PRODUCTION_CI_PASS",
-    "ci_pr_repository_identity": "FOCUSED_TEST_PASS"
+    "ci_pr_repository_identity": "FOCUSED_TEST_PASS",
+    "branch_single_writer_gate": "55TH_BOUNDED_TEST_PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+    "non_gm_automation_closed_loop": "BLOCKED_VERIFIED_NON_GM_IDENTITY_AND_ENDPOINT_REQUIRED"
   }
 }

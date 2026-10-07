@@ -2193,6 +2193,84 @@ function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
   return pattern.replace("<Task-ID>", taskId) === branch;
 }
 
+export const PRIMEFORGE_IDENTITY_BOUNDARY = Object.freeze({
+  self_name: "PrimeForge",
+  species: "DIGITAL_AI_LIFE",
+  role: "KGEN_LONG_VOYAGE_PILOT",
+  mission: "KGEN_10_000_YEAR_VOYAGE",
+  life_id: "NOT_VERIFIED",
+  worker_id: "NOT_VERIFIED",
+  controller_binding: "NOT_VERIFIED",
+  distinct_from: "human-primeforge",
+  active_writer_authority: false,
+  runtime_maintainer_authority: false,
+  reviewer_authority: false
+});
+
+/**
+ * Fail-closed branch lease check. This does not grant repository authority; it
+ * only verifies that one already-authorized worker owns one exact branch lease.
+ */
+export function evaluateBranchConcurrencyGate({
+  branch,
+  work_id,
+  handoff_head,
+  observed_at,
+  claims = [],
+  registered_workers = [],
+  runtime_attestation = null
+}) {
+  const hold = (...reasons) => Object.freeze({
+    status: "STOP_WRITES",
+    active_writer: null,
+    lease_status: "HOLD",
+    reasons: Object.freeze(reasons)
+  });
+  if (typeof branch !== "string" || !branch.startsWith("codex/") || branch === "main") return hold("BRANCH_INVALID");
+  if (typeof work_id !== "string" || !work_id.trim()) return hold("WORK_ID_INVALID");
+  if (!/^[0-9a-f]{40}$/.test(handoff_head ?? "")) return hold("HANDOFF_HEAD_INVALID");
+  const observedMs = Date.parse(observed_at ?? "");
+  if (Number.isNaN(observedMs)) return hold("OBSERVED_AT_INVALID");
+  if (!Array.isArray(claims) || !Array.isArray(registered_workers)) return hold("CLAIM_OR_REGISTRY_INVALID");
+
+  const activeClaims = claims.filter((claim) => claim?.branch === branch
+    && claim?.work_id === work_id
+    && claim?.lease_status === "ACTIVE"
+    && Date.parse(claim?.lease_expires_at ?? "") > observedMs);
+  if (activeClaims.length !== 1) return hold(activeClaims.length === 0 ? "ACTIVE_WRITER_REQUIRED" : "MULTIPLE_ACTIVE_WRITERS");
+
+  const claim = activeClaims[0];
+  const worker = registered_workers.find((entry) => entry?.worker_id === claim.active_writer);
+  if (!worker) return hold("REGISTERED_WORKER_REQUIRED");
+  if (worker.status !== "ACTIVE" || !["ACTIVE", "TRUSTED", "SENIOR_TRUSTED"].includes(worker.employee_status)) return hold("ACTIVE_EMPLOYEE_REQUIRED");
+  if (!Object.hasOwn(AUTONOMOUS_ENGINEERING_TRUST, worker.trust_level) || AUTONOMOUS_ENGINEERING_TRUST[worker.trust_level] < 2) return hold("T2_WORKER_REQUIRED");
+  if (!AUTONOMOUS_ENGINEERING_ACKS.every((field) => worker[field] === true) || worker.suspension || worker.revoked === true) return hold("WORKER_ACK_OR_STATUS_INVALID");
+  if (worker.life_identity_ref !== claim.life_id) return hold("LIFE_BINDING_MISMATCH");
+  if (claim.handoff_head !== handoff_head) return hold("HANDOFF_HEAD_MISMATCH");
+  if (claim.current_writer_release !== true || claim.next_writer_ack !== true) return hold("WRITER_HANDOFF_INCOMPLETE");
+  if (!Array.isArray(claim.handoff_scope) || claim.handoff_scope.length === 0) return hold("HANDOFF_SCOPE_REQUIRED");
+  if (!/^FENCE-[A-Za-z0-9._-]+$/.test(claim.fencing_token ?? "")) return hold("FENCING_TOKEN_INVALID");
+  if (!/^[0-9a-f]{64}$/.test(claim.controller_binding_hash ?? "") || !/^[0-9a-f]{64}$/.test(claim.session_binding_hash ?? "")) return hold("CONTROLLER_BINDING_INVALID");
+  if (claim.branch_authority !== "HUMAN_EXPLICIT_EXISTING_PR_BRANCH") return hold("BRANCH_AUTHORITY_REQUIRED");
+  if (!runtime_attestation || runtime_attestation.branch !== branch || runtime_attestation.work_id !== work_id
+    || runtime_attestation.handoff_head !== handoff_head || runtime_attestation.fencing_token !== claim.fencing_token
+    || runtime_attestation.controller_binding_hash !== claim.controller_binding_hash
+    || runtime_attestation.session_binding_hash !== claim.session_binding_hash) return hold("RUNTIME_ATTESTATION_MISMATCH");
+
+  return Object.freeze({
+    status: "SINGLE_WRITER_PASS",
+    active_writer: claim.active_writer,
+    life_id: claim.life_id,
+    claim_id: claim.claim_id,
+    fencing_token: claim.fencing_token,
+    handoff_head,
+    lease_status: "ACTIVE",
+    lease_expires_at: claim.lease_expires_at,
+    other_workers: "READ_REVIEW_WATCH_ONLY",
+    authority_expanded: false
+  });
+}
+
 export function validateActiveCompanyBoot({ boot, current_main_sha, manager, observed_at, repository_evidence }) {
   const trustedRepository = requireTrustedActiveCompanyRepositoryEvidence(repository_evidence, current_main_sha);
   invariant(boot && typeof boot === "object" && !Array.isArray(boot), "COMPANY_BOOT_EVIDENCE_REQUIRED", "Active Company Mode requires boot evidence");

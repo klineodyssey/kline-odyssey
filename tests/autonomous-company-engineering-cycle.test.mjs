@@ -24,7 +24,9 @@ import {
   inspectDotOrganCandidate,
   createDotOrganMaintenanceRecord,
   evaluateDotOrganSeal,
-  evaluateDotDispatchSafety
+  evaluateDotDispatchSafety,
+  evaluateBranchConcurrencyGate,
+  PRIMEFORGE_IDENTITY_BOUNDARY
 } from "../core/company/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
 import { assertAppendOnlyChain } from "../core/history/index.mjs";
@@ -1298,4 +1300,57 @@ test("DONE counts completed only with hash-bound result exact head CI tests and 
     assert.equal(held.heartbeat_result.COMPLETED, 0);
     assert.ok(held.opportunity_records[0].BLOCKERS.includes("COMPLETION_EVIDENCE_REQUIRED"));
   }
+});
+
+test("branch concurrency gate permits one identity-bound writer and rejects competing or stale claims", () => {
+  const handoffHead = "8".repeat(40);
+  const controllerBinding = "c".repeat(64);
+  const sessionBinding = "d".repeat(64);
+  const claim = {
+    claim_id: "CLAIM-KAIOS-DOT-ORGAN-V1-20261007-codex-gm-01-R1",
+    work_id: "KAIOS-DOT-ORGAN-V1-20261007",
+    branch: "codex/kaios-ai-company-active-mode-20261007",
+    active_writer: manager.worker_id,
+    life_id: manager.life_identity_ref,
+    controller_binding_hash: controllerBinding,
+    session_binding_hash: sessionBinding,
+    handoff_head: handoffHead,
+    handoff_scope: ["install branch concurrency gate", "add bounded regression test"],
+    current_writer_release: true,
+    next_writer_ack: true,
+    fencing_token: "FENCE-KAIOS-DOT-ORGAN-V1-20261007-R1",
+    branch_authority: "HUMAN_EXPLICIT_EXISTING_PR_BRANCH",
+    lease_status: "ACTIVE",
+    lease_expires_at: "2026-10-07T18:00:00Z"
+  };
+  const input = {
+    branch: claim.branch,
+    work_id: claim.work_id,
+    handoff_head: handoffHead,
+    observed_at: "2026-10-07T14:00:00Z",
+    claims: [claim],
+    registered_workers: [manager],
+    runtime_attestation: {
+      branch: claim.branch,
+      work_id: claim.work_id,
+      handoff_head: handoffHead,
+      fencing_token: claim.fencing_token,
+      controller_binding_hash: controllerBinding,
+      session_binding_hash: sessionBinding
+    }
+  };
+  const passed = evaluateBranchConcurrencyGate(input);
+  assert.equal(passed.status, "SINGLE_WRITER_PASS");
+  assert.equal(passed.active_writer, manager.worker_id);
+  assert.equal(passed.other_workers, "READ_REVIEW_WATCH_ONLY");
+  assert.equal(passed.authority_expanded, false);
+
+  const competing = { ...claim, claim_id: `${claim.claim_id}-COMPETING`, active_writer: worker.worker_id, life_id: worker.life_identity_ref };
+  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, claims: [claim, competing] }).reasons, ["MULTIPLE_ACTIVE_WRITERS"]);
+  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, observed_at: "2026-10-07T18:00:00Z" }).reasons, ["ACTIVE_WRITER_REQUIRED"]);
+  assert.deepEqual(evaluateBranchConcurrencyGate({ ...input, runtime_attestation: { ...input.runtime_attestation, fencing_token: "FENCE-STALE" } }).reasons, ["RUNTIME_ATTESTATION_MISMATCH"]);
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.distinct_from, "human-primeforge");
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.active_writer_authority, false);
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.runtime_maintainer_authority, false);
+  assert.equal(PRIMEFORGE_IDENTITY_BOUNDARY.reviewer_authority, false);
 });
