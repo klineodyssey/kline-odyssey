@@ -1,5 +1,102 @@
 # 11520 Universal Exchange V3.9
 
+## Q15 3D frame-budget source audit — 2026-10-07
+
+TASK_ID: Q15-3D-FRAME-BUDGET
+STATUS: SOURCE_AUDIT / IMPLEMENTATION_PROPOSED / NOT_MEASURED
+SOURCE_HEAD: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`
+UPDATED_BY: dot / scoped external engineering documentation
+SCOPE: existing 11520 world renderer; documentation only, no release approval.
+
+### Preserved / partial / missing / tested
+
+- **Preserved owner:** [game-5d.html:26,117](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/game-5d.html#L26)
+  imports Three 0.180.0 and the bootstrap;
+  [game-5d-bootstrap.mjs:44](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/runtime/game-5d-bootstrap.mjs#L44)
+  loads the existing [game-5d-main.mjs:590–797](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/runtime/game-5d-main.mjs#L590),
+  which owns the Three scene, camera, WebGL renderer and RAF loop.
+  `world-runtime.mjs` is its simulation dependency, not a second renderer.
+- **Preserved safeguards:** fixed DPR cap 2 and antialiasing at main:590;
+  12-second avatar fallback with late-success fallback disposal at main:593;
+  per-entity visual records/pending guards at main:605–606; species silhouettes
+  and identity metadata in
+  [life-visual-runtime.mjs:174–207](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/runtime/life-visual-runtime.mjs#L174).
+- **Partial efficiency:** main:591 allocates separate geometry/materials for
+  each procedural tree; main:608–615 builds individual phase spheres/sprites.
+  The main:787 loop performs simulation, visual synchronization, camera, FX,
+  HUD/maps and rendering each RAF. Its clamped 40ms animation delta is not a
+  frame-time measurement. Source structure identifies candidates to measure,
+  not a measured bottleneck. Existing obstruction fading at main:767–783 is
+  not an occlusion-culling system and is outside this implementation proposal.
+- **Missing in inspected owners:** no instancing, explicit distance LOD/culling
+  policy, `renderer.info` sampling, frame-time percentiles or over-budget
+  counters in the complete main, life-visual and combat-FX modules inspected.
+  No assertion here that Three's built-in renderer culling is disabled.
+  [mobile-ui-settings.mjs:26,64,81–82](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/runtime/mobile-ui-settings.mjs#L26)
+  defines HUD disclosure profiles, not graphics-quality tiers.
+- **Separate existing 2D owner:** do not copy or count
+  [KGEN-KAIOS/world-viewer/lod/lod-controller.js:1–18](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/KGEN-KAIOS/world-viewer/lod/lod-controller.js#L1)
+  as 11520 Three LOD. Its EARTH-to-ROOM levels are semantic navigation.
+  [renderer/map-renderer.js:21,48–89](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/KGEN-KAIOS/world-viewer/renderer/map-renderer.js#L21)
+  uses Canvas2D, bounds culling, item caps and its own render/estimated-FPS
+  metrics. These do not establish this 3D scene's performance.
+- **Test inventory, not a new PASS:** existing
+  [11520-living-world-visual.test.mjs:6–52](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/tests/11520-living-world-visual.test.mjs#L6)
+  checks lifestyle/cargo, archetypes and silhouette scale. Existing
+  [11520-browser-responsive.mjs:543–557,595–623](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/tests/11520-browser-responsive.mjs#L543)
+  times geometry/input acquisition, not sustained 3D throughput.
+  This audit ran no browser, GPU benchmark or functional suite:
+  FUNCTIONAL_QA=NOT_RUN; VISUAL_QA=NOT_RUN; mobile FPS=NOT_MEASURED.
+  Absence findings are bounded to inspected owners, not repository-wide proof.
+
+### Asset provenance caveats
+
+Three and GLTFLoader imports are pinned to 0.180.0 (entry:26; main:16–17).
+The Knight model URL at main:593 identifies KayKit-Game-Assets /
+KayKit-Character-Pack-Adventures-1.0 but uses mutable `main`; an immutable
+asset digest and license were not independently verified here. Scenery and
+species bodies are procedural repository source. The older
+[assets/resource-manifest.json:7–9](https://github.com/klineodyssey/kline-odyssey/blob/f7f67950418ebbb6f7a5a309a32d529232fcb3b6/K線西遊記/temples/11520/assets/resource-manifest.json#L7)
+lists Three 0.166.1, so it is insufficient provenance for the actual entry's
+0.180.0 renderer. No assets or dependency versions changed in this audit.
+
+### Smallest proposed measurement slice — not implemented
+
+Reuse `runtime/game-5d-main.mjs`; no new renderer, bootstrap or runtime file.
+At its existing `frame(now)` (source main:787), place opt-in timestamp reads
+at callback entry and immediately before/after the existing render call.
+Record raw RAF delta independently of the existing clamped animation delta,
+CPU callback/render-call duration, and post-render `renderer.info` calls,
+triangles and memory geometry/texture counters. CPU render-call duration is
+not GPU time. Keep game statement order, dt, movement, camera and state writes
+unchanged. Expose only a copied, bounded diagnostics snapshot.
+
+Default off; use a fixed-capacity sample buffer, explicit warmup and
+visible-document sampling. Reset the interval baseline on visibility changes
+rather than treating a hidden-tab pause as a slow gameplay frame. Summaries:
+sample count/window, viewport/DPR, p50/p95/p99 raw frame interval and counts
+over declared 16.67ms/33.33ms reference budgets. Budgets are reporting references,
+not current acceptance claims. No network export, persistence, automatic
+quality changes or financial/player data in the report.
+
+After separate implementation approval, add a small opt-in scenario to the
+existing `tests/11520-browser-responsive.mjs`, retaining current assertions
+and default test budgets. Verify disabled mode, bounded/reset sampling and
+snapshot-copy behavior, then capture an exact-SHA mobile-viewport report and
+inspect the rendered screenshot. Record browser/device/DPR, warmup, scene
+and FX state; label emulation separately from physical-device evidence.
+A source audit or synthetic timing fixture cannot certify mobile FPS.
+
+**Overlap boundary:** main:787 shares a file with stopped Navigator movement
+and camera work. Any later patch must be confined to observational frame hooks,
+with an exact diff proving no edits to movement/camera functions, timing inputs
+or their invocation order. The responsive runner is also a shared file, so its
+candidate changes must be reconciled before a scoped test edit. The stopped
+backpack-preview WebGL remediation, Player Life backup guard and Customer
+journal are excluded; no hooks or changes there. This README-only proposal
+does not authorize any runtime/test implementation or reopening stopped work.
+
+
 ## V2.9.4 M1 read-only wallet candidate
 
 The existing wallet panel has an explicit 1C Testnet read-only view. It reads
