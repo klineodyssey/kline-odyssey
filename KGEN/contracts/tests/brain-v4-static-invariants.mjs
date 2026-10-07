@@ -101,6 +101,31 @@ if (process.argv.includes('--runtime-execution-abi')) {
       positionEngine: 'previewLiquidationBoundary positionKey',
     },
   };
+  // Required decoder property names are independent of current runtime exports.
+  // Bare integer return values and intentionally unnamed inputs stay compatible.
+  const requiredDecoderFields = {
+    "brainProxy.MarginDeposited": "user requestedWei receivedWei",
+    "brainProxy.MarginWithdrawn": "user amountWei",
+    "orderTriggerEngine.order": "orderId trader market c lots triggerPrice createdAt triggeredAt observedPrice fillPrice positionId status previousPrice observedAt observationSequence",
+    "orderTriggerEngine.fillReceipt": "orderId positionId trader market c lots createdAt triggeredAt previousPrice triggerPrice observedPrice fillPrice walletBefore marginLocked walletAfter side observationSequence",
+    "orderTriggerEngine.OrderCreated": "orderId trader",
+    "orderTriggerEngine.OrderFilled": "orderId positionId price",
+    "orderTriggerEngine.OrderTerminated": "orderId status",
+    "positionEngine.readMarketPrice": "priceWad observedAt validSources",
+    "positionEngine.marketConfig": "initialMarginBps maintenanceMarginBps maxOracleAge minPriceWad maxPriceWad enabled",
+    "positionEngine.positionSnapshot": "trader market sizeWad collateralWad entryPriceWad openedAt closedAt exitPriceWad rawPnlWad realizedPnlWad badDebtWad status",
+    "positionEngine.orderTerms": "orderId cWad lots lastPrice observedAt observationSequence",
+    "positionEngine.markPosition": "unrealizedPnlWad equityWad maintenanceMarginWad liquidatable",
+    "positionEngine.settlementReceipt": "positionId orderId market cWad lots entryPrice liquidationTrigger previousPrice observedPrice observedAt settledAt marginBefore marginAfter rawPnl realizedPnl badDebt status trader side settlementPrice triggeredAt observationSequence",
+    "positionEngine.PositionOpened": "positionId trader market sizeWad collateralWad entryPriceWad positionKey",
+    "positionEngine.PositionClosed": "positionId exitPriceWad rawPnlWad realizedPnlWad badDebtWad",
+    "positionEngine.PositionLiquidated": "positionId markPriceWad rawPnlWad realizedPnlWad badDebtWad",
+    "brainProxy.settlementClaims": "user orderId positionId dueWei paidWei remainingWei createdAt updatedAt",
+    "brainProxy.SettlementClaimRecorded": "positionKey user dueWei paidWei remainingWei",
+    "brainProxy.SettlementClaimPaid": "positionKey user paidWei remainingWei"
+  };
+  const decoderNames = p => [...(p.name ? [p.name] : []), ...(p.components || []).flatMap(decoderNames),
+    ...(p.arrayChildren ? decoderNames(p.arrayChildren) : [])];
   const exports = {TESTNET_EXECUTION_ABI, CAPITAL_EXECUTION_ABI};
   const parameter = p => ({type: p.format('sighash'), name: p.name || '',
     ...(p.components ? {components: p.components.map(parameter)} : {}),
@@ -147,6 +172,8 @@ if (process.argv.includes('--runtime-execution-abi')) {
         for (const name of names.split(' ')) assert.ok(fragments.some(f => f.name === name), `missing required fragment: ${exportName}.${organ}.${name}`);
         for (const fragment of fragments) {
           assert.ok(['function', 'event'].includes(fragment.type), 'unsupported frontend fragment');
+          const expectedNames = requiredDecoderFields[`${organ}.${fragment.name}`];
+          if (expectedNames) assert.equal((fragment.type === 'event' ? fragment.inputs : fragment.outputs).flatMap(decoderNames).join(' '), expectedNames, `${organ}.${fragment.name}: required decoder fields`);
           const matches = compiled[organ].filter(f => f.type === fragment.type && f.name === fragment.name);
           assert.equal(matches.length, 1, `${organ}.${fragment.name}: missing or ambiguous canonical fragment`);
           checked.push({exportName, organ, ...compareFragment(fragment, matches[0])});
@@ -157,6 +184,7 @@ if (process.argv.includes('--runtime-execution-abi')) {
   }
   function assertBinding(expected, actual) {
     assert.equal(actual.sourceDigest, expected.sourceDigest, 'source digest mismatch');
+    assert.equal(actual.bytecodeDigest, expected.bytecodeDigest, 'source-bound bytecode digest mismatch');
     assert.equal(actual.artifactDigest, expected.artifactDigest, 'artifact digest mismatch');
   }
   const buildDir = process.env.K11520_ABI_BUILD_DIR || '/tmp/brain-v4-build';
@@ -170,7 +198,11 @@ if (process.argv.includes('--runtime-execution-abi')) {
   };
   const artifacts = Object.fromEntries(Object.entries(contracts).map(([organ, [source, contract]]) => {
     const file = `${buildDir}/${source.replaceAll('/', '_').replace('.sol', '_sol')}_${contract}.abi`;
-    return [organ, {file, ...readArtifact(file)}];
+    const binaryFile = file.replace(/\.abi$/, '.bin');
+    assert.ok(fs.existsSync(binaryFile), `required compiler artifact missing: ${binaryFile}`);
+    const binary = fs.readFileSync(binaryFile, 'utf8').trim();
+    assert.match(binary, /^(?:[a-fA-F0-9]{2})+$/, `invalid compiler binary: ${binaryFile}`);
+    return [organ, {file, binaryFile, binary, ...readArtifact(file)}];
   }));
   assert.match(solc.version(), /^0\.8\.24\+commit\.e11b9ed9\./, 'pinned solc required');
   for (const pkg of ['contracts', 'contracts-upgradeable']) {
@@ -180,7 +212,7 @@ if (process.argv.includes('--runtime-execution-abi')) {
   // optimizer settings. A stale/swapped ABI cannot acquire provenance merely
   // by being hashed after compilation. Capture all transitive imports as well.
   const sources = Object.fromEntries(entries.map(file => [file, {content: fs.readFileSync(file, 'utf8')}]));
-  const settings = {optimizer: {enabled: true, runs: 200}, outputSelection: {'*': {'*': ['abi']}}};
+  const settings = {optimizer: {enabled: true, runs: 200}, outputSelection: {'*': {'*': ['abi', 'evm.bytecode.object']}}};
   const output = JSON.parse(solc.compile(JSON.stringify({language: 'Solidity', sources, settings}), {import(file) {
     const location = file.startsWith('@openzeppelin/') ? `node_modules/${file}` : file;
     try { const content = fs.readFileSync(location, 'utf8'); sources[file] = {content}; return {contents: content}; }
@@ -193,10 +225,13 @@ if (process.argv.includes('--runtime-execution-abi')) {
   for (const [organ, [source, contract]] of Object.entries(contracts)) {
     const abi = output.contracts[source][contract].abi;
     const artifactDigest = sha256(stable(abi));
-    assertBinding({sourceDigest, artifactDigest}, {sourceDigest, artifactDigest: sha256(stable(artifacts[organ].abi))});
+    const bytecode = output.contracts[source][contract].evm.bytecode.object;
+    const bytecodeDigest = sha256(bytecode);
+    assertBinding({sourceDigest, artifactDigest, bytecodeDigest}, {sourceDigest,
+      artifactDigest: sha256(stable(artifacts[organ].abi)), bytecodeDigest: sha256(artifacts[organ].binary)});
     compiled[organ] = abi;
     bindings[organ] = {source, contract, sourceSha256: sourceHashes[source], artifact: artifacts[organ].file,
-      artifactFileSha256: sha256(artifacts[organ].bytes), canonicalAbiSha256: artifactDigest, sourceDigest};
+      artifactFileSha256: sha256(artifacts[organ].bytes), binaryFile: artifacts[organ].binaryFile, bytecodeSha256: bytecodeDigest, canonicalAbiSha256: artifactDigest, sourceDigest};
   }
   const checked = validateExports(exports, compiled);
   let negativeFixtures = 0;
@@ -208,6 +243,17 @@ if (process.argv.includes('--runtime-execution-abi')) {
   const missing = clone(exports);
   missing.CAPITAL_EXECUTION_ABI.brainProxy = missing.CAPITAL_EXECUTION_ABI.brainProxy.filter(f => !f.includes('function claimSettlement('));
   reject('missing declared required runtime fragment', () => validateExports(missing, compiled), /missing required fragment/);
+  for (const [organ, name, before, after] of [
+    ['positionEngine', 'marketConfig', 'uint16 initialMarginBps', 'uint16'],
+    ['positionEngine', 'positionSnapshot', 'address trader', 'address'],
+  ]) {
+    const changed = clone(exports);
+    changed.TESTNET_EXECUTION_ABI[organ] = changed.TESTNET_EXECUTION_ABI[organ].map(f => f.startsWith('function ' + name + '(') ? f.replace(before, after) : f);
+    reject('missing decoder field ' + name, () => validateExports(changed, compiled), /required decoder fields/);
+  }
+  const missingEventName = clone(exports);
+  missingEventName.TESTNET_EXECUTION_ABI.brainProxy = missingEventName.TESTNET_EXECUTION_ABI.brainProxy.map(f => f.replace('address indexed user', 'address indexed'));
+  reject('missing named event decoder field', () => validateExports(missingEventName, compiled), /required decoder fields/);
   const absent = clone(compiled); absent.brainProxy = absent.brainProxy.filter(f => f.name !== 'depositMargin');
   reject('missing canonical fragment', () => validateExports(exports, absent), /missing or ambiguous canonical/);
   reject('integer width', mutate('brainProxy', 'depositMargin', f => f.inputs[0].type = 'uint128'), /type\/width/);
@@ -225,6 +271,7 @@ if (process.argv.includes('--runtime-execution-abi')) {
   reject('tuple array width', () => compareFragment('function x(tuple(uint8 n)[2])', 'function x(tuple(uint8 n)[3])'), /type\/width/);
   reject('array signedness', () => compareFragment('function x(int256[])', 'function x(uint256[])'), /type\/width/);
   reject('source digest', () => assertBinding({sourceDigest, artifactDigest: 'a'}, {sourceDigest: 'changed', artifactDigest: 'a'}), /source digest/);
+  reject('same-ABI stale source-bound binary', () => assertBinding({sourceDigest, artifactDigest: 'a', bytecodeDigest: 'a'}, {sourceDigest, artifactDigest: 'a', bytecodeDigest: 'changed'}), /source-bound bytecode digest/);
   reject('artifact digest', () => assertBinding({sourceDigest, artifactDigest: 'a'}, {sourceDigest, artifactDigest: 'changed'}), /artifact digest/);
   reject('missing artifact fails closed', () => readArtifact(`${buildDir}/__missing_runtime_execution_abi_fixture__.abi`), /required compiler artifact missing/);
   let testedCommit = null;
