@@ -15,7 +15,7 @@
 - risk_level: R1_OFFCHAIN_SIMULATION; dependencies: existing `core/accounting` owner, Physics CURRENT KUFO law,
   exact-head tests, independent review and separately authorized Boot CURRENT registration before installation/seal.
 - Branch: `codex/cfo-finance-organ-v1`; base: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`;
-  implementation source commit: `50dfe685d51a21f4b5b6388f1b3958d41929802c` (later repair commit pending binding).
+  implementation source commit: `1659565fe193cccba30294dcdc10396a9811e0bd`.
 - Scope: exact-integer double-entry, P&L/cash-flow/balance-sheet, separated compensation, royalties,
   compute cost, species consumption and read-only KUFO/KSHIP projection. No payment, signer, Treasury,
   Mainnet, real KGEN/KAIOS movement or CFO Digital Life assignment.

@@ -35,7 +35,7 @@
   "maintainer": "NOT_ASSIGNED",
   "reviewed_by": "FIRST_REVIEW_FAIL_REPAIRED_RE_REVIEW_PENDING",
   "base_main_sha": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
-  "source_commit": "50dfe685d51a21f4b5b6388f1b3958d41929802c",
+  "source_commit": "1659565fe193cccba30294dcdc10396a9811e0bd",
   "head_sha": null,
   "head_binding": "RESOLVE_EXACT_GIT_BRANCH_HEAD_AT_REVIEW; source_commit identifies the implementation logic commit",
   "branch": "codex/cfo-finance-organ-v1",
