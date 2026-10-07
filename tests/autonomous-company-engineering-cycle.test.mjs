@@ -28,6 +28,7 @@ import {
   evaluateBranchConcurrencyGate,
   inspectBranchConcurrencyClaimSet,
   verifyBranchWriterRuntimeAttestation,
+  BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS,
   PRIMEFORGE_IDENTITY_BOUNDARY
 } from "../core/company/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
@@ -1344,6 +1345,7 @@ test("branch concurrency gate rejects diagnostic provenance and structurally blo
     source_ref: WORK_ORDER_REF, claim_id: claim.claim_id,
     signed_payload: {}, public_key_jwk: {}, signature_base64url: "AA"
   }), error => error.code === "BRANCH_WRITER_PUBLIC_EVIDENCE_REQUIRED");
+  assert.deepEqual(BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS, {});
 
   const inspected = inspectBranchConcurrencyClaimSet({ branch: claim.branch, observed_at: "2026-10-07T14:00:00Z", claims: [claim] });
   assert.equal(inspected.status, "STRUCTURALLY_VALID");

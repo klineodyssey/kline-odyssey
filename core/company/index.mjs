@@ -2209,6 +2209,10 @@ export const PRIMEFORGE_IDENTITY_BOUNDARY = Object.freeze({
 
 const VERIFIED_BRANCH_WRITER_ATTESTATIONS = new WeakSet();
 const BRANCH_WRITER_WORK_ORDER_REF = "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json";
+// Deliberately empty until an action-specific identity/security decision installs
+// a controller key fingerprint in shipped code. Repository/network responses
+// cannot create or replace this independent trust anchor.
+export const BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS = Object.freeze({});
 const BRANCH_WRITER_MAX_LEASE_MS = 4 * 60 * 60 * 1000;
 const BRANCH_WRITER_MAX_HEARTBEAT_AGE_MS = 15 * 60 * 1000;
 const BRANCH_WRITER_MAX_ATTESTATION_AGE_MS = 5 * 60 * 1000;
@@ -2255,7 +2259,13 @@ export async function verifyBranchWriterRuntimeAttestation({
   try { registry = JSON.parse(registryFile.content); } catch { invariant(false, "WORKER_REGISTRY_JSON_INVALID", "Canonical worker registry evidence must be valid JSON"); }
   const worker = registry?.workers?.find((entry) => entry?.worker_id === claim.active_writer);
   invariant(worker, "REGISTERED_WORKER_REQUIRED", "Claimed writer is absent from canonical registry evidence");
+  const independentAnchor = BRANCH_WRITER_CONTROLLER_TRUST_ANCHORS[worker.worker_id];
+  invariant(independentAnchor && typeof independentAnchor === "object",
+    "INDEPENDENT_CONTROLLER_TRUST_ANCHOR_REQUIRED", "Repository evidence alone cannot establish writer controller identity");
   invariant(typeof worker.controller_id === "string" && worker.controller_id.trim(), "REGISTERED_CONTROLLER_REQUIRED", "Claimed writer requires a canonical controller binding");
+  invariant(independentAnchor.controller_id === worker.controller_id
+    && independentAnchor.controller_public_key_sha256 === worker.controller_public_key_sha256,
+  "INDEPENDENT_CONTROLLER_TRUST_ANCHOR_MISMATCH", "Canonical controller evidence must match the shipped independent trust anchor");
   invariant(claim.controller_registry_id === worker.controller_id, "CONTROLLER_REGISTRY_BINDING_MISMATCH", "Claim controller must match the canonical worker controller");
   invariant(/^[0-9a-f]{64}$/.test(worker.controller_public_key_sha256 ?? "")
     && worker.controller_public_key_sha256 === claim.controller_binding_hash,
