@@ -1,5 +1,34 @@
 # KGEN Organization V2.0 WorkQueue
 
+## KAIOS AI Company Active Mode — 2026-10-07
+
+- `WORK_ID`: `KAIOS-AI-COMPANY-ACTIVE-MODE-20261007`.
+- `STATUS`: `REVIEW`; `PRIORITY`: `P1`; `RISK`: `R1`.
+- `PROJECT_OWNER`: Human / 沈英明; `OWNER` and `IMPLEMENTER`: `codex-gm-01`;
+  `REVIEWER`: independent `second_review` session, not a new canonical employee.
+- `BASE_SHA`: `f7f67950418ebbb6f7a5a309a32d529232fcb3b6`.
+- `BRANCH`: `codex/kaios-ai-company-active-mode-20261007`.
+- `SCOPE`: cumulative update of the existing Company OS and existing safe planner;
+  machine-verifiable Company Boot, project triad, Codex branch policy, Guardian
+  stop-repeat and material-change-only paid Oracle routing. No second company
+  runtime, worker registry rewrite or protected Canon/CURRENT modification.
+- `DEPENDENCIES`: current Boot / Physics / Universe Map / AGENTS, current handoff,
+  Human Owner policy, worker registry, open PR ownership and exact current main.
+- `EXPECTED_OUTPUT`: bounded implementation, existing test-suite coverage,
+  task-branch commit/push, Draft PR, exact-head CI and independent review.
+- `RESULT`: `LOCAL_QA_PASS / INDEPENDENT_REVIEW_IN_PROGRESS`;
+  `HEAD`: Git commit containing this record; `CI`: `PENDING_EXACT_HEAD`.
+- `TESTS`: Active Company 25/25, Universal 258/258, workflow security 3/3 and
+  11520 native market 24/24 PASS. Full `tests/*.test.mjs` retains three unrelated
+  11520 Windows-CRLF baseline failures reproduced at the exact base SHA.
+- `DATA_LOSS_RISK`: no protected or existing dirty worktree was modified; this
+  candidate is isolated and becomes durable only after task-branch push.
+- `DIRECT_CHANNEL`: available to the independent reviewer in this task; other
+  instances require a repository handoff.
+- `PROTECTED_ACTIONS`: Mainnet, Testnet deployment, real assets, Treasury,
+  payroll, signer, private key, secret, governance/admin, production Oracle,
+  merge and production deployment remain `NOT_AUTHORIZED`.
+
 ## KAIOS World Portal / shared audio — 2026-10-01
 
 - Task: KAIOS-PORTAL-AUDIO-20261001; IMPLEMENTED_LOCAL_QA_PASS / PENDING_EXACT_HEAD_CI_AND_SECOND_REVIEW; P0; owner codex-gm-01.

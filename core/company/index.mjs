@@ -1983,6 +1983,7 @@ export function createAquacultureProjectDraft({
 
 export const AUTONOMOUS_ENGINEERING_SAFE_ACTIONS = Object.freeze([
   "READ", "RESEARCH", "ANALYZE", "DOCUMENT", "TEST", "SIMULATE",
+  "CODE", "DEBUG", "REFACTOR", "LOCAL_QA", "BROWSER_QA", "ASSIGN_WORK",
   "ISSUE_TRIAGE", "SAFE_BRANCH_WORK", "COMMIT_TASK_BRANCH", "PUSH_TASK_BRANCH",
   "OPEN_PR", "CI", "STATUS_RECONCILIATION", "WORK_EVIDENCE", "HANDOFF",
   "REVIEW_REQUEST", "VERIFY_STATIC_PAGES"
@@ -1993,6 +1994,8 @@ export const AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS = Object.freeze([
   "SELF_TRUST_ESCALATION", "SELF_PAYROLL_APPROVAL", "PRIVATE_KEY_ACCESS",
   "TREASURY_TRANSFER", "PAYROLL_PAYMENT", "MAINNET_TRANSACTION", "TOKEN_TRANSFER",
   "CONTRACT_DEPLOYMENT", "GOVERNANCE_EXECUTION", "OWNERSHIP_TRANSFER",
+  "TESTNET_DEPLOYMENT", "SECRET_ACCESS", "ADMIN_EXECUTION", "KYC_EXECUTION",
+  "PRODUCTION_ORACLE_ACTIVATION", "DESTRUCTIVE_PLAYER_LIFE_OPERATION",
   "PUSH_MAIN", "MERGE_MAIN", "EXTERNAL_AGENT_LAUNCH", "PAID_EXTERNAL_API",
   "IRREVERSIBLE_EXTERNAL_ACTION"
 ]);
@@ -2003,6 +2006,43 @@ export const AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES = Object.freeze([
   "BLOCKER_STATE",
   "CLOCK_OUT"
 ]);
+
+export const ACTIVE_COMPANY_BOOT_READS = Object.freeze([
+  "company_boot",
+  "latest_main",
+  "handoff_current",
+  "human_owner_policy",
+  "company_queue",
+  "worker_identity_authority",
+  "active_pr_branch_ci_blockers",
+  "task_safety_runtime_product_docs"
+]);
+
+export const ACTIVE_COMPANY_ROLES = Object.freeze({
+  GENERAL_MANAGER: "GENERAL_MANAGER",
+  PRIMEFORGE: "PRIMEFORGE",
+  DOT: "DOT",
+  CHATGPT: "CHATGPT",
+  CHATGPT_WORK: "CHATGPT_WORK",
+  CODEX: "CODEX",
+  CODEX_CLOUD: "CODEX_CLOUD",
+  REVIEWER: "REVIEWER",
+  HUMAN_RESOURCES: "HUMAN_RESOURCES"
+});
+
+export const ACTIVE_COMPANY_ORACLE_POLICY = Object.freeze({
+  strategy: "FREE_PRICE_FEEDS_FIRST",
+  speed_target: "1C",
+  paid_oracle_procurement: "NOT_ACTIVE",
+  material_triggers: Object.freeze([
+    "NEW_PROVIDER_REPLY",
+    "TRIAL_ACCESS_GRANTED",
+    "MATERIAL_PRICE_CHANGE",
+    "NEW_REQUIRED_ACTION",
+    "FREE_FEED_NO_LONGER_SUFFICIENT",
+    "HUMAN_REQUESTS_PAID_ORACLE_REVIEW"
+  ])
+});
 
 const AUTONOMOUS_ENGINEERING_PRIORITY = Object.freeze({ P0: 0, P1: 1, P2: 2 });
 const AUTONOMOUS_ENGINEERING_TRUST = Object.freeze({ T0: 0, T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 });
@@ -2037,8 +2077,29 @@ function autonomousEngineeringActorsDistinct(left, right) {
 
 function autonomousEngineeringBranchMatches(pattern, branch, taskId) {
   if (typeof pattern !== "string" || typeof branch !== "string" || typeof taskId !== "string") return false;
-  if (branch === "main" || branch.startsWith("codex/")) return false;
+  if (branch === "main") return false;
   return pattern.replace("<Task-ID>", taskId) === branch;
+}
+
+export function validateActiveCompanyBoot({ boot, current_main_sha, manager }) {
+  invariant(boot && typeof boot === "object" && !Array.isArray(boot), "COMPANY_BOOT_EVIDENCE_REQUIRED", "Active Company Mode requires boot evidence");
+  invariant(/^[0-9a-f]{40}$/.test(current_main_sha ?? ""), "INVALID_CURRENT_MAIN_SHA", "current_main_sha must be a lowercase Git SHA");
+  invariant(manager && typeof manager.worker_id === "string" && manager.worker_id.trim(), "COMPANY_BOOT_MANAGER_REQUIRED", "Active Company Mode requires a registered manager");
+  invariant(boot.worker_id === manager.worker_id, "COMPANY_BOOT_WORKER_MISMATCH", "Boot evidence must belong to the active manager");
+  invariant(boot.latest_main_sha === current_main_sha, "COMPANY_BOOT_STALE_MAIN", "Boot evidence must bind the latest main SHA");
+  invariant(typeof boot.completed_at === "string" && !Number.isNaN(Date.parse(boot.completed_at)), "COMPANY_BOOT_TIME_REQUIRED", "Boot evidence requires an ISO completion time");
+  invariant(boot.reads && typeof boot.reads === "object" && !Array.isArray(boot.reads), "COMPANY_BOOT_READS_REQUIRED", "Boot evidence requires canonical read references");
+  const missingReads = ACTIVE_COMPANY_BOOT_READS.filter((field) => typeof boot.reads[field] !== "string" || !boot.reads[field].trim());
+  invariant(missingReads.length === 0, "COMPANY_BOOT_INCOMPLETE", `Missing Company Boot reads: ${missingReads.join(", ")}`);
+  return Object.freeze({
+    status: "COMPANY_BOOT_COMPLETE",
+    worker_id: manager.worker_id,
+    latest_main_sha: current_main_sha,
+    completed_at: boot.completed_at,
+    reads: Object.freeze({ ...boot.reads }),
+    repository_written: false,
+    external_effect: false
+  });
 }
 
 function createAutonomousEngineeringEvent(cycleId, sequence, eventType, actorId, observedAt, payload = {}) {
@@ -2128,7 +2189,7 @@ export function planAutonomousCompanyEngineeringCycle({
   }
 
   const ordered = work_queue
-    .filter((candidate) => ["OPEN", "CLAIMABLE", "READY"].includes(candidate?.status))
+    .filter((candidate) => ["OPEN", "CLAIMABLE", "READY", "READY_FOR_ATOMIC_CLAIM"].includes(candidate?.status))
     .sort((left, right) => {
       const byPriority = (AUTONOMOUS_ENGINEERING_PRIORITY[left.priority] ?? 99) - (AUTONOMOUS_ENGINEERING_PRIORITY[right.priority] ?? 99);
       if (byPriority) return byPriority;
@@ -2173,6 +2234,17 @@ export function planAutonomousCompanyEngineeringCycle({
       reviewer = workers.find((entry) => entry.worker_id === candidate.reviewer_id);
       if (!autonomousEngineeringWorkerEligible(reviewer) || !autonomousEngineeringActorsDistinct(worker, reviewer)) reasons.push("DISTINCT_REVIEWER_REQUIRED");
     }
+    if (candidate.active_company_mode === true) {
+      if (typeof candidate.project_owner_id !== "string" || !candidate.project_owner_id.trim()) reasons.push("PROJECT_OWNER_REQUIRED");
+      if (candidate.implementer_id !== candidate.assigned_worker_id) reasons.push("PROJECT_IMPLEMENTER_MISMATCH");
+      if (reviewRequirement !== "REQUIRED") reasons.push("ACTIVE_COMPANY_REVIEW_REQUIRED");
+      if (!String(reviewer?.role ?? "").includes("Reviewer")) reasons.push("REVIEWER_ROLE_REQUIRED");
+      if (candidate.guardian_denial?.status === "UNRESOLVED") reasons.push("GUARDIAN_STOP_REPEAT");
+      if (candidate.work_category === "PAID_ORACLE_PROCUREMENT"
+        && !ACTIVE_COMPANY_ORACLE_POLICY.material_triggers.includes(candidate.oracle_material_trigger)) {
+        reasons.push("ORACLE_NO_MATERIAL_CHANGE");
+      }
+    }
 
     if (reasons.length) {
       rejected.push(Object.freeze({
@@ -2180,7 +2252,8 @@ export function planAutonomousCompanyEngineeringCycle({
         priority: candidate.priority ?? null,
         reasons: Object.freeze([...new Set(reasons)]),
         forbidden_actions: Object.freeze(forbidden),
-        unknown_actions: Object.freeze(unknown)
+        unknown_actions: Object.freeze(unknown),
+        guardian_denial: candidate.guardian_denial ?? null
       }));
       continue;
     }
@@ -2189,7 +2262,11 @@ export function planAutonomousCompanyEngineeringCycle({
   }
 
   if (!selection) {
-    append("BLOCKER_STATE", { blocker: "NO_VERIFIED_SAFE_WORK", rejected_task_ids: rejected.map((entry) => entry.task_id) });
+    append("BLOCKER_STATE", {
+      blocker: "NO_VERIFIED_SAFE_WORK",
+      rejected_task_ids: rejected.map((entry) => entry.task_id),
+      guardian_denials: rejected.filter((entry) => entry.guardian_denial?.status === "UNRESOLVED").map((entry) => entry.guardian_denial)
+    });
     append("CLOCK_OUT", { result: "NO_VERIFIED_SAFE_WORK" });
     return result("NO_VERIFIED_SAFE_WORK", {
       rejected_candidates: Object.freeze(rejected),
@@ -2211,6 +2288,11 @@ export function planAutonomousCompanyEngineeringCycle({
     authorized_actions: Object.freeze([...(candidate.authorized_actions ?? [])]),
     scope: Object.freeze([...(candidate.scope ?? [])]),
     acceptance_tests: Object.freeze([...(candidate.acceptance_tests ?? [])]),
+    active_company_mode: candidate.active_company_mode === true,
+    project_owner_id: candidate.project_owner_id ?? null,
+    implementer_id: candidate.implementer_id ?? worker.worker_id,
+    expected_output: candidate.expected_output ?? null,
+    dependencies: Object.freeze([...(candidate.dependencies ?? [])]),
     execution_authorized: false,
     merge_authorized: false,
     deployment_authorized: false,
@@ -2232,6 +2314,91 @@ export function planAutonomousCompanyEngineeringCycle({
     rejected_candidates: Object.freeze(rejected),
     events: Object.freeze(events),
     next_safe_action: "EXECUTOR_MUST_REVALIDATE_MAIN_AND_AUTHORITY_BEFORE_EACH_WRITE"
+  });
+}
+
+/**
+ * Active Company Mode preflight for one bounded engineering cycle.
+ *
+ * This composes the existing fail-closed planner. It validates durable boot
+ * evidence, binds every candidate to a Project Owner / Implementer / independent
+ * Reviewer triad, stops unresolved Guardian-denied actions, and keeps paid
+ * Oracle chasing silent until a material trigger exists. It plans only; it does
+ * not claim, launch, write, merge, deploy, pay, sign, or mutate chain state.
+ */
+export function planActiveCompanyOperatingCycle({
+  cycle_id,
+  observed_at,
+  current_main_sha,
+  expected_main_sha,
+  manager,
+  workers = [],
+  work_queue = [],
+  projects = [],
+  guardian_denials = [],
+  previous_cycle_ids = [],
+  boot,
+  direct_channel = "NOT_AVAILABLE",
+  durable_handoff_ref = null
+}) {
+  const bootStatus = validateActiveCompanyBoot({ boot, current_main_sha, manager });
+  requireArray(projects, "projects");
+  requireArray(guardian_denials, "guardian_denials");
+  invariant(["AVAILABLE", "NOT_AVAILABLE"].includes(direct_channel), "DIRECT_CHANNEL_STATUS_INVALID", "direct_channel must be AVAILABLE or NOT_AVAILABLE");
+  if (direct_channel === "NOT_AVAILABLE") {
+    invariant(typeof durable_handoff_ref === "string" && durable_handoff_ref.trim(), "DURABLE_HANDOFF_REQUIRED", "A durable handoff is required when no direct AI channel exists");
+  }
+
+  invariant(projects.every((project) => typeof project?.task_id === "string" && project.task_id.trim()), "ACTIVE_PROJECT_TASK_ID_REQUIRED", "Every active project requires a task_id");
+  invariant(new Set(projects.map((project) => project.task_id)).size === projects.length, "DUPLICATE_ACTIVE_PROJECT", "Each task may have only one active project ownership record");
+  const projectsByTask = new Map(projects.map((project) => [project?.task_id, project]));
+  const normalizedDenials = guardian_denials.map((denial) => {
+    const normalized = Object.fromEntries(
+      ["turn_id", "review_id", "target_item_id", "action", "reason", "timestamp"].map((field) => [
+        field,
+        typeof denial?.[field] === "string" && denial[field].trim() ? denial[field] : "UNKNOWN"
+      ])
+    );
+    return Object.freeze({ ...normalized, status: denial?.status ?? "UNRESOLVED" });
+  });
+  const activeQueue = work_queue.map((candidate) => {
+    const project = projectsByTask.get(candidate?.task_id);
+    const guardianDenial = normalizedDenials.find((denial) => (
+      denial.status === "UNRESOLVED"
+      && denial.target_item_id === candidate?.task_id
+    )) ?? candidate?.guardian_denial ?? null;
+    return {
+      ...candidate,
+      active_company_mode: true,
+      project_owner_id: project?.project_owner_id ?? null,
+      implementer_id: project?.implementer_id ?? null,
+      reviewer_id: project?.reviewer_id ?? null,
+      review_requirement: "REQUIRED",
+      expected_output: project?.expected_output ?? candidate?.expected_output ?? null,
+      dependencies: project?.dependencies ?? candidate?.dependencies ?? [],
+      guardian_denial: guardianDenial
+    };
+  });
+
+  const planned = planAutonomousCompanyEngineeringCycle({
+    cycle_id,
+    observed_at,
+    current_main_sha,
+    expected_main_sha,
+    manager,
+    workers,
+    work_queue: activeQueue,
+    previous_cycle_ids
+  });
+  return Object.freeze({
+    ...planned,
+    mode: "ACTIVE_COMPANY_MODE",
+    boot_status: bootStatus.status,
+    direct_channel,
+    durable_handoff_ref: direct_channel === "NOT_AVAILABLE" ? durable_handoff_ref : null,
+    oracle_policy: ACTIVE_COMPANY_ORACLE_POLICY,
+    guardian_denials: Object.freeze(normalizedDenials),
+    protected_action_authority_granted: false
   });
 }
 

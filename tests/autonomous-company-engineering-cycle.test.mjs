@@ -2,13 +2,17 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   planAutonomousCompanyEngineeringCycle,
+  planActiveCompanyOperatingCycle,
+  validateActiveCompanyBoot,
   persistAutonomousCompanyEngineeringCycle,
   restoreAutonomousCompanyEngineeringCycleState,
   readLatestRepositorySnapshot,
   evaluateExactHeadCiGate,
   AUTONOMOUS_ENGINEERING_DURABLE_EVENT_TYPES,
   AUTONOMOUS_ENGINEERING_SAFE_ACTIONS,
-  AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS
+  AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS,
+  ACTIVE_COMPANY_BOOT_READS,
+  ACTIVE_COMPANY_ORACLE_POLICY
 } from "../core/company/index.mjs";
 import { MemoryUniverseStore } from "../core/registry/store.mjs";
 import { assertAppendOnlyChain } from "../core/history/index.mjs";
@@ -81,6 +85,22 @@ const task = Object.freeze({
   created_at: "2026-09-14T00:00:00Z"
 });
 
+const activeCompanyBoot = Object.freeze({
+  worker_id: manager.worker_id,
+  latest_main_sha: MAIN_SHA,
+  completed_at: "2026-10-07T07:00:00Z",
+  reads: Object.freeze(Object.fromEntries(ACTIVE_COMPANY_BOOT_READS.map((field) => [field, `repo://${field}`])))
+});
+
+const activeCompanyProject = Object.freeze({
+  task_id: task.task_id,
+  project_owner_id: manager.worker_id,
+  implementer_id: worker.worker_id,
+  reviewer_id: reviewer.worker_id,
+  dependencies: ["CURRENT_MAIN"],
+  expected_output: "DRAFT_PR_AND_EXACT_HEAD_CI"
+});
+
 function cycle(overrides = {}) {
   return planAutonomousCompanyEngineeringCycle({
     cycle_id: "KAIOS-ENGINEERING-CYCLE-0001",
@@ -91,6 +111,23 @@ function cycle(overrides = {}) {
     workers: [manager, worker, reviewer],
     work_queue: [task],
     previous_cycle_ids: [],
+    ...overrides
+  });
+}
+
+function activeCycle(overrides = {}) {
+  return planActiveCompanyOperatingCycle({
+    cycle_id: "KAIOS-ACTIVE-COMPANY-CYCLE-0001",
+    observed_at: "2026-10-07T07:01:00Z",
+    current_main_sha: MAIN_SHA,
+    expected_main_sha: MAIN_SHA,
+    manager,
+    workers: [manager, worker, reviewer],
+    work_queue: [task],
+    projects: [activeCompanyProject],
+    previous_cycle_ids: [],
+    boot: activeCompanyBoot,
+    direct_channel: "AVAILABLE",
     ...overrides
   });
 }
@@ -198,14 +235,121 @@ test("rejects forbidden, unknown, high-risk, or side-effectful authority", () =>
   assert.ok(AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes("VERIFY_STATIC_PAGES"));
   assert.ok(!AUTONOMOUS_ENGINEERING_SAFE_ACTIONS.includes("MERGE_MAIN"));
   assert.ok(AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS.includes("EXTERNAL_AGENT_LAUNCH"));
+  assert.ok(AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS.includes("PRODUCTION_ORACLE_ACTIVATION"));
+  assert.ok(AUTONOMOUS_ENGINEERING_FORBIDDEN_ACTIONS.includes("DESTRUCTIVE_PLAYER_LIFE_OPERATION"));
 });
 
-test("blocks main, codex, and mismatched branches", () => {
+test("accepts the canonical READY_FOR_ATOMIC_CLAIM queue state", () => {
+  const result = cycle({ work_queue: [{ ...task, status: "READY_FOR_ATOMIC_CLAIM" }] });
+  assert.equal(result.status, "WORK_ORDER_CANDIDATE_READY");
+});
+
+test("blocks main and branch namespaces that do not match the registered worker", () => {
   for (const branch of ["main", "codex/SAFE-ENGINEERING-001", "chatgpt-handoff/WRONG-TASK"]) {
     const result = cycle({ work_queue: [{ ...task, branch }] });
     assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
     assert.ok(result.rejected_candidates[0].reasons.includes("BRANCH_POLICY_MISMATCH"));
   }
+});
+
+test("allows a registered Codex worker to use its exact codex task branch", () => {
+  const codexTask = {
+    ...task,
+    assigned_worker_id: manager.worker_id,
+    branch: `codex/${task.task_id}`
+  };
+  const result = cycle({ workers: [manager, reviewer], work_queue: [codexTask] });
+  assert.equal(result.status, "WORK_ORDER_CANDIDATE_READY");
+  assert.equal(result.selected_worker_id, manager.worker_id);
+});
+
+test("Active Company Mode requires complete exact-main boot evidence", () => {
+  const boot = validateActiveCompanyBoot({ boot: activeCompanyBoot, current_main_sha: MAIN_SHA, manager });
+  assert.equal(boot.status, "COMPANY_BOOT_COMPLETE");
+  assert.equal(boot.external_effect, false);
+  assert.throws(
+    () => activeCycle({ boot: { ...activeCompanyBoot, reads: { ...activeCompanyBoot.reads, company_queue: "" } } }),
+    (error) => error.code === "COMPANY_BOOT_INCOMPLETE"
+  );
+  assert.throws(
+    () => activeCycle({ boot: { ...activeCompanyBoot, latest_main_sha: "8".repeat(40) } }),
+    (error) => error.code === "COMPANY_BOOT_STALE_MAIN"
+  );
+});
+
+test("Active Company Mode binds one task to owner, implementer, and independent reviewer", () => {
+  const result = activeCycle();
+  assert.equal(result.mode, "ACTIVE_COMPANY_MODE");
+  assert.equal(result.status, "WORK_ORDER_CANDIDATE_READY");
+  assert.equal(result.boot_status, "COMPANY_BOOT_COMPLETE");
+  assert.equal(result.selected_reviewer_id, reviewer.worker_id);
+  assert.equal(result.work_order_candidate.project_owner_id, manager.worker_id);
+  assert.equal(result.work_order_candidate.implementer_id, worker.worker_id);
+  assert.equal(result.work_order_candidate.review_requirement, "REQUIRED");
+  assert.equal(result.work_order_candidate.expected_output, activeCompanyProject.expected_output);
+  assert.deepEqual(result.work_order_candidate.dependencies, ["CURRENT_MAIN"]);
+  assert.equal(result.protected_action_authority_granted, false);
+});
+
+test("Active Company Mode rejects missing ownership, implementer mismatch, and self review", () => {
+  for (const project of [
+    { ...activeCompanyProject, project_owner_id: "" },
+    { ...activeCompanyProject, implementer_id: manager.worker_id },
+    { ...activeCompanyProject, reviewer_id: worker.worker_id }
+  ]) {
+    const result = activeCycle({ projects: [project] });
+    assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+  }
+  const wrongRoleReviewer = { ...reviewer, role: "System Maintainer" };
+  const wrongRole = activeCycle({ workers: [manager, worker, wrongRoleReviewer] });
+  assert.equal(wrongRole.status, "NO_VERIFIED_SAFE_WORK");
+  assert.ok(wrongRole.rejected_candidates[0].reasons.includes("REVIEWER_ROLE_REQUIRED"));
+  assert.throws(
+    () => activeCycle({ projects: [activeCompanyProject, { ...activeCompanyProject }] }),
+    (error) => error.code === "DUPLICATE_ACTIVE_PROJECT"
+  );
+});
+
+test("Active Company Mode stops an unresolved Guardian denial instead of retrying", () => {
+  const denial = Object.freeze({
+    status: "UNRESOLVED",
+    turn_id: "turn-1",
+    review_id: "review-1",
+    target_item_id: task.task_id,
+    action: "PUSH_TASK_BRANCH",
+    reason: "GUARDIAN_DENIED",
+    timestamp: "2026-10-07T07:00:30Z"
+  });
+  const result = activeCycle({ guardian_denials: [denial] });
+  assert.equal(result.status, "NO_VERIFIED_SAFE_WORK");
+  assert.ok(result.rejected_candidates[0].reasons.includes("GUARDIAN_STOP_REPEAT"));
+  assert.equal(result.events[1].payload.guardian_denials[0].review_id, denial.review_id);
+  assert.equal(result.guardian_denials[0].action, denial.action);
+  const unknownFields = activeCycle({ guardian_denials: [{ target_item_id: task.task_id, action: "UNKNOWN" }] });
+  assert.equal(unknownFields.guardian_denials[0].turn_id, "UNKNOWN");
+  assert.equal(unknownFields.guardian_denials[0].reason, "UNKNOWN");
+});
+
+test("Active Company Mode keeps paid Oracle chasing silent until a material trigger", () => {
+  const oracleTask = { ...task, work_category: "PAID_ORACLE_PROCUREMENT" };
+  const silent = activeCycle({ work_queue: [oracleTask] });
+  assert.equal(silent.status, "NO_VERIFIED_SAFE_WORK");
+  assert.ok(silent.rejected_candidates[0].reasons.includes("ORACLE_NO_MATERIAL_CHANGE"));
+  const material = activeCycle({ work_queue: [{ ...oracleTask, oracle_material_trigger: "NEW_PROVIDER_REPLY" }] });
+  assert.equal(material.status, "WORK_ORDER_CANDIDATE_READY");
+  assert.equal(material.oracle_policy.strategy, "FREE_PRICE_FEEDS_FIRST");
+  assert.equal(material.oracle_policy.speed_target, "1C");
+  assert.equal(ACTIVE_COMPANY_ORACLE_POLICY.paid_oracle_procurement, "NOT_ACTIVE");
+});
+
+test("Active Company Mode requires a durable handoff when direct AI communication is unavailable", () => {
+  assert.throws(
+    () => activeCycle({ direct_channel: "NOT_AVAILABLE", durable_handoff_ref: null }),
+    (error) => error.code === "DURABLE_HANDOFF_REQUIRED"
+  );
+  const result = activeCycle({ direct_channel: "NOT_AVAILABLE", durable_handoff_ref: "handoff/HANDOFF_CURRENT.md" });
+  assert.equal(result.status, "WORK_ORDER_CANDIDATE_READY");
+  assert.equal(result.durable_handoff_ref, "handoff/HANDOFF_CURRENT.md");
 });
 
 test("never activates a suspended, occupied, or under-trusted worker", () => {
