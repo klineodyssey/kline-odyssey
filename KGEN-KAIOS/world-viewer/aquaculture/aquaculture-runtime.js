@@ -1,12 +1,12 @@
 /*
 KGEN_META
 VERSION: 1.0.0
-REVISION: 2026-10-07.CUSTOMER_CLOSED_WORLD_CONSTRUCTION.1
+REVISION: 2026-10-07.CUSTOMER_CLOSED_WORLD_PROOF_REVIEW.2
 STATUS: DRAFT
 LAST_UPDATED: 2026-10-07
 UPDATED_BY: dot / Human continuous engineering authorization 2026-10-07
 REVIEWED_BY: PENDING; local tests are not registered Reviewer authority
-SOURCE_COMMIT: 1b32087243ee9489c855b56db786a165184367ab
+SOURCE_COMMIT: 6e4763c496425ecaa91640110ecb302306f83110
 TASK_ID: KAIOS_AI_COMPANY_CUSTOMER_PROJECT_RUNTIME_V2
 CHANGE_REASON: Add opt-in finite fixture configuration and measured construction evidence without changing standalone defaults or delivery acceptance.
 SOURCE_OF_TRUTH: FALSE
@@ -418,6 +418,31 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     });
   }
 
+  // Aggregate fixture logs may span several days. Allocate their effective
+  // hours within each observed window using the existing daily shift limit,
+  // so repeated short commands cannot obtain a fresh shift allowance.
+  function fixtureShiftCapacity(worker, window = null) {
+    const used = new Map();
+    if (!(worker.shift_hours > 0 && worker.shift_hours <= 24)) return { valid: false, available: 0 };
+    const allocate = (log, requested) => {
+      const begin = log.activity_start + log.travel_hours, end = log.activity_end;
+      if (![begin, end, log.activity_start, log.travel_hours, requested].every(Number.isFinite)
+        || begin < 0 || end <= begin || end - log.activity_start > 168 + EPSILON
+        || log.travel_hours < 0 || requested < 0 || !Number.isSafeInteger(Math.floor(end / 24))) return 0;
+      let assigned = 0;
+      for (let day = Math.floor(begin / 24); day * 24 < end && assigned < requested; day += 1) {
+        const span = Math.max(0, Math.min(end, (day + 1) * 24) - Math.max(begin, day * 24));
+        const amount = Math.min(requested - assigned, span, Math.max(0, worker.shift_hours - (used.get(day) ?? 0)));
+        assigned += amount; used.set(day, (used.get(day) ?? 0) + amount);
+      }
+      return assigned;
+    };
+    for (const log of worker.time_log) {
+      if (allocate(log, log.effective_work_hours) + EPSILON < log.effective_work_hours) return { valid: false, available: 0 };
+    }
+    return { valid: true, available: window ? allocate(window, 168) : 0 };
+  }
+
   function advanceConstruction(hours = 72) {
     return execute("ADVANCE_POND_CONSTRUCTION", { hours }, "AQUACULTURE_CONSTRUCTION_TEAM", () => {
       if (state.status !== "RUNNING") return { status: "BLOCKED", reason: "RUNTIME_PAUSED" };
@@ -437,7 +462,9 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
       const travelHours = assignedWorkers.map((worker) => worker.current_location === state.land.land_parcel_id ? 0 : worker.travel_time_hours);
       if (travelHours.some((travel) => travel >= step)) return { status: "BLOCKED", reason: "TRAVEL_TIME_CONFLICT" };
       const calendarDays = Math.max(1, Math.ceil(step / 24));
-      const workerCapacities = assignedWorkers.map((worker, index) => Math.min(Math.max(0, step - travelHours[index]), worker.shift_hours * calendarDays));
+      const workerCapacities = assignedWorkers.map((worker, index) => fixture
+        ? fixtureShiftCapacity(worker, { activity_start: state.simulation_time, activity_end: state.simulation_time + step, travel_hours: travelHours[index] }).available
+        : Math.min(Math.max(0, step - travelHours[index]), worker.shift_hours * calendarDays));
       const workHours = Math.min(Math.max(0, requirement.hours - state.construction.progress_hours), ...workerCapacities);
       if (!(workHours > 0)) return { status: "BLOCKED", reason: "REST_REQUIREMENT_CONFLICT" };
       const activityStart = state.simulation_time;
@@ -451,7 +478,7 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
         for (const [index, worker] of assignedWorkers.entries()) {
           const restHours = round(Math.max(0, step - travelHours[index] - workHours));
           worker.stamina = clamp(round(worker.stamina - workHours * 0.9 + restHours * 0.4), 0, 100);
-          worker.time_log.push({ stage: state.construction.stage, location: state.land.land_parcel_id, activity_start: activityStart, activity_end: state.simulation_time, scheduled_hours: step, travel_hours: travelHours[index], effective_work_hours: workHours, rest_hours: restHours, shift_capacity_hours: worker.shift_hours * calendarDays });
+          worker.time_log.push({ stage: state.construction.stage, location: state.land.land_parcel_id, activity_start: activityStart, activity_end: state.simulation_time, scheduled_hours: step, travel_hours: travelHours[index], effective_work_hours: workHours, rest_hours: restHours, shift_capacity_hours: fixture ? workerCapacities[index] : worker.shift_hours * calendarDays });
           worker.event_log.push({ event: "CONSTRUCTION_SHIFT", stage: state.construction.stage, start: activityStart, end: state.simulation_time, status: "CLOCKED_OUT" });
           worker.current_activity = "OFF_DUTY"; worker.activity_end = state.simulation_time; worker.last_work_end = state.simulation_time; worker.availability = true; worker.rest_state = worker.stamina < 10 ? "REST_REQUIRED" : "RESTED";
         }
@@ -917,9 +944,13 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     const reservations = state.events.filter((event) => event.event_type === "ADVANCE_POND_CONSTRUCTION" && event.status !== "BLOCKED").map((event) => event.outputs.resource_reservation);
     if (reservations.some((reservation) => !reservation || reservation.scope !== "LOCAL_CLOSED_WORLD_TEST"
       || reservation.location !== fixture.args.landParcelId || !(reservation.ended_at > reservation.started_at))) issues.push("RESOURCE_RESERVATION_REQUIRED");
+    if (!state.events.some((event) => event.event_type === "CONFIGURE_LOCAL_FIXTURE"
+      && event.outputs?.fixture_id === fixture.args.fixtureId)) issues.push("FIXTURE_EVENT_HISTORY_REQUIRED");
     for (const stage of complete) {
       const requirement = STAGE_REQUIREMENTS[stage];
       if (!requirement) continue;
+      if (reservations.filter((reservation) => reservation?.stage === stage && reservation.status === "RELEASED_AFTER_COMPLETION"
+        && reservation.reservation_id === `${fixture.args.fixtureId}:${stage}`).length !== 1) issues.push(`COMPLETION_RESERVATION_REQUIRED:${stage}`);
       for (const role of requirement.roles) {
         const worker = state.workers.find((item) => item.role === role);
         const hours = worker?.time_log.filter((log) => log.stage === stage).reduce((sum, log) => sum + log.effective_work_hours, 0);
@@ -927,6 +958,7 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
       }
     }
     for (const worker of state.workers) {
+      if (!fixtureShiftCapacity(worker).valid) issues.push(`CUMULATIVE_SHIFT_CAPACITY:${worker.life_id}`);
       let lastEnd = 0;
       for (const log of worker.time_log) {
         if (log.activity_start < lastEnd || log.activity_end <= log.activity_start || log.location !== fixture.args.landParcelId
@@ -940,7 +972,10 @@ export function createFishpondAquacultureRuntimeV1({ seed = "KAIOS-AQUACULTURE-V
     }
     if (state.enterprise.accounts.payables > 0) issues.push("UNFUNDED_EXPENSES");
     const integrity = integrityReport(); if (!integrity.ok) issues.push(...integrity.issues);
-    try { replayEvents(); } catch { issues.push("OWNER_REPLAY_MISMATCH"); }
+    try {
+      const replayed = replayEvents();
+      if (stableStringify(replayed) !== stableStringify(state)) issues.push("OWNER_EVIDENCE_REPLAY_MISMATCH");
+    } catch { issues.push("OWNER_REPLAY_MISMATCH"); }
     if (complete.length !== CONSTRUCTION_STAGES.length) issues.push("CONSTRUCTION_INCOMPLETE");
     return clone({ scope: "LOCAL_CLOSED_WORLD_TEST", fixtureId: fixture.args.fixtureId, revision: state.revision,
       sourceStateHash: hash(stateProjection(state)), status: issues.length ? "CONSTRUCTION_EVIDENCE_HELD" : "CONSTRUCTION_EVIDENCE_READY",

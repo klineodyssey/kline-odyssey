@@ -476,3 +476,76 @@ test('closed-world empty pools block execution and later unscoped mutations cann
   const standalone = createFishpondAquacultureRuntimeV1(); standalone.start();
   assert.throws(() => standalone.configureLocalFixture(closedWorldFixture(standalone)), /LOCAL_FIXTURE_INITIAL_STATE_REQUIRED/);
 });
+
+test('closed-world inspection rejects missing or forged reservation and revision evidence', () => {
+  const source = createFishpondAquacultureRuntimeV1(); source.configureLocalFixture(closedWorldFixture(source)); completeConstruction(source);
+  for (const change of [
+    (state) => { state.events = []; state.revision = 999; },
+    (state) => { state.events = state.events.slice(1); },
+    (state) => { state.revision += 1; },
+    (state) => { state.action_log.push(structuredClone(state.action_log[0])); },
+    (state) => { for (const event of state.events) if (event.outputs.resource_reservation) Object.assign(event.outputs.resource_reservation, {
+      reservation_id: 'FAKE', stage: 'FAKE', status: 'FAKE', worker_life_ids: [], equipment: [], materials: {}, electricity_kwh: 0, started_at: 0, ended_at: 1
+    }); }
+  ]) {
+    const payload = source.exportState(); change(payload.state);
+    const runtime = createFishpondAquacultureRuntimeV1(); runtime.importState(payload);
+    const report = runtime.inspectLocalConstruction();
+    assert.equal(report.status, 'CONSTRUCTION_EVIDENCE_HELD');
+    assert.ok(report.issues.includes('OWNER_EVIDENCE_REPLAY_MISMATCH'));
+    assert.equal(report.delivery, null); assert.equal(report.receipt, null);
+  }
+});
+
+test('closed-world split calls cannot reset daily capacity while standalone behavior is preserved', () => {
+  const runtime = createFishpondAquacultureRuntimeV1(); runtime.configureLocalFixture(closedWorldFixture(runtime)); runtime.start();
+  runtime.advanceConstruction(8); runtime.advanceConstruction(8);
+  const before = runtime.getState(), blocked = runtime.advanceConstruction(4);
+  assert.equal(blocked.status, 'BLOCKED'); assert.equal(blocked.reason, 'REST_REQUIREMENT_CONFLICT');
+  assert.equal(runtime.getState().simulation_time, before.simulation_time);
+  assert.deepEqual(runtime.getState().workers, before.workers);
+  // A longer observed window can include later days and their unused capacity.
+  completeConstruction(runtime);
+  assert.equal(runtime.inspectLocalConstruction().status, 'CONSTRUCTION_EVIDENCE_READY');
+  const standalone = createFishpondAquacultureRuntimeV1(); standalone.start();
+  for (const hours of [8, 8, 4, 4]) assert.notEqual(standalone.advanceConstruction(hours).status, 'BLOCKED');
+});
+
+test('closed-world inspection independently rejects cumulative daily overwork in imported history', () => {
+  const source = createFishpondAquacultureRuntimeV1(); source.configureLocalFixture(closedWorldFixture(source)); completeConstruction(source);
+  const payload = source.exportState(), worker = payload.state.workers.find((v) => v.role === 'SITE_SUPERVISOR');
+  const log = worker.time_log[0];
+  worker.time_log = [0, 8].map((start) => ({ ...log, activity_start: start, activity_end: start + 8,
+    scheduled_hours: 8, travel_hours: 0, effective_work_hours: 8, rest_hours: 0, shift_capacity_hours: 8 }));
+  payload.state.events = [];
+  const imported = createFishpondAquacultureRuntimeV1(); imported.importState(payload);
+  const report = imported.inspectLocalConstruction();
+  assert.equal(report.status, 'CONSTRUCTION_EVIDENCE_HELD');
+  assert.ok(report.issues.includes(`CUMULATIVE_SHIFT_CAPACITY:${worker.life_id}`));
+});
+
+test('closed-world partitioned short travel windows never arrive or work early', () => {
+  const runtime = createFishpondAquacultureRuntimeV1(), fixture = closedWorldFixture(runtime);
+  fixture.workers[0].current_location = 'SYNTHETIC-REMOTE-YARD'; fixture.workers[0].travel_time_hours = 2;
+  runtime.configureLocalFixture(fixture); runtime.start();
+  const initial = runtime.getState().workers[0];
+  for (const hours of [1, 1, 2]) {
+    assert.equal(runtime.advanceConstruction(hours).reason, 'TRAVEL_TIME_CONFLICT');
+    assert.equal(runtime.getState().simulation_time, 0); assert.deepEqual(runtime.getState().workers[0], initial);
+  }
+  const step = runtime.advanceConstruction(8);
+  assert.equal(step.outputs.effective_work_hours, 6);
+  const log = runtime.getState().workers[0].time_log[0];
+  assert.equal(log.travel_hours + log.effective_work_hours + log.rest_hours, log.scheduled_hours);
+});
+
+test('closed-world daily capacity is correctly recorded across a calendar boundary', () => {
+  const runtime = createFishpondAquacultureRuntimeV1(); runtime.configureLocalFixture(closedWorldFixture(runtime)); runtime.start();
+  runtime.advanceConstruction(23); runtime.advanceConstruction(10);
+  const supervisor = runtime.getState().workers.find((worker) => worker.role === 'SITE_SUPERVISOR');
+  const log = supervisor.time_log[0];
+  assert.equal(log.activity_start, 23); assert.equal(log.activity_end, 33);
+  assert.equal(log.effective_work_hours, 9); assert.equal(log.shift_capacity_hours, 9);
+  completeConstruction(runtime);
+  assert.equal(runtime.inspectLocalConstruction().status, 'CONSTRUCTION_EVIDENCE_READY');
+});

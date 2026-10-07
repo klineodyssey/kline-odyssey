@@ -1,8 +1,8 @@
 # KAIOS Fishpond Aquaculture Runtime V1 Report
 
-Current candidate revision: `2026-10-07.CUSTOMER_CLOSED_WORLD_CONSTRUCTION.1`.
+Current candidate revision: `2026-10-07.CUSTOMER_CLOSED_WORLD_PROOF_REVIEW.2`.
 Status: `DRAFT`, review pending, source parent
-`1b32087243ee9489c855b56db786a165184367ab`. The historical deployed report below
+`6e4763c496425ecaa91640110ecb302306f83110`. The historical deployed report below
 is preserved; it does not claim this additive candidate is deployed.
 
 Task: `KAIOS-FISHPOND-AQUACULTURE-RUNTIME-V1-001`
@@ -140,3 +140,59 @@ configuration action requires its reader. Preserve any such local snapshots
 and fail closed under unsupported code; do not reset data. No deployment,
 real procurement, payment, payroll, new Life, Registry or customer acceptance
 is authorized by this report.
+
+## Independent proof review and opt-in repair
+
+Review of `6e4763c496425ecaa91640110ecb302306f83110` found two real issues
+despite successful ordinary CI. P1: the existing owner replay comparison omits
+events/action history/revision, so forged or missing reservation evidence could
+pass the new inspection. P2: legacy per-call shift capacity could be reset by
+several short calls, producing 16 effective work hours in one day for an
+8-hour worker while the new inspector still reported evidence ready.
+
+This successor repairs only the opt-in closed-world path. Inspection now
+compares the complete canonical replayed state, including all event outputs,
+action history and revision. It also requires the retained fixture event and
+exactly one released completion reservation for each completed stage, so a
+matching but truncated event ring cannot masquerade as full construction
+evidence. Empty events, forged allocation fields, changed revision and duplicate
+configuration actions keep evidence held. The legacy general replay/import
+behavior and standalone acceptance/revenue path are not silently rewritten.
+
+Fixture construction now allocates effective hours within their recorded
+windows against the existing per-calendar-day shift capacity. Previous logs
+consume the same day's capacity across subsequent calls. A short step cannot
+reset that allowance; it blocks without moving the worker, advancing time or
+consuming resources if no capacity remains. The inspector independently checks
+the same cumulative feasibility, in addition to nonoverlap and work/travel/rest
+totals. This is deterministic aggregate calendar-day capacity evidence, not a
+claim of independently observed minute-by-minute labor or a new biological/
+minimum-rest law. Existing stamina and rest-state gates remain.
+
+Five new regression cases cover forged/deleted reservation evidence and
+revision/history, split-call daily capacity with standalone compatibility,
+imported cumulative overwork, and partitioned short travel windows. Against a
+declared two-hour commute, 1h + 1h (or a 2h window) remains blocked at origin;
+a later 8h window records two travel hours and six effective work hours. The
+current owner does not accumulate partial commute progress across blocked calls.
+
+Final local owner suite: 51/51, zero failures/skips, Node 24.19.0. The 27-event
+legacy scenario remains byte-identical to the preserved baseline. Syntax and
+whitespace checks pass. The same three files are changed; no workflow, timeout,
+public UI, scientific coefficient or customer acceptance is added. Source
+re-review and the new ordinary exact-head CI/browser batch must be recorded
+separately before closing these findings.
+
+Source re-review also found and repaired a calendar-boundary logging mismatch:
+a 23h survey followed by a 10h design window spans two days and legitimately
+fits 9 effective hours (1 + 8). Fixture logs now record the actual computed
+window capacity instead of the legacy per-call value of 8; a dedicated
+23h/10h regression reaches evidence-ready completion. Standalone logs are
+unchanged.
+
+Scoped source re-review verified runtime blob
+`f0d6a76091ce2036a80a52017b792559611ee7e3` and closed all three reported
+findings. Nine focused cases and twelve independent boundary-window cases
+passed with exact replay equality. This is scoped source validation, not a
+registered Reviewer role or production/merge authority. Successor CI/browser
+results still require their own source binding.
