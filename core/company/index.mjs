@@ -2622,20 +2622,35 @@ function projectDynamicCompanyOpportunities({ work_queue, projects, repository, 
       project: stableStringify(project), task: stableStringify(task), pr: repository.snapshot.active_task_pr ?? null });
     const canonicalHistoryCandidate = Array.isArray(envelope.previous_work_orders)
       ? envelope.previous_work_orders.find((record) => record?.WORK_ID === task.task_id) : null;
-    const canonicalHistory = canonicalHistoryCandidate
-      && canonicalHistoryCandidate.CANONICAL_HISTORY_REF === task.work_order_ref
-      && /^[0-9a-f]{40}$/.test(canonicalHistoryCandidate.SOURCE_COMMIT ?? "")
-      && /^[0-9a-f]{40}$/.test(canonicalHistoryCandidate.SOURCE_BLOB ?? "")
-      && /^[0-9a-f]{64}$/.test(canonicalHistoryCandidate.RECORD_HASH ?? "")
-      && canonicalHistoryCandidate.SOURCE?.main_sha === canonicalHistoryCandidate.SOURCE_COMMIT
-      && canonicalHistoryCandidate.SOURCE?.git_object === canonicalHistoryCandidate.SOURCE_BLOB
-      ? canonicalHistoryCandidate : null;
-    const previous = canonicalHistory ?? prior.get(task.task_id);
-    const previousVerified = Boolean(canonicalHistory) || (previous && previous_work_orders_verified.includes(previous.WORK_ID));
+    // Envelope bytes can describe history, but cannot prove their own Git ancestry.
+    // Until the canonical reader returns a hash-recomputed historical commit/blob
+    // capability, durable predecessor claims fail closed and cannot drive SUPERSEDES.
+    const canonicalHistory = null;
+    const previous = prior.get(task.task_id);
+    const previousVerified = Boolean(previous && previous_work_orders_verified.includes(previous.WORK_ID));
     if ((previous || canonicalHistoryCandidate) && !previousVerified) blockers.push("PREDECESSOR_PROVENANCE_REQUIRED");
     const changed = previousVerified && stableStringify(previous.EVIDENCE_BINDING) !== stableStringify(binding);
     const expired = task.expires_at != null && (!Number.isFinite(Date.parse(task.expires_at)) || Date.parse(task.expires_at) <= Date.parse(observed_at));
     if (expired) blockers.push("EXPIRED");
+    const lifecycle = String(task.status ?? "READY").toUpperCase();
+    const lifecycleNeedsDispatch = ["ASSIGN", "WORKING", "ACTIVE", "REVIEW", "REVIEWING", "DONE", "COMPLETED"].includes(lifecycle);
+    const dispatchEvidence = task.dispatch_evidence;
+    const dispatched = lifecycleNeedsDispatch
+      && dispatchEvidence?.status === "VERIFIED"
+      && dispatchEvidence?.work_id === task.task_id
+      && dispatchEvidence?.worker_id === project?.implementer_id
+      && typeof dispatchEvidence?.occurred_at === "string"
+      && Number.isFinite(Date.parse(dispatchEvidence.occurred_at))
+      && Date.parse(dispatchEvidence.occurred_at) <= Date.parse(observed_at);
+    if (lifecycleNeedsDispatch && !dispatched) blockers.push("DISPATCH_EVIDENCE_REQUIRED");
+    const projectedStatus = blockers.includes("STALE_MAIN") || expired ? "STALE"
+      : waiting ? "WATCHING"
+      : blockers.length ? "BLOCKED"
+      : ["WORKING", "ACTIVE", "ASSIGN"].includes(lifecycle) ? "ACTIVE"
+      : ["REVIEW", "REVIEWING"].includes(lifecycle) ? "REVIEWING"
+      : ["DONE", "COMPLETED"].includes(lifecycle) ? "COMPLETED"
+      : lifecycle === "BLOCKED" ? "BLOCKED"
+      : "PROPOSED_UNADMITTED";
     records.push(Object.freeze({
       WORK_ID: task.task_id, GENERATED_AT: observed_at, WORK_TYPE: type ?? "UNKNOWN",
       SOURCE: Object.freeze({ path: task.work_order_ref, git_object: file.git_object, main_sha: repository.main_sha }),
@@ -2653,12 +2668,12 @@ function projectDynamicCompanyOpportunities({ work_queue, projects, repository, 
       ORIGIN: cargo.origin, DESTINATION: cargo.destination,
       EXPIRES_WHEN: Object.freeze({ at: task.expires_at ?? null, conditions: ["MAIN_CHANGED", "PR_OR_CI_CHANGED", "DEPENDENCY_CHANGED", "REGISTRY_CHANGED", "HUMAN_CANCELLED"] }),
       SUPERSEDES: changed ? Object.freeze({ WORK_ID: previous.WORK_ID, EVIDENCE_BINDING: previous.EVIDENCE_BINDING }) : null,
-      STATUS: blockers.includes("STALE_MAIN") || expired ? "STALE" : waiting ? "WATCHING" : blockers.length ? "BLOCKED" : "PROPOSED_UNADMITTED",
+      STATUS: projectedStatus,
       BLOCKERS: Object.freeze(blockers), EVIDENCE_BINDING: binding,
       WATCHER: waiting ? task.watcher_id ?? null : null,
       NEXT_CHECK_CONDITION: waiting ? task.next_check_condition ?? null : null,
-      PREDECESSOR_VERIFICATION: previous ? (canonicalHistory ? "CANONICAL_ENVELOPE_HISTORY" : previousVerified ? "SAME_PROCESS_PRODUCED_RECORD" : "NOT_VERIFIED") : "NOT_APPLICABLE",
-      IDEMPOTENT: Boolean(previousVerified && !changed), DISPATCHED: false, ACK: "ACK_NOT_VERIFIED"
+      PREDECESSOR_VERIFICATION: canonicalHistoryCandidate ? "HISTORICAL_GIT_PROVENANCE_NOT_VERIFIED" : previous ? (previousVerified ? "SAME_PROCESS_PRODUCED_RECORD" : "NOT_VERIFIED") : "NOT_APPLICABLE",
+      IDEMPOTENT: Boolean(previousVerified && !changed), DISPATCHED: dispatched, ACK: "ACK_NOT_VERIFIED"
     }));
   }
   for (const record of records) PRODUCED_COMPANY_OPPORTUNITY_RECORDS.add(record);
@@ -2666,11 +2681,15 @@ function projectDynamicCompanyOpportunities({ work_queue, projects, repository, 
     || b.PRIORITY_SCORE - a.PRIORITY_SCORE || a.WORK_ID.localeCompare(b.WORK_ID)));
 }
 
-function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at, workers }) {
+function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at, workers, duplicate_removed = 0 }) {
   const watching = opportunities.filter((record) => record.STATUS === "WATCHING");
   const blocked = opportunities.filter((record) => record.STATUS === "BLOCKED");
   const stale = opportunities.filter((record) => record.STATUS === "STALE");
   const ready = opportunities.filter((record) => record.STATUS === "PROPOSED_UNADMITTED");
+  const active = opportunities.filter((record) => record.STATUS === "ACTIVE");
+  const reviewing = opportunities.filter((record) => record.STATUS === "REVIEWING");
+  const completed = opportunities.filter((record) => record.STATUS === "COMPLETED");
+  const dispatched = opportunities.filter((record) => record.DISPATCHED === true);
   const availableWorkers = workers.filter((worker) => autonomousEngineeringWorkerEligible(worker) && Number(worker.active_claim_count ?? 0) === 0);
   const signatures = Object.freeze({ manufacturer: "NOT_VERIFIED", runtime_maintainer: "NOT_VERIFIED", independent_inspector: "NOT_VERIFIED", gm_acceptance: "NOT_VERIFIED" });
   return Object.freeze({
@@ -2681,10 +2700,10 @@ function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at, w
     day_breath: Object.freeze({ status: "BLOCKED_CANONICAL_K12345_DAY_BOUNDARY_AND_CLOCK_REQUIRED", day_key: null, actual_receipt: null }),
     heartbeat_result: Object.freeze({
       HEARTBEAT_ID: `DOT-${observed_at}`, DETECTED_WORK_COUNT: opportunities.length,
-      NEW_WORK_ORDERS: ready.length, DISPATCHED: 0, ACTIVE: 0, WATCHING: watching.length,
-      BLOCKED: blocked.length, COMPLETED: 0, REVIEWING: 0,
+      NEW_WORK_ORDERS: ready.length, DISPATCHED: dispatched.length, ACTIVE: active.length, WATCHING: watching.length,
+      BLOCKED: blocked.length, COMPLETED: completed.length, REVIEWING: reviewing.length,
       AVAILABLE_WORKERS: availableWorkers.length, IDLE_WORKERS: availableWorkers.map((worker) => worker.worker_id),
-      STALE_REMOVED: stale.length, DUPLICATE_REMOVED: 0
+      STALE_REMOVED: stale.length, DUPLICATE_REMOVED: duplicate_removed
     }),
     watching_chains: Object.freeze(watching.map((record) => Object.freeze({ work_id: record.WORK_ID, watcher: record.WATCHER, next_check_condition: record.NEXT_CHECK_CONDITION, dependency_chain_only: true }))),
     no_global_idle: true,
@@ -2692,8 +2711,8 @@ function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at, w
       ORGAN_ID: "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE", ORGAN_NAME: "KAIOS DOT Dynamic Opportunity & Task Engine",
       VERSION: "1.0.0", DESIGNED_BY: "沈英明", IMPLEMENTED_BY: "DOT_NOT_VERIFIED",
       REVIEWED_BY: "NOT_VERIFIED", MAINTAINED_BY: "PrimeForge_PLUS_DOT_NOT_VERIFIED", POLICY_OWNER: "衡曜_UNDER_HUMAN_AUTHORITY",
-      CREATED_AT: "2026-10-07T12:00:42Z", INSTALLED_AT: "NOT_INSTALLED", BASE_MAIN_SHA: repository.main_sha,
-      HEAD_SHA: "GIT_COMMIT_CONTAINING_THIS_MANIFEST", BRANCH: "codex/kaios-ai-company-active-mode-20261007", PR: 536,
+      CREATED_AT: observed_at, INSTALLED_AT: "NOT_INSTALLED", BASE_MAIN_SHA: repository.main_sha,
+      HEAD_SHA: "NOT_VERIFIED", BRANCH: "codex/kaios-ai-company-active-mode-20261007", PR: 536,
       CHANGED_FILES: Object.freeze(["core/company/index.mjs", "tests/autonomous-company-engineering-cycle.test.mjs", "KGEN-AI-Company/AI_COMPANY_OPERATING_SYSTEM.md", "KGEN-Organization/WorkOrders/WORK_QUEUE.md", "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"]),
       TESTS: "NOT_ESTABLISHED_BY_PLANNER", CI: "NOT_VERIFIED", RUNTIME_QA: "CANDIDATE_ONLY", SECURITY_QA: "PENDING_INDEPENDENT_REVIEW",
       KNOWN_LIMITS: Object.freeze(["NOT_INSTALLED", "NO_REGISTERED_DOT_IDENTITY", "NO_ELIGIBLE_DISTINCT_REVIEWER_CONFIRMED", "NO_AUTHENTICATED_DIRECT_CHANNEL"]),
@@ -2714,20 +2733,48 @@ function dynamicCompanyCycleEvidence({ opportunities, repository, observed_at, w
       status: "WATCHING", next_check_condition: "MAIN_PR_CI_QUEUE_REGISTRY_OR_DEPENDENCY_CHANGE", background_service: false
     }),
     rollback: Object.freeze({ status: "PLAN_ONLY", last_known_good_version: "NONE_NOT_INSTALLED", last_known_good_head: null, action: "REVERT_REVIEWED_CANDIDATE_DIFF_WITH_OWNER_APPROVAL", previous_head: "b00aee498cfd14bb0b4435326edabed2129bf9f2", stop_new_dispatch_on_p0: true }),
-    seal: Object.freeze({ ORGAN_ID: "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE", VERSION: "1.0.0", HEAD_SHA: "GIT_COMMIT_CONTAINING_THIS_MANIFEST", TEST_RESULT: "NOT_VERIFIED", REVIEW_RESULT: "NOT_VERIFIED", INSPECTION_RESULT: "PENDING", MANUFACTURER: "NOT_VERIFIED", MAINTAINER: "NOT_VERIFIED", REVIEWER: "NOT_VERIFIED", GM_ACK: "NOT_VERIFIED", SEALED_AT: null, status: "INVALID", SUPERSEDED_BY: null, reason: "INSTALLATION_INSPECTION_SIGNATURE_AND_AUTHENTICATED_ACK_NOT_VERIFIED" })
+    seal: Object.freeze({ ORGAN_ID: "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE", VERSION: "1.0.0", HEAD_SHA: "NOT_VERIFIED", TEST_RESULT: "NOT_VERIFIED", REVIEW_RESULT: "NOT_VERIFIED", INSPECTION_RESULT: "PENDING", MANUFACTURER: "NOT_VERIFIED", MAINTAINER: "NOT_VERIFIED", REVIEWER: "NOT_VERIFIED", GM_ACK: "NOT_VERIFIED", SEALED_AT: null, status: "INVALID", SUPERSEDED_BY: null, reason: "INSTALLATION_INSPECTION_SIGNATURE_AND_AUTHENTICATED_ACK_NOT_VERIFIED" })
   });
 }
 
 const DOT_MANUFACTURING_FIELDS = Object.freeze("ORGAN_ID ORGAN_NAME VERSION DESIGNED_BY IMPLEMENTED_BY REVIEWED_BY MAINTAINED_BY POLICY_OWNER CREATED_AT INSTALLED_AT BASE_MAIN_SHA HEAD_SHA BRANCH PR CHANGED_FILES TESTS CI RUNTIME_QA SECURITY_QA KNOWN_LIMITS ROLLBACK_PLAN STATUS SIGNATURES".split(" "));
 const DOT_SIGNATURE_STATES = Object.freeze(["SIGNED", "NOT_SIGNED", "NOT_VERIFIED"]);
+const DOT_SIGNATURE_FIELDS = Object.freeze(["manufacturer", "runtime_maintainer", "independent_inspector", "gm_acceptance"]);
 const DOT_DEGRADED_ISSUES = Object.freeze(["BUG", "STALE_LOGIC", "DUPLICATE_PROMPT", "BROKEN_CHANNEL", "WRONG_PRIORITY", "BAD_DISPATCH", "QUEUE_DRIFT", "CARGO_ROUTING_ERROR", "REVIEW_ROUTING_ERROR"]);
+const VERIFIED_DOT_INSPECTIONS = new WeakSet();
+const VERIFIED_DOT_REVIEW_EVIDENCE = new WeakSet();
+const VERIFIED_DOT_GM_ACK_EVIDENCE = new WeakSet();
+const VERIFIED_DOT_ACTOR_EVIDENCE = new WeakSet();
+const VERIFIED_DOT_EXACT_HEAD_GATES = new WeakSet();
 
 export function validateDotOrganManufacturingRecord(record) {
   requireFields(record, DOT_MANUFACTURING_FIELDS, "DotOrganManufacturingRecord");
   invariant(record.ORGAN_ID === "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE" && record.VERSION === "1.0.0", "DOT_ORGAN_IDENTITY_INVALID", "DOT organ identity/version mismatch");
-  invariant(Array.isArray(record.CHANGED_FILES) && Array.isArray(record.KNOWN_LIMITS), "DOT_MANUFACTURING_ARRAYS_REQUIRED", "Manufacturing record requires changed files and known limits");
-  invariant(record.SIGNATURES && Object.values(record.SIGNATURES).every((status) => DOT_SIGNATURE_STATES.includes(status)), "DOT_SIGNATURE_STATUS_INVALID", "DOT signatures must be explicit signed/not-signed/not-verified states");
-  if (record.STATUS !== "INSTALLED") invariant(record.INSTALLED_AT === "NOT_INSTALLED", "DOT_PREMATURE_INSTALLATION", "A non-installed candidate must state NOT_INSTALLED");
+  for (const field of ["ORGAN_NAME", "DESIGNED_BY", "IMPLEMENTED_BY", "REVIEWED_BY", "MAINTAINED_BY", "POLICY_OWNER", "TESTS", "CI", "RUNTIME_QA", "SECURITY_QA", "ROLLBACK_PLAN"]) {
+    invariant(typeof record[field] === "string" && record[field].trim(), "DOT_MANUFACTURING_TEXT_INVALID", `Manufacturing record requires ${field}`);
+  }
+  invariant(typeof record.CREATED_AT === "string" && Number.isFinite(Date.parse(record.CREATED_AT)), "DOT_MANUFACTURING_CREATED_AT_INVALID", "Manufacturing record requires an ISO creation time");
+  invariant(/^[0-9a-f]{40}$/.test(record.BASE_MAIN_SHA ?? ""), "DOT_MANUFACTURING_BASE_SHA_INVALID", "Manufacturing record requires an exact base SHA");
+  invariant(record.HEAD_SHA === "NOT_VERIFIED" || /^[0-9a-f]{40}$/.test(record.HEAD_SHA ?? ""), "DOT_MANUFACTURING_HEAD_SHA_INVALID", "Manufacturing head must be exact or NOT_VERIFIED");
+  invariant(typeof record.BRANCH === "string" && /^codex\/[A-Za-z0-9._/-]+$/.test(record.BRANCH) && record.BRANCH !== "codex/main", "DOT_MANUFACTURING_BRANCH_INVALID", "Manufacturing branch must be a bounded codex branch");
+  invariant(Number.isInteger(record.PR) && record.PR > 0, "DOT_MANUFACTURING_PR_INVALID", "Manufacturing record requires a positive PR number");
+  invariant(Array.isArray(record.CHANGED_FILES) && record.CHANGED_FILES.length > 0 && record.CHANGED_FILES.every((path) => typeof path === "string" && path.trim()), "DOT_MANUFACTURING_ARRAYS_REQUIRED", "Manufacturing record requires changed files");
+  invariant(Array.isArray(record.KNOWN_LIMITS), "DOT_MANUFACTURING_ARRAYS_REQUIRED", "Manufacturing record requires known limits");
+  invariant(record.SIGNATURES && !Array.isArray(record.SIGNATURES)
+    && Object.keys(record.SIGNATURES).length === DOT_SIGNATURE_FIELDS.length
+    && DOT_SIGNATURE_FIELDS.every((field) => Object.hasOwn(record.SIGNATURES, field) && DOT_SIGNATURE_STATES.includes(record.SIGNATURES[field])),
+  "DOT_SIGNATURE_STATUS_INVALID", "DOT signatures require every exact role and an explicit state");
+  invariant(["CANDIDATE_NOT_INSTALLED", "INSTALLED"].includes(record.STATUS), "DOT_MANUFACTURING_STATUS_INVALID", "Unsupported manufacturing state");
+  if (record.STATUS !== "INSTALLED") {
+    invariant(record.INSTALLED_AT === "NOT_INSTALLED", "DOT_PREMATURE_INSTALLATION", "A non-installed candidate must state NOT_INSTALLED");
+  } else {
+    invariant(/^[0-9a-f]{40}$/.test(record.HEAD_SHA), "DOT_INSTALLED_HEAD_REQUIRED", "Installation requires an exact head SHA");
+    invariant(typeof record.INSTALLED_AT === "string" && Number.isFinite(Date.parse(record.INSTALLED_AT)) && Date.parse(record.INSTALLED_AT) >= Date.parse(record.CREATED_AT), "DOT_INSTALLED_AT_INVALID", "Installation requires a valid installation time");
+    invariant(DOT_SIGNATURE_FIELDS.every((field) => record.SIGNATURES[field] === "SIGNED"), "DOT_INSTALLED_SIGNATURES_REQUIRED", "Installation requires all four signatures");
+    for (const field of ["IMPLEMENTED_BY", "REVIEWED_BY", "MAINTAINED_BY", "POLICY_OWNER"]) {
+      invariant(typeof record[field] === "string" && record[field].trim() && !record[field].includes("NOT_VERIFIED"), "DOT_INSTALLED_ACTOR_REQUIRED", `Installation requires verified ${field}`);
+    }
+  }
   return record;
 }
 
@@ -2735,19 +2782,26 @@ export function inspectDotOrganCandidate({ manufacturing_record, main_sha, obser
   validateDotOrganManufacturingRecord(manufacturing_record);
   invariant(/^[0-9a-f]{40}$/.test(main_sha ?? ""), "DOT_INSPECTION_MAIN_INVALID", "Inspection requires exact main SHA");
   invariant(typeof observed_at === "string" && !Number.isNaN(Date.parse(observed_at)), "DOT_INSPECTION_TIME_INVALID", "Inspection requires an ISO time");
+  invariant(main_sha === manufacturing_record.BASE_MAIN_SHA, "DOT_INSPECTION_MAIN_MISMATCH", "Inspection must bind the manufacturing base SHA");
+  invariant(Date.parse(observed_at) >= Date.parse(manufacturing_record.CREATED_AT), "DOT_INSPECTION_TIME_PRECEDES_BUILD", "Inspection cannot predate manufacturing");
   const requiredChecks = Object.freeze(["heartbeat_input", "breath_input", "boot_read", "github_access", "queue_access", "worker_registry", "direct_channels", "priority_engine", "work_order_generator", "dedup_engine", "stale_engine", "dispatch_engine", "review_router", "cargo_resolver", "universe_destination_resolver", "payroll_handoff", "guardian_logging"]);
-  const failures = requiredChecks.filter((field) => checks[field] !== "PASS");
-  const normalizedSignatures = Object.freeze(Object.fromEntries(["manufacturer", "runtime_maintainer", "independent_inspector", "gm_acceptance"].map((field) => [field, DOT_SIGNATURE_STATES.includes(signatures[field]) ? signatures[field] : "NOT_VERIFIED"])));
-  return Object.freeze({
+  // String claims are diagnostic input only. A future canonical inspection
+  // reader must issue the private evidence capability before PASS can activate.
+  const failures = requiredChecks.filter(() => true);
+  const normalizedSignatures = Object.freeze(Object.fromEntries(DOT_SIGNATURE_FIELDS.map((field) => [field, "NOT_VERIFIED"])));
+  const inspection = Object.freeze({
     INSPECTION_ID: `DOT-INSPECTION-${observed_at}`, DATE: observed_at.slice(0, 10), VERSION: manufacturing_record.VERSION,
-    MAIN_SHA: main_sha, HEARTBEAT_LAST_SEEN: observed_at, HEARTBEAT_STATUS: checks.heartbeat_input ?? "NOT_VERIFIED",
-    BREATH_STATUS: checks.breath_input ?? "NOT_VERIFIED", DOT_STATUS: failures.length ? "DEGRADED" : "CANDIDATE_VALIDATED_NOT_INSTALLED",
-    QUEUE_STATUS: checks.queue_access ?? "NOT_VERIFIED", DISPATCH_STATUS: "NO_DISPATCH", REVIEW_STATUS: checks.review_router ?? "NOT_VERIFIED",
-    CARGO_STATUS: checks.cargo_resolver ?? "NOT_VERIFIED", ERRORS: Object.freeze(failures),
+    MAIN_SHA: main_sha, HEARTBEAT_LAST_SEEN: observed_at, HEARTBEAT_STATUS: "NOT_VERIFIED",
+    BREATH_STATUS: "NOT_VERIFIED", DOT_STATUS: "DEGRADED_UNVERIFIED_INSPECTION_INPUT",
+    QUEUE_STATUS: "NOT_VERIFIED", DISPATCH_STATUS: "NO_DISPATCH", REVIEW_STATUS: "NOT_VERIFIED",
+    CARGO_STATUS: "NOT_VERIFIED", ERRORS: Object.freeze(failures.map((field) => `${field.toUpperCase()}_NOT_VERIFIED`)),
     P0: failures.includes("guardian_logging") ? 1 : 0, P1: failures.length, P2: 0,
     REPAIR_REQUIRED: failures.length > 0, REPAIR_OWNER: failures.length ? "PrimeForge + DOT" : null,
     NEXT_INSPECTION: "NEXT_VERIFIED_DAILY_BREATH_OR_MATERIAL_CHANGE", SIGNATURES: normalizedSignatures
   });
+  // Deliberately not added to VERIFIED_DOT_INSPECTIONS: caller strings did not
+  // establish a canonical inspection receipt.
+  return inspection;
 }
 
 export function createDotOrganMaintenanceRecord({ issue = null, root_cause = null, changed_files = [], version_before = "1.0.0", version_after = "1.0.0", observed_at, reviewed_by = "NOT_VERIFIED", gm_ack = "NOT_VERIFIED" }) {
@@ -2762,17 +2816,23 @@ export function createDotOrganMaintenanceRecord({ issue = null, root_cause = nul
   });
 }
 
-export function evaluateDotOrganSeal({ manufacturing_record, inspection_record, exact_head_ci, independent_review, gm_ack, prior_seal = null }) {
+export function evaluateDotOrganSeal({ manufacturing_record, inspection_record, exact_head_gate = null, independent_review_evidence = null, gm_ack_evidence = null, actor_registry_evidence = null, prior_seal = null }) {
   validateDotOrganManufacturingRecord(manufacturing_record);
+  const exactHeadVerified = VERIFIED_DOT_EXACT_HEAD_GATES.has(exact_head_gate)
+    && exact_head_gate.expected_main_sha === manufacturing_record.BASE_MAIN_SHA
+    && exact_head_gate.expected_head_sha === manufacturing_record.HEAD_SHA;
+  const inspectionVerified = VERIFIED_DOT_INSPECTIONS.has(inspection_record) && inspection_record?.REPAIR_REQUIRED === false;
+  const reviewVerified = VERIFIED_DOT_REVIEW_EVIDENCE.has(independent_review_evidence);
+  const gmAckVerified = VERIFIED_DOT_GM_ACK_EVIDENCE.has(gm_ack_evidence);
+  const actorsVerified = VERIFIED_DOT_ACTOR_EVIDENCE.has(actor_registry_evidence);
   const valid = manufacturing_record.STATUS === "INSTALLED" && manufacturing_record.INSTALLED_AT !== "NOT_INSTALLED"
-    && inspection_record?.REPAIR_REQUIRED === false && exact_head_ci === "PASS"
-    && independent_review === "PASS" && gm_ack === "SIGNED"
-    && Object.values(manufacturing_record.SIGNATURES).every((status) => status === "SIGNED");
+    && inspectionVerified && exactHeadVerified && reviewVerified && gmAckVerified && actorsVerified
+    && DOT_SIGNATURE_FIELDS.every((field) => manufacturing_record.SIGNATURES[field] === "SIGNED");
   if (prior_seal?.status === "VALID") invariant(typeof prior_seal.SUPERSEDED_BY === "string" && prior_seal.SUPERSEDED_BY.trim(), "DOT_PRIOR_SEAL_SUPERSESSION_REQUIRED", "A prior valid seal must be retained and superseded explicitly");
   return Object.freeze({ ORGAN_ID: manufacturing_record.ORGAN_ID, VERSION: manufacturing_record.VERSION, HEAD_SHA: manufacturing_record.HEAD_SHA,
-    TEST_RESULT: exact_head_ci, REVIEW_RESULT: independent_review, INSPECTION_RESULT: inspection_record?.REPAIR_REQUIRED === false ? "PASS" : "FAIL",
+    TEST_RESULT: exactHeadVerified ? "PASS" : "NOT_VERIFIED", REVIEW_RESULT: reviewVerified ? "PASS" : "NOT_VERIFIED", INSPECTION_RESULT: inspectionVerified ? "PASS" : "NOT_VERIFIED",
     MANUFACTURER: manufacturing_record.SIGNATURES.manufacturer, MAINTAINER: manufacturing_record.SIGNATURES.runtime_maintainer,
-    REVIEWER: manufacturing_record.SIGNATURES.independent_inspector, GM_ACK: gm_ack, SEALED_AT: valid ? manufacturing_record.INSTALLED_AT : null,
+    REVIEWER: manufacturing_record.SIGNATURES.independent_inspector, GM_ACK: gmAckVerified ? "SIGNED" : "NOT_VERIFIED", SEALED_AT: valid ? manufacturing_record.INSTALLED_AT : null,
     status: valid ? "VALID" : "INVALID", SUPERSEDED_BY: null });
 }
 
@@ -2890,6 +2950,7 @@ export function planActiveCompanyOperatingCycle(input) {
   invariant(Date.parse(observed_at) >= Date.parse(trustedRepository.observed_at), "SNAPSHOT_FROM_FUTURE", "Cycle cannot predate repository observation");
   invariant(projects.every((project) => typeof project?.task_id === "string" && project.task_id.trim()), "ACTIVE_PROJECT_TASK_ID_REQUIRED", "Every project requires a task ID");
   invariant(new Set(projects.map((project) => project.task_id)).size === projects.length, "DUPLICATE_ACTIVE_PROJECT", "Projects must be unique");
+  const originalWorkQueueLength = work_queue.length;
   const unique = new Map();
   for (const candidate of work_queue) {
     requireId(candidate?.task_id, "task_id");
@@ -2897,8 +2958,9 @@ export function planActiveCompanyOperatingCycle(input) {
     unique.set(candidate.task_id, candidate);
   }
   work_queue = [...unique.values()];
+  const duplicateRemoved = originalWorkQueueLength - work_queue.length;
   const opportunities = projectDynamicCompanyOpportunities({ work_queue, projects, repository: trustedRepository, observed_at, previous_work_orders, previous_work_orders_verified });
-  const dynamicEvidence = dynamicCompanyCycleEvidence({ opportunities, repository: trustedRepository, observed_at, workers });
+  const dynamicEvidence = dynamicCompanyCycleEvidence({ opportunities, repository: trustedRepository, observed_at, workers, duplicate_removed: duplicateRemoved });
   const projectsByTask = new Map(projects.map((project) => [project?.task_id, project]));
   const commonPreflight = planAutonomousCompanyEngineeringCycleCore({
     cycle_id,
@@ -3410,9 +3472,11 @@ export function evaluateExactHeadCiGate({ repository_snapshot, expected_main_sha
       || !autonomousEngineeringBranchMatches(registered.allowed_branch_pattern, pr.head_ref, task.task_id)) {
     return hold("HOLD_BRANCH_REGISTRY_TASK_MISMATCH");
   }
-  return hold(VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot) ? "EXACT_MAIN_HEAD_CI_PASS" : "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED", { evidence_class: repository_snapshot.transport_provenance, exact_main: true, exact_head: true, ci_status: "PASS", behind_main: 0,
+  const result = hold(VERIFIED_COMPANY_REPOSITORY_SNAPSHOTS.has(repository_snapshot) ? "EXACT_MAIN_HEAD_CI_PASS" : "DIAGNOSTIC_CI_MATCH_NOT_VERIFIED", { evidence_class: repository_snapshot.transport_provenance, exact_main: true, exact_head: true, ci_status: "PASS", behind_main: 0,
     branch_policy_status: "REGISTRY_TASK_BOUND", branch_policy_work_order: work_order_ref,
     branch_policy_evidence_source: repository_snapshot.pr_files?.[work_order_ref] ? "EXACT_PR_HEAD" : "CURRENT_MAIN" });
+  if (result.status === "EXACT_MAIN_HEAD_CI_PASS") VERIFIED_DOT_EXACT_HEAD_GATES.add(result);
+  return result;
 }
 
 export function createAutonomousBusinessWorkOrder({ cycle_id, primary_job_status, candidates }) {

@@ -181,7 +181,7 @@
     "CREATED_AT": "2026-10-07T12:00:42Z",
     "INSTALLED_AT": "NOT_INSTALLED",
     "BASE_MAIN_SHA": "f7f67950418ebbb6f7a5a309a32d529232fcb3b6",
-    "HEAD_SHA": "GIT_COMMIT_CONTAINING_THIS_MANIFEST",
+    "HEAD_SHA": "NOT_VERIFIED",
     "BRANCH": "codex/kaios-ai-company-active-mode-20261007",
     "PR": 536,
     "CHANGED_FILES": [
@@ -191,7 +191,7 @@
       "KGEN-Organization/WorkOrders/WORK_QUEUE.md",
       "KGEN-Organization/WorkOrders/KAIOS_AI_COMPANY_SAFE_PLANNER_CURRENT_MAIN_R1_20260914.json"
     ],
-    "TESTS": "51_FOCUSED_PASS_LOCAL_PENDING_EXACT_HEAD_CI",
+    "TESTS": "52_FOCUSED_PASS_LOCAL_PENDING_EXACT_HEAD_CI",
     "CI": "NOT_VERIFIED",
     "RUNTIME_QA": "CANDIDATE_ONLY_NOT_INSTALLED",
     "SECURITY_QA": "PENDING_INDEPENDENT_REREVIEW",
@@ -244,7 +244,7 @@
     "ROOT_CAUSE": null,
     "CHANGED_FILES": [],
     "PATCH": null,
-    "TEST": "51_FOCUSED_PASS_LOCAL",
+    "TEST": "52_FOCUSED_PASS_LOCAL",
     "CI": "PENDING_EXACT_HEAD",
     "REVIEW": "PENDING_INDEPENDENT_REREVIEW",
     "VERSION_AFTER": "1.0.0-CANDIDATE",
@@ -285,7 +285,7 @@
   "organ_seal": {
     "ORGAN_ID": "KAIOS-DOT-DYNAMIC-OPPORTUNITY-TASK-ENGINE",
     "VERSION": "1.0.0",
-    "HEAD_SHA": "GIT_COMMIT_CONTAINING_THIS_MANIFEST",
+    "HEAD_SHA": "NOT_VERIFIED",
     "TEST_RESULT": "LOCAL_FOCUSED_PASS_EXACT_HEAD_CI_PENDING",
     "REVIEW_RESULT": "NOT_VERIFIED",
     "INSPECTION_RESULT": "PENDING",
@@ -306,7 +306,7 @@
     "Controller binding restored from main because #536 removed it",
     "Exact-PR-head envelope evidence is implemented but not yet verified against real PR #536 exact-head CI",
     "Dynamic priority factors are implemented as bounded evidence-only inputs; policy remains candidate until review",
-    "Durable predecessor provenance requires canonical envelope history with source commit/blob/hash; no history is fabricated",
+    "Durable predecessor provenance requires a reader-verified historical Git commit/blob/hash capability; self-described envelope history fails closed and cannot supersede",
     "Actual branch WorkOrder test proves parse/projection compatibility, not admission on current main",
     "Demands with a target PR stay ACTIVE_PR_EVIDENCE_REQUIRED until that PR is observed"
   ],

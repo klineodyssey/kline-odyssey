@@ -1128,16 +1128,17 @@ test("NO_GLOBAL_IDLE watches one dependency chain and advances independent ready
   assert.equal(result.heartbeat_result.WATCHING, 1);
 });
 
-test("hash-verified canonical predecessor can supersede on dependency or PR evidence change", async () => {
+test("self-described durable predecessor cannot mint Git provenance or supersession", async () => {
   const first = cycle().opportunity_records[0];
   const durable = { ...structuredClone(first), CANONICAL_HISTORY_REF: WORK_ORDER_REF, SOURCE_COMMIT: first.SOURCE.main_sha, SOURCE_BLOB: first.SOURCE.git_object, RECORD_HASH: "b".repeat(64) };
   const changed = { ...task, dependencies_complete: false };
   const evidence = await repositoryEvidenceForEnvelopes([{ task: changed, project: activeCompanyProject, previous_work_orders: [durable] }]);
   const result = cycle({ work_queue: [changed], repository_evidence: evidence });
   const record = result.opportunity_records[0];
-  assert.equal(record.PREDECESSOR_VERIFICATION, "CANONICAL_ENVELOPE_HISTORY");
+  assert.equal(record.PREDECESSOR_VERIFICATION, "HISTORICAL_GIT_PROVENANCE_NOT_VERIFIED");
   assert.equal(record.STATUS, "BLOCKED");
-  assert.equal(record.SUPERSEDES.WORK_ID, task.task_id);
+  assert.equal(record.SUPERSEDES, null);
+  assert.ok(record.BLOCKERS.includes("PREDECESSOR_PROVENANCE_REQUIRED"));
 });
 
 test("exact-head gate can bind a hash-checked PR-head envelope without pretending main admission", async () => {
@@ -1186,8 +1187,39 @@ test("manufacturing inspection maintenance seal and rollback gates remain truthf
   assert.equal(validateDotOrganManufacturingRecord(manufacturing), manufacturing);
   const checks = Object.fromEntries(["heartbeat_input", "breath_input", "boot_read", "github_access", "queue_access", "worker_registry", "direct_channels", "priority_engine", "work_order_generator", "dedup_engine", "stale_engine", "dispatch_engine", "review_router", "cargo_resolver", "universe_destination_resolver", "payroll_handoff", "guardian_logging"].map((field) => [field, "PASS"]));
   const inspection = inspectDotOrganCandidate({ manufacturing_record: manufacturing, main_sha: MAIN_SHA, observed_at: "2026-10-07T08:00:00Z", checks });
-  assert.equal(inspection.REPAIR_REQUIRED, false); assert.equal(inspection.SIGNATURES.independent_inspector, "NOT_VERIFIED");
+  assert.equal(inspection.REPAIR_REQUIRED, true); assert.equal(inspection.SIGNATURES.independent_inspector, "NOT_VERIFIED");
+  assert.equal(inspection.DOT_STATUS, "DEGRADED_UNVERIFIED_INSPECTION_INPUT");
   assert.equal(createDotOrganMaintenanceRecord({ issue: "QUEUE_DRIFT", observed_at: "2026-10-07T08:00:00Z" }).ORGAN_STATUS, "DEGRADED");
-  assert.equal(evaluateDotOrganSeal({ manufacturing_record: manufacturing, inspection_record: inspection, exact_head_ci: "PASS", independent_review: "PASS", gm_ack: "SIGNED" }).status, "INVALID");
+  assert.equal(evaluateDotOrganSeal({ manufacturing_record: manufacturing, inspection_record: inspection, exact_head_gate: { status: "EXACT_MAIN_HEAD_CI_PASS" }, independent_review_evidence: { status: "PASS" }, gm_ack_evidence: { status: "SIGNED" } }).status, "INVALID");
+  for (const [patch, code] of [
+    [{ HEAD_SHA: "junk" }, "DOT_MANUFACTURING_HEAD_SHA_INVALID"],
+    [{ BASE_MAIN_SHA: "junk" }, "DOT_MANUFACTURING_BASE_SHA_INVALID"],
+    [{ BRANCH: "main" }, "DOT_MANUFACTURING_BRANCH_INVALID"],
+    [{ PR: 0 }, "DOT_MANUFACTURING_PR_INVALID"],
+    [{ INSTALLED_AT: "x" }, "DOT_PREMATURE_INSTALLATION"]
+  ]) assert.throws(() => validateDotOrganManufacturingRecord({ ...manufacturing, ...patch }), error => error.code === code);
+  assert.throws(() => validateDotOrganManufacturingRecord({ ...manufacturing, SIGNATURES: {} }), error => error.code === "DOT_SIGNATURE_STATUS_INVALID");
+  const forgedInstalled = { ...manufacturing, STATUS: "INSTALLED", HEAD_SHA: HEAD_SHA, INSTALLED_AT: "2026-10-07T09:00:00Z", IMPLEMENTED_BY: "dot-01", REVIEWED_BY: "reviewer-01", MAINTAINED_BY: "primeforge-01", POLICY_OWNER: "codex-gm-01", SIGNATURES: { manufacturer: "SIGNED", runtime_maintainer: "SIGNED", independent_inspector: "SIGNED", gm_acceptance: "SIGNED" } };
+  assert.equal(evaluateDotOrganSeal({ manufacturing_record: forgedInstalled, inspection_record: { REPAIR_REQUIRED: false }, exact_head_gate: { status: "EXACT_MAIN_HEAD_CI_PASS", expected_main_sha: MAIN_SHA, expected_head_sha: HEAD_SHA }, independent_review_evidence: { status: "PASS" }, gm_ack_evidence: { status: "SIGNED" }, actor_registry_evidence: { status: "VERIFIED" } }).status, "INVALID");
   assert.deepEqual(evaluateDotDispatchSafety({ data_loss: true }), { ORGAN_STATUS: "DEGRADED", STOP_NEW_DISPATCH: true, ROLLBACK_REQUIRED: true, ESCALATE_GM: true, TRIGGERS: ["DATA_LOSS"] });
+});
+
+test("heartbeat result derives lifecycle and duplicate counts from bound queue evidence", async () => {
+  const definitions = [
+    ["ACTIVE-001", "WORKING"], ["REVIEW-001", "REVIEW"], ["DONE-001", "DONE"], ["BLOCKED-001", "BLOCKED"]
+  ].map(([id, status], index) => {
+    const nextTask = { ...task, task_id: id, status, work_order_ref: `KGEN-Organization/WorkOrders/LIFECYCLE_${index}.json`, branch: `chatgpt-handoff/${id}`,
+      ...(status === "BLOCKED" ? {} : { dispatch_evidence: { status: "VERIFIED", work_id: id, worker_id: worker.worker_id, occurred_at: "2026-10-07T07:00:30Z" } }) };
+    return { task: nextTask, project: { ...activeCompanyProject, task_id: id } };
+  });
+  const evidence = await repositoryEvidenceForEnvelopes(definitions);
+  const result = cycle({ work_queue: definitions.map((entry) => entry.task), projects: definitions.map((entry) => entry.project), repository_evidence: evidence });
+  assert.equal(result.heartbeat_result.ACTIVE, 1);
+  assert.equal(result.heartbeat_result.REVIEWING, 1);
+  assert.equal(result.heartbeat_result.COMPLETED, 1);
+  assert.equal(result.heartbeat_result.BLOCKED, 1);
+  assert.equal(result.heartbeat_result.DISPATCHED, 3);
+  const duplicate = cycle({ work_queue: [task, task] });
+  assert.equal(duplicate.heartbeat_result.DUPLICATE_REMOVED, 1);
+  assert.equal(duplicate.heartbeat_result.DISPATCHED, 0);
 });
