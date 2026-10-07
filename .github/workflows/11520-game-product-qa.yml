@@ -16,12 +16,19 @@ on:
       - ".github/workflows/11520-game-product-qa.yml"
       - ".github/workflows/11520-responsive-qa.yml"
   workflow_dispatch:
+    inputs:
+      bsc56_review_only:
+        description: 'Local four-width unsigned review QA only; never a full product PASS'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   product-qa:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only) }}
     runs-on: ubuntu-latest
     # Full mobile + settlement + Player Life passed on 0610eef3, but the
     # aggregate reached 20 minutes during artifact/post-job cleanup. Keep
@@ -258,7 +265,7 @@ jobs:
 
   simulation-regression:
     needs: product-qa
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -310,6 +317,70 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 11520-simulation-regression-${{ steps.source.outputs.sha }}
+          path: artifacts/11520-settlement-qa/
+          if-no-files-found: error
+          retention-days: 14
+
+  bsc56-review-only:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.bsc56_review_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+      - name: Verify exact QA head and unchanged a678 application tree
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+          RUNTIME_REFERENCE: a678437d435e2b7f58704e81782b1db542716692
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git diff --check "$RUNTIME_REFERENCE" HEAD
+          python3 - <<'PYQA'
+          import os, subprocess
+          changed=set(subprocess.check_output(['git','diff','--name-only',os.environ['RUNTIME_REFERENCE'],'HEAD'],text=True).splitlines())
+          allowed={'.github/workflows/11520-game-product-qa.yml','K線西遊記/temples/11520/tests/11520-browser-settlement.mjs'}
+          assert changed <= allowed, 'Application/source drift: '+repr(sorted(changed-allowed))
+          print('Runtime/entry/all other tracked files byte-identical to '+os.environ['RUNTIME_REFERENCE'])
+          PYQA
+      - name: Install existing pinned Chromium fixture dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1 three@0.180.0 ethers@6.15.0
+          npx playwright install --with-deps chromium
+      - name: Inspect four missing widths with no signing or sends
+        env:
+          K11520_SOURCE_SHA: ${{ github.sha }}
+          K11520_BASE_URL: http://127.0.0.1:4173
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/k11520-bsc56-review-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          timeout --signal=TERM --kill-after=10s 360s node 'K線西遊記/temples/11520/tests/11520-browser-settlement.mjs' --bsc56-review-only
+          python3 - <<'PYQA'
+          import json, os, pathlib
+          out=pathlib.Path('artifacts/11520-settlement-qa')
+          for width,height in [(360,740),(412,772),(432,856),(480,900)]:
+              prefix=f'{width}x{height}'
+              report=json.loads((out/f'{prefix}-bsc56-review-only.json').read_text())
+              assert report['head']==os.environ['K11520_SOURCE_SHA'] and report['functional']=='PASS'
+              assert report['runtimeReference']=='a678437d435e2b7f58704e81782b1db542716692'
+              assert report['signatures']==0 and report['transactionsSent']==0 and report['executionReady'] is False
+              assert len(report['fields'])==8 and len(report['runtimeSources'])==7
+              for state in ['controls','input-action','top','bottom']:
+                  assert (out/f'{prefix}-bsc56-review-mobile-{state}.png').stat().st_size>10000
+          PYQA
+      - name: Preserve source-bound four-width evidence or failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bsc56-review-four-widths-${{ github.sha }}
           path: artifacts/11520-settlement-qa/
           if-no-files-found: error
           retention-days: 14

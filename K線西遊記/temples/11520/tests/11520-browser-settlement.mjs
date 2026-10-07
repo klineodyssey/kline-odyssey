@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
+import {createHash} from 'node:crypto';
+
+const bsc56ReviewOnly=process.argv.includes('--bsc56-review-only');
+if(bsc56ReviewOnly){
+  assert.deepEqual(process.argv.slice(2),['--bsc56-review-only'],'review-only cannot select another execution mode');
+  assert.match(process.env.K11520_SOURCE_SHA||'',/^[0-9a-f]{40}$/,'exact QA source head required');
+}
 
 if(process.argv.includes('--simulation-offline')||process.argv.includes('--simulation-offline-baseline')){
   await offlineSimulationBrowserQA({baseline:process.argv.includes('--simulation-offline-baseline')});process.exit(0);
@@ -21,15 +28,26 @@ if(process.argv.includes('--testnet97')){
 
 // Real Chromium, deterministic read-only quote fixtures. Never a live-funds oracle.
 const base=process.env.K11520_BASE_URL||'http://127.0.0.1:4173';
+if(bsc56ReviewOnly)assert.equal(base,'http://127.0.0.1:4173','bounded review QA must use the local candidate');
 const out='artifacts/11520-settlement-qa';
 await fs.mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true});
 try {
-  for(const [width,height] of [[390,844],[844,390]]) {
+  const reviewSources=['K線西遊記/temples/11520/game-5d.html',...['real-trading-preflight-ui','evm-wallet-runtime','wallet-game-bridge','game-5d-main','real-trading-order-intent','real-trading-market-binding'].map(name=>'K線西遊記/temples/11520/runtime/'+name+'.mjs')];
+  const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+  for(const [width,height] of bsc56ReviewOnly?[[360,740],[412,772],[432,856],[480,900]]:[[390,844],[844,390]]) {
     let eth=4000;
     const page=await browser.newPage({viewport:{width,height},hasTouch:true,isMobile:true});
     page.setDefaultTimeout(20000);
     const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('PAGE_ERROR',String(e))});
+    const sourceReads=[],sourceProof=new Map();
+    if(bsc56ReviewOnly)page.on('response',response=>{
+      const url=new URL(response.url()),path=decodeURI(url.pathname).replace(/^\//,'');
+      if(url.origin===base&&reviewSources.includes(path))sourceReads.push((async()=>{
+        const expected=sha(await fs.readFile(path)),actual=sha(await response.body());
+        assert.equal(response.status(),200,'source response '+path);assert.equal(actual,expected,'served source drift '+path);sourceProof.set(path,{path,sha256:actual});
+      })());
+    });
     // Ordinary simulation QA must remain independent of a public rehearsal.
     // An unverified manifest may not silently activate wallet transactions.
     await page.route('**/docs/K11520_BSC_TESTNET_DEPLOYMENT_MANIFEST.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'PREPARED_NOT_DEPLOYED',chainId:97,testOnly:true})}));
@@ -130,6 +148,7 @@ try {
       assert.equal(await review.locator('input[inputmode="numeric"]').evaluate(el=>{const c=getComputedStyle(el);return c.outlineStyle!=='none'&&parseFloat(c.outlineWidth)>=2}),true,'keyboard focus remains visible');
       assert.equal(await review.locator('input[inputmode="numeric"]').inputValue(),'1000000000000000001','styling preserves exact amount');
       await review.locator('summary').scrollIntoViewIfNeeded();await shot('bsc56-review-'+label+'-controls');
+      if(bsc56ReviewOnly){await review.getByRole('button',{name:'更新審核資訊'}).scrollIntoViewIfNeeded();await shot('bsc56-review-'+label+'-input-action')}
       const fields=review.locator('[data-bsc56-review-field]');assert.equal(await fields.count(),8);
       for(let i=0;i<8;i++){
         await fields.nth(i).scrollIntoViewIfNeeded();
@@ -158,6 +177,13 @@ try {
     await review.locator('summary').click();
     assert.deepEqual(await page.evaluate(()=>({mode:__K11520_EXECUTION__.snapshot().mode,markets:[...document.querySelectorAll('[data-market]')].map(e=>e.value)})),{mode:reviewBaseline.mode,markets:reviewBaseline.markets});
     assert.equal(await page.evaluate(()=>__walletFixture.calls.some(m=>/send|sign|switch|addChain|personal_/i.test(m))),false);
+    if(bsc56ReviewOnly){
+      await Promise.all(sourceReads);assert.equal(sourceProof.size,reviewSources.length,'every entry/runtime source must be observed');
+      const calls=await page.evaluate(()=>__walletFixture.calls);assert.ok(calls.every(method=>['eth_requestAccounts','eth_accounts','eth_chainId','eth_getBalance','eth_call'].includes(method)),'read-only provider allowlist');
+      assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>innerWidth),width);
+      await fs.writeFile(`${out}/${width}x${height}-bsc56-review-only.json`,JSON.stringify({mode:'LOCAL_BSC56_REVIEW_ONLY_SYNTHETIC_PROVIDER',head:process.env.K11520_SOURCE_SHA,runtimeReference:'a678437d435e2b7f58704e81782b1db542716692',viewport:{width,height},functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',fields:['CHAIN','WALLET','CONTRACT','FUNCTION','TOKEN','AMOUNT','EXPECTED_EFFECT','MAXIMUM_EXPOSURE'],runtimeSources:[...sourceProof.values()],harnessSha256:sha(await fs.readFile(new URL(import.meta.url))),walletMethods:calls,signatures:0,transactionsSent:0,executionReady:false},null,2));
+      await page.close();continue;
+    }
     await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=el.scrollHeight});
     await shot('wallet-metrics');
     await page.locator('#walletPanel').evaluate(el=>{el.scrollTop=0});
@@ -284,7 +310,7 @@ try {
     assert.deepEqual(errors,[]);await fs.writeFile(`${out}/${width}x${height}-result.json`,JSON.stringify({mode:'DETERMINISTIC_SIMULATION_FIXTURES',functional:'PASS',visual:'REQUIRES_DIRECT_IMAGE_INSPECTION',snapshot:s},null,2));
     await page.close();
   }
-  console.log('PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
+  console.log(bsc56ReviewOnly?'FUNCTIONAL_PASS: four-width BSC56 unsigned review; visual inspection remains required':'PASS: real Chromium pending/cross/fill/isolated liquidation/receipts/wallet/rotation (both viewports)');
 } finally {await browser.close()}
 
 // Opt-in P0 acceptance at the actual game entry. This lane never calls a model
