@@ -76,7 +76,7 @@ No worker, including Senior Trusted workers, may bypass protected paths, contrac
 
 ## Current Workforce Snapshot
 
-The current roster is projected from `KGEN-KAIOS/worker_registry.json`. After applying the no-active-suspension rule, the 2026-10-08 audit records two formal active employees (`codex-gm-01`, `chatgpt-01`); `cursor-01` retains a registered identity but remains suspended by the Human cost decision. No current October runtime heartbeat exists, so none is claimed to be working now. DOT has Human engineering role authority but hiring remains pending, while Digital Ant reuses the existing `DIGITAL_ANT_0001` Life and remains pending separate Worker/Controller/payroll resolution.
+The current roster is projected from `KGEN-KAIOS/worker_registry.json`. After applying the no-active-suspension rule, the 2026-10-08 audit records two formal active employees (`codex-gm-01`, `chatgpt-01`); `cursor-01` retains a registered identity but remains suspended by the Human cost decision. No current October runtime heartbeat exists, so none is claimed to be working now. DOT accepted the CTDO position proposal in a session-scoped record, but hiring/appointment remains conditional and pending formal identity/onboarding gates. Digital Ant reuses the existing `DIGITAL_ANT_0001` Life and remains pending separate Worker/Controller/payroll resolution.
 
 ## HR Lifecycle
 
