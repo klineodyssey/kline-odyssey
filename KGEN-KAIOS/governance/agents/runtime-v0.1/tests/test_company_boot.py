@@ -14,7 +14,13 @@ from company_boot.company_boot import failure_result
 from company_boot.evidence import canonical_json, sha256_file, sha256_text, stamp_hashes
 from company_boot.models import AUTHORIZED_ACTIONS, BootFailure, FailureCode, Stage
 from company_boot.state_machine import StateTracker
-from company_boot.validators import validate_registry_shape
+from company_boot.validators import (
+    handoff_event_hash,
+    handoff_message_hash,
+    validate_handoff_audit,
+    validate_handoff_message,
+    validate_registry_shape,
+)
 
 
 RUNTIME_DIR = Path(__file__).resolve().parents[1]
@@ -38,6 +44,19 @@ def with_integrity(record: dict) -> dict:
     data = dict(record)
     data.pop("integrity_sha256", None)
     data["integrity_sha256"] = sha256_text(canonical_json(data))
+    return data
+
+
+def with_handoff_message_hash(message: dict) -> dict:
+    data = dict(message)
+    data["PAYLOAD_SHA256"] = sha256_text(canonical_json(data["PAYLOAD"]))
+    data["MESSAGE_SHA256"] = handoff_message_hash(data)
+    return data
+
+
+def with_handoff_event_hash(event: dict) -> dict:
+    data = dict(event)
+    data["EVENT_SHA256"] = handoff_event_hash(data)
     return data
 
 
@@ -673,7 +692,12 @@ class CompanyBootCliTests(unittest.TestCase):
             set(schema["properties"]["agent_registry"]["required"]),
             {"agents", "attestations", "capability_grants", "revocations", "workorders"},
         )
-        self.assertTrue({"sessionLock", "currentState", "sessionBirth", "handoff", "bootResult"}.issubset(schema["$defs"]))
+        self.assertTrue(
+            {
+                "sessionLock", "currentState", "sessionBirth", "handoff", "verifiedInstance",
+                "handoffSafetyBoundary", "handoffChannelMessage", "handoffChannelEvent", "bootResult",
+            }.issubset(schema["$defs"])
+        )
 
     def test_schema_missing_attestations_rejected(self) -> None:
         self.base["agent_registry"].pop("attestations")
@@ -718,6 +742,194 @@ class CompanyBootCliTests(unittest.TestCase):
         self.base["agent_registry"]["attestations"]["ATTEST-0001"]["unexpected"] = True
         self.write_case(self.base)
         self.assert_blocked("ATTESTATION_VALIDATION_FAILED")
+
+
+class HandoffChannelTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.registry = {
+            "INSTANCE-HENGYAO-0001": {
+                "INSTANCE_ID": "INSTANCE-HENGYAO-0001",
+                "SELF_NAME": "衡曜",
+                "LIFE_ID": "LIFE-CODEX-GM-0001",
+                "WORKER_ID": "codex-gm-01",
+                "STATUS": "ACTIVE",
+            },
+            "INSTANCE-MOBILE-0001": {
+                "INSTANCE_ID": "INSTANCE-MOBILE-0001",
+                "SELF_NAME": "行動候證體",
+                "LIFE_ID": "LIFE-PROVISIONAL-MOBILE-0001",
+                "WORKER_ID": "mobile-provisional-01",
+                "STATUS": "ACTIVE",
+            },
+            "INSTANCE-REVIEWER-0001": {
+                "INSTANCE_ID": "INSTANCE-REVIEWER-0001",
+                "SELF_NAME": "獨立審核者",
+                "LIFE_ID": "LIFE-REVIEWER-0001",
+                "WORKER_ID": "reviewer-01",
+                "STATUS": "ACTIVE",
+            },
+        }
+        self.message = with_handoff_message_hash(
+            {
+                "MESSAGE_ID": "MSG-20260825-0001",
+                "CORRELATION_ID": "CORR-20260825-0001",
+                "IDEMPOTENCY_KEY": "IDEM-20260825-0001",
+                "FROM_SELF_NAME": "衡曜",
+                "FROM_LIFE_ID": "LIFE-CODEX-GM-0001",
+                "FROM_WORKER_ID": "codex-gm-01",
+                "FROM_INSTANCE_ID": "INSTANCE-HENGYAO-0001",
+                "TO_SELF_NAME": "行動候證體",
+                "TO_LIFE_ID": "LIFE-PROVISIONAL-MOBILE-0001",
+                "TO_WORKER_ID": "mobile-provisional-01",
+                "TO_INSTANCE_ID": "INSTANCE-MOBILE-0001",
+                "CREATED_AT": "2026-08-25T01:30:00Z",
+                "REPOSITORY": "klineodyssey/kline-odyssey",
+                "BASE_SHA": "1" * 40,
+                "HEAD_SHA": "2" * 40,
+                "PAYLOAD": {"kind": "IDENTITY_RECONCILIATION", "decision": "UNVERIFIED_HOLD"},
+                "PAYLOAD_SHA256": "",
+                "MESSAGE_SHA256": "",
+                "REPLY_TO": None,
+                "ACK_STATUS": "NOT_ACKNOWLEDGED",
+                "DECISION_STATUS": "PENDING",
+                "DELIVERY_STATUS": "CREATED",
+                "SIGNATURE_TYPE": "REPOSITORY_HASH_BOUND_OFFCHAIN",
+                "SAFETY_BOUNDARY": {
+                    "MERGE": False,
+                    "PUSH_MAIN": False,
+                    "DEPLOYMENT": False,
+                    "PAYMENT": False,
+                    "TOKEN_TRANSFER": False,
+                    "TREASURY_ACTION": False,
+                    "GOVERNANCE_EXECUTION": False,
+                    "MAINNET_TRANSACTION": False,
+                    "CHAIN_WRITE": False,
+                    "PRIVATE_KEY_REQUEST": False,
+                    "PRIVATE_KEY_OUTPUT": False,
+                    "PRIVATE_KEY_STORAGE": False,
+                    "CONTROLLER_OR_SIGNER_IMPERSONATION": False,
+                    "SELF_REVIEW": False,
+                    "PUBLIC_AUTO_POST": False,
+                },
+            }
+        )
+
+    def assert_handoff_failure(self, code: FailureCode, callback) -> None:
+        with self.assertRaises(BootFailure) as ctx:
+            callback()
+        self.assertEqual(ctx.exception.code, code)
+
+    def event(self, status: str, actor_instance_id: str, previous_hash: str | None, index: int) -> dict:
+        actor = self.registry[actor_instance_id]
+        return with_handoff_event_hash(
+            {
+                "EVENT_ID": f"EVENT-{index:04d}",
+                "MESSAGE_ID": self.message["MESSAGE_ID"],
+                "CORRELATION_ID": self.message["CORRELATION_ID"],
+                "STATUS": status,
+                "ACTOR_SELF_NAME": actor["SELF_NAME"],
+                "ACTOR_LIFE_ID": actor["LIFE_ID"],
+                "ACTOR_WORKER_ID": actor["WORKER_ID"],
+                "ACTOR_INSTANCE_ID": actor_instance_id,
+                "CREATED_AT": f"2026-08-25T01:{index:02d}:00Z",
+                "MESSAGE_SHA256": self.message["MESSAGE_SHA256"],
+                "PREVIOUS_EVENT_SHA256": previous_hash,
+                "EVENT_SHA256": "",
+            }
+        )
+
+    def test_message_requires_verified_reply_target(self) -> None:
+        registry = {"INSTANCE-HENGYAO-0001": self.registry["INSTANCE-HENGYAO-0001"]}
+        self.assert_handoff_failure(
+            FailureCode.MISSING_VERIFIED_REPLY_TARGET,
+            lambda: validate_handoff_message(self.message, registry),
+        )
+
+    def test_message_rejects_spoofed_sender_identity(self) -> None:
+        message = dict(self.message)
+        message["FROM_WORKER_ID"] = "spoofed-worker"
+        message = with_handoff_message_hash(message)
+        self.assert_handoff_failure(
+            FailureCode.HANDOFF_ACTOR_MISMATCH,
+            lambda: validate_handoff_message(message, self.registry),
+        )
+
+    def test_message_rejects_mutated_payload(self) -> None:
+        message = dict(self.message)
+        message["PAYLOAD"] = {"kind": "MUTATED"}
+        self.assert_handoff_failure(
+            FailureCode.HANDOFF_PAYLOAD_HASH_MISMATCH,
+            lambda: validate_handoff_message(message, self.registry),
+        )
+
+    def test_message_exact_replay_is_idempotent(self) -> None:
+        result = validate_handoff_message(
+            self.message,
+            self.registry,
+            {self.message["MESSAGE_ID"]: self.message["MESSAGE_SHA256"]},
+            {self.message["IDEMPOTENCY_KEY"]: self.message["MESSAGE_SHA256"]},
+        )
+        self.assertEqual(result, "IDEMPOTENT_NOOP")
+
+    def test_message_conflicting_replay_fails_closed(self) -> None:
+        self.assert_handoff_failure(
+            FailureCode.HANDOFF_REPLAY_CONFLICT,
+            lambda: validate_handoff_message(
+                self.message,
+                self.registry,
+                {self.message["MESSAGE_ID"]: "0" * 64},
+                {self.message["IDEMPOTENCY_KEY"]: "0" * 64},
+            ),
+        )
+
+    def test_sender_cannot_ack_for_recipient(self) -> None:
+        created = self.event("CREATED", "INSTANCE-HENGYAO-0001", None, 1)
+        queued = self.event("QUEUED", "INSTANCE-HENGYAO-0001", created["EVENT_SHA256"], 2)
+        delivered = self.event("DELIVERED", "INSTANCE-HENGYAO-0001", queued["EVENT_SHA256"], 3)
+        forged_ack = self.event("ACKNOWLEDGED", "INSTANCE-HENGYAO-0001", delivered["EVENT_SHA256"], 4)
+        self.assert_handoff_failure(
+            FailureCode.HANDOFF_ACK_IMPERSONATION,
+            lambda: validate_handoff_audit(self.message, [created, queued, delivered, forged_ack], self.registry),
+        )
+
+    def test_complete_append_only_audit_chain_passes(self) -> None:
+        events = []
+        previous = None
+        actors = {
+            "CREATED": "INSTANCE-HENGYAO-0001",
+            "QUEUED": "INSTANCE-HENGYAO-0001",
+            "DELIVERED": "INSTANCE-HENGYAO-0001",
+            "ACKNOWLEDGED": "INSTANCE-MOBILE-0001",
+            "ANSWERED": "INSTANCE-MOBILE-0001",
+            "REVIEWED": "INSTANCE-REVIEWER-0001",
+        }
+        for index, status in enumerate(actors, 1):
+            record = self.event(status, actors[status], previous, index)
+            events.append(record)
+            previous = record["EVENT_SHA256"]
+        self.assertEqual(validate_handoff_audit(self.message, events, self.registry), "REVIEWED")
+
+    def test_broken_event_hash_chain_fails_closed(self) -> None:
+        created = self.event("CREATED", "INSTANCE-HENGYAO-0001", None, 1)
+        queued = self.event("QUEUED", "INSTANCE-HENGYAO-0001", "0" * 64, 2)
+        self.assert_handoff_failure(
+            FailureCode.HANDOFF_REPLAY_CONFLICT,
+            lambda: validate_handoff_audit(self.message, [created, queued], self.registry),
+        )
+
+    def test_self_review_is_rejected(self) -> None:
+        created = self.event("CREATED", "INSTANCE-HENGYAO-0001", None, 1)
+        queued = self.event("QUEUED", "INSTANCE-HENGYAO-0001", created["EVENT_SHA256"], 2)
+        delivered = self.event("DELIVERED", "INSTANCE-HENGYAO-0001", queued["EVENT_SHA256"], 3)
+        acknowledged = self.event("ACKNOWLEDGED", "INSTANCE-MOBILE-0001", delivered["EVENT_SHA256"], 4)
+        answered = self.event("ANSWERED", "INSTANCE-MOBILE-0001", acknowledged["EVENT_SHA256"], 5)
+        self_review = self.event("REVIEWED", "INSTANCE-HENGYAO-0001", answered["EVENT_SHA256"], 6)
+        self.assert_handoff_failure(
+            FailureCode.HANDOFF_ACTOR_MISMATCH,
+            lambda: validate_handoff_audit(
+                self.message, [created, queued, delivered, acknowledged, answered, self_review], self.registry
+            ),
+        )
 
 
 if __name__ == "__main__":
